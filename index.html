@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Moretti Test Prep &amp; Tutoring</title>
+  <link rel="icon" type="image/png" href="target-icon.png">
+  <link rel="shortcut icon" href="target-icon.png">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --red:    #B0271C;
+      --bg:     #f7f4ef;
+      --white:  #ffffff;
+      --text:   #111111;
+      --mid:    rgba(17,17,17,0.58);
+      --faint:  rgba(17,17,17,0.28);
+      --border: rgba(17,17,17,0.12);
+      --gold:   #C9A84C;
+      --hel:    'Helvetica Neue', Helvetica, Arial, sans-serif;
+      --serif:  Georgia, 'Times New Roman', serif;
+    }
+
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: var(--hel); font-weight: 300; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+
+    /* ═══ NAV ═══ */
+    #main-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 300; padding: 0.85rem 2.5rem; display: flex; align-items: center; justify-content: space-between; background: var(--red); transform: translateY(-110%); transition: transform 0.5s cubic-bezier(0.16,1,0.3,1); }
+    #main-nav.visible { transform: translateY(0); }
+    .nav-logo-link { display: block; line-height: 0; }
+    .nav-logo-img { height: 36px; width: auto; display: block; }
+    .nav-cta { font-family: var(--hel); font-size: 0.65rem; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: #fff; text-decoration: none; border: 1px solid rgba(255,255,255,0.5); padding: 0.5rem 1.3rem; white-space: nowrap; transition: background 0.2s; }
+    .nav-cta:hover { background: rgba(255,255,255,0.18); border-color: #fff; }
+
+    /* ═══ HERO ═══ */
+    #hero-wrapper { position: relative; height: 200vh; }
+    #hero-sticky { position: sticky; top: 0; height: 100vh; width: 100%; overflow: hidden; background: #fff; }
+    #hero-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
+    #hero-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; }
+    #scroll-hint { position: absolute; bottom: 1.75rem; left: 50%; transform: translateX(-50%); z-index: 4; display: flex; flex-direction: column; align-items: center; gap: 0.4rem; opacity: 0; transition: opacity 0.7s ease 1s; pointer-events: none; }
+    #scroll-hint.show { opacity: 0.45; }
+    #scroll-hint span { font-size: 0.54rem; font-weight: 600; letter-spacing: 0.26em; text-transform: uppercase; color: var(--white); text-shadow: 0 1px 6px rgba(0,0,0,0.4); }
+    #scroll-hint::after { content: ''; width: 1px; height: 36px; background: linear-gradient(to bottom, rgba(255,255,255,0.8), transparent); animation: hint-anim 2s ease-in-out infinite; }
+    @keyframes hint-anim { 0%,100% { opacity: 0.45; transform: scaleY(1); } 50% { opacity: 0.9; transform: scaleY(1.06); } }
+
+    /* ═══ SHARED ═══ */
+    section { padding: 7rem 0; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 3.5rem; }
+    .reveal { opacity: 0; transform: translateY(26px); transition: opacity 2.75s cubic-bezier(0.16,1,0.3,1), transform 2.75s cubic-bezier(0.16,1,0.3,1); }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .d1 { transition-delay: 0.07s; } .d2 { transition-delay: 0.14s; } .d3 { transition-delay: 0.21s; } .d4 { transition-delay: 0.28s; }
+    .section-fade { opacity: 0; transition: opacity 3.4s ease; }
+    .section-fade.visible { opacity: 1; }
+    .eyebrow { display: flex; align-items: center; gap: 0.45rem; font-size: 0.58rem; font-weight: 600; letter-spacing: 0.24em; text-transform: uppercase; color: var(--red); margin-bottom: 1.5rem; }
+    .eyebrow::before { content: '◆'; font-size: 0.4rem; }
+
+    /* ═══ INTRO SECTION ═══ */
+    #intro-dark { background: #ffffff; overflow: hidden; padding: 0; }
+
+    .intro-ticker-outer { padding: 1rem 0; border-bottom: 1px solid var(--border); }
+    .intro-ticker-wrap { overflow: hidden; -webkit-mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%); mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%); }
+    .intro-ticker-track { display: flex; align-items: center; width: max-content; animation: ticker-scroll 28s linear infinite; }
+    .intro-ticker-item { font-size: 0.54rem; font-weight: 600; letter-spacing: 0.24em; text-transform: uppercase; color: var(--gold); white-space: nowrap; padding: 0 1.5rem; }
+    .intro-ticker-sep { font-size: 0.36rem; color: rgba(201,168,76,0.4); flex-shrink: 0; }
+    @keyframes ticker-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+    .intro-inner { display: grid; grid-template-columns: 1fr 1fr; min-height: 75vh; max-width: 1260px; margin: 0 auto; padding: 3.5rem 4rem 3rem; gap: 5rem; align-items: center; }
+    .intro-headline { font-family: var(--serif); font-size: clamp(2rem, 3.6vw, 3.2rem); font-weight: 700; color: var(--text); line-height: 1.2; margin-bottom: 1.75rem; }
+    .intro-bio { font-size: 0.92rem; line-height: 1.9; color: var(--mid); margin-bottom: 2.25rem; max-width: 500px; }
+    .intro-ctas { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .intro-btn-red { background: var(--red); color: #fff; border: none; font-family: var(--hel); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.85rem 1.75rem; text-decoration: none; white-space: nowrap; cursor: pointer; transition: opacity 0.2s; }
+    .intro-btn-red:hover { opacity: 0.86; }
+    .intro-btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border); font-family: var(--hel); font-size: 0.68rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.85rem 1.75rem; text-decoration: none; white-space: nowrap; transition: border-color 0.2s; }
+    .intro-btn-outline:hover { border-color: rgba(17,17,17,0.6); }
+    .intro-right { display: flex; justify-content: center; align-items: center; }
+    .polaroid-wrap { max-width: 460px; width: 100%; position: relative; overflow: hidden; }
+    .polaroid-img { width: 100%; display: block; aspect-ratio: 4/3; object-fit: cover; object-position: center top; }
+
+    .intro-stats { display: grid; grid-template-columns: repeat(5, 1fr); border-top: 1px solid var(--border); }
+    .intro-stat { padding: 1.5rem 1rem; text-align: center; border-right: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .intro-stat:last-child { border-right: none; }
+    .intro-stat-num { display: block; font-family: var(--serif); font-size: clamp(1.6rem, 2.4vw, 2.2rem); font-weight: 700; color: var(--gold); line-height: 1; margin-bottom: 0.45rem; }
+    .intro-stat-lbl { font-size: 0.5rem; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--faint); line-height: 1.55; }
+    .intro-stats-row2 { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--border); }
+    .intro-stat-cred-item { padding: 1.5rem 1rem; text-align: center; border-right: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .intro-stat-cred-item:last-child { border-right: none; }
+    .intro-stat-cred { display: block; font-family: var(--serif); font-size: clamp(1rem, 1.6vw, 1.25rem); font-weight: 700; color: var(--text); line-height: 1; margin-bottom: 0.35rem; }
+    .intro-stat-cred-sub { font-size: 0.5rem; font-weight: 500; letter-spacing: 0.1em; color: var(--faint); line-height: 1.65; }
+
+    /* ═══ MISSION ═══ */
+    #mission { background-image: url(photo-2.jpg); background-size: cover; background-position: center; position: relative; padding: 0; overflow: hidden; }
+    #mission::before { content: ''; position: absolute; inset: 0; background: rgba(0,0,0,0.62); z-index: 0; }
+    #mission .container { position: relative; z-index: 1; padding-top: 7rem; padding-bottom: 7rem; }
+    #mission .blurb-kicker { color: var(--gold); }
+    #mission .blurb-hed { color: #fff; }
+    #mission .blurb-body { color: rgba(255,255,255,0.72); }
+    #mission .blurb-quote { color: rgba(255,255,255,0.82); border-left-color: var(--gold); }
+    .blurb-text { max-width: 700px; }
+    .blurb-kicker { display: block; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: var(--red); margin-bottom: 1rem; }
+    .blurb-hed { font-family: var(--serif); font-size: clamp(1.55rem, 2.6vw, 2.2rem); font-weight: 700; color: var(--text); line-height: 1.25; margin-bottom: 1.4rem; }
+    .blurb-body { font-size: clamp(0.95rem, 1.35vw, 1.06rem); line-height: 1.9; color: var(--mid); }
+    .blurb-body + .blurb-body { margin-top: 1rem; }
+    .blurb-quote { border-left: 3px solid var(--red); padding: 0.1rem 0 0.1rem 1.2rem; margin: 1.4rem 0; font-family: var(--serif); font-style: italic; font-size: clamp(0.95rem, 1.3vw, 1.05rem); color: var(--mid); line-height: 1.65; }
+
+    /* ═══ DISCIPLINES ═══ */
+    #disciplines { background: var(--white); padding: 4.25rem 0 4rem; }
+    .disc-hed { font-family: var(--serif); font-size: clamp(2rem, 3.8vw, 3rem); font-weight: 700; color: var(--text); margin-bottom: 1.5rem; }
+    .disc-grid { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--border); }
+    .disc-card { padding: 1.5rem 1.75rem; border-right: 1px solid var(--border); background: var(--white); }
+    .disc-card:nth-child(3n) { border-right: none; }
+    .disc-card:nth-child(-n+3) { border-bottom: 1px solid var(--border); }
+    .disc-icon { display: block; width: 24px; height: 24px; stroke: var(--red); fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; margin-bottom: 0.85rem; }
+    .disc-title { font-size: 1.2rem; font-weight: 700; color: var(--text); margin-bottom: 0.45rem; line-height: 1.35; }
+    .disc-body { font-size: 0.8rem; line-height: 1.6; color: var(--mid); }
+
+    /* ═══ TEAM ═══ */
+    #about { background: var(--bg); }
+    .team-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; }
+    .team-photo { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; object-position: center top; display: block; margin-bottom: 1.5rem; }
+    .team-photo-placeholder { background: #e5e0d9; display: flex; align-items: flex-end; justify-content: center; overflow: hidden; }
+    .team-photo-placeholder svg { width: 65%; opacity: 0.35; }
+    .team-photo-wrap { width: 100%; aspect-ratio: 1 / 1; overflow: hidden; margin-bottom: 1.5rem; }
+    .team-photo-wrap .team-photo { width: 100%; height: 100%; margin-bottom: 0; aspect-ratio: unset; }
+    .team-photo-wrap.luca-frame .team-photo { transform: scale(1.5) translate(15%, 10%); transform-origin: center; }
+    .team-name { font-family: var(--serif); font-size: 1.2rem; font-weight: 700; color: var(--text); margin-bottom: 0.3rem; line-height: 1.2; }
+    .team-role { font-size: 0.56rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--red); margin-bottom: 0.95rem; }
+    .team-bio { font-size: 0.88rem; line-height: 1.8; color: var(--mid); }
+
+    /* ═══ TESTIMONIALS ═══ */
+    #testimonials { background: var(--white); }
+    .tcarousel { display: flex; align-items: center; justify-content: center; gap: 2rem; }
+    .tarrow { flex: 0 0 auto; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--border); background: var(--white); cursor: pointer; font-size: 1rem; color: var(--red); display: flex; align-items: center; justify-content: center; transition: border-color 0.2s, background 0.2s; }
+    .tarrow:hover { border-color: var(--red); background: rgba(176,39,28,0.06); }
+    .tarrow svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .tsingle { flex: 1 1 auto; max-width: 940px; min-width: 0; text-align: center; opacity: 1; transition: opacity 0.5s ease; padding: 1rem 0; }
+    .tsingle.tfade { opacity: 0; }
+    .tcard-q { display: block; font-family: var(--serif); font-size: 3.5rem; color: var(--red); opacity: 0.18; line-height: 0.8; margin-bottom: 1rem; user-select: none; }
+    .tcard-body { font-family: var(--serif); font-size: 1rem; font-style: italic; line-height: 1.8; color: var(--mid); margin-bottom: 1.5rem; }
+    .tcard-body strong { display: block; font-weight: 700; font-style: normal; font-size: clamp(1.7rem, 3.6vw, 3.1rem); line-height: 1.25; color: var(--text); margin-bottom: 1rem; }
+    .tcard-author { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--red); }
+
+    /* ═══ CONSULT ═══ */
+    #consult { padding: 7rem 0; background: var(--bg); }
+    .consult-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: start; }
+    .consult-heading { font-family: var(--serif); font-size: clamp(1.8rem, 3vw, 2.6rem); font-weight: 700; color: var(--text); margin-bottom: 1.25rem; line-height: 1.2; }
+    .consult-lead { font-size: 0.92rem; line-height: 1.8; color: var(--mid); margin-bottom: 2rem; }
+    .phone-box { border: 1px solid var(--border); padding: 1.2rem 1.5rem; margin-bottom: 2rem; }
+    .phone-box-lbl { display: block; font-size: 0.52rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--faint); margin-bottom: 0.4rem; }
+    .phone-box-num { font-family: var(--serif); font-size: 1.4rem; color: var(--gold); text-decoration: none; }
+    .serve-text { font-size: 0.78rem; line-height: 1.75; color: var(--mid); }
+    .form-card { background: var(--white); border: 1px solid var(--border); padding: 2rem; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-field { margin-bottom: 1.4rem; }
+    .form-label { display: block; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text); margin-bottom: 0.5rem; }
+    .form-input, .form-select, .form-textarea { width: 100%; border: 1px solid #ccc; background: var(--white); font-family: var(--hel); font-size: 0.82rem; color: var(--text); padding: 0.6rem 0.75rem; outline: none; transition: border-color 0.2s; border-radius: 0; -webkit-appearance: none; appearance: none; }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--red); }
+    .form-select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23555'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.75rem center; padding-right: 2rem; }
+    .form-textarea { height: 140px; resize: vertical; }
+    .btn-submit { display: block; width: 100%; background: var(--red); color: white; border: none; font-family: var(--hel); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; padding: 1rem 2rem; cursor: pointer; transition: opacity 0.18s; }
+    .btn-submit:hover { opacity: 0.86; }
+    .form-note { font-size: 0.68rem; color: var(--faint); margin-top: 0.75rem; line-height: 1.65; }
+
+    /* ═══ FOOTER ═══ */
+    footer { background: #111; padding: 3rem 3.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start; }
+    .footer-logo { height: 36px; width: auto; display: block; margin-bottom: 1.25rem; }
+    .footer-tagline { font-size: 0.78rem; line-height: 1.75; color: rgba(255,255,255,0.45); margin-bottom: 0.75rem; }
+    .footer-phone { font-size: 0.82rem; color: var(--gold); text-decoration: none; font-family: var(--serif); }
+    .footer-right { text-align: right; }
+    .footer-serving-hed { font-size: 0.52rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-bottom: 0.85rem; }
+    .footer-towns { font-size: 0.78rem; color: rgba(255,255,255,0.5); line-height: 2; }
+    .footer-linkedin { display: inline-block; margin-top: 1.25rem; font-size: 0.52rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.35); text-decoration: none; transition: color 0.2s; }
+    .footer-linkedin:hover { color: var(--gold); }
+
+    /* ═══ RESPONSIVE ═══ */
+    @media (max-width: 960px) {
+      .consult-grid { grid-template-columns: 1fr; gap: 3rem; }
+      .blurb { grid-template-columns: 1fr; gap: 2.5rem; }
+      .blurb.flip .blurb-photo { order: 0; }
+      .disc-grid { grid-template-columns: repeat(2, 1fr); }
+      .disc-card:nth-child(2n) { border-right: none; }
+      .disc-card:nth-child(3n) { border-right: 1px solid var(--border); }
+      .disc-card:nth-child(2n):nth-child(3n) { border-right: none; }
+      .tcarousel { gap: 0.75rem; }
+      footer { grid-template-columns: 1fr; }
+      .team-grid { grid-template-columns: 1fr; gap: 3.5rem; }
+      .intro-inner { grid-template-columns: 1fr; min-height: auto; padding: 4rem 2.5rem 3.5rem; gap: 3.5rem; }
+      .intro-stats { grid-template-columns: repeat(2, 1fr); }
+      .intro-stat { border-right: 1px solid var(--border); border-top: none; }
+      .intro-stat:nth-child(2n) { border-right: none; }
+      .intro-stat:nth-child(n+3) { border-top: 1px solid var(--border); }
+      .intro-stats-row2 { grid-template-columns: 1fr; }
+      .intro-stat-cred-item { border-right: none; border-top: 1px solid var(--border); }
+      .intro-stat-cred-item:first-child { border-top: none; }
+    }
+    @media (max-width: 640px) {
+      #main-nav { padding: 0.75rem 1.5rem; }
+      section { padding: 4.5rem 0; }
+      .container { padding: 0 1.5rem; }
+      .disc-grid { grid-template-columns: 1fr; }
+      .disc-card { border-right: none !important; border-bottom: 1px solid var(--border); }
+      footer { padding: 2rem 1.5rem; }
+      .form-row { grid-template-columns: 1fr; }
+      .intro-inner { padding: 3rem 1.5rem 2.5rem; }
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+</head>
+<body>
+
+<nav id="main-nav">
+  <a href="/" class="nav-logo-link"><img src="logo-black.png" alt="Moretti Test Prep &amp; Tutoring" class="nav-logo-img"></a>
+  <a href="#consult" class="nav-cta">Book a free intro call</a>
+</nav>
+
+<div id="hero-wrapper">
+  <div id="hero-sticky">
+    <video id="hero-video" src="90933-629483642_medium.mp4" autoplay muted playsinline loop preload="auto"></video>
+    <canvas id="hero-canvas"></canvas>
+    <div id="scroll-hint"><span>Scroll</span></div>
+  </div>
+</div>
+
+<section id="intro-dark" class="section-fade">
+  <div class="intro-ticker-outer">
+    <div class="intro-ticker-wrap">
+      <div class="intro-ticker-track">
+        <span class="intro-ticker-item">Mathematics</span><span class="intro-ticker-sep">◆</span>
+        <span class="intro-ticker-item">ACT &amp; SAT Prep</span><span class="intro-ticker-sep">◆</span>
+        <span class="intro-ticker-item">Chemistry</span><span class="intro-ticker-sep">◆</span>
+        <span class="intro-ticker-item">English &amp; Writing</span><span class="intro-ticker-sep">◆</span>
+        <span class="intro-ticker-item">Italian</span><span class="intro-ticker-sep">◆</span>
+        <span class="intro-ticker-item">Spanish</span><span class="intro-ticker-sep">◆</span>
+        <span class="intro-ticker-item">French</span><span class="intro-ticker-sep">◆</span>
+        <span class="intro-ticker-item">College Essay &amp; Applications</span><span class="intro-ticker-sep">◆</span>
+        <span class="intro-ticker-item">Mathematics</span><span class="intro-ticker-sep">◆</span>
+        <span class="intro-ticker-item">ACT &amp; SAT Prep</span><span class="intro-ticker-sep">◆</span>
+        <span class="intro-ticker-item">Chemistry</span><span class="intro-ticker-sep">◆</span>
+        <span class="intro-ticker-item">English &amp; Writing</span><span class="intro-ticker-sep">◆</span>
+        <span class="intro-ticker-item">Italian</span><span class="intro-ticker-sep">◆</span>
+        <span class="intro-ticker-item">Spanish</span><span class="intro-ticker-sep">◆</span>
+        <span class="intro-ticker-item">French</span><span class="intro-ticker-sep">◆</span>
+        <span class="intro-ticker-item">College Essay &amp; Applications</span><span class="intro-ticker-sep">◆</span>
+      </div>
+    </div>
+  </div>
+  <div class="intro-inner">
+    <div class="intro-left reveal">
+      <h2 class="intro-headline">Precision tutoring for students who deserve better than close enough.</h2>
+      <p class="intro-bio">One-on-one, private instruction from a high scoring Northwestern University honors graduate and professional statistician, applying proven academic and admissions expertise to your child's educational journey across STEM, humanities, foreign languages, and comprehensive test preparation.</p>
+      <div class="intro-ctas">
+        <a href="#consult" class="intro-btn-red">Book a Free Intro Call</a>
+        <a href="tel:2012752791" class="intro-btn-outline">Call (201) 275-2791</a>
+      </div>
+    </div>
+    <div class="intro-right reveal d2">
+      <div class="polaroid-wrap">
+        <img src="photo-3.jpg" alt="In-person tutoring session" class="polaroid-img">
+      </div>
+    </div>
+  </div>
+  <div class="intro-stats">
+    <div class="intro-stat"><span class="intro-stat-num">1530</span><span class="intro-stat-lbl">SAT</span></div>
+    <div class="intro-stat"><span class="intro-stat-num">800</span><span class="intro-stat-lbl">SAT Math II</span></div>
+    <div class="intro-stat"><span class="intro-stat-num">760</span><span class="intro-stat-lbl">SAT Chemistry</span></div>
+    <div class="intro-stat"><span class="intro-stat-num">3.96</span><span class="intro-stat-lbl">College GPA</span></div>
+    <div class="intro-stat"><span class="intro-stat-num">5 · 5</span><span class="intro-stat-lbl">AP Calculus AB &amp; BC</span></div>
+  </div>
+  <div class="intro-stats-row2">
+    <div class="intro-stat-cred-item"><span class="intro-stat-cred">IB Diploma</span><span class="intro-stat-cred-sub">Recipient</span></div>
+    <div class="intro-stat-cred-item"><span class="intro-stat-cred">Dean's List Recipient</span><span class="intro-stat-cred-sub">Northwestern University &nbsp;·&nbsp; 3-Years</span></div>
+    <div class="intro-stat-cred-item"><span class="intro-stat-cred">Advanced Coursework</span><span class="intro-stat-cred-sub">Differential Equations &nbsp;·&nbsp; Multivariable Calculus &nbsp;·&nbsp; Linear Algebra</span></div>
+  </div>
+</section>
+
+<section id="mission">
+  <div class="container">
+    <div class="blurb-text reveal">
+      <span class="blurb-kicker">The Quiet Problem</span>
+      <h3 class="blurb-hed">Modern education optimizes for visible metrics over genuine comprehension, skill development, and critical problem-solving.</h3>
+      <p class="blurb-body">Grade inflation and short-form testing prioritize superficial memorization over critical problem-solving. Institutions have abandoned intentional engagement.</p>
+      <blockquote class="blurb-quote">My approach is different: one-on-one, diagnostic, and exact.</blockquote>
+      <p class="blurb-body">Whether your child is chasing a perfect score or trying to close a gap nobody's caught yet, I bypass the metrics to cultivate deep comprehension and essential study habits across all levels of rigor. Exacting, uncompromising support, structured to be accessible to every family.</p>
+    </div>
+  </div>
+</section>
+
+<section id="testimonials">
+  <div class="container">
+    <div class="eyebrow reveal">Results</div>
+    <div class="tcarousel-wrap reveal d2">
+      <div class="tcarousel">
+        <button class="tarrow tarrow-left" id="tarrow-prev" aria-label="Previous testimonial"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <div class="tsingle" id="tsingle">
+          <span class="tcard-q">&ldquo;</span>
+          <p class="tcard-body" id="tsingle-body"><strong>My daughter has gone from a C to an A grade student in math.</strong> I truly can't say enough praise for Luca. He is calm, sensitive, and able to customize his tutoring to achieve the needed learning. My daughter now feels confident in math and proud of her accomplishments.</p>
+          <span class="tcard-author" id="tsingle-author">Patti &mdash; Westfield</span>
+        </div>
+        <button class="tarrow tarrow-right" id="tarrow-next" aria-label="Next testimonial"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="disciplines">
+  <div class="container">
+    <div class="eyebrow reveal">Areas of Focus</div>
+    <h2 class="disc-hed reveal d1">What we teach.</h2>
+    <div class="disc-grid">
+      <div class="disc-card reveal">
+        <svg class="disc-icon" viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+        <h3 class="disc-title">Mathematics</h3>
+        <p class="disc-body">Algebra 1, Geometry, Algebra 2/Trigonometry, Precalculus (regular and Honors), Statistics and AP Statistics, and Calculus — from Honors Calculus through AP Calculus AB, AP Calculus BC, and Multivariable Calculus.</p>
+      </div>
+      <div class="disc-card reveal d1">
+        <svg class="disc-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+        <h3 class="disc-title">Standardized Test Prep</h3>
+        <p class="disc-body">Focused, score-driven SAT and ACT preparation — math, reading, and writing — plus AP and IB exam preparation across subjects.</p>
+      </div>
+      <div class="disc-card reveal d2">
+        <svg class="disc-icon" viewBox="0 0 24 24"><path d="M9 3h6v7l4 11H5L9 10V3z"/><line x1="9" y1="3" x2="15" y2="3"/></svg>
+        <h3 class="disc-title">General Chemistry</h3>
+        <p class="disc-body">Building the foundational concepts that most quietly trip up high schoolers, from bonding to stoichiometry.</p>
+      </div>
+      <div class="disc-card reveal d3">
+        <svg class="disc-icon" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="currentColor" fill="none" stroke-width="1.75" stroke-linecap="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="currentColor" fill="none" stroke-width="1.75" stroke-linecap="round"/></svg>
+        <h3 class="disc-title">English</h3>
+        <p class="disc-body">Reading comprehension, essay writing, literary analysis, and AP English Language and Literature.</p>
+      </div>
+      <div class="disc-card reveal d4">
+        <svg class="disc-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" fill="none" stroke-width="1.75"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" stroke="currentColor" fill="none" stroke-width="1.75"/></svg>
+        <h3 class="disc-title">Language Tutoring</h3>
+        <p class="disc-body">Italian, French, and Spanish at all levels — conversation, grammar, and exam prep, with our dedicated language specialist.</p>
+      </div>
+      <div class="disc-card reveal d4">
+        <svg class="disc-icon" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" fill="none" stroke-width="1.75" stroke-linecap="round"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" fill="none" stroke-width="1.75" stroke-linecap="round"/></svg>
+        <h3 class="disc-title">College Essay &amp; Applications</h3>
+        <p class="disc-body">Personal statement strategy, supplemental essays, and application narrative — built around what makes each student distinct.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="about">
+  <div class="container">
+    <div class="eyebrow reveal">Meet Our Team</div>
+    <div class="team-grid">
+      <div class="team-card reveal d1">
+        <div class="team-photo-wrap luca-frame"><img class="team-photo" src="photo-luca.jpg" alt="Luca Moretti"></div>
+        <h3 class="team-name">Luca Moretti</h3>
+        <div class="team-role">Founder &amp; Primary Tutor</div>
+        <p class="team-bio">Northwestern University, top of class. Double major in Statistics and Music, with minors in Entrepreneurship and Music Technology in three years. Eight years consistently tutoring across New Jersey and helping students get into their dream universities.</p>
+      </div>
+      <div class="team-card reveal d2">
+        <img class="team-photo" src="photo-lidia.jpg" alt="Lidia Garofalo">
+        <h3 class="team-name">Lidia Garofalo</h3>
+        <div class="team-role">Language Specialist</div>
+        <p class="team-bio">University of Bologna Graduate. Bachelors in Philosophy and Language with experience teaching Americans and Europeans around the world to speak Italian, Spanish, and French fluently.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="consult">
+  <div class="container">
+    <div class="consult-grid">
+      <div>
+        <div class="eyebrow reveal">Book a Free Intro Call</div>
+        <h2 class="consult-heading reveal d1">Let's find the gap.</h2>
+        <p class="consult-lead reveal d2">Tell me a bit about your student and I'll follow up within 24 hours to set up a time — no obligation.</p>
+        <div class="phone-box reveal d2">
+          <span class="phone-box-lbl">Prefer to talk now?</span>
+          <a href="tel:2012752791" class="phone-box-num">(201) 275-2791</a>
+        </div>
+        <p class="serve-text reveal d3">Serving Cranford, Westfield, Mountainside, Scotch Plains, Summit, New Providence, Short Hills, and surrounding towns — in person or online.</p>
+      </div>
+      <div class="form-card">
+        <form id="contact-form" novalidate>
+          <div class="form-row">
+            <div class="form-field"><label class="form-label" for="cf-name">Name</label><input class="form-input" type="text" id="cf-name" name="from_name" required></div>
+            <div class="form-field"><label class="form-label" for="cf-email">Email</label><input class="form-input" type="email" id="cf-email" name="from_email" required></div>
+          </div>
+          <div class="form-row">
+            <div class="form-field"><label class="form-label" for="cf-town">Town</label><input class="form-input" type="text" id="cf-town" name="town" placeholder="e.g. Westfield"></div>
+            <div class="form-field">
+              <label class="form-label" for="cf-type">Subject</label>
+              <select class="form-select" id="cf-type" name="subject" required>
+                <option value="">Select a subject</option>
+                <option value="General Math">General Math</option>
+                <option value="College Math">College Math</option>
+                <option value="Standardized Test Prep">Standardized Test Prep</option>
+                <option value="General Chemistry">General Chemistry</option>
+                <option value="English">English</option>
+                <option value="Language Tutoring">Language Tutoring (Italian / French / Spanish)</option>
+                <option value="College Essay">College Essay / Applications</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-field"><label class="form-label" for="cf-message">Tell me about your student</label><textarea class="form-textarea" id="cf-message" name="message" placeholder="Grade, current grade in the class, what's not working right now..."></textarea></div>
+          <button type="submit" class="btn-submit" id="cf-submit">Send &amp; Book Intro Call</button>
+          <p class="form-note" id="cf-note">We'll get back to you within 24 hours.</p>
+          <p id="cf-success" style="display:none; font-size:0.78rem; color:var(--gold); margin-top:0.75rem; line-height:1.65;">Message sent — we'll follow up shortly.</p>
+          <p id="cf-error" style="display:none; font-size:0.78rem; color:var(--red); margin-top:0.75rem; line-height:1.65;">Something went wrong. Please call (201) 275-2791 directly.</p>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div>
+    <p class="footer-tagline">Moretti Test Prep and Tutoring, located in Cranford NJ</p>
+    <a href="tel:2012752791" class="footer-phone">(201) 275-2791</a>
+  </div>
+  <div class="footer-right">
+    <div class="footer-serving-hed">Serving</div>
+    <div class="footer-towns">Cranford · Westfield · Mountainside<br>Scotch Plains · Summit · Short Hills<br>New Providence · Berkeley Heights</div>
+    <a href="https://www.linkedin.com/company/moretti-test-prep-and-tutoring/?viewAsMember=true" class="footer-linkedin" target="_blank" rel="noopener">LinkedIn ↗</a>
+  </div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+  var nav    = document.getElementById('main-nav');
+  var vid    = document.getElementById('hero-video');
+  var canvas = document.getElementById('hero-canvas');
+  var hint   = document.getElementById('scroll-hint');
+  var ctx    = canvas ? canvas.getContext('2d') : null;
+
+  if (vid) {
+    vid.muted = true;
+    var p = vid.play();
+    if (p && p.catch) { p.catch(function(){}); }
+    vid.addEventListener('canplay', function(){ if(hint) hint.classList.add('show'); });
+    setTimeout(function(){ if(hint) hint.classList.add('show'); }, 1500);
+  }
+
+  var W = 0, H = 0;
+  var logoImg = new Image();
+  logoImg.src = 'logo-white.png';
+  logoImg.onload = function () { window.dispatchEvent(new Event('scroll')); };
+
+  function drawMask(t) {
+    if (!ctx) return;
+    ctx.clearRect(0, 0, W, H);
+    if (t <= 0) return;
+    ctx.save();
+    ctx.globalAlpha = t;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, W, H);
+    if (logoImg.complete && logoImg.naturalWidth) {
+      var scale  = 1 + 5 * (1 - t);
+      var aspect = logoImg.naturalWidth / logoImg.naturalHeight;
+      var lw     = Math.min(W * 0.9, 1200) * scale;
+      var lh     = lw / aspect;
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.globalAlpha = 1;
+      ctx.drawImage(logoImg, (W - lw) / 2, (H - lh) / 2, lw, lh);
+    }
+    ctx.restore();
+  }
+
+  function resizeCanvas() {
+    if (!canvas) return;
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+    window.dispatchEvent(new Event('scroll'));
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  var busy = false;
+  window.addEventListener('scroll', function () {
+    if (busy) return;
+    busy = true;
+    requestAnimationFrame(function () {
+      busy = false;
+      var sy    = window.scrollY;
+      var viewH = window.innerHeight;
+      var wrapper = document.getElementById('hero-wrapper');
+      var wrapH   = wrapper ? wrapper.offsetHeight : viewH * 2;
+      var prog  = Math.min(1, Math.max(0, sy / (wrapH - viewH)));
+      if (sy > viewH * 0.8) nav.classList.add('visible');
+      else                   nav.classList.remove('visible');
+      if (hint) hint.style.opacity = sy > 40 ? '0' : '';
+      var t = Math.min(1, Math.max(0, (prog - 0.04) / 0.58));
+      drawMask(t);
+    });
+  }, { passive: true });
+
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.08, rootMargin: '0px 0px -36px 0px' });
+  document.querySelectorAll('.reveal').forEach(function (el) { io.observe(el); });
+
+  var sfIo = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) { e.target.classList.add('visible'); sfIo.unobserve(e.target); }
+    });
+  }, { threshold: 0.04 });
+  document.querySelectorAll('.section-fade').forEach(function (el) { sfIo.observe(el); });
+
+  /* ═══ TESTIMONIAL CAROUSEL ═══ */
+  (function () {
+    var single = document.getElementById('tsingle');
+    if (!single) return;
+    var bodyEl   = document.getElementById('tsingle-body');
+    var authorEl = document.getElementById('tsingle-author');
+
+    var testimonials = [
+      { body: '<strong>He has a very approachable and calm demeanor and a seriously deep grasp of the material.</strong> He breaks down complex mathematical concepts very well and makes a stressful experience much less so. We would highly recommend him for your son or daughter.', author: 'Ellen, parent &mdash; Westfield' },
+      { body: '<strong>My daughter has gone from a C to an A grade student in math.</strong> I truly can\'t say enough praise for Luca. He is calm, sensitive, and able to customize his tutoring to achieve the needed learning. My daughter now feels confident in math and proud of her accomplishments.', author: 'Patti, parent &mdash; Westfield' },
+      { body: '<strong>I highly recommend Luca as a tutor!</strong> I have always struggled in math, so I knew I needed a tutor who could clearly explain the material.', author: 'Savannah, student &mdash; Cranford' },
+      { body: 'I found Luca from the list of tutors from the Summit Public Schools and I would recommend him for tutoring. <strong>He is very patient, kind and was even available to answer questions on text after a tutoring session.</strong> I would highly recommend him.', author: 'Sharon, parent &mdash; Berkeley Heights' },
+      { body: 'I had lessons with Luca for a year, and he helped me with math while I was studying for my entrance exam. He made learning easy and enjoyable. <strong>Thanks to his help, I got the score I wanted and enjoyed studying.</strong> I highly recommend Luca as a math tutor.', author: 'Maria, student &mdash; Short Hills' }
+    ];
+
+    var active = 1; // starts on Patti's testimonial
+
+    function render(idx) {
+      bodyEl.innerHTML   = testimonials[idx].body;
+      authorEl.innerHTML = testimonials[idx].author;
+    }
+    render(active);
+
+    function goTo(dir) {
+      single.classList.add('tfade');
+      setTimeout(function () {
+        active = (active + dir + testimonials.length) % testimonials.length;
+        render(active);
+        single.classList.remove('tfade');
+      }, 500);
+    }
+
+    var timer = null;
+    function startAuto() {
+      timer = setInterval(function () { goTo(1); }, 15000);
+    }
+    function resetAuto() {
+      if (timer) clearInterval(timer);
+      startAuto();
+    }
+    startAuto();
+
+    var prevBtn = document.getElementById('tarrow-prev');
+    var nextBtn = document.getElementById('tarrow-next');
+    if (prevBtn) prevBtn.addEventListener('click', function () { goTo(-1); resetAuto(); });
+    if (nextBtn) nextBtn.addEventListener('click', function () { goTo(1); resetAuto(); });
+  })();
+
+  emailjs.init('FAAXN09Ad2ObipaJJ');
+
+  var form = document.getElementById('contact-form');
+  if (form) {
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var name  = document.getElementById('cf-name').value.trim();
+      var email = document.getElementById('cf-email').value.trim();
+      var type  = document.getElementById('cf-type').value;
+      if (!name || !email || !type) { alert('Please fill in your name, email, and subject.'); return; }
+      var btn = document.getElementById('cf-submit');
+      btn.disabled = true; btn.textContent = 'Sending…';
+      var params = {
+        from_name: name,
+        from_email: email,
+        town: document.getElementById('cf-town').value.trim(),
+        subject: type,
+        message: document.getElementById('cf-message').value.trim()
+      };
+      emailjs.send('service_k768w0d', 'template_xcv84lb', params)
+        .then(function () {
+          document.getElementById('cf-note').style.display    = 'none';
+          document.getElementById('cf-success').style.display = 'block';
+          document.getElementById('cf-error').style.display   = 'none';
+          form.reset();
+          btn.disabled = false; btn.textContent = 'Send & Book Intro Call';
+          emailjs.send('service_k768w0d', 'template_1q3fi3i', params);
+        }, function () {
+          document.getElementById('cf-error').style.display   = 'block';
+          document.getElementById('cf-success').style.display = 'none';
+          btn.disabled = false; btn.textContent = 'Send & Book Intro Call';
+        });
+    });
+  }
+})();
+</script>
+</body>
+</html>
