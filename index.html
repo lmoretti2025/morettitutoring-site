@@ -3,9 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Moretti Test Prep &amp; Tutoring</title>
+  <title>Moretti Test Prep &amp; Tutoring — Math, SAT/ACT &amp; College Admissions | Cranford, NJ</title>
+  <meta name="description" content="Specialist one-on-one math, SAT &amp; ACT, and college admissions tutoring in Cranford, NJ and online. The 12-week Moretti Method program — if scores don't improve, we keep teaching free.">
+  <meta property="og:title" content="Moretti Test Prep &amp; Tutoring">
+  <meta property="og:description" content="Specialist one-on-one math, SAT &amp; ACT, and college admissions tutoring in Cranford, NJ and online.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://morettitutoring.com/">
+  <meta property="og:image" content="https://morettitutoring.com/logo-black.png">
   <link rel="icon" type="image/png" href="target-icon.png">
   <link rel="shortcut icon" href="target-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Sorts+Mill+Goudy&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -20,6 +29,7 @@
       --gold:   #C9A84C;
       --hel:    'Helvetica Neue', Helvetica, Arial, sans-serif;
       --serif:  Georgia, 'Times New Roman', serif;
+      --display: 'Archivo Black', 'Helvetica Neue', sans-serif;
     }
 
     html { scroll-behavior: smooth; }
@@ -34,15 +44,16 @@
     .nav-cta:hover { background: rgba(255,255,255,0.18); border-color: #fff; }
 
     /* ═══ HERO ═══ */
-    #hero-wrapper { position: relative; height: 200vh; }
-    #hero-sticky { position: sticky; top: 0; height: 100vh; width: 100%; overflow: hidden; background: #fff; }
-    #hero-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
-    #hero-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; }
-    #scroll-hint { position: absolute; bottom: 1.75rem; left: 50%; transform: translateX(-50%); z-index: 4; display: flex; flex-direction: column; align-items: center; gap: 0.4rem; opacity: 0; transition: opacity 0.7s ease 1s; pointer-events: none; }
-    #scroll-hint.show { opacity: 0.45; }
-    #scroll-hint span { font-size: 0.54rem; font-weight: 600; letter-spacing: 0.26em; text-transform: uppercase; color: var(--white); text-shadow: 0 1px 6px rgba(0,0,0,0.4); }
-    #scroll-hint::after { content: ''; width: 1px; height: 36px; background: linear-gradient(to bottom, rgba(255,255,255,0.8), transparent); animation: hint-anim 2s ease-in-out infinite; }
-    @keyframes hint-anim { 0%,100% { opacity: 0.45; transform: scaleY(1); } 50% { opacity: 0.9; transform: scaleY(1.06); } }
+    #hero { position: relative; height: 100vh; background: var(--white); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2.25rem; padding: 0 1.5rem; }
+    .hero-logo { width: min(94vw, 1080px); height: auto; display: block; }
+    .hero-tag { font-size: clamp(1rem, 1.6vw, 1.25rem); font-weight: 500; line-height: 1.75; color: rgba(17,17,17,0.82); max-width: 700px; text-align: center; }
+    #hero .hero-tag.reveal { transition-duration: 4s; transition-delay: 0.8s; }
+    #hero .hero-ctas.reveal { transition-duration: 4s; transition-delay: 1.9s; }
+    .hero-ctas { display: flex; gap: 1.25rem; flex-wrap: wrap; justify-content: center; }
+    .hero-btn-red { background: var(--red); color: #fff; font-family: var(--hel); font-size: 0.84rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; padding: 1.3rem 2.9rem; text-decoration: none; white-space: nowrap; transition: opacity 0.2s; }
+    .hero-btn-red:hover { opacity: 0.86; }
+    .hero-btn-outline { background: transparent; color: var(--text); border: 1px solid rgba(17,17,17,0.35); font-family: var(--hel); font-size: 0.84rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; padding: 1.3rem 2.9rem; text-decoration: none; white-space: nowrap; transition: border-color 0.2s; }
+    .hero-btn-outline:hover { border-color: var(--text); }
 
     /* ═══ SHARED ═══ */
     section { padding: 7rem 0; }
@@ -55,28 +66,26 @@
     .eyebrow { display: flex; align-items: center; gap: 0.45rem; font-size: 0.58rem; font-weight: 600; letter-spacing: 0.24em; text-transform: uppercase; color: var(--red); margin-bottom: 1.5rem; }
     .eyebrow::before { content: '◆'; font-size: 0.4rem; }
 
-    /* ═══ INTRO SECTION ═══ */
-    #intro-dark { background: #ffffff; overflow: hidden; padding: 0; }
-
-    .intro-ticker-outer { padding: 1rem 0; border-bottom: 1px solid var(--border); }
+    /* ═══ TICKER (hero bottom) ═══ */
+    .intro-ticker-outer { position: absolute; bottom: 0; left: 0; right: 0; padding: 1.5rem 0; border-top: 1px solid var(--border); }
     .intro-ticker-wrap { overflow: hidden; -webkit-mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%); mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%); }
-    .intro-ticker-track { display: flex; align-items: center; width: max-content; animation: ticker-scroll 28s linear infinite; }
-    .intro-ticker-item { font-size: 0.54rem; font-weight: 600; letter-spacing: 0.24em; text-transform: uppercase; color: var(--gold); white-space: nowrap; padding: 0 1.5rem; }
-    .intro-ticker-sep { font-size: 0.36rem; color: rgba(201,168,76,0.4); flex-shrink: 0; }
-    @keyframes ticker-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+    .intro-ticker-track { display: flex; align-items: center; width: max-content; animation: ticker-scroll 42s linear infinite; will-change: transform; }
+    .intro-ticker-item { font-size: 0.8rem; font-weight: 600; letter-spacing: 0.24em; text-transform: uppercase; color: var(--gold); white-space: nowrap; padding: 0 2rem; }
+    .intro-ticker-sep { font-size: 0.5rem; color: rgba(201,168,76,0.4); flex-shrink: 0; }
+    @keyframes ticker-scroll { 0% { transform: translate3d(0,0,0); } 100% { transform: translate3d(-50%,0,0); } }
 
-    .intro-inner { display: grid; grid-template-columns: 1fr 1fr; min-height: 75vh; max-width: 1260px; margin: 0 auto; padding: 3.5rem 4rem 3rem; gap: 5rem; align-items: center; }
-    .intro-headline { font-family: var(--serif); font-size: clamp(2rem, 3.6vw, 3.2rem); font-weight: 700; color: var(--text); line-height: 1.2; margin-bottom: 1.75rem; }
-    .intro-bio { font-size: 0.92rem; line-height: 1.9; color: var(--mid); margin-bottom: 2.25rem; max-width: 500px; }
-    .intro-ctas { display: flex; gap: 1rem; flex-wrap: wrap; }
-    .intro-btn-red { background: var(--red); color: #fff; border: none; font-family: var(--hel); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.85rem 1.75rem; text-decoration: none; white-space: nowrap; cursor: pointer; transition: opacity 0.2s; }
-    .intro-btn-red:hover { opacity: 0.86; }
-    .intro-btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border); font-family: var(--hel); font-size: 0.68rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.85rem 1.75rem; text-decoration: none; white-space: nowrap; transition: border-color 0.2s; }
-    .intro-btn-outline:hover { border-color: rgba(17,17,17,0.6); }
-    .intro-right { display: flex; justify-content: center; align-items: center; }
-    .polaroid-wrap { max-width: 460px; width: 100%; position: relative; overflow: hidden; }
-    .polaroid-img { width: 100%; display: block; aspect-ratio: 4/3; object-fit: cover; object-position: center top; }
-
+    /* ═══ STORY: PROBLEM + ANSWER ═══ */
+    #story { background-image: url(photo-2-web.jpg); background-size: cover; background-position: center; position: relative; padding: 0; overflow: hidden; }
+    #story::before { content: ''; position: absolute; inset: 0; background: rgba(0,0,0,0.62); z-index: 0; }
+    #story .container { position: relative; z-index: 1; padding-top: 6.5rem; padding-bottom: 6.5rem; }
+    .blurb-text { max-width: 720px; }
+    .stats-band { background: var(--white); border: 1px solid var(--border); border-top: none; margin: 0 0 1.75rem; }
+    .stats-band .intro-stats { border-top: none; }
+    .stats-band .intro-stat { padding: 1.1rem 0.4rem; }
+    .stats-band .intro-stat-num { font-size: clamp(1.25rem, 1.9vw, 1.7rem); }
+    .stats-band .intro-stat-cred-item { padding: 1.1rem 0.6rem; }
+    .nu-link { font-family: 'Goudy Old Style', 'Sorts Mill Goudy', Georgia, serif; font-weight: 700; color: rgb(63,30,104); text-decoration: none; font-size: 1.05em; }
+    .nu-link:hover { text-decoration: underline; }
     .intro-stats { display: grid; grid-template-columns: repeat(5, 1fr); border-top: 1px solid var(--border); }
     .intro-stat { padding: 1.5rem 1rem; text-align: center; border-right: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; }
     .intro-stat:last-child { border-right: none; }
@@ -88,39 +97,101 @@
     .intro-stat-cred { display: block; font-family: var(--serif); font-size: clamp(1rem, 1.6vw, 1.25rem); font-weight: 700; color: var(--text); line-height: 1; margin-bottom: 0.35rem; }
     .intro-stat-cred-sub { font-size: 0.5rem; font-weight: 500; letter-spacing: 0.1em; color: var(--faint); line-height: 1.65; }
 
-    /* ═══ MISSION ═══ */
-    #mission { background-image: url(photo-2.jpg); background-size: cover; background-position: center; position: relative; padding: 0; overflow: hidden; }
-    #mission::before { content: ''; position: absolute; inset: 0; background: rgba(0,0,0,0.62); z-index: 0; }
-    #mission .container { position: relative; z-index: 1; padding-top: 7rem; padding-bottom: 7rem; }
-    #mission .blurb-kicker { color: var(--gold); }
-    #mission .blurb-hed { color: #fff; }
-    #mission .blurb-body { color: rgba(255,255,255,0.72); }
-    #mission .blurb-quote { color: rgba(255,255,255,0.82); border-left-color: var(--gold); }
-    .blurb-text { max-width: 700px; }
-    .blurb-kicker { display: block; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: var(--red); margin-bottom: 1rem; }
-    .blurb-hed { font-family: var(--serif); font-size: clamp(1.55rem, 2.6vw, 2.2rem); font-weight: 700; color: var(--text); line-height: 1.25; margin-bottom: 1.4rem; }
-    .blurb-body { font-size: clamp(0.95rem, 1.35vw, 1.06rem); line-height: 1.9; color: var(--mid); }
-    .blurb-body + .blurb-body { margin-top: 1rem; }
-    .blurb-quote { border-left: 3px solid var(--red); padding: 0.1rem 0 0.1rem 1.2rem; margin: 1.4rem 0; font-family: var(--serif); font-style: italic; font-size: clamp(0.95rem, 1.3vw, 1.05rem); color: var(--mid); line-height: 1.65; }
+    .blurb-kicker { display: block; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); margin-bottom: 1rem; }
+    .blurb-hed { font-family: var(--display); font-size: clamp(1.35rem, 2.2vw, 1.85rem); font-weight: 400; color: #fff; line-height: 1.4; margin-bottom: 1.4rem; }
+    .blurb-body { font-size: clamp(0.95rem, 1.35vw, 1.06rem); line-height: 1.9; color: rgba(255,255,255,0.72); }
+    .blurb-quote { border-left: 3px solid var(--gold); padding: 0.1rem 0 0.1rem 1.2rem; margin: 1.5rem 0; font-family: var(--serif); font-style: italic; font-size: clamp(0.95rem, 1.3vw, 1.05rem); color: rgba(255,255,255,0.85); line-height: 1.65; }
+    .story-ctas { display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 2.25rem; }
+    .story-btn-red { background: var(--red); color: #fff; font-family: var(--hel); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; padding: 1rem 2.4rem; text-decoration: none; white-space: nowrap; transition: opacity 0.2s; }
+    .story-btn-red:hover { opacity: 0.86; }
+    .story-btn-outline { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.5); font-family: var(--hel); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; padding: 1rem 2.4rem; text-decoration: none; white-space: nowrap; transition: background 0.2s, border-color 0.2s; }
+    .story-btn-outline:hover { background: rgba(255,255,255,0.14); border-color: #fff; }
+
+    /* ═══ METHOD ═══ */
+    #method { background: var(--bg); }
+    .method-hed { font-family: var(--display); font-size: clamp(1.6rem, 2.8vw, 2.4rem); font-weight: 400; color: var(--text); line-height: 1.3; margin-bottom: 1.25rem; }
+    .method-lead { max-width: 760px; font-size: 0.95rem; line-height: 1.9; color: var(--mid); margin-bottom: 3.25rem; }
+    .method-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2.25rem; }
+    .method-step { border-top: 2px solid var(--red); padding-top: 1.2rem; }
+    .method-num { display: block; font-family: var(--serif); font-size: 0.95rem; font-style: italic; color: var(--gold); margin-bottom: 0.55rem; }
+    .method-step-title { font-size: 1.05rem; font-weight: 700; color: var(--text); margin-bottom: 0.5rem; }
+    .method-step-body { font-size: 0.8rem; line-height: 1.7; color: var(--mid); }
+
+    .method-cta-wrap { margin-top: 4rem; }
+    .method-cta { display: inline-block; font-family: var(--display); font-size: clamp(1.25rem, 2.5vw, 2.1rem); font-weight: 400; line-height: 1.3; color: var(--red); text-decoration: none; border-bottom: 3px solid var(--red); padding-bottom: 0.4rem; transition: transform 0.35s cubic-bezier(0.2, 1, 0.3, 1); transform-origin: left bottom; }
+    .method-cta:hover { transform: scale(1.1); }
+    .method-cta .arr { display: inline-block; transition: transform 0.25s ease; }
+    .method-cta:hover .arr { transform: translateX(6px); }
+    .method-guarantee { margin-top: 1.1rem; font-size: 0.8rem; line-height: 1.7; color: var(--mid); max-width: 560px; }
+    .method-guarantee strong { font-weight: 700; color: var(--text); text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    /* slow chronological cascade */
+    .md1 { transition-delay: 0.1s; }
+    .md2 { transition-delay: 1.1s; }
+    .md3 { transition-delay: 2.1s; }
+    .md4 { transition-delay: 3.1s; }
+
+    /* hand-drawn double underline */
+    .uline { position: relative; white-space: nowrap; display: inline-block; }
+    .uline-svg { position: absolute; left: -3%; bottom: -0.32em; width: 106%; height: 0.36em; overflow: visible; fill: none; stroke: var(--red); stroke-width: 2.5px; stroke-linecap: round; }
+    .uline-svg path { stroke-dasharray: 460; stroke-dashoffset: 460; }
+    .method-hed.visible .uline { animation: uline-pop 0.8s cubic-bezier(0.2, 1.4, 0.4, 1) 1.25s; transform-origin: 50% 100%; z-index: 5; }
+    .method-hed.visible .uline-svg path:first-child { animation: uline-draw 0.6s ease-out forwards 1.1s; }
+    .method-hed.visible .uline-svg path:last-child  { animation: uline-draw 0.5s ease-out forwards 1.7s; }
+    @keyframes uline-draw { to { stroke-dashoffset: 0; } }
+    @keyframes uline-pop { 0% { transform: scale(1); } 45% { transform: scale(1.75); } 100% { transform: scale(1); } }
+
+    /* flat illustration doodles */
+    .doodle { display: block; width: 66px; height: 66px; margin-bottom: 0.95rem; overflow: visible; }
+    .dd-sweep { animation: dd-sweep 3.6s ease-in-out infinite; }
+    @keyframes dd-sweep { 0%, 100% { transform: translate(-4px, 1px) rotate(-3deg); } 50% { transform: translate(5px, -2px) rotate(3deg); } }
+    .dd-pop { transform: scale(0); transform-box: fill-box; transform-origin: center; animation: dd-pop 4.2s ease-in-out infinite; }
+    .dd-pop.p2 { animation-delay: 0.8s; }
+    .dd-pop.p3 { animation-delay: 1.6s; }
+    @keyframes dd-pop { 0% { transform: scale(0); } 8% { transform: scale(1.18); } 13% { transform: scale(1); } 78% { transform: scale(1); } 88%, 100% { transform: scale(0); } }
+    .dd-rock { animation: dd-rock 1.6s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+    @keyframes dd-rock { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(3deg) translateY(-1.5px); } }
+    .dd-write { animation: dd-jitter 0.34s ease-in-out infinite; transform-box: fill-box; transform-origin: top center; }
+    @keyframes dd-jitter { 0%, 100% { transform: rotate(-2deg); } 50% { transform: rotate(2.5deg); } }
+    .dd-scribble { stroke: var(--red); stroke-width: 2; fill: none; stroke-linecap: round; stroke-dasharray: 40; stroke-dashoffset: 40; animation: dd-scribble 1.5s linear infinite; }
+    @keyframes dd-scribble { 0% { stroke-dashoffset: 40; } 70% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: 0; } }
+    .dd-bar { transform: scaleY(0); transform-box: fill-box; transform-origin: bottom center; animation: dd-bar 4s ease-in-out infinite; }
+    .dd-bar.b2 { animation-delay: 0.35s; }
+    .dd-bar.b3 { animation-delay: 0.7s; }
+    @keyframes dd-bar { 0% { transform: scaleY(0); } 16% { transform: scaleY(1.07); } 22% { transform: scaleY(1); } 82% { transform: scaleY(1); } 94%, 100% { transform: scaleY(0); } }
+    .dd-line { stroke-dasharray: 70; stroke-dashoffset: 70; animation: dd-line 4s ease-in-out infinite; }
+    @keyframes dd-line { 0% { stroke-dashoffset: 70; opacity: 1; } 30% { stroke-dashoffset: 0; opacity: 1; } 85% { stroke-dashoffset: 0; opacity: 1; } 96%, 100% { stroke-dashoffset: 0; opacity: 0; } }
+    .dd-head { opacity: 0; animation: dd-head 4s ease-in-out infinite; }
+    @keyframes dd-head { 0%, 26% { opacity: 0; } 33% { opacity: 1; } 85% { opacity: 1; } 96%, 100% { opacity: 0; } }
 
     /* ═══ DISCIPLINES ═══ */
-    #disciplines { background: var(--white); padding: 4.25rem 0 4rem; }
-    .disc-hed { font-family: var(--serif); font-size: clamp(2rem, 3.8vw, 3rem); font-weight: 700; color: var(--text); margin-bottom: 1.5rem; }
-    .disc-grid { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--border); }
-    .disc-card { padding: 1.5rem 1.75rem; border-right: 1px solid var(--border); background: var(--white); }
-    .disc-card:nth-child(3n) { border-right: none; }
-    .disc-card:nth-child(-n+3) { border-bottom: 1px solid var(--border); }
-    .disc-icon { display: block; width: 24px; height: 24px; stroke: var(--red); fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; margin-bottom: 0.85rem; }
-    .disc-title { font-size: 1.2rem; font-weight: 700; color: var(--text); margin-bottom: 0.45rem; line-height: 1.35; }
-    .disc-body { font-size: 0.8rem; line-height: 1.6; color: var(--mid); }
+    #disciplines { background-image: url(photo-3-web.jpg); background-size: cover; background-position: center 30%; position: relative; padding: 4.25rem 0 10.5rem; }
+    #disciplines::before { content: ''; position: absolute; inset: 0; background: rgba(0,0,0,0.58); }
+    #disciplines .container { position: relative; z-index: 1; }
+    #disciplines .eyebrow { color: var(--gold); }
+    .disc-hed { font-family: var(--display); font-size: clamp(1.7rem, 3.1vw, 2.5rem); font-weight: 400; color: #fff; margin-bottom: 1.5rem; }
+    .disc-grid { display: grid; grid-template-columns: repeat(5, 1fr); border-top: 1px solid var(--border); border-left: 1px solid var(--border); }
+    .disc-card { padding: 1.75rem 1.4rem 2rem; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); background: var(--white); position: relative; transition: background 0.35s ease; }
+    .disc-card::before { content: ''; position: absolute; top: -1px; left: 0; width: 0; height: 2px; background: var(--red); transition: width 0.4s ease; }
+    .disc-card:hover::before { width: 100%; }
+    .disc-card:hover { background: #FDFBF6; }
+    .disc-num { display: block; font-family: var(--serif); font-style: italic; font-size: 0.85rem; color: var(--gold); margin-bottom: 0.9rem; }
+    .disc-icon { display: block; width: 24px; height: 24px; stroke: var(--red); fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; margin-bottom: 0.85rem; transition: transform 0.3s ease; }
+    .disc-icon path, .disc-icon line, .disc-icon circle, .disc-icon polyline { stroke: var(--red); }
+    .disc-card:hover .disc-icon { transform: translateY(-3px); }
+    .disc-title { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 0.5rem; line-height: 1.35; }
+    .disc-body { font-size: 0.78rem; line-height: 1.65; color: var(--mid); }
+    .disc-link { display: inline-block; margin-top: 0.8rem; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--red); text-decoration: none; border-bottom: 1px solid rgba(176,39,28,0.4); padding-bottom: 2px; transition: border-color 0.2s; }
+    .disc-link:hover { border-color: var(--red); }
 
     /* ═══ TEAM ═══ */
     #about { background: var(--bg); }
-    .team-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; }
+    .team-grid { display: flex; justify-content: center; }
+    .team-card { max-width: 660px; width: 100%; }
     .team-photo { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; object-position: center top; display: block; margin-bottom: 1.5rem; }
     .team-photo-placeholder { background: #e5e0d9; display: flex; align-items: flex-end; justify-content: center; overflow: hidden; }
     .team-photo-placeholder svg { width: 65%; opacity: 0.35; }
-    .team-photo-wrap { width: 100%; aspect-ratio: 1 / 1; overflow: hidden; margin-bottom: 1.5rem; }
+    .team-photo-wrap { width: 100%; aspect-ratio: 1 / 1; overflow: hidden; margin-bottom: 0; }
     .team-photo-wrap .team-photo { width: 100%; height: 100%; margin-bottom: 0; aspect-ratio: unset; }
     .team-photo-wrap.luca-frame .team-photo { transform: scale(1.5) translate(15%, 10%); transform-origin: center; }
     .team-name { font-family: var(--serif); font-size: 1.2rem; font-weight: 700; color: var(--text); margin-bottom: 0.3rem; line-height: 1.2; }
@@ -128,28 +199,43 @@
     .team-bio { font-size: 0.88rem; line-height: 1.8; color: var(--mid); }
 
     /* ═══ TESTIMONIALS ═══ */
-    #testimonials { background: var(--white); }
-    .tcarousel { display: flex; align-items: center; justify-content: center; gap: 2rem; }
-    .tarrow { flex: 0 0 auto; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--border); background: var(--white); cursor: pointer; font-size: 1rem; color: var(--red); display: flex; align-items: center; justify-content: center; transition: border-color 0.2s, background 0.2s; }
-    .tarrow:hover { border-color: var(--red); background: rgba(176,39,28,0.06); }
-    .tarrow svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-    .tsingle { flex: 1 1 auto; max-width: 940px; min-width: 0; text-align: center; opacity: 1; transition: opacity 0.5s ease; padding: 1rem 0; }
+    #testimonials { background: var(--white); padding: 4.5rem 0; }
+    .tsingle { max-width: 940px; opacity: 1; transition: opacity 0.5s ease; display: flex; flex-direction: column; justify-content: center; }
     .tsingle.tfade { opacity: 0; }
-    .tcard-q { display: block; font-family: var(--serif); font-size: 3.5rem; color: var(--red); opacity: 0.18; line-height: 0.8; margin-bottom: 1rem; user-select: none; }
-    .tcard-body { font-family: var(--serif); font-size: 1rem; font-style: italic; line-height: 1.8; color: var(--mid); margin-bottom: 1.5rem; }
-    .tcard-body strong { display: block; font-weight: 700; font-style: normal; font-size: clamp(1.7rem, 3.6vw, 3.1rem); line-height: 1.25; color: var(--text); margin-bottom: 1rem; }
-    .tcard-author { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--red); }
+    .tcard-body { font-family: var(--serif); font-size: 1rem; font-style: italic; line-height: 1.85; color: var(--mid); max-width: 720px; }
+    .tcard-body strong { display: block; font-family: var(--display); font-weight: 400; font-style: normal; font-size: clamp(1.7rem, 3.3vw, 2.9rem); line-height: 1.28; color: var(--text); margin-bottom: 1.4rem; }
+    .tcard-author { display: block; margin-top: 1.3rem; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--red); }
+    .tcard-author::before { content: ''; display: inline-block; width: 26px; height: 2px; background: var(--red); vertical-align: middle; margin-right: 0.75rem; }
+    .tctrl { display: flex; align-items: center; gap: 1.75rem; margin-top: 1.9rem; max-width: 940px; }
+    .tindex { font-family: var(--serif); font-style: italic; font-size: 0.85rem; color: var(--gold); letter-spacing: 0.08em; white-space: nowrap; }
+    .tprogress { flex: 1 1 auto; height: 1px; background: var(--border); position: relative; overflow: hidden; }
+    .tprogress-fill { position: absolute; top: 0; bottom: 0; left: 0; width: 0; background: var(--red); }
+    .tprogress-fill.run { animation: tprog 15s linear forwards; }
+    @keyframes tprog { from { width: 0; } to { width: 100%; } }
+    .tarrow { flex: 0 0 auto; width: 40px; height: 40px; border: 1px solid var(--border); background: var(--white); cursor: pointer; color: var(--red); display: flex; align-items: center; justify-content: center; transition: border-color 0.2s, background 0.2s; }
+    .tarrow:hover { border-color: var(--red); background: rgba(176,39,28,0.06); }
+    .tarrow svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
     /* ═══ CONSULT ═══ */
     #consult { padding: 7rem 0; background: var(--bg); }
     .consult-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: start; }
-    .consult-heading { font-family: var(--serif); font-size: clamp(1.8rem, 3vw, 2.6rem); font-weight: 700; color: var(--text); margin-bottom: 1.25rem; line-height: 1.2; }
+    .consult-heading { font-family: var(--display); font-size: clamp(1.55rem, 2.6vw, 2.2rem); font-weight: 400; color: var(--text); margin-bottom: 1.25rem; line-height: 1.3; }
     .consult-lead { font-size: 0.92rem; line-height: 1.8; color: var(--mid); margin-bottom: 2rem; }
     .phone-box { border: 1px solid var(--border); padding: 1.2rem 1.5rem; margin-bottom: 2rem; }
     .phone-box-lbl { display: block; font-size: 0.52rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--faint); margin-bottom: 0.4rem; }
     .phone-box-num { font-family: var(--serif); font-size: 1.4rem; color: var(--gold); text-decoration: none; }
     .serve-text { font-size: 0.78rem; line-height: 1.75; color: var(--mid); }
-    .form-card { background: var(--white); border: 1px solid var(--border); padding: 2rem; }
+    .enroll-steps { display: flex; flex-wrap: wrap; gap: 0.6rem 1.4rem; list-style: none; margin: 0 0 2rem; padding: 0; }
+    .enroll-steps li { display: flex; align-items: center; gap: 0.55rem; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mid); white-space: nowrap; }
+    .enroll-steps li span { display: flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; background: var(--red); color: #fff; font-size: 0.58rem; font-weight: 700; }
+    .book-card { background: var(--white); border: 1px solid var(--border); padding: 0.4rem; }
+    .form-fallback { margin-top: 3rem; border: 1px solid var(--border); background: var(--white); }
+    .form-fallback summary { cursor: pointer; padding: 1.1rem 1.5rem; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--mid); list-style: none; }
+    .form-fallback summary::-webkit-details-marker { display: none; }
+    .form-fallback summary::before { content: '+'; margin-right: 0.6rem; color: var(--red); }
+    .form-fallback[open] summary::before { content: '\2212'; }
+    .form-fallback[open] summary { border-bottom: 1px solid var(--border); }
+    .form-card { background: var(--white); padding: 2rem; }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
     .form-field { margin-bottom: 1.4rem; }
     .form-label { display: block; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text); margin-bottom: 0.5rem; }
@@ -169,22 +255,23 @@
     .footer-right { text-align: right; }
     .footer-serving-hed { font-size: 0.52rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-bottom: 0.85rem; }
     .footer-towns { font-size: 0.78rem; color: rgba(255,255,255,0.5); line-height: 2; }
-    .footer-linkedin { display: inline-block; margin-top: 1.25rem; font-size: 0.52rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.35); text-decoration: none; transition: color 0.2s; }
+    .footer-linkedin { display: inline-block; margin-top: 1.25rem; line-height: 0; color: rgba(255,255,255,0.35); text-decoration: none; transition: color 0.2s; }
     .footer-linkedin:hover { color: var(--gold); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .dd-sweep, .dd-pop, .dd-rock, .dd-write, .dd-scribble, .dd-bar, .dd-line, .intro-ticker-track, .uline-svg path { animation: none; }
+      .dd-scribble, .dd-line, .uline-svg path { stroke-dashoffset: 0; }
+      .dd-pop, .dd-bar { transform: none; }
+      .reveal, .section-fade { transition: none; opacity: 1; transform: none; }
+    }
 
     /* ═══ RESPONSIVE ═══ */
     @media (max-width: 960px) {
       .consult-grid { grid-template-columns: 1fr; gap: 3rem; }
-      .blurb { grid-template-columns: 1fr; gap: 2.5rem; }
-      .blurb.flip .blurb-photo { order: 0; }
+      .method-grid { grid-template-columns: repeat(2, 1fr); }
       .disc-grid { grid-template-columns: repeat(2, 1fr); }
-      .disc-card:nth-child(2n) { border-right: none; }
-      .disc-card:nth-child(3n) { border-right: 1px solid var(--border); }
-      .disc-card:nth-child(2n):nth-child(3n) { border-right: none; }
-      .tcarousel { gap: 0.75rem; }
+      .tctrl { gap: 1rem; }
       footer { grid-template-columns: 1fr; }
-      .team-grid { grid-template-columns: 1fr; gap: 3.5rem; }
-      .intro-inner { grid-template-columns: 1fr; min-height: auto; padding: 4rem 2.5rem 3.5rem; gap: 3.5rem; }
       .intro-stats { grid-template-columns: repeat(2, 1fr); }
       .intro-stat { border-right: 1px solid var(--border); border-top: none; }
       .intro-stat:nth-child(2n) { border-right: none; }
@@ -197,107 +284,162 @@
       #main-nav { padding: 0.75rem 1.5rem; }
       section { padding: 4.5rem 0; }
       .container { padding: 0 1.5rem; }
+      .method-grid { grid-template-columns: 1fr; }
       .disc-grid { grid-template-columns: 1fr; }
-      .disc-card { border-right: none !important; border-bottom: 1px solid var(--border); }
       footer { padding: 2rem 1.5rem; }
       .form-row { grid-template-columns: 1fr; }
-      .intro-inner { padding: 3rem 1.5rem 2.5rem; }
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script src="https://assets.calendly.com/assets/external/widget.js" async></script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": "Moretti Test Prep and Tutoring",
+    "description": "One-on-one math, SAT & ACT, and college admissions tutoring in Cranford, NJ and online.",
+    "url": "https://morettitutoring.com/",
+    "telephone": "+1-201-275-2791",
+    "address": { "@type": "PostalAddress", "addressLocality": "Cranford", "addressRegion": "NJ", "addressCountry": "US" },
+    "areaServed": ["Cranford NJ","Westfield NJ","Mountainside NJ","Scotch Plains NJ","Summit NJ","Short Hills NJ","New Providence NJ","Berkeley Heights NJ"],
+    "founder": { "@type": "Person", "name": "Luca Moretti" },
+    "sameAs": ["https://www.linkedin.com/company/moretti-test-prep-and-tutoring/"]
+  }
+  </script>
 </head>
 <body>
 
 <nav id="main-nav">
   <a href="/" class="nav-logo-link"><img src="logo-black.png" alt="Moretti Test Prep &amp; Tutoring" class="nav-logo-img"></a>
-  <a href="#consult" class="nav-cta">Book a free intro call</a>
+  <a href="https://calendly.com/morettitutoring" target="_blank" rel="noopener" class="nav-cta">Book a free intro call</a>
 </nav>
 
-<div id="hero-wrapper">
-  <div id="hero-sticky">
-    <video id="hero-video" src="90933-629483642_medium.mp4" autoplay muted playsinline loop preload="auto"></video>
-    <canvas id="hero-canvas"></canvas>
-    <div id="scroll-hint"><span>Scroll</span></div>
+<div id="hero">
+  <img src="logo-black.png" alt="Moretti Test Prep &amp; Tutoring" class="hero-logo reveal">
+  <p class="hero-tag reveal">Specialist one-on-one coaching in mathematics, SAT &amp; ACT prep, and college admissions for New Jersey students and abroad.</p>
+  <div class="hero-ctas reveal d2">
+    <a href="https://calendly.com/morettitutoring" target="_blank" rel="noopener" class="hero-btn-red">Book a Free Intro Call</a>
+    <a href="tel:2012752791" class="hero-btn-outline">Call (201) 275-2791</a>
+  </div>
+  <div class="intro-ticker-outer">
+    <div class="intro-ticker-wrap">
+      <div class="intro-ticker-track" id="ticker-track">
+        <span class="intro-ticker-item">ACT &amp; SAT Prep</span><span class="intro-ticker-sep">◆</span>
+        <span class="intro-ticker-item">AP &amp; IB Prep</span><span class="intro-ticker-sep">◆</span>
+        <span class="intro-ticker-item">Algebra 1</span><span class="intro-ticker-sep">◆</span>
+        <span class="intro-ticker-item">Geometry</span><span class="intro-ticker-sep">◆</span>
+        <span class="intro-ticker-item">Algebra 2 / Trigonometry</span><span class="intro-ticker-sep">◆</span>
+        <span class="intro-ticker-item">Precalculus</span><span class="intro-ticker-sep">◆</span>
+        <span class="intro-ticker-item">Statistics &amp; AP Statistics</span><span class="intro-ticker-sep">◆</span>
+        <span class="intro-ticker-item">AP Calculus AB &amp; BC</span><span class="intro-ticker-sep">◆</span>
+        <span class="intro-ticker-item">Multivariable Calculus</span><span class="intro-ticker-sep">◆</span>
+        <span class="intro-ticker-item">English &amp; Writing</span><span class="intro-ticker-sep">◆</span>
+        <span class="intro-ticker-item">College Essay &amp; Applications</span><span class="intro-ticker-sep">◆</span>
+      </div>
+    </div>
   </div>
 </div>
 
-<section id="intro-dark" class="section-fade">
-  <div class="intro-ticker-outer">
-    <div class="intro-ticker-wrap">
-      <div class="intro-ticker-track">
-        <span class="intro-ticker-item">Mathematics</span><span class="intro-ticker-sep">◆</span>
-        <span class="intro-ticker-item">ACT &amp; SAT Prep</span><span class="intro-ticker-sep">◆</span>
-        <span class="intro-ticker-item">Chemistry</span><span class="intro-ticker-sep">◆</span>
-        <span class="intro-ticker-item">English &amp; Writing</span><span class="intro-ticker-sep">◆</span>
-        <span class="intro-ticker-item">Italian</span><span class="intro-ticker-sep">◆</span>
-        <span class="intro-ticker-item">Spanish</span><span class="intro-ticker-sep">◆</span>
-        <span class="intro-ticker-item">French</span><span class="intro-ticker-sep">◆</span>
-        <span class="intro-ticker-item">College Essay &amp; Applications</span><span class="intro-ticker-sep">◆</span>
-        <span class="intro-ticker-item">Mathematics</span><span class="intro-ticker-sep">◆</span>
-        <span class="intro-ticker-item">ACT &amp; SAT Prep</span><span class="intro-ticker-sep">◆</span>
-        <span class="intro-ticker-item">Chemistry</span><span class="intro-ticker-sep">◆</span>
-        <span class="intro-ticker-item">English &amp; Writing</span><span class="intro-ticker-sep">◆</span>
-        <span class="intro-ticker-item">Italian</span><span class="intro-ticker-sep">◆</span>
-        <span class="intro-ticker-item">Spanish</span><span class="intro-ticker-sep">◆</span>
-        <span class="intro-ticker-item">French</span><span class="intro-ticker-sep">◆</span>
-        <span class="intro-ticker-item">College Essay &amp; Applications</span><span class="intro-ticker-sep">◆</span>
-      </div>
-    </div>
-  </div>
-  <div class="intro-inner">
-    <div class="intro-left reveal">
-      <h2 class="intro-headline">Precision tutoring for students who deserve better than close enough.</h2>
-      <p class="intro-bio">One-on-one, private instruction from a high scoring Northwestern University honors graduate and professional statistician, applying proven academic and admissions expertise to your child's educational journey across STEM, humanities, foreign languages, and comprehensive test preparation.</p>
-      <div class="intro-ctas">
-        <a href="#consult" class="intro-btn-red">Book a Free Intro Call</a>
-        <a href="tel:2012752791" class="intro-btn-outline">Call (201) 275-2791</a>
-      </div>
-    </div>
-    <div class="intro-right reveal d2">
-      <div class="polaroid-wrap">
-        <img src="photo-3.jpg" alt="In-person tutoring session" class="polaroid-img">
-      </div>
-    </div>
-  </div>
-  <div class="intro-stats">
-    <div class="intro-stat"><span class="intro-stat-num">1530</span><span class="intro-stat-lbl">SAT</span></div>
-    <div class="intro-stat"><span class="intro-stat-num">800</span><span class="intro-stat-lbl">SAT Math II</span></div>
-    <div class="intro-stat"><span class="intro-stat-num">760</span><span class="intro-stat-lbl">SAT Chemistry</span></div>
-    <div class="intro-stat"><span class="intro-stat-num">3.96</span><span class="intro-stat-lbl">College GPA</span></div>
-    <div class="intro-stat"><span class="intro-stat-num">5 · 5</span><span class="intro-stat-lbl">AP Calculus AB &amp; BC</span></div>
-  </div>
-  <div class="intro-stats-row2">
-    <div class="intro-stat-cred-item"><span class="intro-stat-cred">IB Diploma</span><span class="intro-stat-cred-sub">Recipient</span></div>
-    <div class="intro-stat-cred-item"><span class="intro-stat-cred">Dean's List Recipient</span><span class="intro-stat-cred-sub">Northwestern University &nbsp;·&nbsp; 3-Years</span></div>
-    <div class="intro-stat-cred-item"><span class="intro-stat-cred">Advanced Coursework</span><span class="intro-stat-cred-sub">Differential Equations &nbsp;·&nbsp; Multivariable Calculus &nbsp;·&nbsp; Linear Algebra</span></div>
-  </div>
-</section>
-
-<section id="mission">
+<section id="story">
   <div class="container">
     <div class="blurb-text reveal">
       <span class="blurb-kicker">The Quiet Problem</span>
-      <h3 class="blurb-hed">Modern education optimizes for visible metrics over genuine comprehension, skill development, and critical problem-solving.</h3>
+      <h2 class="blurb-hed">Modern education optimizes for visible metrics over genuine comprehension, skill development, and critical problem-solving.</h2>
       <p class="blurb-body">Grade inflation and short-form testing prioritize superficial memorization over critical problem-solving. Institutions have abandoned intentional engagement.</p>
       <blockquote class="blurb-quote">My approach is different: one-on-one, diagnostic, and exact.</blockquote>
       <p class="blurb-body">Whether your child is chasing a perfect score or trying to close a gap nobody's caught yet, I bypass the metrics to cultivate deep comprehension and essential study habits across all levels of rigor. Exacting, uncompromising support, structured to be accessible to every family.</p>
+      <div class="story-ctas">
+        <a href="https://calendly.com/morettitutoring" target="_blank" rel="noopener" class="story-btn-red">Find the Answer</a>
+        <a href="tel:2012752791" class="story-btn-outline">Call (201) 275-2791</a>
+      </div>
     </div>
   </div>
 </section>
 
-<section id="testimonials">
+<section id="method">
   <div class="container">
-    <div class="eyebrow reveal">Results</div>
-    <div class="tcarousel-wrap reveal d2">
-      <div class="tcarousel">
-        <button class="tarrow tarrow-left" id="tarrow-prev" aria-label="Previous testimonial"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
-        <div class="tsingle" id="tsingle">
-          <span class="tcard-q">&ldquo;</span>
-          <p class="tcard-body" id="tsingle-body"><strong>My daughter has gone from a C to an A grade student in math.</strong> I truly can't say enough praise for Luca. He is calm, sensitive, and able to customize his tutoring to achieve the needed learning. My daughter now feels confident in math and proud of her accomplishments.</p>
-          <span class="tcard-author" id="tsingle-author">Patti &mdash; Westfield</span>
-        </div>
-        <button class="tarrow tarrow-right" id="tarrow-next" aria-label="Next testimonial"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+    <div class="eyebrow reveal">The Moretti Method</div>
+    <h2 class="method-hed reveal d1">Tutoring that&rsquo;s <span class="uline">tailored<svg class="uline-svg" viewBox="0 0 120 14" preserveAspectRatio="none" aria-hidden="true"><path d="M3 4 C 28 1.5, 72 1.5, 117 3.5" vector-effect="non-scaling-stroke"/><path d="M7 10.5 C 38 8, 82 8, 113 9.5" vector-effect="non-scaling-stroke"/></svg></span>, not templated.</h2>
+    <p class="method-lead reveal d2">Most tutoring is an hour of homework help and a stack of practice problems. We're glad to provide exactly that when it's what your family needs — but our most successful students follow a program built on the Moretti Method: an individualized learning path across SAT and ACT prep, AP and IB exams, mathematics, English, and writing, built around how they learn. The goal is the same in every subject: simplify complex concepts, take the fear out of the material, and build the confidence to excel.</p>
+    <div class="method-grid">
+      <div class="method-step reveal md1">
+        <svg class="doodle" viewBox="0 0 80 80" aria-hidden="true">
+          <circle cx="40" cy="40" r="36" fill="#EFE8DB"/>
+          <rect x="18" y="12" width="34" height="52" rx="3" fill="#ffffff"/>
+          <rect x="24" y="21" width="22" height="3.5" rx="1.75" fill="#D9D2C6"/>
+          <rect x="24" y="30" width="18" height="3.5" rx="1.75" fill="#D9D2C6"/>
+          <rect x="24" y="39" width="21" height="3.5" rx="1.75" fill="#D9D2C6"/>
+          <rect x="24" y="48" width="14" height="3.5" rx="1.75" fill="#D9D2C6"/>
+          <g class="dd-sweep">
+            <circle cx="46" cy="38" r="12" fill="rgba(201,168,76,0.22)"/>
+            <circle cx="46" cy="38" r="12" fill="none" stroke="#B0271C" stroke-width="4.5"/>
+            <line x1="55" y1="47" x2="64" y2="58" stroke="#B0271C" stroke-width="5.5" stroke-linecap="round"/>
+          </g>
+        </svg>
+        <span class="method-num">01</span>
+        <h3 class="method-step-title">Evaluate</h3>
+        <p class="method-step-body">We start with a hand-curated diagnostic — written by us, not pulled from a workbook — of your student's current level in the course or on the test, to identify strengths and the exact gaps holding them back.</p>
       </div>
+      <div class="method-step reveal md2">
+        <svg class="doodle" viewBox="0 0 80 80" aria-hidden="true">
+          <circle cx="40" cy="40" r="36" fill="#EFE8DB"/>
+          <rect x="22" y="14" width="36" height="54" rx="4" fill="#243447"/>
+          <rect x="26" y="20" width="28" height="44" rx="2" fill="#ffffff"/>
+          <rect x="34" y="10" width="12" height="8" rx="2.5" fill="#C9A84C"/>
+          <g class="dd-pop"><circle cx="33" cy="30" r="4.5" fill="#B0271C"/><path d="M30.8 30 l1.7 2 3.2 -3.8" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>
+          <rect x="41" y="28" width="10" height="3.5" rx="1.75" fill="#D9D2C6"/>
+          <g class="dd-pop p2"><circle cx="33" cy="42" r="4.5" fill="#B0271C"/><path d="M30.8 42 l1.7 2 3.2 -3.8" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>
+          <rect x="41" y="40" width="10" height="3.5" rx="1.75" fill="#D9D2C6"/>
+          <g class="dd-pop p3"><circle cx="33" cy="54" r="4.5" fill="#B0271C"/><path d="M30.8 54 l1.7 2 3.2 -3.8" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>
+          <rect x="41" y="52" width="10" height="3.5" rx="1.75" fill="#D9D2C6"/>
+          <g class="dd-rock"><g transform="rotate(-45 59 55)"><rect x="51" y="51.5" width="20" height="7" rx="2" fill="#C9A84C"/><path d="M51 51.5 l-6.5 3.5 6.5 3.5 z" fill="#E8B68E"/></g></g>
+        </svg>
+        <span class="method-num">02</span>
+        <h3 class="method-step-title">Design</h3>
+        <p class="method-step-body">From that assessment we build a customized lesson plan around your child's specific needs and learning style — whether that's algebra foundations, essay structure, or test pacing — with homework calibrated to their ambition: as rigorous, and as far beyond the syllabus, as they want to go.</p>
+      </div>
+      <div class="method-step reveal md3">
+        <svg class="doodle" viewBox="0 0 80 80" aria-hidden="true">
+          <circle cx="40" cy="40" r="36" fill="#EFE8DB"/>
+          <circle cx="40" cy="27" r="9" fill="#E8B68E"/>
+          <path d="M31 26 a9 9 0 0 1 18 0 l0 -1.5 q-4.5 -5 -9 -5 t-9 5 z" fill="#243447"/>
+          <path d="M31 25 a9 9.5 0 0 1 18 0 q-4 -6.5 -9 -6.5 t-9 6.5 z" fill="#243447"/>
+          <circle cx="36.6" cy="28.5" r="1.2" fill="#243447"/><circle cx="43.4" cy="28.5" r="1.2" fill="#243447"/>
+          <path d="M37 32 q3 2.3 6 0" stroke="#243447" stroke-width="1.7" fill="none" stroke-linecap="round"/>
+          <path d="M22 60 q4 -22 18 -22 q14 0 18 22 z" fill="#B0271C"/>
+          <path d="M26 47 q-3 6 1 11" stroke="#B0271C" stroke-width="6.5" fill="none" stroke-linecap="round"/>
+          <circle cx="28" cy="58" r="3.4" fill="#E8B68E"/>
+          <g class="dd-write">
+            <path d="M54 47 q3 6 -2 11" stroke="#B0271C" stroke-width="6.5" fill="none" stroke-linecap="round"/>
+            <circle cx="51" cy="58" r="3.4" fill="#E8B68E"/>
+            <line x1="52" y1="59" x2="45" y2="54.5" stroke="#C9A84C" stroke-width="3.4" stroke-linecap="round"/>
+          </g>
+          <rect x="28" y="52" width="24" height="9" rx="1.5" fill="#ffffff"/>
+          <path class="dd-scribble" d="M31 56.5 q1.5 -2 3 0 t3 0 t3 0 t3 0 t3 0"/>
+          <rect x="10" y="61" width="60" height="6.5" rx="3" fill="#A97C50"/>
+        </svg>
+        <span class="method-num">03</span>
+        <h3 class="method-step-title">Practice</h3>
+        <p class="method-step-body">Every session is targeted practice with immediate feedback, so concepts don't just make sense in the lesson — they hold up on the exam and in the classroom.</p>
+      </div>
+      <div class="method-step reveal md4">
+        <svg class="doodle" viewBox="0 0 80 80" aria-hidden="true">
+          <circle cx="40" cy="40" r="36" fill="#EFE8DB"/>
+          <rect class="dd-bar" x="22" y="46" width="10" height="16" rx="2" fill="#C9A84C"/>
+          <rect class="dd-bar b2" x="36" y="37" width="10" height="25" rx="2" fill="#5E8B6F"/>
+          <rect class="dd-bar b3" x="50" y="26" width="10" height="36" rx="2" fill="#B0271C"/>
+          <rect x="16" y="62" width="48" height="4" rx="2" fill="#243447"/>
+          <path class="dd-line" d="M20 42 L34 31 L44 36 L56 20.5" stroke="#243447" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <path class="dd-head" d="M60 15 L58.3 23.8 L51.9 18.8 z" fill="#243447"/>
+        </svg>
+        <span class="method-num">04</span>
+        <h3 class="method-step-title">Adapt</h3>
+        <p class="method-step-body">We track progress continuously and adjust the plan as your student improves, keeping them on pace for their score and grade goals.</p>
+      </div>
+    </div>
+    <div class="method-cta-wrap reveal">
+      <a href="prep-course.html" class="method-cta">Explore the 12-Week SAT &amp; ACT Program <span class="arr">&rarr;</span></a>
+      <p class="method-guarantee"><strong>The guarantee.</strong> Complete the 12-week program and if your student's official SAT or ACT score doesn't improve, we keep teaching them free until it does.</p>
     </div>
   </div>
 </section>
@@ -308,38 +450,59 @@
     <h2 class="disc-hed reveal d1">What we teach.</h2>
     <div class="disc-grid">
       <div class="disc-card reveal">
+        <span class="disc-num">01</span>
+        <svg class="disc-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+        <h3 class="disc-title">College Entrance Exams</h3>
+        <p class="disc-body">Focused, score-driven SAT and ACT preparation — math, reading, and writing — plus study strategies, resources, and test-taking techniques that raise scores.</p>
+        <a href="prep-course.html" class="disc-link">The 12-Week Program &rarr;</a>
+      </div>
+      <div class="disc-card reveal d1">
+        <span class="disc-num">02</span>
         <svg class="disc-icon" viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
         <h3 class="disc-title">Mathematics</h3>
         <p class="disc-body">Algebra 1, Geometry, Algebra 2/Trigonometry, Precalculus (regular and Honors), Statistics and AP Statistics, and Calculus — from Honors Calculus through AP Calculus AB, AP Calculus BC, and Multivariable Calculus.</p>
       </div>
-      <div class="disc-card reveal d1">
-        <svg class="disc-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
-        <h3 class="disc-title">Standardized Test Prep</h3>
-        <p class="disc-body">Focused, score-driven SAT and ACT preparation — math, reading, and writing — plus AP and IB exam preparation across subjects.</p>
-      </div>
-      <div class="disc-card reveal d2">
-        <svg class="disc-icon" viewBox="0 0 24 24"><path d="M9 3h6v7l4 11H5L9 10V3z"/><line x1="9" y1="3" x2="15" y2="3"/></svg>
-        <h3 class="disc-title">General Chemistry</h3>
-        <p class="disc-body">Building the foundational concepts that most quietly trip up high schoolers, from bonding to stoichiometry.</p>
-      </div>
       <div class="disc-card reveal d3">
+        <span class="disc-num">03</span>
         <svg class="disc-icon" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="currentColor" fill="none" stroke-width="1.75" stroke-linecap="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="currentColor" fill="none" stroke-width="1.75" stroke-linecap="round"/></svg>
         <h3 class="disc-title">English</h3>
-        <p class="disc-body">Reading comprehension, essay writing, literary analysis, and AP English Language and Literature.</p>
+        <p class="disc-body">Reading comprehension, essay writing, grammar, and literary analysis — from everyday coursework to polished analytical prose.</p>
       </div>
       <div class="disc-card reveal d4">
-        <svg class="disc-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" fill="none" stroke-width="1.75"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" stroke="currentColor" fill="none" stroke-width="1.75"/></svg>
-        <h3 class="disc-title">Language Tutoring</h3>
-        <p class="disc-body">Italian, French, and Spanish at all levels — conversation, grammar, and exam prep, with our dedicated language specialist.</p>
+        <span class="disc-num">04</span>
+        <svg class="disc-icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M15.5 12.5L17 22l-5-3-5 3 1.5-9.5"/></svg>
+        <h3 class="disc-title">AP &amp; IB Exams</h3>
+        <p class="disc-body">AP Calculus AB &amp; BC, AP Statistics, and AP English Language &amp; Literature — plus IB Mathematics (AA &amp; AI) and IB English A, at both SL and HL.</p>
       </div>
       <div class="disc-card reveal d4">
+        <span class="disc-num">05</span>
         <svg class="disc-icon" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" fill="none" stroke-width="1.75" stroke-linecap="round"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" fill="none" stroke-width="1.75" stroke-linecap="round"/></svg>
-        <h3 class="disc-title">College Essay &amp; Applications</h3>
-        <p class="disc-body">Personal statement strategy, supplemental essays, and application narrative — built around what makes each student distinct.</p>
+        <h3 class="disc-title">College Essays</h3>
+        <p class="disc-body">Personal statement and supplemental essay coaching — brainstorming, drafting, and revision, built around what makes each student distinct.</p>
+        <a href="applications.html" class="disc-link">Essay Coaching &rarr;</a>
       </div>
     </div>
   </div>
 </section>
+
+<section id="testimonials">
+  <div class="container">
+    <div class="eyebrow reveal">Results</div>
+    <div class="reveal d2">
+      <div class="tsingle" id="tsingle">
+        <p class="tcard-body" id="tsingle-body"><strong>My daughter has gone from a C to an A grade student in math.</strong> I truly can't say enough praise for Luca. He is calm, sensitive, and able to customize his tutoring to achieve the needed learning. My daughter now feels confident in math and proud of her accomplishments.</p>
+        <span class="tcard-author" id="tsingle-author">Patti, parent &nbsp;&middot;&nbsp; Westfield</span>
+      </div>
+      <div class="tctrl">
+        <span class="tindex" id="tindex">02 / 05</span>
+        <div class="tprogress"><div class="tprogress-fill run" id="tprogress"></div></div>
+        <button class="tarrow" id="tarrow-prev" aria-label="Previous testimonial"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <button class="tarrow" id="tarrow-next" aria-label="Next testimonial"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+      </div>
+    </div>
+  </div>
+</section>
+
 
 <section id="about">
   <div class="container">
@@ -347,15 +510,23 @@
     <div class="team-grid">
       <div class="team-card reveal d1">
         <div class="team-photo-wrap luca-frame"><img class="team-photo" src="photo-luca.jpg" alt="Luca Moretti"></div>
+        <div class="stats-band">
+          <div class="intro-stats">
+            <div class="intro-stat"><span class="intro-stat-num">1530</span><span class="intro-stat-lbl">SAT</span></div>
+            <div class="intro-stat"><span class="intro-stat-num">800</span><span class="intro-stat-lbl">SAT Math II</span></div>
+            <div class="intro-stat"><span class="intro-stat-num">760</span><span class="intro-stat-lbl">SAT Chemistry</span></div>
+            <div class="intro-stat"><span class="intro-stat-num">3.96</span><span class="intro-stat-lbl">College GPA</span></div>
+            <div class="intro-stat"><span class="intro-stat-num">5 · 5</span><span class="intro-stat-lbl">AP Calculus AB &amp; BC</span></div>
+          </div>
+          <div class="intro-stats-row2">
+            <div class="intro-stat-cred-item"><span class="intro-stat-cred">IB Diploma</span><span class="intro-stat-cred-sub">Recipient</span></div>
+            <div class="intro-stat-cred-item"><span class="intro-stat-cred">Dean's List Recipient</span><span class="intro-stat-cred-sub">Northwestern University &nbsp;·&nbsp; 3-Years</span></div>
+            <div class="intro-stat-cred-item"><span class="intro-stat-cred">Advanced Coursework</span><span class="intro-stat-cred-sub">Differential Equations &nbsp;·&nbsp; Multivariable Calculus &nbsp;·&nbsp; Linear Algebra</span></div>
+          </div>
+        </div>
         <h3 class="team-name">Luca Moretti</h3>
         <div class="team-role">Founder &amp; Primary Tutor</div>
-        <p class="team-bio">Northwestern University, top of class. Double major in Statistics and Music, with minors in Entrepreneurship and Music Technology in three years. Eight years consistently tutoring across New Jersey and helping students get into their dream universities.</p>
-      </div>
-      <div class="team-card reveal d2">
-        <img class="team-photo" src="photo-lidia.jpg" alt="Lidia Garofalo">
-        <h3 class="team-name">Lidia Garofalo</h3>
-        <div class="team-role">Language Specialist</div>
-        <p class="team-bio">University of Bologna Graduate. Bachelors in Philosophy and Language with experience teaching Americans and Europeans around the world to speak Italian, Spanish, and French fluently.</p>
+        <p class="team-bio"><a href="https://www.northwestern.edu/" target="_blank" rel="noopener" class="nu-link">Northwestern University</a> graduate, top of class. Double major in Statistics and Music, with minors in Entrepreneurship and Music Technology in three years. Local Cranford resident with more than eight years of consistently tutoring across New Jersey — over fifty students coached, SAT and ACT scores raised by upwards of 36%, and student after student into their dream universities.</p>
       </div>
     </div>
   </div>
@@ -367,13 +538,25 @@
       <div>
         <div class="eyebrow reveal">Book a Free Intro Call</div>
         <h2 class="consult-heading reveal d1">Let's find the gap.</h2>
-        <p class="consult-lead reveal d2">Tell me a bit about your student and I'll follow up within 24 hours to set up a time — no obligation.</p>
+        <p class="consult-lead reveal d2">Book a free intro call — pick any time that works. Because the goal isn't just a score: it's options. The schools they want, and the confidence to get there.</p>
+        <ol class="enroll-steps reveal d2">
+          <li><span>1</span>Free intro call</li>
+          <li><span>2</span>Diagnostic</li>
+          <li><span>3</span>Custom plan</li>
+          <li><span>4</span>Start</li>
+        </ol>
         <div class="phone-box reveal d2">
           <span class="phone-box-lbl">Prefer to talk now?</span>
           <a href="tel:2012752791" class="phone-box-num">(201) 275-2791</a>
         </div>
-        <p class="serve-text reveal d3">Serving Cranford, Westfield, Mountainside, Scotch Plains, Summit, New Providence, Short Hills, and surrounding towns — in person or online.</p>
+        <p class="serve-text reveal d3">Serving Cranford, Westfield, Mountainside, Scotch Plains, Summit, New Providence, Berkeley Heights, Short Hills, and surrounding towns — in person or online.</p>
       </div>
+      <div class="book-card reveal d2">
+        <div class="calendly-inline-widget" data-url="https://calendly.com/morettitutoring?hide_gdpr_banner=1&primary_color=b0271c" style="min-width:300px;height:640px;"></div>
+      </div>
+    </div>
+    <details class="form-fallback reveal">
+      <summary>Prefer to write instead? Send a note</summary>
       <div class="form-card">
         <form id="contact-form" novalidate>
           <div class="form-row">
@@ -388,10 +571,9 @@
                 <option value="">Select a subject</option>
                 <option value="General Math">General Math</option>
                 <option value="College Math">College Math</option>
-                <option value="Standardized Test Prep">Standardized Test Prep</option>
-                <option value="General Chemistry">General Chemistry</option>
+                <option value="College Entrance Exams">College Entrance Exams (SAT / ACT)</option>
+                <option value="AP & IB Exams">AP &amp; IB Exams</option>
                 <option value="English">English</option>
-                <option value="Language Tutoring">Language Tutoring (Italian / French / Spanish)</option>
                 <option value="College Essay">College Essay / Applications</option>
               </select>
             </div>
@@ -403,7 +585,7 @@
           <p id="cf-error" style="display:none; font-size:0.78rem; color:var(--red); margin-top:0.75rem; line-height:1.65;">Something went wrong. Please call (201) 275-2791 directly.</p>
         </form>
       </div>
-    </div>
+    </details>
   </div>
 </section>
 
@@ -415,60 +597,18 @@
   <div class="footer-right">
     <div class="footer-serving-hed">Serving</div>
     <div class="footer-towns">Cranford · Westfield · Mountainside<br>Scotch Plains · Summit · Short Hills<br>New Providence · Berkeley Heights</div>
-    <a href="https://www.linkedin.com/company/moretti-test-prep-and-tutoring/?viewAsMember=true" class="footer-linkedin" target="_blank" rel="noopener">LinkedIn ↗</a>
+    <a href="https://www.linkedin.com/company/moretti-test-prep-and-tutoring/?viewAsMember=true" class="footer-linkedin" target="_blank" rel="noopener" aria-label="LinkedIn"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.47-.9 1.63-1.85 3.36-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.72v20.55C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.72C24 .77 23.2 0 22.22 0z"/></svg></a>
   </div>
 </footer>
 
 <script>
 (function () {
   'use strict';
-  var nav    = document.getElementById('main-nav');
-  var vid    = document.getElementById('hero-video');
-  var canvas = document.getElementById('hero-canvas');
-  var hint   = document.getElementById('scroll-hint');
-  var ctx    = canvas ? canvas.getContext('2d') : null;
+  var nav = document.getElementById('main-nav');
 
-  if (vid) {
-    vid.muted = true;
-    var p = vid.play();
-    if (p && p.catch) { p.catch(function(){}); }
-    vid.addEventListener('canplay', function(){ if(hint) hint.classList.add('show'); });
-    setTimeout(function(){ if(hint) hint.classList.add('show'); }, 1500);
-  }
-
-  var W = 0, H = 0;
-  var logoImg = new Image();
-  logoImg.src = 'logo-white.png';
-  logoImg.onload = function () { window.dispatchEvent(new Event('scroll')); };
-
-  function drawMask(t) {
-    if (!ctx) return;
-    ctx.clearRect(0, 0, W, H);
-    if (t <= 0) return;
-    ctx.save();
-    ctx.globalAlpha = t;
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, W, H);
-    if (logoImg.complete && logoImg.naturalWidth) {
-      var scale  = 1 + 5 * (1 - t);
-      var aspect = logoImg.naturalWidth / logoImg.naturalHeight;
-      var lw     = Math.min(W * 0.9, 1200) * scale;
-      var lh     = lw / aspect;
-      ctx.globalCompositeOperation = 'destination-out';
-      ctx.globalAlpha = 1;
-      ctx.drawImage(logoImg, (W - lw) / 2, (H - lh) / 2, lw, lh);
-    }
-    ctx.restore();
-  }
-
-  function resizeCanvas() {
-    if (!canvas) return;
-    W = canvas.width  = window.innerWidth;
-    H = canvas.height = window.innerHeight;
-    window.dispatchEvent(new Event('scroll'));
-  }
-  resizeCanvas();
-  window.addEventListener('resize', resizeCanvas);
+  /* Duplicate ticker content so the -50% loop is perfectly seamless */
+  var ticker = document.getElementById('ticker-track');
+  if (ticker) { ticker.innerHTML += ticker.innerHTML; }
 
   var busy = false;
   window.addEventListener('scroll', function () {
@@ -476,16 +616,8 @@
     busy = true;
     requestAnimationFrame(function () {
       busy = false;
-      var sy    = window.scrollY;
-      var viewH = window.innerHeight;
-      var wrapper = document.getElementById('hero-wrapper');
-      var wrapH   = wrapper ? wrapper.offsetHeight : viewH * 2;
-      var prog  = Math.min(1, Math.max(0, sy / (wrapH - viewH)));
-      if (sy > viewH * 0.8) nav.classList.add('visible');
-      else                   nav.classList.remove('visible');
-      if (hint) hint.style.opacity = sy > 40 ? '0' : '';
-      var t = Math.min(1, Math.max(0, (prog - 0.04) / 0.58));
-      drawMask(t);
+      if (window.scrollY > window.innerHeight * 0.8) nav.classList.add('visible');
+      else nav.classList.remove('visible');
     });
   }, { passive: true });
 
@@ -511,18 +643,43 @@
     var authorEl = document.getElementById('tsingle-author');
 
     var testimonials = [
-      { body: '<strong>He has a very approachable and calm demeanor and a seriously deep grasp of the material.</strong> He breaks down complex mathematical concepts very well and makes a stressful experience much less so. We would highly recommend him for your son or daughter.', author: 'Ellen, parent &mdash; Westfield' },
-      { body: '<strong>My daughter has gone from a C to an A grade student in math.</strong> I truly can\'t say enough praise for Luca. He is calm, sensitive, and able to customize his tutoring to achieve the needed learning. My daughter now feels confident in math and proud of her accomplishments.', author: 'Patti, parent &mdash; Westfield' },
-      { body: '<strong>I highly recommend Luca as a tutor!</strong> I have always struggled in math, so I knew I needed a tutor who could clearly explain the material.', author: 'Savannah, student &mdash; Cranford' },
-      { body: 'I found Luca from the list of tutors from the Summit Public Schools and I would recommend him for tutoring. <strong>He is very patient, kind and was even available to answer questions on text after a tutoring session.</strong> I would highly recommend him.', author: 'Sharon, parent &mdash; Berkeley Heights' },
-      { body: 'I had lessons with Luca for a year, and he helped me with math while I was studying for my entrance exam. He made learning easy and enjoyable. <strong>Thanks to his help, I got the score I wanted and enjoyed studying.</strong> I highly recommend Luca as a math tutor.', author: 'Maria, student &mdash; Short Hills' }
+      { body: '<strong>He has a very approachable and calm demeanor and a seriously deep grasp of the material.</strong> He breaks down complex mathematical concepts very well and makes a stressful experience much less so. We would highly recommend him for your son or daughter.', author: 'Ellen, parent &nbsp;&middot;&nbsp; Westfield' },
+      { body: '<strong>My daughter has gone from a C to an A grade student in math.</strong> I truly can\'t say enough praise for Luca. He is calm, sensitive, and able to customize his tutoring to achieve the needed learning. My daughter now feels confident in math and proud of her accomplishments.', author: 'Patti, parent &nbsp;&middot;&nbsp; Westfield' },
+      { body: '<strong>I highly recommend Luca as a tutor!</strong> I have always struggled in math, so I knew I needed a tutor who could clearly explain the material.', author: 'Savannah, student &nbsp;&middot;&nbsp; Cranford' },
+      { body: 'I found Luca from the list of tutors from the Summit Public Schools and I would recommend him for tutoring. <strong>He is very patient, kind and was even available to answer questions on text after a tutoring session.</strong> I would highly recommend him.', author: 'Sharon, parent &nbsp;&middot;&nbsp; Berkeley Heights' },
+      { body: 'I had lessons with Luca for a year, and he helped me with math while I was studying for my entrance exam. He made learning easy and enjoyable. <strong>Thanks to his help, I got the score I wanted and enjoyed studying.</strong> I highly recommend Luca as a math tutor.', author: 'Maria, student &nbsp;&middot;&nbsp; Short Hills' },
+      { body: '<strong>He made challenging math concepts easy to understand.</strong> He helped build her confidence and made a real difference in her test prep. We highly recommend him to any family looking for an outstanding math tutor.', author: 'Joh, parent &nbsp;&middot;&nbsp; Cranford' },
+      { body: '<strong>If anyone can help you tolerate math and actually master the skill, it\'s Luca!</strong> Luca took the time to break down the underlying concepts, never moving on until he was certain I fully understood. Thanks to Luca, I went from a student who was barely passing with a D to someone who actually enjoys math.', author: 'Cara, student &nbsp;&middot;&nbsp; Lawrence' }
     ];
 
     var active = 1; // starts on Patti's testimonial
 
+    /* Lock the carousel to the height of its tallest testimonial so the
+       page never shifts when quotes change */
+    function sizeCarousel() {
+      var probe = single.cloneNode(false);
+      probe.removeAttribute('id');
+      probe.style.cssText ='position:absolute; visibility:hidden; min-height:0; height:auto; width:' + single.offsetWidth + 'px;';
+      single.parentNode.appendChild(probe);
+      var max = 0;
+      testimonials.forEach(function (t) {
+        probe.innerHTML = '<p class="tcard-body">' + t.body + '</p><span class="tcard-author">' + t.author + '</span>';
+        max = Math.max(max, probe.offsetHeight);
+      });
+      probe.parentNode.removeChild(probe);
+      single.style.minHeight = max + 'px';
+    }
+    sizeCarousel();
+    window.addEventListener('resize', sizeCarousel);
+
+    var indexEl = document.getElementById('tindex');
+    var barEl   = document.getElementById('tprogress');
+
     function render(idx) {
       bodyEl.innerHTML   = testimonials[idx].body;
       authorEl.innerHTML = testimonials[idx].author;
+      if (indexEl) indexEl.textContent = '0' + (idx + 1) + ' / 0' + testimonials.length;
+      if (barEl) { barEl.classList.remove('run'); void barEl.offsetWidth; barEl.classList.add('run'); }
     }
     render(active);
 
@@ -549,6 +706,17 @@
     var nextBtn = document.getElementById('tarrow-next');
     if (prevBtn) prevBtn.addEventListener('click', function () { goTo(-1); resetAuto(); });
     if (nextBtn) nextBtn.addEventListener('click', function () { goTo(1); resetAuto(); });
+
+    /* arrow keys cycle reviews while the section is on screen */
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+      var tag = (document.activeElement && document.activeElement.tagName) || '';
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+      var r = document.getElementById('testimonials').getBoundingClientRect();
+      if (r.bottom < 0 || r.top > window.innerHeight) return;
+      goTo(e.key === 'ArrowRight' ? 1 : -1);
+      resetAuto();
+    });
   })();
 
   emailjs.init('FAAXN09Ad2ObipaJJ');
