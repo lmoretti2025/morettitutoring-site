@@ -15,9 +15,17 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Caladea:wght@700&family=Poppins:wght@300;400;500;600;700&family=Sorts+Mill+Goudy&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Caladea:wght@700&family=Poppins:wght@300;400;500;600;700&family=Sorts+Mill+Goudy&family=Anton&family=Bungee&family=Archivo+Black&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    @font-face {
+      font-family: 'Duera Expanded Black';
+      src: url('duera-expanded-black.ttf') format('truetype');
+      font-weight: 900;
+      font-style: normal;
+      font-display: swap;
+    }
 
     :root {
       --red:    #B0271C;
@@ -77,7 +85,7 @@
 
     /* ═══ STORY: PROBLEM + ANSWER ═══ */
     #story { background-image: url(photo-2-web.jpg); background-size: cover; background-position: center; position: relative; padding: 0; overflow: hidden; }
-    #story::before { content: ''; position: absolute; inset: 0; background: rgba(0,0,0,0.62); z-index: 0; }
+    #story::before { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.62) 62%, #000 100%); z-index: 0; }
     #story .container { position: relative; z-index: 1; padding-top: 6.5rem; padding-bottom: 6.5rem; }
     .blurb-text { max-width: 720px; }
     .stats-band { background: var(--white); border: 1px solid var(--border); border-top: none; margin: 0 0 1.75rem; }
@@ -132,6 +140,70 @@
     .md3 { transition-delay: 2.1s; }
     .md4 { transition-delay: 3.1s; }
 
+    /* ═══ EXPLORE (replaces the old Moretti Method intro) ═══
+       One pinned 100vh frame (#explore-stage, position:sticky) for the
+       whole tall #explore-wrap. Everything lives in a fixed spot on
+       screen from the moment it's rendered — scrolling only reveals each
+       piece by fading it in, in place, one at a time: heading, then
+       subtitle, then 01 → 02 → 03 → 04, then the test-dates line. EXPLORE
+       itself never fades — it just pans slowly right-to-left behind
+       everything the whole time.
+       Once the test-dates line has held for a moment, there's no more
+       room, so group A (heading + subtitle + grid + hint) fades out and
+       slides up and off the screen together — and group B (the portal
+       plaque, then the CTA) fades in at that same center-stage spot to
+       take its place. */
+    #explore-prelude { background: #000; height: 40vh; }
+    #explore-wrap { background: #000; height: 560vh; position: relative; }
+    #explore-postlude { background: #000; height: 5vh; }
+    #explore-stage { position: sticky; top: 0; height: 100vh; overflow: hidden; }
+    .explore-word { position: absolute; top: 66%; left: 50%; z-index: 1; font-family: 'Duera Expanded Black', 'Archivo Black', 'Anton', var(--hel); font-weight: 900; color: var(--red); font-size: 128vh; line-height: 1; letter-spacing: -0.01em; white-space: nowrap; pointer-events: none; will-change: transform; }
+
+    /* group A and group B both anchor to the exact same center point, so
+       whichever one is visible simply occupies "center stage" — nothing
+       has to guess at spacing or fight for room */
+    #explore-group-a, #explore-group-b { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2; width: 92%; max-width: 900px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 1.5rem; will-change: opacity, transform; }
+    #explore-group-b { z-index: 3; max-width: 1000px; }
+
+    .explore-hed { font-family: var(--display); font-weight: 700; color: #fff; font-size: clamp(2.4rem, 5.6vw, 4.3rem); line-height: 1.18; max-width: 900px; text-shadow: 0 3px 22px rgba(0,0,0,0.85), 0 0 60px rgba(0,0,0,0.6); opacity: 0; will-change: opacity; }
+    .explore-sub { font-size: 0.86rem; line-height: 1.8; color: rgba(255,255,255,0.85); max-width: 580px; text-shadow: 0 2px 14px rgba(0,0,0,0.85), 0 0 40px rgba(0,0,0,0.6); opacity: 0; will-change: opacity; }
+    .gold-shine { position: relative; font-weight: 600; background: linear-gradient(100deg, #C9A84C 30%, #F3E3B0 45%, #C9A84C 60%); background-size: 250% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: gold-shine-sweep 3.5s ease-in-out infinite alternate; }
+    @keyframes gold-shine-sweep { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
+
+    .explore-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2.25rem; width: 100%; text-align: left; margin-top: 1rem; }
+    .explore-step { border-top: 2px solid var(--gold); padding-top: 0.85rem; opacity: 0; will-change: opacity; }
+    .explore-step .method-num { color: var(--gold); text-shadow: 0 1px 8px rgba(0,0,0,0.8); }
+    .explore-step .method-step-title { color: #fff; margin-bottom: 0.3rem; font-size: 0.95rem; text-shadow: 0 1px 8px rgba(0,0,0,0.8); }
+    .explore-step-body { font-size: 0.72rem; line-height: 1.55; color: rgba(255,255,255,0.7); text-shadow: 0 1px 8px rgba(0,0,0,0.8); }
+
+    .explore-testdates-hint { text-align: center; font-size: 0.78rem; color: rgba(255,255,255,0.7); text-shadow: 0 1px 8px rgba(0,0,0,0.8); opacity: 0; will-change: opacity; }
+    .explore-testdates-hint a { color: var(--gold); text-decoration: none; font-weight: 600; }
+    .explore-testdates-hint a:hover { text-decoration: underline; }
+
+    .portal-teaser { display: flex; align-items: center; justify-content: space-between; gap: 2rem; background: rgba(0,0,0,0.72); border: 1px solid rgba(255,255,255,0.14); padding: 2.25rem 2.75rem; flex-wrap: wrap; width: 100%; opacity: 0; will-change: opacity; }
+    .portal-teaser-kicker { display: block; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.65rem; }
+    .portal-teaser-hed { font-family: var(--display); font-size: clamp(1.3rem, 2.4vw, 1.75rem); color: #fff; font-weight: 700; margin-bottom: 0.55rem; max-width: 560px; line-height: 1.3; }
+    .portal-teaser-body { font-size: 0.92rem; line-height: 1.65; color: rgba(255,255,255,0.55); max-width: 540px; }
+    .portal-teaser-btn { flex-shrink: 0; background: var(--red); color: #fff; font-family: var(--hel); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 1.05rem 2.1rem; text-decoration: none; white-space: nowrap; transition: opacity 0.2s; }
+    .portal-teaser-btn:hover { opacity: 0.86; }
+
+    #explore-cta-inline { text-align: center; opacity: 0; will-change: opacity; }
+    .explore-cta { display: inline-block; font-family: var(--display); font-size: clamp(1.5rem, 2.9vw, 2.2rem); font-weight: 700; color: #fff; text-decoration: none; border-bottom: 3px solid var(--gold); padding-bottom: 0.35rem; transition: transform 0.35s cubic-bezier(0.2, 1, 0.3, 1); transform-origin: center bottom; text-shadow: 0 2px 14px rgba(0,0,0,0.85); }
+    .explore-cta:hover { transform: scale(1.08); }
+    .explore-cta .arr { display: inline-block; transition: transform 0.25s ease; }
+    .explore-cta:hover .arr { transform: translateX(6px); }
+    .explore-guarantee { margin: 1.1rem auto 0; font-size: 0.94rem; line-height: 1.65; color: rgba(255,255,255,0.7); max-width: 600px; text-shadow: 0 1px 8px rgba(0,0,0,0.8); }
+    .explore-guarantee strong { font-weight: 700; text-transform: uppercase; font-size: 0.82rem; letter-spacing: 0.1em; }
+    .explore-guarantee strong.gold-shine { color: transparent; }
+
+    @media (prefers-reduced-motion: reduce) {
+      #explore-wrap { height: auto; }
+      #explore-stage { position: relative; height: auto; overflow: visible; display: flex; flex-direction: column; align-items: center; gap: 3rem; padding: 5rem 1.5rem; }
+      .explore-word { position: relative; top: auto; left: auto; transform: none !important; font-size: clamp(3rem, 22vw, 9rem); }
+      #explore-group-a, #explore-group-b { position: relative; top: auto; left: auto; transform: none !important; }
+      .explore-hed, .explore-sub, .explore-step, .explore-testdates-hint, .portal-teaser, #explore-cta-inline, #explore-group-b { opacity: 1 !important; }
+    }
+
     /* hand-drawn double underline */
     .uline { position: relative; white-space: nowrap; display: inline-block; }
     .uline-svg { position: absolute; left: -3%; bottom: -0.32em; width: 106%; height: 0.36em; overflow: visible; fill: none; stroke: var(--red); stroke-width: 2.5px; stroke-linecap: round; }
@@ -167,7 +239,7 @@
 
     /* ═══ DISCIPLINES ═══ */
     #disciplines { background-image: url(photo-3-web.jpg); background-size: cover; background-position: center 30%; position: relative; padding: 4.25rem 0 10.5rem; }
-    #disciplines::before { content: ''; position: absolute; inset: 0; background: rgba(0,0,0,0.58); }
+    #disciplines::before { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, #000 0%, rgba(0,0,0,0.58) 18%, rgba(0,0,0,0.58) 100%); }
     #disciplines .container { position: relative; z-index: 1; }
     #disciplines .eyebrow { color: var(--gold); }
     .disc-hed { font-family: var(--display); font-size: clamp(1.7rem, 3.1vw, 2.5rem); font-weight: 700; color: #fff; margin-bottom: 1.5rem; }
@@ -258,6 +330,8 @@
     .footer-towns { font-size: 0.78rem; color: rgba(255,255,255,0.5); line-height: 2; }
     .footer-linkedin { display: inline-block; margin-top: 1.25rem; line-height: 0; color: rgba(255,255,255,0.35); text-decoration: none; transition: color 0.2s; }
     .footer-linkedin:hover { color: var(--gold); }
+    .footer-tos { display: inline-block; margin-top: 0.85rem; font-size: 0.58rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.35); text-decoration: none; transition: color 0.2s; }
+    .footer-tos:hover { color: var(--gold); }
 
     @media (prefers-reduced-motion: reduce) {
       .dd-sweep, .dd-pop, .dd-rock, .dd-write, .dd-scribble, .dd-bar, .dd-line, .intro-ticker-track, .uline-svg path { animation: none; }
@@ -270,6 +344,7 @@
     @media (max-width: 960px) {
       .consult-grid { grid-template-columns: 1fr; gap: 3rem; }
       .method-grid { grid-template-columns: repeat(2, 1fr); }
+      .explore-grid { grid-template-columns: repeat(2, 1fr); }
       .disc-grid { grid-template-columns: repeat(2, 1fr); }
       .tctrl { gap: 1rem; }
       footer { grid-template-columns: 1fr; }
@@ -286,6 +361,9 @@
       section { padding: 4.5rem 0; }
       .container { padding: 0 1.5rem; }
       .method-grid { grid-template-columns: 1fr; }
+      .explore-grid { grid-template-columns: 1fr; }
+      .explore-word { font-size: clamp(3.5rem, 22vw, 7rem); }
+      .portal-teaser { flex-direction: column; align-items: flex-start; padding: 1.75rem; }
       .disc-grid { grid-template-columns: 1fr; }
       footer { padding: 2rem 1.5rem; }
       .form-row { grid-template-columns: 1fr; }
@@ -312,7 +390,10 @@
 
 <nav id="main-nav">
   <a href="/" class="nav-logo-link"><img src="logo-caladea-white.png" alt="Moretti Test Prep &amp; Tutoring" class="nav-logo-img"></a>
-  <a href="https://calendly.com/morettitutoring" target="_blank" rel="noopener" class="nav-cta">Book a free intro call</a>
+  <div style="display:flex; align-items:center; gap:1rem;">
+    <a href="portal/index.html" style="font-family:var(--hel); font-size:0.62rem; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:rgba(255,255,255,0.75); text-decoration:none;">Student Login</a>
+    <a href="https://calendly.com/morettitutoring" target="_blank" rel="noopener" class="nav-cta">Book a free intro call</a>
+  </div>
 </nav>
 
 <div id="hero">
@@ -357,93 +438,69 @@
   </div>
 </section>
 
-<section id="method">
-  <div class="container">
-    <div class="eyebrow reveal">The Moretti Method</div>
-    <h2 class="method-hed reveal d1">Tutoring that&rsquo;s <span class="uline">tailored<svg class="uline-svg" viewBox="0 0 120 14" preserveAspectRatio="none" aria-hidden="true"><path d="M3 4 C 28 1.5, 72 1.5, 117 3.5" vector-effect="non-scaling-stroke"/><path d="M7 10.5 C 38 8, 82 8, 113 9.5" vector-effect="non-scaling-stroke"/></svg></span>, not templated.</h2>
-    <p class="method-lead reveal d2">Most tutoring is an hour of homework help and a stack of practice problems. We're glad to provide exactly that when it's what your family needs — but our most successful students follow a program built on the Moretti Method: an individualized learning path across SAT and ACT prep, AP and IB exams, mathematics, English, and writing, built around how they learn. The goal is the same in every subject: simplify complex concepts, take the fear out of the material, and build the confidence to excel.</p>
-    <div class="method-grid">
-      <div class="method-step reveal md1">
-        <svg class="doodle" viewBox="0 0 80 80" aria-hidden="true">
-          <circle cx="40" cy="40" r="36" fill="#EFE8DB"/>
-          <rect x="18" y="12" width="34" height="52" rx="3" fill="#ffffff"/>
-          <rect x="24" y="21" width="22" height="3.5" rx="1.75" fill="#D9D2C6"/>
-          <rect x="24" y="30" width="18" height="3.5" rx="1.75" fill="#D9D2C6"/>
-          <rect x="24" y="39" width="21" height="3.5" rx="1.75" fill="#D9D2C6"/>
-          <rect x="24" y="48" width="14" height="3.5" rx="1.75" fill="#D9D2C6"/>
-          <g class="dd-sweep">
-            <circle cx="46" cy="38" r="12" fill="rgba(201,168,76,0.22)"/>
-            <circle cx="46" cy="38" r="12" fill="none" stroke="#B0271C" stroke-width="4.5"/>
-            <line x1="55" y1="47" x2="64" y2="58" stroke="#B0271C" stroke-width="5.5" stroke-linecap="round"/>
-          </g>
-        </svg>
-        <span class="method-num">01</span>
-        <h3 class="method-step-title">Evaluate</h3>
-        <p class="method-step-body">We start with a hand-curated diagnostic — written by us, not pulled from a workbook — of your student's current level in the course or on the test, to identify strengths and the exact gaps holding them back.</p>
+<section id="explore-prelude" aria-hidden="true"></section>
+
+<!-- ═══ EXPLORE ═══
+     One pinned frame. Group A (heading → subtitle → 01–04 → test-dates
+     line) fades in piece by piece, each one already sitting in its
+     permanent spot — nothing slides or moves while it appears. EXPLORE
+     pans slowly right-to-left the whole time behind everything. Once
+     group A has held for a moment, it fades out and slides up off the
+     screen as one unit, and group B (portal plaque, then the CTA) fades
+     in at that same center-stage spot. -->
+<section id="explore-wrap">
+  <div id="explore-stage">
+    <div class="explore-word" id="explore-word">EXPLORE</div>
+
+    <div id="explore-group-a">
+      <h2 class="explore-hed" id="explore-hed">The 12-Week SAT &amp; ACT Program</h2>
+      <p class="explore-sub" id="explore-sub">A plan built entirely around your child's pace and foundation — an investment in their ability to score higher, guided by a tutor who teaches to <span class="gold-shine">+1500 SAT</span> and <span class="gold-shine">+34 ACT</span>.</p>
+
+      <div class="explore-grid" id="explore-grid">
+        <div class="explore-step" data-step="1">
+          <span class="method-num">01</span>
+          <h3 class="method-step-title">Evaluate</h3>
+          <p class="explore-step-body">A full, hand-scored diagnostic pinpoints exactly where points are slipping away.</p>
+        </div>
+        <div class="explore-step" data-step="2">
+          <span class="method-num">02</span>
+          <h3 class="method-step-title">Design</h3>
+          <p class="explore-step-body">A session-by-session plan sequenced around how your student actually learns.</p>
+        </div>
+        <div class="explore-step" data-step="3">
+          <span class="method-num">03</span>
+          <h3 class="method-step-title">Practice</h3>
+          <p class="explore-step-body">Deliberate reps on the skills that move the score — never busywork.</p>
+        </div>
+        <div class="explore-step" data-step="4">
+          <span class="method-num">04</span>
+          <h3 class="method-step-title">Adapt</h3>
+          <p class="explore-step-body">Progress is tracked continuously, and the plan adjusts as your student improves.</p>
+        </div>
       </div>
-      <div class="method-step reveal md2">
-        <svg class="doodle" viewBox="0 0 80 80" aria-hidden="true">
-          <circle cx="40" cy="40" r="36" fill="#EFE8DB"/>
-          <rect x="22" y="14" width="36" height="54" rx="4" fill="#243447"/>
-          <rect x="26" y="20" width="28" height="44" rx="2" fill="#ffffff"/>
-          <rect x="34" y="10" width="12" height="8" rx="2.5" fill="#C9A84C"/>
-          <g class="dd-pop"><circle cx="33" cy="30" r="4.5" fill="#B0271C"/><path d="M30.8 30 l1.7 2 3.2 -3.8" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>
-          <rect x="41" y="28" width="10" height="3.5" rx="1.75" fill="#D9D2C6"/>
-          <g class="dd-pop p2"><circle cx="33" cy="42" r="4.5" fill="#B0271C"/><path d="M30.8 42 l1.7 2 3.2 -3.8" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>
-          <rect x="41" y="40" width="10" height="3.5" rx="1.75" fill="#D9D2C6"/>
-          <g class="dd-pop p3"><circle cx="33" cy="54" r="4.5" fill="#B0271C"/><path d="M30.8 54 l1.7 2 3.2 -3.8" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>
-          <rect x="41" y="52" width="10" height="3.5" rx="1.75" fill="#D9D2C6"/>
-          <g class="dd-rock"><g transform="rotate(-45 59 55)"><rect x="51" y="51.5" width="20" height="7" rx="2" fill="#C9A84C"/><path d="M51 51.5 l-6.5 3.5 6.5 3.5 z" fill="#E8B68E"/></g></g>
-        </svg>
-        <span class="method-num">02</span>
-        <h3 class="method-step-title">Design</h3>
-        <p class="method-step-body">From that assessment we build a customized lesson plan around your child's specific needs and learning style — whether that's algebra foundations, essay structure, or test pacing — with homework calibrated to their ambition: as rigorous, and as far beyond the syllabus, as they want to go.</p>
-      </div>
-      <div class="method-step reveal md3">
-        <svg class="doodle" viewBox="0 0 80 80" aria-hidden="true">
-          <circle cx="40" cy="40" r="36" fill="#EFE8DB"/>
-          <circle cx="40" cy="27" r="9" fill="#E8B68E"/>
-          <path d="M31 26 a9 9 0 0 1 18 0 l0 -1.5 q-4.5 -5 -9 -5 t-9 5 z" fill="#243447"/>
-          <path d="M31 25 a9 9.5 0 0 1 18 0 q-4 -6.5 -9 -6.5 t-9 6.5 z" fill="#243447"/>
-          <circle cx="36.6" cy="28.5" r="1.2" fill="#243447"/><circle cx="43.4" cy="28.5" r="1.2" fill="#243447"/>
-          <path d="M37 32 q3 2.3 6 0" stroke="#243447" stroke-width="1.7" fill="none" stroke-linecap="round"/>
-          <path d="M22 60 q4 -22 18 -22 q14 0 18 22 z" fill="#B0271C"/>
-          <path d="M26 47 q-3 6 1 11" stroke="#B0271C" stroke-width="6.5" fill="none" stroke-linecap="round"/>
-          <circle cx="28" cy="58" r="3.4" fill="#E8B68E"/>
-          <g class="dd-write">
-            <path d="M54 47 q3 6 -2 11" stroke="#B0271C" stroke-width="6.5" fill="none" stroke-linecap="round"/>
-            <circle cx="51" cy="58" r="3.4" fill="#E8B68E"/>
-            <line x1="52" y1="59" x2="45" y2="54.5" stroke="#C9A84C" stroke-width="3.4" stroke-linecap="round"/>
-          </g>
-          <rect x="28" y="52" width="24" height="9" rx="1.5" fill="#ffffff"/>
-          <path class="dd-scribble" d="M31 56.5 q1.5 -2 3 0 t3 0 t3 0 t3 0 t3 0"/>
-          <rect x="10" y="61" width="60" height="6.5" rx="3" fill="#A97C50"/>
-        </svg>
-        <span class="method-num">03</span>
-        <h3 class="method-step-title">Practice</h3>
-        <p class="method-step-body">Every session is targeted practice with immediate feedback, so concepts don't just make sense in the lesson — they hold up on the exam and in the classroom.</p>
-      </div>
-      <div class="method-step reveal md4">
-        <svg class="doodle" viewBox="0 0 80 80" aria-hidden="true">
-          <circle cx="40" cy="40" r="36" fill="#EFE8DB"/>
-          <rect class="dd-bar" x="22" y="46" width="10" height="16" rx="2" fill="#C9A84C"/>
-          <rect class="dd-bar b2" x="36" y="37" width="10" height="25" rx="2" fill="#5E8B6F"/>
-          <rect class="dd-bar b3" x="50" y="26" width="10" height="36" rx="2" fill="#B0271C"/>
-          <rect x="16" y="62" width="48" height="4" rx="2" fill="#243447"/>
-          <path class="dd-line" d="M20 42 L34 31 L44 36 L56 20.5" stroke="#243447" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-          <path class="dd-head" d="M60 15 L58.3 23.8 L51.9 18.8 z" fill="#243447"/>
-        </svg>
-        <span class="method-num">04</span>
-        <h3 class="method-step-title">Adapt</h3>
-        <p class="method-step-body">We track progress continuously and adjust the plan as your student improves, keeping them on pace for their score and grade goals.</p>
-      </div>
+
+      <p class="explore-testdates-hint" id="explore-testdates-hint">Don&rsquo;t know when the next SAT or ACT is? <a href="test-dates.html">See upcoming test dates &rarr;</a></p>
     </div>
-    <div class="method-cta-wrap reveal">
-      <a href="prep-course.html" class="method-cta">Explore the 12-Week SAT &amp; ACT Program <span class="arr">&rarr;</span></a>
-      <p class="method-guarantee"><strong>The guarantee.</strong> Complete the 12-week program and if your student's official SAT or ACT score doesn't improve, we keep teaching them free until it does.</p>
+
+    <div id="explore-group-b">
+      <div class="portal-teaser" id="portal-teaser">
+        <div class="portal-teaser-text">
+          <span class="portal-teaser-kicker">For Enrolled Students</span>
+          <h3 class="portal-teaser-hed">A private portal — diagnostics, curated practice, and guides.</h3>
+          <p class="portal-teaser-body">Every student enters the program with a curated diagnostic, followed by a personal practice folder, test-taking guides, session notes, and more.</p>
+        </div>
+        <a href="portal/index.html" class="portal-teaser-btn">Open Student Portal &rarr;</a>
+      </div>
+
+      <div id="explore-cta-inline">
+        <a href="prep-course.html" class="explore-cta">See How It Works <span class="arr">&rarr;</span></a>
+        <p class="explore-guarantee"><strong class="gold-shine">The guarantee.</strong> Complete the 12-week program and if your student's official SAT or ACT score doesn't improve, we keep teaching them free until it does.</p>
+      </div>
     </div>
   </div>
 </section>
+
+<section id="explore-postlude" aria-hidden="true"></section>
 
 <section id="disciplines">
   <div class="container">
@@ -510,7 +567,7 @@
     <div class="eyebrow reveal">Meet Our Team</div>
     <div class="team-grid">
       <div class="team-card reveal d1">
-        <div class="team-photo-wrap luca-frame"><img class="team-photo" src="photo-luca.jpg" alt="Luca Moretti"></div>
+        <div class="team-photo-wrap luca-frame"><img class="team-photo" src="Portrait.png" alt="Luca Moretti"></div>
         <div class="stats-band">
           <div class="intro-stats">
             <div class="intro-stat"><span class="intro-stat-num">1530</span><span class="intro-stat-lbl">SAT</span></div>
@@ -593,7 +650,10 @@
 <footer>
   <div>
     <p class="footer-tagline">Moretti Test Prep &amp; Tutoring, located in Cranford NJ</p>
-    <a href="tel:2012752791" class="footer-phone">(201) 275-2791</a>
+    <a href="tel:2012752791" class="footer-phone">(201) 275-2791</a><br>
+    <a href="test-dates.html" class="footer-tos">Test Dates</a>
+    <a href="portal/index.html" class="footer-tos" style="margin-left:0.9rem;">Student Login</a>
+    <a href="terms.html" class="footer-tos" style="margin-left:0.9rem;">Terms of Service</a>
   </div>
   <div class="footer-right">
     <div class="footer-serving-hed">Serving</div>
@@ -628,6 +688,102 @@
     });
   }, { threshold: 0.08, rootMargin: '0px 0px -36px 0px' });
   document.querySelectorAll('.reveal').forEach(function (el) { io.observe(el); });
+
+  /* ═══ EXPLORE ═══ one pinned frame (#explore-stage, position:sticky)
+     for the whole tall #explore-wrap.
+       - EXPLORE never fades and never drifts vertically — it stays
+         locked at dead-center height and only pans right-to-left, and it
+         finishes that pan in the first half of the scroll so it comes in
+         early rather than crawling the whole way through.
+       - Group A (heading, subtitle, 01–04, test-dates line) each fade in
+         — opacity only, nothing moves — one at a time, in the exact spot
+         they're already sitting in.
+       - Once group A has held for a moment, it stays fully solid (no
+         fade) and just slides up off the screen as one unit, while group
+         B (plaque, then CTA) fades in at that same center-stage spot the
+         instant the slide starts. */
+  (function () {
+    var wrap = document.getElementById('explore-wrap');
+    var word = document.getElementById('explore-word');
+    var groupA = document.getElementById('explore-group-a');
+    var hed = document.getElementById('explore-hed');
+    var sub = document.getElementById('explore-sub');
+    var steps = Array.prototype.slice.call(document.querySelectorAll('#explore-grid [data-step]'));
+    var hint = document.getElementById('explore-testdates-hint');
+    var plaque = document.getElementById('portal-teaser');
+    var ctaInline = document.getElementById('explore-cta-inline');
+    if (!wrap || !word || !groupA) return;
+
+    var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion) return; // CSS fallback already shows everything statically
+
+    function clamp01(v) { return Math.max(0, Math.min(1, v)); }
+    function mapRange(v, a, b, c, d) {
+      if (a === b) return v < a ? c : d;
+      var t = clamp01((v - a) / (b - a));
+      return c + (d - c) * t;
+    }
+    function fadeOnly(el, p, a, b) {
+      if (el) el.style.opacity = mapRange(p, a, b, 0, 1);
+    }
+    // slides up from below its resting spot while fading in, then holds
+    // still once it arrives — used for the plaque's entrance specifically
+    function slideUpFade(el, p, a, b, fromPx) {
+      if (!el) return;
+      var t = mapRange(p, a, b, 0, 1);
+      el.style.opacity = t;
+      el.style.transform = 'translateY(' + ((1 - t) * fromPx) + 'px)';
+    }
+
+    var wordWidth = 0;
+    function measureWord() { wordWidth = word.getBoundingClientRect().width; }
+    measureWord();
+    if (document.fonts && document.fonts.ready) { document.fonts.ready.then(measureWord); }
+
+    var EXIT_A = 0.6, EXIT_B = 0.72;
+
+    var ticking = false;
+    function render() {
+      ticking = false;
+      var scrollable = wrap.offsetHeight - window.innerHeight;
+      var progress = scrollable > 0 ? clamp01(-wrap.getBoundingClientRect().top / scrollable) : 0;
+
+      // EXPLORE pans slowly right to left, clearing its own width plus
+      // the viewport, so every letter takes a turn through the center —
+      // it finishes that pan by the midpoint of the scroll (comes in
+      // earlier) and never moves vertically at all
+      var vw = window.innerWidth;
+      var reach = vw / 2 + wordWidth / 2 + 60;
+      var wordX = mapRange(progress, 0, 0.5, reach, -reach);
+      word.style.transform = 'translate(-50%, -50%) translate(' + wordX + 'px, 0)';
+
+      // group A: each piece fades in, already in its fixed spot
+      fadeOnly(hed, progress, 0.05, 0.11);
+      fadeOnly(sub, progress, 0.13, 0.19);
+      steps.forEach(function (el, i) {
+        var a = 0.21 + i * 0.05;
+        fadeOnly(el, progress, a, a + 0.05);
+      });
+      fadeOnly(hint, progress, 0.44, 0.5);
+
+      // once it's held for a moment, group A stays fully solid — no
+      // fade — and just slides up off the screen together, as one unit
+      var exitY = mapRange(progress, EXIT_A, EXIT_B, 0, -70);
+      groupA.style.transform = 'translate(-50%, -50%) translateY(' + exitY + 'vh)';
+
+      // group B takes over that same center-stage spot the instant the
+      // slide starts: the plaque rises up from the bottom of the screen
+      // and fades in as it settles into place; the CTA just fades in
+      // after, same as everything else
+      slideUpFade(plaque, progress, EXIT_A, EXIT_A + 0.14, 140);
+      fadeOnly(ctaInline, progress, EXIT_A + 0.16, EXIT_A + 0.26);
+    }
+    render();
+    window.addEventListener('scroll', function () {
+      if (!ticking) { ticking = true; requestAnimationFrame(render); }
+    }, { passive: true });
+    window.addEventListener('resize', function () { measureWord(); render(); });
+  })();
 
   var sfIo = new IntersectionObserver(function (entries) {
     entries.forEach(function (e) {
