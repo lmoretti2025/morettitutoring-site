@@ -155,8 +155,16 @@
   .dx-fr-input:focus { outline: none; border-color: var(--red); }
   .dx-fr-submit { background: var(--red); color: #fff; font-family: var(--hel); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 0 1.4rem; border: none; cursor: pointer; transition: opacity 0.2s; }
   .dx-fr-submit:hover { opacity: 0.86; }
-  .dx-fr-hint { font-size: 0.7rem; color: var(--faint); margin-top: -1.4rem; margin-bottom: 2rem; }
 
+  .dx-mark-btn { display: inline-block; background: none; border: 1px dashed rgba(17,17,17,0.3); color: var(--mid); font-family: var(--hel); font-size: 0.6rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.4rem 0.9rem; cursor: pointer; margin-bottom: 1.1rem; transition: color 0.2s, border-color 0.2s, background 0.2s; }
+  .dx-choice { position: relative; }
+  .dx-choice.eliminated { opacity: 0.45; }
+  .dx-choice.eliminated .dx-choice-text { text-decoration: line-through; }
+  .dx-elim { margin-left: auto; flex-shrink: 0; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; border-radius: 50%; color: var(--faint); font-size: 1rem; line-height: 1; cursor: pointer; transition: color 0.2s, background 0.2s; }
+  .dx-elim:hover { color: var(--red); background: rgba(176,39,28,0.08); }
+  .dx-mark-btn.on { background: rgba(201,168,76,0.15); border: 1px solid var(--gold); color: #8a6d1f; }
+  .dx-qnum.marked { box-shadow: inset 0 0 0 2px var(--red); }
+  .dx-qnum.marked::after { content: ''; }
   .dx-nav-row { display: flex; align-items: center; justify-content: space-between; }
   .dx-btn { font-family: var(--hel); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.8rem 1.7rem; border: none; cursor: pointer; transition: opacity 0.2s ease; }
   .dx-btn:disabled { opacity: 0.35; cursor: not-allowed; }
@@ -191,6 +199,11 @@
   .sr-bar-fill.weak { background: var(--gold); }
   .sr-narrative-block { background: var(--bg); border-left: 3px solid var(--gold); padding: 1.25rem 1.5rem; }
   .sr-narrative { font-size: 0.85rem; line-height: 1.8; color: var(--mid); }
+  .sr-takeaways { list-style: none; margin: 0; padding: 0; }
+  .sr-takeaways li { font-size: 0.85rem; line-height: 1.75; color: var(--mid); padding: 0.45rem 0 0.45rem 1.4rem; position: relative; }
+  .sr-takeaways li::before { content: '◆'; position: absolute; left: 0; top: 0.55rem; font-size: 0.5rem; color: var(--gold); }
+  .sr-takeaways li strong { color: var(--text); font-weight: 700; }
+  .sr-takeaways li .sr-red { color: var(--red); font-weight: 700; }
   .sr-footer { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; border-top: 1px solid var(--border); padding-top: 1.5rem; font-size: 0.7rem; color: var(--faint); }
   .sr-print-btn { background: var(--text); color: #fff; border: none; font-family: var(--hel); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.75rem 1.4rem; cursor: pointer; transition: opacity 0.2s; }
   .sr-print-btn:hover { opacity: 0.82; }
@@ -295,8 +308,7 @@
     <h1 class="menu-greeting" id="menu-greeting">Hey there.</h1>
     <p class="menu-sub">What are you working on right now?</p>
     <div class="menu-grid">
-      <div class="menu-card disabled" data-route="diagnostic">
-        <span class="menu-card-coming-soon">Coming Soon</span>
+      <div class="menu-card" data-route="diagnostic">
         <span class="menu-card-icon">01</span>
         <div class="menu-card-title">SAT/ACT Diagnostics</div>
         <div class="menu-card-body">Take the hand-curated diagnostic so Luca can build your plan around real data.</div>
@@ -361,11 +373,11 @@
 <div class="screen" id="screen-intro">
   <div class="panel">
     <div class="kicker" id="intro-kicker">SAT Diagnostic</div>
-    <h1 class="panel-hed" id="intro-hed">Math section — 60 questions.</h1>
+    <h1 class="panel-hed" id="intro-hed">Math section — 75 questions.</h1>
     <p class="panel-sub">No pressure — this just tells Luca where to focus. Take your time.</p>
     <ul class="intro-list">
-      <li>Calculator allowed on every question.</li>
-      <li>Most questions are multiple choice; a few ask you to type in a number.</li>
+      <li id="intro-calc-note">Calculator allowed on every question — you can use the free <a href="https://www.desmos.com/calculator" target="_blank" rel="noopener" style="color:var(--red); font-weight:600;">Desmos calculator</a>.</li>
+      <li id="intro-fr-note">Most questions are multiple choice; a few ask you to type in a number. For those, enter numbers only — ignore units, e.g. type 12 not "12 miles."</li>
       <li>You can jump between questions using the panel on the right, and come back to anything.</li>
       <li>Your results go straight to Luca — no need to send anything yourself.</li>
     </ul>
@@ -391,14 +403,13 @@
             <label for="dx-jump-select">Jump to question</label>
             <select id="dx-jump-select"></select>
           </div>
-          <span class="dx-domain" id="dx-domain"></span>
+          <button class="dx-mark-btn" id="dx-mark" type="button">&#9873; Mark for Review</button>
           <h1 class="dx-qtext" id="dx-qtext"></h1>
           <div class="dx-choices" id="dx-choices" style="display:none;"></div>
           <div class="dx-fr-row" id="dx-fr-row" style="display:none;">
             <input type="text" class="dx-fr-input" id="dx-fr-input" placeholder="Type your answer">
             <button class="dx-fr-submit" id="dx-fr-submit">Enter</button>
           </div>
-          <p class="dx-fr-hint" id="dx-fr-hint" style="display:none;">Numbers only — ignore units, e.g. type 375 not "375 miles."</p>
           <div class="dx-nav-row">
             <button class="dx-btn dx-btn-back" id="dx-back">Back</button>
             <button class="dx-btn dx-btn-next" id="dx-next" disabled>Next</button>
@@ -425,41 +436,10 @@
       <a href="../index.html" class="key-btn" id="done-return-link" style="display:block; text-align:center; text-decoration:none; margin-top:1rem;">Return to Site</a>
     </div>
 
-    <!-- ═══ SCORE REPORT — a College Board-style breakdown Luca can print or
-         save as a PDF to hand (or forward) to parents. Populated by
-         renderScoreReport() in the script below right after scoring. ═══ -->
-    <div class="score-report" id="score-report" style="display:none;">
-      <div class="sr-header">
-        <img src="../logo-caladea-dark.png" alt="Moretti Test Prep &amp; Tutoring" class="sr-logo">
-        <div class="sr-meta">
-          <h2 class="sr-title" id="sr-title"></h2>
-          <p class="sr-sub" id="sr-sub"></p>
-        </div>
-      </div>
-      <div class="sr-overall">
-        <div class="sr-overall-num" id="sr-overall-num"></div>
-        <div class="sr-overall-label">Overall Score</div>
-      </div>
-      <div class="sr-block">
-        <h3 class="sr-block-hed">By Section</h3>
-        <div id="sr-sections"></div>
-      </div>
-      <div class="sr-block">
-        <h3 class="sr-block-hed">By Skill Area</h3>
-        <div id="sr-domains"></div>
-      </div>
-      <div class="sr-block sr-narrative-block">
-        <h3 class="sr-block-hed">What This Tells Us</h3>
-        <p class="sr-narrative" id="sr-narrative"></p>
-      </div>
-      <div class="sr-footer">
-        <span>Moretti Test Prep &amp; Tutoring &middot; Cranford, NJ &middot; (201) 275-2791</span>
-        <button class="sr-print-btn" id="sr-print-btn" type="button">Print / Save as PDF</button>
-      </div>
-    </div>
   </div>
 </div>
 
+<script src="banks.js"></script>
 <script>
 (function () {
   'use strict';
@@ -500,7 +480,10 @@
         sectionIndex: sectionIndex,
         completedSections: completedSections,
         current: current,
-        answers: answers
+        answers: answers,
+        marked: marked,
+        elims: elims,
+        qOrder: qOrder
       }));
     } catch (e) { /* private browsing / storage disabled — fail silently */ }
   }
@@ -638,75 +621,11 @@
     show('dx-screen');
   });
 
-  /* =====================================================================
-     SAT MATH DIAGNOSTIC — 60 QUESTIONS
-     Sourced from Moretti Tutoring's own diagnostic (SAT_Math_Diagnostic.pdf).
-     type: 'mc' (multiple choice) or 'fr' (free response / student-produced).
-     For 'fr' questions, "answer" is the target number; the checker strips
-     units/words and accepts simple fractions (e.g. "1/10").
-     ===================================================================== */
-  var MATH_QUESTIONS = [
-    { domain: 'Algebra', type: 'fr', text: 'A train leaves a station and travels north at 75 mph. Two hours later, a second train leaves on a parallel track traveling north at 125 mph. How many miles from the station will the faster train overtake the slower train?', answer: 375 },
-    { domain: 'Advanced Math', type: 'mc', text: 'Simplify: −4f<sup>−3</sup>g<sup>4</sup>h<sup>0</sup>', choices: ['−4f<sup>3</sup>g<sup>4</sup>', '−4g<sup>4</sup>/f<sup>3</sup>', '4g<sup>4</sup>/f<sup>3</sup>', '−4g<sup>4</sup>/(f<sup>3</sup>h)'], correct: 1 },
-    { domain: 'Advanced Math', type: 'mc', text: 'Solve for x: e<sup>−4x</sup> = e', choices: ['x = 1/4', 'x = −4', 'x = 4', 'x = −1/4'], correct: 3 },
-    { domain: 'Geometry & Trigonometry', type: 'mc', text: 'A circle has radius 4 in. What are its circumference and area?', choices: ['Circumference = 16π in, Area = 8π in²', 'Circumference = 8π in, Area = 4π in²', 'Circumference = 8π in, Area = 16π in²', 'Circumference = 4π in, Area = 16π in²'], correct: 2 },
-    { domain: 'Advanced Math', type: 'mc', text: 'Multiply: (3x + 2)(2x + 7)', choices: ['5x<sup>2</sup> + 25x + 14', '6x<sup>2</sup> + 25x + 9', '6x<sup>2</sup> + 17x + 14', '6x<sup>2</sup> + 25x + 14'], correct: 3 },
-    { domain: 'Advanced Math', type: 'mc', text: 'Solve by factoring: x<sup>2</sup> − 5x − 6 = 0', choices: ['x = 6, −1', 'x = −6, 1', 'x = 3, −2', 'x = −3, 2'], correct: 0 },
-    { domain: 'Advanced Math', type: 'mc', text: 'Solve for x: 3<sup>4x+1</sup> − 5 = 22', choices: ['x = 1/2', 'x = 1/4', 'x = 3/4', 'x = 2'], correct: 0 },
-    { domain: 'Problem-Solving & Data Analysis', type: 'mc', text: 'The cost of a certain shirt is $20 before a 5% sales tax is added. What is the total cost, including sales tax, to purchase the shirt?', choices: ['$20.05', '$25.00', '$21.00', '$20.50'], correct: 2 },
-    { domain: 'Advanced Math', type: 'mc', text: 'Simplify: 32<sup>4/5</sup>', choices: ['8', '128', '64', '16'], correct: 3 },
-    { domain: 'Advanced Math', type: 'mc', text: 'Factor: 25x<sup>2</sup> − 81', choices: ['(5x − 81)(5x + 1)', '(5x − 9)<sup>2</sup>', '(5x − 9)(5x + 9)', '(25x − 81)(x + 1)'], correct: 2 },
-    { domain: 'Problem-Solving & Data Analysis', type: 'fr', text: 'A runner ran at a rate of 6 miles per hour. What is this speed in miles per minute?', answer: 0.1 },
-    { domain: 'Advanced Math', type: 'mc', text: 'Given: 1 − 5x = √(6x − 7). Which describes the real solutions?', choices: ['x = −1 only', 'There are no real solutions', 'x = 1 only', 'x = 1 and x = −8/25'], correct: 1 },
-    { domain: 'Advanced Math', type: 'mc', text: 'After rationalizing the denominator of 3/(1 − √2), an equivalent expression is:', choices: ['3 − 3√2', '3 + 3√2', '−3 − 3√2', '−3 + 3√2'], correct: 2 },
-    { domain: 'Algebra', type: 'mc', text: 'What is the slope-intercept form of the line through (1, 4) and (3, −2)?', choices: ['y = 3x − 7', 'y = −3x + 4', 'y = 3x + 1', 'y = −3x + 7'], correct: 3 },
-    { domain: 'Advanced Math', type: 'mc', text: 'Simplify: x/(x<sup>2</sup> + 5x + 6) − 2/(x<sup>2</sup> + 3x + 2)', choices: ['(x + 3)/[(x + 1)(x + 3)]', '−1/(x + 2)', '(x − 3)/[(x + 1)(x + 3)]', '(x − 3)/[(x + 2)(x + 3)]'], correct: 2 },
-    { domain: 'Advanced Math', type: 'mc', text: 'Given f(x) = −3x<sup>2</sup> − 18x − 15, what is the vertex of the graph?', choices: ['(−6, 12)', '(3, 12)', '(−3, 12)', '(−3, −12)'], correct: 2 },
-    { domain: 'Algebra', type: 'mc', text: 'What is the slope of a line perpendicular to y = (3/2)x − 1?', choices: ['3/2', '−3/2', '2/3', '−2/3'], correct: 3 },
-    { domain: 'Advanced Math', type: 'mc', text: 'Simplify: 2<sup>5</sup> · 2<sup>6</sup>', choices: ['4<sup>11</sup>', '2<sup>11</sup>', '2<sup>30</sup>', '2<sup>31</sup>'], correct: 1 },
-    { domain: 'Algebra', type: 'mc', text: 'Solve for x: 2 ≤ 5 − 2x ≤ 22', choices: ['−17/2 ≤ x ≤ 3/2', '−17/2 ≤ x ≤ −3/2', '3/2 ≤ x ≤ 17/2', '−3/2 ≤ x ≤ 17/2'], correct: 0 },
-    { domain: 'Algebra', type: 'mc', text: 'Which point lies on the graph of y = 3x − 2?', choices: ['(0, −2)', '(0, 2)', '(3, −2)', '(−2, 3)'], correct: 0 },
-    { domain: 'Advanced Math', type: 'mc', text: 'Factor completely: 2y<sup>4</sup> − 32x<sup>4</sup>', choices: ['2(y<sup>2</sup> − 4x<sup>2</sup>)<sup>2</sup>', '(2y<sup>2</sup> − 8x<sup>2</sup>)(y<sup>2</sup> + 4x<sup>2</sup>)', '2(y − 2x)(y + 2x)(y<sup>2</sup> + 4x<sup>2</sup>)', '2(y − 4x)<sup>4</sup>'], correct: 2 },
-    { domain: 'Geometry & Trigonometry', type: 'mc', text: 'A rectangle has length 11 ft and width 4 ft. What are its area and perimeter?', choices: ['Area = 30 ft², Perimeter = 44 ft', 'Area = 15 ft², Perimeter = 30 ft', 'Area = 44 ft², Perimeter = 30 ft', 'Area = 44 ft², Perimeter = 15 ft'], correct: 2 },
-    { domain: 'Problem-Solving & Data Analysis', type: 'mc', text: 'A study was done on the weights of fish in a pond. A random sample was caught and marked so none were weighed twice. The sample contained 150 largemouth bass, of which 30% weighed more than 2 pounds. Which conclusion is best supported by the sample data?', choices: ['The average weight of all fish in the pond is approximately 2 pounds.', 'Approximately 30% of all fish in the pond weigh more than 2 pounds.', 'Approximately 30% of all largemouth bass in the pond weigh more than 2 pounds.', 'The majority of all fish in the pond weigh less than 2 pounds.'], correct: 2 },
-    { domain: 'Advanced Math', type: 'mc', text: 'Simplify: 6a<sup>5</sup>b<sup>9</sup> ÷ (2a<sup>4</sup>b<sup>4</sup>)', choices: ['3a<sup>5</sup>b<sup>5</sup>', '3ab<sup>5</sup>', '4ab<sup>5</sup>', '3ab<sup>9</sup>'], correct: 1 },
-    { domain: 'Algebra', type: 'mc', text: 'Given the system 4x + 2y = 14, 2x − 8y = 8, what is the value of y?', choices: ['−1/9', '−9', '1/9', '9'], correct: 0 },
-    { domain: 'Advanced Math', type: 'fr', text: 'The function f(x) = 2(3)<sup>x</sup> models an insect population after x days. What will the population be on the 5th day?', answer: 486 },
-    { domain: 'Algebra', type: 'mc', text: 'What is the slope of the line through the points (5, 1) and (2, 7)?', choices: ['−1/2', '−3', '2', '−2'], correct: 3 },
-    { domain: 'Advanced Math', type: 'mc', text: 'What is the domain of the function y = 5/√(9 − x)?', choices: ['x ≠ 9', 'x > 9', 'x ≤ 9', 'x < 9'], correct: 3 },
-    { domain: 'Advanced Math', type: 'mc', text: 'Rewrite in simplest radical form: √24', choices: ['6√4', '4√6', '2√6', '2√12'], correct: 2 },
-    { domain: 'Advanced Math', type: 'mc', text: 'Solve for x: x<sup>2</sup> − 35 ≤ 1', choices: ['−1 ≤ x ≤ 1', 'x ≤ 6', '−6 ≤ x ≤ 6', '−36 ≤ x ≤ 36'], correct: 2 },
-    { domain: 'Advanced Math', type: 'mc', text: 'Factor: x<sup>2</sup> + 6x + 8', choices: ['(x + 2)(x − 4)', '(x + 1)(x + 8)', '(x − 2)(x − 4)', '(x + 2)(x + 4)'], correct: 3 },
-    { domain: 'Advanced Math', type: 'mc', text: 'Which expression is equivalent to m<sup>(4x − 7y)</sup>?', choices: ['m<sup>28xy</sup>', 'm<sup>4x</sup>/m<sup>7y</sup>', 'm<sup>4x</sup> + m<sup>7y</sup>', 'm<sup>4x</sup> − m<sup>7y</sup>'], correct: 1 },
-    { domain: 'Advanced Math', type: 'mc', text: 'Use completing the square to rewrite x<sup>2</sup> − 4x + 3 = 0 in the form (x − c)<sup>2</sup> = d. What are c and d?', choices: ['c = −2, d = 1', 'c = 2, d = 1', 'c = 4, d = 3', 'c = 2, d = −1'], correct: 1 },
-    { domain: 'Advanced Math', type: 'mc', text: 'Simplify: √50 + √32 − √27', choices: ['5√2 − 3√3', '9√2 − 3√3', '9√2 − 9√3', '9√2 + 3√3'], correct: 1 },
-    { domain: 'Geometry & Trigonometry', type: 'mc', text: 'What are the point(s) of intersection of x<sup>2</sup> + y<sup>2</sup> = 1 and y + x = 0?', choices: ['(0, 1) and (0, −1)', '(1/2, −1/2) and (−1/2, 1/2)', '(√2/2, √2/2) only', '(√2/2, −√2/2) and (−√2/2, √2/2)'], correct: 3 },
-    { domain: 'Geometry & Trigonometry', type: 'fr', text: 'A triangle has a height of 5 cm and a base length of 12 cm. What is its area (in cm²)?', answer: 30 },
-    { domain: 'Advanced Math', type: 'mc', text: 'After clearing the numerator and denominator of fractions, (2x + 1/4)/(3x − 1/5) is equivalent to:', choices: ['(40x + 5)/(60x + 4)', '(8x + 1)/(15x − 1)', '(40x + 5)/(60x − 4)', '(2x + 1)/(3x − 1)'], correct: 2 },
-    { domain: 'Advanced Math', type: 'mc', text: 'Given f(x) = 3 + x<sup>2</sup>, what is f(x + h) − f(x)?', choices: ['2hx − h<sup>2</sup>', '2hx + h<sup>2</sup>', 'h<sup>2</sup>', '2hx'], correct: 1 },
-    { domain: 'Advanced Math', type: 'mc', text: 'Simplify: (64x<sup>5</sup>y<sup>−1</sup>)<sup>1/5</sup> ÷ (2y<sup>4</sup>)<sup>1/5</sup>', choices: ['2x/y<sup>2</sup>', '32x/y', '2xy', '2x/y'], correct: 3 },
-    { domain: 'Advanced Math', type: 'mc', text: 'f(x) = (x<sup>2</sup> − 7x + 12)<sup>2</sup>. What are the roots of f, with multiplicity?', choices: ['x = 7, x = 12, each multiplicity 2', 'x = 4, x = 3, each multiplicity 1', 'x = −4, x = −3, each multiplicity 2', 'x = 4 (multiplicity 2), x = 3 (multiplicity 2)'], correct: 3 },
-    { domain: 'Algebra', type: 'mc', text: 'What is the solution to the system y = x − 3, y = −x + 1?', choices: ['(−1, 2)', '(−2, 1)', '(1, −2)', '(2, −1)'], correct: 3 },
-    { domain: 'Algebra', type: 'fr', text: 'Temperature T in °F is given by T = (9/5)C + 32, where C is the temperature in °C. What is the Celsius equivalent of 77°F?', answer: 25 },
-    { domain: 'Problem-Solving & Data Analysis', type: 'mc', text: 'A college class of 20 students has ages: 18 (×6), 19 (×5), 20 (×4), 21 (×2), 22 (×1), 23 (×1), 30 (×1). Which gives the correct order of the mean, median, and mode of the ages?', choices: ['mode < median < mean', 'mean < mode < median', 'median < mode < mean', 'mode < mean < median'], correct: 0 },
-    { domain: 'Algebra', type: 'mc', text: 'What is the slope of the line y = −2x + 5?', choices: ['5', '−2', '−5', '2'], correct: 1 },
-    { domain: 'Advanced Math', type: 'mc', text: 'Simplify: (x<sup>2</sup>yz<sup>−2</sup>)<sup>3</sup> ÷ (xy<sup>2</sup>z)<sup>2</sup>', choices: ['x<sup>6</sup>/(yz<sup>8</sup>)', 'x<sup>4</sup>/(yz<sup>8</sup>)', 'x<sup>4</sup>/(y<sup>3</sup>z<sup>8</sup>)', 'x<sup>4</sup>yz<sup>8</sup>'], correct: 1 },
-    { domain: 'Geometry & Trigonometry', type: 'mc', text: 'The radius of a circular fountain is 10 ft. A sidewalk of uniform width surrounds the fountain and has an area of 69π ft². How wide is the sidewalk?', choices: ['3 ft', '23 ft', '6.9 ft', '13 ft'], correct: 0 },
-    { domain: 'Algebra', type: 'mc', text: 'Solve for x: 5x + 3 = −12', choices: ['−3', '3', '−9/5', '−15'], correct: 0 },
-    { domain: 'Advanced Math', type: 'mc', text: 'If (x + a)(x − b) = x<sup>2</sup> − 1, which expression is equivalent to x?', choices: ['(ab + 1)/(a − b)', '(ab − 1)/(a + b)', '(1 − ab)/(a − b)', '(ab − 1)/(a − b)'], correct: 3 },
-    { domain: 'Algebra', type: 'mc', text: 'Solve for x: |3x − 2| − 6 ≥ 0', choices: ['x ≤ −8/3 or x ≥ 4/3', 'x ≥ −4/3', '−4/3 ≤ x ≤ 8/3', 'x ≤ −4/3 or x ≥ 8/3'], correct: 3 },
-    { domain: 'Advanced Math', type: 'mc', text: 'Given f(x) = √(x<sup>2</sup> − 9), what is f(x − 3)?', choices: ['√(x<sup>2</sup> − 6x − 9)', '√(x<sup>2</sup> − 6x)', '√(x<sup>2</sup> − 9) − 3', '√(x<sup>2</sup> − 6x + 9)'], correct: 1 },
-    { domain: 'Algebra', type: 'mc', text: 'Solve for x: 3(x − 2) = 18', choices: ['6', '20/3', '4', '8'], correct: 3 },
-    { domain: 'Geometry & Trigonometry', type: 'mc', text: 'Is the point (−√35/6, −1/6) inside, outside, or on the unit circle x<sup>2</sup> + y<sup>2</sup> = 1?', choices: ['Cannot be determined', 'On the unit circle', 'Inside the unit circle', 'Outside the unit circle'], correct: 1 },
-    { domain: 'Problem-Solving & Data Analysis', type: 'fr', text: 'The ratio of faculty members to students at a college is 1:15. If there are 675 students, how many faculty members are there?', answer: 45 },
-    { domain: 'Algebra', type: 'mc', text: 'What is the solution to the system x + 4y = 6, x + y = 3?', choices: ['(1, 2)', '(3, 0)', '(2, 1)', '(6, −3)'], correct: 2 },
-    { domain: 'Advanced Math', type: 'mc', text: 'Simplify: (2x<sup>2</sup> − x) + (x<sup>2</sup> + 3x − 1)', choices: ['3x<sup>2</sup> + 2x − 1', '3x<sup>2</sup> − 2x − 1', '3x<sup>2</sup> + 2x + 1', 'x<sup>2</sup> + 2x − 1'], correct: 0 },
-    { domain: 'Advanced Math', type: 'mc', text: 'Multiply: (5n + 1)<sup>2</sup>', choices: ['25n<sup>2</sup> + 5n + 1', '25n<sup>2</sup> + 10n + 1', '5n<sup>2</sup> + 10n + 1', '25n<sup>2</sup> + 1'], correct: 1 },
-    { domain: 'Advanced Math', type: 'mc', text: 'Given g(2) = 4 and f(x) = x/2, what is f(g(2))?', choices: ['1', '4', '2', '8'], correct: 2 },
-    { domain: 'Algebra', type: 'mc', text: 'What is the slope of the line through the points (2, −4) and (2, 6)?', choices: ['1', 'Undefined (the line is vertical)', '0', '10'], correct: 1 },
-    { domain: 'Problem-Solving & Data Analysis', type: 'mc', text: 'Solve for x: 18/x = 6/5', choices: ['90', '21.6', '5/3', '15'], correct: 3 },
-    { domain: 'Problem-Solving & Data Analysis', type: 'mc', text: 'y is proportional to x, and y = 42 when x = 6. Which equation represents this relationship?', choices: ['y = 7x', 'y = x/6 + 36', 'y = x + 36', 'y = 252x'], correct: 0 }
-  ];
+
+
+
+
+
 
   /* =====================================================================
      SECTION BANKS & TEST FORMATS
@@ -720,18 +639,17 @@
      below using the same object shape as the Math questions above
      ({ domain, type, text, choices/correct OR answer }).
      ===================================================================== */
-  var SECTION_BANKS = {
-    'reading-writing': { label: 'Reading & Writing', questions: [] },
-    'english':         { label: 'English',           questions: [] },
-    'math':            { label: 'Math',              questions: MATH_QUESTIONS },
-    'reading':         { label: 'Reading',           questions: [] },
-    'science':         { label: 'Science',           questions: [] }
-  };
 
-  var TEST_FORMATS = {
-    SAT: { label: 'SAT', order: ['reading-writing', 'math'] },
-    ACT: { label: 'ACT', order: ['english', 'math', 'reading', 'science'] }
-  };
+  
+
+  
+
+
+
+
+  var SECTION_BANKS = window.SECTION_BANKS;
+
+  var TEST_FORMATS = window.TEST_FORMATS;
 
   var testChoice = null;       // 'SAT' or 'ACT'
   var activeSectionKeys = [];  // populated sections only, in the real test's order
@@ -739,15 +657,32 @@
   var completedSections = [];  // [{ key, label, answers }] for sections already finished
   var current = 0;
   var answers = [];
+  var marked = [];
+  var elims = [];
+  var qOrder = [];
+  var currentQs = [];
+
+  function shuffledOrder(n) {
+    var o = [];
+    for (var i = 0; i < n; i++) o.push(i);
+    for (var j = n - 1; j > 0; j--) {
+      var r = Math.floor(Math.random() * (j + 1));
+      var tmp = o[j]; o[j] = o[r]; o[r] = tmp;
+    }
+    return o;
+  }
+  function canonical(arr) {
+    var out = new Array(arr.length).fill(null);
+    qOrder.forEach(function (orig, pos) { out[orig] = arr[pos]; });
+    return out;
+  }
 
   var card       = document.getElementById('dx-card');
-  var domainEl   = document.getElementById('dx-domain');
   var qtextEl    = document.getElementById('dx-qtext');
   var choicesEl  = document.getElementById('dx-choices');
   var frRow      = document.getElementById('dx-fr-row');
   var frInput    = document.getElementById('dx-fr-input');
   var frSubmit   = document.getElementById('dx-fr-submit');
-  var frHint     = document.getElementById('dx-fr-hint');
   var backBtn    = document.getElementById('dx-back');
   var nextBtn    = document.getElementById('dx-next');
   var qgrid      = document.getElementById('dx-qgrid');
@@ -755,7 +690,7 @@
   var progLabel  = document.getElementById('dx-progress-label');
   var LETTERS    = ['A', 'B', 'C', 'D'];
 
-  function activeQuestions() { return SECTION_BANKS[activeSectionKeys[sectionIndex]].questions; }
+  function activeQuestions() { return currentQs; }
   function isLastQuestionInSection() { return current === activeQuestions().length - 1; }
   function isLastSection() { return sectionIndex === activeSectionKeys.length - 1; }
 
@@ -772,18 +707,27 @@
   function startSection(index) {
     sectionIndex = index;
     current = 0;
-    var qs = activeQuestions();
+    var bank = SECTION_BANKS[activeSectionKeys[sectionIndex]].questions;
+    qOrder = shuffledOrder(bank.length);
+    currentQs = qOrder.map(function (i) { return bank[i]; });
+    var qs = currentQs;
     answers = new Array(qs.length).fill(null);
+    marked = new Array(qs.length).fill(false);
+    elims = new Array(qs.length).fill(null).map(function () { return []; });
     diagnosticSubmitted = false;
     var sectionLabel = SECTION_BANKS[activeSectionKeys[sectionIndex]].label;
     document.getElementById('intro-kicker').textContent = testChoice + ' Diagnostic';
+    var secKey = activeSectionKeys[sectionIndex];
+    var isMathSec = (secKey === 'math' || secKey === 'act-math');
+    document.getElementById('intro-calc-note').style.display = isMathSec ? '' : 'none';
+    document.getElementById('intro-fr-note').style.display = (secKey === 'math' && testChoice === 'SAT') ? '' : 'none';
     document.getElementById('intro-hed').textContent = sectionLabel + ' section — ' + qs.length + ' question' + (qs.length === 1 ? '' : 's') + '.';
     document.getElementById('dx-brand-label').textContent = testChoice + ' Diagnostic — ' + sectionLabel;
     show('screen-intro');
   }
 
   function advanceToNextSection() {
-    completedSections.push({ key: activeSectionKeys[sectionIndex], label: SECTION_BANKS[activeSectionKeys[sectionIndex]].label, answers: answers });
+    completedSections.push({ key: activeSectionKeys[sectionIndex], label: SECTION_BANKS[activeSectionKeys[sectionIndex]].label, answers: canonical(answers), marked: canonical(marked) });
     startSection(sectionIndex + 1);
   }
 
@@ -813,8 +757,21 @@
     nums.forEach(function (el, i) {
       el.classList.toggle('current', i === current);
       el.classList.toggle('answered', answers[i] !== null);
+      el.classList.toggle('marked', !!marked[i]);
     });
   }
+
+  var markBtn = document.getElementById('dx-mark');
+  function refreshMarkBtn() {
+    markBtn.classList.toggle('on', !!marked[current]);
+    markBtn.innerHTML = marked[current] ? '&#9873; Marked for Review' : '&#9873; Mark for Review';
+  }
+  markBtn.addEventListener('click', function () {
+    marked[current] = !marked[current];
+    refreshMarkBtn();
+    refreshSidebar();
+    saveState();
+  });
 
   function parseNumeric(str) {
     str = (str || '').trim();
@@ -834,25 +791,35 @@
   function renderQuestion() {
     var qs = activeQuestions();
     var q = qs[current];
-    domainEl.textContent = q.domain;
     qtextEl.innerHTML = q.text;
 
     if (q.type === 'mc') {
       choicesEl.style.display = 'flex';
       frRow.style.display = 'none';
-      frHint.style.display = 'none';
       choicesEl.innerHTML = '';
       q.choices.forEach(function (choice, i) {
+        var isElim = elims[current] && elims[current].indexOf(i) !== -1;
         var row = document.createElement('div');
-        row.className = 'dx-choice' + (answers[current] === i ? ' selected' : '');
-        row.innerHTML = '<span class="dx-choice-letter">' + LETTERS[i] + '</span><span class="dx-choice-text">' + choice + '</span>';
-        row.addEventListener('click', function () { selectMcAnswer(i); });
+        row.className = 'dx-choice' + (answers[current] === i ? ' selected' : '') + (isElim ? ' eliminated' : '');
+        row.innerHTML = '<span class="dx-choice-letter">' + LETTERS[i] + '</span><span class="dx-choice-text">' + choice + '</span><span class="dx-elim" title="Cross out this answer">&times;</span>';
+        row.querySelector('.dx-elim').addEventListener('click', function (ev) {
+          ev.stopPropagation();
+          var list = elims[current];
+          var at = list.indexOf(i);
+          if (at === -1) { list.push(i); if (answers[current] === i) answers[current] = null; }
+          else { list.splice(at, 1); }
+          renderQuestion();
+        });
+        row.addEventListener('click', function () {
+          var at = elims[current].indexOf(i);
+          if (at !== -1) elims[current].splice(at, 1);
+          selectMcAnswer(i);
+        });
         choicesEl.appendChild(row);
       });
     } else {
       choicesEl.style.display = 'none';
       frRow.style.display = 'flex';
-      frHint.style.display = 'block';
       frInput.value = answers[current] !== null ? answers[current].raw : '';
     }
 
@@ -862,6 +829,7 @@
     progLabel.textContent = 'Question ' + (current + 1) + ' of ' + qs.length;
     progFill.style.width = ((current / qs.length) * 100) + '%';
     jumpSelect.value = current;
+    refreshMarkBtn();
     refreshSidebar();
     saveState();
   }
@@ -910,6 +878,17 @@
   }
 
   backBtn.addEventListener('click', function () { goTo(current - 1); });
+  document.addEventListener('keydown', function (e) {
+    if (activeScreenId !== 'dx-screen') return;
+    var tag = (document.activeElement && document.activeElement.tagName) || '';
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+    if (e.key === 'ArrowLeft') { e.preventDefault(); goTo(current - 1); }
+    else if (e.key === 'ArrowRight') { e.preventDefault(); if (answers[current] !== null) goTo(current + 1); }
+    else {
+      var letterIdx = ['a', 'b', 'c', 'd'].indexOf(e.key.toLowerCase());
+      if (letterIdx !== -1 && activeQuestions()[current].type === 'mc') { e.preventDefault(); selectMcAnswer(letterIdx); }
+    }
+  });
   nextBtn.addEventListener('click', function () {
     if (activeQuestions()[current].type === 'fr') { recordFrAnswer(); }
     if (answers[current] === null) return;
@@ -925,72 +904,6 @@
     return val !== null && Math.abs(val - q.answer) < 0.05;
   }
 
-  /* ═══ PARENT-FACING SCORE REPORT ═══
-     A College Board-style visual breakdown — overall score, per-section
-     bars, per-skill-area bars, and a short plain-English "what this tells
-     us" note — that Luca can print or save as a PDF straight from the
-     browser and hand (or forward) to parents. Purely client-side: no
-     server, no PDF library, just a print stylesheet (see @media print). */
-  function srBarRow(label, correct, total, cls) {
-    var pct = total > 0 ? Math.round((correct / total) * 100) : 0;
-    var row = document.createElement('div');
-    row.className = 'sr-bar-row';
-    row.innerHTML =
-      '<div class="sr-bar-label"><span>' + label + '</span><span>' + correct + ' / ' + total + ' (' + pct + '%)</span></div>' +
-      '<div class="sr-bar-track"><div class="sr-bar-fill ' + (cls || '') + '" style="width:' + pct + '%"></div></div>';
-    return row;
-  }
-
-  function renderScoreReport(data) {
-    var reportEl = document.getElementById('score-report');
-    if (!reportEl) return;
-
-    var overallPct = data.totalQuestions > 0 ? Math.round((data.totalCorrect / data.totalQuestions) * 100) : 0;
-    document.getElementById('sr-title').textContent = data.studentName + ' — ' + data.testChoice + ' Diagnostic Report';
-    document.getElementById('sr-sub').textContent = 'Administered ' + new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) + ' via the Moretti Test Prep student portal';
-    document.getElementById('sr-overall-num').textContent = data.totalCorrect + ' / ' + data.totalQuestions + ' (' + overallPct + '%)';
-
-    var sectionsEl = document.getElementById('sr-sections');
-    sectionsEl.innerHTML = '';
-    data.sectionResults.forEach(function (sec) {
-      sectionsEl.appendChild(srBarRow(sec.label, sec.correct, sec.total));
-    });
-
-    var domainEntries = Object.keys(data.domains).map(function (name) {
-      var d = data.domains[name];
-      return { name: name, correct: d.correct, total: d.total, pct: d.total > 0 ? (d.correct / d.total) : 0 };
-    });
-    domainEntries.sort(function (a, b) { return b.pct - a.pct; });
-
-    var domainsEl = document.getElementById('sr-domains');
-    domainsEl.innerHTML = '';
-    domainEntries.forEach(function (d, i) {
-      var cls = '';
-      if (domainEntries.length > 1 && i === 0) cls = 'strong';
-      else if (domainEntries.length > 1 && i === domainEntries.length - 1) cls = 'weak';
-      domainsEl.appendChild(srBarRow(d.name, d.correct, d.total, cls));
-    });
-
-    var narrative;
-    var first = currentStudent.name.split(' ')[0];
-    if (domainEntries.length >= 2) {
-      var best = domainEntries[0];
-      var worst = domainEntries[domainEntries.length - 1];
-      narrative = first + ' is strongest in ' + best.name + ' (' + Math.round(best.pct * 100) + '% correct) — that\'s an area to keep sharp with light, ongoing review. ' +
-        'The clearest opportunity to gain points quickly is ' + worst.name + ' (' + Math.round(worst.pct * 100) + '% correct); targeted practice here typically moves the overall score the fastest. ' +
-        'The plan we build going forward will weight time accordingly.';
-    } else if (domainEntries.length === 1) {
-      narrative = first + ' scored ' + Math.round(domainEntries[0].pct * 100) + '% in ' + domainEntries[0].name + '. We\'ll use this as the baseline for the plan going forward.';
-    } else {
-      narrative = 'This baseline will anchor the study plan going forward.';
-    }
-    document.getElementById('sr-narrative').textContent = narrative;
-
-    reportEl.style.display = 'block';
-  }
-
-  var srPrintBtn = document.getElementById('sr-print-btn');
-  if (srPrintBtn) srPrintBtn.addEventListener('click', function () { window.print(); });
 
   var diagnosticSubmitted = false;
   function finishDiagnostic() {
@@ -1002,10 +915,12 @@
     progFill.style.width = '100%';
     progLabel.textContent = 'Complete';
 
-    completedSections.push({ key: activeSectionKeys[sectionIndex], label: SECTION_BANKS[activeSectionKeys[sectionIndex]].label, answers: answers });
+    completedSections.push({ key: activeSectionKeys[sectionIndex], label: SECTION_BANKS[activeSectionKeys[sectionIndex]].label, answers: canonical(answers), marked: canonical(marked) });
     clearState(); // the diagnostic is over either way — nothing left to resume
 
     var domains = {};
+    var skills = {};
+    var markedTotal = 0, markedCorrect = 0, skippedCount = 0;
     var totalCorrect = 0;
     var totalQuestions = 0;
     var lines = [];
@@ -1025,9 +940,17 @@
         if (!domains[q.domain]) domains[q.domain] = { correct: 0, total: 0 };
         domains[q.domain].total++;
         if (correct) domains[q.domain].correct++;
+        var skillName = q.skill || q.domain;
+        var skillKey = q.domain + ' \u2192 ' + skillName;
+        if (!skills[skillKey]) skills[skillKey] = { correct: 0, total: 0 };
+        skills[skillKey].total++;
+        if (correct) skills[skillKey].correct++;
 
+        var wasMarked = sec.marked && sec.marked[i];
+        if (wasMarked) { markedTotal++; if (correct) markedCorrect++; }
+        if (given === null || given === undefined) skippedCount++;
         var givenText = (given === null || given === undefined) ? '(skipped)' : (q.type === 'mc' ? LETTERS[given] : given.raw);
-        lines.push('  ' + (i + 1) + '. [' + q.domain + '] answered ' + givenText + ' — ' + (correct ? 'correct' : 'incorrect'));
+        lines.push('  ' + (i + 1) + '. [' + q.domain + ' \u2192 ' + skillName + '] answered ' + givenText + ' \u2014 ' + (correct ? 'correct' : 'incorrect') + (wasMarked ? ' (marked for review)' : ''));
       });
       sectionSummaryLines.push('  - ' + sec.label + ': ' + secCorrect + ' / ' + qs.length);
       sectionResults.push({ label: sec.label, correct: secCorrect, total: qs.length });
@@ -1047,25 +970,32 @@
       reportLines.push('  - ' + d + ': ' + s.correct + ' / ' + s.total + ' (' + Math.round((s.correct / s.total) * 100) + '%)');
     });
     reportLines.push('');
+    reportLines.push('By question type (exact points of fault):');
+    Object.keys(skills).sort().forEach(function (k) {
+      var sk = skills[k];
+      reportLines.push('  - ' + k + ': ' + sk.correct + ' / ' + sk.total + ' (' + Math.round((sk.correct / sk.total) * 100) + '%)');
+    });
+    reportLines.push('');
     reportLines.push('Question-by-question:');
     reportLines = reportLines.concat(lines);
     var report = reportLines.join('\n');
 
     document.getElementById('done-message').textContent =
-      'Your results just went to Luca — no need to send anything yourself. He\'ll follow up with a plan built around exactly where you need it.';
+      'Your results just went to Luca — no need to send anything yourself.';
     var statusEl = document.getElementById('done-status');
     statusEl.textContent = 'Sending your results…';
     statusEl.classList.remove('err');
     show('screen-done');
 
-    renderScoreReport({
-      studentName: currentStudent.name,
-      testChoice: testChoice,
-      totalCorrect: totalCorrect,
-      totalQuestions: totalQuestions,
-      sectionResults: sectionResults,
-      domains: domains
-    });
+    var payload = {
+      n: currentStudent.name, k: currentStudent.key, t: testChoice,
+      dt: new Date().toISOString().slice(0, 10),
+      s: completedSections.map(function (sec) { return { k: sec.key, a: sec.answers, m: (sec.marked || []).map(function (x) { return x ? 1 : 0; } ) }; })
+    };
+    var reportLink = '';
+    try {
+      reportLink = 'https://morettitutoring.com/portal/report.html#d=' + btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+    } catch (e) { reportLink = '(link generation failed — raw data below)'; }
 
     if (!emailjsAvailable) {
       statusEl.textContent = 'Couldn\'t reach the email service from this browser. Please text Luca at (201) 275-2791 with your key (' + currentStudent.key + ') and score (' + totalCorrect + '/' + totalQuestions + ') so he can follow up.';
@@ -1079,7 +1009,7 @@
         from_email: 'portal@morettitutoring.com',
         town: '',
         subject: testChoice + ' Diagnostic — ' + currentStudent.name + ' — ' + totalCorrect + '/' + totalQuestions,
-        message: report
+        message: 'FULL PDF REPORT — open this link, review, then Print / Save as PDF:\n' + reportLink + '\n\n' + report
       }).then(function () {
         statusEl.textContent = 'Results delivered.';
       }, function () {
@@ -1110,9 +1040,14 @@
         activeSectionKeys = state.activeSectionKeys;
         completedSections = Array.isArray(state.completedSections) ? state.completedSections : [];
         sectionIndex = typeof state.sectionIndex === 'number' ? state.sectionIndex : 0;
-        var qs = activeQuestions();
+        var bank = SECTION_BANKS[activeSectionKeys[sectionIndex]].questions;
+        qOrder = (Array.isArray(state.qOrder) && state.qOrder.length === bank.length) ? state.qOrder : shuffledOrder(bank.length);
+        currentQs = qOrder.map(function (i) { return bank[i]; });
+        var qs = currentQs;
         if (Array.isArray(state.answers) && state.answers.length === qs.length) {
           answers = state.answers;
+          marked = (Array.isArray(state.marked) && state.marked.length === qs.length) ? state.marked : new Array(qs.length).fill(false);
+          elims = (Array.isArray(state.elims) && state.elims.length === qs.length) ? state.elims : new Array(qs.length).fill(null).map(function () { return []; });
           current = Math.min(Math.max(state.current || 0, 0), qs.length - 1);
           document.getElementById('dx-student-label').textContent = currentStudent.name;
           document.getElementById('dx-brand-label').textContent = testChoice + ' Diagnostic — ' + SECTION_BANKS[activeSectionKeys[sectionIndex]].label;

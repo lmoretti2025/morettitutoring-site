@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diagnostic Report — Moretti Test Prep &amp; Tutoring</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="../favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caladea:wght@700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --red:#B0271C; --gold:#C9A84C; --ink:#1a1a1a; --mid:rgba(17,17,17,0.6); --faint:rgba(17,17,17,0.32); --border:rgba(17,17,17,0.12); --bg:#f7f4ef; --green:#5E8B6F; --tan:#A97C50; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Poppins', sans-serif; font-weight: 300; color: var(--ink); background: #e8e4dc; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .page { width: 8.5in; min-height: 11in; margin: 24px auto; background: #fff; padding: 0.6in 0.65in; box-shadow: 0 10px 40px rgba(0,0,0,0.15); }
+  .toolbar { max-width: 8.5in; margin: 16px auto 0; display: flex; justify-content: flex-end; gap: 10px; }
+  .toolbar button { background: var(--red); color: #fff; border: none; font-family: 'Poppins'; font-weight: 600; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; padding: 10px 22px; cursor: pointer; }
+  .hdr { display: flex; align-items: center; gap: 16px; border-bottom: 3px solid var(--red); padding-bottom: 14px; margin-bottom: 18px; }
+  .hdr img { height: 40px; }
+  .hdr h1 { font-family: 'Caladea', Georgia, serif; font-size: 19px; }
+  .hdr p { font-size: 11px; color: var(--mid); }
+  .top { display: flex; gap: 24px; align-items: center; margin-bottom: 18px; }
+  .donut-wrap { text-align: center; }
+  .donut-label { font-size: 9px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); margin-top: 4px; }
+  .sec-hed { font-size: 10.5px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mid); border-bottom: 1px solid var(--border); padding-bottom: 5px; margin: 16px 0 10px; }
+  .cols { display: flex; gap: 26px; }
+  .col { flex: 1; }
+  .bar-row { margin-bottom: 8px; }
+  .bar-label { display: flex; justify-content: space-between; font-size: 10.5px; font-weight: 600; margin-bottom: 3px; }
+  .bar-track { height: 7px; background: #eee7da; border-radius: 4px; overflow: hidden; }
+  .bar-fill { height: 100%; background: var(--gold); border-radius: 4px; }
+  .bar-fill.weak { background: var(--red); }
+  .bar-fill.strong { background: var(--green); }
+  .pie-flex { display: flex; align-items: center; gap: 18px; }
+  .legend { font-size: 10px; }
+  .legend div { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+  .legend span.sw { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+  .takeaways { list-style: none; }
+  .takeaways li { font-size: 11px; line-height: 1.65; color: var(--mid); padding: 4px 0 4px 16px; position: relative; }
+  .takeaways li::before { content: '◆'; position: absolute; left: 0; top: 8px; font-size: 6px; color: var(--gold); }
+  .takeaways strong { color: var(--ink); }
+  .takeaways .r { color: var(--red); font-weight: 700; }
+  .ftr { border-top: 1px solid var(--border); margin-top: 18px; padding-top: 8px; font-size: 9.5px; color: var(--faint); display: flex; justify-content: space-between; }
+  table { width: 100%; border-collapse: collapse; font-size: 9.5px; }
+  th { text-align: left; font-size: 8.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); border-bottom: 2px solid var(--red); padding: 4px 6px; }
+  td { padding: 3.5px 6px; border-bottom: 1px solid #eee7da; color: var(--mid); }
+  td.ok { color: var(--green); font-weight: 600; }
+  td.bad { color: var(--red); font-weight: 600; }
+  .raw-hed { font-family: 'Caladea', serif; font-size: 16px; margin-bottom: 4px; }
+  .raw-sub { font-size: 11px; color: var(--mid); margin-bottom: 14px; }
+  #err { max-width: 700px; margin: 80px auto; text-align: center; font-size: 14px; color: var(--mid); display: none; }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; box-shadow: none; width: auto; min-height: auto; padding: 0.35in 0.4in; }
+    .toolbar { display: none; }
+    .pagebreak { page-break-before: always; }
+  }
+</style>
+</head>
+<body>
+<div id="err">Couldn't read the report data from this link. Make sure the full link was copied from the results email.</div>
+<div class="toolbar"><button onclick="window.print()">Print / Save as PDF</button></div>
+<div class="page" id="page1" style="display:none;">
+  <div class="hdr">
+    <img src="../logo-caladea-dark.png" alt="Moretti Test Prep &amp; Tutoring">
+    <div>
+      <h1 id="r-title"></h1>
+      <p id="r-sub"></p>
+    </div>
+  </div>
+  <div class="top" id="donuts"></div>
+  <div class="cols">
+    <div class="col">
+      <div class="sec-hed">Where the missed points live</div>
+      <div class="pie-flex"><canvas id="pie" width="150" height="150"></canvas><div class="legend" id="pie-legend"></div></div>
+      <div class="sec-hed">Skill areas</div>
+      <div id="domains"></div>
+    </div>
+    <div class="col">
+      <div class="sec-hed">Priority areas — fastest score gains</div>
+      <div id="priorities"></div>
+      <div class="sec-hed">Strengths — keep sharp</div>
+      <div id="strengths"></div>
+    </div>
+  </div>
+  <div class="sec-hed">What this tells us</div>
+  <ul class="takeaways" id="takeaways"></ul>
+  <div class="ftr"><span>Moretti Test Prep &amp; Tutoring · Cranford, NJ · (201) 275-2791 · morettitutoring.com</span><span>Page 1 of 2</span></div>
+</div>
+
+<div class="page pagebreak" id="page2" style="display:none;">
+  <div class="hdr">
+    <img src="../logo-caladea-dark.png" alt="Moretti Test Prep &amp; Tutoring">
+    <div><h1>Raw Data</h1><p id="r-sub2"></p></div>
+  </div>
+  <div class="raw-hed" id="raw-score"></div>
+  <p class="raw-sub" id="raw-sections"></p>
+  <div id="raw-tables"></div>
+  <div class="ftr"><span>Moretti Test Prep &amp; Tutoring · Cranford, NJ · (201) 275-2791</span><span>Page 2 of 2</span></div>
+</div>
+
+<script src="banks.js"></script>
+<script>
+(function () {
+  'use strict';
+  var LETTERS = ['A', 'B', 'C', 'D'];
+  function fail() { document.getElementById('err').style.display = 'block'; }
+
+  var data;
+  try {
+    var raw = location.hash.replace(/^#d=/, '');
+    data = JSON.parse(decodeURIComponent(escape(atob(raw))));
+  } catch (e) { fail(); return; }
+  if (!data || !data.s || !window.SECTION_BANKS) { fail(); return; }
+
+  function isCorrect(q, given) {
+    if (given === null || given === undefined) return false;
+    if (q.type === 'mc') return given === q.correct;
+    var v = (typeof given === 'object') ? given.value : null;
+    if (v === null && typeof given === 'object') {
+      var str = (given.raw || '').trim();
+      if (str.indexOf('/') !== -1) { var p = str.split('/'); v = parseFloat(p[0]) / parseFloat(p[1]); }
+      else v = parseFloat(str.replace(/[^0-9.\-]/g, ''));
+    }
+    return v !== null && !isNaN(v) && Math.abs(v - q.answer) < 0.05;
+  }
+
+  var totalC = 0, totalQ = 0, domains = {}, skills = {}, sections = [], markedT = 0, markedC = 0, skipped = 0;
+  data.s.forEach(function (sec) {
+    var bank = window.SECTION_BANKS[sec.k];
+    if (!bank) return;
+    var qs = bank.questions, c = 0, rows = [];
+    qs.forEach(function (q, i) {
+      var given = sec.a[i];
+      var ok = isCorrect(q, given);
+      var wasMarked = sec.m && sec.m[i];
+      if (ok) { c++; totalC++; }
+      totalQ++;
+      if (given === null || given === undefined) skipped++;
+      if (wasMarked) { markedT++; if (ok) markedC++; }
+      var dom = q.domain, sk = q.skill || q.domain;
+      (domains[dom] = domains[dom] || { c: 0, t: 0 }).t++; if (ok) domains[dom].c++;
+      (skills[sk] = skills[sk] || { c: 0, t: 0, dom: dom }).t++; if (ok) skills[sk].c++;
+      var gTxt = (given === null || given === undefined) ? '—' : (q.type === 'mc' ? LETTERS[given] : (given.raw || String(given)));
+      rows.push({ n: i + 1, dom: dom, sk: sk, given: gTxt, ok: ok, marked: !!wasMarked });
+    });
+    sections.push({ label: bank.label.replace(' (optional on the real ACT)', ''), c: c, t: qs.length, rows: rows });
+  });
+
+  var pct = totalQ ? Math.round(totalC / totalQ * 100) : 0;
+  var first = (data.n || 'Student').split(' ')[0];
+  var dateStr = data.dt || new Date().toISOString().slice(0, 10);
+
+  document.getElementById('r-title').textContent = data.n + ' — ' + data.t + ' Diagnostic Report';
+  document.getElementById('r-sub').textContent = 'Administered ' + dateStr + ' · Moretti student portal · Key: ' + (data.k || '');
+  document.getElementById('r-sub2').textContent = data.n + ' · ' + data.t + ' Diagnostic · ' + dateStr;
+
+  /* donuts: overall + each section */
+  function donut(label, c, t, big) {
+    var size = big ? 120 : 92, r = size / 2 - 9, cx = size / 2;
+    var wrap = document.createElement('div');
+    wrap.className = 'donut-wrap';
+    var cv = document.createElement('canvas');
+    cv.width = size; cv.height = size;
+    wrap.appendChild(cv);
+    var lb = document.createElement('div');
+    lb.className = 'donut-label';
+    lb.textContent = label + ' · ' + c + '/' + t;
+    wrap.appendChild(lb);
+    var ctx = cv.getContext('2d');
+    var p = t ? c / t : 0;
+    ctx.lineWidth = big ? 13 : 10;
+    ctx.strokeStyle = '#eee7da';
+    ctx.beginPath(); ctx.arc(cx, cx, r, 0, Math.PI * 2); ctx.stroke();
+    ctx.strokeStyle = p < 0.5 ? '#B0271C' : (p >= 0.75 ? '#5E8B6F' : '#C9A84C');
+    ctx.beginPath(); ctx.arc(cx, cx, r, -Math.PI / 2, -Math.PI / 2 + p * Math.PI * 2); ctx.stroke();
+    ctx.fillStyle = '#1a1a1a';
+    ctx.font = '700 ' + (big ? 24 : 17) + 'px Poppins, sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(Math.round(p * 100) + '%', cx, cx);
+    return wrap;
+  }
+  var donuts = document.getElementById('donuts');
+  donuts.appendChild(donut('Overall', totalC, totalQ, true));
+  sections.forEach(function (s2) { donuts.appendChild(donut(s2.label, s2.c, s2.t, false)); });
+
+  /* pie: share of total misses by domain */
+  var missEntries = Object.keys(domains).map(function (d) { return { name: d, miss: domains[d].t - domains[d].c }; }).filter(function (e) { return e.miss > 0; });
+  missEntries.sort(function (a, b) { return b.miss - a.miss; });
+  var totalMiss = missEntries.reduce(function (a, e) { return a + e.miss; }, 0);
+  var palette = ['#B0271C', '#C9A84C', '#243447', '#A97C50', '#5E8B6F', '#7a7a7a', '#d98c76', '#8888b0'];
+  var pieCtx = document.getElementById('pie').getContext('2d');
+  var ang = -Math.PI / 2;
+  missEntries.forEach(function (e, i) {
+    var slice = totalMiss ? (e.miss / totalMiss) * Math.PI * 2 : 0;
+    pieCtx.fillStyle = palette[i % palette.length];
+    pieCtx.beginPath(); pieCtx.moveTo(75, 75); pieCtx.arc(75, 75, 68, ang, ang + slice); pieCtx.closePath(); pieCtx.fill();
+    ang += slice;
+  });
+  var legend = document.getElementById('pie-legend');
+  missEntries.forEach(function (e, i) {
+    var d2 = document.createElement('div');
+    d2.innerHTML = '<span class="sw" style="background:' + palette[i % palette.length] + '"></span>' + e.name + ' — ' + e.miss + ' missed (' + Math.round(e.miss / totalMiss * 100) + '%)';
+    legend.appendChild(d2);
+  });
+  if (!missEntries.length) legend.innerHTML = '<div>No questions missed.</div>';
+
+  function barRow(label, c, t, cls) {
+    var p2 = t ? Math.round(c / t * 100) : 0;
+    var row = document.createElement('div');
+    row.className = 'bar-row';
+    row.innerHTML = '<div class="bar-label"><span>' + label + '</span><span>' + c + '/' + t + ' (' + p2 + '%)</span></div><div class="bar-track"><div class="bar-fill ' + (cls || '') + '" style="width:' + p2 + '%"></div></div>';
+    return row;
+  }
+  var domEl = document.getElementById('domains');
+  Object.keys(domains).forEach(function (d) {
+    var v = domains[d], pp = v.c / v.t;
+    domEl.appendChild(barRow(d, v.c, v.t, pp < 0.5 ? 'weak' : (pp >= 0.75 ? 'strong' : '')));
+  });
+
+  var skillEntries = Object.keys(skills).map(function (k) { var v = skills[k]; return { name: k, c: v.c, t: v.t, pct: v.t ? v.c / v.t : 0 }; });
+  skillEntries.sort(function (a, b) { return a.pct - b.pct; });
+  var priorities = skillEntries.filter(function (e) { return e.pct < 0.7; }).slice(0, 7);
+  var strengths = skillEntries.filter(function (e) { return e.pct >= 0.75 && e.t >= 2; }).sort(function (a, b) { return b.pct - a.pct; }).slice(0, 5);
+  var priEl = document.getElementById('priorities');
+  priorities.forEach(function (e) { priEl.appendChild(barRow(e.name, e.c, e.t, 'weak')); });
+  if (!priorities.length) priEl.innerHTML = '<p style="font-size:11px;color:var(--mid);">No major weak areas.</p>';
+  var strEl = document.getElementById('strengths');
+  strengths.forEach(function (e) { strEl.appendChild(barRow(e.name, e.c, e.t, 'strong')); });
+  if (!strengths.length) strEl.innerHTML = '<p style="font-size:11px;color:var(--mid);">Strengths appear here at 75%+.</p>';
+
+  var take = [];
+  take.push('<strong>' + first + ' answered ' + totalC + ' of ' + totalQ + ' correctly (' + pct + '%).</strong> A starting point, not a verdict — this report shows exactly where the missing points live.');
+  var domEntries = Object.keys(domains).map(function (d) { return { name: d, pct: domains[d].c / domains[d].t }; }).sort(function (a, b) { return b.pct - a.pct; });
+  if (domEntries.length > 1) take.push('Strongest area: <strong>' + domEntries[0].name + '</strong> (' + Math.round(domEntries[0].pct * 100) + '%) — stays sharp with light review.');
+  priorities.slice(0, 2).forEach(function (p3) {
+    var share = Math.round(p3.t / totalQ * 100);
+    take.push('<span class="r">' + p3.name + ':</span> ' + p3.c + '/' + p3.t + ' correct (' + Math.round(p3.pct * 100) + '%). About <strong>' + share + '%</strong> of the test — recovering the ' + (p3.t - p3.c) + ' missed here moves the score fastest.');
+  });
+  if (markedT > 0) {
+    take.push(markedC / markedT >= 0.6
+      ? first + ' flagged <strong>' + markedT + '</strong> questions as uncertain and got <strong>' + markedC + '</strong> right — under-confidence, not missing skills. Coachable.'
+      : first + ' flagged <strong>' + markedT + '</strong> questions as uncertain, mostly missed — accurate self-awareness; those topics lead the plan.');
+  }
+  if (skipped > 0) take.push('<strong>' + skipped + '</strong> unanswered — pacing and guessing strategy are part of the plan.');
+  take.push('Luca weights session time toward the priority areas above, with re-checks to confirm each is closed.');
+  document.getElementById('takeaways').innerHTML = take.map(function (t2) { return '<li>' + t2 + '</li>'; }).join('');
+
+  /* page 2 — raw data */
+  document.getElementById('raw-score').textContent = 'Raw score: ' + totalC + ' / ' + totalQ + ' (' + pct + '%)';
+  document.getElementById('raw-sections').textContent = sections.map(function (s3) { return s3.label + ' ' + s3.c + '/' + s3.t; }).join(' · ') + (markedT ? ' · Marked for review: ' + markedT : '') + (skipped ? ' · Skipped: ' + skipped : '');
+  var twrap = document.getElementById('raw-tables');
+  sections.forEach(function (s4) {
+    var h = document.createElement('div');
+    h.className = 'sec-hed';
+    h.textContent = s4.label;
+    twrap.appendChild(h);
+    var tb = document.createElement('table');
+    tb.innerHTML = '<tr><th>#</th><th>Skill</th><th>Answer</th><th>Result</th><th>Flagged</th></tr>' +
+      s4.rows.map(function (r) {
+        return '<tr><td>' + r.n + '</td><td>' + r.dom + ' → ' + r.sk + '</td><td>' + r.given + '</td><td class="' + (r.ok ? 'ok' : 'bad') + '">' + (r.ok ? 'Correct' : 'Incorrect') + '</td><td>' + (r.marked ? '⚑' : '') + '</td></tr>';
+      }).join('');
+    twrap.appendChild(tb);
+  });
+
+  document.getElementById('page1').style.display = 'block';
+  document.getElementById('page2').style.display = 'block';
+})();
+</script>
+</body>
+</html>
