@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Portal — Moretti Test Prep &amp; Tutoring</title>
+<meta name="robots" content="noindex">
+<link rel="canonical" href="https://morettitutoring.com/portal">
+<link rel="icon" type="image/png" sizes="512x512" href="../target-icon-white.png">
+<link rel="icon" href="../favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caladea:wght@700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<style>
+  /* =====================================================================
+     MORETTI STUDENT PORTAL
+     ---------------------------------------------------------------------
+     HOW TO ADD A NEW STUDENT (no coding needed):
+     Scroll down to the "STUDENTS" object further down this file. Add one
+     line per student, following the exact pattern of the example already
+     there:
+
+         'KEYGOESHERE': { name: 'Student Name', driveFolderUrl: 'https://drive.google.com/...' },
+
+     - The key (left side, in quotes) is the private code you hand the
+       student. Anything works — e.g. 'JSMITH26'. Keep it unique per student.
+     - driveFolderUrl is the link to that student's personal Google Drive
+       folder. Leave it as an empty string '' if you haven't set one up
+       yet — the portal will show a friendly "not ready yet" message
+       instead of a broken link.
+     ===================================================================== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --red:    #B0271C;
+    --bg:     #f7f4ef;
+    --white:  #ffffff;
+    --text:   #111111;
+    --mid:    rgba(17,17,17,0.58);
+    --faint:  rgba(17,17,17,0.28);
+    --border: rgba(17,17,17,0.12);
+    --gold:   #C9A84C;
+    --hel:    'Poppins', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    --serif:  Georgia, 'Times New Roman', serif;
+    --display: 'Caladea', Georgia, serif;
+  }
+
+  html, body { height: 100%; }
+  body { background: var(--bg); color: var(--text); font-family: var(--hel); font-weight: 300; -webkit-font-smoothing: antialiased; overflow-x: hidden; min-height: 100vh; }
+
+  #main-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 300; padding: 0.85rem 2.5rem; display: flex; align-items: center; justify-content: space-between; background: var(--red); }
+  .nav-logo-link { display: block; line-height: 0; }
+  .nav-logo-img { height: 36px; width: auto; display: block; }
+  .nav-exit { font-family: var(--hel); font-size: 0.65rem; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: #fff; text-decoration: none; border: 1px solid rgba(255,255,255,0.5); padding: 0.5rem 1.3rem; white-space: nowrap; transition: background 0.2s; }
+  .nav-exit:hover { background: rgba(255,255,255,0.18); border-color: #fff; }
+
+  .screen { display: none; min-height: 100vh; padding: 9rem 1.5rem 4rem; align-items: center; justify-content: center; }
+  .screen.active { display: flex; }
+
+  .panel { width: 100%; max-width: 460px; }
+  .panel-wide { width: 100%; max-width: 760px; }
+  .kicker { display: flex; align-items: center; gap: 0.45rem; font-size: 0.58rem; font-weight: 600; letter-spacing: 0.24em; text-transform: uppercase; color: var(--red); margin-bottom: 1.25rem; justify-content: center; }
+  .kicker::before { content: '◆'; font-size: 0.4rem; }
+  .panel-hed { font-family: var(--display); font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 700; color: var(--text); text-align: center; margin-bottom: 0.75rem; line-height: 1.3; }
+  .panel-sub { font-size: 0.88rem; color: var(--mid); text-align: center; line-height: 1.75; margin-bottom: 2.25rem; }
+
+  /* ═══ KEY SCREEN ═══ */
+  .key-input { width: 100%; font-family: var(--hel); font-size: 1rem; letter-spacing: 0.06em; text-align: center; text-transform: uppercase; padding: 1.05rem 1.2rem; border: 1px solid var(--border); background: var(--white); color: var(--text); margin-bottom: 1rem; }
+  .key-input:focus { outline: none; border-color: var(--red); }
+  .key-error { display: none; font-size: 0.78rem; color: var(--red); text-align: center; margin-bottom: 1rem; line-height: 1.6; }
+  .key-btn { display: block; width: 100%; background: var(--red); color: #fff; font-family: var(--hel); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; padding: 1.05rem; border: none; cursor: pointer; transition: opacity 0.2s; }
+  .key-btn:hover { opacity: 0.86; }
+  .key-help { font-size: 0.75rem; color: var(--faint); text-align: center; margin-top: 1.5rem; line-height: 1.7; }
+
+  /* ═══ MENU SCREEN ═══ */
+  .menu-greeting { font-family: var(--display); font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 700; color: var(--text); text-align: center; margin-bottom: 0.6rem; }
+  .menu-sub { font-size: 0.88rem; color: var(--mid); text-align: center; margin-bottom: 2.5rem; }
+  .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+  .menu-card { background: var(--white); border: 1px solid var(--border); padding: 1.75rem 1.5rem; cursor: pointer; text-align: left; transition: border-color 0.2s ease, transform 0.2s ease; position: relative; overflow: hidden; }
+  .menu-card::before { content: ''; position: absolute; top: -1px; left: 0; width: 0; height: 2px; background: var(--red); transition: width 0.35s ease; }
+  .menu-card:hover { border-color: var(--gold); transform: translateY(-2px); }
+  .menu-card:hover::before { width: 100%; }
+  .menu-card-icon { font-family: var(--display); font-size: 1.5rem; color: var(--red); margin-bottom: 0.9rem; display: block; }
+  .menu-card-title { font-size: 0.98rem; font-weight: 700; color: var(--text); margin-bottom: 0.4rem; }
+  .menu-card-body { font-size: 0.78rem; line-height: 1.6; color: var(--mid); }
+  .menu-card-wide { grid-column: 1 / -1; display: flex; align-items: center; gap: 1.75rem; padding: 1.75rem 2rem; }
+  .menu-card-wide .menu-card-icon { margin-bottom: 0; flex-shrink: 0; }
+  .menu-card-wide .menu-card-title { margin-bottom: 0.3rem; }
+  .menu-card.disabled { cursor: default; opacity: 0.5; }
+  .menu-card.disabled:hover { border-color: var(--border); transform: none; }
+  .menu-card.disabled:hover::before { width: 0; }
+  .menu-card-coming-soon { position: absolute; top: 0.9rem; right: 0.9rem; font-size: 0.52rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); border: 1px solid var(--border); padding: 0.25rem 0.55rem; }
+  .menu-exit { display: block; text-align: center; margin-top: 2rem; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); text-decoration: none; }
+  .menu-exit:hover { color: var(--red); }
+
+  /* ═══ RESOURCES SCREEN ═══ */
+  .res-card { background: var(--white); border: 1px solid var(--border); padding: 2.75rem 2.5rem; text-align: center; }
+  .res-icon { font-size: 2rem; margin-bottom: 1.25rem; }
+  .res-drive-btn { display: inline-block; background: var(--red); color: #fff; font-family: var(--hel); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; padding: 1rem 2.2rem; text-decoration: none; margin-top: 0.5rem; transition: opacity 0.2s; }
+  .res-drive-btn:hover { opacity: 0.86; }
+  .res-drive-btn-outline { display: inline-block; background: transparent; color: var(--text); border: 1px solid var(--border); font-family: var(--hel); font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.7rem 1.4rem; text-decoration: none; margin-top: 0.85rem; transition: border-color 0.2s; }
+  .res-drive-btn-outline:hover { border-color: var(--red); color: var(--red); }
+  .res-pending { font-size: 0.85rem; color: var(--mid); line-height: 1.8; }
+  .res-embed { width: 100%; height: 420px; border: 1px solid var(--border); margin: 1.25rem 0 0.25rem; background: var(--bg); }
+  .menu-back-link { display: block; text-align: center; margin-top: 1.75rem; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); text-decoration: none; }
+  .menu-back-link:hover { color: var(--red); }
+
+  /* ═══ DIAGNOSTIC INTRO ═══ */
+  .intro-list { list-style: none; margin: 0 0 2.25rem; padding: 0; }
+  .intro-list li { font-size: 0.85rem; color: var(--mid); line-height: 1.9; padding-left: 1.4rem; position: relative; margin-bottom: 0.4rem; }
+  .intro-list li::before { content: '◆'; position: absolute; left: 0; top: 0.35rem; font-size: 0.45rem; color: var(--gold); }
+
+  /* ═══ DIAGNOSTIC SHELL (reuses portal top bar) ═══ */
+  #dx-screen.screen { display: none; align-items: stretch; padding: 0; min-height: 100vh; }
+  #dx-screen.active { display: flex; flex-direction: column; }
+  #dx-topbar { padding: 0.9rem 2rem; display: flex; align-items: center; justify-content: space-between; background: var(--red); margin-top: 62px; }
+  .dx-brand { font-family: var(--display); font-size: 0.95rem; font-weight: 700; color: #fff; }
+  .dx-brand span { display: block; font-family: var(--hel); font-size: 0.55rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.65); margin-top: 0.2rem; }
+  .dx-progress-wrap { display: flex; align-items: center; gap: 0.9rem; }
+  .dx-progress-track { width: 150px; height: 4px; background: rgba(255,255,255,0.25); }
+  .dx-progress-fill { height: 100%; width: 0%; background: var(--gold); transition: width 0.5s cubic-bezier(0.16,1,0.3,1); }
+  .dx-progress-label { font-size: 0.6rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.75); white-space: nowrap; }
+
+  #dx-shell { display: flex; flex: 1; }
+  #dx-main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 3rem 2.5rem; }
+  #dx-side { width: 260px; flex-shrink: 0; background: var(--white); border-left: 1px solid var(--border); padding: 2rem 1.4rem; display: flex; flex-direction: column; overflow-y: auto; }
+  .dx-side-hed { font-size: 0.54rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); margin-bottom: 1rem; }
+  .dx-qgrid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.4rem; margin-bottom: 1.5rem; }
+  .dx-qnum { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg); font-size: 0.68rem; font-weight: 600; color: var(--mid); cursor: pointer; transition: all 0.2s ease; position: relative; }
+  .dx-qnum:hover { border-color: var(--gold); }
+  .dx-qnum.current { background: var(--red); border-color: var(--red); color: #fff; }
+  .dx-qnum.answered:not(.current) { background: rgba(201,168,76,0.16); border-color: var(--gold); color: var(--text); }
+  .dx-side-note { font-size: 0.68rem; line-height: 1.65; color: var(--mid); margin-top: auto; padding-top: 1.25rem; border-top: 1px solid var(--border); }
+
+  .dx-card-wrap { width: 100%; max-width: 620px; }
+  .dx-card { opacity: 1; transform: translateY(0); transition: opacity 0.38s cubic-bezier(0.16,1,0.3,1), transform 0.38s cubic-bezier(0.16,1,0.3,1); }
+  .dx-card.fading { opacity: 0; transform: translateY(14px); }
+  .dx-mobile-jump { display: none; margin-bottom: 1.4rem; }
+  .dx-mobile-jump label { display: block; font-size: 0.54rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); margin-bottom: 0.5rem; }
+  .dx-mobile-jump select { width: 100%; font-family: var(--hel); font-size: 0.85rem; padding: 0.7rem 0.9rem; border: 1px solid var(--border); background: var(--white); color: var(--text); }
+  .dx-domain { display: inline-block; font-size: 0.56rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--red); margin-bottom: 1rem; }
+  .dx-qtext { font-family: var(--display); font-size: clamp(1.05rem, 1.9vw, 1.35rem); font-weight: 700; line-height: 1.5; color: var(--text); margin-bottom: 1.9rem; }
+  .dx-choices { display: flex; flex-direction: column; gap: 0.7rem; margin-bottom: 2rem; }
+  .dx-choice { display: flex; align-items: center; gap: 0.9rem; border: 1px solid var(--border); background: var(--white); padding: 0.85rem 1.1rem; cursor: pointer; transition: border-color 0.2s ease, background 0.2s ease; }
+  .dx-choice:hover { border-color: var(--gold); }
+  .dx-choice-letter { flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--faint); display: flex; align-items: center; justify-content: center; font-size: 0.68rem; font-weight: 700; color: var(--mid); transition: all 0.2s ease; }
+  .dx-choice-text { font-size: 0.88rem; color: var(--text); }
+  .dx-choice.selected { border-color: var(--red); background: rgba(176,39,28,0.05); }
+  .dx-choice.selected .dx-choice-letter { background: var(--red); border-color: var(--red); color: #fff; }
+
+  .dx-fr-row { display: flex; gap: 0.75rem; margin-bottom: 2rem; }
+  .dx-fr-input { flex: 1; font-family: var(--hel); font-size: 0.92rem; padding: 0.85rem 1.1rem; border: 1px solid var(--border); background: var(--white); color: var(--text); }
+  .dx-fr-input:focus { outline: none; border-color: var(--red); }
+  .dx-fr-submit { background: var(--red); color: #fff; font-family: var(--hel); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 0 1.4rem; border: none; cursor: pointer; transition: opacity 0.2s; }
+  .dx-fr-submit:hover { opacity: 0.86; }
+  .dx-fr-hint { font-size: 0.7rem; color: var(--faint); margin-top: -1.4rem; margin-bottom: 2rem; }
+
+  .dx-nav-row { display: flex; align-items: center; justify-content: space-between; }
+  .dx-btn { font-family: var(--hel); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.8rem 1.7rem; border: none; cursor: pointer; transition: opacity 0.2s ease; }
+  .dx-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .dx-btn-back { background: transparent; color: var(--mid); border: 1px solid var(--border); }
+  .dx-btn-back:hover:not(:disabled) { border-color: var(--text); color: var(--text); }
+  .dx-btn-next { background: var(--red); color: #fff; }
+  .dx-btn-next:hover:not(:disabled) { opacity: 0.86; }
+
+  /* ═══ DONE SCREEN ═══ */
+  .done-icon { font-size: 2.5rem; margin-bottom: 1.25rem; text-align: center; }
+  .done-status { font-size: 0.78rem; text-align: center; color: var(--gold); margin-top: 1.5rem; line-height: 1.7; }
+  .done-status.err { color: var(--red); }
+  .done-wrap { width: 100%; max-width: 760px; display: flex; flex-direction: column; align-items: center; gap: 2.5rem; }
+
+  /* ═══ SCORE REPORT — printable, parent-facing diagnostic breakdown ═══ */
+  .score-report { width: 100%; background: #fff; border: 1px solid var(--border); padding: 2.5rem 2.75rem; }
+  .sr-header { display: flex; align-items: center; gap: 1.25rem; border-bottom: 2px solid var(--red); padding-bottom: 1.5rem; margin-bottom: 1.75rem; }
+  .sr-logo { height: 34px; width: auto; }
+  .sr-title { font-family: var(--display); font-size: 1.3rem; font-weight: 700; color: var(--text); margin-bottom: 0.2rem; }
+  .sr-sub { font-size: 0.78rem; color: var(--mid); }
+  .sr-overall { text-align: center; margin-bottom: 2.25rem; }
+  .sr-overall-num { font-family: var(--serif); font-size: clamp(2.4rem, 5vw, 3.2rem); font-weight: 700; color: var(--red); line-height: 1; }
+  .sr-overall-label { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); margin-top: 0.4rem; }
+  .sr-block { margin-bottom: 2rem; }
+  .sr-block-hed { font-size: 0.66rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mid); margin-bottom: 1rem; }
+  .sr-bar-row { margin-bottom: 1rem; }
+  .sr-bar-label { display: flex; justify-content: space-between; font-size: 0.82rem; color: var(--text); margin-bottom: 0.4rem; }
+  .sr-bar-label span:last-child { color: var(--mid); font-size: 0.78rem; }
+  .sr-bar-track { height: 8px; background: rgba(17,17,17,0.08); }
+  .sr-bar-fill { height: 100%; background: var(--red); }
+  .sr-bar-fill.strong { background: #5E8B6F; }
+  .sr-bar-fill.weak { background: var(--gold); }
+  .sr-narrative-block { background: var(--bg); border-left: 3px solid var(--gold); padding: 1.25rem 1.5rem; }
+  .sr-narrative { font-size: 0.85rem; line-height: 1.8; color: var(--mid); }
+  .sr-footer { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; border-top: 1px solid var(--border); padding-top: 1.5rem; font-size: 0.7rem; color: var(--faint); }
+  .sr-print-btn { background: var(--text); color: #fff; border: none; font-family: var(--hel); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.75rem 1.4rem; cursor: pointer; transition: opacity 0.2s; }
+  .sr-print-btn:hover { opacity: 0.82; }
+
+  @media print {
+    body * { visibility: hidden; }
+    #score-report, #score-report * { visibility: visible; }
+    #score-report { display: block !important; position: absolute; left: 0; top: 0; width: 100%; border: none; padding: 0.5in; }
+    .sr-print-btn { display: none !important; }
+  }
+
+  @media (prefers-reduced-motion: reduce) { .reveal { transition: none; } }
+  @media (max-width: 760px) {
+    .menu-grid { grid-template-columns: 1fr; }
+    #dx-side { display: none; }
+    #dx-main { padding: 2.5rem 1.5rem; }
+    .dx-mobile-jump { display: block; }
+    .res-embed { height: 320px; }
+  }
+  #portal-fatal-error { display: none; position: fixed; inset: 0; background: var(--bg); z-index: 9999; align-items: center; justify-content: center; padding: 2rem; text-align: center; }
+  #portal-fatal-error .ferr-box { max-width: 440px; }
+  #portal-fatal-error h1 { font-family: var(--display); font-size: 1.4rem; color: var(--text); margin-bottom: 0.9rem; }
+  #portal-fatal-error p { font-family: var(--hel); font-size: 0.85rem; color: var(--mid); line-height: 1.85; }
+</style>
+</head>
+<body>
+
+<!-- If a hand-edit to the STUDENTS list below breaks the file (a missing
+     comma or quote mark is the usual culprit), this catches it and shows
+     a plain-English message instead of a blank white page. -->
+<div id="portal-fatal-error">
+  <div class="ferr-box">
+    <h1>Something went wrong loading the portal</h1>
+    <p>Most likely a typo in the STUDENTS list below (a missing comma or quote mark), or the page couldn't reach an external script it needs. Open <code>portal/index.html</code> and check your last edit, or send the detail below to Claude.</p>
+    <p id="ferr-detail" style="font-family: monospace; font-size: 0.72rem; color: var(--red); margin-top: 1rem; word-break: break-word;"></p>
+  </div>
+</div>
+<script>
+  window.addEventListener('error', function (e) {
+    var el = document.getElementById('portal-fatal-error');
+    var detail = document.getElementById('ferr-detail');
+    if (detail) detail.textContent = (e && e.message) ? e.message + (e.filename ? ' (' + e.filename.split('/').pop() + ':' + e.lineno + ')' : '') : '';
+    if (el) el.style.display = 'flex';
+  });
+</script>
+
+<!-- =====================================================================
+     STUDENT DIRECTORY — edit this to add/remove students. This lives in
+     its own script block on purpose: if you make a typo here, the rest of
+     the portal still loads and shows the friendly error above instead of
+     breaking completely.
+
+     Format:
+       'ACCESS KEY': {
+         name: 'Full Name',
+         driveFolderUrl: '...',        // "Your Files" — regular math/English/etc. materials
+         collegePrepFolderUrl: '...',  // "College Prep" — SAT/ACT + admissions/essay materials
+         tests: []                     // "SAT/ACT Tests" — generated tests, once that exists.
+       }                                  Each entry looks like { title: 'Practice Test 1', url: '...' }.
+
+     - The key (left side, in quotes) is the private code you hand the
+       student. Anything works — e.g. 'JSMITH26'. Keep it unique per student.
+     - Leave either folder URL as '' if you haven't set it up yet — the
+       portal shows a friendly "not ready yet" message instead of a
+       broken link. Same for tests: leave it as an empty array [].
+     ===================================================================== -->
+<script>
+  window.STUDENTS = {
+    'DEMO123': { name: 'Demo Student', driveFolderUrl: '', collegePrepFolderUrl: '', tests: [] },
+    'LCORCORAN26': { name: 'Lily Corcoran', driveFolderUrl: 'https://drive.google.com/drive/folders/1OUIP-e9pjcz2akbOX0UmJKaBDiUwYKRh?usp=sharing', collegePrepFolderUrl: '', tests: [] }
+    // 'JSMITH26': {
+    //   name: 'Jordan Smith',
+    //   driveFolderUrl: 'https://drive.google.com/drive/folders/XXXXXXXXXXXX',
+    //   collegePrepFolderUrl: 'https://drive.google.com/drive/folders/YYYYYYYYYYYY',
+    //   tests: [{ title: 'Practice Test 1', url: 'https://drive.google.com/...' }]
+    // },
+  };
+</script>
+
+<nav id="main-nav">
+  <a href="../index.html" class="nav-logo-link" id="nav-logo-exit"><img src="../logo-caladea-white.png" alt="Moretti Test Prep &amp; Tutoring" class="nav-logo-img"></a>
+  <a href="../index.html" class="nav-exit" id="nav-exit-link">Exit Portal</a>
+</nav>
+
+<!-- ═══ SCREEN 1 — ACCESS KEY ═══ -->
+<div class="screen active" id="screen-key">
+  <div class="panel">
+    <div class="kicker">Student Portal</div>
+    <h1 class="panel-hed">Enter your access key</h1>
+    <p class="panel-sub">Luca gave you a personal key when you signed up. Enter it below to get started.</p>
+    <input type="text" class="key-input" id="key-input" placeholder="ACCESS KEY" autocomplete="off" autocapitalize="characters">
+    <p class="key-error" id="key-error">That key wasn't recognized. Double-check it, or text Luca at (201) 275-2791.</p>
+    <button class="key-btn" id="key-submit">Continue</button>
+    <p class="key-help">Don't have a key yet? Call or text Luca at (201) 275-2791 to get set up.</p>
+  </div>
+</div>
+
+<!-- ═══ SCREEN 2 — MENU ═══ -->
+<div class="screen" id="screen-menu">
+  <div class="panel-wide">
+    <div class="kicker">Welcome</div>
+    <h1 class="menu-greeting" id="menu-greeting">Hey there.</h1>
+    <p class="menu-sub">What are you working on right now?</p>
+    <div class="menu-grid">
+      <div class="menu-card disabled" data-route="diagnostic">
+        <span class="menu-card-coming-soon">Coming Soon</span>
+        <span class="menu-card-icon">01</span>
+        <div class="menu-card-title">SAT/ACT Diagnostics</div>
+        <div class="menu-card-body">Take the hand-curated diagnostic so Luca can build your plan around real data.</div>
+      </div>
+      <div class="menu-card disabled" data-route="tests">
+        <span class="menu-card-coming-soon">Coming Soon</span>
+        <span class="menu-card-icon">02</span>
+        <div class="menu-card-title">SAT/ACT Tests</div>
+        <div class="menu-card-body">Full-length practice tests, generated just for you.</div>
+      </div>
+      <div class="menu-card menu-card-wide" data-route="files">
+        <span class="menu-card-icon">03</span>
+        <div>
+          <div class="menu-card-title">Your Files</div>
+          <div class="menu-card-body">Worksheets, practice sets, and materials for anything you're working on with Luca right now.</div>
+        </div>
+      </div>
+    </div>
+    <a href="#" class="menu-exit" id="menu-logout">&larr; Use a different key</a>
+  </div>
+</div>
+
+<!-- ═══ SCREEN 3 — RESOURCES (Drive lookup — used for both "Your Files" and "College Prep") ═══ -->
+<div class="screen" id="screen-resources">
+  <div class="panel-wide">
+    <div class="res-card">
+      <div class="res-icon">🗂️</div>
+      <h1 class="panel-hed" id="res-title" style="margin-bottom:1rem;">Your Files</h1>
+      <div id="res-body"></div>
+    </div>
+    <a href="#" class="menu-back-link" id="res-back">&larr; Back to menu</a>
+  </div>
+</div>
+
+<!-- ═══ SCREEN 3b — SAT/ACT TESTS (placeholder for the generated-test system) ═══ -->
+<div class="screen" id="screen-tests">
+  <div class="panel-wide">
+    <div class="res-card">
+      <div class="res-icon">📝</div>
+      <h1 class="panel-hed" style="margin-bottom:1rem;">SAT/ACT Tests</h1>
+      <div id="tests-body"></div>
+    </div>
+    <a href="#" class="menu-back-link" id="tests-back">&larr; Back to menu</a>
+  </div>
+</div>
+
+<!-- ═══ SCREEN 3c — CHOOSE SAT OR ACT ═══ -->
+<div class="screen" id="screen-test-choice">
+  <div class="panel">
+    <div class="kicker">SAT / ACT Diagnostic</div>
+    <h1 class="panel-hed">Which test are you prepping for?</h1>
+    <p class="panel-sub">The sections and the order you'll see them in match the real test.</p>
+    <div style="display:flex; flex-direction:column; gap:0.9rem; margin-bottom:0.5rem;">
+      <button class="key-btn" id="choose-sat" type="button">SAT</button>
+      <button class="key-btn" id="choose-act" type="button" style="background:var(--text);">ACT</button>
+    </div>
+    <a href="#" class="menu-back-link" id="test-choice-back">&larr; Back to menu</a>
+  </div>
+</div>
+
+<!-- ═══ SCREEN 4 — DIAGNOSTIC SECTION INTRO (shown before each section) ═══ -->
+<div class="screen" id="screen-intro">
+  <div class="panel">
+    <div class="kicker" id="intro-kicker">SAT Diagnostic</div>
+    <h1 class="panel-hed" id="intro-hed">Math section — 60 questions.</h1>
+    <p class="panel-sub">No pressure — this just tells Luca where to focus. Take your time.</p>
+    <ul class="intro-list">
+      <li>Calculator allowed on every question.</li>
+      <li>Most questions are multiple choice; a few ask you to type in a number.</li>
+      <li>You can jump between questions using the panel on the right, and come back to anything.</li>
+      <li>Your results go straight to Luca — no need to send anything yourself.</li>
+    </ul>
+    <button class="key-btn" id="intro-start">Start This Section</button>
+    <a href="#" class="menu-back-link" id="intro-back">&larr; Back to menu</a>
+  </div>
+</div>
+
+<!-- ═══ SCREEN 5 — DIAGNOSTIC ═══ -->
+<div class="screen" id="dx-screen">
+  <div id="dx-topbar">
+    <div class="dx-brand"><span id="dx-brand-label">SAT Diagnostic — Math</span><span id="dx-student-label"></span></div>
+    <div class="dx-progress-wrap">
+      <span class="dx-progress-label" id="dx-progress-label">Question 1 of 60</span>
+      <div class="dx-progress-track"><div class="dx-progress-fill" id="dx-progress-fill"></div></div>
+    </div>
+  </div>
+  <div id="dx-shell">
+    <div id="dx-main">
+      <div class="dx-card-wrap">
+        <div class="dx-card" id="dx-card">
+          <div class="dx-mobile-jump">
+            <label for="dx-jump-select">Jump to question</label>
+            <select id="dx-jump-select"></select>
+          </div>
+          <span class="dx-domain" id="dx-domain"></span>
+          <h1 class="dx-qtext" id="dx-qtext"></h1>
+          <div class="dx-choices" id="dx-choices" style="display:none;"></div>
+          <div class="dx-fr-row" id="dx-fr-row" style="display:none;">
+            <input type="text" class="dx-fr-input" id="dx-fr-input" placeholder="Type your answer">
+            <button class="dx-fr-submit" id="dx-fr-submit">Enter</button>
+          </div>
+          <p class="dx-fr-hint" id="dx-fr-hint" style="display:none;">Numbers only — ignore units, e.g. type 375 not "375 miles."</p>
+          <div class="dx-nav-row">
+            <button class="dx-btn dx-btn-back" id="dx-back">Back</button>
+            <button class="dx-btn dx-btn-next" id="dx-next" disabled>Next</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="dx-side">
+      <div class="dx-side-hed">Questions</div>
+      <div class="dx-qgrid" id="dx-qgrid"></div>
+      <p class="dx-side-note">Click any number to jump there. Gold = answered.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SCREEN 6 — DONE ═══ -->
+<div class="screen" id="screen-done">
+  <div class="done-wrap">
+    <div class="panel">
+      <div class="done-icon">✓</div>
+      <h1 class="panel-hed">All set.</h1>
+      <p class="panel-sub" id="done-message">Your results just went to Luca. He'll follow up with a plan built around exactly where you need it.</p>
+      <p class="done-status" id="done-status"></p>
+      <a href="../index.html" class="key-btn" id="done-return-link" style="display:block; text-align:center; text-decoration:none; margin-top:1rem;">Return to Site</a>
+    </div>
+
+    <!-- ═══ SCORE REPORT — a College Board-style breakdown Luca can print or
+         save as a PDF to hand (or forward) to parents. Populated by
+         renderScoreReport() in the script below right after scoring. ═══ -->
+    <div class="score-report" id="score-report" style="display:none;">
+      <div class="sr-header">
+        <img src="../logo-caladea-dark.png" alt="Moretti Test Prep &amp; Tutoring" class="sr-logo">
+        <div class="sr-meta">
+          <h2 class="sr-title" id="sr-title"></h2>
+          <p class="sr-sub" id="sr-sub"></p>
+        </div>
+      </div>
+      <div class="sr-overall">
+        <div class="sr-overall-num" id="sr-overall-num"></div>
+        <div class="sr-overall-label">Overall Score</div>
+      </div>
+      <div class="sr-block">
+        <h3 class="sr-block-hed">By Section</h3>
+        <div id="sr-sections"></div>
+      </div>
+      <div class="sr-block">
+        <h3 class="sr-block-hed">By Skill Area</h3>
+        <div id="sr-domains"></div>
+      </div>
+      <div class="sr-block sr-narrative-block">
+        <h3 class="sr-block-hed">What This Tells Us</h3>
+        <p class="sr-narrative" id="sr-narrative"></p>
+      </div>
+      <div class="sr-footer">
+        <span>Moretti Test Prep &amp; Tutoring &middot; Cranford, NJ &middot; (201) 275-2791</span>
+        <button class="sr-print-btn" id="sr-print-btn" type="button">Print / Save as PDF</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  if (!window.STUDENTS || typeof window.STUDENTS !== 'object') {
+    var errEl = document.getElementById('portal-fatal-error');
+    if (errEl) errEl.style.display = 'flex';
+    return;
+  }
+  var STUDENTS = window.STUDENTS;
+
+  var EMAILJS_SERVICE_ID  = 'service_k768w0d';
+  var EMAILJS_TEMPLATE_ID = 'template_xcv84lb'; // reuses the same notification template as the contact form
+
+  // If the EmailJS script from the CDN didn't load (offline, blocked, ad
+  // blocker, etc.), don't let that take down the rest of the portal —
+  // just skip the network step later and tell the student to text Luca.
+  var emailjsAvailable = (typeof emailjs !== 'undefined');
+  if (emailjsAvailable) {
+    try { emailjs.init('FAAXN09Ad2ObipaJJ'); } catch (e) { emailjsAvailable = false; }
+  }
+
+  var currentStudent = null; // { key, name }
+  var activeScreenId = 'screen-key';
+  var STORAGE_KEY = 'moretti_portal_state';
+
+  /* ═══ SESSION PERSISTENCE ═══
+     If a student accidentally refreshes or navigates back mid-diagnostic,
+     this restores exactly where they were instead of losing everything. */
+  function saveState() {
+    try {
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify({
+        key: currentStudent ? currentStudent.key : null,
+        screen: activeScreenId,
+        resourceKind: currentResourceKind,
+        testChoice: testChoice,
+        activeSectionKeys: activeSectionKeys,
+        sectionIndex: sectionIndex,
+        completedSections: completedSections,
+        current: current,
+        answers: answers
+      }));
+    } catch (e) { /* private browsing / storage disabled — fail silently */ }
+  }
+  function clearState() {
+    try { sessionStorage.removeItem(STORAGE_KEY); } catch (e) {}
+  }
+
+  /* ═══ SCREEN ROUTING ═══ */
+  var screens = {};
+  document.querySelectorAll('.screen').forEach(function (el) { screens[el.id] = el; });
+  function show(id) {
+    activeScreenId = id;
+    Object.keys(screens).forEach(function (k) { screens[k].classList.toggle('active', k === id); });
+    window.scrollTo(0, 0);
+    saveState();
+  }
+
+  window.addEventListener('beforeunload', function (e) {
+    if (activeScreenId === 'dx-screen') {
+      e.preventDefault();
+      e.returnValue = '';
+    }
+  });
+
+  /* ═══ SCREEN 1: KEY ENTRY ═══ */
+  var keyInput = document.getElementById('key-input');
+  var keyError = document.getElementById('key-error');
+  function tryKey() {
+    var raw = keyInput.value.trim().toUpperCase();
+    if (!raw || !STUDENTS[raw]) {
+      keyError.style.display = 'block';
+      return;
+    }
+    keyError.style.display = 'none';
+    currentStudent = { key: raw, name: STUDENTS[raw].name };
+    document.getElementById('menu-greeting').textContent = 'Hey ' + currentStudent.name.split(' ')[0] + '.';
+    show('screen-menu');
+  }
+  document.getElementById('key-submit').addEventListener('click', tryKey);
+  keyInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') tryKey(); });
+
+  /* Leaving the portal via the logo or "Exit Portal" — not just the menu's
+     "Log out" — should also fully reset things, so coming back always asks
+     for the key again instead of resuming mid-diagnostic. */
+  function exitPortal() { clearState(); }
+  var exitLinkIds = ['nav-logo-exit', 'nav-exit-link'];
+  exitLinkIds.forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el) el.addEventListener('click', exitPortal);
+  });
+
+  /* ═══ SCREEN 2: MENU ═══ */
+  var currentResourceKind = null; // 'files' or 'college-prep' — remembered for persistence/restore
+  document.querySelectorAll('.menu-card').forEach(function (card) {
+    card.addEventListener('click', function () {
+      if (card.classList.contains('disabled')) return; // temporarily off while these get developed further
+      var route = card.getAttribute('data-route');
+      if (route === 'diagnostic') { show('screen-test-choice'); }
+      else if (route === 'files' || route === 'college-prep') { renderResources(route); show('screen-resources'); }
+      else if (route === 'tests') { renderTests(); show('screen-tests'); }
+    });
+  });
+  document.getElementById('menu-logout').addEventListener('click', function (e) {
+    e.preventDefault();
+    currentStudent = null;
+    keyInput.value = '';
+    clearState();
+    show('screen-key');
+  });
+
+  /* ═══ SCREEN 3: RESOURCES (shared by "Your Files" and "College Prep") ═══
+     If the saved link is a normal Google Drive folder URL, embed it
+     inline so the portal feels like a real file browser. Otherwise
+     (a different kind of link, or none yet) fall back to a plain button. */
+  function driveFolderId(url) {
+    var m = url.match(/\/folders\/([a-zA-Z0-9_-]+)/);
+    return m ? m[1] : null;
+  }
+  function renderResources(kind) {
+    currentResourceKind = kind;
+    var isPrep = kind === 'college-prep';
+    document.getElementById('res-title').textContent = isPrep ? 'College Prep' : 'Your Files';
+    var body = document.getElementById('res-body');
+    var student = currentStudent ? STUDENTS[currentStudent.key] : null;
+    var url = student ? (isPrep ? student.collegePrepFolderUrl : student.driveFolderUrl) : '';
+    if (!url) {
+      body.innerHTML = '<p class="res-pending">Your folder isn\'t set up yet. Luca will share it with you directly — check back soon, or ask him at your next session.</p>';
+      return;
+    }
+    var folderId = driveFolderId(url);
+    if (folderId) {
+      body.innerHTML =
+        '<p class="res-pending">Everything Luca has shared with you lives here.</p>' +
+        '<iframe class="res-embed" src="https://drive.google.com/embeddedfolderview?id=' + folderId + '#list" loading="lazy"></iframe>' +
+        '<a href="' + url + '" target="_blank" rel="noopener" class="res-drive-btn-outline">Open in Google Drive &rarr;</a>';
+    } else {
+      body.innerHTML = '<p class="res-pending">Everything Luca has shared with you lives in your personal folder.</p>' +
+        '<a href="' + url + '" target="_blank" rel="noopener" class="res-drive-btn">Open My Folder</a>';
+    }
+  }
+  document.getElementById('res-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-menu'); });
+
+  /* ═══ SCREEN 3b: SAT/ACT TESTS ═══
+     Placeholder until the test-generator exists. Once it does, populate
+     each student's "tests" array (see the STUDENTS comment above) with
+     { title, url } entries and they'll list here automatically. */
+  function renderTests() {
+    var body = document.getElementById('tests-body');
+    var student = currentStudent ? STUDENTS[currentStudent.key] : null;
+    var tests = (student && Array.isArray(student.tests)) ? student.tests : [];
+    if (!tests.length) {
+      body.innerHTML = '<p class="res-pending">No generated tests here yet — Luca is still building this out. Check back soon.</p>';
+      return;
+    }
+    var html = '<div style="display:flex; flex-direction:column; gap:0.75rem; margin-top:0.5rem;">';
+    tests.forEach(function (t) {
+      html += '<a href="' + t.url + '" target="_blank" rel="noopener" class="res-drive-btn-outline" style="display:block;">' + t.title + '</a>';
+    });
+    html += '</div>';
+    body.innerHTML = html;
+  }
+  document.getElementById('tests-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-menu'); });
+
+  /* ═══ SCREEN 3c: CHOOSE SAT OR ACT ═══ */
+  document.getElementById('test-choice-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-menu'); });
+  document.getElementById('choose-sat').addEventListener('click', function () { startTest('SAT'); });
+  document.getElementById('choose-act').addEventListener('click', function () { startTest('ACT'); });
+
+  /* ═══ SCREEN 4: DIAGNOSTIC SECTION INTRO ═══ */
+  document.getElementById('intro-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-menu'); });
+  document.getElementById('intro-start').addEventListener('click', function () {
+    document.getElementById('dx-student-label').textContent = currentStudent.name;
+    buildSidebar();
+    renderQuestion();
+    show('dx-screen');
+  });
+
+  /* =====================================================================
+     SAT MATH DIAGNOSTIC — 60 QUESTIONS
+     Sourced from Moretti Tutoring's own diagnostic (SAT_Math_Diagnostic.pdf).
+     type: 'mc' (multiple choice) or 'fr' (free response / student-produced).
+     For 'fr' questions, "answer" is the target number; the checker strips
+     units/words and accepts simple fractions (e.g. "1/10").
+     ===================================================================== */
+  var MATH_QUESTIONS = [
+    { domain: 'Algebra', type: 'fr', text: 'A train leaves a station and travels north at 75 mph. Two hours later, a second train leaves on a parallel track traveling north at 125 mph. How many miles from the station will the faster train overtake the slower train?', answer: 375 },
+    { domain: 'Advanced Math', type: 'mc', text: 'Simplify: −4f<sup>−3</sup>g<sup>4</sup>h<sup>0</sup>', choices: ['−4f<sup>3</sup>g<sup>4</sup>', '−4g<sup>4</sup>/f<sup>3</sup>', '4g<sup>4</sup>/f<sup>3</sup>', '−4g<sup>4</sup>/(f<sup>3</sup>h)'], correct: 1 },
+    { domain: 'Advanced Math', type: 'mc', text: 'Solve for x: e<sup>−4x</sup> = e', choices: ['x = 1/4', 'x = −4', 'x = 4', 'x = −1/4'], correct: 3 },
+    { domain: 'Geometry & Trigonometry', type: 'mc', text: 'A circle has radius 4 in. What are its circumference and area?', choices: ['Circumference = 16π in, Area = 8π in²', 'Circumference = 8π in, Area = 4π in²', 'Circumference = 8π in, Area = 16π in²', 'Circumference = 4π in, Area = 16π in²'], correct: 2 },
+    { domain: 'Advanced Math', type: 'mc', text: 'Multiply: (3x + 2)(2x + 7)', choices: ['5x<sup>2</sup> + 25x + 14', '6x<sup>2</sup> + 25x + 9', '6x<sup>2</sup> + 17x + 14', '6x<sup>2</sup> + 25x + 14'], correct: 3 },
+    { domain: 'Advanced Math', type: 'mc', text: 'Solve by factoring: x<sup>2</sup> − 5x − 6 = 0', choices: ['x = 6, −1', 'x = −6, 1', 'x = 3, −2', 'x = −3, 2'], correct: 0 },
+    { domain: 'Advanced Math', type: 'mc', text: 'Solve for x: 3<sup>4x+1</sup> − 5 = 22', choices: ['x = 1/2', 'x = 1/4', 'x = 3/4', 'x = 2'], correct: 0 },
+    { domain: 'Problem-Solving & Data Analysis', type: 'mc', text: 'The cost of a certain shirt is $20 before a 5% sales tax is added. What is the total cost, including sales tax, to purchase the shirt?', choices: ['$20.05', '$25.00', '$21.00', '$20.50'], correct: 2 },
+    { domain: 'Advanced Math', type: 'mc', text: 'Simplify: 32<sup>4/5</sup>', choices: ['8', '128', '64', '16'], correct: 3 },
+    { domain: 'Advanced Math', type: 'mc', text: 'Factor: 25x<sup>2</sup> − 81', choices: ['(5x − 81)(5x + 1)', '(5x − 9)<sup>2</sup>', '(5x − 9)(5x + 9)', '(25x − 81)(x + 1)'], correct: 2 },
+    { domain: 'Problem-Solving & Data Analysis', type: 'fr', text: 'A runner ran at a rate of 6 miles per hour. What is this speed in miles per minute?', answer: 0.1 },
+    { domain: 'Advanced Math', type: 'mc', text: 'Given: 1 − 5x = √(6x − 7). Which describes the real solutions?', choices: ['x = −1 only', 'There are no real solutions', 'x = 1 only', 'x = 1 and x = −8/25'], correct: 1 },
+    { domain: 'Advanced Math', type: 'mc', text: 'After rationalizing the denominator of 3/(1 − √2), an equivalent expression is:', choices: ['3 − 3√2', '3 + 3√2', '−3 − 3√2', '−3 + 3√2'], correct: 2 },
+    { domain: 'Algebra', type: 'mc', text: 'What is the slope-intercept form of the line through (1, 4) and (3, −2)?', choices: ['y = 3x − 7', 'y = −3x + 4', 'y = 3x + 1', 'y = −3x + 7'], correct: 3 },
+    { domain: 'Advanced Math', type: 'mc', text: 'Simplify: x/(x<sup>2</sup> + 5x + 6) − 2/(x<sup>2</sup> + 3x + 2)', choices: ['(x + 3)/[(x + 1)(x + 3)]', '−1/(x + 2)', '(x − 3)/[(x + 1)(x + 3)]', '(x − 3)/[(x + 2)(x + 3)]'], correct: 2 },
+    { domain: 'Advanced Math', type: 'mc', text: 'Given f(x) = −3x<sup>2</sup> − 18x − 15, what is the vertex of the graph?', choices: ['(−6, 12)', '(3, 12)', '(−3, 12)', '(−3, −12)'], correct: 2 },
+    { domain: 'Algebra', type: 'mc', text: 'What is the slope of a line perpendicular to y = (3/2)x − 1?', choices: ['3/2', '−3/2', '2/3', '−2/3'], correct: 3 },
+    { domain: 'Advanced Math', type: 'mc', text: 'Simplify: 2<sup>5</sup> · 2<sup>6</sup>', choices: ['4<sup>11</sup>', '2<sup>11</sup>', '2<sup>30</sup>', '2<sup>31</sup>'], correct: 1 },
+    { domain: 'Algebra', type: 'mc', text: 'Solve for x: 2 ≤ 5 − 2x ≤ 22', choices: ['−17/2 ≤ x ≤ 3/2', '−17/2 ≤ x ≤ −3/2', '3/2 ≤ x ≤ 17/2', '−3/2 ≤ x ≤ 17/2'], correct: 0 },
+    { domain: 'Algebra', type: 'mc', text: 'Which point lies on the graph of y = 3x − 2?', choices: ['(0, −2)', '(0, 2)', '(3, −2)', '(−2, 3)'], correct: 0 },
+    { domain: 'Advanced Math', type: 'mc', text: 'Factor completely: 2y<sup>4</sup> − 32x<sup>4</sup>', choices: ['2(y<sup>2</sup> − 4x<sup>2</sup>)<sup>2</sup>', '(2y<sup>2</sup> − 8x<sup>2</sup>)(y<sup>2</sup> + 4x<sup>2</sup>)', '2(y − 2x)(y + 2x)(y<sup>2</sup> + 4x<sup>2</sup>)', '2(y − 4x)<sup>4</sup>'], correct: 2 },
+    { domain: 'Geometry & Trigonometry', type: 'mc', text: 'A rectangle has length 11 ft and width 4 ft. What are its area and perimeter?', choices: ['Area = 30 ft², Perimeter = 44 ft', 'Area = 15 ft², Perimeter = 30 ft', 'Area = 44 ft², Perimeter = 30 ft', 'Area = 44 ft², Perimeter = 15 ft'], correct: 2 },
+    { domain: 'Problem-Solving & Data Analysis', type: 'mc', text: 'A study was done on the weights of fish in a pond. A random sample was caught and marked so none were weighed twice. The sample contained 150 largemouth bass, of which 30% weighed more than 2 pounds. Which conclusion is best supported by the sample data?', choices: ['The average weight of all fish in the pond is approximately 2 pounds.', 'Approximately 30% of all fish in the pond weigh more than 2 pounds.', 'Approximately 30% of all largemouth bass in the pond weigh more than 2 pounds.', 'The majority of all fish in the pond weigh less than 2 pounds.'], correct: 2 },
+    { domain: 'Advanced Math', type: 'mc', text: 'Simplify: 6a<sup>5</sup>b<sup>9</sup> ÷ (2a<sup>4</sup>b<sup>4</sup>)', choices: ['3a<sup>5</sup>b<sup>5</sup>', '3ab<sup>5</sup>', '4ab<sup>5</sup>', '3ab<sup>9</sup>'], correct: 1 },
+    { domain: 'Algebra', type: 'mc', text: 'Given the system 4x + 2y = 14, 2x − 8y = 8, what is the value of y?', choices: ['−1/9', '−9', '1/9', '9'], correct: 0 },
+    { domain: 'Advanced Math', type: 'fr', text: 'The function f(x) = 2(3)<sup>x</sup> models an insect population after x days. What will the population be on the 5th day?', answer: 486 },
+    { domain: 'Algebra', type: 'mc', text: 'What is the slope of the line through the points (5, 1) and (2, 7)?', choices: ['−1/2', '−3', '2', '−2'], correct: 3 },
+    { domain: 'Advanced Math', type: 'mc', text: 'What is the domain of the function y = 5/√(9 − x)?', choices: ['x ≠ 9', 'x > 9', 'x ≤ 9', 'x < 9'], correct: 3 },
+    { domain: 'Advanced Math', type: 'mc', text: 'Rewrite in simplest radical form: √24', choices: ['6√4', '4√6', '2√6', '2√12'], correct: 2 },
+    { domain: 'Advanced Math', type: 'mc', text: 'Solve for x: x<sup>2</sup> − 35 ≤ 1', choices: ['−1 ≤ x ≤ 1', 'x ≤ 6', '−6 ≤ x ≤ 6', '−36 ≤ x ≤ 36'], correct: 2 },
+    { domain: 'Advanced Math', type: 'mc', text: 'Factor: x<sup>2</sup> + 6x + 8', choices: ['(x + 2)(x − 4)', '(x + 1)(x + 8)', '(x − 2)(x − 4)', '(x + 2)(x + 4)'], correct: 3 },
+    { domain: 'Advanced Math', type: 'mc', text: 'Which expression is equivalent to m<sup>(4x − 7y)</sup>?', choices: ['m<sup>28xy</sup>', 'm<sup>4x</sup>/m<sup>7y</sup>', 'm<sup>4x</sup> + m<sup>7y</sup>', 'm<sup>4x</sup> − m<sup>7y</sup>'], correct: 1 },
+    { domain: 'Advanced Math', type: 'mc', text: 'Use completing the square to rewrite x<sup>2</sup> − 4x + 3 = 0 in the form (x − c)<sup>2</sup> = d. What are c and d?', choices: ['c = −2, d = 1', 'c = 2, d = 1', 'c = 4, d = 3', 'c = 2, d = −1'], correct: 1 },
+    { domain: 'Advanced Math', type: 'mc', text: 'Simplify: √50 + √32 − √27', choices: ['5√2 − 3√3', '9√2 − 3√3', '9√2 − 9√3', '9√2 + 3√3'], correct: 1 },
+    { domain: 'Geometry & Trigonometry', type: 'mc', text: 'What are the point(s) of intersection of x<sup>2</sup> + y<sup>2</sup> = 1 and y + x = 0?', choices: ['(0, 1) and (0, −1)', '(1/2, −1/2) and (−1/2, 1/2)', '(√2/2, √2/2) only', '(√2/2, −√2/2) and (−√2/2, √2/2)'], correct: 3 },
+    { domain: 'Geometry & Trigonometry', type: 'fr', text: 'A triangle has a height of 5 cm and a base length of 12 cm. What is its area (in cm²)?', answer: 30 },
+    { domain: 'Advanced Math', type: 'mc', text: 'After clearing the numerator and denominator of fractions, (2x + 1/4)/(3x − 1/5) is equivalent to:', choices: ['(40x + 5)/(60x + 4)', '(8x + 1)/(15x − 1)', '(40x + 5)/(60x − 4)', '(2x + 1)/(3x − 1)'], correct: 2 },
+    { domain: 'Advanced Math', type: 'mc', text: 'Given f(x) = 3 + x<sup>2</sup>, what is f(x + h) − f(x)?', choices: ['2hx − h<sup>2</sup>', '2hx + h<sup>2</sup>', 'h<sup>2</sup>', '2hx'], correct: 1 },
+    { domain: 'Advanced Math', type: 'mc', text: 'Simplify: (64x<sup>5</sup>y<sup>−1</sup>)<sup>1/5</sup> ÷ (2y<sup>4</sup>)<sup>1/5</sup>', choices: ['2x/y<sup>2</sup>', '32x/y', '2xy', '2x/y'], correct: 3 },
+    { domain: 'Advanced Math', type: 'mc', text: 'f(x) = (x<sup>2</sup> − 7x + 12)<sup>2</sup>. What are the roots of f, with multiplicity?', choices: ['x = 7, x = 12, each multiplicity 2', 'x = 4, x = 3, each multiplicity 1', 'x = −4, x = −3, each multiplicity 2', 'x = 4 (multiplicity 2), x = 3 (multiplicity 2)'], correct: 3 },
+    { domain: 'Algebra', type: 'mc', text: 'What is the solution to the system y = x − 3, y = −x + 1?', choices: ['(−1, 2)', '(−2, 1)', '(1, −2)', '(2, −1)'], correct: 3 },
+    { domain: 'Algebra', type: 'fr', text: 'Temperature T in °F is given by T = (9/5)C + 32, where C is the temperature in °C. What is the Celsius equivalent of 77°F?', answer: 25 },
+    { domain: 'Problem-Solving & Data Analysis', type: 'mc', text: 'A college class of 20 students has ages: 18 (×6), 19 (×5), 20 (×4), 21 (×2), 22 (×1), 23 (×1), 30 (×1). Which gives the correct order of the mean, median, and mode of the ages?', choices: ['mode < median < mean', 'mean < mode < median', 'median < mode < mean', 'mode < mean < median'], correct: 0 },
+    { domain: 'Algebra', type: 'mc', text: 'What is the slope of the line y = −2x + 5?', choices: ['5', '−2', '−5', '2'], correct: 1 },
+    { domain: 'Advanced Math', type: 'mc', text: 'Simplify: (x<sup>2</sup>yz<sup>−2</sup>)<sup>3</sup> ÷ (xy<sup>2</sup>z)<sup>2</sup>', choices: ['x<sup>6</sup>/(yz<sup>8</sup>)', 'x<sup>4</sup>/(yz<sup>8</sup>)', 'x<sup>4</sup>/(y<sup>3</sup>z<sup>8</sup>)', 'x<sup>4</sup>yz<sup>8</sup>'], correct: 1 },
+    { domain: 'Geometry & Trigonometry', type: 'mc', text: 'The radius of a circular fountain is 10 ft. A sidewalk of uniform width surrounds the fountain and has an area of 69π ft². How wide is the sidewalk?', choices: ['3 ft', '23 ft', '6.9 ft', '13 ft'], correct: 0 },
+    { domain: 'Algebra', type: 'mc', text: 'Solve for x: 5x + 3 = −12', choices: ['−3', '3', '−9/5', '−15'], correct: 0 },
+    { domain: 'Advanced Math', type: 'mc', text: 'If (x + a)(x − b) = x<sup>2</sup> − 1, which expression is equivalent to x?', choices: ['(ab + 1)/(a − b)', '(ab − 1)/(a + b)', '(1 − ab)/(a − b)', '(ab − 1)/(a − b)'], correct: 3 },
+    { domain: 'Algebra', type: 'mc', text: 'Solve for x: |3x − 2| − 6 ≥ 0', choices: ['x ≤ −8/3 or x ≥ 4/3', 'x ≥ −4/3', '−4/3 ≤ x ≤ 8/3', 'x ≤ −4/3 or x ≥ 8/3'], correct: 3 },
+    { domain: 'Advanced Math', type: 'mc', text: 'Given f(x) = √(x<sup>2</sup> − 9), what is f(x − 3)?', choices: ['√(x<sup>2</sup> − 6x − 9)', '√(x<sup>2</sup> − 6x)', '√(x<sup>2</sup> − 9) − 3', '√(x<sup>2</sup> − 6x + 9)'], correct: 1 },
+    { domain: 'Algebra', type: 'mc', text: 'Solve for x: 3(x − 2) = 18', choices: ['6', '20/3', '4', '8'], correct: 3 },
+    { domain: 'Geometry & Trigonometry', type: 'mc', text: 'Is the point (−√35/6, −1/6) inside, outside, or on the unit circle x<sup>2</sup> + y<sup>2</sup> = 1?', choices: ['Cannot be determined', 'On the unit circle', 'Inside the unit circle', 'Outside the unit circle'], correct: 1 },
+    { domain: 'Problem-Solving & Data Analysis', type: 'fr', text: 'The ratio of faculty members to students at a college is 1:15. If there are 675 students, how many faculty members are there?', answer: 45 },
+    { domain: 'Algebra', type: 'mc', text: 'What is the solution to the system x + 4y = 6, x + y = 3?', choices: ['(1, 2)', '(3, 0)', '(2, 1)', '(6, −3)'], correct: 2 },
+    { domain: 'Advanced Math', type: 'mc', text: 'Simplify: (2x<sup>2</sup> − x) + (x<sup>2</sup> + 3x − 1)', choices: ['3x<sup>2</sup> + 2x − 1', '3x<sup>2</sup> − 2x − 1', '3x<sup>2</sup> + 2x + 1', 'x<sup>2</sup> + 2x − 1'], correct: 0 },
+    { domain: 'Advanced Math', type: 'mc', text: 'Multiply: (5n + 1)<sup>2</sup>', choices: ['25n<sup>2</sup> + 5n + 1', '25n<sup>2</sup> + 10n + 1', '5n<sup>2</sup> + 10n + 1', '25n<sup>2</sup> + 1'], correct: 1 },
+    { domain: 'Advanced Math', type: 'mc', text: 'Given g(2) = 4 and f(x) = x/2, what is f(g(2))?', choices: ['1', '4', '2', '8'], correct: 2 },
+    { domain: 'Algebra', type: 'mc', text: 'What is the slope of the line through the points (2, −4) and (2, 6)?', choices: ['1', 'Undefined (the line is vertical)', '0', '10'], correct: 1 },
+    { domain: 'Problem-Solving & Data Analysis', type: 'mc', text: 'Solve for x: 18/x = 6/5', choices: ['90', '21.6', '5/3', '15'], correct: 3 },
+    { domain: 'Problem-Solving & Data Analysis', type: 'mc', text: 'y is proportional to x, and y = 42 when x = 6. Which equation represents this relationship?', choices: ['y = 7x', 'y = x/6 + 36', 'y = x + 36', 'y = 252x'], correct: 0 }
+  ];
+
+  /* =====================================================================
+     SECTION BANKS & TEST FORMATS
+     ---------------------------------------------------------------------
+     Each real test is just an ordered list of sections. Math is the only
+     section with real content right now (from Bill's PDF). The others are
+     empty placeholders — a section with zero questions is automatically
+     skipped, so today's actual flow is still "choose SAT or ACT -> Math"
+     either way, but the order is already correct for whichever sections
+     get content later. To add a section, fill in its "questions" array
+     below using the same object shape as the Math questions above
+     ({ domain, type, text, choices/correct OR answer }).
+     ===================================================================== */
+  var SECTION_BANKS = {
+    'reading-writing': { label: 'Reading & Writing', questions: [] },
+    'english':         { label: 'English',           questions: [] },
+    'math':            { label: 'Math',              questions: MATH_QUESTIONS },
+    'reading':         { label: 'Reading',           questions: [] },
+    'science':         { label: 'Science',           questions: [] }
+  };
+
+  var TEST_FORMATS = {
+    SAT: { label: 'SAT', order: ['reading-writing', 'math'] },
+    ACT: { label: 'ACT', order: ['english', 'math', 'reading', 'science'] }
+  };
+
+  var testChoice = null;       // 'SAT' or 'ACT'
+  var activeSectionKeys = [];  // populated sections only, in the real test's order
+  var sectionIndex = 0;
+  var completedSections = [];  // [{ key, label, answers }] for sections already finished
+  var current = 0;
+  var answers = [];
+
+  var card       = document.getElementById('dx-card');
+  var domainEl   = document.getElementById('dx-domain');
+  var qtextEl    = document.getElementById('dx-qtext');
+  var choicesEl  = document.getElementById('dx-choices');
+  var frRow      = document.getElementById('dx-fr-row');
+  var frInput    = document.getElementById('dx-fr-input');
+  var frSubmit   = document.getElementById('dx-fr-submit');
+  var frHint     = document.getElementById('dx-fr-hint');
+  var backBtn    = document.getElementById('dx-back');
+  var nextBtn    = document.getElementById('dx-next');
+  var qgrid      = document.getElementById('dx-qgrid');
+  var progFill   = document.getElementById('dx-progress-fill');
+  var progLabel  = document.getElementById('dx-progress-label');
+  var LETTERS    = ['A', 'B', 'C', 'D'];
+
+  function activeQuestions() { return SECTION_BANKS[activeSectionKeys[sectionIndex]].questions; }
+  function isLastQuestionInSection() { return current === activeQuestions().length - 1; }
+  function isLastSection() { return sectionIndex === activeSectionKeys.length - 1; }
+
+  function startTest(choice) {
+    testChoice = choice;
+    activeSectionKeys = TEST_FORMATS[choice].order.filter(function (key) {
+      return SECTION_BANKS[key].questions.length > 0;
+    });
+    completedSections = [];
+    if (!activeSectionKeys.length) { show('screen-menu'); return; } // shouldn't happen — Math always has content
+    startSection(0);
+  }
+
+  function startSection(index) {
+    sectionIndex = index;
+    current = 0;
+    var qs = activeQuestions();
+    answers = new Array(qs.length).fill(null);
+    diagnosticSubmitted = false;
+    var sectionLabel = SECTION_BANKS[activeSectionKeys[sectionIndex]].label;
+    document.getElementById('intro-kicker').textContent = testChoice + ' Diagnostic';
+    document.getElementById('intro-hed').textContent = sectionLabel + ' section — ' + qs.length + ' question' + (qs.length === 1 ? '' : 's') + '.';
+    document.getElementById('dx-brand-label').textContent = testChoice + ' Diagnostic — ' + sectionLabel;
+    show('screen-intro');
+  }
+
+  function advanceToNextSection() {
+    completedSections.push({ key: activeSectionKeys[sectionIndex], label: SECTION_BANKS[activeSectionKeys[sectionIndex]].label, answers: answers });
+    startSection(sectionIndex + 1);
+  }
+
+  var jumpSelect = document.getElementById('dx-jump-select');
+
+  function buildSidebar() {
+    var qs = activeQuestions();
+    qgrid.innerHTML = '';
+    jumpSelect.innerHTML = '';
+    qs.forEach(function (q, i) {
+      var el = document.createElement('div');
+      el.className = 'dx-qnum';
+      el.textContent = i + 1;
+      el.addEventListener('click', function () { goTo(i); });
+      qgrid.appendChild(el);
+
+      var opt = document.createElement('option');
+      opt.value = i;
+      opt.textContent = 'Question ' + (i + 1) + ' of ' + qs.length;
+      jumpSelect.appendChild(opt);
+    });
+  }
+  jumpSelect.addEventListener('change', function () { goTo(parseInt(jumpSelect.value, 10)); });
+
+  function refreshSidebar() {
+    var nums = qgrid.querySelectorAll('.dx-qnum');
+    nums.forEach(function (el, i) {
+      el.classList.toggle('current', i === current);
+      el.classList.toggle('answered', answers[i] !== null);
+    });
+  }
+
+  function parseNumeric(str) {
+    str = (str || '').trim();
+    if (str.indexOf('/') !== -1) {
+      var parts = str.split('/');
+      if (parts.length === 2) {
+        var num = parseFloat(parts[0]);
+        var den = parseFloat(parts[1]);
+        if (!isNaN(num) && !isNaN(den) && den !== 0) return num / den;
+      }
+    }
+    var cleaned = str.replace(/[^0-9.\-]/g, '');
+    var val = parseFloat(cleaned);
+    return isNaN(val) ? null : val;
+  }
+
+  function renderQuestion() {
+    var qs = activeQuestions();
+    var q = qs[current];
+    domainEl.textContent = q.domain;
+    qtextEl.innerHTML = q.text;
+
+    if (q.type === 'mc') {
+      choicesEl.style.display = 'flex';
+      frRow.style.display = 'none';
+      frHint.style.display = 'none';
+      choicesEl.innerHTML = '';
+      q.choices.forEach(function (choice, i) {
+        var row = document.createElement('div');
+        row.className = 'dx-choice' + (answers[current] === i ? ' selected' : '');
+        row.innerHTML = '<span class="dx-choice-letter">' + LETTERS[i] + '</span><span class="dx-choice-text">' + choice + '</span>';
+        row.addEventListener('click', function () { selectMcAnswer(i); });
+        choicesEl.appendChild(row);
+      });
+    } else {
+      choicesEl.style.display = 'none';
+      frRow.style.display = 'flex';
+      frHint.style.display = 'block';
+      frInput.value = answers[current] !== null ? answers[current].raw : '';
+    }
+
+    backBtn.disabled = current === 0;
+    nextBtn.disabled = answers[current] === null;
+    nextBtn.textContent = !isLastQuestionInSection() ? 'Next' : (isLastSection() ? 'Submit Diagnostic' : 'Next Section');
+    progLabel.textContent = 'Question ' + (current + 1) + ' of ' + qs.length;
+    progFill.style.width = ((current / qs.length) * 100) + '%';
+    jumpSelect.value = current;
+    refreshSidebar();
+    saveState();
+  }
+
+  function selectMcAnswer(i) {
+    answers[current] = i;
+    renderQuestion();
+    // Auto-advance to the next question — but never auto-advance past the
+    // end of a section. On the last question the student must press the
+    // button ("Next Section" or "Submit Diagnostic").
+    if (!isLastQuestionInSection()) {
+      setTimeout(function () { goTo(current + 1); }, 420);
+    }
+  }
+
+  function recordFrAnswer() {
+    var raw = frInput.value.trim();
+    if (!raw) return false;
+    answers[current] = { raw: raw, value: parseNumeric(raw) };
+    return true;
+  }
+
+  function submitFrAnswer() {
+    if (!recordFrAnswer()) return;
+    if (!isLastQuestionInSection()) {
+      goTo(current + 1);
+    } else {
+      renderQuestion(); // just enables the bottom button — doesn't advance on its own
+    }
+  }
+  frSubmit.addEventListener('click', submitFrAnswer);
+  frInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') submitFrAnswer(); });
+  frInput.addEventListener('input', function () {
+    nextBtn.disabled = frInput.value.trim() === '';
+  });
+
+  function goTo(index) {
+    var qs = activeQuestions();
+    if (index < 0 || index >= qs.length || index === current) return;
+    card.classList.add('fading');
+    setTimeout(function () {
+      current = index;
+      renderQuestion();
+      card.classList.remove('fading');
+    }, 200);
+  }
+
+  backBtn.addEventListener('click', function () { goTo(current - 1); });
+  nextBtn.addEventListener('click', function () {
+    if (activeQuestions()[current].type === 'fr') { recordFrAnswer(); }
+    if (answers[current] === null) return;
+    if (!isLastQuestionInSection()) { goTo(current + 1); }
+    else if (isLastSection()) { finishDiagnostic(); }
+    else { advanceToNextSection(); }
+  });
+
+  function isCorrect(q, given) {
+    if (given === null || given === undefined) return false;
+    if (q.type === 'mc') return given === q.correct;
+    var val = given.value;
+    return val !== null && Math.abs(val - q.answer) < 0.05;
+  }
+
+  /* ═══ PARENT-FACING SCORE REPORT ═══
+     A College Board-style visual breakdown — overall score, per-section
+     bars, per-skill-area bars, and a short plain-English "what this tells
+     us" note — that Luca can print or save as a PDF straight from the
+     browser and hand (or forward) to parents. Purely client-side: no
+     server, no PDF library, just a print stylesheet (see @media print). */
+  function srBarRow(label, correct, total, cls) {
+    var pct = total > 0 ? Math.round((correct / total) * 100) : 0;
+    var row = document.createElement('div');
+    row.className = 'sr-bar-row';
+    row.innerHTML =
+      '<div class="sr-bar-label"><span>' + label + '</span><span>' + correct + ' / ' + total + ' (' + pct + '%)</span></div>' +
+      '<div class="sr-bar-track"><div class="sr-bar-fill ' + (cls || '') + '" style="width:' + pct + '%"></div></div>';
+    return row;
+  }
+
+  function renderScoreReport(data) {
+    var reportEl = document.getElementById('score-report');
+    if (!reportEl) return;
+
+    var overallPct = data.totalQuestions > 0 ? Math.round((data.totalCorrect / data.totalQuestions) * 100) : 0;
+    document.getElementById('sr-title').textContent = data.studentName + ' — ' + data.testChoice + ' Diagnostic Report';
+    document.getElementById('sr-sub').textContent = 'Administered ' + new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) + ' via the Moretti Test Prep student portal';
+    document.getElementById('sr-overall-num').textContent = data.totalCorrect + ' / ' + data.totalQuestions + ' (' + overallPct + '%)';
+
+    var sectionsEl = document.getElementById('sr-sections');
+    sectionsEl.innerHTML = '';
+    data.sectionResults.forEach(function (sec) {
+      sectionsEl.appendChild(srBarRow(sec.label, sec.correct, sec.total));
+    });
+
+    var domainEntries = Object.keys(data.domains).map(function (name) {
+      var d = data.domains[name];
+      return { name: name, correct: d.correct, total: d.total, pct: d.total > 0 ? (d.correct / d.total) : 0 };
+    });
+    domainEntries.sort(function (a, b) { return b.pct - a.pct; });
+
+    var domainsEl = document.getElementById('sr-domains');
+    domainsEl.innerHTML = '';
+    domainEntries.forEach(function (d, i) {
+      var cls = '';
+      if (domainEntries.length > 1 && i === 0) cls = 'strong';
+      else if (domainEntries.length > 1 && i === domainEntries.length - 1) cls = 'weak';
+      domainsEl.appendChild(srBarRow(d.name, d.correct, d.total, cls));
+    });
+
+    var narrative;
+    var first = currentStudent.name.split(' ')[0];
+    if (domainEntries.length >= 2) {
+      var best = domainEntries[0];
+      var worst = domainEntries[domainEntries.length - 1];
+      narrative = first + ' is strongest in ' + best.name + ' (' + Math.round(best.pct * 100) + '% correct) — that\'s an area to keep sharp with light, ongoing review. ' +
+        'The clearest opportunity to gain points quickly is ' + worst.name + ' (' + Math.round(worst.pct * 100) + '% correct); targeted practice here typically moves the overall score the fastest. ' +
+        'The plan we build going forward will weight time accordingly.';
+    } else if (domainEntries.length === 1) {
+      narrative = first + ' scored ' + Math.round(domainEntries[0].pct * 100) + '% in ' + domainEntries[0].name + '. We\'ll use this as the baseline for the plan going forward.';
+    } else {
+      narrative = 'This baseline will anchor the study plan going forward.';
+    }
+    document.getElementById('sr-narrative').textContent = narrative;
+
+    reportEl.style.display = 'block';
+  }
+
+  var srPrintBtn = document.getElementById('sr-print-btn');
+  if (srPrintBtn) srPrintBtn.addEventListener('click', function () { window.print(); });
+
+  var diagnosticSubmitted = false;
+  function finishDiagnostic() {
+    if (diagnosticSubmitted) return; // guard against a double click/double send
+    diagnosticSubmitted = true;
+    nextBtn.disabled = true;
+    backBtn.disabled = true;
+
+    progFill.style.width = '100%';
+    progLabel.textContent = 'Complete';
+
+    completedSections.push({ key: activeSectionKeys[sectionIndex], label: SECTION_BANKS[activeSectionKeys[sectionIndex]].label, answers: answers });
+    clearState(); // the diagnostic is over either way — nothing left to resume
+
+    var domains = {};
+    var totalCorrect = 0;
+    var totalQuestions = 0;
+    var lines = [];
+    var sectionSummaryLines = [];
+    var sectionResults = []; // [{ label, correct, total }] — feeds the visual score report
+
+    completedSections.forEach(function (sec) {
+      var qs = SECTION_BANKS[sec.key].questions;
+      var secCorrect = 0;
+      lines.push('');
+      lines.push(sec.label.toUpperCase() + ':');
+      qs.forEach(function (q, i) {
+        var given = sec.answers[i];
+        var correct = isCorrect(q, given);
+        if (correct) { secCorrect++; totalCorrect++; }
+        totalQuestions++;
+        if (!domains[q.domain]) domains[q.domain] = { correct: 0, total: 0 };
+        domains[q.domain].total++;
+        if (correct) domains[q.domain].correct++;
+
+        var givenText = (given === null || given === undefined) ? '(skipped)' : (q.type === 'mc' ? LETTERS[given] : given.raw);
+        lines.push('  ' + (i + 1) + '. [' + q.domain + '] answered ' + givenText + ' — ' + (correct ? 'correct' : 'incorrect'));
+      });
+      sectionSummaryLines.push('  - ' + sec.label + ': ' + secCorrect + ' / ' + qs.length);
+      sectionResults.push({ label: sec.label, correct: secCorrect, total: qs.length });
+    });
+
+    var reportLines = [];
+    reportLines.push(testChoice + ' DIAGNOSTIC RESULTS');
+    reportLines.push('Student: ' + currentStudent.name + ' (key: ' + currentStudent.key + ')');
+    reportLines.push('Overall score: ' + totalCorrect + ' / ' + totalQuestions);
+    reportLines.push('');
+    reportLines.push('By section:');
+    reportLines = reportLines.concat(sectionSummaryLines);
+    reportLines.push('');
+    reportLines.push('By skill area:');
+    Object.keys(domains).forEach(function (d) {
+      var s = domains[d];
+      reportLines.push('  - ' + d + ': ' + s.correct + ' / ' + s.total + ' (' + Math.round((s.correct / s.total) * 100) + '%)');
+    });
+    reportLines.push('');
+    reportLines.push('Question-by-question:');
+    reportLines = reportLines.concat(lines);
+    var report = reportLines.join('\n');
+
+    document.getElementById('done-message').textContent =
+      'Your results just went to Luca — no need to send anything yourself. He\'ll follow up with a plan built around exactly where you need it.';
+    var statusEl = document.getElementById('done-status');
+    statusEl.textContent = 'Sending your results…';
+    statusEl.classList.remove('err');
+    show('screen-done');
+
+    renderScoreReport({
+      studentName: currentStudent.name,
+      testChoice: testChoice,
+      totalCorrect: totalCorrect,
+      totalQuestions: totalQuestions,
+      sectionResults: sectionResults,
+      domains: domains
+    });
+
+    if (!emailjsAvailable) {
+      statusEl.textContent = 'Couldn\'t reach the email service from this browser. Please text Luca at (201) 275-2791 with your key (' + currentStudent.key + ') and score (' + totalCorrect + '/' + totalQuestions + ') so he can follow up.';
+      statusEl.classList.add('err');
+      return;
+    }
+
+    try {
+      emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+        from_name: currentStudent.name + ' (' + testChoice + ' Diagnostic)',
+        from_email: 'portal@morettitutoring.com',
+        town: '',
+        subject: testChoice + ' Diagnostic — ' + currentStudent.name + ' — ' + totalCorrect + '/' + totalQuestions,
+        message: report
+      }).then(function () {
+        statusEl.textContent = 'Results delivered.';
+      }, function () {
+        statusEl.textContent = 'Something went wrong sending your results. Please text Luca at (201) 275-2791 and let him know your key (' + currentStudent.key + ') so he can follow up.';
+        statusEl.classList.add('err');
+      });
+    } catch (e) {
+      statusEl.textContent = 'Something went wrong sending your results. Please text Luca at (201) 275-2791 and let him know your key (' + currentStudent.key + ') so he can follow up.';
+      statusEl.classList.add('err');
+    }
+  }
+
+  /* ═══ RESTORE ON LOAD ═══
+     If they refreshed or navigated back with a saved key, pick up right
+     where they left off instead of dropping them at the key screen. */
+  (function restoreState() {
+    try {
+      var raw = sessionStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      var state = JSON.parse(raw);
+      if (!state || !state.key || !STUDENTS[state.key]) { clearState(); return; }
+
+      currentStudent = { key: state.key, name: STUDENTS[state.key].name };
+      document.getElementById('menu-greeting').textContent = 'Hey ' + currentStudent.name.split(' ')[0] + '.';
+
+      if (state.screen === 'dx-screen' && state.testChoice && Array.isArray(state.activeSectionKeys) && state.activeSectionKeys.length) {
+        testChoice = state.testChoice;
+        activeSectionKeys = state.activeSectionKeys;
+        completedSections = Array.isArray(state.completedSections) ? state.completedSections : [];
+        sectionIndex = typeof state.sectionIndex === 'number' ? state.sectionIndex : 0;
+        var qs = activeQuestions();
+        if (Array.isArray(state.answers) && state.answers.length === qs.length) {
+          answers = state.answers;
+          current = Math.min(Math.max(state.current || 0, 0), qs.length - 1);
+          document.getElementById('dx-student-label').textContent = currentStudent.name;
+          document.getElementById('dx-brand-label').textContent = testChoice + ' Diagnostic — ' + SECTION_BANKS[activeSectionKeys[sectionIndex]].label;
+          buildSidebar();
+          renderQuestion();
+          show('dx-screen');
+        } else {
+          show('screen-menu');
+        }
+      } else if (state.screen === 'screen-resources') {
+        renderResources(state.resourceKind || 'files');
+        show('screen-resources');
+      } else if (state.screen === 'screen-tests') {
+        renderTests();
+        show('screen-tests');
+      } else if (state.screen === 'screen-test-choice' || state.screen === 'screen-menu') {
+        show(state.screen);
+      } else {
+        show('screen-menu'); // includes mid-section-break "screen-intro" — safest to restart from the menu
+      }
+    } catch (e) { /* corrupt or blocked storage — just start fresh */ }
+  })();
+})();
+</script>
+</body>
+</html>

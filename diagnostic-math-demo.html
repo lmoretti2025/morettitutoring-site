@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAT Math Diagnostic — Moretti Test Prep &amp; Tutoring</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caladea:wght@700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /*
+    DEMO / PLACEHOLDER DIAGNOSTIC — SAT MATH SECTION
+    ---------------------------------------------------
+    The 8 questions below are ORIGINAL sample problems (not real SAT
+    content) so this UI can be tested end-to-end. Swap them out by
+    editing the QUESTIONS array near the bottom of this file — each
+    question is a plain object: { domain, text, choices[4], correct }.
+    "domain" drives the analytics breakdown on the results screen.
+  */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --red:    #B0271C;
+    --bg:     #f7f4ef;
+    --white:  #ffffff;
+    --text:   #111111;
+    --mid:    rgba(17,17,17,0.58);
+    --faint:  rgba(17,17,17,0.28);
+    --border: rgba(17,17,17,0.12);
+    --gold:   #C9A84C;
+    --hel:    'Poppins', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    --serif:  Georgia, 'Times New Roman', serif;
+    --display: 'Caladea', Georgia, serif;
+  }
+
+  html, body { height: 100%; }
+  body { background: var(--bg); color: var(--text); font-family: var(--hel); font-weight: 300; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+
+  /* ═══ TOP BAR ═══ */
+  #dx-topbar { position: sticky; top: 0; z-index: 50; background: var(--red); padding: 0.9rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+  .dx-brand { font-family: var(--display); font-size: 1rem; font-weight: 700; color: #fff; letter-spacing: 0.01em; }
+  .dx-brand span { display: block; font-family: var(--hel); font-size: 0.56rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.65); margin-top: 0.2rem; }
+  .dx-progress-wrap { display: flex; align-items: center; gap: 0.9rem; }
+  .dx-progress-track { width: 160px; height: 4px; background: rgba(255,255,255,0.25); border-radius: 4px; overflow: hidden; }
+  .dx-progress-fill { height: 100%; width: 0%; background: var(--gold); transition: width 0.5s cubic-bezier(0.16,1,0.3,1); }
+  .dx-progress-label { font-size: 0.62rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.75); white-space: nowrap; }
+
+  /* ═══ LAYOUT ═══ */
+  #dx-shell { display: flex; min-height: calc(100vh - 62px); }
+  #dx-main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 3rem 2.5rem; }
+  #dx-side { width: 220px; flex-shrink: 0; background: var(--white); border-left: 1px solid var(--border); padding: 2.25rem 1.5rem; display: flex; flex-direction: column; }
+  .dx-side-hed { font-size: 0.56rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--faint); margin-bottom: 1.1rem; }
+  .dx-qgrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.55rem; margin-bottom: 1.75rem; }
+  .dx-qnum { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg); font-size: 0.78rem; font-weight: 600; color: var(--mid); cursor: pointer; transition: all 0.2s ease; position: relative; }
+  .dx-qnum:hover { border-color: var(--gold); }
+  .dx-qnum.current { background: var(--red); border-color: var(--red); color: #fff; }
+  .dx-qnum.answered:not(.current) { background: rgba(201,168,76,0.16); border-color: var(--gold); color: var(--text); }
+  .dx-qnum.answered:not(.current)::after { content: '✓'; position: absolute; top: -5px; right: -5px; width: 14px; height: 14px; border-radius: 50%; background: var(--gold); color: #fff; font-size: 0.55rem; display: flex; align-items: center; justify-content: center; }
+  .dx-side-note { font-size: 0.72rem; line-height: 1.7; color: var(--mid); margin-top: auto; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+
+  /* ═══ QUESTION CARD ═══ */
+  .dx-card-wrap { width: 100%; max-width: 620px; }
+  .dx-card { opacity: 1; transform: translateY(0); transition: opacity 0.38s cubic-bezier(0.16,1,0.3,1), transform 0.38s cubic-bezier(0.16,1,0.3,1); }
+  .dx-card.fading { opacity: 0; transform: translateY(14px); }
+  .dx-domain { display: inline-block; font-size: 0.58rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--red); margin-bottom: 1.1rem; }
+  .dx-qtext { font-family: var(--display); font-size: clamp(1.15rem, 2vw, 1.5rem); font-weight: 700; line-height: 1.5; color: var(--text); margin-bottom: 2.1rem; }
+  .dx-choices { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 2.25rem; }
+  .dx-choice { display: flex; align-items: center; gap: 0.9rem; border: 1px solid var(--border); background: var(--white); padding: 0.95rem 1.2rem; cursor: pointer; transition: border-color 0.2s ease, background 0.2s ease; }
+  .dx-choice:hover { border-color: var(--gold); }
+  .dx-choice-letter { flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--faint); display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; color: var(--mid); transition: all 0.2s ease; }
+  .dx-choice-text { font-size: 0.92rem; color: var(--text); }
+  .dx-choice.selected { border-color: var(--red); background: rgba(176,39,28,0.05); }
+  .dx-choice.selected .dx-choice-letter { background: var(--red); border-color: var(--red); color: #fff; }
+
+  .dx-nav-row { display: flex; align-items: center; justify-content: space-between; }
+  .dx-btn { font-family: var(--hel); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; padding: 0.85rem 1.9rem; border: none; cursor: pointer; transition: opacity 0.2s ease; }
+  .dx-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .dx-btn-back { background: transparent; color: var(--mid); border: 1px solid var(--border); }
+  .dx-btn-back:hover:not(:disabled) { border-color: var(--text); color: var(--text); }
+  .dx-btn-next { background: var(--red); color: #fff; }
+  .dx-btn-next:hover:not(:disabled) { opacity: 0.86; }
+
+  /* ═══ RESULTS ═══ */
+  #dx-results { display: none; padding: 4rem 2.5rem; max-width: 760px; margin: 0 auto; }
+  .res-kicker { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); margin-bottom: 1rem; }
+  .res-hed { font-family: var(--display); font-size: clamp(1.5rem, 2.6vw, 2.1rem); font-weight: 700; color: var(--text); margin-bottom: 0.6rem; }
+  .res-sub { font-size: 0.88rem; color: var(--mid); margin-bottom: 2.5rem; line-height: 1.8; }
+  .res-score { font-family: var(--display); font-size: 3rem; font-weight: 700; color: var(--red); margin-bottom: 0.25rem; }
+  .res-score-lbl { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); margin-bottom: 2.25rem; }
+  .res-domain-row { margin-bottom: 1.4rem; }
+  .res-domain-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.5rem; }
+  .res-domain-name { font-size: 0.82rem; font-weight: 600; color: var(--text); }
+  .res-domain-frac { font-size: 0.75rem; color: var(--mid); }
+  .res-bar-track { height: 8px; background: var(--border); }
+  .res-bar-fill { height: 100%; background: var(--gold); width: 0%; transition: width 1s cubic-bezier(0.16,1,0.3,1); }
+  .res-note { font-size: 0.82rem; line-height: 1.85; color: var(--mid); margin-top: 2.5rem; padding-top: 2rem; border-top: 1px solid var(--border); }
+
+  @media (max-width: 760px) {
+    #dx-side { display: none; }
+    #dx-main { padding: 2.5rem 1.5rem; }
+    .dx-progress-track { width: 90px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="dx-topbar">
+  <div class="dx-brand">Moretti Diagnostic<span>SAT — Math Section (Demo)</span></div>
+  <div class="dx-progress-wrap">
+    <span class="dx-progress-label" id="dx-progress-label">Question 1 of 8</span>
+    <div class="dx-progress-track"><div class="dx-progress-fill" id="dx-progress-fill"></div></div>
+  </div>
+</div>
+
+<div id="dx-shell">
+  <div id="dx-main">
+    <div class="dx-card-wrap">
+      <div class="dx-card" id="dx-card">
+        <span class="dx-domain" id="dx-domain"></span>
+        <h1 class="dx-qtext" id="dx-qtext"></h1>
+        <div class="dx-choices" id="dx-choices"></div>
+        <div class="dx-nav-row">
+          <button class="dx-btn dx-btn-back" id="dx-back">Back</button>
+          <button class="dx-btn dx-btn-next" id="dx-next" disabled>Next</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="dx-side">
+    <div class="dx-side-hed">Questions</div>
+    <div class="dx-qgrid" id="dx-qgrid"></div>
+    <p class="dx-side-note">Click any number to jump to that question. Answered questions are marked in gold.</p>
+  </div>
+</div>
+
+<div id="dx-results">
+  <div class="res-kicker">Diagnostic Complete</div>
+  <h1 class="res-hed">Nice work.</h1>
+  <p class="res-sub">Here's the breakdown Moretti Tutoring will use to build a plan. This demo screen shows the analytics that — in the live version — would be sent directly to Luca, no back-and-forth needed.</p>
+  <div class="res-score" id="res-score"></div>
+  <div class="res-score-lbl">Overall Correct</div>
+  <div id="res-domains"></div>
+  <p class="res-note">This is a demo of the diagnostic experience with placeholder questions. In the live portal, this results view is replaced by an automatic email to Moretti Tutoring with the student's name, selected track, and this exact skill-area breakdown.</p>
+</div>
+
+<script>
+(function () {
+  var QUESTIONS = [
+    { domain: 'Algebra', text: 'Solve for x: 3x + 7 = 22', choices: ['3', '5', '7', '9'], correct: 1 },
+    { domain: 'Algebra', text: 'If 2(x − 4) = 3x − 10, what is the value of x?', choices: ['−2', '0', '2', '4'], correct: 2 },
+    { domain: 'Advanced Math', text: 'If f(x) = x² − 3x + 2, what is f(4)?', choices: ['4', '6', '8', '10'], correct: 1 },
+    { domain: 'Advanced Math', text: 'Which value of x satisfies x² = 9 and x < 0?', choices: ['−3', '3', '−9', '9'], correct: 0 },
+    { domain: 'Problem-Solving & Data Analysis', text: 'A survey of 40 students found that 25% prefer math class over English. How many students prefer math?', choices: ['8', '10', '12', '15'], correct: 1 },
+    { domain: 'Problem-Solving & Data Analysis', text: 'The mean of five numbers is 12. Four of the numbers are 10, 11, 13, and 14. What is the fifth number?', choices: ['10', '11', '12', '14'], correct: 2 },
+    { domain: 'Geometry & Trigonometry', text: 'A right triangle has legs of length 6 and 8. What is the length of the hypotenuse?', choices: ['9', '10', '12', '14'], correct: 1 },
+    { domain: 'Geometry & Trigonometry', text: 'A circle has a radius of 5. What is its area in terms of π?', choices: ['5π', '10π', '25π', '50π'], correct: 2 }
+  ];
+
+  var LETTERS = ['A', 'B', 'C', 'D'];
+  var current = 0;
+  var answers = new Array(QUESTIONS.length).fill(null);
+
+  var card       = document.getElementById('dx-card');
+  var domainEl   = document.getElementById('dx-domain');
+  var qtextEl    = document.getElementById('dx-qtext');
+  var choicesEl  = document.getElementById('dx-choices');
+  var backBtn    = document.getElementById('dx-back');
+  var nextBtn    = document.getElementById('dx-next');
+  var qgrid      = document.getElementById('dx-qgrid');
+  var progFill   = document.getElementById('dx-progress-fill');
+  var progLabel  = document.getElementById('dx-progress-label');
+
+  function buildSidebar() {
+    qgrid.innerHTML = '';
+    QUESTIONS.forEach(function (q, i) {
+      var btn = document.createElement('div');
+      btn.className = 'dx-qnum';
+      btn.textContent = i + 1;
+      btn.addEventListener('click', function () { goTo(i); });
+      qgrid.appendChild(btn);
+    });
+  }
+
+  function refreshSidebar() {
+    var nums = qgrid.querySelectorAll('.dx-qnum');
+    nums.forEach(function (el, i) {
+      el.classList.toggle('current', i === current);
+      el.classList.toggle('answered', answers[i] !== null);
+    });
+  }
+
+  function renderQuestion() {
+    var q = QUESTIONS[current];
+    domainEl.textContent = q.domain;
+    qtextEl.textContent = q.text;
+    choicesEl.innerHTML = '';
+    q.choices.forEach(function (choice, i) {
+      var row = document.createElement('div');
+      row.className = 'dx-choice' + (answers[current] === i ? ' selected' : '');
+      row.innerHTML = '<span class="dx-choice-letter">' + LETTERS[i] + '</span><span class="dx-choice-text">' + choice + '</span>';
+      row.addEventListener('click', function () { selectAnswer(i); });
+      choicesEl.appendChild(row);
+    });
+    backBtn.disabled = current === 0;
+    nextBtn.disabled = answers[current] === null;
+    nextBtn.textContent = current === QUESTIONS.length - 1 ? 'Finish' : 'Next';
+    progLabel.textContent = 'Question ' + (current + 1) + ' of ' + QUESTIONS.length;
+    progFill.style.width = (((current) / QUESTIONS.length) * 100) + '%';
+    refreshSidebar();
+  }
+
+  function selectAnswer(i) {
+    answers[current] = i;
+    renderQuestion();
+    // brief pause so the selected state is visible, then fade to the next question
+    if (current < QUESTIONS.length - 1) {
+      setTimeout(function () { goTo(current + 1); }, 480);
+    } else {
+      setTimeout(function () { finish(); }, 480);
+    }
+  }
+
+  function goTo(index) {
+    if (index < 0 || index >= QUESTIONS.length || index === current) return;
+    card.classList.add('fading');
+    setTimeout(function () {
+      current = index;
+      renderQuestion();
+      card.classList.remove('fading');
+    }, 220);
+  }
+
+  backBtn.addEventListener('click', function () { goTo(current - 1); });
+  nextBtn.addEventListener('click', function () {
+    if (current === QUESTIONS.length - 1) { finish(); } else { goTo(current + 1); }
+  });
+
+  function finish() {
+    progFill.style.width = '100%';
+    progLabel.textContent = 'Complete';
+    document.getElementById('dx-shell').style.display = 'none';
+    document.getElementById('dx-topbar').style.display = 'none';
+    var results = document.getElementById('dx-results');
+    results.style.display = 'block';
+
+    var domains = {};
+    QUESTIONS.forEach(function (q, i) {
+      if (!domains[q.domain]) domains[q.domain] = { correct: 0, total: 0 };
+      domains[q.domain].total++;
+      if (answers[i] === q.correct) domains[q.domain].correct++;
+    });
+
+    var totalCorrect = Object.keys(domains).reduce(function (sum, d) { return sum + domains[d].correct; }, 0);
+    document.getElementById('res-score').textContent = totalCorrect + ' / ' + QUESTIONS.length;
+
+    var domainsEl = document.getElementById('res-domains');
+    domainsEl.innerHTML = '';
+    Object.keys(domains).forEach(function (d) {
+      var pct = Math.round((domains[d].correct / domains[d].total) * 100);
+      var row = document.createElement('div');
+      row.className = 'res-domain-row';
+      row.innerHTML =
+        '<div class="res-domain-top"><span class="res-domain-name">' + d + '</span>' +
+        '<span class="res-domain-frac">' + domains[d].correct + ' / ' + domains[d].total + '</span></div>' +
+        '<div class="res-bar-track"><div class="res-bar-fill" style="width:' + pct + '%"></div></div>';
+      domainsEl.appendChild(row);
+      requestAnimationFrame(function () {
+        row.querySelector('.res-bar-fill').style.width = pct + '%';
+      });
+    });
+  }
+
+  buildSidebar();
+  renderQuestion();
+})();
+</script>
+</body>
+</html>

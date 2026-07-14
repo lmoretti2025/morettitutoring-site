@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>The 12-Week SAT &amp; ACT Program — Moretti Test Prep &amp; Tutoring</title>
   <meta name="description" content="A structured 12-week, one-on-one SAT and ACT preparation program: hand-curated diagnostics, full-length practice tests, and a custom study plan built around your student.">
+  <meta property="og:title" content="The 12-Week SAT &amp; ACT Program — Moretti Test Prep &amp; Tutoring">
+  <meta property="og:description" content="A structured 12-week, one-on-one SAT and ACT preparation program built around your student.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://morettitutoring.com/prep-course.html">
+  <meta property="og:image" content="https://morettitutoring.com/logo-caladea-dark.png">
   <link rel="icon" type="image/png" sizes="512x512" href="target-icon-white.png">
   <link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -62,6 +67,7 @@
     /* ═══ HERO ═══ */
     #course-hero { background: var(--white); padding: 10rem 0 5rem; }
     .course-hed { font-family: var(--display); font-size: clamp(1.8rem, 3.4vw, 3rem); font-weight: 700; line-height: 1.25; color: var(--text); margin-bottom: 1.5rem; max-width: 800px; }
+    .course-lead { font-size: 0.92rem; line-height: 1.9; color: var(--mid); max-width: 760px; margin-bottom: 2.5rem; }
 
     /* ═══ INTERACTIVE TIMELINE ═══ */
     #timeline { background: var(--bg); }
@@ -78,11 +84,45 @@
     .tl-label.active { color: var(--red); }
     .tl-card { border: 1px solid var(--border); background: var(--white); padding: 2rem 2.25rem; transition: opacity 0.3s ease; }
     .tl-card.fade { opacity: 0; }
+    .tl-icon { width: 42px; height: 42px; margin-bottom: 0.6rem; }
+    .tl-icon .doodle { width: 42px; height: 42px; margin-bottom: 0; }
     .tl-meta { display: flex; align-items: baseline; gap: 1.1rem; margin-bottom: 0.8rem; flex-wrap: wrap; }
     .tl-week { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--red); }
     .tl-phase { font-family: var(--serif); font-style: italic; font-size: 0.85rem; color: var(--gold); }
     .tl-title { font-size: 1.1rem; font-weight: 700; color: var(--text); margin-bottom: 0.55rem; }
     .tl-body { font-size: 0.85rem; line-height: 1.8; color: var(--mid); max-width: 740px; }
+    .tl-testdates-hint { margin-top: 1.4rem; font-size: 0.8rem; color: var(--mid); }
+    .tl-testdates-hint a { color: var(--red); font-weight: 600; text-decoration: none; }
+    .tl-testdates-hint a:hover { text-decoration: underline; }
+
+    /* ═══ little animated doodles, ported over from the old Moretti
+       Method section, plus a couple of new ones for the icons that
+       didn't have an equivalent yet (a ticking clock, a spinning cycle) */
+    .doodle { display: block; width: 66px; height: 66px; overflow: visible; }
+    .dd-sweep { animation: dd-sweep 3.6s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+    @keyframes dd-sweep { 0%, 100% { transform: translate(-2px, 1px) rotate(-6deg); } 50% { transform: translate(2px, -1px) rotate(6deg); } }
+    .dd-pop { transform: scale(0); transform-box: fill-box; transform-origin: center; animation: dd-pop 4.2s ease-in-out infinite; }
+    @keyframes dd-pop { 0% { transform: scale(0); } 8% { transform: scale(1.18); } 13% { transform: scale(1); } 78% { transform: scale(1); } 88%, 100% { transform: scale(0); } }
+    .dd-rock { animation: dd-rock 1.6s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+    @keyframes dd-rock { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(3deg) translateY(-1.5px); } }
+    .dd-write { animation: dd-jitter 0.34s ease-in-out infinite; transform-box: fill-box; transform-origin: top center; }
+    @keyframes dd-jitter { 0%, 100% { transform: rotate(-2deg); } 50% { transform: rotate(2.5deg); } }
+    .dd-scribble { stroke-dasharray: 40; stroke-dashoffset: 40; animation: dd-scribble 3.4s ease-in-out infinite; }
+    @keyframes dd-scribble { 0% { stroke-dashoffset: 40; } 35% { stroke-dashoffset: 0; } 85% { stroke-dashoffset: 0; } 96%, 100% { stroke-dashoffset: 40; } }
+    /* dd-tick and dd-spin rotate around a specific pivot point (set per
+       element via inline transform-origin, in the icon's own viewBox
+       coordinates) rather than each element's own bounding box, since a
+       clock hand or a refresh arrow needs to pivot around the clock/circle
+       center, not its own center */
+    .dd-tick { animation: dd-tick 1.3s ease-in-out infinite; }
+    @keyframes dd-tick { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(28deg); } }
+    .dd-spin { animation: dd-spin 4.5s linear infinite; }
+    @keyframes dd-spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) {
+      .dd-sweep, .dd-pop, .dd-rock, .dd-write, .dd-scribble, .dd-tick, .dd-spin { animation: none; }
+      .dd-scribble { stroke-dashoffset: 0; }
+      .dd-pop { transform: none; }
+    }
 
     /* ═══ INCLUDED ═══ */
     #included { background-image: url(photo-1-web.jpg); background-size: cover; background-position: center; position: relative; }
@@ -90,13 +130,15 @@
     #included .container { position: relative; z-index: 1; }
     #included .eyebrow { color: var(--gold); }
     .inc-hed { font-family: var(--display); font-size: clamp(1.5rem, 2.7vw, 2.3rem); font-weight: 700; color: #fff; margin-bottom: 2.5rem; }
-    .inc-grid { display: grid; grid-template-columns: repeat(5, 1fr); border-top: 1px solid var(--border); border-left: 1px solid var(--border); }
+    .inc-grid { display: grid; grid-template-columns: repeat(6, 1fr); border-top: 1px solid var(--border); border-left: 1px solid var(--border); }
     .inc-card { padding: 1.5rem 1.4rem; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); background: var(--white); position: relative; transition: background 0.35s ease; }
     .inc-card::before { content: ''; position: absolute; top: -1px; left: 0; width: 0; height: 2px; background: var(--red); transition: width 0.4s ease; }
     .inc-card:hover::before { width: 100%; }
     .inc-card:hover { background: #FDFBF6; }
     .inc-title { font-size: 0.95rem; font-weight: 700; color: var(--text); margin-bottom: 0.45rem; }
     .inc-body { font-size: 0.78rem; line-height: 1.65; color: var(--mid); }
+    .inc-body a { color: var(--red); font-weight: 600; text-decoration: none; }
+    .inc-body a:hover { text-decoration: underline; }
 
     /* ═══ FAQ ═══ */
     #faq { background: var(--white); }
@@ -162,7 +204,8 @@
   <div class="container">
     <div class="eyebrow reveal">College Entrance Exams</div>
     <h1 class="course-hed reveal d1">The 12-Week SAT &amp; ACT Program.</h1>
-    <div class="reveal d2">
+    <p class="course-lead reveal d2">Most tutoring is an hour of homework help and a stack of practice problems. We're glad to provide exactly that when it's what your family needs — but our most successful students follow a program built on the Moretti Method: an individualized learning path across SAT and ACT prep, AP and IB exams, mathematics, English, and writing, built around how they learn. The goal is the same in every subject: simplify complex concepts, take the fear out of the material, and build the confidence to excel.</p>
+    <div class="reveal d3">
       <div class="tl-track" id="tl-track">
         <div class="tl-rail"></div>
         <div class="tl-fill" id="tl-fill"></div>
@@ -171,10 +214,12 @@
       <div class="tl-labels" id="tl-labels"></div>
       <p class="tl-hint">Click &amp; drag the target &nbsp;·&nbsp; or use the &larr; &rarr; arrow keys</p>
       <div class="tl-card" id="tl-card">
+        <div class="tl-icon" id="tl-icon"></div>
         <div class="tl-meta"><span class="tl-week" id="tl-week"></span><span class="tl-phase" id="tl-phase"></span></div>
         <h3 class="tl-title" id="tl-title"></h3>
         <p class="tl-body" id="tl-body"></p>
       </div>
+      <p class="tl-testdates-hint">Working backward from a target date? <a href="test-dates.html">See upcoming SAT &amp; ACT test dates &rarr;</a></p>
     </div>
   </div>
 </section>
@@ -190,10 +235,11 @@
     <h2 class="inc-hed reveal d1">Everything the plan needs. Nothing generic.</h2>
     <div class="inc-grid">
       <div class="inc-card reveal"><h3 class="inc-title">Weekly 1-on-1 sessions</h3><p class="inc-body">Twelve private sessions, in person or online — never a classroom pace.</p></div>
-      <div class="inc-card reveal d1"><h3 class="inc-title">Hand-curated testing</h3><p class="inc-body">Three full-length, timed SAT/ACT tests with materials from us — taken at home, scored and reviewed question by question.</p></div>
+      <div class="inc-card reveal d1"><h3 class="inc-title">Hand-curated testing</h3><p class="inc-body">Full-length, timed SAT/ACT tests with materials from us — taken at home, scored and reviewed question by question.</p></div>
       <div class="inc-card reveal d2"><h3 class="inc-title">Calibrated homework</h3><p class="inc-body">Matched to your student's ambition — as rigorous, and as far beyond the syllabus, as they want to go.</p></div>
       <div class="inc-card reveal d3"><h3 class="inc-title">Progress reports</h3><p class="inc-body">After every phase: what improved, what's next, and how the target score is tracking.</p></div>
       <div class="inc-card reveal d3"><h3 class="inc-title">Test-day strategy</h3><p class="inc-body">Pacing, guessing strategy, and the week-of routine — the details that protect points.</p></div>
+      <div class="inc-card reveal d3"><h3 class="inc-title">Your own student portal</h3><p class="inc-body">A private login with your diagnostic results, a curated practice folder, and college-prep guides. <a href="portal/index.html">Open the portal &rarr;</a></p></div>
     </div>
   </div>
 </section>
@@ -260,6 +306,9 @@
 <footer>
   <p class="footer-tagline">Moretti Test Prep &amp; Tutoring, located in Cranford NJ</p>
   <a href="tel:2012752791" class="footer-phone">(201) 275-2791</a>
+  <a href="test-dates.html" class="footer-back">Test Dates</a>
+  <a href="portal/index.html" class="footer-back">Student Login</a>
+  <a href="terms.html" class="footer-back">Terms of Service</a>
   <a href="index.html" class="footer-back">&larr; Back to Home</a>
 </footer>
 
@@ -276,18 +325,33 @@
   /* ═══ DRAGGABLE 12-WEEK TIMELINE ═══ */
   (function () {
     var pts = [
-      { w: 'Week 1', ph: 'Phase 01 · Diagnose', t: 'Full-length diagnostic', b: 'We provide the complete test materials and your student sits a full, timed SAT or ACT at home. They send us their answer sheet before the first session — we score it and break down performance question by question, not just what was missed, but why.' },
-      { w: 'Week 2', ph: 'Phase 01 · Diagnose', t: 'Goals & custom study plan', b: 'We set a target score based on your student\'s college list, then build the individualized 10-week plan: which content areas, in what order, with homework calibrated to their ambition.' },
-      { w: 'Weeks 3–4', ph: 'Phase 02 · Build', t: 'Math foundations', b: 'Algebra, geometry, data analysis, and the problem types the test returns to again and again — taught for understanding, not memorized tricks.' },
-      { w: 'Week 5', ph: 'Phase 02 · Build', t: 'Reading', b: 'Evidence-based reading strategy: how to move through passages efficiently, find the answer in the text, and stop second-guessing.' },
-      { w: 'Week 6', ph: 'Phase 02 · Build', t: 'Writing & grammar', b: 'The finite set of grammar and rhetoric rules the test actually uses — mastered systematically, since this is the fastest section to raise.' },
-      { w: 'Week 7', ph: 'Phase 03 · Sharpen', t: 'Advanced problem solving', b: 'The hardest 20% of questions — advanced math, dense passages, and trap answers — where top scores are separated from good ones.' },
-      { w: 'Week 8', ph: 'Phase 03 · Sharpen', t: 'Pacing & timing', b: 'Section-by-section timing drills: when to commit, when to skip and return, and how to finish every section with time to check.' },
-      { w: 'Week 9', ph: 'Phase 03 · Sharpen', t: 'Full-length practice test #2', b: 'A second timed test, taken at home with our materials and sent in the day before the session, measures growth against the diagnostic and recalibrates the plan for the final month.' },
-      { w: 'Week 10', ph: 'Phase 03 · Sharpen', t: 'Targeted weakness cycles', b: 'Everything the second test exposed gets its own focused review cycle — drilled until it holds under time pressure.' },
-      { w: 'Week 11', ph: 'Phase 04 · Peak', t: 'Full-length practice test #3', b: 'A final run-through at home under strict test-day conditions — we supply the materials and the exact timing protocol, your student sends in their answers, and we review the scored result together — so nothing about the real thing feels new.' },
-      { w: 'Week 12', ph: 'Phase 04 · Peak', t: 'Final review & test-day plan', b: 'Light review, a section-by-section game plan, and the routine for the week of the test. Your student walks in calm, prepared, and confident.' }
+      { w: 'Week 1', ph: 'Phase 01 · Diagnose', t: 'Full-length diagnostic', b: 'We provide the complete test materials and your student sits a full, timed SAT or ACT at home. They send us their answer sheet before the first session — we score it and break down performance question by question, not just what was missed, but why.', ic: 'test' },
+      { w: 'Week 2', ph: 'Phase 01 · Diagnose', t: 'Goals & custom study plan', b: 'We set a target score based on your student\'s college list, then build the individualized 10-week plan: which content areas, in what order, with homework calibrated to their ambition.', ic: 'goal' },
+      { w: 'Weeks 3–4', ph: 'Phase 02 · Build', t: 'Math foundations', b: 'Algebra, geometry, data analysis, and the problem types the test returns to again and again — taught for understanding, not memorized tricks.', ic: 'math' },
+      { w: 'Week 5', ph: 'Phase 02 · Build', t: 'Reading', b: 'Evidence-based reading strategy: how to move through passages efficiently, find the answer in the text, and stop second-guessing.', ic: 'reading' },
+      { w: 'Week 6', ph: 'Phase 02 · Build', t: 'Writing & grammar', b: 'The finite set of grammar and rhetoric rules the test actually uses — mastered systematically, since this is the fastest section to raise.', ic: 'writing' },
+      { w: 'Week 7', ph: 'Phase 03 · Sharpen', t: 'Advanced problem solving', b: 'The hardest 20% of questions — advanced math, dense passages, and trap answers — where top scores are separated from good ones.', ic: 'problem' },
+      { w: 'Week 8', ph: 'Phase 03 · Sharpen', t: 'Pacing & timing', b: 'Section-by-section timing drills: when to commit, when to skip and return, and how to finish every section with time to check.', ic: 'timing' },
+      { w: 'Week 9', ph: 'Phase 03 · Sharpen', t: 'Full-length practice test #2', b: 'A second timed test, taken at home with our materials and sent in the day before the session, measures growth against the diagnostic and recalibrates the plan for the final month.', ic: 'test' },
+      { w: 'Week 10', ph: 'Phase 03 · Sharpen', t: 'Targeted weakness cycles', b: 'Everything the second test exposed gets its own focused review cycle — drilled until it holds under time pressure.', ic: 'cycle' },
+      { w: 'Week 11', ph: 'Phase 04 · Peak', t: 'Full-length practice test #3', b: 'A final run-through at home under strict test-day conditions — we supply the materials and the exact timing protocol, your student sends in their answers, and we review the scored result together — so nothing about the real thing feels new.', ic: 'test' },
+      { w: 'Week 12', ph: 'Phase 04 · Peak', t: 'Final review & test-day plan', b: 'Light review, a section-by-section game plan, and the routine for the week of the test. Your student walks in calm, prepared, and confident.', ic: 'review' }
     ];
+
+    // one small animated doodle per icon type — several points share a
+    // type (all three full-length tests use "test") since they're the
+    // same idea repeated
+    var ICONS = {
+      test: '<svg class="doodle" viewBox="0 0 40 40" fill="none"><rect x="9" y="4" width="22" height="32" rx="2" stroke="var(--red)" stroke-width="1.8"/><line x1="14" y1="12" x2="26" y2="12" stroke="var(--red)" stroke-width="1.6" stroke-linecap="round"/><line x1="14" y1="18" x2="26" y2="18" stroke="var(--red)" stroke-width="1.6" stroke-linecap="round"/><line x1="14" y1="24" x2="21" y2="24" stroke="var(--red)" stroke-width="1.6" stroke-linecap="round"/><path class="dd-pop" d="M13 30l4 4 9-10" stroke="var(--gold)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>',
+      goal: '<svg class="doodle" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="14" stroke="var(--red)" stroke-width="1.6"/><circle cx="20" cy="20" r="8.5" stroke="var(--red)" stroke-width="1.6"/><circle class="dd-pop" cx="20" cy="20" r="3.4" fill="var(--gold)"/></svg>',
+      math: '<svg class="doodle" viewBox="0 0 40 40" fill="none"><path d="M7 6v28h27" stroke="var(--red)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path class="dd-write" d="M9 27c4-13 9-17 13-5 2 6 6 7 8 1" stroke="var(--gold)" stroke-width="2.2" stroke-linecap="round" fill="none"/></svg>',
+      reading: '<svg class="doodle" viewBox="0 0 40 40" fill="none"><path d="M20 11c-3-2.5-9-3.5-14-1.5v19c5-2 11-1 14 1.5 3-2.5 9-3.5 14-1.5v-19c-5-2-11-1-14 1.5z" stroke="var(--red)" stroke-width="1.5" stroke-linejoin="round"/><line x1="20" y1="11" x2="20" y2="30" stroke="var(--red)" stroke-width="1.3"/><path class="dd-scribble" d="M23.5 15h6.5M23.5 19h6.5M23.5 23h4.5" stroke="var(--gold)" stroke-width="1.7" stroke-linecap="round" fill="none"/></svg>',
+      writing: '<svg class="doodle" viewBox="0 0 40 40" fill="none"><g class="dd-write"><path d="M11 29l16-16 4 4-16 16-5 1 1-5z" stroke="var(--red)" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"/><line x1="24" y1="10" x2="28" y2="14" stroke="var(--red)" stroke-width="1.7"/></g><path class="dd-scribble" d="M9 34h14" stroke="var(--gold)" stroke-width="2.2" stroke-linecap="round" fill="none"/></svg>',
+      problem: '<svg class="doodle" viewBox="0 0 40 40" fill="none"><path d="M20 6c-6 0-10 4.5-10 10 0 4 2 6.5 4 8.5v4h12v-4c2-2 4-4.5 4-8.5 0-5.5-4-10-10-10z" stroke="var(--red)" stroke-width="1.6" stroke-linejoin="round"/><line x1="16" y1="32" x2="24" y2="32" stroke="var(--red)" stroke-width="1.6" stroke-linecap="round"/><line x1="17" y1="35" x2="23" y2="35" stroke="var(--red)" stroke-width="1.6" stroke-linecap="round"/><circle class="dd-pop" cx="20" cy="16" r="2.6" fill="var(--gold)"/></svg>',
+      timing: '<svg class="doodle" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="21" r="14" stroke="var(--red)" stroke-width="1.6"/><line x1="20" y1="21" x2="20" y2="11" stroke="var(--red)" stroke-width="1.8" stroke-linecap="round"/><line class="dd-tick" x1="20" y1="21" x2="27" y2="21" stroke="var(--gold)" stroke-width="2" stroke-linecap="round" style="transform-origin:20px 21px;"/></svg>',
+      cycle: '<svg class="doodle" viewBox="0 0 40 40" fill="none"><g class="dd-spin" style="transform-origin:20px 20px;"><path d="M28 14a10 10 0 1 1 -1.6 -2.6" stroke="var(--red)" stroke-width="2" stroke-linecap="round" fill="none"/><path d="M28 7v7h-7" stroke="var(--red)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></g></svg>',
+      review: '<svg class="doodle" viewBox="0 0 40 40" fill="none"><path d="M11 6v30" stroke="var(--red)" stroke-width="1.8" stroke-linecap="round"/><path class="dd-pop" d="M11 8c6-3 10 3 16 0v14c-6 3-10-3-16 0z" fill="var(--gold)" opacity="0.9"/></svg>'
+    };
 
     var track  = document.getElementById('tl-track');
     if (!track) return;
@@ -295,6 +359,7 @@
     var knob   = document.getElementById('tl-knob');
     var labels = document.getElementById('tl-labels');
     var card   = document.getElementById('tl-card');
+    var iconEl = document.getElementById('tl-icon');
     var weekEl = document.getElementById('tl-week');
     var phEl   = document.getElementById('tl-phase');
     var tEl    = document.getElementById('tl-title');
@@ -325,6 +390,7 @@
       phEl.textContent   = pts[i].ph;
       tEl.textContent    = pts[i].t;
       bEl.textContent    = pts[i].b;
+      if (iconEl) iconEl.innerHTML = ICONS[pts[i].ic] || '';
     }
 
     function setVisuals(i) {
