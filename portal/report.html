@@ -32,10 +32,22 @@
   .bar-fill { height: 100%; background: var(--gold); border-radius: 4px; }
   .bar-fill.weak { background: var(--red); }
   .bar-fill.strong { background: var(--green); }
-  .pie-flex { display: flex; align-items: center; gap: 18px; }
-  .legend { font-size: 10px; }
-  .legend div { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
-  .legend span.sw { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+  .score-badge { display: flex; gap: 22px; align-items: baseline; background: #f7f4ef; border: 1px solid var(--border); padding: 10px 16px; margin-bottom: 4px; }
+  .score-badge .sb-num { font-family: 'Caladea', serif; font-size: 30px; font-weight: 700; color: var(--red); }
+  .score-badge .sb-lab { font-size: 9.5px; color: var(--faint); letter-spacing: 0.08em; text-transform: uppercase; }
+  .score-badge .sb-note { font-size: 9px; color: var(--faint); margin-left: auto; align-self: center; max-width: 260px; text-align: right; }
+  .section-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-bottom: 4px; }
+  .section-card { border: 1px solid var(--border); padding: 10px 12px; }
+  .section-card .sc-hed { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+  .section-card .sc-title { font-family: 'Caladea', serif; font-size: 13px; font-weight: 700; }
+  .section-card .sc-score { font-size: 11px; color: var(--mid); }
+  .section-card .sc-incorrect { font-size: 10px; color: var(--red); font-weight: 600; margin-bottom: 8px; }
+  .sc-pie-flex { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+  .sc-legend { font-size: 9px; flex: 1; }
+  .sc-legend div { display: flex; align-items: center; gap: 5px; margin-bottom: 3px; }
+  .sc-legend span.sw { width: 8px; height: 8px; border-radius: 2px; display: inline-block; flex-shrink: 0; }
+  .section-card .sc-missed { font-size: 9.5px; color: var(--mid); line-height: 1.6; margin-top: 6px; }
+  .section-card .sc-missed strong { color: var(--ink); }
   .takeaways { list-style: none; }
   .takeaways li { font-size: 11px; line-height: 1.65; color: var(--mid); padding: 4px 0 4px 16px; position: relative; }
   .takeaways li::before { content: '◆'; position: absolute; left: 0; top: 8px; font-size: 6px; color: var(--gold); }
@@ -70,16 +82,15 @@
     </div>
   </div>
   <div class="top" id="donuts"></div>
+  <div id="score-badge"></div>
+  <div class="sec-hed">Section breakdown</div>
+  <div id="section-breakdown"></div>
   <div class="cols">
-    <div class="col">
-      <div class="sec-hed">Where the missed points live</div>
-      <div class="pie-flex"><canvas id="pie" width="150" height="150"></canvas><div class="legend" id="pie-legend"></div></div>
-      <div class="sec-hed">Skill areas</div>
-      <div id="domains"></div>
-    </div>
     <div class="col">
       <div class="sec-hed">Priority areas — fastest score gains</div>
       <div id="priorities"></div>
+    </div>
+    <div class="col">
       <div class="sec-hed">Strengths — keep sharp</div>
       <div id="strengths"></div>
     </div>
@@ -104,7 +115,7 @@
 <script>
 (function () {
   'use strict';
-  var LETTERS = ['A', 'B', 'C', 'D'];
+  var LETTERS = ['A', 'B', 'C', 'D', 'E'];
   function fail() { document.getElementById('err').style.display = 'block'; }
 
   var data;
@@ -131,6 +142,18 @@
     var bank = window.SECTION_BANKS[sec.k];
     if (!bank) return;
     var qs = bank.questions, c = 0, rows = [];
+    var secDomains = {}; // this section's own domain/skill breakdown — kept
+                          // separate from the global domains{}/skills{} so
+                          // the report can show "what's weak within THIS
+                          // section" instead of mixing domains across
+                          // completely different sections (e.g. ACT Math's
+                          // "Pre-Algebra" next to ACT Reading's "Reading").
+    // Distractor tracking: on missed multiple-choice questions, which
+    // wrong letter did the student actually pick? A lopsided pattern here
+    // (e.g. always (C)) is a much more teachable, concrete signal than a
+    // skill percentage — it points at a specific trap-answer habit rather
+    // than a vague topic weakness.
+    var secDistractors = {}, secMissedMc = 0;
     qs.forEach(function (q, i) {
       var given = sec.a[i];
       var ok = isCorrect(q, given);
@@ -142,10 +165,18 @@
       var dom = q.domain, sk = q.skill || q.domain;
       (domains[dom] = domains[dom] || { c: 0, t: 0 }).t++; if (ok) domains[dom].c++;
       (skills[sk] = skills[sk] || { c: 0, t: 0, dom: dom }).t++; if (ok) skills[sk].c++;
+      var sd = (secDomains[dom] = secDomains[dom] || { c: 0, t: 0, missedSkills: {} });
+      sd.t++; if (ok) sd.c++;
+      if (!ok) sd.missedSkills[sk] = (sd.missedSkills[sk] || 0) + 1;
+      if (!ok && q.type === 'mc' && given !== null && given !== undefined) {
+        secMissedMc++;
+        var chosenLetter = LETTERS[given];
+        secDistractors[chosenLetter] = (secDistractors[chosenLetter] || 0) + 1;
+      }
       var gTxt = (given === null || given === undefined) ? '—' : (q.type === 'mc' ? LETTERS[given] : (given.raw || String(given)));
       rows.push({ n: i + 1, dom: dom, sk: sk, given: gTxt, ok: ok, marked: !!wasMarked });
     });
-    sections.push({ label: bank.label.replace(' (optional on the real ACT)', ''), c: c, t: qs.length, rows: rows });
+    sections.push({ key: sec.k, label: bank.label.replace(' (optional on the real ACT)', ''), c: c, t: qs.length, rows: rows, domains: secDomains, distractors: secDistractors, missedMc: secMissedMc });
   });
 
   var pct = totalQ ? Math.round(totalC / totalQ * 100) : 0;
@@ -153,7 +184,7 @@
   var dateStr = data.dt || new Date().toISOString().slice(0, 10);
 
   document.getElementById('r-title').textContent = data.n + ' — ' + data.t + ' Diagnostic Report';
-  document.getElementById('r-sub').textContent = 'Administered ' + dateStr + ' · Moretti student portal · Key: ' + (data.k || '');
+  document.getElementById('r-sub').textContent = 'Administered ' + dateStr + ' · Moretti student portal';
   document.getElementById('r-sub2').textContent = data.n + ' · ' + data.t + ' Diagnostic · ' + dateStr;
 
   /* donuts: overall + each section */
@@ -185,27 +216,6 @@
   donuts.appendChild(donut('Overall', totalC, totalQ, true));
   sections.forEach(function (s2) { donuts.appendChild(donut(s2.label, s2.c, s2.t, false)); });
 
-  /* pie: share of total misses by domain */
-  var missEntries = Object.keys(domains).map(function (d) { return { name: d, miss: domains[d].t - domains[d].c }; }).filter(function (e) { return e.miss > 0; });
-  missEntries.sort(function (a, b) { return b.miss - a.miss; });
-  var totalMiss = missEntries.reduce(function (a, e) { return a + e.miss; }, 0);
-  var palette = ['#B0271C', '#C9A84C', '#243447', '#A97C50', '#5E8B6F', '#7a7a7a', '#d98c76', '#8888b0'];
-  var pieCtx = document.getElementById('pie').getContext('2d');
-  var ang = -Math.PI / 2;
-  missEntries.forEach(function (e, i) {
-    var slice = totalMiss ? (e.miss / totalMiss) * Math.PI * 2 : 0;
-    pieCtx.fillStyle = palette[i % palette.length];
-    pieCtx.beginPath(); pieCtx.moveTo(75, 75); pieCtx.arc(75, 75, 68, ang, ang + slice); pieCtx.closePath(); pieCtx.fill();
-    ang += slice;
-  });
-  var legend = document.getElementById('pie-legend');
-  missEntries.forEach(function (e, i) {
-    var d2 = document.createElement('div');
-    d2.innerHTML = '<span class="sw" style="background:' + palette[i % palette.length] + '"></span>' + e.name + ' — ' + e.miss + ' missed (' + Math.round(e.miss / totalMiss * 100) + '%)';
-    legend.appendChild(d2);
-  });
-  if (!missEntries.length) legend.innerHTML = '<div>No questions missed.</div>';
-
   function barRow(label, c, t, cls) {
     var p2 = t ? Math.round(c / t * 100) : 0;
     var row = document.createElement('div');
@@ -213,15 +223,181 @@
     row.innerHTML = '<div class="bar-label"><span>' + label + '</span><span>' + c + '/' + t + ' (' + p2 + '%)</span></div><div class="bar-track"><div class="bar-fill ' + (cls || '') + '" style="width:' + p2 + '%"></div></div>';
     return row;
   }
-  var domEl = document.getElementById('domains');
-  Object.keys(domains).forEach(function (d) {
-    var v = domains[d], pp = v.c / v.t;
-    domEl.appendChild(barRow(d, v.c, v.t, pp < 0.5 ? 'weak' : (pp >= 0.75 ? 'strong' : '')));
-  });
 
-  var skillEntries = Object.keys(skills).map(function (k) { var v = skills[k]; return { name: k, c: v.c, t: v.t, pct: v.t ? v.c / v.t : 0 }; });
-  skillEntries.sort(function (a, b) { return a.pct - b.pct; });
-  var priorities = skillEntries.filter(function (e) { return e.pct < 0.7; }).slice(0, 7);
+  /* ═══ APPROXIMATE SCALED SCORING ═══
+     The SAT (200–800 per section, 400–1600 composite) and ACT (1–36 per
+     section, 1–36 composite) both use non-linear curves that vary test
+     to test — the real curve isn't published in advance. These tables
+     approximate the *typical* published official-practice-test curves
+     (percent-correct -> scaled score) closely enough for a diagnostic
+     estimate. They're explicitly labeled "approximate" in the UI. */
+  var ACT_CURVE = [
+    [0, 1], [4, 6], [8, 8], [12, 9], [16, 10], [20, 11], [24, 12], [28, 13],
+    [32, 14], [36, 15], [40, 16], [44, 17], [48, 18], [51, 19], [54, 20],
+    [57, 21], [60, 22], [63, 23], [66, 24], [69, 25], [71, 26], [74, 27],
+    [77, 28], [80, 29], [83, 30], [86, 31], [89, 32], [91, 33], [94, 34],
+    [97, 35], [100, 36]
+  ];
+  var SAT_CURVE = [
+    [0, 200], [5, 210], [10, 240], [15, 270], [20, 300], [25, 330],
+    [30, 360], [35, 390], [40, 420], [45, 450], [50, 480], [55, 510],
+    [60, 540], [65, 570], [70, 600], [75, 640], [80, 670], [85, 700],
+    [90, 730], [95, 770], [100, 800]
+  ];
+  function scaleFromPct(pct, curve) {
+    if (pct <= curve[0][0]) return curve[0][1];
+    for (var i = 1; i < curve.length; i++) {
+      if (pct <= curve[i][0]) {
+        var lo = curve[i - 1], hi = curve[i];
+        var frac = (pct - lo[0]) / (hi[0] - lo[0]);
+        return Math.round(lo[1] + frac * (hi[1] - lo[1]));
+      }
+    }
+    return curve[curve.length - 1][1];
+  }
+  function roundToTen(n) { return Math.round(n / 10) * 10; }
+
+  var badge = document.getElementById('score-badge');
+  if (data.t === 'SAT') {
+    var rw = sections.filter(function (s) { return s.key === 'reading-writing'; })[0];
+    var mathSec = sections.filter(function (s) { return s.key === 'math'; })[0];
+    var rwScaled = rw ? roundToTen(scaleFromPct(rw.c / rw.t * 100, SAT_CURVE)) : null;
+    var mathScaled = mathSec ? roundToTen(scaleFromPct(mathSec.c / mathSec.t * 100, SAT_CURVE)) : null;
+    var composite = (rwScaled !== null && mathScaled !== null) ? rwScaled + mathScaled : null;
+    badge.className = 'score-badge';
+    badge.innerHTML =
+      (composite !== null ? '<div><div class="sb-num">' + composite + '</div><div class="sb-lab">Est. Composite (400&ndash;1600)</div></div>' : '') +
+      (rwScaled !== null ? '<div><div class="sb-num" style="font-size:20px;">' + rwScaled + '</div><div class="sb-lab">Reading &amp; Writing (200&ndash;800)</div></div>' : '') +
+      (mathScaled !== null ? '<div><div class="sb-num" style="font-size:20px;">' + mathScaled + '</div><div class="sb-lab">Math (200&ndash;800)</div></div>' : '') +
+      '<div class="sb-note">Estimated from this diagnostic using a typical official-practice-test scoring curve — the real SAT curve varies by test and isn\'t published in advance.</div>';
+  } else if (data.t === 'ACT') {
+    var scaledScores = sections.map(function (s) { return scaleFromPct(s.c / s.t * 100, ACT_CURVE); });
+    var actComposite = scaledScores.length ? Math.round(scaledScores.reduce(function (a, b) { return a + b; }, 0) / scaledScores.length) : null;
+    badge.className = 'score-badge';
+    badge.innerHTML =
+      (actComposite !== null ? '<div><div class="sb-num">' + actComposite + '</div><div class="sb-lab">Est. Composite (1&ndash;36)</div></div>' : '') +
+      sections.map(function (s, i) { return '<div><div class="sb-num" style="font-size:20px;">' + scaledScores[i] + '</div><div class="sb-lab">' + s.label + ' (1&ndash;36)</div></div>'; }).join('') +
+      '<div class="sb-note">Estimated from this diagnostic using a typical official-practice-test scoring curve — the real ACT curve varies by test and isn\'t published in advance.</div>';
+  } else {
+    badge.style.display = 'none';
+  }
+
+  /* ═══ SECTION BREAKDOWN — chunked by section, not lumped together ═══
+     Each section gets its own card: total missed, a pie showing which
+     domains those misses fall into (within THAT section only), and the
+     specific skills missed inside each weak domain — so "Math" and
+     "Reading" results never get mixed into one combined chart. */
+  var palette = ['#B0271C', '#C9A84C', '#243447', '#A97C50', '#5E8B6F', '#7a7a7a', '#d98c76', '#8888b0'];
+
+  function sectionPie(s5) {
+    var wrap = document.createElement('div');
+    wrap.className = 'sc-pie-flex';
+    var cv = document.createElement('canvas');
+    cv.width = 84; cv.height = 84;
+    wrap.appendChild(cv);
+    var legend = document.createElement('div');
+    legend.className = 'sc-legend';
+    wrap.appendChild(legend);
+
+    // Sliced by skill (the "subclassification" within a section), not by
+    // domain — domain is often uniform across an entire section (every
+    // ACT Reading question is domain "Reading"), so a domain-level pie
+    // would just be one solid color. Skill is the level of detail that
+    // actually tells you what to work on.
+    var skillMiss = {};
+    Object.keys(s5.domains).forEach(function (d) {
+      var missedSkills = s5.domains[d].missedSkills;
+      Object.keys(missedSkills).forEach(function (sk) {
+        skillMiss[sk] = (skillMiss[sk] || 0) + missedSkills[sk];
+      });
+    });
+    var missEntries = Object.keys(skillMiss).map(function (sk) {
+      return { name: sk, miss: skillMiss[sk] };
+    }).sort(function (a, b) { return b.miss - a.miss; });
+    var totalMiss = missEntries.reduce(function (a, e) { return a + e.miss; }, 0);
+
+    var ctx = cv.getContext('2d');
+    if (!totalMiss) {
+      ctx.fillStyle = '#eee7da';
+      ctx.beginPath(); ctx.arc(42, 42, 38, 0, Math.PI * 2); ctx.fill();
+      legend.innerHTML = '<div>Nothing missed in this section.</div>';
+      return wrap;
+    }
+    var ang = -Math.PI / 2;
+    missEntries.forEach(function (e, i) {
+      var slice = (e.miss / totalMiss) * Math.PI * 2;
+      ctx.fillStyle = palette[i % palette.length];
+      ctx.beginPath(); ctx.moveTo(42, 42); ctx.arc(42, 42, 38, ang, ang + slice); ctx.closePath(); ctx.fill();
+      ang += slice;
+    });
+    missEntries.forEach(function (e, i) {
+      var row = document.createElement('div');
+      row.innerHTML = '<span class="sw" style="background:' + palette[i % palette.length] + '"></span>' + e.name + ' — ' + e.miss + ' (' + Math.round(e.miss / totalMiss * 100) + '%)';
+      legend.appendChild(row);
+    });
+    return wrap;
+  }
+
+  var sbEl = document.getElementById('section-breakdown');
+  var cardsWrap = document.createElement('div');
+  cardsWrap.className = 'section-cards';
+  sections.forEach(function (s5) {
+    var card = document.createElement('div');
+    card.className = 'section-card';
+    var pctS = s5.t ? Math.round(s5.c / s5.t * 100) : 0;
+    var incorrectN = s5.t - s5.c;
+    var head = document.createElement('div');
+    head.className = 'sc-hed';
+    head.innerHTML = '<span class="sc-title">' + s5.label + '</span><span class="sc-score">' + s5.c + '/' + s5.t + ' (' + pctS + '%)</span>';
+    card.appendChild(head);
+    var incEl = document.createElement('div');
+    incEl.className = 'sc-incorrect';
+    incEl.textContent = incorrectN + ' incorrect';
+    card.appendChild(incEl);
+    card.appendChild(sectionPie(s5));
+
+    // Distractor-pattern flag: only worth surfacing when there's enough
+    // missed MC volume to mean something (not 1 unlucky guess) and one
+    // letter clearly dominates the wrong answers picked.
+    var distEntries = Object.keys(s5.distractors || {}).map(function (l) { return { letter: l, n: s5.distractors[l] }; }).sort(function (a, b) { return b.n - a.n; });
+    if (s5.missedMc >= 3 && distEntries.length && distEntries[0].n / s5.missedMc >= 0.5) {
+      var distNote = document.createElement('div');
+      distNote.className = 'sc-missed';
+      distNote.innerHTML = '<strong>Pattern:</strong> picked (' + distEntries[0].letter + ') on ' + distEntries[0].n + ' of ' + s5.missedMc + ' missed multiple-choice questions here — worth checking together for a specific trap-answer habit, not just a topic gap.';
+      card.appendChild(distNote);
+    }
+
+    var domEntries = Object.keys(s5.domains).map(function (d) {
+      var v = s5.domains[d];
+      return { name: d, c: v.c, t: v.t, pct: v.t ? v.c / v.t : 0, missedSkills: v.missedSkills };
+    }).sort(function (a, b) { return a.pct - b.pct; });
+    domEntries.forEach(function (de) {
+      card.appendChild(barRow(de.name, de.c, de.t, de.pct < 0.5 ? 'weak' : (de.pct >= 0.75 ? 'strong' : '')));
+      var missedList = Object.keys(de.missedSkills);
+      if (missedList.length) {
+        var mdiv = document.createElement('div');
+        mdiv.className = 'sc-missed';
+        mdiv.innerHTML = '<strong>Missed on:</strong> ' + missedList.map(function (sk) { return sk + ' (' + de.missedSkills[sk] + ')'; }).join(', ');
+        card.appendChild(mdiv);
+      }
+    });
+    cardsWrap.appendChild(card);
+  });
+  sbEl.appendChild(cardsWrap);
+
+  var skillEntries = Object.keys(skills).map(function (k) { var v = skills[k]; return { name: k, c: v.c, t: v.t, pct: v.t ? v.c / v.t : 0, missed: v.t - v.c }; });
+  // Priority ranking is weighted by missed-question COUNT first, percentage
+  // second — not the other way around. A skill that's 0/1 (0%) isn't a
+  // reliable pattern yet, but a skill that's 4/9 (44%) across nine tries
+  // is, and it also represents more recoverable points. Sorting by raw
+  // percentage alone let single missed questions crowd out the areas that
+  // actually move the score. Skills tested only once are still shown, but
+  // only after every skill with real sample size is accounted for.
+  var reliableWeak = skillEntries.filter(function (e) { return e.t >= 2 && e.pct < 0.75; })
+    .sort(function (a, b) { return (b.missed - a.missed) || (a.pct - b.pct); });
+  var singleSampleWeak = skillEntries.filter(function (e) { return e.t === 1 && e.pct < 1; })
+    .sort(function (a, b) { return a.pct - b.pct; });
+  var priorities = reliableWeak.concat(singleSampleWeak).slice(0, 7);
   var strengths = skillEntries.filter(function (e) { return e.pct >= 0.75 && e.t >= 2; }).sort(function (a, b) { return b.pct - a.pct; }).slice(0, 5);
   var priEl = document.getElementById('priorities');
   priorities.forEach(function (e) { priEl.appendChild(barRow(e.name, e.c, e.t, 'weak')); });

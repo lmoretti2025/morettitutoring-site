@@ -70,6 +70,11 @@
 
   /* ═══ MENU SCREEN ═══ */
   .menu-greeting { font-family: var(--display); font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 700; color: var(--text); text-align: center; margin-bottom: 0.6rem; }
+  .next-session-card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 1.1rem 1.4rem; margin: 0 auto 1.6rem; max-width: 460px; text-align: center; }
+  .ns-label { font-family: var(--serif); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--mid); margin-bottom: 0.35rem; }
+  .ns-date { font-family: var(--display); font-weight: 700; font-size: 1.15rem; color: var(--text); }
+  .ns-join { display: inline-block; margin-top: 0.7rem; font-family: var(--serif); font-size: 0.85rem; color: var(--red); text-decoration: none; font-weight: 600; }
+  .ns-join:hover { text-decoration: underline; }
   .menu-sub { font-size: 0.88rem; color: var(--mid); text-align: center; margin-bottom: 2.5rem; }
   .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
   .menu-card { background: var(--white); border: 1px solid var(--border); padding: 1.75rem 1.5rem; cursor: pointer; text-align: left; transition: border-color 0.2s ease, transform 0.2s ease; position: relative; overflow: hidden; }
@@ -105,10 +110,61 @@
   .intro-list { list-style: none; margin: 0 0 2.25rem; padding: 0; }
   .intro-list li { font-size: 0.85rem; color: var(--mid); line-height: 1.9; padding-left: 1.4rem; position: relative; margin-bottom: 0.4rem; }
   .intro-list li::before { content: '◆'; position: absolute; left: 0; top: 0.35rem; font-size: 0.45rem; color: var(--gold); }
+  .intro-directions { font-size: 0.82rem; color: var(--mid); line-height: 1.85; text-align: left; margin-bottom: 1.5rem; }
+  .intro-directions p { margin-bottom: 1rem; }
+  .intro-directions p:last-child { margin-bottom: 0; }
+  .intro-reference-link { display: inline-flex; align-items: center; gap: 0.4rem; font-family: var(--hel); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--red); text-decoration: none; margin-bottom: 1.75rem; border-bottom: 1px solid var(--red); padding-bottom: 0.15rem; }
+  .intro-reference-link:hover { opacity: 0.75; }
+
+  /* ═══ REFERENCE SHEET MODAL (accessible from intro + mid-test) ═══ */
+  .ref-overlay { display: none; position: fixed; inset: 0; background: rgba(17,17,17,0.55); z-index: 600; align-items: center; justify-content: center; padding: 2rem 1.25rem; }
+  .ref-overlay.active { display: flex; }
+  .ref-modal { background: var(--white); width: 100%; max-width: 760px; max-height: 86vh; overflow-y: auto; padding: 2rem 2.25rem 2.5rem; position: relative; }
+  .ref-modal-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid var(--red); padding-bottom: 1rem; margin-bottom: 1.5rem; }
+  .ref-modal-title { font-family: var(--display); font-size: 1.15rem; font-weight: 700; color: var(--text); }
+  .ref-close { background: none; border: none; font-size: 1.4rem; line-height: 1; color: var(--mid); cursor: pointer; padding: 0.25rem 0.5rem; }
+  .ref-close:hover { color: var(--red); }
+  .ref-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem 1rem; margin-bottom: 1.75rem; }
+  .ref-cell { text-align: center; }
+  .ref-cell svg { max-width: 100%; height: auto; }
+  .ref-formula { font-family: var(--serif); font-size: 0.82rem; color: var(--text); margin-top: 0.5rem; line-height: 1.6; }
+  .ref-special { grid-column: span 3; }
+  .ref-special-wrap { display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; }
+  .ref-special-cell { text-align: center; width: 190px; }
+  .ref-special-cell svg { width: 100%; height: auto; }
+  .ref-special-label { font-family: var(--serif); font-size: 0.78rem; color: var(--mid); margin-top: 0.4rem; }
+  .ref-facts { border-top: 1px solid var(--border); padding-top: 1.25rem; font-size: 0.82rem; color: var(--mid); line-height: 1.9; }
+  @media (max-width: 560px) {
+    .ref-grid { grid-template-columns: repeat(2, 1fr); }
+    .ref-special { grid-column: span 2; }
+  }
 
   /* ═══ DIAGNOSTIC SHELL (reuses portal top bar) ═══ */
   #dx-screen.screen { display: none; align-items: stretch; padding: 0; min-height: 100vh; }
   #dx-screen.active { display: flex; flex-direction: column; }
+
+  /* ═══ PASSAGE MODE (ACT English/Reading) — full passage pinned on the
+     left, scrollable independently; question card on the right. Only
+     shown when the active question carries a `passageId`. ═══ */
+  #dx-shell.passage-mode #dx-main { align-items: stretch; justify-content: flex-start; padding: 0; gap: 0; }
+  .dx-passage-pane { width: 46%; max-width: 620px; flex-shrink: 0; border-right: 1px solid var(--border); background: var(--white); height: calc(100vh - 62px - 68px); overflow-y: auto; padding: 2.5rem 2.25rem; display: none; }
+  #dx-shell.passage-mode .dx-passage-pane { display: block; }
+  #dx-shell.passage-mode .dx-card-wrap { max-width: 560px; padding: 3rem 2.5rem; margin: 0 auto; }
+  .dx-passage-title { font-family: var(--display); font-weight: 700; font-size: 1.05rem; color: var(--text); margin-bottom: 0.3rem; }
+  .dx-passage-kicker { font-family: var(--serif); font-size: 0.78rem; color: var(--mid); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 1.3rem; }
+  .dx-passage-body { font-family: var(--serif); font-size: 0.98rem; line-height: 1.85; color: var(--text); }
+  .dx-passage-body p { margin-bottom: 1.1rem; }
+  .dx-passage-body .dx-ref-num { display: inline-block; min-width: 1.1em; font-weight: 700; color: var(--red); font-size: 0.78em; vertical-align: super; margin: 0 0.05em; }
+  .dx-passage-body .dx-ref-mark { text-decoration: underline; text-decoration-color: var(--red); text-decoration-thickness: 2px; text-underline-offset: 2px; }
+  .dx-passage-body .dx-ref-mark.active-ref, .dx-passage-body .dx-ref-num.active-ref { background: rgba(178,34,52,0.12); border-radius: 2px; }
+  .dx-passage-body { cursor: text; }
+  .dx-user-highlight { background: #fff3a0; cursor: pointer; border-radius: 1px; }
+  .dx-user-highlight:hover { background: #ffe985; }
+  @media (max-width: 900px) {
+    #dx-shell.passage-mode #dx-main { flex-direction: column; }
+    .dx-passage-pane { width: 100%; max-width: none; height: 42vh; border-right: none; border-bottom: 1px solid var(--border); padding: 1.5rem 1.4rem; }
+    #dx-shell.passage-mode .dx-card-wrap { padding: 1.75rem 1.4rem; }
+  }
   #dx-topbar { padding: 0.9rem 2rem; display: flex; align-items: center; justify-content: space-between; background: var(--red); margin-top: 62px; }
   .dx-brand { font-family: var(--display); font-size: 0.95rem; font-weight: 700; color: #fff; }
   .dx-brand span { display: block; font-family: var(--hel); font-size: 0.55rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.65); margin-top: 0.2rem; }
@@ -116,6 +172,13 @@
   .dx-progress-track { width: 150px; height: 4px; background: rgba(255,255,255,0.25); }
   .dx-progress-fill { height: 100%; width: 0%; background: var(--gold); transition: width 0.5s cubic-bezier(0.16,1,0.3,1); }
   .dx-progress-label { font-size: 0.6rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.75); white-space: nowrap; }
+  .dx-reference-btn { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.5); color: #fff; font-family: var(--hel); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.5rem 0.9rem; cursor: pointer; transition: background 0.2s; white-space: nowrap; }
+  .dx-reference-btn:hover { background: rgba(255,255,255,0.22); }
+  .dx-timer { font-family: var(--hel); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.06em; color: #fff; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.35); padding: 0.4rem 0.75rem; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .dx-timer.dx-timer-warn { background: rgba(255,255,255,0.95); color: var(--red); border-color: #fff; animation: dxTimerPulse 1.4s ease-in-out infinite; }
+  @keyframes dxTimerPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+  .dx-timer-toast { position: fixed; top: 78px; left: 50%; transform: translateX(-50%); z-index: 60; background: var(--red); color: #fff; font-family: var(--hel); font-size: 0.8rem; font-weight: 600; letter-spacing: 0.03em; padding: 0.85rem 1.5rem; box-shadow: 0 8px 24px rgba(0,0,0,0.25); animation: dxToastIn 0.35s cubic-bezier(0.16,1,0.3,1); }
+  @keyframes dxToastIn { from { opacity: 0; transform: translate(-50%, -12px); } to { opacity: 1; transform: translate(-50%, 0); } }
 
   #dx-shell { display: flex; flex: 1; }
   #dx-main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 3rem 2.5rem; }
@@ -256,6 +319,11 @@
      ===================================================================== -->
 <script>
   window.APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwsLMGq3lhBEPObcas0k8gVS67NX9y4wXKG6RgzKtlBOT2SXfREK6vBpvvM19w9s1m6/exec';
+
+  // TODO: replace with the real static Google Meet link, e.g.
+  // 'https://meet.google.com/abc-defg-hij'. Left as a placeholder — the
+  // "Join your meeting here" link on the portal home screen uses this.
+  window.GOOGLE_MEET_URL = 'https://meet.google.com/PLACEHOLDER-REPLACE-ME';
 </script>
 
 <nav id="main-nav">
@@ -279,7 +347,7 @@
 
     <div id="email-step" style="display:none;">
       <h1 class="panel-hed">One more thing<span id="email-step-name"></span></h1>
-      <p class="panel-sub">First time using this key — enter your email and we'll automatically share your files with you. No need to wait on Luca.</p>
+      <p class="panel-sub">First time using this key — enter your email and we'll automatically share your files with you.</p>
       <input type="email" class="key-input" id="email-input" placeholder="you@email.com" autocomplete="email" style="text-transform:none;">
       <p class="key-error" id="email-error">That doesn't look like a valid email — double-check it and try again.</p>
       <button class="key-btn" id="email-submit">Unlock My Files</button>
@@ -294,6 +362,11 @@
     <div class="kicker">Welcome</div>
     <h1 class="menu-greeting" id="menu-greeting">Hey there.</h1>
     <p class="menu-sub">What are you working on right now?</p>
+    <div class="next-session-card" id="next-session-card" style="display:none;">
+      <div class="ns-label" id="ns-label">Your next scheduled session is on:</div>
+      <div class="ns-date" id="ns-date">&mdash;</div>
+      <a href="#" class="ns-join" id="ns-join" style="display:none;" target="_blank" rel="noopener">Is it online? Join your meeting here &rarr;</a>
+    </div>
     <div class="menu-grid">
       <div class="menu-card" data-route="diagnostic">
         <span class="menu-card-icon">01</span>
@@ -362,14 +435,159 @@
     <div class="kicker" id="intro-kicker">SAT Diagnostic</div>
     <h1 class="panel-hed" id="intro-hed">Math section — 75 questions.</h1>
     <p class="panel-sub">No pressure — this just tells Luca where to focus. Take your time.</p>
+    <div class="intro-directions" id="intro-directions"></div>
+    <a href="#" class="intro-reference-link" id="intro-reference-link" style="display:none;">View Reference Sheet &rarr;</a>
     <ul class="intro-list">
-      <li id="intro-calc-note">Calculator allowed on every question — you can use the free <a href="https://www.desmos.com/calculator" target="_blank" rel="noopener" style="color:var(--red); font-weight:600;">Desmos calculator</a>.</li>
-      <li id="intro-fr-note">Most questions are multiple choice; a few ask you to type in a number. For those, enter numbers only — ignore units, e.g. type 12 not "12 miles."</li>
-      <li>You can jump between questions using the panel on the right, and come back to anything.</li>
-      <li>Your results go straight to Luca — no need to send anything yourself.</li>
+      <li id="intro-fr-note" style="display:none;">Most questions are multiple choice; a few ask you to type in a number. For those, enter numbers only — ignore units, e.g. type 12 not "12 miles."</li>
     </ul>
     <button class="key-btn" id="intro-start">Start This Section</button>
     <a href="#" class="menu-back-link" id="intro-back">&larr; Back to menu</a>
+  </div>
+</div>
+
+<!-- ═══ REFERENCE SHEET MODAL — floats over any screen, opened via a
+     "Reference" link during Math sections that provide one (real SAT
+     math does; real ACT math doesn't, so it only shows for SAT). ═══ -->
+<div class="ref-overlay" id="ref-overlay">
+  <div class="ref-modal">
+    <div class="ref-modal-header">
+      <span class="ref-modal-title">Reference</span>
+      <button class="ref-close" id="ref-close" type="button" aria-label="Close">&times;</button>
+    </div>
+    <div class="ref-grid">
+      <div class="ref-cell">
+        <svg viewBox="0 0 120 100" style="color:var(--text);">
+          <circle cx="60" cy="52" r="34" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <circle cx="60" cy="52" r="1.6" fill="currentColor"/>
+          <line x1="60" y1="52" x2="94" y2="52" stroke="currentColor" stroke-width="1.5"/>
+          <text x="72" y="47" font-size="11" fill="currentColor">r</text>
+        </svg>
+        <div class="ref-formula">A = &pi;r&sup2;<br>C = 2&pi;r</div>
+      </div>
+      <div class="ref-cell">
+        <svg viewBox="0 0 120 100" style="color:var(--text);">
+          <rect x="18" y="30" width="70" height="42" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <text x="48" y="24" font-size="11" fill="currentColor">&#8467;</text>
+          <text x="94" y="55" font-size="11" fill="currentColor">w</text>
+        </svg>
+        <div class="ref-formula">A = &#8467;w</div>
+      </div>
+      <div class="ref-cell">
+        <svg viewBox="0 0 120 100" style="color:var(--text);">
+          <polygon points="60,18 20,80 100,80" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <line x1="60" y1="18" x2="60" y2="80" stroke="currentColor" stroke-width="1" stroke-dasharray="3,3"/>
+          <rect x="56" y="76" width="8" height="4" fill="none" stroke="currentColor" stroke-width="1"/>
+          <text x="65" y="52" font-size="11" fill="currentColor">h</text>
+          <text x="56" y="94" font-size="11" fill="currentColor">b</text>
+        </svg>
+        <div class="ref-formula">A = &frac12;bh</div>
+      </div>
+      <div class="ref-cell">
+        <svg viewBox="0 0 120 100" style="color:var(--text);">
+          <polygon points="22,20 22,80 100,80" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <rect x="22" y="72" width="8" height="8" fill="none" stroke="currentColor" stroke-width="1"/>
+          <text x="10" y="52" font-size="11" fill="currentColor">b</text>
+          <text x="58" y="94" font-size="11" fill="currentColor">a</text>
+          <text x="64" y="46" font-size="11" fill="currentColor">c</text>
+        </svg>
+        <div class="ref-formula">c&sup2; = a&sup2; + b&sup2;</div>
+      </div>
+      <div class="ref-cell">
+        <div class="ref-facts" style="border-top:none; padding-top:0; text-align:left;">
+          Degrees of arc in a circle: 360<br>
+          Radians of arc in a circle: 2&pi;<br>
+          Triangle angle sum: 180&deg;
+        </div>
+      </div>
+
+      <div class="ref-special">
+        <div class="ref-special-wrap">
+          <div class="ref-special-cell">
+            <svg viewBox="0 0 170 130" style="color:var(--text);">
+              <polygon points="25,105 145,105 145,20" fill="none" stroke="currentColor" stroke-width="2"/>
+              <polyline points="133,105 133,93 145,93" fill="none" stroke="currentColor" stroke-width="1.5"/>
+              <text x="82" y="123" font-size="14" fill="currentColor" text-anchor="middle">x&radic;3</text>
+              <text x="160" y="66" font-size="14" fill="currentColor" text-anchor="middle">x</text>
+              <text x="76" y="55" font-size="14" fill="currentColor" text-anchor="middle">2x</text>
+              <text x="44" y="94" font-size="12" fill="currentColor" text-anchor="middle">30&deg;</text>
+              <text x="126" y="38" font-size="12" fill="currentColor" text-anchor="middle">60&deg;</text>
+            </svg>
+            <div class="ref-special-label">30-60-90</div>
+          </div>
+          <div class="ref-special-cell">
+            <svg viewBox="0 0 150 150" style="color:var(--text);">
+              <polygon points="25,125 125,125 125,25" fill="none" stroke="currentColor" stroke-width="2"/>
+              <polyline points="113,125 113,113 125,113" fill="none" stroke="currentColor" stroke-width="1.5"/>
+              <text x="75" y="143" font-size="14" fill="currentColor" text-anchor="middle">s</text>
+              <text x="141" y="78" font-size="14" fill="currentColor" text-anchor="middle">s</text>
+              <text x="65" y="68" font-size="14" fill="currentColor" text-anchor="middle">s&radic;2</text>
+              <text x="44" y="114" font-size="12" fill="currentColor" text-anchor="middle">45&deg;</text>
+              <text x="106" y="40" font-size="12" fill="currentColor" text-anchor="middle">45&deg;</text>
+            </svg>
+            <div class="ref-special-label">45-45-90</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ref-cell">
+        <svg viewBox="0 0 120 100" style="color:var(--text);">
+          <polygon points="18,30 42,18 96,18 96,62 72,74 18,74" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <line x1="18" y1="30" x2="72" y2="30" stroke="currentColor" stroke-width="1"/>
+          <line x1="72" y1="30" x2="96" y2="18" stroke="currentColor" stroke-width="1"/>
+          <line x1="72" y1="30" x2="72" y2="74" stroke="currentColor" stroke-width="1"/>
+          <text x="42" y="90" font-size="11" fill="currentColor">&#8467;</text>
+          <text x="4" y="55" font-size="11" fill="currentColor">w</text>
+          <text x="102" y="42" font-size="11" fill="currentColor">h</text>
+        </svg>
+        <div class="ref-formula">V = &#8467;wh</div>
+      </div>
+      <div class="ref-cell">
+        <svg viewBox="0 0 120 100" style="color:var(--text);">
+          <ellipse cx="60" cy="24" rx="30" ry="9" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <line x1="30" y1="24" x2="30" y2="70" stroke="currentColor" stroke-width="1.5"/>
+          <line x1="90" y1="24" x2="90" y2="70" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M30,70 A30,9 0 0,0 90,70" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <line x1="60" y1="24" x2="90" y2="24" stroke="currentColor" stroke-width="1"/>
+          <text x="72" y="20" font-size="11" fill="currentColor">r</text>
+          <text x="94" y="50" font-size="11" fill="currentColor">h</text>
+        </svg>
+        <div class="ref-formula">V = &pi;r&sup2;h</div>
+      </div>
+      <div class="ref-cell">
+        <svg viewBox="0 0 120 100" style="color:var(--text);">
+          <circle cx="60" cy="50" r="34" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <ellipse cx="60" cy="50" rx="34" ry="10" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="3,3"/>
+          <line x1="60" y1="50" x2="94" y2="50" stroke="currentColor" stroke-width="1"/>
+          <text x="74" y="46" font-size="11" fill="currentColor">r</text>
+        </svg>
+        <div class="ref-formula">V = &frac43;&pi;r&sup3;</div>
+      </div>
+      <div class="ref-cell">
+        <svg viewBox="0 0 120 100" style="color:var(--text);">
+          <ellipse cx="60" cy="76" rx="30" ry="8" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <line x1="30" y1="76" x2="60" y2="16" stroke="currentColor" stroke-width="1.5"/>
+          <line x1="90" y1="76" x2="60" y2="16" stroke="currentColor" stroke-width="1.5"/>
+          <line x1="60" y1="76" x2="60" y2="16" stroke="currentColor" stroke-width="1" stroke-dasharray="3,3"/>
+          <line x1="60" y1="76" x2="90" y2="76" stroke="currentColor" stroke-width="1"/>
+          <text x="46" y="49" font-size="11" fill="currentColor">h</text>
+          <text x="74" y="72" font-size="11" fill="currentColor">r</text>
+        </svg>
+        <div class="ref-formula">V = &#8531;&pi;r&sup2;h</div>
+      </div>
+      <div class="ref-cell">
+        <svg viewBox="0 0 120 100" style="color:var(--text);">
+          <line x1="57" y1="14" x2="42" y2="62" stroke="currentColor" stroke-width="1" stroke-dasharray="3,3"/>
+          <line x1="57" y1="14" x2="96" y2="62" stroke="currentColor" stroke-width="1" stroke-dasharray="3,3"/>
+          <line x1="57" y1="14" x2="57" y2="68" stroke="currentColor" stroke-width="1" stroke-dasharray="2,2"/>
+          <polygon points="18,74 42,62 96,62 72,74" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <line x1="57" y1="14" x2="18" y2="74" stroke="currentColor" stroke-width="1.5"/>
+          <line x1="57" y1="14" x2="72" y2="74" stroke="currentColor" stroke-width="1.5"/>
+          <text x="45" y="90" font-size="11" fill="currentColor" text-anchor="middle">s</text>
+          <text x="36" y="45" font-size="11" fill="currentColor" text-anchor="middle">h</text>
+        </svg>
+        <div class="ref-formula">Square pyramid<br>V = &#8531;s&sup2;h</div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -378,12 +596,20 @@
   <div id="dx-topbar">
     <div class="dx-brand"><span id="dx-brand-label">SAT Diagnostic — Math</span><span id="dx-student-label"></span></div>
     <div class="dx-progress-wrap">
+      <span class="dx-timer" id="dx-timer" style="display:none;">60:00</span>
+      <button type="button" class="dx-reference-btn" id="dx-reference-btn" style="display:none;">Reference</button>
       <span class="dx-progress-label" id="dx-progress-label">Question 1 of 60</span>
       <div class="dx-progress-track"><div class="dx-progress-fill" id="dx-progress-fill"></div></div>
     </div>
   </div>
+  <div class="dx-timer-toast" id="dx-timer-toast" style="display:none;">You have five minutes remaining.</div>
   <div id="dx-shell">
     <div id="dx-main">
+      <div class="dx-passage-pane" id="dx-passage-pane">
+        <div class="dx-passage-kicker" id="dx-passage-kicker"></div>
+        <div class="dx-passage-title" id="dx-passage-title"></div>
+        <div class="dx-passage-body" id="dx-passage-body"></div>
+      </div>
       <div class="dx-card-wrap">
         <div class="dx-card" id="dx-card">
           <div class="dx-mobile-jump">
@@ -420,7 +646,7 @@
       <h1 class="panel-hed">All set.</h1>
       <p class="panel-sub" id="done-message">Your results just went to Luca. He'll follow up with a plan built around exactly where you need it.</p>
       <p class="done-status" id="done-status"></p>
-      <a href="../index.html" class="key-btn" id="done-return-link" style="display:block; text-align:center; text-decoration:none; margin-top:1rem;">Return to Site</a>
+      <a href="#" class="key-btn" id="done-return-link" style="display:block; text-align:center; text-decoration:none; margin-top:1rem;">Return to Portal</a>
     </div>
 
   </div>
@@ -462,7 +688,7 @@
      roster no longer lives in this page for a restore to look back up. */
   function saveState() {
     try {
-      sessionStorage.setItem(STORAGE_KEY, JSON.stringify({
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
         student: currentStudent,
         screen: activeScreenId,
         resourceKind: currentResourceKind,
@@ -474,12 +700,13 @@
         answers: answers,
         marked: marked,
         elims: elims,
-        qOrder: qOrder
+        qOrder: qOrder,
+        sectionTimerEndsAt: sectionTimerEndsAt
       }));
     } catch (e) { /* private browsing / storage disabled — fail silently */ }
   }
   function clearState() {
-    try { sessionStorage.removeItem(STORAGE_KEY); } catch (e) {}
+    try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
   }
 
   /* ═══ SCREEN ROUTING ═══ */
@@ -548,6 +775,57 @@
     };
     document.getElementById('menu-greeting').textContent = 'Hey ' + currentStudent.name.split(' ')[0] + '.';
     show('screen-menu');
+    loadNextSession();
+  }
+
+  /* ═══ NEXT SESSION WIDGET ═══
+     Reads the student's next scheduled session off Luca's shared iCloud
+     calendar (matched by first name in the event title) and shows it on
+     the portal home screen. The actual calendar fetch + parsing happens
+     server-side in Code.gs (handleNextSession) — a browser fetch straight
+     to iCloud's calendar host is unreliable across browsers/CORS, and
+     routing it through the backend keeps the calendar URL off the client
+     entirely. Fails silently: if the calendar can't be reached, the card
+     just stays hidden instead of showing an error on the home screen. */
+  var nsCard  = document.getElementById('next-session-card');
+  var nsLabel = document.getElementById('ns-label');
+  var nsDate  = document.getElementById('ns-date');
+  var nsJoin  = document.getElementById('ns-join');
+
+  function formatSessionDate(iso, allDay) {
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return iso;
+    var dateOpts = { weekday: 'long', month: 'long', day: 'numeric' };
+    var dateStr = d.toLocaleDateString(undefined, dateOpts);
+    if (allDay) return dateStr;
+    var timeStr = d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+    return dateStr + ' at ' + timeStr;
+  }
+
+  function loadNextSession() {
+    if (!currentStudent || !currentStudent.name) return;
+    fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'nextSession', name: currentStudent.name }) })
+      .then(function (r) { return r.json(); })
+      .catch(function () { return { ok: false }; })
+      .then(function (data) {
+        if (!data || !data.ok) { nsCard.style.display = 'none'; return; }
+        nsCard.style.display = 'block';
+        if (data.next) {
+          nsLabel.textContent = 'Your next scheduled session is on:';
+          nsDate.textContent = formatSessionDate(data.next.startIso, data.next.allDay);
+          var meetUrl = window.GOOGLE_MEET_URL || '';
+          if (meetUrl && meetUrl.indexOf('PLACEHOLDER') === -1) {
+            nsJoin.href = meetUrl;
+            nsJoin.style.display = 'inline-block';
+          } else {
+            nsJoin.style.display = 'none';
+          }
+        } else {
+          nsLabel.textContent = '';
+          nsDate.textContent = 'You have no current sessions scheduled yet.';
+          nsJoin.style.display = 'none';
+        }
+      });
   }
 
   function resetKeyScreen() {
@@ -698,12 +976,27 @@
 
   /* ═══ SCREEN 4: DIAGNOSTIC SECTION INTRO ═══ */
   document.getElementById('intro-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-menu'); });
+  document.getElementById('done-return-link').addEventListener('click', function (e) { e.preventDefault(); show('screen-menu'); });
   document.getElementById('intro-start').addEventListener('click', function () {
     document.getElementById('dx-student-label').textContent = currentStudent.name;
     buildSidebar();
     renderQuestion();
     show('dx-screen');
+    var secKey = activeSectionKeys[sectionIndex];
+    var minutes = (window.SECTION_TIME_LIMITS || {})[secKey];
+    if (minutes) { startSectionTimer(minutes); } else { dxTimerEl.style.display = 'none'; stopSectionTimer(); sectionTimerEndsAt = null; }
   });
+
+  /* ═══ REFERENCE SHEET MODAL — floats over intro or dx-screen, doesn't
+     touch the screen-routing system so it can't disrupt test state. ═══ */
+  var refOverlay = document.getElementById('ref-overlay');
+  function openReference() { refOverlay.classList.add('active'); }
+  function closeReference() { refOverlay.classList.remove('active'); }
+  document.getElementById('intro-reference-link').addEventListener('click', function (e) { e.preventDefault(); openReference(); });
+  document.getElementById('dx-reference-btn').addEventListener('click', openReference);
+  document.getElementById('ref-close').addEventListener('click', closeReference);
+  refOverlay.addEventListener('click', function (e) { if (e.target === refOverlay) closeReference(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && refOverlay.classList.contains('active')) closeReference(); });
 
 
 
@@ -735,6 +1028,31 @@
 
   var TEST_FORMATS = window.TEST_FORMATS;
 
+  /* ═══ OFFICIAL-STYLE SECTION DIRECTIONS ═══
+     Shown on the section intro screen, below the "No pressure..." line.
+     Keyed by SECTION_BANKS key. Sections without an entry here just show
+     no extra directions text (currently: ACT Science). */
+  var SECTION_DIRECTIONS = {
+    'reading-writing':
+      '<p>The questions in this section address a number of important reading and writing skills. Each question includes one or more passages, which may include a table or graph. Read each passage and question carefully, and then choose the best answer to the question based on the passage(s). All questions in this section are multiple-choice with four answer choices. Each question has a single best answer. You can jump between questions using the panel on the right, and come back to anything.</p>',
+    'math':
+      '<p>The questions in this section address a number of important math skills. Use of a calculator is permitted for all questions.</p>' +
+      '<p>Unless otherwise indicated: all variables and expressions represent real numbers; figures provided are drawn to scale; all figures lie in a plane; the domain of a given function f is the set of all real numbers x for which f(x) is a real number.</p>',
+    'english':
+      '<p>In the passages that follow, certain words and phrases are underlined and numbered. In the right-hand column, you will find alternatives for the underlined part. You are to choose the best answer to each question. If you think the original version is best, choose &ldquo;No Change.&rdquo;</p>' +
+      '<p>You will also find questions about a section of the passage, or about the passage as a whole. These questions do not refer to an underlined portion of the passage, but rather are identified by a number or numbers in a box. Read each passage through once before you begin to answer the questions that accompany it. For many of the questions, you must read several sentences beyond the question to determine the answer — be sure you\'ve read far enough ahead each time you choose an answer.</p>',
+    'act-math':
+      '<p>Solve each problem and choose the correct answer. Do not linger over problems that take too much time — solve as many as you can, then return to the others in the time you have left.</p>' +
+      '<p>You are permitted to use a calculator on this test. You may use your calculator for any problems you choose, but some problems may best be done without one.</p>' +
+      '<p>Note: unless otherwise stated, assume the following — illustrative figures are not necessarily drawn to scale; geometric figures lie in a plane; the word &ldquo;line&rdquo; indicates a straight line; the word &ldquo;average&rdquo; indicates arithmetic mean.</p>',
+    'reading':
+      '<p>There are several passages in this test. Each passage is accompanied by several questions. After reading a passage, choose the best answer to each question. You may refer to the passages as often as necessary.</p>'
+  };
+
+  // Real SAT math provides a reference sheet; real ACT math doesn't — the
+  // Reference button only shows for sections where that's genuinely true.
+  var SECTIONS_WITH_REFERENCE = { 'math': true };
+
   var testChoice = null;       // 'SAT' or 'ACT'
   var activeSectionKeys = [];  // populated sections only, in the real test's order
   var sectionIndex = 0;
@@ -746,13 +1064,130 @@
   var qOrder = [];
   var currentQs = [];
 
+  /* ═══ SECTION TIMER ═══
+     Real per-section time limits (window.SECTION_TIME_LIMITS in banks.js).
+     Stored as an absolute end timestamp rather than a remaining-seconds
+     counter so a page refresh mid-section doesn't grant extra time — the
+     clock keeps running in the background either way. */
+  var sectionTimerEndsAt = null;
+  var sectionTimerInterval = null;
+  var sectionTimerWarned = false;
+
+  /* ═══ PASSAGE MODE ═══
+     Questions can optionally carry a `passageId` (looked up in the global
+     window.PASSAGES map — see banks.js) and a `refNum` (the printed
+     underline/number in the passage this question refers to, for
+     English-style "which choice..." items). When a question has a
+     passageId, the left pane shows the full passage; when it doesn't
+     (plain ACT Reading/Science-style comprehension items with the
+     passage baked into q.text), the pane just stays hidden. */
+  var dxShellEl       = document.getElementById('dx-shell');
+  var passagePaneEl   = document.getElementById('dx-passage-pane');
+  var passageKickerEl = document.getElementById('dx-passage-kicker');
+  var passageTitleEl  = document.getElementById('dx-passage-title');
+  var passageBodyEl   = document.getElementById('dx-passage-body');
+  var lastRenderedPassageId = null;
+
+  function renderPassagePane(q) {
+    var passages = window.PASSAGES || {};
+    var passage = q.passageId ? passages[q.passageId] : null;
+
+    if (!passage) {
+      dxShellEl.classList.remove('passage-mode');
+      lastRenderedPassageId = null;
+      return;
+    }
+
+    dxShellEl.classList.add('passage-mode');
+    if (lastRenderedPassageId !== q.passageId) {
+      passageKickerEl.textContent = passage.kicker || '';
+      passageTitleEl.textContent = passage.title || '';
+      passageBodyEl.innerHTML = passage.html || '';
+      lastRenderedPassageId = q.passageId;
+      passageBodyEl.scrollTop = 0;
+    }
+
+    // Highlight the numbered mark this question refers to, and scroll it
+    // into view within the passage pane (not the whole page).
+    var prevActive = passageBodyEl.querySelectorAll('.active-ref');
+    for (var i = 0; i < prevActive.length; i++) prevActive[i].classList.remove('active-ref');
+    if (q.refNum != null) {
+      var marks = passageBodyEl.querySelectorAll('[data-ref="' + q.refNum + '"]');
+      marks.forEach(function (m) {
+        m.classList.add('active-ref');
+      });
+      if (marks.length) {
+        var target = marks[0];
+        var targetTop = target.offsetTop - passageBodyEl.clientHeight / 2;
+        passageBodyEl.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' });
+      }
+    }
+  }
+
+  /* ═══ PASSAGE HIGHLIGHTER ═══
+     Selecting text in the passage pane wraps it in a <mark> instead of
+     just leaving a plain text selection — students can mark up the
+     passage the way they would on paper. Clicking an existing highlight
+     removes it. Highlights live in the DOM, so they persist while the
+     student stays on the same passage (across its questions) and are
+     wiped automatically the next time that passage's HTML is re-set. */
+  function unwrapHighlight(mark) {
+    var parent = mark.parentNode;
+    if (!parent) return;
+    while (mark.firstChild) parent.insertBefore(mark.firstChild, mark);
+    parent.removeChild(mark);
+    parent.normalize();
+  }
+
+  passageBodyEl.addEventListener('mouseup', function () {
+    var sel = window.getSelection();
+    if (!sel || sel.isCollapsed || sel.rangeCount === 0) return;
+    var range = sel.getRangeAt(0);
+    if (!passageBodyEl.contains(range.commonAncestorContainer)) return;
+    if (range.toString().trim() === '') { sel.removeAllRanges(); return; }
+
+    // If the drag overlaps a highlight that's already there, treat this
+    // as "un-highlighting" it — re-selecting the same stretch of text is
+    // the natural undo gesture — instead of nesting a second mark inside
+    // the first.
+    var existing = passageBodyEl.querySelectorAll('.dx-user-highlight');
+    var overlapping = [];
+    for (var i = 0; i < existing.length; i++) {
+      if (range.intersectsNode(existing[i])) overlapping.push(existing[i]);
+    }
+    if (overlapping.length) {
+      overlapping.forEach(unwrapHighlight);
+      sel.removeAllRanges();
+      return;
+    }
+
+    var mark = document.createElement('mark');
+    mark.className = 'dx-user-highlight';
+    try {
+      range.surroundContents(mark);
+    } catch (e) {
+      // Selection crosses element boundaries (spans multiple <p> tags, a
+      // ref-mark, etc.) — surroundContents can't wrap that directly, so
+      // extract the fragment and wrap it instead.
+      try {
+        mark.appendChild(range.extractContents());
+        range.insertNode(mark);
+      } catch (e2) { /* give up quietly rather than breaking the passage */ }
+    }
+    sel.removeAllRanges();
+  });
+  passageBodyEl.addEventListener('click', function (e) {
+    var hit = e.target.closest && e.target.closest('.dx-user-highlight');
+    if (!hit) return;
+    unwrapHighlight(hit);
+  });
+
+  // Questions are presented in fixed order — no randomization. For ACT
+  // English/Reading this preserves chronological order within each passage
+  // (banks.js is pre-sorted by passage-appearance then refNum).
   function shuffledOrder(n) {
     var o = [];
     for (var i = 0; i < n; i++) o.push(i);
-    for (var j = n - 1; j > 0; j--) {
-      var r = Math.floor(Math.random() * (j + 1));
-      var tmp = o[j]; o[j] = o[r]; o[r] = tmp;
-    }
     return o;
   }
   function canonical(arr) {
@@ -772,11 +1207,82 @@
   var qgrid      = document.getElementById('dx-qgrid');
   var progFill   = document.getElementById('dx-progress-fill');
   var progLabel  = document.getElementById('dx-progress-label');
-  var LETTERS    = ['A', 'B', 'C', 'D'];
+  var LETTERS    = ['A', 'B', 'C', 'D', 'E']; // ACT math uses 5 choices; SAT math uses 4 — array just needs to cover the max
+  var dxTimerEl      = document.getElementById('dx-timer');
+  var dxTimerToastEl = document.getElementById('dx-timer-toast');
 
   function activeQuestions() { return currentQs; }
   function isLastQuestionInSection() { return current === activeQuestions().length - 1; }
   function isLastSection() { return sectionIndex === activeSectionKeys.length - 1; }
+
+  /* ═══ SECTION TIMER ═══ */
+  function formatTimer(ms) {
+    var totalSec = Math.max(0, Math.ceil(ms / 1000));
+    var m = Math.floor(totalSec / 60);
+    var s = totalSec % 60;
+    return m + ':' + (s < 10 ? '0' : '') + s;
+  }
+
+  function showTimerToast() {
+    dxTimerToastEl.style.display = 'block';
+    dxTimerToastEl.style.animation = 'none';
+    void dxTimerToastEl.offsetWidth; // restart the entrance animation if triggered twice
+    dxTimerToastEl.style.animation = '';
+    setTimeout(function () { dxTimerToastEl.style.display = 'none'; }, 6000);
+  }
+
+  function tickSectionTimer() {
+    if (sectionTimerEndsAt === null) return;
+    var remaining = sectionTimerEndsAt - Date.now();
+    dxTimerEl.textContent = formatTimer(remaining);
+    if (remaining <= 5 * 60 * 1000 && !sectionTimerWarned) {
+      sectionTimerWarned = true;
+      dxTimerEl.classList.add('dx-timer-warn');
+      showTimerToast();
+    }
+    if (remaining <= 0) {
+      stopSectionTimer();
+      autoSubmitSection();
+    }
+  }
+
+  function startSectionTimer(minutes) {
+    stopSectionTimer();
+    sectionTimerEndsAt = Date.now() + minutes * 60 * 1000;
+    sectionTimerWarned = false;
+    dxTimerEl.classList.remove('dx-timer-warn');
+    dxTimerEl.style.display = 'inline-block';
+    tickSectionTimer();
+    sectionTimerInterval = setInterval(tickSectionTimer, 1000);
+    saveState();
+  }
+
+  // Used when restoring a session mid-refresh — resumes the real countdown
+  // from a previously saved absolute end time rather than granting a
+  // fresh full section's worth of time.
+  function resumeSectionTimer(endsAt) {
+    stopSectionTimer();
+    sectionTimerEndsAt = endsAt;
+    sectionTimerWarned = (endsAt - Date.now()) <= 5 * 60 * 1000;
+    dxTimerEl.classList.toggle('dx-timer-warn', sectionTimerWarned);
+    dxTimerEl.style.display = 'inline-block';
+    tickSectionTimer();
+    if (sectionTimerEndsAt - Date.now() > 0) {
+      sectionTimerInterval = setInterval(tickSectionTimer, 1000);
+    }
+  }
+
+  function stopSectionTimer() {
+    if (sectionTimerInterval) { clearInterval(sectionTimerInterval); sectionTimerInterval = null; }
+  }
+
+  // Fires when the clock hits zero — submits whatever's answered so far
+  // and moves on, exactly like manually pressing Next Section / Submit.
+  function autoSubmitSection() {
+    if (activeScreenId !== 'dx-screen') return; // already left this section some other way
+    if (isLastSection()) { finishDiagnostic(); }
+    else { advanceToNextSection(); }
+  }
 
   function startTest(choice) {
     testChoice = choice;
@@ -802,15 +1308,20 @@
     var sectionLabel = SECTION_BANKS[activeSectionKeys[sectionIndex]].label;
     document.getElementById('intro-kicker').textContent = testChoice + ' Diagnostic';
     var secKey = activeSectionKeys[sectionIndex];
-    var isMathSec = (secKey === 'math' || secKey === 'act-math');
-    document.getElementById('intro-calc-note').style.display = isMathSec ? '' : 'none';
     document.getElementById('intro-fr-note').style.display = (secKey === 'math' && testChoice === 'SAT') ? '' : 'none';
-    document.getElementById('intro-hed').textContent = sectionLabel + ' section — ' + qs.length + ' question' + (qs.length === 1 ? '' : 's') + '.';
+    document.getElementById('intro-directions').innerHTML = SECTION_DIRECTIONS[secKey] || '';
+    var hasReference = !!SECTIONS_WITH_REFERENCE[secKey];
+    document.getElementById('intro-reference-link').style.display = hasReference ? 'inline-flex' : 'none';
+    document.getElementById('dx-reference-btn').style.display = hasReference ? '' : 'none';
+    var timeLimit = (window.SECTION_TIME_LIMITS || {})[secKey];
+    document.getElementById('intro-hed').textContent = sectionLabel + ' section — ' + qs.length + ' question' + (qs.length === 1 ? '' : 's') + (timeLimit ? ' — ' + timeLimit + ' minutes.' : '.');
     document.getElementById('dx-brand-label').textContent = testChoice + ' Diagnostic — ' + sectionLabel;
     show('screen-intro');
   }
 
   function advanceToNextSection() {
+    stopSectionTimer();
+    sectionTimerEndsAt = null;
     completedSections.push({ key: activeSectionKeys[sectionIndex], label: SECTION_BANKS[activeSectionKeys[sectionIndex]].label, answers: canonical(answers), marked: canonical(marked) });
     startSection(sectionIndex + 1);
   }
@@ -876,6 +1387,7 @@
     var qs = activeQuestions();
     var q = qs[current];
     qtextEl.innerHTML = q.text;
+    renderPassagePane(q);
 
     if (q.type === 'mc') {
       choicesEl.style.display = 'flex';
@@ -964,6 +1476,7 @@
   backBtn.addEventListener('click', function () { goTo(current - 1); });
   document.addEventListener('keydown', function (e) {
     if (activeScreenId !== 'dx-screen') return;
+    if (refOverlay.classList.contains('active')) return; // don't let answer shortcuts fire under the Reference modal
     var tag = (document.activeElement && document.activeElement.tagName) || '';
     if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
     if (e.key === 'ArrowLeft') { e.preventDefault(); goTo(current - 1); }
@@ -993,6 +1506,8 @@
   function finishDiagnostic() {
     if (diagnosticSubmitted) return; // guard against a double click/double send
     diagnosticSubmitted = true;
+    stopSectionTimer();
+    sectionTimerEndsAt = null;
     nextBtn.disabled = true;
     backBtn.disabled = true;
 
@@ -1042,7 +1557,7 @@
 
     var reportLines = [];
     reportLines.push(testChoice + ' DIAGNOSTIC RESULTS');
-    reportLines.push('Student: ' + currentStudent.name + ' (key: ' + currentStudent.key + ')');
+    reportLines.push('Student: ' + currentStudent.name);
     reportLines.push('Overall score: ' + totalCorrect + ' / ' + totalQuestions);
     reportLines.push('');
     reportLines.push('By section:');
@@ -1063,6 +1578,10 @@
     reportLines.push('Question-by-question:');
     reportLines = reportLines.concat(lines);
     var report = reportLines.join('\n');
+
+    // Note: no scaled/composite score is shown here on purpose — that
+    // estimate is only revealed on Luca's diagnostic report (report.html),
+    // not to the student on this screen.
 
     document.getElementById('done-message').textContent =
       'Your results just went to Luca — no need to send anything yourself.';
@@ -1111,13 +1630,14 @@
      where they left off instead of dropping them at the key screen. */
   (function restoreState() {
     try {
-      var raw = sessionStorage.getItem(STORAGE_KEY);
+      var raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return;
       var state = JSON.parse(raw);
       if (!state || !state.student || !state.student.key) { clearState(); return; }
 
       currentStudent = state.student;
       document.getElementById('menu-greeting').textContent = 'Hey ' + currentStudent.name.split(' ')[0] + '.';
+      loadNextSession();
 
       if (state.screen === 'dx-screen' && state.testChoice && Array.isArray(state.activeSectionKeys) && state.activeSectionKeys.length) {
         testChoice = state.testChoice;
@@ -1138,6 +1658,14 @@
           buildSidebar();
           renderQuestion();
           show('dx-screen');
+          if (typeof state.sectionTimerEndsAt === 'number') {
+            if (state.sectionTimerEndsAt - Date.now() > 0) {
+              resumeSectionTimer(state.sectionTimerEndsAt);
+            } else {
+              // Time ran out while they were away from the page — submit now.
+              autoSubmitSection();
+            }
+          }
         } else {
           show('screen-menu');
         }

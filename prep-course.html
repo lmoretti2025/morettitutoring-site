@@ -204,7 +204,7 @@
   <div class="container">
     <div class="eyebrow reveal">College Entrance Exams</div>
     <h1 class="course-hed reveal d1">The 12-Week SAT &amp; ACT Program.</h1>
-    <p class="course-lead reveal d2">Most tutoring is an hour of homework help and a stack of practice problems. We're glad to provide exactly that when it's what your family needs — but our most successful students follow a program built on the Moretti Method: an individualized learning path across SAT and ACT prep, AP and IB exams, mathematics, English, and writing, built around how they learn. The goal is the same in every subject: simplify complex concepts, take the fear out of the material, and build the confidence to excel.</p>
+    <p class="course-lead reveal d2">Most tutoring is an hour of homework help and a stack of practice problems. We're glad to provide exactly that when it's what your family needs — but our most successful students follow a program built on the <strong style="color:var(--red);">Moretti Method</strong>: an individualized learning path across SAT and ACT prep, AP and IB exams, mathematics, English, and writing, built around how they learn. The goal is the same in every subject: simplify complex concepts, take the fear out of the material, and build the confidence to excel.</p>
     <div class="reveal d3">
       <div class="tl-track" id="tl-track">
         <div class="tl-rail"></div>
@@ -475,6 +475,14 @@
     }
     sizeCard();
     window.addEventListener('resize', sizeCard);
+    // The card height above is measured against whatever font is painted
+    // at that moment. Google Fonts loads with display=swap, so the very
+    // first measurement often happens against the fallback font, then the
+    // real webfont swaps in with different metrics — recompute once that
+    // finishes so the card doesn't visibly resize under real content.
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(sizeCard);
+    }
 
     goTo(0, true);
     startAuto();

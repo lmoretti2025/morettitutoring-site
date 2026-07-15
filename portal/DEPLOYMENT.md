@@ -108,7 +108,28 @@ adding new students afterward is just adding a row to a spreadsheet.
 
 ---
 
-## Step 5 — Lock down Lily's existing folder
+## Step 5 — Turn on auto-created folders
+
+This makes it so adding a student is just a Key and a Name — no manual
+Drive folder creation needed either.
+
+1. Back in the Apps Script editor, click the function dropdown (top
+   toolbar, currently probably showing `doGet` or `doPost`) and select
+   **setupTrigger**.
+2. Click **Run**.
+3. If it asks you to authorize again, click through it — same as before.
+4. Check the **Execution log** panel; it should say "Trigger installed."
+
+From now on, any row with a Name but a blank `DriveFolderUrl` gets a real
+Drive folder created automatically the moment you edit the sheet, filed
+inside a folder called **"Moretti Portal — Student Folders"** in your
+Drive, with the URL written back into the sheet for you. Pasting in an
+existing folder link still works exactly as before — this only fills in
+blanks, it never overwrites a link you've already set.
+
+---
+
+## Step 6 — Lock down Lily's existing folder
 
 Lily's folder was previously shared as "Anyone with the link," which is
 the exact exposure we're closing. Once the steps above are live:

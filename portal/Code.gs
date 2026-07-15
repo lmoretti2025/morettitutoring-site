@@ -15,6 +15,11 @@
    the key, so if the key ever leaks, a stranger can't re-use it to add
    their own email and get in.
 
+   Also auto-creates each student's Drive folder: add a row with just a
+   Key and a Name (leave DriveFolderUrl blank), and as soon as you save
+   the sheet, a trigger creates a real Drive folder for them and fills
+   in the URL automatically — no manual folder creation needed either.
+
    SETUP — see the deployment guide for full steps. Short version:
      1. Create a Google Sheet with a tab named "Students" and headers:
           Key | Name | DriveFolderUrl | CollegePrepFolderUrl | GrantedEmail | GrantedAt
@@ -24,10 +29,13 @@
           Execute as: Me
           Who has access: Anyone
      5. Copy the deployment URL into APPS_SCRIPT_URL in portal/index.html.
+     6. Select "setupTrigger" in the function dropdown and click Run once
+        (authorize when asked). This turns on the auto-folder feature.
    ========================================================================= */
 
 var SHEET_ID = 'PASTE_YOUR_SHEET_ID_HERE';
 var SHEET_TAB_NAME = 'Students';
+var STUDENT_FOLDERS_PARENT_NAME = 'Moretti Portal — Student Folders';
 
 function doPost(e) {
   var out;
@@ -35,6 +43,8 @@ function doPost(e) {
     var body = JSON.parse(e.postData.contents);
     if (body.action === 'auth') {
       out = handleAuth(body.key, body.email);
+    } else if (body.action === 'nextSession') {
+      out = handleNextSession(body.name);
     } else {
       out = { ok: false, error: 'unknown_action' };
     }
@@ -132,4 +142,196 @@ function handleAuth(rawKey, rawEmail) {
     collegePrepFolderUrl: row.CollegePrepFolderUrl || '',
     tests: []
   };
+}
+
+/* =========================================================================
+   AUTO-CREATE STUDENT FOLDERS
+   -------------------------------------------------------------------------
+   Runs automatically whenever the Students sheet is edited (see
+   setupTrigger below). For any row that has a Name but no DriveFolderUrl
+   yet, it creates a real folder in Drive — inside a single parent folder
+   named by STUDENT_FOLDERS_PARENT_NAME so they don't scatter across My
+   Drive — and writes that folder's URL back into the sheet.
+
+   It only fills in a blank DriveFolderUrl — it never overwrites one that's
+   already set, so pasting in an existing folder link still works exactly
+   like before, and re-editing an already-set-up row won't create a
+   second, duplicate folder.
+   ========================================================================= */
+
+function getOrCreateParentFolder_() {
+  var existing = DriveApp.getFoldersByName(STUDENT_FOLDERS_PARENT_NAME);
+  if (existing.hasNext()) return existing.next();
+  return DriveApp.createFolder(STUDENT_FOLDERS_PARENT_NAME);
+}
+
+function ensureFoldersForAllStudents_() {
+  var sheet = getSheet_();
+  var data = sheet.getDataRange().getValues();
+  var headers = data[0];
+  var nameCol = headers.indexOf('Name');
+  var keyCol = headers.indexOf('Key');
+  var urlCol = headers.indexOf('DriveFolderUrl');
+  if (nameCol === -1 || keyCol === -1 || urlCol === -1) return;
+
+  var parent = null; // only fetched/created if we actually need it
+  for (var i = 1; i < data.length; i++) {
+    var name = String(data[i][nameCol] || '').trim();
+    var url = String(data[i][urlCol] || '').trim();
+    if (!name || url) continue; // needs a name, and must not already have a folder
+
+    var key = String(data[i][keyCol] || '').trim();
+    if (!parent) parent = getOrCreateParentFolder_();
+    var folder = parent.createFolder(key ? (name + ' — ' + key) : name);
+    sheet.getRange(i + 1, urlCol + 1).setValue(folder.getUrl());
+  }
+}
+
+// Installable trigger handler — fires on any edit to the spreadsheet.
+//
+// IMPORTANT: this must NOT react to every edit. handleAuth() (the login
+// flow) writes to the GrantedEmail / GrantedAt columns on a student's row
+// the first time they log in — that write is itself a sheet edit, and an
+// installable onEdit trigger fires for edits made by the script itself,
+// not just ones a person types in. If this handler re-scanned on every
+// edit, a login would re-trigger ensureFoldersForAllStudents_() every
+// time, and if a row's DriveFolderUrl was ever slow to persist or came
+// back blank on that pass, it would create ANOTHER folder — a fresh
+// folder per login instead of one folder per student, ever.
+//
+// So this only reacts to edits that touch the Name or Key column — i.e.
+// someone actually adding or renaming a student in the sheet — and
+// ignores edits to any other column, including the ones the backend
+// itself writes during login.
+function onStudentsEdit(e) {
+  try {
+    if (!e || !e.range) return;
+    var sheet = e.range.getSheet();
+    if (sheet.getName() !== SHEET_TAB_NAME) return;
+
+    var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    var nameCol = headers.indexOf('Name') + 1; // 1-based column index, 0 if missing
+    var keyCol = headers.indexOf('Key') + 1;
+    var editedStart = e.range.getColumn();
+    var editedEnd = editedStart + e.range.getNumColumns() - 1;
+    var touchesNameOrKey =
+      (nameCol > 0 && editedStart <= nameCol && nameCol <= editedEnd) ||
+      (keyCol > 0 && editedStart <= keyCol && keyCol <= editedEnd);
+    if (!touchesNameOrKey) return;
+
+    ensureFoldersForAllStudents_();
+  } catch (err) {
+    console.error('onStudentsEdit error: ' + err);
+  }
+}
+
+// Run this ONCE manually (select it in the function dropdown, click Run,
+// authorize when asked). It registers the trigger above so it fires
+// automatically from then on — you won't need to run this again unless
+// you want to reset it. Safe to run more than once; it clears any
+// duplicate trigger from a prior run first.
+function setupTrigger() {
+  ScriptApp.getProjectTriggers().forEach(function (t) {
+    if (t.getHandlerFunction() === 'onStudentsEdit') ScriptApp.deleteTrigger(t);
+  });
+  ScriptApp.newTrigger('onStudentsEdit')
+    .forSpreadsheet(SpreadsheetApp.openById(SHEET_ID))
+    .onEdit()
+    .create();
+  console.log('Trigger installed. Editing the Students sheet will now auto-create folders.');
+}
+
+/* =========================================================================
+   NEXT SESSION WIDGET — reads Luca's shared iCloud calendar and hands
+   back a student's next upcoming session, matched by first name in the
+   event title (e.g. an event titled "Lily — SAT tutoring" matches a
+   student named "Lily Corcoran").
+
+   This runs server-side rather than the portal fetching the calendar
+   directly from the browser: iCloud's published-calendar host doesn't
+   reliably send the CORS headers a cross-origin browser fetch needs, and
+   keeping the calendar URL server-side means it's never exposed in the
+   page source either.
+   ========================================================================= */
+
+// webcal:// is just https:// with a different scheme name — UrlFetchApp
+// needs an actual https:// URL.
+var CALENDAR_ICS_URL = 'https://p172-caldav.icloud.com/published/2/ODExODY2MDE0NTgxMTg2NueGXoXKSW70-PWkPnqJPMohqzUItIudqwCkF6twJ-BXC1z9zr2f6PGDPEaNfvS15tsp_IDWWX_CrRjXMPwG8TU';
+
+function handleNextSession(rawName) {
+  if (!rawName) return { ok: false, error: 'missing_name' };
+  var firstName = String(rawName).trim().split(/\s+/)[0];
+  if (!firstName) return { ok: false, error: 'missing_name' };
+
+  try {
+    var resp = UrlFetchApp.fetch(CALENDAR_ICS_URL, { muteHttpExceptions: true });
+    if (resp.getResponseCode() !== 200) {
+      return { ok: false, error: 'calendar_unreachable' };
+    }
+    var events = parseICS_(resp.getContentText());
+    var now = new Date();
+    var escaped = firstName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    var nameRe = new RegExp(escaped, 'i');
+
+    var upcoming = events.filter(function (ev) {
+      return ev.start && nameRe.test(ev.summary) && ev.start.getTime() >= now.getTime();
+    });
+    upcoming.sort(function (a, b) { return a.start.getTime() - b.start.getTime(); });
+
+    if (!upcoming.length) return { ok: true, next: null };
+    var next = upcoming[0];
+    return {
+      ok: true,
+      next: { title: next.summary, startIso: next.start.toISOString(), allDay: next.allDay }
+    };
+  } catch (err) {
+    return { ok: false, error: 'server_error', message: String(err) };
+  }
+}
+
+// Minimal ICS (iCalendar) parser — just enough to pull SUMMARY and
+// DTSTART out of each VEVENT block. Does not expand recurring events
+// (RRULE); a recurring session shows its first/anchor occurrence only.
+function parseICS_(text) {
+  // Unfold lines: per the iCal spec, a line starting with a space or tab
+  // is a continuation of the previous line, not a new property.
+  var rawLines = text.split(/\r\n|\n|\r/);
+  var lines = [];
+  rawLines.forEach(function (line) {
+    if (lines.length && (line.charAt(0) === ' ' || line.charAt(0) === '\t')) {
+      lines[lines.length - 1] += line.slice(1);
+    } else {
+      lines.push(line);
+    }
+  });
+
+  var events = [];
+  var cur = null;
+  lines.forEach(function (line) {
+    if (line === 'BEGIN:VEVENT') { cur = { summary: '', start: null, allDay: false }; return; }
+    if (line === 'END:VEVENT') { if (cur) events.push(cur); cur = null; return; }
+    if (!cur) return;
+    var idx = line.indexOf(':');
+    if (idx === -1) return;
+    var key = line.slice(0, idx);
+    var value = line.slice(idx + 1);
+    if (key === 'SUMMARY') {
+      cur.summary = value;
+    } else if (key.indexOf('DTSTART') === 0) {
+      cur.allDay = key.indexOf('VALUE=DATE') !== -1 && key.indexOf('VALUE=DATE-TIME') === -1;
+      cur.start = parseICSDate_(value, cur.allDay);
+    }
+  });
+  return events;
+}
+
+function parseICSDate_(value, allDay) {
+  // Matches 20260716T183000Z, 20260716T183000, or 20260716 (all-day).
+  var m = value.match(/^(\d{4})(\d{2})(\d{2})(T(\d{2})(\d{2})(\d{2})(Z)?)?$/);
+  if (!m) return null;
+  var y = Number(m[1]), mo = Number(m[2]) - 1, d = Number(m[3]);
+  if (!m[4]) return new Date(y, mo, d);
+  var h = Number(m[5]), mi = Number(m[6]), s = Number(m[7]);
+  if (m[8] === 'Z') return new Date(Date.UTC(y, mo, d, h, mi, s));
+  return new Date(y, mo, d, h, mi, s); // floating/local time — treated as local
 }
