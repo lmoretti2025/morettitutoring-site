@@ -71,9 +71,9 @@
   /* ═══ MENU SCREEN ═══ */
   .menu-greeting { font-family: var(--display); font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 700; color: var(--text); text-align: center; margin-bottom: 0.6rem; }
   .next-session-card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 1.1rem 1.4rem; margin: 0 auto 1.6rem; max-width: 460px; text-align: center; }
-  .ns-label { font-family: var(--serif); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--mid); margin-bottom: 0.35rem; }
-  .ns-date { font-family: var(--display); font-weight: 700; font-size: 1.15rem; color: var(--text); }
-  .ns-join { display: inline-block; margin-top: 0.7rem; font-family: var(--serif); font-size: 0.85rem; color: var(--red); text-decoration: none; font-weight: 600; }
+  .ns-label { font-family: var(--hel); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--mid); margin-bottom: 0.35rem; }
+  .ns-date { font-family: var(--hel); font-weight: 700; font-size: 1.05rem; color: var(--text); }
+  .ns-join { display: inline-block; margin-top: 0.7rem; font-family: var(--hel); font-size: 0.75rem; font-weight: 700; color: var(--red); text-decoration: none; word-break: break-all; }
   .ns-join:hover { text-decoration: underline; }
   .menu-sub { font-size: 0.88rem; color: var(--mid); text-align: center; margin-bottom: 2.5rem; }
   .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
@@ -152,11 +152,20 @@
   #dx-shell.passage-mode .dx-card-wrap { max-width: 560px; padding: 3rem 2.5rem; margin: 0 auto; }
   .dx-passage-title { font-family: var(--display); font-weight: 700; font-size: 1.05rem; color: var(--text); margin-bottom: 0.3rem; }
   .dx-passage-kicker { font-family: var(--serif); font-size: 0.78rem; color: var(--mid); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 1.3rem; }
-  .dx-passage-body { font-family: var(--serif); font-size: 0.98rem; line-height: 1.85; color: var(--text); }
+  /* Real ACT passages number every 5th line in the left margin, not inline
+     within the sentence — inline numbers were disorienting mid-read. The
+     gutter column holds the visible "5, 10, 15…" labels; dx-ref-num anchors
+     stay in the text (invisible, zero-width) purely to mark the exact word
+     position each label corresponds to, so JS can measure and align them. */
+  .dx-passage-columns { position: relative; }
+  .dx-passage-gutter { position: absolute; top: 0; left: 0; width: 2.1rem; }
+  .dx-passage-gutter .dx-line-num { position: absolute; left: 0; width: 1.7rem; text-align: right; font-weight: 700; color: var(--faint); font-size: 0.72rem; line-height: 1; transition: color 0.15s ease, background 0.15s ease; padding: 0.1em 0.2em; border-radius: 2px; }
+  .dx-passage-gutter .dx-line-num.active-ref { color: var(--red); background: rgba(178,34,52,0.12); }
+  .dx-passage-body { font-family: var(--serif); font-size: 0.98rem; line-height: 1.85; color: var(--text); margin-left: 2.1rem; }
   .dx-passage-body p { margin-bottom: 1.1rem; }
-  .dx-passage-body .dx-ref-num { display: inline-block; min-width: 1.1em; font-weight: 700; color: var(--red); font-size: 0.78em; vertical-align: super; margin: 0 0.05em; }
+  .dx-passage-body .dx-ref-num { display: inline-block; width: 0; height: 0; overflow: hidden; }
   .dx-passage-body .dx-ref-mark { text-decoration: underline; text-decoration-color: var(--red); text-decoration-thickness: 2px; text-underline-offset: 2px; }
-  .dx-passage-body .dx-ref-mark.active-ref, .dx-passage-body .dx-ref-num.active-ref { background: rgba(178,34,52,0.12); border-radius: 2px; }
+  .dx-passage-body .dx-ref-mark.active-ref { background: rgba(178,34,52,0.12); border-radius: 2px; }
   .dx-passage-body { cursor: text; }
   .dx-user-highlight { background: #fff3a0; cursor: pointer; border-radius: 1px; }
   .dx-user-highlight:hover { background: #ffe985; }
@@ -320,10 +329,10 @@
 <script>
   window.APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwsLMGq3lhBEPObcas0k8gVS67NX9y4wXKG6RgzKtlBOT2SXfREK6vBpvvM19w9s1m6/exec';
 
-  // TODO: replace with the real static Google Meet link, e.g.
-  // 'https://meet.google.com/abc-defg-hij'. Left as a placeholder — the
-  // "Join your meeting here" link on the portal home screen uses this.
-  window.GOOGLE_MEET_URL = 'https://meet.google.com/PLACEHOLDER-REPLACE-ME';
+  // Luca's standing Google Meet room — the "Online? Join here" link on
+  // the portal home screen uses this for every session, since it's a
+  // fixed personal room rather than a per-event generated link.
+  window.GOOGLE_MEET_URL = 'https://meet.google.com/kgd-inuf-wzi';
 </script>
 
 <nav id="main-nav">
@@ -365,7 +374,7 @@
     <div class="next-session-card" id="next-session-card" style="display:none;">
       <div class="ns-label" id="ns-label">Your next scheduled session is on:</div>
       <div class="ns-date" id="ns-date">&mdash;</div>
-      <a href="#" class="ns-join" id="ns-join" style="display:none;" target="_blank" rel="noopener">Is it online? Join your meeting here &rarr;</a>
+      <a href="#" class="ns-join" id="ns-join" style="display:none;" target="_blank" rel="noopener">Online? Join here: <span id="ns-join-url"></span></a>
     </div>
     <div class="menu-grid">
       <div class="menu-card" data-route="diagnostic">
@@ -608,7 +617,10 @@
       <div class="dx-passage-pane" id="dx-passage-pane">
         <div class="dx-passage-kicker" id="dx-passage-kicker"></div>
         <div class="dx-passage-title" id="dx-passage-title"></div>
-        <div class="dx-passage-body" id="dx-passage-body"></div>
+        <div class="dx-passage-columns" id="dx-passage-columns">
+          <div class="dx-passage-gutter" id="dx-passage-gutter"></div>
+          <div class="dx-passage-body" id="dx-passage-body"></div>
+        </div>
       </div>
       <div class="dx-card-wrap">
         <div class="dx-card" id="dx-card">
@@ -791,6 +803,18 @@
   var nsLabel = document.getElementById('ns-label');
   var nsDate  = document.getElementById('ns-date');
   var nsJoin  = document.getElementById('ns-join');
+  var nsJoinUrl = document.getElementById('ns-join-url');
+
+  function setJoinLink() {
+    var meetUrl = window.GOOGLE_MEET_URL || '';
+    if (meetUrl && meetUrl.indexOf('PLACEHOLDER') === -1) {
+      nsJoin.href = meetUrl;
+      if (nsJoinUrl) nsJoinUrl.textContent = meetUrl;
+      nsJoin.style.display = 'inline-block';
+    } else {
+      nsJoin.style.display = 'none';
+    }
+  }
 
   function formatSessionDate(iso, allDay) {
     var d = new Date(iso);
@@ -802,24 +826,57 @@
     return dateStr + ' at ' + timeStr;
   }
 
+  // Append ?debug=1 to the portal URL (e.g. .../portal/index.html?debug=1)
+  // to see exactly why the next-session card isn't matching — no Apps
+  // Script execution log needed. Shows the HTTP status of the calendar
+  // fetch, the name it searched for, and every event title it parsed off
+  // the calendar so a name-matching mismatch is obvious at a glance.
+  var DEBUG_MODE = /[?&]debug=1\b/.test(window.location.search);
+
+  function renderNextSessionDebug(data) {
+    var existing = document.getElementById('ns-debug');
+    if (existing) existing.remove();
+    if (!DEBUG_MODE) return;
+    var box = document.createElement('pre');
+    box.id = 'ns-debug';
+    box.style.cssText = 'text-align:left; font-size:0.68rem; line-height:1.6; background:#111; color:#9fdc9f; padding:0.75rem 1rem; margin-top:0.75rem; white-space:pre-wrap; word-break:break-word; border-radius:6px; max-width:460px; margin-left:auto; margin-right:auto;';
+    box.textContent = 'DEBUG (nextSession):\n' + JSON.stringify(data, null, 1);
+    nsCard.parentNode.insertBefore(box, nsCard.nextSibling);
+  }
+
+  // The DEMO account always shows a canned example session instead of
+  // hitting the real calendar — this makes the widget itself visible and
+  // reviewable independent of whatever's currently wrong with the live
+  // calendar integration (deployment, name matching, etc. — see the
+  // ?debug=1 tool above for diagnosing that separately). Matches on the
+  // student's key, not their name, since "DEMO123" is what's actually
+  // typed in to reach this account.
+  function isDemoAccount() {
+    return !!(currentStudent && currentStudent.key && /^demo/i.test(currentStudent.key));
+  }
+
   function loadNextSession() {
     if (!currentStudent || !currentStudent.name) return;
-    fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'nextSession', name: currentStudent.name }) })
+    if (isDemoAccount()) {
+      var demoWhen = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+      demoWhen.setHours(16, 0, 0, 0);
+      nsCard.style.display = 'block';
+      nsLabel.textContent = '📅 Your next scheduled session is on: (example)';
+      nsDate.textContent = formatSessionDate(demoWhen.toISOString(), false);
+      setJoinLink();
+      return;
+    }
+    fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'nextSession', name: currentStudent.name, debug: DEBUG_MODE }) })
       .then(function (r) { return r.json(); })
-      .catch(function () { return { ok: false }; })
+      .catch(function (err) { return { ok: false, error: 'network', message: String(err) }; })
       .then(function (data) {
-        if (!data || !data.ok) { nsCard.style.display = 'none'; return; }
+        renderNextSessionDebug(data);
+        if (!data || !data.ok) { nsCard.style.display = DEBUG_MODE ? 'block' : 'none'; if (DEBUG_MODE) { nsLabel.textContent = ''; nsDate.textContent = 'Request failed — see debug output below.'; nsJoin.style.display = 'none'; } return; }
         nsCard.style.display = 'block';
         if (data.next) {
-          nsLabel.textContent = 'Your next scheduled session is on:';
+          nsLabel.textContent = '📅 Your next scheduled session is on:';
           nsDate.textContent = formatSessionDate(data.next.startIso, data.next.allDay);
-          var meetUrl = window.GOOGLE_MEET_URL || '';
-          if (meetUrl && meetUrl.indexOf('PLACEHOLDER') === -1) {
-            nsJoin.href = meetUrl;
-            nsJoin.style.display = 'inline-block';
-          } else {
-            nsJoin.style.display = 'none';
-          }
+          setJoinLink();
         } else {
           nsLabel.textContent = '';
           nsDate.textContent = 'You have no current sessions scheduled yet.';
@@ -1085,8 +1142,40 @@
   var passagePaneEl   = document.getElementById('dx-passage-pane');
   var passageKickerEl = document.getElementById('dx-passage-kicker');
   var passageTitleEl  = document.getElementById('dx-passage-title');
+  var passageColumnsEl = document.getElementById('dx-passage-columns');
+  var passageGutterEl  = document.getElementById('dx-passage-gutter');
   var passageBodyEl   = document.getElementById('dx-passage-body');
   var lastRenderedPassageId = null;
+
+  /* Builds the left-margin line-number gutter (real-ACT style: numbers run
+     down the side every 5 lines, not inline in the sentence). Each
+     dx-ref-num anchor stays in the text but is rendered invisible/zero-size
+     (see CSS) purely as a position marker — this walks those anchors and
+     drops a matching visible label in the gutter at the same vertical
+     offset, so "line 15" in the gutter always points at the exact spot in
+     the passage it was sourced from. Re-run on passage swap and on resize,
+     since reflow changes where each line actually falls. */
+  function layoutPassageGutter() {
+    if (!passageColumnsEl.offsetParent) return; // pane isn't visible — nothing to measure yet
+    passageGutterEl.innerHTML = '';
+    var wrapperRect = passageColumnsEl.getBoundingClientRect();
+    var anchors = passageBodyEl.querySelectorAll('.dx-ref-num[data-ref]');
+    anchors.forEach(function (anchor) {
+      var r = anchor.getBoundingClientRect();
+      var top = r.top - wrapperRect.top;
+      var label = document.createElement('div');
+      label.className = 'dx-line-num';
+      label.setAttribute('data-ref', anchor.getAttribute('data-ref'));
+      label.textContent = anchor.getAttribute('data-ref');
+      label.style.top = top + 'px';
+      passageGutterEl.appendChild(label);
+    });
+  }
+  var gutterResizeTimer = null;
+  window.addEventListener('resize', function () {
+    clearTimeout(gutterResizeTimer);
+    gutterResizeTimer = setTimeout(layoutPassageGutter, 150);
+  });
 
   function renderPassagePane(q) {
     var passages = window.PASSAGES || {};
@@ -1104,22 +1193,26 @@
       passageTitleEl.textContent = passage.title || '';
       passageBodyEl.innerHTML = passage.html || '';
       lastRenderedPassageId = q.passageId;
-      passageBodyEl.scrollTop = 0;
+      passagePaneEl.scrollTop = 0;
+      layoutPassageGutter();
     }
 
-    // Highlight the numbered mark this question refers to, and scroll it
-    // into view within the passage pane (not the whole page).
+    // Highlight the numbered mark this question refers to (both the
+    // underline in the body text and its number in the gutter), and scroll
+    // it into view within the passage pane (not the whole page) — the pane
+    // itself is the scrolling element, not the body.
     var prevActive = passageBodyEl.querySelectorAll('.active-ref');
     for (var i = 0; i < prevActive.length; i++) prevActive[i].classList.remove('active-ref');
+    var prevActiveGutter = passageGutterEl.querySelectorAll('.active-ref');
+    for (var j = 0; j < prevActiveGutter.length; j++) prevActiveGutter[j].classList.remove('active-ref');
     if (q.refNum != null) {
       var marks = passageBodyEl.querySelectorAll('[data-ref="' + q.refNum + '"]');
-      marks.forEach(function (m) {
-        m.classList.add('active-ref');
-      });
-      if (marks.length) {
-        var target = marks[0];
-        var targetTop = target.offsetTop - passageBodyEl.clientHeight / 2;
-        passageBodyEl.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' });
+      marks.forEach(function (m) { m.classList.add('active-ref'); });
+      var gutterLabel = passageGutterEl.querySelector('[data-ref="' + q.refNum + '"]');
+      if (gutterLabel) {
+        gutterLabel.classList.add('active-ref');
+        var targetTop = gutterLabel.offsetTop - passagePaneEl.clientHeight / 2;
+        passagePaneEl.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' });
       }
     }
   }
