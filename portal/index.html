@@ -18,18 +18,12 @@
      MORETTI STUDENT PORTAL
      ---------------------------------------------------------------------
      HOW TO ADD A NEW STUDENT (no coding needed):
-     Scroll down to the "STUDENTS" object further down this file. Add one
-     line per student, following the exact pattern of the example already
-     there:
-
-         'KEYGOESHERE': { name: 'Student Name', driveFolderUrl: 'https://drive.google.com/...' },
-
-     - The key (left side, in quotes) is the private code you hand the
-       student. Anything works — e.g. 'JSMITH26'. Keep it unique per student.
-     - driveFolderUrl is the link to that student's personal Google Drive
-       folder. Leave it as an empty string '' if you haven't set one up
-       yet — the portal will show a friendly "not ready yet" message
-       instead of a broken link.
+     The student roster lives in a private Google Sheet now, not in this
+     file — add a row there (Key, Name, DriveFolderUrl, CollegePrepFolderUrl)
+     and the student is set up. The first time they use their key, they'll
+     enter their email and the backend (Code.gs) automatically shares their
+     Drive folder(s) with them — no manual sharing needed. See the
+     deployment guide in this folder for the one-time setup.
      ===================================================================== */
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -231,13 +225,12 @@
 </head>
 <body>
 
-<!-- If a hand-edit to the STUDENTS list below breaks the file (a missing
-     comma or quote mark is the usual culprit), this catches it and shows
-     a plain-English message instead of a blank white page. -->
+<!-- If something breaks while loading the portal, this catches it and
+     shows a plain-English message instead of a blank white page. -->
 <div id="portal-fatal-error">
   <div class="ferr-box">
     <h1>Something went wrong loading the portal</h1>
-    <p>Most likely a typo in the STUDENTS list below (a missing comma or quote mark), or the page couldn't reach an external script it needs. Open <code>portal/index.html</code> and check your last edit, or send the detail below to Claude.</p>
+    <p>Most likely the page couldn't reach the backend it needs (check APPS_SCRIPT_URL below), or an external script failed to load. Open <code>portal/index.html</code> and check your last edit, or send the detail below to Claude.</p>
     <p id="ferr-detail" style="font-family: monospace; font-size: 0.72rem; color: var(--red); margin-top: 1rem; word-break: break-word;"></p>
   </div>
 </div>
@@ -251,36 +244,18 @@
 </script>
 
 <!-- =====================================================================
-     STUDENT DIRECTORY — edit this to add/remove students. This lives in
-     its own script block on purpose: if you make a typo here, the rest of
-     the portal still loads and shows the friendly error above instead of
-     breaking completely.
+     BACKEND CONFIG — the student roster (names, Drive links, and who's
+     been granted access) no longer lives in this file. It used to sit
+     right here in plain JavaScript, which meant anyone who viewed the
+     page's source could read every student's name and Drive folder link,
+     key or no key. It now lives in a private Google Sheet that only the
+     backend script below can read — see Code.gs and the deployment guide
+     in this same folder for how that's set up.
 
-     Format:
-       'ACCESS KEY': {
-         name: 'Full Name',
-         driveFolderUrl: '...',        // "Your Files" — regular math/English/etc. materials
-         collegePrepFolderUrl: '...',  // "College Prep" — SAT/ACT + admissions/essay materials
-         tests: []                     // "SAT/ACT Tests" — generated tests, once that exists.
-       }                                  Each entry looks like { title: 'Practice Test 1', url: '...' }.
-
-     - The key (left side, in quotes) is the private code you hand the
-       student. Anything works — e.g. 'JSMITH26'. Keep it unique per student.
-     - Leave either folder URL as '' if you haven't set it up yet — the
-       portal shows a friendly "not ready yet" message instead of a
-       broken link. Same for tests: leave it as an empty array [].
+     Paste your Apps Script Web App deployment URL below once it's live.
      ===================================================================== -->
 <script>
-  window.STUDENTS = {
-    'DEMO123': { name: 'Demo Student', driveFolderUrl: '', collegePrepFolderUrl: '', tests: [] },
-    'LCORCORAN26': { name: 'Lily Corcoran', driveFolderUrl: 'https://drive.google.com/drive/folders/1OUIP-e9pjcz2akbOX0UmJKaBDiUwYKRh?usp=sharing', collegePrepFolderUrl: '', tests: [] }
-    // 'JSMITH26': {
-    //   name: 'Jordan Smith',
-    //   driveFolderUrl: 'https://drive.google.com/drive/folders/XXXXXXXXXXXX',
-    //   collegePrepFolderUrl: 'https://drive.google.com/drive/folders/YYYYYYYYYYYY',
-    //   tests: [{ title: 'Practice Test 1', url: 'https://drive.google.com/...' }]
-    // },
-  };
+  window.APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwsLMGq3lhBEPObcas0k8gVS67NX9y4wXKG6RgzKtlBOT2SXfREK6vBpvvM19w9s1m6/exec';
 </script>
 
 <nav id="main-nav">
@@ -292,12 +267,24 @@
 <div class="screen active" id="screen-key">
   <div class="panel">
     <div class="kicker">Student Portal</div>
-    <h1 class="panel-hed">Enter your access key</h1>
-    <p class="panel-sub">Luca gave you a personal key when you signed up. Enter it below to get started.</p>
-    <input type="text" class="key-input" id="key-input" placeholder="ACCESS KEY" autocomplete="off" autocapitalize="characters">
-    <p class="key-error" id="key-error">That key wasn't recognized. Double-check it, or text Luca at (201) 275-2791.</p>
-    <button class="key-btn" id="key-submit">Continue</button>
-    <p class="key-help">Don't have a key yet? Call or text Luca at (201) 275-2791 to get set up.</p>
+
+    <div id="key-step">
+      <h1 class="panel-hed">Enter your access key</h1>
+      <p class="panel-sub">Luca gave you a personal key when you signed up. Enter it below to get started.</p>
+      <input type="text" class="key-input" id="key-input" placeholder="ACCESS KEY" autocomplete="off" autocapitalize="characters">
+      <p class="key-error" id="key-error">That key wasn't recognized. Double-check it, or text Luca at (201) 275-2791.</p>
+      <button class="key-btn" id="key-submit">Continue</button>
+      <p class="key-help">Don't have a key yet? Call or text Luca at (201) 275-2791 to get set up.</p>
+    </div>
+
+    <div id="email-step" style="display:none;">
+      <h1 class="panel-hed">One more thing<span id="email-step-name"></span></h1>
+      <p class="panel-sub">First time using this key — enter your email and we'll automatically share your files with you. No need to wait on Luca.</p>
+      <input type="email" class="key-input" id="email-input" placeholder="you@email.com" autocomplete="email" style="text-transform:none;">
+      <p class="key-error" id="email-error">That doesn't look like a valid email — double-check it and try again.</p>
+      <button class="key-btn" id="email-submit">Unlock My Files</button>
+      <a href="#" class="key-help" id="email-back" style="display:block; text-decoration:none;">&larr; Use a different key</a>
+    </div>
   </div>
 </div>
 
@@ -444,12 +431,14 @@
 (function () {
   'use strict';
 
-  if (!window.STUDENTS || typeof window.STUDENTS !== 'object') {
+  if (!window.APPS_SCRIPT_URL || window.APPS_SCRIPT_URL.indexOf('PASTE_YOUR') === 0) {
     var errEl = document.getElementById('portal-fatal-error');
+    var detailEl = document.getElementById('ferr-detail');
+    if (detailEl) detailEl.textContent = 'APPS_SCRIPT_URL is not set yet — see the deployment guide.';
     if (errEl) errEl.style.display = 'flex';
     return;
   }
-  var STUDENTS = window.STUDENTS;
+  var APPS_SCRIPT_URL = window.APPS_SCRIPT_URL;
 
   var EMAILJS_SERVICE_ID  = 'service_k768w0d';
   var EMAILJS_TEMPLATE_ID = 'template_xcv84lb'; // reuses the same notification template as the contact form
@@ -462,17 +451,19 @@
     try { emailjs.init('FAAXN09Ad2ObipaJJ'); } catch (e) { emailjsAvailable = false; }
   }
 
-  var currentStudent = null; // { key, name }
+  var currentStudent = null; // { key, name, driveFolderUrl, collegePrepFolderUrl, tests }
   var activeScreenId = 'screen-key';
   var STORAGE_KEY = 'moretti_portal_state';
 
   /* ═══ SESSION PERSISTENCE ═══
      If a student accidentally refreshes or navigates back mid-diagnostic,
-     this restores exactly where they were instead of losing everything. */
+     this restores exactly where they were instead of losing everything.
+     currentStudent is saved in full here (not just the key) since the
+     roster no longer lives in this page for a restore to look back up. */
   function saveState() {
     try {
       sessionStorage.setItem(STORAGE_KEY, JSON.stringify({
-        key: currentStudent ? currentStudent.key : null,
+        student: currentStudent,
         screen: activeScreenId,
         resourceKind: currentResourceKind,
         testChoice: testChoice,
@@ -508,27 +499,122 @@
     }
   });
 
-  /* ═══ SCREEN 1: KEY ENTRY ═══ */
-  var keyInput = document.getElementById('key-input');
-  var keyError = document.getElementById('key-error');
-  function tryKey() {
-    var raw = keyInput.value.trim().toUpperCase();
-    if (!raw || !STUDENTS[raw]) {
-      keyError.style.display = 'block';
-      return;
-    }
-    keyError.style.display = 'none';
-    currentStudent = { key: raw, name: STUDENTS[raw].name };
+  /* ═══ SCREEN 1: KEY ENTRY + FIRST-USE EMAIL CAPTURE ═══
+     Talks to the Apps Script backend (Code.gs) instead of a local
+     STUDENTS object. On a brand-new key the backend replies with
+     needsEmail: true — the portal then asks for an email and resubmits,
+     at which point the backend both unlocks the portal AND grants that
+     email Viewer access on the student's Drive folder(s) automatically. */
+  var keyStep    = document.getElementById('key-step');
+  var keyInput   = document.getElementById('key-input');
+  var keyError   = document.getElementById('key-error');
+  var keySubmit  = document.getElementById('key-submit');
+  var emailStep  = document.getElementById('email-step');
+  var emailInput = document.getElementById('email-input');
+  var emailError = document.getElementById('email-error');
+  var emailSubmit = document.getElementById('email-submit');
+  var emailStepName = document.getElementById('email-step-name');
+  var pendingKey = null;
+  var pendingName = null;
+
+  // Sends { action:'auth', key, email } to the backend. The body is sent
+  // as a plain string (not application/json) on purpose — that keeps the
+  // request inside the CORS "simple request" rules so the browser doesn't
+  // send a preflight OPTIONS request first, which Apps Script Web Apps
+  // don't handle. Returns a parsed response object, or { ok:false,
+  // error:'network' } if the request itself failed (offline, blocked, etc).
+  function callAuth(key, email) {
+    return fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'auth', key: key, email: email || '' })
+    }).then(function (res) { return res.json(); })
+      .catch(function () { return { ok: false, error: 'network' }; });
+  }
+
+  function authErrorMessage(err) {
+    if (err === 'email_mismatch') return 'This key is already linked to a different email. Text Luca at (201) 275-2791 if that seems wrong.';
+    if (err === 'bad_email') return "That doesn't look like a valid email — double-check it and try again.";
+    if (err === 'network') return "Couldn't reach the server. Check your connection and try again, or text Luca at (201) 275-2791.";
+    return "That key wasn't recognized. Double-check it, or text Luca at (201) 275-2791.";
+  }
+
+  function settle(data) {
+    currentStudent = {
+      key: pendingKey,
+      name: data.name,
+      driveFolderUrl: data.driveFolderUrl || '',
+      collegePrepFolderUrl: data.collegePrepFolderUrl || '',
+      tests: data.tests || []
+    };
     document.getElementById('menu-greeting').textContent = 'Hey ' + currentStudent.name.split(' ')[0] + '.';
     show('screen-menu');
+  }
+
+  function resetKeyScreen() {
+    pendingKey = null;
+    pendingName = null;
+    keyInput.value = '';
+    emailInput.value = '';
+    keyError.style.display = 'none';
+    emailError.style.display = 'none';
+    emailStep.style.display = 'none';
+    keyStep.style.display = 'block';
+  }
+
+  function tryKey() {
+    var raw = keyInput.value.trim().toUpperCase();
+    if (!raw) { keyError.textContent = authErrorMessage(); keyError.style.display = 'block'; return; }
+    keyError.style.display = 'none';
+    keySubmit.disabled = true;
+    keySubmit.textContent = 'Checking…';
+    callAuth(raw, null).then(function (data) {
+      keySubmit.disabled = false;
+      keySubmit.textContent = 'Continue';
+      if (!data.ok) {
+        keyError.textContent = authErrorMessage(data.error);
+        keyError.style.display = 'block';
+        return;
+      }
+      pendingKey = raw;
+      pendingName = data.name;
+      if (data.needsEmail) {
+        emailStepName.textContent = ', ' + data.name.split(' ')[0];
+        keyStep.style.display = 'none';
+        emailStep.style.display = 'block';
+        emailInput.focus();
+      } else {
+        settle(data);
+      }
+    });
   }
   document.getElementById('key-submit').addEventListener('click', tryKey);
   keyInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') tryKey(); });
 
+  function trySubmitEmail() {
+    var email = emailInput.value.trim();
+    if (!email) { emailError.textContent = authErrorMessage('bad_email'); emailError.style.display = 'block'; return; }
+    emailError.style.display = 'none';
+    emailSubmit.disabled = true;
+    emailSubmit.textContent = 'Unlocking…';
+    callAuth(pendingKey, email).then(function (data) {
+      emailSubmit.disabled = false;
+      emailSubmit.textContent = 'Unlock My Files';
+      if (!data.ok) {
+        emailError.textContent = authErrorMessage(data.error);
+        emailError.style.display = 'block';
+        return;
+      }
+      settle(data);
+    });
+  }
+  document.getElementById('email-submit').addEventListener('click', trySubmitEmail);
+  emailInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') trySubmitEmail(); });
+  document.getElementById('email-back').addEventListener('click', function (e) { e.preventDefault(); resetKeyScreen(); });
+
   /* Leaving the portal via the logo or "Exit Portal" — not just the menu's
      "Log out" — should also fully reset things, so coming back always asks
      for the key again instead of resuming mid-diagnostic. */
-  function exitPortal() { clearState(); }
+  function exitPortal() { clearState(); resetKeyScreen(); }
   var exitLinkIds = ['nav-logo-exit', 'nav-exit-link'];
   exitLinkIds.forEach(function (id) {
     var el = document.getElementById(id);
@@ -549,8 +635,8 @@
   document.getElementById('menu-logout').addEventListener('click', function (e) {
     e.preventDefault();
     currentStudent = null;
-    keyInput.value = '';
     clearState();
+    resetKeyScreen();
     show('screen-key');
   });
 
@@ -567,8 +653,7 @@
     var isPrep = kind === 'college-prep';
     document.getElementById('res-title').textContent = isPrep ? 'College Prep' : 'Your Files';
     var body = document.getElementById('res-body');
-    var student = currentStudent ? STUDENTS[currentStudent.key] : null;
-    var url = student ? (isPrep ? student.collegePrepFolderUrl : student.driveFolderUrl) : '';
+    var url = currentStudent ? (isPrep ? currentStudent.collegePrepFolderUrl : currentStudent.driveFolderUrl) : '';
     if (!url) {
       body.innerHTML = '<p class="res-pending">Your folder isn\'t set up yet. Luca will share it with you directly — check back soon, or ask him at your next session.</p>';
       return;
@@ -576,7 +661,7 @@
     var folderId = driveFolderId(url);
     if (folderId) {
       body.innerHTML =
-        '<p class="res-pending">Everything Luca has shared with you lives here.</p>' +
+        '<p class="res-pending">Everything Luca has shared with you lives here. This folder is restricted to your Google account &mdash; if it doesn\'t load below, make sure you\'re signed into the Google account Luca shared it with, or use the button to open it directly in Drive and sign in there.</p>' +
         '<iframe class="res-embed" src="https://drive.google.com/embeddedfolderview?id=' + folderId + '#list" loading="lazy"></iframe>' +
         '<a href="' + url + '" target="_blank" rel="noopener" class="res-drive-btn-outline">Open in Google Drive &rarr;</a>';
     } else {
@@ -587,13 +672,12 @@
   document.getElementById('res-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-menu'); });
 
   /* ═══ SCREEN 3b: SAT/ACT TESTS ═══
-     Placeholder until the test-generator exists. Once it does, populate
-     each student's "tests" array (see the STUDENTS comment above) with
-     { title, url } entries and they'll list here automatically. */
+     Placeholder until the test-generator exists. Once it does, have the
+     backend return a "tests" array (see Code.gs) with { title, url }
+     entries and they'll list here automatically. */
   function renderTests() {
     var body = document.getElementById('tests-body');
-    var student = currentStudent ? STUDENTS[currentStudent.key] : null;
-    var tests = (student && Array.isArray(student.tests)) ? student.tests : [];
+    var tests = (currentStudent && Array.isArray(currentStudent.tests)) ? currentStudent.tests : [];
     if (!tests.length) {
       body.innerHTML = '<p class="res-pending">No generated tests here yet — Luca is still building this out. Check back soon.</p>';
       return;
@@ -1030,9 +1114,9 @@
       var raw = sessionStorage.getItem(STORAGE_KEY);
       if (!raw) return;
       var state = JSON.parse(raw);
-      if (!state || !state.key || !STUDENTS[state.key]) { clearState(); return; }
+      if (!state || !state.student || !state.student.key) { clearState(); return; }
 
-      currentStudent = { key: state.key, name: STUDENTS[state.key].name };
+      currentStudent = state.student;
       document.getElementById('menu-greeting').textContent = 'Hey ' + currentStudent.name.split(' ')[0] + '.';
 
       if (state.screen === 'dx-screen' && state.testChoice && Array.isArray(state.activeSectionKeys) && state.activeSectionKeys.length) {
