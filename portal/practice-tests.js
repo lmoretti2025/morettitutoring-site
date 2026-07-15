@@ -76,37 +76,156 @@
        explanation-per-choice standard, once the SAT set is solid.
 
    -------------------------------------------------------------------------
-   R&W STYLE CALIBRATION — derived from close reading of a large sample of
-   Luca's own "My SAT Questions" reference set (structure/format only, no
-   content copied). Apply these to every R&W question written from here on;
-   Test 1's Text Structure & Purpose and Inferences items were rewritten to
-   match after this calibration — use them as the reference examples.
+   STYLE CALIBRATION — derived from reading every one of the ~1,152 images
+   in Luca's "My SAT Questions" reference folder (structure/format/rigor
+   only — no content copied; see COPYRIGHT NOTE below for what to exclude
+   from that folder if it's ever revisited). Apply these per-skill patterns
+   to every new question. Test 1's Text Structure & Purpose and Inferences
+   items were already rewritten to match — use them as reference examples.
 
+   COPYRIGHT NOTE: close reading surfaced roughly 60+ images across the
+   folder — concentrated almost entirely in Cross-Text Connections (34 of
+   38 items match specific, identifiable released Digital SAT questions)
+   and Text Structure & Purpose (12 of 51, several citing real in-copyright
+   novels) — that read as real released/copyrighted material rather than
+   Luca's own writing. None of that folder is used as a source for this
+   file; this section is a distillation of pattern/structure only, built
+   from the clean majority of the folder. If "My SAT Questions" is ever
+   used again, treat Cross-Text Connections as unreliable entirely and
+   spot-check named-researcher R&W items against real published work.
+
+   GENERAL R&W PATTERNS:
      - Ground every passage in specific, named, real-sounding detail: a
        full-named researcher with a credential ("archaeologist Robert
        Rosenswig," "ecologist Ralf Aben"), a specific place, a specific
        year or figure. Anonymous "a researcher found..." framing reads
-       thin next to this — avoid it.
+       thin next to this — avoid it. Topics should span science, history,
+       art, music, and social science — don't over-index on one domain.
      - Passages run a full paragraph (4-6 sentences), not one or two lines.
        Answer choices for Information & Ideas items are full sentences with
-       a subordinate clause, not short blunt phrases.
-     - Inferences items use the same "complete the text" blank mechanic as
-       Words in Context/Transitions — a passage ending in "This suggests
-       that ______." with "Which choice most logically completes the
-       text?" — NOT "It can most reasonably be inferred that...".
-     - Text Structure & Purpose items present one flowing paragraph with a
-       single sentence wrapped in <u>...</u>, then ask "Which choice best
-       describes the function of the underlined sentence?" — not a
-       reference to "the second sentence" or a two-sentence excerpt.
-     - Command of Evidence can be framed either as a research finding
-       ("which finding, if true, would most directly support...") or as a
-       quotation ("which quotation from a work by a historian would be the
-       most effective evidence...") — vary between the two.
-     - Cross-Text Connections needs a real paragraph on each side (Text 1 /
-       Text 2), each grounded in a named researcher/study, not one-liners.
-     - Boundaries can test more than comma splices/semicolons — sentence
-       word-order shifts (declarative vs. interrogative) and end
-       punctuation are fair game too.
+       a subordinate clause, not short blunt phrases, similar length across
+       all 4 choices (mitigates length-based guessing).
+     - Distractors are almost always "true-but-off-target," not "twisted
+       fact": restates one true detail without addressing the actual ask,
+       overreaches into an absolute/unsupported claim, focuses on a
+       secondary/tangential point, or reverses the actual relationship.
+       Straight factual contradictions are rare — avoid leaning on them.
+
+   PER-SKILL NOTES (Reading & Writing):
+     - Words in Context: ~75% informational fill-in-blank ("Which choice
+       completes the text with the most logical and precise word or
+       phrase?"), ~25% original short excerpt with an underlined polysemous
+       word ("As used in the text, what does the word 'X' most nearly
+       mean?" — all 4 choices are real dictionary senses of that word, only
+       one fits). Never cite a real author/title for the excerpt variant —
+       write fully original short fiction/poetry instead.
+     - Text Structure & Purpose: THREE distinct valid mechanics, roughly
+       even split — vary between them: (1) one paragraph with a single
+       <u>underlined</u> sentence + "Which choice best describes the
+       function of the underlined sentence?" (2) no underline, "Which
+       choice best states the main purpose of the text?" (3) no underline,
+       "Which choice best describes the overall structure of the text?"
+       with answer choices shaped "It does X, then does Y[, then Z]."
+     - Cross-Text Connections: full paragraph on each side (Text 1 / Text
+       2), each grounded in a named researcher/study. Relationship types to
+       rotate: Text 2 complicates/qualifies Text 1; Text 2 directly
+       disputes Text 1; both converge on a shared, hedged claim despite
+       different methods; Text 2 studies the same phenomenon from a
+       different angle. Correct answer usually requires reasoning from
+       Text 2's methodology back onto Text 1's claim, not just paraphrase.
+     - Central Ideas and Details: same dense-paragraph/named-researcher
+       style; correct answer is a full-sentence synthesis of the passage's
+       actual point (not a detail, not an unsupported generalization).
+     - Inferences: "complete the text" blank mechanic — passage ends with a
+       connective clause into a blank ("This finding suggests that ______,"
+       "...therefore conclude that ______," or the blank can complete a
+       mid-sentence verb phrase) + "Which choice most logically completes
+       the text?" NOT "It can most reasonably be inferred that...". The
+       tested leap is always genuinely inferential (necessary-condition
+       reasoning, convergent evidence, causal mechanism from a natural
+       experiment, timing/threshold bound, population comparison) — never
+       simple restatement.
+     - Command of Evidence: vary framing between a research finding
+       ("Which finding, if true, would most directly support/weaken...")
+       and a quotation ("Which quotation from [a work/scholar] most
+       effectively illustrates/supports...") and table/graph data-citation
+       ("Which choice best describes data from the table that support...").
+     - Rhetorical Synthesis: "While researching a topic, a student has
+       taken the following notes:" + 4-6 short bullet facts + "The student
+       wants to [GOAL]. Which choice most effectively uses relevant
+       information from the notes to accomplish this goal?" Goals to rotate:
+       identify a specific fact, emphasize/highlight a detail, contrast two
+       things, emphasize a similarity, summarize a finding, introduce a
+       topic to an unfamiliar audience, address an already-familiar
+       audience, explain a cause/reason, make-and-support a generalization,
+       use a quotation to accomplish a goal. Distractors are "true but
+       off-goal" — never twist a fact, just answer the wrong question.
+     - Transitions: full paragraph, real named/specific grounding (not bare
+       two-sentence pairs). Distractors are near-miss same-category words
+       (e.g. "however" vs. "on the other hand" vs. "nevertheless") more
+       often than wrong-category words.
+     - Boundaries: don't lean only on comma splices/semicolons. Also test:
+       essential vs. nonessential appositives (a named person following a
+       generic noun is almost always essential/no-comma — "playwright Wakako
+       Yamauchi," not "playwright, Wakako Yamauchi,"), colons/dashes vs.
+       commas introducing a list or explanation, conjunctive adverbs
+       needing semicolon+comma (not just a comma), and declarative-vs-
+       interrogative word order paired with matching end punctuation.
+     - Form, Structure, and Sense: subject-verb agreement (usually with a
+       long intervening phrase burying the true subject), verb tense/
+       sequence (past vs. past perfect, cued by "by the time"/"already"),
+       pronoun-antecedent number/case, possessive/apostrophe placement,
+       modifier placement. Choices vary exactly one grammatical axis at a
+       time — never mix two variables in one item's answer set.
+
+   PER-SKILL NOTES (Math):
+     - Answer choices should be clean numbers/fractions; distractors should
+       be the result of one specific, nameable error (sign flip, wrong
+       base, forgot to square/cube a scale factor, used diameter instead
+       of radius, wrong denominator in a table problem, extraneous root
+       from an unchecked radical/rational equation) — not random wrong
+       numbers.
+     - Nonlinear Functions: skews ~55-60% real-world (population/bacteria
+       growth, projectile motion, revenue) vs. abstract. Exponential
+       growth/decay is the single largest subtopic — base/rate confusion
+       (raw percent used as the base instead of 1±rate) is the most common
+       trap. No "Figure not drawn to scale" note is used for function
+       graphs (only for geometry figures).
+     - Nonlinear Equations and Systems: includes literal-equation
+       rearrangement (isolate one variable in a real-world formula) as a
+       legitimate sub-type, not just quadratic-solving. ~2:1 MC:FR.
+     - Equivalent Expressions: a recurring format is asking for a *derived*
+       quantity after simplifying (solve for a+b+c, or ab, or rt) rather
+       than the simplified expression itself — forces full simplification
+       before the "answer" step begins.
+     - Geometry (Area & Volume, Circles, Lines/Angles/Triangles, Right
+       Triangles & Trig): use "Note: Figure not drawn to scale." under any
+       figure where given numeric values don't match the drawn proportions.
+       Center of a circle always labeled O; triangle vertices single
+       capital letters; right-angle tick marks shown. Scale-factor items
+       must test forgetting to square (area) or cube (volume) the linear
+       factor — this is the single most repeated geometry trap.
+     - Ratios, Rates, Proportions, and Units: heavily real-world (unit
+       conversion is the largest subtopic); ~60/40 MC:FR split.
+     - Probability: two-way frequency tables are the dominant vehicle
+       (~70% of items); distractors are structural (wrong cell/row/column,
+       not arithmetic slips) — wrong denominator and complement confusion
+       are the two most common traps. Include at least one compound/
+       independent-event ("and") and one "at least one" complement item per
+       test — both were underrepresented in the sampled reference set.
+     - One/Two-Variable Data: scatterplot slope reading, regression-
+       equation prediction, and linear-vs-exponential model selection from
+       a table are the core Two-Variable formats; sign-flip on slope is the
+       most common distractor. One-Variable covers mean/median/mode/range
+       and the effect of adding/removing a data point.
+     - Percentages: chained/compound percent problems (a percent change of
+       a percent change) are a deliberate recurring FR template — always
+       double-check compounding arithmetic by hand before finalizing.
+     - Sample Statistics & Margin of Error / Evaluating Statistical Claims:
+       purely conceptual, no computation. Core traps: overclaiming
+       certainty (stating one point value instead of the plausible range),
+       overgeneralizing beyond the actually-sampled population, and
+       treating a self-selected/voluntary sample as if it were random.
    ========================================================================= */
 
 window.SAT_PRACTICE_TESTS = [
