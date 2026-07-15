@@ -382,11 +382,10 @@
         <div class="menu-card-title">SAT/ACT Diagnostics</div>
         <div class="menu-card-body">Take the hand-curated diagnostic so Luca can build your plan around real data.</div>
       </div>
-      <div class="menu-card disabled" data-route="tests">
-        <span class="menu-card-coming-soon">Coming Soon</span>
+      <div class="menu-card" data-route="tests">
         <span class="menu-card-icon">02</span>
         <div class="menu-card-title">SAT/ACT Tests</div>
-        <div class="menu-card-body">Full-length practice tests, generated just for you.</div>
+        <div class="menu-card-body">Full-length practice tests, scored instantly with an explanation for every answer.</div>
       </div>
       <div class="menu-card menu-card-wide" data-route="files">
         <span class="menu-card-icon">03</span>
@@ -424,6 +423,30 @@
   </div>
 </div>
 
+<!-- ═══ SCREEN 3b-2 — PRACTICE TEST BREAK (between Reading & Writing and Math — the
+     only practice-test screen that isn't the diagnostic's own dx-screen/screen-intro
+     shell, since it's not a question-answering moment) ═══ -->
+<div class="screen" id="screen-pt-break">
+  <div class="panel">
+    <div class="kicker" id="pt-break-kicker">SAT Practice Test 1</div>
+    <h1 class="panel-hed">Take a short break.</h1>
+    <p class="panel-sub">On the real digital SAT, students get a break between Reading &amp; Writing and Math. Stretch, get some water &mdash; the Math section is up next.</p>
+    <button class="key-btn" id="pt-break-continue">Start Math</button>
+    <a href="#" class="menu-back-link" id="pt-break-exit">&larr; Save &amp; exit to menu</a>
+  </div>
+</div>
+
+<!-- ═══ SCREEN 3b-3 — PRACTICE TEST RESULTS + PER-QUESTION REVIEW ═══ -->
+<div class="screen" id="screen-practice-results">
+  <div class="panel-wide">
+    <div class="kicker">SAT Practice Test 1 — Results</div>
+    <h1 class="panel-hed" id="pt-score-hed">You scored ?/?</h1>
+    <div id="pt-score-breakdown" style="margin-bottom:2rem; font-size:0.9rem; color:var(--mid);"></div>
+    <div id="pt-review-list"></div>
+    <a href="#" class="menu-back-link" id="pt-results-back" style="display:block; margin-top:1.5rem;">&larr; Back to menu</a>
+  </div>
+</div>
+
 <!-- ═══ SCREEN 3c — CHOOSE SAT OR ACT ═══ -->
 <div class="screen" id="screen-test-choice">
   <div class="panel">
@@ -443,7 +466,7 @@
   <div class="panel">
     <div class="kicker" id="intro-kicker">SAT Diagnostic</div>
     <h1 class="panel-hed" id="intro-hed">Math section — 75 questions.</h1>
-    <p class="panel-sub">No pressure — this just tells Luca where to focus. Take your time.</p>
+    <p class="panel-sub" id="intro-sub">No pressure — this just tells Luca where to focus. Take your time.</p>
     <div class="intro-directions" id="intro-directions"></div>
     <a href="#" class="intro-reference-link" id="intro-reference-link" style="display:none;">View Reference Sheet &rarr;</a>
     <ul class="intro-list">
@@ -665,6 +688,7 @@
 </div>
 
 <script src="banks.js"></script>
+<script src="practice-tests.js"></script>
 <script>
 (function () {
   'use strict';
@@ -713,7 +737,14 @@
         marked: marked,
         elims: elims,
         qOrder: qOrder,
-        sectionTimerEndsAt: sectionTimerEndsAt
+        sectionTimerEndsAt: sectionTimerEndsAt,
+        dxMode: dxMode,
+        ptTestId: ptTest ? ptTest.id : null,
+        ptSection: ptSection,
+        ptStage: ptStage,
+        ptVariant: ptVariant,
+        ptCompleted: ptCompleted,
+        ptModuleMinutes: window.PRACTICE_MODULE_TIME_LIMITS_ACTIVE
       }));
     } catch (e) { /* private browsing / storage disabled — fail silently */ }
   }
@@ -1012,26 +1043,190 @@
      entries and they'll list here automatically. */
   function renderTests() {
     var body = document.getElementById('tests-body');
-    var tests = (currentStudent && Array.isArray(currentStudent.tests)) ? currentStudent.tests : [];
-    if (!tests.length) {
-      body.innerHTML = '<p class="res-pending">No generated tests here yet — Luca is still building this out. Check back soon.</p>';
-      return;
+    var practiceTests = (window.SAT_PRACTICE_TESTS || []);
+    var html = '';
+    if (practiceTests.length) {
+      html += '<p class="res-pending" style="margin-bottom:1.4rem;">Full-length, original practice tests that mirror the real digital SAT: two modules per section, with your performance on Module 1 determining whether Module 2 is easier or harder — timed the same way the real test is. Every question comes with an explanation for the right answer and every wrong one, shown after you finish, so this doubles as a teaching tool, not just a score.</p>';
+      html += '<div style="display:flex; flex-direction:column; gap:0.9rem;">';
+      practiceTests.forEach(function (t) {
+        var mathN = (t.sections.math.module1 || []).length + (t.sections.math.module2Easier || []).length;
+        var rwN = (t.sections.readingWriting.module1 || []).length + (t.sections.readingWriting.module2Easier || []).length;
+        html += '<div class="res-card" style="padding:1.4rem 1.6rem;">' +
+          '<div class="menu-card-title" style="margin-bottom:0.3rem;">' + t.title + '</div>' +
+          '<div class="menu-card-body" style="margin-bottom:1rem;">Reading &amp; Writing (' + rwN + ' questions) + Math (' + mathN + ' questions)</div>' +
+          '<button class="key-btn pt-start-btn" type="button" data-test-id="' + t.id + '" style="width:auto; padding:0.9rem 1.8rem;">Start Test &rarr;</button>' +
+          '</div>';
+      });
+      html += '</div>';
+    } else {
+      html += '<p class="res-pending">No practice tests here yet — Luca is still building this out. Check back soon.</p>';
     }
-    var html = '<div style="display:flex; flex-direction:column; gap:0.75rem; margin-top:0.5rem;">';
-    tests.forEach(function (t) {
-      html += '<a href="' + t.url + '" target="_blank" rel="noopener" class="res-drive-btn-outline" style="display:block;">' + t.title + '</a>';
-    });
-    html += '</div>';
+    var legacyTests = (currentStudent && Array.isArray(currentStudent.tests)) ? currentStudent.tests : [];
+    if (legacyTests.length) {
+      html += '<div style="display:flex; flex-direction:column; gap:0.75rem; margin-top:1.4rem;">';
+      legacyTests.forEach(function (t) {
+        html += '<a href="' + t.url + '" target="_blank" rel="noopener" class="res-drive-btn-outline" style="display:block;">' + t.title + '</a>';
+      });
+      html += '</div>';
+    }
     body.innerHTML = html;
+    body.querySelectorAll('.pt-start-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () { startPracticeTest(btn.getAttribute('data-test-id')); });
+    });
   }
   document.getElementById('tests-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-menu'); });
+
+  /* ═══ PRACTICE TEST RUNNER — reuses the diagnostic's exact test-taking
+     infrastructure (dx-screen: cross-out, mark for review, jump grid,
+     keyboard shortcuts, timer, reference sheet, fonts) and screen-intro
+     (real section directions) rather than a separate parallel UI. The
+     only practice-test-specific screen is the short break between R&W
+     and Math (screen-pt-break) — everything else IS the diagnostic shell,
+     just pointed at a practice module's questions instead of a full
+     diagnostic section. See "dxMode" below: it's the single flag that
+     tells the shared engine (startSection, isLastSection call sites,
+     autoSubmitSection, nextBtn handler, save/restore) which world it's in.
+
+     Structure mirrored: Reading & Writing Module 1 -> (scored) -> R&W
+     Module 2 Easier/Harder -> break -> Math Module 1 -> (scored) -> Math
+     Module 2 Easier/Harder -> results. Routing: >=60% correct on a
+     Module 1 sends that section's Module 2 Harder, otherwise Easier —
+     decided independently per section. Every answered question across
+     all four completed modules accumulates into ptCompleted so the final
+     results screen can show one full review with every choiceNotes/
+     explanation, not just the last module. */
+  var dxMode = 'diagnostic'; // 'diagnostic' | 'practice' — read by startSection, isLastSection call sites, autoSubmitSection, nextBtn handler, save/restore
+  var PT_SECTION_LABELS = { readingWriting: 'Reading & Writing', math: 'Math' };
+  var PT_ROUTING_THRESHOLD = 0.6;
+
+  var ptTest = null;
+  var ptSection = 'readingWriting'; // 'readingWriting' | 'math'
+  var ptStage = 'module1';          // 'module1' | 'module2'
+  var ptVariant = null;             // null | 'Easier' | 'Harder' — which module2 array is in play
+  var ptCompleted = [];             // accumulated across all finished modules: {sectionLabel, moduleLabel, q, given, ok}
+
+  function ptModuleQuestions() {
+    var sec = ptTest.sections[ptSection];
+    if (ptStage === 'module1') return sec.module1 || [];
+    return sec['module2' + ptVariant] || [];
+  }
+  function ptModuleLabel() { return ptStage === 'module1' ? 'Module 1' : 'Module 2'; }
+  // Real SAT directions/reference apply per subject regardless of diagnostic
+  // vs. practice-test context, so practice modules borrow the exact same
+  // SECTION_DIRECTIONS / SECTIONS_WITH_REFERENCE entries the diagnostic uses.
+  function ptDirectionsKey() { return ptSection === 'math' ? 'math' : 'reading-writing'; }
+
+  function startPracticeTest(testId) {
+    ptTest = (window.SAT_PRACTICE_TESTS || []).filter(function (t) { return t.id === testId; })[0];
+    if (!ptTest) return;
+    dxMode = 'practice';
+    ptSection = 'readingWriting';
+    ptStage = 'module1';
+    ptVariant = null;
+    ptCompleted = [];
+    ptGotoModuleIntro();
+  }
+
+  // Publishes the current module into the diagnostic's own SECTION_BANKS
+  // under a rotating pseudo-key, then hands off to the diagnostic's own
+  // startSection() — same intro screen, same directions lookup, same
+  // "Start This Section" flow (relabeled for practice mode inside
+  // startSection itself).
+  function ptGotoModuleIntro() {
+    SECTION_BANKS['pt-module'] = { label: PT_SECTION_LABELS[ptSection], questions: ptModuleQuestions() };
+    SECTION_DIRECTIONS['pt-module'] = SECTION_DIRECTIONS[ptDirectionsKey()];
+    SECTIONS_WITH_REFERENCE['pt-module'] = SECTIONS_WITH_REFERENCE[ptDirectionsKey()];
+    window.PRACTICE_MODULE_TIME_LIMITS_ACTIVE = (window.PRACTICE_MODULE_TIME_LIMITS || {})[ptSection];
+    activeSectionKeys = ['pt-module'];
+    startSection(0);
+  }
+
+  document.getElementById('pt-break-continue').addEventListener('click', function () {
+    ptSection = 'math';
+    ptStage = 'module1';
+    ptVariant = null;
+    ptGotoModuleIntro();
+  });
+  document.getElementById('pt-break-exit').addEventListener('click', function (e) { e.preventDefault(); saveState(); show('screen-menu'); });
+
+  // Fires from the shared engine (nextBtn handler / autoSubmitSection)
+  // once the last question of the current module is submitted.
+  function finishPtModule() {
+    stopSectionTimer();
+    sectionTimerEndsAt = null;
+    var qs = activeQuestions();
+    var correct = 0;
+    qs.forEach(function (q, i) {
+      var given = answers[i];
+      var ok = isCorrect(q, given);
+      if (ok) correct++;
+      ptCompleted.push({ sectionLabel: PT_SECTION_LABELS[ptSection], moduleLabel: ptModuleLabel(), q: q, given: given, ok: ok });
+    });
+
+    if (ptStage === 'module1') {
+      ptVariant = (qs.length && correct / qs.length >= PT_ROUTING_THRESHOLD) ? 'Harder' : 'Easier';
+      ptStage = 'module2';
+      ptGotoModuleIntro();
+      return;
+    }
+
+    // Module 2 of this section just finished.
+    if (ptSection === 'readingWriting') {
+      document.getElementById('pt-break-kicker').textContent = ptTest.title;
+      saveState();
+      show('screen-pt-break');
+    } else {
+      finishPracticeTest();
+    }
+  }
+
+  function finishPracticeTest() {
+    var mathCorrect = 0, mathTotal = 0, rwCorrect = 0, rwTotal = 0;
+    var reviewHtml = '';
+    ptCompleted.forEach(function (entry, i) {
+      var q = entry.q, given = entry.given, ok = entry.ok;
+      if (entry.sectionLabel === 'Math') { mathTotal++; if (ok) mathCorrect++; }
+      else { rwTotal++; if (ok) rwCorrect++; }
+      var givenDisplay = q.type === 'fr' ? (given ? given.raw : null) : given;
+
+      reviewHtml += '<div style="border:1px solid var(--border); padding:1.4rem 1.6rem; margin-bottom:1rem; background:var(--white);">' +
+        '<div style="font-size:0.68rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:' + (ok ? 'var(--mid)' : 'var(--red)') + '; margin-bottom:0.5rem;">' +
+        entry.sectionLabel + ' — ' + entry.moduleLabel + ' — ' + (ok ? 'Correct' : (given === null || given === undefined ? 'Skipped' : 'Incorrect')) + '</div>' +
+        '<div style="font-weight:700; margin-bottom:0.8rem;">' + q.text + '</div>';
+
+      if (q.type === 'mc') {
+        q.choices.forEach(function (choice, ci) {
+          var isCorrectChoice = ci === q.correct;
+          var isGivenChoice = ci === given;
+          reviewHtml += '<div style="padding:0.6rem 0.9rem; margin-bottom:0.4rem; border:1px solid ' + (isCorrectChoice ? 'var(--gold)' : (isGivenChoice ? 'var(--red)' : 'var(--border)')) + '; background:' + (isCorrectChoice ? 'rgba(201,168,76,0.08)' : 'transparent') + ';">' +
+            '<strong>' + LETTERS[ci] + '.</strong> ' + choice + (isGivenChoice ? ' <em>(your answer)</em>' : '') + (isCorrectChoice ? ' <em>(correct)</em>' : '') +
+            '<div style="font-size:0.82rem; color:var(--mid); margin-top:0.3rem;">' + (q.choiceNotes && q.choiceNotes[ci] ? q.choiceNotes[ci] : '') + '</div>' +
+            '</div>';
+        });
+      } else {
+        reviewHtml += '<div style="font-size:0.88rem; margin-bottom:0.4rem;">Your answer: <strong>' + (givenDisplay ? givenDisplay : '—') + '</strong> &middot; Correct answer: <strong>' + q.answer + '</strong></div>' +
+          '<div style="font-size:0.82rem; color:var(--mid);">' + (q.explanation || '') + '</div>';
+      }
+      reviewHtml += '</div>';
+    });
+
+    document.getElementById('pt-score-hed').textContent = 'You scored ' + (mathCorrect + rwCorrect) + '/' + (mathTotal + rwTotal);
+    document.getElementById('pt-score-breakdown').textContent = 'Reading & Writing: ' + rwCorrect + '/' + rwTotal + '  •  Math: ' + mathCorrect + '/' + mathTotal;
+    document.getElementById('pt-review-list').innerHTML = reviewHtml;
+    dxMode = 'diagnostic';
+    clearState(); // the practice test is over either way — nothing left to resume
+    show('screen-practice-results');
+  }
+  document.getElementById('pt-results-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-menu'); });
 
   /* ═══ SCREEN 3c: CHOOSE SAT OR ACT ═══ */
   document.getElementById('test-choice-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-menu'); });
   document.getElementById('choose-sat').addEventListener('click', function () { startTest('SAT'); });
   document.getElementById('choose-act').addEventListener('click', function () { startTest('ACT'); });
 
-  /* ═══ SCREEN 4: DIAGNOSTIC SECTION INTRO ═══ */
+  /* ═══ SCREEN 4: DIAGNOSTIC SECTION INTRO (shared by both diagnostic
+     sections and practice-test modules — see startSection, which fills in
+     this screen's text differently per dxMode) ═══ */
   document.getElementById('intro-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-menu'); });
   document.getElementById('done-return-link').addEventListener('click', function (e) { e.preventDefault(); show('screen-menu'); });
   document.getElementById('intro-start').addEventListener('click', function () {
@@ -1039,8 +1234,7 @@
     buildSidebar();
     renderQuestion();
     show('dx-screen');
-    var secKey = activeSectionKeys[sectionIndex];
-    var minutes = (window.SECTION_TIME_LIMITS || {})[secKey];
+    var minutes = dxMode === 'practice' ? window.PRACTICE_MODULE_TIME_LIMITS_ACTIVE : (window.SECTION_TIME_LIMITS || {})[activeSectionKeys[sectionIndex]];
     if (minutes) { startSectionTimer(minutes); } else { dxTimerEl.style.display = 'none'; stopSectionTimer(); sectionTimerEndsAt = null; }
   });
 
@@ -1373,11 +1567,13 @@
   // and moves on, exactly like manually pressing Next Section / Submit.
   function autoSubmitSection() {
     if (activeScreenId !== 'dx-screen') return; // already left this section some other way
+    if (dxMode === 'practice') { finishPtModule(); return; }
     if (isLastSection()) { finishDiagnostic(); }
     else { advanceToNextSection(); }
   }
 
   function startTest(choice) {
+    dxMode = 'diagnostic'; // guard against stale 'practice' mode left over from an abandoned practice-test session
     testChoice = choice;
     activeSectionKeys = TEST_FORMATS[choice].order.filter(function (key) {
       return SECTION_BANKS[key].questions.length > 0;
@@ -1399,16 +1595,29 @@
     elims = new Array(qs.length).fill(null).map(function () { return []; });
     diagnosticSubmitted = false;
     var sectionLabel = SECTION_BANKS[activeSectionKeys[sectionIndex]].label;
-    document.getElementById('intro-kicker').textContent = testChoice + ' Diagnostic';
     var secKey = activeSectionKeys[sectionIndex];
-    document.getElementById('intro-fr-note').style.display = (secKey === 'math' && testChoice === 'SAT') ? '' : 'none';
-    document.getElementById('intro-directions').innerHTML = SECTION_DIRECTIONS[secKey] || '';
+    var isPractice = dxMode === 'practice';
+    var kicker = isPractice ? ptTest.title : (testChoice + ' Diagnostic');
+    var subText = isPractice
+      ? 'Timed for real, just like the digital SAT — once you submit this module you can\'t return to it.'
+      : 'No pressure — this just tells Luca where to focus. Take your time.';
+    var moduleLabel = isPractice ? (' — ' + ptModuleLabel()) : '';
+    var brandLabel = isPractice ? (ptTest.title + ' — ' + sectionLabel + moduleLabel) : (testChoice + ' Diagnostic — ' + sectionLabel);
     var hasReference = !!SECTIONS_WITH_REFERENCE[secKey];
+    var timeLimit = isPractice ? window.PRACTICE_MODULE_TIME_LIMITS_ACTIVE : (window.SECTION_TIME_LIMITS || {})[secKey];
+    var frNoteOn = isPractice ? (ptSection === 'math') : (secKey === 'math' && testChoice === 'SAT');
+
+    document.getElementById('intro-kicker').textContent = kicker;
+    document.getElementById('intro-sub').textContent = subText;
+    document.getElementById('intro-fr-note').style.display = frNoteOn ? '' : 'none';
+    document.getElementById('intro-directions').innerHTML = SECTION_DIRECTIONS[secKey] || '';
     document.getElementById('intro-reference-link').style.display = hasReference ? 'inline-flex' : 'none';
     document.getElementById('dx-reference-btn').style.display = hasReference ? '' : 'none';
-    var timeLimit = (window.SECTION_TIME_LIMITS || {})[secKey];
-    document.getElementById('intro-hed').textContent = sectionLabel + ' section — ' + qs.length + ' question' + (qs.length === 1 ? '' : 's') + (timeLimit ? ' — ' + timeLimit + ' minutes.' : '.');
-    document.getElementById('dx-brand-label').textContent = testChoice + ' Diagnostic — ' + sectionLabel;
+    document.getElementById('intro-hed').textContent = isPractice
+      ? (sectionLabel + moduleLabel + ' — ' + qs.length + ' question' + (qs.length === 1 ? '' : 's') + (timeLimit ? ' — ' + timeLimit + ' minutes.' : '.'))
+      : (sectionLabel + ' section — ' + qs.length + ' question' + (qs.length === 1 ? '' : 's') + (timeLimit ? ' — ' + timeLimit + ' minutes.' : '.'));
+    document.getElementById('dx-brand-label').textContent = brandLabel;
+    document.getElementById('intro-start').textContent = isPractice ? 'Start This Module' : 'Start This Section';
     show('screen-intro');
   }
 
@@ -1514,7 +1723,7 @@
 
     backBtn.disabled = current === 0;
     nextBtn.disabled = answers[current] === null;
-    nextBtn.textContent = !isLastQuestionInSection() ? 'Next' : (isLastSection() ? 'Submit Diagnostic' : 'Next Section');
+    nextBtn.textContent = !isLastQuestionInSection() ? 'Next' : (dxMode === 'practice' ? 'Submit Module' : (isLastSection() ? 'Submit Diagnostic' : 'Next Section'));
     progLabel.textContent = 'Question ' + (current + 1) + ' of ' + qs.length;
     progFill.style.width = ((current / qs.length) * 100) + '%';
     jumpSelect.value = current;
@@ -1583,6 +1792,7 @@
     if (activeQuestions()[current].type === 'fr') { recordFrAnswer(); }
     if (answers[current] === null) return;
     if (!isLastQuestionInSection()) { goTo(current + 1); }
+    else if (dxMode === 'practice') { finishPtModule(); }
     else if (isLastSection()) { finishDiagnostic(); }
     else { advanceToNextSection(); }
   });
@@ -1721,6 +1931,42 @@
   /* ═══ RESTORE ON LOAD ═══
      If they refreshed or navigated back with a saved key, pick up right
      where they left off instead of dropping them at the key screen. */
+  // Shared by both restore branches above (diagnostic section / practice
+  // module) — at this point activeSectionKeys/sectionIndex/dxMode are
+  // already set correctly by the caller; this just does the actual
+  // question-state restore, identically either way.
+  function restoreDxScreenQuestionState(state) {
+    var bank = SECTION_BANKS[activeSectionKeys[sectionIndex]].questions;
+    qOrder = (Array.isArray(state.qOrder) && state.qOrder.length === bank.length) ? state.qOrder : shuffledOrder(bank.length);
+    currentQs = qOrder.map(function (i) { return bank[i]; });
+    var qs = currentQs;
+    if (Array.isArray(state.answers) && state.answers.length === qs.length) {
+      answers = state.answers;
+      marked = (Array.isArray(state.marked) && state.marked.length === qs.length) ? state.marked : new Array(qs.length).fill(false);
+      elims = (Array.isArray(state.elims) && state.elims.length === qs.length) ? state.elims : new Array(qs.length).fill(null).map(function () { return []; });
+      current = Math.min(Math.max(state.current || 0, 0), qs.length - 1);
+      document.getElementById('dx-student-label').textContent = currentStudent.name;
+      document.getElementById('dx-brand-label').textContent = dxMode === 'practice'
+        ? (ptTest.title + ' — ' + PT_SECTION_LABELS[ptSection] + ' — ' + ptModuleLabel())
+        : (testChoice + ' Diagnostic — ' + SECTION_BANKS[activeSectionKeys[sectionIndex]].label);
+      buildSidebar();
+      renderQuestion();
+      // Resume the timer BEFORE show() — show() calls saveState(), and
+      // sectionTimerEndsAt is still null at that point otherwise, which
+      // would persist a null timer and silently break resume on a second
+      // refresh (only reveals itself one refresh later, easy to miss).
+      if (typeof state.sectionTimerEndsAt === 'number' && state.sectionTimerEndsAt - Date.now() > 0) {
+        resumeSectionTimer(state.sectionTimerEndsAt);
+      }
+      show('dx-screen');
+      if (typeof state.sectionTimerEndsAt === 'number' && state.sectionTimerEndsAt - Date.now() <= 0) {
+        autoSubmitSection(); // time ran out while they were away — submit now
+      }
+    } else {
+      show('screen-menu');
+    }
+  }
+
   (function restoreState() {
     try {
       var raw = localStorage.getItem(STORAGE_KEY);
@@ -1732,36 +1978,39 @@
       document.getElementById('menu-greeting').textContent = 'Hey ' + currentStudent.name.split(' ')[0] + '.';
       loadNextSession();
 
-      if (state.screen === 'dx-screen' && state.testChoice && Array.isArray(state.activeSectionKeys) && state.activeSectionKeys.length) {
+      if (state.screen === 'dx-screen' && state.dxMode === 'practice' && state.ptTestId) {
+        // Practice-test resume — reconstruct the pt-module pseudo-section
+        // exactly like ptGotoModuleIntro() does, then fall into the same
+        // restore mechanics the diagnostic branch below uses.
+        ptTest = (window.SAT_PRACTICE_TESTS || []).filter(function (t) { return t.id === state.ptTestId; })[0];
+        if (!ptTest) { show('screen-menu'); return; }
+        dxMode = 'practice';
+        ptSection = state.ptSection || 'readingWriting';
+        ptStage = state.ptStage || 'module1';
+        ptVariant = state.ptVariant || null;
+        ptCompleted = Array.isArray(state.ptCompleted) ? state.ptCompleted : [];
+        window.PRACTICE_MODULE_TIME_LIMITS_ACTIVE = typeof state.ptModuleMinutes === 'number' ? state.ptModuleMinutes : (window.PRACTICE_MODULE_TIME_LIMITS || {})[ptSection];
+        SECTION_BANKS['pt-module'] = { label: PT_SECTION_LABELS[ptSection], questions: ptModuleQuestions() };
+        activeSectionKeys = ['pt-module'];
+        sectionIndex = 0;
+        restoreDxScreenQuestionState(state);
+      } else if (state.screen === 'dx-screen' && state.testChoice && Array.isArray(state.activeSectionKeys) && state.activeSectionKeys.length) {
+        dxMode = 'diagnostic';
         testChoice = state.testChoice;
         activeSectionKeys = state.activeSectionKeys;
         completedSections = Array.isArray(state.completedSections) ? state.completedSections : [];
         sectionIndex = typeof state.sectionIndex === 'number' ? state.sectionIndex : 0;
-        var bank = SECTION_BANKS[activeSectionKeys[sectionIndex]].questions;
-        qOrder = (Array.isArray(state.qOrder) && state.qOrder.length === bank.length) ? state.qOrder : shuffledOrder(bank.length);
-        currentQs = qOrder.map(function (i) { return bank[i]; });
-        var qs = currentQs;
-        if (Array.isArray(state.answers) && state.answers.length === qs.length) {
-          answers = state.answers;
-          marked = (Array.isArray(state.marked) && state.marked.length === qs.length) ? state.marked : new Array(qs.length).fill(false);
-          elims = (Array.isArray(state.elims) && state.elims.length === qs.length) ? state.elims : new Array(qs.length).fill(null).map(function () { return []; });
-          current = Math.min(Math.max(state.current || 0, 0), qs.length - 1);
-          document.getElementById('dx-student-label').textContent = currentStudent.name;
-          document.getElementById('dx-brand-label').textContent = testChoice + ' Diagnostic — ' + SECTION_BANKS[activeSectionKeys[sectionIndex]].label;
-          buildSidebar();
-          renderQuestion();
-          show('dx-screen');
-          if (typeof state.sectionTimerEndsAt === 'number') {
-            if (state.sectionTimerEndsAt - Date.now() > 0) {
-              resumeSectionTimer(state.sectionTimerEndsAt);
-            } else {
-              // Time ran out while they were away from the page — submit now.
-              autoSubmitSection();
-            }
-          }
-        } else {
-          show('screen-menu');
-        }
+        restoreDxScreenQuestionState(state);
+      } else if (state.screen === 'screen-pt-break' && state.ptTestId) {
+        ptTest = (window.SAT_PRACTICE_TESTS || []).filter(function (t) { return t.id === state.ptTestId; })[0];
+        if (!ptTest) { show('screen-menu'); return; }
+        dxMode = 'practice';
+        ptSection = state.ptSection || 'math';
+        ptStage = state.ptStage || 'module1';
+        ptVariant = state.ptVariant || null;
+        ptCompleted = Array.isArray(state.ptCompleted) ? state.ptCompleted : [];
+        document.getElementById('pt-break-kicker').textContent = ptTest.title;
+        show('screen-pt-break');
       } else if (state.screen === 'screen-resources') {
         renderResources(state.resourceKind || 'files');
         show('screen-resources');
