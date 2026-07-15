@@ -167,9 +167,18 @@
        whichever one is visible simply occupies "center stage" — nothing
        has to guess at spacing or fight for room */
     #explore-group-a, #explore-group-b { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2; width: 92%; max-width: 900px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 1.5rem; will-change: opacity, transform; }
-    #explore-group-b { z-index: 3; max-width: 1000px; }
+    #explore-group-b { z-index: 3; max-width: 1000px; pointer-events: none; }
+    #explore-group-b.explore-group-active { pointer-events: auto; }
 
     .explore-hed { font-family: var(--display); font-weight: 700; color: #fff; font-size: clamp(2.4rem, 5.6vw, 4.3rem); line-height: 1.18; max-width: 900px; text-shadow: 0 3px 22px rgba(0,0,0,0.85), 0 0 60px rgba(0,0,0,0.6); opacity: 0; will-change: opacity; }
+    /* The link used to be an inline <a> inside the heading — on wrapped
+       two-line titles that leaves a dead gap between the lines with no
+       hit area at all (inline elements only get clickable glyph boxes,
+       not the full line-height rectangle). display:block makes the whole
+       heading, gaps included, one solid click target. Hover matches the
+       "See How It Works" link exactly: a simple scale-up, no shake. */
+    .explore-hed a { display: block; position: relative; transition: transform 0.35s cubic-bezier(0.2, 1, 0.3, 1); transform-origin: center bottom; }
+    .explore-hed a:hover { transform: scale(1.08); }
     .explore-sub { font-size: 0.86rem; line-height: 1.8; color: rgba(255,255,255,0.85); max-width: 580px; text-shadow: 0 2px 14px rgba(0,0,0,0.85), 0 0 40px rgba(0,0,0,0.6); opacity: 0; will-change: opacity; }
     .gold-shine { position: relative; font-weight: 600; background: linear-gradient(100deg, #C9A84C 30%, #F3E3B0 45%, #C9A84C 60%); background-size: 250% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: gold-shine-sweep 3.5s ease-in-out infinite alternate; }
     @keyframes gold-shine-sweep { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
@@ -204,7 +213,7 @@
       #explore-wrap { height: auto; }
       #explore-stage { position: relative; height: auto; overflow: visible; display: flex; flex-direction: column; align-items: center; gap: 3rem; padding: 5rem 1.5rem; }
       .explore-word { position: relative; top: auto; left: auto; transform: none !important; font-size: clamp(3rem, 22vw, 9rem); }
-      #explore-group-a, #explore-group-b { position: relative; top: auto; left: auto; transform: none !important; }
+      #explore-group-a, #explore-group-b { position: relative; top: auto; left: auto; transform: none !important; pointer-events: auto !important; }
       .explore-hed, .explore-sub, .explore-step, .explore-testdates-hint, .portal-teaser, #explore-cta-inline, #explore-group-b { opacity: 1 !important; }
     }
 
@@ -275,23 +284,28 @@
     .team-role { font-size: 0.56rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--red); margin-bottom: 0.95rem; }
     .team-bio { font-size: 0.88rem; line-height: 1.8; color: var(--mid); }
 
-    /* ═══ TESTIMONIALS ═══ */
-    #testimonials { background: var(--white); padding: 4.5rem 0; }
-    .tsingle { max-width: 940px; opacity: 1; transition: opacity 0.5s ease; display: flex; flex-direction: column; justify-content: center; }
-    .tsingle.tfade { opacity: 0; }
-    .tcard-body { font-family: var(--serif); font-size: 1rem; font-style: italic; line-height: 1.85; color: var(--mid); max-width: 720px; }
-    .tcard-body strong { display: block; font-family: var(--serif); font-weight: 700; font-style: normal; font-size: clamp(1.9rem, 3.8vw, 3.2rem); line-height: 1.22; color: var(--text); margin-bottom: 1.4rem; }
-    .tcard-author { display: block; margin-top: 1.3rem; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--red); }
-    .tcard-author::before { content: ''; display: inline-block; width: 26px; height: 2px; background: var(--red); vertical-align: middle; margin-right: 0.75rem; }
-    .tctrl { display: flex; align-items: center; gap: 1.75rem; margin-top: 1.9rem; max-width: 940px; }
-    .tindex { font-family: var(--serif); font-style: italic; font-size: 0.85rem; color: var(--gold); letter-spacing: 0.08em; white-space: nowrap; }
-    .tprogress { flex: 1 1 auto; height: 1px; background: var(--border); position: relative; overflow: hidden; }
-    .tprogress-fill { position: absolute; top: 0; bottom: 0; left: 0; width: 0; background: var(--red); }
-    .tprogress-fill.run { animation: tprog 15s linear forwards; }
-    @keyframes tprog { from { width: 0; } to { width: 100%; } }
-    .tarrow { flex: 0 0 auto; width: 40px; height: 40px; border: 1px solid var(--border); background: var(--white); cursor: pointer; color: var(--red); display: flex; align-items: center; justify-content: center; transition: border-color 0.2s, background 0.2s; }
-    .tarrow:hover { border-color: var(--red); background: rgba(176,39,28,0.06); }
-    .tarrow svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    /* ═══ TESTIMONIALS — top-3 showcase, middle card elevated ═══ */
+    #testimonials { background: var(--white); padding: 5.5rem 0; }
+    .tgain { color: var(--red); }
+    .tshowcase { display: grid; grid-template-columns: 1fr 1.12fr 1fr; gap: 1.75rem; align-items: center; margin-bottom: 2.5rem; }
+    .tshow-card { background: var(--bg); border: 1px solid var(--border); padding: 2.25rem 2rem; display: flex; flex-direction: column; position: relative; transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s ease, border-color 0.3s ease; }
+    .tshow-card::before { content: ''; position: absolute; top: -1px; left: 0; width: 0; height: 2px; background: var(--gold); transition: width 0.4s ease; }
+    .tshow-card:hover::before { width: 100%; }
+    .tshow-card:hover { border-color: var(--gold); transform: translateY(-6px); box-shadow: 0 18px 44px rgba(17,17,17,0.13); }
+    .tshow-card.mid { background: var(--white); border-color: var(--gold); box-shadow: 0 24px 60px rgba(17,17,17,0.14); transform: translateY(-22px); z-index: 2; padding: 2.75rem 2.25rem; }
+    .tshow-card.mid:hover { transform: translateY(-28px); box-shadow: 0 30px 72px rgba(17,17,17,0.19); }
+    .tshow-body { font-family: var(--serif); font-size: 0.92rem; font-style: italic; line-height: 1.8; color: var(--mid); flex: 1; }
+    .tshow-body strong { display: block; font-family: var(--serif); font-weight: 700; font-style: normal; font-size: clamp(1.15rem, 1.7vw, 1.5rem); line-height: 1.3; color: var(--text); margin-bottom: 1rem; }
+    .tshow-card.mid .tshow-body strong { font-size: clamp(1.3rem, 2vw, 1.7rem); }
+    .tshow-author { display: block; margin-top: 1.3rem; font-size: 0.58rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--red); }
+    .tshow-author::before { content: ''; display: inline-block; width: 22px; height: 2px; background: var(--red); vertical-align: middle; margin-right: 0.65rem; }
+    .tshow-link-wrap { text-align: center; }
+    .tshow-link { display: inline-flex; align-items: center; gap: 0.5rem; font-family: var(--hel); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--red); text-decoration: none; border-bottom: 1px solid var(--red); padding-bottom: 0.2rem; transition: opacity 0.2s; }
+    .tshow-link:hover { opacity: 0.7; }
+    @media (max-width: 900px) {
+      .tshowcase { grid-template-columns: 1fr; gap: 1.25rem; }
+      .tshow-card.mid { transform: none; box-shadow: 0 10px 30px rgba(17,17,17,0.1); order: -1; }
+    }
 
     /* ═══ CONSULT ═══ */
     #consult { padding: 7rem 0; background: var(--bg); }
@@ -350,7 +364,6 @@
       .method-grid { grid-template-columns: repeat(2, 1fr); }
       .explore-grid { grid-template-columns: repeat(2, 1fr); }
       .disc-grid { grid-template-columns: repeat(2, 1fr); }
-      .tctrl { gap: 1rem; }
       footer { grid-template-columns: 1fr; }
       .intro-stats { grid-template-columns: repeat(2, 1fr); }
       .intro-stat { border-right: 1px solid var(--border); border-top: none; }
@@ -465,7 +478,7 @@
         <div class="explore-step" data-step="1">
           <span class="method-num">01</span>
           <h3 class="method-step-title">Evaluate</h3>
-          <p class="explore-step-body">A full, hand-scored diagnostic pinpoints exactly where points are slipping away.</p>
+          <p class="explore-step-body">Data-driven diagnostic pinpoints exactly where points are slipping away.</p>
         </div>
         <div class="explore-step" data-step="2">
           <span class="method-num">02</span>
@@ -551,17 +564,22 @@
 <section id="testimonials">
   <div class="container">
     <div class="eyebrow reveal">Results</div>
-    <div class="reveal d2">
-      <div class="tsingle" id="tsingle">
-        <p class="tcard-body" id="tsingle-body"><strong>My daughter has gone from a C to an A grade student in math.</strong> I truly can't say enough praise for Luca. He is calm, sensitive, and able to customize his tutoring to achieve the needed learning. My daughter now feels confident in math and proud of her accomplishments.</p>
-        <span class="tcard-author" id="tsingle-author">Patti, parent &nbsp;&middot;&nbsp; Westfield</span>
+    <div class="tshowcase reveal d2">
+      <div class="tshow-card">
+        <p class="tshow-body"><strong>My daughter has gone from a <span class="tgain">C</span> to an <span class="tgain">A</span> grade student in math.</strong> I truly can't say enough praise for Luca. He is calm, sensitive, and able to customize his tutoring to achieve the needed learning. My daughter now feels confident in math and proud of her accomplishments.</p>
+        <span class="tshow-author">Patti M.</span>
       </div>
-      <div class="tctrl">
-        <span class="tindex" id="tindex">02 / 05</span>
-        <div class="tprogress"><div class="tprogress-fill run" id="tprogress"></div></div>
-        <button class="tarrow" id="tarrow-prev" aria-label="Previous testimonial"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
-        <button class="tarrow" id="tarrow-next" aria-label="Next testimonial"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+      <div class="tshow-card mid">
+        <p class="tshow-body"><strong>She improved her SAT Math score by approximately <span class="tgain">200 points</span>, exceeding our expectations.</strong> One of Luca's greatest strengths is his ability to quickly identify a student's knowledge gaps and develop a structured, personalized lesson plan. He was always professional, punctual, and prepared for every session.</p>
+        <span class="tshow-author">Michele C.</span>
       </div>
+      <div class="tshow-card">
+        <p class="tshow-body"><strong>If anyone can help you tolerate math and actually master the skill, it's Luca!</strong> He took the time to break down the underlying concepts, never moving on until he was certain I fully understood. Thanks to Luca, I went from a student who was barely passing with a <span class="tgain">D</span> to someone who actually enjoys math.</p>
+        <span class="tshow-author">A student</span>
+      </div>
+    </div>
+    <div class="tshow-link-wrap reveal d3">
+      <a href="testimonials.html" class="tshow-link">Read All Our Testimonials &rarr;</a>
     </div>
   </div>
 </section>
@@ -711,6 +729,7 @@
     var wrap = document.getElementById('explore-wrap');
     var word = document.getElementById('explore-word');
     var groupA = document.getElementById('explore-group-a');
+    var groupB = document.getElementById('explore-group-b');
     var hed = document.getElementById('explore-hed');
     var sub = document.getElementById('explore-sub');
     var steps = Array.prototype.slice.call(document.querySelectorAll('#explore-grid [data-step]'));
@@ -782,6 +801,12 @@
       // after, same as everything else
       slideUpFade(plaque, progress, EXIT_A, EXIT_A + 0.14, 140);
       fadeOnly(ctaInline, progress, EXIT_A + 0.16, EXIT_A + 0.26);
+
+      // only the group actually on screen should be able to catch clicks —
+      // group B used to sit on top of group A (higher z-index) for the
+      // whole scroll range even while invisible, silently blocking clicks
+      // on the heading link underneath it
+      if (groupB) groupB.classList.toggle('explore-group-active', progress >= EXIT_A);
     }
     render();
     window.addEventListener('scroll', function () {
@@ -796,91 +821,6 @@
     });
   }, { threshold: 0.04 });
   document.querySelectorAll('.section-fade').forEach(function (el) { sfIo.observe(el); });
-
-  /* ═══ TESTIMONIAL CAROUSEL ═══ */
-  (function () {
-    var single = document.getElementById('tsingle');
-    if (!single) return;
-    var bodyEl   = document.getElementById('tsingle-body');
-    var authorEl = document.getElementById('tsingle-author');
-
-    var testimonials = [
-      { body: '<strong>He has a very approachable and calm demeanor and a seriously deep grasp of the material.</strong> He breaks down complex mathematical concepts very well and makes a stressful experience much less so. We would highly recommend him for your son or daughter.', author: 'Ellen, parent &nbsp;&middot;&nbsp; Westfield' },
-      { body: '<strong>My daughter has gone from a C to an A grade student in math.</strong> I truly can\'t say enough praise for Luca. He is calm, sensitive, and able to customize his tutoring to achieve the needed learning. My daughter now feels confident in math and proud of her accomplishments.', author: 'Patti, parent &nbsp;&middot;&nbsp; Westfield' },
-      { body: '<strong>I highly recommend Luca as a tutor!</strong> I have always struggled in math, so I knew I needed a tutor who could clearly explain the material.', author: 'Savannah, student &nbsp;&middot;&nbsp; Cranford' },
-      { body: 'I found Luca from the list of tutors from the Summit Public Schools and I would recommend him for tutoring. <strong>He is very patient, kind and was even available to answer questions on text after a tutoring session.</strong> I would highly recommend him.', author: 'Sharon, parent &nbsp;&middot;&nbsp; Berkeley Heights' },
-      { body: 'I had lessons with Luca for a year, and he helped me with math while I was studying for my entrance exam. He made learning easy and enjoyable. <strong>Thanks to his help, I got the score I wanted and enjoyed studying.</strong> I highly recommend Luca as a math tutor.', author: 'Maria, student &nbsp;&middot;&nbsp; Short Hills' },
-      { body: '<strong>He made challenging math concepts easy to understand.</strong> He helped build her confidence and made a real difference in her test prep. We highly recommend him to any family looking for an outstanding math tutor.', author: 'Joh, parent &nbsp;&middot;&nbsp; Cranford' },
-      { body: '<strong>If anyone can help you tolerate math and actually master the skill, it\'s Luca!</strong> Luca took the time to break down the underlying concepts, never moving on until he was certain I fully understood. Thanks to Luca, I went from a student who was barely passing with a D to someone who actually enjoys math.', author: 'Cara, student &nbsp;&middot;&nbsp; Lawrence' },
-      { body: '<strong>Lily improved her SAT Math score by approximately 200 points, exceeding our expectations.</strong> One of Luca\'s greatest strengths is his ability to quickly identify a student\'s knowledge gaps and develop a structured, personalized lesson plan. He was always professional, punctual, and prepared for every session.', author: 'Michele, parent &nbsp;&middot;&nbsp; New Brunswick' }
-    ];
-
-    var active = 1; // starts on Patti's testimonial
-
-    /* Lock the carousel to the height of its tallest testimonial so the
-       page never shifts when quotes change */
-    function sizeCarousel() {
-      var probe = single.cloneNode(false);
-      probe.removeAttribute('id');
-      probe.style.cssText ='position:absolute; visibility:hidden; min-height:0; height:auto; width:' + single.offsetWidth + 'px;';
-      single.parentNode.appendChild(probe);
-      var max = 0;
-      testimonials.forEach(function (t) {
-        probe.innerHTML = '<p class="tcard-body">' + t.body + '</p><span class="tcard-author">' + t.author + '</span>';
-        max = Math.max(max, probe.offsetHeight);
-      });
-      probe.parentNode.removeChild(probe);
-      single.style.minHeight = max + 'px';
-    }
-    sizeCarousel();
-    window.addEventListener('resize', sizeCarousel);
-
-    var indexEl = document.getElementById('tindex');
-    var barEl   = document.getElementById('tprogress');
-
-    function render(idx) {
-      bodyEl.innerHTML   = testimonials[idx].body;
-      authorEl.innerHTML = testimonials[idx].author;
-      if (indexEl) indexEl.textContent = '0' + (idx + 1) + ' / 0' + testimonials.length;
-      if (barEl) { barEl.classList.remove('run'); void barEl.offsetWidth; barEl.classList.add('run'); }
-    }
-    render(active);
-
-    function goTo(dir) {
-      single.classList.add('tfade');
-      setTimeout(function () {
-        active = (active + dir + testimonials.length) % testimonials.length;
-        render(active);
-        single.classList.remove('tfade');
-      }, 500);
-    }
-
-    var timer = null;
-    function startAuto() {
-      timer = setInterval(function () { goTo(1); }, 15000);
-    }
-    function resetAuto() {
-      if (timer) clearInterval(timer);
-      startAuto();
-    }
-    startAuto();
-
-    var prevBtn = document.getElementById('tarrow-prev');
-    var nextBtn = document.getElementById('tarrow-next');
-    if (prevBtn) prevBtn.addEventListener('click', function () { goTo(-1); resetAuto(); });
-    if (nextBtn) nextBtn.addEventListener('click', function () { goTo(1); resetAuto(); });
-
-    /* arrow keys cycle reviews while the section is on screen */
-    document.addEventListener('keydown', function (e) {
-      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
-      var tag = (document.activeElement && document.activeElement.tagName) || '';
-      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
-      var r = document.getElementById('testimonials').getBoundingClientRect();
-      if (r.bottom < 0 || r.top > window.innerHeight) return;
-      goTo(e.key === 'ArrowRight' ? 1 : -1);
-      resetAuto();
-    });
-  })();
 
   emailjs.init('FAAXN09Ad2ObipaJJ');
 

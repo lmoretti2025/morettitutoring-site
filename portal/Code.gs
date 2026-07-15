@@ -44,7 +44,7 @@ function doPost(e) {
     if (body.action === 'auth') {
       out = handleAuth(body.key, body.email);
     } else if (body.action === 'nextSession') {
-      out = handleNextSession(body.name);
+      out = handleNextSession(body.name, !!body.debug);
     } else {
       out = { ok: false, error: 'unknown_action' };
     }
@@ -258,40 +258,75 @@ function setupTrigger() {
 // needs an actual https:// URL.
 var CALENDAR_ICS_URL = 'https://p172-caldav.icloud.com/published/2/ODExODY2MDE0NTgxMTg2NueGXoXKSW70-PWkPnqJPMohqzUItIudqwCkF6twJ-BXC1z9zr2f6PGDPEaNfvS15tsp_IDWWX_CrRjXMPwG8TU';
 
-function handleNextSession(rawName) {
+// debugMode adds a `debug` object to the response with exactly what
+// happened at each step (HTTP status, name matched against, every event
+// summary parsed off the calendar, which ones matched) so this can be
+// diagnosed from the portal itself (append ?debug=1 to the portal URL)
+// without needing to open the Apps Script execution log.
+function handleNextSession(rawName, debugMode) {
   if (!rawName) return { ok: false, error: 'missing_name' };
   var firstName = String(rawName).trim().split(/\s+/)[0];
   if (!firstName) return { ok: false, error: 'missing_name' };
 
   try {
     var resp = UrlFetchApp.fetch(CALENDAR_ICS_URL, { muteHttpExceptions: true });
-    if (resp.getResponseCode() !== 200) {
-      return { ok: false, error: 'calendar_unreachable' };
+    var httpStatus = resp.getResponseCode();
+    Logger.log('handleNextSession: fetched calendar, status=' + httpStatus + ', name="' + rawName + '", firstName="' + firstName + '"');
+    if (httpStatus !== 200) {
+      Logger.log('handleNextSession: calendar unreachable, body preview: ' + resp.getContentText().slice(0, 200));
+      return debugMode
+        ? { ok: false, error: 'calendar_unreachable', debug: { httpStatus: httpStatus, firstName: firstName } }
+        : { ok: false, error: 'calendar_unreachable' };
     }
     var events = parseICS_(resp.getContentText());
     var now = new Date();
     var escaped = firstName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     var nameRe = new RegExp(escaped, 'i');
 
-    var upcoming = events.filter(function (ev) {
-      return ev.start && nameRe.test(ev.summary) && ev.start.getTime() >= now.getTime();
-    });
+    // Recurring weekly/biweekly tutoring sessions are the normal case —
+    // their DTSTART anchor is often weeks or months in the past, so
+    // without expanding RRULE they'd never show up as "upcoming" even
+    // though the student has a session next week. nextOccurrenceOnOrAfter_
+    // walks a recurring event forward to the next real occurrence.
+    var upcoming = events
+      .filter(function (ev) { return nameRe.test(ev.summary); })
+      .map(function (ev) {
+        var occurrence = nextOccurrenceOnOrAfter_(ev, now);
+        if (!occurrence) return null;
+        return { summary: ev.summary, start: occurrence, allDay: ev.allDay };
+      })
+      .filter(function (ev) { return ev !== null; });
     upcoming.sort(function (a, b) { return a.start.getTime() - b.start.getTime(); });
 
-    if (!upcoming.length) return { ok: true, next: null };
+    Logger.log('handleNextSession: parsed ' + events.length + ' total events, ' + upcoming.length + ' matched "' + firstName + '" and are upcoming. All summaries: ' + JSON.stringify(events.map(function (e) { return e.summary; })));
+
+    var debugInfo = debugMode ? {
+      httpStatus: httpStatus,
+      firstName: firstName,
+      totalEventsParsed: events.length,
+      allSummaries: events.map(function (e) { return e.summary; }),
+      matchedUpcomingCount: upcoming.length
+    } : undefined;
+
+    if (!upcoming.length) return debugMode ? { ok: true, next: null, debug: debugInfo } : { ok: true, next: null };
     var next = upcoming[0];
-    return {
+    var result = {
       ok: true,
       next: { title: next.summary, startIso: next.start.toISOString(), allDay: next.allDay }
     };
+    if (debugMode) result.debug = debugInfo;
+    return result;
   } catch (err) {
+    Logger.log('handleNextSession: error — ' + String(err));
     return { ok: false, error: 'server_error', message: String(err) };
   }
 }
 
-// Minimal ICS (iCalendar) parser — just enough to pull SUMMARY and
-// DTSTART out of each VEVENT block. Does not expand recurring events
-// (RRULE); a recurring session shows its first/anchor occurrence only.
+// Minimal ICS (iCalendar) parser — just enough to pull SUMMARY, DTSTART,
+// and RRULE out of each VEVENT block. Recurring events are expanded to
+// their next real occurrence by nextOccurrenceOnOrAfter_ below (weekly/
+// biweekly/daily/monthly/yearly; complex multi-day BYDAY patterns are not
+// specially handled, but the common single-weekday tutoring cadence is).
 function parseICS_(text) {
   // Unfold lines: per the iCal spec, a line starting with a space or tab
   // is a continuation of the previous line, not a new property.
@@ -308,7 +343,7 @@ function parseICS_(text) {
   var events = [];
   var cur = null;
   lines.forEach(function (line) {
-    if (line === 'BEGIN:VEVENT') { cur = { summary: '', start: null, allDay: false }; return; }
+    if (line === 'BEGIN:VEVENT') { cur = { summary: '', start: null, allDay: false, rrule: null }; return; }
     if (line === 'END:VEVENT') { if (cur) events.push(cur); cur = null; return; }
     if (!cur) return;
     var idx = line.indexOf(':');
@@ -320,9 +355,64 @@ function parseICS_(text) {
     } else if (key.indexOf('DTSTART') === 0) {
       cur.allDay = key.indexOf('VALUE=DATE') !== -1 && key.indexOf('VALUE=DATE-TIME') === -1;
       cur.start = parseICSDate_(value, cur.allDay);
+    } else if (key === 'RRULE') {
+      cur.rrule = parseRRule_(value);
     }
   });
   return events;
+}
+
+// Parses just the RRULE fields this widget actually needs to step a
+// recurring event forward: FREQ, INTERVAL, COUNT, UNTIL. BYDAY is read
+// but not used for multi-day-per-week patterns — the common tutoring
+// case is one fixed weekday, which DTSTART's own weekday already covers.
+function parseRRule_(value) {
+  var rule = { freq: null, interval: 1, count: null, until: null };
+  value.split(';').forEach(function (part) {
+    var kv = part.split('=');
+    if (kv.length !== 2) return;
+    var k = kv[0].toUpperCase(), v = kv[1];
+    if (k === 'FREQ') rule.freq = v.toUpperCase();
+    else if (k === 'INTERVAL') rule.interval = Number(v) || 1;
+    else if (k === 'COUNT') rule.count = Number(v) || null;
+    else if (k === 'UNTIL') rule.until = parseICSDate_(v, v.indexOf('T') === -1);
+  });
+  return rule;
+}
+
+// Given a (possibly recurring) event, returns the next occurrence's start
+// Date at or after `now`, or null if the event (and all its recurrences,
+// if any) are entirely in the past / never occur on/after now.
+function nextOccurrenceOnOrAfter_(ev, now) {
+  if (!ev.start) return null;
+  if (ev.start.getTime() >= now.getTime()) return ev.start;
+  if (!ev.rrule || !ev.rrule.freq) return null; // non-recurring and already past
+
+  var freq = ev.rrule.freq, interval = ev.rrule.interval || 1;
+  var stepDays = freq === 'DAILY' ? interval
+    : freq === 'WEEKLY' ? interval * 7
+    : null; // MONTHLY/YEARLY stepping isn't needed for tutoring cadence; skip
+
+  var cur = new Date(ev.start.getTime());
+  var n = 0;
+  var maxIterations = 1000; // safety cap
+  while (n < maxIterations) {
+    if (ev.rrule.until && cur.getTime() > ev.rrule.until.getTime()) return null;
+    if (ev.rrule.count && n >= ev.rrule.count) return null;
+    if (cur.getTime() >= now.getTime()) return cur;
+
+    if (stepDays) {
+      cur = new Date(cur.getTime() + stepDays * 24 * 60 * 60 * 1000);
+    } else if (freq === 'MONTHLY') {
+      cur = new Date(cur.getFullYear(), cur.getMonth() + interval, cur.getDate(), cur.getHours(), cur.getMinutes(), cur.getSeconds());
+    } else if (freq === 'YEARLY') {
+      cur = new Date(cur.getFullYear() + interval, cur.getMonth(), cur.getDate(), cur.getHours(), cur.getMinutes(), cur.getSeconds());
+    } else {
+      return null; // unsupported frequency
+    }
+    n++;
+  }
+  return null;
 }
 
 function parseICSDate_(value, allDay) {
