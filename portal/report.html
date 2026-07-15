@@ -47,6 +47,10 @@
   .bridge-canvas-wrap { text-align: center; }
   .bridge-empty { font-size: 11px; color: var(--mid); padding: 6px 0; }
   .bridge-note { font-size: 9px; color: var(--faint); margin-top: 8px; }
+  .bridge-legend { display: flex; gap: 18px; flex-wrap: wrap; font-size: 9px; color: var(--mid); margin-top: 6px; }
+  .bl-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+  .bl-dot.quick { background: #5E8B6F; }
+  .bl-dot.deep { background: #7A3B32; }
   .section-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; margin-bottom: 2px; }
   .section-card { border: 1px solid var(--border); padding: 10px 12px; }
   .section-card .sc-hed { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 3px; }
@@ -141,6 +145,76 @@
   // (section pies, bridge segments) — tints/shades of the same five brand
   // colors rather than a mixed bag of unrelated hues.
   var BRAND_PALETTE = ['#B0271C', '#C9A84C', '#5E8B6F', '#243447', '#A97C50', '#7A3B32', '#8C9A6E', '#8B6F47'];
+
+  /* ═══ SKILL PREREQUISITES ═══
+     Standard curriculum sequencing — the kind of thing an experienced
+     tutor already knows (algebra fundamentals come before the topics
+     that build on them, literal comprehension before inference, clause
+     structure before the punctuation rules that depend on it) — not
+     anything specific to a particular test's content. Keys/values are
+     verified against the exact skill strings used in banks.js; an
+     unrecognized or unmapped skill just skips the hint rather than
+     guessing. This is intentionally not exhaustive: only the clear,
+     defensible relationships are included.
+     */
+  var SKILL_PREREQS = {
+    // Math — algebra chain
+    'Number of Solutions': ['Factoring', 'Equivalent Expressions'],
+    'Sum & Product Formula': ['Factoring'],
+    'Nonlinear Functions': ['Factoring', 'Linear Equations in One Variable'],
+    'Circle Equations': ['Factoring', 'Equivalent Expressions'],
+    'Conic Sections (Ellipses and Hyperbolas)': ['Circle Equations'],
+    'Logarithms': ['Equivalent Expressions'],
+    'Linear Inequalities': ['Linear Equations in One Variable'],
+    'Regression': ['One-Variable Data', 'Single-Variable Data'],
+    'Table Regression': ['One-Variable Data', 'Single-Variable Data'],
+    'Bracket Regression': ['One-Variable Data', 'Single-Variable Data'],
+    'Evaluation of Models': ['One-Variable Data', 'Single-Variable Data', 'Two-Variable Data'],
+    'Two-Variable Data': ['One-Variable Data', 'Single-Variable Data'],
+    'Percentages': ['Ratios, Rates, Proportions, and Units'],
+    'Percents': ['Ratios, Rates, Proportions, and Units'],
+    'Converting Units': ['Ratios, Rates, Proportions, and Units'],
+    'Similar Shapes': ['Angles, Lines & Triangles', 'Lines, Angles, and Triangles'],
+    'Right Triangles': ['Similar Shapes', 'Angles, Lines & Triangles'],
+    'Right Triangles and Trigonometry': ['Similar Shapes', 'Lines, Angles, and Triangles'],
+    // Reading & Writing — comprehension chain
+    'Inferences': ['Central Ideas', 'Key Ideas & Details'],
+    'Cross-Text Connections': ['Central Ideas', 'Inferences'],
+    'Command of Evidence': ['Central Ideas', 'Inferences'],
+    'Quantitative Evidence': ['Command of Evidence'],
+    'Rhetorical Synthesis': ['Central Ideas', 'Text Structure & Purpose', 'Topic & Purpose'],
+    'Interpretation of Data': ['Central Ideas'],
+    'Integration of Knowledge & Ideas': ['Key Ideas & Details'],
+    'Organization': ['Text Structure & Purpose', 'Topic & Purpose', 'Transitions'],
+    // Standard English Conventions — clause structure before the rules
+    // that depend on recognizing one
+    'Comma Usage': ['Sentence Boundaries', 'Sentence Fragments'],
+    'Nonessential Commas': ['Sentence Boundaries'],
+    'Colons & Lists': ['Sentence Boundaries'],
+    'Punctuation in Lists': ['Sentence Boundaries'],
+    'Parallel Structure': ['Sentence Boundaries'],
+    'Relative Pronouns': ['Sentence Boundaries'],
+    'Pronouns & Apostrophes': ['Sentence Boundaries'],
+    'Pronoun Clarity': ['Sentence Boundaries'],
+    'Dangling Modifiers': ['Sentence Boundaries']
+  };
+  // A skill needs at least 2 attempts on this diagnostic before its
+  // pattern (partial mastery vs. consistent miss) is trustworthy enough
+  // to classify — same reliability bar used for the priorities list
+  // elsewhere in this report.
+  function classifySkill(skillsMap, sk) {
+    var v = skillsMap[sk];
+    if (!v || v.t < 2) return null;
+    var missed = v.t - v.c;
+    if (missed <= 0) return null;
+    var mm = skillMissMarked[sk];
+    var markedShare = (mm && mm.missed) ? mm.marked / mm.missed : 0;
+    // Got at least one right in this skill AND mostly didn't flag the
+    // misses as guesses going in — reads as a careless-error pattern
+    // more than a true content gap.
+    if (v.c > 0 && markedShare < 0.5) return 'quick';
+    return 'deep';
+  }
   function fail() { document.getElementById('err').style.display = 'block'; }
 
   /* ═══ DEMO MODE ═══
@@ -213,6 +287,12 @@
   }
 
   var totalC = 0, totalQ = 0, domains = {}, skills = {}, sections = [], markedT = 0, markedC = 0, skipped = 0;
+  // Per-skill "how many of the misses were flagged as uncertain first" —
+  // used later to tell a likely careless-error pattern (missed a question
+  // in a skill they otherwise handle fine, didn't flag it as a guess)
+  // apart from a real knowledge gap (missed consistently, or flagged
+  // uncertainty going in).
+  var skillMissMarked = {};
   data.s.forEach(function (sec) {
     var bank = window.SECTION_BANKS[sec.k];
     if (!bank) return;
@@ -243,6 +323,11 @@
       var sd = (secDomains[dom] = secDomains[dom] || { c: 0, t: 0, missedSkills: {} });
       sd.t++; if (ok) sd.c++;
       if (!ok) sd.missedSkills[sk] = (sd.missedSkills[sk] || 0) + 1;
+      if (!ok) {
+        var smm = (skillMissMarked[sk] = skillMissMarked[sk] || { missed: 0, marked: 0 });
+        smm.missed++;
+        if (wasMarked) smm.marked++;
+      }
       if (!ok && q.type === 'mc' && given !== null && given !== undefined) {
         secMissedMc++;
         var chosenLetter = LETTERS[given];
@@ -446,7 +531,7 @@
         var perMiss = sectionRecoverable / totalMissed;
         Object.keys(skillMiss).forEach(function (sk) {
           var pts = skillMiss[sk] * perMiss;
-          if (pts > 0) bridgeItems.push({ label: sk, points: pts });
+          if (pts > 0) bridgeItems.push({ label: sk, points: pts, tag: classifySkill(skills, sk) });
         });
       });
     } else if (data.t === 'ACT') {
@@ -463,7 +548,7 @@
         var perMiss = sectionRecoverable / totalMissed;
         Object.keys(skillMiss).forEach(function (sk) {
           var pts = skillMiss[sk] * perMiss;
-          if (pts > 0) bridgeItems.push({ label: sk, points: pts });
+          if (pts > 0) bridgeItems.push({ label: sk, points: pts, tag: classifySkill(skills, sk) });
         });
       });
     }
@@ -478,7 +563,7 @@
     var headroom = scoreMax - currentComposite;
     if (rawTotalRecoverable > headroom && rawTotalRecoverable > 0) {
       var capScale = headroom / rawTotalRecoverable;
-      bridgeItems = bridgeItems.map(function (e) { return { label: e.label, points: e.points * capScale }; });
+      bridgeItems = bridgeItems.map(function (e) { return { label: e.label, points: e.points * capScale, tag: e.tag }; });
     }
     bridgeItems.sort(function (a, b) { return b.points - a.points; });
 
@@ -534,10 +619,27 @@
         canvasWrap.appendChild(msg2);
       } else {
         canvasWrap.appendChild(drawBridge(shownItems, currentComposite, reachable, targetScore));
+
+        // Only show the quick-win/deep-rebuild legend if at least one
+        // shown segment actually got classified — the "Other
+        // opportunities" catch-all and any skill with too small a
+        // sample stay untagged rather than guessing.
+        if (shownItems.some(function (it) { return it.tag; })) {
+          var legend = document.createElement('div');
+          legend.className = 'bridge-legend';
+          legend.innerHTML = '<span><span class="bl-dot quick"></span>Quick win — partial mastery already, likely careless slips</span>' +
+            '<span><span class="bl-dot deep"></span>Deep rebuild — consistent gap, worth real practice time</span>';
+          outer.appendChild(legend);
+        }
+
         var note = document.createElement('div');
         note.className = 'bridge-note';
         var baseText = 'Bars show real composite points recoverable per skill, from ' + currentComposite + ' up to ' + reachable + ' if every gap this diagnostic found were closed.';
         if (hitCeiling) baseText += ' That total is capped at the maximum possible score of ' + scoreMax + '.';
+        var HIGH_BAND = isSAT ? 1500 : 34;
+        if (currentComposite >= HIGH_BAND || targetScore >= HIGH_BAND) {
+          baseText += ' Scores at this level are disproportionately hard to move: the remaining questions skew toward the hardest on the test, so each additional point typically takes more practice than earlier gains did.';
+        }
         var targetText;
         if (targetScore >= reachable) {
           targetText = 'The dashed line marks your target of ' + targetScore + '. Reaching it will likely take growth beyond what this diagnostic can pinpoint.';
@@ -568,7 +670,7 @@
 
     function drawBridge(items, startVal, endVal, targetVal) {
       var bars = [{ label: 'Current', val: startVal, isEndpoint: true }]
-        .concat(items.map(function (e) { return { label: e.label, points: e.points }; }))
+        .concat(items.map(function (e) { return { label: e.label, points: e.points, tag: e.tag }; }))
         .concat([{ label: 'Max recoverable', val: endVal, isEndpoint: true }]);
 
       var w = 620, h = 185, padL = 40, padR = 62, padT = 14, padB = 42;
@@ -624,6 +726,12 @@
           ctx.font = '600 11px Poppins, sans-serif';
           ctx.textAlign = 'center';
           ctx.fillText('+' + Math.round(b.points), bx + barW / 2, top - 6);
+          if (b.tag === 'quick' || b.tag === 'deep') {
+            ctx.beginPath();
+            ctx.fillStyle = b.tag === 'quick' ? '#5E8B6F' : '#7A3B32';
+            ctx.arc(bx + barW / 2, top - 15, 2.5, 0, Math.PI * 2);
+            ctx.fill();
+          }
           running = toVal;
         }
         // x-axis label (rotated-free: short skill names, wrapped by truncation)
@@ -818,9 +926,23 @@
   if (strengths.length) {
     take.push('<strong>Already strong:</strong> ' + strengths.slice(0, 3).map(function (s6) { return s6.name; }).join(', ') + '. Keep these sharp with light review.');
   }
+  var priorityNames = {};
+  priorities.forEach(function (p4) { priorityNames[p4.name] = true; });
   priorities.slice(0, 2).forEach(function (p3) {
     var share = Math.round(p3.t / totalQ * 100);
-    take.push('<span class="r">' + p3.name + ':</span> ' + p3.c + '/' + p3.t + ' correct (' + Math.round(p3.pct * 100) + '%), about <strong>' + share + '%</strong> of the test. Recovering the ' + (p3.t - p3.c) + ' missed here moves the score fastest.');
+    var line = '<span class="r">' + p3.name + ':</span> ' + p3.c + '/' + p3.t + ' correct (' + Math.round(p3.pct * 100) + '%), about <strong>' + share + '%</strong> of the test. Recovering the ' + (p3.t - p3.c) + ' missed here moves the score fastest.';
+    var tag3 = classifySkill(skills, p3.name);
+    if (tag3 === 'quick') {
+      line += ' This looks like a quick fix: partial mastery already, likely careless slips rather than a knowledge gap.';
+    } else if (tag3 === 'deep') {
+      line += ' This looks like a real knowledge gap worth dedicated practice time.';
+    }
+    var prereqs = SKILL_PREREQS[p3.name];
+    if (prereqs) {
+      var weakPrereq = prereqs.filter(function (pr) { return priorityNames[pr]; })[0];
+      if (weakPrereq) line += ' It often traces back to ' + weakPrereq + ', worth checking there too.';
+    }
+    take.push(line);
   });
   if (markedT > 0) {
     take.push(markedC / markedT >= 0.6
