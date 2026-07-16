@@ -39,6 +39,11 @@
     --hel:    'Poppins', 'Helvetica Neue', Helvetica, Arial, sans-serif;
     --serif:  Georgia, 'Times New Roman', serif;
     --display: 'Caladea', Georgia, serif;
+    /* Digital-SAT (Bluebook) test-taking screens use this navy/blue pair
+       instead of the site's red branding — real-test look, not portal
+       chrome, while actually taking a module. */
+    --dx-navy: #12284c;
+    --dx-blue: #3457d5;
   }
 
   html, body { height: 100%; }
@@ -65,6 +70,11 @@
   .key-input:focus { outline: none; border-color: var(--red); }
   .key-error { display: none; font-size: 0.78rem; color: var(--red); text-align: center; margin-bottom: 1rem; line-height: 1.6; }
   .key-btn { display: block; width: 100%; background: var(--red); color: #fff; font-family: var(--hel); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; padding: 1.05rem; border: none; cursor: pointer; transition: opacity 0.2s; }
+  /* Once inside the diagnostic-taking flow itself, primary actions switch
+     to the same navy/gold palette as the rest of the Bluebook-style test
+     screens, instead of the portal's red brand — the login/exit buttons
+     that reuse .key-btn elsewhere stay red. */
+  #intro-start.key-btn { background: var(--dx-blue); }
   .key-btn:hover { opacity: 0.86; }
   .key-help { font-size: 0.75rem; color: var(--faint); text-align: center; margin-top: 1.5rem; line-height: 1.7; }
 
@@ -113,7 +123,7 @@
   .intro-directions { font-size: 0.82rem; color: var(--mid); line-height: 1.85; text-align: left; margin-bottom: 1.5rem; }
   .intro-directions p { margin-bottom: 1rem; }
   .intro-directions p:last-child { margin-bottom: 0; }
-  .intro-reference-link { display: inline-flex; align-items: center; gap: 0.4rem; font-family: var(--hel); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--red); text-decoration: none; margin-bottom: 1.75rem; border-bottom: 1px solid var(--red); padding-bottom: 0.15rem; }
+  .intro-reference-link { display: inline-flex; align-items: center; gap: 0.4rem; font-family: var(--hel); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dx-blue); text-decoration: none; margin-bottom: 1.75rem; border-bottom: 1px solid var(--dx-blue); padding-bottom: 0.15rem; }
   .intro-reference-link:hover { opacity: 0.75; }
 
   /* ═══ REFERENCE SHEET MODAL (accessible from intro + mid-test) ═══ */
@@ -124,19 +134,21 @@
   .ref-modal-title { font-family: var(--display); font-size: 1.15rem; font-weight: 700; color: var(--text); }
   .ref-close { background: none; border: none; font-size: 1.4rem; line-height: 1; color: var(--mid); cursor: pointer; padding: 0.25rem 0.5rem; }
   .ref-close:hover { color: var(--red); }
-  .ref-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem 1rem; margin-bottom: 1.75rem; }
+  /* Real SAT reference sheet layout: a 6-across row of area/triangle
+     formulas, then a 5-across row of volume formulas, then the three
+     degree/radian/triangle-sum facts spanning the full width below. */
+  .ref-row { display: grid; gap: 1.4rem 0.6rem; margin-bottom: 1.6rem; }
+  .ref-row-top { grid-template-columns: repeat(6, 1fr); }
+  .ref-row-bottom { grid-template-columns: repeat(6, 1fr); }
+  .ref-spacer { visibility: hidden; }
   .ref-cell { text-align: center; }
   .ref-cell svg { max-width: 100%; height: auto; }
-  .ref-formula { font-family: var(--serif); font-size: 0.82rem; color: var(--text); margin-top: 0.5rem; line-height: 1.6; }
-  .ref-special { grid-column: span 3; }
-  .ref-special-wrap { display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; }
-  .ref-special-cell { text-align: center; width: 190px; }
-  .ref-special-cell svg { width: 100%; height: auto; }
-  .ref-special-label { font-family: var(--serif); font-size: 0.78rem; color: var(--mid); margin-top: 0.4rem; }
-  .ref-facts { border-top: 1px solid var(--border); padding-top: 1.25rem; font-size: 0.82rem; color: var(--mid); line-height: 1.9; }
+  .ref-formula { font-family: var(--serif); font-size: 0.76rem; color: var(--text); margin-top: 0.4rem; line-height: 1.5; }
+  .ref-special-label { font-family: var(--serif); font-size: 0.76rem; color: var(--mid); margin-top: 0.4rem; }
+  .ref-facts { border-top: 1px solid var(--border); padding-top: 1.25rem; font-size: 0.82rem; color: var(--mid); line-height: 1.9; text-align: center; }
   @media (max-width: 560px) {
-    .ref-grid { grid-template-columns: repeat(2, 1fr); }
-    .ref-special { grid-column: span 2; }
+    .ref-row-top, .ref-row-bottom { grid-template-columns: repeat(3, 1fr); }
+    .ref-spacer { display: none; }
   }
 
   /* ═══ DIAGNOSTIC SHELL (reuses portal top bar) ═══ */
@@ -147,7 +159,7 @@
      left, scrollable independently; question card on the right. Only
      shown when the active question carries a `passageId`. ═══ */
   #dx-shell.passage-mode #dx-main { align-items: stretch; justify-content: flex-start; padding: 0; gap: 0; }
-  .dx-passage-pane { width: 46%; max-width: 620px; flex-shrink: 0; border-right: 1px solid var(--border); background: var(--white); height: calc(100vh - 62px - 68px); overflow-y: auto; padding: 2.5rem 2.25rem; display: none; }
+  .dx-passage-pane { width: 46%; max-width: 620px; flex-shrink: 0; border-right: 1px solid var(--border); background: var(--white); height: calc(100vh - 156px); overflow-y: auto; padding: 2.5rem 2.25rem; display: none; }
   #dx-shell.passage-mode .dx-passage-pane { display: block; }
   #dx-shell.passage-mode .dx-card-wrap { max-width: 560px; padding: 3rem 2.5rem; margin: 0 auto; }
   .dx-passage-title { font-family: var(--display); font-weight: 700; font-size: 1.05rem; color: var(--text); margin-bottom: 0.3rem; }
@@ -174,31 +186,68 @@
     .dx-passage-pane { width: 100%; max-width: none; height: 42vh; border-right: none; border-bottom: 1px solid var(--border); padding: 1.5rem 1.4rem; }
     #dx-shell.passage-mode .dx-card-wrap { padding: 1.75rem 1.4rem; }
   }
-  #dx-topbar { padding: 0.9rem 2rem; display: flex; align-items: center; justify-content: space-between; background: var(--red); margin-top: 62px; }
-  .dx-brand { font-family: var(--display); font-size: 0.95rem; font-weight: 700; color: #fff; }
-  .dx-brand span { display: block; font-family: var(--hel); font-size: 0.55rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.65); margin-top: 0.2rem; }
-  .dx-progress-wrap { display: flex; align-items: center; gap: 0.9rem; }
-  .dx-progress-track { width: 150px; height: 4px; background: rgba(255,255,255,0.25); }
-  .dx-progress-fill { height: 100%; width: 0%; background: var(--gold); transition: width 0.5s cubic-bezier(0.16,1,0.3,1); }
-  .dx-progress-label { font-size: 0.6rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.75); white-space: nowrap; }
-  .dx-reference-btn { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.5); color: #fff; font-family: var(--hel); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.5rem 0.9rem; cursor: pointer; transition: background 0.2s; white-space: nowrap; }
-  .dx-reference-btn:hover { background: rgba(255,255,255,0.22); }
-  .dx-timer { font-family: var(--hel); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.06em; color: #fff; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.35); padding: 0.4rem 0.75rem; white-space: nowrap; font-variant-numeric: tabular-nums; }
-  .dx-timer.dx-timer-warn { background: rgba(255,255,255,0.95); color: var(--red); border-color: #fff; animation: dxTimerPulse 1.4s ease-in-out infinite; }
+  /* Thin navy identification strip, matching Bluebook's "THIS IS A
+     PRACTICE TEST" banner — sits above the toolbar, clears the site's
+     fixed nav itself (dx-topbar no longer needs to). */
+  #dx-notice-bar { margin-top: 62px; background: var(--dx-navy); color: #fff; text-align: center; padding: 0.55rem 1rem; font-family: var(--hel); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; }
+  #dx-topbar { padding: 0.75rem 2rem; display: flex; align-items: center; justify-content: space-between; background: var(--white); border-bottom: 1px solid var(--border); }
+  .dx-brand { font-family: var(--display); font-size: 0.92rem; font-weight: 700; color: var(--text); }
+  .dx-brand span { display: block; font-family: var(--hel); font-size: 0.55rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--mid); margin-top: 0.2rem; }
+  .dx-progress-wrap { display: flex; align-items: center; gap: 0.7rem; }
+  .dx-progress-btn { display: flex; align-items: center; gap: 0.35rem; background: none; border: 1px solid var(--border); padding: 0.42rem 0.8rem; cursor: pointer; transition: border-color 0.2s ease; }
+  .dx-progress-btn:hover { border-color: var(--dx-blue); }
+  .dx-progress-label { font-family: var(--hel); font-size: 0.68rem; font-weight: 600; letter-spacing: 0.04em; color: var(--text); white-space: nowrap; }
+  .dx-progress-caret { font-size: 0.55rem; color: var(--mid); }
+  .dx-reference-btn { background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: var(--hel); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.5rem 0.9rem; cursor: pointer; transition: border-color 0.2s; white-space: nowrap; }
+  .dx-reference-btn:hover { border-color: var(--dx-blue); }
+  .dx-timer { font-family: var(--hel); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.06em; color: var(--text); background: var(--bg); border: 1px solid var(--border); padding: 0.4rem 0.75rem; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .dx-timer.dx-timer-warn { background: var(--red); color: #fff; border-color: var(--red); animation: dxTimerPulse 1.4s ease-in-out infinite; }
   @keyframes dxTimerPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
-  .dx-timer-toast { position: fixed; top: 78px; left: 50%; transform: translateX(-50%); z-index: 60; background: var(--red); color: #fff; font-family: var(--hel); font-size: 0.8rem; font-weight: 600; letter-spacing: 0.03em; padding: 0.85rem 1.5rem; box-shadow: 0 8px 24px rgba(0,0,0,0.25); animation: dxToastIn 0.35s cubic-bezier(0.16,1,0.3,1); }
+  .dx-timer-toast { position: fixed; top: 78px; left: 50%; transform: translateX(-50%); z-index: 60; background: var(--dx-navy); color: #fff; font-family: var(--hel); font-size: 0.8rem; font-weight: 600; letter-spacing: 0.03em; padding: 0.85rem 1.5rem; box-shadow: 0 8px 24px rgba(0,0,0,0.25); animation: dxToastIn 0.35s cubic-bezier(0.16,1,0.3,1); }
   @keyframes dxToastIn { from { opacity: 0; transform: translate(-50%, -12px); } to { opacity: 1; transform: translate(-50%, 0); } }
 
   #dx-shell { display: flex; flex: 1; }
   #dx-main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 3rem 2.5rem; }
-  #dx-side { width: 260px; flex-shrink: 0; background: var(--white); border-left: 1px solid var(--border); padding: 2rem 1.4rem; display: flex; flex-direction: column; overflow-y: auto; }
-  .dx-side-hed { font-size: 0.54rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); margin-bottom: 1rem; }
-  .dx-qgrid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.4rem; margin-bottom: 1.5rem; }
-  .dx-qnum { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--bg); font-size: 0.68rem; font-weight: 600; color: var(--mid); cursor: pointer; transition: all 0.2s ease; position: relative; }
-  .dx-qnum:hover { border-color: var(--gold); }
-  .dx-qnum.current { background: var(--red); border-color: var(--red); color: #fff; }
-  .dx-qnum.answered:not(.current) { background: rgba(201,168,76,0.16); border-color: var(--gold); color: var(--text); }
-  .dx-side-note { font-size: 0.68rem; line-height: 1.65; color: var(--mid); margin-top: auto; padding-top: 1.25rem; border-top: 1px solid var(--border); }
+
+  /* ═══ QUESTION NAVIGATOR — a dismissible popup (opened from the
+     progress button), matching Bluebook's own module question-picker,
+     rather than a permanently-docked sidebar. ═══ */
+  .dx-nav-overlay { display: none; position: fixed; inset: 0; background: rgba(17,17,17,0.55); z-index: 650; align-items: center; justify-content: center; padding: 1.5rem; }
+  .dx-nav-overlay.active { display: flex; }
+  .dx-nav-modal { background: #fff; width: 100%; max-width: 580px; max-height: 85vh; overflow-y: auto; padding: 1.8rem 2rem 2.2rem; box-shadow: 0 24px 64px rgba(0,0,0,0.3); }
+  .dx-nav-modal-hed { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.1rem; }
+  .dx-nav-modal-title { font-family: var(--display); font-weight: 700; font-size: 1.02rem; color: var(--text); text-align: center; flex: 1; }
+  .dx-nav-close { background: none; border: none; font-size: 1.3rem; line-height: 1; color: var(--mid); cursor: pointer; padding: 0 0.2rem; flex-shrink: 0; }
+  .dx-nav-close:hover { color: var(--text); }
+  .dx-nav-legend { display: flex; justify-content: center; gap: 1.7rem; font-family: var(--hel); font-size: 0.7rem; color: var(--mid); padding-bottom: 1.1rem; margin-bottom: 1.3rem; border-bottom: 1px solid var(--border); }
+  .dx-nav-legend span { display: inline-flex; align-items: center; gap: 0.4rem; }
+  .dx-qgrid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 0.5rem; margin-bottom: 0.5rem; }
+  @media (max-width: 480px) { .dx-qgrid { grid-template-columns: repeat(5, 1fr); } }
+  .dx-qnum { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border: 1.5px dashed var(--border); background: #fff; font-family: var(--hel); font-size: 0.76rem; font-weight: 700; color: var(--dx-blue); cursor: pointer; transition: all 0.2s ease; position: relative; }
+  .dx-qnum:hover { border-color: var(--dx-blue); }
+  .dx-qnum.current { border-style: solid; border-color: var(--dx-navy); background: var(--dx-navy); color: #fff; }
+  .dx-qnum.answered:not(.current) { border-style: solid; border-color: rgba(52,87,213,0.35); background: rgba(52,87,213,0.1); }
+  .dx-qnum.marked::after { content: '\1F6A9'; position: absolute; top: -9px; right: -7px; font-size: 0.7rem; }
+  .dx-nav-review-btn { display: block; margin: 1.6rem auto 0; background: #fff; color: var(--dx-blue); border: 1.5px solid var(--dx-blue); font-family: var(--hel); font-weight: 700; font-size: 0.7rem; letter-spacing: 0.06em; text-transform: uppercase; padding: 0.75rem 1.9rem; border-radius: 999px; cursor: pointer; transition: background 0.2s; }
+  .dx-nav-review-btn:hover { background: rgba(52,87,213,0.08); }
+
+  /* ═══ CHECK YOUR WORK — full-page end-of-module review, replaces the
+     question card in #dx-main once the last question's Next is pressed. ═══ */
+  .dx-check-panel { display: none; width: 100%; max-width: 720px; text-align: center; }
+  #dx-main.dx-checking .dx-passage-pane, #dx-main.dx-checking .dx-card-wrap { display: none !important; }
+  #dx-main.dx-checking .dx-check-panel { display: block; }
+  /* Check Your Work is a single centered block even for ACT English/Reading/
+     Science, which otherwise run #dx-main in passage-mode's left-aligned
+     split layout — override that back to centered here. */
+  #dx-shell.passage-mode #dx-main.dx-checking { justify-content: center; padding: 3rem 2.5rem; }
+  .dx-check-hed { font-family: var(--display); font-size: 1.7rem; font-weight: 700; color: var(--text); margin-bottom: 1.3rem; }
+  .dx-check-sub { font-family: var(--hel); font-size: 0.9rem; color: var(--mid); line-height: 1.7; max-width: 560px; margin: 0 auto 2.2rem; }
+  .dx-check-card { background: #fff; border: 1px solid var(--border); box-shadow: 0 12px 40px rgba(17,17,17,0.08); padding: 1.8rem 2rem 2.2rem; text-align: left; }
+  .dx-check-card-hed { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; padding-bottom: 1.1rem; margin-bottom: 1.3rem; border-bottom: 1px solid var(--border); }
+  .dx-check-card-title { font-family: var(--display); font-weight: 700; font-size: 1.02rem; color: var(--text); }
+  .dx-check-legend { display: flex; gap: 1.5rem; font-family: var(--hel); font-size: 0.7rem; color: var(--mid); }
+  .dx-check-legend span { display: inline-flex; align-items: center; gap: 0.4rem; }
+  .dx-check-submit-btn { display: inline-block; margin: 2.2rem auto 0; }
 
   .dx-card-wrap { width: 100%; max-width: 620px; }
   .dx-card { opacity: 1; transform: translateY(0); transition: opacity 0.38s cubic-bezier(0.16,1,0.3,1), transform 0.38s cubic-bezier(0.16,1,0.3,1); }
@@ -207,36 +256,66 @@
   .dx-mobile-jump label { display: block; font-size: 0.54rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); margin-bottom: 0.5rem; }
   .dx-mobile-jump select { width: 100%; font-family: var(--hel); font-size: 0.85rem; padding: 0.7rem 0.9rem; border: 1px solid var(--border); background: var(--white); color: var(--text); }
   .dx-domain { display: inline-block; font-size: 0.56rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--red); margin-bottom: 1rem; }
-  .dx-qtext { font-family: var(--display); font-size: clamp(1.05rem, 1.9vw, 1.35rem); font-weight: 700; line-height: 1.5; color: var(--text); margin-bottom: 1.9rem; }
+  .dx-qtext { font-family: var(--display); font-size: clamp(1.05rem, 1.9vw, 1.35rem); font-weight: 400; line-height: 1.5; color: var(--text); margin-bottom: 1.9rem; }
+  .dx-table { border-collapse: collapse; margin: 0 0 1.3rem 0; font-family: var(--hel); font-size: 0.82rem; font-weight: 400; }
+  .dx-fig { display: block; max-width: 300px; height: auto; margin: 0 0 1.3rem 0; }
+  .dx-table th, .dx-table td { border: 1px solid var(--border); padding: 0.5rem 1.1rem; text-align: center; }
+  .dx-table th { background: var(--bg); font-weight: 700; }
   .dx-choices { display: flex; flex-direction: column; gap: 0.7rem; margin-bottom: 2rem; }
   .dx-choice { display: flex; align-items: center; gap: 0.9rem; border: 1px solid var(--border); background: var(--white); padding: 0.85rem 1.1rem; cursor: pointer; transition: border-color 0.2s ease, background 0.2s ease; }
   .dx-choice:hover { border-color: var(--gold); }
   .dx-choice-letter { flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--faint); display: flex; align-items: center; justify-content: center; font-size: 0.68rem; font-weight: 700; color: var(--mid); transition: all 0.2s ease; }
   .dx-choice-text { font-size: 0.88rem; color: var(--text); }
-  .dx-choice.selected { border-color: var(--red); background: rgba(176,39,28,0.05); }
-  .dx-choice.selected .dx-choice-letter { background: var(--red); border-color: var(--red); color: #fff; }
+  .dx-choice.selected { border-color: var(--dx-blue); background: rgba(52,87,213,0.05); }
+  .dx-choice.selected .dx-choice-letter { background: var(--dx-blue); border-color: var(--dx-blue); color: #fff; }
 
   .dx-fr-row { display: flex; gap: 0.75rem; margin-bottom: 2rem; }
   .dx-fr-input { flex: 1; font-family: var(--hel); font-size: 0.92rem; padding: 0.85rem 1.1rem; border: 1px solid var(--border); background: var(--white); color: var(--text); }
-  .dx-fr-input:focus { outline: none; border-color: var(--red); }
-  .dx-fr-submit { background: var(--red); color: #fff; font-family: var(--hel); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 0 1.4rem; border: none; cursor: pointer; transition: opacity 0.2s; }
-  .dx-fr-submit:hover { opacity: 0.86; }
+  .dx-fr-input:focus { outline: none; border-color: var(--dx-blue); }
 
-  .dx-mark-btn { display: inline-block; background: none; border: 1px dashed rgba(17,17,17,0.3); color: var(--mid); font-family: var(--hel); font-size: 0.6rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.4rem 0.9rem; cursor: pointer; margin-bottom: 1.1rem; transition: color 0.2s, border-color 0.2s, background 0.2s; }
+  /* ═══ QUESTION CARD HEADER — numbered tile + Mark for Review + ABC
+     eliminator toggle, matching Bluebook's own question-card header. ═══ */
+  .dx-card-hed { display: flex; align-items: center; gap: 0.9rem; padding: 0.65rem 0.9rem; background: var(--bg); border: 1px solid var(--border); border-bottom: 1.5px dashed var(--border); margin-bottom: 1.8rem; }
+  .dx-qnum-tile { flex-shrink: 0; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; background: var(--dx-navy); color: #fff; font-family: var(--hel); font-weight: 700; font-size: 0.85rem; }
+  .dx-mark-btn { display: inline-flex; align-items: center; gap: 0.35rem; background: none; border: none; border-bottom: 1px dashed var(--mid); color: var(--mid); font-family: var(--hel); font-size: 0.66rem; font-weight: 600; letter-spacing: 0.04em; padding: 0.15rem 0; cursor: pointer; transition: color 0.2s, border-color 0.2s; }
+  .dx-mark-btn.on { color: var(--gold); border-color: var(--gold); }
+  .dx-abc-btn { margin-left: auto; flex-shrink: 0; background: var(--dx-blue); color: #fff; border: none; font-family: var(--hel); font-weight: 800; font-size: 0.62rem; letter-spacing: 0.03em; padding: 0.38rem 0.6rem; cursor: pointer; transition: opacity 0.2s; }
+  .dx-abc-btn:hover { opacity: 0.85; }
+  .dx-abc-btn.on { background: var(--gold); color: #111; }
   .dx-choice { position: relative; }
   .dx-choice.eliminated { opacity: 0.45; }
   .dx-choice.eliminated .dx-choice-text { text-decoration: line-through; }
-  .dx-elim { margin-left: auto; flex-shrink: 0; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; border-radius: 50%; color: var(--faint); font-size: 1rem; line-height: 1; cursor: pointer; transition: color 0.2s, background 0.2s; }
+  .dx-elim { display: none; margin-left: auto; flex-shrink: 0; width: 26px; height: 26px; align-items: center; justify-content: center; border-radius: 50%; color: var(--faint); font-size: 1rem; line-height: 1; cursor: pointer; transition: color 0.2s, background 0.2s; }
+  #dx-choices.eliminator-on .dx-elim { display: flex; }
   .dx-elim:hover { color: var(--red); background: rgba(176,39,28,0.08); }
-  .dx-mark-btn.on { background: rgba(201,168,76,0.15); border: 1px solid var(--gold); color: #8a6d1f; }
-  .dx-qnum.marked { box-shadow: inset 0 0 0 2px var(--red); }
-  .dx-qnum.marked::after { content: ''; }
   .dx-nav-row { display: flex; align-items: center; justify-content: space-between; }
+
+  /* ═══ BREAK SCREEN — shown between sections, matching Bluebook's own
+     dark break screen (timer + rules), reskinned in the portal's colors. ═══ */
+  #dx-break-screen.screen { display: none; align-items: stretch; padding: 0; min-height: 100vh; }
+  #dx-break-screen.active { display: flex; flex-direction: column; }
+  .dx-break-body { flex: 1; background: var(--dx-navy); color: #fff; display: flex; align-items: center; justify-content: center; padding: 3rem 2rem; }
+  .dx-break-wrap { width: 100%; max-width: 920px; display: flex; align-items: center; gap: 5rem; flex-wrap: wrap; justify-content: center; }
+  .dx-break-timer-box { border: 1.5px solid rgba(255,255,255,0.3); padding: 1.75rem 3rem; text-align: center; flex-shrink: 0; }
+  .dx-break-timer-label { font-family: var(--hel); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.75); margin-bottom: 0.6rem; }
+  .dx-break-timer { font-family: var(--hel); font-size: 3rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .dx-break-resume-btn { display: block; margin: 1.75rem auto 0; background: var(--gold); color: #111; border: none; font-family: var(--hel); font-weight: 700; font-size: 0.78rem; letter-spacing: 0.04em; padding: 0.9rem 1.6rem; border-radius: 999px; cursor: pointer; transition: opacity 0.2s; width: 100%; }
+  .dx-break-resume-btn:hover { opacity: 0.88; }
+  .dx-break-info { max-width: 460px; }
+  .dx-break-info h1 { font-family: var(--display); font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; }
+  .dx-break-info h2 { font-family: var(--display); font-size: 1.2rem; font-weight: 700; margin-bottom: 0.9rem; }
+  .dx-break-info p { font-family: var(--hel); font-size: 0.88rem; line-height: 1.7; color: rgba(255,255,255,0.85); margin-bottom: 1rem; }
+  .dx-break-info hr { border: none; border-top: 1px solid rgba(255,255,255,0.25); margin: 1.75rem 0; }
+  .dx-break-rules { font-family: var(--hel); font-size: 0.86rem; line-height: 1.6; color: rgba(255,255,255,0.85); padding-left: 1.3rem; }
+  .dx-break-rules li { margin-bottom: 0.6rem; }
+  @media (max-width: 760px) {
+    .dx-break-wrap { gap: 2.5rem; }
+  }
   .dx-btn { font-family: var(--hel); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.8rem 1.7rem; border: none; cursor: pointer; transition: opacity 0.2s ease; }
   .dx-btn:disabled { opacity: 0.35; cursor: not-allowed; }
   .dx-btn-back { background: transparent; color: var(--mid); border: 1px solid var(--border); }
   .dx-btn-back:hover:not(:disabled) { border-color: var(--text); color: var(--text); }
-  .dx-btn-next { background: var(--red); color: #fff; }
+  .dx-btn-next { background: var(--dx-blue); color: #fff; }
   .dx-btn-next:hover:not(:disabled) { opacity: 0.86; }
 
   /* ═══ DONE SCREEN ═══ */
@@ -284,7 +363,6 @@
   @media (prefers-reduced-motion: reduce) { .reveal { transition: none; } }
   @media (max-width: 760px) {
     .menu-grid { grid-template-columns: 1fr; }
-    #dx-side { display: none; }
     #dx-main { padding: 2.5rem 1.5rem; }
     .dx-mobile-jump { display: block; }
     .res-embed { height: 320px; }
@@ -377,18 +455,15 @@
       <a href="#" class="ns-join" id="ns-join" style="display:none;" target="_blank" rel="noopener">Online? Join here: <span id="ns-join-url"></span></a>
     </div>
     <div class="menu-grid">
-      <div class="menu-card" data-route="diagnostic">
+      <div class="menu-card menu-card-wide" data-route="diagnostic">
         <span class="menu-card-icon">01</span>
-        <div class="menu-card-title">SAT/ACT Diagnostics</div>
-        <div class="menu-card-body">Take the hand-curated diagnostic so Luca can build your plan around real data.</div>
-      </div>
-      <div class="menu-card" data-route="tests">
-        <span class="menu-card-icon">02</span>
-        <div class="menu-card-title">SAT/ACT Tests</div>
-        <div class="menu-card-body">Full-length practice tests, scored instantly with an explanation for every answer.</div>
+        <div>
+          <div class="menu-card-title">SAT/ACT Diagnostics</div>
+          <div class="menu-card-body">Take the hand-curated diagnostic so Luca can build your plan around real data.</div>
+        </div>
       </div>
       <div class="menu-card menu-card-wide" data-route="files">
-        <span class="menu-card-icon">03</span>
+        <span class="menu-card-icon">02</span>
         <div>
           <div class="menu-card-title">Your Files</div>
           <div class="menu-card-body">Worksheets, practice sets, and materials for anything you're working on with Luca right now.</div>
@@ -408,42 +483,6 @@
       <div id="res-body"></div>
     </div>
     <a href="#" class="menu-back-link" id="res-back">&larr; Back to menu</a>
-  </div>
-</div>
-
-<!-- ═══ SCREEN 3b — SAT/ACT TESTS (placeholder for the generated-test system) ═══ -->
-<div class="screen" id="screen-tests">
-  <div class="panel-wide">
-    <div class="res-card">
-      <div class="res-icon">📝</div>
-      <h1 class="panel-hed" style="margin-bottom:1rem;">SAT/ACT Tests</h1>
-      <div id="tests-body"></div>
-    </div>
-    <a href="#" class="menu-back-link" id="tests-back">&larr; Back to menu</a>
-  </div>
-</div>
-
-<!-- ═══ SCREEN 3b-2 — PRACTICE TEST BREAK (between Reading & Writing and Math — the
-     only practice-test screen that isn't the diagnostic's own dx-screen/screen-intro
-     shell, since it's not a question-answering moment) ═══ -->
-<div class="screen" id="screen-pt-break">
-  <div class="panel">
-    <div class="kicker" id="pt-break-kicker">SAT Practice Test 1</div>
-    <h1 class="panel-hed">Take a short break.</h1>
-    <p class="panel-sub">On the real digital SAT, students get a break between Reading &amp; Writing and Math. Stretch, get some water &mdash; the Math section is up next.</p>
-    <button class="key-btn" id="pt-break-continue">Start Math</button>
-    <a href="#" class="menu-back-link" id="pt-break-exit">&larr; Save &amp; exit to menu</a>
-  </div>
-</div>
-
-<!-- ═══ SCREEN 3b-3 — PRACTICE TEST RESULTS + PER-QUESTION REVIEW ═══ -->
-<div class="screen" id="screen-practice-results">
-  <div class="panel-wide">
-    <div class="kicker">SAT Practice Test 1 — Results</div>
-    <h1 class="panel-hed" id="pt-score-hed">You scored ?/?</h1>
-    <div id="pt-score-breakdown" style="margin-bottom:2rem; font-size:0.9rem; color:var(--mid);"></div>
-    <div id="pt-review-list"></div>
-    <a href="#" class="menu-back-link" id="pt-results-back" style="display:block; margin-top:1.5rem;">&larr; Back to menu</a>
   </div>
 </div>
 
@@ -486,7 +525,7 @@
       <span class="ref-modal-title">Reference</span>
       <button class="ref-close" id="ref-close" type="button" aria-label="Close">&times;</button>
     </div>
-    <div class="ref-grid">
+    <div class="ref-row ref-row-top">
       <div class="ref-cell">
         <svg viewBox="0 0 120 100" style="color:var(--text);">
           <circle cx="60" cy="52" r="34" fill="none" stroke="currentColor" stroke-width="1.5"/>
@@ -515,6 +554,30 @@
         <div class="ref-formula">A = &frac12;bh</div>
       </div>
       <div class="ref-cell">
+        <svg viewBox="0 0 170 130" style="color:var(--text);">
+          <polygon points="25,105 145,105 145,20" fill="none" stroke="currentColor" stroke-width="2"/>
+          <polyline points="133,105 133,93 145,93" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <text x="82" y="123" font-size="14" fill="currentColor" text-anchor="middle">x&radic;3</text>
+          <text x="160" y="66" font-size="14" fill="currentColor" text-anchor="middle">x</text>
+          <text x="76" y="55" font-size="14" fill="currentColor" text-anchor="middle">2x</text>
+          <text x="44" y="94" font-size="12" fill="currentColor" text-anchor="middle">30&deg;</text>
+          <text x="126" y="38" font-size="12" fill="currentColor" text-anchor="middle">60&deg;</text>
+        </svg>
+        <div class="ref-special-label">30-60-90</div>
+      </div>
+      <div class="ref-cell">
+        <svg viewBox="0 0 150 150" style="color:var(--text);">
+          <polygon points="25,125 125,125 125,25" fill="none" stroke="currentColor" stroke-width="2"/>
+          <polyline points="113,125 113,113 125,113" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <text x="75" y="143" font-size="14" fill="currentColor" text-anchor="middle">s</text>
+          <text x="141" y="78" font-size="14" fill="currentColor" text-anchor="middle">s</text>
+          <text x="65" y="68" font-size="14" fill="currentColor" text-anchor="middle">s&radic;2</text>
+          <text x="44" y="114" font-size="12" fill="currentColor" text-anchor="middle">45&deg;</text>
+          <text x="106" y="40" font-size="12" fill="currentColor" text-anchor="middle">45&deg;</text>
+        </svg>
+        <div class="ref-special-label">45-45-90</div>
+      </div>
+      <div class="ref-cell">
         <svg viewBox="0 0 120 100" style="color:var(--text);">
           <polygon points="22,20 22,80 100,80" fill="none" stroke="currentColor" stroke-width="1.5"/>
           <rect x="22" y="72" width="8" height="8" fill="none" stroke="currentColor" stroke-width="1"/>
@@ -524,43 +587,9 @@
         </svg>
         <div class="ref-formula">c&sup2; = a&sup2; + b&sup2;</div>
       </div>
-      <div class="ref-cell">
-        <div class="ref-facts" style="border-top:none; padding-top:0; text-align:left;">
-          Degrees of arc in a circle: 360<br>
-          Radians of arc in a circle: 2&pi;<br>
-          Triangle angle sum: 180&deg;
-        </div>
-      </div>
+    </div>
 
-      <div class="ref-special">
-        <div class="ref-special-wrap">
-          <div class="ref-special-cell">
-            <svg viewBox="0 0 170 130" style="color:var(--text);">
-              <polygon points="25,105 145,105 145,20" fill="none" stroke="currentColor" stroke-width="2"/>
-              <polyline points="133,105 133,93 145,93" fill="none" stroke="currentColor" stroke-width="1.5"/>
-              <text x="82" y="123" font-size="14" fill="currentColor" text-anchor="middle">x&radic;3</text>
-              <text x="160" y="66" font-size="14" fill="currentColor" text-anchor="middle">x</text>
-              <text x="76" y="55" font-size="14" fill="currentColor" text-anchor="middle">2x</text>
-              <text x="44" y="94" font-size="12" fill="currentColor" text-anchor="middle">30&deg;</text>
-              <text x="126" y="38" font-size="12" fill="currentColor" text-anchor="middle">60&deg;</text>
-            </svg>
-            <div class="ref-special-label">30-60-90</div>
-          </div>
-          <div class="ref-special-cell">
-            <svg viewBox="0 0 150 150" style="color:var(--text);">
-              <polygon points="25,125 125,125 125,25" fill="none" stroke="currentColor" stroke-width="2"/>
-              <polyline points="113,125 113,113 125,113" fill="none" stroke="currentColor" stroke-width="1.5"/>
-              <text x="75" y="143" font-size="14" fill="currentColor" text-anchor="middle">s</text>
-              <text x="141" y="78" font-size="14" fill="currentColor" text-anchor="middle">s</text>
-              <text x="65" y="68" font-size="14" fill="currentColor" text-anchor="middle">s&radic;2</text>
-              <text x="44" y="114" font-size="12" fill="currentColor" text-anchor="middle">45&deg;</text>
-              <text x="106" y="40" font-size="12" fill="currentColor" text-anchor="middle">45&deg;</text>
-            </svg>
-            <div class="ref-special-label">45-45-90</div>
-          </div>
-        </div>
-      </div>
-
+    <div class="ref-row ref-row-bottom">
       <div class="ref-cell">
         <svg viewBox="0 0 120 100" style="color:var(--text);">
           <polygon points="18,30 42,18 96,18 96,62 72,74 18,74" fill="none" stroke="currentColor" stroke-width="1.5"/>
@@ -592,7 +621,7 @@
           <line x1="60" y1="50" x2="94" y2="50" stroke="currentColor" stroke-width="1"/>
           <text x="74" y="46" font-size="11" fill="currentColor">r</text>
         </svg>
-        <div class="ref-formula">V = &frac43;&pi;r&sup3;</div>
+        <div class="ref-formula">V = &#8308;&frasl;&#8323;&pi;r&sup3;</div>
       </div>
       <div class="ref-cell">
         <svg viewBox="0 0 120 100" style="color:var(--text);">
@@ -619,19 +648,29 @@
         </svg>
         <div class="ref-formula">Square pyramid<br>V = &#8531;s&sup2;h</div>
       </div>
+      <div class="ref-cell ref-spacer"></div>
+    </div>
+
+    <div class="ref-facts">
+      The number of degrees of arc in a circle is 360.<br>
+      The number of radians of arc in a circle is 2&pi;.<br>
+      The sum of the measures in degrees of the angles of a triangle is 180.
     </div>
   </div>
 </div>
 
 <!-- ═══ SCREEN 5 — DIAGNOSTIC ═══ -->
 <div class="screen" id="dx-screen">
+  <div id="dx-notice-bar"><span id="dx-notice-text">THIS IS A SAT DIAGNOSTIC</span></div>
   <div id="dx-topbar">
     <div class="dx-brand"><span id="dx-brand-label">SAT Diagnostic — Math</span><span id="dx-student-label"></span></div>
     <div class="dx-progress-wrap">
       <span class="dx-timer" id="dx-timer" style="display:none;">60:00</span>
       <button type="button" class="dx-reference-btn" id="dx-reference-btn" style="display:none;">Reference</button>
-      <span class="dx-progress-label" id="dx-progress-label">Question 1 of 60</span>
-      <div class="dx-progress-track"><div class="dx-progress-fill" id="dx-progress-fill"></div></div>
+      <button type="button" class="dx-progress-btn" id="dx-progress-btn">
+        <span class="dx-progress-label" id="dx-progress-label">Question 1 of 60</span>
+        <span class="dx-progress-caret">&#9660;</span>
+      </button>
     </div>
   </div>
   <div class="dx-timer-toast" id="dx-timer-toast" style="display:none;">You have five minutes remaining.</div>
@@ -651,12 +690,15 @@
             <label for="dx-jump-select">Jump to question</label>
             <select id="dx-jump-select"></select>
           </div>
-          <button class="dx-mark-btn" id="dx-mark" type="button">&#9873; Mark for Review</button>
+          <div class="dx-card-hed">
+            <span class="dx-qnum-tile" id="dx-qnum-tile">1</span>
+            <button class="dx-mark-btn" id="dx-mark" type="button">&#128278; Mark for Review</button>
+            <button class="dx-abc-btn" id="dx-abc-toggle" type="button" title="Answer Eliminator">ABC</button>
+          </div>
           <h1 class="dx-qtext" id="dx-qtext"></h1>
           <div class="dx-choices" id="dx-choices" style="display:none;"></div>
           <div class="dx-fr-row" id="dx-fr-row" style="display:none;">
             <input type="text" class="dx-fr-input" id="dx-fr-input" placeholder="Type your answer">
-            <button class="dx-fr-submit" id="dx-fr-submit">Enter</button>
           </div>
           <div class="dx-nav-row">
             <button class="dx-btn dx-btn-back" id="dx-back">Back</button>
@@ -664,11 +706,72 @@
           </div>
         </div>
       </div>
+
+      <!-- ═══ CHECK YOUR WORK — a full review pass shown after the last
+           question of a module, before it actually submits. Matches
+           Bluebook's own end-of-module review screen. ═══ -->
+      <div class="dx-check-panel" id="dx-check-panel">
+        <h1 class="dx-check-hed">Check Your Work</h1>
+        <p class="dx-check-sub">Review any question below before you submit — click a number to jump back to it. Once you submit, you can't return to this module.</p>
+        <div class="dx-check-card">
+          <div class="dx-check-card-hed">
+            <div class="dx-check-card-title" id="dx-check-title">Questions</div>
+            <div class="dx-check-legend">
+              <span>&#9634; Unanswered</span>
+              <span>&#128681; For Review</span>
+            </div>
+          </div>
+          <div class="dx-qgrid" id="dx-check-grid"></div>
+        </div>
+        <button class="dx-btn dx-btn-next dx-check-submit-btn" id="dx-check-submit" type="button">Submit Module</button>
+      </div>
     </div>
-    <div id="dx-side">
-      <div class="dx-side-hed">Questions</div>
-      <div class="dx-qgrid" id="dx-qgrid"></div>
-      <p class="dx-side-note">Click any number to jump there. Gold = answered.</p>
+  </div>
+</div>
+
+<!-- ═══ QUESTION NAVIGATOR POPUP — opened from the progress button in
+     dx-topbar; matches Bluebook's own module question-picker. ═══ -->
+<div class="dx-nav-overlay" id="dx-nav-overlay">
+  <div class="dx-nav-modal">
+    <div class="dx-nav-modal-hed">
+      <div class="dx-nav-modal-title" id="dx-nav-modal-title">Questions</div>
+      <button class="dx-nav-close" id="dx-nav-close" type="button" aria-label="Close">&times;</button>
+    </div>
+    <div class="dx-nav-legend">
+      <span>&#128205; Current</span>
+      <span>&#9634; Unanswered</span>
+      <span>&#128681; For Review</span>
+    </div>
+    <div class="dx-qgrid" id="dx-qgrid"></div>
+    <button class="dx-nav-review-btn" id="dx-nav-review-btn" type="button">Go to Review Page</button>
+  </div>
+</div>
+
+<!-- ═══ SCREEN 5b — BREAK (between sections) ═══ -->
+<div class="screen" id="dx-break-screen">
+  <div class="dx-break-body">
+    <div class="dx-break-wrap">
+      <div>
+        <div class="dx-break-timer-box">
+          <div class="dx-break-timer-label">Remaining Break Time</div>
+          <div class="dx-break-timer" id="dx-break-timer">5:00</div>
+        </div>
+        <button class="dx-break-resume-btn" id="dx-break-resume" type="button">Resume Testing</button>
+      </div>
+      <div class="dx-break-info">
+        <h1>Diagnostic Break</h1>
+        <p>Take a breather — resume whenever you're ready. On the real test, you'd wait out the full clock, so use this time the way you would then.</p>
+        <hr>
+        <h2>Take a Break: Do Not Close Your Device</h2>
+        <p>When you're ready, tap <strong>Resume Testing</strong> to start the next section.</p>
+        <p><strong>Follow these rules during the break:</strong></p>
+        <ol class="dx-break-rules">
+          <li>Do not disturb anyone else who's still testing.</li>
+          <li>Do not exit the app or close your device.</li>
+          <li>Do not access your phone, notes, or the internet.</li>
+          <li>Do not eat or drink near any testing device.</li>
+        </ol>
+      </div>
     </div>
   </div>
 </div>
@@ -688,7 +791,6 @@
 </div>
 
 <script src="banks.js"></script>
-<script src="practice-tests.js"></script>
 <script>
 (function () {
   'use strict';
@@ -738,13 +840,10 @@
         elims: elims,
         qOrder: qOrder,
         sectionTimerEndsAt: sectionTimerEndsAt,
-        dxMode: dxMode,
-        ptTestId: ptTest ? ptTest.id : null,
-        ptSection: ptSection,
-        ptStage: ptStage,
-        ptVariant: ptVariant,
-        ptCompleted: ptCompleted,
-        ptModuleMinutes: window.PRACTICE_MODULE_TIME_LIMITS_ACTIVE
+        moduleStage: moduleStage,
+        module2Variant: module2Variant,
+        module1Buffer: module1Buffer,
+        breakEndsAt: breakEndsAt
       }));
     } catch (e) { /* private browsing / storage disabled — fail silently */ }
   }
@@ -875,28 +974,8 @@
     nsCard.parentNode.insertBefore(box, nsCard.nextSibling);
   }
 
-  // The DEMO account always shows a canned example session instead of
-  // hitting the real calendar — this makes the widget itself visible and
-  // reviewable independent of whatever's currently wrong with the live
-  // calendar integration (deployment, name matching, etc. — see the
-  // ?debug=1 tool above for diagnosing that separately). Matches on the
-  // student's key, not their name, since "DEMO123" is what's actually
-  // typed in to reach this account.
-  function isDemoAccount() {
-    return !!(currentStudent && currentStudent.key && /^demo/i.test(currentStudent.key));
-  }
-
   function loadNextSession() {
     if (!currentStudent || !currentStudent.name) return;
-    if (isDemoAccount()) {
-      var demoWhen = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
-      demoWhen.setHours(16, 0, 0, 0);
-      nsCard.style.display = 'block';
-      nsLabel.textContent = '📅 Your next scheduled session is on: (example)';
-      nsDate.textContent = formatSessionDate(demoWhen.toISOString(), false);
-      setJoinLink();
-      return;
-    }
     fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'nextSession', name: currentStudent.name, debug: DEBUG_MODE }) })
       .then(function (r) { return r.json(); })
       .catch(function (err) { return { ok: false, error: 'network', message: String(err) }; })
@@ -995,7 +1074,6 @@
       var route = card.getAttribute('data-route');
       if (route === 'diagnostic') { show('screen-test-choice'); }
       else if (route === 'files' || route === 'college-prep') { renderResources(route); show('screen-resources'); }
-      else if (route === 'tests') { renderTests(); show('screen-tests'); }
     });
   });
   document.getElementById('menu-logout').addEventListener('click', function (e) {
@@ -1037,196 +1115,12 @@
   }
   document.getElementById('res-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-menu'); });
 
-  /* ═══ SCREEN 3b: SAT/ACT TESTS ═══
-     Placeholder until the test-generator exists. Once it does, have the
-     backend return a "tests" array (see Code.gs) with { title, url }
-     entries and they'll list here automatically. */
-  function renderTests() {
-    var body = document.getElementById('tests-body');
-    var practiceTests = (window.SAT_PRACTICE_TESTS || []);
-    var html = '';
-    if (practiceTests.length) {
-      html += '<p class="res-pending" style="margin-bottom:1.4rem;">Full-length, original practice tests that mirror the real digital SAT: two modules per section, with your performance on Module 1 determining whether Module 2 is easier or harder — timed the same way the real test is. Every question comes with an explanation for the right answer and every wrong one, shown after you finish, so this doubles as a teaching tool, not just a score.</p>';
-      html += '<div style="display:flex; flex-direction:column; gap:0.9rem;">';
-      practiceTests.forEach(function (t) {
-        var mathN = (t.sections.math.module1 || []).length + (t.sections.math.module2Easier || []).length;
-        var rwN = (t.sections.readingWriting.module1 || []).length + (t.sections.readingWriting.module2Easier || []).length;
-        html += '<div class="res-card" style="padding:1.4rem 1.6rem;">' +
-          '<div class="menu-card-title" style="margin-bottom:0.3rem;">' + t.title + '</div>' +
-          '<div class="menu-card-body" style="margin-bottom:1rem;">Reading &amp; Writing (' + rwN + ' questions) + Math (' + mathN + ' questions)</div>' +
-          '<button class="key-btn pt-start-btn" type="button" data-test-id="' + t.id + '" style="width:auto; padding:0.9rem 1.8rem;">Start Test &rarr;</button>' +
-          '</div>';
-      });
-      html += '</div>';
-    } else {
-      html += '<p class="res-pending">No practice tests here yet — Luca is still building this out. Check back soon.</p>';
-    }
-    var legacyTests = (currentStudent && Array.isArray(currentStudent.tests)) ? currentStudent.tests : [];
-    if (legacyTests.length) {
-      html += '<div style="display:flex; flex-direction:column; gap:0.75rem; margin-top:1.4rem;">';
-      legacyTests.forEach(function (t) {
-        html += '<a href="' + t.url + '" target="_blank" rel="noopener" class="res-drive-btn-outline" style="display:block;">' + t.title + '</a>';
-      });
-      html += '</div>';
-    }
-    body.innerHTML = html;
-    body.querySelectorAll('.pt-start-btn').forEach(function (btn) {
-      btn.addEventListener('click', function () { startPracticeTest(btn.getAttribute('data-test-id')); });
-    });
-  }
-  document.getElementById('tests-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-menu'); });
-
-  /* ═══ PRACTICE TEST RUNNER — reuses the diagnostic's exact test-taking
-     infrastructure (dx-screen: cross-out, mark for review, jump grid,
-     keyboard shortcuts, timer, reference sheet, fonts) and screen-intro
-     (real section directions) rather than a separate parallel UI. The
-     only practice-test-specific screen is the short break between R&W
-     and Math (screen-pt-break) — everything else IS the diagnostic shell,
-     just pointed at a practice module's questions instead of a full
-     diagnostic section. See "dxMode" below: it's the single flag that
-     tells the shared engine (startSection, isLastSection call sites,
-     autoSubmitSection, nextBtn handler, save/restore) which world it's in.
-
-     Structure mirrored: Reading & Writing Module 1 -> (scored) -> R&W
-     Module 2 Easier/Harder -> break -> Math Module 1 -> (scored) -> Math
-     Module 2 Easier/Harder -> results. Routing: >=60% correct on a
-     Module 1 sends that section's Module 2 Harder, otherwise Easier —
-     decided independently per section. Every answered question across
-     all four completed modules accumulates into ptCompleted so the final
-     results screen can show one full review with every choiceNotes/
-     explanation, not just the last module. */
-  var dxMode = 'diagnostic'; // 'diagnostic' | 'practice' — read by startSection, isLastSection call sites, autoSubmitSection, nextBtn handler, save/restore
-  var PT_SECTION_LABELS = { readingWriting: 'Reading & Writing', math: 'Math' };
-  var PT_ROUTING_THRESHOLD = 0.6;
-
-  var ptTest = null;
-  var ptSection = 'readingWriting'; // 'readingWriting' | 'math'
-  var ptStage = 'module1';          // 'module1' | 'module2'
-  var ptVariant = null;             // null | 'Easier' | 'Harder' — which module2 array is in play
-  var ptCompleted = [];             // accumulated across all finished modules: {sectionLabel, moduleLabel, q, given, ok}
-
-  function ptModuleQuestions() {
-    var sec = ptTest.sections[ptSection];
-    if (ptStage === 'module1') return sec.module1 || [];
-    return sec['module2' + ptVariant] || [];
-  }
-  function ptModuleLabel() { return ptStage === 'module1' ? 'Module 1' : 'Module 2'; }
-  // Real SAT directions/reference apply per subject regardless of diagnostic
-  // vs. practice-test context, so practice modules borrow the exact same
-  // SECTION_DIRECTIONS / SECTIONS_WITH_REFERENCE entries the diagnostic uses.
-  function ptDirectionsKey() { return ptSection === 'math' ? 'math' : 'reading-writing'; }
-
-  function startPracticeTest(testId) {
-    ptTest = (window.SAT_PRACTICE_TESTS || []).filter(function (t) { return t.id === testId; })[0];
-    if (!ptTest) return;
-    dxMode = 'practice';
-    ptSection = 'readingWriting';
-    ptStage = 'module1';
-    ptVariant = null;
-    ptCompleted = [];
-    ptGotoModuleIntro();
-  }
-
-  // Publishes the current module into the diagnostic's own SECTION_BANKS
-  // under a rotating pseudo-key, then hands off to the diagnostic's own
-  // startSection() — same intro screen, same directions lookup, same
-  // "Start This Section" flow (relabeled for practice mode inside
-  // startSection itself).
-  function ptGotoModuleIntro() {
-    SECTION_BANKS['pt-module'] = { label: PT_SECTION_LABELS[ptSection], questions: ptModuleQuestions() };
-    SECTION_DIRECTIONS['pt-module'] = SECTION_DIRECTIONS[ptDirectionsKey()];
-    SECTIONS_WITH_REFERENCE['pt-module'] = SECTIONS_WITH_REFERENCE[ptDirectionsKey()];
-    window.PRACTICE_MODULE_TIME_LIMITS_ACTIVE = (window.PRACTICE_MODULE_TIME_LIMITS || {})[ptSection];
-    activeSectionKeys = ['pt-module'];
-    startSection(0);
-  }
-
-  document.getElementById('pt-break-continue').addEventListener('click', function () {
-    ptSection = 'math';
-    ptStage = 'module1';
-    ptVariant = null;
-    ptGotoModuleIntro();
-  });
-  document.getElementById('pt-break-exit').addEventListener('click', function (e) { e.preventDefault(); saveState(); show('screen-menu'); });
-
-  // Fires from the shared engine (nextBtn handler / autoSubmitSection)
-  // once the last question of the current module is submitted.
-  function finishPtModule() {
-    stopSectionTimer();
-    sectionTimerEndsAt = null;
-    var qs = activeQuestions();
-    var correct = 0;
-    qs.forEach(function (q, i) {
-      var given = answers[i];
-      var ok = isCorrect(q, given);
-      if (ok) correct++;
-      ptCompleted.push({ sectionLabel: PT_SECTION_LABELS[ptSection], moduleLabel: ptModuleLabel(), q: q, given: given, ok: ok });
-    });
-
-    if (ptStage === 'module1') {
-      ptVariant = (qs.length && correct / qs.length >= PT_ROUTING_THRESHOLD) ? 'Harder' : 'Easier';
-      ptStage = 'module2';
-      ptGotoModuleIntro();
-      return;
-    }
-
-    // Module 2 of this section just finished.
-    if (ptSection === 'readingWriting') {
-      document.getElementById('pt-break-kicker').textContent = ptTest.title;
-      saveState();
-      show('screen-pt-break');
-    } else {
-      finishPracticeTest();
-    }
-  }
-
-  function finishPracticeTest() {
-    var mathCorrect = 0, mathTotal = 0, rwCorrect = 0, rwTotal = 0;
-    var reviewHtml = '';
-    ptCompleted.forEach(function (entry, i) {
-      var q = entry.q, given = entry.given, ok = entry.ok;
-      if (entry.sectionLabel === 'Math') { mathTotal++; if (ok) mathCorrect++; }
-      else { rwTotal++; if (ok) rwCorrect++; }
-      var givenDisplay = q.type === 'fr' ? (given ? given.raw : null) : given;
-
-      reviewHtml += '<div style="border:1px solid var(--border); padding:1.4rem 1.6rem; margin-bottom:1rem; background:var(--white);">' +
-        '<div style="font-size:0.68rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:' + (ok ? 'var(--mid)' : 'var(--red)') + '; margin-bottom:0.5rem;">' +
-        entry.sectionLabel + ' — ' + entry.moduleLabel + ' — ' + (ok ? 'Correct' : (given === null || given === undefined ? 'Skipped' : 'Incorrect')) + '</div>' +
-        '<div style="font-weight:700; margin-bottom:0.8rem;">' + q.text + '</div>';
-
-      if (q.type === 'mc') {
-        q.choices.forEach(function (choice, ci) {
-          var isCorrectChoice = ci === q.correct;
-          var isGivenChoice = ci === given;
-          reviewHtml += '<div style="padding:0.6rem 0.9rem; margin-bottom:0.4rem; border:1px solid ' + (isCorrectChoice ? 'var(--gold)' : (isGivenChoice ? 'var(--red)' : 'var(--border)')) + '; background:' + (isCorrectChoice ? 'rgba(201,168,76,0.08)' : 'transparent') + ';">' +
-            '<strong>' + LETTERS[ci] + '.</strong> ' + choice + (isGivenChoice ? ' <em>(your answer)</em>' : '') + (isCorrectChoice ? ' <em>(correct)</em>' : '') +
-            '<div style="font-size:0.82rem; color:var(--mid); margin-top:0.3rem;">' + (q.choiceNotes && q.choiceNotes[ci] ? q.choiceNotes[ci] : '') + '</div>' +
-            '</div>';
-        });
-      } else {
-        reviewHtml += '<div style="font-size:0.88rem; margin-bottom:0.4rem;">Your answer: <strong>' + (givenDisplay ? givenDisplay : '—') + '</strong> &middot; Correct answer: <strong>' + q.answer + '</strong></div>' +
-          '<div style="font-size:0.82rem; color:var(--mid);">' + (q.explanation || '') + '</div>';
-      }
-      reviewHtml += '</div>';
-    });
-
-    document.getElementById('pt-score-hed').textContent = 'You scored ' + (mathCorrect + rwCorrect) + '/' + (mathTotal + rwTotal);
-    document.getElementById('pt-score-breakdown').textContent = 'Reading & Writing: ' + rwCorrect + '/' + rwTotal + '  •  Math: ' + mathCorrect + '/' + mathTotal;
-    document.getElementById('pt-review-list').innerHTML = reviewHtml;
-    dxMode = 'diagnostic';
-    clearState(); // the practice test is over either way — nothing left to resume
-    show('screen-practice-results');
-  }
-  document.getElementById('pt-results-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-menu'); });
-
   /* ═══ SCREEN 3c: CHOOSE SAT OR ACT ═══ */
   document.getElementById('test-choice-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-menu'); });
   document.getElementById('choose-sat').addEventListener('click', function () { startTest('SAT'); });
   document.getElementById('choose-act').addEventListener('click', function () { startTest('ACT'); });
 
-  /* ═══ SCREEN 4: DIAGNOSTIC SECTION INTRO (shared by both diagnostic
-     sections and practice-test modules — see startSection, which fills in
-     this screen's text differently per dxMode) ═══ */
+  /* ═══ SCREEN 4: DIAGNOSTIC SECTION/MODULE INTRO ═══ */
   document.getElementById('intro-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-menu'); });
   document.getElementById('done-return-link').addEventListener('click', function (e) { e.preventDefault(); show('screen-menu'); });
   document.getElementById('intro-start').addEventListener('click', function () {
@@ -1234,7 +1128,7 @@
     buildSidebar();
     renderQuestion();
     show('dx-screen');
-    var minutes = dxMode === 'practice' ? window.PRACTICE_MODULE_TIME_LIMITS_ACTIVE : (window.SECTION_TIME_LIMITS || {})[activeSectionKeys[sectionIndex]];
+    var minutes = (window.SECTION_MODULE_TIME_LIMITS || {})[activeSectionKeys[sectionIndex]];
     if (minutes) { startSectionTimer(minutes); } else { dxTimerEl.style.display = 'none'; stopSectionTimer(); sectionTimerEndsAt = null; }
   });
 
@@ -1307,13 +1201,44 @@
   var testChoice = null;       // 'SAT' or 'ACT'
   var activeSectionKeys = [];  // populated sections only, in the real test's order
   var sectionIndex = 0;
-  var completedSections = [];  // [{ key, label, answers }] for sections already finished
+  var completedSections = [];  // [{ key, label, answers, marked, module2Variant }] for sections already finished
   var current = 0;
   var answers = [];
   var marked = [];
   var elims = [];
   var qOrder = [];
   var currentQs = [];
+
+  /* ═══ ADAPTIVE SAT MODULES ═══
+     SAT Reading & Writing and Math are real, modular, and adaptive,
+     matching the digital SAT: Module 1 (fixed) is scored, then Module 2
+     Easier or Module 2 Harder is served depending on that score (>=60%
+     correct routes to Harder). A section "has modules" when its bank
+     defines module2Easier (see SECTION_BANKS in banks.js) — ACT sections
+     don't, and stay a single fixed module, matching the real ACT format.
+     module1Buffer holds Module 1's answers/marked while Module 2 runs, so
+     they can be combined into one section-level completedSections entry
+     once both modules are done (report.html expects one entry per
+     section, matching how the real score report works). */
+  var moduleStage = 'module1';   // 'module1' | 'module2'
+  var module2Variant = null;     // null | 'Easier' | 'Harder'
+  var module1Buffer = null;      // { answers, marked } captured at the end of Module 1
+  var MODULE2_ROUTING_THRESHOLD = 0.6;
+
+  function currentSectionKey() { return activeSectionKeys[sectionIndex]; }
+  function currentBank() { return SECTION_BANKS[currentSectionKey()]; }
+  function sectionHasModules(key) { return !!SECTION_BANKS[key].module2Easier; }
+  function moduleQuestions(bank, stage, variant) {
+    if (!bank.module2Easier) return bank.module1; // ACT: single fixed module
+    return stage === 'module1' ? bank.module1 : bank['module2' + variant];
+  }
+  // Reconstructs the exact ordered question list a student saw for a full
+  // section (Module 1 + whichever Module 2 variant they were routed to,
+  // or just the one module for non-adaptive ACT sections) — the single
+  // source of truth both the live engine and report.html rely on.
+  function sectionQuestions(bank, variant) {
+    return bank.module2Easier ? bank.module1.concat(bank['module2' + (variant || 'Easier')]) : bank.module1;
+  }
 
   /* ═══ SECTION TIMER ═══
      Real per-section time limits (window.SECTION_TIME_LIMITS in banks.js).
@@ -1388,7 +1313,15 @@
       passageBodyEl.innerHTML = passage.html || '';
       lastRenderedPassageId = q.passageId;
       passagePaneEl.scrollTop = 0;
-      layoutPassageGutter();
+      // Two rAFs so the pane's just-added 'passage-mode' display change and
+      // the new innerHTML have actually been laid out before we measure —
+      // measuring in the same tick (especially on the very first passage,
+      // before the pane has ever been visible) reads stale/hidden geometry
+      // and either produces no gutter numbers at all or ones that don't
+      // line up. Also re-run once webfonts finish loading, since serif
+      // line heights shift slightly between the fallback and loaded font.
+      requestAnimationFrame(function () { requestAnimationFrame(layoutPassageGutter); });
+      if (document.fonts && document.fonts.ready) { document.fonts.ready.then(layoutPassageGutter); }
     }
 
     // Highlight the numbered mark this question refers to (both the
@@ -1469,13 +1402,34 @@
     unwrapHighlight(hit);
   });
 
-  // Questions are presented in fixed order — no randomization. For ACT
-  // English/Reading this preserves chronological order within each passage
-  // (banks.js is pre-sorted by passage-appearance then refNum).
-  function shuffledOrder(n) {
-    var o = [];
-    for (var i = 0; i < n; i++) o.push(i);
-    return o;
+  // For a flat, independent-item pool (SAT R&W/Math, ACT Math), the order
+  // stays fixed — banks.js is already sorted easy-to-hard, and shuffling
+  // within that would undo the difficulty ramp. For a passage-grouped pool
+  // (ACT English/Reading/Science), each passage's own questions must stay
+  // in their banks.js order (they map to specific underlined portions /
+  // figures read in sequence), but which passage comes first, second, etc.
+  // should still vary between attempts — real test forms rotate passage
+  // order the same way. So: shuffle the passage BLOCKS, keep each block's
+  // internal order untouched.
+  function shuffledOrder(qsBank) {
+    var n = qsBank.length;
+    var order = [];
+    for (var i = 0; i < n; i++) order.push(i);
+    if (!n || qsBank[0].passageId === undefined) return order;
+
+    var blocks = [];
+    var byId = {};
+    qsBank.forEach(function (q, i) {
+      if (!byId[q.passageId]) { byId[q.passageId] = { indices: [] }; blocks.push(byId[q.passageId]); }
+      byId[q.passageId].indices.push(i);
+    });
+    for (var b = blocks.length - 1; b > 0; b--) {
+      var j = Math.floor(Math.random() * (b + 1));
+      var tmp = blocks[b]; blocks[b] = blocks[j]; blocks[j] = tmp;
+    }
+    var result = [];
+    blocks.forEach(function (block) { result = result.concat(block.indices); });
+    return result;
   }
   function canonical(arr) {
     var out = new Array(arr.length).fill(null);
@@ -1488,15 +1442,15 @@
   var choicesEl  = document.getElementById('dx-choices');
   var frRow      = document.getElementById('dx-fr-row');
   var frInput    = document.getElementById('dx-fr-input');
-  var frSubmit   = document.getElementById('dx-fr-submit');
   var backBtn    = document.getElementById('dx-back');
   var nextBtn    = document.getElementById('dx-next');
   var qgrid      = document.getElementById('dx-qgrid');
-  var progFill   = document.getElementById('dx-progress-fill');
   var progLabel  = document.getElementById('dx-progress-label');
+  var qnumTile   = document.getElementById('dx-qnum-tile');
   var LETTERS    = ['A', 'B', 'C', 'D', 'E']; // ACT math uses 5 choices; SAT math uses 4 — array just needs to cover the max
   var dxTimerEl      = document.getElementById('dx-timer');
   var dxTimerToastEl = document.getElementById('dx-timer-toast');
+  var eliminatorOn = false; // "ABC" toggle — shows/hides the per-choice cross-out control
 
   function activeQuestions() { return currentQs; }
   function isLastQuestionInSection() { return current === activeQuestions().length - 1; }
@@ -1567,65 +1521,153 @@
   // and moves on, exactly like manually pressing Next Section / Submit.
   function autoSubmitSection() {
     if (activeScreenId !== 'dx-screen') return; // already left this section some other way
-    if (dxMode === 'practice') { finishPtModule(); return; }
-    if (isLastSection()) { finishDiagnostic(); }
-    else { advanceToNextSection(); }
+    finishCurrentModule();
   }
 
   function startTest(choice) {
-    dxMode = 'diagnostic'; // guard against stale 'practice' mode left over from an abandoned practice-test session
     testChoice = choice;
     activeSectionKeys = TEST_FORMATS[choice].order.filter(function (key) {
-      return SECTION_BANKS[key].questions.length > 0;
+      return SECTION_BANKS[key].module1.length > 0;
     });
     completedSections = [];
     if (!activeSectionKeys.length) { show('screen-menu'); return; } // shouldn't happen — Math always has content
     startSection(0);
   }
 
+  // Begins Module 1 of section `index` — fresh module state every time,
+  // since Module 2 (if the section has one) is reached via
+  // finishCurrentModule() below, not by calling this again.
   function startSection(index) {
     sectionIndex = index;
+    moduleStage = 'module1';
+    module2Variant = null;
+    module1Buffer = null;
+    goToModuleIntro();
+  }
+
+  /* ═══ BREAK SCREEN — shown between sections (not between the two modules
+     of the same section, matching the real digital SAT). The countdown is
+     informational only: this is a diagnostic, not a timed test day, so
+     Resume Testing is always clickable. Stored as an absolute end
+     timestamp, same pattern as the section timer, so a refresh mid-break
+     doesn't grant extra time. ═══ */
+  var BREAK_SECONDS = 10 * 60; // matches the real SAT's 10-minute break, and the ACT's single break (after Math, before Reading)
+  var breakEndsAt = null;
+  var breakInterval = null;
+  var breakTimerEl = document.getElementById('dx-break-timer');
+  var breakResumeBtn = document.getElementById('dx-break-resume');
+
+  function tickBreak() {
+    var remaining = Math.max(0, breakEndsAt - Date.now());
+    breakTimerEl.textContent = formatTimer(remaining);
+    if (remaining <= 0) { advanceFromBreak(); }
+  }
+  function stopBreakTimer() {
+    if (breakInterval) { clearInterval(breakInterval); breakInterval = null; }
+  }
+  function startBreak() {
+    breakEndsAt = Date.now() + BREAK_SECONDS * 1000;
+    tickBreak();
+    breakInterval = setInterval(tickBreak, 1000);
+    show('dx-break-screen');
+  }
+  function resumeBreak(endsAt) {
+    breakEndsAt = endsAt;
+    tickBreak();
+    breakInterval = setInterval(tickBreak, 1000);
+  }
+  // Shared by the "Resume Testing" button and the timer hitting zero — once
+  // the break is over (whether the student clicked through or just ran out
+  // the clock), move straight into the next section automatically instead
+  // of leaving them stranded on the break screen.
+  function advanceFromBreak() {
+    stopBreakTimer();
+    breakEndsAt = null;
+    startSection(sectionIndex);
+  }
+  breakResumeBtn.addEventListener('click', advanceFromBreak);
+
+  // Populates the intro screen for whatever module is current
+  // (moduleStage/module2Variant) and loads its questions — used both for
+  // a section's first module and, via finishCurrentModule(), its second.
+  function goToModuleIntro() {
+    dxMain.classList.remove('dx-checking');
+    var secKey = activeSectionKeys[sectionIndex];
+    var bank = SECTION_BANKS[secKey];
+    var hasTwoModules = sectionHasModules(secKey);
+    var qsBank = moduleQuestions(bank, moduleStage, module2Variant);
     current = 0;
-    var bank = SECTION_BANKS[activeSectionKeys[sectionIndex]].questions;
-    qOrder = shuffledOrder(bank.length);
-    currentQs = qOrder.map(function (i) { return bank[i]; });
+    qOrder = shuffledOrder(qsBank);
+    currentQs = qOrder.map(function (i) { return qsBank[i]; });
     var qs = currentQs;
     answers = new Array(qs.length).fill(null);
     marked = new Array(qs.length).fill(false);
     elims = new Array(qs.length).fill(null).map(function () { return []; });
     diagnosticSubmitted = false;
-    var sectionLabel = SECTION_BANKS[activeSectionKeys[sectionIndex]].label;
-    var secKey = activeSectionKeys[sectionIndex];
-    var isPractice = dxMode === 'practice';
-    var kicker = isPractice ? ptTest.title : (testChoice + ' Diagnostic');
-    var subText = isPractice
-      ? 'Timed for real, just like the digital SAT — once you submit this module you can\'t return to it.'
-      : 'No pressure — this just tells Luca where to focus. Take your time.';
-    var moduleLabel = isPractice ? (' — ' + ptModuleLabel()) : '';
-    var brandLabel = isPractice ? (ptTest.title + ' — ' + sectionLabel + moduleLabel) : (testChoice + ' Diagnostic — ' + sectionLabel);
-    var hasReference = !!SECTIONS_WITH_REFERENCE[secKey];
-    var timeLimit = isPractice ? window.PRACTICE_MODULE_TIME_LIMITS_ACTIVE : (window.SECTION_TIME_LIMITS || {})[secKey];
-    var frNoteOn = isPractice ? (ptSection === 'math') : (secKey === 'math' && testChoice === 'SAT');
 
-    document.getElementById('intro-kicker').textContent = kicker;
-    document.getElementById('intro-sub').textContent = subText;
+    var sectionLabel = bank.label;
+    var moduleLabelSuffix = hasTwoModules ? (' — ' + (moduleStage === 'module1' ? 'Module 1' : 'Module 2')) : '';
+    var hasReference = !!SECTIONS_WITH_REFERENCE[secKey];
+    var timeLimit = (window.SECTION_MODULE_TIME_LIMITS || {})[secKey];
+    var frNoteOn = (secKey === 'math' && testChoice === 'SAT');
+
+    document.getElementById('intro-kicker').textContent = testChoice + ' Diagnostic';
+    document.getElementById('intro-sub').textContent = 'No pressure — this just tells Luca where to focus. Take your time.';
     document.getElementById('intro-fr-note').style.display = frNoteOn ? '' : 'none';
     document.getElementById('intro-directions').innerHTML = SECTION_DIRECTIONS[secKey] || '';
     document.getElementById('intro-reference-link').style.display = hasReference ? 'inline-flex' : 'none';
     document.getElementById('dx-reference-btn').style.display = hasReference ? '' : 'none';
-    document.getElementById('intro-hed').textContent = isPractice
-      ? (sectionLabel + moduleLabel + ' — ' + qs.length + ' question' + (qs.length === 1 ? '' : 's') + (timeLimit ? ' — ' + timeLimit + ' minutes.' : '.'))
-      : (sectionLabel + ' section — ' + qs.length + ' question' + (qs.length === 1 ? '' : 's') + (timeLimit ? ' — ' + timeLimit + ' minutes.' : '.'));
-    document.getElementById('dx-brand-label').textContent = brandLabel;
-    document.getElementById('intro-start').textContent = isPractice ? 'Start This Module' : 'Start This Section';
+    document.getElementById('intro-hed').textContent = sectionLabel + moduleLabelSuffix + ' — ' + qs.length + ' question' + (qs.length === 1 ? '' : 's') + (timeLimit ? ' — ' + timeLimit + ' minutes.' : '.');
+    document.getElementById('dx-brand-label').textContent = testChoice + ' Diagnostic — ' + sectionLabel + moduleLabelSuffix;
+    document.getElementById('dx-notice-text').textContent = 'THIS IS A ' + testChoice + ' DIAGNOSTIC';
+    document.getElementById('intro-start').textContent = hasTwoModules ? 'Start This Module' : 'Start This Section';
     show('screen-intro');
   }
 
-  function advanceToNextSection() {
+  // Fires when the last question of the current module is submitted
+  // (Next button or timer expiry). For a two-module SAT section finishing
+  // Module 1, this scores it, decides the Module 2 Easier/Harder variant,
+  // and goes to that module's intro. Otherwise the section as a whole is
+  // done: Module 1 + Module 2 (or just the one module, for ACT) combine
+  // into a single completedSections entry — the same shape report.html
+  // already expects — before moving to the next section or finishing up.
+  function finishCurrentModule() {
     stopSectionTimer();
     sectionTimerEndsAt = null;
-    completedSections.push({ key: activeSectionKeys[sectionIndex], label: SECTION_BANKS[activeSectionKeys[sectionIndex]].label, answers: canonical(answers), marked: canonical(marked) });
-    startSection(sectionIndex + 1);
+    var secKey = activeSectionKeys[sectionIndex];
+    var hasTwoModules = sectionHasModules(secKey);
+
+    if (hasTwoModules && moduleStage === 'module1') {
+      var qs = activeQuestions();
+      var correct = 0;
+      qs.forEach(function (q, i) { if (isCorrect(q, answers[i])) correct++; });
+      module2Variant = (qs.length && correct / qs.length >= MODULE2_ROUTING_THRESHOLD) ? 'Harder' : 'Easier';
+      module1Buffer = { answers: canonical(answers), marked: canonical(marked) };
+      moduleStage = 'module2';
+      goToModuleIntro();
+      return;
+    }
+
+    var finalAnswers, finalMarked;
+    if (hasTwoModules) {
+      finalAnswers = module1Buffer.answers.concat(canonical(answers));
+      finalMarked = module1Buffer.marked.concat(canonical(marked));
+    } else {
+      finalAnswers = canonical(answers);
+      finalMarked = canonical(marked);
+    }
+    completedSections.push({ key: secKey, label: SECTION_BANKS[secKey].label, answers: finalAnswers, marked: finalMarked, module2Variant: module2Variant });
+    moduleStage = 'module1';
+    module2Variant = null;
+    module1Buffer = null;
+
+    // Real ACT day only has one break — after Math, before Reading. There's
+    // no break between English and Math. The digital SAT's only section
+    // transition (Reading & Writing -> Math) always gets one.
+    var NO_BREAK_AFTER = { 'english': true };
+    if (isLastSection()) { finishDiagnostic(); }
+    else if (NO_BREAK_AFTER[secKey]) { sectionIndex += 1; startSection(sectionIndex); }
+    else { sectionIndex += 1; startBreak(); }
   }
 
   var jumpSelect = document.getElementById('dx-jump-select');
@@ -1638,7 +1680,7 @@
       var el = document.createElement('div');
       el.className = 'dx-qnum';
       el.textContent = i + 1;
-      el.addEventListener('click', function () { goTo(i); });
+      el.addEventListener('click', function () { jumpToQuestion(i); });
       qgrid.appendChild(el);
 
       var opt = document.createElement('option');
@@ -1661,13 +1703,59 @@
   var markBtn = document.getElementById('dx-mark');
   function refreshMarkBtn() {
     markBtn.classList.toggle('on', !!marked[current]);
-    markBtn.innerHTML = marked[current] ? '&#9873; Marked for Review' : '&#9873; Mark for Review';
+    markBtn.innerHTML = marked[current] ? '&#128278; Marked for Review' : '&#128278; Mark for Review';
   }
   markBtn.addEventListener('click', function () {
     marked[current] = !marked[current];
     refreshMarkBtn();
     refreshSidebar();
     saveState();
+  });
+
+  var abcToggle = document.getElementById('dx-abc-toggle');
+  abcToggle.addEventListener('click', function () {
+    eliminatorOn = !eliminatorOn;
+    abcToggle.classList.toggle('on', eliminatorOn);
+    choicesEl.classList.toggle('eliminator-on', eliminatorOn);
+  });
+
+  var navOverlay      = document.getElementById('dx-nav-overlay');
+  var navModalTitle   = document.getElementById('dx-nav-modal-title');
+  var navClose        = document.getElementById('dx-nav-close');
+  var navReviewBtn    = document.getElementById('dx-nav-review-btn');
+  var progressBtn     = document.getElementById('dx-progress-btn');
+
+  function openNavModal() {
+    var secKey = activeSectionKeys[sectionIndex];
+    var bank = SECTION_BANKS[secKey];
+    var moduleLabel = sectionHasModules(secKey) ? (moduleStage === 'module1' ? 'Module 1' : 'Module 2') : 'Module 1';
+    navModalTitle.textContent = 'Section ' + (sectionIndex + 1) + ', ' + moduleLabel + ': ' + bank.label + ' Questions';
+    refreshSidebar();
+    navOverlay.classList.add('active');
+  }
+  function closeNavModal() { navOverlay.classList.remove('active'); }
+
+  // Single entry point for "jump to question N", used by the popup grid,
+  // the Check Your Work grid, and the review button — always closes
+  // whichever overlay is open and always leaves the Check Your Work panel,
+  // even when the target question is the one already loaded underneath it.
+  function jumpToQuestion(i) {
+    closeNavModal();
+    var wasChecking = dxMain.classList.contains('dx-checking');
+    dxMain.classList.remove('dx-checking');
+    if (i === current) { if (wasChecking) renderQuestion(); return; }
+    goTo(i);
+  }
+
+  progressBtn.addEventListener('click', openNavModal);
+  navClose.addEventListener('click', closeNavModal);
+  navOverlay.addEventListener('click', function (e) { if (e.target === navOverlay) closeNavModal(); });
+  // "Go to Review Page" means exactly that — it opens the same Check Your
+  // Work screen reached by finishing the last question, from wherever the
+  // student currently is in the module, matching Bluebook's own popup.
+  navReviewBtn.addEventListener('click', function () {
+    closeNavModal();
+    showCheckScreen();
   });
 
   function parseNumeric(str) {
@@ -1693,6 +1781,7 @@
 
     if (q.type === 'mc') {
       choicesEl.style.display = 'flex';
+      choicesEl.classList.toggle('eliminator-on', eliminatorOn);
       frRow.style.display = 'none';
       choicesEl.innerHTML = '';
       q.choices.forEach(function (choice, i) {
@@ -1723,9 +1812,9 @@
 
     backBtn.disabled = current === 0;
     nextBtn.disabled = answers[current] === null;
-    nextBtn.textContent = !isLastQuestionInSection() ? 'Next' : (dxMode === 'practice' ? 'Submit Module' : (isLastSection() ? 'Submit Diagnostic' : 'Next Section'));
+    nextBtn.textContent = !isLastQuestionInSection() ? 'Next' : 'Go to Review Page';
     progLabel.textContent = 'Question ' + (current + 1) + ' of ' + qs.length;
-    progFill.style.width = ((current / qs.length) * 100) + '%';
+    if (qnumTile) qnumTile.textContent = current + 1;
     jumpSelect.value = current;
     refreshMarkBtn();
     refreshSidebar();
@@ -1733,14 +1822,11 @@
   }
 
   function selectMcAnswer(i) {
+    // Selecting a choice only records it and enables Next — it does not
+    // advance on its own. The student must press Next (or Enter for a
+    // grid-in) to move on, matching the real digital SAT.
     answers[current] = i;
     renderQuestion();
-    // Auto-advance to the next question — but never auto-advance past the
-    // end of a section. On the last question the student must press the
-    // button ("Next Section" or "Submit Diagnostic").
-    if (!isLastQuestionInSection()) {
-      setTimeout(function () { goTo(current + 1); }, 420);
-    }
   }
 
   function recordFrAnswer() {
@@ -1752,14 +1838,14 @@
 
   function submitFrAnswer() {
     if (!recordFrAnswer()) return;
-    if (!isLastQuestionInSection()) {
-      goTo(current + 1);
-    } else {
-      renderQuestion(); // just enables the bottom button — doesn't advance on its own
-    }
+    renderQuestion(); // records the answer and enables Next — doesn't advance on its own
   }
-  frSubmit.addEventListener('click', submitFrAnswer);
-  frInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') submitFrAnswer(); });
+  frInput.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    submitFrAnswer();
+    if (!nextBtn.disabled) nextBtn.click(); // records the answer, then advances — same as pressing Enter on an MC question
+  });
   frInput.addEventListener('input', function () {
     nextBtn.disabled = frInput.value.trim() === '';
   });
@@ -1781,8 +1867,13 @@
     if (refOverlay.classList.contains('active')) return; // don't let answer shortcuts fire under the Reference modal
     var tag = (document.activeElement && document.activeElement.tagName) || '';
     if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+    if (dxMain.classList.contains('dx-checking')) {
+      if (e.key === 'Enter') { e.preventDefault(); checkSubmitBtn.click(); }
+      return;
+    }
     if (e.key === 'ArrowLeft') { e.preventDefault(); goTo(current - 1); }
     else if (e.key === 'ArrowRight') { e.preventDefault(); if (answers[current] !== null) goTo(current + 1); }
+    else if (e.key === 'Enter') { e.preventDefault(); if (!nextBtn.disabled) nextBtn.click(); }
     else {
       var letterIdx = ['a', 'b', 'c', 'd'].indexOf(e.key.toLowerCase());
       if (letterIdx !== -1 && activeQuestions()[current].type === 'mc') { e.preventDefault(); selectMcAnswer(letterIdx); }
@@ -1792,9 +1883,50 @@
     if (activeQuestions()[current].type === 'fr') { recordFrAnswer(); }
     if (answers[current] === null) return;
     if (!isLastQuestionInSection()) { goTo(current + 1); }
-    else if (dxMode === 'practice') { finishPtModule(); }
-    else if (isLastSection()) { finishDiagnostic(); }
-    else { advanceToNextSection(); }
+    else { showCheckScreen(); }
+  });
+
+  /* ═══ CHECK YOUR WORK — shown instead of submitting directly once the
+     last question of a module is answered, so there's always a final
+     full-module review pass, matching the real digital SAT. ═══ */
+  var dxMain          = document.getElementById('dx-main');
+  var checkPanel       = document.getElementById('dx-check-panel');
+  var checkGrid         = document.getElementById('dx-check-grid');
+  var checkTitle       = document.getElementById('dx-check-title');
+  var checkSubmitBtn = document.getElementById('dx-check-submit');
+
+  function buildCheckGrid() {
+    var qs = activeQuestions();
+    checkGrid.innerHTML = '';
+    qs.forEach(function (q, i) {
+      var el = document.createElement('div');
+      el.className = 'dx-qnum';
+      el.textContent = i + 1;
+      el.classList.toggle('answered', answers[i] !== null);
+      el.classList.toggle('marked', !!marked[i]);
+      el.addEventListener('click', function () { jumpToQuestion(i); });
+      checkGrid.appendChild(el);
+    });
+  }
+  // "Submit Module" / "Next Section" / "Submit Diagnostic" — what actually
+  // submitting from the Check Your Work screen will do next.
+  function computeSubmitLabel() {
+    var secKey = activeSectionKeys[sectionIndex];
+    return (sectionHasModules(secKey) && moduleStage === 'module1') ? 'Submit Module' : (isLastSection() ? 'Submit Diagnostic' : 'Next Section');
+  }
+  function showCheckScreen() {
+    var secKey = activeSectionKeys[sectionIndex];
+    var bank = SECTION_BANKS[secKey];
+    var moduleLabel = sectionHasModules(secKey) ? (moduleStage === 'module1' ? 'Module 1' : 'Module 2') : 'Module 1';
+    checkTitle.textContent = 'Section ' + (sectionIndex + 1) + ', ' + moduleLabel + ': ' + bank.label + ' Questions';
+    checkSubmitBtn.textContent = computeSubmitLabel();
+    buildCheckGrid();
+    dxMain.classList.add('dx-checking');
+    saveState();
+  }
+  checkSubmitBtn.addEventListener('click', function () {
+    dxMain.classList.remove('dx-checking');
+    finishCurrentModule();
   });
 
   function isCorrect(q, given) {
@@ -1814,7 +1946,6 @@
     nextBtn.disabled = true;
     backBtn.disabled = true;
 
-    progFill.style.width = '100%';
     progLabel.textContent = 'Complete';
 
     completedSections.push({ key: activeSectionKeys[sectionIndex], label: SECTION_BANKS[activeSectionKeys[sectionIndex]].label, answers: canonical(answers), marked: canonical(marked) });
@@ -1830,7 +1961,7 @@
     var sectionResults = []; // [{ label, correct, total }] — feeds the visual score report
 
     completedSections.forEach(function (sec) {
-      var qs = SECTION_BANKS[sec.key].questions;
+      var qs = sectionQuestions(SECTION_BANKS[sec.key], sec.module2Variant);
       var secCorrect = 0;
       lines.push('');
       lines.push(sec.label.toUpperCase() + ':');
@@ -1896,7 +2027,7 @@
     var payload = {
       n: currentStudent.name, k: currentStudent.key, t: testChoice,
       dt: new Date().toISOString().slice(0, 10),
-      s: completedSections.map(function (sec) { return { k: sec.key, a: sec.answers, m: (sec.marked || []).map(function (x) { return x ? 1 : 0; } ) }; })
+      s: completedSections.map(function (sec) { return { k: sec.key, a: sec.answers, m: (sec.marked || []).map(function (x) { return x ? 1 : 0; } ), v: sec.module2Variant || null }; })
     };
     var reportLink = '';
     try {
@@ -1931,42 +2062,6 @@
   /* ═══ RESTORE ON LOAD ═══
      If they refreshed or navigated back with a saved key, pick up right
      where they left off instead of dropping them at the key screen. */
-  // Shared by both restore branches above (diagnostic section / practice
-  // module) — at this point activeSectionKeys/sectionIndex/dxMode are
-  // already set correctly by the caller; this just does the actual
-  // question-state restore, identically either way.
-  function restoreDxScreenQuestionState(state) {
-    var bank = SECTION_BANKS[activeSectionKeys[sectionIndex]].questions;
-    qOrder = (Array.isArray(state.qOrder) && state.qOrder.length === bank.length) ? state.qOrder : shuffledOrder(bank.length);
-    currentQs = qOrder.map(function (i) { return bank[i]; });
-    var qs = currentQs;
-    if (Array.isArray(state.answers) && state.answers.length === qs.length) {
-      answers = state.answers;
-      marked = (Array.isArray(state.marked) && state.marked.length === qs.length) ? state.marked : new Array(qs.length).fill(false);
-      elims = (Array.isArray(state.elims) && state.elims.length === qs.length) ? state.elims : new Array(qs.length).fill(null).map(function () { return []; });
-      current = Math.min(Math.max(state.current || 0, 0), qs.length - 1);
-      document.getElementById('dx-student-label').textContent = currentStudent.name;
-      document.getElementById('dx-brand-label').textContent = dxMode === 'practice'
-        ? (ptTest.title + ' — ' + PT_SECTION_LABELS[ptSection] + ' — ' + ptModuleLabel())
-        : (testChoice + ' Diagnostic — ' + SECTION_BANKS[activeSectionKeys[sectionIndex]].label);
-      buildSidebar();
-      renderQuestion();
-      // Resume the timer BEFORE show() — show() calls saveState(), and
-      // sectionTimerEndsAt is still null at that point otherwise, which
-      // would persist a null timer and silently break resume on a second
-      // refresh (only reveals itself one refresh later, easy to miss).
-      if (typeof state.sectionTimerEndsAt === 'number' && state.sectionTimerEndsAt - Date.now() > 0) {
-        resumeSectionTimer(state.sectionTimerEndsAt);
-      }
-      show('dx-screen');
-      if (typeof state.sectionTimerEndsAt === 'number' && state.sectionTimerEndsAt - Date.now() <= 0) {
-        autoSubmitSection(); // time ran out while they were away — submit now
-      }
-    } else {
-      show('screen-menu');
-    }
-  }
-
   (function restoreState() {
     try {
       var raw = localStorage.getItem(STORAGE_KEY);
@@ -1978,45 +2073,57 @@
       document.getElementById('menu-greeting').textContent = 'Hey ' + currentStudent.name.split(' ')[0] + '.';
       loadNextSession();
 
-      if (state.screen === 'dx-screen' && state.dxMode === 'practice' && state.ptTestId) {
-        // Practice-test resume — reconstruct the pt-module pseudo-section
-        // exactly like ptGotoModuleIntro() does, then fall into the same
-        // restore mechanics the diagnostic branch below uses.
-        ptTest = (window.SAT_PRACTICE_TESTS || []).filter(function (t) { return t.id === state.ptTestId; })[0];
-        if (!ptTest) { show('screen-menu'); return; }
-        dxMode = 'practice';
-        ptSection = state.ptSection || 'readingWriting';
-        ptStage = state.ptStage || 'module1';
-        ptVariant = state.ptVariant || null;
-        ptCompleted = Array.isArray(state.ptCompleted) ? state.ptCompleted : [];
-        window.PRACTICE_MODULE_TIME_LIMITS_ACTIVE = typeof state.ptModuleMinutes === 'number' ? state.ptModuleMinutes : (window.PRACTICE_MODULE_TIME_LIMITS || {})[ptSection];
-        SECTION_BANKS['pt-module'] = { label: PT_SECTION_LABELS[ptSection], questions: ptModuleQuestions() };
-        activeSectionKeys = ['pt-module'];
-        sectionIndex = 0;
-        restoreDxScreenQuestionState(state);
-      } else if (state.screen === 'dx-screen' && state.testChoice && Array.isArray(state.activeSectionKeys) && state.activeSectionKeys.length) {
-        dxMode = 'diagnostic';
+      if (state.screen === 'dx-screen' && state.testChoice && Array.isArray(state.activeSectionKeys) && state.activeSectionKeys.length) {
         testChoice = state.testChoice;
         activeSectionKeys = state.activeSectionKeys;
         completedSections = Array.isArray(state.completedSections) ? state.completedSections : [];
         sectionIndex = typeof state.sectionIndex === 'number' ? state.sectionIndex : 0;
-        restoreDxScreenQuestionState(state);
-      } else if (state.screen === 'screen-pt-break' && state.ptTestId) {
-        ptTest = (window.SAT_PRACTICE_TESTS || []).filter(function (t) { return t.id === state.ptTestId; })[0];
-        if (!ptTest) { show('screen-menu'); return; }
-        dxMode = 'practice';
-        ptSection = state.ptSection || 'math';
-        ptStage = state.ptStage || 'module1';
-        ptVariant = state.ptVariant || null;
-        ptCompleted = Array.isArray(state.ptCompleted) ? state.ptCompleted : [];
-        document.getElementById('pt-break-kicker').textContent = ptTest.title;
-        show('screen-pt-break');
+        moduleStage = state.moduleStage === 'module2' ? 'module2' : 'module1';
+        module2Variant = state.module2Variant || null;
+        module1Buffer = state.module1Buffer || null;
+
+        var secKey = activeSectionKeys[sectionIndex];
+        var bank = SECTION_BANKS[secKey];
+        var qsBank = moduleQuestions(bank, moduleStage, module2Variant);
+        qOrder = (Array.isArray(state.qOrder) && state.qOrder.length === qsBank.length) ? state.qOrder : shuffledOrder(qsBank);
+        currentQs = qOrder.map(function (i) { return qsBank[i]; });
+        var qs = currentQs;
+        if (Array.isArray(state.answers) && state.answers.length === qs.length) {
+          answers = state.answers;
+          marked = (Array.isArray(state.marked) && state.marked.length === qs.length) ? state.marked : new Array(qs.length).fill(false);
+          elims = (Array.isArray(state.elims) && state.elims.length === qs.length) ? state.elims : new Array(qs.length).fill(null).map(function () { return []; });
+          current = Math.min(Math.max(state.current || 0, 0), qs.length - 1);
+          document.getElementById('dx-student-label').textContent = currentStudent.name;
+          var moduleLabelSuffix = sectionHasModules(secKey) ? (' — ' + (moduleStage === 'module1' ? 'Module 1' : 'Module 2')) : '';
+          document.getElementById('dx-brand-label').textContent = testChoice + ' Diagnostic — ' + bank.label + moduleLabelSuffix;
+          document.getElementById('dx-notice-text').textContent = 'THIS IS A ' + testChoice + ' DIAGNOSTIC';
+          buildSidebar();
+          renderQuestion();
+          // Resume the timer BEFORE show() — show() calls saveState(), and
+          // sectionTimerEndsAt is still null at that point otherwise, which
+          // would persist a null timer and silently break resume on a
+          // second refresh (only reveals itself one refresh later, easy to
+          // miss).
+          if (typeof state.sectionTimerEndsAt === 'number' && state.sectionTimerEndsAt - Date.now() > 0) {
+            resumeSectionTimer(state.sectionTimerEndsAt);
+          }
+          show('dx-screen');
+          if (typeof state.sectionTimerEndsAt === 'number' && state.sectionTimerEndsAt - Date.now() <= 0) {
+            autoSubmitSection(); // time ran out while they were away — submit now
+          }
+        } else {
+          show('screen-menu');
+        }
+      } else if (state.screen === 'dx-break-screen' && state.testChoice && Array.isArray(state.activeSectionKeys) && state.activeSectionKeys.length) {
+        testChoice = state.testChoice;
+        activeSectionKeys = state.activeSectionKeys;
+        completedSections = Array.isArray(state.completedSections) ? state.completedSections : [];
+        sectionIndex = typeof state.sectionIndex === 'number' ? state.sectionIndex : 0;
+        resumeBreak(typeof state.breakEndsAt === 'number' ? state.breakEndsAt : Date.now() + BREAK_SECONDS * 1000);
+        show('dx-break-screen');
       } else if (state.screen === 'screen-resources') {
         renderResources(state.resourceKind || 'files');
         show('screen-resources');
-      } else if (state.screen === 'screen-tests') {
-        renderTests();
-        show('screen-tests');
       } else if (state.screen === 'screen-test-choice' || state.screen === 'screen-menu') {
         show(state.screen);
       } else {
