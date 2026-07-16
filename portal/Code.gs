@@ -22,7 +22,11 @@
 
    SETUP — see the deployment guide for full steps. Short version:
      1. Create a Google Sheet with a tab named "Students" and headers:
-          Key | Name | DriveFolderUrl | CollegePrepFolderUrl | GrantedEmail | GrantedAt
+          Key | Name | DriveFolderUrl | CollegePrepFolderUrl | GrantedEmail | GrantedAt | SATTakenAt | ACTTakenAt
+        (SATTakenAt/ACTTakenAt track the one-real-diagnostic-per-test-type
+        feature — leave both blank for everyone; they get stamped
+        automatically the first time each student finishes that test's
+        diagnostic. A blank cell means "never taken.")
      2. Paste this file into a new Apps Script project (script.google.com).
      3. Set SHEET_ID below to that Sheet's ID (from its URL).
      4. Deploy > New deployment > Web app.
@@ -45,6 +49,8 @@ function doPost(e) {
       out = handleAuth(body.key, body.email);
     } else if (body.action === 'nextSession') {
       out = handleNextSession(body.name, !!body.debug);
+    } else if (body.action === 'markDiagnosticTaken') {
+      out = handleMarkDiagnosticTaken(body.key, body.test);
     } else {
       out = { ok: false, error: 'unknown_action' };
     }
@@ -117,7 +123,7 @@ function handleAuth(rawKey, rawEmail) {
   if (!grantedEmail) {
     // First time this key has ever been used.
     if (!email) {
-      return { ok: true, name: row.Name, needsEmail: true };
+      return { ok: true, name: row.Name, needsEmail: true, satTaken: !!row.SATTakenAt, actTaken: !!row.ACTTakenAt };
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return { ok: false, error: 'bad_email' };
@@ -140,8 +146,43 @@ function handleAuth(rawKey, rawEmail) {
     needsEmail: false,
     driveFolderUrl: row.DriveFolderUrl || '',
     collegePrepFolderUrl: row.CollegePrepFolderUrl || '',
+    satTaken: !!row.SATTakenAt,
+    actTaken: !!row.ACTTakenAt,
     tests: []
   };
+}
+
+/* =========================================================================
+   ONE REAL DIAGNOSTIC PER TEST TYPE
+   -------------------------------------------------------------------------
+   The portal calls this right after a student finishes a diagnostic for
+   the first time for a given test type (SAT or ACT) — see index.html's
+   finishDiagnostic(). It stamps SATTakenAt/ACTTakenAt so that on any later
+   attempt at the SAME test type, handleAuth's satTaken/actTaken flags tell
+   the portal to skip emailing Luca and show practice-only copy instead —
+   a student can't keep re-submitting the same diagnostic hoping for a
+   better score to land in Luca's inbox. Taking the OTHER test type for the
+   first time is unaffected and still emails normally.
+
+   Deliberately idempotent (only writes if the cell is currently blank) so
+   it's safe to call more than once for the same key/test without losing
+   the original completion date. ========================================= */
+function handleMarkDiagnosticTaken(rawKey, rawTest) {
+  if (!rawKey) return { ok: false, error: 'missing_key' };
+  var key = String(rawKey).trim().toUpperCase();
+  var test = String(rawTest || '').trim().toUpperCase();
+  if (test !== 'SAT' && test !== 'ACT') return { ok: false, error: 'bad_test' };
+
+  var sheet = getSheet_();
+  var row = findRow_(sheet, key);
+  if (!row) return { ok: false, error: 'bad_key' };
+
+  var col = test + 'TakenAt';
+  var colIdx = row._headers.indexOf(col);
+  if (colIdx === -1) return { ok: false, error: 'missing_column' };
+
+  if (!row[col]) sheet.getRange(row._rowIndex, colIdx + 1).setValue(new Date());
+  return { ok: true };
 }
 
 /* =========================================================================
