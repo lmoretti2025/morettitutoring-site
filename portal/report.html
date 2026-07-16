@@ -229,16 +229,28 @@
      data itself shifting under you. This runs through the exact same
      rendering code below as a real report, so any layout/content change
      made here is immediately visible in both. */
+  // A SAT section (reading-writing/math) is real, modular, and adaptive —
+  // its bank has module1/module2Easier/module2Harder instead of a flat
+  // "questions" array. This reconstructs the exact ordered list a student
+  // saw: Module 1 + whichever Module 2 variant they were routed to (or
+  // just module1, for ACT's single, non-adaptive module). Keyed the same
+  // way index.html's own sectionQuestions() helper is, since both sides
+  // must agree on ordering for `answers[i]` to line up with `qs[i]`.
+  function sectionQuestions(bank, variant) {
+    return bank.module2Easier ? bank.module1.concat(bank['module2' + (variant || 'Easier')]) : bank.module1;
+  }
+
   function buildDemoData() {
     var testChoice = /[?&]test=SAT\b/i.test(location.search) ? 'SAT' : 'ACT';
     var order = (window.TEST_FORMATS && window.TEST_FORMATS[testChoice] && window.TEST_FORMATS[testChoice].order) || [];
-    var sectionKeys = order.filter(function (k) { return window.SECTION_BANKS[k] && window.SECTION_BANKS[k].questions.length; });
+    var sectionKeys = order.filter(function (k) { return window.SECTION_BANKS[k] && window.SECTION_BANKS[k].module1.length; });
     var seed = 42;
     function rand() { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return (seed % 1000) / 1000; }
     var weakSkillBySection = { 'english': 'Comma Usage', 'act-math': 'Quadratics', 'math': 'Quadratics', 'reading': 'Integration of Knowledge & Ideas', 'reading-writing': 'Command of Evidence' };
 
     var s = sectionKeys.map(function (key) {
-      var qs = window.SECTION_BANKS[key].questions;
+      var variant = rand() < 0.5 ? 'Easier' : 'Harder';
+      var qs = sectionQuestions(window.SECTION_BANKS[key], variant);
       var answers = [], marked = [];
       var weakSkill = weakSkillBySection[key];
       qs.forEach(function (q) {
@@ -255,7 +267,7 @@
         answers.push(given);
         marked.push(rand() < 0.12);
       });
-      return { k: key, a: answers, m: marked };
+      return { k: key, a: answers, m: marked, v: variant };
     });
 
     return { n: 'Demo Student', k: 'DEMO', t: testChoice, dt: new Date().toISOString().slice(0, 10), s: s };
@@ -296,7 +308,7 @@
   data.s.forEach(function (sec) {
     var bank = window.SECTION_BANKS[sec.k];
     if (!bank) return;
-    var qs = bank.questions, c = 0, rows = [];
+    var qs = sectionQuestions(bank, sec.v), c = 0, rows = [];
     var secDomains = {}; // this section's own domain/skill breakdown — kept
                           // separate from the global domains{}/skills{} so
                           // the report can show "what's weak within THIS
@@ -309,12 +321,22 @@
     // skill percentage — it points at a specific trap-answer habit rather
     // than a vague topic weakness.
     var secDistractors = {}, secMissedMc = 0;
+    // Per-difficulty tally (easy/medium/hard) plus a module1/module2 split —
+    // both needed by the IRT-weighted SAT scoring model below. moduleSplit
+    // is just bank.module1.length; on non-adaptive ACT sections that equals
+    // qs.length, so "module2" naturally ends up empty and c1 === c.
+    var diff = { easy: { c: 0, t: 0 }, medium: { c: 0, t: 0 }, hard: { c: 0, t: 0 } };
+    var moduleSplit = bank.module2Easier ? bank.module1.length : qs.length;
+    var c1 = 0, t1 = 0, c2 = 0, t2 = 0;
     qs.forEach(function (q, i) {
       var given = sec.a[i];
       var ok = isCorrect(q, given);
       var wasMarked = sec.m && sec.m[i];
       if (ok) { c++; totalC++; }
       totalQ++;
+      var dtag = diff[q.difficulty];
+      if (dtag) { dtag.t++; if (ok) dtag.c++; }
+      if (i < moduleSplit) { t1++; if (ok) c1++; } else { t2++; if (ok) c2++; }
       if (given === null || given === undefined) skipped++;
       if (wasMarked) { markedT++; if (ok) markedC++; }
       var dom = q.domain, sk = q.skill || q.domain;
@@ -336,7 +358,7 @@
       var gTxt = (given === null || given === undefined) ? '—' : (q.type === 'mc' ? LETTERS[given] : (given.raw || String(given)));
       rows.push({ n: i + 1, dom: dom, sk: sk, given: gTxt, ok: ok, marked: !!wasMarked });
     });
-    sections.push({ key: sec.k, label: bank.label.replace(' (optional on the real ACT)', ''), c: c, t: qs.length, rows: rows, domains: secDomains, distractors: secDistractors, missedMc: secMissedMc });
+    sections.push({ key: sec.k, label: bank.label.replace(' (optional on the real ACT)', ''), c: c, t: qs.length, rows: rows, domains: secDomains, distractors: secDistractors, missedMc: secMissedMc, diff: diff, c1: c1, t1: t1, c2: c2, t2: t2, variant: sec.v });
   });
 
   var pct = totalQ ? Math.round(totalC / totalQ * 100) : 0;
@@ -451,21 +473,75 @@
   }
   function roundToTen(n) { return Math.round(n / 10) * 10; }
 
+  /* ═══ SAT IRT-WEIGHTED SCORING MODEL ═══
+     The digital SAT is adaptive (Module 1 routes to an easier or harder
+     Module 2) and scored with item-response-theory weighting, where a
+     correct hard question is worth more than a correct easy one and a
+     missed easy question is a stronger signal than a missed hard one.
+     Neither the real IRT item parameters nor the official raw-to-scaled
+     conversion table are published, so this reproduces the *shape* of
+     that model closely enough for a diagnostic estimate:
+
+     1. Raw % correct (across both modules) still picks a band of the old
+        flat SAT_CURVE — but instead of reading one point off it, satBand()
+        widens that point into a [L, U] range (the "static conversion
+        table" the real test also just approximates with).
+     2. A weighted-vs-flat performance ratio (easy/medium/hard weighted
+        1x/2x/3x) measures whether the student's hits were concentrated in
+        the hard questions (pushes toward U) or their misses were
+        concentrated in the easy questions (pulls toward L) — a tilt of
+        exactly 0 (performance proportional across difficulties) reproduces
+        the old flat-curve estimate, right at the band's center.
+     3. Routing to the Easier Module 2 caps the section at an approximate
+        ceiling — on the real test, that path structurally can't reach a
+        top score no matter how well the student does on it. */
+  var SAT_EASIER_PATH_CEILING = 650; // approximate — real ceiling varies by test form
+  function satBand(pct) {
+    var center = scaleFromPct(pct, SAT_CURVE);
+    var halfWidth = Math.round(20 + 20 * Math.sin(Math.PI * pct / 100));
+    return { L: Math.max(200, center - halfWidth), U: Math.min(800, center + halfWidth) };
+  }
+  function satSectionScore(sec) {
+    if (!sec || !sec.t) return null;
+    var band = satBand(sec.c / sec.t * 100);
+    var d = sec.diff;
+    var weightedCorrect = d.easy.c * 1 + d.medium.c * 2 + d.hard.c * 3;
+    var weightedTotal = d.easy.t * 1 + d.medium.t * 2 + d.hard.t * 3;
+    var weightedRate = weightedTotal ? weightedCorrect / weightedTotal : (sec.c / sec.t);
+    var flatRate = sec.c / sec.t;
+    var tilt = Math.max(-1, Math.min(1, (weightedRate - flatRate) * 2.5));
+    var position = Math.max(0, Math.min(1, 0.5 + tilt));
+    var score = Math.round(band.L + position * (band.U - band.L));
+    if (sec.variant === 'Easier') score = Math.min(score, SAT_EASIER_PATH_CEILING);
+    return roundToTen(score);
+  }
+
   var tilesEl = document.getElementById('score-tiles');
   var scoreCaption = document.getElementById('score-caption');
   if (data.t === 'SAT') {
     var rw = sections.filter(function (s) { return s.key === 'reading-writing'; })[0];
     var mathSec = sections.filter(function (s) { return s.key === 'math'; })[0];
-    var rwScaled = rw ? roundToTen(scaleFromPct(rw.c / rw.t * 100, SAT_CURVE)) : null;
-    var mathScaled = mathSec ? roundToTen(scaleFromPct(mathSec.c / mathSec.t * 100, SAT_CURVE)) : null;
+    var rwScaled = satSectionScore(rw);
+    var mathScaled = satSectionScore(mathSec);
     var composite = (rwScaled !== null && mathScaled !== null) ? rwScaled + mathScaled : null;
     tilesEl.appendChild(scoreTile('Composite (400–1600)', totalC, totalQ, composite, true));
     if (rw) tilesEl.appendChild(scoreTile('Reading & Writing', rw.c, rw.t, rwScaled, false));
     if (mathSec) tilesEl.appendChild(scoreTile('Math', mathSec.c, mathSec.t, mathScaled, false));
-    scoreCaption.textContent = 'Rings show raw percent correct on this diagnostic. Scores below them are estimated from a typical official-practice-test curve; the real SAT curve varies by test and isn\'t published in advance.';
+    var routedEasier = [rw, mathSec].some(function (s) { return s && s.variant === 'Easier'; });
+    scoreCaption.textContent = 'Rings show raw percent correct on this diagnostic. Scores below them are IRT-weighted estimates that reward correct hard questions and penalize missed easy ones, banded from a typical official-practice-test curve' + (routedEasier ? ' and capped where routing sent a section to the easier Module 2' : '') + '; the real SAT curve and item weights vary by test and aren\'t published in advance.';
   } else if (data.t === 'ACT') {
     var scaledScores = sections.map(function (s) { return scaleFromPct(s.c / s.t * 100, ACT_CURVE); });
-    var actComposite = scaledScores.length ? Math.round(scaledScores.reduce(function (a, b) { return a + b; }, 0) / scaledScores.length) : null;
+    // The ACT Composite is the average of English, Math, and Reading only —
+    // Science is excluded (it's optional on the real ACT and not part of
+    // the Composite calculation) even if a Science section was taken here.
+    // Math.round() already rounds a .5 fraction up, matching the ACT's
+    // stated rounding rule.
+    var compositeKeys = { english: true, 'act-math': true, reading: true };
+    var compositeScores = sections
+      .map(function (s, i) { return { key: s.key, score: scaledScores[i] }; })
+      .filter(function (s) { return compositeKeys[s.key]; })
+      .map(function (s) { return s.score; });
+    var actComposite = compositeScores.length ? Math.round(compositeScores.reduce(function (a, b) { return a + b; }, 0) / compositeScores.length) : null;
     tilesEl.appendChild(scoreTile('Composite (1–36)', totalC, totalQ, actComposite, true));
     sections.forEach(function (s, i) { tilesEl.appendChild(scoreTile(s.label, s.c, s.t, scaledScores[i], false)); });
     scoreCaption.textContent = 'Rings show raw percent correct on this diagnostic. Scores below them are estimated from a typical official-practice-test curve; the real ACT curve varies by test and isn\'t published in advance.';
