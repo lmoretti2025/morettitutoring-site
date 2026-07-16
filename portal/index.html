@@ -126,6 +126,16 @@
   .intro-reference-link { display: inline-flex; align-items: center; gap: 0.4rem; font-family: var(--hel); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dx-blue); text-decoration: none; margin-bottom: 1.75rem; border-bottom: 1px solid var(--dx-blue); padding-bottom: 0.15rem; }
   .intro-reference-link:hover { opacity: 0.75; }
 
+  /* ═══ SCREEN 3d: TEST OVERVIEW ═══ */
+  .overview-sections { border: 1px solid var(--border); margin-bottom: 1.5rem; }
+  .overview-section-row { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; padding: 1rem 1.3rem; border-bottom: 1px solid var(--border); }
+  .overview-section-row:last-child { border-bottom: none; }
+  .overview-section-name { font-family: var(--display); font-weight: 700; font-size: 0.95rem; color: var(--text); }
+  .overview-section-meta { font-family: var(--hel); font-size: 0.72rem; color: var(--mid); white-space: nowrap; }
+  .overview-break-row { display: flex; align-items: center; gap: 0.6rem; padding: 0.7rem 1.3rem; background: var(--bg); font-family: var(--hel); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--mid); border-bottom: 1px solid var(--border); }
+  .overview-note { font-size: 0.82rem; color: var(--mid); line-height: 1.75; text-align: left; margin-bottom: 1.75rem; }
+  .overview-retake-notice { font-size: 0.82rem; color: var(--text); line-height: 1.7; text-align: left; background: rgba(201,168,76,0.14); border: 1px solid var(--gold); padding: 0.9rem 1.1rem; margin-bottom: 1.5rem; }
+
   /* ═══ REFERENCE SHEET MODAL (accessible from intro + mid-test) ═══ */
   .ref-overlay { display: none; position: fixed; inset: 0; background: rgba(17,17,17,0.55); z-index: 600; align-items: center; justify-content: center; padding: 2rem 1.25rem; }
   .ref-overlay.active { display: flex; }
@@ -175,7 +185,7 @@
   .dx-passage-gutter .dx-line-num.active-ref { color: var(--red); background: rgba(178,34,52,0.12); }
   .dx-passage-body { font-family: var(--serif); font-size: 0.98rem; line-height: 1.85; color: var(--text); margin-left: 2.1rem; }
   .dx-passage-body p { margin-bottom: 1.1rem; }
-  .dx-passage-body .dx-ref-num { display: inline-block; width: 0; height: 0; overflow: hidden; }
+  .dx-passage-body .dx-ref-num { display: inline-block; width: 0; height: 0; overflow: hidden; vertical-align: text-top; }
   .dx-passage-body .dx-ref-mark { text-decoration: underline; text-decoration-color: var(--red); text-decoration-thickness: 2px; text-underline-offset: 2px; }
   .dx-passage-body .dx-ref-mark.active-ref { background: rgba(178,34,52,0.12); border-radius: 2px; }
   .dx-passage-body { cursor: text; }
@@ -322,6 +332,8 @@
   .done-icon { font-size: 2.5rem; margin-bottom: 1.25rem; text-align: center; }
   .done-status { font-size: 0.78rem; text-align: center; color: var(--gold); margin-top: 1.5rem; line-height: 1.7; }
   .done-status.err { color: var(--red); }
+  .done-report-link { font-size: 0.85rem; text-align: center; color: var(--mid); margin-top: 0.9rem; line-height: 1.7; }
+  .done-report-link a { color: var(--red); font-weight: 700; text-decoration: underline; }
   .done-wrap { width: 100%; max-width: 760px; display: flex; flex-direction: column; align-items: center; gap: 2.5rem; }
 
   /* ═══ SCORE REPORT — printable, parent-facing diagnostic breakdown ═══ */
@@ -497,6 +509,21 @@
       <button class="key-btn" id="choose-act" type="button" style="background:var(--text);">ACT</button>
     </div>
     <a href="#" class="menu-back-link" id="test-choice-back">&larr; Back to menu</a>
+  </div>
+</div>
+
+<!-- ═══ SCREEN 3d — TEST OVERVIEW (shown once, after choosing SAT/ACT,
+     before the first section's own intro) ═══ -->
+<div class="screen" id="screen-test-overview">
+  <div class="panel-wide">
+    <div class="kicker" id="overview-kicker">SAT Diagnostic</div>
+    <h1 class="panel-hed" id="overview-hed">Here's what to expect.</h1>
+    <p class="panel-sub" id="overview-sub">The sections, order, and timing below match the real test exactly.</p>
+    <div class="overview-retake-notice" id="overview-retake-notice" style="display:none;"></div>
+    <div class="overview-sections" id="overview-sections"></div>
+    <p class="overview-note" id="overview-note"></p>
+    <button class="key-btn" id="overview-start">Begin Diagnostic</button>
+    <a href="#" class="menu-back-link" id="overview-back">&larr; Back to menu</a>
   </div>
 </div>
 
@@ -698,7 +725,7 @@
           <h1 class="dx-qtext" id="dx-qtext"></h1>
           <div class="dx-choices" id="dx-choices" style="display:none;"></div>
           <div class="dx-fr-row" id="dx-fr-row" style="display:none;">
-            <input type="text" class="dx-fr-input" id="dx-fr-input" placeholder="Type your answer">
+            <input type="text" inputmode="decimal" class="dx-fr-input" id="dx-fr-input" placeholder="Type your answer">
           </div>
           <div class="dx-nav-row">
             <button class="dx-btn dx-btn-back" id="dx-back">Back</button>
@@ -784,6 +811,7 @@
       <h1 class="panel-hed">All set.</h1>
       <p class="panel-sub" id="done-message">Your results just went to Luca. He'll follow up with a plan built around exactly where you need it.</p>
       <p class="done-status" id="done-status"></p>
+      <p class="done-report-link" id="done-report-link" style="display:none;"></p>
       <a href="#" class="key-btn" id="done-return-link" style="display:block; text-align:center; text-decoration:none; margin-top:1rem;">Return to Portal</a>
     </div>
 
@@ -823,10 +851,19 @@
      If a student accidentally refreshes or navigates back mid-diagnostic,
      this restores exactly where they were instead of losing everything.
      currentStudent is saved in full here (not just the key) since the
-     roster no longer lives in this page for a restore to look back up. */
+     roster no longer lives in this page for a restore to look back up.
+
+     Deliberately sessionStorage, not localStorage: sessionStorage survives
+     an accidental refresh/back-navigation within the same tab (exactly the
+     case this exists for), but is wiped the moment the tab or browser
+     actually closes — so a student who closes out and comes back later (or
+     the next day) always lands back at a clean key-entry screen instead of
+     resuming a stale attempt and potentially resubmitting it. Deliberately
+     leaving via "Exit Portal" or "Log out" also calls clearState() itself,
+     so even a back button in the same tab won't resume after that. */
   function saveState() {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify({
         student: currentStudent,
         screen: activeScreenId,
         resourceKind: currentResourceKind,
@@ -848,7 +885,7 @@
     } catch (e) { /* private browsing / storage disabled — fail silently */ }
   }
   function clearState() {
-    try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+    try { sessionStorage.removeItem(STORAGE_KEY); } catch (e) {}
   }
 
   /* ═══ SCREEN ROUTING ═══ */
@@ -900,6 +937,21 @@
       .catch(function () { return { ok: false, error: 'network' }; });
   }
 
+  // Fire-and-forget: stamps SATTakenAt/ACTTakenAt on this key's row so any
+  // later attempt at the same test type is recognized as a practice
+  // retake (see finishDiagnostic() and showTestOverview()/
+  // alreadyTakenThisTestType()). No UI feedback either way — a failure
+  // here just means the next attempt at this test type emails Luca again
+  // too, which is a safe direction to fail in.
+  function markDiagnosticTaken(key, test) {
+    try {
+      fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'markDiagnosticTaken', key: key, test: test })
+      }).catch(function () {});
+    } catch (e) {}
+  }
+
   function authErrorMessage(err) {
     if (err === 'email_mismatch') return 'This key is already linked to a different email. Text Luca at (201) 275-2791 if that seems wrong.';
     if (err === 'bad_email') return "That doesn't look like a valid email — double-check it and try again.";
@@ -913,6 +965,8 @@
       name: data.name,
       driveFolderUrl: data.driveFolderUrl || '',
       collegePrepFolderUrl: data.collegePrepFolderUrl || '',
+      satTaken: !!data.satTaken,
+      actTaken: !!data.actTaken,
       tests: data.tests || []
     };
     document.getElementById('menu-greeting').textContent = 'Hey ' + currentStudent.name.split(' ')[0] + '.';
@@ -1058,8 +1112,21 @@
 
   /* Leaving the portal via the logo or "Exit Portal" — not just the menu's
      "Log out" — should also fully reset things, so coming back always asks
-     for the key again instead of resuming mid-diagnostic. */
-  function exitPortal() { clearState(); resetKeyScreen(); }
+     for the key again instead of resuming mid-diagnostic. If they're in the
+     middle of a diagnostic (or its break screen), confirm first — there's
+     no way back into this attempt once they leave, since re-entering the
+     portal never resumes progress anymore. */
+  var MID_DIAGNOSTIC_SCREENS = { 'dx-screen': true, 'dx-break-screen': true, 'screen-intro': true };
+  function exitPortal(e) {
+    if (MID_DIAGNOSTIC_SCREENS[activeScreenId]) {
+      if (!window.confirm('Are you sure? Your progress will be lost and you\'ll have to start from the beginning.')) {
+        if (e) e.preventDefault();
+        return;
+      }
+    }
+    clearState();
+    resetKeyScreen();
+  }
   var exitLinkIds = ['nav-logo-exit', 'nav-exit-link'];
   exitLinkIds.forEach(function (id) {
     var el = document.getElementById(id);
@@ -1224,6 +1291,12 @@
   var module2Variant = null;     // null | 'Easier' | 'Harder'
   var module1Buffer = null;      // { answers, marked } captured at the end of Module 1
   var MODULE2_ROUTING_THRESHOLD = 0.6;
+  // Real ACT day only has one break — after Math, before Reading. There's
+  // no break between English and Math. The digital SAT's only section
+  // transition (Reading & Writing -> Math) always gets one. Shared between
+  // finishCurrentModule() (to decide whether to actually show the break
+  // screen) and the test-overview screen (to describe it up front).
+  var NO_BREAK_AFTER = { 'english': true };
 
   function currentSectionKey() { return activeSectionKeys[sectionIndex]; }
   function currentBank() { return SECTION_BANKS[currentSectionKey()]; }
@@ -1402,34 +1475,19 @@
     unwrapHighlight(hit);
   });
 
-  // For a flat, independent-item pool (SAT R&W/Math, ACT Math), the order
-  // stays fixed — banks.js is already sorted easy-to-hard, and shuffling
-  // within that would undo the difficulty ramp. For a passage-grouped pool
-  // (ACT English/Reading/Science), each passage's own questions must stay
-  // in their banks.js order (they map to specific underlined portions /
-  // figures read in sequence), but which passage comes first, second, etc.
-  // should still vary between attempts — real test forms rotate passage
-  // order the same way. So: shuffle the passage BLOCKS, keep each block's
-  // internal order untouched.
+  // Despite the name, this doesn't shuffle anything — every section (flat
+  // item pools like SAT R&W/Math and ACT Math, and passage-grouped ones
+  // like ACT English/Reading) is presented in exactly the order it's
+  // written in banks.js. That order is a deliberate, hand-sequenced
+  // difficulty ramp — within a passage's questions and across which
+  // passage comes first — so randomizing any of it would undo that intent.
+  // Kept as a function (rather than inlined at the two call sites) since
+  // it's still the one place both index.html and report.html agree on how
+  // a section's flat question order is derived from its bank.
   function shuffledOrder(qsBank) {
-    var n = qsBank.length;
     var order = [];
-    for (var i = 0; i < n; i++) order.push(i);
-    if (!n || qsBank[0].passageId === undefined) return order;
-
-    var blocks = [];
-    var byId = {};
-    qsBank.forEach(function (q, i) {
-      if (!byId[q.passageId]) { byId[q.passageId] = { indices: [] }; blocks.push(byId[q.passageId]); }
-      byId[q.passageId].indices.push(i);
-    });
-    for (var b = blocks.length - 1; b > 0; b--) {
-      var j = Math.floor(Math.random() * (b + 1));
-      var tmp = blocks[b]; blocks[b] = blocks[j]; blocks[j] = tmp;
-    }
-    var result = [];
-    blocks.forEach(function (block) { result = result.concat(block.indices); });
-    return result;
+    for (var i = 0; i < qsBank.length; i++) order.push(i);
+    return order;
   }
   function canonical(arr) {
     var out = new Array(arr.length).fill(null);
@@ -1531,8 +1589,68 @@
     });
     completedSections = [];
     if (!activeSectionKeys.length) { show('screen-menu'); return; } // shouldn't happen — Math always has content
-    startSection(0);
+    showTestOverview();
   }
+
+  // One-time overview shown after choosing SAT/ACT and before the first
+  // section's own intro — states the full format (every section, question
+  // count, timing, and where the break falls) up front, built straight
+  // from SECTION_BANKS/SECTION_MODULE_TIME_LIMITS so it can't drift out of
+  // sync with the actual banks or timers.
+  // Has this key already completed a real (first-time, Luca-notified)
+  // attempt at the test type currently selected? Checked fresh from
+  // currentStudent (set at login from the backend's satTaken/actTaken
+  // flags) rather than cached, since it can change within one browser
+  // session if a student takes SAT, then comes back to try ACT.
+  function alreadyTakenThisTestType() {
+    return testChoice === 'SAT' ? !!(currentStudent && currentStudent.satTaken) : !!(currentStudent && currentStudent.actTaken);
+  }
+
+  function showTestOverview() {
+    document.getElementById('overview-kicker').textContent = testChoice + ' Diagnostic';
+    document.getElementById('overview-sub').textContent =
+      'The sections, order, and timing below match the real test exactly. Read this over, then begin when you\'re ready.';
+
+    var retakeEl = document.getElementById('overview-retake-notice');
+    if (alreadyTakenThisTestType()) {
+      retakeEl.style.display = 'block';
+      retakeEl.textContent = 'Heads up — you\'ve already completed a real ' + testChoice + ' diagnostic on this key. ' +
+        'This attempt is for your own practice: you\'ll still get your results at the end, but Luca won\'t be notified this time.';
+    } else {
+      retakeEl.style.display = 'none';
+      retakeEl.textContent = '';
+    }
+
+    var rowsHtml = '';
+    activeSectionKeys.forEach(function (key, i) {
+      var bank = SECTION_BANKS[key];
+      var hasTwoModules = sectionHasModules(key);
+      var perModuleMinutes = (window.SECTION_MODULE_TIME_LIMITS || {})[key] || 0;
+      var totalMinutes = hasTwoModules ? perModuleMinutes * 2 : perModuleMinutes;
+      var totalQuestions = hasTwoModules ? bank.module1.length + bank.module2Easier.length : bank.module1.length;
+      var label = bank.label.replace(' (optional on the real ACT)', '');
+      var moduleNote = hasTwoModules ? ' (2 modules)' : '';
+      rowsHtml += '<div class="overview-section-row">' +
+        '<span class="overview-section-name">' + (i + 1) + '. ' + label + moduleNote + '</span>' +
+        '<span class="overview-section-meta">' + totalQuestions + ' questions' + (totalMinutes ? ' — ' + totalMinutes + ' min' : '') + '</span>' +
+        '</div>';
+      var isLast = i === activeSectionKeys.length - 1;
+      if (!isLast && !NO_BREAK_AFTER[key]) {
+        rowsHtml += '<div class="overview-break-row">' + (BREAK_SECONDS / 60) + '-minute break</div>';
+      }
+    });
+    document.getElementById('overview-sections').innerHTML = rowsHtml;
+
+    document.getElementById('overview-note').innerHTML =
+      'Each section is timed like the real test, but there\'s no pressure here — this just tells Luca where to focus. ' +
+      'Most questions are multiple choice; a few ask you to type in a number (numbers only, no units). ' +
+      'You can jump between questions and flag any for review within a section, but once you submit a section you can\'t go back into it. ' +
+      'If you accidentally refresh the page, you\'ll pick up right where you left off. But if you close this tab or use Exit Portal partway through, that attempt is over — you\'ll need to start again from the beginning.';
+
+    show('screen-test-overview');
+  }
+  document.getElementById('overview-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-menu'); });
+  document.getElementById('overview-start').addEventListener('click', function () { startSection(0); });
 
   // Begins Module 1 of section `index` — fresh module state every time,
   // since Module 2 (if the section has one) is reached via
@@ -1661,10 +1779,6 @@
     module2Variant = null;
     module1Buffer = null;
 
-    // Real ACT day only has one break — after Math, before Reading. There's
-    // no break between English and Math. The digital SAT's only section
-    // transition (Reading & Writing -> Math) always gets one.
-    var NO_BREAK_AFTER = { 'english': true };
     if (isLastSection()) { finishDiagnostic(); }
     else if (NO_BREAK_AFTER[secKey]) { sectionIndex += 1; startSection(sectionIndex); }
     else { sectionIndex += 1; startBreak(); }
@@ -1847,6 +1961,19 @@
     if (!nextBtn.disabled) nextBtn.click(); // records the answer, then advances — same as pressing Enter on an MC question
   });
   frInput.addEventListener('input', function () {
+    // Grid-in answers are numeric only (a plain number, a decimal, a
+    // negative sign, or a simple a/b fraction) — strip anything else as the
+    // student types instead of letting units or stray words slip in and
+    // silently fail to grade.
+    var sel = frInput.selectionStart;
+    var before = frInput.value;
+    var cleaned = before.replace(/[^0-9.\-\/]/g, '');
+    if (cleaned !== before) {
+      frInput.value = cleaned;
+      var removedBeforeCursor = before.slice(0, sel).length - before.slice(0, sel).replace(/[^0-9.\-\/]/g, '').length;
+      var newPos = Math.max(0, sel - removedBeforeCursor);
+      frInput.setSelectionRange(newPos, newPos);
+    }
     nextBtn.disabled = frInput.value.trim() === '';
   });
 
@@ -2017,13 +2144,6 @@
     // estimate is only revealed on Luca's diagnostic report (report.html),
     // not to the student on this screen.
 
-    document.getElementById('done-message').textContent =
-      'Your results just went to Luca — no need to send anything yourself.';
-    var statusEl = document.getElementById('done-status');
-    statusEl.textContent = 'Sending your results…';
-    statusEl.classList.remove('err');
-    show('screen-done');
-
     var payload = {
       n: currentStudent.name, k: currentStudent.key, t: testChoice,
       dt: new Date().toISOString().slice(0, 10),
@@ -2032,7 +2152,44 @@
     var reportLink = '';
     try {
       reportLink = 'https://morettitutoring.com/portal/report.html#d=' + btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
-    } catch (e) { reportLink = '(link generation failed — raw data below)'; }
+    } catch (e) { reportLink = ''; }
+
+    // The student always sees their own report link, first attempt or
+    // practice retake alike — only whether Luca gets emailed depends on
+    // that distinction (checked below).
+    var reportLinkEl = document.getElementById('done-report-link');
+    if (reportLink) {
+      reportLinkEl.innerHTML = 'See your scores and analysis <a href="' + reportLink + '" target="_blank" rel="noopener">here</a>.';
+      reportLinkEl.style.display = 'block';
+    } else {
+      reportLinkEl.style.display = 'none';
+    }
+
+    var statusEl = document.getElementById('done-status');
+    statusEl.classList.remove('err');
+
+    var isRetake = alreadyTakenThisTestType();
+    if (isRetake) {
+      // Already has a real (Luca-notified) attempt at this test type on
+      // this key — this one's practice only. No email, no re-stamping
+      // (handleMarkDiagnosticTaken is idempotent anyway, but there's
+      // nothing to mark here since it was already set).
+      document.getElementById('done-message').textContent =
+        'Nice work practicing! This attempt wasn\'t sent to Luca — you already have a real ' + testChoice + ' diagnostic on file.';
+      statusEl.textContent = '';
+      show('screen-done');
+      return;
+    }
+
+    document.getElementById('done-message').textContent =
+      'Your results just went to Luca — no need to send anything yourself.';
+    statusEl.textContent = 'Sending your results…';
+    show('screen-done');
+
+    // First-ever real attempt at this test type on this key — stamp it now
+    // (before the email even resolves) so a duplicate submit-click or a
+    // network retry can't double-count it, then send Luca's notification.
+    markDiagnosticTaken(currentStudent.key, testChoice);
 
     if (!emailjsAvailable) {
       statusEl.textContent = 'Couldn\'t reach the email service from this browser. Please text Luca at (201) 275-2791 with your key (' + currentStudent.key + ') and score (' + totalCorrect + '/' + totalQuestions + ') so he can follow up.';
@@ -2059,12 +2216,16 @@
     }
   }
 
-  /* ═══ RESTORE ON LOAD ═══
-     If they refreshed or navigated back with a saved key, pick up right
-     where they left off instead of dropping them at the key screen. */
+  /* ═══ RESTORE ON LOAD — ACCIDENTAL REFRESH ONLY ═══
+     Reads from sessionStorage (see the comment on saveState() above), so
+     this only ever fires for an accidental refresh/back-navigation within
+     the same tab session. Deliberately leaving (closing the tab, or the
+     explicit "Exit Portal"/"Log out" actions, which call clearState()
+     themselves) means there's nothing here to restore, and the student
+     always lands back at a clean key-entry screen instead. */
   (function restoreState() {
     try {
-      var raw = localStorage.getItem(STORAGE_KEY);
+      var raw = sessionStorage.getItem(STORAGE_KEY);
       if (!raw) return;
       var state = JSON.parse(raw);
       if (!state || !state.student || !state.student.key) { clearState(); return; }
@@ -2124,7 +2285,7 @@
       } else if (state.screen === 'screen-resources') {
         renderResources(state.resourceKind || 'files');
         show('screen-resources');
-      } else if (state.screen === 'screen-test-choice' || state.screen === 'screen-menu') {
+      } else if (state.screen === 'screen-test-choice' || state.screen === 'screen-menu' || state.screen === 'screen-test-overview') {
         show(state.screen);
       } else {
         show('screen-menu'); // includes mid-section-break "screen-intro" — safest to restart from the menu
