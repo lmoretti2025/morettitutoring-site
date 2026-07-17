@@ -943,12 +943,29 @@
   // alreadyTakenThisTestType()). No UI feedback either way — a failure
   // here just means the next attempt at this test type emails Luca again
   // too, which is a safe direction to fail in.
-  function markDiagnosticTaken(key, test) {
+  function markDiagnosticTaken(key, test, attemptsLeft) {
+    if (attemptsLeft === undefined) attemptsLeft = 2; // one retry on top of the first try
     try {
+      // keepalive: true is the important part here — Apps Script calls are
+      // slow enough (cold-start latency of a few seconds isn't unusual)
+      // that a student closing the tab or navigating away right after
+      // finishing could otherwise cancel this request mid-flight before
+      // it ever reaches the server, silently leaving the sheet unstamped.
+      // keepalive tells the browser to let it finish in the background
+      // instead of aborting it on unload. The retry covers the other
+      // failure mode — a transient network blip — since this call has no
+      // UI to let the student retry it themselves.
       fetch(APPS_SCRIPT_URL, {
         method: 'POST',
+        keepalive: true,
         body: JSON.stringify({ action: 'markDiagnosticTaken', key: key, test: test })
-      }).catch(function () {});
+      }).then(function (res) { return res.json(); })
+        .then(function (data) {
+          if (!data || !data.ok) throw new Error('not ok');
+        })
+        .catch(function () {
+          if (attemptsLeft > 1) setTimeout(function () { markDiagnosticTaken(key, test, attemptsLeft - 1); }, 1500);
+        });
     } catch (e) {}
   }
 
@@ -2190,6 +2207,13 @@
     // (before the email even resolves) so a duplicate submit-click or a
     // network retry can't double-count it, then send Luca's notification.
     markDiagnosticTaken(currentStudent.key, testChoice);
+    // Also update the in-memory flag immediately — currentStudent.satTaken/
+    // actTaken is only ever set from the server at login, and "Return to
+    // Portal" just switches screens without re-authenticating. Without
+    // this, taking the same test type again later in this same browser
+    // session (no fresh key entry in between) would still look like a
+    // first attempt: no retake notice, and it'd try to email Luca again.
+    if (testChoice === 'SAT') currentStudent.satTaken = true; else currentStudent.actTaken = true;
 
     if (!emailjsAvailable) {
       statusEl.textContent = 'Couldn\'t reach the email service from this browser. Please text Luca at (201) 275-2791 with your key (' + currentStudent.key + ') and score (' + totalCorrect + '/' + totalQuestions + ') so he can follow up.';
