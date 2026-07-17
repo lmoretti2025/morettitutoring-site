@@ -79,13 +79,24 @@
     .eyebrow { display: flex; align-items: center; gap: 0.45rem; font-size: 0.58rem; font-weight: 600; letter-spacing: 0.24em; text-transform: uppercase; color: var(--red); margin-bottom: 1.5rem; }
     .eyebrow::before { content: '◆'; font-size: 0.4rem; }
 
-    /* ═══ TICKER (hero bottom) ═══ */
+    /* ═══ TICKER (shared marquee engine — hero uses testimonials, loud;
+       disciplines uses the subjects list, in its original gold styling) ═══ */
     .intro-ticker-outer { position: absolute; bottom: 0; left: 0; right: 0; padding: 1.5rem 0; border-top: 1px solid var(--border); }
     .intro-ticker-wrap { overflow: hidden; -webkit-mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%); mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%); }
     .intro-ticker-track { display: flex; align-items: center; width: max-content; animation: ticker-scroll 42s linear infinite; will-change: transform; }
     .intro-ticker-item { font-size: 0.8rem; font-weight: 600; letter-spacing: 0.24em; text-transform: uppercase; color: var(--gold); white-space: nowrap; padding: 0 2rem; }
     .intro-ticker-sep { font-size: 0.5rem; color: rgba(201,168,76,0.4); flex-shrink: 0; }
     @keyframes ticker-scroll { 0% { transform: translate3d(0,0,0); } 100% { transform: translate3d(-50%,0,0); } }
+
+    /* louder testimonial ticker — replaces the subjects ticker at the
+       hero's bottom; bigger, bolder, red accents to catch the eye */
+    .testi-ticker-item { font-size: 0.98rem; font-weight: 700; letter-spacing: 0.01em; text-transform: none; color: var(--text); white-space: nowrap; padding: 0 2.25rem; }
+    .testi-ticker-item strong { color: var(--red); font-weight: 700; }
+    .testi-ticker-item .testi-author { margin-left: 0.6rem; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); }
+    .testi-ticker-sep { font-size: 0.55rem; color: var(--red); flex-shrink: 0; }
+
+    /* subjects ticker, relocated into the dark "What we teach" section */
+    .disc-ticker-outer { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; padding: 1.35rem 0; border-top: 1px solid rgba(255,255,255,0.16); background: rgba(0,0,0,0.4); }
 
     /* ═══ STORY: PROBLEM + ANSWER ═══ */
     #story { background-image: url(photo-2-web.jpg); background-size: cover; background-position: center; position: relative; padding: 0; overflow: hidden; }
@@ -157,8 +168,8 @@
        slides up and off the screen together — and group B (the portal
        plaque, then the CTA) fades in at that same center-stage spot to
        take its place. */
-    #explore-prelude { background: #000; height: 40vh; }
-    #explore-wrap { background: #000; height: 560vh; position: relative; }
+    #explore-prelude { background: #000; height: 4vh; }
+    #explore-wrap { background: #000; height: 320vh; position: relative; }
     #explore-postlude { background: #000; height: 5vh; }
     #explore-stage { position: sticky; top: 0; height: 100vh; overflow: hidden; }
     .explore-word { position: absolute; top: 66%; left: 50%; z-index: 1; font-family: 'Duera Expanded Black', 'Archivo Black', 'Anton', var(--hel); font-weight: 900; color: var(--red); font-size: 128vh; line-height: 1; letter-spacing: -0.01em; white-space: nowrap; pointer-events: none; will-change: transform; }
@@ -251,7 +262,7 @@
     @keyframes dd-head { 0%, 26% { opacity: 0; } 33% { opacity: 1; } 85% { opacity: 1; } 96%, 100% { opacity: 0; } }
 
     /* ═══ DISCIPLINES ═══ */
-    #disciplines { background-image: url(photo-3-web.jpg); background-size: cover; background-position: center 30%; position: relative; padding: 4.25rem 0 10.5rem; }
+    #disciplines { background-image: url(photo-3-web.jpg); background-size: cover; background-position: center 30%; position: relative; padding: 4.25rem 0 7rem; }
     #disciplines::before { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, #000 0%, rgba(0,0,0,0.58) 18%, rgba(0,0,0,0.58) 100%); }
     #disciplines .container { position: relative; z-index: 1; }
     #disciplines .eyebrow { color: var(--gold); }
@@ -287,7 +298,7 @@
     /* ═══ TESTIMONIALS — top-3 showcase, middle card elevated ═══ */
     #testimonials { background: var(--white); padding: 5.5rem 0; }
     .tgain { color: var(--red); }
-    .tshowcase { display: grid; grid-template-columns: 1fr 1.12fr 1fr; gap: 1.75rem; align-items: center; margin-bottom: 2.5rem; }
+    .tshowcase { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.75rem; align-items: center; margin-bottom: 2.5rem; }
     .tshow-card { background: var(--bg); border: 1px solid var(--border); padding: 2.25rem 2rem; display: flex; flex-direction: column; position: relative; transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s ease, border-color 0.3s ease; }
     .tshow-card::before { content: ''; position: absolute; top: -1px; left: 0; width: 0; height: 2px; background: var(--gold); transition: width 0.4s ease; }
     .tshow-card:hover::before { width: 100%; }
@@ -302,6 +313,10 @@
     .tshow-link-wrap { text-align: center; }
     .tshow-link { display: inline-flex; align-items: center; gap: 0.5rem; font-family: var(--hel); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--red); text-decoration: none; border-bottom: 1px solid var(--red); padding-bottom: 0.2rem; transition: opacity 0.2s; }
     .tshow-link:hover { opacity: 0.7; }
+    @media (max-width: 1180px) {
+      .tshowcase { grid-template-columns: 1fr 1fr; }
+      .tshow-card.mid { transform: none; }
+    }
     @media (max-width: 900px) {
       .tshowcase { grid-template-columns: 1fr; gap: 1.25rem; }
       .tshow-card.mid { transform: none; box-shadow: 0 10px 30px rgba(17,17,17,0.1); order: -1; }
@@ -379,11 +394,24 @@
       .container { padding: 0 1.5rem; }
       .method-grid { grid-template-columns: 1fr; }
       .explore-grid { grid-template-columns: 1fr; }
-      .explore-word { font-size: clamp(3.5rem, 22vw, 7rem); }
       .portal-teaser { flex-direction: column; align-items: flex-start; padding: 1.75rem; }
       .disc-grid { grid-template-columns: 1fr; }
       footer { padding: 2rem 1.5rem; }
       .form-row { grid-template-columns: 1fr; }
+    }
+
+    /* On phones the sticky-pin scroll animation is unreliable — dynamic
+       browser toolbars change window.innerHeight mid-scroll, throwing off
+       the progress math and leaving the heading stuck invisible. Below
+       768px we bypass the pin/fade JS (see isMobileLayout in the script)
+       and lay EXPLORE out as a normal static stack, always visible. */
+    @media (max-width: 768px) {
+      #explore-prelude, #explore-postlude { height: 0; }
+      #explore-wrap { height: auto; }
+      #explore-stage { position: relative; height: auto; overflow: visible; display: flex; flex-direction: column; align-items: center; gap: 2.5rem; padding: 4.5rem 1.5rem; }
+      .explore-word { position: relative; top: auto; left: auto; transform: none !important; font-size: clamp(2.75rem, 15vw, 4.25rem); }
+      #explore-group-a, #explore-group-b { position: relative; top: auto; left: auto; transform: none !important; pointer-events: auto !important; }
+      .explore-hed, .explore-sub, .explore-step, .explore-testdates-hint, .portal-teaser, #explore-cta-inline, #explore-group-b { opacity: 1 !important; }
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
@@ -423,18 +451,14 @@
   </div>
   <div class="intro-ticker-outer">
     <div class="intro-ticker-wrap">
-      <div class="intro-ticker-track" id="ticker-track">
-        <span class="intro-ticker-item">ACT &amp; SAT Prep</span><span class="intro-ticker-sep">◆</span>
-        <span class="intro-ticker-item">AP &amp; IB Prep</span><span class="intro-ticker-sep">◆</span>
-        <span class="intro-ticker-item">Algebra 1</span><span class="intro-ticker-sep">◆</span>
-        <span class="intro-ticker-item">Geometry</span><span class="intro-ticker-sep">◆</span>
-        <span class="intro-ticker-item">Algebra 2 / Trigonometry</span><span class="intro-ticker-sep">◆</span>
-        <span class="intro-ticker-item">Precalculus</span><span class="intro-ticker-sep">◆</span>
-        <span class="intro-ticker-item">Statistics &amp; AP Statistics</span><span class="intro-ticker-sep">◆</span>
-        <span class="intro-ticker-item">AP Calculus AB &amp; BC</span><span class="intro-ticker-sep">◆</span>
-        <span class="intro-ticker-item">Multivariable Calculus</span><span class="intro-ticker-sep">◆</span>
-        <span class="intro-ticker-item">English &amp; Writing</span><span class="intro-ticker-sep">◆</span>
-        <span class="intro-ticker-item">College Essay &amp; Applications</span><span class="intro-ticker-sep">◆</span>
+      <div class="intro-ticker-track" id="hero-ticker-track">
+        <span class="testi-ticker-item">&ldquo;Actually <strong>enjoys math</strong> now&rdquo;<span class="testi-author">A Student</span></span><span class="testi-ticker-sep">◆</span>
+        <span class="testi-ticker-item">&ldquo;Got the score I wanted&rdquo;<span class="testi-author">A Student</span></span><span class="testi-ticker-sep">◆</span>
+        <span class="testi-ticker-item">&ldquo;<strong>C to an A</strong> in math&rdquo;<span class="testi-author">Patti M.</span></span><span class="testi-ticker-sep">◆</span>
+        <span class="testi-ticker-item">&ldquo;Scored a <strong>1520</strong>!&rdquo;<span class="testi-author">Jessie C.</span></span><span class="testi-ticker-sep">◆</span>
+        <span class="testi-ticker-item">&ldquo;<strong>+200 points</strong> on SAT Math&rdquo;<span class="testi-author">Michele C.</span></span><span class="testi-ticker-sep">◆</span>
+        <span class="testi-ticker-item">&ldquo;Challenging concepts made <strong>easy</strong>&rdquo;<span class="testi-author">A Parent</span></span><span class="testi-ticker-sep">◆</span>
+        <span class="testi-ticker-item">&ldquo;<strong>D to a B</strong>, finals passed&rdquo;<span class="testi-author">A Student</span></span><span class="testi-ticker-sep">◆</span>
       </div>
     </div>
   </div>
@@ -559,6 +583,23 @@
       </div>
     </div>
   </div>
+  <div class="disc-ticker-outer">
+    <div class="intro-ticker-wrap">
+      <div class="intro-ticker-track" id="disc-ticker-track">
+        <span class="intro-ticker-item">ACT &amp; SAT Prep</span><span class="intro-ticker-sep">◆</span>
+        <span class="intro-ticker-item">AP &amp; IB Prep</span><span class="intro-ticker-sep">◆</span>
+        <span class="intro-ticker-item">Algebra 1</span><span class="intro-ticker-sep">◆</span>
+        <span class="intro-ticker-item">Geometry</span><span class="intro-ticker-sep">◆</span>
+        <span class="intro-ticker-item">Algebra 2 / Trigonometry</span><span class="intro-ticker-sep">◆</span>
+        <span class="intro-ticker-item">Precalculus</span><span class="intro-ticker-sep">◆</span>
+        <span class="intro-ticker-item">Statistics &amp; AP Statistics</span><span class="intro-ticker-sep">◆</span>
+        <span class="intro-ticker-item">AP Calculus AB &amp; BC</span><span class="intro-ticker-sep">◆</span>
+        <span class="intro-ticker-item">Multivariable Calculus</span><span class="intro-ticker-sep">◆</span>
+        <span class="intro-ticker-item">English &amp; Writing</span><span class="intro-ticker-sep">◆</span>
+        <span class="intro-ticker-item">College Essay &amp; Applications</span><span class="intro-ticker-sep">◆</span>
+      </div>
+    </div>
+  </div>
 </section>
 
 <section id="testimonials">
@@ -576,6 +617,10 @@
       <div class="tshow-card">
         <p class="tshow-body"><strong>If anyone can help you tolerate math and actually master the skill, it's Luca!</strong> He took the time to break down the underlying concepts, never moving on until he was certain I fully understood. Thanks to Luca, I went from a student who was barely passing with a <span class="tgain">D</span> to someone who actually enjoys math.</p>
         <span class="tshow-author">A student</span>
+      </div>
+      <div class="tshow-card">
+        <p class="tshow-body"><strong>They went into test day feeling confident and scored a <span class="tgain">1520</span>!</strong> Luca's tutoring was incredibly engaging and completely transformed how my child approached studying. I cannot recommend it enough to any parent looking to help their child succeed.</p>
+        <span class="tshow-author">Jessie C.</span>
       </div>
     </div>
     <div class="tshow-link-wrap reveal d3">
@@ -691,8 +736,10 @@
   var nav = document.getElementById('main-nav');
 
   /* Duplicate ticker content so the -50% loop is perfectly seamless */
-  var ticker = document.getElementById('ticker-track');
-  if (ticker) { ticker.innerHTML += ticker.innerHTML; }
+  ['hero-ticker-track', 'disc-ticker-track'].forEach(function (id) {
+    var ticker = document.getElementById(id);
+    if (ticker) { ticker.innerHTML += ticker.innerHTML; }
+  });
 
   var busy = false;
   window.addEventListener('scroll', function () {
@@ -739,7 +786,8 @@
     if (!wrap || !word || !groupA) return;
 
     var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduceMotion) return; // CSS fallback already shows everything statically
+    var isMobileLayout = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+    if (reduceMotion || isMobileLayout) return; // CSS fallback already shows everything statically
 
     function clamp01(v) { return Math.max(0, Math.min(1, v)); }
     function mapRange(v, a, b, c, d) {
@@ -764,7 +812,7 @@
     measureWord();
     if (document.fonts && document.fonts.ready) { document.fonts.ready.then(measureWord); }
 
-    var EXIT_A = 0.6, EXIT_B = 0.72;
+    var EXIT_A = 0.54, EXIT_B = 0.66;
 
     var ticking = false;
     function render() {
@@ -778,17 +826,17 @@
       // earlier) and never moves vertically at all
       var vw = window.innerWidth;
       var reach = vw / 2 + wordWidth / 2 + 60;
-      var wordX = mapRange(progress, 0, 0.5, reach, -reach);
+      var wordX = mapRange(progress, 0, 0.32, reach, -reach);
       word.style.transform = 'translate(-50%, -50%) translate(' + wordX + 'px, 0)';
 
       // group A: each piece fades in, already in its fixed spot
-      fadeOnly(hed, progress, 0.05, 0.11);
-      fadeOnly(sub, progress, 0.13, 0.19);
+      fadeOnly(hed, progress, 0.02, 0.08);
+      fadeOnly(sub, progress, 0.10, 0.16);
       steps.forEach(function (el, i) {
-        var a = 0.21 + i * 0.05;
-        fadeOnly(el, progress, a, a + 0.05);
+        var a = 0.18 + i * 0.045;
+        fadeOnly(el, progress, a, a + 0.045);
       });
-      fadeOnly(hint, progress, 0.44, 0.5);
+      fadeOnly(hint, progress, 0.38, 0.44);
 
       // once it's held for a moment, group A stays fully solid — no
       // fade — and just slides up off the screen together, as one unit
