@@ -181,7 +181,7 @@
     #explore-group-b { z-index: 3; max-width: 1000px; pointer-events: none; }
     #explore-group-b.explore-group-active { pointer-events: auto; }
 
-    .explore-hed { font-family: var(--display); font-weight: 700; color: #fff; font-size: clamp(2.4rem, 5.6vw, 4.3rem); line-height: 1.18; max-width: 900px; text-shadow: 0 3px 22px rgba(0,0,0,0.85), 0 0 60px rgba(0,0,0,0.6); }
+    .explore-hed { font-family: var(--display); font-weight: 700; color: #fff; font-size: clamp(2.4rem, 5.6vw, 4.3rem); line-height: 1.18; max-width: 900px; text-shadow: 0 3px 22px rgba(0,0,0,0.85), 0 0 60px rgba(0,0,0,0.6); opacity: 0; will-change: opacity; }
     /* The link used to be an inline <a> inside the heading — on wrapped
        two-line titles that leaves a dead gap between the lines with no
        hit area at all (inline elements only get clickable glyph boxes,
@@ -190,17 +190,17 @@
        "See How It Works" link exactly: a simple scale-up, no shake. */
     .explore-hed a { display: block; position: relative; transition: transform 0.35s cubic-bezier(0.2, 1, 0.3, 1); transform-origin: center bottom; }
     .explore-hed a:hover { transform: scale(1.08); }
-    .explore-sub { font-size: 0.86rem; line-height: 1.8; color: rgba(255,255,255,0.85); max-width: 580px; text-shadow: 0 2px 14px rgba(0,0,0,0.85), 0 0 40px rgba(0,0,0,0.6); }
+    .explore-sub { font-size: 0.86rem; line-height: 1.8; color: rgba(255,255,255,0.85); max-width: 580px; text-shadow: 0 2px 14px rgba(0,0,0,0.85), 0 0 40px rgba(0,0,0,0.6); opacity: 0; will-change: opacity; }
     .gold-shine { position: relative; font-weight: 600; background: linear-gradient(100deg, #C9A84C 30%, #F3E3B0 45%, #C9A84C 60%); background-size: 250% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: gold-shine-sweep 3.5s ease-in-out infinite alternate; }
     @keyframes gold-shine-sweep { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
 
     .explore-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2.25rem; width: 100%; text-align: left; margin-top: 1rem; }
-    .explore-step { border-top: 2px solid var(--gold); padding-top: 0.85rem; }
+    .explore-step { border-top: 2px solid var(--gold); padding-top: 0.85rem; opacity: 0; will-change: opacity; }
     .explore-step .method-num { color: var(--gold); text-shadow: 0 1px 8px rgba(0,0,0,0.8); }
     .explore-step .method-step-title { color: #fff; margin-bottom: 0.3rem; font-size: 0.95rem; text-shadow: 0 1px 8px rgba(0,0,0,0.8); }
     .explore-step-body { font-size: 0.72rem; line-height: 1.55; color: rgba(255,255,255,0.7); text-shadow: 0 1px 8px rgba(0,0,0,0.8); }
 
-    .explore-testdates-hint { text-align: center; font-size: 0.78rem; color: rgba(255,255,255,0.7); text-shadow: 0 1px 8px rgba(0,0,0,0.8); }
+    .explore-testdates-hint { text-align: center; font-size: 0.78rem; color: rgba(255,255,255,0.7); text-shadow: 0 1px 8px rgba(0,0,0,0.8); opacity: 0; will-change: opacity; }
     .explore-testdates-hint a { color: var(--gold); text-decoration: none; font-weight: 600; }
     .explore-testdates-hint a:hover { text-decoration: underline; }
 
@@ -777,6 +777,10 @@
     var word = document.getElementById('explore-word');
     var groupA = document.getElementById('explore-group-a');
     var groupB = document.getElementById('explore-group-b');
+    var hed = document.getElementById('explore-hed');
+    var sub = document.getElementById('explore-sub');
+    var steps = Array.prototype.slice.call(document.querySelectorAll('#explore-grid [data-step]'));
+    var hint = document.getElementById('explore-testdates-hint');
     var plaque = document.getElementById('portal-teaser');
     var ctaInline = document.getElementById('explore-cta-inline');
     if (!wrap || !word || !groupA) return;
@@ -825,8 +829,14 @@
       var wordX = mapRange(progress, 0, 0.32, reach, -reach);
       word.style.transform = 'translate(-50%, -50%) translate(' + wordX + 'px, 0)';
 
-      // group A is visible immediately (no fade-in wait) so scrolling
-      // into EXPLORE is never met with a blank black frame
+      // group A: each piece fades in, already in its fixed spot
+      fadeOnly(hed, progress, 0.02, 0.08);
+      fadeOnly(sub, progress, 0.10, 0.16);
+      steps.forEach(function (el, i) {
+        var a = 0.18 + i * 0.045;
+        fadeOnly(el, progress, a, a + 0.045);
+      });
+      fadeOnly(hint, progress, 0.38, 0.44);
 
       // once it's held for a moment, group A stays fully solid — no
       // fade — and just slides up off the screen together, as one unit
