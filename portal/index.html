@@ -69,6 +69,10 @@
   .key-input { width: 100%; font-family: var(--hel); font-size: 1rem; letter-spacing: 0.06em; text-align: center; text-transform: uppercase; padding: 1.05rem 1.2rem; border: 1px solid var(--border); background: var(--white); color: var(--text); margin-bottom: 1rem; }
   .key-input:focus { outline: none; border-color: var(--red); }
   .key-error { display: none; font-size: 0.78rem; color: var(--red); text-align: center; margin-bottom: 1rem; line-height: 1.6; }
+  .email-input-wrap { position: relative; }
+  .email-notice { display: none; position: absolute; bottom: calc(100% + 0.6rem); left: 50%; transform: translateX(-50%); width: max-content; max-width: 260px; font-size: 0.72rem; color: var(--white, #fff); text-align: center; line-height: 1.5; background: var(--text, #222); border-radius: 6px; padding: 0.6rem 0.8rem; box-shadow: 0 4px 14px rgba(0,0,0,0.18); z-index: 5; }
+  .email-notice { --arrow-shift: 0px; }
+  .email-notice::after { content: ''; position: absolute; top: 100%; left: calc(50% + var(--arrow-shift)); transform: translateX(-50%); border: 6px solid transparent; border-top-color: var(--text, #222); }
   .key-btn { display: block; width: 100%; background: var(--red); color: #fff; font-family: var(--hel); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; padding: 1.05rem; border: none; cursor: pointer; transition: opacity 0.2s; }
   /* Once inside the diagnostic-taking flow itself, primary actions switch
      to the same navy/gold palette as the rest of the Bluebook-style test
@@ -141,6 +145,15 @@
   .ref-overlay.active { display: flex; }
   .ref-modal { background: var(--white); width: 100%; max-width: 760px; max-height: 86vh; overflow-y: auto; padding: 2rem 2.25rem 2.5rem; position: relative; }
   .ref-modal-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid var(--red); padding-bottom: 1rem; margin-bottom: 1.5rem; }
+
+  /* ═══ "CONTINUE WHERE YOU LEFT OFF?" PROMPT ═══ */
+  .resume-overlay { display: none; position: fixed; inset: 0; background: rgba(17,17,17,0.55); z-index: 700; align-items: center; justify-content: center; padding: 1.5rem; }
+  .resume-overlay.active { display: flex; }
+  .resume-modal { background: var(--white); width: 100%; max-width: 420px; padding: 2rem 2rem 1.75rem; text-align: center; box-shadow: 0 24px 64px rgba(0,0,0,0.3); }
+  .resume-modal-hed { font-family: var(--display); font-weight: 700; font-size: 1.05rem; color: var(--text); margin-bottom: 0.6rem; }
+  .resume-modal-sub { font-family: var(--hel); font-size: 0.85rem; color: var(--mid); line-height: 1.6; margin-bottom: 1.6rem; }
+  .resume-modal-row { display: flex; gap: 0.75rem; }
+  .resume-modal-row .key-btn { margin: 0; }
   .ref-modal-title { font-family: var(--display); font-size: 1.15rem; font-weight: 700; color: var(--text); }
   .ref-close { background: none; border: none; font-size: 1.4rem; line-height: 1; color: var(--mid); cursor: pointer; padding: 0.25rem 0.5rem; }
   .ref-close:hover { color: var(--red); }
@@ -447,7 +460,10 @@
     <div id="email-step" style="display:none;">
       <h1 class="panel-hed">One more thing<span id="email-step-name"></span></h1>
       <p class="panel-sub">First time using this key — enter your email and we'll automatically share your files with you.</p>
-      <input type="email" class="key-input" id="email-input" placeholder="you@email.com" autocomplete="email" style="text-transform:none;">
+      <div class="email-input-wrap">
+        <div class="email-notice" id="email-notice">Please use your main email — your files will be shared exclusively to this address, not any others.</div>
+        <input type="email" class="key-input" id="email-input" placeholder="you@email.com" autocomplete="email" style="text-transform:none;">
+      </div>
       <p class="key-error" id="email-error">That doesn't look like a valid email — double-check it and try again.</p>
       <button class="key-btn" id="email-submit">Unlock My Files</button>
       <a href="#" class="key-help" id="email-back" style="display:block; text-decoration:none;">&larr; Use a different key</a>
@@ -774,6 +790,22 @@
   </div>
 </div>
 
+<!-- ═══ "CONTINUE WHERE YOU LEFT OFF?" PROMPT — shown when a student picks
+     Diagnostic from the menu and has an unfinished FIRST attempt saved
+     from a previous visit (accidental tab close, browser close, coming
+     back a different day). Never shown for a retake/practice attempt —
+     see alreadyTakenThisTestType() / getResumeSnapshot(). ═══ -->
+<div class="resume-overlay" id="resume-overlay">
+  <div class="resume-modal">
+    <div class="resume-modal-hed">Continue where you left off?</div>
+    <p class="resume-modal-sub">You have an unfinished diagnostic saved from before. Pick up right where you left off, or start over from the beginning.</p>
+    <div class="resume-modal-row">
+      <button class="key-btn" id="resume-yes" type="button">Yes</button>
+      <button class="key-btn" id="resume-no" type="button" style="background:var(--text);">No</button>
+    </div>
+  </div>
+</div>
+
 <!-- ═══ SCREEN 5b — BREAK (between sections) ═══ -->
 <div class="screen" id="dx-break-screen">
   <div class="dx-break-body">
@@ -847,45 +879,90 @@
   var activeScreenId = 'screen-key';
   var STORAGE_KEY = 'moretti_portal_state';
 
-  /* ═══ SESSION PERSISTENCE ═══
-     If a student accidentally refreshes or navigates back mid-diagnostic,
-     this restores exactly where they were instead of losing everything.
-     currentStudent is saved in full here (not just the key) since the
-     roster no longer lives in this page for a restore to look back up.
+  // Screens that count as "genuinely mid-diagnostic" — used both by
+  // exitPortal()'s "you'll lose your progress" confirmation and by the
+  // cross-session resume snapshot below, so the two features agree on
+  // exactly when a student is in the middle of an attempt.
+  var MID_DIAGNOSTIC_SCREENS = { 'dx-screen': true, 'dx-break-screen': true, 'screen-intro': true };
 
-     Deliberately sessionStorage, not localStorage: sessionStorage survives
-     an accidental refresh/back-navigation within the same tab (exactly the
-     case this exists for), but is wiped the moment the tab or browser
-     actually closes — so a student who closes out and comes back later (or
-     the next day) always lands back at a clean key-entry screen instead of
-     resuming a stale attempt and potentially resubmitting it. Deliberately
-     leaving via "Exit Portal" or "Log out" also calls clearState() itself,
-     so even a back button in the same tab won't resume after that. */
+  /* ═══ SESSION PERSISTENCE ═══
+     Two layers, for two different kinds of interruption:
+
+     1. sessionStorage (saveState/clearState) — if a student accidentally
+        refreshes or navigates back mid-diagnostic, this restores exactly
+        where they were instead of losing everything. Survives an
+        accidental refresh/back-navigation within the same tab, but is
+        wiped the moment the tab or browser actually closes.
+
+     2. localStorage (syncResumeSnapshot/clearResumeSnapshot) — the same
+        payload, but mirrored somewhere that DOES survive a closed tab or
+        browser, so a student who accidentally leaves mid-diagnostic and
+        comes back later (or the next day) can still pick up where they
+        left off instead of starting over. Deliberately scoped to ONLY a
+        student's first real attempt at a test type — never a retake or
+        practice run (see alreadyTakenThisTestType()) — since a retake is
+        low-stakes and a stale resume prompt on a practice attempt would
+        just be confusing. Deliberately leaving via "Exit Portal" or
+        "Log out" clears BOTH layers via clearState()/clearResumeSnapshot(),
+        so a student who consciously chooses to abandon an attempt is
+        never offered to resume it later — matching the "your progress
+        will be lost" warning those actions already show. */
   function saveState() {
-    try {
-      sessionStorage.setItem(STORAGE_KEY, JSON.stringify({
-        student: currentStudent,
-        screen: activeScreenId,
-        resourceKind: currentResourceKind,
-        testChoice: testChoice,
-        activeSectionKeys: activeSectionKeys,
-        sectionIndex: sectionIndex,
-        completedSections: completedSections,
-        current: current,
-        answers: answers,
-        marked: marked,
-        elims: elims,
-        qOrder: qOrder,
-        sectionTimerEndsAt: sectionTimerEndsAt,
-        moduleStage: moduleStage,
-        module2Variant: module2Variant,
-        module1Buffer: module1Buffer,
-        breakEndsAt: breakEndsAt
-      }));
-    } catch (e) { /* private browsing / storage disabled — fail silently */ }
+    var payload = {
+      student: currentStudent,
+      screen: activeScreenId,
+      resourceKind: currentResourceKind,
+      testChoice: testChoice,
+      activeSectionKeys: activeSectionKeys,
+      sectionIndex: sectionIndex,
+      completedSections: completedSections,
+      current: current,
+      answers: answers,
+      marked: marked,
+      elims: elims,
+      qOrder: qOrder,
+      sectionTimerEndsAt: sectionTimerEndsAt,
+      moduleStage: moduleStage,
+      module2Variant: module2Variant,
+      module1Buffer: module1Buffer,
+      breakEndsAt: breakEndsAt
+    };
+    try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(payload)); } catch (e) { /* private browsing / storage disabled — fail silently */ }
+    syncResumeSnapshot(payload);
   }
   function clearState() {
     try { sessionStorage.removeItem(STORAGE_KEY); } catch (e) {}
+  }
+
+  // One resume slot per student key, so a saved spot never surfaces for a
+  // different key entered later on the same shared device.
+  function resumeStorageKey(key) { return 'moretti_portal_resume_' + key; }
+  function syncResumeSnapshot(payload) {
+    if (!currentStudent || !currentStudent.key) return;
+    var eligible = MID_DIAGNOSTIC_SCREENS[activeScreenId] && !!payload.testChoice && !alreadyTakenThisTestType();
+    try {
+      if (eligible) localStorage.setItem(resumeStorageKey(currentStudent.key), JSON.stringify(payload));
+      else localStorage.removeItem(resumeStorageKey(currentStudent.key));
+    } catch (e) { /* private browsing / storage disabled — fail silently */ }
+  }
+  function clearResumeSnapshot(studentKey) {
+    if (!studentKey) return;
+    try { localStorage.removeItem(resumeStorageKey(studentKey)); } catch (e) {}
+  }
+  // Reads back a saved snapshot for the CURRENT student, if one exists,
+  // is still genuinely mid-diagnostic, and hasn't been invalidated by a
+  // completed attempt since it was saved (e.g. taken on another device).
+  function getResumeSnapshot() {
+    if (!currentStudent || !currentStudent.key) return null;
+    try {
+      var raw = localStorage.getItem(resumeStorageKey(currentStudent.key));
+      if (!raw) return null;
+      var state = JSON.parse(raw);
+      if (!state || !state.testChoice || !MID_DIAGNOSTIC_SCREENS[state.screen]) return null;
+      var alreadyTaken = state.testChoice === 'SAT' ? !!currentStudent.satTaken : !!currentStudent.actTaken;
+      if (alreadyTaken) { clearResumeSnapshot(currentStudent.key); return null; }
+      return state;
+    } catch (e) { return null; }
   }
 
   /* ═══ SCREEN ROUTING ═══ */
@@ -1073,6 +1150,7 @@
     emailInput.value = '';
     keyError.style.display = 'none';
     emailError.style.display = 'none';
+    document.getElementById('email-notice').style.display = 'none';
     emailStep.style.display = 'none';
     keyStep.style.display = 'block';
   }
@@ -1127,13 +1205,47 @@
   emailInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') trySubmitEmail(); });
   document.getElementById('email-back').addEventListener('click', function (e) { e.preventDefault(); resetKeyScreen(); });
 
+  // Nudge the student toward entering their main email the moment they
+  // click/tap into the field — files get shared to whatever address they
+  // type here, so this heads off support pings from a mistyped or
+  // secondary inbox.
+  var emailNotice = document.getElementById('email-notice');
+  function positionEmailNotice() {
+    // Bubble is centered on the input by default (left:50%, transform:
+    // translateX(-50%)) — on a narrow phone screen that can push it past
+    // the edge of the viewport. Nudge it back in bounds instead of
+    // letting it clip, and keep the arrow pointing at the input either way.
+    emailNotice.style.left = '50%';
+    emailNotice.style.transform = 'translateX(-50%)';
+    var margin = 8;
+    var rect = emailNotice.getBoundingClientRect();
+    var shift = 0;
+    if (rect.left < margin) shift = margin - rect.left;
+    else if (rect.right > window.innerWidth - margin) shift = (window.innerWidth - margin) - rect.right;
+    if (shift !== 0) {
+      emailNotice.style.left = 'calc(50% + ' + shift + 'px)';
+      emailNotice.style.setProperty('--arrow-shift', (-shift) + 'px');
+    } else {
+      emailNotice.style.removeProperty('--arrow-shift');
+    }
+  }
+  emailInput.addEventListener('focus', function () {
+    emailNotice.style.display = 'block';
+    requestAnimationFrame(positionEmailNotice);
+  });
+  emailInput.addEventListener('blur', function () { emailNotice.style.display = 'none'; });
+  window.addEventListener('resize', function () {
+    if (emailNotice.style.display === 'block') positionEmailNotice();
+  });
+
   /* Leaving the portal via the logo or "Exit Portal" — not just the menu's
      "Log out" — should also fully reset things, so coming back always asks
-     for the key again instead of resuming mid-diagnostic. If they're in the
-     middle of a diagnostic (or its break screen), confirm first — there's
-     no way back into this attempt once they leave, since re-entering the
-     portal never resumes progress anymore. */
-  var MID_DIAGNOSTIC_SCREENS = { 'dx-screen': true, 'dx-break-screen': true, 'screen-intro': true };
+     for the key again. This is a DELIBERATE exit, so it clears both the
+     sessionStorage refresh-resume AND the cross-session resume snapshot
+     (see clearResumeSnapshot()) — a student who consciously confirms
+     "your progress will be lost" should never be offered to resume that
+     same attempt later. If they're in the middle of a diagnostic (or its
+     break screen), confirm first. */
   function exitPortal(e) {
     if (MID_DIAGNOSTIC_SCREENS[activeScreenId]) {
       if (!window.confirm('Are you sure? Your progress will be lost and you\'ll have to start from the beginning.')) {
@@ -1142,6 +1254,7 @@
       }
     }
     clearState();
+    clearResumeSnapshot(currentStudent && currentStudent.key);
     resetKeyScreen();
   }
   var exitLinkIds = ['nav-logo-exit', 'nav-exit-link'];
@@ -1152,18 +1265,38 @@
 
   /* ═══ SCREEN 2: MENU ═══ */
   var currentResourceKind = null; // 'files' or 'college-prep' — remembered for persistence/restore
+  var resumeOverlay = document.getElementById('resume-overlay');
+  var pendingResumeSnapshot = null;
   document.querySelectorAll('.menu-card').forEach(function (card) {
     card.addEventListener('click', function () {
       if (card.classList.contains('disabled')) return; // temporarily off while these get developed further
       var route = card.getAttribute('data-route');
-      if (route === 'diagnostic') { show('screen-test-choice'); }
+      if (route === 'diagnostic') {
+        var snap = getResumeSnapshot();
+        if (snap) { pendingResumeSnapshot = snap; resumeOverlay.classList.add('active'); }
+        else { show('screen-test-choice'); }
+      }
       else if (route === 'files' || route === 'college-prep') { renderResources(route); show('screen-resources'); }
     });
   });
+  document.getElementById('resume-yes').addEventListener('click', function () {
+    resumeOverlay.classList.remove('active');
+    var snap = pendingResumeSnapshot;
+    pendingResumeSnapshot = null;
+    if (snap) applyRestoredState(snap);
+    else show('screen-test-choice');
+  });
+  document.getElementById('resume-no').addEventListener('click', function () {
+    resumeOverlay.classList.remove('active');
+    pendingResumeSnapshot = null;
+    clearResumeSnapshot(currentStudent && currentStudent.key);
+    show('screen-test-choice');
+  });
   document.getElementById('menu-logout').addEventListener('click', function (e) {
     e.preventDefault();
-    currentStudent = null;
     clearState();
+    clearResumeSnapshot(currentStudent && currentStudent.key);
+    currentStudent = null;
     resetKeyScreen();
     show('screen-key');
   });
@@ -2094,6 +2227,7 @@
 
     completedSections.push({ key: activeSectionKeys[sectionIndex], label: SECTION_BANKS[activeSectionKeys[sectionIndex]].label, answers: canonical(answers), marked: canonical(marked) });
     clearState(); // the diagnostic is over either way — nothing left to resume
+    clearResumeSnapshot(currentStudent && currentStudent.key); // same — this attempt is done, don't offer to resume it later
 
     var domains = {};
     var skills = {};
@@ -2247,13 +2381,86 @@
     }
   }
 
+  /* ═══ APPLY A SAVED STATE OBJECT ═══
+     Shared by both restore paths: the automatic sessionStorage restore on
+     page load (accidental refresh/back-navigation) below, AND the "Continue
+     where you left off?" modal's Yes button (cross-session resume via
+     localStorage — see getResumeSnapshot()/syncResumeSnapshot() up near
+     saveState()). Deliberately does NOT touch currentStudent/the menu
+     greeting/loadNextSession() — the resume-modal path already has a live,
+     logged-in currentStudent by the time this runs, and re-stamping it from
+     a possibly-stale saved copy (e.g. satTaken flipping true on another
+     device since this was saved) would fight with that. The page-load path
+     below sets those itself before calling in. */
+  function applyRestoredState(state) {
+    if (state.screen === 'dx-screen' && state.testChoice && Array.isArray(state.activeSectionKeys) && state.activeSectionKeys.length) {
+      testChoice = state.testChoice;
+      activeSectionKeys = state.activeSectionKeys;
+      completedSections = Array.isArray(state.completedSections) ? state.completedSections : [];
+      sectionIndex = typeof state.sectionIndex === 'number' ? state.sectionIndex : 0;
+      moduleStage = state.moduleStage === 'module2' ? 'module2' : 'module1';
+      module2Variant = state.module2Variant || null;
+      module1Buffer = state.module1Buffer || null;
+
+      var secKey = activeSectionKeys[sectionIndex];
+      var bank = SECTION_BANKS[secKey];
+      var qsBank = moduleQuestions(bank, moduleStage, module2Variant);
+      qOrder = (Array.isArray(state.qOrder) && state.qOrder.length === qsBank.length) ? state.qOrder : shuffledOrder(qsBank);
+      currentQs = qOrder.map(function (i) { return qsBank[i]; });
+      var qs = currentQs;
+      if (Array.isArray(state.answers) && state.answers.length === qs.length) {
+        answers = state.answers;
+        marked = (Array.isArray(state.marked) && state.marked.length === qs.length) ? state.marked : new Array(qs.length).fill(false);
+        elims = (Array.isArray(state.elims) && state.elims.length === qs.length) ? state.elims : new Array(qs.length).fill(null).map(function () { return []; });
+        current = Math.min(Math.max(state.current || 0, 0), qs.length - 1);
+        document.getElementById('dx-student-label').textContent = currentStudent.name;
+        var moduleLabelSuffix = sectionHasModules(secKey) ? (' — ' + (moduleStage === 'module1' ? 'Module 1' : 'Module 2')) : '';
+        document.getElementById('dx-brand-label').textContent = testChoice + ' Diagnostic — ' + bank.label + moduleLabelSuffix;
+        document.getElementById('dx-notice-text').textContent = 'THIS IS A ' + testChoice + ' DIAGNOSTIC';
+        buildSidebar();
+        renderQuestion();
+        // Resume the timer BEFORE show() — show() calls saveState(), and
+        // sectionTimerEndsAt is still null at that point otherwise, which
+        // would persist a null timer and silently break resume on a
+        // second refresh (only reveals itself one refresh later, easy to
+        // miss).
+        if (typeof state.sectionTimerEndsAt === 'number' && state.sectionTimerEndsAt - Date.now() > 0) {
+          resumeSectionTimer(state.sectionTimerEndsAt);
+        }
+        show('dx-screen');
+        if (typeof state.sectionTimerEndsAt === 'number' && state.sectionTimerEndsAt - Date.now() <= 0) {
+          autoSubmitSection(); // time ran out while they were away — submit now
+        }
+      } else {
+        show('screen-menu');
+      }
+    } else if (state.screen === 'dx-break-screen' && state.testChoice && Array.isArray(state.activeSectionKeys) && state.activeSectionKeys.length) {
+      testChoice = state.testChoice;
+      activeSectionKeys = state.activeSectionKeys;
+      completedSections = Array.isArray(state.completedSections) ? state.completedSections : [];
+      sectionIndex = typeof state.sectionIndex === 'number' ? state.sectionIndex : 0;
+      resumeBreak(typeof state.breakEndsAt === 'number' ? state.breakEndsAt : Date.now() + BREAK_SECONDS * 1000);
+      show('dx-break-screen');
+    } else if (state.screen === 'screen-resources') {
+      renderResources(state.resourceKind || 'files');
+      show('screen-resources');
+    } else if (state.screen === 'screen-test-choice' || state.screen === 'screen-menu' || state.screen === 'screen-test-overview') {
+      show(state.screen);
+    } else {
+      show('screen-menu'); // includes mid-section-break "screen-intro" — safest to restart from the menu
+    }
+  }
+
   /* ═══ RESTORE ON LOAD — ACCIDENTAL REFRESH ONLY ═══
      Reads from sessionStorage (see the comment on saveState() above), so
      this only ever fires for an accidental refresh/back-navigation within
      the same tab session. Deliberately leaving (closing the tab, or the
      explicit "Exit Portal"/"Log out" actions, which call clearState()
      themselves) means there's nothing here to restore, and the student
-     always lands back at a clean key-entry screen instead. */
+     always lands back at a clean key-entry screen instead. (The OTHER
+     resume path — closing the tab entirely and coming back later — is
+     handled separately by the "Continue where you left off?" modal, wired
+     up in the menu-card click handler above via getResumeSnapshot().) */
   (function restoreState() {
     try {
       var raw = sessionStorage.getItem(STORAGE_KEY);
@@ -2264,63 +2471,7 @@
       currentStudent = state.student;
       document.getElementById('menu-greeting').textContent = 'Hey ' + currentStudent.name.split(' ')[0] + '.';
       loadNextSession();
-
-      if (state.screen === 'dx-screen' && state.testChoice && Array.isArray(state.activeSectionKeys) && state.activeSectionKeys.length) {
-        testChoice = state.testChoice;
-        activeSectionKeys = state.activeSectionKeys;
-        completedSections = Array.isArray(state.completedSections) ? state.completedSections : [];
-        sectionIndex = typeof state.sectionIndex === 'number' ? state.sectionIndex : 0;
-        moduleStage = state.moduleStage === 'module2' ? 'module2' : 'module1';
-        module2Variant = state.module2Variant || null;
-        module1Buffer = state.module1Buffer || null;
-
-        var secKey = activeSectionKeys[sectionIndex];
-        var bank = SECTION_BANKS[secKey];
-        var qsBank = moduleQuestions(bank, moduleStage, module2Variant);
-        qOrder = (Array.isArray(state.qOrder) && state.qOrder.length === qsBank.length) ? state.qOrder : shuffledOrder(qsBank);
-        currentQs = qOrder.map(function (i) { return qsBank[i]; });
-        var qs = currentQs;
-        if (Array.isArray(state.answers) && state.answers.length === qs.length) {
-          answers = state.answers;
-          marked = (Array.isArray(state.marked) && state.marked.length === qs.length) ? state.marked : new Array(qs.length).fill(false);
-          elims = (Array.isArray(state.elims) && state.elims.length === qs.length) ? state.elims : new Array(qs.length).fill(null).map(function () { return []; });
-          current = Math.min(Math.max(state.current || 0, 0), qs.length - 1);
-          document.getElementById('dx-student-label').textContent = currentStudent.name;
-          var moduleLabelSuffix = sectionHasModules(secKey) ? (' — ' + (moduleStage === 'module1' ? 'Module 1' : 'Module 2')) : '';
-          document.getElementById('dx-brand-label').textContent = testChoice + ' Diagnostic — ' + bank.label + moduleLabelSuffix;
-          document.getElementById('dx-notice-text').textContent = 'THIS IS A ' + testChoice + ' DIAGNOSTIC';
-          buildSidebar();
-          renderQuestion();
-          // Resume the timer BEFORE show() — show() calls saveState(), and
-          // sectionTimerEndsAt is still null at that point otherwise, which
-          // would persist a null timer and silently break resume on a
-          // second refresh (only reveals itself one refresh later, easy to
-          // miss).
-          if (typeof state.sectionTimerEndsAt === 'number' && state.sectionTimerEndsAt - Date.now() > 0) {
-            resumeSectionTimer(state.sectionTimerEndsAt);
-          }
-          show('dx-screen');
-          if (typeof state.sectionTimerEndsAt === 'number' && state.sectionTimerEndsAt - Date.now() <= 0) {
-            autoSubmitSection(); // time ran out while they were away — submit now
-          }
-        } else {
-          show('screen-menu');
-        }
-      } else if (state.screen === 'dx-break-screen' && state.testChoice && Array.isArray(state.activeSectionKeys) && state.activeSectionKeys.length) {
-        testChoice = state.testChoice;
-        activeSectionKeys = state.activeSectionKeys;
-        completedSections = Array.isArray(state.completedSections) ? state.completedSections : [];
-        sectionIndex = typeof state.sectionIndex === 'number' ? state.sectionIndex : 0;
-        resumeBreak(typeof state.breakEndsAt === 'number' ? state.breakEndsAt : Date.now() + BREAK_SECONDS * 1000);
-        show('dx-break-screen');
-      } else if (state.screen === 'screen-resources') {
-        renderResources(state.resourceKind || 'files');
-        show('screen-resources');
-      } else if (state.screen === 'screen-test-choice' || state.screen === 'screen-menu' || state.screen === 'screen-test-overview') {
-        show(state.screen);
-      } else {
-        show('screen-menu'); // includes mid-section-break "screen-intro" — safest to restart from the menu
-      }
+      applyRestoredState(state);
     } catch (e) { /* corrupt or blocked storage — just start fresh */ }
   })();
 })();

@@ -20,13 +20,14 @@
   .hdr img { height: 40px; }
   .hdr h1 { font-family: 'Caladea', Georgia, serif; font-size: 19px; }
   .hdr p { font-size: 11px; color: var(--mid); }
-  .score-tiles { display: flex; align-items: center; gap: 30px; flex-wrap: wrap; margin-bottom: 4px; padding: 4px 0 8px; }
-  .score-tile { text-align: center; }
-  .score-tile .tile-frac { font-size: 8px; color: var(--faint); margin-top: 1px; }
-  .score-tile .tile-score { font-family: 'Caladea', serif; font-weight: 700; color: var(--red); margin-top: 3px; line-height: 1; }
-  .score-tile .tile-score.big { font-size: 30px; }
-  .score-tile .tile-score.small { font-size: 15px; }
-  .score-tile .tile-lab { font-size: 8px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); margin-top: 2px; }
+  .score-tiles { display: flex; align-items: stretch; gap: 14px; flex-wrap: wrap; margin-bottom: 4px; padding: 4px 0 8px; }
+  .score-tile { text-align: center; border: 1px solid var(--border); border-top: 3px solid var(--gold); border-radius: 3px; padding: 10px 18px 8px; min-width: 92px; }
+  .score-tile.big { min-width: 128px; padding: 14px 22px 10px; }
+  .score-tile .tile-score { font-family: 'Caladea', serif; font-weight: 700; color: var(--ink); line-height: 1; }
+  .score-tile .tile-score.big { font-size: 32px; }
+  .score-tile .tile-score.small { font-size: 19px; }
+  .score-tile .tile-frac { font-size: 8.5px; color: var(--faint); margin-top: 5px; }
+  .score-tile .tile-lab { font-size: 8px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mid); margin-top: 5px; }
   .score-tile .tile-lab.big { font-size: 9.5px; }
   .sec-hed { font-size: 10.5px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mid); border-bottom: 1px solid var(--border); padding-bottom: 4px; margin: 12px 0 8px; }
   .bar-row { margin-bottom: 6px; }
@@ -57,12 +58,15 @@
   .section-card .sc-title { font-family: 'Caladea', serif; font-size: 13px; font-weight: 700; }
   .section-card .sc-score { font-size: 11px; color: var(--mid); }
   .section-card .sc-incorrect { font-size: 10px; color: var(--red); font-weight: 600; margin-bottom: 6px; }
-  .sc-pie-flex { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
-  .sc-legend { font-size: 9px; line-height: 1.55; flex: 1; }
-  .sc-legend div { display: flex; align-items: flex-start; gap: 5px; margin-bottom: 3px; }
-  .sc-legend span.sw { width: 8px; height: 8px; border-radius: 2px; display: inline-block; flex-shrink: 0; margin-top: 2px; }
-  .section-card .sc-missed { font-size: 9.5px; color: var(--mid); line-height: 1.6; margin-top: 6px; }
-  .section-card .sc-missed strong { color: var(--ink); }
+  .sc-flag { display: flex; align-items: flex-start; gap: 6px; font-size: 9.5px; line-height: 1.5; color: var(--ink); background: #fbf1de; border-left: 2px solid var(--gold); padding: 5px 7px; margin: 0 0 8px; }
+  .sc-flag .sc-flag-mark { font-weight: 700; color: var(--gold); flex-shrink: 0; }
+  .sc-flag strong { color: var(--ink); }
+  .sc-bars { margin-bottom: 6px; }
+  .sc-bars .sc-bar-row { margin-bottom: 5px; }
+  .sc-bars .sc-bar-label { display: flex; justify-content: space-between; font-size: 9px; margin-bottom: 2px; }
+  .sc-bars .sc-bar-track { height: 6px; background: #eee7da; border-radius: 3px; overflow: hidden; }
+  .sc-bars .sc-bar-fill { height: 100%; }
+  .sc-bars .sc-bar-empty { font-size: 9px; color: var(--faint); }
   .takeaways { list-style: none; }
   .takeaways li { font-size: 11px; line-height: 1.65; color: var(--mid); padding: 4px 0 4px 16px; position: relative; }
   .takeaways li::before { content: '◆'; position: absolute; left: 0; top: 8px; font-size: 6px; color: var(--gold); }
@@ -103,7 +107,7 @@
 </head>
 <body>
 <div id="err">Couldn't read the report data from this link. Make sure the full link was copied from the results email.</div>
-<div id="demo-banner" style="display:none; max-width:8.5in; margin:16px auto 0; background:#1a1a1a; color:#fff; font-family:'Poppins',sans-serif; font-size:12px; font-weight:600; letter-spacing:0.04em; padding:10px 18px; text-align:center;">DEMO — synthetic data, no real student took this. Add &amp;test=SAT to the URL to preview the SAT version.</div>
+<div id="demo-banner" style="display:none; max-width:8.5in; margin:16px auto 0; background:#1a1a1a; color:#fff; font-family:'Poppins',sans-serif; font-size:12px; font-weight:600; letter-spacing:0.04em; padding:10px 18px; text-align:center;">DEMO — synthetic data, no real student took this. Add &amp;test=SAT to the URL to preview the SAT version, and &amp;score=1000/1250/1450 to preview roughly that score band.</div>
 <div class="toolbar"><button onclick="window.print()">Print / Save as PDF</button></div>
 <div class="page" id="page1" style="display:none;">
   <div class="hdr">
@@ -146,6 +150,43 @@
   // colors rather than a mixed bag of unrelated hues.
   var BRAND_PALETTE = ['#B0271C', '#C9A84C', '#5E8B6F', '#243447', '#A97C50', '#7A3B32', '#8C9A6E', '#8B6F47'];
 
+  /* ═══ APPROXIMATE SCALED SCORING ═══
+     The SAT (200–800 per section, 400–1600 composite) and ACT (1–36 per
+     section, 1–36 composite) both use non-linear curves that vary test
+     to test — the real curve isn't published in advance. These tables
+     approximate the *typical* published official-practice-test curves
+     (percent-correct -> scaled score) closely enough for a diagnostic
+     estimate. They're explicitly labeled "approximate" in the UI.
+     Pulled up above the demo-data generator (moved from further down,
+     where it originally sat next to the rest of the scoring code) so
+     demo mode's score search below can call scaleFromPct/roundToTen
+     directly instead of re-implementing a second copy of the curve. */
+  var ACT_CURVE = [
+    [0, 1], [4, 6], [8, 8], [12, 9], [16, 10], [20, 11], [24, 12], [28, 13],
+    [32, 14], [36, 15], [40, 16], [44, 17], [48, 18], [51, 19], [54, 20],
+    [57, 21], [60, 22], [63, 23], [66, 24], [69, 25], [71, 26], [74, 27],
+    [77, 28], [80, 29], [83, 30], [86, 31], [89, 32], [91, 33], [94, 34],
+    [97, 35], [100, 36]
+  ];
+  var SAT_CURVE = [
+    [0, 200], [5, 210], [10, 240], [15, 270], [20, 300], [25, 330],
+    [30, 360], [35, 390], [40, 420], [45, 450], [50, 480], [55, 510],
+    [60, 540], [65, 570], [70, 600], [75, 640], [80, 670], [85, 700],
+    [90, 730], [95, 770], [100, 800]
+  ];
+  function scaleFromPct(pct, curve) {
+    if (pct <= curve[0][0]) return curve[0][1];
+    for (var i = 1; i < curve.length; i++) {
+      if (pct <= curve[i][0]) {
+        var lo = curve[i - 1], hi = curve[i];
+        var frac = (pct - lo[0]) / (hi[0] - lo[0]);
+        return Math.round(lo[1] + frac * (hi[1] - lo[1]));
+      }
+    }
+    return curve[curve.length - 1][1];
+  }
+  function roundToTen(n) { return Math.round(n / 10) * 10; }
+
   /* ═══ SKILL PREREQUISITES ═══
      Standard curriculum sequencing — the kind of thing an experienced
      tutor already knows (algebra fundamentals come before the topics
@@ -157,46 +198,46 @@
      guessing. This is intentionally not exhaustive: only the clear,
      defensible relationships are included.
      */
+  // Rebuilt for the official College Board skill vocabulary (see the
+  // domain/skill audit — every SAT question's "skill" field is now one of
+  // the ~19 skill names College Board itself uses, not the bank's old
+  // homegrown finer-grained labels). That's a much coarser set than
+  // before: several old entries that used to be distinct prereq pairs
+  // (e.g. "Factoring" and "Number of Solutions") are now literally the
+  // SAME official skill, so a prereq relationship between them no longer
+  // makes sense and those entries are gone. What's left are relationships
+  // that still hold at this coarser grain — still an experienced tutor's
+  // ordinary curriculum sequencing, not anything CB-specific.
   var SKILL_PREREQS = {
-    // Math — algebra chain
-    'Number of Solutions': ['Factoring', 'Equivalent Expressions'],
-    'Sum & Product Formula': ['Factoring'],
-    'Nonlinear Functions': ['Factoring', 'Linear Equations in One Variable'],
-    'Circle Equations': ['Factoring', 'Equivalent Expressions'],
-    'Conic Sections (Ellipses and Hyperbolas)': ['Circle Equations'],
-    'Logarithms': ['Equivalent Expressions'],
-    'Linear Inequalities': ['Linear Equations in One Variable'],
-    'Regression': ['One-Variable Data', 'Single-Variable Data'],
-    'Table Regression': ['One-Variable Data', 'Single-Variable Data'],
-    'Bracket Regression': ['One-Variable Data', 'Single-Variable Data'],
-    'Evaluation of Models': ['One-Variable Data', 'Single-Variable Data', 'Two-Variable Data'],
-    'Two-Variable Data': ['One-Variable Data', 'Single-Variable Data'],
+    // Math — Algebra chain
+    'Linear Functions': ['Linear Equations in One Variable'],
+    'Linear Equations in Two Variables': ['Linear Equations in One Variable'],
+    'Systems of Two Linear Equations in Two Variables': ['Linear Equations in Two Variables'],
+    'Linear Inequalities in One or Two Variables': ['Linear Equations in One Variable'],
+    // Math — Advanced Math chain
+    'Nonlinear Functions': ['Equivalent Expressions', 'Linear Functions'],
+    'Nonlinear Equations in One Variable and Systems of Equations in Two Variables': ['Equivalent Expressions', 'Systems of Two Linear Equations in Two Variables'],
+    // Math — Geometry and Trigonometry chain
+    'Right Triangles and Trigonometry': ['Lines, Angles, and Triangles'],
+    'Circles': ['Lines, Angles, and Triangles'],
+    // Math — Problem-Solving and Data Analysis chain
     'Percentages': ['Ratios, Rates, Proportions, and Units'],
-    'Percents': ['Ratios, Rates, Proportions, and Units'],
-    'Converting Units': ['Ratios, Rates, Proportions, and Units'],
-    'Similar Shapes': ['Angles, Lines & Triangles', 'Lines, Angles, and Triangles'],
-    'Right Triangles': ['Similar Shapes', 'Angles, Lines & Triangles'],
-    'Right Triangles and Trigonometry': ['Similar Shapes', 'Lines, Angles, and Triangles'],
-    // Reading & Writing — comprehension chain
-    'Inferences': ['Central Ideas', 'Key Ideas & Details'],
-    'Cross-Text Connections': ['Central Ideas', 'Inferences'],
-    'Command of Evidence': ['Central Ideas', 'Inferences'],
-    'Quantitative Evidence': ['Command of Evidence'],
-    'Rhetorical Synthesis': ['Central Ideas', 'Text Structure & Purpose', 'Topic & Purpose'],
-    'Interpretation of Data': ['Central Ideas'],
-    'Integration of Knowledge & Ideas': ['Key Ideas & Details'],
-    'Organization': ['Text Structure & Purpose', 'Topic & Purpose', 'Transitions'],
-    // Standard English Conventions — clause structure before the rules
-    // that depend on recognizing one
-    'Comma Usage': ['Sentence Boundaries', 'Sentence Fragments'],
-    'Nonessential Commas': ['Sentence Boundaries'],
-    'Colons & Lists': ['Sentence Boundaries'],
-    'Punctuation in Lists': ['Sentence Boundaries'],
-    'Parallel Structure': ['Sentence Boundaries'],
-    'Relative Pronouns': ['Sentence Boundaries'],
-    'Pronouns & Apostrophes': ['Sentence Boundaries'],
-    'Pronoun Clarity': ['Sentence Boundaries'],
-    'Dangling Modifiers': ['Sentence Boundaries']
+    'Two-Variable Data: Models and Scatterplots': ['One-Variable Data: Distributions and Measures of Center and Spread'],
+    'Inference from Sample Statistics and Margin of Error': ['One-Variable Data: Distributions and Measures of Center and Spread'],
+    'Evaluating Statistical Claims: Observational Studies and Experiments': ['Inference from Sample Statistics and Margin of Error'],
+    // Reading & Writing — Information and Ideas chain
+    'Inferences': ['Central Ideas and Details'],
+    'Command of Evidence (Textual)': ['Central Ideas and Details', 'Inferences'],
+    'Command of Evidence (Quantitative)': ['Command of Evidence (Textual)'],
+    // Reading & Writing — Craft and Structure chain
+    'Cross-Text Connections': ['Central Ideas and Details', 'Inferences'],
+    'Text Structure and Purpose': ['Central Ideas and Details'],
+    // Reading & Writing — Expression of Ideas chain
+    'Rhetorical Synthesis': ['Central Ideas and Details', 'Text Structure and Purpose'],
+    'Transitions': ['Text Structure and Purpose'],
+    // Standard English Conventions — recognizing clause/sentence structure
+    // before the agreement and form rules that depend on it
+    'Form, Structure, and Sense': ['Boundaries']
   };
   // A skill needs at least 2 attempts on this diagnostic before its
   // pattern (partial mastery vs. consistent miss) is trustworthy enough
@@ -246,7 +287,51 @@
     var sectionKeys = order.filter(function (k) { return window.SECTION_BANKS[k] && window.SECTION_BANKS[k].module1.length; });
     var seed = 42;
     function rand() { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return (seed % 1000) / 1000; }
-    var weakSkillBySection = { 'english': 'Comma Usage', 'act-math': 'Quadratics', 'math': 'Quadratics', 'reading': 'Integration of Knowledge & Ideas', 'reading-writing': 'Command of Evidence' };
+    // SAT skill names here must be exact official College Board strings
+    // (see the domain/skill audit in banks.js/practice-tests.js) — ACT
+    // entries are untouched, that's a separate taxonomy.
+    var weakSkillBySection = { 'english': 'Comma Usage', 'act-math': 'Quadratics', 'math': 'Nonlinear Equations in One Variable and Systems of Equations in Two Variables', 'reading': 'Integration of Knowledge & Ideas', 'reading-writing': 'Command of Evidence (Textual)' };
+
+    // &score=N previews roughly what that composite's report looks like
+    // (SAT: 400-1600, ACT: 1-36). Earlier this picked from three
+    // hard-coded wrong-rate presets guessed by eye, and they were off by
+    // 200+ points (1000/1250/1450 requested came out 770/1020/1200).
+    // Instead of guessing, this now BISECTS for a wrong-rate whose
+    // estimated composite (via the same scaleFromPct/SAT_CURVE curve the
+    // real report uses) lands on the requested score, then generates
+    // answers uniformly at that rate. It's still an estimate — the real
+    // report layers IRT weighting and the easier-Module-2 cap on top,
+    // which this search doesn't simulate — but it should land within a
+    // rounding step or two instead of hundreds of points off.
+    var scoreParam = parseInt((location.search.match(/[?&]score=(\d+)/) || [])[1], 10);
+    var scaleMax = testChoice === 'SAT' ? 1600 : 36, scaleMin = testChoice === 'SAT' ? 400 : 1;
+    var hasTarget = !isNaN(scoreParam);
+    var target = hasTarget ? Math.max(scaleMin, Math.min(scaleMax, scoreParam)) : null;
+
+    function estimateComposite(wrong) {
+      var pct = Math.max(0, Math.min(100, Math.round((1 - wrong) * 100)));
+      if (testChoice === 'SAT') return roundToTen(scaleFromPct(pct, SAT_CURVE)) * 2;
+      return scaleFromPct(pct, ACT_CURVE);
+    }
+    var BASE_WRONG;
+    if (target !== null) {
+      var lo = 0, hi = 1;
+      for (var iter = 0; iter < 30; iter++) {
+        var mid = (lo + hi) / 2;
+        if (estimateComposite(mid) > target) lo = mid; else hi = mid;
+      }
+      BASE_WRONG = (lo + hi) / 2;
+    } else {
+      BASE_WRONG = 0.22; // default demo (no &score= given) — matches the original preset
+    }
+    // A weak-skill spike only makes sense for the "no target given" default
+    // demo, to show what one concentrated gap looks like. Once a specific
+    // score is requested, applying the searched-for rate UNIFORMLY (no
+    // extra spike) is what actually makes the estimate accurate — misses
+    // land wherever chance puts them, which incidentally still scatters
+    // broadly at high wrong-rates and concentrates narrowly at low ones,
+    // without needing separate hard-coded bands to fake that effect.
+    var WEAK_WRONG = 0.78;
 
     var s = sectionKeys.map(function (key) {
       var variant = rand() < 0.5 ? 'Easier' : 'Harder';
@@ -254,8 +339,8 @@
       var answers = [], marked = [];
       var weakSkill = weakSkillBySection[key];
       qs.forEach(function (q) {
-        var wrong = rand() < 0.22;
-        if (weakSkill && q.skill === weakSkill) wrong = rand() < 0.78;
+        var wrong = rand() < BASE_WRONG;
+        if (!hasTarget && weakSkill && q.skill === weakSkill) wrong = rand() < WEAK_WRONG;
         var given;
         if (q.type === 'mc') {
           var n = (q.choices || []).length || 4;
@@ -377,54 +462,31 @@
      This backs every canvas with a bitmap 2-3x its display size (capped,
      so it doesn't balloon file size) and scales the drawing context to
      match, so all the coordinate math below stays in CSS pixels while
-     the actual pixels drawn are crisp at typical retina/print density. */
-  function crispCanvas(cssSize) {
-    var dpr = Math.min(window.devicePixelRatio || 1, 3);
-    var cv = document.createElement('canvas');
-    cv.width = Math.round(cssSize * dpr);
-    cv.height = Math.round(cssSize * dpr);
-    cv.style.width = cssSize + 'px';
-    cv.style.height = cssSize + 'px';
-    var ctx = cv.getContext('2d');
-    ctx.scale(dpr, dpr);
-    return { cv: cv, ctx: ctx };
-  }
+     the actual pixels drawn are crisp at typical retina/print density
+     (see crispCanvas2 below, used by the score-bridge canvas). */
 
-  /* ═══ SCORE TILES — ring + scaled score combined ═══
-     Each tile is one section's percentage ring (raw performance on this
-     diagnostic) fused with its scaled score underneath, instead of two
-     separate rows of circles and numbers that said mostly the same thing
-     twice. Overall/Composite leads, followed by one tile per section. */
-  function ring(cssSize, c, t, big) {
-    var r = cssSize / 2 - (big ? 12 : 7), cx = cssSize / 2;
-    var made = crispCanvas(cssSize), cv = made.cv, ctx = made.ctx;
-    var p = t ? c / t : 0;
-    ctx.lineWidth = big ? 13 : 8;
-    ctx.lineCap = 'round';
-    ctx.strokeStyle = '#eee7da';
-    ctx.beginPath(); ctx.arc(cx, cx, r, 0, Math.PI * 2); ctx.stroke();
-    ctx.strokeStyle = p < 0.5 ? '#B0271C' : (p >= 0.75 ? '#5E8B6F' : '#C9A84C');
-    ctx.beginPath(); ctx.arc(cx, cx, r, -Math.PI / 2, -Math.PI / 2 + p * Math.PI * 2); ctx.stroke();
-    ctx.fillStyle = '#1a1a1a';
-    ctx.font = '700 ' + (big ? 24 : 13) + 'px Poppins, sans-serif';
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText(Math.round(p * 100) + '%', cx, cx);
-    return cv;
-  }
+  /* ═══ SCORE TILES — flat number + fraction, no ring ═══
+     Used to be a percentage ring fused with the scaled score underneath.
+     A ring/circle draws the eye to itself without adding information a
+     plain number doesn't already say faster — the scaled score and the
+     raw c/t (%) underneath it are the same two facts, just as a flat
+     card instead of a chart. A thin top-edge accent still carries the
+     red/gold/green performance read the ring used to encode in stroke
+     color, without drawing a circle to do it. */
   function scoreTile(label, c, t, scaledScore, big) {
+    var p = t ? c / t : 0;
+    var band = p < 0.5 ? 'var(--red)' : (p >= 0.75 ? 'var(--green)' : 'var(--gold)');
     var tile = document.createElement('div');
-    tile.className = 'score-tile';
-    tile.appendChild(ring(big ? 130 : 68, c, t, big));
+    tile.className = 'score-tile' + (big ? ' big' : '');
+    tile.style.borderTopColor = band;
+    var num = document.createElement('div');
+    num.className = 'tile-score ' + (big ? 'big' : 'small');
+    num.textContent = (scaledScore !== null && scaledScore !== undefined) ? scaledScore : (Math.round(p * 100) + '%');
+    tile.appendChild(num);
     var frac = document.createElement('div');
     frac.className = 'tile-frac';
-    frac.textContent = c + '/' + t;
+    frac.textContent = c + '/' + t + ' (' + Math.round(p * 100) + '%)';
     tile.appendChild(frac);
-    if (scaledScore !== null && scaledScore !== undefined) {
-      var num = document.createElement('div');
-      num.className = 'tile-score ' + (big ? 'big' : 'small');
-      num.textContent = scaledScore;
-      tile.appendChild(num);
-    }
     var lb = document.createElement('div');
     lb.className = 'tile-lab' + (big ? ' big' : '');
     lb.textContent = label;
@@ -439,39 +501,6 @@
     row.innerHTML = '<div class="bar-label"><span>' + label + '</span><span>' + c + '/' + t + ' (' + p2 + '%)</span></div><div class="bar-track"><div class="bar-fill ' + (cls || '') + '" style="width:' + p2 + '%"></div></div>';
     return row;
   }
-
-  /* ═══ APPROXIMATE SCALED SCORING ═══
-     The SAT (200–800 per section, 400–1600 composite) and ACT (1–36 per
-     section, 1–36 composite) both use non-linear curves that vary test
-     to test — the real curve isn't published in advance. These tables
-     approximate the *typical* published official-practice-test curves
-     (percent-correct -> scaled score) closely enough for a diagnostic
-     estimate. They're explicitly labeled "approximate" in the UI. */
-  var ACT_CURVE = [
-    [0, 1], [4, 6], [8, 8], [12, 9], [16, 10], [20, 11], [24, 12], [28, 13],
-    [32, 14], [36, 15], [40, 16], [44, 17], [48, 18], [51, 19], [54, 20],
-    [57, 21], [60, 22], [63, 23], [66, 24], [69, 25], [71, 26], [74, 27],
-    [77, 28], [80, 29], [83, 30], [86, 31], [89, 32], [91, 33], [94, 34],
-    [97, 35], [100, 36]
-  ];
-  var SAT_CURVE = [
-    [0, 200], [5, 210], [10, 240], [15, 270], [20, 300], [25, 330],
-    [30, 360], [35, 390], [40, 420], [45, 450], [50, 480], [55, 510],
-    [60, 540], [65, 570], [70, 600], [75, 640], [80, 670], [85, 700],
-    [90, 730], [95, 770], [100, 800]
-  ];
-  function scaleFromPct(pct, curve) {
-    if (pct <= curve[0][0]) return curve[0][1];
-    for (var i = 1; i < curve.length; i++) {
-      if (pct <= curve[i][0]) {
-        var lo = curve[i - 1], hi = curve[i];
-        var frac = (pct - lo[0]) / (hi[0] - lo[0]);
-        return Math.round(lo[1] + frac * (hi[1] - lo[1]));
-      }
-    }
-    return curve[curve.length - 1][1];
-  }
-  function roundToTen(n) { return Math.round(n / 10) * 10; }
 
   /* ═══ SAT IRT-WEIGHTED SCORING MODEL ═══
      The digital SAT is adaptive (Module 1 routes to an easier or harder
@@ -528,7 +557,7 @@
     if (rw) tilesEl.appendChild(scoreTile('Reading & Writing', rw.c, rw.t, rwScaled, false));
     if (mathSec) tilesEl.appendChild(scoreTile('Math', mathSec.c, mathSec.t, mathScaled, false));
     var routedEasier = [rw, mathSec].some(function (s) { return s && s.variant === 'Easier'; });
-    scoreCaption.textContent = 'Rings show raw percent correct on this diagnostic. Scores below them are IRT-weighted estimates that reward correct hard questions and penalize missed easy ones, banded from a typical official-practice-test curve' + (routedEasier ? ' and capped where routing sent a section to the easier Module 2' : '') + '; the real SAT curve and item weights vary by test and aren\'t published in advance.';
+    scoreCaption.textContent = 'The fraction under each score is raw percent correct on this diagnostic. The score itself is an IRT-weighted estimate that rewards correct hard questions and penalizes missed easy ones, banded from a typical official-practice-test curve' + (routedEasier ? ' and capped where routing sent a section to the easier Module 2' : '') + '; the real SAT curve and item weights vary by test and aren\'t published in advance.';
   } else if (data.t === 'ACT') {
     var scaledScores = sections.map(function (s) { return scaleFromPct(s.c / s.t * 100, ACT_CURVE); });
     // The ACT Composite is the average of English, Math, and Reading only —
@@ -544,7 +573,7 @@
     var actComposite = compositeScores.length ? Math.round(compositeScores.reduce(function (a, b) { return a + b; }, 0) / compositeScores.length) : null;
     tilesEl.appendChild(scoreTile('Composite (1–36)', totalC, totalQ, actComposite, true));
     sections.forEach(function (s, i) { tilesEl.appendChild(scoreTile(s.label, s.c, s.t, scaledScores[i], false)); });
-    scoreCaption.textContent = 'Rings show raw percent correct on this diagnostic. Scores below them are estimated from a typical official-practice-test curve; the real ACT curve varies by test and isn\'t published in advance.';
+    scoreCaption.textContent = 'The fraction under each score is raw percent correct on this diagnostic. The score itself is estimated from a typical official-practice-test curve; the real ACT curve varies by test and isn\'t published in advance.';
   } else {
     tilesEl.style.display = 'none';
   }
@@ -561,6 +590,17 @@
       });
     });
     return skillMiss;
+  }
+  // Which domain (the test's own broader content category, e.g. "Algebra")
+  // each missed skill in this section falls under — used by the score
+  // bridge to roll long-tail skills up to their parent domain instead of
+  // flattening them into one undifferentiated "Other" bucket.
+  function sectionSkillDomain(s5) {
+    var dom = {};
+    Object.keys(s5.domains).forEach(function (d) {
+      Object.keys(s5.domains[d].missedSkills).forEach(function (sk) { dom[sk] = d; });
+    });
+    return dom;
   }
 
   /* ═══ PATH TO TARGET SCORE — "score bridge" waterfall ═══
@@ -597,6 +637,7 @@
     if (data.t === 'SAT') {
       sections.forEach(function (s) {
         var skillMiss = sectionSkillMiss(s);
+        var skillDom = sectionSkillDomain(s);
         var totalMissed = Object.keys(skillMiss).reduce(function (a, k) { return a + skillMiss[k]; }, 0);
         if (!totalMissed) return;
         var baseScaled = (s.key === 'reading-writing') ? rwScaled : (s.key === 'math' ? mathScaled : null);
@@ -607,12 +648,13 @@
         var perMiss = sectionRecoverable / totalMissed;
         Object.keys(skillMiss).forEach(function (sk) {
           var pts = skillMiss[sk] * perMiss;
-          if (pts > 0) bridgeItems.push({ label: sk, points: pts, tag: classifySkill(skills, sk) });
+          if (pts > 0) bridgeItems.push({ label: sk, points: pts, tag: classifySkill(skills, sk), dom: skillDom[sk] });
         });
       });
     } else if (data.t === 'ACT') {
       sections.forEach(function (s, si) {
         var skillMiss = sectionSkillMiss(s);
+        var skillDom = sectionSkillDomain(s);
         var totalMissed = Object.keys(skillMiss).reduce(function (a, k) { return a + skillMiss[k]; }, 0);
         if (!totalMissed) return;
         var fullFixScaled = scaleFromPct(100, ACT_CURVE);
@@ -624,7 +666,7 @@
         var perMiss = sectionRecoverable / totalMissed;
         Object.keys(skillMiss).forEach(function (sk) {
           var pts = skillMiss[sk] * perMiss;
-          if (pts > 0) bridgeItems.push({ label: sk, points: pts, tag: classifySkill(skills, sk) });
+          if (pts > 0) bridgeItems.push({ label: sk, points: pts, tag: classifySkill(skills, sk), dom: skillDom[sk] });
         });
       });
     }
@@ -639,29 +681,78 @@
     var headroom = scoreMax - currentComposite;
     if (rawTotalRecoverable > headroom && rawTotalRecoverable > 0) {
       var capScale = headroom / rawTotalRecoverable;
-      bridgeItems = bridgeItems.map(function (e) { return { label: e.label, points: e.points * capScale, tag: e.tag }; });
+      bridgeItems = bridgeItems.map(function (e) { return { label: e.label, points: e.points * capScale, tag: e.tag, dom: e.dom }; });
     }
     bridgeItems.sort(function (a, b) { return b.points - a.points; });
 
-    // Every named segment must be worth at least ~1 point once rounded —
-    // a real but tiny slice (say, one miss inside an 8-skill-wide weak
-    // section) otherwise displays as a nonsensical "+0". Anything under
-    // that threshold, plus anything past the top 6, folds into one
-    // "Other" bar instead of showing as a zero.
-    var MAX_BRIDGE = 6;
+    // A skill only gets its own named bar if it's a genuinely large,
+    // concentrated gap — worth calling out by exact name (top MAX_NAMED
+    // by size, and at least NAMED_MIN points so it reads as a real,
+    // specific opportunity rather than a rounding artifact).
+    //
+    // Everything else does NOT get flattened into one "Other" blob
+    // anymore. It rolls up to its parent DOMAIN instead — the test's own
+    // broader content category (e.g. "Algebra," "Craft and Structure").
+    // A low scorer's gaps are typically spread evenly across many small
+    // skills rather than concentrated in one or two; grouping those by
+    // domain keeps the chart meaningful ("Other — Algebra," "Other —
+    // Geometry and Trigonometry") instead of naming a handful of
+    // arbitrary small skills while everything else disappears into an
+    // undifferentiated catch-all.
+    //
+    // TOTAL_MAX_BARS is a hard ceiling on the whole chart (named skills +
+    // domain rollups + the generic catch-all combined) — the earlier
+    // version capped named skills and domain rollups independently (up to
+    // 6 + 4 + 1 = 11 mid-bars, plus 2 endpoints), which was the "too many
+    // bars crammed in" problem. Named skills get first claim on the
+    // budget since they're the most specific/useful; whatever's left
+    // fills with domain rollups, largest first.
+    var TOTAL_MAX_BARS = 6, MAX_NAMED = 4, NAMED_MIN = 0.5;
     var namedItems = [];
-    var otherPts = 0;
+    var leftover = [];
     bridgeItems.forEach(function (item) {
-      if (namedItems.length < MAX_BRIDGE && item.points >= 0.5) namedItems.push(item);
-      else otherPts += item.points;
+      if (namedItems.length < MAX_NAMED && item.points >= NAMED_MIN) namedItems.push(item);
+      else leftover.push(item);
     });
-    var shownItems = namedItems.slice();
-    if (otherPts >= 0.5) shownItems.push({ label: 'Other opportunities', points: otherPts });
+
+    var domainBuckets = {}; // domain label -> accumulated points
+    var undomainedPts = 0; // safety net if an item somehow has no domain tag
+    leftover.forEach(function (item) {
+      if (item.dom) domainBuckets[item.dom] = (domainBuckets[item.dom] || 0) + item.points;
+      else undomainedPts += item.points;
+    });
+    var domainItems = Object.keys(domainBuckets)
+      .map(function (d) { return { label: 'Other — ' + d, points: domainBuckets[d] }; })
+      .sort(function (a, b) { return b.points - a.points; });
+
+    // Reserve one slot for a final generic "Other opportunities" bar
+    // whenever there's anything left to put in it, so the remaining
+    // budget for named domain rollups is TOTAL_MAX_BARS minus the named
+    // skills already placed minus that reserved slot.
+    var domainSlots = Math.max(0, TOTAL_MAX_BARS - namedItems.length - 1);
+    var shownDomainItems = [];
+    var genericOtherPts = undomainedPts;
+    domainItems.forEach(function (item, i) {
+      if (i < domainSlots && item.points >= 0.5) shownDomainItems.push(item);
+      else genericOtherPts += item.points;
+    });
+
+    var shownItems = namedItems.concat(shownDomainItems);
+    if (genericOtherPts >= 0.5) shownItems.push({ label: 'Other opportunities', points: genericOtherPts });
 
     // The bars now always sum to exactly this — no more overshoot past
     // the endpoint bar.
     var totalRecoverable = bridgeItems.reduce(function (a, e) { return a + e.points; }, 0);
-    var reachable = Math.round(currentComposite + totalRecoverable);
+    // The real SAT only ever reports composites in 10-point steps (its
+    // section scores are each 200-800 in 10s) — currentComposite is
+    // already guaranteed to land on a multiple of 10 since it's the sum
+    // of two roundToTen'd section scores, but this projected "reachable"
+    // figure wasn't going through the same rounding, so it could land on
+    // an off value like 1247 instead of 1250. roundToTen keeps it
+    // consistent with every other SAT number on this report; ACT
+    // composites are whole-number 1-36 and were already correct with a
+    // plain Math.round.
+    var reachable = isSAT ? roundToTen(currentComposite + totalRecoverable) : Math.round(currentComposite + totalRecoverable);
     var hitCeiling = rawTotalRecoverable > headroom;
 
     var defaultTarget = isSAT ? Math.min(scoreMax, roundToTen(currentComposite + 150)) : Math.min(scoreMax, currentComposite + 3);
@@ -670,6 +761,10 @@
     try { var sv = localStorage.getItem(storeKey); if (sv) savedTarget = parseInt(sv, 10); } catch (e) {}
     var targetScore = (savedTarget !== null && !isNaN(savedTarget)) ? savedTarget : defaultTarget;
     targetScore = Math.max(currentComposite, Math.min(scoreMax, targetScore));
+    // A saved value from before this fix (or manual tampering) could
+    // still be off-grid — snap it to the nearest 10 for SAT so the
+    // displayed target always matches a real, reportable SAT score.
+    if (isSAT) targetScore = roundToTen(targetScore);
 
     renderBridge();
 
@@ -733,6 +828,11 @@
         var v = parseInt(input.value, 10);
         if (isNaN(v)) return;
         v = Math.max(currentComposite, Math.min(scoreMax, v));
+        // The number input's step="10" only guides the up/down arrows —
+        // a parent can still type 1434 directly, which isn't a score the
+        // real SAT ever reports. Snap it to the nearest 10 so every
+        // target this chart can show stays a real, valid SAT score.
+        if (isSAT) v = roundToTen(v);
         targetScore = v;
         try { localStorage.setItem(storeKey, String(v)); } catch (e) {}
         renderBridge();
@@ -749,7 +849,13 @@
         .concat(items.map(function (e) { return { label: e.label, points: e.points, tag: e.tag }; }))
         .concat([{ label: 'Max recoverable', val: endVal, isEndpoint: true }]);
 
-      var w = 620, h = 185, padL = 40, padR = 62, padT = 14, padB = 42;
+      // Width grows with the bar count (more likely now that a low
+      // scorer's spread-out gaps can name up to 9 skills instead of 6) so
+      // bars/labels don't get squeezed thinner than a 6-bar chart used to
+      // be — capped at 680px, the widest a chart can run and still sit
+      // inside the printed page's margins (8.5in page minus 0.65in side
+      // padding each side, at 96dpi).
+      var w = Math.min(680, Math.max(620, 52 * bars.length)), h = 185, padL = 40, padR = 62, padT = 14, padB = 42;
       var plotW = w - padL - padR, plotH = h - padT - padB;
       var n = bars.length;
       var barW = plotW / n * 0.62;
@@ -801,7 +907,14 @@
           ctx.fillStyle = '#1a1a1a';
           ctx.font = '600 11px Poppins, sans-serif';
           ctx.textAlign = 'center';
-          ctx.fillText('+' + Math.round(b.points), bx + barW / 2, top - 6);
+          // SAT composites only ever move in 10-point steps (each section
+          // score is a multiple of 10), so a per-skill "+13" reads as a
+          // real score value that can't actually occur. Round each bar's
+          // label to the nearest 10 for display, same as every other SAT
+          // number on this report — floor of 10 so a genuinely nonzero
+          // sliver still shows as recoverable rather than rounding to +0.
+          var barLabelPts = isSAT ? Math.max(10, roundToTen(b.points)) : Math.round(b.points);
+          ctx.fillText('+' + barLabelPts, bx + barW / 2, top - 6);
           if (b.tag === 'quick' || b.tag === 'deep') {
             ctx.beginPath();
             ctx.fillStyle = b.tag === 'quick' ? '#5E8B6F' : '#7A3B32';
@@ -869,10 +982,13 @@
   }
 
   /* ═══ SECTION BREAKDOWN — chunked by section, not lumped together ═══
-     Each section gets its own card: total missed, a pie showing which
-     domains those misses fall into (within THAT section only), and the
-     specific skills missed inside each weak domain — so "Math" and
-     "Reading" results never get mixed into one combined chart. */
+     Each section gets its own card: total missed, a ranked bar list
+     showing which skills those misses fall into (within THAT section
+     only), and the specific skills missed inside each weak domain — so
+     "Math" and "Reading" results never get mixed into one combined
+     chart. Flat horizontal bars instead of a pie: a ranked list reads
+     faster for "where do I improve" than matching wedge size/color back
+     to a legend, and it matches the score-bridge bars above. */
   // One cohesive palette, shared by every chart on this report — all
   // tints/shades of the same five brand colors (red, gold, green, navy,
   // tan) instead of throwing in unrelated grays/corals/lavenders per
@@ -880,56 +996,62 @@
   // like they'd been colored by two different people.
   var palette = BRAND_PALETTE;
 
-  function sectionPie(s5) {
+  function sectionSkillBars(s5) {
     var wrap = document.createElement('div');
-    wrap.className = 'sc-pie-flex';
-    var size = 96, r = 40, cx = size / 2;
-    var made = crispCanvas(size), cv = made.cv, ctx = made.ctx;
-    wrap.appendChild(cv);
-    var legend = document.createElement('div');
-    legend.className = 'sc-legend';
-    wrap.appendChild(legend);
+    wrap.className = 'sc-bars';
 
-    // Sliced by skill (the "subclassification" within a section), not by
+    // Ranked by skill (the "subclassification" within a section), not by
     // domain — domain is often uniform across an entire section (every
-    // ACT Reading question is domain "Reading"), so a domain-level pie
-    // would just be one solid color. Skill is the level of detail that
-    // actually tells you what to work on.
+    // ACT Reading question is domain "Reading"), so a domain-level list
+    // would just be one bar. Skill is the level of detail that actually
+    // tells you what to work on.
     var skillMiss = sectionSkillMiss(s5);
+    var skillDom = sectionSkillDomain(s5);
     var allEntries = Object.keys(skillMiss).map(function (sk) {
-      return { name: sk, miss: skillMiss[sk] };
+      return { name: sk, miss: skillMiss[sk], dom: skillDom[sk] };
     }).sort(function (a, b) { return b.miss - a.miss; });
     var totalMiss = allEntries.reduce(function (a, e) { return a + e.miss; }, 0);
 
-    // Cap the legend at the top 5 skills — a 96px pie with a dozen-plus
-    // wedges is unreadable no matter how it's drawn, and a wall of tiny
-    // legend rows is exactly the "too large/hard to look at" problem.
-    // Anything past the top 5 gets folded into a single "Other" slice so
-    // the total still reads correctly.
-    var MAX_SLICES = 5;
+    // Cap the list at the top 3 skills — a dozen-plus thin bars is exactly
+    // as unreadable as a dozen-plus pie wedges. Anything past that no
+    // longer collapses into one flat "Other (N skills)" row — a low
+    // scorer whose misses are spread evenly across many skills would have
+    // that single row swallow most of the list, telling a parent nothing
+    // about where the weight actually sits. Instead the leftover skills
+    // roll up to their parent DOMAIN (same rollup the score bridge above
+    // uses), so the tail still reads as "mostly Algebra, some Geometry."
+    // TOTAL_MAX_ROWS is a hard ceiling on the whole list (named skills +
+    // domain rollups + the generic catch-all combined) — named skills get
+    // first claim on the budget, domain rollups fill what's left.
+    var TOTAL_MAX_ROWS = 5, MAX_SLICES = 3;
     var missEntries = allEntries.slice(0, MAX_SLICES);
-    if (allEntries.length > MAX_SLICES) {
-      var otherMiss = allEntries.slice(MAX_SLICES).reduce(function (a, e) { return a + e.miss; }, 0);
-      missEntries.push({ name: 'Other (' + (allEntries.length - MAX_SLICES) + ' skills)', miss: otherMiss });
+    var leftoverEntries = allEntries.slice(MAX_SLICES);
+    if (leftoverEntries.length) {
+      var domBuckets = {}, undomainedMiss = 0;
+      leftoverEntries.forEach(function (e) {
+        if (e.dom) domBuckets[e.dom] = (domBuckets[e.dom] || 0) + e.miss;
+        else undomainedMiss += e.miss;
+      });
+      var domEntries = Object.keys(domBuckets).map(function (d) {
+        return { name: 'Other — ' + d, miss: domBuckets[d] };
+      }).sort(function (a, b) { return b.miss - a.miss; });
+      var domSlots = Math.max(0, TOTAL_MAX_ROWS - missEntries.length - 1);
+      domEntries.slice(0, domSlots).forEach(function (e) { missEntries.push(e); });
+      var restMiss = domEntries.slice(domSlots).reduce(function (a, e) { return a + e.miss; }, 0) + undomainedMiss;
+      if (restMiss > 0) missEntries.push({ name: 'Other', miss: restMiss });
     }
 
     if (!totalMiss) {
-      ctx.fillStyle = '#eee7da';
-      ctx.beginPath(); ctx.arc(cx, cx, r, 0, Math.PI * 2); ctx.fill();
-      legend.innerHTML = '<div>Nothing missed in this section.</div>';
+      wrap.innerHTML = '<div class="sc-bar-empty">Nothing missed in this section.</div>';
       return wrap;
     }
-    var ang = -Math.PI / 2;
     missEntries.forEach(function (e, i) {
-      var slice = (e.miss / totalMiss) * Math.PI * 2;
-      ctx.fillStyle = palette[i % palette.length];
-      ctx.beginPath(); ctx.moveTo(cx, cx); ctx.arc(cx, cx, r, ang, ang + slice); ctx.closePath(); ctx.fill();
-      ang += slice;
-    });
-    missEntries.forEach(function (e, i) {
+      var pct = Math.round(e.miss / totalMiss * 100);
       var row = document.createElement('div');
-      row.innerHTML = '<span class="sw" style="background:' + palette[i % palette.length] + '"></span>' + e.name + ' — ' + e.miss + ' (' + Math.round(e.miss / totalMiss * 100) + '%)';
-      legend.appendChild(row);
+      row.className = 'sc-bar-row';
+      row.innerHTML = '<div class="sc-bar-label"><span>' + e.name + '</span><span>' + e.miss + ' (' + pct + '%)</span></div>' +
+        '<div class="sc-bar-track"><div class="sc-bar-fill" style="width:' + pct + '%;background:' + palette[i % palette.length] + '"></div></div>';
+      wrap.appendChild(row);
     });
     return wrap;
   }
@@ -950,7 +1072,6 @@
     incEl.className = 'sc-incorrect';
     incEl.textContent = incorrectN + ' incorrect';
     card.appendChild(incEl);
-    card.appendChild(sectionPie(s5));
 
     // Distractor-pattern flag: with only 3-4 wrong-answer letters to choose
     // from, a single letter landing on "50% of missed questions" happens
@@ -960,18 +1081,27 @@
     // enough — 6+ missed MC and a clear majority — that this should only
     // fire when a letter is landing meaningfully more than chance would
     // predict (~33%), not on every report.
+    //
+    // This is a directly counted fact (how many missed questions landed on
+    // the same letter), not a modeled estimate, so it belongs on the same
+    // "raw" footing as the skill bars below — but it's a different KIND of
+    // fact (answering behavior, not a content gap), so it gets its own
+    // flagged callout up top rather than blending into the missed-skill
+    // text underneath, where it used to be easy to miss entirely.
     var distEntries = Object.keys(s5.distractors || {}).map(function (l) { return { letter: l, n: s5.distractors[l] }; }).sort(function (a, b) { return b.n - a.n; });
     if (s5.missedMc >= 6 && distEntries.length && distEntries[0].n / s5.missedMc >= 0.6) {
       var distNote = document.createElement('div');
-      distNote.className = 'sc-missed';
-      distNote.innerHTML = '<strong>Possible pattern:</strong> picked (' + distEntries[0].letter + ') on ' + distEntries[0].n + ' of ' + s5.missedMc + ' missed multiple-choice questions here. Worth a quick check together; it may just be this test\'s content rather than a trap-answer habit.';
+      distNote.className = 'sc-flag';
+      distNote.innerHTML = '<span class="sc-flag-mark">!</span><span><strong>Possible pattern:</strong> picked (' + distEntries[0].letter + ') on ' + distEntries[0].n + ' of ' + s5.missedMc + ' missed multiple-choice questions here. Worth a quick check together; it may just be this test\'s content rather than a trap-answer habit.</span>';
       card.appendChild(distNote);
     }
 
+    card.appendChild(sectionSkillBars(s5));
+
     // Only the domain bar itself is shown here — the per-skill "missed on"
-    // breakdown is already in the pie legend directly above, so repeating
-    // it as text underneath was the same information twice in the same
-    // card.
+    // breakdown is already in the skill bar list directly above, so
+    // repeating it as text underneath was the same information twice in
+    // the same card.
     var domEntries = Object.keys(s5.domains).map(function (d) {
       var v = s5.domains[d];
       return { name: d, c: v.c, t: v.t, pct: v.t ? v.c / v.t : 0 };
