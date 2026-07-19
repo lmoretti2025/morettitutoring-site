@@ -562,6 +562,37 @@
     return v !== null && !isNaN(v) && Math.abs(v - q.answer) < 0.05;
   }
 
+  // Collapse to ONE saved entry per section key before scoring. A
+  // correctly-saved diagnostic has exactly one entry per section, but a
+  // bug in an earlier version of the diagnostic-taking flow (a resume /
+  // "continue where you left off" left a partial, never-completed section
+  // in the record alongside the completed one) could write a second stub
+  // for the same section — e.g. a math entry with variant null and only
+  // Module 1's answers sitting next to the real completed math entry.
+  // Left unmerged, sectionQuestions() pads that 22-answer stub out to the
+  // full 44-question section, so it renders as a whole extra section of
+  // blanks and inflates the total question count (54+44+44=142 instead of
+  // 54+44=98). This keeps, per key, the most complete attempt — the one
+  // with the most saved answers; on a tie, the later one in the record,
+  // which is the more recent attempt — and drops the stragglers, so an
+  // already-saved corrupt record displays correctly without a re-take.
+  (function dedupeSections() {
+    if (!data.s || !data.s.length) return;
+    var bestByKey = {}, orderSeen = [];
+    data.s.forEach(function (sec, idx) {
+      var prev = bestByKey[sec.k];
+      var len = (sec.a && sec.a.length) || 0;
+      if (!prev) { orderSeen.push(sec.k); }
+      // Replace when this entry has more answers, or the same count but
+      // appears later (idx larger) — later means more recently recorded.
+      if (!prev || len > prev.len || (len === prev.len && idx > prev.idx)) {
+        bestByKey[sec.k] = { sec: sec, len: len, idx: idx };
+      }
+    });
+    var deduped = orderSeen.map(function (k) { return bestByKey[k].sec; });
+    if (deduped.length !== data.s.length) data.s = deduped;
+  })();
+
   var totalC = 0, totalQ = 0, domains = {}, skills = {}, sections = [], markedT = 0, markedC = 0, skipped = 0;
   data.s.forEach(function (sec) {
     var bank = window.SECTION_BANKS[sec.k];
