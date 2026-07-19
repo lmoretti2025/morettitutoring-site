@@ -2225,7 +2225,18 @@
 
     progLabel.textContent = 'Complete';
 
-    completedSections.push({ key: activeSectionKeys[sectionIndex], label: SECTION_BANKS[activeSectionKeys[sectionIndex]].label, answers: canonical(answers), marked: canonical(marked) });
+    // NOTE: do NOT push the current section here. The only caller of
+    // finishDiagnostic() is finishCurrentModule(), which has ALREADY
+    // pushed the fully-assembled final section (Module 1 + Module 2
+    // combined, with its module2Variant) into completedSections one step
+    // earlier. Re-pushing here used to append a SECOND, malformed entry
+    // for that same section: it used the raw `answers` array (only the
+    // last module's answers, never concatenated with module1Buffer) and
+    // ran after module2Variant had been reset to null — i.e. a
+    // variant-null, half-length stub. report.html then padded that stub
+    // out to a full extra section of blanks, inflating a two-section SAT
+    // from 98 questions to 142. The section is already recorded; just
+    // finalize.
     clearState(); // the diagnostic is over either way — nothing left to resume
     clearResumeSnapshot(currentStudent && currentStudent.key); // same — this attempt is done, don't offer to resume it later
 
