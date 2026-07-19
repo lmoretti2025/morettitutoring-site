@@ -44,14 +44,12 @@
   .bridge-target-row input::-webkit-outer-spin-button,
   .bridge-target-row input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
   .bridge-target-row .bt-reset { font-size: 9px; color: var(--faint); text-decoration: underline; cursor: pointer; background: none; border: none; padding: 0; font-family: 'Poppins'; }
+  .bridge-target-row .bt-drag-hint { font-size: 9px; color: var(--faint); margin-left: 4px; }
   .bridge-target-row .bt-static { display: none; font-weight: 600; font-size: 13px; color: var(--red); }
   .bridge-canvas-wrap { text-align: center; }
   .bridge-empty { font-size: 11px; color: var(--mid); padding: 6px 0; }
   .bridge-note { font-size: 9px; color: var(--faint); margin-top: 8px; }
-  .bridge-legend { display: flex; gap: 18px; flex-wrap: wrap; font-size: 9px; color: var(--mid); margin-top: 6px; }
-  .bl-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
-  .bl-dot.quick { background: #5E8B6F; }
-  .bl-dot.deep { background: #7A3B32; }
+  .bridge-other-note { margin-top: 6px; margin-bottom: 0; }
   .section-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; margin-bottom: 2px; }
   .section-card { border: 1px solid var(--border); padding: 10px 12px; }
   .section-card .sc-hed { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 3px; }
@@ -91,7 +89,7 @@
        printed to PDF they'd show as a static, uneditable text box that
        still looks clickable. Swap in a plain static value instead so the
        PDF a parent receives reads as a finished report, not an app. */
-    .bridge-target-row input, .bridge-target-row .bt-reset { display: none; }
+    .bridge-target-row input, .bridge-target-row .bt-reset, .bridge-target-row .bt-drag-hint { display: none; }
     /* Interactive-only control — if a parent's PDF happens to be printed
        with the detail page expanded that's fine, but the toggle link
        itself has nothing to do once it's on paper. */
@@ -168,11 +166,47 @@
     [77, 28], [80, 29], [83, 30], [86, 31], [89, 32], [91, 33], [94, 34],
     [97, 35], [100, 36]
   ];
-  var SAT_CURVE = [
-    [0, 200], [5, 210], [10, 240], [15, 270], [20, 300], [25, 330],
-    [30, 360], [35, 390], [40, 420], [45, 450], [50, 480], [55, 510],
-    [60, 540], [65, 570], [70, 600], [75, 640], [80, 670], [85, 700],
-    [90, 730], [95, 770], [100, 800]
+  // Built from the actual digital-SAT curve read directly off Albert.io's
+  // published score calculator (the user sampled its section-score output
+  // across a range of raw scores; those readings are the source here).
+  // This replaced an earlier attempt that used College Board's PAPER
+  // practice-test conversion table — that table is for a fixed 66-question
+  // Reading & Writing / 54-question Math paper form, a different curve
+  // from the adaptive digital test Albert models and this bank matches
+  // (54 R&W = 27+27, 44 Math = 22+22), and bridging the two by percentage
+  // was the source of a persistent under/over-estimate. These are the
+  // real digital numbers instead.
+  //
+  // Each entry is [percent of the section's raw-score max, section score].
+  // The readings were taken with the two module sliders set EQUAL, so
+  // Albert's own module weighting cancels out and each point is the pure
+  // base curve for a given total raw score; this report then re-adds the
+  // Module-1-vs-Module-2 effect separately via MODULE_WEIGHT below.
+  // Math and R&W are genuinely different curves (Math is steeper near the
+  // top), so each section reads its own.
+  //
+  // Sample points (balanced split -> total raw -> score), all read off
+  // Albert's calculator; denser near the top of each section, where the
+  // curve bends hardest and a top-scoring student lives:
+  //   R&W (max 54):  0->200, 8->270, 16->320, 24->370, 32->470,
+  //                  40->590, 44->650, 48->710, 50->740, 52->770, 54->800
+  //   Math (max 44): 0->200, 6->260, 12->330, 20->400, 26->480,
+  //                  32->580, 34->620, 38->700, 40->730, 42->770, 44->800
+  // The Math 84.09% -> 675 point is not a balanced-split reading but is
+  // pinned by Albert's two module-split screenshots (37/44 total scores
+  // 650 with a weak Module 1 and 700 with a strong one; their midpoint,
+  // where the module term is zero, is the base value at 37 raw). It sits
+  // between the measured 34->620 and 38->700 points and keeps those two
+  // module-split results exact.
+  var RW_CURVE = [
+    [0, 200], [14.81, 270], [29.63, 320], [44.44, 370], [59.26, 470],
+    [74.07, 590], [81.48, 650], [88.89, 710], [92.59, 740], [96.3, 770],
+    [100, 800]
+  ];
+  var MATH_CURVE = [
+    [0, 200], [13.64, 260], [27.27, 330], [45.45, 400], [59.09, 480],
+    [72.73, 580], [77.27, 620], [84.09, 675], [86.36, 700], [90.91, 730],
+    [95.45, 770], [100, 800]
   ];
   function scaleFromPct(pct, curve) {
     if (pct <= curve[0][0]) return curve[0][1];
@@ -186,6 +220,15 @@
     return curve[curve.length - 1][1];
   }
   function roundToTen(n) { return Math.round(n / 10) * 10; }
+  // Points per unit of (module-1 rate − module-2 rate) in the SAT section
+  // score — calibrated to Albert.io's published digital-SAT calculator
+  // (see satSectionScore below for the full derivation). Declared here,
+  // next to the curves, rather than beside satSectionScore, because the
+  // demo score search (buildDemoData) runs before satSectionScore's line
+  // in the file and calls it — if this constant weren't assigned yet, the
+  // multiplication would produce NaN and the whole demo would fail to
+  // render.
+  var MODULE_WEIGHT = 80;
 
   /* ═══ SKILL PREREQUISITES ═══
      Standard curriculum sequencing — the kind of thing an experienced
@@ -239,23 +282,20 @@
     // before the agreement and form rules that depend on it
     'Form, Structure, and Sense': ['Boundaries']
   };
-  // A skill needs at least 2 attempts on this diagnostic before its
-  // pattern (partial mastery vs. consistent miss) is trustworthy enough
-  // to classify — same reliability bar used for the priorities list
-  // elsewhere in this report.
-  function classifySkill(skillsMap, sk) {
-    var v = skillsMap[sk];
-    if (!v || v.t < 2) return null;
-    var missed = v.t - v.c;
-    if (missed <= 0) return null;
-    var mm = skillMissMarked[sk];
-    var markedShare = (mm && mm.missed) ? mm.marked / mm.missed : 0;
-    // Got at least one right in this skill AND mostly didn't flag the
-    // misses as guesses going in — reads as a careless-error pattern
-    // more than a true content gap.
-    if (v.c > 0 && markedShare < 0.5) return 'quick';
-    return 'deep';
-  }
+  // A per-skill "quick fix (careless) vs. real gap" classifier used to
+  // live here, keyed off whether the student had gotten at least one
+  // right on that skill and whether misses were self-flagged as guesses.
+  // Removed: on this diagnostic a single skill gets as few as 2-3
+  // attempts, and the guess/no-guess split on top of that shrinks the
+  // effective sample further — nowhere near enough to tell "careless
+  // slip" from "doesn't know it yet" with any real confidence, no matter
+  // where the threshold is set. Presenting that call with a confident
+  // green/red dot next to a specific point value overstated what a
+  // diagnostic this size can actually support. The guess-vs-gap read
+  // that stays in this report (further down, near the takeaways) is
+  // built from every flagged question across the WHOLE diagnostic
+  // instead of one skill's handful of attempts, which is a sample size
+  // that can actually carry that claim.
   function fail() { document.getElementById('err').style.display = 'block'; }
 
   /* ═══ DEMO MODE ═══
@@ -293,67 +333,206 @@
     var weakSkillBySection = { 'english': 'Comma Usage', 'act-math': 'Quadratics', 'math': 'Nonlinear Equations in One Variable and Systems of Equations in Two Variables', 'reading': 'Integration of Knowledge & Ideas', 'reading-writing': 'Command of Evidence (Textual)' };
 
     // &score=N previews roughly what that composite's report looks like
-    // (SAT: 400-1600, ACT: 1-36). Earlier this picked from three
-    // hard-coded wrong-rate presets guessed by eye, and they were off by
-    // 200+ points (1000/1250/1450 requested came out 770/1020/1200).
-    // Instead of guessing, this now BISECTS for a wrong-rate whose
-    // estimated composite (via the same scaleFromPct/SAT_CURVE curve the
-    // real report uses) lands on the requested score, then generates
-    // answers uniformly at that rate. It's still an estimate — the real
-    // report layers IRT weighting and the easier-Module-2 cap on top,
-    // which this search doesn't simulate — but it should land within a
-    // rounding step or two instead of hundreds of points off.
+    // (SAT: 400-1600, ACT: 1-36). Three earlier versions of this all
+    // missed: (1) three hard-coded wrong-rate presets guessed by eye
+    // (1000/1250/1450 requested came out 770/1020/1200); (2) bisecting a
+    // simplified formula that ignored IRT tilt and the easier-Module-2
+    // cap, then generating the real answers separately, so the number
+    // searched for wasn't the number actually displayed, and Module 2
+    // routing was an independent coin flip that could (and did) route a
+    // strong performance into the Easier path anyway — capping that
+    // section at 650 regardless of wrong rate, so anything above ~1300
+    // was structurally unreachable; (3) fixed that by tying routing to
+    // simulated Module 1 performance and bisecting against the ACTUAL
+    // scoring pipeline instead of a formula — real improvement, but it
+    // still only varied wrong rate against one fixed seed (42), so it
+    // reported "closest reachable, off by 10-20" for targets that were
+    // exactly reachable one seed over. The seed isn't just a formality —
+    // it also decides routing and exactly which questions land wrong, so
+    // it's a second real axis the composite depends on, not just a
+    // tie-breaker.
+    //
+    // This version searches BOTH: a batch of seeds, each with its own
+    // wrong-rate bisection against the real scoring pipeline, keeping the
+    // best (or first exact) result across all of them. Still fully
+    // deterministic for a given target — no longer tied to one arbitrary
+    // starting seed, so an exactly-reachable score doesn't get missed
+    // just because seed 42 in particular couldn't reach it.
     var scoreParam = parseInt((location.search.match(/[?&]score=(\d+)/) || [])[1], 10);
     var scaleMax = testChoice === 'SAT' ? 1600 : 36, scaleMin = testChoice === 'SAT' ? 400 : 1;
     var hasTarget = !isNaN(scoreParam);
     var target = hasTarget ? Math.max(scaleMin, Math.min(scaleMax, scoreParam)) : null;
 
-    function estimateComposite(wrong) {
-      var pct = Math.max(0, Math.min(100, Math.round((1 - wrong) * 100)));
-      if (testChoice === 'SAT') return roundToTen(scaleFromPct(pct, SAT_CURVE)) * 2;
-      return scaleFromPct(pct, ACT_CURVE);
-    }
-    var BASE_WRONG;
-    if (target !== null) {
-      var lo = 0, hi = 1;
-      for (var iter = 0; iter < 30; iter++) {
-        var mid = (lo + hi) / 2;
-        if (estimateComposite(mid) > target) lo = mid; else hi = mid;
-      }
-      BASE_WRONG = (lo + hi) / 2;
-    } else {
-      BASE_WRONG = 0.22; // default demo (no &score= given) — matches the original preset
-    }
     // A weak-skill spike only makes sense for the "no target given" default
     // demo, to show what one concentrated gap looks like. Once a specific
     // score is requested, applying the searched-for rate UNIFORMLY (no
-    // extra spike) is what actually makes the estimate accurate — misses
+    // extra spike) is what actually makes the search accurate — misses
     // land wherever chance puts them, which incidentally still scatters
     // broadly at high wrong-rates and concentrates narrowly at low ones,
     // without needing separate hard-coded bands to fake that effect.
     var WEAK_WRONG = 0.78;
+    // Module-1 percent correct at/above this routes to the Harder Module 2
+    // — same spirit as the real adaptive SAT's own routing cutoff.
+    var ROUTE_THRESHOLD = 0.6;
 
-    var s = sectionKeys.map(function (key) {
-      var variant = rand() < 0.5 ? 'Easier' : 'Harder';
-      var qs = sectionQuestions(window.SECTION_BANKS[key], variant);
-      var answers = [], marked = [];
-      var weakSkill = weakSkillBySection[key];
+    function genAnswers(qs, wrongRate, weakSkill) {
+      var answers = [], marked = [], correct = 0;
+      var diff = { easy: { c: 0, t: 0 }, medium: { c: 0, t: 0 }, hard: { c: 0, t: 0 } };
       qs.forEach(function (q) {
-        var wrong = rand() < BASE_WRONG;
+        var wrong = rand() < wrongRate;
         if (!hasTarget && weakSkill && q.skill === weakSkill) wrong = rand() < WEAK_WRONG;
         var given;
         if (q.type === 'mc') {
           var n = (q.choices || []).length || 4;
           given = wrong ? (q.correct === 2 ? (q.correct + 1) % n : 2) : q.correct;
         } else {
-          given = wrong ? { raw: String((q.answer || 0) + 1) } : { raw: String(q.answer) };
+          // Must match the shape the real diagnostic (index.html) saves —
+          // { raw, value } — not just { raw }. isCorrect() reads
+          // given.value first and only falls back to re-parsing given.raw
+          // when value is strictly null; a { raw }-only object has value
+          // === undefined, which fails that === null check and skips the
+          // fallback entirely, so isCorrect returned false unconditionally
+          // for EVERY free-response question in the demo, regardless of
+          // whether the intended answer was right or wrong. That silently
+          // capped every demo's achievable score (worse on Math, which
+          // leans more on grid-in questions than R&W does) no matter what
+          // the search above found — the search's own accounting looked
+          // right in isolation, but the real render pipeline re-derives
+          // correctness independently and was scoring a different result.
+          var wrongVal = (q.answer || 0) + 1;
+          given = wrong ? { raw: String(wrongVal), value: wrongVal } : { raw: String(q.answer), value: q.answer };
         }
-        if (rand() < 0.05) given = null;
+        var dtag = diff[q.difficulty];
+        // A random "left it blank" roll only makes sense for the no-target
+        // default demo. When a specific score is requested, this needs to
+        // be reachable EXACTLY — including the true floor (every question
+        // wrong = 400) and the true ceiling (every question right = 1600)
+        // — and an unconditional 5% blank roll broke both: it could turn
+        // an intentionally-correct answer into a blank (silently capping
+        // the achievable ceiling around 1590, never a real 1600 no matter
+        // how low the searched wrong rate went) without ever being able
+        // to turn an intentionally-wrong answer back into right, so it
+        // only ever pulled scores down from whatever was being aimed for.
+        if (!hasTarget && rand() < 0.05) {
+          given = null;
+        } else if (!wrong) {
+          correct++;
+          if (dtag) dtag.c++;
+        }
+        if (dtag) dtag.t++;
         answers.push(given);
         marked.push(rand() < 0.12);
       });
-      return { k: key, a: answers, m: marked, v: variant };
-    });
+      return { answers: answers, marked: marked, correct: correct, diff: diff };
+    }
+
+    function genSection(key, wrongRate) {
+      var bank = window.SECTION_BANKS[key];
+      var weakSkill = weakSkillBySection[key];
+      var m1 = genAnswers(bank.module1, wrongRate, weakSkill);
+      var variant = null, m2 = null, m2t = 0;
+      if (bank.module2Easier) {
+        variant = (m1.correct / bank.module1.length) >= ROUTE_THRESHOLD ? 'Harder' : 'Easier';
+        m2 = genAnswers(bank['module2' + variant], wrongRate, weakSkill);
+        m2t = bank['module2' + variant].length;
+      }
+      var diff = { easy: { c: 0, t: 0 }, medium: { c: 0, t: 0 }, hard: { c: 0, t: 0 } };
+      ['easy', 'medium', 'hard'].forEach(function (d) {
+        diff[d].c = m1.diff[d].c + (m2 ? m2.diff[d].c : 0);
+        diff[d].t = m1.diff[d].t + (m2 ? m2.diff[d].t : 0);
+      });
+      return {
+        k: key,
+        a: m2 ? m1.answers.concat(m2.answers) : m1.answers,
+        m: m2 ? m1.marked.concat(m2.marked) : m1.marked,
+        v: variant,
+        c: m1.correct + (m2 ? m2.correct : 0),
+        t: bank.module1.length + m2t,
+        // Per-module correct/total, needed by satSectionScore's module
+        // weighting (module 1 performance counts for more than module 2).
+        c1: m1.correct,
+        t1: bank.module1.length,
+        c2: m2 ? m2.correct : 0,
+        t2: m2t,
+        diff: diff
+      };
+    }
+
+    // Runs one full trial at a given wrong rate and seed (seed reset each
+    // time, so wrongRate/seedBase are the only things that vary between
+    // calls) and returns both the generated sections and the composite
+    // the real scoring functions would actually display for them.
+    function trial(wrongRate, seedBase) {
+      seed = seedBase;
+      var secs = sectionKeys.map(function (key) { return genSection(key, wrongRate); });
+      var composite = null;
+      if (testChoice === 'SAT') {
+        var rwSec = secs.filter(function (s) { return s.k === 'reading-writing'; })[0];
+        var mathSec = secs.filter(function (s) { return s.k === 'math'; })[0];
+        var rwSc = rwSec ? satSectionScore(rwSec, RW_CURVE) : null;
+        var mathSc = mathSec ? satSectionScore(mathSec, MATH_CURVE) : null;
+        if (rwSc !== null && mathSc !== null) composite = rwSc + mathSc;
+      } else {
+        var scaled = secs.map(function (s) { return scaleFromPct(s.t ? s.c / s.t * 100 : 0, ACT_CURVE); });
+        var compositeKeys = { english: true, 'act-math': true, reading: true };
+        var vals = secs.map(function (s, i) { return { key: s.k, score: scaled[i] }; })
+          .filter(function (s) { return compositeKeys[s.key]; })
+          .map(function (s) { return s.score; });
+        if (vals.length) composite = Math.round(vals.reduce(function (a, b) { return a + b; }, 0) / vals.length);
+      }
+      return { secs: secs, composite: composite };
+    }
+
+    var BASE_WRONG, chosenSecs;
+    if (target !== null) {
+      // Wrong rate alone isn't the only thing that determines the
+      // displayed composite — the seed also decides Module 1/2 routing
+      // and exactly which questions land wrong, so two different seeds
+      // at the same wrong rate can land on different scores. Bisecting
+      // wrong rate against a single fixed seed only ever explores ONE
+      // slice of that space, so plenty of exactly-reachable targets were
+      // being reported as "closest, off by 10-20" when an exact hit
+      // existed one seed over. Sweeping a batch of seeds (each with its
+      // own bisection) searches the real 2-D space instead, and keeps
+      // the best (or first exact) result found across all of them —
+      // still deterministic for a given target, just no longer tied to
+      // one arbitrary starting seed. 80 seeds x ~30 bisection iterations
+      // is a few thousand full trials, well under 100ms even generating
+      // every question's answer array each time.
+      // Hitting the target exactly isn't the only thing that matters here
+      // — the difficulty weighting means the SAME composite is reachable
+      // through very different correct-answer counts, if the right
+      // answers happen to land disproportionately on hard questions. That
+      // makes for a technically-accurate but unrepresentative example: a
+      // demo of "what does a 1250 look like" shouldn't show an oddly low
+      // correct count just because that's the first exact match the
+      // search happened to hit. So this doesn't stop at the first exact
+      // hit — it scans every seed's full bisection path and, among
+      // whichever results tie for closest to the target, keeps the one
+      // with the MOST total correct answers, which is the more typical,
+      // representative way to reach that score.
+      var bestDiff = Infinity, bestWrong = 0.22, bestSeed = 42, bestSecs = null, bestCorrect = -1;
+      for (var seedTry = 1; seedTry <= 80; seedTry++) {
+        var lo = 0, hi = 1;
+        for (var iter = 0; iter < 30; iter++) {
+          var mid = (lo + hi) / 2;
+          var r = trial(mid, seedTry);
+          var d = (r.composite === null) ? Infinity : Math.abs(r.composite - target);
+          var totalCorrect = r.secs.reduce(function (a, s) { return a + s.c; }, 0);
+          if (d < bestDiff || (d === bestDiff && totalCorrect > bestCorrect)) {
+            bestDiff = d; bestWrong = mid; bestSeed = seedTry; bestSecs = r.secs; bestCorrect = totalCorrect;
+          }
+          if (r.composite !== null && r.composite > target) lo = mid; else hi = mid;
+        }
+      }
+      BASE_WRONG = bestWrong;
+      chosenSecs = bestSecs;
+    } else {
+      BASE_WRONG = 0.22; // default demo (no &score= given) — matches the original preset
+      chosenSecs = trial(BASE_WRONG, 42).secs;
+    }
+
+    var s = chosenSecs.map(function (sec) { return { k: sec.k, a: sec.a, m: sec.m, v: sec.v }; });
 
     return { n: 'Demo Student', k: 'DEMO', t: testChoice, dt: new Date().toISOString().slice(0, 10), s: s };
   }
@@ -384,12 +563,6 @@
   }
 
   var totalC = 0, totalQ = 0, domains = {}, skills = {}, sections = [], markedT = 0, markedC = 0, skipped = 0;
-  // Per-skill "how many of the misses were flagged as uncertain first" —
-  // used later to tell a likely careless-error pattern (missed a question
-  // in a skill they otherwise handle fine, didn't flag it as a guess)
-  // apart from a real knowledge gap (missed consistently, or flagged
-  // uncertainty going in).
-  var skillMissMarked = {};
   data.s.forEach(function (sec) {
     var bank = window.SECTION_BANKS[sec.k];
     if (!bank) return;
@@ -430,11 +603,6 @@
       var sd = (secDomains[dom] = secDomains[dom] || { c: 0, t: 0, missedSkills: {} });
       sd.t++; if (ok) sd.c++;
       if (!ok) sd.missedSkills[sk] = (sd.missedSkills[sk] || 0) + 1;
-      if (!ok) {
-        var smm = (skillMissMarked[sk] = skillMissMarked[sk] || { missed: 0, marked: 0 });
-        smm.missed++;
-        if (wasMarked) smm.marked++;
-      }
       if (!ok && q.type === 'mc' && given !== null && given !== undefined) {
         secMissedMc++;
         var chosenLetter = LETTERS[given];
@@ -502,46 +670,63 @@
     return row;
   }
 
-  /* ═══ SAT IRT-WEIGHTED SCORING MODEL ═══
-     The digital SAT is adaptive (Module 1 routes to an easier or harder
-     Module 2) and scored with item-response-theory weighting, where a
-     correct hard question is worth more than a correct easy one and a
-     missed easy question is a stronger signal than a missed hard one.
-     Neither the real IRT item parameters nor the official raw-to-scaled
-     conversion table are published, so this reproduces the *shape* of
-     that model closely enough for a diagnostic estimate:
+  /* ═══ SAT MODULE-WEIGHTED SCORING MODEL ═══
+     The digital SAT is adaptive: Module 1 performance routes you to an
+     easier or harder Module 2, and because of that routing, the module a
+     question sits in matters to the final score, not just the raw count
+     of correct answers. Two students with the SAME total raw score get
+     different section scores depending on how their correct answers split
+     between Module 1 and Module 2.
 
-     1. Raw % correct (across both modules) still picks a band of the old
-        flat SAT_CURVE — but instead of reading one point off it, satBand()
-        widens that point into a [L, U] range (the "static conversion
-        table" the real test also just approximates with).
-     2. A weighted-vs-flat performance ratio (easy/medium/hard weighted
-        1x/2x/3x) measures whether the student's hits were concentrated in
-        the hard questions (pushes toward U) or their misses were
-        concentrated in the easy questions (pulls toward L) — a tilt of
-        exactly 0 (performance proportional across difficulties) reproduces
-        the old flat-curve estimate, right at the band's center.
-     3. Routing to the Easier Module 2 caps the section at an approximate
-        ceiling — on the real test, that path structurally can't reach a
-        top score no matter how well the student does on it. */
-  var SAT_EASIER_PATH_CEILING = 650; // approximate — real ceiling varies by test form
-  function satBand(pct) {
-    var center = scaleFromPct(pct, SAT_CURVE);
-    var halfWidth = Math.round(20 + 20 * Math.sin(Math.PI * pct / 100));
-    return { L: Math.max(200, center - halfWidth), U: Math.min(800, center + halfWidth) };
-  }
-  function satSectionScore(sec) {
+     This was verified directly against Albert.io's published digital-SAT
+     score calculator (screenshots provided by the user, since the page
+     itself is a JS-rendered calculator that no browser tool available
+     here could load). Two of its results pin the effect exactly:
+       - Reading & Writing, 53/54 total: 27-M1 / 26-M2 -> 790, but
+         26-M1 / 27-M2 -> 780. Same total, doing better on Module 1 is
+         worth +10.
+       - Math, 37/44 total: 15-M1 / 22-M2 -> 650, but 22-M1 / 15-M2 ->
+         700. Same total, Module 1 strength worth +50 here (a bigger
+         swing because Math has fewer questions and the routing effect is
+         stronger).
+     Earlier versions of this model weighted questions by DIFFICULTY
+     (easy/medium/hard 1x/2x/3x) and applied a hard easier-Module-2 cap.
+     That was the wrong axis — it couldn't reproduce the module effect at
+     all (a difficulty tilt says nothing about which module a miss was in)
+     and it overestimated scores. Replaced with a model that reads the
+     scaled score straight off College Board's own published raw-to-scaled
+     curve at the total percent correct, then shifts it by the gap between
+     Module 1 and Module 2 performance:
+
+       score = curve(total % correct) + MODULE_WEIGHT * (m1rate - m2rate)
+
+     MODULE_WEIGHT = 80 reproduces all four Albert data points above
+     exactly (RW 780/790, Math 650/700). The shift term is 0 whenever the
+     two modules were answered at the same rate — including a perfect
+     score (both 100%, -> 800) and a zero score (both 0%, -> 200) — so the
+     floor and ceiling are preserved, and it naturally captures the
+     routing effect (doing poorly on Module 1 pulls the section down the
+     way real easier-Module-2 routing does) without a separate hard cap.
+     The result is clamped to the 200-800 section scale.
+     (MODULE_WEIGHT itself is declared up near the curves, not here — the
+     demo score search below calls satSectionScore before this point in
+     the file is reached, so the constant has to be assigned before then
+     or it reads as undefined and every demo score comes out NaN.) */
+  // curve is passed explicitly (RW_CURVE or MATH_CURVE) rather than
+  // inferred from a section-key field on sec — the two call sites for
+  // this function (the real report's section objects, and the demo
+  // generator's) don't use the same field name for that key, and picking
+  // the wrong curve silently would misgrade a section rather than error.
+  function satSectionScore(sec, curve) {
     if (!sec || !sec.t) return null;
-    var band = satBand(sec.c / sec.t * 100);
-    var d = sec.diff;
-    var weightedCorrect = d.easy.c * 1 + d.medium.c * 2 + d.hard.c * 3;
-    var weightedTotal = d.easy.t * 1 + d.medium.t * 2 + d.hard.t * 3;
-    var weightedRate = weightedTotal ? weightedCorrect / weightedTotal : (sec.c / sec.t);
-    var flatRate = sec.c / sec.t;
-    var tilt = Math.max(-1, Math.min(1, (weightedRate - flatRate) * 2.5));
-    var position = Math.max(0, Math.min(1, 0.5 + tilt));
-    var score = Math.round(band.L + position * (band.U - band.L));
-    if (sec.variant === 'Easier') score = Math.min(score, SAT_EASIER_PATH_CEILING);
+    var base = scaleFromPct(sec.c / sec.t * 100, curve);
+    // Module-1 vs Module-2 success rates. A non-adaptive section (no
+    // Module 2, so t2 == 0) has nothing to split, so both rates fall back
+    // to the overall rate and the shift term is 0.
+    var r1 = sec.t1 ? sec.c1 / sec.t1 : (sec.c / sec.t);
+    var r2 = sec.t2 ? sec.c2 / sec.t2 : (sec.c / sec.t);
+    var score = base + MODULE_WEIGHT * (r1 - r2);
+    score = Math.max(200, Math.min(800, score));
     return roundToTen(score);
   }
 
@@ -550,14 +735,14 @@
   if (data.t === 'SAT') {
     var rw = sections.filter(function (s) { return s.key === 'reading-writing'; })[0];
     var mathSec = sections.filter(function (s) { return s.key === 'math'; })[0];
-    var rwScaled = satSectionScore(rw);
-    var mathScaled = satSectionScore(mathSec);
+    var rwScaled = satSectionScore(rw, RW_CURVE);
+    var mathScaled = satSectionScore(mathSec, MATH_CURVE);
     var composite = (rwScaled !== null && mathScaled !== null) ? rwScaled + mathScaled : null;
     tilesEl.appendChild(scoreTile('Composite (400–1600)', totalC, totalQ, composite, true));
     if (rw) tilesEl.appendChild(scoreTile('Reading & Writing', rw.c, rw.t, rwScaled, false));
     if (mathSec) tilesEl.appendChild(scoreTile('Math', mathSec.c, mathSec.t, mathScaled, false));
     var routedEasier = [rw, mathSec].some(function (s) { return s && s.variant === 'Easier'; });
-    scoreCaption.textContent = 'The fraction under each score is raw percent correct on this diagnostic. The score itself is an IRT-weighted estimate that rewards correct hard questions and penalizes missed easy ones, banded from a typical official-practice-test curve' + (routedEasier ? ' and capped where routing sent a section to the easier Module 2' : '') + '; the real SAT curve and item weights vary by test and aren\'t published in advance.';
+    scoreCaption.textContent = 'The fraction under each score is raw percent correct on this diagnostic. The score itself reads that off College Board\'s own published raw-to-scaled conversion table (Reading & Writing and Math have separate tables), then adjusts for which module the misses fell in — because the SAT is adaptive, missing questions in Module 1 costs more than missing the same number in Module 2' + (routedEasier ? ', and a weaker Module 1 also routes that section to the easier Module 2' : '') + '; the real digital SAT curve varies by test, so this is a close estimate, not the exact official scoring.';
   } else if (data.t === 'ACT') {
     var scaledScores = sections.map(function (s) { return scaleFromPct(s.c / s.t * 100, ACT_CURVE); });
     // The ACT Composite is the average of English, Math, and Reading only —
@@ -640,15 +825,16 @@
         var skillDom = sectionSkillDomain(s);
         var totalMissed = Object.keys(skillMiss).reduce(function (a, k) { return a + skillMiss[k]; }, 0);
         if (!totalMissed) return;
+        var sectionCurve = (s.key === 'reading-writing') ? RW_CURVE : (s.key === 'math' ? MATH_CURVE : null);
         var baseScaled = (s.key === 'reading-writing') ? rwScaled : (s.key === 'math' ? mathScaled : null);
-        if (baseScaled === null) return;
-        var fullFixScaled = roundToTen(scaleFromPct(100, SAT_CURVE));
+        if (baseScaled === null || sectionCurve === null) return;
+        var fullFixScaled = roundToTen(scaleFromPct(100, sectionCurve));
         var sectionRecoverable = fullFixScaled - baseScaled;
         if (sectionRecoverable <= 0) return;
         var perMiss = sectionRecoverable / totalMissed;
         Object.keys(skillMiss).forEach(function (sk) {
           var pts = skillMiss[sk] * perMiss;
-          if (pts > 0) bridgeItems.push({ label: sk, points: pts, tag: classifySkill(skills, sk), dom: skillDom[sk] });
+          if (pts > 0) bridgeItems.push({ label: sk, points: pts, dom: skillDom[sk] });
         });
       });
     } else if (data.t === 'ACT') {
@@ -666,7 +852,7 @@
         var perMiss = sectionRecoverable / totalMissed;
         Object.keys(skillMiss).forEach(function (sk) {
           var pts = skillMiss[sk] * perMiss;
-          if (pts > 0) bridgeItems.push({ label: sk, points: pts, tag: classifySkill(skills, sk), dom: skillDom[sk] });
+          if (pts > 0) bridgeItems.push({ label: sk, points: pts, dom: skillDom[sk] });
         });
       });
     }
@@ -681,7 +867,7 @@
     var headroom = scoreMax - currentComposite;
     if (rawTotalRecoverable > headroom && rawTotalRecoverable > 0) {
       var capScale = headroom / rawTotalRecoverable;
-      bridgeItems = bridgeItems.map(function (e) { return { label: e.label, points: e.points * capScale, tag: e.tag, dom: e.dom }; });
+      bridgeItems = bridgeItems.map(function (e) { return { label: e.label, points: e.points * capScale, dom: e.dom }; });
     }
     bridgeItems.sort(function (a, b) { return b.points - a.points; });
 
@@ -715,30 +901,38 @@
       else leftover.push(item);
     });
 
-    var domainBuckets = {}; // domain label -> accumulated points
-    var undomainedPts = 0; // safety net if an item somehow has no domain tag
+    // domain label -> { points: accumulated points, n: how many distinct
+    // skills got folded into this bucket } — the skill count is what lets
+    // the leftover explain ITSELF honestly (see genericOtherN below)
+    // instead of presenting a sum-of-many as if it were one thing.
+    var domainBuckets = {};
+    var undomainedPts = 0, undomainedN = 0; // safety net if an item somehow has no domain tag
     leftover.forEach(function (item) {
-      if (item.dom) domainBuckets[item.dom] = (domainBuckets[item.dom] || 0) + item.points;
-      else undomainedPts += item.points;
+      if (item.dom) {
+        var b = domainBuckets[item.dom] || { points: 0, n: 0 };
+        b.points += item.points; b.n += 1;
+        domainBuckets[item.dom] = b;
+      } else { undomainedPts += item.points; undomainedN += 1; }
     });
     var domainItems = Object.keys(domainBuckets)
-      .map(function (d) { return { label: 'Other — ' + d, points: domainBuckets[d] }; })
+      .map(function (d) { return { label: 'Other — ' + d, points: domainBuckets[d].points, n: domainBuckets[d].n }; })
       .sort(function (a, b) { return b.points - a.points; });
 
-    // Reserve one slot for a final generic "Other opportunities" bar
-    // whenever there's anything left to put in it, so the remaining
-    // budget for named domain rollups is TOTAL_MAX_BARS minus the named
-    // skills already placed minus that reserved slot.
-    var domainSlots = Math.max(0, TOTAL_MAX_BARS - namedItems.length - 1);
+    // No bar slot is reserved for a generic catch-all anymore — the
+    // leftover that doesn't fit is reported as a sentence below the
+    // chart instead of a same-shaped bar (see genericOtherPts/N), so the
+    // full TOTAL_MAX_BARS budget minus named items goes to domain rollups.
+    var domainSlots = Math.max(0, TOTAL_MAX_BARS - namedItems.length);
     var shownDomainItems = [];
-    var genericOtherPts = undomainedPts;
+    var genericOtherPts = undomainedPts, genericOtherN = undomainedN;
     domainItems.forEach(function (item, i) {
       if (i < domainSlots && item.points >= 0.5) shownDomainItems.push(item);
-      else genericOtherPts += item.points;
+      else { genericOtherPts += item.points; genericOtherN += item.n; }
     });
 
-    var shownItems = namedItems.concat(shownDomainItems);
-    if (genericOtherPts >= 0.5) shownItems.push({ label: 'Other opportunities', points: genericOtherPts });
+    var shownItems = namedItems.concat(shownDomainItems.map(function (it) {
+      return { label: it.label + (it.n > 1 ? ' (' + it.n + ' skills)' : ''), points: it.points };
+    }));
 
     // The bars now always sum to exactly this — no more overshoot past
     // the endpoint bar.
@@ -766,6 +960,22 @@
     // displayed target always matches a real, reportable SAT score.
     if (isSAT) targetScore = roundToTen(targetScore);
 
+    // Shared by the number input's change handler and the chart's drag
+    // handle (dragging the dashed line ends by calling this with the
+    // dropped-at value) — one clamp/snap/persist/redraw path instead of
+    // two copies that could drift apart.
+    function applyTargetChange(v) {
+      v = Math.max(currentComposite, Math.min(scoreMax, v));
+      // Snap to the nearest 10 for SAT so every target this chart can
+      // show stays a real, reportable score — typing 1434 into the
+      // field, or dropping the drag handle mid-pixel, shouldn't produce
+      // a target the real SAT never issues.
+      if (isSAT) v = roundToTen(v);
+      targetScore = v;
+      try { localStorage.setItem(storeKey, String(v)); } catch (e) {}
+      renderBridge();
+    }
+
     renderBridge();
 
     function renderBridge() {
@@ -776,7 +986,7 @@
       var row = document.createElement('div');
       row.className = 'bridge-target-row';
       row.innerHTML = '<span><span class="bt-lab">Current: </span>' + currentComposite + '</span>' +
-        '<span><span class="bt-lab">Your target: </span><input type="number" id="bt-input" value="' + targetScore + '" min="' + currentComposite + '" max="' + scoreMax + '" step="' + (isSAT ? 10 : 1) + '"> <span class="bt-static">' + targetScore + '</span> <button type="button" class="bt-reset" id="bt-reset">reset</button></span>';
+        '<span><span class="bt-lab">Your target: </span><input type="number" id="bt-input" value="' + targetScore + '" min="' + currentComposite + '" max="' + scoreMax + '" step="' + (isSAT ? 10 : 1) + '"> <span class="bt-static">' + targetScore + '</span> <button type="button" class="bt-reset" id="bt-reset">reset</button> <span class="bt-drag-hint">or drag the dashed line below</span></span>';
       outer.appendChild(row);
 
       var canvasWrap = document.createElement('div');
@@ -789,18 +999,22 @@
         msg2.textContent = 'Not enough missed questions on this diagnostic to attribute recoverable points to specific skills yet.';
         canvasWrap.appendChild(msg2);
       } else {
-        canvasWrap.appendChild(drawBridge(shownItems, currentComposite, reachable, targetScore));
+        canvasWrap.appendChild(drawBridge(shownItems, currentComposite, reachable, targetScore, applyTargetChange));
 
-        // Only show the quick-win/deep-rebuild legend if at least one
-        // shown segment actually got classified — the "Other
-        // opportunities" catch-all and any skill with too small a
-        // sample stay untagged rather than guessing.
-        if (shownItems.some(function (it) { return it.tag; })) {
-          var legend = document.createElement('div');
-          legend.className = 'bridge-legend';
-          legend.innerHTML = '<span><span class="bl-dot quick"></span>Quick win — partial mastery already, likely careless slips</span>' +
-            '<span><span class="bl-dot deep"></span>Deep rebuild — consistent gap, worth real practice time</span>';
-          outer.appendChild(legend);
+        // The leftover recoverable points that didn't earn their own named
+        // or domain-rollup bar used to be flattened into one "Other
+        // opportunities" bar drawn the same way as the named ones — same
+        // shape, same visual weight, implying it was one comparable
+        // opportunity when it's actually a sum over several small,
+        // unnamed skills. That's a different KIND of fact (breadth of the
+        // gap, not a single fixable thing), so it's stated as a sentence
+        // instead of a bar competing for space on the same axis.
+        if (genericOtherPts >= 0.5) {
+          var otherNote = document.createElement('div');
+          otherNote.className = 'bridge-note bridge-other-note';
+          var otherPtsLabel = isSAT ? Math.max(10, roundToTen(genericOtherPts)) : Math.round(genericOtherPts);
+          otherNote.textContent = 'Plus roughly ' + otherPtsLabel + ' more points spread across ' + genericOtherN + ' other ' + (genericOtherN === 1 ? 'skill' : 'skills') + ', each too small on its own to call out by name.';
+          outer.appendChild(otherNote);
         }
 
         var note = document.createElement('div');
@@ -827,15 +1041,7 @@
       input.addEventListener('change', function () {
         var v = parseInt(input.value, 10);
         if (isNaN(v)) return;
-        v = Math.max(currentComposite, Math.min(scoreMax, v));
-        // The number input's step="10" only guides the up/down arrows —
-        // a parent can still type 1434 directly, which isn't a score the
-        // real SAT ever reports. Snap it to the nearest 10 so every
-        // target this chart can show stays a real, valid SAT score.
-        if (isSAT) v = roundToTen(v);
-        targetScore = v;
-        try { localStorage.setItem(storeKey, String(v)); } catch (e) {}
-        renderBridge();
+        applyTargetChange(v);
       });
       document.getElementById('bt-reset').addEventListener('click', function () {
         targetScore = defaultTarget;
@@ -844,7 +1050,7 @@
       });
     }
 
-    function drawBridge(items, startVal, endVal, targetVal) {
+    function drawBridge(items, startVal, endVal, targetVal, onDragEnd) {
       var bars = [{ label: 'Current', val: startVal, isEndpoint: true }]
         .concat(items.map(function (e) { return { label: e.label, points: e.points, tag: e.tag }; }))
         .concat([{ label: 'Max recoverable', val: endVal, isEndpoint: true }]);
@@ -861,94 +1067,139 @@
       var barW = plotW / n * 0.62;
       var gapW = plotW / n;
 
-      // Axis spans whichever is wider: the current→reachable bar range, or
-      // the target — so a target far beyond what this diagnostic accounts
-      // for still shows on the chart (as a dashed line near the top, with
-      // the real bars visibly filling only part of the distance to it,
-      // rather than being hidden or force-fit to reach it).
-      var minVal = Math.min(startVal, targetVal);
-      var maxVal = Math.max(endVal, targetVal);
-      var range = maxVal - minVal || 1;
-      var headroom = range * 0.14;
-      var axisMin = minVal - headroom, axisMax = maxVal + headroom;
-      function y(v) { return padT + plotH - ((v - axisMin) / (axisMax - axisMin)) * plotH; }
-
       var made = crispCanvas2(w, h), cv = made.cv, ctx = made.ctx;
       cv.setAttribute('role', 'img');
-      cv.setAttribute('aria-label', 'Score bridge from current composite ' + startVal + ' to reachable composite ' + endVal + ', with a target reference line at ' + targetVal + '.');
 
-      // baseline
-      ctx.strokeStyle = 'rgba(17,17,17,0.15)';
-      ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(padL, padT + plotH); ctx.lineTo(padL + plotW, padT + plotH); ctx.stroke();
+      // Full redraw, parameterized on the target value so dragging the
+      // dashed line can repaint the SAME canvas in place (no DOM
+      // replacement mid-drag, so the pointer-capture below keeps working)
+      // instead of only being settable by typing into the number input.
+      // Axis spans whichever is wider: the current→reachable bar range,
+      // or the target — so a target far beyond what this diagnostic
+      // accounts for still shows on the chart (as a dashed line near the
+      // top, with the real bars visibly filling only part of the
+      // distance to it, rather than being hidden or force-fit to reach
+      // it). Returns the axis bounds so the drag handler can invert a
+      // pointer position back into a score value using this same scale.
+      function paint(curTargetVal) {
+        ctx.clearRect(0, 0, w, h);
+        cv.setAttribute('aria-label', 'Score bridge from current composite ' + startVal + ' to reachable composite ' + endVal + ', with a target reference line at ' + curTargetVal + '. Drag the dashed line, or use the target field above the chart, to change it.');
 
-      var running = startVal;
-      var colors = BRAND_PALETTE;
+        var minVal = Math.min(startVal, curTargetVal);
+        var maxVal = Math.max(endVal, curTargetVal);
+        var range = maxVal - minVal || 1;
+        var headroom = range * 0.14;
+        var axisMin = minVal - headroom, axisMax = maxVal + headroom;
+        function y(v) { return padT + plotH - ((v - axisMin) / (axisMax - axisMin)) * plotH; }
 
-      bars.forEach(function (b, i) {
-        var bx = padL + gapW * i + (gapW - barW) / 2;
-        if (b.isEndpoint) {
-          var topY = y(b.val);
-          var baseY = padT + plotH;
-          ctx.fillStyle = (b.label === 'Max recoverable') ? '#5E8B6F' : '#243447';
-          ctx.fillRect(bx, topY, barW, baseY - topY);
-          ctx.fillStyle = '#1a1a1a';
-          ctx.font = '700 15px Poppins, sans-serif';
-          ctx.textAlign = 'center';
-          ctx.fillText(String(b.val), bx + barW / 2, topY - 8);
-          running = b.val;
-        } else {
-          var fromY = y(running);
-          var toVal = running + b.points;
-          var toY = y(toVal);
-          var top = Math.min(fromY, toY), bot = Math.max(fromY, toY);
-          ctx.fillStyle = colors[(i - 1) % colors.length];
-          ctx.fillRect(bx, top, barW, Math.max(bot - top, 2));
-          ctx.fillStyle = '#1a1a1a';
-          ctx.font = '600 11px Poppins, sans-serif';
-          ctx.textAlign = 'center';
-          // SAT composites only ever move in 10-point steps (each section
-          // score is a multiple of 10), so a per-skill "+13" reads as a
-          // real score value that can't actually occur. Round each bar's
-          // label to the nearest 10 for display, same as every other SAT
-          // number on this report — floor of 10 so a genuinely nonzero
-          // sliver still shows as recoverable rather than rounding to +0.
-          var barLabelPts = isSAT ? Math.max(10, roundToTen(b.points)) : Math.round(b.points);
-          ctx.fillText('+' + barLabelPts, bx + barW / 2, top - 6);
-          if (b.tag === 'quick' || b.tag === 'deep') {
-            ctx.beginPath();
-            ctx.fillStyle = b.tag === 'quick' ? '#5E8B6F' : '#7A3B32';
-            ctx.arc(bx + barW / 2, top - 15, 2.5, 0, Math.PI * 2);
-            ctx.fill();
+        // baseline
+        ctx.strokeStyle = 'rgba(17,17,17,0.15)';
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(padL, padT + plotH); ctx.lineTo(padL + plotW, padT + plotH); ctx.stroke();
+
+        var running = startVal;
+        var colors = BRAND_PALETTE;
+
+        bars.forEach(function (b, i) {
+          var bx = padL + gapW * i + (gapW - barW) / 2;
+          if (b.isEndpoint) {
+            var topY = y(b.val);
+            var baseY = padT + plotH;
+            ctx.fillStyle = (b.label === 'Max recoverable') ? '#5E8B6F' : '#243447';
+            ctx.fillRect(bx, topY, barW, baseY - topY);
+            ctx.fillStyle = '#1a1a1a';
+            ctx.font = '700 15px Poppins, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(String(b.val), bx + barW / 2, topY - 8);
+            running = b.val;
+          } else {
+            var fromY = y(running);
+            var toVal = running + b.points;
+            var toY = y(toVal);
+            var top = Math.min(fromY, toY), bot = Math.max(fromY, toY);
+            ctx.fillStyle = colors[(i - 1) % colors.length];
+            ctx.fillRect(bx, top, barW, Math.max(bot - top, 2));
+            ctx.fillStyle = '#1a1a1a';
+            ctx.font = '600 11px Poppins, sans-serif';
+            ctx.textAlign = 'center';
+            // SAT composites only ever move in 10-point steps (each section
+            // score is a multiple of 10), so a per-skill "+13" reads as a
+            // real score value that can't actually occur. Round each bar's
+            // label to the nearest 10 for display, same as every other SAT
+            // number on this report — floor of 10 so a genuinely nonzero
+            // sliver still shows as recoverable rather than rounding to +0.
+            var barLabelPts = isSAT ? Math.max(10, roundToTen(b.points)) : Math.round(b.points);
+            ctx.fillText('+' + barLabelPts, bx + barW / 2, top - 6);
+            running = toVal;
           }
-          running = toVal;
-        }
-        // x-axis label (rotated-free: short skill names, wrapped by truncation)
-        ctx.fillStyle = 'rgba(17,17,17,0.6)';
-        ctx.font = '600 8.5px Poppins, sans-serif';
-        ctx.textAlign = 'center';
-        var label = b.label.length > 16 ? b.label.slice(0, 15) + '…' : b.label;
-        wrapCanvasLabel(ctx, label, bx + barW / 2, padT + plotH + 14, barW + 14, 9);
-      });
+          // x-axis label (rotated-free: short skill names, wrapped by truncation)
+          ctx.fillStyle = 'rgba(17,17,17,0.6)';
+          ctx.font = '600 8.5px Poppins, sans-serif';
+          ctx.textAlign = 'center';
+          var label = b.label.length > 16 ? b.label.slice(0, 15) + '…' : b.label;
+          wrapCanvasLabel(ctx, label, bx + barW / 2, padT + plotH + 14, barW + 14, 9);
+        });
 
-      // Target reference line — dashed, spans the full plot width, drawn
-      // last so it sits on top of the bars. Kept separate from the bars
-      // themselves so the segments never have to distort to reach it.
-      var ty = y(targetVal);
-      ctx.strokeStyle = '#B0271C';
-      ctx.lineWidth = 1.5;
-      ctx.setLineDash([5, 3]);
-      ctx.beginPath(); ctx.moveTo(padL, ty); ctx.lineTo(padL + plotW, ty); ctx.stroke();
-      ctx.setLineDash([]);
-      ctx.fillStyle = '#B0271C';
-      ctx.font = '700 9.5px Poppins, sans-serif';
-      ctx.textAlign = 'left';
-      // Clamp the label's vertical position to stay inside the canvas even
-      // when the target line itself sits right at the top or bottom edge
-      // of the plot area — the line stays at its true position, only the
-      // text nudges to remain fully readable.
-      var tLabelY = Math.max(padT + 8, Math.min(padT + plotH - 4, ty + 3));
-      ctx.fillText('Target ' + targetVal, padL + plotW + 6, tLabelY);
+        // Target reference line — dashed, spans the full plot width, drawn
+        // last so it sits on top of the bars. Kept separate from the bars
+        // themselves so the segments never have to distort to reach it. A
+        // small filled circle at its right end is the drag handle.
+        var ty = y(curTargetVal);
+        ctx.strokeStyle = '#B0271C';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([5, 3]);
+        ctx.beginPath(); ctx.moveTo(padL, ty); ctx.lineTo(padL + plotW, ty); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.beginPath(); ctx.arc(padL + plotW, ty, 3.5, 0, Math.PI * 2);
+        ctx.fillStyle = '#B0271C';
+        ctx.fill();
+        ctx.font = '700 9.5px Poppins, sans-serif';
+        ctx.textAlign = 'left';
+        // Clamp the label's vertical position to stay inside the canvas even
+        // when the target line itself sits right at the top or bottom edge
+        // of the plot area — the line stays at its true position, only the
+        // text nudges to remain fully readable.
+        var tLabelY = Math.max(padT + 8, Math.min(padT + plotH - 4, ty + 3));
+        ctx.fillText('Target ' + curTargetVal, padL + plotW + 8, tLabelY);
+
+        return { axisMin: axisMin, axisMax: axisMax };
+      }
+
+      var axis = paint(targetVal);
+
+      // Draggable target line: click/touch anywhere on the chart and drag
+      // vertically to set the target, instead of only being able to type
+      // a number into the field above it. Pointer Events cover mouse and
+      // touch alike. setPointerCapture keeps the drag tracking even if
+      // the cursor slips outside the small canvas — safe here because
+      // paint() redraws THIS SAME canvas in place rather than replacing
+      // it, so the capture never gets detached mid-drag. The surrounding
+      // target input/note text only resync once, on release, via the
+      // same onDragEnd callback the number input itself uses.
+      cv.style.cursor = 'ns-resize';
+      cv.style.touchAction = 'none';
+      var dragTarget = targetVal;
+      function valueFromClientY(clientY) {
+        var rect = cv.getBoundingClientRect();
+        var scaleY = rect.height ? h / rect.height : 1;
+        var localY = (clientY - rect.top) * scaleY;
+        var v = axis.axisMin + (padT + plotH - localY) / plotH * (axis.axisMax - axis.axisMin);
+        v = Math.max(startVal, Math.min(scoreMax, v));
+        return isSAT ? roundToTen(v) : Math.round(v);
+      }
+      cv.addEventListener('pointerdown', function (e) {
+        cv.setPointerCapture(e.pointerId);
+        dragTarget = valueFromClientY(e.clientY);
+        axis = paint(dragTarget);
+      });
+      cv.addEventListener('pointermove', function (e) {
+        if (e.buttons === 0) return; // not currently pressed/dragging
+        dragTarget = valueFromClientY(e.clientY);
+        axis = paint(dragTarget);
+      });
+      cv.addEventListener('pointerup', function () {
+        if (typeof onDragEnd === 'function') onDragEnd(dragTarget);
+      });
 
       return cv;
     }
@@ -1137,12 +1388,13 @@
   priorities.slice(0, 2).forEach(function (p3) {
     var share = Math.round(p3.t / totalQ * 100);
     var line = '<span class="r">' + p3.name + ':</span> ' + p3.c + '/' + p3.t + ' correct (' + Math.round(p3.pct * 100) + '%), about <strong>' + share + '%</strong> of the test. Recovering the ' + (p3.t - p3.c) + ' missed here moves the score fastest.';
-    var tag3 = classifySkill(skills, p3.name);
-    if (tag3 === 'quick') {
-      line += ' This looks like a quick fix: partial mastery already, likely careless slips rather than a knowledge gap.';
-    } else if (tag3 === 'deep') {
-      line += ' This looks like a real knowledge gap worth dedicated practice time.';
-    }
+    // No "quick fix vs. real gap" call here — with as few as 2-3 attempts
+    // on a single skill, that distinction isn't something this diagnostic
+    // can actually tell apart (see the removed classifySkill for why).
+    // The one guess-vs-gap read this report does make lives further down,
+    // built from every flagged question across the whole diagnostic
+    // instead of one skill's handful of attempts — a sample size that
+    // can actually support the claim.
     var prereqs = SKILL_PREREQS[p3.name];
     if (prereqs) {
       var weakPrereq = prereqs.filter(function (pr) { return priorityNames[pr]; })[0];
