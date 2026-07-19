@@ -2171,17 +2171,13 @@
       reportLink = 'https://morettitutoring.com/portal/report.html#d=' + btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
     } catch (e) { reportLink = ''; }
 
-    // The student always sees their own report link, first attempt or
-    // practice retake alike — only whether Luca gets emailed depends on
-    // that distinction (checked below).
+    // The student only ever sees their own report link on a practice
+    // retake — the first-ever (Luca-notified) attempt at a test type
+    // shows no link at all, just the "sent to Luca" message. That way a
+    // brand-new key's first real diagnostic goes straight to Luca with
+    // nothing for the student to see, and only subsequent practice
+    // attempts (which are NOT emailed to Luca) reveal the scores.
     var reportLinkEl = document.getElementById('done-report-link');
-    if (reportLink) {
-      reportLinkEl.innerHTML = 'See your scores and analysis <a href="' + reportLink + '" target="_blank" rel="noopener">here</a>.';
-      reportLinkEl.style.display = 'block';
-    } else {
-      reportLinkEl.style.display = 'none';
-    }
-
     var statusEl = document.getElementById('done-status');
     statusEl.classList.remove('err');
 
@@ -2190,13 +2186,24 @@
       // Already has a real (Luca-notified) attempt at this test type on
       // this key — this one's practice only. No email, no re-stamping
       // (handleMarkDiagnosticTaken is idempotent anyway, but there's
-      // nothing to mark here since it was already set).
+      // nothing to mark here since it was already set). Since nothing is
+      // being sent to Luca this time, the student gets to see their link.
+      if (reportLink) {
+        reportLinkEl.innerHTML = 'See your scores and analysis <a href="' + reportLink + '" target="_blank" rel="noopener">here</a>.';
+        reportLinkEl.style.display = 'block';
+      } else {
+        reportLinkEl.style.display = 'none';
+      }
       document.getElementById('done-message').textContent =
         'Nice work practicing! This attempt wasn\'t sent to Luca — you already have a real ' + testChoice + ' diagnostic on file.';
       statusEl.textContent = '';
       show('screen-done');
       return;
     }
+
+    // First-ever real attempt — no link for the student, results go to
+    // Luca only.
+    reportLinkEl.style.display = 'none';
 
     document.getElementById('done-message').textContent =
       'Your results just went to Luca — no need to send anything yourself.';
