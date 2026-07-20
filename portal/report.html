@@ -81,6 +81,25 @@
   td { padding: 3.5px 6px; border-bottom: 1px solid #eee7da; color: var(--mid); }
   td.ok { color: var(--green); font-weight: 600; }
   td.bad { color: var(--red); font-weight: 600; }
+  tr.q-row { cursor: pointer; }
+  tr.q-row:hover td { background: #faf7f1; }
+  tr.q-row td.q-toggle { color: var(--faint); width: 14px; text-align: center; }
+  tr.q-row.open td.q-toggle { color: var(--red); }
+  tr.q-detail-row > td { padding: 0; border-bottom: 1px solid #eee7da; }
+  .q-detail { padding: 10px 12px 12px; background: #faf7f1; font-size: 11px; color: var(--ink); }
+  .q-detail .q-text { margin-bottom: 8px; line-height: 1.5; }
+  .q-detail .q-choices { list-style: none; margin: 0; padding: 0; }
+  .q-detail .q-choices li { padding: 4px 8px; border: 1px solid var(--border); border-radius: 4px; margin-bottom: 4px; display: flex; justify-content: space-between; gap: 8px; }
+  .q-detail .q-choices li.q-correct { border-color: var(--green); background: #eef4ef; }
+  .q-detail .q-choices li.q-picked-wrong { border-color: var(--red); background: #f7eeed; }
+  .q-detail .q-tag { font-size: 9px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap; }
+  .q-detail .q-tag.ok { color: var(--green); }
+  .q-detail .q-tag.bad { color: var(--red); }
+  .q-detail .q-fr { padding: 6px 8px; border: 1px solid var(--border); border-radius: 4px; }
+  .q-detail .q-fr .q-correct-ans { color: var(--green); font-weight: 600; }
+  .q-detail .q-fr .q-your-ans { color: var(--red); font-weight: 600; }
+  .q-hint { font-size: 9px; color: var(--faint); font-style: italic; margin: 2px 0 10px; }
+  @media print { .q-hint, td.q-toggle, th.q-toggle { display: none; } }
   .raw-hed { font-family: 'Caladea', serif; font-size: 16px; margin-bottom: 4px; }
   .raw-sub { font-size: 11px; color: var(--mid); margin-bottom: 14px; }
   #err { max-width: 700px; margin: 80px auto; text-align: center; font-size: 14px; color: var(--mid); display: none; }
@@ -127,7 +146,7 @@
   <div id="section-breakdown"></div>
   <div class="sec-hed">What this tells us</div>
   <ul class="takeaways" id="takeaways"></ul>
-  <a href="#" class="detail-toggle" id="detail-toggle">Show full question-by-question detail &darr;</a>
+  <a href="#" class="detail-toggle" id="detail-toggle">Show full question-by-question detail (click any question to see it) &darr;</a>
   <div class="ftr"><span>Moretti Test Prep &amp; Tutoring · Cranford, NJ · (201) 275-2791</span><span id="ftr-date"></span></div>
 </div>
 
@@ -649,7 +668,14 @@
         secDistractors[chosenLetter] = (secDistractors[chosenLetter] || 0) + 1;
       }
       var gTxt = (given === null || given === undefined) ? '—' : (q.type === 'mc' ? LETTERS[given] : (given.raw || String(given)));
-      rows.push({ n: i + 1, dom: dom, sk: sk, given: gTxt, ok: ok, marked: !!wasMarked });
+      // Keep a reference to the full question object and the raw given
+      // answer so the detail table can expand to show the ACTUAL question
+      // (text, choices, correct answer, and what the student picked), not
+      // just the answer letter. givenIdx is the chosen choice index for
+      // multiple-choice (null if blank), used to mark the picked option.
+      rows.push({ n: i + 1, dom: dom, sk: sk, given: gTxt, ok: ok, marked: !!wasMarked,
+        q: q, givenIdx: (q.type === 'mc' && given !== null && given !== undefined) ? given : null,
+        givenText: (given && typeof given === 'object') ? (given.raw || String(given.value)) : null });
     });
     sections.push({ key: sec.k, label: bank.label.replace(' (optional on the real ACT)', ''), c: c, t: qs.length, rows: rows, domains: secDomains, distractors: secDistractors, missedMc: secMissedMc, diff: diff, c1: c1, t1: t1, c2: c2, t2: t2, variant: sec.v });
   });
@@ -1474,17 +1500,100 @@
   /* page 2 — raw data */
   document.getElementById('raw-score').textContent = 'Raw score: ' + totalC + ' / ' + totalQ + ' (' + pct + '%)';
   document.getElementById('raw-sections').textContent = sections.map(function (s3) { return s3.label + ' ' + s3.c + '/' + s3.t; }).join(' · ') + (markedT ? ' · Marked for review: ' + markedT : '') + (skipped ? ' · Skipped: ' + skipped : '');
+  // Builds the expanded detail for one question row: the actual prompt
+  // (its text is trusted HTML straight from the question bank — it carries
+  // its own inline formatting/equations), the answer choices with the
+  // correct one and the student's pick marked for multiple-choice, or a
+  // correct-vs-entered comparison for grid-in. Rendered lazily, only when
+  // a row is first opened.
+  function renderQuestionDetail(r) {
+    var q = r.q || {};
+    var box = document.createElement('div');
+    box.className = 'q-detail';
+    var txt = document.createElement('div');
+    txt.className = 'q-text';
+    txt.innerHTML = q.text || '(question text unavailable)';
+    box.appendChild(txt);
+
+    if (q.type === 'mc' && q.choices) {
+      var ul = document.createElement('ul');
+      ul.className = 'q-choices';
+      q.choices.forEach(function (choice, idx) {
+        var li = document.createElement('li');
+        var isCorrectChoice = idx === q.correct;
+        var isPicked = r.givenIdx === idx;
+        if (isCorrectChoice) li.className = 'q-correct';
+        else if (isPicked) li.className = 'q-picked-wrong';
+        var left = document.createElement('span');
+        left.innerHTML = LETTERS[idx] + '. ' + choice;
+        li.appendChild(left);
+        var tag = '';
+        if (isCorrectChoice && isPicked) tag = '<span class="q-tag ok">✓ correct — selected</span>';
+        else if (isCorrectChoice) tag = '<span class="q-tag ok">✓ correct answer</span>';
+        else if (isPicked) tag = '<span class="q-tag bad">✗ selected</span>';
+        if (tag) { var t = document.createElement('span'); t.innerHTML = tag; li.appendChild(t); }
+        ul.appendChild(li);
+      });
+      box.appendChild(ul);
+      if (r.givenIdx === null) {
+        var blank = document.createElement('div');
+        blank.className = 'q-tag bad';
+        blank.style.marginTop = '4px';
+        blank.textContent = 'Left blank';
+        box.appendChild(blank);
+      }
+    } else if (q.type === 'fr') {
+      var fr = document.createElement('div');
+      fr.className = 'q-fr';
+      var yourAns = (r.givenText !== null && r.givenText !== undefined && r.givenText !== '') ? r.givenText : (r.ok ? String(q.answer) : 'left blank');
+      fr.innerHTML = 'Correct answer: <span class="q-correct-ans">' + q.answer + '</span>' +
+        (r.ok ? '' : ' &nbsp;·&nbsp; Entered: <span class="q-your-ans">' + yourAns + '</span>');
+      box.appendChild(fr);
+    }
+    return box;
+  }
+
   var twrap = document.getElementById('raw-tables');
   sections.forEach(function (s4) {
     var h = document.createElement('div');
     h.className = 'sec-hed';
     h.textContent = s4.label;
     twrap.appendChild(h);
+    var hint = document.createElement('div');
+    hint.className = 'q-hint';
+    hint.textContent = 'Click any question to see the actual prompt, the answer choices, the correct answer, and what was selected.';
+    twrap.appendChild(hint);
     var tb = document.createElement('table');
-    tb.innerHTML = '<tr><th>#</th><th>Skill</th><th>Answer</th><th>Result</th><th>Flagged</th></tr>' +
-      s4.rows.map(function (r) {
-        return '<tr><td>' + r.n + '</td><td>' + r.dom + ' → ' + r.sk + '</td><td>' + r.given + '</td><td class="' + (r.ok ? 'ok' : 'bad') + '">' + (r.ok ? 'Correct' : 'Incorrect') + '</td><td>' + (r.marked ? '⚑' : '') + '</td></tr>';
-      }).join('');
+    // Header. Each question is TWO table rows: a clickable summary row and
+    // a hidden detail row underneath it that expands to show the real
+    // question. Built as DOM (not one innerHTML string) so each pair can
+    // carry its own click handler and the detail is rendered lazily.
+    var thead = document.createElement('tr');
+    thead.innerHTML = '<th class="q-toggle"></th><th>#</th><th>Skill</th><th>Answer</th><th>Result</th><th>Flagged</th>';
+    tb.appendChild(thead);
+    s4.rows.forEach(function (r) {
+      var summary = document.createElement('tr');
+      summary.className = 'q-row';
+      summary.innerHTML = '<td class="q-toggle">▸</td><td>' + r.n + '</td><td>' + r.dom + ' → ' + r.sk +
+        '</td><td>' + r.given + '</td><td class="' + (r.ok ? 'ok' : 'bad') + '">' + (r.ok ? 'Correct' : 'Incorrect') +
+        '</td><td>' + (r.marked ? '⚑' : '') + '</td>';
+      var detailRow = document.createElement('tr');
+      detailRow.className = 'q-detail-row';
+      detailRow.style.display = 'none';
+      var detailCell = document.createElement('td');
+      detailCell.colSpan = 6;
+      detailRow.appendChild(detailCell);
+      var built = false;
+      summary.addEventListener('click', function () {
+        var open = detailRow.style.display !== 'none';
+        if (!open && !built) { detailCell.appendChild(renderQuestionDetail(r)); built = true; }
+        detailRow.style.display = open ? 'none' : '';
+        summary.classList.toggle('open', !open);
+        summary.querySelector('.q-toggle').textContent = open ? '▸' : '▾';
+      });
+      tb.appendChild(summary);
+      tb.appendChild(detailRow);
+    });
     twrap.appendChild(tb);
   });
 
@@ -1501,7 +1610,7 @@
       e.preventDefault();
       var showing = page2.style.display !== 'none';
       page2.style.display = showing ? 'none' : 'block';
-      detailToggle.textContent = showing ? 'Show full question-by-question detail ↓' : 'Hide full question-by-question detail ↑';
+      detailToggle.textContent = showing ? 'Show full question-by-question detail (click any question to see it) ↓' : 'Hide full question-by-question detail ↑';
       if (!showing) page2.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   }
