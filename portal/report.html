@@ -63,8 +63,12 @@
   .sc-bars .sc-bar-row { margin-bottom: 5px; }
   .sc-bars .sc-bar-label { display: flex; justify-content: space-between; font-size: 9px; margin-bottom: 2px; }
   .sc-bars .sc-bar-track { height: 6px; background: #eee7da; border-radius: 3px; overflow: hidden; }
-  .sc-bars .sc-bar-fill { height: 100%; }
+  .sc-bars .sc-bar-fill { height: 100%; background: var(--gold); }
+  .sc-bars .sc-bar-fill.weak { background: var(--red); }
+  .sc-bars .sc-bar-fill.strong { background: var(--green); }
   .sc-bars .sc-bar-empty { font-size: 9px; color: var(--faint); }
+  .sc-grouplabel { font-size: 8px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); margin: 8px 0 4px; }
+  .sc-grouplabel:first-child { margin-top: 2px; }
   .takeaways { list-style: none; }
   .takeaways li { font-size: 11px; line-height: 1.65; color: var(--mid); padding: 4px 0 4px 16px; position: relative; }
   .takeaways li::before { content: '◆'; position: absolute; left: 0; top: 8px; font-size: 6px; color: var(--gold); }
@@ -631,8 +635,13 @@
       var dom = q.domain, sk = q.skill || q.domain;
       (domains[dom] = domains[dom] || { c: 0, t: 0 }).t++; if (ok) domains[dom].c++;
       (skills[sk] = skills[sk] || { c: 0, t: 0, dom: dom }).t++; if (ok) skills[sk].c++;
-      var sd = (secDomains[dom] = secDomains[dom] || { c: 0, t: 0, missedSkills: {} });
+      var sd = (secDomains[dom] = secDomains[dom] || { c: 0, t: 0, missedSkills: {}, skillStats: {} });
       sd.t++; if (ok) sd.c++;
+      // Per-skill correct/total within this section — lets the skill list
+      // report "3/6 correct" instead of only "missed 4", which reads far
+      // more clearly to a parent.
+      var skStat = (sd.skillStats[sk] = sd.skillStats[sk] || { c: 0, t: 0 });
+      skStat.t++; if (ok) skStat.c++;
       if (!ok) sd.missedSkills[sk] = (sd.missedSkills[sk] || 0) + 1;
       if (!ok && q.type === 'mc' && given !== null && given !== undefined) {
         secMissedMc++;
@@ -817,6 +826,19 @@
       Object.keys(s5.domains[d].missedSkills).forEach(function (sk) { dom[sk] = d; });
     });
     return dom;
+  }
+  // Per-skill correct/total within a section: { skill: { c, t, dom } }.
+  // Drives the section-card skill list, which now reads as "correct out of
+  // attempted" per skill rather than "share of misses".
+  function sectionSkillStats(s5) {
+    var out = {};
+    Object.keys(s5.domains).forEach(function (d) {
+      var st = s5.domains[d].skillStats || {};
+      Object.keys(st).forEach(function (sk) {
+        out[sk] = { c: st[sk].c, t: st[sk].t, dom: d };
+      });
+    });
+    return out;
   }
 
   /* ═══ PATH TO TARGET SCORE — "score bridge" waterfall ═══
@@ -1278,63 +1300,57 @@
   // like they'd been colored by two different people.
   var palette = BRAND_PALETTE;
 
+  // The section-card skill list. Every row now reads the SAME way as the
+  // domain rows below it and the score tiles up top: "correct / attempted
+  // (percent)", with the bar filling toward 100% and colored by how the
+  // student did (red under 50%, gold in between, green at/above 75%). The
+  // old version showed each skill's SHARE OF THE SECTION'S MISSES instead
+  // — e.g. "Boundaries 4 (29%)" meaning "4 of your 14 R&W misses were in
+  // Boundaries, = 29% of misses". That's a genuinely confusing statistic
+  // for a parent: the number wasn't out of the questions attempted, and
+  // the bar didn't mean performance, so a longer red bar looked like a
+  // worse score when it actually just meant "more of the misses piled up
+  // here". Now a long green bar = did well, a short red bar = struggled,
+  // consistent everywhere on the page.
+  //
+  // Only skills the student actually MISSED at least one question in are
+  // listed here, weakest first — this block is the "what to work on"
+  // view, so a skill answered perfectly isn't a focus item (the full
+  // by-area picture is the domain rows directly below). Capped at 5 rows;
+  // any remaining weak skills are noted as a count rather than crammed in.
   function sectionSkillBars(s5) {
     var wrap = document.createElement('div');
     wrap.className = 'sc-bars';
 
-    // Ranked by skill (the "subclassification" within a section), not by
-    // domain — domain is often uniform across an entire section (every
-    // ACT Reading question is domain "Reading"), so a domain-level list
-    // would just be one bar. Skill is the level of detail that actually
-    // tells you what to work on.
-    var skillMiss = sectionSkillMiss(s5);
-    var skillDom = sectionSkillDomain(s5);
-    var allEntries = Object.keys(skillMiss).map(function (sk) {
-      return { name: sk, miss: skillMiss[sk], dom: skillDom[sk] };
-    }).sort(function (a, b) { return b.miss - a.miss; });
-    var totalMiss = allEntries.reduce(function (a, e) { return a + e.miss; }, 0);
+    var stats = sectionSkillStats(s5);
+    var weak = Object.keys(stats).map(function (sk) {
+      var v = stats[sk];
+      return { name: sk, c: v.c, t: v.t, pct: v.t ? v.c / v.t : 0, missed: v.t - v.c };
+    }).filter(function (e) { return e.missed > 0; })
+      .sort(function (a, b) { return a.pct - b.pct || b.missed - a.missed; });
 
-    // Cap the list at the top 3 skills — a dozen-plus thin bars is exactly
-    // as unreadable as a dozen-plus pie wedges. Anything past that no
-    // longer collapses into one flat "Other (N skills)" row — a low
-    // scorer whose misses are spread evenly across many skills would have
-    // that single row swallow most of the list, telling a parent nothing
-    // about where the weight actually sits. Instead the leftover skills
-    // roll up to their parent DOMAIN (same rollup the score bridge above
-    // uses), so the tail still reads as "mostly Algebra, some Geometry."
-    // TOTAL_MAX_ROWS is a hard ceiling on the whole list (named skills +
-    // domain rollups + the generic catch-all combined) — named skills get
-    // first claim on the budget, domain rollups fill what's left.
-    var TOTAL_MAX_ROWS = 5, MAX_SLICES = 3;
-    var missEntries = allEntries.slice(0, MAX_SLICES);
-    var leftoverEntries = allEntries.slice(MAX_SLICES);
-    if (leftoverEntries.length) {
-      var domBuckets = {}, undomainedMiss = 0;
-      leftoverEntries.forEach(function (e) {
-        if (e.dom) domBuckets[e.dom] = (domBuckets[e.dom] || 0) + e.miss;
-        else undomainedMiss += e.miss;
-      });
-      var domEntries = Object.keys(domBuckets).map(function (d) {
-        return { name: 'Other — ' + d, miss: domBuckets[d] };
-      }).sort(function (a, b) { return b.miss - a.miss; });
-      var domSlots = Math.max(0, TOTAL_MAX_ROWS - missEntries.length - 1);
-      domEntries.slice(0, domSlots).forEach(function (e) { missEntries.push(e); });
-      var restMiss = domEntries.slice(domSlots).reduce(function (a, e) { return a + e.miss; }, 0) + undomainedMiss;
-      if (restMiss > 0) missEntries.push({ name: 'Other', miss: restMiss });
-    }
-
-    if (!totalMiss) {
+    if (!weak.length) {
       wrap.innerHTML = '<div class="sc-bar-empty">Nothing missed in this section.</div>';
       return wrap;
     }
-    missEntries.forEach(function (e, i) {
-      var pct = Math.round(e.miss / totalMiss * 100);
+
+    var MAX_SKILL_ROWS = 5;
+    weak.slice(0, MAX_SKILL_ROWS).forEach(function (e) {
+      var pct = Math.round(e.pct * 100);
+      var cls = e.pct < 0.5 ? 'weak' : (e.pct >= 0.75 ? 'strong' : '');
       var row = document.createElement('div');
       row.className = 'sc-bar-row';
-      row.innerHTML = '<div class="sc-bar-label"><span>' + e.name + '</span><span>' + e.miss + ' (' + pct + '%)</span></div>' +
-        '<div class="sc-bar-track"><div class="sc-bar-fill" style="width:' + pct + '%;background:' + palette[i % palette.length] + '"></div></div>';
+      row.innerHTML = '<div class="sc-bar-label"><span>' + e.name + '</span><span>' + e.c + '/' + e.t + ' (' + pct + '%)</span></div>' +
+        '<div class="sc-bar-track"><div class="sc-bar-fill ' + cls + '" style="width:' + pct + '%"></div></div>';
       wrap.appendChild(row);
     });
+    var hidden = weak.length - MAX_SKILL_ROWS;
+    if (hidden > 0) {
+      var more = document.createElement('div');
+      more.className = 'sc-bar-empty';
+      more.textContent = '+ ' + hidden + ' more ' + (hidden === 1 ? 'skill' : 'skills') + ' with a miss — see the area totals below';
+      wrap.appendChild(more);
+    }
     return wrap;
   }
 
@@ -1378,12 +1394,25 @@
       card.appendChild(distNote);
     }
 
+    // Two clearly-labeled blocks so the reader knows what each bar means:
+    // first the specific skills the student missed (correct/attempted,
+    // weakest first — "what to drill"), then every content area's
+    // correct/attempted (the fuller picture). Both use the identical
+    // "correct / total (percent)" format and the same red/gold/green fill,
+    // so a bar always means the same thing anywhere on this card.
+    var missedAny = (s5.t - s5.c) > 0;
+    if (missedAny) {
+      var skLabel = document.createElement('div');
+      skLabel.className = 'sc-grouplabel';
+      skLabel.textContent = 'Skills to focus on (correct / attempted)';
+      card.appendChild(skLabel);
+    }
     card.appendChild(sectionSkillBars(s5));
 
-    // Only the domain bar itself is shown here — the per-skill "missed on"
-    // breakdown is already in the skill bar list directly above, so
-    // repeating it as text underneath was the same information twice in
-    // the same card.
+    var domLabel = document.createElement('div');
+    domLabel.className = 'sc-grouplabel';
+    domLabel.textContent = 'By content area (correct / attempted)';
+    card.appendChild(domLabel);
     var domEntries = Object.keys(s5.domains).map(function (d) {
       var v = s5.domains[d];
       return { name: d, c: v.c, t: v.t, pct: v.t ? v.c / v.t : 0 };
