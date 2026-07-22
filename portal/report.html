@@ -1554,6 +1554,11 @@
   }
 
   var twrap = document.getElementById('raw-tables');
+  // Accordion: at most one question's detail is open at a time across the
+  // WHOLE detail view (both sections). Opening a question collapses
+  // whichever one was open. openEntry holds the collapse() of the
+  // currently-open row, or null when nothing is expanded.
+  var openEntry = null;
   sections.forEach(function (s4) {
     var h = document.createElement('div');
     h.className = 'sec-hed';
@@ -1584,12 +1589,22 @@
       detailCell.colSpan = 6;
       detailRow.appendChild(detailCell);
       var built = false;
+      function collapse() {
+        detailRow.style.display = 'none';
+        summary.classList.remove('open');
+        summary.querySelector('.q-toggle').textContent = '▸';
+        if (openEntry === collapse) openEntry = null;
+      }
       summary.addEventListener('click', function () {
-        var open = detailRow.style.display !== 'none';
-        if (!open && !built) { detailCell.appendChild(renderQuestionDetail(r)); built = true; }
-        detailRow.style.display = open ? 'none' : '';
-        summary.classList.toggle('open', !open);
-        summary.querySelector('.q-toggle').textContent = open ? '▸' : '▾';
+        var isOpen = detailRow.style.display !== 'none';
+        if (isOpen) { collapse(); return; }
+        // Opening this one — first close whatever else is open.
+        if (openEntry && openEntry !== collapse) openEntry();
+        if (!built) { detailCell.appendChild(renderQuestionDetail(r)); built = true; }
+        detailRow.style.display = '';
+        summary.classList.add('open');
+        summary.querySelector('.q-toggle').textContent = '▾';
+        openEntry = collapse;
       });
       tb.appendChild(summary);
       tb.appendChild(detailRow);

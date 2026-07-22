@@ -12,7 +12,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caladea:wght@700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
   /* =====================================================================
      MORETTI STUDENT PORTAL
@@ -139,6 +138,21 @@
   .overview-break-row { display: flex; align-items: center; gap: 0.6rem; padding: 0.7rem 1.3rem; background: var(--bg); font-family: var(--hel); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--mid); border-bottom: 1px solid var(--border); }
   .overview-note { font-size: 0.82rem; color: var(--mid); line-height: 1.75; text-align: left; margin-bottom: 1.75rem; }
   .overview-retake-notice { font-size: 0.82rem; color: var(--text); line-height: 1.7; text-align: left; background: rgba(201,168,76,0.14); border: 1px solid var(--gold); padding: 0.9rem 1.1rem; margin-bottom: 1.5rem; }
+  /* ═══ ACCOMMODATIONS PANEL (test overview) ═══ */
+  .accom-panel { border: 1px solid var(--border); text-align: left; margin-bottom: 1.5rem; }
+  .accom-hed { display: flex; align-items: baseline; justify-content: space-between; gap: 0.6rem; padding: 0.85rem 1.3rem; background: var(--bg); border-bottom: 1px solid var(--border); }
+  .accom-hed .accom-title { font-family: var(--hel); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mid); }
+  .accom-hed .accom-state { font-family: var(--hel); font-size: 0.72rem; color: var(--text); font-weight: 600; }
+  .accom-body { padding: 1rem 1.3rem 1.1rem; }
+  .accom-group { margin-bottom: 1.1rem; }
+  .accom-group:last-child { margin-bottom: 0; }
+  .accom-group-label { font-family: var(--hel); font-size: 0.74rem; font-weight: 700; color: var(--text); margin-bottom: 0.55rem; }
+  .accom-options { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .accom-opt { display: inline-flex; align-items: center; gap: 0.4rem; font-family: var(--hel); font-size: 0.78rem; color: var(--text); border: 1px solid var(--border); border-radius: 999px; padding: 0.4rem 0.85rem; cursor: pointer; user-select: none; transition: border-color 0.12s, background 0.12s; }
+  .accom-opt:hover { border-color: var(--mid); }
+  .accom-opt.selected { border-color: var(--red); background: rgba(176,39,28,0.06); font-weight: 600; }
+  .accom-opt input { position: absolute; opacity: 0; width: 0; height: 0; }
+  .accom-note { font-family: var(--hel); font-size: 0.72rem; color: var(--mid); line-height: 1.6; margin-top: 0.7rem; }
 
   /* ═══ REFERENCE SHEET MODAL (accessible from intro + mid-test) ═══ */
   .ref-overlay { display: none; position: fixed; inset: 0; background: rgba(17,17,17,0.55); z-index: 600; align-items: center; justify-content: center; padding: 2rem 1.25rem; }
@@ -536,6 +550,27 @@
     <h1 class="panel-hed" id="overview-hed">Here's what to expect.</h1>
     <p class="panel-sub" id="overview-sub">The sections, order, and timing below match the real test exactly.</p>
     <div class="overview-retake-notice" id="overview-retake-notice" style="display:none;"></div>
+    <div class="accom-panel" id="accom-panel">
+      <div class="accom-hed"><span class="accom-title">Accommodations</span><span class="accom-state" id="accom-state">Standard timing</span></div>
+      <div class="accom-body">
+        <div class="accom-group">
+          <div class="accom-group-label">Extended time</div>
+          <div class="accom-options" id="accom-time-options">
+            <label class="accom-opt selected"><input type="radio" name="accom-time" value="1" checked>Standard</label>
+            <label class="accom-opt"><input type="radio" name="accom-time" value="1.5">Time and one-half (+50%)</label>
+            <label class="accom-opt"><input type="radio" name="accom-time" value="2">Double time (+100%)</label>
+          </div>
+        </div>
+        <div class="accom-group">
+          <div class="accom-group-label">Breaks</div>
+          <div class="accom-options" id="accom-break-options">
+            <label class="accom-opt selected"><input type="radio" name="accom-break" value="standard" checked>Standard break</label>
+            <label class="accom-opt"><input type="radio" name="accom-break" value="extended">Extended break</label>
+          </div>
+          <div class="accom-note">Breaks can always be taken as needed — the break timer never forces you to keep waiting, and you resume whenever you're ready.</div>
+        </div>
+      </div>
+    </div>
     <div class="overview-sections" id="overview-sections"></div>
     <p class="overview-note" id="overview-note"></p>
     <button class="key-btn" id="overview-start">Begin Diagnostic</button>
@@ -864,16 +899,13 @@
   }
   var APPS_SCRIPT_URL = window.APPS_SCRIPT_URL;
 
-  var EMAILJS_SERVICE_ID  = 'service_k768w0d';
-  var EMAILJS_TEMPLATE_ID = 'template_xcv84lb'; // reuses the same notification template as the contact form
-
-  // If the EmailJS script from the CDN didn't load (offline, blocked, ad
-  // blocker, etc.), don't let that take down the rest of the portal —
-  // just skip the network step later and tell the student to text Luca.
-  var emailjsAvailable = (typeof emailjs !== 'undefined');
-  if (emailjsAvailable) {
-    try { emailjs.init('FAAXN09Ad2ObipaJJ'); } catch (e) { emailjsAvailable = false; }
-  }
+  // NOTE: EmailJS was removed from the diagnostic flow on purpose. Its
+  // service/template/public keys had to live in this page's source to work,
+  // which let anyone replay emailjs.send() from a console and forge a
+  // "result" (fake name, fake score) with no key and no exam. Diagnostic
+  // results now go through the backend (action:'submitDiagnostic'), which
+  // validates the key and uses the roster name server-side. Do NOT
+  // reintroduce a client-side email send here.
 
   var currentStudent = null; // { key, name, driveFolderUrl, collegePrepFolderUrl, tests }
   var activeScreenId = 'screen-key';
@@ -1346,6 +1378,8 @@
     renderQuestion();
     show('dx-screen');
     var minutes = (window.SECTION_MODULE_TIME_LIMITS || {})[activeSectionKeys[sectionIndex]];
+    // Scale by the extended-time accommodation (1 / 1.5 / 2).
+    if (minutes) minutes = minutes * accommodations.timeMult;
     if (minutes) { startSectionTimer(minutes); } else { dxTimerEl.style.display = 'none'; stopSectionTimer(); sectionTimerEndsAt = null; }
   });
 
@@ -1418,6 +1452,13 @@
   var testChoice = null;       // 'SAT' or 'ACT'
   var activeSectionKeys = [];  // populated sections only, in the real test's order
   var sectionIndex = 0;
+  // Test-center accommodations, chosen on the overview screen before the
+  // diagnostic starts. timeMult scales every section's module time limit
+  // (1 = standard, 1.5 = time-and-one-half, 2 = double time); breakMult
+  // scales the between-section break length (breaks are always resumable
+  // regardless, so "breaks as needed" is inherent). Persisted with the
+  // rest of the run state so a refresh-resume keeps the same timing.
+  var accommodations = { timeMult: 1, breakMult: 1 };
   var completedSections = [];  // [{ key, label, answers, marked, module2Variant }] for sections already finished
   var current = 0;
   var answers = [];
@@ -1771,25 +1812,7 @@
       retakeEl.textContent = '';
     }
 
-    var rowsHtml = '';
-    activeSectionKeys.forEach(function (key, i) {
-      var bank = SECTION_BANKS[key];
-      var hasTwoModules = sectionHasModules(key);
-      var perModuleMinutes = (window.SECTION_MODULE_TIME_LIMITS || {})[key] || 0;
-      var totalMinutes = hasTwoModules ? perModuleMinutes * 2 : perModuleMinutes;
-      var totalQuestions = hasTwoModules ? bank.module1.length + bank.module2Easier.length : bank.module1.length;
-      var label = bank.label.replace(' (optional on the real ACT)', '');
-      var moduleNote = hasTwoModules ? ' (2 modules)' : '';
-      rowsHtml += '<div class="overview-section-row">' +
-        '<span class="overview-section-name">' + (i + 1) + '. ' + label + moduleNote + '</span>' +
-        '<span class="overview-section-meta">' + totalQuestions + ' questions' + (totalMinutes ? ' — ' + totalMinutes + ' min' : '') + '</span>' +
-        '</div>';
-      var isLast = i === activeSectionKeys.length - 1;
-      if (!isLast && !NO_BREAK_AFTER[key]) {
-        rowsHtml += '<div class="overview-break-row">' + (BREAK_SECONDS / 60) + '-minute break</div>';
-      }
-    });
-    document.getElementById('overview-sections').innerHTML = rowsHtml;
+    renderOverviewTiming();
 
     document.getElementById('overview-note').innerHTML =
       'Each section is timed like the real test, but there\'s no pressure here — this just tells Luca where to focus. ' +
@@ -1799,6 +1822,72 @@
 
     show('screen-test-overview');
   }
+  // Renders the section/timing list on the overview, applying the current
+  // accommodation multipliers so the displayed minutes and break length
+  // reflect exactly what the student will get. Re-run whenever an
+  // accommodation option changes. Displayed minutes are rounded for
+  // readability; the timers themselves use the exact (possibly fractional)
+  // multiplied value.
+  function accomTimeLabel() {
+    if (accommodations.timeMult === 2) return 'Double time (+100%)';
+    if (accommodations.timeMult === 1.5) return 'Time and one-half (+50%)';
+    return 'Standard timing';
+  }
+  function renderOverviewTiming() {
+    var mult = accommodations.timeMult;
+    var rowsHtml = '';
+    activeSectionKeys.forEach(function (key, i) {
+      var bank = SECTION_BANKS[key];
+      var hasTwoModules = sectionHasModules(key);
+      var perModuleMinutes = (window.SECTION_MODULE_TIME_LIMITS || {})[key] || 0;
+      var totalMinutes = (hasTwoModules ? perModuleMinutes * 2 : perModuleMinutes) * mult;
+      var totalQuestions = hasTwoModules ? bank.module1.length + bank.module2Easier.length : bank.module1.length;
+      var label = bank.label.replace(' (optional on the real ACT)', '');
+      var moduleNote = hasTwoModules ? ' (2 modules)' : '';
+      rowsHtml += '<div class="overview-section-row">' +
+        '<span class="overview-section-name">' + (i + 1) + '. ' + label + moduleNote + '</span>' +
+        '<span class="overview-section-meta">' + totalQuestions + ' questions' + (totalMinutes ? ' — ' + Math.round(totalMinutes) + ' min' : '') + '</span>' +
+        '</div>';
+      var isLast = i === activeSectionKeys.length - 1;
+      if (!isLast && !NO_BREAK_AFTER[key]) {
+        var breakMin = Math.round(BREAK_SECONDS * accommodations.breakMult / 60);
+        rowsHtml += '<div class="overview-break-row">' + breakMin + '-minute break' + (accommodations.breakMult > 1 ? ' (extended)' : '') + '</div>';
+      }
+    });
+    document.getElementById('overview-sections').innerHTML = rowsHtml;
+    var stateEl = document.getElementById('accom-state');
+    if (stateEl) {
+      var parts = [accomTimeLabel()];
+      if (accommodations.breakMult > 1) parts.push('extended breaks');
+      stateEl.textContent = parts.join(' · ');
+    }
+  }
+
+  // Wire the accommodation option chips: update state, reflect the
+  // selected pill, re-render the timing preview, and persist so a
+  // mid-diagnostic refresh keeps the same accommodations.
+  (function wireAccommodations() {
+    var timeOpts = document.getElementById('accom-time-options');
+    var breakOpts = document.getElementById('accom-break-options');
+    function syncSelected(container) {
+      Array.prototype.forEach.call(container.querySelectorAll('.accom-opt'), function (lbl) {
+        lbl.classList.toggle('selected', lbl.querySelector('input').checked);
+      });
+    }
+    if (timeOpts) timeOpts.addEventListener('change', function (e) {
+      accommodations.timeMult = parseFloat(e.target.value) || 1;
+      syncSelected(timeOpts);
+      renderOverviewTiming();
+      saveState();
+    });
+    if (breakOpts) breakOpts.addEventListener('change', function (e) {
+      accommodations.breakMult = (e.target.value === 'extended') ? 2 : 1;
+      syncSelected(breakOpts);
+      renderOverviewTiming();
+      saveState();
+    });
+  })();
+
   document.getElementById('overview-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-menu'); });
   document.getElementById('overview-start').addEventListener('click', function () { startSection(0); });
 
@@ -2367,29 +2456,36 @@
     // first attempt: no retake notice, and it'd try to email Luca again.
     if (testChoice === 'SAT') currentStudent.satTaken = true; else currentStudent.actTaken = true;
 
-    if (!emailjsAvailable) {
-      statusEl.textContent = 'Couldn\'t reach the email service from this browser. Please text Luca at (201) 275-2791 with your key (' + currentStudent.key + ') and score (' + totalCorrect + '/' + totalQuestions + ') so he can follow up.';
-      statusEl.classList.add('err');
-      return;
-    }
-
-    try {
-      emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-        from_name: currentStudent.name + ' (' + testChoice + ' Diagnostic)',
-        from_email: 'portal@morettitutoring.com',
-        town: '',
-        subject: testChoice + ' Diagnostic — ' + currentStudent.name + ' — ' + totalCorrect + '/' + totalQuestions,
-        message: 'FULL PDF REPORT — open this link, review, then Print / Save as PDF:\n' + reportLink + '\n\n' + report
-      }).then(function () {
-        statusEl.textContent = 'Results delivered.';
-      }, function () {
-        statusEl.textContent = 'Something went wrong sending your results. Please text Luca at (201) 275-2791 and let him know your key (' + currentStudent.key + ') so he can follow up.';
+    // Results are sent SERVER-SIDE now, not from the browser. The backend
+    // (Code.gs handleSubmitDiagnostic) re-validates the key against the
+    // Students sheet before it will send anything and uses the student's
+    // name FROM the sheet, so a stranger with no key can't forge a result
+    // and nobody can spoof the display name. The old browser EmailJS send
+    // was replayable by anyone who viewed the page source — that's removed.
+    // Body sent as a plain string (no JSON content-type) to stay within the
+    // CORS "simple request" rules Apps Script needs, matching callAuth().
+    fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'submitDiagnostic',
+        key: currentStudent.key,
+        test: testChoice,
+        score: totalCorrect + '/' + totalQuestions,
+        reportLink: reportLink,
+        report: report
+      })
+    }).then(function (res) { return res.json(); })
+      .then(function (data) {
+        if (data && data.ok) {
+          statusEl.textContent = 'Results delivered.';
+        } else {
+          throw new Error((data && data.error) || 'send_failed');
+        }
+      })
+      .catch(function () {
+        statusEl.textContent = 'Couldn\'t deliver your results automatically. Please text Luca at (201) 275-2791 with your key (' + currentStudent.key + ') and score (' + totalCorrect + '/' + totalQuestions + ') so he can follow up.';
         statusEl.classList.add('err');
       });
-    } catch (e) {
-      statusEl.textContent = 'Something went wrong sending your results. Please text Luca at (201) 275-2791 and let him know your key (' + currentStudent.key + ') so he can follow up.';
-      statusEl.classList.add('err');
-    }
   }
 
   /* ═══ APPLY A SAVED STATE OBJECT ═══

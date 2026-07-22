@@ -40,6 +40,10 @@
 var SHEET_ID = 'PASTE_YOUR_SHEET_ID_HERE';
 var SHEET_TAB_NAME = 'Students';
 var STUDENT_FOLDERS_PARENT_NAME = 'Moretti Portal — Student Folders';
+// Where diagnostic-result notifications are sent. IMPORTANT: confirm this
+// is the address you want results delivered to. The email is sent from the
+// Google account that owns this Apps Script (Deploy > Execute as: Me).
+var NOTIFY_EMAIL = 'lmoretti2001@gmail.com';
 
 function doPost(e) {
   var out;
@@ -51,6 +55,8 @@ function doPost(e) {
       out = handleNextSession(body.name, !!body.debug);
     } else if (body.action === 'markDiagnosticTaken') {
       out = handleMarkDiagnosticTaken(body.key, body.test);
+    } else if (body.action === 'submitDiagnostic') {
+      out = handleSubmitDiagnostic(body.key, body.test, body.score, body.reportLink, body.report);
     } else {
       out = { ok: false, error: 'unknown_action' };
     }
@@ -182,6 +188,59 @@ function handleMarkDiagnosticTaken(rawKey, rawTest) {
   if (colIdx === -1) return { ok: false, error: 'missing_column' };
 
   if (!row[col]) sheet.getRange(row._rowIndex, colIdx + 1).setValue(new Date());
+  return { ok: true };
+}
+
+/* =========================================================================
+   SEND A DIAGNOSTIC RESULT TO LUCA — server-side, key-gated
+   -------------------------------------------------------------------------
+   Replaces the old browser-side EmailJS send. That approach shipped the
+   EmailJS service/template/public keys in the page source, so ANYONE who
+   viewed source could call emailjs.send() from a console with a made-up
+   name and score — no key, no exam, nothing server-side. That's exactly
+   how a stranger sent a fake "100% — PWNED" result: they replayed the
+   client email call, they never actually took anything.
+
+   This closes that hole:
+     - The request must carry a key that exists in the Students sheet.
+       No valid key -> no email. A stranger can't pass this.
+     - The student NAME in the email comes from the sheet row, never from
+       whatever the browser sent, so it can't be spoofed to "PWNED".
+     - The report link is only accepted if it points at our own report
+       page, so the email body can't be weaponized into a link elsewhere.
+   A person holding a REAL key is a real student, and the worst they can do
+   is send their own name with a score they could inflate — a completely
+   different risk level from anonymous forgery, and one tied to an identity.
+   ========================================================================= */
+function handleSubmitDiagnostic(rawKey, rawTest, score, reportLink, reportText) {
+  if (!rawKey) return { ok: false, error: 'missing_key' };
+  var key = String(rawKey).trim().toUpperCase();
+  var test = String(rawTest || '').trim().toUpperCase();
+  if (test !== 'SAT' && test !== 'ACT') return { ok: false, error: 'bad_test' };
+
+  var sheet = getSheet_();
+  var row = findRow_(sheet, key);
+  if (!row) return { ok: false, error: 'bad_key' }; // the gate: unknown key -> nothing is sent
+
+  // Name comes from the roster, not the client. This is what makes a
+  // spoofed display name ("PWNED") impossible.
+  var name = String(row.Name || '').trim() || '(unnamed student)';
+  var safeScore = String(score == null ? '' : score).replace(/[\r\n]+/g, ' ').slice(0, 60);
+  var link = String(reportLink || '').slice(0, 4000);
+  if (link && link.indexOf('morettitutoring.com/portal/report.html') === -1) {
+    link = '(report link withheld — did not point at the portal report page)';
+  }
+  var extra = String(reportText || '').slice(0, 100000);
+
+  var subject = test + ' Diagnostic — ' + name + (safeScore ? ' — ' + safeScore : '');
+  var body = 'Student: ' + name + '\n' +
+             'Key: ' + key + '\n' +
+             'Test: ' + test + '\n' +
+             (safeScore ? 'Score: ' + safeScore + '\n' : '') +
+             '\nFull report (open, review, Print / Save as PDF):\n' + link +
+             '\n\n' + extra;
+
+  MailApp.sendEmail(NOTIFY_EMAIL, subject, body);
   return { ok: true };
 }
 
