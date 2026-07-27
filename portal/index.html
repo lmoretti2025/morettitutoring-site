@@ -954,6 +954,16 @@
       elims: elims,
       qOrder: qOrder,
       sectionTimerEndsAt: sectionTimerEndsAt,
+      // How much section time was left at this save. On an accidental
+      // in-tab refresh we still honor the absolute end time above (a
+      // refresh takes seconds — the clock legitimately keeps running).
+      // But on a genuine come-back-later resume (a closed tab or a dead
+      // computer, restored from the localStorage snapshot), we restore
+      // THIS remaining amount instead, so time the student spent away —
+      // possibly with no working computer at all — isn't counted against
+      // them. A diagnostic exists to inform, not to punish a hardware
+      // failure.
+      sectionTimerRemainingMs: (sectionTimerEndsAt !== null ? Math.max(0, sectionTimerEndsAt - Date.now()) : null),
       moduleStage: moduleStage,
       module2Variant: module2Variant,
       module1Buffer: module1Buffer,
@@ -1315,7 +1325,7 @@
     resumeOverlay.classList.remove('active');
     var snap = pendingResumeSnapshot;
     pendingResumeSnapshot = null;
-    if (snap) applyRestoredState(snap);
+    if (snap) applyRestoredState(snap, true); // come-back-later resume — restore remaining time, don't count time away
     else show('screen-test-choice');
   });
   document.getElementById('resume-no').addEventListener('click', function () {
@@ -2499,7 +2509,13 @@
      a possibly-stale saved copy (e.g. satTaken flipping true on another
      device since this was saved) would fight with that. The page-load path
      below sets those itself before calling in. */
-  function applyRestoredState(state) {
+  // fromAway = true means this is a come-back-later resume (the localStorage
+  // "Continue where you left off?" snapshot — a closed tab or crashed/dead
+  // computer), as opposed to an in-tab accidental refresh. On that path we
+  // give the student back the section time they had LEFT, rather than
+  // counting real-world minutes they were away (which could be hours, or a
+  // computer that wouldn't turn on) against a clock that never paused.
+  function applyRestoredState(state, fromAway) {
     if (state.screen === 'dx-screen' && state.testChoice && Array.isArray(state.activeSectionKeys) && state.activeSectionKeys.length) {
       testChoice = state.testChoice;
       activeSectionKeys = state.activeSectionKeys;
@@ -2531,13 +2547,26 @@
         // would persist a null timer and silently break resume on a
         // second refresh (only reveals itself one refresh later, easy to
         // miss).
-        if (typeof state.sectionTimerEndsAt === 'number' && state.sectionTimerEndsAt - Date.now() > 0) {
-          resumeSectionTimer(state.sectionTimerEndsAt);
+        //
+        // Two paths:
+        //   • come-back-later resume (fromAway): rebuild the clock from the
+        //     time REMAINING at the last save, so a long gap (closed tab,
+        //     dead computer) doesn't burn the section clock. A student who
+        //     had 12 minutes left gets 12 minutes back.
+        //   • accidental in-tab refresh: honor the original absolute end
+        //     time — the clock legitimately kept running during a
+        //     seconds-long refresh, matching real test conditions.
+        var effectiveEndsAt = null, alreadyOut = false;
+        if (fromAway && typeof state.sectionTimerRemainingMs === 'number') {
+          if (state.sectionTimerRemainingMs > 0) effectiveEndsAt = Date.now() + state.sectionTimerRemainingMs;
+          else alreadyOut = true; // clock had genuinely run out before they left
+        } else if (typeof state.sectionTimerEndsAt === 'number') {
+          if (state.sectionTimerEndsAt - Date.now() > 0) effectiveEndsAt = state.sectionTimerEndsAt;
+          else alreadyOut = true;
         }
+        if (effectiveEndsAt !== null) resumeSectionTimer(effectiveEndsAt);
         show('dx-screen');
-        if (typeof state.sectionTimerEndsAt === 'number' && state.sectionTimerEndsAt - Date.now() <= 0) {
-          autoSubmitSection(); // time ran out while they were away — submit now
-        }
+        if (alreadyOut) autoSubmitSection(); // time was already spent — submit now
       } else {
         show('screen-menu');
       }
