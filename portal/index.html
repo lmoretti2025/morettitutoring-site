@@ -511,6 +511,13 @@
           <div class="menu-card-body">Worksheets, practice sets, and materials for anything you're working on with Luca right now.</div>
         </div>
       </div>
+      <div class="menu-card menu-card-wide" data-route="sat-resources">
+        <span class="menu-card-icon">03</span>
+        <div>
+          <div class="menu-card-title">SAT/ACT Resources</div>
+          <div class="menu-card-body">Self-paced study tools and practice you can use anytime, on your own.</div>
+        </div>
+      </div>
     </div>
     <a href="#" class="menu-exit" id="menu-logout">&larr; Use a different key</a>
   </div>
@@ -525,6 +532,29 @@
       <div id="res-body"></div>
     </div>
     <a href="#" class="menu-back-link" id="res-back">&larr; Back to menu</a>
+  </div>
+</div>
+
+<!-- ═══ SCREEN 3b — SAT/ACT RESOURCES (self-paced study tools) ═══
+     A grid of study tools students can use on their own. Each is a
+     self-contained page that opens in a new tab so their portal session
+     stays put. Add more resource cards here as they're built — the
+     vocabulary trainer is the first. -->
+<div class="screen" id="screen-sat-resources">
+  <div class="panel-wide">
+    <div class="kicker">SAT / ACT Resources</div>
+    <h1 class="panel-hed">Study tools &amp; practice.</h1>
+    <p class="panel-sub">Self-paced tools to sharpen the skills we work on together — use them anytime.</p>
+    <div class="menu-grid">
+      <a class="menu-card menu-card-wide" href="vocab.html" target="_blank" rel="noopener">
+        <span class="menu-card-icon">Aa</span>
+        <div>
+          <div class="menu-card-title">Vocabulary Practice</div>
+          <div class="menu-card-body">Flashcards, multiple choice, and type-it drills across all six DSAT vocabulary sets. Study one set or all of them.</div>
+        </div>
+      </a>
+    </div>
+    <a href="#" class="menu-back-link" id="sat-resources-back">&larr; Back to menu</a>
   </div>
 </div>
 
@@ -1174,8 +1204,19 @@
         if (!data || !data.ok) { nsCard.style.display = DEBUG_MODE ? 'block' : 'none'; if (DEBUG_MODE) { nsLabel.textContent = ''; nsDate.textContent = 'Request failed — see debug output below.'; nsJoin.style.display = 'none'; } return; }
         nsCard.style.display = 'block';
         if (data.next) {
-          nsLabel.textContent = '📅 Your next scheduled session is on:';
-          nsDate.textContent = formatSessionDate(data.next.startIso, data.next.allDay);
+          // If the session's start time has already passed (the backend
+          // keeps it showing for 20 minutes after it begins), frame it as
+          // in-progress so a late student knows to join now rather than
+          // reading a time that looks like it's already gone.
+          var startMs = Date.parse(data.next.startIso);
+          var inProgress = !data.next.allDay && !isNaN(startMs) && startMs <= Date.now();
+          if (inProgress) {
+            nsLabel.textContent = '📅 Your session is happening now — join below:';
+            nsDate.textContent = 'Started at ' + formatSessionDate(data.next.startIso, data.next.allDay).replace(/^.*at /, '');
+          } else {
+            nsLabel.textContent = '📅 Your next scheduled session is on:';
+            nsDate.textContent = formatSessionDate(data.next.startIso, data.next.allDay);
+          }
           setJoinLink();
         } else {
           nsLabel.textContent = '';
@@ -1319,8 +1360,10 @@
         else { show('screen-test-choice'); }
       }
       else if (route === 'files' || route === 'college-prep') { renderResources(route); show('screen-resources'); }
+      else if (route === 'sat-resources') { show('screen-sat-resources'); }
     });
   });
+  document.getElementById('sat-resources-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-menu'); });
   document.getElementById('resume-yes').addEventListener('click', function () {
     resumeOverlay.classList.remove('active');
     var snap = pendingResumeSnapshot;
@@ -2580,7 +2623,7 @@
     } else if (state.screen === 'screen-resources') {
       renderResources(state.resourceKind || 'files');
       show('screen-resources');
-    } else if (state.screen === 'screen-test-choice' || state.screen === 'screen-menu' || state.screen === 'screen-test-overview') {
+    } else if (state.screen === 'screen-test-choice' || state.screen === 'screen-menu' || state.screen === 'screen-test-overview' || state.screen === 'screen-sat-resources') {
       show(state.screen);
     } else {
       show('screen-menu'); // includes mid-section-break "screen-intro" — safest to restart from the menu
