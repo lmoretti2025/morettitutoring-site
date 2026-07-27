@@ -380,6 +380,15 @@ function handleNextSession(rawName, debugMode) {
     }
     var events = parseICS_(resp.getContentText());
     var now = new Date();
+    // Keep a session showing (with its join link) for a grace window AFTER
+    // it starts, instead of flipping to next week the instant the clock
+    // hits the start time. A student who joins a few minutes late was
+    // losing the link right when they needed it. We look for the next
+    // occurrence at or after (now − 20 min), so a session that started up
+    // to 20 minutes ago is still treated as the current one; only after
+    // that does it roll forward to the next session.
+    var GRACE_MS = 20 * 60 * 1000;
+    var ref = new Date(now.getTime() - GRACE_MS);
     var escaped = firstName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     var nameRe = new RegExp(escaped, 'i');
 
@@ -391,7 +400,7 @@ function handleNextSession(rawName, debugMode) {
     var upcoming = events
       .filter(function (ev) { return nameRe.test(ev.summary); })
       .map(function (ev) {
-        var occurrence = nextOccurrenceOnOrAfter_(ev, now);
+        var occurrence = nextOccurrenceOnOrAfter_(ev, ref);
         if (!occurrence) return null;
         return { summary: ev.summary, start: occurrence, allDay: ev.allDay };
       })
