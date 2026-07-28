@@ -89,6 +89,18 @@
   .ns-join { display: inline-block; margin-top: 0.7rem; font-family: var(--hel); font-size: 0.75rem; font-weight: 700; color: var(--red); text-decoration: none; word-break: break-all; }
   .ns-join:hover { text-decoration: underline; }
   .menu-sub { font-size: 0.88rem; color: var(--mid); text-align: center; margin-bottom: 2.5rem; }
+
+  /* ═══ TEST-DAY COUNTDOWN ═══ shown on the home screen once a student's
+     Students-sheet row has a TestDate. Fill runs from GrantedAt (first
+     login) to TestDate; the target logo sits fixed at the finish line. */
+  .test-countdown { max-width: 460px; margin: 0 auto 1.6rem; }
+  .tc-top { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 0.5rem; }
+  .tc-label { font-family: var(--hel); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--mid); }
+  .tc-days { font-family: var(--hel); font-size: 0.85rem; font-weight: 700; color: var(--red); }
+  .tc-track { position: relative; height: 10px; background: var(--border); border-radius: 999px; margin-right: 34px; }
+  .tc-fill { position: absolute; top: 0; left: 0; height: 100%; background: linear-gradient(90deg, var(--gold), var(--red)); border-radius: 999px; transition: width 0.6s ease; }
+  .tc-flag { position: absolute; top: 50%; right: -34px; transform: translateY(-50%); width: 26px; height: 26px; border-radius: 50%; background: var(--red); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 3px var(--bg); }
+  .tc-flag-icon { width: 15px; height: 15px; display: block; }
   .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
   .menu-card { background: var(--white); border: 1px solid var(--border); padding: 1.75rem 1.5rem; cursor: pointer; text-align: left; transition: border-color 0.2s ease, transform 0.2s ease; position: relative; overflow: hidden; }
   .menu-card::before { content: ''; position: absolute; top: -1px; left: 0; width: 0; height: 2px; background: var(--red); transition: width 0.35s ease; }
@@ -436,12 +448,16 @@
   .vp-still-more { font-family: var(--hel); font-size: 0.74rem; color: var(--faint); padding: 0.3rem 0.2rem; }
   .vp-still-btn { font-family: var(--hel); font-size: 0.78rem; font-weight: 700; color: var(--red); background: transparent; border: 1px solid var(--red); border-radius: 8px; padding: 0.55rem 0.9rem; cursor: pointer; transition: background 0.15s ease, color 0.15s ease, transform 0.12s ease; }
   .vp-still-btn:hover { background: var(--red); color: #fff; transform: translateY(-1px); }
+  .vp-still-btn:disabled { opacity: 0.4; cursor: default; }
+  .vp-still-btn:disabled:hover { background: transparent; color: var(--red); transform: none; }
   .vp-modes { display: flex; gap: 0.4rem; margin-top: 1.1rem; border: 1px solid var(--border); border-radius: 8px; padding: 0.3rem; background: var(--white); }
   .vp-mode-btn { flex: 1; font-family: var(--hel); font-size: 0.78rem; font-weight: 600; color: var(--mid); background: transparent; border: none; border-radius: 6px; padding: 0.6rem 0.4rem; cursor: pointer; transition: background 0.15s ease, color 0.15s ease; }
   .vp-mode-btn.on { background: var(--red); color: #fff; }
   .vp-change-link { display: inline-block; font-family: var(--hel); font-size: 0.78rem; font-weight: 600; color: var(--mid); text-decoration: none; margin-bottom: 0.8rem; transition: color 0.12s ease; }
   .vp-change-link:hover { color: var(--text); }
   .vp-stage { margin-top: 0.4rem; }
+  .pb-stage { margin-top: 0.4rem; }
+  .pb-weak-panel { margin-bottom: 1.1rem; }
   /* ═══ ENTRANCE ANIMATIONS — applied to whatever just got rebuilt in
      #vp-stage (a new flash card, a new quiz question, a mode switch, a
      summary screen). Every drawFlash()/drawQuiz()/summary render wraps its
@@ -499,6 +515,49 @@
   .vp-primary { display: block; width: 100%; font-family: var(--hel); font-size: 0.88rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; background: var(--red); color: #fff; border: none; border-radius: 8px; padding: 0.9rem; margin-top: 1rem; cursor: pointer; transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease; }
   .vp-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); opacity: 0.94; }
   .vp-primary:active { transform: translateY(0); }
+  .vp-primary:disabled { opacity: 0.45; cursor: default; transform: none; box-shadow: none; }
+
+  /* ═══ QUESTION PRACTICE (topic filters + weak-spot mode) ═══ */
+  .pb-pills { display: flex; flex-wrap: wrap; gap: 0.4rem; max-height: 148px; overflow-y: auto; padding: 0.15rem; }
+  .pb-pills-skill .vp-pill { font-size: 0.74rem; padding: 0.4rem 0.8rem; }
+  .pb-empty-note { font-size: 0.8rem; color: var(--mid); margin-top: 0.4rem; }
+
+  .pb-q-meta { display: flex; justify-content: space-between; align-items: baseline; font-family: var(--hel); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); margin-bottom: 0.6rem; }
+  .pb-q-progress { color: var(--red); }
+  .pb-q-card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; padding: 1.6rem; opacity: 0; animation: vpRise 0.3s cubic-bezier(.2,.7,.3,1) forwards; }
+  .pb-q-text { font-size: 1.02rem; line-height: 1.65; color: var(--text); margin-bottom: 1.25rem; }
+  .pb-choices { display: flex; flex-direction: column; gap: 0.6rem; }
+  /* Choices reuse the diagnostic's own .dx-choice/.dx-choice-letter/
+     .dx-elim markup and CSS for a consistent look and the same answer-
+     eliminator behavior — this just adds the two extra states specific to
+     practice mode (a locked-out wrong guess, and the revealed correct
+     answer) plus the eliminator-visibility rule scoped to this module's
+     own #pb-choices id (the existing rule is scoped to #dx-choices). */
+  #pb-choices.eliminator-on .dx-elim { display: flex; }
+  .dx-choice.pb-tried-wrong { border-color: var(--red); background: #f8ecea; opacity: 0.7; cursor: default; }
+  .dx-choice.pb-tried-wrong .dx-choice-letter { border-color: var(--red); color: var(--red); }
+  .dx-choice.pb-right { border-color: #3f7d54; background: #eaf3ec; cursor: default; }
+  .dx-choice.pb-right .dx-choice-letter { background: #3f7d54; border-color: #3f7d54; color: #fff; }
+  .pb-fr-row { display: flex; gap: 0.6rem; margin-bottom: 0.5rem; }
+  .pb-fr-row input { flex: 1; font-family: var(--hel); font-size: 0.95rem; border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem 0.9rem; }
+  .pb-fr-row input:disabled { background: var(--bg); color: var(--mid); }
+  .pb-fr-submit { font-family: var(--hel); font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; background: var(--red); color: #fff; border: none; border-radius: 8px; padding: 0 1.2rem; cursor: pointer; }
+  .pb-fr-submit:disabled { opacity: 0.4; cursor: default; }
+
+  .pb-note { font-size: 0.85rem; line-height: 1.55; margin-top: 0.5rem; padding: 0.7rem 0.85rem; border-radius: 8px; background: var(--bg); color: var(--mid); }
+  .pb-note.pb-note-correct { background: #eaf3ec; color: #2d5b3c; }
+  .pb-note.pb-note-wrong { background: #f8ecea; color: var(--red); }
+  .pb-explain { margin-top: 1.1rem; font-size: 0.86rem; line-height: 1.6; color: var(--text); background: var(--bg); border-radius: 10px; padding: 0.9rem 1.1rem; }
+  .pb-explain-hed { font-family: var(--hel); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); margin-bottom: 0.35rem; }
+
+  .pb-actions { display: flex; justify-content: flex-end; margin-top: 1.2rem; }
+  .pb-next-btn { font-family: var(--hel); font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; background: var(--text); color: #fff; border: none; border-radius: 8px; padding: 0.8rem 1.4rem; cursor: pointer; transition: transform 0.12s ease; }
+  .pb-next-btn:hover { transform: translateY(-1px); }
+
+  .pb-summary { text-align: center; padding: 2rem 1rem; }
+  .pb-summary-score { font-family: var(--display); font-size: 2.2rem; color: var(--red); margin-bottom: 0.4rem; }
+  .pb-summary-sub { font-size: 0.85rem; color: var(--mid); margin-bottom: 1.5rem; }
+  .pb-summary-actions { display: flex; gap: 0.8rem; justify-content: center; flex-wrap: wrap; }
   .vp-summary { text-align: center; background: var(--white); border: 1px solid var(--border); border-radius: 14px; padding: 2rem 1.5rem; }
   .vp-summary .vp-score { font-family: var(--display); font-size: 2.5rem; color: var(--gold); line-height: 1; animation: vpPop 0.4s cubic-bezier(.2,.7,.3,1); }
   .vp-summary .vp-score-sub { font-size: 0.85rem; color: var(--mid); margin: 0.5rem 0 1.25rem; }
@@ -584,6 +643,16 @@
     <div class="kicker">Welcome</div>
     <h1 class="menu-greeting" id="menu-greeting">Hey there.</h1>
     <p class="menu-sub">What are you working on right now?</p>
+    <div class="test-countdown" id="test-countdown" style="display:none;">
+      <div class="tc-top">
+        <span class="tc-label" id="tc-label">Test day</span>
+        <span class="tc-days" id="tc-days">&mdash;</span>
+      </div>
+      <div class="tc-track">
+        <div class="tc-fill" id="tc-fill" style="width:0%;"></div>
+        <div class="tc-flag"><img src="../target-icon-white.png" alt="" class="tc-flag-icon"></div>
+      </div>
+    </div>
     <div class="next-session-card" id="next-session-card" style="display:none;">
       <div class="ns-label" id="ns-label">Your next scheduled session is on:</div>
       <div class="ns-date" id="ns-date">&mdash;</div>
@@ -646,6 +715,13 @@
           <div class="menu-card-body">Flashcards, multiple choice, and type-it drills for the SAT vocabulary list. Study one set at a time or several at once.</div>
         </div>
       </div>
+      <div class="menu-card menu-card-wide" data-route="practice-bank">
+        <span class="menu-card-icon">?</span>
+        <div>
+          <div class="menu-card-title">Question Practice</div>
+          <div class="menu-card-body">Reading &amp; Writing and Math questions with full explanations for every answer choice. Pick your own topics, or practice the skills you missed on your last diagnostic.</div>
+        </div>
+      </div>
     </div>
     <a href="#" class="menu-back-link" id="sat-resources-back">&larr; Back to menu</a>
   </div>
@@ -688,6 +764,49 @@
     </div>
 
     <a href="#" class="menu-back-link" id="vocab-back">&larr; Back to resources</a>
+  </div>
+</div>
+
+<!-- ═══ SCREEN 3b-ii — QUESTION PRACTICE (embedded; only reachable from
+     the SAT/ACT Resources screen inside the portal — no standalone URL) ═══ -->
+<div class="screen" id="screen-practice-bank">
+  <div class="panel-wide">
+    <div class="vp-head">
+      <div class="kicker">SAT / ACT Resources</div>
+      <h1 class="panel-hed">Question Practice</h1>
+    </div>
+
+    <!-- ═══ SETUP — weak-spot shortcut and topic filters are both chosen
+         here BEFORE anything starts. Nothing under #pb-practice exists yet
+         at this point. ═══ -->
+    <div id="pb-setup">
+      <div class="pb-weak-panel" id="pb-weak-panel"></div>
+
+      <div class="vp-panel-label">Section</div>
+      <div class="pb-pills" id="pb-section-pills"></div>
+
+      <div class="vp-panel-label">Domain</div>
+      <div class="pb-pills" id="pb-domain-pills"></div>
+
+      <div class="vp-panel-label">Skill</div>
+      <div class="pb-pills pb-pills-skill" id="pb-skill-pills"></div>
+
+      <div class="vp-panel-label">Difficulty</div>
+      <div class="pb-pills" id="pb-difficulty-pills"></div>
+
+      <div class="vp-pool-count" id="pb-pool-count"></div>
+      <button class="vp-primary" id="pb-start-btn" type="button">Start Practicing</button>
+    </div>
+
+    <!-- ═══ PRACTICE — one question at a time renders into #pb-stage here,
+         only once "Start Practicing" (or a weak-spot shortcut) has been
+         pressed. ═══ -->
+    <div id="pb-practice" style="display:none;">
+      <a href="#" class="vp-change-link" id="pb-change-link">&larr; Change topics</a>
+      <div class="pb-stage" id="pb-stage"></div>
+    </div>
+
+    <a href="#" class="menu-back-link" id="practice-bank-back">&larr; Back to resources</a>
   </div>
 </div>
 
@@ -1049,6 +1168,8 @@
 </div>
 
 <script src="banks.js"></script>
+<script src="practice-tests.js"></script>
+<script src="math-question-bank.js"></script>
 <script>
 (function () {
   'use strict';
@@ -1303,11 +1424,14 @@
       satTaken: !!data.satTaken,
       actTaken: !!data.actTaken,
       testPrep: !!data.testPrep,
+      grantedAt: data.grantedAt || null,
+      testDate: data.testDate || null,
       tests: data.tests || []
     };
     document.getElementById('menu-greeting').textContent = 'Hey ' + currentStudent.name.split(' ')[0] + '.';
     show('screen-menu');
     loadNextSession();
+    renderTestCountdown();
   }
 
   /* ═══ NEXT SESSION WIDGET ═══
@@ -1364,16 +1488,27 @@
     nsCard.parentNode.insertBefore(box, nsCard.nextSibling);
   }
 
+  // Safety net: the join link is shown up front, synchronously, before the
+  // calendar lookup even runs — not gated on the fetch succeeding. A
+  // student's ability to join their class shouldn't depend on Luca's
+  // calendar being reachable, the backend being up, or the student's own
+  // connection being solid enough for the round trip to finish. The
+  // lookup below only ever refines the LABEL/DATE text (which session,
+  // starting when) — it never hides the link, on success, failure, or no
+  // connection at all.
   function loadNextSession() {
     if (!currentStudent || !currentStudent.key) return;
+    nsCard.style.display = 'block';
+    nsLabel.textContent = '';
+    nsDate.textContent = 'Loading your next session…';
+    setJoinLink();
+
     fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'nextSession', key: currentStudent.key, debug: DEBUG_MODE }) })
       .then(function (r) { return r.json(); })
       .catch(function (err) { return { ok: false, error: 'network', message: String(err) }; })
       .then(function (data) {
         renderNextSessionDebug(data);
-        if (!data || !data.ok) { nsCard.style.display = DEBUG_MODE ? 'block' : 'none'; if (DEBUG_MODE) { nsLabel.textContent = ''; nsDate.textContent = 'Request failed — see debug output below.'; nsJoin.style.display = 'none'; } return; }
-        nsCard.style.display = 'block';
-        if (data.next) {
+        if (data && data.ok && data.next) {
           // If the session's start time has already passed (the backend
           // keeps it showing for 20 minutes after it begins), frame it as
           // in-progress so a late student knows to join now rather than
@@ -1387,13 +1522,69 @@
             nsLabel.textContent = '📅 Your next scheduled session is on:';
             nsDate.textContent = formatSessionDate(data.next.startIso, data.next.allDay);
           }
-          setJoinLink();
-        } else {
+        } else if (data && data.ok && !data.next) {
           nsLabel.textContent = '';
           nsDate.textContent = 'You have no current sessions scheduled yet.';
-          nsJoin.style.display = 'none';
+        } else {
+          // Lookup failed — server error, calendar unreachable, offline,
+          // whatever. The link itself (set above, before this fetch even
+          // ran) stays put regardless; only this text falls back.
+          nsLabel.textContent = '';
+          nsDate.textContent = DEBUG_MODE ? 'Request failed — see debug output below.' : "Couldn't load your session time, but you can still join here:";
         }
+        // Always re-affirm the join link after the lookup resolves too —
+        // belt and suspenders, in case anything above ever changes.
+        setJoinLink();
       });
+  }
+
+  /* ═══ TEST-DAY COUNTDOWN ═══
+     Purely client-side — both dates (currentStudent.grantedAt, the day
+     this student first logged in, and currentStudent.testDate, typed into
+     the Students sheet's TestDate column by Luca) already came down with
+     the rest of the auth response, so this needs no extra network call.
+     Hidden whenever there's no TestDate set for a student (most students,
+     most of the time) or the dates don't make sense, so a blank/bad cell
+     just means the card doesn't show rather than showing something wrong. */
+  var tcCard = document.getElementById('test-countdown');
+  var tcLabel = document.getElementById('tc-label');
+  var tcDays = document.getElementById('tc-days');
+  var tcFill = document.getElementById('tc-fill');
+
+  function renderTestCountdown() {
+    if (!currentStudent || !currentStudent.testDate) { tcCard.style.display = 'none'; return; }
+    var testMs = Date.parse(currentStudent.testDate);
+    if (isNaN(testMs)) { tcCard.style.display = 'none'; return; }
+
+    var now = Date.now();
+    var startMs = currentStudent.grantedAt ? Date.parse(currentStudent.grantedAt) : NaN;
+    // Fall back to a flat 12-week runway if there's no login date to anchor
+    // to yet, or if it's somehow after the test date (bad/edited data) —
+    // still shows something reasonable instead of hiding the whole card.
+    if (isNaN(startMs) || startMs >= testMs) startMs = testMs - 84 * 24 * 60 * 60 * 1000;
+
+    var msPerDay = 24 * 60 * 60 * 1000;
+    var daysLeft = Math.ceil((testMs - now) / msPerDay);
+
+    tcCard.style.display = 'block';
+    if (daysLeft > 1) {
+      tcLabel.textContent = 'Countdown to your test';
+      tcDays.textContent = daysLeft + ' days left';
+    } else if (daysLeft === 1) {
+      tcLabel.textContent = 'Countdown to your test';
+      tcDays.textContent = 'Tomorrow';
+    } else if (daysLeft === 0) {
+      tcLabel.textContent = 'Countdown to your test';
+      tcDays.textContent = 'Today';
+    } else {
+      tcLabel.textContent = 'Test day has passed';
+      tcDays.textContent = 'Good luck!';
+    }
+
+    var pct = ((now - startMs) / (testMs - startMs)) * 100;
+    if (isNaN(pct)) pct = 0;
+    pct = Math.max(0, Math.min(100, pct));
+    tcFill.style.width = pct + '%';
   }
 
   function resetKeyScreen() {
@@ -1532,10 +1723,12 @@
       else if (route === 'files' || route === 'college-prep') { renderResources(route); show('screen-resources'); }
       else if (route === 'sat-resources') { show('screen-sat-resources'); }
       else if (route === 'vocab') { show('screen-vocab'); if (window.vocabModuleInit) window.vocabModuleInit(); }
+      else if (route === 'practice-bank') { show('screen-practice-bank'); if (window.pbModuleInit) window.pbModuleInit(); }
     });
   });
   document.getElementById('sat-resources-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-menu'); });
   document.getElementById('vocab-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-sat-resources'); });
+  document.getElementById('practice-bank-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-sat-resources'); });
   document.getElementById('resume-yes').addEventListener('click', function () {
     resumeOverlay.classList.remove('active');
     var snap = pendingResumeSnapshot;
@@ -2582,6 +2775,43 @@
   }
 
 
+  /* ═══ PER-SKILL DIAGNOSTIC RESULTS — feeds the "Practice My Weak Spots"
+     mode of the Question Practice tool (its own isolated module further
+     down the page — see the comment there for why it reads this same
+     localStorage key directly instead of a bridge function). Persisted
+     client-side only, per student key, so it survives closing the tab but
+     never leaves the browser or touches the backend. `skills` here is
+     already keyed "<domain> → <skill>" by finishDiagnostic() above —
+     split back apart on save so the reader gets domain/skill as separate
+     fields without this and the practice module having to agree on a
+     delimiter beyond the one string. Additive across attempts (SAT then
+     ACT, or a retake) rather than overwritten, so results only ever get
+     more complete, never erased by a later attempt at a different skill
+     mix. */
+  function saveDiagnosticSkillStats(skills) {
+    try {
+      var studentKey = currentStudent && currentStudent.key;
+      if (!studentKey) return;
+      var storageKey = 'moretti_diag_skills_' + studentKey;
+      var existing = {};
+      try {
+        var raw = localStorage.getItem(storageKey);
+        if (raw) existing = JSON.parse(raw) || {};
+      } catch (e) { existing = {}; }
+      if (!existing.bySkill || typeof existing.bySkill !== 'object') existing.bySkill = {};
+      Object.keys(skills).forEach(function (skillKey) {
+        var sep = skillKey.indexOf(' → ');
+        var domain = sep === -1 ? skillKey : skillKey.slice(0, sep);
+        var skill = sep === -1 ? skillKey : skillKey.slice(sep + 3);
+        var s = skills[skillKey];
+        var prev = existing.bySkill[skillKey] || { domain: domain, skill: skill, correct: 0, total: 0 };
+        existing.bySkill[skillKey] = { domain: domain, skill: skill, correct: prev.correct + s.correct, total: prev.total + s.total };
+      });
+      existing.updatedAt = new Date().toISOString();
+      localStorage.setItem(storageKey, JSON.stringify(existing));
+    } catch (e) { /* storage disabled / private browsing — skip silently, matches saveState() elsewhere */ }
+  }
+
   var diagnosticSubmitted = false;
   function finishDiagnostic() {
     if (diagnosticSubmitted) return; // guard against a double click/double send
@@ -2645,6 +2875,8 @@
       sectionSummaryLines.push('  - ' + sec.label + ': ' + secCorrect + ' / ' + qs.length);
       sectionResults.push({ label: sec.label, correct: secCorrect, total: qs.length });
     });
+
+    saveDiagnosticSkillStats(skills);
 
     var reportLines = [];
     reportLines.push(testChoice + ' DIAGNOSTIC RESULTS');
@@ -2865,6 +3097,8 @@
       show(state.screen);
     } else if (state.screen === 'screen-vocab') {
       show('screen-vocab'); if (window.vocabModuleInit) window.vocabModuleInit();
+    } else if (state.screen === 'screen-practice-bank') {
+      show('screen-practice-bank'); if (window.pbModuleInit) window.pbModuleInit();
     } else {
       show('screen-menu'); // includes mid-section-break "screen-intro" — safest to restart from the menu
     }
@@ -2890,6 +3124,7 @@
       currentStudent = state.student;
       document.getElementById('menu-greeting').textContent = 'Hey ' + currentStudent.name.split(' ')[0] + '.';
       loadNextSession();
+      renderTestCountdown();
       applyRestoredState(state);
     } catch (e) { /* corrupt or blocked storage — just start fresh */ }
   })();
@@ -3914,7 +4149,13 @@
   };
 
   var setNames = Object.keys(VOCAB);
-  var selectedSets = setNames.slice();
+  // Nothing is pre-selected — a student has to actively choose sets before
+  // Start Studying is even clickable (see updatePoolCount()'s disabled
+  // toggle below). setsAllSnapshot remembers whatever was selected right
+  // before "All sets" was clicked, so clicking "All sets" again restores
+  // that instead of just clearing everything.
+  var selectedSets = [];
+  var setsAllSnapshot = null;
   var mode = 'flash';
   var started = false;
   // Non-null while reviewing the "still learning" list specifically (the
@@ -3970,14 +4211,22 @@
     return Object.keys(progress.stillLearning).map(function (t) { return all[t]; }).filter(Boolean);
   }
 
-  var pillsEl, stageEl, vpSetupEl, vpPracticeEl, stillPanelEl, poolCountEl;
+  var pillsEl, stageEl, vpSetupEl, vpPracticeEl, stillPanelEl, poolCountEl, startBtnEl;
   function renderPills() {
     pillsEl.innerHTML = '';
     if (setNames.length > 1) {
+      var isAllOn = selectedSets.length === setNames.length;
       var all = document.createElement('button');
-      all.className = 'vp-pill' + (selectedSets.length === setNames.length ? ' on' : '');
+      all.className = 'vp-pill' + (isAllOn ? ' on' : '');
       all.type = 'button'; all.textContent = 'All sets';
-      all.addEventListener('click', function () { selectedSets = setNames.slice(); renderPills(); updatePoolCount(); });
+      all.addEventListener('click', function () {
+        // Toggle: turning "All sets" on remembers whatever was selected
+        // beforehand; turning it back off restores exactly that, instead
+        // of dropping to nothing.
+        if (isAllOn) { selectedSets = setsAllSnapshot ? setsAllSnapshot.slice() : []; setsAllSnapshot = null; }
+        else { setsAllSnapshot = selectedSets.slice(); selectedSets = setNames.slice(); }
+        renderPills(); updatePoolCount();
+      });
       pillsEl.appendChild(all);
     }
     setNames.forEach(function (s) {
@@ -3985,9 +4234,11 @@
       b.className = 'vp-pill' + (selectedSets.indexOf(s) !== -1 ? ' on' : '');
       b.type = 'button'; b.textContent = s;
       b.addEventListener('click', function () {
+        // Plain toggle — clicking an already-selected pill deselects only
+        // that one; there's no "must keep at least one" floor anymore,
+        // since the whole point is that nothing is selected by default.
         var i = selectedSets.indexOf(s);
-        if (i === -1) selectedSets.push(s);
-        else if (selectedSets.length > 1) selectedSets.splice(i, 1);
+        if (i === -1) selectedSets.push(s); else selectedSets.splice(i, 1);
         renderPills(); updatePoolCount();
       });
       pillsEl.appendChild(b);
@@ -3996,7 +4247,8 @@
   function updatePoolCount() {
     if (!poolCountEl) return;
     var n = selectedSets.reduce(function (sum, s) { return sum + ((VOCAB[s] || []).length); }, 0);
-    poolCountEl.textContent = n + ' word' + (n === 1 ? '' : 's') + ' in this selection';
+    poolCountEl.textContent = n === 0 ? 'Choose at least one set to begin.' : (n + ' word' + (n === 1 ? '' : 's') + ' in this selection');
+    if (startBtnEl) startBtnEl.disabled = n === 0;
   }
   // Renders the "still learning" review panel on the setup screen — either
   // an empty-state note, or the word count/chips plus a shortcut straight
@@ -4178,6 +4430,7 @@
     vpPracticeEl = document.getElementById('vp-practice');
     stillPanelEl = document.getElementById('vp-still-panel');
     poolCountEl = document.getElementById('vp-pool-count');
+    startBtnEl = document.getElementById('vp-start-btn');
     // Mode buttons on the setup screen just record the choice — actually
     // starting only happens on "Start Studying" (or the still-learning
     // shortcut), matching the rest of the setup-gate flow below.
@@ -4213,6 +4466,540 @@
       if (e.key === 'ArrowLeft') { e.preventDefault(); advanceFlash(-1); }
       else if (e.key === 'ArrowRight') { e.preventDefault(); advanceFlash(1); }
       else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') { e.preventDefault(); flipCurrentCard(); }
+    });
+  };
+})();
+</script>
+
+<!-- ═══ QUESTION PRACTICE MODULE — isolated (its own closure), same pattern
+     as the vocabulary module above. Reads window.SAT_PRACTICE_TESTS (see
+     practice-tests.js — Luca's hand-written R&W/Math bank with a full
+     explanation for every answer choice) rather than banks.js (the
+     diagnostic bank, which has no explanations and isn't meant for
+     open-ended practice). Exposes window.pbModuleInit(), called by the
+     portal when this screen is opened, same as vocabModuleInit(). ═══ -->
+<script>
+(function () {
+  'use strict';
+  var SESSION_CAP = 20; // a practice round stops here even if more questions match, so it stays a sitting rather than a slog
+
+  function escHtml(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  function sameSkill(a, b) { return String(a || '').trim().toLowerCase() === String(b || '').trim().toLowerCase(); }
+  function shuffle(arr) {
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+  function sectionLabel(key) {
+    if (key === 'readingWriting') return 'Reading & Writing';
+    if (key === 'math') return 'Math';
+    return key;
+  }
+  var LETTERS = ['A', 'B', 'C', 'D', 'E'];
+  var DIFFICULTIES = ['easy', 'medium', 'hard'];
+  function difficultyLabel(d) { return d.charAt(0).toUpperCase() + d.slice(1); }
+
+  /* ═══ FLATTEN THE BANK ═══
+     window.SAT_PRACTICE_TESTS is an array of full tests, each with
+     sections.{math,readingWriting}.{module1,module2Easier,module2Harder}
+     arrays of questions (see practice-tests.js's schema comment). Module 2
+     Easier/Harder are two DIFFERENT sets of questions (not duplicates of
+     each other), so both are included here — the "pick one variant" rule
+     is specific to adaptive scoring on a real/diagnostic attempt, not to
+     open-ended practice, where more question variety is strictly better. */
+  var pool = [];
+  (function flattenPool() {
+    var tests = window.SAT_PRACTICE_TESTS || [];
+    tests.forEach(function (test) {
+      var sections = test.sections || {};
+      Object.keys(sections).forEach(function (sectionKey) {
+        var sec = sections[sectionKey] || {};
+        Object.keys(sec).forEach(function (moduleKey) {
+          (sec[moduleKey] || []).forEach(function (q) {
+            pool.push({
+              testId: test.id, testTitle: test.title, section: sectionKey, module: moduleKey,
+              domain: q.domain, skill: q.skill || q.domain, difficulty: q.difficulty || 'medium',
+              type: q.type, text: q.text, choices: q.choices, correct: q.correct,
+              choiceNotes: q.choiceNotes || [], answer: q.answer, explanation: q.explanation || ''
+            });
+          });
+        });
+      });
+    });
+
+    // window.MATH_QUESTION_BANK (math-question-bank.js) is Luca's own
+    // flat, ever-growing Math bank — not split into test modules like
+    // SAT_PRACTICE_TESTS, just one array per skill, added straight to the
+    // same pool tagged as section "math" so it's indistinguishable from
+    // the rest once flattened (same filters, same weak-spot matching).
+    (window.MATH_QUESTION_BANK || []).forEach(function (q) {
+      pool.push({
+        testId: 'luca-math-bank', testTitle: 'Math Question Bank', section: 'math', module: 'n/a',
+        domain: q.domain, skill: q.skill || q.domain, difficulty: q.difficulty || 'medium',
+        type: q.type, text: q.text, choices: q.choices, correct: q.correct,
+        choiceNotes: q.choiceNotes || [], answer: q.answer, explanation: q.explanation || ''
+      });
+    });
+  })();
+
+  // Taxonomy derived from the pool itself (not hardcoded) so it grows
+  // automatically as Luca adds more tests to practice-tests.js — no code
+  // change needed here when SAT Test 2 (or ACT tests, eventually) show up.
+  var sectionKeys = [];
+  var domainsBySection = {}; // sectionKey -> [domain, ...]
+  var skillsByDomain = {};   // domain -> [skill, ...]
+  pool.forEach(function (q) {
+    if (sectionKeys.indexOf(q.section) === -1) sectionKeys.push(q.section);
+    if (!domainsBySection[q.section]) domainsBySection[q.section] = [];
+    if (domainsBySection[q.section].indexOf(q.domain) === -1) domainsBySection[q.section].push(q.domain);
+    if (!skillsByDomain[q.domain]) skillsByDomain[q.domain] = [];
+    if (skillsByDomain[q.domain].indexOf(q.skill) === -1) skillsByDomain[q.domain].push(q.skill);
+  });
+
+  // Nothing pre-selected at any level — a student builds up the filter
+  // from scratch, and the pool count (see updatePoolCount()) stays at 0
+  // with Start disabled until something's actually chosen.
+  var selSections = [];
+  var selDomains = [];
+  var selSkills = [];
+  var selDifficulties = [];
+  // Domain/skill pill OPTIONS (not selections) fall back to the full list
+  // whenever nothing's chosen at the level above, so the setup screen
+  // isn't just empty boxes before a student picks a section — they can
+  // click straight into a domain or skill pill in any order. Once a
+  // section (or domain) IS chosen, the level below narrows to match it,
+  // same cascading behavior as before.
+  function availableDomains() {
+    var sections = selSections.length ? selSections : sectionKeys;
+    var out = [];
+    sections.forEach(function (s) { (domainsBySection[s] || []).forEach(function (d) { if (out.indexOf(d) === -1) out.push(d); }); });
+    return out;
+  }
+  function availableSkills() {
+    var domains = selDomains.length ? selDomains : Object.keys(skillsByDomain);
+    var out = [];
+    domains.forEach(function (d) { (skillsByDomain[d] || []).forEach(function (s) { if (out.indexOf(s) === -1) out.push(s); }); });
+    return out;
+  }
+
+  var sessionQuestions = [];
+  var idx = 0, score = 0;
+  var started = false;
+
+  var setupEl, practiceEl, stageEl, weakPanelEl, poolCountEl, startBtn, changeLink;
+  var sectionPillsEl, domainPillsEl, skillPillsEl, difficultyPillsEl;
+
+  function currentFilteredPool() {
+    return pool.filter(function (q) {
+      return selSections.indexOf(q.section) !== -1 &&
+        selDomains.indexOf(q.domain) !== -1 &&
+        selSkills.indexOf(q.skill) !== -1 &&
+        selDifficulties.indexOf(q.difficulty) !== -1;
+    });
+  }
+
+  // Generic pill-row renderer shared by the section/domain/skill/
+  // difficulty rows below — mirrors the vocabulary module's renderPills().
+  // Plain toggle (clicking an "on" pill turns off only that one — no
+  // "must keep at least one" floor, since starting with nothing selected
+  // is the whole point). The "All" pill remembers whatever was selected
+  // right before it was clicked (via snapBox, a small {value} holder that
+  // outlives any single render since it's created once by the caller,
+  // not here) so clicking "All" again restores that instead of clearing.
+  function renderPillRow(container, options, labelFn, selectedArr, snapBox, onChange) {
+    container.innerHTML = '';
+    if (options.length > 1) {
+      var isAllOn = options.length > 0 && selectedArr.length === options.length;
+      var all = document.createElement('button');
+      all.type = 'button';
+      all.className = 'vp-pill' + (isAllOn ? ' on' : '');
+      all.textContent = 'All';
+      all.addEventListener('click', function () {
+        if (isAllOn) {
+          var restore = (snapBox.value || []).filter(function (o) { return options.indexOf(o) !== -1; });
+          selectedArr.splice(0, selectedArr.length);
+          restore.forEach(function (o) { selectedArr.push(o); });
+          snapBox.value = null;
+        } else {
+          snapBox.value = selectedArr.slice();
+          selectedArr.splice(0, selectedArr.length);
+          options.forEach(function (o) { selectedArr.push(o); });
+        }
+        onChange();
+      });
+      container.appendChild(all);
+    }
+    options.forEach(function (opt) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'vp-pill' + (selectedArr.indexOf(opt) !== -1 ? ' on' : '');
+      b.textContent = labelFn(opt);
+      b.addEventListener('click', function () {
+        var i = selectedArr.indexOf(opt);
+        if (i === -1) selectedArr.push(opt); else selectedArr.splice(i, 1);
+        onChange();
+      });
+      container.appendChild(b);
+    });
+  }
+
+  var sectionSnapBox = { value: null };
+  var domainSnapBox = { value: null };
+  var skillSnapBox = { value: null };
+  var difficultySnapBox = { value: null };
+
+  function renderSectionPills() {
+    renderPillRow(sectionPillsEl, sectionKeys, sectionLabel, selSections, sectionSnapBox, function () {
+      var newDomains = availableDomains();
+      selDomains = selDomains.filter(function (d) { return newDomains.indexOf(d) !== -1; });
+      renderSectionPills(); // refresh this row's own "on" states
+      onDomainsChanged();
+    });
+  }
+  function renderDomainPills() {
+    renderPillRow(domainPillsEl, availableDomains(), function (d) { return d; }, selDomains, domainSnapBox, function () { onDomainsChanged(); });
+  }
+  function onDomainsChanged() {
+    var newSkills = availableSkills();
+    selSkills = selSkills.filter(function (s) { return newSkills.indexOf(s) !== -1; });
+    renderDomainPills();
+    renderSkillPills();
+    updatePoolCount();
+  }
+  function renderSkillPills() {
+    renderPillRow(skillPillsEl, availableSkills(), function (s) { return s; }, selSkills, skillSnapBox, function () { renderSkillPills(); updatePoolCount(); });
+  }
+  function renderDifficultyPills() {
+    renderPillRow(difficultyPillsEl, DIFFICULTIES, difficultyLabel, selDifficulties, difficultySnapBox, function () { renderDifficultyPills(); updatePoolCount(); });
+  }
+  function updatePoolCount() {
+    var n = currentFilteredPool().length;
+    poolCountEl.textContent = (!selSections.length || !selDomains.length || !selSkills.length || !selDifficulties.length)
+      ? 'Choose at least one option in each row to see matches.'
+      : (n + ' question' + (n === 1 ? '' : 's') + ' match your filters' + (n > SESSION_CAP ? ' (practicing ' + SESSION_CAP + ' at a time)' : ''));
+    startBtn.disabled = n === 0;
+  }
+
+  /* ═══ WEAK-SPOT BUTTON ═══
+     Just one button — no breakdown list. Reads the same localStorage key
+     the outer portal script writes to right after a diagnostic finishes
+     (see saveDiagnosticSkillStats() in the main script block) — this
+     module is its own closure so it can't see that function directly, but
+     localStorage itself isn't closure-scoped, so reading the same key by
+     the same naming convention (moretti_diag_skills_<key>) works without
+     any bridge function, same as this module reuses
+     window.getPortalStudentKey() for the key itself.
+
+     Clicking it finds the single worst-performing skill the bank actually
+     has questions for (ties broken by whichever has more attempts behind
+     it — a steadier signal than one lucky/unlucky question), then
+     highlights it: sets the section/domain/skill pills to just that skill
+     and difficulty to "all," and re-renders the pill rows so the student
+     can see exactly what got selected. It does NOT jump straight into
+     practice — Start Practicing (already on screen) is still the one
+     button that begins a round, same as picking topics manually. */
+  function renderWeakPanel() {
+    var key = window.getPortalStudentKey && window.getPortalStudentKey();
+    var data = null;
+    if (key) {
+      try {
+        var raw = localStorage.getItem('moretti_diag_skills_' + key);
+        if (raw) data = JSON.parse(raw);
+      } catch (e) { data = null; }
+    }
+    var bySkill = (data && data.bySkill && typeof data.bySkill === 'object') ? data.bySkill : {};
+    var rows = Object.keys(bySkill).map(function (k) { return bySkill[k]; }).filter(function (r) { return r && r.total > 0; });
+
+    if (!rows.length) {
+      weakPanelEl.innerHTML = '<button class="vp-still-btn" id="pb-weak-btn" type="button" disabled>Practice My Weak Spots</button>' +
+        '<div class="pb-empty-note">Take a diagnostic first so we know what to focus on.</div>';
+      return;
+    }
+    rows.forEach(function (r) { r.pct = Math.round((r.correct / r.total) * 100); });
+    rows.sort(function (a, b) { return a.pct - b.pct || b.total - a.total; });
+    var covered = rows.filter(function (r) { return pool.some(function (q) { return sameSkill(q.skill, r.skill); }); });
+    var worst = covered[0] || null;
+
+    if (!worst) {
+      weakPanelEl.innerHTML = '<button class="vp-still-btn" id="pb-weak-btn" type="button" disabled>Practice My Weak Spots</button>' +
+        '<div class="pb-empty-note">We don’t have practice questions for your weak spots yet — pick topics below instead.</div>';
+      return;
+    }
+
+    weakPanelEl.innerHTML = '<button class="vp-still-btn" id="pb-weak-btn" type="button">Practice My Weak Spots</button>';
+    document.getElementById('pb-weak-btn').addEventListener('click', function () {
+      var match = pool.filter(function (q) { return sameSkill(q.skill, worst.skill); })[0];
+      if (!match) return;
+      selSections = [match.section];
+      selDomains = [match.domain];
+      selSkills = [match.skill];
+      selDifficulties = DIFFICULTIES.slice();
+      renderSectionPills();
+      renderDomainPills();
+      renderSkillPills();
+      renderDifficultyPills();
+      updatePoolCount();
+    });
+  }
+
+  function enterPracticeUI() {
+    setupEl.style.display = 'none';
+    practiceEl.style.display = '';
+  }
+  function backToSetup() {
+    practiceEl.style.display = 'none';
+    setupEl.style.display = '';
+    stageEl.innerHTML = '';
+    renderWeakPanel();
+    updatePoolCount();
+  }
+
+  function startSession(questions) {
+    sessionQuestions = shuffle(questions).slice(0, SESSION_CAP);
+    idx = 0; score = 0;
+    enterPracticeUI();
+    renderQuestion();
+  }
+
+  /* ═══ QUESTION FLOW ═══
+     Wrong choices don't reveal the answer — they mark themselves wrong,
+     show their own explanation right under them, and get locked out (via
+     triedWrong) so a student can't waste a click retrying something
+     already ruled out, but every other untried choice stays live. Next
+     Question only appears once the correct choice has actually been
+     picked (questionSolved), matching "keep trying until you get it."
+     Scoring only counts the FIRST attempt on each question — otherwise
+     every question would eventually count as correct, since getting there
+     is required to move on, and the score would be meaningless. ABC
+     (answer eliminator) reuses the diagnostic's own dx-choice/dx-elim
+     markup and CSS so it looks and behaves identically to the one
+     students already know from the real diagnostic. */
+  var eliminatorOn = false; // persists across the whole practice session, same as the diagnostic's toggle
+  var currentElims = [];    // indices crossed out on the CURRENT question only
+  var triedWrong = [];      // indices already tried and shown wrong, on the CURRENT question
+  var firstAttemptRight = null; // null until the first attempt on this question; true/false after
+  var questionSolved = false;
+  var frAttempts = 0; // wrong grid-in guesses on the CURRENT question — the answer is revealed after 3
+
+  function renderQuestion() {
+    if (idx >= sessionQuestions.length) { renderSummary(); return; }
+    currentElims = [];
+    triedWrong = [];
+    firstAttemptRight = null;
+    questionSolved = false;
+    frAttempts = 0;
+    renderQuestionShell();
+  }
+
+  function renderQuestionShell() {
+    var q = sessionQuestions[idx];
+    var html = '<div class="pb-q-meta"><span>' + escHtml(q.domain) + ' → ' + escHtml(q.skill) + '</span>' +
+      '<button class="dx-abc-btn' + (eliminatorOn ? ' on' : '') + '" id="pb-abc-toggle" type="button" title="Answer Eliminator">ABC</button></div>' +
+      '<div class="pb-q-card"><div class="pb-q-text">' + q.text + '</div>' +
+      (q.type === 'mc'
+        ? '<div class="dx-choices' + (eliminatorOn ? ' eliminator-on' : '') + '" id="pb-choices"></div>'
+        : '<div class="pb-fr-row"><input type="text" id="pb-fr-input" inputmode="decimal" placeholder="Your answer" autocomplete="off"><button class="pb-fr-submit" id="pb-fr-submit" type="button">Check</button></div><div id="pb-fr-feedback"></div>') +
+      '</div><div class="pb-actions" id="pb-actions"></div>';
+    stageEl.innerHTML = html;
+
+    document.getElementById('pb-abc-toggle').addEventListener('click', function () {
+      eliminatorOn = !eliminatorOn;
+      document.getElementById('pb-abc-toggle').classList.toggle('on', eliminatorOn);
+      var choicesEl = document.getElementById('pb-choices');
+      if (choicesEl) choicesEl.classList.toggle('eliminator-on', eliminatorOn);
+    });
+
+    if (q.type === 'mc') {
+      renderChoices(q);
+    } else {
+      var input = document.getElementById('pb-fr-input');
+      var submitBtn = document.getElementById('pb-fr-submit');
+      submitBtn.addEventListener('click', function () { submitFr(q, input); });
+      input.addEventListener('keydown', function (e) { if (e.key === 'Enter') submitFr(q, input); });
+      setTimeout(function () { input.focus(); }, 10);
+    }
+  }
+
+  function renderChoices(q) {
+    var choicesEl = document.getElementById('pb-choices');
+    choicesEl.innerHTML = '';
+    q.choices.forEach(function (c, i) {
+      var isElim = currentElims.indexOf(i) !== -1;
+      var isTriedWrong = triedWrong.indexOf(i) !== -1;
+      var isCorrectRevealed = questionSolved && i === q.correct;
+      var row = document.createElement('div');
+      row.className = 'dx-choice' + (isElim ? ' eliminated' : '') + (isTriedWrong ? ' pb-tried-wrong' : '') + (isCorrectRevealed ? ' pb-right' : '');
+      row.innerHTML = '<span class="dx-choice-letter">' + LETTERS[i] + '</span><span class="dx-choice-text">' + c + '</span><span class="dx-elim" title="Cross out this answer">&times;</span>';
+
+      if (!questionSolved) {
+        row.querySelector('.dx-elim').addEventListener('click', function (ev) {
+          ev.stopPropagation();
+          var at = currentElims.indexOf(i);
+          if (at === -1) currentElims.push(i); else currentElims.splice(at, 1);
+          renderChoices(q);
+        });
+        if (!isTriedWrong) {
+          row.addEventListener('click', function () {
+            // Clicking a crossed-out choice picks it anyway (and un-crosses
+            // it), same as the diagnostic — the × is a note-to-self, not a lock.
+            var at = currentElims.indexOf(i);
+            if (at !== -1) currentElims.splice(at, 1);
+            chooseAnswer(q, i);
+          });
+        } else {
+          row.style.cursor = 'default';
+        }
+      } else {
+        row.style.cursor = 'default';
+      }
+      choicesEl.appendChild(row);
+
+      if (isTriedWrong || isCorrectRevealed) {
+        var note = q.choiceNotes[i];
+        if (note) {
+          var noteEl = document.createElement('div');
+          noteEl.className = 'pb-note ' + (isCorrectRevealed ? 'pb-note-correct' : 'pb-note-wrong');
+          noteEl.textContent = note;
+          choicesEl.appendChild(noteEl);
+        }
+      }
+    });
+
+    // Full, unabridged explanation — Luca's own complete rationale, not a
+    // shortened per-choice note — shown once the question is solved, same
+    // spot the grid-in questions show theirs.
+    if (questionSolved && q.explanation) {
+      var explainEl = document.createElement('div');
+      explainEl.className = 'pb-explain';
+      explainEl.innerHTML = '<div class="pb-explain-hed">Full Explanation</div>' + q.explanation;
+      choicesEl.appendChild(explainEl);
+    }
+
+    if (questionSolved) showNextAction();
+  }
+
+  function chooseAnswer(q, i) {
+    var isRight = i === q.correct;
+    if (firstAttemptRight === null) firstAttemptRight = isRight;
+    if (isRight) {
+      questionSolved = true;
+      if (firstAttemptRight) score++;
+    } else if (triedWrong.indexOf(i) === -1) {
+      triedWrong.push(i);
+    }
+    renderChoices(q);
+  }
+
+  function submitFr(q, input) {
+    if (questionSolved) return;
+    var val = parseFloat(input.value);
+    var isRight = !isNaN(val) && Math.abs(val - q.answer) < 0.05;
+    if (firstAttemptRight === null) firstAttemptRight = isRight;
+    var fb = document.getElementById('pb-fr-feedback');
+    if (isRight) {
+      questionSolved = true;
+      if (firstAttemptRight) score++;
+      input.disabled = true;
+      document.getElementById('pb-fr-submit').disabled = true;
+      fb.innerHTML = '<div class="pb-note pb-note-correct">Correct — ' + escHtml(q.answer) + '</div>' +
+        (q.explanation ? '<div class="pb-explain"><div class="pb-explain-hed">Full Explanation</div>' + q.explanation + '</div>' : '');
+      showNextAction();
+    } else {
+      frAttempts++;
+      if (frAttempts >= 3) {
+        // Three wrong guesses — reveal the answer rather than let a
+        // student get stuck with no way forward. Doesn't count toward
+        // the score either way; firstAttemptRight already captured above.
+        questionSolved = true;
+        input.disabled = true;
+        document.getElementById('pb-fr-submit').disabled = true;
+        fb.innerHTML = '<div class="pb-note pb-note-wrong">Not quite — the answer is ' + escHtml(q.answer) + '</div>' +
+          (q.explanation ? '<div class="pb-explain"><div class="pb-explain-hed">Full Explanation</div>' + q.explanation + '</div>' : '');
+        showNextAction();
+      } else {
+        fb.innerHTML = '<div class="pb-note pb-note-wrong">Not quite — try again (' + (3 - frAttempts) + ' attempt' + (3 - frAttempts === 1 ? '' : 's') + ' left before the answer is revealed).</div>';
+      }
+    }
+  }
+
+  function showNextAction() {
+    document.getElementById('pb-actions').innerHTML = '<button class="pb-next-btn" id="pb-next-btn" type="button">' +
+      (idx + 1 < sessionQuestions.length ? 'Next Question' : 'See Results') + '</button>';
+    document.getElementById('pb-next-btn').addEventListener('click', function () { idx++; renderQuestion(); });
+  }
+
+  function renderSummary() {
+    var pct = sessionQuestions.length ? Math.round((score / sessionQuestions.length) * 100) : 0;
+    stageEl.innerHTML = '<div class="pb-summary">' +
+      '<div class="pb-summary-score">' + score + ' / ' + sessionQuestions.length + '</div>' +
+      '<div class="pb-summary-sub">' + pct + '% correct on this round</div>' +
+      '<div class="pb-summary-actions">' +
+      '<button class="vp-primary" id="pb-again-btn" type="button" style="width:auto; padding:0.8rem 1.4rem;">Practice Again</button>' +
+      '<button class="pb-next-btn" id="pb-change-btn" type="button">Change Topics</button>' +
+      '</div></div>';
+    document.getElementById('pb-again-btn').addEventListener('click', function () { startSession(currentFilteredPool()); });
+    document.getElementById('pb-change-btn').addEventListener('click', backToSetup);
+  }
+
+  window.pbModuleInit = function () {
+    if (started) return;
+    started = true;
+    setupEl = document.getElementById('pb-setup');
+    practiceEl = document.getElementById('pb-practice');
+    stageEl = document.getElementById('pb-stage');
+    weakPanelEl = document.getElementById('pb-weak-panel');
+    poolCountEl = document.getElementById('pb-pool-count');
+    startBtn = document.getElementById('pb-start-btn');
+    sectionPillsEl = document.getElementById('pb-section-pills');
+    domainPillsEl = document.getElementById('pb-domain-pills');
+    skillPillsEl = document.getElementById('pb-skill-pills');
+    difficultyPillsEl = document.getElementById('pb-difficulty-pills');
+    changeLink = document.getElementById('pb-change-link');
+
+    if (!pool.length) {
+      setupEl.innerHTML = '<div class="pb-empty-note">No practice questions are loaded yet — check back soon.</div>';
+      return;
+    }
+
+    renderWeakPanel();
+    renderSectionPills();
+    renderDomainPills();
+    renderSkillPills();
+    renderDifficultyPills();
+    updatePoolCount();
+
+    startBtn.addEventListener('click', function () { startSession(currentFilteredPool()); });
+    changeLink.addEventListener('click', function (e) { e.preventDefault(); backToSetup(); });
+
+    // ═══ KEYBOARD SELECTION — A/B/C/D (and E, for a rare 5-choice
+    // question) pick the matching choice, same idea as the diagnostic's
+    // own letter-key shortcut. Registered once; checks at fire-time
+    // whether the practice-bank screen is actually showing and a live mc
+    // question is on screen, same guard pattern the vocab module uses for
+    // its own keyboard nav. Respects the same lockouts clicking does —
+    // already-solved or already-tried-wrong choices don't respond. ═══
+    document.addEventListener('keydown', function (e) {
+      var scr = document.getElementById('screen-practice-bank');
+      if (!scr || !scr.classList.contains('active')) return;
+      if (questionSolved) return;
+      var choicesEl = document.getElementById('pb-choices');
+      if (!choicesEl) return; // not mid-question, or it's a grid-in question
+      var tag = (document.activeElement && document.activeElement.tagName) || '';
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+      var letterIdx = ['a', 'b', 'c', 'd', 'e'].indexOf(e.key.toLowerCase());
+      if (letterIdx === -1) return;
+      var q = sessionQuestions[idx];
+      if (!q || q.type !== 'mc' || letterIdx >= q.choices.length) return;
+      if (triedWrong.indexOf(letterIdx) !== -1) return; // already tried and wrong — ignore, matches click lockout
+      e.preventDefault();
+      var at = currentElims.indexOf(letterIdx);
+      if (at !== -1) currentElims.splice(at, 1);
+      chooseAnswer(q, letterIdx);
     });
   };
 })();
