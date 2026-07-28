@@ -22,11 +22,18 @@
 
    SETUP — see the deployment guide for full steps. Short version:
      1. Create a Google Sheet with a tab named "Students" and headers:
-          Key | Name | DriveFolderUrl | CollegePrepFolderUrl | GrantedEmail | GrantedAt | SATTakenAt | ACTTakenAt
+          Key | Name | DriveFolderUrl | CollegePrepFolderUrl | GrantedEmail | GrantedAt | SATTakenAt | ACTTakenAt | TestPrep
         (SATTakenAt/ACTTakenAt track the one-real-diagnostic-per-test-type
         feature — leave both blank for everyone; they get stamped
         automatically the first time each student finishes that test's
-        diagnostic. A blank cell means "never taken.")
+        diagnostic. A blank cell means "never taken."
+        TestPrep controls whether a student sees the SAT/ACT Diagnostics
+        and SAT/ACT Resources cards on the portal home screen at all — a
+        student who's only doing subject tutoring, not test prep, should
+        have this left blank/unchecked so those two cards just don't show
+        up for them; "Your Files" always shows either way. Use an actual
+        checkbox column (Insert > Checkbox) or just type TRUE/yes in the
+        cell — either is read as "on".)
      2. Paste this file into a new Apps Script project (script.google.com).
      3. Set SHEET_ID below to that Sheet's ID (from its URL).
      4. Deploy > New deployment > Web app.
@@ -93,6 +100,17 @@ function findRow_(sheet, key) {
   return null;
 }
 
+// Reads a Students-sheet cell that's meant to be a yes/no flag (like
+// TestPrep) and returns a real boolean. A checkbox column already comes
+// back as true/false from getValues(), but this also accepts plain typed
+// text (TRUE/true/yes/y/1) in case the column isn't formatted as a
+// checkbox — so Luca can just type into the cell either way.
+function truthy_(v) {
+  if (v === true) return true;
+  if (typeof v === 'string') return /^(true|yes|y|1)$/i.test(v.trim());
+  return false;
+}
+
 function extractFolderId_(url) {
   if (!url) return null;
   var m = String(url).match(/\/folders\/([a-zA-Z0-9_-]+)/);
@@ -129,7 +147,7 @@ function handleAuth(rawKey, rawEmail) {
   if (!grantedEmail) {
     // First time this key has ever been used.
     if (!email) {
-      return { ok: true, name: row.Name, needsEmail: true, satTaken: !!row.SATTakenAt, actTaken: !!row.ACTTakenAt };
+      return { ok: true, name: row.Name, needsEmail: true, satTaken: !!row.SATTakenAt, actTaken: !!row.ACTTakenAt, testPrep: truthy_(row.TestPrep) };
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return { ok: false, error: 'bad_email' };
@@ -154,6 +172,7 @@ function handleAuth(rawKey, rawEmail) {
     collegePrepFolderUrl: row.CollegePrepFolderUrl || '',
     satTaken: !!row.SATTakenAt,
     actTaken: !!row.ACTTakenAt,
+    testPrep: truthy_(row.TestPrep),
     tests: []
   };
 }
