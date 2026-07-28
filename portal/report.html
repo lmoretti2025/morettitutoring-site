@@ -56,6 +56,12 @@
   .section-card .sc-title { font-family: 'Caladea', serif; font-size: 13px; font-weight: 700; }
   .section-card .sc-score { font-size: 11px; color: var(--mid); }
   .section-card .sc-incorrect { font-size: 10px; color: var(--red); font-weight: 600; margin-bottom: 6px; }
+  .sc-time { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 9.5px; color: var(--mid); margin: 0 0 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+  .sc-time-item { display: flex; flex-direction: column; }
+  .sc-time-item.ok { color: var(--green); }
+  .sc-time-item.bad { color: var(--red); }
+  .sc-time-label { font-size: 8px; text-transform: uppercase; letter-spacing: 0.03em; color: var(--faint); }
+  .sc-time-item.ok .sc-time-label, .sc-time-item.bad .sc-time-label { color: inherit; opacity: 0.75; }
   .sc-flag { display: flex; align-items: flex-start; gap: 6px; font-size: 9.5px; line-height: 1.5; color: var(--ink); background: #fbf1de; border-left: 2px solid var(--gold); padding: 5px 7px; margin: 0 0 8px; }
   .sc-flag .sc-flag-mark { font-weight: 700; color: var(--gold); flex-shrink: 0; }
   .sc-flag strong { color: var(--ink); }
@@ -98,6 +104,7 @@
   .q-detail .q-fr { padding: 6px 8px; border: 1px solid var(--border); border-radius: 4px; }
   .q-detail .q-fr .q-correct-ans { color: var(--green); font-weight: 600; }
   .q-detail .q-fr .q-your-ans { color: var(--red); font-weight: 600; }
+  .q-detail .q-timing { margin-top: 8px; font-size: 9.5px; color: var(--mid); }
   .q-hint { font-size: 9px; color: var(--faint); font-style: italic; margin: 2px 0 10px; }
   @media print { .q-hint, td.q-toggle, th.q-toggle { display: none; } }
   .raw-hed { font-family: 'Caladea', serif; font-size: 16px; margin-bottom: 4px; }
@@ -399,7 +406,7 @@
     var ROUTE_THRESHOLD = 0.6;
 
     function genAnswers(qs, wrongRate, weakSkill) {
-      var answers = [], marked = [], correct = 0;
+      var answers = [], marked = [], times = [], correct = 0;
       var diff = { easy: { c: 0, t: 0 }, medium: { c: 0, t: 0 }, hard: { c: 0, t: 0 } };
       qs.forEach(function (q) {
         var wrong = rand() < wrongRate;
@@ -445,8 +452,23 @@
         if (dtag) dtag.t++;
         answers.push(given);
         marked.push(rand() < 0.12);
+        // Synthetic per-question time for the demo view only — a 20-60s
+        // baseline, skewed longer on questions answered wrong (matches the
+        // real-world pattern of lingering on ones you're unsure of) so the
+        // new Time On Correct/Incorrect breakdown reads realistically.
+        var baseMs = 20000 + rand() * 40000;
+        times.push(Math.round(wrong ? baseMs * (1.2 + rand() * 0.6) : baseMs * (0.7 + rand() * 0.5)));
       });
-      return { answers: answers, marked: marked, correct: correct, diff: diff };
+      return { answers: answers, marked: marked, times: times, correct: correct, diff: diff };
+    }
+    // Turns a flat array of per-question durations into fabricated
+    // sequential first-visited/last-viewed timestamps (demo only), anchored
+    // so the whole section's fake "session" ends now.
+    function deriveVisits(times) {
+      var total = times.reduce(function (a, b) { return a + b; }, 0);
+      var t = Date.now() - total, fv = [], lv = [];
+      times.forEach(function (ms) { fv.push(t); t += ms; lv.push(t); });
+      return { fv: fv, lv: lv };
     }
 
     function genSection(key, wrongRate) {
@@ -468,6 +490,7 @@
         k: key,
         a: m2 ? m1.answers.concat(m2.answers) : m1.answers,
         m: m2 ? m1.marked.concat(m2.marked) : m1.marked,
+        times: m2 ? m1.times.concat(m2.times) : m1.times,
         v: variant,
         c: m1.correct + (m2 ? m2.correct : 0),
         t: bank.module1.length + m2t,
@@ -555,7 +578,10 @@
       chosenSecs = trial(BASE_WRONG, 42).secs;
     }
 
-    var s = chosenSecs.map(function (sec) { return { k: sec.k, a: sec.a, m: sec.m, v: sec.v }; });
+    var s = chosenSecs.map(function (sec) {
+      var visits = deriveVisits(sec.times);
+      return { k: sec.k, a: sec.a, m: sec.m, v: sec.v, tm: sec.times, fv: visits.fv, lv: visits.lv };
+    });
 
     return { n: 'Demo Student', k: 'DEMO', t: testChoice, dt: new Date().toISOString().slice(0, 10), s: s };
   }
@@ -583,6 +609,28 @@
       else v = parseFloat(str.replace(/[^0-9.\-]/g, ''));
     }
     return v !== null && !isNaN(v) && Math.abs(v - q.answer) < 0.05;
+  }
+
+  // Formats a millisecond duration as "1h 12m 04s" / "12m 04s" / "38s",
+  // dropping leading zero units. Used for both the section-level Time On
+  // Section/Correct/Incorrect stats and the per-question Time column.
+  function formatDuration(ms) {
+    ms = ms || 0;
+    var totalSec = Math.round(ms / 1000);
+    var h = Math.floor(totalSec / 3600);
+    var m = Math.floor((totalSec % 3600) / 60);
+    var s = totalSec % 60;
+    if (h > 0) return h + 'h ' + (m < 10 ? '0' : '') + m + 'm ' + (s < 10 ? '0' : '') + s + 's';
+    if (m > 0) return m + 'm ' + (s < 10 ? '0' : '') + s + 's';
+    return s + 's';
+  }
+  // Formats a Date.now() timestamp as a local time-of-day string for the
+  // per-question "first visited" / "last viewed" fields.
+  function formatClock(ts) {
+    if (typeof ts !== 'number') return '—';
+    try {
+      return new Date(ts).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit' });
+    } catch (e) { return '—'; }
   }
 
   // Collapse to ONE saved entry per section key before scoring. A
@@ -640,10 +688,18 @@
     var diff = { easy: { c: 0, t: 0 }, medium: { c: 0, t: 0 }, hard: { c: 0, t: 0 } };
     var moduleSplit = bank.module2Easier ? bank.module1.length : qs.length;
     var c1 = 0, t1 = 0, c2 = 0, t2 = 0;
+    // Time On Section total / Time On Correct / Time On Incorrect — summed
+    // in ms from sec.tm[i] (per-question total time, see index.html's
+    // questionTimeMs). Older saved reports predate this field, so a missing
+    // sec.tm just leaves these at 0 rather than throwing.
+    var secTimeTotal = 0, secTimeCorrect = 0, secTimeIncorrect = 0;
     qs.forEach(function (q, i) {
       var given = sec.a[i];
       var ok = isCorrect(q, given);
       var wasMarked = sec.m && sec.m[i];
+      var qTimeMs = (sec.tm && typeof sec.tm[i] === 'number') ? sec.tm[i] : 0;
+      secTimeTotal += qTimeMs;
+      if (ok) secTimeCorrect += qTimeMs; else secTimeIncorrect += qTimeMs;
       if (ok) { c++; totalC++; }
       totalQ++;
       var dtag = diff[q.difficulty];
@@ -675,9 +731,16 @@
       // multiple-choice (null if blank), used to mark the picked option.
       rows.push({ n: i + 1, dom: dom, sk: sk, given: gTxt, ok: ok, marked: !!wasMarked,
         q: q, givenIdx: (q.type === 'mc' && given !== null && given !== undefined) ? given : null,
-        givenText: (given && typeof given === 'object') ? (given.raw || String(given.value)) : null });
+        givenText: (given && typeof given === 'object') ? (given.raw || String(given.value)) : null,
+        timeMs: qTimeMs,
+        firstVisitedAt: (sec.fv && typeof sec.fv[i] === 'number') ? sec.fv[i] : null,
+        lastViewedAt: (sec.lv && typeof sec.lv[i] === 'number') ? sec.lv[i] : null });
     });
-    sections.push({ key: sec.k, label: bank.label.replace(' (optional on the real ACT)', ''), c: c, t: qs.length, rows: rows, domains: secDomains, distractors: secDistractors, missedMc: secMissedMc, diff: diff, c1: c1, t1: t1, c2: c2, t2: t2, variant: sec.v });
+    sections.push({
+      key: sec.k, label: bank.label.replace(' (optional on the real ACT)', ''), c: c, t: qs.length, rows: rows, domains: secDomains,
+      distractors: secDistractors, missedMc: secMissedMc, diff: diff, c1: c1, t1: t1, c2: c2, t2: t2, variant: sec.v,
+      timeTotal: secTimeTotal, timeCorrect: secTimeCorrect, timeIncorrect: secTimeIncorrect
+    });
   });
 
   var pct = totalQ ? Math.round(totalC / totalQ * 100) : 0;
@@ -1397,6 +1460,20 @@
     incEl.textContent = incorrectN + ' incorrect';
     card.appendChild(incEl);
 
+    // Time On Section / Time On Correct / Time On Incorrect. Only shown
+    // when there's actually timing data to show (older saved reports, or a
+    // section with zero recorded time, just skip this row rather than
+    // displaying an all-zero line).
+    if (s5.timeTotal > 0) {
+      var timeEl = document.createElement('div');
+      timeEl.className = 'sc-time';
+      timeEl.innerHTML =
+        '<span class="sc-time-item"><span class="sc-time-label">Time On Section</span>' + formatDuration(s5.timeTotal) + '</span>' +
+        '<span class="sc-time-item ok"><span class="sc-time-label">Time On Correct</span>' + formatDuration(s5.timeCorrect) + '</span>' +
+        '<span class="sc-time-item bad"><span class="sc-time-label">Time On Incorrect</span>' + formatDuration(s5.timeIncorrect) + '</span>';
+      card.appendChild(timeEl);
+    }
+
     // Distractor-pattern flag: with only 3-4 wrong-answer letters to choose
     // from, a single letter landing on "50% of missed questions" happens
     // by pure chance most of the time at small sample sizes (with 3 wrong
@@ -1550,6 +1627,15 @@
         (r.ok ? '' : ' &nbsp;·&nbsp; Entered: <span class="q-your-ans">' + yourAns + '</span>');
       box.appendChild(fr);
     }
+
+    if (r.timeMs || r.firstVisitedAt || r.lastViewedAt) {
+      var timing = document.createElement('div');
+      timing.className = 'q-timing';
+      timing.innerHTML = 'Time spent: <strong>' + formatDuration(r.timeMs) + '</strong>' +
+        ' &nbsp;·&nbsp; First visited: ' + formatClock(r.firstVisitedAt) +
+        ' &nbsp;·&nbsp; Last viewed: ' + formatClock(r.lastViewedAt);
+      box.appendChild(timing);
+    }
     return box;
   }
 
@@ -1574,19 +1660,19 @@
     // question. Built as DOM (not one innerHTML string) so each pair can
     // carry its own click handler and the detail is rendered lazily.
     var thead = document.createElement('tr');
-    thead.innerHTML = '<th class="q-toggle"></th><th>#</th><th>Skill</th><th>Answer</th><th>Result</th><th>Flagged</th>';
+    thead.innerHTML = '<th class="q-toggle"></th><th>#</th><th>Skill</th><th>Answer</th><th>Result</th><th>Flagged</th><th>Time</th>';
     tb.appendChild(thead);
     s4.rows.forEach(function (r) {
       var summary = document.createElement('tr');
       summary.className = 'q-row';
       summary.innerHTML = '<td class="q-toggle">▸</td><td>' + r.n + '</td><td>' + r.dom + ' → ' + r.sk +
         '</td><td>' + r.given + '</td><td class="' + (r.ok ? 'ok' : 'bad') + '">' + (r.ok ? 'Correct' : 'Incorrect') +
-        '</td><td>' + (r.marked ? '⚑' : '') + '</td>';
+        '</td><td>' + (r.marked ? '⚑' : '') + '</td><td>' + (r.timeMs ? formatDuration(r.timeMs) : '—') + '</td>';
       var detailRow = document.createElement('tr');
       detailRow.className = 'q-detail-row';
       detailRow.style.display = 'none';
       var detailCell = document.createElement('td');
-      detailCell.colSpan = 6;
+      detailCell.colSpan = 7;
       detailRow.appendChild(detailCell);
       var built = false;
       function collapse() {
