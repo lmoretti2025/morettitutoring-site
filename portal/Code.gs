@@ -22,7 +22,7 @@
 
    SETUP — see the deployment guide for full steps. Short version:
      1. Create a Google Sheet with a tab named "Students" and headers:
-          Key | Name | DriveFolderUrl | CollegePrepFolderUrl | GrantedEmail | GrantedAt | SATTakenAt | ACTTakenAt | TestPrep
+          Key | Name | DriveFolderUrl | CollegePrepFolderUrl | GrantedEmail | GrantedAt | SATTakenAt | ACTTakenAt | TestPrep | TestDate
         (SATTakenAt/ACTTakenAt track the one-real-diagnostic-per-test-type
         feature — leave both blank for everyone; they get stamped
         automatically the first time each student finishes that test's
@@ -33,7 +33,14 @@
         have this left blank/unchecked so those two cards just don't show
         up for them; "Your Files" always shows either way. Use an actual
         checkbox column (Insert > Checkbox) or just type TRUE/yes in the
-        cell — either is read as "on".)
+        cell — either is read as "on".
+        TestDate is the student's actual SAT/ACT test date — type it in as
+        a real date (Insert > Date, or just type e.g. 3/14/2027). When
+        it's set, the portal home screen shows a countdown/progress bar
+        running from the day the student first logged into the portal
+        (GrantedAt) to this date, with the days-remaining count and your
+        target logo at the finish line. Leave it blank for a student and
+        the bar just doesn't show — no error, nothing broken.)
      2. Paste this file into a new Apps Script project (script.google.com).
      3. Set SHEET_ID below to that Sheet's ID (from its URL).
      4. Deploy > New deployment > Web app.
@@ -143,6 +150,12 @@ function handleAuth(rawKey, rawEmail) {
   if (!row) return { ok: false, error: 'bad_key' };
 
   var grantedEmail = row.GrantedEmail ? String(row.GrantedEmail).trim().toLowerCase() : '';
+  // The countdown bar's start point. Defaults to whatever's already in the
+  // GrantedAt cell; if this is the very first login (below), it's updated
+  // to "right now" so the bar has a real start date on this very call
+  // instead of waiting for a second login to pick up what was just written
+  // to the sheet.
+  var grantedAtValue = row.GrantedAt || null;
 
   if (!grantedEmail) {
     // First time this key has ever been used.
@@ -156,8 +169,9 @@ function handleAuth(rawKey, rawEmail) {
     grantFolderAccess_(row.CollegePrepFolderUrl, email);
     var emailCol = row._headers.indexOf('GrantedEmail');
     var atCol = row._headers.indexOf('GrantedAt');
+    grantedAtValue = new Date();
     if (emailCol !== -1) sheet.getRange(row._rowIndex, emailCol + 1).setValue(email);
-    if (atCol !== -1) sheet.getRange(row._rowIndex, atCol + 1).setValue(new Date());
+    if (atCol !== -1) sheet.getRange(row._rowIndex, atCol + 1).setValue(grantedAtValue);
   } else if (email && email !== grantedEmail) {
     // Someone's submitting a different email for a key that's already
     // bound to someone else — refuse rather than silently re-sharing.
@@ -173,6 +187,8 @@ function handleAuth(rawKey, rawEmail) {
     satTaken: !!row.SATTakenAt,
     actTaken: !!row.ACTTakenAt,
     testPrep: truthy_(row.TestPrep),
+    grantedAt: grantedAtValue ? new Date(grantedAtValue).toISOString() : null,
+    testDate: row.TestDate ? new Date(row.TestDate).toISOString() : null,
     tests: []
   };
 }
@@ -265,8 +281,44 @@ function handleSubmitDiagnostic(rawKey, rawTest, score, reportLink, reportText) 
              '\nFull report (open, review, Print / Save as PDF):\n' + link +
              '\n\n' + extra;
 
-  MailApp.sendEmail(NOTIFY_EMAIL, subject, body);
+  // Write a durable copy FIRST, before attempting to email. This is the
+  // fix for the "sheet shows taken but the email never arrived and the
+  // score was gone forever" failure mode: previously this function's only
+  // output was the email itself, so any send failure (quota, transient
+  // Gmail error, etc.) silently destroyed the only copy of the score. Now
+  // the raw score/report survive in the DiagnosticLog tab regardless of
+  // whether MailApp succeeds.
+  var emailError = null;
+  try {
+    logDiagnosticResult_(key, name, test, safeScore, link, extra);
+  } catch (logErr) {
+    console.error('Failed to write DiagnosticLog row for ' + key + ': ' + logErr);
+  }
+
+  try {
+    MailApp.sendEmail(NOTIFY_EMAIL, subject, body);
+  } catch (err) {
+    emailError = String(err);
+    console.error('MailApp.sendEmail failed for ' + key + ' (' + test + '): ' + emailError);
+  }
+
+  if (emailError) return { ok: false, error: 'email_failed', detail: emailError };
   return { ok: true };
+}
+
+// Appends one row to a "DiagnosticLog" tab (auto-created on first use, left
+// alone after that) so every submitted diagnostic has a durable record
+// independent of email delivery. Columns: Timestamp | Key | Name | Test |
+// Score | ReportLink | Report. This is a pure log — nothing here is ever
+// read back by the app, it exists purely as a recovery/audit trail.
+function logDiagnosticResult_(key, name, test, score, reportLink, reportText) {
+  var ss = SpreadsheetApp.openById(SHEET_ID);
+  var log = ss.getSheetByName('DiagnosticLog');
+  if (!log) {
+    log = ss.insertSheet('DiagnosticLog');
+    log.appendRow(['Timestamp', 'Key', 'Name', 'Test', 'Score', 'ReportLink', 'Report']);
+  }
+  log.appendRow([new Date(), key, name, test, score, reportLink, reportText]);
 }
 
 /* =========================================================================
