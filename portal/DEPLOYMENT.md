@@ -28,7 +28,11 @@ adding new students afterward is just adding a row to a spreadsheet.
    | Key | Name | DriveFolderUrl | CollegePrepFolderUrl | GrantedEmail | GrantedAt |
    |---|---|---|---|---|---|
    | DEMO123 | Demo Student | | | | |
-   | LCORCORAN26 | Lily Corcoran | https://drive.google.com/drive/folders/1OUIP-e9pjcz2akbOX0UmJKaBDiUwYKRh?usp=sharing | | | |
+
+   (Add one row per real student directly in the Sheet itself — not in
+   this file. This file is committed to git, so a real student's key,
+   name, and Drive folder link don't belong here; the Sheet is the only
+   place that data should live.)
 
    Leave `GrantedEmail` and `GrantedAt` blank — the backend fills those in
    automatically the first time each key is used.
@@ -129,17 +133,18 @@ blanks, it never overwrites a link you've already set.
 
 ---
 
-## Step 6 — Lock down Lily's existing folder
+## Step 6 — Lock down any folder that was previously shared broadly
 
-Lily's folder was previously shared as "Anyone with the link," which is
-the exact exposure we're closing. Once the steps above are live:
+If a student's folder was previously shared as "Anyone with the link,"
+that's the exact exposure this backend is meant to close. Once the steps
+above are live, for each such student:
 
-1. Have Lily open the portal and enter her key (`LCORCORAN26`) — since her
-   `GrantedEmail` cell is still blank, she'll be asked for her email, and
-   the backend will grant her Viewer access directly.
-2. After that, go to her folder in Drive → **Share** → change **General
-   access** from "Anyone with the link" to **Restricted**. Her named
-   access (granted in step 1) keeps her working; the public link stops
+1. Have the student open the portal and enter their key — since their
+   `GrantedEmail` cell is still blank, they'll be asked for their email,
+   and the backend will grant them Viewer access directly.
+2. After that, go to their folder in Drive → **Share** → change **General
+   access** from "Anyone with the link" to **Restricted**. Their named
+   access (granted in step 1) keeps them working; the public link stops
    working for anyone else.
 
 Do this same "Restricted + granted individually" pattern for any other

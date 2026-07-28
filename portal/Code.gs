@@ -59,7 +59,7 @@ function doPost(e) {
     if (body.action === 'auth') {
       out = handleAuth(body.key, body.email);
     } else if (body.action === 'nextSession') {
-      out = handleNextSession(body.name, !!body.debug);
+      out = handleNextSession(body.key, !!body.debug);
     } else if (body.action === 'markDiagnosticTaken') {
       out = handleMarkDiagnosticTaken(body.key, body.test);
     } else if (body.action === 'submitDiagnostic') {
@@ -246,7 +246,13 @@ function handleSubmitDiagnostic(rawKey, rawTest, score, reportLink, reportText) 
   var name = String(row.Name || '').trim() || '(unnamed student)';
   var safeScore = String(score == null ? '' : score).replace(/[\r\n]+/g, ' ').slice(0, 60);
   var link = String(reportLink || '').slice(0, 4000);
-  if (link && link.indexOf('morettitutoring.com/portal/report.html') === -1) {
+  // Must actually START WITH our real report page's origin+path, not just
+  // contain that text anywhere — indexOf(...) === -1 as a "contains" check
+  // would let a link like https://evil.example/?x=morettitutoring.com/portal/report.html
+  // through, since that string does appear somewhere in it. A prefix check
+  // against the real origin closes that.
+  var REPORT_PAGE_PREFIX = 'https://morettitutoring.com/portal/report.html';
+  if (link && link.indexOf(REPORT_PAGE_PREFIX) !== 0) {
     link = '(report link withheld — did not point at the portal report page)';
   }
   var extra = String(reportText || '').slice(0, 100000);
@@ -375,22 +381,55 @@ function setupTrigger() {
 
 // webcal:// is just https:// with a different scheme name — UrlFetchApp
 // needs an actual https:// URL.
-var CALENDAR_ICS_URL = 'https://p172-caldav.icloud.com/published/2/ODExODY2MDE0NTgxMTg2NueGXoXKSW70-PWkPnqJPMohqzUItIudqwCkF6twJ-BXC1z9zr2f6PGDPEaNfvS15tsp_IDWWX_CrRjXMPwG8TU';
+//
+// This URL is a bearer token: anyone who has it can read Luca's full
+// calendar. It must NOT live in this source file — this file is committed
+// to a public GitHub repo, and anything hardcoded here is exposed to
+// everyone, forever (even after being removed in a later commit, since it
+// stays in git history). Store it instead in this script's Script
+// Properties (Apps Script editor -> Project Settings -> Script Properties
+// -> add a property named CALENDAR_ICS_URL with the real URL as the
+// value). Because the URL that was previously hardcoded here was already
+// committed and pushed, treat it as compromised: go to iCloud Calendar ->
+// the calendar's sharing settings -> stop sharing / turn off public
+// calendar, then turn it back on to generate a brand-new published URL,
+// and put ONLY the new one in Script Properties.
+function getCalendarIcsUrl_() {
+  var url = PropertiesService.getScriptProperties().getProperty('CALENDAR_ICS_URL');
+  if (!url) throw new Error('CALENDAR_ICS_URL is not set in Script Properties.');
+  return url;
+}
 
 // debugMode adds a `debug` object to the response with exactly what
 // happened at each step (HTTP status, name matched against, every event
 // summary parsed off the calendar, which ones matched) so this can be
 // diagnosed from the portal itself (append ?debug=1 to the portal URL)
 // without needing to open the Apps Script execution log.
-function handleNextSession(rawName, debugMode) {
-  if (!rawName) return { ok: false, error: 'missing_name' };
-  var firstName = String(rawName).trim().split(/\s+/)[0];
+//
+// Key-gated: this used to take a plain `name` string straight from the
+// client with no check at all, meaning anyone (no key required) could
+// call this endpoint with any name and get back real calendar event
+// titles, and with debug:true, EVERY event summary on the calendar —
+// i.e. every student's name and session schedule, dumped to a total
+// stranger. It now requires a real key, exactly like every other action,
+// and the name used to match events comes from that key's roster row —
+// never from the client — so a valid key only ever reveals that one
+// student's own session, and debug is equally key-gated rather than
+// wide open.
+function handleNextSession(rawKey, debugMode) {
+  if (!rawKey) return { ok: false, error: 'missing_key' };
+  var key = String(rawKey).trim().toUpperCase();
+  var sheet = getSheet_();
+  var row = findRow_(sheet, key);
+  if (!row) return { ok: false, error: 'bad_key' };
+
+  var firstName = String(row.Name || '').trim().split(/\s+/)[0];
   if (!firstName) return { ok: false, error: 'missing_name' };
 
   try {
-    var resp = UrlFetchApp.fetch(CALENDAR_ICS_URL, { muteHttpExceptions: true });
+    var resp = UrlFetchApp.fetch(getCalendarIcsUrl_(), { muteHttpExceptions: true });
     var httpStatus = resp.getResponseCode();
-    Logger.log('handleNextSession: fetched calendar, status=' + httpStatus + ', name="' + rawName + '", firstName="' + firstName + '"');
+    Logger.log('handleNextSession: fetched calendar, status=' + httpStatus + ', name="' + row.Name + '", firstName="' + firstName + '"');
     if (httpStatus !== 200) {
       Logger.log('handleNextSession: calendar unreachable, body preview: ' + resp.getContentText().slice(0, 200));
       return debugMode
