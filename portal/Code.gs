@@ -65,7 +65,22 @@
         (authorize when asked). This turns on the auto-folder feature.
    ========================================================================= */
 
-var SHEET_ID = 'PASTE_YOUR_SHEET_ID_HERE';
+// ═══ RUN THIS DIRECTLY TO DIAGNOSE THE EMAIL PROBLEM ═══
+// Select "testMailApp" in the function dropdown at the top of the editor
+// and click Run. This bypasses the portal, the web deployment, and the
+// execution log entirely — Apps Script shows the result (success toast or
+// the real error) right here in the editor within a couple seconds. If
+// this fails, the error message it throws IS the answer (quota exceeded,
+// authorization needed, invalid address, etc.) — copy whatever it says.
+// If this SUCCEEDS but portal submissions still don't email you, the
+// problem is specific to handleSubmitDiagnostic's call, not MailApp
+// itself, and we look there next.
+function testMailApp() {
+  MailApp.sendEmail(NOTIFY_EMAIL, 'Moretti Portal — test email', 'If you got this, MailApp works fine from this script. Sent ' + new Date());
+  Logger.log('Sent. Check ' + NOTIFY_EMAIL + ' (and spam) for "Moretti Portal — test email".');
+}
+
+var SHEET_ID = '1z55TokZ9V2rjf7qh6WLZyv0OiKJgQKXbQl2h4cEXvOw';
 var SHEET_TAB_NAME = 'Students';
 var STUDENT_FOLDERS_PARENT_NAME = 'Moretti Portal — Student Folders';
 // Where diagnostic-result notifications are sent. IMPORTANT: confirm this
@@ -333,14 +348,7 @@ function handleSubmitDiagnostic(rawKey, rawTest, score, reportLink, reportText) 
   //      the primary, student-facing record. Contains the full
   //      question-by-question report plus the link to the pretty
   //      formatted version.
-  var logOk = false, driveOk = false, driveFileUrl = '';
-  try {
-    logDiagnosticResult_(key, name, test, safeScore, link, extra);
-    logOk = true;
-  } catch (logErr) {
-    console.error('Failed to write DiagnosticLog row for ' + key + ': ' + logErr);
-  }
-
+  var driveOk = false, driveFileUrl = '';
   try {
     var fileText = name + ' — ' + test + ' Diagnostic — ' + dateStr + '\n' +
                    'Score: ' + (safeScore || '(not recorded)') + '\n' +
@@ -380,6 +388,18 @@ function handleSubmitDiagnostic(rawKey, rawTest, score, reportLink, reportText) 
     console.error('MailApp.sendEmail failed for ' + key + ' (' + test + '): ' + emailError);
   }
 
+  // Written LAST so it can record whether the email actually went out —
+  // this makes DiagnosticLog self-diagnosing. If email silently fails
+  // again, you don't need the Executions log at all: just open the
+  // DiagnosticLog tab and read the EmailSent/EmailError columns directly.
+  var logOk = false;
+  try {
+    logDiagnosticResult_(key, name, test, safeScore, link, extra, driveOk, driveFileUrl, !emailError, emailError);
+    logOk = true;
+  } catch (logErr) {
+    console.error('Failed to write DiagnosticLog row for ' + key + ': ' + logErr);
+  }
+
   // ok as long as AT LEAST ONE durable store succeeded — that's the real
   // bar now, not "did the email send."
   return { ok: logOk || driveOk, driveSaved: driveOk, driveFileUrl: driveFileUrl, logSaved: logOk, emailSent: !emailError, emailError: emailError || undefined };
@@ -387,17 +407,19 @@ function handleSubmitDiagnostic(rawKey, rawTest, score, reportLink, reportText) 
 
 // Appends one row to a "DiagnosticLog" tab (auto-created on first use, left
 // alone after that) so every submitted diagnostic has a durable record
-// independent of email delivery. Columns: Timestamp | Key | Name | Test |
-// Score | ReportLink | Report. This is a pure log — nothing here is ever
-// read back by the app, it exists purely as a recovery/audit trail.
-function logDiagnosticResult_(key, name, test, score, reportLink, reportText) {
+// independent of email delivery, AND records whether the email itself
+// succeeded — so a future silent email failure is diagnosable straight
+// from the spreadsheet, no Executions log required. Columns: Timestamp |
+// Key | Name | Test | Score | ReportLink | Report | DriveSaved |
+// DriveFileUrl | EmailSent | EmailError.
+function logDiagnosticResult_(key, name, test, score, reportLink, reportText, driveSaved, driveFileUrl, emailSent, emailError) {
   var ss = SpreadsheetApp.openById(SHEET_ID);
   var log = ss.getSheetByName('DiagnosticLog');
   if (!log) {
     log = ss.insertSheet('DiagnosticLog');
-    log.appendRow(['Timestamp', 'Key', 'Name', 'Test', 'Score', 'ReportLink', 'Report']);
+    log.appendRow(['Timestamp', 'Key', 'Name', 'Test', 'Score', 'ReportLink', 'Report', 'DriveSaved', 'DriveFileUrl', 'EmailSent', 'EmailError']);
   }
-  log.appendRow([new Date(), key, name, test, score, reportLink, reportText]);
+  log.appendRow([new Date(), key, name, test, score, reportLink, reportText, !!driveSaved, driveFileUrl || '', !!emailSent, emailError || '']);
 }
 
 /* =========================================================================
