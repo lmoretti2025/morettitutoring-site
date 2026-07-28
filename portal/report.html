@@ -173,6 +173,24 @@
 (function () {
   'use strict';
   var LETTERS = ['A', 'B', 'C', 'D', 'E'];
+
+  // The report's data comes from an unsigned base64 payload in the URL
+  // fragment (see reportLink in index.html) — anyone can craft a link with
+  // arbitrary content in place of a real free-response answer. Everywhere
+  // that text (the student's typed-in grid-in/free-response answer) gets
+  // rendered, it must go through this escaper before touching innerHTML,
+  // or a crafted link could run script in whoever opens the report (most
+  // often Luca, from the email this link is sent in). Question text/
+  // choices from the bank are a separate, trusted source and are left as
+  // literal HTML on purpose (they carry their own formatting/equations).
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
   // Shared categorical palette for every multi-color chart on this report
   // (section pies, bridge segments) — tints/shades of the same five brand
   // colors rather than a mixed bag of unrelated hues.
@@ -723,7 +741,7 @@
         var chosenLetter = LETTERS[given];
         secDistractors[chosenLetter] = (secDistractors[chosenLetter] || 0) + 1;
       }
-      var gTxt = (given === null || given === undefined) ? '—' : (q.type === 'mc' ? LETTERS[given] : (given.raw || String(given)));
+      var gTxt = (given === null || given === undefined) ? '—' : (q.type === 'mc' ? LETTERS[given] : esc(given.raw || String(given)));
       // Keep a reference to the full question object and the raw given
       // answer so the detail table can expand to show the ACTUAL question
       // (text, choices, correct answer, and what the student picked), not
@@ -731,7 +749,7 @@
       // multiple-choice (null if blank), used to mark the picked option.
       rows.push({ n: i + 1, dom: dom, sk: sk, given: gTxt, ok: ok, marked: !!wasMarked,
         q: q, givenIdx: (q.type === 'mc' && given !== null && given !== undefined) ? given : null,
-        givenText: (given && typeof given === 'object') ? (given.raw || String(given.value)) : null,
+        givenText: (given && typeof given === 'object') ? esc(given.raw || String(given.value)) : null,
         timeMs: qTimeMs,
         firstVisitedAt: (sec.fv && typeof sec.fv[i] === 'number') ? sec.fv[i] : null,
         lastViewedAt: (sec.lv && typeof sec.lv[i] === 'number') ? sec.lv[i] : null });

@@ -418,47 +418,89 @@
   .vp-head { text-align: center; margin-bottom: 1.25rem; }
   .vp-panel-label { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); margin: 1rem 0 0.55rem; }
   .vp-pills { display: flex; flex-wrap: wrap; gap: 0.45rem; }
-  .vp-pill { font-family: var(--hel); font-size: 0.8rem; font-weight: 500; color: var(--text); background: var(--white); border: 1px solid var(--border); border-radius: 999px; padding: 0.45rem 0.95rem; cursor: pointer; transition: border-color 0.12s, background 0.12s, color 0.12s; }
-  .vp-pill:hover { border-color: var(--mid); }
+  .vp-pill { font-family: var(--hel); font-size: 0.8rem; font-weight: 500; color: var(--text); background: var(--white); border: 1px solid var(--border); border-radius: 999px; padding: 0.45rem 0.95rem; cursor: pointer; transition: border-color 0.12s, background 0.12s, color 0.12s, transform 0.12s ease; }
+  .vp-pill:hover { border-color: var(--mid); transform: translateY(-1px); }
   .vp-pill.on { border-color: var(--red); background: var(--red); color: #fff; font-weight: 600; }
+  .vp-pool-count { font-size: 0.72rem; color: var(--faint); margin-top: 0.55rem; }
+  /* ═══ "STILL LEARNING" REVIEW PANEL — lives on the setup screen, above
+     the mode picker. Persisted per-student in localStorage (see
+     progressStorageKey()/loadProgress() in the JS below) so it survives
+     across visits, not just within one flashcard round. ═══ */
+  .vp-still-panel { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 1.1rem 1.2rem; margin-top: 1.1rem; }
+  .vp-still-hed { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; margin-bottom: 0.15rem; }
+  .vp-still-title { font-family: var(--hel); font-size: 0.85rem; font-weight: 700; color: var(--text); }
+  .vp-still-count { font-family: var(--hel); font-size: 0.7rem; font-weight: 600; color: var(--red); background: #f8ecea; border-radius: 999px; padding: 0.15rem 0.6rem; }
+  .vp-still-empty { font-size: 0.8rem; color: var(--mid); margin-top: 0.4rem; }
+  .vp-still-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.7rem 0 0.9rem; }
+  .vp-still-chip { font-family: var(--hel); font-size: 0.74rem; color: var(--text); background: #faf6ee; border: 1px solid var(--border); border-radius: 999px; padding: 0.3rem 0.7rem; }
+  .vp-still-more { font-family: var(--hel); font-size: 0.74rem; color: var(--faint); padding: 0.3rem 0.2rem; }
+  .vp-still-btn { font-family: var(--hel); font-size: 0.78rem; font-weight: 700; color: var(--red); background: transparent; border: 1px solid var(--red); border-radius: 8px; padding: 0.55rem 0.9rem; cursor: pointer; transition: background 0.15s ease, color 0.15s ease, transform 0.12s ease; }
+  .vp-still-btn:hover { background: var(--red); color: #fff; transform: translateY(-1px); }
   .vp-modes { display: flex; gap: 0.4rem; margin-top: 1.1rem; border: 1px solid var(--border); border-radius: 8px; padding: 0.3rem; background: var(--white); }
-  .vp-mode-btn { flex: 1; font-family: var(--hel); font-size: 0.78rem; font-weight: 600; color: var(--mid); background: transparent; border: none; border-radius: 6px; padding: 0.6rem 0.4rem; cursor: pointer; }
+  .vp-mode-btn { flex: 1; font-family: var(--hel); font-size: 0.78rem; font-weight: 600; color: var(--mid); background: transparent; border: none; border-radius: 6px; padding: 0.6rem 0.4rem; cursor: pointer; transition: background 0.15s ease, color 0.15s ease; }
   .vp-mode-btn.on { background: var(--red); color: #fff; }
-  .vp-stage { margin-top: 1.35rem; }
+  .vp-change-link { display: inline-block; font-family: var(--hel); font-size: 0.78rem; font-weight: 600; color: var(--mid); text-decoration: none; margin-bottom: 0.8rem; transition: color 0.12s ease; }
+  .vp-change-link:hover { color: var(--text); }
+  .vp-stage { margin-top: 0.4rem; }
+  /* ═══ ENTRANCE ANIMATIONS — applied to whatever just got rebuilt in
+     #vp-stage (a new flash card, a new quiz question, a mode switch, a
+     summary screen). Every drawFlash()/drawQuiz()/summary render wraps its
+     output in a fresh element carrying one of these classes; since
+     stageEl.innerHTML is replaced wholesale each time, these are brand-new
+     DOM nodes, so the animation always plays from scratch without needing
+     a reflow-forcing restart trick. ═══ */
+  @keyframes vpRise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes vpPop { from { opacity: 0; transform: scale(0.94); } to { opacity: 1; transform: scale(1); } }
+  .vp-rise { animation: vpRise 0.32s cubic-bezier(.2,.7,.3,1); }
+  .vp-pop { animation: vpPop 0.32s cubic-bezier(.2,.7,.3,1); }
   .vp-bar-row { display: flex; align-items: center; justify-content: space-between; font-size: 0.72rem; color: var(--mid); margin-bottom: 0.55rem; }
   .vp-bar-track { height: 5px; background: #e7e0d5; border-radius: 3px; overflow: hidden; margin-bottom: 1rem; }
-  .vp-bar-fill { height: 100%; background: var(--gold); width: 0; transition: width 0.25s ease; }
-  .vp-card { position: relative; background: var(--white); border: 1px solid var(--border); border-radius: 14px; min-height: 200px; display: flex; align-items: center; justify-content: center; text-align: center; padding: 2rem 1.5rem; cursor: pointer; user-select: none; }
-  .vp-card .vp-side { position: absolute; top: 0.85rem; left: 1rem; font-size: 0.56rem; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; color: var(--faint); }
-  .vp-card .vp-term { font-family: var(--display); font-size: 1.7rem; line-height: 1.2; }
-  .vp-card .vp-def { font-size: 1.02rem; line-height: 1.6; }
-  .vp-card .vp-ex { display: block; font-size: 0.82rem; color: var(--mid); font-style: italic; margin-top: 0.85rem; line-height: 1.5; }
+  .vp-bar-fill { height: 100%; background: var(--gold); width: 0; transition: width 0.4s cubic-bezier(.3,.6,.3,1); }
+  /* ═══ FLASHCARD — a real two-sided flip (not a re-render), so flipping
+     never interrupts or restarts the card's own entrance animation. .vp-card
+     is the 3D scene (perspective); .vp-card-inner is the piece that
+     actually rotates; each face is absolutely stacked on top of the other
+     and hidden when facing away (backface-visibility). ═══ */
+  .vp-card { perspective: 1400px; min-height: 210px; cursor: pointer; user-select: none; }
+  .vp-card-inner { position: relative; width: 100%; height: 100%; min-height: 210px; transition: transform 0.45s cubic-bezier(.3,.6,.3,1); transform-style: preserve-3d; }
+  .vp-card.flipped .vp-card-inner { transform: rotateY(180deg); }
+  .vp-card-face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; background: var(--white); border: 1px solid var(--border); border-radius: 14px; display: flex; align-items: center; justify-content: center; text-align: center; padding: 2rem 1.5rem; }
+  .vp-card-face.vp-card-back { transform: rotateY(180deg); }
+  .vp-card-face .vp-side { position: absolute; top: 0.85rem; left: 1rem; font-size: 0.56rem; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; color: var(--faint); }
+  .vp-card-face .vp-term { font-family: var(--display); font-size: 1.7rem; line-height: 1.2; }
+  .vp-card-face .vp-def { font-size: 1.02rem; line-height: 1.6; }
+  .vp-card-face .vp-ex { display: block; font-size: 0.82rem; color: var(--mid); font-style: italic; margin-top: 0.85rem; line-height: 1.5; }
   .vp-hint { text-align: center; font-size: 0.72rem; color: var(--faint); margin-top: 0.7rem; }
   .vp-fc-ctrls { display: flex; gap: 0.6rem; margin-top: 1rem; }
-  .vp-fc-ctrls button { flex: 1; font-family: var(--hel); font-size: 0.78rem; font-weight: 600; padding: 0.75rem; border-radius: 8px; cursor: pointer; border: 1px solid var(--border); background: var(--white); color: var(--text); }
+  .vp-fc-ctrls button { flex: 1; font-family: var(--hel); font-size: 0.78rem; font-weight: 600; padding: 0.75rem; border-radius: 8px; cursor: pointer; border: 1px solid var(--border); background: var(--white); color: var(--text); transition: transform 0.12s ease, background 0.12s ease, box-shadow 0.12s ease; }
+  .vp-fc-ctrls button:hover { transform: translateY(-1px); box-shadow: 0 3px 10px rgba(0,0,0,0.06); }
+  .vp-fc-ctrls button:active { transform: translateY(0); }
   .vp-fc-ctrls .vp-still { border-color: var(--red); color: var(--red); }
   .vp-fc-ctrls .vp-got { border-color: #3f7d54; color: #3f7d54; }
   .vp-nav { display: flex; align-items: center; justify-content: space-between; margin-top: 1rem; }
-  .vp-nav button { font-family: var(--hel); font-size: 0.75rem; font-weight: 600; color: var(--mid); background: none; border: none; cursor: pointer; padding: 0.4rem 0.6rem; }
+  .vp-nav button { font-family: var(--hel); font-size: 0.75rem; font-weight: 600; color: var(--mid); background: none; border: none; cursor: pointer; padding: 0.4rem 0.6rem; transition: color 0.12s ease; }
+  .vp-nav button:hover:not(:disabled) { color: var(--text); }
   .vp-nav button:disabled { color: var(--faint); cursor: default; }
   .vp-prompt { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 1.4rem 1.35rem; margin-bottom: 1rem; }
   .vp-prompt .vp-plabel { font-size: 0.56rem; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; color: var(--faint); margin-bottom: 0.5rem; }
   .vp-prompt .vp-ptext { font-size: 1.12rem; line-height: 1.5; }
   .vp-prompt .vp-ptext.vp-big { font-family: var(--display); font-size: 1.55rem; }
   .vp-opts { display: flex; flex-direction: column; gap: 0.55rem; }
-  .vp-opt { font-family: var(--hel); font-size: 0.94rem; text-align: left; background: var(--white); border: 1px solid var(--border); border-radius: 9px; padding: 0.85rem 1rem; cursor: pointer; }
-  .vp-opt:hover:not(:disabled) { border-color: var(--mid); }
-  .vp-opt.vp-correct { border-color: #3f7d54; background: #eaf3ec; color: #3f7d54; font-weight: 600; }
+  .vp-opt { font-family: var(--hel); font-size: 0.94rem; text-align: left; background: var(--white); border: 1px solid var(--border); border-radius: 9px; padding: 0.85rem 1rem; cursor: pointer; opacity: 0; animation: vpRise 0.3s cubic-bezier(.2,.7,.3,1) forwards; transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease, transform 0.12s ease; }
+  .vp-opt:hover:not(:disabled) { border-color: var(--mid); transform: translateX(2px); }
+  .vp-opt.vp-correct { border-color: #3f7d54; background: #eaf3ec; color: #3f7d54; font-weight: 600; animation: vpPop 0.25s ease; }
   .vp-opt.vp-wrong { border-color: var(--red); background: #f8ecea; color: var(--red); }
-  .vp-opt:disabled { cursor: default; }
-  .vp-input { width: 100%; font-family: var(--hel); font-size: 1.02rem; padding: 0.85rem 1rem; border: 1px solid var(--border); border-radius: 9px; background: var(--white); }
+  .vp-opt:disabled { cursor: default; transform: none; }
+  .vp-input { width: 100%; font-family: var(--hel); font-size: 1.02rem; padding: 0.85rem 1rem; border: 1px solid var(--border); border-radius: 9px; background: var(--white); transition: border-color 0.15s ease; }
   .vp-input:focus { outline: none; border-color: var(--red); }
   .vp-fb { min-height: 1.4rem; margin-top: 0.7rem; font-size: 0.9rem; font-weight: 500; }
-  .vp-fb.ok { color: #3f7d54; }
-  .vp-fb.no { color: var(--red); }
-  .vp-primary { display: block; width: 100%; font-family: var(--hel); font-size: 0.88rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; background: var(--red); color: #fff; border: none; border-radius: 8px; padding: 0.9rem; margin-top: 1rem; cursor: pointer; }
+  .vp-fb.ok { color: #3f7d54; animation: vpRise 0.25s ease; }
+  .vp-fb.no { color: var(--red); animation: vpRise 0.25s ease; }
+  .vp-primary { display: block; width: 100%; font-family: var(--hel); font-size: 0.88rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; background: var(--red); color: #fff; border: none; border-radius: 8px; padding: 0.9rem; margin-top: 1rem; cursor: pointer; transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease; }
+  .vp-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); opacity: 0.94; }
+  .vp-primary:active { transform: translateY(0); }
   .vp-summary { text-align: center; background: var(--white); border: 1px solid var(--border); border-radius: 14px; padding: 2rem 1.5rem; }
-  .vp-summary .vp-score { font-family: var(--display); font-size: 2.5rem; color: var(--gold); line-height: 1; }
+  .vp-summary .vp-score { font-family: var(--display); font-size: 2.5rem; color: var(--gold); line-height: 1; animation: vpPop 0.4s cubic-bezier(.2,.7,.3,1); }
   .vp-summary .vp-score-sub { font-size: 0.85rem; color: var(--mid); margin: 0.5rem 0 1.25rem; }
   .vp-empty { text-align: center; color: var(--mid); font-size: 0.9rem; padding: 2rem 1rem; }
 </style>
@@ -617,14 +659,34 @@
       <div class="kicker">SAT / ACT Resources</div>
       <h1 class="panel-hed">Vocabulary Practice</h1>
     </div>
-    <div class="vp-panel-label">Choose your sets</div>
-    <div class="vp-pills" id="vp-pills"></div>
-    <div class="vp-modes" id="vp-modes">
-      <button class="vp-mode-btn on" data-vpmode="flash" type="button">Flashcards</button>
-      <button class="vp-mode-btn" data-vpmode="mc" type="button">Multiple choice</button>
-      <button class="vp-mode-btn" data-vpmode="type" type="button">Type it</button>
+
+    <!-- ═══ SETUP — sets, "still learning" review, and study mode are all
+         chosen here BEFORE anything starts. Nothing under #vp-practice
+         exists yet at this point. ═══ -->
+    <div id="vp-setup">
+      <div class="vp-panel-label">Choose your sets</div>
+      <div class="vp-pills" id="vp-pills"></div>
+      <div class="vp-pool-count" id="vp-pool-count"></div>
+
+      <div class="vp-still-panel" id="vp-still-panel"></div>
+
+      <div class="vp-panel-label">Choose how to study</div>
+      <div class="vp-modes" id="vp-modes">
+        <button class="vp-mode-btn on" data-vpmode="flash" type="button">Flashcards</button>
+        <button class="vp-mode-btn" data-vpmode="mc" type="button">Multiple choice</button>
+        <button class="vp-mode-btn" data-vpmode="type" type="button">Type it</button>
+      </div>
+      <button class="vp-primary" id="vp-start-btn" type="button">Start Studying</button>
     </div>
-    <div class="vp-stage" id="vp-stage"></div>
+
+    <!-- ═══ PRACTICE — flashcards/MC/type-it render into #vp-stage here,
+         only once "Start Studying" (or "Study these words") has been
+         pressed. ═══ -->
+    <div id="vp-practice" style="display:none;">
+      <a href="#" class="vp-change-link" id="vp-change-link">&larr; Change sets or mode</a>
+      <div class="vp-stage" id="vp-stage"></div>
+    </div>
+
     <a href="#" class="menu-back-link" id="vocab-back">&larr; Back to resources</a>
   </div>
 </div>
@@ -1009,6 +1071,13 @@
   // reintroduce a client-side email send here.
 
   var currentStudent = null; // { key, name, driveFolderUrl, collegePrepFolderUrl, testPrep, tests }
+  // Read-only accessor for the vocab practice module (its own isolated
+  // closure — see the comment above that script block — so it can't see
+  // currentStudent directly) to namespace its localStorage "still
+  // learning" progress per-student instead of mixing everyone's progress
+  // together on a shared/school computer. Deliberately exposes ONLY the
+  // key, not the whole student object.
+  window.getPortalStudentKey = function () { return (currentStudent && currentStudent.key) || null; };
   var activeScreenId = 'screen-key';
   var STORAGE_KEY = 'moretti_portal_state';
 
@@ -1296,8 +1365,8 @@
   }
 
   function loadNextSession() {
-    if (!currentStudent || !currentStudent.name) return;
-    fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'nextSession', name: currentStudent.name, debug: DEBUG_MODE }) })
+    if (!currentStudent || !currentStudent.key) return;
+    fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'nextSession', key: currentStudent.key, debug: DEBUG_MODE }) })
       .then(function (r) { return r.json(); })
       .catch(function (err) { return { ok: false, error: 'network', message: String(err) }; })
       .then(function (data) {
@@ -3848,20 +3917,67 @@
   var selectedSets = setNames.slice();
   var mode = 'flash';
   var started = false;
+  // Non-null while reviewing the "still learning" list specifically (the
+  // shortcut button on the setup screen) — overrides the normal
+  // selectedSets-based pool until the student goes back to setup.
+  var reviewPool = null;
 
   function shuffle(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
-  function pool() { var out = []; selectedSets.forEach(function (s) { (VOCAB[s] || []).forEach(function (c) { out.push(c); }); }); return out; }
+  function pool() {
+    if (reviewPool) return reviewPool;
+    var out = []; selectedSets.forEach(function (s) { (VOCAB[s] || []).forEach(function (c) { out.push(c); }); }); return out;
+  }
   function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
   function norm(s) { return String(s).toLowerCase().trim().replace(/[^a-z0-9]/g, ''); }
+  function allCardsByTerm() {
+    var all = {};
+    setNames.forEach(function (s) { (VOCAB[s] || []).forEach(function (c) { all[c.term] = c; }); });
+    return all;
+  }
 
-  var pillsEl, stageEl;
+  /* ═══ "STILL LEARNING" PROGRESS — persisted in localStorage per student
+     (namespaced via window.getPortalStudentKey(), exposed by the portal's
+     outer script — see the comment there), so it survives across visits
+     instead of resetting every session. A term lands in here from any
+     mode: the Flashcards "Still learning" button, or a wrong answer in
+     Multiple Choice/Type It — and comes back out via "Got it" or later
+     answering it correctly. This is the same word list shown on the setup
+     screen and used by its "Study these words" shortcut. ═══ */
+  function progressStorageKey() {
+    var key = (window.getPortalStudentKey && window.getPortalStudentKey()) || 'anon';
+    return 'moretti_vocab_progress_' + key;
+  }
+  function loadProgress() {
+    try {
+      var raw = localStorage.getItem(progressStorageKey());
+      var obj = raw ? JSON.parse(raw) : null;
+      if (obj && obj.stillLearning && typeof obj.stillLearning === 'object') return obj;
+    } catch (e) { /* corrupt or blocked storage — start fresh */ }
+    return { stillLearning: {} };
+  }
+  var progress = loadProgress();
+  function saveProgress() {
+    try { localStorage.setItem(progressStorageKey(), JSON.stringify(progress)); } catch (e) { /* private browsing / storage disabled — fail silently, matches the rest of the portal's saveState() */ }
+  }
+  function setStillLearning(term, flag) {
+    if (flag) progress.stillLearning[term] = true;
+    else delete progress.stillLearning[term];
+    saveProgress();
+    renderStillPanel();
+  }
+  function stillLearningCards() {
+    var all = allCardsByTerm();
+    return Object.keys(progress.stillLearning).map(function (t) { return all[t]; }).filter(Boolean);
+  }
+
+  var pillsEl, stageEl, vpSetupEl, vpPracticeEl, stillPanelEl, poolCountEl;
   function renderPills() {
     pillsEl.innerHTML = '';
     if (setNames.length > 1) {
       var all = document.createElement('button');
       all.className = 'vp-pill' + (selectedSets.length === setNames.length ? ' on' : '');
       all.type = 'button'; all.textContent = 'All sets';
-      all.addEventListener('click', function () { selectedSets = setNames.slice(); renderPills(); render(); });
+      all.addEventListener('click', function () { selectedSets = setNames.slice(); renderPills(); updatePoolCount(); });
       pillsEl.appendChild(all);
     }
     setNames.forEach(function (s) {
@@ -3872,44 +3988,121 @@
         var i = selectedSets.indexOf(s);
         if (i === -1) selectedSets.push(s);
         else if (selectedSets.length > 1) selectedSets.splice(i, 1);
-        renderPills(); render();
+        renderPills(); updatePoolCount();
       });
       pillsEl.appendChild(b);
     });
   }
+  function updatePoolCount() {
+    if (!poolCountEl) return;
+    var n = selectedSets.reduce(function (sum, s) { return sum + ((VOCAB[s] || []).length); }, 0);
+    poolCountEl.textContent = n + ' word' + (n === 1 ? '' : 's') + ' in this selection';
+  }
+  // Renders the "still learning" review panel on the setup screen — either
+  // an empty-state note, or the word count/chips plus a shortcut straight
+  // into a flashcard round over just those words.
+  function renderStillPanel() {
+    if (!stillPanelEl) return;
+    var cards = stillLearningCards();
+    if (!cards.length) {
+      stillPanelEl.innerHTML = '<div class="vp-still-hed"><span class="vp-still-title">Still learning</span></div>' +
+        '<div class="vp-still-empty">Nothing here yet — words you mark "Still learning" (or miss in Multiple Choice/Type It) will show up here so you can come back to them.</div>';
+      return;
+    }
+    var shown = cards.slice(0, 16);
+    var extra = cards.length - shown.length;
+    stillPanelEl.innerHTML = '<div class="vp-still-hed"><span class="vp-still-title">Still learning</span><span class="vp-still-count">' + cards.length + '</span></div>' +
+      '<div class="vp-still-chips">' + shown.map(function (c) { return '<span class="vp-still-chip">' + esc(c.term) + '</span>'; }).join('') +
+      (extra > 0 ? '<span class="vp-still-more">+ ' + extra + ' more</span>' : '') + '</div>' +
+      '<button class="vp-still-btn" id="vp-still-review-btn" type="button">Study these ' + cards.length + ' word' + (cards.length === 1 ? '' : 's') + ' now</button>';
+    document.getElementById('vp-still-review-btn').addEventListener('click', function () {
+      reviewPool = stillLearningCards();
+      mode = 'flash';
+      Array.prototype.forEach.call(document.querySelectorAll('#vp-modes .vp-mode-btn'), function (b) { b.classList.toggle('on', b.getAttribute('data-vpmode') === 'flash'); });
+      enterPractice();
+    });
+  }
+  // Leaves setup and shows the practice stage — the normal path (Start
+  // Studying) leaves reviewPool untouched (null, so pool() falls back to
+  // selectedSets); the still-learning shortcut sets it first itself.
+  function enterPractice() {
+    vpSetupEl.style.display = 'none';
+    vpPracticeEl.style.display = '';
+    render();
+  }
+  // Back to setup clears any still-learning override and wipes the stage
+  // so a stray #vp-card can't linger and confuse the keyboard-nav guard.
+  function backToSetup() {
+    reviewPool = null;
+    stageEl.innerHTML = '';
+    vpPracticeEl.style.display = 'none';
+    vpSetupEl.style.display = '';
+    renderStillPanel();
+    updatePoolCount();
+  }
 
   function render() {
     var cards = pool();
-    if (!cards.length) { stageEl.innerHTML = '<div class="vp-empty">Pick at least one set to start.</div>'; return; }
+    if (!cards.length) { stageEl.innerHTML = '<div class="vp-empty vp-rise">Pick at least one set to start.</div>'; return; }
     if (mode === 'flash') renderFlash();
     else renderQuiz(mode);
   }
 
   var fc = { order: [], idx: 0, flipped: false, still: [] };
   function renderFlash() { fc.order = shuffle(pool()); fc.idx = 0; fc.flipped = false; fc.still = []; drawFlash(); }
+  // Full rebuild of the flashcard screen — called whenever the CARD ITSELF
+  // changes (advancing, going back, shuffling, grading). Both faces of the
+  // card are always in the DOM at once; only .flipped toggles which one
+  // faces forward (see flipCurrentCard()), so flipping never has to run
+  // this function or interrupt the entrance animation below.
   function drawFlash() {
     var c = fc.order[fc.idx];
     if (!c) { flashSummary(); return; }
     var pct = Math.round(fc.idx / fc.order.length * 100);
     stageEl.innerHTML =
+      '<div class="vp-rise">' +
       '<div class="vp-bar-row"><span>Card ' + (fc.idx + 1) + ' of ' + fc.order.length + '</span><span>' + fc.still.length + ' to review</span></div>' +
       '<div class="vp-bar-track"><div class="vp-bar-fill" style="width:' + pct + '%"></div></div>' +
-      '<div class="vp-card" id="vp-card"><span class="vp-side">' + (fc.flipped ? 'Definition' : 'Word') + '</span>' +
-        (fc.flipped ? '<span><span class="vp-def">' + esc(c.def) + '</span><span class="vp-ex">' + esc(c.ex) + '</span></span>' : '<span class="vp-term">' + esc(c.term) + '</span>') +
+      '<div class="vp-card' + (fc.flipped ? ' flipped' : '') + '" id="vp-card">' +
+        '<div class="vp-card-inner">' +
+          '<div class="vp-card-face vp-card-front"><span class="vp-side">Word</span><span class="vp-term">' + esc(c.term) + '</span></div>' +
+          '<div class="vp-card-face vp-card-back"><span class="vp-side">Definition</span><span><span class="vp-def">' + esc(c.def) + '</span><span class="vp-ex">' + esc(c.ex) + '</span></span></div>' +
+        '</div>' +
       '</div>' +
-      '<div class="vp-hint">Tap the card to flip</div>' +
+      '<div class="vp-hint">Tap the card or press &uarr;/&darr; to flip &nbsp;&middot;&nbsp; &larr;/&rarr; to move between cards</div>' +
       '<div class="vp-fc-ctrls"><button class="vp-still" id="vp-still" type="button">Still learning</button><button class="vp-got" id="vp-got" type="button">Got it</button></div>' +
-      '<div class="vp-nav"><button id="vp-prev" type="button"' + (fc.idx === 0 ? ' disabled' : '') + '>&larr; Back</button><button id="vp-shuffle" type="button">Shuffle</button><button id="vp-skip" type="button">Skip &rarr;</button></div>';
-    document.getElementById('vp-card').addEventListener('click', function () { fc.flipped = !fc.flipped; drawFlash(); });
-    document.getElementById('vp-still').addEventListener('click', function () { fc.still.push(fc.order[fc.idx]); fc.idx++; fc.flipped = false; drawFlash(); });
-    document.getElementById('vp-got').addEventListener('click', function () { fc.idx++; fc.flipped = false; drawFlash(); });
-    document.getElementById('vp-prev').addEventListener('click', function () { if (fc.idx > 0) { fc.idx--; fc.flipped = false; drawFlash(); } });
-    document.getElementById('vp-skip').addEventListener('click', function () { fc.idx++; fc.flipped = false; drawFlash(); });
+      '<div class="vp-nav"><button id="vp-prev" type="button"' + (fc.idx === 0 ? ' disabled' : '') + '>&larr; Back</button><button id="vp-shuffle" type="button">Shuffle</button><button id="vp-skip" type="button">Skip &rarr;</button></div>' +
+      '</div>';
+    document.getElementById('vp-card').addEventListener('click', flipCurrentCard);
+    document.getElementById('vp-still').addEventListener('click', function () { fc.still.push(fc.order[fc.idx]); setStillLearning(c.term, true); advanceFlash(1); });
+    document.getElementById('vp-got').addEventListener('click', function () { setStillLearning(c.term, false); advanceFlash(1); });
+    document.getElementById('vp-prev').addEventListener('click', function () { advanceFlash(-1); });
+    document.getElementById('vp-skip').addEventListener('click', function () { advanceFlash(1); });
     document.getElementById('vp-shuffle').addEventListener('click', renderFlash);
+  }
+  // Flips the currently-displayed card in place — just toggles a class and
+  // lets the CSS 3D transition (see .vp-card-inner) handle the animation,
+  // no re-render involved.
+  function flipCurrentCard() {
+    if (!fc.order[fc.idx]) return;
+    fc.flipped = !fc.flipped;
+    var cardEl = document.getElementById('vp-card');
+    if (cardEl) cardEl.classList.toggle('flipped', fc.flipped);
+  }
+  // Moves to the next (dir=1) or previous (dir=-1) card, if one exists in
+  // that direction. Shared by the Back/Skip/Still Learning/Got It buttons
+  // and by the Left/Right arrow keys.
+  function advanceFlash(dir) {
+    var next = fc.idx + dir;
+    if (next < 0) return; // no card before the first
+    if (next > fc.order.length) return; // don't run past the summary screen
+    fc.idx = next;
+    fc.flipped = false;
+    drawFlash();
   }
   function flashSummary() {
     var reviewed = fc.still.length;
-    stageEl.innerHTML = '<div class="vp-summary"><div class="vp-score">' + (fc.order.length - reviewed) + '/' + fc.order.length + '</div>' +
+    stageEl.innerHTML = '<div class="vp-summary vp-pop"><div class="vp-score">' + (fc.order.length - reviewed) + '/' + fc.order.length + '</div>' +
       '<div class="vp-score-sub">marked "got it"' + (reviewed ? ' · ' + reviewed + ' still to review' : '') + '</div>' +
       (reviewed ? '<button class="vp-primary" id="vp-review" type="button">Review the ' + reviewed + ' you\'re still learning</button>' : '') +
       '<button class="vp-primary" id="vp-restart" type="button" style="' + (reviewed ? 'background:transparent;color:var(--red);border:1px solid var(--red)' : '') + '">Start over</button></div>';
@@ -3928,13 +4121,15 @@
     if (qz.kind === 'mc') {
       var others = shuffle(pool().filter(function (x) { return x.term !== c.term; }));
       var opts = shuffle([c].concat(others.slice(0, 3)));
-      stageEl.innerHTML = head + '<div class="vp-prompt"><div class="vp-plabel">Which word means…</div><div class="vp-ptext">' + esc(c.def) + '</div></div>' +
-        '<div class="vp-opts" id="vp-opts">' + opts.map(function (o) { return '<button class="vp-opt" type="button" data-t="' + esc(o.term) + '">' + esc(o.term) + '</button>'; }).join('') + '</div>';
+      stageEl.innerHTML = '<div class="vp-rise">' + head + '<div class="vp-prompt"><div class="vp-plabel">Which word means…</div><div class="vp-ptext">' + esc(c.def) + '</div></div>' +
+        '<div class="vp-opts" id="vp-opts">' + opts.map(function (o, i) { return '<button class="vp-opt" type="button" data-t="' + esc(o.term) + '" style="animation-delay:' + (i * 0.05) + 's">' + esc(o.term) + '</button>'; }).join('') + '</div></div>';
       Array.prototype.forEach.call(document.querySelectorAll('#vp-opts .vp-opt'), function (b) {
         b.addEventListener('click', function () {
           if (qz.answered) return; qz.answered = true;
           var chosen = b.getAttribute('data-t');
-          if (chosen === c.term) qz.score++;
+          var right = chosen === c.term;
+          if (right) qz.score++;
+          setStillLearning(c.term, !right);
           Array.prototype.forEach.call(document.querySelectorAll('#vp-opts .vp-opt'), function (o) {
             o.disabled = true; var t = o.getAttribute('data-t');
             if (t === c.term) o.classList.add('vp-correct'); else if (t === chosen) o.classList.add('vp-wrong');
@@ -3943,16 +4138,18 @@
         });
       });
     } else {
-      stageEl.innerHTML = head + '<div class="vp-prompt"><div class="vp-plabel">Type the word that means…</div><div class="vp-ptext">' + esc(c.def) + '</div></div>' +
+      stageEl.innerHTML = '<div class="vp-rise">' + head + '<div class="vp-prompt"><div class="vp-plabel">Type the word that means…</div><div class="vp-ptext">' + esc(c.def) + '</div></div>' +
         '<input class="vp-input" id="vp-input" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="your answer">' +
-        '<div class="vp-fb" id="vp-fb"></div><button class="vp-primary" id="vp-check" type="button">Check</button>';
+        '<div class="vp-fb" id="vp-fb"></div><button class="vp-primary" id="vp-check" type="button">Check</button></div>';
       var input = document.getElementById('vp-input');
       input.focus();
       function check() {
         if (qz.answered) return; qz.answered = true;
         var fb = document.getElementById('vp-fb');
-        if (norm(input.value) === norm(c.term)) { qz.score++; fb.className = 'vp-fb ok'; fb.textContent = 'Correct — ' + c.term; }
+        var right = norm(input.value) === norm(c.term);
+        if (right) { qz.score++; fb.className = 'vp-fb ok'; fb.textContent = 'Correct — ' + c.term; }
         else { fb.className = 'vp-fb no'; fb.textContent = 'Answer: ' + c.term; }
+        setStillLearning(c.term, !right);
         input.disabled = true; document.getElementById('vp-check').style.display = 'none'; quizNext();
       }
       input.addEventListener('keydown', function (e) { if (e.key === 'Enter') check(); });
@@ -3968,7 +4165,7 @@
   }
   function quizSummary() {
     var n = qz.order.length, s = qz.score;
-    stageEl.innerHTML = '<div class="vp-summary"><div class="vp-score">' + s + '/' + n + '</div><div class="vp-score-sub">' + Math.round(s / n * 100) + '% correct</div><button class="vp-primary" id="vp-again" type="button">Try again</button></div>';
+    stageEl.innerHTML = '<div class="vp-summary vp-pop"><div class="vp-score">' + s + '/' + n + '</div><div class="vp-score-sub">' + Math.round(s / n * 100) + '% correct</div><button class="vp-primary" id="vp-again" type="button">Try again</button></div>';
     document.getElementById('vp-again').addEventListener('click', function () { renderQuiz(qz.kind); });
   }
 
@@ -3977,15 +4174,46 @@
     started = true;
     pillsEl = document.getElementById('vp-pills');
     stageEl = document.getElementById('vp-stage');
+    vpSetupEl = document.getElementById('vp-setup');
+    vpPracticeEl = document.getElementById('vp-practice');
+    stillPanelEl = document.getElementById('vp-still-panel');
+    poolCountEl = document.getElementById('vp-pool-count');
+    // Mode buttons on the setup screen just record the choice — actually
+    // starting only happens on "Start Studying" (or the still-learning
+    // shortcut), matching the rest of the setup-gate flow below.
     Array.prototype.forEach.call(document.querySelectorAll('#vp-modes .vp-mode-btn'), function (btn) {
       btn.addEventListener('click', function () {
         mode = btn.getAttribute('data-vpmode');
         Array.prototype.forEach.call(document.querySelectorAll('#vp-modes .vp-mode-btn'), function (b) { b.classList.toggle('on', b === btn); });
-        render();
       });
     });
+    document.getElementById('vp-start-btn').addEventListener('click', function () { reviewPool = null; enterPractice(); });
+    document.getElementById('vp-change-link').addEventListener('click', function (e) { e.preventDefault(); backToSetup(); });
     renderPills();
-    render();
+    updatePoolCount();
+    renderStillPanel();
+
+    // ═══ KEYBOARD NAV — Left/Right moves between flashcards, Up/Down
+    // flips the current one. Registered once (vocabModuleInit only ever
+    // runs its body once, guarded by `started` above), so this checks at
+    // fire-time whether the vocab screen is actually the one showing
+    // (this module has its own isolated closure — see the comment at the
+    // top of this script block — so it can't see the portal's own
+    // activeScreenId and instead just reads the "active" class the portal
+    // already toggles on the vocab screen element) and whether flashcard
+    // mode is even the one on screen, rather than trying to add/remove the
+    // listener as the student navigates in and out.
+    document.addEventListener('keydown', function (e) {
+      var scr = document.getElementById('screen-vocab');
+      if (!scr || !scr.classList.contains('active')) return;
+      if (mode !== 'flash') return;
+      if (!document.getElementById('vp-card')) return; // on the empty/summary screen, not mid-deck
+      var tag = (document.activeElement && document.activeElement.tagName) || '';
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return; // don't hijack typing elsewhere on the page
+      if (e.key === 'ArrowLeft') { e.preventDefault(); advanceFlash(-1); }
+      else if (e.key === 'ArrowRight') { e.preventDefault(); advanceFlash(1); }
+      else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') { e.preventDefault(); flipCurrentCard(); }
+    });
   };
 })();
 </script>
