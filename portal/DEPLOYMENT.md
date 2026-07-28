@@ -20,14 +20,14 @@ adding new students afterward is just adding a row to a spreadsheet.
    left to right:
 
    ```
-   Key | Name | DriveFolderUrl | CollegePrepFolderUrl | GrantedEmail | GrantedAt
+   Key | Name | DriveFolderUrl | GrantedEmail | GrantedAt | SATTakenAt | ACTTakenAt | TestPrep | TestDate
    ```
 
 4. Add your existing students starting in row 2. Right now that's:
 
-   | Key | Name | DriveFolderUrl | CollegePrepFolderUrl | GrantedEmail | GrantedAt |
-   |---|---|---|---|---|---|
-   | DEMO123 | Demo Student | | | | |
+   | Key | Name | DriveFolderUrl | GrantedEmail | GrantedAt | SATTakenAt | ACTTakenAt | TestPrep | TestDate |
+   |---|---|---|---|---|---|---|---|---|
+   | DEMO123 | Demo Student | | | | | | | |
 
    (Add one row per real student directly in the Sheet itself — not in
    this file. This file is committed to git, so a real student's key,

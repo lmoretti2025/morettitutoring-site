@@ -22,18 +22,32 @@
 
    SETUP — see the deployment guide for full steps. Short version:
      1. Create a Google Sheet with a tab named "Students" and headers:
-          Key | Name | DriveFolderUrl | CollegePrepFolderUrl | GrantedEmail | GrantedAt | SATTakenAt | ACTTakenAt | TestPrep | TestDate
+          Key | Name | DriveFolderUrl | GrantedEmail | GrantedAt | SATTakenAt | ACTTakenAt | TestPrep | SAT | ACT | TestDate
+        (CollegePrepFolderUrl is NOT part of the live sheet — the code
+        still checks for it and simply no-ops if the column is missing,
+        but don't add it unless you actually want a second Drive folder
+        per student.)
         (SATTakenAt/ACTTakenAt track the one-real-diagnostic-per-test-type
         feature — leave both blank for everyone; they get stamped
         automatically the first time each student finishes that test's
         diagnostic. A blank cell means "never taken."
         TestPrep controls whether a student sees the SAT/ACT Diagnostics
-        and SAT/ACT Resources cards on the portal home screen at all — a
+        and SAT/ACT Resources cards on the portal home screen AT ALL — a
         student who's only doing subject tutoring, not test prep, should
         have this left blank/unchecked so those two cards just don't show
         up for them; "Your Files" always shows either way. Use an actual
         checkbox column (Insert > Checkbox) or just type TRUE/yes in the
         cell — either is read as "on".
+        SAT / ACT are two more checkbox columns that say WHICH test(s) a
+        test-prep student is actually working on — check SAT for an SAT
+        student, ACT for an ACT student, both if genuinely undecided
+        between the two. This controls which test's diagnostic button and
+        resources (vocab list, etc. — SAT-specific tools) the student
+        sees; an ACT-only student never sees SAT-only material and vice
+        versa. If TestPrep is checked but neither SAT nor ACT is checked
+        (e.g. an existing row from before these columns existed), both
+        show by default — nothing breaks for students you haven't
+        re-flagged yet.
         TestDate is the student's actual SAT/ACT test date — type it in as
         a real date (Insert > Date, or just type e.g. 3/14/2027). When
         it's set, the portal home screen shows a countdown/progress bar
@@ -140,6 +154,24 @@ function grantFolderAccess_(url, email) {
   }
 }
 
+// Works out which test(s) a student should see the diagnostic/resources
+// UI for. testPrep is the master on/off switch (subject-only tutoring
+// students have it off and never see either). Within test-prep students,
+// the SAT/ACT columns say which test(s) — if neither is checked (most
+// commonly: an older row from before these columns existed), both show,
+// so nothing silently disappears for students who haven't been re-flagged.
+function testPrepFlags_(row) {
+  var testPrepOn = truthy_(row.TestPrep);
+  var sat = truthy_(row.SAT);
+  var act = truthy_(row.ACT);
+  var neitherSpecified = !sat && !act;
+  return {
+    testPrep: testPrepOn,
+    showSat: testPrepOn && (sat || neitherSpecified),
+    showAct: testPrepOn && (act || neitherSpecified)
+  };
+}
+
 function handleAuth(rawKey, rawEmail) {
   if (!rawKey) return { ok: false, error: 'missing_key' };
   var key = String(rawKey).trim().toUpperCase();
@@ -160,7 +192,8 @@ function handleAuth(rawKey, rawEmail) {
   if (!grantedEmail) {
     // First time this key has ever been used.
     if (!email) {
-      return { ok: true, name: row.Name, needsEmail: true, satTaken: !!row.SATTakenAt, actTaken: !!row.ACTTakenAt, testPrep: truthy_(row.TestPrep) };
+      var flags0 = testPrepFlags_(row);
+      return { ok: true, name: row.Name, needsEmail: true, satTaken: !!row.SATTakenAt, actTaken: !!row.ACTTakenAt, testPrep: flags0.testPrep, showSat: flags0.showSat, showAct: flags0.showAct };
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return { ok: false, error: 'bad_email' };
@@ -178,6 +211,7 @@ function handleAuth(rawKey, rawEmail) {
     return { ok: false, error: 'email_mismatch' };
   }
 
+  var flags = testPrepFlags_(row);
   return {
     ok: true,
     name: row.Name,
@@ -186,7 +220,9 @@ function handleAuth(rawKey, rawEmail) {
     collegePrepFolderUrl: row.CollegePrepFolderUrl || '',
     satTaken: !!row.SATTakenAt,
     actTaken: !!row.ACTTakenAt,
-    testPrep: truthy_(row.TestPrep),
+    testPrep: flags.testPrep,
+    showSat: flags.showSat,
+    showAct: flags.showAct,
     grantedAt: grantedAtValue ? new Date(grantedAtValue).toISOString() : null,
     testDate: row.TestDate ? new Date(row.TestDate).toISOString() : null,
     tests: []
@@ -261,7 +297,16 @@ function handleSubmitDiagnostic(rawKey, rawTest, score, reportLink, reportText) 
   // spoofed display name ("PWNED") impossible.
   var name = String(row.Name || '').trim() || '(unnamed student)';
   var safeScore = String(score == null ? '' : score).replace(/[\r\n]+/g, ' ').slice(0, 60);
-  var link = String(reportLink || '').slice(0, 4000);
+  // This link is a self-contained base64 blob of the whole diagnostic
+  // (every answer plus per-question timing data for every section) — NOT
+  // a normal short URL. A full SAT run easily runs past 4000 characters
+  // once timing telemetry is included. The old 4000-char cap here was
+  // silently truncating it mid-base64, corrupting the payload so
+  // report.html couldn't decode it at all ("Couldn't read the report data
+  // from this link") — every report saved before this fix was affected.
+  // 200000 is generous headroom while still bounding what a spoofed
+  // request could shove into a Sheet cell / Drive file.
+  var link = String(reportLink || '').slice(0, 200000);
   // Must actually START WITH our real report page's origin+path, not just
   // contain that text anywhere — indexOf(...) === -1 as a "contains" check
   // would let a link like https://evil.example/?x=morettitutoring.com/portal/report.html
@@ -272,38 +317,72 @@ function handleSubmitDiagnostic(rawKey, rawTest, score, reportLink, reportText) 
     link = '(report link withheld — did not point at the portal report page)';
   }
   var extra = String(reportText || '').slice(0, 100000);
+  var dateStr = Utilities.formatDate(new Date(), Session.getScriptTimeZone() || 'America/New_York', 'yyyy-MM-dd');
 
-  var subject = test + ' Diagnostic — ' + name + (safeScore ? ' — ' + safeScore : '');
-  var body = 'Student: ' + name + '\n' +
-             'Key: ' + key + '\n' +
-             'Test: ' + test + '\n' +
-             (safeScore ? 'Score: ' + safeScore + '\n' : '') +
-             '\nFull report (open, review, Print / Save as PDF):\n' + link +
-             '\n\n' + extra;
-
-  // Write a durable copy FIRST, before attempting to email. This is the
-  // fix for the "sheet shows taken but the email never arrived and the
-  // score was gone forever" failure mode: previously this function's only
-  // output was the email itself, so any send failure (quota, transient
-  // Gmail error, etc.) silently destroyed the only copy of the score. Now
-  // the raw score/report survive in the DiagnosticLog tab regardless of
-  // whether MailApp succeeds.
-  var emailError = null;
+  // ═══ THE FIX ═══ The email used to be the ONLY place a result's score/
+  // report ever landed — a send failure (quota, transient Gmail error,
+  // network) silently destroyed the only copy, which is exactly what
+  // happened to a real student's diagnostic. Now there are two durable,
+  // non-email stores written FIRST, before email is even attempted, and
+  // the email itself is downgraded to a best-effort "heads up" ping that
+  // carries no unique data — losing it costs nothing but convenience.
+  //
+  //   1. DiagnosticLog tab (this spreadsheet) — always-on backup, works
+  //      even if a student's Drive folder is missing/misconfigured.
+  //   2. A .txt file saved directly into the student's own Drive folder —
+  //      the primary, student-facing record. Contains the full
+  //      question-by-question report plus the link to the pretty
+  //      formatted version.
+  var logOk = false, driveOk = false, driveFileUrl = '';
   try {
     logDiagnosticResult_(key, name, test, safeScore, link, extra);
+    logOk = true;
   } catch (logErr) {
     console.error('Failed to write DiagnosticLog row for ' + key + ': ' + logErr);
   }
 
   try {
+    var fileText = name + ' — ' + test + ' Diagnostic — ' + dateStr + '\n' +
+                   'Score: ' + (safeScore || '(not recorded)') + '\n' +
+                   'Formatted report (open, review, Print / Save as PDF):\n' + link +
+                   '\n\n' + '='.repeat(60) + '\n\n' + extra;
+    var folderId = extractFolderId_(row.DriveFolderUrl);
+    if (folderId) {
+      var folder = DriveApp.getFolderById(folderId);
+      var fileName = name + ' — ' + test + ' Diagnostic — ' + dateStr + '.txt';
+      var file = folder.createFile(fileName, fileText, MimeType.PLAIN_TEXT);
+      driveFileUrl = file.getUrl();
+      driveOk = true;
+    } else {
+      console.error('No Drive folder on record for ' + key + ' — could not save diagnostic file.');
+    }
+  } catch (driveErr) {
+    console.error('Failed to save diagnostic file to Drive for ' + key + ': ' + driveErr);
+  }
+
+  // Best-effort notification — Luca still gets pinged the moment a result
+  // comes in, but the ping itself carries no irreplaceable data, so if
+  // this fails the worst case is he finds out by checking the folder or
+  // DiagnosticLog instead of his inbox, not that anything is lost.
+  var emailError = null;
+  try {
+    var subject = 'New ' + test + ' Diagnostic — ' + name + (safeScore ? ' — ' + safeScore : '');
+    var body = 'Student: ' + name + '\n' +
+               'Key: ' + key + '\n' +
+               'Test: ' + test + '\n' +
+               (safeScore ? 'Score: ' + safeScore + '\n' : '') +
+               '\nSaved to her Drive folder:\n' + (driveFileUrl || '(not saved — see DiagnosticLog tab)') +
+               (row.DriveFolderUrl ? '\nFolder:\n' + row.DriveFolderUrl : '') +
+               '\n\nFormatted report:\n' + link;
     MailApp.sendEmail(NOTIFY_EMAIL, subject, body);
   } catch (err) {
     emailError = String(err);
     console.error('MailApp.sendEmail failed for ' + key + ' (' + test + '): ' + emailError);
   }
 
-  if (emailError) return { ok: false, error: 'email_failed', detail: emailError };
-  return { ok: true };
+  // ok as long as AT LEAST ONE durable store succeeded — that's the real
+  // bar now, not "did the email send."
+  return { ok: logOk || driveOk, driveSaved: driveOk, driveFileUrl: driveFileUrl, logSaved: logOk, emailSent: !emailError, emailError: emailError || undefined };
 }
 
 // Appends one row to a "DiagnosticLog" tab (auto-created on first use, left
