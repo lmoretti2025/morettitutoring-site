@@ -55,6 +55,12 @@
         (GrantedAt) to this date, with the days-remaining count and your
         target logo at the finish line. Leave it blank for a student and
         the bar just doesn't show — no error, nothing broken.)
+        A tab named "Assignments" holds the homework checklist shown on
+        each student's portal home screen — it's created automatically the
+        first time it's needed, with headers Timestamp | Key | Task | Done
+        | DoneAt. To assign something, just add a row yourself (Key, Task
+        text, today's date in Timestamp, leave Done unchecked). See
+        getAssignments_() below for details.
      2. Paste this file into a new Apps Script project (script.google.com).
      3. Set SHEET_ID below to that Sheet's ID (from its URL).
      4. Deploy > New deployment > Web app.
@@ -86,7 +92,7 @@ var STUDENT_FOLDERS_PARENT_NAME = 'Moretti Portal — Student Folders';
 // Where diagnostic-result notifications are sent. IMPORTANT: confirm this
 // is the address you want results delivered to. The email is sent from the
 // Google account that owns this Apps Script (Deploy > Execute as: Me).
-var NOTIFY_EMAIL = 'lmoretti2001@gmail.com';
+var NOTIFY_EMAIL = 'morettitutoring@gmail.com';
 
 function doPost(e) {
   var out;
@@ -100,6 +106,8 @@ function doPost(e) {
       out = handleMarkDiagnosticTaken(body.key, body.test);
     } else if (body.action === 'submitDiagnostic') {
       out = handleSubmitDiagnostic(body.key, body.test, body.score, body.reportLink, body.report);
+    } else if (body.action === 'toggleAssignment') {
+      out = handleToggleAssignment(body.key, body.row, !!body.done);
     } else {
       out = { ok: false, error: 'unknown_action' };
     }
@@ -145,6 +153,26 @@ function truthy_(v) {
   if (v === true) return true;
   if (typeof v === 'string') return /^(true|yes|y|1)$/i.test(v.trim());
   return false;
+}
+
+// Google Sheets treats any cell VALUE that starts with =, +, -, or @ as a
+// formula, even when written via setValue()/appendRow() from Apps Script —
+// this is not limited to typing directly into the sheet. Any client-
+// controlled string that reaches a sheet cell is a formula-injection vector
+// (e.g. a HYPERLINK() redirect, or an IMPORTXML/IMPORTDATA() call that
+// exfiltrates sheet contents to an external URL as soon as the cell is
+// viewed/recalculated). Two concrete reachable paths this closes:
+//   - the "email" field on first login (handleAuth) — the existing regex
+//     only forbids whitespace and @ in the local part, so something like
+//     =HYPERLINK("http://evil.com","x")@a.b passes it and would otherwise
+//     land straight in the GrantedEmail cell as a live formula.
+//   - score/report text on diagnostic submission (handleSubmitDiagnostic)
+//     — both are entirely client-supplied with no format constraint.
+// Prefixing with a single quote is the standard mitigation: Sheets then
+// displays it as inert literal text instead of evaluating it.
+function sheetSafe_(v) {
+  var s = String(v == null ? '' : v);
+  return /^[=+\-@]/.test(s) ? "'" + s : s;
 }
 
 function extractFolderId_(url) {
@@ -218,7 +246,7 @@ function handleAuth(rawKey, rawEmail) {
     var emailCol = row._headers.indexOf('GrantedEmail');
     var atCol = row._headers.indexOf('GrantedAt');
     grantedAtValue = new Date();
-    if (emailCol !== -1) sheet.getRange(row._rowIndex, emailCol + 1).setValue(email);
+    if (emailCol !== -1) sheet.getRange(row._rowIndex, emailCol + 1).setValue(sheetSafe_(email));
     if (atCol !== -1) sheet.getRange(row._rowIndex, atCol + 1).setValue(grantedAtValue);
   } else if (email && email !== grantedEmail) {
     // Someone's submitting a different email for a key that's already
@@ -240,8 +268,88 @@ function handleAuth(rawKey, rawEmail) {
     showAct: flags.showAct,
     grantedAt: grantedAtValue ? new Date(grantedAtValue).toISOString() : null,
     testDate: row.TestDate ? new Date(row.TestDate).toISOString() : null,
-    tests: []
+    tests: [],
+    assignments: getAssignments_(key)
   };
+}
+
+/* =========================================================================
+   HOMEWORK / ASSIGNMENT CHECKLIST
+   -------------------------------------------------------------------------
+   Lightweight "assigned this week" list, shown as a checkbox card on the
+   portal home screen. No admin UI — to assign something, just add a row
+   directly to the "Assignments" tab in the same Sheet:
+     Timestamp | Key | Task | Done | DoneAt
+   Type the student's Key, the task text, and today's date/time in
+   Timestamp (controls sort order — newest first). Leave Done unchecked.
+   The student's own checkbox on their portal home screen writes Done and
+   DoneAt back automatically via toggleAssignment — you'll see it flip in
+   the sheet the moment they check it off, no refresh needed on your end
+   beyond reopening the tab.
+   ========================================================================= */
+function getAssignmentsSheet_() {
+  var ss = SpreadsheetApp.openById(SHEET_ID);
+  var sheet = ss.getSheetByName('Assignments');
+  if (!sheet) {
+    sheet = ss.insertSheet('Assignments');
+    sheet.appendRow(['Timestamp', 'Key', 'Task', 'Done', 'DoneAt']);
+  }
+  return sheet;
+}
+
+// Returns one student's assignments (open and completed), newest-assigned
+// first. `key` must already be uppercased/trimmed by the caller.
+function getAssignments_(key) {
+  var sheet = getAssignmentsSheet_();
+  var data = sheet.getDataRange().getValues();
+  var headers = data[0];
+  var keyCol = headers.indexOf('Key');
+  var taskCol = headers.indexOf('Task');
+  var doneCol = headers.indexOf('Done');
+  var tsCol = headers.indexOf('Timestamp');
+  if (keyCol === -1 || taskCol === -1) return [];
+
+  var out = [];
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][keyCol]).trim().toUpperCase() !== key) continue;
+    var task = String(data[i][taskCol] || '').trim();
+    if (!task) continue;
+    out.push({
+      row: i + 1, // 1-based sheet row — sent back by the client on toggle
+      task: task,
+      done: truthy_(data[i][doneCol]),
+      assignedAt: (tsCol !== -1 && data[i][tsCol]) ? new Date(data[i][tsCol]).toISOString() : null
+    });
+  }
+  out.sort(function (a, b) { return (b.assignedAt || '').localeCompare(a.assignedAt || ''); });
+  return out;
+}
+
+// Flips one assignment's Done state. Re-reads that row's OWN Key cell and
+// requires it to match the key on the request before writing anything —
+// without this check, a student could pass any row number (not just their
+// own) and flip a different student's assignment.
+function handleToggleAssignment(rawKey, rawRow, done) {
+  if (!rawKey) return { ok: false, error: 'missing_key' };
+  var key = String(rawKey).trim().toUpperCase();
+  var row = Number(rawRow);
+  if (!row || row < 2) return { ok: false, error: 'bad_row' };
+
+  var sheet = getAssignmentsSheet_();
+  if (row > sheet.getLastRow()) return { ok: false, error: 'bad_row' };
+  var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  var keyCol = headers.indexOf('Key');
+  var doneCol = headers.indexOf('Done');
+  var doneAtCol = headers.indexOf('DoneAt');
+  if (keyCol === -1 || doneCol === -1) return { ok: false, error: 'bad_sheet' };
+
+  var rowKey = String(sheet.getRange(row, keyCol + 1).getValue()).trim().toUpperCase();
+  if (rowKey !== key) return { ok: false, error: 'key_mismatch' };
+
+  sheet.getRange(row, doneCol + 1).setValue(!!done);
+  if (doneAtCol !== -1) sheet.getRange(row, doneAtCol + 1).setValue(done ? new Date() : '');
+
+  return { ok: true, assignments: getAssignments_(key) };
 }
 
 /* =========================================================================
@@ -419,7 +527,7 @@ function logDiagnosticResult_(key, name, test, score, reportLink, reportText, dr
     log = ss.insertSheet('DiagnosticLog');
     log.appendRow(['Timestamp', 'Key', 'Name', 'Test', 'Score', 'ReportLink', 'Report', 'DriveSaved', 'DriveFileUrl', 'EmailSent', 'EmailError']);
   }
-  log.appendRow([new Date(), key, name, test, score, reportLink, reportText, !!driveSaved, driveFileUrl || '', !!emailSent, emailError || '']);
+  log.appendRow([new Date(), sheetSafe_(key), sheetSafe_(name), sheetSafe_(test), sheetSafe_(score), sheetSafe_(reportLink), sheetSafe_(reportText), !!driveSaved, sheetSafe_(driveFileUrl || ''), !!emailSent, sheetSafe_(emailError || '')]);
 }
 
 /* =========================================================================
