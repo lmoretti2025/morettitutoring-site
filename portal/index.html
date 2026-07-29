@@ -44,10 +44,19 @@
        chrome, while actually taking a module. */
     --dx-navy: #12284c;
     --dx-blue: #3457d5;
+    /* Shared card elevation — used on every white card on the portal so
+       they lift off the beige background instead of relying on the border
+       alone. Kept subtle on purpose; --shadow-hover is the version used on
+       hover/interactive states, a touch stronger. */
+    --shadow:       0 2px 16px rgba(17,17,17,0.055);
+    --shadow-hover: 0 14px 30px rgba(17,17,17,0.10);
   }
 
   html, body { height: 100%; }
-  body { background: var(--bg); color: var(--text); font-family: var(--hel); font-weight: 300; -webkit-font-smoothing: antialiased; overflow-x: hidden; min-height: 100vh; }
+  body { background:
+      radial-gradient(ellipse 900px 460px at 50% 0%, rgba(201,168,76,0.07), transparent 70%),
+      var(--bg);
+    color: var(--text); font-family: var(--hel); font-weight: 300; -webkit-font-smoothing: antialiased; overflow-x: hidden; min-height: 100vh; }
 
   #main-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 300; padding: 0.85rem 2.5rem; display: flex; align-items: center; justify-content: space-between; background: var(--red); }
   .nav-logo-link { display: block; line-height: 0; }
@@ -84,7 +93,11 @@
 
   /* ═══ MENU SCREEN ═══ */
   .menu-greeting { font-family: var(--display); font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 700; color: var(--text); text-align: center; margin-bottom: 0.6rem; }
-  .next-session-card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 1.1rem 1.4rem; margin: 0 auto 1.6rem; max-width: 460px; text-align: center; }
+  .next-session-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 1.3rem 1.4rem; margin: 0 auto 1.6rem; max-width: 460px; text-align: center; box-shadow: var(--shadow); position: relative; overflow: hidden; }
+  /* Thin gold-to-red accent bar along the top — this card is the one
+     piece of information on the page that changes week to week and
+     matters most day-to-day, so it gets the strongest visual treatment. */
+  .next-session-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--gold), var(--red)); }
   .ns-label { font-family: var(--hel); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--mid); margin-bottom: 0.35rem; }
   .ns-date { font-family: var(--hel); font-weight: 700; font-size: 1.05rem; color: var(--text); }
   .ns-join { display: inline-block; margin-top: 0.7rem; font-family: var(--hel); font-size: 0.75rem; font-weight: 700; color: var(--red); text-decoration: none; word-break: break-all; }
@@ -100,13 +113,16 @@
      the main column. On wide screens there IS room, so it detaches into a
      fixed corner widget pinned top-left instead — out of the way of the
      main flow, but always visible without scrolling. */
-  .assign-card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 1.1rem 1.4rem; margin: 0 auto 1.6rem; max-width: 460px; }
-  .assign-label { font-family: var(--hel); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--mid); margin-bottom: 0.7rem; }
-  .assign-list { display: flex; flex-direction: column; gap: 0.55rem; }
+  .assign-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 1.2rem 1.4rem; margin: 0 auto 1.6rem; max-width: 460px; box-shadow: var(--shadow); }
+  .assign-label { display: flex; align-items: center; gap: 0.45rem; font-family: var(--hel); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--mid); margin-bottom: 0.85rem; }
+  .assign-label::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--gold); flex-shrink: 0; }
+  .assign-list { display: flex; flex-direction: column; gap: 0.6rem; }
   .assign-item { display: flex; align-items: flex-start; gap: 0.65rem; cursor: pointer; transition: opacity 0.2s ease, transform 0.2s ease; }
   .assign-item input[type="checkbox"] { margin-top: 0.2rem; width: 17px; height: 17px; flex-shrink: 0; accent-color: var(--red); cursor: pointer; }
   .assign-text { font-family: var(--hel); font-size: 0.9rem; color: var(--text); line-height: 1.35; }
-  .assign-item.assign-fading { opacity: 0; transform: translateX(8px); pointer-events: none; }
+  .assign-item.assign-done { cursor: default; }
+  .assign-item.assign-done .assign-text { color: var(--text-muted, #9a9a9a); text-decoration: line-through; }
+  .assign-item.assign-done input[type="checkbox"] { cursor: default; }
   @media (min-width: 1150px) {
     .assign-card { position: fixed; top: 108px; left: 2rem; margin: 0; width: 260px; max-width: 260px; max-height: calc(100vh - 140px); overflow-y: auto; z-index: 50; }
   }
@@ -114,7 +130,7 @@
   /* ═══ TEST-DAY COUNTDOWN ═══ shown on the home screen once a student's
      Students-sheet row has a TestDate. Fill runs from GrantedAt (first
      login) to TestDate; the target logo sits fixed at the finish line. */
-  .test-countdown { max-width: 460px; margin: 0 auto 1.6rem; }
+  .test-countdown { max-width: 460px; margin: 0 auto 2.1rem; }
   .tc-top { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 0.5rem; }
   .tc-label { font-family: var(--hel); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--mid); }
   .tc-days { font-family: var(--hel); font-size: 0.85rem; font-weight: 700; color: var(--red); }
@@ -122,27 +138,29 @@
   .tc-fill { position: absolute; top: 0; left: 0; height: 100%; background: linear-gradient(90deg, var(--gold), var(--red)); border-radius: 999px; transition: width 0.6s ease; }
   .tc-flag { position: absolute; top: 50%; right: -34px; transform: translateY(-50%); width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; }
   .tc-flag-icon { width: 100%; height: 100%; display: block; }
-  .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
-  .menu-card { background: var(--white); border: 1px solid var(--border); padding: 1.75rem 1.5rem; cursor: pointer; text-align: left; transition: border-color 0.2s ease, transform 0.2s ease; position: relative; overflow: hidden; }
-  .menu-card::before { content: ''; position: absolute; top: -1px; left: 0; width: 0; height: 2px; background: var(--red); transition: width 0.35s ease; }
-  .menu-card:hover { border-color: var(--gold); transform: translateY(-2px); }
+  .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-top: 0.5rem; }
+  .menu-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 1.75rem 1.5rem; cursor: pointer; text-align: left; transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease; position: relative; overflow: hidden; box-shadow: var(--shadow); }
+  .menu-card::before { content: ''; position: absolute; top: -1px; left: 0; width: 0; height: 2px; background: linear-gradient(90deg, var(--gold), var(--red)); transition: width 0.35s ease; }
+  .menu-card:hover { border-color: var(--gold); transform: translateY(-3px); box-shadow: var(--shadow-hover); }
   .menu-card:hover::before { width: 100%; }
-  .menu-card-icon { color: var(--red); margin-bottom: 0.9rem; display: block; width: 30px; height: 30px; }
-  .menu-card-icon svg { width: 100%; height: 100%; display: block; }
+  .menu-card-icon { color: var(--red); background: rgba(176,39,28,0.08); margin-bottom: 0.9rem; display: flex; align-items: center; justify-content: center; width: 46px; height: 46px; border-radius: 12px; font-family: var(--display); font-weight: 700; font-size: 1.15rem; transition: background 0.2s ease, transform 0.2s ease; }
+  .menu-card-icon svg { width: 22px; height: 22px; display: block; }
+  .menu-card:hover .menu-card-icon { background: rgba(201,168,76,0.16); transform: scale(1.05); }
   .menu-card-title { font-size: 0.98rem; font-weight: 700; color: var(--text); margin-bottom: 0.4rem; }
   .menu-card-body { font-size: 0.78rem; line-height: 1.6; color: var(--mid); }
-  .menu-card-wide { grid-column: 1 / -1; display: flex; align-items: center; gap: 1.75rem; padding: 1.75rem 2rem; }
+  .menu-card-wide { grid-column: 1 / -1; display: flex; align-items: center; gap: 1.75rem; padding: 1.5rem 2rem; }
   .menu-card-wide .menu-card-icon { margin-bottom: 0; flex-shrink: 0; }
   .menu-card-wide .menu-card-title { margin-bottom: 0.3rem; }
   .menu-card.disabled { cursor: default; opacity: 0.5; }
-  .menu-card.disabled:hover { border-color: var(--border); transform: none; }
+  .menu-card.disabled:hover { border-color: var(--border); transform: none; box-shadow: var(--shadow); }
   .menu-card.disabled:hover::before { width: 0; }
+  .menu-card.disabled:hover .menu-card-icon { background: rgba(176,39,28,0.08); transform: none; }
   .menu-card-coming-soon { position: absolute; top: 0.9rem; right: 0.9rem; font-size: 0.52rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); border: 1px solid var(--border); padding: 0.25rem 0.55rem; }
   .menu-exit { display: block; text-align: center; margin-top: 2rem; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); text-decoration: none; }
   .menu-exit:hover { color: var(--red); }
 
   /* ═══ RESOURCES SCREEN ═══ */
-  .res-card { background: var(--white); border: 1px solid var(--border); padding: 2.75rem 2.5rem; text-align: center; }
+  .res-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 2.75rem 2.5rem; text-align: center; box-shadow: var(--shadow); }
   .res-icon { font-size: 2rem; margin-bottom: 1.25rem; }
   .res-drive-btn { display: inline-block; background: var(--red); color: #fff; font-family: var(--hel); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; padding: 1rem 2.2rem; text-decoration: none; margin-top: 0.5rem; transition: opacity 0.2s; }
   .res-drive-btn:hover { opacity: 0.86; }
@@ -672,7 +690,7 @@
       </div>
       <div class="tc-track">
         <div class="tc-fill" id="tc-fill" style="width:0%;"></div>
-        <div class="tc-flag"><svg class="tc-flag-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="12" cy="12" r="10" stroke="var(--red)" stroke-width="1.7"/><circle cx="12" cy="12" r="6" stroke="var(--red)" stroke-width="1.7"/><circle cx="12" cy="12" r="2" fill="var(--red)"/></svg></div>
+        <div class="tc-flag"><svg class="tc-flag-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="12" cy="12" r="10" stroke="var(--gold)" stroke-width="1.7"/><circle cx="12" cy="12" r="6" stroke="var(--red)" stroke-width="1.7"/><circle cx="12" cy="12" r="2" fill="var(--red)"/></svg></div>
       </div>
     </div>
     <div class="next-session-card" id="next-session-card" style="display:none;">
@@ -1518,13 +1536,12 @@
         or the student checks off, anything — trusting it is what caused
         a checked box to silently un-check itself on refresh before this.
 
-     2. Checking a box doesn't just cross the item out and leave it
-        sitting there — it fades out and is removed from the list
-        entirely, matching "done means gone," and there's no undo from
-        the portal side. The backend independently drops anything already
-        marked Done, and anything that's aged past 20 minutes into the
-        student's next session (see Code.gs), so a fresh fetch will never
-        bring a completed or expired item back.
+     2. Checking a box does NOT remove the item. It stays right where it
+        is, struck through and checked, until the whole list disappears
+        at once — which only happens when the backend's session-based
+        expiry cutoff clears it (see assignmentExpiryCutoff_ in Code.gs).
+        There's no undo from the portal side, but "done" items are visible
+        proof of what got done until the next session rolls around.
 
      The card itself is hidden entirely when there's nothing to show, so a
      student with nothing outstanding doesn't see an empty box. */
@@ -1532,22 +1549,25 @@
   var assignList = document.getElementById('assign-list');
   var assignPollTimer = null;
   function renderAssignments() {
-    var items = ((currentStudent && currentStudent.assignments) || []).filter(function (i) { return !i.done; });
+    var items = (currentStudent && currentStudent.assignments) || [];
     if (!items.length) { assignCard.style.display = 'none'; assignList.innerHTML = ''; return; }
     assignCard.style.display = '';
     assignList.innerHTML = '';
     items.forEach(function (item) {
       var row = document.createElement('label');
-      row.className = 'assign-item';
+      row.className = 'assign-item' + (item.done ? ' assign-done' : '');
       var cb = document.createElement('input');
       cb.type = 'checkbox';
-      cb.checked = false;
+      cb.checked = !!item.done;
+      cb.disabled = !!item.done; // one-way — no unchecking from the portal
       var span = document.createElement('span');
       span.className = 'assign-text';
       span.textContent = item.task;
       row.appendChild(cb);
       row.appendChild(span);
-      cb.addEventListener('change', function () { completeAssignment(item, row); });
+      if (!item.done) {
+        cb.addEventListener('change', function () { completeAssignment(item, row, cb); });
+      }
       assignList.appendChild(row);
     });
   }
@@ -1578,22 +1598,27 @@
       if (activeScreenId === 'screen-menu') loadAssignments();
     }, 3 * 60 * 1000);
   }
-  // Checking a box is one-way: fade the row out and drop it immediately
-  // (done means gone, no undo from the portal), then tell the backend.
-  // Fire-and-forget — if the request fails, the item just reappears on
-  // the next loadAssignments() refresh instead of anything being lost.
-  function completeAssignment(item, row) {
-    row.classList.add('assign-fading');
-    setTimeout(function () {
-      if (row.parentNode) row.parentNode.removeChild(row);
-      if (!assignList.children.length) assignCard.style.display = 'none';
-    }, 220);
+  // Checking a box is one-way: mark the row done and struck-through right
+  // where it sits (no removal, no undo from the portal), then tell the
+  // backend. Fire-and-forget — if the request fails, the checkbox just
+  // reverts to unchecked/enabled on the next loadAssignments() refresh
+  // instead of anything being lost.
+  function completeAssignment(item, row, cb) {
+    item.done = true;
+    row.classList.add('assign-done');
+    cb.checked = true;
+    cb.disabled = true;
     fetch(APPS_SCRIPT_URL, {
       method: 'POST',
       body: JSON.stringify({ action: 'toggleAssignment', key: currentStudent.key, row: item.row, done: true })
     })
       .then(function (r) { return r.json(); })
-      .then(function (data) { if (data && data.ok && data.assignments) currentStudent.assignments = data.assignments; })
+      .then(function (data) {
+        if (data && data.ok && data.assignments) {
+          currentStudent.assignments = data.assignments;
+          renderAssignments();
+        }
+      })
       .catch(function () {});
   }
 

@@ -313,11 +313,17 @@ function getAssignmentsSheet_() {
 // before auto-expiring.
 var ASSIGNMENT_EXPIRY_GRACE_MS = 20 * 60 * 1000;
 
-// Returns one student's OPEN, not-yet-expired assignments, newest-assigned
-// first. `key` must already be uppercased/trimmed by the caller. `name` is
-// the student's Name off the Students sheet — used only to match calendar
-// events for the auto-expiry check; pass '' to skip expiry entirely (e.g.
-// if the caller doesn't have the name handy).
+// Returns one student's not-yet-expired assignments (done AND still-open),
+// newest-assigned first. `key` must already be uppercased/trimmed by the
+// caller. `name` is the student's Name off the Students sheet — used only
+// to match calendar events for the auto-expiry check; pass '' to skip
+// expiry entirely (e.g. if the caller doesn't have the name handy).
+//
+// Checked-off items are deliberately NOT dropped here the moment they're
+// done — they stay in the list (with done: true) until the same session
+// -based expiry cutoff clears them out along with everything else. That's
+// what makes "checked things disappear only when the next session comes
+// around" true instead of "checked things disappear instantly."
 function getAssignments_(key, name) {
   var sheet = getAssignmentsSheet_();
   var data = sheet.getDataRange().getValues();
@@ -333,12 +339,10 @@ function getAssignments_(key, name) {
     if (String(data[i][keyCol]).trim().toUpperCase() !== key) continue;
     var task = String(data[i][taskCol] || '').trim();
     if (!task) continue;
-    var done = truthy_(data[i][doneCol]);
-    if (done) continue; // checked off — never shown again, regardless of expiry
     out.push({
       row: i + 1, // 1-based sheet row — sent back by the client on toggle
       task: task,
-      done: false,
+      done: truthy_(data[i][doneCol]),
       assignedAt: (tsCol !== -1 && data[i][tsCol]) ? new Date(data[i][tsCol]).toISOString() : null
     });
   }
