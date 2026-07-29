@@ -108,6 +108,8 @@ function doPost(e) {
       out = handleSubmitDiagnostic(body.key, body.test, body.score, body.reportLink, body.report);
     } else if (body.action === 'toggleAssignment') {
       out = handleToggleAssignment(body.key, body.row, !!body.done);
+    } else if (body.action === 'getAssignments') {
+      out = handleGetAssignments(body.key);
     } else {
       out = { ok: false, error: 'unknown_action' };
     }
@@ -269,7 +271,7 @@ function handleAuth(rawKey, rawEmail) {
     grantedAt: grantedAtValue ? new Date(grantedAtValue).toISOString() : null,
     testDate: row.TestDate ? new Date(row.TestDate).toISOString() : null,
     tests: [],
-    assignments: getAssignments_(key)
+    assignments: getAssignments_(key, row.Name)
   };
 }
 
@@ -281,12 +283,22 @@ function handleAuth(rawKey, rawEmail) {
    directly to the "Assignments" tab in the same Sheet:
      Timestamp | Key | Task | Done | DoneAt
    Type the student's Key, the task text, and today's date/time in
-   Timestamp (controls sort order — newest first). Leave Done unchecked.
-   The student's own checkbox on their portal home screen writes Done and
-   DoneAt back automatically via toggleAssignment — you'll see it flip in
-   the sheet the moment they check it off, no refresh needed on your end
-   beyond reopening the tab.
-   ========================================================================= */
+   Timestamp. Leave Done unchecked. Checking the box in the portal removes
+   the item from the student's list immediately (it doesn't just get
+   crossed out and sit there) and writes Done/DoneAt back to this row —
+   there's no "undo" from the portal side, so if a student unchecks by
+   mistake, just re-add the row.
+
+   AUTO-EXPIRY: an assignment also disappears on its own, whether or not
+   it was ever checked off, once the student is 20+ minutes into their
+   NEXT tutoring session after it was assigned — the assumption being
+   that session covers/reviews it, so it's stale by the time the
+   following one starts. This reads the same shared iCloud calendar as
+   the "next session" widget (see handleNextSession/getCalendarIcsUrl_
+   below) to find each student's most recent past session start. If the
+   calendar is unreachable or CALENDAR_ICS_URL isn't set, this silently
+   skips expiry rather than failing — assignments just stay visible until
+   manually checked off, same as before this feature existed. ========= */
 function getAssignmentsSheet_() {
   var ss = SpreadsheetApp.openById(SHEET_ID);
   var sheet = ss.getSheetByName('Assignments');
@@ -297,9 +309,16 @@ function getAssignmentsSheet_() {
   return sheet;
 }
 
-// Returns one student's assignments (open and completed), newest-assigned
-// first. `key` must already be uppercased/trimmed by the caller.
-function getAssignments_(key) {
+// How long into a new session an assignment from before it stays visible
+// before auto-expiring.
+var ASSIGNMENT_EXPIRY_GRACE_MS = 20 * 60 * 1000;
+
+// Returns one student's OPEN, not-yet-expired assignments, newest-assigned
+// first. `key` must already be uppercased/trimmed by the caller. `name` is
+// the student's Name off the Students sheet — used only to match calendar
+// events for the auto-expiry check; pass '' to skip expiry entirely (e.g.
+// if the caller doesn't have the name handy).
+function getAssignments_(key, name) {
   var sheet = getAssignmentsSheet_();
   var data = sheet.getDataRange().getValues();
   var headers = data[0];
@@ -314,21 +333,115 @@ function getAssignments_(key) {
     if (String(data[i][keyCol]).trim().toUpperCase() !== key) continue;
     var task = String(data[i][taskCol] || '').trim();
     if (!task) continue;
+    var done = truthy_(data[i][doneCol]);
+    if (done) continue; // checked off — never shown again, regardless of expiry
     out.push({
       row: i + 1, // 1-based sheet row — sent back by the client on toggle
       task: task,
-      done: truthy_(data[i][doneCol]),
+      done: false,
       assignedAt: (tsCol !== -1 && data[i][tsCol]) ? new Date(data[i][tsCol]).toISOString() : null
     });
   }
+
+  var cutoff = name ? assignmentExpiryCutoff_(name) : null;
+  if (cutoff) {
+    out = out.filter(function (a) {
+      // No timestamp on the row — can't compare, so err toward showing it
+      // rather than silently hiding an assignment Luca can't explain.
+      if (!a.assignedAt) return true;
+      return new Date(a.assignedAt).getTime() >= cutoff.getTime();
+    });
+  }
+
   out.sort(function (a, b) { return (b.assignedAt || '').localeCompare(a.assignedAt || ''); });
   return out;
 }
 
-// Flips one assignment's Done state. Re-reads that row's OWN Key cell and
-// requires it to match the key on the request before writing anything —
-// without this check, a student could pass any row number (not just their
-// own) and flip a different student's assignment.
+// The instant before which an assignment should no longer show, or null if
+// there's no session data to base that on (calendar unreachable, no past
+// session found, or not yet 20 minutes into the most recent one). Equal to
+// the start time of the student's most recent past session — assignments
+// timestamped before that are stale.
+function assignmentExpiryCutoff_(name) {
+  var firstName = String(name || '').trim().split(/\s+/)[0];
+  if (!firstName) return null;
+  try {
+    var resp = UrlFetchApp.fetch(getCalendarIcsUrl_(), { muteHttpExceptions: true });
+    if (resp.getResponseCode() !== 200) return null;
+    var events = parseICS_(resp.getContentText());
+    var now = new Date();
+    var escaped = firstName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    var nameRe = new RegExp(escaped, 'i');
+    var mostRecent = null;
+    events.filter(function (ev) { return nameRe.test(ev.summary); }).forEach(function (ev) {
+      var occ = mostRecentOccurrenceOnOrBefore_(ev, now);
+      if (occ && (!mostRecent || occ.getTime() > mostRecent.getTime())) mostRecent = occ;
+    });
+    if (!mostRecent) return null;
+    if (now.getTime() - mostRecent.getTime() < ASSIGNMENT_EXPIRY_GRACE_MS) return null; // not 20 min in yet
+    return mostRecent;
+  } catch (err) {
+    return null; // calendar unreachable / not configured — degrade gracefully
+  }
+}
+
+// Mirror of nextOccurrenceOnOrAfter_ (see below), but walks a recurring
+// event forward and returns the LATEST occurrence at or before `now`
+// instead of the next one at or after it — i.e. "when did this student's
+// most recent session actually start," not "when's their next one."
+function mostRecentOccurrenceOnOrBefore_(ev, now) {
+  if (!ev.start) return null;
+  if (ev.start.getTime() > now.getTime()) return null; // hasn't happened yet
+  if (!ev.rrule || !ev.rrule.freq) return ev.start; // non-recurring, already occurred
+
+  var freq = ev.rrule.freq, interval = ev.rrule.interval || 1;
+  var stepDays = freq === 'DAILY' ? interval
+    : freq === 'WEEKLY' ? interval * 7
+    : null;
+
+  var cur = new Date(ev.start.getTime());
+  var last = null;
+  var n = 0;
+  var maxIterations = 2000; // safety cap
+  while (n < maxIterations) {
+    if (ev.rrule.until && cur.getTime() > ev.rrule.until.getTime()) break;
+    if (ev.rrule.count && n >= ev.rrule.count) break;
+    if (cur.getTime() > now.getTime()) break;
+    last = cur;
+
+    if (stepDays) {
+      cur = new Date(cur.getTime() + stepDays * 24 * 60 * 60 * 1000);
+    } else if (freq === 'MONTHLY') {
+      cur = new Date(cur.getFullYear(), cur.getMonth() + interval, cur.getDate(), cur.getHours(), cur.getMinutes(), cur.getSeconds());
+    } else if (freq === 'YEARLY') {
+      cur = new Date(cur.getFullYear() + interval, cur.getMonth(), cur.getDate(), cur.getHours(), cur.getMinutes(), cur.getSeconds());
+    } else {
+      break; // unsupported frequency
+    }
+    n++;
+  }
+  return last;
+}
+
+// Lightweight refresh endpoint — the portal calls this on its own (not
+// just at login) so the checklist reflects the current true state on
+// every page load/restore instead of trusting a possibly-stale cached
+// copy from an earlier session snapshot. Read-only; looks up the
+// student's Name itself so the expiry check above has what it needs.
+function handleGetAssignments(rawKey) {
+  if (!rawKey) return { ok: false, error: 'missing_key' };
+  var key = String(rawKey).trim().toUpperCase();
+  var sheet = getSheet_();
+  var row = findRow_(sheet, key);
+  if (!row) return { ok: false, error: 'bad_key' };
+  return { ok: true, assignments: getAssignments_(key, row.Name) };
+}
+
+// Marks one assignment done (the only direction the portal ever calls this
+// with — there's no in-portal "undo"). Re-reads that row's OWN Key cell
+// and requires it to match the key on the request before writing anything
+// — without this check, a student could pass any row number (not just
+// their own) and flip a different student's assignment.
 function handleToggleAssignment(rawKey, rawRow, done) {
   if (!rawKey) return { ok: false, error: 'missing_key' };
   var key = String(rawKey).trim().toUpperCase();
@@ -349,8 +462,119 @@ function handleToggleAssignment(rawKey, rawRow, done) {
   sheet.getRange(row, doneCol + 1).setValue(!!done);
   if (doneAtCol !== -1) sheet.getRange(row, doneAtCol + 1).setValue(done ? new Date() : '');
 
-  return { ok: true, assignments: getAssignments_(key) };
+  var studentsSheet = getSheet_();
+  var studentRow = findRow_(studentsSheet, key);
+  return { ok: true, assignments: getAssignments_(key, studentRow ? studentRow.Name : '') };
 }
+
+/* =========================================================================
+   "ASSIGN HOMEWORK" SHEET MENU
+   -------------------------------------------------------------------------
+   Adds an "Assign Homework" menu to this Sheet's own menu bar (next to
+   File/Edit/View), so assigning something is: open the menu, pick a
+   student from a dropdown, type the task, click Assign. It still just
+   writes one normal row to the Assignments tab underneath — nothing about
+   that tab's structure changes, this is only a friendlier way to add to
+   it than typing a Key, date, and task across three separate cells.
+   onOpen is an Apps Script "simple trigger" — it runs automatically the
+   next time the spreadsheet is opened. If the menu isn't there yet after
+   pasting this in, just reload the spreadsheet tab once.
+   ========================================================================= */
+function onOpen() {
+  SpreadsheetApp.getUi()
+    .createMenu('Assign Homework')
+    .addItem('Assign homework…', 'showAssignHomeworkDialog_')
+    .addToUi();
+}
+
+function showAssignHomeworkDialog_() {
+  var html = HtmlService.createHtmlOutput(ASSIGN_HOMEWORK_HTML_)
+    .setWidth(420)
+    .setHeight(340);
+  SpreadsheetApp.getUi().showModalDialog(html, 'Assign homework');
+}
+
+// Called from the dialog on load to populate the student dropdown — every
+// Students-sheet row that has both a Name and a Key.
+function listStudentsForDialog_() {
+  var sheet = getSheet_();
+  var data = sheet.getDataRange().getValues();
+  var headers = data[0];
+  var nameCol = headers.indexOf('Name');
+  var keyCol = headers.indexOf('Key');
+  if (nameCol === -1 || keyCol === -1) return [];
+  var out = [];
+  for (var i = 1; i < data.length; i++) {
+    var name = String(data[i][nameCol] || '').trim();
+    var key = String(data[i][keyCol] || '').trim();
+    if (name && key) out.push({ name: name, key: key });
+  }
+  out.sort(function (a, b) { return a.name.localeCompare(b.name); });
+  return out;
+}
+
+// Called from the dialog's Assign button. Appends a normal row to the
+// Assignments tab — identical to adding one by hand, just driven from the
+// form instead of the grid.
+function submitAssignmentFromDialog_(key, task) {
+  var cleanKey = String(key || '').trim().toUpperCase();
+  var cleanTask = String(task || '').trim();
+  if (!cleanKey || !cleanTask) throw new Error('Pick a student and enter a task.');
+  var sheet = getAssignmentsSheet_();
+  sheet.appendRow([new Date(), sheetSafe_(cleanKey), sheetSafe_(cleanTask), false, '']);
+  return { ok: true };
+}
+
+var ASSIGN_HOMEWORK_HTML_ = '<!DOCTYPE html><html><head><base target="_top">' +
+  '<style>' +
+  'body{font-family:Arial,sans-serif;font-size:13px;padding:4px 10px 14px;color:#222;}' +
+  'label{display:block;font-weight:600;margin:14px 0 5px;}' +
+  'select,textarea{width:100%;box-sizing:border-box;padding:8px;font-size:13px;font-family:inherit;border:1px solid #ccc;border-radius:4px;}' +
+  'textarea{resize:vertical;min-height:70px;}' +
+  'button{margin-top:18px;padding:9px 20px;background:#b23b2e;color:#fff;border:none;border-radius:4px;font-size:13px;cursor:pointer;}' +
+  'button:disabled{opacity:0.5;cursor:default;}' +
+  '#status{margin-top:10px;font-size:12px;color:#666;min-height:16px;}' +
+  '#status.error{color:#b23b2e;}' +
+  '</style></head><body>' +
+  '<label for="student">Student</label>' +
+  '<select id="student"><option value="">Loading students…</option></select>' +
+  '<label for="task">Task</label>' +
+  '<textarea id="task" placeholder="e.g. Finish Reading Module 3, pgs 12–20"></textarea>' +
+  '<button id="submitBtn" onclick="submitForm()">Assign</button>' +
+  '<div id="status"></div>' +
+  '<script>' +
+  'google.script.run.withSuccessHandler(function(students){' +
+  '  var sel=document.getElementById("student");' +
+  '  sel.innerHTML="";' +
+  '  if(!students.length){sel.innerHTML="<option value=\\"\\">No students found</option>";return;}' +
+  '  students.forEach(function(s){' +
+  '    var opt=document.createElement("option");' +
+  '    opt.value=s.key; opt.textContent=s.name+" ("+s.key+")";' +
+  '    sel.appendChild(opt);' +
+  '  });' +
+  '}).listStudentsForDialog_();' +
+  'function submitForm(){' +
+  '  var key=document.getElementById("student").value;' +
+  '  var task=document.getElementById("task").value.trim();' +
+  '  var statusEl=document.getElementById("status");' +
+  '  var btn=document.getElementById("submitBtn");' +
+  '  if(!key||!task){statusEl.textContent="Pick a student and enter a task.";statusEl.className="error";return;}' +
+  '  btn.disabled=true; statusEl.textContent="Assigning…"; statusEl.className="";' +
+  '  google.script.run' +
+  '    .withSuccessHandler(function(){' +
+  '      statusEl.textContent="Assigned. Close this window or assign another.";' +
+  '      statusEl.className="";' +
+  '      document.getElementById("task").value="";' +
+  '      btn.disabled=false;' +
+  '    })' +
+  '    .withFailureHandler(function(err){' +
+  '      statusEl.textContent="Error: "+(err&&err.message?err.message:err);' +
+  '      statusEl.className="error";' +
+  '      btn.disabled=false;' +
+  '    })' +
+  '    .submitAssignmentFromDialog_(key,task);' +
+  '}' +
+  '</script></body></html>';
 
 /* =========================================================================
    ONE REAL DIAGNOSTIC PER TEST TYPE
