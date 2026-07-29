@@ -94,14 +94,22 @@
   /* ═══ THIS WEEK'S ASSIGNMENTS — home-screen checklist. Populated from
      the Assignments sheet tab (see Code.gs); each row is one task with a
      checkbox that writes back to the sheet the moment it's toggled, so
-     Luca can glance at the sheet instead of texting to ask if it's done. */
+     Luca can glance at the sheet instead of texting to ask if it's done.
+     On narrow/medium screens it stays in the normal centered stack (same
+     as the countdown and next-session cards) since there's no room beside
+     the main column. On wide screens there IS room, so it detaches into a
+     fixed corner widget pinned top-left instead — out of the way of the
+     main flow, but always visible without scrolling. */
   .assign-card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 1.1rem 1.4rem; margin: 0 auto 1.6rem; max-width: 460px; }
   .assign-label { font-family: var(--hel); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--mid); margin-bottom: 0.7rem; }
   .assign-list { display: flex; flex-direction: column; gap: 0.55rem; }
-  .assign-item { display: flex; align-items: flex-start; gap: 0.65rem; cursor: pointer; }
+  .assign-item { display: flex; align-items: flex-start; gap: 0.65rem; cursor: pointer; transition: opacity 0.2s ease, transform 0.2s ease; }
   .assign-item input[type="checkbox"] { margin-top: 0.2rem; width: 17px; height: 17px; flex-shrink: 0; accent-color: var(--red); cursor: pointer; }
   .assign-text { font-family: var(--hel); font-size: 0.9rem; color: var(--text); line-height: 1.35; }
-  .assign-item.assign-done .assign-text { color: var(--mid); text-decoration: line-through; }
+  .assign-item.assign-fading { opacity: 0; transform: translateX(8px); pointer-events: none; }
+  @media (min-width: 1150px) {
+    .assign-card { position: fixed; top: 108px; left: 2rem; margin: 0; width: 260px; max-width: 260px; max-height: calc(100vh - 140px); overflow-y: auto; z-index: 50; }
+  }
 
   /* ═══ TEST-DAY COUNTDOWN ═══ shown on the home screen once a student's
      Students-sheet row has a TestDate. Fill runs from GrantedAt (first
@@ -1491,59 +1499,102 @@
     show('screen-menu');
     loadNextSession();
     renderTestCountdown();
-    renderAssignments();
+    renderAssignments(); // instant paint from the auth response...
+    loadAssignments();   // ...then a fresh fetch right behind it (see comment below)
+    startAssignmentsPolling();
   }
 
   /* ═══ THIS WEEK'S ASSIGNMENTS ═══
-     Renders currentStudent.assignments (from handleAuth's response) as a
-     checklist on the home screen. Checking/unchecking a box writes straight
-     back to the Assignments sheet tab via toggleAssignment — optimistic UI
-     (the box flips instantly) with a rollback if the request fails, so a
-     flaky connection doesn't leave the checkbox lying about what's saved.
-     The card itself is hidden entirely when there are no assignments, so a
-     student with nothing assigned doesn't see an empty box. */
+     Renders currentStudent.assignments as a checklist on the home screen.
+     Two things this deliberately does NOT do the naive way:
+
+     1. It never trusts a cached copy for long. handleAuth's response gives
+        an instant first paint, but the real source of truth is always a
+        fresh loadAssignments() fetch — called again on every restore
+        (accidental refresh, come-back-later resume) and on a slow poll
+        while sitting on the menu. Assignments live outside the normal
+        saveState()/sessionStorage snapshot for exactly this reason: that
+        snapshot is captured once and goes stale the moment Luca adds,
+        or the student checks off, anything — trusting it is what caused
+        a checked box to silently un-check itself on refresh before this.
+
+     2. Checking a box doesn't just cross the item out and leave it
+        sitting there — it fades out and is removed from the list
+        entirely, matching "done means gone," and there's no undo from
+        the portal side. The backend independently drops anything already
+        marked Done, and anything that's aged past 20 minutes into the
+        student's next session (see Code.gs), so a fresh fetch will never
+        bring a completed or expired item back.
+
+     The card itself is hidden entirely when there's nothing to show, so a
+     student with nothing outstanding doesn't see an empty box. */
   var assignCard = document.getElementById('assign-card');
   var assignList = document.getElementById('assign-list');
+  var assignPollTimer = null;
   function renderAssignments() {
-    var items = (currentStudent && currentStudent.assignments) || [];
-    if (!items.length) { assignCard.style.display = 'none'; return; }
+    var items = ((currentStudent && currentStudent.assignments) || []).filter(function (i) { return !i.done; });
+    if (!items.length) { assignCard.style.display = 'none'; assignList.innerHTML = ''; return; }
     assignCard.style.display = '';
     assignList.innerHTML = '';
     items.forEach(function (item) {
       var row = document.createElement('label');
-      row.className = 'assign-item' + (item.done ? ' assign-done' : '');
+      row.className = 'assign-item';
       var cb = document.createElement('input');
       cb.type = 'checkbox';
-      cb.checked = !!item.done;
+      cb.checked = false;
       var span = document.createElement('span');
       span.className = 'assign-text';
       span.textContent = item.task;
       row.appendChild(cb);
       row.appendChild(span);
-      cb.addEventListener('change', function () { toggleAssignment(item, cb, row); });
+      cb.addEventListener('change', function () { completeAssignment(item, row); });
       assignList.appendChild(row);
     });
   }
-  function toggleAssignment(item, cb, row) {
-    var prevDone = item.done;
-    var newDone = cb.checked;
-    item.done = newDone; // optimistic
-    row.classList.toggle('assign-done', newDone);
+  // Fetches the current true list from the backend and re-renders. Called
+  // on login, on every restore, and on a slow poll — never assumed to
+  // already be correct from an earlier snapshot.
+  function loadAssignments() {
+    if (!currentStudent || !currentStudent.key) return;
     fetch(APPS_SCRIPT_URL, {
       method: 'POST',
-      body: JSON.stringify({ action: 'toggleAssignment', key: currentStudent.key, row: item.row, done: newDone })
+      body: JSON.stringify({ action: 'getAssignments', key: currentStudent.key })
     })
       .then(function (r) { return r.json(); })
       .then(function (data) {
-        if (!data || !data.ok) throw new Error('not ok');
-        if (data.assignments) currentStudent.assignments = data.assignments;
+        if (!data || !data.ok) return;
+        currentStudent.assignments = data.assignments || [];
+        renderAssignments();
       })
-      .catch(function () {
-        // Roll back — the sheet write didn't actually happen.
-        item.done = prevDone;
-        cb.checked = prevDone;
-        row.classList.toggle('assign-done', prevDone);
-      });
+      .catch(function () { /* fails silently — the last-rendered list just stays put */ });
+  }
+  // Re-checks every few minutes while the student sits on the home screen,
+  // so an item that ages past the 20-minutes-into-next-session cutoff (see
+  // Code.gs assignmentExpiryCutoff_) disappears on its own without needing
+  // a manual refresh.
+  function startAssignmentsPolling() {
+    if (assignPollTimer) clearInterval(assignPollTimer);
+    assignPollTimer = setInterval(function () {
+      if (activeScreenId === 'screen-menu') loadAssignments();
+    }, 3 * 60 * 1000);
+  }
+  // Checking a box is one-way: fade the row out and drop it immediately
+  // (done means gone, no undo from the portal), then tell the backend.
+  // Fire-and-forget — if the request fails, the item just reappears on
+  // the next loadAssignments() refresh instead of anything being lost.
+  function completeAssignment(item, row) {
+    row.classList.add('assign-fading');
+    setTimeout(function () {
+      if (row.parentNode) row.parentNode.removeChild(row);
+      if (!assignList.children.length) assignCard.style.display = 'none';
+    }, 220);
+    fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'toggleAssignment', key: currentStudent.key, row: item.row, done: true })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (data) { if (data && data.ok && data.assignments) currentStudent.assignments = data.assignments; })
+      .catch(function () {});
   }
 
   /* ═══ NEXT SESSION WIDGET ═══
@@ -1811,6 +1862,7 @@
     }
     clearState();
     clearResumeSnapshot(currentStudent && currentStudent.key);
+    if (assignPollTimer) { clearInterval(assignPollTimer); assignPollTimer = null; }
     resetKeyScreen();
   }
   var exitLinkIds = ['nav-logo-exit', 'nav-exit-link'];
@@ -1858,6 +1910,7 @@
     e.preventDefault();
     clearState();
     clearResumeSnapshot(currentStudent && currentStudent.key);
+    if (assignPollTimer) { clearInterval(assignPollTimer); assignPollTimer = null; }
     currentStudent = null;
     resetKeyScreen();
     show('screen-key');
@@ -3237,8 +3290,9 @@
       document.getElementById('menu-greeting').textContent = 'Hey ' + currentStudent.name.split(' ')[0] + '.';
       loadNextSession();
       renderTestCountdown();
-      renderAssignments();
-      applyRestoredState(state);
+      renderAssignments(); // instant paint from the cached snapshot...
+      loadAssignments();   // ...immediately superseded by a fresh fetch — this refresh is
+      startAssignmentsPolling(); // the actual fix for checked/expired items reappearing after a refresh
     } catch (e) { /* corrupt or blocked storage — just start fresh */ }
   })();
 })();
