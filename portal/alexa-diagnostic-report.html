@@ -1,0 +1,1726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diagnostic Report — Moretti Test Prep &amp; Tutoring</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="../favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caladea:wght@700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --red:#B0271C; --gold:#C9A84C; --ink:#1a1a1a; --mid:rgba(17,17,17,0.6); --faint:rgba(17,17,17,0.32); --border:rgba(17,17,17,0.12); --bg:#f7f4ef; --green:#5E8B6F; --tan:#A97C50; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Poppins', sans-serif; font-weight: 300; color: var(--ink); background: #e8e4dc; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .page { width: 8.5in; min-height: 11in; margin: 24px auto; background: #fff; padding: 0.6in 0.65in; box-shadow: 0 10px 40px rgba(0,0,0,0.15); }
+  .toolbar { max-width: 8.5in; margin: 16px auto 0; display: flex; justify-content: flex-end; gap: 10px; }
+  .toolbar button { background: var(--red); color: #fff; border: none; font-family: 'Poppins'; font-weight: 600; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; padding: 10px 22px; cursor: pointer; }
+  .hdr { display: flex; align-items: center; gap: 16px; border-bottom: 3px solid var(--red); padding-bottom: 14px; margin-bottom: 18px; }
+  .hdr img { height: 40px; }
+  .hdr h1 { font-family: 'Caladea', Georgia, serif; font-size: 19px; }
+  .hdr p { font-size: 11px; color: var(--mid); }
+  .score-tiles { display: flex; align-items: stretch; gap: 14px; flex-wrap: wrap; margin-bottom: 4px; padding: 4px 0 8px; }
+  .score-tile { text-align: center; border: 1px solid var(--border); border-top: 3px solid var(--gold); border-radius: 3px; padding: 10px 18px 8px; min-width: 92px; }
+  .score-tile.big { min-width: 128px; padding: 14px 22px 10px; }
+  .score-tile .tile-score { font-family: 'Caladea', serif; font-weight: 700; color: var(--ink); line-height: 1; }
+  .score-tile .tile-score.big { font-size: 32px; }
+  .score-tile .tile-score.small { font-size: 19px; }
+  .score-tile .tile-frac { font-size: 8.5px; color: var(--faint); margin-top: 5px; }
+  .score-tile .tile-lab { font-size: 8px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mid); margin-top: 5px; }
+  .score-tile .tile-lab.big { font-size: 9.5px; }
+  .sec-hed { font-size: 10.5px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mid); border-bottom: 1px solid var(--border); padding-bottom: 4px; margin: 12px 0 8px; }
+  .bar-row { margin-bottom: 6px; }
+  .bar-label { display: flex; justify-content: space-between; font-size: 10.5px; font-weight: 600; margin-bottom: 3px; }
+  .bar-track { height: 7px; background: #eee7da; border-radius: 4px; overflow: hidden; }
+  .bar-fill { height: 100%; background: var(--gold); border-radius: 4px; }
+  .bar-fill.weak { background: var(--red); }
+  .bar-fill.strong { background: var(--green); }
+  .score-caption { font-size: 8.5px; color: var(--faint); margin: 4px 0 10px; }
+  .bridge-wrap { border: 1px solid var(--border); padding: 10px 14px; margin-bottom: 2px; }
+  .bridge-target-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 6px; font-size: 10.5px; color: var(--mid); }
+  .bridge-target-row .bt-lab { font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; font-size: 9.5px; }
+  .bridge-target-row input { font-family: 'Poppins'; font-weight: 600; font-size: 13px; color: var(--red); border: 1px solid var(--border); background: #f7f4ef; width: 58px; padding: 3px 6px; text-align: center; -moz-appearance: textfield; }
+  .bridge-target-row input::-webkit-outer-spin-button,
+  .bridge-target-row input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .bridge-target-row .bt-reset { font-size: 9px; color: var(--faint); text-decoration: underline; cursor: pointer; background: none; border: none; padding: 0; font-family: 'Poppins'; }
+  .bridge-target-row .bt-drag-hint { font-size: 9px; color: var(--faint); margin-left: 4px; }
+  .bridge-target-row .bt-static { display: none; font-weight: 600; font-size: 13px; color: var(--red); }
+  .bridge-canvas-wrap { text-align: center; }
+  .bridge-empty { font-size: 11px; color: var(--mid); padding: 6px 0; }
+  .bridge-note { font-size: 9px; color: var(--faint); margin-top: 8px; }
+  .bridge-other-note { margin-top: 6px; margin-bottom: 0; }
+  .section-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; margin-bottom: 2px; }
+  .section-card { border: 1px solid var(--border); padding: 10px 12px; }
+  .section-card .sc-hed { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 3px; }
+  .section-card .sc-title { font-family: 'Caladea', serif; font-size: 13px; font-weight: 700; }
+  .section-card .sc-score { font-size: 11px; color: var(--mid); }
+  .section-card .sc-incorrect { font-size: 10px; color: var(--red); font-weight: 600; margin-bottom: 6px; }
+  .sc-time { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 9.5px; color: var(--mid); margin: 0 0 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+  .sc-time-item { display: flex; flex-direction: column; }
+  .sc-time-item.ok { color: var(--green); }
+  .sc-time-item.bad { color: var(--red); }
+  .sc-time-label { font-size: 8px; text-transform: uppercase; letter-spacing: 0.03em; color: var(--faint); }
+  .sc-time-item.ok .sc-time-label, .sc-time-item.bad .sc-time-label { color: inherit; opacity: 0.75; }
+  .sc-flag { display: flex; align-items: flex-start; gap: 6px; font-size: 9.5px; line-height: 1.5; color: var(--ink); background: #fbf1de; border-left: 2px solid var(--gold); padding: 5px 7px; margin: 0 0 8px; }
+  .sc-flag .sc-flag-mark { font-weight: 700; color: var(--gold); flex-shrink: 0; }
+  .sc-flag strong { color: var(--ink); }
+  .sc-bars { margin-bottom: 6px; }
+  .sc-bars .sc-bar-row { margin-bottom: 5px; }
+  .sc-bars .sc-bar-label { display: flex; justify-content: space-between; font-size: 9px; margin-bottom: 2px; }
+  .sc-bars .sc-bar-track { height: 6px; background: #eee7da; border-radius: 3px; overflow: hidden; }
+  .sc-bars .sc-bar-fill { height: 100%; background: var(--gold); }
+  .sc-bars .sc-bar-fill.weak { background: var(--red); }
+  .sc-bars .sc-bar-fill.strong { background: var(--green); }
+  .sc-bars .sc-bar-empty { font-size: 9px; color: var(--faint); }
+  .sc-grouplabel { font-size: 8px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); margin: 8px 0 4px; }
+  .sc-grouplabel:first-child { margin-top: 2px; }
+  .takeaways { list-style: none; }
+  .takeaways li { font-size: 11px; line-height: 1.65; color: var(--mid); padding: 4px 0 4px 16px; position: relative; }
+  .takeaways li::before { content: '◆'; position: absolute; left: 0; top: 8px; font-size: 6px; color: var(--gold); }
+  .takeaways strong { color: var(--ink); }
+  .takeaways .r { color: var(--red); font-weight: 700; }
+  .detail-toggle { display: inline-block; font-size: 9.5px; color: var(--mid); text-decoration: underline; margin-top: 10px; }
+  .ftr { border-top: 1px solid var(--border); margin-top: 14px; padding-top: 8px; font-size: 9.5px; color: var(--faint); display: flex; justify-content: space-between; }
+  table { width: 100%; border-collapse: collapse; font-size: 9.5px; }
+  th { text-align: left; font-size: 8.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); border-bottom: 2px solid var(--red); padding: 4px 6px; }
+  td { padding: 3.5px 6px; border-bottom: 1px solid #eee7da; color: var(--mid); }
+  td.ok { color: var(--green); font-weight: 600; }
+  td.bad { color: var(--red); font-weight: 600; }
+  tr.q-row { cursor: pointer; }
+  tr.q-row:hover td { background: #faf7f1; }
+  tr.q-row td.q-toggle { color: var(--faint); width: 14px; text-align: center; }
+  tr.q-row.open td.q-toggle { color: var(--red); }
+  tr.q-detail-row > td { padding: 0; border-bottom: 1px solid #eee7da; }
+  .q-detail { padding: 10px 12px 12px; background: #faf7f1; font-size: 11px; color: var(--ink); }
+  .q-detail .q-text { margin-bottom: 8px; line-height: 1.5; }
+  .q-detail .q-choices { list-style: none; margin: 0; padding: 0; }
+  .q-detail .q-choices li { padding: 4px 8px; border: 1px solid var(--border); border-radius: 4px; margin-bottom: 4px; display: flex; justify-content: space-between; gap: 8px; }
+  .q-detail .q-choices li.q-correct { border-color: var(--green); background: #eef4ef; }
+  .q-detail .q-choices li.q-picked-wrong { border-color: var(--red); background: #f7eeed; }
+  .q-detail .q-tag { font-size: 9px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap; }
+  .q-detail .q-tag.ok { color: var(--green); }
+  .q-detail .q-tag.bad { color: var(--red); }
+  .q-detail .q-fr { padding: 6px 8px; border: 1px solid var(--border); border-radius: 4px; }
+  .q-detail .q-fr .q-correct-ans { color: var(--green); font-weight: 600; }
+  .q-detail .q-fr .q-your-ans { color: var(--red); font-weight: 600; }
+  .q-detail .q-timing { margin-top: 8px; font-size: 9.5px; color: var(--mid); }
+  .q-hint { font-size: 9px; color: var(--faint); font-style: italic; margin: 2px 0 10px; }
+  @media print { .q-hint, td.q-toggle, th.q-toggle { display: none; } }
+  .raw-hed { font-family: 'Caladea', serif; font-size: 16px; margin-bottom: 4px; }
+  .raw-sub { font-size: 11px; color: var(--mid); margin-bottom: 14px; }
+  #err { max-width: 700px; margin: 80px auto; text-align: center; font-size: 14px; color: var(--mid); display: none; }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; box-shadow: none; width: auto; min-height: auto; padding: 0.35in 0.4in; }
+    .toolbar { display: none; }
+    .pagebreak { page-break-before: always; }
+    /* The target-score input/reset link are for interactive use only —
+       printed to PDF they'd show as a static, uneditable text box that
+       still looks clickable. Swap in a plain static value instead so the
+       PDF a parent receives reads as a finished report, not an app. */
+    .bridge-target-row input, .bridge-target-row .bt-reset, .bridge-target-row .bt-drag-hint { display: none; }
+    /* Interactive-only control — if a parent's PDF happens to be printed
+       with the detail page expanded that's fine, but the toggle link
+       itself has nothing to do once it's on paper. */
+    .detail-toggle { display: none; }
+    .bridge-target-row .bt-static { display: inline; }
+    /* Keep charted/tabular units from splitting across a page break —
+       nothing kills a printed report faster than a card or chart getting
+       sliced in half at the bottom of a page. */
+    .score-tile, .bridge-wrap, .section-card, table tr { page-break-inside: avoid; break-inside: avoid; }
+    .score-tiles { page-break-inside: avoid; break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div id="err">Couldn't read the report data from this link. Make sure the full link was copied from the results email.</div>
+<div id="demo-banner" style="display:none; max-width:8.5in; margin:16px auto 0; background:#1a1a1a; color:#fff; font-family:'Poppins',sans-serif; font-size:12px; font-weight:600; letter-spacing:0.04em; padding:10px 18px; text-align:center;">DEMO — synthetic data, no real student took this. Add &amp;test=SAT to the URL to preview the SAT version, and &amp;score=1000/1250/1450 to preview roughly that score band.</div>
+<div class="toolbar"><button onclick="window.print()">Print / Save as PDF</button></div>
+<div class="page" id="page1" style="display:none;">
+  <div class="hdr">
+    <img src="../logo-caladea-dark.png" alt="Moretti Test Prep &amp; Tutoring">
+    <div>
+      <h1 id="r-title"></h1>
+      <p id="r-sub"></p>
+    </div>
+  </div>
+  <div class="score-tiles" id="score-tiles"></div>
+  <div class="score-caption" id="score-caption"></div>
+  <div class="sec-hed">Path to target score</div>
+  <div id="score-bridge"></div>
+  <div class="sec-hed">Section breakdown</div>
+  <div id="section-breakdown"></div>
+  <div class="sec-hed">What this tells us</div>
+  <ul class="takeaways" id="takeaways"></ul>
+  <div class="ftr"><span>Moretti Test Prep &amp; Tutoring · Cranford, NJ · (201) 275-2791</span><span id="ftr-date"></span></div>
+</div>
+
+<div class="page pagebreak" id="page2" style="display:none;">
+  <div class="hdr">
+    <img src="../logo-caladea-dark.png" alt="Moretti Test Prep &amp; Tutoring">
+    <div><h1>Full Question-by-Question Detail</h1><p id="r-sub2"></p></div>
+  </div>
+  <div class="raw-hed" id="raw-score"></div>
+  <p class="raw-sub" id="raw-sections"></p>
+  <div id="raw-tables"></div>
+  <div class="ftr"><span>Moretti Test Prep &amp; Tutoring · Cranford, NJ · (201) 275-2791</span><span>Page 2 of 2</span></div>
+</div>
+
+<script src="banks.js"></script>
+<script src="alexa-data.js"></script>
+<script>
+(function () {
+  'use strict';
+  var LETTERS = ['A', 'B', 'C', 'D', 'E'];
+
+  // The report's data comes from an unsigned base64 payload in the URL
+  // fragment (see reportLink in index.html) — anyone can craft a link with
+  // arbitrary content in place of a real free-response answer. Everywhere
+  // that text (the student's typed-in grid-in/free-response answer) gets
+  // rendered, it must go through this escaper before touching innerHTML,
+  // or a crafted link could run script in whoever opens the report (most
+  // often Luca, from the email this link is sent in). Question text/
+  // choices from the bank are a separate, trusted source and are left as
+  // literal HTML on purpose (they carry their own formatting/equations).
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+  // Shared categorical palette for every multi-color chart on this report
+  // (section pies, bridge segments) — tints/shades of the same five brand
+  // colors rather than a mixed bag of unrelated hues.
+  var BRAND_PALETTE = ['#B0271C', '#C9A84C', '#5E8B6F', '#243447', '#A97C50', '#7A3B32', '#8C9A6E', '#8B6F47'];
+
+  /* ═══ APPROXIMATE SCALED SCORING ═══
+     The SAT (200–800 per section, 400–1600 composite) and ACT (1–36 per
+     section, 1–36 composite) both use non-linear curves that vary test
+     to test — the real curve isn't published in advance. These tables
+     approximate the *typical* published official-practice-test curves
+     (percent-correct -> scaled score) closely enough for a diagnostic
+     estimate. They're explicitly labeled "approximate" in the UI.
+     Pulled up above the demo-data generator (moved from further down,
+     where it originally sat next to the rest of the scoring code) so
+     demo mode's score search below can call scaleFromPct/roundToTen
+     directly instead of re-implementing a second copy of the curve. */
+  var ACT_CURVE = [
+    [0, 1], [4, 6], [8, 8], [12, 9], [16, 10], [20, 11], [24, 12], [28, 13],
+    [32, 14], [36, 15], [40, 16], [44, 17], [48, 18], [51, 19], [54, 20],
+    [57, 21], [60, 22], [63, 23], [66, 24], [69, 25], [71, 26], [74, 27],
+    [77, 28], [80, 29], [83, 30], [86, 31], [89, 32], [91, 33], [94, 34],
+    [97, 35], [100, 36]
+  ];
+  // Built from the actual digital-SAT curve read directly off Albert.io's
+  // published score calculator (the user sampled its section-score output
+  // across a range of raw scores; those readings are the source here).
+  // This replaced an earlier attempt that used College Board's PAPER
+  // practice-test conversion table — that table is for a fixed 66-question
+  // Reading & Writing / 54-question Math paper form, a different curve
+  // from the adaptive digital test Albert models and this bank matches
+  // (54 R&W = 27+27, 44 Math = 22+22), and bridging the two by percentage
+  // was the source of a persistent under/over-estimate. These are the
+  // real digital numbers instead.
+  //
+  // Each entry is [percent of the section's raw-score max, section score].
+  // The readings were taken with the two module sliders set EQUAL, so
+  // Albert's own module weighting cancels out and each point is the pure
+  // base curve for a given total raw score; this report then re-adds the
+  // Module-1-vs-Module-2 effect separately via MODULE_WEIGHT below.
+  // Math and R&W are genuinely different curves (Math is steeper near the
+  // top), so each section reads its own.
+  //
+  // Sample points (balanced split -> total raw -> score), all read off
+  // Albert's calculator; denser near the top of each section, where the
+  // curve bends hardest and a top-scoring student lives:
+  //   R&W (max 54):  0->200, 8->270, 16->320, 24->370, 32->470,
+  //                  40->590, 44->650, 48->710, 50->740, 52->770, 54->800
+  //   Math (max 44): 0->200, 6->260, 12->330, 20->400, 26->480,
+  //                  32->580, 34->620, 38->700, 40->730, 42->770, 44->800
+  // The Math 84.09% -> 675 point is not a balanced-split reading but is
+  // pinned by Albert's two module-split screenshots (37/44 total scores
+  // 650 with a weak Module 1 and 700 with a strong one; their midpoint,
+  // where the module term is zero, is the base value at 37 raw). It sits
+  // between the measured 34->620 and 38->700 points and keeps those two
+  // module-split results exact.
+  var RW_CURVE = [
+    [0, 200], [14.81, 270], [29.63, 320], [44.44, 370], [59.26, 470],
+    [74.07, 590], [81.48, 650], [88.89, 710], [92.59, 740], [96.3, 770],
+    [100, 800]
+  ];
+  var MATH_CURVE = [
+    [0, 200], [13.64, 260], [27.27, 330], [45.45, 400], [59.09, 480],
+    [72.73, 580], [77.27, 620], [84.09, 675], [86.36, 700], [90.91, 730],
+    [95.45, 770], [100, 800]
+  ];
+  function scaleFromPct(pct, curve) {
+    if (pct <= curve[0][0]) return curve[0][1];
+    for (var i = 1; i < curve.length; i++) {
+      if (pct <= curve[i][0]) {
+        var lo = curve[i - 1], hi = curve[i];
+        var frac = (pct - lo[0]) / (hi[0] - lo[0]);
+        return Math.round(lo[1] + frac * (hi[1] - lo[1]));
+      }
+    }
+    return curve[curve.length - 1][1];
+  }
+  function roundToTen(n) { return Math.round(n / 10) * 10; }
+  // Points per unit of (module-1 rate − module-2 rate) in the SAT section
+  // score — calibrated to Albert.io's published digital-SAT calculator
+  // (see satSectionScore below for the full derivation). Declared here,
+  // next to the curves, rather than beside satSectionScore, because the
+  // demo score search (buildDemoData) runs before satSectionScore's line
+  // in the file and calls it — if this constant weren't assigned yet, the
+  // multiplication would produce NaN and the whole demo would fail to
+  // render.
+  var MODULE_WEIGHT = 80;
+
+  /* ═══ SKILL PREREQUISITES ═══
+     Standard curriculum sequencing — the kind of thing an experienced
+     tutor already knows (algebra fundamentals come before the topics
+     that build on them, literal comprehension before inference, clause
+     structure before the punctuation rules that depend on it) — not
+     anything specific to a particular test's content. Keys/values are
+     verified against the exact skill strings used in banks.js; an
+     unrecognized or unmapped skill just skips the hint rather than
+     guessing. This is intentionally not exhaustive: only the clear,
+     defensible relationships are included.
+     */
+  // Rebuilt for the official College Board skill vocabulary (see the
+  // domain/skill audit — every SAT question's "skill" field is now one of
+  // the ~19 skill names College Board itself uses, not the bank's old
+  // homegrown finer-grained labels). That's a much coarser set than
+  // before: several old entries that used to be distinct prereq pairs
+  // (e.g. "Factoring" and "Number of Solutions") are now literally the
+  // SAME official skill, so a prereq relationship between them no longer
+  // makes sense and those entries are gone. What's left are relationships
+  // that still hold at this coarser grain — still an experienced tutor's
+  // ordinary curriculum sequencing, not anything CB-specific.
+  var SKILL_PREREQS = {
+    // Math — Algebra chain
+    'Linear Functions': ['Linear Equations in One Variable'],
+    'Linear Equations in Two Variables': ['Linear Equations in One Variable'],
+    'Systems of Two Linear Equations in Two Variables': ['Linear Equations in Two Variables'],
+    'Linear Inequalities in One or Two Variables': ['Linear Equations in One Variable'],
+    // Math — Advanced Math chain
+    'Nonlinear Functions': ['Equivalent Expressions', 'Linear Functions'],
+    'Nonlinear Equations in One Variable and Systems of Equations in Two Variables': ['Equivalent Expressions', 'Systems of Two Linear Equations in Two Variables'],
+    // Math — Geometry and Trigonometry chain
+    'Right Triangles and Trigonometry': ['Lines, Angles, and Triangles'],
+    'Circles': ['Lines, Angles, and Triangles'],
+    // Math — Problem-Solving and Data Analysis chain
+    'Percentages': ['Ratios, Rates, Proportions, and Units'],
+    'Two-Variable Data: Models and Scatterplots': ['One-Variable Data: Distributions and Measures of Center and Spread'],
+    'Inference from Sample Statistics and Margin of Error': ['One-Variable Data: Distributions and Measures of Center and Spread'],
+    'Evaluating Statistical Claims: Observational Studies and Experiments': ['Inference from Sample Statistics and Margin of Error'],
+    // Reading & Writing — Information and Ideas chain
+    'Inferences': ['Central Ideas and Details'],
+    'Command of Evidence (Textual)': ['Central Ideas and Details', 'Inferences'],
+    'Command of Evidence (Quantitative)': ['Command of Evidence (Textual)'],
+    // Reading & Writing — Craft and Structure chain
+    'Cross-Text Connections': ['Central Ideas and Details', 'Inferences'],
+    'Text Structure and Purpose': ['Central Ideas and Details'],
+    // Reading & Writing — Expression of Ideas chain
+    'Rhetorical Synthesis': ['Central Ideas and Details', 'Text Structure and Purpose'],
+    'Transitions': ['Text Structure and Purpose'],
+    // Standard English Conventions — recognizing clause/sentence structure
+    // before the agreement and form rules that depend on it
+    'Form, Structure, and Sense': ['Boundaries']
+  };
+  // A per-skill "quick fix (careless) vs. real gap" classifier used to
+  // live here, keyed off whether the student had gotten at least one
+  // right on that skill and whether misses were self-flagged as guesses.
+  // Removed: on this diagnostic a single skill gets as few as 2-3
+  // attempts, and the guess/no-guess split on top of that shrinks the
+  // effective sample further — nowhere near enough to tell "careless
+  // slip" from "doesn't know it yet" with any real confidence, no matter
+  // where the threshold is set. Presenting that call with a confident
+  // green/red dot next to a specific point value overstated what a
+  // diagnostic this size can actually support. The guess-vs-gap read
+  // that stays in this report (further down, near the takeaways) is
+  // built from every flagged question across the WHOLE diagnostic
+  // instead of one skill's handful of attempts, which is a sample size
+  // that can actually carry that claim.
+  function fail() { document.getElementById('err').style.display = 'block'; }
+
+  /* ═══ DEMO MODE ═══
+     Open this file as report.html?demo=1 (add &test=SAT for the SAT
+     version) to see a fully populated example report without a real
+     student ever taking the diagnostic — generates synthetic but
+     realistic answers from the real question banks, with a deliberately
+     tanked skill per section (so "priority areas" has something to show)
+     and a lopsided wrong-answer letter (so the distractor-pattern note
+     fires). Deterministic seed, so the demo looks the same every time —
+     useful for reviewing/tweaking what this report reveals without the
+     data itself shifting under you. This runs through the exact same
+     rendering code below as a real report, so any layout/content change
+     made here is immediately visible in both. */
+  // A SAT section (reading-writing/math) is real, modular, and adaptive —
+  // its bank has module1/module2Easier/module2Harder instead of a flat
+  // "questions" array. This reconstructs the exact ordered list a student
+  // saw: Module 1 + whichever Module 2 variant they were routed to (or
+  // just module1, for ACT's single, non-adaptive module). Keyed the same
+  // way index.html's own sectionQuestions() helper is, since both sides
+  // must agree on ordering for `answers[i]` to line up with `qs[i]`.
+  function sectionQuestions(bank, variant) {
+    return bank.module2Easier ? bank.module1.concat(bank['module2' + (variant || 'Easier')]) : bank.module1;
+  }
+
+  function buildDemoData() {
+    var testChoice = /[?&]test=SAT\b/i.test(location.search) ? 'SAT' : 'ACT';
+    var order = (window.TEST_FORMATS && window.TEST_FORMATS[testChoice] && window.TEST_FORMATS[testChoice].order) || [];
+    var sectionKeys = order.filter(function (k) { return window.SECTION_BANKS[k] && window.SECTION_BANKS[k].module1.length; });
+    var seed = 42;
+    function rand() { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return (seed % 1000) / 1000; }
+    // SAT skill names here must be exact official College Board strings
+    // (see the domain/skill audit in banks.js/practice-tests.js) — ACT
+    // entries are untouched, that's a separate taxonomy.
+    var weakSkillBySection = { 'english': 'Comma Usage', 'act-math': 'Quadratics', 'math': 'Nonlinear Equations in One Variable and Systems of Equations in Two Variables', 'reading': 'Integration of Knowledge & Ideas', 'reading-writing': 'Command of Evidence (Textual)' };
+
+    // &score=N previews roughly what that composite's report looks like
+    // (SAT: 400-1600, ACT: 1-36). Three earlier versions of this all
+    // missed: (1) three hard-coded wrong-rate presets guessed by eye
+    // (1000/1250/1450 requested came out 770/1020/1200); (2) bisecting a
+    // simplified formula that ignored IRT tilt and the easier-Module-2
+    // cap, then generating the real answers separately, so the number
+    // searched for wasn't the number actually displayed, and Module 2
+    // routing was an independent coin flip that could (and did) route a
+    // strong performance into the Easier path anyway — capping that
+    // section at 650 regardless of wrong rate, so anything above ~1300
+    // was structurally unreachable; (3) fixed that by tying routing to
+    // simulated Module 1 performance and bisecting against the ACTUAL
+    // scoring pipeline instead of a formula — real improvement, but it
+    // still only varied wrong rate against one fixed seed (42), so it
+    // reported "closest reachable, off by 10-20" for targets that were
+    // exactly reachable one seed over. The seed isn't just a formality —
+    // it also decides routing and exactly which questions land wrong, so
+    // it's a second real axis the composite depends on, not just a
+    // tie-breaker.
+    //
+    // This version searches BOTH: a batch of seeds, each with its own
+    // wrong-rate bisection against the real scoring pipeline, keeping the
+    // best (or first exact) result across all of them. Still fully
+    // deterministic for a given target — no longer tied to one arbitrary
+    // starting seed, so an exactly-reachable score doesn't get missed
+    // just because seed 42 in particular couldn't reach it.
+    var scoreParam = parseInt((location.search.match(/[?&]score=(\d+)/) || [])[1], 10);
+    var scaleMax = testChoice === 'SAT' ? 1600 : 36, scaleMin = testChoice === 'SAT' ? 400 : 1;
+    var hasTarget = !isNaN(scoreParam);
+    var target = hasTarget ? Math.max(scaleMin, Math.min(scaleMax, scoreParam)) : null;
+
+    // A weak-skill spike only makes sense for the "no target given" default
+    // demo, to show what one concentrated gap looks like. Once a specific
+    // score is requested, applying the searched-for rate UNIFORMLY (no
+    // extra spike) is what actually makes the search accurate — misses
+    // land wherever chance puts them, which incidentally still scatters
+    // broadly at high wrong-rates and concentrates narrowly at low ones,
+    // without needing separate hard-coded bands to fake that effect.
+    var WEAK_WRONG = 0.78;
+    // Module-1 percent correct at/above this routes to the Harder Module 2
+    // — same spirit as the real adaptive SAT's own routing cutoff.
+    var ROUTE_THRESHOLD = 0.6;
+
+    function genAnswers(qs, wrongRate, weakSkill) {
+      var answers = [], marked = [], times = [], correct = 0;
+      var diff = { easy: { c: 0, t: 0 }, medium: { c: 0, t: 0 }, hard: { c: 0, t: 0 } };
+      qs.forEach(function (q) {
+        var wrong = rand() < wrongRate;
+        if (!hasTarget && weakSkill && q.skill === weakSkill) wrong = rand() < WEAK_WRONG;
+        var given;
+        if (q.type === 'mc') {
+          var n = (q.choices || []).length || 4;
+          given = wrong ? (q.correct === 2 ? (q.correct + 1) % n : 2) : q.correct;
+        } else {
+          // Must match the shape the real diagnostic (index.html) saves —
+          // { raw, value } — not just { raw }. isCorrect() reads
+          // given.value first and only falls back to re-parsing given.raw
+          // when value is strictly null; a { raw }-only object has value
+          // === undefined, which fails that === null check and skips the
+          // fallback entirely, so isCorrect returned false unconditionally
+          // for EVERY free-response question in the demo, regardless of
+          // whether the intended answer was right or wrong. That silently
+          // capped every demo's achievable score (worse on Math, which
+          // leans more on grid-in questions than R&W does) no matter what
+          // the search above found — the search's own accounting looked
+          // right in isolation, but the real render pipeline re-derives
+          // correctness independently and was scoring a different result.
+          var wrongVal = (q.answer || 0) + 1;
+          given = wrong ? { raw: String(wrongVal), value: wrongVal } : { raw: String(q.answer), value: q.answer };
+        }
+        var dtag = diff[q.difficulty];
+        // A random "left it blank" roll only makes sense for the no-target
+        // default demo. When a specific score is requested, this needs to
+        // be reachable EXACTLY — including the true floor (every question
+        // wrong = 400) and the true ceiling (every question right = 1600)
+        // — and an unconditional 5% blank roll broke both: it could turn
+        // an intentionally-correct answer into a blank (silently capping
+        // the achievable ceiling around 1590, never a real 1600 no matter
+        // how low the searched wrong rate went) without ever being able
+        // to turn an intentionally-wrong answer back into right, so it
+        // only ever pulled scores down from whatever was being aimed for.
+        if (!hasTarget && rand() < 0.05) {
+          given = null;
+        } else if (!wrong) {
+          correct++;
+          if (dtag) dtag.c++;
+        }
+        if (dtag) dtag.t++;
+        answers.push(given);
+        marked.push(rand() < 0.12);
+        // Synthetic per-question time for the demo view only — a 20-60s
+        // baseline, skewed longer on questions answered wrong (matches the
+        // real-world pattern of lingering on ones you're unsure of) so the
+        // new Time On Correct/Incorrect breakdown reads realistically.
+        var baseMs = 20000 + rand() * 40000;
+        times.push(Math.round(wrong ? baseMs * (1.2 + rand() * 0.6) : baseMs * (0.7 + rand() * 0.5)));
+      });
+      return { answers: answers, marked: marked, times: times, correct: correct, diff: diff };
+    }
+    // Turns a flat array of per-question durations into fabricated
+    // sequential first-visited/last-viewed timestamps (demo only), anchored
+    // so the whole section's fake "session" ends now.
+    function deriveVisits(times) {
+      var total = times.reduce(function (a, b) { return a + b; }, 0);
+      var t = Date.now() - total, fv = [], lv = [];
+      times.forEach(function (ms) { fv.push(t); t += ms; lv.push(t); });
+      return { fv: fv, lv: lv };
+    }
+
+    function genSection(key, wrongRate) {
+      var bank = window.SECTION_BANKS[key];
+      var weakSkill = weakSkillBySection[key];
+      var m1 = genAnswers(bank.module1, wrongRate, weakSkill);
+      var variant = null, m2 = null, m2t = 0;
+      if (bank.module2Easier) {
+        variant = (m1.correct / bank.module1.length) >= ROUTE_THRESHOLD ? 'Harder' : 'Easier';
+        m2 = genAnswers(bank['module2' + variant], wrongRate, weakSkill);
+        m2t = bank['module2' + variant].length;
+      }
+      var diff = { easy: { c: 0, t: 0 }, medium: { c: 0, t: 0 }, hard: { c: 0, t: 0 } };
+      ['easy', 'medium', 'hard'].forEach(function (d) {
+        diff[d].c = m1.diff[d].c + (m2 ? m2.diff[d].c : 0);
+        diff[d].t = m1.diff[d].t + (m2 ? m2.diff[d].t : 0);
+      });
+      return {
+        k: key,
+        a: m2 ? m1.answers.concat(m2.answers) : m1.answers,
+        m: m2 ? m1.marked.concat(m2.marked) : m1.marked,
+        times: m2 ? m1.times.concat(m2.times) : m1.times,
+        v: variant,
+        c: m1.correct + (m2 ? m2.correct : 0),
+        t: bank.module1.length + m2t,
+        // Per-module correct/total, needed by satSectionScore's module
+        // weighting (module 1 performance counts for more than module 2).
+        c1: m1.correct,
+        t1: bank.module1.length,
+        c2: m2 ? m2.correct : 0,
+        t2: m2t,
+        diff: diff
+      };
+    }
+
+    // Runs one full trial at a given wrong rate and seed (seed reset each
+    // time, so wrongRate/seedBase are the only things that vary between
+    // calls) and returns both the generated sections and the composite
+    // the real scoring functions would actually display for them.
+    function trial(wrongRate, seedBase) {
+      seed = seedBase;
+      var secs = sectionKeys.map(function (key) { return genSection(key, wrongRate); });
+      var composite = null;
+      if (testChoice === 'SAT') {
+        var rwSec = secs.filter(function (s) { return s.k === 'reading-writing'; })[0];
+        var mathSec = secs.filter(function (s) { return s.k === 'math'; })[0];
+        var rwSc = rwSec ? satSectionScore(rwSec, RW_CURVE) : null;
+        var mathSc = mathSec ? satSectionScore(mathSec, MATH_CURVE) : null;
+        if (rwSc !== null && mathSc !== null) composite = rwSc + mathSc;
+      } else {
+        var scaled = secs.map(function (s) { return scaleFromPct(s.t ? s.c / s.t * 100 : 0, ACT_CURVE); });
+        var compositeKeys = { english: true, 'act-math': true, reading: true };
+        var vals = secs.map(function (s, i) { return { key: s.k, score: scaled[i] }; })
+          .filter(function (s) { return compositeKeys[s.key]; })
+          .map(function (s) { return s.score; });
+        if (vals.length) composite = Math.round(vals.reduce(function (a, b) { return a + b; }, 0) / vals.length);
+      }
+      return { secs: secs, composite: composite };
+    }
+
+    var BASE_WRONG, chosenSecs;
+    if (target !== null) {
+      // Wrong rate alone isn't the only thing that determines the
+      // displayed composite — the seed also decides Module 1/2 routing
+      // and exactly which questions land wrong, so two different seeds
+      // at the same wrong rate can land on different scores. Bisecting
+      // wrong rate against a single fixed seed only ever explores ONE
+      // slice of that space, so plenty of exactly-reachable targets were
+      // being reported as "closest, off by 10-20" when an exact hit
+      // existed one seed over. Sweeping a batch of seeds (each with its
+      // own bisection) searches the real 2-D space instead, and keeps
+      // the best (or first exact) result found across all of them —
+      // still deterministic for a given target, just no longer tied to
+      // one arbitrary starting seed. 80 seeds x ~30 bisection iterations
+      // is a few thousand full trials, well under 100ms even generating
+      // every question's answer array each time.
+      // Hitting the target exactly isn't the only thing that matters here
+      // — the difficulty weighting means the SAME composite is reachable
+      // through very different correct-answer counts, if the right
+      // answers happen to land disproportionately on hard questions. That
+      // makes for a technically-accurate but unrepresentative example: a
+      // demo of "what does a 1250 look like" shouldn't show an oddly low
+      // correct count just because that's the first exact match the
+      // search happened to hit. So this doesn't stop at the first exact
+      // hit — it scans every seed's full bisection path and, among
+      // whichever results tie for closest to the target, keeps the one
+      // with the MOST total correct answers, which is the more typical,
+      // representative way to reach that score.
+      var bestDiff = Infinity, bestWrong = 0.22, bestSeed = 42, bestSecs = null, bestCorrect = -1;
+      for (var seedTry = 1; seedTry <= 80; seedTry++) {
+        var lo = 0, hi = 1;
+        for (var iter = 0; iter < 30; iter++) {
+          var mid = (lo + hi) / 2;
+          var r = trial(mid, seedTry);
+          var d = (r.composite === null) ? Infinity : Math.abs(r.composite - target);
+          var totalCorrect = r.secs.reduce(function (a, s) { return a + s.c; }, 0);
+          if (d < bestDiff || (d === bestDiff && totalCorrect > bestCorrect)) {
+            bestDiff = d; bestWrong = mid; bestSeed = seedTry; bestSecs = r.secs; bestCorrect = totalCorrect;
+          }
+          if (r.composite !== null && r.composite > target) lo = mid; else hi = mid;
+        }
+      }
+      BASE_WRONG = bestWrong;
+      chosenSecs = bestSecs;
+    } else {
+      BASE_WRONG = 0.22; // default demo (no &score= given) — matches the original preset
+      chosenSecs = trial(BASE_WRONG, 42).secs;
+    }
+
+    var s = chosenSecs.map(function (sec) {
+      var visits = deriveVisits(sec.times);
+      return { k: sec.k, a: sec.a, m: sec.m, v: sec.v, tm: sec.times, fv: visits.fv, lv: visits.lv };
+    });
+
+    return { n: 'Demo Student', k: 'DEMO', t: testChoice, dt: new Date().toISOString().slice(0, 10), s: s };
+  }
+  var DEMO_MODE = /[?&]demo=1\b/.test(location.search);
+
+  var data;
+  if (window.EMBEDDED_REPORT_DATA) {
+    data = window.EMBEDDED_REPORT_DATA;
+  } else if (DEMO_MODE) {
+    data = buildDemoData();
+    document.getElementById('demo-banner').style.display = 'block';
+  } else {
+    try {
+      var raw = location.hash.replace(/^#d=/, '');
+      data = JSON.parse(decodeURIComponent(escape(atob(raw))));
+    } catch (e) { fail(); return; }
+  }
+  if (!data || !data.s || !window.SECTION_BANKS) { fail(); return; }
+
+  function isCorrect(q, given) {
+    if (given === null || given === undefined) return false;
+    if (q.type === 'mc') return given === q.correct;
+    var v = (typeof given === 'object') ? given.value : null;
+    if (v === null && typeof given === 'object') {
+      var str = (given.raw || '').trim();
+      if (str.indexOf('/') !== -1) { var p = str.split('/'); v = parseFloat(p[0]) / parseFloat(p[1]); }
+      else v = parseFloat(str.replace(/[^0-9.\-]/g, ''));
+    }
+    return v !== null && !isNaN(v) && Math.abs(v - q.answer) < 0.05;
+  }
+
+  // Formats a millisecond duration as "1h 12m 04s" / "12m 04s" / "38s",
+  // dropping leading zero units. Used for both the section-level Time On
+  // Section/Correct/Incorrect stats and the per-question Time column.
+  function formatDuration(ms) {
+    ms = ms || 0;
+    var totalSec = Math.round(ms / 1000);
+    var h = Math.floor(totalSec / 3600);
+    var m = Math.floor((totalSec % 3600) / 60);
+    var s = totalSec % 60;
+    if (h > 0) return h + 'h ' + (m < 10 ? '0' : '') + m + 'm ' + (s < 10 ? '0' : '') + s + 's';
+    if (m > 0) return m + 'm ' + (s < 10 ? '0' : '') + s + 's';
+    return s + 's';
+  }
+  // Formats a Date.now() timestamp as a local time-of-day string for the
+  // per-question "first visited" / "last viewed" fields.
+  function formatClock(ts) {
+    if (typeof ts !== 'number') return '—';
+    try {
+      return new Date(ts).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit' });
+    } catch (e) { return '—'; }
+  }
+
+  // Collapse to ONE saved entry per section key before scoring. A
+  // correctly-saved diagnostic has exactly one entry per section, but a
+  // bug in an earlier version of the diagnostic-taking flow (a resume /
+  // "continue where you left off" left a partial, never-completed section
+  // in the record alongside the completed one) could write a second stub
+  // for the same section — e.g. a math entry with variant null and only
+  // Module 1's answers sitting next to the real completed math entry.
+  // Left unmerged, sectionQuestions() pads that 22-answer stub out to the
+  // full 44-question section, so it renders as a whole extra section of
+  // blanks and inflates the total question count (54+44+44=142 instead of
+  // 54+44=98). This keeps, per key, the most complete attempt — the one
+  // with the most saved answers; on a tie, the later one in the record,
+  // which is the more recent attempt — and drops the stragglers, so an
+  // already-saved corrupt record displays correctly without a re-take.
+  (function dedupeSections() {
+    if (!data.s || !data.s.length) return;
+    var bestByKey = {}, orderSeen = [];
+    data.s.forEach(function (sec, idx) {
+      var prev = bestByKey[sec.k];
+      var len = (sec.a && sec.a.length) || 0;
+      if (!prev) { orderSeen.push(sec.k); }
+      // Replace when this entry has more answers, or the same count but
+      // appears later (idx larger) — later means more recently recorded.
+      if (!prev || len > prev.len || (len === prev.len && idx > prev.idx)) {
+        bestByKey[sec.k] = { sec: sec, len: len, idx: idx };
+      }
+    });
+    var deduped = orderSeen.map(function (k) { return bestByKey[k].sec; });
+    if (deduped.length !== data.s.length) data.s = deduped;
+  })();
+
+  var totalC = 0, totalQ = 0, domains = {}, skills = {}, sections = [], markedT = 0, markedC = 0, skipped = 0;
+  data.s.forEach(function (sec) {
+    var bank = window.SECTION_BANKS[sec.k];
+    if (!bank) return;
+    var qs = sectionQuestions(bank, sec.v), c = 0, rows = [];
+    var secDomains = {}; // this section's own domain/skill breakdown — kept
+                          // separate from the global domains{}/skills{} so
+                          // the report can show "what's weak within THIS
+                          // section" instead of mixing domains across
+                          // completely different sections (e.g. ACT Math's
+                          // "Pre-Algebra" next to ACT Reading's "Reading").
+    // Distractor tracking: on missed multiple-choice questions, which
+    // wrong letter did the student actually pick? A lopsided pattern here
+    // (e.g. always (C)) is a much more teachable, concrete signal than a
+    // skill percentage — it points at a specific trap-answer habit rather
+    // than a vague topic weakness.
+    var secDistractors = {}, secMissedMc = 0;
+    // Per-difficulty tally (easy/medium/hard) plus a module1/module2 split —
+    // both needed by the IRT-weighted SAT scoring model below. moduleSplit
+    // is just bank.module1.length; on non-adaptive ACT sections that equals
+    // qs.length, so "module2" naturally ends up empty and c1 === c.
+    var diff = { easy: { c: 0, t: 0 }, medium: { c: 0, t: 0 }, hard: { c: 0, t: 0 } };
+    var moduleSplit = bank.module2Easier ? bank.module1.length : qs.length;
+    var c1 = 0, t1 = 0, c2 = 0, t2 = 0;
+    // Time On Section total / Time On Correct / Time On Incorrect — summed
+    // in ms from sec.tm[i] (per-question total time, see index.html's
+    // questionTimeMs). Older saved reports predate this field, so a missing
+    // sec.tm just leaves these at 0 rather than throwing.
+    var secTimeTotal = 0, secTimeCorrect = 0, secTimeIncorrect = 0;
+    qs.forEach(function (q, i) {
+      var given = sec.a[i];
+      var ok = isCorrect(q, given);
+      var wasMarked = sec.m && sec.m[i];
+      var qTimeMs = (sec.tm && typeof sec.tm[i] === 'number') ? sec.tm[i] : 0;
+      secTimeTotal += qTimeMs;
+      if (ok) secTimeCorrect += qTimeMs; else secTimeIncorrect += qTimeMs;
+      if (ok) { c++; totalC++; }
+      totalQ++;
+      var dtag = diff[q.difficulty];
+      if (dtag) { dtag.t++; if (ok) dtag.c++; }
+      if (i < moduleSplit) { t1++; if (ok) c1++; } else { t2++; if (ok) c2++; }
+      if (given === null || given === undefined) skipped++;
+      if (wasMarked) { markedT++; if (ok) markedC++; }
+      var dom = q.domain, sk = q.skill || q.domain;
+      (domains[dom] = domains[dom] || { c: 0, t: 0 }).t++; if (ok) domains[dom].c++;
+      (skills[sk] = skills[sk] || { c: 0, t: 0, dom: dom }).t++; if (ok) skills[sk].c++;
+      var sd = (secDomains[dom] = secDomains[dom] || { c: 0, t: 0, missedSkills: {}, skillStats: {} });
+      sd.t++; if (ok) sd.c++;
+      // Per-skill correct/total within this section — lets the skill list
+      // report "3/6 correct" instead of only "missed 4", which reads far
+      // more clearly to a parent.
+      var skStat = (sd.skillStats[sk] = sd.skillStats[sk] || { c: 0, t: 0 });
+      skStat.t++; if (ok) skStat.c++;
+      if (!ok) sd.missedSkills[sk] = (sd.missedSkills[sk] || 0) + 1;
+      if (!ok && q.type === 'mc' && given !== null && given !== undefined) {
+        secMissedMc++;
+        var chosenLetter = LETTERS[given];
+        secDistractors[chosenLetter] = (secDistractors[chosenLetter] || 0) + 1;
+      }
+      var gTxt = (given === null || given === undefined) ? '—' : (q.type === 'mc' ? LETTERS[given] : esc(given.raw || String(given)));
+      // Keep a reference to the full question object and the raw given
+      // answer so the detail table can expand to show the ACTUAL question
+      // (text, choices, correct answer, and what the student picked), not
+      // just the answer letter. givenIdx is the chosen choice index for
+      // multiple-choice (null if blank), used to mark the picked option.
+      rows.push({ n: i + 1, dom: dom, sk: sk, given: gTxt, ok: ok, marked: !!wasMarked,
+        q: q, givenIdx: (q.type === 'mc' && given !== null && given !== undefined) ? given : null,
+        givenText: (given && typeof given === 'object') ? esc(given.raw || String(given.value)) : null,
+        timeMs: qTimeMs,
+        firstVisitedAt: (sec.fv && typeof sec.fv[i] === 'number') ? sec.fv[i] : null,
+        lastViewedAt: (sec.lv && typeof sec.lv[i] === 'number') ? sec.lv[i] : null });
+    });
+    sections.push({
+      key: sec.k, label: bank.label.replace(' (optional on the real ACT)', ''), c: c, t: qs.length, rows: rows, domains: secDomains,
+      distractors: secDistractors, missedMc: secMissedMc, diff: diff, c1: c1, t1: t1, c2: c2, t2: t2, variant: sec.v,
+      timeTotal: secTimeTotal, timeCorrect: secTimeCorrect, timeIncorrect: secTimeIncorrect
+    });
+  });
+
+  var pct = totalQ ? Math.round(totalC / totalQ * 100) : 0;
+  var first = (data.n || 'Student').split(' ')[0];
+  var dateStr = data.dt || new Date().toISOString().slice(0, 10);
+
+  document.getElementById('r-title').textContent = data.n + ' — ' + data.t + ' Diagnostic Report';
+  document.getElementById('r-sub').textContent = 'Administered ' + dateStr + ' · Moretti student portal';
+  document.getElementById('r-sub2').textContent = data.n + ' · ' + data.t + ' Diagnostic · ' + dateStr;
+  var ftrDate = document.getElementById('ftr-date');
+  if (ftrDate) ftrDate.textContent = dateStr;
+
+  /* Canvas charts render at CSS-pixel resolution by default, which looks
+     visibly soft/pixelated on any high-DPI display and gets worse when
+     printed or exported to PDF (the browser upsamples a low-res bitmap).
+     This backs every canvas with a bitmap 2-3x its display size (capped,
+     so it doesn't balloon file size) and scales the drawing context to
+     match, so all the coordinate math below stays in CSS pixels while
+     the actual pixels drawn are crisp at typical retina/print density
+     (see crispCanvas2 below, used by the score-bridge canvas). */
+
+  /* ═══ SCORE TILES — flat number + fraction, no ring ═══
+     Used to be a percentage ring fused with the scaled score underneath.
+     A ring/circle draws the eye to itself without adding information a
+     plain number doesn't already say faster — the scaled score and the
+     raw c/t (%) underneath it are the same two facts, just as a flat
+     card instead of a chart. A thin top-edge accent still carries the
+     red/gold/green performance read the ring used to encode in stroke
+     color, without drawing a circle to do it. */
+  function scoreTile(label, c, t, scaledScore, big) {
+    var p = t ? c / t : 0;
+    var band = p < 0.5 ? 'var(--red)' : (p >= 0.75 ? 'var(--green)' : 'var(--gold)');
+    var tile = document.createElement('div');
+    tile.className = 'score-tile' + (big ? ' big' : '');
+    tile.style.borderTopColor = band;
+    var num = document.createElement('div');
+    num.className = 'tile-score ' + (big ? 'big' : 'small');
+    num.textContent = (scaledScore !== null && scaledScore !== undefined) ? scaledScore : (Math.round(p * 100) + '%');
+    tile.appendChild(num);
+    var frac = document.createElement('div');
+    frac.className = 'tile-frac';
+    frac.textContent = c + '/' + t + ' (' + Math.round(p * 100) + '%)';
+    tile.appendChild(frac);
+    var lb = document.createElement('div');
+    lb.className = 'tile-lab' + (big ? ' big' : '');
+    lb.textContent = label;
+    tile.appendChild(lb);
+    return tile;
+  }
+
+  function barRow(label, c, t, cls) {
+    var p2 = t ? Math.round(c / t * 100) : 0;
+    var row = document.createElement('div');
+    row.className = 'bar-row';
+    row.innerHTML = '<div class="bar-label"><span>' + label + '</span><span>' + c + '/' + t + ' (' + p2 + '%)</span></div><div class="bar-track"><div class="bar-fill ' + (cls || '') + '" style="width:' + p2 + '%"></div></div>';
+    return row;
+  }
+
+  /* ═══ SAT MODULE-WEIGHTED SCORING MODEL ═══
+     The digital SAT is adaptive: Module 1 performance routes you to an
+     easier or harder Module 2, and because of that routing, the module a
+     question sits in matters to the final score, not just the raw count
+     of correct answers. Two students with the SAME total raw score get
+     different section scores depending on how their correct answers split
+     between Module 1 and Module 2.
+
+     This was verified directly against Albert.io's published digital-SAT
+     score calculator (screenshots provided by the user, since the page
+     itself is a JS-rendered calculator that no browser tool available
+     here could load). Two of its results pin the effect exactly:
+       - Reading & Writing, 53/54 total: 27-M1 / 26-M2 -> 790, but
+         26-M1 / 27-M2 -> 780. Same total, doing better on Module 1 is
+         worth +10.
+       - Math, 37/44 total: 15-M1 / 22-M2 -> 650, but 22-M1 / 15-M2 ->
+         700. Same total, Module 1 strength worth +50 here (a bigger
+         swing because Math has fewer questions and the routing effect is
+         stronger).
+     Earlier versions of this model weighted questions by DIFFICULTY
+     (easy/medium/hard 1x/2x/3x) and applied a hard easier-Module-2 cap.
+     That was the wrong axis — it couldn't reproduce the module effect at
+     all (a difficulty tilt says nothing about which module a miss was in)
+     and it overestimated scores. Replaced with a model that reads the
+     scaled score straight off College Board's own published raw-to-scaled
+     curve at the total percent correct, then shifts it by the gap between
+     Module 1 and Module 2 performance:
+
+       score = curve(total % correct) + MODULE_WEIGHT * (m1rate - m2rate)
+
+     MODULE_WEIGHT = 80 reproduces all four Albert data points above
+     exactly (RW 780/790, Math 650/700). The shift term is 0 whenever the
+     two modules were answered at the same rate — including a perfect
+     score (both 100%, -> 800) and a zero score (both 0%, -> 200) — so the
+     floor and ceiling are preserved, and it naturally captures the
+     routing effect (doing poorly on Module 1 pulls the section down the
+     way real easier-Module-2 routing does) without a separate hard cap.
+     The result is clamped to the 200-800 section scale.
+     (MODULE_WEIGHT itself is declared up near the curves, not here — the
+     demo score search below calls satSectionScore before this point in
+     the file is reached, so the constant has to be assigned before then
+     or it reads as undefined and every demo score comes out NaN.) */
+  // curve is passed explicitly (RW_CURVE or MATH_CURVE) rather than
+  // inferred from a section-key field on sec — the two call sites for
+  // this function (the real report's section objects, and the demo
+  // generator's) don't use the same field name for that key, and picking
+  // the wrong curve silently would misgrade a section rather than error.
+  function satSectionScore(sec, curve) {
+    if (!sec || !sec.t) return null;
+    var base = scaleFromPct(sec.c / sec.t * 100, curve);
+    // Module-1 vs Module-2 success rates. A non-adaptive section (no
+    // Module 2, so t2 == 0) has nothing to split, so both rates fall back
+    // to the overall rate and the shift term is 0.
+    var r1 = sec.t1 ? sec.c1 / sec.t1 : (sec.c / sec.t);
+    var r2 = sec.t2 ? sec.c2 / sec.t2 : (sec.c / sec.t);
+    var score = base + MODULE_WEIGHT * (r1 - r2);
+    score = Math.max(200, Math.min(800, score));
+    return roundToTen(score);
+  }
+
+  var tilesEl = document.getElementById('score-tiles');
+  var scoreCaption = document.getElementById('score-caption');
+  if (data.t === 'SAT') {
+    var rw = sections.filter(function (s) { return s.key === 'reading-writing'; })[0];
+    var mathSec = sections.filter(function (s) { return s.key === 'math'; })[0];
+    var rwScaled = satSectionScore(rw, RW_CURVE);
+    var mathScaled = satSectionScore(mathSec, MATH_CURVE);
+    var composite = (rwScaled !== null && mathScaled !== null) ? rwScaled + mathScaled : null;
+    tilesEl.appendChild(scoreTile('Composite (400–1600)', totalC, totalQ, composite, true));
+    if (rw) tilesEl.appendChild(scoreTile('Reading & Writing', rw.c, rw.t, rwScaled, false));
+    if (mathSec) tilesEl.appendChild(scoreTile('Math', mathSec.c, mathSec.t, mathScaled, false));
+    var routedEasier = [rw, mathSec].some(function (s) { return s && s.variant === 'Easier'; });
+    scoreCaption.textContent = 'The fraction under each score is raw percent correct on this diagnostic. The score itself reads that off College Board\'s own published raw-to-scaled conversion table (Reading & Writing and Math have separate tables), then adjusts for which module the misses fell in — because the SAT is adaptive, missing questions in Module 1 costs more than missing the same number in Module 2' + (routedEasier ? ', and a weaker Module 1 also routes that section to the easier Module 2' : '') + '; the real digital SAT curve varies by test, so this is a close estimate, not the exact official scoring.';
+  } else if (data.t === 'ACT') {
+    var scaledScores = sections.map(function (s) { return scaleFromPct(s.c / s.t * 100, ACT_CURVE); });
+    // The ACT Composite is the average of English, Math, and Reading only —
+    // Science is excluded (it's optional on the real ACT and not part of
+    // the Composite calculation) even if a Science section was taken here.
+    // Math.round() already rounds a .5 fraction up, matching the ACT's
+    // stated rounding rule.
+    var compositeKeys = { english: true, 'act-math': true, reading: true };
+    var compositeScores = sections
+      .map(function (s, i) { return { key: s.key, score: scaledScores[i] }; })
+      .filter(function (s) { return compositeKeys[s.key]; })
+      .map(function (s) { return s.score; });
+    var actComposite = compositeScores.length ? Math.round(compositeScores.reduce(function (a, b) { return a + b; }, 0) / compositeScores.length) : null;
+    tilesEl.appendChild(scoreTile('Composite (1–36)', totalC, totalQ, actComposite, true));
+    sections.forEach(function (s, i) { tilesEl.appendChild(scoreTile(s.label, s.c, s.t, scaledScores[i], false)); });
+    scoreCaption.textContent = 'The fraction under each score is raw percent correct on this diagnostic. The score itself is estimated from a typical official-practice-test curve; the real ACT curve varies by test and isn\'t published in advance.';
+  } else {
+    tilesEl.style.display = 'none';
+  }
+
+  // Per-section, per-skill missed-question counts — shared by the section
+  // pie charts below and the score-bridge waterfall, so both read the
+  // exact same underlying numbers.
+  function sectionSkillMiss(s5) {
+    var skillMiss = {};
+    Object.keys(s5.domains).forEach(function (d) {
+      var missedSkills = s5.domains[d].missedSkills;
+      Object.keys(missedSkills).forEach(function (sk) {
+        skillMiss[sk] = (skillMiss[sk] || 0) + missedSkills[sk];
+      });
+    });
+    return skillMiss;
+  }
+  // Which domain (the test's own broader content category, e.g. "Algebra")
+  // each missed skill in this section falls under — used by the score
+  // bridge to roll long-tail skills up to their parent domain instead of
+  // flattening them into one undifferentiated "Other" bucket.
+  function sectionSkillDomain(s5) {
+    var dom = {};
+    Object.keys(s5.domains).forEach(function (d) {
+      Object.keys(s5.domains[d].missedSkills).forEach(function (sk) { dom[sk] = d; });
+    });
+    return dom;
+  }
+  // Per-skill correct/total within a section: { skill: { c, t, dom } }.
+  // Drives the section-card skill list, which now reads as "correct out of
+  // attempted" per skill rather than "share of misses".
+  function sectionSkillStats(s5) {
+    var out = {};
+    Object.keys(s5.domains).forEach(function (d) {
+      var st = s5.domains[d].skillStats || {};
+      Object.keys(st).forEach(function (sk) {
+        out[sk] = { c: st[sk].c, t: st[sk].t, dom: d };
+      });
+    });
+    return out;
+  }
+
+  /* ═══ PATH TO TARGET SCORE — "score bridge" waterfall ═══
+     Bars show REAL, unscaled composite points recoverable per skill — not
+     values force-fit to sum to whatever target the parent happens to
+     type in. The earlier version rescaled every segment so they summed
+     exactly to (target − current), which meant typing in a huge target
+     inflated every skill's apparent value, and typing in a modest target
+     could shrink a real but small skill down to a nonsensical "+0". Bars
+     now run from Current to Reachable — what this diagnostic alone
+     suggests is recoverable if every identified gap were closed — and
+     the target is instead drawn as a dashed reference line, so the chart
+     stays honest regardless of what number gets typed in.
+
+     Points are attributed in two steps, not by re-scoring each skill in
+     isolation. Re-scoring one skill at a time under-credits sections where
+     misses are spread thin across many skills: a single skill's fix often
+     isn't enough on its own to cross the curve's next rounding step, even
+     when the section as a whole has plenty of recoverable points, so a
+     weak-but-scattered section (e.g. Reading, missing 1-2 questions across
+     eight different skills) would show almost nothing while a
+     weak-and-concentrated section shows a lot — not an accurate picture.
+     Instead: (1) compute the total points recoverable if EVERY miss in a
+     section were fixed, (2) split that total across the section's missed
+     skills in proportion to how many questions each skill accounts for. */
+  var bridgeWrap = document.getElementById('score-bridge');
+  var currentComposite = (data.t === 'SAT') ? composite : (data.t === 'ACT' ? actComposite : null);
+  if (bridgeWrap && currentComposite !== null && currentComposite !== undefined) {
+    var isSAT = data.t === 'SAT';
+    var scoreMax = isSAT ? 1600 : 36;
+    var scoreMin = isSAT ? 400 : 1;
+
+    var bridgeItems = [];
+    if (data.t === 'SAT') {
+      sections.forEach(function (s) {
+        var skillMiss = sectionSkillMiss(s);
+        var skillDom = sectionSkillDomain(s);
+        var totalMissed = Object.keys(skillMiss).reduce(function (a, k) { return a + skillMiss[k]; }, 0);
+        if (!totalMissed) return;
+        var sectionCurve = (s.key === 'reading-writing') ? RW_CURVE : (s.key === 'math' ? MATH_CURVE : null);
+        var baseScaled = (s.key === 'reading-writing') ? rwScaled : (s.key === 'math' ? mathScaled : null);
+        if (baseScaled === null || sectionCurve === null) return;
+        var fullFixScaled = roundToTen(scaleFromPct(100, sectionCurve));
+        var sectionRecoverable = fullFixScaled - baseScaled;
+        if (sectionRecoverable <= 0) return;
+        var perMiss = sectionRecoverable / totalMissed;
+        Object.keys(skillMiss).forEach(function (sk) {
+          var pts = skillMiss[sk] * perMiss;
+          if (pts > 0) bridgeItems.push({ label: sk, points: pts, dom: skillDom[sk] });
+        });
+      });
+    } else if (data.t === 'ACT') {
+      sections.forEach(function (s, si) {
+        var skillMiss = sectionSkillMiss(s);
+        var skillDom = sectionSkillDomain(s);
+        var totalMissed = Object.keys(skillMiss).reduce(function (a, k) { return a + skillMiss[k]; }, 0);
+        if (!totalMissed) return;
+        var fullFixScaled = scaleFromPct(100, ACT_CURVE);
+        var newScores = scaledScores.slice();
+        newScores[si] = fullFixScaled;
+        var newComposite = Math.round(newScores.reduce(function (a, b) { return a + b; }, 0) / newScores.length);
+        var sectionRecoverable = newComposite - actComposite;
+        if (sectionRecoverable <= 0) return;
+        var perMiss = sectionRecoverable / totalMissed;
+        Object.keys(skillMiss).forEach(function (sk) {
+          var pts = skillMiss[sk] * perMiss;
+          if (pts > 0) bridgeItems.push({ label: sk, points: pts, dom: skillDom[sk] });
+        });
+      });
+    }
+    // A composite score can't exceed the top of the scale — if the sum of
+    // every recoverable point pushes past that ceiling, scale all of them
+    // down together so the bars sum to exactly what's physically possible.
+    // This is the ONLY scaling applied to these bars: unlike the earlier
+    // version, it's driven by the real score ceiling, never by whatever
+    // target a parent happens to type in, so the bars underneath never
+    // change when the target changes.
+    var rawTotalRecoverable = bridgeItems.reduce(function (a, e) { return a + e.points; }, 0);
+    var headroom = scoreMax - currentComposite;
+    if (rawTotalRecoverable > headroom && rawTotalRecoverable > 0) {
+      var capScale = headroom / rawTotalRecoverable;
+      bridgeItems = bridgeItems.map(function (e) { return { label: e.label, points: e.points * capScale, dom: e.dom }; });
+    }
+    bridgeItems.sort(function (a, b) { return b.points - a.points; });
+
+    // A skill only gets its own named bar if it's a genuinely large,
+    // concentrated gap — worth calling out by exact name (top MAX_NAMED
+    // by size, and at least NAMED_MIN points so it reads as a real,
+    // specific opportunity rather than a rounding artifact).
+    //
+    // Everything else does NOT get flattened into one "Other" blob
+    // anymore. It rolls up to its parent DOMAIN instead — the test's own
+    // broader content category (e.g. "Algebra," "Craft and Structure").
+    // A low scorer's gaps are typically spread evenly across many small
+    // skills rather than concentrated in one or two; grouping those by
+    // domain keeps the chart meaningful ("Other — Algebra," "Other —
+    // Geometry and Trigonometry") instead of naming a handful of
+    // arbitrary small skills while everything else disappears into an
+    // undifferentiated catch-all.
+    //
+    // TOTAL_MAX_BARS is a hard ceiling on the whole chart (named skills +
+    // domain rollups + the generic catch-all combined) — the earlier
+    // version capped named skills and domain rollups independently (up to
+    // 6 + 4 + 1 = 11 mid-bars, plus 2 endpoints), which was the "too many
+    // bars crammed in" problem. Named skills get first claim on the
+    // budget since they're the most specific/useful; whatever's left
+    // fills with domain rollups, largest first.
+    var TOTAL_MAX_BARS = 6, MAX_NAMED = 4, NAMED_MIN = 0.5;
+    var namedItems = [];
+    var leftover = [];
+    bridgeItems.forEach(function (item) {
+      if (namedItems.length < MAX_NAMED && item.points >= NAMED_MIN) namedItems.push(item);
+      else leftover.push(item);
+    });
+
+    // domain label -> { points: accumulated points, n: how many distinct
+    // skills got folded into this bucket } — the skill count is what lets
+    // the leftover explain ITSELF honestly (see genericOtherN below)
+    // instead of presenting a sum-of-many as if it were one thing.
+    var domainBuckets = {};
+    var undomainedPts = 0, undomainedN = 0; // safety net if an item somehow has no domain tag
+    leftover.forEach(function (item) {
+      if (item.dom) {
+        var b = domainBuckets[item.dom] || { points: 0, n: 0 };
+        b.points += item.points; b.n += 1;
+        domainBuckets[item.dom] = b;
+      } else { undomainedPts += item.points; undomainedN += 1; }
+    });
+    var domainItems = Object.keys(domainBuckets)
+      .map(function (d) { return { label: 'Other — ' + d, points: domainBuckets[d].points, n: domainBuckets[d].n }; })
+      .sort(function (a, b) { return b.points - a.points; });
+
+    // No bar slot is reserved for a generic catch-all anymore — the
+    // leftover that doesn't fit is reported as a sentence below the
+    // chart instead of a same-shaped bar (see genericOtherPts/N), so the
+    // full TOTAL_MAX_BARS budget minus named items goes to domain rollups.
+    var domainSlots = Math.max(0, TOTAL_MAX_BARS - namedItems.length);
+    var shownDomainItems = [];
+    var genericOtherPts = undomainedPts, genericOtherN = undomainedN;
+    domainItems.forEach(function (item, i) {
+      if (i < domainSlots && item.points >= 0.5) shownDomainItems.push(item);
+      else { genericOtherPts += item.points; genericOtherN += item.n; }
+    });
+
+    var shownItems = namedItems.concat(shownDomainItems.map(function (it) {
+      return { label: it.label + (it.n > 1 ? ' (' + it.n + ' skills)' : ''), points: it.points };
+    }));
+
+    // The bars now always sum to exactly this — no more overshoot past
+    // the endpoint bar.
+    var totalRecoverable = bridgeItems.reduce(function (a, e) { return a + e.points; }, 0);
+    // The real SAT only ever reports composites in 10-point steps (its
+    // section scores are each 200-800 in 10s) — currentComposite is
+    // already guaranteed to land on a multiple of 10 since it's the sum
+    // of two roundToTen'd section scores, but this projected "reachable"
+    // figure wasn't going through the same rounding, so it could land on
+    // an off value like 1247 instead of 1250. roundToTen keeps it
+    // consistent with every other SAT number on this report; ACT
+    // composites are whole-number 1-36 and were already correct with a
+    // plain Math.round.
+    var reachable = isSAT ? roundToTen(currentComposite + totalRecoverable) : Math.round(currentComposite + totalRecoverable);
+    var hitCeiling = rawTotalRecoverable > headroom;
+
+    var defaultTarget = isSAT ? Math.min(scoreMax, roundToTen(currentComposite + 150)) : Math.min(scoreMax, currentComposite + 3);
+    var storeKey = 'mt-target-' + data.t + '-' + (data.n || 'student');
+    var savedTarget = null;
+    try { var sv = localStorage.getItem(storeKey); if (sv) savedTarget = parseInt(sv, 10); } catch (e) {}
+    var targetScore = (savedTarget !== null && !isNaN(savedTarget)) ? savedTarget : defaultTarget;
+    targetScore = Math.max(currentComposite, Math.min(scoreMax, targetScore));
+    // A saved value from before this fix (or manual tampering) could
+    // still be off-grid — snap it to the nearest 10 for SAT so the
+    // displayed target always matches a real, reportable SAT score.
+    if (isSAT) targetScore = roundToTen(targetScore);
+
+    // Shared by the number input's change handler and the chart's drag
+    // handle (dragging the dashed line ends by calling this with the
+    // dropped-at value) — one clamp/snap/persist/redraw path instead of
+    // two copies that could drift apart.
+    function applyTargetChange(v) {
+      v = Math.max(currentComposite, Math.min(scoreMax, v));
+      // Snap to the nearest 10 for SAT so every target this chart can
+      // show stays a real, reportable score — typing 1434 into the
+      // field, or dropping the drag handle mid-pixel, shouldn't produce
+      // a target the real SAT never issues.
+      if (isSAT) v = roundToTen(v);
+      targetScore = v;
+      try { localStorage.setItem(storeKey, String(v)); } catch (e) {}
+      renderBridge();
+    }
+
+    renderBridge();
+
+    function renderBridge() {
+      bridgeWrap.innerHTML = '';
+      var outer = document.createElement('div');
+      outer.className = 'bridge-wrap';
+
+      var row = document.createElement('div');
+      row.className = 'bridge-target-row';
+      row.innerHTML = '<span><span class="bt-lab">Current: </span>' + currentComposite + '</span>' +
+        '<span><span class="bt-lab">Your target: </span><input type="number" id="bt-input" value="' + targetScore + '" min="' + currentComposite + '" max="' + scoreMax + '" step="' + (isSAT ? 10 : 1) + '"> <span class="bt-static">' + targetScore + '</span> <button type="button" class="bt-reset" id="bt-reset">reset</button> <span class="bt-drag-hint">or drag the dashed line below</span></span>';
+      outer.appendChild(row);
+
+      var canvasWrap = document.createElement('div');
+      canvasWrap.className = 'bridge-canvas-wrap';
+      outer.appendChild(canvasWrap);
+
+      if (!shownItems.length) {
+        var msg2 = document.createElement('div');
+        msg2.className = 'bridge-empty';
+        msg2.textContent = 'Not enough missed questions on this diagnostic to attribute recoverable points to specific skills yet.';
+        canvasWrap.appendChild(msg2);
+      } else {
+        canvasWrap.appendChild(drawBridge(shownItems, currentComposite, reachable, targetScore, applyTargetChange));
+
+        // The leftover recoverable points that didn't earn their own named
+        // or domain-rollup bar used to be flattened into one "Other
+        // opportunities" bar drawn the same way as the named ones — same
+        // shape, same visual weight, implying it was one comparable
+        // opportunity when it's actually a sum over several small,
+        // unnamed skills. That's a different KIND of fact (breadth of the
+        // gap, not a single fixable thing), so it's stated as a sentence
+        // instead of a bar competing for space on the same axis.
+        if (genericOtherPts >= 0.5) {
+          var otherNote = document.createElement('div');
+          otherNote.className = 'bridge-note bridge-other-note';
+          var otherPtsLabel = isSAT ? Math.max(10, roundToTen(genericOtherPts)) : Math.round(genericOtherPts);
+          otherNote.textContent = 'Plus roughly ' + otherPtsLabel + ' more points spread across ' + genericOtherN + ' other ' + (genericOtherN === 1 ? 'skill' : 'skills') + ', each too small on its own to call out by name.';
+          outer.appendChild(otherNote);
+        }
+
+        var note = document.createElement('div');
+        note.className = 'bridge-note';
+        var baseText = 'Bars show real composite points recoverable per skill, from ' + currentComposite + ' up to ' + reachable + ' if every gap this diagnostic found were closed.';
+        if (hitCeiling) baseText += ' That total is capped at the maximum possible score of ' + scoreMax + '.';
+        var HIGH_BAND = isSAT ? 1500 : 34;
+        if (currentComposite >= HIGH_BAND || targetScore >= HIGH_BAND) {
+          baseText += ' Scores at this level are disproportionately hard to move: the remaining questions skew toward the hardest on the test, so each additional point typically takes more practice than earlier gains did.';
+        }
+        var targetText;
+        if (targetScore >= reachable) {
+          targetText = 'The dashed line marks your target of ' + targetScore + '. Reaching it will likely take growth beyond what this diagnostic can pinpoint.';
+        } else {
+          targetText = 'The dashed line marks your target of ' + targetScore + '. It is within reach from these fixes alone.';
+        }
+        note.textContent = baseText + ' ' + targetText;
+        outer.appendChild(note);
+      }
+
+      bridgeWrap.appendChild(outer);
+
+      var input = document.getElementById('bt-input');
+      input.addEventListener('change', function () {
+        var v = parseInt(input.value, 10);
+        if (isNaN(v)) return;
+        applyTargetChange(v);
+      });
+      document.getElementById('bt-reset').addEventListener('click', function () {
+        targetScore = defaultTarget;
+        try { localStorage.removeItem(storeKey); } catch (e) {}
+        renderBridge();
+      });
+    }
+
+    function drawBridge(items, startVal, endVal, targetVal, onDragEnd) {
+      var bars = [{ label: 'Current', val: startVal, isEndpoint: true }]
+        .concat(items.map(function (e) { return { label: e.label, points: e.points, tag: e.tag }; }))
+        .concat([{ label: 'Max recoverable', val: endVal, isEndpoint: true }]);
+
+      // Width grows with the bar count (more likely now that a low
+      // scorer's spread-out gaps can name up to 9 skills instead of 6) so
+      // bars/labels don't get squeezed thinner than a 6-bar chart used to
+      // be — capped at 680px, the widest a chart can run and still sit
+      // inside the printed page's margins (8.5in page minus 0.65in side
+      // padding each side, at 96dpi).
+      var w = Math.min(680, Math.max(620, 52 * bars.length)), h = 185, padL = 40, padR = 62, padT = 14, padB = 42;
+      var plotW = w - padL - padR, plotH = h - padT - padB;
+      var n = bars.length;
+      var barW = plotW / n * 0.62;
+      var gapW = plotW / n;
+
+      var made = crispCanvas2(w, h), cv = made.cv, ctx = made.ctx;
+      cv.setAttribute('role', 'img');
+
+      // Full redraw, parameterized on the target value so dragging the
+      // dashed line can repaint the SAME canvas in place (no DOM
+      // replacement mid-drag, so the pointer-capture below keeps working)
+      // instead of only being settable by typing into the number input.
+      // Axis spans whichever is wider: the current→reachable bar range,
+      // or the target — so a target far beyond what this diagnostic
+      // accounts for still shows on the chart (as a dashed line near the
+      // top, with the real bars visibly filling only part of the
+      // distance to it, rather than being hidden or force-fit to reach
+      // it). Returns the axis bounds so the drag handler can invert a
+      // pointer position back into a score value using this same scale.
+      function paint(curTargetVal) {
+        ctx.clearRect(0, 0, w, h);
+        cv.setAttribute('aria-label', 'Score bridge from current composite ' + startVal + ' to reachable composite ' + endVal + ', with a target reference line at ' + curTargetVal + '. Drag the dashed line, or use the target field above the chart, to change it.');
+
+        var minVal = Math.min(startVal, curTargetVal);
+        var maxVal = Math.max(endVal, curTargetVal);
+        var range = maxVal - minVal || 1;
+        var headroom = range * 0.14;
+        var axisMin = minVal - headroom, axisMax = maxVal + headroom;
+        function y(v) { return padT + plotH - ((v - axisMin) / (axisMax - axisMin)) * plotH; }
+
+        // baseline
+        ctx.strokeStyle = 'rgba(17,17,17,0.15)';
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(padL, padT + plotH); ctx.lineTo(padL + plotW, padT + plotH); ctx.stroke();
+
+        var running = startVal;
+        var colors = BRAND_PALETTE;
+
+        bars.forEach(function (b, i) {
+          var bx = padL + gapW * i + (gapW - barW) / 2;
+          if (b.isEndpoint) {
+            var topY = y(b.val);
+            var baseY = padT + plotH;
+            ctx.fillStyle = (b.label === 'Max recoverable') ? '#5E8B6F' : '#243447';
+            ctx.fillRect(bx, topY, barW, baseY - topY);
+            ctx.fillStyle = '#1a1a1a';
+            ctx.font = '700 15px Poppins, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(String(b.val), bx + barW / 2, topY - 8);
+            running = b.val;
+          } else {
+            var fromY = y(running);
+            var toVal = running + b.points;
+            var toY = y(toVal);
+            var top = Math.min(fromY, toY), bot = Math.max(fromY, toY);
+            ctx.fillStyle = colors[(i - 1) % colors.length];
+            ctx.fillRect(bx, top, barW, Math.max(bot - top, 2));
+            ctx.fillStyle = '#1a1a1a';
+            ctx.font = '600 11px Poppins, sans-serif';
+            ctx.textAlign = 'center';
+            // SAT composites only ever move in 10-point steps (each section
+            // score is a multiple of 10), so a per-skill "+13" reads as a
+            // real score value that can't actually occur. Round each bar's
+            // label to the nearest 10 for display, same as every other SAT
+            // number on this report — floor of 10 so a genuinely nonzero
+            // sliver still shows as recoverable rather than rounding to +0.
+            var barLabelPts = isSAT ? Math.max(10, roundToTen(b.points)) : Math.round(b.points);
+            ctx.fillText('+' + barLabelPts, bx + barW / 2, top - 6);
+            running = toVal;
+          }
+          // x-axis label (rotated-free: short skill names, wrapped by truncation)
+          ctx.fillStyle = 'rgba(17,17,17,0.6)';
+          ctx.font = '600 8.5px Poppins, sans-serif';
+          ctx.textAlign = 'center';
+          var label = b.label.length > 16 ? b.label.slice(0, 15) + '…' : b.label;
+          wrapCanvasLabel(ctx, label, bx + barW / 2, padT + plotH + 14, barW + 14, 9);
+        });
+
+        // Target reference line — dashed, spans the full plot width, drawn
+        // last so it sits on top of the bars. Kept separate from the bars
+        // themselves so the segments never have to distort to reach it. A
+        // small filled circle at its right end is the drag handle.
+        var ty = y(curTargetVal);
+        ctx.strokeStyle = '#B0271C';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([5, 3]);
+        ctx.beginPath(); ctx.moveTo(padL, ty); ctx.lineTo(padL + plotW, ty); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.beginPath(); ctx.arc(padL + plotW, ty, 3.5, 0, Math.PI * 2);
+        ctx.fillStyle = '#B0271C';
+        ctx.fill();
+        ctx.font = '700 9.5px Poppins, sans-serif';
+        ctx.textAlign = 'left';
+        // Clamp the label's vertical position to stay inside the canvas even
+        // when the target line itself sits right at the top or bottom edge
+        // of the plot area — the line stays at its true position, only the
+        // text nudges to remain fully readable.
+        var tLabelY = Math.max(padT + 8, Math.min(padT + plotH - 4, ty + 3));
+        ctx.fillText('Target ' + curTargetVal, padL + plotW + 8, tLabelY);
+
+        return { axisMin: axisMin, axisMax: axisMax };
+      }
+
+      var axis = paint(targetVal);
+
+      // Draggable target line: click/touch anywhere on the chart and drag
+      // vertically to set the target, instead of only being able to type
+      // a number into the field above it. Pointer Events cover mouse and
+      // touch alike. setPointerCapture keeps the drag tracking even if
+      // the cursor slips outside the small canvas — safe here because
+      // paint() redraws THIS SAME canvas in place rather than replacing
+      // it, so the capture never gets detached mid-drag. The surrounding
+      // target input/note text only resync once, on release, via the
+      // same onDragEnd callback the number input itself uses.
+      cv.style.cursor = 'ns-resize';
+      cv.style.touchAction = 'none';
+      var dragTarget = targetVal;
+      function valueFromClientY(clientY) {
+        var rect = cv.getBoundingClientRect();
+        var scaleY = rect.height ? h / rect.height : 1;
+        var localY = (clientY - rect.top) * scaleY;
+        var v = axis.axisMin + (padT + plotH - localY) / plotH * (axis.axisMax - axis.axisMin);
+        v = Math.max(startVal, Math.min(scoreMax, v));
+        return isSAT ? roundToTen(v) : Math.round(v);
+      }
+      cv.addEventListener('pointerdown', function (e) {
+        cv.setPointerCapture(e.pointerId);
+        dragTarget = valueFromClientY(e.clientY);
+        axis = paint(dragTarget);
+      });
+      cv.addEventListener('pointermove', function (e) {
+        if (e.buttons === 0) return; // not currently pressed/dragging
+        dragTarget = valueFromClientY(e.clientY);
+        axis = paint(dragTarget);
+      });
+      cv.addEventListener('pointerup', function () {
+        if (typeof onDragEnd === 'function') onDragEnd(dragTarget);
+      });
+
+      return cv;
+    }
+
+    function wrapCanvasLabel(ctx, text, cx, y0, maxW, lineH) {
+      var words = text.split(' ');
+      var lines = [], cur = '';
+      words.forEach(function (word) {
+        var test = cur ? cur + ' ' + word : word;
+        if (ctx.measureText(test).width > maxW && cur) { lines.push(cur); cur = word; }
+        else cur = test;
+      });
+      if (cur) lines.push(cur);
+      lines = lines.slice(0, 2);
+      lines.forEach(function (ln, i) { ctx.fillText(ln, cx, y0 + i * lineH); });
+    }
+
+    function crispCanvas2(cssW, cssH) {
+      var dpr = Math.min(window.devicePixelRatio || 1, 3);
+      var cv = document.createElement('canvas');
+      cv.width = Math.round(cssW * dpr);
+      cv.height = Math.round(cssH * dpr);
+      cv.style.width = cssW + 'px';
+      cv.style.height = cssH + 'px';
+      var ctx = cv.getContext('2d');
+      ctx.scale(dpr, dpr);
+      return { cv: cv, ctx: ctx };
+    }
+  } else if (bridgeWrap) {
+    bridgeWrap.innerHTML = '<div class="bridge-empty">Not available for this test type.</div>';
+  }
+
+  /* ═══ SECTION BREAKDOWN — chunked by section, not lumped together ═══
+     Each section gets its own card: total missed, a ranked bar list
+     showing which skills those misses fall into (within THAT section
+     only), and the specific skills missed inside each weak domain — so
+     "Math" and "Reading" results never get mixed into one combined
+     chart. Flat horizontal bars instead of a pie: a ranked list reads
+     faster for "where do I improve" than matching wedge size/color back
+     to a legend, and it matches the score-bridge bars above. */
+  // One cohesive palette, shared by every chart on this report — all
+  // tints/shades of the same five brand colors (red, gold, green, navy,
+  // tan) instead of throwing in unrelated grays/corals/lavenders per
+  // chart, which is what made the section pies and bridge segments look
+  // like they'd been colored by two different people.
+  var palette = BRAND_PALETTE;
+
+  // The section-card skill list. Every row now reads the SAME way as the
+  // domain rows below it and the score tiles up top: "correct / attempted
+  // (percent)", with the bar filling toward 100% and colored by how the
+  // student did (red under 50%, gold in between, green at/above 75%). The
+  // old version showed each skill's SHARE OF THE SECTION'S MISSES instead
+  // — e.g. "Boundaries 4 (29%)" meaning "4 of your 14 R&W misses were in
+  // Boundaries, = 29% of misses". That's a genuinely confusing statistic
+  // for a parent: the number wasn't out of the questions attempted, and
+  // the bar didn't mean performance, so a longer red bar looked like a
+  // worse score when it actually just meant "more of the misses piled up
+  // here". Now a long green bar = did well, a short red bar = struggled,
+  // consistent everywhere on the page.
+  //
+  // Only skills the student actually MISSED at least one question in are
+  // listed here, weakest first — this block is the "what to work on"
+  // view, so a skill answered perfectly isn't a focus item (the full
+  // by-area picture is the domain rows directly below). Capped at 5 rows;
+  // any remaining weak skills are noted as a count rather than crammed in.
+  function sectionSkillBars(s5) {
+    var wrap = document.createElement('div');
+    wrap.className = 'sc-bars';
+
+    var stats = sectionSkillStats(s5);
+    var weak = Object.keys(stats).map(function (sk) {
+      var v = stats[sk];
+      return { name: sk, c: v.c, t: v.t, pct: v.t ? v.c / v.t : 0, missed: v.t - v.c };
+    }).filter(function (e) { return e.missed > 0; })
+      .sort(function (a, b) { return a.pct - b.pct || b.missed - a.missed; });
+
+    if (!weak.length) {
+      wrap.innerHTML = '<div class="sc-bar-empty">Nothing missed in this section.</div>';
+      return wrap;
+    }
+
+    var MAX_SKILL_ROWS = 5;
+    weak.slice(0, MAX_SKILL_ROWS).forEach(function (e) {
+      var pct = Math.round(e.pct * 100);
+      var cls = e.pct < 0.5 ? 'weak' : (e.pct >= 0.75 ? 'strong' : '');
+      var row = document.createElement('div');
+      row.className = 'sc-bar-row';
+      row.innerHTML = '<div class="sc-bar-label"><span>' + e.name + '</span><span>' + e.c + '/' + e.t + ' (' + pct + '%)</span></div>' +
+        '<div class="sc-bar-track"><div class="sc-bar-fill ' + cls + '" style="width:' + pct + '%"></div></div>';
+      wrap.appendChild(row);
+    });
+    var hidden = weak.length - MAX_SKILL_ROWS;
+    if (hidden > 0) {
+      var more = document.createElement('div');
+      more.className = 'sc-bar-empty';
+      more.textContent = '+ ' + hidden + ' more ' + (hidden === 1 ? 'skill' : 'skills') + ' with a miss — see the area totals below';
+      wrap.appendChild(more);
+    }
+    return wrap;
+  }
+
+  var sbEl = document.getElementById('section-breakdown');
+  var cardsWrap = document.createElement('div');
+  cardsWrap.className = 'section-cards';
+  sections.forEach(function (s5) {
+    var card = document.createElement('div');
+    card.className = 'section-card';
+    var pctS = s5.t ? Math.round(s5.c / s5.t * 100) : 0;
+    var incorrectN = s5.t - s5.c;
+    var head = document.createElement('div');
+    head.className = 'sc-hed';
+    head.innerHTML = '<span class="sc-title">' + s5.label + '</span><span class="sc-score">' + s5.c + '/' + s5.t + ' (' + pctS + '%)</span>';
+    card.appendChild(head);
+    var incEl = document.createElement('div');
+    incEl.className = 'sc-incorrect';
+    incEl.textContent = incorrectN + ' incorrect';
+    card.appendChild(incEl);
+
+    // Time On Section / Time On Correct / Time On Incorrect — omitted for
+    // this report generation only, per request.
+
+    // Distractor-pattern flag: with only 3-4 wrong-answer letters to choose
+    // from, a single letter landing on "50% of missed questions" happens
+    // by pure chance most of the time at small sample sizes (with 3 wrong
+    // choices and 3 missed questions, random guessing alone clears a 50%
+    // threshold on well over half of diagnostics). The bar is set high
+    // enough — 6+ missed MC and a clear majority — that this should only
+    // fire when a letter is landing meaningfully more than chance would
+    // predict (~33%), not on every report.
+    //
+    // This is a directly counted fact (how many missed questions landed on
+    // the same letter), not a modeled estimate, so it belongs on the same
+    // "raw" footing as the skill bars below — but it's a different KIND of
+    // fact (answering behavior, not a content gap), so it gets its own
+    // flagged callout up top rather than blending into the missed-skill
+    // text underneath, where it used to be easy to miss entirely.
+    var distEntries = Object.keys(s5.distractors || {}).map(function (l) { return { letter: l, n: s5.distractors[l] }; }).sort(function (a, b) { return b.n - a.n; });
+    if (s5.missedMc >= 6 && distEntries.length && distEntries[0].n / s5.missedMc >= 0.6) {
+      var distNote = document.createElement('div');
+      distNote.className = 'sc-flag';
+      distNote.innerHTML = '<span class="sc-flag-mark">!</span><span><strong>Possible pattern:</strong> picked (' + distEntries[0].letter + ') on ' + distEntries[0].n + ' of ' + s5.missedMc + ' missed multiple-choice questions here. Worth a quick check together; it may just be this test\'s content rather than a trap-answer habit.</span>';
+      card.appendChild(distNote);
+    }
+
+    // Two clearly-labeled blocks so the reader knows what each bar means:
+    // first the specific skills the student missed (correct/attempted,
+    // weakest first — "what to drill"), then every content area's
+    // correct/attempted (the fuller picture). Both use the identical
+    // "correct / total (percent)" format and the same red/gold/green fill,
+    // so a bar always means the same thing anywhere on this card.
+    var missedAny = (s5.t - s5.c) > 0;
+    if (missedAny) {
+      var skLabel = document.createElement('div');
+      skLabel.className = 'sc-grouplabel';
+      skLabel.textContent = 'Skills to focus on (correct / attempted)';
+      card.appendChild(skLabel);
+    }
+    card.appendChild(sectionSkillBars(s5));
+
+    var domLabel = document.createElement('div');
+    domLabel.className = 'sc-grouplabel';
+    domLabel.textContent = 'By content area (correct / attempted)';
+    card.appendChild(domLabel);
+    var domEntries = Object.keys(s5.domains).map(function (d) {
+      var v = s5.domains[d];
+      return { name: d, c: v.c, t: v.t, pct: v.t ? v.c / v.t : 0 };
+    }).sort(function (a, b) { return a.pct - b.pct; });
+    domEntries.forEach(function (de) {
+      card.appendChild(barRow(de.name, de.c, de.t, de.pct < 0.5 ? 'weak' : (de.pct >= 0.75 ? 'strong' : '')));
+    });
+    cardsWrap.appendChild(card);
+  });
+  sbEl.appendChild(cardsWrap);
+
+  // Priorities/strengths used to get their own bar-list section, but that
+  // was the same skills the bridge chart above already shows, just redrawn
+  // as bars — a parent saw the same weak points twice within a few inches.
+  // The ranked list still drives the two priority callouts in the
+  // takeaways below; strengths get one summary line instead of their own
+  // section, since "what's already fine" only needs a sentence.
+  var skillEntries = Object.keys(skills).map(function (k) { var v = skills[k]; return { name: k, c: v.c, t: v.t, pct: v.t ? v.c / v.t : 0, missed: v.t - v.c }; });
+  var reliableWeak = skillEntries.filter(function (e) { return e.t >= 2 && e.pct < 0.75; })
+    .sort(function (a, b) { return (b.missed - a.missed) || (a.pct - b.pct); });
+  var singleSampleWeak = skillEntries.filter(function (e) { return e.t === 1 && e.pct < 1; })
+    .sort(function (a, b) { return a.pct - b.pct; });
+  var priorities = reliableWeak.concat(singleSampleWeak).slice(0, 7);
+  var strengths = skillEntries.filter(function (e) { return e.pct >= 0.75 && e.t >= 2; }).sort(function (a, b) { return b.pct - a.pct; }).slice(0, 5);
+
+  var take = [];
+  take.push('<strong>' + first + ' answered ' + totalC + ' of ' + totalQ + ' correctly (' + pct + '%).</strong>');
+  if (strengths.length) {
+    take.push('<strong>Already strong:</strong> ' + strengths.slice(0, 3).map(function (s6) { return s6.name; }).join(', ') + '. Keep these sharp with light review.');
+  }
+  var priorityNames = {};
+  priorities.forEach(function (p4) { priorityNames[p4.name] = true; });
+  priorities.slice(0, 2).forEach(function (p3) {
+    var share = Math.round(p3.t / totalQ * 100);
+    var line = '<span class="r">' + p3.name + ':</span> ' + p3.c + '/' + p3.t + ' correct (' + Math.round(p3.pct * 100) + '%), about <strong>' + share + '%</strong> of the test. Recovering the ' + (p3.t - p3.c) + ' missed here moves the score fastest.';
+    // No "quick fix vs. real gap" call here — with as few as 2-3 attempts
+    // on a single skill, that distinction isn't something this diagnostic
+    // can actually tell apart (see the removed classifySkill for why).
+    // The one guess-vs-gap read this report does make lives further down,
+    // built from every flagged question across the whole diagnostic
+    // instead of one skill's handful of attempts — a sample size that
+    // can actually support the claim.
+    var prereqs = SKILL_PREREQS[p3.name];
+    if (prereqs) {
+      var weakPrereq = prereqs.filter(function (pr) { return priorityNames[pr]; })[0];
+      if (weakPrereq) line += ' It often traces back to ' + weakPrereq + ', worth checking there too.';
+    }
+    take.push(line);
+  });
+  // Uncertain-flag takeaway omitted for this report generation only, per request.
+  if (skipped > 0) take.push('<strong>' + skipped + '</strong> unanswered. Pacing and guessing strategy are part of the plan.');
+  take.push('Luca weights session time toward the priority areas above, with re-checks to confirm each is closed.');
+  document.getElementById('takeaways').innerHTML = take.map(function (t2) { return '<li>' + t2 + '</li>'; }).join('');
+
+  /* page 2 — raw data */
+  document.getElementById('raw-score').textContent = 'Raw score: ' + totalC + ' / ' + totalQ + ' (' + pct + '%)';
+  document.getElementById('raw-sections').textContent = sections.map(function (s3) { return s3.label + ' ' + s3.c + '/' + s3.t; }).join(' · ') + (markedT ? ' · Marked for review: ' + markedT : '') + (skipped ? ' · Skipped: ' + skipped : '');
+  // Builds the expanded detail for one question row: the actual prompt
+  // (its text is trusted HTML straight from the question bank — it carries
+  // its own inline formatting/equations), the answer choices with the
+  // correct one and the student's pick marked for multiple-choice, or a
+  // correct-vs-entered comparison for grid-in. Rendered lazily, only when
+  // a row is first opened.
+  function renderQuestionDetail(r) {
+    var q = r.q || {};
+    var box = document.createElement('div');
+    box.className = 'q-detail';
+    var txt = document.createElement('div');
+    txt.className = 'q-text';
+    txt.innerHTML = q.text || '(question text unavailable)';
+    box.appendChild(txt);
+
+    if (q.type === 'mc' && q.choices) {
+      var ul = document.createElement('ul');
+      ul.className = 'q-choices';
+      q.choices.forEach(function (choice, idx) {
+        var li = document.createElement('li');
+        var isCorrectChoice = idx === q.correct;
+        var isPicked = r.givenIdx === idx;
+        if (isCorrectChoice) li.className = 'q-correct';
+        else if (isPicked) li.className = 'q-picked-wrong';
+        var left = document.createElement('span');
+        left.innerHTML = LETTERS[idx] + '. ' + choice;
+        li.appendChild(left);
+        var tag = '';
+        if (isCorrectChoice && isPicked) tag = '<span class="q-tag ok">✓ correct — selected</span>';
+        else if (isCorrectChoice) tag = '<span class="q-tag ok">✓ correct answer</span>';
+        else if (isPicked) tag = '<span class="q-tag bad">✗ selected</span>';
+        if (tag) { var t = document.createElement('span'); t.innerHTML = tag; li.appendChild(t); }
+        ul.appendChild(li);
+      });
+      box.appendChild(ul);
+      if (r.givenIdx === null) {
+        var blank = document.createElement('div');
+        blank.className = 'q-tag bad';
+        blank.style.marginTop = '4px';
+        blank.textContent = 'Left blank';
+        box.appendChild(blank);
+      }
+    } else if (q.type === 'fr') {
+      var fr = document.createElement('div');
+      fr.className = 'q-fr';
+      var yourAns = (r.givenText !== null && r.givenText !== undefined && r.givenText !== '') ? r.givenText : (r.ok ? String(q.answer) : 'left blank');
+      fr.innerHTML = 'Correct answer: <span class="q-correct-ans">' + q.answer + '</span>' +
+        (r.ok ? '' : ' &nbsp;·&nbsp; Entered: <span class="q-your-ans">' + yourAns + '</span>');
+      box.appendChild(fr);
+    }
+
+    if (r.timeMs || r.firstVisitedAt || r.lastViewedAt) {
+      var timing = document.createElement('div');
+      timing.className = 'q-timing';
+      timing.innerHTML = 'Time spent: <strong>' + formatDuration(r.timeMs) + '</strong>' +
+        ' &nbsp;·&nbsp; First visited: ' + formatClock(r.firstVisitedAt) +
+        ' &nbsp;·&nbsp; Last viewed: ' + formatClock(r.lastViewedAt);
+      box.appendChild(timing);
+    }
+    return box;
+  }
+
+  var twrap = document.getElementById('raw-tables');
+  // Accordion: at most one question's detail is open at a time across the
+  // WHOLE detail view (both sections). Opening a question collapses
+  // whichever one was open. openEntry holds the collapse() of the
+  // currently-open row, or null when nothing is expanded.
+  var openEntry = null;
+  sections.forEach(function (s4) {
+    var h = document.createElement('div');
+    h.className = 'sec-hed';
+    h.textContent = s4.label;
+    twrap.appendChild(h);
+    var hint = document.createElement('div');
+    hint.className = 'q-hint';
+    hint.textContent = 'Click any question to see the actual prompt, the answer choices, the correct answer, and what was selected.';
+    twrap.appendChild(hint);
+    var tb = document.createElement('table');
+    // Header. Each question is TWO table rows: a clickable summary row and
+    // a hidden detail row underneath it that expands to show the real
+    // question. Built as DOM (not one innerHTML string) so each pair can
+    // carry its own click handler and the detail is rendered lazily.
+    var thead = document.createElement('tr');
+    thead.innerHTML = '<th class="q-toggle"></th><th>#</th><th>Skill</th><th>Answer</th><th>Result</th><th>Flagged</th><th>Time</th>';
+    tb.appendChild(thead);
+    s4.rows.forEach(function (r) {
+      var summary = document.createElement('tr');
+      summary.className = 'q-row';
+      summary.innerHTML = '<td class="q-toggle">▸</td><td>' + r.n + '</td><td>' + r.dom + ' → ' + r.sk +
+        '</td><td>' + r.given + '</td><td class="' + (r.ok ? 'ok' : 'bad') + '">' + (r.ok ? 'Correct' : 'Incorrect') +
+        '</td><td>' + (r.marked ? '⚑' : '') + '</td><td>' + (r.timeMs ? formatDuration(r.timeMs) : '—') + '</td>';
+      var detailRow = document.createElement('tr');
+      detailRow.className = 'q-detail-row';
+      detailRow.style.display = 'none';
+      var detailCell = document.createElement('td');
+      detailCell.colSpan = 7;
+      detailRow.appendChild(detailCell);
+      var built = false;
+      function collapse() {
+        detailRow.style.display = 'none';
+        summary.classList.remove('open');
+        summary.querySelector('.q-toggle').textContent = '▸';
+        if (openEntry === collapse) openEntry = null;
+      }
+      summary.addEventListener('click', function () {
+        var isOpen = detailRow.style.display !== 'none';
+        if (isOpen) { collapse(); return; }
+        // Opening this one — first close whatever else is open.
+        if (openEntry && openEntry !== collapse) openEntry();
+        if (!built) { detailCell.appendChild(renderQuestionDetail(r)); built = true; }
+        detailRow.style.display = '';
+        summary.classList.add('open');
+        summary.querySelector('.q-toggle').textContent = '▾';
+        openEntry = collapse;
+      });
+      tb.appendChild(summary);
+      tb.appendChild(detailRow);
+    });
+    twrap.appendChild(tb);
+  });
+
+  document.getElementById('page1').style.display = 'block';
+
+  // The question-by-question table is real detail, but it's not what most
+  // parents open this report for — it stays off by default (both on
+  // screen and in a straight-to-print PDF) and is one click away for
+  // anyone who does want it, Luca or the student included.
+  var detailToggle = document.getElementById('detail-toggle');
+  var page2 = document.getElementById('page2');
+  if (detailToggle && page2) {
+    detailToggle.addEventListener('click', function (e) {
+      e.preventDefault();
+      var showing = page2.style.display !== 'none';
+      page2.style.display = showing ? 'none' : 'block';
+      detailToggle.textContent = showing ? 'Show full question-by-question detail (click any question to see it) ↓' : 'Hide full question-by-question detail ↑';
+      if (!showing) page2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
+})();
+</script>
+</body>
+</html>
