@@ -230,7 +230,7 @@
   // The readings were taken with the two module sliders set EQUAL, so
   // Albert's own module weighting cancels out and each point is the pure
   // base curve for a given total raw score; this report then re-adds the
-  // Module-1-vs-Module-2 effect separately via MODULE_WEIGHT below.
+  // Module-1-vs-Module-2 effect separately via the module-weight curves below.
   // Math and R&W are genuinely different curves (Math is steeper near the
   // top), so each section reads its own.
   //
@@ -254,7 +254,7 @@
   ];
   var MATH_CURVE = [
     [0, 200], [13.64, 260], [27.27, 330], [45.45, 400], [59.09, 480],
-    [72.73, 580], [77.27, 620], [84.09, 675], [86.36, 700], [90.91, 730],
+    [72.73, 580], [77.27, 630], [84.09, 675], [86.36, 700], [90.91, 730],
     [95.45, 770], [100, 800]
   ];
   function scaleFromPct(pct, curve) {
@@ -270,14 +270,41 @@
   }
   function roundToTen(n) { return Math.round(n / 10) * 10; }
   // Points per unit of (module-1 rate − module-2 rate) in the SAT section
-  // score — calibrated to Albert.io's published digital-SAT calculator
-  // (see satSectionScore below for the full derivation). Declared here,
-  // next to the curves, rather than beside satSectionScore, because the
-  // demo score search (buildDemoData) runs before satSectionScore's line
-  // in the file and calls it — if this constant weren't assigned yet, the
+  // score. NOT a flat constant — Luca supplied six verified data points (2
+  // near-ceiling from Albert.io's calculator, 4 mid-range from the real
+  // exam's own behavior) and a single weight could not reproduce all six:
+  // the module-split effect is much smaller near a perfect score than in
+  // the middle of the scale (near 800 there's barely any room left to
+  // spread two students apart; in the middle there's a lot). So this is a
+  // piecewise-linear function of total percent correct, anchored at the
+  // exact percentages the six data points sit at and flat outside that
+  // range (no data beyond it to extrapolate from):
+  //   R&W:  77.78% (42/54 total) -> weight 56.25 [15M1/27M2->600, 27M1/15M2->650]
+  //         98.15% (53/54 total) -> weight 135   [26M1/27M2->780, 27M1/26M2->790]
+  //   Math: 77.27% (34/44 total) -> weight 88    [12M1/22M2->590, 22M1/12M2->670]
+  //         84.09% (37/44 total) -> weight 78.57 [15M1/22M2->650, 22M1/15M2->700]
+  // Each weight = (high score − low score) / (2 × |module-1 rate − module-2
+  // rate|) for that pair, so plugging the pair's own numbers back in via
+  // satSectionScore reproduces the pair's own two scores exactly. Declared
+  // here, next to the curves, rather than beside satSectionScore, because
+  // the demo score search (buildDemoData) runs before satSectionScore's
+  // line in the file and calls it — if this weren't assigned yet, the
   // multiplication would produce NaN and the whole demo would fail to
   // render.
-  var MODULE_WEIGHT = 80;
+  var RW_MODULE_WEIGHT_CURVE = [[77.78, 56.25], [98.15, 135]];
+  var MATH_MODULE_WEIGHT_CURVE = [[77.27, 88], [84.09, 78.57]];
+  function moduleWeightFromPct(pct, curve) {
+    if (pct <= curve[0][0]) return curve[0][1];
+    if (pct >= curve[curve.length - 1][0]) return curve[curve.length - 1][1];
+    for (var i = 1; i < curve.length; i++) {
+      if (pct <= curve[i][0]) {
+        var lo = curve[i - 1], hi = curve[i];
+        var frac = (pct - lo[0]) / (hi[0] - lo[0]);
+        return lo[1] + frac * (hi[1] - lo[1]);
+      }
+    }
+    return curve[curve.length - 1][1];
+  }
 
   /* ═══ SKILL PREREQUISITES ═══
      Standard curriculum sequencing — the kind of thing an experienced
@@ -420,9 +447,12 @@
     // broadly at high wrong-rates and concentrates narrowly at low ones,
     // without needing separate hard-coded bands to fake that effect.
     var WEAK_WRONG = 0.78;
-    // Module-1 percent correct at/above this routes to the Harder Module 2
-    // — same spirit as the real adaptive SAT's own routing cutoff.
-    var ROUTE_THRESHOLD = 0.6;
+    // Module-1 raw score STRICTLY ABOVE this many correct routes to the
+    // Harder Module 2 — the real adaptive digital SAT's own routing cutoff
+    // (R&W: above 15/27, Math: above 12/22), matching index.html's
+    // MODULE2_ROUTING_RAW_THRESHOLD exactly so this demo generator's
+    // routing behaves the same as a real student's.
+    var ROUTE_RAW_THRESHOLD = { 'reading-writing': 15, 'math': 12 };
 
     function genAnswers(qs, wrongRate, weakSkill) {
       var answers = [], marked = [], times = [], correct = 0;
@@ -496,7 +526,8 @@
       var m1 = genAnswers(bank.module1, wrongRate, weakSkill);
       var variant = null, m2 = null, m2t = 0;
       if (bank.module2Easier) {
-        variant = (m1.correct / bank.module1.length) >= ROUTE_THRESHOLD ? 'Harder' : 'Easier';
+        var rawT = ROUTE_RAW_THRESHOLD[key];
+        variant = (rawT != null ? m1.correct > rawT : (m1.correct / bank.module1.length) >= 0.6) ? 'Harder' : 'Easier';
         m2 = genAnswers(bank['module2' + variant], wrongRate, weakSkill);
         m2t = bank['module2' + variant].length;
       }
@@ -865,34 +896,37 @@
      curve at the total percent correct, then shifts it by the gap between
      Module 1 and Module 2 performance:
 
-       score = curve(total % correct) + MODULE_WEIGHT * (m1rate - m2rate)
+       score = curve(total % correct) + weight(total % correct) * (m1rate - m2rate)
 
-     MODULE_WEIGHT = 80 reproduces all four Albert data points above
-     exactly (RW 780/790, Math 650/700). The shift term is 0 whenever the
-     two modules were answered at the same rate — including a perfect
+     weight() is the piecewise-linear function declared next to the curves
+     above (RW_MODULE_WEIGHT_CURVE / MATH_MODULE_WEIGHT_CURVE) — not a flat
+     constant, see the comment there for why. The shift term is 0 whenever
+     the two modules were answered at the same rate — including a perfect
      score (both 100%, -> 800) and a zero score (both 0%, -> 200) — so the
      floor and ceiling are preserved, and it naturally captures the
      routing effect (doing poorly on Module 1 pulls the section down the
      way real easier-Module-2 routing does) without a separate hard cap.
-     The result is clamped to the 200-800 section scale.
-     (MODULE_WEIGHT itself is declared up near the curves, not here — the
-     demo score search below calls satSectionScore before this point in
-     the file is reached, so the constant has to be assigned before then
-     or it reads as undefined and every demo score comes out NaN.) */
+     The result is clamped to the 200-800 section scale. */
   // curve is passed explicitly (RW_CURVE or MATH_CURVE) rather than
   // inferred from a section-key field on sec — the two call sites for
   // this function (the real report's section objects, and the demo
   // generator's) don't use the same field name for that key, and picking
   // the wrong curve silently would misgrade a section rather than error.
+  // The matching module-weight curve is inferred from which score curve
+  // was passed (there are only ever these two), rather than adding a
+  // third parameter to every call site.
   function satSectionScore(sec, curve) {
     if (!sec || !sec.t) return null;
-    var base = scaleFromPct(sec.c / sec.t * 100, curve);
+    var pct = sec.c / sec.t * 100;
+    var base = scaleFromPct(pct, curve);
     // Module-1 vs Module-2 success rates. A non-adaptive section (no
     // Module 2, so t2 == 0) has nothing to split, so both rates fall back
     // to the overall rate and the shift term is 0.
     var r1 = sec.t1 ? sec.c1 / sec.t1 : (sec.c / sec.t);
     var r2 = sec.t2 ? sec.c2 / sec.t2 : (sec.c / sec.t);
-    var score = base + MODULE_WEIGHT * (r1 - r2);
+    var weightCurve = (curve === MATH_CURVE) ? MATH_MODULE_WEIGHT_CURVE : RW_MODULE_WEIGHT_CURVE;
+    var weight = moduleWeightFromPct(pct, weightCurve);
+    var score = base + weight * (r1 - r2);
     score = Math.max(200, Math.min(800, score));
     return roundToTen(score);
   }
