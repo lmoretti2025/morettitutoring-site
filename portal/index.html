@@ -2350,7 +2350,15 @@
   var moduleStage = 'module1';   // 'module1' | 'module2'
   var module2Variant = null;     // null | 'Easier' | 'Harder'
   var module1Buffer = null;      // { answers, marked } captured at the end of Module 1
-  var MODULE2_ROUTING_THRESHOLD = 0.6;
+  // Real digital SAT routing cutoff, per Luca: a Module 1 raw score STRICTLY
+  // ABOVE this many correct routes to Module 2 Harder; at or below routes to
+  // Easier. This is an exact raw-count cutoff, not a uniform percentage —
+  // R&W's 27-question Module 1 routes hard above 15 correct (16+), Math's
+  // 22-question Module 1 routes hard above 12 correct (13+). Keyed by the
+  // same section key used everywhere else (bankFor/currentSectionKey), so
+  // it applies identically to the diagnostic and every practice test (same
+  // module1 question counts throughout).
+  var MODULE2_ROUTING_RAW_THRESHOLD = { 'reading-writing': 15, 'math': 12 };
   // Real ACT day only has one break — after Math, before Reading. There's
   // no break between English and Math. The digital SAT's only section
   // transition (Reading & Writing -> Math) always gets one. Shared between
@@ -2982,7 +2990,8 @@
       var qs = activeQuestions();
       var correct = 0;
       qs.forEach(function (q, i) { if (isCorrect(q, answers[i])) correct++; });
-      module2Variant = (qs.length && correct / qs.length >= MODULE2_ROUTING_THRESHOLD) ? 'Harder' : 'Easier';
+      var rawThreshold = MODULE2_ROUTING_RAW_THRESHOLD[secKey];
+      module2Variant = (rawThreshold != null ? correct > rawThreshold : (qs.length && correct / qs.length >= 0.6)) ? 'Harder' : 'Easier';
       module1Buffer = {
         answers: canonical(answers), marked: canonical(marked),
         questionTimeMs: canonical(questionTimeMs),
