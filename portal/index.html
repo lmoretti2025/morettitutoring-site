@@ -298,6 +298,18 @@
   #dx-shell { display: flex; flex: 1; }
   #dx-main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 3rem 2.5rem; }
 
+  /* ═══ PRACTICE TEST screen — class-equivalents of the four dx-* ID rules
+     above (#dx-notice-bar/#dx-topbar/#dx-shell/#dx-main), so the practice
+     test's own screen (its own element IDs, to avoid duplicate-ID
+     collisions with the diagnostic's dx-screen) can reuse the identical
+     layout via classes instead. Every other dx- class (.dx-card,
+     .dx-choice, .dx-btn, .dx-timer, .dx-check-panel, .dx-qgrid, etc.) is
+     already a class selector and is reused as-is, unchanged, below. */
+  .pt-notice-bar { margin-top: 62px; background: var(--dx-navy); color: #fff; text-align: center; padding: 0.55rem 1rem; font-family: var(--hel); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; }
+  .pt-topbar { padding: 0.75rem 2rem; display: flex; align-items: center; justify-content: space-between; background: var(--white); border-bottom: 1px solid var(--border); }
+  .pt-shell { display: flex; flex: 1; }
+  .pt-main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 3rem 2.5rem; }
+
   /* ═══ QUESTION NAVIGATOR — a dismissible popup (opened from the
      progress button), matching Bluebook's own module question-picker,
      rather than a permanently-docked sidebar. ═══ */
@@ -766,8 +778,103 @@
           <div class="menu-card-body">Reading &amp; Writing and Math questions with full explanations for every answer choice. Pick your own topics, or practice the skills you missed on your last diagnostic.</div>
         </div>
       </div>
+      <div class="menu-card menu-card-wide" data-route="practice-tests">
+        <span class="menu-card-icon">&#9201;</span>
+        <div>
+          <div class="menu-card-title">Practice Tests</div>
+          <div class="menu-card-body">Full, timed SAT-format practice tests — the same adaptive Module 1/Module 2 format as the real digital SAT, scored just like your diagnostic.</div>
+        </div>
+      </div>
     </div>
     <a href="#" class="menu-back-link" id="sat-resources-back">&larr; Back to menu</a>
+  </div>
+</div>
+
+<!-- ═══ SCREEN 3b-iii — PRACTICE TESTS (picker) ═══ -->
+<div class="screen" id="screen-practice-tests">
+  <div class="panel-wide">
+    <div class="kicker">SAT Resources</div>
+    <h1 class="panel-hed">Practice tests.</h1>
+    <p class="panel-sub">Pick a test below. Each one is full-length and timed, with the same adaptive Module 1 → Module 2 routing as the real digital SAT — treat it like the real thing.</p>
+    <div class="menu-grid" id="pt-test-list"></div>
+    <a href="#" class="menu-back-link" id="pt-list-back">&larr; Back to SAT Resources</a>
+  </div>
+</div>
+
+<!-- ═══ SCREEN 3b-iv — PRACTICE TEST, question-taking. Reuses the
+     diagnostic's own dx-* CSS CLASSES (dx-card, dx-choice, dx-btn,
+     dx-timer, dx-check-panel, dx-qgrid, ...) for a visually identical
+     experience, but with entirely its own element IDs and its own JS
+     module below (ptModuleInit) — it shares zero state or functions with
+     the diagnostic's engine, so nothing here can affect a real diagnostic
+     attempt. The four dx-* rules that are ID-selectors instead of classes
+     (#dx-notice-bar/#dx-topbar/#dx-shell/#dx-main) have class-equivalents
+     defined above (.pt-notice-bar etc.) for that reason. ═══ -->
+<div class="screen" id="pt-screen">
+  <div class="pt-notice-bar"><span id="pt-notice-text">PRACTICE TEST</span></div>
+  <div class="pt-topbar">
+    <div class="dx-brand"><span id="pt-brand-label">SAT Practice Test</span><span id="pt-student-label"></span></div>
+    <div class="dx-progress-wrap">
+      <span class="dx-timer" id="pt-timer">60:00</span>
+      <button type="button" class="dx-progress-btn" id="pt-progress-btn">
+        <span class="dx-progress-label" id="pt-progress-label">Question 1 of 27</span>
+      </button>
+    </div>
+  </div>
+  <div class="dx-timer-toast" id="pt-timer-toast" style="display:none;">You have five minutes remaining.</div>
+  <div class="pt-shell">
+    <div class="pt-main" id="pt-main">
+      <div class="dx-card-wrap">
+        <div class="dx-card" id="pt-card">
+          <div class="dx-card-hed">
+            <span class="dx-qnum-tile" id="pt-qnum-tile">1</span>
+            <button class="dx-mark-btn" id="pt-mark" type="button">&#128278; Mark for Review</button>
+          </div>
+          <h1 class="dx-qtext" id="pt-qtext"></h1>
+          <div class="dx-choices" id="pt-choices" style="display:none;"></div>
+          <div class="dx-fr-row" id="pt-fr-row" style="display:none;">
+            <input type="text" inputmode="decimal" class="dx-fr-input" id="pt-fr-input" placeholder="Type your answer">
+          </div>
+          <div class="dx-nav-row">
+            <button class="dx-btn dx-btn-back" id="pt-back">Back</button>
+            <button class="dx-btn dx-btn-next" id="pt-next" disabled>Next</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="dx-check-panel" id="pt-check-panel">
+        <h1 class="dx-check-hed">Check Your Work</h1>
+        <p class="dx-check-sub">Review any question below before you submit — click a number to jump back to it. Once you submit, you can't return to this module.</p>
+        <div class="dx-check-card">
+          <div class="dx-check-card-hed">
+            <div class="dx-check-card-title" id="pt-check-title">Questions</div>
+            <div class="dx-check-legend">
+              <span>&#9634; Unanswered</span>
+              <span>&#128681; For Review</span>
+            </div>
+          </div>
+          <div class="dx-qgrid" id="pt-check-grid"></div>
+        </div>
+        <button class="dx-btn dx-btn-next dx-check-submit-btn" id="pt-check-submit" type="button">Submit Module</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SCREEN 3b-v — PRACTICE TEST break, between Reading & Writing and
+     Math. Untimed on purpose (unlike the diagnostic's dx-break-screen) —
+     a practice test is student-initiated study time, not a proctored
+     sitting, so a forced countdown just adds friction without adding
+     anything toward the actual goal (a comparable score to track
+     progress). ═══ -->
+<div class="screen" id="pt-break-screen">
+  <div class="done-wrap">
+    <div class="panel">
+      <div class="done-icon">&#10003;</div>
+      <h1 class="panel-hed" id="pt-break-title">Reading &amp; Writing complete.</h1>
+      <p class="panel-sub" id="pt-break-sub">Take a short break if you'd like — this half doesn't run on a clock. Click below whenever you're ready to continue with Math.</p>
+      <button class="key-btn" id="pt-break-continue" type="button">Continue to Math</button>
+    </div>
   </div>
 </div>
 
@@ -1289,6 +1396,7 @@
       screen: activeScreenId,
       resourceKind: currentResourceKind,
       testChoice: testChoice,
+      practiceTestId: practiceTestId,
       activeSectionKeys: activeSectionKeys,
       sectionIndex: sectionIndex,
       completedSections: completedSections,
@@ -1913,11 +2021,42 @@
       else if (route === 'sat-resources') { show('screen-sat-resources'); }
       else if (route === 'vocab') { show('screen-vocab'); if (window.vocabModuleInit) window.vocabModuleInit(); }
       else if (route === 'practice-bank') { show('screen-practice-bank'); if (window.pbModuleInit) window.pbModuleInit(); }
+      else if (route === 'practice-tests') { renderPracticeTestList(); show('screen-practice-tests'); }
     });
   });
   document.getElementById('sat-resources-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-menu'); });
   document.getElementById('vocab-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-sat-resources'); });
   document.getElementById('practice-bank-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-sat-resources'); });
+  document.getElementById('pt-list-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-sat-resources'); });
+
+  /* ═══ PRACTICE TESTS — PICKER ═══
+     Cards built straight from window.SAT_PRACTICE_TESTS (see
+     practice-tests.js) so a new test just needs to be added to that array —
+     no code change needed here. Clicking a card kicks off startPracticeTest()
+     (defined further down, alongside the rest of the adaptive-module
+     engine), which reuses the exact same Module 1/Module 2 flow as the real
+     SAT diagnostic. */
+  function renderPracticeTestList() {
+    var list = document.getElementById('pt-test-list');
+    var tests = window.SAT_PRACTICE_TESTS || [];
+    if (!tests.length) {
+      list.innerHTML = '<p class="panel-sub">No practice tests are available yet — check back soon.</p>';
+      return;
+    }
+    list.innerHTML = '';
+    tests.forEach(function (test) {
+      var mathQ = ((test.sections || {}).math || {});
+      var rwQ = ((test.sections || {}).readingWriting || {});
+      var totalQ = (mathQ.module1 || []).length + (mathQ.module2Easier || []).length +
+        (rwQ.module1 || []).length + (rwQ.module2Easier || []).length;
+      var card = document.createElement('div');
+      card.className = 'menu-card menu-card-wide';
+      card.innerHTML = '<span class="menu-card-icon">&#9201;</span><div><div class="menu-card-title">' +
+        test.title + '</div><div class="menu-card-body">Full adaptive SAT format — ' + totalQ + ' questions across Reading & Writing and Math, timed and scored just like your diagnostic.</div></div>';
+      card.addEventListener('click', function () { startPracticeTest(test.id); });
+      list.appendChild(card);
+    });
+  }
   document.getElementById('resume-yes').addEventListener('click', function () {
     resumeOverlay.classList.remove('active');
     var snap = pendingResumeSnapshot;
@@ -1974,8 +2113,8 @@
 
   /* ═══ SCREEN 3c: CHOOSE SAT OR ACT ═══ */
   document.getElementById('test-choice-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-menu'); });
-  document.getElementById('choose-sat').addEventListener('click', function () { startTest('SAT'); });
-  document.getElementById('choose-act').addEventListener('click', function () { startTest('ACT'); });
+  document.getElementById('choose-sat').addEventListener('click', function () { practiceTestId = null; startTest('SAT'); });
+  document.getElementById('choose-act').addEventListener('click', function () { practiceTestId = null; startTest('ACT'); });
 
   /* ═══ SCREEN 4: DIAGNOSTIC SECTION/MODULE INTRO ═══ */
   document.getElementById('intro-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-menu'); });
@@ -1986,7 +2125,9 @@
     beginQuestionTime(current);
     renderQuestion();
     show('dx-screen');
-    var minutes = (window.SECTION_MODULE_TIME_LIMITS || {})[activeSectionKeys[sectionIndex]];
+    var secKeyNow = activeSectionKeys[sectionIndex];
+    var timeLimitsNow = practiceTestId ? (window.PRACTICE_MODULE_TIME_LIMITS || {}) : (window.SECTION_MODULE_TIME_LIMITS || {});
+    var minutes = timeLimitsNow[secKeyNow === 'reading-writing' ? 'readingWriting' : secKeyNow] || timeLimitsNow[secKeyNow];
     // Scale by the extended-time accommodation (1 / 1.5 / 2).
     if (minutes) minutes = minutes * accommodations.timeMult;
     if (minutes) { startSectionTimer(minutes); } else { dxTimerEl.style.display = 'none'; stopSectionTimer(); sectionTimerEndsAt = null; }
@@ -2130,9 +2271,35 @@
   // screen) and the test-overview screen (to describe it up front).
   var NO_BREAK_AFTER = { 'english': true };
 
+  // Non-null while a Practice Test (as opposed to a real SAT/ACT
+  // diagnostic) is in progress — the id of the entry in
+  // window.SAT_PRACTICE_TESTS currently being taken. Every place that used
+  // to read SECTION_BANKS[key] directly now goes through bankFor(key)
+  // instead, so the exact same adaptive-module engine below (module1 ->
+  // module2 Easier/Harder routing, timers, Check Your Work, etc.) drives
+  // practice tests too, with zero duplicated logic.
+  var practiceTestId = null;
+  function activePracticeTest() {
+    if (!practiceTestId) return null;
+    return (window.SAT_PRACTICE_TESTS || []).filter(function (t) { return t.id === practiceTestId; })[0] || null;
+  }
+  function bankFor(key) {
+    var pt = activePracticeTest();
+    if (pt && pt.sections) {
+      var ptKey = key === 'reading-writing' ? 'readingWriting' : key;
+      var s = pt.sections[ptKey];
+      if (s) {
+        return {
+          label: key === 'math' ? 'Math' : 'Reading and Writing',
+          module1: s.module1, module2Easier: s.module2Easier, module2Harder: s.module2Harder
+        };
+      }
+    }
+    return SECTION_BANKS[key];
+  }
   function currentSectionKey() { return activeSectionKeys[sectionIndex]; }
-  function currentBank() { return SECTION_BANKS[currentSectionKey()]; }
-  function sectionHasModules(key) { return !!SECTION_BANKS[key].module2Easier; }
+  function currentBank() { return bankFor(currentSectionKey()); }
+  function sectionHasModules(key) { return !!bankFor(key).module2Easier; }
   function moduleQuestions(bank, stage, variant) {
     if (!bank.module2Easier) return bank.module1; // ACT: single fixed module
     return stage === 'module1' ? bank.module1 : bank['module2' + variant];
@@ -2417,11 +2584,21 @@
   function startTest(choice) {
     testChoice = choice;
     activeSectionKeys = TEST_FORMATS[choice].order.filter(function (key) {
-      return SECTION_BANKS[key].module1.length > 0;
+      return bankFor(key).module1.length > 0;
     });
     completedSections = [];
     if (!activeSectionKeys.length) { show('screen-menu'); return; } // shouldn't happen — Math always has content
     showTestOverview();
+  }
+
+  // Practice Tests reuse the exact same adaptive-module engine as the real
+  // SAT diagnostic (testChoice stays 'SAT' so every existing section-order/
+  // module-routing/timer code path behaves identically) — practiceTestId is
+  // the only new piece of state, and bankFor() is the only place that reads
+  // it, so nothing else below needs to know the difference.
+  function startPracticeTest(testId) {
+    practiceTestId = testId;
+    startTest('SAT');
   }
 
   // One-time overview shown after choosing SAT/ACT and before the first
@@ -2439,12 +2616,14 @@
   }
 
   function showTestOverview() {
-    document.getElementById('overview-kicker').textContent = testChoice + ' Diagnostic';
-    document.getElementById('overview-sub').textContent =
-      'The sections, order, and timing below match the real test exactly. Read this over, then begin when you\'re ready.';
+    var pt = activePracticeTest();
+    document.getElementById('overview-kicker').textContent = pt ? pt.title : (testChoice + ' Diagnostic');
+    document.getElementById('overview-sub').textContent = pt
+      ? 'A full, timed, adaptive practice test in the same Module 1 / Module 2 format as the real digital SAT. Read this over, then begin when you\'re ready.'
+      : 'The sections, order, and timing below match the real test exactly. Read this over, then begin when you\'re ready.';
 
     var retakeEl = document.getElementById('overview-retake-notice');
-    if (alreadyTakenThisTestType()) {
+    if (!pt && alreadyTakenThisTestType()) {
       retakeEl.style.display = 'block';
       retakeEl.textContent = 'Heads up — you\'ve already completed a real ' + testChoice + ' diagnostic on this key. ' +
         'This attempt is for your own practice: you\'ll still get your results at the end, but Luca won\'t be notified this time.';
@@ -2477,10 +2656,11 @@
   function renderOverviewTiming() {
     var mult = accommodations.timeMult;
     var rowsHtml = '';
+    var timeLimits = practiceTestId ? (window.PRACTICE_MODULE_TIME_LIMITS || {}) : (window.SECTION_MODULE_TIME_LIMITS || {});
     activeSectionKeys.forEach(function (key, i) {
-      var bank = SECTION_BANKS[key];
+      var bank = bankFor(key);
       var hasTwoModules = sectionHasModules(key);
-      var perModuleMinutes = (window.SECTION_MODULE_TIME_LIMITS || {})[key] || 0;
+      var perModuleMinutes = timeLimits[key === 'reading-writing' ? 'readingWriting' : key] || timeLimits[key] || 0;
       var totalMinutes = (hasTwoModules ? perModuleMinutes * 2 : perModuleMinutes) * mult;
       var totalQuestions = hasTwoModules ? bank.module1.length + bank.module2Easier.length : bank.module1.length;
       var label = bank.label.replace(' (optional on the real ACT)', '');
@@ -2591,7 +2771,7 @@
   function goToModuleIntro() {
     dxMain.classList.remove('dx-checking');
     var secKey = activeSectionKeys[sectionIndex];
-    var bank = SECTION_BANKS[secKey];
+    var bank = bankFor(secKey);
     var hasTwoModules = sectionHasModules(secKey);
     var qsBank = moduleQuestions(bank, moduleStage, module2Variant);
     current = 0;
@@ -2610,18 +2790,21 @@
     var sectionLabel = bank.label;
     var moduleLabelSuffix = hasTwoModules ? (' — ' + (moduleStage === 'module1' ? 'Module 1' : 'Module 2')) : '';
     var hasReference = !!SECTIONS_WITH_REFERENCE[secKey];
-    var timeLimit = (window.SECTION_MODULE_TIME_LIMITS || {})[secKey];
+    var pt = activePracticeTest();
+    var timeLimits = pt ? (window.PRACTICE_MODULE_TIME_LIMITS || {}) : (window.SECTION_MODULE_TIME_LIMITS || {});
+    var timeLimit = timeLimits[secKey === 'reading-writing' ? 'readingWriting' : secKey] || timeLimits[secKey];
     var frNoteOn = (secKey === 'math' && testChoice === 'SAT');
+    var testLabel = pt ? pt.title : (testChoice + ' Diagnostic');
 
-    document.getElementById('intro-kicker').textContent = testChoice + ' Diagnostic';
-    document.getElementById('intro-sub').textContent = 'No pressure — this just tells Luca where to focus. Take your time.';
+    document.getElementById('intro-kicker').textContent = testLabel;
+    document.getElementById('intro-sub').textContent = pt ? 'Take your time and do your best — this is a real, scored practice run.' : 'No pressure — this just tells Luca where to focus. Take your time.';
     document.getElementById('intro-fr-note').style.display = frNoteOn ? '' : 'none';
     document.getElementById('intro-directions').innerHTML = SECTION_DIRECTIONS[secKey] || '';
     document.getElementById('intro-reference-link').style.display = hasReference ? 'inline-flex' : 'none';
     document.getElementById('dx-reference-btn').style.display = hasReference ? '' : 'none';
     document.getElementById('intro-hed').textContent = sectionLabel + moduleLabelSuffix + ' — ' + qs.length + ' question' + (qs.length === 1 ? '' : 's') + (timeLimit ? ' — ' + timeLimit + ' minutes.' : '.');
-    document.getElementById('dx-brand-label').textContent = testChoice + ' Diagnostic — ' + sectionLabel + moduleLabelSuffix;
-    document.getElementById('dx-notice-text').textContent = 'THIS IS A ' + testChoice + ' DIAGNOSTIC';
+    document.getElementById('dx-brand-label').textContent = testLabel + ' — ' + sectionLabel + moduleLabelSuffix;
+    document.getElementById('dx-notice-text').textContent = pt ? ('THIS IS A TIMED, SCORED PRACTICE TEST') : ('THIS IS A ' + testChoice + ' DIAGNOSTIC');
     document.getElementById('intro-start').textContent = hasTwoModules ? 'Start This Module' : 'Start This Section';
     show('screen-intro');
   }
@@ -2670,7 +2853,7 @@
       finalQuestionLastViewedAt = canonical(questionLastViewedAt);
     }
     completedSections.push({
-      key: secKey, label: SECTION_BANKS[secKey].label, answers: finalAnswers, marked: finalMarked, module2Variant: module2Variant,
+      key: secKey, label: bankFor(secKey).label, answers: finalAnswers, marked: finalMarked, module2Variant: module2Variant,
       questionTimeMs: finalQuestionTimeMs, questionFirstVisitedAt: finalQuestionFirstVisitedAt, questionLastViewedAt: finalQuestionLastViewedAt
     });
     moduleStage = 'module1';
@@ -2739,7 +2922,7 @@
 
   function openNavModal() {
     var secKey = activeSectionKeys[sectionIndex];
-    var bank = SECTION_BANKS[secKey];
+    var bank = bankFor(secKey);
     var moduleLabel = sectionHasModules(secKey) ? (moduleStage === 'module1' ? 'Module 1' : 'Module 2') : 'Module 1';
     navModalTitle.textContent = 'Section ' + (sectionIndex + 1) + ', ' + moduleLabel + ': ' + bank.label + ' Questions';
     refreshSidebar();
@@ -2944,7 +3127,7 @@
   function showCheckScreen() {
     flushQuestionTime();
     var secKey = activeSectionKeys[sectionIndex];
-    var bank = SECTION_BANKS[secKey];
+    var bank = bankFor(secKey);
     var moduleLabel = sectionHasModules(secKey) ? (moduleStage === 'module1' ? 'Module 1' : 'Module 2') : 'Module 1';
     checkTitle.textContent = 'Section ' + (sectionIndex + 1) + ', ' + moduleLabel + ': ' + bank.label + ' Questions';
     checkSubmitBtn.textContent = computeSubmitLabel();
@@ -3038,7 +3221,7 @@
     var sectionResults = []; // [{ label, correct, total }] — feeds the visual score report
 
     completedSections.forEach(function (sec) {
-      var qs = sectionQuestions(SECTION_BANKS[sec.key], sec.module2Variant);
+      var qs = sectionQuestions(bankFor(sec.key), sec.module2Variant);
       var secCorrect = 0;
       lines.push('');
       lines.push(sec.label.toUpperCase() + ':');
@@ -3068,8 +3251,9 @@
 
     saveDiagnosticSkillStats(skills);
 
+    var ptDone = activePracticeTest();
     var reportLines = [];
-    reportLines.push(testChoice + ' DIAGNOSTIC RESULTS');
+    reportLines.push(ptDone ? (ptDone.title.toUpperCase() + ' RESULTS') : (testChoice + ' DIAGNOSTIC RESULTS'));
     reportLines.push('Student: ' + currentStudent.name);
     reportLines.push('Overall score: ' + totalCorrect + ' / ' + totalQuestions);
     reportLines.push('');
@@ -3098,6 +3282,7 @@
 
     var payload = {
       n: currentStudent.name, k: currentStudent.key, t: testChoice,
+      pt: ptDone ? ptDone.id : undefined, ptTitle: ptDone ? ptDone.title : undefined,
       dt: new Date().toISOString().slice(0, 10),
       s: completedSections.map(function (sec) {
         return {
@@ -3123,6 +3308,45 @@
     var reportLinkEl = document.getElementById('done-report-link');
     var statusEl = document.getElementById('done-status');
     statusEl.classList.remove('err');
+
+    // Practice Tests are handled entirely separately from the real SAT/ACT
+    // diagnostic flow below: every attempt is a "marker point" meant to
+    // show progress over time, so (unlike the diagnostic) the student
+    // always sees their own score link AND Luca is notified every time —
+    // there's no "first attempt only" gating, and no satTaken/actTaken
+    // stamping (that flag is diagnostic-specific).
+    if (ptDone) {
+      if (reportLink) {
+        reportLinkEl.innerHTML = 'See your scores and analysis <a href="' + reportLink + '" target="_blank" rel="noopener">here</a>.';
+        reportLinkEl.style.display = 'block';
+      } else {
+        reportLinkEl.style.display = 'none';
+      }
+      document.getElementById('done-message').textContent = 'Nice work! Your results just went to Luca — no need to send anything yourself.';
+      statusEl.textContent = 'Sending your results…';
+      show('screen-done');
+      fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'submitPracticeTest',
+          key: currentStudent.key,
+          test: ptDone.title,
+          score: totalCorrect + '/' + totalQuestions,
+          reportLink: reportLink,
+          report: report
+        })
+      }).then(function (res) { return res.json(); })
+        .then(function (data) {
+          if (data && data.ok) { statusEl.textContent = 'Results delivered.'; }
+          else { throw new Error((data && data.error) || 'send_failed'); }
+        })
+        .catch(function () {
+          statusEl.textContent = 'Couldn\'t deliver your results automatically. Please text Luca at (201) 275-2791 with your key (' + currentStudent.key + ') and score (' + totalCorrect + '/' + totalQuestions + ') so he can follow up.';
+          statusEl.classList.add('err');
+        });
+      practiceTestId = null;
+      return;
+    }
 
     var isRetake = alreadyTakenThisTestType();
     if (isRetake) {
@@ -3217,6 +3441,7 @@
   function applyRestoredState(state, fromAway) {
     if (state.screen === 'dx-screen' && state.testChoice && Array.isArray(state.activeSectionKeys) && state.activeSectionKeys.length) {
       testChoice = state.testChoice;
+      practiceTestId = state.practiceTestId || null;
       activeSectionKeys = state.activeSectionKeys;
       completedSections = Array.isArray(state.completedSections) ? state.completedSections : [];
       sectionIndex = typeof state.sectionIndex === 'number' ? state.sectionIndex : 0;
@@ -3225,7 +3450,7 @@
       module1Buffer = state.module1Buffer || null;
 
       var secKey = activeSectionKeys[sectionIndex];
-      var bank = SECTION_BANKS[secKey];
+      var bank = bankFor(secKey);
       var qsBank = moduleQuestions(bank, moduleStage, module2Variant);
       qOrder = (Array.isArray(state.qOrder) && state.qOrder.length === qsBank.length) ? state.qOrder : shuffledOrder(qsBank);
       currentQs = qOrder.map(function (i) { return qsBank[i]; });
@@ -3240,8 +3465,9 @@
         current = Math.min(Math.max(state.current || 0, 0), qs.length - 1);
         document.getElementById('dx-student-label').textContent = currentStudent.name;
         var moduleLabelSuffix = sectionHasModules(secKey) ? (' — ' + (moduleStage === 'module1' ? 'Module 1' : 'Module 2')) : '';
-        document.getElementById('dx-brand-label').textContent = testChoice + ' Diagnostic — ' + bank.label + moduleLabelSuffix;
-        document.getElementById('dx-notice-text').textContent = 'THIS IS A ' + testChoice + ' DIAGNOSTIC';
+        var ptResumed = activePracticeTest();
+        document.getElementById('dx-brand-label').textContent = (ptResumed ? ptResumed.title : (testChoice + ' Diagnostic')) + ' — ' + bank.label + moduleLabelSuffix;
+        document.getElementById('dx-notice-text').textContent = ptResumed ? 'THIS IS A TIMED, SCORED PRACTICE TEST' : ('THIS IS A ' + testChoice + ' DIAGNOSTIC');
         buildSidebar();
         beginQuestionTime(current); // resume the clock for whichever question we're restored to
         renderQuestion();
@@ -3285,6 +3511,8 @@
       show('screen-resources');
     } else if (state.screen === 'screen-test-choice' || state.screen === 'screen-menu' || state.screen === 'screen-test-overview' || state.screen === 'screen-sat-resources') {
       show(state.screen);
+    } else if (state.screen === 'screen-practice-tests') {
+      renderPracticeTestList(); show('screen-practice-tests');
     } else if (state.screen === 'screen-vocab') {
       show('screen-vocab'); if (window.vocabModuleInit) window.vocabModuleInit();
     } else if (state.screen === 'screen-practice-bank') {
