@@ -110,6 +110,10 @@ function doPost(e) {
       out = handleToggleAssignment(body.key, body.row, !!body.done);
     } else if (body.action === 'getAssignments') {
       out = handleGetAssignments(body.key);
+    } else if (body.action === 'assignHomeworkFromDialog') {
+      out = handleAssignHomeworkFromDialog(body.key, body.task);
+    } else if (body.action === 'submitPracticeTest') {
+      out = handleSubmitPracticeTest(body.key, body.test, body.score, body.reportLink, body.report);
     } else {
       out = { ok: false, error: 'unknown_action' };
     }
@@ -492,7 +496,13 @@ function onOpen() {
 }
 
 function showAssignHomeworkDialog_() {
-  var html = HtmlService.createHtmlOutput(ASSIGN_HOMEWORK_HTML_)
+  var students = listStudentsForDialog_();
+  var optionsHtml = students.map(function (s) {
+    return '<option value="' + s.key + '">' + s.name + ' (' + s.key + ')</option>';
+  }).join('');
+  if (!optionsHtml) optionsHtml = '<option value="">No students found</option>';
+  var templated = ASSIGN_HOMEWORK_HTML_.replace('%%STUDENT_OPTIONS%%', optionsHtml);
+  var html = HtmlService.createHtmlOutput(templated)
     .setWidth(420)
     .setHeight(340);
   SpreadsheetApp.getUi().showModalDialog(html, 'Assign homework');
@@ -529,6 +539,25 @@ function submitAssignmentFromDialog_(key, task) {
   return { ok: true };
 }
 
+// Called via a plain fetch() POST from the Assign Homework dialog's
+// <script> (not google.script.run — that RPC bridge doesn't reliably
+// complete inside this dialog's sandboxed iframe in some browser
+// setups, so the dialog talks to the same public web app endpoint
+// the student portal already uses). Re-validates the key against the
+// roster so the public endpoint can't be used to inject rows for a
+// student that doesn't exist.
+function handleAssignHomeworkFromDialog(rawKey, rawTask) {
+  var key = String(rawKey || '').trim().toUpperCase();
+  var task = String(rawTask || '').trim();
+  if (!key || !task) return { ok: false, error: 'missing_fields' };
+  var sheet = getSheet_();
+  var row = findRow_(sheet, key);
+  if (!row) return { ok: false, error: 'bad_key' };
+  var aSheet = getAssignmentsSheet_();
+  aSheet.appendRow([new Date(), sheetSafe_(key), sheetSafe_(task), false, '']);
+  return { ok: true };
+}
+
 var ASSIGN_HOMEWORK_HTML_ = '<!DOCTYPE html><html><head><base target="_top">' +
   '<style>' +
   'body{font-family:Arial,sans-serif;font-size:13px;padding:4px 10px 14px;color:#222;}' +
@@ -541,42 +570,37 @@ var ASSIGN_HOMEWORK_HTML_ = '<!DOCTYPE html><html><head><base target="_top">' +
   '#status.error{color:#b23b2e;}' +
   '</style></head><body>' +
   '<label for="student">Student</label>' +
-  '<select id="student"><option value="">Loading students…</option></select>' +
+  '<select id="student">%%STUDENT_OPTIONS%%</select>' +
   '<label for="task">Task</label>' +
   '<textarea id="task" placeholder="e.g. Finish Reading Module 3, pgs 12–20"></textarea>' +
   '<button id="submitBtn" onclick="submitForm()">Assign</button>' +
   '<div id="status"></div>' +
   '<script>' +
-  'google.script.run.withSuccessHandler(function(students){' +
-  '  var sel=document.getElementById("student");' +
-  '  sel.innerHTML="";' +
-  '  if(!students.length){sel.innerHTML="<option value=\\"\\">No students found</option>";return;}' +
-  '  students.forEach(function(s){' +
-  '    var opt=document.createElement("option");' +
-  '    opt.value=s.key; opt.textContent=s.name+" ("+s.key+")";' +
-  '    sel.appendChild(opt);' +
-  '  });' +
-  '}).listStudentsForDialog_();' +
   'function submitForm(){' +
   '  var key=document.getElementById("student").value;' +
   '  var task=document.getElementById("task").value.trim();' +
   '  var statusEl=document.getElementById("status");' +
   '  var btn=document.getElementById("submitBtn");' +
   '  if(!key||!task){statusEl.textContent="Pick a student and enter a task.";statusEl.className="error";return;}' +
-  '  btn.disabled=true; statusEl.textContent="Assigning…"; statusEl.className="";' +
-  '  google.script.run' +
-  '    .withSuccessHandler(function(){' +
-  '      statusEl.textContent="Assigned. Close this window or assign another.";' +
-  '      statusEl.className="";' +
-  '      document.getElementById("task").value="";' +
-  '      btn.disabled=false;' +
+  '  btn.disabled = true; statusEl.textContent = "Assigning…"; statusEl.className = "";' +
+  '  fetch("https://script.google.com/macros/s/AKfycbwsLMGq3lhBEPObcas0k8gVS67NX9y4wXKG6RgzKtlBOT2SXfREK6vBpvvM19w9s1m6/exec",{method:"POST",body:JSON.stringify({action:"assignHomeworkFromDialog",key:key,task:task})})' +
+  '    .then(function(r){return r.json();})' +
+  '    .then(function(resp){' +
+  '      if(resp && resp.ok){' +
+  '        statusEl.textContent = "Assigned. Close this window or assign another.";' +
+  '        statusEl.className = "";' +
+  '        document.getElementById("task").value = "";' +
+  '      } else {' +
+  '        statusEl.textContent = "Error: " + (resp && resp.error ? resp.error : "unknown");' +
+  '        statusEl.className = "error";' +
+  '      }' +
+  '      btn.disabled = false;' +
   '    })' +
-  '    .withFailureHandler(function(err){' +
-  '      statusEl.textContent="Error: "+(err&&err.message?err.message:err);' +
-  '      statusEl.className="error";' +
-  '      btn.disabled=false;' +
-  '    })' +
-  '    .submitAssignmentFromDialog_(key,task);' +
+  '    .catch(function(err){' +
+  '      statusEl.textContent = "Error: " + err;' +
+  '      statusEl.className = "error";' +
+  '      btn.disabled = false;' +
+  '    });' +
   '}' +
   '</script></body></html>';
 
@@ -741,6 +765,83 @@ function handleSubmitDiagnostic(rawKey, rawTest, score, reportLink, reportText) 
   return { ok: logOk || driveOk, driveSaved: driveOk, driveFileUrl: driveFileUrl, logSaved: logOk, emailSent: !emailError, emailError: emailError || undefined };
 }
 
+// Sibling of handleSubmitDiagnostic above, for full practice-test attempts
+// (portal/practice-tests.js, e.g. "SAT Practice Test 2") instead of the
+// diagnostic. Deliberately NOT the same function: handleSubmitDiagnostic
+// hard-rejects any test value other than 'SAT'/'ACT' (line ~600 above),
+// which a practice test title like "SAT Practice Test 2" would fail. This
+// version takes a free-text title instead and otherwise mirrors the same
+// two-durable-stores-before-email pattern (DiagnosticLog row + a Drive
+// .txt file), reusing the same logDiagnosticResult_ helper so both flows
+// show up in one place for Luca to review. Rows/files from practice tests
+// are distinguishable by the Test column containing the full test title
+// ("SAT Practice Test 2") instead of just "SAT"/"ACT".
+function handleSubmitPracticeTest(rawKey, rawTitle, score, reportLink, reportText) {
+  if (!rawKey) return { ok: false, error: 'missing_key' };
+  var key = String(rawKey).trim().toUpperCase();
+  var test = String(rawTitle || '').trim().slice(0, 80) || 'Practice Test';
+
+  var sheet = getSheet_();
+  var row = findRow_(sheet, key);
+  if (!row) return { ok: false, error: 'bad_key' };
+
+  var name = String(row.Name || '').trim() || '(unnamed student)';
+  var safeScore = String(score == null ? '' : score).replace(/[\r\n]+/g, ' ').slice(0, 60);
+  var link = String(reportLink || '').slice(0, 200000);
+  var REPORT_PAGE_PREFIX = 'https://morettitutoring.com/portal/report.html';
+  if (link && link.indexOf(REPORT_PAGE_PREFIX) !== 0) {
+    link = '(report link withheld — did not point at the portal report page)';
+  }
+  var extra = String(reportText || '').slice(0, 100000);
+  var dateStr = Utilities.formatDate(new Date(), Session.getScriptTimeZone() || 'America/New_York', 'yyyy-MM-dd');
+
+  var driveOk = false, driveFileUrl = '';
+  try {
+    var fileText = name + ' — ' + test + ' — ' + dateStr + '\n' +
+                   'Score: ' + (safeScore || '(not recorded)') + '\n' +
+                   'Formatted report (open, review, Print / Save as PDF):\n' + link +
+                   '\n\n' + '='.repeat(60) + '\n\n' + extra;
+    var folderId = extractFolderId_(row.DriveFolderUrl);
+    if (folderId) {
+      var folder = DriveApp.getFolderById(folderId);
+      var fileName = name + ' — ' + test + ' — ' + dateStr + '.txt';
+      var file = folder.createFile(fileName, fileText, MimeType.PLAIN_TEXT);
+      driveFileUrl = file.getUrl();
+      driveOk = true;
+    } else {
+      console.error('No Drive folder on record for ' + key + ' — could not save practice test file.');
+    }
+  } catch (driveErr) {
+    console.error('Failed to save practice test file to Drive for ' + key + ': ' + driveErr);
+  }
+
+  var emailError = null;
+  try {
+    var subject = 'New ' + test + ' — ' + name + (safeScore ? ' — ' + safeScore : '');
+    var body = 'Student: ' + name + '\n' +
+               'Key: ' + key + '\n' +
+               'Test: ' + test + '\n' +
+               (safeScore ? 'Score: ' + safeScore + '\n' : '') +
+               '\nSaved to her Drive folder:\n' + (driveFileUrl || '(not saved — see DiagnosticLog tab)') +
+               (row.DriveFolderUrl ? '\nFolder:\n' + row.DriveFolderUrl : '') +
+               '\n\nFormatted report:\n' + link;
+    MailApp.sendEmail(NOTIFY_EMAIL, subject, body);
+  } catch (err) {
+    emailError = String(err);
+    console.error('MailApp.sendEmail failed for ' + key + ' (' + test + '): ' + emailError);
+  }
+
+  var logOk = false;
+  try {
+    logDiagnosticResult_(key, name, test, safeScore, link, extra, driveOk, driveFileUrl, !emailError, emailError);
+    logOk = true;
+  } catch (logErr) {
+    console.error('Failed to write DiagnosticLog row for ' + key + ': ' + logErr);
+  }
+
+  return { ok: logOk || driveOk, driveSaved: driveOk, driveFileUrl: driveFileUrl, logSaved: logOk, emailSent: !emailError, emailError: emailError || undefined };
+}
+
 // Appends one row to a "DiagnosticLog" tab (auto-created on first use, left
 // alone after that) so every submitted diagnostic has a durable record
 // independent of email delivery, AND records whether the email itself
@@ -852,7 +953,15 @@ function setupTrigger() {
     .forSpreadsheet(SpreadsheetApp.openById(SHEET_ID))
     .onEdit()
     .create();
-  console.log('Trigger installed. Editing the Students sheet will now auto-create folders.');
+
+  ScriptApp.getProjectTriggers().forEach(function (t) {
+    if (t.getHandlerFunction() === 'onOpen') ScriptApp.deleteTrigger(t);
+  });
+  ScriptApp.newTrigger('onOpen')
+    .forSpreadsheet(SpreadsheetApp.openById(SHEET_ID))
+    .onOpen()
+    .create();
+  console.log('Triggers installed: editing the Students sheet auto-creates folders, and opening the sheet now shows the Assign Homework menu.');
 }
 
 /* =========================================================================

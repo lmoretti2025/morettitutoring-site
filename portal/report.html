@@ -169,6 +169,7 @@
 </div>
 
 <script src="banks.js"></script>
+<script src="practice-tests.js"></script>
 <script>
 (function () {
   'use strict';
@@ -617,6 +618,25 @@
   }
   if (!data || !data.s || !window.SECTION_BANKS) { fail(); return; }
 
+  // Practice-test attempts (see portal/practice-tests.js) set data.pt to
+  // the test's id (e.g. "sat-practice-2") alongside the normal data.t =
+  // 'SAT', so every existing SAT-specific scoring/curve/bridge branch below
+  // runs completely untouched — this is the ONE place that needs to know
+  // the difference: which question bank to pull section content from.
+  // practice-tests.js uses 'readingWriting' (camelCase) for its R&W section
+  // key where banks.js/SECTION_BANKS uses 'reading-writing' (hyphenated);
+  // translate between them here so callers can keep using sec.k as-is.
+  function getBank(sectionKey) {
+    if (data.pt) {
+      var pt = (window.SAT_PRACTICE_TESTS || []).filter(function (t) { return t.id === data.pt; })[0];
+      if (pt && pt.sections) {
+        var ptKey = sectionKey === 'reading-writing' ? 'readingWriting' : sectionKey;
+        if (pt.sections[ptKey]) return pt.sections[ptKey];
+      }
+    }
+    return window.SECTION_BANKS[sectionKey];
+  }
+
   function isCorrect(q, given) {
     if (given === null || given === undefined) return false;
     if (q.type === 'mc') return given === q.correct;
@@ -684,7 +704,7 @@
 
   var totalC = 0, totalQ = 0, domains = {}, skills = {}, sections = [], markedT = 0, markedC = 0, skipped = 0;
   data.s.forEach(function (sec) {
-    var bank = window.SECTION_BANKS[sec.k];
+    var bank = getBank(sec.k);
     if (!bank) return;
     var qs = sectionQuestions(bank, sec.v), c = 0, rows = [];
     var secDomains = {}; // this section's own domain/skill breakdown — kept
@@ -765,7 +785,7 @@
   var first = (data.n || 'Student').split(' ')[0];
   var dateStr = data.dt || new Date().toISOString().slice(0, 10);
 
-  document.getElementById('r-title').textContent = data.n + ' — ' + data.t + ' Diagnostic Report';
+  document.getElementById('r-title').textContent = data.n + ' — ' + (data.ptTitle ? data.ptTitle + ' Report' : data.t + ' Diagnostic Report');
   document.getElementById('r-sub').textContent = 'Administered ' + dateStr + ' · Moretti student portal';
   document.getElementById('r-sub2').textContent = data.n + ' · ' + data.t + ' Diagnostic · ' + dateStr;
   var ftrDate = document.getElementById('ftr-date');
