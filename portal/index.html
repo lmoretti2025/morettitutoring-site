@@ -268,6 +268,12 @@
   .dx-passage-body .dx-ref-mark { text-decoration: underline; text-decoration-color: var(--red); text-decoration-thickness: 2px; text-underline-offset: 2px; }
   .dx-passage-body .dx-ref-mark.active-ref { background: rgba(178,34,52,0.12); border-radius: 2px; }
   .dx-passage-body { cursor: text; }
+  /* Fallback split-pane mode (see splitRwPassage() in the script below) —
+     no formal PASSAGES entry, so no title/kicker header and no line-number
+     gutter to reserve space for; matches the real digital SAT's plain
+     stimulus-left layout for these questions. */
+  .passage-mode-simple .dx-passage-kicker, .passage-mode-simple .dx-passage-title { display: none; }
+  .passage-mode-simple .dx-passage-body { margin-left: 0; }
   .dx-user-highlight { background: #fff3a0; cursor: pointer; border-radius: 1px; }
   .dx-user-highlight:hover { background: #ffe985; }
   @media (max-width: 900px) {
@@ -576,6 +582,7 @@
 
   .pb-q-meta { display: flex; justify-content: space-between; align-items: baseline; font-family: var(--hel); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); margin-bottom: 0.6rem; }
   .pb-q-progress { color: var(--red); }
+  .pb-passage { font-family: var(--serif); font-size: 0.98rem; line-height: 1.85; color: var(--text); background: var(--white); border: 1px solid var(--border); border-radius: 14px; padding: 1.6rem; margin-bottom: 1rem; opacity: 0; animation: vpRise 0.3s cubic-bezier(.2,.7,.3,1) forwards; }
   .pb-q-card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; padding: 1.6rem; opacity: 0; animation: vpRise 0.3s cubic-bezier(.2,.7,.3,1) forwards; }
   .pb-q-text { font-size: 1.02rem; line-height: 1.65; color: var(--text); margin-bottom: 1.25rem; }
   .pb-choices { display: flex; flex-direction: column; gap: 0.6rem; }
@@ -2368,16 +2375,52 @@
     gutterResizeTimer = setTimeout(layoutPassageGutter, 150);
   });
 
-  function renderPassagePane(q) {
+  // Most R&W questions in practice-tests.js/banks.js don't use a separate
+  // window.PASSAGES entry — the passage/stimulus is baked straight into
+  // q.text, ending in the actual interrogative sentence ("Which choice
+  // completes the text...?"), separated from the stimulus by a "<br><br>".
+  // The real digital SAT still shows these split-pane (stimulus left,
+  // question+choices right) — this splits q.text on its LAST "<br><br>" so
+  // that layout applies here too, without needing every question authored
+  // as a formal PASSAGES entry. Only applies to Reading & Writing questions
+  // that don't already have a real q.passageId (those keep their existing
+  // line-numbered-gutter treatment, untouched below) and that actually
+  // contain a splittable "<br><br>" (a few short grammar-only items don't,
+  // and stay single-column same as Math).
+  function splitRwPassage(q) {
+    if (q.passageId) return null;
+    if (currentSectionKey() !== 'reading-writing') return null;
+    var text = q.text || '';
+    var idx = text.lastIndexOf('<br><br>');
+    if (idx === -1) return null;
+    return { passage: text.slice(0, idx), question: text.slice(idx + 8) };
+  }
+
+  function renderPassagePane(q, splitParts) {
     var passages = window.PASSAGES || {};
     var passage = q.passageId ? passages[q.passageId] : null;
 
     if (!passage) {
+      if (splitParts) {
+        dxShellEl.classList.add('passage-mode');
+        dxShellEl.classList.add('passage-mode-simple');
+        var simpleId = 'inline:' + current;
+        if (lastRenderedPassageId !== simpleId) {
+          passageKickerEl.textContent = '';
+          passageTitleEl.textContent = '';
+          passageBodyEl.innerHTML = splitParts.passage;
+          lastRenderedPassageId = simpleId;
+          passagePaneEl.scrollTop = 0;
+        }
+        return;
+      }
       dxShellEl.classList.remove('passage-mode');
+      dxShellEl.classList.remove('passage-mode-simple');
       lastRenderedPassageId = null;
       return;
     }
 
+    dxShellEl.classList.remove('passage-mode-simple');
     dxShellEl.classList.add('passage-mode');
     if (lastRenderedPassageId !== q.passageId) {
       passageKickerEl.textContent = passage.kicker || '';
@@ -2507,7 +2550,7 @@
   var LETTERS    = ['A', 'B', 'C', 'D', 'E']; // ACT math uses 5 choices; SAT math uses 4 — array just needs to cover the max
   var dxTimerEl      = document.getElementById('dx-timer');
   var dxTimerToastEl = document.getElementById('dx-timer-toast');
-  var eliminatorOn = false; // "ABC" toggle — shows/hides the per-choice cross-out control
+  var eliminatorOn = true; // "ABC" toggle — shows/hides the per-choice cross-out control; matches the real digital SAT, which starts with Answer Eliminator on
 
   function activeQuestions() { return currentQs; }
   function isLastQuestionInSection() { return current === activeQuestions().length - 1; }
@@ -2908,6 +2951,7 @@
   });
 
   var abcToggle = document.getElementById('dx-abc-toggle');
+  abcToggle.classList.toggle('on', eliminatorOn); // matches the real digital SAT — Answer Eliminator starts ON
   abcToggle.addEventListener('click', function () {
     eliminatorOn = !eliminatorOn;
     abcToggle.classList.toggle('on', eliminatorOn);
@@ -2971,8 +3015,9 @@
   function renderQuestion() {
     var qs = activeQuestions();
     var q = qs[current];
-    qtextEl.innerHTML = q.text;
-    renderPassagePane(q);
+    var splitParts = splitRwPassage(q);
+    qtextEl.innerHTML = splitParts ? splitParts.question : q.text;
+    renderPassagePane(q, splitParts);
 
     if (q.type === 'mc') {
       choicesEl.style.display = 'flex';
@@ -5199,7 +5244,7 @@
      (answer eliminator) reuses the diagnostic's own dx-choice/dx-elim
      markup and CSS so it looks and behaves identically to the one
      students already know from the real diagnostic. */
-  var eliminatorOn = false; // persists across the whole practice session, same as the diagnostic's toggle
+  var eliminatorOn = true; // persists across the whole practice session, same as the diagnostic — matches the real digital SAT, which starts with Answer Eliminator on
   var currentElims = [];    // indices crossed out on the CURRENT question only
   var triedWrong = [];      // indices already tried and shown wrong, on the CURRENT question
   var firstAttemptRight = null; // null until the first attempt on this question; true/false after
@@ -5216,11 +5261,29 @@
     renderQuestionShell();
   }
 
+  // Same fallback split used on the diagnostic/practice-test screen (see
+  // splitRwPassage() there) — most R&W questions bake their stimulus
+  // straight into q.text, ending in the actual question sentence, joined
+  // by a "<br><br>". Splitting it here keeps the stimulus visually
+  // separated from the question, matching the real digital SAT's layout,
+  // even though this untimed practice tool doesn't have the timed test's
+  // Section/Module topbar chrome to build a true two-column split around.
+  function splitPbPassage(q) {
+    if (q.section !== 'readingWriting') return null;
+    var text = q.text || '';
+    var idx = text.lastIndexOf('<br><br>');
+    if (idx === -1) return null;
+    return { passage: text.slice(0, idx), question: text.slice(idx + 8) };
+  }
+
   function renderQuestionShell() {
     var q = sessionQuestions[idx];
-    var html = '<div class="pb-q-meta"><span>' + escHtml(q.domain) + ' → ' + escHtml(q.skill) + '</span>' +
+    var split = splitPbPassage(q);
+    var passageHtml = split ? '<div class="pb-passage">' + split.passage + '</div>' : '';
+    var questionText = split ? split.question : q.text;
+    var html = passageHtml + '<div class="pb-q-meta"><span>' + escHtml(q.domain) + ' → ' + escHtml(q.skill) + '</span>' +
       '<button class="dx-abc-btn' + (eliminatorOn ? ' on' : '') + '" id="pb-abc-toggle" type="button" title="Answer Eliminator">ABC</button></div>' +
-      '<div class="pb-q-card"><div class="pb-q-text">' + q.text + '</div>' +
+      '<div class="pb-q-card"><div class="pb-q-text">' + questionText + '</div>' +
       (q.type === 'mc'
         ? '<div class="dx-choices' + (eliminatorOn ? ' eliminator-on' : '') + '" id="pb-choices"></div>'
         : '<div class="pb-fr-row"><input type="text" id="pb-fr-input" inputmode="decimal" placeholder="Your answer" autocomplete="off"><button class="pb-fr-submit" id="pb-fr-submit" type="button">Check</button></div><div id="pb-fr-feedback"></div>') +
