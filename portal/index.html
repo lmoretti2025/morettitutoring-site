@@ -248,9 +248,20 @@
      left, scrollable independently; question card on the right. Only
      shown when the active question carries a `passageId`. ═══ */
   #dx-shell.passage-mode #dx-main { align-items: stretch; justify-content: flex-start; padding: 0; gap: 0; }
-  .dx-passage-pane { width: 46%; max-width: 620px; flex-shrink: 0; border-right: 1px solid var(--border); background: var(--white); height: calc(100vh - 156px); overflow-y: auto; padding: 2.5rem 2.25rem; display: none; }
+  /* Split defaults to a dead-even 50/50 (matching the real digital SAT),
+     driven by a CSS var so the draggable divider (see .dx-pane-divider and
+     wirePaneDivider() in the script below) can adjust it live without
+     touching this rule. No max-width cap — capping the passage pane's
+     width used to leave it off-center on wide screens. */
+  #dx-shell { --passage-w: 50%; }
+  .dx-passage-pane { width: var(--passage-w); flex-shrink: 0; border-right: 1px solid var(--border); background: var(--white); height: calc(100vh - 156px); overflow-y: auto; padding: 2.5rem 2.25rem; display: none; }
   #dx-shell.passage-mode .dx-passage-pane { display: block; }
-  #dx-shell.passage-mode .dx-card-wrap { max-width: 560px; padding: 3rem 2.5rem; margin: 0 auto; }
+  .dx-pane-divider { display: none; width: 14px; flex-shrink: 0; position: relative; cursor: col-resize; background: transparent; height: calc(100vh - 156px); }
+  #dx-shell.passage-mode .dx-pane-divider { display: block; }
+  .dx-pane-divider::before { content: ''; position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: var(--border); transform: translateX(-50%); }
+  .dx-pane-grip { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 18px; height: 34px; border-radius: 9px; background: var(--white); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--faint); font-size: 0.7rem; letter-spacing: -1px; }
+  .dx-pane-divider:hover .dx-pane-grip, .dx-pane-divider.dragging .dx-pane-grip { border-color: var(--dx-blue); color: var(--dx-blue); }
+  #dx-shell.passage-mode .dx-card-wrap { flex: 1; min-width: 0; padding: 3rem 2.5rem; margin: 0; }
   .dx-passage-title { font-family: var(--display); font-weight: 700; font-size: 1.05rem; color: var(--text); margin-bottom: 0.3rem; }
   .dx-passage-kicker { font-family: var(--serif); font-size: 0.78rem; color: var(--mid); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 1.3rem; }
   /* Real ACT passages number every 5th line in the left margin, not inline
@@ -293,16 +304,16 @@
   .dx-progress-btn:hover { border-color: var(--dx-blue); }
   .dx-progress-label { font-family: var(--hel); font-size: 0.68rem; font-weight: 600; letter-spacing: 0.04em; color: var(--text); white-space: nowrap; }
   .dx-progress-caret { font-size: 0.55rem; color: var(--mid); }
-  .dx-reference-btn { background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: var(--hel); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.5rem 0.9rem; cursor: pointer; transition: border-color 0.2s; white-space: nowrap; }
+  .dx-reference-btn { background: var(--white); border: 1px solid var(--border); color: var(--text); font-family: var(--hel); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.5rem 0.9rem; cursor: pointer; transition: border-color 0.2s; white-space: nowrap; }
   .dx-reference-btn:hover { border-color: var(--dx-blue); }
-  .dx-timer { font-family: var(--hel); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.06em; color: var(--text); background: var(--bg); border: 1px solid var(--border); padding: 0.4rem 0.75rem; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .dx-timer { font-family: var(--hel); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.06em; color: var(--text); background: var(--white); border: 1px solid var(--border); padding: 0.4rem 0.75rem; white-space: nowrap; font-variant-numeric: tabular-nums; }
   .dx-timer.dx-timer-warn { background: var(--red); color: #fff; border-color: var(--red); animation: dxTimerPulse 1.4s ease-in-out infinite; }
   @keyframes dxTimerPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
   .dx-timer-toast { position: fixed; top: 78px; left: 50%; transform: translateX(-50%); z-index: 60; background: var(--dx-navy); color: #fff; font-family: var(--hel); font-size: 0.8rem; font-weight: 600; letter-spacing: 0.03em; padding: 0.85rem 1.5rem; box-shadow: 0 8px 24px rgba(0,0,0,0.25); animation: dxToastIn 0.35s cubic-bezier(0.16,1,0.3,1); }
   @keyframes dxToastIn { from { opacity: 0; transform: translate(-50%, -12px); } to { opacity: 1; transform: translate(-50%, 0); } }
 
-  #dx-shell { display: flex; flex: 1; }
-  #dx-main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 3rem 2.5rem; }
+  #dx-shell { display: flex; flex: 1; background: var(--white); }
+  #dx-main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 3rem 2.5rem; background: var(--white); }
 
   /* ═══ PRACTICE TEST screen — class-equivalents of the four dx-* ID rules
      above (#dx-notice-bar/#dx-topbar/#dx-shell/#dx-main), so the practice
@@ -382,7 +393,7 @@
 
   /* ═══ QUESTION CARD HEADER — numbered tile + Mark for Review + ABC
      eliminator toggle, matching Bluebook's own question-card header. ═══ */
-  .dx-card-hed { display: flex; align-items: center; gap: 0.9rem; padding: 0.65rem 0.9rem; background: var(--bg); border: 1px solid var(--border); border-bottom: 1.5px dashed var(--border); margin-bottom: 1.8rem; }
+  .dx-card-hed { display: flex; align-items: center; gap: 0.9rem; padding: 0.65rem 0.9rem; background: var(--white); border: 1px solid var(--border); border-bottom: 1.5px dashed var(--border); margin-bottom: 1.8rem; }
   .dx-qnum-tile { flex-shrink: 0; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; background: var(--dx-navy); color: #fff; font-family: var(--hel); font-weight: 700; font-size: 0.85rem; }
   .dx-mark-btn { display: inline-flex; align-items: center; gap: 0.35rem; background: none; border: none; border-bottom: 1px dashed var(--mid); color: var(--mid); font-family: var(--hel); font-size: 0.66rem; font-weight: 600; letter-spacing: 0.04em; padding: 0.15rem 0; cursor: pointer; transition: color 0.2s, border-color 0.2s; }
   .dx-mark-btn.on { color: var(--gold); border-color: var(--gold); }
@@ -680,6 +691,15 @@
       <p class="key-error" id="key-error">That key wasn't recognized. Double-check it, or text Luca at (201) 275-2791.</p>
       <button class="key-btn" id="key-submit">Continue</button>
       <p class="key-help">Don't have a key yet? Call or text Luca at (201) 275-2791 to get set up.</p>
+    </div>
+
+    <div id="name-step" style="display:none;">
+      <h1 class="panel-hed">Welcome! What's your name?</h1>
+      <p class="panel-sub">First time using this key — let's start with your full name.</p>
+      <input type="text" class="key-input" id="name-input" placeholder="Full name" autocomplete="name" style="text-transform:none;">
+      <p class="key-error" id="name-error">Please enter your full name to continue.</p>
+      <button class="key-btn" id="name-submit">Continue</button>
+      <a href="#" class="key-help" id="name-back" style="display:block; text-decoration:none;">&larr; Use a different key</a>
     </div>
 
     <div id="email-step" style="display:none;">
@@ -1202,6 +1222,7 @@
           <div class="dx-passage-body" id="dx-passage-body"></div>
         </div>
       </div>
+      <div class="dx-pane-divider" id="dx-pane-divider"><span class="dx-pane-grip">&#8942;&#8942;</span></div>
       <div class="dx-card-wrap">
         <div class="dx-card" id="dx-card">
           <div class="dx-mobile-jump">
@@ -1489,6 +1510,19 @@
     var resCard = document.querySelector('.menu-card[data-route="sat-resources"]');
     if (diagCard) diagCard.style.display = isTestPrep ? '' : 'none';
     if (resCard) resCard.style.display = isTestPrep ? '' : 'none';
+
+    // New test-prep students: until they've completed a real diagnostic on
+    // at least one of the test types they're flagged for, the diagnostic is
+    // their ONLY menu option — "Your Files" and "SAT Resources" stay hidden
+    // so their first action is always the diagnostic Luca builds their plan
+    // around. Unlocks automatically the moment satTaken/actTaken flips true
+    // (same flags the diagnostic flow already stamps server-side), so this
+    // needs no separate state of its own.
+    var filesCard = document.querySelector('.menu-card[data-route="files"]');
+    var hasCompletedADiagnostic = !!(currentStudent && (currentStudent.satTaken || currentStudent.actTaken));
+    var diagnosticOnly = isTestPrep && !hasCompletedADiagnostic;
+    if (filesCard) filesCard.style.display = diagnosticOnly ? 'none' : '';
+    if (resCard) resCard.style.display = diagnosticOnly ? 'none' : (isTestPrep ? '' : 'none');
   }
   // Hides whichever of the SAT/ACT buttons doesn't apply to this student —
   // an ACT-only student never sees an SAT button to accidentally click.
@@ -1551,6 +1585,10 @@
   var keyInput   = document.getElementById('key-input');
   var keyError   = document.getElementById('key-error');
   var keySubmit  = document.getElementById('key-submit');
+  var nameStep   = document.getElementById('name-step');
+  var nameInput  = document.getElementById('name-input');
+  var nameError  = document.getElementById('name-error');
+  var nameSubmit = document.getElementById('name-submit');
   var emailStep  = document.getElementById('email-step');
   var emailInput = document.getElementById('email-input');
   var emailError = document.getElementById('email-error');
@@ -1565,10 +1603,10 @@
   // send a preflight OPTIONS request first, which Apps Script Web Apps
   // don't handle. Returns a parsed response object, or { ok:false,
   // error:'network' } if the request itself failed (offline, blocked, etc).
-  function callAuth(key, email) {
+  function callAuth(key, email, name) {
     return fetch(APPS_SCRIPT_URL, {
       method: 'POST',
-      body: JSON.stringify({ action: 'auth', key: key, email: email || '' })
+      body: JSON.stringify({ action: 'auth', key: key, email: email || '', name: name || '' })
     }).then(function (res) { return res.json(); })
       .catch(function () { return { ok: false, error: 'network' }; });
   }
@@ -1894,12 +1932,23 @@
     pendingKey = null;
     pendingName = null;
     keyInput.value = '';
+    nameInput.value = '';
     emailInput.value = '';
     keyError.style.display = 'none';
+    nameError.style.display = 'none';
     emailError.style.display = 'none';
     document.getElementById('email-notice').style.display = 'none';
+    nameStep.style.display = 'none';
     emailStep.style.display = 'none';
     keyStep.style.display = 'block';
+  }
+
+  function goToEmailStep() {
+    emailStepName.textContent = pendingName ? (', ' + pendingName.split(' ')[0]) : '';
+    keyStep.style.display = 'none';
+    nameStep.style.display = 'none';
+    emailStep.style.display = 'block';
+    emailInput.focus();
   }
 
   function tryKey() {
@@ -1919,10 +1968,17 @@
       pendingKey = raw;
       pendingName = data.name;
       if (data.needsEmail) {
-        emailStepName.textContent = ', ' + data.name.split(' ')[0];
-        keyStep.style.display = 'none';
-        emailStep.style.display = 'block';
-        emailInput.focus();
+        // Brand-new key with no name on file yet — collect the student's
+        // name first, then email, matching the new two-step first-time
+        // flow. A key Luca already pre-registered with a name skips
+        // straight to the (unchanged) email step, same as before.
+        if (!pendingName || !String(pendingName).trim()) {
+          keyStep.style.display = 'none';
+          nameStep.style.display = 'block';
+          nameInput.focus();
+        } else {
+          goToEmailStep();
+        }
       } else {
         settle(data);
       }
@@ -1931,13 +1987,28 @@
   document.getElementById('key-submit').addEventListener('click', tryKey);
   keyInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') tryKey(); });
 
+  function trySubmitName() {
+    var name = nameInput.value.trim();
+    if (!name || name.indexOf(' ') === -1) {
+      nameError.textContent = 'Please enter your full first and last name to continue.';
+      nameError.style.display = 'block';
+      return;
+    }
+    nameError.style.display = 'none';
+    pendingName = name;
+    goToEmailStep();
+  }
+  document.getElementById('name-submit').addEventListener('click', trySubmitName);
+  nameInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') trySubmitName(); });
+  document.getElementById('name-back').addEventListener('click', function (e) { e.preventDefault(); resetKeyScreen(); });
+
   function trySubmitEmail() {
     var email = emailInput.value.trim();
     if (!email) { emailError.textContent = authErrorMessage('bad_email'); emailError.style.display = 'block'; return; }
     emailError.style.display = 'none';
     emailSubmit.disabled = true;
     emailSubmit.textContent = 'Unlocking…';
-    callAuth(pendingKey, email).then(function (data) {
+    callAuth(pendingKey, email, pendingName).then(function (data) {
       emailSubmit.disabled = false;
       emailSubmit.textContent = 'Unlock My Files';
       if (!data.ok) {
@@ -2344,6 +2415,39 @@
   var passageGutterEl  = document.getElementById('dx-passage-gutter');
   var passageBodyEl   = document.getElementById('dx-passage-body');
   var lastRenderedPassageId = null;
+
+  /* ═══ DRAGGABLE PANE DIVIDER ═══ matches the real digital SAT, which lets
+     a student drag the line between the passage and the question to resize
+     either side. Clamped to 25%–75% so neither pane can be dragged down to
+     nothing. Pointer events cover mouse/touch/pen in one handler. */
+  (function wirePaneDivider() {
+    var divider = document.getElementById('dx-pane-divider');
+    if (!divider) return;
+    var dragging = false;
+    function setSplit(clientX) {
+      var rect = dxShellEl.getBoundingClientRect();
+      var pct = ((clientX - rect.left) / rect.width) * 100;
+      pct = Math.max(25, Math.min(75, pct));
+      dxShellEl.style.setProperty('--passage-w', pct + '%');
+    }
+    divider.addEventListener('pointerdown', function (e) {
+      dragging = true;
+      divider.classList.add('dragging');
+      divider.setPointerCapture(e.pointerId);
+      e.preventDefault();
+    });
+    divider.addEventListener('pointermove', function (e) {
+      if (!dragging) return;
+      setSplit(e.clientX);
+    });
+    function stopDrag(e) {
+      if (!dragging) return;
+      dragging = false;
+      divider.classList.remove('dragging');
+    }
+    divider.addEventListener('pointerup', stopDrag);
+    divider.addEventListener('pointercancel', stopDrag);
+  })();
 
   /* Builds the left-margin line-number gutter (real-ACT style: numbers run
      down the side every 5 lines, not inline in the sentence). Each

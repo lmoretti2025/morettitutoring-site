@@ -99,7 +99,7 @@ function doPost(e) {
   try {
     var body = JSON.parse(e.postData.contents);
     if (body.action === 'auth') {
-      out = handleAuth(body.key, body.email);
+      out = handleAuth(body.key, body.email, body.name);
     } else if (body.action === 'nextSession') {
       out = handleNextSession(body.key, !!body.debug);
     } else if (body.action === 'markDiagnosticTaken') {
@@ -221,14 +221,27 @@ function testPrepFlags_(row) {
   };
 }
 
-function handleAuth(rawKey, rawEmail) {
+function handleAuth(rawKey, rawEmail, rawName) {
   if (!rawKey) return { ok: false, error: 'missing_key' };
   var key = String(rawKey).trim().toUpperCase();
   var email = rawEmail ? String(rawEmail).trim().toLowerCase() : '';
+  var name = rawName ? String(rawName).trim() : '';
 
   var sheet = getSheet_();
   var row = findRow_(sheet, key);
   if (!row) return { ok: false, error: 'bad_key' };
+
+  // Brand-new keys Luca creates with no name filled in yet get one from the
+  // student themselves, submitted alongside their first-time email unlock
+  // (see the portal's new name-step). Never overwrites a name Luca already
+  // set in the roster — this only ever fills in a genuinely blank cell.
+  if (name && (!row.Name || !String(row.Name).trim())) {
+    var nameCol = row._headers.indexOf('Name');
+    if (nameCol !== -1) {
+      sheet.getRange(row._rowIndex, nameCol + 1).setValue(sheetSafe_(name));
+      row.Name = name;
+    }
+  }
 
   var grantedEmail = row.GrantedEmail ? String(row.GrantedEmail).trim().toLowerCase() : '';
   // The countdown bar's start point. Defaults to whatever's already in the
