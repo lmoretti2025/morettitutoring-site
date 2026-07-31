@@ -136,7 +136,7 @@
        nothing kills a printed report faster than a card or chart getting
        sliced in half at the bottom of a page. */
     .score-tile, .bridge-wrap, .section-card, table tr { page-break-inside: avoid; break-inside: avoid; }
-    .score-tiles, .score-summary { page-break-inside: avoid; break-inside: avoid; }
+    .score-tiles, .score-summary, #behavior-section { page-break-inside: avoid; break-inside: avoid; }
   }
 </style>
 </head>
@@ -160,6 +160,8 @@
   <div id="score-bridge"></div>
   <div class="sec-hed">Section breakdown</div>
   <div id="section-breakdown"></div>
+  <div class="sec-hed" id="behavior-hed" style="display:none;">Test-taking behavior</div>
+  <div id="behavior-section" style="display:none;"></div>
   <div class="sec-hed">What this tells us</div>
   <ul class="takeaways" id="takeaways"></ul>
   <a href="#" class="detail-toggle" id="detail-toggle">Show full question-by-question detail (click any question to see it) &darr;</a>
@@ -1633,6 +1635,77 @@
     .sort(function (a, b) { return a.pct - b.pct; });
   var priorities = reliableWeak.concat(singleSampleWeak).slice(0, 7);
   var strengths = skillEntries.filter(function (e) { return e.pct >= 0.75 && e.t >= 2; }).sort(function (a, b) { return b.pct - a.pct; }).slice(0, 5);
+
+  /* ═══ TEST-TAKING BEHAVIOR DETECTION ═══
+     The content breakdown above says WHAT to teach; this says whether the
+     raw score is even a trustworthy read of where the student stands to
+     begin with. This is the same by-hand check Luca does when a diagnostic
+     "feels off" relative to context he already has on a student — a burst
+     of very-fast wrong answers, a hard question answered right in a
+     fraction of the student's usual time, never once touching "flag for
+     review" — automated here so it runs on every report instead of only
+     the ones that get a second look. Thresholds mirror the existing
+     distractor-letter flag's spirit: conservative, sample-size-gated, only
+     fires on a clear pattern rather than a single fast guess. Only the
+     skills most implicated are named (weakest few for the rushed-wrong
+     pattern, the few most affected by suspiciously-fast correct answers)
+     rather than every skill touched — a parent reading this wants the two
+     or three names that matter, not a full skill-by-skill audit that
+     duplicates the section cards above.
+  */
+  function median(arr) {
+    if (!arr.length) return 0;
+    var s12 = arr.slice().sort(function (a, b) { return a - b; });
+    var mid = Math.floor(s12.length / 2);
+    return s12.length % 2 ? s12[mid] : (s12[mid - 1] + s12[mid]) / 2;
+  }
+  function topSkillNames(list, n) {
+    var counts = {};
+    list.forEach(function (x) { counts[x.sk] = (counts[x.sk] || 0) + 1; });
+    return Object.keys(counts).map(function (k) { return { name: k, n: counts[k] }; })
+      .sort(function (a, b) { return b.n - a.n; }).slice(0, n).map(function (e) { return e.name; });
+  }
+  // Evaluated PER SECTION, not pooled across the whole diagnostic — a
+  // guessing burst confined to one section (e.g. rushing the back half of
+  // Math while Reading & Writing was paced normally) is exactly the kind
+  // of pattern that gets diluted into invisibility if lumped in with a
+  // section that behaved normally. Each section gets its own baseline
+  // (median time on that section's own correct MC answers) and its own
+  // ratio check, so a real pattern in one section fires regardless of how
+  // the other section went.
+  var RUSHED_REL = 0.5, RUSHED_ABS_CAP = 20000, LUCKY_REL = 0.35, LUCKY_ABS_CAP = 15000;
+  var behaviorFlags = [];
+  sections.forEach(function (s7) {
+    var correctTimes = s7.rows.filter(function (r) { return r.ok && r.q.type === 'mc' && r.timeMs > 0; }).map(function (r) { return r.timeMs; });
+    var typical = median(correctTimes);
+    if (!typical) return; // no usable timing data for this section — skip rather than guess
+    var cutoff = Math.min(typical * RUSHED_REL, RUSHED_ABS_CAP);
+    var luckyCutoff = Math.min(typical * LUCKY_REL, LUCKY_ABS_CAP);
+    var rushedWrong = [], luckyCorrect = [];
+    s7.rows.forEach(function (r) {
+      if (r.q.type !== 'mc' || !(r.timeMs > 0)) return;
+      if (!r.ok && r.timeMs < cutoff) rushedWrong.push({ sk: r.sk });
+      if (r.ok && r.q.difficulty === 'hard' && r.timeMs < luckyCutoff) luckyCorrect.push({ sk: r.sk });
+    });
+    if (s7.missedMc >= 4 && rushedWrong.length / s7.missedMc >= 0.5) {
+      var wSkills = topSkillNames(rushedWrong, 3).join(', ');
+      behaviorFlags.push('<strong>Pacing flag (' + s7.label + '):</strong> ' + rushedWrong.length + ' of ' + s7.missedMc + ' missed multiple-choice questions here were answered in well under ' + first + '’s own average time on questions answered correctly — a rushed-guess pattern more than ' + rushedWrong.length + ' independently reasoned wrong answers.' + (wSkills ? ' Heaviest in: ' + wSkills + '.' : '') + ' Worth a pacing conversation before treating all of these as pure content gaps.');
+    }
+    var hardCorrectN = s7.diff.hard.c;
+    if (hardCorrectN >= 3 && luckyCorrect.length >= 2 && luckyCorrect.length / hardCorrectN >= 0.4) {
+      var lSkills = topSkillNames(luckyCorrect, 3).join(', ');
+      behaviorFlags.push('<strong>Guess-landed flag (' + s7.label + '):</strong> ' + luckyCorrect.length + ' harder question' + (luckyCorrect.length === 1 ? '' : 's') + (lSkills ? ' (' + lSkills + ')' : '') + ' here were answered correctly in a fraction of ' + first + '’s typical time — consistent with a guess landing right rather than a solved problem. The raw score in this area may read a bit higher than true command of the material.');
+    }
+  });
+  if (markedT === 0 && totalQ >= 40) {
+    behaviorFlags.push(first + ' never used the "flag for review" feature across all ' + totalQ + ' questions' + (skipped < totalQ - totalC ? ', despite ' + (totalQ - totalC) + ' misses' : '') + '. Combined with the timing patterns above, this points at pushing through uncertain questions rather than marking them to revisit — a fixable pacing habit worth raising directly with ' + first + '.');
+  }
+  if (behaviorFlags.length) {
+    document.getElementById('behavior-hed').style.display = '';
+    var bWrap = document.getElementById('behavior-section');
+    bWrap.style.display = '';
+    bWrap.innerHTML = '<ul class="takeaways">' + behaviorFlags.map(function (f) { return '<li>' + f + '</li>'; }).join('') + '</ul>';
+  }
 
   var take = [];
   take.push('<strong>' + first + ' answered ' + totalC + ' of ' + totalQ + ' correctly (' + pct + '%).</strong>');
