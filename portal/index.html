@@ -276,7 +276,18 @@
      is now pixel-perfect regardless of font rendering. */
   .dx-pane-grip { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 18px; height: 34px; border-radius: 9px; background: var(--white); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--faint); }
   .dx-pane-divider:hover .dx-pane-grip, .dx-pane-divider.dragging .dx-pane-grip { border-color: var(--dx-blue); color: var(--dx-blue); }
-  #dx-shell.passage-mode .dx-card-wrap { flex: 1; min-width: 0; padding: 3rem 2.5rem; margin: 0; }
+  /* display:flex + justify-content:center here (added alongside the grip
+     fix above) vertically centers the actual question card within this
+     pane. Before this, the card just sat at the top of the pane while the
+     pane itself stretched to the full available height (needed so long
+     passages can fill/scroll properly) — so on any short question (few
+     answer choices, no long passage) the divider's grip, centered in that
+     full tall pane, ended up floating well below the visibly short card
+     instead of alongside it. Centering the card's content to match is a
+     more robust fix than moving the grip, since it works regardless of how
+     tall a given question's content happens to be. overflow-y:auto keeps
+     genuinely tall cards scrollable instead of clipping. */
+  #dx-shell.passage-mode .dx-card-wrap { flex: 1; min-width: 0; padding: 3rem 2.5rem; margin: 0; display: flex; flex-direction: column; justify-content: center; overflow-y: auto; }
   .dx-passage-title { font-family: var(--display); font-weight: 700; font-size: 1.05rem; color: var(--text); margin-bottom: 0.3rem; }
   .dx-passage-kicker { font-family: var(--serif); font-size: 0.78rem; color: var(--mid); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 1.3rem; }
   /* Real ACT passages number every 5th line in the left margin, not inline
