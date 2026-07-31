@@ -268,7 +268,13 @@
   .dx-pane-divider { display: none; width: 14px; flex-shrink: 0; position: relative; cursor: col-resize; background: transparent; height: calc(100vh - 156px); }
   #dx-shell.passage-mode .dx-pane-divider { display: block; }
   .dx-pane-divider::before { content: ''; position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: var(--border); transform: translateX(-50%); }
-  .dx-pane-grip { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 18px; height: 34px; border-radius: 9px; background: var(--white); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--faint); font-size: 0.7rem; letter-spacing: -1px; }
+  /* Grip icon is a plain SVG (6 dots, 2x3) rather than a text glyph on
+     purpose — a font's vertical-ellipsis character (⋮) is very rarely
+     centered within its own line box across different fonts/browsers, which
+     is why this kept looking off-center no matter how the surrounding CSS
+     was tweaked. An SVG's coordinates are exact, so centering it via flex
+     is now pixel-perfect regardless of font rendering. */
+  .dx-pane-grip { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 18px; height: 34px; border-radius: 9px; background: var(--white); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--faint); }
   .dx-pane-divider:hover .dx-pane-grip, .dx-pane-divider.dragging .dx-pane-grip { border-color: var(--dx-blue); color: var(--dx-blue); }
   #dx-shell.passage-mode .dx-card-wrap { flex: 1; min-width: 0; padding: 3rem 2.5rem; margin: 0; }
   .dx-passage-title { font-family: var(--display); font-weight: 700; font-size: 1.05rem; color: var(--text); margin-bottom: 0.3rem; }
@@ -1226,7 +1232,7 @@
           <div class="dx-passage-body" id="dx-passage-body"></div>
         </div>
       </div>
-      <div class="dx-pane-divider" id="dx-pane-divider"><span class="dx-pane-grip">&#8942;&#8942;</span></div>
+      <div class="dx-pane-divider" id="dx-pane-divider"><span class="dx-pane-grip"><svg width="10" height="18" viewBox="0 0 10 18" aria-hidden="true"><circle cx="2.5" cy="3" r="1.4" fill="currentColor"/><circle cx="7.5" cy="3" r="1.4" fill="currentColor"/><circle cx="2.5" cy="9" r="1.4" fill="currentColor"/><circle cx="7.5" cy="9" r="1.4" fill="currentColor"/><circle cx="2.5" cy="15" r="1.4" fill="currentColor"/><circle cx="7.5" cy="15" r="1.4" fill="currentColor"/></svg></span></div>
       <div class="dx-card-wrap">
         <div class="dx-card" id="dx-card">
           <div class="dx-mobile-jump">
