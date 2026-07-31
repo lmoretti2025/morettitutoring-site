@@ -1366,6 +1366,12 @@
   }
   var APPS_SCRIPT_URL = window.APPS_SCRIPT_URL;
 
+  // How many days a brand-new key's SAT Resources card stays locked after
+  // their first login (currentStudent.grantedAt), regardless of diagnostic
+  // status — see applyTestPrepGating() below. Change this single number to
+  // adjust the lock window.
+  var RESOURCES_LOCK_DAYS = 3;
+
   // NOTE: EmailJS was removed from the diagnostic flow on purpose. Its
   // service/template/public keys had to live in this page's source to work,
   // which let anyone replay emailjs.send() from a console and forge a
@@ -1527,6 +1533,24 @@
     var diagnosticOnly = isTestPrep && !hasCompletedADiagnostic;
     if (filesCard) filesCard.style.display = diagnosticOnly ? 'none' : '';
     if (resCard) resCard.style.display = diagnosticOnly ? 'none' : (isTestPrep ? '' : 'none');
+
+    // On top of the above, SAT Resources stays locked for a brand-new key's
+    // first RESOURCES_LOCK_DAYS days, even after the diagnostic-only gate
+    // above unlocks it — this keeps a new student focused on the diagnostic
+    // and initial plan instead of immediately browsing the resource library.
+    // Timed off currentStudent.grantedAt (stamped server-side the moment a
+    // key's first login/email-unlock happens — see Code.gs handleAuth()), so
+    // it needs no separate state of its own and can't be reset by the
+    // student. A key with no grantedAt on record (shouldn't normally happen
+    // post-first-login, but guards old/edge-case data) is treated as
+    // unlocked rather than permanently locked.
+    if (resCard && resCard.style.display !== 'none' && currentStudent && currentStudent.grantedAt) {
+      var grantedMs = Date.parse(currentStudent.grantedAt);
+      if (!isNaN(grantedMs)) {
+        var daysSinceGranted = (Date.now() - grantedMs) / (24 * 60 * 60 * 1000);
+        if (daysSinceGranted < RESOURCES_LOCK_DAYS) resCard.style.display = 'none';
+      }
+    }
   }
   // Hides whichever of the SAT/ACT buttons doesn't apply to this student —
   // an ACT-only student never sees an SAT button to accidentally click.
