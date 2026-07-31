@@ -693,13 +693,15 @@
     if (m > 0) return m + 'm ' + (s < 10 ? '0' : '') + s + 's';
     return s + 's';
   }
-  // Formats a Date.now() timestamp as a local time-of-day string for the
-  // per-question "first visited" / "last viewed" fields.
-  function formatClock(ts) {
-    if (typeof ts !== 'number') return '—';
-    try {
-      return new Date(ts).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit' });
-    } catch (e) { return '—'; }
+  // The per-question "first visited" / "last viewed" fields are stored as
+  // elapsed milliseconds SINCE THE SECTION STARTED (see sectionStartAt
+  // below), not absolute clock time — a viewer reading this report hours
+  // or days later, possibly in a different time zone than the student who
+  // took the test, has no use for "1:44:29 PM"; "2m 15s in" is what
+  // actually tells the story of how the section played out.
+  function formatElapsedIntoSection(ms) {
+    if (typeof ms !== 'number' || ms < 0) return '—';
+    return formatDuration(ms) + ' in';
   }
 
   // Collapse to ONE saved entry per section key before scoring. A
@@ -762,6 +764,16 @@
     // questionTimeMs). Older saved reports predate this field, so a missing
     // sec.tm just leaves these at 0 rather than throwing.
     var secTimeTotal = 0, secTimeCorrect = 0, secTimeIncorrect = 0;
+    // Baseline for the "First visited" / "Last viewed" per-question fields
+    // below — the earliest fv[] timestamp in this section, i.e. the moment
+    // question 1 first appeared. Everything gets reported relative to this
+    // rather than as an absolute clock reading.
+    var sectionStartAt = null;
+    if (sec.fv && sec.fv.length) {
+      sec.fv.forEach(function (t) {
+        if (typeof t === 'number' && (sectionStartAt === null || t < sectionStartAt)) sectionStartAt = t;
+      });
+    }
     qs.forEach(function (q, i) {
       var given = sec.a[i];
       var ok = isCorrect(q, given);
@@ -802,8 +814,8 @@
         q: q, givenIdx: (q.type === 'mc' && given !== null && given !== undefined) ? given : null,
         givenText: (given && typeof given === 'object') ? esc(given.raw || String(given.value)) : null,
         timeMs: qTimeMs,
-        firstVisitedAt: (sec.fv && typeof sec.fv[i] === 'number') ? sec.fv[i] : null,
-        lastViewedAt: (sec.lv && typeof sec.lv[i] === 'number') ? sec.lv[i] : null });
+        firstVisitedAt: (sec.fv && typeof sec.fv[i] === 'number' && sectionStartAt !== null) ? (sec.fv[i] - sectionStartAt) : null,
+        lastViewedAt: (sec.lv && typeof sec.lv[i] === 'number' && sectionStartAt !== null) ? (sec.lv[i] - sectionStartAt) : null });
     });
     sections.push({
       key: sec.k, label: bank.label.replace(' (optional on the real ACT)', ''), c: c, t: qs.length, rows: rows, domains: secDomains,
@@ -1704,8 +1716,8 @@
       var timing = document.createElement('div');
       timing.className = 'q-timing';
       timing.innerHTML = 'Time spent: <strong>' + formatDuration(r.timeMs) + '</strong>' +
-        ' &nbsp;·&nbsp; First visited: ' + formatClock(r.firstVisitedAt) +
-        ' &nbsp;·&nbsp; Last viewed: ' + formatClock(r.lastViewedAt);
+        ' &nbsp;·&nbsp; First visited: ' + formatElapsedIntoSection(r.firstVisitedAt) +
+        ' &nbsp;·&nbsp; Last viewed: ' + formatElapsedIntoSection(r.lastViewedAt);
       box.appendChild(timing);
     }
     return box;
