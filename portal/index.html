@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="../apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Caladea:wght@700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Caladea:wght@400;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   /* =====================================================================
      MORETTI STUDENT PORTAL
@@ -702,18 +702,13 @@
       <p class="key-help">Don't have a key yet? Call or text Luca at (201) 275-2791 to get set up.</p>
     </div>
 
-    <div id="name-step" style="display:none;">
-      <h1 class="panel-hed">Welcome! What's your name?</h1>
-      <p class="panel-sub">First time using this key — let's start with your full name.</p>
-      <input type="text" class="key-input" id="name-input" placeholder="Full name" autocomplete="name" style="text-transform:none;">
-      <p class="key-error" id="name-error">Please enter your full name to continue.</p>
-      <button class="key-btn" id="name-submit">Continue</button>
-      <a href="#" class="key-help" id="name-back" style="display:block; text-decoration:none;">&larr; Use a different key</a>
-    </div>
-
     <div id="email-step" style="display:none;">
-      <h1 class="panel-hed">One more thing<span id="email-step-name"></span></h1>
-      <p class="panel-sub">First time using this key — enter your email and we'll automatically share your files with you.</p>
+      <h1 class="panel-hed" id="email-step-hed"><span id="email-step-hed-text">One more thing</span><span id="email-step-name"></span></h1>
+      <p class="panel-sub" id="email-step-sub">First time using this key — enter your email and we'll automatically share your files with you.</p>
+      <div id="email-step-name-wrap" style="display:none;">
+        <input type="text" class="key-input" id="email-step-name-input" placeholder="Full name" autocomplete="name" style="text-transform:none;">
+        <p class="key-error" id="email-step-name-error">Please enter your full first and last name to continue.</p>
+      </div>
       <div class="email-input-wrap">
         <div class="email-notice" id="email-notice">Please use your main email — your files will be shared exclusively to this address, not any others.</div>
         <input type="email" class="key-input" id="email-input" placeholder="you@email.com" autocomplete="email" style="text-transform:none;">
@@ -1594,15 +1589,16 @@
   var keyInput   = document.getElementById('key-input');
   var keyError   = document.getElementById('key-error');
   var keySubmit  = document.getElementById('key-submit');
-  var nameStep   = document.getElementById('name-step');
-  var nameInput  = document.getElementById('name-input');
-  var nameError  = document.getElementById('name-error');
-  var nameSubmit = document.getElementById('name-submit');
   var emailStep  = document.getElementById('email-step');
   var emailInput = document.getElementById('email-input');
   var emailError = document.getElementById('email-error');
   var emailSubmit = document.getElementById('email-submit');
   var emailStepName = document.getElementById('email-step-name');
+  var emailStepHedText = document.getElementById('email-step-hed-text');
+  var emailStepSub = document.getElementById('email-step-sub');
+  var emailStepNameWrap = document.getElementById('email-step-name-wrap');
+  var emailStepNameInput = document.getElementById('email-step-name-input');
+  var emailStepNameError = document.getElementById('email-step-name-error');
   var pendingKey = null;
   var pendingName = null;
 
@@ -1941,23 +1937,32 @@
     pendingKey = null;
     pendingName = null;
     keyInput.value = '';
-    nameInput.value = '';
+    emailStepNameInput.value = '';
     emailInput.value = '';
     keyError.style.display = 'none';
-    nameError.style.display = 'none';
+    emailStepNameError.style.display = 'none';
     emailError.style.display = 'none';
     document.getElementById('email-notice').style.display = 'none';
-    nameStep.style.display = 'none';
     emailStep.style.display = 'none';
     keyStep.style.display = 'block';
   }
 
+  // Both the name and email fields live on the same "email-step" panel now
+  // — a brand-new key with no name on file yet shows the name field ABOVE
+  // the email field on this one screen (instead of the old two-screen
+  // name-then-email flow), while a key Luca already pre-registered with a
+  // name just hides the name field and asks for email only, same as before.
   function goToEmailStep() {
-    emailStepName.textContent = pendingName ? (', ' + pendingName.split(' ')[0]) : '';
+    var needsName = !pendingName || !String(pendingName).trim();
+    emailStepHedText.textContent = needsName ? "Welcome! Let's get you set up" : 'One more thing';
+    emailStepName.textContent = (!needsName && pendingName) ? (', ' + pendingName.split(' ')[0]) : '';
+    emailStepNameWrap.style.display = needsName ? 'block' : 'none';
+    emailStepSub.textContent = needsName
+      ? "First time using this key — enter your name and email and we'll automatically share your files with you."
+      : "First time using this key — enter your email and we'll automatically share your files with you.";
     keyStep.style.display = 'none';
-    nameStep.style.display = 'none';
     emailStep.style.display = 'block';
-    emailInput.focus();
+    if (needsName) { emailStepNameInput.focus(); } else { emailInput.focus(); }
   }
 
   function tryKey() {
@@ -1977,17 +1982,7 @@
       pendingKey = raw;
       pendingName = data.name;
       if (data.needsEmail) {
-        // Brand-new key with no name on file yet — collect the student's
-        // name first, then email, matching the new two-step first-time
-        // flow. A key Luca already pre-registered with a name skips
-        // straight to the (unchanged) email step, same as before.
-        if (!pendingName || !String(pendingName).trim()) {
-          keyStep.style.display = 'none';
-          nameStep.style.display = 'block';
-          nameInput.focus();
-        } else {
-          goToEmailStep();
-        }
+        goToEmailStep();
       } else {
         settle(data);
       }
@@ -1996,28 +1991,24 @@
   document.getElementById('key-submit').addEventListener('click', tryKey);
   keyInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') tryKey(); });
 
-  function trySubmitName() {
-    var name = nameInput.value.trim();
-    if (!name || name.indexOf(' ') === -1) {
-      nameError.textContent = 'Please enter your full first and last name to continue.';
-      nameError.style.display = 'block';
-      return;
-    }
-    nameError.style.display = 'none';
-    pendingName = name;
-    goToEmailStep();
-  }
-  document.getElementById('name-submit').addEventListener('click', trySubmitName);
-  nameInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') trySubmitName(); });
-  document.getElementById('name-back').addEventListener('click', function (e) { e.preventDefault(); resetKeyScreen(); });
-
   function trySubmitEmail() {
+    var needsName = emailStepNameWrap.style.display !== 'none';
+    var name = pendingName;
+    if (needsName) {
+      name = emailStepNameInput.value.trim();
+      if (!name || name.indexOf(' ') === -1) {
+        emailStepNameError.textContent = 'Please enter your full first and last name to continue.';
+        emailStepNameError.style.display = 'block';
+        return;
+      }
+      emailStepNameError.style.display = 'none';
+    }
     var email = emailInput.value.trim();
     if (!email) { emailError.textContent = authErrorMessage('bad_email'); emailError.style.display = 'block'; return; }
     emailError.style.display = 'none';
     emailSubmit.disabled = true;
     emailSubmit.textContent = 'Unlocking…';
-    callAuth(pendingKey, email, pendingName).then(function (data) {
+    callAuth(pendingKey, email, name).then(function (data) {
       emailSubmit.disabled = false;
       emailSubmit.textContent = 'Unlock My Files';
       if (!data.ok) {
@@ -2030,6 +2021,7 @@
   }
   document.getElementById('email-submit').addEventListener('click', trySubmitEmail);
   emailInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') trySubmitEmail(); });
+  emailStepNameInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') trySubmitEmail(); });
   document.getElementById('email-back').addEventListener('click', function (e) { e.preventDefault(); resetKeyScreen(); });
 
   // Nudge the student toward entering their main email the moment they
