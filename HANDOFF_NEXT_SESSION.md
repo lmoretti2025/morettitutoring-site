@@ -1,76 +1,78 @@
-# Handoff — SAT Practice Test QA (delete this file once done)
+# Handoff — SAT Practice Test QA, Tests 5 & 6 figures (delete this file once done)
 
-Luca reviewed Tests 4-9 in the live portal and reported a batch of formatting/content bugs.
-This session fixed most of them. One large item remains. Read this whole file before doing
-anything — it tells you exactly what's left and how to do it.
+Tests 7, 8, and 9 are now fully done (this session). Only Tests 5 & 6 remain, and they're
+the hardest of the batch — read this whole file before starting.
 
 ## Context you need
 
 - Main file: `portal/practice-tests.js` — a single JS array `window.SAT_PRACTICE_TESTS`,
-  one object per test (`sat-practice-1` through `sat-practice-9`). Each has
-  `sections.math`/`sections.readingWriting`, each with `module1`/`module2Easier`/`module2Harder`
-  arrays of question objects. Read the big header comment at the top of that file first — it
-  documents the schema and the provenance of every test.
-- Portal login for manual testing: access key `XOR7778`. Dev server: use the Browser pane's
-  `preview_start` with `{name: "static-site"}` (config already in `.claude/launch.json`), then
-  navigate to `/portal/index.html`.
-- Git: only `portal/practice-tests.js` should be modified for this work. There's a **git push
-  auth problem** — the stored GitHub credentials are stale (HTTPS token auth fails). Don't try to
-  fix this yourself with a pasted token (that's a hard boundary — never enter credentials/tokens
-  on the user's behalf). Just commit locally and tell Luca to push from GitHub Desktop (already
-  installed and open on his machine) or re-auth `git push` himself in a terminal.
+  one object per test. Read the big header comment at the top first — it documents the
+  schema and provenance of every test.
+- Portal login for manual testing: access key `XOR7778`. Dev server: Browser pane's
+  `preview_start` with `{name: "static-site"}`, then navigate to `/portal/index.html`.
+- Git: only `portal/practice-tests.js` and `portal/assets/practice-test-figures/**` should
+  be touched for this work. **Push auth is broken** (stale GitHub HTTPS token) — commit
+  locally, tell Luca to push via GitHub Desktop or re-auth `git push` himself. Don't try to
+  fix auth yourself with a pasted token.
 
-## What's already fixed this session (don't redo)
+## What's done (Tests 7, 8, 9 — don't redo)
 
-1. **Newline bug** — Tests 5-9 used literal `\n` instead of `<br>` for paragraph breaks, so
-   passages rendered with no visual spacing. Fixed across all 351 affected fields.
-2. **Math notation italics** — function notation (`f(x)`), `xy`-plane/axis references, line/point/
-   triangle/angle labels, and consistent re-mentions of the same variable within a question, now
-   render in `<i>`. Applied platform-wide (all 9 tests), 440 questions touched. This was regex-
-   based with named-pattern matching, not full per-question review — it's good but not 100%
-   coverage (skips bare variable letters in prose that don't match a recognized pattern).
-3. **Fractions** — calculator-notation fractions (`1/29`, `55/(x+6)`) converted to real stacked
-   HTML fractions (a `<span>` with a `border-bottom` divider). Platform-wide.
-4. **Table centering** — all `<table class="dx-table">` in math questions got
-   `style="margin-left:auto;margin-right:auto;"`.
-5. **R&W title italics** — book/poem/film/artwork titles wrapped in `<i>`, matching Test 1's
-   established convention. Found via cue-word pattern (novel/poem/book/film/etc. + capitalized
-   phrase). 29 titles across the platform, including 2 genuine gaps that existed even in
-   "known good" Tests 1-3 (`Save Me the Waltz`, `Sunshine`). Also propagated into `choices`/
-   `choiceNotes` where the same title is restated.
-6. **Test 4 specific bugs**, all fixed and verified:
-   - R&W M1 Q10: missing `<u>` on the sentence the question asks about — added (verified against
-     the answer explanation which choice/sentence it meant).
-   - R&W M1 Q14: was a prose-described graph, not an actual figure — rebuilt as a real inline SVG
-     bar chart (grouped bars, 2019 vs 2024, matches the data the correct answer needs).
-   - R&W M1 Q16, Q17: were prose-described tables — rebuilt as real `<table>` elements using the
-     data that was already in the prose.
-   - Math Module 2 (Easier AND Harder — same shared figure appears in both): angle labels `a`,
-     `b`, `c` in the SVG now show `a°`, `b°`, `c°` to distinguish from point labels.
+All three fully cleaned up and committed (3 commits on `main`, not yet pushed — see git
+auth note above). Method used, which worked well and should be reused for Tests 5/6 where
+applicable:
 
-All of the above is committed. Verify with `node --check portal/practice-tests.js` before and
-after any change you make — the splice logic that inserts/replaces test blocks in this file is
-hand-written string manipulation, not a proper JSON writer, and it's bitten this session twice
-(unescaped quotes when doing raw string replacement; brace-boundary mis-detection when replacing
-whole test objects). See "How to safely edit this file" below.
+1. Ran the detector script (below) to list flagged questions per test.
+2. For each test, figured out the `module2Easier` → `module2Harder`/`module1` position
+   mapping by comparing stripped question text (see "Position mapping" below) — this
+   showed most `module2Easier` flags were literal duplicates of already-flagged
+   `module1`/`module2Harder` questions, so fixing one source fixed both locations at once
+   (confirmed via the apply script's "replacing N occurrences" output — N=2 means it hit
+   both copies).
+3. For each remaining unique flagged question: read the full question text, decide if it's
+   a **false positive** (the question mentions "graph"/"table"/"figure" in passing but
+   every number needed to solve it is already in the prose — very common, e.g. "the graph
+   of a line through (0,5) and (12,0)"), a **pure data table** (build a real `<table
+   class="dx-table">` directly — safe since it's just transcribing given numbers), or a
+   **real figure/graph** (crop it from the source PDF as an image — this is what Luca
+   explicitly wants, not hand-drawn SVG reconstructions).
+4. For real figures: used `pdftotext -layout` on the whole source PDF once, split on
+   `\f` (form feed = page break) in Python, then grepped for a distinctive phrase from the
+   question to find the exact PDF page number instantly, instead of paging through images
+   one by one. Then `pdftoppm -png -r 170-200 -f N -l N <pdf> out` to render just that page,
+   viewed it with Read, cropped the figure region with PIL, saved as grayscale PNG to
+   `portal/assets/practice-test-figures/test<N>/`, and referenced it with a plain `<img
+   src="assets/practice-test-figures/test<N>/name.png" style="display:block;margin:0.5em
+   auto;max-width:...px;width:100%;">` prepended to the question text.
+5. Applied all text edits through a small Node script (`apply_fix.js` pattern below) that
+   does `JSON.stringify(oldText)` / `JSON.stringify(newText)` and a literal string
+   `.split(oldLit).join(newLit)` on the raw file — NOT regex, NOT manual escaping. This
+   guarantees correct JSON-string escaping and lets you verify occurrence counts before
+   writing (it aborts with nothing written if any old string isn't found — safe to retry).
+6. `node --check portal/practice-tests.js` after every batch, plus the module-count
+   verifier (both scripts below).
 
-## What's NOT fixed — this is the real remaining work
+Two items were left deliberately unfixed because the source text itself was ambiguous
+about the exact geometric layout (not just missing an image) — drawing a guessed diagram
+risked being actively wrong, so they're flagged for Luca instead:
+- Test 8 `math/module2Easier#10` — a lines/angles figure whose own stem says line ℓ
+  crosses line *n* at a right angle, but the answer explanation says line *m*. Needs Luca
+  to check the real source and say which is correct before a diagram can be drawn.
+- Test 9 `math/module2Easier#14` — a transversal + right-triangle figure with more than
+  one geometrically valid layout matching the prose. The question is fully solvable from
+  the given angle values (130°, a°, b°) without a diagram, so nothing is broken by leaving
+  it as text-only; a diagram is a nice-to-have if Luca can point to the source.
 
-### 1. Missing figures/graphs/tables across Tests 5-9 (the big one)
+Also fixed in passing (not part of the original figure-hunt, found while working nearby):
+- A bug from an earlier session's fraction-formatting regex had mistakenly converted two
+  non-fraction text labels ("Magazines/brochures", "Other/none of the above" in a Test 9
+  survey table) into stacked-fraction HTML. Fixed to plain text.
+- A genuine transcription error in Test 9's dot-plot question: the text claimed each of
+  10–14 "occur exactly 4 times," but the real source image shows 5/4/2/4/5. Corrected the
+  text to match the actual image (verified the answer is unaffected either way).
 
-Luca's suspicion was confirmed: Tests 5-9 (built via background agents this session) mostly used
-**worded descriptions** of figures instead of real inline SVG/HTML, unlike Tests 1-4 which have
-actual `<svg class="dx-fig">` diagrams and `<table class="dx-table">` elements.
+## What's NOT done — Tests 5 & 6 (the remaining work)
 
-**Luca's explicit instruction: for these, literally screenshot/crop the actual figure from the
-original source and embed it as a real image. Do NOT hand-draw new SVG reconstructions — that
-wastes time and risks getting the figure wrong.** (Test 4's Q14/Q16/Q17 fixes above were done as
-SVG/table reconstructions because Test 4 has no known recoverable source — that was the exception,
-not the pattern to follow for Tests 5-9, which DO have real sources available — see below.)
-
-**Detection**: a heuristic script found every math/RW question whose text mentions
-figure/graph/table/chart/scatterplot/etc. but has no `<svg` or `<table` in it. Re-run it any time
-(the list will shrink as you fix things) with:
+**Detector script** (re-run any time, list shrinks as you fix things):
 
 ```bash
 node -e "
@@ -80,12 +82,12 @@ eval(fs.readFileSync('portal/practice-tests.js','utf8'));
 const tests = window.SAT_PRACTICE_TESTS;
 const refPattern = /\b(figure|graph|table|chart|shown above|shown below|scatterplot|dot plot|bar graph|line graph)\b/i;
 for (const t of tests) {
-  if (!['sat-practice-5','sat-practice-6','sat-practice-7','sat-practice-8','sat-practice-9'].includes(t.id)) continue;
+  if (!['sat-practice-5','sat-practice-6'].includes(t.id)) continue;
   let flagged = [];
   for (const sec of ['math','readingWriting']) {
     for (const mod of ['module1','module2Easier','module2Harder']) {
       t.sections[sec][mod].forEach((q,i) => {
-        const hasVisual = /<svg|<table/i.test(q.text);
+        const hasVisual = /<svg|<table|<img/i.test(q.text);
         const refsVisual = refPattern.test(q.text);
         if (refsVisual && !hasVisual) flagged.push(sec+'/'+mod+'#'+(i+1));
       });
@@ -96,81 +98,87 @@ for (const t of tests) {
 "
 ```
 
-As of this handoff: **Test5=22, Test6=19, Test7=~20, Test8=12, Test9=~22 flagged items** (~95
-total, though some are false positives — e.g. a question just saying "the value of x" without
-actually needing a figure — so eyeball each one, don't blindly fix all of them).
+As of this handoff: **Test5 = 22 flagged, Test6 = 19 flagged** (41 total; expect some
+false positives once you read them, same as Tests 7-9 — roughly a third of flagged items
+in each test turned out to need no image at all).
 
-**Sources available per test** (this is the important part — where to get the actual images):
+### Why Tests 5 & 6 are harder than 7/8/9
 
-- **Test 7** — sourced from `/Volumes/ZIGGY/Tutoring/Subjects/Test Prep/SAT/Practice Tests/
-  Barron_Practice_Test_1_Complete.pdf`. Page map: R&W Module1 = pdf pages 1-11, R&W
-  Module2Harder = pdf 12-24, Math Module1 = pdf 25-34, Math Module2Harder = pdf 35-43 (there's a
-  1-2 page directions/reference block before each Math module). Read the specific page for a
-  flagged question, screenshot/crop the figure region, and embed it — either save a cropped PNG
-  into a small `assets/` folder under `portal/` and reference it with `<img src="...">`, or
-  (simpler, no new files) just re-read that exact PDF page with the Read tool and describe/copy
-  what you see precisely enough to build an accurate `<svg>` from the ACTUAL figure (not a
-  guess) — Luca's preference is the literal image, so prefer saving+embedding a real cropped
-  image over hand-drawing when you can.
-- **Test 8** — `/Volumes/ZIGGY/Tutoring/Subjects/Test Prep/SAT/Practice Tests/
-  Princeton_Review_Practice_Test_2_with_Answers.pdf`. Page map: R&W Module1 = pdf 4-25, R&W
-  Module2Harder = pdf 43-64, Math Module1 = pdf 65-85, Math Module2Harder = pdf 86-97.
-- **Test 9** — `/Volumes/ZIGGY/Tutoring/Subjects/Test Prep/SAT/Practice Tests/
-  Princeton_Review_Practice_Test_1_with_Answers.pdf`. Page map: R&W Module1 = pdf 4-25, R&W
-  Module2Harder = pdf 45-65, Math Module1 = pdf 67-89, Math Module2Harder = pdf 92-103.
-- **Test 5 & 6** — mixed sourcing, harder:
-  - Some questions came from `/Volumes/ZIGGY/Tutoring/Subjects/Test Prep/Question Bank App/
-    test_prep.db` (a SQLite DB) with real question **image files** in the `images/` folder next
-    to it (e.g. `images/Math_Advanced_Math_Nonlinear_Functions_q<id>.png`). If a flagged Test 5/6
-    question came from this source, you can find its image by the question ID pattern used in
-    that DB (8-char hex IDs) — but the final JSON in `practice-tests.js` doesn't retain the
-    original ID, so you'll need to match by question text/content back to the DB
-    (`SELECT question_number, stem_text FROM questions WHERE ...`) to find the right image file.
-  - Other questions came from College Board's July 2026 Question Bank refresh PDFs in
-    `/Users/lucamoretti/Downloads/New Question Bank Questions (August 2026)/` (`Copy of
-    new_math_questions_only.pdf`, `Copy of new_rw_questions_only.pdf`, plus `_with_answers`
-    versions) — same idea, match by content, find the page, screenshot the figure.
-  - This matching-by-content step is genuinely more work for Tests 5/6 than 7/8/9 (where you
-    already have exact page numbers). Budget more time here.
+Tests 7, 8, 9 each came from ONE linear PDF practice test with exact page ranges, so
+finding a figure was "look up the page number, crop it." Tests 5 & 6 are different: **every
+question in module1, module2Harder, AND module2Easier is independently drawn from a shared
+pool** (see the header comment in `practice-tests.js`, Test 5 & 6 provenance paragraphs) —
+there is no `module1`/`module2Harder` unmodified-source relationship to exploit, so the
+"fix one position, it propagates to module2Easier automatically" shortcut from Tests 7-9
+mostly won't apply here. Confirmed this session: comparing stripped question text between
+`module2Easier` and `module2Harder`/`module1` for Tests 5/6 found only 0-2 overlapping
+questions per test/section (vs. 15-18 for Tests 7-9) — so budget for fixing each flagged
+item essentially independently, ~41 separate lookups, not ~15.
 
-**Recommended approach**: work test-by-test. For each flagged item: read the source page, look at
-the actual figure, decide whether it's worth a real image crop or whether the question doesn't
-actually need one (false positive from the detector — some flagged items are fine as pure text).
-Fix directly in `practice-tests.js`, verify syntax after each batch, don't try to do all ~95 in one
-giant unverified pass.
+**Two source pools, no direct page map:**
 
-### 2. Test 4 R&W M1 Q26/Q27 — unresolved "exits split-page formatting" bug
+1. **College Board digital Question Bank refresh PDFs** (`/Users/lucamoretti/Downloads/New
+   Question Bank Questions (August 2026)/` — `Copy of new_math_questions_only.pdf`,
+   `Copy of new_rw_questions_only.pdf`, plus `_with_answers` versions). Match by content:
+   `pdftotext -layout` the PDF once, search for a distinctive phrase/number from the
+   flagged question's text to find its page (same trick used for Tests 7-9, just without a
+   pre-known page range — search the whole PDF).
+2. **`test_prep.db`** SQLite DB at `/Volumes/ZIGGY/Tutoring/Subjects/Test Prep/Question
+   Bank App/test_prep.db`, table `questions` (columns: `stem_text`, `choices_text`,
+   `correct_answer`, `image_path`, `has_figure`, etc.), with real question **image files**
+   sitting in the sibling `images/` folder. Match by content — `sqlite3` `LIKE` queries on
+   distinctive substrings from the flagged question's stem worked well this session (e.g.
+   `WHERE stem_text LIKE '%distinctive phrase%'`). **Important gotcha found this session:
+   the `image_path` column value in the DB row does NOT reliably match the actual filename
+   on disk** — e.g. DB said `Math_Advanced_Math_Nonlinear_Functions_q50418728.png` but the
+   real file was `Advanced_Nonlinear_Functions_q50418728.png` (different prefix). Always
+   verify with `find images/ -iname "*<the 8-char hex id>*"` rather than trusting
+   `image_path` directly. The hex ID after `q` is the reliable anchor.
+3. If a question isn't found in either pool after a genuine search (try a few distinctive
+   substrings, not just one), and every number needed to solve it is already given in the
+   prose (like the Test 7 gift-bar-chart case), it's safe to hand-build an accurate SVG or
+   `<table>` from the exact stated values — this is NOT the same as guessing an unknown
+   figure, it's just visualizing data that's already fully specified in text. If the figure
+   has any real ambiguity (multiple valid layouts, or the text contradicts itself the way
+   Test 8's ME#10 did), leave it and flag for Luca rather than guess — don't force it.
 
-Luca said these two questions break out of the site's split-page layout. I could not reproduce it:
-I extracted the raw HTML for Q26 and rendered it in isolation in a plain div, and it displayed
-fine with no overflow (496px content in a 500px container). Both questions use `<ul><li>` note
-lists (6 items each) — Test 1 also uses this same list pattern successfully elsewhere, so the tag
-itself isn't inherently broken.
+### Recommended approach
 
-**Next step**: get an actual screenshot from Luca of what "breaking the split-page formatting"
-looks like on Q26/Q27 specifically (which panel, what breaks, does content overflow/disappear/
-misalign), OR log into the live portal yourself (access key `XOR7778`), navigate to SAT Practice
-Test 4 → Reading & Writing Module 1 → jump to question 26, and look at it directly — don't just
-guess-fix based on the raw HTML, since the isolated test found nothing wrong.
+Same as Tests 7-9: work test-by-test, one flagged item at a time. For each: read the full
+question text, classify as false-positive / buildable-table / needs-image. For
+needs-image, try the refresh PDFs first (`pdftotext` + phrase search), then `test_prep.db`
+(`sqlite3` `LIKE` search), then fall back to hand-built SVG/table only if the data is fully
+specified in the prose. Verify syntax (`node --check`) after every batch of edits, not
+after all 41. Commit per-test like this session did (separate commit for Test 5, separate
+for Test 6) so Luca can review incrementally.
 
 ## How to safely edit this file
 
-Learned the hard way this session — two ways this can silently produce a broken file:
-
-1. **Never do raw Python/JS string `.replace()` with content containing unescaped `"` characters**
-   directly into the file (e.g. inserting a raw `<svg ... attr="value">` string via plain text
-   replace) — the file's questions are JSON string literals, so any `"` you insert must be
-   escaped as `\"`. Build replacement content as a Python dict/object and use `json.dumps(...,
-   ensure_ascii=False)` to get proper escaping, then splice that in — don't hand-write escaped
-   JSON strings.
-2. **When replacing a whole test object** (e.g. `{"id": "sat-practice-5", ...}` in full), don't
-   find its boundaries with fragile string-pattern search (`content.rfind("\n  }", ...)`) — this
-   broke twice on nested closing braces. Instead count braces with proper string-aware parsing
-   (skip characters inside JSON string literals so braces in question text don't get counted) to
-   find the exact matching `}` for the opening `{`. There's a working `find_object_bounds()`
-   function for this — search the shell history / just rewrite it, it's about 20 lines.
-3. **Always run `node --check portal/practice-tests.js` after every edit**, and also load it and
-   verify counts (22 math / 27 R&W per module per test) with:
+1. **Use the apply-fix pattern, not raw string replace.** Build a JSON file of
+   `[[oldText, newText], ...]` pairs (old/new are the plain decoded question text, not
+   pre-escaped), then run a script that does `JSON.stringify()` on each to get the exact
+   escaped literal as it appears in the file, and `raw.split(oldLit).join(newLit)` to
+   replace — this handles escaping correctly and is idempotent/safe to retry (nothing is
+   written until every pair in the batch is found). Example script used this session:
+   ```js
+   const fs = require('fs');
+   const fixes = JSON.parse(fs.readFileSync(jsonFile, 'utf8'));
+   let raw = fs.readFileSync('portal/practice-tests.js', 'utf8');
+   for (const [oldText, newText] of fixes) {
+     const oldLit = JSON.stringify(oldText), newLit = JSON.stringify(newText);
+     const count = raw.split(oldLit).length - 1;
+     if (count === 0) { console.error('NOT FOUND:', oldText.slice(0,60)); process.exit(1); }
+     console.log('Replacing', count, 'occurrence(s) of:', oldText.slice(0,60));
+     raw = raw.split(oldLit).join(newLit);
+   }
+   fs.writeFileSync('portal/practice-tests.js', raw);
+   ```
+   A "Replacing 2 occurrence(s)" result on a `module2Harder` fix usually means it also hit
+   an identical `module2Easier` copy — that's expected and good, not a bug.
+2. **Never hand-write escaped JSON strings or do raw `.replace()` with unescaped `"`
+   characters** — this bit the very first session on this file.
+3. **Always run `node --check portal/practice-tests.js`** after every batch, and verify
+   question counts (22 math / 27 R&W per module per test) with:
    ```bash
    node -e "
    const fs = require('fs');
@@ -191,13 +199,32 @@ Learned the hard way this session — two ways this can silently produce a broke
 
 ## Established conventions (for consistency)
 
-- Figures: `<svg viewBox="..." class="dx-fig" style="color:var(--text);">...</svg>`, using
-  `stroke="currentColor"` / `fill="currentColor"` so it's theme-aware. Or a real embedded image if
-  cropped from source (Luca's preference for Tests 5-9's figures — see above).
+- Figures: real cropped image, grayscale PNG, saved to
+  `portal/assets/practice-test-figures/test<N>/<name>.png`, referenced as
+  `<img src="assets/practice-test-figures/test<N>/<name>.png" alt="..." style="display:block;
+  margin:0.5em auto;max-width:XXXpx;width:100%;">` prepended before the question prose
+  (keep a short "shown above"-style rephrase of the prose after the image, don't just leave
+  the old prose-description text — replace the descriptive sentence, keep the actual
+  question sentence). `max-width` around 280-420px depending on figure complexity.
+- Hand-built SVG (only when no source found AND all data is explicit in the prose):
+  `<svg viewBox="..." class="dx-fig" style="color:var(--text);max-width:...px;display:block;
+  margin:0.5em auto;">...</svg>`, using `stroke="currentColor"`/`fill="currentColor"` so
+  it's theme-aware.
 - Tables: `<table class="dx-table" style="margin-left:auto;margin-right:auto;">`.
 - Fractions: `<span style="display:inline-flex;flex-direction:column;align-items:center;
   vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;"><span
   style="border-bottom:1px solid currentColor;padding:0 0.25em;">NUMERATOR</span><span
-  style="padding:0 0.25em;">DENOMINATOR</span></span>`.
-- Italics: `<i>` for math variables/function notation/plane-axis refs and for book/work titles.
+  style="padding:0 0.25em;">DENOMINATOR</span></span> — ONLY for actual numeric fractions,
+  never for text labels containing a slash (caught a bug this session where "Magazines/
+  brochures" got wrongly converted to this).
+- Italics: `<i>` for math variables/function notation/plane-axis refs and book/work titles.
 - Paragraph breaks: `<br>` / `<br><br>` — never a literal newline character in a JSON string.
+
+## Still outstanding after Tests 5/6 are done
+
+- Test 8 `math/module2Easier#10` and Test 9 `math/module2Easier#14` — see "What's NOT
+  done" above, need Luca's input, not blocking.
+- Test 4 R&W M1 Q26/Q27 "exits split-page formatting" bug — unresolved from an earlier
+  session, couldn't reproduce in isolation. Needs a screenshot from Luca of what breaks, or
+  someone driving the live portal directly to Test 4 → R&W Module 1 → Q26.
+- Once Tests 5/6 are done, this file (`HANDOFF_NEXT_SESSION.md`) should be deleted.
