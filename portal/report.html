@@ -679,6 +679,20 @@
     return window.SECTION_BANKS[sectionKey];
   }
 
+  // A practice-test's section object (from getBank, when data.pt is set) is
+  // just {module1, module2Easier, module2Harder} — it carries no `label`
+  // field of its own (only window.SECTION_BANKS entries do). Without this
+  // fallback, any Practice Test score report crashed on `bank.label.replace`
+  // (bank.label undefined) and rendered a blank page. The section key
+  // ('reading-writing' / 'math') always identifies the same category
+  // regardless of whether the question content came from SECTION_BANKS or a
+  // practice test, so SECTION_BANKS' own label is the right display name
+  // either way.
+  function sectionLabel(sectionKey, bank) {
+    var label = (window.SECTION_BANKS[sectionKey] && window.SECTION_BANKS[sectionKey].label) || bank.label || sectionKey;
+    return label.replace(' (optional on the real ACT)', '');
+  }
+
   function isCorrect(q, given) {
     if (given === null || given === undefined) return false;
     if (q.type === 'mc') return given === q.correct;
@@ -829,7 +843,7 @@
         lastViewedAt: (sec.lv && typeof sec.lv[i] === 'number' && sectionStartAt !== null) ? (sec.lv[i] - sectionStartAt) : null });
     });
     sections.push({
-      key: sec.k, label: bank.label.replace(' (optional on the real ACT)', ''), c: c, t: qs.length, rows: rows, domains: secDomains,
+      key: sec.k, label: sectionLabel(sec.k, bank), c: c, t: qs.length, rows: rows, domains: secDomains,
       distractors: secDistractors, missedMc: secMissedMc, diff: diff, c1: c1, t1: t1, c2: c2, t2: t2, variant: sec.v,
       timeTotal: secTimeTotal, timeCorrect: secTimeCorrect, timeIncorrect: secTimeIncorrect
     });
