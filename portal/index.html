@@ -660,6 +660,19 @@
   .pb-summary-score { font-family: var(--display); font-size: 2.2rem; color: var(--red); margin-bottom: 0.4rem; }
   .pb-summary-sub { font-size: 0.85rem; color: var(--mid); margin-bottom: 1.5rem; }
   .pb-summary-actions { display: flex; gap: 0.8rem; justify-content: center; flex-wrap: wrap; }
+
+  /* ═══ MY INCORRECT QUESTIONS — reuses pb-q-meta/pb-passage/pb-q-card/
+     pb-note/pb-explain/dx-choice styling above for each read-only card
+     (no re-answering, so choices are non-interactive — cursor overridden
+     back to default). ═══ */
+  .iq-section-hed { font-family: var(--display); font-size: 1.05rem; font-weight: 700; color: var(--text); margin: 1.9rem 0 0.5rem; }
+  #iq-list .iq-section-hed:first-child { margin-top: 0.6rem; }
+  .iq-domain-hed { font-family: var(--hel); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); margin: 1.1rem 0 0.7rem; border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; }
+  .iq-item { margin-bottom: 1.6rem; }
+  .iq-item .dx-choice { cursor: default; }
+  .iq-item .dx-choice:hover { border-color: var(--border); }
+  .iq-missed-on { font-size: 0.68rem; color: var(--faint); margin-top: 1rem; text-align: right; }
+  .iq-skipped-note { font-size: 0.8rem; color: var(--faint); margin-top: 0.5rem; font-style: italic; }
   .vp-summary { text-align: center; background: var(--white); border: 1px solid var(--border); border-radius: 14px; padding: 2rem 1.5rem; }
   .vp-summary .vp-score { font-family: var(--display); font-size: 2.5rem; color: var(--gold); line-height: 1; animation: vpPop 0.4s cubic-bezier(.2,.7,.3,1); }
   .vp-summary .vp-score-sub { font-size: 0.85rem; color: var(--mid); margin: 0.5rem 0 1.25rem; }
@@ -839,8 +852,47 @@
           <div class="menu-card-body">Full, timed SAT-format practice tests — the same adaptive Module 1/Module 2 format as the real digital SAT, scored just like your diagnostic.</div>
         </div>
       </div>
+      <div class="menu-card menu-card-wide" data-route="incorrect-questions">
+        <span class="menu-card-icon">&#10007;</span>
+        <div>
+          <div class="menu-card-title">My Incorrect Questions</div>
+          <div class="menu-card-body">Every question you've missed on a diagnostic or practice test, all in one place — filter by section, domain, skill, and difficulty to see exactly what to review.</div>
+        </div>
+      </div>
     </div>
     <a href="#" class="menu-back-link" id="sat-resources-back">&larr; Back to menu</a>
+  </div>
+</div>
+
+<!-- ═══ SCREEN 3b-vi — MY INCORRECT QUESTIONS (embedded; only reachable
+     from the SAT Resources screen inside the portal — no standalone URL).
+     Pulls from moretti_incorrect_qs_<studentKey> in localStorage, written
+     by recordIncorrectQuestions() right after finishDiagnostic() scores
+     an attempt (diagnostic OR practice test — both flow through that one
+     function). Read-only review: shows each missed question with the
+     student's answer and the correct one, no re-answering. ═══ -->
+<div class="screen" id="screen-incorrect-questions">
+  <div class="panel-wide">
+    <div class="vp-head">
+      <div class="kicker">SAT Resources</div>
+      <h1 class="panel-hed">My Incorrect Questions</h1>
+    </div>
+
+    <div id="iq-filters">
+      <div class="vp-panel-label">Section</div>
+      <div class="pb-pills" id="iq-section-pills"></div>
+      <div class="vp-panel-label">Domain</div>
+      <div class="pb-pills" id="iq-domain-pills"></div>
+      <div class="vp-panel-label">Skill</div>
+      <div class="pb-pills pb-pills-skill" id="iq-skill-pills"></div>
+      <div class="vp-panel-label">Difficulty</div>
+      <div class="pb-pills" id="iq-difficulty-pills"></div>
+      <div class="vp-pool-count" id="iq-pool-count"></div>
+    </div>
+
+    <div id="iq-list"></div>
+
+    <a href="#" class="menu-back-link" id="incorrect-questions-back">&larr; Back to resources</a>
   </div>
 </div>
 
@@ -2148,12 +2200,14 @@
       else if (route === 'vocab') { show('screen-vocab'); if (window.vocabModuleInit) window.vocabModuleInit(); }
       else if (route === 'practice-bank') { show('screen-practice-bank'); if (window.pbModuleInit) window.pbModuleInit(); }
       else if (route === 'practice-tests') { renderPracticeTestList(); show('screen-practice-tests'); }
+      else if (route === 'incorrect-questions') { show('screen-incorrect-questions'); if (window.iqModuleInit) window.iqModuleInit(); }
     });
   });
   document.getElementById('sat-resources-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-menu'); });
   document.getElementById('vocab-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-sat-resources'); });
   document.getElementById('practice-bank-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-sat-resources'); });
   document.getElementById('pt-list-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-sat-resources'); });
+  document.getElementById('incorrect-questions-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-sat-resources'); });
 
   /* ═══ PRACTICE TESTS — PICKER ═══
      Cards built straight from window.SAT_PRACTICE_TESTS (see
@@ -3391,6 +3445,39 @@
     } catch (e) { /* storage disabled / private browsing — skip silently, matches saveState() elsewhere */ }
   }
 
+  /* ═══ "MY INCORRECT QUESTIONS" LOG — feeds the My Incorrect Questions
+     tool under SAT Resources (its own isolated module further down the
+     page, same read-a-shared-localStorage-key pattern as the Question
+     Practice tool's weak-spot panel above). Unlike saveDiagnosticSkillStats
+     (aggregate counts only, never erased), this stores the FULL question
+     snapshot for every miss — text/choices/correct answer/explanations —
+     so a student can actually review what they got wrong, not just see a
+     percentage. Keyed by a stable per-question key (test/bank id + section
+     + module + index within that module) so retaking the same
+     diagnostic/practice test updates the SAME entry rather than piling up
+     duplicates, and — importantly — a question that's since been answered
+     CORRECTLY is deleted from the log rather than kept, so this always
+     reflects current weak spots, not full history. */
+  function recordIncorrectQuestions(records) {
+    try {
+      var studentKey = currentStudent && currentStudent.key;
+      if (!studentKey) return;
+      var storageKey = 'moretti_incorrect_qs_' + studentKey;
+      var existing = {};
+      try {
+        var raw = localStorage.getItem(storageKey);
+        if (raw) existing = JSON.parse(raw) || {};
+      } catch (e) { existing = {}; }
+      if (!existing.byKey || typeof existing.byKey !== 'object') existing.byKey = {};
+      records.forEach(function (r) {
+        if (r.correct) delete existing.byKey[r.key];
+        else existing.byKey[r.key] = r;
+      });
+      existing.updatedAt = new Date().toISOString();
+      localStorage.setItem(storageKey, JSON.stringify(existing));
+    } catch (e) { /* storage disabled / private browsing — skip silently, matches saveState() elsewhere */ }
+  }
+
   var diagnosticSubmitted = false;
   function finishDiagnostic() {
     if (diagnosticSubmitted) return; // guard against a double click/double send
@@ -3425,9 +3512,13 @@
     var lines = [];
     var sectionSummaryLines = [];
     var sectionResults = []; // [{ label, correct, total }] — feeds the visual score report
+    var incorrectRecords = []; // feeds recordIncorrectQuestions() below — every question, correct or not (correct ones clear a stale prior entry)
+    var ptDoneEarly = activePracticeTest(); // same call as ptDone further below, just needed before that point for the incorrect-question keys/labels
 
     completedSections.forEach(function (sec) {
-      var qs = sectionQuestions(bankFor(sec.key), sec.module2Variant);
+      var bank = bankFor(sec.key);
+      var qs = sectionQuestions(bank, sec.module2Variant);
+      var mod1Len = bank.module1.length;
       var secCorrect = 0;
       lines.push('');
       lines.push(sec.label.toUpperCase() + ':');
@@ -3440,7 +3531,7 @@
         domains[q.domain].total++;
         if (correct) domains[q.domain].correct++;
         var skillName = q.skill || q.domain;
-        var skillKey = q.domain + ' \u2192 ' + skillName;
+        var skillKey = q.domain + ' → ' + skillName;
         if (!skills[skillKey]) skills[skillKey] = { correct: 0, total: 0 };
         skills[skillKey].total++;
         if (correct) skills[skillKey].correct++;
@@ -3449,13 +3540,40 @@
         if (wasMarked) { markedTotal++; if (correct) markedCorrect++; }
         if (given === null || given === undefined) skippedCount++;
         var givenText = (given === null || given === undefined) ? '(skipped)' : (q.type === 'mc' ? LETTERS[given] : given.raw);
-        lines.push('  ' + (i + 1) + '. [' + q.domain + ' \u2192 ' + skillName + '] answered ' + givenText + ' \u2014 ' + (correct ? 'correct' : 'incorrect') + (wasMarked ? ' (marked for review)' : ''));
+        lines.push('  ' + (i + 1) + '. [' + q.domain + ' → ' + skillName + '] answered ' + givenText + ' — ' + (correct ? 'correct' : 'incorrect') + (wasMarked ? ' (marked for review)' : ''));
+
+        var moduleName = i < mod1Len ? 'module1' : ('module2' + (sec.module2Variant || 'Easier'));
+        var moduleIndex = i < mod1Len ? i : (i - mod1Len);
+        var testTag = ptDoneEarly ? ptDoneEarly.id : ('diag-' + testChoice);
+        incorrectRecords.push({
+          key: testTag + '|' + sec.key + '|' + moduleName + '|' + moduleIndex,
+          correct: correct,
+          source: ptDoneEarly ? 'practice-test' : 'diagnostic',
+          testId: ptDoneEarly ? ptDoneEarly.id : null,
+          testTitle: ptDoneEarly ? ptDoneEarly.title : (testChoice + ' Diagnostic'),
+          sectionKey: sec.key,
+          sectionLabel: sec.label,
+          module: moduleName,
+          domain: q.domain,
+          skill: skillName,
+          difficulty: q.difficulty || 'medium',
+          type: q.type,
+          text: q.text,
+          choices: q.choices || null,
+          correctIndex: (q.correct !== undefined ? q.correct : null),
+          choiceNotes: q.choiceNotes || null,
+          answerValue: (q.answer !== undefined ? q.answer : null),
+          explanation: q.explanation || null,
+          given: (given === null || given === undefined) ? null : given,
+          attemptedAt: new Date().toISOString()
+        });
       });
       sectionSummaryLines.push('  - ' + sec.label + ': ' + secCorrect + ' / ' + qs.length);
       sectionResults.push({ label: sec.label, correct: secCorrect, total: qs.length });
     });
 
     saveDiagnosticSkillStats(skills);
+    recordIncorrectQuestions(incorrectRecords);
 
     var ptDone = activePracticeTest();
     var reportLines = [];
@@ -3723,6 +3841,8 @@
       show('screen-vocab'); if (window.vocabModuleInit) window.vocabModuleInit();
     } else if (state.screen === 'screen-practice-bank') {
       show('screen-practice-bank'); if (window.pbModuleInit) window.pbModuleInit();
+    } else if (state.screen === 'screen-incorrect-questions') {
+      show('screen-incorrect-questions'); if (window.iqModuleInit) window.iqModuleInit();
     } else {
       show('screen-menu'); // includes mid-section-break "screen-intro" — safest to restart from the menu
     }
@@ -5645,6 +5765,288 @@
       if (at !== -1) currentElims.splice(at, 1);
       chooseAnswer(q, letterIdx);
     });
+  };
+})();
+</script>
+
+<!-- ═══ MY INCORRECT QUESTIONS MODULE — isolated (its own closure), same
+     pattern as the vocabulary/practice-bank modules above. Read-only
+     review: reads moretti_incorrect_qs_<studentKey> from localStorage
+     (written by recordIncorrectQuestions() in the main script block,
+     right after every diagnostic AND practice-test attempt — both flow
+     through finishDiagnostic()) and renders each missed question with the
+     student's answer and the correct one, grouped by section then domain,
+     filterable by section/domain/skill/difficulty. Nothing here is
+     interactive in the "answer it" sense — no scoring, no retry state —
+     since this is a review of what already happened, not a new practice
+     round. Exposes window.iqModuleInit(), called every time this screen
+     opens (unlike vocab/practice-bank's one-time init) so it always
+     reflects the latest attempt. ═══ -->
+<script>
+(function () {
+  'use strict';
+
+  function escHtml(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  var LETTERS = ['A', 'B', 'C', 'D', 'E'];
+  var DIFFICULTIES = ['easy', 'medium', 'hard'];
+  function difficultyLabel(d) { return d ? (d.charAt(0).toUpperCase() + d.slice(1)) : 'Medium'; }
+  function sectionLabelFor(key) {
+    if (key === 'reading-writing') return 'Reading & Writing';
+    if (key === 'math') return 'Math';
+    if (key === 'english') return 'English';
+    if (key === 'act-math') return 'Math (ACT)';
+    if (key === 'reading') return 'Reading';
+    if (key === 'science') return 'Science';
+    return key;
+  }
+  function dateLabel(iso) {
+    try {
+      var d = new Date(iso);
+      if (isNaN(d.getTime())) return '';
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    } catch (e) { return ''; }
+  }
+
+  var records = [];          // flattened from localStorage — reloaded every time the screen opens
+  var sectionKeys = [];
+  var domainsBySection = {}; // sectionKey -> [domain, ...]
+  var skillsByDomain = {};   // domain -> [skill, ...]
+
+  var selSections = [], selDomains = [], selSkills = [], selDifficulties = [];
+  var sectionSnapBox = { value: null }, domainSnapBox = { value: null }, skillSnapBox = { value: null }, difficultySnapBox = { value: null };
+
+  var listEl, poolCountEl, sectionPillsEl, domainPillsEl, skillPillsEl, difficultyPillsEl;
+  var initialized = false;
+
+  function loadRecords() {
+    records = [];
+    var key = window.getPortalStudentKey && window.getPortalStudentKey();
+    if (!key) return;
+    var raw = null;
+    try { raw = localStorage.getItem('moretti_incorrect_qs_' + key); } catch (e) { raw = null; }
+    if (!raw) return;
+    var data = null;
+    try { data = JSON.parse(raw); } catch (e) { data = null; }
+    var byKey = (data && data.byKey && typeof data.byKey === 'object') ? data.byKey : {};
+    records = Object.keys(byKey).map(function (k) { return byKey[k]; }).filter(function (r) { return r && r.text; });
+    records.sort(function (a, b) { return (b.attemptedAt || '').localeCompare(a.attemptedAt || ''); }); // most recently missed first
+  }
+
+  function rebuildTaxonomy() {
+    sectionKeys = [];
+    domainsBySection = {};
+    skillsByDomain = {};
+    records.forEach(function (r) {
+      if (sectionKeys.indexOf(r.sectionKey) === -1) sectionKeys.push(r.sectionKey);
+      if (!domainsBySection[r.sectionKey]) domainsBySection[r.sectionKey] = [];
+      if (domainsBySection[r.sectionKey].indexOf(r.domain) === -1) domainsBySection[r.sectionKey].push(r.domain);
+      if (!skillsByDomain[r.domain]) skillsByDomain[r.domain] = [];
+      if (skillsByDomain[r.domain].indexOf(r.skill) === -1) skillsByDomain[r.domain].push(r.skill);
+    });
+  }
+
+  // Cascading options, same rule as the Question Practice module: a level
+  // falls back to the full list whenever nothing's chosen at the level
+  // above it.
+  function availableDomains() {
+    var sections = selSections.length ? selSections : sectionKeys;
+    var out = [];
+    sections.forEach(function (s) { (domainsBySection[s] || []).forEach(function (d) { if (out.indexOf(d) === -1) out.push(d); }); });
+    return out;
+  }
+  function availableSkills() {
+    var domains = selDomains.length ? selDomains : Object.keys(skillsByDomain);
+    var out = [];
+    domains.forEach(function (d) { (skillsByDomain[d] || []).forEach(function (s) { if (out.indexOf(s) === -1) out.push(s); }); });
+    return out;
+  }
+
+  // Same generic pill-row renderer as the vocabulary/Question Practice
+  // modules (each module keeps its own copy rather than sharing one across
+  // closures — see the vocabulary module's own comment on this pattern).
+  function renderPillRow(container, options, labelFn, selectedArr, snapBox, onChange) {
+    container.innerHTML = '';
+    if (options.length > 1) {
+      var isAllOn = options.length > 0 && selectedArr.length === options.length;
+      var all = document.createElement('button');
+      all.type = 'button';
+      all.className = 'vp-pill' + (isAllOn ? ' on' : '');
+      all.textContent = 'All';
+      all.addEventListener('click', function () {
+        if (isAllOn) {
+          var restore = (snapBox.value || []).filter(function (o) { return options.indexOf(o) !== -1; });
+          selectedArr.splice(0, selectedArr.length);
+          restore.forEach(function (o) { selectedArr.push(o); });
+          snapBox.value = null;
+        } else {
+          snapBox.value = selectedArr.slice();
+          selectedArr.splice(0, selectedArr.length);
+          options.forEach(function (o) { selectedArr.push(o); });
+        }
+        onChange();
+      });
+      container.appendChild(all);
+    }
+    options.forEach(function (opt) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'vp-pill' + (selectedArr.indexOf(opt) !== -1 ? ' on' : '');
+      b.textContent = labelFn(opt);
+      b.addEventListener('click', function () {
+        var i = selectedArr.indexOf(opt);
+        if (i === -1) selectedArr.push(opt); else selectedArr.splice(i, 1);
+        onChange();
+      });
+      container.appendChild(b);
+    });
+  }
+
+  function renderSectionPills() {
+    renderPillRow(sectionPillsEl, sectionKeys, sectionLabelFor, selSections, sectionSnapBox, function () {
+      var newDomains = availableDomains();
+      selDomains = selDomains.filter(function (d) { return newDomains.indexOf(d) !== -1; });
+      renderSectionPills();
+      onDomainsChanged();
+    });
+  }
+  function renderDomainPills() {
+    renderPillRow(domainPillsEl, availableDomains(), function (d) { return d; }, selDomains, domainSnapBox, function () { onDomainsChanged(); });
+  }
+  function onDomainsChanged() {
+    var newSkills = availableSkills();
+    selSkills = selSkills.filter(function (s) { return newSkills.indexOf(s) !== -1; });
+    renderDomainPills();
+    renderSkillPills();
+    renderList();
+  }
+  function renderSkillPills() {
+    renderPillRow(skillPillsEl, availableSkills(), function (s) { return s; }, selSkills, skillSnapBox, function () { renderSkillPills(); renderList(); });
+  }
+  function renderDifficultyPills() {
+    renderPillRow(difficultyPillsEl, DIFFICULTIES, difficultyLabel, selDifficulties, difficultySnapBox, function () { renderDifficultyPills(); renderList(); });
+  }
+
+  // Same fallback split used on the diagnostic/practice-test screen and
+  // the Question Practice module — most R&W questions bake their stimulus
+  // straight into the text, ending in the actual question sentence,
+  // joined by a "<br><br>".
+  function splitPassage(r) {
+    if (r.sectionKey !== 'reading-writing') return null;
+    var text = r.text || '';
+    var idx = text.lastIndexOf('<br><br>');
+    if (idx === -1) return null;
+    return { passage: text.slice(0, idx), question: text.slice(idx + 8) };
+  }
+
+  function renderCard(r) {
+    var split = splitPassage(r);
+    var passageHtml = split ? '<div class="pb-passage">' + split.passage + '</div>' : '';
+    var questionText = split ? split.question : r.text;
+    var metaBits = [escHtml(r.skill), difficultyLabel(r.difficulty), escHtml(r.testTitle)];
+    var meta = '<div class="pb-q-meta"><span>' + metaBits.join(' · ') + '</span></div>';
+
+    var body = '';
+    if (r.type === 'mc' && r.choices) {
+      body += '<div class="dx-choices">';
+      r.choices.forEach(function (c, i) {
+        var isGiven = (r.given !== null && r.given !== undefined && i === r.given);
+        var isCorrectChoice = (r.correctIndex !== null && r.correctIndex !== undefined && i === r.correctIndex);
+        var cls = 'dx-choice' + (isGiven && !isCorrectChoice ? ' pb-tried-wrong' : '') + (isCorrectChoice ? ' pb-right' : '');
+        body += '<div class="' + cls + '"><span class="dx-choice-letter">' + LETTERS[i] + '</span><span class="dx-choice-text">' + c + '</span></div>';
+        if ((isGiven || isCorrectChoice) && r.choiceNotes && r.choiceNotes[i]) {
+          body += '<div class="pb-note ' + (isCorrectChoice ? 'pb-note-correct' : 'pb-note-wrong') + '">' + r.choiceNotes[i] + '</div>';
+        }
+      });
+      body += '</div>';
+      if (r.given === null || r.given === undefined) body += '<div class="iq-skipped-note">You skipped this question — the correct answer is shown above.</div>';
+    } else if (r.type === 'fr') {
+      var yourAnswer = (r.given && r.given.raw !== undefined && r.given.raw !== null && String(r.given.raw) !== '') ? r.given.raw : '(skipped)';
+      body += '<div class="pb-note pb-note-wrong">Your answer: ' + escHtml(String(yourAnswer)) + '</div>';
+      body += '<div class="pb-note pb-note-correct">Correct answer: ' + escHtml(String(r.answerValue)) + '</div>';
+    }
+    if (r.explanation) body += '<div class="pb-explain"><div class="pb-explain-hed">Full Explanation</div>' + r.explanation + '</div>';
+
+    var missed = dateLabel(r.attemptedAt);
+    return '<div class="iq-item">' + meta + passageHtml +
+      '<div class="pb-q-card"><div class="pb-q-text">' + questionText + '</div>' + body +
+      (missed ? '<div class="iq-missed-on">Missed on ' + missed + '</div>' : '') +
+      '</div></div>';
+  }
+
+  function currentFiltered() {
+    return records.filter(function (r) {
+      return selSections.indexOf(r.sectionKey) !== -1 &&
+        selDomains.indexOf(r.domain) !== -1 &&
+        selSkills.indexOf(r.skill) !== -1 &&
+        selDifficulties.indexOf(r.difficulty) !== -1;
+    });
+  }
+
+  function renderList() {
+    if (!records.length) {
+      poolCountEl.textContent = '';
+      listEl.innerHTML = '<div class="pb-empty-note">Nothing here yet — once you finish a diagnostic or practice test, anything you miss will show up here, organized by section, domain, skill, and difficulty. (Getting a question right on a later attempt clears it from this list, too — this always reflects what you currently have wrong, not your full history.)</div>';
+      return;
+    }
+    var filtered = currentFiltered();
+    if (!filtered.length) {
+      poolCountEl.textContent = '0 questions match these filters.';
+      listEl.innerHTML = '';
+      return;
+    }
+    poolCountEl.textContent = filtered.length + ' question' + (filtered.length === 1 ? '' : 's') +
+      (filtered.length === records.length ? '' : (' shown (of ' + records.length + ' total missed)'));
+
+    var bySection = {};
+    filtered.forEach(function (r) {
+      if (!bySection[r.sectionKey]) bySection[r.sectionKey] = {};
+      if (!bySection[r.sectionKey][r.domain]) bySection[r.sectionKey][r.domain] = [];
+      bySection[r.sectionKey][r.domain].push(r);
+    });
+
+    var order = { easy: 0, medium: 1, hard: 2 };
+    var html = '';
+    sectionKeys.filter(function (s) { return bySection[s]; }).forEach(function (secKey) {
+      html += '<div class="iq-section-hed">' + escHtml(sectionLabelFor(secKey)) + '</div>';
+      Object.keys(bySection[secKey]).sort().forEach(function (domain) {
+        html += '<div class="iq-domain-hed">' + escHtml(domain) + '</div>';
+        var qs = bySection[secKey][domain].slice().sort(function (a, b) {
+          return (order[a.difficulty] - order[b.difficulty]) || String(a.skill).localeCompare(String(b.skill));
+        });
+        qs.forEach(function (r) { html += renderCard(r); });
+      });
+    });
+    listEl.innerHTML = html;
+  }
+
+  window.iqModuleInit = function () {
+    if (!initialized) {
+      initialized = true;
+      listEl = document.getElementById('iq-list');
+      poolCountEl = document.getElementById('iq-pool-count');
+      sectionPillsEl = document.getElementById('iq-section-pills');
+      domainPillsEl = document.getElementById('iq-domain-pills');
+      skillPillsEl = document.getElementById('iq-skill-pills');
+      difficultyPillsEl = document.getElementById('iq-difficulty-pills');
+    }
+
+    loadRecords();
+    rebuildTaxonomy();
+    // Default to everything selected so the list is populated immediately
+    // on open — this is a review tool, not a "build a session" setup
+    // screen like Question Practice, so there's no reason to start empty.
+    selSections = sectionKeys.slice();
+    selDomains = availableDomains();
+    selSkills = availableSkills();
+    selDifficulties = DIFFICULTIES.slice();
+
+    renderSectionPills();
+    renderDomainPills();
+    renderSkillPills();
+    renderDifficultyPills();
+    renderList();
   };
 })();
 </script>
