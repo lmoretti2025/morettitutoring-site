@@ -444,7 +444,7 @@
 <div id="hero">
   <a href="portal/index.html" class="hero-login-link">Student? Login here</a>
   <img src="logo-caladea-dark.png" alt="Moretti Test Prep &amp; Tutoring" class="hero-logo reveal">
-  <p class="hero-tag reveal">Private, one-on-one coaching in math, SAT &amp; ACT prep, and college admissions &mdash; in-person in New Jersey and online.</p>
+  <p class="hero-tag reveal">Private, one-on-one coaching for students who want their grades and scores to actually move &mdash; math, SAT &amp; ACT prep, and college admissions, in-person in New Jersey or online.</p>
   <div class="hero-ctas reveal d2">
     <a href="https://calendly.com/morettitutoring" target="_blank" rel="noopener" class="hero-btn-red">Book a Free Intro Call</a>
     <a href="tel:2012752791" class="hero-btn-outline">Call (201) 275-2791</a>
@@ -680,8 +680,8 @@
         <div class="calendly-inline-widget" data-url="https://calendly.com/morettitutoring?hide_gdpr_banner=1&primary_color=b0271c" style="min-width:300px;height:640px;"></div>
       </div>
     </div>
-    <details class="form-fallback reveal">
-      <summary>Prefer to write instead? Send a note</summary>
+    <details class="form-fallback reveal" open>
+      <summary>Or tell us about your student &mdash; we'll follow up personally, usually same day</summary>
       <div class="form-card">
         <form id="contact-form" novalidate>
           <div class="form-row">
@@ -689,7 +689,23 @@
             <div class="form-field"><label class="form-label" for="cf-email">Email</label><input class="form-input" type="email" id="cf-email" name="from_email" required></div>
           </div>
           <div class="form-row">
+            <div class="form-field"><label class="form-label" for="cf-phone">Phone <span style="text-transform:none; font-weight:400; color:var(--faint);">(optional)</span></label><input class="form-input" type="tel" id="cf-phone" name="phone" placeholder="e.g. (201) 555-0100"></div>
             <div class="form-field"><label class="form-label" for="cf-town">Town</label><input class="form-input" type="text" id="cf-town" name="town" placeholder="e.g. Westfield"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-field">
+              <label class="form-label" for="cf-grade">Student's Grade</label>
+              <select class="form-select" id="cf-grade" name="grade">
+                <option value="">Select a grade</option>
+                <option value="Middle School (6-8)">Middle School (6&ndash;8)</option>
+                <option value="9th Grade">9th Grade</option>
+                <option value="10th Grade">10th Grade</option>
+                <option value="11th Grade">11th Grade</option>
+                <option value="12th Grade">12th Grade</option>
+                <option value="College">College</option>
+                <option value="Adult / Other">Adult / Other</option>
+              </select>
+            </div>
             <div class="form-field">
               <label class="form-label" for="cf-type">Subject</label>
               <select class="form-select" id="cf-type" name="subject" required>
@@ -703,7 +719,7 @@
               </select>
             </div>
           </div>
-          <div class="form-field"><label class="form-label" for="cf-message">Tell me about your student</label><textarea class="form-textarea" id="cf-message" name="message" placeholder="Grade, current grade in the class, what's not working right now..."></textarea></div>
+          <div class="form-field"><label class="form-label" for="cf-message">Tell me about your student</label><textarea class="form-textarea" id="cf-message" name="message" placeholder="Current grade in the class, what's not working right now, any upcoming test dates..."></textarea></div>
           <button type="submit" class="btn-submit" id="cf-submit">Send &amp; Book Intro Call</button>
           <p class="form-note" id="cf-note">We'll get back to you within 24 hours.</p>
           <p id="cf-success" style="display:none; font-size:0.78rem; color:var(--gold); margin-top:0.75rem; line-height:1.65;">Message sent — we'll follow up shortly.</p>
@@ -871,6 +887,31 @@
 
   emailjs.init('FAAXN09Ad2ObipaJJ');
 
+  // Same backend that already powers the student portal (see
+  // portal/Code.gs) — reused here purely to persist leads for the
+  // automated day-3 / day-7 follow-up sequence (see sendLeadFollowUps in
+  // Code.gs). This call is fire-and-forget and never blocks or fails the
+  // actual form submission: the two emailjs.send() calls below are the
+  // real, load-bearing "send the messages" step, exactly as before.
+  var LEAD_BACKEND_URL = 'https://script.google.com/macros/s/AKfycbwsLMGq3lhBEPObcas0k8gVS67NX9y4wXKG6RgzKtlBOT2SXfREK6vBpvvM19w9s1m6/exec';
+  function recordLeadForFollowUp(params) {
+    try {
+      fetch(LEAD_BACKEND_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'submitLead',
+          name: params.from_name,
+          email: params.from_email,
+          phone: params.phone,
+          town: params.town,
+          grade: params.grade,
+          subject: params.subject,
+          message: params.message
+        })
+      }).catch(function () { /* silent — follow-up persistence is best-effort */ });
+    } catch (err) { /* silent — never let this break the real form submission */ }
+  }
+
   var form = document.getElementById('contact-form');
   if (form) {
     form.addEventListener('submit', function (e) {
@@ -884,7 +925,9 @@
       var params = {
         from_name: name,
         from_email: email,
+        phone: document.getElementById('cf-phone').value.trim(),
         town: document.getElementById('cf-town').value.trim(),
+        grade: document.getElementById('cf-grade').value,
         subject: type,
         message: document.getElementById('cf-message').value.trim()
       };
@@ -896,6 +939,7 @@
           form.reset();
           btn.disabled = false; btn.textContent = 'Send & Book Intro Call';
           emailjs.send('service_k768w0d', 'template_1q3fi3i', params);
+          recordLeadForFollowUp(params);
         }, function () {
           document.getElementById('cf-error').style.display   = 'block';
           document.getElementById('cf-success').style.display = 'none';
