@@ -136,6 +136,16 @@
     .assign-card { position: fixed; top: 108px; left: 2rem; margin: 0; width: 260px; max-width: 260px; max-height: calc(100vh - 140px); overflow-y: auto; z-index: 50; }
   }
 
+  /* ═══ SCORE PROGRESS ═══ shown on the home screen once a student has at
+     least one recorded diagnostic/practice-test composite score (see
+     recordScoreHistory() / renderScoreProgress()). Wider than assign-card
+     — a line chart needs the room a 460px checklist column doesn't. */
+  .score-progress-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 1.3rem 1.5rem 1.1rem; margin: 0 auto 1.6rem; max-width: 640px; box-shadow: var(--shadow); }
+  .spc-label { font-family: var(--hel); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--mid); margin-bottom: 0.9rem; }
+  .spc-chart-hed { font-family: var(--hel); font-size: 0.78rem; font-weight: 700; color: var(--text); margin: 0.9rem 0 0.3rem; }
+  .spc-chart-hed:first-child { margin-top: 0; }
+  .spc-note { font-size: 0.7rem; color: var(--faint); margin-top: 0.2rem; }
+
   /* ═══ TEST-DAY COUNTDOWN ═══ shown on the home screen once a student's
      Students-sheet row has a TestDate. Fill runs from GrantedAt (first
      login) to TestDate; the target logo sits fixed at the finish line. */
@@ -780,6 +790,10 @@
     <div class="assign-card" id="assign-card" style="display:none;">
       <div class="assign-label">This Week</div>
       <div class="assign-list" id="assign-list"></div>
+    </div>
+    <div class="score-progress-card" id="score-progress-card" style="display:none;">
+      <div class="spc-label">Score Progress</div>
+      <div id="spc-charts"></div>
     </div>
     <div class="menu-grid">
       <div class="menu-card menu-card-wide" data-route="diagnostic">
@@ -1463,6 +1477,54 @@
   // together on a shared/school computer. Deliberately exposes ONLY the
   // key, not the whole student object.
   window.getPortalStudentKey = function () { return (currentStudent && currentStudent.key) || null; };
+
+  // Last-resort fallback for fetchPortalProgress() below, read straight
+  // from THIS device's own localStorage cache (see recordIncorrectQuestions
+  // / saveDiagnosticSkillStats further down, which keep it populated as a
+  // side effect of every finishDiagnostic() run) — only used if the
+  // backend fetch fails (offline, Apps Script down, etc.), since it only
+  // ever reflects what happened in this specific browser.
+  function loadLocalProgressCache() {
+    var key = currentStudent && currentStudent.key;
+    var incorrectQuestions = {}, skillStats = {};
+    if (key) {
+      try {
+        var rawIq = localStorage.getItem('moretti_incorrect_qs_' + key);
+        if (rawIq) { var iqData = JSON.parse(rawIq); if (iqData && iqData.byKey) incorrectQuestions = iqData.byKey; }
+      } catch (e) { /* ignore */ }
+      try {
+        var rawSk = localStorage.getItem('moretti_diag_skills_' + key);
+        if (rawSk) { var skData = JSON.parse(rawSk); if (skData && skData.bySkill) skillStats = skData.bySkill; }
+      } catch (e) { /* ignore */ }
+    }
+    return { incorrectQuestions: incorrectQuestions, skillStats: skillStats };
+  }
+
+  // Fetches this student's synced "My Incorrect Questions" / "Practice My
+  // Weak Spots" data from the backend (Code.gs' Progress sheet) — shared
+  // by both of those tools' own isolated modules further down the page
+  // (they can't see currentStudent/APPS_SCRIPT_URL directly, same reason
+  // window.getPortalStudentKey exists). Backend-first so the data is the
+  // same regardless of which device/browser is checking — unlike the old
+  // localStorage-only design, a student can take a practice test on their
+  // phone and review it on a laptop, or Luca can check from his own
+  // computer. Always resolves (never rejects); on any network/parse
+  // failure it falls back to this device's own local cache instead, so
+  // the tools degrade to "same device only" rather than breaking outright.
+  window.fetchPortalProgress = function (callback) {
+    var key = currentStudent && currentStudent.key;
+    if (!key) { callback({ incorrectQuestions: {}, skillStats: {} }); return; }
+    fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'getProgress', key: key })
+    }).then(function (res) { return res.json(); })
+      .then(function (data) {
+        if (data && data.ok) callback({ incorrectQuestions: data.incorrectQuestions || {}, skillStats: data.skillStats || {} });
+        else callback(loadLocalProgressCache());
+      })
+      .catch(function () { callback(loadLocalProgressCache()); });
+  };
+
   var activeScreenId = 'screen-key';
   var STORAGE_KEY = 'moretti_portal_state';
 
@@ -1516,6 +1578,7 @@
       current: current,
       answers: answers,
       marked: marked,
+      everMarked: everMarked,
       elims: elims,
       questionTimeMs: questionTimeMs,
       questionFirstVisitedAt: questionFirstVisitedAt,
@@ -1664,7 +1727,7 @@
   function show(id) {
     activeScreenId = id;
     Object.keys(screens).forEach(function (k) { screens[k].classList.toggle('active', k === id); });
-    if (id === 'screen-menu') applyTestPrepGating();
+    if (id === 'screen-menu') { applyTestPrepGating(); renderScoreProgress(); }
     if (id === 'screen-test-choice') applyTestChoiceGating();
     if (id === 'screen-sat-resources') applyResourcesGating();
     window.scrollTo(0, 0);
@@ -1877,6 +1940,107 @@
         }
       })
       .catch(function () {});
+  }
+
+  /* ═══ SCORE PROGRESS WIDGET ═══
+     Reads moretti_score_history_<studentKey> from localStorage (written by
+     recordScoreHistory() right after every diagnostic AND practice-test
+     attempt scores — see finishDiagnostic() further down) and draws a
+     small hand-built inline-SVG line chart per test type the student has
+     taken (SAT and/or ACT use different scales, so each gets its own
+     chart rather than sharing one axis). Entirely client-side/local, same
+     as the weak-spots and incorrect-questions tools — no backend fetch,
+     so unlike the assignments widget this doesn't need polling; it's
+     re-rendered every time show('screen-menu') runs (see the show()
+     hook), which covers login and every return trip to the dashboard,
+     including right after finishing a test. */
+  var scoreProgressCard = document.getElementById('score-progress-card');
+  var scoreProgressChartsEl = document.getElementById('spc-charts');
+  var SCORE_PROGRESS_MAX_POINTS = 12; // most recent N per test type — enough to see a trend without the chart turning into a comb
+
+  function loadScoreHistory() {
+    var key = currentStudent && currentStudent.key;
+    if (!key) return [];
+    var raw = null;
+    try { raw = localStorage.getItem('moretti_score_history_' + key); } catch (e) { raw = null; }
+    if (!raw) return [];
+    var data = null;
+    try { data = JSON.parse(raw); } catch (e) { data = null; }
+    return (data && Array.isArray(data.entries)) ? data.entries : [];
+  }
+
+  // "PT 7" for a practice test, "Diag" for the diagnostic — short enough
+  // to sit under a data point without the x-axis turning into a wall of text.
+  function scoreEntryShortLabel(e) {
+    if (e.source === 'practice-test' && e.testId) {
+      var m = /(\d+)\s*$/.exec(e.testId);
+      if (m) return 'PT ' + m[1];
+    }
+    return 'Diag';
+  }
+
+  function buildScoreLineSvg(entries, scaleMin, scaleMax) {
+    var W = 560, H = 190, padL = 40, padR = 16, padT = 18, padB = 30;
+    var innerW = W - padL - padR, innerH = H - padT - padB;
+    var n = entries.length;
+    function xAt(i) { return n <= 1 ? padL + innerW / 2 : padL + (innerW * i / (n - 1)); }
+    function yAt(v) {
+      var frac = (v - scaleMin) / (scaleMax - scaleMin);
+      frac = Math.max(0, Math.min(1, frac));
+      return padT + innerH * (1 - frac);
+    }
+    var ticks = 4, gridSvg = '';
+    for (var t = 0; t <= ticks; t++) {
+      var val = scaleMin + (scaleMax - scaleMin) * t / ticks;
+      var y = yAt(val);
+      gridSvg += '<line x1="' + padL + '" y1="' + y + '" x2="' + (W - padR) + '" y2="' + y + '" stroke="currentColor" stroke-width="0.5" opacity="0.15"/>';
+      gridSvg += '<text x="' + (padL - 8) + '" y="' + (y + 3) + '" font-size="9" text-anchor="end" fill="currentColor" opacity="0.6">' + Math.round(val) + '</text>';
+    }
+    var pts = entries.map(function (e, i) { return xAt(i) + ',' + yAt(e.composite); }).join(' ');
+    var dotsSvg = '', labelsSvg = '';
+    entries.forEach(function (e, i) {
+      var x = xAt(i), y = yAt(e.composite);
+      // The first/last point's own value label anchors outward (start/end)
+      // instead of centered — a centered label on the leftmost point sits
+      // right where the y-axis tick labels also live, and the two can
+      // visually collide whenever that point's score happens to land near
+      // a gridline's height.
+      var anchor = i === 0 ? 'start' : (i === n - 1 ? 'end' : 'middle');
+      var labelX = i === 0 ? x + 4 : (i === n - 1 ? x - 4 : x);
+      dotsSvg += '<circle cx="' + x + '" cy="' + y + '" r="3.5" fill="var(--red)"/>';
+      labelsSvg += '<text x="' + labelX + '" y="' + Math.max(10, y - 9) + '" font-size="9" text-anchor="' + anchor + '" fill="currentColor" font-weight="700">' + e.composite + '</text>';
+      labelsSvg += '<text x="' + x + '" y="' + (H - 6) + '" font-size="8" text-anchor="middle" fill="currentColor" opacity="0.6">' + scoreEntryShortLabel(e) + '</text>';
+    });
+    return '<svg viewBox="0 0 ' + W + ' ' + H + '" style="color:var(--text); width:100%; height:auto; display:block;" preserveAspectRatio="xMidYMid meet">' +
+      gridSvg +
+      '<polyline points="' + pts + '" fill="none" stroke="var(--red)" stroke-width="2"/>' +
+      dotsSvg + labelsSvg +
+      '</svg>';
+  }
+
+  function renderScoreProgress() {
+    if (!scoreProgressCard) return;
+    var entries = loadScoreHistory();
+    // A single score isn't "progress" — nothing to compare it against yet
+    // — so a test type only gets a chart once there are at least 2 scores
+    // recorded for it, and the whole card stays hidden until at least one
+    // test type clears that bar.
+    var allSat = entries.filter(function (e) { return e.testType === 'SAT'; });
+    var allAct = entries.filter(function (e) { return e.testType === 'ACT'; });
+    if (allSat.length < 2 && allAct.length < 2) { scoreProgressCard.style.display = 'none'; scoreProgressChartsEl.innerHTML = ''; return; }
+    var satShown = allSat.slice(-SCORE_PROGRESS_MAX_POINTS);
+    var actShown = allAct.slice(-SCORE_PROGRESS_MAX_POINTS);
+    var html = '';
+    if (satShown.length >= 2) {
+      html += '<div class="spc-chart-hed">SAT Composite (400–1600)</div>' + buildScoreLineSvg(satShown, 400, 1600);
+      if (satShown.length < allSat.length) html += '<div class="spc-note">Showing your last ' + satShown.length + ' SAT attempts.</div>';
+    }
+    if (actShown.length >= 2) {
+      html += '<div class="spc-chart-hed">ACT Composite (1–36)</div>' + buildScoreLineSvg(actShown, 1, 36);
+      if (actShown.length < allAct.length) html += '<div class="spc-note">Showing your last ' + actShown.length + ' ACT attempts.</div>';
+    }
+    scoreProgressChartsEl.innerHTML = html;
+    scoreProgressCard.style.display = '';
   }
 
   /* ═══ NEXT SESSION WIDGET ═══
@@ -2389,10 +2553,17 @@
   // regardless, so "breaks as needed" is inherent). Persisted with the
   // rest of the run state so a refresh-resume keeps the same timing.
   var accommodations = { timeMult: 1, breakMult: 1 };
-  var completedSections = [];  // [{ key, label, answers, marked, module2Variant }] for sections already finished
+  var completedSections = [];  // [{ key, label, answers, marked, everMarked, module2Variant }] for sections already finished
   var current = 0;
   var answers = [];
   var marked = [];
+  // Same shape as `marked`, but write-only-to-true: once a question is
+  // flagged, its slot here stays true even if the student un-flags it
+  // before submitting. `marked` is what the live UI shows/toggles (the
+  // flag can come off on screen); `everMarked` is what gets logged —
+  // results/reports should reflect that a question WAS flagged at some
+  // point during the attempt, not just its final on/off state.
+  var everMarked = [];
   var elims = [];
   var qOrder = [];
   var currentQs = [];
@@ -3037,6 +3208,7 @@
     var qs = currentQs;
     answers = new Array(qs.length).fill(null);
     marked = new Array(qs.length).fill(false);
+    everMarked = new Array(qs.length).fill(false);
     elims = new Array(qs.length).fill(null).map(function () { return []; });
     questionTimeMs = new Array(qs.length).fill(0);
     questionFirstVisitedAt = new Array(qs.length).fill(null);
@@ -3086,7 +3258,7 @@
       var rawThreshold = MODULE2_ROUTING_RAW_THRESHOLD[secKey];
       module2Variant = (rawThreshold != null ? correct > rawThreshold : (qs.length && correct / qs.length >= 0.6)) ? 'Harder' : 'Easier';
       module1Buffer = {
-        answers: canonical(answers), marked: canonical(marked),
+        answers: canonical(answers), marked: canonical(marked), everMarked: canonical(everMarked),
         questionTimeMs: canonical(questionTimeMs),
         questionFirstVisitedAt: canonical(questionFirstVisitedAt),
         questionLastViewedAt: canonical(questionLastViewedAt)
@@ -3096,22 +3268,24 @@
       return;
     }
 
-    var finalAnswers, finalMarked, finalQuestionTimeMs, finalQuestionFirstVisitedAt, finalQuestionLastViewedAt;
+    var finalAnswers, finalMarked, finalEverMarked, finalQuestionTimeMs, finalQuestionFirstVisitedAt, finalQuestionLastViewedAt;
     if (hasTwoModules) {
       finalAnswers = module1Buffer.answers.concat(canonical(answers));
       finalMarked = module1Buffer.marked.concat(canonical(marked));
+      finalEverMarked = module1Buffer.everMarked.concat(canonical(everMarked));
       finalQuestionTimeMs = module1Buffer.questionTimeMs.concat(canonical(questionTimeMs));
       finalQuestionFirstVisitedAt = module1Buffer.questionFirstVisitedAt.concat(canonical(questionFirstVisitedAt));
       finalQuestionLastViewedAt = module1Buffer.questionLastViewedAt.concat(canonical(questionLastViewedAt));
     } else {
       finalAnswers = canonical(answers);
       finalMarked = canonical(marked);
+      finalEverMarked = canonical(everMarked);
       finalQuestionTimeMs = canonical(questionTimeMs);
       finalQuestionFirstVisitedAt = canonical(questionFirstVisitedAt);
       finalQuestionLastViewedAt = canonical(questionLastViewedAt);
     }
     completedSections.push({
-      key: secKey, label: bankFor(secKey).label, answers: finalAnswers, marked: finalMarked, module2Variant: module2Variant,
+      key: secKey, label: bankFor(secKey).label, answers: finalAnswers, marked: finalMarked, everMarked: finalEverMarked, module2Variant: module2Variant,
       questionTimeMs: finalQuestionTimeMs, questionFirstVisitedAt: finalQuestionFirstVisitedAt, questionLastViewedAt: finalQuestionLastViewedAt
     });
     moduleStage = 'module1';
@@ -3160,6 +3334,7 @@
   }
   markBtn.addEventListener('click', function () {
     marked[current] = !marked[current];
+    if (marked[current]) everMarked[current] = true; // sticky — never cleared by un-flagging
     refreshMarkBtn();
     refreshSidebar();
     saveState();
@@ -3408,56 +3583,57 @@
   }
 
 
+  // `skills` is keyed "<domain> → <skill>" by finishDiagnostic() below —
+  // split back apart here so the reader gets domain/skill as separate
+  // fields without this and every consumer having to agree on a delimiter
+  // beyond the one string. Shared by the local-cache write below and the
+  // backend sync payload, so both store the exact same shape.
+  function skillsToBySkill(skills) {
+    var bySkill = {};
+    Object.keys(skills).forEach(function (skillKey) {
+      var sep = skillKey.indexOf(' → ');
+      var domain = sep === -1 ? skillKey : skillKey.slice(0, sep);
+      var skill = sep === -1 ? skillKey : skillKey.slice(sep + 3);
+      var s = skills[skillKey];
+      bySkill[skillKey] = { domain: domain, skill: skill, correct: s.correct, total: s.total };
+    });
+    return bySkill;
+  }
+
   /* ═══ PER-SKILL DIAGNOSTIC RESULTS — feeds the "Practice My Weak Spots"
-     mode of the Question Practice tool (its own isolated module further
-     down the page — see the comment there for why it reads this same
-     localStorage key directly instead of a bridge function). Persisted
-     client-side only, per student key, so it survives closing the tab but
-     never leaves the browser or touches the backend. `skills` here is
-     already keyed "<domain> → <skill>" by finishDiagnostic() above —
-     split back apart on save so the reader gets domain/skill as separate
-     fields without this and the practice module having to agree on a
-     delimiter beyond the one string. Additive across attempts (SAT then
-     ACT, or a retake) rather than overwritten, so results only ever get
-     more complete, never erased by a later attempt at a different skill
-     mix. */
+     mode of the Question Practice tool. Reflects ONLY the most recently
+     completed diagnostic/practice-test attempt — OVERWRITTEN each time,
+     not merged across attempts — because weak spots are meant to track
+     where a student stands RIGHT NOW, and an old aggregate blended with a
+     brand-new attempt would dilute a real, current improvement (or
+     regression) with stale data. This is the local-device cache; the
+     synced, cross-device copy lives on the backend (see
+     syncProgressToBackend() below and Code.gs' Progress sheet) and is
+     what the review tools actually read from — this local copy is only
+     the fallback for when that fetch fails. */
   function saveDiagnosticSkillStats(skills) {
     try {
       var studentKey = currentStudent && currentStudent.key;
       if (!studentKey) return;
       var storageKey = 'moretti_diag_skills_' + studentKey;
-      var existing = {};
-      try {
-        var raw = localStorage.getItem(storageKey);
-        if (raw) existing = JSON.parse(raw) || {};
-      } catch (e) { existing = {}; }
-      if (!existing.bySkill || typeof existing.bySkill !== 'object') existing.bySkill = {};
-      Object.keys(skills).forEach(function (skillKey) {
-        var sep = skillKey.indexOf(' → ');
-        var domain = sep === -1 ? skillKey : skillKey.slice(0, sep);
-        var skill = sep === -1 ? skillKey : skillKey.slice(sep + 3);
-        var s = skills[skillKey];
-        var prev = existing.bySkill[skillKey] || { domain: domain, skill: skill, correct: 0, total: 0 };
-        existing.bySkill[skillKey] = { domain: domain, skill: skill, correct: prev.correct + s.correct, total: prev.total + s.total };
-      });
-      existing.updatedAt = new Date().toISOString();
-      localStorage.setItem(storageKey, JSON.stringify(existing));
+      localStorage.setItem(storageKey, JSON.stringify({ bySkill: skillsToBySkill(skills), updatedAt: new Date().toISOString() }));
     } catch (e) { /* storage disabled / private browsing — skip silently, matches saveState() elsewhere */ }
   }
 
   /* ═══ "MY INCORRECT QUESTIONS" LOG — feeds the My Incorrect Questions
-     tool under SAT Resources (its own isolated module further down the
-     page, same read-a-shared-localStorage-key pattern as the Question
-     Practice tool's weak-spot panel above). Unlike saveDiagnosticSkillStats
-     (aggregate counts only, never erased), this stores the FULL question
-     snapshot for every miss — text/choices/correct answer/explanations —
-     so a student can actually review what they got wrong, not just see a
-     percentage. Keyed by a stable per-question key (test/bank id + section
-     + module + index within that module) so retaking the same
-     diagnostic/practice test updates the SAME entry rather than piling up
-     duplicates, and — importantly — a question that's since been answered
-     CORRECTLY is deleted from the log rather than kept, so this always
-     reflects current weak spots, not full history. */
+     tool under SAT Resources. This is the local-device cache (see
+     syncProgressToBackend() below for the synced, cross-device copy the
+     review tool actually reads from — this is only its fallback).
+     Unlike saveDiagnosticSkillStats (this attempt's own results only),
+     this stores the FULL question snapshot for every miss —
+     text/choices/correct answer/explanations — so a student can actually
+     review what they got wrong, not just see a percentage. Keyed by a
+     stable per-question key (test/bank id + section + module + index
+     within that module) so retaking the same diagnostic/practice test
+     updates the SAME entry rather than piling up duplicates, and —
+     importantly — a question that's since been answered CORRECTLY is
+     deleted from the log rather than kept, so this always reflects
+     current weak spots, not full history. */
   function recordIncorrectQuestions(records) {
     try {
       var studentKey = currentStudent && currentStudent.key;
@@ -3474,6 +3650,118 @@
         else existing.byKey[r.key] = r;
       });
       existing.updatedAt = new Date().toISOString();
+      localStorage.setItem(storageKey, JSON.stringify(existing));
+    } catch (e) { /* storage disabled / private browsing — skip silently, matches saveState() elsewhere */ }
+  }
+
+  // Sends this attempt's incorrect-question records and skill breakdown to
+  // the backend (Code.gs' Progress sheet, action 'syncProgress') so "My
+  // Incorrect Questions" / "Practice My Weak Spots" work from ANY device,
+  // not just the one that took the test — see fetchPortalProgress() above
+  // for the read side. Best-effort: the local cache written by
+  // recordIncorrectQuestions()/saveDiagnosticSkillStats() just above
+  // already covers this device even if this call fails (offline, Apps
+  // Script hiccup), so there's nothing to retry or surface to the student.
+  // Correct-answer records are trimmed down to just {key, correct} before
+  // sending — the backend only needs those two fields to clear a stale
+  // miss, not the full question text/choices/explanation, which cuts the
+  // payload roughly in half on a typical attempt.
+  function syncProgressToBackend(incorrectRecords, skills) {
+    try {
+      var studentKey = currentStudent && currentStudent.key;
+      if (!studentKey) return;
+      var slimRecords = incorrectRecords.map(function (r) { return r.correct ? { key: r.key, correct: true } : r; });
+      fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'syncProgress', key: studentKey, incorrect: slimRecords, skills: skillsToBySkill(skills) })
+      }).catch(function () {});
+    } catch (e) { /* ignore — local cache already covers this device */ }
+  }
+
+  /* ═══ APPROXIMATE SCALED SCORING (for the dashboard's Score Progress
+     chart only) — a deliberate, deliberately-unmodified copy of the exact
+     same curves/formulas report.html uses for its own score tiles (see
+     report.html's own "APPROXIMATE SCALED SCORING" comment for the full
+     rationale/sourcing behind these specific numbers — Luca's own
+     verified data points, not something to hand-tune from this side).
+     Kept as its own copy rather than a shared include because report.html
+     reconstructs sections from a base64 URL payload while this reads live
+     `completedSections` — different inputs, same math. If report.html's
+     curves ever change, mirror the change here too. */
+  var SCORE_ACT_CURVE = [
+    [0, 1], [4, 6], [8, 8], [12, 9], [16, 10], [20, 11], [24, 12], [28, 13],
+    [32, 14], [36, 15], [40, 16], [44, 17], [48, 18], [51, 19], [54, 20],
+    [57, 21], [60, 22], [63, 23], [66, 24], [69, 25], [71, 26], [74, 27],
+    [77, 28], [80, 29], [83, 30], [86, 31], [89, 32], [91, 33], [94, 34],
+    [97, 35], [100, 36]
+  ];
+  var SCORE_RW_CURVE = [
+    [0, 200], [14.81, 270], [29.63, 320], [44.44, 370], [59.26, 470],
+    [74.07, 590], [81.48, 650], [88.89, 710], [92.59, 740], [96.3, 770],
+    [100, 800]
+  ];
+  var SCORE_MATH_CURVE = [
+    [0, 200], [13.64, 260], [27.27, 330], [45.45, 400], [59.09, 480],
+    [72.73, 580], [77.27, 630], [84.09, 675], [86.36, 700], [90.91, 730],
+    [95.45, 770], [100, 800]
+  ];
+  var SCORE_RW_MODULE_WEIGHT_CURVE = [[77.78, 56.25], [98.15, 135]];
+  var SCORE_MATH_MODULE_WEIGHT_CURVE = [[77.27, 88], [84.09, 78.57]];
+  function scoreScaleFromPct(pct, curve) {
+    if (pct <= curve[0][0]) return curve[0][1];
+    for (var i = 1; i < curve.length; i++) {
+      if (pct <= curve[i][0]) {
+        var lo = curve[i - 1], hi = curve[i];
+        var frac = (pct - lo[0]) / (hi[0] - lo[0]);
+        return Math.round(lo[1] + frac * (hi[1] - lo[1]));
+      }
+    }
+    return curve[curve.length - 1][1];
+  }
+  function scoreRoundToTen(n) { return Math.round(n / 10) * 10; }
+  function scoreModuleWeightFromPct(pct, curve) {
+    if (pct <= curve[0][0]) return curve[0][1];
+    if (pct >= curve[curve.length - 1][0]) return curve[curve.length - 1][1];
+    for (var i = 1; i < curve.length; i++) {
+      if (pct <= curve[i][0]) {
+        var lo = curve[i - 1], hi = curve[i];
+        var frac = (pct - lo[0]) / (hi[0] - lo[0]);
+        return lo[1] + frac * (hi[1] - lo[1]);
+      }
+    }
+    return curve[curve.length - 1][1];
+  }
+  function scoreSatSectionScore(sec, curve) {
+    if (!sec || !sec.t) return null;
+    var pct = sec.c / sec.t * 100;
+    var base = scoreScaleFromPct(pct, curve);
+    var r1 = sec.t1 ? sec.c1 / sec.t1 : (sec.c / sec.t);
+    var r2 = sec.t2 ? sec.c2 / sec.t2 : (sec.c / sec.t);
+    var weightCurve = (curve === SCORE_MATH_CURVE) ? SCORE_MATH_MODULE_WEIGHT_CURVE : SCORE_RW_MODULE_WEIGHT_CURVE;
+    var weight = scoreModuleWeightFromPct(pct, weightCurve);
+    var score = base + weight * (r1 - r2);
+    score = Math.max(200, Math.min(800, score));
+    return scoreRoundToTen(score);
+  }
+
+  /* ═══ SCORE PROGRESS HISTORY — feeds the dashboard's Score Progress
+     line chart (see renderScoreProgress() near the menu-screen code
+     further up). Unlike recordIncorrectQuestions above, this is
+     append-only — every finished attempt is its own point on the chart,
+     nothing is ever removed, since the whole point is showing the trend
+     across every diagnostic AND practice test attempt over time. */
+  function recordScoreHistory(entry) {
+    try {
+      var studentKey = currentStudent && currentStudent.key;
+      if (!studentKey) return;
+      var storageKey = 'moretti_score_history_' + studentKey;
+      var existing = {};
+      try {
+        var raw = localStorage.getItem(storageKey);
+        if (raw) existing = JSON.parse(raw) || {};
+      } catch (e) { existing = {}; }
+      if (!Array.isArray(existing.entries)) existing.entries = [];
+      existing.entries.push(entry);
       localStorage.setItem(storageKey, JSON.stringify(existing));
     } catch (e) { /* storage disabled / private browsing — skip silently, matches saveState() elsewhere */ }
   }
@@ -3513,6 +3801,7 @@
     var sectionSummaryLines = [];
     var sectionResults = []; // [{ label, correct, total }] — feeds the visual score report
     var incorrectRecords = []; // feeds recordIncorrectQuestions() below — every question, correct or not (correct ones clear a stale prior entry)
+    var scoreSections = []; // [{ key, c, t, c1, t1, c2, t2 }] — feeds the Score Progress composite calc below, same shape report.html's own scoring functions expect
     var ptDoneEarly = activePracticeTest(); // same call as ptDone further below, just needed before that point for the incorrect-question keys/labels
 
     completedSections.forEach(function (sec) {
@@ -3520,6 +3809,7 @@
       var qs = sectionQuestions(bank, sec.module2Variant);
       var mod1Len = bank.module1.length;
       var secCorrect = 0;
+      var secC1 = 0, secT1 = 0, secC2 = 0, secT2 = 0;
       lines.push('');
       lines.push(sec.label.toUpperCase() + ':');
       qs.forEach(function (q, i) {
@@ -3527,6 +3817,7 @@
         var correct = isCorrect(q, given);
         if (correct) { secCorrect++; totalCorrect++; }
         totalQuestions++;
+        if (i < mod1Len) { secT1++; if (correct) secC1++; } else { secT2++; if (correct) secC2++; }
         if (!domains[q.domain]) domains[q.domain] = { correct: 0, total: 0 };
         domains[q.domain].total++;
         if (correct) domains[q.domain].correct++;
@@ -3536,7 +3827,7 @@
         skills[skillKey].total++;
         if (correct) skills[skillKey].correct++;
 
-        var wasMarked = sec.marked && sec.marked[i];
+        var wasMarked = !!((sec.everMarked && sec.everMarked[i]) || (sec.marked && sec.marked[i]));
         if (wasMarked) { markedTotal++; if (correct) markedCorrect++; }
         if (given === null || given === undefined) skippedCount++;
         var givenText = (given === null || given === undefined) ? '(skipped)' : (q.type === 'mc' ? LETTERS[given] : given.raw);
@@ -3570,10 +3861,42 @@
       });
       sectionSummaryLines.push('  - ' + sec.label + ': ' + secCorrect + ' / ' + qs.length);
       sectionResults.push({ label: sec.label, correct: secCorrect, total: qs.length });
+      scoreSections.push({ key: sec.key, c: secCorrect, t: qs.length, c1: secC1, t1: secT1, c2: secC2, t2: secT2 });
     });
 
     saveDiagnosticSkillStats(skills);
     recordIncorrectQuestions(incorrectRecords);
+    syncProgressToBackend(incorrectRecords, skills);
+
+    // Composite scaled score for the dashboard's Score Progress chart —
+    // same math as report.html's own score tiles (see the SCORE_* curve
+    // comment above). Only recorded when every section needed for that
+    // test type's composite actually has results (always true for a
+    // normally-completed attempt; guarding anyway rather than assuming).
+    (function recordComposite() {
+      var composite = null, scaleMin = null, scaleMax = null;
+      if (testChoice === 'SAT') {
+        var rwSec = scoreSections.filter(function (s) { return s.key === 'reading-writing'; })[0];
+        var mathSec = scoreSections.filter(function (s) { return s.key === 'math'; })[0];
+        var rwScaled = rwSec ? scoreSatSectionScore(rwSec, SCORE_RW_CURVE) : null;
+        var mathScaled = mathSec ? scoreSatSectionScore(mathSec, SCORE_MATH_CURVE) : null;
+        if (rwScaled !== null && mathScaled !== null) { composite = rwScaled + mathScaled; scaleMin = 400; scaleMax = 1600; }
+      } else if (testChoice === 'ACT') {
+        var compositeKeys = { english: true, 'act-math': true, reading: true };
+        var vals = scoreSections.filter(function (s) { return compositeKeys[s.key]; })
+          .map(function (s) { return scoreScaleFromPct(s.t ? s.c / s.t * 100 : 0, SCORE_ACT_CURVE); });
+        if (vals.length) { composite = Math.round(vals.reduce(function (a, b) { return a + b; }, 0) / vals.length); scaleMin = 1; scaleMax = 36; }
+      }
+      if (composite === null) return;
+      recordScoreHistory({
+        date: new Date().toISOString(),
+        testType: testChoice,
+        source: ptDoneEarly ? 'practice-test' : 'diagnostic',
+        testId: ptDoneEarly ? ptDoneEarly.id : null,
+        testTitle: ptDoneEarly ? ptDoneEarly.title : (testChoice + ' Diagnostic'),
+        composite: composite, scaleMin: scaleMin, scaleMax: scaleMax
+      });
+    })();
 
     var ptDone = activePracticeTest();
     var reportLines = [];
@@ -3610,7 +3933,12 @@
       dt: new Date().toISOString().slice(0, 10),
       s: completedSections.map(function (sec) {
         return {
-          k: sec.key, a: sec.answers, m: (sec.marked || []).map(function (x) { return x ? 1 : 0; }), v: sec.module2Variant || null,
+          // m = "ever flagged for review," not just the final on/off state —
+          // a question flagged then un-flagged before submitting still
+          // shows up here (see everMarked above), so the report's flag
+          // column and its "never used flag for review" behavior check
+          // both reflect what actually happened during the attempt.
+          k: sec.key, a: sec.answers, m: (sec.everMarked || sec.marked || []).map(function (x) { return x ? 1 : 0; }), v: sec.module2Variant || null,
           // Per-question timing: tm = total ms spent on the question, fv/lv =
           // Date.now() timestamps of first-visited/last-viewed, in the same
           // original-bank-order indexing as `a`/`m` above.
@@ -3782,6 +4110,7 @@
       if (Array.isArray(state.answers) && state.answers.length === qs.length) {
         answers = state.answers;
         marked = (Array.isArray(state.marked) && state.marked.length === qs.length) ? state.marked : new Array(qs.length).fill(false);
+        everMarked = (Array.isArray(state.everMarked) && state.everMarked.length === qs.length) ? state.everMarked : new Array(qs.length).fill(false);
         elims = (Array.isArray(state.elims) && state.elims.length === qs.length) ? state.elims : new Array(qs.length).fill(null).map(function () { return []; });
         questionTimeMs = (Array.isArray(state.questionTimeMs) && state.questionTimeMs.length === qs.length) ? state.questionTimeMs : new Array(qs.length).fill(0);
         questionFirstVisitedAt = (Array.isArray(state.questionFirstVisitedAt) && state.questionFirstVisitedAt.length === qs.length) ? state.questionFirstVisitedAt : new Array(qs.length).fill(null);
@@ -5432,14 +5761,14 @@
   }
 
   /* ═══ WEAK-SPOT BUTTON ═══
-     Just one button — no breakdown list. Reads the same localStorage key
-     the outer portal script writes to right after a diagnostic finishes
-     (see saveDiagnosticSkillStats() in the main script block) — this
-     module is its own closure so it can't see that function directly, but
-     localStorage itself isn't closure-scoped, so reading the same key by
-     the same naming convention (moretti_diag_skills_<key>) works without
-     any bridge function, same as this module reuses
-     window.getPortalStudentKey() for the key itself.
+     Just one button — no breakdown list. Reflects the MOST RECENT
+     diagnostic or practice-test attempt only (whichever came last —
+     diagnostics don't get special treatment), fetched from the backend
+     via window.fetchPortalProgress() (see the main script block) so it's
+     correct regardless of which device took that attempt — this module
+     is its own closure so it can't see the backend/localStorage details
+     directly, same as this module reuses window.getPortalStudentKey() for
+     the key itself.
 
      Clicking it finds the single worst-performing skill the bank actually
      has questions for (ties broken by whichever has more attempts behind
@@ -5450,20 +5779,17 @@
      practice — Start Practicing (already on screen) is still the one
      button that begins a round, same as picking topics manually. */
   function renderWeakPanel() {
-    var key = window.getPortalStudentKey && window.getPortalStudentKey();
-    var data = null;
-    if (key) {
-      try {
-        var raw = localStorage.getItem('moretti_diag_skills_' + key);
-        if (raw) data = JSON.parse(raw);
-      } catch (e) { data = null; }
-    }
-    var bySkill = (data && data.bySkill && typeof data.bySkill === 'object') ? data.bySkill : {};
+    weakPanelEl.innerHTML = '<button class="vp-still-btn" id="pb-weak-btn" type="button" disabled>Practice My Weak Spots</button>' +
+      '<div class="pb-empty-note">Loading your latest results…</div>';
+    if (!window.fetchPortalProgress) { renderWeakPanelWith({}); return; }
+    window.fetchPortalProgress(function (progress) { renderWeakPanelWith(progress.skillStats || {}); });
+  }
+  function renderWeakPanelWith(bySkill) {
     var rows = Object.keys(bySkill).map(function (k) { return bySkill[k]; }).filter(function (r) { return r && r.total > 0; });
 
     if (!rows.length) {
       weakPanelEl.innerHTML = '<button class="vp-still-btn" id="pb-weak-btn" type="button" disabled>Practice My Weak Spots</button>' +
-        '<div class="pb-empty-note">Take a diagnostic first so we know what to focus on.</div>';
+        '<div class="pb-empty-note">Complete a diagnostic or practice test first so we know what to focus on.</div>';
       return;
     }
     rows.forEach(function (r) { r.pct = Math.round((r.correct / r.total) * 100); });
@@ -5711,8 +6037,9 @@
   }
 
   window.pbModuleInit = function () {
-    if (started) return;
-    started = true;
+    // Element lookups are cheap/idempotent, so these run every open (not
+    // just the first) — needed so weakPanelEl is valid before the
+    // every-open renderWeakPanel() call below, even on repeat visits.
     setupEl = document.getElementById('pb-setup');
     practiceEl = document.getElementById('pb-practice');
     stageEl = document.getElementById('pb-stage');
@@ -5730,7 +6057,15 @@
       return;
     }
 
+    // Weak-spot data reflects the MOST RECENT attempt, so it's refreshed
+    // on every visit to this screen (unlike the one-time setup below) —
+    // otherwise a practice test finished after this screen's first visit
+    // this session wouldn't show up here until a full page reload.
     renderWeakPanel();
+
+    if (started) return;
+    started = true;
+
     renderSectionPills();
     renderDomainPills();
     renderSkillPills();
@@ -5771,17 +6106,17 @@
 
 <!-- ═══ MY INCORRECT QUESTIONS MODULE — isolated (its own closure), same
      pattern as the vocabulary/practice-bank modules above. Read-only
-     review: reads moretti_incorrect_qs_<studentKey> from localStorage
-     (written by recordIncorrectQuestions() in the main script block,
-     right after every diagnostic AND practice-test attempt — both flow
-     through finishDiagnostic()) and renders each missed question with the
+     review: fetches this student's synced data from the backend via
+     window.fetchPortalProgress() (see the main script block — same
+     backend-first, local-fallback source the Question Practice module's
+     weak-spot panel uses) and renders each missed question with the
      student's answer and the correct one, grouped by section then domain,
      filterable by section/domain/skill/difficulty. Nothing here is
      interactive in the "answer it" sense — no scoring, no retry state —
      since this is a review of what already happened, not a new practice
      round. Exposes window.iqModuleInit(), called every time this screen
      opens (unlike vocab/practice-bank's one-time init) so it always
-     reflects the latest attempt. ═══ -->
+     reflects the latest attempt, from any device. ═══ -->
 <script>
 (function () {
   'use strict';
@@ -5809,7 +6144,7 @@
     } catch (e) { return ''; }
   }
 
-  var records = [];          // flattened from localStorage — reloaded every time the screen opens
+  var records = [];          // flattened from the backend fetch — reloaded every time the screen opens
   var sectionKeys = [];
   var domainsBySection = {}; // sectionKey -> [domain, ...]
   var skillsByDomain = {};   // domain -> [skill, ...]
@@ -5820,18 +6155,14 @@
   var listEl, poolCountEl, sectionPillsEl, domainPillsEl, skillPillsEl, difficultyPillsEl;
   var initialized = false;
 
-  function loadRecords() {
-    records = [];
-    var key = window.getPortalStudentKey && window.getPortalStudentKey();
-    if (!key) return;
-    var raw = null;
-    try { raw = localStorage.getItem('moretti_incorrect_qs_' + key); } catch (e) { raw = null; }
-    if (!raw) return;
-    var data = null;
-    try { data = JSON.parse(raw); } catch (e) { data = null; }
-    var byKey = (data && data.byKey && typeof data.byKey === 'object') ? data.byKey : {};
-    records = Object.keys(byKey).map(function (k) { return byKey[k]; }).filter(function (r) { return r && r.text; });
-    records.sort(function (a, b) { return (b.attemptedAt || '').localeCompare(a.attemptedAt || ''); }); // most recently missed first
+  function loadRecords(callback) {
+    if (!window.fetchPortalProgress) { records = []; callback(); return; }
+    window.fetchPortalProgress(function (progress) {
+      var byKey = (progress.incorrectQuestions && typeof progress.incorrectQuestions === 'object') ? progress.incorrectQuestions : {};
+      records = Object.keys(byKey).map(function (k) { return byKey[k]; }).filter(function (r) { return r && r.text; });
+      records.sort(function (a, b) { return (b.attemptedAt || '').localeCompare(a.attemptedAt || ''); }); // most recently missed first
+      callback();
+    });
   }
 
   function rebuildTaxonomy() {
@@ -6032,21 +6363,25 @@
       difficultyPillsEl = document.getElementById('iq-difficulty-pills');
     }
 
-    loadRecords();
-    rebuildTaxonomy();
-    // Default to everything selected so the list is populated immediately
-    // on open — this is a review tool, not a "build a session" setup
-    // screen like Question Practice, so there's no reason to start empty.
-    selSections = sectionKeys.slice();
-    selDomains = availableDomains();
-    selSkills = availableSkills();
-    selDifficulties = DIFFICULTIES.slice();
+    listEl.innerHTML = '<div class="pb-empty-note">Loading your latest results…</div>';
+    poolCountEl.textContent = '';
+    loadRecords(function () {
+      rebuildTaxonomy();
+      // Default to everything selected so the list is populated
+      // immediately on open — this is a review tool, not a "build a
+      // session" setup screen like Question Practice, so there's no
+      // reason to start empty.
+      selSections = sectionKeys.slice();
+      selDomains = availableDomains();
+      selSkills = availableSkills();
+      selDifficulties = DIFFICULTIES.slice();
 
-    renderSectionPills();
-    renderDomainPills();
-    renderSkillPills();
-    renderDifficultyPills();
-    renderList();
+      renderSectionPills();
+      renderDomainPills();
+      renderSkillPills();
+      renderDifficultyPills();
+      renderList();
+    });
   };
 })();
 </script>

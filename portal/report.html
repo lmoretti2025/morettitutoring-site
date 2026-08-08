@@ -719,11 +719,12 @@
     return s + 's';
   }
   // The per-question "first visited" / "last viewed" fields are stored as
-  // elapsed milliseconds SINCE THE SECTION STARTED (see sectionStartAt
-  // below), not absolute clock time — a viewer reading this report hours
-  // or days later, possibly in a different time zone than the student who
-  // took the test, has no use for "1:44:29 PM"; "2m 15s in" is what
-  // actually tells the story of how the section played out.
+  // elapsed milliseconds SINCE THAT QUESTION'S OWN MODULE STARTED (see
+  // moduleStartAt below — Module 2 gets its own zero point, not Module 1's
+  // continued), not absolute clock time — a viewer reading this report
+  // hours or days later, possibly in a different time zone than the
+  // student who took the test, has no use for "1:44:29 PM"; "2m 15s in"
+  // (into THAT module) is what actually tells the story of how it played out.
   function formatElapsedIntoSection(ms) {
     if (typeof ms !== 'number' || ms < 0) return '—';
     return formatDuration(ms) + ' in';
@@ -790,13 +791,19 @@
     // sec.tm just leaves these at 0 rather than throwing.
     var secTimeTotal = 0, secTimeCorrect = 0, secTimeIncorrect = 0;
     // Baseline for the "First visited" / "Last viewed" per-question fields
-    // below — the earliest fv[] timestamp in this section, i.e. the moment
-    // question 1 first appeared. Everything gets reported relative to this
-    // rather than as an absolute clock reading.
-    var sectionStartAt = null;
+    // below — computed PER MODULE (moduleStartAt[0] for Module 1, [1] for
+    // Module 2), not once for the whole section. Module 2 starts a fresh
+    // timer on the real test (it's a separate timed block from Module 1),
+    // so reporting its questions as "47m in" — elapsed since Module 1
+    // began — misrepresents how the section actually played out. Each
+    // question is reported relative to ITS OWN module's earliest fv[]
+    // timestamp instead, so both modules read "0m in" at their own start.
+    var moduleStartAt = [null, null];
     if (sec.fv && sec.fv.length) {
-      sec.fv.forEach(function (t) {
-        if (typeof t === 'number' && (sectionStartAt === null || t < sectionStartAt)) sectionStartAt = t;
+      sec.fv.forEach(function (t, i) {
+        if (typeof t !== 'number') return;
+        var mi = i < moduleSplit ? 0 : 1;
+        if (moduleStartAt[mi] === null || t < moduleStartAt[mi]) moduleStartAt[mi] = t;
       });
     }
     qs.forEach(function (q, i) {
@@ -804,6 +811,8 @@
       var ok = isCorrect(q, given);
       var wasMarked = sec.m && sec.m[i];
       var qTimeMs = (sec.tm && typeof sec.tm[i] === 'number') ? sec.tm[i] : 0;
+      var moduleIndex = i < moduleSplit ? 0 : 1;
+      var modStartAt = moduleStartAt[moduleIndex];
       secTimeTotal += qTimeMs;
       if (ok) secTimeCorrect += qTimeMs; else secTimeIncorrect += qTimeMs;
       if (ok) { c++; totalC++; }
@@ -838,15 +847,70 @@
       rows.push({ n: i + 1, dom: dom, sk: sk, given: gTxt, ok: ok, marked: !!wasMarked,
         q: q, givenIdx: (q.type === 'mc' && given !== null && given !== undefined) ? given : null,
         givenText: (given && typeof given === 'object') ? esc(given.raw || String(given.value)) : null,
-        timeMs: qTimeMs,
-        firstVisitedAt: (sec.fv && typeof sec.fv[i] === 'number' && sectionStartAt !== null) ? (sec.fv[i] - sectionStartAt) : null,
-        lastViewedAt: (sec.lv && typeof sec.lv[i] === 'number' && sectionStartAt !== null) ? (sec.lv[i] - sectionStartAt) : null });
+        timeMs: qTimeMs, moduleIndex: moduleIndex,
+        firstVisitedAt: (sec.fv && typeof sec.fv[i] === 'number' && modStartAt !== null) ? (sec.fv[i] - modStartAt) : null,
+        lastViewedAt: (sec.lv && typeof sec.lv[i] === 'number' && modStartAt !== null) ? (sec.lv[i] - modStartAt) : null });
     });
     sections.push({
       key: sec.k, label: sectionLabel(sec.k, bank), c: c, t: qs.length, rows: rows, domains: secDomains,
       distractors: secDistractors, missedMc: secMissedMc, diff: diff, c1: c1, t1: t1, c2: c2, t2: t2, variant: sec.v,
-      timeTotal: secTimeTotal, timeCorrect: secTimeCorrect, timeIncorrect: secTimeIncorrect
+      timeTotal: secTimeTotal, timeCorrect: secTimeCorrect, timeIncorrect: secTimeIncorrect,
+      hasModules: !!bank.module2Easier, moduleSplit: moduleSplit
     });
+  });
+
+  // Recomputes one section-card-shaped stats object (score, domain/skill
+  // breakdown, distractor pattern, timing) from just a subset of a
+  // section's rows — used below to split a two-module section into its
+  // own Module 1 / Module 2 card+table instead of one combined block.
+  // Whole-section scoring (c1/t1/c2/t2, the composite formula) and
+  // whole-diagnostic behavior detection (pacing flags, distractor-letter
+  // patterns) deliberately still run on the FULL section further down —
+  // only the display breaks out by module; the underlying scoring model
+  // doesn't change.
+  function buildSectionStatsFromRows(rows) {
+    var c = 0, domains = {}, distractors = {}, missedMc = 0;
+    var diff = { easy: { c: 0, t: 0 }, medium: { c: 0, t: 0 }, hard: { c: 0, t: 0 } };
+    var timeTotal = 0, timeCorrect = 0, timeIncorrect = 0;
+    rows.forEach(function (r) {
+      if (r.ok) c++;
+      var dtag = diff[r.q.difficulty];
+      if (dtag) { dtag.t++; if (r.ok) dtag.c++; }
+      timeTotal += r.timeMs || 0;
+      if (r.ok) timeCorrect += r.timeMs || 0; else timeIncorrect += r.timeMs || 0;
+      var sd = (domains[r.dom] = domains[r.dom] || { c: 0, t: 0, missedSkills: {}, skillStats: {} });
+      sd.t++; if (r.ok) sd.c++;
+      var skStat = (sd.skillStats[r.sk] = sd.skillStats[r.sk] || { c: 0, t: 0 });
+      skStat.t++; if (r.ok) skStat.c++;
+      if (!r.ok) sd.missedSkills[r.sk] = (sd.missedSkills[r.sk] || 0) + 1;
+      if (!r.ok && r.q.type === 'mc' && r.givenIdx !== null && r.givenIdx !== undefined) {
+        missedMc++;
+        var letter = LETTERS[r.givenIdx];
+        distractors[letter] = (distractors[letter] || 0) + 1;
+      }
+    });
+    return {
+      c: c, t: rows.length, rows: rows, domains: domains, distractors: distractors, missedMc: missedMc,
+      diff: diff, timeTotal: timeTotal, timeCorrect: timeCorrect, timeIncorrect: timeIncorrect
+    };
+  }
+  // The section-card grid and the raw per-question table both read from
+  // THIS list instead of `sections` directly — a two-module section (SAT
+  // Reading & Writing, SAT Math) becomes two entries here, one per module,
+  // each scored and timed independently (see buildSectionStatsFromRows
+  // above and the per-module moduleStartAt rebase above). A single-module
+  // section (ACT, or any section without module2Easier) passes through
+  // unchanged as one entry.
+  var displaySections = [];
+  sections.forEach(function (sec) {
+    if (!sec.hasModules) { displaySections.push(sec); return; }
+    var m1Rows = sec.rows.filter(function (r) { return r.moduleIndex === 0; });
+    var m2Rows = sec.rows.filter(function (r) { return r.moduleIndex === 1; });
+    var m1 = buildSectionStatsFromRows(m1Rows);
+    var m2 = buildSectionStatsFromRows(m2Rows);
+    m1.key = sec.key; m1.label = sec.label + ' — Module 1'; m1.variant = null; m1.isModule = true;
+    m2.key = sec.key; m2.label = sec.label + ' — Module 2' + (sec.variant ? ' (' + sec.variant + ')' : ''); m2.variant = sec.variant; m2.isModule = true;
+    displaySections.push(m1, m2);
   });
 
   var pct = totalQ ? Math.round(totalC / totalQ * 100) : 0;
@@ -1555,7 +1619,7 @@
   var sbEl = document.getElementById('section-breakdown');
   var cardsWrap = document.createElement('div');
   cardsWrap.className = 'section-cards';
-  sections.forEach(function (s5) {
+  displaySections.forEach(function (s5) {
     var card = document.createElement('div');
     card.className = 'section-card';
     var pctS = s5.t ? Math.round(s5.c / s5.t * 100) : 0;
@@ -1569,15 +1633,17 @@
     incEl.textContent = incorrectN + ' incorrect';
     card.appendChild(incEl);
 
-    // Time On Section / Time On Correct / Time On Incorrect. Only shown
-    // when there's actually timing data to show (older saved reports, or a
-    // section with zero recorded time, just skip this row rather than
-    // displaying an all-zero line).
+    // Time On Section/Module / Time On Correct / Time On Incorrect. Only
+    // shown when there's actually timing data to show (older saved
+    // reports, or a section with zero recorded time, just skip this row
+    // rather than displaying an all-zero line). Each module's own time is
+    // independent of the other's (see the per-module moduleStartAt rebase
+    // above) — Module 2's clock isn't Module 1's carried forward.
     if (s5.timeTotal > 0) {
       var timeEl = document.createElement('div');
       timeEl.className = 'sc-time';
       timeEl.innerHTML =
-        '<span class="sc-time-item"><span class="sc-time-label">Time On Section</span>' + formatDuration(s5.timeTotal) + '</span>' +
+        '<span class="sc-time-item"><span class="sc-time-label">Time On ' + (s5.isModule ? 'Module' : 'Section') + '</span>' + formatDuration(s5.timeTotal) + '</span>' +
         '<span class="sc-time-item ok"><span class="sc-time-label">Time On Correct</span>' + formatDuration(s5.timeCorrect) + '</span>' +
         '<span class="sc-time-item bad"><span class="sc-time-label">Time On Incorrect</span>' + formatDuration(s5.timeIncorrect) + '</span>';
       card.appendChild(timeEl);
@@ -1821,11 +1887,11 @@
 
   var twrap = document.getElementById('raw-tables');
   // Accordion: at most one question's detail is open at a time across the
-  // WHOLE detail view (both sections). Opening a question collapses
-  // whichever one was open. openEntry holds the collapse() of the
-  // currently-open row, or null when nothing is expanded.
+  // WHOLE detail view (every section/module table). Opening a question
+  // collapses whichever one was open. openEntry holds the collapse() of
+  // the currently-open row, or null when nothing is expanded.
   var openEntry = null;
-  sections.forEach(function (s4) {
+  displaySections.forEach(function (s4) {
     var h = document.createElement('div');
     h.className = 'sec-hed';
     h.textContent = s4.label;
