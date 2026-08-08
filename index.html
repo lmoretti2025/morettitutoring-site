@@ -53,8 +53,10 @@
     .nav-cta:hover { background: rgba(255,255,255,0.18); border-color: #fff; }
 
     /* ═══ HERO ═══ */
-    #hero { position: relative; height: 100vh; height: 100svh; background: var(--white); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2.25rem; padding: 0 1.5rem; }
+    #hero { position: relative; height: 100vh; height: 100svh; background: var(--white); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.85rem; padding: 0 1.5rem 6.5rem; }
     .hero-logo { width: min(96vw, 1220px); height: auto; display: block; }
+    .hero-headline { font-family: var(--display); font-weight: 700; font-size: clamp(1.8rem, 3.6vw, 2.9rem); line-height: 1.25; color: var(--text); max-width: 820px; text-align: center; }
+    #hero .hero-headline.reveal { transition-duration: 4s; transition-delay: 0.4s; }
     .hero-tag { font-size: clamp(1rem, 1.6vw, 1.25rem); font-weight: 500; line-height: 1.75; color: rgb(26,26,26); max-width: 700px; text-align: center; }
     #hero .hero-tag.reveal { transition-duration: 4s; transition-delay: 0.8s; }
     #hero .hero-ctas.reveal { transition-duration: 4s; transition-delay: 1.9s; }
@@ -98,38 +100,45 @@
     /* subjects ticker, relocated into the dark "What we teach" section */
     .disc-ticker-outer { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; padding: 1.35rem 0; border-top: 1px solid rgba(255,255,255,0.16); background: rgba(0,0,0,0.4); }
 
-    /* ═══ STORY: PROBLEM + ANSWER ═══ */
-    #story { background-image: url(photo-2-web.jpg); background-size: cover; background-position: center; position: relative; padding: 0; overflow: hidden; }
-    #story::before { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.62) 62%, #000 100%); z-index: 0; }
-    #story .container { position: relative; z-index: 1; padding-top: 6.5rem; padding-bottom: 6.5rem; }
-    .blurb-text { max-width: 720px; }
-    .stats-band { background: var(--white); border: 1px solid var(--border); border-top: none; margin: 0 0 1.75rem; }
+    /* ═══ MEET YOUR INSTRUCTOR ═══ same dark photo background + fade-to-
+       black the old "Quiet Problem" section used, so it still blends
+       straight into the pure-black #explore-wrap below it. Sized to fit
+       one screen on normal desktop/laptop heights (min-height + flex
+       centering, not a hard clip) — see the tightened copy/spacing below. */
+    #instructor { background-image: url(photo-3-web.jpg); background-size: cover; background-position: center; position: relative; overflow: hidden; min-height: 100vh; display: flex; align-items: center; padding: 3rem 0; }
+    #instructor::before { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.62) 62%, #000 100%); z-index: 0; }
+    #instructor .container { position: relative; z-index: 1; width: 100%; }
+    .instructor-grid { display: grid; grid-template-columns: minmax(340px, 400px) 1fr; gap: 3.5rem; align-items: center; }
+    .instructor-text { max-width: 620px; }
+    .stats-band { background: var(--white); border: 1px solid var(--border); border-top: none; margin: 0 0 1.1rem; }
     .stats-band .intro-stats { border-top: none; }
-    .stats-band .intro-stat { padding: 1.1rem 0.4rem; }
-    .stats-band .intro-stat-num { font-size: clamp(1.25rem, 1.9vw, 1.7rem); }
-    .stats-band .intro-stat-cred-item { padding: 1.1rem 0.6rem; }
+    .stats-band .intro-stat { padding: 0.8rem 0.4rem; }
+    .stats-band .intro-stat-num { font-size: clamp(1.1rem, 1.7vw, 1.5rem); }
+    .stats-band .intro-stat-cred-item { padding: 0.8rem 0.6rem; }
     .nu-link { font-family: 'Goudy Old Style', 'Sorts Mill Goudy', Georgia, serif; font-weight: 700; color: rgb(63,30,104); text-decoration: none; font-size: 1.05em; }
     .nu-link:hover { text-decoration: underline; }
-    .intro-stats { display: grid; grid-template-columns: repeat(5, 1fr); border-top: 1px solid var(--border); }
-    .intro-stat { padding: 1.5rem 1rem; text-align: center; border-right: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    /* min-width: 0 on the grid cells below lets long labels (e.g. the
+       credential sub-lines) actually wrap within their 1fr share instead
+       of forcing the track — and the whole card — wider than its
+       container (grid items default to min-width:auto, i.e. "never
+       narrower than my content," which is exactly what was pushing the
+       stats band outside the photo tile). */
+    .intro-stats { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--border); }
+    .intro-stat { min-width: 0; padding: 1.5rem 1rem; text-align: center; border-right: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; }
     .intro-stat:last-child { border-right: none; }
     .intro-stat-num { display: block; font-family: var(--serif); font-size: clamp(1.6rem, 2.4vw, 2.2rem); font-weight: 700; color: var(--gold); line-height: 1; margin-bottom: 0.45rem; }
     .intro-stat-lbl { font-size: 0.5rem; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--faint); line-height: 1.55; }
     .intro-stats-row2 { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--border); }
-    .intro-stat-cred-item { padding: 1.5rem 1rem; text-align: center; border-right: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .intro-stat-cred-item { min-width: 0; padding: 1.5rem 1rem; text-align: center; border-right: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; }
     .intro-stat-cred-item:last-child { border-right: none; }
     .intro-stat-cred { display: block; font-family: var(--serif); font-size: clamp(1rem, 1.6vw, 1.25rem); font-weight: 700; color: var(--text); line-height: 1; margin-bottom: 0.35rem; }
     .intro-stat-cred-sub { font-size: 0.5rem; font-weight: 500; letter-spacing: 0.1em; color: var(--faint); line-height: 1.65; }
 
-    .blurb-kicker { display: block; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); margin-bottom: 1rem; }
-    .blurb-hed { font-family: var(--display); font-size: clamp(1.35rem, 2.2vw, 1.85rem); font-weight: 700; color: #fff; line-height: 1.4; margin-bottom: 1.4rem; }
-    .blurb-body { font-size: clamp(0.95rem, 1.35vw, 1.06rem); line-height: 1.9; color: rgba(255,255,255,0.72); }
-    .blurb-quote { border-left: 3px solid var(--gold); padding: 0.1rem 0 0.1rem 1.2rem; margin: 1.5rem 0; font-family: var(--serif); font-style: italic; font-size: clamp(0.95rem, 1.3vw, 1.05rem); color: rgba(255,255,255,0.85); line-height: 1.65; }
-    .story-ctas { display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 2.25rem; }
-    .story-btn-red { background: var(--red); color: #fff; font-family: var(--hel); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; padding: 1rem 2.4rem; text-decoration: none; white-space: nowrap; transition: opacity 0.2s; }
-    .story-btn-red:hover { opacity: 0.86; }
-    .story-btn-outline { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.5); font-family: var(--hel); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; padding: 1rem 2.4rem; text-decoration: none; white-space: nowrap; transition: background 0.2s, border-color 0.2s; }
-    .story-btn-outline:hover { background: rgba(255,255,255,0.14); border-color: #fff; }
+    .blurb-kicker { display: block; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.85rem; }
+    .blurb-hed { font-family: var(--display); font-size: clamp(1.3rem, 2.3vw, 1.85rem); font-weight: 700; color: #fff; line-height: 1.3; margin-bottom: 1.1rem; }
+    .blurb-body { font-size: clamp(0.85rem, 1.15vw, 0.95rem); line-height: 1.6; color: rgba(255,255,255,0.78); margin-bottom: 0.9rem; }
+    .instructor-cta { display: inline-block; margin-top: 0.6rem; background: var(--red); color: #fff; font-family: var(--hel); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; padding: 1rem 2.4rem; text-decoration: none; white-space: nowrap; transition: opacity 0.2s; }
+    .instructor-cta:hover { opacity: 0.86; }
 
     /* ═══ METHOD ═══ */
     #method { background: var(--bg); }
@@ -262,7 +271,7 @@
     @keyframes dd-head { 0%, 26% { opacity: 0; } 33% { opacity: 1; } 85% { opacity: 1; } 96%, 100% { opacity: 0; } }
 
     /* ═══ DISCIPLINES ═══ */
-    #disciplines { background-image: url(photo-3-web.jpg); background-size: cover; background-position: center 30%; position: relative; padding: 4.25rem 0 7rem; }
+    #disciplines { background-image: url(photo-2-web.jpg); background-size: cover; background-position: center 30%; position: relative; padding: 4.25rem 0 7rem; }
     #disciplines::before { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, #000 0%, rgba(0,0,0,0.58) 18%, rgba(0,0,0,0.58) 100%); }
     #disciplines .container { position: relative; z-index: 1; }
     #disciplines .eyebrow { color: var(--gold); }
@@ -281,19 +290,13 @@
     .disc-link { display: inline-block; margin-top: 0.8rem; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--red); text-decoration: none; border-bottom: 1px solid rgba(176,39,28,0.4); padding-bottom: 2px; transition: border-color 0.2s; }
     .disc-link:hover { border-color: var(--red); }
 
-    /* ═══ TEAM ═══ */
-    #about { background: var(--bg); }
-    .team-grid { display: flex; justify-content: center; }
-    .team-card { max-width: 660px; width: 100%; }
+    /* ═══ TEAM (instructor photo tile — left column of #instructor) ═══ */
     .team-photo { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; object-position: center top; display: block; margin-bottom: 1.5rem; }
-    .team-photo-placeholder { background: #e5e0d9; display: flex; align-items: flex-end; justify-content: center; overflow: hidden; }
-    .team-photo-placeholder svg { width: 65%; opacity: 0.35; }
     .team-photo-wrap { width: 100%; aspect-ratio: 1 / 1; overflow: hidden; margin-bottom: 0; }
     .team-photo-wrap .team-photo { width: 100%; height: 100%; margin-bottom: 0; aspect-ratio: unset; }
     .team-photo-wrap.luca-frame .team-photo { transform: scale(1.5) translate(15%, 10%); transform-origin: center; }
-    .team-name { font-family: var(--serif); font-size: 1.2rem; font-weight: 700; color: var(--text); margin-bottom: 0.3rem; line-height: 1.2; }
-    .team-role { font-size: 0.56rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--red); margin-bottom: 0.95rem; }
-    .team-bio { font-size: 0.88rem; line-height: 1.8; color: var(--mid); }
+    .team-name { font-family: var(--serif); font-size: 0.92rem; font-weight: 700; color: #fff; margin-bottom: 0.25rem; line-height: 1.2; margin-top: 0.85rem; }
+    .team-role { font-size: 0.48rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold); }
 
     /* ═══ TESTIMONIALS — top-3 showcase, middle card elevated ═══ */
     #testimonials { background: var(--white); padding: 5.5rem 0; }
@@ -335,20 +338,16 @@
     .enroll-steps li { display: flex; align-items: center; gap: 0.55rem; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mid); white-space: nowrap; }
     .enroll-steps li span { display: flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; background: var(--red); color: #fff; font-size: 0.58rem; font-weight: 700; }
     .book-card { background: var(--white); border: 1px solid var(--border); padding: 0.4rem; }
-    .form-fallback { margin-top: 3rem; border: 1px solid var(--border); background: var(--white); }
-    .form-fallback summary { cursor: pointer; padding: 1.1rem 1.5rem; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--mid); list-style: none; }
-    .form-fallback summary::-webkit-details-marker { display: none; }
-    .form-fallback summary::before { content: '+'; margin-right: 0.6rem; color: var(--red); }
-    .form-fallback[open] summary::before { content: '\2212'; }
-    .form-fallback[open] summary { border-bottom: 1px solid var(--border); }
     .form-card { background: var(--white); padding: 2rem; }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
     .form-field { margin-bottom: 1.4rem; }
     .form-label { display: block; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text); margin-bottom: 0.5rem; }
-    .form-input, .form-select, .form-textarea { width: 100%; border: 1px solid #ccc; background: var(--white); font-family: var(--hel); font-size: 0.82rem; color: var(--text); padding: 0.6rem 0.75rem; outline: none; transition: border-color 0.2s; border-radius: 0; -webkit-appearance: none; appearance: none; }
-    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--red); }
+    .form-input, .form-select { width: 100%; border: 1px solid #ccc; background: var(--white); font-family: var(--hel); font-size: 0.82rem; color: var(--text); padding: 0.6rem 0.75rem; outline: none; transition: border-color 0.2s; border-radius: 0; -webkit-appearance: none; appearance: none; }
+    .form-input:focus, .form-select:focus { border-color: var(--red); }
     .form-select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23555'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.75rem center; padding-right: 2rem; }
-    .form-textarea { height: 140px; resize: vertical; }
+    .form-radio-group { display: flex; gap: 1.5rem; }
+    .form-radio { display: flex; align-items: center; gap: 0.5rem; font-size: 0.82rem; color: var(--text); cursor: pointer; }
+    .form-radio input { accent-color: var(--red); width: 15px; height: 15px; cursor: pointer; }
     .btn-submit { display: block; width: 100%; background: var(--red); color: white; border: none; font-family: var(--hel); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; padding: 1rem 2rem; cursor: pointer; transition: opacity 0.18s; }
     .btn-submit:hover { opacity: 0.86; }
     .form-note { font-size: 0.68rem; color: var(--faint); margin-top: 0.75rem; line-height: 1.65; }
@@ -376,14 +375,11 @@
     /* ═══ RESPONSIVE ═══ */
     @media (max-width: 960px) {
       .consult-grid { grid-template-columns: 1fr; gap: 3rem; }
+      .instructor-grid { grid-template-columns: 1fr; gap: 3rem; }
       .method-grid { grid-template-columns: repeat(2, 1fr); }
       .explore-grid { grid-template-columns: repeat(2, 1fr); }
       .disc-grid { grid-template-columns: repeat(2, 1fr); }
       footer { grid-template-columns: 1fr; }
-      .intro-stats { grid-template-columns: repeat(2, 1fr); }
-      .intro-stat { border-right: 1px solid var(--border); border-top: none; }
-      .intro-stat:nth-child(2n) { border-right: none; }
-      .intro-stat:nth-child(n+3) { border-top: 1px solid var(--border); }
       .intro-stats-row2 { grid-template-columns: 1fr; }
       .intro-stat-cred-item { border-right: none; border-top: 1px solid var(--border); }
       .intro-stat-cred-item:first-child { border-top: none; }
@@ -414,8 +410,6 @@
       .explore-hed, .explore-sub, .explore-step, .explore-testdates-hint, .portal-teaser, #explore-cta-inline, #explore-group-b { opacity: 1 !important; }
     }
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-  <script src="https://assets.calendly.com/assets/external/widget.js" async></script>
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -437,16 +431,17 @@
   <a href="/" class="nav-logo-link"><img src="logo-caladea-white.png" alt="Moretti Test Prep &amp; Tutoring" class="nav-logo-img"></a>
   <div style="display:flex; align-items:center; gap:1rem;">
     <a href="portal/index.html" style="font-family:var(--hel); font-size:0.62rem; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:rgba(255,255,255,0.75); text-decoration:none;">Student Login</a>
-    <a href="https://calendly.com/morettitutoring" target="_blank" rel="noopener" class="nav-cta">Book a free intro call</a>
+    <a href="#reserve" class="nav-cta">Reserve Your Seat</a>
   </div>
 </nav>
 
 <div id="hero">
   <a href="portal/index.html" class="hero-login-link">Student? Login here</a>
   <img src="logo-caladea-dark.png" alt="Moretti Test Prep &amp; Tutoring" class="hero-logo reveal">
-  <p class="hero-tag reveal">Private, one-on-one coaching for students who want their grades and scores to actually move &mdash; math, SAT &amp; ACT prep, and college admissions, in-person in New Jersey or online.</p>
+  <h1 class="hero-headline reveal">Get Into the Schools, Programs, and Classes You Want.</h1>
+  <p class="hero-tag reveal">One-on-one math, SAT/ACT, and college admissions coaching &mdash; in New Jersey or online.</p>
   <div class="hero-ctas reveal d2">
-    <a href="https://calendly.com/morettitutoring" target="_blank" rel="noopener" class="hero-btn-red">Book a Free Intro Call</a>
+    <a href="#reserve" class="hero-btn-red">Reserve Your Seat</a>
     <a href="tel:2012752791" class="hero-btn-outline">Call (201) 275-2791</a>
   </div>
   <div class="intro-ticker-outer">
@@ -463,17 +458,38 @@
   </div>
 </div>
 
-<section id="story">
+<!-- ═══ MEET YOUR INSTRUCTOR ═══ combines what used to be two separate
+     sections ("The Quiet Problem" philosophy blurb, and the "Meet Our
+     Team" bio card) into one: the photo/stats/credentials tile on the
+     left, Luca's background, mission, and what makes his tutoring
+     different on the right. ═══ -->
+<section id="instructor">
   <div class="container">
-    <div class="blurb-text reveal">
-      <span class="blurb-kicker">The Quiet Problem</span>
-      <h2 class="blurb-hed">Modern education optimizes for visible metrics over genuine comprehension, skill development, and critical problem-solving.</h2>
-      <p class="blurb-body">Grade inflation and short-form testing prioritize superficial memorization over critical problem-solving. Institutions have abandoned intentional engagement.</p>
-      <blockquote class="blurb-quote">My approach is different: one-on-one, diagnostic, and exact.</blockquote>
-      <p class="blurb-body">Whether your child is chasing a perfect score or trying to close a gap nobody's caught yet, I bypass the metrics to cultivate deep comprehension and essential study habits across all levels of rigor. Exacting, uncompromising support, structured to be accessible to every family.</p>
-      <div class="story-ctas">
-        <a href="https://calendly.com/morettitutoring" target="_blank" rel="noopener" class="story-btn-red">Find the Answer</a>
-        <a href="tel:2012752791" class="story-btn-outline">Call (201) 275-2791</a>
+    <div class="instructor-grid">
+      <div class="team-card reveal d1">
+        <div class="team-photo-wrap luca-frame"><img class="team-photo" src="Portrait.png" alt="Luca Moretti"></div>
+        <div class="stats-band">
+          <div class="intro-stats">
+            <div class="intro-stat"><span class="intro-stat-num">1530</span><span class="intro-stat-lbl">SAT</span></div>
+            <div class="intro-stat"><span class="intro-stat-num">3.96</span><span class="intro-stat-lbl">College GPA</span></div>
+            <div class="intro-stat"><span class="intro-stat-num">5 · 5</span><span class="intro-stat-lbl">AP Calculus AB &amp; BC</span></div>
+          </div>
+          <div class="intro-stats-row2">
+            <div class="intro-stat-cred-item"><span class="intro-stat-cred">IB Diploma</span><span class="intro-stat-cred-sub">Recipient</span></div>
+            <div class="intro-stat-cred-item"><span class="intro-stat-cred">Dean's List Recipient</span><span class="intro-stat-cred-sub">Northwestern University &nbsp;·&nbsp; 3-Years</span></div>
+            <div class="intro-stat-cred-item"><span class="intro-stat-cred">Advanced Coursework</span><span class="intro-stat-cred-sub">Differential Equations &nbsp;·&nbsp; Multivariable Calculus &nbsp;·&nbsp; Linear Algebra</span></div>
+          </div>
+        </div>
+        <h3 class="team-name">Luca Moretti</h3>
+        <div class="team-role">Founder &amp; Primary Tutor</div>
+      </div>
+      <div class="instructor-text reveal d2">
+        <span class="blurb-kicker">Meet Your Instructor</span>
+        <h2 class="blurb-hed">A Message From Luca</h2>
+        <p class="blurb-body">Modern tutoring and education has a habit of optimizing for grades and short-form testing that reward memorization over real understanding. I built my practice as the opposite of that: one-on-one, diagnostic, and <strong style="color:var(--red); font-weight:700;">data-driven</strong>, because no two students are missing the same points.</p>
+        <p class="blurb-body">I'm a <a href="https://www.northwestern.edu/" target="_blank" rel="noopener" class="nu-link">Northwestern University</a> statistics graduate — top of my class, in three years — and for the past eight-plus years I've tutored across New Jersey and online, raising SAT and ACT scores by upwards of 36% and helping over 50 students into the schools they were chasing.</p>
+        <p class="blurb-body">Generic tutoring often settles for explaining the immediate assignment, providing guidance that expires the moment the hour ends. My methods go beyond that: every plan starts with a real diagnostic and understanding, adapting as a student improves, and backed by a private portal — adaptive practice tests, a weak-spot tracker, a running log of every missed question, and more — so we're always working on exactly what's costing points.</p>
+        <a href="#reserve" class="instructor-cta">Reserve Your Seat</a>
       </div>
     </div>
   </div>
@@ -629,43 +645,15 @@
 </section>
 
 
-<section id="about">
-  <div class="container">
-    <div class="eyebrow reveal">Meet Our Team</div>
-    <div class="team-grid">
-      <div class="team-card reveal d1">
-        <div class="team-photo-wrap luca-frame"><img class="team-photo" src="Portrait.png" alt="Luca Moretti"></div>
-        <div class="stats-band">
-          <div class="intro-stats">
-            <div class="intro-stat"><span class="intro-stat-num">1530</span><span class="intro-stat-lbl">SAT</span></div>
-            <div class="intro-stat"><span class="intro-stat-num">800</span><span class="intro-stat-lbl">SAT Math II</span></div>
-            <div class="intro-stat"><span class="intro-stat-num">760</span><span class="intro-stat-lbl">SAT Chemistry</span></div>
-            <div class="intro-stat"><span class="intro-stat-num">3.96</span><span class="intro-stat-lbl">College GPA</span></div>
-            <div class="intro-stat"><span class="intro-stat-num">5 · 5</span><span class="intro-stat-lbl">AP Calculus AB &amp; BC</span></div>
-          </div>
-          <div class="intro-stats-row2">
-            <div class="intro-stat-cred-item"><span class="intro-stat-cred">IB Diploma</span><span class="intro-stat-cred-sub">Recipient</span></div>
-            <div class="intro-stat-cred-item"><span class="intro-stat-cred">Dean's List Recipient</span><span class="intro-stat-cred-sub">Northwestern University &nbsp;·&nbsp; 3-Years</span></div>
-            <div class="intro-stat-cred-item"><span class="intro-stat-cred">Advanced Coursework</span><span class="intro-stat-cred-sub">Differential Equations &nbsp;·&nbsp; Multivariable Calculus &nbsp;·&nbsp; Linear Algebra</span></div>
-          </div>
-        </div>
-        <h3 class="team-name">Luca Moretti</h3>
-        <div class="team-role">Founder &amp; Primary Tutor</div>
-        <p class="team-bio"><a href="https://www.northwestern.edu/" target="_blank" rel="noopener" class="nu-link">Northwestern University</a> graduate, top of class. Double major in Statistics and Music, with minors in Entrepreneurship and Music Technology in three years. Local Cranford resident with more than eight years of consistently tutoring across New Jersey — over fifty students coached, SAT and ACT scores raised by upwards of 36%, and student after student into their dream universities.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="consult">
+<section id="reserve">
   <div class="container">
     <div class="consult-grid">
       <div>
-        <div class="eyebrow reveal">Book a Free Intro Call</div>
-        <h2 class="consult-heading reveal d1">Let's find the gap.</h2>
-        <p class="consult-lead reveal d2">Book a free intro call — pick any time that works. Because the goal isn't just a score: it's options. The schools they want, and the confidence to get there.</p>
+        <div class="eyebrow reveal">Reserve Your Seat</div>
+        <h2 class="consult-heading reveal d1">Ready to get started?</h2>
+        <p class="consult-lead reveal d2">Reserve your child's spot and get a personalized strategy call within 24 hours.</p>
         <ol class="enroll-steps reveal d2">
-          <li><span>1</span>Free intro call</li>
+          <li><span>1</span>Reserve your seat</li>
           <li><span>2</span>Diagnostic</li>
           <li><span>3</span>Custom plan</li>
           <li><span>4</span>Start</li>
@@ -677,56 +665,45 @@
         <p class="serve-text reveal d3">Serving Cranford, Westfield, Mountainside, Scotch Plains, Summit, New Providence, Berkeley Heights, Short Hills, and surrounding towns — in person or online.</p>
       </div>
       <div class="book-card reveal d2">
-        <div class="calendly-inline-widget" data-url="https://calendly.com/morettitutoring?hide_gdpr_banner=1&primary_color=b0271c" style="min-width:300px;height:640px;"></div>
+        <div class="form-card">
+          <form id="reserve-form" novalidate>
+            <div class="form-field"><label class="form-label" for="rf-name">Parent Name</label><input class="form-input" type="text" id="rf-name" name="parentName" required></div>
+            <div class="form-row">
+              <div class="form-field"><label class="form-label" for="rf-phone">Best Phone Number</label><input class="form-input" type="tel" id="rf-phone" name="phone" placeholder="e.g. (201) 555-0100" required></div>
+              <div class="form-field"><label class="form-label" for="rf-email">Best Email Address</label><input class="form-input" type="email" id="rf-email" name="email" required></div>
+            </div>
+            <div class="form-field">
+              <span class="form-label">Are you from the USA?</span>
+              <div class="form-radio-group">
+                <label class="form-radio"><input type="radio" name="isUSA" value="Yes" required> Yes</label>
+                <label class="form-radio"><input type="radio" name="isUSA" value="No"> No</label>
+              </div>
+            </div>
+            <div class="form-field">
+              <span class="form-label">Are you a parent or a student?</span>
+              <div class="form-radio-group">
+                <label class="form-radio"><input type="radio" name="role" value="Parent" required> Parent</label>
+                <label class="form-radio"><input type="radio" name="role" value="Student"> Student</label>
+              </div>
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="rf-grade">What grade is your child in?</label>
+              <select class="form-select" id="rf-grade" name="grade" required>
+                <option value="">Select a grade</option>
+                <option value="9th or below">9th or below</option>
+                <option value="10th">10th</option>
+                <option value="11th">11th</option>
+                <option value="12th">12th</option>
+              </select>
+            </div>
+            <button type="submit" class="btn-submit" id="rf-submit">Reserve My Seat</button>
+            <p class="form-note" id="rf-note">We'll get back to you within 24 hours.</p>
+            <p id="rf-success" style="display:none; font-size:0.78rem; color:var(--gold); margin-top:0.75rem; line-height:1.65;">Thanks — check your email for confirmation. We'll follow up personally within 24 hours.</p>
+            <p id="rf-error" style="display:none; font-size:0.78rem; color:var(--red); margin-top:0.75rem; line-height:1.65;">Something went wrong. Please call (201) 275-2791 directly.</p>
+          </form>
+        </div>
       </div>
     </div>
-    <details class="form-fallback reveal" open>
-      <summary>Or tell us about your student &mdash; we'll follow up personally, usually same day</summary>
-      <div class="form-card">
-        <form id="contact-form" novalidate>
-          <div class="form-row">
-            <div class="form-field"><label class="form-label" for="cf-name">Name</label><input class="form-input" type="text" id="cf-name" name="from_name" required></div>
-            <div class="form-field"><label class="form-label" for="cf-email">Email</label><input class="form-input" type="email" id="cf-email" name="from_email" required></div>
-          </div>
-          <div class="form-row">
-            <div class="form-field"><label class="form-label" for="cf-phone">Phone <span style="text-transform:none; font-weight:400; color:var(--faint);">(optional)</span></label><input class="form-input" type="tel" id="cf-phone" name="phone" placeholder="e.g. (201) 555-0100"></div>
-            <div class="form-field"><label class="form-label" for="cf-town">Town</label><input class="form-input" type="text" id="cf-town" name="town" placeholder="e.g. Westfield"></div>
-          </div>
-          <div class="form-row">
-            <div class="form-field">
-              <label class="form-label" for="cf-grade">Student's Grade</label>
-              <select class="form-select" id="cf-grade" name="grade">
-                <option value="">Select a grade</option>
-                <option value="Middle School (6-8)">Middle School (6&ndash;8)</option>
-                <option value="9th Grade">9th Grade</option>
-                <option value="10th Grade">10th Grade</option>
-                <option value="11th Grade">11th Grade</option>
-                <option value="12th Grade">12th Grade</option>
-                <option value="College">College</option>
-                <option value="Adult / Other">Adult / Other</option>
-              </select>
-            </div>
-            <div class="form-field">
-              <label class="form-label" for="cf-type">Subject</label>
-              <select class="form-select" id="cf-type" name="subject" required>
-                <option value="">Select a subject</option>
-                <option value="General Math">General Math</option>
-                <option value="College Math">College Math</option>
-                <option value="College Entrance Exams">College Entrance Exams (SAT / ACT)</option>
-                <option value="AP & IB Exams">AP &amp; IB Exams</option>
-                <option value="English">English</option>
-                <option value="College Essay">College Essay / Applications</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-field"><label class="form-label" for="cf-message">Tell me about your student</label><textarea class="form-textarea" id="cf-message" name="message" placeholder="Current grade in the class, what's not working right now, any upcoming test dates..."></textarea></div>
-          <button type="submit" class="btn-submit" id="cf-submit">Send &amp; Book Intro Call</button>
-          <p class="form-note" id="cf-note">We'll get back to you within 24 hours.</p>
-          <p id="cf-success" style="display:none; font-size:0.78rem; color:var(--gold); margin-top:0.75rem; line-height:1.65;">Message sent — we'll follow up shortly.</p>
-          <p id="cf-error" style="display:none; font-size:0.78rem; color:var(--red); margin-top:0.75rem; line-height:1.65;">Something went wrong. Please call (201) 275-2791 directly.</p>
-        </form>
-      </div>
-    </details>
   </div>
 </section>
 
@@ -885,65 +862,42 @@
   }, { threshold: 0.04 });
   document.querySelectorAll('.section-fade').forEach(function (el) { sfIo.observe(el); });
 
-  emailjs.init('FAAXN09Ad2ObipaJJ');
-
-  // Same backend that already powers the student portal (see
-  // portal/Code.gs) — reused here purely to persist leads for the
-  // automated day-3 / day-7 follow-up sequence (see sendLeadFollowUps in
-  // Code.gs). This call is fire-and-forget and never blocks or fails the
-  // actual form submission: the two emailjs.send() calls below are the
-  // real, load-bearing "send the messages" step, exactly as before.
+  // Reserve-a-seat form — posts straight to the same Apps Script backend
+  // that powers the student portal (see portal/Code.gs, action
+  // 'submitLead'). Everything (logging the lead, notifying Luca, and
+  // sending the submitter their "we got your message" confirmation) now
+  // happens server-side in that one call — no EmailJS/Calendly on this
+  // page anymore.
   var LEAD_BACKEND_URL = 'https://script.google.com/macros/s/AKfycbwsLMGq3lhBEPObcas0k8gVS67NX9y4wXKG6RgzKtlBOT2SXfREK6vBpvvM19w9s1m6/exec';
-  function recordLeadForFollowUp(params) {
-    try {
+  var reserveForm = document.getElementById('reserve-form');
+  if (reserveForm) {
+    reserveForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var name  = document.getElementById('rf-name').value.trim();
+      var phone = document.getElementById('rf-phone').value.trim();
+      var email = document.getElementById('rf-email').value.trim();
+      var isUSA = (reserveForm.querySelector('input[name="isUSA"]:checked') || {}).value || '';
+      var role  = (reserveForm.querySelector('input[name="role"]:checked') || {}).value || '';
+      var grade = document.getElementById('rf-grade').value;
+      if (!name || !phone || !email || !isUSA || !role || !grade) { alert('Please fill in every field.'); return; }
+      var btn = document.getElementById('rf-submit');
+      btn.disabled = true; btn.textContent = 'Sending…';
       fetch(LEAD_BACKEND_URL, {
         method: 'POST',
-        body: JSON.stringify({
-          action: 'submitLead',
-          name: params.from_name,
-          email: params.from_email,
-          phone: params.phone,
-          town: params.town,
-          grade: params.grade,
-          subject: params.subject,
-          message: params.message
+        body: JSON.stringify({ action: 'submitLead', name: name, phone: phone, email: email, isUSA: isUSA, role: role, grade: grade })
+      }).then(function (res) { return res.json(); })
+        .then(function (data) {
+          if (!data || !data.ok) throw new Error('submit_failed');
+          document.getElementById('rf-note').style.display    = 'none';
+          document.getElementById('rf-success').style.display = 'block';
+          document.getElementById('rf-error').style.display   = 'none';
+          reserveForm.reset();
+          btn.disabled = false; btn.textContent = 'Reserve My Seat';
         })
-      }).catch(function () { /* silent — follow-up persistence is best-effort */ });
-    } catch (err) { /* silent — never let this break the real form submission */ }
-  }
-
-  var form = document.getElementById('contact-form');
-  if (form) {
-    form.addEventListener('submit', function (e) {
-      e.preventDefault();
-      var name  = document.getElementById('cf-name').value.trim();
-      var email = document.getElementById('cf-email').value.trim();
-      var type  = document.getElementById('cf-type').value;
-      if (!name || !email || !type) { alert('Please fill in your name, email, and subject.'); return; }
-      var btn = document.getElementById('cf-submit');
-      btn.disabled = true; btn.textContent = 'Sending…';
-      var params = {
-        from_name: name,
-        from_email: email,
-        phone: document.getElementById('cf-phone').value.trim(),
-        town: document.getElementById('cf-town').value.trim(),
-        grade: document.getElementById('cf-grade').value,
-        subject: type,
-        message: document.getElementById('cf-message').value.trim()
-      };
-      emailjs.send('service_k768w0d', 'template_xcv84lb', params)
-        .then(function () {
-          document.getElementById('cf-note').style.display    = 'none';
-          document.getElementById('cf-success').style.display = 'block';
-          document.getElementById('cf-error').style.display   = 'none';
-          form.reset();
-          btn.disabled = false; btn.textContent = 'Send & Book Intro Call';
-          emailjs.send('service_k768w0d', 'template_1q3fi3i', params);
-          recordLeadForFollowUp(params);
-        }, function () {
-          document.getElementById('cf-error').style.display   = 'block';
-          document.getElementById('cf-success').style.display = 'none';
-          btn.disabled = false; btn.textContent = 'Send & Book Intro Call';
+        .catch(function () {
+          document.getElementById('rf-error').style.display   = 'block';
+          document.getElementById('rf-success').style.display = 'none';
+          btn.disabled = false; btn.textContent = 'Reserve My Seat';
         });
     });
   }

@@ -121,7 +121,7 @@ function doPost(e) {
     } else if (body.action === 'submitPracticeTest') {
       out = handleSubmitPracticeTest(body.key, body.test, body.score, body.reportLink, body.report);
     } else if (body.action === 'submitLead') {
-      out = handleSubmitLead(body.name, body.email, body.phone, body.town, body.grade, body.subject, body.message);
+      out = handleSubmitLead(body.name, body.phone, body.email, body.isUSA, body.role, body.grade);
     } else if (body.action === 'syncProgress') {
       out = handleSyncProgress(body.key, body.incorrect, body.skills);
     } else if (body.action === 'getProgress') {
@@ -1124,21 +1124,21 @@ function setupTrigger() {
 /* =========================================================================
    WEBSITE LEAD CAPTURE + FOLLOW-UP SEQUENCE
    -------------------------------------------------------------------------
-   The public site's contact form (index.html, #contact-form) already
-   sends its own instant emails via EmailJS the moment someone submits —
-   one notifying Luca, one auto-replying to the parent. That part doesn't
-   touch this backend at all and keeps working exactly as before.
+   The public site's reserve-a-seat form (index.html, #reserve-form) POSTs
+   straight here (action: 'submitLead') — everything happens server-side
+   in handleSubmitLead(): the lead is logged to a "Leads" tab (auto-created
+   below, same pattern as the Assignments tab), Luca gets an internal
+   notification, and the submitter gets an immediate confirmation email.
+   Unlike the diagnostic flow there's no Drive file to save — the sheet
+   row IS the durable record, so it's written before either email is
+   attempted, and a mail failure never fails the submission itself.
 
-   This section's ONLY job is persistence + a short, automatic follow-up
-   sequence for leads who don't book a call right away: the form also
-   fires a fire-and-forget POST here (action: 'submitLead'), which appends
-   one row to a "Leads" tab (auto-created below, same pattern as the
-   Assignments tab). A daily trigger (sendLeadFollowUps) then sends:
+   A daily trigger (sendLeadFollowUps) then sends up to two more touches
+   for leads who don't respond:
      - Day 3 after submission: a short "how this actually works" email
        explaining the process/methodology and the 12-Week Program
        guarantee.
-     - Day 7 after submission: a final check-in with a real testimonial
-       and a direct booking link.
+     - Day 7 after submission: a final check-in with a real testimonial.
    That's it — 2 follow-up touches, not a long drip campaign. A lead that
    doesn't respond to either just stops there; nothing repeats forever.
 
@@ -1150,35 +1150,94 @@ function setupTrigger() {
    deploying a new version, run "setupLeadFollowUpTrigger" once from the
    function dropdown (authorize when asked) to turn on the daily send.
    ========================================================================= */
+// Columns grew from 10 to 12 when the site's lead form switched to the
+// "reserve a seat" fields (IsUSA, Role) — Town/Subject/Message stay as
+// columns (older rows still have data in them) but no longer get written
+// to by new submissions. Appending the two new headers, rather than
+// rewriting the row, keeps an already-live sheet's existing columns/data
+// untouched.
 function getLeadsSheet_() {
   var ss = SpreadsheetApp.openById(SHEET_ID);
   var sheet = ss.getSheetByName('Leads');
   if (!sheet) {
     sheet = ss.insertSheet('Leads');
-    sheet.appendRow(['Timestamp', 'Name', 'Email', 'Phone', 'Town', 'Grade', 'Subject', 'Message', 'Stage', 'LastEmailAt']);
+    sheet.appendRow(['Timestamp', 'Name', 'Email', 'Phone', 'Town', 'Grade', 'Subject', 'Message', 'Stage', 'LastEmailAt', 'IsUSA', 'Role']);
+    return sheet;
   }
+  var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  ['IsUSA', 'Role'].forEach(function (col) {
+    if (headers.indexOf(col) === -1) {
+      sheet.getRange(1, sheet.getLastColumn() + 1).setValue(col);
+      headers.push(col);
+    }
+  });
   return sheet;
 }
 
-function handleSubmitLead(name, email, phone, town, grade, subject, message) {
-  name = String(name || '').trim();
-  email = String(email || '').trim();
+// Builds the sheet row by header NAME rather than a fixed positional
+// array — robust to the old/new column layouts above, and to Luca ever
+// re-ordering columns by hand in the sheet itself.
+function handleSubmitLead(rawName, rawPhone, rawEmail, rawIsUSA, rawRole, rawGrade) {
+  var name = String(rawName || '').trim();
+  var email = String(rawEmail || '').trim();
   if (!name || !email) return { ok: false, error: 'missing_name_or_email' };
+  var phone = String(rawPhone || '').trim();
+  var isUSA = String(rawIsUSA || '').trim();
+  var role = String(rawRole || '').trim();
+  var grade = String(rawGrade || '').trim();
 
   var sheet = getLeadsSheet_();
-  sheet.appendRow([
-    new Date(),
-    sheetSafe_(name),
-    sheetSafe_(email),
-    sheetSafe_(phone || ''),
-    sheetSafe_(town || ''),
-    sheetSafe_(grade || ''),
-    sheetSafe_(subject || ''),
-    sheetSafe_(message || ''),
-    '',   // Stage — blank until the day-3 email goes out
-    ''    // LastEmailAt
-  ]);
+  var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  var row = new Array(headers.length).fill('');
+  function set(col, val) { var i = headers.indexOf(col); if (i !== -1) row[i] = val; }
+  set('Timestamp', new Date());
+  set('Name', sheetSafe_(name));
+  set('Email', sheetSafe_(email));
+  set('Phone', sheetSafe_(phone));
+  set('Grade', sheetSafe_(grade));
+  set('IsUSA', sheetSafe_(isUSA));
+  set('Role', sheetSafe_(role));
+  // Stage/LastEmailAt left blank — sendLeadFollowUps() below picks up any
+  // row whose Stage is still blank.
+  sheet.appendRow(row);
+
+  // Best-effort from here on — the lead is already durably logged above,
+  // so a mail failure costs convenience, not data (same principle as
+  // handleSubmitDiagnostic's "durable store first" pattern).
+  try {
+    MailApp.sendEmail(NOTIFY_EMAIL, 'New lead — ' + name,
+      'Name: ' + name + '\nRole: ' + (role || '(not given)') + '\nPhone: ' + phone + '\nEmail: ' + email +
+      '\nFrom the USA: ' + (isUSA || '(not given)') + '\nGrade: ' + (grade || '(not given)') +
+      '\n\nReply within 24 hours per the site\'s promise.');
+  } catch (err) {
+    console.error('Lead notify email failed for ' + email + ': ' + err);
+  }
+  try {
+    sendLeadEmail_(email, name, leadEmailConfirmation_(name));
+  } catch (err) {
+    console.error('Lead confirmation email failed for ' + email + ': ' + err);
+  }
+
   return { ok: true };
+}
+
+function leadEmailConfirmation_(name) {
+  var firstName = String(name || '').split(' ')[0] || 'there';
+  var text =
+    'Hi ' + firstName + ',\n\n' +
+    'Thanks for reaching out to Moretti Test Prep & Tutoring — this confirms we\'ve received your message.\n\n' +
+    'I\'ll personally follow up within 24 hours to talk through a plan for your student.\n\n' +
+    'Need something sooner? Call or text (201) 275-2791 directly.\n\n' +
+    'Best,\nLuca Moretti';
+  var html =
+    '<div style="font-family:Georgia,serif; color:#111; font-size:15px; line-height:1.6; max-width:560px;">' +
+    '<p>Hi ' + firstName + ',</p>' +
+    '<p>Thanks for reaching out to Moretti Test Prep &amp; Tutoring &mdash; this confirms we\'ve received your message.</p>' +
+    '<p>I\'ll personally follow up within <strong>24 hours</strong> to talk through a plan for your student.</p>' +
+    '<p>Need something sooner? Call or text <a href="tel:2012752791" style="color:#B0271C; font-weight:bold;">(201) 275-2791</a> directly.</p>' +
+    '<p>Best,<br>Luca Moretti</p>' +
+    '</div>';
+  return { subject: 'We\'ve received your message — Moretti Test Prep & Tutoring', text: text, html: html };
 }
 
 // Run daily (see setupLeadFollowUpTrigger). Sends the day-3 email to any
@@ -1203,15 +1262,15 @@ function sendLeadFollowUps() {
     if (!(submitted instanceof Date)) continue;
     var daysSince = (now - submitted) / (24 * 60 * 60 * 1000);
 
-    var name = row[col.Name], email = row[col.Email], subject = row[col.Subject];
+    var name = row[col.Name], email = row[col.Email];
     if (!email) continue;
 
     if (stage === '' && daysSince >= 3) {
-      sendLeadEmail_(email, name, leadEmailDay3_(name, subject));
+      sendLeadEmail_(email, name, leadEmailDay3_(name));
       sheet.getRange(i + 1, col.Stage + 1).setValue('1');
       sheet.getRange(i + 1, col.LastEmailAt + 1).setValue(now);
     } else if (stage === '1' && daysSince >= 7) {
-      sendLeadEmail_(email, name, leadEmailDay7_(name, subject));
+      sendLeadEmail_(email, name, leadEmailDay7_(name));
       sheet.getRange(i + 1, col.Stage + 1).setValue('2');
       sheet.getRange(i + 1, col.LastEmailAt + 1).setValue(now);
     }
@@ -1232,50 +1291,50 @@ function sendLeadEmail_(toEmail, name, msg) {
   }
 }
 
-function leadEmailDay3_(name, subject) {
+function leadEmailDay3_(name) {
   var firstName = String(name || '').split(' ')[0] || 'there';
   var text =
     'Hi ' + firstName + ',\n\n' +
-    'Wanted to follow up in case you\'re still looking into ' + (subject || 'tutoring') + ' support.\n\n' +
-    'Here\'s how I actually work with students: every plan starts with a real assessment — figuring out exactly which specific gaps are costing points or grades, not just "more practice." From there we build a plan around those gaps specifically, session by session, instead of a generic curriculum.\n\n' +
-    'For SAT/ACT prep, that\'s built into the 12-Week Program: a diagnostic to start, a custom study plan, two more full-length practice tests along the way to track real movement, and a guarantee — if a student completes all twelve sessions and the homework and their score doesn\'t improve, I keep working with them for free until it does.\n\n' +
-    'Happy to walk you through what this would look like for your student specifically — no pressure, just a real conversation:\n' +
-    'https://calendly.com/morettitutoring\n\n' +
+    'Wanted to follow up in case you\'re still looking into SAT/ACT prep for your student.\n\n' +
+    'Here\'s how I actually work with students: every plan starts with a real assessment — figuring out exactly which specific gaps are costing points, not just "more practice." From there we build a plan around those gaps specifically, session by session, instead of a generic curriculum.\n\n' +
+    'That\'s built into the 12-Week Program: a diagnostic to start, a custom study plan, two more full-length practice tests along the way to track real movement, and a guarantee — if a student completes all twelve sessions and the homework and their score doesn\'t improve, I keep working with them for free until it does.\n\n' +
+    'Happy to walk you through what this would look like for your student specifically — no pressure, just a real conversation. Reserve a seat here:\n' +
+    'https://morettitutoring.com/#reserve\n\n' +
     'Best,\nLuca';
   var html =
     '<div style="font-family:Georgia,serif; color:#111; font-size:15px; line-height:1.6; max-width:560px;">' +
     '<p>Hi ' + firstName + ',</p>' +
-    '<p>Wanted to follow up in case you\'re still looking into ' + (subject || 'tutoring') + ' support.</p>' +
-    '<p>Here\'s how I actually work with students: every plan starts with a real assessment &mdash; figuring out exactly which specific gaps are costing points or grades, not just &ldquo;more practice.&rdquo; From there we build a plan around those gaps specifically, session by session, instead of a generic curriculum.</p>' +
-    '<p>For SAT/ACT prep, that\'s built into the <strong>12-Week Program</strong>: a diagnostic to start, a custom study plan, two more full-length practice tests along the way to track real movement, and a guarantee &mdash; if a student completes all twelve sessions and the homework and their score doesn\'t improve, I keep working with them for free until it does.</p>' +
+    '<p>Wanted to follow up in case you\'re still looking into SAT/ACT prep for your student.</p>' +
+    '<p>Here\'s how I actually work with students: every plan starts with a real assessment &mdash; figuring out exactly which specific gaps are costing points, not just &ldquo;more practice.&rdquo; From there we build a plan around those gaps specifically, session by session, instead of a generic curriculum.</p>' +
+    '<p>That\'s built into the <strong>12-Week Program</strong>: a diagnostic to start, a custom study plan, two more full-length practice tests along the way to track real movement, and a guarantee &mdash; if a student completes all twelve sessions and the homework and their score doesn\'t improve, I keep working with them for free until it does.</p>' +
     '<p>Happy to walk you through what this would look like for your student specifically &mdash; no pressure, just a real conversation:</p>' +
-    '<p><a href="https://calendly.com/morettitutoring" style="color:#B0271C; font-weight:bold;">Book a Free Intro Call &rarr;</a></p>' +
+    '<p><a href="https://morettitutoring.com/#reserve" style="color:#B0271C; font-weight:bold;">Reserve Your Seat &rarr;</a></p>' +
     '<p>Best,<br>Luca</p>' +
     '</div>';
-  return { subject: 'Following up on ' + (subject || 'tutoring') + ' for your student', text: text, html: html };
+  return { subject: 'Following up on SAT/ACT prep for your student', text: text, html: html };
 }
 
-function leadEmailDay7_(name, subject) {
+function leadEmailDay7_(name) {
   var firstName = String(name || '').split(' ')[0] || 'there';
   var text =
     'Hi ' + firstName + ',\n\n' +
-    'Just a short final check-in — are you still looking for ' + (subject || 'tutoring') + ' support this semester?\n\n' +
+    'Just a short final check-in — are you still looking for SAT/ACT prep support this semester?\n\n' +
     '"I highly recommend Luca as a math tutor. He worked with my daughter to prepare for the SAT and made a tremendous impact on both her confidence and performance... she improved her SAT Math score by approximately 200 points, exceeding our expectations." — Michele C.\n\n' +
-    'If now isn\'t the right time, no worries at all — feel free to reach back out whenever it is. If you\'d like to talk it through, here\'s my calendar:\n' +
-    'https://calendly.com/morettitutoring\n\n' +
+    'If now isn\'t the right time, no worries at all — feel free to reach back out whenever it is. If you\'d like to talk it through, reserve a seat here:\n' +
+    'https://morettitutoring.com/#reserve\n\n' +
     'Best,\nLuca';
   var html =
     '<div style="font-family:Georgia,serif; color:#111; font-size:15px; line-height:1.6; max-width:560px;">' +
     '<p>Hi ' + firstName + ',</p>' +
-    '<p>Just a short final check-in &mdash; are you still looking for ' + (subject || 'tutoring') + ' support this semester?</p>' +
+    '<p>Just a short final check-in &mdash; are you still looking for SAT/ACT prep support this semester?</p>' +
     '<blockquote style="border-left:3px solid #C9A84C; margin:1.2em 0; padding:0.2em 1em; font-style:italic; color:#333;">' +
     '&ldquo;I highly recommend Luca as a math tutor. He worked with my daughter to prepare for the SAT and made a tremendous impact on both her confidence and performance&hellip; she improved her SAT Math score by approximately <strong>200 points</strong>, exceeding our expectations.&rdquo;<br><span style="font-style:normal; font-size:0.85em; color:#666;">&mdash; Michele C.</span>' +
     '</blockquote>' +
-    '<p>If now isn\'t the right time, no worries at all &mdash; feel free to reach back out whenever it is. If you\'d like to talk it through, here\'s my calendar:</p>' +
-    '<p><a href="https://calendly.com/morettitutoring" style="color:#B0271C; font-weight:bold;">Book a Free Intro Call &rarr;</a></p>' +
+    '<p>If now isn\'t the right time, no worries at all &mdash; feel free to reach back out whenever it is. If you\'d like to talk it through, here\'s where to reserve a seat:</p>' +
+    '<p><a href="https://morettitutoring.com/#reserve" style="color:#B0271C; font-weight:bold;">Reserve Your Seat &rarr;</a></p>' +
     '<p>Best,<br>Luca</p>' +
     '</div>';
-  return { subject: 'Still looking for ' + (subject || 'tutoring') + ' help?', text: text, html: html };
+  return { subject: 'Still looking for SAT/ACT prep help?', text: text, html: html };
 }
 
 // Run this ONCE manually (select it in the function dropdown, click Run,
