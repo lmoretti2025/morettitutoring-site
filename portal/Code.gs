@@ -61,6 +61,12 @@
         | DoneAt. To assign something, just add a row yourself (Key, Task
         text, today's date in Timestamp, leave Done unchecked). See
         getAssignments_() below for details.
+        A tab named "Progress" is also created automatically the first
+        time a student finishes a diagnostic or practice test — it's what
+        makes the portal's "My Incorrect Questions" and "Practice My Weak
+        Spots" tools work from any device instead of just the one that
+        took the test. Nothing to set up or maintain here; see
+        handleSyncProgress()/handleGetProgress() below for details.
      2. Paste this file into a new Apps Script project (script.google.com).
      3. Set SHEET_ID below to that Sheet's ID (from its URL).
      4. Deploy > New deployment > Web app.
@@ -116,6 +122,10 @@ function doPost(e) {
       out = handleSubmitPracticeTest(body.key, body.test, body.score, body.reportLink, body.report);
     } else if (body.action === 'submitLead') {
       out = handleSubmitLead(body.name, body.email, body.phone, body.town, body.grade, body.subject, body.message);
+    } else if (body.action === 'syncProgress') {
+      out = handleSyncProgress(body.key, body.incorrect, body.skills);
+    } else if (body.action === 'getProgress') {
+      out = handleGetProgress(body.key);
     } else {
       out = { ok: false, error: 'unknown_action' };
     }
@@ -872,6 +882,138 @@ function logDiagnosticResult_(key, name, test, score, reportLink, reportText, dr
     log.appendRow(['Timestamp', 'Key', 'Name', 'Test', 'Score', 'ReportLink', 'Report', 'DriveSaved', 'DriveFileUrl', 'EmailSent', 'EmailError']);
   }
   log.appendRow([new Date(), sheetSafe_(key), sheetSafe_(name), sheetSafe_(test), sheetSafe_(score), sheetSafe_(reportLink), sheetSafe_(reportText), !!driveSaved, sheetSafe_(driveFileUrl || ''), !!emailSent, sheetSafe_(emailError || '')]);
+}
+
+/* =========================================================================
+   STUDENT PROGRESS SYNC — "My Incorrect Questions" / "Practice My Weak
+   Spots", moved server-side
+   -------------------------------------------------------------------------
+   These two portal tools used to be 100% client-side (localStorage only),
+   which meant the data only ever existed in whatever browser/device took
+   the test — a student taking a practice test on one device and checking
+   their weak spots on another (or Luca checking from his own computer)
+   always saw nothing, even though the attempt genuinely happened. This
+   "Progress" tab (auto-created on first use, one row per student key) is
+   now the source of truth both tools read from (via action 'getProgress'),
+   kept current by every diagnostic/practice-test completion (action
+   'syncProgress', called right alongside the existing submitDiagnostic/
+   submitPracticeTest send — see index.html's syncProgressToBackend()).
+
+   Columns: Key | IncorrectQuestionsJSON | SkillStatsJSON | UpdatedAt.
+     - IncorrectQuestionsJSON: the SAME byKey map the client used to keep
+       in localStorage — merged here the identical way (a miss (re)writes
+       its entry, a correct answer on a later attempt clears it), so this
+       always reflects CURRENT outstanding misses, not full history.
+     - SkillStatsJSON: OVERWRITTEN (not merged) with whatever came in on
+       THIS submission — "Practice My Weak Spots" is meant to reflect the
+       most recently completed diagnostic/practice test, not a lifetime
+       aggregate, so each new attempt fully replaces the last one's
+       breakdown rather than blending into it.
+   ========================================================================= */
+function getProgressSheet_() {
+  var ss = SpreadsheetApp.openById(SHEET_ID);
+  var sheet = ss.getSheetByName('Progress');
+  if (!sheet) {
+    sheet = ss.insertSheet('Progress');
+    sheet.appendRow(['Key', 'IncorrectQuestionsJSON', 'SkillStatsJSON', 'UpdatedAt']);
+  }
+  return sheet;
+}
+
+// A Google Sheets cell tops out around 50,000 characters — IncorrectQuestionsJSON
+// carries full question text/choices/explanations per miss, which can add up
+// over enough outstanding misses. Rather than truncate the JSON string itself
+// (which would corrupt it), this drops the OLDEST misses (by attemptedAt) one
+// at a time until the serialized map fits — a student's most recent misses are
+// the ones "Practice My Weak Spots" and this log actually need.
+var PROGRESS_CELL_CAP_ = 45000;
+function capIncorrectByKey_(byKey) {
+  if (JSON.stringify(byKey).length <= PROGRESS_CELL_CAP_) return byKey;
+  var oldestFirst = Object.keys(byKey).sort(function (a, b) {
+    return String((byKey[a] && byKey[a].attemptedAt) || '').localeCompare(String((byKey[b] && byKey[b].attemptedAt) || ''));
+  });
+  while (oldestFirst.length && JSON.stringify(byKey).length > PROGRESS_CELL_CAP_) {
+    delete byKey[oldestFirst.shift()];
+  }
+  return byKey;
+}
+
+// rawIncorrect: array of records shaped like index.html's incorrectRecords
+// (or the slimmed {key, correct:true} form for entries the client already
+// knows are correct — see syncProgressToBackend()). rawSkills: this attempt's
+// own bySkill-shaped breakdown (already split into domain/skill fields by the
+// client — see skillsToBySkill() in index.html), which fully replaces
+// whatever was stored before.
+function handleSyncProgress(rawKey, rawIncorrect, rawSkills) {
+  if (!rawKey) return { ok: false, error: 'missing_key' };
+  var key = String(rawKey).trim().toUpperCase();
+  var sheet = getSheet_();
+  var row = findRow_(sheet, key);
+  if (!row) return { ok: false, error: 'bad_key' }; // same gate as the other submit handlers — unknown key writes nothing
+
+  var pSheet = getProgressSheet_();
+  var pData = pSheet.getDataRange().getValues();
+  var pHeaders = pData[0];
+  var keyCol = pHeaders.indexOf('Key');
+  var iqCol = pHeaders.indexOf('IncorrectQuestionsJSON');
+  var skCol = pHeaders.indexOf('SkillStatsJSON');
+  var atCol = pHeaders.indexOf('UpdatedAt');
+
+  var rowIndex = -1, byKey = {};
+  for (var i = 1; i < pData.length; i++) {
+    if (String(pData[i][keyCol]).trim().toUpperCase() === key) {
+      rowIndex = i + 1;
+      try { byKey = JSON.parse(pData[i][iqCol]) || {}; } catch (e) { byKey = {}; }
+      break;
+    }
+  }
+
+  (Array.isArray(rawIncorrect) ? rawIncorrect : []).forEach(function (r) {
+    if (!r || !r.key) return;
+    if (r.correct) delete byKey[r.key];
+    else byKey[r.key] = r;
+  });
+  byKey = capIncorrectByKey_(byKey);
+  var bySkill = (rawSkills && typeof rawSkills === 'object') ? rawSkills : {};
+
+  var iqJson = sheetSafe_(JSON.stringify(byKey));
+  var skJson = sheetSafe_(JSON.stringify(bySkill));
+  if (rowIndex === -1) {
+    pSheet.appendRow([key, iqJson, skJson, new Date()]);
+  } else {
+    pSheet.getRange(rowIndex, iqCol + 1).setValue(iqJson);
+    pSheet.getRange(rowIndex, skCol + 1).setValue(skJson);
+    pSheet.getRange(rowIndex, atCol + 1).setValue(new Date());
+  }
+  return { ok: true };
+}
+
+// Read-only fetch for the two portal tools — deliberately returns ok:true
+// with empty objects for a valid key that just has no Progress row yet
+// (brand-new student, nothing submitted), rather than an error; only an
+// unrecognized key is rejected.
+function handleGetProgress(rawKey) {
+  if (!rawKey) return { ok: false, error: 'missing_key' };
+  var key = String(rawKey).trim().toUpperCase();
+  var sheet = getSheet_();
+  var row = findRow_(sheet, key);
+  if (!row) return { ok: false, error: 'bad_key' };
+
+  var pSheet = getProgressSheet_();
+  var pData = pSheet.getDataRange().getValues();
+  var pHeaders = pData[0];
+  var keyCol = pHeaders.indexOf('Key');
+  var iqCol = pHeaders.indexOf('IncorrectQuestionsJSON');
+  var skCol = pHeaders.indexOf('SkillStatsJSON');
+  for (var i = 1; i < pData.length; i++) {
+    if (String(pData[i][keyCol]).trim().toUpperCase() === key) {
+      var byKey = {}, bySkill = {};
+      try { byKey = JSON.parse(pData[i][iqCol]) || {}; } catch (e) { /* ignore */ }
+      try { bySkill = JSON.parse(pData[i][skCol]) || {}; } catch (e) { /* ignore */ }
+      return { ok: true, incorrectQuestions: byKey, skillStats: bySkill };
+    }
+  }
+  return { ok: true, incorrectQuestions: {}, skillStats: {} };
 }
 
 /* =========================================================================
