@@ -126,13 +126,23 @@
   .assign-label { display: flex; align-items: center; gap: 0.45rem; font-family: var(--hel); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--mid); margin-bottom: 0.85rem; }
   .assign-label::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--gold); flex-shrink: 0; }
   .assign-list { display: flex; flex-direction: column; gap: 0.6rem; }
+  /* Stacked, not side-by-side: the This Week card is a narrow sidebar
+     column, and an inline pill squeezed the task text into a 4-line
+     ribbon and still overflowed the card on longer labels. */
+  .assign-row { display: flex; flex-direction: column; align-items: flex-start; gap: 0.4rem; }
   .assign-item { display: flex; align-items: flex-start; gap: 0.65rem; cursor: pointer; transition: opacity 0.2s ease, transform 0.2s ease; }
   .assign-item input[type="checkbox"] { margin-top: 0.2rem; width: 17px; height: 17px; flex-shrink: 0; accent-color: var(--red); cursor: pointer; }
   .assign-text { font-family: var(--hel); font-size: 0.9rem; color: var(--text); line-height: 1.35; }
   .assign-item.assign-done { cursor: default; }
   .assign-item.assign-done .assign-text { color: var(--text-muted, #9a9a9a); text-decoration: line-through; }
   .assign-item.assign-done input[type="checkbox"] { cursor: default; }
-  @media (min-width: 1150px) {
+  /* 1260px is the width at which BOTH pinned side cards (This Week left,
+     Score Progress right) clear the 600px centre column without overlapping
+     it — see the no-scroll block further down for that arithmetic. Below
+     it, both drop back into the normal flow and the page scrolls. The two
+     cards share this breakpoint on purpose: pinning one without the other
+     used to let the checklist overlap the column between 1150 and 1260. */
+  @media (min-width: 1260px) {
     .assign-card { position: fixed; top: 108px; left: 2rem; margin: 0; width: 260px; max-width: 260px; max-height: calc(100vh - 140px); overflow-y: auto; z-index: 50; }
   }
 
@@ -140,11 +150,31 @@
      least one recorded diagnostic/practice-test composite score (see
      recordScoreHistory() / renderScoreProgress()). Wider than assign-card
      — a line chart needs the room a 460px checklist column doesn't. */
-  .score-progress-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 1.3rem 1.5rem 1.1rem; margin: 0 auto 1.6rem; max-width: 640px; box-shadow: var(--shadow); }
+  .score-progress-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 1.3rem 1.5rem 1.1rem; margin: 0 auto 1.6rem; max-width: 640px; box-shadow: var(--shadow); position: relative; }
   .spc-label { font-family: var(--hel); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--mid); margin-bottom: 0.9rem; }
   .spc-chart-hed { font-family: var(--hel); font-size: 0.78rem; font-weight: 700; color: var(--text); margin: 0.9rem 0 0.3rem; }
   .spc-chart-hed:first-child { margin-top: 0; }
   .spc-note { font-size: 0.7rem; color: var(--faint); margin-top: 0.2rem; }
+  .spc-chart-wrap { position: relative; }
+  .spc-hit { cursor: pointer; }
+  .spc-hit:focus { outline: none; }
+  .spc-hit:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; border-radius: 50%; }
+  /* Hover/tap readout for a single attempt: which test, the composite, and
+     the weakest skill area on it. pointer-events:none so the tooltip can
+     never sit between the cursor and the point it describes. */
+  .spc-tip { display: none; position: absolute; z-index: 60; background: var(--text); color: #fff; border-radius: 8px; padding: 0.5rem 0.7rem; font-family: var(--hel); font-size: 0.68rem; line-height: 1.45; width: max-content; max-width: 230px; pointer-events: none; box-shadow: 0 8px 22px rgba(17,17,17,0.28); }
+  .spc-tip-hed { font-weight: 700; }
+  .spc-tip-score { color: var(--gold); font-weight: 700; }
+  .spc-tip-weak { margin-top: 0.25rem; opacity: 0.88; }
+  .spc-tip-muted { opacity: 0.6; font-style: italic; }
+  /* On a wide window Score Progress mirrors the This Week checklist: a
+     fixed card pinned to the top RIGHT, out of the centre column entirely.
+     That's what lets the home screen fit one viewport without scrolling —
+     the chart was the tallest thing in the stack. Below 1150px it falls
+     back into the normal flow, same as the checklist does. */
+  @media (min-width: 1260px) {
+    .score-progress-card { position: fixed; top: 108px; right: 2rem; left: auto; margin: 0; width: 290px; max-width: 290px; max-height: calc(100vh - 140px); overflow-y: auto; overflow-x: visible; z-index: 50; }
+  }
 
   /* ═══ TEST-DAY COUNTDOWN ═══ shown on the home screen once a student's
      Students-sheet row has a TestDate. Fill runs from GrantedAt (first
@@ -175,6 +205,26 @@
   .menu-card.disabled:hover::before { width: 0; }
   .menu-card.disabled:hover .menu-card-icon { background: rgba(176,39,28,0.08); transform: none; }
   .menu-card-coming-soon { position: absolute; top: 0.9rem; right: 0.9rem; font-size: 0.52rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); border: 1px solid var(--border); padding: 0.25rem 0.55rem; }
+  /* Status badge in a card's top-right — same slot/shape as the
+     coming-soon chip above, but for state a student needs to read at a
+     glance: whether they've already done this test, and whether it's a
+     one-time thing or something they can repeat. This is the main fix for
+     students retaking the diagnostic when they meant a practice test. */
+  .menu-card-badge { position: absolute; top: 0.9rem; right: 0.9rem; font-size: 0.52rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.25rem 0.55rem; border: 1px solid var(--border); color: var(--faint); background: var(--white); }
+  .menu-card-badge.badge-done { border-color: #3f8f5f; color: #3f8f5f; background: rgba(63,143,95,0.09); }
+  .menu-card-badge.badge-todo { border-color: var(--red); color: var(--red); background: rgba(176,39,28,0.07); }
+  .menu-card-wide .menu-card-title { padding-right: 6.5rem; } /* keep long titles clear of the badge */
+  /* Big test number on a practice-test card, so "take Practice Test 1"
+     maps onto something a student can spot without reading any prose. */
+  .pt-num { font-family: var(--display); font-weight: 700; font-size: 1.35rem; color: var(--red); background: rgba(176,39,28,0.08); width: 46px; height: 46px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .menu-card:hover .pt-num { background: rgba(201,168,76,0.16); }
+  .pt-card-done .pt-num { color: #3f8f5f; background: rgba(63,143,95,0.1); }
+  /* Applied when a student arrives from an assignment that names a
+     specific test — pulls the eye to the one card they were sent for. */
+  .menu-card.pt-highlight { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,168,76,0.28), var(--shadow-hover); }
+  /* "Take me there" shortcut on an assignment row that names a test. */
+  .assign-go { flex-shrink: 0; margin-left: 1.55rem; /* lines up under the task text, past the checkbox */ font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--red); background: rgba(176,39,28,0.07); border: 1px solid rgba(176,39,28,0.25); border-radius: 999px; padding: 0.3rem 0.7rem; text-decoration: none; white-space: nowrap; }
+  .assign-go:hover { background: var(--red); color: var(--white); }
   .menu-exit { display: block; text-align: center; margin-top: 2rem; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); text-decoration: none; }
   .menu-exit:hover { color: var(--red); }
 
@@ -209,6 +259,8 @@
   .overview-break-row { display: flex; align-items: center; gap: 0.6rem; padding: 0.7rem 1.3rem; background: var(--bg); font-family: var(--hel); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--mid); border-bottom: 1px solid var(--border); }
   .overview-note { font-size: 0.82rem; color: var(--mid); line-height: 1.75; text-align: left; margin-bottom: 1.75rem; }
   .overview-retake-notice { font-size: 0.82rem; color: var(--text); line-height: 1.7; text-align: left; background: rgba(201,168,76,0.14); border: 1px solid var(--gold); padding: 0.9rem 1.1rem; margin-bottom: 1.5rem; }
+  .overview-retake-notice a { color: var(--red); font-weight: 700; text-decoration: none; border-bottom: 1px solid rgba(176,39,28,0.4); }
+  .overview-retake-notice a:hover { border-bottom-color: var(--red); }
   /* ═══ ACCOMMODATIONS PANEL (test overview) ═══ */
   .accom-panel { border: 1px solid var(--border); text-align: left; margin-bottom: 1.5rem; }
   .accom-hed { display: flex; align-items: baseline; justify-content: space-between; gap: 0.6rem; padding: 0.85rem 1.3rem; background: var(--bg); border-bottom: 1px solid var(--border); }
@@ -522,9 +574,127 @@
     .sr-print-btn { display: none !important; }
   }
 
+  /* ═══ HOME SCREEN FITS THE VIEWPORT — NO SCROLLING ═══
+     The dashboard is meant to be taken in at a glance, so on a normal
+     laptop/desktop window it's a single static page: the screen is exactly
+     one viewport tall with overflow hidden, and the pieces inside are sized
+     to fit rather than stacking past the fold.
+
+     What makes that fit at all is the two side cards being pinned out of
+     the centre column (This Week left, Score Progress right) — the column
+     is then just the greeting, countdown, next session, four menu cards and
+     the exit link, which comes to roughly 510px.
+
+     The gate is deliberately conservative: >= 1260px wide and >= 640px
+     tall. 1260 is where both pinned cards clear the 600px column —
+     left needs 32 + 260 = 292px and the column's left edge sits at
+     vw/2 - 300, so vw >= 1184; right needs 32 + 290 = 322px against a right
+     edge of vw/2 + 300, so vw >= 1244. Anything narrower or shorter (a
+     phone, a half-width window, a zoomed-in browser) drops both cards back
+     into the flow and scrolls normally — clipping content a student can't
+     reach would be far worse than a scrollbar.
+
+     Applies to the home screen only (#screen-menu); the practice-test
+     picker, vocab and question tools still scroll, since their content is
+     a list that's genuinely longer than a screen. */
+  @media (min-width: 1260px) and (min-height: 720px) {
+    #screen-menu.screen { height: 100dvh; min-height: 100dvh; padding: 5.25rem 1.5rem 1.25rem; overflow: hidden; }
+    #screen-menu .panel-wide { display: flex; flex-direction: column; max-height: 100%; min-height: 0; max-width: 600px; }
+    /* Tighter rhythm between the stacked cards than the 1.6rem default. */
+    #screen-menu .test-countdown { margin-bottom: 1.15rem; }
+    #screen-menu .next-session-card,
+    #screen-menu .score-progress-card { margin-bottom: 1rem; }
+    /* The "schedule window" — trimmed padding and a join link that stays on
+       one line instead of wrapping the URL across three. */
+    #screen-menu .next-session-card { padding: 0.85rem 1.1rem; }
+    #screen-menu .ns-join { margin-top: 0.4rem; word-break: normal; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+    /* The pinned card sizes itself; it just needs a ceiling for the rare
+       student with both an SAT and an ACT chart stacked in it. */
+    #screen-menu .score-progress-card { padding: 1.1rem 1.25rem 0.9rem; }
+    #screen-menu .spc-label { margin-bottom: 0.55rem; }
+    /* Cards stay one per row. A two-column grid saved more height, but at
+       600px of column the halves left roughly 110px for a title once the
+       icon and the status badge took their share — "Your Diagnostic Test"
+       wrapped onto three lines. Moving the side cards out of the column
+       freed enough room that the readable version fits anyway. */
+    #screen-menu .menu-grid { gap: 0.8rem; margin-top: 0; flex: 0 0 auto; }
+    #screen-menu .menu-grid .menu-card-wide { gap: 1.15rem; padding: 1.1rem 1.4rem; }
+    #screen-menu .menu-card-body { font-size: 0.74rem; line-height: 1.5; }
+    #screen-menu .menu-exit { margin-top: 1.1rem; }
+  }
+  /* Shorter windows inside the no-scroll range (a 768px-tall laptop, or a
+     window the student has made smaller): trim the decorative bits so the
+     four menu cards still land above the fold. */
+  @media (min-width: 1260px) and (min-height: 720px) and (max-height: 880px) {
+    #screen-menu.screen { padding-top: 4.75rem; }
+    #screen-menu .menu-sub { display: none; }
+    #screen-menu .kicker { margin-bottom: 0.5rem; }
+    #screen-menu .menu-greeting { font-size: 1.5rem; margin-bottom: 0.35rem; }
+    #screen-menu .test-countdown { margin-bottom: 0.8rem; }
+    #screen-menu .next-session-card { margin-bottom: 0.8rem; padding: 0.7rem 1rem; }
+    #screen-menu .menu-grid { gap: 0.65rem; }
+    #screen-menu .menu-grid .menu-card-wide { padding: 0.9rem 1.2rem; gap: 0.95rem; }
+    #screen-menu .menu-card-icon, #screen-menu .pt-num { width: 40px; height: 40px; }
+    #screen-menu .menu-card-body { font-size: 0.72rem; line-height: 1.45; }
+    #screen-menu .menu-exit { margin-top: 0.75rem; }
+  }
+  /* Default (narrow/short windows): the picker is a normal stacked list
+     with a full sentence per test, and the page scrolls. */
+  .pt-note { font-size: 0.7rem; line-height: 1.5; color: var(--faint); margin-bottom: 0.2rem; }
+  .pt-meta { display: none; font-size: 0.7rem; color: var(--mid); }
+  .pt-card-done .pt-meta { color: #3f8f5f; font-weight: 600; }
+
+  /* ═══ PRACTICE-TEST PICKER FITS THE VIEWPORT ═══
+     Same idea as the home screen: one static page, no scrolling. Eleven
+     stacked full-width cards were four screens long, which is its own
+     version of "I can't find Practice Test 3" — as a tile grid, every test
+     is visible at once and the number you were told to take is the thing
+     you scan for.
+
+     The full sentence per card is dropped for a one-line meta here; it's
+     the same information the tile already implies, and the grid is what
+     makes all eleven visible. The grid keeps `overflow-y: auto` as a
+     safety valve: if the bank ever outgrows three rows, the tiles scroll
+     inside their own box rather than pushing the page past one screen. */
+  @media (min-width: 900px) and (min-height: 640px) {
+    #screen-practice-tests.screen { height: 100dvh; min-height: 100dvh; padding: 5rem 1.5rem 1.25rem; overflow: hidden; }
+    #screen-practice-tests .panel-wide { max-width: 940px; display: flex; flex-direction: column; max-height: 100%; min-height: 0; }
+    #screen-practice-tests .panel-hed { margin-bottom: 0.4rem; }
+    #screen-practice-tests .panel-sub { font-size: 0.78rem; line-height: 1.55; margin-bottom: 1rem; }
+    #screen-practice-tests .pt-sub-detail { display: none; }
+    #pt-test-list { grid-template-columns: repeat(4, 1fr); gap: 0.7rem; margin-top: 0; flex: 0 1 auto; min-height: 0; overflow-y: auto; padding: 2px; }
+    #pt-test-list .menu-card-wide { grid-column: auto; flex-direction: column; align-items: flex-start; gap: 0.45rem; padding: 0.8rem 0.9rem; }
+    #pt-test-list .pt-num, #pt-test-list .menu-card-icon { width: 36px; height: 36px; font-size: 1.1rem; margin-bottom: 0; }
+    #pt-test-list .menu-card-title { font-size: 0.84rem; margin-bottom: 0; padding-right: 0; }
+    #pt-test-list .pt-body-long { display: none; }
+    #pt-test-list .pt-meta { display: block; }
+    #pt-test-list .pt-note { font-size: 0.62rem; line-height: 1.4; margin-bottom: 0; }
+    /* Badge moves out of the absolute top-right corner and into the tile's
+       own flow — at ~210px wide there isn't room to reserve a corner for
+       it without the title wrapping. */
+    #pt-test-list .menu-card-badge { position: static; order: 3; margin-top: 0.15rem; }
+    #screen-practice-tests .menu-back-link { margin-top: 1rem; flex: 0 0 auto; }
+  }
+  @media (min-width: 900px) and (min-height: 640px) and (max-height: 780px) {
+    #screen-practice-tests.screen { padding-top: 4.5rem; }
+    #screen-practice-tests .panel-sub { margin-bottom: 0.7rem; }
+    #pt-test-list { gap: 0.55rem; }
+    #pt-test-list .menu-card-wide { padding: 0.7rem 0.8rem; gap: 0.35rem; }
+    #pt-test-list .pt-num, #pt-test-list .menu-card-icon { width: 32px; height: 32px; font-size: 1rem; }
+  }
+  @media (min-width: 1200px) and (min-height: 640px) {
+    #pt-test-list { grid-template-columns: repeat(5, 1fr); }
+  }
   @media (prefers-reduced-motion: reduce) { .reveal { transition: none; } }
   @media (max-width: 760px) {
     .menu-grid { grid-template-columns: 1fr; }
+    /* On a phone the card is ~343px wide. The default 2rem side padding
+       plus the 6.5rem the title reserves for the status badge left about
+       100px of text column, which wrapped "Practice Test 1" onto three
+       lines. Trim both to what the badge actually occupies at this size. */
+    .menu-card-wide { padding: 1.25rem 1.15rem; gap: 1rem; }
+    .menu-card-wide .menu-card-title { padding-right: 4.9rem; }
+    .menu-card-badge { top: 0.7rem; right: 0.7rem; }
     #dx-main { padding: 2.5rem 1.5rem; }
     .dx-mobile-jump { display: block; }
     .res-embed { height: 320px; }
@@ -796,11 +966,20 @@
       <div id="spc-charts"></div>
     </div>
     <div class="menu-grid">
-      <div class="menu-card menu-card-wide" data-route="diagnostic">
+      <div class="menu-card menu-card-wide" data-route="diagnostic" id="menu-card-diagnostic">
+        <span class="menu-card-badge" id="diag-card-badge" style="display:none;"></span>
         <span class="menu-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="1.5"/><rect x="9" y="2" width="6" height="3" rx="1"/><path d="M9 12.5l2 2 4-4.5"/></svg></span>
         <div>
-          <div class="menu-card-title">SAT/ACT Diagnostics</div>
-          <div class="menu-card-body">Take the hand-curated diagnostic so Luca can build your plan around real data.</div>
+          <div class="menu-card-title">Your Diagnostic Test</div>
+          <div class="menu-card-body" id="diag-card-body">Your starting point &mdash; it's how Luca sees where you are and builds your plan around real data.</div>
+        </div>
+      </div>
+      <div class="menu-card menu-card-wide" data-route="practice-tests" id="menu-card-practice-tests">
+        <span class="menu-card-badge" id="pt-card-badge" style="display:none;"></span>
+        <span class="menu-card-icon">&#9201;</span>
+        <div>
+          <div class="menu-card-title">Practice Tests 1&ndash;<span id="pt-card-count">11</span></div>
+          <div class="menu-card-body" id="pt-card-body">Full, timed practice tests you can take as many times as you want. If Luca asked you to take "Practice Test 3," it's in here.</div>
         </div>
       </div>
       <div class="menu-card menu-card-wide" data-route="files">
@@ -862,8 +1041,8 @@
       <div class="menu-card menu-card-wide" data-route="practice-tests">
         <span class="menu-card-icon">&#9201;</span>
         <div>
-          <div class="menu-card-title">Practice Tests</div>
-          <div class="menu-card-body">Full, timed SAT-format practice tests — the same adaptive Module 1/Module 2 format as the real digital SAT, scored just like your diagnostic.</div>
+          <div class="menu-card-title">Practice Tests 1&ndash;<span id="pt-res-card-count">11</span></div>
+          <div class="menu-card-body">Full, timed SAT-format practice tests &mdash; the same adaptive Module 1/Module 2 format as the real digital SAT. Also on your home screen.</div>
         </div>
       </div>
       <div class="menu-card menu-card-wide" data-route="incorrect-questions">
@@ -913,11 +1092,11 @@
 <!-- ═══ SCREEN 3b-iii — PRACTICE TESTS (picker) ═══ -->
 <div class="screen" id="screen-practice-tests">
   <div class="panel-wide">
-    <div class="kicker">SAT Resources</div>
-    <h1 class="panel-hed">Practice tests.</h1>
-    <p class="panel-sub">Pick a test below. Each one is full-length and timed, with the same adaptive Module 1 → Module 2 routing as the real digital SAT — treat it like the real thing.</p>
+    <div class="kicker">Practice Tests</div>
+    <h1 class="panel-hed">Pick a practice test.</h1>
+    <p class="panel-sub">These are numbered the same way Luca refers to them &mdash; if he said "take Practice Test 2," click Practice Test 2. <span class="pt-sub-detail">Each one is full-length and timed, with the same adaptive Module 1 &rarr; Module 2 routing as the real digital SAT. </span>None of these are your diagnostic; take them in any order, and repeat any of them.</p>
     <div class="menu-grid" id="pt-test-list"></div>
-    <a href="#" class="menu-back-link" id="pt-list-back">&larr; Back to SAT Resources</a>
+    <a href="#" class="menu-back-link" id="pt-list-back">&larr; Back</a>
   </div>
 </div>
 
@@ -1690,6 +1869,53 @@
         if (daysSinceGranted < RESOURCES_LOCK_DAYS) resCard.style.display = 'none';
       }
     }
+
+    // The home screen's Practice Tests card is a shortcut into a corner of
+    // SAT Resources, so it follows SAT Resources' visibility exactly —
+    // every gate above (not test prep, diagnostic not done yet, still
+    // inside the new-key lock window) applies to it unchanged. Practice
+    // tests are SAT-format only, so an ACT-only student never sees it.
+    var ptCard = document.getElementById('menu-card-practice-tests');
+    if (ptCard) ptCard.style.display = (resCard && resCard.style.display === 'none') || !showSat ? 'none' : '';
+  }
+
+  /* Fills in the two test cards' badges and body copy from what the
+     student has actually done. The whole point is that a student who has
+     already finished their diagnostic can tell at a glance that it's done
+     and that the numbered practice tests are the thing to take next —
+     that mix-up is what had students re-taking the diagnostic. */
+  function applyTestCardStates() {
+    var diagBadge = document.getElementById('diag-card-badge');
+    var diagBody = document.getElementById('diag-card-body');
+    var diagDone = !!(currentStudent && (currentStudent.satTaken || currentStudent.actTaken));
+    if (diagBadge) {
+      diagBadge.style.display = '';
+      diagBadge.className = 'menu-card-badge ' + (diagDone ? 'badge-done' : 'badge-todo');
+      diagBadge.textContent = diagDone ? 'Completed' : 'Start here';
+    }
+    if (diagBody) {
+      diagBody.innerHTML = diagDone
+        ? 'Done &mdash; Luca has your results. Looking for a full test to take now? Use <strong>Practice Tests</strong> below.'
+        : 'Your starting point &mdash; it\'s how Luca sees where you are and builds your plan around real data.';
+    }
+
+    var tests = window.SAT_PRACTICE_TESTS || [];
+    var countEls = [document.getElementById('pt-card-count'), document.getElementById('pt-res-card-count')];
+    countEls.forEach(function (el) { if (el && tests.length) el.textContent = tests.length; });
+
+    var ptBadge = document.getElementById('pt-card-badge');
+    var ptBody = document.getElementById('pt-card-body');
+    var doneIds = practiceTestResultsById();
+    var doneCount = tests.filter(function (t) { return !!doneIds[t.id]; }).length;
+    if (ptBadge) {
+      ptBadge.style.display = '';
+      ptBadge.className = 'menu-card-badge' + (doneCount ? ' badge-done' : '');
+      ptBadge.textContent = doneCount ? doneCount + ' of ' + tests.length + ' done' : 'Take anytime';
+    }
+    if (ptBody) {
+      ptBody.innerHTML = 'Full, timed practice tests, numbered 1&ndash;' + (tests.length || 11) +
+        '. If Luca asked you to take &ldquo;Practice Test 3,&rdquo; it&rsquo;s in here &mdash; not in the diagnostic.';
+    }
   }
   // Hides whichever of the SAT/ACT buttons doesn't apply to this student —
   // an ACT-only student never sees an SAT button to accidentally click.
@@ -1719,6 +1945,13 @@
   // test?" screen entirely and go straight in — an ACT-only student
   // should never even see an SAT option to choose from.
   function goToTestChoice() {
+    // Entering the DIAGNOSTIC flow, so drop any practice test that was
+    // selected earlier in this session. Without this, a student who
+    // opened a practice test, backed out to the menu, then clicked their
+    // diagnostic silently got the practice test again — practiceTestId
+    // outlived the screen that set it, and every downstream label reads
+    // from it. Same class of wrong-test confusion this whole pass is about.
+    practiceTestId = null;
     var showSat = !!(currentStudent && currentStudent.showSat);
     var showAct = !!(currentStudent && currentStudent.showAct);
     if (showSat && !showAct) { startTest('SAT'); return; }
@@ -1728,7 +1961,7 @@
   function show(id) {
     activeScreenId = id;
     Object.keys(screens).forEach(function (k) { screens[k].classList.toggle('active', k === id); });
-    if (id === 'screen-menu') { applyTestPrepGating(); renderScoreProgress(); }
+    if (id === 'screen-menu') { applyTestPrepGating(); applyTestCardStates(); renderScoreProgress(); }
     if (id === 'screen-test-choice') applyTestChoiceGating();
     if (id === 'screen-sat-resources') applyResourcesGating();
     window.scrollTo(0, 0);
@@ -1875,6 +2108,8 @@
     assignCard.style.display = '';
     assignList.innerHTML = '';
     items.forEach(function (item) {
+      var wrap = document.createElement('div');
+      wrap.className = 'assign-row';
       var row = document.createElement('label');
       row.className = 'assign-item' + (item.done ? ' assign-done' : '');
       var cb = document.createElement('input');
@@ -1886,12 +2121,69 @@
       span.textContent = item.task;
       row.appendChild(cb);
       row.appendChild(span);
+      wrap.appendChild(row);
       if (!item.done) {
         cb.addEventListener('change', function () { completeAssignment(item, row, cb); });
+        var go = assignmentShortcut(item.task);
+        // Kept OUTSIDE the <label> on purpose: a link inside it would put
+        // the "go there" tap inside the checkbox's own hit area, and a
+        // student heading off to take a test would silently tick the task
+        // off as done on the way out.
+        if (go) wrap.appendChild(go);
       }
-      assignList.appendChild(row);
+      assignList.appendChild(wrap);
     });
   }
+  /* Turns "Take practice test 3" (however Luca phrases it in the sheet)
+     into a button that lands the student on that exact card. This is the
+     direct fix for "I told them to take Practice Test 1 and they couldn't
+     find it": the instruction and the way there are now the same thing.
+     Returns null when a task doesn't name a test, which is most of them. */
+  function assignmentShortcut(task) {
+    var text = String(task || '');
+    var link = document.createElement('a');
+    link.className = 'assign-go';
+    link.href = '#';
+    // Matches how a task actually gets typed into the sheet: "Practice
+    // Test 3", "practice test #3", "PT3", "pt 3" — any case, any spacing.
+    // Not matched (on purpose): a bare "Test 3", which is just as likely
+    // to be a school test as one of these.
+    var ptMatch = /(?:practice\s*test|\bpt)\s*#?\s*(\d+)/i.exec(text);
+    if (ptMatch) {
+      var num = ptMatch[1];
+      // Only offer it if a test with that number actually exists — a
+      // shortcut to a test that isn't there is worse than no shortcut.
+      var exists = (window.SAT_PRACTICE_TESTS || []).some(function (t) { return practiceTestNumber(t) === num; });
+      if (!exists) return null;
+      link.textContent = 'Take Test ' + num + ' →';
+      link.addEventListener('click', function (e) {
+        e.preventDefault();
+        ptListReturnScreen = 'screen-menu';
+        goToPracticeTests(num);
+      });
+      return link;
+    }
+    // Much stricter than the practice-test case above, and deliberately
+    // so. That one lands on a picker; this one opens the diagnostic flow,
+    // which is the exact thing students were starting by mistake. So it
+    // needs an explicit take-verb ("go over the diagnostic results"
+    // must NOT offer to start it), and it's suppressed entirely once the
+    // diagnostic is already on file — at that point nobody should be
+    // handed a one-click path back into it.
+    var diagDone = !!(currentStudent && (currentStudent.satTaken || currentStudent.actTaken));
+    if (!diagDone && /\b(take|start|begin|do)\b[^.!?]{0,24}\bdiagnostic\b/i.test(text)) {
+      link.textContent = 'Go to diagnostic →';
+      link.addEventListener('click', function (e) {
+        e.preventDefault();
+        var snap = getResumeSnapshot();
+        if (snap) { pendingResumeSnapshot = snap; resumeOverlay.classList.add('active'); }
+        else { goToTestChoice(); }
+      });
+      return link;
+    }
+    return null;
+  }
+
   // Fetches the current true list from the backend and re-renders. Called
   // on login, on every restore, and on a slow poll — never assumed to
   // already be correct from an earlier snapshot.
@@ -1981,7 +2273,11 @@
   }
 
   function buildScoreLineSvg(entries, scaleMin, scaleMax) {
-    var W = 560, H = 190, padL = 40, padR = 16, padT = 18, padB = 30;
+    // Sized so one viewBox unit ≈ one CSS pixel in the top-right sidebar
+    // the card now lives in (~258px of usable width). That 1:1 scale is the
+    // whole point: the font-size values below then render at their face
+    // value instead of being shrunk to 6-7px by a wider viewBox.
+    var W = 260, H = 172, padL = 32, padR = 12, padT = 16, padB = 24;
     var innerW = W - padL - padR, innerH = H - padT - padB;
     var n = entries.length;
     function xAt(i) { return n <= 1 ? padL + innerW / 2 : padL + (innerW * i / (n - 1)); }
@@ -1995,7 +2291,7 @@
       var val = scaleMin + (scaleMax - scaleMin) * t / ticks;
       var y = yAt(val);
       gridSvg += '<line x1="' + padL + '" y1="' + y + '" x2="' + (W - padR) + '" y2="' + y + '" stroke="currentColor" stroke-width="0.5" opacity="0.15"/>';
-      gridSvg += '<text x="' + (padL - 8) + '" y="' + (y + 3) + '" font-size="9" text-anchor="end" fill="currentColor" opacity="0.6">' + Math.round(val) + '</text>';
+      gridSvg += '<text x="' + (padL - 6) + '" y="' + (y + 3.5) + '" font-size="10" text-anchor="end" fill="currentColor" opacity="0.62">' + Math.round(val) + '</text>';
     }
     var pts = entries.map(function (e, i) { return xAt(i) + ',' + yAt(e.composite); }).join(' ');
     var dotsSvg = '', labelsSvg = '';
@@ -2008,15 +2304,113 @@
       // a gridline's height.
       var anchor = i === 0 ? 'start' : (i === n - 1 ? 'end' : 'middle');
       var labelX = i === 0 ? x + 4 : (i === n - 1 ? x - 4 : x);
-      dotsSvg += '<circle cx="' + x + '" cy="' + y + '" r="3.5" fill="var(--red)"/>';
-      labelsSvg += '<text x="' + labelX + '" y="' + Math.max(10, y - 9) + '" font-size="9" text-anchor="' + anchor + '" fill="currentColor" font-weight="700">' + e.composite + '</text>';
-      labelsSvg += '<text x="' + x + '" y="' + (H - 6) + '" font-size="8" text-anchor="middle" fill="currentColor" opacity="0.6">' + scoreEntryShortLabel(e) + '</text>';
+      dotsSvg += '<circle class="spc-dot" cx="' + x + '" cy="' + y + '" r="3.5" fill="var(--red)"/>';
+      // Invisible, generously sized hover target over each point — a 3.5px
+      // dot in a chart this narrow is almost impossible to hit with a mouse.
+      dotsSvg += '<circle class="spc-hit" cx="' + x + '" cy="' + y + '" r="12" fill="transparent" data-i="' + i + '" tabindex="0"/>';
+      // Only the newest point keeps a printed value. With up to 12 points
+      // across 320 units, labelling them all turned into overlapping mush —
+      // the hover tooltip carries the rest now.
+      if (i === n - 1) {
+        labelsSvg += '<text x="' + labelX + '" y="' + Math.max(11, y - 9) + '" font-size="12" text-anchor="' + anchor + '" fill="currentColor" font-weight="700">' + e.composite + '</text>';
+      }
+      // Same crowding problem on the x-axis: past 6 points, label every other.
+      if (n <= 6 || i % 2 === 0 || i === n - 1) {
+        labelsSvg += '<text x="' + x + '" y="' + (H - 6) + '" font-size="9" text-anchor="middle" fill="currentColor" opacity="0.6">' + scoreEntryShortLabel(e) + '</text>';
+      }
     });
     return '<svg viewBox="0 0 ' + W + ' ' + H + '" style="color:var(--text); width:100%; height:auto; display:block;" preserveAspectRatio="xMidYMid meet">' +
       gridSvg +
       '<polyline points="' + pts + '" fill="none" stroke="var(--red)" stroke-width="2"/>' +
       dotsSvg + labelsSvg +
       '</svg>';
+  }
+
+  /* ═══ SCORE PROGRESS TOOLTIP ═══
+     Hovering (or tapping, or tabbing to) a point shows what that attempt
+     actually was: which test, the composite, and the weakest skill area on
+     it — the "so what do I do about it" half that a bare score line can't
+     carry. The weakest area comes from weakestDomain() at the moment the
+     attempt was scored; attempts recorded before that existed simply have
+     no `weakest` field, and the tooltip drops that line rather than
+     guessing retroactively. */
+  var spcChartEntries = {}; // chart index -> the entries array it was drawn from
+  var spcTip = null;
+
+  function spcTipEl() {
+    if (spcTip && spcTip.isConnected) return spcTip;
+    spcTip = document.createElement('div');
+    spcTip.className = 'spc-tip';
+    spcTip.setAttribute('role', 'tooltip');
+    scoreProgressCard.appendChild(spcTip);
+    return spcTip;
+  }
+
+  function spcEntryTitle(e) {
+    var t = String(e.testTitle || '').replace(/^SAT\s+/i, '').replace(/\s+[—–-]\s+.*$/, '');
+    return t || (e.source === 'practice-test' ? 'Practice test' : 'Diagnostic');
+  }
+
+  function showSpcTip(hit) {
+    var wrap = hit.closest('.spc-chart-wrap');
+    if (!wrap) return;
+    var entries = spcChartEntries[wrap.getAttribute('data-chart')];
+    var e = entries && entries[Number(hit.getAttribute('data-i'))];
+    if (!e) return;
+    var tip = spcTipEl();
+    tip.textContent = '';
+    function line(cls, text) {
+      var d = document.createElement('div');
+      d.className = cls;
+      d.textContent = text; // domain labels come from our own bank, but keep it text-only regardless
+      tip.appendChild(d);
+    }
+    line('spc-tip-hed', spcEntryTitle(e));
+    line('spc-tip-score', String(e.composite) + (e.date ? ' · ' + shortDate(e.date) : ''));
+    if (e.weakest && e.weakest.label) {
+      line('spc-tip-weak', 'Weakest: ' + e.weakest.label + ' (' + e.weakest.correct + '/' + e.weakest.total + ')');
+    } else {
+      line('spc-tip-weak spc-tip-muted', 'No skill breakdown saved for this one.');
+    }
+    // Position above the point, in the card's own coordinate space, then
+    // clamp so a point near either edge doesn't push the tooltip outside.
+    tip.style.visibility = 'hidden';
+    tip.style.display = 'block';
+    var cardRect = scoreProgressCard.getBoundingClientRect();
+    var hitRect = hit.getBoundingClientRect();
+    var tipRect = tip.getBoundingClientRect();
+    var left = (hitRect.left + hitRect.width / 2) - cardRect.left - tipRect.width / 2;
+    left = Math.max(6, Math.min(left, cardRect.width - tipRect.width - 6));
+    var top = hitRect.top - cardRect.top - tipRect.height - 4;
+    if (top < 2) top = (hitRect.bottom - cardRect.top) + 4; // flip below when there's no room above
+    tip.style.left = Math.round(left) + 'px';
+    tip.style.top = Math.round(top) + 'px';
+    tip.style.visibility = '';
+  }
+
+  function hideSpcTip() { if (spcTip) spcTip.style.display = 'none'; }
+
+  if (scoreProgressChartsEl) {
+    // Delegated, so it survives every innerHTML rebuild in renderScoreProgress.
+    scoreProgressChartsEl.addEventListener('mouseover', function (ev) {
+      var hit = ev.target.closest && ev.target.closest('.spc-hit');
+      if (hit) showSpcTip(hit);
+    });
+    scoreProgressChartsEl.addEventListener('mouseout', function (ev) {
+      var hit = ev.target.closest && ev.target.closest('.spc-hit');
+      if (hit) hideSpcTip();
+    });
+    // Touch and keyboard get the same information — on a tablet there is no
+    // hover, and the chart is the only place the weakest-area note appears.
+    scoreProgressChartsEl.addEventListener('click', function (ev) {
+      var hit = ev.target.closest && ev.target.closest('.spc-hit');
+      if (hit) showSpcTip(hit); else hideSpcTip();
+    });
+    scoreProgressChartsEl.addEventListener('focusin', function (ev) {
+      var hit = ev.target.closest && ev.target.closest('.spc-hit');
+      if (hit) showSpcTip(hit);
+    });
+    scoreProgressChartsEl.addEventListener('focusout', hideSpcTip);
   }
 
   function renderScoreProgress() {
@@ -2032,14 +2426,18 @@
     var satShown = allSat.slice(-SCORE_PROGRESS_MAX_POINTS);
     var actShown = allAct.slice(-SCORE_PROGRESS_MAX_POINTS);
     var html = '';
-    if (satShown.length >= 2) {
-      html += '<div class="spc-chart-hed">SAT Composite (400–1600)</div>' + buildScoreLineSvg(satShown, 400, 1600);
-      if (satShown.length < allSat.length) html += '<div class="spc-note">Showing your last ' + satShown.length + ' SAT attempts.</div>';
+    hideSpcTip();
+    spcChartEntries = {};
+    var chartIndex = 0;
+    function addChart(hed, shown, min, max, totalCount, typeLabel) {
+      spcChartEntries[chartIndex] = shown;
+      html += '<div class="spc-chart-hed">' + hed + '</div>' +
+        '<div class="spc-chart-wrap" data-chart="' + chartIndex + '">' + buildScoreLineSvg(shown, min, max) + '</div>';
+      if (shown.length < totalCount) html += '<div class="spc-note">Showing your last ' + shown.length + ' ' + typeLabel + ' attempts.</div>';
+      chartIndex++;
     }
-    if (actShown.length >= 2) {
-      html += '<div class="spc-chart-hed">ACT Composite (1–36)</div>' + buildScoreLineSvg(actShown, 1, 36);
-      if (actShown.length < allAct.length) html += '<div class="spc-note">Showing your last ' + actShown.length + ' ACT attempts.</div>';
-    }
+    if (satShown.length >= 2) addChart('SAT Composite (400–1600)', satShown, 400, 1600, allSat.length, 'SAT');
+    if (actShown.length >= 2) addChart('ACT Composite (1–36)', actShown, 1, 36, allAct.length, 'ACT');
     scoreProgressChartsEl.innerHTML = html;
     scoreProgressCard.style.display = '';
   }
@@ -2364,23 +2762,75 @@
       else if (route === 'sat-resources') { show('screen-sat-resources'); }
       else if (route === 'vocab') { show('screen-vocab'); if (window.vocabModuleInit) window.vocabModuleInit(); }
       else if (route === 'practice-bank') { show('screen-practice-bank'); if (window.pbModuleInit) window.pbModuleInit(); }
-      else if (route === 'practice-tests') { renderPracticeTestList(); show('screen-practice-tests'); }
+      else if (route === 'practice-tests') {
+        // Reachable from two places now (home screen and SAT Resources) —
+        // remember which, so "Back" returns where the student came from
+        // instead of always dumping them in SAT Resources.
+        ptListReturnScreen = card.closest('#screen-sat-resources') ? 'screen-sat-resources' : 'screen-menu';
+        renderPracticeTestList();
+        show('screen-practice-tests');
+      }
       else if (route === 'incorrect-questions') { show('screen-incorrect-questions'); if (window.iqModuleInit) window.iqModuleInit(); }
     });
   });
   document.getElementById('sat-resources-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-menu'); });
   document.getElementById('vocab-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-sat-resources'); });
   document.getElementById('practice-bank-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-sat-resources'); });
-  document.getElementById('pt-list-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-sat-resources'); });
+  var ptListReturnScreen = 'screen-menu';
+  document.getElementById('pt-list-back').addEventListener('click', function (e) { e.preventDefault(); show(ptListReturnScreen); });
   document.getElementById('incorrect-questions-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-sat-resources'); });
 
-  /* ═══ PRACTICE TESTS — PICKER ═══
-     Cards built straight from window.SAT_PRACTICE_TESTS (see
-     practice-tests.js) so a new test just needs to be added to that array —
-     no code change needed here. Clicking a card kicks off startPracticeTest()
-     (defined further down, alongside the rest of the adaptive-module
-     engine), which reuses the exact same Module 1/Module 2 flow as the real
-     SAT diagnostic. */
+  /* ═══ PRACTICE TESTS — NAMING, COMPLETION STATE, PICKER ═══
+
+     Students kept confusing "Practice Test N" with the diagnostic, and
+     couldn't find the numbered test Luca named out loud. Three things fix
+     that, and they all key off the SAME number:
+
+       - practiceTestNumber() pulls N straight out of the test's id
+         ('sat-practice-3' -> 3), which is what Luca says out loud, what
+         the card shows in a big numeral, and what an assignment like
+         "take practice test 3" gets matched against.
+       - practiceTestResultsById() marks the ones already done (and with
+         what score) so a student never re-takes one by accident, the way
+         they were re-taking the diagnostic.
+       - Everything says "practice test" or "diagnostic" explicitly; no
+         card describes itself in terms of the other one anymore.
+
+     Cards are still built straight from window.SAT_PRACTICE_TESTS (see
+     practice-tests.js), so adding a test needs no code change here. */
+  function practiceTestNumber(test) {
+    var m = /(\d+)\s*$/.exec(String((test && test.id) || ''));
+    return m ? m[1] : null;
+  }
+  // "SAT Practice Test 11 — Hardest Full-Length Test (No Scaling)" splits
+  // into the plain "Practice Test 11" students are told to take, plus the
+  // descriptive tail as a separate note — so the numbered name is never
+  // buried inside a longer string.
+  function practiceTestNameParts(test) {
+    var num = practiceTestNumber(test);
+    var raw = String((test && test.title) || '').replace(/^SAT\s+/i, '');
+    var parts = raw.split(/\s+[—–-]\s+/);
+    return { name: num ? 'Practice Test ' + num : (parts[0] || raw), note: parts.slice(1).join(' — ') };
+  }
+  // testId -> most recent completed attempt, read from the same local
+  // score history that feeds the dashboard's Score Progress chart. Local
+  // to this browser, like every other progress tool in the portal — a
+  // student on a new device sees these unmarked, which is why the copy
+  // says "on this device" rather than claiming it's never been taken.
+  function practiceTestResultsById() {
+    var byId = {};
+    loadScoreHistory().forEach(function (e) {
+      if (!e || e.source !== 'practice-test' || !e.testId) return;
+      var prev = byId[e.testId];
+      if (!prev || String(e.date || '') > String(prev.date || '')) byId[e.testId] = e;
+    });
+    return byId;
+  }
+  function shortDate(iso) {
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  }
   function renderPracticeTestList() {
     var list = document.getElementById('pt-test-list');
     var tests = window.SAT_PRACTICE_TESTS || [];
@@ -2388,19 +2838,58 @@
       list.innerHTML = '<p class="panel-sub">No practice tests are available yet — check back soon.</p>';
       return;
     }
+    var done = practiceTestResultsById();
     list.innerHTML = '';
     tests.forEach(function (test) {
       var mathQ = ((test.sections || {}).math || {});
       var rwQ = ((test.sections || {}).readingWriting || {});
       var totalQ = (mathQ.module1 || []).length + (mathQ.module2Easier || []).length +
         (rwQ.module1 || []).length + (rwQ.module2Easier || []).length;
+      var parts = practiceTestNameParts(test);
+      var num = practiceTestNumber(test);
+      var result = done[test.id];
       var card = document.createElement('div');
-      card.className = 'menu-card menu-card-wide';
-      card.innerHTML = '<span class="menu-card-icon">&#9201;</span><div><div class="menu-card-title">' +
-        test.title + '</div><div class="menu-card-body">Full adaptive SAT format — ' + totalQ + ' questions across Reading & Writing and Math, timed and scored just like your diagnostic.</div></div>';
+      card.className = 'menu-card menu-card-wide' + (result ? ' pt-card-done' : '');
+      card.setAttribute('data-pt-id', test.id);
+      if (num) card.setAttribute('data-pt-num', num);
+      // Same word the diagnostic card uses, on purpose — one vocabulary for
+      // "you've already taken this" everywhere in the portal. The score
+      // itself lives in the body copy just below.
+      var badge = result ? '<span class="menu-card-badge badge-done">Completed</span>' : '';
+      var body = result
+        ? 'You took this on ' + (shortDate(result.date) || 'this device') +
+          (result.composite ? ' and scored ' + result.composite : '') +
+          '. You can retake it &mdash; your new score is saved alongside the old one.'
+        : 'Full adaptive SAT format &mdash; ' + totalQ + ' questions across Reading &amp; Writing and Math, timed like the real test.';
+      // Two descriptions of the same thing: a one-line meta for the compact
+      // tile grid (which has to fit 11 tests in one screen) and the full
+      // sentence for the stacked layout on narrow windows. CSS picks one.
+      var meta = result
+        ? (result.composite ? 'Scored ' + result.composite : 'Taken') + (shortDate(result.date) ? ' &middot; ' + shortDate(result.date) : '')
+        : totalQ + ' questions &middot; timed';
+      card.innerHTML = badge +
+        '<span class="' + (num ? 'pt-num' : 'menu-card-icon') + '">' + (num || '&#9201;') + '</span>' +
+        '<div class="pt-card-text"><div class="menu-card-title">' + parts.name + '</div>' +
+        (parts.note ? '<div class="pt-note">' + parts.note + '</div>' : '') +
+        '<div class="pt-meta">' + meta + '</div>' +
+        '<div class="menu-card-body pt-body-long">' + body + '</div></div>';
       card.addEventListener('click', function () { startPracticeTest(test.id); });
       list.appendChild(card);
     });
+  }
+  // Sends a student straight to the picker with one test called out —
+  // used by the "Take me there" shortcut on an assignment that names a
+  // numbered test. Deliberately stops at the picker instead of launching
+  // the test: starting a full timed test should always be a decision the
+  // student makes on purpose, not a side effect of tapping a to-do row.
+  function goToPracticeTests(highlightNum) {
+    renderPracticeTestList();
+    show('screen-practice-tests');
+    if (!highlightNum) return;
+    var card = document.querySelector('#pt-test-list .menu-card[data-pt-num="' + highlightNum + '"]');
+    if (!card) return;
+    card.classList.add('pt-highlight');
+    if (card.scrollIntoView) card.scrollIntoView({ block: 'center', behavior: 'smooth' });
   }
   document.getElementById('resume-yes').addEventListener('click', function () {
     resumeOverlay.classList.remove('active');
@@ -3046,20 +3535,46 @@
 
   function showTestOverview() {
     var pt = activePracticeTest();
-    document.getElementById('overview-kicker').textContent = pt ? pt.title : (testChoice + ' Diagnostic');
+    document.getElementById('overview-kicker').textContent = pt ? practiceTestNameParts(pt).name : (testChoice + ' Diagnostic');
     document.getElementById('overview-sub').textContent = pt
-      ? 'A full, timed, adaptive practice test in the same Module 1 / Module 2 format as the real digital SAT. Read this over, then begin when you\'re ready.'
+      ? 'This is ' + practiceTestNameParts(pt).name + ' — a full, timed, adaptive practice test in the same Module 1 / Module 2 format as the real digital SAT. Read this over, then begin when you\'re ready.'
       : 'The sections, order, and timing below match the real test exactly. Read this over, then begin when you\'re ready.';
 
     var retakeEl = document.getElementById('overview-retake-notice');
     if (!pt && alreadyTakenThisTestType()) {
+      // Students land here by mistake — they're told "take practice test 1",
+      // click the only card that looks like a test, and end up re-taking the
+      // diagnostic. So this says plainly what they're about to start, and
+      // offers the numbered practice tests as a one-click alternative
+      // rather than making them find their own way back.
       retakeEl.style.display = 'block';
-      retakeEl.textContent = 'Heads up — you\'ve already completed a real ' + testChoice + ' diagnostic on this key. ' +
-        'This attempt is for your own practice: you\'ll still get your results at the end, but Luca won\'t be notified this time.';
+      retakeEl.innerHTML = '<strong>This is your ' + testChoice + ' diagnostic, and you\'ve already taken it.</strong> ' +
+        'You can redo it for practice — you\'ll get your results, but Luca won\'t be notified this time.<br>' +
+        'Were you asked to take a numbered <strong>practice test</strong> instead? ' +
+        '<a href="#" id="overview-goto-pt">Go to Practice Tests &rarr;</a>';
     } else {
       retakeEl.style.display = 'none';
-      retakeEl.textContent = '';
+      retakeEl.innerHTML = '';
     }
+
+    // Delegated so it survives the innerHTML rewrite above on every visit.
+    if (!retakeEl.dataset.ptLinkBound) {
+      retakeEl.dataset.ptLinkBound = '1';
+      retakeEl.addEventListener('click', function (e) {
+        var link = e.target.closest && e.target.closest('#overview-goto-pt');
+        if (!link) return;
+        e.preventDefault();
+        practiceTestId = null; // abandon the diagnostic attempt they didn't mean to start
+        ptListReturnScreen = 'screen-menu';
+        goToPracticeTests(null);
+      });
+    }
+
+    // Was hardcoded to "Begin Diagnostic" — so the last thing a student
+    // saw before starting Practice Test 3 was the word "Diagnostic".
+    document.getElementById('overview-start').textContent = pt
+      ? ('Begin ' + practiceTestNameParts(pt).name)
+      : ('Begin ' + testChoice + ' Diagnostic');
 
     renderOverviewTiming();
 
@@ -3138,7 +3653,10 @@
     });
   })();
 
-  document.getElementById('overview-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-menu'); });
+  // Backing out of the overview abandons whichever test it was describing —
+  // clear the selection so the next thing the student opens is the thing
+  // they actually clicked (see the note in goToTestChoice()).
+  document.getElementById('overview-back').addEventListener('click', function (e) { e.preventDefault(); practiceTestId = null; show('screen-menu'); });
   document.getElementById('overview-start').addEventListener('click', function () { startSection(0); });
 
   // Begins Module 1 of section `index` — fresh module state every time,
@@ -3234,7 +3752,11 @@
     document.getElementById('dx-reference-btn').style.display = hasReference ? '' : 'none';
     document.getElementById('intro-hed').textContent = sectionLabel + moduleLabelSuffix + ' — ' + qs.length + ' question' + (qs.length === 1 ? '' : 's') + (timeLimit ? ' — ' + timeLimit + ' minutes.' : '.');
     document.getElementById('dx-brand-label').textContent = testLabel + ' — ' + sectionLabel + moduleLabelSuffix;
-    document.getElementById('dx-notice-text').textContent = pt ? ('THIS IS A TIMED, SCORED PRACTICE TEST') : ('THIS IS A ' + testChoice + ' DIAGNOSTIC');
+    // Naming the exact test in the banner lets a student confirm mid-test
+    // that they're in the one they were told to take.
+    document.getElementById('dx-notice-text').textContent = pt
+      ? ('THIS IS ' + practiceTestNameParts(pt).name.toUpperCase() + ' — TIMED AND SCORED')
+      : ('THIS IS YOUR ' + testChoice + ' DIAGNOSTIC — NOT A PRACTICE TEST');
     document.getElementById('intro-start').textContent = hasTwoModules ? 'Start This Module' : 'Start This Section';
     show('screen-intro');
   }
@@ -3751,6 +4273,32 @@
      append-only — every finished attempt is its own point on the chart,
      nothing is ever removed, since the whole point is showing the trend
      across every diagnostic AND practice test attempt over time. */
+  /* The single weakest skill area on one attempt, stored alongside that
+     attempt's composite so the Score Progress chart can show "what was
+     dragging this score down" on hover — a number on its own doesn't tell
+     a student what to do next.
+
+     Domains with only a question or two are skipped: going 0/1 on a
+     domain isn't evidence of a weakness, it's noise, and it would
+     otherwise win the "lowest percentage" contest every time. Ties break
+     toward the domain with more questions behind it, for the same reason.
+     Returns null when nothing clears the bar (a very short section, say),
+     and the tooltip then just shows the score. */
+  function weakestDomain(domains) {
+    var MIN_QUESTIONS = 3;
+    var best = null;
+    Object.keys(domains || {}).forEach(function (name) {
+      var d = domains[name];
+      if (!d || d.total < MIN_QUESTIONS) return;
+      var pct = d.correct / d.total;
+      if (!best || pct < best.pct || (pct === best.pct && d.total > best.total)) {
+        best = { label: name, correct: d.correct, total: d.total, pct: pct };
+      }
+    });
+    if (!best) return null;
+    return { label: best.label, correct: best.correct, total: best.total };
+  }
+
   function recordScoreHistory(entry) {
     try {
       var studentKey = currentStudent && currentStudent.key;
@@ -3895,7 +4443,8 @@
         source: ptDoneEarly ? 'practice-test' : 'diagnostic',
         testId: ptDoneEarly ? ptDoneEarly.id : null,
         testTitle: ptDoneEarly ? ptDoneEarly.title : (testChoice + ' Diagnostic'),
-        composite: composite, scaleMin: scaleMin, scaleMax: scaleMax
+        composite: composite, scaleMin: scaleMin, scaleMax: scaleMax,
+        weakest: weakestDomain(domains)
       });
     })();
 
@@ -4121,7 +4670,9 @@
         var moduleLabelSuffix = sectionHasModules(secKey) ? (' — ' + (moduleStage === 'module1' ? 'Module 1' : 'Module 2')) : '';
         var ptResumed = activePracticeTest();
         document.getElementById('dx-brand-label').textContent = (ptResumed ? ptResumed.title : (testChoice + ' Diagnostic')) + ' — ' + bank.label + moduleLabelSuffix;
-        document.getElementById('dx-notice-text').textContent = ptResumed ? 'THIS IS A TIMED, SCORED PRACTICE TEST' : ('THIS IS A ' + testChoice + ' DIAGNOSTIC');
+        document.getElementById('dx-notice-text').textContent = ptResumed
+          ? ('THIS IS ' + practiceTestNameParts(ptResumed).name.toUpperCase() + ' — TIMED AND SCORED')
+          : ('THIS IS YOUR ' + testChoice + ' DIAGNOSTIC — NOT A PRACTICE TEST');
         buildSidebar();
         beginQuestionTime(current); // resume the clock for whichever question we're restored to
         renderQuestion();
