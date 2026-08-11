@@ -342,8 +342,9 @@
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
     .form-field { margin-bottom: 1.4rem; }
     .form-label { display: block; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text); margin-bottom: 0.5rem; }
-    .form-input, .form-select { width: 100%; border: 1px solid #ccc; background: var(--white); font-family: var(--hel); font-size: 0.82rem; color: var(--text); padding: 0.6rem 0.75rem; outline: none; transition: border-color 0.2s; border-radius: 0; -webkit-appearance: none; appearance: none; }
-    .form-input:focus, .form-select:focus { border-color: var(--red); }
+    .form-input, .form-select, .form-textarea { width: 100%; border: 1px solid #ccc; background: var(--white); font-family: var(--hel); font-size: 0.82rem; color: var(--text); padding: 0.6rem 0.75rem; outline: none; transition: border-color 0.2s; border-radius: 0; -webkit-appearance: none; appearance: none; }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--red); }
+    .form-textarea { min-height: 96px; line-height: 1.6; resize: vertical; }
     .form-select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23555'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.75rem center; padding-right: 2rem; }
     .form-radio-group { display: flex; gap: 1.5rem; }
     .form-radio { display: flex; align-items: center; gap: 0.5rem; font-size: 0.82rem; color: var(--text); cursor: pointer; }
@@ -696,6 +697,22 @@
                 <option value="12th">12th</option>
               </select>
             </div>
+            <div class="form-field">
+              <label class="form-label" for="rf-topic">What do you need help with?</label>
+              <select class="form-select" id="rf-topic" name="topic" required>
+                <option value="">Select a topic</option>
+                <option value="SAT / ACT Prep">SAT / ACT Prep</option>
+                <option value="Mathematics">Mathematics</option>
+                <option value="English">English</option>
+                <option value="AP &amp; IB Exams">AP &amp; IB Exams</option>
+                <option value="College Essays &amp; Applications">College Essays &amp; Applications</option>
+                <option value="Something else / Not sure yet">Something else / Not sure yet</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="rf-message">Your Message <span style="font-weight:400; letter-spacing:0.04em; text-transform:none; color:var(--faint);">(optional)</span></label>
+              <textarea class="form-textarea" id="rf-message" name="message" rows="4" placeholder="Tell us about your student — current scores, goals, timeline, or anything else we should know."></textarea>
+            </div>
             <button type="submit" class="btn-submit" id="rf-submit">Reserve My Seat</button>
             <p class="form-note" id="rf-note">We'll get back to you within 24 hours.</p>
             <p id="rf-success" style="display:none; font-size:0.78rem; color:var(--gold); margin-top:0.75rem; line-height:1.65;">Thanks — check your email for confirmation. We'll follow up personally within 24 hours.</p>
@@ -726,6 +743,22 @@
 (function () {
   'use strict';
   var nav = document.getElementById('main-nav');
+
+  /* Arriving from another page's "Reserve Your Seat" link (index.html#reserve).
+     The browser's own anchor jump happens during parse, before the tall
+     vh-sized hero/explore sections have finished sizing — so it lands in the
+     wrong place, and the ticker duplication below moves things again. Redo
+     the jump once everything has settled, instantly (the page sets
+     scroll-behavior: smooth, which would otherwise animate a 6000px scroll). */
+  if (window.location.hash === '#reserve') {
+    window.addEventListener('load', function () {
+      setTimeout(function () {
+        var target = document.getElementById('reserve');
+        if (!target) return;
+        window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY, behavior: 'instant' });
+      }, 80);
+    });
+  }
 
   /* Duplicate ticker content so the -50% loop is perfectly seamless */
   ['hero-ticker-track', 'disc-ticker-track'].forEach(function (id) {
@@ -879,12 +912,15 @@
       var isUSA = (reserveForm.querySelector('input[name="isUSA"]:checked') || {}).value || '';
       var role  = (reserveForm.querySelector('input[name="role"]:checked') || {}).value || '';
       var grade = document.getElementById('rf-grade').value;
-      if (!name || !phone || !email || !isUSA || !role || !grade) { alert('Please fill in every field.'); return; }
+      var topic = document.getElementById('rf-topic').value;
+      // Message is the one optional field — everything else is required.
+      var message = document.getElementById('rf-message').value.trim();
+      if (!name || !phone || !email || !isUSA || !role || !grade || !topic) { alert('Please fill in every field.'); return; }
       var btn = document.getElementById('rf-submit');
       btn.disabled = true; btn.textContent = 'Sending…';
       fetch(LEAD_BACKEND_URL, {
         method: 'POST',
-        body: JSON.stringify({ action: 'submitLead', name: name, phone: phone, email: email, isUSA: isUSA, role: role, grade: grade })
+        body: JSON.stringify({ action: 'submitLead', name: name, phone: phone, email: email, isUSA: isUSA, role: role, grade: grade, topic: topic, message: message })
       }).then(function (res) { return res.json(); })
         .then(function (data) {
           if (!data || !data.ok) throw new Error('submit_failed');

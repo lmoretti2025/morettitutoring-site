@@ -121,7 +121,7 @@ function doPost(e) {
     } else if (body.action === 'submitPracticeTest') {
       out = handleSubmitPracticeTest(body.key, body.test, body.score, body.reportLink, body.report);
     } else if (body.action === 'submitLead') {
-      out = handleSubmitLead(body.name, body.phone, body.email, body.isUSA, body.role, body.grade);
+      out = handleSubmitLead(body.name, body.phone, body.email, body.isUSA, body.role, body.grade, body.topic, body.message);
     } else if (body.action === 'syncProgress') {
       out = handleSyncProgress(body.key, body.incorrect, body.skills);
     } else if (body.action === 'getProgress') {
@@ -1151,11 +1151,12 @@ function setupTrigger() {
    function dropdown (authorize when asked) to turn on the daily send.
    ========================================================================= */
 // Columns grew from 10 to 12 when the site's lead form switched to the
-// "reserve a seat" fields (IsUSA, Role) — Town/Subject/Message stay as
-// columns (older rows still have data in them) but no longer get written
-// to by new submissions. Appending the two new headers, rather than
-// rewriting the row, keeps an already-live sheet's existing columns/data
-// untouched.
+// "reserve a seat" fields (IsUSA, Role). Town is the only column that's
+// now write-only history (older rows still have data in it); Subject and
+// Message came back into use when the reserve form regained a topic
+// dropdown and a message box — Subject holds the chosen topic. Appending
+// missing headers, rather than rewriting the row, keeps an already-live
+// sheet's existing columns/data untouched.
 function getLeadsSheet_() {
   var ss = SpreadsheetApp.openById(SHEET_ID);
   var sheet = ss.getSheetByName('Leads');
@@ -1165,7 +1166,7 @@ function getLeadsSheet_() {
     return sheet;
   }
   var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
-  ['IsUSA', 'Role'].forEach(function (col) {
+  ['IsUSA', 'Role', 'Subject', 'Message'].forEach(function (col) {
     if (headers.indexOf(col) === -1) {
       sheet.getRange(1, sheet.getLastColumn() + 1).setValue(col);
       headers.push(col);
@@ -1177,7 +1178,7 @@ function getLeadsSheet_() {
 // Builds the sheet row by header NAME rather than a fixed positional
 // array — robust to the old/new column layouts above, and to Luca ever
 // re-ordering columns by hand in the sheet itself.
-function handleSubmitLead(rawName, rawPhone, rawEmail, rawIsUSA, rawRole, rawGrade) {
+function handleSubmitLead(rawName, rawPhone, rawEmail, rawIsUSA, rawRole, rawGrade, rawTopic, rawMessage) {
   var name = String(rawName || '').trim();
   var email = String(rawEmail || '').trim();
   if (!name || !email) return { ok: false, error: 'missing_name_or_email' };
@@ -1185,6 +1186,10 @@ function handleSubmitLead(rawName, rawPhone, rawEmail, rawIsUSA, rawRole, rawGra
   var isUSA = String(rawIsUSA || '').trim();
   var role = String(rawRole || '').trim();
   var grade = String(rawGrade || '').trim();
+  var topic = String(rawTopic || '').trim();
+  // Free text, so cap it before it reaches a cell — Sheets truncates at
+  // 50k chars anyway, and nothing useful arrives past a couple thousand.
+  var message = String(rawMessage || '').trim().slice(0, 2000);
 
   var sheet = getLeadsSheet_();
   var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
@@ -1197,6 +1202,8 @@ function handleSubmitLead(rawName, rawPhone, rawEmail, rawIsUSA, rawRole, rawGra
   set('Grade', sheetSafe_(grade));
   set('IsUSA', sheetSafe_(isUSA));
   set('Role', sheetSafe_(role));
+  set('Subject', sheetSafe_(topic));
+  set('Message', sheetSafe_(message));
   // Stage/LastEmailAt left blank — sendLeadFollowUps() below picks up any
   // row whose Stage is still blank.
   sheet.appendRow(row);
@@ -1208,6 +1215,8 @@ function handleSubmitLead(rawName, rawPhone, rawEmail, rawIsUSA, rawRole, rawGra
     MailApp.sendEmail(NOTIFY_EMAIL, 'New lead — ' + name,
       'Name: ' + name + '\nRole: ' + (role || '(not given)') + '\nPhone: ' + phone + '\nEmail: ' + email +
       '\nFrom the USA: ' + (isUSA || '(not given)') + '\nGrade: ' + (grade || '(not given)') +
+      '\nLooking for: ' + (topic || '(not given)') +
+      '\n\nMessage:\n' + (message || '(none)') +
       '\n\nReply within 24 hours per the site\'s promise.');
   } catch (err) {
     console.error('Lead notify email failed for ' + email + ': ' + err);
