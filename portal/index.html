@@ -1442,6 +1442,7 @@
 <script src="banks.js"></script>
 <script src="practice-tests.js"></script>
 <script src="math-question-bank.js"></script>
+<script src="reading-question-bank.js"></script>
 <script>
 (function () {
   'use strict';
@@ -5615,6 +5616,22 @@
     (window.MATH_QUESTION_BANK || []).forEach(function (q) {
       pool.push({
         testId: 'luca-math-bank', testTitle: 'Math Question Bank', section: 'math', module: 'n/a',
+        domain: q.domain, skill: q.skill || q.domain, difficulty: q.difficulty || 'medium',
+        type: q.type, text: q.text, choices: q.choices, correct: q.correct,
+        choiceNotes: q.choiceNotes || [], answer: q.answer, explanation: q.explanation || ''
+      });
+    });
+
+    // window.READING_QUESTION_BANK (reading-question-bank.js) — same flat-
+    // pool treatment as MATH_QUESTION_BANK above, tagged section
+    // "readingWriting" (matching SAT_PRACTICE_TESTS' own key for this
+    // section, so sectionLabel() below already renders it correctly as
+    // "Reading & Writing"). Unlike the Math bank, this one is entirely
+    // officially-sourced content, not Luca's own writing — see that
+    // file's own header comment.
+    (window.READING_QUESTION_BANK || []).forEach(function (q) {
+      pool.push({
+        testId: 'reading-question-bank', testTitle: 'Reading & Writing Question Bank', section: 'readingWriting', module: 'n/a',
         domain: q.domain, skill: q.skill || q.domain, difficulty: q.difficulty || 'medium',
         type: q.type, text: q.text, choices: q.choices, correct: q.correct,
         choiceNotes: q.choiceNotes || [], answer: q.answer, explanation: q.explanation || ''
