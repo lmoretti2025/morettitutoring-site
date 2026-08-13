@@ -661,7 +661,6 @@
     #screen-practice-tests .panel-wide { max-width: 940px; display: flex; flex-direction: column; max-height: 100%; min-height: 0; }
     #screen-practice-tests .panel-hed { margin-bottom: 0.4rem; }
     #screen-practice-tests .panel-sub { font-size: 0.78rem; line-height: 1.55; margin-bottom: 1rem; }
-    #screen-practice-tests .pt-sub-detail { display: none; }
     #pt-test-list { grid-template-columns: repeat(4, 1fr); gap: 0.7rem; margin-top: 0; flex: 0 1 auto; min-height: 0; overflow-y: auto; padding: 2px; }
     #pt-test-list .menu-card-wide { grid-column: auto; flex-direction: column; align-items: flex-start; gap: 0.45rem; padding: 0.8rem 0.9rem; }
     #pt-test-list .pt-num, #pt-test-list .menu-card-icon { width: 36px; height: 36px; font-size: 1.1rem; margin-bottom: 0; }
@@ -796,11 +795,21 @@
   .vp-primary:active { transform: translateY(0); }
   .vp-primary:disabled { opacity: 0.45; cursor: default; transform: none; box-shadow: none; }
 
-  /* ═══ FILTER PILLS — used by My Incorrect Questions' section/domain/
-     skill/difficulty filters (pb- prefix is a holdover from the removed
-     Question Practice feature, which introduced this styling first). ═══ */
-  .pb-pills { display: flex; flex-wrap: wrap; gap: 0.4rem; max-height: 148px; overflow-y: auto; padding: 0.15rem; }
-  .pb-pills-skill .vp-pill { font-size: 0.74rem; padding: 0.4rem 0.8rem; }
+  /* ═══ CHECKBOX DROPDOWNS — used by My Incorrect Questions' section/
+     domain/skill/difficulty filters. A button showing a one-line summary
+     ("All" / "3 of 8 selected") that opens a checkbox panel below it. ═══ */
+  .iq-dropdown { position: relative; margin-bottom: 0.6rem; }
+  .iq-dropdown-btn { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; font-family: var(--hel); font-size: 0.82rem; font-weight: 600; color: var(--text); background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 0.65rem 0.9rem; cursor: pointer; transition: border-color 0.15s ease; text-align: left; }
+  .iq-dropdown-btn:hover { border-color: var(--mid); }
+  .iq-dropdown.open .iq-dropdown-btn { border-color: var(--red); }
+  .iq-dropdown-caret { font-size: 0.62rem; color: var(--mid); transition: transform 0.15s ease; }
+  .iq-dropdown.open .iq-dropdown-caret { transform: rotate(180deg); }
+  .iq-dropdown-panel { display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 40; max-height: 260px; overflow-y: auto; background: var(--white); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 8px 24px rgba(17,17,17,0.16); padding: 0.35rem; }
+  .iq-dropdown.open .iq-dropdown-panel { display: block; }
+  .iq-dropdown-option { display: flex; align-items: center; gap: 0.6rem; padding: 0.5rem 0.55rem; border-radius: 6px; cursor: pointer; font-family: var(--hel); font-size: 0.82rem; color: var(--text); }
+  .iq-dropdown-option:hover { background: var(--bg); }
+  .iq-dropdown-option input[type="checkbox"] { flex-shrink: 0; width: 16px; height: 16px; accent-color: var(--red); cursor: pointer; }
+  .iq-dropdown-option-all { border-bottom: 1px solid var(--border); margin-bottom: 0.25rem; padding-bottom: 0.65rem; font-weight: 700; }
   .pb-empty-note { font-size: 0.8rem; color: var(--mid); margin-top: 0.4rem; }
 
   /* pb-q-meta/pb-passage/pb-q-card/pb-q-text/pb-note(+variants)/
@@ -961,7 +970,7 @@
         <span class="menu-card-icon">&#9201;</span>
         <div>
           <div class="menu-card-title">Practice Tests 1&ndash;<span id="pt-card-count">11</span></div>
-          <div class="menu-card-body" id="pt-card-body">Full, timed practice tests you can take as many times as you want. If Luca asked you to take "Practice Test 3," it's in here.</div>
+          <div class="menu-card-body" id="pt-card-body">Full, timed practice tests you can take as many times as you want.</div>
         </div>
       </div>
       <div class="menu-card menu-card-wide" data-route="files">
@@ -1048,13 +1057,13 @@
 
     <div id="iq-filters">
       <div class="vp-panel-label">Section</div>
-      <div class="pb-pills" id="iq-section-pills"></div>
+      <div class="iq-dropdown" id="iq-section-pills"></div>
       <div class="vp-panel-label">Domain</div>
-      <div class="pb-pills" id="iq-domain-pills"></div>
+      <div class="iq-dropdown" id="iq-domain-pills"></div>
       <div class="vp-panel-label">Skill</div>
-      <div class="pb-pills pb-pills-skill" id="iq-skill-pills"></div>
+      <div class="iq-dropdown" id="iq-skill-pills"></div>
       <div class="vp-panel-label">Difficulty</div>
-      <div class="pb-pills" id="iq-difficulty-pills"></div>
+      <div class="iq-dropdown" id="iq-difficulty-pills"></div>
       <div class="vp-pool-count" id="iq-pool-count"></div>
     </div>
 
@@ -1069,7 +1078,7 @@
   <div class="panel-wide">
     <div class="kicker">Practice Tests</div>
     <h1 class="panel-hed">Pick a practice test.</h1>
-    <p class="panel-sub">These are numbered the same way Luca refers to them &mdash; if he said "take Practice Test 2," click Practice Test 2. <span class="pt-sub-detail">Each one is full-length and timed, with the same adaptive Module 1 &rarr; Module 2 routing as the real digital SAT. </span>None of these are your diagnostic; take them in any order, and repeat any of them.</p>
+    <p class="panel-sub">Fully-timed, curated tests. Note that the majority test <strong>harder</strong> than normal. After you complete it once, any subsequent attempt won't be reported to Luca.</p>
     <div class="menu-grid" id="pt-test-list"></div>
     <a href="#" class="menu-back-link" id="pt-list-back">&larr; Back</a>
   </div>
@@ -1892,8 +1901,7 @@
       ptBadge.textContent = doneCount ? doneCount + ' of ' + tests.length + ' done' : 'Take anytime';
     }
     if (ptBody) {
-      ptBody.innerHTML = 'Full, timed practice tests, numbered 1&ndash;' + (tests.length || 11) +
-        '. If Luca asked you to take &ldquo;Practice Test 3,&rdquo; it&rsquo;s in here &mdash; not in the diagnostic.';
+      ptBody.innerHTML = 'Full, timed practice tests, numbered 1&ndash;' + (tests.length || 11) + '.';
     }
   }
   // Hides whichever of the SAT/ACT buttons doesn't apply to this student —
@@ -4360,6 +4368,18 @@
     clearState(); // the diagnostic is over either way — nothing left to resume
     clearResumeSnapshot(currentStudent && currentStudent.key); // same — this attempt is done, don't offer to resume it later
 
+    // One timestamp for every question in this attempt, computed once here
+    // rather than fresh per-question inside the loop below. Sections are
+    // scored in TEST_FORMATS order (reading-writing before math for the
+    // SAT), so a per-question timestamp would give every R&W question a
+    // few milliseconds' earlier attemptedAt than every Math question from
+    // the SAME submission — and since the backend's storage-cap eviction
+    // (capIncorrectByKey_ in Code.gs) drops the OLDEST entries first when
+    // the sheet cell fills up, that made R&W misses get evicted before Math
+    // ones on every single attempt, regardless of which was actually more
+    // recent. A single shared timestamp removes that section-order bias.
+    var attemptTimestamp = new Date().toISOString();
+
     var domains = {};
     var skills = {};
     var markedTotal = 0, markedCorrect = 0, skippedCount = 0;
@@ -4424,7 +4444,7 @@
           answerValue: (q.answer !== undefined ? q.answer : null),
           explanation: q.explanation || null,
           given: (given === null || given === undefined) ? null : given,
-          attemptedAt: new Date().toISOString()
+          attemptedAt: attemptTimestamp
         });
       });
       sectionSummaryLines.push('  - ' + sec.label + ': ' + secCorrect + ' / ' + qs.length);
@@ -5913,9 +5933,7 @@
       '<button class="vp-still-btn" id="vp-still-review-btn" type="button">Study these ' + cards.length + ' word' + (cards.length === 1 ? '' : 's') + ' now</button>';
     document.getElementById('vp-still-review-btn').addEventListener('click', function () {
       reviewPool = stillLearningCards();
-      mode = 'flash';
-      Array.prototype.forEach.call(document.querySelectorAll('#vp-modes .vp-mode-btn'), function (b) { b.classList.toggle('on', b.getAttribute('data-vpmode') === 'flash'); });
-      enterPractice();
+      enterPractice(); // respects whichever mode (flash/mc/type) is already selected — it used to force mode back to 'flash' here regardless of the student's choice
     });
   }
   // Leaves setup and shows the practice stage — the normal path (Start
@@ -6159,7 +6177,20 @@
   var skillsByDomain = {};   // domain -> [skill, ...]
 
   var selSections = [], selDomains = [], selSkills = [], selDifficulties = [];
-  var sectionSnapBox = { value: null }, domainSnapBox = { value: null }, skillSnapBox = { value: null }, difficultySnapBox = { value: null };
+  // Tracks whichever dropdown (if any) is currently open, so opening one
+  // closes any other and outside clicks close it. Checked on 'mousedown'
+  // rather than 'click' so the outside-detection runs BEFORE a checkbox's
+  // own click/change (which rebuilds the panel's DOM) — that ordering
+  // means the check always runs against the original, not-yet-rebuilt
+  // DOM, so a click on a checkbox can never be misread as "outside."
+  var openDropdown = null;
+  function closeDropdown() {
+    if (openDropdown) openDropdown.classList.remove('open');
+    openDropdown = null;
+  }
+  document.addEventListener('mousedown', function (e) {
+    if (openDropdown && !openDropdown.contains(e.target)) closeDropdown();
+  });
 
   var listEl, poolCountEl, sectionPillsEl, domainPillsEl, skillPillsEl, difficultyPillsEl;
   var initialized = false;
@@ -6203,48 +6234,73 @@
     return out;
   }
 
-  // Same generic pill-row renderer as the vocabulary/Question Practice
-  // modules (each module keeps its own copy rather than sharing one across
-  // closures — see the vocabulary module's own comment on this pattern).
-  function renderPillRow(container, options, labelFn, selectedArr, snapBox, onChange) {
+  // Checkbox dropdown: a button showing a summary ("All" / "3 of 8
+  // selected") that opens a panel of checkboxes, one per option plus an
+  // "All" checkbox at the top. Replaces the old pill-row buttons per
+  // Luca's request — same cascading behavior (section narrows domain
+  // narrows skill), just a dropdown+checkboxes instead of a wrapping row
+  // of toggle buttons.
+  function renderCheckboxDropdown(container, options, labelFn, selectedArr, onChange) {
+    var wasOpen = container.classList.contains('open'); // preserved across the rebuild every onChange triggers, so checking a box doesn't close the dropdown
     container.innerHTML = '';
-    if (options.length > 1) {
-      var isAllOn = options.length > 0 && selectedArr.length === options.length;
-      var all = document.createElement('button');
-      all.type = 'button';
-      all.className = 'vp-pill' + (isAllOn ? ' on' : '');
-      all.textContent = 'All';
-      all.addEventListener('click', function () {
-        if (isAllOn) {
-          var restore = (snapBox.value || []).filter(function (o) { return options.indexOf(o) !== -1; });
-          selectedArr.splice(0, selectedArr.length);
-          restore.forEach(function (o) { selectedArr.push(o); });
-          snapBox.value = null;
-        } else {
-          snapBox.value = selectedArr.slice();
-          selectedArr.splice(0, selectedArr.length);
-          options.forEach(function (o) { selectedArr.push(o); });
-        }
-        onChange();
-      });
-      container.appendChild(all);
-    }
-    options.forEach(function (opt) {
-      var b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'vp-pill' + (selectedArr.indexOf(opt) !== -1 ? ' on' : '');
-      b.textContent = labelFn(opt);
-      b.addEventListener('click', function () {
-        var i = selectedArr.indexOf(opt);
-        if (i === -1) selectedArr.push(opt); else selectedArr.splice(i, 1);
-        onChange();
-      });
-      container.appendChild(b);
+    container.className = 'iq-dropdown' + (wasOpen ? ' open' : '');
+
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'iq-dropdown-btn';
+    var summary = options.length === 0 ? 'None available'
+      : selectedArr.length === options.length ? 'All'
+      : selectedArr.length === 0 ? 'None selected'
+      : selectedArr.length + ' of ' + options.length + ' selected';
+    btn.innerHTML = '<span>' + escHtml(summary) + '</span><span class="iq-dropdown-caret">&#9662;</span>';
+    btn.addEventListener('click', function () {
+      var isOpen = container.classList.contains('open');
+      closeDropdown();
+      if (!isOpen) { container.classList.add('open'); openDropdown = container; }
     });
+    container.appendChild(btn);
+
+    var panel = document.createElement('div');
+    panel.className = 'iq-dropdown-panel';
+
+    if (options.length > 1) {
+      var allRow = document.createElement('label');
+      allRow.className = 'iq-dropdown-option iq-dropdown-option-all';
+      var allCb = document.createElement('input');
+      allCb.type = 'checkbox';
+      allCb.checked = selectedArr.length === options.length;
+      allCb.addEventListener('change', function () {
+        selectedArr.splice(0, selectedArr.length);
+        if (allCb.checked) options.forEach(function (o) { selectedArr.push(o); });
+        onChange();
+      });
+      allRow.appendChild(allCb);
+      allRow.appendChild(document.createTextNode('All'));
+      panel.appendChild(allRow);
+    }
+
+    options.forEach(function (opt) {
+      var row = document.createElement('label');
+      row.className = 'iq-dropdown-option';
+      var cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = selectedArr.indexOf(opt) !== -1;
+      cb.addEventListener('change', function () {
+        var i = selectedArr.indexOf(opt);
+        if (cb.checked) { if (i === -1) selectedArr.push(opt); }
+        else if (i !== -1) selectedArr.splice(i, 1);
+        onChange();
+      });
+      row.appendChild(cb);
+      row.appendChild(document.createTextNode(labelFn(opt)));
+      panel.appendChild(row);
+    });
+
+    container.appendChild(panel);
   }
 
   function renderSectionPills() {
-    renderPillRow(sectionPillsEl, sectionKeys, sectionLabelFor, selSections, sectionSnapBox, function () {
+    renderCheckboxDropdown(sectionPillsEl, sectionKeys, sectionLabelFor, selSections, function () {
       var newDomains = availableDomains();
       selDomains = selDomains.filter(function (d) { return newDomains.indexOf(d) !== -1; });
       renderSectionPills();
@@ -6252,7 +6308,7 @@
     });
   }
   function renderDomainPills() {
-    renderPillRow(domainPillsEl, availableDomains(), function (d) { return d; }, selDomains, domainSnapBox, function () { onDomainsChanged(); });
+    renderCheckboxDropdown(domainPillsEl, availableDomains(), function (d) { return d; }, selDomains, function () { onDomainsChanged(); });
   }
   function onDomainsChanged() {
     var newSkills = availableSkills();
@@ -6262,10 +6318,10 @@
     renderList();
   }
   function renderSkillPills() {
-    renderPillRow(skillPillsEl, availableSkills(), function (s) { return s; }, selSkills, skillSnapBox, function () { renderSkillPills(); renderList(); });
+    renderCheckboxDropdown(skillPillsEl, availableSkills(), function (s) { return s; }, selSkills, function () { renderSkillPills(); renderList(); });
   }
   function renderDifficultyPills() {
-    renderPillRow(difficultyPillsEl, DIFFICULTIES, difficultyLabel, selDifficulties, difficultySnapBox, function () { renderDifficultyPills(); renderList(); });
+    renderCheckboxDropdown(difficultyPillsEl, DIFFICULTIES, difficultyLabel, selDifficulties, function () { renderDifficultyPills(); renderList(); });
   }
 
   // Same fallback split used on the diagnostic/practice-test screen and
