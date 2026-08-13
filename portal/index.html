@@ -1729,6 +1729,7 @@
       student: currentStudent,
       screen: activeScreenId,
       resourceKind: currentResourceKind,
+      ptListReturnScreen: ptListReturnScreen,
       testChoice: testChoice,
       practiceTestId: practiceTestId,
       activeSectionKeys: activeSectionKeys,
@@ -3004,9 +3005,9 @@
 
 
 
-  var SECTION_BANKS = window.SECTION_BANKS;
+  var SECTION_BANKS = window.SECTION_BANKS || {};
 
-  var TEST_FORMATS = window.TEST_FORMATS;
+  var TEST_FORMATS = window.TEST_FORMATS || {};
 
   /* ═══ OFFICIAL-STYLE SECTION DIRECTIONS ═══
      Shown on the section intro screen, below the "No pressure..." line.
@@ -4756,6 +4757,7 @@
     } else if (state.screen === 'screen-test-choice' || state.screen === 'screen-menu' || state.screen === 'screen-test-overview' || state.screen === 'screen-sat-resources') {
       show(state.screen);
     } else if (state.screen === 'screen-practice-tests') {
+      ptListReturnScreen = state.ptListReturnScreen === 'screen-sat-resources' ? 'screen-sat-resources' : 'screen-menu';
       renderPracticeTestList(); show('screen-practice-tests');
     } else if (state.screen === 'screen-vocab') {
       show('screen-vocab'); if (window.vocabModuleInit) window.vocabModuleInit();
