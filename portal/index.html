@@ -1619,16 +1619,36 @@
      few times with backoff before giving up, which turns the vast
      majority of those false alarms back into successes.
 
+     Each attempt is also capped at timeoutMs via AbortController. Plain
+     fetch() has NO built-in timeout — without this, a genuinely bad cold
+     start (or a hung connection) just sits there indefinitely, and the
+     retry logic above NEVER gets a chance to run, because it only fires
+     on a rejection, not a hang. That's what turned "occasionally slow"
+     into "sometimes just doesn't come back": the very first attempt
+     could hang for 30+ seconds with nothing to trigger a second try.
+     Aborting a slow attempt at a reasonable bound and immediately retrying
+     is a real fix, not just a fallback — Apps Script's cold start happens
+     SERVER-SIDE on that first request regardless of whether the client
+     gave up waiting on it, so the retry that follows usually lands on an
+     already-warm container and comes back fast.
+
      Deliberately NOT used for the fire-and-forget calls that already
      handle their own retries (markDiagnosticTaken) or that are safe to
      silently drop (nextSession polling). */
   function postToBackend(payload, opts) {
     opts = opts || {};
-    var attempts = opts.attempts || 3;
+    var attempts = opts.attempts || 4;
     var delayMs = opts.delayMs || 900;
+    var timeoutMs = opts.timeoutMs || 12000;
     function attempt(n) {
-      return fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) })
-        .then(function (res) { return res.json(); })
+      var controller = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+      var timer = controller ? setTimeout(function () { controller.abort(); }, timeoutMs) : null;
+      return fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+        signal: controller ? controller.signal : undefined
+      })
+        .then(function (res) { clearTimeout(timer); return res.json(); })
         .then(function (data) {
           // A well-formed { ok:false } is a real answer from the server
           // (bad key, email mismatch) — never retry those, the answer
@@ -1637,7 +1657,14 @@
           throw new Error('malformed_response');
         })
         .catch(function (err) {
+          clearTimeout(timer);
           if (n >= attempts) throw err;
+          // Lets a caller (e.g. the key-entry button) show something other
+          // than a static "Checking…" for the whole multi-attempt stretch,
+          // so a slow cold start reads as "still working" instead of
+          // "frozen." Optional — every existing caller that doesn't pass
+          // it behaves exactly as before.
+          if (opts.onRetry) opts.onRetry(n + 1, attempts);
           return new Promise(function (resolve) { setTimeout(resolve, delayMs * n); })
             .then(function () { return attempt(n + 1); });
         });
@@ -1704,10 +1731,16 @@
   window.fetchPortalProgress = function (callback) {
     var key = currentStudent && currentStudent.key;
     if (!key) { callback({ incorrectQuestions: {}, skillStats: {} }); return; }
-    fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      body: JSON.stringify({ action: 'getProgress', key: key })
-    }).then(function (res) { return res.json(); })
+    // Routed through postToBackend (defined below) rather than a bare
+    // fetch() — a bare fetch() has no timeout, so a bad Apps Script cold
+    // start just sits there with My Incorrect Questions' "Loading your
+    // latest results…" frozen on screen for however long that takes, with
+    // nothing to fall back to the local cache until it either resolves or
+    // the browser's own (very long, effectively unbounded) network
+    // timeout finally gives up. postToBackend bounds each attempt and
+    // retries a few times before this catches and falls back — same fix
+    // as callAuth() above, same root cause.
+    postToBackend({ action: 'getProgress', key: key })
       .then(function (data) {
         if (data && data.ok) callback({ incorrectQuestions: data.incorrectQuestions || {}, skillStats: data.skillStats || {} });
         else callback(loadLocalProgressCache());
@@ -2037,10 +2070,10 @@
   // send a preflight OPTIONS request first, which Apps Script Web Apps
   // don't handle. Returns a parsed response object, or { ok:false,
   // error:'network' } if the request itself failed (offline, blocked, etc).
-  function callAuth(key, email, name) {
+  function callAuth(key, email, name, onRetry) {
     // Retries on transient failures (see postToBackend) so a single Apps
     // Script cold start or dropped redirect doesn't read as "can't log in".
-    return postToBackend({ action: 'auth', key: key, email: email || '', name: name || '' })
+    return postToBackend({ action: 'auth', key: key, email: email || '', name: name || '' }, { onRetry: onRetry })
       .catch(function () { return { ok: false, error: 'network' }; });
   }
 
@@ -2664,7 +2697,12 @@
     keyError.style.display = 'none';
     keySubmit.disabled = true;
     keySubmit.textContent = 'Checking…';
-    callAuth(raw, null).then(function (data) {
+    // A cold Apps Script start can take several retries to land — without
+    // this, the button just says "Checking…" through the whole stretch,
+    // which reads as frozen rather than working. This doesn't make it
+    // faster, but a visibly-changing button is the difference between
+    // "still working" and "did this break?"
+    callAuth(raw, null, function (attemptNum) { keySubmit.textContent = 'Still checking… (' + attemptNum + ')'; }).then(function (data) {
       keySubmit.disabled = false;
       keySubmit.textContent = 'Continue';
       if (!data.ok) {
@@ -2701,7 +2739,7 @@
     emailError.style.display = 'none';
     emailSubmit.disabled = true;
     emailSubmit.textContent = 'Unlocking…';
-    callAuth(pendingKey, email, name).then(function (data) {
+    callAuth(pendingKey, email, name, function (attemptNum) { emailSubmit.textContent = 'Still unlocking… (' + attemptNum + ')'; }).then(function (data) {
       emailSubmit.disabled = false;
       emailSubmit.textContent = 'Unlock My Files';
       if (!data.ok) {
