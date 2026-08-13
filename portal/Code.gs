@@ -23,10 +23,6 @@
    SETUP — see the deployment guide for full steps. Short version:
      1. Create a Google Sheet with a tab named "Students" and headers:
           Key | Name | DriveFolderUrl | GrantedEmail | GrantedAt | SATTakenAt | ACTTakenAt | TestPrep | SAT | ACT | TestDate
-        (CollegePrepFolderUrl is NOT part of the live sheet — the code
-        still checks for it and simply no-ops if the column is missing,
-        but don't add it unless you actually want a second Drive folder
-        per student.)
         (SATTakenAt/ACTTakenAt track the one-real-diagnostic-per-test-type
         feature — leave both blank for everyone; they get stamped
         automatically the first time each student finishes that test's
@@ -273,7 +269,6 @@ function handleAuth(rawKey, rawEmail, rawName) {
       return { ok: false, error: 'bad_email' };
     }
     grantFolderAccess_(row.DriveFolderUrl, email);
-    grantFolderAccess_(row.CollegePrepFolderUrl, email);
     var emailCol = row._headers.indexOf('GrantedEmail');
     var atCol = row._headers.indexOf('GrantedAt');
     grantedAtValue = new Date();
@@ -291,7 +286,6 @@ function handleAuth(rawKey, rawEmail, rawName) {
     name: row.Name,
     needsEmail: false,
     driveFolderUrl: row.DriveFolderUrl || '',
-    collegePrepFolderUrl: row.CollegePrepFolderUrl || '',
     satTaken: !!row.SATTakenAt,
     actTaken: !!row.ACTTakenAt,
     testPrep: flags.testPrep,
