@@ -3009,6 +3009,71 @@
 
   var TEST_FORMATS = window.TEST_FORMATS || {};
 
+  /* ═══ INCORRECT-QUESTION KEY RESOLVER ═══
+     "My Incorrect Questions" (see the iqModuleInit script further down,
+     its own isolated closure) used to get full question text/choices/
+     explanations straight from the backend's stored record. That record
+     is now slimmed to just {key, correct, given, attemptedAt} before it's
+     ever sent to or stored in the Progress sheet (see the incorrectRecords
+     push in finishDiagnostic() and syncProgressToBackend() below) — a
+     Sheets cell tops out around 50,000 characters, and storing a full
+     question snapshot per outstanding miss was the actual cause of a past
+     bug where old misses silently fell off the list. Everything else a
+     miss needs to render (text, choices, domain/skill/difficulty, the
+     test it came from) is fully derivable from `key` alone (shaped
+     testTag|sectionKey|module|moduleIndex — see the incorrectRecords push
+     below) by looking the question straight back up in banks.js/
+     practice-tests.js, which is what this does. Exposed on window since
+     iqModuleInit is a separate closure that can't see SECTION_BANKS/
+     SAT_PRACTICE_TESTS directly (same reason window.getPortalStudentKey
+     exists). Deliberately independent of bankFor()/activePracticeTest()
+     above — those resolve against whatever test is CURRENTLY in progress,
+     but a stored key needs to resolve correctly regardless of what (if
+     anything) is active right now, including long after that attempt. */
+  window.resolveQuestionByKey = function (key) {
+    var parts = String(key || '').split('|');
+    if (parts.length !== 4) return null;
+    var testTag = parts[0], sectionKey = parts[1], moduleName = parts[2], moduleIndex = parseInt(parts[3], 10);
+    if (isNaN(moduleIndex)) return null;
+
+    var bank, testTitle;
+    if (testTag.indexOf('diag-') === 0) {
+      bank = SECTION_BANKS[sectionKey];
+      testTitle = testTag.slice(5) + ' Diagnostic';
+    } else {
+      var pt = (window.SAT_PRACTICE_TESTS || []).filter(function (t) { return t.id === testTag; })[0];
+      if (!pt || !pt.sections) return null;
+      var ptKey = sectionKey === 'reading-writing' ? 'readingWriting' : sectionKey;
+      var s = pt.sections[ptKey];
+      if (!s) return null;
+      bank = { module1: s.module1, module2Easier: s.module2Easier, module2Harder: s.module2Harder };
+      testTitle = pt.title;
+    }
+    if (!bank) return null;
+
+    var qs = moduleName === 'module1' ? bank.module1
+      : moduleName === 'module2Easier' ? bank.module2Easier
+      : moduleName === 'module2Harder' ? bank.module2Harder
+      : null;
+    var q = qs && qs[moduleIndex];
+    if (!q) return null;
+
+    return {
+      sectionKey: sectionKey,
+      testTitle: testTitle,
+      domain: q.domain,
+      skill: q.skill || q.domain,
+      difficulty: q.difficulty || 'medium',
+      type: q.type,
+      text: q.text,
+      choices: q.choices || null,
+      correctIndex: (q.correct !== undefined ? q.correct : null),
+      choiceNotes: q.choiceNotes || null,
+      answerValue: (q.answer !== undefined ? q.answer : null),
+      explanation: q.explanation || null
+    };
+  };
+
   /* ═══ OFFICIAL-STYLE SECTION DIRECTIONS ═══
      Shown on the section intro screen, below the "No pressure..." line.
      Keyed by SECTION_BANKS key. Sections without an entry here just show
@@ -4176,15 +4241,17 @@
      syncProgressToBackend() below for the synced, cross-device copy the
      review tool actually reads from — this is only its fallback).
      Unlike saveDiagnosticSkillStats (this attempt's own results only),
-     this stores the FULL question snapshot for every miss —
-     text/choices/correct answer/explanations — so a student can actually
-     review what they got wrong, not just see a percentage. Keyed by a
-     stable per-question key (test/bank id + section + module + index
-     within that module) so retaking the same diagnostic/practice test
-     updates the SAME entry rather than piling up duplicates, and —
-     importantly — a question that's since been answered CORRECTLY is
-     deleted from the log rather than kept, so this always reflects
-     current weak spots, not full history. */
+     this keeps one entry per outstanding miss, keyed by a stable
+     per-question key (test/bank id + section + module + index within that
+     module) so retaking the same diagnostic/practice test updates the
+     SAME entry rather than piling up duplicates — and a question that's
+     since been answered CORRECTLY is deleted from the log rather than
+     kept, so this always reflects current weak spots, not full history.
+     Each entry is deliberately slim ({key, correct, given, attemptedAt} —
+     see the incorrectRecords push in finishDiagnostic()); the full
+     question text/choices/explanation a student needs to actually review
+     a miss is resolved from `key` at render time via
+     window.resolveQuestionByKey(), not stored here. */
   function recordIncorrectQuestions(records) {
     try {
       var studentKey = currentStudent && currentStudent.key;
@@ -4213,18 +4280,16 @@
   // recordIncorrectQuestions()/saveDiagnosticSkillStats() just above
   // already covers this device even if this call fails (offline, Apps
   // Script hiccup), so there's nothing to retry or surface to the student.
-  // Correct-answer records are trimmed down to just {key, correct} before
-  // sending — the backend only needs those two fields to clear a stale
-  // miss, not the full question text/choices/explanation, which cuts the
-  // payload roughly in half on a typical attempt.
+  // incorrectRecords is already the slim {key, correct, given,
+  // attemptedAt} shape by this point (see the push in finishDiagnostic())
+  // — sent as-is, no further trimming needed here.
   function syncProgressToBackend(incorrectRecords, skills) {
     try {
       var studentKey = currentStudent && currentStudent.key;
       if (!studentKey) return;
-      var slimRecords = incorrectRecords.map(function (r) { return r.correct ? { key: r.key, correct: true } : r; });
       fetch(APPS_SCRIPT_URL, {
         method: 'POST',
-        body: JSON.stringify({ action: 'syncProgress', key: studentKey, incorrect: slimRecords, skills: skillsToBySkill(skills) })
+        body: JSON.stringify({ action: 'syncProgress', key: studentKey, incorrect: incorrectRecords, skills: skillsToBySkill(skills) })
       }).catch(function () {});
     } catch (e) { /* ignore — local cache already covers this device */ }
   }
@@ -4425,25 +4490,16 @@
         var moduleName = i < mod1Len ? 'module1' : ('module2' + (sec.module2Variant || 'Easier'));
         var moduleIndex = i < mod1Len ? i : (i - mod1Len);
         var testTag = ptDoneEarly ? ptDoneEarly.id : ('diag-' + testChoice);
+        // Deliberately slim — everything else a miss needs to render
+        // (text, choices, domain/skill/difficulty, which test it's from)
+        // is fully derivable from `key` alone via
+        // window.resolveQuestionByKey() at render time. See that
+        // function's comment for why: storing a full question snapshot
+        // per outstanding miss was what caused the old Sheets-cell-cap
+        // eviction bug.
         incorrectRecords.push({
           key: testTag + '|' + sec.key + '|' + moduleName + '|' + moduleIndex,
           correct: correct,
-          source: ptDoneEarly ? 'practice-test' : 'diagnostic',
-          testId: ptDoneEarly ? ptDoneEarly.id : null,
-          testTitle: ptDoneEarly ? ptDoneEarly.title : (testChoice + ' Diagnostic'),
-          sectionKey: sec.key,
-          sectionLabel: sec.label,
-          module: moduleName,
-          domain: q.domain,
-          skill: skillName,
-          difficulty: q.difficulty || 'medium',
-          type: q.type,
-          text: q.text,
-          choices: q.choices || null,
-          correctIndex: (q.correct !== undefined ? q.correct : null),
-          choiceNotes: q.choiceNotes || null,
-          answerValue: (q.answer !== undefined ? q.answer : null),
-          explanation: q.explanation || null,
           given: (given === null || given === undefined) ? null : given,
           attemptedAt: attemptTimestamp
         });
@@ -6207,11 +6263,27 @@
   var listEl, poolCountEl, sectionPillsEl, domainPillsEl, skillPillsEl, difficultyPillsEl;
   var initialized = false;
 
+  // Stored records are slim ({key, correct, given, attemptedAt} — see
+  // window.resolveQuestionByKey's comment in the main script for why);
+  // this resolves each one's full text/choices/domain/skill/etc. straight
+  // back out of banks.js/practice-tests.js by key, merged with the
+  // attempt-specific bits (given answer, when it was missed) the stored
+  // record actually carries. A key that no longer resolves (question
+  // removed/renumbered since the miss was recorded) is dropped rather
+  // than rendered broken.
   function loadRecords(callback) {
     if (!window.fetchPortalProgress) { records = []; callback(); return; }
     window.fetchPortalProgress(function (progress) {
       var byKey = (progress.incorrectQuestions && typeof progress.incorrectQuestions === 'object') ? progress.incorrectQuestions : {};
-      records = Object.keys(byKey).map(function (k) { return byKey[k]; }).filter(function (r) { return r && r.text; });
+      records = Object.keys(byKey).map(function (k) {
+        var stored = byKey[k];
+        if (!stored) return null;
+        var resolved = window.resolveQuestionByKey ? window.resolveQuestionByKey(k) : null;
+        if (!resolved) return null;
+        resolved.given = stored.given;
+        resolved.attemptedAt = stored.attemptedAt;
+        return resolved;
+      }).filter(function (r) { return r && r.text; });
       records.sort(function (a, b) { return (b.attemptedAt || '').localeCompare(a.attemptedAt || ''); }); // most recently missed first
       callback();
     });

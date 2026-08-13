@@ -920,12 +920,18 @@ function getProgressSheet_() {
   return sheet;
 }
 
-// A Google Sheets cell tops out around 50,000 characters — IncorrectQuestionsJSON
-// carries full question text/choices/explanations per miss, which can add up
-// over enough outstanding misses. Rather than truncate the JSON string itself
-// (which would corrupt it), this drops the OLDEST misses (by attemptedAt) one
-// at a time until the serialized map fits — a student's most recent misses are
-// the ones "Practice My Weak Spots" and this log actually need.
+// A Google Sheets cell tops out around 50,000 characters. As of the
+// client-side slimming in index.html (each miss now stores only
+// {key, correct, given, attemptedAt} — full question text/choices/
+// explanations are resolved back out of banks.js/practice-tests.js at
+// render time via window.resolveQuestionByKey(), not stored here), this
+// should essentially never trigger anymore; it's kept as a safety net
+// (and to gracefully finish shrinking any pre-existing rows still
+// carrying old, unslimmed records). Rather than truncate the JSON string
+// itself (which would corrupt it), this drops the OLDEST misses (by
+// attemptedAt) one at a time until the serialized map fits — a student's
+// most recent misses are the ones "Practice My Weak Spots" and this log
+// actually need.
 var PROGRESS_CELL_CAP_ = 45000;
 function capIncorrectByKey_(byKey) {
   if (JSON.stringify(byKey).length <= PROGRESS_CELL_CAP_) return byKey;
