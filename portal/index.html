@@ -5839,6 +5839,16 @@
     setNames.forEach(function (s) { (VOCAB[s] || []).forEach(function (c) { all[c.term] = c; }); });
     return all;
   }
+  // Every card across every set, flattened — used to draw Multiple Choice
+  // distractors from the FULL vocabulary bank, not just whatever's in the
+  // current quiz pool. pool() is deliberately narrow when reviewing "still
+  // learning" words (sometimes just 2-3 terms), and drawing distractors
+  // from that same narrow set left too few (or too obviously-related)
+  // wrong answers to choose from.
+  function allCards() {
+    var byTerm = allCardsByTerm();
+    return Object.keys(byTerm).map(function (t) { return byTerm[t]; });
+  }
 
   /* ═══ "STILL LEARNING" PROGRESS — persisted in localStorage per student
      (namespaced via window.getPortalStudentKey(), exposed by the portal's
@@ -6033,7 +6043,7 @@
     var head = '<div class="vp-bar-row"><span>Question ' + (qz.idx + 1) + ' of ' + qz.order.length + '</span><span>Score ' + qz.score + '</span></div>' +
       '<div class="vp-bar-track"><div class="vp-bar-fill" style="width:' + pct + '%"></div></div>';
     if (qz.kind === 'mc') {
-      var others = shuffle(pool().filter(function (x) { return x.term !== c.term; }));
+      var others = shuffle(allCards().filter(function (x) { return x.term !== c.term; }));
       var opts = shuffle([c].concat(others.slice(0, 3)));
       stageEl.innerHTML = '<div class="vp-rise">' + head + '<div class="vp-prompt"><div class="vp-plabel">Which word means…</div><div class="vp-ptext">' + esc(c.def) + '</div></div>' +
         '<div class="vp-opts" id="vp-opts">' + opts.map(function (o, i) { return '<button class="vp-opt" type="button" data-t="' + esc(o.term) + '" style="animation-delay:' + (i * 0.05) + 's">' + esc(o.term) + '</button>'; }).join('') + '</div></div>';
