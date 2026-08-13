@@ -992,7 +992,7 @@
   </div>
 </div>
 
-<!-- ═══ SCREEN 3 — RESOURCES (Drive lookup — used for both "Your Files" and "College Prep") ═══ -->
+<!-- ═══ SCREEN 3 — RESOURCES (Drive lookup for "Your Files") ═══ -->
 <div class="screen" id="screen-resources">
   <div class="panel-wide">
     <div class="res-card">
@@ -1628,7 +1628,7 @@
   // validates the key and uses the roster name server-side. Do NOT
   // reintroduce a client-side email send here.
 
-  var currentStudent = null; // { key, name, driveFolderUrl, collegePrepFolderUrl, testPrep, tests }
+  var currentStudent = null; // { key, name, driveFolderUrl, testPrep, tests }
   // Read-only accessor for the vocab practice module (its own isolated
   // closure — see the comment above that script block — so it can't see
   // currentStudent directly) to namespace its localStorage "still
@@ -1728,7 +1728,6 @@
     var payload = {
       student: currentStudent,
       screen: activeScreenId,
-      resourceKind: currentResourceKind,
       ptListReturnScreen: ptListReturnScreen,
       testChoice: testChoice,
       practiceTestId: practiceTestId,
@@ -2043,7 +2042,6 @@
       key: pendingKey,
       name: data.name,
       driveFolderUrl: data.driveFolderUrl || '',
-      collegePrepFolderUrl: data.collegePrepFolderUrl || '',
       satTaken: !!data.satTaken,
       actTaken: !!data.actTaken,
       testPrep: !!data.testPrep,
@@ -2733,7 +2731,6 @@
   });
 
   /* ═══ SCREEN 2: MENU ═══ */
-  var currentResourceKind = null; // 'files' or 'college-prep' — remembered for persistence/restore
   var resumeOverlay = document.getElementById('resume-overlay');
   var resumeModalSub = document.getElementById('resume-modal-sub');
   var pendingResumeSnapshot = null;
@@ -2761,7 +2758,7 @@
         if (snap) openResumeOverlay(snap);
         else { goToTestChoice(); }
       }
-      else if (route === 'files' || route === 'college-prep') { renderResources(route); show('screen-resources'); }
+      else if (route === 'files') { renderResources(); show('screen-resources'); }
       else if (route === 'sat-resources') { show('screen-sat-resources'); }
       else if (route === 'vocab') { show('screen-vocab'); if (window.vocabModuleInit) window.vocabModuleInit(); }
       else if (route === 'practice-tests') {
@@ -2915,7 +2912,7 @@
     show('screen-key');
   });
 
-  /* ═══ SCREEN 3: RESOURCES (shared by "Your Files" and "College Prep") ═══
+  /* ═══ SCREEN 3: RESOURCES ("Your Files") ═══
      If the saved link is a normal Google Drive folder URL, embed it
      inline so the portal feels like a real file browser. Otherwise
      (a different kind of link, or none yet) fall back to a plain button. */
@@ -2923,12 +2920,9 @@
     var m = url.match(/\/folders\/([a-zA-Z0-9_-]+)/);
     return m ? m[1] : null;
   }
-  function renderResources(kind) {
-    currentResourceKind = kind;
-    var isPrep = kind === 'college-prep';
-    document.getElementById('res-title').textContent = isPrep ? 'College Prep' : 'Your Files';
+  function renderResources() {
     var body = document.getElementById('res-body');
-    var url = currentStudent ? (isPrep ? currentStudent.collegePrepFolderUrl : currentStudent.driveFolderUrl) : '';
+    var url = currentStudent ? currentStudent.driveFolderUrl : '';
     if (!url) {
       body.innerHTML = '<p class="res-pending">Your folder isn\'t set up yet. Luca will share it with you directly — check back soon, or ask him at your next session.</p>';
       return;
@@ -4808,7 +4802,7 @@
       resumeBreak(typeof state.breakEndsAt === 'number' ? state.breakEndsAt : Date.now() + BREAK_SECONDS * 1000);
       show('dx-break-screen');
     } else if (state.screen === 'screen-resources') {
-      renderResources(state.resourceKind || 'files');
+      renderResources();
       show('screen-resources');
     } else if (state.screen === 'screen-test-choice' || state.screen === 'screen-menu' || state.screen === 'screen-test-overview' || state.screen === 'screen-sat-resources') {
       show(state.screen);
