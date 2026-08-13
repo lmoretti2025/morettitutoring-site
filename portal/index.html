@@ -1013,7 +1013,7 @@
           <div class="menu-card-body">Flashcards, multiple choice, and type-it drills for the SAT vocabulary list. Study one set at a time or several at once.</div>
         </div>
       </div>
-      <div class="menu-card menu-card-wide" data-route="practice-tests">
+      <div class="menu-card menu-card-wide" data-route="practice-tests" id="res-card-practice-tests">
         <span class="menu-card-icon">&#9201;</span>
         <div>
           <div class="menu-card-title">Practice Tests 1&ndash;<span id="pt-res-card-count">11</span></div>
@@ -1498,7 +1498,7 @@
 <div class="resume-overlay" id="resume-overlay">
   <div class="resume-modal">
     <div class="resume-modal-hed">Continue where you left off?</div>
-    <p class="resume-modal-sub">You have an unfinished diagnostic saved from before. Pick up right where you left off, or start over from the beginning.</p>
+    <p class="resume-modal-sub" id="resume-modal-sub">You have an unfinished diagnostic saved from before. Pick up right where you left off, or start over from the beginning.</p>
     <div class="resume-modal-row">
       <button class="key-btn" id="resume-yes" type="button">Yes</button>
       <button class="key-btn" id="resume-no" type="button" style="background:var(--text);">No</button>
@@ -1847,6 +1847,15 @@
     // tests are SAT-format only, so an ACT-only student never sees it.
     var ptCard = document.getElementById('menu-card-practice-tests');
     if (ptCard) ptCard.style.display = (resCard && resCard.style.display === 'none') || !showSat ? 'none' : '';
+
+    // SAT Resources has its own, second copy of the Practice Tests card
+    // (screen-sat-resources), reachable once a student is already inside
+    // that screen. It needs the same showSat check as the home-screen
+    // shortcut above — without it, an ACT-only student could reach a full
+    // SAT-format practice test through this second entry point even though
+    // the home-screen card correctly hides it.
+    var ptResCard = document.getElementById('res-card-practice-tests');
+    if (ptResCard) ptResCard.style.display = showSat ? '' : 'none';
   }
 
   /* Fills in the two test cards' badges and body copy from what the
@@ -2145,7 +2154,7 @@
       link.addEventListener('click', function (e) {
         e.preventDefault();
         var snap = getResumeSnapshot();
-        if (snap) { pendingResumeSnapshot = snap; resumeOverlay.classList.add('active'); }
+        if (snap) openResumeOverlay(snap);
         else { goToTestChoice(); }
       });
       return link;
@@ -2717,14 +2726,30 @@
   /* ═══ SCREEN 2: MENU ═══ */
   var currentResourceKind = null; // 'files' or 'college-prep' — remembered for persistence/restore
   var resumeOverlay = document.getElementById('resume-overlay');
+  var resumeModalSub = document.getElementById('resume-modal-sub');
   var pendingResumeSnapshot = null;
+  // A saved snapshot can be either a real diagnostic in progress OR a
+  // numbered practice test in progress (see syncResumeSnapshot() —
+  // eligibility only requires MID_DIAGNOSTIC_SCREENS + a testChoice, which
+  // is true for both). The modal text used to always say "diagnostic"
+  // regardless, which is wrong and confusing for a student resuming a
+  // practice test. snap.practiceTestId (set at line ~1724) tells them apart.
+  function openResumeOverlay(snap) {
+    pendingResumeSnapshot = snap;
+    if (resumeModalSub) {
+      resumeModalSub.textContent = snap && snap.practiceTestId
+        ? 'You have an unfinished practice test saved from before. Pick up right where you left off, or start over from the beginning.'
+        : 'You have an unfinished diagnostic saved from before. Pick up right where you left off, or start over from the beginning.';
+    }
+    resumeOverlay.classList.add('active');
+  }
   document.querySelectorAll('.menu-card').forEach(function (card) {
     card.addEventListener('click', function () {
       if (card.classList.contains('disabled')) return; // temporarily off while these get developed further
       var route = card.getAttribute('data-route');
       if (route === 'diagnostic') {
         var snap = getResumeSnapshot();
-        if (snap) { pendingResumeSnapshot = snap; resumeOverlay.classList.add('active'); }
+        if (snap) openResumeOverlay(snap);
         else { goToTestChoice(); }
       }
       else if (route === 'files' || route === 'college-prep') { renderResources(route); show('screen-resources'); }
