@@ -1560,7 +1560,38 @@
 </div>
 
 <script src="banks.js"></script>
-<script src="practice-tests.js"></script>
+<script>
+  /* practice-tests.js is ~2.6MB uncompressed (the 11 full practice tests,
+     including every embedded figure's markup) — big enough that loading
+     it as a normal blocking <script> tag was adding real, measurable
+     delay before the key-entry screen even became interactive: the
+     browser has to finish downloading AND parsing/executing that whole
+     file (building ~1,600 question objects) before any script after it
+     in document order — including the one that wires up the key-submit
+     button — can run. Nothing on the key-entry screen, and nothing most
+     students do for their first several seconds in the portal, actually
+     needs practice-test data.
+
+     So it's loaded here via an async-by-default dynamically-created
+     <script> tag instead of a static one — this starts the download
+     immediately (so it's normally ready well before a student would
+     navigate to Practice Tests or My Incorrect Questions) without
+     blocking the parser or delaying every other script's execution.
+     window.__practiceTestsReady resolves once it's loaded (or on error,
+     so nothing hangs forever — the rest of the app already treats
+     window.SAT_PRACTICE_TESTS as optional via `|| []`/`|| {}` fallbacks).
+     The few call sites that genuinely can't tolerate it still being
+     empty (resuming a practice test mid-refresh, My Incorrect Questions'
+     key resolver) explicitly await this promise — see their own
+     comments for why. */
+  window.__practiceTestsReady = new Promise(function (resolve) {
+    var s = document.createElement('script');
+    s.src = 'practice-tests.js';
+    s.onload = resolve;
+    s.onerror = resolve;
+    document.head.appendChild(s);
+  });
+</script>
 <script>
 (function () {
   'use strict';
@@ -1953,6 +1984,21 @@
     if (id === 'screen-sat-resources') applyResourcesGating();
     window.scrollTo(0, 0);
     saveState();
+  }
+
+  // practice-tests.js loads in the background (see the loader comment at
+  // the top of the page) — if a student reaches the menu or the practice
+  // tests picker before it's finished, the counts/list would render off
+  // an empty window.SAT_PRACTICE_TESTS. Both screens already tolerate
+  // that gracefully (a 0-count just doesn't overwrite the placeholder
+  // text, the picker shows "check back soon"), but this re-renders
+  // whichever of the two is on screen once the real data actually
+  // arrives, so nobody's stuck looking at a stale/empty state.
+  if (window.__practiceTestsReady) {
+    window.__practiceTestsReady.then(function () {
+      if (activeScreenId === 'screen-menu') applyTestCardStates();
+      else if (activeScreenId === 'screen-practice-tests') renderPracticeTestList();
+    });
   }
 
   window.addEventListener('beforeunload', function (e) {
@@ -6267,19 +6313,28 @@
   // than rendered broken.
   function loadRecords(callback) {
     if (!window.fetchPortalProgress) { records = []; callback(); return; }
+    // Kicked off in parallel, not chained — fetchPortalProgress is an Apps
+    // Script round-trip (the slower of the two in practice), while
+    // practice-tests.js is a same-origin static file that's normally
+    // already loaded (or close to it) well before this screen is even
+    // opened. Only the final resolve step below actually needs to wait
+    // for both.
+    var readyPromise = window.__practiceTestsReady || Promise.resolve();
     window.fetchPortalProgress(function (progress) {
       var byKey = (progress.incorrectQuestions && typeof progress.incorrectQuestions === 'object') ? progress.incorrectQuestions : {};
-      records = Object.keys(byKey).map(function (k) {
-        var stored = byKey[k];
-        if (!stored) return null;
-        var resolved = window.resolveQuestionByKey ? window.resolveQuestionByKey(k) : null;
-        if (!resolved) return null;
-        resolved.given = stored.given;
-        resolved.attemptedAt = stored.attemptedAt;
-        return resolved;
-      }).filter(function (r) { return r && r.text; });
-      records.sort(function (a, b) { return (b.attemptedAt || '').localeCompare(a.attemptedAt || ''); }); // most recently missed first
-      callback();
+      readyPromise.then(function () {
+        records = Object.keys(byKey).map(function (k) {
+          var stored = byKey[k];
+          if (!stored) return null;
+          var resolved = window.resolveQuestionByKey ? window.resolveQuestionByKey(k) : null;
+          if (!resolved) return null;
+          resolved.given = stored.given;
+          resolved.attemptedAt = stored.attemptedAt;
+          return resolved;
+        }).filter(function (r) { return r && r.text; });
+        records.sort(function (a, b) { return (b.attemptedAt || '').localeCompare(a.attemptedAt || ''); }); // most recently missed first
+        callback();
+      });
     });
   }
 
