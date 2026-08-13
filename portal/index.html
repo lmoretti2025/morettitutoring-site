@@ -4926,6 +4926,19 @@
       renderAssignments(); // instant paint from the cached snapshot...
       loadAssignments();   // ...immediately superseded by a fresh fetch — this refresh is
       startAssignmentsPolling(); // the actual fix for checked/expired items reappearing after a refresh
+      // Restores the actual SCREEN (mid-diagnostic, mid-practice-test, a
+      // resource screen, etc.) — everything above this line only restores
+      // the student's identity/menu chrome. This call went missing when
+      // applyRestoredState() was pulled out into its own shared function
+      // (for the separate "come back later" resume-modal path below) —
+      // this refresh path was never updated to actually call it, silently
+      // reducing "accidental refresh mid-exam" to "restore the login, drop
+      // back to the menu" instead of the "restores exactly where they
+      // were" this whole function's own comment above promises.
+      // fromAway=false: this is the accidental in-tab-refresh path, so the
+      // section timer honors its original absolute end time rather than
+      // the remaining-time treatment the come-back-later path gets.
+      applyRestoredState(state, false);
     } catch (e) { /* corrupt or blocked storage — just start fresh */ }
   })();
 })();
