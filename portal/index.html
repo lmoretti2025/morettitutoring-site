@@ -737,8 +737,6 @@
   .vp-change-link { display: inline-block; font-family: var(--hel); font-size: 0.78rem; font-weight: 600; color: var(--mid); text-decoration: none; margin-bottom: 0.8rem; transition: color 0.12s ease; }
   .vp-change-link:hover { color: var(--text); }
   .vp-stage { margin-top: 0.4rem; }
-  .pb-stage { margin-top: 0.4rem; }
-  .pb-weak-panel { margin-bottom: 1.1rem; }
   /* ═══ ENTRANCE ANIMATIONS — applied to whatever just got rebuilt in
      #vp-stage (a new flash card, a new quiz question, a mode switch, a
      summary screen). Every drawFlash()/drawQuiz()/summary render wraps its
@@ -798,48 +796,32 @@
   .vp-primary:active { transform: translateY(0); }
   .vp-primary:disabled { opacity: 0.45; cursor: default; transform: none; box-shadow: none; }
 
-  /* ═══ QUESTION PRACTICE (topic filters + weak-spot mode) ═══ */
+  /* ═══ FILTER PILLS — used by My Incorrect Questions' section/domain/
+     skill/difficulty filters (pb- prefix is a holdover from the removed
+     Question Practice feature, which introduced this styling first). ═══ */
   .pb-pills { display: flex; flex-wrap: wrap; gap: 0.4rem; max-height: 148px; overflow-y: auto; padding: 0.15rem; }
   .pb-pills-skill .vp-pill { font-size: 0.74rem; padding: 0.4rem 0.8rem; }
   .pb-empty-note { font-size: 0.8rem; color: var(--mid); margin-top: 0.4rem; }
 
+  /* pb-q-meta/pb-passage/pb-q-card/pb-q-text/pb-note(+variants)/
+     pb-explain(+hed)/dx-choice.pb-tried-wrong/dx-choice.pb-right below are
+     shared with the My Incorrect Questions module further down (see that
+     module's own header comment) — kept even though the Question Practice
+     feature that introduced them was removed. */
   .pb-q-meta { display: flex; justify-content: space-between; align-items: baseline; font-family: var(--hel); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); margin-bottom: 0.6rem; }
-  .pb-q-progress { color: var(--red); }
   .pb-passage { font-family: var(--serif); font-size: 0.98rem; line-height: 1.85; color: var(--text); background: var(--white); border: 1px solid var(--border); border-radius: 14px; padding: 1.6rem; margin-bottom: 1rem; opacity: 0; animation: vpRise 0.3s cubic-bezier(.2,.7,.3,1) forwards; }
   .pb-q-card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; padding: 1.6rem; opacity: 0; animation: vpRise 0.3s cubic-bezier(.2,.7,.3,1) forwards; }
   .pb-q-text { font-size: 1.02rem; line-height: 1.65; color: var(--text); margin-bottom: 1.25rem; }
-  .pb-choices { display: flex; flex-direction: column; gap: 0.6rem; }
-  /* Choices reuse the diagnostic's own .dx-choice/.dx-choice-letter/
-     .dx-elim markup and CSS for a consistent look and the same answer-
-     eliminator behavior — this just adds the two extra states specific to
-     practice mode (a locked-out wrong guess, and the revealed correct
-     answer) plus the eliminator-visibility rule scoped to this module's
-     own #pb-choices id (the existing rule is scoped to #dx-choices). */
-  #pb-choices.eliminator-on .dx-elim { display: flex; }
   .dx-choice.pb-tried-wrong { border-color: var(--red); background: #f8ecea; opacity: 0.7; cursor: default; }
   .dx-choice.pb-tried-wrong .dx-choice-letter { border-color: var(--red); color: var(--red); }
   .dx-choice.pb-right { border-color: #3f7d54; background: #eaf3ec; cursor: default; }
   .dx-choice.pb-right .dx-choice-letter { background: #3f7d54; border-color: #3f7d54; color: #fff; }
-  .pb-fr-row { display: flex; gap: 0.6rem; margin-bottom: 0.5rem; }
-  .pb-fr-row input { flex: 1; font-family: var(--hel); font-size: 0.95rem; border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem 0.9rem; }
-  .pb-fr-row input:disabled { background: var(--bg); color: var(--mid); }
-  .pb-fr-submit { font-family: var(--hel); font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; background: var(--red); color: #fff; border: none; border-radius: 8px; padding: 0 1.2rem; cursor: pointer; }
-  .pb-fr-submit:disabled { opacity: 0.4; cursor: default; }
 
   .pb-note { font-size: 0.85rem; line-height: 1.55; margin-top: 0.5rem; padding: 0.7rem 0.85rem; border-radius: 8px; background: var(--bg); color: var(--mid); }
   .pb-note.pb-note-correct { background: #eaf3ec; color: #2d5b3c; }
   .pb-note.pb-note-wrong { background: #f8ecea; color: var(--red); }
   .pb-explain { margin-top: 1.1rem; font-size: 0.86rem; line-height: 1.6; color: var(--text); background: var(--bg); border-radius: 10px; padding: 0.9rem 1.1rem; }
   .pb-explain-hed { font-family: var(--hel); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); margin-bottom: 0.35rem; }
-
-  .pb-actions { display: flex; justify-content: flex-end; margin-top: 1.2rem; }
-  .pb-next-btn { font-family: var(--hel); font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; background: var(--text); color: #fff; border: none; border-radius: 8px; padding: 0.8rem 1.4rem; cursor: pointer; transition: transform 0.12s ease; }
-  .pb-next-btn:hover { transform: translateY(-1px); }
-
-  .pb-summary { text-align: center; padding: 2rem 1rem; }
-  .pb-summary-score { font-family: var(--display); font-size: 2.2rem; color: var(--red); margin-bottom: 0.4rem; }
-  .pb-summary-sub { font-size: 0.85rem; color: var(--mid); margin-bottom: 1.5rem; }
-  .pb-summary-actions { display: flex; gap: 0.8rem; justify-content: center; flex-wrap: wrap; }
 
   /* ═══ MY INCORRECT QUESTIONS — reuses pb-q-meta/pb-passage/pb-q-card/
      pb-note/pb-explain/dx-choice styling above for each read-only card
@@ -1031,13 +1013,6 @@
           <div class="menu-card-body">Flashcards, multiple choice, and type-it drills for the SAT vocabulary list. Study one set at a time or several at once.</div>
         </div>
       </div>
-      <div class="menu-card menu-card-wide" data-route="practice-bank">
-        <span class="menu-card-icon">?</span>
-        <div>
-          <div class="menu-card-title">Question Practice</div>
-          <div class="menu-card-body">Reading &amp; Writing and Math questions with full explanations for every answer choice. Pick your own topics, or practice the skills you missed on your last diagnostic.</div>
-        </div>
-      </div>
       <div class="menu-card menu-card-wide" data-route="practice-tests">
         <span class="menu-card-icon">&#9201;</span>
         <div>
@@ -1214,49 +1189,6 @@
     </div>
 
     <a href="#" class="menu-back-link" id="vocab-back">&larr; Back to resources</a>
-  </div>
-</div>
-
-<!-- ═══ SCREEN 3b-ii — QUESTION PRACTICE (embedded; only reachable from
-     the SAT Resources screen inside the portal — no standalone URL) ═══ -->
-<div class="screen" id="screen-practice-bank">
-  <div class="panel-wide">
-    <div class="vp-head">
-      <div class="kicker">SAT Resources</div>
-      <h1 class="panel-hed">Question Practice</h1>
-    </div>
-
-    <!-- ═══ SETUP — weak-spot shortcut and topic filters are both chosen
-         here BEFORE anything starts. Nothing under #pb-practice exists yet
-         at this point. ═══ -->
-    <div id="pb-setup">
-      <div class="pb-weak-panel" id="pb-weak-panel"></div>
-
-      <div class="vp-panel-label">Section</div>
-      <div class="pb-pills" id="pb-section-pills"></div>
-
-      <div class="vp-panel-label">Domain</div>
-      <div class="pb-pills" id="pb-domain-pills"></div>
-
-      <div class="vp-panel-label">Skill</div>
-      <div class="pb-pills pb-pills-skill" id="pb-skill-pills"></div>
-
-      <div class="vp-panel-label">Difficulty</div>
-      <div class="pb-pills" id="pb-difficulty-pills"></div>
-
-      <div class="vp-pool-count" id="pb-pool-count"></div>
-      <button class="vp-primary" id="pb-start-btn" type="button">Start Practicing</button>
-    </div>
-
-    <!-- ═══ PRACTICE — one question at a time renders into #pb-stage here,
-         only once "Start Practicing" (or a weak-spot shortcut) has been
-         pressed. ═══ -->
-    <div id="pb-practice" style="display:none;">
-      <a href="#" class="vp-change-link" id="pb-change-link">&larr; Change topics</a>
-      <div class="pb-stage" id="pb-stage"></div>
-    </div>
-
-    <a href="#" class="menu-back-link" id="practice-bank-back">&larr; Back to resources</a>
   </div>
 </div>
 
@@ -1620,8 +1552,6 @@
 
 <script src="banks.js"></script>
 <script src="practice-tests.js"></script>
-<script src="math-question-bank.js"></script>
-<script src="reading-question-bank.js"></script>
 <script>
 (function () {
   'use strict';
@@ -2800,7 +2730,6 @@
       else if (route === 'files' || route === 'college-prep') { renderResources(route); show('screen-resources'); }
       else if (route === 'sat-resources') { show('screen-sat-resources'); }
       else if (route === 'vocab') { show('screen-vocab'); if (window.vocabModuleInit) window.vocabModuleInit(); }
-      else if (route === 'practice-bank') { show('screen-practice-bank'); if (window.pbModuleInit) window.pbModuleInit(); }
       else if (route === 'practice-tests') {
         // Reachable from two places now (home screen and SAT Resources) —
         // remember which, so "Back" returns where the student came from
@@ -2814,7 +2743,6 @@
   });
   document.getElementById('sat-resources-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-menu'); });
   document.getElementById('vocab-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-sat-resources'); });
-  document.getElementById('practice-bank-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-sat-resources'); });
   var ptListReturnScreen = 'screen-menu';
   document.getElementById('pt-list-back').addEventListener('click', function (e) { e.preventDefault(); show(ptListReturnScreen); });
   document.getElementById('incorrect-questions-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-sat-resources'); });
@@ -4785,8 +4713,6 @@
       renderPracticeTestList(); show('screen-practice-tests');
     } else if (state.screen === 'screen-vocab') {
       show('screen-vocab'); if (window.vocabModuleInit) window.vocabModuleInit();
-    } else if (state.screen === 'screen-practice-bank') {
-      show('screen-practice-bank'); if (window.pbModuleInit) window.pbModuleInit();
     } else if (state.screen === 'screen-incorrect-questions') {
       show('screen-incorrect-questions'); if (window.iqModuleInit) window.iqModuleInit();
     } else {
@@ -6163,593 +6089,17 @@
 })();
 </script>
 
-<!-- ═══ QUESTION PRACTICE MODULE — isolated (its own closure), same pattern
-     as the vocabulary module above. Reads window.SAT_PRACTICE_TESTS (see
-     practice-tests.js — Luca's hand-written R&W/Math bank with a full
-     explanation for every answer choice) rather than banks.js (the
-     diagnostic bank, which has no explanations and isn't meant for
-     open-ended practice). Exposes window.pbModuleInit(), called by the
-     portal when this screen is opened, same as vocabModuleInit(). ═══ -->
-<script>
-(function () {
-  'use strict';
-  var SESSION_CAP = 20; // a practice round stops here even if more questions match, so it stays a sitting rather than a slog
-
-  function escHtml(s) {
-    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  }
-  function sameSkill(a, b) { return String(a || '').trim().toLowerCase() === String(b || '').trim().toLowerCase(); }
-  function shuffle(arr) {
-    var a = arr.slice();
-    for (var i = a.length - 1; i > 0; i--) {
-      var j = Math.floor(Math.random() * (i + 1));
-      var t = a[i]; a[i] = a[j]; a[j] = t;
-    }
-    return a;
-  }
-  function sectionLabel(key) {
-    if (key === 'readingWriting') return 'Reading & Writing';
-    if (key === 'math') return 'Math';
-    return key;
-  }
-  var LETTERS = ['A', 'B', 'C', 'D', 'E'];
-  var DIFFICULTIES = ['easy', 'medium', 'hard'];
-  function difficultyLabel(d) { return d.charAt(0).toUpperCase() + d.slice(1); }
-
-  /* ═══ FLATTEN THE BANK ═══
-     window.SAT_PRACTICE_TESTS is an array of full tests, each with
-     sections.{math,readingWriting}.{module1,module2Easier,module2Harder}
-     arrays of questions (see practice-tests.js's schema comment). Module 2
-     Easier/Harder are two DIFFERENT sets of questions (not duplicates of
-     each other), so both are included here — the "pick one variant" rule
-     is specific to adaptive scoring on a real/diagnostic attempt, not to
-     open-ended practice, where more question variety is strictly better. */
-  var pool = [];
-  (function flattenPool() {
-    var tests = window.SAT_PRACTICE_TESTS || [];
-    tests.forEach(function (test) {
-      var sections = test.sections || {};
-      Object.keys(sections).forEach(function (sectionKey) {
-        var sec = sections[sectionKey] || {};
-        Object.keys(sec).forEach(function (moduleKey) {
-          (sec[moduleKey] || []).forEach(function (q) {
-            pool.push({
-              testId: test.id, testTitle: test.title, section: sectionKey, module: moduleKey,
-              domain: q.domain, skill: q.skill || q.domain, difficulty: q.difficulty || 'medium',
-              type: q.type, text: q.text, choices: q.choices, correct: q.correct,
-              choiceNotes: q.choiceNotes || [], answer: q.answer, explanation: q.explanation || ''
-            });
-          });
-        });
-      });
-    });
-
-    // window.MATH_QUESTION_BANK (math-question-bank.js) is Luca's own
-    // flat, ever-growing Math bank — not split into test modules like
-    // SAT_PRACTICE_TESTS, just one array per skill, added straight to the
-    // same pool tagged as section "math" so it's indistinguishable from
-    // the rest once flattened (same filters, same weak-spot matching).
-    (window.MATH_QUESTION_BANK || []).forEach(function (q) {
-      pool.push({
-        testId: 'luca-math-bank', testTitle: 'Math Question Bank', section: 'math', module: 'n/a',
-        domain: q.domain, skill: q.skill || q.domain, difficulty: q.difficulty || 'medium',
-        type: q.type, text: q.text, choices: q.choices, correct: q.correct,
-        choiceNotes: q.choiceNotes || [], answer: q.answer, explanation: q.explanation || ''
-      });
-    });
-
-    // window.READING_QUESTION_BANK (reading-question-bank.js) — same flat-
-    // pool treatment as MATH_QUESTION_BANK above, tagged section
-    // "readingWriting" (matching SAT_PRACTICE_TESTS' own key for this
-    // section, so sectionLabel() below already renders it correctly as
-    // "Reading & Writing"). Unlike the Math bank, this one is entirely
-    // officially-sourced content, not Luca's own writing — see that
-    // file's own header comment.
-    (window.READING_QUESTION_BANK || []).forEach(function (q) {
-      pool.push({
-        testId: 'reading-question-bank', testTitle: 'Reading & Writing Question Bank', section: 'readingWriting', module: 'n/a',
-        domain: q.domain, skill: q.skill || q.domain, difficulty: q.difficulty || 'medium',
-        type: q.type, text: q.text, choices: q.choices, correct: q.correct,
-        choiceNotes: q.choiceNotes || [], answer: q.answer, explanation: q.explanation || ''
-      });
-    });
-  })();
-
-  // Taxonomy derived from the pool itself (not hardcoded) so it grows
-  // automatically as Luca adds more tests to practice-tests.js — no code
-  // change needed here when SAT Test 2 (or ACT tests, eventually) show up.
-  var sectionKeys = [];
-  var domainsBySection = {}; // sectionKey -> [domain, ...]
-  var skillsByDomain = {};   // domain -> [skill, ...]
-  pool.forEach(function (q) {
-    if (sectionKeys.indexOf(q.section) === -1) sectionKeys.push(q.section);
-    if (!domainsBySection[q.section]) domainsBySection[q.section] = [];
-    if (domainsBySection[q.section].indexOf(q.domain) === -1) domainsBySection[q.section].push(q.domain);
-    if (!skillsByDomain[q.domain]) skillsByDomain[q.domain] = [];
-    if (skillsByDomain[q.domain].indexOf(q.skill) === -1) skillsByDomain[q.domain].push(q.skill);
-  });
-
-  // Nothing pre-selected at any level — a student builds up the filter
-  // from scratch, and the pool count (see updatePoolCount()) stays at 0
-  // with Start disabled until something's actually chosen.
-  var selSections = [];
-  var selDomains = [];
-  var selSkills = [];
-  var selDifficulties = [];
-  // Domain/skill pill OPTIONS (not selections) fall back to the full list
-  // whenever nothing's chosen at the level above, so the setup screen
-  // isn't just empty boxes before a student picks a section — they can
-  // click straight into a domain or skill pill in any order. Once a
-  // section (or domain) IS chosen, the level below narrows to match it,
-  // same cascading behavior as before.
-  function availableDomains() {
-    var sections = selSections.length ? selSections : sectionKeys;
-    var out = [];
-    sections.forEach(function (s) { (domainsBySection[s] || []).forEach(function (d) { if (out.indexOf(d) === -1) out.push(d); }); });
-    return out;
-  }
-  function availableSkills() {
-    var domains = selDomains.length ? selDomains : Object.keys(skillsByDomain);
-    var out = [];
-    domains.forEach(function (d) { (skillsByDomain[d] || []).forEach(function (s) { if (out.indexOf(s) === -1) out.push(s); }); });
-    return out;
-  }
-
-  var sessionQuestions = [];
-  var idx = 0, score = 0;
-  var started = false;
-
-  var setupEl, practiceEl, stageEl, weakPanelEl, poolCountEl, startBtn, changeLink;
-  var sectionPillsEl, domainPillsEl, skillPillsEl, difficultyPillsEl;
-
-  function currentFilteredPool() {
-    return pool.filter(function (q) {
-      return selSections.indexOf(q.section) !== -1 &&
-        selDomains.indexOf(q.domain) !== -1 &&
-        selSkills.indexOf(q.skill) !== -1 &&
-        selDifficulties.indexOf(q.difficulty) !== -1;
-    });
-  }
-
-  // Generic pill-row renderer shared by the section/domain/skill/
-  // difficulty rows below — mirrors the vocabulary module's renderPills().
-  // Plain toggle (clicking an "on" pill turns off only that one — no
-  // "must keep at least one" floor, since starting with nothing selected
-  // is the whole point). The "All" pill remembers whatever was selected
-  // right before it was clicked (via snapBox, a small {value} holder that
-  // outlives any single render since it's created once by the caller,
-  // not here) so clicking "All" again restores that instead of clearing.
-  function renderPillRow(container, options, labelFn, selectedArr, snapBox, onChange) {
-    container.innerHTML = '';
-    if (options.length > 1) {
-      var isAllOn = options.length > 0 && selectedArr.length === options.length;
-      var all = document.createElement('button');
-      all.type = 'button';
-      all.className = 'vp-pill' + (isAllOn ? ' on' : '');
-      all.textContent = 'All';
-      all.addEventListener('click', function () {
-        if (isAllOn) {
-          var restore = (snapBox.value || []).filter(function (o) { return options.indexOf(o) !== -1; });
-          selectedArr.splice(0, selectedArr.length);
-          restore.forEach(function (o) { selectedArr.push(o); });
-          snapBox.value = null;
-        } else {
-          snapBox.value = selectedArr.slice();
-          selectedArr.splice(0, selectedArr.length);
-          options.forEach(function (o) { selectedArr.push(o); });
-        }
-        onChange();
-      });
-      container.appendChild(all);
-    }
-    options.forEach(function (opt) {
-      var b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'vp-pill' + (selectedArr.indexOf(opt) !== -1 ? ' on' : '');
-      b.textContent = labelFn(opt);
-      b.addEventListener('click', function () {
-        var i = selectedArr.indexOf(opt);
-        if (i === -1) selectedArr.push(opt); else selectedArr.splice(i, 1);
-        onChange();
-      });
-      container.appendChild(b);
-    });
-  }
-
-  var sectionSnapBox = { value: null };
-  var domainSnapBox = { value: null };
-  var skillSnapBox = { value: null };
-  var difficultySnapBox = { value: null };
-
-  function renderSectionPills() {
-    renderPillRow(sectionPillsEl, sectionKeys, sectionLabel, selSections, sectionSnapBox, function () {
-      var newDomains = availableDomains();
-      selDomains = selDomains.filter(function (d) { return newDomains.indexOf(d) !== -1; });
-      renderSectionPills(); // refresh this row's own "on" states
-      onDomainsChanged();
-    });
-  }
-  function renderDomainPills() {
-    renderPillRow(domainPillsEl, availableDomains(), function (d) { return d; }, selDomains, domainSnapBox, function () { onDomainsChanged(); });
-  }
-  function onDomainsChanged() {
-    var newSkills = availableSkills();
-    selSkills = selSkills.filter(function (s) { return newSkills.indexOf(s) !== -1; });
-    renderDomainPills();
-    renderSkillPills();
-    updatePoolCount();
-  }
-  function renderSkillPills() {
-    renderPillRow(skillPillsEl, availableSkills(), function (s) { return s; }, selSkills, skillSnapBox, function () { renderSkillPills(); updatePoolCount(); });
-  }
-  function renderDifficultyPills() {
-    renderPillRow(difficultyPillsEl, DIFFICULTIES, difficultyLabel, selDifficulties, difficultySnapBox, function () { renderDifficultyPills(); updatePoolCount(); });
-  }
-  function updatePoolCount() {
-    var n = currentFilteredPool().length;
-    poolCountEl.textContent = (!selSections.length || !selDomains.length || !selSkills.length || !selDifficulties.length)
-      ? 'Choose at least one option in each row to see matches.'
-      : (n + ' question' + (n === 1 ? '' : 's') + ' match your filters' + (n > SESSION_CAP ? ' (practicing ' + SESSION_CAP + ' at a time)' : ''));
-    startBtn.disabled = n === 0;
-  }
-
-  /* ═══ WEAK-SPOT BUTTON ═══
-     Just one button — no breakdown list. Reflects the MOST RECENT
-     diagnostic or practice-test attempt only (whichever came last —
-     diagnostics don't get special treatment), fetched from the backend
-     via window.fetchPortalProgress() (see the main script block) so it's
-     correct regardless of which device took that attempt — this module
-     is its own closure so it can't see the backend/localStorage details
-     directly, same as this module reuses window.getPortalStudentKey() for
-     the key itself.
-
-     Clicking it finds the single worst-performing skill the bank actually
-     has questions for (ties broken by whichever has more attempts behind
-     it — a steadier signal than one lucky/unlucky question), then
-     highlights it: sets the section/domain/skill pills to just that skill
-     and difficulty to "all," and re-renders the pill rows so the student
-     can see exactly what got selected. It does NOT jump straight into
-     practice — Start Practicing (already on screen) is still the one
-     button that begins a round, same as picking topics manually. */
-  function renderWeakPanel() {
-    weakPanelEl.innerHTML = '<button class="vp-still-btn" id="pb-weak-btn" type="button" disabled>Practice My Weak Spots</button>' +
-      '<div class="pb-empty-note">Loading your latest results…</div>';
-    if (!window.fetchPortalProgress) { renderWeakPanelWith({}); return; }
-    window.fetchPortalProgress(function (progress) { renderWeakPanelWith(progress.skillStats || {}); });
-  }
-  function renderWeakPanelWith(bySkill) {
-    var rows = Object.keys(bySkill).map(function (k) { return bySkill[k]; }).filter(function (r) { return r && r.total > 0; });
-
-    if (!rows.length) {
-      weakPanelEl.innerHTML = '<button class="vp-still-btn" id="pb-weak-btn" type="button" disabled>Practice My Weak Spots</button>' +
-        '<div class="pb-empty-note">Complete a diagnostic or practice test first so we know what to focus on.</div>';
-      return;
-    }
-    rows.forEach(function (r) { r.pct = Math.round((r.correct / r.total) * 100); });
-    rows.sort(function (a, b) { return a.pct - b.pct || b.total - a.total; });
-    var covered = rows.filter(function (r) { return pool.some(function (q) { return sameSkill(q.skill, r.skill); }); });
-    var worst = covered[0] || null;
-
-    if (!worst) {
-      weakPanelEl.innerHTML = '<button class="vp-still-btn" id="pb-weak-btn" type="button" disabled>Practice My Weak Spots</button>' +
-        '<div class="pb-empty-note">We don’t have practice questions for your weak spots yet — pick topics below instead.</div>';
-      return;
-    }
-
-    weakPanelEl.innerHTML = '<button class="vp-still-btn" id="pb-weak-btn" type="button">Practice My Weak Spots</button>';
-    document.getElementById('pb-weak-btn').addEventListener('click', function () {
-      var match = pool.filter(function (q) { return sameSkill(q.skill, worst.skill); })[0];
-      if (!match) return;
-      selSections = [match.section];
-      selDomains = [match.domain];
-      selSkills = [match.skill];
-      selDifficulties = DIFFICULTIES.slice();
-      renderSectionPills();
-      renderDomainPills();
-      renderSkillPills();
-      renderDifficultyPills();
-      updatePoolCount();
-    });
-  }
-
-  function enterPracticeUI() {
-    setupEl.style.display = 'none';
-    practiceEl.style.display = '';
-  }
-  function backToSetup() {
-    practiceEl.style.display = 'none';
-    setupEl.style.display = '';
-    stageEl.innerHTML = '';
-    renderWeakPanel();
-    updatePoolCount();
-  }
-
-  function startSession(questions) {
-    sessionQuestions = shuffle(questions).slice(0, SESSION_CAP);
-    idx = 0; score = 0;
-    enterPracticeUI();
-    renderQuestion();
-  }
-
-  /* ═══ QUESTION FLOW ═══
-     Wrong choices don't reveal the answer — they mark themselves wrong,
-     show their own explanation right under them, and get locked out (via
-     triedWrong) so a student can't waste a click retrying something
-     already ruled out, but every other untried choice stays live. Next
-     Question only appears once the correct choice has actually been
-     picked (questionSolved), matching "keep trying until you get it."
-     Scoring only counts the FIRST attempt on each question — otherwise
-     every question would eventually count as correct, since getting there
-     is required to move on, and the score would be meaningless. ABC
-     (answer eliminator) reuses the diagnostic's own dx-choice/dx-elim
-     markup and CSS so it looks and behaves identically to the one
-     students already know from the real diagnostic. */
-  var eliminatorOn = true; // persists across the whole practice session, same as the diagnostic — matches the real digital SAT, which starts with Answer Eliminator on
-  var currentElims = [];    // indices crossed out on the CURRENT question only
-  var triedWrong = [];      // indices already tried and shown wrong, on the CURRENT question
-  var firstAttemptRight = null; // null until the first attempt on this question; true/false after
-  var questionSolved = false;
-  var frAttempts = 0; // wrong grid-in guesses on the CURRENT question — the answer is revealed after 3
-
-  function renderQuestion() {
-    if (idx >= sessionQuestions.length) { renderSummary(); return; }
-    currentElims = [];
-    triedWrong = [];
-    firstAttemptRight = null;
-    questionSolved = false;
-    frAttempts = 0;
-    renderQuestionShell();
-  }
-
-  // Same fallback split used on the diagnostic/practice-test screen (see
-  // splitRwPassage() there) — most R&W questions bake their stimulus
-  // straight into q.text, ending in the actual question sentence, joined
-  // by a "<br><br>". Splitting it here keeps the stimulus visually
-  // separated from the question, matching the real digital SAT's layout,
-  // even though this untimed practice tool doesn't have the timed test's
-  // Section/Module topbar chrome to build a true two-column split around.
-  function splitPbPassage(q) {
-    if (q.section !== 'readingWriting') return null;
-    var text = q.text || '';
-    var idx = text.lastIndexOf('<br><br>');
-    if (idx === -1) return null;
-    return { passage: text.slice(0, idx), question: text.slice(idx + 8) };
-  }
-
-  function renderQuestionShell() {
-    var q = sessionQuestions[idx];
-    var split = splitPbPassage(q);
-    var passageHtml = split ? '<div class="pb-passage">' + split.passage + '</div>' : '';
-    var questionText = split ? split.question : q.text;
-    var html = passageHtml + '<div class="pb-q-meta"><span>' + escHtml(q.domain) + ' → ' + escHtml(q.skill) + '</span>' +
-      '<button class="dx-abc-btn' + (eliminatorOn ? ' on' : '') + '" id="pb-abc-toggle" type="button" title="Answer Eliminator">ABC</button></div>' +
-      '<div class="pb-q-card"><div class="pb-q-text">' + questionText + '</div>' +
-      (q.type === 'mc'
-        ? '<div class="dx-choices' + (eliminatorOn ? ' eliminator-on' : '') + '" id="pb-choices"></div>'
-        : '<div class="pb-fr-row"><input type="text" id="pb-fr-input" inputmode="decimal" placeholder="Your answer" autocomplete="off"><button class="pb-fr-submit" id="pb-fr-submit" type="button">Check</button></div><div id="pb-fr-feedback"></div>') +
-      '</div><div class="pb-actions" id="pb-actions"></div>';
-    stageEl.innerHTML = html;
-
-    document.getElementById('pb-abc-toggle').addEventListener('click', function () {
-      eliminatorOn = !eliminatorOn;
-      document.getElementById('pb-abc-toggle').classList.toggle('on', eliminatorOn);
-      var choicesEl = document.getElementById('pb-choices');
-      if (choicesEl) choicesEl.classList.toggle('eliminator-on', eliminatorOn);
-    });
-
-    if (q.type === 'mc') {
-      renderChoices(q);
-    } else {
-      var input = document.getElementById('pb-fr-input');
-      var submitBtn = document.getElementById('pb-fr-submit');
-      submitBtn.addEventListener('click', function () { submitFr(q, input); });
-      input.addEventListener('keydown', function (e) { if (e.key === 'Enter') submitFr(q, input); });
-      setTimeout(function () { input.focus(); }, 10);
-    }
-  }
-
-  function renderChoices(q) {
-    var choicesEl = document.getElementById('pb-choices');
-    choicesEl.innerHTML = '';
-    q.choices.forEach(function (c, i) {
-      var isElim = currentElims.indexOf(i) !== -1;
-      var isTriedWrong = triedWrong.indexOf(i) !== -1;
-      var isCorrectRevealed = questionSolved && i === q.correct;
-      var row = document.createElement('div');
-      row.className = 'dx-choice' + (isElim ? ' eliminated' : '') + (isTriedWrong ? ' pb-tried-wrong' : '') + (isCorrectRevealed ? ' pb-right' : '');
-      row.innerHTML = '<span class="dx-choice-letter">' + LETTERS[i] + '</span><span class="dx-choice-text">' + c + '</span><span class="dx-elim" title="Cross out this answer">&times;</span>';
-
-      if (!questionSolved) {
-        row.querySelector('.dx-elim').addEventListener('click', function (ev) {
-          ev.stopPropagation();
-          var at = currentElims.indexOf(i);
-          if (at === -1) currentElims.push(i); else currentElims.splice(at, 1);
-          renderChoices(q);
-        });
-        if (!isTriedWrong) {
-          row.addEventListener('click', function () {
-            // Clicking a crossed-out choice picks it anyway (and un-crosses
-            // it), same as the diagnostic — the × is a note-to-self, not a lock.
-            var at = currentElims.indexOf(i);
-            if (at !== -1) currentElims.splice(at, 1);
-            chooseAnswer(q, i);
-          });
-        } else {
-          row.style.cursor = 'default';
-        }
-      } else {
-        row.style.cursor = 'default';
-      }
-      choicesEl.appendChild(row);
-
-      if (isTriedWrong || isCorrectRevealed) {
-        var note = q.choiceNotes[i];
-        if (note) {
-          var noteEl = document.createElement('div');
-          noteEl.className = 'pb-note ' + (isCorrectRevealed ? 'pb-note-correct' : 'pb-note-wrong');
-          noteEl.textContent = note;
-          choicesEl.appendChild(noteEl);
-        }
-      }
-    });
-
-    // Full, unabridged explanation — Luca's own complete rationale, not a
-    // shortened per-choice note — shown once the question is solved, same
-    // spot the grid-in questions show theirs.
-    if (questionSolved && q.explanation) {
-      var explainEl = document.createElement('div');
-      explainEl.className = 'pb-explain';
-      explainEl.innerHTML = '<div class="pb-explain-hed">Full Explanation</div>' + q.explanation;
-      choicesEl.appendChild(explainEl);
-    }
-
-    if (questionSolved) showNextAction();
-  }
-
-  function chooseAnswer(q, i) {
-    var isRight = i === q.correct;
-    if (firstAttemptRight === null) firstAttemptRight = isRight;
-    if (isRight) {
-      questionSolved = true;
-      if (firstAttemptRight) score++;
-    } else if (triedWrong.indexOf(i) === -1) {
-      triedWrong.push(i);
-    }
-    renderChoices(q);
-  }
-
-  function submitFr(q, input) {
-    if (questionSolved) return;
-    var val = parseFloat(input.value);
-    var isRight = !isNaN(val) && Math.abs(val - q.answer) < 0.05;
-    if (firstAttemptRight === null) firstAttemptRight = isRight;
-    var fb = document.getElementById('pb-fr-feedback');
-    if (isRight) {
-      questionSolved = true;
-      if (firstAttemptRight) score++;
-      input.disabled = true;
-      document.getElementById('pb-fr-submit').disabled = true;
-      fb.innerHTML = '<div class="pb-note pb-note-correct">Correct — ' + escHtml(q.answer) + '</div>' +
-        (q.explanation ? '<div class="pb-explain"><div class="pb-explain-hed">Full Explanation</div>' + q.explanation + '</div>' : '');
-      showNextAction();
-    } else {
-      frAttempts++;
-      if (frAttempts >= 3) {
-        // Three wrong guesses — reveal the answer rather than let a
-        // student get stuck with no way forward. Doesn't count toward
-        // the score either way; firstAttemptRight already captured above.
-        questionSolved = true;
-        input.disabled = true;
-        document.getElementById('pb-fr-submit').disabled = true;
-        fb.innerHTML = '<div class="pb-note pb-note-wrong">Not quite — the answer is ' + escHtml(q.answer) + '</div>' +
-          (q.explanation ? '<div class="pb-explain"><div class="pb-explain-hed">Full Explanation</div>' + q.explanation + '</div>' : '');
-        showNextAction();
-      } else {
-        fb.innerHTML = '<div class="pb-note pb-note-wrong">Not quite — try again (' + (3 - frAttempts) + ' attempt' + (3 - frAttempts === 1 ? '' : 's') + ' left before the answer is revealed).</div>';
-      }
-    }
-  }
-
-  function showNextAction() {
-    document.getElementById('pb-actions').innerHTML = '<button class="pb-next-btn" id="pb-next-btn" type="button">' +
-      (idx + 1 < sessionQuestions.length ? 'Next Question' : 'See Results') + '</button>';
-    document.getElementById('pb-next-btn').addEventListener('click', function () { idx++; renderQuestion(); });
-  }
-
-  function renderSummary() {
-    var pct = sessionQuestions.length ? Math.round((score / sessionQuestions.length) * 100) : 0;
-    stageEl.innerHTML = '<div class="pb-summary">' +
-      '<div class="pb-summary-score">' + score + ' / ' + sessionQuestions.length + '</div>' +
-      '<div class="pb-summary-sub">' + pct + '% correct on this round</div>' +
-      '<div class="pb-summary-actions">' +
-      '<button class="vp-primary" id="pb-again-btn" type="button" style="width:auto; padding:0.8rem 1.4rem;">Practice Again</button>' +
-      '<button class="pb-next-btn" id="pb-change-btn" type="button">Change Topics</button>' +
-      '</div></div>';
-    document.getElementById('pb-again-btn').addEventListener('click', function () { startSession(currentFilteredPool()); });
-    document.getElementById('pb-change-btn').addEventListener('click', backToSetup);
-  }
-
-  window.pbModuleInit = function () {
-    // Element lookups are cheap/idempotent, so these run every open (not
-    // just the first) — needed so weakPanelEl is valid before the
-    // every-open renderWeakPanel() call below, even on repeat visits.
-    setupEl = document.getElementById('pb-setup');
-    practiceEl = document.getElementById('pb-practice');
-    stageEl = document.getElementById('pb-stage');
-    weakPanelEl = document.getElementById('pb-weak-panel');
-    poolCountEl = document.getElementById('pb-pool-count');
-    startBtn = document.getElementById('pb-start-btn');
-    sectionPillsEl = document.getElementById('pb-section-pills');
-    domainPillsEl = document.getElementById('pb-domain-pills');
-    skillPillsEl = document.getElementById('pb-skill-pills');
-    difficultyPillsEl = document.getElementById('pb-difficulty-pills');
-    changeLink = document.getElementById('pb-change-link');
-
-    if (!pool.length) {
-      setupEl.innerHTML = '<div class="pb-empty-note">No practice questions are loaded yet — check back soon.</div>';
-      return;
-    }
-
-    // Weak-spot data reflects the MOST RECENT attempt, so it's refreshed
-    // on every visit to this screen (unlike the one-time setup below) —
-    // otherwise a practice test finished after this screen's first visit
-    // this session wouldn't show up here until a full page reload.
-    renderWeakPanel();
-
-    if (started) return;
-    started = true;
-
-    renderSectionPills();
-    renderDomainPills();
-    renderSkillPills();
-    renderDifficultyPills();
-    updatePoolCount();
-
-    startBtn.addEventListener('click', function () { startSession(currentFilteredPool()); });
-    changeLink.addEventListener('click', function (e) { e.preventDefault(); backToSetup(); });
-
-    // ═══ KEYBOARD SELECTION — A/B/C/D (and E, for a rare 5-choice
-    // question) pick the matching choice, same idea as the diagnostic's
-    // own letter-key shortcut. Registered once; checks at fire-time
-    // whether the practice-bank screen is actually showing and a live mc
-    // question is on screen, same guard pattern the vocab module uses for
-    // its own keyboard nav. Respects the same lockouts clicking does —
-    // already-solved or already-tried-wrong choices don't respond. ═══
-    document.addEventListener('keydown', function (e) {
-      var scr = document.getElementById('screen-practice-bank');
-      if (!scr || !scr.classList.contains('active')) return;
-      if (questionSolved) return;
-      var choicesEl = document.getElementById('pb-choices');
-      if (!choicesEl) return; // not mid-question, or it's a grid-in question
-      var tag = (document.activeElement && document.activeElement.tagName) || '';
-      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
-      var letterIdx = ['a', 'b', 'c', 'd', 'e'].indexOf(e.key.toLowerCase());
-      if (letterIdx === -1) return;
-      var q = sessionQuestions[idx];
-      if (!q || q.type !== 'mc' || letterIdx >= q.choices.length) return;
-      if (triedWrong.indexOf(letterIdx) !== -1) return; // already tried and wrong — ignore, matches click lockout
-      e.preventDefault();
-      var at = currentElims.indexOf(letterIdx);
-      if (at !== -1) currentElims.splice(at, 1);
-      chooseAnswer(q, letterIdx);
-    });
-  };
-})();
-</script>
-
 <!-- ═══ MY INCORRECT QUESTIONS MODULE — isolated (its own closure), same
-     pattern as the vocabulary/practice-bank modules above. Read-only
-     review: fetches this student's synced data from the backend via
-     window.fetchPortalProgress() (see the main script block — same
-     backend-first, local-fallback source the Question Practice module's
-     weak-spot panel uses) and renders each missed question with the
+     pattern as the vocabulary module above. Read-only review: fetches this
+     student's synced data from the backend via window.fetchPortalProgress()
+     (see the main script block) and renders each missed question with the
      student's answer and the correct one, grouped by section then domain,
      filterable by section/domain/skill/difficulty. Nothing here is
      interactive in the "answer it" sense — no scoring, no retry state —
-     since this is a review of what already happened, not a new practice
-     round. Exposes window.iqModuleInit(), called every time this screen
-     opens (unlike vocab/practice-bank's one-time init) so it always
-     reflects the latest attempt, from any device. ═══ -->
+     since this is a review of what already happened, not a practice round.
+     Exposes window.iqModuleInit(), called every time this screen opens
+     (unlike vocab's one-time init) so it always reflects the latest
+     attempt, from any device. ═══ -->
 <script>
 (function () {
   'use strict';
