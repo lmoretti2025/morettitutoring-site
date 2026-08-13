@@ -1635,6 +1635,46 @@
   }
   var APPS_SCRIPT_URL = window.APPS_SCRIPT_URL;
 
+  /* ═══ BACKEND POST WITH RETRY ═══
+     Apps Script Web Apps are genuinely flaky on the client side: a call
+     can take several seconds on a cold start, and the 302 hop to
+     script.googleusercontent.com intermittently fails CORS or is dropped
+     by a phone switching networks. Critically, when that happens doPost
+     has usually ALREADY RUN server-side — the row is written and the
+     email is sent — but fetch() still rejects, so the student sees a
+     scary "couldn't deliver your results" (or "can't log in") message for
+     a request that actually succeeded.
+
+     A single blip should not surface as a hard failure. This retries a
+     few times with backoff before giving up, which turns the vast
+     majority of those false alarms back into successes.
+
+     Deliberately NOT used for the fire-and-forget calls that already
+     handle their own retries (markDiagnosticTaken) or that are safe to
+     silently drop (nextSession polling). */
+  function postToBackend(payload, opts) {
+    opts = opts || {};
+    var attempts = opts.attempts || 3;
+    var delayMs = opts.delayMs || 900;
+    function attempt(n) {
+      return fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) })
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+          // A well-formed { ok:false } is a real answer from the server
+          // (bad key, email mismatch) — never retry those, the answer
+          // won't change and retrying would just stall the student.
+          if (data && typeof data.ok !== 'undefined') return data;
+          throw new Error('malformed_response');
+        })
+        .catch(function (err) {
+          if (n >= attempts) throw err;
+          return new Promise(function (resolve) { setTimeout(resolve, delayMs * n); })
+            .then(function () { return attempt(n + 1); });
+        });
+    }
+    return attempt(1);
+  }
+
   // How many days a brand-new key's SAT Resources card stays locked after
   // their first login (currentStudent.grantedAt), regardless of diagnostic
   // status — see applyTestPrepGating() below. Change this single number to
@@ -2005,10 +2045,9 @@
   // don't handle. Returns a parsed response object, or { ok:false,
   // error:'network' } if the request itself failed (offline, blocked, etc).
   function callAuth(key, email, name) {
-    return fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      body: JSON.stringify({ action: 'auth', key: key, email: email || '', name: name || '' })
-    }).then(function (res) { return res.json(); })
+    // Retries on transient failures (see postToBackend) so a single Apps
+    // Script cold start or dropped redirect doesn't read as "can't log in".
+    return postToBackend({ action: 'auth', key: key, email: email || '', name: name || '' })
       .catch(function () { return { ok: false, error: 'network' }; });
   }
 
@@ -3893,6 +3932,7 @@
   // even when the target question is the one already loaded underneath it.
   function jumpToQuestion(i) {
     closeNavModal();
+    commitPendingFrAnswer(); // covers the i === current path below, which re-renders without going through goTo()
     var wasChecking = dxMain.classList.contains('dx-checking');
     dxMain.classList.remove('dx-checking');
     if (i === current) { if (wasChecking) { beginQuestionTime(current); renderQuestion(); } return; }
@@ -3989,6 +4029,25 @@
     return true;
   }
 
+  /* Commits whatever is currently typed in the grid-in box into answers[]
+     before we navigate away from the question.
+
+     This exists because renderQuestion() repopulates frInput from
+     answers[current] — so any typed-but-uncommitted value is destroyed the
+     moment we re-render. recordFrAnswer() used to be called ONLY from the
+     Next button and the Enter key, which meant a student who typed a
+     grid-in answer and then left by ANY other route — the question-grid
+     tiles, the jump dropdown, the Back button, the arrow keys, or "Go to
+     Review Page" — silently lost that answer. It showed up as an
+     unanswered question on the review screen and as a blank in the
+     submitted report. Every navigation path now funnels through here. */
+  function commitPendingFrAnswer() {
+    var qs = activeQuestions();
+    if (!qs.length || current < 0 || current >= qs.length) return;
+    if (qs[current].type !== 'fr') return;
+    recordFrAnswer();
+  }
+
   function submitFrAnswer() {
     if (!recordFrAnswer()) return;
     renderQuestion(); // records the answer and enables Next — doesn't advance on its own
@@ -3999,6 +4058,10 @@
     submitFrAnswer();
     if (!nextBtn.disabled) nextBtn.click(); // records the answer, then advances — same as pressing Enter on an MC question
   });
+  // Backstop: if the box loses focus for any reason not covered by the
+  // navigation hooks above, bank the value then too rather than trusting
+  // that every future caller remembers to.
+  frInput.addEventListener('blur', function () { commitPendingFrAnswer(); });
   frInput.addEventListener('input', function () {
     // Grid-in answers are numeric only (a plain number, a decimal, a
     // negative sign, or a simple a/b fraction) — strip anything else as the
@@ -4018,6 +4081,7 @@
 
   function goTo(index) {
     var qs = activeQuestions();
+    commitPendingFrAnswer(); // before the early return — a typed grid-in must survive even a no-op navigation
     if (index < 0 || index >= qs.length || index === current) return;
     flushQuestionTime();
     card.classList.add('fading');
@@ -4083,6 +4147,7 @@
     return (sectionHasModules(secKey) && moduleStage === 'module1') ? 'Submit Module' : (isLastSection() ? 'Submit Diagnostic' : 'Next Section');
   }
   function showCheckScreen() {
+    commitPendingFrAnswer(); // "Go to Review Page" from the nav modal doesn't pass through goTo()
     flushQuestionTime();
     var secKey = activeSectionKeys[sectionIndex];
     var bank = bankFor(secKey);
@@ -4527,23 +4592,23 @@
       document.getElementById('done-message').textContent = 'Nice work! Your results just went to Luca — no need to send anything yourself.';
       statusEl.textContent = 'Sending your results…';
       show('screen-done');
-      fetch(APPS_SCRIPT_URL, {
-        method: 'POST',
-        body: JSON.stringify({
-          action: 'submitPracticeTest',
-          key: currentStudent.key,
-          test: ptDone.title,
-          score: totalCorrect + '/' + totalQuestions,
-          reportLink: reportLink,
-          report: report
-        })
-      }).then(function (res) { return res.json(); })
+      postToBackend({
+        action: 'submitPracticeTest',
+        key: currentStudent.key,
+        test: ptDone.title,
+        score: totalCorrect + '/' + totalQuestions,
+        reportLink: reportLink,
+        report: report
+      })
         .then(function (data) {
           if (data && data.ok) { statusEl.textContent = 'Results delivered.'; }
           else { throw new Error((data && data.error) || 'send_failed'); }
         })
         .catch(function () {
-          statusEl.textContent = 'Couldn\'t deliver your results automatically. Please text Luca at (201) 275-2791 with your key (' + currentStudent.key + ') and score (' + totalCorrect + '/' + totalQuestions + ') so he can follow up.';
+          // Only reached after every retry failed. Even then the send may
+          // well have gone through server-side, so word this as "may not
+          // have" rather than a flat failure.
+          statusEl.textContent = 'Your results may not have sent automatically. Please text Luca at (201) 275-2791 with your key (' + currentStudent.key + ') and score (' + totalCorrect + '/' + totalQuestions + ') so he can confirm.';
           statusEl.classList.add('err');
         });
       practiceTestId = null;
@@ -4599,17 +4664,14 @@
     // was replayable by anyone who viewed the page source — that's removed.
     // Body sent as a plain string (no JSON content-type) to stay within the
     // CORS "simple request" rules Apps Script needs, matching callAuth().
-    fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      body: JSON.stringify({
-        action: 'submitDiagnostic',
-        key: currentStudent.key,
-        test: testChoice,
-        score: totalCorrect + '/' + totalQuestions,
-        reportLink: reportLink,
-        report: report
-      })
-    }).then(function (res) { return res.json(); })
+    postToBackend({
+      action: 'submitDiagnostic',
+      key: currentStudent.key,
+      test: testChoice,
+      score: totalCorrect + '/' + totalQuestions,
+      reportLink: reportLink,
+      report: report
+    })
       .then(function (data) {
         if (data && data.ok) {
           statusEl.textContent = 'Results delivered.';
@@ -4618,7 +4680,10 @@
         }
       })
       .catch(function () {
-        statusEl.textContent = 'Couldn\'t deliver your results automatically. Please text Luca at (201) 275-2791 with your key (' + currentStudent.key + ') and score (' + totalCorrect + '/' + totalQuestions + ') so he can follow up.';
+        // Only reached after every retry failed. Even then the send may
+        // well have gone through server-side, so word this as "may not
+        // have" rather than a flat failure.
+        statusEl.textContent = 'Your results may not have sent automatically. Please text Luca at (201) 275-2791 with your key (' + currentStudent.key + ') and score (' + totalCorrect + '/' + totalQuestions + ') so he can confirm.';
         statusEl.classList.add('err');
       });
   }
