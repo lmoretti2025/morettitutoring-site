@@ -3463,6 +3463,7 @@
   // and moves on, exactly like manually pressing Next Section / Submit.
   function autoSubmitSection() {
     if (activeScreenId !== 'dx-screen') return; // already left this section some other way
+    commitPendingFrAnswer(); // a grid-in value typed right as the clock hits 0 must still count — every other exit path already does this
     finishCurrentModule();
   }
 
@@ -3952,7 +3953,7 @@
 
   function recordFrAnswer() {
     var raw = frInput.value.trim();
-    if (!raw) return false;
+    if (!raw) { answers[current] = null; return false; } // student cleared the box — clear the recorded answer too, don't leave a stale one behind
     answers[current] = { raw: raw, value: parseNumeric(raw) };
     return true;
   }
