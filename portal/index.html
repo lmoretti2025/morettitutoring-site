@@ -3990,7 +3990,7 @@
     var nums = qgrid.querySelectorAll('.dx-qnum');
     nums.forEach(function (el, i) {
       el.classList.toggle('current', i === current);
-      el.classList.toggle('answered', answers[i] !== null);
+      el.classList.toggle('answered', answers[i] != null);
       el.classList.toggle('marked', !!marked[i]);
     });
   }
@@ -4106,11 +4106,20 @@
     } else {
       choicesEl.style.display = 'none';
       frRow.style.display = 'flex';
-      frInput.value = answers[current] !== null ? answers[current].raw : '';
+      // != null (not !==) deliberately catches BOTH null and undefined —
+      // if answers[current] were ever undefined rather than null (a
+      // restored session from a differently-shaped saved state, say),
+      // `!== null` alone would still be true, and answers[current].raw
+      // would then either throw or — if answers[current] itself somehow
+      // WAS a stray object missing .raw — set frInput.value to
+      // undefined, which the DOM silently stringifies to the literal
+      // text "undefined" in the box. Matches suspected reports of
+      // exactly that on a grid-in question.
+      frInput.value = (answers[current] != null && answers[current].raw != null) ? answers[current].raw : '';
     }
 
     backBtn.disabled = current === 0;
-    nextBtn.disabled = answers[current] === null;
+    nextBtn.disabled = answers[current] == null;
     nextBtn.textContent = !isLastQuestionInSection() ? 'Next' : 'Go to Review Page';
     progLabel.textContent = 'Question ' + (current + 1) + ' of ' + qs.length;
     if (qnumTile) qnumTile.textContent = current + 1;
@@ -4210,7 +4219,7 @@
       return;
     }
     if (e.key === 'ArrowLeft') { e.preventDefault(); goTo(current - 1); }
-    else if (e.key === 'ArrowRight') { e.preventDefault(); if (answers[current] !== null) goTo(current + 1); }
+    else if (e.key === 'ArrowRight') { e.preventDefault(); if (answers[current] != null) goTo(current + 1); }
     else if (e.key === 'Enter') { e.preventDefault(); if (!nextBtn.disabled) nextBtn.click(); }
     else {
       var letterIdx = ['a', 'b', 'c', 'd'].indexOf(e.key.toLowerCase());
@@ -4219,7 +4228,7 @@
   });
   nextBtn.addEventListener('click', function () {
     if (activeQuestions()[current].type === 'fr') { recordFrAnswer(); }
-    if (answers[current] === null) return;
+    if (answers[current] == null) return;
     if (!isLastQuestionInSection()) { goTo(current + 1); }
     else { showCheckScreen(); }
   });
@@ -4240,7 +4249,7 @@
       var el = document.createElement('div');
       el.className = 'dx-qnum';
       el.textContent = i + 1;
-      el.classList.toggle('answered', answers[i] !== null);
+      el.classList.toggle('answered', answers[i] != null);
       el.classList.toggle('marked', !!marked[i]);
       el.addEventListener('click', function () { jumpToQuestion(i); });
       checkGrid.appendChild(el);
@@ -4269,11 +4278,25 @@
     finishCurrentModule();
   });
 
+  // q.answer is stored as plain TEXT for fr-type questions — usually a
+  // decimal, but sometimes a fraction string like "1/3" (11 questions
+  // across practice-tests.js as of this fix). This used to compare
+  // given.value (already numeric, via parseNumeric()) directly against
+  // q.answer with no conversion — `0.333 - "1/3"` coerces the string
+  // through Number("1/3"), which is NaN (Number() doesn't parse "/"
+  // syntax the way parseFloat-per-part does), so Math.abs(NaN) < 0.05
+  // was ALWAYS false. Every fraction-formatted answer in the bank was
+  // silently ungradeable — entering the exact correct value still
+  // scored as wrong, no matter what a student typed. Routing q.answer
+  // through the same parseNumeric() the student's own input already
+  // goes through fixes this for both plain decimals (unaffected either
+  // way) and fraction strings alike.
   function isCorrect(q, given) {
     if (given === null || given === undefined) return false;
     if (q.type === 'mc') return given === q.correct;
     var val = given.value;
-    return val !== null && Math.abs(val - q.answer) < 0.05;
+    var target = parseNumeric(String(q.answer));
+    return val !== null && target !== null && Math.abs(val - target) < 0.05;
   }
 
 
@@ -4562,7 +4585,14 @@
         var wasMarked = !!((sec.everMarked && sec.everMarked[i]) || (sec.marked && sec.marked[i]));
         if (wasMarked) { markedTotal++; if (correct) markedCorrect++; }
         if (given === null || given === undefined) skippedCount++;
-        var givenText = (given === null || given === undefined) ? '(skipped)' : (q.type === 'mc' ? LETTERS[given] : given.raw);
+        // Guards the same way report.html's summary table now does — a
+        // corrupted/mismatched-type answers[] entry (an fr-shaped object
+        // in an mc slot, or vice versa) would otherwise silently print
+        // the literal text "undefined" into this line instead of
+        // degrading safely.
+        var givenText = (given === null || given === undefined) ? '(skipped)'
+          : (q.type === 'mc' ? ((typeof given === 'number' && given >= 0 && given < LETTERS.length) ? LETTERS[given] : '(unrecognized)')
+          : ((given && given.raw != null) ? given.raw : '(unrecognized)'));
         lines.push('  ' + (i + 1) + '. [' + q.domain + ' → ' + skillName + '] answered ' + givenText + ' — ' + (correct ? 'correct' : 'incorrect') + (wasMarked ? ' (marked for review)' : ''));
 
         var moduleName = i < mod1Len ? 'module1' : ('module2' + (sec.module2Variant || 'Easier'));
@@ -4832,7 +4862,24 @@
       currentQs = qOrder.map(function (i) { return qsBank[i]; });
       var qs = currentQs;
       if (Array.isArray(state.answers) && state.answers.length === qs.length) {
-        answers = state.answers;
+        // Length matching isn't enough on its own — a saved answer whose
+        // SHAPE doesn't match its own question's current type (an
+        // {raw,value} fr-style object sitting at an mc question's index,
+        // or vice versa) would otherwise be trusted as-is. That mismatch
+        // is exactly what let LETTERS[given] (an mc-only lookup) receive
+        // an object instead of a number, silently evaluating to
+        // undefined and then rendering as the literal text "undefined"
+        // in a review screen instead of failing safely — a real report.
+        // Discarding a mismatched entry back to null is the same
+        // "unanswered" state a skipped question already has, not a new
+        // failure mode.
+        answers = state.answers.map(function (a, i) {
+          var expectType = qs[i] && qs[i].type;
+          if (a === null || a === undefined) return null;
+          if (expectType === 'mc') return (typeof a === 'number') ? a : null;
+          if (expectType === 'fr') return (a && typeof a === 'object' && 'value' in a) ? a : null;
+          return a;
+        });
         marked = (Array.isArray(state.marked) && state.marked.length === qs.length) ? state.marked : new Array(qs.length).fill(false);
         everMarked = (Array.isArray(state.everMarked) && state.everMarked.length === qs.length) ? state.everMarked : new Array(qs.length).fill(false);
         elims = (Array.isArray(state.elims) && state.elims.length === qs.length) ? state.elims : new Array(qs.length).fill(null).map(function () { return []; });
