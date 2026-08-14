@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Moretti Test Prep &amp; Tutoring — Math, SAT/ACT &amp; College Admissions | Cranford, NJ</title>
-  <meta name="description" content="Specialist one-on-one math, SAT &amp; ACT, and college admissions tutoring in Cranford, NJ and online. The 12-week Moretti Method program — if scores don't improve, we keep teaching free.">
+  <title>Moretti Test Prep &amp; Tutoring — Math, SAT &amp; College Admissions | Cranford, NJ</title>
+  <meta name="description" content="Specialist one-on-one math, SAT, and college admissions tutoring in Cranford, NJ and online. The 12-week Moretti Method program — if scores don't improve, we keep teaching free.">
   <meta property="og:title" content="Moretti Test Prep &amp; Tutoring">
-  <meta property="og:description" content="Specialist one-on-one math, SAT &amp; ACT, and college admissions tutoring in Cranford, NJ and online.">
+  <meta property="og:description" content="Specialist one-on-one math, SAT, and college admissions tutoring in Cranford, NJ and online.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://morettitutoring.com/">
   <meta property="og:image" content="https://morettitutoring.com/logo-caladea-dark.png">
@@ -74,6 +74,12 @@
     section { padding: 7rem 0; }
     .container { max-width: 1100px; margin: 0 auto; padding: 0 3.5rem; }
     .reveal { opacity: 0; transform: translateY(26px); transition: opacity 2.75s cubic-bezier(0.16,1,0.3,1), transform 2.75s cubic-bezier(0.16,1,0.3,1); }
+    /* .reveal-toggle plays this same fade-up repeatedly (every time it
+       scrolls in and out of view, not just once) instead of playing once
+       and staying. Deliberately kept at the same 2.75s pace as a normal
+       .reveal — a faster duration was tried here first but read as an
+       abrupt snap rather than the slower, more natural fade the rest of
+       the site uses, so this doesn't override it. */
     .reveal.visible { opacity: 1; transform: translateY(0); }
     .d1 { transition-delay: 0.07s; } .d2 { transition-delay: 0.14s; } .d3 { transition-delay: 0.21s; } .d4 { transition-delay: 0.28s; }
     .section-fade { opacity: 0; transition: opacity 3.4s ease; }
@@ -102,7 +108,7 @@
 
     /* ═══ MEET YOUR INSTRUCTOR ═══ same dark photo background + fade-to-
        black the old "Quiet Problem" section used, so it still blends
-       straight into the pure-black #explore-wrap below it. Sized to fit
+       straight into the pure-black #explore-static below it. Sized to fit
        one screen on normal desktop/laptop heights (min-height + flex
        centering, not a hard clip) — see the tightened copy/spacing below. */
     #instructor { background-image: url(photo-3-web.jpg); background-size: cover; background-position: center; position: relative; overflow: hidden; min-height: 100vh; display: flex; align-items: center; padding: 3rem 0; }
@@ -164,63 +170,85 @@
     .md3 { transition-delay: 2.1s; }
     .md4 { transition-delay: 3.1s; }
 
-    /* ═══ EXPLORE (replaces the old Moretti Method intro) ═══
-       One pinned 100vh frame (#explore-stage, position:sticky) for the
-       whole tall #explore-wrap. Everything lives in a fixed spot on
-       screen from the moment it's rendered — scrolling only reveals each
-       piece by fading it in, in place, one at a time: heading, then
-       subtitle, then 01 → 02 → 03 → 04, then the test-dates line. EXPLORE
-       itself never fades — it just pans slowly right-to-left behind
-       everything the whole time.
-       Once the test-dates line has held for a moment, there's no more
-       room, so group A (heading + subtitle + grid + hint) fades out and
-       slides up and off the screen together — and group B (the portal
-       plaque, then the CTA) fades in at that same center-stage spot to
-       take its place. */
-    #explore-prelude { background: #000; height: 4vh; }
-    #explore-wrap { background: #000; height: 320vh; position: relative; }
-    #explore-postlude { background: #000; height: 5vh; }
-    #explore-stage { position: sticky; top: 0; height: 100vh; overflow: hidden; }
-    .explore-word { position: absolute; top: 66%; left: 50%; z-index: 1; font-family: 'Duera Expanded Black', 'Archivo Black', 'Anton', var(--hel); font-weight: 900; color: var(--red); font-size: 128vh; line-height: 1; letter-spacing: -0.01em; white-space: nowrap; pointer-events: none; will-change: transform; }
+    /* ═══ THE 12-WEEK PROGRAM (static — no scroll-jacking) ═══
+       Three stacked blocks in normal document flow: program overview +
+       4-step grid, "what you'll learn" (text + photo), then the portal
+       teaser + CTA. Each fades up via the site's ordinary .reveal /
+       IntersectionObserver pattern (see the `io` observer below) as it
+       scrolls into view — replaces an earlier pinned-scroll version
+       (position:sticky over a 100%+ extra-tall wrapper) that left a
+       large, unavoidable stretch of flat black background showing
+       through wherever the short, centered text didn't reach, no matter
+       how much the scroll DISTANCE was tuned — that distance only
+       controlled pacing, not how much of any single frame was black.
+       A plain stacked layout has no pinned full-viewport backdrop to
+       begin with, so there's nothing for that dead space to come from. */
+    #explore-static { background: #000; position: relative; overflow: hidden; padding: 5rem 0; }
+    .explore-static-intro { position: relative; z-index: 1; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 1.5rem; }
 
-    /* group A and group B both anchor to the exact same center point, so
-       whichever one is visible simply occupies "center stage" — nothing
-       has to guess at spacing or fight for room */
-    #explore-group-a, #explore-group-b { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2; width: 92%; max-width: 900px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 1.5rem; will-change: opacity, transform; }
-    #explore-group-b { z-index: 3; max-width: 1000px; pointer-events: none; }
-    #explore-group-b.explore-group-active { pointer-events: auto; }
+    .learn-static { position: relative; z-index: 1; padding: 5rem 0; }
+    #learn-content { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 3.5rem; align-items: center; width: 100%; }
+    .learn-text-col { display: flex; flex-direction: column; align-items: flex-start; gap: 1.35rem; text-align: left; }
+    .learn-hed { font-family: var(--display); font-weight: 700; color: #fff; font-size: clamp(1.9rem, 3.4vw, 2.75rem); line-height: 1.2; text-shadow: 0 3px 22px rgba(0,0,0,0.85), 0 0 60px rgba(0,0,0,0.6); }
+    .learn-items { list-style: none; display: flex; flex-direction: column; gap: 1.15rem; }
+    .learn-item { display: flex; align-items: flex-start; gap: 0.85rem; }
+    .learn-check { flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--gold); display: flex; align-items: center; justify-content: center; margin-top: 0.1rem; }
+    .learn-check svg { width: 11px; height: 11px; stroke: var(--gold); fill: none; stroke-width: 2.25; stroke-linecap: round; stroke-linejoin: round; }
+    .learn-item-text { font-size: 0.86rem; line-height: 1.55; color: rgba(255,255,255,0.9); text-shadow: 0 2px 14px rgba(0,0,0,0.85), 0 0 40px rgba(0,0,0,0.6); }
+    /* Deliberately slow and clearly one-at-a-time — a long transition
+       duration plus a full second-plus between each item's delay, so
+       each bullet visibly finishes appearing before the next one
+       starts, rather than the site's usual quick, nearly-simultaneous
+       .d1–.d4 stagger (kept as-is elsewhere; these are scoped via
+       nth-child instead of reusing .d1–.d4 so this doesn't slow down
+       every OTHER staggered-reveal group on the page too). */
+    .learn-items .learn-item { transition-duration: 3.5s; }
+    .learn-items .learn-item:nth-child(1) { transition-delay: 0s; }
+    .learn-items .learn-item:nth-child(2) { transition-delay: 1.1s; }
+    .learn-items .learn-item:nth-child(3) { transition-delay: 2.2s; }
+    .learn-items .learn-item:nth-child(4) { transition-delay: 3.3s; }
+    .learn-photo-col { width: 100%; }
+    .learn-photo-col img { display: block; width: 100%; height: 420px; object-fit: cover; }
 
-    .explore-hed { font-family: var(--display); font-weight: 700; color: #fff; font-size: clamp(2.4rem, 5.6vw, 4.3rem); line-height: 1.18; max-width: 900px; text-shadow: 0 3px 22px rgba(0,0,0,0.85), 0 0 60px rgba(0,0,0,0.6); opacity: 0; will-change: opacity; }
-    /* The link used to be an inline <a> inside the heading — on wrapped
-       two-line titles that leaves a dead gap between the lines with no
-       hit area at all (inline elements only get clickable glyph boxes,
-       not the full line-height rectangle). display:block makes the whole
-       heading, gaps included, one solid click target. Hover matches the
-       "See How It Works" link exactly: a simple scale-up, no shake. */
+    .explore-hed { font-family: var(--display); font-weight: 700; color: #fff; font-size: clamp(2.8rem, 6.4vw, 5rem); line-height: 1.16; max-width: 960px; text-shadow: 0 3px 22px rgba(0,0,0,0.85), 0 0 60px rgba(0,0,0,0.6); }
+    /* display:block makes the whole heading (gaps included on a wrapped
+       two-line title) one solid click target instead of just the glyph
+       boxes an inline link would get. Hover matches the "See How It
+       Works" link exactly: a simple scale-up, no shake. */
     .explore-hed a { display: block; position: relative; transition: transform 0.35s cubic-bezier(0.2, 1, 0.3, 1); transform-origin: center bottom; }
     .explore-hed a:hover { transform: scale(1.08); }
-    .explore-sub { font-size: 0.86rem; line-height: 1.8; color: rgba(255,255,255,0.85); max-width: 580px; text-shadow: 0 2px 14px rgba(0,0,0,0.85), 0 0 40px rgba(0,0,0,0.6); opacity: 0; will-change: opacity; }
+    .explore-sub { font-size: 1.08rem; line-height: 1.75; color: rgba(255,255,255,0.85); max-width: 660px; text-shadow: 0 2px 14px rgba(0,0,0,0.85), 0 0 40px rgba(0,0,0,0.6); }
     .gold-shine { position: relative; font-weight: 600; background: linear-gradient(100deg, #C9A84C 30%, #F3E3B0 45%, #C9A84C 60%); background-size: 250% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: gold-shine-sweep 3.5s ease-in-out infinite alternate; }
     @keyframes gold-shine-sweep { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
 
     .explore-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2.25rem; width: 100%; text-align: left; margin-top: 1rem; }
-    .explore-step { border-top: 2px solid var(--gold); padding-top: 0.85rem; opacity: 0; will-change: opacity; }
+    .explore-step { border-top: 2px solid var(--gold); padding-top: 0.85rem; }
     .explore-step .method-num { color: var(--gold); text-shadow: 0 1px 8px rgba(0,0,0,0.8); }
     .explore-step .method-step-title { color: #fff; margin-bottom: 0.3rem; font-size: 0.95rem; text-shadow: 0 1px 8px rgba(0,0,0,0.8); }
     .explore-step-body { font-size: 0.72rem; line-height: 1.55; color: rgba(255,255,255,0.7); text-shadow: 0 1px 8px rgba(0,0,0,0.8); }
+    /* Same deliberately slow, clearly one-at-a-time stagger as
+       .learn-items above — overrides the .d1–.d4 delays these elements
+       also carry (nth-child here beats a single class selector on
+       specificity), scoped to just this grid for the same reason. */
+    .explore-grid .explore-step { transition-duration: 3.5s; }
+    .explore-grid .explore-step:nth-child(1) { transition-delay: 0s; }
+    .explore-grid .explore-step:nth-child(2) { transition-delay: 1.1s; }
+    .explore-grid .explore-step:nth-child(3) { transition-delay: 2.2s; }
+    .explore-grid .explore-step:nth-child(4) { transition-delay: 3.3s; }
 
-    .explore-testdates-hint { text-align: center; font-size: 0.78rem; color: rgba(255,255,255,0.7); text-shadow: 0 1px 8px rgba(0,0,0,0.8); opacity: 0; will-change: opacity; }
+    .explore-testdates-hint { text-align: center; font-size: 0.78rem; color: rgba(255,255,255,0.7); text-shadow: 0 1px 8px rgba(0,0,0,0.8); }
     .explore-testdates-hint a { color: var(--gold); text-decoration: none; font-weight: 600; }
     .explore-testdates-hint a:hover { text-decoration: underline; }
 
-    .portal-teaser { display: flex; align-items: center; justify-content: space-between; gap: 2rem; background: rgba(0,0,0,0.72); border: 1px solid rgba(255,255,255,0.14); padding: 2.25rem 2.75rem; flex-wrap: wrap; width: 100%; opacity: 0; will-change: opacity; }
-    .portal-teaser-kicker { display: block; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.65rem; }
+    .explore-static-outro { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 2rem; padding-top: 1rem; }
+    .portal-teaser { display: flex; align-items: center; justify-content: space-between; gap: 2rem; background: rgba(0,0,0,0.72); border: 1px solid rgba(255,255,255,0.14); padding: 2.25rem 2.75rem; flex-wrap: wrap; width: 100%; }
+    .portal-teaser-kicker { display: block; text-align: center; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.65rem; }
     .portal-teaser-hed { font-family: var(--display); font-size: clamp(1.3rem, 2.4vw, 1.75rem); color: #fff; font-weight: 700; margin-bottom: 0.55rem; max-width: 560px; line-height: 1.3; }
     .portal-teaser-body { font-size: 0.92rem; line-height: 1.65; color: rgba(255,255,255,0.55); max-width: 540px; }
     .portal-teaser-btn { flex-shrink: 0; background: var(--red); color: #fff; font-family: var(--hel); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 1.05rem 2.1rem; text-decoration: none; white-space: nowrap; transition: opacity 0.2s; }
     .portal-teaser-btn:hover { opacity: 0.86; }
 
-    #explore-cta-inline { text-align: center; opacity: 0; will-change: opacity; }
+    #explore-cta-inline { text-align: center; }
     .explore-cta { display: inline-block; font-family: var(--display); font-size: clamp(1.5rem, 2.9vw, 2.2rem); font-weight: 700; color: #fff; text-decoration: none; border-bottom: 3px solid var(--gold); padding-bottom: 0.35rem; transition: transform 0.35s cubic-bezier(0.2, 1, 0.3, 1); transform-origin: center bottom; text-shadow: 0 2px 14px rgba(0,0,0,0.85); }
     .explore-cta:hover { transform: scale(1.08); }
     .explore-cta .arr { display: inline-block; transition: transform 0.25s ease; }
@@ -229,12 +257,18 @@
     .explore-guarantee strong { font-weight: 700; text-transform: uppercase; font-size: 0.82rem; letter-spacing: 0.1em; }
     .explore-guarantee strong.gold-shine { color: transparent; }
 
-    @media (prefers-reduced-motion: reduce) {
-      #explore-wrap { height: auto; }
-      #explore-stage { position: relative; height: auto; overflow: visible; display: flex; flex-direction: column; align-items: center; gap: 3rem; padding: 5rem 1.5rem; }
-      .explore-word { position: relative; top: auto; left: auto; transform: none !important; font-size: clamp(3rem, 22vw, 9rem); }
-      #explore-group-a, #explore-group-b { position: relative; top: auto; left: auto; transform: none !important; pointer-events: auto !important; }
-      .explore-hed, .explore-sub, .explore-step, .explore-testdates-hint, .portal-teaser, #explore-cta-inline, #explore-group-b { opacity: 1 !important; }
+    @media (max-width: 900px) {
+      #learn-content { grid-template-columns: 1fr; gap: 2rem; text-align: center; }
+      .learn-text-col { align-items: center; text-align: center; }
+      .learn-items { text-align: left; }
+      .learn-photo-col img { height: 300px; }
+      .explore-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 640px) {
+      #explore-static { padding: 3.5rem 0; }
+      .learn-static { padding: 3.5rem 0; }
+      .explore-grid { grid-template-columns: 1fr; }
+      .portal-teaser { flex-direction: column; align-items: flex-start; padding: 1.75rem; }
     }
 
     /* hand-drawn double underline */
@@ -271,12 +305,12 @@
     @keyframes dd-head { 0%, 26% { opacity: 0; } 33% { opacity: 1; } 85% { opacity: 1; } 96%, 100% { opacity: 0; } }
 
     /* ═══ DISCIPLINES ═══ */
-    #disciplines { background-image: url(photo-2-web.jpg); background-size: cover; background-position: center 30%; position: relative; padding: 4.25rem 0 7rem; }
+    #disciplines { background-image: url(photo-2-web.jpg); background-size: cover; background-position: center 30%; position: relative; padding: 2.25rem 0 7rem; }
     #disciplines::before { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, #000 0%, rgba(0,0,0,0.58) 18%, rgba(0,0,0,0.58) 100%); }
     #disciplines .container { position: relative; z-index: 1; }
-    #disciplines .eyebrow { color: var(--gold); }
-    .disc-hed { font-family: var(--display); font-size: clamp(1.7rem, 3.1vw, 2.5rem); font-weight: 700; color: #fff; margin-bottom: 1.5rem; }
-    .disc-grid { display: grid; grid-template-columns: repeat(5, 1fr); border-top: 1px solid var(--border); border-left: 1px solid var(--border); }
+    #disciplines .eyebrow { color: var(--gold); font-size: 0.78rem; margin-bottom: 1.1rem; }
+    .disc-hed { font-family: var(--display); font-size: clamp(2.2rem, 4.4vw, 3.4rem); font-weight: 700; color: #fff; margin-bottom: 1.5rem; }
+    .disc-grid { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--border); border-left: 1px solid var(--border); }
     .disc-card { padding: 1.75rem 1.4rem 2rem; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); background: var(--white); position: relative; transition: background 0.35s ease; }
     .disc-card::before { content: ''; position: absolute; top: -1px; left: 0; width: 0; height: 2px; background: var(--red); transition: width 0.4s ease; }
     .disc-card:hover::before { width: 100%; }
@@ -397,26 +431,13 @@
       .form-row { grid-template-columns: 1fr; }
     }
 
-    /* On phones the sticky-pin scroll animation is unreliable — dynamic
-       browser toolbars change window.innerHeight mid-scroll, throwing off
-       the progress math and leaving the heading stuck invisible. Below
-       768px we bypass the pin/fade JS (see isMobileLayout in the script)
-       and lay EXPLORE out as a normal static stack, always visible. */
-    @media (max-width: 768px) {
-      #explore-prelude, #explore-postlude { height: 0; }
-      #explore-wrap { height: auto; }
-      #explore-stage { position: relative; height: auto; overflow: visible; display: flex; flex-direction: column; align-items: center; gap: 2.5rem; padding: 4.5rem 1.5rem; }
-      .explore-word { position: relative; top: auto; left: auto; transform: none !important; font-size: clamp(2.75rem, 15vw, 4.25rem); }
-      #explore-group-a, #explore-group-b { position: relative; top: auto; left: auto; transform: none !important; pointer-events: auto !important; }
-      .explore-hed, .explore-sub, .explore-step, .explore-testdates-hint, .portal-teaser, #explore-cta-inline, #explore-group-b { opacity: 1 !important; }
-    }
   </style>
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
     "name": "Moretti Test Prep and Tutoring",
-    "description": "One-on-one math, SAT & ACT, and college admissions tutoring in Cranford, NJ and online.",
+    "description": "One-on-one math, SAT, and college admissions tutoring in Cranford, NJ and online.",
     "url": "https://morettitutoring.com/",
     "telephone": "+1-201-275-2791",
     "address": { "@type": "PostalAddress", "addressLocality": "Cranford", "addressRegion": "NJ", "addressCountry": "US" },
@@ -440,7 +461,7 @@
   <a href="portal/index.html" class="hero-login-link">Student? Login here</a>
   <img src="logo-caladea-dark.png" alt="Moretti Test Prep &amp; Tutoring" class="hero-logo reveal">
   <h1 class="hero-headline reveal">Get Into the Schools, Programs, and Classes You Want.</h1>
-  <p class="hero-tag reveal">One-on-one math, SAT/ACT, and college admissions coaching &mdash; in New Jersey or online.</p>
+  <p class="hero-tag reveal">One-on-one math, SAT, and college admissions coaching &mdash; in New Jersey or online.</p>
   <div class="hero-ctas reveal d2">
     <a href="#reserve" class="hero-btn-red">Reserve Your Seat</a>
     <a href="tel:2012752791" class="hero-btn-outline">Call (201) 275-2791</a>
@@ -488,7 +509,7 @@
         <span class="blurb-kicker">Meet Your Instructor</span>
         <h2 class="blurb-hed">A Message From Luca</h2>
         <p class="blurb-body">Modern tutoring and education has a habit of optimizing for grades and short-form testing that reward memorization over real understanding. I built my practice as the opposite of that: one-on-one, diagnostic, and <strong style="color:var(--red); font-weight:700;">data-driven</strong>, because no two students are missing the same points.</p>
-        <p class="blurb-body">I'm a <a href="https://www.northwestern.edu/" target="_blank" rel="noopener" class="nu-link">Northwestern University</a> statistics graduate — top of my class, in three years — and for the past eight-plus years I've tutored across New Jersey and online, raising SAT and ACT scores by upwards of 36% and helping over 50 students into the schools they were chasing.</p>
+        <p class="blurb-body">I'm a <a href="https://www.northwestern.edu/" target="_blank" rel="noopener" class="nu-link">Northwestern University</a> statistics graduate — top of my class, in three years — and for the past eight-plus years I've tutored across New Jersey and online, raising SAT scores by upwards of 36% and helping over 50 students into the schools they were chasing.</p>
         <p class="blurb-body">Generic tutoring often settles for explaining the immediate assignment, providing guidance that expires the moment the hour ends. My methods go beyond that: every plan starts with a real diagnostic and understanding, adapting as a student improves, and backed by a private portal — adaptive practice tests, a weak-spot tracker, a running log of every missed question, and more — so we're always working on exactly what's costing points.</p>
         <a href="#reserve" class="instructor-cta">Reserve Your Seat</a>
       </div>
@@ -496,69 +517,83 @@
   </div>
 </section>
 
-<section id="explore-prelude" aria-hidden="true"></section>
+<!-- ═══ THE 12-WEEK PROGRAM ═══ a normal, statically-flowing dark section
+     (no scroll-jacking, no pinned full-screen takeover) — three blocks
+     stacked in document order, each fading up into place on scroll via
+     the site's existing .reveal/IntersectionObserver pattern (see the
+     `io` observer below): the program overview, what a student learns,
+     then the portal teaser + CTA. Replaces an earlier pinned-scroll
+     version that used position:sticky and a tall (200%+ viewport)
+     wrapper — that produced a large, unavoidable stretch of solid black
+     background per Luca's own screen-space feedback, since a pinned
+     frame's flat black backdrop shows through wherever the (short,
+     centered) text doesn't reach, regardless of how much total scroll
+     distance the pin spans. A plain stacked layout has no such backdrop
+     to begin with. -->
+<section id="explore-static">
+  <div class="container explore-static-intro reveal reveal-toggle">
+    <h2 class="explore-hed"><a href="prep-course.html" style="color:inherit; text-decoration:none;">The 12-Week SAT Program</a></h2>
+    <p class="explore-sub">A plan built entirely around your child's pace and foundation — an investment in their ability to score higher, guided by a tutor who teaches to <span class="gold-shine">+1500 SAT</span>.</p>
 
-<!-- ═══ EXPLORE ═══
-     One pinned frame. Group A (heading → subtitle → 01–04 → test-dates
-     line) fades in piece by piece, each one already sitting in its
-     permanent spot — nothing slides or moves while it appears. EXPLORE
-     pans slowly right-to-left the whole time behind everything. Once
-     group A has held for a moment, it fades out and slides up off the
-     screen as one unit, and group B (portal plaque, then the CTA) fades
-     in at that same center-stage spot. -->
-<section id="explore-wrap">
-  <div id="explore-stage">
-    <div class="explore-word" id="explore-word">EXPLORE</div>
-
-    <div id="explore-group-a">
-      <h2 class="explore-hed" id="explore-hed"><a href="prep-course.html" style="color:inherit; text-decoration:none;">The 12-Week SAT &amp; ACT Program</a></h2>
-      <p class="explore-sub" id="explore-sub">A plan built entirely around your child's pace and foundation — an investment in their ability to score higher, guided by a tutor who teaches to <span class="gold-shine">+1500 SAT</span> and <span class="gold-shine">+34 ACT</span>.</p>
-
-      <div class="explore-grid" id="explore-grid">
-        <div class="explore-step" data-step="1">
-          <span class="method-num">01</span>
-          <h3 class="method-step-title">Evaluate</h3>
-          <p class="explore-step-body">Data-driven diagnostic pinpoints exactly where points are slipping away.</p>
-        </div>
-        <div class="explore-step" data-step="2">
-          <span class="method-num">02</span>
-          <h3 class="method-step-title">Design</h3>
-          <p class="explore-step-body">A session-by-session plan sequenced around how your student actually learns.</p>
-        </div>
-        <div class="explore-step" data-step="3">
-          <span class="method-num">03</span>
-          <h3 class="method-step-title">Practice</h3>
-          <p class="explore-step-body">Deliberate reps on the skills that move the score — never busywork.</p>
-        </div>
-        <div class="explore-step" data-step="4">
-          <span class="method-num">04</span>
-          <h3 class="method-step-title">Adapt</h3>
-          <p class="explore-step-body">Progress is tracked continuously, and the plan adjusts as your student improves.</p>
-        </div>
+    <div class="explore-grid">
+      <div class="explore-step reveal reveal-toggle d1">
+        <span class="method-num">01</span>
+        <h3 class="method-step-title">Evaluate</h3>
+        <p class="explore-step-body">Data-driven diagnostic pinpoints exactly where points are slipping away.</p>
       </div>
-
-      <p class="explore-testdates-hint" id="explore-testdates-hint">Don&rsquo;t know when the next SAT or ACT is? <a href="test-dates.html">See upcoming test dates &rarr;</a></p>
+      <div class="explore-step reveal reveal-toggle d2">
+        <span class="method-num">02</span>
+        <h3 class="method-step-title">Design</h3>
+        <p class="explore-step-body">A session-by-session plan sequenced around how your student actually learns.</p>
+      </div>
+      <div class="explore-step reveal reveal-toggle d3">
+        <span class="method-num">03</span>
+        <h3 class="method-step-title">Practice</h3>
+        <p class="explore-step-body">Deliberate reps on the skills that move the score — never busywork.</p>
+      </div>
+      <div class="explore-step reveal reveal-toggle d4">
+        <span class="method-num">04</span>
+        <h3 class="method-step-title">Adapt</h3>
+        <p class="explore-step-body">Progress is tracked continuously, and the plan adjusts as your student improves.</p>
+      </div>
     </div>
 
-    <div id="explore-group-b">
-      <div class="portal-teaser" id="portal-teaser">
-        <div class="portal-teaser-text">
-          <span class="portal-teaser-kicker">For Enrolled Students</span>
-          <h3 class="portal-teaser-hed">A private portal — diagnostics, curated practice, and guides.</h3>
-          <p class="portal-teaser-body">Every student enters the program with a curated diagnostic, followed by a personal practice folder, test-taking guides, session notes, and more.</p>
-        </div>
-        <a href="portal/index.html" class="portal-teaser-btn">Open Student Portal &rarr;</a>
-      </div>
+    <p class="explore-testdates-hint">Don&rsquo;t know when the next SAT is? <a href="test-dates.html">See upcoming test dates &rarr;</a></p>
+  </div>
 
-      <div id="explore-cta-inline">
-        <a href="prep-course.html" class="explore-cta">See How It Works <span class="arr">&rarr;</span></a>
-        <p class="explore-guarantee"><strong class="gold-shine">The guarantee.</strong> Complete the 12-week program and if your student's official SAT or ACT score doesn't improve, we keep teaching them free until it does.</p>
+  <div class="container learn-static">
+    <div id="learn-content">
+      <div class="learn-text-col">
+        <h2 class="learn-hed">Here&rsquo;s what you&rsquo;ll learn.</h2>
+        <ul class="learn-items">
+          <li class="learn-item reveal reveal-toggle"><span class="learn-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span class="learn-item-text"><strong class="gold-shine">The exact playbook for every SAT question:</strong> The specific, fastest but most confident approach for every question type the test actually uses.</span></li>
+          <li class="learn-item reveal reveal-toggle"><span class="learn-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span class="learn-item-text"><strong class="gold-shine">Top 1% pacing secrets:</strong> How to build steady execution habits so every section feels like a controlled rhythm with leftover time for review, not a panic against the clock.</span></li>
+          <li class="learn-item reveal reveal-toggle"><span class="learn-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span class="learn-item-text"><strong class="gold-shine">Complete Desmos mastery:</strong> Advanced calculator techniques to bypass lengthy manual algebra and solve complex problems in seconds.</span></li>
+          <li class="learn-item reveal reveal-toggle"><span class="learn-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span class="learn-item-text"><strong class="gold-shine">Error-diagnosis protocols:</strong> A systematic approach to analyzing mistakes so specific point-costing errors are permanently eliminated.</span></li>
+        </ul>
+      </div>
+      <div class="learn-photo-col">
+        <img src="photo-1-web.jpg" alt="Moretti Test Prep &amp; Tutoring session in progress">
       </div>
     </div>
   </div>
-</section>
 
-<section id="explore-postlude" aria-hidden="true"></section>
+  <div class="container explore-static-outro">
+    <div class="portal-teaser reveal reveal-toggle">
+      <div class="portal-teaser-text">
+        <span class="portal-teaser-kicker">For Enrolled Students</span>
+        <h3 class="portal-teaser-hed">A private portal — diagnostics, curated practice, and guides.</h3>
+        <p class="portal-teaser-body">Every student enters the program with a curated diagnostic, followed by a personal practice folder, test-taking guides, session notes, and more.</p>
+      </div>
+      <a href="portal/index.html" class="portal-teaser-btn">Open Student Portal &rarr;</a>
+    </div>
+
+    <div id="explore-cta-inline" class="reveal reveal-toggle">
+      <a href="prep-course.html" class="explore-cta">See How It Works <span class="arr">&rarr;</span></a>
+      <p class="explore-guarantee"><strong class="gold-shine">The guarantee.</strong> Complete the 12-week program and if your student's official SAT score doesn't improve, we keep teaching them free until it does.</p>
+    </div>
+  </div>
+</section>
 
 <section id="disciplines">
   <div class="container">
@@ -569,41 +604,29 @@
         <span class="disc-num">01</span>
         <svg class="disc-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
         <h3 class="disc-title">College Entrance Exams</h3>
-        <p class="disc-body">Focused, score-driven SAT and ACT preparation — math, reading, and writing — plus study strategies, resources, and test-taking techniques that raise scores.</p>
+        <p class="disc-body">Focused, score-driven SAT preparation — math, reading, and writing — plus study strategies, resources, and test-taking techniques that raise scores.</p>
         <a href="prep-course.html" class="disc-link">The 12-Week Program &rarr;</a>
       </div>
       <div class="disc-card reveal d1">
         <span class="disc-num">02</span>
         <svg class="disc-icon" viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
         <h3 class="disc-title">Mathematics</h3>
-        <p class="disc-body">Algebra 1, Geometry, Algebra 2/Trigonometry, Precalculus (regular and Honors), Statistics and AP Statistics, and Calculus — from Honors Calculus through AP Calculus AB, AP Calculus BC, and Multivariable Calculus.</p>
+        <p class="disc-body">Algebra 1 through Multivariable Calculus — Geometry, Algebra 2/Trigonometry, Precalculus, Statistics and AP Statistics, AP Calculus AB &amp; BC, and IB Mathematics (AA &amp; AI) at SL and HL.</p>
+        <a href="math-program.html" class="disc-link">The Math Mastery Program &rarr;</a>
       </div>
       <div class="disc-card reveal d3">
         <span class="disc-num">03</span>
-        <svg class="disc-icon" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="currentColor" fill="none" stroke-width="1.75" stroke-linecap="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="currentColor" fill="none" stroke-width="1.75" stroke-linecap="round"/></svg>
-        <h3 class="disc-title">English</h3>
-        <p class="disc-body">Reading comprehension, essay writing, grammar, and literary analysis — from everyday coursework to polished analytical prose.</p>
-      </div>
-      <div class="disc-card reveal d4">
-        <span class="disc-num">04</span>
-        <svg class="disc-icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M15.5 12.5L17 22l-5-3-5 3 1.5-9.5"/></svg>
-        <h3 class="disc-title">AP &amp; IB Exams</h3>
-        <p class="disc-body">AP Calculus AB &amp; BC, AP Statistics, and AP English Language &amp; Literature — plus IB Mathematics (AA &amp; AI) and IB English A, at both SL and HL.</p>
-      </div>
-      <div class="disc-card reveal d4">
-        <span class="disc-num">05</span>
         <svg class="disc-icon" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" fill="none" stroke-width="1.75" stroke-linecap="round"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" fill="none" stroke-width="1.75" stroke-linecap="round"/></svg>
-        <h3 class="disc-title">College Essays</h3>
+        <h3 class="disc-title">College Admissions</h3>
         <p class="disc-body">Personal statement and supplemental essay coaching — brainstorming, drafting, and revision, built around what makes each student distinct.</p>
-        <a href="applications.html" class="disc-link">Essay Coaching &rarr;</a>
+        <a href="applications.html" class="disc-link">Admissions Coaching &rarr;</a>
       </div>
     </div>
   </div>
   <div class="disc-ticker-outer">
     <div class="intro-ticker-wrap">
       <div class="intro-ticker-track" id="disc-ticker-track">
-        <span class="intro-ticker-item">ACT &amp; SAT Prep</span><span class="intro-ticker-sep">◆</span>
-        <span class="intro-ticker-item">AP &amp; IB Prep</span><span class="intro-ticker-sep">◆</span>
+        <span class="intro-ticker-item">SAT Prep</span><span class="intro-ticker-sep">◆</span>
         <span class="intro-ticker-item">Algebra 1</span><span class="intro-ticker-sep">◆</span>
         <span class="intro-ticker-item">Geometry</span><span class="intro-ticker-sep">◆</span>
         <span class="intro-ticker-item">Algebra 2 / Trigonometry</span><span class="intro-ticker-sep">◆</span>
@@ -611,8 +634,8 @@
         <span class="intro-ticker-item">Statistics &amp; AP Statistics</span><span class="intro-ticker-sep">◆</span>
         <span class="intro-ticker-item">AP Calculus AB &amp; BC</span><span class="intro-ticker-sep">◆</span>
         <span class="intro-ticker-item">Multivariable Calculus</span><span class="intro-ticker-sep">◆</span>
-        <span class="intro-ticker-item">English &amp; Writing</span><span class="intro-ticker-sep">◆</span>
-        <span class="intro-ticker-item">College Essay &amp; Applications</span><span class="intro-ticker-sep">◆</span>
+        <span class="intro-ticker-item">IB Mathematics</span><span class="intro-ticker-sep">◆</span>
+        <span class="intro-ticker-item">College Admissions &amp; Essays</span><span class="intro-ticker-sep">◆</span>
       </div>
     </div>
   </div>
@@ -674,13 +697,6 @@
               <div class="form-field"><label class="form-label" for="rf-email">Best Email Address</label><input class="form-input" type="email" id="rf-email" name="email" required></div>
             </div>
             <div class="form-field">
-              <span class="form-label">Are you from the USA?</span>
-              <div class="form-radio-group">
-                <label class="form-radio"><input type="radio" name="isUSA" value="Yes" required> Yes</label>
-                <label class="form-radio"><input type="radio" name="isUSA" value="No"> No</label>
-              </div>
-            </div>
-            <div class="form-field">
               <span class="form-label">Are you a parent or a student?</span>
               <div class="form-radio-group">
                 <label class="form-radio"><input type="radio" name="role" value="Parent" required> Parent</label>
@@ -701,11 +717,9 @@
               <label class="form-label" for="rf-topic">What do you need help with?</label>
               <select class="form-select" id="rf-topic" name="topic" required>
                 <option value="">Select a topic</option>
-                <option value="SAT / ACT Prep">SAT / ACT Prep</option>
+                <option value="SAT Prep">SAT Prep</option>
                 <option value="Mathematics">Mathematics</option>
-                <option value="English">English</option>
-                <option value="AP &amp; IB Exams">AP &amp; IB Exams</option>
-                <option value="College Essays &amp; Applications">College Essays &amp; Applications</option>
+                <option value="College Admissions &amp; Essays">College Admissions &amp; Essays</option>
                 <option value="Something else / Not sure yet">Something else / Not sure yet</option>
               </select>
             </div>
@@ -782,111 +796,23 @@
       if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
     });
   }, { threshold: 0.08, rootMargin: '0px 0px -36px 0px' });
-  document.querySelectorAll('.reveal').forEach(function (el) { io.observe(el); });
+  // .reveal-toggle elements (currently just the 12-Week Program section)
+  // are excluded from the one-shot observer above and handled by their
+  // own toggling one instead — see right below.
+  document.querySelectorAll('.reveal:not(.reveal-toggle)').forEach(function (el) { io.observe(el); });
 
-  /* ═══ EXPLORE ═══ one pinned frame (#explore-stage, position:sticky)
-     for the whole tall #explore-wrap.
-       - EXPLORE never fades and never drifts vertically — it stays
-         locked at dead-center height and only pans right-to-left, and it
-         finishes that pan in the first half of the scroll so it comes in
-         early rather than crawling the whole way through.
-       - Group A (heading, subtitle, 01–04, test-dates line) each fade in
-         — opacity only, nothing moves — one at a time, in the exact spot
-         they're already sitting in.
-       - Once group A has held for a moment, it stays fully solid (no
-         fade) and just slides up off the screen as one unit, while group
-         B (plaque, then CTA) fades in at that same center-stage spot the
-         instant the slide starts. */
-  (function () {
-    var wrap = document.getElementById('explore-wrap');
-    var word = document.getElementById('explore-word');
-    var groupA = document.getElementById('explore-group-a');
-    var groupB = document.getElementById('explore-group-b');
-    var hed = document.getElementById('explore-hed');
-    var sub = document.getElementById('explore-sub');
-    var steps = Array.prototype.slice.call(document.querySelectorAll('#explore-grid [data-step]'));
-    var hint = document.getElementById('explore-testdates-hint');
-    var plaque = document.getElementById('portal-teaser');
-    var ctaInline = document.getElementById('explore-cta-inline');
-    if (!wrap || !word || !groupA) return;
+  // Toggles .visible on and off as each element crosses in and out of
+  // view, instead of the site's usual reveal-once-and-stay behavior
+  // above — scrolling back up past something here hides it again, so
+  // scrolling down always re-triggers the same entrance, procedurally,
+  // rather than only playing once per page load.
+  var ioToggle = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      e.target.classList.toggle('visible', e.isIntersecting);
+    });
+  }, { threshold: 0.08, rootMargin: '0px 0px -36px 0px' });
+  document.querySelectorAll('.reveal-toggle').forEach(function (el) { ioToggle.observe(el); });
 
-    var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    var isMobileLayout = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
-    if (reduceMotion || isMobileLayout) return; // CSS fallback already shows everything statically
-
-    function clamp01(v) { return Math.max(0, Math.min(1, v)); }
-    function mapRange(v, a, b, c, d) {
-      if (a === b) return v < a ? c : d;
-      var t = clamp01((v - a) / (b - a));
-      return c + (d - c) * t;
-    }
-    function fadeOnly(el, p, a, b) {
-      if (el) el.style.opacity = mapRange(p, a, b, 0, 1);
-    }
-    // slides up from below its resting spot while fading in, then holds
-    // still once it arrives — used for the plaque's entrance specifically
-    function slideUpFade(el, p, a, b, fromPx) {
-      if (!el) return;
-      var t = mapRange(p, a, b, 0, 1);
-      el.style.opacity = t;
-      el.style.transform = 'translateY(' + ((1 - t) * fromPx) + 'px)';
-    }
-
-    var wordWidth = 0;
-    function measureWord() { wordWidth = word.getBoundingClientRect().width; }
-    measureWord();
-    if (document.fonts && document.fonts.ready) { document.fonts.ready.then(measureWord); }
-
-    var EXIT_A = 0.54, EXIT_B = 0.66;
-
-    var ticking = false;
-    function render() {
-      ticking = false;
-      var scrollable = wrap.offsetHeight - window.innerHeight;
-      var progress = scrollable > 0 ? clamp01(-wrap.getBoundingClientRect().top / scrollable) : 0;
-
-      // EXPLORE pans slowly right to left, clearing its own width plus
-      // the viewport, so every letter takes a turn through the center —
-      // it finishes that pan by the midpoint of the scroll (comes in
-      // earlier) and never moves vertically at all
-      var vw = window.innerWidth;
-      var reach = vw / 2 + wordWidth / 2 + 60;
-      var wordX = mapRange(progress, 0, 0.32, reach, -reach);
-      word.style.transform = 'translate(-50%, -50%) translate(' + wordX + 'px, 0)';
-
-      // group A: each piece fades in, already in its fixed spot
-      fadeOnly(hed, progress, 0.02, 0.08);
-      fadeOnly(sub, progress, 0.10, 0.16);
-      steps.forEach(function (el, i) {
-        var a = 0.18 + i * 0.045;
-        fadeOnly(el, progress, a, a + 0.045);
-      });
-      fadeOnly(hint, progress, 0.38, 0.44);
-
-      // once it's held for a moment, group A stays fully solid — no
-      // fade — and just slides up off the screen together, as one unit
-      var exitY = mapRange(progress, EXIT_A, EXIT_B, 0, -70);
-      groupA.style.transform = 'translate(-50%, -50%) translateY(' + exitY + 'vh)';
-
-      // group B takes over that same center-stage spot the instant the
-      // slide starts: the plaque rises up from the bottom of the screen
-      // and fades in as it settles into place; the CTA just fades in
-      // after, same as everything else
-      slideUpFade(plaque, progress, EXIT_A, EXIT_A + 0.14, 140);
-      fadeOnly(ctaInline, progress, EXIT_A + 0.16, EXIT_A + 0.26);
-
-      // only the group actually on screen should be able to catch clicks —
-      // group B used to sit on top of group A (higher z-index) for the
-      // whole scroll range even while invisible, silently blocking clicks
-      // on the heading link underneath it
-      if (groupB) groupB.classList.toggle('explore-group-active', progress >= EXIT_A);
-    }
-    render();
-    window.addEventListener('scroll', function () {
-      if (!ticking) { ticking = true; requestAnimationFrame(render); }
-    }, { passive: true });
-    window.addEventListener('resize', function () { measureWord(); render(); });
-  })();
 
   var sfIo = new IntersectionObserver(function (entries) {
     entries.forEach(function (e) {
@@ -909,18 +835,17 @@
       var name  = document.getElementById('rf-name').value.trim();
       var phone = document.getElementById('rf-phone').value.trim();
       var email = document.getElementById('rf-email').value.trim();
-      var isUSA = (reserveForm.querySelector('input[name="isUSA"]:checked') || {}).value || '';
       var role  = (reserveForm.querySelector('input[name="role"]:checked') || {}).value || '';
       var grade = document.getElementById('rf-grade').value;
       var topic = document.getElementById('rf-topic').value;
       // Message is the one optional field — everything else is required.
       var message = document.getElementById('rf-message').value.trim();
-      if (!name || !phone || !email || !isUSA || !role || !grade || !topic) { alert('Please fill in every field.'); return; }
+      if (!name || !phone || !email || !role || !grade || !topic) { alert('Please fill in every field.'); return; }
       var btn = document.getElementById('rf-submit');
       btn.disabled = true; btn.textContent = 'Sending…';
       fetch(LEAD_BACKEND_URL, {
         method: 'POST',
-        body: JSON.stringify({ action: 'submitLead', name: name, phone: phone, email: email, isUSA: isUSA, role: role, grade: grade, topic: topic, message: message })
+        body: JSON.stringify({ action: 'submitLead', name: name, phone: phone, email: email, role: role, grade: grade, topic: topic, message: message })
       }).then(function (res) { return res.json(); })
         .then(function (data) {
           if (!data || !data.ok) throw new Error('submit_failed');
