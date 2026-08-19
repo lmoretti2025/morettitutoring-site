@@ -59,11 +59,64 @@
       var(--bg);
     color: var(--text); font-family: var(--hel); font-weight: 300; -webkit-font-smoothing: antialiased; overflow-x: hidden; min-height: 100vh; }
 
-  #main-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 300; padding: 0.85rem 2.5rem; display: flex; align-items: center; justify-content: space-between; background: var(--red); }
-  .nav-logo-link { display: block; line-height: 0; }
+  #main-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 300; padding: 0.85rem 2.5rem; display: flex; align-items: center; gap: 1.4rem; justify-content: space-between; background: var(--red); }
+  .nav-logo-link { display: block; line-height: 0; flex-shrink: 0; }
   .nav-logo-img { height: 36px; width: auto; display: block; }
   .nav-exit { font-family: var(--hel); font-size: 0.65rem; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: #fff; text-decoration: none; border: 1px solid rgba(255,255,255,0.5); padding: 0.5rem 1.3rem; white-space: nowrap; transition: background 0.2s; }
   .nav-exit:hover { background: rgba(255,255,255,0.18); border-color: #fff; }
+
+  /* ═══ TOP BAR — search / countdown / profile ═══ shown only once a
+     student is inside the app shell (the same screens the sidebar shows
+     for — see nav-app-shell toggled in updateSidebarForScreen()). The
+     plain "Exit Portal" link stays for the key/onboarding/test-taking
+     screens where there's no student session to hang a profile control
+     off of; inside the app shell it's folded into the profile menu
+     instead of showing twice. */
+  .nav-exit { display: inline-block; }
+  #main-nav.nav-app-shell .nav-exit { display: none; }
+  .nav-search, .nav-countdown, .nav-profile { display: none; }
+  #main-nav.nav-app-shell .nav-search { display: block; }
+  /* .has-date is toggled by renderTestCountdown() — combined with
+     .nav-app-shell here (rather than an inline style) so the two
+     conditions ("student has a test date" and "on an app-shell screen")
+     compose instead of one clobbering the other via style specificity. */
+  #main-nav.nav-app-shell .nav-countdown.has-date { display: flex; }
+  #main-nav.nav-app-shell .nav-profile { display: block; }
+
+  .nav-search { position: relative; flex: 1 1 auto; max-width: 360px; }
+  .nav-search-input { width: 100%; font-family: var(--hel); font-size: 0.8rem; color: #fff; background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.3); border-radius: 999px; padding: 0.55rem 1rem 0.55rem 2.2rem; transition: background 0.2s, border-color 0.2s; }
+  .nav-search-input::placeholder { color: rgba(255,255,255,0.6); }
+  .nav-search-input:focus { outline: none; background: rgba(255,255,255,0.22); border-color: rgba(255,255,255,0.55); }
+  .nav-search-icon { position: absolute; left: 0.85rem; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; color: rgba(255,255,255,0.6); pointer-events: none; }
+  .nav-search-icon svg { width: 100%; height: 100%; display: block; }
+  .nav-search-results { display: none; position: absolute; top: calc(100% + 8px); left: 0; right: 0; background: var(--white); border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow-hover); padding: 0.4rem; z-index: 90; max-height: 320px; overflow-y: auto; }
+  .nav-search.is-open .nav-search-results { display: block; }
+  .nav-search-result { display: block; width: 100%; text-align: left; background: none; border: none; font-family: var(--hel); font-size: 0.82rem; color: var(--text); padding: 0.6rem 0.7rem; border-radius: 6px; cursor: pointer; }
+  .nav-search-result:hover, .nav-search-result.is-focused { background: var(--bg); color: var(--red); }
+  .nav-search-empty { font-family: var(--hel); font-size: 0.78rem; color: var(--faint); padding: 0.6rem 0.7rem; }
+
+  .nav-countdown { align-items: baseline; gap: 0.3rem; font-family: var(--hel); font-size: 0.72rem; color: rgba(255,255,255,0.85); white-space: nowrap; background: rgba(255,255,255,0.12); border-radius: 999px; padding: 0.5rem 0.95rem; }
+  .nav-countdown-num { font-weight: 700; color: var(--gold); }
+
+  .nav-profile { position: relative; flex-shrink: 0; }
+  .nav-profile-btn { display: flex; align-items: center; gap: 0.55rem; background: none; border: none; cursor: pointer; padding: 0.2rem; }
+  .nav-avatar { width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.18); border: 1.5px solid rgba(255,255,255,0.4); color: #fff; font-family: var(--hel); font-size: 0.72rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .nav-profile-caret { width: 9px; height: 9px; color: rgba(255,255,255,0.7); }
+  .nav-profile-menu { display: none; position: absolute; top: calc(100% + 10px); right: 0; background: var(--white); border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow-hover); padding: 0.5rem; min-width: 200px; z-index: 90; }
+  .nav-profile.is-open .nav-profile-menu { display: block; }
+  .nav-profile-name { font-family: var(--hel); font-size: 0.8rem; font-weight: 700; color: var(--text); padding: 0.5rem 0.7rem 0.3rem; }
+  .nav-profile-divider { height: 1px; background: var(--border); margin: 0.3rem 0; }
+  .nav-profile-item { display: block; width: 100%; text-align: left; background: none; border: none; font-family: var(--hel); font-size: 0.8rem; color: var(--text); padding: 0.55rem 0.7rem; border-radius: 6px; cursor: pointer; text-decoration: none; }
+  .nav-profile-item:hover { background: var(--bg); color: var(--red); }
+
+  @media (max-width: 899px) {
+    #main-nav { padding: 0.75rem 1.2rem; gap: 0.7rem; }
+    .nav-search { display: none !important; }
+    .nav-countdown { font-size: 0.66rem; padding: 0.4rem 0.7rem; }
+  }
+  @media (max-width: 480px) {
+    .nav-countdown { display: none !important; }
+  }
 
   .screen { display: none; min-height: 100vh; padding: 9rem 1.5rem 4rem; align-items: center; justify-content: center; }
   .screen.active { display: flex; }
@@ -143,10 +196,10 @@
   .onb-dark .key-error { color: var(--gold); }
 
   #onb-splash { cursor: pointer; padding: 3rem 0; }
-  .onb-mark { width: min(280px, 70%); height: auto; opacity: 0; transform: scale(0.82); animation: onbMarkRise 0.6s cubic-bezier(0.22,1.2,0.36,1) 0.15s forwards; }
+  .onb-mark { width: min(520px, 88%); height: auto; opacity: 0; transform: scale(0.82); animation: onbMarkRise 2.4s cubic-bezier(0.22,1.2,0.36,1) 0.15s forwards; }
   @keyframes onbMarkRise { 60% { opacity: 1; transform: scale(1.03); } to { opacity: 1; transform: scale(1); } }
   .onb-hint { margin-top: 1.6rem; font-family: var(--hel); font-size: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0); }
-  .onb-splash-hint-visible { animation: onbHintFade 0.6s ease 0.9s forwards; }
+  .onb-splash-hint-visible { animation: onbHintFade 0.6s ease 1.8s forwards; }
   @keyframes onbHintFade { to { color: rgba(255,255,255,0.4); } }
   .onb-kicker { font-family: var(--hel); font-size: 0.6rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.7rem; text-align: center; }
 
@@ -159,14 +212,26 @@
 
   #onb-pillars .onb-pillars-hed, #onb-roadmap .onb-pillars-hed, #onb-testdate .onb-pillars-hed, #onb-accom .onb-pillars-hed { font-size: 1.5rem; }
   .onb-pillar-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.6rem; margin-top: 1.6rem; text-align: center; }
+  .onb-pillar { display: flex; flex-direction: column; align-items: center; opacity: 0; transform: translateY(10px); }
+  .onb-pane.is-active .onb-pillar:nth-child(1) { animation: onbRiseIn 0.5s cubic-bezier(0.16,1,0.3,1) 0.32s forwards; }
+  .onb-pane.is-active .onb-pillar:nth-child(2) { animation: onbRiseIn 0.5s cubic-bezier(0.16,1,0.3,1) 0.56s forwards; }
+  .onb-pane.is-active .onb-pillar:nth-child(3) { animation: onbRiseIn 0.5s cubic-bezier(0.16,1,0.3,1) 0.8s forwards; }
+  @keyframes onbRiseIn { to { opacity: 1; transform: translateY(0); } }
   .onb-pillar-title { font-size: 0.85rem; font-weight: 700; color: var(--text); margin: 0.7rem 0 0.3rem; }
   .onb-pillar-body { font-size: 0.75rem; line-height: 1.55; color: var(--mid); }
 
   .onb-roadmap { position: relative; margin-top: 1.6rem; padding-top: 4px; }
   .onb-roadmap-track { display: grid; grid-template-columns: repeat(4, 1fr); }
-  .onb-roadmap-line { position: absolute; left: 12.5%; right: 12.5%; top: 14px; height: 2px; background: linear-gradient(90deg, var(--gold), var(--red)); }
-  .onb-rstep { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 0 0.4rem; }
-  .onb-rstep-num { flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%; background: var(--white); border: 2px solid var(--red); color: var(--red); font-size: 0.66rem; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-bottom: 0.7rem; }
+  .onb-roadmap-line { position: absolute; left: 12.5%; right: 12.5%; top: 14px; height: 2px; background: var(--border); }
+  .onb-roadmap-line-fill { position: absolute; left: 12.5%; top: 14px; height: 2px; width: 0; background: linear-gradient(90deg, var(--gold), var(--red)); }
+  .onb-pane.is-active .onb-roadmap-line-fill { animation: onbLineGrowX 1.15s cubic-bezier(0.16,1,0.3,1) 0.3s forwards; }
+  @keyframes onbLineGrowX { to { width: 75%; } }
+  .onb-rstep { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 0 0.4rem; opacity: 0; transform: translateY(6px); }
+  .onb-pane.is-active .onb-rstep:nth-child(1) { animation: onbRiseIn 0.4s ease 0.4s forwards; }
+  .onb-pane.is-active .onb-rstep:nth-child(2) { animation: onbRiseIn 0.4s ease 0.65s forwards; }
+  .onb-pane.is-active .onb-rstep:nth-child(3) { animation: onbRiseIn 0.4s ease 0.9s forwards; }
+  .onb-pane.is-active .onb-rstep:nth-child(4) { animation: onbRiseIn 0.4s ease 1.15s forwards; }
+  .onb-rstep-num { flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%; background: var(--white); border: 2px solid var(--red); color: var(--red); font-size: 0.66rem; font-weight: 700; display: flex; align-items: center; justify-content: center; z-index: 1; margin-bottom: 0.7rem; }
   .onb-rstep-title { font-size: 0.78rem; font-weight: 700; color: var(--text); }
   .onb-rstep-body { font-size: 0.68rem; color: var(--mid); margin-top: 0.25rem; line-height: 1.45; }
 
@@ -273,26 +338,10 @@
   .spc-tip-muted { opacity: 0.6; font-style: italic; }
   .spc-tip-cue { margin-top: 0.4rem; color: var(--gold); font-weight: 700; }
 
-  /* ═══ TEST-DAY COUNTDOWN ═══ shown on the home screen once a student's
-     Students-sheet row has a TestDate. Fill runs from GrantedAt (first
-     login) to TestDate; the target logo sits fixed at the finish line. */
-  .test-countdown { max-width: 460px; margin: 0 auto 2.1rem; }
-  .tc-top { display: flex; align-items: baseline; justify-content: center; text-align: center; margin-bottom: 0.5rem; }
-  /* Just the day-count sentence ("12 days left to your test") is shown —
-     tc-label used to carry a redundant "Test Day" kicker above/beside it,
-     dropped per Luca's request so there's one readout, not two. The
-     element stays in the DOM (renderTestCountdown() still sets its text
-     for anyone inspecting/screen-reading it) but is visually hidden. */
-  .tc-label { display: none; }
-  /* Only the count itself ("12 days left") is bold/red — "to your test"
-     stays plain so the emphasis lands on the number, not the whole
-     sentence. */
-  .tc-days-main { font-family: var(--hel); font-size: 0.85rem; font-weight: 700; color: var(--red); }
-  .tc-days-rest { font-family: var(--hel); font-size: 0.85rem; font-weight: 400; color: var(--mid); }
-  .tc-track { position: relative; height: 10px; background: var(--border); border-radius: 999px; margin-right: 40px; }
-  .tc-fill { position: absolute; top: 0; left: 0; height: 100%; background: linear-gradient(90deg, var(--gold), var(--red)); border-radius: 999px; transition: width 0.6s ease; }
-  .tc-flag { position: absolute; top: 50%; right: -34px; transform: translateY(-50%); width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; }
-  .tc-flag-icon { width: 100%; height: 100%; display: block; }
+  /* ═══ TEST-DAY COUNTDOWN ═══ moved to the top bar (see .nav-countdown
+     in the #main-nav block above) — this used to be a progress-bar card
+     under the Home greeting; that duplicate home was dropped so the
+     countdown only lives in one place. */
   .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-top: 0.5rem; }
   .menu-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 1.75rem 1.5rem; cursor: pointer; text-align: left; transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease; position: relative; overflow: hidden; box-shadow: var(--shadow); }
   .menu-card::before { content: ''; position: absolute; top: -1px; left: 0; width: 0; height: 2px; background: linear-gradient(90deg, var(--gold), var(--red)); transition: width 0.35s ease; }
@@ -333,12 +382,32 @@
   .assign-go:hover { background: var(--red); color: var(--white); }
   .menu-exit { display: block; text-align: center; margin-top: 2rem; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); text-decoration: none; }
   .menu-exit:hover { color: var(--red); }
-  /* ═══ HOME LAYOUT (redesign) ═══ next-session + this-week paired
-     directly under the greeting, always in normal flow (no more pinning
-     to page corners — see the removed-block comment further down). */
-  .home-top-row { display: flex; gap: 1.2rem; align-items: flex-start; justify-content: center; flex-wrap: wrap; }
-  .home-top-row .next-session-card,
-  .home-top-row .assign-card { flex: 1 1 320px; margin: 0 0 1.6rem; max-width: 460px; }
+
+  /* ═══ HOME LAYOUT — true 3-column dashboard ═══ sidebar (nav) is
+     column 1; this is columns 2 (~65%, main) and 3 (~35%, right rail).
+     The greeting stays full-width above both. */
+  .home-panel { max-width: 1180px; }
+  .home-dashboard { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 1.8rem; align-items: start; margin-top: 1.8rem; }
+  .home-main { min-width: 0; }
+  .home-aside { display: flex; flex-direction: column; }
+  /* These cards used to be centered, fixed-width blocks in a single
+     column (margin:0 auto / max-width caps below); now each lives inside
+     a grid column that already constrains its width, so they just fill
+     it. */
+  .home-main .assign-card,
+  .home-main .score-progress-card,
+  .home-aside .next-session-card { max-width: none; margin: 0 0 1.6rem; }
+  .home-aside .next-session-card:last-child,
+  .home-main .score-progress-card:last-child { margin-bottom: 0; }
+
+  @media (max-width: 1080px) {
+    .home-dashboard { grid-template-columns: 1fr; }
+    .home-aside { flex-direction: row; flex-wrap: wrap; gap: 1.2rem; }
+    .home-aside > * { flex: 1 1 280px; margin: 0 !important; }
+  }
+  @media (max-width: 560px) {
+    .home-aside { flex-direction: column; }
+  }
 
   /* ═══ YOUR OVERVIEW ═══ Stripe-dashboard-style section: a heading, a
      "which tests count toward this" filter chip, the big aggregate line
@@ -346,7 +415,7 @@
      the two skill-breakdown donuts) — mirrors a "big graph on top, small
      stat cards underneath" layout rather than a stack of equal-weight
      cards. */
-  .home-overview { max-width: 720px; margin: 0 auto; }
+  .home-overview { width: 100%; }
   .home-overview-hed { font-family: var(--display); font-size: 1.25rem; font-weight: 700; color: var(--text); margin-bottom: 0.9rem; }
   .home-overview-filters { display: flex; gap: 0.6rem; margin-bottom: 1.1rem; flex-wrap: wrap; }
   .ov-filter { position: relative; }
@@ -1048,6 +1117,41 @@
 
 <nav id="main-nav">
   <a href="../index.html" class="nav-logo-link" id="nav-logo-exit"><img src="../logo-caladea-white.png" alt="Moretti Test Prep &amp; Tutoring" class="nav-logo-img"></a>
+
+  <!-- Quick-nav search — jumps to Home/Practice Tests/Files/Vocabulary/My
+       Incorrect Questions/Diagnostic by name. Only shown once a student is
+       inside the app shell (see .nav-app-shell gating in the CSS above and
+       updateSidebarForScreen() below). -->
+  <div class="nav-search" id="nav-search">
+    <span class="nav-search-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span>
+    <input type="text" class="nav-search-input" id="nav-search-input" placeholder="Search the portal&hellip;" autocomplete="off">
+    <div class="nav-search-results" id="nav-search-results"></div>
+  </div>
+
+  <!-- Persistent, glanceable test-day countdown — the ONE place it lives
+       now (see renderTestCountdown()); the old under-greeting progress bar
+       on Home was dropped so it isn't shown in two places at once. -->
+  <div class="nav-countdown" id="nav-countdown">
+    <span class="nav-countdown-num" id="nav-countdown-num">&mdash;</span>
+    <span id="nav-countdown-rest"></span>
+  </div>
+
+  <!-- Profile control — student initials, name, and the two account
+       actions that used to be two separate links (nav-exit-link's "Exit
+       Portal" and Home's "Use a different key"). -->
+  <div class="nav-profile" id="nav-profile">
+    <button type="button" class="nav-profile-btn" id="nav-profile-btn">
+      <span class="nav-avatar" id="nav-avatar">&nbsp;</span>
+      <svg class="nav-profile-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="nav-profile-menu" id="nav-profile-menu">
+      <div class="nav-profile-name" id="nav-profile-name">&nbsp;</div>
+      <a href="#" class="nav-profile-item" id="nav-profile-switch-key">Use a different key</a>
+      <div class="nav-profile-divider"></div>
+      <a href="../index.html" class="nav-profile-item" id="nav-profile-exit">Exit Portal</a>
+    </div>
+  </div>
+
   <a href="../index.html" class="nav-exit" id="nav-exit-link">Exit Portal</a>
 </nav>
 
@@ -1128,7 +1232,7 @@
          validation/submit logic as the old email-step (see the script
          block below), just restyled dark and relocated here. -->
     <div class="onb-pane onb-dark" id="onb-identity">
-      <div class="onb-kicker">Almost there</div>
+      <div class="onb-kicker" id="email-step-kicker">Almost there</div>
       <h1 class="panel-hed onb-light-text" id="email-step-hed"><span id="email-step-hed-text">One more thing</span><span id="email-step-name"></span></h1>
       <p class="panel-sub onb-mid-text" id="email-step-sub">First time using this key — enter your email and we'll automatically share your files with you.</p>
       <div id="email-step-name-wrap" style="display:none;">
@@ -1166,7 +1270,7 @@
         <div class="onb-pillar">
           <span class="menu-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg></span>
           <div class="onb-pillar-title">One plan, built around you.</div>
-          <div class="onb-pillar-body">Luca designs your 12&#8209;week program from your actual results.</div>
+          <div class="onb-pillar-body">Luca designs your program from your actual results.</div>
         </div>
         <div class="onb-pillar">
           <span class="menu-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c0-3.5 3.1-6 7-6s7 2.5 7 6"/></svg></span>
@@ -1184,6 +1288,7 @@
       <h1 class="panel-hed onb-pillars-hed">Here's what happens next.</h1>
       <div class="onb-roadmap">
         <div class="onb-roadmap-line"></div>
+        <div class="onb-roadmap-line-fill"></div>
         <div class="onb-roadmap-track">
           <div class="onb-rstep"><span class="onb-rstep-num">1</span><div class="onb-rstep-title">Diagnostic</div><div class="onb-rstep-body">A full, real, timed test.</div></div>
           <div class="onb-rstep"><span class="onb-rstep-num">2</span><div class="onb-rstep-title">Your custom plan</div><div class="onb-rstep-body">Built around the results.</div></div>
@@ -1204,7 +1309,6 @@
     <div class="onb-pane" id="onb-testdate">
       <div class="kicker">Your Timeline</div>
       <h1 class="panel-hed onb-pillars-hed">When are you planning to take the SAT?</h1>
-      <p class="panel-sub">This shapes your 12-week plan, built backward from test day. Only dates you can still register for are shown.</p>
       <div class="onb-date-grid" id="onbDateGrid"></div>
       <button type="button" class="onb-date-opt onb-date-opt-unsure" data-onb-date-opt="unsure">Not sure yet &mdash; I'll decide with Luca</button>
       <div class="onb-dots"></div>
@@ -1272,87 +1376,88 @@
   </div>
 </div>
 
-<!-- ═══ SCREEN 2 — MENU ═══ -->
+<!-- ═══ SCREEN 2 — MENU ═══ true 3-column dashboard: the persistent
+     sidebar (nav column) + this screen's own main/aside split below. The
+     test-day countdown used to live here as a progress bar under the
+     greeting; it now lives ONLY in the top bar (see #nav-countdown) so it
+     isn't shown in two places at once. -->
 <div class="screen has-sidebar" id="screen-menu">
-  <div class="panel-wide">
+  <div class="panel-wide home-panel">
     <h1 class="menu-greeting" id="menu-greeting">Hey there.</h1>
-    <div class="test-countdown" id="test-countdown" style="display:none;">
-      <div class="tc-top">
-        <span class="tc-label" id="tc-label">Test day</span>
-        <span class="tc-days"><span class="tc-days-main" id="tc-days-main">&mdash;</span><span class="tc-days-rest" id="tc-days-rest"></span></span>
-      </div>
-      <div class="tc-track">
-        <div class="tc-fill" id="tc-fill" style="width:0%;"></div>
-        <div class="tc-flag"><svg class="tc-flag-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="12" cy="12" r="10" stroke="var(--gold)" stroke-width="1.7"/><circle cx="12" cy="12" r="6" stroke="var(--red)" stroke-width="1.7"/><circle cx="12" cy="12" r="2" fill="var(--red)"/></svg></div>
-      </div>
-    </div>
-    <!-- A. Scheduled class + what's due before it, directly under the
-         greeting — the two things a student needs to know first. -->
-    <div class="home-top-row">
-      <div class="next-session-card" id="next-session-card" style="display:none;">
-        <div class="ns-label" id="ns-label">Your next scheduled session is on:</div>
-        <div class="ns-date" id="ns-date">&mdash;</div>
-        <a href="#" class="ns-join" id="ns-join" style="display:none;" target="_blank" rel="noopener">Online? Join here: <span id="ns-join-url"></span></a>
-      </div>
-      <div class="assign-card" id="assign-card" style="display:none;">
-        <div class="assign-label">This Week</div>
-        <div class="assign-list" id="assign-list"></div>
-      </div>
-    </div>
 
-    <!-- B. YOUR OVERVIEW — a filter chip (which tests count toward the
-         numbers below — see renderHomeTestFilter()), the big aggregate
-         line graph, then a row of compact stat cards: most recent test +
-         the two skill-breakdown donuts (top 3 skills each). -->
-    <div class="home-overview" id="home-overview" style="display:none;">
-      <h2 class="home-overview-hed">Your Overview</h2>
-      <div class="home-overview-filters">
-        <div class="ov-filter" id="home-test-filter">
-          <button type="button" class="ov-filter-btn" id="home-test-filter-btn">
-            <span class="ov-filter-btn-label">Tests</span>
-            <span class="ov-filter-btn-value" id="home-test-filter-summary">All</span>
-            <span class="ov-filter-caret">&#9662;</span>
-          </button>
-          <div class="ov-filter-panel" id="home-test-filter-panel"></div>
+    <div class="home-dashboard">
+      <!-- MAIN COLUMN (~65%) — action items first, then the analytics/
+           skill-mastery breakdown. -->
+      <div class="home-main">
+        <div class="assign-card" id="assign-card" style="display:none;">
+          <div class="assign-label">This Week</div>
+          <div class="assign-list" id="assign-list"></div>
         </div>
-      </div>
 
-      <div class="score-progress-card" id="score-progress-card" style="display:none;">
-        <div class="spc-label">Score Progress</div>
-        <div id="spc-charts"></div>
-      </div>
+        <!-- YOUR OVERVIEW — a filter chip (which tests count toward the
+             numbers below — see renderHomeTestFilter()), the big aggregate
+             line graph, then a row of compact stat cards: most recent test
+             + the two skill-breakdown donuts (top 3 skills each). -->
+        <div class="home-overview" id="home-overview" style="display:none;">
+          <h2 class="home-overview-hed">Your Overview</h2>
+          <div class="home-overview-filters">
+            <div class="ov-filter" id="home-test-filter">
+              <button type="button" class="ov-filter-btn" id="home-test-filter-btn">
+                <span class="ov-filter-btn-label">Tests</span>
+                <span class="ov-filter-btn-value" id="home-test-filter-summary">All</span>
+                <span class="ov-filter-caret">&#9662;</span>
+              </button>
+              <div class="ov-filter-panel" id="home-test-filter-panel"></div>
+            </div>
+          </div>
 
-      <div class="home-stats-row">
-        <div class="recent-test-card" id="recent-test-card" style="display:none;">
-          <div class="rt-label">Most Recent Test</div>
-          <div class="rt-body">
-            <div class="rt-composite-num" id="rt-composite-num">&mdash;</div>
-            <div class="rt-composite-sub" id="rt-composite-sub"></div>
-            <div class="rt-title" id="rt-title"></div>
-            <div class="rt-date" id="rt-date"></div>
-            <div class="rt-weakest" id="rt-weakest"></div>
+          <div class="score-progress-card" id="score-progress-card" style="display:none;">
+            <div class="spc-label">Score Progress</div>
+            <div id="spc-charts"></div>
+          </div>
+
+          <div class="home-stats-row">
+            <div class="recent-test-card" id="recent-test-card" style="display:none;">
+              <div class="rt-label">Most Recent Test</div>
+              <div class="rt-body">
+                <div class="rt-composite-num" id="rt-composite-num">&mdash;</div>
+                <div class="rt-composite-sub" id="rt-composite-sub"></div>
+                <div class="rt-title" id="rt-title"></div>
+                <div class="rt-date" id="rt-date"></div>
+                <div class="rt-weakest" id="rt-weakest"></div>
+              </div>
+            </div>
+            <div class="pie-card">
+              <div class="pie-card-label">Math &mdash; Top Weak Skills</div>
+              <div class="pie-card-body" id="pie-math-body">
+                <div class="pie-canvas-wrap"><canvas id="pie-math-canvas"></canvas></div>
+                <div class="pie-legend" id="pie-math-legend"></div>
+              </div>
+              <div class="pie-empty" id="pie-math-empty" style="display:none;">Nothing missed here yet.</div>
+            </div>
+            <div class="pie-card">
+              <div class="pie-card-label">Reading &amp; Writing &mdash; Top Weak Skills</div>
+              <div class="pie-card-body" id="pie-rw-body">
+                <div class="pie-canvas-wrap"><canvas id="pie-rw-canvas"></canvas></div>
+                <div class="pie-legend" id="pie-rw-legend"></div>
+              </div>
+              <div class="pie-empty" id="pie-rw-empty" style="display:none;">Nothing missed here yet.</div>
+            </div>
           </div>
         </div>
-        <div class="pie-card">
-          <div class="pie-card-label">Math &mdash; Top Weak Skills</div>
-          <div class="pie-card-body" id="pie-math-body">
-            <div class="pie-canvas-wrap"><canvas id="pie-math-canvas"></canvas></div>
-            <div class="pie-legend" id="pie-math-legend"></div>
-          </div>
-          <div class="pie-empty" id="pie-math-empty" style="display:none;">Nothing missed here yet.</div>
-        </div>
-        <div class="pie-card">
-          <div class="pie-card-label">Reading &amp; Writing &mdash; Top Weak Skills</div>
-          <div class="pie-card-body" id="pie-rw-body">
-            <div class="pie-canvas-wrap"><canvas id="pie-rw-canvas"></canvas></div>
-            <div class="pie-legend" id="pie-rw-legend"></div>
-          </div>
-          <div class="pie-empty" id="pie-rw-empty" style="display:none;">Nothing missed here yet.</div>
-        </div>
       </div>
-    </div>
 
-    <a href="#" class="menu-exit" id="menu-logout">&larr; Use a different key</a>
+      <!-- RIGHT RAIL (~35%) — next live session. Persistent alongside the
+           main column instead of pinned to the top of a single center
+           column. -->
+      <aside class="home-aside">
+        <div class="next-session-card" id="next-session-card" style="display:none;">
+          <div class="ns-label" id="ns-label">Your next scheduled session is on:</div>
+          <div class="ns-date" id="ns-date">&mdash;</div>
+          <a href="#" class="ns-join" id="ns-join" style="display:none;" target="_blank" rel="noopener">Online? Join here: <span id="ns-join-url"></span></a>
+        </div>
+      </aside>
+    </div>
   </div>
 </div>
 
@@ -1590,27 +1695,6 @@
     <h1 class="panel-hed" id="overview-hed">Here's what to expect.</h1>
     <p class="panel-sub" id="overview-sub">The sections, order, and timing below match the real test exactly.</p>
     <div class="overview-retake-notice" id="overview-retake-notice" style="display:none;"></div>
-    <div class="accom-panel" id="accom-panel">
-      <div class="accom-hed"><span class="accom-title">Accommodations</span><span class="accom-state" id="accom-state">Standard timing</span></div>
-      <div class="accom-body">
-        <div class="accom-group">
-          <div class="accom-group-label">Extended time</div>
-          <div class="accom-options" id="accom-time-options">
-            <label class="accom-opt selected"><input type="radio" name="accom-time" value="1" checked>Standard</label>
-            <label class="accom-opt"><input type="radio" name="accom-time" value="1.5">Time and one-half (+50%)</label>
-            <label class="accom-opt"><input type="radio" name="accom-time" value="2">Double time (+100%)</label>
-          </div>
-        </div>
-        <div class="accom-group">
-          <div class="accom-group-label">Breaks</div>
-          <div class="accom-options" id="accom-break-options">
-            <label class="accom-opt selected"><input type="radio" name="accom-break" value="standard" checked>Standard break</label>
-            <label class="accom-opt"><input type="radio" name="accom-break" value="extended">Extended break</label>
-          </div>
-          <div class="accom-note">Breaks can always be taken as needed — the break timer never forces you to keep waiting, and you resume whenever you're ready.</div>
-        </div>
-      </div>
-    </div>
     <div class="overview-sections" id="overview-sections"></div>
     <p class="overview-note" id="overview-note"></p>
     <button class="key-btn" id="overview-start">Begin Diagnostic</button>
@@ -2396,10 +2480,14 @@
   var SIDEBAR_SCREENS = { 'screen-menu': 1, 'screen-practice-tests': 1, 'screen-resources': 1, 'screen-vocab': 1, 'screen-incorrect-questions': 1, 'screen-sat-resources': 1 };
   var SIDEBAR_NAV_FOR_SCREEN = { 'screen-menu': 'home', 'screen-practice-tests': 'practice-tests', 'screen-resources': 'files', 'screen-vocab': 'vocab', 'screen-incorrect-questions': 'incorrect-questions' };
   var sidebarEl = document.getElementById('portal-sidebar');
+  var mainNavEl = document.getElementById('main-nav');
   function updateSidebarForScreen(id) {
     if (!sidebarEl) return;
     var showIt = !!SIDEBAR_SCREENS[id];
     sidebarEl.classList.toggle('sidebar-shown', showIt);
+    // Top-bar search/countdown/profile only make sense alongside the
+    // sidebar — same screens, same gate (see .nav-app-shell in the CSS).
+    if (mainNavEl) mainNavEl.classList.toggle('nav-app-shell', showIt);
     if (showIt) applySidebarGating();
     var activeNav = SIDEBAR_NAV_FOR_SCREEN[id] || null;
     document.querySelectorAll('.sidebar-item').forEach(function (el) {
@@ -2552,6 +2640,7 @@
     show('screen-menu');
     loadNextSession();
     renderTestCountdown();
+    renderNavProfile();
     renderAssignments(); // instant paint from the auth response...
     loadAssignments();   // ...then a fresh fetch right behind it (see comment below)
     startAssignmentsPolling();
@@ -3335,55 +3424,36 @@
      Hidden whenever there's no TestDate set for a student (most students,
      most of the time) or the dates don't make sense, so a blank/bad cell
      just means the card doesn't show rather than showing something wrong. */
-  var tcCard = document.getElementById('test-countdown');
-  var tcLabel = document.getElementById('tc-label');
-  var tcDaysMain = document.getElementById('tc-days-main');
-  var tcDaysRest = document.getElementById('tc-days-rest');
-  var tcFill = document.getElementById('tc-fill');
+  var tcCard = document.getElementById('nav-countdown');
+  var tcDaysMain = document.getElementById('nav-countdown-num');
+  var tcDaysRest = document.getElementById('nav-countdown-rest');
 
   function renderTestCountdown() {
-    if (!currentStudent || !currentStudent.testDate) { tcCard.style.display = 'none'; return; }
+    if (!currentStudent || !currentStudent.testDate) { tcCard.classList.remove('has-date'); return; }
     var testMs = Date.parse(currentStudent.testDate);
-    if (isNaN(testMs)) { tcCard.style.display = 'none'; return; }
+    if (isNaN(testMs)) { tcCard.classList.remove('has-date'); return; }
 
     var now = Date.now();
-    var startMs = currentStudent.grantedAt ? Date.parse(currentStudent.grantedAt) : NaN;
-    // Fall back to a flat 12-week runway if there's no login date to anchor
-    // to yet, or if it's somehow after the test date (bad/edited data) —
-    // still shows something reasonable instead of hiding the whole card.
-    if (isNaN(startMs) || startMs >= testMs) startMs = testMs - 84 * 24 * 60 * 60 * 1000;
-
     var msPerDay = 24 * 60 * 60 * 1000;
     var daysLeft = Math.ceil((testMs - now) / msPerDay);
 
-    tcCard.style.display = 'block';
-    // One combined, centered readout ("12 days left to your test") instead
-    // of a separate "Countdown to your test" label plus a bare day count —
-    // tcLabel now just carries a short, non-repeating kicker (hidden via
-    // CSS). Only the count itself is bold/red (tcDaysMain); "to your test"
-    // stays plain (tcDaysRest) so the emphasis lands on the number.
+    tcCard.classList.add('has-date');
+    // One combined, glanceable readout ("12 days left to your test") —
+    // this is now the countdown's ONE home (the top bar), so it stays a
+    // plain text pill rather than duplicating a progress bar anywhere else.
     if (daysLeft > 1) {
-      tcLabel.textContent = 'Test Day';
       tcDaysMain.textContent = daysLeft + ' days left';
       tcDaysRest.textContent = ' to your test';
     } else if (daysLeft === 1) {
-      tcLabel.textContent = 'Test Day';
       tcDaysMain.textContent = '1 day left';
       tcDaysRest.textContent = ' to your test';
     } else if (daysLeft === 0) {
-      tcLabel.textContent = 'Test Day';
       tcDaysMain.textContent = 'Today';
       tcDaysRest.textContent = ' is your test day!';
     } else {
-      tcLabel.textContent = 'Test day has passed';
       tcDaysMain.textContent = 'Good luck!';
       tcDaysRest.textContent = '';
     }
-
-    var pct = ((now - startMs) / (testMs - startMs)) * 100;
-    if (isNaN(pct)) pct = 0;
-    pct = Math.max(0, Math.min(100, pct));
-    tcFill.style.width = pct + '%';
   }
 
   function resetKeyScreen() {
@@ -3432,20 +3502,17 @@
     });
   });
 
-  // Beat 1: the brand moment. Auto-advances; a click/tap anywhere on it
-  // also advances immediately (see the #onb-splash listener below).
-  var onbSplashTimer = null;
+  // Beat 1: the brand moment. Waits for the student to click/tap — no
+  // auto-advance — so the (much larger, slower-fading) logo has room to
+  // breathe before anyone moves on.
   function goToOnboardSplash() {
     document.getElementById('main-nav').classList.add('nav-hidden');
     document.getElementById('screen-onboard').classList.add('is-dark');
     onbGoTo('onb-splash');
     document.getElementById('onb-splash-hint').classList.add('onb-splash-hint-visible');
     show('screen-onboard');
-    clearTimeout(onbSplashTimer);
-    onbSplashTimer = setTimeout(goToOnboardIdentity, 2300);
   }
   document.getElementById('onb-splash').addEventListener('click', function () {
-    clearTimeout(onbSplashTimer);
     goToOnboardIdentity();
   });
 
@@ -3454,11 +3521,11 @@
   // name on file yet shows the name field ABOVE the email field; a key
   // Luca already pre-registered with a name just asks for email.
   function goToOnboardIdentity() {
-    clearTimeout(onbSplashTimer);
     var needsName = !pendingName || !String(pendingName).trim();
     emailStepHedText.textContent = needsName ? "Welcome! Let's get you set up" : 'One more thing';
     emailStepName.textContent = (!needsName && pendingName) ? (', ' + pendingName.split(' ')[0]) : '';
     emailStepNameWrap.style.display = needsName ? 'block' : 'none';
+    document.getElementById('email-step-kicker').style.display = needsName ? 'none' : '';
     emailStepSub.textContent = needsName
       ? "First time using this key — enter your name and email and we'll automatically share your files with you."
       : "First time using this key — enter your email and we'll automatically share your files with you.";
@@ -3760,22 +3827,104 @@
   document.getElementById('pt-list-back').addEventListener('click', function (e) { e.preventDefault(); show(ptListReturnScreen); });
   document.getElementById('incorrect-questions-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-menu'); });
 
-  /* ═══ SIDEBAR NAVIGATION ═══ drives the exact same routing the old
-     home-screen menu cards used (see the .menu-card handler above) —
-     the sidebar is just a persistent way to reach the same screens from
-     anywhere, not a new navigation model. */
+  /* ═══ SIDEBAR / TOP-BAR NAVIGATION ═══ drives the exact same routing
+     the old home-screen menu cards used (see the .menu-card handler
+     above) — a single dispatcher shared by the sidebar, the top-bar
+     search results, and the right-rail quick links, none of which are a
+     new navigation model, just more doors into the same five screens. */
+  function navigateTo(nav) {
+    if (nav === 'home') { show('screen-menu'); }
+    else if (nav === 'files') { renderResources(); show('screen-resources'); }
+    else if (nav === 'vocab') { show('screen-vocab'); if (window.vocabModuleInit) window.vocabModuleInit(); }
+    else if (nav === 'practice-tests') { ptListReturnScreen = 'screen-menu'; renderPracticeTestList(); show('screen-practice-tests'); }
+    else if (nav === 'incorrect-questions') { show('screen-incorrect-questions'); if (window.iqModuleInit) window.iqModuleInit(); }
+    else if (nav === 'diagnostic') { ptListReturnScreen = 'screen-menu'; renderPracticeTestList(); show('screen-practice-tests'); }
+  }
   document.querySelectorAll('.sidebar-item').forEach(function (item) {
     item.addEventListener('click', function (e) {
       e.preventDefault();
       if (item.style.display === 'none') return; // gated off — ignore stray clicks (e.g. keyboard)
-      var nav = item.getAttribute('data-nav');
-      if (nav === 'home') { show('screen-menu'); }
-      else if (nav === 'files') { renderResources(); show('screen-resources'); }
-      else if (nav === 'vocab') { show('screen-vocab'); if (window.vocabModuleInit) window.vocabModuleInit(); }
-      else if (nav === 'practice-tests') { ptListReturnScreen = 'screen-menu'; renderPracticeTestList(); show('screen-practice-tests'); }
-      else if (nav === 'incorrect-questions') { show('screen-incorrect-questions'); if (window.iqModuleInit) window.iqModuleInit(); }
+      navigateTo(item.getAttribute('data-nav'));
     });
   });
+
+  /* ═══ TOP-BAR SEARCH ═══ a lightweight quick-nav, not a content search:
+     matches the query against the portal's five destinations (plus
+     "Diagnostic", which lives inside Practice Tests) and jumps straight
+     there on click/Enter. */
+  var NAV_SEARCH_INDEX = [
+    { label: 'Home', nav: 'home' },
+    { label: 'Practice Tests', nav: 'practice-tests' },
+    { label: 'Diagnostic', nav: 'diagnostic' },
+    { label: 'Files', nav: 'files' },
+    { label: 'Vocabulary', nav: 'vocab' },
+    { label: 'My Incorrect Questions', nav: 'incorrect-questions' }
+  ];
+  var navSearchWrap = document.getElementById('nav-search');
+  var navSearchInput = document.getElementById('nav-search-input');
+  var navSearchResults = document.getElementById('nav-search-results');
+  function renderNavSearchResults() {
+    var q = navSearchInput.value.trim().toLowerCase();
+    var matches = q ? NAV_SEARCH_INDEX.filter(function (item) { return item.label.toLowerCase().indexOf(q) !== -1; }) : NAV_SEARCH_INDEX;
+    navSearchResults.innerHTML = matches.length
+      ? matches.map(function (item) { return '<button type="button" class="nav-search-result" data-nav="' + item.nav + '">' + item.label + '</button>'; }).join('')
+      : '<div class="nav-search-empty">No matches.</div>';
+  }
+  navSearchInput.addEventListener('focus', function () { renderNavSearchResults(); navSearchWrap.classList.add('is-open'); });
+  navSearchInput.addEventListener('input', renderNavSearchResults);
+  navSearchResults.addEventListener('click', function (e) {
+    var btn = e.target.closest('.nav-search-result');
+    if (!btn) return;
+    navSearchWrap.classList.remove('is-open');
+    navSearchInput.value = '';
+    navigateTo(btn.getAttribute('data-nav'));
+  });
+  navSearchInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') {
+      var first = navSearchResults.querySelector('.nav-search-result');
+      if (first) { navSearchWrap.classList.remove('is-open'); navSearchInput.value = ''; navigateTo(first.getAttribute('data-nav')); }
+    } else if (e.key === 'Escape') {
+      navSearchWrap.classList.remove('is-open');
+      navSearchInput.blur();
+    }
+  });
+  document.addEventListener('click', function (e) {
+    if (!navSearchWrap.contains(e.target)) navSearchWrap.classList.remove('is-open');
+  });
+
+  /* ═══ TOP-BAR PROFILE CONTROL ═══ initials avatar + name, with the two
+     account actions that used to be separate links: "Use a different
+     key" (Home's old menu-logout link) and "Exit Portal" (nav-exit-link,
+     which stays visible on its own outside the app shell). */
+  function switchKey(e) {
+    if (e) e.preventDefault();
+    clearState();
+    clearResumeSnapshot(currentStudent && currentStudent.key);
+    if (assignPollTimer) { clearInterval(assignPollTimer); assignPollTimer = null; }
+    currentStudent = null;
+    resetKeyScreen();
+    show('screen-key');
+  }
+  var navProfile = document.getElementById('nav-profile');
+  var navProfileBtn = document.getElementById('nav-profile-btn');
+  navProfileBtn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    navProfile.classList.toggle('is-open');
+  });
+  document.getElementById('nav-profile-switch-key').addEventListener('click', function (e) {
+    navProfile.classList.remove('is-open');
+    switchKey(e);
+  });
+  document.getElementById('nav-profile-exit').addEventListener('click', exitPortal);
+  document.addEventListener('click', function (e) {
+    if (!navProfile.contains(e.target)) navProfile.classList.remove('is-open');
+  });
+  function renderNavProfile() {
+    if (!currentStudent || !currentStudent.name) return;
+    var initials = currentStudent.name.trim().split(/\s+/).map(function (p) { return p[0]; }).slice(0, 2).join('').toUpperCase();
+    document.getElementById('nav-avatar').textContent = initials;
+    document.getElementById('nav-profile-name').textContent = currentStudent.name;
+  }
 
   /* ═══ PRACTICE TESTS — NAMING, COMPLETION STATE, PICKER ═══
 
@@ -3939,16 +4088,6 @@
     clearResumeSnapshot(currentStudent && currentStudent.key);
     goToTestChoice();
   });
-  document.getElementById('menu-logout').addEventListener('click', function (e) {
-    e.preventDefault();
-    clearState();
-    clearResumeSnapshot(currentStudent && currentStudent.key);
-    if (assignPollTimer) { clearInterval(assignPollTimer); assignPollTimer = null; }
-    currentStudent = null;
-    resetKeyScreen();
-    show('screen-key');
-  });
-
   /* ═══ SCREEN 3: RESOURCES ("Your Files") ═══
      If the saved link is a normal Google Drive folder URL, embed it
      inline so the portal feels like a real file browser. Otherwise
@@ -5958,6 +6097,7 @@
       document.getElementById('menu-greeting').textContent = 'Hey ' + currentStudent.name.split(' ')[0] + '.';
       loadNextSession();
       renderTestCountdown();
+      renderNavProfile();
       renderAssignments(); // instant paint from the cached snapshot...
       loadAssignments();   // ...immediately superseded by a fresh fetch — this refresh is
       startAssignmentsPolling(); // the actual fix for checked/expired items reappearing after a refresh
