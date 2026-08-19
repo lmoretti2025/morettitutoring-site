@@ -69,6 +69,19 @@
         Spots" tools work from any device instead of just the one that
         took the test. Nothing to set up or maintain here; see
         handleSyncProgress()/handleGetProgress() below for details.
+        A tab named "ScoreHistory" is also created automatically, the
+        first time any student finishes a diagnostic/practice test — a
+        server-side log of every composite score, used by the biweekly
+        guardian summary email (see below). Nothing to set up here either;
+        see handleSyncScoreHistory() below.
+        GuardianName / GuardianEmail are two more optional columns on
+        Students — fill these in by hand for any student whose
+        parent/guardian should get a biweekly progress-summary email
+        (composite score trend + current weak spot). Leave GuardianEmail
+        blank for a student and they're simply skipped — nothing breaks,
+        nothing sends. Both auto-create the first time the summary job
+        runs if they don't exist yet. See "GUARDIAN BIWEEKLY SUMMARY"
+        below for how the email itself is built.
      2. Paste this file into a new Apps Script project (script.google.com).
      3. Set SHEET_ID below to that Sheet's ID (from its URL).
      4. Deploy > New deployment > Web app.
@@ -77,6 +90,9 @@
      5. Copy the deployment URL into APPS_SCRIPT_URL in portal/index.html.
      6. Select "setupTrigger" in the function dropdown and click Run once
         (authorize when asked). This turns on the auto-folder feature.
+     7. (Optional) Select "setupGuardianSummaryTrigger" and click Run once
+        to turn on the biweekly guardian summary email. Only needed once,
+        ever — skip this entirely if you'd rather not offer it yet.
    ========================================================================= */
 
 // ═══ RUN THIS DIRECTLY TO DIAGNOSE THE EMAIL PROBLEM ═══
@@ -129,7 +145,9 @@ function doPost(e) {
     } else if (body.action === 'getProgress') {
       out = handleGetProgress(body.key);
     } else if (body.action === 'saveOnboardingPrefs') {
-      out = handleSaveOnboardingPrefs(body.key, body.testDate, body.accomTimeMult, body.accomBreakMult, body.baselineType, body.baselineRw, body.baselineMath);
+      out = handleSaveOnboardingPrefs(body.key, body.testDate, body.accomTimeMult, body.accomBreakMult, body.baselineType, body.baselineRw, body.baselineMath, body.guardianName, body.guardianEmail);
+    } else if (body.action === 'syncScoreHistory') {
+      out = handleSyncScoreHistory(body.key, body.entry);
     } else {
       out = { ok: false, error: 'unknown_action' };
     }
@@ -368,15 +386,19 @@ function handleAuth(rawKey, rawEmail, rawName) {
 /* =========================================================================
    ONBOARDING PREFERENCES — test date + testing accommodations + optional
    baseline PSAT/SAT score (as a Reading & Writing / Math section-score
-   breakdown, not a composite), captured once during the first-login
-   onboarding sequence (portal/index.html's #screen-onboard) and never
-   asked again. TestDate reuses the column the countdown widget already
-   reads (see handleAuth above); AccomTimeMult/AccomBreakMult/BaselineType/
-   BaselineRW/BaselineMath are new columns, auto-created on the Students
-   sheet the first time this runs (same pattern getLeadsSheet_ uses below)
-   so nothing needs to be set up by hand first.
+   breakdown, not a composite) + optional parent/guardian contact,
+   captured once during the first-login onboarding sequence (portal/
+   index.html's #screen-onboard) and never asked again. TestDate reuses
+   the column the countdown widget already reads (see handleAuth above);
+   AccomTimeMult/AccomBreakMult/BaselineType/BaselineRW/BaselineMath/
+   GuardianName/GuardianEmail are new columns, auto-created on the
+   Students sheet the first time this runs (same pattern getLeadsSheet_
+   uses below) so nothing needs to be set up by hand first. GuardianName/
+   GuardianEmail are pure data capture right now — nothing reads them yet
+   (see the "GUARDIAN BIWEEKLY SUMMARY" section further down for the one
+   thing that will, once/if that's turned on).
    ========================================================================= */
-function handleSaveOnboardingPrefs(rawKey, rawTestDate, rawAccomTimeMult, rawAccomBreakMult, rawBaselineType, rawBaselineRw, rawBaselineMath) {
+function handleSaveOnboardingPrefs(rawKey, rawTestDate, rawAccomTimeMult, rawAccomBreakMult, rawBaselineType, rawBaselineRw, rawBaselineMath, rawGuardianName, rawGuardianEmail) {
   var key = String(rawKey || '').trim().toUpperCase();
   if (!key) return { ok: false, error: 'missing_key' };
 
@@ -385,7 +407,7 @@ function handleSaveOnboardingPrefs(rawKey, rawTestDate, rawAccomTimeMult, rawAcc
   if (!row) return { ok: false, error: 'bad_key' };
 
   var headers = row._headers;
-  ['AccomTimeMult', 'AccomBreakMult', 'BaselineType', 'BaselineRW', 'BaselineMath'].forEach(function (col) {
+  ['AccomTimeMult', 'AccomBreakMult', 'BaselineType', 'BaselineRW', 'BaselineMath', 'GuardianName', 'GuardianEmail'].forEach(function (col) {
     if (headers.indexOf(col) === -1) {
       sheet.getRange(1, sheet.getLastColumn() + 1).setValue(col);
       headers.push(col);
@@ -426,6 +448,16 @@ function handleSaveOnboardingPrefs(rawKey, rawTestDate, rawAccomTimeMult, rawAcc
     setCol('BaselineRW', baselineRw);
     setCol('BaselineMath', baselineMath);
   }
+
+  // Also optional, also skippable — a blank/missing guardian email just
+  // means nothing gets written, same as everything else on this screen.
+  // Name is written even without an email (harmless either way); the
+  // email itself gets a basic format check — same regex handleAuth uses
+  // for the student's own email — before being trusted onto the sheet.
+  var guardianName = String(rawGuardianName || '').trim();
+  var guardianEmail = String(rawGuardianEmail || '').trim().toLowerCase();
+  if (guardianName) setCol('GuardianName', sheetSafe_(guardianName));
+  if (guardianEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guardianEmail)) setCol('GuardianEmail', guardianEmail);
 
   return { ok: true };
 }
@@ -1149,6 +1181,59 @@ function handleGetProgress(rawKey) {
 }
 
 /* =========================================================================
+   SCORE HISTORY — a server-side, append-only log of every diagnostic/
+   practice-test composite, mirroring what index.html's recordScoreHistory()
+   already writes to the browser's own localStorage (moretti_score_history_
+   <key>). That local copy is what actually drives the Score Progress chart
+   on Home — this sheet exists purely so a composite score trend is
+   available to code that can't reach localStorage, i.e. the biweekly
+   guardian-summary trigger below (Apps Script triggers run server-side,
+   with no browser in the loop). Best-effort from the client's side (see
+   syncScoreHistoryToBackend() in index.html) — if this call fails, the
+   student's own Score Progress chart is unaffected, only the guardian
+   email's trend data would be missing that one point.
+   ========================================================================= */
+function getScoreHistorySheet_() {
+  var ss = SpreadsheetApp.openById(SHEET_ID);
+  var sheet = ss.getSheetByName('ScoreHistory');
+  if (!sheet) {
+    sheet = ss.insertSheet('ScoreHistory');
+    sheet.appendRow(['Timestamp', 'Key', 'TestType', 'Source', 'TestId', 'TestTitle', 'Composite', 'ScaleMin', 'ScaleMax', 'RW', 'Math', 'WeakestLabel', 'WeakestCorrect', 'WeakestTotal']);
+  }
+  return sheet;
+}
+
+// rawEntry mirrors the exact shape index.html's recordComposite() builds
+// for its own localStorage write (see recordScoreHistory() there) — sent
+// here unchanged rather than reshaped, so the two copies can't drift apart.
+function handleSyncScoreHistory(rawKey, rawEntry) {
+  if (!rawKey) return { ok: false, error: 'missing_key' };
+  var key = String(rawKey).trim().toUpperCase();
+  var sheet = getSheet_();
+  var row = findRow_(sheet, key);
+  if (!row) return { ok: false, error: 'bad_key' };
+
+  var entry = (rawEntry && typeof rawEntry === 'object') ? rawEntry : {};
+  var composite = Number(entry.composite);
+  if (!composite) return { ok: false, error: 'missing_composite' }; // nothing useful to log without one
+
+  var weakest = (entry.weakest && typeof entry.weakest === 'object') ? entry.weakest : null;
+  var shSheet = getScoreHistorySheet_();
+  shSheet.appendRow([
+    new Date(), key,
+    (entry.testType === 'ACT' ? 'ACT' : 'SAT'),
+    (entry.source === 'practice-test' ? 'practice-test' : 'diagnostic'),
+    entry.testId || '', sheetSafe_(entry.testTitle || ''),
+    composite, Number(entry.scaleMin) || '', Number(entry.scaleMax) || '',
+    Number(entry.rw) || '', Number(entry.math) || '',
+    weakest ? sheetSafe_(weakest.label || '') : '',
+    weakest ? (Number(weakest.correct) || '') : '',
+    weakest ? (Number(weakest.total) || '') : ''
+  ]);
+  return { ok: true };
+}
+
+/* =========================================================================
    AUTO-CREATE STUDENT FOLDERS
    -------------------------------------------------------------------------
    Runs automatically whenever the Students sheet is edited (see
@@ -1519,6 +1604,215 @@ function setupLeadFollowUpTrigger() {
     .atHour(9)
     .create();
   console.log('Trigger installed: sendLeadFollowUps will now run once a day around 9am.');
+}
+
+/* =========================================================================
+   GUARDIAN BIWEEKLY SUMMARY
+   -------------------------------------------------------------------------
+   Opt-in per student: fill in GuardianEmail (and optionally GuardianName)
+   on that student's row in the Students sheet — both auto-create the
+   first time this runs if they don't exist yet, same pattern as
+   AccomTimeMult/BaselineType above. A blank GuardianEmail just means that
+   student is skipped, nothing else needed.
+
+   Runs daily (see setupGuardianSummaryTrigger) but only actually SENDS to
+   a given student once every GUARDIAN_SUMMARY_DAYS days — gated by
+   LastGuardianSummaryAt on their row, same "scan daily, gate in code"
+   idiom sendLeadFollowUps() uses above, since Apps Script's timeBased()
+   builder doesn't have a clean "every 14 days" primitive that survives a
+   trigger reinstall.
+   ========================================================================= */
+var GUARDIAN_SUMMARY_DAYS = 14;
+var GUARDIAN_COLS_ = ['GuardianName', 'GuardianEmail', 'LastGuardianSummaryAt'];
+
+function ensureGuardianColumns_(sheet, headers) {
+  GUARDIAN_COLS_.forEach(function (col) {
+    if (headers.indexOf(col) === -1) {
+      sheet.getRange(1, sheet.getLastColumn() + 1).setValue(col);
+      headers.push(col);
+    }
+  });
+}
+
+function sendGuardianSummaries() {
+  var sheet = getSheet_();
+  var headers = sheet.getDataRange().getValues()[0];
+  ensureGuardianColumns_(sheet, headers);
+  // Re-read after possibly adding columns, so col indexes below line up.
+  var data = sheet.getDataRange().getValues();
+  headers = data[0];
+  var col = {};
+  headers.forEach(function (h, i) { col[h] = i; });
+  var now = new Date();
+
+  for (var i = 1; i < data.length; i++) {
+    var row = data[i];
+    var guardianEmail = String(row[col.GuardianEmail] || '').trim();
+    if (!guardianEmail) continue;
+
+    var lastSent = row[col.LastGuardianSummaryAt];
+    if (lastSent instanceof Date) {
+      var daysSince = (now - lastSent) / (24 * 60 * 60 * 1000);
+      if (daysSince < GUARDIAN_SUMMARY_DAYS) continue;
+    }
+
+    var key = String(row[col.Key] || '').trim().toUpperCase();
+    if (!key) continue;
+    var studentName = row[col.Name] || 'your student';
+
+    var trend = scoreTrendForStudent_(key);
+    if (!trend.length) continue; // nothing to report yet — don't send an empty update
+
+    var weakest = weakestSkillForStudent_(key);
+    var guardianName = row[col.GuardianName] || '';
+    var msg = guardianSummaryEmail_(studentName, guardianName, trend, weakest);
+    sendLeadEmail_(guardianEmail, guardianName || studentName, msg);
+    sheet.getRange(i + 1, col.LastGuardianSummaryAt + 1).setValue(now);
+  }
+}
+
+// Last GUARDIAN_SUMMARY_TREND_MAX entries for this student, oldest first —
+// enough to show a real trend in the email without dumping the student's
+// entire history every time.
+var GUARDIAN_SUMMARY_TREND_MAX = 5;
+function scoreTrendForStudent_(key) {
+  var sheet = getScoreHistorySheet_();
+  var data = sheet.getDataRange().getValues();
+  var headers = data[0];
+  var col = {};
+  headers.forEach(function (h, i) { col[h] = i; });
+  var rows = [];
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][col.Key] || '').trim().toUpperCase() === key) {
+      rows.push({
+        date: data[i][col.Timestamp], testTitle: data[i][col.TestTitle] || '',
+        testType: data[i][col.TestType], composite: data[i][col.Composite]
+      });
+    }
+  }
+  rows.sort(function (a, b) { return new Date(a.date) - new Date(b.date); });
+  return rows.slice(-GUARDIAN_SUMMARY_TREND_MAX);
+}
+
+// Mirrors index.html's client-side weakestDomain() — same "at least 3
+// questions, lowest correct%, ties favor more questions" logic, run here
+// against the SAME SkillStatsJSON the Progress sheet already stores (see
+// handleSyncProgress above), aggregated up from skill-level to
+// domain-level first since that JSON is keyed "Domain → Skill", not by
+// domain alone.
+function weakestSkillForStudent_(key) {
+  var pSheet = getProgressSheet_();
+  var pData = pSheet.getDataRange().getValues();
+  var pHeaders = pData[0];
+  var keyCol = pHeaders.indexOf('Key');
+  var skCol = pHeaders.indexOf('SkillStatsJSON');
+  var bySkill = null;
+  for (var i = 1; i < pData.length; i++) {
+    if (String(pData[i][keyCol] || '').trim().toUpperCase() === key) {
+      try { bySkill = JSON.parse(pData[i][skCol]) || {}; } catch (e) { bySkill = {}; }
+      break;
+    }
+  }
+  if (!bySkill) return null;
+
+  var byDomain = {};
+  Object.keys(bySkill).forEach(function (k) {
+    var s = bySkill[k];
+    if (!s || !s.domain) return;
+    if (!byDomain[s.domain]) byDomain[s.domain] = { correct: 0, total: 0 };
+    byDomain[s.domain].correct += Number(s.correct) || 0;
+    byDomain[s.domain].total += Number(s.total) || 0;
+  });
+
+  var MIN_QUESTIONS = 3;
+  var best = null;
+  Object.keys(byDomain).forEach(function (name) {
+    var d = byDomain[name];
+    if (d.total < MIN_QUESTIONS) return;
+    var pct = d.correct / d.total;
+    if (!best || pct < best.pct || (pct === best.pct && d.total > best.total)) {
+      best = { label: name, correct: d.correct, total: d.total, pct: pct };
+    }
+  });
+  return best;
+}
+
+function guardianSummaryEmail_(studentName, guardianName, trend, weakest) {
+  var studentFirst = String(studentName).split(' ')[0] || 'your student';
+  var greetName = guardianName ? String(guardianName).split(' ')[0] : '';
+  var latest = trend[trend.length - 1];
+  var first = trend[0];
+  var trendLine = trend.map(function (e) {
+    return (e.testTitle || (e.testType + ' attempt')) + ': ' + e.composite;
+  }).join('  →  ');
+
+  var movementText = '';
+  if (trend.length > 1 && typeof first.composite === 'number' && typeof latest.composite === 'number') {
+    var diff = latest.composite - first.composite;
+    if (diff > 0) movementText = studentFirst + '’s composite is up ' + diff + ' points since ' + formatDateShort_(first.date) + '.';
+    else if (diff < 0) movementText = studentFirst + '’s composite has moved ' + diff + ' points since ' + formatDateShort_(first.date) + ' — normal test-to-test variation, not a trend to worry about on its own.';
+    else movementText = studentFirst + '’s composite has held steady since ' + formatDateShort_(first.date) + '.';
+  }
+
+  var weakestText = weakest
+    ? studentFirst + '’s current focus area is ' + weakest.label + ' (' + weakest.correct + '/' + weakest.total + ' on the most recent attempt).'
+    : '';
+
+  var text =
+    'Hi' + (greetName ? ' ' + greetName : '') + ',\n\n' +
+    'A quick update on ' + studentFirst + '’s progress:\n\n' +
+    'Most recent score: ' + latest.composite + ' (' + (latest.testTitle || latest.testType) + ', ' + formatDateShort_(latest.date) + ')\n' +
+    (movementText ? movementText + '\n' : '') +
+    (weakestText ? weakestText + '\n' : '') +
+    '\nRecent attempts: ' + trendLine + '\n\n' +
+    'Happy to talk through the plan anytime — just reply to this email or text (201) 275-2791.\n\n' +
+    'Best,\nLuca';
+
+  var html =
+    '<div style="font-family:Georgia,serif; color:#111; font-size:15px; line-height:1.6; max-width:560px;">' +
+    '<p>Hi' + (greetName ? ' ' + greetName : '') + ',</p>' +
+    '<p>A quick update on <strong>' + studentFirst + '</strong>’s progress:</p>' +
+    '<div style="background:#f7f4ef; border-left:3px solid #C9A84C; padding:0.9em 1.2em; margin:1em 0;">' +
+    '<div style="font-size:1.4em; font-weight:bold; color:#B0271C;">' + latest.composite + '</div>' +
+    '<div style="font-size:0.85em; color:#666;">' + escapeHtml_(latest.testTitle || latest.testType) + ' &middot; ' + formatDateShort_(latest.date) + '</div>' +
+    '</div>' +
+    (movementText ? '<p>' + escapeHtml_(movementText) + '</p>' : '') +
+    (weakestText ? '<p>' + escapeHtml_(weakestText) + '</p>' : '') +
+    '<p style="font-size:0.85em; color:#666;">Recent attempts: ' + escapeHtml_(trendLine) + '</p>' +
+    '<p>Happy to talk through the plan anytime &mdash; just reply to this email or text <a href="tel:2012752791" style="color:#B0271C; font-weight:bold;">(201) 275-2791</a>.</p>' +
+    '<p>Best,<br>Luca</p>' +
+    '</div>';
+
+  return { subject: studentFirst + '’s Progress Update — Moretti Test Prep & Tutoring', text: text, html: html };
+}
+
+function formatDateShort_(d) {
+  var date = (d instanceof Date) ? d : new Date(d);
+  if (isNaN(date.getTime())) return '';
+  return Utilities.formatDate(date, Session.getScriptTimeZone() || 'America/New_York', 'MMM d');
+}
+
+function escapeHtml_(s) {
+  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// Run this ONCE manually (select it in the function dropdown, click Run,
+// authorize when asked) to turn on the biweekly guardian summary send.
+// Safe to run more than once; it clears any duplicate trigger from a
+// prior run first. The job itself runs daily and only actually emails a
+// given guardian once every GUARDIAN_SUMMARY_DAYS days (see
+// sendGuardianSummaries above) — daily is just the scan cadence, not the
+// send cadence.
+function setupGuardianSummaryTrigger() {
+  ScriptApp.getProjectTriggers().forEach(function (t) {
+    if (t.getHandlerFunction() === 'sendGuardianSummaries') ScriptApp.deleteTrigger(t);
+  });
+  ScriptApp.newTrigger('sendGuardianSummaries')
+    .timeBased()
+    .everyDays(1)
+    .atHour(8)
+    .create();
+  console.log('Trigger installed: sendGuardianSummaries will now run once a day around 8am (actual guardian emails go out at most once every ' + GUARDIAN_SUMMARY_DAYS + ' days per student).');
 }
 
 /* =========================================================================

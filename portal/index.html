@@ -423,6 +423,12 @@
      column 1; this is columns 2 (~65%, main) and 3 (~35%, right rail).
      The greeting stays full-width above both. */
   .home-panel { max-width: 1180px; }
+  /* ═══ HOME EMPTY STATES ═══ see renderHomeState() — replaces the entire
+     .home-dashboard below for a student who hasn't taken their diagnostic
+     yet, or just has and is still inside the new-key hold. */
+  .home-empty-state { max-width: 460px; margin: 3rem auto 0; text-align: center; }
+  .home-empty-sub { font-size: 0.92rem; color: var(--mid); line-height: 1.75; margin-bottom: 2rem; }
+  .home-empty-cta { max-width: 320px; margin: 0 auto; padding: 1.15rem 2rem; font-size: 0.85rem; }
   .home-dashboard { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 1.8rem; align-items: start; margin-top: 1.8rem; }
   .home-main { min-width: 0; }
   .home-aside { display: flex; flex-direction: column; }
@@ -1532,6 +1538,45 @@
       </div>
       <div class="onb-dots"></div>
       <button class="key-btn" id="onb-baseline-continue">Continue</button>
+    </div>
+
+    <!-- Act 2, beat 6c: parent/guardian contact — optional, same card/
+         sub-panel idiom as baseline above. Purely a data-capture step
+         right now: nothing reads GuardianName/GuardianEmail yet, it just
+         gets logged on the Students sheet for whenever it's needed. -->
+    <div class="onb-pane" id="onb-guardian">
+      <div class="kicker">Staying In Touch</div>
+      <h1 class="panel-hed onb-pillars-hed">Keep a parent or guardian in the loop.</h1>
+      <p class="panel-sub">Totally optional &mdash; if you'd like Luca to be able to reach a parent or guardian directly, add their info here. Skip this if it's not needed.</p>
+      <div class="onb-accom-cards">
+        <div class="onb-accom-card is-selected" data-onb-guardian-card>
+          <div class="onb-accom-row">
+            <div><div class="onb-accom-title">Not needed</div><div class="onb-accom-note">Skip this</div></div>
+            <span class="onb-accom-check"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+          </div>
+        </div>
+        <div class="onb-accom-card" data-onb-guardian-card>
+          <div class="onb-accom-row">
+            <div><div class="onb-accom-title">Add a contact</div><div class="onb-accom-note">Parent or guardian</div></div>
+            <span class="onb-accom-check"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+          </div>
+        </div>
+      </div>
+      <div class="onb-accom-sub" id="onbGuardianSub">
+        <div class="onb-accom-sub-inner" style="grid-template-columns:1fr 1fr;">
+          <div>
+            <div class="onb-accom-group-label">Name</div>
+            <input type="text" class="key-input" id="onbGuardianNameInput" placeholder="Full name" autocomplete="name" style="margin-bottom:0; padding:0.6rem 0.9rem; text-align:left; text-transform:none;">
+          </div>
+          <div>
+            <div class="onb-accom-group-label">Email</div>
+            <input type="email" class="key-input" id="onbGuardianEmailInput" placeholder="parent@email.com" autocomplete="email" style="margin-bottom:0; padding:0.6rem 0.9rem; text-align:left; text-transform:none;">
+          </div>
+        </div>
+        <p class="key-error" id="onbGuardianEmailError">That doesn't look like a valid email &mdash; double-check it, or leave it blank.</p>
+      </div>
+      <div class="onb-dots"></div>
+      <button class="key-btn" id="onb-guardian-continue">Continue</button>
     </div>
 
     <!-- Act 2, beat 7: accommodations — the one screen that has to
@@ -2659,6 +2704,40 @@
   // sessionStorage refresh-restore, and every "back to menu" link) rather
   // than once at login, so it stays correct even if currentStudent is
   // replaced later (e.g. the cross-session resume-modal path).
+  // ═══ HOME EMPTY STATES ═══ swaps the entire .home-dashboard (This Week,
+  // Next Session, Your Overview — everything) for a bare message in two
+  // cases: a test-prep student who hasn't taken their diagnostic yet
+  // ("Take Diagnostic" is their only move), or one who just has and is
+  // still inside the new-key hold (see isGrantedLocked()) — Luca hasn't
+  // had a chance to look at it yet, so there's nothing to show but "hang
+  // on." A subject-only student (no SAT/ACT flags) never hits either case
+  // and always sees the normal dashboard.
+  function renderHomeState() {
+    var emptyEl = document.getElementById('home-empty-state');
+    var dashboardEl = document.getElementById('home-dashboard');
+    var subEl = document.getElementById('home-empty-sub');
+    var ctaBtn = document.getElementById('home-empty-cta');
+    var isTestPrep = !!(currentStudent && (currentStudent.showSat || currentStudent.showAct));
+    var hasCompletedADiagnostic = !!(currentStudent && (currentStudent.satTaken || currentStudent.actTaken));
+    var needsDiagnostic = isTestPrep && !hasCompletedADiagnostic;
+    var processing = hasCompletedADiagnostic && isGrantedLocked();
+    if (needsDiagnostic) {
+      subEl.textContent = 'You still need to take your diagnostic before you can access other features.';
+      ctaBtn.style.display = '';
+      emptyEl.style.display = 'block';
+      dashboardEl.style.display = 'none';
+    } else if (processing) {
+      subEl.textContent = 'Please wait while we process your diagnostic for access to the full portal.';
+      ctaBtn.style.display = 'none';
+      emptyEl.style.display = 'block';
+      dashboardEl.style.display = 'none';
+    } else {
+      emptyEl.style.display = 'none';
+      dashboardEl.style.display = '';
+    }
+  }
+  document.getElementById('home-empty-cta').addEventListener('click', startDiagnosticFlow);
+
   function applyTestPrepGating() {
     var showSat = !!(currentStudent && currentStudent.showSat);
     var showAct = !!(currentStudent && currentStudent.showAct);
@@ -2834,7 +2913,7 @@
       screens[k].classList.toggle('active', isActive);
       if (!isActive) screens[k].classList.remove('screen-visible');
     });
-    if (id === 'screen-menu') { applyTestPrepGating(); applyTestCardStates(); renderScoreProgress(); renderHomePies(); renderRecentTestCard(); }
+    if (id === 'screen-menu') { renderHomeState(); applyTestPrepGating(); applyTestCardStates(); renderScoreProgress(); renderHomePies(); renderRecentTestCard(); }
     if (id === 'screen-test-choice') applyTestChoiceGating();
     if (id === 'screen-sat-resources') applyResourcesGating();
     updateSidebarForScreen(id);
@@ -3863,7 +3942,7 @@
      every beat's "Continue" routes through; it also renders the progress
      dots and drives them off ONB_STEPS below rather than each pane
      tracking its own position. */
-  var ONB_STEPS = ['onb-welcome', 'onb-pillars', 'onb-roadmap', 'onb-testdate', 'onb-baseline', 'onb-accom', 'onb-handoff'];
+  var ONB_STEPS = ['onb-welcome', 'onb-pillars', 'onb-roadmap', 'onb-testdate', 'onb-baseline', 'onb-guardian', 'onb-accom', 'onb-handoff'];
   var onboardAuthData = null; // the auth response, held onto until the sequence's final beat actually settles into the app
 
   function onbGoTo(paneId) {
@@ -4092,7 +4171,7 @@
       onbBaselineType = null;
       onbBaselineRw = null;
       onbBaselineMath = null;
-      onbGoTo('onb-accom');
+      onbGoTo('onb-guardian');
       return;
     }
     var range = onbBaselineRange();
@@ -4111,6 +4190,45 @@
     onbBaselineType = document.querySelector('#onbBaselineTestOpts .is-on').getAttribute('data-val');
     onbBaselineRw = rw;
     onbBaselineMath = math;
+    onbGoTo('onb-guardian');
+  });
+
+  // Beat 6c: parent/guardian contact — optional, same idiom as baseline
+  // above. Email gets a basic format check (only when non-blank — the
+  // whole step is skippable), same regex the key-entry email field uses
+  // elsewhere in this file. Nothing downstream reads these values yet;
+  // they're just carried through to saveOnboardingPrefs for Luca to use
+  // later (see Code.gs's GuardianName/GuardianEmail columns).
+  var onbHasGuardian = false;
+  document.querySelectorAll('[data-onb-guardian-card]').forEach(function (card, i) {
+    card.addEventListener('click', function () {
+      document.querySelectorAll('[data-onb-guardian-card]').forEach(function (c) { c.classList.remove('is-selected'); });
+      card.classList.add('is-selected');
+      onbHasGuardian = (i === 1);
+      document.getElementById('onbGuardianSub').classList.toggle('is-open', onbHasGuardian);
+      document.getElementById('onbGuardianEmailError').style.display = 'none';
+    });
+  });
+  var onbGuardianName = null;
+  var onbGuardianEmail = null;
+  document.getElementById('onb-guardian-continue').addEventListener('click', function () {
+    if (!onbHasGuardian) {
+      onbGuardianName = null;
+      onbGuardianEmail = null;
+      onbGoTo('onb-accom');
+      return;
+    }
+    var nameInput = document.getElementById('onbGuardianNameInput');
+    var emailInput = document.getElementById('onbGuardianEmailInput');
+    var email = emailInput.value.trim();
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      document.getElementById('onbGuardianEmailError').style.display = 'block';
+      emailInput.focus();
+      return;
+    }
+    document.getElementById('onbGuardianEmailError').style.display = 'none';
+    onbGuardianName = nameInput.value.trim() || null;
+    onbGuardianEmail = email || null;
     onbGoTo('onb-accom');
   });
 
@@ -4152,7 +4270,7 @@
       fetch(APPS_SCRIPT_URL, {
         method: 'POST',
         keepalive: true,
-        body: JSON.stringify({ action: 'saveOnboardingPrefs', key: pendingKey, testDate: onbSelectedTestDate, accomTimeMult: timeMult, accomBreakMult: breakMult, baselineType: onbBaselineType, baselineRw: onbBaselineRw, baselineMath: onbBaselineMath })
+        body: JSON.stringify({ action: 'saveOnboardingPrefs', key: pendingKey, testDate: onbSelectedTestDate, accomTimeMult: timeMult, accomBreakMult: breakMult, baselineType: onbBaselineType, baselineRw: onbBaselineRw, baselineMath: onbBaselineMath, guardianName: onbGuardianName, guardianEmail: onbGuardianEmail })
       }).catch(function () {});
     } catch (e) {}
     onbGoTo('onb-handoff');
@@ -6284,6 +6402,25 @@
       existing.entries.push(entry);
       localStorage.setItem(storageKey, JSON.stringify(existing));
     } catch (e) { /* storage disabled / private browsing — skip silently, matches saveState() elsewhere */ }
+    syncScoreHistoryToBackend(entry);
+  }
+
+  // Best-effort mirror of the localStorage write above, server-side (see
+  // handleSyncScoreHistory in Code.gs) — the local copy is what actually
+  // drives this device's own Score Progress chart, so a failure here
+  // doesn't affect the student at all; it only means the biweekly guardian
+  // summary trigger (which runs server-side, no browser/localStorage
+  // available to it) would be missing this one data point.
+  function syncScoreHistoryToBackend(entry) {
+    try {
+      var studentKey = currentStudent && currentStudent.key;
+      if (!studentKey) return;
+      fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        keepalive: true,
+        body: JSON.stringify({ action: 'syncScoreHistory', key: studentKey, entry: entry })
+      }).catch(function () {});
+    } catch (e) { /* ignore */ }
   }
 
   var diagnosticSubmitted = false;
