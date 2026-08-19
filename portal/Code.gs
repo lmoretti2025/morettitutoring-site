@@ -129,7 +129,7 @@ function doPost(e) {
     } else if (body.action === 'getProgress') {
       out = handleGetProgress(body.key);
     } else if (body.action === 'saveOnboardingPrefs') {
-      out = handleSaveOnboardingPrefs(body.key, body.testDate, body.accomTimeMult, body.accomBreakMult);
+      out = handleSaveOnboardingPrefs(body.key, body.testDate, body.accomTimeMult, body.accomBreakMult, body.baselineType, body.baselineRw, body.baselineMath);
     } else {
       out = { ok: false, error: 'unknown_action' };
     }
@@ -208,11 +208,25 @@ function extractFolderId_(url) {
 // broken row in the sheet doesn't take down login for everyone else —
 // worst case the student just doesn't get auto-shared and Luca has to
 // add them manually as a fallback.
+//
+// Checks existing access FIRST rather than calling addViewer() unconditionally
+// — addViewer() is a no-op on permissions for someone who's already a viewer,
+// but Drive still fires a "this was shared with you" notification email on
+// EVERY call regardless of whether access already existed. handleAuth's
+// self-heal retry (see its comment) runs this on every returning-student
+// login, which without this check meant a fresh share-notification email on
+// every single login, forever.
 function grantFolderAccess_(url, email) {
   var id = extractFolderId_(url);
   if (!id || !email) return;
   try {
-    DriveApp.getFolderById(id).addViewer(email);
+    var folder = DriveApp.getFolderById(id);
+    var lowerEmail = email.toLowerCase();
+    var alreadyHasAccess = folder.getViewers().concat(folder.getEditors()).some(function (u) {
+      return u.getEmail().toLowerCase() === lowerEmail;
+    });
+    if (alreadyHasAccess) return;
+    folder.addViewer(email);
   } catch (err) {
     // logged to Apps Script's execution log for debugging
     console.error('Could not grant access to folder ' + id + ' for ' + email + ': ' + err);
@@ -343,21 +357,26 @@ function handleAuth(rawKey, rawEmail, rawName) {
     // true, instead of resetting to standard timing before every attempt.
     accomTimeMult: row.AccomTimeMult || null,
     accomBreakMult: row.AccomBreakMult || null,
+    baselineType: row.BaselineType || null,
+    baselineRw: row.BaselineRW || null,
+    baselineMath: row.BaselineMath || null,
     tests: [],
     assignments: getAssignments_(key, row.Name)
   };
 }
 
 /* =========================================================================
-   ONBOARDING PREFERENCES — test date + testing accommodations, captured
-   once during the first-login onboarding sequence (portal/index.html's
-   #screen-onboard) and never asked again. TestDate reuses the column the
-   countdown widget already reads (see handleAuth above); AccomTimeMult /
-   AccomBreakMult are new columns, auto-created on the Students sheet the
-   first time this runs (same pattern getLeadsSheet_ uses below) so nothing
-   needs to be set up by hand first.
+   ONBOARDING PREFERENCES — test date + testing accommodations + optional
+   baseline PSAT/SAT score (as a Reading & Writing / Math section-score
+   breakdown, not a composite), captured once during the first-login
+   onboarding sequence (portal/index.html's #screen-onboard) and never
+   asked again. TestDate reuses the column the countdown widget already
+   reads (see handleAuth above); AccomTimeMult/AccomBreakMult/BaselineType/
+   BaselineRW/BaselineMath are new columns, auto-created on the Students
+   sheet the first time this runs (same pattern getLeadsSheet_ uses below)
+   so nothing needs to be set up by hand first.
    ========================================================================= */
-function handleSaveOnboardingPrefs(rawKey, rawTestDate, rawAccomTimeMult, rawAccomBreakMult) {
+function handleSaveOnboardingPrefs(rawKey, rawTestDate, rawAccomTimeMult, rawAccomBreakMult, rawBaselineType, rawBaselineRw, rawBaselineMath) {
   var key = String(rawKey || '').trim().toUpperCase();
   if (!key) return { ok: false, error: 'missing_key' };
 
@@ -366,7 +385,7 @@ function handleSaveOnboardingPrefs(rawKey, rawTestDate, rawAccomTimeMult, rawAcc
   if (!row) return { ok: false, error: 'bad_key' };
 
   var headers = row._headers;
-  ['AccomTimeMult', 'AccomBreakMult'].forEach(function (col) {
+  ['AccomTimeMult', 'AccomBreakMult', 'BaselineType', 'BaselineRW', 'BaselineMath'].forEach(function (col) {
     if (headers.indexOf(col) === -1) {
       sheet.getRange(1, sheet.getLastColumn() + 1).setValue(col);
       headers.push(col);
@@ -387,6 +406,26 @@ function handleSaveOnboardingPrefs(rawKey, rawTestDate, rawAccomTimeMult, rawAcc
   if (timeMult === 1 || timeMult === 1.5 || timeMult === 2) setCol('AccomTimeMult', timeMult);
   var breakMult = Number(rawAccomBreakMult);
   if (breakMult === 1 || breakMult === 2) setCol('AccomBreakMult', breakMult);
+
+  // Optional — most underclassmen skip this, so all three arrive as
+  // null/blank and nothing gets written. BaselineType is only ever 'psat'
+  // or 'sat'; the two section scores are only written alongside a valid
+  // type, range for that test (SAT: 200-800 each, PSAT: 160-760 each), AND
+  // a real SAT/PSAT section score is always a multiple of 10 — same
+  // "never trust the client" approach as the accommodation multipliers,
+  // this just re-checks what the portal's own form already enforces
+  // client-side.
+  var baselineType = (rawBaselineType === 'psat' || rawBaselineType === 'sat') ? rawBaselineType : null;
+  var baselineRange = baselineType === 'sat' ? { min: 200, max: 800 } : { min: 160, max: 760 };
+  var baselineRw = Number(rawBaselineRw);
+  var baselineMath = Number(rawBaselineMath);
+  if (baselineType &&
+      baselineRw >= baselineRange.min && baselineRw <= baselineRange.max && baselineRw % 10 === 0 &&
+      baselineMath >= baselineRange.min && baselineMath <= baselineRange.max && baselineMath % 10 === 0) {
+    setCol('BaselineType', baselineType);
+    setCol('BaselineRW', baselineRw);
+    setCol('BaselineMath', baselineMath);
+  }
 
   return { ok: true };
 }
