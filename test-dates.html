@@ -120,15 +120,15 @@
             <th>Deadline for Changes / Late Registration</th>
           </tr>
         </thead>
-        <tbody>
-          <tr><td>August 22, 2026</td><td>August 7, 2026</td><td>August 11, 2026</td></tr>
-          <tr><td>September 12, 2026</td><td>August 28, 2026</td><td>September 1, 2026</td></tr>
-          <tr><td>October 3, 2026</td><td>September 18, 2026</td><td>September 22, 2026</td></tr>
-          <tr><td>November 7, 2026</td><td>October 23, 2026</td><td>October 27, 2026</td></tr>
-          <tr><td>December 5, 2026</td><td>November 20, 2026</td><td>November 24, 2026</td></tr>
-          <tr><td>March 6, 2027</td><td>February 19, 2027</td><td>February 23, 2027</td></tr>
-          <tr><td>May 1, 2027</td><td>April 16, 2027</td><td>April 20, 2027</td></tr>
-          <tr><td>June 5, 2027</td><td>May 21, 2027</td><td>May 25, 2027</td></tr>
+        <tbody id="td-tbody">
+          <tr data-reg-deadline="2026-08-07"><td>August 22, 2026</td><td>August 7, 2026</td><td>August 11, 2026</td></tr>
+          <tr data-reg-deadline="2026-08-28"><td>September 12, 2026</td><td>August 28, 2026</td><td>September 1, 2026</td></tr>
+          <tr data-reg-deadline="2026-09-18"><td>October 3, 2026</td><td>September 18, 2026</td><td>September 22, 2026</td></tr>
+          <tr data-reg-deadline="2026-10-23"><td>November 7, 2026</td><td>October 23, 2026</td><td>October 27, 2026</td></tr>
+          <tr data-reg-deadline="2026-11-20"><td>December 5, 2026</td><td>November 20, 2026</td><td>November 24, 2026</td></tr>
+          <tr data-reg-deadline="2027-02-19"><td>March 6, 2027</td><td>February 19, 2027</td><td>February 23, 2027</td></tr>
+          <tr data-reg-deadline="2027-04-16"><td>May 1, 2027</td><td>April 16, 2027</td><td>April 20, 2027</td></tr>
+          <tr data-reg-deadline="2027-05-21"><td>June 5, 2027</td><td>May 21, 2027</td><td>May 25, 2027</td></tr>
         </tbody>
       </table>
     </div>
@@ -136,6 +136,41 @@
     <a href="https://satsuite.collegeboard.org/sat/dates-deadlines" target="_blank" rel="noopener" class="td-source">Official SAT dates &amp; deadlines &rarr;</a>
   </div>
 </section>
+
+<script>
+  // Auto-retires a test date once its OWN registration deadline has
+  // passed — at that point a student literally can't sign up for it
+  // anymore, so listing it as "upcoming" is actively misleading rather
+  // than just stale. Each row carries the deadline in data-reg-deadline
+  // (YYYY-MM-DD); this runs once on load and hides any row whose deadline
+  // is in the past, so the table always starts from the next date a
+  // student can actually still register for — no manual pruning needed
+  // as the school year goes on. If every row for the year has expired,
+  // the note about updating for next year takes over so the page never
+  // just goes blank.
+  (function () {
+    'use strict';
+    var todayStr = new Date().toISOString().slice(0, 10); // YYYY-MM-DD, local calendar date
+    var rows = document.querySelectorAll('#td-tbody tr[data-reg-deadline]');
+    var remaining = 0;
+    rows.forEach(function (row) {
+      var deadline = row.getAttribute('data-reg-deadline');
+      if (deadline < todayStr) row.style.display = 'none';
+      else remaining++;
+    });
+    if (remaining === 0) {
+      var tbody = document.getElementById('td-tbody');
+      var tr = document.createElement('tr');
+      var td = document.createElement('td');
+      td.colSpan = 3;
+      td.textContent = 'Every date above has passed its registration deadline for now — check back soon, or see the official College Board page below for the next school year’s dates.';
+      td.style.color = 'var(--mid, #666)';
+      td.style.fontStyle = 'italic';
+      tr.appendChild(td);
+      tbody.appendChild(tr);
+    }
+  })();
+</script>
 
 <section id="td-cta">
   <div class="container">

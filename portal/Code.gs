@@ -51,6 +51,12 @@
         (GrantedAt) to this date, with the days-remaining count and your
         target logo at the finish line. Leave it blank for a student and
         the bar just doesn't show — no error, nothing broken.)
+        AccomTimeMult / AccomBreakMult (a new student's testing
+        accommodations — 1 / 1.5 / 2 and 1 / 2) don't need to be set up by
+        hand: the portal's first-login onboarding sequence writes them
+        itself the first time a new student answers that question, and
+        handleSaveOnboardingPrefs() below auto-creates the columns on the
+        Students sheet the first time it runs if they don't exist yet.
         A tab named "Assignments" holds the homework checklist shown on
         each student's portal home screen — it's created automatically the
         first time it's needed, with headers Timestamp | Key | Task | Done
@@ -117,11 +123,13 @@ function doPost(e) {
     } else if (body.action === 'submitPracticeTest') {
       out = handleSubmitPracticeTest(body.key, body.test, body.score, body.reportLink, body.report);
     } else if (body.action === 'submitLead') {
-      out = handleSubmitLead(body.name, body.phone, body.email, body.isUSA, body.role, body.grade, body.topic, body.message);
+      out = handleSubmitLead(body.name, body.phone, body.email, body.isUSA, body.role, body.grade, body.topic, body.message, body.hp, body.elapsedMs);
     } else if (body.action === 'syncProgress') {
       out = handleSyncProgress(body.key, body.incorrect, body.skills);
     } else if (body.action === 'getProgress') {
       out = handleGetProgress(body.key);
+    } else if (body.action === 'saveOnboardingPrefs') {
+      out = handleSaveOnboardingPrefs(body.key, body.testDate, body.accomTimeMult, body.accomBreakMult);
     } else {
       out = { ok: false, error: 'unknown_action' };
     }
@@ -268,16 +276,52 @@ function handleAuth(rawKey, rawEmail, rawName) {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return { ok: false, error: 'bad_email' };
     }
+    // For a brand-new key with no Name pre-filled by Luca, the student's
+    // name is written to the sheet just above (in the same call) — that
+    // edit fires the onStudentsEdit trigger, but only ASYNCHRONOUSLY, and
+    // even once it runs it creates the folder using its own fresh read of
+    // the sheet, not this function's `row` object. So `row.DriveFolderUrl`
+    // here is whatever it was when findRow_ ran at the top of this
+    // function — reliably still blank for this case — and granting access
+    // against a blank URL is a silent no-op (see grantFolderAccess_) that
+    // then gets masked forever, because GrantedEmail is about to be set
+    // below and no code path ever retries the grant after that. So: if
+    // there's still no folder on this row, create it right here,
+    // synchronously, before attempting the grant. (If Luca DID pre-fill a
+    // folder URL, or the trigger already created one moments earlier via a
+    // separate edit, row.DriveFolderUrl is already populated and this is
+    // skipped — no duplicate folder.)
+    if (!row.DriveFolderUrl) {
+      var urlCol = row._headers.indexOf('DriveFolderUrl');
+      if (urlCol !== -1) {
+        var newFolderUrl = createFolderForStudent_(row.Name || name, key);
+        sheet.getRange(row._rowIndex, urlCol + 1).setValue(newFolderUrl);
+        row.DriveFolderUrl = newFolderUrl;
+      }
+    }
     grantFolderAccess_(row.DriveFolderUrl, email);
     var emailCol = row._headers.indexOf('GrantedEmail');
     var atCol = row._headers.indexOf('GrantedAt');
     grantedAtValue = new Date();
     if (emailCol !== -1) sheet.getRange(row._rowIndex, emailCol + 1).setValue(sheetSafe_(email));
     if (atCol !== -1) sheet.getRange(row._rowIndex, atCol + 1).setValue(grantedAtValue);
-  } else if (email && email !== grantedEmail) {
-    // Someone's submitting a different email for a key that's already
-    // bound to someone else — refuse rather than silently re-sharing.
-    return { ok: false, error: 'email_mismatch' };
+  } else {
+    if (email && email !== grantedEmail) {
+      // Someone's submitting a different email for a key that's already
+      // bound to someone else — refuse rather than silently re-sharing.
+      return { ok: false, error: 'email_mismatch' };
+    }
+    // Self-heal: any student who was granted BEFORE the fix above existed
+    // has GrantedEmail permanently set but may never have actually gotten
+    // Drive access, because their folder didn't exist yet at the moment
+    // of that first grant. Nothing previously retried the grant after
+    // GrantedEmail was set, so those students were stuck silently. Retry
+    // is safe to repeat on every login — addViewer() on someone who's
+    // already a viewer is a no-op — and only costs a call when there's
+    // actually a folder + email on file to grant against.
+    if (row.DriveFolderUrl && grantedEmail) {
+      grantFolderAccess_(row.DriveFolderUrl, grantedEmail);
+    }
   }
 
   var flags = testPrepFlags_(row);
@@ -293,9 +337,58 @@ function handleAuth(rawKey, rawEmail, rawName) {
     showAct: flags.showAct,
     grantedAt: grantedAtValue ? new Date(grantedAtValue).toISOString() : null,
     testDate: row.TestDate ? new Date(row.TestDate).toISOString() : null,
+    // Set once, during the first-login onboarding sequence (see
+    // handleSaveOnboardingPrefs_ below) and read back on every login after
+    // that — this is what makes "permanent for their account" actually
+    // true, instead of resetting to standard timing before every attempt.
+    accomTimeMult: row.AccomTimeMult || null,
+    accomBreakMult: row.AccomBreakMult || null,
     tests: [],
     assignments: getAssignments_(key, row.Name)
   };
+}
+
+/* =========================================================================
+   ONBOARDING PREFERENCES — test date + testing accommodations, captured
+   once during the first-login onboarding sequence (portal/index.html's
+   #screen-onboard) and never asked again. TestDate reuses the column the
+   countdown widget already reads (see handleAuth above); AccomTimeMult /
+   AccomBreakMult are new columns, auto-created on the Students sheet the
+   first time this runs (same pattern getLeadsSheet_ uses below) so nothing
+   needs to be set up by hand first.
+   ========================================================================= */
+function handleSaveOnboardingPrefs(rawKey, rawTestDate, rawAccomTimeMult, rawAccomBreakMult) {
+  var key = String(rawKey || '').trim().toUpperCase();
+  if (!key) return { ok: false, error: 'missing_key' };
+
+  var sheet = getSheet_();
+  var row = findRow_(sheet, key);
+  if (!row) return { ok: false, error: 'bad_key' };
+
+  var headers = row._headers;
+  ['AccomTimeMult', 'AccomBreakMult'].forEach(function (col) {
+    if (headers.indexOf(col) === -1) {
+      sheet.getRange(1, sheet.getLastColumn() + 1).setValue(col);
+      headers.push(col);
+    }
+  });
+  function setCol(col, val) {
+    var i = headers.indexOf(col);
+    if (i !== -1) sheet.getRange(row._rowIndex, i + 1).setValue(val);
+  }
+
+  if (rawTestDate) {
+    var d = new Date(rawTestDate);
+    if (!isNaN(d.getTime())) setCol('TestDate', d);
+  }
+  // Only ever the three known-good values — never write whatever the
+  // client sends verbatim into the sheet.
+  var timeMult = Number(rawAccomTimeMult);
+  if (timeMult === 1 || timeMult === 1.5 || timeMult === 2) setCol('AccomTimeMult', timeMult);
+  var breakMult = Number(rawAccomBreakMult);
+  if (breakMult === 1 || breakMult === 2) setCol('AccomBreakMult', breakMult);
+
+  return { ok: true };
 }
 
 /* =========================================================================
@@ -1037,6 +1130,18 @@ function getOrCreateParentFolder_() {
   return DriveApp.createFolder(STUDENT_FOLDERS_PARENT_NAME);
 }
 
+// Creates one student's Drive folder and returns its URL. Same naming
+// convention as ensureFoldersForAllStudents_ below, factored out so
+// handleAuth (see the "brand-new key, no name yet" comment there) can
+// create the folder synchronously on first login instead of waiting on
+// the async onStudentsEdit trigger — see that call site for why the
+// trigger alone isn't good enough for this case.
+function createFolderForStudent_(name, key) {
+  var parent = getOrCreateParentFolder_();
+  var folder = parent.createFolder(key ? (name + ' — ' + key) : name);
+  return folder.getUrl();
+}
+
 function ensureFoldersForAllStudents_() {
   var sheet = getSheet_();
   var data = sheet.getDataRange().getValues();
@@ -1178,7 +1283,22 @@ function getLeadsSheet_() {
 // Builds the sheet row by header NAME rather than a fixed positional
 // array — robust to the old/new column layouts above, and to Luca ever
 // re-ordering columns by hand in the sheet itself.
-function handleSubmitLead(rawName, rawPhone, rawEmail, rawIsUSA, rawRole, rawGrade, rawTopic, rawMessage) {
+//
+// rawHoneypot/rawElapsedMs are the two anti-spam signals the reserve form
+// (index.html, #reserve-form) sends alongside the real fields — see that
+// form's submit handler for the client-side half of this check. Both are
+// re-checked HERE, not just client-side, because LEAD_BACKEND_URL is
+// public (sitting right there in index.html's source), so a bot can skip
+// the page and POST directly to this endpoint, bypassing any check that
+// only lives in the browser. A tripped check returns the same {ok:true}
+// a real submission gets — never {ok:false} — so a scripted bot has
+// nothing to react to and no reason to adapt; it just silently never
+// reaches the sheet.
+function handleSubmitLead(rawName, rawPhone, rawEmail, rawIsUSA, rawRole, rawGrade, rawTopic, rawMessage, rawHoneypot, rawElapsedMs) {
+  if (String(rawHoneypot || '').trim()) return { ok: true };
+  var elapsedMs = Number(rawElapsedMs);
+  if (!isNaN(elapsedMs) && elapsedMs < 2500) return { ok: true };
+
   var name = String(rawName || '').trim();
   var email = String(rawEmail || '').trim();
   if (!name || !email) return { ok: false, error: 'missing_name_or_email' };
