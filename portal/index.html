@@ -1456,6 +1456,7 @@
       </div>
       <div class="onb-dots"></div>
       <button class="key-btn" data-onb-next>Continue</button>
+      <a href="#" class="key-help" data-onb-back style="display:block; text-decoration:none;">&larr; Back</a>
     </div>
 
     <!-- Act 2, beat 5: what happens next — a horizontal roadmap. -->
@@ -1474,6 +1475,7 @@
       </div>
       <div class="onb-dots"></div>
       <button class="key-btn" data-onb-next>Continue</button>
+      <a href="#" class="key-help" data-onb-back style="display:block; text-decoration:none;">&larr; Back</a>
     </div>
 
     <!-- Act 2, beat 6: test date — real dates, auto-filtered to ones a
@@ -1489,6 +1491,7 @@
       <button type="button" class="onb-date-opt onb-date-opt-unsure" data-onb-date-opt="unsure">Not sure yet &mdash; I'll decide with Luca</button>
       <div class="onb-dots"></div>
       <button class="key-btn" data-onb-next>Continue</button>
+      <a href="#" class="key-help" data-onb-back style="display:block; text-decoration:none;">&larr; Back</a>
     </div>
 
     <!-- Act 2, beat 6b: baseline score — optional, skipped by anyone who
@@ -1538,6 +1541,7 @@
       </div>
       <div class="onb-dots"></div>
       <button class="key-btn" id="onb-baseline-continue">Continue</button>
+      <a href="#" class="key-help" data-onb-back style="display:block; text-decoration:none;">&larr; Back</a>
     </div>
 
     <!-- Act 2, beat 6c: parent/guardian contact — optional, same card/
@@ -1547,7 +1551,6 @@
     <div class="onb-pane" id="onb-guardian">
       <div class="kicker">Staying In Touch</div>
       <h1 class="panel-hed onb-pillars-hed">Keep a parent or guardian in the loop.</h1>
-      <p class="panel-sub">Totally optional &mdash; if you'd like Luca to be able to reach a parent or guardian directly, add their info here. Skip this if it's not needed.</p>
       <div class="onb-accom-cards">
         <div class="onb-accom-card is-selected" data-onb-guardian-card>
           <div class="onb-accom-row">
@@ -1577,6 +1580,7 @@
       </div>
       <div class="onb-dots"></div>
       <button class="key-btn" id="onb-guardian-continue">Continue</button>
+      <a href="#" class="key-help" data-onb-back style="display:block; text-decoration:none;">&larr; Back</a>
     </div>
 
     <!-- Act 2, beat 7: accommodations — the one screen that has to
@@ -1624,6 +1628,7 @@
       <p class="onb-microcopy">This is a one&#8209;time setup, not a per&#8209;test question &mdash; and it just matches what's already approved through your school. You can always ask Luca to update it later.</p>
       <div class="onb-dots"></div>
       <button class="key-btn" id="onb-accom-continue">Save &amp; Continue</button>
+      <a href="#" class="key-help" data-onb-back style="display:block; text-decoration:none;">&larr; Back</a>
     </div>
 
     <!-- Act 2, beat 8: handoff — straight into the diagnostic, with a
@@ -3963,6 +3968,21 @@
       var pane = btn.closest('.onb-pane');
       var idx = ONB_STEPS.indexOf(pane.id);
       if (idx !== -1 && idx < ONB_STEPS.length - 1) onbGoTo(ONB_STEPS[idx + 1]);
+    });
+  });
+  // Going back never needs the validation each step's own Continue button
+  // runs (nothing is being submitted), so this is a single generic
+  // handler for every step rather than one per pane — same ONB_STEPS
+  // index math as data-onb-next, just -1 instead of +1. Whatever was
+  // already picked on a step (a card selection, a typed score) is still
+  // sitting in the DOM when a student comes back to it, so nothing is
+  // lost by going back and then forward again.
+  document.querySelectorAll('[data-onb-back]').forEach(function (btn) {
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
+      var pane = btn.closest('.onb-pane');
+      var idx = ONB_STEPS.indexOf(pane.id);
+      if (idx > 0) onbGoTo(ONB_STEPS[idx - 1]);
     });
   });
 
