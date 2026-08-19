@@ -386,6 +386,13 @@
     .btn-submit { display: block; width: 100%; background: var(--red); color: white; border: none; font-family: var(--hel); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; padding: 1rem 2rem; cursor: pointer; transition: opacity 0.18s; }
     .btn-submit:hover { opacity: 0.86; }
     .form-note { font-size: 0.68rem; color: var(--faint); margin-top: 0.75rem; line-height: 1.65; }
+    /* Honeypot field for the reserve form (see #rf-hp below and the submit
+       handler's botCheck) — positioned off-screen rather than
+       display:none/visibility:hidden, since some spam bots specifically
+       skip filling fields hidden that way but still fill this one. A real
+       visitor tabbing through the form never lands on it (tabindex="-1"),
+       and screen readers skip it (aria-hidden). */
+    .hp-field { position: absolute; left: -9999px; top: -9999px; width: 1px; height: 1px; overflow: hidden; }
 
     /* ═══ FOOTER ═══ */
     footer { background: #111; padding: 3rem 3.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start; }
@@ -691,6 +698,15 @@
       <div class="book-card reveal d2">
         <div class="form-card">
           <form id="reserve-form" novalidate>
+            <!-- Honeypot — invisible to a real visitor, but a generic spam
+                 bot that fills every input on the page fills this too. A
+                 non-empty value here means the submission is dropped (see
+                 the submit handler below and handleSubmitLead in
+                 portal/Code.gs, which checks it again server-side). -->
+            <div class="hp-field" aria-hidden="true">
+              <label for="rf-hp">Leave this field blank</label>
+              <input type="text" id="rf-hp" name="companyWebsite" tabindex="-1" autocomplete="off">
+            </div>
             <div class="form-field"><label class="form-label" for="rf-name">Parent Name</label><input class="form-input" type="text" id="rf-name" name="parentName" required></div>
             <div class="form-row">
               <div class="form-field"><label class="form-label" for="rf-phone">Best Phone Number</label><input class="form-input" type="tel" id="rf-phone" name="phone" placeholder="e.g. (201) 555-0100" required></div>
@@ -796,22 +812,11 @@
       if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
     });
   }, { threshold: 0.08, rootMargin: '0px 0px -36px 0px' });
-  // .reveal-toggle elements (currently just the 12-Week Program section)
-  // are excluded from the one-shot observer above and handled by their
-  // own toggling one instead — see right below.
-  document.querySelectorAll('.reveal:not(.reveal-toggle)').forEach(function (el) { io.observe(el); });
-
-  // Toggles .visible on and off as each element crosses in and out of
-  // view, instead of the site's usual reveal-once-and-stay behavior
-  // above — scrolling back up past something here hides it again, so
-  // scrolling down always re-triggers the same entrance, procedurally,
-  // rather than only playing once per page load.
-  var ioToggle = new IntersectionObserver(function (entries) {
-    entries.forEach(function (e) {
-      e.target.classList.toggle('visible', e.isIntersecting);
-    });
-  }, { threshold: 0.08, rootMargin: '0px 0px -36px 0px' });
-  document.querySelectorAll('.reveal-toggle').forEach(function (el) { ioToggle.observe(el); });
+  // .reveal-toggle elements (the 12-Week Program section) used to hide
+  // again on scroll-up via a separate toggling observer — dropped per
+  // Luca's request so they behave like every other .reveal element:
+  // fade in once, then stay visible for the rest of the session.
+  document.querySelectorAll('.reveal').forEach(function (el) { io.observe(el); });
 
 
   var sfIo = new IntersectionObserver(function (entries) {
@@ -828,6 +833,15 @@
   // happens server-side in that one call — no EmailJS/Calendly on this
   // page anymore.
   var LEAD_BACKEND_URL = 'https://script.google.com/macros/s/AKfycbwsLMGq3lhBEPObcas0k8gVS67NX9y4wXKG6RgzKtlBOT2SXfREK6vBpvvM19w9s1m6/exec';
+  // Marks when the page (and so the form) became available, so the submit
+  // handler below can tell "a person read the form, then filled it out"
+  // apart from "something submitted within a fraction of a second of the
+  // page loading" — the second is a bot, not a very fast typist. Checked
+  // again server-side (handleSubmitLead in portal/Code.gs), since a bot
+  // that skips the page and POSTs straight to LEAD_BACKEND_URL (visible
+  // right above, in the page source) would otherwise bypass every
+  // client-side check entirely.
+  var reserveFormReadyAt = Date.now();
   var reserveForm = document.getElementById('reserve-form');
   if (reserveForm) {
     reserveForm.addEventListener('submit', function (e) {
@@ -841,11 +855,24 @@
       // Message is the one optional field — everything else is required.
       var message = document.getElementById('rf-message').value.trim();
       if (!name || !phone || !email || !role || !grade || !topic) { alert('Please fill in every field.'); return; }
+      var honeypot = document.getElementById('rf-hp').value;
+      var elapsedMs = Date.now() - reserveFormReadyAt;
+      // A tripped honeypot or an implausibly fast submit (under 2.5s for a
+      // 6-field form) reads as a bot — silently pretend success instead of
+      // erroring, so a scripted bot has no signal to react/adapt to, and
+      // just quietly skip the actual network call.
+      if (honeypot || elapsedMs < 2500) {
+        document.getElementById('rf-note').style.display    = 'none';
+        document.getElementById('rf-success').style.display = 'block';
+        document.getElementById('rf-error').style.display   = 'none';
+        reserveForm.reset();
+        return;
+      }
       var btn = document.getElementById('rf-submit');
       btn.disabled = true; btn.textContent = 'Sending…';
       fetch(LEAD_BACKEND_URL, {
         method: 'POST',
-        body: JSON.stringify({ action: 'submitLead', name: name, phone: phone, email: email, role: role, grade: grade, topic: topic, message: message })
+        body: JSON.stringify({ action: 'submitLead', name: name, phone: phone, email: email, role: role, grade: grade, topic: topic, message: message, hp: honeypot, elapsedMs: elapsedMs })
       }).then(function (res) { return res.json(); })
         .then(function (data) {
           if (!data || !data.ok) throw new Error('submit_failed');

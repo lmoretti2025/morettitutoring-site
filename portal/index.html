@@ -50,6 +50,7 @@
        hover/interactive states, a touch stronger. */
     --shadow:       0 2px 16px rgba(17,17,17,0.055);
     --shadow-hover: 0 14px 30px rgba(17,17,17,0.10);
+    --sidebar-w:    220px;
   }
 
   html, body { height: 100%; }
@@ -76,6 +77,17 @@
     background: var(--white);
   }
 
+  /* Redesigned "app shell" screens (Home + everything the sidebar reaches)
+     go solid white instead of the marketing pages' warm cream — closer to
+     the Stripe-style reference Luca wanted, and consistent with the
+     already-white test-taking screens above. Scoped rather than a global
+     --bg change so the key-entry screen and the site's own marketing
+     pages (which link back to `#main-nav`'s logo) keep their branded
+     cream tone. */
+  #screen-menu, #screen-practice-tests, #screen-vocab, #screen-incorrect-questions, #screen-resources, #screen-sat-resources {
+    background: var(--white);
+  }
+
   .panel { width: 100%; max-width: 460px; }
   .panel-wide { width: 100%; max-width: 760px; }
   .kicker { display: flex; align-items: center; gap: 0.45rem; font-size: 0.58rem; font-weight: 600; letter-spacing: 0.24em; text-transform: uppercase; color: var(--red); margin-bottom: 1.25rem; justify-content: center; }
@@ -99,6 +111,99 @@
   #intro-start.key-btn { background: var(--dx-blue); }
   .key-btn:hover { opacity: 0.86; }
   .key-help { font-size: 0.75rem; color: var(--faint); text-align: center; margin-top: 1.5rem; line-height: 1.7; }
+
+  /* ═══ MAIN NAV — hidden + slid up during the dark half of onboarding
+     (see .nav-hidden below), slides back down the moment that sequence
+     turns light. Unrelated to every other screen, which keeps the nav
+     visible exactly as before. ═══ */
+  #main-nav { transition: transform 0.6s cubic-bezier(0.16,1,0.3,1); }
+  #main-nav.nav-hidden { transform: translateY(-100%); }
+
+  /* ═══ FIRST-LOGIN ONBOARDING SEQUENCE ═══
+     #screen-onboard hosts every beat as a sibling "pane" (.onb-pane),
+     only one visible at a time via .is-active — same show/hide idiom as
+     the rest of the portal's screens, just nested one level deeper so
+     the whole sequence can share one background-color transition (dark
+     to light) instead of each beat being its own top-level .screen. */
+  #screen-onboard { background: var(--white); transition: background-color 0.9s ease; }
+  #screen-onboard.is-dark { background: #170908; padding-top: 1.5rem; }
+  .onboard-shell { width: 100%; max-width: 620px; text-align: center; }
+  .onb-pane { display: none; }
+  .onb-pane.is-active { display: block; animation: onbRise 0.5s cubic-bezier(0.16,1,0.3,1); }
+  @keyframes onbRise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* Dark panes (splash + identity capture) reuse the portal's own
+     .panel-hed/.panel-sub/.kicker/.key-help classes rather than
+     duplicating them — this just overrides their color for these two
+     panes specifically, since everywhere else on the dark portal they're
+     meant to read dark-on-light. */
+  .onb-dark .panel-hed, .onb-dark .onb-light-text { color: #fff; }
+  .onb-dark .panel-sub, .onb-dark .onb-mid-text { color: rgba(255,255,255,0.68); }
+  .onb-dark .key-help, .onb-dark .kicker { color: rgba(255,255,255,0.5); }
+  .onb-dark .key-error { color: var(--gold); }
+
+  #onb-splash { cursor: pointer; padding: 3rem 0; }
+  .onb-mark { width: min(280px, 70%); height: auto; opacity: 0; transform: scale(0.82); animation: onbMarkRise 0.6s cubic-bezier(0.22,1.2,0.36,1) 0.15s forwards; }
+  @keyframes onbMarkRise { 60% { opacity: 1; transform: scale(1.03); } to { opacity: 1; transform: scale(1); } }
+  .onb-hint { margin-top: 1.6rem; font-family: var(--hel); font-size: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0); }
+  .onb-splash-hint-visible { animation: onbHintFade 0.6s ease 0.9s forwards; }
+  @keyframes onbHintFade { to { color: rgba(255,255,255,0.4); } }
+  .onb-kicker { font-family: var(--hel); font-size: 0.6rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.7rem; text-align: center; }
+
+  .onb-dots { display: flex; justify-content: center; gap: 0.4rem; margin: 1.6rem 0 1rem; }
+  .onb-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--border); transition: background 0.2s ease, width 0.2s ease; }
+  .onb-dark .onb-dot { background: rgba(255,255,255,0.25); }
+  .onb-dot.is-current { background: var(--red); width: 16px; border-radius: 3px; }
+  .onb-dark .onb-dot.is-current { background: var(--gold); }
+  .onb-dot.is-done { background: var(--gold); }
+
+  #onb-pillars .onb-pillars-hed, #onb-roadmap .onb-pillars-hed, #onb-testdate .onb-pillars-hed, #onb-accom .onb-pillars-hed { font-size: 1.5rem; }
+  .onb-pillar-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.6rem; margin-top: 1.6rem; text-align: center; }
+  .onb-pillar-title { font-size: 0.85rem; font-weight: 700; color: var(--text); margin: 0.7rem 0 0.3rem; }
+  .onb-pillar-body { font-size: 0.75rem; line-height: 1.55; color: var(--mid); }
+
+  .onb-roadmap { position: relative; margin-top: 1.6rem; padding-top: 4px; }
+  .onb-roadmap-track { display: grid; grid-template-columns: repeat(4, 1fr); }
+  .onb-roadmap-line { position: absolute; left: 12.5%; right: 12.5%; top: 14px; height: 2px; background: linear-gradient(90deg, var(--gold), var(--red)); }
+  .onb-rstep { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 0 0.4rem; }
+  .onb-rstep-num { flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%; background: var(--white); border: 2px solid var(--red); color: var(--red); font-size: 0.66rem; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-bottom: 0.7rem; }
+  .onb-rstep-title { font-size: 0.78rem; font-weight: 700; color: var(--text); }
+  .onb-rstep-body { font-size: 0.68rem; color: var(--mid); margin-top: 0.25rem; line-height: 1.45; }
+
+  .onb-date-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem; margin: 1.4rem 0 0.6rem; }
+  .onb-date-opt { font-family: var(--hel); font-size: 0.8rem; font-weight: 600; color: var(--text); background: var(--white); border: 1.5px solid var(--border); border-radius: 10px; padding: 0.7rem 0.5rem; cursor: pointer; text-align: center; transition: border-color 0.15s ease, background 0.15s ease; }
+  .onb-date-opt.is-on { border-color: var(--red); background: rgba(176,39,28,0.06); color: var(--red); }
+  .onb-date-opt-unsure { display: block; width: 100%; text-align: center; background: none; border: 1px dashed var(--border); color: var(--faint); margin-bottom: 0.4rem; }
+  .onb-date-opt-unsure.is-on { border-color: var(--red); border-style: solid; background: rgba(176,39,28,0.06); color: var(--red); }
+
+  .onb-accom-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; text-align: left; margin-top: 1.5rem; }
+  .onb-accom-card { border: 1.5px solid var(--border); border-radius: 12px; padding: 1rem 1.1rem; cursor: pointer; transition: border-color 0.15s ease, background 0.15s ease; }
+  .onb-accom-card.is-selected { border-color: var(--red); background: rgba(176,39,28,0.045); }
+  .onb-accom-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.6rem; }
+  .onb-accom-title { font-size: 0.85rem; font-weight: 700; color: var(--text); }
+  .onb-accom-note { font-size: 0.7rem; color: var(--faint); margin-top: 0.15rem; }
+  .onb-accom-check { flex-shrink: 0; width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; transition: border-color 0.15s ease, background 0.15s ease; margin-top: 0.1rem; }
+  .onb-accom-card.is-selected .onb-accom-check { border-color: var(--red); background: var(--red); }
+  .onb-accom-check svg { width: 10px; height: 10px; opacity: 0; }
+  .onb-accom-card.is-selected .onb-accom-check svg { opacity: 1; }
+  .onb-accom-sub { max-height: 0; overflow: hidden; transition: max-height 0.35s cubic-bezier(0.16,1,0.3,1); text-align: left; }
+  .onb-accom-sub.is-open { max-height: 160px; }
+  .onb-accom-sub-inner { padding-top: 1.1rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+  .onb-accom-group-label { font-size: 0.66rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--mid); margin-bottom: 0.5rem; }
+  .onb-accom-opts { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .onb-accom-opt { font-size: 0.72rem; color: var(--text); border: 1px solid var(--border); border-radius: 999px; padding: 0.35rem 0.7rem; cursor: pointer; background: var(--white); }
+  .onb-accom-opt.is-on { border-color: var(--red); background: rgba(176,39,28,0.06); font-weight: 600; }
+  .onb-microcopy { font-size: 0.72rem; line-height: 1.6; color: var(--faint); margin-top: 1.2rem; text-align: center; }
+
+  .onb-handoff-mark { width: 64px; height: 64px; margin: 0 auto 1.4rem; display: block; }
+
+  @media (max-width: 640px) {
+    .onb-pillar-row { grid-template-columns: 1fr; gap: 1rem; }
+    .onb-date-grid { grid-template-columns: repeat(2, 1fr); }
+    .onb-accom-cards, .onb-accom-sub-inner { grid-template-columns: 1fr; }
+    .onb-roadmap-track { grid-template-columns: repeat(2, 1fr); row-gap: 1.4rem; }
+    .onb-roadmap-line { display: none; }
+  }
 
   /* ═══ MENU SCREEN ═══ */
   .menu-greeting { font-family: var(--display); font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 700; color: var(--text); text-align: center; margin-bottom: 0.6rem; }
@@ -136,21 +241,20 @@
   .assign-item.assign-done { cursor: default; }
   .assign-item.assign-done .assign-text { color: var(--text-muted, #9a9a9a); text-decoration: line-through; }
   .assign-item.assign-done input[type="checkbox"] { cursor: default; }
-  /* 1260px is the width at which BOTH pinned side cards (This Week left,
-     Score Progress right) clear the 600px centre column without overlapping
-     it — see the no-scroll block further down for that arithmetic. Below
-     it, both drop back into the normal flow and the page scrolls. The two
-     cards share this breakpoint on purpose: pinning one without the other
-     used to let the checklist overlap the column between 1150 and 1260. */
-  @media (min-width: 1260px) {
-    .assign-card { position: fixed; top: 108px; left: 2rem; margin: 0; width: 260px; max-width: 260px; max-height: calc(100vh - 140px); overflow-y: auto; z-index: 50; }
-  }
+  /* Both This Week and Score Progress used to pin to the page's far
+     corners at ≥1260px, out of the normal column, as part of the old
+     "home fits one viewport" design. Dropped along with that design (see
+     the comment further down where that block used to live) — they now
+     stay in normal flow at every width, which is also what lets Score
+     Progress read as the wide, primary graph it's meant to be now. */
 
   /* ═══ SCORE PROGRESS ═══ shown on the home screen once a student has at
      least one recorded diagnostic/practice-test composite score (see
-     recordScoreHistory() / renderScoreProgress()). Wider than assign-card
-     — a line chart needs the room a 460px checklist column doesn't. */
-  .score-progress-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 1.3rem 1.5rem 1.1rem; margin: 0 auto 1.6rem; max-width: 640px; box-shadow: var(--shadow); position: relative; }
+     recordScoreHistory() / renderScoreProgress()). This is Home's
+     main/aggregate chart — wider than the other cards (720px vs. their
+     460-640px caps) so it reads as the primary graph, not one card among
+     equals. */
+  .score-progress-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem 1.7rem 1.3rem; margin: 0 auto 1.6rem; max-width: 720px; box-shadow: var(--shadow); position: relative; }
   .spc-label { font-family: var(--hel); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--mid); margin-bottom: 0.9rem; }
   .spc-chart-hed { font-family: var(--hel); font-size: 0.78rem; font-weight: 700; color: var(--text); margin: 0.9rem 0 0.3rem; }
   .spc-chart-hed:first-child { margin-top: 0; }
@@ -167,22 +271,24 @@
   .spc-tip-score { color: var(--gold); font-weight: 700; }
   .spc-tip-weak { margin-top: 0.25rem; opacity: 0.88; }
   .spc-tip-muted { opacity: 0.6; font-style: italic; }
-  /* On a wide window Score Progress mirrors the This Week checklist: a
-     fixed card pinned to the top RIGHT, out of the centre column entirely.
-     That's what lets the home screen fit one viewport without scrolling —
-     the chart was the tallest thing in the stack. Below 1150px it falls
-     back into the normal flow, same as the checklist does. */
-  @media (min-width: 1260px) {
-    .score-progress-card { position: fixed; top: 108px; right: 2rem; left: auto; margin: 0; width: 290px; max-width: 290px; max-height: calc(100vh - 140px); overflow-y: auto; overflow-x: visible; z-index: 50; }
-  }
+  .spc-tip-cue { margin-top: 0.4rem; color: var(--gold); font-weight: 700; }
 
   /* ═══ TEST-DAY COUNTDOWN ═══ shown on the home screen once a student's
      Students-sheet row has a TestDate. Fill runs from GrantedAt (first
      login) to TestDate; the target logo sits fixed at the finish line. */
   .test-countdown { max-width: 460px; margin: 0 auto 2.1rem; }
-  .tc-top { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 0.5rem; }
-  .tc-label { font-family: var(--hel); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--mid); }
-  .tc-days { font-family: var(--hel); font-size: 0.85rem; font-weight: 700; color: var(--red); }
+  .tc-top { display: flex; align-items: baseline; justify-content: center; text-align: center; margin-bottom: 0.5rem; }
+  /* Just the day-count sentence ("12 days left to your test") is shown —
+     tc-label used to carry a redundant "Test Day" kicker above/beside it,
+     dropped per Luca's request so there's one readout, not two. The
+     element stays in the DOM (renderTestCountdown() still sets its text
+     for anyone inspecting/screen-reading it) but is visually hidden. */
+  .tc-label { display: none; }
+  /* Only the count itself ("12 days left") is bold/red — "to your test"
+     stays plain so the emphasis lands on the number, not the whole
+     sentence. */
+  .tc-days-main { font-family: var(--hel); font-size: 0.85rem; font-weight: 700; color: var(--red); }
+  .tc-days-rest { font-family: var(--hel); font-size: 0.85rem; font-weight: 400; color: var(--mid); }
   .tc-track { position: relative; height: 10px; background: var(--border); border-radius: 999px; margin-right: 40px; }
   .tc-fill { position: absolute; top: 0; left: 0; height: 100%; background: linear-gradient(90deg, var(--gold), var(--red)); border-radius: 999px; transition: width 0.6s ease; }
   .tc-flag { position: absolute; top: 50%; right: -34px; transform: translateY(-50%); width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; }
@@ -227,6 +333,105 @@
   .assign-go:hover { background: var(--red); color: var(--white); }
   .menu-exit { display: block; text-align: center; margin-top: 2rem; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); text-decoration: none; }
   .menu-exit:hover { color: var(--red); }
+  /* ═══ HOME LAYOUT (redesign) ═══ next-session + this-week paired
+     directly under the greeting, always in normal flow (no more pinning
+     to page corners — see the removed-block comment further down). */
+  .home-top-row { display: flex; gap: 1.2rem; align-items: flex-start; justify-content: center; flex-wrap: wrap; }
+  .home-top-row .next-session-card,
+  .home-top-row .assign-card { flex: 1 1 320px; margin: 0 0 1.6rem; max-width: 460px; }
+
+  /* ═══ YOUR OVERVIEW ═══ Stripe-dashboard-style section: a heading, a
+     "which tests count toward this" filter chip, the big aggregate line
+     graph, then a row of compact stat cards below it (most recent test +
+     the two skill-breakdown donuts) — mirrors a "big graph on top, small
+     stat cards underneath" layout rather than a stack of equal-weight
+     cards. */
+  .home-overview { max-width: 720px; margin: 0 auto; }
+  .home-overview-hed { font-family: var(--display); font-size: 1.25rem; font-weight: 700; color: var(--text); margin-bottom: 0.9rem; }
+  .home-overview-filters { display: flex; gap: 0.6rem; margin-bottom: 1.1rem; flex-wrap: wrap; }
+  .ov-filter { position: relative; }
+  .ov-filter-btn { display: flex; align-items: center; gap: 0.4rem; font-family: var(--hel); font-size: 0.76rem; color: var(--text); background: var(--white); border: 1px solid var(--border); border-radius: 999px; padding: 0.5rem 0.95rem; cursor: pointer; }
+  .ov-filter-btn:hover { border-color: var(--mid); }
+  .ov-filter-btn-label { color: var(--mid); }
+  .ov-filter-btn-value { color: var(--red); font-weight: 700; }
+  .ov-filter-caret { font-size: 0.6rem; color: var(--faint); }
+  .ov-filter-panel { display: none; position: absolute; top: calc(100% + 6px); left: 0; z-index: 80; background: var(--white); border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow-hover); padding: 0.5rem; min-width: 220px; max-height: 320px; overflow-y: auto; }
+  .ov-filter.open .ov-filter-panel { display: block; }
+  .ov-filter-option { display: flex; align-items: center; gap: 0.6rem; padding: 0.5rem 0.6rem; font-family: var(--hel); font-size: 0.82rem; color: var(--text); cursor: pointer; border-radius: 6px; }
+  .ov-filter-option:hover { background: var(--bg); }
+  .ov-filter-option input { width: 15px; height: 15px; accent-color: var(--red); cursor: pointer; }
+  .ov-filter-option-all { border-bottom: 1px solid var(--border); margin-bottom: 0.3rem; padding-bottom: 0.65rem; font-weight: 600; }
+
+  /* Two donut charts, one per section, showing which skills are behind
+     the MOST currently-outstanding misses (top 3 only — see
+     renderHomePie()'s truncation) — same data source as My Incorrect
+     Questions. */
+  .home-stats-row { display: flex; gap: 1.2rem; flex-wrap: wrap; align-items: stretch; }
+  .home-stats-row > * { flex: 1 1 220px; }
+  .pie-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 1.3rem 1.4rem 1.5rem; box-shadow: var(--shadow); }
+  .pie-card-label { font-family: var(--hel); font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--mid); margin-bottom: 1rem; text-align: center; }
+  /* Canvas gets its own fixed-size box (Chart.js needs a sized parent to
+     avoid runaway growth); the legend lives BELOW it in normal flow with
+     no height cap, so a long skill name wraps onto its own line instead
+     of being clipped — the bug this replaced (Chart.js' built-in legend
+     crammed into the same fixed box as the doughnut) was cutting text off
+     and fighting the chart for room. */
+  .pie-card-body { display: flex; flex-direction: column; align-items: center; }
+  .pie-canvas-wrap { position: relative; width: 130px; height: 130px; flex-shrink: 0; }
+  .pie-empty { font-size: 0.78rem; color: var(--faint); text-align: center; padding: 1.6rem 0.4rem; line-height: 1.6; }
+  .pie-legend { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem; font-size: 0.72rem; color: var(--mid); width: 100%; }
+  .pie-legend-item { display: flex; align-items: flex-start; gap: 0.5rem; cursor: pointer; text-align: left; line-height: 1.35; transition: color 0.12s ease; }
+  .pie-legend-item:hover { color: var(--red); }
+  .pie-legend-swatch { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; margin-top: 0.28rem; }
+  .pie-legend-count { color: var(--faint); white-space: nowrap; }
+  .pie-legend-more { font-size: 0.68rem; color: var(--faint); margin-top: 0.2rem; font-style: italic; }
+
+  /* Single-attempt stat card — one of the three tiles in .home-stats-row,
+     alongside the two pies, so its internal layout is a compact vertical
+     stack (label, big number, meta) rather than the wide horizontal
+     layout a full-width card would use. */
+  .recent-test-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 1.3rem 1.4rem; box-shadow: var(--shadow); }
+  .rt-label { font-family: var(--hel); font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--mid); margin-bottom: 0.9rem; }
+  .rt-body { display: flex; flex-direction: column; align-items: flex-start; gap: 0.3rem; }
+  .rt-composite-num { font-family: var(--display); font-weight: 700; font-size: 2rem; color: var(--red); line-height: 1; }
+  .rt-composite-sub { font-family: var(--hel); font-size: 0.7rem; color: var(--mid); margin-bottom: 0.6rem; }
+  .rt-title { font-family: var(--hel); font-weight: 700; font-size: 0.82rem; color: var(--text); }
+  .rt-date { font-family: var(--hel); font-size: 0.72rem; color: var(--faint); margin-top: 0.1rem; }
+  .rt-weakest { font-family: var(--hel); font-size: 0.75rem; color: var(--text); margin-top: 0.55rem; line-height: 1.5; }
+  .rt-weakest strong { color: var(--red); }
+
+  /* ═══ PORTAL SIDEBAR ═══ replaces the old home-screen menu-card grid as
+     the primary way to move between Home/Practice Tests/Files/Vocabulary/
+     My Incorrect Questions. Fixed column on desktop; collapses into a
+     horizontal scrollable strip under the top bar on narrow screens (see
+     the max-width:899px block below). Hidden entirely until a screen with
+     the static .has-sidebar class is active — toggled in show(). */
+  .portal-sidebar { display: none; }
+  .portal-sidebar.sidebar-shown { display: flex; }
+  .sidebar-item { position: relative; display: flex; align-items: center; gap: 0.85rem; padding: 0.8rem 1.5rem 0.8rem 1.7rem; font-family: var(--hel); font-size: 0.8rem; font-weight: 500; color: var(--mid); text-decoration: none; white-space: nowrap; transition: background 0.15s ease, color 0.15s ease; }
+  .sidebar-item::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: transparent; }
+  .sidebar-item:hover { background: rgba(176,39,28,0.05); color: var(--text); }
+  .sidebar-item.active { color: var(--text); font-weight: 700; background: rgba(201,168,76,0.09); }
+  .sidebar-item.active::before { background: linear-gradient(180deg, var(--gold), var(--red)); }
+  .sidebar-icon { width: 18px; height: 18px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: var(--red); }
+  .sidebar-icon svg { width: 18px; height: 18px; display: block; }
+  .sidebar-icon-text { font-family: var(--display); font-weight: 700; font-size: 0.82rem; }
+  @media (min-width: 900px) {
+    .portal-sidebar.sidebar-shown { flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; width: var(--sidebar-w); padding-top: 6.5rem; background: var(--white); border-right: 1px solid var(--border); z-index: 200; overflow-y: auto; }
+    .screen.has-sidebar { padding-left: calc(var(--sidebar-w) + 2.5rem); }
+  }
+  @media (max-width: 899px) {
+    .portal-sidebar.sidebar-shown { flex-direction: row; position: fixed; top: 62px; left: 0; right: 0; z-index: 250; background: var(--white); border-bottom: 1px solid var(--border); overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 0.45rem 0.6rem; gap: 0.3rem; }
+    .sidebar-item { flex: 0 0 auto; padding: 0.5rem 0.85rem; border-radius: 999px; font-size: 0.7rem; gap: 0.4rem; }
+    .sidebar-item::before { display: none; }
+    .sidebar-item.active { background: var(--red); color: #fff; }
+    .sidebar-item.active .sidebar-icon { color: #fff; }
+    .screen.has-sidebar { padding-top: calc(9rem + 3.4rem); }
+    #screen-menu.has-sidebar.screen { padding-top: calc(5.25rem + 3.4rem); }
+  }
+  @media (max-width: 899px) and (max-width: 480px) {
+    #screen-menu.has-sidebar.screen { padding-top: calc(4.75rem + 3.4rem); }
+  }
 
   /* ═══ RESOURCES SCREEN ═══ */
   .res-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 2.75rem 2.5rem; text-align: center; box-shadow: var(--shadow); }
@@ -574,73 +779,18 @@
     .sr-print-btn { display: none !important; }
   }
 
-  /* ═══ HOME SCREEN FITS THE VIEWPORT — NO SCROLLING ═══
-     The dashboard is meant to be taken in at a glance, so on a normal
-     laptop/desktop window it's a single static page: the screen is exactly
-     one viewport tall with overflow hidden, and the pieces inside are sized
-     to fit rather than stacking past the fold.
-
-     What makes that fit at all is the two side cards being pinned out of
-     the centre column (This Week left, Score Progress right) — the column
-     is then just the greeting, countdown, next session, four menu cards and
-     the exit link, which comes to roughly 510px.
-
-     The gate is deliberately conservative: >= 1260px wide and >= 640px
-     tall. 1260 is where both pinned cards clear the 600px column —
-     left needs 32 + 260 = 292px and the column's left edge sits at
-     vw/2 - 300, so vw >= 1184; right needs 32 + 290 = 322px against a right
-     edge of vw/2 + 300, so vw >= 1244. Anything narrower or shorter (a
-     phone, a half-width window, a zoomed-in browser) drops both cards back
-     into the flow and scrolls normally — clipping content a student can't
-     reach would be far worse than a scrollbar.
-
-     Applies to the home screen only (#screen-menu); the practice-test
-     picker, vocab and question tools still scroll, since their content is
-     a list that's genuinely longer than a screen. */
-  @media (min-width: 1260px) and (min-height: 720px) {
-    #screen-menu.screen { height: 100dvh; min-height: 100dvh; padding: 5.25rem 1.5rem 1.25rem; overflow: hidden; }
-    #screen-menu .panel-wide { display: flex; flex-direction: column; max-height: 100%; min-height: 0; max-width: 600px; }
-    /* Tighter rhythm between the stacked cards than the 1.6rem default. */
-    #screen-menu .test-countdown { margin-bottom: 1.15rem; }
-    #screen-menu .next-session-card,
-    #screen-menu .score-progress-card { margin-bottom: 1rem; }
-    /* The "schedule window" — trimmed padding and a join link that stays on
-       one line instead of wrapping the URL across three. */
-    #screen-menu .next-session-card { padding: 0.85rem 1.1rem; }
-    #screen-menu .ns-join { margin-top: 0.4rem; word-break: normal; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
-    /* The pinned card sizes itself; it just needs a ceiling for the rare
-       student with both an SAT and an ACT chart stacked in it. */
-    #screen-menu .score-progress-card { padding: 1.1rem 1.25rem 0.9rem; }
-    #screen-menu .spc-label { margin-bottom: 0.55rem; }
-    /* Cards stay one per row. A two-column grid saved more height, but at
-       600px of column the halves left roughly 110px for a title once the
-       icon and the status badge took their share — "Your Diagnostic Test"
-       wrapped onto three lines. Moving the side cards out of the column
-       freed enough room that the readable version fits anyway. */
-    #screen-menu .menu-grid { gap: 0.8rem; margin-top: 0; flex: 0 0 auto; }
-    #screen-menu .menu-grid .menu-card-wide { gap: 1.15rem; padding: 1.1rem 1.4rem; }
-    #screen-menu .menu-card-body { font-size: 0.74rem; line-height: 1.5; }
-    #screen-menu .menu-exit { margin-top: 1.1rem; }
-  }
-  /* Shorter windows inside the no-scroll range (a 768px-tall laptop, or a
-     window the student has made smaller): trim the decorative bits so the
-     four menu cards still land above the fold. */
-  @media (min-width: 1260px) and (min-height: 720px) and (max-height: 880px) {
-    #screen-menu.screen { padding-top: 4.75rem; }
-    #screen-menu .menu-sub { display: none; }
-    #screen-menu .kicker { margin-bottom: 0.5rem; }
-    #screen-menu .menu-greeting { font-size: 1.5rem; margin-bottom: 0.35rem; }
-    #screen-menu .test-countdown { margin-bottom: 0.8rem; }
-    #screen-menu .next-session-card { margin-bottom: 0.8rem; padding: 0.7rem 1rem; }
-    #screen-menu .menu-grid { gap: 0.65rem; }
-    #screen-menu .menu-grid .menu-card-wide { padding: 0.9rem 1.2rem; gap: 0.95rem; }
-    #screen-menu .menu-card-icon, #screen-menu .pt-num { width: 40px; height: 40px; }
-    #screen-menu .menu-card-body { font-size: 0.72rem; line-height: 1.45; }
-    #screen-menu .menu-exit { margin-top: 0.75rem; }
-  }
+  /* Home used to try to fit one viewport with overflow:hidden on a large
+     desktop window (pinning This Week/Score Progress to the page corners
+     to make room). The redesign has genuinely more content on it now
+     (Your Overview, the big line graph, the stat row) than any viewport
+     can show at a glance, so that trick was silently clipping content
+     instead of showing a scrollbar — removed. Home now just scrolls like
+     every other screen; the corner-pinned card behavior at ≥1260px above
+     (see .assign-card/.score-progress-card) is unrelated and unaffected. */
   /* Default (narrow/short windows): the picker is a normal stacked list
      with a full sentence per test, and the page scrolls. */
   .pt-note { font-size: 0.7rem; line-height: 1.5; color: var(--faint); margin-bottom: 0.2rem; }
+  .pt-locked-note { grid-column: 1 / -1; text-align: center; padding: 1.2rem 0.5rem; color: var(--faint); font-size: 0.82rem; line-height: 1.7; }
   .pt-meta { display: none; font-size: 0.7rem; color: var(--mid); }
   .pt-card-done .pt-meta { color: #3f8f5f; font-weight: 600; }
 
@@ -657,7 +807,7 @@
      safety valve: if the bank ever outgrows three rows, the tiles scroll
      inside their own box rather than pushing the page past one screen. */
   @media (min-width: 900px) and (min-height: 640px) {
-    #screen-practice-tests.screen { height: 100dvh; min-height: 100dvh; padding: 5rem 1.5rem 1.25rem; overflow: hidden; }
+    #screen-practice-tests.screen { height: 100dvh; min-height: 100dvh; padding: 5rem 1.5rem 1.25rem calc(var(--sidebar-w) + 2.5rem); overflow: hidden; }
     #screen-practice-tests .panel-wide { max-width: 940px; display: flex; flex-direction: column; max-height: 100%; min-height: 0; }
     #screen-practice-tests .panel-hed { margin-bottom: 0.4rem; }
     #screen-practice-tests .panel-sub { font-size: 0.78rem; line-height: 1.55; margin-bottom: 1rem; }
@@ -833,17 +983,23 @@
   .pb-explain-hed { font-family: var(--hel); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); margin-bottom: 0.35rem; }
 
   /* ═══ MY INCORRECT QUESTIONS — reuses pb-q-meta/pb-passage/pb-q-card/
-     pb-note/pb-explain/dx-choice styling above for each read-only card
-     (no re-answering, so choices are non-interactive — cursor overridden
-     back to default). ═══ */
+     pb-note/pb-explain/dx-choice styling above. Now a self-quiz rather
+     than a read-only report: unanswered mc choices (.iq-quiz-choice) stay
+     clickable; once answered they render as .iq-quiz-answered instead,
+     which is the one that goes back to non-interactive/cursor:default. ═══ */
   .iq-section-hed { font-family: var(--display); font-size: 1.05rem; font-weight: 700; color: var(--text); margin: 1.9rem 0 0.5rem; }
   #iq-list .iq-section-hed:first-child { margin-top: 0.6rem; }
   .iq-domain-hed { font-family: var(--hel); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); margin: 1.1rem 0 0.7rem; border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; }
   .iq-item { margin-bottom: 1.6rem; }
-  .iq-item .dx-choice { cursor: default; }
-  .iq-item .dx-choice:hover { border-color: var(--border); }
+  .iq-item .iq-quiz-answered { cursor: default; }
+  .iq-item .iq-quiz-answered:hover { border-color: var(--border); }
+  .iq-item .iq-quiz-choice:hover { border-color: var(--gold); background: rgba(201,168,76,0.06); }
   .iq-missed-on { font-size: 0.68rem; color: var(--faint); margin-top: 1rem; text-align: right; }
-  .iq-skipped-note { font-size: 0.8rem; color: var(--faint); margin-top: 0.5rem; font-style: italic; }
+  .iq-quiz-hint { font-size: 0.8rem; color: var(--faint); margin-top: 0.5rem; font-style: italic; }
+  .iq-fr-row { display: flex; gap: 0.7rem; align-items: stretch; }
+  .iq-fr-row .iq-fr-input { flex: 1; }
+  .iq-fr-check { font-family: var(--hel); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #fff; background: var(--red); border: none; border-radius: 6px; padding: 0 1.3rem; cursor: pointer; transition: opacity 0.2s ease; }
+  .iq-fr-check:hover { opacity: 0.86; }
   .vp-summary { text-align: center; background: var(--white); border: 1px solid var(--border); border-radius: 14px; padding: 2rem 1.5rem; }
   .vp-summary .vp-score { font-family: var(--display); font-size: 2.5rem; color: var(--gold); line-height: 1; animation: vpPop 0.4s cubic-bezier(.2,.7,.3,1); }
   .vp-summary .vp-score-sub { font-size: 0.85rem; color: var(--mid); margin: 0.5rem 0 1.25rem; }
@@ -895,6 +1051,37 @@
   <a href="../index.html" class="nav-exit" id="nav-exit-link">Exit Portal</a>
 </nav>
 
+<!-- ═══ PORTAL SIDEBAR — persistent left-hand nav (top strip on mobile),
+     shown across the "browsing" screens once a student is logged in.
+     Items are gated the same way the old home-screen menu cards were
+     (see applySidebarGating(), which mirrors applyTestPrepGating()) —
+     Home and Files always show; Practice Tests/Vocabulary/My Incorrect
+     Questions hide for non-test-prep students, during the diagnostic-only
+     window, or (Vocabulary) for ACT-only students. Clicking an item drives
+     the SAME show()/route logic the old menu cards used to. ═══ -->
+<nav class="portal-sidebar" id="portal-sidebar">
+  <a href="#" class="sidebar-item" data-nav="home" id="sidebar-home">
+    <span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9a1 1 0 0 0 1 1h3v-6h4v6h3a1 1 0 0 0 1-1v-9"/></svg></span>
+    <span class="sidebar-label">Home</span>
+  </a>
+  <a href="#" class="sidebar-item" data-nav="practice-tests" id="sidebar-practice-tests">
+    <span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2"/><path d="M9 2h6"/></svg></span>
+    <span class="sidebar-label">Practice Tests</span>
+  </a>
+  <a href="#" class="sidebar-item" data-nav="files" id="sidebar-files">
+    <span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a1 1 0 0 1 1-1h5l2 2h9a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7z"/></svg></span>
+    <span class="sidebar-label">Files</span>
+  </a>
+  <a href="#" class="sidebar-item" data-nav="vocab" id="sidebar-vocab">
+    <span class="sidebar-icon sidebar-icon-text">Aa</span>
+    <span class="sidebar-label">Vocabulary</span>
+  </a>
+  <a href="#" class="sidebar-item" data-nav="incorrect-questions" id="sidebar-incorrect-questions">
+    <span class="sidebar-icon sidebar-icon-text">&#10007;</span>
+    <span class="sidebar-label">My Incorrect Questions</span>
+  </a>
+</nav>
+
 <!-- ═══ SCREEN 1 — ACCESS KEY ═══ -->
 <div class="screen active" id="screen-key">
   <div class="panel">
@@ -908,10 +1095,42 @@
       <button class="key-btn" id="key-submit">Continue</button>
       <p class="key-help">Don't have a key yet? Call or text Luca at (201) 275-2791 to get set up.</p>
     </div>
+  </div>
+</div>
 
-    <div id="email-step" style="display:none;">
-      <h1 class="panel-hed" id="email-step-hed"><span id="email-step-hed-text">One more thing</span><span id="email-step-name"></span></h1>
-      <p class="panel-sub" id="email-step-sub">First time using this key — enter your email and we'll automatically share your files with you.</p>
+<!-- ═══ SCREEN 1b — FIRST-LOGIN ONBOARDING SEQUENCE ═══
+     Runs once, only the very first time a brand-new key is used — the
+     same "needsEmail" signal that used to just show a plain email-capture
+     panel now launches this instead (see tryKey()/goToOnboardSplash()
+     below). A returning student with an email already on file skips this
+     entirely and goes straight from key entry to screen-menu, exactly as
+     before this existed.
+
+     Two acts, one screen: DARK (splash + the same name/email capture that
+     used to be its own light "email-step" panel — #main-nav is hidden via
+     the .nav-hidden class toggled on it below, so nothing but the mark
+     and the form are on screen) and LIGHT (welcome through handoff — the
+     background fades to white and #main-nav slides back down the moment
+     that transition happens; everything after that uses the exact same
+     classes as the rest of the portal, so it never looks like a separate
+     "onboarding product" bolted on). -->
+<div class="screen" id="screen-onboard">
+  <div class="onboard-shell" id="onboard-shell">
+
+    <!-- Act 1, beat 1: the brand moment. Auto-advances; click/tap also
+         advances immediately for anyone who doesn't want to wait. -->
+    <div class="onb-pane onb-dark is-active" id="onb-splash">
+      <img class="onb-mark" src="../logo-caladea-white.png" alt="Moretti Test Prep &amp; Tutoring">
+      <div class="onb-hint" id="onb-splash-hint">Click to continue</div>
+    </div>
+
+    <!-- Act 1, beat 2: name/email capture — same fields, same ids, same
+         validation/submit logic as the old email-step (see the script
+         block below), just restyled dark and relocated here. -->
+    <div class="onb-pane onb-dark" id="onb-identity">
+      <div class="onb-kicker">Almost there</div>
+      <h1 class="panel-hed onb-light-text" id="email-step-hed"><span id="email-step-hed-text">One more thing</span><span id="email-step-name"></span></h1>
+      <p class="panel-sub onb-mid-text" id="email-step-sub">First time using this key — enter your email and we'll automatically share your files with you.</p>
       <div id="email-step-name-wrap" style="display:none;">
         <input type="text" class="key-input" id="email-step-name-input" placeholder="Full name" autocomplete="name" style="text-transform:none;">
         <p class="key-error" id="email-step-name-error">Please enter your full first and last name to continue.</p>
@@ -922,78 +1141,223 @@
       </div>
       <p class="key-error" id="email-error">That doesn't look like a valid email — double-check it and try again.</p>
       <button class="key-btn" id="email-submit">Unlock My Files</button>
-      <a href="#" class="key-help" id="email-back" style="display:block; text-decoration:none;">&larr; Use a different key</a>
+      <a href="#" class="key-help onb-mid-text" id="email-back" style="display:block; text-decoration:none;">&larr; Use a different key</a>
     </div>
+
+    <!-- Act 2, beat 3: welcome (name filled in from the auth response). -->
+    <div class="onb-pane" id="onb-welcome">
+      <div class="kicker">Welcome</div>
+      <h1 class="panel-hed" id="onb-welcome-hed">Welcome.</h1>
+      <p class="panel-sub">Let's find out exactly where you're starting from &mdash; everything from here is built around that.</p>
+      <div class="onb-dots"></div>
+      <button class="key-btn" data-onb-next>Continue</button>
+    </div>
+
+    <!-- Act 2, beat 4: what I do — three pillars. -->
+    <div class="onb-pane" id="onb-pillars">
+      <div class="kicker">How This Works</div>
+      <h1 class="panel-hed onb-pillars-hed">Real prep, built around real data.</h1>
+      <div class="onb-pillar-row">
+        <div class="onb-pillar">
+          <span class="menu-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="1.5"/><rect x="9" y="2" width="6" height="3" rx="1"/><path d="M9 12.5l2 2 4-4.5"/></svg></span>
+          <div class="onb-pillar-title">Real data first.</div>
+          <div class="onb-pillar-body">Every plan starts with a full diagnostic, not a guess.</div>
+        </div>
+        <div class="onb-pillar">
+          <span class="menu-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg></span>
+          <div class="onb-pillar-title">One plan, built around you.</div>
+          <div class="onb-pillar-body">Luca designs your 12&#8209;week program from your actual results.</div>
+        </div>
+        <div class="onb-pillar">
+          <span class="menu-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c0-3.5 3.1-6 7-6s7 2.5 7 6"/></svg></span>
+          <div class="onb-pillar-title">Direct, one&#8209;on&#8209;one.</div>
+          <div class="onb-pillar-body">You work with Luca &mdash; not a franchise, not a rotating roster.</div>
+        </div>
+      </div>
+      <div class="onb-dots"></div>
+      <button class="key-btn" data-onb-next>Continue</button>
+    </div>
+
+    <!-- Act 2, beat 5: what happens next — a horizontal roadmap. -->
+    <div class="onb-pane" id="onb-roadmap">
+      <div class="kicker">Your Path</div>
+      <h1 class="panel-hed onb-pillars-hed">Here's what happens next.</h1>
+      <div class="onb-roadmap">
+        <div class="onb-roadmap-line"></div>
+        <div class="onb-roadmap-track">
+          <div class="onb-rstep"><span class="onb-rstep-num">1</span><div class="onb-rstep-title">Diagnostic</div><div class="onb-rstep-body">A full, real, timed test.</div></div>
+          <div class="onb-rstep"><span class="onb-rstep-num">2</span><div class="onb-rstep-title">Your custom plan</div><div class="onb-rstep-body">Built around the results.</div></div>
+          <div class="onb-rstep"><span class="onb-rstep-num">3</span><div class="onb-rstep-title">Weekly sessions</div><div class="onb-rstep-body">In person or online.</div></div>
+          <div class="onb-rstep"><span class="onb-rstep-num">4</span><div class="onb-rstep-title">Track progress</div><div class="onb-rstep-body">Every test sharpens the plan.</div></div>
+        </div>
+      </div>
+      <div class="onb-dots"></div>
+      <button class="key-btn" data-onb-next>Continue</button>
+    </div>
+
+    <!-- Act 2, beat 6: test date — real dates, auto-filtered to ones a
+         student can still register for (see SAT_DATES in the script
+         below, which mirrors test-dates.html's own auto-expiring logic —
+         both need updating together when a new school year's dates come
+         out). Written to the SAME TestDate column the countdown widget
+         already reads (see handleSaveOnboardingPrefs in Code.gs). -->
+    <div class="onb-pane" id="onb-testdate">
+      <div class="kicker">Your Timeline</div>
+      <h1 class="panel-hed onb-pillars-hed">When are you planning to take the SAT?</h1>
+      <p class="panel-sub">This shapes your 12-week plan, built backward from test day. Only dates you can still register for are shown.</p>
+      <div class="onb-date-grid" id="onbDateGrid"></div>
+      <button type="button" class="onb-date-opt onb-date-opt-unsure" data-onb-date-opt="unsure">Not sure yet &mdash; I'll decide with Luca</button>
+      <div class="onb-dots"></div>
+      <button class="key-btn" data-onb-next>Continue</button>
+    </div>
+
+    <!-- Act 2, beat 7: accommodations — the one screen that has to
+         actually function. This sets `accommodations` (used by the real
+         diagnostic timer) directly and persists it to the Students sheet
+         via saveOnboardingPrefs, so it's a permanent account setting from
+         here on, not a per-test question. -->
+    <div class="onb-pane" id="onb-accom">
+      <div class="kicker">One More Thing</div>
+      <h1 class="panel-hed onb-pillars-hed">Do you test with accommodations?</h1>
+      <p class="panel-sub">If your school has approved extended time or breaks, tell us once &mdash; we'll apply it to every future diagnostic and practice test automatically.</p>
+      <div class="onb-accom-cards">
+        <div class="onb-accom-card is-selected" data-onb-accom-card>
+          <div class="onb-accom-row">
+            <div><div class="onb-accom-title">Standard timing</div><div class="onb-accom-note">Most students</div></div>
+            <span class="onb-accom-check"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+          </div>
+        </div>
+        <div class="onb-accom-card" data-onb-accom-card>
+          <div class="onb-accom-row">
+            <div><div class="onb-accom-title">I have accommodations</div><div class="onb-accom-note">Extended time or breaks</div></div>
+            <span class="onb-accom-check"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+          </div>
+        </div>
+      </div>
+      <div class="onb-accom-sub" id="onbAccomSub">
+        <div class="onb-accom-sub-inner">
+          <div>
+            <div class="onb-accom-group-label">Extended time</div>
+            <div class="onb-accom-opts" id="onbAccomTimeOpts">
+              <span class="onb-accom-opt is-on" data-val="1">Standard</span>
+              <span class="onb-accom-opt" data-val="1.5">Time and one&#8209;half (+50%)</span>
+              <span class="onb-accom-opt" data-val="2">Double time (+100%)</span>
+            </div>
+          </div>
+          <div>
+            <div class="onb-accom-group-label">Breaks</div>
+            <div class="onb-accom-opts" id="onbAccomBreakOpts">
+              <span class="onb-accom-opt is-on" data-val="1">Standard</span>
+              <span class="onb-accom-opt" data-val="2">Extended</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="onb-microcopy">This is a one&#8209;time setup, not a per&#8209;test question &mdash; and it just matches what's already approved through your school. You can always ask Luca to update it later.</p>
+      <div class="onb-dots"></div>
+      <button class="key-btn" id="onb-accom-continue">Save &amp; Continue</button>
+    </div>
+
+    <!-- Act 2, beat 8: handoff — straight into the diagnostic, with a
+         quiet exit for anyone who needs to stop here. -->
+    <div class="onb-pane" id="onb-handoff">
+      <img class="onb-handoff-mark" src="../target-icon-white.png" alt="">
+      <h1 class="panel-hed" id="onb-handoff-hed">You're all set.</h1>
+      <p class="panel-sub">Let's see where you're starting from.</p>
+      <div class="onb-dots"></div>
+      <button class="key-btn" id="onb-start-diagnostic">Start My Diagnostic</button>
+      <a href="#" class="key-help" id="onb-later" style="display:block; text-decoration:none;">I'll do this later</a>
+    </div>
+
   </div>
 </div>
 
 <!-- ═══ SCREEN 2 — MENU ═══ -->
-<div class="screen" id="screen-menu">
+<div class="screen has-sidebar" id="screen-menu">
   <div class="panel-wide">
-    <div class="kicker">Welcome</div>
     <h1 class="menu-greeting" id="menu-greeting">Hey there.</h1>
-    <p class="menu-sub">What are you working on right now?</p>
     <div class="test-countdown" id="test-countdown" style="display:none;">
       <div class="tc-top">
         <span class="tc-label" id="tc-label">Test day</span>
-        <span class="tc-days" id="tc-days">&mdash;</span>
+        <span class="tc-days"><span class="tc-days-main" id="tc-days-main">&mdash;</span><span class="tc-days-rest" id="tc-days-rest"></span></span>
       </div>
       <div class="tc-track">
         <div class="tc-fill" id="tc-fill" style="width:0%;"></div>
         <div class="tc-flag"><svg class="tc-flag-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="12" cy="12" r="10" stroke="var(--gold)" stroke-width="1.7"/><circle cx="12" cy="12" r="6" stroke="var(--red)" stroke-width="1.7"/><circle cx="12" cy="12" r="2" fill="var(--red)"/></svg></div>
       </div>
     </div>
-    <div class="next-session-card" id="next-session-card" style="display:none;">
-      <div class="ns-label" id="ns-label">Your next scheduled session is on:</div>
-      <div class="ns-date" id="ns-date">&mdash;</div>
-      <a href="#" class="ns-join" id="ns-join" style="display:none;" target="_blank" rel="noopener">Online? Join here: <span id="ns-join-url"></span></a>
-    </div>
-    <div class="assign-card" id="assign-card" style="display:none;">
-      <div class="assign-label">This Week</div>
-      <div class="assign-list" id="assign-list"></div>
-    </div>
-    <div class="score-progress-card" id="score-progress-card" style="display:none;">
-      <div class="spc-label">Score Progress</div>
-      <div id="spc-charts"></div>
-    </div>
-    <div class="menu-grid">
-      <div class="menu-card menu-card-wide" data-route="diagnostic" id="menu-card-diagnostic">
-        <span class="menu-card-badge" id="diag-card-badge" style="display:none;"></span>
-        <span class="menu-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="1.5"/><rect x="9" y="2" width="6" height="3" rx="1"/><path d="M9 12.5l2 2 4-4.5"/></svg></span>
-        <div>
-          <div class="menu-card-title">Your Diagnostic Test</div>
-          <div class="menu-card-body" id="diag-card-body">Your starting point &mdash; it's how Luca sees where you are and builds your plan around real data.</div>
-        </div>
+    <!-- A. Scheduled class + what's due before it, directly under the
+         greeting — the two things a student needs to know first. -->
+    <div class="home-top-row">
+      <div class="next-session-card" id="next-session-card" style="display:none;">
+        <div class="ns-label" id="ns-label">Your next scheduled session is on:</div>
+        <div class="ns-date" id="ns-date">&mdash;</div>
+        <a href="#" class="ns-join" id="ns-join" style="display:none;" target="_blank" rel="noopener">Online? Join here: <span id="ns-join-url"></span></a>
       </div>
-      <div class="menu-card menu-card-wide" data-route="practice-tests" id="menu-card-practice-tests">
-        <span class="menu-card-badge" id="pt-card-badge" style="display:none;"></span>
-        <span class="menu-card-icon">&#9201;</span>
-        <div>
-          <div class="menu-card-title">Practice Tests 1&ndash;<span id="pt-card-count">11</span></div>
-          <div class="menu-card-body" id="pt-card-body">Full, timed practice tests you can take as many times as you want.</div>
-        </div>
-      </div>
-      <div class="menu-card menu-card-wide" data-route="files">
-        <span class="menu-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a1 1 0 0 1 1-1h5l2 2h9a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7z"/></svg></span>
-        <div>
-          <div class="menu-card-title">Your Files</div>
-          <div class="menu-card-body">Worksheets, practice sets, and materials for anything you're working on with Luca right now.</div>
-        </div>
-      </div>
-      <div class="menu-card menu-card-wide" data-route="sat-resources">
-        <span class="menu-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.2c-1.6-1.3-3.7-1.7-6.2-1.7V17c2.5 0 4.6.4 6.2 1.7c1.6-1.3 3.7-1.7 6.2-1.7V4.5c-2.5 0-4.6.4-6.2 1.7z"/><path d="M12 6.2V18.7"/></svg></span>
-        <div>
-          <div class="menu-card-title">SAT Resources</div>
-          <div class="menu-card-body">Self-paced study tools and practice you can use anytime, on your own.</div>
-        </div>
+      <div class="assign-card" id="assign-card" style="display:none;">
+        <div class="assign-label">This Week</div>
+        <div class="assign-list" id="assign-list"></div>
       </div>
     </div>
+
+    <!-- B. YOUR OVERVIEW — a filter chip (which tests count toward the
+         numbers below — see renderHomeTestFilter()), the big aggregate
+         line graph, then a row of compact stat cards: most recent test +
+         the two skill-breakdown donuts (top 3 skills each). -->
+    <div class="home-overview" id="home-overview" style="display:none;">
+      <h2 class="home-overview-hed">Your Overview</h2>
+      <div class="home-overview-filters">
+        <div class="ov-filter" id="home-test-filter">
+          <button type="button" class="ov-filter-btn" id="home-test-filter-btn">
+            <span class="ov-filter-btn-label">Tests</span>
+            <span class="ov-filter-btn-value" id="home-test-filter-summary">All</span>
+            <span class="ov-filter-caret">&#9662;</span>
+          </button>
+          <div class="ov-filter-panel" id="home-test-filter-panel"></div>
+        </div>
+      </div>
+
+      <div class="score-progress-card" id="score-progress-card" style="display:none;">
+        <div class="spc-label">Score Progress</div>
+        <div id="spc-charts"></div>
+      </div>
+
+      <div class="home-stats-row">
+        <div class="recent-test-card" id="recent-test-card" style="display:none;">
+          <div class="rt-label">Most Recent Test</div>
+          <div class="rt-body">
+            <div class="rt-composite-num" id="rt-composite-num">&mdash;</div>
+            <div class="rt-composite-sub" id="rt-composite-sub"></div>
+            <div class="rt-title" id="rt-title"></div>
+            <div class="rt-date" id="rt-date"></div>
+            <div class="rt-weakest" id="rt-weakest"></div>
+          </div>
+        </div>
+        <div class="pie-card">
+          <div class="pie-card-label">Math &mdash; Top Weak Skills</div>
+          <div class="pie-card-body" id="pie-math-body">
+            <div class="pie-canvas-wrap"><canvas id="pie-math-canvas"></canvas></div>
+            <div class="pie-legend" id="pie-math-legend"></div>
+          </div>
+          <div class="pie-empty" id="pie-math-empty" style="display:none;">Nothing missed here yet.</div>
+        </div>
+        <div class="pie-card">
+          <div class="pie-card-label">Reading &amp; Writing &mdash; Top Weak Skills</div>
+          <div class="pie-card-body" id="pie-rw-body">
+            <div class="pie-canvas-wrap"><canvas id="pie-rw-canvas"></canvas></div>
+            <div class="pie-legend" id="pie-rw-legend"></div>
+          </div>
+          <div class="pie-empty" id="pie-rw-empty" style="display:none;">Nothing missed here yet.</div>
+        </div>
+      </div>
+    </div>
+
     <a href="#" class="menu-exit" id="menu-logout">&larr; Use a different key</a>
   </div>
 </div>
 
 <!-- ═══ SCREEN 3 — RESOURCES (Drive lookup for "Your Files") ═══ -->
-<div class="screen" id="screen-resources">
+<div class="screen has-sidebar" id="screen-resources">
   <div class="panel-wide">
     <div class="res-card">
       <div class="res-icon">🗂️</div>
@@ -1009,7 +1373,7 @@
      self-contained page that opens in a new tab so their portal session
      stays put. Add more resource cards here as they're built — the
      vocabulary trainer is the first. -->
-<div class="screen" id="screen-sat-resources">
+<div class="screen has-sidebar" id="screen-sat-resources">
   <div class="panel-wide">
     <div class="kicker">SAT Resources</div>
     <h1 class="panel-hed">Study tools &amp; practice.</h1>
@@ -1048,14 +1412,17 @@
      an attempt (diagnostic OR practice test — both flow through that one
      function). Read-only review: shows each missed question with the
      student's answer and the correct one, no re-answering. ═══ -->
-<div class="screen" id="screen-incorrect-questions">
+<div class="screen has-sidebar" id="screen-incorrect-questions">
   <div class="panel-wide">
     <div class="vp-head">
       <div class="kicker">SAT Resources</div>
       <h1 class="panel-hed">My Incorrect Questions</h1>
+      <p class="panel-sub">Quiz yourself — answer each one before the correct answer is revealed.</p>
     </div>
 
     <div id="iq-filters">
+      <div class="vp-panel-label">Test</div>
+      <div class="iq-dropdown" id="iq-test-pills"></div>
       <div class="vp-panel-label">Section</div>
       <div class="iq-dropdown" id="iq-section-pills"></div>
       <div class="vp-panel-label">Domain</div>
@@ -1069,16 +1436,16 @@
 
     <div id="iq-list"></div>
 
-    <a href="#" class="menu-back-link" id="incorrect-questions-back">&larr; Back to resources</a>
+    <a href="#" class="menu-back-link" id="incorrect-questions-back">&larr; Back to home</a>
   </div>
 </div>
 
 <!-- ═══ SCREEN 3b-iii — PRACTICE TESTS (picker) ═══ -->
-<div class="screen" id="screen-practice-tests">
+<div class="screen has-sidebar" id="screen-practice-tests">
   <div class="panel-wide">
     <div class="kicker">Practice Tests</div>
-    <h1 class="panel-hed">Pick a practice test.</h1>
-    <p class="panel-sub">Fully-timed, curated tests. Note that the majority test <strong>harder</strong> than normal. After you complete it once, any subsequent attempt won't be reported to Luca.</p>
+    <h1 class="panel-hed">Pick a test.</h1>
+    <p class="panel-sub">Your diagnostic, plus fully-timed, curated practice tests. Note that the majority test <strong>harder</strong> than normal. After you complete a practice test once, any subsequent attempt won't be reported to Luca.</p>
     <div class="menu-grid" id="pt-test-list"></div>
     <a href="#" class="menu-back-link" id="pt-list-back">&larr; Back</a>
   </div>
@@ -1163,7 +1530,7 @@
 
 <!-- ═══ SCREEN 3b-i — VOCABULARY PRACTICE (embedded; only reachable from
      the SAT Resources screen inside the portal — no standalone URL) ═══ -->
-<div class="screen" id="screen-vocab">
+<div class="screen has-sidebar" id="screen-vocab">
   <div class="panel-wide">
     <div class="vp-head">
       <div class="kicker">SAT Resources</div>
@@ -1197,7 +1564,7 @@
       <div class="vp-stage" id="vp-stage"></div>
     </div>
 
-    <a href="#" class="menu-back-link" id="vocab-back">&larr; Back to resources</a>
+    <a href="#" class="menu-back-link" id="vocab-back">&larr; Back to home</a>
   </div>
 </div>
 
@@ -1591,6 +1958,18 @@
     s.onerror = resolve;
     document.head.appendChild(s);
   });
+
+  // Chart.js — only used for the two "Where Points Are Going" donut charts
+  // on Home. Loaded the same async, non-blocking way as practice-tests.js
+  // above, since nothing on the key-entry/login screens needs it and it
+  // shouldn't delay them. renderHomePies() awaits this before drawing.
+  window.__chartJsReady = new Promise(function (resolve) {
+    var s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js';
+    s.onload = resolve;
+    s.onerror = resolve;
+    document.head.appendChild(s);
+  });
 </script>
 <script>
 (function () {
@@ -1877,21 +2256,22 @@
     var showSat = !!(currentStudent && currentStudent.showSat);
     var showAct = !!(currentStudent && currentStudent.showAct);
     var isTestPrep = showSat || showAct;
-    var diagCard = document.querySelector('.menu-card[data-route="diagnostic"]');
     var resCard = document.querySelector('.menu-card[data-route="sat-resources"]');
-    if (diagCard) diagCard.style.display = isTestPrep ? '' : 'none';
-    if (resCard) resCard.style.display = isTestPrep ? '' : 'none';
 
     // New test-prep students: until they've completed a real diagnostic on
     // at least one of the test types they're flagged for, the diagnostic is
-    // their ONLY menu option — "Your Files" and "SAT Resources" stay hidden
-    // so their first action is always the diagnostic Luca builds their plan
-    // around. Unlocks automatically the moment satTaken/actTaken flips true
-    // (same flags the diagnostic flow already stamps server-side), so this
-    // needs no separate state of its own.
+    // their ONLY option — "Your Files" and "SAT Resources" stay hidden so
+    // their first action is always the diagnostic Luca builds their plan
+    // around. (The diagnostic itself now lives inside the Practice Tests
+    // picker — see the Diagnostic tile in renderPracticeTestList() — so
+    // there's no separate diagnostic card to gate here anymore.) Unlocks
+    // automatically the moment satTaken/actTaken flips true (same flags the
+    // diagnostic flow already stamps server-side), so this needs no
+    // separate state of its own.
     var filesCard = document.querySelector('.menu-card[data-route="files"]');
     var hasCompletedADiagnostic = !!(currentStudent && (currentStudent.satTaken || currentStudent.actTaken));
     var diagnosticOnly = isTestPrep && !hasCompletedADiagnostic;
+    if (resCard) resCard.style.display = isTestPrep ? '' : 'none';
     if (filesCard) filesCard.style.display = diagnosticOnly ? 'none' : '';
     if (resCard) resCard.style.display = diagnosticOnly ? 'none' : (isTestPrep ? '' : 'none');
 
@@ -1937,20 +2317,6 @@
      and that the numbered practice tests are the thing to take next —
      that mix-up is what had students re-taking the diagnostic. */
   function applyTestCardStates() {
-    var diagBadge = document.getElementById('diag-card-badge');
-    var diagBody = document.getElementById('diag-card-body');
-    var diagDone = !!(currentStudent && (currentStudent.satTaken || currentStudent.actTaken));
-    if (diagBadge) {
-      diagBadge.style.display = '';
-      diagBadge.className = 'menu-card-badge ' + (diagDone ? 'badge-done' : 'badge-todo');
-      diagBadge.textContent = diagDone ? 'Completed' : 'Start here';
-    }
-    if (diagBody) {
-      diagBody.innerHTML = diagDone
-        ? 'Done &mdash; Luca has your results. Looking for a full test to take now? Use <strong>Practice Tests</strong> below.'
-        : 'Your starting point &mdash; it\'s how Luca sees where you are and builds your plan around real data.';
-    }
-
     var tests = window.SAT_PRACTICE_TESTS || [];
     var countEls = [document.getElementById('pt-card-count'), document.getElementById('pt-res-card-count')];
     countEls.forEach(function (el) { if (el && tests.length) el.textContent = tests.length; });
@@ -1991,6 +2357,55 @@
     var vocabCard = document.querySelector('.menu-card[data-route="vocab"]');
     if (vocabCard) vocabCard.style.display = showSat ? '' : 'none';
   }
+
+  /* ═══ SIDEBAR GATING ═══ same rules as applyTestPrepGating() above,
+     just re-derived here since the sidebar's Practice Tests/Files/
+     Vocabulary/My Incorrect Questions items are separate elements from
+     the (now-removed) home-screen menu cards they replaced. Kept as its
+     own function, evaluated fresh, rather than reusing applyTestPrepGating
+     directly — the old cards it touches still exist off-screen (feeding
+     applyTestCardStates' badges) and this needs to run on every
+     has-sidebar screen, not just screen-menu. */
+  function applySidebarGating() {
+    var showSat = !!(currentStudent && currentStudent.showSat);
+    var isTestPrep = !!(currentStudent && (currentStudent.showSat || currentStudent.showAct));
+    var hasCompletedADiagnostic = !!(currentStudent && (currentStudent.satTaken || currentStudent.actTaken));
+    var diagnosticOnly = isTestPrep && !hasCompletedADiagnostic;
+    var grantedLocked = false;
+    if (currentStudent && currentStudent.grantedAt) {
+      var grantedMs = Date.parse(currentStudent.grantedAt);
+      if (!isNaN(grantedMs)) grantedLocked = ((Date.now() - grantedMs) / (24 * 60 * 60 * 1000)) < RESOURCES_LOCK_DAYS;
+    }
+    var resourcesHidden = diagnosticOnly || !isTestPrep || grantedLocked;
+    function setNav(id, hidden) {
+      var el = document.getElementById(id);
+      if (el) el.style.display = hidden ? 'none' : '';
+    }
+    setNav('sidebar-files', diagnosticOnly);
+    // Practice Tests is where the diagnostic itself now lives (see
+    // renderPracticeTestList()'s Diagnostic tile) — it has to stay
+    // reachable for ANY test-prep student, including ACT-only ones and
+    // students still in the diagnostic-only window, or they'd have no way
+    // to ever take their diagnostic. The numbered tests inside that screen
+    // still lock themselves behind hasCompletedADiagnostic; this only
+    // gates whether the screen itself is reachable.
+    setNav('sidebar-practice-tests', !isTestPrep);
+    setNav('sidebar-vocab', resourcesHidden || !showSat);
+    setNav('sidebar-incorrect-questions', resourcesHidden);
+  }
+  var SIDEBAR_SCREENS = { 'screen-menu': 1, 'screen-practice-tests': 1, 'screen-resources': 1, 'screen-vocab': 1, 'screen-incorrect-questions': 1, 'screen-sat-resources': 1 };
+  var SIDEBAR_NAV_FOR_SCREEN = { 'screen-menu': 'home', 'screen-practice-tests': 'practice-tests', 'screen-resources': 'files', 'screen-vocab': 'vocab', 'screen-incorrect-questions': 'incorrect-questions' };
+  var sidebarEl = document.getElementById('portal-sidebar');
+  function updateSidebarForScreen(id) {
+    if (!sidebarEl) return;
+    var showIt = !!SIDEBAR_SCREENS[id];
+    sidebarEl.classList.toggle('sidebar-shown', showIt);
+    if (showIt) applySidebarGating();
+    var activeNav = SIDEBAR_NAV_FOR_SCREEN[id] || null;
+    document.querySelectorAll('.sidebar-item').forEach(function (el) {
+      el.classList.toggle('active', el.getAttribute('data-nav') === activeNav);
+    });
+  }
   // Routes to the diagnostic flow: if the student is only flagged for one
   // test (SAT column or ACT column checked, not both), skip the "which
   // test?" screen entirely and go straight in — an ACT-only student
@@ -2012,9 +2427,10 @@
   function show(id) {
     activeScreenId = id;
     Object.keys(screens).forEach(function (k) { screens[k].classList.toggle('active', k === id); });
-    if (id === 'screen-menu') { applyTestPrepGating(); applyTestCardStates(); renderScoreProgress(); }
+    if (id === 'screen-menu') { applyTestPrepGating(); applyTestCardStates(); renderScoreProgress(); renderHomePies(); renderRecentTestCard(); }
     if (id === 'screen-test-choice') applyTestChoiceGating();
     if (id === 'screen-sat-resources') applyResourcesGating();
+    updateSidebarForScreen(id);
     window.scrollTo(0, 0);
     saveState();
   }
@@ -2051,7 +2467,6 @@
   var keyInput   = document.getElementById('key-input');
   var keyError   = document.getElementById('key-error');
   var keySubmit  = document.getElementById('key-submit');
-  var emailStep  = document.getElementById('email-step');
   var emailInput = document.getElementById('email-input');
   var emailError = document.getElementById('email-error');
   var emailSubmit = document.getElementById('email-submit');
@@ -2128,6 +2543,8 @@
       showAct: data.showAct !== undefined ? !!data.showAct : !!data.testPrep,
       grantedAt: data.grantedAt || null,
       testDate: data.testDate || null,
+      accomTimeMult: data.accomTimeMult || null,
+      accomBreakMult: data.accomBreakMult || null,
       tests: data.tests || [],
       assignments: data.assignments || []
     };
@@ -2138,6 +2555,13 @@
     renderAssignments(); // instant paint from the auth response...
     loadAssignments();   // ...then a fresh fetch right behind it (see comment below)
     startAssignmentsPolling();
+    // Applies whatever accommodations were saved (during onboarding, or on
+    // a prior login) to the actual diagnostic timer — see the var
+    // declaration and applyStoredAccommodations() further down. A
+    // brand-new student who just finished onboarding this same session
+    // already has `accommodations` set directly from their answer; this
+    // is what makes it apply on EVERY future login too, not just this one.
+    if (typeof applyStoredAccommodations === 'function') applyStoredAccommodations();
   }
 
   /* ═══ THIS WEEK'S ASSIGNMENTS ═══
@@ -2337,11 +2761,14 @@
   }
 
   function buildScoreLineSvg(entries, scaleMin, scaleMax) {
-    // Sized so one viewBox unit ≈ one CSS pixel in the top-right sidebar
-    // the card now lives in (~258px of usable width). That 1:1 scale is the
-    // whole point: the font-size values below then render at their face
-    // value instead of being shrunk to 6-7px by a wider viewBox.
-    var W = 260, H = 172, padL = 32, padR = 12, padT = 16, padB = 24;
+    // Score Progress is Home's main/primary chart (see .score-progress-card
+    // above), so this is sized as a wide dashboard-style chart — roughly
+    // 1 viewBox unit ≈ 1 CSS pixel at the card's normal-flow width (~680px
+    // usable), same "keep the font-size values legible" logic as before,
+    // just recalibrated for the wider card instead of the old ~258px
+    // pinned sidebar box. The ≥1260px pinned-corner variant still scales
+    // this same viewBox down via CSS (preserveAspectRatio handles that).
+    var W = 640, H = 230, padL = 44, padR = 16, padT = 20, padB = 30;
     var innerW = W - padL - padR, innerH = H - padT - padB;
     var n = entries.length;
     function xAt(i) { return n <= 1 ? padL + innerW / 2 : padL + (innerW * i / (n - 1)); }
@@ -2355,7 +2782,7 @@
       var val = scaleMin + (scaleMax - scaleMin) * t / ticks;
       var y = yAt(val);
       gridSvg += '<line x1="' + padL + '" y1="' + y + '" x2="' + (W - padR) + '" y2="' + y + '" stroke="currentColor" stroke-width="0.5" opacity="0.15"/>';
-      gridSvg += '<text x="' + (padL - 6) + '" y="' + (y + 3.5) + '" font-size="10" text-anchor="end" fill="currentColor" opacity="0.62">' + Math.round(val) + '</text>';
+      gridSvg += '<text x="' + (padL - 8) + '" y="' + (y + 4) + '" font-size="12" text-anchor="end" fill="currentColor" opacity="0.62">' + Math.round(val) + '</text>';
     }
     var pts = entries.map(function (e, i) { return xAt(i) + ',' + yAt(e.composite); }).join(' ');
     var dotsSvg = '', labelsSvg = '';
@@ -2367,25 +2794,26 @@
       // visually collide whenever that point's score happens to land near
       // a gridline's height.
       var anchor = i === 0 ? 'start' : (i === n - 1 ? 'end' : 'middle');
-      var labelX = i === 0 ? x + 4 : (i === n - 1 ? x - 4 : x);
-      dotsSvg += '<circle class="spc-dot" cx="' + x + '" cy="' + y + '" r="3.5" fill="var(--red)"/>';
-      // Invisible, generously sized hover target over each point — a 3.5px
-      // dot in a chart this narrow is almost impossible to hit with a mouse.
-      dotsSvg += '<circle class="spc-hit" cx="' + x + '" cy="' + y + '" r="12" fill="transparent" data-i="' + i + '" tabindex="0"/>';
+      var labelX = i === 0 ? x + 5 : (i === n - 1 ? x - 5 : x);
+      dotsSvg += '<circle class="spc-dot" cx="' + x + '" cy="' + y + '" r="4.5" fill="var(--red)"/>';
+      // Invisible, generously sized hover/click target over each point —
+      // also the click target that jumps into My Incorrect Questions for
+      // that attempt's weakest domain (see the 'click' handler below).
+      dotsSvg += '<circle class="spc-hit" cx="' + x + '" cy="' + y + '" r="16" fill="transparent" data-i="' + i + '" tabindex="0"/>';
       // Only the newest point keeps a printed value. With up to 12 points
       // across 320 units, labelling them all turned into overlapping mush —
       // the hover tooltip carries the rest now.
       if (i === n - 1) {
-        labelsSvg += '<text x="' + labelX + '" y="' + Math.max(11, y - 9) + '" font-size="12" text-anchor="' + anchor + '" fill="currentColor" font-weight="700">' + e.composite + '</text>';
+        labelsSvg += '<text x="' + labelX + '" y="' + Math.max(14, y - 11) + '" font-size="15" text-anchor="' + anchor + '" fill="currentColor" font-weight="700">' + e.composite + '</text>';
       }
       // Same crowding problem on the x-axis: past 6 points, label every other.
       if (n <= 6 || i % 2 === 0 || i === n - 1) {
-        labelsSvg += '<text x="' + x + '" y="' + (H - 6) + '" font-size="9" text-anchor="middle" fill="currentColor" opacity="0.6">' + scoreEntryShortLabel(e) + '</text>';
+        labelsSvg += '<text x="' + x + '" y="' + (H - 8) + '" font-size="11" text-anchor="middle" fill="currentColor" opacity="0.6">' + scoreEntryShortLabel(e) + '</text>';
       }
     });
     return '<svg viewBox="0 0 ' + W + ' ' + H + '" style="color:var(--text); width:100%; height:auto; display:block;" preserveAspectRatio="xMidYMid meet">' +
       gridSvg +
-      '<polyline points="' + pts + '" fill="none" stroke="var(--red)" stroke-width="2"/>' +
+      '<polyline points="' + pts + '" fill="none" stroke="var(--red)" stroke-width="2.5"/>' +
       dotsSvg + labelsSvg +
       '</svg>';
   }
@@ -2415,12 +2843,27 @@
     return t || (e.source === 'practice-test' ? 'Practice test' : 'Diagnostic');
   }
 
-  function showSpcTip(hit) {
+  function spcEntryForHit(hit) {
     var wrap = hit.closest('.spc-chart-wrap');
-    if (!wrap) return;
+    if (!wrap) return null;
     var entries = spcChartEntries[wrap.getAttribute('data-chart')];
-    var e = entries && entries[Number(hit.getAttribute('data-i'))];
+    return entries && entries[Number(hit.getAttribute('data-i'))];
+  }
+
+  // Which hit's tooltip is currently showing — lets the click handler
+  // below tell "first interaction with this point" (show info) apart from
+  // "second interaction with the SAME point" (follow through and navigate
+  // to My Incorrect Questions for that attempt's weakest domain). On a
+  // mouse, hovering already shows the tip, so a click always navigates —
+  // "hover to see it, click to review" reads naturally. On touch, where
+  // there's no hover, the first tap shows the tip and a second tap on the
+  // same point navigates.
+  var spcTipShownFor = null;
+
+  function showSpcTip(hit) {
+    var e = spcEntryForHit(hit);
     if (!e) return;
+    spcTipShownFor = hit;
     var tip = spcTipEl();
     tip.textContent = '';
     function line(cls, text) {
@@ -2433,6 +2876,7 @@
     line('spc-tip-score', String(e.composite) + (e.date ? ' · ' + shortDate(e.date) : ''));
     if (e.weakest && e.weakest.label) {
       line('spc-tip-weak', 'Weakest: ' + e.weakest.label + ' (' + e.weakest.correct + '/' + e.weakest.total + ')');
+      line('spc-tip-cue', 'Click to review these questions →');
     } else {
       line('spc-tip-weak spc-tip-muted', 'No skill breakdown saved for this one.');
     }
@@ -2452,7 +2896,7 @@
     tip.style.visibility = '';
   }
 
-  function hideSpcTip() { if (spcTip) spcTip.style.display = 'none'; }
+  function hideSpcTip() { if (spcTip) spcTip.style.display = 'none'; spcTipShownFor = null; }
 
   if (scoreProgressChartsEl) {
     // Delegated, so it survives every innerHTML rebuild in renderScoreProgress.
@@ -2464,11 +2908,15 @@
       var hit = ev.target.closest && ev.target.closest('.spc-hit');
       if (hit) hideSpcTip();
     });
-    // Touch and keyboard get the same information — on a tablet there is no
-    // hover, and the chart is the only place the weakest-area note appears.
     scoreProgressChartsEl.addEventListener('click', function (ev) {
       var hit = ev.target.closest && ev.target.closest('.spc-hit');
-      if (hit) showSpcTip(hit); else hideSpcTip();
+      if (!hit) { hideSpcTip(); return; }
+      if (spcTipShownFor === hit) {
+        var e = spcEntryForHit(hit);
+        if (e && e.weakest && e.weakest.label) goToIncorrectQuestionsForDomain(e.weakest.label);
+      } else {
+        showSpcTip(hit);
+      }
     });
     scoreProgressChartsEl.addEventListener('focusin', function (ev) {
       var hit = ev.target.closest && ev.target.closest('.spc-hit');
@@ -2477,16 +2925,110 @@
     scoreProgressChartsEl.addEventListener('focusout', hideSpcTip);
   }
 
+  /* ═══ YOUR OVERVIEW — TEST FILTER ═══ narrows both the Score Progress
+     line graph and the "Where Points Are Going" donuts to just the
+     test(s) picked in the "Tests" chip, so a student can see (say) only
+     their last three practice tests' trend instead of everything on file.
+     Tracked as an EXCLUSION set rather than an inclusion list — "All"
+     (the default) is then just "nothing excluded," which stays correct
+     automatically as new attempts add new test options over time, with no
+     migration/sync step needed each render. */
+  var homeExcludedTests = {};
+  function homeTestIncluded(label) { return !homeExcludedTests[label]; }
+  // "SAT Practice Test 4 — Hardest..." -> "Practice Test 4"; "SAT
+  // Diagnostic" -> "Diagnostic" — same trim the My Incorrect Questions
+  // module's local testLabelFor() does (that's a separate closure and
+  // can't share this one).
+  function homeTestLabel(title) {
+    var raw = String(title || '').replace(/^SAT\s+/i, '').replace(/^ACT\s+/i, '');
+    var parts = raw.split(/\s+[—–-]\s+/);
+    return parts[0] || raw || 'Unknown test';
+  }
+  function homeAllTestLabels() {
+    var seen = {}, out = [];
+    loadScoreHistory().forEach(function (e) {
+      var l = homeTestLabel(e.testTitle);
+      if (!seen[l]) { seen[l] = 1; out.push(l); }
+    });
+    out.sort(function (a, b) {
+      var na = /(\d+)\s*$/.exec(a), nb = /(\d+)\s*$/.exec(b);
+      if (!na && !nb) return a.localeCompare(b);
+      if (!na) return -1;
+      if (!nb) return 1;
+      return Number(na[1]) - Number(nb[1]);
+    });
+    return out;
+  }
+  var homeTestFilterOpen = false;
+  function renderHomeTestFilter() {
+    var wrap = document.getElementById('home-test-filter');
+    var summaryEl = document.getElementById('home-test-filter-summary');
+    var panel = document.getElementById('home-test-filter-panel');
+    if (!wrap || !panel) return;
+    var options = homeAllTestLabels();
+    if (options.length < 2) { wrap.style.display = 'none'; return; } // nothing to filter with 0-1 tests on file
+    wrap.style.display = '';
+    var includedCount = options.filter(homeTestIncluded).length;
+    summaryEl.textContent = includedCount === options.length ? 'All' : includedCount === 0 ? 'None' : includedCount + ' of ' + options.length;
+    panel.innerHTML = '';
+    function optionRow(label, checked, onChange, extraClass) {
+      var row = document.createElement('label');
+      row.className = 'ov-filter-option' + (extraClass ? ' ' + extraClass : '');
+      var cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = checked;
+      cb.addEventListener('change', onChange);
+      row.appendChild(cb);
+      row.appendChild(document.createTextNode(label));
+      panel.appendChild(row);
+      return row;
+    }
+    optionRow('All', includedCount === options.length, function () {
+      homeExcludedTests = {};
+      renderHomeTestFilter();
+      renderScoreProgress();
+      renderHomePies();
+    }, 'ov-filter-option-all');
+    options.forEach(function (label) {
+      optionRow(label, homeTestIncluded(label), function (ev) {
+        if (ev.target.checked) delete homeExcludedTests[label];
+        else homeExcludedTests[label] = true;
+        renderHomeTestFilter();
+        renderScoreProgress();
+        renderHomePies();
+      });
+    });
+  }
+  var homeTestFilterBtn = document.getElementById('home-test-filter-btn');
+  if (homeTestFilterBtn) {
+    homeTestFilterBtn.addEventListener('click', function () {
+      var wrap = document.getElementById('home-test-filter');
+      homeTestFilterOpen = !homeTestFilterOpen;
+      wrap.classList.toggle('open', homeTestFilterOpen);
+    });
+    document.addEventListener('mousedown', function (ev) {
+      var wrap = document.getElementById('home-test-filter');
+      if (homeTestFilterOpen && wrap && !wrap.contains(ev.target)) {
+        homeTestFilterOpen = false;
+        wrap.classList.remove('open');
+      }
+    });
+  }
+
   function renderScoreProgress() {
     if (!scoreProgressCard) return;
-    var entries = loadScoreHistory();
-    // A single score isn't "progress" — nothing to compare it against yet
-    // — so a test type only gets a chart once there are at least 2 scores
-    // recorded for it, and the whole card stays hidden until at least one
-    // test type clears that bar.
+    var entries = loadScoreHistory().filter(function (e) { return homeTestIncluded(homeTestLabel(e.testTitle)); });
+    // Score Progress is Home's main graph now, so it shows as soon as
+    // there's ANY recorded score — even a single point is still useful
+    // context (today's score), and buildScoreLineSvg() already centers a
+    // lone point cleanly rather than needing 2+ to draw a line. (Used to
+    // require 2+ per test type on the theory that "a single score isn't
+    // progress"; that made sense when this was a small side widget, but
+    // hiding the main chart entirely after someone's very first attempt
+    // reads as broken, not restrained.)
     var allSat = entries.filter(function (e) { return e.testType === 'SAT'; });
     var allAct = entries.filter(function (e) { return e.testType === 'ACT'; });
-    if (allSat.length < 2 && allAct.length < 2) { scoreProgressCard.style.display = 'none'; scoreProgressChartsEl.innerHTML = ''; return; }
+    if (!allSat.length && !allAct.length) { scoreProgressCard.style.display = 'none'; scoreProgressChartsEl.innerHTML = ''; return; }
     var satShown = allSat.slice(-SCORE_PROGRESS_MAX_POINTS);
     var actShown = allAct.slice(-SCORE_PROGRESS_MAX_POINTS);
     var html = '';
@@ -2500,10 +3042,185 @@
       if (shown.length < totalCount) html += '<div class="spc-note">Showing your last ' + shown.length + ' ' + typeLabel + ' attempts.</div>';
       chartIndex++;
     }
-    if (satShown.length >= 2) addChart('SAT Composite (400–1600)', satShown, 400, 1600, allSat.length, 'SAT');
-    if (actShown.length >= 2) addChart('ACT Composite (1–36)', actShown, 1, 36, allAct.length, 'ACT');
+    if (satShown.length >= 1) addChart('SAT Composite (400–1600)', satShown, 400, 1600, allSat.length, 'SAT');
+    if (actShown.length >= 1) addChart('ACT Composite (1–36)', actShown, 1, 36, allAct.length, 'ACT');
     scoreProgressChartsEl.innerHTML = html;
     scoreProgressCard.style.display = '';
+  }
+
+  /* ═══ HOME: MOST RECENT TEST ═══ scoped to a single attempt (the latest
+     entry in loadScoreHistory()), separate from the aggregate trend above
+     it — composite front and center, section sub-scores and the weakest
+     domain from THAT attempt as the "what to do next" takeaway. */
+  function renderRecentTestCard() {
+    var cardEl = document.getElementById('recent-test-card');
+    if (!cardEl) return;
+    var entries = loadScoreHistory();
+    if (!entries.length) { cardEl.style.display = 'none'; return; }
+    var e = entries[entries.length - 1];
+    var numEl = document.getElementById('rt-composite-num');
+    var subEl = document.getElementById('rt-composite-sub');
+    var titleEl = document.getElementById('rt-title');
+    var dateEl = document.getElementById('rt-date');
+    var weakestEl = document.getElementById('rt-weakest');
+    if (numEl) numEl.textContent = (e.composite != null) ? String(e.composite) : '—';
+    // rw/math only exist on SAT attempts recorded after this field was
+    // added (see recordComposite() in finishDiagnostic()) — older entries
+    // just show the bare composite, no sub-score line.
+    if (subEl) subEl.textContent = (e.rw != null && e.math != null) ? ('R&W ' + e.rw + '  ·  Math ' + e.math) : '';
+    if (titleEl) titleEl.textContent = spcEntryTitle(e);
+    if (dateEl) dateEl.textContent = e.date ? shortDate(e.date) : '';
+    if (weakestEl) {
+      weakestEl.textContent = '';
+      if (e.weakest && e.weakest.label) {
+        weakestEl.appendChild(document.createTextNode('Weakest this time: '));
+        var strong = document.createElement('strong');
+        strong.textContent = e.weakest.label + ' (' + e.weakest.correct + '/' + e.weakest.total + ')';
+        weakestEl.appendChild(strong);
+      }
+    }
+    cardEl.style.display = '';
+  }
+
+  /* ═══ HOME: "WHERE POINTS ARE GOING" DONUT CHARTS ═══ two Chart.js
+     doughnuts (Math, Reading & Writing) built from the SAME synced
+     incorrect-question data that feeds My Incorrect Questions (see
+     window.fetchPortalProgress + window.resolveQuestionByKey above/below)
+     — i.e. every question currently missed across EVERY attempt on file,
+     not one test's snapshot. Getting a question right on a later attempt
+     clears it from this data too (see recordIncorrectQuestions' comment),
+     so the charts always reflect current weak spots, not stale history.
+     A slice (or legend item) click jumps into My Incorrect Questions with
+     that skill pre-selected — see the `preset` param on window.iqModuleInit
+     further down the page. */
+  var HOME_PIE_PALETTE = ['#B0271C', '#BF5B33', '#C97A3C', '#CB9247', '#C9A84C', '#8A1F17'];
+  var homeMathChart = null, homeRwChart = null;
+  var MATH_SECTION_KEYS = { 'math': 1, 'act-math': 1 };
+  var RW_SECTION_KEYS = { 'reading-writing': 1, 'english': 1, 'reading': 1, 'science': 1 };
+
+  function homeSkillBuckets(callback) {
+    if (!window.fetchPortalProgress || !window.resolveQuestionByKey) { callback({ math: {}, rw: {} }); return; }
+    var readyPromise = window.__practiceTestsReady || Promise.resolve();
+    window.fetchPortalProgress(function (progress) {
+      var byKey = (progress.incorrectQuestions && typeof progress.incorrectQuestions === 'object') ? progress.incorrectQuestions : {};
+      readyPromise.then(function () {
+        var math = {}, rw = {};
+        Object.keys(byKey).forEach(function (k) {
+          var resolved = window.resolveQuestionByKey(k);
+          if (!resolved || !resolved.skill) return;
+          if (!homeTestIncluded(homeTestLabel(resolved.testTitle))) return; // Your Overview's Tests filter
+          var bucket = MATH_SECTION_KEYS[resolved.sectionKey] ? math : (RW_SECTION_KEYS[resolved.sectionKey] ? rw : null);
+          if (!bucket) return;
+          bucket[resolved.skill] = (bucket[resolved.skill] || 0) + 1;
+        });
+        callback({ math: math, rw: rw });
+      });
+    });
+  }
+
+  function goToIncorrectQuestionsForSkill(skill) {
+    if (window.iqModuleInit) window.iqModuleInit({ skill: skill });
+    show('screen-incorrect-questions');
+  }
+  // Same idea, one level up the taxonomy — used by the Score Progress
+  // chart's per-point "click to review" (see showSpcTip()/the click
+  // handler above), since a data point's weakest area is a DOMAIN
+  // (weakestDomain() in finishDiagnostic()), not a single skill.
+  function goToIncorrectQuestionsForDomain(domain) {
+    if (window.iqModuleInit) window.iqModuleInit({ domain: domain });
+    show('screen-incorrect-questions');
+  }
+
+  function renderHomePie(canvasId, emptyId, bodyId, legendId, bucket, setChart, getChart) {
+    var body = document.getElementById(bodyId);
+    var emptyEl = document.getElementById(emptyId);
+    var canvas = document.getElementById(canvasId);
+    var legendEl = document.getElementById(legendId);
+    var existing = getChart();
+    if (existing) { existing.destroy(); setChart(null); }
+    // Every skill gets a slice in the actual chart — only the TEXT legend
+    // below it truncates to the top 3 worst (see HOME_PIE_MAX_SKILLS
+    // below). Truncating the chart data itself used to make a skill with
+    // real misses just vanish from the donut instead of still being
+    // represented as a (smaller) slice.
+    var allSkills = Object.keys(bucket).sort(function (a, b) { return bucket[b] - bucket[a]; });
+    if (!allSkills.length || !window.Chart || !canvas) {
+      if (body) body.style.display = 'none';
+      if (emptyEl) emptyEl.style.display = '';
+      return;
+    }
+    if (body) body.style.display = '';
+    if (emptyEl) emptyEl.style.display = 'none';
+    var colors = allSkills.map(function (s, i) { return HOME_PIE_PALETTE[i % HOME_PIE_PALETTE.length]; });
+    // Chart.js' own built-in legend draws inside the same fixed-size box as
+    // the doughnut, so it was fighting the chart for room and truncating
+    // longer skill names — turned off here (display:false) in favor of a
+    // plain HTML legend below the canvas (see .pie-legend below), which
+    // just wraps normally like any other text.
+    var chart = new Chart(canvas, {
+      type: 'doughnut',
+      data: { labels: allSkills, datasets: [{ data: allSkills.map(function (s) { return bucket[s]; }), backgroundColor: colors, borderColor: '#fff', borderWidth: 2 }] },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        onClick: function (evt, elements) {
+          if (!elements || !elements.length) return;
+          goToIncorrectQuestionsForSkill(allSkills[elements[0].index]);
+        }
+      }
+    });
+    setChart(chart);
+    if (legendEl) {
+      legendEl.innerHTML = '';
+      // Top 3 worst-scoring skills only, in the text legend — this is a
+      // Home-screen glance, not the full breakdown (that's what My
+      // Incorrect Questions is for, one click away via any slice/legend
+      // item, or the "+N more" line below).
+      var HOME_PIE_MAX_SKILLS = 3;
+      var shownSkills = allSkills.slice(0, HOME_PIE_MAX_SKILLS);
+      shownSkills.forEach(function (skill, i) {
+        var item = document.createElement('div');
+        item.className = 'pie-legend-item';
+        var swatch = document.createElement('span');
+        swatch.className = 'pie-legend-swatch';
+        swatch.style.background = colors[i];
+        var label = document.createElement('span');
+        label.textContent = skill;
+        var count = document.createElement('span');
+        count.className = 'pie-legend-count';
+        count.textContent = '(' + bucket[skill] + ')';
+        item.appendChild(swatch);
+        item.appendChild(label);
+        item.appendChild(count);
+        item.addEventListener('click', function () { goToIncorrectQuestionsForSkill(skill); });
+        legendEl.appendChild(item);
+      });
+      var hiddenCount = allSkills.length - shownSkills.length;
+      if (hiddenCount > 0) {
+        var more = document.createElement('div');
+        more.className = 'pie-legend-more';
+        more.textContent = '+' + hiddenCount + ' more in My Incorrect Questions';
+        legendEl.appendChild(more);
+      }
+    }
+  }
+
+  function renderHomePies() {
+    // "Your Overview" (filter chip + line graph + this stat row) is a
+    // test-prep-only section — a subject-tutoring-only student has no
+    // diagnostic/practice-test data to show here at all.
+    var overviewEl = document.getElementById('home-overview');
+    var isTestPrep = !!(currentStudent && (currentStudent.showSat || currentStudent.showAct));
+    if (overviewEl) overviewEl.style.display = isTestPrep ? '' : 'none';
+    if (!isTestPrep) return;
+    renderHomeTestFilter();
+    if (!window.__chartJsReady) return;
+    window.__chartJsReady.then(function () {
+      homeSkillBuckets(function (buckets) {
+        renderHomePie('pie-math-canvas', 'pie-math-empty', 'pie-math-body', 'pie-math-legend', buckets.math, function (c) { homeMathChart = c; }, function () { return homeMathChart; });
+        renderHomePie('pie-rw-canvas', 'pie-rw-empty', 'pie-rw-body', 'pie-rw-legend', buckets.rw, function (c) { homeRwChart = c; }, function () { return homeRwChart; });
+      });
+    });
   }
 
   /* ═══ NEXT SESSION WIDGET ═══
@@ -2620,7 +3337,8 @@
      just means the card doesn't show rather than showing something wrong. */
   var tcCard = document.getElementById('test-countdown');
   var tcLabel = document.getElementById('tc-label');
-  var tcDays = document.getElementById('tc-days');
+  var tcDaysMain = document.getElementById('tc-days-main');
+  var tcDaysRest = document.getElementById('tc-days-rest');
   var tcFill = document.getElementById('tc-fill');
 
   function renderTestCountdown() {
@@ -2639,18 +3357,27 @@
     var daysLeft = Math.ceil((testMs - now) / msPerDay);
 
     tcCard.style.display = 'block';
+    // One combined, centered readout ("12 days left to your test") instead
+    // of a separate "Countdown to your test" label plus a bare day count —
+    // tcLabel now just carries a short, non-repeating kicker (hidden via
+    // CSS). Only the count itself is bold/red (tcDaysMain); "to your test"
+    // stays plain (tcDaysRest) so the emphasis lands on the number.
     if (daysLeft > 1) {
-      tcLabel.textContent = 'Countdown to your test';
-      tcDays.textContent = daysLeft + ' days left';
+      tcLabel.textContent = 'Test Day';
+      tcDaysMain.textContent = daysLeft + ' days left';
+      tcDaysRest.textContent = ' to your test';
     } else if (daysLeft === 1) {
-      tcLabel.textContent = 'Countdown to your test';
-      tcDays.textContent = 'Tomorrow';
+      tcLabel.textContent = 'Test Day';
+      tcDaysMain.textContent = '1 day left';
+      tcDaysRest.textContent = ' to your test';
     } else if (daysLeft === 0) {
-      tcLabel.textContent = 'Countdown to your test';
-      tcDays.textContent = 'Today';
+      tcLabel.textContent = 'Test Day';
+      tcDaysMain.textContent = 'Today';
+      tcDaysRest.textContent = ' is your test day!';
     } else {
       tcLabel.textContent = 'Test day has passed';
-      tcDays.textContent = 'Good luck!';
+      tcDaysMain.textContent = 'Good luck!';
+      tcDaysRest.textContent = '';
     }
 
     var pct = ((now - startMs) / (testMs - startMs)) * 100;
@@ -2669,16 +3396,65 @@
     emailStepNameError.style.display = 'none';
     emailError.style.display = 'none';
     document.getElementById('email-notice').style.display = 'none';
-    emailStep.style.display = 'none';
-    keyStep.style.display = 'block';
+    document.getElementById('main-nav').classList.remove('nav-hidden');
+    document.getElementById('screen-onboard').classList.remove('is-dark');
+    onbGoTo('onb-splash');
+    show('screen-key');
   }
 
-  // Both the name and email fields live on the same "email-step" panel now
-  // — a brand-new key with no name on file yet shows the name field ABOVE
-  // the email field on this one screen (instead of the old two-screen
-  // name-then-email flow), while a key Luca already pre-registered with a
-  // name just hides the name field and asks for email only, same as before.
-  function goToEmailStep() {
+  /* ═══ FIRST-LOGIN ONBOARDING SEQUENCE ═══
+     One pane visible at a time inside #screen-onboard (see the HTML and
+     its CSS comment for the full shape). onbGoTo() is the one function
+     every beat's "Continue" routes through; it also renders the progress
+     dots and drives them off ONB_STEPS below rather than each pane
+     tracking its own position. */
+  var ONB_STEPS = ['onb-welcome', 'onb-pillars', 'onb-roadmap', 'onb-testdate', 'onb-accom', 'onb-handoff'];
+  var onboardAuthData = null; // the auth response, held onto until the sequence's final beat actually settles into the app
+
+  function onbGoTo(paneId) {
+    document.querySelectorAll('.onb-pane').forEach(function (p) { p.classList.toggle('is-active', p.id === paneId); });
+    var stepIdx = ONB_STEPS.indexOf(paneId);
+    document.querySelectorAll('.onb-dots').forEach(function (dotsEl) {
+      dotsEl.innerHTML = '';
+      if (stepIdx === -1) return; // splash/identity aren't counted steps
+      ONB_STEPS.forEach(function (id, i) {
+        var d = document.createElement('span');
+        d.className = 'onb-dot' + (i === stepIdx ? ' is-current' : i < stepIdx ? ' is-done' : '');
+        dotsEl.appendChild(d);
+      });
+    });
+  }
+  document.querySelectorAll('[data-onb-next]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var pane = btn.closest('.onb-pane');
+      var idx = ONB_STEPS.indexOf(pane.id);
+      if (idx !== -1 && idx < ONB_STEPS.length - 1) onbGoTo(ONB_STEPS[idx + 1]);
+    });
+  });
+
+  // Beat 1: the brand moment. Auto-advances; a click/tap anywhere on it
+  // also advances immediately (see the #onb-splash listener below).
+  var onbSplashTimer = null;
+  function goToOnboardSplash() {
+    document.getElementById('main-nav').classList.add('nav-hidden');
+    document.getElementById('screen-onboard').classList.add('is-dark');
+    onbGoTo('onb-splash');
+    document.getElementById('onb-splash-hint').classList.add('onb-splash-hint-visible');
+    show('screen-onboard');
+    clearTimeout(onbSplashTimer);
+    onbSplashTimer = setTimeout(goToOnboardIdentity, 2300);
+  }
+  document.getElementById('onb-splash').addEventListener('click', function () {
+    clearTimeout(onbSplashTimer);
+    goToOnboardIdentity();
+  });
+
+  // Beat 2: name/email capture — unchanged fields/logic from the old
+  // "email-step" panel, just living here now. A brand-new key with no
+  // name on file yet shows the name field ABOVE the email field; a key
+  // Luca already pre-registered with a name just asks for email.
+  function goToOnboardIdentity() {
+    clearTimeout(onbSplashTimer);
     var needsName = !pendingName || !String(pendingName).trim();
     emailStepHedText.textContent = needsName ? "Welcome! Let's get you set up" : 'One more thing';
     emailStepName.textContent = (!needsName && pendingName) ? (', ' + pendingName.split(' ')[0]) : '';
@@ -2686,9 +3462,25 @@
     emailStepSub.textContent = needsName
       ? "First time using this key — enter your name and email and we'll automatically share your files with you."
       : "First time using this key — enter your email and we'll automatically share your files with you.";
-    keyStep.style.display = 'none';
-    emailStep.style.display = 'block';
+    onbGoTo('onb-identity');
     if (needsName) { emailStepNameInput.focus(); } else { emailInput.focus(); }
+  }
+
+  // The moment identity capture succeeds: background fades from dark to
+  // white and #main-nav slides back down (both are plain CSS transitions
+  // triggered by removing these two classes — see the CSS), then beat 3
+  // (Welcome) takes over. The auth response is held in onboardAuthData
+  // until the sequence's handoff beat, which is when this student
+  // actually "arrives" in the app (see settle() calls at the bottom).
+  function transitionOnboardToLight(data) {
+    onboardAuthData = data;
+    document.getElementById('screen-onboard').classList.remove('is-dark');
+    document.getElementById('main-nav').classList.remove('nav-hidden');
+    var firstName = (data.name || '').split(' ')[0] || 'there';
+    document.getElementById('onb-welcome-hed').textContent = 'Welcome, ' + firstName + '.';
+    document.getElementById('onb-handoff-hed').textContent = "You're all set, " + firstName + '.';
+    renderOnbDateGrid();
+    onbGoTo('onb-welcome');
   }
 
   function tryKey() {
@@ -2713,7 +3505,7 @@
       pendingKey = raw;
       pendingName = data.name;
       if (data.needsEmail) {
-        goToEmailStep();
+        goToOnboardSplash();
       } else {
         settle(data);
       }
@@ -2747,13 +3539,111 @@
         emailError.style.display = 'block';
         return;
       }
-      settle(data);
+      transitionOnboardToLight(data);
     });
   }
   document.getElementById('email-submit').addEventListener('click', trySubmitEmail);
   emailInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') trySubmitEmail(); });
   emailStepNameInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') trySubmitEmail(); });
   document.getElementById('email-back').addEventListener('click', function (e) { e.preventDefault(); resetKeyScreen(); });
+
+  // Beat 6: test date — same national SAT dates and registration
+  // deadlines as test-dates.html, filtered the same way that page filters
+  // itself (a date drops once TODAY is past its OWN registration
+  // deadline). The two lists have to be updated together when a new
+  // school year's dates come out — there's no shared source between this
+  // page and that one.
+  var ONB_SAT_DATES = [
+    { test: 'August 22, 2026', iso: '2026-08-22', regDeadline: '2026-08-07' },
+    { test: 'September 12, 2026', iso: '2026-09-12', regDeadline: '2026-08-28' },
+    { test: 'October 3, 2026', iso: '2026-10-03', regDeadline: '2026-09-18' },
+    { test: 'November 7, 2026', iso: '2026-11-07', regDeadline: '2026-10-23' },
+    { test: 'December 5, 2026', iso: '2026-12-05', regDeadline: '2026-11-20' },
+    { test: 'March 6, 2027', iso: '2027-03-06', regDeadline: '2027-02-19' },
+    { test: 'May 1, 2027', iso: '2027-05-01', regDeadline: '2027-04-16' },
+    { test: 'June 5, 2027', iso: '2027-06-05', regDeadline: '2027-05-21' }
+  ];
+  var onbSelectedTestDate = null; // ISO string, or null for "not sure yet"
+  function renderOnbDateGrid() {
+    var grid = document.getElementById('onbDateGrid');
+    if (!grid) return;
+    var todayStr = new Date().toISOString().slice(0, 10);
+    var upcoming = ONB_SAT_DATES.filter(function (d) { return d.regDeadline >= todayStr; });
+    grid.innerHTML = '';
+    upcoming.forEach(function (d) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'onb-date-opt';
+      btn.setAttribute('data-onb-date-opt', d.iso);
+      btn.textContent = d.test;
+      grid.appendChild(btn);
+    });
+  }
+  document.addEventListener('click', function (e) {
+    var opt = e.target.closest('[data-onb-date-opt]');
+    if (!opt) return;
+    document.querySelectorAll('[data-onb-date-opt]').forEach(function (o) { o.classList.remove('is-on'); });
+    opt.classList.add('is-on');
+    var val = opt.getAttribute('data-onb-date-opt');
+    onbSelectedTestDate = val === 'unsure' ? null : val;
+  });
+
+  // Beat 7: accommodations. Choosing "Standard" collapses the extended
+  // options; choosing "I have accommodations" opens the shared panel
+  // below both cards. Continuing here both sets `accommodations` (used by
+  // the real diagnostic timer — see its declaration further down) AND
+  // persists it to the Students sheet via saveOnboardingPrefs, so it's a
+  // permanent account setting from here on, not a per-test question.
+  var onbAccomHasAccoms = false;
+  document.querySelectorAll('[data-onb-accom-card]').forEach(function (card, i) {
+    card.addEventListener('click', function () {
+      document.querySelectorAll('[data-onb-accom-card]').forEach(function (c) { c.classList.remove('is-selected'); });
+      card.classList.add('is-selected');
+      onbAccomHasAccoms = (i === 1);
+      document.getElementById('onbAccomSub').classList.toggle('is-open', onbAccomHasAccoms);
+    });
+  });
+  ['onbAccomTimeOpts', 'onbAccomBreakOpts'].forEach(function (id) {
+    var group = document.getElementById(id);
+    group.addEventListener('click', function (e) {
+      var opt = e.target.closest('.onb-accom-opt');
+      if (!opt) return;
+      Array.prototype.forEach.call(group.children, function (o) { o.classList.remove('is-on'); });
+      opt.classList.add('is-on');
+    });
+  });
+  document.getElementById('onb-accom-continue').addEventListener('click', function () {
+    var timeMult = onbAccomHasAccoms ? parseFloat(document.querySelector('#onbAccomTimeOpts .is-on').getAttribute('data-val')) : 1;
+    var breakMult = onbAccomHasAccoms ? parseFloat(document.querySelector('#onbAccomBreakOpts .is-on').getAttribute('data-val')) : 1;
+    accommodations.timeMult = timeMult;
+    accommodations.breakMult = breakMult;
+    // Best-effort, fire-and-forget — same pattern as markDiagnosticTaken()
+    // above. The choice already took effect locally (accommodations var,
+    // just above) regardless of whether this call succeeds, so a network
+    // hiccup here doesn't block the sequence or lose the student's answer
+    // for THIS session; it just might not carry over to a future login.
+    try {
+      fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        keepalive: true,
+        body: JSON.stringify({ action: 'saveOnboardingPrefs', key: pendingKey, testDate: onbSelectedTestDate, accomTimeMult: timeMult, accomBreakMult: breakMult })
+      }).catch(function () {});
+    } catch (e) {}
+    onbGoTo('onb-handoff');
+  });
+
+  // Beat 8: handoff. This is where the student actually "arrives" —
+  // settle() (defined above) is only called now, not at the top of the
+  // sequence, so nothing about the app's normal state (currentStudent,
+  // assignments, the countdown, etc.) exists until onboarding is done.
+  document.getElementById('onb-start-diagnostic').addEventListener('click', function () {
+    settle(onboardAuthData);
+    goToTestChoice();
+  });
+  document.getElementById('onb-later').addEventListener('click', function (e) {
+    e.preventDefault();
+    settle(onboardAuthData);
+  });
 
   // Nudge the student toward entering their main email the moment they
   // click/tap into the field — files get shared to whatever address they
@@ -2833,16 +3723,20 @@
     }
     resumeOverlay.classList.add('active');
   }
+  // Same "resume or start fresh" check the old home-screen diagnostic card
+  // used — now the click handler for the Diagnostic tile inside the
+  // Practice Tests picker (see renderPracticeTestList()) instead, since the
+  // diagnostic lives there now, thrown in with the 11 numbered tests.
+  function startDiagnosticFlow() {
+    var snap = getResumeSnapshot();
+    if (snap) openResumeOverlay(snap);
+    else { goToTestChoice(); }
+  }
   document.querySelectorAll('.menu-card').forEach(function (card) {
     card.addEventListener('click', function () {
       if (card.classList.contains('disabled')) return; // temporarily off while these get developed further
       var route = card.getAttribute('data-route');
-      if (route === 'diagnostic') {
-        var snap = getResumeSnapshot();
-        if (snap) openResumeOverlay(snap);
-        else { goToTestChoice(); }
-      }
-      else if (route === 'files') { renderResources(); show('screen-resources'); }
+      if (route === 'files') { renderResources(); show('screen-resources'); }
       else if (route === 'sat-resources') { show('screen-sat-resources'); }
       else if (route === 'vocab') { show('screen-vocab'); if (window.vocabModuleInit) window.vocabModuleInit(); }
       else if (route === 'practice-tests') {
@@ -2857,10 +3751,31 @@
     });
   });
   document.getElementById('sat-resources-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-menu'); });
-  document.getElementById('vocab-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-sat-resources'); });
+  // Vocab/IQ used to back out to the SAT Resources hub screen — now that
+  // the sidebar is the primary way in (bypassing that hub entirely), back
+  // returns straight to Home instead of routing through an orphaned
+  // intermediate screen.
+  document.getElementById('vocab-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-menu'); });
   var ptListReturnScreen = 'screen-menu';
   document.getElementById('pt-list-back').addEventListener('click', function (e) { e.preventDefault(); show(ptListReturnScreen); });
-  document.getElementById('incorrect-questions-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-sat-resources'); });
+  document.getElementById('incorrect-questions-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-menu'); });
+
+  /* ═══ SIDEBAR NAVIGATION ═══ drives the exact same routing the old
+     home-screen menu cards used (see the .menu-card handler above) —
+     the sidebar is just a persistent way to reach the same screens from
+     anywhere, not a new navigation model. */
+  document.querySelectorAll('.sidebar-item').forEach(function (item) {
+    item.addEventListener('click', function (e) {
+      e.preventDefault();
+      if (item.style.display === 'none') return; // gated off — ignore stray clicks (e.g. keyboard)
+      var nav = item.getAttribute('data-nav');
+      if (nav === 'home') { show('screen-menu'); }
+      else if (nav === 'files') { renderResources(); show('screen-resources'); }
+      else if (nav === 'vocab') { show('screen-vocab'); if (window.vocabModuleInit) window.vocabModuleInit(); }
+      else if (nav === 'practice-tests') { ptListReturnScreen = 'screen-menu'; renderPracticeTestList(); show('screen-practice-tests'); }
+      else if (nav === 'incorrect-questions') { show('screen-incorrect-questions'); if (window.iqModuleInit) window.iqModuleInit(); }
+    });
+  });
 
   /* ═══ PRACTICE TESTS — NAMING, COMPLETION STATE, PICKER ═══
 
@@ -2913,15 +3828,53 @@
     if (isNaN(d.getTime())) return '';
     return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
   }
+  // Diagnostic tile prepended to the practice-test grid — thrown in with
+  // the 11 numbered tests instead of living as its own separate
+  // Home-screen callout, so "which test do I take first" is answered by
+  // one list instead of two different screens/mental models. Clicking it
+  // reuses the exact same resume-or-start-fresh flow the old standalone
+  // diagnostic card used (see startDiagnosticFlow()).
+  function buildDiagnosticTile(hasCompletedADiagnostic) {
+    var card = document.createElement('div');
+    card.className = 'menu-card menu-card-wide' + (hasCompletedADiagnostic ? ' pt-card-done' : '');
+    card.innerHTML =
+      (hasCompletedADiagnostic ? '<span class="menu-card-badge badge-done">Completed</span>' : '<span class="menu-card-badge badge-todo">Start here</span>') +
+      '<span class="menu-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="1.5"/><rect x="9" y="2" width="6" height="3" rx="1"/><path d="M9 12.5l2 2 4-4.5"/></svg></span>' +
+      '<div class="pt-card-text"><div class="menu-card-title">Diagnostic</div>' +
+      '<div class="pt-meta">' + (hasCompletedADiagnostic ? 'Already taken' : 'Take this first') + '</div>' +
+      '<div class="menu-card-body pt-body-long">' + (hasCompletedADiagnostic
+        ? 'Done &mdash; Luca has your results. The numbered tests below are for ongoing practice, not a retake of this.'
+        : 'Your starting point &mdash; it\'s how Luca sees where you are and builds your plan around real data.') + '</div></div>';
+    card.addEventListener('click', startDiagnosticFlow);
+    return card;
+  }
   function renderPracticeTestList() {
     var list = document.getElementById('pt-test-list');
+    list.innerHTML = '';
+    var isTestPrep = !!(currentStudent && (currentStudent.showSat || currentStudent.showAct));
+    var hasCompletedADiagnostic = !!(currentStudent && (currentStudent.satTaken || currentStudent.actTaken));
+    if (isTestPrep) list.appendChild(buildDiagnosticTile(hasCompletedADiagnostic));
+
     var tests = window.SAT_PRACTICE_TESTS || [];
     if (!tests.length) {
-      list.innerHTML = '<p class="panel-sub">No practice tests are available yet — check back soon.</p>';
+      var loadingNote = document.createElement('p');
+      loadingNote.className = 'panel-sub pt-locked-note';
+      loadingNote.textContent = 'No practice tests are available yet — check back soon.';
+      list.appendChild(loadingNote);
+      return;
+    }
+    // The 11 numbered tests stay locked until the diagnostic is done —
+    // same "diagnostic first" ordering the portal has always enforced,
+    // just expressed as a note in this shared list instead of hiding a
+    // separate card elsewhere.
+    if (isTestPrep && !hasCompletedADiagnostic) {
+      var lockedNote = document.createElement('p');
+      lockedNote.className = 'panel-sub pt-locked-note';
+      lockedNote.textContent = 'Complete your diagnostic above to unlock Practice Tests 1–' + tests.length + '.';
+      list.appendChild(lockedNote);
       return;
     }
     var done = practiceTestResultsById();
-    list.innerHTML = '';
     tests.forEach(function (test) {
       var mathQ = ((test.sections || {}).math || {});
       var rwQ = ((test.sections || {}).readingWriting || {});
@@ -3798,6 +4751,34 @@
     });
   })();
 
+  // Called from settle() on every login. Reflects whatever accommodations
+  // are saved on the student's account (set once during onboarding, or on
+  // a prior login — see AccomTimeMult/AccomBreakMult in Code.gs) into both
+  // the `accommodations` var itself AND this per-test panel's radios, so
+  // a returning student's diagnostic starts pre-set to their real timing
+  // instead of silently resetting to standard every attempt. The panel
+  // stays editable here on purpose — a student whose accommodations
+  // changed mid-year can still adjust for one attempt without needing to
+  // redo the whole onboarding sequence.
+  function applyStoredAccommodations() {
+    if (!currentStudent) return;
+    if (currentStudent.accomTimeMult) accommodations.timeMult = Number(currentStudent.accomTimeMult);
+    if (currentStudent.accomBreakMult) accommodations.breakMult = Number(currentStudent.accomBreakMult);
+    var timeOpts = document.getElementById('accom-time-options');
+    var breakOpts = document.getElementById('accom-break-options');
+    [timeOpts, breakOpts].forEach(function (container) {
+      if (!container) return;
+      Array.prototype.forEach.call(container.querySelectorAll('.accom-opt'), function (lbl) {
+        var input = lbl.querySelector('input');
+        var matches = container === timeOpts
+          ? (parseFloat(input.value) === accommodations.timeMult)
+          : ((input.value === 'extended') === (accommodations.breakMult > 1));
+        input.checked = matches;
+        lbl.classList.toggle('selected', matches);
+      });
+    });
+  }
+
   // Backing out of the overview abandons whichever test it was describing —
   // clear the selection so the next thing the student opens is the thing
   // they actually clicked (see the note in goToTestChoice()).
@@ -4648,6 +5629,13 @@
         testId: ptDoneEarly ? ptDoneEarly.id : null,
         testTitle: ptDoneEarly ? ptDoneEarly.title : (testChoice + ' Diagnostic'),
         composite: composite, scaleMin: scaleMin, scaleMax: scaleMax,
+        // SAT-only section split (rw/math already computed above) — feeds
+        // the Home screen's Most Recent Test card sub-score line. ACT
+        // scores 3 (English/Math/Reading) or 4 (+Science) sections
+        // averaged into one composite, so there's no clean two-way split
+        // to store here; that card just shows the bare composite for ACT.
+        rw: (testChoice === 'SAT' && typeof rwScaled === 'number') ? rwScaled : undefined,
+        math: (testChoice === 'SAT' && typeof mathScaled === 'number') ? mathScaled : undefined,
         weakest: weakestDomain(domains)
       });
     })();
@@ -6376,13 +7364,31 @@
       return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     } catch (e) { return ''; }
   }
+  // "SAT Practice Test 4 — Hardest..." -> "Practice Test 4"; "SAT
+  // Diagnostic" -> "Diagnostic" — same trim the main script's
+  // practiceTestNameParts() does, reimplemented locally since this module
+  // is its own isolated closure and can't see that function.
+  function testLabelFor(title) {
+    var raw = String(title || '').replace(/^SAT\s+/i, '').replace(/^ACT\s+/i, '');
+    var parts = raw.split(/\s+[—–-]\s+/);
+    return parts[0] || raw || 'Unknown test';
+  }
 
   var records = [];          // flattened from the backend fetch — reloaded every time the screen opens
   var sectionKeys = [];
   var domainsBySection = {}; // sectionKey -> [domain, ...]
   var skillsByDomain = {};   // domain -> [skill, ...]
+  var testKeys = [];         // distinct test labels ("Diagnostic", "Practice Test 1", ...)
 
-  var selSections = [], selDomains = [], selSkills = [], selDifficulties = [];
+  var selSections = [], selDomains = [], selSkills = [], selDifficulties = [], selTests = [];
+  // Per-question self-quiz progress for this screen visit — { [record
+  // key]: { chosenIndex } for mc, or { rawAnswer, correct } for fr }.
+  // Deliberately in-memory only (not persisted): this is a "quiz yourself
+  // right now" pass, not a second scored attempt, so there's nothing to
+  // save once the student navigates away. Keyed by the same slim record
+  // key used everywhere else (see the loadRecords comment below) so it
+  // survives renderList() rebuilding the DOM on every filter change.
+  var quizState = {};
   // Tracks whichever dropdown (if any) is currently open, so opening one
   // closes any other and outside clicks close it. Checked on 'mousedown'
   // rather than 'click' so the outside-detection runs BEFORE a checkbox's
@@ -6398,7 +7404,7 @@
     if (openDropdown && !openDropdown.contains(e.target)) closeDropdown();
   });
 
-  var listEl, poolCountEl, sectionPillsEl, domainPillsEl, skillPillsEl, difficultyPillsEl;
+  var listEl, poolCountEl, sectionPillsEl, domainPillsEl, skillPillsEl, difficultyPillsEl, testPillsEl;
   var initialized = false;
 
   // Stored records are slim ({key, correct, given, attemptedAt} — see
@@ -6426,8 +7432,10 @@
           if (!stored) return null;
           var resolved = window.resolveQuestionByKey ? window.resolveQuestionByKey(k) : null;
           if (!resolved) return null;
+          resolved.key = k; // stable id for the Test filter and quizState above
           resolved.given = stored.given;
           resolved.attemptedAt = stored.attemptedAt;
+          resolved.testLabel = testLabelFor(resolved.testTitle);
           return resolved;
         }).filter(function (r) { return r && r.text; });
         records.sort(function (a, b) { return (b.attemptedAt || '').localeCompare(a.attemptedAt || ''); }); // most recently missed first
@@ -6440,12 +7448,24 @@
     sectionKeys = [];
     domainsBySection = {};
     skillsByDomain = {};
+    testKeys = [];
     records.forEach(function (r) {
       if (sectionKeys.indexOf(r.sectionKey) === -1) sectionKeys.push(r.sectionKey);
       if (!domainsBySection[r.sectionKey]) domainsBySection[r.sectionKey] = [];
       if (domainsBySection[r.sectionKey].indexOf(r.domain) === -1) domainsBySection[r.sectionKey].push(r.domain);
       if (!skillsByDomain[r.domain]) skillsByDomain[r.domain] = [];
       if (skillsByDomain[r.domain].indexOf(r.skill) === -1) skillsByDomain[r.domain].push(r.skill);
+      if (testKeys.indexOf(r.testLabel) === -1) testKeys.push(r.testLabel);
+    });
+    // Diagnostic first, then Practice Test 1, 2, 3… in numeric order —
+    // not alphabetical, which would put "Practice Test 10" before
+    // "Practice Test 2".
+    testKeys.sort(function (a, b) {
+      var na = /(\d+)\s*$/.exec(a), nb = /(\d+)\s*$/.exec(b);
+      if (!na && !nb) return a.localeCompare(b);
+      if (!na) return -1;
+      if (!nb) return 1;
+      return Number(na[1]) - Number(nb[1]);
     });
   }
 
@@ -6554,6 +7574,12 @@
   function renderDifficultyPills() {
     renderCheckboxDropdown(difficultyPillsEl, DIFFICULTIES, difficultyLabel, selDifficulties, function () { renderDifficultyPills(); renderList(); });
   }
+  // Independent of Section/Domain/Skill's cascade — same as Difficulty —
+  // since "which test was this on" is a separate dimension from the
+  // skill taxonomy, not a level within it.
+  function renderTestPills() {
+    renderCheckboxDropdown(testPillsEl, testKeys, function (t) { return t; }, selTests, function () { renderTestPills(); renderList(); });
+  }
 
   // Same fallback split used on the diagnostic/practice-test screen and
   // the Question Practice module — most R&W questions bake their stimulus
@@ -6567,33 +7593,71 @@
     return { passage: text.slice(0, idx), question: text.slice(idx + 8) };
   }
 
+  // Loose numeric compare for the fr self-check below — good enough for a
+  // self-quiz (not a formal regrade): exact string match first, then a
+  // numeric compare that also handles simple "a/b" fractions the way the
+  // real diagnostic's parseNumeric() does.
+  function parseSimpleNumeric(s) {
+    s = String(s == null ? '' : s).trim();
+    var frac = /^-?\d+(\.\d+)?\s*\/\s*\d+(\.\d+)?$/.exec(s);
+    if (frac) {
+      var parts = s.split('/');
+      var d = parseFloat(parts[1]);
+      return d ? parseFloat(parts[0]) / d : null;
+    }
+    var n = parseFloat(s);
+    return isNaN(n) ? null : n;
+  }
+  function checkFrAnswer(raw, expected) {
+    var a = String(raw == null ? '' : raw).trim();
+    var b = String(expected == null ? '' : expected).trim();
+    if (!a) return false;
+    if (a.toLowerCase() === b.toLowerCase()) return true;
+    var an = parseSimpleNumeric(a), bn = parseSimpleNumeric(b);
+    return (an !== null && bn !== null && Math.abs(an - bn) < 0.05);
+  }
+
+  // Quiz mode: the correct answer (and, for mc, which choice you picked
+  // back when you actually missed it) stays hidden until you answer it
+  // again right now — this screen used to just show the spoiler
+  // immediately, which made it a read-only report instead of something a
+  // student could practice against. `state` (quizState[r.key]) is set the
+  // moment the student answers (see wireQuizInteractions() below) and
+  // persists across re-renders for the rest of this screen visit.
   function renderCard(r) {
     var split = splitPassage(r);
     var passageHtml = split ? '<div class="pb-passage">' + split.passage + '</div>' : '';
     var questionText = split ? split.question : r.text;
     var metaBits = [escHtml(r.skill), difficultyLabel(r.difficulty), escHtml(r.testTitle)];
     var meta = '<div class="pb-q-meta"><span>' + metaBits.join(' · ') + '</span></div>';
+    var state = quizState[r.key];
 
     var body = '';
     if (r.type === 'mc' && r.choices) {
-      body += '<div class="dx-choices">';
+      body += '<div class="dx-choices iq-quiz-choices" data-qkey="' + escHtml(r.key) + '">';
       r.choices.forEach(function (c, i) {
-        var isGiven = (r.given !== null && r.given !== undefined && i === r.given);
+        var isChosen = !!state && state.chosenIndex === i;
         var isCorrectChoice = (r.correctIndex !== null && r.correctIndex !== undefined && i === r.correctIndex);
-        var cls = 'dx-choice' + (isGiven && !isCorrectChoice ? ' pb-tried-wrong' : '') + (isCorrectChoice ? ' pb-right' : '');
-        body += '<div class="' + cls + '"><span class="dx-choice-letter">' + LETTERS[i] + '</span><span class="dx-choice-text">' + c + '</span></div>';
-        if ((isGiven || isCorrectChoice) && r.choiceNotes && r.choiceNotes[i]) {
+        var cls = 'dx-choice' + (state ? ' iq-quiz-answered' : ' iq-quiz-choice');
+        if (state) cls += (isChosen && !isCorrectChoice ? ' pb-tried-wrong' : '') + (isCorrectChoice ? ' pb-right' : '');
+        body += '<div class="' + cls + '" data-index="' + i + '"><span class="dx-choice-letter">' + LETTERS[i] + '</span><span class="dx-choice-text">' + c + '</span></div>';
+        if (state && (isChosen || isCorrectChoice) && r.choiceNotes && r.choiceNotes[i]) {
           body += '<div class="pb-note ' + (isCorrectChoice ? 'pb-note-correct' : 'pb-note-wrong') + '">' + r.choiceNotes[i] + '</div>';
         }
       });
       body += '</div>';
-      if (r.given === null || r.given === undefined) body += '<div class="iq-skipped-note">You skipped this question — the correct answer is shown above.</div>';
+      if (!state) body += '<div class="iq-quiz-hint">Choose an answer to check yourself.</div>';
     } else if (r.type === 'fr') {
-      var yourAnswer = (r.given && r.given.raw !== undefined && r.given.raw !== null && String(r.given.raw) !== '') ? r.given.raw : '(skipped)';
-      body += '<div class="pb-note pb-note-wrong">Your answer: ' + escHtml(String(yourAnswer)) + '</div>';
-      body += '<div class="pb-note pb-note-correct">Correct answer: ' + escHtml(String(r.answerValue)) + '</div>';
+      body += '<div class="iq-quiz-fr" data-qkey="' + escHtml(r.key) + '">';
+      if (!state) {
+        body += '<div class="iq-fr-row"><input type="text" class="dx-fr-input iq-fr-input" placeholder="Your answer" autocomplete="off"><button type="button" class="iq-fr-check">Check</button></div>';
+      } else {
+        body += '<div class="pb-note ' + (state.correct ? 'pb-note-correct' : 'pb-note-wrong') + '">Your answer: ' + escHtml(state.rawAnswer || '(skipped)') + (state.correct ? ' — correct!' : ' — not quite') + '</div>';
+        if (!state.correct) body += '<div class="pb-note pb-note-correct">Correct answer: ' + escHtml(String(r.answerValue)) + '</div>';
+      }
+      body += '</div>';
     }
-    if (r.explanation) body += '<div class="pb-explain"><div class="pb-explain-hed">Full Explanation</div>' + r.explanation + '</div>';
+    if (state && r.explanation) body += '<div class="pb-explain"><div class="pb-explain-hed">Full Explanation</div>' + r.explanation + '</div>';
 
     var missed = dateLabel(r.attemptedAt);
     return '<div class="iq-item">' + meta + passageHtml +
@@ -6602,12 +7666,54 @@
       '</div></div>';
   }
 
+  // Delegated so it survives every renderList() rebuild — attached once,
+  // the first time this screen initializes (see window.iqModuleInit
+  // below), same pattern as the mousedown outside-click handler above.
+  var quizWired = false;
+  function wireQuizInteractions() {
+    if (quizWired) return;
+    quizWired = true;
+    listEl.addEventListener('click', function (ev) {
+      var choice = ev.target.closest && ev.target.closest('.iq-quiz-choice');
+      if (choice) {
+        var wrap = choice.closest('.iq-quiz-choices');
+        var qkey = wrap && wrap.getAttribute('data-qkey');
+        if (qkey && !quizState[qkey]) {
+          quizState[qkey] = { chosenIndex: Number(choice.getAttribute('data-index')) };
+          renderList();
+        }
+        return;
+      }
+      var checkBtn = ev.target.closest && ev.target.closest('.iq-fr-check');
+      if (checkBtn) {
+        var frWrap = checkBtn.closest('.iq-quiz-fr');
+        var frKey = frWrap && frWrap.getAttribute('data-qkey');
+        var input = frWrap && frWrap.querySelector('.iq-fr-input');
+        if (frKey && input && !quizState[frKey]) {
+          var record = records.filter(function (r) { return r.key === frKey; })[0];
+          var raw = input.value;
+          quizState[frKey] = { rawAnswer: raw, correct: record ? checkFrAnswer(raw, record.answerValue) : false };
+          renderList();
+        }
+      }
+    });
+    listEl.addEventListener('keydown', function (ev) {
+      if (ev.key !== 'Enter') return;
+      var input = ev.target.closest && ev.target.closest('.iq-fr-input');
+      if (!input) return;
+      ev.preventDefault();
+      var checkBtn = input.closest('.iq-quiz-fr').querySelector('.iq-fr-check');
+      if (checkBtn) checkBtn.click();
+    });
+  }
+
   function currentFiltered() {
     return records.filter(function (r) {
       return selSections.indexOf(r.sectionKey) !== -1 &&
         selDomains.indexOf(r.domain) !== -1 &&
         selSkills.indexOf(r.skill) !== -1 &&
-        selDifficulties.indexOf(r.difficulty) !== -1;
+        selDifficulties.indexOf(r.difficulty) !== -1 &&
+        selTests.indexOf(r.testLabel) !== -1;
     });
   }
 
@@ -6648,7 +7754,16 @@
     listEl.innerHTML = html;
   }
 
-  window.iqModuleInit = function () {
+  // `preset` — optional { skill } or { domain } — lets Home jump straight
+  // into this screen with one skill or domain pre-selected in the
+  // matching filter, instead of always opening to "everything selected."
+  // { skill } comes from the "Where Points Are Going" donut charts
+  // (renderHomePies()); { domain } comes from a Score Progress data
+  // point's weakest area (weakestDomain() only ever resolves to
+  // domain-level granularity, not a single skill — see
+  // goToIncorrectQuestionsForDomain()). Whichever level isn't preset is
+  // left at its normal "all selected" default.
+  window.iqModuleInit = function (preset) {
     if (!initialized) {
       initialized = true;
       listEl = document.getElementById('iq-list');
@@ -6657,6 +7772,8 @@
       domainPillsEl = document.getElementById('iq-domain-pills');
       skillPillsEl = document.getElementById('iq-skill-pills');
       difficultyPillsEl = document.getElementById('iq-difficulty-pills');
+      testPillsEl = document.getElementById('iq-test-pills');
+      wireQuizInteractions();
     }
 
     listEl.innerHTML = '<div class="pb-empty-note">Loading your latest results…</div>';
@@ -6669,13 +7786,17 @@
       // reason to start empty.
       selSections = sectionKeys.slice();
       selDomains = availableDomains();
-      selSkills = availableSkills();
+      if (preset && preset.domain && selDomains.indexOf(preset.domain) !== -1) selDomains = [preset.domain];
+      var skillOptions = availableSkills();
+      selSkills = (preset && preset.skill && skillOptions.indexOf(preset.skill) !== -1) ? [preset.skill] : skillOptions;
       selDifficulties = DIFFICULTIES.slice();
+      selTests = testKeys.slice();
 
       renderSectionPills();
       renderDomainPills();
       renderSkillPills();
       renderDifficultyPills();
+      renderTestPills();
       renderList();
     });
   };
