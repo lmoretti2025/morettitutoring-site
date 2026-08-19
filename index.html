@@ -61,9 +61,27 @@
     #hero .hero-tag.reveal { transition-duration: 4s; transition-delay: 0.8s; }
     #hero .hero-ctas.reveal { transition-duration: 4s; transition-delay: 1.9s; }
     #hero .hero-login-link.reveal { transition-duration: 4s; transition-delay: 1.9s; }
-    .hero-login-link { position: absolute; top: 1.75rem; right: 1.75rem; font-family: var(--hel); font-size: 0.62rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(17,17,17,0.45); text-decoration: none; }
+    /* Padding gives this a real tap/click target (the bare text glyphs
+       were the only clickable area before — letter-spacing alone leaves
+       real gaps between characters that weren't part of the hit box).
+       top/right are pulled in by the same amount the padding adds, so
+       the padded box's outer edge still lands at the original 1.75rem
+       inset and the text reads in the same spot as before — a negative
+       margin would seem like the obvious way to do this, but margins on
+       an absolutely-positioned, inset-anchored element push the CONTENT
+       away from the (fixed) anchor rather than pulling the anchor in,
+       which was shifting this off-screen.
+       z-index matters here for a less obvious reason: .hero-logo below
+       has .reveal's `transform`, which promotes it into its own stacking
+       context at the same implicit level as this absolutely-positioned
+       link — and since the logo comes later in the DOM, it was painting
+       on top and silently eating clicks anywhere the huge (up to 1220px)
+       logo image's box overlapped this corner, even on its transparent
+       margin. Explicit z-index puts this link above it regardless of
+       DOM order. */
+    .hero-login-link { position: absolute; z-index: 5; top: 1.15rem; right: 0.95rem; padding: 0.6rem 0.8rem; font-family: var(--hel); font-size: 0.62rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(17,17,17,0.45); text-decoration: none; }
     .hero-login-link:hover { color: rgba(17,17,17,0.75); }
-    @media (max-width: 640px) { .hero-login-link { top: 1rem; right: 1rem; font-size: 0.56rem; } }
+    @media (max-width: 640px) { .hero-login-link { top: 0.4rem; right: 0.2rem; font-size: 0.56rem; } }
     .hero-ctas { display: flex; gap: 1.25rem; flex-wrap: wrap; justify-content: center; }
     .hero-btn-red { background: var(--red); color: #fff; font-family: var(--hel); font-size: 0.84rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; padding: 1.3rem 2.9rem; text-decoration: none; white-space: nowrap; transition: opacity 0.2s; }
     .hero-btn-red:hover { opacity: 0.86; }
