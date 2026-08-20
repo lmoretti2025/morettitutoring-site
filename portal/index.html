@@ -81,7 +81,12 @@
   .nav-exit { display: inline-block; }
   #main-nav.nav-app-shell .nav-exit { display: none; }
   .nav-search, .nav-countdown, .nav-profile { display: none; }
-  #main-nav.nav-app-shell .nav-search { display: block; }
+  /* Search removed from the top nav — was #main-nav.nav-app-shell
+     .nav-search { display: block; }. Left as a plain "always hidden" rule
+     rather than deleting the markup/JS wiring below (nav-search-input's
+     match-building etc.) — that logic is now permanently inert against a
+     hidden input, which is the lower-risk way to pull a feature than
+     partially unwiring event listeners that other code might still touch. */
   /* .has-date is toggled by renderTestCountdown() — combined with
      .nav-app-shell here (rather than an inline style) so the two
      conditions ("student has a test date" and "on an app-shell screen")
@@ -197,6 +202,19 @@
      visible exactly as before. ═══ */
   #main-nav { transition: transform 0.6s cubic-bezier(0.16,1,0.3,1); }
   #main-nav.nav-hidden { transform: translateY(-100%); }
+
+  /* ═══ EXAM WATERMARK ═══ hidden by default; toggled to .visible in
+     lockstep with #main-nav.nav-hidden (see show() in the JS). Fixed +
+     centered + very low opacity + pointer-events:none — explicitly NOT
+     supposed to be noticed, just present, the same idea as a letterhead
+     watermark on paper. The site's own red target-and-arrow mark (same
+     file as the favicon/onboarding checkmark), at a low enough opacity
+     that the red doesn't read as a colored shape competing for attention
+     — just barely there, like an actual paper watermark. */
+  .exam-watermark { display: none; position: fixed; inset: 0; z-index: 1; align-items: center; justify-content: center; pointer-events: none; opacity: 0.1; }
+  .exam-watermark.visible { display: flex; }
+  .exam-watermark img { width: 380px; height: 380px; display: block; }
+  @media (max-width: 640px) { .exam-watermark img { width: 240px; height: 240px; } }
 
   /* ═══ FIRST-LOGIN ONBOARDING SEQUENCE ═══
      #screen-onboard hosts every beat as a sibling "pane" (.onb-pane),
@@ -412,6 +430,52 @@
   .pt-num { font-family: var(--display); font-weight: 700; font-size: 1.35rem; color: var(--red); background: rgba(176,39,28,0.08); width: 46px; height: 46px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .menu-card:hover .pt-num { background: rgba(201,168,76,0.16); }
   .pt-card-done .pt-num { color: #3f8f5f; background: rgba(63,143,95,0.1); }
+
+  /* ═══ VIEW RESULTS — direct button for one attempt, dropdown for
+     several ═══ positioned in the card's own flex row (menu-card-wide is
+     display:flex), flex-shrink:0 so it never gets squeezed by a long
+     title. Click handling (including the stopPropagation that keeps this
+     from also triggering the card's own start/retake click) lives in
+     wirePtMenu(). */
+  /* margin-top clears .menu-card-badge's own top-right corner slot (0.9rem
+     from the top, ~22px tall) — without it, the wider "View Results"
+     button (this used to be a 32px-wide ••• icon, which fit underneath)
+     visually collides with the badge above it. */
+  .pt-menu-wrap { position: relative; flex-shrink: 0; margin-left: auto; margin-top: 1.7rem; align-self: flex-start; }
+  .pt-view-results-btn { display: flex; align-items: center; gap: 0.3rem; background: none; border: 1px solid var(--border); border-radius: 8px; padding: 0.4rem 0.75rem; font-family: var(--hel); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.02em; color: var(--mid); cursor: pointer; white-space: nowrap; }
+  .pt-view-results-btn:hover { border-color: var(--gold); color: var(--text); }
+  .pt-caret { font-size: 0.6rem; }
+  /* Rendered as position:fixed (see positionPtMenuDropdown() in the JS),
+     computed from the toggle button's own bounding rect at the moment it
+     opens — NOT absolutely positioned relative to the card. A card sitting
+     in a 2-column scrolling grid has other cards both beside and below it
+     that would otherwise paint over an absolutely-positioned dropdown
+     (or clip it, since the grid itself scrolls with overflow:auto); fixed
+     positioning escapes both problems and the very high z-index keeps it
+     above every other card regardless of DOM order. */
+  .pt-menu-dropdown { display: none; position: fixed; background: var(--white); border: 1px solid var(--border); border-radius: 8px; box-shadow: var(--shadow-hover); min-width: 160px; padding: 0.35rem; z-index: 99999; }
+  .pt-menu-wrap.open .pt-menu-dropdown { display: block; }
+  /* :active (not just :hover) also has to be neutralized here — CSS
+     applies :active to an element's ancestors too while a descendant is
+     being pressed (see .menu-card:not(.disabled):active's transform:
+     scale(0.97) below), so pressing an item in the OPEN dropdown itself
+     briefly re-applies a transform to this card mid-click. That transform
+     re-establishes the containing block the dropdown's position:fixed is
+     escaping (see the .pt-menu-dropdown comment), so between mousedown and
+     mouseup the dropdown jumps out from under the cursor and mouseup lands
+     on the card underneath instead of the menu item — confirmed by tracing
+     real clicks: mousedown hit the button, mouseup/click hit the card. */
+  /* !important on transform specifically: the global press-effect rule
+     (.menu-card:not(.disabled):active { transform: scale(0.97) }, further
+     down this stylesheet) has equal selector specificity and comes later
+     in source order, so it would otherwise win the cascade and re-break
+     this override the instant the card is pressed. */
+  .menu-card.pt-menu-card-open, .menu-card.pt-menu-card-open:hover, .menu-card.pt-menu-card-open:active { overflow: visible; transform: none !important; transition-property: border-color, box-shadow; }
+  .pt-menu-item { display: block; width: 100%; text-align: left; background: none; border: none; padding: 0.55rem 0.7rem; font-family: var(--hel); font-size: 0.76rem; font-weight: 600; color: var(--text); cursor: pointer; border-radius: 5px; }
+  .pt-menu-item:hover { background: rgba(176,39,28,0.06); color: var(--red); }
+  @media (max-width: 900px) {
+    #pt-test-list .pt-menu-wrap { position: absolute; bottom: 0.6rem; right: 0.6rem; margin-left: 0; }
+  }
   /* Applied when a student arrives from an assignment that names a
      specific test — pulls the eye to the one card they were sent for. */
   .menu-card.pt-highlight { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,168,76,0.28), var(--shadow-hover); }
@@ -732,9 +796,13 @@
     #dx-shell.passage-mode .dx-card-wrap { padding: 1.75rem 1.4rem; }
   }
   /* Thin navy identification strip, matching Bluebook's "THIS IS A
-     PRACTICE TEST" banner — sits above the toolbar, clears the site's
-     fixed nav itself (dx-topbar no longer needs to). */
-  #dx-notice-bar { margin-top: 62px; background: var(--dx-navy); color: #fff; text-align: center; padding: 0.55rem 1rem; font-family: var(--hel); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; }
+     PRACTICE TEST" banner — sits above the toolbar. No longer needs to
+     clear the site's fixed nav (margin-top used to reserve that space):
+     #main-nav now slides fully off-screen for the duration of every exam
+     (see examChromeHidden in the JS), so this strip is the very first
+     thing on the page — flush to the top, not floating 62px down into
+     empty space where the header used to be. */
+  #dx-notice-bar { background: var(--dx-navy); color: #fff; text-align: center; padding: 0.55rem 1rem; font-family: var(--hel); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; }
   /* 3-column grid (not flex space-between) specifically so the timer can
      sit dead-center regardless of how wide the brand/tools columns are —
      matches Bluebook's own centered timer, which a flex layout can't do
@@ -806,7 +874,7 @@
      layout via classes instead. Every other dx- class (.dx-card,
      .dx-choice, .dx-btn, .dx-timer, .dx-check-panel, .dx-qgrid, etc.) is
      already a class selector and is reused as-is, unchanged, below. */
-  .pt-notice-bar { margin-top: 62px; background: var(--dx-navy); color: #fff; text-align: center; padding: 0.55rem 1rem; font-family: var(--hel); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; }
+  .pt-notice-bar { background: var(--dx-navy); color: #fff; text-align: center; padding: 0.55rem 1rem; font-family: var(--hel); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; }
   .pt-topbar { padding: 0.75rem 2rem; display: flex; align-items: center; justify-content: space-between; background: var(--white); border-bottom: 1px solid var(--border); }
   .pt-shell { display: flex; flex: 1; }
   .pt-main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 3rem 2.5rem; }
@@ -885,7 +953,13 @@
 
   /* ═══ QUESTION CARD HEADER — numbered tile + Mark for Review + ABC
      eliminator toggle, matching Bluebook's own question-card header. ═══ */
-  .dx-card-hed { display: flex; align-items: center; gap: 0.9rem; padding: 0.65rem 0.9rem 0.65rem 0; background: #eef1f5; border: 1px solid var(--border); margin-bottom: 1.8rem; }
+  /* Sticky so the question number stays put as a student scrolls through
+     a long passage/answer list — matches Bluebook's own behavior, where
+     the numbered tile never moves regardless of scroll position. Works in
+     both layouts: passage-mode's own inner-scrolling .dx-card-wrap, and
+     math-mode's page-level scroll (position:sticky finds whichever
+     ancestor is actually scrolling, no separate rule needed for each). */
+  .dx-card-hed { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 0.9rem; padding: 0.65rem 0.9rem 0.65rem 0; background: #eef1f5; border: 1px solid var(--border); margin-bottom: 1.8rem; }
   .dx-qnum-tile { flex-shrink: 0; align-self: stretch; width: 34px; display: flex; align-items: center; justify-content: center; background: #000; color: #fff; font-family: var(--hel); font-weight: 700; font-size: 0.9rem; }
   .dx-mark-btn { display: inline-flex; align-items: center; gap: 0.35rem; background: none; border: none; border-bottom: 1px dashed var(--mid); color: var(--mid); font-family: var(--hel); font-size: 0.66rem; font-weight: 600; letter-spacing: 0.04em; padding: 0.15rem 0; cursor: pointer; transition: color 0.2s, border-color 0.2s; }
   .dx-mark-btn.on { color: var(--gold); border-color: var(--gold); }
@@ -933,6 +1007,8 @@
   .dx-break-timer-label { font-family: var(--hel); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.75); margin-bottom: 0.6rem; }
   .dx-break-timer { font-family: var(--hel); font-size: 3rem; font-weight: 700; font-variant-numeric: tabular-nums; }
   .dx-break-resume-btn { display: block; margin: 1.75rem auto 0; background: var(--gold); color: #111; border: none; font-family: var(--hel); font-weight: 700; font-size: 0.78rem; letter-spacing: 0.04em; padding: 0.9rem 1.6rem; border-radius: 999px; cursor: pointer; transition: opacity 0.2s; width: 100%; }
+  .dx-break-exit-link { display: block; text-align: center; margin-top: 0.9rem; font-family: var(--hel); font-size: 0.68rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); text-decoration: none; }
+  .dx-break-exit-link:hover { color: var(--red); }
   .dx-break-resume-btn:hover { opacity: 0.88; }
   .dx-break-info { max-width: 460px; }
   .dx-break-info h1 { font-family: var(--display); font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; }
@@ -958,6 +1034,37 @@
   .done-report-link { font-size: 0.85rem; text-align: center; color: var(--mid); margin-top: 0.9rem; line-height: 1.7; }
   .done-report-link a { color: var(--red); font-weight: 700; text-decoration: underline; }
   .done-wrap { width: 100%; max-width: 760px; display: flex; flex-direction: column; align-items: center; gap: 2.5rem; }
+  .done-panel { position: relative; overflow: hidden; }
+  #done-view-results { margin-top: 1.5rem; }
+  .done-secondary-btn { display: block; text-align: center; text-decoration: none; margin-top: 0.75rem; background: none; border: 1px solid var(--border); color: var(--mid); }
+  .done-secondary-btn:hover { border-color: var(--gold); color: var(--text); }
+
+  /* ═══ CONFETTI ═══ a handful of small rects, randomly positioned/
+     colored/timed by fireConfetti() (see the JS near screen-done's
+     wiring), falling + rotating via one shared CSS animation. Deliberately
+     not a canvas/physics confetti library — the site has no build step or
+     external JS deps beyond Google Fonts, and a few dozen falling
+     rectangles don't need real physics to read as a celebration. */
+  .confetti-stage { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 1; }
+  .confetti-piece { position: absolute; top: -12px; width: 8px; height: 14px; opacity: 0.9; animation: confetti-fall linear forwards; }
+  @keyframes confetti-fall {
+    0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(340px) rotate(540deg); opacity: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) { .confetti-piece { display: none; } }
+
+  /* ═══ IN-PLACE RESULTS VIEW ═══ swapped in for #pt-picker-view inside
+     #screen-practice-tests (see openTestResults() in the JS) — deliberately
+     NOT a bordered/shadowed "document preview" box: no card chrome at all,
+     just a back link and the report filling the rest of the panel, so it
+     reads as the page itself rather than a PDF embedded inside one. The
+     screen scrolls at the page level (see the #pt-test-list comment above
+     for why this doesn't try to pin itself to one fixed viewport height),
+     so the iframe just needs a tall, fixed height of its own rather than
+     flexing to fill a constrained parent. */
+  .pt-results-view { max-width: none; }
+  .pt-results-back { margin-bottom: 0.85rem; margin-top: 0; }
+  .pt-results-iframe { display: block; width: 100%; height: 85vh; border: none; background: var(--white); }
 
   /* ═══ SCORE REPORT — printable, parent-facing diagnostic breakdown ═══ */
   .score-report { width: 100%; background: #fff; border: 1px solid var(--border); padding: 2.5rem 2.75rem; }
@@ -1010,45 +1117,29 @@
   .pt-meta { display: none; font-size: 0.7rem; color: var(--mid); }
   .pt-card-done .pt-meta { color: #3f8f5f; font-weight: 600; }
 
-  /* ═══ PRACTICE-TEST PICKER FITS THE VIEWPORT ═══
-     Same idea as the home screen: one static page, no scrolling. Eleven
-     stacked full-width cards were four screens long, which is its own
-     version of "I can't find Practice Test 3" — as a tile grid, every test
-     is visible at once and the number you were told to take is the thing
-     you scan for.
-
-     The full sentence per card is dropped for a one-line meta here; it's
-     the same information the tile already implies, and the grid is what
-     makes all eleven visible. The grid keeps `overflow-y: auto` as a
-     safety valve: if the bank ever outgrows three rows, the tiles scroll
-     inside their own box rather than pushing the page past one screen. */
-  @media (min-width: 900px) and (min-height: 640px) {
-    #screen-practice-tests.screen { height: 100dvh; min-height: 100dvh; padding: 5rem 1.5rem 1.25rem calc(var(--sidebar-w) + 2.5rem); overflow: hidden; }
-    #screen-practice-tests .panel-wide { max-width: 940px; display: flex; flex-direction: column; max-height: 100%; min-height: 0; }
-    #screen-practice-tests .panel-hed { margin-bottom: 0.4rem; }
-    #screen-practice-tests .panel-sub { font-size: 0.78rem; line-height: 1.55; margin-bottom: 1rem; }
-    #pt-test-list { grid-template-columns: repeat(4, 1fr); gap: 0.7rem; margin-top: 0; flex: 0 1 auto; min-height: 0; overflow-y: auto; padding: 2px; }
-    #pt-test-list .menu-card-wide { grid-column: auto; flex-direction: column; align-items: flex-start; gap: 0.45rem; padding: 0.8rem 0.9rem; }
-    #pt-test-list .pt-num, #pt-test-list .menu-card-icon { width: 36px; height: 36px; font-size: 1.1rem; margin-bottom: 0; }
-    #pt-test-list .menu-card-title { font-size: 0.84rem; margin-bottom: 0; padding-right: 0; }
-    #pt-test-list .pt-body-long { display: none; }
-    #pt-test-list .pt-meta { display: block; }
-    #pt-test-list .pt-note { font-size: 0.62rem; line-height: 1.4; margin-bottom: 0; }
-    /* Badge moves out of the absolute top-right corner and into the tile's
-       own flow — at ~210px wide there isn't room to reserve a corner for
-       it without the title wrapping. */
-    #pt-test-list .menu-card-badge { position: static; order: 3; margin-top: 0.15rem; }
-    #screen-practice-tests .menu-back-link { margin-top: 1rem; flex: 0 0 auto; }
-  }
-  @media (min-width: 900px) and (min-height: 640px) and (max-height: 780px) {
-    #screen-practice-tests.screen { padding-top: 4.5rem; }
-    #screen-practice-tests .panel-sub { margin-bottom: 0.7rem; }
-    #pt-test-list { gap: 0.55rem; }
-    #pt-test-list .menu-card-wide { padding: 0.7rem 0.8rem; gap: 0.35rem; }
-    #pt-test-list .pt-num, #pt-test-list .menu-card-icon { width: 32px; height: 32px; font-size: 1rem; }
-  }
-  @media (min-width: 1200px) and (min-height: 640px) {
-    #pt-test-list { grid-template-columns: repeat(5, 1fr); }
+  /* ═══ PRACTICE-TEST PICKER — 2-up, larger cards, own scroll ═══
+     Used to cram every tile into one fixed viewport (4-5 columns, shrunk
+     padding/icons, body text hidden) so nothing ever scrolled — traded
+     away for a bigger, easier-to-read 2-column layout instead: the full
+     card body text stays visible (same size as every other menu-card on
+     the site) and the list scrolls in its own box when there's more than
+     fits, rather than everything shrinking to avoid a scrollbar.
+     grid-column:auto overrides .menu-card-wide's own default (a full-width
+     span, 1 / -1) — that's what actually makes two cards share a row
+     instead of each one claiming the whole grid regardless of viewport. */
+  #pt-test-list .menu-card-wide { grid-column: auto; }
+  /* No height:100dvh/overflow:hidden pinning here on purpose (an earlier
+     version tried to keep the whole picker inside one fixed viewport,
+     Home-screen-style) — a CSS Grid squeezed into a height-constrained
+     flex/scroll box like that silently COMPRESSES its "auto" rows to fit
+     rather than keeping their real content height and actually
+     overflowing, which crushed every card down to a sliver instead of
+     the list scrolling past them. Letting the screen scroll at the page
+     level (same as Home) sidesteps that entirely — simpler and it's what
+     "implement scrolling" actually asked for. */
+  @media (min-width: 900px) {
+    #screen-practice-tests .panel-wide { max-width: 1100px; }
+    #pt-test-list { grid-template-columns: repeat(2, 1fr); gap: 1.1rem; }
   }
   @media (prefers-reduced-motion: reduce) { .reveal { transition: none; } }
   @media (max-width: 760px) {
@@ -1164,6 +1255,20 @@
   /* ═══ CHECKBOX DROPDOWNS — used by My Incorrect Questions' section/
      domain/skill/difficulty filters. A button showing a one-line summary
      ("All" / "3 of 8 selected") that opens a checkbox panel below it. ═══ */
+  /* Compact one-line filter bar (Test/Section/Domain/Skill/Difficulty) +
+     the red practice-launch button — see #iq-filters below. Each dropdown
+     used to stack under its own full-width vp-panel-label with a
+     100%-wide button; here every group is an inline label+button pair
+     that wraps as a unit, so the whole bar reads as one row on a normal
+     screen instead of five stacked full-width fields. */
+  #iq-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem 0.9rem; margin: 1.1rem 0 0.4rem; }
+  .iq-filter-group { display: flex; align-items: center; gap: 0.4rem; }
+  .iq-filter-label { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); white-space: nowrap; }
+  #iq-filters .iq-dropdown { margin-bottom: 0; }
+  #iq-filters .iq-dropdown-btn { width: auto; padding: 0.42rem 0.7rem; font-size: 0.76rem; white-space: nowrap; }
+  .iq-practice-btn { margin-left: auto; background: var(--red); color: #fff; border: none; border-radius: 8px; padding: 0.6rem 1.1rem; font-family: var(--hel); font-size: 0.78rem; font-weight: 700; cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 0.3rem; transition: filter 0.15s var(--ease), transform 0.15s var(--ease); }
+  .iq-practice-btn:hover:not(:disabled) { filter: brightness(0.92); transform: translateY(-1px); }
+  .iq-practice-btn:disabled { opacity: 0.45; cursor: default; transform: none; }
   .iq-dropdown { position: relative; margin-bottom: 0.6rem; }
   .iq-dropdown-btn { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; font-family: var(--hel); font-size: 0.82rem; font-weight: 600; color: var(--text); background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 0.65rem 0.9rem; cursor: pointer; transition: border-color 0.15s var(--ease); text-align: left; }
   .iq-dropdown-btn:hover { border-color: var(--mid); }
@@ -1334,6 +1439,20 @@
   <a href="../index.html" class="nav-exit" id="nav-exit-link">Exit Portal</a>
 </nav>
 
+<!-- ═══ EXAM WATERMARK ═══ stands in for the branded header while it's
+     hidden for the duration of an exam (see examChromeHidden in the JS) —
+     a single fixed mark behind the content, not per-screen markup, since
+     dx-screen/dx-break-screen are mutually exclusive anyway. Shown/hidden
+     in lockstep with #main-nav's own .nav-hidden toggle. The site's own
+     target-and-arrow mark (Moretti_E1.png, a higher-res render of the
+     same mark as the favicon/onboarding checkmark) rather than the full
+     "MORETTI" wordmark — legible as "the site's own mark" without
+     reading as a text element competing with the actual question
+     content. -->
+<div class="exam-watermark" id="exam-watermark" aria-hidden="true">
+  <img src="../Moretti_E1.png" alt="">
+</div>
+
 <!-- ═══ PORTAL SIDEBAR — persistent left-hand nav (top strip on mobile),
      shown across the "browsing" screens once a student is logged in.
      Items are gated the same way the old home-screen menu cards were
@@ -1494,6 +1613,23 @@
       <button type="button" class="onb-date-opt onb-date-opt-unsure" data-onb-date-opt="unsure">Not sure yet &mdash; I'll decide with Luca</button>
       <div class="onb-dots"></div>
       <button class="key-btn" data-onb-next>Continue</button>
+      <a href="#" class="key-help" data-onb-back style="display:block; text-decoration:none;">&larr; Back</a>
+    </div>
+
+    <!-- Act 2, beat 6a: target score — the goal every score-bridge chart
+         on report.html measures distance against from here on (see
+         defaultTarget in report.html, which now reads this first before
+         falling back to its own current+150-style guess). Required, not
+         skippable like baseline/guardian below — a diagnostic needs a
+         real destination to measure progress against, not an assumed one. -->
+    <div class="onb-pane" id="onb-target">
+      <div class="kicker">Your Goal</div>
+      <h1 class="panel-hed onb-pillars-hed">What's your target score?</h1>
+      <p class="panel-sub" id="onbTargetSub">Your best guess is fine — this just gives Luca (and every score report from here on) a real goal to measure against, not a guess pulled from thin air. You can always change it later in Account Settings.</p>
+      <input type="number" inputmode="numeric" class="key-input" id="onbTargetInput" placeholder="e.g. 1350" style="max-width:220px; margin-left:auto; margin-right:auto; text-align:center; text-transform:none;">
+      <p class="key-error" id="onbTargetError">Enter a target between <span id="onbTargetRangeText">400 and 1600</span>.</p>
+      <div class="onb-dots"></div>
+      <button class="key-btn" id="onb-target-continue">Continue</button>
       <a href="#" class="key-help" data-onb-back style="display:block; text-decoration:none;">&larr; Back</a>
     </div>
 
@@ -1668,6 +1804,13 @@
       <div class="onb-accom-group-label" style="margin-bottom:0.7rem;">Test Date</div>
       <div class="onb-date-grid" id="settingsDateGrid"></div>
       <button type="button" class="onb-date-opt onb-date-opt-unsure" data-settings-date-opt="unsure">Not sure yet</button>
+    </div>
+
+    <div class="settings-section">
+      <div class="onb-accom-group-label" style="margin-bottom:0.7rem;">Target Score</div>
+      <p class="panel-sub" style="text-align:left; margin:0 0 0.8rem; font-size:0.78rem;">The goal every score report measures distance against.</p>
+      <input type="number" inputmode="numeric" class="key-input" id="settingsTargetInput" placeholder="e.g. 1350" style="max-width:220px; margin-bottom:0; padding:0.6rem 0.9rem; text-align:left; text-transform:none;">
+      <p class="key-error" id="settingsTargetError">Enter a target between <span id="settingsTargetRangeText">400 and 1600</span>.</p>
     </div>
 
     <div class="settings-section">
@@ -1946,18 +2089,14 @@
     </div>
 
     <div id="iq-filters">
-      <div class="vp-panel-label">Test</div>
-      <div class="iq-dropdown" id="iq-test-pills"></div>
-      <div class="vp-panel-label">Section</div>
-      <div class="iq-dropdown" id="iq-section-pills"></div>
-      <div class="vp-panel-label">Domain</div>
-      <div class="iq-dropdown" id="iq-domain-pills"></div>
-      <div class="vp-panel-label">Skill</div>
-      <div class="iq-dropdown" id="iq-skill-pills"></div>
-      <div class="vp-panel-label">Difficulty</div>
-      <div class="iq-dropdown" id="iq-difficulty-pills"></div>
-      <div class="vp-pool-count" id="iq-pool-count"></div>
+      <div class="iq-filter-group"><span class="iq-filter-label">Test</span><div class="iq-dropdown" id="iq-test-pills"></div></div>
+      <div class="iq-filter-group"><span class="iq-filter-label">Section</span><div class="iq-dropdown" id="iq-section-pills"></div></div>
+      <div class="iq-filter-group"><span class="iq-filter-label">Domain</span><div class="iq-dropdown" id="iq-domain-pills"></div></div>
+      <div class="iq-filter-group"><span class="iq-filter-label">Skill</span><div class="iq-dropdown" id="iq-skill-pills"></div></div>
+      <div class="iq-filter-group"><span class="iq-filter-label">Difficulty</span><div class="iq-dropdown" id="iq-difficulty-pills"></div></div>
+      <button type="button" class="iq-practice-btn" id="iq-practice-btn">Practice Selected Mistakes <span id="iq-practice-count">(0)</span></button>
     </div>
+    <div class="vp-pool-count" id="iq-pool-count"></div>
 
     <div id="iq-list"></div>
 
@@ -1967,12 +2106,26 @@
 
 <!-- ═══ SCREEN 3b-iii — PRACTICE TESTS (picker) ═══ -->
 <div class="screen has-sidebar" id="screen-practice-tests">
-  <div class="panel-wide">
+  <div class="panel-wide" id="pt-picker-view">
     <div class="kicker">Practice Tests</div>
     <h1 class="panel-hed">Pick a test.</h1>
     <p class="panel-sub">Your diagnostic, plus fully-timed, curated practice tests. Note that the majority test <strong>harder</strong> than normal. After you complete a practice test once, any subsequent attempt won't be reported to Luca.</p>
     <div class="menu-grid" id="pt-test-list"></div>
     <a href="#" class="menu-back-link" id="pt-list-back">&larr; Back</a>
+  </div>
+  <!-- ═══ IN-PLACE RESULTS VIEW ═══ an <iframe> onto report.html#d=...
+       (same-origin, same payload the emailed link uses), swapped in for
+       #pt-picker-view above WITHOUT leaving screen-practice-tests — the
+       sidebar stays put with "Practice Tests" still the active item, and
+       the iframe fills the entire panel edge to edge (no card border/
+       shadow/fixed-height scrollbox) so the report reads as the page
+       itself, not a document preview embedded inside one. Reached from a
+       completed card's "View Results" control (see openTestResults() and
+       the pt-menu wiring further down) or the post-submission done
+       screen's own "View Results" button. -->
+  <div class="panel-wide pt-results-view" id="pt-results-view" style="display:none;">
+    <a href="#" class="menu-back-link pt-results-back" id="test-results-back">&larr; Back to Practice Tests</a>
+    <iframe id="test-results-iframe" class="pt-results-iframe" title="Test results"></iframe>
   </div>
 </div>
 
@@ -2310,6 +2463,14 @@
       <button type="button" class="dx-timer-toggle" id="dx-timer-toggle">Hide</button>
     </div>
     <div class="dx-progress-wrap">
+      <!-- Only exit path left once #main-nav's own Exit Portal link is
+           hidden for the duration of the exam (see examChromeHidden in the
+           JS) — routes through the exact same exitPortal() confirm-and-
+           abandon logic nav-exit-link used, just triggered from here now. -->
+      <button type="button" class="dx-icon-btn" id="dx-exit-btn" title="Exit Portal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+        <span>Exit</span>
+      </button>
       <button type="button" class="dx-icon-btn" id="dx-calculator-btn" style="display:none;" title="Calculator">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10.5" x2="8" y2="10.51"/><line x1="12" y1="10.5" x2="12" y2="10.51"/><line x1="16" y1="10.5" x2="16" y2="10.51"/><line x1="8" y1="14.5" x2="8" y2="14.51"/><line x1="12" y1="14.5" x2="12" y2="14.51"/><line x1="16" y1="14.5" x2="16" y2="14.51"/><line x1="8" y1="18.5" x2="8" y2="18.51"/><line x1="12" y1="18.5" x2="12" y2="18.51"/><line x1="16" y1="18.5" x2="16" y2="18.51"/></svg>
         <span>Calculator</span>
@@ -2467,6 +2628,7 @@
           <div class="dx-break-timer" id="dx-break-timer">5:00</div>
         </div>
         <button class="dx-break-resume-btn" id="dx-break-resume" type="button">Resume Testing</button>
+        <a href="#" class="dx-break-exit-link" id="dx-break-exit-btn">Exit Portal</a>
       </div>
       <div class="dx-break-info">
         <h1>Diagnostic Break</h1>
@@ -2489,13 +2651,26 @@
 <!-- ═══ SCREEN 6 — DONE ═══ -->
 <div class="screen" id="screen-done">
   <div class="done-wrap">
-    <div class="panel">
+    <div class="panel done-panel">
+      <!-- Confetti burst — a handful of absolutely-positioned pieces
+           populated and animated from JS (see fireConfetti()) the moment
+           this screen shows, rather than a fixed set baked into the HTML,
+           so it can actually restart on a second attempt in the same
+           session instead of only ever playing once. -->
+      <div class="confetti-stage" id="confetti-stage" aria-hidden="true"></div>
       <div class="done-icon">✓</div>
-      <h1 class="panel-hed">All set.</h1>
+      <h1 class="panel-hed" id="done-hed">Congratulations!</h1>
       <p class="panel-sub" id="done-message">Your results just went to Luca. He'll follow up with a plan built around exactly where you need it.</p>
       <p class="done-status" id="done-status"></p>
-      <p class="done-report-link" id="done-report-link" style="display:none;"></p>
-      <a href="#" class="key-btn" id="done-return-link" style="display:block; text-align:center; text-decoration:none; margin-top:1rem;">Return to Portal</a>
+      <!-- Replaces the old plain "See your scores... here" text link — same
+           reportLink, just surfaced as the primary action instead of a
+           sentence. Opens the in-place results view on the Practice Tests
+           screen (see #pt-results-view there, and openTestResults() in the
+           JS) instead of a new tab. Hidden entirely on a first-ever
+           (Luca-notified-only) diagnostic, same gating the old text link
+           had — see finishDiagnostic(). -->
+      <a href="#" class="key-btn" id="done-view-results" style="display:none;">View Results</a>
+      <a href="#" class="key-btn done-secondary-btn" id="done-return-link">Return to Portal</a>
     </div>
 
   </div>
@@ -2722,6 +2897,19 @@
   // cross-session resume snapshot below, so the two features agree on
   // exactly when a student is in the middle of an attempt.
   var MID_DIAGNOSTIC_SCREENS = { 'dx-screen': true, 'dx-break-screen': true, 'screen-intro': true, 'dx-module-over-screen': true };
+  // Tracks whether #main-nav (the red bar + logo) is CURRENTLY hidden
+  // because of an exam screen specifically — as opposed to the onboarding
+  // splash, which manages the exact same .nav-hidden class itself around
+  // its own dark-intro sequence (see goToOnboardSplash/
+  // transitionOnboardToLight). Without this flag, show()'s own
+  // add/remove-on-transition logic below would fight onboarding's: e.g.
+  // show('screen-onboard') runs right after onboarding adds .nav-hidden,
+  // and 'screen-onboard' isn't a MID_DIAGNOSTIC_SCREEN, so a naive
+  // "remove .nav-hidden for every non-exam screen" would immediately undo
+  // onboarding's own dark-splash effect. Scoping the removal to only fire
+  // when THIS flag was the one that turned it on keeps the two managers
+  // from stepping on each other.
+  var examChromeHidden = false;
 
   /* ═══ SESSION PERSISTENCE ═══
      Two layers, for two different kinds of interruption:
@@ -3021,6 +3209,7 @@
   var SIDEBAR_NAV_FOR_SCREEN = { 'screen-menu': 'home', 'screen-practice-tests': 'practice-tests', 'screen-resources': 'files', 'screen-vocab': 'vocab', 'screen-incorrect-questions': 'incorrect-questions' };
   var sidebarEl = document.getElementById('portal-sidebar');
   var mainNavEl = document.getElementById('main-nav');
+  var examWatermarkEl = document.getElementById('exam-watermark');
   function updateSidebarForScreen(id) {
     if (!sidebarEl) return;
     var showIt = !!SIDEBAR_SCREENS[id];
@@ -3062,6 +3251,26 @@
     if (id === 'screen-menu') { renderHomeState(); applyTestPrepGating(); applyTestCardStates(); renderScoreProgress(); renderHomePies(); renderRecentTestCard(); }
     if (id === 'screen-test-choice') applyTestChoiceGating();
     if (id === 'screen-sat-resources') applyResourcesGating();
+    if (id === 'screen-done') fireConfetti();
+    // Exam screens lose the branded red header entirely (not just the
+    // search/countdown/profile bits app-shell gating already hides) —
+    // see examChromeHidden's comment above for why this checks that flag
+    // rather than just "is this screen in MID_DIAGNOSTIC_SCREENS" both
+    // ways. A faint fixed watermark (see .exam-watermark in the CSS)
+    // stands in for the branding while the real header's gone; the exit
+    // path that lived in #main-nav moves to a small control inside
+    // #dx-topbar/#dx-break-screen themselves — see #dx-exit-btn below.
+    if (MID_DIAGNOSTIC_SCREENS[id]) {
+      if (!examChromeHidden) {
+        mainNavEl.classList.add('nav-hidden');
+        examWatermarkEl.classList.add('visible');
+        examChromeHidden = true;
+      }
+    } else if (examChromeHidden) {
+      mainNavEl.classList.remove('nav-hidden');
+      examWatermarkEl.classList.remove('visible');
+      examChromeHidden = false;
+    }
     updateSidebarForScreen(id);
     window.scrollTo(0, 0);
     saveState();
@@ -3096,7 +3305,7 @@
   if (window.__practiceTestsReady) {
     window.__practiceTestsReady.then(function () {
       if (activeScreenId === 'screen-menu') applyTestCardStates();
-      else if (activeScreenId === 'screen-practice-tests') renderPracticeTestList();
+      else if (activeScreenId === 'screen-practice-tests' && !anyPtMenuOpen()) renderPracticeTestList();
     });
   }
 
@@ -3200,6 +3409,7 @@
       baselineMath: data.baselineMath || null,
       guardianName: data.guardianName || null,
       guardianEmail: data.guardianEmail || null,
+      targetScore: data.targetScore || null,
       tests: data.tests || [],
       assignments: data.assignments || []
     };
@@ -3211,6 +3421,7 @@
     renderAssignments(); // instant paint from the auth response...
     loadAssignments();   // ...then a fresh fetch right behind it (see comment below)
     startAssignmentsPolling();
+    loadServerScoreHistory(); // fills in any completed test this browser doesn't have locally (see mergedScoreHistory)
     // Applies whatever accommodations were saved (during onboarding, or on
     // a prior login) to the actual diagnostic timer — see the var
     // declaration and applyStoredAccommodations() further down. A
@@ -3406,6 +3617,64 @@
     return (data && Array.isArray(data.entries)) ? data.entries : [];
   }
 
+  // Server-side mirror of the local history above (see handleGetScoreHistory
+  // in Code.gs) — populated by loadServerScoreHistory() after login. Exists
+  // so "Completed"/"View Results" reflect what the STUDENT'S ROW actually
+  // shows, not just what this particular browser happens to remember: a
+  // student checked from a new device, or by Luca testing with their key
+  // from his own machine, would otherwise see no results at all even for an
+  // attempt that's fully recorded server-side. Starts empty and stays empty
+  // if the fetch hasn't landed yet or fails — every reader below treats that
+  // the same as "nothing new to add," so there's no error state to handle.
+  // Guards every background re-render of the Practice Tests grid (this
+  // fetch resolving, the test-bank data finishing its own separate load —
+  // see window.__practiceTestsReady below) against tearing down a "View
+  // Results" dropdown the student has open RIGHT NOW: renderPracticeTestList()
+  // rebuilds #pt-test-list's innerHTML from scratch, which silently closes
+  // any open menu and replaces it with a fresh (closed) card in the exact
+  // same on-screen spot — so a click already in flight at "Attempt 2"
+  // lands on the card underneath instead and starts a new attempt. This
+  // was a real, timing-dependent bug (only reproduces if a background
+  // refresh happens to land in the ~1 click of the menu being open), not a
+  // one-off. Skipping the rebuild here just means it happens on the NEXT
+  // natural render (leaving/re-entering this screen) instead of mid-click.
+  function anyPtMenuOpen() { return !!document.querySelector('[data-pt-menu-wrap].open'); }
+  var serverScoreHistoryEntries = [];
+  function loadServerScoreHistory() {
+    var key = currentStudent && currentStudent.key;
+    if (!key) return;
+    fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'getScoreHistory', key: key })
+    }).then(function (r) { return r.json(); }).then(function (data) {
+      if (!data || !data.ok || !Array.isArray(data.entries)) return;
+      serverScoreHistoryEntries = data.entries;
+      if (activeScreenId === 'screen-menu') { renderScoreProgress(); renderRecentTestCard(); }
+      else if (activeScreenId === 'screen-practice-tests' && !anyPtMenuOpen()) renderPracticeTestList();
+    }).catch(function () { /* stays empty — same as any other best-effort fetch here */ });
+  }
+  // Local + server history combined, deduped by attemptId so an attempt
+  // taken on THIS device (present in both copies once its sync call lands)
+  // isn't counted twice. Local entries win the dedupe since they're already
+  // on screen instantly; server-only entries (a different device, or a
+  // cleared local cache) are appended after. An entry from either source
+  // that predates the attemptId field (or whose sync call never included
+  // one) has no id to match on and is just kept as-is from both sides —
+  // matches this function's only real caller, the per-test attempt lists,
+  // which already tolerate a stray duplicate far better than a silently
+  // dropped attempt.
+  function mergedScoreHistory() {
+    var local = loadScoreHistory();
+    var seen = {};
+    local.forEach(function (e) { if (e && e.attemptId) seen[e.attemptId] = true; });
+    var merged = local.slice();
+    serverScoreHistoryEntries.forEach(function (e) {
+      if (e && e.attemptId && seen[e.attemptId]) return;
+      merged.push(e);
+    });
+    return merged;
+  }
+
   // "PT 7" for a practice test, "Diag" for the diagnostic, "Base" for the
   // self-reported baseline point — short enough to sit under a data point
   // without the x-axis turning into a wall of text.
@@ -3418,7 +3687,7 @@
     return 'Diag';
   }
 
-  function buildScoreLineSvg(entries, scaleMin, scaleMax) {
+  function buildScoreLineSvg(entries, scaleMin, scaleMax, target) {
     // Score Progress is Home's main/primary chart (see .score-progress-card
     // above), so this is sized as a wide dashboard-style chart — roughly
     // 1 viewBox unit ≈ 1 CSS pixel at the card's normal-flow width (~680px
@@ -3469,8 +3738,19 @@
         labelsSvg += '<text x="' + x + '" y="' + (H - 8) + '" font-size="11" text-anchor="middle" fill="currentColor" opacity="0.6">' + scoreEntryShortLabel(e) + '</text>';
       }
     });
+    // Dashed reference line at the student's target score (see
+    // currentStudent.targetScore) — drawn under the actual score line/dots
+    // so it reads as a backdrop goalpost, not competing data. Label sits
+    // on the right edge, opposite the newest-point value label on the
+    // left/middle, so the two don't collide.
+    var targetSvg = '';
+    if (target != null) {
+      var ty = yAt(target);
+      targetSvg = '<line x1="' + padL + '" y1="' + ty + '" x2="' + (W - padR) + '" y2="' + ty + '" stroke="var(--gold)" stroke-width="1.5" stroke-dasharray="5,4"/>' +
+        '<text x="' + (W - padR) + '" y="' + (ty - 6) + '" font-size="11" text-anchor="end" fill="var(--gold)" font-weight="700">Target ' + target + '</text>';
+    }
     return '<svg viewBox="0 0 ' + W + ' ' + H + '" style="color:var(--text); width:100%; height:auto; display:block;" preserveAspectRatio="xMidYMid meet">' +
-      gridSvg +
+      gridSvg + targetSvg +
       '<polyline points="' + pts + '" fill="none" stroke="var(--red)" stroke-width="2.5"/>' +
       dotsSvg + labelsSvg +
       '</svg>';
@@ -3604,7 +3884,7 @@
   }
   function homeAllTestLabels() {
     var seen = {}, out = [];
-    loadScoreHistory().forEach(function (e) {
+    mergedScoreHistory().forEach(function (e) {
       var l = homeTestLabel(e.testTitle);
       if (!seen[l]) { seen[l] = 1; out.push(l); }
     });
@@ -3699,7 +3979,13 @@
     // itself during the new-key hold — this keeps the card from even
     // populating with real score data underneath a hidden parent.
     if (isGrantedLocked()) { scoreProgressCard.style.display = 'none'; scoreProgressChartsEl.innerHTML = ''; return; }
-    var entries = loadScoreHistory().filter(function (e) { return homeTestIncluded(homeTestLabel(e.testTitle)); });
+    // composite == null happens for an attempt whose score-sync never
+    // landed (see scoreEntryForSubmit's comment in recordComposite()) — a
+    // real completed attempt, just with nothing plottable on this chart.
+    // Filtered out here rather than fed to buildScoreLineSvg, which has no
+    // sensible y position for a null value and would otherwise draw it at
+    // the bottom of the axis like a score of 0.
+    var entries = mergedScoreHistory().filter(function (e) { return homeTestIncluded(homeTestLabel(e.testTitle)) && e.composite != null; });
     // Score Progress is Home's main graph now, so it shows as soon as
     // there's ANY recorded score — even a single point is still useful
     // context (today's score), and buildScoreLineSvg() already centers a
@@ -3724,10 +4010,16 @@
     hideSpcTip();
     spcChartEntries = {};
     var chartIndex = 0;
+    // Only drawn on the chart whose scale it actually falls inside — a
+    // single target field covers whichever test the student is prepping
+    // for, so an SAT-range target (400-1600) has no business appearing on
+    // an ACT chart's 1-36 scale, and vice versa.
+    var target = (currentStudent && currentStudent.targetScore) ? Number(currentStudent.targetScore) : null;
     function addChart(hed, shown, min, max, totalCount, typeLabel) {
       spcChartEntries[chartIndex] = shown;
+      var chartTarget = (target && target >= min && target <= max) ? target : null;
       html += '<div class="spc-chart-hed">' + hed + '</div>' +
-        '<div class="spc-chart-wrap" data-chart="' + chartIndex + '">' + buildScoreLineSvg(shown, min, max) + '</div>';
+        '<div class="spc-chart-wrap" data-chart="' + chartIndex + '">' + buildScoreLineSvg(shown, min, max, chartTarget) + '</div>';
       if (shown.length < totalCount) html += '<div class="spc-note">Showing your last ' + shown.length + ' ' + typeLabel + ' attempts.</div>';
       chartIndex++;
     }
@@ -3746,7 +4038,7 @@
     if (!cardEl) return;
     // Same new-key hold as the rest of Your Overview — see isGrantedLocked().
     if (isGrantedLocked()) { cardEl.style.display = 'none'; return; }
-    var entries = loadScoreHistory();
+    var entries = mergedScoreHistory();
     if (!entries.length) { cardEl.style.display = 'none'; return; }
     var e = entries[entries.length - 1];
     var numEl = document.getElementById('rt-composite-num');
@@ -4090,7 +4382,7 @@
      every beat's "Continue" routes through; it also renders the progress
      dots and drives them off ONB_STEPS below rather than each pane
      tracking its own position. */
-  var ONB_STEPS = ['onb-welcome', 'onb-pillars', 'onb-roadmap', 'onb-testdate', 'onb-baseline', 'onb-guardian', 'onb-accom', 'onb-handoff'];
+  var ONB_STEPS = ['onb-welcome', 'onb-pillars', 'onb-roadmap', 'onb-testdate', 'onb-target', 'onb-baseline', 'onb-guardian', 'onb-accom', 'onb-handoff'];
   var onboardAuthData = null; // the auth response, held onto until the sequence's final beat actually settles into the app
 
   function onbGoTo(paneId) {
@@ -4174,6 +4466,15 @@
     document.getElementById('onb-welcome-hed').textContent = 'Welcome, ' + firstName + '.';
     document.getElementById('onb-handoff-hed').textContent = "You're all set, " + firstName + '.';
     renderOnbDateGrid();
+    // Target-score range/placeholder depends on which test(s) this student
+    // actually preps for (data.showSat/showAct, same flags the rest of the
+    // portal gates on) — an ACT-only student shouldn't see SAT-scale hints.
+    // Defaults to SAT's scale when both or neither flag is set, since SAT
+    // prep is this program's more common case.
+    var actOnly = !!data.showAct && !data.showSat;
+    onbTargetRange = actOnly ? { min: 1, max: 36 } : { min: 400, max: 1600 };
+    document.getElementById('onbTargetInput').placeholder = actOnly ? 'e.g. 28' : 'e.g. 1350';
+    document.getElementById('onbTargetRangeText').textContent = onbTargetRange.min + ' and ' + onbTargetRange.max;
     onbGoTo('onb-welcome');
   }
 
@@ -4326,6 +4627,28 @@
       if (digitsOnly !== this.value) this.value = digitsOnly;
     });
   });
+  // Beat 6a: target score. Set by transitionOnboardToLight above (per-test
+  // scale). Required — Continue won't advance without a valid number in
+  // range, unlike baseline/guardian just below, which are both openly
+  // skippable.
+  var onbTargetRange = { min: 400, max: 1600 };
+  var onbTargetScore = null;
+  document.getElementById('onbTargetInput').addEventListener('input', function () {
+    var digitsOnly = this.value.replace(/[^0-9]/g, '');
+    if (digitsOnly !== this.value) this.value = digitsOnly;
+  });
+  document.getElementById('onb-target-continue').addEventListener('click', function () {
+    var input = document.getElementById('onbTargetInput');
+    var val = parseInt(input.value, 10);
+    if (isNaN(val) || val < onbTargetRange.min || val > onbTargetRange.max) {
+      document.getElementById('onbTargetError').style.display = 'block';
+      input.focus();
+      return;
+    }
+    document.getElementById('onbTargetError').style.display = 'none';
+    onbTargetScore = val;
+    onbGoTo('onb-baseline');
+  });
   var onbBaselineType = null; // 'psat' | 'sat' | null
   var onbBaselineRw = null; // number | null
   var onbBaselineMath = null; // number | null
@@ -4433,7 +4756,7 @@
       fetch(APPS_SCRIPT_URL, {
         method: 'POST',
         keepalive: true,
-        body: JSON.stringify({ action: 'saveOnboardingPrefs', key: pendingKey, testDate: onbSelectedTestDate, accomTimeMult: timeMult, accomBreakMult: breakMult, baselineType: onbBaselineType, baselineRw: onbBaselineRw, baselineMath: onbBaselineMath, guardianName: onbGuardianName, guardianEmail: onbGuardianEmail })
+        body: JSON.stringify({ action: 'saveOnboardingPrefs', key: pendingKey, testDate: onbSelectedTestDate, accomTimeMult: timeMult, accomBreakMult: breakMult, baselineType: onbBaselineType, baselineRw: onbBaselineRw, baselineMath: onbBaselineMath, guardianName: onbGuardianName, guardianEmail: onbGuardianEmail, targetScore: onbTargetScore })
       }).catch(function () {});
     } catch (e) {}
     onbGoTo('onb-handoff');
@@ -4505,7 +4828,7 @@
     if (assignPollTimer) { clearInterval(assignPollTimer); assignPollTimer = null; }
     resetKeyScreen();
   }
-  var exitLinkIds = ['nav-logo-exit', 'nav-exit-link'];
+  var exitLinkIds = ['nav-logo-exit', 'nav-exit-link', 'dx-exit-btn', 'dx-break-exit-btn'];
   exitLinkIds.forEach(function (id) {
     var el = document.getElementById(id);
     if (el) el.addEventListener('click', exitPortal);
@@ -4675,6 +4998,7 @@
   var settingsHasAccom = false;
   var settingsHasBaseline = false;
   var settingsHasGuardian = false;
+  var settingsTargetRange = { min: 400, max: 1600 };
   var settingsSelectedTestDate = null; // ISO string, or null for "not sure yet"
 
   function renderSettingsDateGrid() {
@@ -4776,6 +5100,13 @@
     });
     if (!settingsSelectedTestDate) document.querySelector('.onb-date-opt-unsure[data-settings-date-opt]').classList.add('is-on');
 
+    var settingsTargetActOnly = !!currentStudent.showAct && !currentStudent.showSat;
+    settingsTargetRange = settingsTargetActOnly ? { min: 1, max: 36 } : { min: 400, max: 1600 };
+    document.getElementById('settingsTargetInput').placeholder = settingsTargetActOnly ? 'e.g. 28' : 'e.g. 1350';
+    document.getElementById('settingsTargetRangeText').textContent = settingsTargetRange.min + ' and ' + settingsTargetRange.max;
+    document.getElementById('settingsTargetInput').value = currentStudent.targetScore || '';
+    document.getElementById('settingsTargetError').style.display = 'none';
+
     settingsHasAccom = Number(currentStudent.accomTimeMult) > 1 || Number(currentStudent.accomBreakMult) > 1;
     document.querySelectorAll('[data-settings-accom-card]').forEach(function (c, i) { c.classList.toggle('is-selected', (i === 1) === settingsHasAccom); });
     document.getElementById('settingsAccomSub').classList.toggle('is-open', settingsHasAccom);
@@ -4817,6 +5148,22 @@
 
     var timeMult = settingsHasAccom ? parseFloat(document.querySelector('#settingsAccomTimeOpts .is-on').getAttribute('data-val')) : 1;
     var breakMult = settingsHasAccom ? parseFloat(document.querySelector('#settingsAccomBreakOpts .is-on').getAttribute('data-val')) : 1;
+
+    // Optional here (unlike onboarding, where it's required) — a blank
+    // field just means "don't change it," same as every other field on
+    // this screen; only a non-blank, out-of-range value blocks saving.
+    var targetInput = document.getElementById('settingsTargetInput');
+    var targetScore = null;
+    if (targetInput.value.trim() !== '') {
+      var tVal = parseInt(targetInput.value, 10);
+      if (isNaN(tVal) || tVal < settingsTargetRange.min || tVal > settingsTargetRange.max) {
+        document.getElementById('settingsTargetError').style.display = 'block';
+        targetInput.focus();
+        return;
+      }
+      targetScore = tVal;
+    }
+    document.getElementById('settingsTargetError').style.display = 'none';
 
     var baselineType = null, baselineRw = null, baselineMath = null;
     if (settingsHasBaseline) {
@@ -4865,7 +5212,8 @@
       baselineRw: baselineRw,
       baselineMath: baselineMath,
       guardianName: guardianName,
-      guardianEmail: guardianEmail
+      guardianEmail: guardianEmail,
+      targetScore: targetScore
     }).then(function (data) {
       saveBtn.disabled = false;
       saveBtn.textContent = 'Save Changes';
@@ -4881,6 +5229,7 @@
       currentStudent.baselineMath = baselineMath;
       currentStudent.guardianName = guardianName;
       currentStudent.guardianEmail = guardianEmail;
+      if (targetScore !== null) currentStudent.targetScore = targetScore;
       if (typeof applyStoredAccommodations === 'function') applyStoredAccommodations();
       renderTestCountdown();
       saveState();
@@ -4924,14 +5273,14 @@
     var parts = raw.split(/\s+[—–-]\s+/);
     return { name: num ? 'Practice Test ' + num : (parts[0] || raw), note: parts.slice(1).join(' — ') };
   }
-  // testId -> most recent completed attempt, read from the same local
-  // score history that feeds the dashboard's Score Progress chart. Local
-  // to this browser, like every other progress tool in the portal — a
-  // student on a new device sees these unmarked, which is why the copy
-  // says "on this device" rather than claiming it's never been taken.
+  // testId -> most recent completed attempt, read from local + server score
+  // history combined (see mergedScoreHistory) — a student checked from a
+  // new device, or an attempt whose local sync never landed, still shows up
+  // here as long as its sync-to-backend call succeeded from wherever it WAS
+  // taken.
   function practiceTestResultsById() {
     var byId = {};
-    loadScoreHistory().forEach(function (e) {
+    mergedScoreHistory().forEach(function (e) {
       if (!e || e.source !== 'practice-test' || !e.testId) return;
       var prev = byId[e.testId];
       if (!prev || String(e.date || '') > String(prev.date || '')) byId[e.testId] = e;
@@ -4943,6 +5292,59 @@
     if (isNaN(d.getTime())) return '';
     return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
   }
+  // Every completed attempt of one numbered practice test, oldest first —
+  // feeds the ••• menu's "Attempt 1 / Attempt 2 / ..." breakdown once a
+  // test has been retaken. Only attempts with a visible link are included
+  // (see linkVisibleToStudent in finishDiagnostic) — an attempt with none
+  // still counts toward "Completed"/the score shown elsewhere, but there's
+  // nothing for a menu item to open.
+  function practiceTestAttempts(testId) {
+    return mergedScoreHistory()
+      .filter(function (e) { return e && e.source === 'practice-test' && e.testId === testId && (e.reportLinkRelative || e.reportLink); })
+      .sort(function (a, b) { return String(a.date || '') < String(b.date || '') ? -1 : 1; });
+  }
+  // Which test type the diagnostic tile's attempts belong to. testChoice
+  // itself is only set once the student is actually mid-flow (picked SAT vs
+  // ACT from screen-test-choice, or resumed a snapshot that had it) — it's
+  // still null on a student who opened Practice Tests straight from the
+  // nav, which used to mean a completed diagnostic's attempts could never
+  // be found here even though satTaken/actTaken (a separate, always-current
+  // server flag) confirms one exists. Falls back to whichever test the
+  // student's own satTaken/actTaken or single-test showSat/showAct says is
+  // theirs; only genuinely ambiguous for a dual-SAT-and-ACT student who
+  // hasn't chosen a side yet this session, same gap the rest of the
+  // diagnostic tile already has (it shows one combined tile either way).
+  function diagnosticTestType() {
+    if (testChoice) return testChoice;
+    if (!currentStudent) return null;
+    if (currentStudent.satTaken) return 'SAT';
+    if (currentStudent.actTaken) return 'ACT';
+    if (currentStudent.showSat && !currentStudent.showAct) return 'SAT';
+    if (currentStudent.showAct && !currentStudent.showSat) return 'ACT';
+    return null;
+  }
+  // Every completed diagnostic attempt for diagnosticTestType() above (a
+  // diagnostic can be retaken as a practice run once already taken, see
+  // alreadyTakenThisTestType()), oldest first.
+  function diagnosticAttempts() {
+    var type = diagnosticTestType();
+    return mergedScoreHistory()
+      .filter(function (e) { return e && e.source === 'diagnostic' && e.testType === type && (e.reportLinkRelative || e.reportLink); })
+      .sort(function (a, b) { return String(a.date || '') < String(b.date || '') ? -1 : 1; });
+  }
+  // Turns an oldest-first attempt list into the ••• menu's item data:
+  // numbered by chronological order (Attempt 1 = first taken) but shown
+  // newest-first, since the most recent attempt is what a student almost
+  // always wants to reopen.
+  function attemptMenuItems(attemptsOldestFirst) {
+    return attemptsOldestFirst.map(function (e, i) {
+      var d = shortDate(e.date);
+      var label = attemptsOldestFirst.length > 1
+        ? 'Attempt ' + (i + 1) + (d ? ' — ' + d : '') + (e.composite ? ' (' + e.composite + ')' : '')
+        : 'View Results';
+      return { label: label, link: e.reportLinkRelative || e.reportLink };
+    }).reverse();
+  }
   // Diagnostic tile prepended to the practice-test grid — thrown in with
   // the 11 numbered tests instead of living as its own separate
   // Home-screen callout, so "which test do I take first" is answered by
@@ -4952,6 +5354,14 @@
   function buildDiagnosticTile(hasCompletedADiagnostic) {
     var card = document.createElement('div');
     card.className = 'menu-card menu-card-wide' + (hasCompletedADiagnostic ? ' pt-card-done' : '');
+    // Combines this device's local history with the server-synced copy
+    // (see mergedScoreHistory) and only ever populated when the student was
+    // actually allowed to see it (see linkVisibleToStudent in
+    // finishDiagnostic) — a first-ever diagnostic still shows "Completed"
+    // here (that badge reflects the server-confirmed satTaken/actTaken
+    // flag) but won't have a link to show, same as the done screen itself
+    // never showed one for that attempt.
+    var attempts = hasCompletedADiagnostic ? attemptMenuItems(diagnosticAttempts()) : [];
     card.innerHTML =
       (hasCompletedADiagnostic ? '<span class="menu-card-badge badge-done">Completed</span>' : '<span class="menu-card-badge badge-todo">Start here</span>') +
       '<span class="menu-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="1.5"/><rect x="9" y="2" width="6" height="3" rx="1"/><path d="M9 12.5l2 2 4-4.5"/></svg></span>' +
@@ -4959,11 +5369,24 @@
       '<div class="pt-meta">' + (hasCompletedADiagnostic ? 'Already taken' : 'Take this first') + '</div>' +
       '<div class="menu-card-body pt-body-long">' + (hasCompletedADiagnostic
         ? 'Done &mdash; Luca has your results. The numbered tests below are for ongoing practice, not a retake of this.'
-        : 'Your starting point &mdash; it\'s how Luca sees where you are and builds your plan around real data.') + '</div></div>';
+        : 'Your starting point &mdash; it\'s how Luca sees where you are and builds your plan around real data.') + '</div></div>' +
+      (attempts.length ? buildPtMenuHtml(attempts) : '');
     card.addEventListener('click', startDiagnosticFlow);
+    if (attempts.length) wirePtMenu(card, attempts);
     return card;
   }
   function renderPracticeTestList() {
+    // Every real entry into this screen (sidebar nav, goToPracticeTests(),
+    // the results view's own back link) runs through here — resetting the
+    // picker/results toggle at the top means "come back to Practice Tests
+    // from anywhere" always lands on the picker, never stuck showing a
+    // stale results iframe from earlier in the session. openTestResults()
+    // deliberately does NOT call this (it would immediately hide the very
+    // results view it's trying to show), so this is the one place that
+    // needs to own the reset.
+    document.getElementById('pt-picker-view').style.display = '';
+    document.getElementById('pt-results-view').style.display = 'none';
+    document.getElementById('test-results-iframe').src = 'about:blank';
     var list = document.getElementById('pt-test-list');
     list.innerHTML = '';
     var isTestPrep = !!(currentStudent && (currentStudent.showSat || currentStudent.showAct));
@@ -5007,7 +5430,7 @@
       // itself lives in the body copy just below.
       var badge = result ? '<span class="menu-card-badge badge-done">Completed</span>' : '';
       var body = result
-        ? 'You took this on ' + (shortDate(result.date) || 'this device') +
+        ? 'You took this on ' + (shortDate(result.date) || 'record') +
           (result.composite ? ' and scored ' + result.composite : '') +
           '. You can retake it &mdash; your new score is saved alongside the old one.'
         : 'Full adaptive SAT format &mdash; ' + totalQ + ' questions across Reading &amp; Writing and Math, timed like the real test.';
@@ -5017,16 +5440,96 @@
       var meta = result
         ? (result.composite ? 'Scored ' + result.composite : 'Taken') + (shortDate(result.date) ? ' &middot; ' + shortDate(result.date) : '')
         : totalQ + ' questions &middot; timed';
+      var attempts = result ? attemptMenuItems(practiceTestAttempts(test.id)) : [];
       card.innerHTML = badge +
         '<span class="' + (num ? 'pt-num' : 'menu-card-icon') + '">' + (num || '&#9201;') + '</span>' +
         '<div class="pt-card-text"><div class="menu-card-title">' + parts.name + '</div>' +
         (parts.note ? '<div class="pt-note">' + parts.note + '</div>' : '') +
         '<div class="pt-meta">' + meta + '</div>' +
-        '<div class="menu-card-body pt-body-long">' + body + '</div></div>';
+        '<div class="menu-card-body pt-body-long">' + body + '</div></div>' +
+        (attempts.length ? buildPtMenuHtml(attempts) : '');
       card.addEventListener('click', function () { startPracticeTest(test.id); });
+      if (attempts.length) wirePtMenu(card, attempts);
       list.appendChild(card);
     });
   }
+  // Shared by every card that can show past results (numbered practice
+  // tests here, and the diagnostic tile in buildDiagnosticTile below).
+  // One attempt: a plain "View Results" button that opens it directly —
+  // no menu to open first. More than one: the same-looking button becomes
+  // a dropdown toggle (adds a caret) listing every attempt (see
+  // attemptMenuItems), newest first. Markup only; wirePtMenu attaches the
+  // actual behavior once the card is in the DOM.
+  function buildPtMenuHtml(attempts) {
+    if (attempts.length === 1) {
+      return '<div class="pt-menu-wrap" data-pt-menu-wrap>' +
+        '<button type="button" class="pt-view-results-btn" data-pt-view-results data-pt-attempt-idx="0">View Results</button>' +
+      '</div>';
+    }
+    var items = attempts.map(function (a, i) {
+      return '<button type="button" class="pt-menu-item" data-pt-view-results data-pt-attempt-idx="' + i + '">' + a.label + '</button>';
+    }).join('');
+    return '<div class="pt-menu-wrap" data-pt-menu-wrap>' +
+      '<button type="button" class="pt-view-results-btn" data-pt-menu-toggle aria-haspopup="true" aria-expanded="false">View Results <span class="pt-caret">&#9662;</span></button>' +
+      '<div class="pt-menu-dropdown" data-pt-menu-dropdown>' + items + '</div>' +
+    '</div>';
+  }
+  // Placed as position:fixed (see the .pt-menu-dropdown comment in the
+  // CSS) so it always paints above every card regardless of scroll
+  // position or DOM order — computed fresh from the toggle's own
+  // bounding rect each time it opens, right-aligned to the button the
+  // same way the old absolutely-positioned version was.
+  function positionPtMenuDropdown(wrap) {
+    var dropdown = wrap.querySelector('[data-pt-menu-dropdown]');
+    var toggle = wrap.querySelector('[data-pt-menu-toggle]');
+    if (!dropdown || !toggle) return;
+    var r = toggle.getBoundingClientRect();
+    dropdown.style.top = (r.bottom + 6) + 'px';
+    dropdown.style.right = (window.innerWidth - r.right) + 'px';
+  }
+  // stopPropagation on every click inside the menu — without it, clicking
+  // the "View Results" button (or an "Attempt N" item) would bubble up to
+  // the card's own click listener and immediately start/retake the test
+  // underneath whatever the menu was trying to do.
+  function wirePtMenu(card, attempts) {
+    var wrap = card.querySelector('[data-pt-menu-wrap]');
+    if (!wrap) return;
+    wrap.addEventListener('click', function (e) { e.stopPropagation(); });
+    var toggle = wrap.querySelector('[data-pt-menu-toggle]');
+    if (toggle) {
+      toggle.addEventListener('click', function () {
+        var willOpen = !wrap.classList.contains('open');
+        closeAllPtMenus();
+        if (willOpen) {
+          wrap.classList.add('open');
+          card.classList.add('pt-menu-card-open'); // see .menu-card.pt-menu-card-open in the CSS
+          toggle.setAttribute('aria-expanded', 'true');
+          positionPtMenuDropdown(wrap);
+        }
+      });
+    }
+    wrap.querySelectorAll('[data-pt-view-results]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        closeAllPtMenus();
+        var idx = parseInt(btn.getAttribute('data-pt-attempt-idx'), 10);
+        openTestResults(attempts[idx].link);
+      });
+    });
+  }
+  function closeAllPtMenus() {
+    document.querySelectorAll('[data-pt-menu-wrap].open').forEach(function (w) {
+      w.classList.remove('open');
+      var t = w.querySelector('[data-pt-menu-toggle]');
+      if (t) t.setAttribute('aria-expanded', 'false');
+    });
+    document.querySelectorAll('.pt-menu-card-open').forEach(function (c) { c.classList.remove('pt-menu-card-open'); });
+  }
+  document.addEventListener('click', closeAllPtMenus);
+  // The dropdown's position is computed once, at open time, from the
+  // toggle's screen position — scrolling the (now-scrollable, see
+  // #pt-test-list) list afterward would leave it visually detached from
+  // its button, so scrolling just closes it instead of re-tracking it.
+  document.getElementById('pt-test-list').addEventListener('scroll', closeAllPtMenus);
   // Sends a student straight to the picker with one test called out —
   // used by the "Take me there" shortcut on an assignment that names a
   // numbered test. Deliberately stops at the picker instead of launching
@@ -5107,6 +5610,58 @@
     if (minutes) { startSectionTimer(minutes); } else { dxTimerWrapEl.style.display = 'none'; stopSectionTimer(); sectionTimerEndsAt = null; }
   }
   document.getElementById('done-return-link').addEventListener('click', function (e) { e.preventDefault(); show('screen-menu'); });
+
+  /* ═══ CONFETTI ═══ see .confetti-stage/.confetti-piece in the CSS. Pure
+     CSS animation, JS only picks each piece's position/color/timing —
+     rebuilt from scratch on every call (innerHTML = '' first) so a second
+     attempt in the same session gets a fresh burst instead of the first
+     one's now-finished pieces just sitting there. */
+  var CONFETTI_COLORS = ['#B0271C', '#C9A84C', '#5E8B6F', '#243447', '#A97C50'];
+  function fireConfetti() {
+    var stage = document.getElementById('confetti-stage');
+    if (!stage) return;
+    stage.innerHTML = '';
+    var n = 46;
+    for (var i = 0; i < n; i++) {
+      var piece = document.createElement('span');
+      piece.className = 'confetti-piece';
+      piece.style.left = (Math.random() * 100) + '%';
+      piece.style.background = CONFETTI_COLORS[i % CONFETTI_COLORS.length];
+      piece.style.animationDuration = (1.6 + Math.random() * 1.2) + 's';
+      piece.style.animationDelay = (Math.random() * 0.5) + 's';
+      piece.style.transform = 'rotate(' + Math.round(Math.random() * 360) + 'deg)';
+      stage.appendChild(piece);
+    }
+  }
+
+  /* ═══ IN-PLACE RESULTS VIEWER ═══ points #test-results-iframe at a
+     relative report.html#d=... link (see reportLinkRelative in
+     finishDiagnostic, and reportLinkRelative stashed onto each
+     score-history entry) and swaps #pt-picker-view for #pt-results-view —
+     still screen-practice-tests the whole time (sidebar, active nav item,
+     everything stays put), never a separate screen. Deliberately does NOT
+     call renderPracticeTestList() (that resets this exact toggle back to
+     the picker — see its own comment) — the grid underneath doesn't need
+     to be fresh while it's hidden; it gets rebuilt when "Back" is clicked.
+     "Back" always returns to the Practice Tests list, regardless of where
+     the link was opened from (the done screen, or a card's own View
+     Results), since that's the one place every path to a result actually
+     starts from. */
+  function openTestResults(link) {
+    if (!link) return;
+    document.getElementById('test-results-iframe').src = link;
+    show('screen-practice-tests');
+    document.getElementById('pt-picker-view').style.display = 'none';
+    document.getElementById('pt-results-view').style.display = '';
+  }
+  document.getElementById('test-results-back').addEventListener('click', function (e) {
+    e.preventDefault();
+    renderPracticeTestList();
+  });
+  document.getElementById('done-view-results').addEventListener('click', function (e) {
+    e.preventDefault();
+    openTestResults(this.getAttribute('data-report-link'));
+  });
 
   /* ═══ REFERENCE SHEET MODAL — floats over intro or dx-screen, doesn't
      touch the screen-routing system so it can't disrupt test state. ═══ */
@@ -6094,8 +6649,19 @@
 
   // Backing out of the overview abandons whichever test it was describing —
   // clear the selection so the next thing the student opens is the thing
-  // they actually clicked (see the note in goToTestChoice()).
-  document.getElementById('overview-back').addEventListener('click', function (e) { e.preventDefault(); practiceTestId = null; show('screen-menu'); });
+  // they actually clicked (see the note in goToTestChoice()). Returns to
+  // wherever that click actually came from: a numbered practice test is
+  // only ever reached from the Practice Tests list now (see
+  // renderPracticeTestList()), so "back" from there should land back on
+  // that list, not jump to Home — only the real diagnostic (no
+  // practiceTestId set) still backs out to the menu.
+  document.getElementById('overview-back').addEventListener('click', function (e) {
+    e.preventDefault();
+    var wasPracticeTest = !!practiceTestId;
+    practiceTestId = null;
+    if (wasPracticeTest) { renderPracticeTestList(); show('screen-practice-tests'); }
+    else { show('screen-menu'); }
+  });
   document.getElementById('overview-start').addEventListener('click', function () { startSection(0); });
 
   // Begins Module 1 of section `index` — fresh module state every time,
@@ -6814,6 +7380,19 @@
     return { label: best.label, correct: best.correct, total: best.total };
   }
 
+  // Pulls just the score-sheet columns (see logDiagnosticResult_ in
+  // Code.gs) out of a recordComposite() entry so they can ride along on
+  // the same submitDiagnostic/submitPracticeTest request that already
+  // reliably carries the report — see scoreEntryForSubmit above for why
+  // this replaced relying on the separate syncScoreHistory call alone.
+  function scoreEntryFields(entry) {
+    if (!entry) return {};
+    return {
+      attemptId: entry.attemptId, composite: entry.composite,
+      scaleMin: entry.scaleMin, scaleMax: entry.scaleMax,
+      rw: entry.rw, math: entry.math, weakest: entry.weakest || null
+    };
+  }
   function recordScoreHistory(entry) {
     try {
       var studentKey = currentStudent && currentStudent.key;
@@ -6828,25 +7407,18 @@
       existing.entries.push(entry);
       localStorage.setItem(storageKey, JSON.stringify(existing));
     } catch (e) { /* storage disabled / private browsing — skip silently, matches saveState() elsewhere */ }
-    syncScoreHistoryToBackend(entry);
-  }
-
-  // Best-effort mirror of the localStorage write above, server-side (see
-  // handleSyncScoreHistory in Code.gs) — the local copy is what actually
-  // drives this device's own Score Progress chart, so a failure here
-  // doesn't affect the student at all; it only means the biweekly guardian
-  // summary trigger (which runs server-side, no browser/localStorage
-  // available to it) would be missing this one data point.
-  function syncScoreHistoryToBackend(entry) {
-    try {
-      var studentKey = currentStudent && currentStudent.key;
-      if (!studentKey) return;
-      fetch(APPS_SCRIPT_URL, {
-        method: 'POST',
-        keepalive: true,
-        body: JSON.stringify({ action: 'syncScoreHistory', key: studentKey, entry: entry })
-      }).catch(function () {});
-    } catch (e) { /* ignore */ }
+    // No separate backend sync call here on purpose — this entry's fields
+    // (composite/rw/math/weakest/attemptId) now ride along on the same
+    // submitDiagnostic/submitPracticeTest request as the report itself
+    // (see scoreEntryForSubmit at that call site), landing in the SAME row
+    // instead of a second 'score'-Kind row. The old separate
+    // action:'syncScoreHistory' keepalive call used to be that second row's
+    // only source and silently failed for a real attempt — its payload
+    // (this same entry, reportLink included) is bigger than a keepalive
+    // fetch is allowed to send — leaving Composite/RW/Math null server-side
+    // even though the report/link landed fine. Calling it here too would
+    // just risk that second row succeeding sometimes and showing up as a
+    // duplicate "Attempt" in the View Results dropdown.
   }
 
   var diagnosticSubmitted = false;
@@ -6961,11 +7533,112 @@
     recordIncorrectQuestions(incorrectRecords);
     syncProgressToBackend(incorrectRecords, skills);
 
+    // Total minutes allotted for a section (both modules combined, scaled
+    // by the SAME extended-time accommodation actually applied when the
+    // section was taken — enterModule() above reads accommodations.timeMult
+    // at module-start time; it isn't editable once the diagnostic is under
+    // way, so re-reading it here at submission time gives the identical
+    // value). This is the "how long did they actually have" half of the
+    // "unused section time" read on report.html (see the tl field below) —
+    // the other half, actual time spent, is already sent via tm/fv/lv.
+    // Recomputed here rather than captured live per-module because it's a
+    // pure function of (section key, practice-test-or-not, accommodation
+    // multiplier) — nothing about it can drift between module-start and
+    // submission, so there's no need to add new tracked state to get it.
+    //
+    // Moved above recordComposite() (and using ptDoneEarly rather than the
+    // ptDone declared further below — same value, see ptDoneEarly's own
+    // comment) so the reportLink built here can be stashed onto this
+    // attempt's score-history entry — that's what lets "View Results" on a
+    // completed practice-test card reopen this exact report later, instead
+    // of the link only ever existing for the few seconds this screen is up.
+    function allottedMinutesFor(secKey) {
+      var timeLimitsNow = practiceTestId ? (window.PRACTICE_MODULE_TIME_LIMITS || {}) : (window.SECTION_MODULE_TIME_LIMITS || {});
+      var perModuleMinutes = timeLimitsNow[secKey === 'reading-writing' ? 'readingWriting' : secKey] || timeLimitsNow[secKey] || 0;
+      if (!perModuleMinutes) return 0;
+      var totalMinutes = (sectionHasModules(secKey) ? perModuleMinutes * 2 : perModuleMinutes) * accommodations.timeMult;
+      return totalMinutes;
+    }
+    var payload = {
+      n: currentStudent.name, k: currentStudent.key, t: testChoice,
+      pt: ptDoneEarly ? ptDoneEarly.id : undefined, ptTitle: ptDoneEarly ? ptDoneEarly.title : undefined,
+      dt: new Date().toISOString().slice(0, 10),
+      // Full submission timestamp (dt above is date-only) — lets
+      // report.html read the time of day an attempt happened (e.g. a
+      // late-night finish). Same value as attemptTimestamp above, kept as
+      // its own payload field since dt/ts serve different readers (dt is
+      // the plain human date shown in the report header, ts is for the
+      // new time-of-day behavior check below). A real absolute instant
+      // (new Date().toISOString(), UTC) — report.html converts it to local
+      // clock time with toLocaleTimeString() when displaying it, same as
+      // the browser viewing the report would show any other local time.
+      ts: attemptTimestamp,
+      // The goal set during onboarding (or since, in Account Settings) —
+      // report.html reads this as the score-bridge chart's default target
+      // instead of guessing "current + 150," while still letting that
+      // chart's own target field/drag-handle override it for just this
+      // view (see targetScore in report.html's bridge-chart section).
+      targetScore: currentStudent.targetScore || null,
+      s: completedSections.map(function (sec) {
+        return {
+          // m = "ever flagged for review," not just the final on/off state —
+          // a question flagged then un-flagged before submitting still
+          // shows up here (see everMarked above), so the report's flag
+          // column and its "never used flag for review" behavior check
+          // both reflect what actually happened during the attempt.
+          k: sec.key, a: sec.answers, m: (sec.everMarked || sec.marked || []).map(function (x) { return x ? 1 : 0; }), v: sec.module2Variant || null,
+          // Per-question timing: tm = total ms spent on the question, fv/lv =
+          // Date.now() timestamps of first-visited/last-viewed, in the same
+          // original-bank-order indexing as `a`/`m` above.
+          tm: sec.questionTimeMs || null, fv: sec.questionFirstVisitedAt || null, lv: sec.questionLastViewedAt || null,
+          // fp = ms spent on the question during its FIRST look only (see
+          // questionFirstVisitDurationMs above) — null for any question
+          // never actually visited, or on a report saved before this field
+          // existed. Distinct from tm, which is a running total across
+          // every visit; this is what lets report.html tell "rushed the
+          // first pass, came back and fixed it" apart from "took a while,
+          // all at once."
+          fp: sec.questionFirstVisitDurationMs || null,
+          // tl = total minutes allotted for this section (both modules,
+          // accommodation-adjusted) — see allottedMinutesFor above. 0/absent
+          // for a section with no timer (shouldn't happen in practice, but
+          // report.html treats a falsy tl as "no unused-time read available"
+          // rather than dividing by zero).
+          tl: allottedMinutesFor(sec.key)
+        };
+      })
+    };
+    var reportPayloadB64 = '';
+    try { reportPayloadB64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload)))); } catch (e) { reportPayloadB64 = ''; }
+    // Absolute (for the emailed/external link — has to work opened outside
+    // the site, e.g. from Luca's inbox) and relative (for the in-portal
+    // "View Results" screen's <iframe>, so it loads whatever origin is
+    // actually serving this page right now — localhost while testing,
+    // the real domain in production — instead of always pointing at
+    // production regardless of where index.html itself is running).
+    var reportLink = reportPayloadB64 ? 'https://morettitutoring.com/portal/report.html#d=' + reportPayloadB64 : '';
+    var reportLinkRelative = reportPayloadB64 ? 'report.html#d=' + reportPayloadB64 : '';
+    // A first-ever (Luca-notified) diagnostic deliberately shows the
+    // student nothing — see the branching further down. That gate has to
+    // apply here too, not just on the done screen: without it, the link
+    // would still get stashed onto this attempt's score-history entry, and
+    // the diagnostic tile's ••• menu (see buildDiagnosticTile) would end up
+    // exposing a "View Results" that the done screen just finished hiding.
+    // alreadyTakenThisTestType() reads currentStudent.satTaken/actTaken —
+    // still the PRE-this-attempt value here, since that flag isn't set to
+    // true until the first-time branch further down, so this correctly
+    // means "was there already a real attempt before this one."
+    var linkVisibleToStudent = !!ptDoneEarly || alreadyTakenThisTestType();
+
     // Composite scaled score for the dashboard's Score Progress chart —
     // same math as report.html's own score tiles (see the SCORE_* curve
     // comment above). Only recorded when every section needed for that
     // test type's composite actually has results (always true for a
     // normally-completed attempt; guarding anyway rather than assuming).
+    // Hoisted out of the old recordComposite() IIFE so the same computed
+    // values can also ride along on the submitDiagnostic/submitPracticeTest
+    // call below — see the comment on that postToBackend call for why.
+    var scoreEntryForSubmit = null;
     (function recordComposite() {
       var composite = null, scaleMin = null, scaleMax = null;
       if (testChoice === 'SAT') {
@@ -6981,8 +7654,14 @@
         if (vals.length) { composite = Math.round(vals.reduce(function (a, b) { return a + b; }, 0) / vals.length); scaleMin = 1; scaleMax = 36; }
       }
       if (composite === null) return;
-      recordScoreHistory({
+      var entry = {
         date: new Date().toISOString(),
+        // Lets this same attempt's local copy and its server-synced mirror
+        // (see handleGetScoreHistory in Code.gs) be recognized as one
+        // attempt once mergedScoreHistory() combines both sources —
+        // without it, a student checking "View Results" on the same
+        // device that took the test would see it listed twice.
+        attemptId: 'a' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8),
         testType: testChoice,
         source: ptDoneEarly ? 'practice-test' : 'diagnostic',
         testId: ptDoneEarly ? ptDoneEarly.id : null,
@@ -6995,8 +7674,23 @@
         // to store here; that card just shows the bare composite for ACT.
         rw: (testChoice === 'SAT' && typeof rwScaled === 'number') ? rwScaled : undefined,
         math: (testChoice === 'SAT' && typeof mathScaled === 'number') ? mathScaled : undefined,
-        weakest: weakestDomain(domains)
-      });
+        weakest: weakestDomain(domains),
+        // Stored so "View Results" on an already-completed practice-test
+        // card (or the diagnostic tile) can reopen this exact attempt's
+        // report later — see reportLinkRelative above. Local to this
+        // browser only, same as the rest of this entry; a student on a
+        // new device just won't have it, same as everything else here.
+        reportLink: linkVisibleToStudent ? reportLink : '',
+        reportLinkRelative: linkVisibleToStudent ? reportLinkRelative : ''
+      };
+      recordScoreHistory(entry);
+      // See the postToBackend call below — carried on the SAME reliable
+      // request as the report itself instead of only the separate
+      // keepalive syncScoreHistory call, which silently fails for a real
+      // attempt (the entry's reportLink field alone is bigger than
+      // keepalive fetches are allowed to be), leaving Composite/RW/Math
+      // null server-side even though the report/link landed fine.
+      scoreEntryForSubmit = entry;
     })();
 
     var ptDone = activePracticeTest();
@@ -7028,82 +7722,30 @@
     // estimate is only revealed on Luca's diagnostic report (report.html),
     // not to the student on this screen.
 
-    // Total minutes allotted for a section (both modules combined, scaled
-    // by the SAME extended-time accommodation actually applied when the
-    // section was taken — enterModule() above reads accommodations.timeMult
-    // at module-start time; it isn't editable once the diagnostic is under
-    // way, so re-reading it here at submission time gives the identical
-    // value). This is the "how long did they actually have" half of the
-    // "unused section time" read on report.html (see the tl field below) —
-    // the other half, actual time spent, is already sent via tm/fv/lv.
-    // Recomputed here rather than captured live per-module because it's a
-    // pure function of (section key, practice-test-or-not, accommodation
-    // multiplier) — nothing about it can drift between module-start and
-    // submission, so there's no need to add new tracked state to get it.
-    function allottedMinutesFor(secKey) {
-      var timeLimitsNow = practiceTestId ? (window.PRACTICE_MODULE_TIME_LIMITS || {}) : (window.SECTION_MODULE_TIME_LIMITS || {});
-      var perModuleMinutes = timeLimitsNow[secKey === 'reading-writing' ? 'readingWriting' : secKey] || timeLimitsNow[secKey] || 0;
-      if (!perModuleMinutes) return 0;
-      var totalMinutes = (sectionHasModules(secKey) ? perModuleMinutes * 2 : perModuleMinutes) * accommodations.timeMult;
-      return totalMinutes;
-    }
-    var payload = {
-      n: currentStudent.name, k: currentStudent.key, t: testChoice,
-      pt: ptDone ? ptDone.id : undefined, ptTitle: ptDone ? ptDone.title : undefined,
-      dt: new Date().toISOString().slice(0, 10),
-      // Full submission timestamp (dt above is date-only) — lets
-      // report.html read the time of day an attempt happened (e.g. a
-      // late-night finish). Same value as attemptTimestamp above, kept as
-      // its own payload field since dt/ts serve different readers (dt is
-      // the plain human date shown in the report header, ts is for the
-      // new time-of-day behavior check below). A real absolute instant
-      // (new Date().toISOString(), UTC) — report.html converts it to local
-      // clock time with toLocaleTimeString() when displaying it, same as
-      // the browser viewing the report would show any other local time.
-      ts: attemptTimestamp,
-      s: completedSections.map(function (sec) {
-        return {
-          // m = "ever flagged for review," not just the final on/off state —
-          // a question flagged then un-flagged before submitting still
-          // shows up here (see everMarked above), so the report's flag
-          // column and its "never used flag for review" behavior check
-          // both reflect what actually happened during the attempt.
-          k: sec.key, a: sec.answers, m: (sec.everMarked || sec.marked || []).map(function (x) { return x ? 1 : 0; }), v: sec.module2Variant || null,
-          // Per-question timing: tm = total ms spent on the question, fv/lv =
-          // Date.now() timestamps of first-visited/last-viewed, in the same
-          // original-bank-order indexing as `a`/`m` above.
-          tm: sec.questionTimeMs || null, fv: sec.questionFirstVisitedAt || null, lv: sec.questionLastViewedAt || null,
-          // fp = ms spent on the question during its FIRST look only (see
-          // questionFirstVisitDurationMs above) — null for any question
-          // never actually visited, or on a report saved before this field
-          // existed. Distinct from tm, which is a running total across
-          // every visit; this is what lets report.html tell "rushed the
-          // first pass, came back and fixed it" apart from "took a while,
-          // all at once."
-          fp: sec.questionFirstVisitDurationMs || null,
-          // tl = total minutes allotted for this section (both modules,
-          // accommodation-adjusted) — see allottedMinutesFor above. 0/absent
-          // for a section with no timer (shouldn't happen in practice, but
-          // report.html treats a falsy tl as "no unused-time read available"
-          // rather than dividing by zero).
-          tl: allottedMinutesFor(sec.key)
-        };
-      })
-    };
-    var reportLink = '';
-    try {
-      reportLink = 'https://morettitutoring.com/portal/report.html#d=' + btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
-    } catch (e) { reportLink = ''; }
-
     // The student only ever sees their own report link on a practice
     // retake — the first-ever (Luca-notified) attempt at a test type
     // shows no link at all, just the "sent to Luca" message. That way a
     // brand-new key's first real diagnostic goes straight to Luca with
     // nothing for the student to see, and only subsequent practice
     // attempts (which are NOT emailed to Luca) reveal the scores.
-    var reportLinkEl = document.getElementById('done-report-link');
+    var viewResultsBtn = document.getElementById('done-view-results');
     var statusEl = document.getElementById('done-status');
     statusEl.classList.remove('err');
+    // Shared by all three branches below — shows/hides the View Results
+    // button and, when shown, stashes the relative link (see
+    // reportLinkRelative above) on it for done-view-results' click handler
+    // to read. Kept as a relative link specifically because this button
+    // opens the in-portal iframe viewer, not a new tab — see
+    // openTestResults().
+    function setViewResultsLink(link) {
+      if (link) {
+        viewResultsBtn.setAttribute('data-report-link', link);
+        viewResultsBtn.style.display = 'block';
+      } else {
+        viewResultsBtn.removeAttribute('data-report-link');
+        viewResultsBtn.style.display = 'none';
+      }
+    }
 
     // Practice Tests are handled entirely separately from the real SAT/ACT
     // diagnostic flow below: every attempt is a "marker point" meant to
@@ -7112,23 +7754,19 @@
     // there's no "first attempt only" gating, and no satTaken/actTaken
     // stamping (that flag is diagnostic-specific).
     if (ptDone) {
-      if (reportLink) {
-        reportLinkEl.innerHTML = 'See your scores and analysis <a href="' + reportLink + '" target="_blank" rel="noopener">here</a>.';
-        reportLinkEl.style.display = 'block';
-      } else {
-        reportLinkEl.style.display = 'none';
-      }
+      setViewResultsLink(reportLinkRelative);
       document.getElementById('done-message').textContent = 'Nice work! Your results just went to Luca — no need to send anything yourself.';
       statusEl.textContent = 'Sending your results…';
       show('screen-done');
-      postToBackend({
+      postToBackend(Object.assign({
         action: 'submitPracticeTest',
         key: currentStudent.key,
         test: ptDone.title,
+        testId: ptDone.id,
         score: totalCorrect + '/' + totalQuestions,
         reportLink: reportLink,
         report: report
-      })
+      }, scoreEntryFields(scoreEntryForSubmit)))
         .then(function (data) {
           if (data && data.ok) { statusEl.textContent = 'Results delivered.'; }
           else { throw new Error((data && data.error) || 'send_failed'); }
@@ -7151,12 +7789,7 @@
       // (handleMarkDiagnosticTaken is idempotent anyway, but there's
       // nothing to mark here since it was already set). Since nothing is
       // being sent to Luca this time, the student gets to see their link.
-      if (reportLink) {
-        reportLinkEl.innerHTML = 'See your scores and analysis <a href="' + reportLink + '" target="_blank" rel="noopener">here</a>.';
-        reportLinkEl.style.display = 'block';
-      } else {
-        reportLinkEl.style.display = 'none';
-      }
+      setViewResultsLink(reportLinkRelative);
       document.getElementById('done-message').textContent =
         'Nice work practicing! This attempt wasn\'t sent to Luca — you already have a real ' + testChoice + ' diagnostic on file.';
       statusEl.textContent = '';
@@ -7166,7 +7799,7 @@
 
     // First-ever real attempt — no link for the student, results go to
     // Luca only.
-    reportLinkEl.style.display = 'none';
+    setViewResultsLink(null);
 
     document.getElementById('done-message').textContent =
       'Your results just went to Luca — no need to send anything yourself.';
@@ -7193,14 +7826,14 @@
     // was replayable by anyone who viewed the page source — that's removed.
     // Body sent as a plain string (no JSON content-type) to stay within the
     // CORS "simple request" rules Apps Script needs, matching callAuth().
-    postToBackend({
+    postToBackend(Object.assign({
       action: 'submitDiagnostic',
       key: currentStudent.key,
       test: testChoice,
       score: totalCorrect + '/' + totalQuestions,
       reportLink: reportLink,
       report: report
-    })
+    }, scoreEntryFields(scoreEntryForSubmit)))
       .then(function (data) {
         if (data && data.ok) {
           statusEl.textContent = 'Results delivered.';
@@ -7368,6 +8001,7 @@
       renderAssignments(); // instant paint from the cached snapshot...
       loadAssignments();   // ...immediately superseded by a fresh fetch — this refresh is
       startAssignmentsPolling(); // the actual fix for checked/expired items reappearing after a refresh
+      loadServerScoreHistory(); // same fetch the login path does — without it, a refresh drops any attempt this browser doesn't have locally (see mergedScoreHistory)
       // Restores the actual SCREEN (mid-diagnostic, mid-practice-test, a
       // resource screen, etc.) — everything above this line only restores
       // the student's identity/menu chrome. This call went missing when
@@ -8811,7 +9445,7 @@
     if (openDropdown && !openDropdown.contains(e.target)) closeDropdown();
   });
 
-  var listEl, poolCountEl, sectionPillsEl, domainPillsEl, skillPillsEl, difficultyPillsEl, testPillsEl;
+  var listEl, poolCountEl, sectionPillsEl, domainPillsEl, skillPillsEl, difficultyPillsEl, testPillsEl, practiceBtnEl, practiceCountEl;
   var initialized = false;
 
   // Stored records are slim ({key, correct, given, attemptedAt} — see
@@ -9124,13 +9758,20 @@
     });
   }
 
+  function setPracticeCount(n) {
+    practiceCountEl.textContent = '(' + n + ')';
+    practiceBtnEl.disabled = n === 0;
+  }
+
   function renderList() {
     if (!records.length) {
       poolCountEl.textContent = '';
+      setPracticeCount(0);
       listEl.innerHTML = '<div class="pb-empty-note">Nothing here yet — once you finish a diagnostic or practice test, anything you miss will show up here, organized by section, domain, skill, and difficulty. (Getting a question right on a later attempt clears it from this list, too — this always reflects what you currently have wrong, not your full history.)</div>';
       return;
     }
     var filtered = currentFiltered();
+    setPracticeCount(filtered.length);
     if (!filtered.length) {
       poolCountEl.textContent = '0 questions match these filters.';
       listEl.innerHTML = '';
@@ -9180,11 +9821,24 @@
       skillPillsEl = document.getElementById('iq-skill-pills');
       difficultyPillsEl = document.getElementById('iq-difficulty-pills');
       testPillsEl = document.getElementById('iq-test-pills');
+      practiceBtnEl = document.getElementById('iq-practice-btn');
+      practiceCountEl = document.getElementById('iq-practice-count');
+      // Jumps straight to the filtered list — the cards themselves are
+      // already the "quiz yourself" practice UI (see renderCard/
+      // wireQuizInteractions below), so this button's whole job is taking
+      // a student from "I've set my filters" to "I'm looking at the first
+      // question" without them hunting for where the list starts.
+      practiceBtnEl.addEventListener('click', function () {
+        if (practiceBtnEl.disabled) return;
+        var first = listEl.querySelector('.iq-item') || listEl;
+        first.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
       wireQuizInteractions();
     }
 
     listEl.innerHTML = '<div class="pb-empty-note">Loading your latest results…</div>';
     poolCountEl.textContent = '';
+    setPracticeCount(0);
     loadRecords(function () {
       rebuildTaxonomy();
       // Default to everything selected so the list is populated

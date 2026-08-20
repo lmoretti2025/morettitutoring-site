@@ -8,7 +8,7 @@
 <link rel="icon" href="../favicon.ico">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Caladea:wght@400;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Caladea:wght@400;700&family=Poppins:wght@300;400;500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
 <style>
   :root { --red:#B0271C; --gold:#C9A84C; --ink:#1a1a1a; --mid:rgba(17,17,17,0.6); --faint:rgba(17,17,17,0.32); --border:rgba(17,17,17,0.12); --bg:#f7f4ef; --green:#5E8B6F; --tan:#A97C50; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -26,9 +26,9 @@
      the centering below actually read as "centered within something"
      rather than just centered in the middle of an otherwise-empty page
      width. */
-  .score-summary { background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 18px 16px 14px; margin-bottom: 16px; }
+  .score-summary { background: var(--bg); border: 1px solid var(--border); border-radius: 14px; padding: 20px 18px 16px; margin-bottom: 16px; }
   .score-tiles { display: flex; align-items: stretch; justify-content: center; gap: 18px; flex-wrap: wrap; margin-bottom: 4px; }
-  .score-tile { text-align: center; background: #fff; border: 1px solid var(--border); border-top: 3px solid var(--gold); border-radius: 3px; padding: 10px 18px 8px; min-width: 92px; }
+  .score-tile { text-align: center; background: #fff; border: 1px solid var(--border); border-top: 3px solid var(--gold); border-radius: 10px; padding: 12px 20px 10px; min-width: 92px; }
   .score-tile.big { min-width: 128px; padding: 14px 22px 10px; }
   .score-tile .tile-score { font-family: 'Caladea', serif; font-weight: 700; color: var(--ink); line-height: 1; }
   .score-tile .tile-score.big { font-size: 32px; }
@@ -36,15 +36,139 @@
   .score-tile .tile-frac { font-size: 8.5px; color: var(--faint); margin-top: 5px; }
   .score-tile .tile-lab { font-size: 8px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mid); margin-top: 5px; }
   .score-tile .tile-lab.big { font-size: 9.5px; }
-  .sec-hed { font-size: 10.5px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mid); border-bottom: 1px solid var(--border); padding-bottom: 4px; margin: 12px 0 8px; }
+  .sec-hed { font-size: 10.5px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mid); border-bottom: 1px solid var(--border); padding-bottom: 6px; margin: 22px 0 12px; }
   .bar-row { margin-bottom: 6px; }
   .bar-label { display: flex; justify-content: space-between; font-size: 10.5px; font-weight: 600; margin-bottom: 3px; }
   .bar-track { height: 7px; background: #eee7da; border-radius: 4px; overflow: hidden; }
   .bar-fill { height: 100%; background: var(--gold); border-radius: 4px; }
   .bar-fill.weak { background: var(--red); }
   .bar-fill.strong { background: var(--green); }
-  .score-caption { font-size: 8.5px; color: var(--faint); text-align: center; max-width: 560px; margin: 8px auto 0; }
-  .bridge-wrap { border: 1px solid var(--border); padding: 10px 14px; margin-bottom: 2px; }
+  /* Explanatory paragraph removed from view — the JS still assembles and
+     assigns the text (see scoreCaption.textContent in the two branches
+     below), harmlessly, into a hidden element, rather than touching that
+     logic right now. */
+  .score-caption { display: none; }
+  /* ═══ RAW STATS STRIP ═══ a fast, whole-diagnostic Correct/Wrong/
+     Unattempted/Accuracy readout above the section detail — the same
+     "gradebook" summary a parent already knows how to read at a glance,
+     ahead of the scaled-score interpretation above it and the per-section
+     detail below. Complements the score-tiles (which speak in scaled
+     score) rather than replacing them — this is the plain-counts view. */
+  .raw-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
+  .raw-stat { border: 1px solid rgba(17,17,17,0.08); border-radius: 12px; padding: 11px 12px 9px; box-shadow: 0 1px 2px rgba(17,17,17,0.03); }
+  .raw-stat-lab { font-family: 'Nunito', 'Poppins', sans-serif; font-size: 8.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--faint); margin-bottom: 4px; }
+  .raw-stat-num { font-family: 'Nunito', 'Poppins', sans-serif; font-weight: 800; font-size: 19px; color: var(--ink); line-height: 1; }
+  .raw-stat.ok .raw-stat-num { color: var(--green); }
+  .raw-stat.bad .raw-stat-num { color: var(--red); }
+  @media print { .raw-stats { page-break-inside: avoid; break-inside: avoid; } }
+
+  /* ═══ TOP ROW — score tiles + a real, interactive progress card ═══ */
+  .top-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: stretch; margin-bottom: 0; }
+  .top-row .score-summary { margin-bottom: 0; }
+  .progress-card { border: 1px solid rgba(17,17,17,0.08); border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; box-shadow: 0 1px 2px rgba(17,17,17,0.03); }
+  .progress-card-hed { font-family: 'Nunito', 'Poppins', sans-serif; font-size: 10.5px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--mid); margin-bottom: 6px; }
+  .progress-loading, .progress-empty { font-size: 10px; color: var(--faint); margin: auto 0; text-align: center; padding: 14px 0; }
+  .progress-chart-wrap { text-align: center; }
+  .progress-point-info { margin-top: 6px; font-size: 9.5px; color: var(--mid); border-top: 1px solid var(--border); padding-top: 6px; min-height: 28px; }
+  .progress-point-info strong { color: var(--ink); }
+  .progress-point-info .r { color: var(--red); font-weight: 600; }
+  @media (max-width: 620px) { .top-row { grid-template-columns: 1fr; } }
+  @media print { .top-row, .progress-card { page-break-inside: avoid; break-inside: avoid; } }
+
+  /* ═══ TOPICS COSTING THE MOST POINTS — ranked list with a radial %
+     gauge, same underlying skill-miss data as the bridge chart above,
+     just presented as a scannable list instead of a waterfall. ═══ */
+  .topics-list { border: 1px solid rgba(17,17,17,0.08); border-radius: 12px; overflow: hidden; box-shadow: 0 1px 2px rgba(17,17,17,0.03); }
+  .topics-row { display: flex; align-items: center; gap: 10px; padding: 9px 14px; border-bottom: 1px solid #f1ede4; }
+  .topics-row:last-child { border-bottom: none; }
+  .topics-rank { font-family: 'Nunito', 'Poppins', sans-serif; font-weight: 800; font-size: 14px; color: var(--faint); width: 20px; flex-shrink: 0; }
+  .topics-main { flex: 1; min-width: 0; }
+  .topics-name { font-family: 'Nunito', 'Poppins', sans-serif; font-size: 11px; font-weight: 700; color: var(--ink); }
+  .topics-meta { font-family: 'Nunito', 'Poppins', sans-serif; font-size: 8.5px; font-weight: 600; color: var(--faint); margin-top: 1px; }
+  .topics-gauge { flex-shrink: 0; }
+
+  /* ═══ ACCURACY BY TOPIC — a threshold-banded gradient track with a dot
+     at the actual percentage, instead of a filled bar — reads as "where
+     does this land against a real bar" rather than just "how full." ═══ */
+  .acc-topic-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 2px; }
+  .acc-topic-card { border: 1px solid rgba(17,17,17,0.08); border-radius: 12px; padding: 12px 14px; box-shadow: 0 1px 2px rgba(17,17,17,0.03); }
+  .acc-topic-card-hed { font-family: 'Nunito', 'Poppins', sans-serif; font-weight: 800; font-size: 12.5px; margin-bottom: 2px; }
+  .acc-topic-legend { font-family: 'Nunito', 'Poppins', sans-serif; display: flex; gap: 8px; font-size: 7.5px; font-weight: 700; color: var(--faint); margin-bottom: 8px; }
+  .acc-topic-legend span { display: inline-flex; align-items: center; gap: 3px; }
+  .acc-topic-legend i { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+  .acc-topic-row { margin-bottom: 8px; }
+  .acc-topic-row:last-child { margin-bottom: 0; }
+  .acc-topic-row-lab { font-family: 'Nunito', 'Poppins', sans-serif; display: flex; justify-content: space-between; font-size: 9.5px; font-weight: 700; margin-bottom: 3px; }
+  .acc-topic-row-lab .n { color: var(--faint); font-size: 8.5px; font-weight: 600; }
+  .acc-topic-track { position: relative; height: 5px; border-radius: 3px; background: linear-gradient(90deg, var(--red) 0%, var(--red) 60%, var(--gold) 60%, var(--gold) 85%, var(--green) 85%, var(--green) 100%); opacity: 0.35; }
+  .acc-topic-dot { position: absolute; top: 50%; width: 9px; height: 9px; border-radius: 50%; background: #fff; border: 2px solid var(--ink); transform: translate(-50%, -50%); }
+  @media (max-width: 620px) { .acc-topic-grid { grid-template-columns: 1fr; } }
+
+  /* ═══ CONFIDENCE QUADRANT — per-question scatter, time (relative to the
+     section's own median) vs. right/wrong. No platform to compare against,
+     so the x-axis is scaled to the student's OWN pace, not a peer
+     average. ═══ */
+  .quadrant-sub { font-size: 9px; color: var(--faint); margin: -6px 0 8px; }
+  .quadrant-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .quadrant-card { border: 1px solid rgba(17,17,17,0.08); border-radius: 12px; padding: 12px; box-shadow: 0 1px 2px rgba(17,17,17,0.03); }
+  .quadrant-card-hed { font-family: 'Nunito', 'Poppins', sans-serif; font-weight: 800; font-size: 12.5px; margin-bottom: 6px; text-align: center; }
+  .quad-dot { stroke: #fff; stroke-width: 1; }
+  .quad-dot.ok { fill: var(--green); }
+  .quad-dot.bad { fill: var(--red); }
+  .quad-dot:hover { stroke: var(--ink); }
+  @media (max-width: 620px) { .quadrant-grid { grid-template-columns: 1fr; } }
+  @media print { .topics-list, .acc-topic-grid, .quadrant-grid { page-break-inside: avoid; break-inside: avoid; } }
+
+  /* ═══ QUESTION TILES (upgraded sc-qgrid) — hover preview + click to open
+     the full question in a modal, instead of just a native title tooltip. ═══ */
+  .sc-qgrid-cell { cursor: pointer; position: relative; }
+  .sc-qgrid-tooltip { position: absolute; z-index: 50; bottom: calc(100% + 5px); left: 50%; transform: translateX(-50%); width: 190px; background: var(--ink); color: #fff; border-radius: 4px; padding: 6px 8px; font-size: 8.5px; line-height: 1.4; pointer-events: none; box-shadow: 0 6px 18px rgba(0,0,0,0.25); display: none; }
+  .sc-qgrid-cell:hover .sc-qgrid-tooltip { display: block; }
+  .sc-qgrid-tooltip b { display: block; margin-bottom: 2px; }
+  .sc-qgrid-tooltip .ok { color: #9fd8b4; }
+  .sc-qgrid-tooltip .bad { color: #f0a89e; }
+  @media print { .sc-qgrid-tooltip { display: none !important; } }
+
+  /* ═══ SHARED QUESTION MODAL ═══ */
+  .q-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(17,17,17,0.55); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
+  .q-modal-overlay.open { display: flex; }
+  .q-modal { background: #fff; max-width: 520px; width: 100%; max-height: 82vh; overflow-y: auto; border-radius: 16px; box-shadow: 0 30px 70px rgba(0,0,0,0.4); }
+  .q-modal-hed { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 2px solid var(--red); border-radius: 16px 16px 0 0; position: sticky; top: 0; background: #fff; }
+  .q-modal-hed span { font-family: 'Caladea', serif; font-weight: 700; font-size: 13px; }
+  .q-modal-close { background: none; border: none; font-size: 20px; line-height: 1; cursor: pointer; color: var(--mid); padding: 2px 4px; }
+  .q-modal-close:hover { color: var(--ink); }
+  .q-modal-body { padding: 14px 16px 18px; font-size: 11.5px; }
+  .q-modal-body .q-detail { padding: 0; background: none; }
+  @media print { .q-modal-overlay { display: none !important; } }
+
+  /* ═══ PER-QUESTION GRID ═══ small colored squares, one per question,
+     numbered — a visual scan of WHERE misses clustered before reading any
+     table. Deliberately reuses the diagnostic's own "Check Your Work"
+     grid idiom (see #dx-check-grid/.dx-qnum in index.html) rather than
+     inventing a new visual language, just recolored for three states
+     (right/wrong/unattempted) instead of that screen's two
+     (answered/unanswered). */
+  .sc-qgrid { display: flex; flex-wrap: wrap; gap: 3px; margin-bottom: 8px; }
+  .sc-qgrid-cell { width: 15px; height: 15px; border-radius: 2px; font-size: 7px; font-weight: 700; display: flex; align-items: center; justify-content: center; border: 1px solid transparent; }
+  .sc-qgrid-cell.ok { background: rgba(94,139,111,0.16); color: var(--green); border-color: rgba(94,139,111,0.4); }
+  .sc-qgrid-cell.bad { background: rgba(176,39,28,0.12); color: var(--red); border-color: rgba(176,39,28,0.4); }
+  .sc-qgrid-cell.skip { background: #fff; color: var(--faint); border-color: var(--border); }
+
+  /* ═══ TIME BY DIFFICULTY ═══ a compact segmented bar — kept as a bar
+     rather than a donut to match every other proportion on this page
+     (bar-fill/sc-bar-fill above), not because a donut couldn't work. */
+  .sc-difftime { margin-bottom: 8px; }
+  .sc-difftime-track { display: flex; height: 8px; border-radius: 3px; overflow: hidden; background: #eee7da; margin-bottom: 3px; }
+  .sc-difftime-seg.easy { background: #A9C4B4; }
+  .sc-difftime-seg.medium { background: var(--gold); }
+  .sc-difftime-seg.hard { background: var(--red); }
+  .sc-difftime-legend { display: flex; gap: 10px; font-size: 8px; color: var(--mid); }
+  .sc-difftime-legend span { display: inline-flex; align-items: center; gap: 3px; }
+  .sc-difftime-dot { width: 6px; height: 6px; border-radius: 1.5px; display: inline-block; }
+  .sc-difftime-dot.easy { background: #A9C4B4; }
+  .sc-difftime-dot.medium { background: var(--gold); }
+  .sc-difftime-dot.hard { background: var(--red); }
+  .bridge-wrap { border: 1px solid var(--border); border-radius: 14px; padding: 14px 18px; margin-bottom: 2px; }
   .bridge-target-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 6px; font-size: 10.5px; color: var(--mid); }
   .bridge-target-row .bt-lab { font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; font-size: 9.5px; }
   .bridge-target-row input { font-family: 'Poppins'; font-weight: 600; font-size: 13px; color: var(--red); border: 1px solid var(--border); background: #f7f4ef; width: 58px; padding: 3px 6px; text-align: center; -moz-appearance: textfield; }
@@ -57,8 +181,8 @@
   .bridge-empty { font-size: 11px; color: var(--mid); padding: 6px 0; }
   .bridge-note { font-size: 9px; color: var(--faint); margin-top: 8px; }
   .bridge-other-note { margin-top: 6px; margin-bottom: 0; }
-  .section-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; margin-bottom: 2px; }
-  .section-card { border: 1px solid var(--border); padding: 10px 12px; }
+  .section-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-bottom: 2px; }
+  .section-card { border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; }
   .section-card .sc-hed { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 3px; }
   .section-card .sc-title { font-family: 'Caladea', serif; font-size: 13px; font-weight: 700; }
   .section-card .sc-score { font-size: 11px; color: var(--mid); }
@@ -75,7 +199,7 @@
   .sc-time-item.bad { color: var(--red); }
   .sc-time-label { font-size: 8px; text-transform: uppercase; letter-spacing: 0.03em; color: var(--faint); }
   .sc-time-item.ok .sc-time-label, .sc-time-item.bad .sc-time-label { color: inherit; opacity: 0.75; }
-  .sc-flag { display: flex; align-items: flex-start; gap: 6px; font-size: 9.5px; line-height: 1.5; color: var(--ink); background: #fbf1de; border-left: 2px solid var(--gold); padding: 5px 7px; margin: 0 0 8px; }
+  .sc-flag { display: flex; align-items: flex-start; gap: 6px; font-size: 9.5px; line-height: 1.5; color: var(--ink); background: #fbf1de; border-left: 3px solid var(--gold); border-radius: 8px; padding: 7px 10px; margin: 0 0 10px; }
   .sc-flag .sc-flag-mark { font-weight: 700; color: var(--gold); flex-shrink: 0; }
   .sc-flag strong { color: var(--ink); }
   .sc-bars { margin-bottom: 6px; }
@@ -195,20 +319,49 @@
       <p id="r-sub"></p>
     </div>
   </div>
-  <div class="score-summary">
-    <div class="score-tiles" id="score-tiles"></div>
-    <div class="score-caption" id="score-caption"></div>
+  <div class="top-row">
+    <div class="score-summary">
+      <div class="score-tiles" id="score-tiles"></div>
+      <div class="score-caption" id="score-caption"></div>
+    </div>
+    <div class="progress-card" id="progress-card">
+      <div class="progress-card-hed">Score progress</div>
+      <div id="progress-card-body"><div class="progress-loading">Loading history&hellip;</div></div>
+    </div>
   </div>
+  <div class="raw-stats" id="raw-stats"></div>
   <div class="sec-hed">Path to target score</div>
   <div id="score-bridge"></div>
   <div class="sec-hed">Section breakdown</div>
   <div id="section-breakdown"></div>
+  <div class="sec-hed" id="skillbreak-hed" style="display:none;">Skill breakdown</div>
+  <div id="topics-costing" style="display:none;"></div>
+  <div id="accuracy-by-topic" style="display:none;"></div>
+  <div class="sec-hed" id="quadrant-hed" style="display:none;">Confidence quadrant</div>
+  <p class="quadrant-sub" id="quadrant-sub" style="display:none;">Each dot is one multiple-choice question — time spent (x) vs. right or wrong (y), relative to <span id="quadrant-sub-first"></span>&rsquo;s own median pace. Hover a dot, or click to review the question.</p>
+  <div id="confidence-quadrant" style="display:none;"></div>
   <div class="sec-hed" id="behavior-hed" style="display:none;">Test-taking behavior</div>
   <div id="behavior-section" style="display:none;"></div>
   <div class="sec-hed">What this tells us</div>
   <ul class="takeaways" id="takeaways"></ul>
   <a href="#" class="detail-toggle" id="detail-toggle">Show full question-by-question detail (click any question to see it) &darr;</a>
   <div class="ftr"><span>Moretti Test Prep &amp; Tutoring · Cranford, NJ · (201) 275-2791</span><span id="ftr-date"></span></div>
+
+  <!-- ═══ QUESTION MODAL ═══ shared by the section-card tiles and the
+       confidence-quadrant dots — both just call openQuestionModal(row)
+       with a row object from the same `rows` arrays the rest of this page
+       already built, and this renders it via the exact same
+       renderQuestionDetail() the page-2 expandable table uses, so there's
+       one source of truth for "what a question looks like," not two. -->
+  <div class="q-modal-overlay" id="q-modal-overlay">
+    <div class="q-modal" role="dialog" aria-modal="true">
+      <div class="q-modal-hed">
+        <span id="q-modal-title"></span>
+        <button type="button" class="q-modal-close" id="q-modal-close" aria-label="Close">&times;</button>
+      </div>
+      <div class="q-modal-body" id="q-modal-body"></div>
+    </div>
+  </div>
 </div>
 
 <div class="page pagebreak" id="page2" style="display:none;">
@@ -250,6 +403,39 @@
   // (section pies, bridge segments) — tints/shades of the same five brand
   // colors rather than a mixed bag of unrelated hues.
   var BRAND_PALETTE = ['#B0271C', '#C9A84C', '#5E8B6F', '#243447', '#A97C50', '#7A3B32', '#8C9A6E', '#8B6F47'];
+
+  // Strips HTML (question text carries its own inline formatting/figures —
+  // see esc()'s comment above) down to plain text for the hover tooltip,
+  // which has no room for a rendered SVG chart or a real table. Truncated
+  // short — a tooltip previews, the modal (openQuestionModal below) is
+  // where the real, fully-formatted question lives.
+  function previewText(html) {
+    var div = document.createElement('div');
+    div.innerHTML = html || '';
+    var t = (div.textContent || '').replace(/\s+/g, ' ').trim();
+    return t.length > 90 ? esc(t.slice(0, 90)) + '&hellip;' : esc(t);
+  }
+
+  /* ═══ SHARED QUESTION MODAL ═══ opened from the section-card tiles and
+     the confidence-quadrant dots (both defined further down) — one modal,
+     one renderQuestionDetail() (defined later, in the page-2 setup; a
+     plain `function` declaration is hoisted, so calling it from here
+     before its own line executes is safe). */
+  var qModalOverlay = document.getElementById('q-modal-overlay');
+  var qModalTitle = document.getElementById('q-modal-title');
+  var qModalBody = document.getElementById('q-modal-body');
+  function openQuestionModal(row, label) {
+    qModalTitle.textContent = 'Question ' + row.n + (label ? ' — ' + label : '');
+    qModalBody.innerHTML = '';
+    qModalBody.appendChild(renderQuestionDetail(row));
+    qModalOverlay.classList.add('open');
+  }
+  function closeQuestionModal() { qModalOverlay.classList.remove('open'); }
+  if (qModalOverlay) {
+    document.getElementById('q-modal-close').addEventListener('click', closeQuestionModal);
+    qModalOverlay.addEventListener('click', function (e) { if (e.target === qModalOverlay) closeQuestionModal(); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeQuestionModal(); });
+  }
 
   /* ═══ APPROXIMATE SCALED SCORING ═══
      The SAT (200–800 per section, 400–1600 composite) and ACT (1–36 per
@@ -942,6 +1128,7 @@
       // just the answer letter. givenIdx is the chosen choice index for
       // multiple-choice (null if blank), used to mark the picked option.
       rows.push({ n: i + 1, dom: dom, sk: sk, given: gTxt, ok: ok, marked: !!wasMarked,
+        skipped: (given === null || given === undefined),
         q: q, givenIdx: (q.type === 'mc' && given !== null && given !== undefined) ? given : null,
         givenText: (given && typeof given === 'object') ? esc(given.raw || String(given.value)) : null,
         timeMs: qTimeMs, firstVisitMs: qFirstVisitMs, moduleIndex: moduleIndex,
@@ -1066,10 +1253,9 @@
     num.className = 'tile-score ' + (big ? 'big' : 'small');
     num.textContent = (scaledScore !== null && scaledScore !== undefined) ? scaledScore : (Math.round(p * 100) + '%');
     tile.appendChild(num);
-    var frac = document.createElement('div');
-    frac.className = 'tile-frac';
-    frac.textContent = c + '/' + t + ' (' + Math.round(p * 100) + '%)';
-    tile.appendChild(frac);
+    // The c/t (%) fraction that used to sit here is now shown once, plainly,
+    // in the Correct/Wrong/Accuracy/Unattempted strip right below this
+    // card — no need to repeat "67%" a second time under every tile too.
     var lb = document.createElement('div');
     lb.className = 'tile-lab' + (big ? ' big' : '');
     lb.textContent = label;
@@ -1180,6 +1366,31 @@
   } else {
     tilesEl.style.display = 'none';
   }
+
+  // ═══ RAW STATS STRIP ═══ whole-diagnostic Correct/Wrong/Unattempted/
+  // Accuracy, computed from the same totalC/totalQ/skipped the rest of
+  // this page already derived above — no new counting, just a different
+  // presentation of numbers that already exist. Accuracy is figured
+  // against ATTEMPTED questions (totalQ - skipped), not the raw total —
+  // a student who left half the test blank shouldn't have that same
+  // blankness silently punish their accuracy figure too; skipped already
+  // gets its own honest tile right next to it.
+  (function renderRawStats() {
+    var wrap = document.getElementById('raw-stats');
+    if (!wrap) return;
+    var attempted = totalQ - skipped;
+    var wrongCount = totalQ - totalC - skipped;
+    var accuracyPct = attempted ? Math.round(totalC / attempted * 100) : 0;
+    var stats = [
+      { lab: 'Correct', val: totalC + '/' + totalQ, cls: '' },
+      { lab: 'Wrong', val: String(wrongCount), cls: wrongCount > 0 ? 'bad' : '' },
+      { lab: 'Accuracy', val: accuracyPct + '%', cls: accuracyPct >= 75 ? 'ok' : (accuracyPct < 50 ? 'bad' : '') },
+      { lab: 'Unattempted', val: String(skipped), cls: skipped > 0 ? 'bad' : '' }
+    ];
+    wrap.innerHTML = stats.map(function (s) {
+      return '<div class="raw-stat ' + s.cls + '"><div class="raw-stat-lab">' + s.lab + '</div><div class="raw-stat-num">' + s.val + '</div></div>';
+    }).join('');
+  })();
 
   // Per-section, per-skill missed-question counts — shared by the section
   // pie charts below and the score-bridge waterfall, so both read the
@@ -1380,7 +1591,8 @@
     var reachable = isSAT ? roundToTen(currentComposite + totalRecoverable) : Math.round(currentComposite + totalRecoverable);
     var hitCeiling = rawTotalRecoverable > headroom;
 
-    var defaultTarget = isSAT ? Math.min(scoreMax, roundToTen(currentComposite + 150)) : Math.min(scoreMax, currentComposite + 3);
+    var studentTarget = (data.targetScore !== undefined && data.targetScore !== null && !isNaN(parseInt(data.targetScore, 10))) ? parseInt(data.targetScore, 10) : null;
+    var defaultTarget = (studentTarget !== null) ? Math.min(scoreMax, studentTarget) : (isSAT ? Math.min(scoreMax, roundToTen(currentComposite + 150)) : Math.min(scoreMax, currentComposite + 3));
     var storeKey = 'mt-target-' + data.t + '-' + (data.n || 'student');
     var savedTarget = null;
     try { var sv = localStorage.getItem(storeKey); if (sv) savedTarget = parseInt(sv, 10); } catch (e) {}
@@ -1749,6 +1961,35 @@
     incEl.textContent = incorrectN + ' incorrect';
     card.appendChild(incEl);
 
+    // Per-question grid — one small square per question, numbered, colored
+    // by outcome (right/wrong/unattempted) — a visual scan of WHERE misses
+    // clustered in the section before reading a single number below. Reuses
+    // the diagnostic's own Check-Your-Work grid idiom (see .dx-qnum in
+    // index.html), just recolored for a third state.
+    var gridEl = document.createElement('div');
+    gridEl.className = 'sc-qgrid';
+    s5.rows.forEach(function (r) {
+      var cell = document.createElement('div');
+      cell.className = 'sc-qgrid-cell ' + (r.skipped ? 'skip' : (r.ok ? 'ok' : 'bad'));
+      var num = document.createElement('span');
+      num.textContent = r.n;
+      cell.appendChild(num);
+      // Custom tooltip (not the native `title` attribute — that can't be
+      // styled and looks out of place on a branded page) previews the
+      // question text and outcome on hover; clicking opens the same
+      // question full-size in the shared modal, reusing renderQuestionDetail
+      // rather than a second copy of "how to display a question."
+      var tip = document.createElement('div');
+      tip.className = 'sc-qgrid-tooltip';
+      var statusWord = r.skipped ? 'Unattempted' : (r.ok ? 'Correct' : 'Incorrect');
+      var statusCls = r.skipped ? '' : (r.ok ? 'ok' : 'bad');
+      tip.innerHTML = '<b class="' + statusCls + '">Q' + r.n + ' — ' + statusWord + '</b>' + previewText(r.q && r.q.text);
+      cell.appendChild(tip);
+      cell.addEventListener('click', function () { openQuestionModal(r, s5.label); });
+      gridEl.appendChild(cell);
+    });
+    card.appendChild(gridEl);
+
     // Time On Section/Module / Time On Correct / Time On Incorrect. Only
     // shown when there's actually timing data to show (older saved
     // reports, or a section with zero recorded time, just skip this row
@@ -1780,6 +2021,42 @@
       card.appendChild(timeEl);
     }
 
+    // Time by difficulty — a segmented bar showing how the clock actually
+    // split across easy/medium/hard questions. Not a new measurement: this
+    // is timeMs (already tracked per question) grouped by q.difficulty
+    // (already used for the SAT module-weighted scoring model above),
+    // just never surfaced as its own view before. A student spending
+    // disproportionate time on "easy"-tagged questions is a different,
+    // more specific coaching conversation than "ran long on this section."
+    (function renderDifficultyTime() {
+      var byDiff = { easy: 0, medium: 0, hard: 0 };
+      s5.rows.forEach(function (r) {
+        var d = r.q && r.q.difficulty;
+        if (byDiff.hasOwnProperty(d)) byDiff[d] += (r.timeMs || 0);
+      });
+      var totalDiffMs = byDiff.easy + byDiff.medium + byDiff.hard;
+      if (totalDiffMs <= 0) return;
+      var diffWrap = document.createElement('div');
+      diffWrap.className = 'sc-difftime';
+      var track = document.createElement('div');
+      track.className = 'sc-difftime-track';
+      ['easy', 'medium', 'hard'].forEach(function (d) {
+        if (byDiff[d] <= 0) return;
+        var seg = document.createElement('div');
+        seg.className = 'sc-difftime-seg ' + d;
+        seg.style.width = (byDiff[d] / totalDiffMs * 100) + '%';
+        track.appendChild(seg);
+      });
+      diffWrap.appendChild(track);
+      var legend = document.createElement('div');
+      legend.className = 'sc-difftime-legend';
+      legend.innerHTML = ['easy', 'medium', 'hard'].map(function (d) {
+        return '<span><span class="sc-difftime-dot ' + d + '"></span>' + d.charAt(0).toUpperCase() + d.slice(1) + ' ' + formatDuration(byDiff[d]) + '</span>';
+      }).join('');
+      diffWrap.appendChild(legend);
+      card.appendChild(diffWrap);
+    })();
+
     // Distractor-pattern flag: with only 3-4 wrong-answer letters to choose
     // from, a single letter landing on "50% of missed questions" happens
     // by pure chance most of the time at small sample sizes (with 3 wrong
@@ -1804,20 +2081,14 @@
     }
 
     // Two clearly-labeled blocks so the reader knows what each bar means:
-    // first the specific skills the student missed (correct/attempted,
-    // weakest first — "what to drill"), then every content area's
-    // correct/attempted (the fuller picture). Both use the identical
-    // "correct / total (percent)" format and the same red/gold/green fill,
-    // so a bar always means the same thing anywhere on this card.
-    var missedAny = (s5.t - s5.c) > 0;
-    if (missedAny) {
-      var skLabel = document.createElement('div');
-      skLabel.className = 'sc-grouplabel';
-      skLabel.textContent = 'Skills to focus on (correct / attempted)';
-      card.appendChild(skLabel);
-    }
-    card.appendChild(sectionSkillBars(s5));
-
+    // Per-module "Skills to focus on" bars used to live here — cut in
+    // favor of the whole-test "Topics costing the most points" list in
+    // the Skill Breakdown section further down (see renderSkillBreakdown),
+    // which is the same missed-skill data at the altitude that's actually
+    // useful (once, ranked, whole-test) instead of once per module. "By
+    // content area" stays: it shows every domain (not just misses), which
+    // the whole-test "Accuracy by topic" view doesn't fully replace since
+    // that one's per-subject rather than per-module.
     var domLabel = document.createElement('div');
     domLabel.className = 'sc-grouplabel';
     domLabel.textContent = 'By content area (correct / attempted)';
@@ -2125,6 +2396,281 @@
     });
     twrap.appendChild(tb);
   });
+
+  /* ═══ SKILL BREAKDOWN — topics costing points, accuracy by topic, and
+     time-by-difficulty, one level up from the per-module section cards
+     above (those are per-module; this is per-subject, matching how a
+     parent actually thinks about "how's Math doing" rather than "how's
+     Math Module 2 doing"). Only rendered when there's more than one
+     subject to make a "breakdown" meaningful — a single-section report
+     would just be duplicating the one section card above it. ═══ */
+  (function renderSkillBreakdown() {
+    if (sections.length < 2) return;
+    document.getElementById('skillbreak-hed').style.display = '';
+
+    // Topics costing the most points — same skill-miss data the bridge
+    // chart above is built from, ranked and shown as a scannable list
+    // instead of a waterfall. t>=2 mirrors the same reliability bar the
+    // takeaways section already applies before naming a skill by name.
+    var topicsWrap = document.getElementById('topics-costing');
+    var skillEntries = Object.keys(skills).map(function (k) {
+      var v = skills[k];
+      return { name: k, c: v.c, t: v.t, missed: v.t - v.c, pct: v.t ? v.c / v.t : 0 };
+    }).filter(function (e) { return e.t >= 2 && e.missed > 0; })
+      .sort(function (a, b) { return b.missed - a.missed || a.pct - b.pct; })
+      .slice(0, 5);
+    if (skillEntries.length) {
+      topicsWrap.style.display = '';
+      var list = document.createElement('div');
+      list.className = 'topics-list';
+      skillEntries.forEach(function (e, i) {
+        var pct = Math.round(e.pct * 100);
+        var band = pct < 50 ? 'var(--red)' : (pct >= 75 ? 'var(--green)' : 'var(--gold)');
+        var row = document.createElement('div');
+        row.className = 'topics-row';
+        var r2 = 13, circ = 2 * Math.PI * r2;
+        row.innerHTML =
+          '<span class="topics-rank">' + (i + 1) + '</span>' +
+          '<span class="topics-main"><span class="topics-name">' + e.name + '</span>' +
+          '<span class="topics-meta">' + e.c + '/' + e.t + ' correct &middot; ' + e.t + ' attempts</span></span>' +
+          '<span class="topics-gauge"><svg width="34" height="34" viewBox="0 0 34 34">' +
+            '<circle cx="17" cy="17" r="' + r2 + '" fill="none" stroke="#eee7da" stroke-width="3.5"/>' +
+            '<circle cx="17" cy="17" r="' + r2 + '" fill="none" stroke="' + band + '" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="' + circ + '" stroke-dashoffset="' + (circ * (1 - e.pct)) + '" transform="rotate(-90 17 17)"/>' +
+            '<text x="17" y="20" text-anchor="middle" font-size="9" font-weight="800" fill="' + band + '" font-family="Nunito, sans-serif">' + pct + '</text>' +
+          '</svg></span>';
+        list.appendChild(row);
+      });
+      topicsWrap.appendChild(list);
+    }
+
+    // Accuracy by topic + time-by-difficulty, one card pair per subject
+    // (Reading & Writing / Math, or English / Math / Reading / Science for
+    // the ACT) — each subject's own domains{} (already computed per
+    // section, above) and its rows' timeMs grouped by q.difficulty.
+    var accWrap = document.getElementById('accuracy-by-topic');
+    var accGrid = document.createElement('div');
+    accGrid.className = 'acc-topic-grid';
+    var DIFF_COLORS = { easy: '#A9C4B4', medium: 'var(--gold)', hard: 'var(--red)' };
+    sections.forEach(function (sec) {
+      var domEntries = Object.keys(sec.domains).map(function (d) {
+        var v = sec.domains[d];
+        return { name: d, c: v.c, t: v.t, pct: v.t ? v.c / v.t : 0 };
+      }).sort(function (a, b) { return a.pct - b.pct; });
+      if (!domEntries.length) return;
+      var card = document.createElement('div');
+      card.className = 'acc-topic-card';
+      var hed = document.createElement('div');
+      hed.className = 'acc-topic-card-hed';
+      hed.textContent = sec.label;
+      card.appendChild(hed);
+      var legend = document.createElement('div');
+      legend.className = 'acc-topic-legend';
+      legend.innerHTML = '<span><i style="background:var(--red)"></i>&lt; 50%</span><span><i style="background:var(--gold)"></i>50&ndash;74%</span><span><i style="background:var(--green)"></i>&ge; 75%</span>';
+      card.appendChild(legend);
+      domEntries.forEach(function (de) {
+        var pct = Math.round(de.pct * 100);
+        var row = document.createElement('div');
+        row.className = 'acc-topic-row';
+        row.innerHTML = '<div class="acc-topic-row-lab"><span>' + de.name + '</span><span class="n">' + de.c + '/' + de.t + ' &middot; ' + pct + '%</span></div>' +
+          '<div class="acc-topic-track"><div class="acc-topic-dot" style="left:' + pct + '%;"></div></div>';
+        card.appendChild(row);
+      });
+
+      // Time by difficulty, this subject, both modules combined — same
+      // underlying timeMs/q.difficulty already used per-module in the
+      // section cards above, aggregated one level up. Rendered as a
+      // donut here specifically (the per-module view above stays a bar,
+      // to match this page's other proportions) since this is a new,
+      // higher-level summary rather than a restyle of that existing one.
+      var byDiff = { easy: 0, medium: 0, hard: 0 };
+      sec.rows.forEach(function (r) {
+        var d = r.q && r.q.difficulty;
+        if (byDiff.hasOwnProperty(d)) byDiff[d] += (r.timeMs || 0);
+      });
+      var totalMs = byDiff.easy + byDiff.medium + byDiff.hard;
+      if (totalMs > 0) {
+        var dlabel = document.createElement('div');
+        dlabel.className = 'acc-topic-row-lab';
+        dlabel.style.marginTop = '10px';
+        dlabel.innerHTML = '<span>Time by difficulty</span><span class="n">' + formatDuration(totalMs) + ' total</span>';
+        card.appendChild(dlabel);
+        var donutWrap = document.createElement('div');
+        donutWrap.style.display = 'flex';
+        donutWrap.style.alignItems = 'center';
+        donutWrap.style.gap = '10px';
+        var R = 22, C = 2 * Math.PI * R, offset = 0;
+        var arcs = ['easy', 'medium', 'hard'].map(function (d) {
+          var frac = byDiff[d] / totalMs;
+          var dash = frac * C;
+          var seg = '<circle cx="26" cy="26" r="' + R + '" fill="none" stroke="' + DIFF_COLORS[d] + '" stroke-width="7" stroke-dasharray="' + dash + ' ' + (C - dash) + '" stroke-dashoffset="' + (-offset) + '" transform="rotate(-90 26 26)"/>';
+          offset += dash;
+          return seg;
+        }).join('');
+        var legendHtml = ['easy', 'medium', 'hard'].map(function (d) {
+          return byDiff[d] > 0 ? '<span><i style="background:' + DIFF_COLORS[d] + '"></i>' + d.charAt(0).toUpperCase() + d.slice(1) + ' ' + formatDuration(byDiff[d]) + '</span>' : '';
+        }).join('');
+        donutWrap.innerHTML = '<svg width="52" height="52" viewBox="0 0 52 52">' + arcs + '</svg>' +
+          '<div class="acc-topic-legend" style="flex-direction:column; align-items:flex-start; gap:3px;">' + legendHtml + '</div>';
+        card.appendChild(donutWrap);
+      }
+
+      accGrid.appendChild(card);
+    });
+    if (accGrid.children.length) {
+      accWrap.style.display = '';
+      accWrap.appendChild(accGrid);
+    }
+  })();
+
+  /* ═══ CONFIDENCE QUADRANT ═══ per subject: every multiple-choice
+     question plotted by time (x — this subject's OWN pace, not a peer
+     average nobody here has) and correct/wrong (y). Quadrant meaning
+     mirrors the same rushed/lucky logic the behavior flags above already
+     use, just shown per-question instead of summarized into a sentence:
+     fast+right = confidently know it, slow+right = got there but not
+     fast, fast+wrong = probably a guess, slow+wrong = a real gap worked
+     through and still missed. */
+  (function renderConfidenceQuadrant() {
+    var wrap = document.getElementById('confidence-quadrant');
+    var cards = [];
+    sections.forEach(function (sec) {
+      var mcRows = sec.rows.filter(function (r) { return r.q && r.q.type === 'mc' && r.timeMs > 0; });
+      if (mcRows.length < 6) return; // too few points to read as a real scatter
+      var times = mcRows.map(function (r) { return r.timeMs; }).sort(function (a, b) { return a - b; });
+      function percentileOf(ms) {
+        var idx = times.filter(function (t) { return t <= ms; }).length;
+        return times.length > 1 ? (idx - 1) / (times.length - 1) : 0.5;
+      }
+      var W = 300, H = 190, PAD = 8;
+      var dots = mcRows.map(function (r) {
+        var px = PAD + percentileOf(r.timeMs) * (W - PAD * 2);
+        var jitter = ((r.n * 37) % 100) / 100;
+        var py = r.ok ? (18 + jitter * (H / 2 - 30)) : (H / 2 + 12 + jitter * (H / 2 - 30));
+        var cls = r.ok ? 'ok' : 'bad';
+        return '<circle cx="' + px.toFixed(1) + '" cy="' + py.toFixed(1) + '" r="4.5" class="quad-dot ' + cls + '" data-n="' + r.n + '"><title>Q' + r.n + ' — ' + (r.ok ? 'correct' : 'incorrect') + ', ' + formatDuration(r.timeMs) + '</title></circle>';
+      }).join('');
+      var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" style="max-width:340px; display:block; margin:0 auto;">' +
+        '<rect x="0" y="0" width="' + (W / 2) + '" height="' + (H / 2) + '" fill="rgba(94,139,111,0.08)"/>' +
+        '<rect x="' + (W / 2) + '" y="0" width="' + (W / 2) + '" height="' + (H / 2) + '" fill="rgba(201,168,76,0.08)"/>' +
+        '<rect x="0" y="' + (H / 2) + '" width="' + (W / 2) + '" height="' + (H / 2) + '" fill="rgba(176,39,28,0.05)"/>' +
+        '<rect x="' + (W / 2) + '" y="' + (H / 2) + '" width="' + (W / 2) + '" height="' + (H / 2) + '" fill="rgba(176,39,28,0.1)"/>' +
+        '<line x1="' + (W / 2) + '" y1="0" x2="' + (W / 2) + '" y2="' + H + '" stroke="var(--border)" stroke-dasharray="3 3"/>' +
+        '<line x1="0" y1="' + (H / 2) + '" x2="' + W + '" y2="' + (H / 2) + '" stroke="var(--border)"/>' +
+        '<text x="6" y="12" font-size="8" fill="var(--green)" font-weight="800" font-family="Nunito, sans-serif">Confident</text>' +
+        '<text x="' + (W - 6) + '" y="12" text-anchor="end" font-size="8" fill="var(--gold)" font-weight="800" font-family="Nunito, sans-serif">Careful</text>' +
+        '<text x="6" y="' + (H - 6) + '" font-size="8" fill="var(--red)" font-weight="800" font-family="Nunito, sans-serif">Guessed</text>' +
+        '<text x="' + (W - 6) + '" y="' + (H - 6) + '" text-anchor="end" font-size="8" fill="var(--red)" font-weight="800" font-family="Nunito, sans-serif">Struggled</text>' +
+        dots + '</svg>';
+      var card = document.createElement('div');
+      card.className = 'quadrant-card';
+      card.innerHTML = '<div class="quadrant-card-hed">' + sec.label + '</div>' + svg;
+      card.querySelectorAll('.quad-dot').forEach(function (dotEl, idx) {
+        dotEl.style.cursor = 'pointer';
+        dotEl.addEventListener('click', function () { openQuestionModal(mcRows[idx], sec.label); });
+      });
+      cards.push(card);
+    });
+    if (cards.length) {
+      document.getElementById('quadrant-hed').style.display = '';
+      document.getElementById('quadrant-sub').style.display = '';
+      document.getElementById('quadrant-sub-first').textContent = first;
+      wrap.style.display = '';
+      var grid = document.createElement('div');
+      grid.className = 'quadrant-grid';
+      cards.forEach(function (c) { grid.appendChild(c); });
+      wrap.appendChild(grid);
+    }
+  })();
+
+  /* ═══ PROGRESS CARD ═══ a real composite-score trend, fetched live from
+     the backend's ScoreHistory sheet (see handleGetScoreHistory in
+     Code.gs) rather than baked into this report's own URL — keeps the
+     link short and means the chart is always current, not frozen at
+     whatever history existed the moment THIS report was generated.
+     Clicking a point shows that attempt's date/composite/weakest-area —
+     it does NOT link to that attempt's own full report, because no full
+     past report is stored anywhere retrievable server-side (only the
+     composite + weakest label are logged) — building that would need a
+     real backend store of past report payloads, not a small addition. */
+  (function renderProgressCard() {
+    var body = document.getElementById('progress-card-body');
+    if (!data.k) { body.innerHTML = '<div class="progress-empty">No student key on this report.</div>'; return; }
+    var APPS_SCRIPT_URL_LOCAL = 'https://script.google.com/macros/s/AKfycbwsLMGq3lhBEPObcas0k8gVS67NX9y4wXKG6RgzKtlBOT2SXfREK6vBpvvM19w9s1m6/exec';
+    var controller = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    var timer = controller ? setTimeout(function () { controller.abort(); }, 10000) : null;
+    fetch(APPS_SCRIPT_URL_LOCAL, { method: 'POST', body: JSON.stringify({ action: 'getScoreHistory', key: data.k }), signal: controller ? controller.signal : undefined })
+      .then(function (res) { if (timer) clearTimeout(timer); return res.json(); })
+      .then(function (resp) {
+        if (!resp || !resp.ok || !Array.isArray(resp.entries) || resp.entries.length < 2) {
+          body.innerHTML = '<div class="progress-empty">Not enough attempts yet to chart a trend — this fills in after a second diagnostic or practice test.</div>';
+          return;
+        }
+        drawProgress(resp.entries.filter(function (e) { return e.composite; }));
+      })
+      .catch(function () {
+        body.innerHTML = '<div class="progress-empty">Couldn&rsquo;t load score history right now.</div>';
+      });
+
+    function drawProgress(entries) {
+      if (entries.length < 2) { body.innerHTML = '<div class="progress-empty">Not enough attempts yet to chart a trend.</div>'; return; }
+      body.innerHTML = '';
+      var wrapEl = document.createElement('div');
+      wrapEl.className = 'progress-chart-wrap';
+      var W = 300, H = 110, padL = 26, padR = 10, padT = 12, padB = 18;
+      var plotW = W - padL - padR, plotH = H - padT - padB;
+      var vals = entries.map(function (e) { return e.composite; });
+      var minV = Math.min.apply(null, vals), maxV = Math.max.apply(null, vals);
+      var range = (maxV - minV) || 1;
+      var pad2 = range * 0.15;
+      var axisMin = minV - pad2, axisMax = maxV + pad2;
+      function x(i) { return padL + (entries.length > 1 ? i / (entries.length - 1) : 0.5) * plotW; }
+      function y(v) { return padT + plotH - ((v - axisMin) / (axisMax - axisMin)) * plotH; }
+      var dpr = Math.min(2, window.devicePixelRatio || 1);
+      var cv = document.createElement('canvas');
+      cv.width = W * dpr; cv.height = H * dpr;
+      cv.style.width = W + 'px'; cv.style.height = H + 'px';
+      cv.style.cursor = 'pointer';
+      var ctx = cv.getContext('2d');
+      ctx.scale(dpr, dpr);
+      ctx.strokeStyle = 'rgba(17,17,17,0.12)';
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(padL, padT); ctx.lineTo(padL, H - padB); ctx.lineTo(W - padR, H - padB); ctx.stroke();
+      ctx.strokeStyle = '#B0271C';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      entries.forEach(function (e, i) { var px = x(i), py = y(e.composite); if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py); });
+      ctx.stroke();
+      entries.forEach(function (e, i) {
+        var px = x(i), py = y(e.composite);
+        ctx.beginPath();
+        ctx.fillStyle = (i === entries.length - 1) ? '#B0271C' : '#fff';
+        ctx.strokeStyle = '#B0271C';
+        ctx.lineWidth = 1.4;
+        ctx.arc(px, py, i === entries.length - 1 ? 3.6 : 2.6, 0, Math.PI * 2);
+        ctx.fill(); ctx.stroke();
+      });
+      ctx.fillStyle = 'rgba(17,17,17,0.4)';
+      ctx.font = '8px Poppins, sans-serif';
+      ctx.textAlign = 'left'; ctx.fillText(String(Math.round(axisMax)), 2, padT + 4);
+      ctx.fillText(String(Math.round(axisMin)), 2, H - padB);
+      wrapEl.appendChild(cv);
+      var infoEl = document.createElement('div');
+      infoEl.className = 'progress-point-info';
+      infoEl.innerHTML = 'Click a point for details.';
+      wrapEl.appendChild(infoEl);
+      cv.addEventListener('click', function (e) {
+        var rect = cv.getBoundingClientRect();
+        var mx = e.clientX - rect.left;
+        var closest = 0, closestDist = Infinity;
+        entries.forEach(function (en, i) { var d2 = Math.abs(x(i) - mx); if (d2 < closestDist) { closestDist = d2; closest = i; } });
+        var pt = entries[closest];
+        var dateStr2 = pt.date ? new Date(pt.date).toLocaleDateString() : '';
+        var weakTxt = pt.weakest ? (' Weakest: <strong>' + esc(pt.weakest.label) + '</strong> (' + pt.weakest.correct + '/' + pt.weakest.total + ').') : '';
+        infoEl.innerHTML = '<strong>' + esc(pt.testTitle || pt.testType || 'Attempt') + '</strong> &middot; ' + dateStr2 + ' &middot; <span class="r">' + pt.composite + '</span>.' + weakTxt;
+      });
+      body.appendChild(wrapEl);
+    }
+  })();
 
   document.getElementById('page1').style.display = 'block';
 
