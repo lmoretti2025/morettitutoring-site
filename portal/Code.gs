@@ -22,29 +22,21 @@
 
    SETUP — see the deployment guide for full steps. Short version:
      1. Create a Google Sheet with a tab named "Students" and headers:
-          Key | Name | DriveFolderUrl | GrantedEmail | GrantedAt | SATTakenAt | ACTTakenAt | TestPrep | SAT | ACT | TestDate
-        (SATTakenAt/ACTTakenAt track the one-real-diagnostic-per-test-type
-        feature — leave both blank for everyone; they get stamped
-        automatically the first time each student finishes that test's
-        diagnostic. A blank cell means "never taken."
-        TestPrep controls whether a student sees the SAT/ACT Diagnostics
-        and SAT/ACT Resources cards on the portal home screen AT ALL — a
-        student who's only doing subject tutoring, not test prep, should
-        have this left blank/unchecked so those two cards just don't show
-        up for them; "Your Files" always shows either way. Use an actual
-        checkbox column (Insert > Checkbox) or just type TRUE/yes in the
-        cell — either is read as "on".
-        SAT / ACT are two more checkbox columns that say WHICH test(s) a
-        test-prep student is actually working on — check SAT for an SAT
-        student, ACT for an ACT student, both if genuinely undecided
-        between the two. This controls which test's diagnostic button and
-        resources (vocab list, etc. — SAT-specific tools) the student
-        sees; an ACT-only student never sees SAT-only material and vice
-        versa. If TestPrep is checked but neither SAT nor ACT is checked
-        (e.g. an existing row from before these columns existed), both
-        show by default — nothing breaks for students you haven't
-        re-flagged yet.
-        TestDate is the student's actual SAT/ACT test date — type it in as
+          Key | Name | DriveFolderUrl | GrantedEmail | GrantedAt | SATTakenAt | SAT | TestDate
+        (SATTakenAt tracks the one-real-diagnostic feature — leave blank
+        for everyone; it gets stamped automatically the first time a
+        student finishes the diagnostic. A blank cell means "never taken."
+        SAT is the master on/off switch for whether a student sees the SAT
+        Diagnostic and SAT Resources cards on the portal home screen AT
+        ALL — a student who's only doing subject tutoring, not test prep,
+        should have this left blank/unchecked so those two cards just
+        don't show up for them; "Your Files" always shows either way. Use
+        an actual checkbox column (Insert > Checkbox) or just type
+        TRUE/yes in the cell — either is read as "on". (The program is
+        SAT-only now — the old separate TestPrep/ACT columns and ACT
+        diagnostic support were retired; SAT alone does the job TestPrep
+        used to.)
+        TestDate is the student's actual SAT test date — type it in as
         a real date (Insert > Date, or just type e.g. 3/14/2027). When
         it's set, the portal home screen shows a countdown/progress bar
         running from the day the student first logged into the portal
@@ -63,17 +55,21 @@
         | DoneAt. To assign something, just add a row yourself (Key, Task
         text, today's date in Timestamp, leave Done unchecked). See
         getAssignments_() below for details.
-        A tab named "Progress" is also created automatically the first
-        time a student finishes a diagnostic or practice test — it's what
-        makes the portal's "My Incorrect Questions" and "Practice My Weak
-        Spots" tools work from any device instead of just the one that
-        took the test. Nothing to set up or maintain here; see
+        IncorrectQuestionsJSON / SkillStatsJSON / ProgressUpdatedAt are
+        three more columns on Students, auto-created the first time a
+        student finishes a diagnostic or practice test — they're what make
+        the portal's "My Incorrect Questions" and "Practice My Weak Spots"
+        tools work from any device instead of just the one that took the
+        test. Nothing to set up or maintain here; see
         handleSyncProgress()/handleGetProgress() below for details.
-        A tab named "ScoreHistory" is also created automatically, the
-        first time any student finishes a diagnostic/practice test — a
-        server-side log of every composite score, used by the biweekly
-        guardian summary email (see below). Nothing to set up here either;
-        see handleSyncScoreHistory() below.
+        A tab named "Attempts" is also created automatically, the first
+        time any student finishes a diagnostic/practice test — one row per
+        attempt (a 'log' row with the full report text/Drive/email status,
+        and a 'score' row with the composite/section scores, both tagged
+        via the Kind column), used by the biweekly guardian summary email
+        (see below) and by report.html's live Score Progress chart.
+        Nothing to set up here either; see handleSyncScoreHistory() and
+        logDiagnosticResult_() below.
         GuardianName / GuardianEmail are two more optional columns on
         Students — fill these in by hand for any student whose
         parent/guardian should get a biweekly progress-summary email
@@ -129,7 +125,7 @@ function doPost(e) {
     } else if (body.action === 'markDiagnosticTaken') {
       out = handleMarkDiagnosticTaken(body.key, body.test);
     } else if (body.action === 'submitDiagnostic') {
-      out = handleSubmitDiagnostic(body.key, body.test, body.score, body.reportLink, body.report);
+      out = handleSubmitDiagnostic(body.key, body.test, body.score, body.reportLink, body.report, body);
     } else if (body.action === 'toggleAssignment') {
       out = handleToggleAssignment(body.key, body.row, !!body.done);
     } else if (body.action === 'getAssignments') {
@@ -137,7 +133,7 @@ function doPost(e) {
     } else if (body.action === 'assignHomeworkFromDialog') {
       out = handleAssignHomeworkFromDialog(body.key, body.task);
     } else if (body.action === 'submitPracticeTest') {
-      out = handleSubmitPracticeTest(body.key, body.test, body.score, body.reportLink, body.report);
+      out = handleSubmitPracticeTest(body.key, body.test, body.score, body.reportLink, body.report, body.testId, body);
     } else if (body.action === 'submitLead') {
       out = handleSubmitLead(body.name, body.phone, body.email, body.isUSA, body.role, body.grade, body.topic, body.message, body.hp, body.elapsedMs);
     } else if (body.action === 'syncProgress') {
@@ -148,6 +144,8 @@ function doPost(e) {
       out = handleSaveOnboardingPrefs(body.key, body.testDate, body.accomTimeMult, body.accomBreakMult, body.baselineType, body.baselineRw, body.baselineMath, body.guardianName, body.guardianEmail);
     } else if (body.action === 'syncScoreHistory') {
       out = handleSyncScoreHistory(body.key, body.entry);
+    } else if (body.action === 'getScoreHistory') {
+      out = handleGetScoreHistory(body.key);
     } else {
       out = { ok: false, error: 'unknown_action' };
     }
@@ -185,7 +183,7 @@ function findRow_(sheet, key) {
 }
 
 // Reads a Students-sheet cell that's meant to be a yes/no flag (like
-// TestPrep) and returns a real boolean. A checkbox column already comes
+// SAT) and returns a real boolean. A checkbox column already comes
 // back as true/false from getValues(), but this also accepts plain typed
 // text (TRUE/true/yes/y/1) in case the column isn't formatted as a
 // checkbox — so Luca can just type into the cell either way.
@@ -251,21 +249,19 @@ function grantFolderAccess_(url, email) {
   }
 }
 
-// Works out which test(s) a student should see the diagnostic/resources
-// UI for. testPrep is the master on/off switch (subject-only tutoring
-// students have it off and never see either). Within test-prep students,
-// the SAT/ACT columns say which test(s) — if neither is checked (most
-// commonly: an older row from before these columns existed), both show,
-// so nothing silently disappears for students who haven't been re-flagged.
+// Works out whether a student should see the SAT diagnostic/resources UI.
+// The program is SAT-only now — the old separate TestPrep (master on/off)
+// and SAT/ACT (which test) columns collapsed into this one SAT checkbox,
+// which does both jobs at once: unchecked means subject-tutoring-only
+// (never sees the SAT Diagnostic/Resources cards), checked means test
+// prep. ACT is retired — showAct is always false, so any ACT-specific UI
+// still in the client is simply unreachable now, not deleted outright.
 function testPrepFlags_(row) {
-  var testPrepOn = truthy_(row.TestPrep);
-  var sat = truthy_(row.SAT);
-  var act = truthy_(row.ACT);
-  var neitherSpecified = !sat && !act;
+  var showSat = truthy_(row.SAT);
   return {
-    testPrep: testPrepOn,
-    showSat: testPrepOn && (sat || neitherSpecified),
-    showAct: testPrepOn && (act || neitherSpecified)
+    testPrep: showSat,
+    showSat: showSat,
+    showAct: false
   };
 }
 
@@ -303,7 +299,7 @@ function handleAuth(rawKey, rawEmail, rawName) {
     // First time this key has ever been used.
     if (!email) {
       var flags0 = testPrepFlags_(row);
-      return { ok: true, name: row.Name, needsEmail: true, satTaken: !!row.SATTakenAt, actTaken: !!row.ACTTakenAt, testPrep: flags0.testPrep, showSat: flags0.showSat, showAct: flags0.showAct };
+      return { ok: true, name: row.Name, needsEmail: true, satTaken: !!row.SATTakenAt, actTaken: false, testPrep: flags0.testPrep, showSat: flags0.showSat, showAct: flags0.showAct };
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return { ok: false, error: 'bad_email' };
@@ -363,7 +359,7 @@ function handleAuth(rawKey, rawEmail, rawName) {
     needsEmail: false,
     driveFolderUrl: row.DriveFolderUrl || '',
     satTaken: !!row.SATTakenAt,
-    actTaken: !!row.ACTTakenAt,
+    actTaken: false,
     testPrep: flags.testPrep,
     showSat: flags.showSat,
     showAct: flags.showAct,
@@ -380,6 +376,7 @@ function handleAuth(rawKey, rawEmail, rawName) {
     baselineMath: row.BaselineMath || null,
     guardianName: row.GuardianName || null,
     guardianEmail: row.GuardianEmail || null,
+    targetScore: row.TargetScore || null,
     tests: [],
     assignments: getAssignments_(key, row.Name)
   };
@@ -400,7 +397,7 @@ function handleAuth(rawKey, rawEmail, rawName) {
    (see the "GUARDIAN BIWEEKLY SUMMARY" section further down for the one
    thing that will, once/if that's turned on).
    ========================================================================= */
-function handleSaveOnboardingPrefs(rawKey, rawTestDate, rawAccomTimeMult, rawAccomBreakMult, rawBaselineType, rawBaselineRw, rawBaselineMath, rawGuardianName, rawGuardianEmail) {
+function handleSaveOnboardingPrefs(rawKey, rawTestDate, rawAccomTimeMult, rawAccomBreakMult, rawBaselineType, rawBaselineRw, rawBaselineMath, rawGuardianName, rawGuardianEmail, rawTargetScore) {
   var key = String(rawKey || '').trim().toUpperCase();
   if (!key) return { ok: false, error: 'missing_key' };
 
@@ -409,7 +406,7 @@ function handleSaveOnboardingPrefs(rawKey, rawTestDate, rawAccomTimeMult, rawAcc
   if (!row) return { ok: false, error: 'bad_key' };
 
   var headers = row._headers;
-  ['AccomTimeMult', 'AccomBreakMult', 'BaselineType', 'BaselineRW', 'BaselineMath', 'GuardianName', 'GuardianEmail'].forEach(function (col) {
+  ['AccomTimeMult', 'AccomBreakMult', 'BaselineType', 'BaselineRW', 'BaselineMath', 'GuardianName', 'GuardianEmail', 'TargetScore'].forEach(function (col) {
     if (headers.indexOf(col) === -1) {
       sheet.getRange(1, sheet.getLastColumn() + 1).setValue(col);
       headers.push(col);
@@ -460,6 +457,15 @@ function handleSaveOnboardingPrefs(rawKey, rawTestDate, rawAccomTimeMult, rawAcc
   var guardianEmail = String(rawGuardianEmail || '').trim().toLowerCase();
   if (guardianName) setCol('GuardianName', sheetSafe_(guardianName));
   if (guardianEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guardianEmail)) setCol('GuardianEmail', guardianEmail);
+
+  // Target score — the goal the score-bridge chart on report.html measures
+  // distance against. Loosely validated (1-1600 covers both the ACT's 1-36
+  // and the SAT's 400-1600 without this function needing to know which
+  // test the student is actually prepping for) rather than tightly, same
+  // "never trust the client, but don't need to re-derive its own form
+  // logic here" spirit as the rest of this function.
+  var targetScore = Number(rawTargetScore);
+  if (targetScore >= 1 && targetScore <= 1600) setCol('TargetScore', targetScore);
 
   return { ok: true };
 }
@@ -843,7 +849,7 @@ function handleMarkDiagnosticTaken(rawKey, rawTest) {
    is send their own name with a score they could inflate — a completely
    different risk level from anonymous forgery, and one tied to an identity.
    ========================================================================= */
-function handleSubmitDiagnostic(rawKey, rawTest, score, reportLink, reportText) {
+function handleSubmitDiagnostic(rawKey, rawTest, score, reportLink, reportText, scoreFields) {
   if (!rawKey) return { ok: false, error: 'missing_key' };
   var key = String(rawKey).trim().toUpperCase();
   var test = String(rawTest || '').trim().toUpperCase();
@@ -939,7 +945,7 @@ function handleSubmitDiagnostic(rawKey, rawTest, score, reportLink, reportText) 
   // DiagnosticLog tab and read the EmailSent/EmailError columns directly.
   var logOk = false;
   try {
-    logDiagnosticResult_(key, name, test, safeScore, link, extra, driveOk, driveFileUrl, !emailError, emailError);
+    logDiagnosticResult_(key, name, test, safeScore, link, extra, driveOk, driveFileUrl, !emailError, emailError, 'diagnostic', '', test, scoreFields);
     logOk = true;
   } catch (logErr) {
     console.error('Failed to write DiagnosticLog row for ' + key + ': ' + logErr);
@@ -961,10 +967,11 @@ function handleSubmitDiagnostic(rawKey, rawTest, score, reportLink, reportText) 
 // show up in one place for Luca to review. Rows/files from practice tests
 // are distinguishable by the Test column containing the full test title
 // ("SAT Practice Test 2") instead of just "SAT"/"ACT".
-function handleSubmitPracticeTest(rawKey, rawTitle, score, reportLink, reportText) {
+function handleSubmitPracticeTest(rawKey, rawTitle, score, reportLink, reportText, rawTestId, scoreFields) {
   if (!rawKey) return { ok: false, error: 'missing_key' };
   var key = String(rawKey).trim().toUpperCase();
   var test = String(rawTitle || '').trim().slice(0, 80) || 'Practice Test';
+  var testId = String(rawTestId || '').trim().slice(0, 80);
 
   var sheet = getSheet_();
   var row = findRow_(sheet, key);
@@ -1018,7 +1025,7 @@ function handleSubmitPracticeTest(rawKey, rawTitle, score, reportLink, reportTex
 
   var logOk = false;
   try {
-    logDiagnosticResult_(key, name, test, safeScore, link, extra, driveOk, driveFileUrl, !emailError, emailError);
+    logDiagnosticResult_(key, name, test, safeScore, link, extra, driveOk, driveFileUrl, !emailError, emailError, 'practice-test', testId, 'SAT', scoreFields);
     logOk = true;
   } catch (logErr) {
     console.error('Failed to write DiagnosticLog row for ' + key + ': ' + logErr);
@@ -1027,21 +1034,90 @@ function handleSubmitPracticeTest(rawKey, rawTitle, score, reportLink, reportTex
   return { ok: logOk || driveOk, driveSaved: driveOk, driveFileUrl: driveFileUrl, logSaved: logOk, emailSent: !emailError, emailError: emailError || undefined };
 }
 
-// Appends one row to a "DiagnosticLog" tab (auto-created on first use, left
-// alone after that) so every submitted diagnostic has a durable record
-// independent of email delivery, AND records whether the email itself
-// succeeded — so a future silent email failure is diagnosable straight
-// from the spreadsheet, no Executions log required. Columns: Timestamp |
-// Key | Name | Test | Score | ReportLink | Report | DriveSaved |
+// One row per diagnostic/practice-test attempt, tagged by Kind so this one
+// tab can serve both the old "DiagnosticLog" (full report text + Drive/
+// email status, written here) and "ScoreHistory" (composite/section
+// scores, written by handleSyncScoreHistory below) jobs without forcing
+// the two separate client calls that produce them into a single request.
+// Auto-created on first use, self-migrates in an existing spreadsheet the
+// same way getScoreHistorySheet_ used to. Columns: Kind | Timestamp | Key
+// | Name | TestType | Source | TestId | TestTitle | Score | Composite |
+// ScaleMin | ScaleMax | RW | Math | WeakestLabel | WeakestCorrect |
+// WeakestTotal | ReportLink | AttemptId | Report | DriveSaved |
 // DriveFileUrl | EmailSent | EmailError.
-function logDiagnosticResult_(key, name, test, score, reportLink, reportText, driveSaved, driveFileUrl, emailSent, emailError) {
+var ATTEMPTS_HEADERS_ = ['Kind', 'Timestamp', 'Key', 'Name', 'TestType', 'Source', 'TestId', 'TestTitle',
+  'Score', 'Composite', 'ScaleMin', 'ScaleMax', 'RW', 'Math', 'WeakestLabel', 'WeakestCorrect', 'WeakestTotal',
+  'ReportLink', 'AttemptId', 'Report', 'DriveSaved', 'DriveFileUrl', 'EmailSent', 'EmailError'];
+function getAttemptsSheet_() {
   var ss = SpreadsheetApp.openById(SHEET_ID);
-  var log = ss.getSheetByName('DiagnosticLog');
-  if (!log) {
-    log = ss.insertSheet('DiagnosticLog');
-    log.appendRow(['Timestamp', 'Key', 'Name', 'Test', 'Score', 'ReportLink', 'Report', 'DriveSaved', 'DriveFileUrl', 'EmailSent', 'EmailError']);
+  var sheet = ss.getSheetByName('Attempts');
+  if (!sheet) {
+    sheet = ss.insertSheet('Attempts');
+    sheet.appendRow(ATTEMPTS_HEADERS_);
+  } else {
+    var headers = sheet.getRange(1, 1, 1, Math.max(sheet.getLastColumn(), 1)).getValues()[0];
+    ATTEMPTS_HEADERS_.forEach(function (name) {
+      if (headers.indexOf(name) === -1) {
+        sheet.getRange(1, headers.length + 1).setValue(name);
+        headers.push(name);
+      }
+    });
   }
-  log.appendRow([new Date(), sheetSafe_(key), sheetSafe_(name), sheetSafe_(test), sheetSafe_(score), sheetSafe_(reportLink), sheetSafe_(reportText), !!driveSaved, sheetSafe_(driveFileUrl || ''), !!emailSent, sheetSafe_(emailError || '')]);
+  return sheet;
+}
+
+// Appends one Kind:'log' row to the Attempts sheet so every submitted
+// diagnostic has a durable record independent of email delivery, AND
+// records whether the email itself succeeded — so a future silent email
+// failure is diagnosable straight from the spreadsheet, no Executions log
+// required.
+// source/testId/testType are what let this 'log' row participate in the
+// SAME "Completed" badge / Attempt 1,2,3.../View Results grouping that
+// 'score' rows drive on the portal (see practiceTestAttempts()/
+// diagnosticAttempts() in index.html) — without them, a real, successful
+// submission would still be durably logged here but invisible to that UI,
+// since it filters on exactly these three fields.
+function logDiagnosticResult_(key, name, test, score, reportLink, reportText, driveSaved, driveFileUrl, emailSent, emailError, source, testId, testType, scoreFields) {
+  var sheet = getAttemptsSheet_();
+  var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  var col = {};
+  headers.forEach(function (h, i) { col[h] = i; });
+  var out = new Array(headers.length).fill('');
+  out[col.Kind] = 'log';
+  out[col.Timestamp] = new Date();
+  out[col.Key] = sheetSafe_(key);
+  out[col.Name] = sheetSafe_(name);
+  out[col.TestTitle] = sheetSafe_(test);
+  out[col.Score] = sheetSafe_(score);
+  out[col.ReportLink] = sheetSafe_(reportLink);
+  out[col.Report] = sheetSafe_(reportText);
+  out[col.DriveSaved] = !!driveSaved;
+  out[col.DriveFileUrl] = sheetSafe_(driveFileUrl || '');
+  out[col.EmailSent] = !!emailSent;
+  out[col.EmailError] = sheetSafe_(emailError || '');
+  out[col.Source] = source || '';
+  out[col.TestId] = testId || '';
+  out[col.TestType] = testType || '';
+  // Carried on this SAME row (instead of only the separate 'score'-Kind
+  // row a parallel syncScoreHistory call used to write) so the Home
+  // graph/"View Results" menu always has a composite the moment this
+  // request succeeds — see scoreEntryForSubmit in index.html for why the
+  // old separate call couldn't be relied on alone.
+  var sf = (scoreFields && typeof scoreFields === 'object') ? scoreFields : {};
+  var composite = Number(sf.composite);
+  if (composite) {
+    out[col.Composite] = composite;
+    out[col.ScaleMin] = Number(sf.scaleMin) || '';
+    out[col.ScaleMax] = Number(sf.scaleMax) || '';
+    out[col.RW] = Number(sf.rw) || '';
+    out[col.Math] = Number(sf.math) || '';
+    var weakest = (sf.weakest && typeof sf.weakest === 'object') ? sf.weakest : null;
+    out[col.WeakestLabel] = weakest ? sheetSafe_(weakest.label || '') : '';
+    out[col.WeakestCorrect] = weakest ? (Number(weakest.correct) || '') : '';
+    out[col.WeakestTotal] = weakest ? (Number(weakest.total) || '') : '';
+    out[col.AttemptId] = sf.attemptId ? String(sf.attemptId) : '';
+  }
+  sheet.appendRow(out);
 }
 
 /* =========================================================================
@@ -1052,14 +1128,17 @@ function logDiagnosticResult_(key, name, test, score, reportLink, reportText, dr
    which meant the data only ever existed in whatever browser/device took
    the test — a student taking a practice test on one device and checking
    their weak spots on another (or Luca checking from his own computer)
-   always saw nothing, even though the attempt genuinely happened. This
-   "Progress" tab (auto-created on first use, one row per student key) is
-   now the source of truth both tools read from (via action 'getProgress'),
-   kept current by every diagnostic/practice-test completion (action
-   'syncProgress', called right alongside the existing submitDiagnostic/
-   submitPracticeTest send — see index.html's syncProgressToBackend()).
-
-   Columns: Key | IncorrectQuestionsJSON | SkillStatsJSON | UpdatedAt.
+   always saw nothing, even though the attempt genuinely happened. Three
+   columns on the Students sheet itself — IncorrectQuestionsJSON,
+   SkillStatsJSON, ProgressUpdatedAt (auto-created the first time this
+   runs, same pattern as AccomTimeMult etc. in handleSaveOnboardingPrefs
+   above) — are now the source of truth both tools read from (via action
+   'getProgress'), kept current by every diagnostic/practice-test
+   completion (action 'syncProgress', called right alongside the existing
+   submitDiagnostic/submitPracticeTest send — see index.html's
+   syncProgressToBackend()). This used to be its own "Progress" tab
+   (one row per student key, same shape); folded into Students since it's
+   always been 1:1 with a student row anyway.
      - IncorrectQuestionsJSON: the SAME byKey map the client used to keep
        in localStorage — merged here the identical way (a miss (re)writes
        its entry, a correct answer on a later attempt clears it), so this
@@ -1070,15 +1149,6 @@ function logDiagnosticResult_(key, name, test, score, reportLink, reportText, dr
        aggregate, so each new attempt fully replaces the last one's
        breakdown rather than blending into it.
    ========================================================================= */
-function getProgressSheet_() {
-  var ss = SpreadsheetApp.openById(SHEET_ID);
-  var sheet = ss.getSheetByName('Progress');
-  if (!sheet) {
-    sheet = ss.insertSheet('Progress');
-    sheet.appendRow(['Key', 'IncorrectQuestionsJSON', 'SkillStatsJSON', 'UpdatedAt']);
-  }
-  return sheet;
-}
 
 // A Google Sheets cell tops out around 50,000 characters. As of the
 // client-side slimming in index.html (each miss now stores only
@@ -1117,23 +1187,16 @@ function handleSyncProgress(rawKey, rawIncorrect, rawSkills) {
   var row = findRow_(sheet, key);
   if (!row) return { ok: false, error: 'bad_key' }; // same gate as the other submit handlers — unknown key writes nothing
 
-  var pSheet = getProgressSheet_();
-  var pData = pSheet.getDataRange().getValues();
-  var pHeaders = pData[0];
-  var keyCol = pHeaders.indexOf('Key');
-  var iqCol = pHeaders.indexOf('IncorrectQuestionsJSON');
-  var skCol = pHeaders.indexOf('SkillStatsJSON');
-  var atCol = pHeaders.indexOf('UpdatedAt');
-
-  var rowIndex = -1, byKey = {};
-  for (var i = 1; i < pData.length; i++) {
-    if (String(pData[i][keyCol]).trim().toUpperCase() === key) {
-      rowIndex = i + 1;
-      try { byKey = JSON.parse(pData[i][iqCol]) || {}; } catch (e) { byKey = {}; }
-      break;
+  var headers = row._headers;
+  ['IncorrectQuestionsJSON', 'SkillStatsJSON', 'ProgressUpdatedAt'].forEach(function (col) {
+    if (headers.indexOf(col) === -1) {
+      sheet.getRange(1, sheet.getLastColumn() + 1).setValue(col);
+      headers.push(col);
     }
-  }
+  });
 
+  var byKey = {};
+  try { byKey = JSON.parse(row.IncorrectQuestionsJSON) || {}; } catch (e) { byKey = {}; }
   (Array.isArray(rawIncorrect) ? rawIncorrect : []).forEach(function (r) {
     if (!r || !r.key) return;
     if (r.correct) delete byKey[r.key];
@@ -1142,20 +1205,17 @@ function handleSyncProgress(rawKey, rawIncorrect, rawSkills) {
   byKey = capIncorrectByKey_(byKey);
   var bySkill = (rawSkills && typeof rawSkills === 'object') ? rawSkills : {};
 
-  var iqJson = sheetSafe_(JSON.stringify(byKey));
-  var skJson = sheetSafe_(JSON.stringify(bySkill));
-  if (rowIndex === -1) {
-    pSheet.appendRow([key, iqJson, skJson, new Date()]);
-  } else {
-    pSheet.getRange(rowIndex, iqCol + 1).setValue(iqJson);
-    pSheet.getRange(rowIndex, skCol + 1).setValue(skJson);
-    pSheet.getRange(rowIndex, atCol + 1).setValue(new Date());
-  }
+  var iqCol = headers.indexOf('IncorrectQuestionsJSON');
+  var skCol = headers.indexOf('SkillStatsJSON');
+  var atCol = headers.indexOf('ProgressUpdatedAt');
+  sheet.getRange(row._rowIndex, iqCol + 1).setValue(sheetSafe_(JSON.stringify(byKey)));
+  sheet.getRange(row._rowIndex, skCol + 1).setValue(sheetSafe_(JSON.stringify(bySkill)));
+  sheet.getRange(row._rowIndex, atCol + 1).setValue(new Date());
   return { ok: true };
 }
 
 // Read-only fetch for the two portal tools — deliberately returns ok:true
-// with empty objects for a valid key that just has no Progress row yet
+// with empty objects for a valid key that just has no progress synced yet
 // (brand-new student, nothing submitted), rather than an error; only an
 // unrecognized key is rejected.
 function handleGetProgress(rawKey) {
@@ -1165,21 +1225,10 @@ function handleGetProgress(rawKey) {
   var row = findRow_(sheet, key);
   if (!row) return { ok: false, error: 'bad_key' };
 
-  var pSheet = getProgressSheet_();
-  var pData = pSheet.getDataRange().getValues();
-  var pHeaders = pData[0];
-  var keyCol = pHeaders.indexOf('Key');
-  var iqCol = pHeaders.indexOf('IncorrectQuestionsJSON');
-  var skCol = pHeaders.indexOf('SkillStatsJSON');
-  for (var i = 1; i < pData.length; i++) {
-    if (String(pData[i][keyCol]).trim().toUpperCase() === key) {
-      var byKey = {}, bySkill = {};
-      try { byKey = JSON.parse(pData[i][iqCol]) || {}; } catch (e) { /* ignore */ }
-      try { bySkill = JSON.parse(pData[i][skCol]) || {}; } catch (e) { /* ignore */ }
-      return { ok: true, incorrectQuestions: byKey, skillStats: bySkill };
-    }
-  }
-  return { ok: true, incorrectQuestions: {}, skillStats: {} };
+  var byKey = {}, bySkill = {};
+  try { byKey = JSON.parse(row.IncorrectQuestionsJSON) || {}; } catch (e) { /* ignore */ }
+  try { bySkill = JSON.parse(row.SkillStatsJSON) || {}; } catch (e) { /* ignore */ }
+  return { ok: true, incorrectQuestions: byKey, skillStats: bySkill };
 }
 
 /* =========================================================================
@@ -1187,23 +1236,17 @@ function handleGetProgress(rawKey) {
    practice-test composite, mirroring what index.html's recordScoreHistory()
    already writes to the browser's own localStorage (moretti_score_history_
    <key>). That local copy is what actually drives the Score Progress chart
-   on Home — this sheet exists purely so a composite score trend is
-   available to code that can't reach localStorage, i.e. the biweekly
-   guardian-summary trigger below (Apps Script triggers run server-side,
-   with no browser in the loop). Best-effort from the client's side (see
+   on Home — this exists purely so a composite score trend is available to
+   code that can't reach localStorage, i.e. the biweekly guardian-summary
+   trigger below (Apps Script triggers run server-side, with no browser in
+   the loop). Best-effort from the client's side (see
    syncScoreHistoryToBackend() in index.html) — if this call fails, the
    student's own Score Progress chart is unaffected, only the guardian
-   email's trend data would be missing that one point.
+   email's trend data would be missing that one point. Writes Kind:'score'
+   rows into the shared Attempts sheet (see getAttemptsSheet_ above) —
+   this used to be its own "ScoreHistory" tab, folded in alongside the old
+   "DiagnosticLog" tab's rows since both are one-row-per-attempt logs.
    ========================================================================= */
-function getScoreHistorySheet_() {
-  var ss = SpreadsheetApp.openById(SHEET_ID);
-  var sheet = ss.getSheetByName('ScoreHistory');
-  if (!sheet) {
-    sheet = ss.insertSheet('ScoreHistory');
-    sheet.appendRow(['Timestamp', 'Key', 'TestType', 'Source', 'TestId', 'TestTitle', 'Composite', 'ScaleMin', 'ScaleMax', 'RW', 'Math', 'WeakestLabel', 'WeakestCorrect', 'WeakestTotal']);
-  }
-  return sheet;
-}
 
 // rawEntry mirrors the exact shape index.html's recordComposite() builds
 // for its own localStorage write (see recordScoreHistory() there) — sent
@@ -1220,19 +1263,99 @@ function handleSyncScoreHistory(rawKey, rawEntry) {
   if (!composite) return { ok: false, error: 'missing_composite' }; // nothing useful to log without one
 
   var weakest = (entry.weakest && typeof entry.weakest === 'object') ? entry.weakest : null;
-  var shSheet = getScoreHistorySheet_();
-  shSheet.appendRow([
-    new Date(), key,
-    (entry.testType === 'ACT' ? 'ACT' : 'SAT'),
-    (entry.source === 'practice-test' ? 'practice-test' : 'diagnostic'),
-    entry.testId || '', sheetSafe_(entry.testTitle || ''),
-    composite, Number(entry.scaleMin) || '', Number(entry.scaleMax) || '',
-    Number(entry.rw) || '', Number(entry.math) || '',
-    weakest ? sheetSafe_(weakest.label || '') : '',
-    weakest ? (Number(weakest.correct) || '') : '',
-    weakest ? (Number(weakest.total) || '') : ''
-  ]);
+  var sheet2 = getAttemptsSheet_();
+  var headers = sheet2.getRange(1, 1, 1, sheet2.getLastColumn()).getValues()[0];
+  var col = {};
+  headers.forEach(function (h, i) { col[h] = i; });
+  var out = new Array(headers.length).fill('');
+  out[col.Kind] = 'score';
+  out[col.Timestamp] = new Date();
+  out[col.Key] = key;
+  out[col.TestType] = (entry.testType === 'ACT' ? 'ACT' : 'SAT');
+  out[col.Source] = (entry.source === 'practice-test' ? 'practice-test' : 'diagnostic');
+  out[col.TestId] = entry.testId || '';
+  out[col.TestTitle] = sheetSafe_(entry.testTitle || '');
+  out[col.Composite] = composite;
+  out[col.ScaleMin] = Number(entry.scaleMin) || '';
+  out[col.ScaleMax] = Number(entry.scaleMax) || '';
+  out[col.RW] = Number(entry.rw) || '';
+  out[col.Math] = Number(entry.math) || '';
+  out[col.WeakestLabel] = weakest ? sheetSafe_(weakest.label || '') : '';
+  out[col.WeakestCorrect] = weakest ? (Number(weakest.correct) || '') : '';
+  out[col.WeakestTotal] = weakest ? (Number(weakest.total) || '') : '';
+  // The relative report.html#d=... link — same one index.html's own
+  // "View Results" menu stores locally (see recordComposite() there).
+  // Storing it here too is what lets that menu keep working for a
+  // student checked from a device other than the one that took the
+  // test (or after a cleared cache) — without this, "Completed" still
+  // shows (that badge reads satTaken, a separate flag) but the link to
+  // reopen the actual report would only ever exist on the one browser
+  // that generated it. Blank when the attempt itself was never meant to
+  // be link-visible (see linkVisibleToStudent in index.html — a
+  // first-ever diagnostic notifies Luca instead of showing the student a
+  // link), matching what's stored locally in that case too.
+  out[col.ReportLink] = entry.reportLinkRelative ? String(entry.reportLinkRelative) : '';
+  // Lets a locally-recorded attempt and its server-synced mirror be
+  // recognized as the SAME attempt (see mergedScoreHistory() in
+  // index.html) instead of double-counting it once this endpoint's
+  // results are merged in alongside the local copy.
+  out[col.AttemptId] = entry.attemptId ? String(entry.attemptId) : '';
+  sheet2.appendRow(out);
   return { ok: true };
+}
+
+// Read side of the sheet above — lets report.html pull a student's real
+// composite-score trend live (action: 'getScoreHistory'), rather than
+// baking history into the report's own URL (which would make an already-
+// long base64 report link grow with every past attempt embedded in it).
+// Server-side sheet only — this deliberately does NOT read the
+// localStorage copy (it can't; Apps Script has no browser), so a student
+// whose sync-to-backend call failed on a given attempt (see
+// syncScoreHistoryToBackend's comment — best-effort, silently skipped on
+// failure) just has a gap here on that one point. Returns oldest-first,
+// capped at MAX_HISTORY_POINTS so a student with many attempts doesn't
+// return an ever-growing payload.
+function handleGetScoreHistory(rawKey) {
+  if (!rawKey) return { ok: false, error: 'missing_key' };
+  var key = String(rawKey).trim().toUpperCase();
+  var MAX_HISTORY_POINTS = 20;
+  var sheet = getAttemptsSheet_();
+  var values = sheet.getDataRange().getValues();
+  var headers = values[0];
+  var col = {};
+  headers.forEach(function (h, i) { col[h] = i; });
+  var entries = [];
+  for (var i = 1; i < values.length; i++) {
+    var row = values[i];
+    // Both Kinds returned here on purpose — 'score' rows carry the
+    // composite/section breakdown this endpoint was originally built for
+    // (report.html's trend chart), but 'log' rows (written on every
+    // submission regardless of Kind — see logDiagnosticResult_) are what
+    // let index.html's own View Results/"Completed" grouping find an
+    // attempt that predates the composite-score feature, or one whose
+    // syncScoreHistory call happened to fail. A 'log' row with no
+    // composite just renders as "Taken" instead of "Scored ###" wherever
+    // that number would've shown — never a reason to hide the attempt.
+    if (String(row[col.Key] || '').trim().toUpperCase() !== key) continue;
+    var ts = row[col.Timestamp];
+    entries.push({
+      date: (ts instanceof Date) ? ts.toISOString() : String(ts || ''),
+      testType: row[col.TestType] || 'SAT',
+      source: row[col.Source] || 'diagnostic',
+      testId: row[col.TestId] || '',
+      testTitle: row[col.TestTitle] || '',
+      composite: Number(row[col.Composite]) || null,
+      scaleMin: Number(row[col.ScaleMin]) || null,
+      scaleMax: Number(row[col.ScaleMax]) || null,
+      rw: Number(row[col.RW]) || null,
+      math: Number(row[col.Math]) || null,
+      weakest: row[col.WeakestLabel] ? { label: row[col.WeakestLabel], correct: Number(row[col.WeakestCorrect]) || 0, total: Number(row[col.WeakestTotal]) || 0 } : null,
+      reportLinkRelative: row[col.ReportLink] || '',
+      attemptId: row[col.AttemptId] || ''
+    });
+  }
+  if (entries.length > MAX_HISTORY_POINTS) entries = entries.slice(entries.length - MAX_HISTORY_POINTS);
+  return { ok: true, entries: entries };
 }
 
 /* =========================================================================
@@ -1678,13 +1801,14 @@ function sendGuardianSummaries() {
 // entire history every time.
 var GUARDIAN_SUMMARY_TREND_MAX = 5;
 function scoreTrendForStudent_(key) {
-  var sheet = getScoreHistorySheet_();
+  var sheet = getAttemptsSheet_();
   var data = sheet.getDataRange().getValues();
   var headers = data[0];
   var col = {};
   headers.forEach(function (h, i) { col[h] = i; });
   var rows = [];
   for (var i = 1; i < data.length; i++) {
+    if (data[i][col.Kind] !== 'score') continue;
     if (String(data[i][col.Key] || '').trim().toUpperCase() === key) {
       rows.push({
         date: data[i][col.Timestamp], testTitle: data[i][col.TestTitle] || '',
@@ -1698,23 +1822,16 @@ function scoreTrendForStudent_(key) {
 
 // Mirrors index.html's client-side weakestDomain() — same "at least 3
 // questions, lowest correct%, ties favor more questions" logic, run here
-// against the SAME SkillStatsJSON the Progress sheet already stores (see
-// handleSyncProgress above), aggregated up from skill-level to
-// domain-level first since that JSON is keyed "Domain → Skill", not by
+// against the SAME SkillStatsJSON column the Students sheet already
+// stores (see handleSyncProgress above), aggregated up from skill-level
+// to domain-level first since that JSON is keyed "Domain → Skill", not by
 // domain alone.
 function weakestSkillForStudent_(key) {
-  var pSheet = getProgressSheet_();
-  var pData = pSheet.getDataRange().getValues();
-  var pHeaders = pData[0];
-  var keyCol = pHeaders.indexOf('Key');
-  var skCol = pHeaders.indexOf('SkillStatsJSON');
+  var sheet = getSheet_();
+  var row = findRow_(sheet, key);
+  if (!row) return null;
   var bySkill = null;
-  for (var i = 1; i < pData.length; i++) {
-    if (String(pData[i][keyCol] || '').trim().toUpperCase() === key) {
-      try { bySkill = JSON.parse(pData[i][skCol]) || {}; } catch (e) { bySkill = {}; }
-      break;
-    }
-  }
+  try { bySkill = JSON.parse(row.SkillStatsJSON) || {}; } catch (e) { bySkill = {}; }
   if (!bySkill) return null;
 
   var byDomain = {};
