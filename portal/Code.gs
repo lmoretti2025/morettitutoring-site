@@ -146,6 +146,10 @@ function doPost(e) {
       out = handleSyncScoreHistory(body.key, body.entry);
     } else if (body.action === 'getScoreHistory') {
       out = handleGetScoreHistory(body.key);
+    } else if (body.action === 'listBlankComposite') {
+      out = handleListBlankComposite();
+    } else if (body.action === 'backfillCompositeFields') {
+      out = handleBackfillCompositeFields(body.patches);
     } else {
       out = { ok: false, error: 'unknown_action' };
     }
@@ -1356,6 +1360,76 @@ function handleGetScoreHistory(rawKey) {
   }
   if (entries.length > MAX_HISTORY_POINTS) entries = entries.slice(entries.length - MAX_HISTORY_POINTS);
   return { ok: true, entries: entries };
+}
+
+// Admin-only, one-off dump used to backfill Composite/RW/Math on 'log' rows
+// that predate this session's fix to logDiagnosticResult_ (see its own
+// comment) — those rows have a full ReportLink (self-contained #d=...
+// payload) but were never scored into the sheet itself. Rather than port
+// the whole grading engine (practice-tests.js's question bank + curve
+// math) into Apps Script, this just lists every row that NEEDS a backfill
+// so a browser session that already has that grading engine loaded
+// (report.html, via openTestResults()-style navigation) can read the
+// already-correct composite/rw/math straight off each report and hand
+// back a small, hand-verified patch — see backfillCompositeFields below,
+// which is what actually writes the values this lists. Every row here is
+// otherwise durable (Score/Report/ReportLink already saved); this is
+// purely "fill in the number that was never computed," not a data-loss
+// risk if it's never run.
+function handleListBlankComposite() {
+  var sheet = getAttemptsSheet_();
+  var values = sheet.getDataRange().getValues();
+  var headers = values[0];
+  var col = {};
+  headers.forEach(function (h, i) { col[h] = i; });
+  var rows = [];
+  for (var i = 1; i < values.length; i++) {
+    var row = values[i];
+    if (row[col.Kind] !== 'log') continue;
+    if (row[col.Composite]) continue; // already has a real value
+    var link = String(row[col.ReportLink] || '');
+    if (!link || link.indexOf('report.html#d=') === -1) continue; // nothing to recompute from
+    var ts = row[col.Timestamp];
+    rows.push({
+      rowNum: i + 1,
+      key: row[col.Key] || '',
+      name: row[col.Name] || '',
+      date: (ts instanceof Date) ? ts.toISOString() : String(ts || ''),
+      testId: row[col.TestId] || '',
+      testTitle: row[col.TestTitle] || '',
+      testType: row[col.TestType] || '',
+      reportLink: link
+    });
+  }
+  return { ok: true, rows: rows };
+}
+
+// Writes a batch of {rowNum, composite, scaleMin, scaleMax, rw, math}
+// patches (rowNum from handleListBlankComposite above, values read off
+// each row's own rendered report.html) directly into the Attempts sheet.
+// rowNum is trusted as-is (this is a hand-run admin tool, not a public
+// action) but double-checked against Kind==='log' and an empty Composite
+// so a stale rowNum from an edited sheet can't clobber a real value.
+function handleBackfillCompositeFields(rawPatches) {
+  var patches = Array.isArray(rawPatches) ? rawPatches : [];
+  var sheet = getAttemptsSheet_();
+  var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  var col = {};
+  headers.forEach(function (h, i) { col[h] = i; });
+  var applied = [];
+  patches.forEach(function (p) {
+    var r = Number(p.rowNum);
+    if (!r || r < 2) return;
+    var rowVals = sheet.getRange(r, 1, 1, headers.length).getValues()[0];
+    if (rowVals[col.Kind] !== 'log' || rowVals[col.Composite]) return;
+    sheet.getRange(r, col.Composite + 1).setValue(Number(p.composite));
+    sheet.getRange(r, col.ScaleMin + 1).setValue(Number(p.scaleMin));
+    sheet.getRange(r, col.ScaleMax + 1).setValue(Number(p.scaleMax));
+    sheet.getRange(r, col.RW + 1).setValue(p.rw ? Number(p.rw) : '');
+    sheet.getRange(r, col.Math + 1).setValue(p.math ? Number(p.math) : '');
+    applied.push(r);
+  });
+  return { ok: true, appliedRows: applied };
 }
 
 /* =========================================================================
