@@ -272,6 +272,8 @@
   .onb-date-opt-unsure { display: block; width: 100%; text-align: center; background: none; border: 1px dashed var(--border); color: var(--faint); margin-bottom: 0.4rem; }
   .onb-date-opt-unsure.is-on { border-color: var(--red); border-style: solid; background: rgba(176,39,28,0.06); color: var(--red); }
 
+  .settings-section { text-align: left; margin-top: 2.1rem; padding-top: 2.1rem; border-top: 1px solid var(--border); }
+  .settings-section:first-of-type { margin-top: 1.8rem; padding-top: 0; border-top: none; }
   .onb-accom-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; text-align: left; margin-top: 1.5rem; }
   .onb-accom-card { border: 1.5px solid var(--border); border-radius: 12px; padding: 1rem 1.1rem; cursor: pointer; transition: border-color 0.15s var(--ease), background 0.15s var(--ease); }
   .onb-accom-card.is-selected { border-color: var(--red); background: rgba(176,39,28,0.045); }
@@ -1322,6 +1324,7 @@
     </button>
     <div class="nav-profile-menu" id="nav-profile-menu">
       <div class="nav-profile-name" id="nav-profile-name">&nbsp;</div>
+      <a href="#" class="nav-profile-item" id="nav-profile-settings">Account Settings</a>
       <a href="#" class="nav-profile-item" id="nav-profile-switch-key">Use a different key</a>
       <div class="nav-profile-divider"></div>
       <a href="../index.html" class="nav-profile-item" id="nav-profile-exit">Exit Portal</a>
@@ -1642,6 +1645,143 @@
       <a href="#" class="key-help" id="onb-later" style="display:block; text-decoration:none;">I'll do this later</a>
     </div>
 
+  </div>
+</div>
+
+<!-- ═══ SCREEN — ACCOUNT SETTINGS ═══ reachable from the profile menu
+     (nav-profile-item#nav-profile-settings), not the sidebar — this is
+     account management, not a results/features surface, so it's
+     deliberately NOT in SIDEBAR_SCREENS/isGrantedLocked gating. Reuses the
+     exact card-toggle/sub-panel markup and validation from the onboarding
+     sequence above (#onb-accom/#onb-baseline/#onb-guardian) with fresh
+     "settings*" ids so the two don't collide, pre-filled from
+     currentStudent on open (see openSettingsScreen()) and saved together
+     in one saveOnboardingPrefs call (see settings-save's handler) rather
+     than the onboarding flow's one-field-per-step submits. -->
+<div class="screen" id="screen-settings">
+  <div class="panel-wide">
+    <div class="kicker">Account</div>
+    <h1 class="panel-hed" style="margin-bottom:0.6rem;">Account Settings.</h1>
+    <p class="panel-sub">Update your test date, accommodations, baseline score, or guardian contact any time.</p>
+
+    <div class="settings-section">
+      <div class="onb-accom-group-label" style="margin-bottom:0.7rem;">Test Date</div>
+      <div class="onb-date-grid" id="settingsDateGrid"></div>
+      <button type="button" class="onb-date-opt onb-date-opt-unsure" data-settings-date-opt="unsure">Not sure yet</button>
+    </div>
+
+    <div class="settings-section">
+      <div class="onb-accom-group-label" style="margin-bottom:0.7rem;">Testing Accommodations</div>
+      <div class="onb-accom-cards">
+        <div class="onb-accom-card is-selected" data-settings-accom-card>
+          <div class="onb-accom-row">
+            <div><div class="onb-accom-title">Standard timing</div><div class="onb-accom-note">Most students</div></div>
+            <span class="onb-accom-check"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+          </div>
+        </div>
+        <div class="onb-accom-card" data-settings-accom-card>
+          <div class="onb-accom-row">
+            <div><div class="onb-accom-title">I have accommodations</div><div class="onb-accom-note">Extended time or breaks</div></div>
+            <span class="onb-accom-check"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+          </div>
+        </div>
+      </div>
+      <div class="onb-accom-sub" id="settingsAccomSub">
+        <div class="onb-accom-sub-inner">
+          <div>
+            <div class="onb-accom-group-label">Extended time</div>
+            <div class="onb-accom-opts" id="settingsAccomTimeOpts">
+              <span class="onb-accom-opt is-on" data-val="1">Standard</span>
+              <span class="onb-accom-opt" data-val="1.5">Time and one&#8209;half (+50%)</span>
+              <span class="onb-accom-opt" data-val="2">Double time (+100%)</span>
+            </div>
+          </div>
+          <div>
+            <div class="onb-accom-group-label">Breaks</div>
+            <div class="onb-accom-opts" id="settingsAccomBreakOpts">
+              <span class="onb-accom-opt is-on" data-val="1">Standard</span>
+              <span class="onb-accom-opt" data-val="2">Extended</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="onb-accom-group-label" style="margin-bottom:0.7rem;">Baseline Score</div>
+      <div class="onb-accom-cards">
+        <div class="onb-accom-card is-selected" data-settings-baseline-card>
+          <div class="onb-accom-row">
+            <div><div class="onb-accom-title">Haven't tested yet</div><div class="onb-accom-note">Most underclassmen</div></div>
+            <span class="onb-accom-check"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+          </div>
+        </div>
+        <div class="onb-accom-card" data-settings-baseline-card>
+          <div class="onb-accom-row">
+            <div><div class="onb-accom-title">I have a score</div><div class="onb-accom-note">PSAT or SAT</div></div>
+            <span class="onb-accom-check"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+          </div>
+        </div>
+      </div>
+      <div class="onb-accom-sub" id="settingsBaselineSub">
+        <div class="onb-accom-sub-inner" style="grid-template-columns:1fr;">
+          <div>
+            <div class="onb-accom-group-label">Which test</div>
+            <div class="onb-accom-opts" id="settingsBaselineTestOpts">
+              <span class="onb-accom-opt is-on" data-val="psat">PSAT</span>
+              <span class="onb-accom-opt" data-val="sat">SAT</span>
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.2rem;">
+            <div>
+              <div class="onb-accom-group-label">Reading &amp; Writing</div>
+              <input type="number" inputmode="numeric" step="10" class="key-input" id="settingsBaselineRwInput" placeholder="e.g. 620" style="margin-bottom:0; padding:0.6rem 0.9rem; text-align:left; text-transform:none;">
+            </div>
+            <div>
+              <div class="onb-accom-group-label">Math</div>
+              <input type="number" inputmode="numeric" step="10" class="key-input" id="settingsBaselineMathInput" placeholder="e.g. 580" style="margin-bottom:0; padding:0.6rem 0.9rem; text-align:left; text-transform:none;">
+            </div>
+          </div>
+          <p class="key-error" id="settingsBaselineScoreError">Enter section scores between <span id="settingsBaselineScoreRangeText">160 and 760</span> each, in multiples of 10.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="onb-accom-group-label" style="margin-bottom:0.7rem;">Parent / Guardian Contact</div>
+      <div class="onb-accom-cards">
+        <div class="onb-accom-card is-selected" data-settings-guardian-card>
+          <div class="onb-accom-row">
+            <div><div class="onb-accom-title">Not needed</div><div class="onb-accom-note">Skip this</div></div>
+            <span class="onb-accom-check"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+          </div>
+        </div>
+        <div class="onb-accom-card" data-settings-guardian-card>
+          <div class="onb-accom-row">
+            <div><div class="onb-accom-title">Add a contact</div><div class="onb-accom-note">Parent or guardian</div></div>
+            <span class="onb-accom-check"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+          </div>
+        </div>
+      </div>
+      <div class="onb-accom-sub" id="settingsGuardianSub">
+        <div class="onb-accom-sub-inner" style="grid-template-columns:1fr 1fr;">
+          <div>
+            <div class="onb-accom-group-label">Name</div>
+            <input type="text" class="key-input" id="settingsGuardianNameInput" placeholder="Full name" autocomplete="name" style="margin-bottom:0; padding:0.6rem 0.9rem; text-align:left; text-transform:none;">
+          </div>
+          <div>
+            <div class="onb-accom-group-label">Email</div>
+            <input type="email" class="key-input" id="settingsGuardianEmailInput" placeholder="parent@email.com" autocomplete="email" style="margin-bottom:0; padding:0.6rem 0.9rem; text-align:left; text-transform:none;">
+          </div>
+        </div>
+        <p class="key-error" id="settingsGuardianEmailError">That doesn't look like a valid email &mdash; double-check it, or leave it blank.</p>
+      </div>
+    </div>
+
+    <p class="key-error" id="settingsSaveError">Couldn't save — check your connection and try again.</p>
+    <button class="key-btn" id="settings-save">Save Changes</button>
+    <p class="onb-microcopy" id="settingsSavedNote" style="display:none; color: var(--red); font-weight: 600;">Saved.</p>
+    <a href="#" class="menu-back-link" id="settings-back">&larr; Back to menu</a>
   </div>
 </div>
 
@@ -2632,6 +2772,7 @@
       questionTimeMs: questionTimeMs,
       questionFirstVisitedAt: questionFirstVisitedAt,
       questionLastViewedAt: questionLastViewedAt,
+      questionFirstVisitDurationMs: questionFirstVisitDurationMs,
       qOrder: qOrder,
       sectionTimerEndsAt: sectionTimerEndsAt,
       // How much section time was left at this save. On an accidental
@@ -3057,6 +3198,8 @@
       baselineType: data.baselineType || null,
       baselineRw: data.baselineRw || null,
       baselineMath: data.baselineMath || null,
+      guardianName: data.guardianName || null,
+      guardianEmail: data.guardianEmail || null,
       tests: data.tests || [],
       assignments: data.assignments || []
     };
@@ -4523,6 +4666,232 @@
     document.getElementById('nav-profile-name').textContent = currentStudent.name;
   }
 
+  /* ═══ ACCOUNT SETTINGS ═══ same card-toggle/sub-panel idiom and
+     validation as onboarding's baseline/guardian/accommodations panes
+     (search ONB_SAT_DATES/ONB_BASELINE_RANGES above), reused here under
+     "settings*" ids, pre-filled from currentStudent on open and saved
+     together with one saveOnboardingPrefs call rather than the
+     onboarding flow's per-step submits. */
+  var settingsHasAccom = false;
+  var settingsHasBaseline = false;
+  var settingsHasGuardian = false;
+  var settingsSelectedTestDate = null; // ISO string, or null for "not sure yet"
+
+  function renderSettingsDateGrid() {
+    var grid = document.getElementById('settingsDateGrid');
+    if (!grid) return;
+    var todayStr = new Date().toISOString().slice(0, 10);
+    var upcoming = ONB_SAT_DATES.filter(function (d) { return d.regDeadline >= todayStr; });
+    grid.innerHTML = '';
+    upcoming.forEach(function (d) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'onb-date-opt';
+      btn.setAttribute('data-settings-date-opt', d.iso);
+      btn.textContent = d.test;
+      grid.appendChild(btn);
+    });
+  }
+  document.addEventListener('click', function (e) {
+    var opt = e.target.closest('[data-settings-date-opt]');
+    if (!opt) return;
+    document.querySelectorAll('[data-settings-date-opt]').forEach(function (o) { o.classList.remove('is-on'); });
+    opt.classList.add('is-on');
+    var val = opt.getAttribute('data-settings-date-opt');
+    settingsSelectedTestDate = val === 'unsure' ? null : val;
+  });
+
+  document.querySelectorAll('[data-settings-accom-card]').forEach(function (card, i) {
+    card.addEventListener('click', function () {
+      document.querySelectorAll('[data-settings-accom-card]').forEach(function (c) { c.classList.remove('is-selected'); });
+      card.classList.add('is-selected');
+      settingsHasAccom = (i === 1);
+      document.getElementById('settingsAccomSub').classList.toggle('is-open', settingsHasAccom);
+    });
+  });
+  ['settingsAccomTimeOpts', 'settingsAccomBreakOpts'].forEach(function (id) {
+    var group = document.getElementById(id);
+    group.addEventListener('click', function (e) {
+      var opt = e.target.closest('.onb-accom-opt');
+      if (!opt) return;
+      Array.prototype.forEach.call(group.children, function (o) { o.classList.remove('is-on'); });
+      opt.classList.add('is-on');
+    });
+  });
+
+  document.querySelectorAll('[data-settings-baseline-card]').forEach(function (card, i) {
+    card.addEventListener('click', function () {
+      document.querySelectorAll('[data-settings-baseline-card]').forEach(function (c) { c.classList.remove('is-selected'); });
+      card.classList.add('is-selected');
+      settingsHasBaseline = (i === 1);
+      document.getElementById('settingsBaselineSub').classList.toggle('is-open', settingsHasBaseline);
+      document.getElementById('settingsBaselineScoreError').style.display = 'none';
+      if (settingsHasBaseline) updateSettingsBaselineRangeText();
+    });
+  });
+  function settingsBaselineRange() {
+    var type = document.querySelector('#settingsBaselineTestOpts .is-on').getAttribute('data-val');
+    return ONB_BASELINE_RANGES[type] || ONB_BASELINE_RANGES.sat;
+  }
+  function updateSettingsBaselineRangeText() {
+    var range = settingsBaselineRange();
+    document.getElementById('settingsBaselineScoreRangeText').textContent = range.min + ' and ' + range.max;
+  }
+  document.getElementById('settingsBaselineTestOpts').addEventListener('click', function (e) {
+    var opt = e.target.closest('.onb-accom-opt');
+    if (!opt) return;
+    Array.prototype.forEach.call(this.children, function (o) { o.classList.remove('is-on'); });
+    opt.classList.add('is-on');
+    updateSettingsBaselineRangeText();
+  });
+  ['settingsBaselineRwInput', 'settingsBaselineMathInput'].forEach(function (id) {
+    document.getElementById(id).addEventListener('input', function () {
+      var digitsOnly = this.value.replace(/[^0-9]/g, '');
+      if (digitsOnly !== this.value) this.value = digitsOnly;
+    });
+  });
+
+  document.querySelectorAll('[data-settings-guardian-card]').forEach(function (card, i) {
+    card.addEventListener('click', function () {
+      document.querySelectorAll('[data-settings-guardian-card]').forEach(function (c) { c.classList.remove('is-selected'); });
+      card.classList.add('is-selected');
+      settingsHasGuardian = (i === 1);
+      document.getElementById('settingsGuardianSub').classList.toggle('is-open', settingsHasGuardian);
+      document.getElementById('settingsGuardianEmailError').style.display = 'none';
+    });
+  });
+
+  // Populates every field from currentStudent — called each time the
+  // screen is opened so it never shows stale values from a previous visit
+  // this session (e.g. after Luca edits the sheet directly and the
+  // student logs back in).
+  function openSettingsScreen() {
+    renderSettingsDateGrid();
+    document.getElementById('settingsSaveError').style.display = 'none';
+    document.getElementById('settingsSavedNote').style.display = 'none';
+
+    settingsSelectedTestDate = currentStudent.testDate ? currentStudent.testDate.slice(0, 10) : null;
+    document.querySelectorAll('[data-settings-date-opt]').forEach(function (o) {
+      o.classList.toggle('is-on', o.getAttribute('data-settings-date-opt') === settingsSelectedTestDate);
+    });
+    if (!settingsSelectedTestDate) document.querySelector('.onb-date-opt-unsure[data-settings-date-opt]').classList.add('is-on');
+
+    settingsHasAccom = Number(currentStudent.accomTimeMult) > 1 || Number(currentStudent.accomBreakMult) > 1;
+    document.querySelectorAll('[data-settings-accom-card]').forEach(function (c, i) { c.classList.toggle('is-selected', (i === 1) === settingsHasAccom); });
+    document.getElementById('settingsAccomSub').classList.toggle('is-open', settingsHasAccom);
+    var timeVal = currentStudent.accomTimeMult ? String(currentStudent.accomTimeMult) : '1';
+    var breakVal = currentStudent.accomBreakMult ? String(currentStudent.accomBreakMult) : '1';
+    document.querySelectorAll('#settingsAccomTimeOpts .onb-accom-opt').forEach(function (o) { o.classList.toggle('is-on', o.getAttribute('data-val') === timeVal); });
+    document.querySelectorAll('#settingsAccomBreakOpts .onb-accom-opt').forEach(function (o) { o.classList.toggle('is-on', o.getAttribute('data-val') === breakVal); });
+
+    settingsHasBaseline = !!currentStudent.baselineType;
+    document.querySelectorAll('[data-settings-baseline-card]').forEach(function (c, i) { c.classList.toggle('is-selected', (i === 1) === settingsHasBaseline); });
+    document.getElementById('settingsBaselineSub').classList.toggle('is-open', settingsHasBaseline);
+    var baselineType = currentStudent.baselineType || 'psat';
+    document.querySelectorAll('#settingsBaselineTestOpts .onb-accom-opt').forEach(function (o) { o.classList.toggle('is-on', o.getAttribute('data-val') === baselineType); });
+    document.getElementById('settingsBaselineRwInput').value = currentStudent.baselineRw || '';
+    document.getElementById('settingsBaselineMathInput').value = currentStudent.baselineMath || '';
+    updateSettingsBaselineRangeText();
+
+    settingsHasGuardian = !!(currentStudent.guardianName || currentStudent.guardianEmail);
+    document.querySelectorAll('[data-settings-guardian-card]').forEach(function (c, i) { c.classList.toggle('is-selected', (i === 1) === settingsHasGuardian); });
+    document.getElementById('settingsGuardianSub').classList.toggle('is-open', settingsHasGuardian);
+    document.getElementById('settingsGuardianNameInput').value = currentStudent.guardianName || '';
+    document.getElementById('settingsGuardianEmailInput').value = currentStudent.guardianEmail || '';
+  }
+
+  document.getElementById('nav-profile-settings').addEventListener('click', function (e) {
+    e.preventDefault();
+    navProfile.classList.remove('is-open');
+    openSettingsScreen();
+    show('screen-settings');
+  });
+  document.getElementById('settings-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-menu'); });
+
+  document.getElementById('settings-save').addEventListener('click', function () {
+    var saveBtn = this;
+    var saveError = document.getElementById('settingsSaveError');
+    var savedNote = document.getElementById('settingsSavedNote');
+    saveError.style.display = 'none';
+    savedNote.style.display = 'none';
+
+    var timeMult = settingsHasAccom ? parseFloat(document.querySelector('#settingsAccomTimeOpts .is-on').getAttribute('data-val')) : 1;
+    var breakMult = settingsHasAccom ? parseFloat(document.querySelector('#settingsAccomBreakOpts .is-on').getAttribute('data-val')) : 1;
+
+    var baselineType = null, baselineRw = null, baselineMath = null;
+    if (settingsHasBaseline) {
+      var range = settingsBaselineRange();
+      var rwInput = document.getElementById('settingsBaselineRwInput');
+      var mathInput = document.getElementById('settingsBaselineMathInput');
+      var rw = parseInt(rwInput.value, 10);
+      var math = parseInt(mathInput.value, 10);
+      var rwValid = rw >= range.min && rw <= range.max && rw % 10 === 0;
+      var mathValid = math >= range.min && math <= range.max && math % 10 === 0;
+      if (!rwValid || !mathValid) {
+        document.getElementById('settingsBaselineScoreError').style.display = 'block';
+        (rwValid ? mathInput : rwInput).focus();
+        return;
+      }
+      document.getElementById('settingsBaselineScoreError').style.display = 'none';
+      baselineType = document.querySelector('#settingsBaselineTestOpts .is-on').getAttribute('data-val');
+      baselineRw = rw;
+      baselineMath = math;
+    }
+
+    var guardianName = null, guardianEmail = null;
+    if (settingsHasGuardian) {
+      var gNameInput = document.getElementById('settingsGuardianNameInput');
+      var gEmailInput = document.getElementById('settingsGuardianEmailInput');
+      var gEmail = gEmailInput.value.trim();
+      if (gEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(gEmail)) {
+        document.getElementById('settingsGuardianEmailError').style.display = 'block';
+        gEmailInput.focus();
+        return;
+      }
+      document.getElementById('settingsGuardianEmailError').style.display = 'none';
+      guardianName = gNameInput.value.trim() || null;
+      guardianEmail = gEmail || null;
+    }
+
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving…';
+    postToBackend({
+      action: 'saveOnboardingPrefs',
+      key: currentStudent.key,
+      testDate: settingsSelectedTestDate,
+      accomTimeMult: timeMult,
+      accomBreakMult: breakMult,
+      baselineType: baselineType,
+      baselineRw: baselineRw,
+      baselineMath: baselineMath,
+      guardianName: guardianName,
+      guardianEmail: guardianEmail
+    }).then(function (data) {
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Save Changes';
+      if (!data || !data.ok) {
+        saveError.style.display = 'block';
+        return;
+      }
+      currentStudent.testDate = settingsSelectedTestDate ? new Date(settingsSelectedTestDate).toISOString() : null;
+      currentStudent.accomTimeMult = timeMult;
+      currentStudent.accomBreakMult = breakMult;
+      currentStudent.baselineType = baselineType;
+      currentStudent.baselineRw = baselineRw;
+      currentStudent.baselineMath = baselineMath;
+      currentStudent.guardianName = guardianName;
+      currentStudent.guardianEmail = guardianEmail;
+      if (typeof applyStoredAccommodations === 'function') applyStoredAccommodations();
+      renderTestCountdown();
+      saveState();
+      savedNote.style.display = 'block';
+    }).catch(function () {
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Save Changes';
+      saveError.style.display = 'block';
+    });
+  });
+
   /* ═══ PRACTICE TESTS — NAMING, COMPLETION STATE, PICKER ═══
 
      Students kept confusing "Practice Test N" with the diagnostic, and
@@ -4931,6 +5300,22 @@
   var questionTimeMs = [];          // [i] = total ms spent actively viewing question i
   var questionFirstVisitedAt = [];  // [i] = Date.now() of the first time question i was shown, or null
   var questionLastViewedAt = [];    // [i] = Date.now() of the most recent time question i was shown, or null
+  // [i] = ms spent on question i during its FIRST look only, or null until
+  // that first look actually ends. "Ends" specifically means a genuine
+  // departure — goTo() moving to a different question, or showCheckScreen()
+  // leaving to the Check Your Work screen (see flushQuestionTime below,
+  // which both of those call and nothing else does) — NOT the periodic
+  // autosave checkpoint in saveState(), which deliberately updates
+  // questionTimeMs inline without going through flushQuestionTime, so a save
+  // firing mid-look never counts as leaving. Distinct from questionTimeMs,
+  // which keeps accumulating across every later revisit — this freezes the
+  // first time and never updates again, which is what actually lets
+  // report.html tell "rushed on the first pass, came back and fixed it
+  // later" apart from "took forty seconds all at once," something the
+  // cumulative total alone can't distinguish (a question answered in 8s on
+  // first look, skipped, then revisited for 40s more reads identically to
+  // one answered in 48s straight through under questionTimeMs alone).
+  var questionFirstVisitDurationMs = [];
   var questionEnterTime = null;
   // Adds the time since questionEnterTime onto the current question's
   // bucket and stops the clock (questionEnterTime = null) — call this right
@@ -4939,6 +5324,22 @@
   function flushQuestionTime() {
     if (questionEnterTime !== null && current >= 0 && current < questionTimeMs.length) {
       questionTimeMs[current] = (questionTimeMs[current] || 0) + (Date.now() - questionEnterTime);
+    }
+    // First-pass duration: snapshot the total accumulated time for this
+    // question at the moment it's genuinely left, but only the first time —
+    // a later revisit-then-leave-again must not overwrite it. Reading
+    // questionTimeMs[current] here (rather than summing a separate
+    // in-progress accumulator) is what makes this correct across a
+    // mid-first-look refresh too: questionTimeMs survives a resume (see
+    // restoreState), so the first REAL departure after resuming still
+    // captures the whole first look, pre- and post-refresh combined, not
+    // just whatever ran after the refresh. Guarded on questionFirstVisitedAt
+    // being set so a stray call against a question that was never actually
+    // shown can't wrongly "finalize" it at 0.
+    if (current >= 0 && current < questionFirstVisitDurationMs.length &&
+        questionFirstVisitedAt[current] != null &&
+        (questionFirstVisitDurationMs[current] === null || questionFirstVisitDurationMs[current] === undefined)) {
+      questionFirstVisitDurationMs[current] = questionTimeMs[current] || 0;
     }
     questionEnterTime = null;
   }
@@ -5776,6 +6177,7 @@
     questionTimeMs = new Array(qs.length).fill(0);
     questionFirstVisitedAt = new Array(qs.length).fill(null);
     questionLastViewedAt = new Array(qs.length).fill(null);
+    questionFirstVisitDurationMs = new Array(qs.length).fill(null);
     questionEnterTime = null;
     diagnosticSubmitted = false;
 
@@ -5828,14 +6230,15 @@
         answers: canonical(answers), marked: canonical(marked), everMarked: canonical(everMarked),
         questionTimeMs: canonical(questionTimeMs),
         questionFirstVisitedAt: canonical(questionFirstVisitedAt),
-        questionLastViewedAt: canonical(questionLastViewedAt)
+        questionLastViewedAt: canonical(questionLastViewedAt),
+        questionFirstVisitDurationMs: canonical(questionFirstVisitDurationMs)
       };
       moduleStage = 'module2';
       goToModuleIntro();
       return;
     }
 
-    var finalAnswers, finalMarked, finalEverMarked, finalQuestionTimeMs, finalQuestionFirstVisitedAt, finalQuestionLastViewedAt;
+    var finalAnswers, finalMarked, finalEverMarked, finalQuestionTimeMs, finalQuestionFirstVisitedAt, finalQuestionLastViewedAt, finalQuestionFirstVisitDurationMs;
     if (hasTwoModules) {
       finalAnswers = module1Buffer.answers.concat(canonical(answers));
       finalMarked = module1Buffer.marked.concat(canonical(marked));
@@ -5843,6 +6246,7 @@
       finalQuestionTimeMs = module1Buffer.questionTimeMs.concat(canonical(questionTimeMs));
       finalQuestionFirstVisitedAt = module1Buffer.questionFirstVisitedAt.concat(canonical(questionFirstVisitedAt));
       finalQuestionLastViewedAt = module1Buffer.questionLastViewedAt.concat(canonical(questionLastViewedAt));
+      finalQuestionFirstVisitDurationMs = module1Buffer.questionFirstVisitDurationMs.concat(canonical(questionFirstVisitDurationMs));
     } else {
       finalAnswers = canonical(answers);
       finalMarked = canonical(marked);
@@ -5850,10 +6254,12 @@
       finalQuestionTimeMs = canonical(questionTimeMs);
       finalQuestionFirstVisitedAt = canonical(questionFirstVisitedAt);
       finalQuestionLastViewedAt = canonical(questionLastViewedAt);
+      finalQuestionFirstVisitDurationMs = canonical(questionFirstVisitDurationMs);
     }
     completedSections.push({
       key: secKey, label: bankFor(secKey).label, answers: finalAnswers, marked: finalMarked, everMarked: finalEverMarked, module2Variant: module2Variant,
-      questionTimeMs: finalQuestionTimeMs, questionFirstVisitedAt: finalQuestionFirstVisitedAt, questionLastViewedAt: finalQuestionLastViewedAt
+      questionTimeMs: finalQuestionTimeMs, questionFirstVisitedAt: finalQuestionFirstVisitedAt, questionLastViewedAt: finalQuestionLastViewedAt,
+      questionFirstVisitDurationMs: finalQuestionFirstVisitDurationMs
     });
     moduleStage = 'module1';
     module2Variant = null;
@@ -6622,10 +7028,39 @@
     // estimate is only revealed on Luca's diagnostic report (report.html),
     // not to the student on this screen.
 
+    // Total minutes allotted for a section (both modules combined, scaled
+    // by the SAME extended-time accommodation actually applied when the
+    // section was taken — enterModule() above reads accommodations.timeMult
+    // at module-start time; it isn't editable once the diagnostic is under
+    // way, so re-reading it here at submission time gives the identical
+    // value). This is the "how long did they actually have" half of the
+    // "unused section time" read on report.html (see the tl field below) —
+    // the other half, actual time spent, is already sent via tm/fv/lv.
+    // Recomputed here rather than captured live per-module because it's a
+    // pure function of (section key, practice-test-or-not, accommodation
+    // multiplier) — nothing about it can drift between module-start and
+    // submission, so there's no need to add new tracked state to get it.
+    function allottedMinutesFor(secKey) {
+      var timeLimitsNow = practiceTestId ? (window.PRACTICE_MODULE_TIME_LIMITS || {}) : (window.SECTION_MODULE_TIME_LIMITS || {});
+      var perModuleMinutes = timeLimitsNow[secKey === 'reading-writing' ? 'readingWriting' : secKey] || timeLimitsNow[secKey] || 0;
+      if (!perModuleMinutes) return 0;
+      var totalMinutes = (sectionHasModules(secKey) ? perModuleMinutes * 2 : perModuleMinutes) * accommodations.timeMult;
+      return totalMinutes;
+    }
     var payload = {
       n: currentStudent.name, k: currentStudent.key, t: testChoice,
       pt: ptDone ? ptDone.id : undefined, ptTitle: ptDone ? ptDone.title : undefined,
       dt: new Date().toISOString().slice(0, 10),
+      // Full submission timestamp (dt above is date-only) — lets
+      // report.html read the time of day an attempt happened (e.g. a
+      // late-night finish). Same value as attemptTimestamp above, kept as
+      // its own payload field since dt/ts serve different readers (dt is
+      // the plain human date shown in the report header, ts is for the
+      // new time-of-day behavior check below). A real absolute instant
+      // (new Date().toISOString(), UTC) — report.html converts it to local
+      // clock time with toLocaleTimeString() when displaying it, same as
+      // the browser viewing the report would show any other local time.
+      ts: attemptTimestamp,
       s: completedSections.map(function (sec) {
         return {
           // m = "ever flagged for review," not just the final on/off state —
@@ -6637,7 +7072,21 @@
           // Per-question timing: tm = total ms spent on the question, fv/lv =
           // Date.now() timestamps of first-visited/last-viewed, in the same
           // original-bank-order indexing as `a`/`m` above.
-          tm: sec.questionTimeMs || null, fv: sec.questionFirstVisitedAt || null, lv: sec.questionLastViewedAt || null
+          tm: sec.questionTimeMs || null, fv: sec.questionFirstVisitedAt || null, lv: sec.questionLastViewedAt || null,
+          // fp = ms spent on the question during its FIRST look only (see
+          // questionFirstVisitDurationMs above) — null for any question
+          // never actually visited, or on a report saved before this field
+          // existed. Distinct from tm, which is a running total across
+          // every visit; this is what lets report.html tell "rushed the
+          // first pass, came back and fixed it" apart from "took a while,
+          // all at once."
+          fp: sec.questionFirstVisitDurationMs || null,
+          // tl = total minutes allotted for this section (both modules,
+          // accommodation-adjusted) — see allottedMinutesFor above. 0/absent
+          // for a section with no timer (shouldn't happen in practice, but
+          // report.html treats a falsy tl as "no unused-time read available"
+          // rather than dividing by zero).
+          tl: allottedMinutesFor(sec.key)
         };
       })
     };
@@ -6827,6 +7276,10 @@
         questionTimeMs = (Array.isArray(state.questionTimeMs) && state.questionTimeMs.length === qs.length) ? state.questionTimeMs : new Array(qs.length).fill(0);
         questionFirstVisitedAt = (Array.isArray(state.questionFirstVisitedAt) && state.questionFirstVisitedAt.length === qs.length) ? state.questionFirstVisitedAt : new Array(qs.length).fill(null);
         questionLastViewedAt = (Array.isArray(state.questionLastViewedAt) && state.questionLastViewedAt.length === qs.length) ? state.questionLastViewedAt : new Array(qs.length).fill(null);
+        // Restoring this alongside questionTimeMs (rather than resetting it)
+        // is what makes flushQuestionTime's first-departure snapshot correct
+        // across a refresh mid-first-look — see its comment above.
+        questionFirstVisitDurationMs = (Array.isArray(state.questionFirstVisitDurationMs) && state.questionFirstVisitDurationMs.length === qs.length) ? state.questionFirstVisitDurationMs : new Array(qs.length).fill(null);
         current = Math.min(Math.max(state.current || 0, 0), qs.length - 1);
         document.getElementById('dx-student-label').textContent = currentStudent.name;
         var moduleLabelSuffix = sectionHasModules(secKey) ? (' — ' + (moduleStage === 'module1' ? 'Module 1' : 'Module 2')) : '';

@@ -263,8 +263,52 @@
     .portal-teaser-kicker { display: block; text-align: center; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.65rem; }
     .portal-teaser-hed { font-family: var(--display); font-size: clamp(1.3rem, 2.4vw, 1.75rem); color: #fff; font-weight: 700; margin-bottom: 0.55rem; max-width: 560px; line-height: 1.3; }
     .portal-teaser-body { font-size: 0.92rem; line-height: 1.65; color: rgba(255,255,255,0.55); max-width: 540px; }
-    .portal-teaser-btn { flex-shrink: 0; background: var(--red); color: #fff; font-family: var(--hel); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 1.05rem 2.1rem; text-decoration: none; white-space: nowrap; transition: opacity 0.2s; }
+    .portal-teaser-btn { flex-shrink: 0; display: inline-block; background: var(--red); color: #fff; font-family: var(--hel); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 1.05rem 2.1rem; text-decoration: none; white-space: nowrap; transition: opacity 0.2s; }
     .portal-teaser-btn:hover { opacity: 0.86; }
+    .portal-teaser-text { flex: 1 1 320px; min-width: 260px; }
+
+    /* ═══ PORTAL TEASER VISUAL — a live-report preview standing in for
+       the promise in the paragraph above it, instead of just a paragraph.
+       A "browser window" mockup rebuilding a real report.html section
+       card (timing forensics, a detected answering pattern, per-skill
+       bars) — the part of the portal that's genuinely unusual, not the
+       plain composite score. Colors are report.html's own tokens
+       (--red/--gold/--green from that page) written as literals here
+       since this page doesn't declare them; keep the two in sync by eye
+       if report.html's palette ever changes. ═══ */
+    .portal-teaser.has-visual { align-items: stretch; }
+    .teaser-visual { flex: 1 1 340px; min-width: 300px; display: flex; align-items: center; justify-content: center; }
+    .teaser-browser { width: 100%; max-width: 430px; background: #e8e4dc; border-radius: 10px; box-shadow: 0 24px 60px rgba(0,0,0,0.55); overflow: hidden; transform: rotate(-1.4deg); }
+    .teaser-browser-chrome { display: flex; align-items: center; padding: 0.6rem 0.75rem; background: #d9d4c8; }
+    .teaser-browser-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(0,0,0,0.22); margin-right: 0.4rem; }
+    .teaser-browser-url { flex: 1; margin-left: 0.5rem; background: #fff; border-radius: 4px; padding: 0.3rem 0.6rem; font-size: 0.6rem; color: rgba(17,17,17,0.45); font-family: var(--hel); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .teaser-report { background: #fff; padding: 1.05rem 1.1rem 1.2rem; font-family: var(--hel); }
+    .teaser-report-hdr { display: flex; align-items: baseline; justify-content: space-between; border-bottom: 2px solid var(--red); padding-bottom: 0.5rem; margin-bottom: 0.7rem; }
+    .teaser-report-name { font-family: var(--display); font-weight: 700; font-size: 0.74rem; color: #111; }
+    .teaser-report-sub { font-size: 0.48rem; color: rgba(17,17,17,0.45); margin-top: 0.15rem; }
+    .teaser-report-mark { font-family: var(--display); font-weight: 700; font-size: 0.58rem; letter-spacing: 0.02em; color: var(--red); }
+    .teaser-report-strip { display: flex; align-items: baseline; gap: 0.5rem; background: #f7f4ef; border: 1px solid rgba(17,17,17,0.12); border-radius: 4px; padding: 0.5rem 0.7rem; margin-bottom: 0.75rem; }
+    .teaser-report-strip-num { font-family: var(--display); font-weight: 700; font-size: 1rem; color: #111; }
+    .teaser-report-strip-lab { font-size: 0.44rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: rgba(17,17,17,0.5); }
+    .teaser-report-strip-sep { flex: 1; }
+    .teaser-report-strip-sub { font-size: 0.46rem; color: rgba(17,17,17,0.4); }
+    .teaser-card { border: 1px solid rgba(17,17,17,0.14); padding: 0.75rem 0.8rem 0.85rem; }
+    .teaser-card-hed { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.15rem; }
+    .teaser-card-title { font-family: var(--display); font-weight: 700; font-size: 0.62rem; color: #111; }
+    .teaser-card-score { font-size: 0.5rem; color: rgba(17,17,17,0.5); }
+    .teaser-card-wrong { font-size: 0.46rem; color: var(--red); font-weight: 600; margin-bottom: 0.5rem; }
+    .teaser-time-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.35rem 0.5rem; font-size: 0.44rem; color: rgba(17,17,17,0.55); padding-bottom: 0.5rem; margin-bottom: 0.5rem; border-bottom: 1px solid rgba(17,17,17,0.12); }
+    .teaser-time-item { display: flex; flex-direction: column; }
+    .teaser-time-item.bad { color: var(--red); }
+    .teaser-time-label { font-size: 0.36rem; text-transform: uppercase; letter-spacing: 0.03em; color: rgba(17,17,17,0.4); }
+    .teaser-time-item.bad .teaser-time-label { color: var(--red); opacity: 0.8; }
+    .teaser-flag { display: flex; gap: 0.3rem; font-size: 0.44rem; line-height: 1.5; color: #111; background: #fbf1de; border-left: 2px solid var(--gold); padding: 0.3rem 0.4rem; margin-bottom: 0.55rem; }
+    .teaser-flag b { color: #111; }
+    .teaser-grouplab { font-size: 0.38rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: rgba(17,17,17,0.4); margin-bottom: 0.3rem; }
+    .teaser-skillrow { margin-bottom: 0.32rem; }
+    .teaser-skillrow-lab { display: flex; justify-content: space-between; font-size: 0.44rem; margin-bottom: 0.12rem; color: #222; }
+    .teaser-skillrow-track { height: 3.5px; background: #eee7da; border-radius: 2px; overflow: hidden; }
+    .teaser-skillrow-fill { height: 100%; border-radius: 2px; }
 
     #explore-cta-inline { text-align: center; }
     .explore-cta { display: inline-block; font-family: var(--display); font-size: clamp(1.5rem, 2.9vw, 2.2rem); font-weight: 700; color: #fff; text-decoration: none; border-bottom: 3px solid var(--gold); padding-bottom: 0.35rem; transition: transform 0.35s cubic-bezier(0.2, 1, 0.3, 1); transform-origin: center bottom; text-shadow: 0 2px 14px rgba(0,0,0,0.85); }
@@ -514,7 +558,7 @@
   <div class="container">
     <div class="instructor-grid">
       <div class="team-card reveal d1">
-        <div class="team-photo-wrap luca-frame"><img class="team-photo" src="Portrait.png" alt="Luca Moretti"></div>
+        <div class="team-photo-wrap luca-frame"><img class="team-photo" src="Portrait.jpg" alt="Luca Moretti" width="800" height="800" loading="lazy"></div>
         <div class="stats-band">
           <div class="intro-stats">
             <div class="intro-stat"><span class="intro-stat-num">1530</span><span class="intro-stat-lbl">SAT</span></div>
@@ -588,6 +632,15 @@
 
   <div class="container learn-static">
     <div id="learn-content">
+      <!-- Photo on the left / checklist on the right — deliberately the
+           mirror of the portal-teaser section right below, which puts its
+           own visual (the report preview) on the right. Two stacked
+           sections with the visual on the same side read as a rigid
+           template; alternating gives the page a left-right-left rhythm
+           instead. -->
+      <div class="learn-photo-col">
+        <img src="photo-1-web.jpg" alt="Moretti Test Prep &amp; Tutoring session in progress">
+      </div>
       <div class="learn-text-col">
         <h2 class="learn-hed">Here&rsquo;s what you&rsquo;ll learn.</h2>
         <ul class="learn-items">
@@ -597,20 +650,71 @@
           <li class="learn-item reveal reveal-toggle"><span class="learn-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span class="learn-item-text"><strong class="gold-shine">Error-diagnosis protocols:</strong> A systematic approach to analyzing mistakes so specific point-costing errors are permanently eliminated.</span></li>
         </ul>
       </div>
-      <div class="learn-photo-col">
-        <img src="photo-1-web.jpg" alt="Moretti Test Prep &amp; Tutoring session in progress">
-      </div>
     </div>
   </div>
 
   <div class="container explore-static-outro">
-    <div class="portal-teaser reveal reveal-toggle">
+    <div class="portal-teaser has-visual reveal reveal-toggle">
       <div class="portal-teaser-text">
         <span class="portal-teaser-kicker">For Enrolled Students</span>
         <h3 class="portal-teaser-hed">A private portal — diagnostics, curated practice, and guides.</h3>
-        <p class="portal-teaser-body">Every student enters the program with a curated diagnostic, followed by a personal practice folder, test-taking guides, session notes, and more.</p>
+        <p class="portal-teaser-body">Every student enters the program with a curated diagnostic, followed by a personal practice folder, test-taking guides, session notes, and more. Here&rsquo;s a real report slice — timing forensics, a detected answering pattern, and a per-skill breakdown, generated the moment a student finishes.</p>
+        <a href="portal/index.html" class="portal-teaser-btn">Open Student Portal &rarr;</a>
       </div>
-      <a href="portal/index.html" class="portal-teaser-btn">Open Student Portal &rarr;</a>
+      <div class="teaser-visual" aria-hidden="true">
+        <div class="teaser-browser">
+          <div class="teaser-browser-chrome">
+            <span class="teaser-browser-dot"></span><span class="teaser-browser-dot"></span><span class="teaser-browser-dot"></span>
+            <span class="teaser-browser-url">morettitutoring.com/portal/report.html</span>
+          </div>
+          <div class="teaser-report">
+            <div class="teaser-report-hdr">
+              <div>
+                <div class="teaser-report-name">Jamie R. — SAT Diagnostic</div>
+                <div class="teaser-report-sub">Administered Aug 19 &middot; Moretti student portal</div>
+              </div>
+              <div class="teaser-report-mark">MORETTI</div>
+            </div>
+            <div class="teaser-report-strip">
+              <span class="teaser-report-strip-num">1450</span>
+              <span class="teaser-report-strip-lab">Composite</span>
+              <span class="teaser-report-strip-sep"></span>
+              <span class="teaser-report-strip-sub">R&amp;W 750 &middot; Math 700</span>
+            </div>
+            <div class="teaser-card">
+              <div class="teaser-card-hed">
+                <span class="teaser-card-title">Math — Module 2 (Harder)</span>
+                <span class="teaser-card-score">15/22 (68%)</span>
+              </div>
+              <div class="teaser-card-wrong">7 incorrect</div>
+              <div class="teaser-time-grid">
+                <div class="teaser-time-item"><span class="teaser-time-label">Time on module</span>16m 45s</div>
+                <div class="teaser-time-item"><span class="teaser-time-label">Time on correct</span>9m 48s</div>
+                <div class="teaser-time-item bad"><span class="teaser-time-label">Time on incorrect</span>6m 57s</div>
+                <div class="teaser-time-item bad"><span class="teaser-time-label">Unused</span>18m 15s of 35m</div>
+              </div>
+              <div class="teaser-flag"><span>&#9888;</span><span><b>Possible pattern:</b> picked (C) on 7 of 9 missed multiple-choice questions here — worth a quick check together.</span></div>
+              <div class="teaser-grouplab">Skills to focus on (correct / attempted)</div>
+              <div class="teaser-skillrow">
+                <div class="teaser-skillrow-lab"><span>Nonlinear Equations</span><span>1/4 (25%)</span></div>
+                <div class="teaser-skillrow-track"><div class="teaser-skillrow-fill" style="width:25%; background:#B0271C;"></div></div>
+              </div>
+              <div class="teaser-skillrow">
+                <div class="teaser-skillrow-lab"><span>Linear Functions</span><span>1/2 (50%)</span></div>
+                <div class="teaser-skillrow-track"><div class="teaser-skillrow-fill" style="width:50%; background:#C9A84C;"></div></div>
+              </div>
+              <div class="teaser-skillrow">
+                <div class="teaser-skillrow-lab"><span>Equivalent Expressions</span><span>2/3 (67%)</span></div>
+                <div class="teaser-skillrow-track"><div class="teaser-skillrow-fill" style="width:67%; background:#C9A84C;"></div></div>
+              </div>
+              <div class="teaser-skillrow">
+                <div class="teaser-skillrow-lab"><span>Nonlinear Functions</span><span>4/5 (80%)</span></div>
+                <div class="teaser-skillrow-track"><div class="teaser-skillrow-fill" style="width:80%; background:#5E8B6F;"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div id="explore-cta-inline" class="reveal reveal-toggle">

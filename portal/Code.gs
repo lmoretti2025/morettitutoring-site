@@ -378,6 +378,8 @@ function handleAuth(rawKey, rawEmail, rawName) {
     baselineType: row.BaselineType || null,
     baselineRw: row.BaselineRW || null,
     baselineMath: row.BaselineMath || null,
+    guardianName: row.GuardianName || null,
+    guardianEmail: row.GuardianEmail || null,
     tests: [],
     assignments: getAssignments_(key, row.Name)
   };

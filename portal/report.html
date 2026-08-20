@@ -63,7 +63,13 @@
   .section-card .sc-title { font-family: 'Caladea', serif; font-size: 13px; font-weight: 700; }
   .section-card .sc-score { font-size: 11px; color: var(--mid); }
   .section-card .sc-incorrect { font-size: 10px; color: var(--red); font-weight: 600; margin-bottom: 6px; }
-  .sc-time { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 9.5px; color: var(--mid); margin: 0 0 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+  /* A 2x2 grid rather than a wrapping flex row — with the Unused stat added
+     alongside Time On Module/Correct/Incorrect, a 4-item flex row wraps as
+     3-then-1, an unbalanced single item stranded alone on its own line.
+     auto-fit at a 90px minimum gives 2 columns at the section-card's normal
+     width (two side-by-side cards on an 8.5in page) while still allowing 4
+     across if a card ever gets wide enough to fit them. */
+  .sc-time { display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 6px 12px; font-size: 9.5px; color: var(--mid); margin: 0 0 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
   .sc-time-item { display: flex; flex-direction: column; }
   .sc-time-item.ok { color: var(--green); }
   .sc-time-item.bad { color: var(--red); }
@@ -137,6 +143,43 @@
        sliced in half at the bottom of a page. */
     .score-tile, .bridge-wrap, .section-card, table tr { page-break-inside: avoid; break-inside: avoid; }
     .score-tiles, .score-summary, #behavior-section { page-break-inside: avoid; break-inside: avoid; }
+  }
+  /* ═══ MOBILE ═══ this report ships as a link in an email, and a parent
+     opening it is at least as likely to tap it on their phone first as to
+     ever print it — but everything above assumes the fixed 8.5in page the
+     Print/PDF button targets, so without this a phone got a tiny, forced-
+     horizontal-scroll miniature of a print page rather than a normal
+     mobile page. Scoped to its own breakpoint (not folded into the
+     existing @media print block above, which is a different context
+     entirely) and additive-only: nothing here touches print or the
+     >700px screen layout, it only lets .page's own width go fluid and
+     gives the few genuinely fixed-width children (the bridge chart
+     canvas, the raw-detail table) their own local horizontal scroll
+     instead of blowing out the whole page's width. */
+  @media screen and (max-width: 700px) {
+    .toolbar { max-width: 100%; padding: 0 14px; }
+    .page { width: 100%; min-height: 0; margin: 14px auto; padding: 1.1rem 1rem; }
+    .hdr img { height: 32px; }
+    .hdr h1 { font-size: 16px; }
+    .score-tiles { gap: 10px; }
+    .score-tile { padding: 8px 12px 7px; min-width: 84px; }
+    .score-tile.big { min-width: 108px; padding: 12px 16px 9px; }
+    /* The waterfall chart draws to a canvas at least 620px wide (see
+       drawBridge in the script below) — fixed by design, since the bar
+       count/spacing math needs a real pixel budget to stay legible. Rather
+       than shrinking (and re-cramping) the chart itself, it scrolls
+       horizontally within its own box, the same trade a printed-report
+       page makes for a wide table. */
+    .bridge-canvas-wrap { overflow-x: auto; }
+    table { display: block; overflow-x: auto; white-space: nowrap; }
+    /* The nowrap above is for the raw score TABLE (short cells: #, skill,
+       answer, result, time) — it's what lets that table scroll sideways
+       instead of squeezing. The expanded question detail underneath a row
+       is ordinary prose (the question text, answer choices) sitting inside
+       one of that table's cells, so it needs to explicitly opt back into
+       normal wrapping or every open question would render as one
+       unreadable horizontal line. */
+    .q-detail, .q-detail * { white-space: normal; }
   }
 </style>
 </head>
@@ -531,6 +574,14 @@
       return { fv: fv, lv: lv };
     }
 
+    // Same per-section allotted-minutes math as index.html's
+    // allottedMinutesFor() (no accommodation multiplier in the demo — always
+    // standard timing), so the demo exercises the unused-time behavior flag
+    // with realistic numbers instead of leaving it permanently untestable.
+    function demoAllottedMinutes(key, hasTwoModules) {
+      var perModule = (window.SECTION_MODULE_TIME_LIMITS && window.SECTION_MODULE_TIME_LIMITS[key]) || 0;
+      return hasTwoModules ? perModule * 2 : perModule;
+    }
     function genSection(key, wrongRate) {
       var bank = window.SECTION_BANKS[key];
       var weakSkill = weakSkillBySection[key];
@@ -561,6 +612,7 @@
         t1: bank.module1.length,
         c2: m2 ? m2.correct : 0,
         t2: m2t,
+        tl: demoAllottedMinutes(key, !!bank.module2Easier),
         diff: diff
       };
     }
@@ -641,10 +693,18 @@
 
     var s = chosenSecs.map(function (sec) {
       var visits = deriveVisits(sec.times);
-      return { k: sec.k, a: sec.a, m: sec.m, v: sec.v, tm: sec.times, fv: visits.fv, lv: visits.lv };
+      // fp = first-pass duration — the demo never models a revisit, so a
+      // question's whole recorded time IS its first-look time; reusing
+      // sec.times here is exact, not an approximation, for this generator.
+      return { k: sec.k, a: sec.a, m: sec.m, v: sec.v, tm: sec.times, fp: sec.times, fv: visits.fv, lv: visits.lv, tl: sec.tl };
     });
 
-    return { n: 'Demo Student', k: 'DEMO', t: testChoice, dt: new Date().toISOString().slice(0, 10), s: s };
+    // &late=1 fakes an 11:30pm submission so the late-night behavior flag
+    // (see behaviorFlags below) is actually exercisable in demo mode
+    // without waiting for a real 11pm-5am clock to preview it.
+    var demoNow = new Date();
+    if (/[?&]late=1\b/.test(location.search)) demoNow.setHours(23, 30, 0, 0);
+    return { n: 'Demo Student', k: 'DEMO', t: testChoice, dt: demoNow.toISOString().slice(0, 10), ts: demoNow.toISOString(), s: s };
   }
   var DEMO_MODE = /[?&]demo=1\b/.test(location.search);
 
@@ -829,6 +889,15 @@
       var ok = isCorrect(q, given);
       var wasMarked = sec.m && sec.m[i];
       var qTimeMs = (sec.tm && typeof sec.tm[i] === 'number') ? sec.tm[i] : 0;
+      // ms spent on this question during its first look only, or null —
+      // absent on a report saved before index.html started sending it (see
+      // questionFirstVisitDurationMs there) or for a question never
+      // visited. A strictly more precise "was this a rushed guess" signal
+      // than qTimeMs (the cumulative total): a question rushed in 5s on
+      // first look, skipped, then genuinely reworked for 30s on return
+      // shows qTimeMs=35s (reads as unhurried) but firstVisitMs=5s (still
+      // correctly shows the rushed first instinct).
+      var qFirstVisitMs = (sec.fp && typeof sec.fp[i] === 'number') ? sec.fp[i] : null;
       var moduleIndex = i < moduleSplit ? 0 : 1;
       var modStartAt = moduleStartAt[moduleIndex];
       secTimeTotal += qTimeMs;
@@ -875,7 +944,7 @@
       rows.push({ n: i + 1, dom: dom, sk: sk, given: gTxt, ok: ok, marked: !!wasMarked,
         q: q, givenIdx: (q.type === 'mc' && given !== null && given !== undefined) ? given : null,
         givenText: (given && typeof given === 'object') ? esc(given.raw || String(given.value)) : null,
-        timeMs: qTimeMs, moduleIndex: moduleIndex,
+        timeMs: qTimeMs, firstVisitMs: qFirstVisitMs, moduleIndex: moduleIndex,
         firstVisitedAt: (sec.fv && typeof sec.fv[i] === 'number' && modStartAt !== null) ? (sec.fv[i] - modStartAt) : null,
         lastViewedAt: (sec.lv && typeof sec.lv[i] === 'number' && modStartAt !== null) ? (sec.lv[i] - modStartAt) : null });
     });
@@ -883,6 +952,11 @@
       key: sec.k, label: sectionLabel(sec.k, bank), c: c, t: qs.length, rows: rows, domains: secDomains,
       distractors: secDistractors, missedMc: secMissedMc, diff: diff, c1: c1, t1: t1, c2: c2, t2: t2, variant: sec.v,
       timeTotal: secTimeTotal, timeCorrect: secTimeCorrect, timeIncorrect: secTimeIncorrect,
+      // Total minutes allotted for this section (both modules, accommodation-
+      // adjusted — see allottedMinutesFor() in index.html's finishDiagnostic).
+      // Absent on reports saved before this field existed; every read below
+      // treats a falsy timeAllottedMin the same as "no unused-time data".
+      timeAllottedMin: sec.tl || 0,
       hasModules: !!bank.module2Easier, moduleSplit: moduleSplit
     });
   });
@@ -938,15 +1012,29 @@
     var m2 = buildSectionStatsFromRows(m2Rows);
     m1.key = sec.key; m1.label = sec.label + ' — Module 1'; m1.variant = null; m1.isModule = true;
     m2.key = sec.key; m2.label = sec.label + ' — Module 2' + (sec.variant ? ' (' + sec.variant + ')' : ''); m2.variant = sec.variant; m2.isModule = true;
+    // The two modules split the section's allotted time evenly (see
+    // banks.js's SECTION_MODULE_TIME_LIMITS comment — the stored figure is
+    // already per-module), so halving the whole-section total gives each
+    // module's own allotment for its "of N min allotted" display below.
+    m1.timeAllottedMin = sec.timeAllottedMin / 2;
+    m2.timeAllottedMin = sec.timeAllottedMin / 2;
     displaySections.push(m1, m2);
   });
 
   var pct = totalQ ? Math.round(totalC / totalQ * 100) : 0;
   var first = (data.n || 'Student').split(' ')[0];
   var dateStr = data.dt || new Date().toISOString().slice(0, 10);
+  // data.ts (added alongside dt — see finishDiagnostic's payload in
+  // index.html) is a real instant, not just a date — absent on any report
+  // saved before this field existed, so every use below is guarded rather
+  // than assuming it's there. Rendered with toLocaleTimeString() in
+  // whoever's browser opens this report, same as any other local time.
+  var attemptDate = data.ts ? new Date(data.ts) : null;
+  if (attemptDate && isNaN(attemptDate.getTime())) attemptDate = null;
+  var timeStr = attemptDate ? attemptDate.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : null;
 
   document.getElementById('r-title').textContent = data.n + ' — ' + (data.ptTitle ? data.ptTitle + ' Report' : data.t + ' Diagnostic Report');
-  document.getElementById('r-sub').textContent = 'Administered ' + dateStr + ' · Moretti student portal';
+  document.getElementById('r-sub').textContent = 'Administered ' + dateStr + (timeStr ? ' at ' + timeStr : '') + ' · Moretti student portal';
   document.getElementById('r-sub2').textContent = data.n + ' · ' + data.t + ' Diagnostic · ' + dateStr;
   var ftrDate = document.getElementById('ftr-date');
   if (ftrDate) ftrDate.textContent = dateStr;
@@ -1670,10 +1758,25 @@
     if (s5.timeTotal > 0) {
       var timeEl = document.createElement('div');
       timeEl.className = 'sc-time';
-      timeEl.innerHTML =
+      var timeHtml =
         '<span class="sc-time-item"><span class="sc-time-label">Time On ' + (s5.isModule ? 'Module' : 'Section') + '</span>' + formatDuration(s5.timeTotal) + '</span>' +
         '<span class="sc-time-item ok"><span class="sc-time-label">Time On Correct</span>' + formatDuration(s5.timeCorrect) + '</span>' +
         '<span class="sc-time-item bad"><span class="sc-time-label">Time On Incorrect</span>' + formatDuration(s5.timeIncorrect) + '</span>';
+      // Unused time — only shown when this section/module actually has an
+      // allotted-minutes figure to compare against (see timeAllottedMin,
+      // sourced from index.html's tl payload field; absent on reports saved
+      // before that field existed). A negative leftover (ran past the
+      // nominal limit — possible with an extended-time accommodation
+      // applied mid-attempt, or clock drift) is floored at 0 rather than
+      // shown as a confusing negative "unused" figure.
+      if (s5.timeAllottedMin > 0) {
+        var allottedMs2 = s5.timeAllottedMin * 60000;
+        var leftoverMs2 = Math.max(0, allottedMs2 - s5.timeTotal);
+        var leftoverShare2 = leftoverMs2 / allottedMs2;
+        var unusedCls = leftoverShare2 >= 0.15 ? 'bad' : '';
+        timeHtml += '<span class="sc-time-item ' + unusedCls + '"><span class="sc-time-label">Unused</span>' + formatDuration(leftoverMs2) + ' of ' + Math.round(s5.timeAllottedMin) + 'm</span>';
+      }
+      timeEl.innerHTML = timeHtml;
       card.appendChild(timeEl);
     }
 
@@ -1783,21 +1886,72 @@
   // the other section went.
   var RUSHED_REL = 0.5, RUSHED_ABS_CAP = 20000, LUCKY_REL = 0.35, LUCKY_ABS_CAP = 15000;
   var behaviorFlags = [];
+  // Late-night attempt: a diagnostic finished well outside normal waking
+  // hours is exactly the kind of context Luca already factors in by hand
+  // when a score looks lower than he'd expect (fatigue suppresses
+  // performance in a way that has nothing to do with content knowledge) —
+  // this just surfaces it automatically instead of relying on him
+  // separately knowing when the student actually sat down. Gated on
+  // attemptDate existing (older saved reports predate the ts field) and
+  // reads the SUBMISSION hour specifically — for a ~2hr diagnostic that's
+  // usually close enough to "when this happened" without needing a
+  // separate start timestamp. 10pm-5am local (to whoever's browser opens
+  // the report) is deliberately conservative — a 9:45 finish isn't "late
+  // night," but an 11pm+ or pre-dawn one is worth a direct question.
+  if (attemptDate) {
+    var attemptHour = attemptDate.getHours();
+    if (attemptHour >= 22 || attemptHour < 5) {
+      behaviorFlags.push('<strong>Late-night attempt:</strong> this diagnostic was submitted at ' + timeStr + ' local time. Fatigue at that hour can suppress performance in ways that have nothing to do with content knowledge — worth asking ' + first + ' when this was actually taken before treating a lower-than-expected score as a real ceiling, and worth scheduling the next one earlier in the day if this pattern repeats.');
+    }
+  }
+  // Unused-time thresholds: flagged only when BOTH a meaningful chunk of
+  // minutes (>=5) AND a meaningful share of the section's own clock (>=15%)
+  // were left unused, AND at least one question here was missed — a
+  // section finished early with a perfect score is just efficient, not a
+  // pacing problem worth raising. Checked independently of the
+  // rushed/lucky checks below (which bail out when there's no usable
+  // correct-MC timing to build a baseline from) since "how much clock was
+  // left" doesn't depend on having that baseline at all.
+  var UNUSED_MIN_MINUTES = 5, UNUSED_MIN_SHARE = 0.15;
   sections.forEach(function (s7) {
-    var correctTimes = s7.rows.filter(function (r) { return r.ok && r.q.type === 'mc' && r.timeMs > 0; }).map(function (r) { return r.timeMs; });
+    if (s7.timeAllottedMin > 0 && s7.timeTotal > 0) {
+      var allottedMs = s7.timeAllottedMin * 60000;
+      var leftoverMs = allottedMs - s7.timeTotal;
+      var leftoverMin = leftoverMs / 60000;
+      var leftoverShare = leftoverMs / allottedMs;
+      var missedHere = s7.t - s7.c;
+      if (leftoverMin >= UNUSED_MIN_MINUTES && leftoverShare >= UNUSED_MIN_SHARE && missedHere > 0) {
+        behaviorFlags.push('<strong>Unused time (' + s7.label + '):</strong> ' + first + ' submitted with roughly ' + Math.round(leftoverMin) + ' of ' + Math.round(s7.timeAllottedMin) + ' minutes still on the clock (about ' + Math.round(leftoverShare * 100) + '% of the section) while still missing ' + missedHere + ' question' + (missedHere === 1 ? '' : 's') + ' here. Worth checking whether ' + first + ' is submitting out of habit rather than using the full section to go back and recheck answers.');
+      }
+    }
+  });
+  // Prefers each row's first-look duration (see qFirstVisitMs above) over
+  // its cumulative total when available — a strictly more accurate read of
+  // "was this a rushed guess," since the cumulative total can hide a fast
+  // first look behind time added on a later revisit that didn't actually
+  // change anything. Falls back to the cumulative total for a row with no
+  // first-pass data (an older saved report, or a question never visited),
+  // so this degrades to the previous behavior rather than dropping rows.
+  function pacingTimeMs(r) { return (r.firstVisitMs != null) ? r.firstVisitMs : r.timeMs; }
+  sections.forEach(function (s7) {
+    var usingFirstPass = s7.rows.some(function (r) { return r.firstVisitMs != null; });
+    var correctTimes = s7.rows.filter(function (r) { return r.ok && r.q.type === 'mc' && pacingTimeMs(r) > 0; }).map(pacingTimeMs);
     var typical = median(correctTimes);
     if (!typical) return; // no usable timing data for this section — skip rather than guess
     var cutoff = Math.min(typical * RUSHED_REL, RUSHED_ABS_CAP);
     var luckyCutoff = Math.min(typical * LUCKY_REL, LUCKY_ABS_CAP);
     var rushedWrong = [], luckyCorrect = [];
     s7.rows.forEach(function (r) {
-      if (r.q.type !== 'mc' || !(r.timeMs > 0)) return;
-      if (!r.ok && r.timeMs < cutoff) rushedWrong.push({ sk: r.sk });
-      if (r.ok && r.q.difficulty === 'hard' && r.timeMs < luckyCutoff) luckyCorrect.push({ sk: r.sk });
+      if (r.q.type !== 'mc' || !(pacingTimeMs(r) > 0)) return;
+      if (!r.ok && pacingTimeMs(r) < cutoff) rushedWrong.push({ sk: r.sk });
+      if (r.ok && r.q.difficulty === 'hard' && pacingTimeMs(r) < luckyCutoff) luckyCorrect.push({ sk: r.sk });
     });
     if (s7.missedMc >= 4 && rushedWrong.length / s7.missedMc >= 0.5) {
       var wSkills = topSkillNames(rushedWrong, 3).join(', ');
-      behaviorFlags.push('<strong>Pacing flag (' + s7.label + '):</strong> ' + rushedWrong.length + ' of ' + s7.missedMc + ' missed multiple-choice questions here were answered in well under ' + first + '’s own average time on questions answered correctly — a rushed-guess pattern more than ' + rushedWrong.length + ' independently reasoned wrong answers.' + (wSkills ? ' Heaviest in: ' + wSkills + '.' : '') + ' Worth a pacing conversation before treating all of these as pure content gaps.');
+      var rushedBasis = usingFirstPass
+        ? 'spent well under ' + first + '’s own average FIRST-LOOK time on questions answered correctly (whether or not ' + first + ' ever came back to them)'
+        : 'answered in well under ' + first + '’s own average time on questions answered correctly';
+      behaviorFlags.push('<strong>Pacing flag (' + s7.label + '):</strong> ' + rushedWrong.length + ' of ' + s7.missedMc + ' missed multiple-choice questions here were ' + rushedBasis + ' — a rushed-guess pattern more than ' + rushedWrong.length + ' independently reasoned wrong answers.' + (wSkills ? ' Heaviest in: ' + wSkills + '.' : '') + ' Worth a pacing conversation before treating all of these as pure content gaps.');
     }
     var hardCorrectN = s7.diff.hard.c;
     if (hardCorrectN >= 3 && luckyCorrect.length >= 2 && luckyCorrect.length / hardCorrectN >= 0.4) {
