@@ -15,6 +15,22 @@
   body { font-family: 'Poppins', sans-serif; font-weight: 300; color: var(--ink); background: #e8e4dc; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .page { width: 8.5in; min-height: 11in; margin: 24px auto; background: #fff; padding: 0.6in 0.65in; box-shadow: 0 10px 40px rgba(0,0,0,0.15); }
   .toolbar { max-width: 8.5in; margin: 16px auto 0; display: flex; justify-content: flex-end; gap: 10px; }
+  /* Seamless-in-portal mode (see the embedded-detection script right
+     after <body> opens) — strips exactly the styling that makes .page
+     read as a printable document sitting on a desk (fixed 8.5in width,
+     drop shadow, cream margin gutter around a white rectangle) so it
+     instead just flows as a plain content panel, full width, no visible
+     frame — the same "part of the page" treatment every other screen in
+     the portal gets. Deliberately leaves .page's own white background
+     alone rather than trying to match it to the portal's cream body:
+     every card inside (.section-card, .bridge-wrap, .topics-list, etc.)
+     was built assuming a white backdrop and has no fill color of its
+     own, so recoloring the page out from under them would just swap
+     "boxed white document" for "boxed transparent cards with no visible
+     card," which reads as more broken, not less. */
+  body.embedded { background: transparent; }
+  body.embedded .page { width: 100%; max-width: none; min-height: 0; margin: 0; padding: 1.75rem clamp(1rem, 4vw, 2.75rem) 3rem; box-shadow: none; }
+  body.embedded .toolbar { max-width: none; margin: 0; padding: 14px clamp(1rem, 4vw, 2.75rem) 0; }
   .toolbar button { background: var(--red); color: #fff; border: none; font-family: 'Poppins'; font-weight: 600; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; padding: 10px 22px; cursor: pointer; }
   .hdr { display: flex; align-items: center; gap: 16px; border-bottom: 3px solid var(--red); padding-bottom: 14px; margin-bottom: 18px; }
   .hdr img { height: 40px; }
@@ -54,7 +70,7 @@
      ahead of the scaled-score interpretation above it and the per-section
      detail below. Complements the score-tiles (which speak in scaled
      score) rather than replacing them — this is the plain-counts view. */
-  .raw-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
+  .raw-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 16px; margin-bottom: 16px; }
   .raw-stat { border: 1px solid rgba(17,17,17,0.08); border-radius: 12px; padding: 11px 12px 9px; box-shadow: 0 1px 2px rgba(17,17,17,0.03); }
   .raw-stat-lab { font-family: 'Nunito', 'Poppins', sans-serif; font-size: 8.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--faint); margin-bottom: 4px; }
   .raw-stat-num { font-family: 'Nunito', 'Poppins', sans-serif; font-weight: 800; font-size: 19px; color: var(--ink); line-height: 1; }
@@ -62,9 +78,13 @@
   .raw-stat.bad .raw-stat-num { color: var(--red); }
   @media print { .raw-stats { page-break-inside: avoid; break-inside: avoid; } }
 
-  /* ═══ TOP ROW — score tiles + a real, interactive progress card ═══ */
-  .top-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: stretch; margin-bottom: 0; }
+  /* ═══ TOP ROW — score tiles only now (the progress card was dropped —
+     redundant with the portal's own Home page Score Progress graph, and
+     this is a static/printed document that can't offer the interactive
+     "click a point" behavior that graph has anyway). ═══ */
+  .top-row { display: block; margin-bottom: 0; }
   .top-row .score-summary { margin-bottom: 0; }
+  .progress-card { display: none; }
   .progress-card { border: 1px solid rgba(17,17,17,0.08); border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; box-shadow: 0 1px 2px rgba(17,17,17,0.03); }
   .progress-card-hed { font-family: 'Nunito', 'Poppins', sans-serif; font-size: 10.5px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--mid); margin-bottom: 6px; }
   .progress-loading, .progress-empty { font-size: 10px; color: var(--faint); margin: auto 0; text-align: center; padding: 14px 0; }
@@ -79,12 +99,18 @@
      gauge, same underlying skill-miss data as the bridge chart above,
      just presented as a scannable list instead of a waterfall. ═══ */
   .topics-list { border: 1px solid rgba(17,17,17,0.08); border-radius: 12px; overflow: hidden; box-shadow: 0 1px 2px rgba(17,17,17,0.03); }
-  .topics-row { display: flex; align-items: center; gap: 10px; padding: 9px 14px; border-bottom: 1px solid #f1ede4; }
+  .topics-row { display: flex; align-items: center; gap: 14px; padding: 13px 16px; border-bottom: 1px solid #f1ede4; }
   .topics-row:last-child { border-bottom: none; }
   .topics-rank { font-family: 'Nunito', 'Poppins', sans-serif; font-weight: 800; font-size: 14px; color: var(--faint); width: 20px; flex-shrink: 0; }
-  .topics-main { flex: 1; min-width: 0; }
+  /* Name and meta used to be two inline spans with no line break between
+     them (topics-main had no display/flow rule of its own), so they ran
+     together on one line — "Boundaries6/10 correct · 10 attempts" — with
+     no space at the seam. Stacking them as a column with a real gap is
+     what actually separates "what" from "how many," matching every other
+     two-line label on this report (acc-topic-row-lab, sc-title, etc). */
+  .topics-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
   .topics-name { font-family: 'Nunito', 'Poppins', sans-serif; font-size: 11px; font-weight: 700; color: var(--ink); }
-  .topics-meta { font-family: 'Nunito', 'Poppins', sans-serif; font-size: 8.5px; font-weight: 600; color: var(--faint); margin-top: 1px; }
+  .topics-meta { font-family: 'Nunito', 'Poppins', sans-serif; font-size: 8.5px; font-weight: 600; color: var(--faint); }
   .topics-gauge { flex-shrink: 0; }
 
   /* ═══ ACCURACY BY TOPIC — a threshold-banded gradient track with a dot
@@ -149,7 +175,14 @@
      (right/wrong/unattempted) instead of that screen's two
      (answered/unanswered). */
   .sc-qgrid { display: flex; flex-wrap: wrap; gap: 3px; margin-bottom: 8px; }
-  .sc-qgrid-cell { width: 15px; height: 15px; border-radius: 2px; font-size: 7px; font-weight: 700; display: flex; align-items: center; justify-content: center; border: 1px solid transparent; }
+  /* line-height:1 on both the cell and its number span — flex centering
+     centers the SPAN's line box, not the glyph inside it, so a span with
+     the browser's default line-height (~1.2x font-size) sits centered as
+     a box but the digit inside still reads visually low/off-center at
+     this tiny (15px) scale. Pinning line-height to 1 collapses that gap
+     so the glyph itself lands on the flex-centered point. */
+  .sc-qgrid-cell { width: 15px; height: 15px; border-radius: 2px; font-size: 7px; font-weight: 700; line-height: 1; display: flex; align-items: center; justify-content: center; border: 1px solid transparent; }
+  .sc-qgrid-cell span { line-height: 1; }
   .sc-qgrid-cell.ok { background: rgba(94,139,111,0.16); color: var(--green); border-color: rgba(94,139,111,0.4); }
   .sc-qgrid-cell.bad { background: rgba(176,39,28,0.12); color: var(--red); border-color: rgba(176,39,28,0.4); }
   .sc-qgrid-cell.skip { background: #fff; color: var(--faint); border-color: var(--border); }
@@ -217,6 +250,7 @@
   .takeaways li::before { content: '◆'; position: absolute; left: 0; top: 8px; font-size: 6px; color: var(--gold); }
   .takeaways strong { color: var(--ink); }
   .takeaways .r { color: var(--red); font-weight: 700; }
+  .behavior-clean { font-size: 11px; line-height: 1.65; color: var(--mid); }
   .detail-toggle { display: inline-block; font-size: 9.5px; color: var(--mid); text-decoration: underline; margin-top: 10px; }
   .ftr { border-top: 1px solid var(--border); margin-top: 14px; padding-top: 8px; font-size: 9.5px; color: var(--faint); display: flex; justify-content: space-between; }
   table { width: 100%; border-collapse: collapse; font-size: 9.5px; }
@@ -308,6 +342,17 @@
 </style>
 </head>
 <body>
+<script>
+  // Viewed inside the portal's in-place results viewer (see openTestResults()
+  // in index.html) vs opened directly — a standalone visit (the emailed
+  // link, printing) still gets the "printable page on a desk" look (.page's
+  // fixed 8.5in width, drop shadow, cream margin) since that's exactly
+  // right for print/PDF, but that same look reads as a boxed PDF preview
+  // when this is sitting inside the portal's own page. Added as early and
+  // synchronously as possible (right after <body> opens) so there's no
+  // flash of the boxed look before this runs.
+  if (window.self !== window.top) document.body.classList.add('embedded');
+</script>
 <div id="err">Couldn't read the report data from this link. Make sure the full link was copied from the results email.</div>
 <div id="demo-banner" style="display:none; max-width:8.5in; margin:16px auto 0; background:#1a1a1a; color:#fff; font-family:'Poppins',sans-serif; font-size:12px; font-weight:600; letter-spacing:0.04em; padding:10px 18px; text-align:center;">DEMO — synthetic data, no real student took this. Add &amp;test=SAT to the URL to preview the SAT version, and &amp;score=1000/1250/1450 to preview roughly that score band.</div>
 <div class="toolbar"><button onclick="window.print()">Print / Save as PDF</button></div>
@@ -1704,7 +1749,7 @@
       // be — capped at 680px, the widest a chart can run and still sit
       // inside the printed page's margins (8.5in page minus 0.65in side
       // padding each side, at 96dpi).
-      var w = Math.min(680, Math.max(620, 52 * bars.length)), h = 185, padL = 40, padR = 62, padT = 14, padB = 42;
+      var w = Math.min(680, Math.max(620, 52 * bars.length)), h = 230, padL = 40, padR = 62, padT = 16, padB = 46;
       var plotW = w - padL - padR, plotH = h - padT - padB;
       var n = bars.length;
       var barW = plotW / n * 0.62;
@@ -1861,7 +1906,7 @@
     }
 
     function crispCanvas2(cssW, cssH) {
-      var dpr = Math.min(window.devicePixelRatio || 1, 3);
+      var dpr = Math.min(window.devicePixelRatio || 1, 4);
       var cv = document.createElement('canvas');
       cv.width = Math.round(cssW * dpr);
       cv.height = Math.round(cssH * dpr);
@@ -1975,15 +2020,17 @@
       num.textContent = r.n;
       cell.appendChild(num);
       // Custom tooltip (not the native `title` attribute — that can't be
-      // styled and looks out of place on a branded page) previews the
-      // question text and outcome on hover; clicking opens the same
-      // question full-size in the shared modal, reusing renderQuestionDetail
-      // rather than a second copy of "how to display a question."
+      // styled and looks out of place on a branded page) — just the
+      // question number and outcome, no text preview (removed on
+      // purpose: this grid is meant to be scanned as a quick right/wrong/
+      // unattempted map, not a second place to read question content —
+      // clicking a tile already opens the full question in the shared
+      // modal below via renderQuestionDetail).
       var tip = document.createElement('div');
       tip.className = 'sc-qgrid-tooltip';
       var statusWord = r.skipped ? 'Unattempted' : (r.ok ? 'Correct' : 'Incorrect');
       var statusCls = r.skipped ? '' : (r.ok ? 'ok' : 'bad');
-      tip.innerHTML = '<b class="' + statusCls + '">Q' + r.n + ' — ' + statusWord + '</b>' + previewText(r.q && r.q.text);
+      tip.innerHTML = '<b class="' + statusCls + '">Q' + r.n + ' — ' + statusWord + '</b>';
       cell.appendChild(tip);
       cell.addEventListener('click', function () { openQuestionModal(r, s5.label); });
       gridEl.appendChild(cell);
@@ -2233,12 +2280,16 @@
   if (markedT === 0 && totalQ >= 40) {
     behaviorFlags.push(first + ' never used the "flag for review" feature across all ' + totalQ + ' questions' + (skipped < totalQ - totalC ? ', despite ' + (totalQ - totalC) + ' misses' : '') + '. Combined with the timing patterns above, this points at pushing through uncertain questions rather than marking them to revisit — a fixable pacing habit worth raising directly with ' + first + '.');
   }
-  if (behaviorFlags.length) {
-    document.getElementById('behavior-hed').style.display = '';
-    var bWrap = document.getElementById('behavior-section');
-    bWrap.style.display = '';
-    bWrap.innerHTML = '<ul class="takeaways">' + behaviorFlags.map(function (f) { return '<li>' + f + '</li>'; }).join('') + '</ul>';
-  }
+  // Always shown now, even with zero flags — a section that only ever
+  // appears when something's wrong reads as broken/missing on every
+  // normal report (which is most of them), not as "nothing to flag here."
+  // A clean pass is itself useful information for a parent reading this.
+  document.getElementById('behavior-hed').style.display = '';
+  var bWrap = document.getElementById('behavior-section');
+  bWrap.style.display = '';
+  bWrap.innerHTML = behaviorFlags.length
+    ? '<ul class="takeaways">' + behaviorFlags.map(function (f) { return '<li>' + f + '</li>'; }).join('') + '</ul>'
+    : '<p class="behavior-clean">No pacing or timing red flags on this attempt — ' + first + '’s scores here look like a real read of where things stand, not an artifact of rushing, guessing, or fatigue.</p>';
 
   var take = [];
   take.push('<strong>' + first + ' answered ' + totalC + ' of ' + totalQ + ' correctly (' + pct + '%).</strong>');
@@ -2432,11 +2483,11 @@
         row.innerHTML =
           '<span class="topics-rank">' + (i + 1) + '</span>' +
           '<span class="topics-main"><span class="topics-name">' + e.name + '</span>' +
-          '<span class="topics-meta">' + e.c + '/' + e.t + ' correct &middot; ' + e.t + ' attempts</span></span>' +
-          '<span class="topics-gauge"><svg width="34" height="34" viewBox="0 0 34 34">' +
+          '<span class="topics-meta">' + e.c + '/' + e.t + ' correct</span></span>' +
+          '<span class="topics-gauge"><svg width="38" height="38" viewBox="0 0 34 34">' +
             '<circle cx="17" cy="17" r="' + r2 + '" fill="none" stroke="#eee7da" stroke-width="3.5"/>' +
             '<circle cx="17" cy="17" r="' + r2 + '" fill="none" stroke="' + band + '" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="' + circ + '" stroke-dashoffset="' + (circ * (1 - e.pct)) + '" transform="rotate(-90 17 17)"/>' +
-            '<text x="17" y="20" text-anchor="middle" font-size="9" font-weight="800" fill="' + band + '" font-family="Nunito, sans-serif">' + pct + '</text>' +
+            '<text x="17" y="20" text-anchor="middle" font-size="7.5" font-weight="800" fill="' + band + '" font-family="Nunito, sans-serif">' + pct + '%</text>' +
           '</svg></span>';
         list.appendChild(row);
       });
@@ -2670,7 +2721,11 @@
       });
       body.appendChild(wrapEl);
     }
-  })();
+  });
+  // Not invoked — the progress card itself is hidden (see .progress-card
+  // display:none above), and this fetch was the ONLY reason for that
+  // network round trip, so skipping the call avoids it firing for no
+  // visible result on every single report open/print.
 
   document.getElementById('page1').style.display = 'block';
 
