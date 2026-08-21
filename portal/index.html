@@ -492,9 +492,12 @@
   .menu-exit { display: block; text-align: center; margin-top: 2rem; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); text-decoration: none; }
   .menu-exit:hover { color: var(--red); }
 
-  /* ═══ HOME LAYOUT — true 3-column dashboard ═══ sidebar (nav) is
-     column 1; this is columns 2 (~65%, main) and 3 (~35%, right rail).
-     The greeting stays full-width above both. */
+  /* ═══ HOME LAYOUT ═══ sidebar (nav) is column 1; everything below is a
+     single full-width column (up to .home-panel's cap) so nothing in it
+     is ever stuck at partial width next to a stretch of empty page — the
+     top row (This Week / Next Session) is the only place two cards sit
+     side by side, and it's height-matched on purpose. The greeting stays
+     full-width above it all. */
   .home-panel { max-width: 1180px; }
   /* ═══ HOME EMPTY STATES ═══ see renderHomeState() — replaces the entire
      .home-dashboard below for a student who hasn't taken their diagnostic
@@ -502,26 +505,21 @@
   .home-empty-state { max-width: 460px; margin: 3rem auto 0; text-align: center; }
   .home-empty-sub { font-size: 0.92rem; color: var(--mid); line-height: 1.75; margin-bottom: 2rem; }
   .home-empty-cta { max-width: 320px; margin: 0 auto; padding: 1.15rem 2rem; font-size: 0.85rem; }
-  .home-dashboard { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 1.8rem; align-items: start; margin-top: 1.8rem; }
-  .home-main { min-width: 0; }
-  .home-aside { display: flex; flex-direction: column; }
-  /* These cards used to be centered, fixed-width blocks in a single
-     column (margin:0 auto / max-width caps below); now each lives inside
-     a grid column that already constrains its width, so they just fill
-     it. */
-  .home-main .assign-card,
-  .home-main .score-progress-card,
-  .home-aside .next-session-card { max-width: none; margin: 0 0 1.6rem; }
-  .home-aside .next-session-card:last-child,
-  .home-main .score-progress-card:last-child { margin-bottom: 0; }
+  .home-dashboard { margin-top: 1.6rem; }
+  /* Top row: This Week gets the lion's share of the width, Next Session
+     a fixed narrower column — align-items:stretch so a short next-session
+     card doesn't strand empty space beside a taller This Week list (or
+     vice versa). Either card can be display:none on its own (no
+     assignments this week, no session scheduled) — the other just fills
+     the row. */
+  .home-top-row { display: flex; align-items: stretch; gap: 1.6rem; margin-bottom: 1.8rem; }
+  .home-top-row .assign-card { flex: 1 1 0; min-width: 0; }
+  .home-top-row .next-session-card { flex: 0 0 320px; }
+  .assign-card, .score-progress-card, .next-session-card { max-width: none; margin: 0; }
 
-  @media (max-width: 1080px) {
-    .home-dashboard { grid-template-columns: 1fr; }
-    .home-aside { flex-direction: row; flex-wrap: wrap; gap: 1.2rem; }
-    .home-aside > * { flex: 1 1 280px; margin: 0 !important; }
-  }
-  @media (max-width: 560px) {
-    .home-aside { flex-direction: column; }
+  @media (max-width: 900px) {
+    .home-top-row { flex-direction: column; }
+    .home-top-row .next-session-card { flex-basis: auto; }
   }
 
   /* ═══ YOUR OVERVIEW ═══ Stripe-dashboard-style section: a heading, a
@@ -2262,15 +2260,26 @@
     </div>
 
     <div class="home-dashboard" id="home-dashboard">
-      <!-- MAIN COLUMN (~65%) — action items first, then the analytics/
-           skill-mastery breakdown. -->
-      <div class="home-main">
+      <!-- TOP ROW — action items (This Week) beside the next live session,
+           stretched to match heights so neither card leaves the other
+           stranded next to empty space. -->
+      <div class="home-top-row">
         <div class="assign-card" id="assign-card" style="display:none;">
           <div class="assign-label">This Week</div>
           <div class="assign-list" id="assign-list"></div>
         </div>
 
-        <!-- YOUR OVERVIEW — a filter chip (which tests count toward the
+        <div class="next-session-card" id="next-session-card" style="display:none;">
+          <div class="ns-label" id="ns-label">Your next scheduled session is on:</div>
+          <div class="ns-date" id="ns-date">&mdash;</div>
+          <a href="#" class="ns-join" id="ns-join" style="display:none;" target="_blank" rel="noopener">Online? Join here: <span id="ns-join-url"></span></a>
+        </div>
+      </div>
+
+      <!-- YOUR OVERVIEW — full width below the top row (not confined to a
+           ~65% main column) so the score graph and stat cards actually use
+           the page's width instead of leaving the right rail empty for the
+           rest of the screen. A filter chip (which tests count toward the
              numbers below — see renderHomeTestFilter()), the big aggregate
              line graph, then a row of compact stat cards: most recent test
              + the two skill-breakdown donuts (top 3 skills each). -->
@@ -2321,18 +2330,6 @@
             </div>
           </div>
         </div>
-      </div>
-
-      <!-- RIGHT RAIL (~35%) — next live session. Persistent alongside the
-           main column instead of pinned to the top of a single center
-           column. -->
-      <aside class="home-aside">
-        <div class="next-session-card" id="next-session-card" style="display:none;">
-          <div class="ns-label" id="ns-label">Your next scheduled session is on:</div>
-          <div class="ns-date" id="ns-date">&mdash;</div>
-          <a href="#" class="ns-join" id="ns-join" style="display:none;" target="_blank" rel="noopener">Online? Join here: <span id="ns-join-url"></span></a>
-        </div>
-      </aside>
     </div>
   </div>
 </div>
@@ -7104,6 +7101,8 @@
     document.getElementById('overview-start').textContent = pt
       ? ('Begin ' + practiceTestNameParts(pt).name)
       : ('Begin ' + testChoice + ' Diagnostic');
+
+    document.getElementById('overview-back').textContent = pt ? '← Back to Practice Tests' : '← Back to menu';
 
     renderOverviewTiming();
 
