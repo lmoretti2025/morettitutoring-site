@@ -78,22 +78,15 @@
   .raw-stat.bad .raw-stat-num { color: var(--red); }
   @media print { .raw-stats { page-break-inside: avoid; break-inside: avoid; } }
 
-  /* ═══ TOP ROW — score tiles only now (the progress card was dropped —
-     redundant with the portal's own Home page Score Progress graph, and
-     this is a static/printed document that can't offer the interactive
-     "click a point" behavior that graph has anyway). ═══ */
+  /* ═══ TOP ROW — score tiles only. The progress card (a redundant,
+     non-interactive echo of the portal's own Home page Score Progress
+     graph) has been removed entirely — markup, styles, and its
+     background fetch — rather than hidden, after a prior hide-only
+     attempt got silently undone by a duplicate rule right below it. ═══ */
   .top-row { display: block; margin-bottom: 0; }
   .top-row .score-summary { margin-bottom: 0; }
-  .progress-card { display: none; }
-  .progress-card { border: 1px solid rgba(17,17,17,0.08); border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; box-shadow: 0 1px 2px rgba(17,17,17,0.03); }
-  .progress-card-hed { font-family: 'Nunito', 'Poppins', sans-serif; font-size: 10.5px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--mid); margin-bottom: 6px; }
-  .progress-loading, .progress-empty { font-size: 10px; color: var(--faint); margin: auto 0; text-align: center; padding: 14px 0; }
-  .progress-chart-wrap { text-align: center; }
-  .progress-point-info { margin-top: 6px; font-size: 9.5px; color: var(--mid); border-top: 1px solid var(--border); padding-top: 6px; min-height: 28px; }
-  .progress-point-info strong { color: var(--ink); }
-  .progress-point-info .r { color: var(--red); font-weight: 600; }
   @media (max-width: 620px) { .top-row { grid-template-columns: 1fr; } }
-  @media print { .top-row, .progress-card { page-break-inside: avoid; break-inside: avoid; } }
+  @media print { .top-row { page-break-inside: avoid; break-inside: avoid; } }
 
   /* ═══ TOPICS COSTING THE MOST POINTS — ranked list with a radial %
      gauge, same underlying skill-miss data as the bridge chart above,
@@ -368,10 +361,6 @@
     <div class="score-summary">
       <div class="score-tiles" id="score-tiles"></div>
       <div class="score-caption" id="score-caption"></div>
-    </div>
-    <div class="progress-card" id="progress-card">
-      <div class="progress-card-hed">Score progress</div>
-      <div id="progress-card-body"><div class="progress-loading">Loading history&hellip;</div></div>
     </div>
   </div>
   <div class="raw-stats" id="raw-stats"></div>
@@ -2632,100 +2621,6 @@
       wrap.appendChild(grid);
     }
   })();
-
-  /* ═══ PROGRESS CARD ═══ a real composite-score trend, fetched live from
-     the backend's ScoreHistory sheet (see handleGetScoreHistory in
-     Code.gs) rather than baked into this report's own URL — keeps the
-     link short and means the chart is always current, not frozen at
-     whatever history existed the moment THIS report was generated.
-     Clicking a point shows that attempt's date/composite/weakest-area —
-     it does NOT link to that attempt's own full report, because no full
-     past report is stored anywhere retrievable server-side (only the
-     composite + weakest label are logged) — building that would need a
-     real backend store of past report payloads, not a small addition. */
-  (function renderProgressCard() {
-    var body = document.getElementById('progress-card-body');
-    if (!data.k) { body.innerHTML = '<div class="progress-empty">No student key on this report.</div>'; return; }
-    var APPS_SCRIPT_URL_LOCAL = 'https://script.google.com/macros/s/AKfycbwsLMGq3lhBEPObcas0k8gVS67NX9y4wXKG6RgzKtlBOT2SXfREK6vBpvvM19w9s1m6/exec';
-    var controller = (typeof AbortController !== 'undefined') ? new AbortController() : null;
-    var timer = controller ? setTimeout(function () { controller.abort(); }, 10000) : null;
-    fetch(APPS_SCRIPT_URL_LOCAL, { method: 'POST', body: JSON.stringify({ action: 'getScoreHistory', key: data.k }), signal: controller ? controller.signal : undefined })
-      .then(function (res) { if (timer) clearTimeout(timer); return res.json(); })
-      .then(function (resp) {
-        if (!resp || !resp.ok || !Array.isArray(resp.entries) || resp.entries.length < 2) {
-          body.innerHTML = '<div class="progress-empty">Not enough attempts yet to chart a trend — this fills in after a second diagnostic or practice test.</div>';
-          return;
-        }
-        drawProgress(resp.entries.filter(function (e) { return e.composite; }));
-      })
-      .catch(function () {
-        body.innerHTML = '<div class="progress-empty">Couldn&rsquo;t load score history right now.</div>';
-      });
-
-    function drawProgress(entries) {
-      if (entries.length < 2) { body.innerHTML = '<div class="progress-empty">Not enough attempts yet to chart a trend.</div>'; return; }
-      body.innerHTML = '';
-      var wrapEl = document.createElement('div');
-      wrapEl.className = 'progress-chart-wrap';
-      var W = 300, H = 110, padL = 26, padR = 10, padT = 12, padB = 18;
-      var plotW = W - padL - padR, plotH = H - padT - padB;
-      var vals = entries.map(function (e) { return e.composite; });
-      var minV = Math.min.apply(null, vals), maxV = Math.max.apply(null, vals);
-      var range = (maxV - minV) || 1;
-      var pad2 = range * 0.15;
-      var axisMin = minV - pad2, axisMax = maxV + pad2;
-      function x(i) { return padL + (entries.length > 1 ? i / (entries.length - 1) : 0.5) * plotW; }
-      function y(v) { return padT + plotH - ((v - axisMin) / (axisMax - axisMin)) * plotH; }
-      var dpr = Math.min(2, window.devicePixelRatio || 1);
-      var cv = document.createElement('canvas');
-      cv.width = W * dpr; cv.height = H * dpr;
-      cv.style.width = W + 'px'; cv.style.height = H + 'px';
-      cv.style.cursor = 'pointer';
-      var ctx = cv.getContext('2d');
-      ctx.scale(dpr, dpr);
-      ctx.strokeStyle = 'rgba(17,17,17,0.12)';
-      ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(padL, padT); ctx.lineTo(padL, H - padB); ctx.lineTo(W - padR, H - padB); ctx.stroke();
-      ctx.strokeStyle = '#B0271C';
-      ctx.lineWidth = 1.6;
-      ctx.beginPath();
-      entries.forEach(function (e, i) { var px = x(i), py = y(e.composite); if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py); });
-      ctx.stroke();
-      entries.forEach(function (e, i) {
-        var px = x(i), py = y(e.composite);
-        ctx.beginPath();
-        ctx.fillStyle = (i === entries.length - 1) ? '#B0271C' : '#fff';
-        ctx.strokeStyle = '#B0271C';
-        ctx.lineWidth = 1.4;
-        ctx.arc(px, py, i === entries.length - 1 ? 3.6 : 2.6, 0, Math.PI * 2);
-        ctx.fill(); ctx.stroke();
-      });
-      ctx.fillStyle = 'rgba(17,17,17,0.4)';
-      ctx.font = '8px Poppins, sans-serif';
-      ctx.textAlign = 'left'; ctx.fillText(String(Math.round(axisMax)), 2, padT + 4);
-      ctx.fillText(String(Math.round(axisMin)), 2, H - padB);
-      wrapEl.appendChild(cv);
-      var infoEl = document.createElement('div');
-      infoEl.className = 'progress-point-info';
-      infoEl.innerHTML = 'Click a point for details.';
-      wrapEl.appendChild(infoEl);
-      cv.addEventListener('click', function (e) {
-        var rect = cv.getBoundingClientRect();
-        var mx = e.clientX - rect.left;
-        var closest = 0, closestDist = Infinity;
-        entries.forEach(function (en, i) { var d2 = Math.abs(x(i) - mx); if (d2 < closestDist) { closestDist = d2; closest = i; } });
-        var pt = entries[closest];
-        var dateStr2 = pt.date ? new Date(pt.date).toLocaleDateString() : '';
-        var weakTxt = pt.weakest ? (' Weakest: <strong>' + esc(pt.weakest.label) + '</strong> (' + pt.weakest.correct + '/' + pt.weakest.total + ').') : '';
-        infoEl.innerHTML = '<strong>' + esc(pt.testTitle || pt.testType || 'Attempt') + '</strong> &middot; ' + dateStr2 + ' &middot; <span class="r">' + pt.composite + '</span>.' + weakTxt;
-      });
-      body.appendChild(wrapEl);
-    }
-  });
-  // Not invoked — the progress card itself is hidden (see .progress-card
-  // display:none above), and this fetch was the ONLY reason for that
-  // network round trip, so skipping the call avoids it firing for no
-  // visible result on every single report open/print.
 
   document.getElementById('page1').style.display = 'block';
 
