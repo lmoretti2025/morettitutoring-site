@@ -29,7 +29,7 @@
 
   :root {
     --red:    #B0271C;
-    --bg:     #f7f4ef;
+    --bg:     #f2f2f2;
     --white:  #ffffff;
     --text:   #111111;
     --mid:    rgba(17,17,17,0.58);
@@ -1301,6 +1301,36 @@
   .iq-practice-btn { flex-shrink: 0; margin-left: auto; background: var(--red); color: #fff; border: none; border-radius: 8px; padding: 0.6rem 1.1rem; font-family: var(--hel); font-size: 0.78rem; font-weight: 700; cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 0.3rem; transition: filter 0.15s var(--ease), transform 0.15s var(--ease); }
   .iq-practice-btn:hover:not(:disabled) { filter: brightness(0.92); transform: translateY(-1px); }
   .iq-practice-btn:disabled { opacity: 0.45; cursor: default; transform: none; }
+
+  /* ═══ CHALLENGE QUESTIONS ═══ two big "open the whole deck" cards
+     (Reading & Writing / Math) plus a cumulative analytics row below —
+     see window.challengeModuleInit() near the end of the file for the
+     data wiring and the practice-runner reuse. */
+  .chal-intro { display: flex; gap: 0.9rem; align-items: flex-start; background: rgba(201,168,76,0.07); border: 1px solid rgba(201,168,76,0.35); border-radius: 12px; padding: 1.1rem 1.3rem; margin-bottom: 1.6rem; }
+  .chal-intro-icon { font-size: 1.3rem; line-height: 1; flex-shrink: 0; }
+  .chal-intro-hed { font-family: var(--hel); font-weight: 700; font-size: 0.88rem; color: var(--text); margin-bottom: 0.3rem; }
+  .chal-intro-sub { font-size: 0.8rem; color: var(--mid); line-height: 1.6; }
+  .chal-decks { display: flex; gap: 1.2rem; margin-bottom: 2rem; flex-wrap: wrap; }
+  .chal-deck { flex: 1 1 300px; position: relative; overflow: hidden; border: none; border-radius: 14px; padding: 1.6rem 1.7rem; min-height: 150px; cursor: pointer; text-align: left; display: flex; align-items: flex-end; box-shadow: var(--shadow); transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease); }
+  .chal-deck:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); }
+  .chal-deck:active { transform: translateY(-1px) scale(0.99); }
+  .chal-deck-rw { background: linear-gradient(135deg, var(--red) 0%, #c9a84c 130%); }
+  .chal-deck-math { background: linear-gradient(135deg, #262220 0%, var(--red) 140%); }
+  .chal-deck-body { position: relative; z-index: 2; }
+  .chal-deck-title { font-family: var(--display); font-weight: 700; font-size: 1.35rem; color: #fff; margin-bottom: 0.3rem; }
+  .chal-deck-count { font-family: var(--hel); font-size: 0.8rem; color: rgba(255,255,255,0.85); margin-bottom: 1.1rem; }
+  .chal-deck-open { display: inline-flex; align-items: center; gap: 0.4rem; background: #fff; color: var(--text); font-family: var(--hel); font-weight: 700; font-size: 0.78rem; border-radius: 999px; padding: 0.5rem 1rem; }
+  .chal-deck-arrow { transition: transform 0.15s var(--ease); }
+  .chal-deck:hover .chal-deck-arrow { transform: translateX(3px); }
+  .chal-deck-art { position: absolute; right: -10px; bottom: -10px; width: 130px; height: 130px; opacity: 0.22; z-index: 1; }
+  .chal-analytics-hed { font-family: var(--display); font-size: 1.15rem; font-weight: 700; color: var(--text); margin-bottom: 0.9rem; }
+  .chal-stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; }
+  .chal-stat { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 1.1rem 1.3rem; box-shadow: var(--shadow); }
+  .chal-stat-label { font-family: var(--hel); font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--mid); margin-bottom: 0.6rem; }
+  .chal-stat-num { font-family: var(--display); font-weight: 700; font-size: 1.7rem; color: var(--text); }
+  @media (max-width: 640px) {
+    .chal-decks { flex-direction: column; }
+  }
   /* ═══ PRACTICE RUNNER — one question at a time, rendered straight into
      the real exam's own #dx-card (see startPracticeRunner/
      renderRunnerQuestion in the JS) — only the end-of-round summary needs
@@ -1528,7 +1558,7 @@
 #pt-native-report .bridge-wrap { border: 1px solid var(--border); border-radius: 14px; padding: 14px 18px; margin-bottom: 2px; }
 #pt-native-report .bridge-target-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 6px; font-size: 10.5px; color: var(--mid); }
 #pt-native-report .bridge-target-row .bt-lab { font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; font-size: 9.5px; }
-#pt-native-report .bridge-target-row input { font-family: 'Poppins'; font-weight: 600; font-size: 13px; color: var(--red); border: 1px solid var(--border); background: #f7f4ef; width: 58px; padding: 3px 6px; text-align: center; -moz-appearance: textfield; }
+#pt-native-report .bridge-target-row input { font-family: 'Poppins'; font-weight: 600; font-size: 13px; color: var(--red); border: 1px solid var(--border); background: #f2f2f2; width: 58px; padding: 3px 6px; text-align: center; -moz-appearance: textfield; }
 #pt-native-report .bridge-target-row input::-webkit-outer-spin-button, #pt-native-report .bridge-target-row input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 #pt-native-report .bridge-target-row .bt-reset { font-size: 9px; color: var(--faint); text-decoration: underline; cursor: pointer; background: none; border: none; padding: 0; font-family: 'Poppins'; }
 #pt-native-report .bridge-target-row .bt-drag-hint { font-size: 9px; color: var(--faint); margin-left: 4px; }
@@ -1792,6 +1822,10 @@
   <a href="#" class="sidebar-item" data-nav="incorrect-questions" id="sidebar-incorrect-questions">
     <span class="sidebar-icon sidebar-icon-text">&#10007;</span>
     <span class="sidebar-label">My Incorrect Questions</span>
+  </a>
+  <a href="#" class="sidebar-item" data-nav="challenge-questions" id="sidebar-challenge-questions">
+    <span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.5-2 5-2 5s3.5-.5 5-2c.8-.8.8-2.2 0-3s-2.2-.8-3 0Z"/><path d="M9 15l-1.5-1.5L15 6c1.5-1.5 4-2.5 6-2.5s-1 4.5-2.5 6l-7.5 7.5L9 15Z"/><path d="M15 6c0 2 1.5 5 4.5 4.5"/><circle cx="15.5" cy="8.5" r="1"/></svg></span>
+    <span class="sidebar-label">Challenge Questions</span>
   </a>
 </nav>
 
@@ -2413,6 +2447,74 @@
     <div id="iq-list"></div>
 
     <a href="#" class="menu-back-link" id="incorrect-questions-back">&larr; Back to home</a>
+  </div>
+</div>
+
+<!-- ═══ SCREEN 3b-ii-b — CHALLENGE QUESTIONS ═══ hand-picked, hardest-of-
+     the-hard practice sets — the Module 2 Harder-tier questions that
+     separate a 1400 from a 1500+. Two decks (Reading & Writing, Math),
+     each opened full-screen into the same real exam UI (#dx-screen) the
+     diagnostic/practice tests and My Incorrect Questions' practice
+     runner already reuse — see window.challengeModuleInit() near the end
+     of the file. Cumulative attempt/accuracy/timing stats are read from
+     localStorage (moretti_challenge_progress_<studentKey>), same pattern
+     as Score Progress and the "still learning" vocab tracker. -->
+<div class="screen has-sidebar" id="screen-challenge-questions">
+  <div class="panel-wide" id="challenge-picker-view">
+    <div class="vp-head">
+      <div class="kicker">SAT Resources</div>
+      <h1 class="panel-hed">Challenge Questions</h1>
+      <p class="panel-sub">Hand-picked, extra-hard practice sets — the questions that separate a 1400 from a 1500+.</p>
+    </div>
+
+    <div class="chal-intro">
+      <span class="chal-intro-icon">💡</span>
+      <div>
+        <div class="chal-intro-hed">What are Challenge Questions?</div>
+        <div class="chal-intro-sub">These are the hardest questions Luca has — the kind you'd only see in the toughest Module 2. Getting comfortable here is what separates a great score from a near-perfect one.</div>
+      </div>
+    </div>
+
+    <div class="chal-decks">
+      <button type="button" class="chal-deck chal-deck-rw" id="chal-open-rw">
+        <div class="chal-deck-body">
+          <div class="chal-deck-title">Reading &amp; Writing</div>
+          <div class="chal-deck-count" id="chal-rw-count">&mdash; questions</div>
+          <span class="chal-deck-open">Open <span class="chal-deck-arrow">&rarr;</span></span>
+        </div>
+        <svg class="chal-deck-art" viewBox="0 0 120 120" fill="none"><path d="M20 30c15-8 30-8 40 0v65c-10-8-25-8-40 0V30Z" stroke="white" stroke-width="2.5" stroke-linejoin="round"/><path d="M100 30c-15-8-30-8-40 0v65c10-8 25-8 40 0V30Z" stroke="white" stroke-width="2.5" stroke-linejoin="round"/><path d="M60 30v65" stroke="white" stroke-width="2.5"/></svg>
+      </button>
+      <button type="button" class="chal-deck chal-deck-math" id="chal-open-math">
+        <div class="chal-deck-body">
+          <div class="chal-deck-title">Math</div>
+          <div class="chal-deck-count" id="chal-math-count">&mdash; questions</div>
+          <span class="chal-deck-open">Open <span class="chal-deck-arrow">&rarr;</span></span>
+        </div>
+        <svg class="chal-deck-art" viewBox="0 0 120 120" fill="none"><path d="M25 90 85 30" stroke="white" stroke-width="2.5" stroke-linecap="round"/><path d="M25 90 25 60 55 60Z" stroke="white" stroke-width="2.5" stroke-linejoin="round"/><circle cx="85" cy="30" r="7" stroke="white" stroke-width="2.5"/></svg>
+      </button>
+    </div>
+
+    <h2 class="chal-analytics-hed">Challenge Question Analytics</h2>
+    <div class="chal-stats-row">
+      <div class="chal-stat">
+        <div class="chal-stat-label">Questions Attempted</div>
+        <div class="chal-stat-num" id="chal-stat-attempted">0</div>
+      </div>
+      <div class="chal-stat">
+        <div class="chal-stat-label">Current Accuracy</div>
+        <div class="chal-stat-num" id="chal-stat-accuracy">0%</div>
+      </div>
+      <div class="chal-stat">
+        <div class="chal-stat-label">Correct Answers</div>
+        <div class="chal-stat-num" id="chal-stat-correct">0</div>
+      </div>
+      <div class="chal-stat">
+        <div class="chal-stat-label">Average Time</div>
+        <div class="chal-stat-num" id="chal-stat-avgtime">&mdash;</div>
+      </div>
+    </div>
+
+    <a href="#" class="menu-back-link" id="challenge-questions-back">&larr; Back to home</a>
   </div>
 </div>
 
@@ -3064,6 +3166,7 @@
 </div>
 
 <script src="banks.js"></script>
+<script src="challenge-questions.js"></script>
 <script>
   /* practice-tests.js is ~2.6MB uncompressed (the 11 full practice tests,
      including every embedded figure's markup) — big enough that loading
@@ -3591,9 +3694,10 @@
     setNav('sidebar-practice-tests', !isTestPrep || (hasCompletedADiagnostic && grantedLocked));
     setNav('sidebar-vocab', resourcesHidden || !showSat);
     setNav('sidebar-incorrect-questions', resourcesHidden);
+    setNav('sidebar-challenge-questions', resourcesHidden || !showSat);
   }
-  var SIDEBAR_SCREENS = { 'screen-menu': 1, 'screen-practice-tests': 1, 'screen-resources': 1, 'screen-vocab': 1, 'screen-incorrect-questions': 1, 'screen-sat-resources': 1 };
-  var SIDEBAR_NAV_FOR_SCREEN = { 'screen-menu': 'home', 'screen-practice-tests': 'practice-tests', 'screen-resources': 'files', 'screen-vocab': 'vocab', 'screen-incorrect-questions': 'incorrect-questions' };
+  var SIDEBAR_SCREENS = { 'screen-menu': 1, 'screen-practice-tests': 1, 'screen-resources': 1, 'screen-vocab': 1, 'screen-incorrect-questions': 1, 'screen-sat-resources': 1, 'screen-challenge-questions': 1 };
+  var SIDEBAR_NAV_FOR_SCREEN = { 'screen-menu': 'home', 'screen-practice-tests': 'practice-tests', 'screen-resources': 'files', 'screen-vocab': 'vocab', 'screen-incorrect-questions': 'incorrect-questions', 'screen-challenge-questions': 'challenge-questions' };
   var sidebarEl = document.getElementById('portal-sidebar');
   var mainNavEl = document.getElementById('main-nav');
   var examWatermarkEl = document.getElementById('exam-watermark');
@@ -5291,6 +5395,7 @@
   var ptListReturnScreen = 'screen-menu';
   document.getElementById('pt-list-back').addEventListener('click', function (e) { e.preventDefault(); show(ptListReturnScreen); });
   document.getElementById('incorrect-questions-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-menu'); });
+  document.getElementById('challenge-questions-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-menu'); });
 
   /* ═══ SIDEBAR / TOP-BAR NAVIGATION ═══ drives the exact same routing
      the old home-screen menu cards used (see the .menu-card handler
@@ -5303,6 +5408,7 @@
     else if (nav === 'vocab') { show('screen-vocab'); if (window.vocabModuleInit) window.vocabModuleInit(); }
     else if (nav === 'practice-tests') { ptListReturnScreen = 'screen-menu'; renderPracticeTestList(); show('screen-practice-tests'); }
     else if (nav === 'incorrect-questions') { show('screen-incorrect-questions'); if (window.iqModuleInit) window.iqModuleInit(); }
+    else if (nav === 'challenge-questions') { show('screen-challenge-questions'); if (window.challengeModuleInit) window.challengeModuleInit(); }
     else if (nav === 'diagnostic') { ptListReturnScreen = 'screen-menu'; renderPracticeTestList(); show('screen-practice-tests'); }
   }
   document.querySelectorAll('.sidebar-item').forEach(function (item) {
@@ -5323,7 +5429,8 @@
     { label: 'Diagnostic', nav: 'diagnostic' },
     { label: 'Files', nav: 'files' },
     { label: 'Vocabulary', nav: 'vocab' },
-    { label: 'My Incorrect Questions', nav: 'incorrect-questions' }
+    { label: 'My Incorrect Questions', nav: 'incorrect-questions' },
+    { label: 'Challenge Questions', nav: 'challenge-questions' }
   ];
   var navSearchWrap = document.getElementById('nav-search');
   var navSearchInput = document.getElementById('nav-search-input');
@@ -10614,6 +10721,283 @@
       renderTestPills();
       renderList();
     });
+  };
+})();
+</script>
+<script>
+/* ═══ CHALLENGE QUESTIONS MODULE ═══ isolated IIFE, same pattern as the
+   My Incorrect Questions module right above — the "Open" button on each
+   deck card switches the WHOLE SCREEN to the real exam UI (#dx-screen)
+   via window.dxStartIncorrectPractice()/dxEndIncorrectPractice() (see
+   the main script, right after ensureDesmosCalculator), the same bridge
+   the incorrect-questions practice runner uses. Question pools come from
+   window.CHALLENGE_MATH/CHALLENGE_RW (challenge-questions.js) — static
+   arrays, not a filtered subset, so this module doesn't need the
+   taxonomy/filter machinery the IQ module has. Cumulative attempt count,
+   accuracy, and average time-per-question are persisted in localStorage
+   per student (moretti_challenge_progress_<studentKey>), the same
+   per-device pattern Score Progress and the vocab "still learning"
+   tracker already use elsewhere in this file. */
+(function () {
+  'use strict';
+  var LETTERS = ['A', 'B', 'C', 'D'];
+
+  // Same fallback split My Incorrect Questions uses — R&W questions bake
+  // their stimulus straight into `text`, ending in the actual question
+  // sentence, joined by "<br><br>".
+  function splitPassage(r) {
+    if (r.sectionKey !== 'reading-writing') return null;
+    var text = r.text || '';
+    var idx = text.lastIndexOf('<br><br>');
+    if (idx === -1) return null;
+    return { passage: text.slice(0, idx), question: text.slice(idx + 8) };
+  }
+
+  function parseSimpleNumeric(s) {
+    s = String(s == null ? '' : s).trim();
+    var frac = /^-?\d+(\.\d+)?\s*\/\s*\d+(\.\d+)?$/.exec(s);
+    if (frac) {
+      var parts = s.split('/');
+      var d = parseFloat(parts[1]);
+      return d ? parseFloat(parts[0]) / d : null;
+    }
+    var n = parseFloat(s);
+    return isNaN(n) ? null : n;
+  }
+  function checkFrAnswer(raw, expected) {
+    var a = String(raw == null ? '' : raw).trim();
+    var b = String(expected == null ? '' : expected).trim();
+    if (!a) return false;
+    if (a.toLowerCase() === b.toLowerCase()) return true;
+    var an = parseSimpleNumeric(a), bn = parseSimpleNumeric(b);
+    return (an !== null && bn !== null && Math.abs(an - bn) < 0.05);
+  }
+
+  // ═══ CUMULATIVE ANALYTICS ═══ one running tally across both decks (not
+  // per-section) — matches the single "Challenge Question Analytics" row
+  // under both cards. getPortalStudentKey() is the same narrow bridge My
+  // Incorrect Questions uses to namespace localStorage without needing
+  // direct access to currentStudent (this module can't see it — separate
+  // IIFE, same reason window.getPortalStudentKey exists at all).
+  function progressStorageKey() {
+    var key = window.getPortalStudentKey ? window.getPortalStudentKey() : null;
+    return 'moretti_challenge_progress_' + (key || 'anon');
+  }
+  function loadProgress() {
+    try {
+      var raw = localStorage.getItem(progressStorageKey());
+      if (raw) {
+        var parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object') return parsed;
+      }
+    } catch (e) { /* ignore */ }
+    return { attempted: 0, correct: 0, totalTimeMs: 0 };
+  }
+  function recordAttempt(wasCorrect, timeMs) {
+    var p = loadProgress();
+    p.attempted = (p.attempted || 0) + 1;
+    if (wasCorrect) p.correct = (p.correct || 0) + 1;
+    p.totalTimeMs = (p.totalTimeMs || 0) + (timeMs > 0 ? timeMs : 0);
+    try { localStorage.setItem(progressStorageKey(), JSON.stringify(p)); } catch (e) { /* private browsing / storage disabled — fail silently */ }
+  }
+  function formatAvgTime(ms) {
+    if (!ms) return '—';
+    var totalSec = Math.round(ms / 1000);
+    var m = Math.floor(totalSec / 60), s = totalSec % 60;
+    return m > 0 ? (m + 'm ' + s + 's') : (s + 's');
+  }
+  function renderStats() {
+    var p = loadProgress();
+    var attempted = p.attempted || 0;
+    var correct = p.correct || 0;
+    var accuracy = attempted ? Math.round((correct / attempted) * 100) : 0;
+    var avgMs = attempted ? (p.totalTimeMs / attempted) : 0;
+    var attEl = document.getElementById('chal-stat-attempted');
+    var accEl = document.getElementById('chal-stat-accuracy');
+    var corEl = document.getElementById('chal-stat-correct');
+    var timeEl = document.getElementById('chal-stat-avgtime');
+    if (attEl) attEl.textContent = String(attempted);
+    if (accEl) accEl.textContent = accuracy + '%';
+    if (corEl) corEl.textContent = String(correct);
+    if (timeEl) timeEl.textContent = formatAvgTime(avgMs);
+  }
+
+  /* ═══ PRACTICE RUNNER ═══ same shape as My Incorrect Questions' own
+     runner (see startPracticeRunner/renderRunnerQuestion above) — a
+     linear, Submit-then-Next queue rendered straight into the real
+     exam's #dx-card. The queue here is a full static deck (all 69 math
+     or all 41 R&W questions) rather than a filtered subset, and every
+     submitted answer also feeds the cumulative analytics above via
+     recordAttempt(), timed from when the question first rendered. */
+  var runnerQueue = [];
+  var runnerIndex = 0;
+  var runnerState = {};
+  var runnerScore = 0;
+  var questionShownAt = 0;
+
+  function startRunner(sectionKey) {
+    var pool = sectionKey === 'math' ? (window.CHALLENGE_MATH || []) : (window.CHALLENGE_RW || []);
+    if (!pool.length) return;
+    runnerQueue = pool;
+    runnerIndex = 0;
+    runnerState = {};
+    runnerScore = 0;
+    var label = sectionKey === 'math' ? 'Challenge: Math' : 'Challenge: Reading & Writing';
+    window.dxPracticeNextHandler = runnerAdvance;
+    window.dxPracticeExitHandler = endRunner;
+    if (window.dxStartIncorrectPractice) window.dxStartIncorrectPractice(label);
+    renderRunnerQuestion();
+  }
+  function endRunner() {
+    if (window.dxEndIncorrectPractice) window.dxEndIncorrectPractice();
+    if (window.showScreen) window.showScreen('screen-challenge-questions');
+    renderStats();
+  }
+  function runnerAdvance() {
+    if (runnerIndex >= runnerQueue.length) return; // already on the Done screen
+    var r = runnerQueue[runnerIndex];
+    var st = runnerState[r.key];
+    if (!st.submitted) {
+      var elapsed = questionShownAt ? (Date.now() - questionShownAt) : 0;
+      if (r.type === 'mc') {
+        st.correct = (st.chosenIndex === r.correct);
+      } else if (r.type === 'fr') {
+        var input = document.getElementById('dx-fr-input');
+        st.rawAnswer = input ? input.value : '';
+        st.correct = checkFrAnswer(st.rawAnswer, r.answer);
+      }
+      st.submitted = true;
+      if (st.correct) runnerScore++;
+      recordAttempt(st.correct, elapsed);
+    } else {
+      runnerIndex++;
+    }
+    renderRunnerQuestion();
+  }
+  function renderRunnerQuestion() {
+    var qtextEl = document.getElementById('dx-qtext');
+    var choicesEl = document.getElementById('dx-choices');
+    var frRowEl = document.getElementById('dx-fr-row');
+    var frInputEl = document.getElementById('dx-fr-input');
+    var navRowEl = document.querySelector('#dx-card .dx-nav-row');
+    var backBtnEl = document.getElementById('dx-back');
+    var nextBtnEl = document.getElementById('dx-next');
+    var calcBtnEl = document.getElementById('dx-calculator-btn');
+    var existingSummary = document.getElementById('chal-runner-summary');
+    if (existingSummary) existingSummary.parentNode.removeChild(existingSummary);
+    var dxCardEl = document.getElementById('dx-card');
+    Array.prototype.forEach.call(dxCardEl.querySelectorAll('.pb-note, .pb-explain'), function (el) {
+      el.parentNode.removeChild(el);
+    });
+    backBtnEl.disabled = true;
+
+    if (runnerIndex >= runnerQueue.length) {
+      document.getElementById('dx-notice-text').textContent = 'PRACTICE MODE — DONE';
+      qtextEl.innerHTML = '';
+      choicesEl.style.display = 'none';
+      frRowEl.style.display = 'none';
+      navRowEl.style.display = 'none';
+      calcBtnEl.style.display = 'none';
+      nextBtnEl.disabled = true;
+      var cardHedDone = document.querySelector('#dx-card .dx-card-hed');
+      if (cardHedDone) cardHedDone.style.display = 'none';
+      if (window.dxSetMathMode) window.dxSetMathMode(false);
+      if (window.dxCloseCalculator) window.dxCloseCalculator();
+      if (window.dxRenderPassagePane) window.dxRenderPassagePane({}, null);
+      var summary = document.createElement('div');
+      summary.id = 'chal-runner-summary';
+      summary.className = 'iq-runner-summary';
+      summary.innerHTML = '<div class="iq-runner-summary-score">' + runnerScore + ' / ' + runnerQueue.length + '</div>' +
+        '<div class="iq-runner-summary-lab">correct this round</div>' +
+        '<button type="button" class="key-btn" id="chal-runner-done" type="button">Done</button>';
+      document.getElementById('dx-card').insertBefore(summary, navRowEl);
+      document.getElementById('chal-runner-done').addEventListener('click', endRunner);
+      return;
+    }
+
+    navRowEl.style.display = '';
+    var r = runnerQueue[runnerIndex];
+    var isNewQuestion = !runnerState[r.key];
+    var st = runnerState[r.key] || (runnerState[r.key] = {});
+    if (isNewQuestion) questionShownAt = Date.now();
+    document.getElementById('dx-notice-text').textContent = 'PRACTICE MODE — QUESTION ' + (runnerIndex + 1) + ' OF ' + runnerQueue.length;
+    var cardHedEl = document.querySelector('#dx-card .dx-card-hed');
+    if (cardHedEl) cardHedEl.style.display = '';
+    var qnumTileEl = document.getElementById('dx-qnum-tile');
+    if (qnumTileEl) { qnumTileEl.textContent = runnerIndex + 1; qnumTileEl.style.display = ''; }
+    var split = splitPassage(r);
+    var questionText = split ? split.question : r.text;
+    qtextEl.innerHTML = questionText;
+    if (window.dxRenderPassagePane) window.dxRenderPassagePane({}, split, r.key);
+
+    var isMath = r.sectionKey === 'math';
+    calcBtnEl.style.display = isMath ? '' : 'none';
+    if (window.dxSetMathMode) window.dxSetMathMode(isMath);
+    if (!isMath && window.dxCloseCalculator) window.dxCloseCalculator();
+
+    if (r.type === 'mc' && r.choices) {
+      choicesEl.style.display = 'flex';
+      frRowEl.style.display = 'none';
+      choicesEl.innerHTML = '';
+      r.choices.forEach(function (c, i) {
+        var cls = 'dx-choice';
+        if (!st.submitted) {
+          if (st.chosenIndex === i) cls += ' selected';
+        } else {
+          var isCorrectChoice = r.correct === i;
+          var isChosen = st.chosenIndex === i;
+          if (isCorrectChoice) cls += ' pb-right';
+          else if (isChosen) cls += ' pb-tried-wrong';
+        }
+        var row = document.createElement('div');
+        row.className = cls;
+        row.innerHTML = '<span class="dx-choice-letter">' + LETTERS[i] + '</span><span class="dx-choice-text">' + c + '</span>';
+        if (!st.submitted) {
+          row.addEventListener('click', function () {
+            st.chosenIndex = i;
+            renderRunnerQuestion();
+          });
+        }
+        choicesEl.appendChild(row);
+      });
+      nextBtnEl.disabled = !st.submitted && st.chosenIndex == null;
+    } else if (r.type === 'fr') {
+      choicesEl.style.display = 'none';
+      frRowEl.style.display = st.submitted ? 'none' : 'flex';
+      frInputEl.value = st.rawAnswer || '';
+      nextBtnEl.disabled = false;
+      if (st.submitted) {
+        var frNote = document.createElement('div');
+        frNote.className = 'pb-note ' + (st.correct ? 'pb-note-correct' : 'pb-note-wrong');
+        frNote.textContent = 'Your answer: ' + (st.rawAnswer || '(skipped)') + (st.correct ? ' — correct!' : ' — not quite');
+        frRowEl.parentNode.insertBefore(frNote, frRowEl.nextSibling);
+        if (!st.correct) {
+          var frCorrect = document.createElement('div');
+          frCorrect.className = 'pb-note pb-note-correct';
+          frCorrect.textContent = 'Correct answer: ' + String(r.answer);
+          frRowEl.parentNode.insertBefore(frCorrect, frNote.nextSibling);
+        }
+      }
+    }
+
+    nextBtnEl.textContent = st.submitted ? (runnerIndex + 1 < runnerQueue.length ? 'Next' : 'See Results') : 'Submit';
+    if (!st.submitted) frInputEl.oninput = function () { st.rawAnswer = frInputEl.value; };
+  }
+
+  var wired = false;
+  window.challengeModuleInit = function () {
+    var rwCountEl = document.getElementById('chal-rw-count');
+    var mathCountEl = document.getElementById('chal-math-count');
+    if (rwCountEl) rwCountEl.textContent = (window.CHALLENGE_RW || []).length + ' questions';
+    if (mathCountEl) mathCountEl.textContent = (window.CHALLENGE_MATH || []).length + ' questions';
+    renderStats();
+    if (!wired) {
+      wired = true;
+      var rwBtn = document.getElementById('chal-open-rw');
+      var mathBtn = document.getElementById('chal-open-math');
+      if (rwBtn) rwBtn.addEventListener('click', function () { startRunner('reading-writing'); });
+      if (mathBtn) mathBtn.addEventListener('click', function () { startRunner('math'); });
+    }
   };
 })();
 </script>
