@@ -679,6 +679,21 @@
   .resume-modal-sub { font-family: var(--hel); font-size: 0.85rem; color: var(--mid); line-height: 1.6; margin-bottom: 1.6rem; }
   .resume-modal-row { display: flex; gap: 0.75rem; }
   .resume-modal-row .key-btn { margin: 0; }
+
+  /* ═══ "WELCOME BACK" AWAY OVERLAY ═══ see AWAY_THRESHOLD_MS in the main
+     script — shown instead of silently auto-submitting when a section or
+     break timer is discovered to have expired by a large margin (the tab
+     sat backgrounded/unattended for a long stretch, not a normal few-
+     seconds-late tick). Requires an explicit click to proceed, unlike
+     every other timer expiry in this file, specifically so an unattended
+     computer can never cascade through the rest of the diagnostic and
+     email Luca a near-blank result with nobody ever having seen it happen. */
+  .away-overlay { display: none; position: fixed; inset: 0; background: rgba(17,17,17,0.55); z-index: 700; align-items: center; justify-content: center; padding: 1.5rem; }
+  .away-overlay.active { display: flex; }
+  .away-modal { background: var(--white); width: 100%; max-width: 440px; padding: 2rem 2rem 1.75rem; text-align: center; box-shadow: 0 24px 64px rgba(0,0,0,0.3); }
+  .away-modal-hed { font-family: var(--display); font-weight: 700; font-size: 1.05rem; color: var(--text); margin-bottom: 0.6rem; }
+  .away-modal-sub { font-family: var(--hel); font-size: 0.85rem; color: var(--mid); line-height: 1.65; margin-bottom: 1.6rem; }
+  .away-modal .key-btn { margin: 0; }
   .ref-modal-title { font-family: var(--display); font-size: 1.15rem; font-weight: 700; color: var(--text); }
   .ref-close { background: none; border: none; font-size: 1.4rem; line-height: 1; color: var(--mid); cursor: pointer; padding: 0.25rem 0.5rem; }
   .ref-close:hover { color: var(--red); }
@@ -3084,6 +3099,16 @@
       <button class="key-btn" id="resume-yes" type="button">Yes</button>
       <button class="key-btn" id="resume-no" type="button" style="background:var(--text);">No</button>
     </div>
+  </div>
+</div>
+
+<!-- ═══ "WELCOME BACK" AWAY OVERLAY ═══ see AWAY_THRESHOLD_MS / the
+     tickSectionTimer()/tickBreak() comments in the script below. -->
+<div class="away-overlay" id="away-overlay">
+  <div class="away-modal">
+    <div class="away-modal-hed">Welcome back.</div>
+    <p class="away-modal-sub" id="away-modal-sub">Your time ran out while you were away, so that part has already been submitted as-is. Click below when you're ready to keep going.</p>
+    <button class="key-btn" id="away-continue" type="button">Continue</button>
   </div>
 </div>
 
@@ -7079,6 +7104,51 @@
     setTimeout(function () { dxTimerToastEl.style.display = 'none'; }, 6000);
   }
 
+  // ═══ "WELCOME BACK" AWAY GUARD ═══ a normal timer tick fires every
+  // second, so a normal expiry is caught within ~1s of actually hitting
+  // zero. If instead we only notice AFTER the deadline has already passed
+  // by a wide margin, the only way that happens is the tab sat
+  // backgrounded/throttled or the computer was asleep/off for a long
+  // unattended stretch (browsers heavily throttle timers in an inactive
+  // tab, and a fresh page load after a crash calls this same tick once
+  // immediately against a possibly long-stale `endsAt`). Previously, both
+  // cases were treated identically — expiry meant an immediate, silent
+  // auto-submit-and-advance — so an interrupted student's computer issue
+  // could cascade through every remaining module and section completely
+  // unattended, each one auto-submitted blank, ending in a real diagnostic
+  // result quietly emailed to Luca hours later with nobody having seen it
+  // happen. This threshold splits the two cases: a genuine on-time expiry
+  // still auto-advances exactly as before, but a large overrun pauses on
+  // the away-overlay (see #away-overlay) and requires an actual click
+  // before advancing — so an unattended computer can freeze the test in
+  // place for whoever finds it next, instead of quietly finishing it.
+  var AWAY_THRESHOLD_MS = 90 * 1000;
+  var awayOverlayEl = document.getElementById('away-overlay');
+  var awayModalSubEl = document.getElementById('away-modal-sub');
+  var awayContinueBtn = document.getElementById('away-continue');
+  var awayResumeAction = null;
+  function showAwayOverlay(kind, resumeFn) {
+    awayResumeAction = resumeFn;
+    awayModalSubEl.textContent = kind === 'break'
+      ? 'Testing has been paused since you were away when your break ended. Click below when you’re ready to keep going.'
+      : 'Testing has been paused since you were away — nothing was submitted. Click below to pick up right where you left off, with your remaining time restored.';
+    awayOverlayEl.classList.add('active');
+  }
+  awayContinueBtn.addEventListener('click', function () {
+    awayOverlayEl.classList.remove('active');
+    var fn = awayResumeAction;
+    awayResumeAction = null;
+    if (fn) fn();
+  });
+
+  // Remaining time as of the last tick that found the clock still
+  // genuinely running (not a large away-gap) — the live-tab equivalent of
+  // sectionTimerRemainingMs in saveState() above. Used to restore the
+  // clock to wherever it actually was the last time this tab was known to
+  // be live, rather than either the (now-expired) absolute deadline or a
+  // fresh full reset, when the away-overlay's Continue is clicked.
+  var lastKnownSectionRemainingMs = null;
+
   function tickSectionTimer() {
     if (sectionTimerEndsAt === null) return;
     var remaining = sectionTimerEndsAt - Date.now();
@@ -7090,7 +7160,19 @@
     }
     if (remaining <= 0) {
       stopSectionTimer();
-      autoSubmitSection();
+      if (-remaining > AWAY_THRESHOLD_MS) {
+        // Away too long — never submit here. Same "give back the time you
+        // were away" principle the reload/resume path already applies via
+        // sectionTimerRemainingMs, just applied live for a tab that never
+        // actually reloaded (see the AWAY_THRESHOLD_MS comment above for
+        // why this only fires on a large overrun, not a normal expiry).
+        var restoreMs = lastKnownSectionRemainingMs || 0;
+        showAwayOverlay('section', function () { resumeSectionTimer(Date.now() + restoreMs); });
+      } else {
+        autoSubmitSection();
+      }
+    } else {
+      lastKnownSectionRemainingMs = remaining;
     }
   }
 
@@ -7098,6 +7180,7 @@
     stopSectionTimer();
     sectionTimerEndsAt = Date.now() + minutes * 60 * 1000;
     sectionTimerWarned = false;
+    lastKnownSectionRemainingMs = null;
     dxTimerEl.classList.remove('dx-timer-warn');
     dxTimerWrapEl.style.display = 'flex';
     tickSectionTimer();
@@ -7111,6 +7194,7 @@
   function resumeSectionTimer(endsAt) {
     stopSectionTimer();
     sectionTimerEndsAt = endsAt;
+    lastKnownSectionRemainingMs = null;
     sectionTimerWarned = (endsAt - Date.now()) <= 5 * 60 * 1000;
     dxTimerEl.classList.toggle('dx-timer-warn', sectionTimerWarned);
     dxTimerWrapEl.style.display = 'flex';
@@ -7357,9 +7441,13 @@
   var breakResumeBtn = document.getElementById('dx-break-resume');
 
   function tickBreak() {
-    var remaining = Math.max(0, breakEndsAt - Date.now());
-    breakTimerEl.textContent = formatTimer(remaining);
-    if (remaining <= 0) { advanceFromBreak(); }
+    var rawRemaining = breakEndsAt - Date.now();
+    breakTimerEl.textContent = formatTimer(Math.max(0, rawRemaining));
+    if (rawRemaining <= 0) {
+      stopBreakTimer(); // otherwise this keeps firing every second while the away-overlay sits open, below
+      if (-rawRemaining > AWAY_THRESHOLD_MS) showAwayOverlay('break', advanceFromBreak);
+      else advanceFromBreak();
+    }
   }
   function stopBreakTimer() {
     if (breakInterval) { clearInterval(breakInterval); breakInterval = null; }
