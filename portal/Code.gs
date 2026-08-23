@@ -138,6 +138,8 @@ function doPost(e) {
       out = handleSubmitLead(body.name, body.phone, body.email, body.isUSA, body.role, body.grade, body.topic, body.message, body.hp, body.elapsedMs);
     } else if (body.action === 'syncProgress') {
       out = handleSyncProgress(body.key, body.incorrect, body.skills);
+    } else if (body.action === 'saveQuestion') {
+      out = handleSaveQuestion(body.key, body.record);
     } else if (body.action === 'getProgress') {
       out = handleGetProgress(body.key);
     } else if (body.action === 'saveOnboardingPrefs') {
@@ -150,6 +152,8 @@ function doPost(e) {
       out = handleListBlankComposite();
     } else if (body.action === 'backfillCompositeFields') {
       out = handleBackfillCompositeFields(body.patches);
+    } else if (body.action === 'deleteAttempt') {
+      out = handleDeleteAttempt(body.key, body.testTag);
     } else {
       out = { ok: false, error: 'unknown_action' };
     }
@@ -1183,7 +1187,11 @@ function capIncorrectByKey_(byKey) {
 // knows are correct — see syncProgressToBackend()). rawSkills: this attempt's
 // own bySkill-shaped breakdown (already split into domain/skill fields by the
 // client — see skillsToBySkill() in index.html), which fully replaces
-// whatever was stored before.
+// whatever was stored before. Saved-question data is intentionally NOT
+// touched here — see handleSaveQuestion() below, a separate action so a
+// student saving/un-saving a question while reviewing a report can never
+// accidentally overwrite SkillStatsJSON (which this handler REPLACES, not
+// merges, on every call).
 function handleSyncProgress(rawKey, rawIncorrect, rawSkills) {
   if (!rawKey) return { ok: false, error: 'missing_key' };
   var key = String(rawKey).trim().toUpperCase();
@@ -1218,6 +1226,40 @@ function handleSyncProgress(rawKey, rawIncorrect, rawSkills) {
   return { ok: true };
 }
 
+/* ═══ SAVED & MISTAKES — "SAVE" FROM A REPORT REVIEW ═══ deliberately its
+   own action, not folded into syncProgress above: a student can save (or
+   un-save) a question at ANY time while reviewing a past report, not only
+   right after finishing a test, and syncProgress REPLACES SkillStatsJSON
+   wholesale on every call — routing saves through it would risk wiping a
+   student's skill breakdown every time they bookmark a question days
+   later. rawRecord: {key, remove} to un-save, or {key, given, correct,
+   savedAt, testTitle, ...} to save — same slim-record philosophy as
+   IncorrectQuestionsJSON (resolved back to full question text/choices at
+   render time via window.resolveQuestionByKey(), not stored here). */
+function handleSaveQuestion(rawKey, rawRecord) {
+  if (!rawKey) return { ok: false, error: 'missing_key' };
+  if (!rawRecord || !rawRecord.key) return { ok: false, error: 'missing_record' };
+  var key = String(rawKey).trim().toUpperCase();
+  var sheet = getSheet_();
+  var row = findRow_(sheet, key);
+  if (!row) return { ok: false, error: 'bad_key' };
+
+  var headers = row._headers;
+  if (headers.indexOf('SavedQuestionsJSON') === -1) {
+    sheet.getRange(1, sheet.getLastColumn() + 1).setValue('SavedQuestionsJSON');
+    headers.push('SavedQuestionsJSON');
+  }
+  var savedByKey = {};
+  try { savedByKey = JSON.parse(row.SavedQuestionsJSON) || {}; } catch (e) { savedByKey = {}; }
+  if (rawRecord.remove) delete savedByKey[rawRecord.key];
+  else savedByKey[rawRecord.key] = rawRecord;
+  savedByKey = capIncorrectByKey_(savedByKey); // same 45k-char cell cap, oldest (by savedAt) dropped first
+
+  var svCol = headers.indexOf('SavedQuestionsJSON');
+  sheet.getRange(row._rowIndex, svCol + 1).setValue(sheetSafe_(JSON.stringify(savedByKey)));
+  return { ok: true };
+}
+
 // Read-only fetch for the two portal tools — deliberately returns ok:true
 // with empty objects for a valid key that just has no progress synced yet
 // (brand-new student, nothing submitted), rather than an error; only an
@@ -1229,10 +1271,91 @@ function handleGetProgress(rawKey) {
   var row = findRow_(sheet, key);
   if (!row) return { ok: false, error: 'bad_key' };
 
-  var byKey = {}, bySkill = {};
+  var byKey = {}, bySkill = {}, savedByKey = {};
   try { byKey = JSON.parse(row.IncorrectQuestionsJSON) || {}; } catch (e) { /* ignore */ }
   try { bySkill = JSON.parse(row.SkillStatsJSON) || {}; } catch (e) { /* ignore */ }
-  return { ok: true, incorrectQuestions: byKey, skillStats: bySkill };
+  try { savedByKey = JSON.parse(row.SavedQuestionsJSON) || {}; } catch (e) { /* ignore */ }
+  return { ok: true, incorrectQuestions: byKey, skillStats: bySkill, savedQuestions: savedByKey };
+}
+
+/* =========================================================================
+   DELETE A TEST RESULT — self-service, student-facing. A student can
+   remove one of their own past diagnostic/practice-test attempts from the
+   "View Results" menu on the Practice Tests screen (e.g. a run that
+   glitched partway through and logged bogus answers) so it stops skewing
+   their own incorrect-question bank, saved questions, and score history.
+   Scoped entirely by the student's own key — same gate every other
+   student-facing action here already uses (findRow_ against `key`), so
+   this can only ever touch that one student's own row.
+   ========================================================================= */
+
+// The testTag prefix every IncorrectQuestionsJSON/SavedQuestionsJSON key
+// carries (see index.html's report renderer: testTag + '|' + sectionKey +
+// '|' + moduleName + '|' + moduleIndex) — a practice test's own id
+// (row.TestId, e.g. "sat-practice-2"), or 'diag-' + the SAT/ACT type for
+// the diagnostic. `row` here is any object with Source/TestId/TestType
+// fields, not necessarily a full Attempts-sheet row.
+function testTagForAttemptRow_(row) {
+  if (row.Source === 'practice-test' && row.TestId) return String(row.TestId);
+  if (row.Source === 'diagnostic' && row.TestType) return 'diag-' + String(row.TestType);
+  return null;
+}
+
+// Deletes everything tied to ONE attempt (identified by testTag — see
+// index.html's deleteAttempt(), which computes the same tag from the
+// attempt it's deleting): its IncorrectQuestionsJSON/SavedQuestionsJSON
+// entries (matched by the testTag prefix every question key carries) and
+// its Attempts-sheet rows (both 'log' and 'score' kind — the latter is
+// what drives the Home score-progress graph and this same "View Results"
+// menu). Does NOT touch SkillStatsJSON — it isn't attempt-tagged
+// (handleSyncProgress overwrites it wholesale on every submission, so
+// there's no way to tell which attempt it came from), so clearing it here
+// could just as easily wipe a good attempt's breakdown as a bad one's.
+function handleDeleteAttempt(rawKey, rawTestTag) {
+  if (!rawKey) return { ok: false, error: 'missing_key' };
+  if (!rawTestTag) return { ok: false, error: 'missing_test_tag' };
+  var key = String(rawKey).trim().toUpperCase();
+  var testTag = String(rawTestTag);
+
+  var sheet = getSheet_();
+  var row = findRow_(sheet, key);
+  if (!row) return { ok: false, error: 'bad_key' };
+
+  var removedIncorrect = 0, removedSaved = 0, removedAttemptRows = 0;
+  var prefix = testTag + '|';
+
+  var byKey = {};
+  try { byKey = JSON.parse(row.IncorrectQuestionsJSON) || {}; } catch (e) { byKey = {}; }
+  Object.keys(byKey).forEach(function (k) {
+    if (k.indexOf(prefix) === 0) { delete byKey[k]; removedIncorrect++; }
+  });
+  var iqCol = row._headers.indexOf('IncorrectQuestionsJSON');
+  if (iqCol !== -1) sheet.getRange(row._rowIndex, iqCol + 1).setValue(sheetSafe_(JSON.stringify(byKey)));
+
+  var savedByKey = {};
+  try { savedByKey = JSON.parse(row.SavedQuestionsJSON) || {}; } catch (e) { savedByKey = {}; }
+  Object.keys(savedByKey).forEach(function (k) {
+    if (k.indexOf(prefix) === 0) { delete savedByKey[k]; removedSaved++; }
+  });
+  var svCol = row._headers.indexOf('SavedQuestionsJSON');
+  if (svCol !== -1) sheet.getRange(row._rowIndex, svCol + 1).setValue(sheetSafe_(JSON.stringify(savedByKey)));
+
+  var attemptsSheet = getAttemptsSheet_();
+  var data = attemptsSheet.getDataRange().getValues();
+  var headers = data[0];
+  var col = {};
+  headers.forEach(function (h, i) { col[h] = i; });
+  // Bottom-up so earlier row indices stay valid as rows are removed.
+  for (var i = data.length - 1; i >= 1; i--) {
+    var r = data[i];
+    if (String(r[col.Key]).trim().toUpperCase() !== key) continue;
+    var pseudo = { Source: r[col.Source], TestId: r[col.TestId], TestType: r[col.TestType] };
+    if (testTagForAttemptRow_(pseudo) !== testTag) continue;
+    attemptsSheet.deleteRow(i + 1);
+    removedAttemptRows++;
+  }
+
+  return { ok: true, removedIncorrect: removedIncorrect, removedSaved: removedSaved, removedAttemptRows: removedAttemptRows };
 }
 
 /* =========================================================================
