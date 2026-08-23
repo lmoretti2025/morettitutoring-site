@@ -448,10 +448,19 @@
      from the top, ~22px tall) — without it, the wider "View Results"
      button (this used to be a 32px-wide ••• icon, which fit underneath)
      visually collides with the badge above it. */
-  .pt-menu-wrap { position: relative; flex-shrink: 0; margin-left: auto; margin-top: 1.7rem; align-self: flex-start; }
+  .pt-menu-wrap { position: relative; flex-shrink: 0; margin-left: auto; margin-top: 1.7rem; align-self: flex-start; display: flex; align-items: center; gap: 0.4rem; }
   .pt-view-results-btn { display: flex; align-items: center; gap: 0.3rem; background: none; border: 1px solid var(--border); border-radius: 8px; padding: 0.4rem 0.75rem; font-family: var(--hel); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.02em; color: var(--mid); cursor: pointer; white-space: nowrap; }
   .pt-view-results-btn:hover { border-color: var(--gold); color: var(--text); }
   .pt-caret { font-size: 0.6rem; }
+  /* Small icon-only delete button — sits beside "View Results" for a
+     single attempt, or inline with each row in the dropdown for multiple.
+     Faint by default so it doesn't compete with the primary action; only
+     turns red (a real "this deletes something" signal) on hover/focus. */
+  .pt-attempt-delete, .pt-menu-item-delete { display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: none; border: 1px solid var(--border); border-radius: 8px; width: 30px; height: 30px; padding: 0; color: var(--faint); cursor: pointer; }
+  .pt-attempt-delete:hover, .pt-menu-item-delete:hover { border-color: var(--red); color: var(--red); background: rgba(176,39,28,0.06); }
+  .pt-menu-item-row { display: flex; align-items: stretch; gap: 0.3rem; }
+  .pt-menu-item-row .pt-menu-item { flex: 1; min-width: 0; }
+  .pt-menu-item-delete { border: none; width: 30px; }
   /* Rendered as position:fixed (see positionPtMenuDropdown() in the JS),
      computed from the toggle button's own bounding rect at the moment it
      opens — NOT absolutely positioned relative to the card. A card sitting
@@ -1096,15 +1105,15 @@
      date + a pill-shaped download button on the right, replacing both the
      old print-style letterhead (logo/red rule, now hidden — see
      #pt-native-report .hdr) and the separate toolbar Download button. */
-  .pt-report-hed { display: flex; align-items: center; gap: 0.9rem; padding: 1.1rem 0 1.4rem; flex-wrap: wrap; }
-  .pt-report-hed-icon { flex-shrink: 0; width: 40px; height: 40px; border-radius: 10px; background: rgba(17,17,17,0.04); color: var(--faint); display: flex; align-items: center; justify-content: center; }
-  .pt-report-hed-icon svg { width: 20px; height: 20px; }
-  .pt-report-hed-text { display: flex; flex-direction: column; gap: 0.15rem; margin-right: auto; }
-  .pt-report-hed-title { font-family: var(--hel); font-size: 1.3rem; font-weight: 700; color: var(--text); }
-  .pt-report-hed-sub { font-family: var(--hel); font-size: 0.78rem; color: var(--mid); }
-  .pt-report-hed-right { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
-  .pt-report-hed-date { font-family: var(--hel); font-size: 0.78rem; color: var(--mid); white-space: nowrap; }
-  .pt-report-hed-download { display: flex; align-items: center; gap: 0.4rem; font-family: var(--hel); font-size: 0.78rem; font-weight: 600; color: #fff; background: var(--red); border: none; border-radius: 999px; padding: 0.55rem 1.1rem; cursor: pointer; white-space: nowrap; transition: filter 0.15s var(--ease); }
+  #pt-native-report .pt-report-hed { display: flex; align-items: center; gap: 0.9rem; padding: 1.1rem 0 1.4rem; flex-wrap: wrap; }
+  #pt-native-report .pt-report-hed-icon { flex-shrink: 0; width: 40px; height: 40px; border-radius: 10px; background: rgba(17,17,17,0.04); color: var(--faint); display: flex; align-items: center; justify-content: center; }
+  #pt-native-report .pt-report-hed-icon svg { width: 20px; height: 20px; }
+  #pt-native-report .pt-report-hed-text { display: flex; flex-direction: column; gap: 0.15rem; margin-right: auto; }
+  #pt-native-report .pt-report-hed-title { font-family: var(--hel); font-size: 1.3rem; font-weight: 700; color: var(--text); }
+  #pt-native-report .pt-report-hed-sub { font-family: var(--hel); font-size: 0.78rem; color: var(--mid); }
+  #pt-native-report .pt-report-hed-right { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+  #pt-native-report .pt-report-hed-date { font-family: var(--hel); font-size: 0.78rem; color: var(--mid); white-space: nowrap; }
+  #pt-native-report .pt-report-hed-download { display: flex; align-items: center; gap: 0.4rem; font-family: var(--hel); font-size: 0.78rem; font-weight: 600; color: #fff; background: var(--red); border: none; border-radius: 999px; padding: 0.55rem 1.1rem; cursor: pointer; white-space: nowrap; transition: filter 0.15s var(--ease); }
   .pt-report-hed-download:hover { filter: brightness(0.92); }
 
   /* ═══ SCORE REPORT — printable, parent-facing diagnostic breakdown ═══ */
@@ -1293,6 +1302,20 @@
   .vp-primary:active { transform: translateY(0); }
   .vp-primary:disabled { opacity: 0.45; cursor: default; transform: none; box-shadow: none; }
 
+  /* Saved & Mistakes' two-tab switcher (Saved Questions / Mistakes Log) —
+     plain underline tabs, active one in brand red with a count badge next
+     to Mistakes Log. */
+  .iq-tabs { display: flex; align-items: center; gap: 1.6rem; margin-top: 1.3rem; border-bottom: 1px solid var(--border); }
+  .iq-tab { background: none; border: none; border-bottom: 2px solid transparent; padding: 0 0 0.7rem; margin-bottom: -1px; font-family: var(--hel); font-size: 0.84rem; font-weight: 700; color: var(--faint); cursor: pointer; display: flex; align-items: center; gap: 0.45rem; transition: color 0.15s var(--ease); }
+  .iq-tab:hover { color: var(--text); }
+  .iq-tab.active { color: var(--red); border-bottom-color: var(--red); }
+  .iq-tab-count { background: rgba(17,17,17,0.06); color: var(--mid); border-radius: 999px; padding: 0.1rem 0.5rem; font-size: 0.72rem; font-weight: 700; }
+  .iq-tab.active .iq-tab-count { background: rgba(176,39,28,0.12); color: var(--red); }
+  .pb-empty-saved { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 0.6rem; padding: 3rem 1.5rem; }
+  .pb-empty-saved .pb-empty-icon { color: var(--faint); opacity: 0.6; }
+  .pb-empty-saved .pb-empty-title { font-family: var(--display); font-size: 1.15rem; font-weight: 700; color: var(--text); }
+  .pb-empty-saved .pb-empty-sub { font-size: 0.82rem; color: var(--mid); max-width: 30rem; }
+
   /* ═══ CHECKBOX DROPDOWNS — used by My Incorrect Questions' section/
      domain/skill/difficulty filters. A button showing a one-line summary
      ("All" / "3 of 8 selected") that opens a checkbox panel below it. ═══ */
@@ -1374,6 +1397,7 @@
      module's own header comment) — kept even though the Question Practice
      feature that introduced them was removed. */
   .pb-q-meta { display: flex; justify-content: space-between; align-items: baseline; font-family: var(--hel); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); margin-bottom: 0.6rem; }
+  .iq-saved-badge { flex-shrink: 0; color: var(--gold); font-weight: 700; letter-spacing: 0.04em; }
   .pb-passage { font-family: var(--serif); font-size: 0.98rem; line-height: 1.85; color: var(--text); background: var(--white); border: 1px solid var(--border); border-radius: 14px; padding: 1.6rem; margin-bottom: 1rem; opacity: 0; animation: vpRise 0.3s cubic-bezier(.2,.7,.3,1) forwards; }
   .pb-q-card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; padding: 1.6rem; opacity: 0; animation: vpRise 0.3s cubic-bezier(.2,.7,.3,1) forwards; }
   .pb-q-text { font-family: var(--serif); font-size: 1.02rem; line-height: 1.65; color: var(--text); margin-bottom: 1.25rem; }
@@ -1518,6 +1542,44 @@
 
   @media (max-width: 620px) {#pt-native-report .acc-topic-grid { grid-template-columns: 1fr; }
  }
+  /* ═══ ACCURACY BY TOPIC ═══ one block per subject, a segmented three-
+     tier tracker per domain row — see renderSkillBreakdown()'s accuracy-
+     by-topic pass in the script for the tier thresholds/logic. */
+  #pt-native-report .atb-section { margin-bottom: 2rem; }
+  #pt-native-report .atb-section:last-child { margin-bottom: 0; }
+  #pt-native-report .atb-hed-row { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.25rem; }
+  #pt-native-report .atb-hed { font-family: var(--hel); font-size: 1rem; font-weight: 700; color: var(--text); }
+  #pt-native-report .atb-subhed { font-family: var(--hel); font-size: 0.76rem; color: var(--mid); margin-top: 0.15rem; }
+  #pt-native-report .atb-legend { display: flex; gap: 0.9rem; font-family: var(--hel); font-size: 0.68rem; color: var(--mid); }
+  #pt-native-report .atb-legend span { display: inline-flex; align-items: center; gap: 0.35rem; white-space: nowrap; }
+  #pt-native-report .atb-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+  #pt-native-report .atb-dot.high { background: var(--green); }
+  #pt-native-report .atb-dot.mid { background: var(--atb-amber, #F59E0B); }
+  #pt-native-report .atb-dot.low { background: var(--red); }
+  #pt-native-report .atb-rows { display: flex; flex-direction: column; gap: 1.1rem; }
+  #pt-native-report .atb-row { display: flex; align-items: center; gap: 1.5rem; }
+  #pt-native-report .atb-row-left { flex: 0 0 200px; min-width: 0; }
+  #pt-native-report .atb-domain-name { font-family: var(--hel); font-size: 0.82rem; font-weight: 700; color: var(--text); }
+  #pt-native-report .atb-domain-attempts { font-family: var(--hel); font-size: 0.7rem; color: var(--faint); margin-top: 0.2rem; }
+  #pt-native-report .atb-tracker { flex: 1 1 220px; min-width: 120px; display: flex; gap: 0.4rem; }
+  #pt-native-report .atb-seg { position: relative; flex: 1; height: 8px; border-radius: 999px; background: #ece5d6; }
+  #pt-native-report .atb-seg.active.low { background: var(--red); }
+  #pt-native-report .atb-seg.active.mid { background: var(--atb-amber, #F59E0B); }
+  #pt-native-report .atb-seg.active.high { background: var(--green); }
+  #pt-native-report .atb-handle { position: absolute; top: 50%; width: 15px; height: 15px; border-radius: 50%; background: #fff; border: 3px solid currentColor; box-shadow: 0 1px 3px rgba(17,17,17,0.25); transform: translate(-50%, -50%); }
+  #pt-native-report .atb-seg.low .atb-handle { color: var(--red); }
+  #pt-native-report .atb-seg.mid .atb-handle { color: var(--atb-amber, #F59E0B); }
+  #pt-native-report .atb-seg.high .atb-handle { color: var(--green); }
+  #pt-native-report .atb-pct { flex: 0 0 52px; text-align: right; font-family: var(--hel); font-weight: 700; font-size: 1.15rem; }
+  #pt-native-report .atb-pct.low { color: var(--red); }
+  #pt-native-report .atb-pct.mid { color: var(--atb-amber, #F59E0B); }
+  #pt-native-report .atb-pct.high { color: var(--green); }
+  @media (max-width: 640px) {
+    #pt-native-report .atb-row { flex-wrap: wrap; gap: 0.6rem 1rem; }
+    #pt-native-report .atb-row-left { flex: 1 1 100%; }
+    #pt-native-report .atb-tracker { flex: 1 1 auto; order: 3; width: 100%; }
+    #pt-native-report .atb-pct { flex: 0 0 auto; margin-left: auto; }
+  }
 #pt-native-report .quadrant-sub { font-size: 9px; color: var(--faint); margin: -6px 0 8px; }
 #pt-native-report .quadrant-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 #pt-native-report .quadrant-card { border: 1px solid rgba(17,17,17,0.08); border-radius: 12px; padding: 12px; box-shadow: 0 1px 2px rgba(17,17,17,0.03); }
@@ -1639,6 +1701,10 @@
 #pt-native-report .q-detail .q-fr .q-your-ans { color: var(--red); font-weight: 600; }
 #pt-native-report .q-detail .q-timing { margin-top: 8px; font-size: 9.5px; color: var(--mid); }
 #pt-native-report .q-hint { font-size: 9px; color: var(--faint); font-style: italic; margin: 2px 0 10px; }
+#pt-native-report .q-save-row { margin-top: 0.75rem; }
+#pt-native-report .q-save-btn { display: inline-flex; align-items: center; gap: 0.4rem; font-family: var(--hel); font-size: 0.72rem; font-weight: 700; color: var(--mid); background: var(--white); border: 1px solid var(--border); border-radius: 999px; padding: 0.5rem 0.9rem; cursor: pointer; transition: border-color 0.15s var(--ease), color 0.15s var(--ease), background 0.15s var(--ease); }
+#pt-native-report .q-save-btn:hover { border-color: var(--gold); color: var(--text); }
+#pt-native-report .q-save-btn.on { background: rgba(201,168,76,0.12); border-color: var(--gold); color: var(--text); }
 
   @media print {#pt-native-report .q-hint, #pt-native-report td.q-toggle, #pt-native-report th.q-toggle { display: none; }
  }
@@ -1682,36 +1748,96 @@
      look this whole rebuild was meant to get away from. The progress
      card itself has been removed outright (markup, styles, and its
      background fetch), not just hidden — see .top-row above. */
+  /* Modern, more saturated red/green — shadows the site-wide brand
+     --red/--green (the muted brick-red/sage used for buttons and accents
+     everywhere else) ONLY inside the report, since CSS custom properties
+     resolve against the nearest ancestor that redefines them. Every
+     existing var(--red)/var(--green) reference in this report (CSS AND
+     the JS that writes inline "var(--red)"/"var(--green)" strings) picks
+     this up automatically — nothing outside #pt-native-report is
+     affected. */
+  #pt-native-report { --red: #EF4444; --green: #16A34A; }
   #pt-native-report { width: 100%; max-width: none; min-height: 0; margin: 0; padding-top: 0.5rem; background: var(--white); }
   #pt-native-report .page { width: 100%; max-width: none; min-height: 0; margin: 0; padding: 0; box-shadow: none; background: var(--white); }
   #pt-native-report .hdr { display: none; }
   /* More breathing room between sections and inside cards than the
      print-oriented original (built to fit two 8.5x11 pages) needed. */
-  #pt-native-report .sec-hed { margin: 2.25rem 0 1rem; font-size: 0.72rem; }
-  #pt-native-report .score-summary { padding: 1.5rem 1.75rem; }
-  #pt-native-report .section-cards { gap: 1.1rem; }
-  #pt-native-report .section-card { padding: 1.1rem 1.25rem; }
-  /* Score header redesign: one dominant Composite card (big number, no
-     border-top accent stripe) with R&W/Math demoted to a smaller stacked
-     column beside it, instead of three equal-sized tiles in a row — and
-     the raw-stats strip below it sized/rounded to match. */
-  #pt-native-report .score-tiles { display: flex; align-items: stretch; gap: 0.9rem; margin-bottom: 0; flex-wrap: wrap; }
-  #pt-native-report .score-tile { flex: 2 1 260px; min-width: 0; background: var(--white); border: 1px solid var(--border); border-top: 1px solid var(--border); border-radius: 16px; padding: 1.75rem 1.5rem; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-  #pt-native-report .score-tile .tile-lab { font-family: var(--hel); font-size: 0.72rem; letter-spacing: 0.1em; margin-top: 0; margin-bottom: 0.5rem; }
-  #pt-native-report .score-tile .tile-score { font-family: var(--hel); }
-  #pt-native-report .score-tile .tile-score.big { font-size: 3.4rem; }
-  #pt-native-report .score-tiles-small { flex: 1 1 180px; display: flex; flex-direction: column; gap: 0.9rem; min-width: 0; }
-  #pt-native-report .score-tiles-small .score-tile { flex: 1; padding: 1rem 1.25rem; }
-  #pt-native-report .score-tiles-small .tile-score.small { font-size: 1.5rem; }
+  #pt-native-report .sec-hed { margin: 2.25rem 0 1rem; font-size: 0.72rem; border-bottom: none; padding-bottom: 0; }
+  #pt-native-report .score-summary { padding: 0; background: transparent; border: none; }
+  /* Score header redesign — ONE connected card, score row fused straight
+     into the Correct/Wrong/Accuracy/Unattempted row below it (a single
+     divider between the two, not two separate cards with a gap and a
+     grey page-background halo around them). Composite sits in its own
+     left-hand panel, R&W/Math stack as plain label/number rows to its
+     right — matching a predicted-score-report layout (OnePrep's, e.g.)
+     rather than a row of stat tiles. Kept deliberately light on internal
+     rules: one divider between Composite and R&W/Math, one between the
+     score row and the stat row, none elsewhere — a grid of border lines
+     was reading as clutter, not structure. */
+  #pt-native-report .score-card { background: var(--white); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); overflow: hidden; }
+  #pt-native-report .score-tiles { display: flex; align-items: stretch; gap: 0; margin-bottom: 0; flex-wrap: wrap; }
+  #pt-native-report .score-tile { flex: 1 1 180px; min-width: 0; background: transparent; border: none; border-radius: 0; padding: 1.4rem 1.75rem; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+  #pt-native-report .score-tile.big { flex: 0 0 auto; min-width: 220px; border-right: 1px solid var(--border); }
+  #pt-native-report .score-tile .tile-lab { font-family: var(--hel); font-size: 0.68rem; letter-spacing: 0.09em; margin: 0 0 0.4rem; }
+  #pt-native-report .score-tile .tile-score { font-family: var(--hel); color: var(--text); }
+  #pt-native-report .score-tile .tile-score.big { font-size: 2.5rem; }
+  #pt-native-report .score-tiles-small { flex: 1 1 320px; display: flex; flex-direction: row; min-width: 0; align-items: center; gap: 0.6rem; padding: 0.75rem 0.5rem; }
+  #pt-native-report .score-tiles-small .score-tile { flex: 1; padding: 0 1.1rem; }
+  #pt-native-report .score-tiles-small .tile-score.small { font-size: 1.4rem; }
   #pt-native-report .score-caption { display: none; }
-  #pt-native-report .raw-stats { grid-template-columns: repeat(4, 1fr); gap: 0.9rem; margin-top: 1.1rem; }
-  #pt-native-report .raw-stat { border-radius: 14px; padding: 1.1rem 1.25rem 1rem; }
-  #pt-native-report .raw-stat-lab { font-family: var(--hel); font-size: 0.68rem; letter-spacing: 0.06em; }
-  #pt-native-report .raw-stat-num { font-family: var(--hel); font-size: 1.7rem; }
+  #pt-native-report .raw-stats { display: flex; border-top: 1px solid var(--border); margin: 0; }
+  #pt-native-report .raw-stat { flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.7rem; padding: 1rem 1.1rem; border: none; border-radius: 0; box-shadow: none; background: transparent; }
+  #pt-native-report .raw-stat-icon { flex-shrink: 0; width: 26px; height: 26px; color: var(--faint); }
+  #pt-native-report .raw-stat-icon svg { width: 100%; height: 100%; display: block; }
+  #pt-native-report .raw-stat.ok .raw-stat-icon { color: var(--green); }
+  #pt-native-report .raw-stat.bad .raw-stat-icon { color: var(--red); }
+  #pt-native-report .raw-stat-text { min-width: 0; }
+  #pt-native-report .raw-stat-lab { font-family: var(--hel); font-size: 0.66rem; letter-spacing: 0.06em; margin-bottom: 0.15rem; }
+  #pt-native-report .raw-stat-num { font-family: var(--hel); font-size: 1.35rem; }
   @media (max-width: 700px) {
-    #pt-native-report .score-tiles-small { flex-direction: row; }
-    #pt-native-report .raw-stats { grid-template-columns: repeat(2, 1fr); }
+    #pt-native-report .score-tiles { flex-direction: column; }
+    #pt-native-report .score-tile.big { border-right: none; border-bottom: 1px solid var(--border); width: 100%; }
+    #pt-native-report .raw-stats { flex-wrap: wrap; }
+    #pt-native-report .raw-stat:nth-child(-n+2) { border-bottom: 1px solid var(--border); }
   }
+
+  /* Section snapshot tiles — module name, a plain color grid (no question
+     numbers, no per-module time/domain breakdown; see the JS comment
+     above renderSectionBreakdown), average time per question, and the raw
+     fraction. Sits directly under the score card, ahead of the bridge
+     chart — light single-card tiles, four in a row on a wide screen. */
+  #pt-native-report .section-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: 1.5rem; margin: 1.1rem 0 0; }
+  @media (max-width: 640px) {
+    #pt-native-report .section-cards { grid-template-columns: repeat(2, 1fr); }
+  }
+  #pt-native-report .section-card { background: transparent; border: none; border-radius: 0; box-shadow: none; padding: 0; }
+  #pt-native-report .section-card .sc-title { font-family: var(--hel); font-size: 0.82rem; font-weight: 700; color: var(--text); margin-bottom: 0.5rem; }
+  #pt-native-report .sc-counts { display: flex; flex-wrap: wrap; gap: 0.7rem; margin-bottom: 0.6rem; }
+  #pt-native-report .sc-count { font-family: var(--hel); font-size: 0.8rem; font-weight: 700; color: var(--faint); }
+  #pt-native-report .sc-count.ok { color: var(--green); }
+  #pt-native-report .sc-count.bad { color: var(--red); }
+  #pt-native-report .sc-count span { font-weight: 500; opacity: 0.75; margin-left: 0.2em; font-size: 0.85em; }
+  #pt-native-report .sc-qgrid { gap: 5px; }
+  #pt-native-report .sc-qgrid-cell { width: 17px; height: 17px; border-radius: 5px; border: none; }
+  #pt-native-report .sc-qgrid-cell.ok { background: var(--green); }
+  #pt-native-report .sc-qgrid-cell.bad { background: var(--red); }
+  #pt-native-report .sc-qgrid-cell.skip { background: transparent; border: 1.5px solid var(--border); }
+  #pt-native-report .sc-meta { font-family: var(--hel); font-size: 0.72rem; color: var(--faint); margin-top: 0.7rem; }
+  #pt-native-report .sc-meta .ok { color: var(--green); font-weight: 700; }
+
+  /* Bridge chart + condensed skills list share one card — the skills list
+     appends directly under the chart instead of living in its own section
+     further down the page with a full heading and big circular gauges. */
+  #pt-native-report .bridge-card { background: var(--white); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); overflow: hidden; }
+  #pt-native-report .bridge-wrap { border: none; box-shadow: none; border-radius: 0; margin-bottom: 0; }
+  #pt-native-report #bridge-skills:empty { display: none; }
+  #pt-native-report .bridge-skills-lab { font-family: var(--hel); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mid); padding: 1rem 1.5rem 0; }
+  #pt-native-report .topics-list.condensed { border: none; border-top: 1px solid var(--border); margin-top: 0.8rem; border-radius: 0; box-shadow: none; }
+  #pt-native-report .topics-list.condensed .topics-row { padding: 0.6rem 1.5rem; gap: 0.9rem; border-bottom: none; }
+  #pt-native-report .topics-list.condensed .topics-name { flex: 1; font-size: 0.76rem; font-weight: 600; color: var(--text); }
+  #pt-native-report .topics-bar-track { flex: 1 1 120px; height: 6px; border-radius: 3px; background: #eee7da; overflow: hidden; }
+  #pt-native-report .topics-bar-fill { display: block; height: 100%; border-radius: 3px; }
+  #pt-native-report .topics-pct { flex-shrink: 0; width: 34px; text-align: right; font-family: var(--hel); font-size: 0.74rem; font-weight: 700; }
 </style>
 </head>
 <body>
@@ -1836,7 +1962,7 @@
   </a>
   <a href="#" class="sidebar-item" data-nav="incorrect-questions" id="sidebar-incorrect-questions">
     <span class="sidebar-icon sidebar-icon-text">&#10007;</span>
-    <span class="sidebar-label">My Incorrect Questions</span>
+    <span class="sidebar-label">Saved &amp; Mistakes</span>
   </a>
   <a href="#" class="sidebar-item" data-nav="challenge-questions" id="sidebar-challenge-questions">
     <span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.5-2 5-2 5s3.5-.5 5-2c.8-.8.8-2.2 0-3s-2.2-.8-3 0Z"/><path d="M9 15l-1.5-1.5L15 6c1.5-1.5 4-2.5 6-2.5s-1 4.5-2.5 6l-7.5 7.5L9 15Z"/><path d="M15 6c0 2 1.5 5 4.5 4.5"/><circle cx="15.5" cy="8.5" r="1"/></svg></span>
@@ -2423,8 +2549,8 @@
       <div class="menu-card menu-card-wide" data-route="incorrect-questions">
         <span class="menu-card-icon">&#10007;</span>
         <div>
-          <div class="menu-card-title">My Incorrect Questions</div>
-          <div class="menu-card-body">Every question you've missed on a diagnostic or practice test, all in one place — filter by section, domain, skill, and difficulty to see exactly what to review.</div>
+          <div class="menu-card-title">Saved &amp; Mistakes</div>
+          <div class="menu-card-body">Every question you've missed on a diagnostic or practice test, plus anything you've saved on purpose (even ones you got right) — filter by section, domain, skill, and difficulty to see exactly what to review.</div>
         </div>
       </div>
     </div>
@@ -2443,8 +2569,13 @@
   <div class="panel-wide" id="iq-picker-view">
     <div class="vp-head">
       <div class="kicker">SAT Resources</div>
-      <h1 class="panel-hed">My Incorrect Questions</h1>
+      <h1 class="panel-hed">Saved &amp; Mistakes</h1>
       <p class="panel-sub">Quiz yourself — answer each one before the correct answer is revealed.</p>
+    </div>
+
+    <div class="iq-tabs" id="iq-tabs">
+      <button type="button" class="iq-tab active" data-tab="saved" id="iq-tab-saved">Saved Questions</button>
+      <button type="button" class="iq-tab" data-tab="mistakes" id="iq-tab-mistakes">Mistakes Log <span class="iq-tab-count" id="iq-tab-mistakes-count">0</span></button>
     </div>
 
     <div id="iq-filters">
@@ -2580,17 +2711,20 @@
   </div>
   <div class="top-row">
     <div class="score-summary">
-      <div class="score-tiles" id="score-tiles"></div>
+      <div class="score-card" id="score-card">
+        <div class="score-tiles" id="score-tiles"></div>
+        <div class="raw-stats" id="raw-stats"></div>
+      </div>
       <div class="score-caption" id="score-caption"></div>
     </div>
   </div>
-  <div class="raw-stats" id="raw-stats"></div>
-  <div class="sec-hed">Path to target score</div>
-  <div id="score-bridge"></div>
-  <div class="sec-hed">Section breakdown</div>
   <div id="section-breakdown"></div>
+  <div class="sec-hed">Path to target score</div>
+  <div class="bridge-card" id="bridge-card">
+    <div id="score-bridge"></div>
+    <div id="bridge-skills"></div>
+  </div>
   <div class="sec-hed" id="skillbreak-hed" style="display:none;">Skill breakdown</div>
-  <div id="topics-costing" style="display:none;"></div>
   <div id="accuracy-by-topic" style="display:none;"></div>
   <div class="sec-hed" id="quadrant-hed" style="display:none;">Confidence quadrant</div>
   <p class="quadrant-sub" id="quadrant-sub" style="display:none;">Each dot is one multiple-choice question — time spent (x) vs. right or wrong (y), relative to <span id="quadrant-sub-first"></span>&rsquo;s own median pace. Hover a dot, or click to review the question.</p>
@@ -3359,7 +3493,7 @@
   // ever reflects what happened in this specific browser.
   function loadLocalProgressCache() {
     var key = currentStudent && currentStudent.key;
-    var incorrectQuestions = {}, skillStats = {};
+    var incorrectQuestions = {}, skillStats = {}, savedQuestions = {};
     if (key) {
       try {
         var rawIq = localStorage.getItem('moretti_incorrect_qs_' + key);
@@ -3369,11 +3503,15 @@
         var rawSk = localStorage.getItem('moretti_diag_skills_' + key);
         if (rawSk) { var skData = JSON.parse(rawSk); if (skData && skData.bySkill) skillStats = skData.bySkill; }
       } catch (e) { /* ignore */ }
+      try {
+        var rawSv = localStorage.getItem('moretti_saved_qs_' + key);
+        if (rawSv) { var svData = JSON.parse(rawSv); if (svData && svData.byKey) savedQuestions = svData.byKey; }
+      } catch (e) { /* ignore */ }
     }
-    return { incorrectQuestions: incorrectQuestions, skillStats: skillStats };
+    return { incorrectQuestions: incorrectQuestions, skillStats: skillStats, savedQuestions: savedQuestions };
   }
 
-  // Fetches this student's synced "My Incorrect Questions" / "Practice My
+  // Fetches this student's synced "Saved & Mistakes" / "Practice My
   // Weak Spots" data from the backend (Code.gs' Progress sheet) — shared
   // by both of those tools' own isolated modules further down the page
   // (they can't see currentStudent/APPS_SCRIPT_URL directly, same reason
@@ -3386,11 +3524,11 @@
   // the tools degrade to "same device only" rather than breaking outright.
   window.fetchPortalProgress = function (callback) {
     var key = currentStudent && currentStudent.key;
-    if (!key) { callback({ incorrectQuestions: {}, skillStats: {} }); return; }
+    if (!key) { callback({ incorrectQuestions: {}, skillStats: {}, savedQuestions: {} }); return; }
     // Routed through postToBackend (defined below) rather than a bare
     // fetch() — a bare fetch() has no timeout, so a bad Apps Script cold
-    // start just sits there with My Incorrect Questions' "Loading your
-    // latest results…" frozen on screen for however long that takes, with
+    // start just sits there with Saved & Mistakes' "Loading your latest
+    // results…" frozen on screen for however long that takes, with
     // nothing to fall back to the local cache until it either resolves or
     // the browser's own (very long, effectively unbounded) network
     // timeout finally gives up. postToBackend bounds each attempt and
@@ -3398,8 +3536,21 @@
     // as callAuth() above, same root cause.
     postToBackend({ action: 'getProgress', key: key })
       .then(function (data) {
-        if (data && data.ok) callback({ incorrectQuestions: data.incorrectQuestions || {}, skillStats: data.skillStats || {} });
-        else callback(loadLocalProgressCache());
+        if (data && data.ok) {
+          // Merge in this device's own local saved-questions cache
+          // regardless — until Code.gs is redeployed with the
+          // SavedQuestionsJSON column, an old-but-still-`ok`-responding
+          // backend has no savedQuestions field at all, and without this
+          // merge a just-saved question would silently vanish from Saved
+          // & Mistakes (the backend branch otherwise wins outright, never
+          // falling through to loadLocalProgressCache() below). Backend
+          // entries win on key collision once that IS deployed and both
+          // sides agree.
+          var merged = Object.assign({}, loadLocalProgressCache().savedQuestions, data.savedQuestions || {});
+          callback({ incorrectQuestions: data.incorrectQuestions || {}, skillStats: data.skillStats || {}, savedQuestions: merged });
+        } else {
+          callback(loadLocalProgressCache());
+        }
       })
       .catch(function () { callback(loadLocalProgressCache()); });
   };
@@ -4712,7 +4863,7 @@
       if (hiddenCount > 0) {
         var more = document.createElement('div');
         more.className = 'pie-legend-more';
-        more.textContent = '+' + hiddenCount + ' more in My Incorrect Questions';
+        more.textContent = '+' + hiddenCount + ' more in Saved & Mistakes';
         legendEl.appendChild(more);
       }
     }
@@ -5454,7 +5605,7 @@
     { label: 'Diagnostic', nav: 'diagnostic' },
     { label: 'Files', nav: 'files' },
     { label: 'Vocabulary', nav: 'vocab' },
-    { label: 'My Incorrect Questions', nav: 'incorrect-questions' },
+    { label: 'Saved & Mistakes', nav: 'incorrect-questions' },
     { label: 'Challenge Questions', nav: 'challenge-questions' }
   ];
   var navSearchWrap = document.getElementById('nav-search');
@@ -5890,13 +6041,29 @@
     if (!link) return link;
     return link.indexOf(REPORT_ABS_PREFIX) === 0 ? 'report.html' + link.slice(REPORT_ABS_PREFIX.length) : link;
   }
+  // testTag matches the SAME prefix a report's own question keys carry
+  // (see the report renderer's row-building loop further down: testTag +
+  // '|' + sectionKey + '|' + moduleName + '|' + moduleIndex) — a practice
+  // test's own id, or 'diag-' + SAT/ACT for the diagnostic. Carried on
+  // each menu item so deleteAttempt() (below) can purge exactly this
+  // attempt's incorrect/saved questions without touching any other.
+  function testTagForScoreEntry(e) {
+    if (e.source === 'practice-test' && e.testId) return e.testId;
+    if (e.testType) return 'diag-' + e.testType;
+    return null;
+  }
   function attemptMenuItems(attemptsOldestFirst) {
     return attemptsOldestFirst.map(function (e, i) {
       var d = shortDate(e.date);
       var label = attemptsOldestFirst.length > 1
         ? 'Attempt ' + (i + 1) + (d ? ' — ' + d : '') + (e.composite ? ' (' + e.composite + ')' : '')
         : 'View Results';
-      return { label: label, link: toRelativeReportLink(e.reportLinkRelative || e.reportLink) };
+      return {
+        label: label,
+        link: toRelativeReportLink(e.reportLinkRelative || e.reportLink),
+        testTag: testTagForScoreEntry(e),
+        attemptId: e.attemptId || null
+      };
     }).reverse();
   }
   // Diagnostic tile prepended to the practice-test grid — thrown in with
@@ -6014,14 +6181,19 @@
   // a dropdown toggle (adds a caret) listing every attempt (see
   // attemptMenuItems), newest first. Markup only; wirePtMenu attaches the
   // actual behavior once the card is in the DOM.
+  var DELETE_ICON_SVG = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>';
   function buildPtMenuHtml(attempts) {
     if (attempts.length === 1) {
       return '<div class="pt-menu-wrap" data-pt-menu-wrap>' +
         '<button type="button" class="pt-view-results-btn" data-pt-view-results data-pt-attempt-idx="0">View Results</button>' +
+        '<button type="button" class="pt-attempt-delete" data-pt-delete data-pt-attempt-idx="0" title="Delete this result" aria-label="Delete this result">' + DELETE_ICON_SVG + '</button>' +
       '</div>';
     }
     var items = attempts.map(function (a, i) {
-      return '<button type="button" class="pt-menu-item" data-pt-view-results data-pt-attempt-idx="' + i + '">' + a.label + '</button>';
+      return '<div class="pt-menu-item-row">' +
+        '<button type="button" class="pt-menu-item" data-pt-view-results data-pt-attempt-idx="' + i + '">' + a.label + '</button>' +
+        '<button type="button" class="pt-menu-item-delete" data-pt-delete data-pt-attempt-idx="' + i + '" title="Delete this result" aria-label="Delete this result">' + DELETE_ICON_SVG + '</button>' +
+      '</div>';
     }).join('');
     return '<div class="pt-menu-wrap" data-pt-menu-wrap>' +
       '<button type="button" class="pt-view-results-btn" data-pt-menu-toggle aria-haspopup="true" aria-expanded="false">View Results <span class="pt-caret">&#9662;</span></button>' +
@@ -6068,6 +6240,65 @@
         var idx = parseInt(btn.getAttribute('data-pt-attempt-idx'), 10);
         openTestResults(attempts[idx].link);
       });
+    });
+    wrap.querySelectorAll('[data-pt-delete]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var idx = parseInt(btn.getAttribute('data-pt-attempt-idx'), 10);
+        deleteAttempt(attempts[idx], btn);
+      });
+    });
+  }
+  // Removes this ONE attempt's result — server-side (its incorrect/saved
+  // questions and its Attempts-log/score-history row, via the
+  // 'deleteAttempt' action) and this device's own local caches, so a
+  // student can clear out a glitched or accidental run without it
+  // skewing their Saved & Mistakes bank or score history. Self-service —
+  // scoped to the student's own key the same way every other write here
+  // is, so this can only ever touch their own data.
+  function deleteAttempt(attempt, btn) {
+    if (!attempt.testTag) return; // pre-Attempts-sheet entries have no testTag to scope a delete to — nothing safe to remove
+    if (!window.confirm('Delete this result? It\'ll be removed from your score history and Saved & Mistakes. This can\'t be undone.')) return;
+    btn.disabled = true;
+    var key = currentStudent && currentStudent.key;
+    fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'deleteAttempt', key: key, testTag: attempt.testTag })
+    }).then(function (r) { return r.json(); }).then(function (res) {
+      if (!res || !res.ok) { btn.disabled = false; return; }
+      purgeLocalAttemptCaches(key, attempt.testTag);
+      closeAllPtMenus();
+      renderPracticeTestList();
+      if (activeScreenId === 'screen-menu') { renderScoreProgress(); renderRecentTestCard(); }
+    }).catch(function () { btn.disabled = false; });
+  }
+  // Strips one testTag's entries out of this device's own localStorage
+  // copies — the server-side delete alone isn't enough, since Score
+  // Progress and the offline fallback for Saved & Mistakes both read
+  // these local caches first/instead (see loadScoreHistory and
+  // loadLocalProgressCache above).
+  function purgeLocalAttemptCaches(key, testTag) {
+    if (!key) return;
+    var prefix = testTag + '|';
+    try {
+      var shRaw = localStorage.getItem('moretti_score_history_' + key);
+      if (shRaw) {
+        var shData = JSON.parse(shRaw);
+        if (shData && Array.isArray(shData.entries)) {
+          shData.entries = shData.entries.filter(function (e) { return testTagForScoreEntry(e) !== testTag; });
+          localStorage.setItem('moretti_score_history_' + key, JSON.stringify(shData));
+        }
+      }
+    } catch (e) { /* ignore */ }
+    serverScoreHistoryEntries = serverScoreHistoryEntries.filter(function (e) { return testTagForScoreEntry(e) !== testTag; });
+    ['moretti_incorrect_qs_' + key, 'moretti_saved_qs_' + key].forEach(function (storageKey) {
+      try {
+        var raw = localStorage.getItem(storageKey);
+        if (!raw) return;
+        var data = JSON.parse(raw);
+        if (!data || !data.byKey) return;
+        Object.keys(data.byKey).forEach(function (k) { if (k.indexOf(prefix) === 0) delete data.byKey[k]; });
+        localStorage.setItem(storageKey, JSON.stringify(data));
+      } catch (e) { /* ignore */ }
     });
   }
   function closeAllPtMenus() {
@@ -8027,17 +8258,68 @@
     } catch (e) { /* storage disabled / private browsing — skip silently, matches saveState() elsewhere */ }
   }
 
+  /* ═══ "SAVED & MISTAKES" — SAVED-QUESTION LOG ═══ same local-device-
+     cache/backend-synced split as recordIncorrectQuestions() above, but a
+     student can toggle a save on or off at any time WHILE REVIEWING A
+     REPORT (see window.saveReportQuestion() below and the report
+     renderer's Save button on each question) — not tied to a single live
+     attempt the way a mistake auto-clears on a later correct answer.
+     `record.remove` un-saves; otherwise the record is written/overwritten. */
+  function recordSavedQuestions(records) {
+    try {
+      var studentKey = currentStudent && currentStudent.key;
+      if (!studentKey || !records.length) return;
+      var storageKey = 'moretti_saved_qs_' + studentKey;
+      var existing = {};
+      try {
+        var raw = localStorage.getItem(storageKey);
+        if (raw) existing = JSON.parse(raw) || {};
+      } catch (e) { existing = {}; }
+      if (!existing.byKey || typeof existing.byKey !== 'object') existing.byKey = {};
+      records.forEach(function (r) {
+        if (!r || !r.key) return;
+        if (r.remove) delete existing.byKey[r.key];
+        else existing.byKey[r.key] = r;
+      });
+      existing.updatedAt = new Date().toISOString();
+      localStorage.setItem(storageKey, JSON.stringify(existing));
+    } catch (e) { /* storage disabled / private browsing — skip silently, matches saveState() elsewhere */ }
+  }
+
+  // ═══ SAVE FROM A REPORT REVIEW ═══ the actual entry point for the
+  // Saved & Mistakes save feature — called from the report renderer's own
+  // Save button (a SEPARATE script/IIFE that can't see currentStudent or
+  // recordSavedQuestions directly, same reason window.getPortalStudentKey
+  // exists at all). Updates this device's local cache immediately (so the
+  // toggle feels instant and survives even if the network call below
+  // fails) and best-effort syncs to the backend so it shows up from any
+  // device. `record` is {key, given, correct, testTitle, savedAt} to
+  // save, or {key, remove:true} to un-save.
+  window.saveReportQuestion = function (record) {
+    if (!record || !record.key) return;
+    recordSavedQuestions([record]);
+    try {
+      var studentKey = currentStudent && currentStudent.key;
+      if (!studentKey) return;
+      fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'saveQuestion', key: studentKey, record: record })
+      }).catch(function () {});
+    } catch (e) { /* ignore — local cache above already covers this device */ }
+  };
+
   // Sends this attempt's incorrect-question records and skill breakdown to
-  // the backend (Code.gs' Progress sheet, action 'syncProgress') so "My
-  // Incorrect Questions" / "Practice My Weak Spots" work from ANY device,
+  // the backend (Code.gs' Progress sheet, action 'syncProgress') so
+  // "Saved & Mistakes" / "Practice My Weak Spots" work from ANY device,
   // not just the one that took the test — see fetchPortalProgress() above
   // for the read side. Best-effort: the local cache written by
   // recordIncorrectQuestions()/saveDiagnosticSkillStats() just above
   // already covers this device even if this call fails (offline, Apps
-  // Script hiccup), so there's nothing to retry or surface to the student.
-  // incorrectRecords is already the slim {key, correct, given,
-  // attemptedAt} shape by this point (see the push in finishDiagnostic())
-  // — sent as-is, no further trimming needed here.
+  // Script hiccup), so there's nothing to retry or surface to the
+  // student. incorrectRecords is already in its slim final shape by this
+  // point (see the push in finishDiagnostic()) — sent as-is, no further
+  // trimming needed here. Saved-question syncing is a separate action —
+  // see syncSavedQuestionToBackend() below.
   function syncProgressToBackend(incorrectRecords, skills) {
     try {
       var studentKey = currentStudent && currentStudent.key;
@@ -10212,8 +10494,21 @@
     if (openDropdown && !openDropdown.contains(e.target)) closeDropdown();
   });
 
-  var listEl, poolCountEl, sectionPillsEl, domainPillsEl, skillPillsEl, difficultyPillsEl, testPillsEl, practiceBtnEl, practiceCountEl;
+  var listEl, poolCountEl, sectionPillsEl, domainPillsEl, skillPillsEl, difficultyPillsEl, testPillsEl, practiceBtnEl, practiceCountEl, filtersEl, tabSavedEl, tabMistakesEl, tabMistakesCountEl;
   var initialized = false;
+  // 'saved' | 'mistakes' — which of the two tabs is showing. Saved
+  // Questions has no filter bar (it's just a browse/review list), so
+  // #iq-filters is hidden whenever this isn't 'mistakes'.
+  var activeTab = 'saved';
+  var SECTION_ORDER = ['reading-writing', 'math', 'english', 'act-math', 'reading', 'science'];
+  // A record is a "mistake" if it came from incorrectQuestions (savedCorrect
+  // is only ever set on the saved-but-right branch in loadRecords below) —
+  // regardless of whether the student also starred it, so a saved-and-wrong
+  // question still shows up in the Mistakes Log. isSaved is independent and
+  // drives the Saved Questions tab.
+  function mistakeRecords() { return records.filter(function (r) { return !r.savedCorrect; }); }
+  function savedRecordsList() { return records.filter(function (r) { return r.isSaved; }); }
+  function baseRecords() { return activeTab === 'saved' ? savedRecordsList() : mistakeRecords(); }
 
   // Stored records are slim ({key, correct, given, attemptedAt} — see
   // window.resolveQuestionByKey's comment in the main script for why);
@@ -10234,6 +10529,7 @@
     var readyPromise = window.__practiceTestsReady || Promise.resolve();
     window.fetchPortalProgress(function (progress) {
       var byKey = (progress.incorrectQuestions && typeof progress.incorrectQuestions === 'object') ? progress.incorrectQuestions : {};
+      var savedByKey = (progress.savedQuestions && typeof progress.savedQuestions === 'object') ? progress.savedQuestions : {};
       readyPromise.then(function () {
         records = Object.keys(byKey).map(function (k) {
           var stored = byKey[k];
@@ -10244,9 +10540,31 @@
           resolved.given = stored.given;
           resolved.attemptedAt = stored.attemptedAt;
           resolved.testLabel = testLabelFor(resolved.testTitle);
+          resolved.isSaved = !!savedByKey[k];
           return resolved;
         }).filter(function (r) { return r && r.text; });
-        records.sort(function (a, b) { return (b.attemptedAt || '').localeCompare(a.attemptedAt || ''); }); // most recently missed first
+        // Saved questions the student got RIGHT never show up in
+        // incorrectQuestions at all (nothing to merge onto above), so add
+        // them as their own records here — same resolve path, just
+        // sourced from savedQuestions instead, and correct=true since a
+        // missing/never-set byKey[k] entry means it was never gotten
+        // wrong (or has since been fixed and cleared from that list).
+        var mistakeKeys = {};
+        records.forEach(function (r) { mistakeKeys[r.key] = true; });
+        Object.keys(savedByKey).forEach(function (k) {
+          if (mistakeKeys[k]) return; // already covered above, isSaved already set
+          var stored = savedByKey[k];
+          var resolved = window.resolveQuestionByKey ? window.resolveQuestionByKey(k) : null;
+          if (!resolved || !resolved.text) return;
+          resolved.key = k;
+          resolved.given = stored.given;
+          resolved.attemptedAt = stored.savedAt;
+          resolved.testLabel = testLabelFor(resolved.testTitle);
+          resolved.isSaved = true;
+          resolved.savedCorrect = true; // got it right, saved it anyway — quiz mode below skips grading these as a "miss"
+          records.push(resolved);
+        });
+        records.sort(function (a, b) { return (b.attemptedAt || '').localeCompare(a.attemptedAt || ''); }); // most recently missed/saved first
         callback();
       });
     });
@@ -10257,7 +10575,9 @@
     domainsBySection = {};
     skillsByDomain = {};
     testKeys = [];
-    records.forEach(function (r) {
+    // Filter options only need to cover the Mistakes Log — Saved Questions
+    // has no filter bar (see baseRecords() above).
+    mistakeRecords().forEach(function (r) {
       if (sectionKeys.indexOf(r.sectionKey) === -1) sectionKeys.push(r.sectionKey);
       if (!domainsBySection[r.sectionKey]) domainsBySection[r.sectionKey] = [];
       if (domainsBySection[r.sectionKey].indexOf(r.domain) === -1) domainsBySection[r.sectionKey].push(r.domain);
@@ -10437,7 +10757,8 @@
     var passageHtml = split ? '<div class="pb-passage">' + split.passage + '</div>' : '';
     var questionText = split ? split.question : r.text;
     var metaBits = [escHtml(r.skill), difficultyLabel(r.difficulty), escHtml(r.testTitle)];
-    var meta = '<div class="pb-q-meta"><span>' + metaBits.join(' · ') + '</span></div>';
+    var savedBadge = r.isSaved ? '<span class="iq-saved-badge">&#11088; Saved</span>' : '';
+    var meta = '<div class="pb-q-meta"><span>' + metaBits.join(' · ') + '</span>' + savedBadge + '</div>';
     var state = quizState[r.key];
 
     var body = '';
@@ -10468,9 +10789,10 @@
     if (state && r.explanation) body += '<div class="pb-explain"><div class="pb-explain-hed">Full Explanation</div>' + r.explanation + '</div>';
 
     var missed = dateLabel(r.attemptedAt);
+    var dateLine = missed ? ('<div class="iq-missed-on">' + (r.savedCorrect ? 'Saved on ' : 'Missed on ') + missed + '</div>') : '';
     return '<div class="iq-item">' + meta + passageHtml +
       '<div class="pb-q-card"><div class="pb-q-text">' + questionText + '</div>' + body +
-      (missed ? '<div class="iq-missed-on">Missed on ' + missed + '</div>' : '') +
+      dateLine +
       '</div></div>';
   }
 
@@ -10516,7 +10838,9 @@
   }
 
   function currentFiltered() {
-    return records.filter(function (r) {
+    var base = baseRecords();
+    if (activeTab !== 'mistakes') return base; // Saved Questions ignores the filter bar entirely — it's hidden on this tab
+    return base.filter(function (r) {
       return selSections.indexOf(r.sectionKey) !== -1 &&
         selDomains.indexOf(r.domain) !== -1 &&
         selSkills.indexOf(r.skill) !== -1 &&
@@ -10530,11 +10854,16 @@
     practiceBtnEl.disabled = n === 0;
   }
 
+  var BOOKMARK_SVG = '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 3.5h12a1 1 0 0 1 1 1V21l-7-4.2L5 21V4.5a1 1 0 0 1 1-1z"/></svg>';
+
   function renderList() {
-    if (!records.length) {
+    var base = baseRecords();
+    if (!base.length) {
       poolCountEl.textContent = '';
       setPracticeCount(0);
-      listEl.innerHTML = '<div class="pb-empty-note">Nothing here yet — once you finish a diagnostic or practice test, anything you miss will show up here, organized by section, domain, skill, and difficulty. (Getting a question right on a later attempt clears it from this list, too — this always reflects what you currently have wrong, not your full history.)</div>';
+      listEl.innerHTML = activeTab === 'saved'
+        ? '<div class="pb-empty-saved">' + BOOKMARK_SVG + '<div class="pb-empty-title">No saved questions yet</div><div class="pb-empty-sub">You can save questions when reviewing your score reports and study off question banks.</div></div>'
+        : '<div class="pb-empty-note">Nothing here yet — once you finish a diagnostic or practice test, anything you miss will show up here, organized by section, domain, skill, and difficulty. (Getting a question right on a later attempt clears it from this list, too — this always reflects what you currently have wrong, not your full history.)</div>';
       return;
     }
     var filtered = currentFiltered();
@@ -10545,7 +10874,7 @@
       return;
     }
     poolCountEl.textContent = filtered.length + ' question' + (filtered.length === 1 ? '' : 's') +
-      (filtered.length === records.length ? '' : (' shown (of ' + records.length + ' total missed)'));
+      (filtered.length === base.length ? '' : (' shown (of ' + base.length + ' total ' + (activeTab === 'saved' ? 'saved' : 'missed') + ')'));
 
     var bySection = {};
     filtered.forEach(function (r) {
@@ -10554,9 +10883,16 @@
       bySection[r.sectionKey][r.domain].push(r);
     });
 
+    // Section order follows SECTION_ORDER (R&W before Math, etc.) rather
+    // than the mistakes-only `sectionKeys` taxonomy, so Saved Questions
+    // still groups correctly even for a section with no actual mistakes.
     var order = { easy: 0, medium: 1, hard: 2 };
     var html = '';
-    sectionKeys.filter(function (s) { return bySection[s]; }).forEach(function (secKey) {
+    Object.keys(bySection).sort(function (a, b) {
+      var ia = SECTION_ORDER.indexOf(a); if (ia === -1) ia = 99;
+      var ib = SECTION_ORDER.indexOf(b); if (ib === -1) ib = 99;
+      return ia - ib || a.localeCompare(b);
+    }).forEach(function (secKey) {
       html += '<div class="iq-section-hed">' + escHtml(sectionLabelFor(secKey)) + '</div>';
       Object.keys(bySection[secKey]).sort().forEach(function (domain) {
         html += '<div class="iq-domain-hed">' + escHtml(domain) + '</div>';
@@ -10766,6 +11102,15 @@
   // domain-level granularity, not a single skill — see
   // goToIncorrectQuestionsForDomain()). Whichever level isn't preset is
   // left at its normal "all selected" default.
+  function setActiveTab(tab) {
+    if (activeTab === tab) return;
+    activeTab = tab;
+    tabSavedEl.classList.toggle('active', tab === 'saved');
+    tabMistakesEl.classList.toggle('active', tab === 'mistakes');
+    filtersEl.style.display = tab === 'mistakes' ? '' : 'none';
+    renderList();
+  }
+
   window.iqModuleInit = function (preset) {
     if (!initialized) {
       initialized = true;
@@ -10778,18 +11123,33 @@
       testPillsEl = document.getElementById('iq-test-pills');
       practiceBtnEl = document.getElementById('iq-practice-btn');
       practiceCountEl = document.getElementById('iq-practice-count');
+      filtersEl = document.getElementById('iq-filters');
+      tabSavedEl = document.getElementById('iq-tab-saved');
+      tabMistakesEl = document.getElementById('iq-tab-mistakes');
+      tabMistakesCountEl = document.getElementById('iq-tab-mistakes-count');
       practiceBtnEl.addEventListener('click', function () {
         if (practiceBtnEl.disabled) return;
         startPracticeRunner();
       });
+      tabSavedEl.addEventListener('click', function () { setActiveTab('saved'); });
+      tabMistakesEl.addEventListener('click', function () { setActiveTab('mistakes'); });
       wireQuizInteractions();
     }
+
+    // Reset to Saved Questions every time the screen is opened fresh,
+    // unless a domain/skill preset (from Home's "Where Points Are Going"
+    // or Score Progress) explicitly wants the Mistakes Log filtered.
+    activeTab = (preset && (preset.domain || preset.skill)) ? 'mistakes' : 'saved';
+    tabSavedEl.classList.toggle('active', activeTab === 'saved');
+    tabMistakesEl.classList.toggle('active', activeTab === 'mistakes');
+    filtersEl.style.display = activeTab === 'mistakes' ? '' : 'none';
 
     listEl.innerHTML = '<div class="pb-empty-note">Loading your latest results…</div>';
     poolCountEl.textContent = '';
     setPracticeCount(0);
     loadRecords(function () {
       rebuildTaxonomy();
+      tabMistakesCountEl.textContent = mistakeRecords().length;
       // Default to everything selected so the list is populated
       // immediately on open — this is a review tool, not a "build a
       // session" setup screen like Question Practice, so there's no
@@ -11118,7 +11478,7 @@ window.renderNativeReport = function (data) {
   // View Results on a practice test, then a Score Progress point on Home,
   // or two Score Progress points back to back) piled the new tiles/cards
   // on top of the previous report's instead of replacing them.
-  ['score-tiles', 'score-bridge', 'section-breakdown', 'topics-costing',
+  ['score-tiles', 'raw-stats', 'score-bridge', 'bridge-skills', 'section-breakdown',
    'accuracy-by-topic', 'confidence-quadrant', 'behavior-section', 'raw-tables'
   ].forEach(function (id) {
     var el = document.getElementById(id);
@@ -11859,13 +12219,22 @@ window.renderNativeReport = function (data) {
       // (text, choices, correct answer, and what the student picked), not
       // just the answer letter. givenIdx is the chosen choice index for
       // multiple-choice (null if blank), used to mark the picked option.
+      // Same key scheme index.html's live exam uses for incorrectRecords
+      // (testTag|sectionKey|module|moduleIndex) — resolvable later via
+      // window.resolveQuestionByKey(), which is what lets the report's
+      // own Save button (see renderQuestionDetail()) write something the
+      // Saved & Mistakes screen can actually read back out.
+      var rowModuleName = i < moduleSplit ? 'module1' : ('module2' + (sec.v || 'Easier'));
+      var rowModuleIdx = i < moduleSplit ? i : (i - moduleSplit);
+      var rowTestTag = data.pt ? data.pt : ('diag-' + data.t);
       rows.push({ n: i + 1, dom: dom, sk: sk, given: gTxt, ok: ok, marked: !!wasMarked,
         skipped: (given === null || given === undefined),
         q: q, givenIdx: (q.type === 'mc' && given !== null && given !== undefined) ? given : null,
         givenText: (given && typeof given === 'object') ? esc(given.raw || String(given.value)) : null,
         timeMs: qTimeMs, firstVisitMs: qFirstVisitMs, moduleIndex: moduleIndex,
         firstVisitedAt: (sec.fv && typeof sec.fv[i] === 'number' && modStartAt !== null) ? (sec.fv[i] - modStartAt) : null,
-        lastViewedAt: (sec.lv && typeof sec.lv[i] === 'number' && modStartAt !== null) ? (sec.lv[i] - modStartAt) : null });
+        lastViewedAt: (sec.lv && typeof sec.lv[i] === 'number' && modStartAt !== null) ? (sec.lv[i] - modStartAt) : null,
+        key: rowTestTag + '|' + sec.k + '|' + rowModuleName + '|' + rowModuleIdx });
     });
     sections.push({
       key: sec.k, label: sectionLabel(sec.k, bank), c: c, t: qs.length, rows: rows, domains: secDomains,
@@ -11929,8 +12298,11 @@ window.renderNativeReport = function (data) {
     var m2Rows = sec.rows.filter(function (r) { return r.moduleIndex === 1; });
     var m1 = buildSectionStatsFromRows(m1Rows);
     var m2 = buildSectionStatsFromRows(m2Rows);
-    m1.key = sec.key; m1.label = sec.label + ' — Module 1'; m1.variant = null; m1.isModule = true;
-    m2.key = sec.key; m2.label = sec.label + ' — Module 2' + (sec.variant ? ' (' + sec.variant + ')' : ''); m2.variant = sec.variant; m2.isModule = true;
+    // Abbreviated to "R&W" for the module tile headers specifically (not
+    // anywhere else this label is used) — matches how tight the tile is.
+    var tileSubject = /^reading\s*(&|and)\s*writing$/i.test(sec.label) ? 'R&W' : sec.label;
+    m1.key = sec.key; m1.label = tileSubject + ' – Module 1'; m1.variant = null; m1.isModule = true;
+    m2.key = sec.key; m2.label = tileSubject + ' – Module 2' + (sec.variant ? ' (' + sec.variant + ')' : ''); m2.variant = sec.variant; m2.isModule = true;
     // The two modules split the section's allotted time evenly (see
     // banks.js's SECTION_MODULE_TIME_LIMITS comment — the stored figure is
     // already per-module), so halving the whole-section total gives each
@@ -11962,7 +12334,6 @@ window.renderNativeReport = function (data) {
   var hedTitleEl = document.getElementById('pt-report-hed-title');
   if (hedTitleEl) {
     hedTitleEl.textContent = data.ptTitle || (data.t + ' Diagnostic');
-    document.getElementById('pt-report-hed-sub').textContent = data.t === 'ACT' ? 'All sections' : 'All modules';
     var longDateBasis = attemptDate || (data.dt ? new Date(data.dt + 'T12:00:00') : null);
     var longDate = (longDateBasis && !isNaN(longDateBasis.getTime()))
       ? longDateBasis.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
@@ -11992,21 +12363,20 @@ window.renderNativeReport = function (data) {
      color, without drawing a circle to do it. */
   function scoreTile(label, c, t, scaledScore, big) {
     var p = t ? c / t : 0;
-    var band = p < 0.5 ? 'var(--red)' : (p >= 0.75 ? 'var(--green)' : 'var(--gold)');
     var tile = document.createElement('div');
     tile.className = 'score-tile' + (big ? ' big' : '');
-    tile.style.borderTopColor = band;
-    var num = document.createElement('div');
-    num.className = 'tile-score ' + (big ? 'big' : 'small');
-    num.textContent = (scaledScore !== null && scaledScore !== undefined) ? scaledScore : (Math.round(p * 100) + '%');
-    tile.appendChild(num);
-    // The c/t (%) fraction that used to sit here is now shown once, plainly,
-    // in the Correct/Wrong/Accuracy/Unattempted strip right below this
-    // card — no need to repeat "67%" a second time under every tile too.
+    // Label above the number (small caps caption, then the number) — one
+    // connected score card, not a stack of individually-bordered tiles, so
+    // the visual hierarchy comes from type size/weight alone, no per-tile
+    // accent border.
     var lb = document.createElement('div');
     lb.className = 'tile-lab' + (big ? ' big' : '');
     lb.textContent = label;
     tile.appendChild(lb);
+    var num = document.createElement('div');
+    num.className = 'tile-score ' + (big ? 'big' : 'small');
+    num.textContent = (scaledScore !== null && scaledScore !== undefined) ? scaledScore : (Math.round(p * 100) + '%');
+    tile.appendChild(num);
     return tile;
   }
 
@@ -12090,8 +12460,8 @@ window.renderNativeReport = function (data) {
     var mathScaled = satSectionScore(mathSec, MATH_CURVE);
     var composite = (rwScaled !== null && mathScaled !== null) ? rwScaled + mathScaled : null;
     tilesEl.appendChild(scoreTile('Composite (400–1600)', totalC, totalQ, composite, true));
-    if (rw) tilesEl.appendChild(scoreTile('Reading & Writing', rw.c, rw.t, rwScaled, false));
-    if (mathSec) tilesEl.appendChild(scoreTile('Math', mathSec.c, mathSec.t, mathScaled, false));
+    if (rw) tilesEl.appendChild(scoreTile('Reading & Writing (200–800)', rw.c, rw.t, rwScaled, false));
+    if (mathSec) tilesEl.appendChild(scoreTile('Math (200–800)', mathSec.c, mathSec.t, mathScaled, false));
     var routedEasier = [rw, mathSec].some(function (s) { return s && s.variant === 'Easier'; });
     scoreCaption.textContent = 'The fraction under each score is raw percent correct on this diagnostic. The score itself reads that off College Board\'s own published raw-to-scaled conversion table (Reading & Writing and Math have separate tables), then adjusts for which module the misses fell in — because the SAT is adaptive, missing questions in Module 1 costs more than missing the same number in Module 2' + (routedEasier ? ', and a weaker Module 1 also routes that section to the easier Module 2' : '') + '; the real digital SAT curve varies by test, so this is a close estimate, not the exact official scoring.';
   } else if (data.t === 'ACT') {
@@ -12140,14 +12510,24 @@ window.renderNativeReport = function (data) {
     var attempted = totalQ - skipped;
     var wrongCount = totalQ - totalC - skipped;
     var accuracyPct = attempted ? Math.round(totalC / attempted * 100) : 0;
+    // Each stat gets its own small icon (check / x / target / dashed
+    // circle) — a bare number strip read as disconnected boxes with
+    // nothing to anchor the eye; a glyph per stat is what makes this scan
+    // as one connected summary instead of four separate tiles.
+    var ICONS = {
+      correct: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5L16 9"/></svg>',
+      wrong: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/></svg>',
+      accuracy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.1" fill="currentColor" stroke="none"/></svg>',
+      unattempted: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="3 3.5"><circle cx="12" cy="12" r="9"/></svg>'
+    };
     var stats = [
-      { lab: 'Correct', val: totalC + '/' + totalQ, cls: '' },
-      { lab: 'Wrong', val: String(wrongCount), cls: wrongCount > 0 ? 'bad' : '' },
-      { lab: 'Accuracy', val: accuracyPct + '%', cls: accuracyPct >= 75 ? 'ok' : (accuracyPct < 50 ? 'bad' : '') },
-      { lab: 'Unattempted', val: String(skipped), cls: skipped > 0 ? 'bad' : '' }
+      { lab: 'Correct', val: totalC + '/' + totalQ, cls: '', icon: ICONS.correct },
+      { lab: 'Wrong', val: String(wrongCount), cls: wrongCount > 0 ? 'bad' : '', icon: ICONS.wrong },
+      { lab: 'Accuracy', val: accuracyPct + '%', cls: accuracyPct >= 75 ? 'ok' : (accuracyPct < 50 ? 'bad' : ''), icon: ICONS.accuracy },
+      { lab: 'Unattempted', val: String(skipped), cls: skipped > 0 ? 'bad' : '', icon: ICONS.unattempted }
     ];
     wrap.innerHTML = stats.map(function (s) {
-      return '<div class="raw-stat ' + s.cls + '"><div class="raw-stat-lab">' + s.lab + '</div><div class="raw-stat-num">' + s.val + '</div></div>';
+      return '<div class="raw-stat ' + s.cls + '"><span class="raw-stat-icon">' + s.icon + '</span><div class="raw-stat-text"><div class="raw-stat-lab">' + s.lab + '</div><div class="raw-stat-num">' + s.val + '</div></div></div>';
     }).join('');
   })();
 
@@ -12452,6 +12832,34 @@ window.renderNativeReport = function (data) {
       });
     }
 
+    // Flat, square-cornered bars are what read as "dated" on a chart like
+    // this — every modern bar/waterfall chart rounds the leading edge.
+    // Only the top two corners round (the bars sit flush on a shared
+    // baseline/each other), so this stays a waterfall, not a set of
+    // floating pills.
+    function roundTopRect(ctx, x, y, wid, hgt, r) {
+      if (hgt <= 0) return;
+      r = Math.max(0, Math.min(r, wid / 2, hgt));
+      ctx.beginPath();
+      ctx.moveTo(x, y + hgt);
+      ctx.lineTo(x, y + r);
+      ctx.arcTo(x, y, x + r, y, r);
+      ctx.lineTo(x + wid - r, y);
+      ctx.arcTo(x + wid, y, x + wid, y + r, r);
+      ctx.lineTo(x + wid, y + hgt);
+      ctx.closePath();
+      ctx.fill();
+    }
+    function roundRect(ctx, x, y, wid, hgt, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + wid, y, x + wid, y + hgt, r);
+      ctx.arcTo(x + wid, y + hgt, x, y + hgt, r);
+      ctx.arcTo(x, y + hgt, x, y, r);
+      ctx.arcTo(x, y, x + wid, y, r);
+      ctx.closePath();
+    }
+
     function drawBridge(items, startVal, endVal, targetVal, onDragEnd) {
       var bars = [{ label: 'Current', val: startVal, isEndpoint: true }]
         .concat(items.map(function (e) { return { label: e.label, points: e.points, tag: e.tag }; }))
@@ -12463,7 +12871,7 @@ window.renderNativeReport = function (data) {
       // be — capped at 680px, the widest a chart can run and still sit
       // inside the printed page's margins (8.5in page minus 0.65in side
       // padding each side, at 96dpi).
-      var w = Math.min(680, Math.max(620, 52 * bars.length)), h = 230, padL = 40, padR = 62, padT = 16, padB = 46;
+      var w = Math.min(680, Math.max(620, 52 * bars.length)), h = 230, padL = 40, padR = 78, padT = 16, padB = 46;
       var plotW = w - padL - padR, plotH = h - padT - padB;
       var n = bars.length;
       var barW = plotW / n * 0.62;
@@ -12494,6 +12902,16 @@ window.renderNativeReport = function (data) {
         var axisMin = minVal - headroom, axisMax = maxVal + headroom;
         function y(v) { return padT + plotH - ((v - axisMin) / (axisMax - axisMin)) * plotH; }
 
+        // Subtle horizontal gridlines — a plain baseline read as dated;
+        // four faint reference lines is the same trick every modern chart
+        // library (Chart.js, Recharts, etc.) uses to make bar heights
+        // scannable at a glance without adding any visual noise.
+        ctx.strokeStyle = 'rgba(17,17,17,0.055)';
+        ctx.lineWidth = 1;
+        for (var gi = 1; gi <= 4; gi++) {
+          var gy = padT + (plotH / 4) * gi;
+          ctx.beginPath(); ctx.moveTo(padL, gy); ctx.lineTo(padL + plotW, gy); ctx.stroke();
+        }
         // baseline
         ctx.strokeStyle = 'rgba(17,17,17,0.15)';
         ctx.lineWidth = 1;
@@ -12508,7 +12926,7 @@ window.renderNativeReport = function (data) {
             var topY = y(b.val);
             var baseY = padT + plotH;
             ctx.fillStyle = (b.label === 'Max recoverable') ? '#5E8B6F' : '#243447';
-            ctx.fillRect(bx, topY, barW, baseY - topY);
+            roundTopRect(ctx, bx, topY, barW, baseY - topY, 4);
             ctx.fillStyle = '#1a1a1a';
             ctx.font = '700 15px Poppins, sans-serif';
             ctx.textAlign = 'center';
@@ -12519,8 +12937,15 @@ window.renderNativeReport = function (data) {
             var toVal = running + b.points;
             var toY = y(toVal);
             var top = Math.min(fromY, toY), bot = Math.max(fromY, toY);
+            var segH = Math.max(bot - top, 2);
             ctx.fillStyle = colors[(i - 1) % colors.length];
-            ctx.fillRect(bx, top, barW, Math.max(bot - top, 2));
+            // These segments float mid-chart — neither end sits on the
+            // baseline the way Current/Max recoverable do — so unlike
+            // those two, BOTH ends round here, not just the top; a flat
+            // bottom edge on a bar that isn't resting on anything read as
+            // an unfinished/disconnected shape.
+            roundRect(ctx, bx, top, barW, segH, Math.min(4, segH / 2));
+            ctx.fill();
             ctx.fillStyle = '#1a1a1a';
             ctx.font = '600 11px Poppins, sans-serif';
             ctx.textAlign = 'center';
@@ -12555,14 +12980,26 @@ window.renderNativeReport = function (data) {
         ctx.beginPath(); ctx.arc(padL + plotW, ty, 3.5, 0, Math.PI * 2);
         ctx.fillStyle = '#B0271C';
         ctx.fill();
+        // Solid rounded pill instead of bare text — reads as a proper chart
+        // annotation (the kind Chart.js/Recharts plugins draw) rather than
+        // a stray label floating off the plot edge.
         ctx.font = '700 9.5px Poppins, sans-serif';
-        ctx.textAlign = 'left';
-        // Clamp the label's vertical position to stay inside the canvas even
+        var targetLabel = 'Target ' + curTargetVal;
+        var labelW = ctx.measureText(targetLabel).width;
+        var pillPadX = 7, pillH = 16, pillW = labelW + pillPadX * 2;
+        // Clamp the pill's vertical position to stay inside the canvas even
         // when the target line itself sits right at the top or bottom edge
         // of the plot area — the line stays at its true position, only the
-        // text nudges to remain fully readable.
-        var tLabelY = Math.max(padT + 8, Math.min(padT + plotH - 4, ty + 3));
-        ctx.fillText('Target ' + curTargetVal, padL + plotW + 8, tLabelY);
+        // pill nudges to remain fully visible.
+        var pillY = Math.max(padT, Math.min(padT + plotH - pillH, ty - pillH / 2));
+        ctx.fillStyle = '#B0271C';
+        roundRect(ctx, padL + plotW + 8, pillY, pillW, pillH, 8);
+        ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(targetLabel, padL + plotW + 8 + pillPadX, pillY + pillH / 2 + 0.5);
+        ctx.textBaseline = 'alphabetic';
 
         return { axisMin: axisMin, axisMax: axisMax };
       }
@@ -12703,43 +13140,48 @@ window.renderNativeReport = function (data) {
     return wrap;
   }
 
+  // Condensed module snapshot tiles — module name, a correct/incorrect/
+  // omitted count line, a plain color grid (no question numbers — this is
+  // a scan-at-a-glance map, not a second place to read question content;
+  // clicking a square still opens that question in the shared modal
+  // below), and the average time on correct vs. incorrect questions. The
+  // richer per-module detail that used to live here (time-by-difficulty,
+  // the distractor-pattern flag, by-content-area bars) moved to the same
+  // altitude it's actually useful at instead: content-area accuracy now
+  // lives once per SUBJECT in Skill Breakdown below rather than once per
+  // MODULE here, and the rest is still recoverable from the full
+  // question-by-question detail table at the bottom of this report.
+  function formatMinSec(ms) {
+    var totalSec = Math.round((ms || 0) / 1000);
+    var m = Math.floor(totalSec / 60), s = totalSec % 60;
+    return m + ':' + (s < 10 ? '0' : '') + s;
+  }
   var sbEl = document.getElementById('section-breakdown');
   var cardsWrap = document.createElement('div');
   cardsWrap.className = 'section-cards';
   displaySections.forEach(function (s5) {
     var card = document.createElement('div');
     card.className = 'section-card';
-    var pctS = s5.t ? Math.round(s5.c / s5.t * 100) : 0;
-    var incorrectN = s5.t - s5.c;
     var head = document.createElement('div');
     head.className = 'sc-hed';
-    head.innerHTML = '<span class="sc-title">' + s5.label + '</span><span class="sc-score">' + s5.c + '/' + s5.t + ' (' + pctS + '%)</span>';
+    head.innerHTML = '<span class="sc-title">' + s5.label + '</span>';
     card.appendChild(head);
-    var incEl = document.createElement('div');
-    incEl.className = 'sc-incorrect';
-    incEl.textContent = incorrectN + ' incorrect';
-    card.appendChild(incEl);
 
-    // Per-question grid — one small square per question, numbered, colored
-    // by outcome (right/wrong/unattempted) — a visual scan of WHERE misses
-    // clustered in the section before reading a single number below. Reuses
-    // the diagnostic's own Check-Your-Work grid idiom (see .dx-qnum in
-    // index.html), just recolored for a third state.
+    var omitted = s5.rows.filter(function (r) { return r.skipped; }).length;
+    var incorrectN = s5.t - s5.c - omitted;
+    var countsEl = document.createElement('div');
+    countsEl.className = 'sc-counts';
+    countsEl.innerHTML =
+      '<span class="sc-count ok">' + s5.c + ' <span>correct</span></span>' +
+      '<span class="sc-count bad">' + incorrectN + ' <span>incorrect</span></span>' +
+      '<span class="sc-count">' + omitted + ' <span>omitted</span></span>';
+    card.appendChild(countsEl);
+
     var gridEl = document.createElement('div');
     gridEl.className = 'sc-qgrid';
     s5.rows.forEach(function (r) {
       var cell = document.createElement('div');
       cell.className = 'sc-qgrid-cell ' + (r.skipped ? 'skip' : (r.ok ? 'ok' : 'bad'));
-      var num = document.createElement('span');
-      num.textContent = r.n;
-      cell.appendChild(num);
-      // Custom tooltip (not the native `title` attribute — that can't be
-      // styled and looks out of place on a branded page) — just the
-      // question number and outcome, no text preview (removed on
-      // purpose: this grid is meant to be scanned as a quick right/wrong/
-      // unattempted map, not a second place to read question content —
-      // clicking a tile already opens the full question in the shared
-      // modal below via renderQuestionDetail).
       var tip = document.createElement('div');
       tip.className = 'sc-qgrid-tooltip';
       var statusWord = r.skipped ? 'Unattempted' : (r.ok ? 'Correct' : 'Incorrect');
@@ -12751,116 +13193,18 @@ window.renderNativeReport = function (data) {
     });
     card.appendChild(gridEl);
 
-    // Time On Section/Module / Time On Correct / Time On Incorrect. Only
-    // shown when there's actually timing data to show (older saved
-    // reports, or a section with zero recorded time, just skip this row
-    // rather than displaying an all-zero line). Each module's own time is
-    // independent of the other's (see the per-module moduleStartAt rebase
-    // above) — Module 2's clock isn't Module 1's carried forward.
+    // Avg time on a correct question vs. an incorrect one — a real signal
+    // (rushing to a wrong answer vs. working carefully to a right one),
+    // not the same "avg per question" figure restated.
+    var avgCorrectMs = s5.c ? (s5.timeCorrect / s5.c) : 0;
+    var avgIncorrectMs = incorrectN ? (s5.timeIncorrect / incorrectN) : 0;
     if (s5.timeTotal > 0) {
-      var timeEl = document.createElement('div');
-      timeEl.className = 'sc-time';
-      var timeHtml =
-        '<span class="sc-time-item"><span class="sc-time-label">Time On ' + (s5.isModule ? 'Module' : 'Section') + '</span>' + formatDuration(s5.timeTotal) + '</span>' +
-        '<span class="sc-time-item ok"><span class="sc-time-label">Time On Correct</span>' + formatDuration(s5.timeCorrect) + '</span>' +
-        '<span class="sc-time-item bad"><span class="sc-time-label">Time On Incorrect</span>' + formatDuration(s5.timeIncorrect) + '</span>';
-      // Unused time — only shown when this section/module actually has an
-      // allotted-minutes figure to compare against (see timeAllottedMin,
-      // sourced from index.html's tl payload field; absent on reports saved
-      // before that field existed). A negative leftover (ran past the
-      // nominal limit — possible with an extended-time accommodation
-      // applied mid-attempt, or clock drift) is floored at 0 rather than
-      // shown as a confusing negative "unused" figure.
-      if (s5.timeAllottedMin > 0) {
-        var allottedMs2 = s5.timeAllottedMin * 60000;
-        var leftoverMs2 = Math.max(0, allottedMs2 - s5.timeTotal);
-        var leftoverShare2 = leftoverMs2 / allottedMs2;
-        var unusedCls = leftoverShare2 >= 0.15 ? 'bad' : '';
-        timeHtml += '<span class="sc-time-item ' + unusedCls + '"><span class="sc-time-label">Unused</span>' + formatDuration(leftoverMs2) + ' of ' + Math.round(s5.timeAllottedMin) + 'm</span>';
-      }
-      timeEl.innerHTML = timeHtml;
-      card.appendChild(timeEl);
+      var metaEl = document.createElement('div');
+      metaEl.className = 'sc-meta';
+      metaEl.innerHTML = 'Avg <span class="ok">' + formatMinSec(avgCorrectMs) + '</span> / ' + formatMinSec(avgIncorrectMs);
+      card.appendChild(metaEl);
     }
 
-    // Time by difficulty — a segmented bar showing how the clock actually
-    // split across easy/medium/hard questions. Not a new measurement: this
-    // is timeMs (already tracked per question) grouped by q.difficulty
-    // (already used for the SAT module-weighted scoring model above),
-    // just never surfaced as its own view before. A student spending
-    // disproportionate time on "easy"-tagged questions is a different,
-    // more specific coaching conversation than "ran long on this section."
-    (function renderDifficultyTime() {
-      var byDiff = { easy: 0, medium: 0, hard: 0 };
-      s5.rows.forEach(function (r) {
-        var d = r.q && r.q.difficulty;
-        if (byDiff.hasOwnProperty(d)) byDiff[d] += (r.timeMs || 0);
-      });
-      var totalDiffMs = byDiff.easy + byDiff.medium + byDiff.hard;
-      if (totalDiffMs <= 0) return;
-      var diffWrap = document.createElement('div');
-      diffWrap.className = 'sc-difftime';
-      var track = document.createElement('div');
-      track.className = 'sc-difftime-track';
-      ['easy', 'medium', 'hard'].forEach(function (d) {
-        if (byDiff[d] <= 0) return;
-        var seg = document.createElement('div');
-        seg.className = 'sc-difftime-seg ' + d;
-        seg.style.width = (byDiff[d] / totalDiffMs * 100) + '%';
-        track.appendChild(seg);
-      });
-      diffWrap.appendChild(track);
-      var legend = document.createElement('div');
-      legend.className = 'sc-difftime-legend';
-      legend.innerHTML = ['easy', 'medium', 'hard'].map(function (d) {
-        return '<span><span class="sc-difftime-dot ' + d + '"></span>' + d.charAt(0).toUpperCase() + d.slice(1) + ' ' + formatDuration(byDiff[d]) + '</span>';
-      }).join('');
-      diffWrap.appendChild(legend);
-      card.appendChild(diffWrap);
-    })();
-
-    // Distractor-pattern flag: with only 3-4 wrong-answer letters to choose
-    // from, a single letter landing on "50% of missed questions" happens
-    // by pure chance most of the time at small sample sizes (with 3 wrong
-    // choices and 3 missed questions, random guessing alone clears a 50%
-    // threshold on well over half of diagnostics). The bar is set high
-    // enough — 6+ missed MC and a clear majority — that this should only
-    // fire when a letter is landing meaningfully more than chance would
-    // predict (~33%), not on every report.
-    //
-    // This is a directly counted fact (how many missed questions landed on
-    // the same letter), not a modeled estimate, so it belongs on the same
-    // "raw" footing as the skill bars below — but it's a different KIND of
-    // fact (answering behavior, not a content gap), so it gets its own
-    // flagged callout up top rather than blending into the missed-skill
-    // text underneath, where it used to be easy to miss entirely.
-    var distEntries = Object.keys(s5.distractors || {}).map(function (l) { return { letter: l, n: s5.distractors[l] }; }).sort(function (a, b) { return b.n - a.n; });
-    if (s5.missedMc >= 6 && distEntries.length && distEntries[0].n / s5.missedMc >= 0.6) {
-      var distNote = document.createElement('div');
-      distNote.className = 'sc-flag';
-      distNote.innerHTML = '<span class="sc-flag-mark">!</span><span><strong>Possible pattern:</strong> picked (' + distEntries[0].letter + ') on ' + distEntries[0].n + ' of ' + s5.missedMc + ' missed multiple-choice questions here. Worth a quick check together; it may just be this test\'s content rather than a trap-answer habit.</span>';
-      card.appendChild(distNote);
-    }
-
-    // Two clearly-labeled blocks so the reader knows what each bar means:
-    // Per-module "Skills to focus on" bars used to live here — cut in
-    // favor of the whole-test "Topics costing the most points" list in
-    // the Skill Breakdown section further down (see renderSkillBreakdown),
-    // which is the same missed-skill data at the altitude that's actually
-    // useful (once, ranked, whole-test) instead of once per module. "By
-    // content area" stays: it shows every domain (not just misses), which
-    // the whole-test "Accuracy by topic" view doesn't fully replace since
-    // that one's per-subject rather than per-module.
-    var domLabel = document.createElement('div');
-    domLabel.className = 'sc-grouplabel';
-    domLabel.textContent = 'By content area (correct / attempted)';
-    card.appendChild(domLabel);
-    var domEntries = Object.keys(s5.domains).map(function (d) {
-      var v = s5.domains[d];
-      return { name: d, c: v.c, t: v.t, pct: v.t ? v.c / v.t : 0 };
-    }).sort(function (a, b) { return a.pct - b.pct; });
-    domEntries.forEach(function (de) {
-      card.appendChild(barRow(de.name, de.c, de.t, de.pct < 0.5 ? 'weak' : (de.pct >= 0.75 ? 'strong' : '')));
-    });
     cardsWrap.appendChild(card);
   });
   sbEl.appendChild(cardsWrap);
@@ -13100,7 +13444,57 @@ window.renderNativeReport = function (data) {
         ' &nbsp;·&nbsp; Last viewed: ' + formatElapsedIntoSection(r.lastViewedAt);
       box.appendChild(timing);
     }
+
+    // Save to "Saved & Mistakes" — works on ANY question here, right or
+    // wrong (that's the whole point: a mistake already lands in Saved &
+    // Mistakes on its own, but a student reviewing this report may want
+    // to bank a question they got right too, e.g. one they guessed on or
+    // want more reps of). See window.saveReportQuestion() in the main
+    // script for the actual read/write; this button just toggles it.
+    if (r.key) {
+      var saveRow = document.createElement('div');
+      saveRow.className = 'q-save-row';
+      var saveBtn = document.createElement('button');
+      saveBtn.type = 'button';
+      saveBtn.className = 'q-save-btn';
+      function paintSaveBtn() {
+        var isSaved = isReportQuestionSaved(r.key);
+        saveBtn.classList.toggle('on', isSaved);
+        saveBtn.innerHTML = isSaved ? '&#11088; Saved to Saved &amp; Mistakes' : '&#11088; Save this question';
+      }
+      paintSaveBtn();
+      saveBtn.addEventListener('click', function () {
+        var nowSaved = !isReportQuestionSaved(r.key);
+        if (window.saveReportQuestion) {
+          window.saveReportQuestion(nowSaved
+            ? { key: r.key, given: r.givenIdx, correct: r.ok, testTitle: (data.ptTitle || (data.t + ' Diagnostic')), savedAt: new Date().toISOString() }
+            : { key: r.key, remove: true });
+        }
+        paintSaveBtn();
+      });
+      saveRow.appendChild(saveBtn);
+      box.appendChild(saveRow);
+    }
     return box;
+  }
+
+  // Synchronous local-cache check so the Save button's on/off state is
+  // known immediately on open (no fetch/flicker) — the same localStorage
+  // shape recordSavedQuestions()/saveReportQuestion() write to, read
+  // straight here since the report renderer is a separate script/IIFE
+  // from where those functions live (same reason window.
+  // getPortalStudentKey exists at all). A stale read (another device
+  // saved it since) just means this button starts unchecked until
+  // clicked — no worse than any other local-cache fallback on this page.
+  function isReportQuestionSaved(key) {
+    try {
+      var studentKey = window.getPortalStudentKey ? window.getPortalStudentKey() : null;
+      if (!studentKey) return false;
+      var raw = localStorage.getItem('moretti_saved_qs_' + studentKey);
+      if (!raw) return false;
+      var parsed = JSON.parse(raw);
+      return !!(parsed && parsed.byKey && parsed.byKey[key]);
+    } catch (e) { return false; }
   }
 
   var twrap = document.getElementById('raw-tables');
@@ -13173,118 +13567,103 @@ window.renderNativeReport = function (data) {
     if (sections.length < 2) return;
     document.getElementById('skillbreak-hed').style.display = '';
 
-    // Topics costing the most points — same skill-miss data the bridge
-    // chart above is built from, ranked and shown as a scannable list
-    // instead of a waterfall. t>=2 mirrors the same reliability bar the
-    // takeaways section already applies before naming a skill by name.
-    var topicsWrap = document.getElementById('topics-costing');
+    // Top 5 weakest skills — same skill-miss data the bridge chart above
+    // is built from, appended directly under it as condensed rows (name +
+    // a thin inline bar, one line each) rather than a separate section
+    // with its own heading and big circular gauges further down the page.
+    // t>=2 mirrors the same reliability bar the takeaways section already
+    // applies before naming a skill by name.
+    var topicsWrap = document.getElementById('bridge-skills');
     var skillEntries = Object.keys(skills).map(function (k) {
       var v = skills[k];
       return { name: k, c: v.c, t: v.t, missed: v.t - v.c, pct: v.t ? v.c / v.t : 0 };
     }).filter(function (e) { return e.t >= 2 && e.missed > 0; })
       .sort(function (a, b) { return b.missed - a.missed || a.pct - b.pct; })
       .slice(0, 5);
-    if (skillEntries.length) {
-      topicsWrap.style.display = '';
+    if (skillEntries.length && topicsWrap) {
+      var lab = document.createElement('div');
+      lab.className = 'bridge-skills-lab';
+      lab.textContent = 'Top 5 weakest skills';
+      topicsWrap.appendChild(lab);
       var list = document.createElement('div');
-      list.className = 'topics-list';
-      skillEntries.forEach(function (e, i) {
+      list.className = 'topics-list condensed';
+      skillEntries.forEach(function (e) {
         var pct = Math.round(e.pct * 100);
         var band = pct < 50 ? 'var(--red)' : (pct >= 75 ? 'var(--green)' : 'var(--gold)');
         var row = document.createElement('div');
         row.className = 'topics-row';
-        var r2 = 13, circ = 2 * Math.PI * r2;
         row.innerHTML =
-          '<span class="topics-rank">' + (i + 1) + '</span>' +
-          '<span class="topics-main"><span class="topics-name">' + e.name + '</span>' +
-          '<span class="topics-meta">' + e.c + '/' + e.t + ' correct</span></span>' +
-          '<span class="topics-gauge"><svg width="38" height="38" viewBox="0 0 34 34">' +
-            '<circle cx="17" cy="17" r="' + r2 + '" fill="none" stroke="#eee7da" stroke-width="3.5"/>' +
-            '<circle cx="17" cy="17" r="' + r2 + '" fill="none" stroke="' + band + '" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="' + circ + '" stroke-dashoffset="' + (circ * (1 - e.pct)) + '" transform="rotate(-90 17 17)"/>' +
-            '<text x="17" y="20" text-anchor="middle" font-size="7.5" font-weight="800" fill="' + band + '" font-family="Nunito, sans-serif">' + pct + '%</text>' +
-          '</svg></span>';
+          '<span class="topics-name">' + e.name + '</span>' +
+          '<span class="topics-bar-track"><span class="topics-bar-fill" style="width:' + pct + '%;background:' + band + ';"></span></span>' +
+          '<span class="topics-pct" style="color:' + band + ';">' + pct + '%</span>';
         list.appendChild(row);
       });
       topicsWrap.appendChild(list);
     }
 
-    // Accuracy by topic + time-by-difficulty, one card pair per subject
-    // (Reading & Writing / Math, or English / Math / Reading / Science for
-    // the ACT) — each subject's own domains{} (already computed per
-    // section, above) and its rows' timeMs grouped by q.difficulty.
+    // Accuracy by topic — one block per subject (Reading & Writing / Math,
+    // or English / Math / Reading / Science for the ACT). Each domain gets
+    // a row: name + attempt count on the left, a three-tier segmented
+    // tracker in the middle (low/mid/high pill tracks, only the tier this
+    // domain actually falls in gets filled, with a handle positioned
+    // proportionally within that tier's own range), and the accuracy
+    // number on the right, colored to match its tier. Tiers: <60% low
+    // (red), 60-84% mid (amber), >=85% high (green) — a stricter bar than
+    // this report's other red/gold/green splits on purpose, since this is
+    // meant to read as "is this topic actually solid," not just "better
+    // than half."
+    var ACC_TIERS = [
+      { key: 'low', min: 0, max: 60 },
+      { key: 'mid', min: 60, max: 85 },
+      { key: 'high', min: 85, max: 100 }
+    ];
+    function accTierFor(pct) {
+      if (pct >= 85) return ACC_TIERS[2];
+      if (pct >= 60) return ACC_TIERS[1];
+      return ACC_TIERS[0];
+    }
     var accWrap = document.getElementById('accuracy-by-topic');
-    var accGrid = document.createElement('div');
-    accGrid.className = 'acc-topic-grid';
-    var DIFF_COLORS = { easy: '#A9C4B4', medium: 'var(--gold)', hard: 'var(--red)' };
     sections.forEach(function (sec) {
       var domEntries = Object.keys(sec.domains).map(function (d) {
         var v = sec.domains[d];
-        return { name: d, c: v.c, t: v.t, pct: v.t ? v.c / v.t : 0 };
+        return { name: d, t: v.t, pct: v.t ? Math.round(v.c / v.t * 100) : 0 };
       }).sort(function (a, b) { return a.pct - b.pct; });
       if (!domEntries.length) return;
-      var card = document.createElement('div');
-      card.className = 'acc-topic-card';
-      var hed = document.createElement('div');
-      hed.className = 'acc-topic-card-hed';
-      hed.textContent = sec.label;
-      card.appendChild(hed);
-      var legend = document.createElement('div');
-      legend.className = 'acc-topic-legend';
-      legend.innerHTML = '<span><i style="background:var(--red)"></i>&lt; 50%</span><span><i style="background:var(--gold)"></i>50&ndash;74%</span><span><i style="background:var(--green)"></i>&ge; 75%</span>';
-      card.appendChild(legend);
+
+      var section = document.createElement('div');
+      section.className = 'atb-section';
+      section.innerHTML =
+        '<div class="atb-hed-row">' +
+          '<div><div class="atb-hed">' + sec.label + '</div><div class="atb-subhed">Accuracy by topic</div></div>' +
+          '<div class="atb-legend">' +
+            '<span><i class="atb-dot high"></i>&ge;85%</span>' +
+            '<span><i class="atb-dot mid"></i>60&ndash;84%</span>' +
+            '<span><i class="atb-dot low"></i>&lt;60%</span>' +
+          '</div>' +
+        '</div>';
+      var rowsWrap = document.createElement('div');
+      rowsWrap.className = 'atb-rows';
       domEntries.forEach(function (de) {
-        var pct = Math.round(de.pct * 100);
+        var tier = accTierFor(de.pct);
+        var within = tier.max > tier.min ? Math.max(0, Math.min(100, (de.pct - tier.min) / (tier.max - tier.min) * 100)) : 100;
         var row = document.createElement('div');
-        row.className = 'acc-topic-row';
-        row.innerHTML = '<div class="acc-topic-row-lab"><span>' + de.name + '</span><span class="n">' + de.c + '/' + de.t + ' &middot; ' + pct + '%</span></div>' +
-          '<div class="acc-topic-track"><div class="acc-topic-dot" style="left:' + pct + '%;"></div></div>';
-        card.appendChild(row);
+        row.className = 'atb-row';
+        row.innerHTML =
+          '<div class="atb-row-left"><div class="atb-domain-name">' + de.name + '</div><div class="atb-domain-attempts">' + de.t + ' attempt' + (de.t === 1 ? '' : 's') + '</div></div>' +
+          '<div class="atb-tracker">' +
+            ACC_TIERS.map(function (t) {
+              return '<span class="atb-seg ' + t.key + (t.key === tier.key ? ' active' : '') + '">' +
+                (t.key === tier.key ? '<span class="atb-handle" style="left:' + within + '%;"></span>' : '') +
+                '</span>';
+            }).join('') +
+          '</div>' +
+          '<div class="atb-pct ' + tier.key + '">' + de.pct + '%</div>';
+        rowsWrap.appendChild(row);
       });
-
-      // Time by difficulty, this subject, both modules combined — same
-      // underlying timeMs/q.difficulty already used per-module in the
-      // section cards above, aggregated one level up. Rendered as a
-      // donut here specifically (the per-module view above stays a bar,
-      // to match this page's other proportions) since this is a new,
-      // higher-level summary rather than a restyle of that existing one.
-      var byDiff = { easy: 0, medium: 0, hard: 0 };
-      sec.rows.forEach(function (r) {
-        var d = r.q && r.q.difficulty;
-        if (byDiff.hasOwnProperty(d)) byDiff[d] += (r.timeMs || 0);
-      });
-      var totalMs = byDiff.easy + byDiff.medium + byDiff.hard;
-      if (totalMs > 0) {
-        var dlabel = document.createElement('div');
-        dlabel.className = 'acc-topic-row-lab';
-        dlabel.style.marginTop = '10px';
-        dlabel.innerHTML = '<span>Time by difficulty</span><span class="n">' + formatDuration(totalMs) + ' total</span>';
-        card.appendChild(dlabel);
-        var donutWrap = document.createElement('div');
-        donutWrap.style.display = 'flex';
-        donutWrap.style.alignItems = 'center';
-        donutWrap.style.gap = '10px';
-        var R = 22, C = 2 * Math.PI * R, offset = 0;
-        var arcs = ['easy', 'medium', 'hard'].map(function (d) {
-          var frac = byDiff[d] / totalMs;
-          var dash = frac * C;
-          var seg = '<circle cx="26" cy="26" r="' + R + '" fill="none" stroke="' + DIFF_COLORS[d] + '" stroke-width="7" stroke-dasharray="' + dash + ' ' + (C - dash) + '" stroke-dashoffset="' + (-offset) + '" transform="rotate(-90 26 26)"/>';
-          offset += dash;
-          return seg;
-        }).join('');
-        var legendHtml = ['easy', 'medium', 'hard'].map(function (d) {
-          return byDiff[d] > 0 ? '<span><i style="background:' + DIFF_COLORS[d] + '"></i>' + d.charAt(0).toUpperCase() + d.slice(1) + ' ' + formatDuration(byDiff[d]) + '</span>' : '';
-        }).join('');
-        donutWrap.innerHTML = '<svg width="52" height="52" viewBox="0 0 52 52">' + arcs + '</svg>' +
-          '<div class="acc-topic-legend" style="flex-direction:column; align-items:flex-start; gap:3px;">' + legendHtml + '</div>';
-        card.appendChild(donutWrap);
-      }
-
-      accGrid.appendChild(card);
+      section.appendChild(rowsWrap);
+      accWrap.appendChild(section);
     });
-    if (accGrid.children.length) {
-      accWrap.style.display = '';
-      accWrap.appendChild(accGrid);
-    }
+    if (accWrap.children.length) accWrap.style.display = '';
   })();
 
   /* ═══ CONFIDENCE QUADRANT ═══ per subject: every multiple-choice
