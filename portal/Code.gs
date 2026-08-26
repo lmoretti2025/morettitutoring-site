@@ -140,6 +140,10 @@ function doPost(e) {
       out = handleSyncProgress(body.key, body.incorrect, body.skills);
     } else if (body.action === 'saveQuestion') {
       out = handleSaveQuestion(body.key, body.record);
+    } else if (body.action === 'addIncorrectQuestion') {
+      out = handleAddIncorrectQuestion(body.key, body.record);
+    } else if (body.action === 'updateCollections') {
+      out = handleUpdateCollections(body.key, body.collections);
     } else if (body.action === 'getProgress') {
       out = handleGetProgress(body.key);
     } else if (body.action === 'saveOnboardingPrefs') {
@@ -1247,7 +1251,15 @@ function handleSyncProgress(rawKey, rawIncorrect, rawSkills) {
   (Array.isArray(rawIncorrect) ? rawIncorrect : []).forEach(function (r) {
     if (!r || !r.key) return;
     if (r.correct) delete byKey[r.key];
-    else byKey[r.key] = r;
+    else {
+      // wrongAttempts accumulates across misses on the SAME question
+      // (Mistakes Log shows it as "N wrong attempts") — reset back to 0
+      // the moment the entry is deleted above on a correct answer, so a
+      // question missed, fixed, then missed again later starts counting
+      // fresh rather than carrying a stale streak forward.
+      var prevAttempts = (byKey[r.key] && byKey[r.key].wrongAttempts) || 0;
+      byKey[r.key] = Object.assign({}, r, { wrongAttempts: prevAttempts + 1 });
+    }
   });
   byKey = capIncorrectByKey_(byKey);
   var bySkill = (rawSkills && typeof rawSkills === 'object') ? rawSkills : {};
@@ -1295,6 +1307,81 @@ function handleSaveQuestion(rawKey, rawRecord) {
   return { ok: true };
 }
 
+/* ═══ QUESTION BANK — RECORD A MISS ═══ same reasoning as handleSaveQuestion
+   just above: its own action rather than routed through syncProgress,
+   because syncProgress REPLACES SkillStatsJSON wholesale on every call and
+   a Question Bank practice session has no "this attempt's skill breakdown"
+   of its own to send — calling syncProgress with an empty/partial one
+   would silently wipe the student's real diagnostic/practice-test skill
+   breakdown. This ONLY ever touches IncorrectQuestionsJSON, merging in one
+   record at a time (rawRecord: {key, given, correct, attemptedAt} — same
+   slim-record shape every other miss uses, resolved back to full question
+   content at render time via window.resolveQuestionByKey()'s 'qb|' key
+   branch, not stored here). A student who later answers the same question
+   right also calls this (with correct:true), which deletes rather than
+   stores it — same self-clearing behavior IncorrectQuestionsJSON already
+   has everywhere else. */
+function handleAddIncorrectQuestion(rawKey, rawRecord) {
+  if (!rawKey) return { ok: false, error: 'missing_key' };
+  if (!rawRecord || !rawRecord.key) return { ok: false, error: 'missing_record' };
+  var key = String(rawKey).trim().toUpperCase();
+  var sheet = getSheet_();
+  var row = findRow_(sheet, key);
+  if (!row) return { ok: false, error: 'bad_key' };
+
+  var headers = row._headers;
+  if (headers.indexOf('IncorrectQuestionsJSON') === -1) {
+    sheet.getRange(1, sheet.getLastColumn() + 1).setValue('IncorrectQuestionsJSON');
+    headers.push('IncorrectQuestionsJSON');
+  }
+  var byKey = {};
+  try { byKey = JSON.parse(row.IncorrectQuestionsJSON) || {}; } catch (e) { byKey = {}; }
+  if (rawRecord.correct) delete byKey[rawRecord.key];
+  else {
+    // Same wrongAttempts accumulation as handleSyncProgress above.
+    var prevAttempts = (byKey[rawRecord.key] && byKey[rawRecord.key].wrongAttempts) || 0;
+    byKey[rawRecord.key] = Object.assign({}, rawRecord, { wrongAttempts: prevAttempts + 1 });
+  }
+  byKey = capIncorrectByKey_(byKey);
+
+  var iqCol = headers.indexOf('IncorrectQuestionsJSON');
+  sheet.getRange(row._rowIndex, iqCol + 1).setValue(sheetSafe_(JSON.stringify(byKey)));
+  return { ok: true };
+}
+
+/* ═══ SAVED & MISTAKES — COLLECTIONS ═══ student-defined, self-service
+   drill decks (e.g. "Weak Algebra", "Review before test") — a question
+   can belong to any number of them, independent of whether it's
+   currently saved or an outstanding mistake, so adding a miss to a
+   collection doesn't stop it from clearing out of the Mistakes Log once
+   it's answered correctly, and a collection entry doesn't vanish either
+   way. rawCollections is the client's FULL, already-merged collections
+   object ({ [name]: { [key]: {addedAt} } }) — this overwrites
+   CollectionsJSON wholesale rather than merging one entry at a time
+   (unlike IncorrectQuestionsJSON/SavedQuestionsJSON above). That's safe
+   here specifically because a student only ever edits their own
+   collections from one device at a time in practice, and the local
+   cache the client sends this from is itself already the merge of
+   whatever the backend last had plus this device's own edits — see
+   fetchPortalProgress()/syncCollectionsToBackend() in index.html. */
+function handleUpdateCollections(rawKey, rawCollections) {
+  if (!rawKey) return { ok: false, error: 'missing_key' };
+  if (!rawCollections || typeof rawCollections !== 'object') return { ok: false, error: 'missing_collections' };
+  var key = String(rawKey).trim().toUpperCase();
+  var sheet = getSheet_();
+  var row = findRow_(sheet, key);
+  if (!row) return { ok: false, error: 'bad_key' };
+
+  var headers = row._headers;
+  if (headers.indexOf('CollectionsJSON') === -1) {
+    sheet.getRange(1, sheet.getLastColumn() + 1).setValue('CollectionsJSON');
+    headers.push('CollectionsJSON');
+  }
+  var colCol = headers.indexOf('CollectionsJSON');
+  sheet.getRange(row._rowIndex, colCol + 1).setValue(sheetSafe_(JSON.stringify(rawCollections)));
+  return { ok: true };
+}
+
 // Read-only fetch for the two portal tools — deliberately returns ok:true
 // with empty objects for a valid key that just has no progress synced yet
 // (brand-new student, nothing submitted), rather than an error; only an
@@ -1306,11 +1393,12 @@ function handleGetProgress(rawKey) {
   var row = findRow_(sheet, key);
   if (!row) return { ok: false, error: 'bad_key' };
 
-  var byKey = {}, bySkill = {}, savedByKey = {};
+  var byKey = {}, bySkill = {}, savedByKey = {}, collections = {};
   try { byKey = JSON.parse(row.IncorrectQuestionsJSON) || {}; } catch (e) { /* ignore */ }
   try { bySkill = JSON.parse(row.SkillStatsJSON) || {}; } catch (e) { /* ignore */ }
   try { savedByKey = JSON.parse(row.SavedQuestionsJSON) || {}; } catch (e) { /* ignore */ }
-  return { ok: true, incorrectQuestions: byKey, skillStats: bySkill, savedQuestions: savedByKey };
+  try { collections = JSON.parse(row.CollectionsJSON) || {}; } catch (e) { /* ignore */ }
+  return { ok: true, incorrectQuestions: byKey, skillStats: bySkill, savedQuestions: savedByKey, collections: collections };
 }
 
 /* =========================================================================
