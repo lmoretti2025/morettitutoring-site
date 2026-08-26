@@ -6679,34 +6679,46 @@
     var key = currentStudent && currentStudent.key;
     fetch(APPS_SCRIPT_URL, {
       method: 'POST',
-      body: JSON.stringify({ action: 'deleteAttempt', key: key, testTag: attempt.testTag })
+      body: JSON.stringify({ action: 'deleteAttempt', key: key, testTag: attempt.testTag, attemptId: attempt.attemptId || '' })
     }).then(function (r) { return r.json(); }).then(function (res) {
       if (!res || !res.ok) { btn.disabled = false; return; }
-      purgeLocalAttemptCaches(key, attempt.testTag);
+      purgeLocalAttemptCaches(key, attempt.testTag, attempt.attemptId);
       closeAllPtMenus();
       renderPracticeTestList();
       if (activeScreenId === 'screen-menu') { renderScoreProgress(); renderRecentTestCard(); }
     }).catch(function () { btn.disabled = false; });
   }
-  // Strips one testTag's entries out of this device's own localStorage
+  // Strips one attempt's entries out of this device's own localStorage
   // copies — the server-side delete alone isn't enough, since Score
   // Progress and the offline fallback for Saved & Mistakes both read
   // these local caches first/instead (see loadScoreHistory and
   // loadLocalProgressCache above).
-  function purgeLocalAttemptCaches(key, testTag) {
+  //
+  // Score-history entries are matched by attemptId when the deleted
+  // attempt has one, not just testTag — a retake of the same test shares
+  // one testTag, so testTag-only matching here would strip every attempt
+  // of that test from the chart, not just the one being deleted (mirrors
+  // the same fix in handleDeleteAttempt in Code.gs). Falls back to
+  // testTag-only matching for legacy entries with no attemptId.
+  function purgeLocalAttemptCaches(key, testTag, attemptId) {
     if (!key) return;
     var prefix = testTag + '|';
+    function matchesDeletedAttempt(e) {
+      if (testTagForScoreEntry(e) !== testTag) return false;
+      if (attemptId) return (e.attemptId || '') === attemptId;
+      return true;
+    }
     try {
       var shRaw = localStorage.getItem('moretti_score_history_' + key);
       if (shRaw) {
         var shData = JSON.parse(shRaw);
         if (shData && Array.isArray(shData.entries)) {
-          shData.entries = shData.entries.filter(function (e) { return testTagForScoreEntry(e) !== testTag; });
+          shData.entries = shData.entries.filter(function (e) { return !matchesDeletedAttempt(e); });
           localStorage.setItem('moretti_score_history_' + key, JSON.stringify(shData));
         }
       }
     } catch (e) { /* ignore */ }
-    serverScoreHistoryEntries = serverScoreHistoryEntries.filter(function (e) { return testTagForScoreEntry(e) !== testTag; });
+    serverScoreHistoryEntries = serverScoreHistoryEntries.filter(function (e) { return !matchesDeletedAttempt(e); });
     ['moretti_incorrect_qs_' + key, 'moretti_saved_qs_' + key].forEach(function (storageKey) {
       try {
         var raw = localStorage.getItem(storageKey);

@@ -157,7 +157,7 @@ function doPost(e) {
     } else if (body.action === 'backfillCompositeFields') {
       out = handleBackfillCompositeFields(body.patches);
     } else if (body.action === 'deleteAttempt') {
-      out = handleDeleteAttempt(body.key, body.testTag);
+      out = handleDeleteAttempt(body.key, body.testTag, body.attemptId);
     } else {
       out = { ok: false, error: 'unknown_action' };
     }
@@ -1434,11 +1434,25 @@ function testTagForAttemptRow_(row) {
 // (handleSyncProgress overwrites it wholesale on every submission, so
 // there's no way to tell which attempt it came from), so clearing it here
 // could just as easily wipe a good attempt's breakdown as a bad one's.
-function handleDeleteAttempt(rawKey, rawTestTag) {
+//
+// testTag alone only identifies the TEST, not the attempt — a retake of
+// the same practice test (or a second diagnostic of the same type) shares
+// one testTag with the first attempt. Without rawAttemptId, "delete this
+// one bad attempt" would therefore delete every Attempts-sheet row for
+// that test, not just the one clicked (this is exactly what happened to a
+// student with two attempts on the same test — see the incident this
+// param was added for). rawAttemptId scopes the Attempts-sheet deletion to
+// the single matching row when present; IncorrectQuestionsJSON/
+// SavedQuestionsJSON still use the testTag prefix only, since those keys
+// were never attempt-tagged in the first place (a retake overwrites the
+// same question keys rather than appending new ones, so there's nothing
+// attempt-specific there to preserve).
+function handleDeleteAttempt(rawKey, rawTestTag, rawAttemptId) {
   if (!rawKey) return { ok: false, error: 'missing_key' };
   if (!rawTestTag) return { ok: false, error: 'missing_test_tag' };
   var key = String(rawKey).trim().toUpperCase();
   var testTag = String(rawTestTag);
+  var attemptId = rawAttemptId ? String(rawAttemptId) : '';
 
   var sheet = getSheet_();
   var row = findRow_(sheet, key);
@@ -1474,6 +1488,13 @@ function handleDeleteAttempt(rawKey, rawTestTag) {
     if (String(r[col.Key]).trim().toUpperCase() !== key) continue;
     var pseudo = { Source: r[col.Source], TestId: r[col.TestId], TestType: r[col.TestType] };
     if (testTagForAttemptRow_(pseudo) !== testTag) continue;
+    // When the attempt being deleted has an AttemptId, only remove the row
+    // that actually carries it — leaves any other attempt of the same test
+    // (which shares this same testTag) untouched. Rows from before this
+    // field existed have no AttemptId to match; those still fall back to
+    // the old testTag-only behavior, which is the best available signal
+    // for legacy data.
+    if (attemptId && String(r[col.AttemptId] || '') !== attemptId) continue;
     attemptsSheet.deleteRow(i + 1);
     removedAttemptRows++;
   }
