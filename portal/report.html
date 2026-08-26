@@ -10,7 +10,18 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caladea:wght@400;700&family=Poppins:wght@300;400;500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
 <style>
-  :root { --red:#B0271C; --gold:#C9A84C; --ink:#1a1a1a; --mid:rgba(17,17,17,0.6); --faint:rgba(17,17,17,0.32); --border:rgba(17,17,17,0.12); --bg:#f2f2f2; --green:#5E8B6F; --tan:#A97C50; }
+  /* --red/--green here are the MODERN, more saturated report palette
+     (#EF4444/#16A34A) — not the muted brick-red/sage (#B0271C/#5E8B6F)
+     used sitewide for buttons/accents elsewhere on morettitutoring.com.
+     This file IS the report (no surrounding site chrome to protect), so
+     unlike the portal's #pt-native-report (which shadows these same two
+     vars only inside that one subtree — see index.html), the swap just
+     happens at :root directly and every var(--red)/var(--green) reference
+     on the page picks it up. --white/--text/--hel/--display are aliases
+     for values this file already had under other names (#fff/--ink/
+     'Poppins'/'Caladea'), added so CSS ported straight from index.html's
+     report redesign (which uses those names) works unmodified. */
+  :root { --red:#EF4444; --gold:#C9A84C; --ink:#1a1a1a; --mid:rgba(17,17,17,0.6); --faint:rgba(17,17,17,0.32); --border:rgba(17,17,17,0.12); --bg:#f2f2f2; --green:#16A34A; --tan:#A97C50; --white:#fff; --text:#1a1a1a; --hel:'Poppins',sans-serif; --display:'Caladea',Georgia,serif; --shadow: 0 2px 16px rgba(17,17,17,0.055); }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Poppins', sans-serif; font-weight: 300; color: var(--ink); background: #e8e4dc; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .page { width: 8.5in; min-height: 11in; margin: 24px auto; background: #fff; padding: 0.6in 0.65in; box-shadow: 0 10px 40px rgba(0,0,0,0.15); }
@@ -36,22 +47,27 @@
   .hdr img { height: 40px; }
   .hdr h1 { font-family: 'Caladea', Georgia, serif; font-size: 19px; }
   .hdr p { font-size: 11px; color: var(--mid); }
-  /* Score summary is its own visually grouped card now (light tint +
-     border) instead of tiles floating loose against the white page
-     background — gives the headline numbers a clear boundary and makes
-     the centering below actually read as "centered within something"
-     rather than just centered in the middle of an otherwise-empty page
-     width. */
-  .score-summary { background: var(--bg); border: 1px solid var(--border); border-radius: 14px; padding: 20px 18px 16px; margin-bottom: 16px; }
-  .score-tiles { display: flex; align-items: stretch; justify-content: center; gap: 18px; flex-wrap: wrap; margin-bottom: 4px; }
-  .score-tile { text-align: center; background: #fff; border: 1px solid var(--border); border-top: 3px solid var(--gold); border-radius: 10px; padding: 12px 20px 10px; min-width: 92px; }
-  .score-tile.big { min-width: 128px; padding: 14px 22px 10px; }
-  .score-tile .tile-score { font-family: 'Caladea', serif; font-weight: 700; color: var(--ink); line-height: 1; }
-  .score-tile .tile-score.big { font-size: 32px; }
-  .score-tile .tile-score.small { font-size: 19px; }
-  .score-tile .tile-frac { font-size: 8.5px; color: var(--faint); margin-top: 5px; }
-  .score-tile .tile-lab { font-size: 8px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mid); margin-top: 5px; }
-  .score-tile .tile-lab.big { font-size: 9.5px; }
+  /* Score header — ONE connected card, score row fused straight into the
+     Correct/Wrong/Accuracy/Unattempted row below it (a single divider
+     between the two, not two separate boxed sections with a gap and a
+     grey page-background halo around them). Composite sits in its own
+     left-hand panel, R&W/Math stack as plain label/number rows to its
+     right. Ported verbatim from the portal's own native report (see
+     index.html's #pt-native-report override block) so the emailed/printed
+     report matches what a student sees in-app exactly. */
+  .score-summary { background: transparent; border: none; padding: 0; margin-bottom: 16px; }
+  .score-card { background: var(--white); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); overflow: hidden; }
+  .score-tiles { display: flex; align-items: stretch; gap: 0; margin-bottom: 0; flex-wrap: wrap; }
+  .score-tile { flex: 1 1 180px; min-width: 0; text-align: center; background: transparent; border: none; border-radius: 0; padding: 1.4rem 1.75rem; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .score-tile.big { flex: 0 0 auto; min-width: 220px; border-right: 1px solid var(--border); padding: 1.4rem 1.75rem; }
+  .score-tile .tile-lab { font-family: var(--hel); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--mid); margin: 0 0 0.4rem; }
+  .score-tile .tile-lab.big { font-size: 0.68rem; }
+  .score-tile .tile-score { font-family: var(--hel); font-weight: 700; color: var(--text); line-height: 1; }
+  .score-tile .tile-score.big { font-size: 2.5rem; }
+  .score-tile .tile-score.small { font-size: 1.4rem; }
+  .score-tiles-small { flex: 1 1 320px; display: flex; flex-direction: row; min-width: 0; align-items: center; gap: 0.6rem; padding: 0.75rem 0.5rem; }
+  .score-tiles-small .score-tile { flex: 1; padding: 0 1.1rem; }
+  .score-tiles-small .tile-score.small { font-size: 1.4rem; }
   .sec-hed { font-size: 10.5px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mid); border-bottom: 1px solid var(--border); padding-bottom: 6px; margin: 22px 0 12px; }
   .bar-row { margin-bottom: 6px; }
   .bar-label { display: flex; justify-content: space-between; font-size: 10.5px; font-weight: 600; margin-bottom: 3px; }
@@ -64,18 +80,28 @@
      below), harmlessly, into a hidden element, rather than touching that
      logic right now. */
   .score-caption { display: none; }
-  /* ═══ RAW STATS STRIP ═══ a fast, whole-diagnostic Correct/Wrong/
-     Unattempted/Accuracy readout above the section detail — the same
-     "gradebook" summary a parent already knows how to read at a glance,
-     ahead of the scaled-score interpretation above it and the per-section
-     detail below. Complements the score-tiles (which speak in scaled
-     score) rather than replacing them — this is the plain-counts view. */
-  .raw-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 16px; margin-bottom: 16px; }
-  .raw-stat { border: 1px solid rgba(17,17,17,0.08); border-radius: 12px; padding: 11px 12px 9px; box-shadow: 0 1px 2px rgba(17,17,17,0.03); }
-  .raw-stat-lab { font-family: 'Nunito', 'Poppins', sans-serif; font-size: 8.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--faint); margin-bottom: 4px; }
-  .raw-stat-num { font-family: 'Nunito', 'Poppins', sans-serif; font-weight: 800; font-size: 19px; color: var(--ink); line-height: 1; }
+  /* ═══ RAW STATS STRIP ═══ fused into the same card as score-tiles above
+     (one divider between them, see .raw-stats border-top below) instead
+     of four individually-bordered boxes — each stat gets its own small
+     icon (check/x/target/dashed-circle) so the strip reads as one
+     connected summary. */
+  .raw-stats { display: flex; border-top: 1px solid var(--border); margin: 0; }
+  .raw-stat { flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.7rem; padding: 1rem 1.1rem; border: none; border-radius: 0; box-shadow: none; background: transparent; }
+  .raw-stat-icon { flex-shrink: 0; width: 26px; height: 26px; color: var(--faint); }
+  .raw-stat-icon svg { width: 100%; height: 100%; display: block; }
+  .raw-stat.ok .raw-stat-icon { color: var(--green); }
+  .raw-stat.bad .raw-stat-icon { color: var(--red); }
+  .raw-stat-text { min-width: 0; }
+  .raw-stat-lab { font-family: var(--hel); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--faint); margin-bottom: 0.15rem; }
+  .raw-stat-num { font-family: var(--hel); font-weight: 800; font-size: 1.35rem; color: var(--text); line-height: 1; }
   .raw-stat.ok .raw-stat-num { color: var(--green); }
   .raw-stat.bad .raw-stat-num { color: var(--red); }
+  @media (max-width: 620px) {
+    .score-tiles { flex-direction: column; }
+    .score-tile.big { border-right: none; border-bottom: 1px solid var(--border); width: 100%; }
+    .raw-stats { flex-wrap: wrap; }
+    .raw-stat:nth-child(-n+2) { border-bottom: 1px solid var(--border); }
+  }
   @media print { .raw-stats { page-break-inside: avoid; break-inside: avoid; } }
 
   /* ═══ TOP ROW — score tiles only. The progress card (a redundant,
@@ -88,40 +114,57 @@
   @media (max-width: 620px) { .top-row { grid-template-columns: 1fr; } }
   @media print { .top-row { page-break-inside: avoid; break-inside: avoid; } }
 
-  /* ═══ TOPICS COSTING THE MOST POINTS — ranked list with a radial %
-     gauge, same underlying skill-miss data as the bridge chart above,
-     just presented as a scannable list instead of a waterfall. ═══ */
-  .topics-list { border: 1px solid rgba(17,17,17,0.08); border-radius: 12px; overflow: hidden; box-shadow: 0 1px 2px rgba(17,17,17,0.03); }
-  .topics-row { display: flex; align-items: center; gap: 14px; padding: 13px 16px; border-bottom: 1px solid #f1ede4; }
-  .topics-row:last-child { border-bottom: none; }
-  .topics-rank { font-family: 'Nunito', 'Poppins', sans-serif; font-weight: 800; font-size: 14px; color: var(--faint); width: 20px; flex-shrink: 0; }
-  /* Name and meta used to be two inline spans with no line break between
-     them (topics-main had no display/flow rule of its own), so they ran
-     together on one line — "Boundaries6/10 correct · 10 attempts" — with
-     no space at the seam. Stacking them as a column with a real gap is
-     what actually separates "what" from "how many," matching every other
-     two-line label on this report (acc-topic-row-lab, sc-title, etc). */
-  .topics-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
-  .topics-name { font-family: 'Nunito', 'Poppins', sans-serif; font-size: 11px; font-weight: 700; color: var(--ink); }
-  .topics-meta { font-family: 'Nunito', 'Poppins', sans-serif; font-size: 8.5px; font-weight: 600; color: var(--faint); }
-  .topics-gauge { flex-shrink: 0; }
+  /* One-time explainer above the first subject block — what this section
+     actually shows and how to read it, since "a bar with a dot on it"
+     isn't self-explanatory without a caption the first time you see it. */
+  .skillbreak-intro { font-size: 13.12px; color: var(--mid); line-height: 1.55; margin: 0 0 28px; max-width: 640px; }
 
-  /* ═══ ACCURACY BY TOPIC — a threshold-banded gradient track with a dot
-     at the actual percentage, instead of a filled bar — reads as "where
-     does this land against a real bar" rather than just "how full." ═══ */
-  .acc-topic-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 2px; }
-  .acc-topic-card { border: 1px solid rgba(17,17,17,0.08); border-radius: 12px; padding: 12px 14px; box-shadow: 0 1px 2px rgba(17,17,17,0.03); }
-  .acc-topic-card-hed { font-family: 'Nunito', 'Poppins', sans-serif; font-weight: 800; font-size: 12.5px; margin-bottom: 2px; }
-  .acc-topic-legend { font-family: 'Nunito', 'Poppins', sans-serif; display: flex; gap: 8px; font-size: 7.5px; font-weight: 700; color: var(--faint); margin-bottom: 8px; }
-  .acc-topic-legend span { display: inline-flex; align-items: center; gap: 3px; }
-  .acc-topic-legend i { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
-  .acc-topic-row { margin-bottom: 8px; }
-  .acc-topic-row:last-child { margin-bottom: 0; }
-  .acc-topic-row-lab { font-family: 'Nunito', 'Poppins', sans-serif; display: flex; justify-content: space-between; font-size: 9.5px; font-weight: 700; margin-bottom: 3px; }
-  .acc-topic-row-lab .n { color: var(--faint); font-size: 8.5px; font-weight: 600; }
-  .acc-topic-track { position: relative; height: 5px; border-radius: 3px; background: linear-gradient(90deg, var(--red) 0%, var(--red) 60%, var(--gold) 60%, var(--gold) 85%, var(--green) 85%, var(--green) 100%); opacity: 0.35; }
-  .acc-topic-dot { position: absolute; top: 50%; width: 9px; height: 9px; border-radius: 50%; background: #fff; border: 2px solid var(--ink); transform: translate(-50%, -50%); }
-  @media (max-width: 620px) { .acc-topic-grid { grid-template-columns: 1fr; } }
+  /* Two subjects side by side (R&W | Math, or the 4 ACT subjects wrap
+     2-up) instead of stacked full-width — the old stacked layout took
+     nearly double the vertical space for no real benefit, since each
+     subject's row list is narrow content anyway. */
+  .atb-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 0 40px; }
+  .atb-section { margin-bottom: 32px; }
+  .atb-hed-row { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+  .atb-hed { font-family: 'Poppins', sans-serif; font-size: 15.2px; font-weight: 700; color: var(--ink); }
+  .atb-subhed { font-family: 'Poppins', sans-serif; font-size: 11.52px; color: var(--mid); margin-top: 2.4px; }
+  .atb-legend { display: flex; gap: 9.6px; font-family: 'Poppins', sans-serif; font-size: 9.92px; color: var(--mid); flex-wrap: wrap; }
+  .atb-legend span { display: inline-flex; align-items: center; gap: 4.8px; white-space: nowrap; }
+  .atb-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+  .atb-dot.high { background: var(--green); }
+  .atb-dot.mid { background: var(--atb-amber, #F59E0B); }
+  .atb-dot.low { background: var(--red); }
+  .atb-rows { display: flex; flex-direction: column; gap: 14.4px; }
+  .atb-row { display: flex; align-items: center; gap: 14.4px; }
+  .atb-row-left { flex: 0 0 128px; min-width: 0; }
+  .atb-domain-name { font-family: 'Poppins', sans-serif; font-size: 12.48px; font-weight: 700; color: var(--ink); line-height: 1.25; }
+  .atb-domain-attempts { font-family: 'Poppins', sans-serif; font-size: 10.56px; color: var(--faint); margin-top: 3.2px; }
+  .atb-focus-tag { color: var(--red); font-weight: 700; }
+  /* Single continuous track filled from 0 to the actual accuracy, with a
+     handle dot riding the fill's edge — reads at a glance as "how far
+     along" the way a slider does, instead of the old three-separate-pill
+     tracker (same information, more visual parts). */
+  .atb-tracker { position: relative; flex: 1 1 90px; min-width: 60px; display: flex; align-items: center; }
+  .atb-track { position: relative; width: 100%; height: 6px; border-radius: 999px; background: #ece5d6; overflow: visible; }
+  .atb-track-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 999px; }
+  .atb-track-fill.low { background: var(--red); }
+  .atb-track-fill.mid { background: var(--atb-amber, #F59E0B); }
+  .atb-track-fill.high { background: var(--green); }
+  .atb-handle-dot { position: absolute; top: 50%; width: 13px; height: 13px; border-radius: 50%; background: #fff; border: 3px solid currentColor; box-shadow: 0 1px 3px rgba(17,17,17,0.25); transform: translate(-50%, -50%); }
+  .atb-handle-dot.low { color: var(--red); }
+  .atb-handle-dot.mid { color: var(--atb-amber, #F59E0B); }
+  .atb-handle-dot.high { color: var(--green); }
+  .atb-pct { flex: 0 0 40px; text-align: right; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 16.32px; }
+  .atb-pct.low { color: var(--red); }
+  .atb-pct.mid { color: var(--atb-amber, #F59E0B); }
+  .atb-pct.high { color: var(--green); }
+  @media (max-width: 480px) {
+    .atb-grid { grid-template-columns: 1fr; }
+    .atb-row { flex-wrap: wrap; gap: 8px 12.8px; }
+    .atb-row-left { flex: 1 1 100%; }
+    .atb-tracker { flex: 1 1 auto; order: 3; width: 100%; }
+    .atb-pct { flex: 0 0 auto; margin-left: auto; }
+  }
 
   /* ═══ CONFIDENCE QUADRANT — per-question scatter, time (relative to the
      section's own median) vs. right/wrong. No platform to compare against,
@@ -136,7 +179,7 @@
   .quad-dot.bad { fill: var(--red); }
   .quad-dot:hover { stroke: var(--ink); }
   @media (max-width: 620px) { .quadrant-grid { grid-template-columns: 1fr; } }
-  @media print { .topics-list, .acc-topic-grid, .quadrant-grid { page-break-inside: avoid; break-inside: avoid; } }
+  @media print { .atb-section, .quadrant-grid { page-break-inside: avoid; break-inside: avoid; } }
 
   /* ═══ QUESTION TILES (upgraded sc-qgrid) — hover preview + click to open
      the full question in a modal, instead of just a native title tooltip. ═══ */
@@ -158,6 +201,8 @@
   .q-modal-close:hover { color: var(--ink); }
   .q-modal-body { padding: 14px 16px 18px; font-size: 11.5px; }
   .q-modal-body .q-detail { padding: 0; background: none; }
+  .q-list-divider { border-top: 1px solid var(--border); margin: 18px 0; }
+  .q-list-qnum { font-family: 'Caladea', serif; font-weight: 700; font-size: 12px; color: var(--mid); margin-bottom: 6px; }
   @media print { .q-modal-overlay { display: none !important; } }
 
   /* ═══ PER-QUESTION GRID ═══ small colored squares, one per question,
@@ -194,7 +239,19 @@
   .sc-difftime-dot.easy { background: #A9C4B4; }
   .sc-difftime-dot.medium { background: var(--gold); }
   .sc-difftime-dot.hard { background: var(--red); }
-  .bridge-wrap { border: 1px solid var(--border); border-radius: 14px; padding: 14px 18px; margin-bottom: 2px; }
+  /* Bridge chart card — now the sole content of "Path to target score"
+     (the old "Top 5 weakest skills" list that used to append below the
+     chart is gone; each bar is hoverable/clickable for that same
+     per-skill detail instead — see drawBridge()'s bar-hit-testing in the
+     script). Sized larger now that it's not sharing the card with
+     anything else. */
+  .bridge-card { background: var(--white); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); overflow: hidden; }
+  .bridge-wrap { border: none; box-shadow: none; border-radius: 0; padding: 24px 28px; margin-bottom: 0; }
+  /* The note that used to sit inside the card, right under the chart, now
+     lives in its own block below the whole card (see #bridge-note-outer
+     in the markup and renderBridge() in the script). */
+  .bridge-note-block { font-size: 12.48px; color: var(--mid); margin: 14px 0 0; line-height: 1.5; }
+  .bridge-note-block .bridge-other-note { margin-bottom: 6px; }
   .bridge-target-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 6px; font-size: 10.5px; color: var(--mid); }
   .bridge-target-row .bt-lab { font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; font-size: 9.5px; }
   .bridge-target-row input { font-family: 'Poppins'; font-weight: 600; font-size: 13px; color: var(--red); border: 1px solid var(--border); background: #f2f2f2; width: 58px; padding: 3px 6px; text-align: center; -moz-appearance: textfield; }
@@ -203,41 +260,49 @@
   .bridge-target-row .bt-reset { font-size: 9px; color: var(--faint); text-decoration: underline; cursor: pointer; background: none; border: none; padding: 0; font-family: 'Poppins'; }
   .bridge-target-row .bt-drag-hint { font-size: 9px; color: var(--faint); margin-left: 4px; }
   .bridge-target-row .bt-static { display: none; font-weight: 600; font-size: 13px; color: var(--red); }
-  .bridge-canvas-wrap { text-align: center; }
+  /* overflow-x:auto (not just on the small-screen media query further
+     down) is the real safety net against clipping: the standalone page
+     is a fixed 8.5in wide, and its actual content width (~630px once the
+     page and bridge-wrap's own padding are subtracted) is narrower than
+     the chart can legitimately need for a wide bar count — a bare
+     overflow:hidden on the card above this would silently CROP the right
+     edge of the chart instead of showing all of it. Scrolling means nothing
+     is ever cut off, in either standalone or embedded mode. */
+  .bridge-canvas-wrap { text-align: center; overflow-x: auto; }
+  .bridge-canvas-inner { position: relative; display: inline-block; }
   .bridge-empty { font-size: 11px; color: var(--mid); padding: 6px 0; }
-  .bridge-note { font-size: 9px; color: var(--faint); margin-top: 8px; }
-  .bridge-other-note { margin-top: 6px; margin-bottom: 0; }
-  .section-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-bottom: 2px; }
-  .section-card { border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; }
-  .section-card .sc-hed { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 3px; }
-  .section-card .sc-title { font-family: 'Caladea', serif; font-size: 13px; font-weight: 700; }
-  .section-card .sc-score { font-size: 11px; color: var(--mid); }
-  .section-card .sc-incorrect { font-size: 10px; color: var(--red); font-weight: 600; margin-bottom: 6px; }
-  /* A 2x2 grid rather than a wrapping flex row — with the Unused stat added
-     alongside Time On Module/Correct/Incorrect, a 4-item flex row wraps as
-     3-then-1, an unbalanced single item stranded alone on its own line.
-     auto-fit at a 90px minimum gives 2 columns at the section-card's normal
-     width (two side-by-side cards on an 8.5in page) while still allowing 4
-     across if a card ever gets wide enough to fit them. */
-  .sc-time { display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 6px 12px; font-size: 9.5px; color: var(--mid); margin: 0 0 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
-  .sc-time-item { display: flex; flex-direction: column; }
-  .sc-time-item.ok { color: var(--green); }
-  .sc-time-item.bad { color: var(--red); }
-  .sc-time-label { font-size: 8px; text-transform: uppercase; letter-spacing: 0.03em; color: var(--faint); }
-  .sc-time-item.ok .sc-time-label, .sc-time-item.bad .sc-time-label { color: inherit; opacity: 0.75; }
-  .sc-flag { display: flex; align-items: flex-start; gap: 6px; font-size: 9.5px; line-height: 1.5; color: var(--ink); background: #fbf1de; border-left: 3px solid var(--gold); border-radius: 8px; padding: 7px 10px; margin: 0 0 10px; }
-  .sc-flag .sc-flag-mark { font-weight: 700; color: var(--gold); flex-shrink: 0; }
-  .sc-flag strong { color: var(--ink); }
-  .sc-bars { margin-bottom: 6px; }
-  .sc-bars .sc-bar-row { margin-bottom: 5px; }
-  .sc-bars .sc-bar-label { display: flex; justify-content: space-between; font-size: 9px; margin-bottom: 2px; }
-  .sc-bars .sc-bar-track { height: 6px; background: #eee7da; border-radius: 3px; overflow: hidden; }
-  .sc-bars .sc-bar-fill { height: 100%; background: var(--gold); }
-  .sc-bars .sc-bar-fill.weak { background: var(--red); }
-  .sc-bars .sc-bar-fill.strong { background: var(--green); }
-  .sc-bars .sc-bar-empty { font-size: 9px; color: var(--faint); }
-  .sc-grouplabel { font-size: 8px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); margin: 8px 0 4px; }
-  .sc-grouplabel:first-child { margin-top: 2px; }
+  /* Hover/click affordance on each recoverable-points bar — a small
+     floating card following the cursor (percent correct + raw fraction),
+     positioned with JS (see the mousemove handler in drawBridge()). */
+  .bridge-tooltip { display: none; position: fixed; z-index: 60; background: var(--ink); color: #fff; border-radius: 8px; padding: 8px 11px; font-family: 'Poppins', sans-serif; font-size: 11.5px; line-height: 1.4; pointer-events: none; box-shadow: 0 8px 20px rgba(17,17,17,0.25); white-space: nowrap; }
+  .bridge-tooltip b { display: block; font-size: 12.5px; margin-bottom: 2px; }
+  .bridge-tooltip .bridge-tooltip-hint { display: block; margin-top: 4px; color: rgba(255,255,255,0.65); font-size: 10.2px; }
+  /* Section snapshot tiles — module name, a plain color grid (no question
+     numbers, no per-module time/domain breakdown), average time per
+     question. Sits directly under the score card, ahead of the bridge
+     chart — light single-card tiles, four in a row on a wide screen.
+     Ported verbatim from the portal's native report; replaces the older
+     time-by-difficulty/distractor-flag/domain-bars design below. min-height
+     on the title AND the counts row is what keeps all four tiles' grids
+     starting at the same y-position — without it, a title/count line that
+     happens to wrap (a longer module label, or a 2-digit "omitted" count
+     tipping the row over its width) makes only THAT tile taller. */
+  .section-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: 24px; margin: 17.6px 0 0; }
+  @media (max-width: 640px) { .section-cards { grid-template-columns: repeat(2, 1fr); } }
+  .section-card { background: transparent; border: none; border-radius: 0; box-shadow: none; padding: 0; }
+  .section-card .sc-title { font-family: var(--hel); font-size: 13.12px; font-weight: 700; color: var(--text); margin-bottom: 8px; min-height: 34px; display: flex; align-items: flex-end; }
+  .sc-counts { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 11.2px; margin-bottom: 9.6px; min-height: 35px; }
+  .sc-count { font-family: var(--hel); font-size: 12.8px; font-weight: 700; color: var(--faint); }
+  .sc-count.ok { color: var(--green); }
+  .sc-count.bad { color: var(--red); }
+  .sc-count span { font-weight: 500; opacity: 0.75; margin-left: 0.2em; font-size: 0.85em; }
+  .section-card .sc-qgrid { gap: 5px; }
+  .section-card .sc-qgrid-cell { width: 17px; height: 17px; border-radius: 5px; border: none; }
+  .section-card .sc-qgrid-cell.ok { background: var(--green); }
+  .section-card .sc-qgrid-cell.bad { background: var(--red); }
+  .section-card .sc-qgrid-cell.skip { background: transparent; border: 1.5px solid var(--border); }
+  .sc-meta { font-family: var(--hel); font-size: 11.52px; color: var(--faint); margin-top: 11.2px; }
+  .sc-meta .ok { color: var(--green); font-weight: 700; }
   .takeaways { list-style: none; }
   .takeaways li { font-size: 11px; line-height: 1.65; color: var(--mid); padding: 4px 0 4px 16px; position: relative; }
   .takeaways li::before { content: '◆'; position: absolute; left: 0; top: 8px; font-size: 6px; color: var(--gold); }
@@ -257,7 +322,11 @@
   tr.q-row.open td.q-toggle { color: var(--red); }
   tr.q-detail-row > td { padding: 0; border-bottom: 1px solid #eee7da; }
   .q-detail { padding: 10px 12px 12px; background: #faf7f1; font-size: 11px; color: var(--ink); }
+  .q-detail-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 10px; margin-bottom: 8px; }
   .q-detail .q-text { margin-bottom: 8px; line-height: 1.5; }
+  .q-hide-toggle { display: inline-flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 700; letter-spacing: 0.02em; color: var(--mid); cursor: pointer; user-select: none; }
+  .q-hide-toggle input { cursor: pointer; }
+  .q-fr-hidden { font-size: 10.5px; font-style: italic; color: var(--faint); padding: 6px 8px; border: 1px dashed var(--border); border-radius: 4px; }
   .q-detail .q-choices { list-style: none; margin: 0; padding: 0; }
   .q-detail .q-choices li { padding: 4px 8px; border: 1px solid var(--border); border-radius: 4px; margin-bottom: 4px; display: flex; justify-content: space-between; gap: 8px; }
   .q-detail .q-choices li.q-correct { border-color: var(--green); background: #eef4ef; }
@@ -359,17 +428,20 @@
   </div>
   <div class="top-row">
     <div class="score-summary">
-      <div class="score-tiles" id="score-tiles"></div>
+      <div class="score-card" id="score-card">
+        <div class="score-tiles" id="score-tiles"></div>
+        <div class="raw-stats" id="raw-stats"></div>
+      </div>
       <div class="score-caption" id="score-caption"></div>
     </div>
   </div>
-  <div class="raw-stats" id="raw-stats"></div>
-  <div class="sec-hed">Path to target score</div>
-  <div id="score-bridge"></div>
-  <div class="sec-hed">Section breakdown</div>
   <div id="section-breakdown"></div>
+  <div class="sec-hed">Path to target score</div>
+  <div class="bridge-card" id="bridge-card">
+    <div id="score-bridge"></div>
+  </div>
+  <div id="bridge-note-outer"></div>
   <div class="sec-hed" id="skillbreak-hed" style="display:none;">Skill breakdown</div>
-  <div id="topics-costing" style="display:none;"></div>
   <div id="accuracy-by-topic" style="display:none;"></div>
   <div class="sec-hed" id="quadrant-hed" style="display:none;">Confidence quadrant</div>
   <p class="quadrant-sub" id="quadrant-sub" style="display:none;">Each dot is one multiple-choice question — time spent (x) vs. right or wrong (y), relative to <span id="quadrant-sub-first"></span>&rsquo;s own median pace. Hover a dot, or click to review the question.</p>
@@ -462,6 +534,29 @@
     qModalTitle.textContent = 'Question ' + row.n + (label ? ' — ' + label : '');
     qModalBody.innerHTML = '';
     qModalBody.appendChild(renderQuestionDetail(row));
+    qModalOverlay.classList.add('open');
+  }
+  // Same modal shell, multiple questions stacked with a divider between
+  // each — used by the bridge chart's "click a bar to see those
+  // questions" (a skill or domain rollup can cover several missed
+  // questions at once, not just one). renderQuestionDetail is a plain
+  // function declaration (hoisted), same as openQuestionModal above, so
+  // calling it here before its own definition further down is safe.
+  function openQuestionListModal(rowsList, label) {
+    qModalTitle.textContent = label + ' — ' + rowsList.length + ' question' + (rowsList.length === 1 ? '' : 's');
+    qModalBody.innerHTML = '';
+    rowsList.forEach(function (r, i) {
+      if (i > 0) {
+        var hr = document.createElement('div');
+        hr.className = 'q-list-divider';
+        qModalBody.appendChild(hr);
+      }
+      var qhead = document.createElement('div');
+      qhead.className = 'q-list-qnum';
+      qhead.textContent = 'Question ' + r.n;
+      qModalBody.appendChild(qhead);
+      qModalBody.appendChild(renderQuestionDetail(r));
+    });
     qModalOverlay.classList.add('open');
   }
   function closeQuestionModal() { qModalOverlay.classList.remove('open'); }
@@ -1231,8 +1326,11 @@
     var m2Rows = sec.rows.filter(function (r) { return r.moduleIndex === 1; });
     var m1 = buildSectionStatsFromRows(m1Rows);
     var m2 = buildSectionStatsFromRows(m2Rows);
-    m1.key = sec.key; m1.label = sec.label + ' — Module 1'; m1.variant = null; m1.isModule = true;
-    m2.key = sec.key; m2.label = sec.label + ' — Module 2' + (sec.variant ? ' (' + sec.variant + ')' : ''); m2.variant = sec.variant; m2.isModule = true;
+    // Abbreviated to "R&W" for the module tile headers specifically (not
+    // anywhere else this label is used) — matches how tight the tile is.
+    var tileSubject = /^reading\s*(&|and)\s*writing$/i.test(sec.label) ? 'R&W' : sec.label;
+    m1.key = sec.key; m1.label = tileSubject + ' – Module 1'; m1.variant = null; m1.isModule = true;
+    m2.key = sec.key; m2.label = tileSubject + ' – Module 2' + (sec.variant ? ' (' + sec.variant + ')' : ''); m2.variant = sec.variant; m2.isModule = true;
     // The two modules split the section's allotted time evenly (see
     // banks.js's SECTION_MODULE_TIME_LIMITS comment — the stored figure is
     // already per-module), so halving the whole-section total gives each
@@ -1279,21 +1377,20 @@
      color, without drawing a circle to do it. */
   function scoreTile(label, c, t, scaledScore, big) {
     var p = t ? c / t : 0;
-    var band = p < 0.5 ? 'var(--red)' : (p >= 0.75 ? 'var(--green)' : 'var(--gold)');
     var tile = document.createElement('div');
     tile.className = 'score-tile' + (big ? ' big' : '');
-    tile.style.borderTopColor = band;
-    var num = document.createElement('div');
-    num.className = 'tile-score ' + (big ? 'big' : 'small');
-    num.textContent = (scaledScore !== null && scaledScore !== undefined) ? scaledScore : (Math.round(p * 100) + '%');
-    tile.appendChild(num);
-    // The c/t (%) fraction that used to sit here is now shown once, plainly,
-    // in the Correct/Wrong/Accuracy/Unattempted strip right below this
-    // card — no need to repeat "67%" a second time under every tile too.
+    // Label above the number (small caps caption, then the number) — one
+    // connected score card, not a stack of individually-bordered tiles, so
+    // the visual hierarchy comes from type size/weight alone, no per-tile
+    // accent border.
     var lb = document.createElement('div');
     lb.className = 'tile-lab' + (big ? ' big' : '');
     lb.textContent = label;
     tile.appendChild(lb);
+    var num = document.createElement('div');
+    num.className = 'tile-score ' + (big ? 'big' : 'small');
+    num.textContent = (scaledScore !== null && scaledScore !== undefined) ? scaledScore : (Math.round(p * 100) + '%');
+    tile.appendChild(num);
     return tile;
   }
 
@@ -1377,8 +1474,8 @@
     var mathScaled = satSectionScore(mathSec, MATH_CURVE);
     var composite = (rwScaled !== null && mathScaled !== null) ? rwScaled + mathScaled : null;
     tilesEl.appendChild(scoreTile('Composite (400–1600)', totalC, totalQ, composite, true));
-    if (rw) tilesEl.appendChild(scoreTile('Reading & Writing', rw.c, rw.t, rwScaled, false));
-    if (mathSec) tilesEl.appendChild(scoreTile('Math', mathSec.c, mathSec.t, mathScaled, false));
+    if (rw) tilesEl.appendChild(scoreTile('Reading & Writing (200–800)', rw.c, rw.t, rwScaled, false));
+    if (mathSec) tilesEl.appendChild(scoreTile('Math (200–800)', mathSec.c, mathSec.t, mathScaled, false));
     var routedEasier = [rw, mathSec].some(function (s) { return s && s.variant === 'Easier'; });
     scoreCaption.textContent = 'The fraction under each score is raw percent correct on this diagnostic. The score itself reads that off College Board\'s own published raw-to-scaled conversion table (Reading & Writing and Math have separate tables), then adjusts for which module the misses fell in — because the SAT is adaptive, missing questions in Module 1 costs more than missing the same number in Module 2' + (routedEasier ? ', and a weaker Module 1 also routes that section to the easier Module 2' : '') + '; the real digital SAT curve varies by test, so this is a close estimate, not the exact official scoring.';
   } else if (data.t === 'ACT') {
@@ -1400,6 +1497,18 @@
   } else {
     tilesEl.style.display = 'none';
   }
+  // Groups every non-composite tile (R&W+Math for SAT; up to 4 sections for
+  // ACT) into their own wrapper so CSS can lay them out as a smaller column
+  // beside the composite tile instead of all tiles sitting in one equal-
+  // width row — see .score-tiles-small in the stylesheet.
+  (function groupSmallScoreTiles() {
+    var small = Array.prototype.filter.call(tilesEl.children, function (el) { return !el.classList.contains('big'); });
+    if (!small.length) return;
+    var wrap = document.createElement('div');
+    wrap.className = 'score-tiles-small';
+    small.forEach(function (el) { wrap.appendChild(el); });
+    tilesEl.appendChild(wrap);
+  })();
 
   // ═══ RAW STATS STRIP ═══ whole-diagnostic Correct/Wrong/Unattempted/
   // Accuracy, computed from the same totalC/totalQ/skipped the rest of
@@ -1415,14 +1524,24 @@
     var attempted = totalQ - skipped;
     var wrongCount = totalQ - totalC - skipped;
     var accuracyPct = attempted ? Math.round(totalC / attempted * 100) : 0;
+    // Each stat gets its own small icon (check / x / target / dashed
+    // circle) — a bare number strip read as disconnected boxes with
+    // nothing to anchor the eye; a glyph per stat is what makes this scan
+    // as one connected summary instead of four separate tiles.
+    var ICONS = {
+      correct: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5L16 9"/></svg>',
+      wrong: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/></svg>',
+      accuracy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.1" fill="currentColor" stroke="none"/></svg>',
+      unattempted: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="3 3.5"><circle cx="12" cy="12" r="9"/></svg>'
+    };
     var stats = [
-      { lab: 'Correct', val: totalC + '/' + totalQ, cls: '' },
-      { lab: 'Wrong', val: String(wrongCount), cls: wrongCount > 0 ? 'bad' : '' },
-      { lab: 'Accuracy', val: accuracyPct + '%', cls: accuracyPct >= 75 ? 'ok' : (accuracyPct < 50 ? 'bad' : '') },
-      { lab: 'Unattempted', val: String(skipped), cls: skipped > 0 ? 'bad' : '' }
+      { lab: 'Correct', val: totalC + '/' + totalQ, cls: '', icon: ICONS.correct },
+      { lab: 'Wrong', val: String(wrongCount), cls: wrongCount > 0 ? 'bad' : '', icon: ICONS.wrong },
+      { lab: 'Accuracy', val: accuracyPct + '%', cls: accuracyPct >= 75 ? 'ok' : (accuracyPct < 50 ? 'bad' : ''), icon: ICONS.accuracy },
+      { lab: 'Unattempted', val: String(skipped), cls: skipped > 0 ? 'bad' : '', icon: ICONS.unattempted }
     ];
     wrap.innerHTML = stats.map(function (s) {
-      return '<div class="raw-stat ' + s.cls + '"><div class="raw-stat-lab">' + s.lab + '</div><div class="raw-stat-num">' + s.val + '</div></div>';
+      return '<div class="raw-stat ' + s.cls + '"><span class="raw-stat-icon">' + s.icon + '</span><div class="raw-stat-text"><div class="raw-stat-lab">' + s.lab + '</div><div class="raw-stat-num">' + s.val + '</div></div></div>';
     }).join('');
   })();
 
@@ -1591,7 +1710,7 @@
       } else { undomainedPts += item.points; undomainedN += 1; }
     });
     var domainItems = Object.keys(domainBuckets)
-      .map(function (d) { return { label: 'Other — ' + d, points: domainBuckets[d].points, n: domainBuckets[d].n }; })
+      .map(function (d) { return { label: 'Other — ' + d, dom: d, points: domainBuckets[d].points, n: domainBuckets[d].n }; })
       .sort(function (a, b) { return b.points - a.points; });
 
     // No bar slot is reserved for a generic catch-all anymore — the
@@ -1606,8 +1725,17 @@
       else { genericOtherPts += item.points; genericOtherN += item.n; }
     });
 
-    var shownItems = namedItems.concat(shownDomainItems.map(function (it) {
-      return { label: it.label + (it.n > 1 ? ' (' + it.n + ' skills)' : ''), points: it.points };
+    // filterType/filterName are what the hover tooltip and click-through
+    // (see drawBridge()'s bar-hit-testing) use to look up real stats and
+    // matching questions for a bar — 'skill' bars resolve against the
+    // global `skills` map by exact name; 'domain' rollups resolve against
+    // `domains` (the whole domain's accuracy, not just the folded-in
+    // skills' share of it — the same number "Skill Breakdown" shows for
+    // that domain, so the two sections never disagree).
+    var shownItems = namedItems.map(function (it) {
+      return { label: it.label, points: it.points, filterType: 'skill', filterName: it.label };
+    }).concat(shownDomainItems.map(function (it) {
+      return { label: it.label + (it.n > 1 ? ' (' + it.n + ' skills)' : ''), points: it.points, filterType: 'domain', filterName: it.dom };
     }));
 
     // The bars now always sum to exactly this — no more overshoot past
@@ -1653,10 +1781,33 @@
       renderBridge();
     }
 
+    // Every question, across every section, that this bar's skill/domain
+    // covers AND was actually missed — "recoverable points" is inherently
+    // about the misses, so a click surfaces the questions that cost the
+    // points this bar claims are recoverable, not every attempt.
+    function rowsForItem(item) {
+      var out = [];
+      sections.forEach(function (s) {
+        s.rows.forEach(function (r) {
+          if (r.ok) return;
+          if (item.filterType === 'skill' && r.sk === item.filterName) out.push(r);
+          else if (item.filterType === 'domain' && r.dom === item.filterName) out.push(r);
+        });
+      });
+      return out;
+    }
+    function onBarClick(item) {
+      var matches = rowsForItem(item);
+      if (!matches.length) return;
+      openQuestionListModal(matches, item.label);
+    }
+
     renderBridge();
 
     function renderBridge() {
       bridgeWrap.innerHTML = '';
+      var noteOuter = document.getElementById('bridge-note-outer');
+      if (noteOuter) noteOuter.innerHTML = '';
       var outer = document.createElement('div');
       outer.className = 'bridge-wrap';
 
@@ -1676,7 +1827,9 @@
         msg2.textContent = 'Not enough missed questions on this diagnostic to attribute recoverable points to specific skills yet.';
         canvasWrap.appendChild(msg2);
       } else {
-        canvasWrap.appendChild(drawBridge(shownItems, currentComposite, reachable, targetScore, applyTargetChange));
+        canvasWrap.appendChild(drawBridge(shownItems, currentComposite, reachable, targetScore, applyTargetChange, onBarClick));
+
+        if (!noteOuter) { bridgeWrap.appendChild(outer); return; }
 
         // The leftover recoverable points that didn't earn their own named
         // or domain-rollup bar used to be flattened into one "Other
@@ -1685,18 +1838,20 @@
         // opportunity when it's actually a sum over several small,
         // unnamed skills. That's a different KIND of fact (breadth of the
         // gap, not a single fixable thing), so it's stated as a sentence
-        // instead of a bar competing for space on the same axis.
+        // instead of a bar competing for space on the same axis. Lives
+        // below the whole card now (see #bridge-note-outer), not nested
+        // inside it, so it reads as commentary on the section as a whole.
         if (genericOtherPts >= 0.5) {
           var otherNote = document.createElement('div');
-          otherNote.className = 'bridge-note bridge-other-note';
+          otherNote.className = 'bridge-note-block bridge-other-note';
           var otherPtsLabel = isSAT ? Math.max(10, roundToTen(genericOtherPts)) : Math.round(genericOtherPts);
           otherNote.textContent = 'Plus roughly ' + otherPtsLabel + ' more points spread across ' + genericOtherN + ' other ' + (genericOtherN === 1 ? 'skill' : 'skills') + ', each too small on its own to call out by name.';
-          outer.appendChild(otherNote);
+          noteOuter.appendChild(otherNote);
         }
 
         var note = document.createElement('div');
-        note.className = 'bridge-note';
-        var baseText = 'Bars show real composite points recoverable per skill, from ' + currentComposite + ' up to ' + reachable + ' if every gap this diagnostic found were closed.';
+        note.className = 'bridge-note-block';
+        var baseText = 'Bars show real composite points recoverable per skill, from ' + currentComposite + ' up to ' + reachable + ' if every gap this diagnostic found were closed. Hover a bar for that skill\'s accuracy, or click it to see those questions.';
         if (hitCeiling) baseText += ' That total is capped at the maximum possible score of ' + scoreMax + '.';
         var HIGH_BAND = isSAT ? 1500 : 34;
         if (currentComposite >= HIGH_BAND || targetScore >= HIGH_BAND) {
@@ -1709,7 +1864,7 @@
           targetText = 'The dashed line marks your target of ' + targetScore + '. It is within reach from these fixes alone.';
         }
         note.textContent = baseText + ' ' + targetText;
-        outer.appendChild(note);
+        noteOuter.appendChild(note);
       }
 
       bridgeWrap.appendChild(outer);
@@ -1727,22 +1882,87 @@
       });
     }
 
-    function drawBridge(items, startVal, endVal, targetVal, onDragEnd) {
+    function roundTopRect(ctx, x, y, wid, hgt, r) {
+      if (hgt <= 0) return;
+      r = Math.max(0, Math.min(r, wid / 2, hgt));
+      ctx.beginPath();
+      ctx.moveTo(x, y + hgt);
+      ctx.lineTo(x, y + r);
+      ctx.arcTo(x, y, x + r, y, r);
+      ctx.lineTo(x + wid - r, y);
+      ctx.arcTo(x + wid, y, x + wid, y + r, r);
+      ctx.lineTo(x + wid, y + hgt);
+      ctx.closePath();
+      ctx.fill();
+    }
+    function roundRect(ctx, x, y, wid, hgt, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + wid, y, x + wid, y + hgt, r);
+      ctx.arcTo(x + wid, y + hgt, x, y + hgt, r);
+      ctx.arcTo(x, y + hgt, x, y, r);
+      ctx.arcTo(x, y, x + wid, y, r);
+      ctx.closePath();
+    }
+
+    function drawBridge(items, startVal, endVal, targetVal, onDragEnd, onBarClick) {
       var bars = [{ label: 'Current', val: startVal, isEndpoint: true }]
-        .concat(items.map(function (e) { return { label: e.label, points: e.points, tag: e.tag }; }))
+        .concat(items.map(function (e) { return { label: e.label, points: e.points, tag: e.tag, filterType: e.filterType, filterName: e.filterName }; }))
         .concat([{ label: 'Max recoverable', val: endVal, isEndpoint: true }]);
 
       // Width grows with the bar count (more likely now that a low
       // scorer's spread-out gaps can name up to 9 skills instead of 6) so
       // bars/labels don't get squeezed thinner than a 6-bar chart used to
-      // be — capped at 680px, the widest a chart can run and still sit
-      // inside the printed page's margins (8.5in page minus 0.65in side
-      // padding each side, at 96dpi).
-      var w = Math.min(680, Math.max(620, 52 * bars.length)), h = 230, padL = 40, padR = 62, padT = 16, padB = 46;
-      var plotW = w - padL - padR, plotH = h - padT - padB;
+      // be. Embedded in the portal (see the body.embedded check right
+      // after <body> opens) it can run as wide as the native report's own
+      // chart does (980px, matching #screen-practice-tests .panel-wide);
+      // opened standalone it stays capped at 860px so it still fits the
+      // printed page's margins (8.5in minus 0.65in each side, at 96dpi)
+      // when printed/saved as a PDF. Taller too (230 -> 340+) now that the
+      // chart isn't sharing its card with the old "Top 5 weakest skills"
+      // list.
+      var isEmbedded = document.body.classList.contains('embedded');
+      // Standalone's real ceiling is ~630px (8.5in page minus its own
+      // padding minus bridge-wrap's padding) — sized to fit that without
+      // scrolling in the common case; the overflow-x:auto above is what
+      // keeps a wider chart (many bars) from ever clipping instead of
+      // just gaining a horizontal scrollbar.
+      var wCap = isEmbedded ? 1040 : 620, wMin = isEmbedded ? 820 : 560;
+      var w = Math.min(wCap, Math.max(wMin, 100 * bars.length)), padL = 50, padR = 100, padT = 24;
       var n = bars.length;
-      var barW = plotW / n * 0.62;
+      var plotW = w - padL - padR;
       var gapW = plotW / n;
+      var barW = gapW * 0.62;
+
+      // Bar labels are shown in FULL now — no more 16-char/"…" truncation
+      // and no cap on wrapped lines — so a long skill or domain-rollup
+      // name just wraps across as many lines as it needs at this chart's
+      // actual column width. Since that affects how tall the chart has to
+      // be, it's measured with a throwaway canvas context BEFORE the real
+      // one is created (padB below can't be a fixed guess any more).
+      var measureCtx = document.createElement('canvas').getContext('2d');
+      measureCtx.font = '600 9.5px Poppins, sans-serif';
+      var labelMaxW = gapW + 14;
+      function wrapLinesFor(text, maxW) {
+        var words = text.split(' ');
+        var lines = [], cur = '';
+        words.forEach(function (word) {
+          var test = cur ? cur + ' ' + word : word;
+          if (measureCtx.measureText(test).width > maxW && cur) { lines.push(cur); cur = word; }
+          else cur = test;
+        });
+        if (cur) lines.push(cur);
+        return lines;
+      }
+      var maxLabelLines = 1;
+      bars.forEach(function (b) {
+        var lc = wrapLinesFor(b.label, labelMaxW).length;
+        if (lc > maxLabelLines) maxLabelLines = lc;
+      });
+      var labelLineH = 11;
+      var padB = 34 + maxLabelLines * labelLineH;
+      var h = 340 + (maxLabelLines - 1) * labelLineH;
+      var plotH = h - padT - padB;
 
       var made = crispCanvas2(w, h), cv = made.cv, ctx = made.ctx;
       cv.setAttribute('role', 'img');
@@ -1758,9 +1978,13 @@
       // distance to it, rather than being hidden or force-fit to reach
       // it). Returns the axis bounds so the drag handler can invert a
       // pointer position back into a score value using this same scale.
+      // Hit regions for the mid-chart (non-endpoint) bars, rebuilt on every
+      // paint() call — used by the mousemove/click handlers below.
+      var barRects = [];
       function paint(curTargetVal) {
         ctx.clearRect(0, 0, w, h);
-        cv.setAttribute('aria-label', 'Score bridge from current composite ' + startVal + ' to reachable composite ' + endVal + ', with a target reference line at ' + curTargetVal + '. Drag the dashed line, or use the target field above the chart, to change it.');
+        barRects = [];
+        cv.setAttribute('aria-label', 'Score bridge from current composite ' + startVal + ' to reachable composite ' + endVal + ', with a target reference line at ' + curTargetVal + '. Drag the dashed line, or use the target field above the chart, to change it. Hover or click a bar for that skill\'s accuracy and missed questions.');
 
         var minVal = Math.min(startVal, curTargetVal);
         var maxVal = Math.max(endVal, curTargetVal);
@@ -1769,6 +1993,16 @@
         var axisMin = minVal - headroom, axisMax = maxVal + headroom;
         function y(v) { return padT + plotH - ((v - axisMin) / (axisMax - axisMin)) * plotH; }
 
+        // Subtle horizontal gridlines — a plain baseline read as dated;
+        // four faint reference lines is the same trick every modern chart
+        // library (Chart.js, Recharts, etc.) uses to make bar heights
+        // scannable at a glance without adding any visual noise.
+        ctx.strokeStyle = 'rgba(17,17,17,0.055)';
+        ctx.lineWidth = 1;
+        for (var gi = 1; gi <= 4; gi++) {
+          var gy = padT + (plotH / 4) * gi;
+          ctx.beginPath(); ctx.moveTo(padL, gy); ctx.lineTo(padL + plotW, gy); ctx.stroke();
+        }
         // baseline
         ctx.strokeStyle = 'rgba(17,17,17,0.15)';
         ctx.lineWidth = 1;
@@ -1783,21 +2017,32 @@
             var topY = y(b.val);
             var baseY = padT + plotH;
             ctx.fillStyle = (b.label === 'Max recoverable') ? '#5E8B6F' : '#243447';
-            ctx.fillRect(bx, topY, barW, baseY - topY);
+            roundTopRect(ctx, bx, topY, barW, baseY - topY, 4);
             ctx.fillStyle = '#1a1a1a';
-            ctx.font = '700 15px Poppins, sans-serif';
+            ctx.font = '700 17px Poppins, sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText(String(b.val), bx + barW / 2, topY - 8);
+            ctx.fillText(String(b.val), bx + barW / 2, topY - 9);
             running = b.val;
           } else {
             var fromY = y(running);
             var toVal = running + b.points;
             var toY = y(toVal);
             var top = Math.min(fromY, toY), bot = Math.max(fromY, toY);
+            var segH = Math.max(bot - top, 2);
             ctx.fillStyle = colors[(i - 1) % colors.length];
-            ctx.fillRect(bx, top, barW, Math.max(bot - top, 2));
+            // These segments float mid-chart — neither end sits on the
+            // baseline the way Current/Max recoverable do — so unlike
+            // those two, BOTH ends round here, not just the top; a flat
+            // bottom edge on a bar that isn't resting on anything read as
+            // an unfinished/disconnected shape.
+            roundRect(ctx, bx, top, barW, segH, Math.min(4, segH / 2));
+            ctx.fill();
+            // Hoverable/clickable — see the mousemove/pointerdown handlers
+            // below, which hit-test against this list in the same
+            // client-coordinate space valueFromClientY uses.
+            if (b.filterType) barRects.push({ x: bx, y: top, w: barW, h: segH, item: b });
             ctx.fillStyle = '#1a1a1a';
-            ctx.font = '600 11px Poppins, sans-serif';
+            ctx.font = '600 12px Poppins, sans-serif';
             ctx.textAlign = 'center';
             // SAT composites only ever move in 10-point steps (each section
             // score is a multiple of 10), so a per-skill "+13" reads as a
@@ -1806,15 +2051,15 @@
             // number on this report — floor of 10 so a genuinely nonzero
             // sliver still shows as recoverable rather than rounding to +0.
             var barLabelPts = isSAT ? Math.max(10, roundToTen(b.points)) : Math.round(b.points);
-            ctx.fillText('+' + barLabelPts, bx + barW / 2, top - 6);
+            ctx.fillText('+' + barLabelPts, bx + barW / 2, top - 7);
             running = toVal;
           }
-          // x-axis label (rotated-free: short skill names, wrapped by truncation)
+          // x-axis label (rotated-free: full text, wrapped to as many
+          // lines as it needs — see the padB/h measurement above).
           ctx.fillStyle = 'rgba(17,17,17,0.6)';
-          ctx.font = '600 8.5px Poppins, sans-serif';
+          ctx.font = '600 9.5px Poppins, sans-serif';
           ctx.textAlign = 'center';
-          var label = b.label.length > 16 ? b.label.slice(0, 15) + '…' : b.label;
-          wrapCanvasLabel(ctx, label, bx + barW / 2, padT + plotH + 14, barW + 14, 9);
+          wrapCanvasLabel(ctx, b.label, bx + barW / 2, padT + plotH + 15, gapW + 14, labelLineH);
         });
 
         // Target reference line — dashed, spans the full plot width, drawn
@@ -1830,29 +2075,47 @@
         ctx.beginPath(); ctx.arc(padL + plotW, ty, 3.5, 0, Math.PI * 2);
         ctx.fillStyle = '#B0271C';
         ctx.fill();
-        ctx.font = '700 9.5px Poppins, sans-serif';
-        ctx.textAlign = 'left';
-        // Clamp the label's vertical position to stay inside the canvas even
+        // Solid rounded pill instead of bare text — reads as a proper chart
+        // annotation (the kind Chart.js/Recharts plugins draw) rather than
+        // a stray label floating off the plot edge.
+        ctx.font = '700 10.5px Poppins, sans-serif';
+        var targetLabel = 'Target ' + curTargetVal;
+        var labelW = ctx.measureText(targetLabel).width;
+        var pillPadX = 8, pillH = 18, pillW = labelW + pillPadX * 2;
+        // Clamp the pill's vertical position to stay inside the canvas even
         // when the target line itself sits right at the top or bottom edge
         // of the plot area — the line stays at its true position, only the
-        // text nudges to remain fully readable.
-        var tLabelY = Math.max(padT + 8, Math.min(padT + plotH - 4, ty + 3));
-        ctx.fillText('Target ' + curTargetVal, padL + plotW + 8, tLabelY);
+        // pill nudges to remain fully visible.
+        var pillY = Math.max(padT, Math.min(padT + plotH - pillH, ty - pillH / 2));
+        ctx.fillStyle = '#B0271C';
+        roundRect(ctx, padL + plotW + 8, pillY, pillW, pillH, 8);
+        ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(targetLabel, padL + plotW + 8 + pillPadX, pillY + pillH / 2 + 0.5);
+        ctx.textBaseline = 'alphabetic';
 
         return { axisMin: axisMin, axisMax: axisMax };
       }
 
       var axis = paint(targetVal);
 
-      // Draggable target line: click/touch anywhere on the chart and drag
-      // vertically to set the target, instead of only being able to type
-      // a number into the field above it. Pointer Events cover mouse and
-      // touch alike. setPointerCapture keeps the drag tracking even if
-      // the cursor slips outside the small canvas — safe here because
-      // paint() redraws THIS SAME canvas in place rather than replacing
-      // it, so the capture never gets detached mid-drag. The surrounding
-      // target input/note text only resync once, on release, via the
-      // same onDragEnd callback the number input itself uses.
+      // Draggable target line: click/touch anywhere on EMPTY chart space
+      // and drag vertically to set the target, instead of only being able
+      // to type a number into the field above it. Pointer Events cover
+      // mouse and touch alike. setPointerCapture keeps the drag tracking
+      // even if the cursor slips outside the small canvas — safe here
+      // because paint() redraws THIS SAME canvas in place rather than
+      // replacing it, so the capture never gets detached mid-drag. The
+      // surrounding target input/note text only resync once, on release,
+      // via the same onDragEnd callback the number input itself uses.
+      //
+      // A pointerdown that lands ON a bar instead starts a bar
+      // click-through (see barRects/hitTestBar below) rather than a
+      // target drag — the two gestures share the same canvas but a click
+      // on a bar is never meant to also nudge the target line out from
+      // under it.
       cv.style.cursor = 'ns-resize';
       cv.style.touchAction = 'none';
       var dragTarget = targetVal;
@@ -1864,23 +2127,93 @@
         v = Math.max(startVal, Math.min(scoreMax, v));
         return isSAT ? roundToTen(v) : Math.round(v);
       }
+      function hitTestBar(clientX, clientY) {
+        var rect = cv.getBoundingClientRect();
+        var scaleX = rect.width ? w / rect.width : 1;
+        var scaleY = rect.height ? h / rect.height : 1;
+        var lx = (clientX - rect.left) * scaleX;
+        var ly = (clientY - rect.top) * scaleY;
+        for (var i = 0; i < barRects.length; i++) {
+          var br = barRects[i];
+          if (lx >= br.x && lx <= br.x + br.w && ly >= br.y && ly <= br.y + br.h) return br;
+        }
+        return null;
+      }
+
+      // Floating tooltip — a plain sibling <div> next to the canvas
+      // (position:fixed, see .bridge-tooltip in the stylesheet), not
+      // drawn on the canvas itself, so its text stays real DOM (readable,
+      // selectable) rather than more canvas drawing code.
+      var wrap = document.createElement('div');
+      wrap.className = 'bridge-canvas-inner';
+      wrap.appendChild(cv);
+      var tooltip = document.createElement('div');
+      tooltip.className = 'bridge-tooltip';
+      wrap.appendChild(tooltip);
+      function statsForItem(item) {
+        if (item.filterType === 'skill') return skills[item.filterName];
+        if (item.filterType === 'domain') return domains[item.filterName];
+        return null;
+      }
+      function showTooltip(clientX, clientY, item) {
+        var stat = statsForItem(item);
+        if (!stat || !stat.t) { tooltip.style.display = 'none'; return; }
+        var pct = Math.round(stat.c / stat.t * 100);
+        tooltip.innerHTML = '<b>' + item.label + '</b>' + pct + '% correct (' + stat.c + '/' + stat.t + ')' +
+          '<span class="bridge-tooltip-hint">Click to see these questions</span>';
+        tooltip.style.left = (clientX + 14) + 'px';
+        tooltip.style.top = (clientY + 14) + 'px';
+        tooltip.style.display = 'block';
+      }
+      function hideTooltip() { tooltip.style.display = 'none'; }
+
+      var isDraggingTarget = false;
+      var pendingBarItem = null;
       cv.addEventListener('pointerdown', function (e) {
+        var hit = hitTestBar(e.clientX, e.clientY);
         cv.setPointerCapture(e.pointerId);
+        if (hit) { pendingBarItem = hit.item; isDraggingTarget = false; return; }
+        pendingBarItem = null;
+        isDraggingTarget = true;
         dragTarget = valueFromClientY(e.clientY);
         axis = paint(dragTarget);
+        hideTooltip();
       });
       cv.addEventListener('pointermove', function (e) {
-        if (e.buttons === 0) return; // not currently pressed/dragging
-        dragTarget = valueFromClientY(e.clientY);
-        axis = paint(dragTarget);
+        if (isDraggingTarget && e.buttons !== 0) {
+          dragTarget = valueFromClientY(e.clientY);
+          axis = paint(dragTarget);
+          return;
+        }
+        var hit = hitTestBar(e.clientX, e.clientY);
+        if (hit) {
+          cv.style.cursor = 'pointer';
+          showTooltip(e.clientX, e.clientY, hit.item);
+        } else {
+          cv.style.cursor = 'ns-resize';
+          hideTooltip();
+        }
       });
+      cv.addEventListener('pointerleave', function () { hideTooltip(); });
       cv.addEventListener('pointerup', function () {
-        if (typeof onDragEnd === 'function') onDragEnd(dragTarget);
+        if (isDraggingTarget) {
+          isDraggingTarget = false;
+          if (typeof onDragEnd === 'function') onDragEnd(dragTarget);
+          return;
+        }
+        if (pendingBarItem) {
+          var item = pendingBarItem;
+          pendingBarItem = null;
+          if (typeof onBarClick === 'function') onBarClick(item);
+        }
       });
 
-      return cv;
+      return wrap;
     }
 
+    // No cap on line count any more — labels render in full (see the
+    // padB/h measurement pass in drawBridge, which sizes the chart to fit
+    // however many lines the longest label actually needs).
     function wrapCanvasLabel(ctx, text, cx, y0, maxW, lineH) {
       var words = text.split(' ');
       var lines = [], cur = '';
@@ -1890,7 +2223,6 @@
         else cur = test;
       });
       if (cur) lines.push(cur);
-      lines = lines.slice(0, 2);
       lines.forEach(function (ln, i) { ctx.fillText(ln, cx, y0 + i * lineH); });
     }
 
@@ -1978,43 +2310,48 @@
     return wrap;
   }
 
+  // Condensed module snapshot tiles — module name, a correct/incorrect/
+  // omitted count line, a plain color grid (no question numbers — this is
+  // a scan-at-a-glance map, not a second place to read question content;
+  // clicking a square still opens that question in the shared modal
+  // below), and the average time on correct vs. incorrect questions. The
+  // richer per-module detail that used to live here (time-by-difficulty,
+  // the distractor-pattern flag, by-content-area bars) moved to the same
+  // altitude it's actually useful at instead: content-area accuracy now
+  // lives once per SUBJECT in Skill Breakdown below rather than once per
+  // MODULE here, and the rest is still recoverable from the full
+  // question-by-question detail table at the bottom of this report.
+  function formatMinSec(ms) {
+    var totalSec = Math.round((ms || 0) / 1000);
+    var m = Math.floor(totalSec / 60), s = totalSec % 60;
+    return m + ':' + (s < 10 ? '0' : '') + s;
+  }
   var sbEl = document.getElementById('section-breakdown');
   var cardsWrap = document.createElement('div');
   cardsWrap.className = 'section-cards';
   displaySections.forEach(function (s5) {
     var card = document.createElement('div');
     card.className = 'section-card';
-    var pctS = s5.t ? Math.round(s5.c / s5.t * 100) : 0;
-    var incorrectN = s5.t - s5.c;
     var head = document.createElement('div');
     head.className = 'sc-hed';
-    head.innerHTML = '<span class="sc-title">' + s5.label + '</span><span class="sc-score">' + s5.c + '/' + s5.t + ' (' + pctS + '%)</span>';
+    head.innerHTML = '<span class="sc-title">' + s5.label + '</span>';
     card.appendChild(head);
-    var incEl = document.createElement('div');
-    incEl.className = 'sc-incorrect';
-    incEl.textContent = incorrectN + ' incorrect';
-    card.appendChild(incEl);
 
-    // Per-question grid — one small square per question, numbered, colored
-    // by outcome (right/wrong/unattempted) — a visual scan of WHERE misses
-    // clustered in the section before reading a single number below. Reuses
-    // the diagnostic's own Check-Your-Work grid idiom (see .dx-qnum in
-    // index.html), just recolored for a third state.
+    var omitted = s5.rows.filter(function (r) { return r.skipped; }).length;
+    var incorrectN = s5.t - s5.c - omitted;
+    var countsEl = document.createElement('div');
+    countsEl.className = 'sc-counts';
+    countsEl.innerHTML =
+      '<span class="sc-count ok">' + s5.c + ' <span>correct</span></span>' +
+      '<span class="sc-count bad">' + incorrectN + ' <span>incorrect</span></span>' +
+      '<span class="sc-count">' + omitted + ' <span>omitted</span></span>';
+    card.appendChild(countsEl);
+
     var gridEl = document.createElement('div');
     gridEl.className = 'sc-qgrid';
     s5.rows.forEach(function (r) {
       var cell = document.createElement('div');
       cell.className = 'sc-qgrid-cell ' + (r.skipped ? 'skip' : (r.ok ? 'ok' : 'bad'));
-      var num = document.createElement('span');
-      num.textContent = r.n;
-      cell.appendChild(num);
-      // Custom tooltip (not the native `title` attribute — that can't be
-      // styled and looks out of place on a branded page) — just the
-      // question number and outcome, no text preview (removed on
-      // purpose: this grid is meant to be scanned as a quick right/wrong/
-      // unattempted map, not a second place to read question content —
-      // clicking a tile already opens the full question in the shared
-      // modal below via renderQuestionDetail).
       var tip = document.createElement('div');
       tip.className = 'sc-qgrid-tooltip';
       var statusWord = r.skipped ? 'Unattempted' : (r.ok ? 'Correct' : 'Incorrect');
@@ -2026,116 +2363,18 @@
     });
     card.appendChild(gridEl);
 
-    // Time On Section/Module / Time On Correct / Time On Incorrect. Only
-    // shown when there's actually timing data to show (older saved
-    // reports, or a section with zero recorded time, just skip this row
-    // rather than displaying an all-zero line). Each module's own time is
-    // independent of the other's (see the per-module moduleStartAt rebase
-    // above) — Module 2's clock isn't Module 1's carried forward.
+    // Avg time on a correct question vs. an incorrect one — a real signal
+    // (rushing to a wrong answer vs. working carefully to a right one),
+    // not the same "avg per question" figure restated.
+    var avgCorrectMs = s5.c ? (s5.timeCorrect / s5.c) : 0;
+    var avgIncorrectMs = incorrectN ? (s5.timeIncorrect / incorrectN) : 0;
     if (s5.timeTotal > 0) {
-      var timeEl = document.createElement('div');
-      timeEl.className = 'sc-time';
-      var timeHtml =
-        '<span class="sc-time-item"><span class="sc-time-label">Time On ' + (s5.isModule ? 'Module' : 'Section') + '</span>' + formatDuration(s5.timeTotal) + '</span>' +
-        '<span class="sc-time-item ok"><span class="sc-time-label">Time On Correct</span>' + formatDuration(s5.timeCorrect) + '</span>' +
-        '<span class="sc-time-item bad"><span class="sc-time-label">Time On Incorrect</span>' + formatDuration(s5.timeIncorrect) + '</span>';
-      // Unused time — only shown when this section/module actually has an
-      // allotted-minutes figure to compare against (see timeAllottedMin,
-      // sourced from index.html's tl payload field; absent on reports saved
-      // before that field existed). A negative leftover (ran past the
-      // nominal limit — possible with an extended-time accommodation
-      // applied mid-attempt, or clock drift) is floored at 0 rather than
-      // shown as a confusing negative "unused" figure.
-      if (s5.timeAllottedMin > 0) {
-        var allottedMs2 = s5.timeAllottedMin * 60000;
-        var leftoverMs2 = Math.max(0, allottedMs2 - s5.timeTotal);
-        var leftoverShare2 = leftoverMs2 / allottedMs2;
-        var unusedCls = leftoverShare2 >= 0.15 ? 'bad' : '';
-        timeHtml += '<span class="sc-time-item ' + unusedCls + '"><span class="sc-time-label">Unused</span>' + formatDuration(leftoverMs2) + ' of ' + Math.round(s5.timeAllottedMin) + 'm</span>';
-      }
-      timeEl.innerHTML = timeHtml;
-      card.appendChild(timeEl);
+      var metaEl = document.createElement('div');
+      metaEl.className = 'sc-meta';
+      metaEl.innerHTML = 'Avg <span class="ok">' + formatMinSec(avgCorrectMs) + '</span> / ' + formatMinSec(avgIncorrectMs);
+      card.appendChild(metaEl);
     }
 
-    // Time by difficulty — a segmented bar showing how the clock actually
-    // split across easy/medium/hard questions. Not a new measurement: this
-    // is timeMs (already tracked per question) grouped by q.difficulty
-    // (already used for the SAT module-weighted scoring model above),
-    // just never surfaced as its own view before. A student spending
-    // disproportionate time on "easy"-tagged questions is a different,
-    // more specific coaching conversation than "ran long on this section."
-    (function renderDifficultyTime() {
-      var byDiff = { easy: 0, medium: 0, hard: 0 };
-      s5.rows.forEach(function (r) {
-        var d = r.q && r.q.difficulty;
-        if (byDiff.hasOwnProperty(d)) byDiff[d] += (r.timeMs || 0);
-      });
-      var totalDiffMs = byDiff.easy + byDiff.medium + byDiff.hard;
-      if (totalDiffMs <= 0) return;
-      var diffWrap = document.createElement('div');
-      diffWrap.className = 'sc-difftime';
-      var track = document.createElement('div');
-      track.className = 'sc-difftime-track';
-      ['easy', 'medium', 'hard'].forEach(function (d) {
-        if (byDiff[d] <= 0) return;
-        var seg = document.createElement('div');
-        seg.className = 'sc-difftime-seg ' + d;
-        seg.style.width = (byDiff[d] / totalDiffMs * 100) + '%';
-        track.appendChild(seg);
-      });
-      diffWrap.appendChild(track);
-      var legend = document.createElement('div');
-      legend.className = 'sc-difftime-legend';
-      legend.innerHTML = ['easy', 'medium', 'hard'].map(function (d) {
-        return '<span><span class="sc-difftime-dot ' + d + '"></span>' + d.charAt(0).toUpperCase() + d.slice(1) + ' ' + formatDuration(byDiff[d]) + '</span>';
-      }).join('');
-      diffWrap.appendChild(legend);
-      card.appendChild(diffWrap);
-    })();
-
-    // Distractor-pattern flag: with only 3-4 wrong-answer letters to choose
-    // from, a single letter landing on "50% of missed questions" happens
-    // by pure chance most of the time at small sample sizes (with 3 wrong
-    // choices and 3 missed questions, random guessing alone clears a 50%
-    // threshold on well over half of diagnostics). The bar is set high
-    // enough — 6+ missed MC and a clear majority — that this should only
-    // fire when a letter is landing meaningfully more than chance would
-    // predict (~33%), not on every report.
-    //
-    // This is a directly counted fact (how many missed questions landed on
-    // the same letter), not a modeled estimate, so it belongs on the same
-    // "raw" footing as the skill bars below — but it's a different KIND of
-    // fact (answering behavior, not a content gap), so it gets its own
-    // flagged callout up top rather than blending into the missed-skill
-    // text underneath, where it used to be easy to miss entirely.
-    var distEntries = Object.keys(s5.distractors || {}).map(function (l) { return { letter: l, n: s5.distractors[l] }; }).sort(function (a, b) { return b.n - a.n; });
-    if (s5.missedMc >= 6 && distEntries.length && distEntries[0].n / s5.missedMc >= 0.6) {
-      var distNote = document.createElement('div');
-      distNote.className = 'sc-flag';
-      distNote.innerHTML = '<span class="sc-flag-mark">!</span><span><strong>Possible pattern:</strong> picked (' + distEntries[0].letter + ') on ' + distEntries[0].n + ' of ' + s5.missedMc + ' missed multiple-choice questions here. Worth a quick check together; it may just be this test\'s content rather than a trap-answer habit.</span>';
-      card.appendChild(distNote);
-    }
-
-    // Two clearly-labeled blocks so the reader knows what each bar means:
-    // Per-module "Skills to focus on" bars used to live here — cut in
-    // favor of the whole-test "Topics costing the most points" list in
-    // the Skill Breakdown section further down (see renderSkillBreakdown),
-    // which is the same missed-skill data at the altitude that's actually
-    // useful (once, ranked, whole-test) instead of once per module. "By
-    // content area" stays: it shows every domain (not just misses), which
-    // the whole-test "Accuracy by topic" view doesn't fully replace since
-    // that one's per-subject rather than per-module.
-    var domLabel = document.createElement('div');
-    domLabel.className = 'sc-grouplabel';
-    domLabel.textContent = 'By content area (correct / attempted)';
-    card.appendChild(domLabel);
-    var domEntries = Object.keys(s5.domains).map(function (d) {
-      var v = s5.domains[d];
-      return { name: d, c: v.c, t: v.t, pct: v.t ? v.c / v.t : 0 };
-    }).sort(function (a, b) { return a.pct - b.pct; });
-    domEntries.forEach(function (de) {
-      card.appendChild(barRow(de.name, de.c, de.t, de.pct < 0.5 ? 'weak' : (de.pct >= 0.75 ? 'strong' : '')));
-    });
     cardsWrap.appendChild(card);
   });
   sbEl.appendChild(cardsWrap);
@@ -2326,46 +2565,86 @@
     var q = r.q || {};
     var box = document.createElement('div');
     box.className = 'q-detail';
+
+    // "Hide answer" — pinned to the top right of every question
+    // previewer, and applies to EVERY question here, correct or missed
+    // (reviewing from the bridge chart's "see those questions" list is
+    // just as useful as a self-quiz as reviewing a question answered
+    // correctly). Starts hidden (checked) by default; unchecking reveals
+    // the normal fully-marked view.
+    var actionsRow = document.createElement('div');
+    actionsRow.className = 'q-detail-actions';
+    box.appendChild(actionsRow);
+
+    var hideAnswer = true;
+    var answerWrap = document.createElement('div');
+    var toggleRow = document.createElement('label');
+    toggleRow.className = 'q-hide-toggle';
+    toggleRow.innerHTML = '<input type="checkbox" checked> Hide answer';
+    var hideCb = toggleRow.querySelector('input');
+    hideCb.addEventListener('click', function (e) { e.stopPropagation(); });
+    hideCb.addEventListener('change', function () {
+      hideAnswer = hideCb.checked;
+      renderAnswerArea();
+    });
+    actionsRow.appendChild(toggleRow);
+
     var txt = document.createElement('div');
     txt.className = 'q-text';
     txt.innerHTML = q.text || '(question text unavailable)';
     box.appendChild(txt);
+    box.appendChild(answerWrap);
 
-    if (q.type === 'mc' && q.choices) {
-      var ul = document.createElement('ul');
-      ul.className = 'q-choices';
-      q.choices.forEach(function (choice, idx) {
-        var li = document.createElement('li');
-        var isCorrectChoice = idx === q.correct;
-        var isPicked = r.givenIdx === idx;
-        if (isCorrectChoice) li.className = 'q-correct';
-        else if (isPicked) li.className = 'q-picked-wrong';
-        var left = document.createElement('span');
-        left.innerHTML = LETTERS[idx] + '. ' + choice;
-        li.appendChild(left);
-        var tag = '';
-        if (isCorrectChoice && isPicked) tag = '<span class="q-tag ok">✓ correct — selected</span>';
-        else if (isCorrectChoice) tag = '<span class="q-tag ok">✓ correct answer</span>';
-        else if (isPicked) tag = '<span class="q-tag bad">✗ selected</span>';
-        if (tag) { var t = document.createElement('span'); t.innerHTML = tag; li.appendChild(t); }
-        ul.appendChild(li);
-      });
-      box.appendChild(ul);
-      if (r.givenIdx === null) {
-        var blank = document.createElement('div');
-        blank.className = 'q-tag bad';
-        blank.style.marginTop = '4px';
-        blank.textContent = 'Left blank';
-        box.appendChild(blank);
+    function renderAnswerArea() {
+      answerWrap.innerHTML = '';
+      if (q.type === 'mc' && q.choices) {
+        var ul = document.createElement('ul');
+        ul.className = 'q-choices';
+        q.choices.forEach(function (choice, idx) {
+          var li = document.createElement('li');
+          var isCorrectChoice = idx === q.correct;
+          var isPicked = r.givenIdx === idx;
+          if (!hideAnswer) {
+            if (isCorrectChoice) li.className = 'q-correct';
+            else if (isPicked) li.className = 'q-picked-wrong';
+          }
+          var left = document.createElement('span');
+          left.innerHTML = LETTERS[idx] + '. ' + choice;
+          li.appendChild(left);
+          if (!hideAnswer) {
+            var tag = '';
+            if (isCorrectChoice && isPicked) tag = '<span class="q-tag ok">✓ correct — selected</span>';
+            else if (isCorrectChoice) tag = '<span class="q-tag ok">✓ correct answer</span>';
+            else if (isPicked) tag = '<span class="q-tag bad">✗ selected</span>';
+            if (tag) { var t = document.createElement('span'); t.innerHTML = tag; li.appendChild(t); }
+          }
+          ul.appendChild(li);
+        });
+        answerWrap.appendChild(ul);
+        if (!hideAnswer && r.givenIdx === null) {
+          var blank = document.createElement('div');
+          blank.className = 'q-tag bad';
+          blank.style.marginTop = '4px';
+          blank.textContent = 'Left blank';
+          answerWrap.appendChild(blank);
+        }
+      } else if (q.type === 'fr') {
+        if (hideAnswer) {
+          var frHidden = document.createElement('div');
+          frHidden.className = 'q-fr q-fr-hidden';
+          frHidden.textContent = 'Answer hidden — uncheck "Hide answer" above to reveal.';
+          answerWrap.appendChild(frHidden);
+        } else {
+          var fr = document.createElement('div');
+          fr.className = 'q-fr';
+          var yourAns = (r.givenText !== null && r.givenText !== undefined && r.givenText !== '') ? r.givenText : (r.ok ? String(q.answer) : 'left blank');
+          fr.innerHTML = 'Correct answer: <span class="q-correct-ans">' + q.answer + '</span>' +
+            (r.ok ? '' : ' &nbsp;·&nbsp; Entered: <span class="q-your-ans">' + yourAns + '</span>');
+          answerWrap.appendChild(fr);
+        }
       }
-    } else if (q.type === 'fr') {
-      var fr = document.createElement('div');
-      fr.className = 'q-fr';
-      var yourAns = (r.givenText !== null && r.givenText !== undefined && r.givenText !== '') ? r.givenText : (r.ok ? String(q.answer) : 'left blank');
-      fr.innerHTML = 'Correct answer: <span class="q-correct-ans">' + q.answer + '</span>' +
-        (r.ok ? '' : ' &nbsp;·&nbsp; Entered: <span class="q-your-ans">' + yourAns + '</span>');
-      box.appendChild(fr);
     }
+    renderAnswerArea();
 
     if (r.timeMs || r.firstVisitedAt || r.lastViewedAt) {
       var timing = document.createElement('div');
@@ -2448,118 +2727,81 @@
     if (sections.length < 2) return;
     document.getElementById('skillbreak-hed').style.display = '';
 
-    // Topics costing the most points — same skill-miss data the bridge
-    // chart above is built from, ranked and shown as a scannable list
-    // instead of a waterfall. t>=2 mirrors the same reliability bar the
-    // takeaways section already applies before naming a skill by name.
-    var topicsWrap = document.getElementById('topics-costing');
-    var skillEntries = Object.keys(skills).map(function (k) {
-      var v = skills[k];
-      return { name: k, c: v.c, t: v.t, missed: v.t - v.c, pct: v.t ? v.c / v.t : 0 };
-    }).filter(function (e) { return e.t >= 2 && e.missed > 0; })
-      .sort(function (a, b) { return b.missed - a.missed || a.pct - b.pct; })
-      .slice(0, 5);
-    if (skillEntries.length) {
-      topicsWrap.style.display = '';
-      var list = document.createElement('div');
-      list.className = 'topics-list';
-      skillEntries.forEach(function (e, i) {
-        var pct = Math.round(e.pct * 100);
-        var band = pct < 50 ? 'var(--red)' : (pct >= 75 ? 'var(--green)' : 'var(--gold)');
-        var row = document.createElement('div');
-        row.className = 'topics-row';
-        var r2 = 13, circ = 2 * Math.PI * r2;
-        row.innerHTML =
-          '<span class="topics-rank">' + (i + 1) + '</span>' +
-          '<span class="topics-main"><span class="topics-name">' + e.name + '</span>' +
-          '<span class="topics-meta">' + e.c + '/' + e.t + ' correct</span></span>' +
-          '<span class="topics-gauge"><svg width="38" height="38" viewBox="0 0 34 34">' +
-            '<circle cx="17" cy="17" r="' + r2 + '" fill="none" stroke="#eee7da" stroke-width="3.5"/>' +
-            '<circle cx="17" cy="17" r="' + r2 + '" fill="none" stroke="' + band + '" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="' + circ + '" stroke-dashoffset="' + (circ * (1 - e.pct)) + '" transform="rotate(-90 17 17)"/>' +
-            '<text x="17" y="20" text-anchor="middle" font-size="7.5" font-weight="800" fill="' + band + '" font-family="Nunito, sans-serif">' + pct + '%</text>' +
-          '</svg></span>';
-        list.appendChild(row);
-      });
-      topicsWrap.appendChild(list);
+    // Accuracy by topic — one block per subject (Reading & Writing / Math,
+    // or English / Math / Reading / Science for the ACT), laid out side by
+    // side in a grid rather than stacked full-width (see .atb-grid) since
+    // each subject's own row list is narrow content on its own. Each
+    // domain gets a row: name + attempt count + average time on the left,
+    // a single track filled from 0 to the actual accuracy with a handle
+    // riding the fill's edge (colored by tier), and the percentage on the
+    // right. Tiers: <60% low (red), 60-84% mid (amber), >=85% high
+    // (green) — a stricter bar than this report's other red/gold/green
+    // splits on purpose, since this is meant to read as "is this topic
+    // actually solid," not just "better than half."
+    function accTierKey(pct) {
+      if (pct >= 85) return 'high';
+      if (pct >= 60) return 'mid';
+      return 'low';
     }
-
-    // Accuracy by topic + time-by-difficulty, one card pair per subject
-    // (Reading & Writing / Math, or English / Math / Reading / Science for
-    // the ACT) — each subject's own domains{} (already computed per
-    // section, above) and its rows' timeMs grouped by q.difficulty.
     var accWrap = document.getElementById('accuracy-by-topic');
-    var accGrid = document.createElement('div');
-    accGrid.className = 'acc-topic-grid';
-    var DIFF_COLORS = { easy: '#A9C4B4', medium: 'var(--gold)', hard: 'var(--red)' };
+
+    // One-time plain-language explainer above the grid — what "accuracy
+    // by topic" actually means and what to do about a red row, since a
+    // bar with a dot on it isn't self-explanatory the first time you see
+    // it.
+    var intro = document.createElement('p');
+    intro.className = 'skillbreak-intro';
+    intro.textContent = 'Every question on this test is tagged with a topic (like "Algebra" or "Craft & Structure"). This shows your accuracy on EVERY topic you were tested on — not just the ones you missed — so you can see the full picture, not only the gaps. Each bar is colored by how solid that topic is: red means it\'s costing you real points and is worth the most practice time; amber is close but not reliable yet; green means you\'ve got it. The dot marks exactly where your accuracy lands.';
+    accWrap.appendChild(intro);
+
+    var grid = document.createElement('div');
+    grid.className = 'atb-grid';
+
     sections.forEach(function (sec) {
       var domEntries = Object.keys(sec.domains).map(function (d) {
         var v = sec.domains[d];
-        return { name: d, c: v.c, t: v.t, pct: v.t ? v.c / v.t : 0 };
+        // Average time per question in this domain — the timing stat
+        // that used to live in its own "time by difficulty" donut here,
+        // folded into the same row instead of a separate section so it
+        // doesn't cost any extra vertical space.
+        var domRows = sec.rows.filter(function (r) { return r.dom === d; });
+        var timeSum = domRows.reduce(function (a, r) { return a + (r.timeMs || 0); }, 0);
+        var avgMs = domRows.length ? timeSum / domRows.length : 0;
+        return { name: d, t: v.t, pct: v.t ? Math.round(v.c / v.t * 100) : 0, avgMs: avgMs };
       }).sort(function (a, b) { return a.pct - b.pct; });
       if (!domEntries.length) return;
-      var card = document.createElement('div');
-      card.className = 'acc-topic-card';
-      var hed = document.createElement('div');
-      hed.className = 'acc-topic-card-hed';
-      hed.textContent = sec.label;
-      card.appendChild(hed);
-      var legend = document.createElement('div');
-      legend.className = 'acc-topic-legend';
-      legend.innerHTML = '<span><i style="background:var(--red)"></i>&lt; 50%</span><span><i style="background:var(--gold)"></i>50&ndash;74%</span><span><i style="background:var(--green)"></i>&ge; 75%</span>';
-      card.appendChild(legend);
+
+      var section = document.createElement('div');
+      section.className = 'atb-section';
+      section.innerHTML =
+        '<div class="atb-hed-row">' +
+          '<div><div class="atb-hed">' + sec.label + '</div><div class="atb-subhed">Accuracy by topic</div></div>' +
+          '<div class="atb-legend">' +
+            '<span><i class="atb-dot high"></i>&ge;85%</span>' +
+            '<span><i class="atb-dot mid"></i>60&ndash;84%</span>' +
+            '<span><i class="atb-dot low"></i>&lt;60%</span>' +
+          '</div>' +
+        '</div>';
+      var rowsWrap = document.createElement('div');
+      rowsWrap.className = 'atb-rows';
       domEntries.forEach(function (de) {
-        var pct = Math.round(de.pct * 100);
+        var tier = accTierKey(de.pct);
         var row = document.createElement('div');
-        row.className = 'acc-topic-row';
-        row.innerHTML = '<div class="acc-topic-row-lab"><span>' + de.name + '</span><span class="n">' + de.c + '/' + de.t + ' &middot; ' + pct + '%</span></div>' +
-          '<div class="acc-topic-track"><div class="acc-topic-dot" style="left:' + pct + '%;"></div></div>';
-        card.appendChild(row);
+        row.className = 'atb-row';
+        row.innerHTML =
+          '<div class="atb-row-left"><div class="atb-domain-name">' + de.name + '</div><div class="atb-domain-attempts">' + de.t + ' attempt' + (de.t === 1 ? '' : 's') + (de.avgMs ? ' &middot; avg ' + formatMinSec(de.avgMs) : '') + (tier === 'low' ? ' &middot; <span class="atb-focus-tag">focus here</span>' : '') + '</div></div>' +
+          '<div class="atb-tracker">' +
+            '<div class="atb-track"><div class="atb-track-fill ' + tier + '" style="width:' + de.pct + '%;"></div></div>' +
+            '<span class="atb-handle-dot ' + tier + '" style="left:' + de.pct + '%;"></span>' +
+          '</div>' +
+          '<div class="atb-pct ' + tier + '">' + de.pct + '%</div>';
+        rowsWrap.appendChild(row);
       });
-
-      // Time by difficulty, this subject, both modules combined — same
-      // underlying timeMs/q.difficulty already used per-module in the
-      // section cards above, aggregated one level up. Rendered as a
-      // donut here specifically (the per-module view above stays a bar,
-      // to match this page's other proportions) since this is a new,
-      // higher-level summary rather than a restyle of that existing one.
-      var byDiff = { easy: 0, medium: 0, hard: 0 };
-      sec.rows.forEach(function (r) {
-        var d = r.q && r.q.difficulty;
-        if (byDiff.hasOwnProperty(d)) byDiff[d] += (r.timeMs || 0);
-      });
-      var totalMs = byDiff.easy + byDiff.medium + byDiff.hard;
-      if (totalMs > 0) {
-        var dlabel = document.createElement('div');
-        dlabel.className = 'acc-topic-row-lab';
-        dlabel.style.marginTop = '10px';
-        dlabel.innerHTML = '<span>Time by difficulty</span><span class="n">' + formatDuration(totalMs) + ' total</span>';
-        card.appendChild(dlabel);
-        var donutWrap = document.createElement('div');
-        donutWrap.style.display = 'flex';
-        donutWrap.style.alignItems = 'center';
-        donutWrap.style.gap = '10px';
-        var R = 22, C = 2 * Math.PI * R, offset = 0;
-        var arcs = ['easy', 'medium', 'hard'].map(function (d) {
-          var frac = byDiff[d] / totalMs;
-          var dash = frac * C;
-          var seg = '<circle cx="26" cy="26" r="' + R + '" fill="none" stroke="' + DIFF_COLORS[d] + '" stroke-width="7" stroke-dasharray="' + dash + ' ' + (C - dash) + '" stroke-dashoffset="' + (-offset) + '" transform="rotate(-90 26 26)"/>';
-          offset += dash;
-          return seg;
-        }).join('');
-        var legendHtml = ['easy', 'medium', 'hard'].map(function (d) {
-          return byDiff[d] > 0 ? '<span><i style="background:' + DIFF_COLORS[d] + '"></i>' + d.charAt(0).toUpperCase() + d.slice(1) + ' ' + formatDuration(byDiff[d]) + '</span>' : '';
-        }).join('');
-        donutWrap.innerHTML = '<svg width="52" height="52" viewBox="0 0 52 52">' + arcs + '</svg>' +
-          '<div class="acc-topic-legend" style="flex-direction:column; align-items:flex-start; gap:3px;">' + legendHtml + '</div>';
-        card.appendChild(donutWrap);
-      }
-
-      accGrid.appendChild(card);
+      section.appendChild(rowsWrap);
+      grid.appendChild(section);
     });
-    if (accGrid.children.length) {
-      accWrap.style.display = '';
-      accWrap.appendChild(accGrid);
-    }
+    accWrap.appendChild(grid);
+    if (grid.children.length) accWrap.style.display = '';
   })();
 
   /* ═══ CONFIDENCE QUADRANT ═══ per subject: every multiple-choice

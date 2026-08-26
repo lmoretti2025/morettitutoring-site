@@ -437,6 +437,11 @@
   .pt-num { font-family: var(--display); font-weight: 700; font-size: 1.35rem; color: var(--red); background: rgba(176,39,28,0.08); width: 46px; height: 46px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .menu-card:hover .pt-num { background: rgba(201,168,76,0.16); }
   .pt-card-done .pt-num { color: #3f8f5f; background: rgba(63,143,95,0.1); }
+  /* The diagnostic tile uses .menu-card-icon (a plain SVG glyph), not
+     .pt-num (the numbered practice tests) — without this it stayed
+     red/gold-on-hover forever, never picking up the same "done" green the
+     numbered tiles get once completed. */
+  .pt-card-done .menu-card-icon { color: #3f8f5f; background: rgba(63,143,95,0.1); }
 
   /* ═══ VIEW RESULTS — direct button for one attempt, dropdown for
      several ═══ positioned in the card's own flex row (menu-card-wide is
@@ -1369,6 +1374,69 @@
   @media (max-width: 640px) {
     .chal-decks { flex-direction: column; }
   }
+
+  /* ═══ QUESTION BANK ═══ subject picker -> per-skill drilldown -> the
+     same real-exam practice runner Challenge Questions uses. Analytics
+     row reuses .chal-stat directly (identical tiles, different numbers) —
+     see window.qbModuleInit() near the end of the file. */
+  .qb-stats-row { margin-bottom: 1.8rem; }
+  .qb-subjects { display: flex; gap: 1.2rem; flex-wrap: wrap; }
+  .qb-subject { flex: 1 1 300px; position: relative; overflow: hidden; border: none; border-radius: 14px; padding: 1.6rem 1.7rem; min-height: 150px; cursor: pointer; text-align: left; display: flex; flex-direction: column; justify-content: space-between; gap: 1.1rem; box-shadow: var(--shadow); background: linear-gradient(135deg, var(--red) 0%, #c9a84c 130%); transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease); }
+  .qb-subject:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); }
+  .qb-subject:active { transform: translateY(-1px) scale(0.99); }
+  .qb-subject-title { font-family: var(--display); font-weight: 700; font-size: 1.35rem; color: #fff; margin-bottom: 0.3rem; }
+  .qb-subject-count { font-family: var(--hel); font-size: 0.8rem; color: rgba(255,255,255,0.85); }
+  .qb-subject-bar { margin-top: 0.7rem; height: 6px; border-radius: 999px; background: rgba(255,255,255,0.28); overflow: hidden; }
+  .qb-subject-bar-fill { height: 100%; background: #fff; border-radius: 999px; width: 0%; transition: width 0.4s var(--ease); }
+  .qb-subject-open { display: inline-flex; align-items: center; gap: 0.4rem; background: #fff; color: var(--text); font-family: var(--hel); font-weight: 700; font-size: 0.78rem; border-radius: 999px; padding: 0.5rem 1rem; align-self: flex-start; }
+  .qb-subject:hover .chal-deck-arrow { transform: translateX(3px); }
+  .qb-subject-disabled { cursor: default; background: rgba(17,17,17,0.05); box-shadow: none; border: 1px dashed var(--border); }
+  .qb-subject-disabled .qb-subject-title { color: var(--text); }
+  .qb-subject-disabled .qb-subject-count { color: var(--faint); }
+  @media (max-width: 640px) { .qb-subjects { flex-direction: column; } }
+
+  .qb-skills-back { display: inline-block; font-family: var(--hel); font-size: 0.78rem; font-weight: 700; color: var(--mid); text-decoration: none; margin-bottom: 0.9rem; transition: color 0.15s var(--ease); }
+  .qb-skills-back:hover { color: var(--red); }
+
+  /* Difficulty/Completed filter dropdowns reuse .iq-dropdown* (Saved &
+     Mistakes' checkbox-dropdown component) for visual consistency — see
+     buildCheckboxDropdown()/buildRadioDropdown() in window.qbModuleInit(). */
+  .qb-toolbar { display: flex; gap: 0.7rem; margin-bottom: 1.1rem; }
+  .qb-toolbar .iq-dropdown-btn { width: auto; padding: 0.5rem 0.85rem; font-size: 0.78rem; }
+
+  .qb-practice-all-bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.3rem; margin-bottom: 1.4rem; box-shadow: var(--shadow); }
+  .qb-practice-all-title { font-family: var(--display); font-weight: 700; font-size: 0.95rem; color: var(--text); margin-bottom: 0.2rem; }
+  .qb-practice-all-sub { font-size: 0.78rem; color: var(--mid); }
+  .qb-start-btn { flex-shrink: 0; background: var(--red); color: #fff; border: none; border-radius: 8px; padding: 0.6rem 1.15rem; font-family: var(--hel); font-size: 0.78rem; font-weight: 700; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 0.35rem; transition: filter 0.15s var(--ease), transform 0.15s var(--ease); }
+  .qb-start-btn:hover { filter: brightness(0.92); transform: translateY(-1px); }
+
+  .qb-table { width: 100%; border-collapse: collapse; background: var(--white); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); }
+  .qb-table th { text-align: left; font-family: var(--hel); font-size: 0.66rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--faint); padding: 0.8rem 1rem; border-bottom: 1px solid var(--border); }
+  .qb-table .qb-th-check { width: 40px; }
+  .qb-table .qb-th-progress { width: 160px; }
+  .qb-table .qb-th-acc { width: 90px; }
+  .qb-domain-row td { padding: 0.7rem 1rem 0.3rem; font-family: var(--hel); font-size: 0.66rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--faint); background: rgba(17,17,17,0.02); border-top: 1px solid var(--border); }
+  .qb-domain-row:first-child td { border-top: none; }
+  .qb-skill-row td { padding: 0.8rem 1rem; border-bottom: 1px solid var(--border); font-size: 0.86rem; color: var(--text); vertical-align: middle; }
+  .qb-skill-row:last-child td { border-bottom: none; }
+  .qb-skill-row:hover td { background: rgba(17,17,17,0.015); }
+  .qb-skill-row input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--red); cursor: pointer; }
+  .qb-skill-name-cell { display: flex; align-items: center; gap: 0.6rem; cursor: pointer; }
+  .qb-weak-tag { display: inline-flex; align-items: center; gap: 0.25rem; background: rgba(176,39,28,0.09); color: var(--red); font-family: var(--hel); font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; border-radius: 999px; padding: 0.2rem 0.55rem; }
+  .qb-progress-cell { display: flex; align-items: center; gap: 0.6rem; }
+  .qb-progress-track { flex: 1 1 auto; height: 6px; border-radius: 999px; background: rgba(17,17,17,0.08); overflow: hidden; min-width: 60px; }
+  .qb-progress-fill { height: 100%; border-radius: 999px; background: var(--gold); }
+  .qb-progress-frac { font-size: 0.76rem; color: var(--mid); white-space: nowrap; }
+  .qb-acc-cell { font-weight: 600; color: var(--mid); }
+  .qb-acc-cell.has-data { color: var(--text); }
+
+  .qb-selection-bar { position: fixed; left: 50%; bottom: 1.5rem; transform: translateX(-50%); z-index: 60; display: flex; align-items: center; gap: 1rem; background: var(--text); color: #fff; border-radius: 999px; padding: 0.7rem 0.8rem 0.7rem 1.3rem; box-shadow: 0 12px 30px rgba(17,17,17,0.28); font-family: var(--hel); font-size: 0.82rem; font-weight: 600; }
+  .qb-selection-bar .qb-start-btn { background: #fff; color: var(--text); }
+  .qb-selection-bar .qb-start-btn:hover { filter: none; background: var(--gold); color: #fff; }
+  @media (max-width: 640px) {
+    .qb-th-acc, .qb-acc-cell { display: none; }
+    .qb-th-progress { width: auto; }
+  }
   /* ═══ PRACTICE RUNNER — one question at a time, rendered straight into
      the real exam's own #dx-card (see startPracticeRunner/
      renderRunnerQuestion in the JS) — only the end-of-round summary needs
@@ -1519,63 +1587,55 @@
 
   @media print {#pt-native-report .top-row { page-break-inside: avoid; break-inside: avoid; }
  }
-#pt-native-report .topics-list { border: 1px solid rgba(17,17,17,0.08); border-radius: 12px; overflow: hidden; box-shadow: 0 1px 2px rgba(17,17,17,0.03); }
-#pt-native-report .topics-row { display: flex; align-items: center; gap: 14px; padding: 13px 16px; border-bottom: 1px solid #f1ede4; }
-#pt-native-report .topics-row:last-child { border-bottom: none; }
-#pt-native-report .topics-rank { font-family: 'Nunito', 'Poppins', sans-serif; font-weight: 800; font-size: 14px; color: var(--faint); width: 20px; flex-shrink: 0; }
-#pt-native-report .topics-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
-#pt-native-report .topics-name { font-family: 'Nunito', 'Poppins', sans-serif; font-size: 11px; font-weight: 700; color: var(--ink); }
-#pt-native-report .topics-meta { font-family: 'Nunito', 'Poppins', sans-serif; font-size: 8.5px; font-weight: 600; color: var(--faint); }
-#pt-native-report .topics-gauge { flex-shrink: 0; }
-#pt-native-report .acc-topic-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 2px; }
-#pt-native-report .acc-topic-card { border: 1px solid rgba(17,17,17,0.08); border-radius: 12px; padding: 12px 14px; box-shadow: 0 1px 2px rgba(17,17,17,0.03); }
-#pt-native-report .acc-topic-card-hed { font-family: 'Nunito', 'Poppins', sans-serif; font-weight: 800; font-size: 12.5px; margin-bottom: 2px; }
-#pt-native-report .acc-topic-legend { font-family: 'Nunito', 'Poppins', sans-serif; display: flex; gap: 8px; font-size: 7.5px; font-weight: 700; color: var(--faint); margin-bottom: 8px; }
-#pt-native-report .acc-topic-legend span { display: inline-flex; align-items: center; gap: 3px; }
-#pt-native-report .acc-topic-legend i { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
-#pt-native-report .acc-topic-row { margin-bottom: 8px; }
-#pt-native-report .acc-topic-row:last-child { margin-bottom: 0; }
-#pt-native-report .acc-topic-row-lab { font-family: 'Nunito', 'Poppins', sans-serif; display: flex; justify-content: space-between; font-size: 9.5px; font-weight: 700; margin-bottom: 3px; }
-#pt-native-report .acc-topic-row-lab .n { color: var(--faint); font-size: 8.5px; font-weight: 600; }
-#pt-native-report .acc-topic-track { position: relative; height: 5px; border-radius: 3px; background: linear-gradient(90deg, var(--red) 0%, var(--red) 60%, var(--gold) 60%, var(--gold) 85%, var(--green) 85%, var(--green) 100%); opacity: 0.35; }
-#pt-native-report .acc-topic-dot { position: absolute; top: 50%; width: 9px; height: 9px; border-radius: 50%; background: #fff; border: 2px solid var(--ink); transform: translate(-50%, -50%); }
-
-  @media (max-width: 620px) {#pt-native-report .acc-topic-grid { grid-template-columns: 1fr; }
- }
+  /* One-time explainer above the first subject block — what this section
+     actually shows and how to read it, since "a bar with a dot on it"
+     isn't self-explanatory without a caption the first time you see it. */
+  #pt-native-report .skillbreak-intro { font-size: 0.82rem; color: var(--mid); line-height: 1.55; margin: 0 0 1.75rem; max-width: 640px; }
   /* ═══ ACCURACY BY TOPIC ═══ one block per subject, a segmented three-
      tier tracker per domain row — see renderSkillBreakdown()'s accuracy-
      by-topic pass in the script for the tier thresholds/logic. */
+  /* Two subjects side by side (R&W | Math, or the 4 ACT subjects wrap
+     2-up) instead of stacked full-width — the old stacked layout took
+     nearly double the vertical space for no real benefit, since each
+     subject's row list is narrow content anyway. */
+  #pt-native-report .atb-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 0 2.5rem; }
   #pt-native-report .atb-section { margin-bottom: 2rem; }
-  #pt-native-report .atb-section:last-child { margin-bottom: 0; }
-  #pt-native-report .atb-hed-row { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.25rem; }
-  #pt-native-report .atb-hed { font-family: var(--hel); font-size: 1rem; font-weight: 700; color: var(--text); }
-  #pt-native-report .atb-subhed { font-family: var(--hel); font-size: 0.76rem; color: var(--mid); margin-top: 0.15rem; }
-  #pt-native-report .atb-legend { display: flex; gap: 0.9rem; font-family: var(--hel); font-size: 0.68rem; color: var(--mid); }
-  #pt-native-report .atb-legend span { display: inline-flex; align-items: center; gap: 0.35rem; white-space: nowrap; }
-  #pt-native-report .atb-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+  #pt-native-report .atb-hed-row { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
+  #pt-native-report .atb-hed { font-family: var(--hel); font-size: 0.95rem; font-weight: 700; color: var(--text); }
+  #pt-native-report .atb-subhed { font-family: var(--hel); font-size: 0.72rem; color: var(--mid); margin-top: 0.15rem; }
+  #pt-native-report .atb-legend { display: flex; gap: 0.6rem; font-family: var(--hel); font-size: 0.62rem; color: var(--mid); flex-wrap: wrap; }
+  #pt-native-report .atb-legend span { display: inline-flex; align-items: center; gap: 0.3rem; white-space: nowrap; }
+  #pt-native-report .atb-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
   #pt-native-report .atb-dot.high { background: var(--green); }
   #pt-native-report .atb-dot.mid { background: var(--atb-amber, #F59E0B); }
   #pt-native-report .atb-dot.low { background: var(--red); }
-  #pt-native-report .atb-rows { display: flex; flex-direction: column; gap: 1.1rem; }
-  #pt-native-report .atb-row { display: flex; align-items: center; gap: 1.5rem; }
-  #pt-native-report .atb-row-left { flex: 0 0 200px; min-width: 0; }
-  #pt-native-report .atb-domain-name { font-family: var(--hel); font-size: 0.82rem; font-weight: 700; color: var(--text); }
-  #pt-native-report .atb-domain-attempts { font-family: var(--hel); font-size: 0.7rem; color: var(--faint); margin-top: 0.2rem; }
-  #pt-native-report .atb-tracker { flex: 1 1 220px; min-width: 120px; display: flex; gap: 0.4rem; }
-  #pt-native-report .atb-seg { position: relative; flex: 1; height: 8px; border-radius: 999px; background: #ece5d6; }
-  #pt-native-report .atb-seg.active.low { background: var(--red); }
-  #pt-native-report .atb-seg.active.mid { background: var(--atb-amber, #F59E0B); }
-  #pt-native-report .atb-seg.active.high { background: var(--green); }
-  #pt-native-report .atb-handle { position: absolute; top: 50%; width: 15px; height: 15px; border-radius: 50%; background: #fff; border: 3px solid currentColor; box-shadow: 0 1px 3px rgba(17,17,17,0.25); transform: translate(-50%, -50%); }
-  #pt-native-report .atb-seg.low .atb-handle { color: var(--red); }
-  #pt-native-report .atb-seg.mid .atb-handle { color: var(--atb-amber, #F59E0B); }
-  #pt-native-report .atb-seg.high .atb-handle { color: var(--green); }
-  #pt-native-report .atb-pct { flex: 0 0 52px; text-align: right; font-family: var(--hel); font-weight: 700; font-size: 1.15rem; }
+  #pt-native-report .atb-rows { display: flex; flex-direction: column; gap: 0.9rem; }
+  #pt-native-report .atb-row { display: flex; align-items: center; gap: 0.9rem; }
+  #pt-native-report .atb-row-left { flex: 0 0 128px; min-width: 0; }
+  #pt-native-report .atb-domain-name { font-family: var(--hel); font-size: 0.78rem; font-weight: 700; color: var(--text); line-height: 1.25; }
+  #pt-native-report .atb-domain-attempts { font-family: var(--hel); font-size: 0.66rem; color: var(--faint); margin-top: 0.2rem; }
+  #pt-native-report .atb-focus-tag { color: var(--red); font-weight: 700; }
+  /* Single continuous track filled from 0 to the actual accuracy, with a
+     handle dot riding the fill's edge — reads at a glance as "how far
+     along" the way a slider does, instead of the old three-separate-pill
+     tracker (same information, more visual parts). */
+  #pt-native-report .atb-tracker { position: relative; flex: 1 1 90px; min-width: 60px; display: flex; align-items: center; }
+  #pt-native-report .atb-track { position: relative; width: 100%; height: 6px; border-radius: 999px; background: #ece5d6; overflow: visible; }
+  #pt-native-report .atb-track-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 999px; }
+  #pt-native-report .atb-track-fill.low { background: var(--red); }
+  #pt-native-report .atb-track-fill.mid { background: var(--atb-amber, #F59E0B); }
+  #pt-native-report .atb-track-fill.high { background: var(--green); }
+  #pt-native-report .atb-handle-dot { position: absolute; top: 50%; width: 13px; height: 13px; border-radius: 50%; background: #fff; border: 3px solid currentColor; box-shadow: 0 1px 3px rgba(17,17,17,0.25); transform: translate(-50%, -50%); }
+  #pt-native-report .atb-handle-dot.low { color: var(--red); }
+  #pt-native-report .atb-handle-dot.mid { color: var(--atb-amber, #F59E0B); }
+  #pt-native-report .atb-handle-dot.high { color: var(--green); }
+  #pt-native-report .atb-pct { flex: 0 0 42px; text-align: right; font-family: var(--hel); font-weight: 700; font-size: 1.02rem; }
   #pt-native-report .atb-pct.low { color: var(--red); }
   #pt-native-report .atb-pct.mid { color: var(--atb-amber, #F59E0B); }
   #pt-native-report .atb-pct.high { color: var(--green); }
-  @media (max-width: 640px) {
-    #pt-native-report .atb-row { flex-wrap: wrap; gap: 0.6rem 1rem; }
+  @media (max-width: 480px) {
+    #pt-native-report .atb-grid { grid-template-columns: 1fr; }
+    #pt-native-report .atb-row { flex-wrap: wrap; gap: 0.5rem 0.8rem; }
     #pt-native-report .atb-row-left { flex: 1 1 100%; }
     #pt-native-report .atb-tracker { flex: 1 1 auto; order: 3; width: 100%; }
     #pt-native-report .atb-pct { flex: 0 0 auto; margin-left: auto; }
@@ -1592,7 +1652,7 @@
   @media (max-width: 620px) {#pt-native-report .quadrant-grid { grid-template-columns: 1fr; }
  }
 
-  @media print {#pt-native-report .topics-list, #pt-native-report .acc-topic-grid, #pt-native-report .quadrant-grid { page-break-inside: avoid; break-inside: avoid; }
+  @media print {#pt-native-report .atb-section, #pt-native-report .quadrant-grid { page-break-inside: avoid; break-inside: avoid; }
  }
 #pt-native-report .sc-qgrid-cell { cursor: pointer; position: relative; }
 #pt-native-report .sc-qgrid-tooltip { position: absolute; z-index: 50; bottom: calc(100% + 5px); left: 50%; transform: translateX(-50%); width: 190px; background: var(--ink); color: #fff; border-radius: 4px; padding: 6px 8px; font-size: 8.5px; line-height: 1.4; pointer-events: none; box-shadow: 0 6px 18px rgba(0,0,0,0.25); display: none; }
@@ -1612,6 +1672,8 @@
 #pt-native-report .q-modal-close:hover { color: var(--ink); }
 #pt-native-report .q-modal-body { padding: 14px 16px 18px; font-size: 11.5px; }
 #pt-native-report .q-modal-body .q-detail { padding: 0; background: none; }
+#pt-native-report .q-list-divider { border-top: 1px solid var(--border); margin: 18px 0; }
+#pt-native-report .q-list-qnum { font-family: 'Caladea', serif; font-weight: 700; font-size: 12px; color: var(--mid); margin-bottom: 6px; }
 
   @media print {#pt-native-report .q-modal-overlay { display: none !important; }
  }
@@ -1640,7 +1702,14 @@
 #pt-native-report .bridge-target-row .bt-reset { font-size: 9px; color: var(--faint); text-decoration: underline; cursor: pointer; background: none; border: none; padding: 0; font-family: 'Poppins'; }
 #pt-native-report .bridge-target-row .bt-drag-hint { font-size: 9px; color: var(--faint); margin-left: 4px; }
 #pt-native-report .bridge-target-row .bt-static { display: none; font-weight: 600; font-size: 13px; color: var(--red); }
-#pt-native-report .bridge-canvas-wrap { text-align: center; }
+/* overflow-x:auto (not just on the small-screen media query further
+   down) is the real safety net against clipping — .bridge-card above
+   this has overflow:hidden, so a chart that ever needs to be wider than
+   its column (a long bar count) would otherwise silently CROP its right
+   edge instead of showing all of it. Scrolling means nothing is ever cut
+   off. */
+#pt-native-report .bridge-canvas-wrap { text-align: center; overflow-x: auto; }
+#pt-native-report .bridge-canvas-inner { position: relative; display: inline-block; }
 #pt-native-report .bridge-empty { font-size: 11px; color: var(--mid); padding: 6px 0; }
 #pt-native-report .bridge-note { font-size: 9px; color: var(--faint); margin-top: 8px; }
 #pt-native-report .bridge-other-note { margin-top: 6px; margin-bottom: 0; }
@@ -1688,7 +1757,11 @@
 #pt-native-report tr.q-row.open td.q-toggle { color: var(--red); }
 #pt-native-report tr.q-detail-row > td { padding: 0; border-bottom: 1px solid #eee7da; }
 #pt-native-report .q-detail { padding: 10px 12px 12px; background: #faf7f1; font-size: 11px; color: var(--ink); }
+#pt-native-report .q-detail-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 10px; margin-bottom: 8px; }
 #pt-native-report .q-detail .q-text { margin-bottom: 8px; line-height: 1.5; }
+#pt-native-report .q-hide-toggle { display: inline-flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 700; letter-spacing: 0.02em; color: var(--mid); cursor: pointer; user-select: none; }
+#pt-native-report .q-hide-toggle input { cursor: pointer; }
+#pt-native-report .q-fr-hidden { font-size: 10.5px; font-style: italic; color: var(--faint); padding: 6px 8px; border: 1px dashed var(--border); border-radius: 4px; }
 #pt-native-report .q-detail .q-choices { list-style: none; margin: 0; padding: 0; }
 #pt-native-report .q-detail .q-choices li { padding: 4px 8px; border: 1px solid var(--border); border-radius: 4px; margin-bottom: 4px; display: flex; justify-content: space-between; gap: 8px; }
 #pt-native-report .q-detail .q-choices li.q-correct { border-color: var(--green); background: #eef4ef; }
@@ -1701,8 +1774,7 @@
 #pt-native-report .q-detail .q-fr .q-your-ans { color: var(--red); font-weight: 600; }
 #pt-native-report .q-detail .q-timing { margin-top: 8px; font-size: 9.5px; color: var(--mid); }
 #pt-native-report .q-hint { font-size: 9px; color: var(--faint); font-style: italic; margin: 2px 0 10px; }
-#pt-native-report .q-save-row { margin-top: 0.75rem; }
-#pt-native-report .q-save-btn { display: inline-flex; align-items: center; gap: 0.4rem; font-family: var(--hel); font-size: 0.72rem; font-weight: 700; color: var(--mid); background: var(--white); border: 1px solid var(--border); border-radius: 999px; padding: 0.5rem 0.9rem; cursor: pointer; transition: border-color 0.15s var(--ease), color 0.15s var(--ease), background 0.15s var(--ease); }
+#pt-native-report .q-save-btn { display: inline-flex; align-items: center; gap: 0.4rem; font-family: var(--hel); font-size: 0.72rem; font-weight: 700; color: var(--mid); background: var(--white); border: 1px solid var(--border); border-radius: 999px; padding: 0.4rem 0.8rem; cursor: pointer; transition: border-color 0.15s var(--ease), color 0.15s var(--ease), background 0.15s var(--ease); }
 #pt-native-report .q-save-btn:hover { border-color: var(--gold); color: var(--text); }
 #pt-native-report .q-save-btn.on { background: rgba(201,168,76,0.12); border-color: var(--gold); color: var(--text); }
 
@@ -1811,8 +1883,14 @@
     #pt-native-report .section-cards { grid-template-columns: repeat(2, 1fr); }
   }
   #pt-native-report .section-card { background: transparent; border: none; border-radius: 0; box-shadow: none; padding: 0; }
-  #pt-native-report .section-card .sc-title { font-family: var(--hel); font-size: 0.82rem; font-weight: 700; color: var(--text); margin-bottom: 0.5rem; }
-  #pt-native-report .sc-counts { display: flex; flex-wrap: wrap; gap: 0.7rem; margin-bottom: 0.6rem; }
+  /* min-height on both the title and the counts row — NOT just padding —
+     is what keeps all four tiles' grids starting at the same y-position.
+     Without it, a title/count line that happens to wrap (a longer module
+     label, or a 2-digit "omitted" count tipping the row over its width)
+     makes only THAT tile taller, so its grid sits lower than its
+     neighbors' even though the cards themselves are the same height. */
+  #pt-native-report .section-card .sc-title { font-family: var(--hel); font-size: 0.82rem; font-weight: 700; color: var(--text); margin-bottom: 0.5rem; min-height: 2.15rem; display: flex; align-items: flex-end; }
+  #pt-native-report .sc-counts { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 0.7rem; margin-bottom: 0.6rem; min-height: 2.2rem; }
   #pt-native-report .sc-count { font-family: var(--hel); font-size: 0.8rem; font-weight: 700; color: var(--faint); }
   #pt-native-report .sc-count.ok { color: var(--green); }
   #pt-native-report .sc-count.bad { color: var(--red); }
@@ -1825,19 +1903,29 @@
   #pt-native-report .sc-meta { font-family: var(--hel); font-size: 0.72rem; color: var(--faint); margin-top: 0.7rem; }
   #pt-native-report .sc-meta .ok { color: var(--green); font-weight: 700; }
 
-  /* Bridge chart + condensed skills list share one card — the skills list
-     appends directly under the chart instead of living in its own section
-     further down the page with a full heading and big circular gauges. */
+  /* Bridge chart card — now the sole content of "Path to target score"
+     (the old "Top 5 weakest skills" list that used to append below the
+     chart is gone; each bar is hoverable/clickable for that same
+     per-skill detail instead — see drawBridge()'s bar-hit-testing in the
+     script). Sized larger now that it's not sharing the card with
+     anything else. */
   #pt-native-report .bridge-card { background: var(--white); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); overflow: hidden; }
-  #pt-native-report .bridge-wrap { border: none; box-shadow: none; border-radius: 0; margin-bottom: 0; }
-  #pt-native-report #bridge-skills:empty { display: none; }
-  #pt-native-report .bridge-skills-lab { font-family: var(--hel); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mid); padding: 1rem 1.5rem 0; }
-  #pt-native-report .topics-list.condensed { border: none; border-top: 1px solid var(--border); margin-top: 0.8rem; border-radius: 0; box-shadow: none; }
-  #pt-native-report .topics-list.condensed .topics-row { padding: 0.6rem 1.5rem; gap: 0.9rem; border-bottom: none; }
-  #pt-native-report .topics-list.condensed .topics-name { flex: 1; font-size: 0.76rem; font-weight: 600; color: var(--text); }
-  #pt-native-report .topics-bar-track { flex: 1 1 120px; height: 6px; border-radius: 3px; background: #eee7da; overflow: hidden; }
-  #pt-native-report .topics-bar-fill { display: block; height: 100%; border-radius: 3px; }
-  #pt-native-report .topics-pct { flex-shrink: 0; width: 34px; text-align: right; font-family: var(--hel); font-size: 0.74rem; font-weight: 700; }
+  #pt-native-report .bridge-wrap { border: none; box-shadow: none; border-radius: 0; margin-bottom: 0; padding: 1.5rem 1.75rem; }
+  /* The note that used to sit inside the card, right under the chart, now
+     lives in its own block below the whole card (see #bridge-note-outer
+     in the markup and renderBridge() in the script) — same text, just
+     positioned once at the "Path to target score" section level instead
+     of nested inside the bordered card. */
+  #pt-native-report .bridge-note-block { font-size: 0.78rem; color: var(--mid); margin: 0.9rem 0 0; line-height: 1.5; }
+  #pt-native-report .bridge-note-block .bridge-other-note { margin-bottom: 0.4rem; }
+  /* Hover/click affordance on each recoverable-points bar — a small
+     floating card following the cursor (percent correct + raw fraction),
+     positioned with JS (see the mousemove handler in drawBridge()).
+     position:fixed so it isn't clipped by the card's overflow:hidden or
+     the canvas-wrap's own scroll container. */
+  #pt-native-report .bridge-tooltip { display: none; position: fixed; z-index: 60; background: var(--text); color: #fff; border-radius: 8px; padding: 0.5rem 0.7rem; font-family: var(--hel); font-size: 0.72rem; line-height: 1.4; pointer-events: none; box-shadow: 0 8px 20px rgba(17,17,17,0.25); white-space: nowrap; }
+  #pt-native-report .bridge-tooltip b { display: block; font-size: 0.78rem; margin-bottom: 0.15rem; }
+  #pt-native-report .bridge-tooltip .bridge-tooltip-hint { display: block; margin-top: 0.25rem; color: rgba(255,255,255,0.65); font-size: 0.64rem; }
 </style>
 </head>
 <body>
@@ -1967,6 +2055,10 @@
   <a href="#" class="sidebar-item" data-nav="challenge-questions" id="sidebar-challenge-questions">
     <span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.5-2 5-2 5s3.5-.5 5-2c.8-.8.8-2.2 0-3s-2.2-.8-3 0Z"/><path d="M9 15l-1.5-1.5L15 6c1.5-1.5 4-2.5 6-2.5s-1 4.5-2.5 6l-7.5 7.5L9 15Z"/><path d="M15 6c0 2 1.5 5 4.5 4.5"/><circle cx="15.5" cy="8.5" r="1"/></svg></span>
     <span class="sidebar-label">Challenge Questions</span>
+  </a>
+  <a href="#" class="sidebar-item" data-nav="question-bank" id="sidebar-question-bank">
+    <span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4" width="17" height="16" rx="1.5"/><path d="M8 9h8"/><path d="M8 12.5h8"/><path d="M8 16h5"/></svg></span>
+    <span class="sidebar-label">Question Bank</span>
   </a>
 </nav>
 
@@ -2664,6 +2756,96 @@
   </div>
 </div>
 
+<!-- ═══ SCREEN 3b-ii-c — QUESTION BANK ═══ the official College Board SAT
+     Reading & Writing question bank (1,780 questions across all 10 R&W
+     skills), imported from Luca's own PDFs — see question-bank.js.
+     Subject picker -> per-skill drilldown -> practice runner, same
+     reuse-the-real-exam-UI bridge (window.dxStartIncorrectPractice/
+     dxEndIncorrectPractice) as Challenge Questions above, but organized
+     by skill with its own progress tracked locally per device
+     (moretti_qb_progress_<studentKey>) — see window.qbModuleInit() near
+     the end of the file. -->
+<div class="screen has-sidebar" id="screen-question-bank">
+  <div class="panel-wide" id="qb-home-view">
+    <div class="vp-head">
+      <div class="kicker">SAT Resources</div>
+      <h1 class="panel-hed">Question Bank</h1>
+      <p class="panel-sub">Every official College Board Reading &amp; Writing question, organized by skill — pick a subject, then a skill, to start practicing.</p>
+    </div>
+
+    <div class="chal-stats-row qb-stats-row">
+      <div class="chal-stat">
+        <div class="chal-stat-label">Questions Attempted</div>
+        <div class="chal-stat-num" id="qb-stat-attempted">0</div>
+      </div>
+      <div class="chal-stat">
+        <div class="chal-stat-label">Current Accuracy</div>
+        <div class="chal-stat-num" id="qb-stat-accuracy">0%</div>
+      </div>
+      <div class="chal-stat">
+        <div class="chal-stat-label">Saved Questions</div>
+        <div class="chal-stat-num" id="qb-stat-saved">0</div>
+      </div>
+      <div class="chal-stat">
+        <div class="chal-stat-label">Study Streak</div>
+        <div class="chal-stat-num" id="qb-stat-streak">0</div>
+      </div>
+    </div>
+
+    <div class="qb-subjects">
+      <button type="button" class="qb-subject" id="qb-subject-rw">
+        <div class="qb-subject-body">
+          <div class="qb-subject-title">Reading &amp; Writing</div>
+          <div class="qb-subject-count" id="qb-subject-rw-count">&mdash; of &mdash; solved</div>
+          <div class="qb-subject-bar"><div class="qb-subject-bar-fill" id="qb-subject-rw-bar"></div></div>
+        </div>
+        <span class="qb-subject-open">Browse skills <span class="chal-deck-arrow">&rarr;</span></span>
+      </button>
+      <div class="qb-subject qb-subject-disabled">
+        <div class="qb-subject-body">
+          <div class="qb-subject-title">Math</div>
+          <div class="qb-subject-count">Coming soon</div>
+        </div>
+      </div>
+    </div>
+
+    <a href="#" class="menu-back-link" id="question-bank-back">&larr; Back to home</a>
+  </div>
+
+  <div class="panel-wide" id="qb-skills-view" style="display:none;">
+    <a href="#" class="qb-skills-back" id="qb-skills-back">&larr; Question Bank</a>
+    <div class="vp-head">
+      <h1 class="panel-hed" id="qb-skills-hed">Reading &amp; Writing</h1>
+      <p class="panel-sub">Progress and accuracy are tracked per skill, on this device.</p>
+    </div>
+
+    <div class="qb-toolbar">
+      <div class="iq-dropdown" id="qb-diff-dropdown"></div>
+      <div class="iq-dropdown" id="qb-completed-dropdown"></div>
+    </div>
+
+    <div class="qb-practice-all-bar">
+      <div>
+        <div class="qb-practice-all-title">Practice all topics</div>
+        <div class="qb-practice-all-sub" id="qb-practice-all-sub">Start practicing all skills.</div>
+      </div>
+      <button type="button" class="qb-start-btn" id="qb-practice-all-btn">Start practice</button>
+    </div>
+
+    <table class="qb-table">
+      <thead>
+        <tr><th class="qb-th-check"></th><th>Topic</th><th class="qb-th-progress">Progress</th><th class="qb-th-acc">Accuracy</th></tr>
+      </thead>
+      <tbody id="qb-skills-tbody"></tbody>
+    </table>
+  </div>
+
+  <div class="qb-selection-bar" id="qb-selection-bar" style="display:none;">
+    <span id="qb-selection-count">0 topics selected</span>
+    <button type="button" class="qb-start-btn" id="qb-selection-start-btn">Start <span class="chal-deck-arrow">&rarr;</span></button>
+  </div>
+</div>
+
 <!-- ═══ SCREEN 3b-iii — PRACTICE TESTS (picker) ═══ -->
 <div class="screen has-sidebar" id="screen-practice-tests">
   <div class="panel-wide" id="pt-picker-view">
@@ -2722,8 +2904,8 @@
   <div class="sec-hed">Path to target score</div>
   <div class="bridge-card" id="bridge-card">
     <div id="score-bridge"></div>
-    <div id="bridge-skills"></div>
   </div>
+  <div id="bridge-note-outer"></div>
   <div class="sec-hed" id="skillbreak-hed" style="display:none;">Skill breakdown</div>
   <div id="accuracy-by-topic" style="display:none;"></div>
   <div class="sec-hed" id="quadrant-hed" style="display:none;">Confidence quadrant</div>
@@ -3326,6 +3508,7 @@
 
 <script src="banks.js"></script>
 <script src="challenge-questions.js"></script>
+<script src="question-bank.js"></script>
 <script>
   /* practice-tests.js is ~2.6MB uncompressed (the 11 full practice tests,
      including every embedded figure's markup) — big enough that loading
@@ -3871,9 +4054,10 @@
     setNav('sidebar-vocab', resourcesHidden || !showSat);
     setNav('sidebar-incorrect-questions', resourcesHidden);
     setNav('sidebar-challenge-questions', resourcesHidden || !showSat);
+    setNav('sidebar-question-bank', resourcesHidden || !showSat);
   }
-  var SIDEBAR_SCREENS = { 'screen-menu': 1, 'screen-practice-tests': 1, 'screen-resources': 1, 'screen-vocab': 1, 'screen-incorrect-questions': 1, 'screen-sat-resources': 1, 'screen-challenge-questions': 1 };
-  var SIDEBAR_NAV_FOR_SCREEN = { 'screen-menu': 'home', 'screen-practice-tests': 'practice-tests', 'screen-resources': 'files', 'screen-vocab': 'vocab', 'screen-incorrect-questions': 'incorrect-questions', 'screen-challenge-questions': 'challenge-questions' };
+  var SIDEBAR_SCREENS = { 'screen-menu': 1, 'screen-practice-tests': 1, 'screen-resources': 1, 'screen-vocab': 1, 'screen-incorrect-questions': 1, 'screen-sat-resources': 1, 'screen-challenge-questions': 1, 'screen-question-bank': 1 };
+  var SIDEBAR_NAV_FOR_SCREEN = { 'screen-menu': 'home', 'screen-practice-tests': 'practice-tests', 'screen-resources': 'files', 'screen-vocab': 'vocab', 'screen-incorrect-questions': 'incorrect-questions', 'screen-challenge-questions': 'challenge-questions', 'screen-question-bank': 'question-bank' };
   var sidebarEl = document.getElementById('portal-sidebar');
   var mainNavEl = document.getElementById('main-nav');
   var examWatermarkEl = document.getElementById('exam-watermark');
@@ -4054,6 +4238,10 @@
     if (err === 'email_mismatch') return 'This key is already linked to a different email. Text Luca at (201) 275-2791 if that seems wrong.';
     if (err === 'bad_email') return "That doesn't look like a valid email — double-check it and try again.";
     if (err === 'network') return "Couldn't reach the server. Check your connection and try again, or text Luca at (201) 275-2791.";
+    // handleAuth serializes concurrent logins with a lock (see Code.gs) so
+    // a slow login can't fire a duplicate Drive share — this only fires if
+    // that lock is still held 30s later, which should be essentially never.
+    if (err === 'busy_try_again') return 'The server is still finishing your last login attempt — wait a moment and try again.';
     return "That key wasn't recognized. Double-check it, or text Luca at (201) 275-2791.";
   }
 
@@ -5585,6 +5773,7 @@
     else if (nav === 'practice-tests') { ptListReturnScreen = 'screen-menu'; renderPracticeTestList(); show('screen-practice-tests'); }
     else if (nav === 'incorrect-questions') { show('screen-incorrect-questions'); if (window.iqModuleInit) window.iqModuleInit(); }
     else if (nav === 'challenge-questions') { show('screen-challenge-questions'); if (window.challengeModuleInit) window.challengeModuleInit(); }
+    else if (nav === 'question-bank') { show('screen-question-bank'); if (window.qbModuleInit) window.qbModuleInit(); }
     else if (nav === 'diagnostic') { ptListReturnScreen = 'screen-menu'; renderPracticeTestList(); show('screen-practice-tests'); }
   }
   document.querySelectorAll('.sidebar-item').forEach(function (item) {
@@ -5606,7 +5795,8 @@
     { label: 'Files', nav: 'files' },
     { label: 'Vocabulary', nav: 'vocab' },
     { label: 'Saved & Mistakes', nav: 'incorrect-questions' },
-    { label: 'Challenge Questions', nav: 'challenge-questions' }
+    { label: 'Challenge Questions', nav: 'challenge-questions' },
+    { label: 'Question Bank', nav: 'question-bank' }
   ];
   var navSearchWrap = document.getElementById('nav-search');
   var navSearchInput = document.getElementById('nav-search-input');
@@ -11450,6 +11640,524 @@
 })();
 </script>
 <script>
+/* ═══ QUESTION BANK MODULE ═══ isolated IIFE, same picker -> practice-
+   runner bridge as Challenge Questions right above (window.
+   dxStartIncorrectPractice()/dxEndIncorrectPractice() switch the WHOLE
+   SCREEN to the real exam UI). Question pool comes from window.
+   QUESTION_BANK (question-bank.js) — the official College Board SAT
+   Reading & Writing bank, 1,780 questions across 10 skills, each with its
+   own qid used as the runner's per-question key. Unlike Challenge
+   Questions' two flat decks, this has a skill drilldown with per-skill
+   progress, plus a save/bookmark toggle inside the runner itself — both
+   tracked in localStorage per student (moretti_qb_progress_<studentKey>),
+   same per-device pattern as Challenge Questions' own analytics. */
+(function () {
+  'use strict';
+  var LETTERS = ['A', 'B', 'C', 'D'];
+  var SESSION_SIZE = 10;
+
+  // Display order for domain groups in the skill drilldown — matches the
+  // order College Board itself lists the four SAT R&W domains.
+  var DOMAIN_ORDER = ['Standard English Conventions', 'Information & Ideas', 'Craft & Structure', 'Expression of Ideas'];
+
+  var skillsCache = null; // [{ domain, skill, questions: [...] }], built once from QUESTION_BANK
+  function allSkills() {
+    if (skillsCache) return skillsCache;
+    var bySkill = {}; // skill -> { domain, skill, questions: [] }
+    (window.QUESTION_BANK || []).forEach(function (q) {
+      var entry = bySkill[q.skill] || (bySkill[q.skill] = { domain: q.domain, skill: q.skill, questions: [] });
+      entry.questions.push(q);
+    });
+    var list = Object.keys(bySkill).map(function (k) { return bySkill[k]; });
+    list.sort(function (a, b) {
+      var da = DOMAIN_ORDER.indexOf(a.domain), db = DOMAIN_ORDER.indexOf(b.domain);
+      if (da !== db) return da - db;
+      return a.skill.localeCompare(b.skill);
+    });
+    skillsCache = list;
+    return list;
+  }
+
+  // ═══ PROGRESS (localStorage, per student, per device — see the module
+  // comment above for why this doesn't round-trip to the backend in v1) ═══
+  function progressStorageKey() {
+    var key = window.getPortalStudentKey ? window.getPortalStudentKey() : null;
+    return 'moretti_qb_progress_' + (key || 'anon');
+  }
+  function loadProgress() {
+    try {
+      var raw = localStorage.getItem(progressStorageKey());
+      if (raw) {
+        var parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object') return { attempts: parsed.attempts || {}, saved: parsed.saved || {} };
+      }
+    } catch (e) { /* ignore */ }
+    return { attempts: {}, saved: {} };
+  }
+  function saveProgress(p) {
+    try { localStorage.setItem(progressStorageKey(), JSON.stringify(p)); } catch (e) { /* private browsing / storage disabled — fail silently */ }
+  }
+  function recordAttempt(qid, wasCorrect) {
+    var p = loadProgress();
+    p.attempts[qid] = { correct: wasCorrect, attemptedAt: new Date().toISOString() };
+    saveProgress(p);
+  }
+  function toggleSaved(qid) {
+    var p = loadProgress();
+    if (p.saved[qid]) delete p.saved[qid]; else p.saved[qid] = true;
+    saveProgress(p);
+    return !!p.saved[qid];
+  }
+
+  function computeStreak(attempts) {
+    var days = {};
+    Object.keys(attempts).forEach(function (qid) {
+      var a = attempts[qid];
+      if (a && a.attemptedAt) days[a.attemptedAt.slice(0, 10)] = true;
+    });
+    function fmt(d) { return d.toISOString().slice(0, 10); }
+    var cur = new Date();
+    if (!days[fmt(cur)]) {
+      cur.setDate(cur.getDate() - 1);
+      if (!days[fmt(cur)]) return 0;
+    }
+    var streak = 0;
+    while (days[fmt(cur)]) { streak++; cur.setDate(cur.getDate() - 1); }
+    return streak;
+  }
+
+  function renderStats() {
+    var p = loadProgress();
+    var attemptedQids = Object.keys(p.attempts);
+    var correctCount = attemptedQids.filter(function (qid) { return p.attempts[qid].correct; }).length;
+    var accuracy = attemptedQids.length ? Math.round((correctCount / attemptedQids.length) * 100) : 0;
+    var attEl = document.getElementById('qb-stat-attempted');
+    var accEl = document.getElementById('qb-stat-accuracy');
+    var savedEl = document.getElementById('qb-stat-saved');
+    var streakEl = document.getElementById('qb-stat-streak');
+    if (attEl) attEl.textContent = String(attemptedQids.length);
+    if (accEl) accEl.textContent = accuracy + '%';
+    if (savedEl) savedEl.textContent = String(Object.keys(p.saved).length);
+    if (streakEl) streakEl.textContent = String(computeStreak(p.attempts));
+
+    var total = (window.QUESTION_BANK || []).length;
+    var rwCountEl = document.getElementById('qb-subject-rw-count');
+    var rwBarEl = document.getElementById('qb-subject-rw-bar');
+    if (rwCountEl) rwCountEl.textContent = correctCount + ' of ' + total + ' solved';
+    if (rwBarEl) rwBarEl.style.width = (total ? Math.round((correctCount / total) * 100) : 0) + '%';
+  }
+
+  function escHtmlQb(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  // A skill counts as "Weak" once there's enough of a sample to mean
+  // something (5+ attempts) and accuracy on it is below 60% — same rough
+  // bar the report's skill breakdown uses elsewhere in this file.
+  var WEAK_MIN_ATTEMPTS = 5, WEAK_ACC_THRESHOLD = 60;
+
+  // ═══ FILTER / SELECTION STATE ═══ reset every time the skills view is
+  // entered (see showSkills() below) — this is a "build a session" screen,
+  // not a persisted view, so there's no reason to remember a filter or
+  // selection from a previous visit.
+  var selectedDifficulties = ['easy', 'medium', 'hard'];
+  var completedFilter = 'all'; // 'all' | 'done' | 'not'
+  var selectedSkills = [];
+
+  var openQbDropdown = null;
+  function closeQbDropdown() { if (openQbDropdown) openQbDropdown.classList.remove('open'); openQbDropdown = null; }
+  document.addEventListener('mousedown', function (e) {
+    if (openQbDropdown && !openQbDropdown.contains(e.target)) closeQbDropdown();
+  });
+
+  // Small checkbox-dropdown builder, same visual language as Saved &
+  // Mistakes' filter pills (.iq-dropdown*) but self-contained — that
+  // module's own version is private to its own closure.
+  function buildCheckboxDropdown(container, label, options, labelFn, selectedArr, onChange) {
+    var wasOpen = container.classList.contains('open');
+    container.innerHTML = '';
+    container.classList.toggle('open', wasOpen);
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'iq-dropdown-btn';
+    var summary = selectedArr.length === options.length ? 'All' : selectedArr.length + ' of ' + options.length;
+    btn.innerHTML = '<span>' + escHtmlQb(label) + ': ' + escHtmlQb(summary) + '</span><span class="iq-dropdown-caret">&#9662;</span>';
+    btn.addEventListener('click', function () {
+      var isOpen = container.classList.contains('open');
+      closeQbDropdown();
+      if (!isOpen) { container.classList.add('open'); openQbDropdown = container; }
+    });
+    container.appendChild(btn);
+    var panel = document.createElement('div');
+    panel.className = 'iq-dropdown-panel';
+    options.forEach(function (opt) {
+      var row = document.createElement('label');
+      row.className = 'iq-dropdown-option';
+      var cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = selectedArr.indexOf(opt) !== -1;
+      cb.addEventListener('change', function () {
+        var i = selectedArr.indexOf(opt);
+        if (cb.checked) { if (i === -1) selectedArr.push(opt); }
+        else if (i !== -1 && selectedArr.length > 1) selectedArr.splice(i, 1);
+        else cb.checked = true; // never allow zero difficulties selected — nothing left to practice
+        onChange();
+      });
+      row.appendChild(cb);
+      row.appendChild(document.createTextNode(labelFn(opt)));
+      panel.appendChild(row);
+    });
+    container.appendChild(panel);
+  }
+  function buildRadioDropdown(container, label, options, selectedGetter, onSelect) {
+    var wasOpen = container.classList.contains('open');
+    container.innerHTML = '';
+    container.classList.toggle('open', wasOpen);
+    var current = options.filter(function (o) { return o.value === selectedGetter(); })[0];
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'iq-dropdown-btn';
+    btn.innerHTML = '<span>' + escHtmlQb(label) + ': ' + escHtmlQb(current ? current.label : '') + '</span><span class="iq-dropdown-caret">&#9662;</span>';
+    btn.addEventListener('click', function () {
+      var isOpen = container.classList.contains('open');
+      closeQbDropdown();
+      if (!isOpen) { container.classList.add('open'); openQbDropdown = container; }
+    });
+    container.appendChild(btn);
+    var panel = document.createElement('div');
+    panel.className = 'iq-dropdown-panel';
+    options.forEach(function (opt) {
+      var row = document.createElement('label');
+      row.className = 'iq-dropdown-option';
+      var rb = document.createElement('input');
+      rb.type = 'radio';
+      rb.name = 'qb-radio-' + label;
+      rb.checked = opt.value === selectedGetter();
+      rb.addEventListener('change', function () { onSelect(opt.value); });
+      row.appendChild(rb);
+      row.appendChild(document.createTextNode(opt.label));
+      panel.appendChild(row);
+    });
+    container.appendChild(panel);
+  }
+
+  function renderFilters() {
+    var diffContainer = document.getElementById('qb-diff-dropdown');
+    var completedContainer = document.getElementById('qb-completed-dropdown');
+    if (diffContainer) {
+      buildCheckboxDropdown(diffContainer, 'Difficulty', ['easy', 'medium', 'hard'], function (d) { return d.charAt(0).toUpperCase() + d.slice(1); }, selectedDifficulties, function () {
+        renderFilters();
+        renderSkillsList();
+      });
+    }
+    if (completedContainer) {
+      buildRadioDropdown(completedContainer, 'Completed', [
+        { value: 'all', label: 'All' },
+        { value: 'done', label: 'Completed' },
+        { value: 'not', label: 'Not completed' }
+      ], function () { return completedFilter; }, function (val) {
+        completedFilter = val;
+        closeQbDropdown();
+        renderFilters();
+        renderSkillsList();
+      });
+    }
+  }
+
+  function renderSelectionBar() {
+    var bar = document.getElementById('qb-selection-bar');
+    var countEl = document.getElementById('qb-selection-count');
+    if (!bar) return;
+    if (selectedSkills.length) {
+      bar.style.display = 'flex';
+      countEl.textContent = selectedSkills.length + ' topic' + (selectedSkills.length === 1 ? '' : 's') + ' selected';
+    } else {
+      bar.style.display = 'none';
+    }
+  }
+
+  function renderSkillsList() {
+    var tbody = document.getElementById('qb-skills-tbody');
+    if (!tbody) return;
+    var p = loadProgress();
+    var groups = {};
+    var order = [];
+    allSkills().forEach(function (s) {
+      if (!groups[s.domain]) { groups[s.domain] = []; order.push(s.domain); }
+      groups[s.domain].push(s);
+    });
+    var rowsHtml = '';
+    order.forEach(function (domain) {
+      var skillRows = groups[domain].map(function (s) {
+        var qids = s.questions.map(function (q) { return q.qid; });
+        var attempted = qids.filter(function (id) { return p.attempts[id]; });
+        var correct = attempted.filter(function (id) { return p.attempts[id].correct; });
+        var acc = attempted.length ? Math.round((correct.length / attempted.length) * 100) : 0;
+        var pct = qids.length ? Math.round((attempted.length / qids.length) * 100) : 0;
+        var isDone = attempted.length > 0 && attempted.length === qids.length;
+        return { s: s, attempted: attempted, correct: correct, acc: acc, pct: pct, isDone: isDone };
+      }).filter(function (row) {
+        if (completedFilter === 'done') return row.isDone;
+        if (completedFilter === 'not') return !row.isDone;
+        return true;
+      });
+      if (!skillRows.length) return;
+      rowsHtml += '<tr class="qb-domain-row"><td colspan="4">' + escHtmlQb(domain) + '</td></tr>';
+      skillRows.forEach(function (row) {
+        var s = row.s;
+        var isWeak = row.attempted.length >= WEAK_MIN_ATTEMPTS && row.acc < WEAK_ACC_THRESHOLD;
+        var checked = selectedSkills.indexOf(s.skill) !== -1;
+        rowsHtml += '<tr class="qb-skill-row" data-skill="' + escHtmlQb(s.skill) + '">' +
+          '<td><input type="checkbox" class="qb-skill-check" ' + (checked ? 'checked' : '') + '></td>' +
+          '<td><label class="qb-skill-name-cell">' + escHtmlQb(s.skill) + (isWeak ? ' <span class="qb-weak-tag">&#9889; Weak</span>' : '') + '</label></td>' +
+          '<td><div class="qb-progress-cell"><div class="qb-progress-track"><div class="qb-progress-fill" style="width:' + row.pct + '%;"></div></div>' +
+            '<span class="qb-progress-frac">' + row.attempted.length + '/' + s.questions.length + '</span></div></td>' +
+          '<td class="qb-acc-cell' + (row.attempted.length ? ' has-data' : '') + '">' + (row.attempted.length ? row.acc + '%' : '&mdash;') + '</td>' +
+        '</tr>';
+      });
+    });
+    tbody.innerHTML = rowsHtml;
+
+    Array.prototype.forEach.call(tbody.querySelectorAll('.qb-skill-row'), function (tr) {
+      var skillName = tr.getAttribute('data-skill');
+      var cb = tr.querySelector('.qb-skill-check');
+      function toggle() {
+        var i = selectedSkills.indexOf(skillName);
+        if (i === -1) selectedSkills.push(skillName); else selectedSkills.splice(i, 1);
+        cb.checked = selectedSkills.indexOf(skillName) !== -1;
+        renderSelectionBar();
+      }
+      cb.addEventListener('click', function (e) { e.stopPropagation(); toggle(); });
+      tr.querySelector('.qb-skill-name-cell').addEventListener('click', function (e) { e.preventDefault(); toggle(); });
+    });
+
+    var allSkillNames = allSkills().map(function (s) { return s.skill; });
+    var subEl = document.getElementById('qb-practice-all-sub');
+    if (subEl) subEl.textContent = 'Start practicing all ' + allSkillNames.length + ' skills in Reading & Writing.';
+  }
+
+  function showHome() {
+    closeQbDropdown();
+    document.getElementById('qb-home-view').style.display = '';
+    document.getElementById('qb-skills-view').style.display = 'none';
+    document.getElementById('qb-selection-bar').style.display = 'none';
+    renderStats();
+  }
+  function showSkills() {
+    document.getElementById('qb-home-view').style.display = 'none';
+    document.getElementById('qb-skills-view').style.display = '';
+    selectedDifficulties = ['easy', 'medium', 'hard'];
+    completedFilter = 'all';
+    selectedSkills = [];
+    renderFilters();
+    renderSkillsList();
+    renderSelectionBar();
+  }
+
+  /* ═══ PRACTICE RUNNER ═══ same shape as Challenge Questions' own runner
+     — a linear, Submit-then-Next queue rendered into the real exam's
+     #dx-card, plus a save/bookmark toggle injected into the card header
+     and a "Full Explanation" block (this bank's questions carry the
+     official College Board rationale as r.explanation, unlike Challenge
+     Questions' decks which don't have one). Session pool puts anything
+     not yet answered correctly first (never-attempted, then past misses),
+     shuffled within each group, capped at SESSION_SIZE so a 200+ question
+     skill doesn't turn "Practice" into a marathon — repeat visits work
+     through the rest. */
+  function shuffle(arr) {
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+  var runnerQueue = [];
+  var runnerIndex = 0;
+  var runnerState = {};
+  var runnerScore = 0;
+  var runnerSkillLabel = '';
+
+  // skillNames: array of skill names to draw from (one for a single-topic
+  // "Practice" click, all of them for "Practice all topics", a checked
+  // subset for the floating selection bar). Every session — regardless of
+  // how it was started — respects the Difficulty filter currently set on
+  // the skills view.
+  function startRunner(skillNames, label) {
+    var entries = allSkills().filter(function (s) { return skillNames.indexOf(s.skill) !== -1; });
+    var pool = [];
+    entries.forEach(function (s) {
+      s.questions.forEach(function (q) {
+        if (selectedDifficulties.indexOf(q.difficulty) !== -1) pool.push(q);
+      });
+    });
+    if (!pool.length) return;
+    var p = loadProgress();
+    var notSolved = [], solved = [];
+    pool.forEach(function (q) {
+      var a = p.attempts[q.qid];
+      if (a && a.correct) solved.push(q); else notSolved.push(q);
+    });
+    var queue = shuffle(notSolved).concat(shuffle(solved)).slice(0, SESSION_SIZE);
+    runnerQueue = queue;
+    runnerIndex = 0;
+    runnerState = {};
+    runnerScore = 0;
+    runnerSkillLabel = label;
+    window.dxPracticeNextHandler = runnerAdvance;
+    window.dxPracticeExitHandler = endRunner;
+    if (window.dxStartIncorrectPractice) window.dxStartIncorrectPractice('Question Bank: ' + label);
+    renderRunnerQuestion();
+  }
+  function endRunner() {
+    if (window.dxEndIncorrectPractice) window.dxEndIncorrectPractice();
+    if (window.showScreen) window.showScreen('screen-question-bank');
+    showSkills();
+  }
+  function runnerAdvance() {
+    if (runnerIndex >= runnerQueue.length) return;
+    var r = runnerQueue[runnerIndex];
+    var st = runnerState[r.qid];
+    if (!st.submitted) {
+      st.correct = (st.chosenIndex === r.correct);
+      st.submitted = true;
+      if (st.correct) runnerScore++;
+      recordAttempt(r.qid, st.correct);
+    } else {
+      runnerIndex++;
+    }
+    renderRunnerQuestion();
+  }
+  function renderSaveBtn(r) {
+    var hedEl = document.querySelector('#dx-card .dx-card-hed');
+    if (!hedEl) return;
+    var btn = document.getElementById('qb-save-btn');
+    if (!btn) {
+      btn = document.createElement('button');
+      btn.type = 'button';
+      btn.id = 'qb-save-btn';
+      btn.className = 'dx-mark-btn';
+      hedEl.appendChild(btn);
+    }
+    var p = loadProgress();
+    var isSaved = !!p.saved[r.qid];
+    btn.innerHTML = (isSaved ? '&#9733; Saved' : '&#9734; Save');
+    btn.onclick = function () {
+      var nowSaved = toggleSaved(r.qid);
+      btn.innerHTML = (nowSaved ? '&#9733; Saved' : '&#9734; Save');
+    };
+  }
+  function renderRunnerQuestion() {
+    var qtextEl = document.getElementById('dx-qtext');
+    var choicesEl = document.getElementById('dx-choices');
+    var frRowEl = document.getElementById('dx-fr-row');
+    var navRowEl = document.querySelector('#dx-card .dx-nav-row');
+    var backBtnEl = document.getElementById('dx-back');
+    var nextBtnEl = document.getElementById('dx-next');
+    var calcBtnEl = document.getElementById('dx-calculator-btn');
+    var existingSummary = document.getElementById('qb-runner-summary');
+    if (existingSummary) existingSummary.parentNode.removeChild(existingSummary);
+    var dxCardEl = document.getElementById('dx-card');
+    Array.prototype.forEach.call(dxCardEl.querySelectorAll('.pb-note, .pb-explain'), function (el) {
+      el.parentNode.removeChild(el);
+    });
+    backBtnEl.disabled = true;
+    frRowEl.style.display = 'none';
+    calcBtnEl.style.display = 'none';
+
+    if (runnerIndex >= runnerQueue.length) {
+      document.getElementById('dx-notice-text').textContent = 'PRACTICE MODE — DONE';
+      qtextEl.innerHTML = '';
+      choicesEl.style.display = 'none';
+      navRowEl.style.display = 'none';
+      nextBtnEl.disabled = true;
+      var cardHedDone = document.querySelector('#dx-card .dx-card-hed');
+      if (cardHedDone) cardHedDone.style.display = 'none';
+      if (window.dxCloseCalculator) window.dxCloseCalculator();
+      if (window.dxRenderPassagePane) window.dxRenderPassagePane({}, null);
+      var summary = document.createElement('div');
+      summary.id = 'qb-runner-summary';
+      summary.className = 'iq-runner-summary';
+      summary.innerHTML = '<div class="iq-runner-summary-score">' + runnerScore + ' / ' + runnerQueue.length + '</div>' +
+        '<div class="iq-runner-summary-lab">correct this round</div>' +
+        '<button type="button" class="key-btn" id="qb-runner-done" type="button">Done</button>';
+      document.getElementById('dx-card').insertBefore(summary, navRowEl);
+      document.getElementById('qb-runner-done').addEventListener('click', endRunner);
+      return;
+    }
+
+    navRowEl.style.display = '';
+    var r = runnerQueue[runnerIndex];
+    var st = runnerState[r.qid] || (runnerState[r.qid] = {});
+    document.getElementById('dx-notice-text').textContent = 'PRACTICE MODE — QUESTION ' + (runnerIndex + 1) + ' OF ' + runnerQueue.length;
+    var cardHedEl = document.querySelector('#dx-card .dx-card-hed');
+    if (cardHedEl) cardHedEl.style.display = '';
+    var qnumTileEl = document.getElementById('dx-qnum-tile');
+    if (qnumTileEl) { qnumTileEl.textContent = runnerIndex + 1; qnumTileEl.style.display = ''; }
+    qtextEl.innerHTML = r.text;
+    if (window.dxRenderPassagePane) window.dxRenderPassagePane({}, null, r.qid);
+    renderSaveBtn(r);
+
+    choicesEl.style.display = 'flex';
+    choicesEl.innerHTML = '';
+    r.choices.forEach(function (c, i) {
+      var cls = 'dx-choice';
+      if (!st.submitted) {
+        if (st.chosenIndex === i) cls += ' selected';
+      } else {
+        var isCorrectChoice = r.correct === i;
+        var isChosen = st.chosenIndex === i;
+        if (isCorrectChoice) cls += ' pb-right';
+        else if (isChosen) cls += ' pb-tried-wrong';
+      }
+      var row = document.createElement('div');
+      row.className = cls;
+      row.innerHTML = '<span class="dx-choice-letter">' + LETTERS[i] + '</span><span class="dx-choice-text">' + c + '</span>';
+      if (!st.submitted) {
+        row.addEventListener('click', function () {
+          st.chosenIndex = i;
+          renderRunnerQuestion();
+        });
+      }
+      choicesEl.appendChild(row);
+    });
+    nextBtnEl.disabled = !st.submitted && st.chosenIndex == null;
+
+    if (st.submitted && r.explanation) {
+      var explain = document.createElement('div');
+      explain.className = 'pb-explain';
+      explain.innerHTML = '<div class="pb-explain-hed">Full Explanation</div>' + r.explanation;
+      navRowEl.parentNode.insertBefore(explain, navRowEl);
+    }
+    nextBtnEl.textContent = st.submitted ? (runnerIndex + 1 < runnerQueue.length ? 'Next' : 'See Results') : 'Submit';
+  }
+
+  var wired = false;
+  window.qbModuleInit = function () {
+    showHome();
+    if (!wired) {
+      wired = true;
+      var subjectBtn = document.getElementById('qb-subject-rw');
+      if (subjectBtn) subjectBtn.addEventListener('click', showSkills);
+      var backBtn = document.getElementById('qb-skills-back');
+      if (backBtn) backBtn.addEventListener('click', function (e) { e.preventDefault(); showHome(); });
+      var homeBackBtn = document.getElementById('question-bank-back');
+      if (homeBackBtn) homeBackBtn.addEventListener('click', function (e) { e.preventDefault(); if (window.showScreen) window.showScreen('screen-menu'); });
+      var practiceAllBtn = document.getElementById('qb-practice-all-btn');
+      if (practiceAllBtn) practiceAllBtn.addEventListener('click', function () {
+        startRunner(allSkills().map(function (s) { return s.skill; }), 'Reading & Writing');
+      });
+      var selectionStartBtn = document.getElementById('qb-selection-start-btn');
+      if (selectionStartBtn) selectionStartBtn.addEventListener('click', function () {
+        if (!selectedSkills.length) return;
+        var label = selectedSkills.length === 1 ? selectedSkills[0] : selectedSkills.length + ' skills';
+        startRunner(selectedSkills.slice(), label);
+      });
+    }
+  };
+})();
+</script>
+<script>
 /* ═══ NATIVE REPORT RENDERER ═══ ported from report.html's own script so
    "View Results" renders the report as real content on THIS page instead
    of inside an iframe onto a separate document — the iframe approach kept
@@ -11478,7 +12186,7 @@ window.renderNativeReport = function (data) {
   // View Results on a practice test, then a Score Progress point on Home,
   // or two Score Progress points back to back) piled the new tiles/cards
   // on top of the previous report's instead of replacing them.
-  ['score-tiles', 'raw-stats', 'score-bridge', 'bridge-skills', 'section-breakdown',
+  ['score-tiles', 'raw-stats', 'score-bridge', 'bridge-note-outer', 'section-breakdown',
    'accuracy-by-topic', 'confidence-quadrant', 'behavior-section', 'raw-tables'
   ].forEach(function (id) {
     var el = document.getElementById(id);
@@ -11532,6 +12240,29 @@ window.renderNativeReport = function (data) {
     qModalTitle.textContent = 'Question ' + row.n + (label ? ' — ' + label : '');
     qModalBody.innerHTML = '';
     qModalBody.appendChild(renderQuestionDetail(row));
+    qModalOverlay.classList.add('open');
+  }
+  // Same modal shell, multiple questions stacked with a divider between
+  // each — used by the bridge chart's "click a bar to see those
+  // questions" (a skill or domain rollup can cover several missed
+  // questions at once, not just one). renderQuestionDetail is a plain
+  // function declaration (hoisted), same as openQuestionModal above, so
+  // calling it here before its own definition further down is safe.
+  function openQuestionListModal(rowsList, label) {
+    qModalTitle.textContent = label + ' — ' + rowsList.length + ' question' + (rowsList.length === 1 ? '' : 's');
+    qModalBody.innerHTML = '';
+    rowsList.forEach(function (r, i) {
+      if (i > 0) {
+        var hr = document.createElement('div');
+        hr.className = 'q-list-divider';
+        qModalBody.appendChild(hr);
+      }
+      var qhead = document.createElement('div');
+      qhead.className = 'q-list-qnum';
+      qhead.textContent = 'Question ' + r.n;
+      qModalBody.appendChild(qhead);
+      qModalBody.appendChild(renderQuestionDetail(r));
+    });
     qModalOverlay.classList.add('open');
   }
   function closeQuestionModal() { qModalOverlay.classList.remove('open'); }
@@ -12696,7 +13427,7 @@ window.renderNativeReport = function (data) {
       } else { undomainedPts += item.points; undomainedN += 1; }
     });
     var domainItems = Object.keys(domainBuckets)
-      .map(function (d) { return { label: 'Other — ' + d, points: domainBuckets[d].points, n: domainBuckets[d].n }; })
+      .map(function (d) { return { label: 'Other — ' + d, dom: d, points: domainBuckets[d].points, n: domainBuckets[d].n }; })
       .sort(function (a, b) { return b.points - a.points; });
 
     // No bar slot is reserved for a generic catch-all anymore — the
@@ -12711,8 +13442,17 @@ window.renderNativeReport = function (data) {
       else { genericOtherPts += item.points; genericOtherN += item.n; }
     });
 
-    var shownItems = namedItems.concat(shownDomainItems.map(function (it) {
-      return { label: it.label + (it.n > 1 ? ' (' + it.n + ' skills)' : ''), points: it.points };
+    // filterType/filterName are what the hover tooltip and click-through
+    // (see drawBridge()'s bar-hit-testing) use to look up real stats and
+    // matching questions for a bar — 'skill' bars resolve against the
+    // global `skills` map by exact name; 'domain' rollups resolve against
+    // `domains` (the whole domain's accuracy, not just the folded-in
+    // skills' share of it — the same number "Skill Breakdown" shows for
+    // that domain, so the two sections never disagree).
+    var shownItems = namedItems.map(function (it) {
+      return { label: it.label, points: it.points, filterType: 'skill', filterName: it.label };
+    }).concat(shownDomainItems.map(function (it) {
+      return { label: it.label + (it.n > 1 ? ' (' + it.n + ' skills)' : ''), points: it.points, filterType: 'domain', filterName: it.dom };
     }));
 
     // The bars now always sum to exactly this — no more overshoot past
@@ -12758,10 +13498,33 @@ window.renderNativeReport = function (data) {
       renderBridge();
     }
 
+    // Every question, across every section, that this bar's skill/domain
+    // covers AND was actually missed — "recoverable points" is inherently
+    // about the misses, so a click surfaces the questions that cost the
+    // points this bar claims are recoverable, not every attempt.
+    function rowsForItem(item) {
+      var out = [];
+      sections.forEach(function (s) {
+        s.rows.forEach(function (r) {
+          if (r.ok) return;
+          if (item.filterType === 'skill' && r.sk === item.filterName) out.push(r);
+          else if (item.filterType === 'domain' && r.dom === item.filterName) out.push(r);
+        });
+      });
+      return out;
+    }
+    function onBarClick(item) {
+      var matches = rowsForItem(item);
+      if (!matches.length) return;
+      openQuestionListModal(matches, item.label);
+    }
+
     renderBridge();
 
     function renderBridge() {
       bridgeWrap.innerHTML = '';
+      var noteOuter = document.getElementById('bridge-note-outer');
+      if (noteOuter) noteOuter.innerHTML = '';
       var outer = document.createElement('div');
       outer.className = 'bridge-wrap';
 
@@ -12781,7 +13544,9 @@ window.renderNativeReport = function (data) {
         msg2.textContent = 'Not enough missed questions on this diagnostic to attribute recoverable points to specific skills yet.';
         canvasWrap.appendChild(msg2);
       } else {
-        canvasWrap.appendChild(drawBridge(shownItems, currentComposite, reachable, targetScore, applyTargetChange));
+        canvasWrap.appendChild(drawBridge(shownItems, currentComposite, reachable, targetScore, applyTargetChange, onBarClick));
+
+        if (!noteOuter) { bridgeWrap.appendChild(outer); return; }
 
         // The leftover recoverable points that didn't earn their own named
         // or domain-rollup bar used to be flattened into one "Other
@@ -12790,18 +13555,20 @@ window.renderNativeReport = function (data) {
         // opportunity when it's actually a sum over several small,
         // unnamed skills. That's a different KIND of fact (breadth of the
         // gap, not a single fixable thing), so it's stated as a sentence
-        // instead of a bar competing for space on the same axis.
+        // instead of a bar competing for space on the same axis. Lives
+        // below the whole card now (see #bridge-note-outer), not nested
+        // inside it, so it reads as commentary on the section as a whole.
         if (genericOtherPts >= 0.5) {
           var otherNote = document.createElement('div');
-          otherNote.className = 'bridge-note bridge-other-note';
+          otherNote.className = 'bridge-note-block bridge-other-note';
           var otherPtsLabel = isSAT ? Math.max(10, roundToTen(genericOtherPts)) : Math.round(genericOtherPts);
           otherNote.textContent = 'Plus roughly ' + otherPtsLabel + ' more points spread across ' + genericOtherN + ' other ' + (genericOtherN === 1 ? 'skill' : 'skills') + ', each too small on its own to call out by name.';
-          outer.appendChild(otherNote);
+          noteOuter.appendChild(otherNote);
         }
 
         var note = document.createElement('div');
-        note.className = 'bridge-note';
-        var baseText = 'Bars show real composite points recoverable per skill, from ' + currentComposite + ' up to ' + reachable + ' if every gap this diagnostic found were closed.';
+        note.className = 'bridge-note-block';
+        var baseText = 'Bars show real composite points recoverable per skill, from ' + currentComposite + ' up to ' + reachable + ' if every gap this diagnostic found were closed. Hover a bar for that skill\'s accuracy, or click it to see those questions.';
         if (hitCeiling) baseText += ' That total is capped at the maximum possible score of ' + scoreMax + '.';
         var HIGH_BAND = isSAT ? 1500 : 34;
         if (currentComposite >= HIGH_BAND || targetScore >= HIGH_BAND) {
@@ -12814,7 +13581,7 @@ window.renderNativeReport = function (data) {
           targetText = 'The dashed line marks your target of ' + targetScore + '. It is within reach from these fixes alone.';
         }
         note.textContent = baseText + ' ' + targetText;
-        outer.appendChild(note);
+        noteOuter.appendChild(note);
       }
 
       bridgeWrap.appendChild(outer);
@@ -12860,22 +13627,57 @@ window.renderNativeReport = function (data) {
       ctx.closePath();
     }
 
-    function drawBridge(items, startVal, endVal, targetVal, onDragEnd) {
+    function drawBridge(items, startVal, endVal, targetVal, onDragEnd, onBarClick) {
       var bars = [{ label: 'Current', val: startVal, isEndpoint: true }]
-        .concat(items.map(function (e) { return { label: e.label, points: e.points, tag: e.tag }; }))
+        .concat(items.map(function (e) { return { label: e.label, points: e.points, tag: e.tag, filterType: e.filterType, filterName: e.filterName }; }))
         .concat([{ label: 'Max recoverable', val: endVal, isEndpoint: true }]);
 
       // Width grows with the bar count (more likely now that a low
       // scorer's spread-out gaps can name up to 9 skills instead of 6) so
       // bars/labels don't get squeezed thinner than a 6-bar chart used to
-      // be — capped at 680px, the widest a chart can run and still sit
-      // inside the printed page's margins (8.5in page minus 0.65in side
-      // padding each side, at 96dpi).
-      var w = Math.min(680, Math.max(620, 52 * bars.length)), h = 230, padL = 40, padR = 78, padT = 16, padB = 46;
-      var plotW = w - padL - padR, plotH = h - padT - padB;
+      // be — capped at 980px, close to the full width of the Practice
+      // Tests panel (#screen-practice-tests .panel-wide maxes out at
+      // 1100px) minus the card/wrap padding around it, now that the chart
+      // isn't sharing its card with the old "Top 5 weakest skills" list.
+      // Taller too (230 -> 400+) for the same reason — more vertical room
+      // to actually use once the card isn't budgeting space for that list.
+      var w = Math.min(1000, Math.max(820, 100 * bars.length)), padL = 50, padR = 100, padT = 24;
       var n = bars.length;
-      var barW = plotW / n * 0.62;
+      var plotW = w - padL - padR;
       var gapW = plotW / n;
+      var barW = gapW * 0.62;
+
+      // Bar labels are shown in FULL now — no more 16-char/"…" truncation
+      // and no cap on wrapped lines — so a long skill or domain-rollup
+      // name (e.g. "Nonlinear Equations in One Variable and Systems of
+      // Equations in Two Variables") just wraps across as many lines as
+      // it needs at this chart's actual column width. Since that affects
+      // how tall the chart has to be, it's measured with a throwaway
+      // canvas context BEFORE the real one is created (padB below can't
+      // be a fixed guess any more).
+      var measureCtx = document.createElement('canvas').getContext('2d');
+      measureCtx.font = '600 9.5px Poppins, sans-serif';
+      var labelMaxW = gapW + 14;
+      function wrapLinesFor(text, maxW) {
+        var words = text.split(' ');
+        var lines = [], cur = '';
+        words.forEach(function (word) {
+          var test = cur ? cur + ' ' + word : word;
+          if (measureCtx.measureText(test).width > maxW && cur) { lines.push(cur); cur = word; }
+          else cur = test;
+        });
+        if (cur) lines.push(cur);
+        return lines;
+      }
+      var maxLabelLines = 1;
+      bars.forEach(function (b) {
+        var lc = wrapLinesFor(b.label, labelMaxW).length;
+        if (lc > maxLabelLines) maxLabelLines = lc;
+      });
+      var labelLineH = 11;
+      var padB = 34 + maxLabelLines * labelLineH;
+      var h = 340 + (maxLabelLines - 1) * labelLineH;
+      var plotH = h - padT - padB;
 
       var made = crispCanvas2(w, h), cv = made.cv, ctx = made.ctx;
       cv.setAttribute('role', 'img');
@@ -12891,9 +13693,15 @@ window.renderNativeReport = function (data) {
       // distance to it, rather than being hidden or force-fit to reach
       // it). Returns the axis bounds so the drag handler can invert a
       // pointer position back into a score value using this same scale.
+      // Hit regions for the mid-chart (non-endpoint) bars, rebuilt on every
+      // paint() call — used by the mousemove/click handlers below to know
+      // which bar (if any) the cursor is over, in the SAME coordinate
+      // space valueFromClientY already converts pointer events into.
+      var barRects = [];
       function paint(curTargetVal) {
         ctx.clearRect(0, 0, w, h);
-        cv.setAttribute('aria-label', 'Score bridge from current composite ' + startVal + ' to reachable composite ' + endVal + ', with a target reference line at ' + curTargetVal + '. Drag the dashed line, or use the target field above the chart, to change it.');
+        barRects = [];
+        cv.setAttribute('aria-label', 'Score bridge from current composite ' + startVal + ' to reachable composite ' + endVal + ', with a target reference line at ' + curTargetVal + '. Drag the dashed line, or use the target field above the chart, to change it. Hover or click a bar for that skill\'s accuracy and missed questions.');
 
         var minVal = Math.min(startVal, curTargetVal);
         var maxVal = Math.max(endVal, curTargetVal);
@@ -12928,9 +13736,9 @@ window.renderNativeReport = function (data) {
             ctx.fillStyle = (b.label === 'Max recoverable') ? '#5E8B6F' : '#243447';
             roundTopRect(ctx, bx, topY, barW, baseY - topY, 4);
             ctx.fillStyle = '#1a1a1a';
-            ctx.font = '700 15px Poppins, sans-serif';
+            ctx.font = '700 17px Poppins, sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText(String(b.val), bx + barW / 2, topY - 8);
+            ctx.fillText(String(b.val), bx + barW / 2, topY - 9);
             running = b.val;
           } else {
             var fromY = y(running);
@@ -12946,8 +13754,12 @@ window.renderNativeReport = function (data) {
             // an unfinished/disconnected shape.
             roundRect(ctx, bx, top, barW, segH, Math.min(4, segH / 2));
             ctx.fill();
+            // Hoverable/clickable — see the mousemove/pointerdown handlers
+            // below, which hit-test against this list in the same
+            // client-coordinate space valueFromClientY uses.
+            if (b.filterType) barRects.push({ x: bx, y: top, w: barW, h: segH, item: b });
             ctx.fillStyle = '#1a1a1a';
-            ctx.font = '600 11px Poppins, sans-serif';
+            ctx.font = '600 12px Poppins, sans-serif';
             ctx.textAlign = 'center';
             // SAT composites only ever move in 10-point steps (each section
             // score is a multiple of 10), so a per-skill "+13" reads as a
@@ -12956,15 +13768,15 @@ window.renderNativeReport = function (data) {
             // number on this report — floor of 10 so a genuinely nonzero
             // sliver still shows as recoverable rather than rounding to +0.
             var barLabelPts = isSAT ? Math.max(10, roundToTen(b.points)) : Math.round(b.points);
-            ctx.fillText('+' + barLabelPts, bx + barW / 2, top - 6);
+            ctx.fillText('+' + barLabelPts, bx + barW / 2, top - 7);
             running = toVal;
           }
-          // x-axis label (rotated-free: short skill names, wrapped by truncation)
+          // x-axis label (rotated-free: full text, wrapped to as many
+          // lines as it needs — see the padB/h measurement above).
           ctx.fillStyle = 'rgba(17,17,17,0.6)';
-          ctx.font = '600 8.5px Poppins, sans-serif';
+          ctx.font = '600 9.5px Poppins, sans-serif';
           ctx.textAlign = 'center';
-          var label = b.label.length > 16 ? b.label.slice(0, 15) + '…' : b.label;
-          wrapCanvasLabel(ctx, label, bx + barW / 2, padT + plotH + 14, barW + 14, 9);
+          wrapCanvasLabel(ctx, b.label, bx + barW / 2, padT + plotH + 15, gapW + 14, labelLineH);
         });
 
         // Target reference line — dashed, spans the full plot width, drawn
@@ -12983,10 +13795,10 @@ window.renderNativeReport = function (data) {
         // Solid rounded pill instead of bare text — reads as a proper chart
         // annotation (the kind Chart.js/Recharts plugins draw) rather than
         // a stray label floating off the plot edge.
-        ctx.font = '700 9.5px Poppins, sans-serif';
+        ctx.font = '700 10.5px Poppins, sans-serif';
         var targetLabel = 'Target ' + curTargetVal;
         var labelW = ctx.measureText(targetLabel).width;
-        var pillPadX = 7, pillH = 16, pillW = labelW + pillPadX * 2;
+        var pillPadX = 8, pillH = 18, pillW = labelW + pillPadX * 2;
         // Clamp the pill's vertical position to stay inside the canvas even
         // when the target line itself sits right at the top or bottom edge
         // of the plot area — the line stays at its true position, only the
@@ -13006,15 +13818,21 @@ window.renderNativeReport = function (data) {
 
       var axis = paint(targetVal);
 
-      // Draggable target line: click/touch anywhere on the chart and drag
-      // vertically to set the target, instead of only being able to type
-      // a number into the field above it. Pointer Events cover mouse and
-      // touch alike. setPointerCapture keeps the drag tracking even if
-      // the cursor slips outside the small canvas — safe here because
-      // paint() redraws THIS SAME canvas in place rather than replacing
-      // it, so the capture never gets detached mid-drag. The surrounding
-      // target input/note text only resync once, on release, via the
-      // same onDragEnd callback the number input itself uses.
+      // Draggable target line: click/touch anywhere on EMPTY chart space
+      // and drag vertically to set the target, instead of only being able
+      // to type a number into the field above it. Pointer Events cover
+      // mouse and touch alike. setPointerCapture keeps the drag tracking
+      // even if the cursor slips outside the small canvas — safe here
+      // because paint() redraws THIS SAME canvas in place rather than
+      // replacing it, so the capture never gets detached mid-drag. The
+      // surrounding target input/note text only resync once, on release,
+      // via the same onDragEnd callback the number input itself uses.
+      //
+      // A pointerdown that lands ON a bar instead starts a bar
+      // click-through (see barRects/hitTestBar below) rather than a
+      // target drag — the two gestures share the same canvas but a click
+      // on a bar is never meant to also nudge the target line out from
+      // under it.
       cv.style.cursor = 'ns-resize';
       cv.style.touchAction = 'none';
       var dragTarget = targetVal;
@@ -13026,23 +13844,93 @@ window.renderNativeReport = function (data) {
         v = Math.max(startVal, Math.min(scoreMax, v));
         return isSAT ? roundToTen(v) : Math.round(v);
       }
+      function hitTestBar(clientX, clientY) {
+        var rect = cv.getBoundingClientRect();
+        var scaleX = rect.width ? w / rect.width : 1;
+        var scaleY = rect.height ? h / rect.height : 1;
+        var lx = (clientX - rect.left) * scaleX;
+        var ly = (clientY - rect.top) * scaleY;
+        for (var i = 0; i < barRects.length; i++) {
+          var br = barRects[i];
+          if (lx >= br.x && lx <= br.x + br.w && ly >= br.y && ly <= br.y + br.h) return br;
+        }
+        return null;
+      }
+
+      // Floating tooltip — a plain sibling <div> next to the canvas
+      // (position:fixed, see .bridge-tooltip in the stylesheet), not
+      // drawn on the canvas itself, so its text stays real DOM (readable,
+      // selectable) rather than more canvas drawing code.
+      var wrap = document.createElement('div');
+      wrap.className = 'bridge-canvas-inner';
+      wrap.appendChild(cv);
+      var tooltip = document.createElement('div');
+      tooltip.className = 'bridge-tooltip';
+      wrap.appendChild(tooltip);
+      function statsForItem(item) {
+        if (item.filterType === 'skill') return skills[item.filterName];
+        if (item.filterType === 'domain') return domains[item.filterName];
+        return null;
+      }
+      function showTooltip(clientX, clientY, item) {
+        var stat = statsForItem(item);
+        if (!stat || !stat.t) { tooltip.style.display = 'none'; return; }
+        var pct = Math.round(stat.c / stat.t * 100);
+        tooltip.innerHTML = '<b>' + item.label + '</b>' + pct + '% correct (' + stat.c + '/' + stat.t + ')' +
+          '<span class="bridge-tooltip-hint">Click to see these questions</span>';
+        tooltip.style.left = (clientX + 14) + 'px';
+        tooltip.style.top = (clientY + 14) + 'px';
+        tooltip.style.display = 'block';
+      }
+      function hideTooltip() { tooltip.style.display = 'none'; }
+
+      var isDraggingTarget = false;
+      var pendingBarItem = null;
       cv.addEventListener('pointerdown', function (e) {
+        var hit = hitTestBar(e.clientX, e.clientY);
         cv.setPointerCapture(e.pointerId);
+        if (hit) { pendingBarItem = hit.item; isDraggingTarget = false; return; }
+        pendingBarItem = null;
+        isDraggingTarget = true;
         dragTarget = valueFromClientY(e.clientY);
         axis = paint(dragTarget);
+        hideTooltip();
       });
       cv.addEventListener('pointermove', function (e) {
-        if (e.buttons === 0) return; // not currently pressed/dragging
-        dragTarget = valueFromClientY(e.clientY);
-        axis = paint(dragTarget);
+        if (isDraggingTarget && e.buttons !== 0) {
+          dragTarget = valueFromClientY(e.clientY);
+          axis = paint(dragTarget);
+          return;
+        }
+        var hit = hitTestBar(e.clientX, e.clientY);
+        if (hit) {
+          cv.style.cursor = 'pointer';
+          showTooltip(e.clientX, e.clientY, hit.item);
+        } else {
+          cv.style.cursor = 'ns-resize';
+          hideTooltip();
+        }
       });
+      cv.addEventListener('pointerleave', function () { hideTooltip(); });
       cv.addEventListener('pointerup', function () {
-        if (typeof onDragEnd === 'function') onDragEnd(dragTarget);
+        if (isDraggingTarget) {
+          isDraggingTarget = false;
+          if (typeof onDragEnd === 'function') onDragEnd(dragTarget);
+          return;
+        }
+        if (pendingBarItem) {
+          var item = pendingBarItem;
+          pendingBarItem = null;
+          if (typeof onBarClick === 'function') onBarClick(item);
+        }
       });
 
-      return cv;
+      return wrap;
     }
 
+    // No cap on line count any more — labels render in full (see the
+    // padB/h measurement pass in drawBridge, which sizes the chart to fit
+    // however many lines the longest label actually needs).
     function wrapCanvasLabel(ctx, text, cx, y0, maxW, lineH) {
       var words = text.split(' ');
       var lines = [], cur = '';
@@ -13052,7 +13940,6 @@ window.renderNativeReport = function (data) {
         else cur = test;
       });
       if (cur) lines.push(cur);
-      lines = lines.slice(0, 2);
       lines.forEach(function (ln, i) { ctx.fillText(ln, cx, y0 + i * lineH); });
     }
 
@@ -13395,55 +14282,32 @@ window.renderNativeReport = function (data) {
     var q = r.q || {};
     var box = document.createElement('div');
     box.className = 'q-detail';
-    var txt = document.createElement('div');
-    txt.className = 'q-text';
-    txt.innerHTML = q.text || '(question text unavailable)';
-    box.appendChild(txt);
 
-    if (q.type === 'mc' && q.choices) {
-      var ul = document.createElement('ul');
-      ul.className = 'q-choices';
-      q.choices.forEach(function (choice, idx) {
-        var li = document.createElement('li');
-        var isCorrectChoice = idx === q.correct;
-        var isPicked = r.givenIdx === idx;
-        if (isCorrectChoice) li.className = 'q-correct';
-        else if (isPicked) li.className = 'q-picked-wrong';
-        var left = document.createElement('span');
-        left.innerHTML = LETTERS[idx] + '. ' + choice;
-        li.appendChild(left);
-        var tag = '';
-        if (isCorrectChoice && isPicked) tag = '<span class="q-tag ok">✓ correct — selected</span>';
-        else if (isCorrectChoice) tag = '<span class="q-tag ok">✓ correct answer</span>';
-        else if (isPicked) tag = '<span class="q-tag bad">✗ selected</span>';
-        if (tag) { var t = document.createElement('span'); t.innerHTML = tag; li.appendChild(t); }
-        ul.appendChild(li);
-      });
-      box.appendChild(ul);
-      if (r.givenIdx === null) {
-        var blank = document.createElement('div');
-        blank.className = 'q-tag bad';
-        blank.style.marginTop = '4px';
-        blank.textContent = 'Left blank';
-        box.appendChild(blank);
-      }
-    } else if (q.type === 'fr') {
-      var fr = document.createElement('div');
-      fr.className = 'q-fr';
-      var yourAns = (r.givenText !== null && r.givenText !== undefined && r.givenText !== '') ? r.givenText : (r.ok ? String(q.answer) : 'left blank');
-      fr.innerHTML = 'Correct answer: <span class="q-correct-ans">' + q.answer + '</span>' +
-        (r.ok ? '' : ' &nbsp;·&nbsp; Entered: <span class="q-your-ans">' + yourAns + '</span>');
-      box.appendChild(fr);
-    }
+    // ═══ TOP-RIGHT ACTIONS ═══ "Hide answer" + "Save this question",
+    // together in one row pinned to the top right of every question
+    // previewer. "Hide answer" now applies to EVERY question here,
+    // correct or missed — reviewing from the bridge chart's "see those
+    // questions" list is just as useful as a self-quiz as reviewing a
+    // question answered correctly, and missed questions still show the
+    // choices/prompt with the marking withheld until revealed. Starts
+    // hidden (checked) by default; unchecking reveals the normal
+    // fully-marked view.
+    var actionsRow = document.createElement('div');
+    actionsRow.className = 'q-detail-actions';
+    box.appendChild(actionsRow);
 
-    if (r.timeMs || r.firstVisitedAt || r.lastViewedAt) {
-      var timing = document.createElement('div');
-      timing.className = 'q-timing';
-      timing.innerHTML = 'Time spent: <strong>' + formatDuration(r.timeMs) + '</strong>' +
-        ' &nbsp;·&nbsp; First visited: ' + formatElapsedIntoSection(r.firstVisitedAt) +
-        ' &nbsp;·&nbsp; Last viewed: ' + formatElapsedIntoSection(r.lastViewedAt);
-      box.appendChild(timing);
-    }
+    var hideAnswer = true;
+    var answerWrap = document.createElement('div');
+    var toggleRow = document.createElement('label');
+    toggleRow.className = 'q-hide-toggle';
+    toggleRow.innerHTML = '<input type="checkbox" checked> Hide answer';
+    var hideCb = toggleRow.querySelector('input');
+    hideCb.addEventListener('click', function (e) { e.stopPropagation(); });
+    hideCb.addEventListener('change', function () {
+      hideAnswer = hideCb.checked;
+      renderAnswerArea();
+    });
+    actionsRow.appendChild(toggleRow);
 
     // Save to "Saved & Mistakes" — works on ANY question here, right or
     // wrong (that's the whole point: a mistake already lands in Saved &
@@ -13452,16 +14316,14 @@ window.renderNativeReport = function (data) {
     // want more reps of). See window.saveReportQuestion() in the main
     // script for the actual read/write; this button just toggles it.
     if (r.key) {
-      var saveRow = document.createElement('div');
-      saveRow.className = 'q-save-row';
       var saveBtn = document.createElement('button');
       saveBtn.type = 'button';
       saveBtn.className = 'q-save-btn';
-      function paintSaveBtn() {
+      var paintSaveBtn = function () {
         var isSaved = isReportQuestionSaved(r.key);
         saveBtn.classList.toggle('on', isSaved);
-        saveBtn.innerHTML = isSaved ? '&#11088; Saved to Saved &amp; Mistakes' : '&#11088; Save this question';
-      }
+        saveBtn.innerHTML = isSaved ? '&#11088; Saved' : '&#11088; Save this question';
+      };
       paintSaveBtn();
       saveBtn.addEventListener('click', function () {
         var nowSaved = !isReportQuestionSaved(r.key);
@@ -13472,8 +14334,73 @@ window.renderNativeReport = function (data) {
         }
         paintSaveBtn();
       });
-      saveRow.appendChild(saveBtn);
-      box.appendChild(saveRow);
+      actionsRow.appendChild(saveBtn);
+    }
+
+    var txt = document.createElement('div');
+    txt.className = 'q-text';
+    txt.innerHTML = q.text || '(question text unavailable)';
+    box.appendChild(txt);
+    box.appendChild(answerWrap);
+
+    function renderAnswerArea() {
+      answerWrap.innerHTML = '';
+      if (q.type === 'mc' && q.choices) {
+        var ul = document.createElement('ul');
+        ul.className = 'q-choices';
+        q.choices.forEach(function (choice, idx) {
+          var li = document.createElement('li');
+          var isCorrectChoice = idx === q.correct;
+          var isPicked = r.givenIdx === idx;
+          if (!hideAnswer) {
+            if (isCorrectChoice) li.className = 'q-correct';
+            else if (isPicked) li.className = 'q-picked-wrong';
+          }
+          var left = document.createElement('span');
+          left.innerHTML = LETTERS[idx] + '. ' + choice;
+          li.appendChild(left);
+          if (!hideAnswer) {
+            var tag = '';
+            if (isCorrectChoice && isPicked) tag = '<span class="q-tag ok">✓ correct — selected</span>';
+            else if (isCorrectChoice) tag = '<span class="q-tag ok">✓ correct answer</span>';
+            else if (isPicked) tag = '<span class="q-tag bad">✗ selected</span>';
+            if (tag) { var t = document.createElement('span'); t.innerHTML = tag; li.appendChild(t); }
+          }
+          ul.appendChild(li);
+        });
+        answerWrap.appendChild(ul);
+        if (!hideAnswer && r.givenIdx === null) {
+          var blank = document.createElement('div');
+          blank.className = 'q-tag bad';
+          blank.style.marginTop = '4px';
+          blank.textContent = 'Left blank';
+          answerWrap.appendChild(blank);
+        }
+      } else if (q.type === 'fr') {
+        if (hideAnswer) {
+          var frHidden = document.createElement('div');
+          frHidden.className = 'q-fr q-fr-hidden';
+          frHidden.textContent = 'Answer hidden — uncheck "Hide answer" above to reveal.';
+          answerWrap.appendChild(frHidden);
+        } else {
+          var fr = document.createElement('div');
+          fr.className = 'q-fr';
+          var yourAns = (r.givenText !== null && r.givenText !== undefined && r.givenText !== '') ? r.givenText : (r.ok ? String(q.answer) : 'left blank');
+          fr.innerHTML = 'Correct answer: <span class="q-correct-ans">' + q.answer + '</span>' +
+            (r.ok ? '' : ' &nbsp;·&nbsp; Entered: <span class="q-your-ans">' + yourAns + '</span>');
+          answerWrap.appendChild(fr);
+        }
+      }
+    }
+    renderAnswerArea();
+
+    if (r.timeMs || r.firstVisitedAt || r.lastViewedAt) {
+      var timing = document.createElement('div');
+      timing.className = 'q-timing';
+      timing.innerHTML = 'Time spent: <strong>' + formatDuration(r.timeMs) + '</strong>' +
+        ' &nbsp;·&nbsp; First visited: ' + formatElapsedIntoSection(r.firstVisitedAt) +
+        ' &nbsp;·&nbsp; Last viewed: ' + formatElapsedIntoSection(r.lastViewedAt);
+      box.appendChild(timing);
     }
     return box;
   }
@@ -13567,66 +14494,47 @@ window.renderNativeReport = function (data) {
     if (sections.length < 2) return;
     document.getElementById('skillbreak-hed').style.display = '';
 
-    // Top 5 weakest skills — same skill-miss data the bridge chart above
-    // is built from, appended directly under it as condensed rows (name +
-    // a thin inline bar, one line each) rather than a separate section
-    // with its own heading and big circular gauges further down the page.
-    // t>=2 mirrors the same reliability bar the takeaways section already
-    // applies before naming a skill by name.
-    var topicsWrap = document.getElementById('bridge-skills');
-    var skillEntries = Object.keys(skills).map(function (k) {
-      var v = skills[k];
-      return { name: k, c: v.c, t: v.t, missed: v.t - v.c, pct: v.t ? v.c / v.t : 0 };
-    }).filter(function (e) { return e.t >= 2 && e.missed > 0; })
-      .sort(function (a, b) { return b.missed - a.missed || a.pct - b.pct; })
-      .slice(0, 5);
-    if (skillEntries.length && topicsWrap) {
-      var lab = document.createElement('div');
-      lab.className = 'bridge-skills-lab';
-      lab.textContent = 'Top 5 weakest skills';
-      topicsWrap.appendChild(lab);
-      var list = document.createElement('div');
-      list.className = 'topics-list condensed';
-      skillEntries.forEach(function (e) {
-        var pct = Math.round(e.pct * 100);
-        var band = pct < 50 ? 'var(--red)' : (pct >= 75 ? 'var(--green)' : 'var(--gold)');
-        var row = document.createElement('div');
-        row.className = 'topics-row';
-        row.innerHTML =
-          '<span class="topics-name">' + e.name + '</span>' +
-          '<span class="topics-bar-track"><span class="topics-bar-fill" style="width:' + pct + '%;background:' + band + ';"></span></span>' +
-          '<span class="topics-pct" style="color:' + band + ';">' + pct + '%</span>';
-        list.appendChild(row);
-      });
-      topicsWrap.appendChild(list);
-    }
-
     // Accuracy by topic — one block per subject (Reading & Writing / Math,
-    // or English / Math / Reading / Science for the ACT). Each domain gets
-    // a row: name + attempt count on the left, a three-tier segmented
-    // tracker in the middle (low/mid/high pill tracks, only the tier this
-    // domain actually falls in gets filled, with a handle positioned
-    // proportionally within that tier's own range), and the accuracy
-    // number on the right, colored to match its tier. Tiers: <60% low
-    // (red), 60-84% mid (amber), >=85% high (green) — a stricter bar than
-    // this report's other red/gold/green splits on purpose, since this is
-    // meant to read as "is this topic actually solid," not just "better
-    // than half."
-    var ACC_TIERS = [
-      { key: 'low', min: 0, max: 60 },
-      { key: 'mid', min: 60, max: 85 },
-      { key: 'high', min: 85, max: 100 }
-    ];
-    function accTierFor(pct) {
-      if (pct >= 85) return ACC_TIERS[2];
-      if (pct >= 60) return ACC_TIERS[1];
-      return ACC_TIERS[0];
+    // or English / Math / Reading / Science for the ACT), laid out side by
+    // side in a grid rather than stacked full-width (see .atb-grid) since
+    // each subject's own row list is narrow content on its own. Each
+    // domain gets a row: name + attempt count + average time on the left,
+    // a single track filled from 0 to the actual accuracy with a handle
+    // riding the fill's edge (colored by tier), and the percentage on the
+    // right. Tiers: <60% low (red), 60-84% mid (amber), >=85% high
+    // (green) — a stricter bar than this report's other red/gold/green
+    // splits on purpose, since this is meant to read as "is this topic
+    // actually solid," not just "better than half."
+    function accTierKey(pct) {
+      if (pct >= 85) return 'high';
+      if (pct >= 60) return 'mid';
+      return 'low';
     }
     var accWrap = document.getElementById('accuracy-by-topic');
+
+    // One-time plain-language explainer above the grid — what "accuracy
+    // by topic" actually means and what to do about a red row, since a
+    // bar with a dot on it isn't self-explanatory the first time you see
+    // it.
+    var intro = document.createElement('p');
+    intro.className = 'skillbreak-intro';
+    intro.textContent = 'Every question on this test is tagged with a topic (like "Algebra" or "Craft & Structure"). This shows your accuracy on EVERY topic you were tested on — not just the ones you missed — so you can see the full picture, not only the gaps. Each bar is colored by how solid that topic is: red means it\'s costing you real points and is worth the most practice time; amber is close but not reliable yet; green means you\'ve got it. The dot marks exactly where your accuracy lands.';
+    accWrap.appendChild(intro);
+
+    var grid = document.createElement('div');
+    grid.className = 'atb-grid';
+
     sections.forEach(function (sec) {
       var domEntries = Object.keys(sec.domains).map(function (d) {
         var v = sec.domains[d];
-        return { name: d, t: v.t, pct: v.t ? Math.round(v.c / v.t * 100) : 0 };
+        // Average time per question in this domain — the timing stat
+        // that used to live in its own "time by difficulty" donut here,
+        // folded into the same row instead of a separate section so it
+        // doesn't cost any extra vertical space.
+        var domRows = sec.rows.filter(function (r) { return r.dom === d; });
+        var timeSum = domRows.reduce(function (a, r) { return a + (r.timeMs || 0); }, 0);
+        var avgMs = domRows.length ? timeSum / domRows.length : 0;
+        return { name: d, t: v.t, pct: v.t ? Math.round(v.c / v.t * 100) : 0, avgMs: avgMs };
       }).sort(function (a, b) { return a.pct - b.pct; });
       if (!domEntries.length) return;
 
@@ -13644,26 +14552,23 @@ window.renderNativeReport = function (data) {
       var rowsWrap = document.createElement('div');
       rowsWrap.className = 'atb-rows';
       domEntries.forEach(function (de) {
-        var tier = accTierFor(de.pct);
-        var within = tier.max > tier.min ? Math.max(0, Math.min(100, (de.pct - tier.min) / (tier.max - tier.min) * 100)) : 100;
+        var tier = accTierKey(de.pct);
         var row = document.createElement('div');
         row.className = 'atb-row';
         row.innerHTML =
-          '<div class="atb-row-left"><div class="atb-domain-name">' + de.name + '</div><div class="atb-domain-attempts">' + de.t + ' attempt' + (de.t === 1 ? '' : 's') + '</div></div>' +
+          '<div class="atb-row-left"><div class="atb-domain-name">' + de.name + '</div><div class="atb-domain-attempts">' + de.t + ' attempt' + (de.t === 1 ? '' : 's') + (de.avgMs ? ' &middot; avg ' + formatMinSec(de.avgMs) : '') + (tier === 'low' ? ' &middot; <span class="atb-focus-tag">focus here</span>' : '') + '</div></div>' +
           '<div class="atb-tracker">' +
-            ACC_TIERS.map(function (t) {
-              return '<span class="atb-seg ' + t.key + (t.key === tier.key ? ' active' : '') + '">' +
-                (t.key === tier.key ? '<span class="atb-handle" style="left:' + within + '%;"></span>' : '') +
-                '</span>';
-            }).join('') +
+            '<div class="atb-track"><div class="atb-track-fill ' + tier + '" style="width:' + de.pct + '%;"></div></div>' +
+            '<span class="atb-handle-dot ' + tier + '" style="left:' + de.pct + '%;"></span>' +
           '</div>' +
-          '<div class="atb-pct ' + tier.key + '">' + de.pct + '%</div>';
+          '<div class="atb-pct ' + tier + '">' + de.pct + '%</div>';
         rowsWrap.appendChild(row);
       });
       section.appendChild(rowsWrap);
-      accWrap.appendChild(section);
+      grid.appendChild(section);
     });
-    if (accWrap.children.length) accWrap.style.display = '';
+    accWrap.appendChild(grid);
+    if (grid.children.length) accWrap.style.display = '';
   })();
 
   /* ═══ CONFIDENCE QUADRANT ═══ per subject: every multiple-choice

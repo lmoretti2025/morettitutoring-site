@@ -273,12 +273,47 @@ function testPrepFlags_(row) {
   };
 }
 
+// ═══ WHY THIS FUNCTION IS LOCKED ═══ postToBackend on the client (see
+// index.html) aggressively retries a slow 'auth' call — by design, since an
+// Apps Script cold start can take 10+ seconds and the client has no way to
+// tell "still running" apart from "actually failed." But that means a slow
+// login can genuinely be TWO overlapping handleAuth() executions for the
+// same key: the first one (still running server-side even though the
+// client gave up on it) and the client's retry, racing each other. Without
+// a lock, both can read the sheet before either has written GrantedEmail/
+// DriveFolderUrl, both fall into the same "first login" branch, and
+// grantFolderAccess_'s already-has-access check (see its own comment) can
+// find nothing yet because the other execution's addViewer() hasn't
+// propagated to a fresh Drive read yet either — so both call addViewer(),
+// and the student gets a second "shared with you" folder email. This is
+// the exact "random folder share request on login, sometimes" bug: it only
+// shows up when a login is slow enough to trigger the client's retry,
+// which is intermittent by nature. A per-script lock serializes any two
+// overlapping calls (for the same key or different ones — the critical
+// section here is a handful of sheet reads/writes plus one Drive check, so
+// the serialization cost is imperceptible) so the second execution always
+// sees the first one's completed writes before it decides what to do.
 function handleAuth(rawKey, rawEmail, rawName) {
   if (!rawKey) return { ok: false, error: 'missing_key' };
   var key = String(rawKey).trim().toUpperCase();
   var email = rawEmail ? String(rawEmail).trim().toLowerCase() : '';
   var name = rawName ? String(rawName).trim() : '';
 
+  var lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(30000);
+  } catch (lockErr) {
+    console.error('handleAuth could not acquire lock for ' + key + ': ' + lockErr);
+    return { ok: false, error: 'busy_try_again' };
+  }
+  try {
+    return handleAuthLocked_(key, email, name);
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function handleAuthLocked_(key, email, name) {
   var sheet = getSheet_();
   var row = findRow_(sheet, key);
   if (!row) return { ok: false, error: 'bad_key' };
