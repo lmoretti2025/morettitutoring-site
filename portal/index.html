@@ -67,39 +67,40 @@
   }
 
   html, body { height: 100%; }
-  body { background:
-      radial-gradient(ellipse 900px 460px at 50% 0%, rgba(201,168,76,0.07), transparent 70%),
-      var(--bg);
+  /* Reserves the scrollbar's own width permanently, on every page —
+     without this, a page that grows tall enough to need a scrollbar
+     (Practice Tests, a long Mistakes list) got narrower by that
+     scrollbar's width the instant it appeared, visibly shifting/resizing
+     everything on screen. A short page now just shows a blank gutter
+     instead of the content jumping when it later needs one. */
+  html { scrollbar-gutter: stable; }
+  /* Plain white page background everywhere, full stop — the old cream/grey
+     var(--bg) radial-gradient tint (kept as a deliberate "branded" look on
+     key-entry/onboarding/marketing screens through several earlier rounds
+     of this redesign) is gone site-wide now. var(--bg) itself stays
+     defined and still used for small in-page accents (hover states, note
+     boxes, progress-track fills) — only the page's own background no
+     longer uses it. */
+  body { background: var(--white);
     color: var(--text); font-family: var(--hel); font-weight: 300; -webkit-font-smoothing: antialiased; overflow-x: hidden; min-height: 100vh; }
 
+  /* #main-nav is the pre-login-only top bar now (key entry, onboarding) —
+     see the "no more red bar on top" restructure: once a student is in the
+     app shell it hides entirely (.nav-app-shell below) and the red
+     .portal-sidebar takes over the logo/countdown/account job instead. */
   #main-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 300; padding: 0.85rem 2.5rem; display: flex; align-items: center; gap: 1.4rem; justify-content: space-between; background: var(--red); }
   .nav-logo-link { display: block; line-height: 0; flex-shrink: 0; }
   .nav-logo-img { height: 36px; width: auto; display: block; }
   .nav-exit { font-family: var(--hel); font-size: 0.65rem; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: #fff; text-decoration: none; border: 1px solid rgba(255,255,255,0.5); padding: 0.5rem 1.3rem; white-space: nowrap; transition: background 0.2s; }
   .nav-exit:hover { background: rgba(255,255,255,0.18); border-color: #fff; }
-
-  /* ═══ TOP BAR — search / countdown / profile ═══ shown only once a
-     student is inside the app shell (the same screens the sidebar shows
-     for — see nav-app-shell toggled in updateSidebarForScreen()). The
-     plain "Exit Portal" link stays for the key/onboarding/test-taking
-     screens where there's no student session to hang a profile control
-     off of; inside the app shell it's folded into the profile menu
-     instead of showing twice. */
   .nav-exit { display: inline-block; }
-  #main-nav.nav-app-shell .nav-exit { display: none; }
-  .nav-search, .nav-countdown, .nav-profile { display: none; }
-  /* Search removed from the top nav — was #main-nav.nav-app-shell
-     .nav-search { display: block; }. Left as a plain "always hidden" rule
-     rather than deleting the markup/JS wiring below (nav-search-input's
+  #main-nav.nav-app-shell { display: none; }
+  .nav-search { display: none; }
+  /* Search removed from the nav entirely — left as a plain "always hidden"
+     rule rather than deleting the markup/JS wiring below (nav-search-input's
      match-building etc.) — that logic is now permanently inert against a
      hidden input, which is the lower-risk way to pull a feature than
      partially unwiring event listeners that other code might still touch. */
-  /* .has-date is toggled by renderTestCountdown() — combined with
-     .nav-app-shell here (rather than an inline style) so the two
-     conditions ("student has a test date" and "on an app-shell screen")
-     compose instead of one clobbering the other via style specificity. */
-  #main-nav.nav-app-shell .nav-countdown.has-date { display: flex; }
-  #main-nav.nav-app-shell .nav-profile { display: block; }
 
   .nav-search { position: relative; flex: 1 1 auto; max-width: 360px; }
   .nav-search-input { width: 100%; font-family: var(--hel); font-size: 0.8rem; color: #fff; background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.3); border-radius: 999px; padding: 0.55rem 1rem 0.55rem 2.2rem; transition: background 0.2s, border-color 0.2s; }
@@ -113,28 +114,28 @@
   .nav-search-result:hover, .nav-search-result.is-focused { background: var(--bg); color: var(--red); }
   .nav-search-empty { font-family: var(--hel); font-size: 0.78rem; color: var(--faint); padding: 0.6rem 0.7rem; }
 
-  .nav-countdown { align-items: baseline; gap: 0.3rem; font-family: var(--hel); font-size: 0.72rem; color: rgba(255,255,255,0.85); white-space: nowrap; background: rgba(255,255,255,0.12); border-radius: 999px; padding: 0.5rem 0.95rem; }
-  .nav-countdown-num { font-weight: 700; color: var(--gold); }
+  /* ═══ SIDEBAR BRAND — logo + a big, glanceable test-day countdown ═══
+     lives at the very top of the red .portal-sidebar now (see .sb-brand
+     below); renderTestCountdown() fills these same two spans it always
+     has, only the surrounding layout changed. */
+  .nav-countdown { display: none; flex-direction: column; align-items: flex-start; gap: 0.1rem; font-family: var(--hel); white-space: normal; }
+  .nav-countdown.has-date { display: flex; }
+  .nav-countdown-num { font-family: var(--display); font-weight: 700; font-size: 1.7rem; line-height: 1.15; color: #fff; }
+  #nav-countdown-rest { font-size: 0.68rem; letter-spacing: 0.05em; text-transform: uppercase; color: rgba(255,255,255,0.72); }
 
+  /* ═══ ACCOUNT CONTROL ═══ pinned to the very bottom of the sidebar (see
+     .nav-profile placement inside .portal-sidebar in the CSS below). */
   .nav-profile { position: relative; flex-shrink: 0; }
-  .nav-profile-btn { display: flex; align-items: center; gap: 0.55rem; background: none; border: none; cursor: pointer; padding: 0.2rem; }
+  .nav-profile-btn { display: flex; align-items: center; gap: 0.65rem; width: 100%; background: none; border: none; cursor: pointer; padding: 0.2rem; text-align: left; }
   .nav-avatar { width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.18); border: 1.5px solid rgba(255,255,255,0.4); color: #fff; font-family: var(--hel); font-size: 0.72rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-  .nav-profile-caret { width: 9px; height: 9px; color: rgba(255,255,255,0.7); }
-  .nav-profile-menu { display: none; position: absolute; top: calc(100% + 10px); right: 0; background: var(--white); border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow-hover); padding: 0.5rem; min-width: 200px; z-index: 90; }
+  .nav-profile-name-inline { flex: 1 1 auto; font-family: var(--hel); font-size: 0.78rem; font-weight: 600; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .nav-profile-caret { width: 9px; height: 9px; color: rgba(255,255,255,0.7); flex-shrink: 0; }
+  .nav-profile-menu { display: none; position: absolute; bottom: calc(100% + 10px); left: 0; background: var(--white); border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow-hover); padding: 0.5rem; min-width: 200px; z-index: 90; }
   .nav-profile.is-open .nav-profile-menu { display: block; }
   .nav-profile-name { font-family: var(--hel); font-size: 0.8rem; font-weight: 700; color: var(--text); padding: 0.5rem 0.7rem 0.3rem; }
   .nav-profile-divider { height: 1px; background: var(--border); margin: 0.3rem 0; }
   .nav-profile-item { display: block; width: 100%; text-align: left; background: none; border: none; font-family: var(--hel); font-size: 0.8rem; color: var(--text); padding: 0.55rem 0.7rem; border-radius: 6px; cursor: pointer; text-decoration: none; }
   .nav-profile-item:hover { background: var(--bg); color: var(--red); }
-
-  @media (max-width: 899px) {
-    #main-nav { padding: 0.75rem 1.2rem; gap: 0.7rem; }
-    .nav-search { display: none !important; }
-    .nav-countdown { font-size: 0.66rem; padding: 0.4rem 0.7rem; }
-  }
-  @media (max-width: 480px) {
-    .nav-countdown { display: none !important; }
-  }
 
   .screen { display: none; min-height: 100vh; padding: 9rem 1.5rem 4rem; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.22s var(--ease); }
   .screen.active { display: flex; }
@@ -640,24 +641,31 @@
   }
 
   /* ═══ PORTAL SIDEBAR ═══ replaces the old home-screen menu-card grid as
-     the primary way to move between Home/Practice Tests/Files/Vocabulary/
-     My Incorrect Questions. Fixed column on desktop; collapses into a
-     horizontal scrollable strip under the top bar on narrow screens (see
-     the max-width:899px block below). Hidden entirely until a screen with
-     the static .has-sidebar class is active — toggled in show(). */
-  .portal-sidebar { display: none; }
+     the primary way to move between Home/Files/Practice Tests/Question
+     Bank/Challenge Questions/Vocabulary/Saved & Mistakes, AND (since the
+     "no more red bar on top" restructure) doubles as the branded chrome
+     that used to be #main-nav's job — logo + countdown live in .sb-brand
+     at the top, the account control (.nav-profile) is pinned to the very
+     bottom. Fixed red column on desktop; collapses into a compact red
+     header + horizontal scrollable strip on narrow screens (see the
+     max-width:899px block below). Hidden entirely until a screen with the
+     static .has-sidebar class is active — toggled in show(). */
+  .portal-sidebar { display: none; background: var(--red); }
   .portal-sidebar.sidebar-shown { display: flex; }
-  .sidebar-item { position: relative; display: flex; align-items: center; gap: 0.85rem; padding: 0.8rem 1.5rem 0.8rem 1.7rem; font-family: var(--hel); font-size: 0.8rem; font-weight: 500; color: var(--mid); text-decoration: none; white-space: nowrap; transition: background 0.15s var(--ease), color 0.15s var(--ease); }
-  .sidebar-item::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: transparent; }
-  .sidebar-item:hover { background: rgba(176,39,28,0.05); color: var(--text); }
-  .sidebar-item.active { color: var(--text); font-weight: 700; background: rgba(201,168,76,0.09); }
-  .sidebar-item.active::before { background: linear-gradient(180deg, var(--gold), var(--red)); }
-  .sidebar-icon { width: 18px; height: 18px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: var(--red); }
+  .sb-brand { display: flex; flex-direction: column; align-items: flex-start; gap: 1.35rem; padding: 1.6rem 1.5rem 1.75rem; }
+  .sb-brand .nav-logo-link { align-self: center; }
+  .sb-links { display: flex; flex-direction: column; flex: 1 1 auto; }
+  .sb-divider { padding: 1.15rem 1.5rem 0.45rem; font-family: var(--hel); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.45); }
+  .sidebar-item { position: relative; display: flex; align-items: center; gap: 0.85rem; padding: 0.75rem 1.5rem; margin: 0 0.75rem; border-radius: 999px; font-family: var(--hel); font-size: 0.8rem; font-weight: 500; color: rgba(255,255,255,0.75); text-decoration: none; white-space: nowrap; transition: background 0.15s var(--ease), color 0.15s var(--ease); }
+  .sidebar-item:hover { background: rgba(255,255,255,0.1); color: #fff; }
+  .sidebar-item.active { color: var(--red); font-weight: 700; background: #fff; }
+  .sidebar-icon { width: 18px; height: 18px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: inherit; }
   .sidebar-icon svg { width: 18px; height: 18px; display: block; }
   .sidebar-icon-text { font-family: var(--display); font-weight: 700; font-size: 0.82rem; }
+  .nav-profile { margin-top: auto; padding: 1.1rem 1.5rem 0.25rem; border-top: 1px solid rgba(255,255,255,0.15); }
   @media (min-width: 900px) {
-    .portal-sidebar.sidebar-shown { flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; width: var(--sidebar-w); padding-top: 6.5rem; background: var(--white); border-right: 1px solid var(--border); z-index: 200; overflow-y: auto; }
-    .screen.has-sidebar { padding-left: calc(var(--sidebar-w) + 2.5rem); }
+    .portal-sidebar.sidebar-shown { flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; width: var(--sidebar-w); background: var(--red); border-right: none; z-index: 300; overflow-y: auto; }
+    .screen.has-sidebar { padding-left: calc(var(--sidebar-w) + 2.5rem); padding-top: 3rem; }
   }
   /* .screen's base rule vertically centers its content (align-items:center)
      for the short, single-panel screens (login, onboarding) — wrong for
@@ -672,16 +680,31 @@
      sensible to stick to. */
   .screen.has-sidebar { align-items: flex-start; }
   @media (max-width: 899px) {
-    .portal-sidebar.sidebar-shown { flex-direction: row; position: fixed; top: 62px; left: 0; right: 0; z-index: 250; background: var(--white); border-bottom: 1px solid var(--border); overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 0.45rem 0.6rem; gap: 0.3rem; }
-    .sidebar-item { flex: 0 0 auto; padding: 0.5rem 0.85rem; border-radius: 999px; font-size: 0.7rem; gap: 0.4rem; }
-    .sidebar-item::before { display: none; }
-    .sidebar-item.active { background: var(--red); color: #fff; }
-    .sidebar-item.active .sidebar-icon { color: #fff; }
-    .screen.has-sidebar { padding-top: calc(9rem + 3.4rem); }
-    #screen-menu.has-sidebar.screen { padding-top: calc(5.25rem + 3.4rem); }
+    .portal-sidebar.sidebar-shown { flex-direction: column; position: fixed; top: 0; left: 0; right: 0; bottom: auto; z-index: 250; background: var(--red); border-bottom: 1px solid rgba(255,255,255,0.15); }
+    .sb-brand { flex-direction: row; align-items: center; justify-content: flex-start; gap: 0.85rem; padding: 0.65rem 4.6rem 0.65rem 1.1rem; }
+    .nav-logo-img { height: 26px; }
+    .nav-countdown { flex-direction: row; align-items: baseline; gap: 0.3rem; }
+    .nav-countdown-num { font-size: 0.85rem; }
+    #nav-countdown-rest { font-size: 0.62rem; }
+    .sb-links { flex-direction: row; overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 0.45rem 0.6rem; gap: 0.3rem; border-top: 1px solid rgba(255,255,255,0.15); }
+    .sb-divider { display: none; }
+    .sidebar-item { flex: 0 0 auto; padding: 0.5rem 0.85rem; margin: 0; font-size: 0.7rem; gap: 0.4rem; }
+    .sidebar-item.active { background: #fff; color: var(--red); }
+    /* Floats over the brand row's right side (where the top bar's profile
+       control used to sit) rather than trailing the horizontal item strip,
+       since "bottom of the sidebar" isn't a coherent position once the
+       sidebar itself is a top-docked strip on mobile. */
+    .nav-profile { position: fixed; top: 0.55rem; right: 0.9rem; left: auto; bottom: auto; z-index: 260; margin-top: 0; padding: 0; border-top: none; width: auto; }
+    .nav-profile-name-inline { display: none; }
+    .nav-profile-menu { top: calc(100% + 10px); bottom: auto; left: auto; right: 0; }
+    .screen.has-sidebar { padding-top: 6.75rem; }
+    #screen-menu.has-sidebar.screen { padding-top: 6.75rem; }
   }
   @media (max-width: 899px) and (max-width: 480px) {
-    #screen-menu.has-sidebar.screen { padding-top: calc(4.75rem + 3.4rem); }
+    .sb-brand { padding-right: 4rem; }
+    .nav-countdown { display: none !important; }
+    .screen.has-sidebar { padding-top: 6rem; }
+    #screen-menu.has-sidebar.screen { padding-top: 6rem; }
   }
 
   /* ═══ RESOURCES SCREEN ═══ */
@@ -1280,6 +1303,55 @@
   .vp-pill:hover { border-color: var(--mid); transform: translateY(-1px); }
   .vp-pill.on { border-color: var(--red); background: var(--red); color: #fff; font-weight: 600; }
   .vp-pool-count { font-size: 0.72rem; color: var(--faint); margin-top: 0.55rem; }
+
+  /* ═══ STATS ROW — Mastered/Learning/Not started counts, derived from
+     progress.seen + progress.stillLearning (see statsCounts() in the JS),
+     plus an overall % mastered bar. Purely a readout — no controls. ═══ */
+  .vp-stats-row { display: flex; align-items: center; gap: 1.75rem; background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 1.1rem 1.3rem; flex-wrap: wrap; }
+  .vp-stat { text-align: center; }
+  .vp-stat-num { display: block; font-family: var(--display); font-weight: 700; font-size: 1.4rem; line-height: 1.1; color: var(--text); }
+  .vp-stat-num.vp-stat-mastered { color: #3f7d54; }
+  .vp-stat-num.vp-stat-learning { color: var(--gold); }
+  .vp-stat-label { display: block; font-size: 0.62rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--faint); margin-top: 0.15rem; }
+  .vp-stat-progress { flex: 1 1 160px; min-width: 140px; }
+  .vp-stat-progress-track { height: 6px; background: var(--bg); border-radius: 3px; overflow: hidden; }
+  .vp-stat-progress-fill { height: 100%; background: linear-gradient(90deg, var(--gold), #3f7d54); width: 0; transition: width 0.4s cubic-bezier(.3,.6,.3,1); }
+  .vp-stat-progress-label { display: block; font-size: 0.68rem; color: var(--faint); margin-top: 0.4rem; text-align: right; }
+  @media (max-width: 560px) { .vp-stats-row { gap: 1.1rem; } .vp-stat-progress { flex-basis: 100%; order: 10; } }
+
+  /* ═══ 10-MINUTE PRACTICE — the headline feature: a timed, adaptive drill
+     (see buildTenMinQueue()/startTenMinPractice() in the JS) that runs
+     for exactly ten minutes regardless of how many words that covers,
+     built around Luca's own standing advice to students ("ten minutes a
+     day"). Visually distinct from the plain white mode cards below it —
+     this is the thing a student should reach for first. ═══ */
+  .vp-tenmin-card { display: flex; align-items: center; gap: 1.1rem; background: linear-gradient(135deg, var(--red), #8f2018); border-radius: 14px; padding: 1.3rem 1.5rem; margin-top: 1.1rem; box-shadow: 0 10px 26px rgba(176,39,28,0.22); }
+  .vp-tenmin-icon { flex-shrink: 0; width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.16); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; }
+  .vp-tenmin-copy { flex: 1 1 auto; min-width: 0; }
+  .vp-tenmin-title { font-family: var(--display); font-weight: 700; font-size: 1.05rem; color: #fff; }
+  .vp-tenmin-sub { font-size: 0.76rem; color: rgba(255,255,255,0.82); line-height: 1.5; margin-top: 0.2rem; }
+  .vp-tenmin-btn { flex-shrink: 0; font-family: var(--hel); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--red); background: #fff; border: none; border-radius: 999px; padding: 0.7rem 1.3rem; cursor: pointer; display: flex; align-items: center; gap: 0.4rem; transition: transform 0.12s var(--ease), opacity 0.12s var(--ease); }
+  .vp-tenmin-btn:hover { transform: translateY(-1px); opacity: 0.92; }
+  @media (max-width: 560px) { .vp-tenmin-card { flex-wrap: wrap; } .vp-tenmin-btn { width: 100%; justify-content: center; } }
+  /* Live session chrome (timer + end-early), shown above #vp-tenmin-inner
+     while a 10-minute round is actually running. */
+  .vp-tenmin-hed { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.9rem; }
+  .vp-tenmin-timer { font-family: var(--display); font-weight: 700; font-size: 1.3rem; color: var(--red); font-variant-numeric: tabular-nums; }
+  .vp-tenmin-end { font-family: var(--hel); font-size: 0.75rem; font-weight: 600; color: var(--faint); text-decoration: none; }
+  .vp-tenmin-end:hover { color: var(--red); }
+
+  /* ═══ STUDY MODE CARDS — replaces the old three-way pill row with a
+     clearer card grid; still just a selector (Start Studying stays the
+     actual action), same as before. ═══ */
+  .vp-mode-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.7rem; }
+  .vp-mode-card { text-align: left; background: var(--white); border: 1.5px solid var(--border); border-radius: 12px; padding: 0.9rem 1rem; cursor: pointer; transition: border-color 0.12s, transform 0.12s var(--ease); }
+  .vp-mode-card:hover { transform: translateY(-1px); border-color: var(--mid); }
+  .vp-mode-card.on { border-color: var(--red); background: #fdf5f4; }
+  .vp-mode-card-hed { font-family: var(--hel); font-size: 0.84rem; font-weight: 700; color: var(--text); }
+  .vp-mode-card.on .vp-mode-card-hed { color: var(--red); }
+  .vp-mode-card-sub { font-size: 0.7rem; color: var(--mid); line-height: 1.45; margin-top: 0.3rem; }
+  @media (max-width: 560px) { .vp-mode-cards { grid-template-columns: 1fr; } }
+
   /* ═══ "STILL LEARNING" REVIEW PANEL — lives on the setup screen, above
      the mode picker. Persisted per-student in localStorage (see
      progressStorageKey()/loadProgress() in the JS below) so it survives
@@ -1362,19 +1434,19 @@
   .vp-primary:disabled { opacity: 0.45; cursor: default; transform: none; box-shadow: none; }
 
   /* Keeps the title, tabs, and filters in view while #iq-list scrolls
-     underneath — top matches #main-nav's own rendered height (60px) so
-     this sticks directly below the fixed nav bar instead of going under
-     it. Solid background so scrolled-past question rows don't show
-     through underneath it. */
-  /* Same two-layer background as body itself (flat var(--bg) plus the
-     faint gold radial glow), not a plain var(--bg) fill — a flat color
-     here read as a mismatched grey box against the page's actual
-     (gradient) background around it. */
-  .iq-sticky-head { position: sticky; top: 60px; z-index: 90; padding-bottom: 0.6rem;
-    background: radial-gradient(ellipse 900px 460px at 50% 0%, rgba(201,168,76,0.07), transparent 70%), var(--bg);
-  }
+     underneath. Solid background so scrolled-past question rows don't show
+     through underneath it. Desktop has no fixed top bar any more (the red
+     .portal-sidebar is a left column only, not an overlapping header), so
+     this sticks flush to the viewport top; mobile still has the red
+     sidebar's brand row + horizontal item strip docked above the content,
+     so it sticks below that instead. */
+  /* #screen-incorrect-questions itself is var(--white) (see that rule up
+     top), not the page's usual var(--bg) grey — matching var(--bg) here
+     (an earlier attempt) read as a mismatched grey box against this
+     screen's actual white background. */
+  .iq-sticky-head { position: sticky; top: 0; z-index: 90; padding-bottom: 0.6rem; background: var(--white); }
   @media (max-width: 899px) {
-    .iq-sticky-head { top: 110px; } /* nav bar + the horizontal mobile sidebar strip beneath it */
+    .iq-sticky-head { top: 104px; } /* red sidebar's brand row + item strip */
   }
 
   /* Saved & Mistakes' two-tab switcher (Saved Questions / Mistakes Log) —
@@ -1405,7 +1477,8 @@
   .iq-collection-empty { font-size: 0.85rem; color: var(--mid); padding: 2rem 0; text-align: center; }
 
   .iq-add-to-collection { position: relative; display: inline-block; margin-bottom: 0.9rem; }
-  .iq-add-to-collection-btn { display: inline-flex; align-items: center; gap: 0.4rem; font-family: var(--hel); font-size: 0.72rem; font-weight: 700; color: var(--mid); background: var(--white); border: 1px solid var(--border); border-radius: 999px; padding: 0.4rem 0.8rem; cursor: pointer; transition: border-color 0.15s var(--ease), color 0.15s var(--ease); }
+  .iq-add-to-collection-btn { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; flex-shrink: 0; color: var(--mid); background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 0; cursor: pointer; transition: border-color 0.15s var(--ease), color 0.15s var(--ease); }
+  .iq-add-to-collection-btn svg { width: 15px; height: 15px; }
   .iq-add-to-collection-btn:hover, .iq-add-to-collection.open .iq-add-to-collection-btn { border-color: var(--gold); color: var(--text); }
   .iq-add-to-collection-panel { display: none; position: absolute; top: calc(100% + 4px); left: 0; z-index: 40; min-width: 220px; background: var(--white); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 8px 24px rgba(17,17,17,0.16); padding: 0.5rem; }
   .iq-add-to-collection.open .iq-add-to-collection-panel { display: block; }
@@ -1431,15 +1504,30 @@
   #iq-filters .iq-dropdown-btn:hover { background: rgba(17,17,17,0.07); border: none; }
   #iq-filters .iq-dropdown.open .iq-dropdown-btn { background: rgba(17,17,17,0.07); border: none; }
   .iq-filters-badge { background: var(--red); color: #fff; border-radius: 999px; padding: 0.05rem 0.42rem; font-size: 0.68rem; font-weight: 700; }
-  /* The single combined panel — was five separate ~80px-wide panels (one
-     per filter button); now one panel holding all five category
-     sections, wide enough for a full skill/domain name and tall enough
-     to hold all five without needing the page itself to scroll. */
-  .iq-filters-panel { right: auto; width: 280px; max-height: min(70vh, 460px); overflow-y: auto; }
-  .iq-filter-section { margin-bottom: 0.9rem; }
-  .iq-filter-section:last-child { margin-bottom: 0; }
-  .iq-filter-section-label { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); margin: 0 0.55rem 0.3rem; }
+  /* The single "Filters" panel lists the five categories as rows; each
+     row's own checkbox list pops out to the right instead of everything
+     being stacked open in one long scroll — was five separate ~80px-wide
+     panels (one per filter button), then briefly one panel with all five
+     stacked open, now this nested flyout instead. */
+  .iq-filters-panel { right: auto; width: 210px; padding: 0.4rem; overflow: visible; max-height: none; }
+  .iq-filter-cat { position: relative; }
+  .iq-filter-cat-row { display: flex; align-items: center; gap: 0.5rem; width: 100%; background: none; border: none; border-radius: 8px; padding: 0.55rem 0.6rem; font-family: var(--hel); font-size: 0.82rem; color: var(--text); cursor: pointer; text-align: left; }
+  .iq-filter-cat-row:hover, .iq-filter-cat.open .iq-filter-cat-row { background: var(--bg); }
+  .iq-filter-cat-label { flex-shrink: 0; }
+  .iq-filter-cat-summary { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: right; font-size: 0.74rem; color: var(--red); font-weight: 600; }
+  .iq-filter-cat-caret { flex-shrink: 0; font-size: 0.9rem; color: var(--faint); }
+  .iq-filter-cat.open > .iq-filter-cat-row .iq-filter-cat-caret { color: var(--red); }
+  .iq-filter-flyout { display: none; position: absolute; top: 0; left: calc(100% + 8px); z-index: 45; width: 230px; max-height: 300px; overflow-y: auto; scrollbar-gutter: stable; background: var(--white); border: none; border-radius: 16px; box-shadow: 0 12px 32px rgba(17,17,17,0.14); padding: 0.5rem; }
+  /* .open is the ONLY thing that shows a flyout — driven by JS for both
+     click and hover (see the mouseenter listener above openOnly()) rather
+     than a plain CSS :hover rule, which left the browser genuinely
+     unsure which category was "hovered" once the cursor crossed into a
+     flyout hanging over an adjacent row. */
+  .iq-filter-cat.open .iq-filter-flyout { display: block; }
   .iq-filter-section-empty { font-size: 0.78rem; color: var(--faint); padding: 0.3rem 0.55rem; }
+  @media (max-width: 480px) {
+    .iq-filter-flyout { left: auto; right: calc(100% + 8px); } /* flips to the left edge on narrow screens where a right-side flyout would run off-screen */
+  }
   .iq-practice-btn { flex-shrink: 0; margin-left: auto; background: var(--text); color: #fff; border: none; border-radius: 999px; padding: 0.6rem 1.2rem; font-family: var(--hel); font-size: 0.78rem; font-weight: 700; cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 0.3rem; transition: filter 0.15s var(--ease), transform 0.15s var(--ease); }
   .iq-practice-btn:hover:not(:disabled) { filter: brightness(1.3); transform: translateY(-1px); }
   .iq-practice-btn:disabled { opacity: 0.45; cursor: default; transform: none; }
@@ -1520,11 +1608,23 @@
   .qb-start-btn { flex-shrink: 0; background: rgba(17,17,17,0.06); color: var(--mid); border: none; border-radius: 999px; padding: 0.6rem 1.15rem; font-family: var(--hel); font-size: 0.78rem; font-weight: 700; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 0.35rem; transition: background 0.15s var(--ease), color 0.15s var(--ease); }
   .qb-start-btn:hover { background: var(--red); color: #fff; }
 
-  .qb-table { width: 100%; border-collapse: collapse; background: var(--white); border: none; border-radius: 0; overflow: visible; box-shadow: none; margin-top: 0.5rem; }
+  /* table-layout:fixed forces the Progress/Accuracy columns to their exact
+     specified widths on every row, full stop — with the default auto
+     layout the browser is free to recompute column widths from cell
+     content (and a colspan domain-header row like .qb-domain-row can
+     perturb that), which is what let the accuracy dot's column drift
+     between renders. Fixed layout removes that source of drift entirely;
+     the unset Topic column just takes whatever width is left over. */
+  .qb-table { width: 100%; table-layout: fixed; border-collapse: collapse; background: var(--white); border: none; border-radius: 0; overflow: visible; box-shadow: none; margin-top: 0.5rem; }
   .qb-table th { text-align: left; font-family: var(--hel); font-size: 0.66rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--faint); padding: 1.1rem 0.5rem 0.6rem; border-bottom: none; }
   .qb-table .qb-th-check { width: 40px; }
   .qb-table .qb-th-progress { width: 160px; }
-  .qb-table .qb-th-acc { width: 90px; }
+  /* Right-aligned to match .qb-acc-cell's own right alignment below —
+     left-aligning the header while the body's dot+value pair sits flush
+     right (deliberately, so the dot's position stays static row to row)
+     put the header label and its own column's values out of line with
+     each other. */
+  .qb-table .qb-th-acc { width: 90px; text-align: right; }
   .qb-domain-row td { padding: 1.3rem 0.5rem 0.5rem; font-family: var(--display); font-size: 1.05rem; font-weight: 700; color: var(--text); background: none; border-top: none; text-transform: none; letter-spacing: normal; }
   .qb-domain-row:first-child td { padding-top: 0.5rem; }
   .qb-skill-row td { padding: 0.85rem 0.5rem; border-bottom: 1px solid var(--border); font-size: 0.86rem; color: var(--text); vertical-align: middle; }
@@ -1534,12 +1634,22 @@
   .qb-skill-row input[type="checkbox"]:checked::after { content: ''; position: absolute; left: 5px; top: 1px; width: 5px; height: 9px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
   .qb-skill-name-cell { display: flex; align-items: center; gap: 0.6rem; cursor: pointer; }
   .qb-weak-tag { display: inline-flex; align-items: center; gap: 0.25rem; background: rgba(176,39,28,0.09); color: var(--red); font-family: var(--hel); font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; border-radius: 999px; padding: 0.2rem 0.55rem; }
+  /* Same pill as .qb-weak-tag, colors only — .qb-weak-tag stays for layout. */
+  .qb-strong-tag { background: rgba(63,125,84,0.1); color: #3f7d54; }
   .qb-progress-cell { display: flex; align-items: center; gap: 0.6rem; }
   .qb-progress-track { flex: 1 1 auto; height: 5px; border-radius: 999px; background: rgba(17,17,17,0.07); overflow: hidden; min-width: 60px; }
   .qb-progress-fill { height: 100%; border-radius: 999px; background: var(--gold); }
   .qb-progress-frac { font-size: 0.76rem; color: var(--mid); white-space: nowrap; }
-  .qb-acc-cell { font-weight: 600; color: var(--faint); }
+  /* Right-aligned, fixed-width value so the strength dot lands in the same
+     horizontal spot on every row regardless of "0%" vs "100%" text width —
+     the dot's position must stay static once a section has multiple rows. */
+  .qb-acc-cell { display: flex; align-items: center; justify-content: flex-end; gap: 0.45rem; font-weight: 600; color: var(--faint); }
   .qb-acc-cell.has-data { color: var(--text); }
+  .qb-acc-value { display: inline-block; min-width: 2.6em; text-align: right; }
+  .qb-strength-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; background: var(--faint); }
+  .qb-strength-dot.weak { background: var(--red); }
+  .qb-strength-dot.mid { background: var(--gold); }
+  .qb-strength-dot.strong { background: #3f7d54; }
 
   .qb-selection-bar { position: fixed; left: 50%; bottom: 1.5rem; transform: translateX(-50%); z-index: 60; display: flex; align-items: center; gap: 1rem; background: var(--text); color: #fff; border-radius: 999px; padding: 0.7rem 0.8rem 0.7rem 1.3rem; box-shadow: 0 12px 30px rgba(17,17,17,0.28); font-family: var(--hel); font-size: 0.82rem; font-weight: 600; }
   .qb-selection-bar .qb-start-btn { background: #fff; color: var(--text); }
@@ -1565,17 +1675,33 @@
   .iq-runner-summary-lab { font-size: 0.82rem; color: var(--mid); margin-bottom: 1.5rem; }
   .iq-runner-summary .key-btn { display: inline-block; width: auto; min-width: 160px; }
   .iq-dropdown { position: relative; margin-bottom: 0.6rem; }
-  .iq-dropdown-btn { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; font-family: var(--hel); font-size: 0.82rem; font-weight: 600; color: var(--text); background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 0.65rem 0.9rem; cursor: pointer; transition: border-color 0.15s var(--ease); text-align: left; }
+  .iq-dropdown-btn { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; font-family: var(--hel); font-size: 0.82rem; font-weight: 600; color: var(--text); background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 0.65rem 0.9rem; cursor: pointer; transition: border-color 0.15s var(--ease), box-shadow 0.15s var(--ease); text-align: left; }
   .iq-dropdown-btn:hover { border-color: var(--mid); }
-  .iq-dropdown.open .iq-dropdown-btn { border-color: var(--red); }
+  .iq-dropdown.open .iq-dropdown-btn { border-color: var(--red); box-shadow: 0 0 0 3px rgba(176,39,28,0.1); }
   .iq-dropdown-caret { font-size: 0.62rem; color: var(--mid); transition: transform 0.15s var(--ease); }
   .iq-dropdown.open .iq-dropdown-caret { transform: rotate(180deg); }
-  .iq-dropdown-panel { display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 40; max-height: 260px; overflow-y: auto; background: var(--white); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 8px 24px rgba(17,17,17,0.16); padding: 0.35rem; }
+  /* Softer, more modern panel: bigger radius, no hard border (shadow
+     alone does the separating), and scrollbar-gutter so a long list's own
+     scrollbar reserves its space up front instead of narrowing the panel
+     the moment it appears. */
+  .iq-dropdown-panel { display: none; position: absolute; top: calc(100% + 8px); left: 0; right: 0; z-index: 40; max-height: 260px; overflow-y: auto; scrollbar-gutter: stable; background: var(--white); border: none; border-radius: 16px; box-shadow: 0 12px 32px rgba(17,17,17,0.14); padding: 0.5rem; }
   .iq-dropdown.open .iq-dropdown-panel { display: block; }
-  .iq-dropdown-option { display: flex; align-items: center; gap: 0.6rem; padding: 0.5rem 0.55rem; border-radius: 6px; cursor: pointer; font-family: var(--hel); font-size: 0.82rem; color: var(--text); }
+  .iq-dropdown-option { display: flex; align-items: center; gap: 0.65rem; padding: 0.55rem 0.6rem; border-radius: 10px; cursor: pointer; font-family: var(--hel); font-size: 0.82rem; color: var(--text); transition: background 0.12s var(--ease); }
   .iq-dropdown-option:hover { background: var(--bg); }
-  .iq-dropdown-option input[type="checkbox"] { flex-shrink: 0; width: 16px; height: 16px; accent-color: var(--red); cursor: pointer; }
-  .iq-dropdown-option-all { border-bottom: 1px solid var(--border); margin-bottom: 0.25rem; padding-bottom: 0.65rem; font-weight: 700; }
+  /* Custom rounded checkbox — replaces the native square one so every
+     dropdown in the app shares the same soft, modern checkmark style
+     (same pattern as This Week's checklist on Home). */
+  .iq-dropdown-option input[type="checkbox"] {
+    appearance: none; -webkit-appearance: none; flex-shrink: 0; width: 18px; height: 18px; border-radius: 6px;
+    border: 1.5px solid var(--border); background: var(--white); position: relative; cursor: pointer;
+    transition: background 0.12s var(--ease), border-color 0.12s var(--ease);
+  }
+  .iq-dropdown-option input[type="checkbox"]:checked { background: var(--red); border-color: var(--red); }
+  .iq-dropdown-option input[type="checkbox"]:checked::after {
+    content: ''; position: absolute; left: 5px; top: 1px; width: 5px; height: 10px;
+    border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg);
+  }
+  .iq-dropdown-option-all { border-bottom: 1px solid var(--border); margin-bottom: 0.3rem; padding-bottom: 0.7rem; font-weight: 700; }
   .pb-empty-note { font-size: 0.8rem; color: var(--mid); margin-top: 0.4rem; }
 
   /* pb-q-meta/pb-passage/pb-q-card/pb-q-text/pb-note(+variants)/
@@ -1629,12 +1755,9 @@
   .iq-pill-diff.medium { background: rgba(201,168,76,0.2); color: #8a6d1f; }
   .iq-pill-diff.hard { background: rgba(176,39,28,0.1); color: var(--red); }
   .iq-pill-wrong { background: rgba(176,39,28,0.1); color: var(--red); }
+  .iq-pill-source { background: rgba(201,168,76,0.16); color: #8a6d1f; }
   .iq-item-time { flex-shrink: 0; font-size: 0.72rem; color: var(--faint); margin-left: auto; white-space: nowrap; }
   .iq-item-preview { flex: 1 1 100%; font-size: 0.85rem; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .iq-item-caret { flex-shrink: 0; color: var(--faint); font-size: 0.6rem; transition: transform 0.15s var(--ease); }
-  .iq-item.open .iq-item-caret { transform: rotate(90deg); }
-  .iq-item-detail { display: none; padding: 0 0.15rem 1.3rem; }
-  .iq-item.open .iq-item-detail { display: block; }
   .iq-missed-on { font-size: 0.68rem; color: var(--faint); margin-top: 1rem; text-align: right; }
   .iq-quiz-hint { font-size: 0.8rem; color: var(--faint); margin-top: 0.5rem; font-style: italic; }
   .iq-fr-row { display: flex; gap: 0.7rem; align-items: stretch; }
@@ -1802,11 +1925,17 @@
   @media print {#pt-native-report .atb-section, #pt-native-report .quadrant-grid { page-break-inside: avoid; break-inside: avoid; }
  }
 #pt-native-report .sc-qgrid-cell { cursor: pointer; position: relative; }
-#pt-native-report .sc-qgrid-tooltip { position: absolute; z-index: 50; bottom: calc(100% + 5px); left: 50%; transform: translateX(-50%); width: 190px; background: var(--ink); color: #fff; border-radius: 4px; padding: 6px 8px; font-size: 8.5px; line-height: 1.4; pointer-events: none; box-shadow: 0 6px 18px rgba(0,0,0,0.25); display: none; }
+/* Same look as the timing chart's .bridge-tooltip (dark card, bold title,
+   status line, "click to see this question" hint) — CSS-hover positioned
+   off the cell itself rather than JS/mousemove-driven like .bridge-tooltip
+   is, since there's no canvas here to need that, but visually they should
+   read as the exact same tooltip everywhere in the report. */
+#pt-native-report .sc-qgrid-tooltip { position: absolute; z-index: 50; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); background: var(--text); color: #fff; border-radius: 8px; padding: 0.5rem 0.7rem; font-family: var(--hel); font-size: 0.72rem; line-height: 1.4; text-align: left; white-space: nowrap; pointer-events: none; box-shadow: 0 8px 20px rgba(17,17,17,0.25); display: none; }
 #pt-native-report .sc-qgrid-cell:hover .sc-qgrid-tooltip { display: block; }
-#pt-native-report .sc-qgrid-tooltip b { display: block; margin-bottom: 2px; }
+#pt-native-report .sc-qgrid-tooltip b { display: block; font-size: 0.78rem; margin-bottom: 0.15rem; }
 #pt-native-report .sc-qgrid-tooltip .ok { color: #9fd8b4; }
 #pt-native-report .sc-qgrid-tooltip .bad { color: #f0a89e; }
+#pt-native-report .sc-qgrid-tooltip-hint { display: block; margin-top: 0.25rem; color: rgba(255,255,255,0.65); font-size: 0.64rem; }
 
   @media print {#pt-native-report .sc-qgrid-tooltip { display: none !important; }
  }
@@ -1819,72 +1948,78 @@
    Previous/Next just walks `rowsList`, so opening from a single question
    (module context, full list) or from a filtered set (a bridge bar's
    "see those questions") both just work. */
-#pt-native-report .q-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(17,17,17,0.55); z-index: 9000; align-items: center; justify-content: center; padding: 3vh 3vw; }
-#pt-native-report .q-modal-overlay.open { display: flex; }
-#pt-native-report .q-modal { display: flex; flex-direction: column; width: 100%; max-width: 1400px; height: 100%; max-height: 900px; background: #fff; border-radius: 20px; box-shadow: 0 40px 90px rgba(0,0,0,0.45); overflow: hidden; }
-#pt-native-report .q-modal-hed { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 24px; border-bottom: 1px solid var(--border); flex-shrink: 0; flex-wrap: wrap; }
-#pt-native-report .q-modal-hed-left { display: flex; align-items: center; gap: 10px; }
-#pt-native-report .q-modal-hed-right { display: flex; align-items: center; gap: 18px; }
-#pt-native-report .q-modal-hed span#q-modal-title { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 14px; color: var(--ink); }
-#pt-native-report .q-modal-status-pill { display: inline-flex; align-items: center; gap: 4px; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 0.02em; padding: 3px 9px; border-radius: 999px; }
-#pt-native-report .q-modal-status-pill.ok { background: rgba(94,139,111,0.14); color: var(--green); }
-#pt-native-report .q-modal-status-pill.bad { background: rgba(176,39,28,0.1); color: var(--red); }
-#pt-native-report .q-modal-pill-dot { display: inline-flex; align-items: center; justify-content: center; width: 13px; height: 13px; border-radius: 50%; font-size: 8px; color: #fff; }
-#pt-native-report .q-modal-status-pill.ok .q-modal-pill-dot { background: var(--green); }
-#pt-native-report .q-modal-status-pill.bad .q-modal-pill-dot { background: var(--red); }
-#pt-native-report .q-modal-flag-pill { display: inline-flex; align-items: center; gap: 4px; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 0.02em; padding: 3px 9px; border-radius: 999px; background: rgba(201,168,76,0.18); color: #8a6d1f; }
-#pt-native-report .q-modal-toggle { display: flex; align-items: center; gap: 8px; font-family: 'Poppins', sans-serif; font-size: 11.5px; font-weight: 600; color: var(--mid); cursor: pointer; user-select: none; }
-#pt-native-report .q-toggle-switch { position: relative; display: inline-block; width: 34px; height: 19px; flex-shrink: 0; }
-#pt-native-report .q-toggle-switch input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; z-index: 1; }
-#pt-native-report .q-toggle-track { position: absolute; inset: 0; background: rgba(17,17,17,0.16); border-radius: 999px; transition: background 0.18s ease; }
-#pt-native-report .q-toggle-thumb { position: absolute; top: 2px; left: 2px; width: 15px; height: 15px; background: #fff; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.3); transition: transform 0.18s ease; }
-#pt-native-report .q-toggle-switch input:checked ~ .q-toggle-track { background: var(--red); }
-#pt-native-report .q-toggle-switch input:checked ~ .q-toggle-track .q-toggle-thumb { transform: translateX(15px); }
-#pt-native-report .q-modal-close { background: none; border: none; font-size: 22px; line-height: 1; cursor: pointer; color: var(--mid); padding: 2px 4px; }
-#pt-native-report .q-modal-close:hover { color: var(--ink); }
-#pt-native-report .q-modal-body { flex: 1 1 auto; min-height: 0; display: flex; overflow: hidden; }
-#pt-native-report .q-modal-pane { flex: 1 1 50%; min-width: 0; overflow-y: auto; padding: 28px 34px; font-size: 13px; line-height: 1.7; }
-#pt-native-report .q-modal-passage-pane { border-right: 1px solid var(--border); color: var(--ink); }
-#pt-native-report .q-modal-passage-pane:empty { display: none; }
-#pt-native-report .q-modal-passage-pane:empty ~ .q-modal-question-pane { flex-basis: 100%; max-width: 720px; margin: 0 auto; }
-#pt-native-report .q-modal-question-pane .q-text { font-size: 14px; margin-bottom: 16px; color: var(--ink); }
-#pt-native-report .q-modal-body .q-detail { padding: 0; background: none; }
+.q-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(17,17,17,0.55); z-index: 9000; align-items: center; justify-content: center; padding: 3vh 3vw; }
+.q-modal-overlay.open { display: flex; }
+.q-modal { display: flex; flex-direction: column; width: 100%; max-width: 1400px; height: 100%; max-height: 900px; background: #fff; border-radius: 20px; box-shadow: 0 40px 90px rgba(0,0,0,0.45); overflow: hidden; }
+.q-modal-hed { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 24px; border-bottom: 1px solid var(--border); flex-shrink: 0; flex-wrap: wrap; }
+.q-modal-hed-left { display: flex; align-items: center; gap: 10px; }
+.q-modal-hed-right { display: flex; align-items: center; gap: 18px; }
+.q-modal-hed span#q-modal-title { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 14px; color: var(--ink); }
+.q-modal-status-pill { display: inline-flex; align-items: center; gap: 4px; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 0.02em; padding: 3px 9px; border-radius: 999px; }
+.q-modal-status-pill.ok { background: rgba(94,139,111,0.14); color: var(--green); }
+.q-modal-status-pill.bad { background: rgba(176,39,28,0.1); color: var(--red); }
+.q-modal-pill-dot { display: inline-flex; align-items: center; justify-content: center; width: 13px; height: 13px; border-radius: 50%; font-size: 8px; color: #fff; }
+.q-modal-status-pill.ok .q-modal-pill-dot { background: var(--green); }
+.q-modal-status-pill.bad .q-modal-pill-dot { background: var(--red); }
+.q-modal-flag-pill { display: inline-flex; align-items: center; gap: 4px; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 0.02em; padding: 3px 9px; border-radius: 999px; background: rgba(201,168,76,0.18); color: #8a6d1f; }
+.q-modal-toggle { display: flex; align-items: center; gap: 8px; font-family: 'Poppins', sans-serif; font-size: 11.5px; font-weight: 600; color: var(--mid); cursor: pointer; user-select: none; }
+/* "Hide choices" has nothing to do on a free-response question (no choice
+   list exists to hide) — dimmed here as a hint that it's inert on THIS
+   question, nothing more. Stays fully clickable on purpose (see the
+   comment above where this class gets toggled) — a real student's actual
+   bug report was this control getting stuck once it was also disabled. */
+.q-modal-toggle-na { opacity: 0.4; }
+.q-toggle-switch { position: relative; display: inline-block; width: 34px; height: 19px; flex-shrink: 0; }
+.q-toggle-switch input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; z-index: 1; }
+.q-toggle-track { position: absolute; inset: 0; background: rgba(17,17,17,0.16); border-radius: 999px; transition: background 0.18s ease; }
+.q-toggle-thumb { position: absolute; top: 2px; left: 2px; width: 15px; height: 15px; background: #fff; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.3); transition: transform 0.18s ease; }
+.q-toggle-switch input:checked ~ .q-toggle-track { background: var(--red); }
+.q-toggle-switch input:checked ~ .q-toggle-track .q-toggle-thumb { transform: translateX(15px); }
+.q-modal-close { background: none; border: none; font-size: 22px; line-height: 1; cursor: pointer; color: var(--mid); padding: 2px 4px; }
+.q-modal-close:hover { color: var(--ink); }
+.q-modal-body { flex: 1 1 auto; min-height: 0; display: flex; overflow: hidden; }
+.q-modal-pane { flex: 1 1 50%; min-width: 0; overflow-y: auto; padding: 28px 34px; font-size: 13px; line-height: 1.7; }
+.q-modal-passage-pane { border-right: 1px solid var(--border); color: var(--ink); }
+.q-modal-passage-pane:empty { display: none; }
+.q-modal-passage-pane:empty ~ .q-modal-question-pane { flex-basis: 100%; max-width: 720px; margin: 0 auto; }
+.q-modal-question-pane .q-text { font-size: 14px; margin-bottom: 16px; color: var(--ink); }
+.q-modal-body .q-detail { padding: 0; background: none; }
 /* Choices — rounded rows with a circular lettered badge (matches the
    live exam's own .dx-choice/.dx-choice-letter look, which report.html
    doesn't otherwise define since it's a standalone document with no
    live-exam CSS to inherit) plus a circular check/x mark on the right
    once revealed, instead of the plain bordered-list/inline-tag style
    this used to reuse from the page-2 accordion table. */
-#pt-native-report .q-modal-question-pane .q-choices { list-style: none; margin: 0 0 4px; padding: 0; display: flex; flex-direction: column; gap: 10px; }
-#pt-native-report .q-modal-question-pane .q-choices li { display: flex; align-items: center; gap: 14px; border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; font-size: 13.5px; line-height: 1.55; color: var(--ink); }
-#pt-native-report .q-modal-question-pane .q-choice-badge { flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--faint); display: flex; align-items: center; justify-content: center; font-family: 'Poppins', sans-serif; font-size: 11px; font-weight: 700; color: var(--mid); }
-#pt-native-report .q-modal-question-pane .q-choice-text { flex: 1 1 auto; }
-#pt-native-report .q-modal-question-pane .q-choice-mark { flex-shrink: 0; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 11px; }
-#pt-native-report .q-modal-question-pane li.q-correct { border-color: var(--green); background: #eef7f0; }
-#pt-native-report .q-modal-question-pane li.q-correct .q-choice-badge { background: var(--green); border-color: var(--green); color: #fff; }
-#pt-native-report .q-modal-question-pane li.q-correct .q-choice-mark { background: var(--green); }
-#pt-native-report .q-modal-question-pane li.q-picked-wrong { border-color: var(--red); background: #fbeeec; }
-#pt-native-report .q-modal-question-pane li.q-picked-wrong .q-choice-badge { background: var(--red); border-color: var(--red); color: #fff; }
-#pt-native-report .q-modal-question-pane li.q-picked-wrong .q-choice-mark { background: var(--red); }
-#pt-native-report .q-modal-explain-block { display: none; margin-top: 16px; }
-#pt-native-report .q-modal-explain-block.open { display: block; }
-#pt-native-report .q-modal-ftr { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 24px; border-top: 1px solid var(--border); flex-shrink: 0; font-family: 'Poppins', sans-serif; }
-#pt-native-report .q-modal-ftr span#q-modal-counter { font-size: 11.5px; color: var(--faint); }
-#pt-native-report .q-modal-ftr-actions { display: flex; gap: 8px; }
-#pt-native-report .q-modal-ftr-btn { font-family: inherit; font-size: 11.5px; font-weight: 600; padding: 8px 18px; border-radius: 999px; border: 1px solid var(--border); background: #fff; color: var(--ink); cursor: pointer; transition: background 0.15s ease, opacity 0.15s ease; }
-#pt-native-report .q-modal-ftr-btn:hover:not(:disabled) { background: rgba(17,17,17,0.04); }
-#pt-native-report .q-modal-ftr-btn:disabled { opacity: 0.4; cursor: default; }
-#pt-native-report .q-modal-ftr-btn.primary { background: var(--red); color: #fff; border-color: var(--red); }
-#pt-native-report .q-modal-ftr-btn.primary:hover:not(:disabled) { opacity: 0.9; background: var(--red); }
+.q-modal-question-pane .q-choices { list-style: none; margin: 0 0 4px; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.q-modal-question-pane .q-choices li { display: flex; align-items: center; gap: 14px; border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; font-size: 13.5px; line-height: 1.55; color: var(--ink); }
+.q-modal-question-pane .q-choice-badge { flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--faint); display: flex; align-items: center; justify-content: center; font-family: 'Poppins', sans-serif; font-size: 11px; font-weight: 700; color: var(--mid); }
+.q-modal-question-pane .q-choice-text { flex: 1 1 auto; }
+.q-modal-question-pane .q-choice-mark { flex-shrink: 0; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 11px; }
+.q-modal-question-pane li.q-correct { border-color: var(--green); background: #eef7f0; }
+.q-modal-question-pane li.q-correct .q-choice-badge { background: var(--green); border-color: var(--green); color: #fff; }
+.q-modal-question-pane li.q-correct .q-choice-mark { background: var(--green); }
+.q-modal-question-pane li.q-picked-wrong { border-color: var(--red); background: #fbeeec; }
+.q-modal-question-pane li.q-picked-wrong .q-choice-badge { background: var(--red); border-color: var(--red); color: #fff; }
+.q-modal-question-pane li.q-picked-wrong .q-choice-mark { background: var(--red); }
+.q-modal-explain-block { display: none; margin-top: 16px; }
+.q-modal-explain-block.open { display: block; }
+.q-modal-ftr { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 24px; border-top: 1px solid var(--border); flex-shrink: 0; font-family: 'Poppins', sans-serif; }
+.q-modal-ftr span#q-modal-counter { font-size: 11.5px; color: var(--faint); }
+.q-modal-ftr-actions { display: flex; gap: 8px; }
+.q-modal-ftr-btn { font-family: inherit; font-size: 11.5px; font-weight: 600; padding: 8px 18px; border-radius: 999px; border: 1px solid var(--border); background: #fff; color: var(--ink); cursor: pointer; transition: background 0.15s ease, opacity 0.15s ease; }
+.q-modal-ftr-btn:hover:not(:disabled) { background: rgba(17,17,17,0.04); }
+.q-modal-ftr-btn:disabled { opacity: 0.4; cursor: default; }
+.q-modal-ftr-btn.primary { background: var(--red); color: #fff; border-color: var(--red); }
+.q-modal-ftr-btn.primary:hover:not(:disabled) { opacity: 0.9; background: var(--red); }
 @media (max-width: 900px) {
-  #pt-native-report .q-modal-overlay { padding: 0; }
-  #pt-native-report .q-modal { max-width: none; max-height: none; border-radius: 0; }
-  #pt-native-report .q-modal-body { flex-direction: column; overflow-y: auto; }
-  #pt-native-report .q-modal-passage-pane { border-right: none; border-bottom: 1px solid var(--border); }
-  #pt-native-report .q-modal-pane { padding: 18px 20px; overflow-y: visible; }
+  .q-modal-overlay { padding: 0; }
+  .q-modal { max-width: none; max-height: none; border-radius: 0; }
+  .q-modal-body { flex-direction: column; overflow-y: auto; }
+  .q-modal-passage-pane { border-right: none; border-bottom: 1px solid var(--border); }
+  .q-modal-pane { padding: 18px 20px; overflow-y: visible; }
 }
 
-  @media print {#pt-native-report .q-modal-overlay { display: none !important; }
+  @media print {.q-modal-overlay { display: none !important; }
  }
 #pt-native-report .sc-qgrid { display: flex; flex-wrap: wrap; gap: 3px; margin-bottom: 8px; }
 #pt-native-report .sc-qgrid-cell { width: 15px; height: 15px; border-radius: 2px; font-size: 7px; font-weight: 700; line-height: 1; display: flex; align-items: center; justify-content: center; border: 1px solid transparent; }
@@ -1903,6 +2038,45 @@
 #pt-native-report .sc-difftime-dot.easy { background: #A9C4B4; }
 #pt-native-report .sc-difftime-dot.medium { background: var(--gold); }
 #pt-native-report .sc-difftime-dot.hard { background: var(--red); }
+/* "How you allocated your time" — one module's chart, HTML/CSS bars (not
+   SVG) so each bar can carry the same .sc-qgrid-tooltip hover popup the
+   per-question tiles elsewhere in this report already use, for a
+   consistent hover experience. Fixed pixel dimensions throughout (set
+   inline per-render in JS, same values every module) rather than
+   percentage/viewBox scaling, so paging between modules never resizes
+   the chart. */
+/* One tile for the whole Timing section — same pattern as .bridge-card:
+   a single bordered card holding the allocation graph AND the difficulty
+   time-split below it, divided by #timing-sub's border-top rather than
+   two separate boxes stacked on the page. */
+#pt-native-report .timing-card { background: var(--white); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); padding: 1.5rem 1.75rem; }
+#pt-native-report .timing-card > #timing-allocation-sub { margin: 0 0 0.9rem; }
+#pt-native-report .timing-card > #timing-allocation { margin: 0 0 1.4rem; }
+#pt-native-report .timing-card > #timing-sub { margin: 0 0 0.9rem; padding-top: 1.4rem; border-top: 1px solid var(--border); }
+#pt-native-report .timing-card > #timing-stats { margin: 0; }
+#pt-native-report .timing-carousel { display: flex; align-items: center; justify-content: center; gap: 6px; }
+/* Borderless — a plain ghost icon button (fill on hover only), not another
+   bordered circle sitting next to the chart's own border. */
+#pt-native-report .timing-nav-btn { flex-shrink: 0; width: 32px; height: 32px; border-radius: 50%; border: none; background: none; color: var(--mid); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.15s ease, color 0.15s ease, opacity 0.15s ease; }
+#pt-native-report .timing-nav-btn svg { width: 16px; height: 16px; }
+#pt-native-report .timing-nav-btn:hover:not(:disabled) { background: rgba(17,17,17,0.06); color: var(--ink); }
+#pt-native-report .timing-nav-btn:disabled { opacity: 0.25; cursor: default; }
+/* Static — no scrolling. The chart's own fixed CHART_W/CHART_H (set inline
+   in JS) already guarantees nothing inside ever exceeds this box. No
+   border/shadow of its own any more — .timing-card above is now the only
+   box, so nothing here reads as a second nested tile. */
+#pt-native-report .timing-chart-card { padding: 0; overflow: visible; }
+#pt-native-report .timing-chart-hed { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 10px; font-family: 'Poppins', sans-serif; }
+#pt-native-report .timing-chart-hed span:first-child { font-size: 12.5px; font-weight: 700; color: var(--ink); }
+#pt-native-report .timing-module-counter { font-size: 10.5px; color: var(--faint); white-space: nowrap; }
+#pt-native-report .timing-chart-plot { position: relative; }
+#pt-native-report .timing-gridline { position: absolute; width: 1px; background: currentColor; opacity: 0.07; }
+#pt-native-report .timing-gridlabel { position: absolute; transform: translateX(-50%); font-size: 8.5px; color: var(--faint); font-variant-numeric: tabular-nums; }
+#pt-native-report .timing-rowlabel { position: absolute; left: -8px; transform: translate(-100%, -50%); font-size: 8px; color: var(--faint); font-variant-numeric: tabular-nums; }
+#pt-native-report .timing-xcaption { position: absolute; left: 50%; transform: translateX(-50%); font-size: 8.5px; color: var(--faint); }
+#pt-native-report .timing-bar { position: absolute; border-radius: 2px; cursor: pointer; }
+#pt-native-report .timing-bar-ok { background: var(--green); }
+#pt-native-report .timing-bar-bad { background: var(--red); }
 #pt-native-report .bridge-wrap { border: 1px solid var(--border); border-radius: 14px; padding: 14px 18px; margin-bottom: 2px; }
 #pt-native-report .bridge-target-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 6px; font-size: 10.5px; color: var(--mid); }
 #pt-native-report .bridge-target-row .bt-lab { font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; font-size: 9.5px; }
@@ -1953,6 +2127,11 @@
 #pt-native-report .takeaways strong { color: var(--ink); }
 #pt-native-report .takeaways .r { color: var(--red); font-weight: 700; }
 #pt-native-report .behavior-clean { font-size: 11px; line-height: 1.65; color: var(--mid); }
+/* The single synthesized "Where to focus" headline — the biggest stuck/
+   rushed pattern found across every section, pulled out and stated first
+   rather than left for a parent to infer from the flag list below it. */
+#pt-native-report .behavior-focus { background: rgba(176,39,28,0.06); border: 1px solid rgba(176,39,28,0.25); border-radius: 10px; padding: 10px 14px; margin-bottom: 12px; font-size: 11.5px; line-height: 1.65; color: var(--ink); }
+#pt-native-report .behavior-focus strong { color: var(--red); }
 #pt-native-report .detail-toggle { display: inline-block; font-size: 9.5px; color: var(--mid); text-decoration: underline; margin-top: 10px; }
 #pt-native-report .ftr { border-top: 1px solid var(--border); margin-top: 14px; padding-top: 8px; font-size: 9.5px; color: var(--faint); display: flex; justify-content: space-between; }
 #pt-native-report table { width: 100%; border-collapse: collapse; font-size: 9.5px; }
@@ -1965,12 +2144,12 @@
 #pt-native-report tr.q-row td.q-toggle { color: var(--faint); width: 14px; text-align: center; }
 #pt-native-report tr.q-row.open td.q-toggle { color: var(--red); }
 #pt-native-report tr.q-detail-row > td { padding: 0; border-bottom: 1px solid #eee7da; }
-#pt-native-report .q-detail { padding: 10px 12px 12px; background: #faf7f1; font-size: 11px; color: var(--ink); }
-#pt-native-report .q-detail-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 10px; margin-bottom: 8px; }
-#pt-native-report .q-detail .q-text { margin-bottom: 8px; line-height: 1.5; }
-#pt-native-report .q-hide-toggle { display: inline-flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 700; letter-spacing: 0.02em; color: var(--mid); cursor: pointer; user-select: none; }
-#pt-native-report .q-hide-toggle input { cursor: pointer; }
-#pt-native-report .q-fr-hidden { font-size: 10.5px; font-style: italic; color: var(--faint); padding: 6px 8px; border: 1px dashed var(--border); border-radius: 4px; }
+.q-detail { padding: 10px 12px 12px; background: #faf7f1; font-size: 11px; color: var(--ink); }
+.q-detail-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 10px; margin-bottom: 8px; }
+.q-detail .q-text { margin-bottom: 8px; line-height: 1.5; }
+.q-hide-toggle { display: inline-flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 700; letter-spacing: 0.02em; color: var(--mid); cursor: pointer; user-select: none; }
+.q-hide-toggle input { cursor: pointer; }
+.q-fr-hidden { font-size: 10.5px; font-style: italic; color: var(--faint); padding: 6px 8px; border: 1px dashed var(--border); border-radius: 4px; }
 /* Rounded rows with a circular lettered badge + circular check/x mark
    once revealed — same visual language as the question preview modal
    (its answer area also carries .q-detail, so this same rule covers
@@ -1978,28 +2157,37 @@
    is what actually prints/downloads via "Print / Save as PDF" (the page-2
    full-detail table uses this same renderQuestionDetail()), so the
    printable version gets the same look, not just the on-screen modal. */
-#pt-native-report .q-detail .q-choices { list-style: none; margin: 0 0 4px; padding: 0; display: flex; flex-direction: column; gap: 6px; }
-#pt-native-report .q-detail .q-choices li { display: flex; align-items: center; gap: 8px; border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; }
-#pt-native-report .q-detail .q-choice-badge { flex-shrink: 0; width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--faint); display: flex; align-items: center; justify-content: center; font-size: 8.5px; font-weight: 700; color: var(--mid); }
-#pt-native-report .q-detail .q-choice-text { flex: 1 1 auto; }
-#pt-native-report .q-detail .q-choice-mark { flex-shrink: 0; width: 14px; height: 14px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 8px; }
-#pt-native-report .q-detail .q-choices li.q-correct { border-color: var(--green); background: #eef4ef; }
-#pt-native-report .q-detail .q-choices li.q-correct .q-choice-badge { background: var(--green); border-color: var(--green); color: #fff; }
-#pt-native-report .q-detail .q-choices li.q-correct .q-choice-mark { background: var(--green); }
-#pt-native-report .q-detail .q-choices li.q-picked-wrong { border-color: var(--red); background: #f7eeed; }
-#pt-native-report .q-detail .q-choices li.q-picked-wrong .q-choice-badge { background: var(--red); border-color: var(--red); color: #fff; }
-#pt-native-report .q-detail .q-choices li.q-picked-wrong .q-choice-mark { background: var(--red); }
-#pt-native-report .q-detail .q-tag { font-size: 9px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap; }
-#pt-native-report .q-detail .q-tag.ok { color: var(--green); }
-#pt-native-report .q-detail .q-tag.bad { color: var(--red); }
-#pt-native-report .q-detail .q-fr { padding: 6px 8px; border: 1px solid var(--border); border-radius: 4px; }
-#pt-native-report .q-detail .q-fr .q-correct-ans { color: var(--green); font-weight: 600; }
-#pt-native-report .q-detail .q-fr .q-your-ans { color: var(--red); font-weight: 600; }
-#pt-native-report .q-detail .q-timing { margin-top: 8px; font-size: 9.5px; color: var(--mid); }
-#pt-native-report .q-hint { font-size: 9px; color: var(--faint); font-style: italic; margin: 2px 0 10px; }
-#pt-native-report .q-save-btn { display: inline-flex; align-items: center; gap: 0.4rem; font-family: var(--hel); font-size: 0.72rem; font-weight: 700; color: var(--mid); background: var(--white); border: 1px solid var(--border); border-radius: 999px; padding: 0.4rem 0.8rem; cursor: pointer; transition: border-color 0.15s var(--ease), color 0.15s var(--ease), background 0.15s var(--ease); }
-#pt-native-report .q-save-btn:hover { border-color: var(--gold); color: var(--text); }
-#pt-native-report .q-save-btn.on { background: rgba(201,168,76,0.12); border-color: var(--gold); color: var(--text); }
+.q-detail .q-choices { list-style: none; margin: 0 0 4px; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.q-detail .q-choices li { display: flex; align-items: center; gap: 8px; border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; }
+.q-detail .q-choice-badge { flex-shrink: 0; width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--faint); display: flex; align-items: center; justify-content: center; font-size: 8.5px; font-weight: 700; color: var(--mid); }
+.q-detail .q-choice-text { flex: 1 1 auto; }
+.q-detail .q-choice-mark { flex-shrink: 0; width: 14px; height: 14px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 8px; }
+.q-detail .q-choices li.q-correct { border-color: var(--green); background: #eef4ef; }
+.q-detail .q-choices li.q-correct .q-choice-badge { background: var(--green); border-color: var(--green); color: #fff; }
+.q-detail .q-choices li.q-correct .q-choice-mark { background: var(--green); }
+.q-detail .q-choices li.q-picked-wrong { border-color: var(--red); background: #f7eeed; }
+.q-detail .q-choices li.q-picked-wrong .q-choice-badge { background: var(--red); border-color: var(--red); color: #fff; }
+.q-detail .q-choices li.q-picked-wrong .q-choice-mark { background: var(--red); }
+.q-detail .q-tag { font-size: 9px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap; }
+.q-detail .q-tag.ok { color: var(--green); }
+.q-detail .q-tag.bad { color: var(--red); }
+.q-detail .q-fr { padding: 6px 8px; border: 1px solid var(--border); border-radius: 4px; }
+.q-detail .q-fr .q-correct-ans { color: var(--green); font-weight: 600; }
+.q-detail .q-fr .q-your-ans { color: var(--red); font-weight: 600; }
+.q-detail .q-timing { margin-top: 8px; font-size: 9.5px; color: var(--mid); }
+/* Clean icon-row layout for time-on-question/subtype/difficulty — replaces
+   the old single run-on "Time spent: X · First visited: Y · Last viewed:
+   Z" line with one row per fact, each with its own small icon, easier to
+   scan at a glance. */
+.q-modal-meta { margin-top: 16px; display: flex; flex-direction: column; gap: 7px; }
+.q-modal-meta-row { display: flex; align-items: baseline; gap: 8px; font-size: 12.5px; color: var(--mid); }
+.q-modal-meta-icon { flex-shrink: 0; width: 16px; text-align: center; opacity: 0.7; }
+.q-modal-meta-row strong { color: var(--ink); font-weight: 700; }
+.q-choices-hidden { font-size: 12.5px; font-style: italic; color: var(--faint); padding: 10px 14px; border: 1px dashed var(--border); border-radius: 8px; }
+.q-hint { font-size: 9px; color: var(--faint); font-style: italic; margin: 2px 0 10px; }
+.q-save-btn { display: inline-flex; align-items: center; gap: 0.4rem; font-family: var(--hel); font-size: 0.72rem; font-weight: 700; color: var(--mid); background: var(--white); border: 1px solid var(--border); border-radius: 999px; padding: 0.4rem 0.8rem; cursor: pointer; transition: border-color 0.15s var(--ease), color 0.15s var(--ease), background 0.15s var(--ease); }
+.q-save-btn:hover { border-color: var(--gold); color: var(--text); }
+.q-save-btn.on { background: rgba(201,168,76,0.12); border-color: var(--gold); color: var(--text); }
 
   @media print {#pt-native-report .q-hint, #pt-native-report td.q-toggle, #pt-native-report th.q-toggle { display: none; }
  }
@@ -2029,7 +2217,7 @@
 #pt-native-report .score-tile.big { min-width: 108px; padding: 12px 16px 9px; }
 #pt-native-report .bridge-canvas-wrap { overflow-x: auto; }
 #pt-native-report table { display: block; overflow-x: auto; white-space: nowrap; }
-#pt-native-report .q-detail, #pt-native-report .q-detail * { white-space: normal; }
+.q-detail, .q-detail * { white-space: normal; }
 
   }
 
@@ -2144,7 +2332,7 @@
      sitting outside .bridge-wrap, so they need their own matching
      horizontal padding to line up with the chart above them. */
   #pt-native-report .bridge-card > #bridge-note-outer { padding: 0 1.75rem; }
-  #pt-native-report .bridge-card > #skillbreak-hed.bridge-card-subhed { margin: 0; padding: 1.4rem 1.75rem 0.9rem; border-top: 1px solid var(--border); }
+  #pt-native-report .bridge-card > .bridge-card-subhed { margin: 0; padding: 1.4rem 1.75rem 0.9rem; border-top: 1px solid var(--border); }
   #pt-native-report .bridge-card > #accuracy-by-topic { padding: 0 1.75rem 1.6rem; }
   #pt-native-report .bridge-note-block { font-size: 0.6rem; color: var(--faint); margin: 0 0 0.9rem; line-height: 1.5; }
   #pt-native-report .bridge-note-block .bridge-other-note { margin-bottom: 0.4rem; }
@@ -2198,42 +2386,21 @@
   window.GOOGLE_MEET_URL = 'https://meet.google.com/kgd-inuf-wzi';
 </script>
 
+<!-- Pre-login-only top bar now (key entry, onboarding, marketing-style
+     screens) — once a student is in the app shell this whole bar hides
+     (see #main-nav.nav-app-shell in the CSS) and the sidebar below takes
+     over the logo/countdown/account job instead. -->
 <nav id="main-nav">
   <a href="../index.html" class="nav-logo-link" id="nav-logo-exit"><img src="../logo-caladea-white.png" alt="Moretti Test Prep &amp; Tutoring" class="nav-logo-img"></a>
 
-  <!-- Quick-nav search — jumps to Home/Practice Tests/Files/Vocabulary/My
-       Incorrect Questions/Diagnostic by name. Only shown once a student is
-       inside the app shell (see .nav-app-shell gating in the CSS above and
-       updateSidebarForScreen() below). -->
+  <!-- Dead weight kept intentionally: search was removed from the nav (see
+       .nav-search{display:none} in the CSS) but the input + its JS wiring
+       below were left in place rather than torn out, since nothing renders
+       it either way. -->
   <div class="nav-search" id="nav-search">
     <span class="nav-search-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span>
     <input type="text" class="nav-search-input" id="nav-search-input" placeholder="Search the portal&hellip;" autocomplete="off">
     <div class="nav-search-results" id="nav-search-results"></div>
-  </div>
-
-  <!-- Persistent, glanceable test-day countdown — the ONE place it lives
-       now (see renderTestCountdown()); the old under-greeting progress bar
-       on Home was dropped so it isn't shown in two places at once. -->
-  <div class="nav-countdown" id="nav-countdown">
-    <span class="nav-countdown-num" id="nav-countdown-num">&mdash;</span>
-    <span id="nav-countdown-rest"></span>
-  </div>
-
-  <!-- Profile control — student initials, name, and the two account
-       actions that used to be two separate links (nav-exit-link's "Exit
-       Portal" and Home's "Use a different key"). -->
-  <div class="nav-profile" id="nav-profile">
-    <button type="button" class="nav-profile-btn" id="nav-profile-btn">
-      <span class="nav-avatar" id="nav-avatar">&nbsp;</span>
-      <svg class="nav-profile-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-    </button>
-    <div class="nav-profile-menu" id="nav-profile-menu">
-      <div class="nav-profile-name" id="nav-profile-name">&nbsp;</div>
-      <a href="#" class="nav-profile-item" id="nav-profile-settings">Account Settings</a>
-      <a href="#" class="nav-profile-item" id="nav-profile-switch-key">Use a different key</a>
-      <div class="nav-profile-divider"></div>
-      <a href="../index.html" class="nav-profile-item" id="nav-profile-exit">Exit Portal</a>
-    </div>
   </div>
 
   <a href="../index.html" class="nav-exit" id="nav-exit-link">Exit Portal</a>
@@ -2262,34 +2429,67 @@
      window, or (Vocabulary) for ACT-only students. Clicking an item drives
      the SAME show()/route logic the old menu cards used to. ═══ -->
 <nav class="portal-sidebar" id="portal-sidebar">
-  <a href="#" class="sidebar-item" data-nav="home" id="sidebar-home">
-    <span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9a1 1 0 0 0 1 1h3v-6h4v6h3a1 1 0 0 0 1-1v-9"/></svg></span>
-    <span class="sidebar-label">Home</span>
-  </a>
-  <a href="#" class="sidebar-item" data-nav="files" id="sidebar-files">
-    <span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a1 1 0 0 1 1-1h5l2 2h9a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7z"/></svg></span>
-    <span class="sidebar-label">Files</span>
-  </a>
-  <a href="#" class="sidebar-item" data-nav="practice-tests" id="sidebar-practice-tests">
-    <span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2"/><path d="M9 2h6"/></svg></span>
-    <span class="sidebar-label">Practice Tests</span>
-  </a>
-  <a href="#" class="sidebar-item" data-nav="question-bank" id="sidebar-question-bank">
-    <span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4" width="17" height="16" rx="1.5"/><path d="M8 9h8"/><path d="M8 12.5h8"/><path d="M8 16h5"/></svg></span>
-    <span class="sidebar-label">Question Bank</span>
-  </a>
-  <a href="#" class="sidebar-item" data-nav="challenge-questions" id="sidebar-challenge-questions">
-    <span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.5-2 5-2 5s3.5-.5 5-2c.8-.8.8-2.2 0-3s-2.2-.8-3 0Z"/><path d="M9 15l-1.5-1.5L15 6c1.5-1.5 4-2.5 6-2.5s-1 4.5-2.5 6l-7.5 7.5L9 15Z"/><path d="M15 6c0 2 1.5 5 4.5 4.5"/><circle cx="15.5" cy="8.5" r="1"/></svg></span>
-    <span class="sidebar-label">Challenge Questions</span>
-  </a>
-  <a href="#" class="sidebar-item" data-nav="vocab" id="sidebar-vocab">
-    <span class="sidebar-icon sidebar-icon-text">Aa</span>
-    <span class="sidebar-label">Vocabulary</span>
-  </a>
-  <a href="#" class="sidebar-item" data-nav="incorrect-questions" id="sidebar-incorrect-questions">
-    <span class="sidebar-icon sidebar-icon-text">&#10007;</span>
-    <span class="sidebar-label">Saved &amp; Mistakes</span>
-  </a>
+  <div class="sb-brand">
+    <a href="../index.html" class="nav-logo-link" id="sidebar-logo-exit"><img src="../logo-caladea-white.png" alt="Moretti Test Prep &amp; Tutoring" class="nav-logo-img"></a>
+    <!-- Persistent, glanceable test-day countdown — the ONE place it lives
+         now (see renderTestCountdown()); the old under-greeting progress bar
+         on Home was dropped so it isn't shown in two places at once. -->
+    <div class="nav-countdown" id="nav-countdown">
+      <span class="nav-countdown-num" id="nav-countdown-num">&mdash;</span>
+      <span id="nav-countdown-rest"></span>
+    </div>
+  </div>
+
+  <div class="sb-links">
+    <a href="#" class="sidebar-item" data-nav="home" id="sidebar-home">
+      <span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9a1 1 0 0 0 1 1h3v-6h4v6h3a1 1 0 0 0 1-1v-9"/></svg></span>
+      <span class="sidebar-label">Home</span>
+    </a>
+    <a href="#" class="sidebar-item" data-nav="files" id="sidebar-files">
+      <span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a1 1 0 0 1 1-1h5l2 2h9a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7z"/></svg></span>
+      <span class="sidebar-label">Files</span>
+    </a>
+    <div class="sb-divider"><span>Learn</span></div>
+    <a href="#" class="sidebar-item" data-nav="practice-tests" id="sidebar-practice-tests">
+      <span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2"/><path d="M9 2h6"/></svg></span>
+      <span class="sidebar-label">Practice Tests</span>
+    </a>
+    <a href="#" class="sidebar-item" data-nav="question-bank" id="sidebar-question-bank">
+      <span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4" width="17" height="16" rx="1.5"/><path d="M8 9h8"/><path d="M8 12.5h8"/><path d="M8 16h5"/></svg></span>
+      <span class="sidebar-label">Question Bank</span>
+    </a>
+    <a href="#" class="sidebar-item" data-nav="challenge-questions" id="sidebar-challenge-questions">
+      <span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.5-2 5-2 5s3.5-.5 5-2c.8-.8.8-2.2 0-3s-2.2-.8-3 0Z"/><path d="M9 15l-1.5-1.5L15 6c1.5-1.5 4-2.5 6-2.5s-1 4.5-2.5 6l-7.5 7.5L9 15Z"/><path d="M15 6c0 2 1.5 5 4.5 4.5"/><circle cx="15.5" cy="8.5" r="1"/></svg></span>
+      <span class="sidebar-label">Challenge Questions</span>
+    </a>
+    <a href="#" class="sidebar-item" data-nav="vocab" id="sidebar-vocab">
+      <span class="sidebar-icon sidebar-icon-text">Aa</span>
+      <span class="sidebar-label">Vocabulary</span>
+    </a>
+    <a href="#" class="sidebar-item" data-nav="incorrect-questions" id="sidebar-incorrect-questions">
+      <span class="sidebar-icon sidebar-icon-text">&#10007;</span>
+      <span class="sidebar-label">Saved &amp; Mistakes</span>
+    </a>
+  </div>
+
+  <!-- Profile control — student initials, name, and the two account
+       actions that used to be two separate links (nav-exit-link's "Exit
+       Portal" and Home's "Use a different key"). Pinned to the very bottom
+       of the sidebar (see .nav-profile in the CSS). -->
+  <div class="nav-profile" id="nav-profile">
+    <button type="button" class="nav-profile-btn" id="nav-profile-btn">
+      <span class="nav-avatar" id="nav-avatar">&nbsp;</span>
+      <span class="nav-profile-name-inline" id="nav-profile-name-inline">&nbsp;</span>
+      <svg class="nav-profile-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="nav-profile-menu" id="nav-profile-menu">
+      <div class="nav-profile-name" id="nav-profile-name">&nbsp;</div>
+      <a href="#" class="nav-profile-item" id="nav-profile-settings">Account Settings</a>
+      <a href="#" class="nav-profile-item" id="nav-profile-switch-key">Use a different key</a>
+      <div class="nav-profile-divider"></div>
+      <a href="../index.html" class="nav-profile-item" id="nav-profile-exit">Exit Portal</a>
+    </div>
+  </div>
 </nav>
 
 <!-- ═══ SCREEN 1 — ACCESS KEY ═══ -->
@@ -2730,7 +2930,10 @@
     </div>
 
     <p class="key-error" id="settingsSaveError">Couldn't save — check your connection and try again.</p>
-    <button class="key-btn" id="settings-save">Save Changes</button>
+    <!-- .key-error above is display:none (0 height) whenever there's no
+         error to show, which is the normal case — without its own margin,
+         Save Changes sat flush against the guardian name/email inputs. -->
+    <button class="key-btn" id="settings-save" style="margin-top:1.5rem;">Save Changes</button>
     <p class="onb-microcopy" id="settingsSavedNote" style="display:none; color: var(--red); font-weight: 600;">Saved.</p>
     <a href="#" class="menu-back-link" id="settings-back">&larr; Back to menu</a>
   </div>
@@ -2904,7 +3107,7 @@
       <div class="vp-head">
         <div class="kicker">SAT Resources</div>
         <h1 class="panel-hed">Saved &amp; Mistakes</h1>
-        <p class="panel-sub">Quiz yourself — answer each one before the correct answer is revealed.</p>
+        <p class="panel-sub">Click any question to review it — passage, choices, and a toggle to hide the answer until you're ready.</p>
       </div>
 
       <div class="iq-tabs" id="iq-tabs">
@@ -2923,10 +3126,11 @@
         <div id="iq-collections-chips"></div>
       </div>
 
-      <!-- ONE "Filters" button opens ONE panel holding all five category
-           groups (Test/Section/Domain/Skill/Difficulty), instead of five
-           separate always-visible dropdown buttons — same underlying
-           filter state and cascading logic, just one entry point. -->
+      <!-- ONE "Filters" button opens ONE panel listing the five categories
+           (Source/Section/Domain/Skill/Difficulty) as rows; clicking a row
+           pops its checkbox list out to the RIGHT instead of everything
+           being stacked open at once — same underlying filter state and
+           cascading logic, just a nested flyout instead of one long panel. -->
       <div id="iq-filters">
         <div class="iq-dropdown" id="iq-filters-dropdown">
           <button type="button" class="iq-dropdown-btn iq-filters-btn" id="iq-filters-btn">
@@ -2935,11 +3139,26 @@
             <span class="iq-dropdown-caret">&#9662;</span>
           </button>
           <div class="iq-dropdown-panel iq-filters-panel">
-            <div class="iq-filter-section"><div class="iq-filter-section-label">Test</div><div id="iq-test-pills"></div></div>
-            <div class="iq-filter-section"><div class="iq-filter-section-label">Section</div><div id="iq-section-pills"></div></div>
-            <div class="iq-filter-section"><div class="iq-filter-section-label">Domain</div><div id="iq-domain-pills"></div></div>
-            <div class="iq-filter-section"><div class="iq-filter-section-label">Skill</div><div id="iq-skill-pills"></div></div>
-            <div class="iq-filter-section"><div class="iq-filter-section-label">Difficulty</div><div id="iq-difficulty-pills"></div></div>
+            <div class="iq-filter-cat" data-cat="test">
+              <button type="button" class="iq-filter-cat-row"><span class="iq-filter-cat-label">Source</span><span class="iq-filter-cat-summary" id="iq-test-summary">All</span><span class="iq-filter-cat-caret">&#8250;</span></button>
+              <div class="iq-filter-flyout" id="iq-test-pills"></div>
+            </div>
+            <div class="iq-filter-cat" data-cat="section">
+              <button type="button" class="iq-filter-cat-row"><span class="iq-filter-cat-label">Section</span><span class="iq-filter-cat-summary" id="iq-section-summary">All</span><span class="iq-filter-cat-caret">&#8250;</span></button>
+              <div class="iq-filter-flyout" id="iq-section-pills"></div>
+            </div>
+            <div class="iq-filter-cat" data-cat="domain">
+              <button type="button" class="iq-filter-cat-row"><span class="iq-filter-cat-label">Domain</span><span class="iq-filter-cat-summary" id="iq-domain-summary">All</span><span class="iq-filter-cat-caret">&#8250;</span></button>
+              <div class="iq-filter-flyout" id="iq-domain-pills"></div>
+            </div>
+            <div class="iq-filter-cat" data-cat="skill">
+              <button type="button" class="iq-filter-cat-row"><span class="iq-filter-cat-label">Skill</span><span class="iq-filter-cat-summary" id="iq-skill-summary">All</span><span class="iq-filter-cat-caret">&#8250;</span></button>
+              <div class="iq-filter-flyout" id="iq-skill-pills"></div>
+            </div>
+            <div class="iq-filter-cat" data-cat="difficulty">
+              <button type="button" class="iq-filter-cat-row"><span class="iq-filter-cat-label">Difficulty</span><span class="iq-filter-cat-summary" id="iq-difficulty-summary">All</span><span class="iq-filter-cat-caret">&#8250;</span></button>
+              <div class="iq-filter-flyout" id="iq-difficulty-pills"></div>
+            </div>
           </div>
         </div>
         <button type="button" class="iq-practice-btn" id="iq-practice-btn">Practice Selected Mistakes <span id="iq-practice-count">(0)</span></button>
@@ -3175,9 +3394,21 @@
     <div class="sec-hed bridge-card-subhed" id="skillbreak-hed" style="display:none;">Skill breakdown</div>
     <div id="accuracy-by-topic" style="display:none;"></div>
   </div>
+  <!-- Timing: the per-question allocation graph first, the easy/medium/hard
+       time-split cards below it (#timing-allocation before #timing-stats —
+       each is its own fixed container so this HTML order is what decides
+       the on-page order, regardless of which one the JS fills in first). -->
   <div class="sec-hed" id="timing-hed" style="display:none;">Timing</div>
-  <p class="quadrant-sub" id="timing-sub" style="display:none;">How your time split across easy, medium, and hard questions in each subject — a rough gut check on whether the clock is where the trouble actually is.</p>
-  <div id="timing-stats" style="display:none;"></div>
+  <!-- One tile, like the "Path to target score" bridge-card — the
+       allocation graph and the difficulty time-split sit in the SAME
+       bordered card, with #timing-sub's border-top acting as the divider
+       line between them (see .timing-card CSS). -->
+  <div class="timing-card" id="timing-card" style="display:none;">
+    <p class="quadrant-sub" id="timing-allocation-sub" style="display:none;">Every question in one module — when it was visited and how long it took, right (green) or wrong (red). A bar reaching well past where it "should" sit means a later return trip to that question, not just reading order.</p>
+    <div id="timing-allocation" style="display:none;"></div>
+    <p class="quadrant-sub" id="timing-sub" style="display:none;">How your time split across easy, medium, and hard questions in each subject — a rough gut check on whether the clock is where the trouble actually is.</p>
+    <div id="timing-stats" style="display:none;"></div>
+  </div>
   <div class="sec-hed" id="quadrant-hed" style="display:none;">Confidence quadrant</div>
   <p class="quadrant-sub" id="quadrant-sub" style="display:none;">Each dot is one multiple-choice question — time spent (x) vs. right or wrong (y), relative to <span id="quadrant-sub-first"></span>&rsquo;s own median pace. Hover a dot, or click to review the question.</p>
   <div id="confidence-quadrant" style="display:none;"></div>
@@ -3188,43 +3419,6 @@
   <a href="#" class="detail-toggle" id="detail-toggle">Show full question-by-question detail (click any question to see it) &darr;</a>
   <div class="ftr"><span>Moretti Test Prep &amp; Tutoring · Cranford, NJ · (201) 275-2791</span><span id="ftr-date"></span></div>
 
-  <!-- ═══ QUESTION MODAL ═══ shared by the section-card tiles and the
-       confidence-quadrant dots — both just call openQuestionModal(row)
-       with a row object from the same `rows` arrays the rest of this page
-       already built, and this renders it via the exact same
-       renderQuestionDetail() the page-2 expandable table uses, so there's
-       one source of truth for "what a question looks like," not two. -->
-  <div class="q-modal-overlay" id="q-modal-overlay">
-    <div class="q-modal" role="dialog" aria-modal="true">
-      <div class="q-modal-hed">
-        <div class="q-modal-hed-left">
-          <span id="q-modal-title"></span>
-          <span class="q-modal-status-pill" id="q-modal-status-pill"></span>
-          <span class="q-modal-flag-pill" id="q-modal-flag-pill" style="display:none;">&#9873; Flagged for review</span>
-        </div>
-        <div class="q-modal-hed-right">
-          <label class="q-modal-toggle">
-            <span>Hide answers</span>
-            <span class="q-toggle-switch"><input type="checkbox" id="q-modal-hide-toggle" checked><span class="q-toggle-track"><span class="q-toggle-thumb"></span></span></span>
-          </label>
-          <button type="button" class="q-modal-close" id="q-modal-close" aria-label="Close">&times;</button>
-        </div>
-      </div>
-      <div class="q-modal-body" id="q-modal-body">
-        <div class="q-modal-pane q-modal-passage-pane" id="q-modal-passage-pane"></div>
-        <div class="q-modal-pane q-modal-question-pane" id="q-modal-question-pane"></div>
-      </div>
-      <div class="q-modal-ftr">
-        <span id="q-modal-counter"></span>
-        <div class="q-modal-ftr-actions">
-          <button type="button" class="q-modal-ftr-btn q-save-btn" id="q-modal-save-btn">&#11088; Save this question</button>
-          <button type="button" class="q-modal-ftr-btn" id="q-modal-explain-btn">Explanation</button>
-          <button type="button" class="q-modal-ftr-btn" id="q-modal-prev-btn">Previous</button>
-          <button type="button" class="q-modal-ftr-btn primary" id="q-modal-next-btn">Next</button>
-        </div>
-      </div>
-    </div>
-  </div>
 </div>
 
 <div class="page pagebreak" id="page2" style="display:none;">
@@ -3237,6 +3431,50 @@
   <div id="raw-tables"></div>
   <div class="ftr"><span>Moretti Test Prep &amp; Tutoring · Cranford, NJ · (201) 275-2791</span><span>Page 2 of 2</span></div>
 </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ QUESTION MODAL ═══ the one shared question-preview modal for the
+     whole portal (see window.openQuestionModal's own comment) — a direct
+     top-level sibling of every .screen, NOT nested inside
+     #screen-practice-tests/#pt-native-report like it originally was.
+     Nesting it there meant the modal only rendered while Practice Tests
+     itself was the active screen (a hidden ancestor's display:none hides
+     it regardless of the modal's own .open class) — invisible from every
+     other screen, including Saved & Mistakes, which needs it too. -->
+<div class="q-modal-overlay" id="q-modal-overlay">
+  <div class="q-modal" role="dialog" aria-modal="true">
+    <div class="q-modal-hed">
+      <div class="q-modal-hed-left">
+        <span id="q-modal-title"></span>
+        <span class="q-modal-status-pill" id="q-modal-status-pill"></span>
+        <span class="q-modal-flag-pill" id="q-modal-flag-pill" style="display:none;">&#9873; Flagged for review</span>
+      </div>
+      <div class="q-modal-hed-right">
+        <label class="q-modal-toggle">
+          <span>Hide answers</span>
+          <span class="q-toggle-switch"><input type="checkbox" id="q-modal-hide-toggle" checked><span class="q-toggle-track"><span class="q-toggle-thumb"></span></span></span>
+        </label>
+        <label class="q-modal-toggle">
+          <span>Hide choices</span>
+          <span class="q-toggle-switch"><input type="checkbox" id="q-modal-hide-choices-toggle"><span class="q-toggle-track"><span class="q-toggle-thumb"></span></span></span>
+        </label>
+        <button type="button" class="q-modal-close" id="q-modal-close" aria-label="Close">&times;</button>
+      </div>
+    </div>
+    <div class="q-modal-body" id="q-modal-body">
+      <div class="q-modal-pane q-modal-passage-pane" id="q-modal-passage-pane"></div>
+      <div class="q-modal-pane q-modal-question-pane" id="q-modal-question-pane"></div>
+    </div>
+    <div class="q-modal-ftr">
+      <span id="q-modal-counter"></span>
+      <div class="q-modal-ftr-actions">
+        <button type="button" class="q-modal-ftr-btn q-save-btn" id="q-modal-save-btn">&#11088; Save this question</button>
+        <button type="button" class="q-modal-ftr-btn" id="q-modal-explain-btn">Explanation</button>
+        <button type="button" class="q-modal-ftr-btn" id="q-modal-prev-btn">Previous</button>
+        <button type="button" class="q-modal-ftr-btn primary" id="q-modal-next-btn">Next</button>
+      </div>
     </div>
   </div>
 </div>
@@ -3331,17 +3569,49 @@
          chosen here BEFORE anything starts. Nothing under #vp-practice
          exists yet at this point. ═══ -->
     <div id="vp-setup">
+      <!-- Mastered/Learning/Not started + overall % mastered — see
+           statsCounts()/renderStatsRow() in the JS. Pure readout. -->
+      <div class="vp-stats-row" id="vp-stats-row">
+        <div class="vp-stat"><span class="vp-stat-num vp-stat-mastered" id="vp-stat-mastered">0</span><span class="vp-stat-label">Mastered</span></div>
+        <div class="vp-stat"><span class="vp-stat-num vp-stat-learning" id="vp-stat-learning">0</span><span class="vp-stat-label">Learning</span></div>
+        <div class="vp-stat"><span class="vp-stat-num" id="vp-stat-new">0</span><span class="vp-stat-label">Not started</span></div>
+        <div class="vp-stat-progress">
+          <div class="vp-stat-progress-track"><div class="vp-stat-progress-fill" id="vp-stat-progress-fill"></div></div>
+          <span class="vp-stat-progress-label" id="vp-stat-progress-label">0% mastered</span>
+        </div>
+      </div>
+
+      <!-- The headline feature — a fixed ten-minute adaptive round, no
+           setup required (see startTenMinPractice() in the JS). -->
+      <div class="vp-tenmin-card">
+        <div class="vp-tenmin-icon">&#9201;</div>
+        <div class="vp-tenmin-copy">
+          <div class="vp-tenmin-title">10-Minute Practice</div>
+          <div class="vp-tenmin-sub">A quick, focused round pulling from what you're still learning first. Ten minutes a day is the single best habit for building vocabulary.</div>
+        </div>
+        <button class="vp-tenmin-btn" id="vp-tenmin-btn" type="button">Start <span>&rarr;</span></button>
+      </div>
+
       <div class="vp-panel-label">Choose your sets</div>
       <div class="vp-pills" id="vp-pills"></div>
       <div class="vp-pool-count" id="vp-pool-count"></div>
 
       <div class="vp-still-panel" id="vp-still-panel"></div>
 
-      <div class="vp-panel-label">Choose how to study</div>
-      <div class="vp-modes" id="vp-modes">
-        <button class="vp-mode-btn on" data-vpmode="flash" type="button">Flashcards</button>
-        <button class="vp-mode-btn" data-vpmode="mc" type="button">Multiple choice</button>
-        <button class="vp-mode-btn" data-vpmode="type" type="button">Type it</button>
+      <div class="vp-panel-label">Study modes</div>
+      <div class="vp-mode-cards" id="vp-modes">
+        <button class="vp-mode-card on" data-vpmode="flash" type="button">
+          <div class="vp-mode-card-hed">Flashcards</div>
+          <div class="vp-mode-card-sub">Flip through terms and self-grade what you know.</div>
+        </button>
+        <button class="vp-mode-card" data-vpmode="mc" type="button">
+          <div class="vp-mode-card-hed">Multiple Choice</div>
+          <div class="vp-mode-card-sub">Match each definition to the right word.</div>
+        </button>
+        <button class="vp-mode-card" data-vpmode="type" type="button">
+          <div class="vp-mode-card-hed">Type It</div>
+          <div class="vp-mode-card-sub">Type the word a definition describes.</div>
+        </button>
       </div>
       <button class="vp-primary" id="vp-start-btn" type="button">Start Studying</button>
     </div>
@@ -3352,6 +3622,18 @@
     <div id="vp-practice" style="display:none;">
       <a href="#" class="vp-change-link" id="vp-change-link">&larr; Change sets or mode</a>
       <div class="vp-stage" id="vp-stage"></div>
+    </div>
+
+    <!-- ═══ 10-MINUTE PRACTICE STAGE — separate from #vp-practice above
+         (different chrome: a countdown instead of a "N of M" bar, and a
+         fixed multiple-choice format regardless of whatever mode is
+         selected below) — see startTenMinPractice()/drawTenMin(). ═══ -->
+    <div id="vp-tenmin-stage" style="display:none;">
+      <div class="vp-tenmin-hed">
+        <span class="vp-tenmin-timer" id="vp-tenmin-timer">10:00</span>
+        <a href="#" class="vp-tenmin-end" id="vp-tenmin-end">End early</a>
+      </div>
+      <div class="vp-stage" id="vp-tenmin-inner"></div>
     </div>
 
     <a href="#" class="menu-back-link" id="vocab-back">&larr; Back to home</a>
@@ -3800,7 +4082,6 @@
 
 <script src="banks.js"></script>
 <script src="challenge-questions.js"></script>
-<script src="question-bank.js"></script>
 <script src="question-bank-math.js"></script>
 <script>
   /* practice-tests.js is ~2.6MB uncompressed (the 11 full practice tests,
@@ -3829,6 +4110,25 @@
   window.__practiceTestsReady = new Promise(function (resolve) {
     var s = document.createElement('script');
     s.src = 'practice-tests.js';
+    s.onload = resolve;
+    s.onerror = resolve;
+    document.head.appendChild(s);
+  });
+
+  /* question-bank.js is ~4MB uncompressed — bigger than practice-tests.js
+     above, and until now it was still a plain blocking <script> tag, so
+     EVERY page load (Home, Saved & Mistakes, Practice Tests — not just
+     the Question Bank screen itself) sat blocked on downloading AND
+     parsing this one file before any script after it could run. Same
+     fix, same async-dynamic-<script> pattern as practice-tests.js: starts
+     the download immediately without blocking the parser.
+     window.__questionBankReady resolves once loaded (or on error).
+     poolFor() in the Question Bank module already tolerates
+     window.QUESTION_BANK being undefined (`|| []`), so qbModuleInit()
+     just re-renders once this resolves — see its own comment. */
+  window.__questionBankReady = new Promise(function (resolve) {
+    var s = document.createElement('script');
+    s.src = 'question-bank.js';
     s.onload = resolve;
     s.onerror = resolve;
     document.head.appendChild(s);
@@ -5944,7 +6244,7 @@
     if (assignPollTimer) { clearInterval(assignPollTimer); assignPollTimer = null; }
     resetKeyScreen();
   }
-  var exitLinkIds = ['nav-logo-exit', 'nav-exit-link', 'dx-exit-btn', 'dx-break-exit-btn'];
+  var exitLinkIds = ['nav-logo-exit', 'sidebar-logo-exit', 'nav-exit-link', 'dx-exit-btn', 'dx-break-exit-btn'];
   exitLinkIds.forEach(function (id) {
     var el = document.getElementById(id);
     if (el) el.addEventListener('click', exitPortal);
@@ -6108,6 +6408,8 @@
     var initials = currentStudent.name.trim().split(/\s+/).map(function (p) { return p[0]; }).slice(0, 2).join('').toUpperCase();
     document.getElementById('nav-avatar').textContent = initials;
     document.getElementById('nav-profile-name').textContent = currentStudent.name;
+    var inlineName = document.getElementById('nav-profile-name-inline');
+    if (inlineName) inlineName.textContent = currentStudent.name.trim().split(/\s+/)[0];
   }
 
   /* ═══ ACCOUNT SETTINGS ═══ same card-toggle/sub-panel idiom and
@@ -10705,19 +11007,61 @@
     try {
       var raw = localStorage.getItem(progressStorageKey());
       var obj = raw ? JSON.parse(raw) : null;
-      if (obj && obj.stillLearning && typeof obj.stillLearning === 'object') return obj;
+      if (obj && obj.stillLearning && typeof obj.stillLearning === 'object') {
+        // seen{} is newer than stillLearning{} — a progress blob saved
+        // before it existed just gets an empty one here, same as a
+        // brand-new student; nothing in the Mastered count needs it to be
+        // backfilled retroactively.
+        if (!obj.seen || typeof obj.seen !== 'object') obj.seen = {};
+        return obj;
+      }
     } catch (e) { /* corrupt or blocked storage — start fresh */ }
-    return { stillLearning: {} };
+    return { stillLearning: {}, seen: {} };
   }
   var progress = loadProgress();
   function saveProgress() {
     try { localStorage.setItem(progressStorageKey(), JSON.stringify(progress)); } catch (e) { /* private browsing / storage disabled — fail silently, matches the rest of the portal's saveState() */ }
   }
+  // Every grading action across every mode (Flashcards' Still learning/Got
+  // it, a Multiple Choice/Type It/10-minute-practice answer) funnels
+  // through here — it's both the stillLearning{} write AND the seen{}
+  // write (a word is "Mastered" the moment it's been seen at least once
+  // and ISN'T currently marked still-learning; see statsCounts()), so
+  // every call site automatically keeps the stats row correct with no
+  // separate bookkeeping needed at each grading site.
   function setStillLearning(term, flag) {
+    progress.seen[term] = true;
     if (flag) progress.stillLearning[term] = true;
     else delete progress.stillLearning[term];
     saveProgress();
     renderStillPanel();
+    renderStatsRow();
+  }
+  // Mastered = seen at least once AND not currently still-learning.
+  // Learning = currently still-learning (regardless of seen — a word can
+  // land there straight from a wrong answer, which also marks it seen).
+  // Not started = every other word in the bank.
+  function statsCounts() {
+    var byTerm = allCardsByTerm();
+    var terms = Object.keys(byTerm);
+    var total = terms.length;
+    var learning = 0, mastered = 0;
+    terms.forEach(function (t) {
+      if (progress.stillLearning[t]) learning++;
+      else if (progress.seen[t]) mastered++;
+    });
+    return { total: total, mastered: mastered, learning: learning, notStarted: total - mastered - learning };
+  }
+  var statMasteredEl, statLearningEl, statNewEl, statFillEl, statLabelEl;
+  function renderStatsRow() {
+    if (!statMasteredEl) return;
+    var c = statsCounts();
+    statMasteredEl.textContent = String(c.mastered);
+    statLearningEl.textContent = String(c.learning);
+    statNewEl.textContent = String(c.notStarted);
+    var pct = c.total ? Math.round(c.mastered / c.total * 100) : 0;
+    statFillEl.style.width = pct + '%';
+    statLabelEl.textContent = pct + '% mastered';
   }
   function stillLearningCards() {
     var all = allCardsByTerm();
@@ -10932,6 +11276,108 @@
     document.getElementById('vp-again').addEventListener('click', function () { renderQuiz(qz.kind); });
   }
 
+  /* ═══ 10-MINUTE PRACTICE ═══ a fixed ten-minute timed round, no sets/
+     mode picker required — always multiple choice (fastest per-word
+     format, well suited to a drill against the clock), always drawing
+     from the FULL vocabulary bank across every set, prioritized so the
+     ten minutes goes to the words that most need it: currently
+     still-learning first, then never-seen, then already-mastered (a
+     light review) last. Ends the instant the clock hits zero — see
+     tickTenMin() — rather than waiting for the current queue to run out;
+     if the queue itself runs out first, it's rebuilt (re-prioritized
+     against whatever's been graded so far) and keeps going. */
+  var tenMin = { queue: [], pos: 0, endAt: 0, timerId: null, answered: 0, correct: 0, active: false };
+  var tenMinStageEl, tenMinInnerEl, tenMinTimerEl;
+  function buildTenMinQueue() {
+    var byTerm = allCardsByTerm();
+    var terms = Object.keys(byTerm);
+    var learning = [], notStarted = [], mastered = [];
+    terms.forEach(function (t) {
+      if (progress.stillLearning[t]) learning.push(t);
+      else if (progress.seen[t]) mastered.push(t);
+      else notStarted.push(t);
+    });
+    var ordered = shuffle(learning).concat(shuffle(notStarted)).concat(shuffle(mastered));
+    return ordered.map(function (t) { return byTerm[t]; });
+  }
+  function startTenMinPractice() {
+    tenMin.queue = buildTenMinQueue();
+    tenMin.pos = 0;
+    tenMin.answered = 0;
+    tenMin.correct = 0;
+    tenMin.active = true;
+    tenMin.endAt = Date.now() + 10 * 60 * 1000;
+    vpSetupEl.style.display = 'none';
+    tenMinStageEl.style.display = '';
+    if (tenMin.timerId) clearInterval(tenMin.timerId);
+    tenMin.timerId = setInterval(tickTenMin, 250);
+    tickTenMin();
+    drawTenMin();
+  }
+  // Reads the clock fresh off Date.now() each tick (rather than
+  // decrementing a counter) so drift from tab-throttling/background timers can
+  // never make the displayed time diverge from when the round actually
+  // ends.
+  function tickTenMin() {
+    var remain = tenMin.endAt - Date.now();
+    if (tenMinTimerEl) {
+      var mm = Math.max(0, Math.floor(remain / 60000));
+      var ss = Math.max(0, Math.floor((remain % 60000) / 1000));
+      tenMinTimerEl.textContent = mm + ':' + (ss < 10 ? '0' : '') + ss;
+    }
+    if (remain <= 0) finishTenMin();
+  }
+  function nextTenMinCard() {
+    tenMin.pos++;
+    if (tenMin.pos >= tenMin.queue.length) { tenMin.queue = buildTenMinQueue(); tenMin.pos = 0; }
+    drawTenMin();
+  }
+  function drawTenMin() {
+    if (!tenMin.active) return;
+    var c = tenMin.queue[tenMin.pos];
+    if (!c) { finishTenMin(); return; } // empty vocab bank — nothing to draw at all
+    var others = shuffle(allCards().filter(function (x) { return x.term !== c.term; }));
+    var opts = shuffle([c].concat(others.slice(0, 3)));
+    tenMinInnerEl.innerHTML = '<div class="vp-rise"><div class="vp-prompt"><div class="vp-plabel">Which word means…</div><div class="vp-ptext">' + esc(c.def) + '</div></div>' +
+      '<div class="vp-opts" id="vp-tenmin-opts">' + opts.map(function (o, i) { return '<button class="vp-opt" type="button" data-t="' + esc(o.term) + '" style="animation-delay:' + (i * 0.05) + 's">' + esc(o.term) + '</button>'; }).join('') + '</div></div>';
+    var answered = false;
+    Array.prototype.forEach.call(document.querySelectorAll('#vp-tenmin-opts .vp-opt'), function (b) {
+      b.addEventListener('click', function () {
+        if (answered || !tenMin.active) return;
+        answered = true;
+        var chosen = b.getAttribute('data-t');
+        var right = chosen === c.term;
+        tenMin.answered++;
+        if (right) tenMin.correct++;
+        setStillLearning(c.term, !right);
+        Array.prototype.forEach.call(document.querySelectorAll('#vp-tenmin-opts .vp-opt'), function (o) {
+          o.disabled = true; var t = o.getAttribute('data-t');
+          if (t === c.term) o.classList.add('vp-correct'); else if (t === chosen) o.classList.add('vp-wrong');
+        });
+        setTimeout(function () { if (tenMin.active) nextTenMinCard(); }, 550);
+      });
+    });
+  }
+  function finishTenMin() {
+    if (!tenMin.active) return;
+    tenMin.active = false;
+    if (tenMin.timerId) { clearInterval(tenMin.timerId); tenMin.timerId = null; }
+    var pct = tenMin.answered ? Math.round(tenMin.correct / tenMin.answered * 100) : 0;
+    tenMinInnerEl.innerHTML = '<div class="vp-summary vp-pop"><div class="vp-score">' + tenMin.correct + '/' + tenMin.answered + '</div>' +
+      '<div class="vp-score-sub">' + (tenMin.answered ? pct + '% correct — ' : '') + 'that’s today’s 10 minutes done. Same time tomorrow?</div>' +
+      '<button class="vp-primary" id="vp-tenmin-again" type="button">Go again</button>' +
+      '<button class="vp-primary" id="vp-tenmin-done" type="button" style="background:transparent;color:var(--red);border:1px solid var(--red)">Back to Vocabulary</button></div>';
+    document.getElementById('vp-tenmin-again').addEventListener('click', startTenMinPractice);
+    document.getElementById('vp-tenmin-done').addEventListener('click', exitTenMin);
+  }
+  function exitTenMin() {
+    tenMin.active = false;
+    if (tenMin.timerId) { clearInterval(tenMin.timerId); tenMin.timerId = null; }
+    tenMinStageEl.style.display = 'none';
+    vpSetupEl.style.display = '';
+    renderStatsRow();
+  }
+
   window.vocabModuleInit = function () {
     if (started) return;
     started = true;
@@ -10942,20 +11388,31 @@
     stillPanelEl = document.getElementById('vp-still-panel');
     poolCountEl = document.getElementById('vp-pool-count');
     startBtnEl = document.getElementById('vp-start-btn');
-    // Mode buttons on the setup screen just record the choice — actually
+    statMasteredEl = document.getElementById('vp-stat-mastered');
+    statLearningEl = document.getElementById('vp-stat-learning');
+    statNewEl = document.getElementById('vp-stat-new');
+    statFillEl = document.getElementById('vp-stat-progress-fill');
+    statLabelEl = document.getElementById('vp-stat-progress-label');
+    tenMinStageEl = document.getElementById('vp-tenmin-stage');
+    tenMinInnerEl = document.getElementById('vp-tenmin-inner');
+    tenMinTimerEl = document.getElementById('vp-tenmin-timer');
+    // Mode cards on the setup screen just record the choice — actually
     // starting only happens on "Start Studying" (or the still-learning
     // shortcut), matching the rest of the setup-gate flow below.
-    Array.prototype.forEach.call(document.querySelectorAll('#vp-modes .vp-mode-btn'), function (btn) {
+    Array.prototype.forEach.call(document.querySelectorAll('#vp-modes .vp-mode-card'), function (btn) {
       btn.addEventListener('click', function () {
         mode = btn.getAttribute('data-vpmode');
-        Array.prototype.forEach.call(document.querySelectorAll('#vp-modes .vp-mode-btn'), function (b) { b.classList.toggle('on', b === btn); });
+        Array.prototype.forEach.call(document.querySelectorAll('#vp-modes .vp-mode-card'), function (b) { b.classList.toggle('on', b === btn); });
       });
     });
     document.getElementById('vp-start-btn').addEventListener('click', function () { reviewPool = null; enterPractice(); });
     document.getElementById('vp-change-link').addEventListener('click', function (e) { e.preventDefault(); backToSetup(); });
+    document.getElementById('vp-tenmin-btn').addEventListener('click', startTenMinPractice);
+    document.getElementById('vp-tenmin-end').addEventListener('click', function (e) { e.preventDefault(); finishTenMin(); });
     renderPills();
     updatePoolCount();
     renderStillPanel();
+    renderStatsRow();
 
     // ═══ KEYBOARD NAV — Left/Right moves between flashcards, Up/Down
     // flips the current one. Registered once (vocabModuleInit only ever
@@ -11075,6 +11532,15 @@
   }
   document.addEventListener('mousedown', function (e) {
     if (openDropdown && !openDropdown.contains(e.target)) closeDropdown();
+  });
+  // Same outside-click-closes behavior for the per-row "Add to collection"
+  // popover — it only ever closed when a DIFFERENT one opened (see the
+  // click handler below), never on a plain click elsewhere on the page.
+  document.addEventListener('mousedown', function (e) {
+    var open = document.querySelectorAll('.iq-add-to-collection.open');
+    for (var i = 0; i < open.length; i++) {
+      if (!open[i].contains(e.target)) open[i].classList.remove('open');
+    }
   });
 
   var listEl, poolCountEl, sectionPillsEl, domainPillsEl, skillPillsEl, difficultyPillsEl, testPillsEl, practiceBtnEl, practiceCountEl, filtersEl, tabSavedEl, tabMistakesEl, tabMistakesCountEl, tabCollectionsEl, collectionsBarEl, collectionsChipsEl;
@@ -11247,8 +11713,17 @@
   // its own separate trigger button+panel — this only ever builds the
   // checkbox rows, not a button or panel wrapper, since the single shared
   // button already gates visibility of all five at once.
-  function renderCheckboxOptions(container, options, labelFn, selectedArr, onChange) {
+  function renderCheckboxOptions(container, options, labelFn, selectedArr, onChange, summaryId) {
     container.innerHTML = '';
+    if (summaryId) {
+      var summaryEl = document.getElementById(summaryId);
+      if (summaryEl) {
+        summaryEl.textContent = options.length === 0 ? 'None available'
+          : selectedArr.length === options.length ? 'All'
+          : selectedArr.length === 0 ? 'None'
+          : selectedArr.length + ' of ' + options.length;
+      }
+    }
 
     if (!options.length) {
       var empty = document.createElement('div');
@@ -11316,10 +11791,10 @@
       renderSectionPills();
       onDomainsChanged();
       updateFiltersBadge();
-    });
+    }, 'iq-section-summary');
   }
   function renderDomainPills() {
-    renderCheckboxOptions(domainPillsEl, availableDomains(), function (d) { return d; }, selDomains, function () { onDomainsChanged(); updateFiltersBadge(); });
+    renderCheckboxOptions(domainPillsEl, availableDomains(), function (d) { return d; }, selDomains, function () { onDomainsChanged(); updateFiltersBadge(); }, 'iq-domain-summary');
   }
   function onDomainsChanged() {
     var newSkills = availableSkills();
@@ -11329,16 +11804,16 @@
     renderList();
   }
   function renderSkillPills() {
-    renderCheckboxOptions(skillPillsEl, availableSkills(), function (s) { return s; }, selSkills, function () { renderSkillPills(); renderList(); updateFiltersBadge(); });
+    renderCheckboxOptions(skillPillsEl, availableSkills(), function (s) { return s; }, selSkills, function () { renderSkillPills(); renderList(); updateFiltersBadge(); }, 'iq-skill-summary');
   }
   function renderDifficultyPills() {
-    renderCheckboxOptions(difficultyPillsEl, DIFFICULTIES, difficultyLabel, selDifficulties, function () { renderDifficultyPills(); renderList(); updateFiltersBadge(); });
+    renderCheckboxOptions(difficultyPillsEl, DIFFICULTIES, difficultyLabel, selDifficulties, function () { renderDifficultyPills(); renderList(); updateFiltersBadge(); }, 'iq-difficulty-summary');
   }
   // Independent of Section/Domain/Skill's cascade — same as Difficulty —
   // since "which test was this on" is a separate dimension from the
   // skill taxonomy, not a level within it.
   function renderTestPills() {
-    renderCheckboxOptions(testPillsEl, testKeys, function (t) { return t; }, selTests, function () { renderTestPills(); renderList(); updateFiltersBadge(); });
+    renderCheckboxOptions(testPillsEl, testKeys, function (t) { return t; }, selTests, function () { renderTestPills(); renderList(); updateFiltersBadge(); }, 'iq-test-summary');
   }
 
   // Same fallback split used on the diagnostic/practice-test screen and
@@ -11395,17 +11870,50 @@
     return t.length > 140 ? escHtml(t.slice(0, 140)) + '&hellip;' : escHtml(t);
   }
 
-  var openItemKey = null; // accordion — at most one row expanded at a time
+  // Maps one of THIS module's own records onto the shared question-modal's
+  // expected shape ({q:{...}, givenIdx, givenText, ok, skipped, marked,
+  // key}) — see window.openQuestionModal's own comment (defined in the
+  // report-review script block) for what each field does. This is what
+  // makes that modal "the universal viewer": every place in the portal
+  // that shows a single question, including this one, feeds it through an
+  // adapter like this rather than building its own detail view.
+  function toModalRow(r) {
+    var givenIsObj = r.given && typeof r.given === 'object';
+    return {
+      q: { type: r.type, choices: r.choices, correct: r.correctIndex, text: r.text, answer: r.answerValue, explanation: r.explanation, domain: r.domain, skill: r.skill, difficulty: r.difficulty },
+      givenIdx: r.type === 'mc' && typeof r.given === 'number' ? r.given : null,
+      givenText: r.type === 'fr' ? (givenIsObj ? (r.given.raw != null ? String(r.given.raw) : null) : (r.given != null ? String(r.given) : null)) : null,
+      ok: !!r.savedCorrect,
+      skipped: r.given === null || r.given === undefined,
+      marked: false,
+      key: r.key,
+      testTitle: r.testLabel || r.testTitle || ''
+    };
+  }
 
   function renderCard(r) {
-    var split = splitPassage(r);
-    var passageHtml = split ? '<div class="pb-passage">' + split.passage + '</div>' : '';
-    var questionText = split ? split.question : r.text;
-    var state = quizState[r.key];
-    var isOpen = openItemKey === r.key;
-
     var wrongCount = (!r.savedCorrect && r.wrongAttempts) ? r.wrongAttempts : 0;
     var iconOk = r.savedCorrect;
+
+    // "Add to collection" lives right on the row now (used to be tucked
+    // inside the accordion detail this row no longer has, since clicking
+    // the row opens the shared question modal instead — see
+    // window.iqModuleInit's own comment). Icon-only for one-glance width;
+    // the panel it opens is unchanged, same collections data/logic as
+    // before.
+    var collectionNames = Object.keys(collections).sort(function (a, b) { return a.localeCompare(b); });
+    var addPanelOptions = collectionNames.map(function (name) {
+      var checked = collections[name] && collections[name][r.key];
+      return '<label class="iq-add-to-collection-option"><input type="checkbox" data-collection="' + escHtml(name) + '" ' + (checked ? 'checked' : '') + '> ' + escHtml(name) + '</label>';
+    }).join('');
+    var addToCollectionHtml = '<div class="iq-add-to-collection" data-key="' + escHtml(r.key) + '">' +
+      '<button type="button" class="iq-add-to-collection-btn" title="Add to collection"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7a1 1 0 0 1 1-1h4.5l1.8 2H19a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7z"/><line x1="12" y1="12.5" x2="12" y2="16.5"/><line x1="10" y1="14.5" x2="14" y2="14.5"/></svg></button>' +
+      '<div class="iq-add-to-collection-panel">' +
+        (addPanelOptions || '<div style="font-size:0.78rem;color:var(--faint);padding:0.3rem 0.5rem;">No collections yet.</div>') +
+        '<div class="iq-add-to-collection-new"><input type="text" placeholder="New collection…" maxlength="60"><button type="button">Add</button></div>' +
+      '</div>' +
+    '</div>';
+
     var summary = '<div class="iq-item-summary">' +
       '<span class="iq-item-icon' + (iconOk ? ' ok' : '') + '">' +
         (iconOk
@@ -11413,67 +11921,15 @@
           : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg>') +
       '</span>' +
       '<span class="iq-pill iq-pill-category">' + escHtml(sectionLabelFor(r.sectionKey)) + '</span>' +
+      (r.testLabel ? '<span class="iq-pill iq-pill-source">' + escHtml(r.testLabel) + '</span>' : '') +
       '<span class="iq-pill iq-pill-diff ' + escHtml(r.difficulty || 'medium') + '">' + difficultyLabel(r.difficulty) + '</span>' +
       (wrongCount ? '<span class="iq-pill iq-pill-wrong">' + wrongCount + ' wrong attempt' + (wrongCount === 1 ? '' : 's') + '</span>' : '') +
       (r.isSaved ? '<span class="iq-pill iq-pill-category">&#11088; Saved</span>' : '') +
       '<span class="iq-item-time">' + relativeTimeLabel(r.attemptedAt) + '</span>' +
-      '<span class="iq-item-caret">&#9656;</span>' +
-      '<div class="iq-item-preview">' + iqPreviewText(questionText) + '</div>' +
+      addToCollectionHtml +
+      '<div class="iq-item-preview">' + iqPreviewText((splitPassage(r) || {}).question || r.text) + '</div>' +
     '</div>';
-
-    var body = '';
-    if (r.type === 'mc' && r.choices) {
-      body += '<div class="dx-choices iq-quiz-choices" data-qkey="' + escHtml(r.key) + '">';
-      r.choices.forEach(function (c, i) {
-        var isChosen = !!state && state.chosenIndex === i;
-        var isCorrectChoice = (r.correctIndex !== null && r.correctIndex !== undefined && i === r.correctIndex);
-        var cls = 'dx-choice' + (state ? ' iq-quiz-answered' : ' iq-quiz-choice');
-        if (state) cls += (isChosen && !isCorrectChoice ? ' pb-tried-wrong' : '') + (isCorrectChoice ? ' pb-right' : '');
-        body += '<div class="' + cls + '" data-index="' + i + '"><span class="dx-choice-letter">' + LETTERS[i] + '</span><span class="dx-choice-text">' + c + '</span></div>';
-        if (state && (isChosen || isCorrectChoice) && r.choiceNotes && r.choiceNotes[i]) {
-          body += '<div class="pb-note ' + (isCorrectChoice ? 'pb-note-correct' : 'pb-note-wrong') + '">' + r.choiceNotes[i] + '</div>';
-        }
-      });
-      body += '</div>';
-      if (!state) body += '<div class="iq-quiz-hint">Choose an answer to check yourself.</div>';
-    } else if (r.type === 'fr') {
-      body += '<div class="iq-quiz-fr" data-qkey="' + escHtml(r.key) + '">';
-      if (!state) {
-        body += '<div class="iq-fr-row"><input type="text" class="dx-fr-input iq-fr-input" placeholder="Your answer" autocomplete="off"><button type="button" class="iq-fr-check">Check</button></div>';
-      } else {
-        body += '<div class="pb-note ' + (state.correct ? 'pb-note-correct' : 'pb-note-wrong') + '">Your answer: ' + escHtml(state.rawAnswer || '(skipped)') + (state.correct ? ' — correct!' : ' — not quite') + '</div>';
-        if (!state.correct) body += '<div class="pb-note pb-note-correct">Correct answer: ' + escHtml(String(r.answerValue)) + '</div>';
-      }
-      body += '</div>';
-    }
-    if (state && r.explanation) body += '<div class="pb-explain"><div class="pb-explain-hed">Full Explanation</div>' + r.explanation + '</div>';
-
-    var missed = dateLabel(r.attemptedAt);
-    var dateLine = missed ? ('<div class="iq-missed-on">' + (r.savedCorrect ? 'Saved on ' : 'Missed on ') + missed + '</div>') : '';
-
-    // "Add to collection" — a checkbox per existing collection (checked
-    // if this question is already in it) plus an inline "new collection"
-    // field, so filing a question away never requires leaving this row.
-    // Rebuilt from the live `collections` object on every render, so it's
-    // always current without its own separate state to keep in sync.
-    var collectionNames = Object.keys(collections).sort(function (a, b) { return a.localeCompare(b); });
-    var addPanelOptions = collectionNames.map(function (name) {
-      var checked = collections[name] && collections[name][r.key];
-      return '<label class="iq-add-to-collection-option"><input type="checkbox" data-collection="' + escHtml(name) + '" ' + (checked ? 'checked' : '') + '> ' + escHtml(name) + '</label>';
-    }).join('');
-    var addToCollectionHtml = '<div class="iq-add-to-collection" data-key="' + escHtml(r.key) + '">' +
-      '<button type="button" class="iq-add-to-collection-btn">&#128193; Add to collection</button>' +
-      '<div class="iq-add-to-collection-panel">' +
-        (addPanelOptions || '<div style="font-size:0.78rem;color:var(--faint);padding:0.3rem 0.5rem;">No collections yet.</div>') +
-        '<div class="iq-add-to-collection-new"><input type="text" placeholder="New collection…" maxlength="60"><button type="button">Add</button></div>' +
-      '</div>' +
-    '</div>';
-
-    var detail = '<div class="iq-item-detail">' + addToCollectionHtml + passageHtml +
-      '<div class="pb-q-card"><div class="pb-q-text">' + questionText + '</div>' + body +
-      dateLine +
-      '</div></div>';
-    return '<div class="iq-item' + (isOpen ? ' open' : '') + '" data-key="' + escHtml(r.key) + '">' + summary + detail + '</div>';
+    return '<div class="iq-item" data-key="' + escHtml(r.key) + '">' + summary + '</div>';
   }
 
   // Delegated so it survives every renderList() rebuild — attached once,
@@ -11484,14 +11940,10 @@
     if (quizWired) return;
     quizWired = true;
     listEl.addEventListener('click', function (ev) {
-      var summaryRow = ev.target.closest && ev.target.closest('.iq-item-summary');
-      if (summaryRow) {
-        var item = summaryRow.closest('.iq-item');
-        var key = item && item.getAttribute('data-key');
-        openItemKey = (openItemKey === key) ? null : key;
-        renderList();
-        return;
-      }
+      // Add-to-collection targets first — that control now lives inside
+      // .iq-item-summary itself (see renderCard), so it has to be checked
+      // before the summary-row fallback below, or a click on it would
+      // always be read as "open the question modal" instead.
       var addBtn = ev.target.closest && ev.target.closest('.iq-add-to-collection-btn');
       if (addBtn) {
         var addWrap = addBtn.closest('.iq-add-to-collection');
@@ -11520,38 +11972,24 @@
         saveCollectionsAndRerender();
         return;
       }
-      var choice = ev.target.closest && ev.target.closest('.iq-quiz-choice');
-      if (choice) {
-        var wrap = choice.closest('.iq-quiz-choices');
-        var qkey = wrap && wrap.getAttribute('data-qkey');
-        if (qkey && !quizState[qkey]) {
-          quizState[qkey] = { chosenIndex: Number(choice.getAttribute('data-index')) };
-          renderList();
-        }
-        return;
-      }
-      var checkBtn = ev.target.closest && ev.target.closest('.iq-fr-check');
-      if (checkBtn) {
-        var frWrap = checkBtn.closest('.iq-quiz-fr');
-        var frKey = frWrap && frWrap.getAttribute('data-qkey');
-        var input = frWrap && frWrap.querySelector('.iq-fr-input');
-        if (frKey && input && !quizState[frKey]) {
-          var record = records.filter(function (r) { return r.key === frKey; })[0];
-          var raw = input.value;
-          quizState[frKey] = { rawAnswer: raw, correct: record ? checkFrAnswer(raw, record.answerValue) : false };
-          renderList();
-        }
+      // Fallback — clicking anywhere else on the row opens it in the
+      // shared question modal (see window.openQuestionModal), with
+      // Previous/Next walking the SAME filtered/sorted list currently on
+      // screen so paging through the modal matches what's visible behind it.
+      var summaryRow = ev.target.closest && ev.target.closest('.iq-item-summary');
+      if (summaryRow) {
+        var item = summaryRow.closest('.iq-item');
+        var key = item && item.getAttribute('data-key');
+        var list = currentFiltered();
+        var idx = -1;
+        for (var i = 0; i < list.length; i++) { if (list[i].key === key) { idx = i; break; } }
+        if (idx === -1 || !window.openQuestionModal) return;
+        var label = activeTab === 'saved' ? 'Saved Questions' : activeTab === 'collections' ? (activeCollectionName || 'Collection') : 'Mistakes';
+        window.openQuestionModal(list.map(toModalRow), idx, label);
       }
     });
     listEl.addEventListener('keydown', function (ev) {
       if (ev.key !== 'Enter') return;
-      var frInput = ev.target.closest && ev.target.closest('.iq-fr-input');
-      if (frInput) {
-        ev.preventDefault();
-        var checkBtn = frInput.closest('.iq-quiz-fr').querySelector('.iq-fr-check');
-        if (checkBtn) checkBtn.click();
-        return;
-      }
       var newCollInput = ev.target.closest && ev.target.closest('.iq-add-to-collection-new input');
       if (newCollInput) {
         ev.preventDefault();
@@ -11661,15 +12099,26 @@
     var r = runnerQueue[runnerIndex];
     var st = runnerState[r.key];
     if (!st.submitted) {
+      var given;
       if (r.type === 'mc') {
         st.correct = (st.chosenIndex === r.correctIndex);
+        given = st.chosenIndex;
       } else if (r.type === 'fr') {
         var input = document.getElementById('dx-fr-input');
         st.rawAnswer = input ? input.value : '';
         st.correct = checkFrAnswer(st.rawAnswer, r.answerValue);
+        given = { raw: st.rawAnswer, value: parseSimpleNumeric(st.rawAnswer) };
       }
       st.submitted = true;
       if (st.correct) runnerScore++;
+      // Practicing a mistake here used to be purely local/ephemeral — a
+      // wrong answer never touched the real wrongAttempts count, and a
+      // right one never cleared the mistake, so this screen's own numbers
+      // drifted from what actually happened here. Same bridge Question
+      // Bank uses for the identical "record one miss/clear" job.
+      if (window.recordQuestionBankMistake && r.key) {
+        window.recordQuestionBankMistake({ key: r.key, given: given, correct: st.correct, attemptedAt: new Date().toISOString() });
+      }
     } else {
       runnerIndex++;
     }
@@ -11936,6 +12385,32 @@
           var isOpen = dropdownEl.classList.contains('open');
           closeDropdown();
           if (!isOpen) { dropdownEl.classList.add('open'); openDropdown = dropdownEl; }
+        });
+        // Each category row (Source/Section/Domain/Skill/Difficulty) pops
+        // its own checkbox list out to the right — clicking a row toggles
+        // just that one open, closing any other category's flyout in the
+        // same panel first (at most one flyout open at a time).
+        var cats = dropdownEl.querySelectorAll('.iq-filter-cat');
+        function openOnly(cat) {
+          Array.prototype.forEach.call(cats, function (c) { c.classList.toggle('open', c === cat); });
+        }
+        Array.prototype.forEach.call(cats, function (cat) {
+          cat.querySelector('.iq-filter-cat-row').addEventListener('click', function () {
+            var wasOpen = cat.classList.contains('open');
+            Array.prototype.forEach.call(cats, function (c) { c.classList.remove('open'); });
+            if (!wasOpen) cat.classList.add('open');
+          });
+          // Also opens on hover, not just click — but driven by JS
+          // (explicitly closing every other category first), not a plain
+          // CSS :hover rule. Rows sit ~39px apart while a flyout can run
+          // up to 300px tall, so a plain :hover rule left the browser's
+          // hover state genuinely ambiguous the instant the cursor
+          // crossed from one row into the flyout hanging below/beside the
+          // row above it — which is what made every flyout look like it
+          // was stuck rendering inside the first category's space instead
+          // of cleanly popping out next to whichever row was actually
+          // meant to be open.
+          cat.addEventListener('mouseenter', function () { openOnly(cat); });
         });
       })();
       tabSavedEl.addEventListener('click', function () { setActiveTab('saved'); });
@@ -12444,8 +12919,9 @@
 
   // A skill counts as "Weak" once there's enough of a sample to mean
   // something (5+ attempts) and accuracy on it is below 60% — same rough
-  // bar the report's skill breakdown uses elsewhere in this file.
-  var WEAK_MIN_ATTEMPTS = 5, WEAK_ACC_THRESHOLD = 60;
+  // bar the report's skill breakdown uses elsewhere in this file. "Strong"
+  // is the same sample-size bar at the other end (85%+).
+  var WEAK_MIN_ATTEMPTS = 5, WEAK_ACC_THRESHOLD = 60, STRONG_ACC_THRESHOLD = 85;
 
   // ═══ FILTER / SELECTION STATE ═══ reset every time the skills view is
   // entered (see showSkills() below) — this is a "build a session" screen,
@@ -12596,14 +13072,26 @@
       rowsHtml += '<tr class="qb-domain-row"><td colspan="4">' + escHtmlQb(domain) + '</td></tr>';
       skillRows.forEach(function (row) {
         var s = row.s;
-        var isWeak = row.attempted.length >= WEAK_MIN_ATTEMPTS && row.acc < WEAK_ACC_THRESHOLD;
+        var hasEnough = row.attempted.length >= WEAK_MIN_ATTEMPTS;
+        var isWeak = hasEnough && row.acc < WEAK_ACC_THRESHOLD;
+        var isStrong = hasEnough && row.acc >= STRONG_ACC_THRESHOLD;
+        // red/amber/green — same three-way read as the strength dot next
+        // to the percentage; "amber" also covers every row that hasn't
+        // hit WEAK_MIN_ATTEMPTS yet (not enough of a sample to call it
+        // either way), same as the tag showing neither Weak nor Strong.
+        var strengthCls = isWeak ? 'weak' : isStrong ? 'strong' : 'mid';
+        var tagHtml = isWeak ? ' <span class="qb-weak-tag">&#9889; Weak</span>'
+          : isStrong ? ' <span class="qb-weak-tag qb-strong-tag">&#10003; Strong</span>' : '';
         var checked = selectedSkills.indexOf(s.skill) !== -1;
         rowsHtml += '<tr class="qb-skill-row" data-skill="' + escHtmlQb(s.skill) + '">' +
           '<td><input type="checkbox" class="qb-skill-check" ' + (checked ? 'checked' : '') + '></td>' +
-          '<td><label class="qb-skill-name-cell">' + escHtmlQb(s.skill) + (isWeak ? ' <span class="qb-weak-tag">&#9889; Weak</span>' : '') + '</label></td>' +
+          '<td><label class="qb-skill-name-cell">' + escHtmlQb(s.skill) + tagHtml + '</label></td>' +
           '<td><div class="qb-progress-cell"><div class="qb-progress-track"><div class="qb-progress-fill" style="width:' + row.pct + '%;"></div></div>' +
             '<span class="qb-progress-frac">' + row.attempted.length + '/' + s.questions.length + '</span></div></td>' +
-          '<td class="qb-acc-cell' + (row.attempted.length ? ' has-data' : '') + '">' + (row.attempted.length ? row.acc + '%' : '&mdash;') + '</td>' +
+          '<td class="qb-acc-cell' + (row.attempted.length ? ' has-data' : '') + '">' +
+            (row.attempted.length ? '<span class="qb-strength-dot ' + strengthCls + '"></span>' : '') +
+            '<span class="qb-acc-value">' + (row.attempted.length ? row.acc + '%' : '&mdash;') + '</span>' +
+          '</td>' +
         '</tr>';
       });
     });
@@ -12922,8 +13410,25 @@
   }
 
   var wired = false;
+  var qbReadyRerendered = false;
   window.qbModuleInit = function () {
     showHome();
+    // question-bank.js (~4MB) now loads async (see window.__questionBankReady
+    // in the <head>) rather than blocking every page load — poolFor()
+    // tolerates window.QUESTION_BANK being undefined in the meantime
+    // (returns []), so the very first paint here can show 0/empty counts
+    // if a student reaches this screen before the download finishes. This
+    // re-renders whichever view is current the moment it's actually ready,
+    // so that first paint self-corrects instead of staying wrong until the
+    // next navigation. Guarded to run only once — real data never needs a
+    // second correction after it's already shown up.
+    if (!qbReadyRerendered && window.__questionBankReady) {
+      window.__questionBankReady.then(function () {
+        qbReadyRerendered = true;
+        var skillsVisible = document.getElementById('qb-skills-view').style.display !== 'none';
+        if (skillsVisible) { renderFilters(); renderSkillsList(); } else { showHome(); }
+      });
+    }
     if (!wired) {
       wired = true;
       var subjectBtn = document.getElementById('qb-subject-rw');
@@ -12970,81 +13475,59 @@
    copies since it's a standalone document. */
 (function () {
   'use strict';
-window.renderNativeReport = function (data) {
-  'use strict';
-  // Re-entrancy guard — this renders into a PERSISTENT part of the page
-  // (#pt-native-report never gets torn down between reports, only hidden/
-  // shown), and several sections below build their content with
-  // appendChild rather than an innerHTML assignment. Without clearing
-  // those out first, opening a second report in the same page load (e.g.
-  // View Results on a practice test, then a Score Progress point on Home,
-  // or two Score Progress points back to back) piled the new tiles/cards
-  // on top of the previous report's instead of replacing them.
-  ['score-tiles', 'raw-stats', 'score-bridge', 'bridge-note-outer', 'section-breakdown',
-   'accuracy-by-topic', 'timing-stats', 'confidence-quadrant', 'behavior-section', 'raw-tables'
-  ].forEach(function (id) {
-    var el = document.getElementById(id);
-    if (el) el.innerHTML = '';
-  });
-  var LETTERS = ['A', 'B', 'C', 'D', 'E'];
 
-  // The report's data comes from an unsigned base64 payload in the URL
-  // fragment (see reportLink in index.html) — anyone can craft a link with
-  // arbitrary content in place of a real free-response answer. Everywhere
-  // that text (the student's typed-in grid-in/free-response answer) gets
-  // rendered, it must go through this escaper before touching innerHTML,
-  // or a crafted link could run script in whoever opens the report (most
-  // often Luca, from the email this link is sent in). Question text/
-  // choices from the bank are a separate, trusted source and are left as
-  // literal HTML on purpose (they carry their own formatting/equations).
-  function esc(s) {
-    return String(s == null ? '' : s)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
-  }
-  // Shared categorical palette for every multi-color chart on this report
-  // (section pies, bridge segments) — tints/shades of the same five brand
-  // colors rather than a mixed bag of unrelated hues.
-  var BRAND_PALETTE = ['#B0271C', '#C9A84C', '#5E8B6F', '#243447', '#A97C50', '#7A3B32', '#8C9A6E', '#8B6F47'];
-
-  // Strips HTML (question text carries its own inline formatting/figures —
-  // see esc()'s comment above) down to plain text for the hover tooltip,
-  // which has no room for a rendered SVG chart or a real table. Truncated
-  // short — a tooltip previews, the modal (openQuestionModal below) is
-  // where the real, fully-formatted question lives.
-  function previewText(html) {
-    var div = document.createElement('div');
-    div.innerHTML = html || '';
-    var t = (div.textContent || '').replace(/\s+/g, ' ').trim();
-    return t.length > 90 ? esc(t.slice(0, 90)) + '&hellip;' : esc(t);
-  }
-
-  // R&W questions bake their stimulus straight into `text`, ending in the
-  // actual question sentence, joined by "<br><br>" (same convention the
-  // live exam/practice-runner splitPassage() helpers elsewhere in this
-  // codebase already rely on for the exact same banks.js data) — split
-  // here too so the modal can show it in its own passage pane on the
-  // left instead of jammed above the question on the right.
+  /* ═══ SHARED QUESTION PREVIEW MODAL ═══ full-bleed, real-exam-style —
+     see the modal's own CSS comment for the shape. Hoisted to true
+     top-level scope (a sibling of window.renderNativeReport below, not
+     nested inside it) so window.openQuestionModal exists from page load —
+     renderNativeReport only actually runs once a student opens "View
+     Results" on a report, but Saved & Mistakes needs this modal available
+     the very first time that screen opens, with no report ever viewed
+     first. Opened from the section-card tiles, the confidence-quadrant
+     dots, and the bridge chart's "see those questions" inside
+     renderNativeReport (still reachable via this same closure), PLUS
+     Saved & Mistakes' own row click (see its toModalRow() adapter) —
+     always with a full rowsList + a starting index, so Previous/Next
+     always has something to walk regardless of which of those four
+     opened it. */
   function splitPassageForModal(text) {
     text = String(text || '');
     var idx = text.lastIndexOf('<br><br>');
     if (idx === -1) return null;
     return { passage: text.slice(0, idx), question: text.slice(idx + 8) };
   }
+  // Small local copies — window.renderNativeReport defines its own
+  // versions of these three (used by its raw-tables/quadrant-dot code
+  // too), but this block no longer lives inside that closure, so it
+  // needs its own. Same small-helper-per-closure pattern this file
+  // already uses everywhere a tiny utility is needed in more than one
+  // otherwise-separate script.
+  function qModalFormatDuration(ms) {
+    ms = ms || 0;
+    var totalSec = Math.round(ms / 1000);
+    var h = Math.floor(totalSec / 3600);
+    var m = Math.floor((totalSec % 3600) / 60);
+    var s = totalSec % 60;
+    if (h > 0) return h + 'h ' + (m < 10 ? '0' : '') + m + 'm ' + (s < 10 ? '0' : '') + s + 's';
+    if (m > 0) return m + 'm ' + (s < 10 ? '0' : '') + s + 's';
+    return s + 's';
+  }
+  function qModalFormatElapsed(ms) {
+    if (typeof ms !== 'number' || ms < 0) return '—';
+    return qModalFormatDuration(ms) + ' in';
+  }
+  function qModalIsSaved(key) {
+    try {
+      var studentKey = window.getPortalStudentKey ? window.getPortalStudentKey() : null;
+      if (!studentKey) return false;
+      var raw = localStorage.getItem('moretti_saved_qs_' + studentKey);
+      if (!raw) return false;
+      var parsed = JSON.parse(raw);
+      return !!(parsed && parsed.byKey && parsed.byKey[key]);
+    } catch (e) { return false; }
+  }
 
-  /* ═══ SHARED QUESTION PREVIEW MODAL ═══ full-bleed, real-exam-style —
-     see the modal's own CSS comment for the shape. Opened from the
-     section-card tiles, the confidence-quadrant dots, and the bridge
-     chart's "see those questions" (all defined further down) — always
-     with a full rowsList + a starting index, so Previous/Next always has
-     something to walk regardless of which of those three opened it. One
-     modal, one render path (renderModalQuestion below); renderQuestionDetail
-     (defined later, in the page-2 setup — hoisted, safe to reference here)
-     is reused for the accordion table on page 2, NOT by this modal, which
-     builds its own two-pane markup instead. */
+  var LETTERS = ['A', 'B', 'C', 'D', 'E'];
   var qModalOverlay = document.getElementById('q-modal-overlay');
   var qModalTitleEl = document.getElementById('q-modal-title');
   var qModalPillEl = document.getElementById('q-modal-status-pill');
@@ -13052,6 +13535,7 @@ window.renderNativeReport = function (data) {
   var qModalPassagePane = document.getElementById('q-modal-passage-pane');
   var qModalQuestionPane = document.getElementById('q-modal-question-pane');
   var qModalHideToggle = document.getElementById('q-modal-hide-toggle');
+  var qModalHideChoicesToggle = document.getElementById('q-modal-hide-choices-toggle');
   var qModalCounterEl = document.getElementById('q-modal-counter');
   var qModalExplainBtn = document.getElementById('q-modal-explain-btn');
   var qModalSaveBtn = document.getElementById('q-modal-save-btn');
@@ -13060,12 +13544,20 @@ window.renderNativeReport = function (data) {
 
   var modalRows = [], modalIndex = 0, modalLabel = '';
   var modalHideAnswer = true; // persists across Previous/Next within one open — a per-session preference, not per-question
+  var modalHideChoices = false; // off by default — hiding answers alone covers most review; hiding choices too is for a stricter self-test
   var modalExplainOpen = false;
 
-  function renderModalAnswerArea(r, q, hideAnswer) {
+  function renderModalAnswerArea(r, q, hideAnswer, hideChoices) {
     var wrap = document.createElement('div');
     wrap.className = 'q-detail'; // reuses .q-detail .q-choices' colored-border/background rules — this pane has no .q-detail ancestor of its own
     if (q.type === 'mc' && q.choices) {
+      if (hideChoices) {
+        var hidden = document.createElement('div');
+        hidden.className = 'q-choices-hidden';
+        hidden.textContent = 'Choices hidden — use the toggle above to reveal.';
+        wrap.appendChild(hidden);
+        return wrap;
+      }
       var ul = document.createElement('ul');
       ul.className = 'q-choices';
       q.choices.forEach(function (choice, idx) {
@@ -13149,15 +13641,27 @@ window.renderNativeReport = function (data) {
     qtext.className = 'q-text';
     qtext.innerHTML = split ? split.question : (q.text || '(question text unavailable)');
     qModalQuestionPane.appendChild(qtext);
-    qModalQuestionPane.appendChild(renderModalAnswerArea(r, q, modalHideAnswer));
+    qModalQuestionPane.appendChild(renderModalAnswerArea(r, q, modalHideAnswer, modalHideChoices));
 
-    if (r.timeMs || r.firstVisitedAt || r.lastViewedAt) {
-      var timing = document.createElement('div');
-      timing.className = 'q-timing';
-      timing.innerHTML = 'Time spent: <strong>' + formatDuration(r.timeMs) + '</strong>' +
-        ' &nbsp;·&nbsp; First visited: ' + formatElapsedIntoSection(r.firstVisitedAt) +
-        ' &nbsp;·&nbsp; Last viewed: ' + formatElapsedIntoSection(r.lastViewedAt);
-      qModalQuestionPane.appendChild(timing);
+    // Clean icon-row summary — time on this question, its subtype
+    // (domain → skill), and its difficulty, one row per fact instead of
+    // the old single run-on line — only the facts actually available for
+    // THIS row render (Saved & Mistakes' rows carry no per-question
+    // timing at all, so that row just doesn't appear there).
+    var metaRows = [];
+    if (r.timeMs) metaRows.push(['&#9201;', 'Time on this question', qModalFormatDuration(r.timeMs)]);
+    if (r.firstVisitedAt != null) metaRows.push(['&#8594;', 'First visited', qModalFormatElapsed(r.firstVisitedAt)]);
+    if (r.lastViewedAt != null) metaRows.push(['&#8635;', 'Last viewed', qModalFormatElapsed(r.lastViewedAt)]);
+    var subtypeLabel = (q.domain && q.skill && q.skill !== q.domain) ? (q.domain + ' — ' + q.skill) : (q.skill || q.domain);
+    if (subtypeLabel) metaRows.push(['#', 'Subtype', subtypeLabel]);
+    if (q.difficulty) metaRows.push(['&#9707;', 'Difficulty', String(q.difficulty).charAt(0).toUpperCase() + String(q.difficulty).slice(1)]);
+    if (metaRows.length) {
+      var metaEl = document.createElement('div');
+      metaEl.className = 'q-modal-meta';
+      metaEl.innerHTML = metaRows.map(function (m) {
+        return '<div class="q-modal-meta-row"><span class="q-modal-meta-icon">' + m[0] + '</span>' + m[1] + ': <strong>' + m[2] + '</strong></div>';
+      }).join('');
+      qModalQuestionPane.appendChild(metaEl);
     }
 
     modalExplainOpen = false;
@@ -13174,21 +13678,24 @@ window.renderNativeReport = function (data) {
     }
 
     // Save to Saved & Mistakes — same window.saveReportQuestion() bridge
-    // and isReportQuestionSaved() local-cache check the accordion table's
-    // renderQuestionDetail() uses (see that function's own comment).
+    // the accordion table's renderQuestionDetail() uses. testTitle comes
+    // off the row itself (r.testTitle) rather than an outer report's
+    // `data` — this modal is shared with contexts (Saved & Mistakes) that
+    // have no single report `data` to read that from, and every row
+    // already knows its own source test either way.
     if (r.key) {
       qModalSaveBtn.style.display = '';
       var paintModalSaveBtn = function () {
-        var isSaved = isReportQuestionSaved(r.key);
+        var isSaved = qModalIsSaved(r.key);
         qModalSaveBtn.classList.toggle('on', isSaved);
         qModalSaveBtn.innerHTML = isSaved ? '&#11088; Saved' : '&#11088; Save this question';
       };
       paintModalSaveBtn();
       qModalSaveBtn.onclick = function () {
-        var nowSaved = !isReportQuestionSaved(r.key);
+        var nowSaved = !qModalIsSaved(r.key);
         if (window.saveReportQuestion) {
           window.saveReportQuestion(nowSaved
-            ? { key: r.key, given: r.givenIdx, correct: r.ok, testTitle: (data.ptTitle || (data.t + ' Diagnostic')), savedAt: new Date().toISOString() }
+            ? { key: r.key, given: r.givenIdx, correct: r.ok, testTitle: r.testTitle || '', savedAt: new Date().toISOString() }
             : { key: r.key, remove: true });
         }
         paintModalSaveBtn();
@@ -13198,6 +13705,21 @@ window.renderNativeReport = function (data) {
     }
 
     qModalHideToggle.checked = modalHideAnswer;
+    qModalHideChoicesToggle.checked = modalHideChoices;
+    // "Hide choices" only means anything for a multiple-choice question —
+    // a free-response question has no choice list to hide, so toggling it
+    // there has no visible effect. This ONLY dims the label as a hint that
+    // it's inert on this question — it must NEVER set .disabled: a real
+    // student's actual bug report was choices already hidden (from an
+    // earlier MC question) landing on an FR question and the toggle
+    // becoming unclickable while still showing ON, i.e. actually stuck —
+    // .disabled here is what caused that, by blocking the very click that
+    // would have turned it back off once they returned to an MC question.
+    // Leaving it always clickable means modalHideChoices can still be
+    // flipped off at any time, even mid-FR-question, ready for whichever
+    // MC question comes next.
+    var choicesApplicable = q.type === 'mc' && !!q.choices;
+    qModalHideChoicesToggle.closest('.q-modal-toggle').classList.toggle('q-modal-toggle-na', !choicesApplicable);
     qModalCounterEl.textContent = (modalIndex + 1) + ' of ' + modalRows.length;
     qModalPrevBtn.disabled = modalIndex === 0;
     qModalNextBtn.disabled = modalIndex === modalRows.length - 1;
@@ -13216,9 +13738,11 @@ window.renderNativeReport = function (data) {
     modalIndex = Math.max(0, Math.min(index, rowsList.length - 1));
     modalLabel = label || '';
     modalHideAnswer = true;
+    modalHideChoices = false;
     renderModalQuestion();
     qModalOverlay.classList.add('open');
   }
+  window.openQuestionModal = openQuestionModal;
   function closeQuestionModal() { qModalOverlay.classList.remove('open'); }
   if (qModalOverlay) {
     document.getElementById('q-modal-close').addEventListener('click', closeQuestionModal);
@@ -13233,6 +13757,10 @@ window.renderNativeReport = function (data) {
       modalHideAnswer = qModalHideToggle.checked;
       renderModalQuestion();
     });
+    qModalHideChoicesToggle.addEventListener('change', function () {
+      modalHideChoices = qModalHideChoicesToggle.checked;
+      renderModalQuestion();
+    });
     qModalExplainBtn.addEventListener('click', function () {
       modalExplainOpen = !modalExplainOpen;
       var block = document.getElementById('q-modal-explain-block');
@@ -13245,6 +13773,64 @@ window.renderNativeReport = function (data) {
       if (modalIndex < modalRows.length - 1) { modalIndex++; renderModalQuestion(); }
     });
   }
+
+window.renderNativeReport = function (data) {
+  'use strict';
+  // Re-entrancy guard — this renders into a PERSISTENT part of the page
+  // (#pt-native-report never gets torn down between reports, only hidden/
+  // shown), and several sections below build their content with
+  // appendChild rather than an innerHTML assignment. Without clearing
+  // those out first, opening a second report in the same page load (e.g.
+  // View Results on a practice test, then a Score Progress point on Home,
+  // or two Score Progress points back to back) piled the new tiles/cards
+  // on top of the previous report's instead of replacing them.
+  ['score-tiles', 'raw-stats', 'score-bridge', 'bridge-note-outer', 'section-breakdown',
+   'accuracy-by-topic', 'timing-stats', 'confidence-quadrant', 'behavior-section', 'raw-tables'
+  ].forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el) el.innerHTML = '';
+  });
+  var LETTERS = ['A', 'B', 'C', 'D', 'E'];
+
+  // The report's data comes from an unsigned base64 payload in the URL
+  // fragment (see reportLink in index.html) — anyone can craft a link with
+  // arbitrary content in place of a real free-response answer. Everywhere
+  // that text (the student's typed-in grid-in/free-response answer) gets
+  // rendered, it must go through this escaper before touching innerHTML,
+  // or a crafted link could run script in whoever opens the report (most
+  // often Luca, from the email this link is sent in). Question text/
+  // choices from the bank are a separate, trusted source and are left as
+  // literal HTML on purpose (they carry their own formatting/equations).
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+  // Shared categorical palette for every multi-color chart on this report
+  // (section pies, bridge segments) — tints/shades of the same five brand
+  // colors rather than a mixed bag of unrelated hues.
+  var BRAND_PALETTE = ['#B0271C', '#C9A84C', '#5E8B6F', '#243447', '#A97C50', '#7A3B32', '#8C9A6E', '#8B6F47'];
+
+  // Strips HTML (question text carries its own inline formatting/figures —
+  // see esc()'s comment above) down to plain text for the hover tooltip,
+  // which has no room for a rendered SVG chart or a real table. Truncated
+  // short — a tooltip previews, the modal (openQuestionModal below) is
+  // where the real, fully-formatted question lives.
+  function previewText(html) {
+    var div = document.createElement('div');
+    div.innerHTML = html || '';
+    var t = (div.textContent || '').replace(/\s+/g, ' ').trim();
+    return t.length > 90 ? esc(t.slice(0, 90)) + '&hellip;' : esc(t);
+  }
+
+  // splitPassageForModal/openQuestionModal/closeQuestionModal and their
+  // supporting render functions used to live here — hoisted out to
+  // top-level scope (right above this function) so window.openQuestionModal
+  // exists from page load, not only after a report has been opened at
+  // least once. See that block's own comment for why.
 
   /* ═══ APPROXIMATE SCALED SCORING ═══
      The SAT (200–800 per section, 400–1600 composite) and ACT (1–36 per
@@ -13939,7 +14525,8 @@ window.renderNativeReport = function (data) {
         timeMs: qTimeMs, firstVisitMs: qFirstVisitMs, moduleIndex: moduleIndex,
         firstVisitedAt: (sec.fv && typeof sec.fv[i] === 'number' && modStartAt !== null) ? (sec.fv[i] - modStartAt) : null,
         lastViewedAt: (sec.lv && typeof sec.lv[i] === 'number' && modStartAt !== null) ? (sec.lv[i] - modStartAt) : null,
-        key: rowTestTag + '|' + sec.k + '|' + rowModuleName + '|' + rowModuleIdx });
+        key: rowTestTag + '|' + sec.k + '|' + rowModuleName + '|' + rowModuleIdx,
+        testTitle: data.ptTitle || (data.t + ' Diagnostic') });
     });
     sections.push({
       key: sec.k, label: sectionLabel(sec.k, bank), c: c, t: qs.length, rows: rows, domains: secDomains,
@@ -15047,7 +15634,9 @@ window.renderNativeReport = function (data) {
       tip.className = 'sc-qgrid-tooltip';
       var statusWord = r.skipped ? 'Unattempted' : (r.ok ? 'Correct' : 'Incorrect');
       var statusCls = r.skipped ? '' : (r.ok ? 'ok' : 'bad');
-      tip.innerHTML = '<b class="' + statusCls + '">Q' + r.n + ' — ' + statusWord + '</b>';
+      tip.innerHTML = '<b>Question ' + r.n + '</b>' +
+        '<span class="' + statusCls + '">' + statusWord + '</span>' + (r.timeMs ? ' · ' + formatDuration(r.timeMs) : '') +
+        '<span class="sc-qgrid-tooltip-hint">Click to see this question</span>';
       cell.appendChild(tip);
       cell.addEventListener('click', function () { openQuestionModal(s5.rows, rIdx, s5.label); });
       gridEl.appendChild(cell);
@@ -15061,14 +15650,19 @@ window.renderNativeReport = function (data) {
     var avgIncorrectMs = incorrectN ? (s5.timeIncorrect / incorrectN) : 0;
     if (s5.timeTotal > 0) {
       // Actual avg time per question against the REAL per-question budget
-      // this module's official time limit implies (window.
-      // SECTION_MODULE_TIME_LIMITS in banks.js — the same real SAT/ACT
-      // per-module minutes the diagnostic's own timer counts down from,
-      // divided by this module's actual question count) — "0:52 of 1:11"
-      // reads directly as pace against the clock, not just a bare number.
+      // this module's official time limit implies — s5.timeAllottedMin
+      // (same field the "Unused time" behavior flag above already reads),
+      // divided by this module's actual question count. That field is
+      // this STUDENT's actual allotted minutes, already scaled by their
+      // accommodations (see allottedMinutesFor() in finishDiagnostic) —
+      // window.SECTION_MODULE_TIME_LIMITS on its own is only the flat
+      // standard-time constant from banks.js, so using it directly here
+      // (an earlier version of this did) compared a time-and-a-half or
+      // double-time student's actual pace against a budget that was never
+      // theirs, always reading as "over pace" even when they were well
+      // within their own real allotted time.
       var avgAllMs = s5.t ? (s5.timeTotal / s5.t) : 0;
-      var timeLimitMin = (window.SECTION_MODULE_TIME_LIMITS && window.SECTION_MODULE_TIME_LIMITS[s5.key]) || 0;
-      var expectedMsPerQ = (timeLimitMin && s5.t) ? (timeLimitMin * 60000 / s5.t) : 0;
+      var expectedMsPerQ = (s5.timeAllottedMin && s5.t) ? (s5.timeAllottedMin * 60000 / s5.t) : 0;
       var paceEl = document.createElement('div');
       paceEl.className = 'sc-meta';
       if (expectedMsPerQ) {
@@ -15140,8 +15734,16 @@ window.renderNativeReport = function (data) {
   // (median time on that section's own correct MC answers) and its own
   // ratio check, so a real pattern in one section fires regardless of how
   // the other section went.
-  var RUSHED_REL = 0.5, RUSHED_ABS_CAP = 20000, LUCKY_REL = 0.35, LUCKY_ABS_CAP = 15000;
+  var RUSHED_REL = 0.5, RUSHED_ABS_CAP = 20000, LUCKY_REL = 0.35, LUCKY_ABS_CAP = 15000, STUCK_REL = 1.6;
   var behaviorFlags = [];
+  // Candidates for the single "Where to focus" headline synthesized below,
+  // AFTER every section's been scanned — the stuck/rushed flags below are
+  // already the two most actionable patterns in this whole report (a real
+  // content gap vs. a pacing/carelessness issue), so rather than making a
+  // parent read every flag and infer which one matters most, the biggest
+  // one (by raw count) gets pulled out and stated directly, in front of
+  // everything else.
+  var focusCandidates = [];
   // Late-night attempt: a diagnostic finished well outside normal waking
   // hours is exactly the kind of context Luca already factors in by hand
   // when a score looks lower than he'd expect (fatigue suppresses
@@ -15196,18 +15798,34 @@ window.renderNativeReport = function (data) {
     if (!typical) return; // no usable timing data for this section — skip rather than guess
     var cutoff = Math.min(typical * RUSHED_REL, RUSHED_ABS_CAP);
     var luckyCutoff = Math.min(typical * LUCKY_REL, LUCKY_ABS_CAP);
-    var rushedWrong = [], luckyCorrect = [];
+    var stuckCutoff = typical * STUCK_REL;
+    var rushedWrong = [], luckyCorrect = [], stuckWrong = [];
     s7.rows.forEach(function (r) {
       if (r.q.type !== 'mc' || !(pacingTimeMs(r) > 0)) return;
       if (!r.ok && pacingTimeMs(r) < cutoff) rushedWrong.push({ sk: r.sk });
+      if (!r.ok && pacingTimeMs(r) >= stuckCutoff) stuckWrong.push({ sk: r.sk });
       if (r.ok && r.q.difficulty === 'hard' && pacingTimeMs(r) < luckyCutoff) luckyCorrect.push({ sk: r.sk });
     });
+    // Stuck flag: missed questions where REAL, deliberate time was spent —
+    // the direct counterpart to the Pacing (rushed-guess) flag below, and
+    // the one this report was missing: without it, a question worked hard
+    // on and still gotten wrong reads identically, in the skill breakdown
+    // above, to a rushed guess or a lucky fluke on some OTHER question —
+    // there was no way to tell "spend more time here" (rushed) apart from
+    // "this needs real content review" (stuck) from the skill breakdown
+    // alone. Same sample-size gate as the pacing flag, for the same reason.
+    if (s7.missedMc >= 4 && stuckWrong.length / s7.missedMc >= 0.5) {
+      var sSkills = topSkillNames(stuckWrong, 3).join(', ');
+      behaviorFlags.push('<strong>Stuck flag (' + s7.label + '):</strong> ' + stuckWrong.length + ' of ' + s7.missedMc + ' missed multiple-choice questions here took well over ' + first + '’s own typical time on a correct answer — real, deliberate effort that still came back wrong, not a rushed guess.' + (sSkills ? ' Heaviest in: ' + sSkills + '.' : '') + ' This is the clearest signal of an actual content gap in this report — worth prioritizing over anything that looks like a pacing issue.');
+      focusCandidates.push({ kind: 'stuck', section: s7.label, skill: topSkillNames(stuckWrong, 1)[0], count: stuckWrong.length });
+    }
     if (s7.missedMc >= 4 && rushedWrong.length / s7.missedMc >= 0.5) {
       var wSkills = topSkillNames(rushedWrong, 3).join(', ');
       var rushedBasis = usingFirstPass
         ? 'spent well under ' + first + '’s own average FIRST-LOOK time on questions answered correctly (whether or not ' + first + ' ever came back to them)'
         : 'answered in well under ' + first + '’s own average time on questions answered correctly';
       behaviorFlags.push('<strong>Pacing flag (' + s7.label + '):</strong> ' + rushedWrong.length + ' of ' + s7.missedMc + ' missed multiple-choice questions here were ' + rushedBasis + ' — a rushed-guess pattern more than ' + rushedWrong.length + ' independently reasoned wrong answers.' + (wSkills ? ' Heaviest in: ' + wSkills + '.' : '') + ' Worth a pacing conversation before treating all of these as pure content gaps.');
+      focusCandidates.push({ kind: 'rushed', section: s7.label, skill: topSkillNames(rushedWrong, 1)[0], count: rushedWrong.length });
     }
     var hardCorrectN = s7.diff.hard.c;
     if (hardCorrectN >= 3 && luckyCorrect.length >= 2 && luckyCorrect.length / hardCorrectN >= 0.4) {
@@ -15218,6 +15836,19 @@ window.renderNativeReport = function (data) {
   if (markedT === 0 && totalQ >= 40) {
     behaviorFlags.push(first + ' never used the "flag for review" feature across all ' + totalQ + ' questions' + (skipped < totalQ - totalC ? ', despite ' + (totalQ - totalC) + ' misses' : '') + '. Combined with the timing patterns above, this points at pushing through uncertain questions rather than marking them to revisit — a fixable pacing habit worth raising directly with ' + first + '.');
   }
+  // "Where to focus" headline — the single biggest stuck/rushed pattern
+  // found above (by raw question count), stated directly instead of
+  // leaving a parent to read every flag below and work out which one
+  // actually matters most for what to do next.
+  var focusHeadline = '';
+  if (focusCandidates.length) {
+    focusCandidates.sort(function (a, b) { return b.count - a.count; });
+    var topFocus = focusCandidates[0];
+    var where = topFocus.skill ? (topFocus.skill + ' (' + topFocus.section + ')') : topFocus.section;
+    focusHeadline = topFocus.kind === 'stuck'
+      ? '<strong>Where to focus:</strong> ' + where + ' — ' + topFocus.count + ' missed question' + (topFocus.count === 1 ? '' : 's') + ' here took real, deliberate time and still came back wrong. That’s a genuine knowledge gap, not a pacing issue — prioritize content review here before drilling speed anywhere else.'
+      : '<strong>Where to focus:</strong> ' + where + ' — ' + topFocus.count + ' missed question' + (topFocus.count === 1 ? '' : 's') + ' here were answered suspiciously fast, a rushed-guess pattern rather than a true content gap. A pacing/checking-work conversation is likely to help more here than more content review.';
+  }
   // Always shown now, even with zero flags — a section that only ever
   // appears when something's wrong reads as broken/missing on every
   // normal report (which is most of them), not as "nothing to flag here."
@@ -15225,9 +15856,9 @@ window.renderNativeReport = function (data) {
   document.getElementById('behavior-hed').style.display = '';
   var bWrap = document.getElementById('behavior-section');
   bWrap.style.display = '';
-  bWrap.innerHTML = behaviorFlags.length
+  bWrap.innerHTML = (focusHeadline ? '<div class="behavior-focus">' + focusHeadline + '</div>' : '') + (behaviorFlags.length
     ? '<ul class="takeaways">' + behaviorFlags.map(function (f) { return '<li>' + f + '</li>'; }).join('') + '</ul>'
-    : '<p class="behavior-clean">No pacing or timing red flags on this attempt — ' + first + '’s scores here look like a real read of where things stand, not an artifact of rushing, guessing, or fatigue.</p>';
+    : '<p class="behavior-clean">No pacing or timing red flags on this attempt — ' + first + '’s scores here look like a real read of where things stand, not an artifact of rushing, guessing, or fatigue.</p>');
 
   var take = [];
   take.push('<strong>' + first + ' answered ' + totalC + ' of ' + totalQ + ' correctly (' + pct + '%).</strong>');
@@ -15603,6 +16234,7 @@ window.renderNativeReport = function (data) {
     });
     if (cards.length) {
       document.getElementById('timing-hed').style.display = '';
+      document.getElementById('timing-card').style.display = '';
       document.getElementById('timing-sub').style.display = '';
       wrap.style.display = '';
       var grid = document.createElement('div');
@@ -15610,6 +16242,211 @@ window.renderNativeReport = function (data) {
       cards.forEach(function (c) { grid.appendChild(c); });
       wrap.appendChild(grid);
     }
+  })();
+
+  /* ═══ HOW YOU ALLOCATED YOUR TIME ═══ one chart per MODULE (not per
+     section — R&W and Math each split into their own Module 1/Module 2),
+     one horizontal bar per question, colored green/red by correct/
+     incorrect. Folded under the "Timing" heading above (no separate
+     heading of its own) since it's a second view of the same timing
+     data, just per-question instead of per-difficulty.
+
+     The x-axis is a RECONSTRUCTED, gapless timeline, not each row's own
+     raw first-visited/last-viewed timestamps plotted independently.
+     Reading order alone would misrepresent revisits, but plotting each
+     row's own timestamps independently has its own failure mode: only one
+     question is ever on screen at a time, so two rows' bars can never
+     legitimately share an x-range — if they did (from clock drift between
+     whatever updated each row's timestamps, or plain rounding), the chart
+     shows overlapping bars and stray gaps that don't correspond to
+     anything real. buildModuleTimeline() below fixes this by construction:
+     every question's visit(s) become fixed-duration segments, sorted into
+     the order they actually happened, then laid out end-to-end with zero
+     gap and zero overlap — a question's real "when" only matters for
+     ordering, not for its on-chart position, so nothing here can render
+     two questions occupying the same x. */
+  function buildModuleTimeline(rows) {
+    var segs = [];
+    rows.forEach(function (r, i) {
+      // A revisited question becomes TWO segments — the first look, then
+      // the actual return trip — rather than one span stretching across
+      // every question answered in between. r.firstVisitMs (time spent on
+      // the first look only) is what makes the split possible; older
+      // reports saved before that field existed fall back to one segment
+      // covering the row's whole timeMs.
+      //
+      // r.lastViewedAt is the START of the most recent visit (beginQuestion
+      // Time() stamps it the moment the question becomes visible again),
+      // NOT when they left it — the return segment has to start there and
+      // run forward, not end there and run backward. Building it backward
+      // (an earlier version of this did) put the "return" segment BEFORE
+      // the actual return happened, which usually collapsed it right back
+      // against the first-look segment — a revisit that should show as a
+      // bar reaching out much later instead barely moved, which is exactly
+      // "return trips aren't documented."
+      if (r.firstVisitMs != null && r.lastViewedAt != null &&
+          r.lastViewedAt - ((r.firstVisitedAt || 0) + r.firstVisitMs) > 2000) {
+        var returnDur = Math.max(0, r.timeMs - r.firstVisitMs);
+        segs.push({ rowIndex: i, start: r.firstVisitedAt || 0, dur: r.firstVisitMs });
+        segs.push({ rowIndex: i, start: r.lastViewedAt, dur: returnDur });
+      } else {
+        segs.push({ rowIndex: i, start: r.firstVisitedAt || 0, dur: r.timeMs || 0 });
+      }
+    });
+    segs = segs.filter(function (s) { return s.dur > 0; });
+    segs.sort(function (a, b) { return a.start - b.start; });
+    var cursor = 0;
+    var byRow = {};
+    segs.forEach(function (s) {
+      s.plotStart = cursor; s.plotEnd = cursor + s.dur; cursor = s.plotEnd;
+      (byRow[s.rowIndex] = byRow[s.rowIndex] || []).push(s);
+    });
+    return { byRow: byRow, totalMs: cursor };
+  }
+
+  (function renderTimingAllocation() {
+    var wrap = document.getElementById('timing-allocation');
+    var moduleViews = [];
+    sections.forEach(function (sec) {
+      if (!sec.hasModules) {
+        moduleViews.push({ label: sec.label, rows: sec.rows });
+        return;
+      }
+      var m1 = sec.rows.filter(function (r) { return r.moduleIndex === 0; });
+      var m2 = sec.rows.filter(function (r) { return r.moduleIndex === 1; });
+      if (m1.length) moduleViews.push({ label: sec.label + ' – Module 1', rows: m1 });
+      if (m2.length) moduleViews.push({ label: sec.label + ' – Module 2' + (sec.variant ? ' (' + sec.variant + ')' : ''), rows: m2 });
+    });
+    moduleViews = moduleViews.map(function (mv) {
+      return { label: mv.label, rows: mv.rows.filter(function (r) { return r.timeMs > 0; }) };
+    }).filter(function (mv) { return mv.rows.length >= 2; });
+    if (!moduleViews.length) return;
+    moduleViews.forEach(function (mv) { mv.timeline = buildModuleTimeline(mv.rows); });
+
+    // Fixed plot dimensions, shared by every module view — sized for the
+    // LARGEST module's row count so a shorter module (Math's 22 vs R&W's
+    // 27) just leaves a little empty space at the bottom instead of the
+    // whole chart shrinking and every row getting fatter.
+    var ROW_H = 12, PAD_L = 32, PAD_R = 14, PAD_T = 10, PAD_B = 30;
+    var CHART_W = 640;
+    var INNER_W = CHART_W - PAD_L - PAD_R;
+    var maxRows = 0;
+    moduleViews.forEach(function (mv) { if (mv.rows.length > maxRows) maxRows = mv.rows.length; });
+    var PLOT_H = maxRows * ROW_H;
+    var CHART_H = PAD_T + PLOT_H + PAD_B;
+
+    // One shared minutes axis across all four modules (not recomputed per
+    // module) — same "nothing about this chart randomly resizes when you
+    // page" reasoning as the fixed plot dimensions above. Built from each
+    // module's own reconstructed (gapless) total, not raw wall-clock time.
+    var dataMaxMin = 5;
+    moduleViews.forEach(function (mv) {
+      var totalMin = mv.timeline.totalMs / 60000;
+      if (totalMin > dataMaxMin) dataMaxMin = totalMin;
+    });
+    // Gridlines/labels only go up to the last real 5-minute mark AT or
+    // BELOW the actual data (no rounding up to a phantom tick past
+    // whatever anyone actually did — a "35" label past the last real bar
+    // read as pointless axis padding). axisMaxMin gives the plot a little
+    // unlabeled breathing room on the right so the last bar isn't flush
+    // against the card edge.
+    var lastGridMin = Math.floor(dataMaxMin / 5) * 5;
+    var axisMaxMin = dataMaxMin * 1.06;
+    function xAt(min) { return PAD_L + Math.min(1, min / axisMaxMin) * INNER_W; }
+
+    wrap.innerHTML =
+      '<div class="timing-carousel">' +
+        '<button type="button" class="timing-nav-btn" id="timing-prev-btn" aria-label="Previous module"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>' +
+        '<div class="timing-chart-card" style="width:' + CHART_W + 'px;">' +
+          '<div class="timing-chart-hed"><span id="timing-module-label"></span><span class="timing-module-counter" id="timing-module-counter"></span></div>' +
+          '<div class="timing-chart-plot" id="timing-chart-plot" style="width:' + CHART_W + 'px; height:' + CHART_H + 'px;"></div>' +
+        '</div>' +
+        '<button type="button" class="timing-nav-btn" id="timing-next-btn" aria-label="Next module"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>' +
+      '</div>';
+
+    var labelEl = document.getElementById('timing-module-label');
+    var counterEl = document.getElementById('timing-module-counter');
+    var plotEl = document.getElementById('timing-chart-plot');
+    var prevBtn = document.getElementById('timing-prev-btn');
+    var nextBtn = document.getElementById('timing-next-btn');
+    var moduleIdx = 0;
+
+    // Same floating tooltip the "Path to target score" bridge chart uses
+    // (.bridge-tooltip, position:fixed, JS-positioned off the pointer) —
+    // reused verbatim rather than restyled, so hovering a timing bar looks
+    // identical to hovering a bridge bar. Lives outside .timing-chart-plot
+    // (which gets replaced wholesale on every module change) so it isn't
+    // torn down and recreated on every page/next click.
+    var tooltip = document.createElement('div');
+    tooltip.className = 'bridge-tooltip';
+    plotEl.parentNode.appendChild(tooltip);
+    function showTimingTooltip(clientX, clientY, r, qn) {
+      tooltip.innerHTML = '<b>Question ' + qn + '</b>' + (r.ok ? 'Correct' : 'Incorrect') + ' · ' + formatDuration(r.timeMs) +
+        '<span class="bridge-tooltip-hint">Click to see this question</span>';
+      tooltip.style.left = (clientX + 14) + 'px';
+      tooltip.style.top = (clientY + 14) + 'px';
+      tooltip.style.display = 'block';
+    }
+    function hideTimingTooltip() { tooltip.style.display = 'none'; }
+
+    function renderModule() {
+      var mv = moduleViews[moduleIdx];
+      hideTimingTooltip();
+      var gridHtml = '';
+      for (var t = 0; t <= lastGridMin; t += 5) {
+        var gx = xAt(t);
+        gridHtml += '<div class="timing-gridline" style="left:' + gx.toFixed(1) + 'px; top:' + PAD_T + 'px; height:' + PLOT_H + 'px;"></div>' +
+          '<div class="timing-gridlabel" style="left:' + gx.toFixed(1) + 'px; top:' + (PAD_T + PLOT_H + 4) + 'px;">' + t + '</div>';
+      }
+      var barsHtml = '';
+      // Bottom-up y-axis: question 1 sits on the BOTTOM row, the module's
+      // last question on the TOP row — row position is the row count
+      // flipped (mv.rows[i] is still question i+1; only where it's drawn
+      // flips), so the index used for openQuestionModal/qn stays untouched.
+      mv.rows.forEach(function (r, i) {
+        var y = PAD_T + (mv.rows.length - 1 - i) * ROW_H;
+        var qn = i + 1; // renumbered from 1 within THIS module, not the section-wide r.n
+        var rowSegs = mv.timeline.byRow[i] || [];
+        rowSegs.forEach(function (seg) {
+          var x1 = xAt(seg.plotStart / 60000), x2 = xAt(seg.plotEnd / 60000);
+          // A 1px floor only (not the more-readable-but-wider minimum this
+          // used to have) — segments are laid out edge-to-edge with zero
+          // gap already, so any bigger minimum here necessarily eats into
+          // the next segment's own space and reads as two questions
+          // overlapping in time, which they never actually do.
+          var w = Math.max(1, x2 - x1);
+          barsHtml += '<div class="timing-bar ' + (r.ok ? 'timing-bar-ok' : 'timing-bar-bad') + '" data-idx="' + i + '" style="left:' + x1.toFixed(1) + 'px; top:' + (y + 1.5).toFixed(1) + 'px; width:' + w.toFixed(1) + 'px; height:' + (ROW_H - 3) + 'px;"></div>';
+        });
+        if (i === 0 || qn % 5 === 0 || i === mv.rows.length - 1) {
+          barsHtml += '<div class="timing-rowlabel" style="top:' + (y + ROW_H / 2).toFixed(1) + 'px;">' + qn + '</div>';
+        }
+      });
+      var xCaption = '<div class="timing-xcaption" style="top:' + (PAD_T + PLOT_H + 16) + 'px;">Time (minutes)</div>';
+      plotEl.innerHTML = gridHtml + barsHtml + xCaption;
+      // Click opens the same question-preview modal every other tile in
+      // this report opens (see the .sc-qgrid-cell wiring above) — hover
+      // shows the bridge-style tooltip built above.
+      Array.prototype.forEach.call(plotEl.querySelectorAll('.timing-bar'), function (barEl) {
+        var i = +barEl.getAttribute('data-idx');
+        var r = mv.rows[i];
+        var qn = i + 1;
+        barEl.addEventListener('mousemove', function (e) { showTimingTooltip(e.clientX, e.clientY, r, qn); });
+        barEl.addEventListener('mouseleave', hideTimingTooltip);
+        barEl.addEventListener('click', function () { openQuestionModal(mv.rows, i, mv.label); });
+      });
+      labelEl.textContent = mv.label;
+      counterEl.textContent = (moduleIdx + 1) + ' of ' + moduleViews.length;
+      prevBtn.disabled = moduleIdx === 0;
+      nextBtn.disabled = moduleIdx === moduleViews.length - 1;
+    }
+    prevBtn.addEventListener('click', function () { if (moduleIdx > 0) { moduleIdx--; renderModule(); } });
+    nextBtn.addEventListener('click', function () { if (moduleIdx < moduleViews.length - 1) { moduleIdx++; renderModule(); } });
+    renderModule();
+
+    document.getElementById('timing-hed').style.display = ''; // shared with the difficulty-split stats above — no separate heading here
+    document.getElementById('timing-card').style.display = '';
+    document.getElementById('timing-allocation-sub').style.display = '';
+    wrap.style.display = '';
   })();
 
   /* ═══ CONFIDENCE QUADRANT ═══ per subject: every multiple-choice

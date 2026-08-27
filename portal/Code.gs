@@ -390,12 +390,26 @@ function handleAuthLocked_(key, email, name) {
     // has GrantedEmail permanently set but may never have actually gotten
     // Drive access, because their folder didn't exist yet at the moment
     // of that first grant. Nothing previously retried the grant after
-    // GrantedEmail was set, so those students were stuck silently. Retry
-    // is safe to repeat on every login — addViewer() on someone who's
-    // already a viewer is a no-op — and only costs a call when there's
-    // actually a folder + email on file to grant against.
-    if (row.DriveFolderUrl && grantedEmail) {
+    // GrantedEmail was set, so those students were stuck silently.
+    //
+    // Gated on GrantedAt being empty (never confirmed) rather than retrying
+    // on every single login forever: grantFolderAccess_'s own
+    // getViewers()/getEditors() check is NOT a reliable "already shared"
+    // signal for every case — the folder's owner (whoever the script runs
+    // as) never appears in either list, so if that account is ever also
+    // the "student" on a row (e.g. Luca's own test/QA key), the check
+    // never finds them and calls addViewer() again on every login, which
+    // is what was sending a fresh "shared with you" folder email on every
+    // single login instead of just once. Once we've attempted the grant
+    // here a single time, GrantedAt gets set below and this branch never
+    // touches Drive again for this row.
+    if (!row.GrantedAt && row.DriveFolderUrl && grantedEmail) {
       grantFolderAccess_(row.DriveFolderUrl, grantedEmail);
+      var healAtCol = row._headers.indexOf('GrantedAt');
+      if (healAtCol !== -1) {
+        grantedAtValue = new Date();
+        sheet.getRange(row._rowIndex, healAtCol + 1).setValue(grantedAtValue);
+      }
     }
   }
 
