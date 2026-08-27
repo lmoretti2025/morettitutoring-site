@@ -345,7 +345,6 @@
   .ns-date { font-family: var(--hel); font-weight: 700; font-size: 1.05rem; color: var(--text); }
   .ns-join { display: inline-block; margin-top: 0.7rem; font-family: var(--hel); font-size: 0.75rem; font-weight: 700; color: var(--red); text-decoration: none; word-break: break-all; }
   .ns-join:hover { text-decoration: underline; }
-  .menu-sub { font-size: 0.88rem; color: var(--mid); text-align: center; margin-bottom: 2.5rem; }
 
   /* ═══ THIS WEEK'S ASSIGNMENTS — home-screen checklist. Populated from
      the Assignments sheet tab (see Code.gs); each row is one task with a
@@ -423,7 +422,6 @@
   .menu-card.disabled:hover { border-color: var(--border); transform: none; box-shadow: var(--shadow); }
   .menu-card.disabled:hover::before { width: 0; }
   .menu-card.disabled:hover .menu-card-icon { background: rgba(176,39,28,0.08); transform: none; }
-  .menu-card-coming-soon { position: absolute; top: 0.9rem; right: 0.9rem; font-size: 0.52rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); border: 1px solid var(--border); padding: 0.25rem 0.55rem; }
   /* Status badge in a card's top-right — same slot/shape as the
      coming-soon chip above, but for state a student needs to read at a
      glance: whether they've already done this test, and whether it's a
@@ -504,8 +502,6 @@
   /* "Take me there" shortcut on an assignment row that names a test. */
   .assign-go { flex-shrink: 0; margin-left: 1.55rem; /* lines up under the task text, past the checkbox */ font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--red); background: rgba(176,39,28,0.07); border: 1px solid rgba(176,39,28,0.25); border-radius: 999px; padding: 0.3rem 0.7rem; text-decoration: none; white-space: nowrap; }
   .assign-go:hover { background: var(--red); color: var(--white); }
-  .menu-exit { display: block; text-align: center; margin-top: 2rem; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); text-decoration: none; }
-  .menu-exit:hover { color: var(--red); }
 
   /* ═══ HOME LAYOUT ═══ sidebar (nav) is column 1; everything below is a
      single full-width column (up to .home-panel's cap) so nothing in it
@@ -740,22 +736,6 @@
   .overview-retake-notice { font-size: 0.82rem; color: var(--text); line-height: 1.7; text-align: left; background: rgba(201,168,76,0.14); border: 1px solid var(--gold); padding: 0.9rem 1.1rem; margin-bottom: 1.5rem; }
   .overview-retake-notice a { color: var(--red); font-weight: 700; text-decoration: none; border-bottom: 1px solid rgba(176,39,28,0.4); }
   .overview-retake-notice a:hover { border-bottom-color: var(--red); }
-  /* ═══ ACCOMMODATIONS PANEL (test overview) ═══ */
-  .accom-panel { border: 1px solid var(--border); text-align: left; margin-bottom: 1.5rem; }
-  .accom-hed { display: flex; align-items: baseline; justify-content: space-between; gap: 0.6rem; padding: 0.85rem 1.3rem; background: var(--bg); border-bottom: 1px solid var(--border); }
-  .accom-hed .accom-title { font-family: var(--hel); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mid); }
-  .accom-hed .accom-state { font-family: var(--hel); font-size: 0.72rem; color: var(--text); font-weight: 600; }
-  .accom-body { padding: 1rem 1.3rem 1.1rem; }
-  .accom-group { margin-bottom: 1.1rem; }
-  .accom-group:last-child { margin-bottom: 0; }
-  .accom-group-label { font-family: var(--hel); font-size: 0.74rem; font-weight: 700; color: var(--text); margin-bottom: 0.55rem; }
-  .accom-options { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-  .accom-opt { display: inline-flex; align-items: center; gap: 0.4rem; font-family: var(--hel); font-size: 0.78rem; color: var(--text); border: 1px solid var(--border); border-radius: 999px; padding: 0.4rem 0.85rem; cursor: pointer; user-select: none; transition: border-color 0.12s, background 0.12s; }
-  .accom-opt:hover { border-color: var(--mid); }
-  .accom-opt.selected { border-color: var(--red); background: rgba(176,39,28,0.06); font-weight: 600; }
-  .accom-opt input { position: absolute; opacity: 0; width: 0; height: 0; }
-  .accom-note { font-family: var(--hel); font-size: 0.72rem; color: var(--mid); line-height: 1.6; margin-top: 0.7rem; }
-
   /* ═══ REFERENCE SHEET MODAL (accessible from intro + mid-test) ═══ */
   .ref-overlay { display: none; position: fixed; inset: 0; background: rgba(17,17,17,0.55); z-index: 600; align-items: center; justify-content: center; padding: 2rem 1.25rem; }
   .ref-overlay.active { display: flex; }
@@ -981,7 +961,10 @@
   .dx-calc-close { background: none; border: none; font-size: 1.1rem; line-height: 1; color: var(--mid); cursor: pointer; padding: 0.2rem 0.4rem; }
   .dx-calc-close:hover { color: var(--red); }
   .dx-calc-mount { flex: 1; min-height: 0; position: relative; }
-  .dx-calc-mount .dcg-calculator-api-container { width: 100%; height: 100%; }
+  /* Shared by the exam's #dx-calc-mount AND the question-preview modal's
+     #q-modal-calc-pane (see window.ensureDesmosCalculator) — flex:1 so it
+     fills whichever flex-column container it's mounted into either way. */
+  .dx-calc-frame { display: block; flex: 1; min-height: 0; width: 100%; height: 100%; border: none; }
   @media (max-width: 900px) {
     #dx-shell.calc-open { flex-direction: column; }
     .dx-calc-pane { width: 100% !important; max-width: none; height: 45vh; border-right: none; border-bottom: 1px solid var(--border); }
@@ -1054,7 +1037,6 @@
   .dx-mobile-jump { display: none; margin-bottom: 1.4rem; }
   .dx-mobile-jump label { display: block; font-size: 0.54rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); margin-bottom: 0.5rem; }
   .dx-mobile-jump select { width: 100%; font-family: var(--hel); font-size: 0.85rem; padding: 0.7rem 0.9rem; border: 1px solid var(--border); background: var(--white); color: var(--text); }
-  .dx-domain { display: inline-block; font-size: 0.56rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--red); margin-bottom: 1rem; }
   .dx-qtext { font-family: var(--display); font-size: clamp(1.05rem, 1.9vw, 1.35rem); font-weight: 400; line-height: 1.5; color: var(--text); margin-bottom: 1.9rem; }
   .dx-table { border-collapse: collapse; margin: 0 0 1.3rem 0; font-family: var(--hel); font-size: 0.82rem; font-weight: 400; }
   .dx-fig { display: block; max-width: 300px; height: auto; margin: 0 0 1.3rem 0; }
@@ -1152,8 +1134,6 @@
   .done-icon { font-size: 2.5rem; margin-bottom: 1.25rem; text-align: center; }
   .done-status { font-size: 0.78rem; text-align: center; color: var(--gold); margin-top: 1.5rem; line-height: 1.7; }
   .done-status.err { color: var(--red); }
-  .done-report-link { font-size: 0.85rem; text-align: center; color: var(--mid); margin-top: 0.9rem; line-height: 1.7; }
-  .done-report-link a { color: var(--red); font-weight: 700; text-decoration: underline; }
   .done-wrap { width: 100%; max-width: 760px; display: flex; flex-direction: column; align-items: center; gap: 2.5rem; }
   .done-panel { position: relative; overflow: hidden; }
   #done-view-results { margin-top: 1.5rem; }
@@ -1199,39 +1179,13 @@
   .pt-report-hed-download:hover { filter: brightness(0.92); }
 
   /* ═══ SCORE REPORT — printable, parent-facing diagnostic breakdown ═══ */
-  .score-report { width: 100%; background: #fff; border: 1px solid var(--border); padding: 2.5rem 2.75rem; }
-  .sr-header { display: flex; align-items: center; gap: 1.25rem; border-bottom: 2px solid var(--red); padding-bottom: 1.5rem; margin-bottom: 1.75rem; }
-  .sr-logo { height: 34px; width: auto; }
-  .sr-title { font-family: var(--display); font-size: 1.3rem; font-weight: 700; color: var(--text); margin-bottom: 0.2rem; }
-  .sr-sub { font-size: 0.78rem; color: var(--mid); }
-  .sr-overall { text-align: center; margin-bottom: 2.25rem; }
-  .sr-overall-num { font-family: var(--serif); font-size: clamp(2.4rem, 5vw, 3.2rem); font-weight: 700; color: var(--red); line-height: 1; }
-  .sr-overall-label { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); margin-top: 0.4rem; }
-  .sr-block { margin-bottom: 2rem; }
-  .sr-block-hed { font-size: 0.66rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mid); margin-bottom: 1rem; }
-  .sr-bar-row { margin-bottom: 1rem; }
-  .sr-bar-label { display: flex; justify-content: space-between; font-size: 0.82rem; color: var(--text); margin-bottom: 0.4rem; }
-  .sr-bar-label span:last-child { color: var(--mid); font-size: 0.78rem; }
-  .sr-bar-track { height: 8px; background: rgba(17,17,17,0.08); }
-  .sr-bar-fill { height: 100%; background: var(--red); }
   .sr-bar-fill.strong { background: #5E8B6F; }
   .sr-bar-fill.weak { background: var(--gold); }
-  .sr-narrative-block { background: var(--bg); border-left: 3px solid var(--gold); padding: 1.25rem 1.5rem; }
-  .sr-narrative { font-size: 0.85rem; line-height: 1.8; color: var(--mid); }
-  .sr-takeaways { list-style: none; margin: 0; padding: 0; }
-  .sr-takeaways li { font-size: 0.85rem; line-height: 1.75; color: var(--mid); padding: 0.45rem 0 0.45rem 1.4rem; position: relative; }
-  .sr-takeaways li::before { content: '◆'; position: absolute; left: 0; top: 0.55rem; font-size: 0.5rem; color: var(--gold); }
-  .sr-takeaways li strong { color: var(--text); font-weight: 700; }
-  .sr-takeaways li .sr-red { color: var(--red); font-weight: 700; }
-  .sr-footer { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; border-top: 1px solid var(--border); padding-top: 1.5rem; font-size: 0.7rem; color: var(--faint); }
-  .sr-print-btn { background: var(--text); color: #fff; border: none; font-family: var(--hel); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.75rem 1.4rem; cursor: pointer; transition: opacity 0.2s; }
-  .sr-print-btn:hover { opacity: 0.82; }
 
   @media print {
     body * { visibility: hidden; }
     #score-report, #score-report * { visibility: visible; }
     #score-report { display: block !important; position: absolute; left: 0; top: 0; width: 100%; border: none; padding: 0.5in; }
-    .sr-print-btn { display: none !important; }
   }
 
   /* Home used to try to fit one viewport with overflow:hidden on a large
@@ -1298,10 +1252,42 @@
   #screen-vocab .panel-wide { max-width: 640px; }
   .vp-head { text-align: center; margin-bottom: 1.25rem; }
   .vp-panel-label { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); margin: 1rem 0 0.55rem; }
-  .vp-pills { display: flex; flex-wrap: wrap; gap: 0.45rem; }
-  .vp-pill { font-family: var(--hel); font-size: 0.8rem; font-weight: 500; color: var(--text); background: var(--white); border: 1px solid var(--border); border-radius: 999px; padding: 0.45rem 0.95rem; cursor: pointer; transition: border-color 0.12s, background 0.12s, color 0.12s, transform 0.12s var(--ease); }
-  .vp-pill:hover { border-color: var(--mid); transform: translateY(-1px); }
-  .vp-pill.on { border-color: var(--red); background: var(--red); color: #fff; font-weight: 600; }
+  /* ═══ SET TILES ═══ two tiles, not a whole grid of one per set: "All
+     sets" and a "Choose sets" tile that opens a dropdown of individual
+     sets (checkboxes, one or many) — the card-grid version of this
+     (one tile per set) worked but ate a lot of vertical space for
+     something used maybe once per session. Each dropdown row still shows
+     word count + a mastery bar, same info the old per-set cards had. */
+  .vp-set-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+  .vp-set-card { position: relative; text-align: left; background: var(--white); border: 1.5px solid var(--border); border-radius: 12px; padding: 0.75rem 0.85rem; cursor: pointer; transition: border-color 0.12s, transform 0.12s var(--ease); }
+  .vp-set-card:hover { transform: translateY(-1px); border-color: var(--mid); }
+  .vp-set-card.on { border-color: var(--red); background: #fdf5f4; }
+  .vp-set-card-top { display: flex; align-items: center; justify-content: space-between; gap: 0.4rem; }
+  .vp-set-card-name { font-family: var(--hel); font-size: 0.8rem; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 0.4rem; }
+  .vp-set-card.on .vp-set-card-name { color: var(--red); }
+  .vp-set-card-check { flex-shrink: 0; width: 15px; height: 15px; border-radius: 50%; border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; transition: border-color 0.12s, background 0.12s; }
+  .vp-set-card.on .vp-set-card-check { border-color: var(--red); background: var(--red); }
+  .vp-set-card-check svg { width: 9px; height: 9px; opacity: 0; }
+  .vp-set-card.on .vp-set-card-check svg { opacity: 1; }
+  .vp-set-card-count { font-size: 0.66rem; color: var(--faint); margin-top: 0.3rem; }
+  .vp-set-card-all { border-style: dashed; }
+  /* "Choose sets" tile — its own caret instead of the round check (it's a
+     dropdown trigger, not a plain toggle), and stays visually "on"
+     whenever one or more individual sets are picked even though "All
+     sets" isn't. */
+  .vp-set-select-tile.on { border-color: var(--red); background: #fdf5f4; }
+  .vp-set-select-caret { flex-shrink: 0; font-size: 0.8rem; color: var(--faint); transition: transform 0.15s var(--ease), color 0.12s; }
+  .vp-set-select-tile.open .vp-set-select-caret { transform: rotate(180deg); color: var(--red); }
+  .vp-set-dropdown-panel { display: none; position: absolute; top: calc(100% + 8px); left: 0; right: 0; z-index: 40; max-height: 280px; overflow-y: auto; scrollbar-gutter: stable; background: var(--white); border: none; border-radius: 14px; box-shadow: 0 12px 32px rgba(17,17,17,0.14); padding: 0.4rem; cursor: default; }
+  .vp-set-select-tile.open .vp-set-dropdown-panel { display: block; }
+  .vp-set-dropdown-row { display: flex; align-items: center; gap: 0.55rem; padding: 0.5rem 0.55rem; border-radius: 8px; cursor: pointer; }
+  .vp-set-dropdown-row:hover { background: var(--bg); }
+  .vp-set-dropdown-row input { width: 15px; height: 15px; accent-color: var(--red); cursor: pointer; flex-shrink: 0; }
+  .vp-set-dropdown-row-main { flex: 1; min-width: 0; }
+  .vp-set-dropdown-row-name { font-family: var(--hel); font-size: 0.8rem; font-weight: 600; color: var(--text); }
+  .vp-set-dropdown-row-count { font-size: 0.64rem; color: var(--faint); margin-top: 0.1rem; }
+  .vp-set-dropdown-row-track { height: 3px; background: var(--bg); border-radius: 2px; overflow: hidden; margin-top: 0.3rem; width: 90px; }
+  .vp-set-dropdown-row-fill { height: 100%; background: linear-gradient(90deg, var(--gold), #3f7d54); width: 0; }
   .vp-pool-count { font-size: 0.72rem; color: var(--faint); margin-top: 0.55rem; }
 
   /* ═══ STATS ROW — Mastered/Learning/Not started counts, derived from
@@ -1371,7 +1357,6 @@
   .vp-still-btn:disabled { opacity: 0.4; cursor: default; }
   .vp-still-btn:disabled:hover { background: transparent; color: var(--red); transform: none; }
   .vp-modes { display: flex; gap: 0.4rem; margin-top: 1.1rem; border: 1px solid var(--border); border-radius: 8px; padding: 0.3rem; background: var(--white); }
-  .vp-mode-btn { flex: 1; font-family: var(--hel); font-size: 0.78rem; font-weight: 600; color: var(--mid); background: transparent; border: none; border-radius: 6px; padding: 0.6rem 0.4rem; cursor: pointer; transition: background 0.15s var(--ease), color 0.15s var(--ease); }
   .vp-mode-btn.on { background: var(--red); color: #fff; }
   .vp-change-link { display: inline-block; font-family: var(--hel); font-size: 0.78rem; font-weight: 600; color: var(--mid); text-decoration: none; margin-bottom: 0.8rem; transition: color 0.12s var(--ease); }
   .vp-change-link:hover { color: var(--text); }
@@ -1719,11 +1704,6 @@
      shared with the My Incorrect Questions module further down (see that
      module's own header comment) — kept even though the Question Practice
      feature that introduced them was removed. */
-  .pb-q-meta { display: flex; justify-content: space-between; align-items: baseline; font-family: var(--hel); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); margin-bottom: 0.6rem; }
-  .iq-saved-badge { flex-shrink: 0; color: var(--gold); font-weight: 700; letter-spacing: 0.04em; }
-  .pb-passage { font-family: var(--serif); font-size: 0.98rem; line-height: 1.85; color: var(--text); background: var(--white); border: 1px solid var(--border); border-radius: 14px; padding: 1.6rem; margin-bottom: 1rem; opacity: 0; animation: vpRise 0.3s cubic-bezier(.2,.7,.3,1) forwards; }
-  .pb-q-card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; padding: 1.6rem; opacity: 0; animation: vpRise 0.3s cubic-bezier(.2,.7,.3,1) forwards; }
-  .pb-q-text { font-family: var(--serif); font-size: 1.02rem; line-height: 1.65; color: var(--text); margin-bottom: 1.25rem; }
   .dx-choice.pb-tried-wrong { border-color: var(--red); background: #f8ecea; opacity: 0.7; cursor: default; }
   .dx-choice.pb-tried-wrong .dx-choice-letter { border-color: var(--red); color: var(--red); }
   .dx-choice.pb-right { border-color: #3f7d54; background: #eaf3ec; cursor: default; }
@@ -1740,9 +1720,6 @@
      than a read-only report: unanswered mc choices (.iq-quiz-choice) stay
      clickable; once answered they render as .iq-quiz-answered instead,
      which is the one that goes back to non-interactive/cursor:default. ═══ */
-  .iq-section-hed { font-family: var(--display); font-size: 1.05rem; font-weight: 700; color: var(--text); margin: 1.9rem 0 0.5rem; }
-  #iq-list .iq-section-hed:first-child { margin-top: 0.6rem; }
-  .iq-domain-hed { font-family: var(--hel); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); margin: 1.1rem 0 0.7rem; border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; }
   .iq-item .iq-quiz-answered { cursor: default; }
   .iq-item .iq-quiz-answered:hover { border-color: var(--border); }
   .iq-item .iq-quiz-choice:hover { border-color: var(--gold); background: rgba(201,168,76,0.06); }
@@ -1768,12 +1745,6 @@
   .iq-pill-source { background: rgba(201,168,76,0.16); color: #8a6d1f; }
   .iq-item-time { flex-shrink: 0; font-size: 0.72rem; color: var(--faint); margin-left: auto; white-space: nowrap; }
   .iq-item-preview { flex: 1 1 100%; font-size: 0.85rem; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .iq-missed-on { font-size: 0.68rem; color: var(--faint); margin-top: 1rem; text-align: right; }
-  .iq-quiz-hint { font-size: 0.8rem; color: var(--faint); margin-top: 0.5rem; font-style: italic; }
-  .iq-fr-row { display: flex; gap: 0.7rem; align-items: stretch; }
-  .iq-fr-row .iq-fr-input { flex: 1; }
-  .iq-fr-check { font-family: var(--hel); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #fff; background: var(--red); border: none; border-radius: 6px; padding: 0 1.3rem; cursor: pointer; transition: opacity 0.2s var(--ease); }
-  .iq-fr-check:hover { opacity: 0.86; }
   .vp-summary { text-align: center; background: var(--white); border: 1px solid var(--border); border-radius: 14px; padding: 2rem 1.5rem; }
   .vp-summary .vp-score { font-family: var(--display); font-size: 2.5rem; color: var(--gold); line-height: 1; animation: vpPop 0.4s cubic-bezier(.2,.7,.3,1); }
   .vp-summary .vp-score-sub { font-size: 0.85rem; color: var(--mid); margin: 0.5rem 0 1.25rem; }
@@ -1849,6 +1820,13 @@
 #pt-native-report .bar-fill.weak { background: var(--red); }
 #pt-native-report .bar-fill.strong { background: var(--green); }
 #pt-native-report .score-caption { display: none; }
+/* "Since last time" — see renderSinceLastTime(). Green/red text only (no
+   card chrome of its own) so it reads as a caption under the score tiles,
+   not a competing box next to .behavior-focus/.skilldx-card below it. */
+#pt-native-report .score-since-last { text-align: center; font-family: 'Poppins', sans-serif; font-size: 12px; font-weight: 600; margin: 6px 0 2px; }
+#pt-native-report .score-since-last .up { color: var(--green); }
+#pt-native-report .score-since-last .down { color: var(--red); }
+#pt-native-report .score-since-last .flat { color: var(--mid); }
 #pt-native-report .raw-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 16px; margin-bottom: 16px; }
 #pt-native-report .raw-stat { border: 1px solid rgba(17,17,17,0.08); border-radius: 12px; padding: 11px 12px 9px; box-shadow: 0 1px 2px rgba(17,17,17,0.03); }
 #pt-native-report .raw-stat-lab { font-family: 'Nunito', 'Poppins', sans-serif; font-size: 8.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--faint); margin-bottom: 4px; }
@@ -1987,7 +1965,19 @@
 .q-toggle-switch input:checked ~ .q-toggle-track .q-toggle-thumb { transform: translateX(15px); }
 .q-modal-close { background: none; border: none; font-size: 22px; line-height: 1; cursor: pointer; color: var(--mid); padding: 2px 4px; }
 .q-modal-close:hover { color: var(--ink); }
+/* Calculator toggle — same real Desmos embed the live exam uses (see
+   window.ensureDesmosCalculator), only shown for math questions. */
+.q-modal-calc-btn { display: inline-flex; align-items: center; gap: 6px; font-family: 'Poppins', sans-serif; font-size: 11.5px; font-weight: 600; color: var(--mid); background: none; border: 1px solid var(--border); border-radius: 999px; padding: 5px 12px; cursor: pointer; transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease; }
+.q-modal-calc-btn svg { width: 13px; height: 13px; flex-shrink: 0; }
+.q-modal-calc-btn:hover { border-color: var(--mid); }
+.q-modal-calc-btn.on { border-color: var(--red); background: rgba(176,39,28,0.06); color: var(--red); }
 .q-modal-body { flex: 1 1 auto; min-height: 0; display: flex; overflow: hidden; }
+.q-modal-calc-pane { display: none; flex-direction: column; width: 45%; min-width: 320px; max-width: 640px; flex-shrink: 0; border-right: 1px solid var(--border); background: #fbfbfb; order: -1; }
+.q-modal-body.calc-open .q-modal-calc-pane { display: flex; }
+@media (max-width: 860px) {
+  .q-modal-calc-pane { width: 100%; max-width: none; min-width: 0; height: 45vh; border-right: none; border-top: 1px solid var(--border); order: 0; }
+  .q-modal-body.calc-open { flex-direction: column; overflow-y: auto; }
+}
 .q-modal-pane { flex: 1 1 50%; min-width: 0; overflow-y: auto; padding: 28px 34px; font-size: 13px; line-height: 1.7; }
 .q-modal-passage-pane { border-right: 1px solid var(--border); color: var(--ink); }
 .q-modal-passage-pane:empty { display: none; }
@@ -2037,17 +2027,6 @@
 #pt-native-report .sc-qgrid-cell.ok { background: rgba(94,139,111,0.16); color: var(--green); border-color: rgba(94,139,111,0.4); }
 #pt-native-report .sc-qgrid-cell.bad { background: rgba(176,39,28,0.12); color: var(--red); border-color: rgba(176,39,28,0.4); }
 #pt-native-report .sc-qgrid-cell.skip { background: #fff; color: var(--faint); border-color: var(--border); }
-#pt-native-report .sc-difftime { margin-bottom: 8px; }
-#pt-native-report .sc-difftime-track { display: flex; height: 12px; border-radius: 4px; overflow: hidden; background: #eee7da; margin-bottom: 3px; }
-#pt-native-report .sc-difftime-seg.easy { background: #A9C4B4; }
-#pt-native-report .sc-difftime-seg.medium { background: var(--gold); }
-#pt-native-report .sc-difftime-seg.hard { background: var(--red); }
-#pt-native-report .sc-difftime-legend { display: flex; flex-direction: column; gap: 6px; font-size: 11px; color: var(--mid); margin-top: 8px; }
-#pt-native-report .sc-difftime-legend span { display: inline-flex; align-items: center; gap: 6px; }
-#pt-native-report .sc-difftime-dot { width: 8px; height: 8px; border-radius: 2px; display: inline-block; flex-shrink: 0; }
-#pt-native-report .sc-difftime-dot.easy { background: #A9C4B4; }
-#pt-native-report .sc-difftime-dot.medium { background: var(--gold); }
-#pt-native-report .sc-difftime-dot.hard { background: var(--red); }
 /* "How you allocated your time" — one module's chart, HTML/CSS bars (not
    SVG) so each bar can carry the same .sc-qgrid-tooltip hover popup the
    per-question tiles elsewhere in this report already use, for a
@@ -2061,9 +2040,7 @@
    two separate boxes stacked on the page. */
 #pt-native-report .timing-card { background: var(--white); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); padding: 1.5rem 1.75rem; }
 #pt-native-report .timing-card > #timing-allocation-sub { margin: 0 0 0.9rem; }
-#pt-native-report .timing-card > #timing-allocation { margin: 0 0 1.4rem; }
-#pt-native-report .timing-card > #timing-sub { margin: 0 0 0.9rem; padding-top: 1.4rem; border-top: 1px solid var(--border); }
-#pt-native-report .timing-card > #timing-stats { margin: 0; }
+#pt-native-report .timing-card > #timing-allocation { margin: 0; }
 #pt-native-report .timing-carousel { display: flex; align-items: center; justify-content: center; gap: 6px; }
 /* Borderless — a plain ghost icon button (fill on hover only), not another
    bordered circle sitting next to the chart's own border. */
@@ -2112,15 +2089,9 @@
 #pt-native-report .section-card .sc-title { font-family: 'Caladea', serif; font-size: 13px; font-weight: 700; }
 #pt-native-report .section-card .sc-score { font-size: 11px; color: var(--mid); }
 #pt-native-report .section-card .sc-incorrect { font-size: 10px; color: var(--red); font-weight: 600; margin-bottom: 6px; }
-#pt-native-report .sc-time { display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 6px 12px; font-size: 9.5px; color: var(--mid); margin: 0 0 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
-#pt-native-report .sc-time-item { display: flex; flex-direction: column; }
 #pt-native-report .sc-time-item.ok { color: var(--green); }
 #pt-native-report .sc-time-item.bad { color: var(--red); }
-#pt-native-report .sc-time-label { font-size: 8px; text-transform: uppercase; letter-spacing: 0.03em; color: var(--faint); }
 #pt-native-report .sc-time-item.ok .sc-time-label, #pt-native-report .sc-time-item.bad .sc-time-label { color: inherit; opacity: 0.75; }
-#pt-native-report .sc-flag { display: flex; align-items: flex-start; gap: 6px; font-size: 9.5px; line-height: 1.5; color: var(--ink); background: #fbf1de; border-left: 3px solid var(--gold); border-radius: 8px; padding: 7px 10px; margin: 0 0 10px; }
-#pt-native-report .sc-flag .sc-flag-mark { font-weight: 700; color: var(--gold); flex-shrink: 0; }
-#pt-native-report .sc-flag strong { color: var(--ink); }
 #pt-native-report .sc-bars { margin-bottom: 6px; }
 #pt-native-report .sc-bars .sc-bar-row { margin-bottom: 5px; }
 #pt-native-report .sc-bars .sc-bar-label { display: flex; justify-content: space-between; font-size: 9px; margin-bottom: 2px; }
@@ -2129,8 +2100,6 @@
 #pt-native-report .sc-bars .sc-bar-fill.weak { background: var(--red); }
 #pt-native-report .sc-bars .sc-bar-fill.strong { background: var(--green); }
 #pt-native-report .sc-bars .sc-bar-empty { font-size: 9px; color: var(--faint); }
-#pt-native-report .sc-grouplabel { font-size: 8px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); margin: 8px 0 4px; }
-#pt-native-report .sc-grouplabel:first-child { margin-top: 2px; }
 #pt-native-report .takeaways { list-style: none; }
 #pt-native-report .takeaways li { font-size: 11px; line-height: 1.65; color: var(--mid); padding: 4px 0 4px 16px; position: relative; }
 #pt-native-report .takeaways li::before { content: '◆'; position: absolute; left: 0; top: 8px; font-size: 6px; color: var(--gold); }
@@ -2142,6 +2111,32 @@
    rather than left for a parent to infer from the flag list below it. */
 #pt-native-report .behavior-focus { background: rgba(176,39,28,0.06); border: 1px solid rgba(176,39,28,0.25); border-radius: 10px; padding: 10px 14px; margin-bottom: 12px; font-size: 11.5px; line-height: 1.65; color: var(--ink); }
 #pt-native-report .behavior-focus strong { color: var(--red); }
+/* ═══ SKILL DIAGNOSIS ═══ Mastered/Inefficient/Stuck/Rushed rollup, see
+   skillBuckets/renderSkillDiagnosis(). Same card chrome as .timing-card. */
+#pt-native-report .skilldx-card { background: var(--white); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); padding: 1.5rem 1.75rem; }
+#pt-native-report .skilldx-card > .behavior-focus { margin-bottom: 1.1rem; }
+#pt-native-report .skilldx-row { display: flex; align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+#pt-native-report .skilldx-row:last-child { border-bottom: none; }
+#pt-native-report .skilldx-row-main { flex: 1; min-width: 0; }
+#pt-native-report .skilldx-row-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 5px; }
+#pt-native-report .skilldx-row-name { font-family: 'Poppins', sans-serif; font-size: 12.5px; font-weight: 700; color: var(--ink); }
+#pt-native-report .skilldx-tag { font-family: 'Poppins', sans-serif; font-size: 9.5px; font-weight: 700; letter-spacing: 0.03em; padding: 2px 8px; border-radius: 999px; flex-shrink: 0; }
+#pt-native-report .skilldx-tag.gap { background: rgba(176,39,28,0.1); color: var(--red); }
+#pt-native-report .skilldx-tag.pacing { background: rgba(201,168,76,0.18); color: #8a6d1f; }
+#pt-native-report .skilldx-tag.slow { background: rgba(94,139,111,0.12); color: #3f7d54; }
+#pt-native-report .skilldx-tag.solid { background: rgba(17,17,17,0.06); color: var(--mid); }
+#pt-native-report .skilldx-track { display: flex; height: 8px; border-radius: 4px; overflow: hidden; background: var(--bg); }
+#pt-native-report .skilldx-seg.mastered { background: #3f7d54; }
+#pt-native-report .skilldx-seg.inefficient { background: #A9C4B4; }
+#pt-native-report .skilldx-seg.stuck { background: var(--red); }
+#pt-native-report .skilldx-seg.rushed { background: var(--gold); }
+#pt-native-report .skilldx-legend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border); font-size: 10px; color: var(--mid); }
+#pt-native-report .skilldx-legend span { display: inline-flex; align-items: center; gap: 4px; }
+#pt-native-report .skilldx-dot { width: 7px; height: 7px; border-radius: 2px; display: inline-block; flex-shrink: 0; }
+#pt-native-report .skilldx-dot.mastered { background: #3f7d54; }
+#pt-native-report .skilldx-dot.inefficient { background: #A9C4B4; }
+#pt-native-report .skilldx-dot.stuck { background: var(--red); }
+#pt-native-report .skilldx-dot.rushed { background: var(--gold); }
 #pt-native-report .detail-toggle { display: inline-block; font-size: 9.5px; color: var(--mid); text-decoration: underline; margin-top: 10px; }
 #pt-native-report .ftr { border-top: 1px solid var(--border); margin-top: 14px; padding-top: 8px; font-size: 9.5px; color: var(--faint); display: flex; justify-content: space-between; }
 #pt-native-report table { width: 100%; border-collapse: collapse; font-size: 9.5px; }
@@ -2357,6 +2352,55 @@
 </style>
 </head>
 <body>
+
+<!-- ═══ window.Portal — genuinely shared utilities ═══ this file is a
+     dozen-plus isolated IIFEs (the real exam, vocab practice, Question
+     Bank, Challenge Questions, the native report renderer, ...) that
+     can't see each other's local variables/functions on purpose — same
+     reason window.getPortalStudentKey exists. That isolation is fine for
+     screen-specific state, but small generic utilities (HTML-escaping, a
+     Fisher-Yates shuffle) kept getting reinvented per closure instead of
+     shared, and drifted: this file had THREE different HTML-escaping
+     functions (esc/escHtml/escHtmlQb) escaping different characters, and
+     TWO separate copies of the exact same shuffle. That's exactly the bug
+     class that caused the Question Bank Save button to write to a
+     local-only bookmark map instead of the real Saved & Mistakes system —
+     a closure reached for the nearest same-ish-looking local helper
+     instead of the one actual source of truth. Placed first, before every
+     other script on the page, so it's unconditionally available by the
+     time anything else runs. Each closure below still keeps its own
+     esc()/shuffle()/etc. wrapper (for call-site brevity and because some
+     names are already baked into a lot of call sites) — those wrappers
+     now just delegate here instead of reimplementing the logic, so there
+     is exactly one real copy to fix or extend. ═══ -->
+<script>
+window.Portal = {
+  // The strictest of the three escaping variants this file used to have
+  // (also handles both quote characters, not just &/</>) — safe as the
+  // one shared version since escaping MORE characters than a caller
+  // strictly needs is inert wherever the result lands in HTML text
+  // content (an escaped quote still renders as a plain quote), and
+  // correct rather than unsafe for the few call sites that build an HTML
+  // attribute value from it.
+  escHtml: function (s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  },
+  // Fisher-Yates, non-mutating (returns a new array; the input is untouched).
+  shuffle: function (arr) {
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+};
+</script>
 
 <!-- If something breaks while loading the portal, this catches it and
      shows a plain-English message instead of a blank white page. -->
@@ -3393,6 +3437,11 @@
         <div class="score-tiles" id="score-tiles"></div>
         <div class="raw-stats" id="raw-stats"></div>
       </div>
+      <!-- One stated verdict comparing THIS composite to the last attempt
+           of the same test type, instead of leaving a parent to notice the
+           trend themselves from separate score tiles across separate
+           reports — see renderSinceLastTime() further down. -->
+      <div class="score-since-last" id="score-since-last" style="display:none;"></div>
       <div class="score-caption" id="score-caption"></div>
     </div>
   </div>
@@ -3404,20 +3453,27 @@
     <div class="sec-hed bridge-card-subhed" id="skillbreak-hed" style="display:none;">Skill breakdown</div>
     <div id="accuracy-by-topic" style="display:none;"></div>
   </div>
-  <!-- Timing: the per-question allocation graph first, the easy/medium/hard
-       time-split cards below it (#timing-allocation before #timing-stats —
-       each is its own fixed container so this HTML order is what decides
-       the on-page order, regardless of which one the JS fills in first). -->
+  <!-- Timing: the per-question allocation graph — see .timing-card CSS.
+       The old "time split by difficulty" stat that used to sit below this
+       (easy/medium/hard % of time) was removed: it told you WHERE time
+       went but not whether that mattered, which is exactly what "Where it
+       matters most" right below now answers instead, per-skill and with
+       actual right/wrong context. -->
   <div class="sec-hed" id="timing-hed" style="display:none;">Timing</div>
-  <!-- One tile, like the "Path to target score" bridge-card — the
-       allocation graph and the difficulty time-split sit in the SAME
-       bordered card, with #timing-sub's border-top acting as the divider
-       line between them (see .timing-card CSS). -->
   <div class="timing-card" id="timing-card" style="display:none;">
     <p class="quadrant-sub" id="timing-allocation-sub" style="display:none;">Every question in one module — when it was visited and how long it took, right (green) or wrong (red). A bar reaching well past where it "should" sit means a later return trip to that question, not just reading order.</p>
     <div id="timing-allocation" style="display:none;"></div>
-    <p class="quadrant-sub" id="timing-sub" style="display:none;">How your time split across easy, medium, and hard questions in each subject — a rough gut check on whether the clock is where the trouble actually is.</p>
-    <div id="timing-stats" style="display:none;"></div>
+  </div>
+  <!-- Where it matters most: every timed MC question classified as
+       Mastered/Inefficient/Stuck/Rushed (right/wrong × normal/slow pace)
+       and rolled up per skill — see the skillBuckets/renderSkillDiagnosis
+       comment in the JS for the full reasoning. Placed right after the
+       timing chart on purpose: this IS the verdict that chart's raw bars
+       support, read immediately after seeing where the time actually went. -->
+  <div class="sec-hed" id="skilldx-hed" style="display:none;">Where it matters most</div>
+  <div class="skilldx-card" id="skilldx-card" style="display:none;">
+    <div id="skilldx-headline"></div>
+    <div id="skilldx-table"></div>
   </div>
   <div class="sec-hed" id="quadrant-hed" style="display:none;">Confidence quadrant</div>
   <p class="quadrant-sub" id="quadrant-sub" style="display:none;">Each dot is one multiple-choice question — time spent (x) vs. right or wrong (y), relative to <span id="quadrant-sub-first"></span>&rsquo;s own median pace. Hover a dot, or click to review the question.</p>
@@ -3462,6 +3518,10 @@
         <span class="q-modal-flag-pill" id="q-modal-flag-pill" style="display:none;">&#9873; Flagged for review</span>
       </div>
       <div class="q-modal-hed-right">
+        <button type="button" class="q-modal-calc-btn" id="q-modal-calc-btn" style="display:none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10.5" x2="8" y2="10.51"/><line x1="12" y1="10.5" x2="12" y2="10.51"/><line x1="16" y1="10.5" x2="16" y2="10.51"/><line x1="8" y1="14.5" x2="8" y2="14.51"/><line x1="12" y1="14.5" x2="12" y2="14.51"/><line x1="16" y1="14.5" x2="16" y2="14.51"/></svg>
+          <span>Calculator</span>
+        </button>
         <label class="q-modal-toggle">
           <span>Hide answers</span>
           <span class="q-toggle-switch"><input type="checkbox" id="q-modal-hide-toggle" checked><span class="q-toggle-track"><span class="q-toggle-thumb"></span></span></span>
@@ -3476,6 +3536,7 @@
     <div class="q-modal-body" id="q-modal-body">
       <div class="q-modal-pane q-modal-passage-pane" id="q-modal-passage-pane"></div>
       <div class="q-modal-pane q-modal-question-pane" id="q-modal-question-pane"></div>
+      <div class="q-modal-calc-pane" id="q-modal-calc-pane"></div>
     </div>
     <div class="q-modal-ftr">
       <span id="q-modal-counter"></span>
@@ -3603,7 +3664,7 @@
       </div>
 
       <div class="vp-panel-label">Choose your sets</div>
-      <div class="vp-pills" id="vp-pills"></div>
+      <div class="vp-set-cards" id="vp-set-cards"></div>
       <div class="vp-pool-count" id="vp-pool-count"></div>
 
       <div class="vp-still-panel" id="vp-still-panel"></div>
@@ -4304,6 +4365,93 @@
     return { incorrectQuestions: incorrectQuestions, skillStats: skillStats, savedQuestions: savedQuestions, collections: collections };
   }
 
+  // Cross-device fix for Saved & Mistakes' other half — see
+  // reconcileLocalScoreHistory() further down for the identical fix
+  // already shipped for score history, and fetchPortalProgress()'s own
+  // comment for why this one needed a backend version marker first. A
+  // local entry the server doesn't confirm gets dropped UNLESS it's recent
+  // enough that it might just not have synced yet (same grace window
+  // reconcileLocalScoreHistory uses) — e.g. a question saved seconds ago,
+  // right before this fetch landed. Also writes the result back to
+  // localStorage (storageKey) so this device's own cache self-heals, not
+  // just the in-memory value this call returns.
+  var PROGRESS_RECONCILE_GRACE_MS = 10 * 60 * 1000;
+  function reconcileProgressMap(localMap, serverMap, tsField, storageKey) {
+    localMap = localMap || {}; serverMap = serverMap || {};
+    var kept = {}, droppedAny = false;
+    Object.keys(localMap).forEach(function (k) {
+      if (Object.prototype.hasOwnProperty.call(serverMap, k)) return; // server copy (added below) wins on collision
+      var entry = localMap[k];
+      var ts = entry && entry[tsField] ? Date.parse(entry[tsField]) : NaN;
+      if (!isNaN(ts) && (Date.now() - ts) < PROGRESS_RECONCILE_GRACE_MS) kept[k] = entry;
+      else droppedAny = true;
+    });
+    Object.keys(serverMap).forEach(function (k) { kept[k] = serverMap[k]; });
+    if (droppedAny) {
+      try { localStorage.setItem(storageKey, JSON.stringify({ byKey: kept, updatedAt: new Date().toISOString() })); } catch (e) { /* private browsing / storage disabled — next reconcile will just retry */ }
+    }
+    return kept;
+  }
+
+  // Same idea as loadLocalProgressCache() above, split out separately since
+  // the vocab/Question Bank modules read these raw shapes directly (they
+  // own the merge logic themselves — see mergeVocabProgress_/mergeQbAttempts_
+  // in their own script blocks) rather than through fetchPortalProgress's
+  // callback shape.
+  function loadLocalVocabProgress_(key) {
+    try {
+      var raw = localStorage.getItem('moretti_vocab_progress_' + key);
+      var obj = raw ? JSON.parse(raw) : null;
+      if (obj && typeof obj === 'object') {
+        return { stillLearning: obj.stillLearning || {}, seen: obj.seen || {}, termUpdatedAt: obj.termUpdatedAt || {} };
+      }
+    } catch (e) { /* ignore */ }
+    return { stillLearning: {}, seen: {}, termUpdatedAt: {} };
+  }
+  function loadLocalQbAttempts_(key) {
+    try {
+      var raw = localStorage.getItem('moretti_qb_progress_' + key);
+      var obj = raw ? JSON.parse(raw) : null;
+      if (obj && obj.attempts && typeof obj.attempts === 'object') return obj.attempts;
+    } catch (e) { /* ignore */ }
+    return {};
+  }
+  // Last-write-wins merge by per-entry timestamp — used for both vocab
+  // terms (termUpdatedAt) and Question Bank attempts (attemptedAt), since
+  // both can flip back and forth on different devices (a word marked
+  // "Got it" on a phone, then answered wrong again on a laptop) and a
+  // dumb union would let a stale flag from one device silently win.
+  function mergeByTimestamp_(localMap, serverMap, localTimes, serverTimes) {
+    var out = {}, times = {};
+    Object.keys(localMap || {}).forEach(function (k) { out[k] = localMap[k]; times[k] = (localTimes && localTimes[k]) || ''; });
+    Object.keys(serverMap || {}).forEach(function (k) {
+      var st = (serverTimes && serverTimes[k]) || '';
+      if (!(k in out) || String(st) > String(times[k] || '')) { out[k] = serverMap[k]; times[k] = st; }
+    });
+    return { map: out, times: times };
+  }
+  // Exposed on window — the vocab/Question Bank modules that actually own
+  // this data live in separate isolated IIFEs (same reason
+  // window.getPortalStudentKey exists) and call these after fetching their
+  // own local + backend copies.
+  window.mergeVocabProgress_ = function (local, server) {
+    if (!server) return local;
+    var sl = mergeByTimestamp_(local.stillLearning, server.stillLearning, local.termUpdatedAt, server.termUpdatedAt);
+    // seen{} is monotonic (a word never becomes "unseen") — plain union is
+    // correct and needs no timestamp.
+    var seen = Object.assign({}, local.seen, server.seen);
+    return { stillLearning: sl.map, seen: seen, termUpdatedAt: sl.times };
+  };
+  window.mergeQbAttempts_ = function (local, server) {
+    var out = {};
+    Object.keys(local || {}).forEach(function (qid) { out[qid] = local[qid]; });
+    Object.keys(server || {}).forEach(function (qid) {
+      var s = server[qid];
+      if (!out[qid] || String((s && s.attemptedAt) || '') > String((out[qid] && out[qid].attemptedAt) || '')) out[qid] = s;
+    });
+    return out;
+  };
+
   // Fetches this student's synced "Saved & Mistakes" / "Practice My
   // Weak Spots" data from the backend (Code.gs' Progress sheet) — shared
   // by both of those tools' own isolated modules further down the page
@@ -4339,6 +4487,8 @@
     var key = currentStudent && currentStudent.key;
     if (!key) { callback({ incorrectQuestions: {}, skillStats: {}, savedQuestions: {} }); return; }
     var localCache = loadLocalProgressCache();
+    localCache.vocabProgress = loadLocalVocabProgress_(key);
+    localCache.qbAttempts = loadLocalQbAttempts_(key);
     callback(Object.assign({ isStale: true }, localCache));
     if (progressFetchResult && (Date.now() - progressFetchAt) < PROGRESS_CACHE_TTL_MS) {
       callback(progressFetchResult);
@@ -4359,18 +4509,24 @@
       .then(function (data) {
         var result;
         if (data && data.ok) {
-          // Merge in this device's own local saved/incorrect-question
-          // caches regardless — until Code.gs is redeployed with the
-          // matching column, an old-but-still-`ok`-responding backend has
-          // no savedQuestions/qb-sourced incorrectQuestions entries at
-          // all, and without this merge a just-saved or just-missed
-          // Question Bank question would silently vanish from Saved &
-          // Mistakes (the backend branch otherwise wins outright, never
-          // falling through to loadLocalProgressCache() below). Backend
-          // entries win on key collision once that IS deployed and both
-          // sides agree.
-          var mergedSaved = Object.assign({}, localCache.savedQuestions, data.savedQuestions || {});
-          var mergedIncorrect = Object.assign({}, localCache.incorrectQuestions, data.incorrectQuestions || {});
+          // apiVersion only exists on a Code.gs new enough to have BOTH
+          // IncorrectQuestionsJSON and SavedQuestionsJSON wired up (see the
+          // PROGRESS_API_VERSION comment in Code.gs) — that's the one
+          // signal that separates "the backend legitimately has nothing
+          // here for this key" from "this deployed backend predates these
+          // fields and never touched them at all." Only once that's
+          // confirmed is it safe to RECONCILE (drop a local entry the
+          // server doesn't confirm) instead of just merging — reconciling
+          // against an old backend would silently wipe real local data the
+          // backend was simply never asked about. Below that version, this
+          // falls back to the old additive-only merge exactly as before.
+          var canReconcile = typeof data.apiVersion === 'number' && data.apiVersion >= 2;
+          var mergedSaved = canReconcile
+            ? reconcileProgressMap(localCache.savedQuestions, data.savedQuestions || {}, 'savedAt', 'moretti_saved_qs_' + key)
+            : Object.assign({}, localCache.savedQuestions, data.savedQuestions || {});
+          var mergedIncorrect = canReconcile
+            ? reconcileProgressMap(localCache.incorrectQuestions, data.incorrectQuestions || {}, 'attemptedAt', 'moretti_incorrect_qs_' + key)
+            : Object.assign({}, localCache.incorrectQuestions, data.incorrectQuestions || {});
           // Collections merge per NAME (not per-question-within-a-name) —
           // a collection is always synced as a whole (see
           // syncCollectionsToBackend()), so the backend's copy of a given
@@ -4378,7 +4534,9 @@
           // local-only collection this device hasn't synced yet still
           // shows up via the merge.
           var mergedCollections = Object.assign({}, localCache.collections, data.collections || {});
-          result = { incorrectQuestions: mergedIncorrect, skillStats: data.skillStats || {}, savedQuestions: mergedSaved, collections: mergedCollections };
+          var mergedVocab = window.mergeVocabProgress_(localCache.vocabProgress, data.vocabProgress || null);
+          var mergedQbAttempts = window.mergeQbAttempts_(localCache.qbAttempts, data.qbAttempts || {});
+          result = { incorrectQuestions: mergedIncorrect, skillStats: data.skillStats || {}, savedQuestions: mergedSaved, collections: mergedCollections, vocabProgress: mergedVocab, qbAttempts: mergedQbAttempts };
         } else {
           result = localCache;
         }
@@ -4399,6 +4557,35 @@
   // this, saving a question then jumping straight to Saved & Mistakes
   // could still show the pre-save cached copy for up to a minute.
   window.invalidatePortalProgressCache = function () { progressFetchResult = null; progressFetchAt = 0; };
+
+  // Push bridges for the vocab/Question Bank modules below (isolated
+  // closures, same reason window.getPortalStudentKey exists) — debounced
+  // so a rapid burst of grading actions (e.g. 10-Minute Practice answering
+  // a card every couple seconds) coalesces into one request instead of one
+  // per card. Both actions overwrite server-side wholesale — safe because
+  // the caller always sends its own already-merged (local+server) view,
+  // same reasoning as syncCollectionsToBackend()/updateCollections above.
+  var vocabSyncTimer = null, qbAttemptsSyncTimer = null;
+  window.syncVocabProgress = function (progress) {
+    var key = currentStudent && currentStudent.key;
+    if (!key || !progress) return;
+    clearTimeout(vocabSyncTimer);
+    vocabSyncTimer = setTimeout(function () {
+      postToBackend({ action: 'syncVocabProgress', key: key, progress: progress }).then(function () {
+        if (window.invalidatePortalProgressCache) window.invalidatePortalProgressCache();
+      }).catch(function () { /* best-effort — this device's own localStorage copy is already saved */ });
+    }, 1500);
+  };
+  window.syncQbAttempts = function (attempts) {
+    var key = currentStudent && currentStudent.key;
+    if (!key || !attempts) return;
+    clearTimeout(qbAttemptsSyncTimer);
+    qbAttemptsSyncTimer = setTimeout(function () {
+      postToBackend({ action: 'syncQbAttempts', key: key, attempts: attempts }).then(function () {
+        if (window.invalidatePortalProgressCache) window.invalidatePortalProgressCache();
+      }).catch(function () { /* best-effort */ });
+    }, 1500);
+  };
 
   var activeScreenId = 'screen-key';
   var STORAGE_KEY = 'moretti_portal_state';
@@ -4487,7 +4674,8 @@
       moduleStage: moduleStage,
       module2Variant: module2Variant,
       module1Buffer: module1Buffer,
-      breakEndsAt: breakEndsAt
+      breakEndsAt: breakEndsAt,
+      breakKind: breakKind
     };
     try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(payload)); } catch (e) { /* private browsing / storage disabled — fail silently */ }
     syncResumeSnapshot(payload);
@@ -5157,6 +5345,13 @@
   // natural render (leaving/re-entering this screen) instead of mid-click.
   function anyPtMenuOpen() { return !!document.querySelector('[data-pt-menu-wrap].open'); }
   var serverScoreHistoryEntries = [];
+  // Distinguishes "haven't heard back from the server yet" from "server
+  // says there's genuinely nothing" — mergedScoreHistory() below needs
+  // this to know whether it's actually safe to treat the server's list as
+  // authoritative for reconciling stale local entries, or whether the
+  // fetch just hasn't landed yet (in which case an empty
+  // serverScoreHistoryEntries must NOT be read as "delete everything").
+  var serverScoreHistoryFetched = false;
   function loadServerScoreHistory() {
     var key = currentStudent && currentStudent.key;
     if (!key) return;
@@ -5166,9 +5361,37 @@
     }).then(function (r) { return r.json(); }).then(function (data) {
       if (!data || !data.ok || !Array.isArray(data.entries)) return;
       serverScoreHistoryEntries = data.entries;
+      serverScoreHistoryFetched = true;
+      reconcileLocalScoreHistory();
       if (activeScreenId === 'screen-menu') { renderScoreProgress(); renderRecentTestCard(); }
       else if (activeScreenId === 'screen-practice-tests' && !anyPtMenuOpen()) renderPracticeTestList();
     }).catch(function () { /* stays empty — same as any other best-effort fetch here */ });
+  }
+  // Fixes the actual "stale device" bug: deleteAttempt() only ever purges
+  // the LOCAL cache on the device that clicked Delete (see its own
+  // comment) — any OTHER device (a student's own laptop, or a second
+  // computer of Luca's) that had already cached that same bad attempt
+  // keeps showing it forever, since mergedScoreHistory() used to just
+  // UNION local + server with no way to notice an entry had been removed
+  // server-side. Once the server's list is confirmed fetched, any local
+  // entry with an attemptId that's no longer in it — and old enough that
+  // it isn't just a brand-new attempt still waiting to sync — gets purged
+  // from localStorage right here, so this device self-heals the moment it
+  // next checks in, not just for the one device that ran the delete.
+  var RECONCILE_GRACE_MS = 10 * 60 * 1000;
+  function reconcileLocalScoreHistory() {
+    var key = currentStudent && currentStudent.key;
+    if (!key || !serverScoreHistoryFetched) return;
+    var serverIds = {};
+    serverScoreHistoryEntries.forEach(function (e) { if (e && e.attemptId) serverIds[e.attemptId] = true; });
+    var local = loadScoreHistory();
+    var kept = local.filter(function (e) {
+      if (!e || !e.attemptId || serverIds[e.attemptId]) return true;
+      var ts = e.date ? Date.parse(e.date) : NaN;
+      return !isNaN(ts) && (Date.now() - ts) < RECONCILE_GRACE_MS;
+    });
+    if (kept.length === local.length) return; // nothing stale — don't touch storage for no reason
+    try { localStorage.setItem('moretti_score_history_' + key, JSON.stringify({ entries: kept })); } catch (e) { /* private browsing / storage disabled — next reconcile will just retry */ }
   }
   // Local + server history combined, deduped by attemptId so an attempt
   // taken on THIS device (present in both copies once its sync call lands)
@@ -7743,76 +7966,51 @@
     divider.addEventListener('pointercancel', stopDrag);
   })();
 
-  /* ═══ DESMOS CALCULATOR ═══ real Desmos graphing calculator, not a
-     custom-built one — embedded as a genuine flex-sibling side panel (see
+  /* ═══ DESMOS CALCULATOR ═══ the SAME calculator embedded live inside
+     College Board's own Bluebook app for the real digital SAT/PSAT — an
+     iframe of Desmos' own testing endpoint (desmos.com/testing/
+     collegeboard/graphing), not the general-purpose public API this used
+     to load. Embedded as a genuine flex-sibling side panel (see
      .dx-calc-pane in the CSS) so the question/passage content actually
      shifts over to make room, matching the real digital SAT rather than
      floating a modal on top of it. Math sections only (dx-calculator-btn
      is hidden/shown by MATH_SECTION_KEYS in goToModuleIntro()).
 
-     The Desmos script itself is lazy-loaded on first open, not at page
-     load — same reasoning as window.__chartJsReady above (a script this
-     size shouldn't cost anything for the (likely majority of) students
-     who never open the calculator). Uses Desmos' public demo API key —
-     fine for this volume of usage, but if this ever needs its own
-     production key, swap it here: https://www.desmos.com/api/v1.9/docs/ */
-  var desmosCalcInstance = null;
-  var desmosLoadPromise = null;
-  function loadDesmos() {
-    if (!desmosLoadPromise) {
-      desmosLoadPromise = new Promise(function (resolve, reject) {
-        if (window.Desmos) { resolve(); return; }
-        var s = document.createElement('script');
-        s.src = 'https://www.desmos.com/api/v1.9/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6';
-        s.onload = resolve;
-        s.onerror = reject;
-        document.head.appendChild(s);
-      });
-    }
-    return desmosLoadPromise;
-  }
-  // Split out of openCalculator() below so the exact same lazy-load +
-  // singleton-instance + resize dance is callable from other closures too
-  // (the My Incorrect Questions module's practice runner is its own
-  // isolated IIFE — see the NATIVE REPORT RENDERER comment elsewhere for
-  // why this codebase has several of those — and can't see dxShellEl/
-  // desmosCalcInstance directly, only what's exposed on window). Resolves
-  // once the SAME real Desmos instance this exam screen uses is mounted
-  // and sized into whichever element mountEl currently is — deliberately
-  // NOT re-created per caller, so a graph plotted during a real exam is
-  // still there if the calculator is reopened later from practice mode,
-  // and vice versa.
+     The iframe's src is only set on first open, not at page load, so a
+     student who never opens the calculator never pays for it. This same
+     helper backs the Saved & Mistakes/Question Bank question-preview
+     modal's own calculator toggle — see window.ensureDesmosCalculator's
+     other call site further down the file — so there's exactly one
+     calculator implementation on the whole site, not two that could ever
+     drift apart. */
+  window.DESMOS_CALC_URL = 'https://www.desmos.com/testing/collegeboard/graphing?lang=en';
+  // Split out of openCalculator() below so the exact same lazy-load dance
+  // is callable from other closures too (the My Incorrect Questions
+  // module's practice runner and the shared question-preview modal are
+  // their own isolated IIFEs — see the NATIVE REPORT RENDERER comment
+  // elsewhere for why this codebase has several of those — and can't see
+  // dxShellEl directly, only what's exposed on window). Idempotent — a
+  // mountEl that already has its iframe just gets handed back, so calling
+  // this again never reloads (and loses graph state on) an already-open
+  // calculator.
   function ensureDesmosCalculator(mountEl) {
-    return loadDesmos().then(function () {
-      if (!desmosCalcInstance) {
-        // Full default Desmos functionality — the only restriction is no
-        // copy/paste of graph links or bulk table data (pasteGraphLink /
-        // pasteTableData: false); typing expressions normally is
-        // unaffected.
-        desmosCalcInstance = Desmos.GraphingCalculator(mountEl, {
-          keypad: true, expressionsTopbar: true, settingsMenu: false, border: false,
-          pasteGraphLink: false, pasteTableData: false
-        });
+    return new Promise(function (resolve) {
+      var frame = mountEl.querySelector('iframe.dx-calc-frame');
+      if (!frame) {
+        frame = document.createElement('iframe');
+        frame.className = 'dx-calc-frame';
+        frame.title = 'Desmos graphing calculator';
+        frame.src = window.DESMOS_CALC_URL;
+        mountEl.appendChild(frame);
       }
-      // Never re-created for a caller that already has an instance — the
-      // practice runner (see moveCalcPaneInto() there) physically relocates
-      // the one #dx-calc-mount element itself into whichever container
-      // wants it, rather than asking Desmos to mount a second instance, so
-      // mountEl above only matters the very first time this is ever called.
-      // The panel's own width transitions in via flex layout, not a
-      // sudden reflow, so give it a beat before telling Desmos to measure
-      // its container — asking immediately can catch it mid-layout.
-      setTimeout(function () { if (desmosCalcInstance) desmosCalcInstance.resize(); }, 50);
-      return desmosCalcInstance;
+      resolve(frame);
     });
   }
   window.ensureDesmosCalculator = ensureDesmosCalculator;
   function openCalculator() {
     dxShellEl.classList.add('calc-open');
     document.getElementById('dx-calculator-btn').classList.add('on');
-    ensureDesmosCalculator(document.getElementById('dx-calc-mount')).catch(function () {
-      document.getElementById('dx-calc-mount').innerHTML = '<p style="padding:1.5rem; font-family:var(--hel); font-size:0.8rem; color:var(--faint);">Calculator couldn\'t load — check your connection and try again.</p>';
-    });
+    ensureDesmosCalculator(document.getElementById('dx-calc-mount'));
   }
   function closeCalculator() {
     dxShellEl.classList.remove('calc-open');
@@ -7847,6 +8045,14 @@
   window.dxPracticeNextHandler = null;
   window.dxPracticeBackHandler = null;
   window.dxPracticeExitHandler = null;
+  // Letter-key (A/B/C/D) answer selection during a practice run (My
+  // Incorrect Questions, Challenge Questions, Question Bank) — same slot
+  // pattern as the three handlers above. The real exam's own keydown
+  // listener below calls selectMcAnswer() directly for this; practice runs
+  // build their choice rows in their own isolated closures with their own
+  // per-question state, so this hands the letter index off to whichever
+  // runner is currently active instead.
+  window.dxPracticeLetterHandler = null;
   window.showScreen = show;
   window.dxRenderPassagePane = function (q, splitParts, inlineId) { renderPassagePane(q, splitParts, inlineId); };
   window.dxIsPracticeActive = function () { return iqPracticeActive; };
@@ -7864,7 +8070,10 @@
     var mobileJump = document.querySelector('.dx-mobile-jump');
     if (mobileJump) mobileJump.style.display = 'none';
     document.getElementById('dx-mark').style.display = 'none';
-    document.getElementById('dx-abc-toggle').style.display = 'none';
+    // Answer Eliminator stays visible/usable in practice mode too (Question
+    // Bank, Challenge Questions, My Incorrect Questions) — it toggles the
+    // shared #dx-choices.eliminator-on class every choice-rendering path in
+    // this file reads, real exam or practice runner alike.
     var exitLabel = document.querySelector('#dx-exit-btn span');
     if (exitLabel) exitLabel.textContent = 'Exit Practice';
     dxShellEl.classList.remove('calc-open', 'passage-mode', 'passage-mode-simple');
@@ -7875,6 +8084,7 @@
     window.dxPracticeNextHandler = null;
     window.dxPracticeBackHandler = null;
     window.dxPracticeExitHandler = null;
+    window.dxPracticeLetterHandler = null;
     dxShellEl.classList.remove('calc-open', 'passage-mode', 'passage-mode-simple', 'math-mode');
     document.getElementById('dx-timer-wrap').style.display = '';
     document.getElementById('dx-reference-btn').style.display = '';
@@ -8411,16 +8621,11 @@
     show('screen-test-overview');
   }
   // Renders the section/timing list on the overview, applying the current
-  // accommodation multipliers so the displayed minutes and break length
-  // reflect exactly what the student will get. Re-run whenever an
-  // accommodation option changes. Displayed minutes are rounded for
-  // readability; the timers themselves use the exact (possibly fractional)
-  // multiplied value.
-  function accomTimeLabel() {
-    if (accommodations.timeMult === 2) return 'Double time (+100%)';
-    if (accommodations.timeMult === 1.5) return 'Time and one-half (+50%)';
-    return 'Standard timing';
-  }
+  // accommodation multipliers (set once from the student's account — see
+  // applyStoredAccommodations() below) so the displayed minutes and break
+  // length reflect exactly what the student will get. Displayed minutes
+  // are rounded for readability; the timers themselves use the exact
+  // (possibly fractional) multiplied value.
   function renderOverviewTiming() {
     var mult = accommodations.timeMult;
     var rowsHtml = '';
@@ -8437,6 +8642,14 @@
         '<span class="overview-section-name">' + (i + 1) + '. ' + label + moduleNote + '</span>' +
         '<span class="overview-section-meta">' + totalQuestions + ' questions' + (totalMinutes ? ' — ' + Math.round(totalMinutes) + ' min' : '') + '</span>' +
         '</div>';
+      // Real digital SAT accommodation: extended time (time-and-one-half
+      // or double) gets a 5-minute break between this section's own two
+      // modules — standard timing goes straight through, same as the
+      // real thing. Separate from, and unaffected by, the "extended
+      // breaks" toggle below, which only scales the between-SECTION break.
+      if (hasTwoModules && mult > 1) {
+        rowsHtml += '<div class="overview-break-row">5-minute break (between modules)</div>';
+      }
       var isLast = i === activeSectionKeys.length - 1;
       if (!isLast && !NO_BREAK_AFTER[key]) {
         var breakMin = Math.round(BREAK_SECONDS * accommodations.breakMult / 60);
@@ -8444,65 +8657,22 @@
       }
     });
     document.getElementById('overview-sections').innerHTML = rowsHtml;
-    var stateEl = document.getElementById('accom-state');
-    if (stateEl) {
-      var parts = [accomTimeLabel()];
-      if (accommodations.breakMult > 1) parts.push('extended breaks');
-      stateEl.textContent = parts.join(' · ');
-    }
   }
-
-  // Wire the accommodation option chips: update state, reflect the
-  // selected pill, re-render the timing preview, and persist so a
-  // mid-diagnostic refresh keeps the same accommodations.
-  (function wireAccommodations() {
-    var timeOpts = document.getElementById('accom-time-options');
-    var breakOpts = document.getElementById('accom-break-options');
-    function syncSelected(container) {
-      Array.prototype.forEach.call(container.querySelectorAll('.accom-opt'), function (lbl) {
-        lbl.classList.toggle('selected', lbl.querySelector('input').checked);
-      });
-    }
-    if (timeOpts) timeOpts.addEventListener('change', function (e) {
-      accommodations.timeMult = parseFloat(e.target.value) || 1;
-      syncSelected(timeOpts);
-      renderOverviewTiming();
-      saveState();
-    });
-    if (breakOpts) breakOpts.addEventListener('change', function (e) {
-      accommodations.breakMult = (e.target.value === 'extended') ? 2 : 1;
-      syncSelected(breakOpts);
-      renderOverviewTiming();
-      saveState();
-    });
-  })();
 
   // Called from settle() on every login. Reflects whatever accommodations
   // are saved on the student's account (set once during onboarding, or on
-  // a prior login — see AccomTimeMult/AccomBreakMult in Code.gs) into both
-  // the `accommodations` var itself AND this per-test panel's radios, so
-  // a returning student's diagnostic starts pre-set to their real timing
-  // instead of silently resetting to standard every attempt. The panel
-  // stays editable here on purpose — a student whose accommodations
-  // changed mid-year can still adjust for one attempt without needing to
-  // redo the whole onboarding sequence.
+  // a prior login — see AccomTimeMult/AccomBreakMult in Code.gs) into the
+  // `accommodations` var, so a returning student's diagnostic starts
+  // pre-set to their real timing instead of silently resetting to
+  // standard every attempt. Accommodations are account-level only — there
+  // used to be a per-diagnostic override panel here too, but it was
+  // removed from the HTML and this just backfilled from the account
+  // either way, so there was nothing left for a student to actually
+  // override.
   function applyStoredAccommodations() {
     if (!currentStudent) return;
     if (currentStudent.accomTimeMult) accommodations.timeMult = Number(currentStudent.accomTimeMult);
     if (currentStudent.accomBreakMult) accommodations.breakMult = Number(currentStudent.accomBreakMult);
-    var timeOpts = document.getElementById('accom-time-options');
-    var breakOpts = document.getElementById('accom-break-options');
-    [timeOpts, breakOpts].forEach(function (container) {
-      if (!container) return;
-      Array.prototype.forEach.call(container.querySelectorAll('.accom-opt'), function (lbl) {
-        var input = lbl.querySelector('input');
-        var matches = container === timeOpts
-          ? (parseFloat(input.value) === accommodations.timeMult)
-          : ((input.value === 'extended') === (accommodations.breakMult > 1));
-        input.checked = matches;
-        lbl.classList.toggle('selected', matches);
-      });
-    });
   }
 
   // Backing out of the overview abandons whichever test it was describing —
@@ -8539,9 +8709,15 @@
      Resume Testing is always clickable. Stored as an absolute end
      timestamp, same pattern as the section timer, so a refresh mid-break
      doesn't grant extra time. ═══ */
-  var BREAK_SECONDS = 10 * 60; // matches the real SAT's 10-minute break, and the ACT's single break (after Math, before Reading)
+  var BREAK_SECONDS = 10 * 60; // matches the real SAT's 10-minute break, and the ACT's single break (after Math, before Reading) — between SECTIONS, standard timing or not, unaffected by accommodations
+  // Between MODULES within the same section — real-SAT-accommodations
+  // break that only exists for extended-time students (time-and-a-half or
+  // double time). Standard-time students go straight from Module 1 into
+  // Module 2 with no break at all, same as always.
+  var MODULE_BREAK_SECONDS = 5 * 60;
   var breakEndsAt = null;
   var breakInterval = null;
+  var breakKind = null; // 'section' | 'module' — decides what advanceFromBreak() does next
   var breakTimerEl = document.getElementById('dx-break-timer');
   var breakResumeBtn = document.getElementById('dx-break-resume');
 
@@ -8558,24 +8734,41 @@
     if (breakInterval) { clearInterval(breakInterval); breakInterval = null; }
   }
   function startBreak() {
+    breakKind = 'section';
     breakEndsAt = Date.now() + BREAK_SECONDS * 1000;
     tickBreak();
     breakInterval = setInterval(tickBreak, 1000);
     show('dx-break-screen');
   }
-  function resumeBreak(endsAt) {
+  // Only ever called for an extended-time student (accommodations.timeMult
+  // > 1) between a section's Module 1 and Module 2 — see finishCurrentModule().
+  function startModuleBreak() {
+    breakKind = 'module';
+    breakEndsAt = Date.now() + MODULE_BREAK_SECONDS * 1000;
+    tickBreak();
+    breakInterval = setInterval(tickBreak, 1000);
+    show('dx-break-screen');
+  }
+  function resumeBreak(endsAt, kind) {
     breakEndsAt = endsAt;
+    breakKind = kind || 'section';
     tickBreak();
     breakInterval = setInterval(tickBreak, 1000);
   }
   // Shared by the "Resume Testing" button and the timer hitting zero — once
   // the break is over (whether the student clicked through or just ran out
-  // the clock), move straight into the next section automatically instead
-  // of leaving them stranded on the break screen.
+  // the clock), move straight into whatever's next automatically instead
+  // of leaving them stranded on the break screen: the next SECTION for a
+  // between-section break, or straight into Module 2's intro for a
+  // between-module break (moduleStage/module2Variant/module1Buffer are
+  // already set up for it by finishCurrentModule() before this fires).
   function advanceFromBreak() {
     stopBreakTimer();
     breakEndsAt = null;
-    startSection(sectionIndex);
+    var kind = breakKind;
+    breakKind = null;
+    if (kind === 'module') goToModuleIntro();
+    else startSection(sectionIndex);
   }
   breakResumeBtn.addEventListener('click', advanceFromBreak);
 
@@ -8662,7 +8855,13 @@
         questionFirstVisitDurationMs: canonical(questionFirstVisitDurationMs)
       };
       moduleStage = 'module2';
-      goToModuleIntro();
+      // Real digital SAT accommodation: extended-time students (time-and-
+      // one-half or double time) get a 5-minute break between a section's
+      // two modules — standard-time students go straight into Module 2,
+      // same as always. The 10-minute between-SECTION break below is
+      // unaffected either way.
+      if (accommodations.timeMult > 1) startModuleBreak();
+      else goToModuleIntro();
       return;
     }
 
@@ -8743,11 +8942,22 @@
 
   var abcToggle = document.getElementById('dx-abc-toggle');
   abcToggle.classList.toggle('on', eliminatorOn); // matches the real digital SAT — Answer Eliminator starts ON
+  // Pushed onto #dx-choices immediately (not just inside renderQuestion(),
+  // which only runs once the real exam is actually showing a question) so
+  // a student who goes straight into a practice run (Question Bank,
+  // Challenge, My Incorrect Questions — separate isolated closures that
+  // read this same shared element, see window.dxIsEliminatorOn below)
+  // still sees Answer Eliminator start ON, matching its true default.
+  choicesEl.classList.toggle('eliminator-on', eliminatorOn);
   abcToggle.addEventListener('click', function () {
     eliminatorOn = !eliminatorOn;
     abcToggle.classList.toggle('on', eliminatorOn);
     choicesEl.classList.toggle('eliminator-on', eliminatorOn);
   });
+  // Practice runners (Question Bank, Challenge Questions, My Incorrect
+  // Questions) are their own isolated closures and can't see `eliminatorOn`
+  // directly — same reason window.getPortalStudentKey exists.
+  window.dxIsEliminatorOn = function () { return eliminatorOn; };
 
   var navOverlay      = document.getElementById('dx-nav-overlay');
   var navModalTitle   = document.getElementById('dx-nav-modal-title');
@@ -8953,7 +9163,9 @@
     var tag = (document.activeElement && document.activeElement.tagName) || '';
     if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
     if (iqPracticeActive) {
-      if (e.key === 'Enter' && !nextBtn.disabled) { e.preventDefault(); nextBtn.click(); }
+      if (e.key === 'Enter' && !nextBtn.disabled) { e.preventDefault(); nextBtn.click(); return; }
+      var practiceLetterIdx = ['a', 'b', 'c', 'd'].indexOf(e.key.toLowerCase());
+      if (practiceLetterIdx !== -1 && window.dxPracticeLetterHandler) { e.preventDefault(); window.dxPracticeLetterHandler(practiceLetterIdx); }
       return;
     }
     if (dxMain.classList.contains('dx-checking')) {
@@ -9944,7 +10156,14 @@
       activeSectionKeys = state.activeSectionKeys;
       completedSections = Array.isArray(state.completedSections) ? state.completedSections : [];
       sectionIndex = typeof state.sectionIndex === 'number' ? state.sectionIndex : 0;
-      resumeBreak(typeof state.breakEndsAt === 'number' ? state.breakEndsAt : Date.now() + BREAK_SECONDS * 1000);
+      // Only actually needed for a resumed MODULE break (advanceFromBreak()
+      // calls goToModuleIntro(), which reads these) — harmless to restore
+      // unconditionally otherwise, same fields a mid-module refresh already
+      // restores elsewhere.
+      moduleStage = state.moduleStage || 'module1';
+      module2Variant = state.module2Variant || null;
+      module1Buffer = state.module1Buffer || null;
+      resumeBreak(typeof state.breakEndsAt === 'number' ? state.breakEndsAt : Date.now() + BREAK_SECONDS * 1000, state.breakKind);
       show('dx-break-screen');
     } else if (state.screen === 'screen-resources') {
       renderResources();
@@ -11039,12 +11258,12 @@
   // selectedSets-based pool until the student goes back to setup.
   var reviewPool = null;
 
-  function shuffle(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+  function shuffle(a) { return window.Portal.shuffle(a); }
   function pool() {
     if (reviewPool) return reviewPool;
     var out = []; selectedSets.forEach(function (s) { (VOCAB[s] || []).forEach(function (c) { out.push(c); }); }); return out;
   }
-  function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  function esc(s) { return window.Portal.escHtml(s); }
   function norm(s) { return String(s).toLowerCase().trim().replace(/[^a-z0-9]/g, ''); }
   function allCardsByTerm() {
     var all = {};
@@ -11079,19 +11298,42 @@
       var raw = localStorage.getItem(progressStorageKey());
       var obj = raw ? JSON.parse(raw) : null;
       if (obj && obj.stillLearning && typeof obj.stillLearning === 'object') {
-        // seen{} is newer than stillLearning{} — a progress blob saved
-        // before it existed just gets an empty one here, same as a
-        // brand-new student; nothing in the Mastered count needs it to be
-        // backfilled retroactively.
+        // seen{}/termUpdatedAt{} are newer than stillLearning{} — a progress
+        // blob saved before either existed just gets empty ones here, same
+        // as a brand-new student; nothing needs to be backfilled
+        // retroactively.
         if (!obj.seen || typeof obj.seen !== 'object') obj.seen = {};
+        if (!obj.termUpdatedAt || typeof obj.termUpdatedAt !== 'object') obj.termUpdatedAt = {};
         return obj;
       }
     } catch (e) { /* corrupt or blocked storage — start fresh */ }
-    return { stillLearning: {}, seen: {} };
+    return { stillLearning: {}, seen: {}, termUpdatedAt: {} };
   }
   var progress = loadProgress();
   function saveProgress() {
     try { localStorage.setItem(progressStorageKey(), JSON.stringify(progress)); } catch (e) { /* private browsing / storage disabled — fail silently, matches the rest of the portal's saveState() */ }
+    // Cross-device sync — see window.syncVocabProgress() in the main
+    // script block. Debounced there, so calling this on every grading
+    // action is cheap.
+    if (window.syncVocabProgress) window.syncVocabProgress(progress);
+  }
+  // Merges this device's local progress with the backend's copy (fetched
+  // once per module load) so a word mastered/still-learning on ANOTHER
+  // device shows up here too, instead of this device silently overwriting
+  // the server with a stale/incomplete local picture the first time it
+  // saves. See mergeVocabProgress_()/window.fetchPortalProgress() in the
+  // main script block for the merge rule (last-write-wins per term via
+  // termUpdatedAt; seen{} is a plain union since it's monotonic).
+  var vocabProgressMerged = false;
+  function mergeInServerVocabProgress(serverVocabProgress) {
+    if (!serverVocabProgress || vocabProgressMerged) return;
+    vocabProgressMerged = true;
+    if (window.mergeVocabProgress_) {
+      progress = window.mergeVocabProgress_(progress, serverVocabProgress);
+    }
+    saveProgress();
+    renderStillPanel();
+    renderStatsRow();
   }
   // Every grading action across every mode (Flashcards' Still learning/Got
   // it, a Multiple Choice/Type It/10-minute-practice answer) funnels
@@ -11102,11 +11344,13 @@
   // separate bookkeeping needed at each grading site.
   function setStillLearning(term, flag) {
     progress.seen[term] = true;
+    progress.termUpdatedAt[term] = new Date().toISOString();
     if (flag) progress.stillLearning[term] = true;
     else delete progress.stillLearning[term];
     saveProgress();
     renderStillPanel();
     renderStatsRow();
+    renderPills(); // keeps each set card's own mastery bar live, not just the overall stats row
   }
   // Mastered = seen at least once AND not currently still-learning.
   // Learning = currently still-learning (regardless of seen — a word can
@@ -11139,38 +11383,112 @@
     return Object.keys(progress.stillLearning).map(function (t) { return all[t]; }).filter(Boolean);
   }
 
-  var pillsEl, stageEl, vpSetupEl, vpPracticeEl, stillPanelEl, poolCountEl, startBtnEl;
-  function renderPills() {
-    pillsEl.innerHTML = '';
-    if (setNames.length > 1) {
-      var isAllOn = selectedSets.length === setNames.length;
-      var all = document.createElement('button');
-      all.className = 'vp-pill' + (isAllOn ? ' on' : '');
-      all.type = 'button'; all.textContent = 'All sets';
-      all.addEventListener('click', function () {
-        // Toggle: turning "All sets" on remembers whatever was selected
-        // beforehand; turning it back off restores exactly that, instead
-        // of dropping to nothing.
-        if (isAllOn) { selectedSets = setsAllSnapshot ? setsAllSnapshot.slice() : []; setsAllSnapshot = null; }
-        else { setsAllSnapshot = selectedSets.slice(); selectedSets = setNames.slice(); }
-        renderPills(); updatePoolCount();
-      });
-      pillsEl.appendChild(all);
-    }
-    setNames.forEach(function (s) {
-      var b = document.createElement('button');
-      b.className = 'vp-pill' + (selectedSets.indexOf(s) !== -1 ? ' on' : '');
-      b.type = 'button'; b.textContent = s;
-      b.addEventListener('click', function () {
-        // Plain toggle — clicking an already-selected pill deselects only
-        // that one; there's no "must keep at least one" floor anymore,
-        // since the whole point is that nothing is selected by default.
-        var i = selectedSets.indexOf(s);
-        if (i === -1) selectedSets.push(s); else selectedSets.splice(i, 1);
-        renderPills(); updatePoolCount();
-      });
-      pillsEl.appendChild(b);
+  // Mastered/total within a single set — same rule statsCounts() uses
+  // across the whole bank (mastered = seen at least once AND not currently
+  // still-learning), just scoped to one set's own terms.
+  var CHECK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+  function setStats(setName) {
+    var cards = VOCAB[setName] || [];
+    var mastered = 0;
+    cards.forEach(function (c) {
+      if (!progress.stillLearning[c.term] && progress.seen[c.term]) mastered++;
     });
+    return { total: cards.length, mastered: mastered };
+  }
+  var pillsEl, stageEl, vpSetupEl, vpPracticeEl, stillPanelEl, poolCountEl, startBtnEl;
+  var setDropdownOpen = false;
+  function closeSetDropdown() {
+    if (!setDropdownOpen) return;
+    setDropdownOpen = false;
+    var tile = pillsEl && pillsEl.querySelector('.vp-set-select-tile');
+    if (tile) tile.classList.remove('open');
+  }
+  document.addEventListener('click', function (e) {
+    if (!setDropdownOpen) return;
+    // Checking a row's checkbox fires 'change' -> renderPills() -> the
+    // whole tile (including that checkbox) gets torn down and rebuilt
+    // BEFORE this same click finishes bubbling up to document — e.target
+    // is then a detached node from the old DOM, which tile.contains()
+    // would wrongly read as "click landed outside" and close the panel
+    // the instant someone tries to check a second box. isConnected catches
+    // exactly that case (the node this click actually started on no
+    // longer exists) without otherwise changing what counts as "outside."
+    if (!e.target.isConnected) return;
+    var tile = pillsEl && pillsEl.querySelector('.vp-set-select-tile');
+    if (tile && !tile.contains(e.target)) closeSetDropdown();
+  });
+  // Two tiles instead of the old flat pill row (or the even-older one-card-
+  // per-set grid): "All sets", and a "Choose sets" tile that opens a
+  // dropdown of individual sets — one click gets you either everything or
+  // a precise multi-pick, without ten separate tiles eating the screen for
+  // something used maybe once per session.
+  function renderPills() {
+    if (!pillsEl) return; // called from setStillLearning() too, which can fire before the setup screen's own elements exist
+    var wasOpen = setDropdownOpen;
+    pillsEl.innerHTML = '';
+    if (setNames.length <= 1) return;
+
+    var isAllOn = selectedSets.length === setNames.length;
+    var all = document.createElement('button');
+    all.className = 'vp-set-card vp-set-card-all' + (isAllOn ? ' on' : '');
+    all.type = 'button';
+    var allTotal = setNames.reduce(function (n, s) { return n + (VOCAB[s] || []).length; }, 0);
+    all.innerHTML = '<div class="vp-set-card-top"><span class="vp-set-card-name">&#128218; All sets</span>' +
+      '<span class="vp-set-card-check">' + CHECK_SVG + '</span></div>' +
+      '<div class="vp-set-card-count">' + allTotal + ' words &middot; ' + setNames.length + ' sets</div>';
+    all.addEventListener('click', function () {
+      closeSetDropdown();
+      // Toggle: turning "All sets" on remembers whatever was selected
+      // beforehand; turning it back off restores exactly that, instead
+      // of dropping to nothing.
+      if (isAllOn) { selectedSets = setsAllSnapshot ? setsAllSnapshot.slice() : []; setsAllSnapshot = null; }
+      else { setsAllSnapshot = selectedSets.slice(); selectedSets = setNames.slice(); }
+      renderPills(); updatePoolCount();
+    });
+    pillsEl.appendChild(all);
+
+    // "on" whenever ANY individual set is picked, independent of whether
+    // that happens to add up to every set — that's still "All sets"'
+    // territory to claim visually, not this tile's.
+    var hasSelection = selectedSets.length > 0 && !isAllOn;
+    var tile = document.createElement('div');
+    tile.className = 'vp-set-card vp-set-select-tile' + (hasSelection ? ' on' : '') + (wasOpen ? ' open' : '');
+    var summary = selectedSets.length === 0 ? 'Tap to pick one or more'
+      : selectedSets.length === 1 ? selectedSets[0]
+      : selectedSets.length + ' of ' + setNames.length + ' sets';
+    tile.innerHTML = '<div class="vp-set-card-top"><span class="vp-set-card-name">Choose sets</span>' +
+      '<span class="vp-set-select-caret">&#9662;</span></div>' +
+      '<div class="vp-set-card-count">' + esc(summary) + '</div>' +
+      '<div class="vp-set-dropdown-panel"></div>';
+    tile.querySelector('.vp-set-card-top').addEventListener('click', function () {
+      setDropdownOpen = !setDropdownOpen;
+      tile.classList.toggle('open', setDropdownOpen);
+    });
+    var panel = tile.querySelector('.vp-set-dropdown-panel');
+    setNames.forEach(function (s) {
+      var stats = setStats(s);
+      var pct = stats.total ? Math.round(stats.mastered / stats.total * 100) : 0;
+      var row = document.createElement('label');
+      row.className = 'vp-set-dropdown-row';
+      var cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = selectedSets.indexOf(s) !== -1;
+      cb.addEventListener('change', function () {
+        var i = selectedSets.indexOf(s);
+        if (cb.checked) { if (i === -1) selectedSets.push(s); }
+        else if (i !== -1) selectedSets.splice(i, 1);
+        renderPills(); updatePoolCount();
+      });
+      row.appendChild(cb);
+      var main = document.createElement('div');
+      main.className = 'vp-set-dropdown-row-main';
+      main.innerHTML = '<div class="vp-set-dropdown-row-name">' + esc(s) + '</div>' +
+        '<div class="vp-set-dropdown-row-count">' + stats.total + ' words</div>' +
+        '<div class="vp-set-dropdown-row-track"><div class="vp-set-dropdown-row-fill" style="width:' + pct + '%;"></div></div>';
+      row.appendChild(main);
+      panel.appendChild(row);
+    });
+    pillsEl.appendChild(tile);
   }
   function updatePoolCount() {
     if (!poolCountEl) return;
@@ -11452,7 +11770,7 @@
   window.vocabModuleInit = function () {
     if (started) return;
     started = true;
-    pillsEl = document.getElementById('vp-pills');
+    pillsEl = document.getElementById('vp-set-cards');
     stageEl = document.getElementById('vp-stage');
     vpSetupEl = document.getElementById('vp-setup');
     vpPracticeEl = document.getElementById('vp-practice');
@@ -11484,6 +11802,15 @@
     updatePoolCount();
     renderStillPanel();
     renderStatsRow();
+
+    // Pull in whatever this student's OTHER devices have synced, so
+    // mastered/still-learning status is consistent everywhere instead of
+    // reflecting only this browser. See mergeInServerVocabProgress() above.
+    if (window.fetchPortalProgress) {
+      window.fetchPortalProgress(function (data) {
+        if (data && !data.isStale && data.vocabProgress) mergeInServerVocabProgress(data.vocabProgress);
+      });
+    }
 
     // ═══ KEYBOARD NAV — Left/Right moves between flashcards, Up/Down
     // flips the current one. Registered once (vocabModuleInit only ever
@@ -11525,9 +11852,7 @@
 (function () {
   'use strict';
 
-  function escHtml(s) {
-    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  }
+  function escHtml(s) { return window.Portal.escHtml(s); }
   var LETTERS = ['A', 'B', 'C', 'D', 'E'];
   var DIFFICULTIES = ['easy', 'medium', 'hard'];
   function difficultyLabel(d) { return d ? (d.charAt(0).toUpperCase() + d.slice(1)) : 'Medium'; }
@@ -12157,7 +12482,21 @@
     runnerScore = 0;
     window.dxPracticeNextHandler = runnerAdvance;
     window.dxPracticeExitHandler = endPracticeRunner;
+    window.dxPracticeLetterHandler = selectRunnerChoice;
     if (window.dxStartIncorrectPractice) window.dxStartIncorrectPractice('Practice: Selected Mistakes');
+    renderRunnerQuestion();
+  }
+  // Shared by the click handler on each choice row AND the A/B/C/D keyboard
+  // shortcut (see window.dxPracticeLetterHandler) — same "un-eliminate on
+  // select" behavior the real exam's own selectMcAnswer/renderQuestion
+  // pairing has.
+  function selectRunnerChoice(i) {
+    var r = runnerQueue[runnerIndex];
+    var st = r && runnerState[r.key];
+    if (!st || st.submitted) return;
+    var at = (st.elim || []).indexOf(i);
+    if (at !== -1) st.elim.splice(at, 1);
+    st.chosenIndex = i;
     renderRunnerQuestion();
   }
   function endPracticeRunner() {
@@ -12271,7 +12610,8 @@
       frRowEl.style.display = 'none';
       choicesEl.innerHTML = '';
       r.choices.forEach(function (c, i) {
-        var cls = 'dx-choice';
+        var isElim = !st.submitted && (st.elim || []).indexOf(i) !== -1;
+        var cls = 'dx-choice' + (isElim ? ' eliminated' : '');
         if (!st.submitted) {
           if (st.chosenIndex === i) cls += ' selected';
         } else {
@@ -12282,10 +12622,16 @@
         }
         var row = document.createElement('div');
         row.className = cls;
-        row.innerHTML = '<span class="dx-choice-letter">' + LETTERS[i] + '</span><span class="dx-choice-text">' + c + '</span>';
+        row.innerHTML = '<span class="dx-choice-letter">' + LETTERS[i] + '</span><span class="dx-choice-text">' + c + '</span>' +
+          (!st.submitted ? '<span class="dx-elim" title="Cross out this answer">&times;</span>' : '');
         if (!st.submitted) {
-          row.addEventListener('click', function () {
-            st.chosenIndex = i;
+          row.addEventListener('click', function () { selectRunnerChoice(i); });
+          row.querySelector('.dx-elim').addEventListener('click', function (ev) {
+            ev.stopPropagation();
+            st.elim = st.elim || [];
+            var at = st.elim.indexOf(i);
+            if (at === -1) { st.elim.push(i); if (st.chosenIndex === i) st.chosenIndex = null; }
+            else st.elim.splice(at, 1);
             renderRunnerQuestion();
           });
         }
@@ -12653,7 +12999,19 @@
     var label = sectionKey === 'math' ? 'Challenge: Math' : 'Challenge: Reading & Writing';
     window.dxPracticeNextHandler = runnerAdvance;
     window.dxPracticeExitHandler = endRunner;
+    window.dxPracticeLetterHandler = selectRunnerChoice;
     if (window.dxStartIncorrectPractice) window.dxStartIncorrectPractice(label);
+    renderRunnerQuestion();
+  }
+  // Shared by the click handler on each choice row AND the A/B/C/D keyboard
+  // shortcut (see window.dxPracticeLetterHandler).
+  function selectRunnerChoice(i) {
+    var r = runnerQueue[runnerIndex];
+    var st = r && runnerState[r.key];
+    if (!st || st.submitted) return;
+    var at = (st.elim || []).indexOf(i);
+    if (at !== -1) st.elim.splice(at, 1);
+    st.chosenIndex = i;
     renderRunnerQuestion();
   }
   function endRunner() {
@@ -12748,7 +13106,8 @@
       frRowEl.style.display = 'none';
       choicesEl.innerHTML = '';
       r.choices.forEach(function (c, i) {
-        var cls = 'dx-choice';
+        var isElim = !st.submitted && (st.elim || []).indexOf(i) !== -1;
+        var cls = 'dx-choice' + (isElim ? ' eliminated' : '');
         if (!st.submitted) {
           if (st.chosenIndex === i) cls += ' selected';
         } else {
@@ -12759,10 +13118,16 @@
         }
         var row = document.createElement('div');
         row.className = cls;
-        row.innerHTML = '<span class="dx-choice-letter">' + LETTERS[i] + '</span><span class="dx-choice-text">' + c + '</span>';
+        row.innerHTML = '<span class="dx-choice-letter">' + LETTERS[i] + '</span><span class="dx-choice-text">' + c + '</span>' +
+          (!st.submitted ? '<span class="dx-elim" title="Cross out this answer">&times;</span>' : '');
         if (!st.submitted) {
-          row.addEventListener('click', function () {
-            st.chosenIndex = i;
+          row.addEventListener('click', function () { selectRunnerChoice(i); });
+          row.querySelector('.dx-elim').addEventListener('click', function (ev) {
+            ev.stopPropagation();
+            st.elim = st.elim || [];
+            var at = st.elim.indexOf(i);
+            if (at === -1) { st.elim.push(i); if (st.chosenIndex === i) st.chosenIndex = null; }
+            else st.elim.splice(at, 1);
             renderRunnerQuestion();
           });
         }
@@ -12832,7 +13197,6 @@
 (function () {
   'use strict';
   var LETTERS = ['A', 'B', 'C', 'D'];
-  var SESSION_SIZE = 10;
   var currentSubject = 'rw'; // 'rw' | 'math' — which pool the skills view/runner are currently working from
 
   // Display order for domain groups in the skill drilldown — matches the
@@ -12905,18 +13269,49 @@
   }
   function saveProgress(p) {
     try { localStorage.setItem(progressStorageKey(), JSON.stringify(p)); } catch (e) { /* private browsing / storage disabled — fail silently */ }
+    // Cross-device sync — see window.syncQbAttempts() in the main script
+    // block (debounced there). Only the per-question attempt history
+    // syncs; `saved` here is legacy/unused (real saves route through
+    // window.saveReportQuestion — see qbIsSaved() below).
+    if (window.syncQbAttempts) window.syncQbAttempts(p.attempts);
   }
   function recordAttempt(qid, wasCorrect) {
     var p = loadProgress();
     p.attempts[qid] = { correct: wasCorrect, attemptedAt: new Date().toISOString() };
     saveProgress(p);
   }
-  function toggleSaved(qid) {
+  // Merges in whatever this student's OTHER devices have synced for
+  // per-question attempt history, same reasoning as the vocab module's
+  // mergeInServerVocabProgress(). Called once from qbModuleInit() below.
+  var qbAttemptsMerged = false;
+  function mergeInServerQbAttempts(serverAttempts) {
+    if (!serverAttempts || qbAttemptsMerged) return;
+    qbAttemptsMerged = true;
     var p = loadProgress();
-    if (p.saved[qid]) delete p.saved[qid]; else p.saved[qid] = true;
+    p.attempts = window.mergeQbAttempts_ ? window.mergeQbAttempts_(p.attempts, serverAttempts) : p.attempts;
     saveProgress(p);
-    return !!p.saved[qid];
+    if (typeof renderStats === 'function') renderStats();
+    if (typeof renderSkillsList === 'function') renderSkillsList();
   }
+  // "Saved" here means the SAME Saved & Mistakes "Saved Questions" tab
+  // every other part of the report uses (window.saveReportQuestion, the
+  // same bridge the shared question modal's Save button calls) — not a
+  // separate Question-Bank-only bookmark. It used to be exactly that (a
+  // local-only progress.saved map, isolated from the rest of the app),
+  // which is why a question saved from a Question Bank practice session
+  // never actually showed up in Saved & Mistakes. See qbIsSaved()/
+  // renderSaveBtn() below.
+  function qbSavedByKey() {
+    try {
+      var studentKey = window.getPortalStudentKey ? window.getPortalStudentKey() : null;
+      if (!studentKey) return {};
+      var raw = localStorage.getItem('moretti_saved_qs_' + studentKey);
+      if (!raw) return {};
+      var parsed = JSON.parse(raw);
+      return (parsed && parsed.byKey) || {};
+    } catch (e) { return {}; }
+  }
+  function qbIsSaved(key) { return !!qbSavedByKey()[key]; }
 
   function computeStreak(attempts) {
     var days = {};
@@ -12946,7 +13341,11 @@
     var streakEl = document.getElementById('qb-stat-streak');
     if (attEl) attEl.textContent = String(attemptedQids.length);
     if (accEl) accEl.textContent = accuracy + '%';
-    if (savedEl) savedEl.textContent = String(Object.keys(p.saved).length);
+    if (savedEl) {
+      var savedByKey = qbSavedByKey();
+      var qbSavedCount = Object.keys(savedByKey).filter(function (k) { return k.indexOf('qb|') === 0; }).length;
+      savedEl.textContent = String(qbSavedCount);
+    }
     if (streakEl) streakEl.textContent = String(computeStreak(p.attempts));
 
     function paintSubjectCard(subject, countElId, barElId) {
@@ -12974,9 +13373,7 @@
     }
   }
 
-  function escHtmlQb(s) {
-    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  }
+  function escHtmlQb(s) { return window.Portal.escHtml(s); }
 
   // Splits a question-bank item's raw PDF-extracted text into a left-pane
   // "passage" (the stimulus/notes/paired texts) and a right-pane "question"
@@ -13186,10 +13583,10 @@
           '<td><label class="qb-skill-name-cell">' + escHtmlQb(s.skill) + tagHtml + '</label></td>' +
           '<td><div class="qb-progress-cell"><div class="qb-progress-track"><div class="qb-progress-fill" style="width:' + row.pct + '%;"></div></div>' +
             '<span class="qb-progress-frac">' + row.attempted.length + '/' + s.questions.length + '</span></div></td>' +
-          '<td class="qb-acc-cell' + (row.attempted.length ? ' has-data' : '') + '">' +
+          '<td><div class="qb-acc-cell' + (row.attempted.length ? ' has-data' : '') + '">' +
             (row.attempted.length ? '<span class="qb-strength-dot ' + strengthCls + '"></span>' : '') +
             '<span class="qb-acc-value">' + (row.attempted.length ? row.acc + '%' : '&mdash;') + '</span>' +
-          '</td>' +
+          '</div></td>' +
         '</tr>';
       });
     });
@@ -13239,19 +13636,12 @@
      #dx-card, plus a save/bookmark toggle injected into the card header
      and a "Full Explanation" block (this bank's questions carry the
      official College Board rationale as r.explanation, unlike Challenge
-     Questions' decks which don't have one). Session pool puts anything
-     not yet answered correctly first (never-attempted, then past misses),
-     shuffled within each group, capped at SESSION_SIZE so a 200+ question
-     skill doesn't turn "Practice" into a marathon — repeat visits work
-     through the rest. */
-  function shuffle(arr) {
-    var a = arr.slice();
-    for (var i = a.length - 1; i > 0; i--) {
-      var j = Math.floor(Math.random() * (i + 1));
-      var t = a[i]; a[i] = a[j]; a[j] = t;
-    }
-    return a;
-  }
+     Questions' decks which don't have one). Session pool is EVERY question
+     in the selected topic(s) (matching the current Difficulty filter) —
+     not a fixed-size sample — with anything not yet answered correctly
+     first (never-attempted, then past misses) and already-mastered
+     questions last, shuffled within each group. */
+  function shuffle(arr) { return window.Portal.shuffle(arr); }
   var runnerQueue = [];
   var runnerIndex = 0;
   var runnerState = {};
@@ -13310,7 +13700,7 @@
       var a = p.attempts[q.qid];
       if (a && a.correct) solved.push(q); else notSolved.push(q);
     });
-    var queue = shuffle(notSolved).concat(shuffle(solved)).slice(0, SESSION_SIZE);
+    var queue = shuffle(notSolved).concat(shuffle(solved));
     runnerQueue = queue;
     runnerIndex = 0;
     runnerState = {};
@@ -13318,8 +13708,23 @@
     runnerSkillLabel = label;
     window.dxPracticeNextHandler = runnerAdvance;
     window.dxPracticeExitHandler = endRunner;
+    window.dxPracticeLetterHandler = selectRunnerChoice;
     if (window.dxStartIncorrectPractice) window.dxStartIncorrectPractice('Question Bank: ' + label);
     startQbTimer();
+    renderRunnerQuestion();
+  }
+  // Shared by the click handler on each choice row AND the A/B/C/D keyboard
+  // shortcut (see window.dxPracticeLetterHandler). Covers both the plain
+  // MC branch and the image-based math 'mc-image' branch below — both key
+  // their per-question state off r.qid and use the same chosenIndex/elim
+  // shape.
+  function selectRunnerChoice(i) {
+    var r = runnerQueue[runnerIndex];
+    var st = r && runnerState[r.qid];
+    if (!st || st.submitted) return;
+    var at = (st.elim || []).indexOf(i);
+    if (at !== -1) st.elim.splice(at, 1);
+    st.chosenIndex = i;
     renderRunnerQuestion();
   }
   function endRunner() {
@@ -13364,6 +13769,11 @@
     }
     renderRunnerQuestion();
   }
+  // Available on every question regardless of whether it's been answered
+  // yet, or answered right — saving was previously only reachable through
+  // a wrong answer elsewhere in the app, which meant there was no way to
+  // bookmark a question during a Question Bank session just because it's
+  // worth a second look, correct or not.
   function renderSaveBtn(r) {
     var hedEl = document.querySelector('#dx-card .dx-card-hed');
     if (!hedEl) return;
@@ -13375,12 +13785,25 @@
       btn.className = 'dx-mark-btn';
       hedEl.appendChild(btn);
     }
-    var p = loadProgress();
-    var isSaved = !!p.saved[r.qid];
-    btn.innerHTML = (isSaved ? '&#9733; Saved' : '&#9734; Save');
+    var qbKey = 'qb|' + currentSubject + '|' + r.qid;
+    function paint() { btn.innerHTML = qbIsSaved(qbKey) ? '&#9733; Saved' : '&#9734; Save'; }
+    paint();
     btn.onclick = function () {
-      var nowSaved = toggleSaved(r.qid);
-      btn.innerHTML = (nowSaved ? '&#9733; Saved' : '&#9734; Save');
+      if (!window.saveReportQuestion) return;
+      if (qbIsSaved(qbKey)) {
+        window.saveReportQuestion({ key: qbKey, remove: true });
+      } else {
+        var st = runnerState[r.qid];
+        window.saveReportQuestion({
+          key: qbKey,
+          given: (st && st.submitted) ? (r.type === 'fr' ? st.rawAnswer : st.chosenIndex) : null,
+          correct: (st && st.submitted) ? st.correct : null,
+          testTitle: 'Question Bank',
+          savedAt: new Date().toISOString()
+        });
+      }
+      paint();
+      renderStats();
     };
   }
   function renderRunnerQuestion() {
@@ -13517,7 +13940,8 @@
       qtextEl.innerHTML = split ? split.question : r.text;
       if (window.dxRenderPassagePane) window.dxRenderPassagePane({}, split, r.qid);
       r.choices.forEach(function (c, i) {
-        var cls = 'dx-choice';
+        var isElim = !st.submitted && (st.elim || []).indexOf(i) !== -1;
+        var cls = 'dx-choice' + (isElim ? ' eliminated' : '');
         if (!st.submitted) {
           if (st.chosenIndex === i) cls += ' selected';
         } else {
@@ -13528,10 +13952,16 @@
         }
         var row = document.createElement('div');
         row.className = cls;
-        row.innerHTML = '<span class="dx-choice-letter">' + LETTERS[i] + '</span><span class="dx-choice-text">' + c + '</span>';
+        row.innerHTML = '<span class="dx-choice-letter">' + LETTERS[i] + '</span><span class="dx-choice-text">' + c + '</span>' +
+          (!st.submitted ? '<span class="dx-elim" title="Cross out this answer">&times;</span>' : '');
         if (!st.submitted) {
-          row.addEventListener('click', function () {
-            st.chosenIndex = i;
+          row.addEventListener('click', function () { selectRunnerChoice(i); });
+          row.querySelector('.dx-elim').addEventListener('click', function (ev) {
+            ev.stopPropagation();
+            st.elim = st.elim || [];
+            var at = st.elim.indexOf(i);
+            if (at === -1) { st.elim.push(i); if (st.chosenIndex === i) st.chosenIndex = null; }
+            else st.elim.splice(at, 1);
             renderRunnerQuestion();
           });
         }
@@ -13552,6 +13982,13 @@
   var qbReadyRerendered = false;
   window.qbModuleInit = function () {
     showHome();
+    // Pull in whatever this student's OTHER devices have synced for
+    // per-question attempt history — see mergeInServerQbAttempts() above.
+    if (window.fetchPortalProgress) {
+      window.fetchPortalProgress(function (data) {
+        if (data && !data.isStale && data.qbAttempts) mergeInServerQbAttempts(data.qbAttempts);
+      });
+    }
     // question-bank.js (~4MB) now loads async (see window.__questionBankReady
     // in the <head>) rather than blocking every page load — poolFor()
     // tolerates window.QUESTION_BANK being undefined in the meantime
@@ -13675,6 +14112,9 @@
   var qModalQuestionPane = document.getElementById('q-modal-question-pane');
   var qModalHideToggle = document.getElementById('q-modal-hide-toggle');
   var qModalHideChoicesToggle = document.getElementById('q-modal-hide-choices-toggle');
+  var qModalCalcBtn = document.getElementById('q-modal-calc-btn');
+  var qModalBodyEl = document.getElementById('q-modal-body');
+  var qModalCalcPane = document.getElementById('q-modal-calc-pane');
   var qModalCounterEl = document.getElementById('q-modal-counter');
   var qModalExplainBtn = document.getElementById('q-modal-explain-btn');
   var qModalSaveBtn = document.getElementById('q-modal-save-btn');
@@ -13685,6 +14125,16 @@
   var modalHideAnswer = true; // persists across Previous/Next within one open — a per-session preference, not per-question
   var modalHideChoices = false; // off by default — hiding answers alone covers most review; hiding choices too is for a stricter self-test
   var modalExplainOpen = false;
+  var modalCalcOpen = false; // persists across Previous/Next, same as the toggles above — a student working a run of math questions shouldn't have to reopen it each time
+
+  // A row's key namespaces the section/subject it came from (see the report
+  // renderer's incorrectRecords loop and window.recordQuestionBankMistake's
+  // 'qb|' branch), so it's reliable even when q.domain uses ACT-style
+  // domain names this doesn't recognize — same section keys
+  // MATH_SECTION_KEYS gates the real exam's calculator button on.
+  function qModalIsMathRow(r) {
+    return !!(r && r.key && /\|(math|act-math)\|/.test(r.key));
+  }
 
   function renderModalAnswerArea(r, q, hideAnswer, hideChoices) {
     var wrap = document.createElement('div');
@@ -13859,6 +14309,15 @@
     // MC question comes next.
     var choicesApplicable = q.type === 'mc' && !!q.choices;
     qModalHideChoicesToggle.closest('.q-modal-toggle').classList.toggle('q-modal-toggle-na', !choicesApplicable);
+    // Calculator only makes sense on math questions — real digital SAT
+    // gating (see MATH_SECTION_KEYS in the main script). Navigating to a
+    // non-math question with the calculator open just closes it rather
+    // than leaving an inert button toggled on.
+    var isMathRow = qModalIsMathRow(r);
+    qModalCalcBtn.style.display = isMathRow ? '' : 'none';
+    if (!isMathRow && modalCalcOpen) { modalCalcOpen = false; qModalBodyEl.classList.remove('calc-open'); }
+    qModalCalcBtn.classList.toggle('on', modalCalcOpen);
+    if (modalCalcOpen && window.ensureDesmosCalculator) window.ensureDesmosCalculator(qModalCalcPane);
     qModalCounterEl.textContent = (modalIndex + 1) + ' of ' + modalRows.length;
     qModalPrevBtn.disabled = modalIndex === 0;
     qModalNextBtn.disabled = modalIndex === modalRows.length - 1;
@@ -13878,6 +14337,8 @@
     modalLabel = label || '';
     modalHideAnswer = true;
     modalHideChoices = false;
+    modalCalcOpen = false;
+    qModalBodyEl.classList.remove('calc-open');
     renderModalQuestion();
     qModalOverlay.classList.add('open');
   }
@@ -13885,6 +14346,12 @@
   function closeQuestionModal() { qModalOverlay.classList.remove('open'); }
   if (qModalOverlay) {
     document.getElementById('q-modal-close').addEventListener('click', closeQuestionModal);
+    qModalCalcBtn.addEventListener('click', function () {
+      modalCalcOpen = !modalCalcOpen;
+      qModalBodyEl.classList.toggle('calc-open', modalCalcOpen);
+      qModalCalcBtn.classList.toggle('on', modalCalcOpen);
+      if (modalCalcOpen && window.ensureDesmosCalculator) window.ensureDesmosCalculator(qModalCalcPane);
+    });
     qModalOverlay.addEventListener('click', function (e) { if (e.target === qModalOverlay) closeQuestionModal(); });
     document.addEventListener('keydown', function (e) {
       if (!qModalOverlay.classList.contains('open')) return;
@@ -13924,7 +14391,8 @@ window.renderNativeReport = function (data) {
   // or two Score Progress points back to back) piled the new tiles/cards
   // on top of the previous report's instead of replacing them.
   ['score-tiles', 'raw-stats', 'score-bridge', 'bridge-note-outer', 'section-breakdown',
-   'accuracy-by-topic', 'timing-stats', 'confidence-quadrant', 'behavior-section', 'raw-tables'
+   'accuracy-by-topic', 'confidence-quadrant', 'behavior-section', 'raw-tables',
+   'skilldx-headline', 'skilldx-table'
   ].forEach(function (id) {
     var el = document.getElementById(id);
     if (el) el.innerHTML = '';
@@ -13940,14 +14408,7 @@ window.renderNativeReport = function (data) {
   // often Luca, from the email this link is sent in). Question text/
   // choices from the bank are a separate, trusted source and are left as
   // literal HTML on purpose (they carry their own formatting/equations).
-  function esc(s) {
-    return String(s == null ? '' : s)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
-  }
+  function esc(s) { return window.Portal.escHtml(s); }
   // Shared categorical palette for every multi-color chart on this report
   // (section pies, bridge segments) — tints/shades of the same five brand
   // colors rather than a mixed bag of unrelated hues.
@@ -14914,6 +15375,46 @@ window.renderNativeReport = function (data) {
   } else {
     tilesEl.style.display = 'none';
   }
+  /* ═══ SINCE LAST TIME ═══ one stated comparison against the most recent
+     PRIOR attempt of the same test type, instead of leaving a parent to
+     spot the trend themselves across separate reports' score tiles — same
+     "turn several numbers into one verdict" pattern as the skill-diagnosis
+     headline above. Reads localStorage directly (moretti_score_history_
+     <key>, the same store recordScoreHistory()/mergedScoreHistory() use)
+     rather than a cross-closure bridge — this renderer already has data.k
+     (the student key) and doesn't otherwise share a closure with the main
+     portal script that owns those functions. That means a student's OTHER
+     device (which hasn't cached this history locally) won't show a
+     comparison even though the backend has it — an acceptable gap for a
+     nice-to-have caption, not a data-integrity path like Saved & Mistakes. */
+  (function renderSinceLastTime() {
+    var wrap = document.getElementById('score-since-last');
+    // #pt-native-report is a persistent container re-rendered in place
+    // (see the clearing list at the top of this function) — reset every
+    // time before any early return below, or a later report with no prior
+    // attempt to compare against would keep showing the PREVIOUS report's
+    // stale "Since last time" line instead of hiding it.
+    wrap.style.display = 'none';
+    wrap.innerHTML = '';
+    var thisComposite = data.t === 'SAT' ? composite : (data.t === 'ACT' ? actComposite : null);
+    if (thisComposite == null || !data.k || !data.t) return;
+    var thisTs = data.ts || Date.parse(data.dt) || Date.now();
+    var entries = [];
+    try {
+      var raw = localStorage.getItem('moretti_score_history_' + data.k);
+      entries = (JSON.parse(raw) || {}).entries || [];
+    } catch (e) { entries = []; }
+    var prior = entries.filter(function (e) {
+      return e && e.testType === data.t && typeof e.composite === 'number' && Date.parse(e.date) < thisTs;
+    }).sort(function (a, b) { return Date.parse(b.date) - Date.parse(a.date); })[0];
+    if (!prior) return; // first attempt of this test type this browser knows about — nothing to compare against
+    var delta = thisComposite - prior.composite;
+    var cls = delta > 0 ? 'up' : delta < 0 ? 'down' : 'flat';
+    var arrow = delta > 0 ? '&#9650;' : delta < 0 ? '&#9660;' : '&#8212;';
+    var deltaText = delta === 0 ? 'No change' : (delta > 0 ? '+' : '') + delta;
+    wrap.innerHTML = 'Since last time: <span class="' + cls + '">' + arrow + ' ' + deltaText + '</span> (' + prior.composite + ' &rarr; ' + thisComposite + ')';
+    wrap.style.display = '';
+  })();
   // Groups every non-composite tile (R&W+Math for SAT; up to 4 sections for
   // ACT) into their own wrapper so CSS can lay them out as a smaller column
   // beside the composite tile instead of all tiles sitting in one equal-
@@ -15782,11 +16283,6 @@ window.renderNativeReport = function (data) {
     });
     card.appendChild(gridEl);
 
-    // Avg time on a correct question vs. an incorrect one — a real signal
-    // (rushing to a wrong answer vs. working carefully to a right one),
-    // not the same "avg per question" figure restated.
-    var avgCorrectMs = s5.c ? (s5.timeCorrect / s5.c) : 0;
-    var avgIncorrectMs = incorrectN ? (s5.timeIncorrect / incorrectN) : 0;
     if (s5.timeTotal > 0) {
       // Actual avg time per question against the REAL per-question budget
       // this module's official time limit implies — s5.timeAllottedMin
@@ -15811,11 +16307,6 @@ window.renderNativeReport = function (data) {
         paceEl.innerHTML = 'Avg time: ' + formatMinSec(avgAllMs) + ' per question';
       }
       card.appendChild(paceEl);
-
-      var metaEl = document.createElement('div');
-      metaEl.className = 'sc-meta';
-      metaEl.innerHTML = 'Avg <span class="ok">' + formatMinSec(avgCorrectMs) + '</span> / ' + formatMinSec(avgIncorrectMs);
-      card.appendChild(metaEl);
     }
 
     cardsWrap.appendChild(card);
@@ -15875,14 +16366,26 @@ window.renderNativeReport = function (data) {
   // the other section went.
   var RUSHED_REL = 0.5, RUSHED_ABS_CAP = 20000, LUCKY_REL = 0.35, LUCKY_ABS_CAP = 15000, STUCK_REL = 1.6;
   var behaviorFlags = [];
-  // Candidates for the single "Where to focus" headline synthesized below,
-  // AFTER every section's been scanned — the stuck/rushed flags below are
-  // already the two most actionable patterns in this whole report (a real
-  // content gap vs. a pacing/carelessness issue), so rather than making a
-  // parent read every flag and infer which one matters most, the biggest
-  // one (by raw count) gets pulled out and stated directly, in front of
-  // everything else.
-  var focusCandidates = [];
+  // ═══ SKILL DIAGNOSIS ROLLUP ═══ the Stuck/Pacing/Guess-landed flags below
+  // already classify individual OUTLIER questions per section; this instead
+  // classifies EVERY timed multiple-choice question, everywhere, into one of
+  // four buckets (same time/correctness split the confidence quadrant plots
+  // as a scatter, just aggregated instead of left as dots to interpret by
+  // eye) and rolls the counts up per SKILL:
+  //   Mastered    — correct, normal pace or faster
+  //   Inefficient — correct, but notably slower than typical (got there, not efficiently)
+  //   Stuck       — wrong, and took real, deliberate time (a genuine content gap)
+  //   Rushed      — wrong, answered suspiciously fast (a guess, not a gap)
+  // A skill dominated by Stuck needs content review; the same skill
+  // dominated by Rushed needs a pacing conversation instead — two totally
+  // different fixes that "average time by difficulty" or a raw accuracy
+  // percentage can't tell apart on their own. See renderSkillDiagnosis()
+  // further down, which turns this into both the per-skill table and the
+  // single "Your biggest issue" headline.
+  var skillBuckets = {};
+  function bucketFor(skillName) {
+    return skillBuckets[skillName] || (skillBuckets[skillName] = { mastered: 0, inefficient: 0, stuck: 0, rushed: 0, total: 0, hardTotal: 0 });
+  }
   // Late-night attempt: a diagnostic finished well outside normal waking
   // hours is exactly the kind of context Luca already factors in by hand
   // when a score looks lower than he'd expect (fatigue suppresses
@@ -15944,6 +16447,19 @@ window.renderNativeReport = function (data) {
       if (!r.ok && pacingTimeMs(r) < cutoff) rushedWrong.push({ sk: r.sk });
       if (!r.ok && pacingTimeMs(r) >= stuckCutoff) stuckWrong.push({ sk: r.sk });
       if (r.ok && r.q.difficulty === 'hard' && pacingTimeMs(r) < luckyCutoff) luckyCorrect.push({ sk: r.sk });
+      // Four-bucket classification, EVERY qualifying question (not just the
+      // outliers the flags above threshold on) — one shared stuckCutoff
+      // splits each half (right/wrong) into "normal pace" vs. "notably
+      // slow," so Mastered/Inefficient and Stuck/Rushed use the exact same
+      // line, just on opposite sides of correctness.
+      if (r.sk) {
+        var b = bucketFor(r.sk);
+        b.total++;
+        if (r.q.difficulty === 'hard') b.hardTotal++;
+        var slow = pacingTimeMs(r) >= stuckCutoff;
+        if (r.ok) { if (slow) b.inefficient++; else b.mastered++; }
+        else { if (slow) b.stuck++; else b.rushed++; }
+      }
     });
     // Stuck flag: missed questions where REAL, deliberate time was spent —
     // the direct counterpart to the Pacing (rushed-guess) flag below, and
@@ -15956,7 +16472,6 @@ window.renderNativeReport = function (data) {
     if (s7.missedMc >= 4 && stuckWrong.length / s7.missedMc >= 0.5) {
       var sSkills = topSkillNames(stuckWrong, 3).join(', ');
       behaviorFlags.push('<strong>Stuck flag (' + s7.label + '):</strong> ' + stuckWrong.length + ' of ' + s7.missedMc + ' missed multiple-choice questions here took well over ' + first + '’s own typical time on a correct answer — real, deliberate effort that still came back wrong, not a rushed guess.' + (sSkills ? ' Heaviest in: ' + sSkills + '.' : '') + ' This is the clearest signal of an actual content gap in this report — worth prioritizing over anything that looks like a pacing issue.');
-      focusCandidates.push({ kind: 'stuck', section: s7.label, skill: topSkillNames(stuckWrong, 1)[0], count: stuckWrong.length });
     }
     if (s7.missedMc >= 4 && rushedWrong.length / s7.missedMc >= 0.5) {
       var wSkills = topSkillNames(rushedWrong, 3).join(', ');
@@ -15964,7 +16479,6 @@ window.renderNativeReport = function (data) {
         ? 'spent well under ' + first + '’s own average FIRST-LOOK time on questions answered correctly (whether or not ' + first + ' ever came back to them)'
         : 'answered in well under ' + first + '’s own average time on questions answered correctly';
       behaviorFlags.push('<strong>Pacing flag (' + s7.label + '):</strong> ' + rushedWrong.length + ' of ' + s7.missedMc + ' missed multiple-choice questions here were ' + rushedBasis + ' — a rushed-guess pattern more than ' + rushedWrong.length + ' independently reasoned wrong answers.' + (wSkills ? ' Heaviest in: ' + wSkills + '.' : '') + ' Worth a pacing conversation before treating all of these as pure content gaps.');
-      focusCandidates.push({ kind: 'rushed', section: s7.label, skill: topSkillNames(rushedWrong, 1)[0], count: rushedWrong.length });
     }
     var hardCorrectN = s7.diff.hard.c;
     if (hardCorrectN >= 3 && luckyCorrect.length >= 2 && luckyCorrect.length / hardCorrectN >= 0.4) {
@@ -15975,29 +16489,99 @@ window.renderNativeReport = function (data) {
   if (markedT === 0 && totalQ >= 40) {
     behaviorFlags.push(first + ' never used the "flag for review" feature across all ' + totalQ + ' questions' + (skipped < totalQ - totalC ? ', despite ' + (totalQ - totalC) + ' misses' : '') + '. Combined with the timing patterns above, this points at pushing through uncertain questions rather than marking them to revisit — a fixable pacing habit worth raising directly with ' + first + '.');
   }
-  // "Where to focus" headline — the single biggest stuck/rushed pattern
-  // found above (by raw question count), stated directly instead of
-  // leaving a parent to read every flag below and work out which one
-  // actually matters most for what to do next.
-  var focusHeadline = '';
-  if (focusCandidates.length) {
-    focusCandidates.sort(function (a, b) { return b.count - a.count; });
-    var topFocus = focusCandidates[0];
-    var where = topFocus.skill ? (topFocus.skill + ' (' + topFocus.section + ')') : topFocus.section;
-    focusHeadline = topFocus.kind === 'stuck'
-      ? '<strong>Where to focus:</strong> ' + where + ' — ' + topFocus.count + ' missed question' + (topFocus.count === 1 ? '' : 's') + ' here took real, deliberate time and still came back wrong. That’s a genuine knowledge gap, not a pacing issue — prioritize content review here before drilling speed anywhere else.'
-      : '<strong>Where to focus:</strong> ' + where + ' — ' + topFocus.count + ' missed question' + (topFocus.count === 1 ? '' : 's') + ' here were answered suspiciously fast, a rushed-guess pattern rather than a true content gap. A pacing/checking-work conversation is likely to help more here than more content review.';
-  }
-  // Always shown now, even with zero flags — a section that only ever
-  // appears when something's wrong reads as broken/missing on every
-  // normal report (which is most of them), not as "nothing to flag here."
-  // A clean pass is itself useful information for a parent reading this.
+  // Test-taking behavior flags are still individual sentences about
+  // specific patterns (late-night, unused time, guess-landed) — always
+  // shown, even with zero flags, so a clean pass reads as "checked and
+  // fine" rather than a section that only ever appears when something's
+  // wrong. The single biggest-issue HEADLINE used to live here too; it's
+  // now renderSkillDiagnosis() below, built from the full per-skill
+  // rollup instead of just this loop's section-level outliers.
   document.getElementById('behavior-hed').style.display = '';
   var bWrap = document.getElementById('behavior-section');
   bWrap.style.display = '';
-  bWrap.innerHTML = (focusHeadline ? '<div class="behavior-focus">' + focusHeadline + '</div>' : '') + (behaviorFlags.length
+  bWrap.innerHTML = behaviorFlags.length
     ? '<ul class="takeaways">' + behaviorFlags.map(function (f) { return '<li>' + f + '</li>'; }).join('') + '</ul>'
-    : '<p class="behavior-clean">No pacing or timing red flags on this attempt — ' + first + '’s scores here look like a real read of where things stand, not an artifact of rushing, guessing, or fatigue.</p>');
+    : '<p class="behavior-clean">No pacing or timing red flags on this attempt — ' + first + '’s scores here look like a real read of where things stand, not an artifact of rushing, guessing, or fatigue.</p>';
+
+  /* ═══ renderSkillDiagnosis() ═══ turns skillBuckets (built inline in the
+     sections.forEach loop above) into the "Where it matters most" card:
+     one stated verdict up top, then a per-skill table so the reader can
+     see WHY — same four-color breakdown, not just a single number. A
+     skill needs at least 4 timed MC attempts to get a row at all (fewer
+     than that and Mastered-vs-Stuck is noise, not a pattern); of those,
+     only skills with an actual signal (gap/pacing/slow) are shown — a
+     report full of "Solid" rows for skills the bridge chart already
+     confirmed as strengths would just be repetition. */
+  (function renderSkillDiagnosis() {
+    // 3, not a stricter number, to match this report's other single-attempt
+    // skill-level gates (HOME_WEAK_SKILL_MIN_ATTEMPTS, MIN_QUESTIONS) — a
+    // ~22-27 question module split across a dozen-plus skills rarely gives
+    // any one skill more than a few attempts, so a stricter floor would
+    // leave this section empty on most real reports.
+    var MIN_SAMPLE = 3, SIGNAL_MIN_COUNT = 2, SIGNAL_MIN_SHARE = 0.3;
+    var rows = Object.keys(skillBuckets).map(function (sk) {
+      var b = skillBuckets[sk];
+      return { skill: sk, mastered: b.mastered, inefficient: b.inefficient, stuck: b.stuck, rushed: b.rushed, total: b.total, hardShare: b.total ? b.hardTotal / b.total : 0 };
+    }).filter(function (r) { return r.total >= MIN_SAMPLE; });
+    // Severity ranks WHICH fix matters more when a skill shows more than
+    // one pattern at once: a real content gap (Stuck) always outranks a
+    // pacing issue (Rushed), which outranks "getting there, just slow"
+    // (Inefficient) — re-teaching content nobody's actually missing
+    // wastes a session; missing an actual gap because a pacing issue
+    // elsewhere had a bigger raw count does too.
+    function severityOf(r) {
+      if (r.stuck >= SIGNAL_MIN_COUNT && r.stuck / r.total >= SIGNAL_MIN_SHARE) return 3;
+      if (r.rushed >= SIGNAL_MIN_COUNT && r.rushed / r.total >= SIGNAL_MIN_SHARE) return 2;
+      if (r.inefficient >= SIGNAL_MIN_COUNT && r.inefficient / r.total >= SIGNAL_MIN_SHARE) return 1;
+      return 0;
+    }
+    rows.forEach(function (r) { r.severity = severityOf(r); });
+    rows.sort(function (a, b) {
+      if (b.severity !== a.severity) return b.severity - a.severity;
+      var bMax = Math.max(b.stuck, b.rushed, b.inefficient), aMax = Math.max(a.stuck, a.rushed, a.inefficient);
+      return bMax - aMax;
+    });
+    var signalRows = rows.filter(function (r) { return r.severity > 0; }).slice(0, 6);
+    var headEl = document.getElementById('skilldx-headline');
+    var tableEl = document.getElementById('skilldx-table');
+    if (!signalRows.length) {
+      document.getElementById('skilldx-hed').style.display = '';
+      document.getElementById('skilldx-card').style.display = '';
+      headEl.innerHTML = '';
+      tableEl.innerHTML = '<p class="behavior-clean">No skill shows a clear Stuck or Rushed pattern — every skill with enough attempts to judge is a mix of normal-pace right and wrong answers, not a concentrated gap or guessing habit.</p>';
+      return;
+    }
+    var top = signalRows[0];
+    // Difficulty context ("Hard Algebra") only when this skill's own
+    // sample actually skewed hard — otherwise naming a difficulty that
+    // wasn't really the driver would overstate what the data shows.
+    var diffPrefix = top.hardShare >= 0.6 ? 'Hard ' : '';
+    var kindLabel = top.severity === 3 ? 'Stuck' : top.severity === 2 ? 'Rushed' : 'Slow but right';
+    var headline = top.severity === 3
+      ? '<strong>Your biggest issue:</strong> ' + kindLabel + ' on ' + diffPrefix + esc(top.skill) + ' — ' + top.stuck + ' of ' + top.total + ' questions here took real, deliberate time and still came back wrong. That’s a knowledge gap, not a pacing one — review content before drilling speed there.'
+      : top.severity === 2
+      ? '<strong>Your biggest issue:</strong> ' + kindLabel + ' on ' + diffPrefix + esc(top.skill) + ' — ' + top.rushed + ' of ' + top.total + ' questions here were answered suspiciously fast and wrong. That’s a pacing pattern, not a knowledge gap — slow down and check work here rather than re-teaching the content.'
+      : '<strong>Your biggest issue:</strong> ' + kindLabel + ' on ' + diffPrefix + esc(top.skill) + ' — ' + top.inefficient + ' of ' + top.total + ' correct answers here took much longer than typical. Not urgent, but a good target for light speed drills once anything above is handled.';
+    headEl.innerHTML = '<div class="behavior-focus">' + headline + '</div>';
+    tableEl.innerHTML = signalRows.map(function (r) {
+      var tagCls = r.severity === 3 ? 'gap' : r.severity === 2 ? 'pacing' : 'slow';
+      var tagLabel = r.severity === 3 ? 'Content gap' : r.severity === 2 ? 'Pacing' : 'Getting there';
+      function seg(n, cls) { return n ? '<div class="skilldx-seg ' + cls + '" style="width:' + (n / r.total * 100) + '%;" title="' + n + ' ' + cls + '"></div>' : ''; }
+      return '<div class="skilldx-row">' +
+        '<div class="skilldx-row-main">' +
+          '<div class="skilldx-row-top"><span class="skilldx-row-name">' + esc(r.skill) + '</span><span class="skilldx-tag ' + tagCls + '">' + tagLabel + '</span></div>' +
+          '<div class="skilldx-track">' + seg(r.mastered, 'mastered') + seg(r.inefficient, 'inefficient') + seg(r.stuck, 'stuck') + seg(r.rushed, 'rushed') + '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('') + '<div class="skilldx-legend">' +
+      '<span><i class="skilldx-dot mastered"></i>Mastered</span>' +
+      '<span><i class="skilldx-dot inefficient"></i>Inefficient (slow, right)</span>' +
+      '<span><i class="skilldx-dot stuck"></i>Stuck (slow, wrong)</span>' +
+      '<span><i class="skilldx-dot rushed"></i>Rushed (fast, wrong)</span>' +
+    '</div>';
+    document.getElementById('skilldx-hed').style.display = '';
+    document.getElementById('skilldx-card').style.display = '';
+  })();
 
   var take = [];
   take.push('<strong>' + first + ' answered ' + totalC + ' of ' + totalQ + ' correctly (' + pct + '%).</strong>');
@@ -16327,60 +16911,6 @@ window.renderNativeReport = function (data) {
     });
     accWrap.appendChild(grid);
     if (grid.children.length) accWrap.style.display = '';
-  })();
-
-  /* ═══ TIMING — TIME SHARE BY DIFFICULTY ═══ per subject: what fraction
-     of the total time in that subject went to easy/medium/hard questions.
-     A student spending, say, 60% of their R&W time on hard questions
-     that are only a third of the section is pacing itself — badly-timed
-     questions cost points elsewhere even when they're eventually solved
-     right. Reuses the .sc-difftime segmented-bar markup that used to live
-     per-module (see the section-breakdown comment above), once per
-     subject here instead. */
-  (function renderTimingStats() {
-    var wrap = document.getElementById('timing-stats');
-    var cards = [];
-    sections.forEach(function (sec) {
-      var diffTime = { easy: 0, medium: 0, hard: 0 };
-      var totalMs = 0;
-      sec.rows.forEach(function (r) {
-        if (!r.q || !r.timeMs) return;
-        var d = r.q.difficulty;
-        if (diffTime[d] === undefined) return;
-        diffTime[d] += r.timeMs;
-        totalMs += r.timeMs;
-      });
-      if (!totalMs) return;
-      var pctEasy = Math.round(diffTime.easy / totalMs * 100);
-      var pctMedium = Math.round(diffTime.medium / totalMs * 100);
-      var pctHard = Math.max(0, 100 - pctEasy - pctMedium); // avoids rounding drift leaving the bar short of 100%
-      var card = document.createElement('div');
-      card.className = 'quadrant-card'; // same borderless card look as the confidence-quadrant cards below
-      card.innerHTML = '<div class="quadrant-card-hed">' + sec.label + '</div>' +
-        '<div class="sc-difftime">' +
-          '<div class="sc-difftime-track">' +
-            '<div class="sc-difftime-seg easy" style="width:' + pctEasy + '%"></div>' +
-            '<div class="sc-difftime-seg medium" style="width:' + pctMedium + '%"></div>' +
-            '<div class="sc-difftime-seg hard" style="width:' + pctHard + '%"></div>' +
-          '</div>' +
-          '<div class="sc-difftime-legend">' +
-            '<span><i class="sc-difftime-dot easy"></i>Easy — ' + pctEasy + '% (' + formatMinSec(diffTime.easy) + ')</span>' +
-            '<span><i class="sc-difftime-dot medium"></i>Medium — ' + pctMedium + '% (' + formatMinSec(diffTime.medium) + ')</span>' +
-            '<span><i class="sc-difftime-dot hard"></i>Hard — ' + pctHard + '% (' + formatMinSec(diffTime.hard) + ')</span>' +
-          '</div>' +
-        '</div>';
-      cards.push(card);
-    });
-    if (cards.length) {
-      document.getElementById('timing-hed').style.display = '';
-      document.getElementById('timing-card').style.display = '';
-      document.getElementById('timing-sub').style.display = '';
-      wrap.style.display = '';
-      var grid = document.createElement('div');
-      grid.className = 'quadrant-grid';
-      cards.forEach(function (c) { grid.appendChild(c); });
-      wrap.appendChild(grid);
-    }
   })();
 
   /* ═══ HOW YOU ALLOCATED YOUR TIME ═══ one chart per MODULE (not per

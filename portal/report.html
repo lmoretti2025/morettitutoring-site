@@ -181,6 +181,60 @@
   @media (max-width: 620px) { .quadrant-grid { grid-template-columns: 1fr; } }
   @media print { .atb-section, .quadrant-grid { page-break-inside: avoid; break-inside: avoid; } }
 
+  /* ═══ TIMING ALLOCATION CHART — one module at a time, every question
+     positioned by when it was actually visited (a return trip shows as a
+     second bar reaching out later, not a bar dragged across the whole
+     module) — see index.html's identical chart (this is the standalone
+     report's own copy, kept in sync by hand). Wraps the difficulty-split
+     stats below it into one bordered card (#timing-sub's border-top acts
+     as the divider between them). ═══ */
+  .timing-card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow); padding: 20px 24px; }
+  .timing-card > #timing-allocation-sub { margin: 0 0 10px; }
+  .timing-card > #timing-allocation { margin: 0; }
+  /* ═══ SKILL DIAGNOSIS ═══ Mastered/Inefficient/Stuck/Rushed rollup — see
+     index.html's identical CSS (this is the standalone report's own copy,
+     kept in sync by hand). */
+  .skilldx-card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow); padding: 20px 24px; }
+  .skilldx-card > .behavior-focus { margin-bottom: 14px; }
+  .skilldx-row { display: flex; align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+  .skilldx-row:last-child { border-bottom: none; }
+  .skilldx-row-main { flex: 1; min-width: 0; }
+  .skilldx-row-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 5px; }
+  .skilldx-row-name { font-weight: 700; font-size: 12px; color: var(--ink); }
+  .skilldx-tag { font-size: 9px; font-weight: 700; letter-spacing: 0.03em; padding: 2px 8px; border-radius: 999px; flex-shrink: 0; }
+  .skilldx-tag.gap { background: rgba(176,39,28,0.1); color: var(--red); }
+  .skilldx-tag.pacing { background: rgba(201,168,76,0.18); color: #8a6d1f; }
+  .skilldx-tag.slow { background: rgba(94,139,111,0.12); color: #3f7d54; }
+  .skilldx-track { display: flex; height: 8px; border-radius: 4px; overflow: hidden; background: var(--bg); }
+  .skilldx-seg.mastered { background: #3f7d54; }
+  .skilldx-seg.inefficient { background: #A9C4B4; }
+  .skilldx-seg.stuck { background: var(--red); }
+  .skilldx-seg.rushed { background: var(--gold); }
+  .skilldx-legend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border); font-size: 9.5px; color: var(--mid); }
+  .skilldx-legend span { display: inline-flex; align-items: center; gap: 4px; }
+  .skilldx-dot { width: 7px; height: 7px; border-radius: 2px; display: inline-block; flex-shrink: 0; }
+  .skilldx-dot.mastered { background: #3f7d54; }
+  .skilldx-dot.inefficient { background: #A9C4B4; }
+  .skilldx-dot.stuck { background: var(--red); }
+  .skilldx-dot.rushed { background: var(--gold); }
+  .timing-carousel { display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .timing-nav-btn { flex-shrink: 0; width: 30px; height: 30px; border-radius: 50%; border: none; background: none; color: var(--mid); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  .timing-nav-btn svg { width: 15px; height: 15px; }
+  .timing-nav-btn:disabled { opacity: 0.25; cursor: default; }
+  .timing-chart-card { overflow: visible; }
+  .timing-chart-hed { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+  .timing-chart-hed span:first-child { font-size: 12px; font-weight: 700; color: var(--ink); }
+  .timing-module-counter { font-size: 10px; color: var(--faint); white-space: nowrap; }
+  .timing-chart-plot { position: relative; }
+  .timing-gridline { position: absolute; width: 1px; background: currentColor; opacity: 0.07; }
+  .timing-gridlabel { position: absolute; transform: translateX(-50%); font-size: 8px; color: var(--faint); font-variant-numeric: tabular-nums; }
+  .timing-rowlabel { position: absolute; left: -8px; transform: translate(-100%, -50%); font-size: 7.5px; color: var(--faint); font-variant-numeric: tabular-nums; }
+  .timing-xcaption { position: absolute; left: 50%; transform: translateX(-50%); font-size: 8px; color: var(--faint); }
+  .timing-bar { position: absolute; border-radius: 2px; cursor: pointer; }
+  .timing-bar-ok { background: var(--green); }
+  .timing-bar-bad { background: var(--red); }
+  @media print { .timing-nav-btn { display: none; } }
+
   /* ═══ QUESTION TILES (upgraded sc-qgrid) — hover preview + click to open
      the full question in a modal, instead of just a native title tooltip. ═══ */
   .sc-qgrid-cell { cursor: pointer; position: relative; }
@@ -211,6 +265,11 @@
   .q-modal-status-pill.bad .q-modal-pill-dot { background: var(--red); }
   .q-modal-flag-pill { display: inline-flex; align-items: center; gap: 4px; font-weight: 700; font-size: 10px; letter-spacing: 0.02em; padding: 3px 9px; border-radius: 999px; background: rgba(201,168,76,0.18); color: #8a6d1f; }
   .q-modal-toggle { display: flex; align-items: center; gap: 8px; font-size: 11.5px; font-weight: 600; color: var(--mid); cursor: pointer; user-select: none; }
+  /* "Hide choices" is dimmed (never disabled — see index.html's identical
+     toggle for why a .disabled attribute here got a real student stuck) on
+     a free-response question, which has no choice list to hide. */
+  .q-modal-toggle-na { opacity: 0.4; }
+  .q-choices-hidden { font-size: 11.5px; font-style: italic; color: var(--faint); padding: 10px 12px; border: 1px dashed var(--border); border-radius: 6px; }
   .q-toggle-switch { position: relative; display: inline-block; width: 34px; height: 19px; flex-shrink: 0; }
   .q-toggle-switch input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; z-index: 1; }
   .q-toggle-track { position: absolute; inset: 0; background: rgba(17,17,17,0.16); border-radius: 999px; transition: background 0.18s ease; }
@@ -276,20 +335,6 @@
   .sc-qgrid-cell.bad { background: rgba(176,39,28,0.12); color: var(--red); border-color: rgba(176,39,28,0.4); }
   .sc-qgrid-cell.skip { background: #fff; color: var(--faint); border-color: var(--border); }
 
-  /* ═══ TIME BY DIFFICULTY ═══ a compact segmented bar — kept as a bar
-     rather than a donut to match every other proportion on this page
-     (bar-fill/sc-bar-fill above), not because a donut couldn't work. */
-  .sc-difftime { margin-bottom: 8px; }
-  .sc-difftime-track { display: flex; height: 12px; border-radius: 4px; overflow: hidden; background: #eee7da; margin-bottom: 3px; }
-  .sc-difftime-seg.easy { background: #A9C4B4; }
-  .sc-difftime-seg.medium { background: var(--gold); }
-  .sc-difftime-seg.hard { background: var(--red); }
-  .sc-difftime-legend { display: flex; flex-direction: column; gap: 6px; font-size: 11px; color: var(--mid); margin-top: 8px; }
-  .sc-difftime-legend span { display: inline-flex; align-items: center; gap: 6px; }
-  .sc-difftime-dot { width: 8px; height: 8px; border-radius: 2px; display: inline-block; flex-shrink: 0; }
-  .sc-difftime-dot.easy { background: #A9C4B4; }
-  .sc-difftime-dot.medium { background: var(--gold); }
-  .sc-difftime-dot.hard { background: var(--red); }
   /* Bridge chart card — now the sole content of "Path to target score"
      (the old "Top 5 weakest skills" list that used to append below the
      chart is gone; each bar is hoverable/clickable for that same
@@ -367,6 +412,8 @@
   .takeaways strong { color: var(--ink); }
   .takeaways .r { color: var(--red); font-weight: 700; }
   .behavior-clean { font-size: 11px; line-height: 1.65; color: var(--mid); }
+  .behavior-focus { background: rgba(176,39,28,0.06); border: 1px solid rgba(176,39,28,0.25); border-radius: 8px; padding: 9px 12px; margin-bottom: 10px; font-size: 10.5px; line-height: 1.65; color: var(--ink); }
+  .behavior-focus strong { color: var(--red); }
   .detail-toggle { display: inline-block; font-size: 9.5px; color: var(--mid); text-decoration: underline; margin-top: 10px; }
   .ftr { border-top: 1px solid var(--border); margin-top: 14px; padding-top: 8px; font-size: 9.5px; color: var(--faint); display: flex; justify-content: space-between; }
   table { width: 100%; border-collapse: collapse; font-size: 9.5px; }
@@ -515,8 +562,15 @@
     <div id="accuracy-by-topic" style="display:none;"></div>
   </div>
   <div class="sec-hed" id="timing-hed" style="display:none;">Timing</div>
-  <p class="quadrant-sub" id="timing-sub" style="display:none;">How your time split across easy, medium, and hard questions in each subject — a rough gut check on whether the clock is where the trouble actually is.</p>
-  <div id="timing-stats" style="display:none;"></div>
+  <div class="timing-card" id="timing-card" style="display:none;">
+    <p class="quadrant-sub" id="timing-allocation-sub" style="display:none;">Every question in one module — when it was visited and how long it took, right (green) or wrong (red). A bar reaching well past where it "should" sit means a later return trip to that question, not just reading order.</p>
+    <div id="timing-allocation" style="display:none;"></div>
+  </div>
+  <div class="sec-hed" id="skilldx-hed" style="display:none;">Where it matters most</div>
+  <div class="skilldx-card" id="skilldx-card" style="display:none;">
+    <div id="skilldx-headline"></div>
+    <div id="skilldx-table"></div>
+  </div>
   <div class="sec-hed" id="quadrant-hed" style="display:none;">Confidence quadrant</div>
   <p class="quadrant-sub" id="quadrant-sub" style="display:none;">Each dot is one multiple-choice question — time spent (x) vs. right or wrong (y), relative to <span id="quadrant-sub-first"></span>&rsquo;s own median pace. Hover a dot, or click to review the question.</p>
   <div id="confidence-quadrant" style="display:none;"></div>
@@ -545,6 +599,10 @@
           <label class="q-modal-toggle">
             <span>Hide answers</span>
             <span class="q-toggle-switch"><input type="checkbox" id="q-modal-hide-toggle" checked><span class="q-toggle-track"><span class="q-toggle-thumb"></span></span></span>
+          </label>
+          <label class="q-modal-toggle">
+            <span>Hide choices</span>
+            <span class="q-toggle-switch"><input type="checkbox" id="q-modal-hide-choices-toggle"><span class="q-toggle-track"><span class="q-toggle-thumb"></span></span></span>
           </label>
           <button type="button" class="q-modal-close" id="q-modal-close" aria-label="Close">&times;</button>
         </div>
@@ -640,6 +698,7 @@
   var qModalPassagePane = document.getElementById('q-modal-passage-pane');
   var qModalQuestionPane = document.getElementById('q-modal-question-pane');
   var qModalHideToggle = document.getElementById('q-modal-hide-toggle');
+  var qModalHideChoicesToggle = document.getElementById('q-modal-hide-choices-toggle');
   var qModalCounterEl = document.getElementById('q-modal-counter');
   var qModalExplainBtn = document.getElementById('q-modal-explain-btn');
   var qModalPrevBtn = document.getElementById('q-modal-prev-btn');
@@ -647,12 +706,20 @@
 
   var modalRows = [], modalIndex = 0, modalLabel = '';
   var modalHideAnswer = true;
+  var modalHideChoices = false;
   var modalExplainOpen = false;
 
-  function renderModalAnswerArea(r, q, hideAnswer) {
+  function renderModalAnswerArea(r, q, hideAnswer, hideChoices) {
     var wrap = document.createElement('div');
     wrap.className = 'q-detail'; // reuses .q-detail .q-choices' colored-border/background rules — this pane has no .q-detail ancestor of its own
     if (q.type === 'mc' && q.choices) {
+      if (hideChoices) {
+        var hidden = document.createElement('div');
+        hidden.className = 'q-choices-hidden';
+        hidden.textContent = 'Choices hidden — use the toggle above to reveal.';
+        wrap.appendChild(hidden);
+        return wrap;
+      }
       var ul = document.createElement('ul');
       ul.className = 'q-choices';
       q.choices.forEach(function (choice, idx) {
@@ -732,7 +799,7 @@
     qtext.className = 'q-text';
     qtext.innerHTML = split ? split.question : (q.text || '(question text unavailable)');
     qModalQuestionPane.appendChild(qtext);
-    qModalQuestionPane.appendChild(renderModalAnswerArea(r, q, modalHideAnswer));
+    qModalQuestionPane.appendChild(renderModalAnswerArea(r, q, modalHideAnswer, modalHideChoices));
 
     if (r.timeMs || r.firstVisitedAt || r.lastViewedAt) {
       var timing = document.createElement('div');
@@ -757,6 +824,9 @@
     }
 
     qModalHideToggle.checked = modalHideAnswer;
+    qModalHideChoicesToggle.checked = modalHideChoices;
+    var choicesApplicable = q.type === 'mc' && !!q.choices;
+    qModalHideChoicesToggle.closest('.q-modal-toggle').classList.toggle('q-modal-toggle-na', !choicesApplicable);
     qModalCounterEl.textContent = (modalIndex + 1) + ' of ' + modalRows.length;
     qModalPrevBtn.disabled = modalIndex === 0;
     qModalNextBtn.disabled = modalIndex === modalRows.length - 1;
@@ -769,6 +839,7 @@
     modalIndex = Math.max(0, Math.min(index, rowsList.length - 1));
     modalLabel = label || '';
     modalHideAnswer = true;
+    modalHideChoices = false;
     renderModalQuestion();
     qModalOverlay.classList.add('open');
   }
@@ -783,6 +854,10 @@
     });
     qModalHideToggle.addEventListener('change', function () {
       modalHideAnswer = qModalHideToggle.checked;
+      renderModalQuestion();
+    });
+    qModalHideChoicesToggle.addEventListener('change', function () {
+      modalHideChoices = qModalHideChoicesToggle.checked;
       renderModalQuestion();
     });
     qModalExplainBtn.addEventListener('click', function () {
@@ -2595,19 +2670,18 @@
     });
     card.appendChild(gridEl);
 
-    // Avg time on a correct question vs. an incorrect one — a real signal
-    // (rushing to a wrong answer vs. working carefully to a right one),
-    // not the same "avg per question" figure restated.
-    var avgCorrectMs = s5.c ? (s5.timeCorrect / s5.c) : 0;
-    var avgIncorrectMs = incorrectN ? (s5.timeIncorrect / incorrectN) : 0;
     if (s5.timeTotal > 0) {
       // Actual avg time per question against the REAL per-question budget
-      // this module's official time limit implies (window.
-      // SECTION_MODULE_TIME_LIMITS in banks.js) — "0:52 of 1:11" reads
-      // directly as pace against the clock, not just a bare number.
+      // this module's official time limit implies — s5.timeAllottedMin
+      // (same field the "Unused time" behavior flag reads) is this
+      // STUDENT's actual allotted minutes, already scaled by their
+      // accommodations — see index.html's identical fix/comment. Using
+      // window.SECTION_MODULE_TIME_LIMITS directly (this used to) compares
+      // a time-and-a-half/double-time student's real pace against a budget
+      // that was never theirs, always reading as "over pace" even when
+      // they were well within their own real allotted time.
       var avgAllMs = s5.t ? (s5.timeTotal / s5.t) : 0;
-      var timeLimitMin = (window.SECTION_MODULE_TIME_LIMITS && window.SECTION_MODULE_TIME_LIMITS[s5.key]) || 0;
-      var expectedMsPerQ = (timeLimitMin && s5.t) ? (timeLimitMin * 60000 / s5.t) : 0;
+      var expectedMsPerQ = (s5.timeAllottedMin && s5.t) ? (s5.timeAllottedMin * 60000 / s5.t) : 0;
       var paceEl = document.createElement('div');
       paceEl.className = 'sc-meta';
       if (expectedMsPerQ) {
@@ -2617,11 +2691,6 @@
         paceEl.innerHTML = 'Avg time: ' + formatMinSec(avgAllMs) + ' per question';
       }
       card.appendChild(paceEl);
-
-      var metaEl = document.createElement('div');
-      metaEl.className = 'sc-meta';
-      metaEl.innerHTML = 'Avg <span class="ok">' + formatMinSec(avgCorrectMs) + '</span> / ' + formatMinSec(avgIncorrectMs);
-      card.appendChild(metaEl);
     }
 
     cardsWrap.appendChild(card);
@@ -2679,8 +2748,17 @@
   // (median time on that section's own correct MC answers) and its own
   // ratio check, so a real pattern in one section fires regardless of how
   // the other section went.
-  var RUSHED_REL = 0.5, RUSHED_ABS_CAP = 20000, LUCKY_REL = 0.35, LUCKY_ABS_CAP = 15000;
+  var RUSHED_REL = 0.5, RUSHED_ABS_CAP = 20000, LUCKY_REL = 0.35, LUCKY_ABS_CAP = 15000, STUCK_REL = 1.6;
   var behaviorFlags = [];
+  // Mastered/Inefficient/Stuck/Rushed rollup per skill — see
+  // renderSkillDiagnosis() and skillBuckets in index.html's identical block
+  // for the full reasoning (this is the standalone report's own copy, kept
+  // in sync by hand). Replaced the old section-level "Where to focus"
+  // headline (focusCandidates) with this finer-grained, per-skill version.
+  var skillBuckets = {};
+  function bucketFor(skillName) {
+    return skillBuckets[skillName] || (skillBuckets[skillName] = { mastered: 0, inefficient: 0, stuck: 0, rushed: 0, total: 0, hardTotal: 0 });
+  }
   // Late-night attempt: a diagnostic finished well outside normal waking
   // hours is exactly the kind of context Luca already factors in by hand
   // when a score looks lower than he'd expect (fatigue suppresses
@@ -2735,12 +2813,29 @@
     if (!typical) return; // no usable timing data for this section — skip rather than guess
     var cutoff = Math.min(typical * RUSHED_REL, RUSHED_ABS_CAP);
     var luckyCutoff = Math.min(typical * LUCKY_REL, LUCKY_ABS_CAP);
-    var rushedWrong = [], luckyCorrect = [];
+    var stuckCutoff = typical * STUCK_REL;
+    var rushedWrong = [], luckyCorrect = [], stuckWrong = [];
     s7.rows.forEach(function (r) {
       if (r.q.type !== 'mc' || !(pacingTimeMs(r) > 0)) return;
       if (!r.ok && pacingTimeMs(r) < cutoff) rushedWrong.push({ sk: r.sk });
+      if (!r.ok && pacingTimeMs(r) >= stuckCutoff) stuckWrong.push({ sk: r.sk });
       if (r.ok && r.q.difficulty === 'hard' && pacingTimeMs(r) < luckyCutoff) luckyCorrect.push({ sk: r.sk });
+      if (r.sk) {
+        var b = bucketFor(r.sk);
+        b.total++;
+        if (r.q.difficulty === 'hard') b.hardTotal++;
+        var slow = pacingTimeMs(r) >= stuckCutoff;
+        if (r.ok) { if (slow) b.inefficient++; else b.mastered++; }
+        else { if (slow) b.stuck++; else b.rushed++; }
+      }
     });
+    // Stuck flag: missed questions where REAL, deliberate time was spent —
+    // the direct counterpart to the Pacing (rushed-guess) flag below — see
+    // index.html's identical block for the full rationale.
+    if (s7.missedMc >= 4 && stuckWrong.length / s7.missedMc >= 0.5) {
+      var sSkills = topSkillNames(stuckWrong, 3).join(', ');
+      behaviorFlags.push('<strong>Stuck flag (' + s7.label + '):</strong> ' + stuckWrong.length + ' of ' + s7.missedMc + ' missed multiple-choice questions here took well over ' + first + '’s own typical time on a correct answer — real, deliberate effort that still came back wrong, not a rushed guess.' + (sSkills ? ' Heaviest in: ' + sSkills + '.' : '') + ' This is the clearest signal of an actual content gap in this report — worth prioritizing over anything that looks like a pacing issue.');
+    }
     if (s7.missedMc >= 4 && rushedWrong.length / s7.missedMc >= 0.5) {
       var wSkills = topSkillNames(rushedWrong, 3).join(', ');
       var rushedBasis = usingFirstPass
@@ -2767,6 +2862,66 @@
   bWrap.innerHTML = behaviorFlags.length
     ? '<ul class="takeaways">' + behaviorFlags.map(function (f) { return '<li>' + f + '</li>'; }).join('') + '</ul>'
     : '<p class="behavior-clean">No pacing or timing red flags on this attempt — ' + first + '’s scores here look like a real read of where things stand, not an artifact of rushing, guessing, or fatigue.</p>';
+
+  /* ═══ renderSkillDiagnosis() ═══ see index.html's identical function for
+     the full reasoning (this is the standalone report's own copy, kept in
+     sync by hand). */
+  (function renderSkillDiagnosis() {
+    var MIN_SAMPLE = 3, SIGNAL_MIN_COUNT = 2, SIGNAL_MIN_SHARE = 0.3;
+    var rows = Object.keys(skillBuckets).map(function (sk) {
+      var b = skillBuckets[sk];
+      return { skill: sk, mastered: b.mastered, inefficient: b.inefficient, stuck: b.stuck, rushed: b.rushed, total: b.total, hardShare: b.total ? b.hardTotal / b.total : 0 };
+    }).filter(function (r) { return r.total >= MIN_SAMPLE; });
+    function severityOf(r) {
+      if (r.stuck >= SIGNAL_MIN_COUNT && r.stuck / r.total >= SIGNAL_MIN_SHARE) return 3;
+      if (r.rushed >= SIGNAL_MIN_COUNT && r.rushed / r.total >= SIGNAL_MIN_SHARE) return 2;
+      if (r.inefficient >= SIGNAL_MIN_COUNT && r.inefficient / r.total >= SIGNAL_MIN_SHARE) return 1;
+      return 0;
+    }
+    rows.forEach(function (r) { r.severity = severityOf(r); });
+    rows.sort(function (a, b) {
+      if (b.severity !== a.severity) return b.severity - a.severity;
+      var bMax = Math.max(b.stuck, b.rushed, b.inefficient), aMax = Math.max(a.stuck, a.rushed, a.inefficient);
+      return bMax - aMax;
+    });
+    var signalRows = rows.filter(function (r) { return r.severity > 0; }).slice(0, 6);
+    var headEl = document.getElementById('skilldx-headline');
+    var tableEl = document.getElementById('skilldx-table');
+    if (!signalRows.length) {
+      document.getElementById('skilldx-hed').style.display = '';
+      document.getElementById('skilldx-card').style.display = '';
+      headEl.innerHTML = '';
+      tableEl.innerHTML = '<p class="behavior-clean">No skill shows a clear Stuck or Rushed pattern — every skill with enough attempts to judge is a mix of normal-pace right and wrong answers, not a concentrated gap or guessing habit.</p>';
+      return;
+    }
+    var top = signalRows[0];
+    var diffPrefix = top.hardShare >= 0.6 ? 'Hard ' : '';
+    var kindLabel = top.severity === 3 ? 'Stuck' : top.severity === 2 ? 'Rushed' : 'Slow but right';
+    var headline = top.severity === 3
+      ? '<strong>Your biggest issue:</strong> ' + kindLabel + ' on ' + diffPrefix + esc(top.skill) + ' — ' + top.stuck + ' of ' + top.total + ' questions here took real, deliberate time and still came back wrong. That’s a knowledge gap, not a pacing one — review content before drilling speed there.'
+      : top.severity === 2
+      ? '<strong>Your biggest issue:</strong> ' + kindLabel + ' on ' + diffPrefix + esc(top.skill) + ' — ' + top.rushed + ' of ' + top.total + ' questions here were answered suspiciously fast and wrong. That’s a pacing pattern, not a knowledge gap — slow down and check work here rather than re-teaching the content.'
+      : '<strong>Your biggest issue:</strong> ' + kindLabel + ' on ' + diffPrefix + esc(top.skill) + ' — ' + top.inefficient + ' of ' + top.total + ' correct answers here took much longer than typical. Not urgent, but a good target for light speed drills once anything above is handled.';
+    headEl.innerHTML = '<div class="behavior-focus">' + headline + '</div>';
+    tableEl.innerHTML = signalRows.map(function (r) {
+      var tagCls = r.severity === 3 ? 'gap' : r.severity === 2 ? 'pacing' : 'slow';
+      var tagLabel = r.severity === 3 ? 'Content gap' : r.severity === 2 ? 'Pacing' : 'Getting there';
+      function seg(n, cls) { return n ? '<div class="skilldx-seg ' + cls + '" style="width:' + (n / r.total * 100) + '%;" title="' + n + ' ' + cls + '"></div>' : ''; }
+      return '<div class="skilldx-row">' +
+        '<div class="skilldx-row-main">' +
+          '<div class="skilldx-row-top"><span class="skilldx-row-name">' + esc(r.skill) + '</span><span class="skilldx-tag ' + tagCls + '">' + tagLabel + '</span></div>' +
+          '<div class="skilldx-track">' + seg(r.mastered, 'mastered') + seg(r.inefficient, 'inefficient') + seg(r.stuck, 'stuck') + seg(r.rushed, 'rushed') + '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('') + '<div class="skilldx-legend">' +
+      '<span><i class="skilldx-dot mastered"></i>Mastered</span>' +
+      '<span><i class="skilldx-dot inefficient"></i>Inefficient (slow, right)</span>' +
+      '<span><i class="skilldx-dot stuck"></i>Stuck (slow, wrong)</span>' +
+      '<span><i class="skilldx-dot rushed"></i>Rushed (fast, wrong)</span>' +
+    '</div>';
+    document.getElementById('skilldx-hed').style.display = '';
+    document.getElementById('skilldx-card').style.display = '';
+  })();
 
   var take = [];
   take.push('<strong>' + first + ' answered ' + totalC + ' of ' + totalQ + ' correctly (' + pct + '%).</strong>');
@@ -3048,52 +3203,144 @@
     if (grid.children.length) accWrap.style.display = '';
   })();
 
-  /* ═══ TIMING — TIME SHARE BY DIFFICULTY ═══ per subject: what fraction
-     of the total time in that subject went to easy/medium/hard questions
-     — see index.html's identical block for the full rationale. */
-  (function renderTimingStats() {
-    var wrap = document.getElementById('timing-stats');
-    var cards = [];
-    sections.forEach(function (sec) {
-      var diffTime = { easy: 0, medium: 0, hard: 0 };
-      var totalMs = 0;
-      sec.rows.forEach(function (r) {
-        if (!r.q || !r.timeMs) return;
-        var d = r.q.difficulty;
-        if (diffTime[d] === undefined) return;
-        diffTime[d] += r.timeMs;
-        totalMs += r.timeMs;
-      });
-      if (!totalMs) return;
-      var pctEasy = Math.round(diffTime.easy / totalMs * 100);
-      var pctMedium = Math.round(diffTime.medium / totalMs * 100);
-      var pctHard = Math.max(0, 100 - pctEasy - pctMedium);
-      var card = document.createElement('div');
-      card.className = 'quadrant-card';
-      card.innerHTML = '<div class="quadrant-card-hed">' + sec.label + '</div>' +
-        '<div class="sc-difftime">' +
-          '<div class="sc-difftime-track">' +
-            '<div class="sc-difftime-seg easy" style="width:' + pctEasy + '%"></div>' +
-            '<div class="sc-difftime-seg medium" style="width:' + pctMedium + '%"></div>' +
-            '<div class="sc-difftime-seg hard" style="width:' + pctHard + '%"></div>' +
-          '</div>' +
-          '<div class="sc-difftime-legend">' +
-            '<span><i class="sc-difftime-dot easy"></i>Easy — ' + pctEasy + '% (' + formatMinSec(diffTime.easy) + ')</span>' +
-            '<span><i class="sc-difftime-dot medium"></i>Medium — ' + pctMedium + '% (' + formatMinSec(diffTime.medium) + ')</span>' +
-            '<span><i class="sc-difftime-dot hard"></i>Hard — ' + pctHard + '% (' + formatMinSec(diffTime.hard) + ')</span>' +
-          '</div>' +
-        '</div>';
-      cards.push(card);
+
+  /* ═══ TIMING — PER-QUESTION ALLOCATION CHART ═══ one module at a time —
+     see index.html's identical buildModuleTimeline()/renderTimingAllocation()
+     (this is the standalone report's own copy, kept in sync by hand). */
+  function buildModuleTimeline(rows) {
+    var segs = [];
+    rows.forEach(function (r, i) {
+      if (r.firstVisitMs != null && r.lastViewedAt != null &&
+          r.lastViewedAt - ((r.firstVisitedAt || 0) + r.firstVisitMs) > 2000) {
+        var returnDur = Math.max(0, r.timeMs - r.firstVisitMs);
+        segs.push({ rowIndex: i, start: r.firstVisitedAt || 0, dur: r.firstVisitMs });
+        segs.push({ rowIndex: i, start: r.lastViewedAt, dur: returnDur });
+      } else {
+        segs.push({ rowIndex: i, start: r.firstVisitedAt || 0, dur: r.timeMs || 0 });
+      }
     });
-    if (cards.length) {
-      document.getElementById('timing-hed').style.display = '';
-      document.getElementById('timing-sub').style.display = '';
-      wrap.style.display = '';
-      var grid = document.createElement('div');
-      grid.className = 'quadrant-grid';
-      cards.forEach(function (c) { grid.appendChild(c); });
-      wrap.appendChild(grid);
+    segs = segs.filter(function (s) { return s.dur > 0; });
+    segs.sort(function (a, b) { return a.start - b.start; });
+    var cursor = 0;
+    var byRow = {};
+    segs.forEach(function (s) {
+      s.plotStart = cursor; s.plotEnd = cursor + s.dur; cursor = s.plotEnd;
+      (byRow[s.rowIndex] = byRow[s.rowIndex] || []).push(s);
+    });
+    return { byRow: byRow, totalMs: cursor };
+  }
+
+  (function renderTimingAllocation() {
+    var wrap = document.getElementById('timing-allocation');
+    var moduleViews = [];
+    sections.forEach(function (sec) {
+      if (!sec.hasModules) {
+        moduleViews.push({ label: sec.label, rows: sec.rows });
+        return;
+      }
+      var m1 = sec.rows.filter(function (r) { return r.moduleIndex === 0; });
+      var m2 = sec.rows.filter(function (r) { return r.moduleIndex === 1; });
+      if (m1.length) moduleViews.push({ label: sec.label + ' – Module 1', rows: m1 });
+      if (m2.length) moduleViews.push({ label: sec.label + ' – Module 2' + (sec.variant ? ' (' + sec.variant + ')' : ''), rows: m2 });
+    });
+    moduleViews = moduleViews.map(function (mv) {
+      return { label: mv.label, rows: mv.rows.filter(function (r) { return r.timeMs > 0; }) };
+    }).filter(function (mv) { return mv.rows.length >= 2; });
+    if (!moduleViews.length) return;
+    moduleViews.forEach(function (mv) { mv.timeline = buildModuleTimeline(mv.rows); });
+
+    var ROW_H = 12, PAD_L = 32, PAD_R = 14, PAD_T = 10, PAD_B = 30;
+    var CHART_W = 640;
+    var INNER_W = CHART_W - PAD_L - PAD_R;
+    var maxRows = 0;
+    moduleViews.forEach(function (mv) { if (mv.rows.length > maxRows) maxRows = mv.rows.length; });
+    var PLOT_H = maxRows * ROW_H;
+    var CHART_H = PAD_T + PLOT_H + PAD_B;
+
+    var dataMaxMin = 5;
+    moduleViews.forEach(function (mv) {
+      var totalMin = mv.timeline.totalMs / 60000;
+      if (totalMin > dataMaxMin) dataMaxMin = totalMin;
+    });
+    var lastGridMin = Math.floor(dataMaxMin / 5) * 5;
+    var axisMaxMin = dataMaxMin * 1.06;
+    function xAt(min) { return PAD_L + Math.min(1, min / axisMaxMin) * INNER_W; }
+
+    wrap.innerHTML =
+      '<div class="timing-carousel">' +
+        '<button type="button" class="timing-nav-btn" id="timing-prev-btn" aria-label="Previous module"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>' +
+        '<div class="timing-chart-card" style="width:' + CHART_W + 'px;">' +
+          '<div class="timing-chart-hed"><span id="timing-module-label"></span><span class="timing-module-counter" id="timing-module-counter"></span></div>' +
+          '<div class="timing-chart-plot" id="timing-chart-plot" style="width:' + CHART_W + 'px; height:' + CHART_H + 'px;"></div>' +
+        '</div>' +
+        '<button type="button" class="timing-nav-btn" id="timing-next-btn" aria-label="Next module"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>' +
+      '</div>';
+
+    var labelEl = document.getElementById('timing-module-label');
+    var counterEl = document.getElementById('timing-module-counter');
+    var plotEl = document.getElementById('timing-chart-plot');
+    var prevBtn = document.getElementById('timing-prev-btn');
+    var nextBtn = document.getElementById('timing-next-btn');
+    var moduleIdx = 0;
+
+    var tooltip = document.createElement('div');
+    tooltip.className = 'bridge-tooltip';
+    plotEl.parentNode.appendChild(tooltip);
+    function showTimingTooltip(clientX, clientY, r, qn) {
+      tooltip.innerHTML = '<b>Question ' + qn + '</b>' + (r.ok ? 'Correct' : 'Incorrect') + ' · ' + formatDuration(r.timeMs) +
+        '<span class="bridge-tooltip-hint">Click to see this question</span>';
+      tooltip.style.left = (clientX + 14) + 'px';
+      tooltip.style.top = (clientY + 14) + 'px';
+      tooltip.style.display = 'block';
     }
+    function hideTimingTooltip() { tooltip.style.display = 'none'; }
+
+    function renderModule() {
+      var mv = moduleViews[moduleIdx];
+      hideTimingTooltip();
+      var gridHtml = '';
+      for (var t = 0; t <= lastGridMin; t += 5) {
+        var gx = xAt(t);
+        gridHtml += '<div class="timing-gridline" style="left:' + gx.toFixed(1) + 'px; top:' + PAD_T + 'px; height:' + PLOT_H + 'px;"></div>' +
+          '<div class="timing-gridlabel" style="left:' + gx.toFixed(1) + 'px; top:' + (PAD_T + PLOT_H + 4) + 'px;">' + t + '</div>';
+      }
+      var barsHtml = '';
+      mv.rows.forEach(function (r, i) {
+        var y = PAD_T + (mv.rows.length - 1 - i) * ROW_H;
+        var qn = i + 1;
+        var rowSegs = mv.timeline.byRow[i] || [];
+        rowSegs.forEach(function (seg) {
+          var x1 = xAt(seg.plotStart / 60000), x2 = xAt(seg.plotEnd / 60000);
+          var w = Math.max(1, x2 - x1);
+          barsHtml += '<div class="timing-bar ' + (r.ok ? 'timing-bar-ok' : 'timing-bar-bad') + '" data-idx="' + i + '" style="left:' + x1.toFixed(1) + 'px; top:' + (y + 1.5).toFixed(1) + 'px; width:' + w.toFixed(1) + 'px; height:' + (ROW_H - 3) + 'px;"></div>';
+        });
+        if (i === 0 || qn % 5 === 0 || i === mv.rows.length - 1) {
+          barsHtml += '<div class="timing-rowlabel" style="top:' + (y + ROW_H / 2).toFixed(1) + 'px;">' + qn + '</div>';
+        }
+      });
+      var xCaption = '<div class="timing-xcaption" style="top:' + (PAD_T + PLOT_H + 16) + 'px;">Time (minutes)</div>';
+      plotEl.innerHTML = gridHtml + barsHtml + xCaption;
+      Array.prototype.forEach.call(plotEl.querySelectorAll('.timing-bar'), function (barEl) {
+        var i = +barEl.getAttribute('data-idx');
+        var r = mv.rows[i];
+        var qn = i + 1;
+        barEl.addEventListener('mousemove', function (e) { showTimingTooltip(e.clientX, e.clientY, r, qn); });
+        barEl.addEventListener('mouseleave', hideTimingTooltip);
+        barEl.addEventListener('click', function () { openQuestionModal(mv.rows, i, mv.label); });
+      });
+      labelEl.textContent = mv.label;
+      counterEl.textContent = (moduleIdx + 1) + ' of ' + moduleViews.length;
+      prevBtn.disabled = moduleIdx === 0;
+      nextBtn.disabled = moduleIdx === moduleViews.length - 1;
+    }
+    prevBtn.addEventListener('click', function () { if (moduleIdx > 0) { moduleIdx--; renderModule(); } });
+    nextBtn.addEventListener('click', function () { if (moduleIdx < moduleViews.length - 1) { moduleIdx++; renderModule(); } });
+    renderModule();
+
+    document.getElementById('timing-hed').style.display = '';
+    document.getElementById('timing-card').style.display = '';
+    document.getElementById('timing-allocation-sub').style.display = '';
+    wrap.style.display = '';
   })();
 
   /* ═══ CONFIDENCE QUADRANT ═══ per subject: every multiple-choice
