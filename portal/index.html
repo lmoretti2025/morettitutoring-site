@@ -1347,6 +1347,8 @@
   .vp-mode-card { text-align: left; background: var(--white); border: 1.5px solid var(--border); border-radius: 12px; padding: 0.9rem 1rem; cursor: pointer; transition: border-color 0.12s, transform 0.12s var(--ease); }
   .vp-mode-card:hover { transform: translateY(-1px); border-color: var(--mid); }
   .vp-mode-card.on { border-color: var(--red); background: #fdf5f4; }
+  .vp-mode-card-icon { display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 8px; background: rgba(176,39,28,0.08); color: var(--red); margin-bottom: 0.55rem; }
+  .vp-mode-card-icon svg { width: 16px; height: 16px; }
   .vp-mode-card-hed { font-family: var(--hel); font-size: 0.84rem; font-weight: 700; color: var(--text); }
   .vp-mode-card.on .vp-mode-card-hed { color: var(--red); }
   .vp-mode-card-sub { font-size: 0.7rem; color: var(--mid); line-height: 1.45; margin-top: 0.3rem; }
@@ -3609,14 +3611,17 @@
       <div class="vp-panel-label">Study modes</div>
       <div class="vp-mode-cards" id="vp-modes">
         <button class="vp-mode-card on" data-vpmode="flash" type="button">
+          <span class="vp-mode-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="9" width="14" height="10" rx="2"/><path d="M7 5h14a2 2 0 0 1 2 2v10"/></svg></span>
           <div class="vp-mode-card-hed">Flashcards</div>
           <div class="vp-mode-card-sub">Flip through terms and self-grade what you know.</div>
         </button>
         <button class="vp-mode-card" data-vpmode="mc" type="button">
+          <span class="vp-mode-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.4 9.2a2.6 2.6 0 1 1 3.6 2.4c-.9.4-1.5 1.1-1.5 2.3"/><line x1="12" y1="17.2" x2="12" y2="17.21"/></svg></span>
           <div class="vp-mode-card-hed">Multiple Choice</div>
           <div class="vp-mode-card-sub">Match each definition to the right word.</div>
         </button>
         <button class="vp-mode-card" data-vpmode="type" type="button">
+          <span class="vp-mode-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="2"/><line x1="7" y1="10" x2="7" y2="10.01"/><line x1="11" y1="10" x2="11" y2="10.01"/><line x1="15" y1="10" x2="15" y2="10.01"/><line x1="7" y1="14" x2="17" y2="14"/></svg></span>
           <div class="vp-mode-card-hed">Type It</div>
           <div class="vp-mode-card-sub">Type the word a definition describes.</div>
         </button>
@@ -4319,11 +4324,30 @@
   // call (isStale will be true on it, false/undefined on the real one) —
   // existing callers that take one argument work unchanged since the
   // second parameter is optional.
+  // In-memory only (resets on page load) — Home (renderHomePies) and Saved
+  // & Mistakes (loadRecords) each call fetchPortalProgress() independently,
+  // and without this, navigating between them fired a second full Apps
+  // Script round trip for data that's usually still identical: this
+  // portal's slowest cost by far is per-request latency, not payload size,
+  // so a redundant request is one of the most expensive things this app
+  // can do. progressFetchPromise also de-dupes two calls landing in the
+  // same tick (e.g. a screen that itself calls this twice) into one
+  // in-flight request instead of two concurrent ones.
+  var progressFetchPromise = null, progressFetchResult = null, progressFetchAt = 0;
+  var PROGRESS_CACHE_TTL_MS = 60000;
   window.fetchPortalProgress = function (callback) {
     var key = currentStudent && currentStudent.key;
     if (!key) { callback({ incorrectQuestions: {}, skillStats: {}, savedQuestions: {} }); return; }
     var localCache = loadLocalProgressCache();
     callback(Object.assign({ isStale: true }, localCache));
+    if (progressFetchResult && (Date.now() - progressFetchAt) < PROGRESS_CACHE_TTL_MS) {
+      callback(progressFetchResult);
+      return;
+    }
+    if (progressFetchPromise) {
+      progressFetchPromise.then(function (result) { callback(result); });
+      return;
+    }
     // Routed through postToBackend (defined below) rather than a bare
     // fetch() — a bare fetch() has no timeout, so a bad Apps Script cold
     // start just sits there indefinitely with nothing to trigger a retry.
@@ -4331,8 +4355,9 @@
     // this catches and falls back — same fix as callAuth() above, same
     // root cause. The stale local callback above already covers the
     // "nothing to look at yet" gap this used to leave.
-    postToBackend({ action: 'getProgress', key: key })
+    progressFetchPromise = postToBackend({ action: 'getProgress', key: key })
       .then(function (data) {
+        var result;
         if (data && data.ok) {
           // Merge in this device's own local saved/incorrect-question
           // caches regardless — until Code.gs is redeployed with the
@@ -4353,13 +4378,27 @@
           // local-only collection this device hasn't synced yet still
           // shows up via the merge.
           var mergedCollections = Object.assign({}, localCache.collections, data.collections || {});
-          callback({ incorrectQuestions: mergedIncorrect, skillStats: data.skillStats || {}, savedQuestions: mergedSaved, collections: mergedCollections });
+          result = { incorrectQuestions: mergedIncorrect, skillStats: data.skillStats || {}, savedQuestions: mergedSaved, collections: mergedCollections };
         } else {
-          callback(localCache);
+          result = localCache;
         }
+        progressFetchResult = result;
+        progressFetchAt = Date.now();
+        progressFetchPromise = null;
+        callback(result);
+        return result;
       })
-      .catch(function () { callback(localCache); });
+      .catch(function () {
+        progressFetchPromise = null;
+        callback(localCache);
+        return localCache;
+      });
   };
+  // A write anywhere (saving a question, recording a Question Bank miss,
+  // syncing collections) makes the cached read stale immediately — without
+  // this, saving a question then jumping straight to Saved & Mistakes
+  // could still show the pre-save cached copy for up to a minute.
+  window.invalidatePortalProgressCache = function () { progressFetchResult = null; progressFetchAt = 0; };
 
   var activeScreenId = 'screen-key';
   var STORAGE_KEY = 'moretti_portal_state';
@@ -7336,14 +7375,16 @@
   // resolved straight from window.QUESTION_BANK/QUESTION_BANK_MATH by qid,
   // not the testTag|sectionKey|module|moduleIndex shape below (a Question
   // Bank question was never taken as part of a specific test/module, so
-  // that shape doesn't apply). R&W items resolve to a normal 'mc' record;
-  // Math items are image-based (see question-bank-math.js's own comment
-  // for why — the source PDFs render every equation as vector graphics,
-  // not selectable text), so they resolve to a 'fr' record whose "answer"
-  // is just the correct letter — the existing Saved & Mistakes runner
-  // already knows how to quiz a typed-answer fr question and show its
-  // explanation, so this reuses that path instead of teaching it a third,
-  // image-aware choice renderer.
+  // that shape doesn't apply). Both pools are plain typed HTML/text now
+  // (see question-bank-math.js's own comment) and carry a real q.type —
+  // 'mc' resolves to a normal multiple-choice record; 'fr' (Math's
+  // student-produced-response/grid-in questions, which have no answer
+  // choices in the source) resolves to a typed-answer record the existing
+  // Saved & Mistakes runner already knows how to quiz and show the
+  // explanation for. A legacy 'mc-image' entry (old image-crop format,
+  // kept only for backward compatibility with any question saved under
+  // that format) still maps onto the same typed-answer 'fr' shape, just
+  // with cropped-image src's standing in for real markup.
   function resolveQuestionBankKey_(key) {
     var parts = String(key).split('|');
     if (parts.length !== 3 || parts[0] !== 'qb') return null;
@@ -7367,6 +7408,24 @@
         correctIndex: null,
         answerValue: LETTERS_QB[q.correct],
         explanation: q.explImg ? '<img src="' + q.explImg + '" style="max-width:100%;">' : null,
+        passageId: null,
+        refNum: null
+      };
+    }
+    if (q.type === 'fr') {
+      return {
+        sectionKey: sectionKey,
+        testTitle: 'Question Bank Questions',
+        domain: q.domain,
+        skill: q.skill,
+        difficulty: q.difficulty || 'medium',
+        type: 'fr',
+        text: q.text,
+        choices: null,
+        correctIndex: null,
+        choiceNotes: null,
+        answerValue: q.answerValue,
+        explanation: q.explanation || null,
         passageId: null,
         refNum: null
       };
@@ -9121,6 +9180,7 @@
   window.saveReportQuestion = function (record) {
     if (!record || !record.key) return;
     recordSavedQuestions([record]);
+    if (window.invalidatePortalProgressCache) window.invalidatePortalProgressCache();
     try {
       var studentKey = currentStudent && currentStudent.key;
       if (!studentKey) return;
@@ -9148,6 +9208,7 @@
   window.recordQuestionBankMistake = function (record) {
     if (!record || !record.key) return;
     recordIncorrectQuestions([record]);
+    if (window.invalidatePortalProgressCache) window.invalidatePortalProgressCache();
     try {
       var studentKey = currentStudent && currentStudent.key;
       if (!studentKey) return;
@@ -9173,6 +9234,7 @@
       if (!studentKey) return;
       localStorage.setItem('moretti_collections_' + studentKey, JSON.stringify({ byName: collections, updatedAt: new Date().toISOString() }));
     } catch (e) { /* storage disabled / private browsing — skip silently */ }
+    if (window.invalidatePortalProgressCache) window.invalidatePortalProgressCache();
     try {
       var studentKey2 = currentStudent && currentStudent.key;
       if (!studentKey2) return;
@@ -9196,6 +9258,7 @@
   // trimming needed here. Saved-question syncing is a separate action —
   // see syncSavedQuestionToBackend() below.
   function syncProgressToBackend(incorrectRecords, skills) {
+    if (window.invalidatePortalProgressCache) window.invalidatePortalProgressCache();
     try {
       var studentKey = currentStudent && currentStudent.key;
       if (!studentKey) return;
@@ -12752,10 +12815,15 @@
    dxStartIncorrectPractice()/dxEndIncorrectPractice() switch the WHOLE
    SCREEN to the real exam UI). Two question pools: window.QUESTION_BANK
    (question-bank.js, Reading & Writing, plain text) and window.
-   QUESTION_BANK_MATH (question-bank-math.js, Math — image-based, since
-   those source PDFs render every equation as vector graphics, not
-   selectable text; see that file's own comment). Each question's qid is
-   the runner's per-question key. Per-skill progress and a save/bookmark
+   QUESTION_BANK_MATH (question-bank-math.js, Math, also plain typed
+   text/HTML — see that file's own comment). Each pool's entries carry a
+   q.type: 'mc' (multiple choice, renders r.choices as clickable rows) or
+   'fr' (free/typed response — Math's student-produced-response
+   "grid-in" questions, which have no answer choices in the source;
+   renders the shared #dx-fr-row text input and grades with the same
+   tolerant numeric/fraction match every other 'fr' runner in this file
+   uses). Each question's qid is the runner's per-question key. Per-skill
+   progress and a save/bookmark
    toggle inside the runner are tracked in localStorage per student
    (moretti_qb_progress_<studentKey>), same per-device pattern as Challenge
    Questions' own analytics — but a MISS also round-trips to the backend
@@ -12774,6 +12842,28 @@
     math: ['Algebra', 'Advanced Math', 'Problem-Solving and Data Analysis', 'Geometry and Trigonometry']
   };
   function poolFor(subject) { return subject === 'math' ? (window.QUESTION_BANK_MATH || []) : (window.QUESTION_BANK || []); }
+  // Same tolerant numeric/fraction/string match used by every other 'fr'
+  // runner in this file (Practice Tests, Saved & Mistakes) — duplicated
+  // locally since each runner is its own isolated IIFE with no shared module.
+  function parseSimpleNumeric(s) {
+    s = String(s == null ? '' : s).trim();
+    var frac = /^-?\d+(\.\d+)?\s*\/\s*\d+(\.\d+)?$/.exec(s);
+    if (frac) {
+      var parts = s.split('/');
+      var d = parseFloat(parts[1]);
+      return d ? parseFloat(parts[0]) / d : null;
+    }
+    var n = parseFloat(s);
+    return isNaN(n) ? null : n;
+  }
+  function checkFrAnswer(raw, expected) {
+    var a = String(raw == null ? '' : raw).trim();
+    var b = String(expected == null ? '' : expected).trim();
+    if (!a) return false;
+    if (a.toLowerCase() === b.toLowerCase()) return true;
+    var an = parseSimpleNumeric(a), bn = parseSimpleNumeric(b);
+    return (an !== null && bn !== null && Math.abs(an - bn) < 0.05);
+  }
 
   var skillsCache = {}; // subject -> [{ domain, skill, questions: [...] }], built once per subject
   function allSkills(subject) {
@@ -13243,7 +13333,16 @@
     var r = runnerQueue[runnerIndex];
     var st = runnerState[r.qid];
     if (!st.submitted) {
-      st.correct = (st.chosenIndex === r.correct);
+      var given;
+      if (r.type === 'fr') {
+        var frInputEl = document.getElementById('dx-fr-input');
+        st.rawAnswer = frInputEl ? frInputEl.value : '';
+        st.correct = checkFrAnswer(st.rawAnswer, r.answerValue);
+        given = st.rawAnswer;
+      } else {
+        st.correct = (st.chosenIndex === r.correct);
+        given = st.chosenIndex;
+      }
       st.submitted = true;
       if (st.correct) runnerScore++;
       recordAttempt(r.qid, st.correct);
@@ -13255,7 +13354,7 @@
       if (window.recordQuestionBankMistake) {
         window.recordQuestionBankMistake({
           key: 'qb|' + currentSubject + '|' + r.qid,
-          given: st.chosenIndex,
+          given: given,
           correct: st.correct,
           attemptedAt: new Date().toISOString()
         });
@@ -13380,6 +13479,38 @@
         explainImg.className = 'pb-explain';
         explainImg.innerHTML = '<div class="pb-explain-hed">Full Explanation</div><img src="' + r.explImg + '" style="max-width:100%;">';
         navRowEl.parentNode.insertBefore(explainImg, navRowEl);
+      }
+    } else if (r.type === 'fr') {
+      // Student-produced-response math question (no answer choices in the
+      // source — College Board grid-in) — typed-answer flow, same widget
+      // and tolerant-match grading (checkFrAnswer above) every other 'fr'
+      // runner in this file already uses.
+      var frInputEl = document.getElementById('dx-fr-input');
+      var split = splitPassageQb(r.text);
+      qtextEl.innerHTML = split ? split.question : r.text;
+      if (window.dxRenderPassagePane) window.dxRenderPassagePane({}, split, r.qid);
+      choicesEl.style.display = 'none';
+      frRowEl.style.display = st.submitted ? 'none' : 'flex';
+      frInputEl.value = st.rawAnswer || '';
+      nextBtnEl.disabled = false;
+      if (!st.submitted) frInputEl.oninput = function () { st.rawAnswer = frInputEl.value; };
+      if (st.submitted) {
+        var frNote = document.createElement('div');
+        frNote.className = 'pb-note ' + (st.correct ? 'pb-note-correct' : 'pb-note-wrong');
+        frNote.innerHTML = 'Your answer: ' + escHtmlQb(st.rawAnswer || '(skipped)') + (st.correct ? ' — correct!' : ' — not quite');
+        frRowEl.parentNode.insertBefore(frNote, frRowEl.nextSibling);
+        if (!st.correct) {
+          var frCorrect = document.createElement('div');
+          frCorrect.className = 'pb-note pb-note-correct';
+          frCorrect.innerHTML = 'Correct answer: ' + escHtmlQb(String(r.answerValue));
+          frRowEl.parentNode.insertBefore(frCorrect, frNote.nextSibling);
+        }
+        if (r.explanation) {
+          var frExplain = document.createElement('div');
+          frExplain.className = 'pb-explain';
+          frExplain.innerHTML = '<div class="pb-explain-hed">Full Explanation</div>' + r.explanation;
+          navRowEl.parentNode.insertBefore(frExplain, navRowEl);
+        }
       }
     } else {
       var split = splitPassageQb(r.text);
