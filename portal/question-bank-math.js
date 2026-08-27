@@ -1,12 +1,29 @@
 /* =====================================================================
    MORETTI QUESTION BANK — MATH — official College Board SAT Math
    question bank, typed out the same way as banks.js's existing Math
-   questions (plain text/HTML, <sup> for exponents, √(...) for square
-   roots) — NOT image crops. Fill this in via question-bank-source/
-   math-manual-entry-template.csv (see that folder's own README), or by
-   hand in the same shape as question-bank.js's entries. Empty until real
-   questions are added — the Math subject card on the Question Bank home
-   screen stays a "Coming soon" placeholder until this has content.
+   questions (plain text/HTML, <sup> for exponents, √(...)/∛(...)/
+   <sup>N</sup>√(...) for roots) — NOT image crops. Fill this in via
+   question-bank-source/math-manual-entry-template.csv (see that
+   folder's own README), or by hand in the same shape as
+   question-bank.js's entries.
+
+   Two entry shapes, matched by "type":
+   - "mc" (multiple choice): {qid, domain, skill, difficulty, type: "mc",
+     text, choices: [4 strings], correct: 0-3, explanation}
+   - "fr" (free/typed response — College Board's student-produced-
+     response "grid-in" questions, which have NO answer choices in the
+     source): {qid, domain, skill, difficulty, type: "fr", text,
+     answerValue: "<the correct answer, as CB states it>", explanation}
+     The runner (index.html's Question Bank module) grades "fr" with a
+     tolerant numeric/fraction match, so a single canonical answerValue
+     (e.g. "7/6") is enough even when CB lists several accepted written
+     forms (e.g. "7/6, 1.166, 1.167") — do not skip these questions just
+     because they're not multiple choice; every question in the source
+     PDF should end up in this file, mc or fr.
+
+   Empty until real questions are added — the Math subject card on the
+   Question Bank home screen stays a "Coming soon" placeholder until
+   this has content.
    ===================================================================== */
 window.QUESTION_BANK_MATH = [
 {"qid": "c602140f", "domain": "Advanced Math", "skill": "Equivalent Expressions", "difficulty": "medium", "type": "mc", "text": "<div style=\"text-align:center; margin:1.2em 0; font-size:1.1em;\">(<i>x</i> − 11<i>y</i>)(2<i>x</i> − 3<i>y</i>) − 12<i>y</i>(−2<i>x</i> + 3<i>y</i>)</div>Which of the following is equivalent to the expression above?", "choices": ["<i>x</i> − 23<i>y</i>", "2<i>x</i><sup>2</sup> − <i>x</i><i>y</i> − 3<i>y</i><sup>2</sup>", "2<i>x</i><sup>2</sup> + 24<i>x</i><i>y</i> + 36<i>y</i><sup>2</sup>", "2<i>x</i><sup>2</sup> − 49<i>x</i><i>y</i> + 69<i>y</i><sup>2</sup>"], "correct": 1, "explanation": "Choice B is correct. Expanding all terms yields (<i>x</i> − 11<i>y</i>)(2<i>x</i> − 3<i>y</i>) − 12<i>y</i>(−2<i>x</i> + 3<i>y</i>), which is equivalent to 2<i>x</i><sup>2</sup> − 22<i>x</i><i>y</i> − 3<i>x</i><i>y</i> + 33<i>y</i><sup>2</sup> + 24<i>x</i><i>y</i> − 36<i>y</i><sup>2</sup>. Combining like terms gives 2<i>x</i><sup>2</sup> − <i>x</i><i>y</i> − 3<i>y</i><sup>2</sup>.<br><br>Choice A is incorrect and may be the result of using the sums of the coefficients of the existing <i>x</i> and <i>y</i> terms as the coefficients of the <i>x</i> and <i>y</i> terms in the new expressions. Choice C is incorrect and may be the result of incorrectly combining like terms. Choice D is incorrect and may be the result of using the incorrect sign in front of the 12<i>y</i> term."},
