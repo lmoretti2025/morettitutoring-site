@@ -576,10 +576,15 @@
   .spc-target-line { position: absolute; left: 0; right: 0; border-top: 1.5px dashed var(--gold); pointer-events: none; }
   .spc-target-line span { position: absolute; right: 0; top: -18px; font-family: var(--hel); font-size: 0.68rem; font-weight: 700; color: var(--gold); white-space: nowrap; }
 
-  /* One combined card, not three separate ones — the border/shadow/radius
-     live on the row itself, and each tile is just a padded flex child with
-     a divider between it and the next, so it reads as one unified strip
-     rather than three tiles with gaps. */
+  /* ONE card for the whole overview block — chart + the three mini tiles —
+     not two separate boxes stacked with a gap between them. The
+     background/border/radius/shadow live here on the wrapper; both
+     .score-progress-card and .home-stats-row below drop their own (see
+     the .overview-card overrides further down) and just contribute a
+     section each, divided by a single hairline. */
+  .overview-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); overflow: hidden; }
+  .overview-card .score-progress-card { border: none; box-shadow: none; border-radius: 0; margin: 0; max-width: none; border-bottom: 1px solid var(--border); }
+  .overview-card .home-stats-row { border: none; box-shadow: none; border-radius: 0; margin-top: 0; }
   .home-stats-row { display: flex; align-items: stretch; margin-top: 1.6rem; background: var(--white); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); overflow: hidden; }
   .home-stats-row > * { flex: 1 1 0; min-width: 0; padding: 1.15rem 1.3rem; border-left: 1px solid var(--border); }
   .home-stats-row > *:first-child { border-left: none; }
@@ -1338,6 +1343,16 @@
   .vp-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); opacity: 0.94; }
   .vp-primary:active { transform: translateY(0); }
   .vp-primary:disabled { opacity: 0.45; cursor: default; transform: none; box-shadow: none; }
+
+  /* Keeps the title, tabs, and filters in view while #iq-list scrolls
+     underneath — top matches #main-nav's own rendered height (60px) so
+     this sticks directly below the fixed nav bar instead of going under
+     it. Solid background so scrolled-past question rows don't show
+     through underneath it. */
+  .iq-sticky-head { position: sticky; top: 60px; z-index: 90; background: var(--bg); padding-bottom: 0.6rem; }
+  @media (max-width: 899px) {
+    .iq-sticky-head { top: 110px; } /* nav bar + the horizontal mobile sidebar strip beneath it */
+  }
 
   /* Saved & Mistakes' two-tab switcher (Saved Questions / Mistakes Log) —
      plain underline tabs, active one in brand red with a count badge next
@@ -2746,29 +2761,37 @@
             </div>
           </div>
 
-          <div class="score-progress-card" id="score-progress-card" style="display:none;">
-            <div class="spc-label">Score Progress</div>
-            <div id="spc-charts"></div>
-          </div>
+          <!-- ONE combined card — the bar chart and the three mini tiles
+               below it used to be two separate bordered boxes; they're now
+               one continuous card (score-progress-card and home-stats-row
+               both drop their own background/border/shadow/radius and take
+               it from this wrapper instead, see .overview-card in the CSS),
+               with a single divider line between the chart and the tiles. -->
+          <div class="overview-card">
+            <div class="score-progress-card" id="score-progress-card" style="display:none;">
+              <div class="spc-label">Score Progress</div>
+              <div id="spc-charts"></div>
+            </div>
 
-          <div class="home-stats-row">
-            <div class="mini-skill-card" id="mini-math-card" style="display:none;">
-              <div class="mini-skill-label">Math &mdash; Top Weak Skill</div>
-              <div class="mini-skill-name" id="mini-math-name">&mdash;</div>
-              <div class="mini-skill-sub" id="mini-math-sub"></div>
-              <div class="mini-skill-bar-track"><div class="mini-skill-bar-fill" id="mini-math-bar"></div></div>
-            </div>
-            <div class="mini-skill-card" id="mini-rw-card" style="display:none;">
-              <div class="mini-skill-label">R&amp;W &mdash; Top Weak Skill</div>
-              <div class="mini-skill-name" id="mini-rw-name">&mdash;</div>
-              <div class="mini-skill-sub" id="mini-rw-sub"></div>
-              <div class="mini-skill-bar-track"><div class="mini-skill-bar-fill" id="mini-rw-bar"></div></div>
-            </div>
-            <div class="next-session-card mini-session-card" id="next-session-card" style="display:none;">
-              <div class="mini-session-eyebrow">Next Session</div>
-              <div class="ns-label" id="ns-label">Your next scheduled session is on:</div>
-              <div class="ns-date" id="ns-date">&mdash;</div>
-              <a href="#" class="ns-join" id="ns-join" style="display:none;" target="_blank" rel="noopener">Online? Join here: <span id="ns-join-url"></span></a>
+            <div class="home-stats-row">
+              <div class="mini-skill-card" id="mini-math-card" style="display:none;">
+                <div class="mini-skill-label">Math &mdash; Top Weak Skill</div>
+                <div class="mini-skill-name" id="mini-math-name">&mdash;</div>
+                <div class="mini-skill-sub" id="mini-math-sub"></div>
+                <div class="mini-skill-bar-track"><div class="mini-skill-bar-fill" id="mini-math-bar"></div></div>
+              </div>
+              <div class="mini-skill-card" id="mini-rw-card" style="display:none;">
+                <div class="mini-skill-label">R&amp;W &mdash; Top Weak Skill</div>
+                <div class="mini-skill-name" id="mini-rw-name">&mdash;</div>
+                <div class="mini-skill-sub" id="mini-rw-sub"></div>
+                <div class="mini-skill-bar-track"><div class="mini-skill-bar-fill" id="mini-rw-bar"></div></div>
+              </div>
+              <div class="next-session-card mini-session-card" id="next-session-card" style="display:none;">
+                <div class="mini-session-eyebrow">Next Session</div>
+                <div class="ns-label" id="ns-label">Your next scheduled session is on:</div>
+                <div class="ns-date" id="ns-date">&mdash;</div>
+                <a href="#" class="ns-join" id="ns-join" style="display:none;" target="_blank" rel="noopener">Online? Join here: <span id="ns-join-url"></span></a>
+              </div>
             </div>
           </div>
         </div>
@@ -2854,39 +2877,45 @@
      student's answer and the correct one, no re-answering. ═══ -->
 <div class="screen has-sidebar" id="screen-incorrect-questions">
   <div class="panel-wide" id="iq-picker-view">
-    <div class="vp-head">
-      <div class="kicker">SAT Resources</div>
-      <h1 class="panel-hed">Saved &amp; Mistakes</h1>
-      <p class="panel-sub">Quiz yourself — answer each one before the correct answer is revealed.</p>
-    </div>
-
-    <div class="iq-tabs" id="iq-tabs">
-      <button type="button" class="iq-tab active" data-tab="mistakes" id="iq-tab-mistakes">Mistakes <span class="iq-tab-count" id="iq-tab-mistakes-count">0</span></button>
-      <button type="button" class="iq-tab" data-tab="collections" id="iq-tab-collections">Collections</button>
-      <button type="button" class="iq-tab" data-tab="saved" id="iq-tab-saved">Saved Questions</button>
-    </div>
-
-    <!-- ═══ COLLECTIONS BAR ═══ only shown on the Collections tab — a row
-         of chips (one per student-made collection, each showing its
-         question count) plus a "+ New Collection" chip. Clicking a chip
-         selects it as the active collection and filters #iq-list to just
-         its questions, same row rendering as every other tab. See
-         window.iqModuleInit()'s own comment for the data model. -->
-    <div id="iq-collections-bar" style="display:none;">
-      <div id="iq-collections-chips"></div>
-    </div>
-
-    <div id="iq-filters">
-      <div id="iq-filter-groups">
-        <div class="iq-filter-group"><span class="iq-filter-label">Test</span><div class="iq-dropdown" id="iq-test-pills"></div></div>
-        <div class="iq-filter-group"><span class="iq-filter-label">Section</span><div class="iq-dropdown" id="iq-section-pills"></div></div>
-        <div class="iq-filter-group"><span class="iq-filter-label">Domain</span><div class="iq-dropdown" id="iq-domain-pills"></div></div>
-        <div class="iq-filter-group"><span class="iq-filter-label">Skill</span><div class="iq-dropdown" id="iq-skill-pills"></div></div>
-        <div class="iq-filter-group"><span class="iq-filter-label">Difficulty</span><div class="iq-dropdown" id="iq-difficulty-pills"></div></div>
+    <!-- Sticky header — title, tabs, and filters stay put while #iq-list
+         scrolls beneath them, instead of scrolling away with a long
+         mistakes list. top offset matches #main-nav's own height so this
+         sticks directly under it, not underneath/hidden by it. -->
+    <div class="iq-sticky-head">
+      <div class="vp-head">
+        <div class="kicker">SAT Resources</div>
+        <h1 class="panel-hed">Saved &amp; Mistakes</h1>
+        <p class="panel-sub">Quiz yourself — answer each one before the correct answer is revealed.</p>
       </div>
-      <button type="button" class="iq-practice-btn" id="iq-practice-btn">Practice Selected Mistakes <span id="iq-practice-count">(0)</span></button>
+
+      <div class="iq-tabs" id="iq-tabs">
+        <button type="button" class="iq-tab active" data-tab="mistakes" id="iq-tab-mistakes">Mistakes <span class="iq-tab-count" id="iq-tab-mistakes-count">0</span></button>
+        <button type="button" class="iq-tab" data-tab="collections" id="iq-tab-collections">Collections</button>
+        <button type="button" class="iq-tab" data-tab="saved" id="iq-tab-saved">Saved Questions</button>
+      </div>
+
+      <!-- ═══ COLLECTIONS BAR ═══ only shown on the Collections tab — a row
+           of chips (one per student-made collection, each showing its
+           question count) plus a "+ New Collection" chip. Clicking a chip
+           selects it as the active collection and filters #iq-list to just
+           its questions, same row rendering as every other tab. See
+           window.iqModuleInit()'s own comment for the data model. -->
+      <div id="iq-collections-bar" style="display:none;">
+        <div id="iq-collections-chips"></div>
+      </div>
+
+      <div id="iq-filters">
+        <div id="iq-filter-groups">
+          <div class="iq-filter-group"><span class="iq-filter-label">Test</span><div class="iq-dropdown" id="iq-test-pills"></div></div>
+          <div class="iq-filter-group"><span class="iq-filter-label">Section</span><div class="iq-dropdown" id="iq-section-pills"></div></div>
+          <div class="iq-filter-group"><span class="iq-filter-label">Domain</span><div class="iq-dropdown" id="iq-domain-pills"></div></div>
+          <div class="iq-filter-group"><span class="iq-filter-label">Skill</span><div class="iq-dropdown" id="iq-skill-pills"></div></div>
+          <div class="iq-filter-group"><span class="iq-filter-label">Difficulty</span><div class="iq-dropdown" id="iq-difficulty-pills"></div></div>
+        </div>
+        <button type="button" class="iq-practice-btn" id="iq-practice-btn">Practice Selected Mistakes <span id="iq-practice-count">(0)</span></button>
+      </div>
+      <div class="vp-pool-count" id="iq-pool-count"></div>
     </div>
-    <div class="vp-pool-count" id="iq-pool-count"></div>
 
     <div id="iq-list"></div>
 
