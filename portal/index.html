@@ -1509,7 +1509,15 @@
      being stacked open in one long scroll — was five separate ~80px-wide
      panels (one per filter button), then briefly one panel with all five
      stacked open, now this nested flyout instead. */
-  .iq-filters-panel { right: auto; width: 210px; padding: 0.4rem; overflow: visible; max-height: none; }
+  /* .iq-dropdown-panel.iq-filters-panel (compound, not just .iq-filters-panel)
+     — needs to out-specificity the base .iq-dropdown-panel's overflow-y:auto
+     declared later in this file, not just out-order it. Equal-specificity
+     single-class selectors are decided by source order, and that rule was
+     silently winning despite this one looking like it should — the flyout
+     opened fine but was clipped to the panel's own scroll box, forcing a
+     student to scroll sideways INSIDE the filters panel to see it, instead
+     of the flyout actually escaping to sit beside it. */
+  .iq-dropdown-panel.iq-filters-panel { right: auto; width: 210px; padding: 0.4rem; overflow: visible; max-height: none; }
   .iq-filter-cat { position: relative; }
   .iq-filter-cat-row { display: flex; align-items: center; gap: 0.5rem; width: 100%; background: none; border: none; border-radius: 8px; padding: 0.55rem 0.6rem; font-family: var(--hel); font-size: 0.82rem; color: var(--text); cursor: pointer; text-align: left; }
   .iq-filter-cat-row:hover, .iq-filter-cat.open .iq-filter-cat-row { background: var(--bg); }
