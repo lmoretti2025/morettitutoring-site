@@ -606,7 +606,12 @@
      chrome belongs to the ROW now, not each tile, or this would render as
      a card-within-a-card instead of one seamless strip. */
   .home-stats-row .mini-session-card.next-session-card {
-    background: none; border: none; box-shadow: none; border-radius: 0; text-align: left;
+    /* border-left deliberately untouched — that's the divider shared with
+       every other tile in the row (see .home-stats-row > * above); a full
+       "border: none" here would win the cascade (three classes beat that
+       rule's one) and silently erase the divider between this tile and
+       R&W's, which is exactly what happened before this comment existed. */
+    background: none; border-top: none; border-right: none; border-bottom: none; box-shadow: none; border-radius: 0; text-align: left;
   }
   .home-stats-row .mini-session-card.next-session-card::before { display: none; }
   .mini-session-eyebrow { font-family: var(--hel); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mid); margin-bottom: 0.65rem; }
@@ -654,6 +659,18 @@
     .portal-sidebar.sidebar-shown { flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; width: var(--sidebar-w); padding-top: 6.5rem; background: var(--white); border-right: 1px solid var(--border); z-index: 200; overflow-y: auto; }
     .screen.has-sidebar { padding-left: calc(var(--sidebar-w) + 2.5rem); }
   }
+  /* .screen's base rule vertically centers its content (align-items:center)
+     for the short, single-panel screens (login, onboarding) — wrong for
+     every sidebar/dashboard screen, where content anchored to the top is
+     what every layout here assumes. Usually invisible, since dashboard
+     content is normally taller than the viewport anyway, but a short state
+     (an empty Saved & Mistakes tab, for instance) would otherwise float
+     the whole panel — sticky header included — into the vertical middle of
+     the screen instead of the top, which is what actually broke the
+     sticky header in Saved & Mistakes: sticky positioning against a
+     vertically-centered, shorter-than-viewport container has nothing
+     sensible to stick to. */
+  .screen.has-sidebar { align-items: flex-start; }
   @media (max-width: 899px) {
     .portal-sidebar.sidebar-shown { flex-direction: row; position: fixed; top: 62px; left: 0; right: 0; z-index: 250; background: var(--white); border-bottom: 1px solid var(--border); overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 0.45rem 0.6rem; gap: 0.3rem; }
     .sidebar-item { flex: 0 0 auto; padding: 0.5rem 0.85rem; border-radius: 999px; font-size: 0.7rem; gap: 0.4rem; }
