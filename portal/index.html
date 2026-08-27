@@ -558,44 +558,59 @@
   .ov-filter-option input { width: 15px; height: 15px; accent-color: var(--red); cursor: pointer; }
   .ov-filter-option-all { border-bottom: 1px solid var(--border); margin-bottom: 0.3rem; padding-bottom: 0.65rem; font-weight: 600; }
 
-  /* Two donut charts, one per section, showing which skills are behind
-     the MOST currently-outstanding misses (top 3 only — see
-     renderHomePie()'s truncation) — same data source as My Incorrect
-     Questions. */
+  /* ═══ HOME OVERVIEW — "Overview First" redesign ═══ bar-style Score
+     Progress (replacing the old line/dot SVG chart), a row of three
+     compact mini cards (Math/R&W top weak skill + Next Session), and a
+     Latest Test By Section breakdown — replaces the old aggregate-only
+     line chart + two doughnut charts. */
+  .spc-score-top { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1.1rem; }
+  .spc-composite-num { font-family: var(--display); font-weight: 700; font-size: 2.1rem; color: var(--text); line-height: 1; }
+  .spc-composite-delta { font-family: var(--hel); font-size: 0.8rem; font-weight: 700; color: var(--green); margin-top: 0.3rem; }
+  .spc-bar-chart-wrap { position: relative; }
+  .spc-bars { height: 90px; display: flex; align-items: flex-end; gap: 8px; cursor: pointer; }
+  .spc-bars .spc-bar { flex: 1; min-height: 3px; background: linear-gradient(180deg, var(--gold), var(--red)); border-radius: 4px 4px 0 0; opacity: 0.85; transition: height 0.9s cubic-bezier(0.22,1,0.3,1), opacity 0.15s var(--ease); }
+  .spc-bars .spc-bar:last-child { opacity: 1; }
+  .spc-bars .spc-bar:hover { opacity: 1; }
+  .spc-bar-labels { display: flex; justify-content: space-between; font-family: var(--hel); font-size: 0.68rem; color: var(--faint); margin-top: 0.5rem; }
+  .spc-target-line { position: absolute; left: 0; right: 0; border-top: 1.5px dashed var(--gold); pointer-events: none; }
+  .spc-target-line span { position: absolute; right: 0; top: -18px; font-family: var(--hel); font-size: 0.68rem; font-weight: 700; color: var(--gold); white-space: nowrap; }
+
   .home-stats-row { display: flex; gap: 1.2rem; flex-wrap: wrap; align-items: stretch; }
   .home-stats-row > * { flex: 1 1 220px; }
-  .pie-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 1.3rem 1.4rem 1.5rem; box-shadow: var(--shadow); }
-  .pie-card-label { font-family: var(--hel); font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--mid); margin-bottom: 1rem; text-align: center; }
-  /* Canvas gets its own fixed-size box (Chart.js needs a sized parent to
-     avoid runaway growth); the legend lives BELOW it in normal flow with
-     no height cap, so a long skill name wraps onto its own line instead
-     of being clipped — the bug this replaced (Chart.js' built-in legend
-     crammed into the same fixed box as the doughnut) was cutting text off
-     and fighting the chart for room. */
-  .pie-card-body { display: flex; flex-direction: column; align-items: center; }
-  .pie-canvas-wrap { position: relative; width: 130px; height: 130px; flex-shrink: 0; }
-  .pie-canvas-wrap.skeleton { border-radius: 50%; }
-  .pie-empty { font-size: 0.78rem; color: var(--faint); text-align: center; padding: 1.6rem 0.4rem; line-height: 1.6; }
-  .pie-legend { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem; font-size: 0.72rem; color: var(--mid); width: 100%; }
-  .pie-legend-item { display: flex; align-items: flex-start; gap: 0.5rem; cursor: pointer; text-align: left; line-height: 1.35; transition: color 0.12s var(--ease); }
-  .pie-legend-item:hover { color: var(--red); }
-  .pie-legend-swatch { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; margin-top: 0.28rem; }
-  .pie-legend-count { color: var(--faint); white-space: nowrap; }
-  .pie-legend-more { font-size: 0.68rem; color: var(--faint); margin-top: 0.2rem; font-style: italic; }
+  .mini-skill-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 1.15rem 1.3rem; box-shadow: var(--shadow); }
+  .mini-skill-label { font-family: var(--hel); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mid); margin-bottom: 0.65rem; }
+  .mini-skill-name { font-family: var(--display); font-weight: 700; font-size: 1.3rem; color: var(--text); cursor: pointer; }
+  .mini-skill-name:hover { color: var(--red); }
+  .mini-skill-sub { font-family: var(--hel); font-size: 0.76rem; color: var(--mid); margin: 0.15rem 0 0.75rem; }
+  .mini-skill-bar-track { height: 6px; background: var(--bg); border-radius: 3px; overflow: hidden; }
+  .mini-skill-bar-fill { height: 100%; width: 0; background: var(--red); border-radius: 3px; transition: width 0.9s cubic-bezier(0.22,1,0.3,1); }
 
-  /* Single-attempt stat card — one of the three tiles in .home-stats-row,
-     alongside the two pies, so its internal layout is a compact vertical
-     stack (label, big number, meta) rather than the wide horizontal
-     layout a full-width card would use. */
-  .recent-test-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 1.3rem 1.4rem; box-shadow: var(--shadow); }
-  .rt-label { font-family: var(--hel); font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--mid); margin-bottom: 0.9rem; }
-  .rt-body { display: flex; flex-direction: column; align-items: flex-start; gap: 0.3rem; }
-  .rt-composite-num { font-family: var(--display); font-weight: 700; font-size: 2rem; color: var(--red); line-height: 1; }
-  .rt-composite-sub { font-family: var(--hel); font-size: 0.7rem; color: var(--mid); margin-bottom: 0.6rem; }
-  .rt-title { font-family: var(--hel); font-weight: 700; font-size: 0.82rem; color: var(--text); }
-  .rt-date { font-family: var(--hel); font-size: 0.72rem; color: var(--faint); margin-top: 0.1rem; }
-  .rt-weakest { font-family: var(--hel); font-size: 0.75rem; color: var(--text); margin-top: 0.55rem; line-height: 1.5; }
-  .rt-weakest strong { color: var(--red); }
+  .mini-session-card { padding: 1.15rem 1.3rem; text-align: left; }
+  .home-stats-row .mini-session-card.next-session-card::before { display: none; }
+  .mini-session-eyebrow { font-family: var(--hel); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mid); margin-bottom: 0.65rem; }
+
+  .latest-test-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 1.2rem 1.4rem; box-shadow: var(--shadow); }
+  .lt-label { font-family: var(--hel); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mid); margin-bottom: 0.9rem; }
+  .lt-row { display: flex; justify-content: space-between; align-items: baseline; font-family: var(--hel); font-size: 0.86rem; font-weight: 600; color: var(--text); margin-bottom: 0.35rem; }
+  .lt-bar-track { height: 6px; background: var(--bg); border-radius: 3px; overflow: hidden; margin-bottom: 0.9rem; }
+  .lt-bar-fill { height: 100%; width: 0; border-radius: 3px; transition: width 0.9s cubic-bezier(0.22,1,0.3,1); }
+  .lt-bar-fill.gold { background: var(--gold); }
+  .lt-bar-fill.red { background: var(--red); }
+  .lt-date { font-family: var(--hel); font-size: 0.78rem; color: var(--faint); margin-top: 0.2rem; }
+  .home-top-row .latest-test-card { flex: 1 1 0; min-width: 0; }
+
+  /* Custom checkmark box (replacing the native checkbox) so a completed
+     This Week task shows the same solid-green check used elsewhere in the
+     redesigned home cards. */
+  .assign-item input[type="checkbox"] {
+    appearance: none; -webkit-appearance: none; width: 19px; height: 19px; border-radius: 5px;
+    border: 1.5px solid var(--border); margin-top: 0.15rem; position: relative; background: var(--white); accent-color: unset;
+  }
+  .assign-item input[type="checkbox"]:checked { background: var(--green); border-color: var(--green); }
+  .assign-item input[type="checkbox"]:checked::after {
+    content: ''; position: absolute; left: 5px; top: 1px; width: 5px; height: 10px;
+    border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg);
+  }
 
   /* ═══ PORTAL SIDEBAR ═══ replaces the old home-screen menu-card grid as
      the primary way to move between Home/Practice Tests/Files/Vocabulary/
@@ -2198,13 +2213,21 @@
     <span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9a1 1 0 0 0 1 1h3v-6h4v6h3a1 1 0 0 0 1-1v-9"/></svg></span>
     <span class="sidebar-label">Home</span>
   </a>
+  <a href="#" class="sidebar-item" data-nav="files" id="sidebar-files">
+    <span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a1 1 0 0 1 1-1h5l2 2h9a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7z"/></svg></span>
+    <span class="sidebar-label">Files</span>
+  </a>
   <a href="#" class="sidebar-item" data-nav="practice-tests" id="sidebar-practice-tests">
     <span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2"/><path d="M9 2h6"/></svg></span>
     <span class="sidebar-label">Practice Tests</span>
   </a>
-  <a href="#" class="sidebar-item" data-nav="files" id="sidebar-files">
-    <span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a1 1 0 0 1 1-1h5l2 2h9a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7z"/></svg></span>
-    <span class="sidebar-label">Files</span>
+  <a href="#" class="sidebar-item" data-nav="question-bank" id="sidebar-question-bank">
+    <span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4" width="17" height="16" rx="1.5"/><path d="M8 9h8"/><path d="M8 12.5h8"/><path d="M8 16h5"/></svg></span>
+    <span class="sidebar-label">Question Bank</span>
+  </a>
+  <a href="#" class="sidebar-item" data-nav="challenge-questions" id="sidebar-challenge-questions">
+    <span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.5-2 5-2 5s3.5-.5 5-2c.8-.8.8-2.2 0-3s-2.2-.8-3 0Z"/><path d="M9 15l-1.5-1.5L15 6c1.5-1.5 4-2.5 6-2.5s-1 4.5-2.5 6l-7.5 7.5L9 15Z"/><path d="M15 6c0 2 1.5 5 4.5 4.5"/><circle cx="15.5" cy="8.5" r="1"/></svg></span>
+    <span class="sidebar-label">Challenge Questions</span>
   </a>
   <a href="#" class="sidebar-item" data-nav="vocab" id="sidebar-vocab">
     <span class="sidebar-icon sidebar-icon-text">Aa</span>
@@ -2213,14 +2236,6 @@
   <a href="#" class="sidebar-item" data-nav="incorrect-questions" id="sidebar-incorrect-questions">
     <span class="sidebar-icon sidebar-icon-text">&#10007;</span>
     <span class="sidebar-label">Saved &amp; Mistakes</span>
-  </a>
-  <a href="#" class="sidebar-item" data-nav="challenge-questions" id="sidebar-challenge-questions">
-    <span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.5-2 5-2 5s3.5-.5 5-2c.8-.8.8-2.2 0-3s-2.2-.8-3 0Z"/><path d="M9 15l-1.5-1.5L15 6c1.5-1.5 4-2.5 6-2.5s-1 4.5-2.5 6l-7.5 7.5L9 15Z"/><path d="M15 6c0 2 1.5 5 4.5 4.5"/><circle cx="15.5" cy="8.5" r="1"/></svg></span>
-    <span class="sidebar-label">Challenge Questions</span>
-  </a>
-  <a href="#" class="sidebar-item" data-nav="question-bank" id="sidebar-question-bank">
-    <span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4" width="17" height="16" rx="1.5"/><path d="M8 9h8"/><path d="M8 12.5h8"/><path d="M8 16h5"/></svg></span>
-    <span class="sidebar-label">Question Bank</span>
   </a>
 </nav>
 
@@ -2718,49 +2733,44 @@
           </div>
 
           <div class="home-stats-row">
-            <div class="recent-test-card" id="recent-test-card" style="display:none;">
-              <div class="rt-label">Most Recent Test</div>
-              <div class="rt-body">
-                <div class="rt-composite-num" id="rt-composite-num">&mdash;</div>
-                <div class="rt-composite-sub" id="rt-composite-sub"></div>
-                <div class="rt-title" id="rt-title"></div>
-                <div class="rt-date" id="rt-date"></div>
-                <div class="rt-weakest" id="rt-weakest"></div>
-              </div>
+            <div class="mini-skill-card" id="mini-math-card" style="display:none;">
+              <div class="mini-skill-label">Math &mdash; Top Weak Skill</div>
+              <div class="mini-skill-name" id="mini-math-name">&mdash;</div>
+              <div class="mini-skill-sub" id="mini-math-sub"></div>
+              <div class="mini-skill-bar-track"><div class="mini-skill-bar-fill" id="mini-math-bar"></div></div>
             </div>
-            <div class="pie-card">
-              <div class="pie-card-label">Math &mdash; Top Weak Skills</div>
-              <div class="pie-card-body" id="pie-math-body">
-                <div class="pie-canvas-wrap skeleton" id="pie-math-wrap"><canvas id="pie-math-canvas"></canvas></div>
-                <div class="pie-legend" id="pie-math-legend"></div>
-              </div>
-              <div class="pie-empty" id="pie-math-empty" style="display:none;">Nothing missed here yet.</div>
+            <div class="mini-skill-card" id="mini-rw-card" style="display:none;">
+              <div class="mini-skill-label">R&amp;W &mdash; Top Weak Skill</div>
+              <div class="mini-skill-name" id="mini-rw-name">&mdash;</div>
+              <div class="mini-skill-sub" id="mini-rw-sub"></div>
+              <div class="mini-skill-bar-track"><div class="mini-skill-bar-fill" id="mini-rw-bar"></div></div>
             </div>
-            <div class="pie-card">
-              <div class="pie-card-label">Reading &amp; Writing &mdash; Top Weak Skills</div>
-              <div class="pie-card-body" id="pie-rw-body">
-                <div class="pie-canvas-wrap skeleton" id="pie-rw-wrap"><canvas id="pie-rw-canvas"></canvas></div>
-                <div class="pie-legend" id="pie-rw-legend"></div>
-              </div>
-              <div class="pie-empty" id="pie-rw-empty" style="display:none;">Nothing missed here yet.</div>
+            <div class="next-session-card mini-session-card" id="next-session-card" style="display:none;">
+              <div class="mini-session-eyebrow">Next Session</div>
+              <div class="ns-label" id="ns-label">Your next scheduled session is on:</div>
+              <div class="ns-date" id="ns-date">&mdash;</div>
+              <a href="#" class="ns-join" id="ns-join" style="display:none;" target="_blank" rel="noopener">Online? Join here: <span id="ns-join-url"></span></a>
             </div>
           </div>
         </div>
 
-      <!-- BOTTOM ROW — action items (This Week) beside the next live
-           session, now the secondary row under the overview. Stretched to
-           match heights so neither card leaves the other stranded next to
-           empty space. -->
+      <!-- BOTTOM ROW — action items (This Week) beside the most recent
+           test's section-by-section breakdown, the secondary row under the
+           overview. Stretched to match heights so neither card leaves the
+           other stranded next to empty space. -->
       <div class="home-top-row">
         <div class="assign-card" id="assign-card" style="display:none;">
           <div class="assign-label">This Week</div>
           <div class="assign-list" id="assign-list"></div>
         </div>
 
-        <div class="next-session-card" id="next-session-card" style="display:none;">
-          <div class="ns-label" id="ns-label">Your next scheduled session is on:</div>
-          <div class="ns-date" id="ns-date">&mdash;</div>
-          <a href="#" class="ns-join" id="ns-join" style="display:none;" target="_blank" rel="noopener">Online? Join here: <span id="ns-join-url"></span></a>
+        <div class="latest-test-card" id="latest-test-card" style="display:none;">
+          <div class="lt-label">Latest Test &mdash; By Section</div>
+          <div class="lt-row"><span id="lt-rw-name">Reading &amp; Writing</span><span id="lt-rw-score"></span></div>
+          <div class="lt-bar-track"><div class="lt-bar-fill gold" id="lt-rw-bar"></div></div>
+          <div class="lt-row"><span id="lt-math-name">Math</span><span id="lt-math-score"></span></div>
+          <div class="lt-bar-track"><div class="lt-bar-fill red" id="lt-math-bar"></div></div>
+          <div class="lt-date" id="lt-date"></div>
         </div>
       </div>
     </div>
@@ -4769,73 +4779,46 @@
     return 'Diag';
   }
 
-  function buildScoreLineSvg(entries, scaleMin, scaleMax, target) {
-    // Score Progress is Home's main/primary chart (see .score-progress-card
-    // above), so this is sized as a wide dashboard-style chart — roughly
-    // 1 viewBox unit ≈ 1 CSS pixel at the card's normal-flow width (~680px
-    // usable), same "keep the font-size values legible" logic as before,
-    // just recalibrated for the wider card instead of the old ~258px
-    // pinned sidebar box. The ≥1260px pinned-corner variant still scales
-    // this same viewBox down via CSS (preserveAspectRatio handles that).
-    var W = 640, H = 230, padL = 44, padR = 16, padT = 20, padB = 30;
-    var innerW = W - padL - padR, innerH = H - padT - padB;
+  // Bar-style rendering of one test type's trend (replaces the old
+  // line/dot SVG chart as part of the "Overview First" redesign) — the
+  // latest composite is called out big, with the delta since the earliest
+  // point shown underneath, then one bar per attempt. Each bar keeps the
+  // same .spc-hit class + data-i index the hover/click tooltip system
+  // already expects (see the delegated listeners on scoreProgressChartsEl
+  // below) — that whole system reads the hit element's data-i and its
+  // ancestor .spc-chart-wrap's data-chart to look back up spcChartEntries,
+  // and neither of those attributes changed, so it works unmodified
+  // against bars instead of the old invisible hit-circles.
+  function buildScoreBarChart(entries, scaleMin, scaleMax, target) {
     var n = entries.length;
-    function xAt(i) { return n <= 1 ? padL + innerW / 2 : padL + (innerW * i / (n - 1)); }
-    function yAt(v) {
-      var frac = (v - scaleMin) / (scaleMax - scaleMin);
-      frac = Math.max(0, Math.min(1, frac));
-      return padT + innerH * (1 - frac);
+    var last = entries[n - 1];
+    var deltaHtml = '';
+    if (n > 1 && entries[0].composite != null && last.composite != null) {
+      var delta = last.composite - entries[0].composite;
+      if (delta !== 0) {
+        deltaHtml = '<div class="spc-composite-delta">' + (delta > 0 ? '↑ ' : '↓ ') + Math.abs(delta) +
+          ' pts since ' + scoreEntryShortLabel(entries[0]) + '</div>';
+      }
     }
-    var ticks = 4, gridSvg = '';
-    for (var t = 0; t <= ticks; t++) {
-      var val = scaleMin + (scaleMax - scaleMin) * t / ticks;
-      var y = yAt(val);
-      gridSvg += '<line x1="' + padL + '" y1="' + y + '" x2="' + (W - padR) + '" y2="' + y + '" stroke="currentColor" stroke-width="0.5" opacity="0.15"/>';
-      gridSvg += '<text x="' + (padL - 8) + '" y="' + (y + 4) + '" font-size="12" text-anchor="end" fill="currentColor" opacity="0.62">' + Math.round(val) + '</text>';
-    }
-    var pts = entries.map(function (e, i) { return xAt(i) + ',' + yAt(e.composite); }).join(' ');
-    var dotsSvg = '', labelsSvg = '';
+    var barsHtml = '', labelsHtml = '';
     entries.forEach(function (e, i) {
-      var x = xAt(i), y = yAt(e.composite);
-      // The first/last point's own value label anchors outward (start/end)
-      // instead of centered — a centered label on the leftmost point sits
-      // right where the y-axis tick labels also live, and the two can
-      // visually collide whenever that point's score happens to land near
-      // a gridline's height.
-      var anchor = i === 0 ? 'start' : (i === n - 1 ? 'end' : 'middle');
-      var labelX = i === 0 ? x + 5 : (i === n - 1 ? x - 5 : x);
-      dotsSvg += '<circle class="spc-dot" cx="' + x + '" cy="' + y + '" r="4.5" fill="var(--red)"/>';
-      // Invisible, generously sized hover/click target over each point —
-      // also the click target that jumps into My Incorrect Questions for
-      // that attempt's weakest domain (see the 'click' handler below).
-      dotsSvg += '<circle class="spc-hit" cx="' + x + '" cy="' + y + '" r="16" fill="transparent" data-i="' + i + '" tabindex="0"/>';
-      // Only the newest point keeps a printed value. With up to 12 points
-      // across 320 units, labelling them all turned into overlapping mush —
-      // the hover tooltip carries the rest now.
-      if (i === n - 1) {
-        labelsSvg += '<text x="' + labelX + '" y="' + Math.max(14, y - 11) + '" font-size="15" text-anchor="' + anchor + '" fill="currentColor" font-weight="700">' + e.composite + '</text>';
-      }
-      // Same crowding problem on the x-axis: past 6 points, label every other.
-      if (n <= 6 || i % 2 === 0 || i === n - 1) {
-        labelsSvg += '<text x="' + x + '" y="' + (H - 8) + '" font-size="11" text-anchor="middle" fill="currentColor" opacity="0.6">' + scoreEntryShortLabel(e) + '</text>';
-      }
+      var frac = (scaleMax > scaleMin) ? (e.composite - scaleMin) / (scaleMax - scaleMin) : 0;
+      frac = Math.max(0, Math.min(1, frac));
+      var heightPct = Math.max(2, Math.round(frac * 100));
+      barsHtml += '<div class="spc-bar spc-hit" style="height:' + heightPct + '%" data-i="' + i + '" tabindex="0"></div>';
+      labelsHtml += '<span>' + scoreEntryShortLabel(e) + '</span>';
     });
-    // Dashed reference line at the student's target score (see
-    // currentStudent.targetScore) — drawn under the actual score line/dots
-    // so it reads as a backdrop goalpost, not competing data. Label sits
-    // on the right edge, opposite the newest-point value label on the
-    // left/middle, so the two don't collide.
-    var targetSvg = '';
+    var targetHtml = '';
     if (target != null) {
-      var ty = yAt(target);
-      targetSvg = '<line x1="' + padL + '" y1="' + ty + '" x2="' + (W - padR) + '" y2="' + ty + '" stroke="var(--gold)" stroke-width="1.5" stroke-dasharray="5,4"/>' +
-        '<text x="' + (W - padR) + '" y="' + (ty - 6) + '" font-size="11" text-anchor="end" fill="var(--gold)" font-weight="700">Target ' + target + '</text>';
+      var tFrac = Math.max(0, Math.min(1, (target - scaleMin) / (scaleMax - scaleMin)));
+      targetHtml = '<div class="spc-target-line" style="bottom:' + Math.round(tFrac * 100) + '%"><span>Target ' + target + '</span></div>';
     }
-    return '<svg viewBox="0 0 ' + W + ' ' + H + '" style="color:var(--text); width:100%; height:auto; display:block;" preserveAspectRatio="xMidYMid meet">' +
-      gridSvg + targetSvg +
-      '<polyline points="' + pts + '" fill="none" stroke="var(--red)" stroke-width="2.5"/>' +
-      dotsSvg + labelsSvg +
-      '</svg>';
+    return '<div class="spc-score-top"><div>' +
+        '<div class="spc-composite-num">' + (last.composite != null ? last.composite : '—') + '</div>' +
+        deltaHtml +
+      '</div></div>' +
+      '<div class="spc-bar-chart-wrap">' + targetHtml + '<div class="spc-bars">' + barsHtml + '</div></div>' +
+      '<div class="spc-bar-labels">' + labelsHtml + '</div>';
   }
 
   /* ═══ SCORE PROGRESS TOOLTIP ═══
@@ -5111,7 +5094,7 @@
       spcChartEntries[chartIndex] = shown;
       var chartTarget = (target && target >= min && target <= max) ? target : null;
       html += '<div class="spc-chart-hed">' + hed + '</div>' +
-        '<div class="spc-chart-wrap" data-chart="' + chartIndex + '">' + buildScoreLineSvg(shown, min, max, chartTarget) + '</div>';
+        '<div class="spc-chart-wrap" data-chart="' + chartIndex + '">' + buildScoreBarChart(shown, min, max, chartTarget) + '</div>';
       if (shown.length < totalCount) html += '<div class="spc-note">Showing your last ' + shown.length + ' ' + typeLabel + ' attempts.</div>';
       chartIndex++;
     }
@@ -5119,79 +5102,68 @@
     if (actShown.length >= 1) addChart('ACT Composite (1–36)', actShown, 1, 36, allAct.length, 'ACT');
     scoreProgressChartsEl.innerHTML = html;
     scoreProgressCard.style.display = '';
+    animateScoreBars();
   }
 
-  /* ═══ HOME: MOST RECENT TEST ═══ scoped to a single attempt (the latest
-     entry in loadScoreHistory()), separate from the aggregate trend above
-     it — composite front and center, section sub-scores and the weakest
-     domain from THAT attempt as the "what to do next" takeaway. */
+  // Bars grow in from zero the moment Score Progress renders (login,
+  // returning to Home, a fresh attempt) instead of just appearing at full
+  // height — collapses each bar to 0 first, forces a reflow so the browser
+  // registers that starting height, then restores the real height on the
+  // next frame so the CSS transition on .spc-bar (see its rule above)
+  // actually has something to animate between. Respects
+  // prefers-reduced-motion by skipping straight to the real heights.
+  function animateScoreBars() {
+    var bars = scoreProgressChartsEl.querySelectorAll('.spc-bar');
+    if (!bars.length) return;
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var targets = [];
+    bars.forEach(function (bar) { targets.push(bar.style.height); bar.style.height = '0%'; });
+    void scoreProgressChartsEl.offsetHeight; // force reflow so the 0% above is committed before animating away from it
+    requestAnimationFrame(function () {
+      bars.forEach(function (bar, i) { bar.style.height = targets[i]; });
+    });
+  }
+
+  /* ═══ HOME: LATEST TEST — BY SECTION ═══ scoped to a single attempt (the
+     latest entry in loadScoreHistory()) — R&W and Math scaled scores as
+     bars, so "how did the last test actually break down" reads at a glance
+     next to This Week, instead of only the bare composite. ACT attempts
+     have no separate rw/math split (see recordComposite() in
+     finishDiagnostic()), so this card just stays hidden for those — same
+     as it did when this card only showed the composite. */
+  var RT_SCORE_MAX = 800; // SAT per-section scale ceiling — the bar width denominator
   function renderRecentTestCard() {
-    var cardEl = document.getElementById('recent-test-card');
+    var cardEl = document.getElementById('latest-test-card');
     if (!cardEl) return;
     // Same new-key hold as the rest of Your Overview — see isGrantedLocked().
     if (isGrantedLocked()) { cardEl.style.display = 'none'; return; }
     var entries = mergedScoreHistory();
-    if (!entries.length) { cardEl.style.display = 'none'; return; }
-    var e = entries[entries.length - 1];
-    var numEl = document.getElementById('rt-composite-num');
-    var subEl = document.getElementById('rt-composite-sub');
-    var titleEl = document.getElementById('rt-title');
-    var dateEl = document.getElementById('rt-date');
-    var weakestEl = document.getElementById('rt-weakest');
-    if (numEl) numEl.textContent = (e.composite != null) ? String(e.composite) : '—';
-    // rw/math only exist on SAT attempts recorded after this field was
-    // added (see recordComposite() in finishDiagnostic()) — older entries
-    // just show the bare composite, no sub-score line.
-    if (subEl) subEl.textContent = (e.rw != null && e.math != null) ? ('R&W ' + e.rw + '  ·  Math ' + e.math) : '';
-    if (titleEl) titleEl.textContent = spcEntryTitle(e);
-    if (dateEl) dateEl.textContent = e.date ? shortDate(e.date) : '';
-    if (weakestEl) {
-      weakestEl.textContent = '';
-      if (e.weakest && e.weakest.label) {
-        weakestEl.appendChild(document.createTextNode('Weakest this time: '));
-        var strong = document.createElement('strong');
-        strong.textContent = e.weakest.label + ' (' + e.weakest.correct + '/' + e.weakest.total + ')';
-        weakestEl.appendChild(strong);
-      }
-    }
+    var e = entries.length ? entries[entries.length - 1] : null;
+    if (!e || e.rw == null || e.math == null) { cardEl.style.display = 'none'; return; }
+    var rwBar = document.getElementById('lt-rw-bar'), mathBar = document.getElementById('lt-math-bar');
+    var rwScore = document.getElementById('lt-rw-score'), mathScore = document.getElementById('lt-math-score');
+    var dateEl = document.getElementById('lt-date');
+    if (rwScore) rwScore.textContent = String(e.rw);
+    if (mathScore) mathScore.textContent = String(e.math);
+    if (rwBar) rwBar.style.width = Math.max(2, Math.round(e.rw / RT_SCORE_MAX * 100)) + '%';
+    if (mathBar) mathBar.style.width = Math.max(2, Math.round(e.math / RT_SCORE_MAX * 100)) + '%';
+    if (dateEl) dateEl.textContent = spcEntryTitle(e) + (e.date ? ' · ' + shortDate(e.date) : '');
     cardEl.style.display = '';
   }
 
-  /* ═══ HOME: "WHERE POINTS ARE GOING" DONUT CHARTS ═══ two Chart.js
-     doughnuts (Math, Reading & Writing) built from the SAME synced
-     incorrect-question data that feeds My Incorrect Questions (see
-     window.fetchPortalProgress + window.resolveQuestionByKey above/below)
-     — i.e. every question currently missed across EVERY attempt on file,
-     not one test's snapshot. Getting a question right on a later attempt
-     clears it from this data too (see recordIncorrectQuestions' comment),
-     so the charts always reflect current weak spots, not stale history.
-     A slice (or legend item) click jumps into My Incorrect Questions with
-     that skill pre-selected — see the `preset` param on window.iqModuleInit
-     further down the page. */
-  var HOME_PIE_PALETTE = ['#B0271C', '#BF5B33', '#C97A3C', '#CB9247', '#C9A84C', '#8A1F17'];
-  var homeMathChart = null, homeRwChart = null;
+  /* ═══ HOME: TOP WEAK SKILL MINI CARDS ═══ one skill per section (Math,
+     Reading & Writing) — whichever has the worst accuracy across every
+     attempt on file (see window.fetchPortalProgress' skillStats, the same
+     correct/total breakdown behind the "By skill area" report section),
+     not just a raw miss count — a skill gone 2/2 then missed once reads as
+     more mastered than one gone 1/10, and a pure miss-count would rank
+     them backwards. Clicking either name jumps into My Incorrect Questions
+     with that skill pre-selected — see the `preset` param on
+     window.iqModuleInit further down the page. */
+  var HOME_MATH_DOMAINS = { 'Advanced Math': 1, 'Algebra': 1, 'Geometry & Trigonometry': 1, 'Problem-Solving & Data Analysis': 1 };
+  var HOME_RW_DOMAINS = { 'Craft & Structure': 1, 'Information & Ideas': 1, 'Standard English Conventions': 1, 'Expression of Ideas': 1 };
   var MATH_SECTION_KEYS = { 'math': 1, 'act-math': 1 };
-  var RW_SECTION_KEYS = { 'reading-writing': 1, 'english': 1, 'reading': 1, 'science': 1 };
-
-  function homeSkillBuckets(callback) {
-    if (!window.fetchPortalProgress || !window.resolveQuestionByKey) { callback({ math: {}, rw: {} }); return; }
-    var readyPromise = window.__practiceTestsReady || Promise.resolve();
-    window.fetchPortalProgress(function (progress) {
-      var byKey = (progress.incorrectQuestions && typeof progress.incorrectQuestions === 'object') ? progress.incorrectQuestions : {};
-      readyPromise.then(function () {
-        var math = {}, rw = {};
-        Object.keys(byKey).forEach(function (k) {
-          var resolved = window.resolveQuestionByKey(k);
-          if (!resolved || !resolved.skill) return;
-          if (!homeTestIncluded(homeTestLabel(resolved.testTitle))) return; // Your Overview's Tests filter
-          var bucket = MATH_SECTION_KEYS[resolved.sectionKey] ? math : (RW_SECTION_KEYS[resolved.sectionKey] ? rw : null);
-          if (!bucket) return;
-          bucket[resolved.skill] = (bucket[resolved.skill] || 0) + 1;
-        });
-        callback({ math: math, rw: rw });
-      });
-    });
-  }
+  var HOME_WEAK_SKILL_MIN_ATTEMPTS = 3; // fewer than this and one miss/hit swings the % too wildly to call it "the" weak spot
 
   function goToIncorrectQuestionsForSkill(skill) {
     if (window.iqModuleInit) window.iqModuleInit({ skill: skill });
@@ -5206,86 +5178,37 @@
     show('screen-incorrect-questions');
   }
 
-  function renderHomePie(canvasId, emptyId, bodyId, legendId, bucket, setChart, getChart) {
-    var body = document.getElementById(bodyId);
-    var emptyEl = document.getElementById(emptyId);
-    var canvas = document.getElementById(canvasId);
-    var legendEl = document.getElementById(legendId);
-    // Loading skeleton (see .skeleton in the CSS) covers the wait for
-    // Chart.js to finish loading async — whatever happens below (a real
-    // chart or the "nothing missed" empty state), that wait is over.
-    if (canvas && canvas.parentElement) canvas.parentElement.classList.remove('skeleton');
-    var existing = getChart();
-    if (existing) { existing.destroy(); setChart(null); }
-    // Every skill gets a slice in the actual chart — only the TEXT legend
-    // below it truncates to the top 3 worst (see HOME_PIE_MAX_SKILLS
-    // below). Truncating the chart data itself used to make a skill with
-    // real misses just vanish from the donut instead of still being
-    // represented as a (smaller) slice.
-    var allSkills = Object.keys(bucket).sort(function (a, b) { return bucket[b] - bucket[a]; });
-    if (!allSkills.length || !window.Chart || !canvas) {
-      if (body) body.style.display = 'none';
-      if (emptyEl) emptyEl.style.display = '';
-      return;
-    }
-    if (body) body.style.display = '';
-    if (emptyEl) emptyEl.style.display = 'none';
-    var colors = allSkills.map(function (s, i) { return HOME_PIE_PALETTE[i % HOME_PIE_PALETTE.length]; });
-    // Chart.js' own built-in legend draws inside the same fixed-size box as
-    // the doughnut, so it was fighting the chart for room and truncating
-    // longer skill names — turned off here (display:false) in favor of a
-    // plain HTML legend below the canvas (see .pie-legend below), which
-    // just wraps normally like any other text.
-    var chart = new Chart(canvas, {
-      type: 'doughnut',
-      data: { labels: allSkills, datasets: [{ data: allSkills.map(function (s) { return bucket[s]; }), backgroundColor: colors, borderColor: '#fff', borderWidth: 2 }] },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        onClick: function (evt, elements) {
-          if (!elements || !elements.length) return;
-          goToIncorrectQuestionsForSkill(allSkills[elements[0].index]);
-        }
+  // Lowest-accuracy skill within one domain set, out of the skillStats
+  // object synced by syncProgress (see handleSyncProgress in Code.gs) —
+  // mirrors weakestDomain()'s tie-breaking (more questions behind it wins
+  // a tie) at the skill level instead of the domain level.
+  function weakestSkillIn(skillStats, domainSet) {
+    var best = null;
+    Object.keys(skillStats || {}).forEach(function (key) {
+      var s = skillStats[key];
+      if (!s || !domainSet[s.domain] || !s.total || s.total < HOME_WEAK_SKILL_MIN_ATTEMPTS) return;
+      var pct = s.correct / s.total;
+      if (!best || pct < best.pct || (pct === best.pct && s.total > best.total)) {
+        best = { skill: s.skill, correct: s.correct, total: s.total, pct: pct };
       }
     });
-    setChart(chart);
-    if (legendEl) {
-      legendEl.innerHTML = '';
-      // Top 3 worst-scoring skills only, in the text legend — this is a
-      // Home-screen glance, not the full breakdown (that's what My
-      // Incorrect Questions is for, one click away via any slice/legend
-      // item, or the "+N more" line below).
-      var HOME_PIE_MAX_SKILLS = 3;
-      var shownSkills = allSkills.slice(0, HOME_PIE_MAX_SKILLS);
-      shownSkills.forEach(function (skill, i) {
-        var item = document.createElement('div');
-        item.className = 'pie-legend-item';
-        var swatch = document.createElement('span');
-        swatch.className = 'pie-legend-swatch';
-        swatch.style.background = colors[i];
-        var label = document.createElement('span');
-        label.textContent = skill;
-        var count = document.createElement('span');
-        count.className = 'pie-legend-count';
-        count.textContent = '(' + bucket[skill] + ')';
-        item.appendChild(swatch);
-        item.appendChild(label);
-        item.appendChild(count);
-        item.addEventListener('click', function () { goToIncorrectQuestionsForSkill(skill); });
-        legendEl.appendChild(item);
-      });
-      var hiddenCount = allSkills.length - shownSkills.length;
-      if (hiddenCount > 0) {
-        var more = document.createElement('div');
-        more.className = 'pie-legend-more';
-        more.textContent = '+' + hiddenCount + ' more in Saved & Mistakes';
-        legendEl.appendChild(more);
-      }
-    }
+    return best;
+  }
+
+  function fillMiniSkillCard(cardId, nameId, subId, barId, best) {
+    var cardEl = document.getElementById(cardId);
+    if (!cardEl) return;
+    if (!best) { cardEl.style.display = 'none'; return; }
+    var nameEl = document.getElementById(nameId), subEl = document.getElementById(subId), barEl = document.getElementById(barId);
+    var pctInt = Math.round(best.pct * 100);
+    if (nameEl) { nameEl.textContent = best.skill; nameEl.onclick = function () { goToIncorrectQuestionsForSkill(best.skill); }; }
+    if (subEl) subEl.textContent = pctInt + '% correct over last ' + best.total;
+    if (barEl) barEl.style.width = Math.max(2, pctInt) + '%';
+    cardEl.style.display = '';
   }
 
   function renderHomePies() {
-    // "Your Overview" (filter chip + line graph + this stat row) is a
+    // "Your Overview" (filter chip + bar chart + this stat row) is a
     // test-prep-only section — a subject-tutoring-only student has no
     // diagnostic/practice-test data to show here at all. It's also held
     // back for the same RESOURCES_LOCK_DAYS window as SAT Resources/
@@ -5299,12 +5222,11 @@
     if (overviewEl) overviewEl.style.display = showOverview ? '' : 'none';
     if (!showOverview) return;
     renderHomeTestFilter();
-    if (!window.__chartJsReady) return;
-    window.__chartJsReady.then(function () {
-      homeSkillBuckets(function (buckets) {
-        renderHomePie('pie-math-canvas', 'pie-math-empty', 'pie-math-body', 'pie-math-legend', buckets.math, function (c) { homeMathChart = c; }, function () { return homeMathChart; });
-        renderHomePie('pie-rw-canvas', 'pie-rw-empty', 'pie-rw-body', 'pie-rw-legend', buckets.rw, function (c) { homeRwChart = c; }, function () { return homeRwChart; });
-      });
+    if (!window.fetchPortalProgress) return;
+    window.fetchPortalProgress(function (progress) {
+      var skillStats = (progress.skillStats && typeof progress.skillStats === 'object') ? progress.skillStats : {};
+      fillMiniSkillCard('mini-math-card', 'mini-math-name', 'mini-math-sub', 'mini-math-bar', weakestSkillIn(skillStats, HOME_MATH_DOMAINS));
+      fillMiniSkillCard('mini-rw-card', 'mini-rw-name', 'mini-rw-sub', 'mini-rw-bar', weakestSkillIn(skillStats, HOME_RW_DOMAINS));
     });
   }
 
