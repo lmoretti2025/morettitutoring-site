@@ -543,7 +543,8 @@
      stat cards underneath" layout rather than a stack of equal-weight
      cards. */
   .home-overview { width: 100%; }
-  .home-overview-hed { font-family: var(--display); font-size: 1.25rem; font-weight: 700; color: var(--text); margin-bottom: 0.9rem; }
+  .home-overview-hed { display: flex; align-items: center; gap: 0.55rem; font-family: var(--display); font-size: 1.25rem; font-weight: 700; color: var(--text); margin-bottom: 0.9rem; }
+  .home-overview-icon { width: 20px; height: 20px; flex-shrink: 0; color: var(--red); }
   .home-overview-filters { display: flex; gap: 0.6rem; margin-bottom: 1.1rem; flex-wrap: wrap; }
   .ov-filter { position: relative; }
   .ov-filter-btn { display: flex; align-items: center; gap: 0.4rem; font-family: var(--hel); font-size: 0.76rem; color: var(--text); background: var(--white); border: 1px solid var(--border); border-radius: 999px; padding: 0.5rem 0.95rem; cursor: pointer; }
@@ -575,9 +576,18 @@
   .spc-target-line { position: absolute; left: 0; right: 0; border-top: 1.5px dashed var(--gold); pointer-events: none; }
   .spc-target-line span { position: absolute; right: 0; top: -18px; font-family: var(--hel); font-size: 0.68rem; font-weight: 700; color: var(--gold); white-space: nowrap; }
 
-  .home-stats-row { display: flex; gap: 1.2rem; flex-wrap: wrap; align-items: stretch; }
-  .home-stats-row > * { flex: 1 1 220px; }
-  .mini-skill-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 1.15rem 1.3rem; box-shadow: var(--shadow); }
+  /* One combined card, not three separate ones — the border/shadow/radius
+     live on the row itself, and each tile is just a padded flex child with
+     a divider between it and the next, so it reads as one unified strip
+     rather than three tiles with gaps. */
+  .home-stats-row { display: flex; align-items: stretch; margin-top: 1.6rem; background: var(--white); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); overflow: hidden; }
+  .home-stats-row > * { flex: 1 1 0; min-width: 0; padding: 1.15rem 1.3rem; border-left: 1px solid var(--border); }
+  .home-stats-row > *:first-child { border-left: none; }
+  @media (max-width: 640px) {
+    .home-stats-row { flex-direction: column; }
+    .home-stats-row > * { border-left: none; border-top: 1px solid var(--border); }
+    .home-stats-row > *:first-child { border-top: none; }
+  }
   .mini-skill-label { font-family: var(--hel); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mid); margin-bottom: 0.65rem; }
   .mini-skill-name { font-family: var(--display); font-weight: 700; font-size: 1.3rem; color: var(--text); cursor: pointer; }
   .mini-skill-name:hover { color: var(--red); }
@@ -585,7 +595,14 @@
   .mini-skill-bar-track { height: 6px; background: var(--bg); border-radius: 3px; overflow: hidden; }
   .mini-skill-bar-fill { height: 100%; width: 0; background: var(--red); border-radius: 3px; transition: width 0.9s cubic-bezier(0.22,1,0.3,1); }
 
-  .mini-session-card { padding: 1.15rem 1.3rem; text-align: left; }
+  /* Strips .next-session-card's own standalone-card chrome (background,
+     border, shadow, radius, its own padding, the gold-red top accent bar)
+     when it's the third tile in the combined .home-stats-row strip — that
+     chrome belongs to the ROW now, not each tile, or this would render as
+     a card-within-a-card instead of one seamless strip. */
+  .home-stats-row .mini-session-card.next-session-card {
+    background: none; border: none; box-shadow: none; border-radius: 0; text-align: left;
+  }
   .home-stats-row .mini-session-card.next-session-card::before { display: none; }
   .mini-session-eyebrow { font-family: var(--hel); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mid); margin-bottom: 0.65rem; }
 
@@ -1374,13 +1391,15 @@
      100%-wide button; here every group is an inline label+button pair
      that wraps as a unit, so the whole bar reads as one row on a normal
      screen instead of five stacked full-width fields. */
-  #iq-filters { display: flex; flex-wrap: nowrap; align-items: center; gap: 0.6rem 0.9rem; margin: 1.1rem 0 0.4rem; }
-  /* nowrap + its own overflow-x, not flex-wrap — wrapping let a filter
-     group drop to a second line while the button stayed pinned to the
-     first, an inconsistent-looking half-wrap. This keeps everything on
-     one row always; if it doesn't fit, the filter groups scroll
-     horizontally within their own strip instead of wrapping. */
-  #iq-filter-groups { display: flex; flex-wrap: nowrap; align-items: center; gap: 0.6rem 0.9rem; flex: 1; min-width: 0; overflow-x: auto; padding: 0.15rem 0.05rem; }
+  #iq-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem 0.9rem; margin: 1.1rem 0 0.4rem; }
+  /* Wraps onto additional lines instead of scrolling horizontally — a
+     scrollable strip was clipping the dropdown panels open above/below it
+     (overflow-x:auto on this element forces overflow-y to compute as auto
+     too, so an open .iq-dropdown-panel got cut off at this container's own
+     edge instead of overlaying the page). Wrapping keeps every filter
+     fully reachable without scrolling and lets its dropdown open completely
+     visible. */
+  #iq-filter-groups { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem 0.9rem; flex: 1; min-width: 0; padding: 0.15rem 0.05rem; }
   .iq-filter-group { display: flex; align-items: center; gap: 0.4rem; flex-shrink: 0; }
   .iq-filter-label { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); white-space: nowrap; }
   #iq-filters .iq-dropdown { margin-bottom: 0; }
@@ -2715,7 +2734,7 @@
            most recent test + the two skill-breakdown donuts (top 3 skills
            each). -->
         <div class="home-overview" id="home-overview" style="display:none;">
-          <h2 class="home-overview-hed">Your Overview</h2>
+          <h2 class="home-overview-hed"><svg class="home-overview-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10"/><path d="M11 20V4"/><path d="M18 20v-7"/></svg>Your Overview</h2>
           <div class="home-overview-filters">
             <div class="ov-filter" id="home-test-filter">
               <button type="button" class="ov-filter-btn" id="home-test-filter-btn">
@@ -2842,9 +2861,9 @@
     </div>
 
     <div class="iq-tabs" id="iq-tabs">
-      <button type="button" class="iq-tab active" data-tab="saved" id="iq-tab-saved">Saved Questions</button>
-      <button type="button" class="iq-tab" data-tab="mistakes" id="iq-tab-mistakes">Mistakes Log <span class="iq-tab-count" id="iq-tab-mistakes-count">0</span></button>
+      <button type="button" class="iq-tab active" data-tab="mistakes" id="iq-tab-mistakes">Mistakes <span class="iq-tab-count" id="iq-tab-mistakes-count">0</span></button>
       <button type="button" class="iq-tab" data-tab="collections" id="iq-tab-collections">Collections</button>
+      <button type="button" class="iq-tab" data-tab="saved" id="iq-tab-saved">Saved Questions</button>
     </div>
 
     <!-- ═══ COLLECTIONS BAR ═══ only shown on the Collections tab — a row
@@ -4789,15 +4808,34 @@
   // ancestor .spc-chart-wrap's data-chart to look back up spcChartEntries,
   // and neither of those attributes changed, so it works unmodified
   // against bars instead of the old invisible hit-circles.
+  // Disambiguates retakes — scoreEntryShortLabel() alone gives every
+  // attempt of the same test the same short label (e.g. two PT1 attempts
+  // both read "PT 1"), which reads as a labeling bug once a student
+  // actually has a retake on the chart. Only labels that repeat within
+  // THIS shown set get a "– Attempt N" suffix; a label that's unique stays
+  // exactly as scoreEntryShortLabel() returns it.
+  function scoreEntryLabelsWithAttempts(entries) {
+    var base = entries.map(scoreEntryShortLabel);
+    var counts = {};
+    base.forEach(function (l) { counts[l] = (counts[l] || 0) + 1; });
+    var seen = {};
+    return base.map(function (l) {
+      if (counts[l] <= 1) return l;
+      seen[l] = (seen[l] || 0) + 1;
+      return l + ' – Attempt ' + seen[l];
+    });
+  }
+
   function buildScoreBarChart(entries, scaleMin, scaleMax, target) {
     var n = entries.length;
     var last = entries[n - 1];
+    var labels = scoreEntryLabelsWithAttempts(entries);
     var deltaHtml = '';
     if (n > 1 && entries[0].composite != null && last.composite != null) {
       var delta = last.composite - entries[0].composite;
       if (delta !== 0) {
         deltaHtml = '<div class="spc-composite-delta">' + (delta > 0 ? '↑ ' : '↓ ') + Math.abs(delta) +
-          ' pts since ' + scoreEntryShortLabel(entries[0]) + '</div>';
+          ' pts since ' + labels[0] + '</div>';
       }
     }
     var barsHtml = '', labelsHtml = '';
@@ -4806,7 +4844,7 @@
       frac = Math.max(0, Math.min(1, frac));
       var heightPct = Math.max(2, Math.round(frac * 100));
       barsHtml += '<div class="spc-bar spc-hit" style="height:' + heightPct + '%" data-i="' + i + '" tabindex="0"></div>';
-      labelsHtml += '<span>' + scoreEntryShortLabel(e) + '</span>';
+      labelsHtml += '<span>' + labels[i] + '</span>';
     });
     var targetHtml = '';
     if (target != null) {
@@ -10985,8 +11023,8 @@
   // 'saved' | 'mistakes' | 'collections' — which tab is showing. Saved
   // Questions and Collections both skip the filter bar (they're already
   // curated lists, not a "build a session" screen) — #iq-filters only
-  // shows on Mistakes Log.
-  var activeTab = 'saved';
+  // shows on Mistakes.
+  var activeTab = 'mistakes';
   // { [collectionName]: { [key]: {addedAt} } } — loaded from
   // window.fetchPortalProgress() in loadRecords() below, written back via
   // window.updateStudentCollections() any time it changes (see
@@ -11829,10 +11867,11 @@
       wireQuizInteractions();
     }
 
-    // Reset to Saved Questions every time the screen is opened fresh,
-    // unless a domain/skill preset (from Home's "Where Points Are Going"
-    // or Score Progress) explicitly wants the Mistakes Log filtered.
-    activeTab = (preset && (preset.domain || preset.skill)) ? 'mistakes' : 'saved';
+    // Reset to Mistakes every time the screen is opened fresh — the same
+    // tab a domain/skill preset (from Home's weak-skill cards or Score
+    // Progress) would land on anyway, so that case no longer needs its own
+    // branch here.
+    activeTab = 'mistakes';
     activeCollectionName = null;
     tabSavedEl.classList.toggle('active', activeTab === 'saved');
     tabMistakesEl.classList.toggle('active', activeTab === 'mistakes');
