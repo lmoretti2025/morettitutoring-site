@@ -144,6 +144,10 @@ function doPost(e) {
       out = handleAddIncorrectQuestion(body.key, body.record);
     } else if (body.action === 'updateCollections') {
       out = handleUpdateCollections(body.key, body.collections);
+    } else if (body.action === 'syncVocabProgress') {
+      out = handleSyncVocabProgress(body.key, body.progress);
+    } else if (body.action === 'syncQbAttempts') {
+      out = handleSyncQbAttempts(body.key, body.attempts);
     } else if (body.action === 'getProgress') {
       out = handleGetProgress(body.key);
     } else if (body.action === 'saveOnboardingPrefs') {
@@ -1396,7 +1400,79 @@ function handleUpdateCollections(rawKey, rawCollections) {
   return { ok: true };
 }
 
-// Read-only fetch for the two portal tools — deliberately returns ok:true
+/* ═══ VOCABULARY PROGRESS ═══ was 100% localStorage (moretti_vocab_progress_
+   <key>), so a student's mastered/still-learning words on one device were
+   invisible on another. rawProgress is the CLIENT's own already-merged view
+   ({stillLearning, seen, termUpdatedAt} — see loadProgress()/mergeVocab
+   Progress_() in index.html) — same "client merges, server just overwrites"
+   approach as handleUpdateCollections above, safe for the same reason: a
+   student only ever studies vocab from one device at a time, and the
+   client always merges local+server (via getProgress) before pushing here,
+   so an overwrite never silently drops the other device's data. */
+function handleSyncVocabProgress(rawKey, rawProgress) {
+  if (!rawKey) return { ok: false, error: 'missing_key' };
+  if (!rawProgress || typeof rawProgress !== 'object') return { ok: false, error: 'missing_progress' };
+  var key = String(rawKey).trim().toUpperCase();
+  var sheet = getSheet_();
+  var row = findRow_(sheet, key);
+  if (!row) return { ok: false, error: 'bad_key' };
+
+  var headers = row._headers;
+  if (headers.indexOf('VocabProgressJSON') === -1) {
+    sheet.getRange(1, sheet.getLastColumn() + 1).setValue('VocabProgressJSON');
+    headers.push('VocabProgressJSON');
+  }
+  var payload = {
+    stillLearning: (rawProgress.stillLearning && typeof rawProgress.stillLearning === 'object') ? rawProgress.stillLearning : {},
+    seen: (rawProgress.seen && typeof rawProgress.seen === 'object') ? rawProgress.seen : {},
+    termUpdatedAt: (rawProgress.termUpdatedAt && typeof rawProgress.termUpdatedAt === 'object') ? rawProgress.termUpdatedAt : {}
+  };
+  var vpCol = headers.indexOf('VocabProgressJSON');
+  sheet.getRange(row._rowIndex, vpCol + 1).setValue(sheetSafe_(JSON.stringify(payload)));
+  return { ok: true };
+}
+
+/* ═══ QUESTION BANK — PER-QUESTION ATTEMPT HISTORY ═══ same story as vocab
+   above: the per-skill "solved" tracking (moretti_qb_progress_<key>.
+   attempts) that drives each subtopic's mastery % was local-only, so
+   Question Bank progress looked wiped every time a student switched
+   devices. rawAttempts is the client's own already-merged
+   {qid: {correct, attemptedAt}} map — same overwrite-after-client-merge
+   approach as VocabProgressJSON. Reuses capIncorrectByKey_ since the shape
+   (an object keyed by id, each entry carrying attemptedAt) is identical to
+   IncorrectQuestionsJSON. */
+function handleSyncQbAttempts(rawKey, rawAttempts) {
+  if (!rawKey) return { ok: false, error: 'missing_key' };
+  if (!rawAttempts || typeof rawAttempts !== 'object') return { ok: false, error: 'missing_attempts' };
+  var key = String(rawKey).trim().toUpperCase();
+  var sheet = getSheet_();
+  var row = findRow_(sheet, key);
+  if (!row) return { ok: false, error: 'bad_key' };
+
+  var headers = row._headers;
+  if (headers.indexOf('QbAttemptsJSON') === -1) {
+    sheet.getRange(1, sheet.getLastColumn() + 1).setValue('QbAttemptsJSON');
+    headers.push('QbAttemptsJSON');
+  }
+  var attempts = capIncorrectByKey_(rawAttempts);
+  var qaCol = headers.indexOf('QbAttemptsJSON');
+  sheet.getRange(row._rowIndex, qaCol + 1).setValue(sheetSafe_(JSON.stringify(attempts)));
+  return { ok: true };
+}
+
+// Bumped whenever handleGetProgress's response shape changes in a way the
+// client needs to know about to trust it fully. Specifically: a client
+// talking to an OLDER, not-yet-redeployed Code.gs gets a response that's
+// simply missing this field (undefined, not a lower number) — that's the
+// signal index.html's fetchPortalProgress() uses to tell "the backend
+// legitimately has nothing here" (safe to reconcile away stale local
+// incorrectQuestions/savedQuestions entries the server no longer confirms)
+// apart from "this deployed backend predates the field entirely" (never
+// safe to reconcile against — it would purge real data the backend was
+// never asked about). See fetchPortalProgress()'s own comment for the full
+// reasoning; bump this again if that response shape changes again.
+var PROGRESS_API_VERSION = 2;
+// Read-only fetch for the portal tools — deliberately returns ok:true
 // with empty objects for a valid key that just has no progress synced yet
 // (brand-new student, nothing submitted), rather than an error; only an
 // unrecognized key is rejected.
@@ -1407,12 +1483,14 @@ function handleGetProgress(rawKey) {
   var row = findRow_(sheet, key);
   if (!row) return { ok: false, error: 'bad_key' };
 
-  var byKey = {}, bySkill = {}, savedByKey = {}, collections = {};
+  var byKey = {}, bySkill = {}, savedByKey = {}, collections = {}, vocabProgress = null, qbAttempts = {};
   try { byKey = JSON.parse(row.IncorrectQuestionsJSON) || {}; } catch (e) { /* ignore */ }
   try { bySkill = JSON.parse(row.SkillStatsJSON) || {}; } catch (e) { /* ignore */ }
   try { savedByKey = JSON.parse(row.SavedQuestionsJSON) || {}; } catch (e) { /* ignore */ }
   try { collections = JSON.parse(row.CollectionsJSON) || {}; } catch (e) { /* ignore */ }
-  return { ok: true, incorrectQuestions: byKey, skillStats: bySkill, savedQuestions: savedByKey, collections: collections };
+  try { vocabProgress = JSON.parse(row.VocabProgressJSON) || null; } catch (e) { /* ignore */ }
+  try { qbAttempts = JSON.parse(row.QbAttemptsJSON) || {}; } catch (e) { /* ignore */ }
+  return { ok: true, apiVersion: PROGRESS_API_VERSION, incorrectQuestions: byKey, skillStats: bySkill, savedQuestions: savedByKey, collections: collections, vocabProgress: vocabProgress, qbAttempts: qbAttempts };
 }
 
 /* =========================================================================
