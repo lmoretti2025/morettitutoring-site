@@ -1366,7 +1366,13 @@
      this sticks directly below the fixed nav bar instead of going under
      it. Solid background so scrolled-past question rows don't show
      through underneath it. */
-  .iq-sticky-head { position: sticky; top: 60px; z-index: 90; background: var(--bg); padding-bottom: 0.6rem; }
+  /* Same two-layer background as body itself (flat var(--bg) plus the
+     faint gold radial glow), not a plain var(--bg) fill — a flat color
+     here read as a mismatched grey box against the page's actual
+     (gradient) background around it. */
+  .iq-sticky-head { position: sticky; top: 60px; z-index: 90; padding-bottom: 0.6rem;
+    background: radial-gradient(ellipse 900px 460px at 50% 0%, rgba(201,168,76,0.07), transparent 70%), var(--bg);
+  }
   @media (max-width: 899px) {
     .iq-sticky-head { top: 110px; } /* nav bar + the horizontal mobile sidebar strip beneath it */
   }
@@ -1417,27 +1423,23 @@
   /* ═══ CHECKBOX DROPDOWNS — used by My Incorrect Questions' section/
      domain/skill/difficulty filters. A button showing a one-line summary
      ("All" / "3 of 8 selected") that opens a checkbox panel below it. ═══ */
-  /* Compact one-line filter bar (Test/Section/Domain/Skill/Difficulty) +
-     the red practice-launch button — see #iq-filters below. Each dropdown
-     used to stack under its own full-width vp-panel-label with a
-     100%-wide button; here every group is an inline label+button pair
-     that wraps as a unit, so the whole bar reads as one row on a normal
-     screen instead of five stacked full-width fields. */
+  /* One row: the single "Filters" dropdown + the red practice-launch
+     button — see #iq-filters below. */
   #iq-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem 0.9rem; margin: 1.1rem 0 0.4rem; }
-  /* Wraps onto additional lines instead of scrolling horizontally — a
-     scrollable strip was clipping the dropdown panels open above/below it
-     (overflow-x:auto on this element forces overflow-y to compute as auto
-     too, so an open .iq-dropdown-panel got cut off at this container's own
-     edge instead of overlaying the page). Wrapping keeps every filter
-     fully reachable without scrolling and lets its dropdown open completely
-     visible. */
-  #iq-filter-groups { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem 0.9rem; flex: 1; min-width: 0; padding: 0.15rem 0.05rem; }
-  .iq-filter-group { display: flex; align-items: center; gap: 0.4rem; flex-shrink: 0; }
-  .iq-filter-label { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); white-space: nowrap; }
   #iq-filters .iq-dropdown { margin-bottom: 0; }
   #iq-filters .iq-dropdown-btn { width: auto; padding: 0.48rem 0.85rem; font-size: 0.76rem; white-space: nowrap; background: rgba(17,17,17,0.045); border: none; border-radius: 999px; }
   #iq-filters .iq-dropdown-btn:hover { background: rgba(17,17,17,0.07); border: none; }
   #iq-filters .iq-dropdown.open .iq-dropdown-btn { background: rgba(17,17,17,0.07); border: none; }
+  .iq-filters-badge { background: var(--red); color: #fff; border-radius: 999px; padding: 0.05rem 0.42rem; font-size: 0.68rem; font-weight: 700; }
+  /* The single combined panel — was five separate ~80px-wide panels (one
+     per filter button); now one panel holding all five category
+     sections, wide enough for a full skill/domain name and tall enough
+     to hold all five without needing the page itself to scroll. */
+  .iq-filters-panel { right: auto; width: 280px; max-height: min(70vh, 460px); overflow-y: auto; }
+  .iq-filter-section { margin-bottom: 0.9rem; }
+  .iq-filter-section:last-child { margin-bottom: 0; }
+  .iq-filter-section-label { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); margin: 0 0.55rem 0.3rem; }
+  .iq-filter-section-empty { font-size: 0.78rem; color: var(--faint); padding: 0.3rem 0.55rem; }
   .iq-practice-btn { flex-shrink: 0; margin-left: auto; background: var(--text); color: #fff; border: none; border-radius: 999px; padding: 0.6rem 1.2rem; font-family: var(--hel); font-size: 0.78rem; font-weight: 700; cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 0.3rem; transition: filter 0.15s var(--ease), transform 0.15s var(--ease); }
   .iq-practice-btn:hover:not(:disabled) { filter: brightness(1.3); transform: translateY(-1px); }
   .iq-practice-btn:disabled { opacity: 0.45; cursor: default; transform: none; }
@@ -2921,13 +2923,24 @@
         <div id="iq-collections-chips"></div>
       </div>
 
+      <!-- ONE "Filters" button opens ONE panel holding all five category
+           groups (Test/Section/Domain/Skill/Difficulty), instead of five
+           separate always-visible dropdown buttons — same underlying
+           filter state and cascading logic, just one entry point. -->
       <div id="iq-filters">
-        <div id="iq-filter-groups">
-          <div class="iq-filter-group"><span class="iq-filter-label">Test</span><div class="iq-dropdown" id="iq-test-pills"></div></div>
-          <div class="iq-filter-group"><span class="iq-filter-label">Section</span><div class="iq-dropdown" id="iq-section-pills"></div></div>
-          <div class="iq-filter-group"><span class="iq-filter-label">Domain</span><div class="iq-dropdown" id="iq-domain-pills"></div></div>
-          <div class="iq-filter-group"><span class="iq-filter-label">Skill</span><div class="iq-dropdown" id="iq-skill-pills"></div></div>
-          <div class="iq-filter-group"><span class="iq-filter-label">Difficulty</span><div class="iq-dropdown" id="iq-difficulty-pills"></div></div>
+        <div class="iq-dropdown" id="iq-filters-dropdown">
+          <button type="button" class="iq-dropdown-btn iq-filters-btn" id="iq-filters-btn">
+            <span>Filters</span>
+            <span class="iq-filters-badge" id="iq-filters-badge" style="display:none;"></span>
+            <span class="iq-dropdown-caret">&#9662;</span>
+          </button>
+          <div class="iq-dropdown-panel iq-filters-panel">
+            <div class="iq-filter-section"><div class="iq-filter-section-label">Test</div><div id="iq-test-pills"></div></div>
+            <div class="iq-filter-section"><div class="iq-filter-section-label">Section</div><div id="iq-section-pills"></div></div>
+            <div class="iq-filter-section"><div class="iq-filter-section-label">Domain</div><div id="iq-domain-pills"></div></div>
+            <div class="iq-filter-section"><div class="iq-filter-section-label">Skill</div><div id="iq-skill-pills"></div></div>
+            <div class="iq-filter-section"><div class="iq-filter-section-label">Difficulty</div><div id="iq-difficulty-pills"></div></div>
+          </div>
         </div>
         <button type="button" class="iq-practice-btn" id="iq-practice-btn">Practice Selected Mistakes <span id="iq-practice-count">(0)</span></button>
       </div>
@@ -11227,34 +11240,23 @@
     return out;
   }
 
-  // Checkbox dropdown: a button showing a summary ("All" / "3 of 8
-  // selected") that opens a panel of checkboxes, one per option plus an
-  // "All" checkbox at the top. Replaces the old pill-row buttons per
-  // Luca's request — same cascading behavior (section narrows domain
-  // narrows skill), just a dropdown+checkboxes instead of a wrapping row
-  // of toggle buttons.
-  function renderCheckboxDropdown(container, options, labelFn, selectedArr, onChange) {
-    var wasOpen = container.classList.contains('open'); // preserved across the rebuild every onChange triggers, so checking a box doesn't close the dropdown
+  // Checkbox list: one "All" checkbox plus one per option, written
+  // straight into `container`. Used for all five filter categories
+  // (Test/Section/Domain/Skill/Difficulty), which now share ONE outer
+  // "Filters" dropdown (see #iq-filters-dropdown) instead of each having
+  // its own separate trigger button+panel — this only ever builds the
+  // checkbox rows, not a button or panel wrapper, since the single shared
+  // button already gates visibility of all five at once.
+  function renderCheckboxOptions(container, options, labelFn, selectedArr, onChange) {
     container.innerHTML = '';
-    container.className = 'iq-dropdown' + (wasOpen ? ' open' : '');
 
-    var btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'iq-dropdown-btn';
-    var summary = options.length === 0 ? 'None available'
-      : selectedArr.length === options.length ? 'All'
-      : selectedArr.length === 0 ? 'None selected'
-      : selectedArr.length + ' of ' + options.length + ' selected';
-    btn.innerHTML = '<span>' + escHtml(summary) + '</span><span class="iq-dropdown-caret">&#9662;</span>';
-    btn.addEventListener('click', function () {
-      var isOpen = container.classList.contains('open');
-      closeDropdown();
-      if (!isOpen) { container.classList.add('open'); openDropdown = container; }
-    });
-    container.appendChild(btn);
-
-    var panel = document.createElement('div');
-    panel.className = 'iq-dropdown-panel';
+    if (!options.length) {
+      var empty = document.createElement('div');
+      empty.className = 'iq-filter-section-empty';
+      empty.textContent = 'None available';
+      container.appendChild(empty);
+      return;
+    }
 
     if (options.length > 1) {
       var allRow = document.createElement('label');
@@ -11269,7 +11271,7 @@
       });
       allRow.appendChild(allCb);
       allRow.appendChild(document.createTextNode('All'));
-      panel.appendChild(allRow);
+      container.appendChild(allRow);
     }
 
     options.forEach(function (opt) {
@@ -11286,22 +11288,38 @@
       });
       row.appendChild(cb);
       row.appendChild(document.createTextNode(labelFn(opt)));
-      panel.appendChild(row);
+      container.appendChild(row);
     });
+  }
 
-    container.appendChild(panel);
+  // "Filters" button label — a small badge naming how many categories are
+  // actually narrowed (not left at "All"), so the single button still
+  // hints at active filters without needing five separate summaries
+  // visible at once.
+  function updateFiltersBadge() {
+    var badge = document.getElementById('iq-filters-badge');
+    if (!badge) return;
+    var narrowed = 0;
+    if (selTests.length && selTests.length < testKeys.length) narrowed++;
+    if (selSections.length && selSections.length < sectionKeys.length) narrowed++;
+    if (selDomains.length && selDomains.length < availableDomains().length) narrowed++;
+    if (selSkills.length && selSkills.length < availableSkills().length) narrowed++;
+    if (selDifficulties.length && selDifficulties.length < DIFFICULTIES.length) narrowed++;
+    if (narrowed > 0) { badge.textContent = String(narrowed); badge.style.display = ''; }
+    else { badge.style.display = 'none'; }
   }
 
   function renderSectionPills() {
-    renderCheckboxDropdown(sectionPillsEl, sectionKeys, sectionLabelFor, selSections, function () {
+    renderCheckboxOptions(sectionPillsEl, sectionKeys, sectionLabelFor, selSections, function () {
       var newDomains = availableDomains();
       selDomains = selDomains.filter(function (d) { return newDomains.indexOf(d) !== -1; });
       renderSectionPills();
       onDomainsChanged();
+      updateFiltersBadge();
     });
   }
   function renderDomainPills() {
-    renderCheckboxDropdown(domainPillsEl, availableDomains(), function (d) { return d; }, selDomains, function () { onDomainsChanged(); });
+    renderCheckboxOptions(domainPillsEl, availableDomains(), function (d) { return d; }, selDomains, function () { onDomainsChanged(); updateFiltersBadge(); });
   }
   function onDomainsChanged() {
     var newSkills = availableSkills();
@@ -11311,16 +11329,16 @@
     renderList();
   }
   function renderSkillPills() {
-    renderCheckboxDropdown(skillPillsEl, availableSkills(), function (s) { return s; }, selSkills, function () { renderSkillPills(); renderList(); });
+    renderCheckboxOptions(skillPillsEl, availableSkills(), function (s) { return s; }, selSkills, function () { renderSkillPills(); renderList(); updateFiltersBadge(); });
   }
   function renderDifficultyPills() {
-    renderCheckboxDropdown(difficultyPillsEl, DIFFICULTIES, difficultyLabel, selDifficulties, function () { renderDifficultyPills(); renderList(); });
+    renderCheckboxOptions(difficultyPillsEl, DIFFICULTIES, difficultyLabel, selDifficulties, function () { renderDifficultyPills(); renderList(); updateFiltersBadge(); });
   }
   // Independent of Section/Domain/Skill's cascade — same as Difficulty —
   // since "which test was this on" is a separate dimension from the
   // skill taxonomy, not a level within it.
   function renderTestPills() {
-    renderCheckboxDropdown(testPillsEl, testKeys, function (t) { return t; }, selTests, function () { renderTestPills(); renderList(); });
+    renderCheckboxOptions(testPillsEl, testKeys, function (t) { return t; }, selTests, function () { renderTestPills(); renderList(); updateFiltersBadge(); });
   }
 
   // Same fallback split used on the diagnostic/practice-test screen and
@@ -11907,6 +11925,19 @@
         if (practiceBtnEl.disabled) return;
         startPracticeRunner();
       });
+      // Single "Filters" button opens/closes the one shared panel holding
+      // all five category groups — same open/close tracking (openDropdown/
+      // closeDropdown) every other dropdown here already uses, so an
+      // outside click or opening a different dropdown closes it the same way.
+      (function () {
+        var dropdownEl = document.getElementById('iq-filters-dropdown');
+        var btnEl = document.getElementById('iq-filters-btn');
+        btnEl.addEventListener('click', function () {
+          var isOpen = dropdownEl.classList.contains('open');
+          closeDropdown();
+          if (!isOpen) { dropdownEl.classList.add('open'); openDropdown = dropdownEl; }
+        });
+      })();
       tabSavedEl.addEventListener('click', function () { setActiveTab('saved'); });
       tabMistakesEl.addEventListener('click', function () { setActiveTab('mistakes'); });
       tabCollectionsEl.addEventListener('click', function () { setActiveTab('collections'); });
@@ -11948,6 +11979,7 @@
       renderSkillPills();
       renderDifficultyPills();
       renderTestPills();
+      updateFiltersBadge();
       renderCollectionsChips();
       renderList();
     });
