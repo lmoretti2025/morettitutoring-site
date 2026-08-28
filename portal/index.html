@@ -1289,6 +1289,11 @@
   .vp-set-dropdown-row-track { height: 3px; background: var(--bg); border-radius: 2px; overflow: hidden; margin-top: 0.3rem; width: 90px; }
   .vp-set-dropdown-row-fill { height: 100%; background: linear-gradient(90deg, var(--gold), #3f7d54); width: 0; }
   .vp-pool-count { font-size: 0.72rem; color: var(--faint); margin-top: 0.55rem; }
+  @media (max-width: 560px) {
+    .vp-set-cards { grid-template-columns: 1fr; }
+    .vp-set-dropdown-panel { max-height: 240px; }
+    .vp-set-dropdown-row-track { width: 60px; }
+  }
 
   /* ═══ STATS ROW — Mastered/Learning/Not started counts, derived from
      progress.seen + progress.stillLearning (see statsCounts() in the JS),
@@ -2137,6 +2142,11 @@
 #pt-native-report .skilldx-dot.inefficient { background: #A9C4B4; }
 #pt-native-report .skilldx-dot.stuck { background: var(--red); }
 #pt-native-report .skilldx-dot.rushed { background: var(--gold); }
+  @media (max-width: 480px) {
+    #pt-native-report .skilldx-card { padding: 1.1rem 1rem; }
+    #pt-native-report .skilldx-row-top { flex-wrap: wrap; gap: 4px 8px; }
+    #pt-native-report .skilldx-legend { gap: 8px 10px; font-size: 9.5px; }
+  }
 #pt-native-report .detail-toggle { display: inline-block; font-size: 9.5px; color: var(--mid); text-decoration: underline; margin-top: 10px; }
 #pt-native-report .ftr { border-top: 1px solid var(--border); margin-top: 14px; padding-top: 8px; font-size: 9.5px; color: var(--faint); display: flex; justify-content: space-between; }
 #pt-native-report table { width: 100%; border-collapse: collapse; font-size: 9.5px; }
@@ -3935,15 +3945,15 @@ window.Portal = {
            hidden for the duration of the exam (see examChromeHidden in the
            JS) — routes through the exact same exitPortal() confirm-and-
            abandon logic nav-exit-link used, just triggered from here now. -->
-      <button type="button" class="dx-icon-btn" id="dx-exit-btn" title="Exit Portal">
+      <button type="button" class="dx-icon-btn" id="dx-exit-btn" title="Exit Portal" aria-label="Exit Portal">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
         <span>Exit</span>
       </button>
-      <button type="button" class="dx-icon-btn" id="dx-calculator-btn" style="display:none;" title="Calculator">
+      <button type="button" class="dx-icon-btn" id="dx-calculator-btn" style="display:none;" title="Calculator" aria-label="Calculator">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10.5" x2="8" y2="10.51"/><line x1="12" y1="10.5" x2="12" y2="10.51"/><line x1="16" y1="10.5" x2="16" y2="10.51"/><line x1="8" y1="14.5" x2="8" y2="14.51"/><line x1="12" y1="14.5" x2="12" y2="14.51"/><line x1="16" y1="14.5" x2="16" y2="14.51"/><line x1="8" y1="18.5" x2="8" y2="18.51"/><line x1="12" y1="18.5" x2="12" y2="18.51"/><line x1="16" y1="18.5" x2="16" y2="18.51"/></svg>
         <span>Calculator</span>
       </button>
-      <button type="button" class="dx-icon-btn" id="dx-reference-btn" style="display:none;" title="Reference">
+      <button type="button" class="dx-icon-btn" id="dx-reference-btn" style="display:none;" title="Reference" aria-label="Reference sheet">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
         <span>Reference</span>
       </button>
@@ -3983,8 +3993,8 @@ window.Portal = {
         <button type="button" class="dx-hl-swatch dx-hl-swatch-blue" data-hl-color="blue" title="Highlight blue"></button>
         <button type="button" class="dx-hl-swatch dx-hl-swatch-pink" data-hl-color="pink" title="Highlight pink"></button>
         <div class="dx-hl-divider"></div>
-        <button type="button" class="dx-hl-tool-btn" id="dx-hl-underline" title="Underline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 4v7a6 6 0 0 0 12 0V4"/><line x1="4" y1="20" x2="20" y2="20"/></svg></button>
-        <button type="button" class="dx-hl-tool-btn dx-hl-delete" id="dx-hl-delete" title="Remove highlight" style="display:none;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
+        <button type="button" class="dx-hl-tool-btn" id="dx-hl-underline" title="Underline" aria-label="Underline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 4v7a6 6 0 0 0 12 0V4"/><line x1="4" y1="20" x2="20" y2="20"/></svg></button>
+        <button type="button" class="dx-hl-tool-btn dx-hl-delete" id="dx-hl-delete" title="Remove highlight" aria-label="Remove highlight" style="display:none;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
       </div>
       <div class="dx-pane-divider" id="dx-pane-divider"><span class="dx-pane-grip"><svg width="10" height="18" viewBox="0 0 10 18" aria-hidden="true"><circle cx="2.5" cy="3" r="1.4" fill="currentColor"/><circle cx="7.5" cy="3" r="1.4" fill="currentColor"/><circle cx="2.5" cy="9" r="1.4" fill="currentColor"/><circle cx="7.5" cy="9" r="1.4" fill="currentColor"/><circle cx="2.5" cy="15" r="1.4" fill="currentColor"/><circle cx="7.5" cy="15" r="1.4" fill="currentColor"/></svg></span></div>
       <div class="dx-card-wrap">
@@ -7625,12 +7635,12 @@ window.Portal = {
         skill: q.skill,
         difficulty: q.difficulty || 'medium',
         type: 'fr',
-        text: '<img src="' + q.qImg + '" style="max-width:100%;"><img src="' + q.ansImg + '" style="max-width:100%; margin-top:0.5rem;">' +
-          '<span style="display:none;">' + escHtml(q.skill) + ' — Math practice question</span>',
+        text: '<img src="' + q.qImg + '" alt="' + window.Portal.escHtml(q.skill) + ' — question figure" style="max-width:100%;"><img src="' + q.ansImg + '" alt="Answer choices figure" style="max-width:100%; margin-top:0.5rem;">' +
+          '<span style="display:none;">' + window.Portal.escHtml(q.skill) + ' — Math practice question</span>',
         choices: null,
         correctIndex: null,
         answerValue: LETTERS_QB[q.correct],
-        explanation: q.explImg ? '<img src="' + q.explImg + '" style="max-width:100%;">' : null,
+        explanation: q.explImg ? '<img src="' + q.explImg + '" alt="Explanation figure" style="max-width:100%;">' : null,
         passageId: null,
         refNum: null
       };
@@ -9030,7 +9040,7 @@ window.Portal = {
         var isElim = elims[current] && elims[current].indexOf(i) !== -1;
         var row = document.createElement('div');
         row.className = 'dx-choice' + (answers[current] === i ? ' selected' : '') + (isElim ? ' eliminated' : '');
-        row.innerHTML = '<span class="dx-choice-letter">' + LETTERS[i] + '</span><span class="dx-choice-text">' + choice + '</span><span class="dx-elim" title="Cross out this answer">&times;</span>';
+        row.innerHTML = '<span class="dx-choice-letter">' + LETTERS[i] + '</span><span class="dx-choice-text">' + choice + '</span><span class="dx-elim" title="Cross out this answer" role="button" aria-label="Cross out this answer">&times;</span>';
         row.querySelector('.dx-elim').addEventListener('click', function (ev) {
           ev.stopPropagation();
           var list = elims[current];
@@ -12303,7 +12313,7 @@ window.Portal = {
       return '<label class="iq-add-to-collection-option"><input type="checkbox" data-collection="' + escHtml(name) + '" ' + (checked ? 'checked' : '') + '> ' + escHtml(name) + '</label>';
     }).join('');
     var addToCollectionHtml = '<div class="iq-add-to-collection" data-key="' + escHtml(r.key) + '">' +
-      '<button type="button" class="iq-add-to-collection-btn" title="Add to collection"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7a1 1 0 0 1 1-1h4.5l1.8 2H19a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7z"/><line x1="12" y1="12.5" x2="12" y2="16.5"/><line x1="10" y1="14.5" x2="14" y2="14.5"/></svg></button>' +
+      '<button type="button" class="iq-add-to-collection-btn" title="Add to collection" aria-label="Add to collection"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7a1 1 0 0 1 1-1h4.5l1.8 2H19a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7z"/><line x1="12" y1="12.5" x2="12" y2="16.5"/><line x1="10" y1="14.5" x2="14" y2="14.5"/></svg></button>' +
       '<div class="iq-add-to-collection-panel">' +
         (addPanelOptions || '<div style="font-size:0.78rem;color:var(--faint);padding:0.3rem 0.5rem;">No collections yet.</div>') +
         '<div class="iq-add-to-collection-new"><input type="text" placeholder="New collection…" maxlength="60"><button type="button">Add</button></div>' +
@@ -12623,7 +12633,7 @@ window.Portal = {
         var row = document.createElement('div');
         row.className = cls;
         row.innerHTML = '<span class="dx-choice-letter">' + LETTERS[i] + '</span><span class="dx-choice-text">' + c + '</span>' +
-          (!st.submitted ? '<span class="dx-elim" title="Cross out this answer">&times;</span>' : '');
+          (!st.submitted ? '<span class="dx-elim" title="Cross out this answer" role="button" aria-label="Cross out this answer">&times;</span>' : '');
         if (!st.submitted) {
           row.addEventListener('click', function () { selectRunnerChoice(i); });
           row.querySelector('.dx-elim').addEventListener('click', function (ev) {
@@ -13119,7 +13129,7 @@ window.Portal = {
         var row = document.createElement('div');
         row.className = cls;
         row.innerHTML = '<span class="dx-choice-letter">' + LETTERS[i] + '</span><span class="dx-choice-text">' + c + '</span>' +
-          (!st.submitted ? '<span class="dx-elim" title="Cross out this answer">&times;</span>' : '');
+          (!st.submitted ? '<span class="dx-elim" title="Cross out this answer" role="button" aria-label="Cross out this answer">&times;</span>' : '');
         if (!st.submitted) {
           row.addEventListener('click', function () { selectRunnerChoice(i); });
           row.querySelector('.dx-elim').addEventListener('click', function (ev) {
@@ -13869,11 +13879,12 @@ window.Portal = {
       // (grading still works normally; the choice VALUES just aren't
       // separately clickable text the way R&W's are).
       if (window.dxRenderPassagePane) window.dxRenderPassagePane({}, null);
-      qtextEl.innerHTML = '<img src="' + r.qImg + '" style="max-width:100%;">';
+      qtextEl.innerHTML = '<img src="' + r.qImg + '" alt="Question figure" style="max-width:100%;">';
       var ansWrap = document.createElement('div');
       ansWrap.style.width = '100%';
       var ansImgEl = document.createElement('img');
       ansImgEl.src = r.ansImg;
+      ansImgEl.alt = 'Answer choices figure';
       ansImgEl.style.maxWidth = '100%';
       ansWrap.appendChild(ansImgEl);
       var letterRow = document.createElement('div');
@@ -13900,7 +13911,7 @@ window.Portal = {
       if (st.submitted && r.explImg) {
         var explainImg = document.createElement('div');
         explainImg.className = 'pb-explain';
-        explainImg.innerHTML = '<div class="pb-explain-hed">Full Explanation</div><img src="' + r.explImg + '" style="max-width:100%;">';
+        explainImg.innerHTML = '<div class="pb-explain-hed">Full Explanation</div><img src="' + r.explImg + '" alt="Explanation figure" style="max-width:100%;">';
         navRowEl.parentNode.insertBefore(explainImg, navRowEl);
       }
     } else if (r.type === 'fr') {
@@ -13953,7 +13964,7 @@ window.Portal = {
         var row = document.createElement('div');
         row.className = cls;
         row.innerHTML = '<span class="dx-choice-letter">' + LETTERS[i] + '</span><span class="dx-choice-text">' + c + '</span>' +
-          (!st.submitted ? '<span class="dx-elim" title="Cross out this answer">&times;</span>' : '');
+          (!st.submitted ? '<span class="dx-elim" title="Cross out this answer" role="button" aria-label="Cross out this answer">&times;</span>' : '');
         if (!st.submitted) {
           row.addEventListener('click', function () { selectRunnerChoice(i); });
           row.querySelector('.dx-elim').addEventListener('click', function (ev) {
