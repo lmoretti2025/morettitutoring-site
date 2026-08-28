@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Roster — Moretti Test Prep &amp; Tutoring</title>
+<style>
+  :root {
+    --red:    #B0271C;
+    --bg:     #f2f2f2;
+    --white:  #ffffff;
+    --text:   #111111;
+    --mid:    rgba(17,17,17,0.58);
+    --faint:  rgba(17,17,17,0.28);
+    --border: rgba(17,17,17,0.12);
+    --gold:   #C9A84C;
+    --green:  #5E8B6F;
+    --hel:    'Poppins', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    --display: 'Iowan Old Style', Georgia, ui-serif, serif;
+    --shadow: 0 2px 16px rgba(17,17,17,0.055);
+    --ease:   cubic-bezier(0.16,1,0.3,1);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--hel);
+    -webkit-font-smoothing: antialiased;
+  }
+  header {
+    background: var(--red);
+    color: #fff;
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  header .brand { font-family: var(--display); font-size: 1.1rem; letter-spacing: 0.02em; }
+  header .brand small { display: block; font-family: var(--hel); font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.85; margin-top: 0.15rem; }
+  #refresh-btn { background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.4); color: #fff; font-family: var(--hel); font-size: 0.78rem; font-weight: 600; padding: 0.5rem 0.9rem; border-radius: 8px; cursor: pointer; transition: background 0.12s; }
+  #refresh-btn:hover { background: rgba(255,255,255,0.24); }
+  #refresh-btn:disabled { opacity: 0.6; cursor: default; }
+
+  main { max-width: 1100px; margin: 0 auto; padding: 1.75rem 1.5rem 4rem; }
+
+  /* ═══ KEY GATE ═══ same idea as the student portal's own access-key
+     screen — a centered card, nothing else on the page until it succeeds. */
+  #gate { max-width: 380px; margin: 4.5rem auto 0; background: var(--white); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); padding: 2rem 1.75rem; text-align: center; }
+  #gate .eyebrow { font-family: var(--hel); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--red); margin-bottom: 0.5rem; }
+  #gate h1 { font-family: var(--display); font-size: 1.5rem; margin: 0 0 0.5rem; }
+  #gate p { color: var(--mid); font-size: 0.85rem; line-height: 1.5; margin: 0 0 1.25rem; }
+  #gate input { width: 100%; font-family: var(--hel); font-size: 0.95rem; padding: 0.7rem 0.9rem; border: 1.5px solid var(--border); border-radius: 10px; margin-bottom: 0.9rem; text-align: center; letter-spacing: 0.04em; }
+  #gate input:focus { outline: none; border-color: var(--red); }
+  #gate button { width: 100%; font-family: var(--hel); font-weight: 700; font-size: 0.9rem; background: var(--red); color: #fff; border: none; border-radius: 999px; padding: 0.75rem; cursor: pointer; transition: transform 0.12s var(--ease), box-shadow 0.12s; }
+  #gate button:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(176,39,28,0.28); }
+  #gate button:disabled { opacity: 0.6; cursor: default; transform: none; box-shadow: none; }
+  #gate-error { color: var(--red); font-size: 0.8rem; font-weight: 600; margin-top: 0.7rem; min-height: 1.1em; }
+
+  /* ═══ ROSTER ═══ */
+  #roster { display: none; }
+  .summary-row { display: flex; gap: 0.9rem; margin-bottom: 1.4rem; flex-wrap: wrap; }
+  .summary-tile { flex: 1 1 150px; background: var(--white); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); padding: 0.9rem 1.1rem; }
+  .summary-tile .num { font-family: var(--display); font-size: 1.6rem; color: var(--text); }
+  .summary-tile .lbl { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); margin-top: 0.15rem; }
+  .summary-tile.flagged .num { color: var(--red); }
+
+  .filter-row { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1rem; }
+  .filter-row label { font-size: 0.8rem; color: var(--mid); display: flex; align-items: center; gap: 0.4rem; cursor: pointer; user-select: none; }
+  .filter-row input[type="checkbox"] { accent-color: var(--red); width: 15px; height: 15px; cursor: pointer; }
+
+  .roster-table-wrap { background: var(--white); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; }
+  .roster-table-scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; min-width: 780px; }
+  thead th { text-align: left; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--faint); padding: 0.8rem 0.9rem; border-bottom: 1px solid var(--border); white-space: nowrap; cursor: pointer; }
+  thead th:hover { color: var(--red); }
+  thead th .arrow { opacity: 0.4; font-size: 0.6rem; margin-left: 0.2rem; }
+  tbody td { padding: 0.75rem 0.9rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: #fbfbfb; }
+  .name-cell { font-weight: 700; }
+  .name-cell .key { display: block; font-weight: 400; font-size: 0.7rem; color: var(--faint); font-family: monospace; margin-top: 0.1rem; }
+  .delta { font-weight: 700; }
+  .delta.up { color: var(--green); }
+  .delta.down { color: var(--red); }
+  .no-score { color: var(--faint); font-style: italic; }
+  .assign-pill { display: inline-block; font-size: 0.72rem; font-weight: 700; padding: 0.2rem 0.55rem; border-radius: 999px; background: var(--bg); color: var(--mid); }
+  .assign-pill.behind { background: rgba(176,39,28,0.1); color: var(--red); }
+  .assign-pill.done { background: rgba(94,139,111,0.12); color: var(--green); }
+  .stale { color: var(--red); font-weight: 700; }
+  .weakest-label { font-size: 0.78rem; }
+  .weakest-frac { color: var(--faint); font-size: 0.72rem; }
+
+  #status-msg { text-align: center; padding: 3rem 1rem; color: var(--mid); font-size: 0.9rem; }
+  #status-msg.error { color: var(--red); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">MORETTI<small>Roster — internal use only</small></div>
+  <button id="refresh-btn" type="button" style="display:none;">Refresh</button>
+</header>
+
+<main>
+  <div id="gate">
+    <div class="eyebrow">Admin</div>
+    <h1>Enter admin key</h1>
+    <p>This page isn't linked from the student portal and shows every student at once — Luca only.</p>
+    <input type="password" id="gate-key" placeholder="Admin key" autocomplete="off">
+    <button id="gate-submit" type="button">View roster</button>
+    <div id="gate-error"></div>
+  </div>
+
+  <div id="roster">
+    <div class="summary-row" id="summary-row"></div>
+    <div class="filter-row">
+      <label><input type="checkbox" id="filter-flagged"> Show only students needing attention (assignments behind, or 10+ days quiet)</label>
+    </div>
+    <div class="roster-table-wrap">
+      <div class="roster-table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th data-sort="name">Student <span class="arrow"></span></th>
+              <th data-sort="composite">Composite <span class="arrow"></span></th>
+              <th data-sort="weakest">Weakest area <span class="arrow"></span></th>
+              <th data-sort="assign">Assignments <span class="arrow"></span></th>
+              <th data-sort="activity">Last activity <span class="arrow"></span></th>
+            </tr>
+          </thead>
+          <tbody id="roster-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div id="status-msg"></div>
+</main>
+
+<script>
+(function () {
+  'use strict';
+  // Same backend this whole static site already talks to — see
+  // index.html's window.APPS_SCRIPT_URL (kept in sync by hand, same as
+  // report.html's score curves; this file needs exactly one value from
+  // there, not the whole app, so it isn't worth sharing via an include).
+  var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwsLMGq3lhBEPObcas0k8gVS67NX9y4wXKG6RgzKtlBOT2SXfREK6vBpvvM19w9s1m6/exec';
+  var SESSION_KEY = 'moretti_admin_key';
+  var STALE_DAYS = 10;
+
+  var gateEl = document.getElementById('gate');
+  var rosterEl = document.getElementById('roster');
+  var statusEl = document.getElementById('status-msg');
+  var gateKeyEl = document.getElementById('gate-key');
+  var gateSubmitEl = document.getElementById('gate-submit');
+  var gateErrorEl = document.getElementById('gate-error');
+  var refreshBtn = document.getElementById('refresh-btn');
+  var summaryRowEl = document.getElementById('summary-row');
+  var bodyEl = document.getElementById('roster-body');
+  var filterFlaggedEl = document.getElementById('filter-flagged');
+
+  var allStudents = [];
+  var sortKey = 'name';
+  var sortDir = 1;
+
+  function postToBackend(payload) {
+    return fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) })
+      .then(function (res) { return res.json(); });
+  }
+
+  function daysAgo(iso) {
+    if (!iso) return null;
+    return (Date.now() - new Date(iso).getTime()) / 86400000;
+  }
+
+  function relativeTime(iso) {
+    var d = daysAgo(iso);
+    if (d == null) return 'Never';
+    if (d < 1) return 'Today';
+    if (d < 2) return 'Yesterday';
+    if (d < 14) return Math.floor(d) + ' days ago';
+    var weeks = Math.floor(d / 7);
+    if (weeks < 8) return weeks + ' week' + (weeks === 1 ? '' : 's') + ' ago';
+    return Math.floor(d / 30) + ' months ago';
+  }
+
+  function escHtml(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  function isFlagged(s) {
+    var behindOnAssignments = s.assignTotal > 0 && s.assignDone < s.assignTotal;
+    var d = daysAgo(s.lastActivityAt);
+    var quiet = d == null || d >= STALE_DAYS;
+    return behindOnAssignments || quiet;
+  }
+
+  function renderSummary() {
+    var total = allStudents.length;
+    var flagged = allStudents.filter(isFlagged).length;
+    var withScore = allStudents.filter(function (s) { return s.composite != null; }).length;
+    summaryRowEl.innerHTML =
+      '<div class="summary-tile"><div class="num">' + total + '</div><div class="lbl">Students</div></div>' +
+      '<div class="summary-tile' + (flagged ? ' flagged' : '') + '"><div class="num">' + flagged + '</div><div class="lbl">Need attention</div></div>' +
+      '<div class="summary-tile"><div class="num">' + withScore + '</div><div class="lbl">With a score on file</div></div>';
+  }
+
+  function sortValue(s, key) {
+    if (key === 'name') return s.name.toLowerCase();
+    if (key === 'composite') return s.composite == null ? -1 : s.composite;
+    if (key === 'weakest') return s.weakest ? s.weakest.label.toLowerCase() : '￿'; // sorts empties last
+    if (key === 'assign') return s.assignTotal ? s.assignDone / s.assignTotal : 2; // no assignments sorts after "all done"
+    if (key === 'activity') return s.lastActivityAt ? new Date(s.lastActivityAt).getTime() : -1;
+    return 0;
+  }
+
+  function renderTable() {
+    var rows = allStudents.slice();
+    if (filterFlaggedEl.checked) rows = rows.filter(isFlagged);
+    rows.sort(function (a, b) {
+      var va = sortValue(a, sortKey), vb = sortValue(b, sortKey);
+      if (va < vb) return -1 * sortDir;
+      if (va > vb) return 1 * sortDir;
+      return 0;
+    });
+
+    if (!rows.length) {
+      bodyEl.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--faint); padding:2rem;">No students match this filter.</td></tr>';
+      return;
+    }
+
+    bodyEl.innerHTML = rows.map(function (s) {
+      var scoreCell = s.composite == null
+        ? '<span class="no-score">No score yet</span>'
+        : String(s.composite) + (s.testType ? ' <span style="color:var(--faint); font-size:0.72rem;">(' + escHtml(s.testType) + ')</span>' : '') +
+          (s.compositeDelta != null && s.compositeDelta !== 0
+            ? ' <span class="delta ' + (s.compositeDelta > 0 ? 'up' : 'down') + '">' + (s.compositeDelta > 0 ? '&#9650;' : '&#9660;') + ' ' + Math.abs(s.compositeDelta) + '</span>'
+            : '');
+
+      var weakestCell = s.weakest
+        ? '<span class="weakest-label">' + escHtml(s.weakest.label) + '</span><br><span class="weakest-frac">' + s.weakest.correct + ' / ' + s.weakest.total + ' correct</span>'
+        : '<span class="no-score">&mdash;</span>';
+
+      var assignCls = s.assignTotal === 0 ? '' : (s.assignDone >= s.assignTotal ? 'done' : 'behind');
+      var assignCell = s.assignTotal === 0
+        ? '<span class="assign-pill">No assignments</span>'
+        : '<span class="assign-pill ' + assignCls + '">' + s.assignDone + ' of ' + s.assignTotal + ' done</span>';
+
+      var d = daysAgo(s.lastActivityAt);
+      var activityCls = (d == null || d >= STALE_DAYS) ? 'stale' : '';
+      var activityCell = '<span class="' + activityCls + '">' + relativeTime(s.lastActivityAt) + '</span>';
+
+      return '<tr>' +
+        '<td class="name-cell">' + escHtml(s.name) + '<span class="key">' + escHtml(s.key) + '</span></td>' +
+        '<td>' + scoreCell + '</td>' +
+        '<td>' + weakestCell + '</td>' +
+        '<td>' + assignCell + '</td>' +
+        '<td>' + activityCell + '</td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  document.querySelectorAll('thead th[data-sort]').forEach(function (th) {
+    th.addEventListener('click', function () {
+      var key = th.getAttribute('data-sort');
+      if (sortKey === key) sortDir *= -1;
+      else { sortKey = key; sortDir = 1; }
+      document.querySelectorAll('thead .arrow').forEach(function (a) { a.textContent = ''; });
+      th.querySelector('.arrow').textContent = sortDir === 1 ? '▲' : '▼';
+      renderTable();
+    });
+  });
+  filterFlaggedEl.addEventListener('change', renderTable);
+
+  function loadRoster(adminKey) {
+    gateSubmitEl.disabled = true;
+    gateErrorEl.textContent = '';
+    statusEl.textContent = '';
+    return postToBackend({ action: 'getRoster', adminKey: adminKey }).then(function (data) {
+      gateSubmitEl.disabled = false;
+      if (!data || !data.ok) {
+        var msg = (data && data.error === 'unauthorized') ? 'Wrong admin key.' : 'Could not load the roster. Try again.';
+        // Always surface the gate on failure — a Refresh click or the
+        // auto-continue-on-reload path below can hit this branch while
+        // the roster is already showing, and gate-error lives inside
+        // #gate, so leaving it hidden means the error is never seen.
+        gateErrorEl.textContent = msg;
+        gateEl.style.display = 'block';
+        rosterEl.style.display = 'none';
+        refreshBtn.style.display = 'none';
+        try { sessionStorage.removeItem(SESSION_KEY); } catch (e) {}
+        return false;
+      }
+      try { sessionStorage.setItem(SESSION_KEY, adminKey); } catch (e) {}
+      allStudents = data.students || [];
+      gateEl.style.display = 'none';
+      rosterEl.style.display = 'block';
+      refreshBtn.style.display = '';
+      renderSummary();
+      renderTable();
+      return true;
+    }).catch(function () {
+      gateSubmitEl.disabled = false;
+      gateErrorEl.textContent = 'Network error — check your connection and try again.';
+      gateEl.style.display = 'block';
+      rosterEl.style.display = 'none';
+      refreshBtn.style.display = 'none';
+      return false;
+    });
+  }
+
+  gateSubmitEl.addEventListener('click', function () {
+    var key = gateKeyEl.value.trim();
+    if (!key) { gateErrorEl.textContent = 'Enter the admin key.'; return; }
+    loadRoster(key);
+  });
+  gateKeyEl.addEventListener('keydown', function (e) { if (e.key === 'Enter') gateSubmitEl.click(); });
+
+  refreshBtn.addEventListener('click', function () {
+    var key = (function () { try { return sessionStorage.getItem(SESSION_KEY); } catch (e) { return null; } })();
+    if (!key) return;
+    refreshBtn.disabled = true;
+    loadRoster(key).then(function () { refreshBtn.disabled = false; });
+  });
+
+  // Auto-continue if this browser already unlocked the roster this
+  // session — avoids re-typing the key on every reload without ever
+  // persisting it to disk (sessionStorage clears when the tab closes).
+  var savedKey = (function () { try { return sessionStorage.getItem(SESSION_KEY); } catch (e) { return null; } })();
+  if (savedKey) loadRoster(savedKey);
+})();
+</script>
+</body>
+</html>

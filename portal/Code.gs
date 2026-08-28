@@ -109,6 +109,14 @@ function testMailApp() {
 var SHEET_ID = '1z55TokZ9V2rjf7qh6WLZyv0OiKJgQKXbQl2h4cEXvOw';
 var SHEET_TAB_NAME = 'Students';
 var STUDENT_FOLDERS_PARENT_NAME = 'Moretti Portal — Student Folders';
+// Gates the getRoster action (admin.html's whole-roster view) — a single
+// shared secret, not a per-student Key, since only Luca uses that page.
+// CHANGE THIS before deploying admin.html anywhere Luca doesn't fully
+// trust the network it's opened from; it's a plain equality check, same
+// trust model as everything else in this file (this script is server-only,
+// never shipped to a browser, so this constant is never visible to a
+// student even though it sits in the same file as SHEET_ID above).
+var ADMIN_KEY = 'ZQ9JY4dGKhL5VowT7qoJO0ET';
 // Where diagnostic-result notifications are sent. IMPORTANT: confirm this
 // is the address you want results delivered to. The email is sent from the
 // Google account that owns this Apps Script (Deploy > Execute as: Me).
@@ -162,6 +170,8 @@ function doPost(e) {
       out = handleBackfillCompositeFields(body.patches);
     } else if (body.action === 'deleteAttempt') {
       out = handleDeleteAttempt(body.key, body.testTag, body.attemptId);
+    } else if (body.action === 'getRoster') {
+      out = handleGetRoster(body.adminKey);
     } else {
       out = { ok: false, error: 'unknown_action' };
     }
@@ -1592,6 +1602,106 @@ function handleDeleteAttempt(rawKey, rawTestTag, rawAttemptId) {
   }
 
   return { ok: true, removedIncorrect: removedIncorrect, removedSaved: removedSaved, removedAttemptRows: removedAttemptRows };
+}
+
+/* ═══ ADMIN ROSTER ═══ powers admin.html, a standalone page (not linked
+   from the student-facing portal) that gives Luca a single at-a-glance
+   view across every student instead of opening each one's report/sheet
+   row by hand. Read-only, gated by ADMIN_KEY above (see its comment for
+   the trust model). Reuses the same per-student building blocks the
+   biweekly guardian-summary email already relies on
+   (scoreTrendForStudent_/weakestSkillForStudent_ further down this file)
+   rather than duplicating that logic a third time. */
+function handleGetRoster(rawAdminKey) {
+  if (!ADMIN_KEY || rawAdminKey !== ADMIN_KEY) return { ok: false, error: 'unauthorized' };
+
+  var sheet = getSheet_();
+  var data = sheet.getDataRange().getValues();
+  var headers = data[0];
+  var col = {};
+  headers.forEach(function (h, i) { col[h] = i; });
+
+  // Most recent Attempts-sheet row per student — the "finished a
+  // diagnostic/practice test" half of a last-activity signal.
+  // ProgressUpdatedAt (the other half, bumped on question-practice syncs —
+  // see handleSyncProgress above) is read straight off the Students row
+  // below; vocab/QB-attempt syncs don't currently bump either timestamp,
+  // so a student who ONLY does vocab/QB drills will under-report here —
+  // a known gap, not a bug, and cheap to close later by having those two
+  // sync handlers stamp ProgressUpdatedAt too if this view says it matters.
+  var lastAttemptMsByKey = {};
+  try {
+    var aSheet = getAttemptsSheet_();
+    var aData = aSheet.getDataRange().getValues();
+    var aHeaders = aData[0];
+    var aCol = {};
+    aHeaders.forEach(function (h, i) { aCol[h] = i; });
+    for (var j = 1; j < aData.length; j++) {
+      var ak = String(aData[j][aCol.Key] || '').trim().toUpperCase();
+      var ats = aData[j][aCol.Timestamp];
+      if (!ak || !ats) continue;
+      var atMs = new Date(ats).getTime();
+      if (!lastAttemptMsByKey[ak] || atMs > lastAttemptMsByKey[ak]) lastAttemptMsByKey[ak] = atMs;
+    }
+  } catch (e) { /* Attempts sheet unreadable — last-activity just falls back to ProgressUpdatedAt alone */ }
+
+  // Assignment completion counts per student — same Assignments sheet
+  // getAssignments_ reads per-student, aggregated here across everyone in
+  // one pass instead of one sheet read per student.
+  var assignByKey = {};
+  try {
+    var asSheet = getAssignmentsSheet_();
+    var asData = asSheet.getDataRange().getValues();
+    var asHeaders = asData[0];
+    var asKeyCol = asHeaders.indexOf('Key');
+    var asTaskCol = asHeaders.indexOf('Task');
+    var asDoneCol = asHeaders.indexOf('Done');
+    for (var m = 1; m < asData.length; m++) {
+      var task = String(asData[m][asTaskCol] || '').trim();
+      if (!task) continue;
+      var mk = String(asData[m][asKeyCol] || '').trim().toUpperCase();
+      if (!mk) continue;
+      if (!assignByKey[mk]) assignByKey[mk] = { total: 0, done: 0 };
+      assignByKey[mk].total++;
+      if (truthy_(asData[m][asDoneCol])) assignByKey[mk].done++;
+    }
+  } catch (e) { /* Assignments sheet unreadable — assignment counts just default to 0/0 below */ }
+
+  var students = [];
+  for (var i = 1; i < data.length; i++) {
+    var name = String(data[i][col.Name] || '').trim();
+    var key = String(data[i][col.Key] || '').trim().toUpperCase();
+    if (!name || !key) continue;
+
+    var trend = scoreTrendForStudent_(key);
+    var latest = trend.length ? trend[trend.length - 1] : null;
+    var first = trend.length ? trend[0] : null;
+    var weakest = weakestSkillForStudent_(key);
+    var assign = assignByKey[key] || { total: 0, done: 0 };
+
+    var progressAtCell = col.ProgressUpdatedAt !== undefined ? data[i][col.ProgressUpdatedAt] : null;
+    var progressAtMs = progressAtCell ? new Date(progressAtCell).getTime() : 0;
+    var lastActivityMs = Math.max(progressAtMs || 0, lastAttemptMsByKey[key] || 0);
+
+    var grantedAtCell = col.GrantedAt !== undefined ? data[i][col.GrantedAt] : null;
+
+    students.push({
+      name: name,
+      key: key,
+      sat: truthy_(data[i][col.SAT]),
+      grantedAt: grantedAtCell ? new Date(grantedAtCell).toISOString() : null,
+      lastActivityAt: lastActivityMs ? new Date(lastActivityMs).toISOString() : null,
+      composite: latest ? latest.composite : null,
+      compositeDelta: (latest && first && trend.length > 1 && typeof latest.composite === 'number' && typeof first.composite === 'number')
+        ? latest.composite - first.composite : null,
+      testType: latest ? latest.testType : null,
+      weakest: weakest, // { label, correct, total } or null
+      assignTotal: assign.total,
+      assignDone: assign.done
+    });
+  }
+  students.sort(function (a, b) { return a.name.localeCompare(b.name); });
+  return { ok: true, students: students };
 }
 
 /* =========================================================================
