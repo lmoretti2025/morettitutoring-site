@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <title>Roster — Moretti Test Prep &amp; Tutoring</title>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
 <style>
   :root {
     --red:    #B0271C;
@@ -95,6 +96,63 @@
 
   #status-msg { text-align: center; padding: 3rem 1rem; color: var(--mid); font-size: 0.9rem; }
   #status-msg.error { color: var(--red); }
+
+  .assign-pill.schedule-btn { border: none; background: var(--red); color: #fff; cursor: pointer; font-family: var(--hel); }
+  .assign-pill.schedule-btn:hover { background: #8f1f16; }
+
+  /* ═══ SCHEDULER ═══ per-student calendar, opened from the roster's
+     "Schedule" button. FullCalendar handles all the grid/drag mechanics;
+     these rules just re-skin its default look with the portal's own
+     tokens (via its documented CSS custom properties) so it reads as
+     part of this page rather than a bolted-on widget. */
+  #scheduler { display: none; }
+  .sched-back { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.82rem; font-weight: 600; color: var(--mid); text-decoration: none; margin-bottom: 1rem; cursor: pointer; }
+  .sched-back:hover { color: var(--red); }
+  .sched-hed { font-family: var(--display); font-size: 1.5rem; margin: 0 0 1.1rem; }
+  .sched-hed .key { font-family: monospace; font-size: 0.8rem; font-weight: 400; color: var(--faint); margin-left: 0.5rem; }
+  #sched-calendar-wrap { background: var(--white); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow); padding: 1.25rem; }
+  #sched-calendar {
+    --fc-border-color: var(--border);
+    --fc-page-bg-color: var(--white);
+    --fc-neutral-bg-color: var(--bg);
+    --fc-list-event-hover-bg-color: var(--bg);
+    --fc-today-bg-color: rgba(176,39,28,0.06);
+    --fc-button-bg-color: var(--white);
+    --fc-button-border-color: var(--border);
+    --fc-button-text-color: var(--text);
+    --fc-button-hover-bg-color: var(--bg);
+    --fc-button-hover-border-color: var(--border);
+    --fc-button-active-bg-color: var(--red);
+    --fc-button-active-border-color: var(--red);
+    font-family: var(--hel);
+  }
+  #sched-calendar .fc-toolbar-title { font-family: var(--display); font-size: 1.2rem; }
+  #sched-calendar .fc-button { text-transform: capitalize; box-shadow: none !important; font-weight: 600; font-size: 0.78rem; }
+  #sched-calendar .fc-button-primary:not(:disabled).fc-button-active { color: #fff; }
+  #sched-calendar .fc-daygrid-day.fc-day-today .fc-daygrid-day-number { color: var(--red); font-weight: 700; }
+  #sched-calendar a { cursor: pointer; }
+  .sched-event { border: none !important; background: var(--red) !important; padding: 1px 4px; border-radius: 5px; font-size: 0.72rem; }
+  .sched-event.sched-event-done { background: var(--faint) !important; text-decoration: line-through; opacity: 0.75; }
+  .sched-hint { font-size: 0.76rem; color: var(--faint); margin-top: 0.9rem; text-align: center; }
+
+  /* ═══ TASK MODAL ═══ shared by "create on selected day(s)" and "edit
+     an existing event" — which fields show is toggled in JS. */
+  #sched-modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(17,17,17,0.4); z-index: 100; align-items: center; justify-content: center; padding: 1rem; }
+  #sched-modal-backdrop.open { display: flex; }
+  #sched-modal { background: var(--white); border-radius: 16px; box-shadow: 0 20px 50px rgba(17,17,17,0.25); padding: 1.5rem; width: 100%; max-width: 380px; }
+  #sched-modal h2 { font-family: var(--display); font-size: 1.15rem; margin: 0 0 0.3rem; }
+  #sched-modal .sched-modal-sub { font-size: 0.78rem; color: var(--faint); margin: 0 0 1rem; }
+  #sched-modal textarea { width: 100%; font-family: var(--hel); font-size: 0.9rem; padding: 0.65rem 0.8rem; border: 1.5px solid var(--border); border-radius: 10px; resize: vertical; min-height: 64px; margin-bottom: 0.9rem; }
+  #sched-modal textarea:focus { outline: none; border-color: var(--red); }
+  #sched-modal label.chk { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: var(--text); margin-bottom: 1rem; cursor: pointer; }
+  #sched-modal label.chk input { accent-color: var(--green); width: 16px; height: 16px; }
+  .sched-modal-actions { display: flex; gap: 0.6rem; }
+  .sched-modal-actions button { flex: 1; font-family: var(--hel); font-weight: 700; font-size: 0.85rem; padding: 0.65rem; border-radius: 999px; cursor: pointer; border: none; }
+  #sched-save-btn { background: var(--red); color: #fff; }
+  #sched-save-btn:hover { background: #8f1f16; }
+  #sched-cancel-btn { background: var(--bg); color: var(--mid); }
+  #sched-delete-btn { background: none; color: var(--red); flex: 0 0 auto; padding: 0.65rem 0.9rem; }
+  #sched-modal-error { color: var(--red); font-size: 0.78rem; font-weight: 600; margin-top: 0.6rem; min-height: 1em; }
 </style>
 </head>
 <body>
@@ -129,6 +187,7 @@
               <th data-sort="weakest">Weakest area <span class="arrow"></span></th>
               <th data-sort="assign">Assignments <span class="arrow"></span></th>
               <th data-sort="activity">Last activity <span class="arrow"></span></th>
+              <th></th>
             </tr>
           </thead>
           <tbody id="roster-body"></tbody>
@@ -137,8 +196,34 @@
     </div>
   </div>
 
+  <div id="scheduler">
+    <a class="sched-back" id="sched-back-btn">&larr; Back to roster</a>
+    <h1 class="sched-hed" id="sched-hed">Student<span class="key" id="sched-hed-key"></span></h1>
+    <div id="sched-calendar-wrap">
+      <div id="sched-calendar"></div>
+    </div>
+    <p class="sched-hint">Click a day to add a task. Drag across several days to assign the same task to all of them. Drag an existing task to reschedule it, or click it to edit or delete.</p>
+  </div>
+
   <div id="status-msg"></div>
 </main>
+
+<div id="sched-modal-backdrop">
+  <div id="sched-modal">
+    <h2 id="sched-modal-title">Add a task</h2>
+    <p class="sched-modal-sub" id="sched-modal-sub"></p>
+    <textarea id="sched-modal-task" placeholder="e.g. Question Bank &mdash; 10 Boundaries questions"></textarea>
+    <label class="chk" id="sched-modal-done-row" style="display:none;">
+      <input type="checkbox" id="sched-modal-done"> Marked done
+    </label>
+    <div class="sched-modal-actions">
+      <button type="button" id="sched-delete-btn" style="display:none;">Delete</button>
+      <button type="button" id="sched-cancel-btn">Cancel</button>
+      <button type="button" id="sched-save-btn">Save</button>
+    </div>
+    <div id="sched-modal-error"></div>
+  </div>
+</div>
 
 <script>
 (function () {
@@ -228,7 +313,7 @@
     });
 
     if (!rows.length) {
-      bodyEl.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--faint); padding:2rem;">No students match this filter.</td></tr>';
+      bodyEl.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--faint); padding:2rem;">No students match this filter.</td></tr>';
       return;
     }
 
@@ -259,9 +344,20 @@
         '<td>' + weakestCell + '</td>' +
         '<td>' + assignCell + '</td>' +
         '<td>' + activityCell + '</td>' +
+        '<td><button type="button" class="assign-pill schedule-btn" data-key="' + escHtml(s.key) + '">Schedule</button></td>' +
         '</tr>';
     }).join('');
   }
+
+  // Delegated (rows are rebuilt on every render, so a per-row listener
+  // would leak/re-attach) — matches the click to the student it belongs
+  // to by key rather than closing over a specific row element.
+  bodyEl.addEventListener('click', function (e) {
+    var btn = e.target.closest('.schedule-btn');
+    if (!btn) return;
+    var student = allStudents.find(function (s) { return s.key === btn.getAttribute('data-key'); });
+    if (student) openScheduler(student);
+  });
 
   document.querySelectorAll('thead th[data-sort]').forEach(function (th) {
     th.addEventListener('click', function () {
@@ -331,6 +427,177 @@
   // persisting it to disk (sessionStorage clears when the tab closes).
   var savedKey = (function () { try { return sessionStorage.getItem(SESSION_KEY); } catch (e) { return null; } })();
   if (savedKey) loadRoster(savedKey);
+
+  // ═══ SCHEDULER ═══ per-student FullCalendar view, opened via the
+  // roster table's "Schedule" button (delegated listener above).
+  var schedulerEl = document.getElementById('scheduler');
+  var schedBackBtn = document.getElementById('sched-back-btn');
+  var schedHedEl = document.getElementById('sched-hed');
+  var schedHedKeyEl = document.getElementById('sched-hed-key');
+  var schedCalendarEl = document.getElementById('sched-calendar');
+  var calendar = null;
+  var currentSchedStudent = null;
+
+  var modalBackdrop = document.getElementById('sched-modal-backdrop');
+  var modalTitle = document.getElementById('sched-modal-title');
+  var modalSub = document.getElementById('sched-modal-sub');
+  var modalTaskEl = document.getElementById('sched-modal-task');
+  var modalDoneRow = document.getElementById('sched-modal-done-row');
+  var modalDoneEl = document.getElementById('sched-modal-done');
+  var modalErrorEl = document.getElementById('sched-modal-error');
+  var saveBtn = document.getElementById('sched-save-btn');
+  var cancelBtn = document.getElementById('sched-cancel-btn');
+  var deleteBtn = document.getElementById('sched-delete-btn');
+
+  var modalMode = null;   // 'create' | 'edit'
+  var modalDates = [];    // "YYYY-MM-DD"[], for create (one entry per selected day)
+  var modalEvent = null;  // FullCalendar event object, for edit
+
+  function adminKey() {
+    try { return sessionStorage.getItem(SESSION_KEY); } catch (e) { return null; }
+  }
+
+  function toDateStr(d) {
+    var y = d.getFullYear(), m = String(d.getMonth() + 1).padStart(2, '0'), day = String(d.getDate()).padStart(2, '0');
+    return y + '-' + m + '-' + day;
+  }
+
+  function formatDateStr(s) {
+    var parts = s.split('-');
+    var d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+    return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+  }
+
+  function openScheduler(student) {
+    currentSchedStudent = student;
+    schedHedEl.firstChild.textContent = student.name;
+    schedHedKeyEl.textContent = student.key;
+    rosterEl.style.display = 'none';
+    schedulerEl.style.display = 'block';
+    refreshBtn.style.display = 'none';
+    if (!calendar) initCalendar();
+    loadSchedAssignments();
+  }
+
+  schedBackBtn.addEventListener('click', function () {
+    schedulerEl.style.display = 'none';
+    rosterEl.style.display = 'block';
+    refreshBtn.style.display = '';
+    currentSchedStudent = null;
+  });
+
+  function initCalendar() {
+    calendar = new FullCalendar.Calendar(schedCalendarEl, {
+      initialView: 'dayGridMonth',
+      headerToolbar: { left: 'prev,next today', center: 'title', right: '' },
+      height: 'auto',
+      selectable: true,
+      editable: true,
+      select: function (info) {
+        // info.end is exclusive (one day past the last selected day) in
+        // dayGridMonth — walk start..end to get every selected date,
+        // covering both a plain single-day click and a multi-day drag.
+        var dates = [];
+        var d = new Date(info.start);
+        while (d < info.end) { dates.push(toDateStr(d)); d.setDate(d.getDate() + 1); }
+        calendar.unselect();
+        openCreateModal(dates);
+      },
+      eventClick: function (info) { openEditModal(info.event); },
+      eventDrop: function (info) {
+        postToBackend({
+          action: 'updateAdminAssignment', adminKey: adminKey(), key: currentSchedStudent.key,
+          row: info.event.extendedProps.row, patch: { dueDate: toDateStr(info.event.start) }
+        }).then(function (data) { if (!data || !data.ok) info.revert(); })
+          .catch(function () { info.revert(); });
+      }
+    });
+    calendar.render();
+  }
+
+  function loadSchedAssignments() {
+    postToBackend({ action: 'getAdminAssignments', adminKey: adminKey(), key: currentSchedStudent.key }).then(function (data) {
+      if (!data || !data.ok || !calendar) return;
+      calendar.removeAllEvents();
+      (data.assignments || []).forEach(function (a) {
+        if (!a.dueDate) return; // undated legacy rows have no day to sit on
+        calendar.addEvent({
+          id: String(a.row),
+          title: a.task,
+          start: a.dueDate.slice(0, 10),
+          allDay: true,
+          classNames: ['sched-event'].concat(a.done ? ['sched-event-done'] : []),
+          extendedProps: { row: a.row, done: a.done, task: a.task }
+        });
+      });
+    });
+  }
+
+  function openCreateModal(dates) {
+    modalMode = 'create';
+    modalDates = dates;
+    modalEvent = null;
+    modalTitle.textContent = dates.length > 1 ? 'Add a task to ' + dates.length + ' days' : 'Add a task';
+    modalSub.textContent = dates.length > 1
+      ? formatDateStr(dates[0]) + ' through ' + formatDateStr(dates[dates.length - 1])
+      : formatDateStr(dates[0]);
+    modalTaskEl.value = '';
+    modalDoneRow.style.display = 'none';
+    deleteBtn.style.display = 'none';
+    modalErrorEl.textContent = '';
+    modalBackdrop.classList.add('open');
+    modalTaskEl.focus();
+  }
+
+  function openEditModal(event) {
+    modalMode = 'edit';
+    modalEvent = event;
+    modalDates = [];
+    modalTitle.textContent = 'Edit task';
+    modalSub.textContent = formatDateStr(toDateStr(event.start));
+    modalTaskEl.value = event.extendedProps.task;
+    modalDoneRow.style.display = '';
+    modalDoneEl.checked = !!event.extendedProps.done;
+    deleteBtn.style.display = '';
+    modalErrorEl.textContent = '';
+    modalBackdrop.classList.add('open');
+    modalTaskEl.focus();
+  }
+
+  function closeModal() {
+    modalBackdrop.classList.remove('open');
+    modalMode = null; modalEvent = null; modalDates = [];
+  }
+
+  cancelBtn.addEventListener('click', closeModal);
+  modalBackdrop.addEventListener('click', function (e) { if (e.target === modalBackdrop) closeModal(); });
+
+  saveBtn.addEventListener('click', function () {
+    var task = modalTaskEl.value.trim();
+    if (!task) { modalErrorEl.textContent = 'Enter a task.'; return; }
+    saveBtn.disabled = true;
+    var request = modalMode === 'create'
+      ? postToBackend({ action: 'createAdminAssignment', adminKey: adminKey(), key: currentSchedStudent.key, task: task, dueDates: modalDates })
+      : postToBackend({ action: 'updateAdminAssignment', adminKey: adminKey(), key: currentSchedStudent.key, row: modalEvent.extendedProps.row, patch: { task: task, done: modalDoneEl.checked } });
+    request.then(function (data) {
+      saveBtn.disabled = false;
+      if (!data || !data.ok) { modalErrorEl.textContent = 'Could not save. Try again.'; return; }
+      closeModal();
+      loadSchedAssignments();
+    }).catch(function () { saveBtn.disabled = false; modalErrorEl.textContent = 'Network error — try again.'; });
+  });
+
+  deleteBtn.addEventListener('click', function () {
+    if (!modalEvent) return;
+    deleteBtn.disabled = true;
+    postToBackend({ action: 'deleteAdminAssignment', adminKey: adminKey(), key: currentSchedStudent.key, row: modalEvent.extendedProps.row })
+      .then(function (data) {
+        deleteBtn.disabled = false;
+        if (!data || !data.ok) { modalErrorEl.textContent = 'Could not delete. Try again.'; return; }
+        closeModal();
+        loadSchedAssignments();
+      }).catch(function () { deleteBtn.disabled = false; modalErrorEl.textContent = 'Network error — try again.'; });
+  });
 })();
 </script>
 </body>
