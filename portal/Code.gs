@@ -138,6 +138,8 @@ function doPost(e) {
       out = handleToggleAssignment(body.key, body.row, !!body.done);
     } else if (body.action === 'getAssignments') {
       out = handleGetAssignments(body.key);
+    } else if (body.action === 'getAssignmentsCalendar') {
+      out = handleGetAssignmentsCalendar(body.key);
     } else if (body.action === 'assignHomeworkFromDialog') {
       out = handleAssignHomeworkFromDialog(body.key, body.task);
     } else if (body.action === 'submitPracticeTest') {
@@ -172,6 +174,14 @@ function doPost(e) {
       out = handleDeleteAttempt(body.key, body.testTag, body.attemptId);
     } else if (body.action === 'getRoster') {
       out = handleGetRoster(body.adminKey);
+    } else if (body.action === 'getAdminAssignments') {
+      out = handleGetAdminAssignments(body.adminKey, body.key);
+    } else if (body.action === 'createAdminAssignment') {
+      out = handleCreateAdminAssignment(body.adminKey, body.key, body.task, body.dueDates);
+    } else if (body.action === 'updateAdminAssignment') {
+      out = handleUpdateAdminAssignment(body.adminKey, body.key, body.row, body.patch);
+    } else if (body.action === 'deleteAdminAssignment') {
+      out = handleDeleteAdminAssignment(body.adminKey, body.key, body.row);
     } else {
       out = { ok: false, error: 'unknown_action' };
     }
@@ -574,9 +584,22 @@ function getAssignmentsSheet_() {
   var sheet = ss.getSheetByName('Assignments');
   if (!sheet) {
     sheet = ss.insertSheet('Assignments');
-    sheet.appendRow(['Timestamp', 'Key', 'Task', 'Done', 'DoneAt']);
+    sheet.appendRow(['Timestamp', 'Key', 'Task', 'Done', 'DoneAt', 'DueDate']);
   }
   return sheet;
+}
+
+// Adds the DueDate column to an existing Assignments sheet that predates
+// it (same lazy-migration pattern as IncorrectQuestionsJSON etc. on the
+// Students sheet) — called by every admin-scheduler handler below before
+// it reads or writes DueDate, so this never has to be a one-time manual
+// step in the spreadsheet itself.
+function ensureAssignmentDueDateColumn_(sheet, headers) {
+  if (headers.indexOf('DueDate') === -1) {
+    sheet.getRange(1, sheet.getLastColumn() + 1).setValue('DueDate');
+    headers.push('DueDate');
+  }
+  return headers;
 }
 
 // How long into a new session an assignment from before it stays visible
@@ -602,6 +625,7 @@ function getAssignments_(key, name) {
   var taskCol = headers.indexOf('Task');
   var doneCol = headers.indexOf('Done');
   var tsCol = headers.indexOf('Timestamp');
+  var dueCol = headers.indexOf('DueDate'); // -1 on a sheet that predates this column — treated as "no due date" below, same as a blank cell
   if (keyCol === -1 || taskCol === -1) return [];
 
   var out = [];
@@ -613,9 +637,20 @@ function getAssignments_(key, name) {
       row: i + 1, // 1-based sheet row — sent back by the client on toggle
       task: task,
       done: truthy_(data[i][doneCol]),
-      assignedAt: (tsCol !== -1 && data[i][tsCol]) ? new Date(data[i][tsCol]).toISOString() : null
+      assignedAt: (tsCol !== -1 && data[i][tsCol]) ? new Date(data[i][tsCol]).toISOString() : null,
+      dueDate: (dueCol !== -1 && data[i][dueCol]) ? new Date(data[i][dueCol]).toISOString() : null
     });
   }
+
+  // A task scheduled for a future day shouldn't show up early just
+  // because it already exists in the sheet — the whole point of the
+  // admin scheduler is laying out several days at once. An undated task
+  // (dueDate: null) is unaffected, same as before this column existed.
+  var todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+  out = out.filter(function (a) {
+    if (!a.dueDate) return true;
+    return new Date(a.dueDate).getTime() <= todayStart.getTime() + (24 * 60 * 60 * 1000 - 1);
+  });
 
   var cutoff = name ? assignmentExpiryCutoff_(name) : null;
   if (cutoff) {
@@ -711,6 +746,48 @@ function handleGetAssignments(rawKey) {
   return { ok: true, assignments: getAssignments_(key, row.Name) };
 }
 
+// Powers the student portal's own Calendar tab — deliberately separate
+// from getAssignments_/handleGetAssignments above (which feeds the Home
+// checklist and intentionally hides anything not yet due, plus expires
+// via the session-based cutoff). A calendar is exactly the place a
+// student SHOULD be able to see a task scheduled for later in the week,
+// so this returns every row for the student, unfiltered by date or
+// session — same "return everything, let the client decide what to show"
+// shape as the admin scheduler's handleGetAdminAssignments, just gated
+// by the student's own key instead of ADMIN_KEY (same trust model as
+// every other student-facing action in this file — the key IS the
+// credential).
+function handleGetAssignmentsCalendar(rawKey) {
+  if (!rawKey) return { ok: false, error: 'missing_key' };
+  var key = String(rawKey).trim().toUpperCase();
+  var studentsSheet = getSheet_();
+  if (!findRow_(studentsSheet, key)) return { ok: false, error: 'bad_key' };
+
+  var sheet = getAssignmentsSheet_();
+  var data = sheet.getDataRange().getValues();
+  var headers = ensureAssignmentDueDateColumn_(sheet, data[0]);
+  var keyCol = headers.indexOf('Key');
+  var taskCol = headers.indexOf('Task');
+  var doneCol = headers.indexOf('Done');
+  var tsCol = headers.indexOf('Timestamp');
+  var dueCol = headers.indexOf('DueDate');
+
+  var out = [];
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][keyCol]).trim().toUpperCase() !== key) continue;
+    var task = String(data[i][taskCol] || '').trim();
+    if (!task) continue;
+    out.push({
+      row: i + 1,
+      task: task,
+      done: truthy_(data[i][doneCol]),
+      assignedAt: (tsCol !== -1 && data[i][tsCol]) ? new Date(data[i][tsCol]).toISOString() : null,
+      dueDate: (dueCol !== -1 && data[i][dueCol]) ? new Date(data[i][dueCol]).toISOString() : null
+    });
+  }
+  return { ok: true, assignments: out };
+}
+
 // Marks one assignment done (the only direction the portal ever calls this
 // with — there's no in-portal "undo"). Re-reads that row's OWN Key cell
 // and requires it to match the key on the request before writing anything
@@ -739,6 +816,139 @@ function handleToggleAssignment(rawKey, rawRow, done) {
   var studentsSheet = getSheet_();
   var studentRow = findRow_(studentsSheet, key);
   return { ok: true, assignments: getAssignments_(key, studentRow ? studentRow.Name : '') };
+}
+
+/* ═══ ADMIN DAY SCHEDULER ═══ powers admin.html's per-student calendar
+   (FullCalendar month view — see that file). All four actions here are
+   gated by ADMIN_KEY (see its comment near SHEET_ID for the trust model)
+   and, like handleToggleAssignment above, re-verify the target row's own
+   Key cell before writing anything — not a security boundary against an
+   already-authenticated admin, but cheap insurance against a stale row
+   number sending an edit to the wrong student's row. Unlike
+   getAssignments_ (the student-facing read), these return/accept EVERY
+   row for a student — past, future, and done — since the calendar needs
+   the whole picture, not just what's currently due.
+   ═══════════════════════════════════════════════════════════════════ */
+function handleGetAdminAssignments(rawAdminKey, rawKey) {
+  if (!ADMIN_KEY || rawAdminKey !== ADMIN_KEY) return { ok: false, error: 'unauthorized' };
+  var key = String(rawKey || '').trim().toUpperCase();
+  if (!key) return { ok: false, error: 'missing_key' };
+
+  var sheet = getAssignmentsSheet_();
+  var data = sheet.getDataRange().getValues();
+  var headers = ensureAssignmentDueDateColumn_(sheet, data[0]);
+  var keyCol = headers.indexOf('Key');
+  var taskCol = headers.indexOf('Task');
+  var doneCol = headers.indexOf('Done');
+  var tsCol = headers.indexOf('Timestamp');
+  var dueCol = headers.indexOf('DueDate');
+
+  var out = [];
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][keyCol]).trim().toUpperCase() !== key) continue;
+    var task = String(data[i][taskCol] || '').trim();
+    if (!task) continue;
+    out.push({
+      row: i + 1,
+      task: task,
+      done: truthy_(data[i][doneCol]),
+      assignedAt: (tsCol !== -1 && data[i][tsCol]) ? new Date(data[i][tsCol]).toISOString() : null,
+      dueDate: (dueCol !== -1 && data[i][dueCol]) ? new Date(data[i][dueCol]).toISOString() : null
+    });
+  }
+  return { ok: true, assignments: out };
+}
+
+// rawDueDates: array of "YYYY-MM-DD" strings — one row is appended per
+// date, so a drag-selected range in the calendar (the "repeat this task
+// on several days" convenience) becomes several independently
+// completable/deletable rows rather than one recurring entry.
+function handleCreateAdminAssignment(rawAdminKey, rawKey, rawTask, rawDueDates) {
+  if (!ADMIN_KEY || rawAdminKey !== ADMIN_KEY) return { ok: false, error: 'unauthorized' };
+  var key = String(rawKey || '').trim().toUpperCase();
+  var task = String(rawTask || '').trim();
+  var dates = Array.isArray(rawDueDates) ? rawDueDates : [];
+  if (!key || !task || !dates.length) return { ok: false, error: 'missing_fields' };
+
+  var studentsSheet = getSheet_();
+  if (!findRow_(studentsSheet, key)) return { ok: false, error: 'bad_key' };
+
+  var sheet = getAssignmentsSheet_();
+  var headers = ensureAssignmentDueDateColumn_(sheet, sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0]);
+  var created = 0;
+  dates.forEach(function (d) {
+    var parts = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(d || ''));
+    if (!parts) return; // silently skips a malformed date rather than failing the whole batch
+    var dueDate = new Date(Number(parts[1]), Number(parts[2]) - 1, Number(parts[3]));
+    var row = new Array(headers.length).fill('');
+    row[headers.indexOf('Timestamp')] = new Date();
+    row[headers.indexOf('Key')] = sheetSafe_(key);
+    row[headers.indexOf('Task')] = sheetSafe_(task);
+    row[headers.indexOf('Done')] = false;
+    row[headers.indexOf('DoneAt')] = '';
+    row[headers.indexOf('DueDate')] = dueDate;
+    sheet.appendRow(row);
+    created++;
+  });
+  if (!created) return { ok: false, error: 'no_valid_dates' };
+  return { ok: true, created: created };
+}
+
+// patch: { task?, dueDate? ("YYYY-MM-DD" or null to clear), done? } — only
+// the keys present are written, so a drag-to-reschedule (dueDate alone)
+// doesn't touch task/done, and the edit popover's Save doesn't touch
+// fields the admin didn't change.
+function handleUpdateAdminAssignment(rawAdminKey, rawKey, rawRow, rawPatch) {
+  if (!ADMIN_KEY || rawAdminKey !== ADMIN_KEY) return { ok: false, error: 'unauthorized' };
+  var key = String(rawKey || '').trim().toUpperCase();
+  var row = Number(rawRow);
+  var patch = (rawPatch && typeof rawPatch === 'object') ? rawPatch : {};
+  if (!key || !row || row < 2) return { ok: false, error: 'bad_row' };
+
+  var sheet = getAssignmentsSheet_();
+  if (row > sheet.getLastRow()) return { ok: false, error: 'bad_row' };
+  var headers = ensureAssignmentDueDateColumn_(sheet, sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0]);
+  var keyCol = headers.indexOf('Key');
+
+  var rowKey = String(sheet.getRange(row, keyCol + 1).getValue()).trim().toUpperCase();
+  if (rowKey !== key) return { ok: false, error: 'key_mismatch' };
+
+  if (typeof patch.task === 'string' && patch.task.trim()) {
+    sheet.getRange(row, headers.indexOf('Task') + 1).setValue(sheetSafe_(patch.task.trim()));
+  }
+  if (Object.prototype.hasOwnProperty.call(patch, 'dueDate')) {
+    var dueCol = headers.indexOf('DueDate') + 1;
+    if (patch.dueDate) {
+      var parts = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(patch.dueDate));
+      if (parts) sheet.getRange(row, dueCol).setValue(new Date(Number(parts[1]), Number(parts[2]) - 1, Number(parts[3])));
+    } else {
+      sheet.getRange(row, dueCol).setValue('');
+    }
+  }
+  if (Object.prototype.hasOwnProperty.call(patch, 'done')) {
+    var doneCol = headers.indexOf('Done') + 1;
+    var doneAtCol = headers.indexOf('DoneAt') + 1;
+    sheet.getRange(row, doneCol).setValue(!!patch.done);
+    sheet.getRange(row, doneAtCol).setValue(patch.done ? new Date() : '');
+  }
+  return { ok: true };
+}
+
+function handleDeleteAdminAssignment(rawAdminKey, rawKey, rawRow) {
+  if (!ADMIN_KEY || rawAdminKey !== ADMIN_KEY) return { ok: false, error: 'unauthorized' };
+  var key = String(rawKey || '').trim().toUpperCase();
+  var row = Number(rawRow);
+  if (!key || !row || row < 2) return { ok: false, error: 'bad_row' };
+
+  var sheet = getAssignmentsSheet_();
+  if (row > sheet.getLastRow()) return { ok: false, error: 'bad_row' };
+  var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  var keyCol = headers.indexOf('Key');
+  var rowKey = String(sheet.getRange(row, keyCol + 1).getValue()).trim().toUpperCase();
+  if (rowKey !== key) return { ok: false, error: 'key_mismatch' };
+
+  sheet.deleteRow(row);
+  return { ok: true };
 }
 
 /* =========================================================================

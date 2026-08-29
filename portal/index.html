@@ -335,6 +335,18 @@
   }
 
   /* ═══ MENU SCREEN ═══ */
+  /* Beta notice — shown once per fresh login (see showBetaBanner() in the
+     JS), dismissible for the rest of that session. Lives at the top of
+     Home specifically, not as a fixed page-wide overlay, since Home is
+     already guaranteed to be the first thing every student lands on right
+     after logging in (settle() always shows('screen-menu')) — a simple,
+     reflow-safe placement instead of fighting the sidebar's own fixed
+     positioning across every breakpoint. */
+  .beta-banner { display: none; align-items: flex-start; gap: 0.9rem; background: var(--white); border: 1px solid var(--border); border-left: 3px solid var(--gold); border-radius: 10px; padding: 0.9rem 1.1rem; margin: 0 auto 1.4rem; max-width: 460px; box-shadow: var(--shadow); text-align: left; }
+  .beta-banner-text { flex: 1; font-family: var(--hel); font-size: 0.78rem; line-height: 1.6; color: var(--mid); }
+  .beta-banner-text b { color: var(--text); }
+  .beta-banner-close { flex-shrink: 0; background: none; border: none; font-size: 1.2rem; line-height: 1; color: var(--faint); cursor: pointer; padding: 0 0.1rem; }
+  .beta-banner-close:hover { color: var(--text); }
   .menu-greeting { font-family: var(--display); font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 700; color: var(--text); text-align: center; margin-bottom: 0.6rem; }
   .next-session-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 1.3rem 1.4rem; margin: 0 auto 1.6rem; max-width: 460px; text-align: center; box-shadow: var(--shadow); position: relative; overflow: hidden; }
   /* Thin gold-to-red accent bar along the top — this card is the one
@@ -949,13 +961,17 @@
   /* ═══ CALCULATOR PANE ═══ a genuine flex sibling of #dx-main (not an
      overlay) — #dx-main is flex:1, so adding this sibling automatically
      shrinks the question/passage area to make room, exactly like the real
-     digital SAT. Fixed width, not user-resizable — a draggable divider
-     was tried here and pulled (see prior git history if this needs
-     revisiting): its hit target was too thin to grab reliably, and the
-     "grip" affordance visually floating in the middle of the screen when
-     the drag wasn't obviously connected to anything read as broken UI
-     rather than a resize handle. */
-  .dx-calc-pane { display: none; flex-direction: column; width: var(--calc-w); min-width: 280px; max-width: 70%; flex-shrink: 0; border-right: 1px solid var(--border); background: #fbfbfb; }
+     digital SAT. Now user-resizable via .dx-calc-divider, same proven
+     14px-hit-zone/centered-grip shape as the question-preview modal's
+     .q-modal-calc-divider (see that comment) — an EARLIER attempt at a
+     divider here used a thin border as its only hit target and a grip
+     that didn't read as attached to anything, which is why it got pulled;
+     this reuses the version that actually shipped and works instead. This
+     one shell (#dx-shell/#dx-card) is also what every practice runner
+     (My Incorrect Questions, Challenge Questions, Question Bank) reuses
+     for its own calculator, so fixing it here covers all of them plus the
+     real exam in one place — not a fourth copy of this pane. */
+  .dx-calc-pane { display: none; flex-direction: column; width: var(--calc-w); min-width: 280px; max-width: 70%; flex-shrink: 0; background: #fbfbfb; }
   #dx-shell.calc-open .dx-calc-pane { display: flex; }
   .dx-calc-pane-hed { display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 0.9rem; font-family: var(--hel); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--mid); border-bottom: 1px solid var(--border); flex-shrink: 0; }
   .dx-calc-close { background: none; border: none; font-size: 1.1rem; line-height: 1; color: var(--mid); cursor: pointer; padding: 0.2rem 0.4rem; }
@@ -965,9 +981,17 @@
      #q-modal-calc-pane (see window.ensureDesmosCalculator) — flex:1 so it
      fills whichever flex-column container it's mounted into either way. */
   .dx-calc-frame { display: block; flex: 1; min-height: 0; width: 100%; height: 100%; border: none; }
+  .dx-calc-divider { display: none; width: 14px; flex-shrink: 0; position: relative; cursor: col-resize; }
+  #dx-shell.calc-open .dx-calc-divider { display: block; }
+  .dx-calc-divider::before { content: ''; position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: var(--border); transform: translateX(-50%); }
+  .dx-calc-grip { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 16px; height: 30px; border-radius: 8px; background: var(--white); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--faint); }
+  .dx-calc-divider:hover .dx-calc-grip, .dx-calc-divider.dragging .dx-calc-grip { border-color: var(--dx-blue); color: var(--dx-blue); }
   @media (max-width: 900px) {
     #dx-shell.calc-open { flex-direction: column; }
-    .dx-calc-pane { width: 100% !important; max-width: none; height: 45vh; border-right: none; border-bottom: 1px solid var(--border); }
+    .dx-calc-pane { width: 100% !important; max-width: none; height: var(--calc-h, 45vh); border-bottom: 1px solid var(--border); }
+    .dx-calc-divider { width: 100%; height: 14px; cursor: row-resize; }
+    .dx-calc-divider::before { left: 0; right: 0; top: 50%; bottom: auto; width: auto; height: 1px; transform: translateY(-50%); }
+    .dx-calc-grip { width: 30px; height: 16px; border-radius: 8px; }
   }
 
   /* ═══ PRACTICE TEST screen — class-equivalents of the four dx-* ID rules
@@ -1039,7 +1063,16 @@
   .dx-mobile-jump select { width: 100%; font-family: var(--hel); font-size: 0.85rem; padding: 0.7rem 0.9rem; border: 1px solid var(--border); background: var(--white); color: var(--text); }
   .dx-qtext { font-family: var(--display); font-size: clamp(1.05rem, 1.9vw, 1.35rem); font-weight: 400; line-height: 1.5; color: var(--text); margin-bottom: 1.9rem; }
   .dx-table { border-collapse: collapse; margin: 0 0 1.3rem 0; font-family: var(--hel); font-size: 0.82rem; font-weight: 400; }
-  .dx-fig { display: block; max-width: 300px; height: auto; margin: 0 0 1.3rem 0; }
+  /* width:100% is load-bearing, not decorative — every .dx-fig is an
+     inline <svg> with no width/height attribute (only a viewBox), and a
+     sizeless SVG with only max-width/height:auto computes to 0×0 in this
+     browser (confirmed live: an unstyled instance measured width:0px,
+     height:0px). width:100% gives it something concrete to resolve
+     against, and height:auto then scales it correctly using the SVG's own
+     viewBox aspect ratio. Every .dx-fig site-wide is an SVG (never an
+     <img> — raster figures carry their own inline sizing instead), so this
+     is safe everywhere the class is used. */
+  .dx-fig { display: block; width: 100%; max-width: 300px; height: auto; margin: 0 0 1.3rem 0; }
   .dx-table th, .dx-table td { border: 1px solid var(--border); padding: 0.5rem 1.1rem; text-align: center; }
   .dx-table th { background: var(--bg); font-weight: 700; }
   .dx-choices { display: flex; flex-direction: column; gap: 0.7rem; margin-bottom: 2rem; }
@@ -1977,11 +2010,31 @@
 .q-modal-calc-btn:hover { border-color: var(--mid); }
 .q-modal-calc-btn.on { border-color: var(--red); background: rgba(176,39,28,0.06); color: var(--red); }
 .q-modal-body { flex: 1 1 auto; min-height: 0; display: flex; overflow: hidden; }
-.q-modal-calc-pane { display: none; flex-direction: column; width: 45%; min-width: 320px; max-width: 640px; flex-shrink: 0; border-right: 1px solid var(--border); background: #fbfbfb; order: -1; }
+/* width/height now driven by --qcalc-w/--qcalc-h (see wireQModalCalcDivider
+   in the JS) instead of the old static 45%/45vh — dragging
+   #q-modal-calc-divider updates whichever var is live for the current
+   layout. No border on the pane itself; the divider draws the one seam
+   line, same reasoning as the real exam's .dx-pane-divider (see its
+   comment) so there's never a doubled line. */
+.q-modal-calc-pane { display: none; flex-direction: column; width: var(--qcalc-w, 45%); min-width: 320px; max-width: 70%; flex-shrink: 0; background: #fbfbfb; order: -2; }
 .q-modal-body.calc-open .q-modal-calc-pane { display: flex; }
+/* Matches .dx-pane-divider's proven shape exactly (14px invisible hit
+   zone, 1px visible seam, centered grip) — the ORIGINAL calculator-pane
+   divider (see the comment on .dx-calc-pane) used a thin border as its
+   only hit target and a grip that didn't read as attached to anything,
+   which is why it got pulled; this reuses the version that actually
+   shipped and works, just re-skinned for this modal instead of #dx-shell. */
+.q-modal-calc-divider { display: none; width: 14px; flex-shrink: 0; position: relative; cursor: col-resize; order: -1; }
+.q-modal-body.calc-open .q-modal-calc-divider { display: block; }
+.q-modal-calc-divider::before { content: ''; position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: var(--border); transform: translateX(-50%); }
+.q-modal-calc-grip { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 16px; height: 30px; border-radius: 8px; background: var(--white); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--faint); }
+.q-modal-calc-divider:hover .q-modal-calc-grip, .q-modal-calc-divider.dragging .q-modal-calc-grip { border-color: var(--red); color: var(--red); }
 @media (max-width: 860px) {
-  .q-modal-calc-pane { width: 100%; max-width: none; min-width: 0; height: 45vh; border-right: none; border-top: 1px solid var(--border); order: 0; }
+  .q-modal-calc-pane { width: 100%; max-width: none; min-width: 0; height: var(--qcalc-h, 45vh); border-top: 1px solid var(--border); order: 2; }
   .q-modal-body.calc-open { flex-direction: column; overflow-y: auto; }
+  .q-modal-calc-divider { width: 100%; height: 14px; cursor: row-resize; order: 1; }
+  .q-modal-calc-divider::before { left: 0; right: 0; top: 50%; bottom: auto; width: auto; height: 1px; transform: translateY(-50%); }
+  .q-modal-calc-grip { width: 30px; height: 16px; border-radius: 8px; }
 }
 .q-modal-pane { flex: 1 1 50%; min-width: 0; overflow-y: auto; padding: 28px 34px; font-size: 13px; line-height: 1.7; }
 .q-modal-passage-pane { border-right: 1px solid var(--border); color: var(--ink); }
@@ -2822,7 +2875,7 @@ window.Portal = {
           <div>
             <div class="onb-accom-group-label">Extended time</div>
             <div class="onb-accom-opts" id="onbAccomTimeOpts">
-              <span class="onb-accom-opt is-on" data-val="1">Standard</span>
+              <span class="onb-accom-opt" data-val="1">Standard</span>
               <span class="onb-accom-opt" data-val="1.5">Time and one&#8209;half (+50%)</span>
               <span class="onb-accom-opt" data-val="2">Double time (+100%)</span>
             </div>
@@ -2830,12 +2883,13 @@ window.Portal = {
           <div>
             <div class="onb-accom-group-label">Breaks</div>
             <div class="onb-accom-opts" id="onbAccomBreakOpts">
-              <span class="onb-accom-opt is-on" data-val="1">Standard</span>
+              <span class="onb-accom-opt" data-val="1">Standard</span>
               <span class="onb-accom-opt" data-val="2">Extended</span>
             </div>
           </div>
         </div>
       </div>
+      <p class="key-error" id="onbAccomError">Choose an extended-time option and a breaks option below (even if it's "Standard") before continuing.</p>
       <p class="onb-microcopy">This is a one&#8209;time setup, not a per&#8209;test question &mdash; and it just matches what's already approved through your school. You can always ask Luca to update it later.</p>
       <div class="onb-dots"></div>
       <button class="key-btn" id="onb-accom-continue">Save &amp; Continue</button>
@@ -3010,6 +3064,10 @@ window.Portal = {
      isn't shown in two places at once. -->
 <div class="screen has-sidebar" id="screen-menu">
   <div class="panel-wide home-panel">
+    <div class="beta-banner" id="beta-banner">
+      <div class="beta-banner-text"><b>This portal is still in beta.</b> Luca's actively testing it and adding new content, so you might run into the occasional rough edge — if something looks off or isn't working, please reach out. Your feedback goes straight to fixing it.</div>
+      <button type="button" class="beta-banner-close" id="beta-banner-close" aria-label="Dismiss">&times;</button>
+    </div>
     <h1 class="menu-greeting" id="menu-greeting">Hey there.</h1>
 
     <!-- ═══ HOME EMPTY STATES ═══ replaces the whole dashboard (This
@@ -3371,6 +3429,7 @@ window.Portal = {
 
     <div class="qb-toolbar">
       <div class="iq-dropdown" id="qb-diff-dropdown"></div>
+      <div class="iq-dropdown" id="qb-source-dropdown"></div>
       <div class="iq-dropdown" id="qb-completed-dropdown"></div>
     </div>
 
@@ -3547,6 +3606,7 @@ window.Portal = {
       <div class="q-modal-pane q-modal-passage-pane" id="q-modal-passage-pane"></div>
       <div class="q-modal-pane q-modal-question-pane" id="q-modal-question-pane"></div>
       <div class="q-modal-calc-pane" id="q-modal-calc-pane"></div>
+      <div class="q-modal-calc-divider" id="q-modal-calc-divider"><span class="q-modal-calc-grip"><svg width="10" height="18" viewBox="0 0 10 18" aria-hidden="true"><circle cx="2.5" cy="3" r="1.4" fill="currentColor"/><circle cx="7.5" cy="3" r="1.4" fill="currentColor"/><circle cx="2.5" cy="9" r="1.4" fill="currentColor"/><circle cx="7.5" cy="9" r="1.4" fill="currentColor"/><circle cx="2.5" cy="15" r="1.4" fill="currentColor"/><circle cx="7.5" cy="15" r="1.4" fill="currentColor"/></svg></span></div>
     </div>
     <div class="q-modal-ftr">
       <span id="q-modal-counter"></span>
@@ -3979,6 +4039,7 @@ window.Portal = {
       </div>
       <div class="dx-calc-mount" id="dx-calc-mount"></div>
     </div>
+    <div class="dx-calc-divider" id="dx-calc-divider"><span class="dx-calc-grip"><svg width="10" height="18" viewBox="0 0 10 18" aria-hidden="true"><circle cx="2.5" cy="3" r="1.4" fill="currentColor"/><circle cx="7.5" cy="3" r="1.4" fill="currentColor"/><circle cx="2.5" cy="9" r="1.4" fill="currentColor"/><circle cx="7.5" cy="9" r="1.4" fill="currentColor"/><circle cx="2.5" cy="15" r="1.4" fill="currentColor"/><circle cx="7.5" cy="15" r="1.4" fill="currentColor"/></svg></span></div>
     <div id="dx-main">
       <div class="dx-passage-pane" id="dx-passage-pane">
         <div class="dx-passage-kicker" id="dx-passage-kicker"></div>
@@ -4388,16 +4449,30 @@ window.Portal = {
   var PROGRESS_RECONCILE_GRACE_MS = 10 * 60 * 1000;
   function reconcileProgressMap(localMap, serverMap, tsField, storageKey) {
     localMap = localMap || {}; serverMap = serverMap || {};
-    var kept = {}, droppedAny = false;
+    var kept = {}, changed = false;
     Object.keys(localMap).forEach(function (k) {
-      if (Object.prototype.hasOwnProperty.call(serverMap, k)) return; // server copy (added below) wins on collision
       var entry = localMap[k];
       var ts = entry && entry[tsField] ? Date.parse(entry[tsField]) : NaN;
+      if (Object.prototype.hasOwnProperty.call(serverMap, k)) {
+        // Collision: the backend write for a just-recorded wrong attempt
+        // (addIncorrectQuestion) is fire-and-forget and often still in
+        // flight when this fetch lands right after finishing a practice
+        // round — trusting the server unconditionally here silently rolled
+        // a fresh local wrongAttempts increment back down to the server's
+        // stale copy, which is why the count could look frozen no matter
+        // how many times a question was retaken. Keep whichever side has
+        // the newer timestamp instead, same last-write-wins rule
+        // mergeQbAttempts_ already uses for Question Bank attempts.
+        var serverEntry = serverMap[k];
+        var serverTs = serverEntry && serverEntry[tsField] ? Date.parse(serverEntry[tsField]) : NaN;
+        if (!isNaN(ts) && (isNaN(serverTs) || ts > serverTs)) { kept[k] = entry; changed = true; }
+        return;
+      }
       if (!isNaN(ts) && (Date.now() - ts) < PROGRESS_RECONCILE_GRACE_MS) kept[k] = entry;
-      else droppedAny = true;
+      else changed = true;
     });
-    Object.keys(serverMap).forEach(function (k) { kept[k] = serverMap[k]; });
-    if (droppedAny) {
+    Object.keys(serverMap).forEach(function (k) { if (!(k in kept)) kept[k] = serverMap[k]; });
+    if (changed) {
       try { localStorage.setItem(storageKey, JSON.stringify({ byKey: kept, updatedAt: new Date().toISOString() })); } catch (e) { /* private browsing / storage disabled — next reconcile will just retry */ }
     }
     return kept;
@@ -5105,6 +5180,23 @@ window.Portal = {
     return "That key wasn't recognized. Double-check it, or text Luca at (201) 275-2791.";
   }
 
+  // Shown once per fresh login (called from settle() below), dismissible
+  // for the rest of that browser session — sessionStorage rather than
+  // localStorage on purpose, so it reliably comes back and gets seen again
+  // on the student's NEXT login, not just their first one ever.
+  var BETA_BANNER_DISMISS_KEY = 'moretti_beta_banner_dismissed';
+  function showBetaBanner() {
+    var el = document.getElementById('beta-banner');
+    if (!el) return;
+    var dismissed = false;
+    try { dismissed = sessionStorage.getItem(BETA_BANNER_DISMISS_KEY) === '1'; } catch (e) {}
+    el.style.display = dismissed ? 'none' : 'flex';
+  }
+  document.getElementById('beta-banner-close').addEventListener('click', function () {
+    document.getElementById('beta-banner').style.display = 'none';
+    try { sessionStorage.setItem(BETA_BANNER_DISMISS_KEY, '1'); } catch (e) {}
+  });
+
   function settle(data) {
     currentStudent = {
       key: pendingKey,
@@ -5129,6 +5221,7 @@ window.Portal = {
       assignments: data.assignments || []
     };
     document.getElementById('menu-greeting').textContent = 'Hey ' + currentStudent.name.split(' ')[0] + '.';
+    showBetaBanner();
     show('screen-menu');
     loadNextSession();
     renderTestCountdown();
@@ -6422,6 +6515,7 @@ window.Portal = {
       card.classList.add('is-selected');
       onbAccomHasAccoms = (i === 1);
       document.getElementById('onbAccomSub').classList.toggle('is-open', onbAccomHasAccoms);
+      document.getElementById('onbAccomError').style.display = 'none';
     });
   });
   ['onbAccomTimeOpts', 'onbAccomBreakOpts'].forEach(function (id) {
@@ -6431,11 +6525,28 @@ window.Portal = {
       if (!opt) return;
       Array.prototype.forEach.call(group.children, function (o) { o.classList.remove('is-on'); });
       opt.classList.add('is-on');
+      document.getElementById('onbAccomError').style.display = 'none';
     });
   });
   document.getElementById('onb-accom-continue').addEventListener('click', function () {
-    var timeMult = onbAccomHasAccoms ? parseFloat(document.querySelector('#onbAccomTimeOpts .is-on').getAttribute('data-val')) : 1;
-    var breakMult = onbAccomHasAccoms ? parseFloat(document.querySelector('#onbAccomBreakOpts .is-on').getAttribute('data-val')) : 1;
+    // Neither opts group has a default "is-on" option (unlike the Settings
+    // screen's equivalent, which pre-fills from the student's saved
+    // values) — a student who picks "I have accommodations" but never taps
+    // a specific time/break pill used to hit a null .querySelector() here,
+    // which threw and silently killed the rest of this handler: nothing
+    // saved, no navigation, Continue just looked unresponsive. That's the
+    // #onbAccomError message below was written for but never actually
+    // wired up to show. Guard it for real now instead of assuming a pill
+    // is always picked.
+    var timeOpt = onbAccomHasAccoms ? document.querySelector('#onbAccomTimeOpts .is-on') : null;
+    var breakOpt = onbAccomHasAccoms ? document.querySelector('#onbAccomBreakOpts .is-on') : null;
+    if (onbAccomHasAccoms && (!timeOpt || !breakOpt)) {
+      document.getElementById('onbAccomError').style.display = 'block';
+      return;
+    }
+    document.getElementById('onbAccomError').style.display = 'none';
+    var timeMult = onbAccomHasAccoms ? parseFloat(timeOpt.getAttribute('data-val')) : 1;
+    var breakMult = onbAccomHasAccoms ? parseFloat(breakOpt.getAttribute('data-val')) : 1;
     accommodations.timeMult = timeMult;
     accommodations.breakMult = breakMult;
     // Best-effort, fire-and-forget — same pattern as markDiagnosticTaken()
@@ -7968,6 +8079,51 @@ window.Portal = {
       setSplit(e.clientX);
     });
     function stopDrag(e) {
+      if (!dragging) return;
+      dragging = false;
+      divider.classList.remove('dragging');
+    }
+    divider.addEventListener('pointerup', stopDrag);
+    divider.addEventListener('pointercancel', stopDrag);
+  })();
+
+  /* ═══ DRAGGABLE CALCULATOR DIVIDER ═══ same shape as wirePaneDivider
+     above, driving --calc-w (side-by-side, ≥900px) or --calc-h (stacked
+     mobile layout, <900px) instead of --passage-w. This single #dx-shell
+     pane is reused by the real exam AND every practice runner's own
+     calculator (My Incorrect Questions, Challenge Questions, Question
+     Bank all toggle this same #dx-calc-pane), so this one wiring covers
+     all of them. */
+  (function wireDxCalcDivider() {
+    var divider = document.getElementById('dx-calc-divider');
+    var calcPane = document.getElementById('dx-calc-pane');
+    if (!divider || !calcPane || !dxShellEl) return;
+    var dragging = false;
+    var mobileQuery = window.matchMedia('(max-width: 900px)');
+    function setSplit(clientX, clientY) {
+      if (mobileQuery.matches) {
+        var paneTop = calcPane.getBoundingClientRect().top;
+        var vh = ((clientY - paneTop) / window.innerHeight) * 100;
+        vh = Math.max(20, Math.min(70, vh));
+        dxShellEl.style.setProperty('--calc-h', vh + 'vh');
+      } else {
+        var rect = dxShellEl.getBoundingClientRect();
+        var pctW = ((clientX - rect.left) / rect.width) * 100;
+        pctW = Math.max(25, Math.min(70, pctW));
+        dxShellEl.style.setProperty('--calc-w', pctW + '%');
+      }
+    }
+    divider.addEventListener('pointerdown', function (e) {
+      dragging = true;
+      divider.classList.add('dragging');
+      divider.setPointerCapture(e.pointerId);
+      e.preventDefault();
+    });
+    divider.addEventListener('pointermove', function (e) {
+      if (!dragging) return;
+      setSplit(e.clientX, e.clientY);
+    });
+    function stopDrag() {
       if (!dragging) return;
       dragging = false;
       divider.classList.remove('dragging');
@@ -10179,6 +10335,11 @@ window.Portal = {
       renderResources();
       show('screen-resources');
     } else if (state.screen === 'screen-test-choice' || state.screen === 'screen-menu' || state.screen === 'screen-test-overview' || state.screen === 'screen-sat-resources') {
+      // A same-tab refresh re-parses this whole script, so #beta-banner is
+      // back to its CSS default (display:none) regardless of whether
+      // settle() already showed it earlier this session — re-run the same
+      // dismissed-this-session check rather than leaving it stuck hidden.
+      if (state.screen === 'screen-menu' && typeof showBetaBanner === 'function') showBetaBanner();
       show(state.screen);
     } else if (state.screen === 'screen-practice-tests') {
       ptListReturnScreen = state.ptListReturnScreen === 'screen-sat-resources' ? 'screen-sat-resources' : 'screen-menu';
@@ -10210,6 +10371,20 @@ window.Portal = {
       if (!state || !state.student || !state.student.key) { clearState(); return; }
 
       currentStudent = state.student;
+      // `accommodations` (timeMult/breakMult) is a plain module-level var,
+      // NOT part of the saved snapshot — it's always derived fresh from
+      // currentStudent.accomTimeMult/accomBreakMult via
+      // applyStoredAccommodations(). The fresh-login path (settle(), see
+      // its own call to this) already does that, but THIS path — restoring
+      // from a same-tab refresh — never did, so `accommodations` silently
+      // stayed at its hardcoded {timeMult:1, breakMult:1} default after
+      // any refresh, regardless of the student's real accommodation. That
+      // means a refresh mid-diagnostic (routine on mobile, where the OS
+      // can reload a backgrounded tab on its own) silently stripped a
+      // student's extended time for the rest of the attempt. Must run
+      // before applyRestoredState() below, since that's what recomputes
+      // this section's timer end time off the (until now, wrong) value.
+      if (typeof applyStoredAccommodations === 'function') applyStoredAccommodations();
       document.getElementById('menu-greeting').textContent = 'Hey ' + currentStudent.name.split(' ')[0] + '.';
       loadNextSession();
       renderTestCountdown();
@@ -12553,8 +12728,15 @@ window.Portal = {
     var backBtnEl = document.getElementById('dx-back');
     var nextBtnEl = document.getElementById('dx-next');
     var calcBtnEl = document.getElementById('dx-calculator-btn');
-    var existingSummary = document.getElementById('iq-runner-summary');
-    if (existingSummary) existingSummary.parentNode.removeChild(existingSummary);
+    // Removes ANY leftover completion summary here, not just this
+    // runner's own #iq-runner-summary — all three practice runners (My
+    // Incorrect Questions, Challenge Questions, Question Bank) share this
+    // same #dx-card shell and the same .iq-runner-summary class, and a
+    // student finishing one round then switching straight to a different
+    // practice mode without reloading left the FIRST runner's "X / Y
+    // correct" card orphaned in the DOM, sitting below whatever the next
+    // runner rendered on top of it.
+    document.querySelectorAll('#dx-card .iq-runner-summary').forEach(function (el) { el.parentNode.removeChild(el); });
     // The fr "Your answer: X" / "Correct answer: Y" notes and the full
     // explanation block are injected as siblings OUTSIDE choicesEl/frRowEl
     // (see below) — nothing else clears them, so without this every call
@@ -13059,8 +13241,10 @@ window.Portal = {
     var backBtnEl = document.getElementById('dx-back');
     var nextBtnEl = document.getElementById('dx-next');
     var calcBtnEl = document.getElementById('dx-calculator-btn');
-    var existingSummary = document.getElementById('chal-runner-summary');
-    if (existingSummary) existingSummary.parentNode.removeChild(existingSummary);
+    // See the identical comment on this same cleanup in the My Incorrect
+    // Questions runner above — removes any OTHER runner's leftover
+    // completion card too, not just this one's own #chal-runner-summary.
+    document.querySelectorAll('#dx-card .iq-runner-summary').forEach(function (el) { el.parentNode.removeChild(el); });
     var dxCardEl = document.getElementById('dx-card');
     Array.prototype.forEach.call(dxCardEl.querySelectorAll('.pb-note, .pb-explain'), function (el) {
       el.parentNode.removeChild(el);
@@ -13208,6 +13392,11 @@ window.Portal = {
   'use strict';
   var LETTERS = ['A', 'B', 'C', 'D'];
   var currentSubject = 'rw'; // 'rw' | 'math' — which pool the skills view/runner are currently working from
+  // Temporary block on the Math pool while its questions get a formatting
+  // pass — set back to false to reopen Math once that's done. Gates the
+  // subject card (see paintQbHome below) and its click handler, the only
+  // two ways into showSkills('math')/poolFor('math') from the UI.
+  var QB_MATH_TEMP_DISABLED = true;
 
   // Display order for domain groups in the skill drilldown — matches the
   // order College Board itself lists each subject's own domains.
@@ -13374,10 +13563,13 @@ window.Portal = {
     // Math starts out with zero typed questions (see question-bank-
     // math.js) — reads as "Coming soon" and isn't clickable until at
     // least one real question has been added, same as it looked before
-    // any Math content existed at all.
+    // any Math content existed at all. QB_MATH_TEMP_DISABLED (below) reuses
+    // this exact same gate to also temporarily block Math once it DOES have
+    // content, while a formatting pass on those questions is in progress —
+    // flip that flag back to false to reopen it, no other change needed.
     var mathBtn = document.getElementById('qb-subject-math');
     if (mathBtn) {
-      var mathEmpty = (window.QUESTION_BANK_MATH || []).length === 0;
+      var mathEmpty = QB_MATH_TEMP_DISABLED || (window.QUESTION_BANK_MATH || []).length === 0;
       mathBtn.classList.toggle('qb-subject-empty', mathEmpty);
       if (mathEmpty) document.getElementById('qb-subject-math-count').textContent = 'Coming soon';
     }
@@ -13435,6 +13627,18 @@ window.Portal = {
   var selectedDifficulties = ['easy', 'medium', 'hard'];
   var completedFilter = 'all'; // 'all' | 'done' | 'not'
   var selectedSkills = [];
+  // All distinct q.source values present in the current subject's pool
+  // (e.g. "Non-Bluebook", "August 2026 SAT") — computed fresh each time
+  // showSkills() resets the filters, same as selectedDifficulties.
+  var selectedSources = [];
+  function availableSources(subject) {
+    var seen = {}, list = [];
+    poolFor(subject).forEach(function (q) {
+      var src = q.source || 'Non-Bluebook';
+      if (!seen[src]) { seen[src] = true; list.push(src); }
+    });
+    return list;
+  }
 
   var openQbDropdown = null;
   function closeQbDropdown() { if (openQbDropdown) openQbDropdown.classList.remove('open'); openQbDropdown = null; }
@@ -13515,12 +13719,25 @@ window.Portal = {
 
   function renderFilters() {
     var diffContainer = document.getElementById('qb-diff-dropdown');
+    var sourceContainer = document.getElementById('qb-source-dropdown');
     var completedContainer = document.getElementById('qb-completed-dropdown');
     if (diffContainer) {
       buildCheckboxDropdown(diffContainer, 'Difficulty', ['easy', 'medium', 'hard'], function (d) { return d.charAt(0).toUpperCase() + d.slice(1); }, selectedDifficulties, function () {
         renderFilters();
         renderSkillsList();
       });
+    }
+    if (sourceContainer) {
+      var sources = availableSources(currentSubject);
+      if (sources.length < 2) {
+        sourceContainer.style.display = 'none';
+      } else {
+        sourceContainer.style.display = '';
+        buildCheckboxDropdown(sourceContainer, 'Source', sources, function (s) { return s; }, selectedSources, function () {
+          renderFilters();
+          renderSkillsList();
+        });
+      }
     }
     if (completedContainer) {
       buildRadioDropdown(completedContainer, 'Completed', [
@@ -13634,6 +13851,7 @@ window.Portal = {
     document.getElementById('qb-skills-view').style.display = '';
     document.getElementById('qb-skills-hed').textContent = currentSubject === 'math' ? 'Math' : 'Reading & Writing';
     selectedDifficulties = ['easy', 'medium', 'hard'];
+    selectedSources = availableSources(currentSubject);
     completedFilter = 'all';
     selectedSkills = [];
     renderFilters();
@@ -13700,7 +13918,9 @@ window.Portal = {
     var pool = [];
     entries.forEach(function (s) {
       s.questions.forEach(function (q) {
-        if (selectedDifficulties.indexOf(q.difficulty) !== -1) pool.push(q);
+        if (selectedDifficulties.indexOf(q.difficulty) === -1) return;
+        if (selectedSources.indexOf(q.source || 'Non-Bluebook') === -1) return;
+        pool.push(q);
       });
     });
     if (!pool.length) return;
@@ -13824,8 +14044,10 @@ window.Portal = {
     var backBtnEl = document.getElementById('dx-back');
     var nextBtnEl = document.getElementById('dx-next');
     var calcBtnEl = document.getElementById('dx-calculator-btn');
-    var existingSummary = document.getElementById('qb-runner-summary');
-    if (existingSummary) existingSummary.parentNode.removeChild(existingSummary);
+    // See the identical comment on this same cleanup in the My Incorrect
+    // Questions runner — removes any OTHER runner's leftover completion
+    // card too, not just this one's own #qb-runner-summary.
+    document.querySelectorAll('#dx-card .iq-runner-summary').forEach(function (el) { el.parentNode.removeChild(el); });
     var dxCardEl = document.getElementById('dx-card');
     Array.prototype.forEach.call(dxCardEl.querySelectorAll('.pb-note, .pb-explain'), function (el) {
       el.parentNode.removeChild(el);
@@ -13864,6 +14086,20 @@ window.Portal = {
     if (cardHedEl) cardHedEl.style.display = '';
     var qnumTileEl = document.getElementById('dx-qnum-tile');
     if (qnumTileEl) { qnumTileEl.textContent = runnerIndex + 1; qnumTileEl.style.display = ''; }
+    // Re-shows the calculator button for math questions — the top of this
+    // function unconditionally hides it (calcBtnEl.style.display = 'none',
+    // above) before this branch even knows whether the upcoming question
+    // is math or R&W, and unlike the other two practice runners (My
+    // Incorrect Questions, Challenge Questions), nothing here ever set it
+    // back. That left the calculator permanently missing from every
+    // Question Bank math practice session, not just hidden until some
+    // later toggle — same isMath signal (currentSubject, this module's
+    // own subject-scoped equivalent of Challenge's r.sectionKey) as those
+    // other two runners use.
+    var isMath = currentSubject === 'math';
+    calcBtnEl.style.display = isMath ? '' : 'none';
+    if (window.dxSetMathMode) window.dxSetMathMode(isMath);
+    if (!isMath && window.dxCloseCalculator) window.dxCloseCalculator();
     renderSaveBtn(r);
     choicesEl.style.display = 'flex';
     choicesEl.innerHTML = '';
@@ -13920,7 +14156,14 @@ window.Portal = {
       // and tolerant-match grading (checkFrAnswer above) every other 'fr'
       // runner in this file already uses.
       var frInputEl = document.getElementById('dx-fr-input');
-      var split = splitPassageQb(r.text);
+      // Math questions have no real passage — splitPassageQb's heuristic
+      // (split at the last sentence boundary before the text's final "?")
+      // is tuned for R&W's passage-then-prompt shape, but a math question's
+      // own setup sentence ending in a period right before its "...?" question
+      // sentence matches that same shape well enough to falsely trigger it,
+      // wrongly splitting a single self-contained math question across the
+      // passage/question two-pane divider it should never show at all.
+      var split = currentSubject === 'math' ? null : splitPassageQb(r.text);
       qtextEl.innerHTML = split ? split.question : r.text;
       if (window.dxRenderPassagePane) window.dxRenderPassagePane({}, split, r.qid);
       choicesEl.style.display = 'none';
@@ -13947,7 +14190,14 @@ window.Portal = {
         }
       }
     } else {
-      var split = splitPassageQb(r.text);
+      // Math questions have no real passage — splitPassageQb's heuristic
+      // (split at the last sentence boundary before the text's final "?")
+      // is tuned for R&W's passage-then-prompt shape, but a math question's
+      // own setup sentence ending in a period right before its "...?" question
+      // sentence matches that same shape well enough to falsely trigger it,
+      // wrongly splitting a single self-contained math question across the
+      // passage/question two-pane divider it should never show at all.
+      var split = currentSubject === 'math' ? null : splitPassageQb(r.text);
       qtextEl.innerHTML = split ? split.question : r.text;
       if (window.dxRenderPassagePane) window.dxRenderPassagePane({}, split, r.qid);
       r.choices.forEach(function (c, i) {
@@ -14022,7 +14272,7 @@ window.Portal = {
       if (subjectBtn) subjectBtn.addEventListener('click', function () { showSkills('rw'); });
       var mathSubjectBtn = document.getElementById('qb-subject-math');
       if (mathSubjectBtn) mathSubjectBtn.addEventListener('click', function () {
-        if (mathSubjectBtn.classList.contains('qb-subject-empty')) return;
+        if (QB_MATH_TEMP_DISABLED || mathSubjectBtn.classList.contains('qb-subject-empty')) return;
         showSkills('math');
       });
       var backBtn = document.getElementById('qb-skills-back');
@@ -14131,6 +14381,58 @@ window.Portal = {
   var qModalSaveBtn = document.getElementById('q-modal-save-btn');
   var qModalPrevBtn = document.getElementById('q-modal-prev-btn');
   var qModalNextBtn = document.getElementById('q-modal-next-btn');
+
+  /* ═══ DRAGGABLE CALCULATOR DIVIDER ═══ same pattern as the real exam's
+     .dx-pane-divider (see that comment for why THIS shape of hit
+     target/grip works where the pane's own border didn't) — updates
+     --qcalc-w on wide layouts (side-by-side, dragging left/right) or
+     --qcalc-h once the modal drops to the stacked mobile layout at
+     860px (dragging up/down instead). Checked live on every drag via
+     matchMedia rather than cached once, so resizing the window mid-drag
+     (or just starting a drag right at the breakpoint) still picks the
+     right axis. Clamped the same 25%-75% / 20%-70vh either way so the
+     content pane can never get dragged down to nothing. */
+  (function wireQModalCalcDivider() {
+    var divider = document.getElementById('q-modal-calc-divider');
+    if (!divider || !qModalBodyEl || !qModalCalcPane) return;
+    var dragging = false;
+    var mobileQuery = window.matchMedia('(max-width: 860px)');
+    function setSplit(clientX, clientY) {
+      if (mobileQuery.matches) {
+        // --qcalc-h is a vh unit (matching the 45vh static default it
+        // replaces), so this reads against the actual viewport height,
+        // not qModalBodyEl's own box — that box is a scroll container in
+        // this stacked layout (overflow-y:auto), and its rendered height
+        // isn't necessarily the same as the viewport's.
+        var paneTop = qModalCalcPane.getBoundingClientRect().top;
+        var vh = ((clientY - paneTop) / window.innerHeight) * 100;
+        vh = Math.max(20, Math.min(70, vh));
+        qModalBodyEl.style.setProperty('--qcalc-h', vh + 'vh');
+      } else {
+        var rect = qModalBodyEl.getBoundingClientRect();
+        var pctW = ((clientX - rect.left) / rect.width) * 100;
+        pctW = Math.max(25, Math.min(70, pctW));
+        qModalBodyEl.style.setProperty('--qcalc-w', pctW + '%');
+      }
+    }
+    divider.addEventListener('pointerdown', function (e) {
+      dragging = true;
+      divider.classList.add('dragging');
+      divider.setPointerCapture(e.pointerId);
+      e.preventDefault();
+    });
+    divider.addEventListener('pointermove', function (e) {
+      if (!dragging) return;
+      setSplit(e.clientX, e.clientY);
+    });
+    function stopDrag() {
+      if (!dragging) return;
+      dragging = false;
+      divider.classList.remove('dragging');
+    }
+    divider.addEventListener('pointerup', stopDrag);
+    divider.addEventListener('pointercancel', stopDrag);
+  })();
 
   var modalRows = [], modalIndex = 0, modalLabel = '';
   var modalHideAnswer = true; // persists across Previous/Next within one open — a per-session preference, not per-question
