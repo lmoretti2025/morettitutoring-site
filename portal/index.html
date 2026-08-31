@@ -335,19 +335,25 @@
   }
 
   /* ═══ MENU SCREEN ═══ */
-  /* Beta notice — shown once per fresh login (see showBetaBanner() in the
-     JS), dismissible for the rest of that session. Lives at the top of
-     Home specifically, not as a fixed page-wide overlay, since Home is
-     already guaranteed to be the first thing every student lands on right
-     after logging in (settle() always shows('screen-menu')) — a simple,
-     reflow-safe placement instead of fighting the sidebar's own fixed
-     positioning across every breakpoint. */
-  .beta-banner { display: none; align-items: flex-start; gap: 0.9rem; background: var(--white); border: 1px solid var(--border); border-left: 3px solid var(--gold); border-radius: 10px; padding: 0.9rem 1.1rem; margin: 0 auto 1.4rem; max-width: 460px; box-shadow: var(--shadow); text-align: left; }
-  .beta-banner-text { flex: 1; font-family: var(--hel); font-size: 0.78rem; line-height: 1.6; color: var(--mid); }
-  .beta-banner-text b { color: var(--text); }
-  .beta-banner-close { flex-shrink: 0; background: none; border: none; font-size: 1.2rem; line-height: 1; color: var(--faint); cursor: pointer; padding: 0 0.1rem; }
-  .beta-banner-close:hover { color: var(--text); }
-  .menu-greeting { font-family: var(--display); font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 700; color: var(--text); text-align: center; margin-bottom: 0.6rem; }
+  /* Beta notice — a blocking modal (same overlay/card shape as
+     .resume-overlay/.resume-modal above), not a dismissible banner. Shown
+     every fresh login (see showBetaModal() in the JS) and must be
+     acknowledged before a student can interact with anything underneath —
+     the overlay itself, not just the card, covers the full viewport, so
+     there's nothing to click through to until "Got it" is pressed. */
+  .beta-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(17,17,17,0.55); z-index: 700; align-items: center; justify-content: center; padding: 1.5rem; }
+  .beta-modal-overlay.active { display: flex; }
+  .beta-modal { background: var(--white); width: 100%; max-width: 420px; padding: 2rem 2rem 1.75rem; text-align: center; box-shadow: 0 24px 64px rgba(0,0,0,0.3); border-top: 3px solid var(--gold); }
+  .beta-modal-hed { font-family: var(--display); font-weight: 700; font-size: 1.15rem; color: var(--text); margin-bottom: 0.7rem; }
+  .beta-modal-sub { font-family: var(--hel); font-size: 0.85rem; color: var(--mid); line-height: 1.65; margin-bottom: 1.6rem; }
+  .beta-modal .key-btn { margin: 0; }
+  /* Default state (no JS, no .pre-reveal) is fully visible — the reveal
+     animation only ever ADDS .pre-reveal then removes it a frame later
+     (see revealGreeting()), so a JS error can never leave the greeting
+     permanently invisible; the failure mode is "no animation," not "no
+     greeting." */
+  .menu-greeting { font-family: var(--display); font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 700; color: var(--text); text-align: center; margin-bottom: 0.6rem; transition: opacity 0.5s var(--ease), transform 0.5s var(--ease), filter 0.5s var(--ease); }
+  .menu-greeting.pre-reveal { opacity: 0; transform: translateY(6px); filter: blur(4px); }
   .next-session-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 1.3rem 1.4rem; margin: 0 auto 1.6rem; max-width: 460px; text-align: center; box-shadow: var(--shadow); position: relative; overflow: hidden; }
   /* Thin gold-to-red accent bar along the top — this card is the one
      piece of information on the page that changes week to week, so it
@@ -371,6 +377,8 @@
   .assign-label { display: flex; align-items: center; gap: 0.45rem; font-family: var(--hel); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--mid); margin-bottom: 0.85rem; }
   .assign-label::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--gold); flex-shrink: 0; }
   .assign-list { display: flex; flex-direction: column; gap: 0.6rem; }
+  .assign-cal-link { display: inline-block; margin-top: 0.9rem; font-family: var(--hel); font-size: 0.76rem; font-weight: 700; color: var(--red); text-decoration: none; }
+  .assign-cal-link:hover { text-decoration: underline; }
   /* Stacked, not side-by-side: the This Week card is a narrow sidebar
      column, and an inline pill squeezed the task text into a 4-line
      ribbon and still overflowed the card on longer labels. */
@@ -573,7 +581,7 @@
      compact mini cards (Math/R&W top weak skill + Next Session), and a
      Latest Test By Section breakdown — replaces the old aggregate-only
      line chart + two doughnut charts. */
-  .spc-score-top { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1.1rem; }
+  .spc-score-top { display: flex; align-items: flex-end; justify-content: flex-start; flex-wrap: wrap; gap: 0.9rem; margin-bottom: 1.1rem; }
   .spc-composite-num { font-family: var(--display); font-weight: 700; font-size: 2.1rem; color: var(--text); line-height: 1; }
   .spc-composite-delta { font-family: var(--hel); font-size: 0.8rem; font-weight: 700; color: var(--green); margin-top: 0.3rem; }
   .spc-bar-chart-wrap { position: relative; }
@@ -1483,36 +1491,6 @@
   .iq-tab.active { color: var(--red); border-bottom-color: var(--red); }
   .iq-tab-count { background: rgba(17,17,17,0.06); color: var(--mid); border-radius: 999px; padding: 0.1rem 0.5rem; font-size: 0.72rem; font-weight: 700; }
   .iq-tab.active .iq-tab-count { background: rgba(176,39,28,0.12); color: var(--red); }
-
-  /* ═══ COLLECTIONS ═══ chip row (Collections tab) + the per-question
-     "add to collection" control inside each expanded row. */
-  #iq-collections-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin: 1rem 0 0.2rem; }
-  #iq-collections-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-  .iq-collection-chip { display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(17,17,17,0.045); border: none; border-radius: 999px; padding: 0.45rem 0.9rem; font-family: var(--hel); font-size: 0.78rem; font-weight: 600; color: var(--mid); cursor: pointer; transition: background 0.15s var(--ease), color 0.15s var(--ease); }
-  .iq-collection-chip:hover { background: rgba(17,17,17,0.08); }
-  .iq-collection-chip.active { background: var(--red); color: #fff; }
-  .iq-collection-chip-count { opacity: 0.75; }
-  .iq-collection-chip-del { opacity: 0.6; font-weight: 700; padding-left: 0.2rem; }
-  .iq-collection-chip-del:hover { opacity: 1; }
-  .iq-collection-new-btn { display: inline-flex; align-items: center; gap: 0.3rem; background: none; border: 1px dashed var(--border); border-radius: 999px; padding: 0.45rem 0.9rem; font-family: var(--hel); font-size: 0.78rem; font-weight: 600; color: var(--mid); cursor: pointer; transition: border-color 0.15s var(--ease), color 0.15s var(--ease); }
-  .iq-collection-new-btn:hover { border-color: var(--red); color: var(--red); }
-  .iq-collection-new-row { display: flex; align-items: center; gap: 0.5rem; }
-  .iq-collection-new-row input { font-family: var(--hel); font-size: 0.8rem; padding: 0.4rem 0.7rem; border: 1px solid var(--border); border-radius: 999px; min-width: 160px; }
-  .iq-collection-new-row button { font-family: var(--hel); font-size: 0.76rem; font-weight: 700; background: var(--red); color: #fff; border: none; border-radius: 999px; padding: 0.4rem 0.9rem; cursor: pointer; }
-  .iq-collection-empty { font-size: 0.85rem; color: var(--mid); padding: 2rem 0; text-align: center; }
-
-  .iq-add-to-collection { position: relative; display: inline-block; margin-bottom: 0.9rem; }
-  .iq-add-to-collection-btn { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; flex-shrink: 0; color: var(--mid); background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 0; cursor: pointer; transition: border-color 0.15s var(--ease), color 0.15s var(--ease); }
-  .iq-add-to-collection-btn svg { width: 15px; height: 15px; }
-  .iq-add-to-collection-btn:hover, .iq-add-to-collection.open .iq-add-to-collection-btn { border-color: var(--gold); color: var(--text); }
-  .iq-add-to-collection-panel { display: none; position: absolute; top: calc(100% + 4px); left: 0; z-index: 40; min-width: 220px; background: var(--white); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 8px 24px rgba(17,17,17,0.16); padding: 0.5rem; }
-  .iq-add-to-collection.open .iq-add-to-collection-panel { display: block; }
-  .iq-add-to-collection-option { display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.5rem; border-radius: 6px; cursor: pointer; font-family: var(--hel); font-size: 0.8rem; color: var(--text); }
-  .iq-add-to-collection-option:hover { background: var(--bg); }
-  .iq-add-to-collection-option input { accent-color: var(--red); cursor: pointer; }
-  .iq-add-to-collection-new { display: flex; gap: 0.4rem; margin-top: 0.3rem; padding-top: 0.4rem; border-top: 1px solid var(--border); }
-  .iq-add-to-collection-new input { flex: 1; font-family: var(--hel); font-size: 0.78rem; padding: 0.35rem 0.6rem; border: 1px solid var(--border); border-radius: 6px; min-width: 0; }
-  .iq-add-to-collection-new button { font-family: var(--hel); font-size: 0.75rem; font-weight: 700; background: var(--red); color: #fff; border: none; border-radius: 6px; padding: 0.35rem 0.7rem; cursor: pointer; white-space: nowrap; }
   .pb-empty-saved { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 0.6rem; padding: 3rem 1.5rem; }
   .pb-empty-saved .pb-empty-icon { color: var(--faint); opacity: 0.6; }
   .pb-empty-saved .pb-empty-title { font-family: var(--display); font-size: 1.15rem; font-weight: 700; color: var(--text); }
@@ -1603,7 +1581,34 @@
      same real-exam practice runner Challenge Questions uses. Analytics
      row reuses .chal-stat directly (identical tiles, different numbers) —
      see window.qbModuleInit() near the end of the file. */
-  .qb-stats-row { margin-bottom: 1.8rem; }
+  /* ═══ QB HOME — STATS + WEAKNESS PRACTICE ═══ replaces the old 4-tile
+     .chal-stats-row grid (Attempted/Accuracy/Saved/Streak as four separate
+     disconnected cards). Saved Questions and Study Streak are gone
+     entirely; the remaining two follow the native report's own .raw-stat
+     language instead — one connected card with a hairline divider between
+     stats and a round icon anchoring each, rather than a bare number in
+     its own box (see the .raw-stat rule's own comment for why: "a bare
+     number strip reads as disconnected boxes with nothing to anchor the
+     eye"). Right next to it, same width class, is the weakness-practice
+     card — same red-gradient shape as Vocabulary's .vp-tenmin-card so this
+     screen's own "just start something focused" CTA matches the one
+     students already know from there. */
+  .qb-home-row { display: flex; align-items: stretch; gap: 1.2rem; margin-bottom: 1.8rem; flex-wrap: wrap; }
+  .qb-raw-stats { flex: 1 1 320px; display: flex; background: var(--white); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); overflow: hidden; }
+  .qb-raw-stat { flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.7rem; padding: 1rem 1.1rem; border-left: 1px solid var(--border); }
+  .qb-raw-stat:first-child { border-left: none; }
+  .qb-raw-stat-icon { flex-shrink: 0; width: 26px; height: 26px; color: var(--red); }
+  .qb-raw-stat-icon svg { width: 100%; height: 100%; display: block; }
+  .qb-raw-stat-text { min-width: 0; }
+  .qb-raw-stat-lab { font-family: var(--hel); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--faint); margin-bottom: 0.2rem; }
+  .qb-raw-stat-num { font-family: var(--hel); font-size: 1.35rem; font-weight: 700; color: var(--text); }
+  @media (max-width: 560px) {
+    .qb-raw-stats { flex-wrap: wrap; }
+    .qb-raw-stat { flex: 1 1 50%; border-left: none; border-top: 1px solid var(--border); }
+    .qb-raw-stat:nth-child(-n+2) { border-top: none; }
+  }
+  .qb-weak-card { flex: 1 1 320px; margin-top: 0; }
+  @media (max-width: 900px) { .qb-home-row { flex-direction: column; } }
   .qb-subjects { display: flex; gap: 1.2rem; flex-wrap: wrap; }
   .qb-subject { flex: 1 1 300px; position: relative; overflow: hidden; border: none; border-radius: 14px; padding: 1.6rem 1.7rem; min-height: 150px; cursor: pointer; text-align: left; display: flex; flex-direction: column; justify-content: space-between; gap: 1.1rem; box-shadow: var(--shadow); background: linear-gradient(135deg, var(--red) 0%, #c9a84c 130%); transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease); }
   .qb-subject:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); }
@@ -2412,6 +2417,93 @@
   #pt-native-report .bridge-tooltip { display: none; position: fixed; z-index: 60; background: var(--text); color: #fff; border-radius: 8px; padding: 0.5rem 0.7rem; font-family: var(--hel); font-size: 0.72rem; line-height: 1.4; pointer-events: none; box-shadow: 0 8px 20px rgba(17,17,17,0.25); white-space: nowrap; }
   #pt-native-report .bridge-tooltip b { display: block; font-size: 0.78rem; margin-bottom: 0.15rem; }
   #pt-native-report .bridge-tooltip .bridge-tooltip-hint { display: block; margin-top: 0.25rem; color: rgba(255,255,255,0.65); font-size: 0.64rem; }
+  /* ═══ STUDENT CALENDAR ═══ their own homework and sessions on one grid,
+     day by day. Hand-rolled rather than pulled from a calendar library:
+     the portal ships no third-party JS on this path today, and what a
+     student needs here is a readable week — not drag-and-drop, resizing,
+     or a dozen view types. Week is the default because that's the unit
+     work actually gets assigned in; Month is for looking ahead. */
+  /* Seven day columns need more room than the portal's default reading
+     width — same widening #screen-practice-tests already does for its
+     grid. Only on screens actually wide enough to use it. */
+  @media (min-width: 1100px) { #screen-calendar .panel-wide { max-width: 1040px; } }
+  /* No page heading on this screen (the sidebar already names it), so the
+     toolbar is the first thing in the panel — it needs its own top space. */
+  #screen-calendar .panel-wide { padding-top: 0.5rem; }
+  #screen-calendar .cal-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1rem; }
+  #screen-calendar .cal-nav { display: flex; align-items: center; gap: 0.35rem; }
+  .cal-arrow, .cal-today, .cal-view-btn {
+    font-family: var(--hel); font-weight: 600; font-size: 0.82rem; color: var(--text);
+    background: var(--white); border: 1px solid var(--border); border-radius: 999px;
+    padding: 0.4rem 0.85rem; cursor: pointer; transition: border-color 0.12s, color 0.12s, background 0.12s;
+  }
+  .cal-arrow { padding: 0.4rem 0.75rem; font-size: 1rem; line-height: 1; }
+  .cal-arrow:hover, .cal-today:hover, .cal-view-btn:hover { border-color: var(--red); color: var(--red); }
+  .cal-view-btn.is-on { background: var(--red); border-color: var(--red); color: #fff; }
+  .cal-title { font-family: var(--display); font-size: 1.15rem; text-align: center; flex: 1 1 auto; }
+  .cal-views { display: flex; gap: 0.35rem; }
+
+  .cal-legend { display: flex; flex-wrap: wrap; gap: 0.3rem 1rem; font-size: 0.75rem; color: var(--mid); margin-bottom: 0.9rem; align-items: center; }
+  .cal-legend i { display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 0.35rem; vertical-align: -1px; }
+  .cal-note { font-size: 0.78rem; color: var(--mid); background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 0.6rem 0.85rem; margin-bottom: 0.9rem; }
+  .cal-loading, .cal-empty { text-align: center; color: var(--faint); font-size: 0.88rem; padding: 2.5rem 1rem; }
+
+  /* Week — seven day cards. They stack on a phone rather than shrinking
+     into unreadable columns, which is also the more natural reading order
+     on the device most students actually check this on. */
+  .cal-week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 0.6rem; }
+  .cal-day { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 0.7rem 0.65rem; min-height: 130px; display: flex; flex-direction: column; gap: 0.4rem; }
+  .cal-day.is-today { border-color: var(--red); box-shadow: 0 0 0 1px var(--red) inset; }
+  .cal-day.is-past { background: #fbfbfb; }
+  .cal-day-head { display: flex; align-items: baseline; justify-content: space-between; gap: 0.3rem; }
+  .cal-day-name { font-size: 0.64rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); }
+  .cal-day.is-today .cal-day-name { color: var(--red); }
+  .cal-day-num { font-family: var(--display); font-size: 1.05rem; color: var(--text); }
+  .cal-day.is-today .cal-day-num { color: var(--red); font-weight: 700; }
+  .cal-day-empty { font-size: 0.75rem; color: var(--faint); }
+
+  .cal-session { background: rgba(62,107,140,0.1); border: 1px solid rgba(62,107,140,0.3); border-radius: 8px; padding: 0.35rem 0.5rem; font-size: 0.74rem; color: #2f5470; }
+  .cal-session b { display: block; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #3E6B8C; margin-bottom: 0.1rem; }
+
+  .cal-task { display: flex; align-items: flex-start; gap: 0.45rem; background: var(--bg); border-radius: 8px; padding: 0.4rem 0.5rem; font-size: 0.78rem; line-height: 1.35; cursor: pointer; }
+  .cal-task input { accent-color: var(--green); width: 15px; height: 15px; margin: 0.1rem 0 0; flex: 0 0 auto; cursor: pointer; }
+  .cal-task.is-done { color: var(--faint); text-decoration: line-through; }
+  .cal-task.is-done input { cursor: default; }
+  .cal-task.is-overdue { background: rgba(176,39,28,0.08); }
+
+  /* Month — a compact grid to look ahead with, not to work from. */
+  .cal-month { background: var(--white); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .cal-month-head, .cal-month-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
+  .cal-month-head div { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); padding: 0.55rem 0.4rem; text-align: center; border-bottom: 1px solid var(--border); }
+  .cal-mday { border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); min-height: 84px; padding: 0.35rem 0.4rem; display: flex; flex-direction: column; gap: 0.2rem; cursor: pointer; background: none; font-family: var(--hel); text-align: left; }
+  .cal-mday:nth-child(7n) { border-right: none; }
+  .cal-mday:hover { background: #fbfbfb; }
+  .cal-mday.is-other { background: #fafafa; color: var(--faint); }
+  .cal-mday.is-today .cal-mday-num { color: var(--red); font-weight: 700; }
+  .cal-mday-num { font-size: 0.75rem; color: var(--mid); }
+  .cal-chip { font-size: 0.65rem; line-height: 1.25; border-radius: 4px; padding: 0.1rem 0.25rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .cal-chip.task { background: rgba(176,39,28,0.12); color: var(--red); }
+  .cal-chip.task.is-done { background: var(--bg); color: var(--faint); text-decoration: line-through; }
+  .cal-chip.sess { background: rgba(62,107,140,0.14); color: #3E6B8C; }
+  .cal-more { font-size: 0.62rem; color: var(--faint); }
+
+  @media (max-width: 780px) {
+    /* A month cell is ~50px wide on a phone, which truncates every chip to
+       "Qu…". Dots instead: they still answer "is anything on this day",
+       and tapping the day opens that week, where the labels are legible. */
+    .cal-mday { min-height: 58px; flex-direction: row; flex-wrap: wrap; align-content: flex-start; gap: 3px; }
+    .cal-mday-num { flex: 0 0 100%; }
+    .cal-chip { width: 6px; height: 6px; padding: 0; border-radius: 50%; overflow: hidden; text-indent: -999px; flex: 0 0 auto; }
+    .cal-chip.task { background: var(--red); }
+    .cal-chip.sess { background: #3E6B8C; }
+    .cal-chip.task.is-done { background: var(--faint); }
+    .cal-more { display: none; }
+
+    .cal-week { grid-template-columns: 1fr; }
+    .cal-day { min-height: 0; }
+    .cal-day.is-empty { display: none; }  /* an empty day is just noise in a stacked list */
+    .cal-title { order: -1; flex: 1 1 100%; text-align: left; }
+  }
 </style>
 </head>
 <body>
@@ -2561,6 +2653,10 @@ window.Portal = {
     <a href="#" class="sidebar-item" data-nav="home" id="sidebar-home">
       <span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9a1 1 0 0 0 1 1h3v-6h4v6h3a1 1 0 0 0 1-1v-9"/></svg></span>
       <span class="sidebar-label">Home</span>
+    </a>
+    <a href="#" class="sidebar-item" data-nav="calendar" id="sidebar-calendar">
+      <span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 9.5h17"/><path d="M8 3.5v3"/><path d="M16 3.5v3"/></svg></span>
+      <span class="sidebar-label">Calendar</span>
     </a>
     <a href="#" class="sidebar-item" data-nav="files" id="sidebar-files">
       <span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a1 1 0 0 1 1-1h5l2 2h9a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7z"/></svg></span>
@@ -3064,10 +3160,6 @@ window.Portal = {
      isn't shown in two places at once. -->
 <div class="screen has-sidebar" id="screen-menu">
   <div class="panel-wide home-panel">
-    <div class="beta-banner" id="beta-banner">
-      <div class="beta-banner-text"><b>This portal is still in beta.</b> Luca's actively testing it and adding new content, so you might run into the occasional rough edge — if something looks off or isn't working, please reach out. Your feedback goes straight to fixing it.</div>
-      <button type="button" class="beta-banner-close" id="beta-banner-close" aria-label="Dismiss">&times;</button>
-    </div>
     <h1 class="menu-greeting" id="menu-greeting">Hey there.</h1>
 
     <!-- ═══ HOME EMPTY STATES ═══ replaces the whole dashboard (This
@@ -3148,6 +3240,10 @@ window.Portal = {
         <div class="assign-card" id="assign-card" style="display:none;">
           <div class="assign-label">This Week</div>
           <div class="assign-list" id="assign-list"></div>
+          <!-- This card shows only what's due now (see getAssignments' own
+               date/session filtering); the calendar is where the rest of
+               the week lives, so give it a way through from here. -->
+          <a href="#" class="assign-cal-link" id="assign-cal-link">See my full calendar &rarr;</a>
         </div>
 
         <div class="latest-test-card" id="latest-test-card" style="display:none;">
@@ -3164,6 +3260,37 @@ window.Portal = {
 </div>
 
 <!-- ═══ SCREEN 3 — RESOURCES (Drive lookup for "Your Files") ═══ -->
+<!-- ═══ SCREEN — CALENDAR ═══ the student's own week: what's due on which
+     day, and when their sessions are. Fed by getAssignmentsCalendar,
+     which (unlike the Home checklist) deliberately includes work that
+     isn't due yet — looking ahead is the entire point of this screen. -->
+<div class="screen has-sidebar" id="screen-calendar">
+  <div class="panel-wide">
+    <div class="cal-toolbar">
+      <div class="cal-nav">
+        <button type="button" class="cal-arrow" id="cal-prev" aria-label="Previous">&lsaquo;</button>
+        <button type="button" class="cal-today" id="cal-today">Today</button>
+        <button type="button" class="cal-arrow" id="cal-next" aria-label="Next">&rsaquo;</button>
+      </div>
+      <div class="cal-title" id="cal-title">&mdash;</div>
+      <div class="cal-views">
+        <button type="button" class="cal-view-btn is-on" data-calview="week">Week</button>
+        <button type="button" class="cal-view-btn" data-calview="month">Month</button>
+      </div>
+    </div>
+
+    <div class="cal-legend">
+      <span><i style="background:rgba(176,39,28,0.35)"></i>Assigned work</span>
+      <span><i style="background:rgba(62,107,140,0.45)"></i>Tutoring session</span>
+      <span class="cal-legend-hint" style="color:var(--faint);">Tick something off as you finish it.</span>
+    </div>
+    <div class="cal-note" id="cal-note" style="display:none;"></div>
+    <div id="cal-body"><div class="cal-loading">Loading your calendar&hellip;</div></div>
+
+    <a href="#" class="menu-back-link" id="cal-back">&larr; Back to menu</a>
+  </div>
+</div>
+
 <div class="screen has-sidebar" id="screen-resources">
   <div class="panel-wide">
     <div class="res-card">
@@ -3233,19 +3360,8 @@ window.Portal = {
       </div>
 
       <div class="iq-tabs" id="iq-tabs">
-        <button type="button" class="iq-tab active" data-tab="mistakes" id="iq-tab-mistakes">Mistakes <span class="iq-tab-count" id="iq-tab-mistakes-count">0</span></button>
-        <button type="button" class="iq-tab" data-tab="collections" id="iq-tab-collections">Collections</button>
+        <button type="button" class="iq-tab active" data-tab="mistakes" id="iq-tab-mistakes">Mistakes Log <span class="iq-tab-count" id="iq-tab-mistakes-count">0</span></button>
         <button type="button" class="iq-tab" data-tab="saved" id="iq-tab-saved">Saved Questions</button>
-      </div>
-
-      <!-- ═══ COLLECTIONS BAR ═══ only shown on the Collections tab — a row
-           of chips (one per student-made collection, each showing its
-           question count) plus a "+ New Collection" chip. Clicking a chip
-           selects it as the active collection and filters #iq-list to just
-           its questions, same row rendering as every other tab. See
-           window.iqModuleInit()'s own comment for the data model. -->
-      <div id="iq-collections-bar" style="display:none;">
-        <div id="iq-collections-chips"></div>
       </div>
 
       <!-- ONE "Filters" button opens ONE panel listing the five categories
@@ -3379,22 +3495,35 @@ window.Portal = {
       <p class="panel-sub">Every official College Board Reading &amp; Writing question, organized by skill — pick a subject, then a skill, to start practicing.</p>
     </div>
 
-    <div class="chal-stats-row qb-stats-row">
-      <div class="chal-stat">
-        <div class="chal-stat-label">Questions Attempted</div>
-        <div class="chal-stat-num" id="qb-stat-attempted">0</div>
+    <div class="qb-home-row">
+      <div class="qb-raw-stats">
+        <div class="qb-raw-stat">
+          <span class="qb-raw-stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.1" fill="currentColor" stroke="none"/></svg></span>
+          <div class="qb-raw-stat-text">
+            <div class="qb-raw-stat-lab">Questions Attempted</div>
+            <div class="qb-raw-stat-num" id="qb-stat-attempted">0</div>
+          </div>
+        </div>
+        <div class="qb-raw-stat">
+          <span class="qb-raw-stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5L16 9"/></svg></span>
+          <div class="qb-raw-stat-text">
+            <div class="qb-raw-stat-lab">Current Accuracy</div>
+            <div class="qb-raw-stat-num" id="qb-stat-accuracy">0%</div>
+          </div>
+        </div>
       </div>
-      <div class="chal-stat">
-        <div class="chal-stat-label">Current Accuracy</div>
-        <div class="chal-stat-num" id="qb-stat-accuracy">0%</div>
-      </div>
-      <div class="chal-stat">
-        <div class="chal-stat-label">Saved Questions</div>
-        <div class="chal-stat-num" id="qb-stat-saved">0</div>
-      </div>
-      <div class="chal-stat">
-        <div class="chal-stat-label">Study Streak</div>
-        <div class="chal-stat-num" id="qb-stat-streak">0</div>
+      <!-- Pulls each subject's single weakest skill (lowest accuracy, min
+           sample size — same weakestSkillIn()/HOME_*_DOMAINS bar the Home
+           dashboard's own mini skill cards use, via the
+           window.getWeakestSkillsForQb bridge) and runs both back to back
+           in one session — see startWeaknessPractice() in the script. -->
+      <div class="vp-tenmin-card qb-weak-card" id="qb-weak-card">
+        <div class="vp-tenmin-icon">&#127919;</div>
+        <div class="vp-tenmin-copy">
+          <div class="vp-tenmin-title">Practice Your Weaknesses</div>
+          <div class="vp-tenmin-sub">A focused 50-question round — 25 from your weakest Reading &amp; Writing skill, 25 from your weakest Math skill.</div>
+        </div>
+        <button class="vp-tenmin-btn" id="qb-weak-btn" type="button">Start <span>&rarr;</span></button>
       </div>
     </div>
 
@@ -4126,6 +4255,17 @@ window.Portal = {
      from a previous visit (accidental tab close, browser close, coming
      back a different day). Never shown for a retake/practice attempt —
      see alreadyTakenThisTestType() / getResumeSnapshot(). ═══ -->
+<!-- ═══ BETA NOTICE MODAL ═══ blocking, shown every fresh login (see
+     showBetaModal() in the script below) — a student must click "Got it"
+     before the overlay clears and anything underneath becomes reachable. -->
+<div class="beta-modal-overlay" id="beta-modal-overlay">
+  <div class="beta-modal">
+    <div class="beta-modal-hed">This portal is still in beta</div>
+    <p class="beta-modal-sub">Luca's actively testing it and adding new content, so you might run into the occasional rough edge. If something looks off or isn't working, please reach out — your feedback goes straight to fixing it.</p>
+    <button class="key-btn" id="beta-modal-ok" type="button">Got it</button>
+  </div>
+</div>
+
 <div class="resume-overlay" id="resume-overlay">
   <div class="resume-modal">
     <div class="resume-modal-hed">Continue where you left off?</div>
@@ -4414,7 +4554,7 @@ window.Portal = {
   // ever reflects what happened in this specific browser.
   function loadLocalProgressCache() {
     var key = currentStudent && currentStudent.key;
-    var incorrectQuestions = {}, skillStats = {}, savedQuestions = {}, collections = {};
+    var incorrectQuestions = {}, skillStats = {}, savedQuestions = {};
     if (key) {
       try {
         var rawIq = localStorage.getItem('moretti_incorrect_qs_' + key);
@@ -4428,12 +4568,8 @@ window.Portal = {
         var rawSv = localStorage.getItem('moretti_saved_qs_' + key);
         if (rawSv) { var svData = JSON.parse(rawSv); if (svData && svData.byKey) savedQuestions = svData.byKey; }
       } catch (e) { /* ignore */ }
-      try {
-        var rawCo = localStorage.getItem('moretti_collections_' + key);
-        if (rawCo) { var coData = JSON.parse(rawCo); if (coData && coData.byName) collections = coData.byName; }
-      } catch (e) { /* ignore */ }
     }
-    return { incorrectQuestions: incorrectQuestions, skillStats: skillStats, savedQuestions: savedQuestions, collections: collections };
+    return { incorrectQuestions: incorrectQuestions, skillStats: skillStats, savedQuestions: savedQuestions };
   }
 
   // Cross-device fix for Saved & Mistakes' other half — see
@@ -4612,16 +4748,9 @@ window.Portal = {
           var mergedIncorrect = canReconcile
             ? reconcileProgressMap(localCache.incorrectQuestions, data.incorrectQuestions || {}, 'attemptedAt', 'moretti_incorrect_qs_' + key)
             : Object.assign({}, localCache.incorrectQuestions, data.incorrectQuestions || {});
-          // Collections merge per NAME (not per-question-within-a-name) —
-          // a collection is always synced as a whole (see
-          // syncCollectionsToBackend()), so the backend's copy of a given
-          // collection name is authoritative once it exists; a
-          // local-only collection this device hasn't synced yet still
-          // shows up via the merge.
-          var mergedCollections = Object.assign({}, localCache.collections, data.collections || {});
           var mergedVocab = window.mergeVocabProgress_(localCache.vocabProgress, data.vocabProgress || null);
           var mergedQbAttempts = window.mergeQbAttempts_(localCache.qbAttempts, data.qbAttempts || {});
-          result = { incorrectQuestions: mergedIncorrect, skillStats: data.skillStats || {}, savedQuestions: mergedSaved, collections: mergedCollections, vocabProgress: mergedVocab, qbAttempts: mergedQbAttempts };
+          result = { incorrectQuestions: mergedIncorrect, skillStats: data.skillStats || {}, savedQuestions: mergedSaved, vocabProgress: mergedVocab, qbAttempts: mergedQbAttempts };
         } else {
           result = localCache;
         }
@@ -4637,8 +4766,8 @@ window.Portal = {
         return localCache;
       });
   };
-  // A write anywhere (saving a question, recording a Question Bank miss,
-  // syncing collections) makes the cached read stale immediately — without
+  // A write anywhere (saving a question, recording a Question Bank miss)
+  // makes the cached read stale immediately — without
   // this, saving a question then jumping straight to Saved & Mistakes
   // could still show the pre-save cached copy for up to a minute.
   window.invalidatePortalProgressCache = function () { progressFetchResult = null; progressFetchAt = 0; };
@@ -4648,8 +4777,7 @@ window.Portal = {
   // so a rapid burst of grading actions (e.g. 10-Minute Practice answering
   // a card every couple seconds) coalesces into one request instead of one
   // per card. Both actions overwrite server-side wholesale — safe because
-  // the caller always sends its own already-merged (local+server) view,
-  // same reasoning as syncCollectionsToBackend()/updateCollections above.
+  // the caller always sends its own already-merged (local+server) view.
   var vocabSyncTimer = null, qbAttemptsSyncTimer = null;
   window.syncVocabProgress = function (progress) {
     var key = currentStudent && currentStudent.key;
@@ -4991,8 +5119,8 @@ window.Portal = {
     setNav('sidebar-challenge-questions', resourcesHidden || !showSat);
     setNav('sidebar-question-bank', resourcesHidden || !showSat);
   }
-  var SIDEBAR_SCREENS = { 'screen-menu': 1, 'screen-practice-tests': 1, 'screen-resources': 1, 'screen-vocab': 1, 'screen-incorrect-questions': 1, 'screen-sat-resources': 1, 'screen-challenge-questions': 1, 'screen-question-bank': 1 };
-  var SIDEBAR_NAV_FOR_SCREEN = { 'screen-menu': 'home', 'screen-practice-tests': 'practice-tests', 'screen-resources': 'files', 'screen-vocab': 'vocab', 'screen-incorrect-questions': 'incorrect-questions', 'screen-challenge-questions': 'challenge-questions', 'screen-question-bank': 'question-bank' };
+  var SIDEBAR_SCREENS = { 'screen-menu': 1, 'screen-calendar': 1, 'screen-practice-tests': 1, 'screen-resources': 1, 'screen-vocab': 1, 'screen-incorrect-questions': 1, 'screen-sat-resources': 1, 'screen-challenge-questions': 1, 'screen-question-bank': 1 };
+  var SIDEBAR_NAV_FOR_SCREEN = { 'screen-menu': 'home', 'screen-calendar': 'calendar', 'screen-practice-tests': 'practice-tests', 'screen-resources': 'files', 'screen-vocab': 'vocab', 'screen-incorrect-questions': 'incorrect-questions', 'screen-challenge-questions': 'challenge-questions', 'screen-question-bank': 'question-bank' };
   var sidebarEl = document.getElementById('portal-sidebar');
   var mainNavEl = document.getElementById('main-nav');
   var examWatermarkEl = document.getElementById('exam-watermark');
@@ -5180,23 +5308,39 @@ window.Portal = {
     return "That key wasn't recognized. Double-check it, or text Luca at (201) 275-2791.";
   }
 
-  // Shown once per fresh login (called from settle() below), dismissible
-  // for the rest of that browser session — sessionStorage rather than
-  // localStorage on purpose, so it reliably comes back and gets seen again
-  // on the student's NEXT login, not just their first one ever.
-  var BETA_BANNER_DISMISS_KEY = 'moretti_beta_banner_dismissed';
-  function showBetaBanner() {
-    var el = document.getElementById('beta-banner');
-    if (!el) return;
-    var dismissed = false;
-    try { dismissed = sessionStorage.getItem(BETA_BANNER_DISMISS_KEY) === '1'; } catch (e) {}
-    el.style.display = dismissed ? 'none' : 'flex';
+  // Blocking beta notice — shown every fresh login (settle()) and on a
+  // same-tab refresh (restoreState()), with no "remember this was
+  // dismissed" persistence: while the portal's in beta, every student who
+  // logs in should see it, every time, not just their first visit ever.
+  // Unlike the old dismissible banner this replaced, this is a full
+  // .resume-overlay-style modal — the overlay covers the whole viewport,
+  // so nothing underneath is reachable until "Got it" is clicked, which
+  // just closes the overlay (no state to carry: it reopens fresh next
+  // login regardless). Deliberately NOT wired into ordinary in-app
+  // navigation (e.g. clicking the Home sidebar item) — that would mean a
+  // blocking modal interrupting a student mid-session every time they
+  // click Home, which is real friction a soft banner never had.
+  function showBetaModal() {
+    var el = document.getElementById('beta-modal-overlay');
+    if (el) el.classList.add('active');
   }
-  document.getElementById('beta-banner-close').addEventListener('click', function () {
-    document.getElementById('beta-banner').style.display = 'none';
-    try { sessionStorage.setItem(BETA_BANNER_DISMISS_KEY, '1'); } catch (e) {}
+  document.getElementById('beta-modal-ok').addEventListener('click', function () {
+    document.getElementById('beta-modal-overlay').classList.remove('active');
   });
 
+  // Subtle fade/blur-in on the "Hey Owen." greeting, matching the same
+  // "collapse to a starting state, force a reflow, restore on the next
+  // frame" pattern animateScoreBars() already uses so a CSS transition has
+  // something to actually animate between — see the .pre-reveal CSS rule's
+  // own comment for why the DEFAULT (no-JS) state is fully visible rather
+  // than the animated-from state.
+  function revealGreeting(el) {
+    if (!el) return;
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    el.classList.add('pre-reveal');
+    void el.offsetHeight; // force reflow so pre-reveal's starting state is committed before animating away from it
+    requestAnimationFrame(function () { el.classList.remove('pre-reveal'); });
+  }
   function settle(data) {
     currentStudent = {
       key: pendingKey,
@@ -5221,7 +5365,8 @@ window.Portal = {
       assignments: data.assignments || []
     };
     document.getElementById('menu-greeting').textContent = 'Hey ' + currentStudent.name.split(' ')[0] + '.';
-    showBetaBanner();
+    revealGreeting(document.getElementById('menu-greeting'));
+    showBetaModal();
     show('screen-menu');
     loadNextSession();
     renderTestCountdown();
@@ -5379,6 +5524,331 @@ window.Portal = {
   // backend. Fire-and-forget — if the request fails, the checkbox just
   // reverts to unchecked/enabled on the next loadAssignments() refresh
   // instead of anything being lost.
+  /* ═══ CALENDAR SCREEN ═══
+     The Home checklist answers "what do I do today"; this answers "what
+     does my week look like" — which is the question a student actually
+     asks on a Sunday night. It reads getAssignmentsCalendar rather than
+     getAssignments on purpose: that feed returns work that ISN'T due yet
+     (which the checklist deliberately hides) plus this student's own
+     tutoring sessions, so due dates and the sessions they're being
+     prepared for sit on one grid.
+
+     Hand-rolled rather than a calendar library: nothing on this page
+     needs dragging or resizing — a student reads this screen and ticks
+     things off it. Two views only. Week is the default because a week is
+     the unit work gets assigned in; Month is for looking ahead.
+
+     Data is fetched in a wide window (the visible range padded either
+     side) and re-fetched only when the student pages outside it, so
+     stepping week to week doesn't mean a round trip to Apps Script —
+     which on a cold start is slow enough to feel broken. */
+  var calState = {
+    view: 'week', anchor: null, items: [], sessions: [],
+    loadedStart: null, loadedEnd: null, loading: false, failed: false, failReason: null,
+    calendarError: false, wired: false
+  };
+
+  function calStartOfDay(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+  function calAddDays(d, n) { var x = new Date(d.getTime()); x.setDate(x.getDate() + n); return x; }
+  function calWeekStart(d) { var x = calStartOfDay(d); x.setDate(x.getDate() - x.getDay()); return x; }
+  function calDayKey(d) {
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  // The day an assignment belongs on. dueDay is sent pre-formatted by the
+  // backend in ITS timezone (see dueDayString_ in Code.gs); the ISO
+  // instant is only a fallback for a backend that predates that field.
+  function calItemDay(a) {
+    if (a.dueDay) return a.dueDay;
+    if (!a.dueDate) return null;
+    var d = new Date(a.dueDate);
+    return isNaN(d.getTime()) ? null : calDayKey(d);
+  }
+  function calSessionDay(sess) {
+    var d = new Date(sess.startIso);
+    return isNaN(d.getTime()) ? null : calDayKey(d);
+  }
+  function calEscape(str) {
+    return String(str == null ? '' : str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  function calVisibleRange() {
+    if (calState.view === 'week') {
+      var ws = calWeekStart(calState.anchor);
+      return { start: ws, end: calAddDays(ws, 7) };
+    }
+    var ms = new Date(calState.anchor.getFullYear(), calState.anchor.getMonth(), 1);
+    var gridStart = calAddDays(ms, -ms.getDay());
+    return { start: gridStart, end: calAddDays(gridStart, 42) };
+  }
+
+  var CAL_PAD_DAYS = 40;
+  function calEnsureData(force) {
+    if (!currentStudent || !currentStudent.key) return;
+    var vis = calVisibleRange();
+    var covered = calState.loadedStart && vis.start >= calState.loadedStart && vis.end <= calState.loadedEnd;
+    if (covered && !force) return;
+    // One request at a time — but whatever range the student has moved to
+    // by the time this one lands gets re-checked in the callback below.
+    // Without that, paging ahead during a slow load (an Apps Script cold
+    // start is seconds long) silently strands them on a week that never
+    // gets fetched — which reads as "nothing assigned" rather than "not
+    // loaded", the worst possible way for this screen to be wrong.
+    if (calState.loading) return;
+
+    var start = calAddDays(vis.start, -CAL_PAD_DAYS);
+    var end = calAddDays(vis.end, CAL_PAD_DAYS);
+    calState.loading = true;
+    calState.failed = false;
+    calState.failReason = null;
+    calRender();
+    postToBackend({
+      action: 'getAssignmentsCalendar', key: currentStudent.key,
+      start: calDayKey(start), end: calDayKey(end)
+    }).then(function (data) {
+      calState.loading = false;
+      if (!data || !data.ok) {
+        calState.failed = true;
+        // The server ANSWERED, it just said no — telling a student to
+        // check their connection here sends them chasing the wrong
+        // problem. The real reason goes to the console for Luca: an
+        // 'unknown_action' means this build of the portal is talking to a
+        // backend deployment that predates the calendar feed.
+        calState.failReason = (data && data.error) || 'server';
+        if (window.console && console.warn) console.warn('[calendar] backend refused getAssignmentsCalendar:', calState.failReason);
+        calRender();
+        return;
+      }
+      calState.items = data.assignments || [];
+      calState.sessions = data.sessions || [];
+      calState.calendarError = !!data.calendarError;
+      calState.loadedStart = start;
+      calState.loadedEnd = end;
+      calRender();
+      calEnsureData(); // no-op unless they paged somewhere else while this was loading
+    }).catch(function () {
+      calState.loading = false;
+      calState.failed = true;
+      calState.failReason = 'network';
+      calRender();
+    });
+  }
+
+  function calTaskHtml(item, dayKey, todayKey) {
+    var overdue = !item.done && dayKey && dayKey < todayKey;
+    return '<div class="cal-task' + (item.done ? ' is-done' : '') + (overdue ? ' is-overdue' : '') + '" data-row="' + item.row + '">' +
+      '<input type="checkbox"' + (item.done ? ' checked disabled' : '') + '>' +
+      '<span>' + calEscape(item.task) + '</span>' +
+      '</div>';
+  }
+
+  function calSessionHtml(sess) {
+    var d = new Date(sess.startIso);
+    var when = sess.allDay ? 'All day' : d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+    return '<div class="cal-session"><b>' + calEscape(when) + '</b>' + calEscape(sess.title) + '</div>';
+  }
+
+  function calRender() {
+    var body = document.getElementById('cal-body');
+    var titleEl = document.getElementById('cal-title');
+    var noteEl = document.getElementById('cal-note');
+    if (!body || !calState.anchor) return;
+
+    var vis = calVisibleRange();
+    titleEl.textContent = calState.view === 'week'
+      ? calAddDays(vis.start, 0).toLocaleDateString(undefined, { month: 'long', day: 'numeric' }) + ' — ' +
+        calAddDays(vis.end, -1).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })
+      : calState.anchor.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+
+    var notes = [];
+    var covered = calState.loadedStart && vis.start >= calState.loadedStart && vis.end <= calState.loadedEnd;
+    // An in-flight load for a range we haven't got yet: say so, so an
+    // empty-looking week isn't mistaken for an empty one.
+    if (calState.loading && !covered) notes.push('Loading this part of your calendar&hellip;');
+    // A failed refresh keeps the last-loaded week on screen rather than
+    // blanking it — but say so, so nobody plans around a stale list
+    // believing it's current.
+    if (calState.failed && calState.items.length) notes.push('Couldn’t refresh just now — showing what was last loaded.');
+    if (calState.calendarError) notes.push('Session times couldn’t be loaded right now — your assignments below are up to date.');
+    var undated = calState.items.filter(function (a) { return !calItemDay(a) && !a.done; });
+    if (undated.length) {
+      notes.push('No date set: ' + undated.map(function (a) { return calEscape(a.task); }).join(' &middot; '));
+    }
+    noteEl.innerHTML = notes.join('<br>');
+    noteEl.style.display = notes.length ? 'block' : 'none';
+
+    if (calState.loading && !calState.items.length) { body.innerHTML = '<div class="cal-loading">Loading your calendar&hellip;</div>'; return; }
+    if (calState.failed && !calState.items.length) {
+      body.innerHTML = '<div class="cal-empty">' + (calState.failReason === 'network'
+        ? 'Couldn’t reach the internet just now — check your connection and try again.'
+        : 'Your calendar isn’t available right now. Everything you’ve been assigned is still on your Home screen.') +
+        '</div>';
+      return;
+    }
+
+    var byDay = {};
+    calState.items.forEach(function (a) {
+      var k = calItemDay(a);
+      if (!k) return;
+      (byDay[k] = byDay[k] || { tasks: [], sessions: [] }).tasks.push(a);
+    });
+    calState.sessions.forEach(function (sess) {
+      var k = calSessionDay(sess);
+      if (!k) return;
+      (byDay[k] = byDay[k] || { tasks: [], sessions: [] }).sessions.push(sess);
+    });
+
+    var todayKey = calDayKey(new Date());
+    body.innerHTML = calState.view === 'week'
+      ? calRenderWeek(vis, byDay, todayKey)
+      : calRenderMonth(vis, byDay, todayKey);
+  }
+
+  function calRenderWeek(vis, byDay, todayKey) {
+    var anything = false;
+    for (var n = 0; n < 7; n++) {
+      var probe = byDay[calDayKey(calAddDays(vis.start, n))];
+      if (probe && (probe.tasks.length || probe.sessions.length)) { anything = true; break; }
+    }
+    // Empty day cards are hidden on a phone (see the media query), so a
+    // week with nothing in it would otherwise render as a blank screen —
+    // indistinguishable from something having gone wrong.
+    var out = [anything ? '' : '<div class="cal-empty">Nothing assigned this week.</div>', '<div class="cal-week">'];
+    for (var i = 0; i < 7; i++) {
+      var d = calAddDays(vis.start, i);
+      var key = calDayKey(d);
+      var day = byDay[key] || { tasks: [], sessions: [] };
+      var isEmpty = !day.tasks.length && !day.sessions.length;
+      out.push('<div class="cal-day' + (key === todayKey ? ' is-today' : '') + (key < todayKey ? ' is-past' : '') + (isEmpty ? ' is-empty' : '') + '">');
+      out.push('<div class="cal-day-head"><span class="cal-day-name">' +
+        d.toLocaleDateString(undefined, { weekday: 'short' }) + '</span><span class="cal-day-num">' + d.getDate() + '</span></div>');
+      day.sessions.forEach(function (sess) { out.push(calSessionHtml(sess)); });
+      day.tasks.forEach(function (t) { out.push(calTaskHtml(t, key, todayKey)); });
+      if (isEmpty) out.push('<div class="cal-day-empty">Nothing due</div>');
+      out.push('</div>');
+    }
+    out.push('</div>');
+    return out.join('');
+  }
+
+  var CAL_MONTH_CHIP_MAX = 3;
+  function calRenderMonth(vis, byDay, todayKey) {
+    var month = calState.anchor.getMonth();
+    var out = ['<div class="cal-month"><div class="cal-month-head">'];
+    ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach(function (n) { out.push('<div>' + n + '</div>'); });
+    out.push('</div><div class="cal-month-grid">');
+    for (var i = 0; i < 42; i++) {
+      var d = calAddDays(vis.start, i);
+      var key = calDayKey(d);
+      var day = byDay[key] || { tasks: [], sessions: [] };
+      out.push('<button type="button" class="cal-mday' + (d.getMonth() !== month ? ' is-other' : '') +
+        (key === todayKey ? ' is-today' : '') + '" data-day="' + key + '">');
+      out.push('<span class="cal-mday-num">' + d.getDate() + '</span>');
+      var shown = 0;
+      day.sessions.forEach(function (sess) {
+        if (shown >= CAL_MONTH_CHIP_MAX) return;
+        shown++;
+        out.push('<span class="cal-chip sess">' + calEscape(sess.title) + '</span>');
+      });
+      day.tasks.forEach(function (t) {
+        if (shown >= CAL_MONTH_CHIP_MAX) return;
+        shown++;
+        out.push('<span class="cal-chip task' + (t.done ? ' is-done' : '') + '">' + calEscape(t.task) + '</span>');
+      });
+      var total = day.sessions.length + day.tasks.length;
+      if (total > shown) out.push('<span class="cal-more">+' + (total - shown) + ' more</span>');
+      out.push('</button>');
+    }
+    out.push('</div></div>');
+    return out.join('');
+  }
+
+  // Ticking something off here writes through the same one-way toggle the
+  // Home checklist uses, and hands the fresh list back to that checklist
+  // too — otherwise Home would keep showing as outstanding something the
+  // student just ticked off on this screen.
+  function calToggle(row) {
+    var item = calState.items.filter(function (a) { return a.row === row; })[0];
+    if (!item || item.done) return;
+    item.done = true;
+    calRender();
+    fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'toggleAssignment', key: currentStudent.key, row: row, done: true })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (!data || !data.ok) { item.done = false; calRender(); return; }
+        if (data.assignments && currentStudent) {
+          currentStudent.assignments = data.assignments;
+          renderAssignments();
+        }
+      })
+      .catch(function () { item.done = false; calRender(); });
+  }
+
+  var assignCalLink = document.getElementById('assign-cal-link');
+  if (assignCalLink) {
+    // Bound here rather than inside calWire below: that only runs the
+    // first time the calendar screen is opened, which is exactly the
+    // thing this link exists to do first.
+    assignCalLink.addEventListener('click', function (e) { e.preventDefault(); navigateTo('calendar'); });
+  }
+
+  function calWire() {
+    calState.wired = true;
+    document.getElementById('cal-prev').addEventListener('click', function () {
+      calState.anchor = calState.view === 'week'
+        ? calAddDays(calState.anchor, -7)
+        : new Date(calState.anchor.getFullYear(), calState.anchor.getMonth() - 1, 1);
+      calRender(); calEnsureData();
+    });
+    document.getElementById('cal-next').addEventListener('click', function () {
+      calState.anchor = calState.view === 'week'
+        ? calAddDays(calState.anchor, 7)
+        : new Date(calState.anchor.getFullYear(), calState.anchor.getMonth() + 1, 1);
+      calRender(); calEnsureData();
+    });
+    document.getElementById('cal-today').addEventListener('click', function () {
+      calState.anchor = new Date();
+      calRender(); calEnsureData();
+    });
+    document.querySelectorAll('.cal-view-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        calState.view = btn.getAttribute('data-calview');
+        document.querySelectorAll('.cal-view-btn').forEach(function (b) { b.classList.toggle('is-on', b === btn); });
+        calRender(); calEnsureData();
+      });
+    });
+    document.getElementById('cal-body').addEventListener('click', function (e) {
+      var task = e.target.closest('.cal-task');
+      if (task) { calToggle(Number(task.getAttribute('data-row'))); return; }
+      // A day in the month view opens that week — "what exactly is that
+      // dot" is the only question a month cell ever raises.
+      var mday = e.target.closest('.cal-mday');
+      if (mday) {
+        var parts = mday.getAttribute('data-day').split('-');
+        calState.anchor = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+        calState.view = 'week';
+        document.querySelectorAll('.cal-view-btn').forEach(function (b) { b.classList.toggle('is-on', b.getAttribute('data-calview') === 'week'); });
+        calRender(); calEnsureData();
+      }
+    });
+    var back = document.getElementById('cal-back');
+    if (back) back.addEventListener('click', function (e) { e.preventDefault(); show('screen-menu'); });
+  }
+
+  // Called by navigateTo every time the screen is opened — re-fetches so a
+  // task Luca added since the last visit shows up without a reload.
+  window.calendarModuleInit = function () {
+    if (!calState.wired) calWire();
+    // Always opens on the current week, even if the last visit wandered
+    // off to December — "where am I" should never be a question this
+    // screen raises, and the student can page back in one click.
+    calState.anchor = new Date();
+    calRender();
+    calEnsureData(true);
+  };
+
   function completeAssignment(item, row, cb) {
     item.done = true;
     row.classList.add('assign-done');
@@ -5584,7 +6054,7 @@ window.Portal = {
       targetHtml = '<div class="spc-target-line" style="bottom:' + Math.round(tFrac * 100) + '%"><span>Target ' + target + '</span></div>';
     }
     return '<div class="spc-score-top"><div>' +
-        '<div class="spc-composite-num">' + (last.composite != null ? last.composite : '—') + '</div>' +
+        '<div class="spc-composite-num"' + (last.composite != null ? ' data-count-to="' + last.composite + '"' : '') + '>' + (last.composite != null ? '0' : '—') + '</div>' +
         deltaHtml +
       '</div></div>' +
       '<div class="spc-bar-chart-wrap">' + targetHtml + '<div class="spc-bars">' + barsHtml + '</div></div>' +
@@ -5873,6 +6343,7 @@ window.Portal = {
     scoreProgressChartsEl.innerHTML = html;
     scoreProgressCard.style.display = '';
     animateScoreBars();
+    animateCountUp(scoreProgressChartsEl);
   }
 
   // Bars grow in from zero the moment Score Progress renders (login,
@@ -5891,6 +6362,35 @@ window.Portal = {
     void scoreProgressChartsEl.offsetHeight; // force reflow so the 0% above is committed before animating away from it
     requestAnimationFrame(function () {
       bars.forEach(function (bar, i) { bar.style.height = targets[i]; });
+    });
+  }
+
+  // Counts each [data-count-to] element up from 0 to its real value instead
+  // of just having the composite score appear — same "draw the eye to the
+  // one number that matters" job as animateScoreBars() above, on the
+  // number those bars sit next to. Shared/generic on purpose (keyed off a
+  // data attribute, not a hardcoded element id) so any future stat number
+  // can opt in by just adding data-count-to to its markup. Eased with the
+  // same cubic-bezier feel as the rest of the app's motion (see --ease),
+  // computed by hand since this is a plain number tween, not a CSS
+  // transition — CSS can't animate a text node's numeric content.
+  function animateCountUp(root) {
+    var els = root.querySelectorAll('[data-count-to]');
+    if (!els.length) return;
+    var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    els.forEach(function (el) {
+      var target = Number(el.getAttribute('data-count-to'));
+      if (!isFinite(target)) return;
+      if (reduceMotion) { el.textContent = String(target); return; }
+      var duration = 900, start = null;
+      function ease(t) { return 1 - Math.pow(1 - t, 3); } // cubic ease-out — fast start, gentle settle
+      function tick(ts) {
+        if (start === null) start = ts;
+        var progress = Math.min(1, (ts - start) / duration);
+        el.textContent = String(Math.round(target * ease(progress)));
+        if (progress < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
     });
   }
 
@@ -5959,7 +6459,12 @@ window.Portal = {
       if (!s || !domainSet[s.domain] || !s.total || s.total < HOME_WEAK_SKILL_MIN_ATTEMPTS) return;
       var pct = s.correct / s.total;
       if (!best || pct < best.pct || (pct === best.pct && s.total > best.total)) {
-        best = { skill: s.skill, correct: s.correct, total: s.total, pct: pct };
+        // domain is included so callers outside this file's own domain-set
+        // vocabulary (see window.getWeakestSkillsForQb) can still place
+        // this skill even when its exact name doesn't exist in THEIR own
+        // taxonomy — existing callers here only ever read .skill/.pct/
+        // .total, so adding a field is safe.
+        best = { skill: s.skill, domain: s.domain, correct: s.correct, total: s.total, pct: pct };
       }
     });
     return best;
@@ -5976,6 +6481,33 @@ window.Portal = {
     if (barEl) barEl.style.width = Math.max(2, pctInt) + '%';
     cardEl.style.display = '';
   }
+
+  // Bridge for the Question Bank module's "Practice Your Weaknesses" button
+  // (that module is its own isolated closure — same reason
+  // window.getPortalStudentKey exists) — reuses the exact same weakest-
+  // skill signal Home's own "Math/R&W — Top Weak Skill" mini cards already
+  // show, so "your weakest skill" means the same thing in both places
+  // instead of Question Bank inventing a second, QB-attempts-only notion of
+  // weakness that could disagree with what Home tells the student.
+  window.getWeakestSkillsForQb = function (callback) {
+    if (!window.fetchPortalProgress) { callback({ rw: null, math: null }); return; }
+    window.fetchPortalProgress(function (progress) {
+      var skillStats = (progress.skillStats && typeof progress.skillStats === 'object') ? progress.skillStats : {};
+      var rw = weakestSkillIn(skillStats, HOME_RW_DOMAINS);
+      var math = weakestSkillIn(skillStats, HOME_MATH_DOMAINS);
+      // domain travels alongside the skill name — the diagnostic's skill
+      // taxonomy is much finer-grained than Question Bank's own (30+
+      // skills vs. QB Math's current 8), and formats domain/skill names
+      // slightly differently ("&" vs "and", stray commas, casing), so a
+      // caller matching into QB's own skill list needs a same-domain
+      // fallback for when the exact skill name isn't one QB has content
+      // for yet — see weaknessPoolFor()'s use of this in the QB module.
+      callback({
+        rw: rw ? { skill: rw.skill, domain: rw.domain } : null,
+        math: math ? { skill: math.skill, domain: math.domain } : null
+      });
+    });
+  };
 
   function renderHomePies() {
     // "Your Overview" (filter chip + bar chart + this stat row) is a
@@ -6705,6 +7237,7 @@ window.Portal = {
      new navigation model, just more doors into the same five screens. */
   function navigateTo(nav) {
     if (nav === 'home') { show('screen-menu'); }
+    else if (nav === 'calendar') { show('screen-calendar'); if (window.calendarModuleInit) window.calendarModuleInit(); }
     else if (nav === 'files') { renderResources(); show('screen-resources'); }
     else if (nav === 'vocab') { show('screen-vocab'); if (window.vocabModuleInit) window.vocabModuleInit(); }
     else if (nav === 'practice-tests') { ptListReturnScreen = 'screen-menu'; renderPracticeTestList(); show('screen-practice-tests'); }
@@ -6727,6 +7260,7 @@ window.Portal = {
      there on click/Enter. */
   var NAV_SEARCH_INDEX = [
     { label: 'Home', nav: 'home' },
+    { label: 'Calendar', nav: 'calendar' },
     { label: 'Practice Tests', nav: 'practice-tests' },
     { label: 'Diagnostic', nav: 'diagnostic' },
     { label: 'Files', nav: 'files' },
@@ -9597,32 +10131,6 @@ window.Portal = {
     } catch (e) { /* ignore — local cache above already covers this device */ }
   };
 
-  // ═══ SAVED & MISTAKES — COLLECTIONS ═══ bridge for the iq module's own
-  // isolated closure (same reason window.getPortalStudentKey exists —
-  // that module can't see currentStudent/APPS_SCRIPT_URL directly).
-  // `collections` is the FULL, already-merged { [name]: { [key]:
-  // {addedAt} } } object — this writes it to the local cache immediately
-  // (instant, survives a failed network call) and best-effort syncs the
-  // whole thing to the backend (Code.gs' updateCollections action, which
-  // overwrites CollectionsJSON wholesale — see that handler's own
-  // comment for why that's safe here specifically).
-  window.updateStudentCollections = function (collections) {
-    try {
-      var studentKey = currentStudent && currentStudent.key;
-      if (!studentKey) return;
-      localStorage.setItem('moretti_collections_' + studentKey, JSON.stringify({ byName: collections, updatedAt: new Date().toISOString() }));
-    } catch (e) { /* storage disabled / private browsing — skip silently */ }
-    if (window.invalidatePortalProgressCache) window.invalidatePortalProgressCache();
-    try {
-      var studentKey2 = currentStudent && currentStudent.key;
-      if (!studentKey2) return;
-      fetch(APPS_SCRIPT_URL, {
-        method: 'POST',
-        body: JSON.stringify({ action: 'updateCollections', key: studentKey2, collections: collections })
-      }).catch(function () {});
-    } catch (e) { /* ignore — local cache above already covers this device */ }
-  };
-
   // Sends this attempt's incorrect-question records and skill breakdown to
   // the backend (Code.gs' Progress sheet, action 'syncProgress') so
   // "Saved & Mistakes" / "Practice My Weak Spots" work from ANY device,
@@ -10335,11 +10843,11 @@ window.Portal = {
       renderResources();
       show('screen-resources');
     } else if (state.screen === 'screen-test-choice' || state.screen === 'screen-menu' || state.screen === 'screen-test-overview' || state.screen === 'screen-sat-resources') {
-      // A same-tab refresh re-parses this whole script, so #beta-banner is
-      // back to its CSS default (display:none) regardless of whether
-      // settle() already showed it earlier this session — re-run the same
-      // dismissed-this-session check rather than leaving it stuck hidden.
-      if (state.screen === 'screen-menu' && typeof showBetaBanner === 'function') showBetaBanner();
+      // A same-tab refresh re-parses this whole script, so the modal's own
+      // .active class is gone regardless of whether settle() already
+      // showed it earlier this session — re-show it rather than leaving a
+      // refresh silently skip the notice entirely.
+      if (state.screen === 'screen-menu' && typeof showBetaModal === 'function') showBetaModal();
       show(state.screen);
     } else if (state.screen === 'screen-practice-tests') {
       ptListReturnScreen = state.ptListReturnScreen === 'screen-sat-resources' ? 'screen-sat-resources' : 'screen-menu';
@@ -12114,30 +12622,12 @@ window.Portal = {
   document.addEventListener('mousedown', function (e) {
     if (openDropdown && !openDropdown.contains(e.target)) closeDropdown();
   });
-  // Same outside-click-closes behavior for the per-row "Add to collection"
-  // popover — it only ever closed when a DIFFERENT one opened (see the
-  // click handler below), never on a plain click elsewhere on the page.
-  document.addEventListener('mousedown', function (e) {
-    var open = document.querySelectorAll('.iq-add-to-collection.open');
-    for (var i = 0; i < open.length; i++) {
-      if (!open[i].contains(e.target)) open[i].classList.remove('open');
-    }
-  });
-
-  var listEl, poolCountEl, sectionPillsEl, domainPillsEl, skillPillsEl, difficultyPillsEl, testPillsEl, practiceBtnEl, practiceCountEl, filtersEl, tabSavedEl, tabMistakesEl, tabMistakesCountEl, tabCollectionsEl, collectionsBarEl, collectionsChipsEl;
+  var listEl, poolCountEl, sectionPillsEl, domainPillsEl, skillPillsEl, difficultyPillsEl, testPillsEl, practiceBtnEl, practiceCountEl, filtersEl, tabSavedEl, tabMistakesEl, tabMistakesCountEl;
   var initialized = false;
-  // 'saved' | 'mistakes' | 'collections' — which tab is showing. Saved
-  // Questions and Collections both skip the filter bar (they're already
-  // curated lists, not a "build a session" screen) — #iq-filters only
-  // shows on Mistakes.
+  // 'saved' | 'mistakes' — which tab is showing. Saved Questions skips the
+  // filter bar (it's already a curated list, not a "build a session"
+  // screen) — #iq-filters only shows on Mistakes.
   var activeTab = 'mistakes';
-  // { [collectionName]: { [key]: {addedAt} } } — loaded from
-  // window.fetchPortalProgress() in loadRecords() below, written back via
-  // window.updateStudentCollections() any time it changes (see
-  // saveCollectionsAndRerender()). activeCollectionName is which one the
-  // Collections tab is currently showing (null = "pick one" empty state).
-  var collections = {};
-  var activeCollectionName = null;
   var SECTION_ORDER = ['reading-writing', 'math', 'english', 'act-math', 'reading', 'science'];
   // A record is a "mistake" if it came from incorrectQuestions (savedCorrect
   // is only ever set on the saved-but-right branch in loadRecords below) —
@@ -12145,14 +12635,9 @@ window.Portal = {
   // question still shows up in the Mistakes Log. isSaved is independent and
   // drives the Saved Questions tab.
   function mistakeRecords() { return records.filter(function (r) { return !r.savedCorrect; }); }
-  function collectionRecords() {
-    var keys = (activeCollectionName && collections[activeCollectionName]) || {};
-    return records.filter(function (r) { return !!keys[r.key]; });
-  }
   function savedRecordsList() { return records.filter(function (r) { return r.isSaved; }); }
   function baseRecords() {
     if (activeTab === 'saved') return savedRecordsList();
-    if (activeTab === 'collections') return collectionRecords();
     return mistakeRecords();
   }
 
@@ -12176,7 +12661,6 @@ window.Portal = {
     window.fetchPortalProgress(function (progress) {
       var byKey = (progress.incorrectQuestions && typeof progress.incorrectQuestions === 'object') ? progress.incorrectQuestions : {};
       var savedByKey = (progress.savedQuestions && typeof progress.savedQuestions === 'object') ? progress.savedQuestions : {};
-      collections = (progress.collections && typeof progress.collections === 'object') ? progress.collections : {};
       readyPromise.then(function () {
         records = Object.keys(byKey).map(function (k) {
           var stored = byKey[k];
@@ -12211,32 +12695,6 @@ window.Portal = {
           resolved.isSaved = true;
           resolved.savedCorrect = true; // got it right, saved it anyway — quiz mode below skips grading these as a "miss"
           records.push(resolved);
-        });
-        // A collection can hold a key that's neither an outstanding
-        // mistake NOR saved (e.g. a question added while it was still a
-        // mistake, later corrected and cleared from the Mistakes Log,
-        // never separately saved) — without this pass that key would
-        // silently vanish from `records` entirely and the collection
-        // would look like it lost a question. collectionOnly marks these
-        // so renderCard shows them as plain review items, same as a
-        // saved-and-correct one, not implying a live miss.
-        var knownKeys = {};
-        records.forEach(function (r) { knownKeys[r.key] = true; });
-        Object.keys(collections).forEach(function (name) {
-          Object.keys(collections[name] || {}).forEach(function (k) {
-            if (knownKeys[k]) return;
-            knownKeys[k] = true;
-            var resolved = window.resolveQuestionByKey ? window.resolveQuestionByKey(k) : null;
-            if (!resolved || !resolved.text) return;
-            resolved.key = k;
-            resolved.given = null;
-            resolved.attemptedAt = collections[name][k].addedAt || '';
-            resolved.testLabel = testLabelFor(resolved.testTitle);
-            resolved.isSaved = !!savedByKey[k];
-            resolved.savedCorrect = true;
-            resolved.collectionOnly = true;
-            records.push(resolved);
-          });
         });
         records.sort(function (a, b) { return (b.attemptedAt || '').localeCompare(a.attemptedAt || ''); }); // most recently missed/saved first
         callback();
@@ -12476,25 +12934,6 @@ window.Portal = {
     var wrongCount = (!r.savedCorrect && r.wrongAttempts) ? r.wrongAttempts : 0;
     var iconOk = r.savedCorrect;
 
-    // "Add to collection" lives right on the row now (used to be tucked
-    // inside the accordion detail this row no longer has, since clicking
-    // the row opens the shared question modal instead — see
-    // window.iqModuleInit's own comment). Icon-only for one-glance width;
-    // the panel it opens is unchanged, same collections data/logic as
-    // before.
-    var collectionNames = Object.keys(collections).sort(function (a, b) { return a.localeCompare(b); });
-    var addPanelOptions = collectionNames.map(function (name) {
-      var checked = collections[name] && collections[name][r.key];
-      return '<label class="iq-add-to-collection-option"><input type="checkbox" data-collection="' + escHtml(name) + '" ' + (checked ? 'checked' : '') + '> ' + escHtml(name) + '</label>';
-    }).join('');
-    var addToCollectionHtml = '<div class="iq-add-to-collection" data-key="' + escHtml(r.key) + '">' +
-      '<button type="button" class="iq-add-to-collection-btn" title="Add to collection" aria-label="Add to collection"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7a1 1 0 0 1 1-1h4.5l1.8 2H19a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7z"/><line x1="12" y1="12.5" x2="12" y2="16.5"/><line x1="10" y1="14.5" x2="14" y2="14.5"/></svg></button>' +
-      '<div class="iq-add-to-collection-panel">' +
-        (addPanelOptions || '<div style="font-size:0.78rem;color:var(--faint);padding:0.3rem 0.5rem;">No collections yet.</div>') +
-        '<div class="iq-add-to-collection-new"><input type="text" placeholder="New collection…" maxlength="60"><button type="button">Add</button></div>' +
-      '</div>' +
-    '</div>';
-
     var summary = '<div class="iq-item-summary">' +
       '<span class="iq-item-icon' + (iconOk ? ' ok' : '') + '">' +
         (iconOk
@@ -12507,7 +12946,6 @@ window.Portal = {
       (wrongCount ? '<span class="iq-pill iq-pill-wrong">' + wrongCount + ' wrong attempt' + (wrongCount === 1 ? '' : 's') + '</span>' : '') +
       (r.isSaved ? '<span class="iq-pill iq-pill-category">&#11088; Saved</span>' : '') +
       '<span class="iq-item-time">' + relativeTimeLabel(r.attemptedAt) + '</span>' +
-      addToCollectionHtml +
       '<div class="iq-item-preview">' + iqPreviewText((splitPassage(r) || {}).question || r.text) + '</div>' +
     '</div>';
     return '<div class="iq-item" data-key="' + escHtml(r.key) + '">' + summary + '</div>';
@@ -12521,38 +12959,6 @@ window.Portal = {
     if (quizWired) return;
     quizWired = true;
     listEl.addEventListener('click', function (ev) {
-      // Add-to-collection targets first — that control now lives inside
-      // .iq-item-summary itself (see renderCard), so it has to be checked
-      // before the summary-row fallback below, or a click on it would
-      // always be read as "open the question modal" instead.
-      var addBtn = ev.target.closest && ev.target.closest('.iq-add-to-collection-btn');
-      if (addBtn) {
-        var addWrap = addBtn.closest('.iq-add-to-collection');
-        var wasOpen = addWrap.classList.contains('open');
-        Array.prototype.forEach.call(listEl.querySelectorAll('.iq-add-to-collection.open'), function (el) { el.classList.remove('open'); });
-        if (!wasOpen) addWrap.classList.add('open');
-        return;
-      }
-      var collectionCb = ev.target.closest && ev.target.closest('.iq-add-to-collection-option');
-      if (collectionCb) {
-        var cbInput = collectionCb.querySelector('input');
-        if (ev.target !== cbInput) cbInput.checked = !cbInput.checked; // clicking the label text, not just the box itself
-        var cbWrap = collectionCb.closest('.iq-add-to-collection');
-        var cbKey = cbWrap.getAttribute('data-key');
-        toggleKeyInCollection(cbInput.getAttribute('data-collection'), cbKey);
-        saveCollectionsAndRerender();
-        return;
-      }
-      var addNewBtn = ev.target.closest && ev.target.closest('.iq-add-to-collection-new button');
-      if (addNewBtn) {
-        var newWrap = addNewBtn.closest('.iq-add-to-collection');
-        var newInput = newWrap.querySelector('.iq-add-to-collection-new input');
-        var newName = newInput.value;
-        var newKey = newWrap.getAttribute('data-key');
-        if (createCollection(newName)) toggleKeyInCollection(newName.trim().slice(0, 60), newKey);
-        saveCollectionsAndRerender();
-        return;
-      }
       // Fallback — clicking anywhere else on the row opens it in the
       // shared question modal (see window.openQuestionModal), with
       // Previous/Next walking the SAME filtered/sorted list currently on
@@ -12565,17 +12971,8 @@ window.Portal = {
         var idx = -1;
         for (var i = 0; i < list.length; i++) { if (list[i].key === key) { idx = i; break; } }
         if (idx === -1 || !window.openQuestionModal) return;
-        var label = activeTab === 'saved' ? 'Saved Questions' : activeTab === 'collections' ? (activeCollectionName || 'Collection') : 'Mistakes';
+        var label = activeTab === 'saved' ? 'Saved Questions' : 'Mistakes';
         window.openQuestionModal(list.map(toModalRow), idx, label);
-      }
-    });
-    listEl.addEventListener('keydown', function (ev) {
-      if (ev.key !== 'Enter') return;
-      var newCollInput = ev.target.closest && ev.target.closest('.iq-add-to-collection-new input');
-      if (newCollInput) {
-        ev.preventDefault();
-        var addBtn2 = newCollInput.closest('.iq-add-to-collection-new').querySelector('button');
-        if (addBtn2) addBtn2.click();
       }
     });
   }
@@ -12600,23 +12997,12 @@ window.Portal = {
   var BOOKMARK_SVG = '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 3.5h12a1 1 0 0 1 1 1V21l-7-4.2L5 21V4.5a1 1 0 0 1 1-1z"/></svg>';
 
   function renderList() {
-    if (activeTab === 'collections' && !activeCollectionName) {
-      poolCountEl.textContent = '';
-      setPracticeCount(0);
-      var hasAny = Object.keys(collections).length > 0;
-      listEl.innerHTML = '<div class="iq-collection-empty">' + (hasAny
-        ? 'Pick a collection above to see what\'s in it.'
-        : 'No collections yet — expand any question below and use "Add to collection" to start one, or click "+ New Collection" above.') + '</div>';
-      return;
-    }
     var base = baseRecords();
     if (!base.length) {
       poolCountEl.textContent = '';
       setPracticeCount(0);
       listEl.innerHTML = activeTab === 'saved'
         ? '<div class="pb-empty-saved">' + BOOKMARK_SVG + '<div class="pb-empty-title">No saved questions yet</div><div class="pb-empty-sub">You can save questions when reviewing your score reports and study off question banks.</div></div>'
-        : activeTab === 'collections'
-        ? '<div class="iq-collection-empty">Nothing in "' + escHtml(activeCollectionName) + '" yet.</div>'
         : '<div class="pb-empty-note">Nothing here yet — once you finish a diagnostic or practice test, anything you miss will show up here, organized by section, domain, skill, and difficulty. (Getting a question right on a later attempt clears it from this list, too — this always reflects what you currently have wrong, not your full history.)</div>';
       return;
     }
@@ -12880,84 +13266,8 @@ window.Portal = {
     activeTab = tab;
     tabSavedEl.classList.toggle('active', tab === 'saved');
     tabMistakesEl.classList.toggle('active', tab === 'mistakes');
-    tabCollectionsEl.classList.toggle('active', tab === 'collections');
     filtersEl.style.display = tab === 'mistakes' ? '' : 'none';
-    collectionsBarEl.style.display = tab === 'collections' ? '' : 'none';
     renderList();
-  }
-
-  // ═══ COLLECTIONS ═══ persists the WHOLE collections object (see
-  // window.updateStudentCollections's own comment for why a wholesale
-  // write is fine here) and re-renders both the chip row and whatever's
-  // currently showing, so a change (new collection, added/removed
-  // question, rename, delete) is reflected everywhere immediately.
-  function saveCollectionsAndRerender() {
-    if (window.updateStudentCollections) window.updateStudentCollections(collections);
-    renderCollectionsChips();
-    renderList();
-  }
-  function collectionCount(name) { return Object.keys(collections[name] || {}).length; }
-  function createCollection(name) {
-    name = String(name || '').trim().slice(0, 60);
-    if (!name || collections[name]) return false;
-    collections[name] = {};
-    return true;
-  }
-  function deleteCollection(name) {
-    delete collections[name];
-    if (activeCollectionName === name) activeCollectionName = null;
-  }
-  function toggleKeyInCollection(name, key) {
-    if (!collections[name]) collections[name] = {};
-    if (collections[name][key]) delete collections[name][key];
-    else collections[name][key] = { addedAt: new Date().toISOString() };
-  }
-
-  function renderCollectionsChips() {
-    if (!collectionsChipsEl) return;
-    var names = Object.keys(collections).sort(function (a, b) { return a.localeCompare(b); });
-    collectionsChipsEl.innerHTML = names.map(function (name) {
-      return '<button type="button" class="iq-collection-chip' + (name === activeCollectionName ? ' active' : '') + '" data-name="' + escHtml(name) + '">' +
-        escHtml(name) + ' <span class="iq-collection-chip-count">' + collectionCount(name) + '</span>' +
-        '<span class="iq-collection-chip-del" data-del="' + escHtml(name) + '" title="Delete collection">&times;</span>' +
-      '</button>';
-    }).join('') + '<button type="button" class="iq-collection-new-btn" id="iq-collection-new-btn">+ New Collection</button>';
-
-    Array.prototype.forEach.call(collectionsChipsEl.querySelectorAll('.iq-collection-chip'), function (chip) {
-      chip.addEventListener('click', function (e) {
-        var delName = e.target.getAttribute && e.target.getAttribute('data-del');
-        if (delName) {
-          e.stopPropagation();
-          if (!confirm('Delete the collection "' + delName + '"? The questions themselves stay saved elsewhere if they were.')) return;
-          deleteCollection(delName);
-          saveCollectionsAndRerender();
-          return;
-        }
-        var name = chip.getAttribute('data-name');
-        activeCollectionName = (activeCollectionName === name) ? null : name;
-        renderCollectionsChips();
-        renderList();
-      });
-    });
-    var newBtn = document.getElementById('iq-collection-new-btn');
-    if (newBtn) newBtn.addEventListener('click', function () {
-      collectionsChipsEl.innerHTML = '<div class="iq-collection-new-row"><input type="text" id="iq-collection-new-input" placeholder="Collection name" autocomplete="off" maxlength="60"><button type="button" id="iq-collection-new-confirm">Create</button></div>';
-      var input = document.getElementById('iq-collection-new-input');
-      input.focus();
-      function confirmNew() {
-        if (createCollection(input.value)) {
-          activeCollectionName = input.value.trim().slice(0, 60);
-          saveCollectionsAndRerender();
-        } else {
-          renderCollectionsChips();
-        }
-      }
-      document.getElementById('iq-collection-new-confirm').addEventListener('click', confirmNew);
-      input.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter') { e.preventDefault(); confirmNew(); }
-        else if (e.key === 'Escape') renderCollectionsChips();
-      });
-    });
   }
 
   window.iqModuleInit = function (preset) {
@@ -12976,9 +13286,6 @@ window.Portal = {
       tabSavedEl = document.getElementById('iq-tab-saved');
       tabMistakesEl = document.getElementById('iq-tab-mistakes');
       tabMistakesCountEl = document.getElementById('iq-tab-mistakes-count');
-      tabCollectionsEl = document.getElementById('iq-tab-collections');
-      collectionsBarEl = document.getElementById('iq-collections-bar');
-      collectionsChipsEl = document.getElementById('iq-collections-chips');
       practiceBtnEl.addEventListener('click', function () {
         if (practiceBtnEl.disabled) return;
         startPracticeRunner();
@@ -13024,7 +13331,6 @@ window.Portal = {
       })();
       tabSavedEl.addEventListener('click', function () { setActiveTab('saved'); });
       tabMistakesEl.addEventListener('click', function () { setActiveTab('mistakes'); });
-      tabCollectionsEl.addEventListener('click', function () { setActiveTab('collections'); });
       wireQuizInteractions();
     }
 
@@ -13033,11 +13339,8 @@ window.Portal = {
     // Progress) would land on anyway, so that case no longer needs its own
     // branch here.
     activeTab = 'mistakes';
-    activeCollectionName = null;
     tabSavedEl.classList.toggle('active', activeTab === 'saved');
     tabMistakesEl.classList.toggle('active', activeTab === 'mistakes');
-    tabCollectionsEl.classList.toggle('active', activeTab === 'collections');
-    collectionsBarEl.style.display = activeTab === 'collections' ? '' : 'none';
     filtersEl.style.display = activeTab === 'mistakes' ? '' : 'none';
 
     listEl.innerHTML = '<div class="pb-empty-note">Loading your latest results…</div>';
@@ -13064,7 +13367,6 @@ window.Portal = {
       renderDifficultyPills();
       renderTestPills();
       updateFiltersBadge();
-      renderCollectionsChips();
       renderList();
     });
   };
@@ -13396,12 +13698,12 @@ window.Portal = {
   // pass — set back to false to reopen Math once that's done. Gates the
   // subject card (see paintQbHome below) and its click handler, the only
   // two ways into showSkills('math')/poolFor('math') from the UI.
-  var QB_MATH_TEMP_DISABLED = true;
+  var QB_MATH_TEMP_DISABLED = false;
 
   // Display order for domain groups in the skill drilldown — matches the
   // order College Board itself lists each subject's own domains.
   var DOMAIN_ORDER = {
-    rw: ['Standard English Conventions', 'Information & Ideas', 'Craft & Structure', 'Expression of Ideas'],
+    rw: ['Standard English Conventions', 'Information and Ideas', 'Craft and Structure', 'Expression of Ideas'],
     math: ['Algebra', 'Advanced Math', 'Problem-Solving and Data Analysis', 'Geometry and Trigonometry']
   };
   function poolFor(subject) { return subject === 'math' ? (window.QUESTION_BANK_MATH || []) : (window.QUESTION_BANK || []); }
@@ -13512,23 +13814,6 @@ window.Portal = {
   }
   function qbIsSaved(key) { return !!qbSavedByKey()[key]; }
 
-  function computeStreak(attempts) {
-    var days = {};
-    Object.keys(attempts).forEach(function (qid) {
-      var a = attempts[qid];
-      if (a && a.attemptedAt) days[a.attemptedAt.slice(0, 10)] = true;
-    });
-    function fmt(d) { return d.toISOString().slice(0, 10); }
-    var cur = new Date();
-    if (!days[fmt(cur)]) {
-      cur.setDate(cur.getDate() - 1);
-      if (!days[fmt(cur)]) return 0;
-    }
-    var streak = 0;
-    while (days[fmt(cur)]) { streak++; cur.setDate(cur.getDate() - 1); }
-    return streak;
-  }
-
   function renderStats() {
     var p = loadProgress();
     var attemptedQids = Object.keys(p.attempts);
@@ -13536,16 +13821,8 @@ window.Portal = {
     var accuracy = attemptedQids.length ? Math.round((correctCount / attemptedQids.length) * 100) : 0;
     var attEl = document.getElementById('qb-stat-attempted');
     var accEl = document.getElementById('qb-stat-accuracy');
-    var savedEl = document.getElementById('qb-stat-saved');
-    var streakEl = document.getElementById('qb-stat-streak');
     if (attEl) attEl.textContent = String(attemptedQids.length);
     if (accEl) accEl.textContent = accuracy + '%';
-    if (savedEl) {
-      var savedByKey = qbSavedByKey();
-      var qbSavedCount = Object.keys(savedByKey).filter(function (k) { return k.indexOf('qb|') === 0; }).length;
-      savedEl.textContent = String(qbSavedCount);
-    }
-    if (streakEl) streakEl.textContent = String(computeStreak(p.attempts));
 
     function paintSubjectCard(subject, countElId, barElId) {
       var qids = {};
@@ -13580,22 +13857,66 @@ window.Portal = {
   // Splits a question-bank item's raw PDF-extracted text into a left-pane
   // "passage" (the stimulus/notes/paired texts) and a right-pane "question"
   // (the actual interrogative prompt), matching the real exam's two-column
-  // layout — every R&W item ends in exactly one direct question sentence
-  // ("Which choice...?", "As used in the text...?", "Based on the texts,
-  // how would...?"), so the split point is the sentence terminator (. ! ?)
-  // immediately BEFORE the text's final "?", found by scanning backward.
-  // No such terminator (single-sentence text, or no "?" at all) means
-  // there's nothing meaningful to split off — falls back to showing the
-  // whole thing as the question, same as when a question has no passage.
+  // layout.
+  //
+  // Originally this just scanned backward from the text's final "?" for the
+  // nearest preceding sentence terminator (. ! ?) and split there — but an
+  // audit of all ~1,800 R&W items (prompted by a report that passage text
+  // was bleeding into the question pane) turned up two real failure modes
+  // in that approach:
+  //   1. A period that ISN'T a sentence end — a decimal ("156.2"), a middle
+  //      initial ("James K. Polk"), an abbreviation, or an ellipsis inside
+  //      a title — got treated as the boundary, chopping the split mid-
+  //      sentence or mid-name and leaving a fragment stranded on the wrong
+  //      side (e.g. "James K." on the passage side, "Polk received ___" on
+  //      the question side).
+  //   2. Some CB question types (Command of Evidence: Quantitative's
+  //      fill-in-the-blank data statement, Rhetorical Synthesis' "The
+  //      student wants..." framing) have their real prompt start on a NEW
+  //      LINE with no period at all separating it from the preceding
+  //      sentence — nothing for a punctuation scan to find.
+  // Fixed by anchoring on the actual College Board question-stem phrases
+  // (QUESTION_TRIGGER_RE below) wherever one appears — these are drawn from
+  // a small, fixed, heavily-reused vocabulary across real CB items ("Which
+  // choice...", "As used in...", "The student wants...", etc.), so finding
+  // the LAST one is far more reliable than guessing from punctuation alone,
+  // and it's immune to stray periods anywhere earlier in the passage. Only
+  // when no known trigger phrase is found does this fall back to the
+  // original punctuation scan — now abbreviation/decimal-aware itself
+  // (isRealSentenceBoundary below) so it no longer trips on the same
+  // false positives even in that fallback path.
+  var QUESTION_TRIGGER_RE = /\b(Which choice|Which quotation|Which finding|Which statement|Which question|Which detail|Which response|Which of the following|Which function|What choice|What does|What is|What best|What most|As used in (?:the|this) (?:text|excerpt|sentence)|Based on (?:the|these) texts?|According to (?:the|this|these) (?:text|texts|table|graph|figure)|In (?:which|the context of)|At what|How does the (?:writer|author)|The student wants)\b/g;
+  function lastQuestionTriggerIndex(text) {
+    var m, last = -1;
+    QUESTION_TRIGGER_RE.lastIndex = 0;
+    while ((m = QUESTION_TRIGGER_RE.exec(text))) { last = m.index; }
+    return last;
+  }
+  var ABBREVIATION_RE = /(?:^|[\s"'])(Dr|Mr|Mrs|Ms|Jr|Sr|St|vs|etc|U\.S|no|Vol|pp|al)$/i;
+  function isRealSentenceBoundary(text, i) {
+    var c = text.charAt(i);
+    if (c === '!' || c === '?') return true;
+    if (c !== '.') return false;
+    var before = text.charAt(i - 1), after = text.charAt(i + 1);
+    if (/\d/.test(before) && /\d/.test(after)) return false; // decimal, e.g. 156.2
+    if (/[A-Z]/.test(before) && (i < 2 || /[\s(]/.test(text.charAt(i - 2)))) return false; // single-cap initial, e.g. " K."
+    if (ABBREVIATION_RE.test(text.slice(Math.max(0, i - 4), i))) return false;
+    return true;
+  }
   function splitPassageQb(text) {
     text = String(text || '').trim();
     var qMark = text.lastIndexOf('?');
     if (qMark === -1) return null;
-    var i = qMark - 1, boundary = -1;
-    while (i >= 0) {
-      var c = text.charAt(i);
-      if (c === '.' || c === '!' || c === '?') { boundary = i; break; }
-      i--;
+    var triggerIdx = lastQuestionTriggerIndex(text.slice(0, qMark + 1));
+    var boundary = -1;
+    if (triggerIdx !== -1) {
+      boundary = triggerIdx - 1;
+    } else {
+      var i = qMark - 1;
+      while (i >= 0) {
+        if (isRealSentenceBoundary(text, i)) { boundary = i; break; }
+        i--;
+      }
     }
     if (boundary === -1) return null;
     // The PDF's own line breaks are just visual wrapping at the page's
@@ -13943,6 +14264,139 @@ window.Portal = {
     startQbTimer();
     renderRunnerQuestion();
   }
+
+  // Session length cap for "Practice Your Weaknesses" — 25 questions per
+  // subject, 50 total, so a weak skill with hundreds of questions behind
+  // it (Words in Context alone has 250+) doesn't turn "a focused round"
+  // into an unbounded marathon.
+  var QB_WEAKNESS_SESSION_CAP = 25;
+  // "Practice Your Weaknesses" — pulls the single weakest skill in EACH
+  // subject (via window.getWeakestSkillsForQb, the bridge to Home's own
+  // weakestSkillIn()/HOME_*_DOMAINS) and runs both back to back in one
+  // session, unlike startRunner() above which only ever draws from
+  // currentSubject's own pool. Every question here is tagged with its own
+  // _qbSubject so renderRunnerQuestion() can switch calculator/passage-
+  // split behavior per question instead of relying on the single
+  // module-wide currentSubject flag — see that function's own comments on
+  // the two places this tag is read. Deliberately skips the
+  // selectedDifficulties/selectedSources filters startRunner() respects:
+  // those only get initialized when a student actually opens the skills
+  // view (see showSkills()), which this button bypasses entirely, and a
+  // focused "drill your weak spot" session has no real reason to exclude
+  // any difficulty or source anyway.
+  //
+  // The diagnostic's skill names (window.getWeakestSkillsForQb's source)
+  // and Question Bank's own skill list are two INDEPENDENTLY maintained
+  // taxonomies — an audit while building this button found they disagree
+  // constantly: casing ("Linear functions" vs "Linear Functions"), "&" vs
+  // "and", stray commas, AND — for Math specifically — real granularity
+  // gaps (the diagnostic tracks 30+ distinct math skills; Question Bank's
+  // math content currently covers 8 broader ones, so skills like
+  // "Percentages" or "Probability" have no 1:1 QB match at all yet).
+  // Matching on raw equality would silently return nothing for Math most
+  // of the time. normalizeSkillKey() absorbs the formatting differences;
+  // when even that finds no exact skill, matchQbSkillEntry() falls back to
+  // the same DOMAIN instead of giving up, so "your weakest skill wasn't
+  // typed into Question Bank yet" still gets the student practicing the
+  // right broader area rather than nothing at all.
+  function normalizeSkillKey(s) {
+    return String(s || '').toLowerCase().replace(/&/g, 'and').replace(/[.,()]/g, '').replace(/\s+/g, ' ').trim();
+  }
+  function matchQbSkillEntry(subject, weak) {
+    if (!weak || !weak.skill) return null;
+    var entries = allSkills(subject);
+    var wantSkill = normalizeSkillKey(weak.skill);
+    var exact = entries.filter(function (s) { return normalizeSkillKey(s.skill) === wantSkill; })[0];
+    if (exact) return exact;
+    if (!weak.domain) return null;
+    var wantDomain = normalizeSkillKey(weak.domain);
+    var sameDomain = entries.filter(function (s) { return normalizeSkillKey(s.domain) === wantDomain; });
+    if (!sameDomain.length) return null;
+    // Among same-domain skills, prefer whichever the student has actually
+    // done worst on within Question Bank's own local attempt history — an
+    // untried skill ranks as "not weak" (pct 1) so a genuinely-attempted-
+    // and-missed one is picked first; falls back to the first one
+    // alphabetically (allSkills() is already sorted by DOMAIN_ORDER then
+    // name) when nothing here has been attempted at all.
+    var p = loadProgress();
+    var best = null;
+    sameDomain.forEach(function (entry) {
+      var correct = 0, total = 0;
+      entry.questions.forEach(function (q) {
+        var a = p.attempts[q.qid];
+        if (a) { total++; if (a.correct) correct++; }
+      });
+      var pct = total ? correct / total : 1;
+      if (!best || pct < best.pct) best = { entry: entry, pct: pct };
+    });
+    return best ? best.entry : sameDomain[0];
+  }
+  function weaknessPoolFor(subject, weak) {
+    var entry = matchQbSkillEntry(subject, weak);
+    if (!entry) return [];
+    return entry.questions.map(function (q) {
+      // Shallow-copy rather than mutating the shared bank array in place —
+      // poolFor()'s arrays are the same object instances every other
+      // runner reads from, and tagging them directly would leak
+      // _qbSubject into sessions that never asked for it.
+      var tagged = Object.assign({}, q);
+      tagged._qbSubject = subject;
+      return tagged;
+    });
+  }
+  function startWeaknessPractice() {
+    var btn = document.getElementById('qb-weak-btn');
+    var subEl = document.querySelector('#qb-weak-card .vp-tenmin-sub');
+    var defaultSub = subEl ? subEl.textContent : '';
+    if (btn) btn.disabled = true;
+    window.getWeakestSkillsForQb(function (weak) {
+      if (btn) btn.disabled = false;
+      if (!weak.rw && !weak.math) {
+        if (subEl) subEl.textContent = "Not enough practice data yet to find a weak spot — take a diagnostic or practice test first, then this'll have something to work with.";
+        return;
+      }
+      var p = loadProgress();
+      function splitSolved(pool) {
+        var notSolved = [], solved = [];
+        pool.forEach(function (q) {
+          var a = p.attempts[q.qid];
+          if (a && a.correct) solved.push(q); else notSolved.push(q);
+        });
+        return shuffle(notSolved).concat(shuffle(solved));
+      }
+      // R&W's queue first, then Math's — kept contiguous rather than fully
+      // interleaved, so the calculator/passage-pane don't flicker in and
+      // out of math mode every other question. Each half is capped at
+      // QB_WEAKNESS_SESSION_CAP AFTER the not-yet-solved-first shuffle, so
+      // a 50-question session is still weighted toward what the student
+      // hasn't gotten right yet, not just the first 25 in whatever order
+      // the skill happened to store them — a skill with fewer than the cap
+      // just contributes however many it has (unchanged from before).
+      var queue = splitSolved(weaknessPoolFor('rw', weak.rw)).slice(0, QB_WEAKNESS_SESSION_CAP)
+        .concat(splitSolved(weaknessPoolFor('math', weak.math)).slice(0, QB_WEAKNESS_SESSION_CAP));
+      if (!queue.length) {
+        // A weak skill/domain was found, but nothing in Question Bank
+        // matches it even at the domain level — genuinely possible for
+        // Math while its catalog is still small. Distinct message from
+        // the "no diagnostic data at all" one above so it's clear this
+        // isn't a "go take a test" situation.
+        if (subEl) subEl.textContent = "Couldn't find matching Question Bank questions for your weakest skill yet — try Browse skills below instead.";
+        return;
+      }
+      if (subEl) subEl.textContent = defaultSub;
+      runnerQueue = queue;
+      runnerIndex = 0;
+      runnerState = {};
+      runnerScore = 0;
+      runnerSkillLabel = 'Your Weakest Skills';
+      window.dxPracticeNextHandler = runnerAdvance;
+      window.dxPracticeExitHandler = endRunner;
+      window.dxPracticeLetterHandler = selectRunnerChoice;
+      if (window.dxStartIncorrectPractice) window.dxStartIncorrectPractice('Question Bank: Your Weakest Skills');
+      startQbTimer();
+      renderRunnerQuestion();
+    });
+  }
   // Shared by the click handler on each choice row AND the A/B/C/D keyboard
   // shortcut (see window.dxPracticeLetterHandler). Covers both the plain
   // MC branch and the image-based math 'mc-image' branch below — both key
@@ -14095,8 +14549,11 @@ window.Portal = {
     // Question Bank math practice session, not just hidden until some
     // later toggle — same isMath signal (currentSubject, this module's
     // own subject-scoped equivalent of Challenge's r.sectionKey) as those
-    // other two runners use.
-    var isMath = currentSubject === 'math';
+    // other two runners use. r._qbSubject (set only by
+    // startWeaknessPractice()'s combined RW+Math queue) takes priority when
+    // present — a single-subject session has no per-question tag, so it
+    // falls through to the module-wide currentSubject exactly as before.
+    var isMath = (r._qbSubject || currentSubject) === 'math';
     calcBtnEl.style.display = isMath ? '' : 'none';
     if (window.dxSetMathMode) window.dxSetMathMode(isMath);
     if (!isMath && window.dxCloseCalculator) window.dxCloseCalculator();
@@ -14163,7 +14620,7 @@ window.Portal = {
       // sentence matches that same shape well enough to falsely trigger it,
       // wrongly splitting a single self-contained math question across the
       // passage/question two-pane divider it should never show at all.
-      var split = currentSubject === 'math' ? null : splitPassageQb(r.text);
+      var split = (r._qbSubject || currentSubject) === 'math' ? null : splitPassageQb(r.text);
       qtextEl.innerHTML = split ? split.question : r.text;
       if (window.dxRenderPassagePane) window.dxRenderPassagePane({}, split, r.qid);
       choicesEl.style.display = 'none';
@@ -14197,7 +14654,7 @@ window.Portal = {
       // sentence matches that same shape well enough to falsely trigger it,
       // wrongly splitting a single self-contained math question across the
       // passage/question two-pane divider it should never show at all.
-      var split = currentSubject === 'math' ? null : splitPassageQb(r.text);
+      var split = (r._qbSubject || currentSubject) === 'math' ? null : splitPassageQb(r.text);
       qtextEl.innerHTML = split ? split.question : r.text;
       if (window.dxRenderPassagePane) window.dxRenderPassagePane({}, split, r.qid);
       r.choices.forEach(function (c, i) {
@@ -14275,6 +14732,8 @@ window.Portal = {
         if (QB_MATH_TEMP_DISABLED || mathSubjectBtn.classList.contains('qb-subject-empty')) return;
         showSkills('math');
       });
+      var weakBtn = document.getElementById('qb-weak-btn');
+      if (weakBtn) weakBtn.addEventListener('click', startWeaknessPractice);
       var backBtn = document.getElementById('qb-skills-back');
       if (backBtn) backBtn.addEventListener('click', function (e) { e.preventDefault(); showHome(); });
       var homeBackBtn = document.getElementById('question-bank-back');

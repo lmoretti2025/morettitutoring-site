@@ -17,6 +17,7 @@
     --border: rgba(17,17,17,0.12);
     --gold:   #C9A84C;
     --green:  #5E8B6F;
+    --blue:   #3E6B8C;
     --hel:    'Poppins', 'Helvetica Neue', Helvetica, Arial, sans-serif;
     --display: 'Iowan Old Style', Georgia, ui-serif, serif;
     --shadow: 0 2px 16px rgba(17,17,17,0.055);
@@ -39,11 +40,17 @@
     justify-content: space-between;
     gap: 1rem;
   }
-  header .brand { font-family: var(--display); font-size: 1.1rem; letter-spacing: 0.02em; }
-  header .brand small { display: block; font-family: var(--hel); font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.85; margin-top: 0.15rem; }
-  #refresh-btn { background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.4); color: #fff; font-family: var(--hel); font-size: 0.78rem; font-weight: 600; padding: 0.5rem 0.9rem; border-radius: 8px; cursor: pointer; transition: background 0.12s; }
-  #refresh-btn:hover { background: rgba(255,255,255,0.24); }
-  #refresh-btn:disabled { opacity: 0.6; cursor: default; }
+  /* Same asset, height and white-on-red treatment as the student
+     portal's own nav (see .nav-logo-img in index.html) so the two read as
+     one product rather than two apps that happen to share a colour. */
+  header .brand { line-height: 0; }
+  header .brand-logo { height: 36px; width: auto; display: block; }
+  header .brand small { display: block; line-height: 1.2; font-family: var(--hel); font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.85; margin-top: 0.35rem; }
+  #topnav { display: none; gap: 0.5rem; align-items: center; }
+  .nav-btn { background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.4); color: #fff; font-family: var(--hel); font-size: 0.78rem; font-weight: 600; padding: 0.5rem 0.9rem; border-radius: 8px; cursor: pointer; transition: background 0.12s; }
+  .nav-btn:hover { background: rgba(255,255,255,0.24); }
+  .nav-btn:disabled { opacity: 0.6; cursor: default; }
+  .nav-btn.is-on { background: #fff; color: var(--red); border-color: #fff; }
 
   main { max-width: 1100px; margin: 0 auto; padding: 1.75rem 1.5rem 4rem; }
 
@@ -60,6 +67,12 @@
   #gate button:disabled { opacity: 0.6; cursor: default; transform: none; box-shadow: none; }
   #gate-error { color: var(--red); font-size: 0.8rem; font-weight: 600; margin-top: 0.7rem; min-height: 1.1em; }
 
+  /* ═══ SHARED ═══ */
+  .card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow); padding: 1.25rem 1.4rem; margin-bottom: 1.25rem; }
+  .card > h2 { font-family: var(--display); font-size: 1.05rem; margin: 0 0 0.15rem; }
+  .card > .card-sub { font-size: 0.76rem; color: var(--faint); margin: 0 0 1rem; }
+  .empty { color: var(--faint); font-style: italic; font-size: 0.84rem; padding: 0.6rem 0; }
+
   /* ═══ ROSTER ═══ */
   #roster { display: none; }
   .summary-row { display: flex; gap: 0.9rem; margin-bottom: 1.4rem; flex-wrap: wrap; }
@@ -67,6 +80,7 @@
   .summary-tile .num { font-family: var(--display); font-size: 1.6rem; color: var(--text); }
   .summary-tile .lbl { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); margin-top: 0.15rem; }
   .summary-tile.flagged .num { color: var(--red); }
+  .summary-tile .sub { font-size: 0.72rem; color: var(--faint); margin-top: 0.2rem; }
 
   .filter-row { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1rem; }
   .filter-row label { font-size: 0.8rem; color: var(--mid); display: flex; align-items: center; gap: 0.4rem; cursor: pointer; user-select: none; }
@@ -75,13 +89,16 @@
   .roster-table-wrap { background: var(--white); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; }
   .roster-table-scroll { overflow-x: auto; }
   table { width: 100%; border-collapse: collapse; font-size: 0.82rem; min-width: 780px; }
-  thead th { text-align: left; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--faint); padding: 0.8rem 0.9rem; border-bottom: 1px solid var(--border); white-space: nowrap; cursor: pointer; }
-  thead th:hover { color: var(--red); }
+  thead th { text-align: left; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--faint); padding: 0.8rem 0.9rem; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  thead th[data-sort] { cursor: pointer; }
+  thead th[data-sort]:hover { color: var(--red); }
   thead th .arrow { opacity: 0.4; font-size: 0.6rem; margin-left: 0.2rem; }
   tbody td { padding: 0.75rem 0.9rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
   tbody tr:last-child td { border-bottom: none; }
   tbody tr:hover { background: #fbfbfb; }
   .name-cell { font-weight: 700; }
+  .name-cell .student-link { background: none; border: none; padding: 0; font: inherit; color: var(--text); cursor: pointer; text-align: left; }
+  .name-cell .student-link:hover { color: var(--red); text-decoration: underline; }
   .name-cell .key { display: block; font-weight: 400; font-size: 0.7rem; color: var(--faint); font-family: monospace; margin-top: 0.1rem; }
   .delta { font-weight: 700; }
   .delta.up { color: var(--green); }
@@ -93,25 +110,83 @@
   .stale { color: var(--red); font-weight: 700; }
   .weakest-label { font-size: 0.78rem; }
   .weakest-frac { color: var(--faint); font-size: 0.72rem; }
+  .row-actions { display: flex; gap: 0.35rem; justify-content: flex-end; }
 
   #status-msg { text-align: center; padding: 3rem 1rem; color: var(--mid); font-size: 0.9rem; }
   #status-msg.error { color: var(--red); }
 
-  .assign-pill.schedule-btn { border: none; background: var(--red); color: #fff; cursor: pointer; font-family: var(--hel); }
-  .assign-pill.schedule-btn:hover { background: #8f1f16; }
+  /* Deliberately element-agnostic: a few of these are <a> (Drive folder,
+     the per-attempt Drive file) rather than <button>, and they have to
+     read as the same control. */
+  .mini { display: inline-block; border: 1px solid var(--border); background: var(--white); color: var(--mid); font-family: var(--hel); font-size: 0.72rem; font-weight: 700; padding: 0.25rem 0.6rem; border-radius: 999px; cursor: pointer; white-space: nowrap; text-decoration: none; line-height: 1.5; }
+  .mini:hover { border-color: var(--red); color: var(--red); }
+  .mini.solid { background: var(--red); border-color: var(--red); color: #fff; }
+  .mini.solid:hover { background: #8f1f16; color: #fff; }
+  .mini:disabled { opacity: 0.45; cursor: default; border-color: var(--border); color: var(--faint); }
 
-  /* ═══ SCHEDULER ═══ per-student calendar, opened from the roster's
-     "Schedule" button. FullCalendar handles all the grid/drag mechanics;
-     these rules just re-skin its default look with the portal's own
-     tokens (via its documented CSS custom properties) so it reads as
-     part of this page rather than a bolted-on widget. */
-  #scheduler { display: none; }
-  .sched-back { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.82rem; font-weight: 600; color: var(--mid); text-decoration: none; margin-bottom: 1rem; cursor: pointer; }
+  /* ═══ STUDENT PAGE ═══ one student, two tabs: the test reports they've
+     generated, and the homework calendar those reports should be driving. */
+  #student, #allcal, #scheduler { display: none; }
+  .sched-back { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.82rem; font-weight: 600; color: var(--mid); text-decoration: none; margin-bottom: 1rem; cursor: pointer; background: none; border: none; padding: 0; font-family: var(--hel); }
   .sched-back:hover { color: var(--red); }
   .sched-hed { font-family: var(--display); font-size: 1.5rem; margin: 0 0 1.1rem; }
   .sched-hed .key { font-family: monospace; font-size: 0.8rem; font-weight: 400; color: var(--faint); margin-left: 0.5rem; }
-  #sched-calendar-wrap { background: var(--white); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow); padding: 1.25rem; }
-  #sched-calendar {
+  .stu-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.4rem; }
+  .stu-head .sched-hed { margin-bottom: 0.35rem; }
+  .stu-meta { font-size: 0.78rem; color: var(--mid); display: flex; flex-wrap: wrap; gap: 0.35rem 1rem; margin-bottom: 1rem; }
+  .stu-meta span b { font-weight: 700; color: var(--text); }
+  .stu-actions { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+
+  .tabbar { display: flex; gap: 0.4rem; border-bottom: 1px solid var(--border); margin-bottom: 1.3rem; }
+  .tab { background: none; border: none; border-bottom: 2px solid transparent; margin-bottom: -1px; font-family: var(--hel); font-size: 0.84rem; font-weight: 700; color: var(--faint); padding: 0.55rem 0.9rem; cursor: pointer; }
+  .tab:hover { color: var(--mid); }
+  .tab.is-on { color: var(--red); border-bottom-color: var(--red); }
+
+  /* Score trend — hand-drawn SVG rather than a chart library: it's one
+     line with a handful of points, and admin.html already carries one
+     third-party script (FullCalendar) it can't avoid. */
+  .trend-wrap { overflow-x: auto; }
+  .trend-svg { width: 100%; min-width: 420px; height: 190px; display: block; }
+  .trend-svg .grid { stroke: var(--border); stroke-width: 1; }
+  .trend-svg .line { fill: none; stroke: var(--red); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+  .trend-svg .dot { fill: var(--red); }
+  .trend-svg .target-line { stroke: var(--gold); stroke-width: 1.5; stroke-dasharray: 5 4; }
+  .trend-svg text { font-family: var(--hel); font-size: 10px; fill: var(--faint); }
+  .trend-svg text.val { fill: var(--text); font-weight: 700; font-size: 11px; }
+
+  .src-badge { display: inline-block; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 0.12rem 0.4rem; border-radius: 4px; background: var(--bg); color: var(--mid); margin-left: 0.35rem; vertical-align: middle; }
+  .src-badge.diag { background: rgba(176,39,28,0.1); color: var(--red); }
+
+  .skill-row { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0; border-bottom: 1px solid var(--border); }
+  .skill-row:last-child { border-bottom: none; }
+  .skill-row .sk-name { flex: 1 1 auto; min-width: 0; font-size: 0.82rem; }
+  .skill-row .sk-name small { display: block; color: var(--faint); font-size: 0.68rem; }
+  .skill-row .sk-bar { flex: 0 0 120px; height: 7px; background: var(--bg); border-radius: 4px; overflow: hidden; }
+  .skill-row .sk-bar i { display: block; height: 100%; background: var(--gold); }
+  .skill-row .sk-bar i.weak { background: var(--red); }
+  .skill-row .sk-bar i.strong { background: var(--green); }
+  .skill-row .sk-frac { flex: 0 0 74px; text-align: right; font-size: 0.75rem; color: var(--mid); }
+
+  /* ═══ REPORT VIEWER ═══ the student's own report.html, opened in place
+     over the admin page. report.html detects being framed and drops its
+     printable-page chrome on its own (see its body.embedded rules), so
+     this is just a frame plus a way out of it. */
+  #report-viewer { display: none; position: fixed; inset: 0; z-index: 200; background: var(--bg); flex-direction: column; }
+  #report-viewer.open { display: flex; }
+  #report-bar { flex: 0 0 auto; background: var(--red); color: #fff; display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.7rem 1.1rem; }
+  #report-bar .rb-title { font-family: var(--display); font-size: 0.95rem; }
+  #report-bar .rb-title small { display: block; font-family: var(--hel); font-size: 0.66rem; opacity: 0.85; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 0.1rem; }
+  #report-bar .rb-actions { display: flex; gap: 0.5rem; }
+  #report-frame-wrap { flex: 1 1 auto; overflow: hidden; background: var(--white); }
+  #report-frame-wrap iframe { width: 100%; height: 100%; border: none; display: block; }
+  #report-loading { padding: 2.5rem; text-align: center; color: var(--mid); font-size: 0.85rem; }
+
+  /* ═══ CALENDARS ═══ FullCalendar handles all the grid/drag mechanics;
+     these rules just re-skin its default look with the portal's own
+     tokens (via its documented CSS custom properties) so it reads as
+     part of this page rather than a bolted-on widget. */
+  .cal-wrap { background: var(--white); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow); padding: 1.25rem; }
+  .cal-host {
     --fc-border-color: var(--border);
     --fc-page-bg-color: var(--white);
     --fc-neutral-bg-color: var(--bg);
@@ -126,24 +201,56 @@
     --fc-button-active-border-color: var(--red);
     font-family: var(--hel);
   }
-  #sched-calendar .fc-toolbar-title { font-family: var(--display); font-size: 1.2rem; }
-  #sched-calendar .fc-button { text-transform: capitalize; box-shadow: none !important; font-weight: 600; font-size: 0.78rem; }
-  #sched-calendar .fc-button-primary:not(:disabled).fc-button-active { color: #fff; }
-  #sched-calendar .fc-daygrid-day.fc-day-today .fc-daygrid-day-number { color: var(--red); font-weight: 700; }
-  #sched-calendar a { cursor: pointer; }
+  .cal-host .fc-toolbar-title { font-family: var(--display); font-size: 1.2rem; }
+  .cal-host .fc-button { text-transform: capitalize; box-shadow: none !important; font-weight: 600; font-size: 0.78rem; }
+  .cal-host .fc-button-primary:not(:disabled).fc-button-active { color: #fff; }
+  .cal-host .fc-daygrid-day.fc-day-today .fc-daygrid-day-number { color: var(--red); font-weight: 700; }
+  .cal-host a { cursor: pointer; }
   .sched-event { border: none !important; background: var(--red) !important; padding: 1px 4px; border-radius: 5px; font-size: 0.72rem; }
   .sched-event.sched-event-done { background: var(--faint) !important; text-decoration: line-through; opacity: 0.75; }
+  /* Sessions are context, not content — they're what the homework is
+     being planned around, so they read as a quieter, cooler band that
+     can't be dragged or edited from here (the calendar itself is the
+     source of truth for those). */
+  .sess-event { border: none !important; background: var(--blue) !important; color: #fff !important; padding: 1px 4px; border-radius: 5px; font-size: 0.72rem; cursor: pointer; }
+  .sess-event.sess-unmatched { background: var(--faint) !important; }
+  /* All-students view: one colour per student, applied inline from JS —
+     so unlike .sched-event/.sess-event this class deliberately sets no
+     background of its own. */
+  .cal-chip { border: none !important; padding: 1px 4px; border-radius: 5px; font-size: 0.72rem; cursor: pointer; }
+  .cal-chip.is-done { opacity: 0.55; text-decoration: line-through; }
+  /* Homework in the all-students view: same student colour as their
+     sessions, but outlined instead of filled, so "session" vs "due" is
+     readable without a second colour axis. */
+  .cal-chip.hw-outline { border-style: solid !important; border-width: 1.5px !important; background: #fff !important; }
+  .cal-chip.sess-unmatched { background: rgba(17,17,17,0.28) !important; }
   .sched-hint { font-size: 0.76rem; color: var(--faint); margin-top: 0.9rem; text-align: center; }
+  .cal-legend { display: flex; flex-wrap: wrap; gap: 0.35rem 1rem; font-size: 0.75rem; color: var(--mid); margin-bottom: 0.9rem; align-items: center; }
+  .cal-legend .swatch { display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 0.35rem; vertical-align: -1px; }
+  .cal-note { font-size: 0.76rem; color: var(--red); font-weight: 600; margin-bottom: 0.8rem; }
+  .next-session { background: rgba(62,107,140,0.08); border: 1px solid rgba(62,107,140,0.25); border-radius: 12px; padding: 0.7rem 1rem; font-size: 0.82rem; color: var(--text); margin-bottom: 1.1rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+  .next-session b { font-weight: 700; }
+  .next-session .ns-none { color: var(--mid); }
 
-  /* ═══ TASK MODAL ═══ shared by "create on selected day(s)" and "edit
-     an existing event" — which fields show is toggled in JS. */
+  .undated-row { display: flex; align-items: center; gap: 0.7rem; padding: 0.5rem 0; border-bottom: 1px solid var(--border); font-size: 0.82rem; }
+  .undated-row:last-child { border-bottom: none; }
+  .undated-row .ud-task { flex: 1 1 auto; min-width: 0; }
+  .undated-row.is-done .ud-task { text-decoration: line-through; color: var(--faint); }
+
+  /* ═══ TASK MODAL ═══ shared by "create on selected day(s)", "edit an
+     existing event", and the all-students calendar's quick-assign —
+     which fields show is toggled in JS. */
   #sched-modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(17,17,17,0.4); z-index: 100; align-items: center; justify-content: center; padding: 1rem; }
   #sched-modal-backdrop.open { display: flex; }
-  #sched-modal { background: var(--white); border-radius: 16px; box-shadow: 0 20px 50px rgba(17,17,17,0.25); padding: 1.5rem; width: 100%; max-width: 380px; }
+  #sched-modal { background: var(--white); border-radius: 16px; box-shadow: 0 20px 50px rgba(17,17,17,0.25); padding: 1.5rem; width: 100%; max-width: 400px; }
   #sched-modal h2 { font-family: var(--display); font-size: 1.15rem; margin: 0 0 0.3rem; }
   #sched-modal .sched-modal-sub { font-size: 0.78rem; color: var(--faint); margin: 0 0 1rem; }
-  #sched-modal textarea { width: 100%; font-family: var(--hel); font-size: 0.9rem; padding: 0.65rem 0.8rem; border: 1.5px solid var(--border); border-radius: 10px; resize: vertical; min-height: 64px; margin-bottom: 0.9rem; }
+  #sched-modal textarea { width: 100%; font-family: var(--hel); font-size: 0.9rem; padding: 0.65rem 0.8rem; border: 1.5px solid var(--border); border-radius: 10px; resize: vertical; min-height: 64px; margin-bottom: 0.7rem; }
   #sched-modal textarea:focus { outline: none; border-color: var(--red); }
+  #sched-modal label.fld { display: block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--faint); margin-bottom: 0.9rem; }
+  #sched-modal label.fld input { display: block; width: 100%; font-family: var(--hel); font-size: 0.88rem; font-weight: 400; letter-spacing: 0; text-transform: none; color: var(--text); padding: 0.55rem 0.7rem; border: 1.5px solid var(--border); border-radius: 10px; margin-top: 0.3rem; }
+  #sched-modal label.fld input:focus { outline: none; border-color: var(--red); }
+  .preset-row { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.9rem; }
   #sched-modal label.chk { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: var(--text); margin-bottom: 1rem; cursor: pointer; }
   #sched-modal label.chk input { accent-color: var(--green); width: 16px; height: 16px; }
   .sched-modal-actions { display: flex; gap: 0.6rem; }
@@ -152,14 +259,40 @@
   #sched-save-btn:hover { background: #8f1f16; }
   #sched-cancel-btn { background: var(--bg); color: var(--mid); }
   #sched-delete-btn { background: none; color: var(--red); flex: 0 0 auto; padding: 0.65rem 0.9rem; }
+  #sched-delete-btn.armed { background: var(--red); color: #fff; }
   #sched-modal-error { color: var(--red); font-size: 0.78rem; font-weight: 600; margin-top: 0.6rem; min-height: 1em; }
+
+  @media (max-width: 620px) {
+    main { padding: 1.25rem 1rem 3rem; }
+    .cal-wrap { padding: 0.85rem; }
+    /* The three nav buttons don't fit beside the wordmark on a phone —
+       drop them onto their own full-width row rather than letting the
+       last one hang off the edge. */
+    header { flex-wrap: wrap; }
+    header .brand-logo { height: 26px; }
+    #topnav { width: 100%; justify-content: space-between; }
+    .nav-btn { flex: 1 1 auto; padding: 0.5rem 0.4rem; font-size: 0.72rem; }
+    .stu-head { flex-direction: column; }
+    .next-session { flex-direction: column; align-items: flex-start; }
+    /* Seven day columns can't fit a phone. Scroll the calendar inside
+       its own card rather than letting it widen the whole page. */
+    .cal-wrap { overflow-x: auto; }
+    .cal-host { min-width: 560px; }
+  }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="brand">MORETTI<small>Roster — internal use only</small></div>
-  <button id="refresh-btn" type="button" style="display:none;">Refresh</button>
+  <div class="brand">
+    <img src="../logo-caladea-white.png" alt="Moretti Test Prep &amp; Tutoring" class="brand-logo">
+    <small>Roster — internal use only</small>
+  </div>
+  <nav id="topnav">
+    <button type="button" class="nav-btn is-on" id="nav-roster">Roster</button>
+    <button type="button" class="nav-btn" id="nav-allcal">All sessions</button>
+    <button type="button" class="nav-btn" id="refresh-btn">Refresh</button>
+  </nav>
 </header>
 
 <main>
@@ -196,23 +329,99 @@
     </div>
   </div>
 
-  <div id="scheduler">
-    <a class="sched-back" id="sched-back-btn">&larr; Back to roster</a>
-    <h1 class="sched-hed" id="sched-hed">Student<span class="key" id="sched-hed-key"></span></h1>
-    <div id="sched-calendar-wrap">
-      <div id="sched-calendar"></div>
+  <!-- ═══ ONE STUDENT ═══ reports on the left tab, the homework calendar
+       on the right one; both keyed off the same loaded student. -->
+  <div id="student">
+    <button type="button" class="sched-back" id="student-back-btn">&larr; Back to roster</button>
+    <div class="stu-head">
+      <div>
+        <h1 class="sched-hed" id="stu-name">Student<span class="key" id="stu-key"></span></h1>
+        <div class="stu-meta" id="stu-meta"></div>
+      </div>
+      <div class="stu-actions" id="stu-actions"></div>
     </div>
-    <p class="sched-hint">Click a day to add a task. Drag across several days to assign the same task to all of them. Drag an existing task to reschedule it, or click it to edit or delete.</p>
+
+    <div class="tabbar">
+      <button type="button" class="tab is-on" data-tab="reports">Test reports</button>
+      <button type="button" class="tab" data-tab="homework">Homework &amp; sessions</button>
+    </div>
+
+    <section id="tab-reports">
+      <div class="summary-row" id="stu-tiles"></div>
+      <div class="card" id="stu-trend-card">
+        <h2>Score progress</h2>
+        <p class="card-sub" id="stu-trend-sub">Every scored attempt, oldest first.</p>
+        <div class="trend-wrap" id="stu-trend"></div>
+      </div>
+      <div class="card">
+        <h2>Test reports</h2>
+        <p class="card-sub">Every diagnostic and practice test this student has submitted. Opening one shows the exact report they see.</p>
+        <div class="roster-table-scroll"><table id="stu-attempts-table"><thead><tr>
+          <th>Date</th><th>Test</th><th>Score</th><th>Weakest area</th><th></th>
+        </tr></thead><tbody id="stu-attempts"></tbody></table></div>
+      </div>
+      <div class="card">
+        <h2>Weakest skills</h2>
+        <p class="card-sub" id="stu-skills-sub">From their most recent completed test — the same breakdown "Practice My Weak Spots" uses.</p>
+        <div id="stu-skills"></div>
+      </div>
+    </section>
+
+    <section id="tab-homework" style="display:none;">
+      <div class="next-session" id="hw-next"></div>
+      <div class="cal-legend">
+        <span><i class="swatch" style="background:var(--blue)"></i>Tutoring session</span>
+        <span><i class="swatch" style="background:var(--red)"></i>Homework due</span>
+        <span><i class="swatch" style="background:var(--faint)"></i>Done</span>
+      </div>
+      <div class="cal-note" id="hw-cal-note" style="display:none;"></div>
+      <div class="cal-wrap">
+        <div class="cal-host" id="sched-calendar"></div>
+      </div>
+      <p class="sched-hint">Click a day to add a task. Drag across several days to assign the same task to all of them. Drag an existing task to reschedule it, or click it to edit or delete. Click a session to assign work due that day.</p>
+      <div class="card" id="hw-undated-card" style="display:none; margin-top:1.25rem;">
+        <h2>Undated tasks</h2>
+        <p class="card-sub">Assigned without a due date (from the Sheet's own Assign Homework menu) — drag them onto a day by giving them a date here.</p>
+        <div id="hw-undated"></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ═══ EVERY STUDENT ═══ the week/month as Luca actually works it:
+       all sessions, all outstanding homework, one grid. -->
+  <div id="allcal">
+    <h1 class="sched-hed">All sessions &amp; homework</h1>
+    <div class="cal-legend" id="allcal-legend"></div>
+    <div class="cal-note" id="allcal-note" style="display:none;"></div>
+    <div class="cal-wrap">
+      <div class="cal-host" id="allcal-calendar"></div>
+    </div>
+    <p class="sched-hint">Click a session to assign that student homework for that day. Click a homework chip to open that student's page.</p>
   </div>
 
   <div id="status-msg"></div>
 </main>
+
+<div id="report-viewer">
+  <div id="report-bar">
+    <div class="rb-title" id="report-title">Report<small id="report-sub"></small></div>
+    <div class="rb-actions">
+      <button type="button" class="nav-btn" id="report-newtab">Open in new tab</button>
+      <button type="button" class="nav-btn" id="report-close">Close</button>
+    </div>
+  </div>
+  <div id="report-frame-wrap"><div id="report-loading">Loading report&hellip;</div></div>
+</div>
 
 <div id="sched-modal-backdrop">
   <div id="sched-modal">
     <h2 id="sched-modal-title">Add a task</h2>
     <p class="sched-modal-sub" id="sched-modal-sub"></p>
     <textarea id="sched-modal-task" placeholder="e.g. Question Bank &mdash; 10 Boundaries questions"></textarea>
+    <div class="preset-row" id="sched-presets"></div>
+    <label class="fld" id="sched-modal-date-row" style="display:none;">Due date
+      <input type="date" id="sched-modal-date">
+    </label>
     <label class="chk" id="sched-modal-done-row" style="display:none;">
       <input type="checkbox" id="sched-modal-done"> Marked done
     </label>
@@ -235,25 +444,34 @@
   var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwsLMGq3lhBEPObcas0k8gVS67NX9y4wXKG6RgzKtlBOT2SXfREK6vBpvvM19w9s1m6/exec';
   var SESSION_KEY = 'moretti_admin_key';
   var STALE_DAYS = 10;
+  // Reports are stored with an absolute link so the copy emailed to Luca
+  // works from his inbox; rewritten to a relative one here so opening a
+  // report loads it from whatever origin admin.html itself is on
+  // (localhost while testing, the real domain in production). Same
+  // rewrite index.html does for its own in-portal results viewer.
+  var REPORT_ABS_PREFIX = 'https://morettitutoring.com/portal/report.html';
+  var TASK_PRESETS = [
+    'Question Bank — 15 questions',
+    'Review my incorrect questions',
+    'Vocab — 1 set',
+    'Math review — 1 lesson',
+    'Full practice test (timed)'
+  ];
 
-  var gateEl = document.getElementById('gate');
-  var rosterEl = document.getElementById('roster');
-  var statusEl = document.getElementById('status-msg');
-  var gateKeyEl = document.getElementById('gate-key');
-  var gateSubmitEl = document.getElementById('gate-submit');
-  var gateErrorEl = document.getElementById('gate-error');
-  var refreshBtn = document.getElementById('refresh-btn');
-  var summaryRowEl = document.getElementById('summary-row');
-  var bodyEl = document.getElementById('roster-body');
-  var filterFlaggedEl = document.getElementById('filter-flagged');
+  function $(id) { return document.getElementById(id); }
 
-  var allStudents = [];
-  var sortKey = 'name';
-  var sortDir = 1;
-
+  /* ═══ SHARED HELPERS ═══ */
   function postToBackend(payload) {
     return fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) })
       .then(function (res) { return res.json(); });
+  }
+
+  function adminKey() {
+    try { return sessionStorage.getItem(SESSION_KEY); } catch (e) { return null; }
+  }
+
+  function escHtml(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
 
   function daysAgo(iso) {
@@ -272,9 +490,97 @@
     return Math.floor(d / 30) + ' months ago';
   }
 
-  function escHtml(s) {
-    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  // "YYYY-MM-DD" in LOCAL time — the format every dueDate the backend
+  // takes is in. Deliberately not toISOString().slice(0,10), which is UTC
+  // and lands on the wrong day for anything after 8pm Eastern.
+  function toDateStr(d) {
+    var y = d.getFullYear(), m = String(d.getMonth() + 1).padStart(2, '0'), day = String(d.getDate()).padStart(2, '0');
+    return y + '-' + m + '-' + day;
   }
+
+  // The day an assignment is due, as "YYYY-MM-DD". The backend sends this
+  // pre-formatted in the script's own timezone (see dueDayString_ there),
+  // which is the only reading that can't drift by a day; the ISO instant
+  // is the fallback for anything that predates that field.
+  function dueDayOf(a) {
+    return (a && a.dueDay) || isoToDateStr(a && a.dueDate);
+  }
+
+  function isoToDateStr(iso) {
+    if (!iso) return '';
+    var d = new Date(iso);
+    return isNaN(d.getTime()) ? '' : toDateStr(d);
+  }
+
+  function formatDateStr(s) {
+    var parts = String(s).split('-');
+    var d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+    return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+  }
+
+  function formatDay(iso) {
+    if (!iso) return '—';
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return '—';
+    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  function formatSessionWhen(session) {
+    var d = new Date(session.startIso);
+    if (isNaN(d.getTime())) return '';
+    if (session.allDay) return d.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
+    return d.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' }) +
+      ' at ' + d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+  }
+
+  // Stable per-student colour for the all-students calendar — same key
+  // always gets the same hue, so the grid reads consistently from week to
+  // week without any colours needing to be stored anywhere.
+  function studentColor(key) {
+    var h = 0, s = String(key || '');
+    for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 360;
+    return 'hsl(' + h + ', 44%, 41%)';
+  }
+
+  function setStatus(msg, isError) {
+    var el = $('status-msg');
+    el.textContent = msg || '';
+    el.className = isError ? 'error' : '';
+  }
+
+  /* ═══ VIEW SWITCHING ═══ four full-page views (gate / roster / one
+     student / everyone's calendar), only one visible at a time. */
+  var VIEWS = { gate: $('gate'), roster: $('roster'), student: $('student'), allcal: $('allcal') };
+  var currentView = 'gate';
+
+  function showView(name) {
+    Object.keys(VIEWS).forEach(function (k) { VIEWS[k].style.display = (k === name) ? 'block' : 'none'; });
+    currentView = name;
+    $('topnav').style.display = (name === 'gate') ? 'none' : 'flex';
+    $('nav-roster').classList.toggle('is-on', name === 'roster' || name === 'student');
+    $('nav-allcal').classList.toggle('is-on', name === 'allcal');
+    // FullCalendar measures itself on render; a calendar that was built
+    // while its container was display:none comes out zero-height until
+    // it's told to re-measure once it's actually on screen.
+    if (name === 'allcal' && allCalendar) allCalendar.updateSize();
+    if (name === 'student' && schedCalendar && activeTab === 'homework') schedCalendar.updateSize();
+    window.scrollTo(0, 0);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════
+     ROSTER
+     ═══════════════════════════════════════════════════════════════════ */
+  var allStudents = [];
+  var sortKey = 'name';
+  var sortDir = 1;
+  var rosterStale = false; // set by a homework edit made from a calendar view
+
+  var gateKeyEl = $('gate-key');
+  var gateSubmitEl = $('gate-submit');
+  var gateErrorEl = $('gate-error');
+  var summaryRowEl = $('summary-row');
+  var bodyEl = $('roster-body');
+  var filterFlaggedEl = $('filter-flagged');
 
   function isFlagged(s) {
     var behindOnAssignments = s.assignTotal > 0 && s.assignDone < s.assignTotal;
@@ -338,13 +644,18 @@
       var activityCls = (d == null || d >= STALE_DAYS) ? 'stale' : '';
       var activityCell = '<span class="' + activityCls + '">' + relativeTime(s.lastActivityAt) + '</span>';
 
+      var k = escHtml(s.key);
       return '<tr>' +
-        '<td class="name-cell">' + escHtml(s.name) + '<span class="key">' + escHtml(s.key) + '</span></td>' +
+        '<td class="name-cell"><button type="button" class="student-link" data-key="' + k + '" data-tab="reports">' + escHtml(s.name) + '</button>' +
+          '<span class="key">' + k + '</span></td>' +
         '<td>' + scoreCell + '</td>' +
         '<td>' + weakestCell + '</td>' +
         '<td>' + assignCell + '</td>' +
         '<td>' + activityCell + '</td>' +
-        '<td><button type="button" class="assign-pill schedule-btn" data-key="' + escHtml(s.key) + '">Schedule</button></td>' +
+        '<td><div class="row-actions">' +
+          '<button type="button" class="mini student-link" data-key="' + k + '" data-tab="reports">Reports</button>' +
+          '<button type="button" class="mini solid student-link" data-key="' + k + '" data-tab="homework">Schedule</button>' +
+        '</div></td>' +
         '</tr>';
     }).join('');
   }
@@ -353,10 +664,10 @@
   // would leak/re-attach) — matches the click to the student it belongs
   // to by key rather than closing over a specific row element.
   bodyEl.addEventListener('click', function (e) {
-    var btn = e.target.closest('.schedule-btn');
+    var btn = e.target.closest('.student-link');
     if (!btn) return;
     var student = allStudents.find(function (s) { return s.key === btn.getAttribute('data-key'); });
-    if (student) openScheduler(student);
+    if (student) openStudent(student, btn.getAttribute('data-tab') || 'reports');
   });
 
   document.querySelectorAll('thead th[data-sort]').forEach(function (th) {
@@ -371,39 +682,39 @@
   });
   filterFlaggedEl.addEventListener('change', renderTable);
 
-  function loadRoster(adminKey) {
-    gateSubmitEl.disabled = true;
-    gateErrorEl.textContent = '';
-    statusEl.textContent = '';
-    return postToBackend({ action: 'getRoster', adminKey: adminKey }).then(function (data) {
+  // silent: this is a background top-up of the roster's numbers (after a
+  // homework edit changed someone's "x of y done"), not something the
+  // admin asked for. A failed background call must leave the page exactly
+  // where it is — the non-silent path below drops to the gate and throws
+  // away the session key, which would be a brutal thing to do to someone
+  // mid-edit because one refresh request happened to time out.
+  function loadRoster(key, silent) {
+    if (!silent) { gateSubmitEl.disabled = true; gateErrorEl.textContent = ''; setStatus(''); }
+    return postToBackend({ action: 'getRoster', adminKey: key }).then(function (data) {
       gateSubmitEl.disabled = false;
       if (!data || !data.ok) {
+        if (silent) return false;
         var msg = (data && data.error === 'unauthorized') ? 'Wrong admin key.' : 'Could not load the roster. Try again.';
         // Always surface the gate on failure — a Refresh click or the
         // auto-continue-on-reload path below can hit this branch while
         // the roster is already showing, and gate-error lives inside
         // #gate, so leaving it hidden means the error is never seen.
         gateErrorEl.textContent = msg;
-        gateEl.style.display = 'block';
-        rosterEl.style.display = 'none';
-        refreshBtn.style.display = 'none';
+        showView('gate');
         try { sessionStorage.removeItem(SESSION_KEY); } catch (e) {}
         return false;
       }
-      try { sessionStorage.setItem(SESSION_KEY, adminKey); } catch (e) {}
+      try { sessionStorage.setItem(SESSION_KEY, key); } catch (e) {}
       allStudents = data.students || [];
-      gateEl.style.display = 'none';
-      rosterEl.style.display = 'block';
-      refreshBtn.style.display = '';
       renderSummary();
       renderTable();
+      if (currentView === 'gate') showView('roster');
       return true;
     }).catch(function () {
       gateSubmitEl.disabled = false;
+      if (silent) return false;
       gateErrorEl.textContent = 'Network error — check your connection and try again.';
-      gateEl.style.display = 'block';
-      rosterEl.style.display = 'none';
-      refreshBtn.style.display = 'none';
+      showView('gate');
       return false;
     });
   }
@@ -415,159 +726,735 @@
   });
   gateKeyEl.addEventListener('keydown', function (e) { if (e.key === 'Enter') gateSubmitEl.click(); });
 
-  refreshBtn.addEventListener('click', function () {
-    var key = (function () { try { return sessionStorage.getItem(SESSION_KEY); } catch (e) { return null; } })();
+  $('nav-roster').addEventListener('click', goToRoster);
+  $('nav-allcal').addEventListener('click', openAllCalendar);
+  $('student-back-btn').addEventListener('click', goToRoster);
+
+  $('refresh-btn').addEventListener('click', function () {
+    var key = adminKey();
     if (!key) return;
-    refreshBtn.disabled = true;
-    loadRoster(key).then(function () { refreshBtn.disabled = false; });
+    var btn = $('refresh-btn');
+    btn.disabled = true;
+    var done = function () { btn.disabled = false; };
+    if (currentView === 'student' && currentStudent) {
+      loadStudentDetail(currentStudent.key);
+      loadNextSession(currentStudent.key);
+      if (schedCalendar) schedCalendar.refetchEvents();
+      rosterStale = false;
+      loadRoster(key, true).then(done);
+    } else if (currentView === 'allcal') {
+      if (allCalendar) allCalendar.refetchEvents();
+      rosterStale = false;
+      loadRoster(key, true).then(done);
+    } else {
+      rosterStale = false;
+      loadRoster(key).then(done);
+    }
   });
 
   // Auto-continue if this browser already unlocked the roster this
   // session — avoids re-typing the key on every reload without ever
   // persisting it to disk (sessionStorage clears when the tab closes).
-  var savedKey = (function () { try { return sessionStorage.getItem(SESSION_KEY); } catch (e) { return null; } })();
+  var savedKey = adminKey();
   if (savedKey) loadRoster(savedKey);
 
-  // ═══ SCHEDULER ═══ per-student FullCalendar view, opened via the
-  // roster table's "Schedule" button (delegated listener above).
-  var schedulerEl = document.getElementById('scheduler');
-  var schedBackBtn = document.getElementById('sched-back-btn');
-  var schedHedEl = document.getElementById('sched-hed');
-  var schedHedKeyEl = document.getElementById('sched-hed-key');
-  var schedCalendarEl = document.getElementById('sched-calendar');
-  var calendar = null;
-  var currentSchedStudent = null;
+  /* ═══════════════════════════════════════════════════════════════════
+     ONE STUDENT — reports tab
+     ═══════════════════════════════════════════════════════════════════ */
+  var currentStudent = null;  // the roster row that was clicked
+  var currentDetail = null;   // getStudentDetail's payload for that student
+  var activeTab = 'reports';
 
-  var modalBackdrop = document.getElementById('sched-modal-backdrop');
-  var modalTitle = document.getElementById('sched-modal-title');
-  var modalSub = document.getElementById('sched-modal-sub');
-  var modalTaskEl = document.getElementById('sched-modal-task');
-  var modalDoneRow = document.getElementById('sched-modal-done-row');
-  var modalDoneEl = document.getElementById('sched-modal-done');
-  var modalErrorEl = document.getElementById('sched-modal-error');
-  var saveBtn = document.getElementById('sched-save-btn');
-  var cancelBtn = document.getElementById('sched-cancel-btn');
-  var deleteBtn = document.getElementById('sched-delete-btn');
-
-  var modalMode = null;   // 'create' | 'edit'
-  var modalDates = [];    // "YYYY-MM-DD"[], for create (one entry per selected day)
-  var modalEvent = null;  // FullCalendar event object, for edit
-
-  function adminKey() {
-    try { return sessionStorage.getItem(SESSION_KEY); } catch (e) { return null; }
+  function openStudent(student, tab) {
+    currentStudent = student;
+    currentDetail = null;
+    $('stu-name').firstChild.textContent = student.name;
+    $('stu-key').textContent = student.key;
+    $('stu-meta').innerHTML = '<span>Loading&hellip;</span>';
+    $('stu-actions').innerHTML = '';
+    $('stu-tiles').innerHTML = '';
+    $('stu-attempts').innerHTML = '<tr><td colspan="5" class="empty">Loading&hellip;</td></tr>';
+    $('stu-skills').innerHTML = '<div class="empty">Loading&hellip;</div>';
+    $('stu-trend').innerHTML = '';
+    $('hw-next').innerHTML = '<span class="ns-none">Checking the calendar&hellip;</span>';
+    // Cleared, not just hidden: this list is filled by the calendar fetch,
+    // which hasn't run for THIS student yet. Leaving the previous
+    // student's rows in place would show their tasks on this page — and
+    // "Give it a date" would then edit that other student's row.
+    hwUndated = [];
+    $('hw-undated-card').style.display = 'none';
+    showView('student');
+    selectTab(tab || 'reports');
+    loadStudentDetail(student.key);
+    loadNextSession(student.key);
   }
 
-  function toDateStr(d) {
-    var y = d.getFullYear(), m = String(d.getMonth() + 1).padStart(2, '0'), day = String(d.getDate()).padStart(2, '0');
-    return y + '-' + m + '-' + day;
-  }
-
-  function formatDateStr(s) {
-    var parts = s.split('-');
-    var d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
-    return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
-  }
-
-  function openScheduler(student) {
-    currentSchedStudent = student;
-    schedHedEl.firstChild.textContent = student.name;
-    schedHedKeyEl.textContent = student.key;
-    rosterEl.style.display = 'none';
-    schedulerEl.style.display = 'block';
-    refreshBtn.style.display = 'none';
-    if (!calendar) initCalendar();
-    loadSchedAssignments();
-  }
-
-  schedBackBtn.addEventListener('click', function () {
-    schedulerEl.style.display = 'none';
-    rosterEl.style.display = 'block';
-    refreshBtn.style.display = '';
-    currentSchedStudent = null;
+  document.querySelectorAll('.tabbar .tab').forEach(function (btn) {
+    btn.addEventListener('click', function () { selectTab(btn.getAttribute('data-tab')); });
   });
 
-  function initCalendar() {
-    calendar = new FullCalendar.Calendar(schedCalendarEl, {
+  function selectTab(tab) {
+    activeTab = tab;
+    document.querySelectorAll('.tabbar .tab').forEach(function (b) {
+      b.classList.toggle('is-on', b.getAttribute('data-tab') === tab);
+    });
+    $('tab-reports').style.display = (tab === 'reports') ? 'block' : 'none';
+    $('tab-homework').style.display = (tab === 'homework') ? 'block' : 'none';
+    if (tab === 'homework') {
+      if (!schedCalendar) initSchedCalendar();
+      else { schedCalendar.updateSize(); schedCalendar.refetchEvents(); }
+    }
+  }
+
+  function loadStudentDetail(key) {
+    return postToBackend({ action: 'getStudentDetail', adminKey: adminKey(), key: key }).then(function (data) {
+      if (!currentStudent || currentStudent.key !== key) return; // navigated away mid-flight
+      if (!data || !data.ok) {
+        $('stu-meta').innerHTML = '<span style="color:var(--red);">Could not load this student.</span>';
+        $('stu-attempts').innerHTML = '<tr><td colspan="5" class="empty">Could not load their test reports.</td></tr>';
+        $('stu-skills').innerHTML = '<div class="empty">&mdash;</div>';
+        return;
+      }
+      currentDetail = data;
+      renderStudentMeta(data);
+      renderStudentTiles(data);
+      renderTrend(data);
+      renderAttempts(data);
+      renderSkills(data);
+    }).catch(function () {
+      $('stu-meta').innerHTML = '<span style="color:var(--red);">Network error loading this student.</span>';
+    });
+  }
+
+  function renderStudentMeta(data) {
+    var s = data.student;
+    var bits = [];
+    if (s.testDate) {
+      var days = Math.ceil((new Date(s.testDate).getTime() - Date.now()) / 86400000);
+      bits.push('<span>Test date <b>' + formatDay(s.testDate) + '</b>' +
+        (days >= 0 ? ' (' + days + ' day' + (days === 1 ? '' : 's') + ' out)' : ' (past)') + '</span>');
+    }
+    if (s.targetScore) bits.push('<span>Target <b>' + s.targetScore + '</b></span>');
+    if (s.baselineRw || s.baselineMath) {
+      bits.push('<span>Baseline <b>' + ((s.baselineRw || 0) + (s.baselineMath || 0)) + '</b> (' +
+        (s.baselineRw || '—') + ' R&amp;W / ' + (s.baselineMath || '—') + ' Math)</span>');
+    }
+    if (s.accomTimeMult && String(s.accomTimeMult) !== '1') bits.push('<span>Accommodations <b>' + escHtml(String(s.accomTimeMult)) + '&times; time</b></span>');
+    if (s.grantedEmail) bits.push('<span>' + escHtml(s.grantedEmail) + '</span>');
+    if (s.guardianEmail) bits.push('<span>Parent ' + escHtml(s.guardianName || '') + ' &lt;' + escHtml(s.guardianEmail) + '&gt;</span>');
+    if (!bits.length) bits.push('<span class="empty" style="padding:0;">No onboarding details on file yet.</span>');
+    $('stu-meta').innerHTML = bits.join('');
+
+    var actions = [];
+    if (s.driveFolderUrl) actions.push('<a class="mini" target="_blank" rel="noopener" href="' + escHtml(s.driveFolderUrl) + '">Drive folder</a>');
+    actions.push('<button type="button" class="mini solid" id="stu-assign-btn">Assign homework</button>');
+    $('stu-actions').innerHTML = actions.join('');
+    var assignBtn = $('stu-assign-btn');
+    if (assignBtn) assignBtn.addEventListener('click', function () {
+      selectTab('homework');
+      openCreateModal([toDateStr(new Date())], currentStudent.key, currentStudent.name, '');
+    });
+  }
+
+  function renderStudentTiles(data) {
+    var scored = data.attempts.filter(function (a) { return a.composite; });
+    var latest = scored.length ? scored[0] : null;             // attempts are newest-first
+    var first = scored.length ? scored[scored.length - 1] : null;
+    var delta = (latest && first && scored.length > 1) ? latest.composite - first.composite : null;
+    var target = data.student.targetScore;
+
+    var tiles = [];
+    tiles.push('<div class="summary-tile"><div class="num">' + (latest ? latest.composite : '—') + '</div>' +
+      '<div class="lbl">Latest composite</div>' +
+      '<div class="sub">' + (latest ? formatDay(latest.at) : 'No scored attempt yet') + '</div></div>');
+    tiles.push('<div class="summary-tile"><div class="num">' +
+      (delta == null ? '—' : (delta > 0 ? '+' : '') + delta) + '</div>' +
+      '<div class="lbl">Since first test</div>' +
+      '<div class="sub">' + (scored.length ? scored.length + ' scored attempt' + (scored.length === 1 ? '' : 's') : '&nbsp;') + '</div></div>');
+    tiles.push('<div class="summary-tile"><div class="num">' + (target || '—') + '</div>' +
+      '<div class="lbl">Target</div>' +
+      '<div class="sub">' + (target && latest ? (target - latest.composite > 0 ? (target - latest.composite) + ' to go' : 'Target met') : '&nbsp;') + '</div></div>');
+    tiles.push('<div class="summary-tile"><div class="num">' + data.incorrectCount + '</div>' +
+      '<div class="lbl">Outstanding misses</div>' +
+      '<div class="sub">' + data.savedCount + ' saved question' + (data.savedCount === 1 ? '' : 's') + '</div></div>');
+    $('stu-tiles').innerHTML = tiles.join('');
+  }
+
+  /* Score trend — hand-rolled SVG (see the note in this file's <style>).
+     Oldest attempt on the left; the student's target, if they set one,
+     as a dashed gold line so "are they on track" is one glance. */
+  function renderTrend(data) {
+    var pts = data.attempts.filter(function (a) { return a.composite; }).slice().reverse();
+    var host = $('stu-trend');
+    if (pts.length < 2) {
+      host.innerHTML = '<div class="empty">' +
+        (pts.length === 1 ? 'One scored attempt so far — a trend needs at least two.' : 'No scored attempts yet.') +
+        '</div>';
+      return;
+    }
+    var W = 640, H = 190, padL = 38, padR = 30, padT = 24, padB = 30;
+    var target = data.student.targetScore || null;
+    var vals = pts.map(function (p) { return p.composite; });
+    if (target) vals = vals.concat([target]);
+    var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
+    if (hi === lo) { hi = lo + 10; lo = lo - 10; }
+    var pad = (hi - lo) * 0.15;
+    lo -= pad; hi += pad;
+
+    function x(i) { return padL + (pts.length === 1 ? 0 : i * (W - padL - padR) / (pts.length - 1)); }
+    function y(v) { return padT + (hi - v) * (H - padT - padB) / (hi - lo); }
+
+    var parts = [];
+    parts.push('<svg class="trend-svg" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" role="img" aria-label="Composite score over time">');
+    // horizontal gridlines at the extremes of the plotted range
+    [hi, (hi + lo) / 2, lo].forEach(function (v) {
+      parts.push('<line class="grid" x1="' + padL + '" y1="' + y(v).toFixed(1) + '" x2="' + (W - padR) + '" y2="' + y(v).toFixed(1) + '"></line>');
+      parts.push('<text x="4" y="' + (y(v) + 3).toFixed(1) + '">' + Math.round(v) + '</text>');
+    });
+    if (target) {
+      parts.push('<line class="target-line" x1="' + padL + '" y1="' + y(target).toFixed(1) + '" x2="' + (W - padR) + '" y2="' + y(target).toFixed(1) + '"></line>');
+      parts.push('<text x="' + (W - padR) + '" y="' + (y(target) - 5).toFixed(1) + '" text-anchor="end" style="fill:var(--gold); font-weight:700;">target ' + target + '</text>');
+    }
+    parts.push('<polyline class="line" points="' + pts.map(function (p, i) { return x(i).toFixed(1) + ',' + y(p.composite).toFixed(1); }).join(' ') + '"></polyline>');
+    pts.forEach(function (p, i) {
+      parts.push('<circle class="dot" cx="' + x(i).toFixed(1) + '" cy="' + y(p.composite).toFixed(1) + '" r="3.5"></circle>');
+      parts.push('<text class="val" x="' + x(i).toFixed(1) + '" y="' + (y(p.composite) - 9).toFixed(1) + '" text-anchor="middle">' + p.composite + '</text>');
+      var d = new Date(p.at);
+      var label = isNaN(d.getTime()) ? '' : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+      parts.push('<text x="' + x(i).toFixed(1) + '" y="' + (H - 8) + '" text-anchor="middle">' + label + '</text>');
+    });
+    parts.push('</svg>');
+    host.innerHTML = parts.join('');
+  }
+
+  function attemptLabel(a) {
+    if (a.testTitle) return a.testTitle;
+    if (a.source === 'practice-test') return a.testId || 'Practice test';
+    return (a.testType || 'SAT') + ' diagnostic';
+  }
+
+  function renderAttempts(data) {
+    var host = $('stu-attempts');
+    if (!data.attempts.length) {
+      host.innerHTML = '<tr><td colspan="5" class="empty">No diagnostics or practice tests submitted yet.</td></tr>';
+      return;
+    }
+    host.innerHTML = data.attempts.map(function (a, i) {
+      var isDiag = a.source !== 'practice-test';
+      var score = a.composite
+        ? '<b>' + a.composite + '</b>' + (a.rw || a.math ? ' <span style="color:var(--faint); font-size:0.72rem;">' + (a.rw || '—') + ' / ' + (a.math || '—') + '</span>' : '')
+        : '<span class="no-score">' + (a.score ? escHtml(String(a.score)) : 'Taken') + '</span>';
+      var weakest = a.weakest
+        ? '<span class="weakest-label">' + escHtml(a.weakest.label) + '</span><br><span class="weakest-frac">' + a.weakest.correct + ' / ' + a.weakest.total + ' correct</span>'
+        : '<span class="no-score">&mdash;</span>';
+      var actions = a.hasReport
+        ? '<button type="button" class="mini solid report-btn" data-idx="' + i + '">View report</button>'
+        : '<button type="button" class="mini" disabled title="This attempt logged no report payload">No report</button>';
+      if (a.driveFileUrl) {
+        actions += ' <a class="mini" target="_blank" rel="noopener" href="' + escHtml(a.driveFileUrl) + '">Drive</a>';
+      }
+      return '<tr>' +
+        '<td>' + formatDay(a.at) + '</td>' +
+        '<td>' + escHtml(attemptLabel(a)) + '<span class="src-badge' + (isDiag ? ' diag' : '') + '">' + (isDiag ? 'Diagnostic' : 'Practice') + '</span></td>' +
+        '<td>' + score + '</td>' +
+        '<td>' + weakest + '</td>' +
+        '<td><div class="row-actions">' + actions + '</div></td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  $('stu-attempts').addEventListener('click', function (e) {
+    var btn = e.target.closest('.report-btn');
+    if (!btn || !currentDetail) return;
+    openReport(currentDetail.attempts[Number(btn.getAttribute('data-idx'))]);
+  });
+
+  function renderSkills(data) {
+    var host = $('stu-skills');
+    if (!data.skills.length) {
+      host.innerHTML = '<div class="empty">No skill breakdown synced yet — it appears once they finish a diagnostic or practice test.</div>';
+      return;
+    }
+    host.innerHTML = data.skills.slice(0, 12).map(function (sk) {
+      var cls = sk.pct < 50 ? 'weak' : (sk.pct >= 80 ? 'strong' : '');
+      return '<div class="skill-row">' +
+        '<div class="sk-name">' + escHtml(sk.label) + (sk.domain && sk.domain !== sk.label ? '<small>' + escHtml(sk.domain) + '</small>' : '') + '</div>' +
+        '<div class="sk-bar"><i class="' + cls + '" style="width:' + sk.pct + '%"></i></div>' +
+        '<div class="sk-frac">' + sk.correct + '/' + sk.total + ' &middot; ' + sk.pct + '%</div>' +
+        '<button type="button" class="mini skill-assign-btn" data-skill="' + escHtml(sk.label) + '">Assign</button>' +
+        '</div>';
+    }).join('');
+  }
+
+  // The whole point of having reports and the scheduler on one page:
+  // a weak skill goes straight to a dated task without retyping it.
+  $('stu-skills').addEventListener('click', function (e) {
+    var btn = e.target.closest('.skill-assign-btn');
+    if (!btn || !currentStudent) return;
+    var tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    selectTab('homework');
+    openCreateModal([toDateStr(tomorrow)], currentStudent.key, currentStudent.name,
+      'Question Bank — 10 questions on ' + btn.getAttribute('data-skill'));
+  });
+
+  /* ═══ REPORT VIEWER ═══ the payload lives in one Attempts-sheet cell
+     and can run tens of KB, so it's fetched for the single report being
+     opened rather than shipped with the whole detail response. */
+  function relativeReportLink(link) {
+    if (!link) return '';
+    return link.indexOf(REPORT_ABS_PREFIX) === 0 ? 'report.html' + link.slice(REPORT_ABS_PREFIX.length) : link;
+  }
+
+  // This string comes out of a spreadsheet cell and goes straight into an
+  // iframe src / window.open. Anything that isn't the report page itself
+  // (a javascript: or data: URL that somehow ended up in that column) is
+  // refused rather than loaded.
+  function safeReportLink(link) {
+    var rel = relativeReportLink(link);
+    return /^(report\.html([?#]|$)|https:\/\/)/.test(rel) ? rel : '';
+  }
+
+  var reportViewerLink = '';
+  function openReport(attempt) {
+    if (!attempt || !attempt.reportRow || !currentStudent) return;
+    var wrap = $('report-frame-wrap');
+    reportViewerLink = '';
+    $('report-title').firstChild.textContent = attemptLabel(attempt);
+    $('report-sub').textContent = currentStudent.name + ' · ' + formatDay(attempt.at);
+    wrap.innerHTML = '<div id="report-loading">Loading report&hellip;</div>';
+    $('report-viewer').classList.add('open');
+
+    postToBackend({ action: 'getAttemptReport', adminKey: adminKey(), key: currentStudent.key, row: attempt.reportRow })
+      .then(function (data) {
+        if (!data || !data.ok || !data.reportLink) {
+          wrap.innerHTML = '<div id="report-loading">This attempt has no saved report payload.</div>';
+          return;
+        }
+        var link = safeReportLink(data.reportLink);
+        if (!link) {
+          wrap.innerHTML = '<div id="report-loading">This attempt\'s saved report link isn\'t a report URL — nothing to open.</div>';
+          return;
+        }
+        reportViewerLink = link;
+        // A fresh <iframe> per open, rather than reassigning src: the
+        // report is addressed entirely by URL hash, and changing only the
+        // hash on a live frame doesn't reload it — it would silently keep
+        // showing the previous student's report.
+        var frame = document.createElement('iframe');
+        frame.setAttribute('title', 'Test report');
+        frame.src = reportViewerLink;
+        wrap.innerHTML = '';
+        wrap.appendChild(frame);
+      })
+      .catch(function () {
+        wrap.innerHTML = '<div id="report-loading">Network error loading the report.</div>';
+      });
+  }
+
+  function closeReport() {
+    $('report-viewer').classList.remove('open');
+    $('report-frame-wrap').innerHTML = '<div id="report-loading">Loading report&hellip;</div>'; // stop the frame
+    reportViewerLink = '';
+  }
+  $('report-close').addEventListener('click', closeReport);
+  $('report-newtab').addEventListener('click', function () {
+    if (reportViewerLink) window.open(reportViewerLink, '_blank');
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    if ($('report-viewer').classList.contains('open')) closeReport();
+    else if ($('sched-modal-backdrop').classList.contains('open')) closeModal();
+  });
+
+  /* ═══════════════════════════════════════════════════════════════════
+     CALENDARS — one student's homework, and everyone's week
+     -------------------------------------------------------------------
+     Both grids are fed by the same backend action (getAdminCalendar):
+     tutoring sessions read off the published calendar, plus every dated
+     assignment. Sessions are what homework is planned AROUND, so they're
+     drawn here but never editable — the calendar itself stays the source
+     of truth for when a session is. Clicking one assigns work due that
+     day, which is the whole reason they're on this grid.
+     ═══════════════════════════════════════════════════════════════════ */
+  var schedCalendar = null;
+  var allCalendar = null;
+  var hwUndated = [];
+
+  function firstName(name) { return String(name || '').trim().split(/\s+/)[0] || ''; }
+
+  var ICS_NOTE = 'The tutoring calendar could not be read, so no sessions are shown. (Check CALENDAR_ICS_URL in the Apps Script project properties.) Homework is unaffected.';
+  var LOAD_NOTE = 'Could not load this calendar — check your connection, then hit Refresh.';
+  function setCalNote(el, msg) {
+    el.style.display = msg ? 'block' : 'none';
+    el.textContent = msg || '';
+  }
+
+  // One shape for both grids. isAll colours each chip by student — solid
+  // for a session, outlined for homework — since in the everyone view the
+  // student matters more than the kind; the single-student grid uses the
+  // flat blue/red pair instead, where the kind is the only distinction
+  // that's left to make.
+  function buildEvents(data, isAll) {
+    var out = [];
+    (data.sessions || []).forEach(function (s, i) {
+      var matched = s.matched || [];
+      var color = (isAll && matched.length === 1) ? studentColor(matched[0].key) : null;
+      out.push({
+        id: 'sess-' + i,
+        title: s.title,
+        start: s.startIso,
+        end: s.endIso || undefined,
+        allDay: !!s.allDay,
+        editable: false,
+        durationEditable: false,
+        startEditable: false,
+        classNames: isAll
+          ? ['cal-chip'].concat(matched.length ? [] : ['sess-unmatched'])
+          : ['sess-event'].concat(matched.length ? [] : ['sess-unmatched']),
+        backgroundColor: color || undefined,
+        borderColor: color || undefined,
+        extendedProps: { kind: 'session', matched: matched }
+      });
+    });
+    (data.assignments || []).forEach(function (a) {
+      if (!a.dueDate) return; // undated rows are listed beside the calendar instead
+      var color = isAll ? studentColor(a.key) : null;
+      out.push({
+        id: 'a' + a.row,
+        title: isAll ? (firstName(a.studentName) + ' — ' + a.task) : a.task,
+        start: dueDayOf(a),
+        allDay: true,
+        classNames: isAll
+          ? ['cal-chip', 'hw-outline'].concat(a.done ? ['is-done'] : [])
+          : ['sched-event'].concat(a.done ? ['sched-event-done'] : []),
+        backgroundColor: isAll ? '#ffffff' : undefined,
+        borderColor: color || undefined,
+        textColor: color || undefined,
+        extendedProps: {
+          kind: 'assignment', row: a.row, done: a.done, task: a.task,
+          studentKey: a.key, studentName: a.studentName, dueDate: a.dueDate, dueDay: a.dueDay
+        }
+      });
+    });
+    return out;
+  }
+
+  // dayGridMonth hands back an end that's exclusive (one day past the last
+  // selected day); timeGridWeek hands back real times. Walking whole days
+  // from the start's midnight covers both a single click and a multi-day
+  // drag without special-casing the view.
+  function datesFromSelection(info) {
+    var dates = [];
+    var d = new Date(info.start.getFullYear(), info.start.getMonth(), info.start.getDate());
+    while (d.getTime() < info.end.getTime()) {
+      dates.push(toDateStr(d));
+      d.setDate(d.getDate() + 1);
+    }
+    return dates.length ? dates : [toDateStr(info.start)];
+  }
+
+  function refreshActiveCalendar() {
+    if (schedCalendar && currentView === 'student') schedCalendar.refetchEvents();
+    if (allCalendar && currentView === 'allcal') allCalendar.refetchEvents();
+    // The roster's "x of y done" column is now out of date — but getRoster
+    // is by far the most expensive call this page makes (it reads the
+    // Students, Attempts and Assignments sheets), and the roster isn't
+    // even on screen. Mark it instead, and reload once, on the way back.
+    rosterStale = true;
+  }
+
+  // Called by everything that lands on the roster, so a stale count is
+  // refreshed exactly once when it's about to be looked at.
+  function goToRoster() {
+    showView('roster');
+    var k = adminKey();
+    if (rosterStale && k) { rosterStale = false; loadRoster(k, true); }
+  }
+
+  /* ── one student ─────────────────────────────────────────────────── */
+  function initSchedCalendar() {
+    schedCalendar = new FullCalendar.Calendar($('sched-calendar'), {
       initialView: 'dayGridMonth',
-      headerToolbar: { left: 'prev,next today', center: 'title', right: '' },
+      headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek' },
       height: 'auto',
       selectable: true,
       editable: true,
+      nowIndicator: true,
+      // Tutoring happens after school — showing midnight-to-midnight in
+      // the week view spends most of the grid on hours nothing is ever
+      // scheduled in.
+      slotMinTime: '07:00:00',
+      slotMaxTime: '22:00:00',
+      expandRows: true,
+      dayMaxEvents: 4,
+      // Month cells are narrow enough to clip most real task names —
+      // the native tooltip is the cheapest way to still read one.
+      eventDidMount: function (info) { info.el.title = info.event.title; },
+      // Without this a failed load just leaves an empty grid, which reads
+      // as "this student has nothing scheduled" — the exact wrong
+      // conclusion to hand someone planning their week.
+      eventSourceFailure: function () { setCalNote($('hw-cal-note'), LOAD_NOTE); },
+      events: fetchStudentEvents,
       select: function (info) {
-        // info.end is exclusive (one day past the last selected day) in
-        // dayGridMonth — walk start..end to get every selected date,
-        // covering both a plain single-day click and a multi-day drag.
-        var dates = [];
-        var d = new Date(info.start);
-        while (d < info.end) { dates.push(toDateStr(d)); d.setDate(d.getDate() + 1); }
-        calendar.unselect();
-        openCreateModal(dates);
+        var dates = datesFromSelection(info);
+        schedCalendar.unselect();
+        openCreateModal(dates, currentStudent.key, currentStudent.name, '');
       },
-      eventClick: function (info) { openEditModal(info.event); },
+      eventClick: function (info) {
+        var p = info.event.extendedProps;
+        if (p.kind === 'session') {
+          openCreateModal([toDateStr(info.event.start)], currentStudent.key, currentStudent.name, '', 'Due the day of this session');
+        } else {
+          openEditModal(p);
+        }
+      },
       eventDrop: function (info) {
+        var p = info.event.extendedProps;
+        if (p.kind !== 'assignment') { info.revert(); return; }
         postToBackend({
-          action: 'updateAdminAssignment', adminKey: adminKey(), key: currentSchedStudent.key,
-          row: info.event.extendedProps.row, patch: { dueDate: toDateStr(info.event.start) }
-        }).then(function (data) { if (!data || !data.ok) info.revert(); })
-          .catch(function () { info.revert(); });
+          action: 'updateAdminAssignment', adminKey: adminKey(), key: p.studentKey,
+          row: p.row, patch: { dueDate: toDateStr(info.event.start) }
+        }).then(function (data) {
+          if (!data || !data.ok) info.revert();
+          else refreshActiveCalendar(); // re-reads so extendedProps.dueDate isn't left stale
+        }).catch(function () { info.revert(); });
       }
     });
-    calendar.render();
+    schedCalendar.render();
   }
 
-  function loadSchedAssignments() {
-    postToBackend({ action: 'getAdminAssignments', adminKey: adminKey(), key: currentSchedStudent.key }).then(function (data) {
-      if (!data || !data.ok || !calendar) return;
-      calendar.removeAllEvents();
-      (data.assignments || []).forEach(function (a) {
-        if (!a.dueDate) return; // undated legacy rows have no day to sit on
-        calendar.addEvent({
-          id: String(a.row),
-          title: a.task,
-          start: a.dueDate.slice(0, 10),
-          allDay: true,
-          classNames: ['sched-event'].concat(a.done ? ['sched-event-done'] : []),
-          extendedProps: { row: a.row, done: a.done, task: a.task }
+  function fetchStudentEvents(info, success, failure) {
+    if (!currentStudent) { success([]); return; }
+    var key = currentStudent.key;
+    postToBackend({ action: 'getAdminCalendar', adminKey: adminKey(), key: key, start: info.startStr, end: info.endStr })
+      .then(function (data) {
+        if (!data || !data.ok) { failure(new Error(data && data.error ? data.error : 'load_failed')); return; }
+        if (!currentStudent || currentStudent.key !== key) { success([]); return; } // navigated away mid-flight
+        setCalNote($('hw-cal-note'), data.calendarError ? ICS_NOTE : '');
+        hwUndated = (data.assignments || []).filter(function (a) { return !a.dueDate; });
+        renderUndated();
+        success(buildEvents(data, false));
+      })
+      .catch(function (err) { failure(err); });
+  }
+
+  function renderUndated() {
+    var card = $('hw-undated-card');
+    // Emptied as well as hidden, so no previous student's rows are left
+    // sitting in the DOM behind a display:none.
+    if (!hwUndated.length) { card.style.display = 'none'; $('hw-undated').innerHTML = ''; return; }
+    card.style.display = 'block';
+    $('hw-undated').innerHTML = hwUndated.map(function (a) {
+      return '<div class="undated-row' + (a.done ? ' is-done' : '') + '">' +
+        '<div class="ud-task">' + escHtml(a.task) + '</div>' +
+        '<button type="button" class="mini undated-btn" data-row="' + a.row + '">Give it a date</button>' +
+        '</div>';
+    }).join('');
+  }
+
+  $('hw-undated').addEventListener('click', function (e) {
+    var btn = e.target.closest('.undated-btn');
+    if (!btn) return;
+    // Matched by sheet row rather than list position — a refetch between
+    // render and click would otherwise shift what this button points at.
+    var row = Number(btn.getAttribute('data-row'));
+    var a = hwUndated.filter(function (x) { return x.row === row; })[0];
+    if (a) openEditModal({ row: a.row, task: a.task, done: a.done, dueDate: a.dueDate, dueDay: a.dueDay, studentKey: a.key, studentName: a.studentName });
+  });
+
+  function loadNextSession(key) {
+    var host = $('hw-next');
+    var now = new Date();
+    var end = new Date(now.getTime() + 90 * 86400000);
+    postToBackend({ action: 'getAdminCalendar', adminKey: adminKey(), key: key, start: toDateStr(now), end: toDateStr(end) })
+      .then(function (data) {
+        if (!currentStudent || currentStudent.key !== key) return;
+        if (!data || !data.ok) { host.innerHTML = '<span class="ns-none">Could not reach the calendar.</span>'; return; }
+        if (data.calendarError) {
+          host.innerHTML = '<span class="ns-none">The tutoring calendar is not reachable right now.</span>';
+          return;
+        }
+        // 20 minutes of grace, same as the portal's own next-session card:
+        // a session that started a few minutes ago is still "the" session.
+        var cutoff = Date.now() - 20 * 60 * 1000;
+        var next = (data.sessions || []).filter(function (s) { return new Date(s.startIso).getTime() >= cutoff; })[0];
+        if (!next) {
+          host.innerHTML = '<span class="ns-none">No upcoming session on the calendar matching <b>' + escHtml(firstName(currentStudent.name)) + '</b>.</span>';
+          return;
+        }
+        host.innerHTML = '<span>Next session: <b>' + escHtml(formatSessionWhen(next)) + '</b></span>' +
+          '<button type="button" class="mini solid" id="hw-assign-next">Assign for that day</button>';
+        $('hw-assign-next').addEventListener('click', function () {
+          selectTab('homework');
+          openCreateModal([isoToDateStr(next.startIso)], currentStudent.key, currentStudent.name, '', 'Due the day of their next session');
         });
-      });
-    });
+      })
+      .catch(function () { host.innerHTML = '<span class="ns-none">Could not reach the calendar.</span>'; });
   }
 
-  function openCreateModal(dates) {
+  /* ── everyone ────────────────────────────────────────────────────── */
+  function openAllCalendar() {
+    showView('allcal');
+    if (!allCalendar) initAllCalendar();
+    else { allCalendar.updateSize(); allCalendar.refetchEvents(); }
+  }
+
+  function initAllCalendar() {
+    allCalendar = new FullCalendar.Calendar($('allcal-calendar'), {
+      initialView: 'timeGridWeek',
+      headerToolbar: { left: 'prev,next today', center: 'title', right: 'timeGridWeek,dayGridMonth' },
+      height: 'auto',
+      editable: false,
+      nowIndicator: true,
+      slotMinTime: '07:00:00',
+      slotMaxTime: '22:00:00',
+      expandRows: true,
+      dayMaxEvents: 5,
+      eventDidMount: function (info) { info.el.title = info.event.title; },
+      eventSourceFailure: function () { setCalNote($('allcal-note'), LOAD_NOTE); },
+      events: fetchAllEvents,
+      eventClick: function (info) {
+        var p = info.event.extendedProps;
+        if (p.kind === 'session') {
+          if (!p.matched.length) return; // a session with no student in the title — nothing to assign to
+          var who = p.matched[0];
+          // Two students can share a first name, and the event title is
+          // the only link back to a roster row — so say out loud which one
+          // this is about to be assigned to rather than picking silently.
+          openCreateModal([toDateStr(info.event.start)], who.key, who.name, '',
+            p.matched.length > 1 ? 'Several students match this session title' : 'Due the day of this session');
+        } else {
+          var student = allStudents.find(function (s) { return s.key === p.studentKey; });
+          if (student) openStudent(student, 'homework');
+        }
+      }
+    });
+    allCalendar.render();
+  }
+
+  function fetchAllEvents(info, success, failure) {
+    postToBackend({ action: 'getAdminCalendar', adminKey: adminKey(), start: info.startStr, end: info.endStr })
+      .then(function (data) {
+        if (!data || !data.ok) { failure(new Error(data && data.error ? data.error : 'load_failed')); return; }
+        setCalNote($('allcal-note'), data.calendarError ? ICS_NOTE : '');
+        renderAllLegend(data);
+        success(buildEvents(data, true));
+      })
+      .catch(function (err) { failure(err); });
+  }
+
+  // Only the students actually on screen this week get a swatch — a
+  // legend listing the whole roster every week would be longer than the
+  // calendar it explains.
+  function renderAllLegend(data) {
+    var seen = {};
+    (data.sessions || []).forEach(function (s) {
+      (s.matched || []).forEach(function (m) { seen[m.key] = m.name; });
+    });
+    (data.assignments || []).forEach(function (a) { if (a.key) seen[a.key] = a.studentName || a.key; });
+    var names = Object.keys(seen).sort(function (a, b) { return String(seen[a]).localeCompare(String(seen[b])); });
+    var parts = names.map(function (k) {
+      return '<span><i class="swatch" style="background:' + studentColor(k) + '"></i>' + escHtml(seen[k]) + '</span>';
+    });
+    parts.push('<span style="color:var(--faint);">Solid = session &middot; Outlined = homework due</span>');
+    $('allcal-legend').innerHTML = parts.join('');
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════
+     TASK MODAL — create on selected day(s), or edit one existing row
+     ═══════════════════════════════════════════════════════════════════ */
+  var modalBackdrop = $('sched-modal-backdrop');
+  var modalTitle = $('sched-modal-title');
+  var modalSub = $('sched-modal-sub');
+  var modalTaskEl = $('sched-modal-task');
+  var modalDateRow = $('sched-modal-date-row');
+  var modalDateEl = $('sched-modal-date');
+  var modalDoneRow = $('sched-modal-done-row');
+  var modalDoneEl = $('sched-modal-done');
+  var modalErrorEl = $('sched-modal-error');
+  var saveBtn = $('sched-save-btn');
+  var cancelBtn = $('sched-cancel-btn');
+  var deleteBtn = $('sched-delete-btn');
+
+  var modalMode = null;        // 'create' | 'edit'
+  var modalDates = [];         // "YYYY-MM-DD"[], for create (one entry per selected day)
+  var modalAssignment = null;  // { row, task, done, dueDate, studentKey, studentName }, for edit
+  var modalStudentKey = null;
+  var modalStudentName = '';
+
+  $('sched-presets').innerHTML = TASK_PRESETS.map(function (t) {
+    return '<button type="button" class="mini preset-btn" data-task="' + escHtml(t) + '">' + escHtml(t) + '</button>';
+  }).join('');
+  $('sched-presets').addEventListener('click', function (e) {
+    var btn = e.target.closest('.preset-btn');
+    if (!btn) return;
+    modalTaskEl.value = btn.getAttribute('data-task');
+    modalTaskEl.focus();
+  });
+
+  function openCreateModal(dates, studentKey, studentName, prefill, note) {
+    if (!dates || !dates.length) return; // nothing selected — nothing to write
     modalMode = 'create';
     modalDates = dates;
-    modalEvent = null;
+    modalAssignment = null;
+    modalStudentKey = studentKey;
+    modalStudentName = studentName || '';
     modalTitle.textContent = dates.length > 1 ? 'Add a task to ' + dates.length + ' days' : 'Add a task';
-    modalSub.textContent = dates.length > 1
+    var when = dates.length > 1
       ? formatDateStr(dates[0]) + ' through ' + formatDateStr(dates[dates.length - 1])
       : formatDateStr(dates[0]);
-    modalTaskEl.value = '';
+    modalSub.textContent = modalStudentName + ' · ' + when + (note ? ' · ' + note : '');
+    modalTaskEl.value = prefill || '';
+    modalDateRow.style.display = 'none';
     modalDoneRow.style.display = 'none';
     deleteBtn.style.display = 'none';
     modalErrorEl.textContent = '';
+    disarmDelete();
     modalBackdrop.classList.add('open');
     modalTaskEl.focus();
   }
 
-  function openEditModal(event) {
+  function openEditModal(assignment) {
     modalMode = 'edit';
-    modalEvent = event;
     modalDates = [];
+    modalAssignment = assignment;
+    modalStudentKey = assignment.studentKey;
+    modalStudentName = assignment.studentName || (currentStudent ? currentStudent.name : '');
     modalTitle.textContent = 'Edit task';
-    modalSub.textContent = formatDateStr(toDateStr(event.start));
-    modalTaskEl.value = event.extendedProps.task;
-    modalDoneRow.style.display = '';
-    modalDoneEl.checked = !!event.extendedProps.done;
+    var day = dueDayOf(assignment);
+    modalSub.textContent = modalStudentName + (day ? ' · ' + formatDateStr(day) : ' · no due date yet');
+    modalTaskEl.value = assignment.task;
+    modalDateRow.style.display = 'block';
+    modalDateEl.value = day;
+    modalDoneRow.style.display = 'flex';
+    modalDoneEl.checked = !!assignment.done;
     deleteBtn.style.display = '';
     modalErrorEl.textContent = '';
+    disarmDelete();
     modalBackdrop.classList.add('open');
     modalTaskEl.focus();
+  }
+
+  // Delete removes a row from the sheet for good, and it sits one button
+  // away from Cancel. First click arms it, second click does it.
+  var deleteArmed = false;
+  function disarmDelete() {
+    deleteArmed = false;
+    deleteBtn.textContent = 'Delete';
+    deleteBtn.classList.remove('armed');
   }
 
   function closeModal() {
     modalBackdrop.classList.remove('open');
-    modalMode = null; modalEvent = null; modalDates = [];
+    modalMode = null; modalAssignment = null; modalDates = []; modalStudentKey = null;
+    disarmDelete();
   }
+
+  modalTaskEl.addEventListener('keydown', function (e) {
+    // The task field is a textarea, so plain Enter has to stay a newline.
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); saveBtn.click(); }
+  });
 
   cancelBtn.addEventListener('click', closeModal);
   modalBackdrop.addEventListener('click', function (e) { if (e.target === modalBackdrop) closeModal(); });
@@ -575,27 +1462,38 @@
   saveBtn.addEventListener('click', function () {
     var task = modalTaskEl.value.trim();
     if (!task) { modalErrorEl.textContent = 'Enter a task.'; return; }
+    if (!modalStudentKey) { modalErrorEl.textContent = 'No student selected.'; return; }
     saveBtn.disabled = true;
     var request = modalMode === 'create'
-      ? postToBackend({ action: 'createAdminAssignment', adminKey: adminKey(), key: currentSchedStudent.key, task: task, dueDates: modalDates })
-      : postToBackend({ action: 'updateAdminAssignment', adminKey: adminKey(), key: currentSchedStudent.key, row: modalEvent.extendedProps.row, patch: { task: task, done: modalDoneEl.checked } });
+      ? postToBackend({ action: 'createAdminAssignment', adminKey: adminKey(), key: modalStudentKey, task: task, dueDates: modalDates })
+      : postToBackend({
+          action: 'updateAdminAssignment', adminKey: adminKey(), key: modalStudentKey, row: modalAssignment.row,
+          patch: { task: task, done: modalDoneEl.checked, dueDate: modalDateEl.value || null }
+        });
     request.then(function (data) {
       saveBtn.disabled = false;
       if (!data || !data.ok) { modalErrorEl.textContent = 'Could not save. Try again.'; return; }
       closeModal();
-      loadSchedAssignments();
+      refreshActiveCalendar();
     }).catch(function () { saveBtn.disabled = false; modalErrorEl.textContent = 'Network error — try again.'; });
   });
 
   deleteBtn.addEventListener('click', function () {
-    if (!modalEvent) return;
+    if (!modalAssignment) return;
+    if (!deleteArmed) {
+      deleteArmed = true;
+      deleteBtn.textContent = 'Really delete?';
+      deleteBtn.classList.add('armed');
+      modalErrorEl.textContent = '';
+      return;
+    }
     deleteBtn.disabled = true;
-    postToBackend({ action: 'deleteAdminAssignment', adminKey: adminKey(), key: currentSchedStudent.key, row: modalEvent.extendedProps.row })
+    postToBackend({ action: 'deleteAdminAssignment', adminKey: adminKey(), key: modalStudentKey, row: modalAssignment.row })
       .then(function (data) {
         deleteBtn.disabled = false;
         if (!data || !data.ok) { modalErrorEl.textContent = 'Could not delete. Try again.'; return; }
         closeModal();
-        loadSchedAssignments();
+        refreshActiveCalendar();
       }).catch(function () { deleteBtn.disabled = false; modalErrorEl.textContent = 'Network error — try again.'; });
   });
 })();
