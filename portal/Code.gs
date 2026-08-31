@@ -66,18 +66,20 @@
         time any student finishes a diagnostic/practice test — one row per
         attempt (a 'log' row with the full report text/Drive/email status,
         and a 'score' row with the composite/section scores, both tagged
-        via the Kind column), used by the biweekly guardian summary email
+        via the Kind column), used by the weekly guardian summary email
         (see below) and by report.html's live Score Progress chart.
         Nothing to set up here either; see handleSyncScoreHistory() and
         logDiagnosticResult_() below.
         GuardianName / GuardianEmail are two more optional columns on
         Students — fill these in by hand for any student whose
-        parent/guardian should get a biweekly progress-summary email
-        (composite score trend + current weak spot). Leave GuardianEmail
-        blank for a student and they're simply skipped — nothing breaks,
-        nothing sends. Both auto-create the first time the summary job
-        runs if they don't exist yet. See "GUARDIAN BIWEEKLY SUMMARY"
-        below for how the email itself is built.
+        parent/guardian should get the weekly Friday progress email
+        (latest score + trend + current weak spot + what we're doing
+        about it). Students can also add a parent themselves during
+        onboarding or in Settings. Leave GuardianEmail blank and that
+        student is simply skipped — nothing breaks, nothing sends. Both
+        auto-create the first time the summary job runs if they don't
+        exist yet. See "GUARDIAN WEEKLY SUMMARY" below for the send rules
+        and how the email itself is built.
      2. Paste this file into a new Apps Script project (script.google.com).
      3. Set SHEET_ID below to that Sheet's ID (from its URL).
      4. Deploy > New deployment > Web app.
@@ -86,9 +88,19 @@
      5. Copy the deployment URL into APPS_SCRIPT_URL in portal/index.html.
      6. Select "setupTrigger" in the function dropdown and click Run once
         (authorize when asked). This turns on the auto-folder feature.
+     6b. Services (+) in the left sidebar > Gmail API > Add. This turns on
+        one-thread-per-family for the LEAD flow: an inquiry and both
+        follow-up nudges land in a single Gmail conversation, and the
+        nudges learn to skip anyone waiting on YOUR reply. Skipping this
+        step is safe — mail still sends, just unthreaded. Run
+        "testFamilyThread" after adding it to confirm. The weekly progress
+        emails deliberately do NOT thread; they are one fresh dated email
+        per week (see "GUARDIAN WEEKLY SUMMARY" below).
      7. (Optional) Select "setupGuardianSummaryTrigger" and click Run once
-        to turn on the biweekly guardian summary email. Only needed once,
-        ever — skip this entirely if you'd rather not offer it yet.
+        to turn on the weekly Friday guardian summary email. Only needed
+        once, ever — skip this entirely if you'd rather not offer it yet.
+        Run "previewGuardianSummaries" first to see exactly who would be
+        emailed this week without actually sending anything.
    ========================================================================= */
 
 // ═══ RUN THIS DIRECTLY TO DIAGNOSE THE EMAIL PROBLEM ═══
@@ -139,9 +151,9 @@ function doPost(e) {
     } else if (body.action === 'getAssignments') {
       out = handleGetAssignments(body.key);
     } else if (body.action === 'getAssignmentsCalendar') {
-      out = handleGetAssignmentsCalendar(body.key);
+      out = handleGetAssignmentsCalendar(body.key, body.start, body.end);
     } else if (body.action === 'assignHomeworkFromDialog') {
-      out = handleAssignHomeworkFromDialog(body.key, body.task);
+      out = handleAssignHomeworkFromDialog(body.key, body.task, body.dueDate);
     } else if (body.action === 'submitPracticeTest') {
       out = handleSubmitPracticeTest(body.key, body.test, body.score, body.reportLink, body.report, body.testId, body);
     } else if (body.action === 'submitLead') {
@@ -182,6 +194,12 @@ function doPost(e) {
       out = handleUpdateAdminAssignment(body.adminKey, body.key, body.row, body.patch);
     } else if (body.action === 'deleteAdminAssignment') {
       out = handleDeleteAdminAssignment(body.adminKey, body.key, body.row);
+    } else if (body.action === 'getAdminCalendar') {
+      out = handleGetAdminCalendar(body.adminKey, body.key, body.start, body.end);
+    } else if (body.action === 'getStudentDetail') {
+      out = handleGetStudentDetail(body.adminKey, body.key);
+    } else if (body.action === 'getAttemptReport') {
+      out = handleGetAttemptReport(body.adminKey, body.key, body.row);
     } else {
       out = { ok: false, error: 'unknown_action' };
     }
@@ -247,6 +265,30 @@ function truthy_(v) {
 function sheetSafe_(v) {
   var s = String(v == null ? '' : v);
   return /^[=+\-@]/.test(s) ? "'" + s : s;
+}
+
+/* ═══ DATE CELLS ═══ every date on these sheets is hand-editable, and a
+   cell holding text a person typed ("TBD", "asap", "9/5 or 9/6") parses
+   to an Invalid Date. Invalid Dates are quietly poisonous: every
+   comparison against them is false (so a range filter passes them
+   THROUGH rather than skipping them) and .toISOString() then throws
+   RangeError. One such cell in the Assignments sheet's DueDate column
+   used to be enough to blow up getAssignments_ — i.e. break login and
+   the homework checklist for that student — and to make every dated
+   assignment vanish from the admin calendar, since the throw landed in a
+   catch that treats the whole sheet as unreadable. Everything that reads
+   a date cell goes through here instead: unparseable reads as "no date",
+   which is exactly how a blank cell already behaves.
+   ═══════════════════════════════════════════════════════════════════ */
+function toDateOrNull_(v) {
+  if (!v && v !== 0) return null;
+  var d = (v instanceof Date) ? v : new Date(v);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+function isoOrNull_(v) {
+  var d = toDateOrNull_(v);
+  return d ? d.toISOString() : null;
 }
 
 function extractFolderId_(url) {
@@ -448,8 +490,8 @@ function handleAuthLocked_(key, email, name) {
     testPrep: flags.testPrep,
     showSat: flags.showSat,
     showAct: flags.showAct,
-    grantedAt: grantedAtValue ? new Date(grantedAtValue).toISOString() : null,
-    testDate: row.TestDate ? new Date(row.TestDate).toISOString() : null,
+    grantedAt: isoOrNull_(grantedAtValue),
+    testDate: isoOrNull_(row.TestDate),
     // Set once, during the first-login onboarding sequence (see
     // handleSaveOnboardingPrefs_ below) and read back on every login after
     // that — this is what makes "permanent for their account" actually
@@ -478,9 +520,10 @@ function handleAuthLocked_(key, email, name) {
    GuardianName/GuardianEmail are new columns, auto-created on the
    Students sheet the first time this runs (same pattern getLeadsSheet_
    uses below) so nothing needs to be set up by hand first. GuardianName/
-   GuardianEmail are pure data capture right now — nothing reads them yet
-   (see the "GUARDIAN BIWEEKLY SUMMARY" section further down for the one
-   thing that will, once/if that's turned on).
+   GuardianEmail are read by the weekly guardian summary send — see
+   "GUARDIAN WEEKLY SUMMARY" further down — which is why clearing
+   GuardianEmail here has to be a real unsubscribe, not just a blanked
+   form field.
    ========================================================================= */
 function handleSaveOnboardingPrefs(rawKey, rawTestDate, rawAccomTimeMult, rawAccomBreakMult, rawBaselineType, rawBaselineRw, rawBaselineMath, rawGuardianName, rawGuardianEmail, rawTargetScore) {
   var key = String(rawKey || '').trim().toUpperCase();
@@ -491,7 +534,7 @@ function handleSaveOnboardingPrefs(rawKey, rawTestDate, rawAccomTimeMult, rawAcc
   if (!row) return { ok: false, error: 'bad_key' };
 
   var headers = row._headers;
-  ['AccomTimeMult', 'AccomBreakMult', 'BaselineType', 'BaselineRW', 'BaselineMath', 'GuardianName', 'GuardianEmail', 'TargetScore'].forEach(function (col) {
+  ['AccomTimeMult', 'AccomBreakMult', 'BaselineType', 'BaselineRW', 'BaselineMath', 'GuardianName', 'GuardianEmail', 'LastGuardianSummaryAt', 'TargetScore'].forEach(function (col) {
     if (headers.indexOf(col) === -1) {
       sheet.getRange(1, sheet.getLastColumn() + 1).setValue(col);
       headers.push(col);
@@ -533,15 +576,34 @@ function handleSaveOnboardingPrefs(rawKey, rawTestDate, rawAccomTimeMult, rawAcc
     setCol('BaselineMath', baselineMath);
   }
 
-  // Also optional, also skippable — a blank/missing guardian email just
-  // means nothing gets written, same as everything else on this screen.
+  // Optional, but UNLIKE everything else on this screen these two have to
+  // tell "not sent" apart from "sent as empty". The Settings pane's "No
+  // contact" card posts guardianEmail:null on purpose, and that is a
+  // student removing their parent from the weekly summary send — so an
+  // empty value has to actually clear the cell instead of leaving the old
+  // address sitting there still receiving mail. (That was the bug: this
+  // only ever wrote truthy values, so the UI reported the contact removed
+  // while the sheet kept it forever.) undefined — the key absent from the
+  // request entirely — still means "leave whatever's on the sheet alone",
+  // which is what stops a future caller that doesn't know about these
+  // columns from wiping them.
   // Name is written even without an email (harmless either way); the
   // email itself gets a basic format check — same regex handleAuth uses
   // for the student's own email — before being trusted onto the sheet.
-  var guardianName = String(rawGuardianName || '').trim();
-  var guardianEmail = String(rawGuardianEmail || '').trim().toLowerCase();
-  if (guardianName) setCol('GuardianName', sheetSafe_(guardianName));
-  if (guardianEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guardianEmail)) setCol('GuardianEmail', guardianEmail);
+  var guardianName = String(rawGuardianName == null ? '' : rawGuardianName).trim();
+  var guardianEmail = String(rawGuardianEmail == null ? '' : rawGuardianEmail).trim().toLowerCase();
+  if (rawGuardianName !== undefined) setCol('GuardianName', guardianName ? sheetSafe_(guardianName) : '');
+  if (rawGuardianEmail !== undefined) {
+    if (!guardianEmail) {
+      // Unsubscribed. Clear the send stamp along with the address so that
+      // if the same parent is added back later they aren't sitting behind
+      // a stale "already emailed" timestamp from before the removal.
+      setCol('GuardianEmail', '');
+      setCol('LastGuardianSummaryAt', '');
+    } else if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guardianEmail)) {
+      setCol('GuardianEmail', guardianEmail);
+    }
+  }
 
   // Target score — the goal the score-bridge chart on report.html measures
   // distance against. Loosely validated (1-1600 covers both the ACT's 1-36
@@ -637,8 +699,8 @@ function getAssignments_(key, name) {
       row: i + 1, // 1-based sheet row — sent back by the client on toggle
       task: task,
       done: truthy_(data[i][doneCol]),
-      assignedAt: (tsCol !== -1 && data[i][tsCol]) ? new Date(data[i][tsCol]).toISOString() : null,
-      dueDate: (dueCol !== -1 && data[i][dueCol]) ? new Date(data[i][dueCol]).toISOString() : null
+      assignedAt: tsCol !== -1 ? isoOrNull_(data[i][tsCol]) : null,
+      dueDate: dueCol !== -1 ? isoOrNull_(data[i][dueCol]) : null
     });
   }
 
@@ -675,9 +737,11 @@ function assignmentExpiryCutoff_(name) {
   var firstName = String(name || '').trim().split(/\s+/)[0];
   if (!firstName) return null;
   try {
-    var resp = UrlFetchApp.fetch(getCalendarIcsUrl_(), { muteHttpExceptions: true });
-    if (resp.getResponseCode() !== 200) return null;
-    var events = parseICS_(resp.getContentText());
+    // Cached read (see fetchCalendarText_) — this runs on every student
+    // page load, and previously did its own full iCloud fetch each time.
+    var icsText = fetchCalendarText_();
+    if (!icsText) return null;
+    var events = parseICS_(icsText);
     var now = new Date();
     var escaped = firstName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     var nameRe = new RegExp(escaped, 'i');
@@ -700,8 +764,9 @@ function assignmentExpiryCutoff_(name) {
 // most recent session actually start," not "when's their next one."
 function mostRecentOccurrenceOnOrBefore_(ev, now) {
   if (!ev.start) return null;
+  if (ev.cancelled) return null;
   if (ev.start.getTime() > now.getTime()) return null; // hasn't happened yet
-  if (!ev.rrule || !ev.rrule.freq) return ev.start; // non-recurring, already occurred
+  if (!ev.rrule || !ev.rrule.freq) return isExcludedOccurrence_(ev, ev.start) ? null : ev.start; // non-recurring, already occurred
 
   var freq = ev.rrule.freq, interval = ev.rrule.interval || 1;
   var stepDays = freq === 'DAILY' ? interval
@@ -716,7 +781,9 @@ function mostRecentOccurrenceOnOrBefore_(ev, now) {
     if (ev.rrule.until && cur.getTime() > ev.rrule.until.getTime()) break;
     if (ev.rrule.count && n >= ev.rrule.count) break;
     if (cur.getTime() > now.getTime()) break;
-    last = cur;
+    // A cancelled week never happened, so it can't be what expires a
+    // student's assignments either (see assignmentExpiryCutoff_).
+    if (!isExcludedOccurrence_(ev, cur)) last = cur;
 
     if (stepDays) {
       cur = new Date(cur.getTime() + stepDays * 24 * 60 * 60 * 1000);
@@ -757,11 +824,12 @@ function handleGetAssignments(rawKey) {
 // by the student's own key instead of ADMIN_KEY (same trust model as
 // every other student-facing action in this file — the key IS the
 // credential).
-function handleGetAssignmentsCalendar(rawKey) {
+function handleGetAssignmentsCalendar(rawKey, rawStart, rawEnd) {
   if (!rawKey) return { ok: false, error: 'missing_key' };
   var key = String(rawKey).trim().toUpperCase();
   var studentsSheet = getSheet_();
-  if (!findRow_(studentsSheet, key)) return { ok: false, error: 'bad_key' };
+  var studentRow = findRow_(studentsSheet, key);
+  if (!studentRow) return { ok: false, error: 'bad_key' };
 
   var sheet = getAssignmentsSheet_();
   var data = sheet.getDataRange().getValues();
@@ -781,11 +849,45 @@ function handleGetAssignmentsCalendar(rawKey) {
       row: i + 1,
       task: task,
       done: truthy_(data[i][doneCol]),
-      assignedAt: (tsCol !== -1 && data[i][tsCol]) ? new Date(data[i][tsCol]).toISOString() : null,
-      dueDate: (dueCol !== -1 && data[i][dueCol]) ? new Date(data[i][dueCol]).toISOString() : null
+      assignedAt: tsCol !== -1 ? isoOrNull_(data[i][tsCol]) : null,
+      dueDate: dueCol !== -1 ? isoOrNull_(data[i][dueCol]) : null,
+      dueDay: dueCol !== -1 && toDateOrNull_(data[i][dueCol]) ? dueDayString_(toDateOrNull_(data[i][dueCol])) : null
     });
   }
-  return { ok: true, assignments: out };
+
+  /* Their own tutoring sessions, on the same grid as the homework — the
+     point of a calendar for a student is seeing "this is due, and that's
+     when we meet about it" in one place. Matched by first name against
+     the event title exactly like handleNextSession does for the Home
+     card, and filtered to THIS student before anything is returned: a key
+     only ever reveals its own owner's sessions, never a roster of
+     everyone else's. An unreadable calendar degrades to an empty session
+     list plus a flag, never an error — the homework half of this screen
+     has nothing to do with the calendar being reachable.
+     ================================================================= */
+  var sessions = [];
+  var calendarError = null;
+  var now = new Date();
+  var rangeStart = parseRangeDate_(rawStart, new Date(now.getFullYear(), now.getMonth() - 1, 1));
+  var rangeEnd = parseRangeDate_(rawEnd, new Date(now.getFullYear(), now.getMonth() + 3, 1));
+  if (rangeEnd.getTime() <= rangeStart.getTime()) rangeEnd = new Date(rangeStart.getTime() + 31 * 86400000);
+  if (rangeEnd.getTime() - rangeStart.getTime() > ADMIN_CALENDAR_MAX_DAYS_ * 86400000) {
+    rangeEnd = new Date(rangeStart.getTime() + ADMIN_CALENDAR_MAX_DAYS_ * 86400000);
+  }
+  var firstName = String(studentRow.Name || '').trim().split(/\s+/)[0];
+  var rawSessions = sessionsForRange_(rangeStart, rangeEnd);
+  if (rawSessions === null) {
+    calendarError = 'calendar_unavailable';
+  } else if (firstName) {
+    var escaped = firstName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    var nameRe = new RegExp(escaped, 'i');
+    rawSessions.forEach(function (ev) {
+      if (!nameRe.test(ev.title)) return;
+      sessions.push({ title: ev.title, startIso: ev.startIso, endIso: ev.endIso, allDay: ev.allDay });
+    });
+  }
+
+  return { ok: true, assignments: out, sessions: sessions, calendarError: calendarError };
 }
 
 // Marks one assignment done (the only direction the portal ever calls this
@@ -852,8 +954,8 @@ function handleGetAdminAssignments(rawAdminKey, rawKey) {
       row: i + 1,
       task: task,
       done: truthy_(data[i][doneCol]),
-      assignedAt: (tsCol !== -1 && data[i][tsCol]) ? new Date(data[i][tsCol]).toISOString() : null,
-      dueDate: (dueCol !== -1 && data[i][dueCol]) ? new Date(data[i][dueCol]).toISOString() : null
+      assignedAt: tsCol !== -1 ? isoOrNull_(data[i][tsCol]) : null,
+      dueDate: dueCol !== -1 ? isoOrNull_(data[i][dueCol]) : null
     });
   }
   return { ok: true, assignments: out };
@@ -951,6 +1053,413 @@ function handleDeleteAdminAssignment(rawAdminKey, rawKey, rawRow) {
   return { ok: true };
 }
 
+/* ═══ ADMIN CALENDAR ═══ the sessions half of admin.html's scheduler.
+   Homework has always been assignable to a date; what was missing is the
+   thing those dates are actually planned AROUND — the tutoring sessions
+   themselves. This returns both for a date window in one call: every
+   session from the published calendar (see sessionsForRange_) and every
+   dated assignment, either for one student (rawKey) or for the whole
+   roster (rawKey omitted — the all-students month view).
+
+   Sessions are matched to students the same way handleNextSession does
+   it, by first name against the event title, since that's the only link
+   between an iCloud event and a roster row. A title that matches two
+   students (two Alexes) comes back with both in `matched` rather than
+   guessing one; a title that matches nobody comes back with an empty
+   `matched` and is still shown, greyed, so a session that ISN'T a
+   student — a consult, a block of personal time — doesn't silently
+   vanish from a calendar Luca is using to plan.
+   ═══════════════════════════════════════════════════════════════════ */
+var ADMIN_CALENDAR_MAX_DAYS_ = 200;
+
+// Accepts "YYYY-MM-DD" (local midnight, what FullCalendar's activeStart/
+// activeEnd serialize to) or a full ISO instant; falls back rather than
+// throwing on anything unparseable.
+function parseRangeDate_(v, fallback) {
+  if (!v) return fallback;
+  var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(v));
+  if (m) return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+  var d = new Date(String(v));
+  return isNaN(d.getTime()) ? fallback : d;
+}
+
+// Reads ONLY the Key and Name columns, rather than the whole Students
+// sheet the way findRow_/handleGetRoster do. Every calendar navigation
+// calls this, and the same sheet also carries the per-student progress
+// JSON blobs — up to 45k characters per cell (see PROGRESS_CELL_CAP_) —
+// so a full getDataRange() here would drag megabytes across for two
+// short strings per student.
+function rosterNamesForMatching_() {
+  var sheet = getSheet_();
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 2) return [];
+  var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  var keyIdx = headers.indexOf('Key');
+  var nameIdx = headers.indexOf('Name');
+  if (keyIdx === -1 || nameIdx === -1) return [];
+  var lo = Math.min(keyIdx, nameIdx);
+  var hi = Math.max(keyIdx, nameIdx);
+  var block = sheet.getRange(2, lo + 1, lastRow - 1, hi - lo + 1).getValues();
+  var out = [];
+  for (var i = 0; i < block.length; i++) {
+    var name = String(block[i][nameIdx - lo] || '').trim();
+    var key = String(block[i][keyIdx - lo] || '').trim().toUpperCase();
+    if (!name || !key) continue;
+    var firstName = name.split(/\s+/)[0];
+    var escaped = firstName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    out.push({ key: key, name: name, firstName: firstName, re: new RegExp(escaped, 'i') });
+  }
+  return out;
+}
+
+// A due date is stored as a Date at midnight in the SCRIPT's timezone.
+// Sending only an ISO instant makes the client re-derive the day in the
+// BROWSER's timezone, which lands on the wrong day whenever the two
+// differ (an 8pm-Eastern midnight is already tomorrow in UTC). Date
+// methods here run in the script's timezone, so this hands back the exact
+// day that was stored and the client never has to do the maths.
+function dueDayString_(d) {
+  return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
+}
+
+function handleGetAdminCalendar(rawAdminKey, rawKey, rawStart, rawEnd) {
+  if (!ADMIN_KEY || rawAdminKey !== ADMIN_KEY) return { ok: false, error: 'unauthorized' };
+  var key = String(rawKey || '').trim().toUpperCase();
+
+  var now = new Date();
+  var rangeStart = parseRangeDate_(rawStart, new Date(now.getFullYear(), now.getMonth() - 1, 1));
+  var rangeEnd = parseRangeDate_(rawEnd, new Date(now.getFullYear(), now.getMonth() + 2, 1));
+  if (rangeEnd.getTime() <= rangeStart.getTime()) rangeEnd = new Date(rangeStart.getTime() + 31 * 86400000);
+  // A hostile-or-typo'd range ("expand a decade of weekly sessions") is
+  // clamped rather than refused — the client still gets the window it can
+  // actually draw.
+  if (rangeEnd.getTime() - rangeStart.getTime() > ADMIN_CALENDAR_MAX_DAYS_ * 86400000) {
+    rangeEnd = new Date(rangeStart.getTime() + ADMIN_CALENDAR_MAX_DAYS_ * 86400000);
+  }
+
+  var students = rosterNamesForMatching_();
+  var nameByKey = {};
+  students.forEach(function (s) { nameByKey[s.key] = s.name; });
+  if (key && !nameByKey[key]) return { ok: false, error: 'bad_key' };
+
+  var sessions = [];
+  var calendarError = null;
+  var raw = sessionsForRange_(rangeStart, rangeEnd);
+  if (raw === null) {
+    calendarError = 'calendar_unavailable';
+  } else {
+    raw.forEach(function (ev) {
+      var matched = students.filter(function (st) { return st.re.test(ev.title); });
+      // Single-student view: only that student's own sessions.
+      if (key && !matched.some(function (m) { return m.key === key; })) return;
+      sessions.push({
+        title: ev.title,
+        startIso: ev.startIso,
+        endIso: ev.endIso,
+        allDay: ev.allDay,
+        matched: matched.map(function (m) { return { key: m.key, name: m.name }; })
+      });
+    });
+  }
+
+  var assignments = [];
+  try {
+    var asSheet = getAssignmentsSheet_();
+    var asData = asSheet.getDataRange().getValues();
+    var asHeaders = ensureAssignmentDueDateColumn_(asSheet, asData[0]);
+    var keyCol = asHeaders.indexOf('Key');
+    var taskCol = asHeaders.indexOf('Task');
+    var doneCol = asHeaders.indexOf('Done');
+    var tsCol = asHeaders.indexOf('Timestamp');
+    var dueCol = asHeaders.indexOf('DueDate');
+    for (var i = 1; i < asData.length; i++) {
+      var rowKey = String(asData[i][keyCol] || '').trim().toUpperCase();
+      if (!rowKey) continue;
+      if (key && rowKey !== key) continue;
+      var task = String(asData[i][taskCol] || '').trim();
+      if (!task) continue;
+      var due = (dueCol !== -1) ? toDateOrNull_(asData[i][dueCol]) : null;
+      if (due) {
+        if (due.getTime() < rangeStart.getTime() || due.getTime() >= rangeEnd.getTime()) continue;
+      } else if (!key) {
+        // Undated rows have no day to sit on. The single-student view
+        // still gets them (it lists them beside the calendar so they
+        // aren't invisible); the all-students view would just be noise.
+        continue;
+      }
+      assignments.push({
+        row: i + 1,
+        key: rowKey,
+        studentName: nameByKey[rowKey] || '',
+        task: task,
+        done: truthy_(asData[i][doneCol]),
+        assignedAt: tsCol !== -1 ? isoOrNull_(asData[i][tsCol]) : null,
+        dueDate: due ? due.toISOString() : null,
+        dueDay: due ? dueDayString_(due) : null // the day to draw it on — see dueDayString_
+      });
+    }
+  } catch (e) { /* Assignments sheet unreadable — sessions still render */ }
+
+  return {
+    ok: true,
+    rangeStart: rangeStart.toISOString(),
+    rangeEnd: rangeEnd.toISOString(),
+    sessions: sessions,
+    assignments: assignments,
+    students: students.map(function (s) { return { key: s.key, name: s.name }; }),
+    calendarError: calendarError
+  };
+}
+
+/* ═══ ADMIN STUDENT DETAIL ═══ everything admin.html's per-student page
+   shows above the scheduler: the roster row's own fields, every
+   diagnostic/practice-test attempt that student has logged, and their
+   current skill breakdown.
+
+   Attempts come out of the shared Attempts sheet, where ONE attempt can
+   be up to two rows — a 'log' row (written by logDiagnosticResult_ on
+   submission) and a 'score' row (written by handleSyncScoreHistory) —
+   so rows are merged back into one attempt per submission here, the same
+   way index.html's own View Results grouping does it client-side.
+   Deliberately does NOT include ReportLink: that field carries the
+   entire base64 report payload (tens of KB per attempt, capped only by
+   the 50k Sheets cell limit), so a student with a dozen attempts would
+   make this a multi-megabyte response for data the page only needs when
+   a specific report is actually opened. handleGetAttemptReport below
+   fetches exactly one on demand.
+   ═══════════════════════════════════════════════════════════════════ */
+var ADMIN_DETAIL_MAX_ATTEMPTS_ = 60;
+
+// Every Attempts data row, as an array of arrays, with the columns named
+// in skipNames left blank instead of read. Two columns on this sheet are
+// enormous — Report (an entire report's plain text) and ReportLink (the
+// whole base64 report payload, capped only by the 50k Sheets cell limit)
+// — and between them they're most of the sheet's bytes. Skipping the ones
+// a given caller doesn't need is the difference between a fast read and
+// hauling the full archive across. Blank placeholders are left in place
+// so every column index still lines up with `headers`.
+function readAttemptRows_(sheet, headers, skipNames) {
+  var lastRow = sheet.getLastRow();
+  var lastCol = headers.length;
+  if (lastRow < 2 || lastCol < 1) return [];
+  var n = lastRow - 1;
+  var skip = {};
+  (skipNames || []).forEach(function (name) {
+    var idx = headers.indexOf(name);
+    if (idx !== -1) skip[idx] = true;
+  });
+
+  var out = [];
+  for (var i = 0; i < n; i++) out.push(new Array(lastCol).fill(''));
+
+  // One getValues() per run of consecutive columns we DO want.
+  var c = 0;
+  while (c < lastCol) {
+    if (skip[c]) { c++; continue; }
+    var start = c;
+    while (c < lastCol && !skip[c]) c++;
+    var block = sheet.getRange(2, start + 1, n, c - start).getValues();
+    for (var r = 0; r < n; r++) {
+      for (var j = 0; j < c - start; j++) out[r][start + j] = block[r][j];
+    }
+  }
+  return out;
+}
+
+function handleGetStudentDetail(rawAdminKey, rawKey) {
+  if (!ADMIN_KEY || rawAdminKey !== ADMIN_KEY) return { ok: false, error: 'unauthorized' };
+  var key = String(rawKey || '').trim().toUpperCase();
+  if (!key) return { ok: false, error: 'missing_key' };
+
+  var sheet = getSheet_();
+  var row = findRow_(sheet, key);
+  if (!row) return { ok: false, error: 'bad_key' };
+
+  var flags = testPrepFlags_(row);
+  var student = {
+    key: key,
+    name: row.Name || '',
+    driveFolderUrl: row.DriveFolderUrl || '',
+    grantedEmail: row.GrantedEmail || '',
+    grantedAt: isoOrNull_(row.GrantedAt),
+    testDate: isoOrNull_(row.TestDate),
+    targetScore: Number(row.TargetScore) || null,
+    baselineType: row.BaselineType || null,
+    baselineRw: Number(row.BaselineRW) || null,
+    baselineMath: Number(row.BaselineMath) || null,
+    accomTimeMult: row.AccomTimeMult || null,
+    accomBreakMult: row.AccomBreakMult || null,
+    guardianName: row.GuardianName || '',
+    guardianEmail: row.GuardianEmail || '',
+    satTaken: !!row.SATTakenAt,
+    showSat: flags.showSat,
+    showAct: flags.showAct,
+    progressUpdatedAt: isoOrNull_(row.ProgressUpdatedAt)
+  };
+
+  // ── attempts ──────────────────────────────────────────────────────
+  var attempts = [];
+  try {
+    var aSheet = getAttemptsSheet_();
+    var aHeaders = aSheet.getRange(1, 1, 1, aSheet.getLastColumn()).getValues()[0];
+    // ReportLink is kept: its length is how we tell which row of an
+    // attempt carries the openable payload (it's never returned — see
+    // handleGetAttemptReport).
+    var aData = readAttemptRows_(aSheet, aHeaders, ['Report']);
+    var c = {};
+    aHeaders.forEach(function (h, i) { c[h] = i; });
+
+    var byGroup = {};
+    var order = [];
+    for (var i = 0; i < aData.length; i++) {
+      var r = aData[i];
+      var sheetRow = i + 2; // aData starts at the first data row, not the header
+      if (String(r[c.Key] || '').trim().toUpperCase() !== key) continue;
+      var ts = toDateOrNull_(r[c.Timestamp]);
+      var attemptId = String(r[c.AttemptId] || '').trim();
+      var source = String(r[c.Source] || '');
+      var testId = String(r[c.TestId] || '');
+      var testType = String(r[c.TestType] || '');
+      // attemptId is the real identity when it's there. Rows that predate
+      // it (or whose score row never synced) fall back to
+      // source|testId|type plus the minute they landed — two rows for the
+      // same submission are written seconds apart, two genuinely separate
+      // attempts at the same test never are.
+      var groupId = attemptId ||
+        (source + '|' + testId + '|' + testType + '|' + (ts ? Math.floor(ts.getTime() / 60000) : 'x' + sheetRow));
+      if (!byGroup[groupId]) {
+        byGroup[groupId] = {
+          attemptId: attemptId || null,
+          at: null, source: '', testType: '', testId: '', testTitle: '',
+          composite: null, rw: null, math: null, scaleMin: null, scaleMax: null,
+          weakest: null, score: '', reportRow: null, reportChars: 0,
+          driveFileUrl: '', emailSent: null, emailError: ''
+        };
+        order.push(groupId);
+      }
+      var g = byGroup[groupId];
+      if (ts && (!g.at || ts.getTime() < new Date(g.at).getTime())) g.at = ts.toISOString();
+      if (!g.attemptId && attemptId) g.attemptId = attemptId;
+      if (!g.source && source) g.source = source;
+      if (!g.testType && testType) g.testType = testType;
+      if (!g.testId && testId) g.testId = testId;
+      if (!g.testTitle && r[c.TestTitle]) g.testTitle = String(r[c.TestTitle]);
+      if (!g.score && r[c.Score] !== '' && r[c.Score] != null) g.score = String(r[c.Score]);
+      if (g.composite == null && Number(r[c.Composite])) {
+        g.composite = Number(r[c.Composite]);
+        g.rw = Number(r[c.RW]) || null;
+        g.math = Number(r[c.Math]) || null;
+        g.scaleMin = Number(r[c.ScaleMin]) || null;
+        g.scaleMax = Number(r[c.ScaleMax]) || null;
+      }
+      if (!g.weakest && r[c.WeakestLabel]) {
+        g.weakest = {
+          label: String(r[c.WeakestLabel]),
+          correct: Number(r[c.WeakestCorrect]) || 0,
+          total: Number(r[c.WeakestTotal]) || 0
+        };
+      }
+      var link = String(r[c.ReportLink] || '');
+      // Longest wins: a truncated/blank link on one row of the pair
+      // shouldn't shadow the complete one on the other.
+      if (link.length > g.reportChars) { g.reportChars = link.length; g.reportRow = sheetRow; }
+      if (!g.driveFileUrl && r[c.DriveFileUrl]) g.driveFileUrl = String(r[c.DriveFileUrl]);
+      if (g.emailSent == null && r[c.EmailSent] !== '' && r[c.EmailSent] != null) g.emailSent = truthy_(r[c.EmailSent]);
+      if (!g.emailError && r[c.EmailError]) g.emailError = String(r[c.EmailError]);
+    }
+
+    attempts = order.map(function (id) {
+      var g = byGroup[id];
+      return {
+        attemptId: g.attemptId,
+        at: g.at,
+        source: g.source || 'diagnostic',
+        testType: g.testType || 'SAT',
+        testId: g.testId,
+        testTitle: g.testTitle,
+        composite: g.composite,
+        rw: g.rw,
+        math: g.math,
+        scaleMin: g.scaleMin,
+        scaleMax: g.scaleMax,
+        weakest: g.weakest,
+        score: g.score,
+        hasReport: !!g.reportRow,
+        reportRow: g.reportRow,
+        driveFileUrl: g.driveFileUrl,
+        emailSent: g.emailSent,
+        emailError: g.emailError
+      };
+    });
+    attempts.sort(function (a, b) { return String(b.at || '').localeCompare(String(a.at || '')); });
+    if (attempts.length > ADMIN_DETAIL_MAX_ATTEMPTS_) attempts = attempts.slice(0, ADMIN_DETAIL_MAX_ATTEMPTS_);
+  } catch (e) { /* Attempts sheet unreadable — the page still renders the roster row */ }
+
+  // ── skills + outstanding misses ───────────────────────────────────
+  // Same SkillStatsJSON the student's own "Practice My Weak Spots" reads
+  // (this student's MOST RECENT attempt's breakdown, not a lifetime
+  // aggregate — see handleSyncProgress), flattened and sorted weakest
+  // first so the page can show what to actually assign next.
+  var skills = [];
+  var incorrectCount = 0;
+  var savedCount = 0;
+  try {
+    var bySkill = JSON.parse(row.SkillStatsJSON) || {};
+    Object.keys(bySkill).forEach(function (k) {
+      var v = bySkill[k] || {};
+      var total = Number(v.total) || 0;
+      if (!total) return;
+      var correct = Number(v.correct) || 0;
+      skills.push({
+        label: v.label || v.skill || k,
+        domain: v.domain || '',
+        section: v.section || '',
+        correct: correct,
+        total: total,
+        pct: Math.round((correct / total) * 100)
+      });
+    });
+    skills.sort(function (a, b) { return a.pct - b.pct || b.total - a.total; });
+  } catch (e) { /* no/!invalid skill stats — just an empty breakdown */ }
+  try { incorrectCount = Object.keys(JSON.parse(row.IncorrectQuestionsJSON) || {}).length; } catch (e) { /* ignore */ }
+  try { savedCount = Object.keys(JSON.parse(row.SavedQuestionsJSON) || {}).length; } catch (e) { /* ignore */ }
+
+  return {
+    ok: true,
+    student: student,
+    attempts: attempts,
+    skills: skills,
+    incorrectCount: incorrectCount,
+    savedCount: savedCount
+  };
+}
+
+// One attempt's report payload, fetched only when Luca actually opens it
+// (see the size note on handleGetStudentDetail). `row` is the reportRow
+// that detail call handed back; its own Key cell is re-checked here so a
+// stale row number can't read a different student's report.
+function handleGetAttemptReport(rawAdminKey, rawKey, rawRow) {
+  if (!ADMIN_KEY || rawAdminKey !== ADMIN_KEY) return { ok: false, error: 'unauthorized' };
+  var key = String(rawKey || '').trim().toUpperCase();
+  var row = Number(rawRow);
+  if (!key || !row || row < 2) return { ok: false, error: 'bad_row' };
+
+  var sheet = getAttemptsSheet_();
+  if (row > sheet.getLastRow()) return { ok: false, error: 'bad_row' };
+  var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  var c = {};
+  headers.forEach(function (h, i) { c[h] = i; });
+  var values = sheet.getRange(row, 1, 1, sheet.getLastColumn()).getValues()[0];
+  if (String(values[c.Key] || '').trim().toUpperCase() !== key) return { ok: false, error: 'key_mismatch' };
+
+  return {
+    ok: true,
+    reportLink: String(values[c.ReportLink] || ''),
+    driveFileUrl: String(values[c.DriveFileUrl] || ''),
+    at: isoOrNull_(values[c.Timestamp])
+  };
+}
+
 /* =========================================================================
    "ASSIGN HOMEWORK" SHEET MENU
    -------------------------------------------------------------------------
@@ -1006,12 +1515,36 @@ function listStudentsForDialog_() {
 // Called from the dialog's Assign button. Appends a normal row to the
 // Assignments tab — identical to adding one by hand, just driven from the
 // form instead of the grid.
-function submitAssignmentFromDialog_(key, task) {
+// Appends one assignment row, addressed BY COLUMN NAME rather than by
+// position. The two callers used to append a fixed 5-element array, which
+// silently wrote the wrong columns if the sheet's were ever reordered and
+// had no way to set DueDate at all — so anything assigned from the Sheet
+// landed undated, and only the admin scheduler could put work on a day.
+// rawDueDate is optional ("YYYY-MM-DD"); blank still means undated, which
+// the student's calendar shows under "No date set".
+function appendAssignmentRow_(key, task, rawDueDate) {
+  var sheet = getAssignmentsSheet_();
+  var headers = ensureAssignmentDueDateColumn_(sheet, sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0]);
+  var row = new Array(headers.length).fill('');
+  function put(name, value) {
+    var i = headers.indexOf(name);
+    if (i !== -1) row[i] = value;
+  }
+  put('Timestamp', new Date());
+  put('Key', sheetSafe_(key));
+  put('Task', sheetSafe_(task));
+  put('Done', false);
+  put('DoneAt', '');
+  var parts = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(rawDueDate || ''));
+  put('DueDate', parts ? new Date(Number(parts[1]), Number(parts[2]) - 1, Number(parts[3])) : '');
+  sheet.appendRow(row);
+}
+
+function submitAssignmentFromDialog_(key, task, dueDate) {
   var cleanKey = String(key || '').trim().toUpperCase();
   var cleanTask = String(task || '').trim();
   if (!cleanKey || !cleanTask) throw new Error('Pick a student and enter a task.');
-  var sheet = getAssignmentsSheet_();
-  sheet.appendRow([new Date(), sheetSafe_(cleanKey), sheetSafe_(cleanTask), false, '']);
+  appendAssignmentRow_(cleanKey, cleanTask, dueDate);
   return { ok: true };
 }
 
@@ -1022,15 +1555,14 @@ function submitAssignmentFromDialog_(key, task) {
 // the student portal already uses). Re-validates the key against the
 // roster so the public endpoint can't be used to inject rows for a
 // student that doesn't exist.
-function handleAssignHomeworkFromDialog(rawKey, rawTask) {
+function handleAssignHomeworkFromDialog(rawKey, rawTask, rawDueDate) {
   var key = String(rawKey || '').trim().toUpperCase();
   var task = String(rawTask || '').trim();
   if (!key || !task) return { ok: false, error: 'missing_fields' };
   var sheet = getSheet_();
   var row = findRow_(sheet, key);
   if (!row) return { ok: false, error: 'bad_key' };
-  var aSheet = getAssignmentsSheet_();
-  aSheet.appendRow([new Date(), sheetSafe_(key), sheetSafe_(task), false, '']);
+  appendAssignmentRow_(key, task, rawDueDate);
   return { ok: true };
 }
 
@@ -1038,7 +1570,7 @@ var ASSIGN_HOMEWORK_HTML_ = '<!DOCTYPE html><html><head><base target="_top">' +
   '<style>' +
   'body{font-family:Arial,sans-serif;font-size:13px;padding:4px 10px 14px;color:#222;}' +
   'label{display:block;font-weight:600;margin:14px 0 5px;}' +
-  'select,textarea{width:100%;box-sizing:border-box;padding:8px;font-size:13px;font-family:inherit;border:1px solid #ccc;border-radius:4px;}' +
+  'select,textarea,input[type=date]{width:100%;box-sizing:border-box;padding:8px;font-size:13px;font-family:inherit;border:1px solid #ccc;border-radius:4px;}' +
   'textarea{resize:vertical;min-height:70px;}' +
   'button{margin-top:18px;padding:9px 20px;background:#b23b2e;color:#fff;border:none;border-radius:4px;font-size:13px;cursor:pointer;}' +
   'button:disabled{opacity:0.5;cursor:default;}' +
@@ -1049,23 +1581,27 @@ var ASSIGN_HOMEWORK_HTML_ = '<!DOCTYPE html><html><head><base target="_top">' +
   '<select id="student">%%STUDENT_OPTIONS%%</select>' +
   '<label for="task">Task</label>' +
   '<textarea id="task" placeholder="e.g. Finish Reading Module 3, pgs 12–20"></textarea>' +
+  '<label for="due">Due date <span style="font-weight:400;color:#888;">(optional — leave blank and it shows under &ldquo;No date set&rdquo;)</span></label>' +
+  '<input type="date" id="due">' +
   '<button id="submitBtn" onclick="submitForm()">Assign</button>' +
   '<div id="status"></div>' +
   '<script>' +
   'function submitForm(){' +
   '  var key=document.getElementById("student").value;' +
   '  var task=document.getElementById("task").value.trim();' +
+  '  var due=document.getElementById("due").value;' +
   '  var statusEl=document.getElementById("status");' +
   '  var btn=document.getElementById("submitBtn");' +
   '  if(!key||!task){statusEl.textContent="Pick a student and enter a task.";statusEl.className="error";return;}' +
   '  btn.disabled = true; statusEl.textContent = "Assigning…"; statusEl.className = "";' +
-  '  fetch("https://script.google.com/macros/s/AKfycbwsLMGq3lhBEPObcas0k8gVS67NX9y4wXKG6RgzKtlBOT2SXfREK6vBpvvM19w9s1m6/exec",{method:"POST",body:JSON.stringify({action:"assignHomeworkFromDialog",key:key,task:task})})' +
+  '  fetch("https://script.google.com/macros/s/AKfycbwsLMGq3lhBEPObcas0k8gVS67NX9y4wXKG6RgzKtlBOT2SXfREK6vBpvvM19w9s1m6/exec",{method:"POST",body:JSON.stringify({action:"assignHomeworkFromDialog",key:key,task:task,dueDate:due})})' +
   '    .then(function(r){return r.json();})' +
   '    .then(function(resp){' +
   '      if(resp && resp.ok){' +
   '        statusEl.textContent = "Assigned. Close this window or assign another.";' +
   '        statusEl.className = "";' +
   '        document.getElementById("task").value = "";' +
+  '        document.getElementById("due").value = "";' +
   '      } else {' +
   '        statusEl.textContent = "Error: " + (resp && resp.error ? resp.error : "unknown");' +
   '        statusEl.className = "error";' +
@@ -1819,7 +2355,7 @@ function handleDeleteAttempt(rawKey, rawTestTag, rawAttemptId) {
    view across every student instead of opening each one's report/sheet
    row by hand. Read-only, gated by ADMIN_KEY above (see its comment for
    the trust model). Reuses the same per-student building blocks the
-   biweekly guardian-summary email already relies on
+   weekly guardian-summary email already relies on
    (scoreTrendForStudent_/weakestSkillForStudent_ further down this file)
    rather than duplicating that logic a third time. */
 function handleGetRoster(rawAdminKey) {
@@ -1840,20 +2376,40 @@ function handleGetRoster(rawAdminKey) {
   // a known gap, not a bug, and cheap to close later by having those two
   // sync handlers stamp ProgressUpdatedAt too if this view says it matters.
   var lastAttemptMsByKey = {};
+  // Score rows, bucketed by student in the SAME pass — this used to be a
+  // separate scoreTrendForStudent_() call per student, each one re-reading
+  // the entire Attempts sheet (so a 20-student roster did 20 full reads of
+  // the biggest sheet in the file, on the very first screen of the admin
+  // page). Report/ReportLink are skipped outright: nothing here shows
+  // either, and together they're most of the sheet's bytes.
+  var trendRowsByKey = {};
   try {
     var aSheet = getAttemptsSheet_();
-    var aData = aSheet.getDataRange().getValues();
-    var aHeaders = aData[0];
+    var aHeaders = aSheet.getRange(1, 1, 1, aSheet.getLastColumn()).getValues()[0];
+    var aData = readAttemptRows_(aSheet, aHeaders, ['Report', 'ReportLink']);
     var aCol = {};
     aHeaders.forEach(function (h, i) { aCol[h] = i; });
-    for (var j = 1; j < aData.length; j++) {
+    for (var j = 0; j < aData.length; j++) {
       var ak = String(aData[j][aCol.Key] || '').trim().toUpperCase();
       var ats = aData[j][aCol.Timestamp];
       if (!ak || !ats) continue;
-      var atMs = new Date(ats).getTime();
+      var atDate = toDateOrNull_(ats);
+      if (!atDate) continue;
+      var atMs = atDate.getTime();
       if (!lastAttemptMsByKey[ak] || atMs > lastAttemptMsByKey[ak]) lastAttemptMsByKey[ak] = atMs;
+      if (aData[j][aCol.Kind] !== 'score') continue;
+      if (!trendRowsByKey[ak]) trendRowsByKey[ak] = [];
+      trendRowsByKey[ak].push({
+        date: ats, testTitle: aData[j][aCol.TestTitle] || '',
+        testType: aData[j][aCol.TestType], composite: aData[j][aCol.Composite]
+      });
     }
-  } catch (e) { /* Attempts sheet unreadable — last-activity just falls back to ProgressUpdatedAt alone */ }
+    // Same ordering and same "last N" window scoreTrendForStudent_ applies.
+    Object.keys(trendRowsByKey).forEach(function (k) {
+      trendRowsByKey[k].sort(function (a, b) { return new Date(a.date) - new Date(b.date); });
+      trendRowsByKey[k] = trendRowsByKey[k].slice(-GUARDIAN_SUMMARY_TREND_MAX);
+    });
+  } catch (e) { /* Attempts sheet unreadable — last-activity falls back to ProgressUpdatedAt, and every trend is simply empty */ }
 
   // Assignment completion counts per student — same Assignments sheet
   // getAssignments_ reads per-student, aggregated here across everyone in
@@ -1883,15 +2439,16 @@ function handleGetRoster(rawAdminKey) {
     var key = String(data[i][col.Key] || '').trim().toUpperCase();
     if (!name || !key) continue;
 
-    var trend = scoreTrendForStudent_(key);
+    var trend = trendRowsByKey[key] || [];
     var latest = trend.length ? trend[trend.length - 1] : null;
     var first = trend.length ? trend[0] : null;
-    var weakest = weakestSkillForStudent_(key);
+    // Read off the Students row already in hand — weakestSkillForStudent_
+    // would re-read the whole sheet to find the row we're standing on.
+    var weakest = col.SkillStatsJSON !== undefined ? weakestFromSkillStats_(data[i][col.SkillStatsJSON]) : null;
     var assign = assignByKey[key] || { total: 0, done: 0 };
 
-    var progressAtCell = col.ProgressUpdatedAt !== undefined ? data[i][col.ProgressUpdatedAt] : null;
-    var progressAtMs = progressAtCell ? new Date(progressAtCell).getTime() : 0;
-    var lastActivityMs = Math.max(progressAtMs || 0, lastAttemptMsByKey[key] || 0);
+    var progressAt = col.ProgressUpdatedAt !== undefined ? toDateOrNull_(data[i][col.ProgressUpdatedAt]) : null;
+    var lastActivityMs = Math.max(progressAt ? progressAt.getTime() : 0, lastAttemptMsByKey[key] || 0);
 
     var grantedAtCell = col.GrantedAt !== undefined ? data[i][col.GrantedAt] : null;
 
@@ -1899,7 +2456,7 @@ function handleGetRoster(rawAdminKey) {
       name: name,
       key: key,
       sat: truthy_(data[i][col.SAT]),
-      grantedAt: grantedAtCell ? new Date(grantedAtCell).toISOString() : null,
+      grantedAt: isoOrNull_(grantedAtCell),
       lastActivityAt: lastActivityMs ? new Date(lastActivityMs).toISOString() : null,
       composite: latest ? latest.composite : null,
       compositeDelta: (latest && first && trend.length > 1 && typeof latest.composite === 'number' && typeof first.composite === 'number')
@@ -1920,7 +2477,7 @@ function handleGetRoster(rawAdminKey) {
    already writes to the browser's own localStorage (moretti_score_history_
    <key>). That local copy is what actually drives the Score Progress chart
    on Home — this exists purely so a composite score trend is available to
-   code that can't reach localStorage, i.e. the biweekly guardian-summary
+   code that can't reach localStorage, i.e. the weekly guardian-summary
    trigger below (Apps Script triggers run server-side, with no browser in
    the loop). Best-effort from the client's side (see
    syncScoreHistoryToBackend() in index.html) — if this call fails, the
@@ -2269,11 +2826,13 @@ function getLeadsSheet_() {
   var sheet = ss.getSheetByName('Leads');
   if (!sheet) {
     sheet = ss.insertSheet('Leads');
-    sheet.appendRow(['Timestamp', 'Name', 'Email', 'Phone', 'Town', 'Grade', 'Subject', 'Message', 'Stage', 'LastEmailAt', 'IsUSA', 'Role']);
+    sheet.appendRow(['Timestamp', 'Name', 'Email', 'Phone', 'Town', 'Grade', 'Subject', 'Message', 'Stage', 'LastEmailAt', 'IsUSA', 'Role', 'ThreadId']);
     return sheet;
   }
   var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
-  ['IsUSA', 'Role', 'Subject', 'Message'].forEach(function (col) {
+  // ThreadId is the family's one Gmail conversation — see "ONE THREAD PER
+  // FAMILY" below. Auto-creates on an already-live sheet like the rest.
+  ['IsUSA', 'Role', 'Subject', 'Message', 'ThreadId'].forEach(function (col) {
     if (headers.indexOf(col) === -1) {
       sheet.getRange(1, sheet.getLastColumn() + 1).setValue(col);
       headers.push(col);
@@ -2344,7 +2903,14 @@ function handleSubmitLead(rawName, rawPhone, rawEmail, rawIsUSA, rawRole, rawGra
     console.error('Lead notify email failed for ' + email + ': ' + err);
   }
   try {
-    sendLeadEmail_(email, name, leadEmailConfirmation_(name));
+    // This is the message that CREATES the family's thread — the first
+    // one the lead is actually a participant in. Everything afterwards
+    // (nudges, and later the weekly progress updates) replies into it.
+    var seeded = sendFamilyEmail_('', email, leadEmailConfirmation_(name));
+    if (seeded.threadId) {
+      var tCol = headers.indexOf('ThreadId');
+      if (tCol !== -1) sheet.getRange(sheet.getLastRow(), tCol + 1).setValue(seeded.threadId);
+    }
   } catch (err) {
     console.error('Lead confirmation email failed for ' + email + ': ' + err);
   }
@@ -2353,6 +2919,7 @@ function handleSubmitLead(rawName, rawPhone, rawEmail, rawIsUSA, rawRole, rawGra
 }
 
 function leadEmailConfirmation_(name) {
+  name = String(name || '').trim() || 'your student';
   var firstName = String(name || '').split(' ')[0] || 'there';
   var text =
     'Hi ' + firstName + ',\n\n' +
@@ -2368,7 +2935,11 @@ function leadEmailConfirmation_(name) {
     '<p>Need something sooner? Call or text <a href="tel:2012752791" style="color:#B0271C; font-weight:bold;">(201) 275-2791</a> directly.</p>' +
     '<p>Best,<br>Luca Moretti</p>' +
     '</div>';
-  return { subject: 'We\'ve received your message — Moretti Test Prep & Tutoring', text: text, html: html };
+  // NOT "We've received your message" any more: this subject becomes the
+  // permanent header of the family's whole thread (Gmail shows the first
+  // message's subject on every reply), so it names the family instead of
+  // describing one moment in the relationship.
+  return { subject: 'Moretti Test Prep — ' + name, text: text, html: html };
 }
 
 // Run daily (see setupLeadFollowUpTrigger). Sends the day-3 email to any
@@ -2376,6 +2947,13 @@ function leadEmailConfirmation_(name) {
 // any lead that's 7+ days old and has only had the day-3 email — one
 // pass per lead per day, so nothing double-sends even if this runs a few
 // minutes late or the sheet has hundreds of rows.
+// Days of silence before each nudge, measured from the LAST message in
+// the family's thread — not from the form submission. That's the whole
+// point: if Luca answered an inquiry by hand on day 5, the clock restarts
+// from his reply, so the nudge goes to people who didn't answer HIM.
+var LEAD_NUDGE_1_DAYS = 3;
+var LEAD_NUDGE_2_DAYS = 4;
+
 function sendLeadFollowUps() {
   var sheet = getLeadsSheet_();
   var data = sheet.getDataRange().getValues();
@@ -2383,31 +2961,216 @@ function sendLeadFollowUps() {
   var col = {};
   headers.forEach(function (h, i) { col[h] = i; });
   var now = new Date();
+  var DAY = 24 * 60 * 60 * 1000;
+  var sent = 0, waiting = 0, quiet = 0;
 
   for (var i = 1; i < data.length; i++) {
     var row = data[i];
     var stage = String(row[col.Stage] || '').trim();
     if (stage === 'STOP') continue;
-
-    var submitted = row[col.Timestamp];
-    if (!(submitted instanceof Date)) continue;
-    var daysSince = (now - submitted) / (24 * 60 * 60 * 1000);
+    if (stage !== '' && stage !== '1') continue; // '2' = both nudges already sent
 
     var name = row[col.Name], email = row[col.Email];
     if (!email) continue;
 
-    if (stage === '' && daysSince >= 3) {
-      sendLeadEmail_(email, name, leadEmailDay3_(name));
-      sheet.getRange(i + 1, col.Stage + 1).setValue('1');
-      sheet.getRange(i + 1, col.LastEmailAt + 1).setValue(now);
-    } else if (stage === '1' && daysSince >= 7) {
-      sendLeadEmail_(email, name, leadEmailDay7_(name));
-      sheet.getRange(i + 1, col.Stage + 1).setValue('2');
-      sheet.getRange(i + 1, col.LastEmailAt + 1).setValue(now);
+    var threadId = col.ThreadId === undefined ? '' : String(row[col.ThreadId] || '').trim();
+    var state = threadState_(threadId);
+
+    // ═══ The rule Luca asked for ═══ never nudge someone who is waiting
+    // on HIM. If the last message in the thread came from the lead, the
+    // ball is in his court and an automated "still interested?" would be
+    // both wrong and slightly insulting. Skip, and pick them up again
+    // only once he has replied and they've gone quiet.
+    if (state && !state.lastFromUs) { waiting++; continue; }
+
+    // Silence measured from our last message when we can see the thread,
+    // and from the form submission when we can't (no thread yet, or the
+    // advanced Gmail service isn't enabled).
+    var since;
+    if (state) {
+      since = (now - state.lastAt) / DAY;
+    } else {
+      var submitted = row[col.Timestamp];
+      if (!(submitted instanceof Date)) continue;
+      // Preserves the original day-3 / day-7 schedule for old rows that
+      // never got a ThreadId.
+      since = (now - submitted) / DAY - (stage === '1' ? LEAD_NUDGE_1_DAYS : 0);
     }
+
+    var due = (stage === '' ? LEAD_NUDGE_1_DAYS : LEAD_NUDGE_2_DAYS);
+    if (since < due) { quiet++; continue; }
+
+    var msg = (stage === '' ? leadEmailDay3_(name) : leadEmailDay7_(name));
+    var res = sendFamilyEmail_(threadId, email, msg);
+    if (!res.ok) continue; // failed — retry on tomorrow's run rather than advancing the stage
+
+    sheet.getRange(i + 1, col.Stage + 1).setValue(stage === '' ? '1' : '2');
+    sheet.getRange(i + 1, col.LastEmailAt + 1).setValue(now);
+    if (col.ThreadId !== undefined && res.threadId && res.threadId !== threadId) {
+      sheet.getRange(i + 1, col.ThreadId + 1).setValue(res.threadId);
+    }
+    sent++;
+  }
+
+  console.log('Lead follow-ups — sent: ' + sent + ', skipped (awaiting Luca): ' + waiting + ', skipped (too soon): ' + quiet);
+}
+
+/* =========================================================================
+   ONE THREAD PER FAMILY
+   -------------------------------------------------------------------------
+   The inquiry confirmation and every follow-up nudge go into a SINGLE
+   Gmail thread per family, so Luca opens one conversation instead of
+   hunting through a dozen unrelated ones, and anything he types by hand
+   in that thread becomes part of the same history.
+
+   Scope: this is the SALES conversation. The weekly progress emails
+   pointedly do not use it — a recurring report is not a conversation, and
+   threading twelve weeks of them buries the newest one. See "GUARDIAN
+   WEEKLY SUMMARY" further down for that reasoning.
+
+   Why this can't use MailApp: MailApp.sendEmail() cannot set In-Reply-To
+   or References, the headers mail clients actually thread on, so every
+   message it sends is structurally a brand-new conversation. GmailApp's
+   thread.reply() sets them, but replies to the SENDER of the thread's
+   last message — which is Luca himself whenever the last message was one
+   of ours, so it would mail him his own follow-up. The advanced Gmail
+   service is the only option that sets the headers AND lets us name the
+   recipient explicitly.
+
+   ONE-TIME SETUP: in the Apps Script editor, Services (+) > Gmail API >
+   Add. Without it every call below throws and the code falls back to
+   unthreaded MailApp sends, so nothing is ever lost — mail just stops
+   threading until the service is added.
+   ========================================================================= */
+
+var SENDER_NAME_ = 'Luca Moretti — Moretti Test Prep & Tutoring';
+
+function senderAddress_() {
+  try {
+    var addr = Session.getEffectiveUser().getEmail();
+    if (addr) return addr;
+  } catch (e) { /* fall through */ }
+  return NOTIFY_EMAIL;
+}
+
+// Long base64 lines are legal but some strict clients choke on them.
+function wrapBase64_(b64) {
+  return String(b64).replace(/(.{76})/g, '$1\r\n');
+}
+
+// Subjects here carry em dashes and curly quotes, which aren't legal raw
+// in a header — RFC 2047 encode the whole thing rather than trying to
+// detect which ones need it.
+function encodeSubject_(subject) {
+  return '=?UTF-8?B?' + Utilities.base64Encode(subject, Utilities.Charset.UTF_8) + '?=';
+}
+
+function buildRawMessage_(to, subject, text, html, inReplyTo, references) {
+  var b = 'bnd' + Utilities.getUuid().replace(/-/g, '');
+  var L = [];
+  L.push('From: ' + encodeSubject_(SENDER_NAME_) + ' <' + senderAddress_() + '>');
+  L.push('To: ' + to);
+  L.push('Subject: ' + encodeSubject_(subject));
+  if (inReplyTo) {
+    L.push('In-Reply-To: ' + inReplyTo);
+    L.push('References: ' + (references || inReplyTo));
+  }
+  L.push('MIME-Version: 1.0');
+  L.push('Content-Type: multipart/alternative; boundary="' + b + '"');
+  L.push('');
+  L.push('--' + b);
+  L.push('Content-Type: text/plain; charset="UTF-8"');
+  L.push('Content-Transfer-Encoding: base64');
+  L.push('');
+  L.push(wrapBase64_(Utilities.base64Encode(text, Utilities.Charset.UTF_8)));
+  L.push('--' + b);
+  L.push('Content-Type: text/html; charset="UTF-8"');
+  L.push('Content-Transfer-Encoding: base64');
+  L.push('');
+  L.push(wrapBase64_(Utilities.base64Encode(html, Utilities.Charset.UTF_8)));
+  L.push('--' + b + '--');
+  return L.join('\r\n');
+}
+
+// Sends into threadId when we have one, otherwise starts a fresh thread.
+// ALWAYS returns the thread id the message actually landed in, so the
+// caller can write it back to the sheet and every later email finds its
+// way to the same conversation.
+// Returns { ok: bool, threadId: string, threaded: bool }.
+function sendFamilyEmail_(threadId, toEmail, msg) {
+  var subject = msg.subject, inReplyTo = '', references = '', threaded = false;
+
+  if (threadId) {
+    try {
+      var thread = GmailApp.getThreadById(threadId);
+      if (thread) {
+        var msgs = thread.getMessages();
+        var last = msgs[msgs.length - 1];
+        inReplyTo = last.getHeader('Message-ID') || '';
+        references = last.getHeader('References') || '';
+        references = (references ? references + ' ' : '') + inReplyTo;
+        // Gmail splits a thread whose subject doesn't match, so the
+        // thread's own subject wins over whatever the template built.
+        var base = thread.getFirstMessageSubject() || msg.subject;
+        subject = /^re:/i.test(base) ? base : 'Re: ' + base;
+        threaded = true;
+      } else {
+        threadId = ''; // thread was deleted — start a new one, don't drop the mail
+      }
+    } catch (err) {
+      console.error('Could not read thread ' + threadId + ': ' + err);
+      threadId = '';
+    }
+  }
+
+  try {
+    var res = Gmail.Users.Messages.send({
+      raw: Utilities.base64EncodeWebSafe(buildRawMessage_(toEmail, subject, msg.text, msg.html, inReplyTo, references), Utilities.Charset.UTF_8),
+      threadId: threadId || undefined
+    }, 'me');
+    return { ok: true, threadId: (res && res.threadId) || threadId || '', threaded: threaded };
+  } catch (err) {
+    // Almost always "Gmail is not defined" — the advanced service hasn't
+    // been added yet. Fall back to an unthreaded send so the family still
+    // hears from us; threading resumes on its own once the service is on.
+    console.error('Threaded send failed for ' + toEmail + ' (' + err + ') — falling back to MailApp.');
+    return { ok: sendLeadEmail_(toEmail, '', msg), threadId: threadId || '', threaded: false };
   }
 }
 
+// Who spoke last in this thread, and when. This is what lets the drip
+// tell "they never wrote back" apart from "they replied and are waiting
+// on Luca" — an automated "still interested?" sent to someone whose
+// email is sitting unanswered in his own inbox is the worst message the
+// system could possibly send.
+// Returns null when there's no readable thread, which callers treat as
+// "fall back to timestamps".
+function threadState_(threadId) {
+  if (!threadId) return null;
+  try {
+    var thread = GmailApp.getThreadById(threadId);
+    if (!thread) return null;
+    var msgs = thread.getMessages();
+    if (!msgs.length) return null;
+    var last = msgs[msgs.length - 1];
+    var ours = senderAddress_().toLowerCase();
+    return {
+      lastFromUs: String(last.getFrom() || '').toLowerCase().indexOf(ours) !== -1,
+      lastAt: last.getDate(),
+      messageCount: msgs.length
+    };
+  } catch (err) {
+    console.error('Could not read thread state for ' + threadId + ': ' + err);
+    return null;
+  }
+}
+
+// Unthreaded fallback, and the only sender left that doesn't need the
+// advanced Gmail service. Returns true only if MailApp accepted the
+// message. The lead drip callers above ignore the return — a missed follow-up self-corrects
+// on the next daily run — but sendGuardianSummaries below DOES check it,
+// because it must never stamp a "sent" timestamp for an email that never
+// actually left.
 function sendLeadEmail_(toEmail, name, msg) {
   try {
     MailApp.sendEmail({
@@ -2417,8 +3180,10 @@ function sendLeadEmail_(toEmail, name, msg) {
       htmlBody: msg.html,
       name: 'Luca Moretti — Moretti Test Prep & Tutoring'
     });
+    return true;
   } catch (err) {
     console.error('sendLeadEmail_ failed for ' + toEmail + ': ' + err);
+    return false;
   }
 }
 
@@ -2426,7 +3191,7 @@ function leadEmailDay3_(name) {
   var firstName = String(name || '').split(' ')[0] || 'there';
   var text =
     'Hi ' + firstName + ',\n\n' +
-    'Wanted to follow up in case you\'re still looking into SAT/ACT prep for your student.\n\n' +
+    'Wanted to follow up in case you\'re still looking into SAT prep for your student.\n\n' +
     'Here\'s how I actually work with students: every plan starts with a real assessment — figuring out exactly which specific gaps are costing points, not just "more practice." From there we build a plan around those gaps specifically, session by session, instead of a generic curriculum.\n\n' +
     'That\'s built into the 12-Week Program: a diagnostic to start, a custom study plan, two more full-length practice tests along the way to track real movement, and a guarantee — if a student completes all twelve sessions and the homework and their score doesn\'t improve, I keep working with them for free until it does.\n\n' +
     'Happy to walk you through what this would look like for your student specifically — no pressure, just a real conversation. Reserve a seat here:\n' +
@@ -2435,21 +3200,21 @@ function leadEmailDay3_(name) {
   var html =
     '<div style="font-family:Georgia,serif; color:#111; font-size:15px; line-height:1.6; max-width:560px;">' +
     '<p>Hi ' + firstName + ',</p>' +
-    '<p>Wanted to follow up in case you\'re still looking into SAT/ACT prep for your student.</p>' +
+    '<p>Wanted to follow up in case you\'re still looking into SAT prep for your student.</p>' +
     '<p>Here\'s how I actually work with students: every plan starts with a real assessment &mdash; figuring out exactly which specific gaps are costing points, not just &ldquo;more practice.&rdquo; From there we build a plan around those gaps specifically, session by session, instead of a generic curriculum.</p>' +
     '<p>That\'s built into the <strong>12-Week Program</strong>: a diagnostic to start, a custom study plan, two more full-length practice tests along the way to track real movement, and a guarantee &mdash; if a student completes all twelve sessions and the homework and their score doesn\'t improve, I keep working with them for free until it does.</p>' +
     '<p>Happy to walk you through what this would look like for your student specifically &mdash; no pressure, just a real conversation:</p>' +
     '<p><a href="https://morettitutoring.com/#reserve" style="color:#B0271C; font-weight:bold;">Reserve Your Seat &rarr;</a></p>' +
     '<p>Best,<br>Luca</p>' +
     '</div>';
-  return { subject: 'Following up on SAT/ACT prep for your student', text: text, html: html };
+  return { subject: 'Following up on SAT prep for your student', text: text, html: html };
 }
 
 function leadEmailDay7_(name) {
   var firstName = String(name || '').split(' ')[0] || 'there';
   var text =
     'Hi ' + firstName + ',\n\n' +
-    'Just a short final check-in — are you still looking for SAT/ACT prep support this semester?\n\n' +
+    'Just a short final check-in — are you still looking for SAT prep support this semester?\n\n' +
     '"I highly recommend Luca as a math tutor. He worked with my daughter to prepare for the SAT and made a tremendous impact on both her confidence and performance... she improved her SAT Math score by approximately 200 points, exceeding our expectations." — Michele C.\n\n' +
     'If now isn\'t the right time, no worries at all — feel free to reach back out whenever it is. If you\'d like to talk it through, reserve a seat here:\n' +
     'https://morettitutoring.com/#reserve\n\n' +
@@ -2457,7 +3222,7 @@ function leadEmailDay7_(name) {
   var html =
     '<div style="font-family:Georgia,serif; color:#111; font-size:15px; line-height:1.6; max-width:560px;">' +
     '<p>Hi ' + firstName + ',</p>' +
-    '<p>Just a short final check-in &mdash; are you still looking for SAT/ACT prep support this semester?</p>' +
+    '<p>Just a short final check-in &mdash; are you still looking for SAT prep support this semester?</p>' +
     '<blockquote style="border-left:3px solid #C9A84C; margin:1.2em 0; padding:0.2em 1em; font-style:italic; color:#333;">' +
     '&ldquo;I highly recommend Luca as a math tutor. He worked with my daughter to prepare for the SAT and made a tremendous impact on both her confidence and performance&hellip; she improved her SAT Math score by approximately <strong>200 points</strong>, exceeding our expectations.&rdquo;<br><span style="font-style:normal; font-size:0.85em; color:#666;">&mdash; Michele C.</span>' +
     '</blockquote>' +
@@ -2465,7 +3230,7 @@ function leadEmailDay7_(name) {
     '<p><a href="https://morettitutoring.com/#reserve" style="color:#B0271C; font-weight:bold;">Reserve Your Seat &rarr;</a></p>' +
     '<p>Best,<br>Luca</p>' +
     '</div>';
-  return { subject: 'Still looking for SAT/ACT prep help?', text: text, html: html };
+  return { subject: 'Still looking for SAT prep help?', text: text, html: html };
 }
 
 // Run this ONCE manually (select it in the function dropdown, click Run,
@@ -2485,28 +3250,75 @@ function setupLeadFollowUpTrigger() {
 }
 
 /* =========================================================================
-   GUARDIAN BIWEEKLY SUMMARY
+   GUARDIAN WEEKLY SUMMARY
    -------------------------------------------------------------------------
    Opt-in per student: fill in GuardianEmail (and optionally GuardianName)
-   on that student's row in the Students sheet — both auto-create the
-   first time this runs if they don't exist yet, same pattern as
-   AccomTimeMult/BaselineType above. A blank GuardianEmail just means that
-   student is skipped, nothing else needed.
+   on that student's row in the Students sheet, or let the student add a
+   parent themselves during onboarding or in Settings (both write those
+   same two columns, via handleSaveOnboardingPrefs above). Both columns
+   auto-create the first time this runs if they don't exist yet, same
+   pattern as AccomTimeMult/BaselineType. A blank GuardianEmail means that
+   student is skipped entirely, and CLEARING it later is a real
+   unsubscribe — it wipes LastGuardianSummaryAt along with the address.
 
-   Runs daily (see setupGuardianSummaryTrigger) but only actually SENDS to
-   a given student once every GUARDIAN_SUMMARY_DAYS days — gated by
-   LastGuardianSummaryAt on their row, same "scan daily, gate in code"
-   idiom sendLeadFollowUps() uses above, since Apps Script's timeBased()
-   builder doesn't have a clean "every 14 days" primitive that survives a
-   trigger reinstall.
+   Sends every FRIDAY morning (see setupGuardianSummaryTrigger), and ONLY
+   for students who finished a PRACTICE TEST within the last
+   GUARDIAN_ACTIVITY_WINDOW_DAYS days. Diagnostics never trigger or appear
+   in one of these — Luca writes to a parent himself about a diagnostic,
+   and an automated summary landing next to that would duplicate or
+   contradict it. See isDiagnosticRow_ below. A student who hasn't tested inside
+   that window produces no email at all — their parent hears nothing,
+   rather than getting a recycled update about a score they were already
+   told about. That activity gate is the entire suppression rule; there is
+   deliberately no separate per-guardian cooldown stacked on top of it.
+
+   So the practical rhythm is: a parent hears from us the Friday after
+   their student tests, and stays quiet otherwise. Two separate gates get
+   that result, and both matter. The activity window above stops a stale
+   score from being reported months later. GUARDIAN_SKIP_REPEAT_SCORES
+   stops the SAME score being reported twice — without it, the window (14
+   days) being wider than the cadence (7 days) means one test would
+   headline two consecutive Fridays. Set it to false if you'd rather have
+   the steady weekly touchpoint and don't mind a repeat.
+
+   NOT THREADED, on purpose — the one place that deliberately breaks the
+   one-thread-per-family rule the lead flow follows. Threading is right
+   for a conversation and wrong for a recurring report: by week twelve a
+   parent would be opening an update buried under eleven quoted copies of
+   the previous ones, which is how a report stops being read. So each
+   Friday email starts its own conversation, and its subject carries the
+   date — because Gmail groups by subject + participants even with no
+   In-Reply-To header, a fixed weekly subject would quietly re-thread them
+   on the parent's side no matter what we did at send time. A parent's
+   reply then lands anchored to the week it is actually about.
    ========================================================================= */
-var GUARDIAN_SUMMARY_DAYS = 14;
+
+// How recently a student must have tested for their parent to hear from
+// us at all. This is the rule that keeps quiet students' parents quiet.
+var GUARDIAN_ACTIVITY_WINDOW_DAYS = 14;
+
+// true:  (current) only email when a NEW score has landed since the last
+//        one went out, so every email a parent opens has something in it
+//        they haven't already been told.
+// false: email every Friday throughout the activity window, which lets a
+//        single score headline two consecutive weeks.
+var GUARDIAN_SKIP_REPEAT_SCORES = true;
+
 var GUARDIAN_COLS_ = ['GuardianName', 'GuardianEmail', 'LastGuardianSummaryAt'];
 
+// Matches on the TRIMMED header name. A header typed with a trailing
+// space ("GuardianEmail ") used to miss indexOf, get a second column
+// appended next to it, and then the code would read the new empty column
+// while hand-entered values sat in the original — a student with a
+// guardian right there in the sheet reading as "no guardian email on
+// record". See diagnoseGuardianColumns() below.
 function ensureGuardianColumns_(sheet, headers) {
+  var have = {};
+  headers.forEach(function (h, i) { have[String(h).trim()] = i; });
   GUARDIAN_COLS_.forEach(function (col) {
-    if (headers.indexOf(col) === -1) {
+    if (have[col] === undefined) {
       sheet.getRange(1, sheet.getLastColumn() + 1).setValue(col);
+      have[col] = headers.length;
       headers.push(col);
     }
   });
@@ -2520,57 +3332,136 @@ function sendGuardianSummaries() {
   var data = sheet.getDataRange().getValues();
   headers = data[0];
   var col = {};
-  headers.forEach(function (h, i) { col[h] = i; });
+  // Trimmed, so a header with a stray space still resolves.
+  headers.forEach(function (h, i) { col[String(h).trim()] = i; });
   var now = new Date();
+  var tz = Session.getScriptTimeZone() || 'America/New_York';
+  var windowMs = GUARDIAN_ACTIVITY_WINDOW_DAYS * 24 * 60 * 60 * 1000;
+  var sent = 0, skipped = 0, failed = 0;
 
   for (var i = 1; i < data.length; i++) {
     var row = data[i];
     var guardianEmail = String(row[col.GuardianEmail] || '').trim();
-    if (!guardianEmail) continue;
-
-    var lastSent = row[col.LastGuardianSummaryAt];
-    if (lastSent instanceof Date) {
-      var daysSince = (now - lastSent) / (24 * 60 * 60 * 1000);
-      if (daysSince < GUARDIAN_SUMMARY_DAYS) continue;
-    }
+    if (!guardianEmail) continue; // no parent on record, or unsubscribed
 
     var key = String(row[col.Key] || '').trim().toUpperCase();
     if (!key) continue;
     var studentName = row[col.Name] || 'your student';
+    var guardianName = row[col.GuardianName] || '';
 
     var trend = scoreTrendForStudent_(key);
-    if (!trend.length) continue; // nothing to report yet — don't send an empty update
+    if (!trend.length) { skipped++; continue; } // never tested — nothing to report
+
+    // ═══ THE suppression rule ═══ no diagnostic or practice test inside
+    // the activity window means this parent gets nothing this week. Not a
+    // shortened email, not a "no activity this week" note — no send at
+    // all. A parent should never receive an update built on a stale score.
+    var latest = trend[trend.length - 1];
+    var latestDate = (latest.date instanceof Date) ? latest.date : new Date(latest.date);
+    if (isNaN(latestDate.getTime()) || (now - latestDate) > windowMs) { skipped++; continue; }
+
+    var lastSent = row[col.LastGuardianSummaryAt];
+    if (lastSent instanceof Date) {
+      // Same-DAY guard only — a manual re-run from the editor, or a double
+      // trigger fire, must not put two copies in a parent's inbox in one
+      // morning. This is not a cadence gate; the weekly trigger is.
+      if (Utilities.formatDate(lastSent, tz, 'yyyy-MM-dd') === Utilities.formatDate(now, tz, 'yyyy-MM-dd')) { skipped++; continue; }
+      // Nothing new since the last email — stay quiet rather than send a
+      // parent the same headline score a second time.
+      if (GUARDIAN_SKIP_REPEAT_SCORES && latestDate <= lastSent) { skipped++; continue; }
+    }
 
     var weakest = weakestSkillForStudent_(key);
-    var guardianName = row[col.GuardianName] || '';
-    var msg = guardianSummaryEmail_(studentName, guardianName, trend, weakest);
-    sendLeadEmail_(guardianEmail, guardianName || studentName, msg);
-    sheet.getRange(i + 1, col.LastGuardianSummaryAt + 1).setValue(now);
+    var msg = guardianSummaryEmail_(studentName, guardianName, trend, weakest, now);
+
+    // Stamp ONLY on a real send. This used to stamp unconditionally, so a
+    // bounce or a MailApp quota hit silently cost that parent the whole
+    // window, with nothing on the sheet to show why they went dark. A
+    // failure now simply retries next Friday and shows up in the log line
+    // at the bottom of this function.
+    // Deliberately NOT threaded — passing '' starts a fresh conversation
+    // every week. See the section header for why progress mail is the one
+    // thing that must not join the family thread.
+    if (sendFamilyEmail_('', guardianEmail, msg).ok) {
+      sheet.getRange(i + 1, col.LastGuardianSummaryAt + 1).setValue(now);
+      sent++;
+    } else {
+      failed++;
+    }
   }
+
+  console.log('Guardian weekly summaries — sent: ' + sent + ', skipped: ' + skipped + ', failed: ' + failed);
 }
 
 // Last GUARDIAN_SUMMARY_TREND_MAX entries for this student, oldest first —
 // enough to show a real trend in the email without dumping the student's
 // entire history every time.
 var GUARDIAN_SUMMARY_TREND_MAX = 5;
+// Diagnostics are deliberately EXCLUDED from the guardian email — Luca
+// writes to a parent personally about a diagnostic, and an automated
+// summary arriving alongside that would either duplicate it or contradict
+// it. Only full practice tests feed the weekly update.
+//
+// A diagnostic is tagged Source:'diagnostic' with an empty TestId and a
+// bare "SAT"/"ACT" title (see handleSubmitDiagnostic); a practice test
+// carries a real TestId and a full title like "SAT Practice Test 2".
+// Older rows predating the Source column are identified by that same
+// shape, so nothing slips through on a blank.
+function isDiagnosticRow_(source, testId, testTitle) {
+  var src = String(source || '').trim().toLowerCase();
+  if (src === 'diagnostic') return true;
+  if (src === 'practice-test') return false;
+  if (String(testId || '').trim()) return false; // has a test id -> a real practice test
+  var title = String(testTitle || '').trim();
+  return /^(sat|act)$/i.test(title) || /diagnostic/i.test(title);
+}
+
 function scoreTrendForStudent_(key) {
   var sheet = getAttemptsSheet_();
   var data = sheet.getDataRange().getValues();
   var headers = data[0];
   var col = {};
-  headers.forEach(function (h, i) { col[h] = i; });
-  var rows = [];
+  headers.forEach(function (h, i) { col[String(h).trim()] = i; });
+
+  // Two row Kinds can describe the same attempt. 'score' rows are written
+  // by handleSyncScoreHistory, a SEPARATE best-effort call from the client
+  // after a test is submitted; 'log' rows are written by the submit itself
+  // and carry a Composite too (see logDiagnosticResult_). When that second
+  // call fails — it has before, which is why handleBackfillCompositeFields
+  // exists — the attempt is on record with a real score but no 'score'
+  // row, and a parent would silently never hear about a test their child
+  // actually sat. So 'score' rows win, and a 'log' row is folded in only
+  // where no 'score' row already describes that same attempt.
+  var scoreRows = [], logRows = [];
   for (var i = 1; i < data.length; i++) {
-    if (data[i][col.Kind] !== 'score') continue;
-    if (String(data[i][col.Key] || '').trim().toUpperCase() === key) {
-      rows.push({
-        date: data[i][col.Timestamp], testTitle: data[i][col.TestTitle] || '',
-        testType: data[i][col.TestType], composite: data[i][col.Composite]
-      });
-    }
+    if (String(data[i][col.Key] || '').trim().toUpperCase() !== key) continue;
+    var kind = data[i][col.Kind];
+    if (kind !== 'score' && kind !== 'log') continue;
+    // Luca handles diagnostics by hand — see isDiagnosticRow_ above.
+    if (isDiagnosticRow_(data[i][col.Source], data[i][col.TestId], data[i][col.TestTitle])) continue;
+    var composite = Number(data[i][col.Composite]);
+    if (!composite) continue; // a log row with no composite tells a parent nothing
+    var entry = {
+      date: data[i][col.Timestamp],
+      testTitle: data[i][col.TestTitle] || '',
+      testType: data[i][col.TestType],
+      testId: data[i][col.TestId] || '',
+      composite: composite
+    };
+    (kind === 'score' ? scoreRows : logRows).push(entry);
   }
-  rows.sort(function (a, b) { return new Date(a.date) - new Date(b.date); });
-  return rows.slice(-GUARDIAN_SUMMARY_TREND_MAX);
+
+  function sig(e) { return (e.testId || e.testTitle) + '|' + e.composite; }
+  var seen = {};
+  scoreRows.forEach(function (e) { seen[sig(e)] = true; });
+  logRows.forEach(function (e) {
+    if (seen[sig(e)]) return;
+    seen[sig(e)] = true;
+    scoreRows.push(e);
+  });
+
+  scoreRows.sort(function (a, b) { return new Date(a.date) - new Date(b.date); });
+  return scoreRows.slice(-GUARDIAN_SUMMARY_TREND_MAX);
 }
 
 // Mirrors index.html's client-side weakestDomain() — same "at least 3
@@ -2583,79 +3474,202 @@ function weakestSkillForStudent_(key) {
   var sheet = getSheet_();
   var row = findRow_(sheet, key);
   if (!row) return null;
+  return weakestFromSkillStats_(row.SkillStatsJSON);
+}
+
+// The domain-level "weakest area" calc, split out of the function above so
+// handleGetRoster can run it against a Students row it has ALREADY read
+// rather than paying for a whole extra sheet read per student (which is
+// what weakestSkillForStudent_ -> findRow_ does). Same inputs, same
+// output — the guardian summary still calls the wrapper.
+function weakestFromSkillStats_(skillStatsJson) {
   var bySkill = null;
-  try { bySkill = JSON.parse(row.SkillStatsJSON) || {}; } catch (e) { bySkill = {}; }
+  try { bySkill = JSON.parse(skillStatsJson) || {}; } catch (e) { bySkill = {}; }
   if (!bySkill) return null;
 
+  // Keyed on the NORMALIZED domain name so the two spellings of the same
+  // domain add up as one, and labelled with the canonical wording.
   var byDomain = {};
   Object.keys(bySkill).forEach(function (k) {
     var s = bySkill[k];
     if (!s || !s.domain) return;
-    if (!byDomain[s.domain]) byDomain[s.domain] = { correct: 0, total: 0 };
-    byDomain[s.domain].correct += Number(s.correct) || 0;
-    byDomain[s.domain].total += Number(s.total) || 0;
+    var dk = normalizeDomainKey_(s.domain);
+    if (!dk) return;
+    if (!byDomain[dk]) byDomain[dk] = { label: canonicalDomainLabel_(s.domain), correct: 0, total: 0 };
+    byDomain[dk].correct += Number(s.correct) || 0;
+    byDomain[dk].total += Number(s.total) || 0;
   });
 
   var MIN_QUESTIONS = 3;
   var best = null;
-  Object.keys(byDomain).forEach(function (name) {
-    var d = byDomain[name];
+  Object.keys(byDomain).forEach(function (dk) {
+    var d = byDomain[dk];
     if (d.total < MIN_QUESTIONS) return;
     var pct = d.correct / d.total;
     if (!best || pct < best.pct || (pct === best.pct && d.total > best.total)) {
-      best = { label: name, correct: d.correct, total: d.total, pct: pct };
+      best = { label: d.label, correct: d.correct, total: d.total, pct: pct };
     }
   });
   return best;
 }
 
-function guardianSummaryEmail_(studentName, guardianName, trend, weakest) {
+// What we're actually DOING about the weak domain, in one sentence a
+// parent can read without knowing the test. Keyed to the eight College
+// Board SAT domains the question bank tags against (see index.html's
+// domain labels). A domain that isn't in this map — College Board
+// relabels one every few years — falls through to the generic line
+// rather than asserting a strategy that may not fit.
+// The data files now spell every domain and skill one way: "and" is
+// always written out, never "&". They did NOT always: practice tests 5-9
+// used both
+// spellings of the same domain WITHIN one test, which split it into two
+// buckets, so a student's real accuracy was computed from partial data
+// and could fall under MIN_QUESTIONS in both halves and vanish from the
+// weak-spot calc entirely. The data is fixed, but this normalizer stays
+// as the safety net — the next test added by hand could spell it either
+// way, and this makes that harmless instead of silently wrong.
+function normalizeDomainKey_(label) {
+  return String(label == null ? '' : label)
+    .replace(/&/g, ' and ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+}
+
+var GUARDIAN_STRATEGY_NOTES_ = {
+  'Information and Ideas': 'evidence questions — locating the one line that actually proves the answer, instead of picking the choice that merely sounds reasonable',
+  'Craft and Structure': 'vocabulary-in-context and author\u2019s-purpose questions, where the trap is a word\u2019s everyday meaning rather than the one the passage needs',
+  'Expression of Ideas': 'transitions and rhetorical synthesis — pinning down the logical relationship between two sentences before looking at a single answer choice',
+  'Standard English Conventions': 'punctuation, agreement, and modifiers — the most teachable material on the whole test, because it\u2019s a finite set of rules rather than a skill that has to be grown',
+  'Algebra': 'linear equations, inequalities, and systems — these appear early and often, which makes them the cheapest points available on the test',
+  'Advanced Math': 'quadratics, polynomials, and nonlinear systems, where recognizing what kind of problem it is matters more than the algebra that follows',
+  'Problem-Solving and Data Analysis': 'ratios, percentages, and reading data displays — questions that punish a careless glance at a chart far more than they punish weak math',
+  'Geometry and Trigonometry': 'circles, triangles, and right-triangle trig, where most lost points come from a formula not being recalled quickly enough rather than not being understood'
+};
+
+// Above this accuracy in their WEAKEST domain, a student doesn't have a
+// content gap anywhere on the test — so telling their parent we're going
+// to drill that domain is both wrong and faintly alarming. What actually
+// separates these students from a top score is time: getting through the
+// routine questions cleanly enough to leave real minutes for the two or
+// three genuinely hard ones. Tune this if the line lands in the wrong
+// place for your roster.
+var GUARDIAN_PACING_THRESHOLD_ = 0.75;
+
+function guardianIsPacingCase_(weakest) {
+  return !!(weakest && weakest.total > 0 && (weakest.correct / weakest.total) >= GUARDIAN_PACING_THRESHOLD_);
+}
+
+// The "what we're doing about it" paragraph. Two different jobs depending
+// on which side of the threshold the student is on.
+// Both spellings collapse to one entry here, keyed normalized. The value
+// is the official College Board wording, which is what a parent sees no
+// matter which variant their student's questions happened to be tagged
+// with.
+var GUARDIAN_DOMAIN_LOOKUP_ = (function () {
+  var byKey = {};
+  Object.keys(GUARDIAN_STRATEGY_NOTES_).forEach(function (official) {
+    byKey[normalizeDomainKey_(official)] = { label: official, focus: GUARDIAN_STRATEGY_NOTES_[official] };
+  });
+  return byKey;
+})();
+
+// Falls back to whatever the data said for a domain we don't recognize,
+// so an unknown label still reads correctly in the email.
+function canonicalDomainLabel_(label) {
+  var hit = GUARDIAN_DOMAIN_LOOKUP_[normalizeDomainKey_(label)];
+  return hit ? hit.label : String(label == null ? '' : label);
+}
+
+function guardianStrategyNote_(label, isPacingCase) {
+  if (isPacingCase) {
+    return 'At this level the remaining points come from strategy rather than content. The work now is efficiency: answering the routine questions faster and more accurately, so there are real minutes left at the end of each module for the two or three genuinely hard ones — instead of meeting them with the clock already running out.';
+  }
+  var hit = GUARDIAN_DOMAIN_LOOKUP_[normalizeDomainKey_(label)];
+  if (!hit) return 'Upcoming sessions are built around that area specifically — targeted practice on those exact question types, not more practice in general.';
+  return 'Upcoming sessions are built around ' + hit.focus + '. The plan is targeted practice on those specific question types, not more volume in general.';
+}
+
+function guardianSummaryEmail_(studentName, guardianName, trend, weakest, sentAt) {
   var studentFirst = String(studentName).split(' ')[0] || 'your student';
   var greetName = guardianName ? String(guardianName).split(' ')[0] : '';
   var latest = trend[trend.length - 1];
   var first = trend[0];
   var trendLine = trend.map(function (e) {
     return (e.testTitle || (e.testType + ' attempt')) + ': ' + e.composite;
-  }).join('  →  ');
+  }).join('  \u2192  ');
 
   var movementText = '';
   if (trend.length > 1 && typeof first.composite === 'number' && typeof latest.composite === 'number') {
     var diff = latest.composite - first.composite;
-    if (diff > 0) movementText = studentFirst + '’s composite is up ' + diff + ' points since ' + formatDateShort_(first.date) + '.';
-    else if (diff < 0) movementText = studentFirst + '’s composite has moved ' + diff + ' points since ' + formatDateShort_(first.date) + ' — normal test-to-test variation, not a trend to worry about on its own.';
-    else movementText = studentFirst + '’s composite has held steady since ' + formatDateShort_(first.date) + '.';
+    var mag = Math.abs(diff);
+    // "1 points" reads as a bug to a parent, and a bare minus sign ("moved
+    // -90 points") reads worse than just saying it plainly.
+    var pts = mag + (mag === 1 ? ' point' : ' points');
+    var since = ' since ' + formatDateShort_(first.date);
+    if (diff > 0) movementText = studentFirst + '\u2019s composite is up ' + pts + since + '.';
+    else if (diff < 0) movementText = studentFirst + '\u2019s composite is down ' + pts + since + ' — normal test-to-test variation, not a trend to worry about on its own.';
+    else movementText = studentFirst + '\u2019s composite has held steady' + since + '.';
   }
 
+  // A student whose weakest domain is still strong shouldn't be told they
+  // have a "focus area" — that reads as a problem where there isn't one.
+  var isPacing = guardianIsPacingCase_(weakest);
+  // Canonicalized here as well as in the aggregation, so the parent never
+  // sees a raw "Craft & Structure" variant no matter which caller built
+  // this weakest object.
+  var domainLabel = weakest ? canonicalDomainLabel_(weakest.label) : '';
   var weakestText = weakest
-    ? studentFirst + '’s current focus area is ' + weakest.label + ' (' + weakest.correct + '/' + weakest.total + ' on the most recent attempt).'
+    ? (isPacing
+        ? domainLabel + ' was ' + studentFirst + '\u2019s lowest area on the most recent attempt (' + weakest.correct + '/' + weakest.total + ') — strong enough that it isn\u2019t a content gap.'
+        : studentFirst + '\u2019s current focus area is ' + domainLabel + ' (' + weakest.correct + '/' + weakest.total + ' on the most recent attempt).')
     : '';
+  // Only ever paired with a real weak domain — a strategy paragraph with
+  // nothing concrete to point at reads like filler.
+  var strategyText = weakest ? guardianStrategyNote_(weakest.label, isPacing) : '';
 
   var text =
-    'Hi' + (greetName ? ' ' + greetName : '') + ',\n\n' +
-    'A quick update on ' + studentFirst + '’s progress:\n\n' +
+    'Hi' + (greetName ? ' ' + greetName : ' there') + ',\n\n' +
+    'A quick update on ' + studentFirst + '\u2019s progress:\n\n' +
     'Most recent score: ' + latest.composite + ' (' + (latest.testTitle || latest.testType) + ', ' + formatDateShort_(latest.date) + ')\n' +
     (movementText ? movementText + '\n' : '') +
-    (weakestText ? weakestText + '\n' : '') +
-    '\nRecent attempts: ' + trendLine + '\n\n' +
-    'Happy to talk through the plan anytime — just reply to this email or text (201) 275-2791.\n\n' +
+    '\nRecent attempts: ' + trendLine + '\n' +
+    (weakestText ? '\n' + (isPacing ? 'WHERE THE NEXT POINTS ARE' : 'THIS WEEK\u2019S FOCUS') + '\n' + weakestText + '\n' : '') +
+    (strategyText ? strategyText + '\n' : '') +
+    '\nHappy to talk through the plan anytime — just reply to this email or text (201) 275-2791.\n\n' +
     'Best,\nLuca';
 
   var html =
     '<div style="font-family:Georgia,serif; color:#111; font-size:15px; line-height:1.6; max-width:560px;">' +
-    '<p>Hi' + (greetName ? ' ' + greetName : '') + ',</p>' +
-    '<p>A quick update on <strong>' + studentFirst + '</strong>’s progress:</p>' +
+    '<p>Hi' + (greetName ? ' ' + escapeHtml_(greetName) : ' there') + ',</p>' +
+    '<p>A quick update on <strong>' + escapeHtml_(studentFirst) + '</strong>\u2019s progress:</p>' +
     '<div style="background:#f7f4ef; border-left:3px solid #C9A84C; padding:0.9em 1.2em; margin:1em 0;">' +
     '<div style="font-size:1.4em; font-weight:bold; color:#B0271C;">' + latest.composite + '</div>' +
     '<div style="font-size:0.85em; color:#666;">' + escapeHtml_(latest.testTitle || latest.testType) + ' &middot; ' + formatDateShort_(latest.date) + '</div>' +
     '</div>' +
     (movementText ? '<p>' + escapeHtml_(movementText) + '</p>' : '') +
-    (weakestText ? '<p>' + escapeHtml_(weakestText) + '</p>' : '') +
     '<p style="font-size:0.85em; color:#666;">Recent attempts: ' + escapeHtml_(trendLine) + '</p>' +
-    '<p>Happy to talk through the plan anytime &mdash; just reply to this email or text <a href="tel:2012752791" style="color:#B0271C; font-weight:bold;">(201) 275-2791</a>.</p>' +
+    (weakestText
+      ? '<div style="border-top:1px solid #e5e0d8; margin:1.5em 0 0; padding-top:1.2em;">' +
+        '<div style="font-family:Helvetica,Arial,sans-serif; font-size:0.68em; font-weight:bold; letter-spacing:0.12em; text-transform:uppercase; color:#999; margin-bottom:0.6em;">' + (isPacing ? 'Where The Next Points Are' : 'This Week\u2019s Focus') + '</div>' +
+        '<p style="margin:0 0 0.8em;">' + escapeHtml_(weakestText) + '</p>' +
+        (strategyText ? '<p style="margin:0; color:#444;">' + escapeHtml_(strategyText) + '</p>' : '') +
+        '</div>'
+      : '') +
+    '<p style="margin-top:1.5em;">Happy to talk through the plan anytime &mdash; just reply to this email or text <a href="tel:2012752791" style="color:#B0271C; font-weight:bold;">(201) 275-2791</a>.</p>' +
     '<p>Best,<br>Luca</p>' +
     '</div>';
 
-  return { subject: studentFirst + '’s Progress Update — Moretti Test Prep & Tutoring', text: text, html: html };
+  // The date is what keeps each week a SEPARATE email in the parent's
+  // inbox. Gmail groups messages by subject + participants even when no
+  // In-Reply-To/References headers are present, so a fixed weekly subject
+  // would collapse the whole term into one thread on their side — week 12
+  // arriving under eleven quoted copies of itself is how an update stops
+  // being read. Varying the subject is the only thing that prevents it.
+  // Plain text in BOTH parts too — a subject is never HTML, so an entity
+  // here would show up literally as "&amp;".
+  var stamp = formatDateShort_(sentAt || new Date());
+  return { subject: studentFirst + '\u2019s Progress Update' + (stamp ? ' — ' + stamp : ''), text: text, html: html };
 }
 
 function formatDateShort_(d) {
@@ -2669,22 +3683,211 @@ function escapeHtml_(s) {
 }
 
 // Run this ONCE manually (select it in the function dropdown, click Run,
-// authorize when asked) to turn on the biweekly guardian summary send.
+// authorize when asked) to turn on the weekly guardian summary send.
 // Safe to run more than once; it clears any duplicate trigger from a
-// prior run first. The job itself runs daily and only actually emails a
-// given guardian once every GUARDIAN_SUMMARY_DAYS days (see
-// sendGuardianSummaries above) — daily is just the scan cadence, not the
-// send cadence.
+// prior run first — including the old DAILY trigger, if this project
+// still has one installed from the previous biweekly design.
 function setupGuardianSummaryTrigger() {
   ScriptApp.getProjectTriggers().forEach(function (t) {
     if (t.getHandlerFunction() === 'sendGuardianSummaries') ScriptApp.deleteTrigger(t);
   });
   ScriptApp.newTrigger('sendGuardianSummaries')
     .timeBased()
-    .everyDays(1)
+    .onWeekDay(ScriptApp.WeekDay.FRIDAY)
     .atHour(8)
     .create();
-  console.log('Trigger installed: sendGuardianSummaries will now run once a day around 8am (actual guardian emails go out at most once every ' + GUARDIAN_SUMMARY_DAYS + ' days per student).');
+  console.log('Trigger installed: sendGuardianSummaries now runs every Friday around 8am. Parents only hear from it for students who tested within the last ' + GUARDIAN_ACTIVITY_WINDOW_DAYS + ' days.');
+}
+
+// DRY RUN — select this in the function dropdown and click Run to see
+// exactly who would be emailed this Friday and who gets skipped (and
+// why), without sending anything at all. Read the result in the execution
+// log. Worth running before setupGuardianSummaryTrigger the first time.
+function previewGuardianSummaries() {
+  var sheet = getSheet_();
+  var headers = sheet.getDataRange().getValues()[0];
+  ensureGuardianColumns_(sheet, headers);
+  var data = sheet.getDataRange().getValues();
+  headers = data[0];
+  var col = {};
+  headers.forEach(function (h, i) { col[String(h).trim()] = i; });
+  var now = new Date();
+  var windowMs = GUARDIAN_ACTIVITY_WINDOW_DAYS * 24 * 60 * 60 * 1000;
+  var lines = [];
+
+  // Counted rather than listed — the sheet carries hundreds of blank
+  // trailing rows, and one line each blew past the Apps Script log limit
+  // and truncated the SEND lines, which are the only ones worth reading.
+  var blank = 0, noGuardian = 0, noScores = 0;
+
+  for (var i = 1; i < data.length; i++) {
+    var row = data[i];
+    var key = String(row[col.Key] || '').trim().toUpperCase();
+    var name = String(row[col.Name] || '').trim();
+    if (!key && !name) { blank++; continue; }   // empty trailing row
+    if (!name) name = '(unnamed)';
+
+    var guardianEmail = String(row[col.GuardianEmail] || '').trim();
+    if (!guardianEmail) { noGuardian++; continue; }
+    if (!key) { lines.push('SKIP  ' + name + ' — has a guardian email but no student Key'); continue; }
+
+    var trend = scoreTrendForStudent_(key);
+    if (!trend.length) { noScores++; continue; } // no PRACTICE-TEST scores
+
+    var latest = trend[trend.length - 1];
+    var latestDate = (latest.date instanceof Date) ? latest.date : new Date(latest.date);
+    if (isNaN(latestDate.getTime())) { lines.push('SKIP  ' + name + ' — unreadable date on latest score'); continue; }
+    var days = Math.floor((now - latestDate) / (24 * 60 * 60 * 1000));
+    if ((now - latestDate) > windowMs) {
+      lines.push('SKIP  ' + name + ' — last test was ' + days + ' days ago (window is ' + GUARDIAN_ACTIVITY_WINDOW_DAYS + ')');
+      continue;
+    }
+
+    var weakest = weakestSkillForStudent_(key);
+    lines.push('SEND  ' + name + ' \u2192 ' + guardianEmail + ' — ' + latest.composite +
+               ' from ' + days + ' day(s) ago, focus: ' + (weakest ? weakest.label : '(none identified yet)'));
+  }
+
+  // Summary first so it survives even if the list below gets truncated.
+  console.log(
+    'Guardian weekly summary preview — NOTHING SENT.\n' +
+    'Would send: ' + lines.filter(function (l) { return l.indexOf('SEND') === 0; }).length +
+    '   |   skipped: ' + noGuardian + ' no guardian email, ' + noScores + ' no practice-test scores yet, ' +
+    lines.filter(function (l) { return l.indexOf('SKIP') === 0; }).length + ' other' +
+    '   |   ' + blank + ' blank rows ignored\n\n' +
+    (lines.join('\n') || '(nothing actionable — no student is currently due an email)'));
+}
+
+
+
+
+// ═══ RUN THIS IF A STUDENT READS AS "no scores logged yet" BUT HAS
+// ACTUALLY TAKEN TESTS ═══
+// Read-only. Dumps every Attempts row for each student who has a guardian
+// email, so you can see whether their attempts landed as 'score' rows,
+// 'log' rows, or not at all — and whether a composite was recorded.
+function diagnoseStudentAttempts() {
+  var students = getSheet_();
+  var sData = students.getDataRange().getValues();
+  var sCol = {};
+  sData[0].forEach(function (h, i) { sCol[String(h).trim()] = i; });
+
+  var attempts = getAttemptsSheet_();
+  var aData = attempts.getDataRange().getValues();
+  var aCol = {};
+  aData[0].forEach(function (h, i) { aCol[String(h).trim()] = i; });
+
+  var out = [];
+  for (var i = 1; i < sData.length; i++) {
+    var name = String(sData[i][sCol.Name] || '').trim();
+    var key = String(sData[i][sCol.Key] || '').trim().toUpperCase();
+    var gEmail = String(sData[i][sCol.GuardianEmail] || '').trim();
+    if (!gEmail || !key) continue;
+
+    out.push('');
+    out.push(name + '  (key ' + key + ', guardian ' + gEmail + ')');
+    var found = 0;
+    for (var j = 1; j < aData.length; j++) {
+      if (String(aData[j][aCol.Key] || '').trim().toUpperCase() !== key) continue;
+      found++;
+      var comp = aData[j][aCol.Composite];
+      out.push('    ' + String(aData[j][aCol.Kind] || '?') +
+               '  ' + Utilities.formatDate(new Date(aData[j][aCol.Timestamp]), Session.getScriptTimeZone() || 'America/New_York', 'yyyy-MM-dd') +
+               '  "' + String(aData[j][aCol.TestTitle] || '') + '"' +
+               '  composite=' + (comp === '' || comp == null ? '(BLANK)' : comp));
+    }
+    if (!found) out.push('    (no rows at all in the Attempts sheet — this student has never submitted a test)');
+    else out.push('    -> trend the email would use: ' + scoreTrendForStudent_(key).length + ' entr(ies)');
+  }
+
+  console.log('ATTEMPTS BY STUDENT (guardian-enabled only):' + (out.join('\n') || ' none'));
+}
+
+// ═══ RUN THIS IF THE PREVIEW SAYS "no guardian email on record" FOR A
+// STUDENT WHO CLEARLY HAS ONE IN THE SHEET ═══
+// Read-only; sends nothing, writes nothing. It prints the real header row
+// with its exact cell contents (quoted, so stray spaces are visible), flags
+// any duplicated or near-duplicated header, and then dumps every
+// guardian-ish cell for each named student. The usual cause of a "missing"
+// guardian is TWO columns with the same name: the portal writes into one
+// (by header lookup) while hand-typed values sit in the other.
+function diagnoseGuardianColumns() {
+  var sheet = getSheet_();
+  var data = sheet.getDataRange().getValues();
+  if (!data.length) { console.log('Students sheet is empty.'); return; }
+  var headers = data[0];
+  var out = [];
+
+  out.push('HEADER ROW (' + headers.length + ' columns) — quoted so stray spaces show:');
+  var seen = {}, dupes = [];
+  headers.forEach(function (h, i) {
+    var raw = String(h);
+    var norm = raw.trim().toLowerCase();
+    if (norm && seen[norm] !== undefined) dupes.push('"' + raw + '" appears at column ' + (seen[norm] + 1) + ' AND ' + (i + 1));
+    else if (norm) seen[norm] = i;
+    if (norm.indexOf('guardian') !== -1 || norm.indexOf('parent') !== -1 || raw !== raw.trim()) {
+      out.push('   col ' + (i + 1) + ': "' + raw + '"' + (raw !== raw.trim() ? '   <-- HAS STRAY WHITESPACE' : ''));
+    }
+  });
+
+  if (dupes.length) {
+    out.push('');
+    out.push('*** DUPLICATE HEADERS — this is almost certainly the problem ***');
+    dupes.forEach(function (d) { out.push('   ' + d); });
+    out.push('   Fix: copy any values out of the duplicate into the original,');
+    out.push('   then delete the duplicate column and re-run the preview.');
+  }
+
+  // Which columns the CODE is actually reading.
+  var col = {};
+  headers.forEach(function (h, i) { col[String(h).trim()] = i; });
+  out.push('');
+  out.push('The code reads GuardianName from column ' +
+           (col.GuardianName === undefined ? '(NOT FOUND)' : col.GuardianName + 1) +
+           ' and GuardianEmail from column ' +
+           (col.GuardianEmail === undefined ? '(NOT FOUND)' : col.GuardianEmail + 1) + '.');
+
+  out.push('');
+  out.push('PER-STUDENT — every column whose header mentions guardian/parent:');
+  for (var i = 1; i < data.length; i++) {
+    var name = String(data[i][col.Name] || '').trim();
+    var key = String(data[i][col.Key] || '').trim();
+    if (!name && !key) continue;
+    var cells = [];
+    headers.forEach(function (h, c) {
+      var norm = String(h).trim().toLowerCase();
+      if (norm.indexOf('guardian') !== -1 || norm.indexOf('parent') !== -1) {
+        cells.push(String(h).trim() + '="' + String(data[i][c] || '') + '"');
+      }
+    });
+    out.push('   ' + (name || '(unnamed)') + ':  ' + (cells.join('   ') || '(no guardian columns)'));
+  }
+
+  console.log(out.join('\n'));
+}
+
+// End-to-end check of the threading setup WITHOUT touching a real family:
+// sends one message to Luca himself, then replies into it. Two messages
+// in one thread in his own inbox means everything works. If the advanced
+// Gmail service isn't enabled yet, the log says so plainly.
+function testFamilyThread() {
+  var me = senderAddress_();
+  var first = sendFamilyEmail_('', me, {
+    subject: 'Moretti Test Prep — threading test',
+    text: 'Message 1 of 2. If message 2 lands underneath this one in the same conversation, threading works.',
+    html: '<p>Message 1 of 2. If message 2 lands underneath this one in the same conversation, threading works.</p>'
+  });
+  if (!first.threadId) {
+    console.log('FAILED — no thread id came back. Add the Gmail API under Services (+) in this editor, then run this again.');
+    return;
+  }
+  var second = sendFamilyEmail_(first.threadId, me, {
+    subject: '(ignored — the thread subject wins)',
+    text: 'Message 2 of 2. This should be threaded under message 1.',
+    html: '<p>Message 2 of 2. This should be threaded under message 1.</p>'
+  });
+  console.log('Sent to ' + me + '. Thread: ' + first.threadId +
+              '\nSecond message threaded: ' + (second.threaded ? 'YES — setup is correct' : 'NO — check that the Gmail API service is added'));
 }
 
 /* =========================================================================
@@ -2719,6 +3922,119 @@ function getCalendarIcsUrl_() {
   var url = PropertiesService.getScriptProperties().getProperty('CALENDAR_ICS_URL');
   if (!url) throw new Error('CALENDAR_ICS_URL is not set in Script Properties.');
   return url;
+}
+
+/* ═══ SHARED CALENDAR READ ═══ one fetch of the published .ics, cached
+   for a few minutes and reused by everything that needs it. The admin
+   calendar (see handleGetAdminCalendar) re-reads the calendar on every
+   month the admin pages through, and assignmentExpiryCutoff_ reads it on
+   every single student page load — without this each of those was its own
+   full round trip to iCloud. Returns null (never throws) when the
+   calendar isn't configured or is unreachable, so every caller degrades
+   to "no session data" instead of failing outright.
+   ═══════════════════════════════════════════════════════════════════ */
+var CALENDAR_CACHE_KEY_ = 'moretti_ics_text';
+var CALENDAR_CACHE_TTL_S_ = 300;
+var CALENDAR_CACHE_MAX_CHARS_ = 90000; // Apps Script caps one cache entry at 100KB
+
+function fetchCalendarText_() {
+  var cache = null;
+  try { cache = CacheService.getScriptCache(); } catch (e) { /* cache unavailable — just fetch */ }
+  if (cache) {
+    var hit = cache.get(CALENDAR_CACHE_KEY_);
+    if (hit) return hit;
+  }
+  try {
+    var resp = UrlFetchApp.fetch(getCalendarIcsUrl_(), { muteHttpExceptions: true });
+    if (resp.getResponseCode() !== 200) return null;
+    var text = resp.getContentText();
+    // A calendar bigger than the cache entry limit simply isn't cached —
+    // still correct, just one fetch per call like before.
+    if (cache && text.length <= CALENDAR_CACHE_MAX_CHARS_) {
+      try { cache.put(CALENDAR_CACHE_KEY_, text, CALENDAR_CACHE_TTL_S_); } catch (e) { /* ignore */ }
+    }
+    return text;
+  } catch (err) {
+    return null;
+  }
+}
+
+// Every occurrence of one (possibly recurring) event that overlaps
+// [rangeStart, rangeEnd) — the range version of
+// nextOccurrenceOnOrAfter_/mostRecentOccurrenceOnOrBefore_, which answer
+// "the one before/after now." An event's DTEND is carried through as a
+// duration so a session drawn on a week view occupies its real block of
+// time; an event with no DTEND comes back with end: null and is drawn as
+// a point/all-day chip by the client.
+var OCCURRENCE_SCAN_CAP_ = 2000;
+function occurrencesInRange_(ev, rangeStart, rangeEnd) {
+  if (!ev.start || ev.cancelled) return [];
+  var durationMs = (ev.end && ev.end.getTime() > ev.start.getTime()) ? ev.end.getTime() - ev.start.getTime() : 0;
+  var out = [];
+
+  function consider(d) {
+    var startMs = d.getTime();
+    var endMs = startMs + durationMs;
+    if (startMs >= rangeEnd.getTime()) return;
+    // An event that started before the window but runs into it still
+    // belongs on screen; a zero-duration one has to start inside it.
+    if ((durationMs ? endMs : startMs) < rangeStart.getTime()) return;
+    if (isExcludedOccurrence_(ev, d)) return;
+    out.push({ start: new Date(startMs), end: durationMs ? new Date(endMs) : null });
+  }
+
+  if (!ev.rrule || !ev.rrule.freq) { consider(ev.start); return out; }
+
+  var freq = ev.rrule.freq, interval = ev.rrule.interval || 1;
+  var stepDays = freq === 'DAILY' ? interval : freq === 'WEEKLY' ? interval * 7 : null;
+  var cur = new Date(ev.start.getTime());
+  var n = 0;
+  while (n < OCCURRENCE_SCAN_CAP_) {
+    if (ev.rrule.until && cur.getTime() > ev.rrule.until.getTime()) break;
+    if (ev.rrule.count && n >= ev.rrule.count) break;
+    if (cur.getTime() >= rangeEnd.getTime()) break;
+    consider(cur);
+
+    if (stepDays) {
+      cur = new Date(cur.getTime() + stepDays * 24 * 60 * 60 * 1000);
+    } else if (freq === 'MONTHLY') {
+      cur = new Date(cur.getFullYear(), cur.getMonth() + interval, cur.getDate(), cur.getHours(), cur.getMinutes(), cur.getSeconds());
+    } else if (freq === 'YEARLY') {
+      cur = new Date(cur.getFullYear() + interval, cur.getMonth(), cur.getDate(), cur.getHours(), cur.getMinutes(), cur.getSeconds());
+    } else {
+      break; // unsupported frequency — same limit nextOccurrenceOnOrAfter_ has
+    }
+    n++;
+  }
+  return out;
+}
+
+// Every session on the calendar between two instants, flattened and
+// sorted. Returns null (not []) when the calendar can't be read at all,
+// so a caller can tell "no sessions this month" apart from "the calendar
+// is down" and say so in the UI instead of showing a convincing but
+// wrong empty week.
+var SESSIONS_RANGE_CAP_ = 600;
+function sessionsForRange_(rangeStart, rangeEnd) {
+  var text = fetchCalendarText_();
+  if (!text) return null;
+  var events;
+  try { events = parseICS_(text); } catch (e) { return null; }
+  var out = [];
+  events.forEach(function (ev) {
+    if (out.length >= SESSIONS_RANGE_CAP_) return;
+    occurrencesInRange_(ev, rangeStart, rangeEnd).forEach(function (occ) {
+      if (out.length >= SESSIONS_RANGE_CAP_) return;
+      out.push({
+        title: ev.summary,
+        startIso: occ.start.toISOString(),
+        endIso: occ.end ? occ.end.toISOString() : null,
+        allDay: !!ev.allDay
+      });
+    });
+  });
+  out.sort(function (a, b) { return a.startIso.localeCompare(b.startIso); });
+  return out;
 }
 
 // debugMode adds a `debug` object to the response with exactly what
@@ -2831,7 +4147,7 @@ function parseICS_(text) {
   var events = [];
   var cur = null;
   lines.forEach(function (line) {
-    if (line === 'BEGIN:VEVENT') { cur = { summary: '', start: null, allDay: false, rrule: null }; return; }
+    if (line === 'BEGIN:VEVENT') { cur = { summary: '', start: null, end: null, allDay: false, rrule: null, exdates: [], cancelled: false }; return; }
     if (line === 'END:VEVENT') { if (cur) events.push(cur); cur = null; return; }
     if (!cur) return;
     var idx = line.indexOf(':');
@@ -2839,15 +4155,58 @@ function parseICS_(text) {
     var key = line.slice(0, idx);
     var value = line.slice(idx + 1);
     if (key === 'SUMMARY') {
-      cur.summary = value;
+      cur.summary = unescapeICSText_(value);
     } else if (key.indexOf('DTSTART') === 0) {
       cur.allDay = key.indexOf('VALUE=DATE') !== -1 && key.indexOf('VALUE=DATE-TIME') === -1;
       cur.start = parseICSDate_(value, cur.allDay);
+    } else if (key.indexOf('DTEND') === 0) {
+      // Only read for its DURATION relative to DTSTART (see
+      // occurrencesInRange_) — the admin calendar draws real time blocks
+      // for a session, not just a dot on a day, so "4:00" vs "4:00-5:30"
+      // is the difference between a usable week view and a useless one.
+      cur.end = parseICSDate_(value, key.indexOf('VALUE=DATE') !== -1 && key.indexOf('VALUE=DATE-TIME') === -1);
+    } else if (key.indexOf('EXDATE') === 0) {
+      // A single cancelled week of a recurring session. Without this, a
+      // session Luca already called off still shows on the admin calendar
+      // (and still expires assignments via assignmentExpiryCutoff_) as if
+      // it had happened.
+      value.split(',').forEach(function (v) {
+        var d = parseICSDate_(v.trim(), v.indexOf('T') === -1);
+        if (d) cur.exdates.push(d.getTime());
+      });
+    } else if (key === 'STATUS') {
+      cur.cancelled = String(value).toUpperCase() === 'CANCELLED';
     } else if (key === 'RRULE') {
       cur.rrule = parseRRule_(value);
     }
   });
   return events;
+}
+
+// ICS escapes commas, semicolons, backslashes and newlines inside text
+// values (SUMMARY especially — "Luca, Nikolas \u2014 SAT" arrives as
+// "Luca\, Nikolas..."). Un-escaping here means the name-matching regexes
+// and everything the admin calendar displays see the real title.
+function unescapeICSText_(value) {
+  return String(value == null ? '' : value)
+    .replace(/\\[nN]/g, ' ')
+    .replace(/\\([,;\\])/g, '$1')
+    .trim();
+}
+
+// True if this occurrence was individually cancelled via EXDATE. Compared
+// loosely (exact instant OR same calendar day) because an EXDATE is often
+// published in UTC while the occurrence we generated is floating/local —
+// a strict === would silently never match and quietly do nothing.
+function isExcludedOccurrence_(ev, date) {
+  if (!ev.exdates || !ev.exdates.length) return false;
+  var t = date.getTime();
+  for (var i = 0; i < ev.exdates.length; i++) {
+    var ex = new Date(ev.exdates[i]);
+    if (ex.getTime() === t) return true;
+    if (ex.getFullYear() === date.getFullYear() && ex.getMonth() === date.getMonth() && ex.getDate() === date.getDate()) return true;
+  }
+  return false;
 }
 
 // Parses just the RRULE fields this widget actually needs to step a
@@ -2873,8 +4232,9 @@ function parseRRule_(value) {
 // if any) are entirely in the past / never occur on/after now.
 function nextOccurrenceOnOrAfter_(ev, now) {
   if (!ev.start) return null;
-  if (ev.start.getTime() >= now.getTime()) return ev.start;
-  if (!ev.rrule || !ev.rrule.freq) return null; // non-recurring and already past
+  if (ev.cancelled) return null;
+  if (ev.start.getTime() >= now.getTime() && !isExcludedOccurrence_(ev, ev.start)) return ev.start;
+  if (!ev.rrule || !ev.rrule.freq) return null; // non-recurring and already past (or cancelled outright)
 
   var freq = ev.rrule.freq, interval = ev.rrule.interval || 1;
   var stepDays = freq === 'DAILY' ? interval
@@ -2887,7 +4247,9 @@ function nextOccurrenceOnOrAfter_(ev, now) {
   while (n < maxIterations) {
     if (ev.rrule.until && cur.getTime() > ev.rrule.until.getTime()) return null;
     if (ev.rrule.count && n >= ev.rrule.count) return null;
-    if (cur.getTime() >= now.getTime()) return cur;
+    // An EXDATE'd week is skipped rather than returned — "next session"
+    // should be the next one that's actually happening.
+    if (cur.getTime() >= now.getTime() && !isExcludedOccurrence_(ev, cur)) return cur;
 
     if (stepDays) {
       cur = new Date(cur.getTime() + stepDays * 24 * 60 * 60 * 1000);
