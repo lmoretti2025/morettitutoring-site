@@ -21,9 +21,10 @@
      because they're not multiple choice; every question in the source
      PDF should end up in this file, mc or fr.
 
-   Empty until real questions are added — the Math subject card on the
-   Question Bank home screen stays a "Coming soon" placeholder until
-   this has content.
+   Figures/graphs are ripped directly from the source PDF page as a
+   cropped PNG in question-bank-assets/ (named <qid>.png, or
+   <qid>_A.png.../_D.png when the 4 answer choices are themselves
+   images), referenced via <img>, rather than hand-drawn.
    ===================================================================== */
 window.QUESTION_BANK_MATH = [
 {"qid":"6d99b141","domain":"Geometry and Trigonometry","skill":"Lines, Angles, and Triangles","difficulty":"hard","type":"fr","text":"<div style=\"text-align:center; margin:1.2em 0;\"><img src=\"question-bank-assets/6d99b141.png\" alt=\"Triangle DBA with cevians; point C on DB, point E on DA where lines BE and CA cross; angle x at E\" style=\"max-width:280px;width:100%;height:auto;\"/></div><div style=\"text-align:center;\">Note: Figure not drawn to scale.</div><br>In the figure, <i>AC</i> = <i>CD</i>. The measure of angle <i>EBC</i> is 45°, and the measure of angle <i>ACD</i> is 104°. What is the value of <i>x</i>?","answerValue":"83","explanation":"The correct answer is 83. It's given that in the figure, <i>AC</i> = <i>CD</i>. Thus, triangle <i>ACD</i> is an isosceles triangle and the measure of angle <i>CDA</i> is equal to the measure of angle <i>CAD</i>. The sum of the measures of the interior angles of a triangle is 180°. Thus, the sum of the measures of the interior angles of triangle <i>ACD</i> is 180°. It's given that the measure of angle <i>ACD</i> is 104°. It follows that the sum of the measures of angles <i>CDA</i> and <i>CAD</i> is (180 − 104)°, or 76°. Since the measure of angle <i>CDA</i> is equal to the measure of angle <i>CAD</i>, the measure of angle <i>CDA</i> is half of 76°, or 38°. The sum of the measures of the interior angles of triangle <i>BDE</i> is 180°. It's given that the measure of angle <i>EBC</i> is 45°. Since the measure of angle <i>BDE</i>, which is the same angle as angle <i>CDA</i>, is 38°, it follows that the measure of angle <i>DEB</i> is (180 − 45 − 38)°, or 97°. Since angle <i>DEB</i> and angle <i>AEB</i> form a straight line, the sum of the measures of these angles is 180°. It's given in the figure that the measure of angle <i>AEB</i> is <i>x</i>°. It follows that 97 + <i>x</i> = 180. Subtracting 97 from both sides of this equation yields <i>x</i> = 83.","source":"Non-Bluebook"},
