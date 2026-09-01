@@ -4012,7 +4012,20 @@ window.Portal = {
   </div>
 
   <div class="sec-hed" id="dx-hed" style="display:none;">What went wrong</div>
-  <div id="dx-card" style="display:none;"></div>
+  <!-- Renamed from a duplicate id="dx-card" — the real exam-engine card
+       (the one every runner's renderRunnerQuestion() actually renders
+       questions into) also uses id="dx-card", further down this file. Two
+       elements sharing an id means document.getElementById('dx-card')
+       ALWAYS returns this one (the first in document order, which is just
+       an empty placeholder here) — so every runner's "clear the previous
+       question's stale .pb-explain/.pb-note before rendering the next
+       one" cleanup was silently querying this empty div and removing
+       nothing, while the explanation itself got correctly inserted into
+       the OTHER (real) card via a compound querySelector that doesn't
+       have this id-uniqueness assumption. Net effect: explanations piled
+       up, one more each question, in Question Bank / My Incorrect
+       Questions / Challenge Questions alike. -->
+  <div id="dx-verdict-card" style="display:none;"></div>
 
   <div class="sec-hed" id="skilldx-hed" style="display:none;">1 &middot; What isn&rsquo;t known yet</div>
   <div class="skilldx-card" id="skilldx-card" style="display:none;">
@@ -4099,83 +4112,6 @@ window.Portal = {
         <button type="button" class="q-modal-ftr-btn" id="q-modal-prev-btn">Previous</button>
         <button type="button" class="q-modal-ftr-btn primary" id="q-modal-next-btn">Next</button>
       </div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══ SCREEN 3b-iv — PRACTICE TEST, question-taking. Reuses the
-     diagnostic's own dx-* CSS CLASSES (dx-card, dx-choice, dx-btn,
-     dx-timer, dx-check-panel, dx-qgrid, ...) for a visually identical
-     experience, but with entirely its own element IDs and its own JS
-     module below (ptModuleInit) — it shares zero state or functions with
-     the diagnostic's engine, so nothing here can affect a real diagnostic
-     attempt. The four dx-* rules that are ID-selectors instead of classes
-     (#dx-notice-bar/#dx-topbar/#dx-shell/#dx-main) have class-equivalents
-     defined above (.pt-notice-bar etc.) for that reason. ═══ -->
-<div class="screen" id="pt-screen">
-  <div class="pt-notice-bar"><span id="pt-notice-text">PRACTICE TEST</span></div>
-  <div class="pt-topbar">
-    <div class="dx-brand"><span id="pt-brand-label">SAT Practice Test</span><span id="pt-student-label"></span></div>
-    <div class="dx-progress-wrap">
-      <span class="dx-timer" id="pt-timer">60:00</span>
-      <button type="button" class="dx-progress-btn" id="pt-progress-btn">
-        <span class="dx-progress-label" id="pt-progress-label">Question 1 of 27</span>
-      </button>
-    </div>
-  </div>
-  <div class="dx-timer-toast" id="pt-timer-toast" style="display:none;">You have five minutes remaining.</div>
-  <div class="pt-shell">
-    <div class="pt-main" id="pt-main">
-      <div class="dx-card-wrap">
-        <div class="dx-card" id="pt-card">
-          <div class="dx-card-hed">
-            <span class="dx-qnum-tile" id="pt-qnum-tile">1</span>
-            <button class="dx-mark-btn" id="pt-mark" type="button">&#128278; Mark for Review</button>
-          </div>
-          <h1 class="dx-qtext" id="pt-qtext"></h1>
-          <div class="dx-choices" id="pt-choices" style="display:none;"></div>
-          <div class="dx-fr-row" id="pt-fr-row" style="display:none;">
-            <input type="text" inputmode="decimal" class="dx-fr-input" id="pt-fr-input" placeholder="Type your answer">
-          </div>
-          <div class="dx-nav-row">
-            <button class="dx-btn dx-btn-back" id="pt-back">Back</button>
-            <button class="dx-btn dx-btn-next" id="pt-next" disabled>Next</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="dx-check-panel" id="pt-check-panel">
-        <h1 class="dx-check-hed">Check Your Work</h1>
-        <p class="dx-check-sub">Review any question below before you submit — click a number to jump back to it. Once you submit, you can't return to this module.</p>
-        <div class="dx-check-card">
-          <div class="dx-check-card-hed">
-            <div class="dx-check-card-title" id="pt-check-title">Questions</div>
-            <div class="dx-check-legend">
-              <span>&#9634; Unanswered</span>
-              <span>&#128681; For Review</span>
-            </div>
-          </div>
-          <div class="dx-qgrid" id="pt-check-grid"></div>
-        </div>
-        <button class="dx-btn dx-btn-next dx-check-submit-btn" id="pt-check-submit" type="button">Submit Module</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══ SCREEN 3b-v — PRACTICE TEST break, between Reading & Writing and
-     Math. Untimed on purpose (unlike the diagnostic's dx-break-screen) —
-     a practice test is student-initiated study time, not a proctored
-     sitting, so a forced countdown just adds friction without adding
-     anything toward the actual goal (a comparable score to track
-     progress). ═══ -->
-<div class="screen" id="pt-break-screen">
-  <div class="done-wrap">
-    <div class="panel">
-      <div class="done-icon">&#10003;</div>
-      <h1 class="panel-hed" id="pt-break-title">Reading &amp; Writing complete.</h1>
-      <p class="panel-sub" id="pt-break-sub">Take a short break if you'd like — this half doesn't run on a clock. Click below whenever you're ready to continue with Math.</p>
-      <button class="key-btn" id="pt-break-continue" type="button">Continue to Math</button>
     </div>
   </div>
 </div>
@@ -9967,7 +9903,15 @@ window.Portal = {
      Resume Testing is always clickable. Stored as an absolute end
      timestamp, same pattern as the section timer, so a refresh mid-break
      doesn't grant extra time. ═══ */
-  var BREAK_SECONDS = 10 * 60; // matches the real SAT's 10-minute break between SECTIONS, standard timing or not, unaffected by accommodations
+  // Base 10-minute between-SECTIONS break, scaled by accommodations.breakMult
+  // wherever it's actually used (see startBreak() below) — this used to be
+  // applied unscaled in the real countdown while renderOverviewTiming()
+  // (a few hundred lines up) already promised the extended time and
+  // labeled it "(extended)", so a student with approved extended breaks
+  // saw a 20-minute promise but only ever got 10 minutes for real. Fixed
+  // so the constant here is the base and every consumer scales it the
+  // same way the overview screen always has.
+  var BREAK_SECONDS = 10 * 60;
   // Between MODULES within the same section — real-SAT-accommodations
   // break that only exists for extended-time students (time-and-a-half or
   // double time). Standard-time students go straight from Module 1 into
@@ -9993,7 +9937,7 @@ window.Portal = {
   }
   function startBreak() {
     breakKind = 'section';
-    breakEndsAt = Date.now() + BREAK_SECONDS * 1000;
+    breakEndsAt = Date.now() + BREAK_SECONDS * accommodations.breakMult * 1000;
     tickBreak();
     breakInterval = setInterval(tickBreak, 1000);
     show('dx-break-screen');
@@ -11426,7 +11370,7 @@ window.Portal = {
       moduleStage = state.moduleStage || 'module1';
       module2Variant = state.module2Variant || null;
       module1Buffer = state.module1Buffer || null;
-      resumeBreak(typeof state.breakEndsAt === 'number' ? state.breakEndsAt : Date.now() + BREAK_SECONDS * 1000, state.breakKind);
+      resumeBreak(typeof state.breakEndsAt === 'number' ? state.breakEndsAt : Date.now() + BREAK_SECONDS * accommodations.breakMult * 1000, state.breakKind);
       show('dx-break-screen');
     } else if (state.screen === 'screen-resources') {
       renderResources();
@@ -18785,7 +18729,7 @@ window.renderNativeReport = function (data) {
     var fixed = ['content', 'method', 'clock'].map(function (k) {
       return items.filter(function (i) { return i.key === k; })[0];
     });
-    document.getElementById('dx-card').innerHTML =
+    document.getElementById('dx-verdict-card').innerHTML =
       '<p class="dx-verdict">' + verdict + '</p>' +
       '<div class="dx-split">' + fixed.map(function (i) {
         if (!i.n) return '';
@@ -18800,8 +18744,8 @@ window.renderNativeReport = function (data) {
           ' <em>&mdash; ' + esc(i.sub) + '</em></span>';
       }).join('') + '</div>';
     document.getElementById('dx-hed').style.display = '';
-    document.getElementById('dx-card').style.display = '';
-    document.getElementById('dx-card').className = 'dx-card';
+    document.getElementById('dx-verdict-card').style.display = '';
+    document.getElementById('dx-verdict-card').className = 'dx-card';
   })();
 
   /* ═══ TIME BUDGET CARD ═══ see report.html's identical function (this
