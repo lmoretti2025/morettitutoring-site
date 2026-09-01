@@ -249,7 +249,23 @@
   #sched-modal textarea:focus { outline: none; border-color: var(--red); }
   #sched-modal label.fld { display: block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--faint); margin-bottom: 0.9rem; }
   #sched-modal label.fld input { display: block; width: 100%; font-family: var(--hel); font-size: 0.88rem; font-weight: 400; letter-spacing: 0; text-transform: none; color: var(--text); padding: 0.55rem 0.7rem; border: 1.5px solid var(--border); border-radius: 10px; margin-top: 0.3rem; }
-  #sched-modal label.fld input:focus { outline: none; border-color: var(--red); }
+  #sched-modal label.fld input:focus, #sched-modal label.fld select:focus { outline: none; border-color: var(--red); }
+  #sched-modal label.fld select { display: block; width: 100%; font-family: var(--hel); font-size: 0.88rem; font-weight: 400; letter-spacing: 0; text-transform: none; color: var(--text); padding: 0.55rem 0.7rem; border: 1.5px solid var(--border); border-radius: 10px; margin-top: 0.3rem; background: var(--white); }
+  #sched-modal label.fld textarea { min-height: 54px; margin-top: 0.3rem; margin-bottom: 0; font-weight: 400; letter-spacing: 0; text-transform: none; }
+  .fld-opt { font-weight: 400; letter-spacing: 0; text-transform: none; color: var(--faint); }
+  .fld-row { display: flex; gap: 0.7rem; }
+  .fld-row > .fld { flex: 1 1 0; min-width: 0; }
+  .scope-toggle { display: flex; gap: 0.35rem; margin-top: 0.35rem; }
+  .scope-btn { flex: 1 1 0; font-family: var(--hel); font-size: 0.74rem; font-weight: 700; letter-spacing: 0; text-transform: none; padding: 0.4rem 0.5rem; border: 1px solid var(--border); background: var(--white); color: var(--mid); border-radius: 999px; cursor: pointer; }
+  .scope-btn.is-on { background: var(--red); border-color: var(--red); color: #fff; }
+  /* Editing Code.gs changes nothing until Apps Script is redeployed, and
+     the old deployment answers every request while silently ignoring
+     fields it doesn't know — which reads as "it saved but didn't". This
+     says so out loud instead. */
+  .deploy-banner { font-size: 0.82rem; line-height: 1.5; color: var(--red); background: rgba(176,39,28,0.07); border: 1px solid rgba(176,39,28,0.25); border-radius: 12px; padding: 0.8rem 1rem; margin-bottom: 1.2rem; }
+  .deploy-banner b { font-weight: 700; }
+  .deploy-banner code { font-family: ui-monospace, Menlo, monospace; font-size: 0.78rem; background: rgba(17,17,17,0.06); padding: 0.05rem 0.3rem; border-radius: 4px; }
+  .fld-warn { font-size: 0.74rem; line-height: 1.45; color: var(--red); background: rgba(176,39,28,0.07); border: 1px solid rgba(176,39,28,0.2); border-radius: 8px; padding: 0.5rem 0.65rem; margin: -0.4rem 0 0.9rem; }
   .preset-row { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.9rem; }
   #sched-modal label.chk { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: var(--text); margin-bottom: 1rem; cursor: pointer; }
   #sched-modal label.chk input { accent-color: var(--green); width: 16px; height: 16px; }
@@ -306,6 +322,7 @@
   </div>
 
   <div id="roster">
+    <div class="deploy-banner" id="deploy-banner" style="display:none;"></div>
     <div class="summary-row" id="summary-row"></div>
     <div class="filter-row">
       <label><input type="checkbox" id="filter-flagged"> Show only students needing attention (assignments behind, or 10+ days quiet)</label>
@@ -419,6 +436,35 @@
     <p class="sched-modal-sub" id="sched-modal-sub"></p>
     <textarea id="sched-modal-task" placeholder="e.g. Question Bank &mdash; 10 Boundaries questions"></textarea>
     <div class="preset-row" id="sched-presets"></div>
+    <label class="fld">Description <span class="fld-opt">optional &mdash; the student reads this when they open it</span>
+      <textarea id="sched-modal-notes" placeholder="e.g. One set in the Vocabulary trainer, out loud."></textarea>
+    </label>
+    <div class="fld-warn" id="sched-notes-warn" style="display:none;">
+      Descriptions and repeat grouping aren't saved yet &mdash; the Apps Script backend needs redeploying
+      (Deploy &rarr; Manage deployments &rarr; edit &rarr; New version). Everything else here works.
+    </div>
+    <div class="fld-row" id="sched-repeat-row">
+      <label class="fld">Repeat
+        <select id="sched-modal-repeat">
+          <option value="none">Doesn't repeat</option>
+          <option value="daily">Every day</option>
+          <option value="weekdays">Every weekday</option>
+          <option value="weekly">Every week</option>
+          <option value="biweekly">Every 2 weeks</option>
+        </select>
+      </label>
+      <label class="fld" id="sched-until-row" style="display:none;">Until
+        <input type="date" id="sched-modal-until">
+      </label>
+    </div>
+    <div class="fld-row" id="sched-scope-row" style="display:none;">
+      <div class="fld" style="margin-bottom:0.9rem;">This is a repeating task &mdash; apply changes to
+        <div class="scope-toggle">
+          <button type="button" class="scope-btn is-on" data-scope="one">Just this day</button>
+          <button type="button" class="scope-btn" data-scope="series">The whole series</button>
+        </div>
+      </div>
+    </div>
     <label class="fld" id="sched-modal-date-row" style="display:none;">Due date
       <input type="date" id="sched-modal-date">
     </label>
@@ -574,6 +620,71 @@
   var sortKey = 'name';
   var sortDir = 1;
   var rosterStale = false; // set by a homework edit made from a calendar view
+  // null = not known yet. Set from what the backend actually returns: a
+  // deployment that predates the Notes/SeriesId columns accepts a write
+  // carrying them and silently drops it, answering ok:true either way.
+  // Without this check the page cheerfully reports "saved" while the
+  // description goes nowhere — which is exactly how it behaved before.
+  var backendStoresNotes = null;
+
+  // What this build of admin.html needs the deployment to understand. Kept
+  // beside the version constant in Code.gs — bump both together.
+  var REQUIRED_BACKEND_VERSION = 5;
+  var CAPABILITY_LABELS = {
+    calendar: 'the calendar and student pages',
+    dueDates: 'due dates',
+    notes: 'assignment descriptions',
+    series: 'repeating assignments'
+  };
+
+  function joinList(items) {
+    if (items.length <= 1) return items[0] || '';
+    return items.slice(0, -1).join(', ') + ' and ' + items[items.length - 1];
+  }
+
+  function checkBackendVersion() {
+    var banner = $('deploy-banner');
+    postToBackend({ action: 'version', adminKey: adminKey() }).then(function (data) {
+      // An old deployment doesn't know the action at all — which is itself
+      // the answer.
+      var version = (data && data.ok && data.version) || 0;
+      if (version >= REQUIRED_BACKEND_VERSION) {
+        backendStoresNotes = true;
+        banner.style.display = 'none';
+        return;
+      }
+      // A deployment old enough not to know this action can't tell us what
+      // it supports, so don't pretend to enumerate: claiming "the calendar
+      // won't stick" when the calendar plainly works would make this
+      // banner the thing nobody believes. Name only what's actually known.
+      var have = (data && data.capabilities) || null;
+      var whatBreaks;
+      if (have) {
+        var missing = Object.keys(CAPABILITY_LABELS).filter(function (c) { return have.indexOf(c) === -1; });
+        backendStoresNotes = have.indexOf('notes') !== -1;
+        whatBreaks = missing.length
+          ? joinList(missing.map(function (c) { return CAPABILITY_LABELS[c]; }))
+          : 'some of the newest behaviour (descriptions save, but this page can\'t read them back)';
+      } else {
+        whatBreaks = 'anything added since it was last deployed — currently ' +
+          joinList([CAPABILITY_LABELS.notes, CAPABILITY_LABELS.series]);
+      }
+      banner.innerHTML = '<b>The Apps Script backend is out of date' +
+        (version ? ' (running v' + version + ', this page expects v' + REQUIRED_BACKEND_VERSION + ')' : '') + '.</b><br>' +
+        'Until it\'s redeployed, ' + whatBreaks + ' will appear to save but won\'t stick. ' +
+        'Fix: open the Apps Script project, paste in the current <code>portal/Code.gs</code>, then <b>Deploy → Manage deployments → edit (pencil) → Version: New version → Deploy</b>.';
+      banner.style.display = 'block';
+    }).catch(function () { /* offline — the roster load will report that itself */ });
+  }
+  // Two roster loads can be in flight at once — the auto-continue on page
+  // load (from a possibly stale session key) and the admin typing a key
+  // before that one lands. Apps Script latency swings between one and ten
+  // seconds, so they resolve in either order, and the older one landing
+  // last used to overwrite the newer result: a CORRECT key would show the
+  // roster, then get thrown back to the gate reading "Wrong admin key"
+  // with the session cleared. Every response now checks it's still the
+  // most recent request before touching anything.
+  var rosterLoadSeq = 0;
 
   var gateKeyEl = $('gate-key');
   var gateSubmitEl = $('gate-submit');
@@ -689,8 +800,10 @@
   // away the session key, which would be a brutal thing to do to someone
   // mid-edit because one refresh request happened to time out.
   function loadRoster(key, silent) {
+    var seq = ++rosterLoadSeq;
     if (!silent) { gateSubmitEl.disabled = true; gateErrorEl.textContent = ''; setStatus(''); }
     return postToBackend({ action: 'getRoster', adminKey: key }).then(function (data) {
+      if (seq !== rosterLoadSeq) return false; // superseded by a newer load
       gateSubmitEl.disabled = false;
       if (!data || !data.ok) {
         if (silent) return false;
@@ -706,11 +819,13 @@
       }
       try { sessionStorage.setItem(SESSION_KEY, key); } catch (e) {}
       allStudents = data.students || [];
+      checkBackendVersion();
       renderSummary();
       renderTable();
       if (currentView === 'gate') showView('roster');
       return true;
     }).catch(function () {
+      if (seq !== rosterLoadSeq) return false; // superseded by a newer load
       gateSubmitEl.disabled = false;
       if (silent) return false;
       gateErrorEl.textContent = 'Network error — check your connection and try again.';
@@ -839,7 +954,10 @@
       bits.push('<span>Baseline <b>' + ((s.baselineRw || 0) + (s.baselineMath || 0)) + '</b> (' +
         (s.baselineRw || '—') + ' R&amp;W / ' + (s.baselineMath || '—') + ' Math)</span>');
     }
-    if (s.accomTimeMult && String(s.accomTimeMult) !== '1') bits.push('<span>Accommodations <b>' + escHtml(String(s.accomTimeMult)) + '&times; time</b></span>');
+    // Only ever a number here — a sheet cell formatted as a time used to
+    // render as "1899-12-31T17:00:00.000Z× time" on this line.
+    var timeMult = Number(s.accomTimeMult);
+    if (isFinite(timeMult) && timeMult > 1) bits.push('<span>Accommodations <b>' + timeMult + '&times; time</b></span>');
     if (s.grantedEmail) bits.push('<span>' + escHtml(s.grantedEmail) + '</span>');
     if (s.guardianEmail) bits.push('<span>Parent ' + escHtml(s.guardianName || '') + ' &lt;' + escHtml(s.guardianEmail) + '&gt;</span>');
     if (!bits.length) bits.push('<span class="empty" style="padding:0;">No onboarding details on file yet.</span>');
@@ -1095,6 +1213,12 @@
   // student matters more than the kind; the single-student grid uses the
   // flat blue/red pair instead, where the kind is the only distinction
   // that's left to make.
+  function noteBackendCapability(data) {
+    var rows = (data && data.assignments) || [];
+    if (!rows.length) return; // nothing to infer from; leave it unknown
+    backendStoresNotes = Object.prototype.hasOwnProperty.call(rows[0], 'notes');
+  }
+
   function buildEvents(data, isAll) {
     var out = [];
     (data.sessions || []).forEach(function (s, i) {
@@ -1122,7 +1246,9 @@
       var color = isAll ? studentColor(a.key) : null;
       out.push({
         id: 'a' + a.row,
-        title: isAll ? (firstName(a.studentName) + ' — ' + a.task) : a.task,
+        // ↻ marks one occurrence of a repeat, so it's obvious before
+        // opening it that editing may affect more than this day.
+        title: (a.seriesId ? '↻ ' : '') + (isAll ? (firstName(a.studentName) + ' — ' + a.task) : a.task),
         start: dueDayOf(a),
         allDay: true,
         classNames: isAll
@@ -1132,7 +1258,8 @@
         borderColor: color || undefined,
         textColor: color || undefined,
         extendedProps: {
-          kind: 'assignment', row: a.row, done: a.done, task: a.task,
+          kind: 'assignment', row: a.row, done: a.done, task: a.task, notes: a.notes || '',
+          seriesId: a.seriesId || '',
           studentKey: a.key, studentName: a.studentName, dueDate: a.dueDate, dueDay: a.dueDay
         }
       });
@@ -1232,6 +1359,7 @@
         if (!data || !data.ok) { failure(new Error(data && data.error ? data.error : 'load_failed')); return; }
         if (!currentStudent || currentStudent.key !== key) { success([]); return; } // navigated away mid-flight
         setCalNote($('hw-cal-note'), data.calendarError ? ICS_NOTE : '');
+        noteBackendCapability(data);
         hwUndated = (data.assignments || []).filter(function (a) { return !a.dueDate; });
         renderUndated();
         success(buildEvents(data, false));
@@ -1260,7 +1388,7 @@
     // render and click would otherwise shift what this button points at.
     var row = Number(btn.getAttribute('data-row'));
     var a = hwUndated.filter(function (x) { return x.row === row; })[0];
-    if (a) openEditModal({ row: a.row, task: a.task, done: a.done, dueDate: a.dueDate, dueDay: a.dueDay, studentKey: a.key, studentName: a.studentName });
+    if (a) openEditModal({ row: a.row, task: a.task, notes: a.notes, seriesId: a.seriesId, done: a.done, dueDate: a.dueDate, dueDay: a.dueDay, studentKey: a.key, studentName: a.studentName });
   });
 
   function loadNextSession(key) {
@@ -1338,6 +1466,7 @@
       .then(function (data) {
         if (!data || !data.ok) { failure(new Error(data && data.error ? data.error : 'load_failed')); return; }
         setCalNote($('allcal-note'), data.calendarError ? ICS_NOTE : '');
+        noteBackendCapability(data);
         renderAllLegend(data);
         success(buildEvents(data, true));
       })
@@ -1368,6 +1497,12 @@
   var modalTitle = $('sched-modal-title');
   var modalSub = $('sched-modal-sub');
   var modalTaskEl = $('sched-modal-task');
+  var modalNotesEl = $('sched-modal-notes');
+  var modalRepeatEl = $('sched-modal-repeat');
+  var modalUntilEl = $('sched-modal-until');
+  var modalRepeatRow = $('sched-repeat-row');
+  var modalUntilRow = $('sched-until-row');
+  var modalScopeRow = $('sched-scope-row');
   var modalDateRow = $('sched-modal-date-row');
   var modalDateEl = $('sched-modal-date');
   var modalDoneRow = $('sched-modal-done-row');
@@ -1382,6 +1517,7 @@
   var modalAssignment = null;  // { row, task, done, dueDate, studentKey, studentName }, for edit
   var modalStudentKey = null;
   var modalStudentName = '';
+  var modalScope = 'one'; // edit mode: 'one' occurrence or the whole 'series'
 
   $('sched-presets').innerHTML = TASK_PRESETS.map(function (t) {
     return '<button type="button" class="mini preset-btn" data-task="' + escHtml(t) + '">' + escHtml(t) + '</button>';
@@ -1391,6 +1527,74 @@
     if (!btn) return;
     modalTaskEl.value = btn.getAttribute('data-task');
     modalTaskEl.focus();
+  });
+
+  /* ═══ RECURRENCE ═══ a repeat is expanded here into the list of days it
+     covers, and the backend writes one row per day (see
+     handleCreateAdminAssignment's comment for why rows rather than a
+     stored rule: each day has to be tickable on its own, which is the
+     whole point of "10 minutes of vocab, every day"). */
+  var MAX_OCCURRENCES = 200;
+  function expandRepeat(baseDates, mode, untilStr) {
+    if (mode === 'none' || !untilStr) return baseDates.slice();
+    var parts = /^(\d{4})-(\d{2})-(\d{2})$/.exec(untilStr);
+    if (!parts) return baseDates.slice();
+    var until = new Date(Number(parts[1]), Number(parts[2]) - 1, Number(parts[3]));
+    var step = mode === 'weekly' ? 7 : mode === 'biweekly' ? 14 : 1;
+    var seen = {};
+    baseDates.forEach(function (d) {
+      var p = /^(\d{4})-(\d{2})-(\d{2})$/.exec(d);
+      if (!p) return;
+      var cur = new Date(Number(p[1]), Number(p[2]) - 1, Number(p[3]));
+      var guard = 0;
+      while (cur.getTime() <= until.getTime() && guard++ < 1000) {
+        // "Every weekday" walks day by day and simply skips the weekend,
+        // so it lands on Mon–Fri regardless of which day it started on.
+        if (!(mode === 'weekdays' && (cur.getDay() === 0 || cur.getDay() === 6))) seen[toDateStr(cur)] = 1;
+        cur.setDate(cur.getDate() + step);
+      }
+    });
+    return Object.keys(seen).sort();
+  }
+
+  function repeatSummary(count, mode) {
+    if (mode === 'none' || count <= 1) return '';
+    var word = mode === 'daily' ? 'every day' : mode === 'weekdays' ? 'every weekday'
+      : mode === 'weekly' ? 'every week' : 'every 2 weeks';
+    return count + ' days &middot; ' + word;
+  }
+
+  modalRepeatEl.addEventListener('change', function () {
+    var repeating = modalRepeatEl.value !== 'none';
+    modalUntilRow.style.display = repeating ? '' : 'none';
+    // Default the end date to four weeks out rather than making someone
+    // pick one before the repeat does anything at all.
+    if (repeating && !modalUntilEl.value && modalDates.length) {
+      var p = /^(\d{4})-(\d{2})-(\d{2})$/.exec(modalDates[0]);
+      if (p) {
+        var d = new Date(Number(p[1]), Number(p[2]) - 1, Number(p[3]));
+        d.setDate(d.getDate() + 28);
+        modalUntilEl.value = toDateStr(d);
+      }
+    }
+    updateRepeatHint();
+  });
+  modalUntilEl.addEventListener('change', updateRepeatHint);
+
+  function updateRepeatHint() {
+    if (modalMode !== 'create') return;
+    var dates = expandRepeat(modalDates, modalRepeatEl.value, modalUntilEl.value);
+    modalErrorEl.innerHTML = dates.length > MAX_OCCURRENCES
+      ? 'That\'s ' + dates.length + ' days — pick an earlier end date (' + MAX_OCCURRENCES + ' max).'
+      : repeatSummary(dates.length, modalRepeatEl.value);
+    modalErrorEl.style.color = dates.length > MAX_OCCURRENCES ? '' : 'var(--faint)';
+  }
+
+  document.querySelectorAll('.scope-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      modalScope = btn.getAttribute('data-scope');
+      document.querySelectorAll('.scope-btn').forEach(function (b) { b.classList.toggle('is-on', b === btn); });
+    });
   });
 
   function openCreateModal(dates, studentKey, studentName, prefill, note) {
@@ -1406,10 +1610,19 @@
       : formatDateStr(dates[0]);
     modalSub.textContent = modalStudentName + ' · ' + when + (note ? ' · ' + note : '');
     modalTaskEl.value = prefill || '';
+    modalNotesEl.value = '';
+    modalRepeatEl.value = 'none';
+    modalUntilEl.value = '';
+    modalRepeatRow.style.display = '';
+    modalUntilRow.style.display = 'none';
+    modalScopeRow.style.display = 'none';
+    modalScope = 'one';
     modalDateRow.style.display = 'none';
     modalDoneRow.style.display = 'none';
     deleteBtn.style.display = 'none';
     modalErrorEl.textContent = '';
+    modalErrorEl.style.color = '';
+    $('sched-notes-warn').style.display = (backendStoresNotes === false) ? 'block' : 'none';
     disarmDelete();
     modalBackdrop.classList.add('open');
     modalTaskEl.focus();
@@ -1425,12 +1638,21 @@
     var day = dueDayOf(assignment);
     modalSub.textContent = modalStudentName + (day ? ' · ' + formatDateStr(day) : ' · no due date yet');
     modalTaskEl.value = assignment.task;
+    modalNotesEl.value = assignment.notes || '';
+    // Repeat is a create-time choice; an existing row is edited either on
+    // its own or across the series it already belongs to.
+    modalRepeatRow.style.display = 'none';
+    modalScope = 'one';
+    modalScopeRow.style.display = assignment.seriesId ? '' : 'none';
+    document.querySelectorAll('.scope-btn').forEach(function (b) { b.classList.toggle('is-on', b.getAttribute('data-scope') === 'one'); });
     modalDateRow.style.display = 'block';
     modalDateEl.value = day;
     modalDoneRow.style.display = 'flex';
     modalDoneEl.checked = !!assignment.done;
     deleteBtn.style.display = '';
     modalErrorEl.textContent = '';
+    modalErrorEl.style.color = '';
+    $('sched-notes-warn').style.display = (backendStoresNotes === false) ? 'block' : 'none';
     disarmDelete();
     modalBackdrop.classList.add('open');
     modalTaskEl.focus();
@@ -1463,12 +1685,24 @@
     var task = modalTaskEl.value.trim();
     if (!task) { modalErrorEl.textContent = 'Enter a task.'; return; }
     if (!modalStudentKey) { modalErrorEl.textContent = 'No student selected.'; return; }
+    var notes = modalNotesEl.value.trim();
+    var dates = modalDates;
+    if (modalMode === 'create') {
+      dates = expandRepeat(modalDates, modalRepeatEl.value, modalUntilEl.value);
+      if (!dates.length) { modalErrorEl.textContent = 'Pick an end date for the repeat.'; modalErrorEl.style.color = ''; return; }
+      if (dates.length > MAX_OCCURRENCES) {
+        modalErrorEl.textContent = 'That\'s ' + dates.length + ' days — pick an earlier end date (' + MAX_OCCURRENCES + ' max).';
+        modalErrorEl.style.color = '';
+        return;
+      }
+    }
     saveBtn.disabled = true;
     var request = modalMode === 'create'
-      ? postToBackend({ action: 'createAdminAssignment', adminKey: adminKey(), key: modalStudentKey, task: task, dueDates: modalDates })
+      ? postToBackend({ action: 'createAdminAssignment', adminKey: adminKey(), key: modalStudentKey, task: task, dueDates: dates, notes: notes })
       : postToBackend({
           action: 'updateAdminAssignment', adminKey: adminKey(), key: modalStudentKey, row: modalAssignment.row,
-          patch: { task: task, done: modalDoneEl.checked, dueDate: modalDateEl.value || null }
+          patch: { task: task, notes: notes, done: modalDoneEl.checked, dueDate: modalDateEl.value || null },
+          scope: modalScope
         });
     request.then(function (data) {
       saveBtn.disabled = false;
@@ -1482,13 +1716,13 @@
     if (!modalAssignment) return;
     if (!deleteArmed) {
       deleteArmed = true;
-      deleteBtn.textContent = 'Really delete?';
+      deleteBtn.textContent = (modalScope === 'series' && modalAssignment.seriesId) ? 'Delete all?' : 'Really delete?';
       deleteBtn.classList.add('armed');
       modalErrorEl.textContent = '';
       return;
     }
     deleteBtn.disabled = true;
-    postToBackend({ action: 'deleteAdminAssignment', adminKey: adminKey(), key: modalStudentKey, row: modalAssignment.row })
+    postToBackend({ action: 'deleteAdminAssignment', adminKey: adminKey(), key: modalStudentKey, row: modalAssignment.row, scope: modalScope })
       .then(function (data) {
         deleteBtn.disabled = false;
         if (!data || !data.ok) { modalErrorEl.textContent = 'Could not delete. Try again.'; return; }

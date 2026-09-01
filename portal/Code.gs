@@ -33,9 +33,10 @@
         don't show up for them; "Your Files" always shows either way. Use
         an actual checkbox column (Insert > Checkbox) or just type
         TRUE/yes in the cell — either is read as "on". (The program is
-        SAT-only now — the old separate TestPrep/ACT columns and ACT
-        diagnostic support were retired; SAT alone does the job TestPrep
-        used to.)
+        SAT-only — the old separate TestPrep/ACT columns and the whole
+        ACT diagnostic were retired; SAT alone does the job TestPrep
+        used to. The ACTTakenAt column, if your sheet still has one, is
+        now unused and safe to delete.)
         TestDate is the student's actual SAT test date — type it in as
         a real date (Insert > Date, or just type e.g. 3/14/2027). When
         it's set, the portal home screen shows a countdown/progress bar
@@ -129,6 +130,23 @@ var STUDENT_FOLDERS_PARENT_NAME = 'Moretti Portal — Student Folders';
 // never shipped to a browser, so this constant is never visible to a
 // student even though it sits in the same file as SHEET_ID above).
 var ADMIN_KEY = 'ZQ9JY4dGKhL5VowT7qoJO0ET';
+
+/* ═══ BACKEND VERSION ═══ bumped whenever this file gains something the
+   front-end depends on. The pages fetch it and say plainly when the
+   deployment they're talking to is older than the code they shipped
+   with — which has been the actual cause of every "it says saved but
+   nothing happens" so far: editing Code.gs here changes nothing until
+   Apps Script is redeployed (Deploy → Manage deployments → edit → New
+   version), and until then the old code answers every request, happily
+   ignoring fields it has never heard of.
+   Bump this AND add the capability name when you add a feature. */
+var BACKEND_VERSION = 5;
+var BACKEND_CAPABILITIES = [
+  'calendar',        // getAssignmentsCalendar / getAdminCalendar / getStudentDetail
+  'dueDates',        // DueDate column + dueDay
+  'notes',           // per-assignment description
+  'series'           // repeating assignments sharing a SeriesId
+];
 // Where diagnostic-result notifications are sent. IMPORTANT: confirm this
 // is the address you want results delivered to. The email is sent from the
 // Google account that owns this Apps Script (Deploy > Execute as: Me).
@@ -189,11 +207,13 @@ function doPost(e) {
     } else if (body.action === 'getAdminAssignments') {
       out = handleGetAdminAssignments(body.adminKey, body.key);
     } else if (body.action === 'createAdminAssignment') {
-      out = handleCreateAdminAssignment(body.adminKey, body.key, body.task, body.dueDates);
+      out = handleCreateAdminAssignment(body.adminKey, body.key, body.task, body.dueDates, body.notes);
     } else if (body.action === 'updateAdminAssignment') {
-      out = handleUpdateAdminAssignment(body.adminKey, body.key, body.row, body.patch);
+      out = handleUpdateAdminAssignment(body.adminKey, body.key, body.row, body.patch, body.scope);
     } else if (body.action === 'deleteAdminAssignment') {
-      out = handleDeleteAdminAssignment(body.adminKey, body.key, body.row);
+      out = handleDeleteAdminAssignment(body.adminKey, body.key, body.row, body.scope);
+    } else if (body.action === 'version') {
+      out = { ok: true, version: BACKEND_VERSION, capabilities: BACKEND_CAPABILITIES };
     } else if (body.action === 'getAdminCalendar') {
       out = handleGetAdminCalendar(body.adminKey, body.key, body.start, body.end);
     } else if (body.action === 'getStudentDetail') {
@@ -280,6 +300,31 @@ function sheetSafe_(v) {
    a date cell goes through here instead: unparseable reads as "no date",
    which is exactly how a blank cell already behaves.
    ═══════════════════════════════════════════════════════════════════ */
+/* A testing-accommodation multiplier as read back off the Students sheet.
+   handleSaveOnboardingPrefs only ever writes the numbers 1, 1.5 or 2 — but
+   if that column is (or ever gets) formatted as a TIME in Sheets, the cell
+   comes back as a Date instead: 1.5 reads as 1899-12-31 12:00, because
+   Sheets counts days from 1899-12-30. The client then does
+   Number(thatDate) → NaN, and NaN flows straight into every module's time
+   limit (index.html multiplies each section's minutes by it), so an
+   accommodated student's exam timer breaks outright while Settings shows
+   them as having no accommodations at all. Recovered here, where the
+   script's own timezone makes the day arithmetic exact. */
+function accomMultiplier_(v) {
+  if (v == null || v === '') return null;
+  // Object.prototype.toString rather than instanceof: the latter is false
+  // for a Date that came from another JS realm, and this value arrives
+  // from the Sheets bridge.
+  var isDate = Object.prototype.toString.call(v) === '[object Date]';
+  var n = Number(v);
+  if (!isDate && isFinite(n) && n > 0) return n;
+  var d = isDate ? v : new Date(v);
+  if (isNaN(d.getTime())) return null;
+  var days = (d.getTime() - new Date(1899, 11, 30).getTime()) / 86400000;
+  days = Math.round(days * 4) / 4; // the only values that exist are 1, 1.5, 2
+  return (days >= 0.5 && days <= 4) ? days : null;
+}
+
 function toDateOrNull_(v) {
   if (!v && v !== 0) return null;
   var d = (v instanceof Date) ? v : new Date(v);
@@ -328,18 +373,17 @@ function grantFolderAccess_(url, email) {
 }
 
 // Works out whether a student should see the SAT diagnostic/resources UI.
-// The program is SAT-only now — the old separate TestPrep (master on/off)
-// and SAT/ACT (which test) columns collapsed into this one SAT checkbox,
-// which does both jobs at once: unchecked means subject-tutoring-only
-// (never sees the SAT Diagnostic/Resources cards), checked means test
-// prep. ACT is retired — showAct is always false, so any ACT-specific UI
-// still in the client is simply unreachable now, not deleted outright.
+// The program is SAT-only — the old separate TestPrep (master on/off) and
+// which-test columns collapsed into this one SAT checkbox, which
+// does both jobs at once: unchecked means subject-tutoring-only (never
+// sees the SAT Diagnostic/Resources cards), checked means test prep. The
+// ACT program is retired and its client-side UI has been deleted, so
+// there's no showAct flag to send any more.
 function testPrepFlags_(row) {
   var showSat = truthy_(row.SAT);
   return {
     testPrep: showSat,
-    showSat: showSat,
-    showAct: false
+    showSat: showSat
   };
 }
 
@@ -412,7 +456,7 @@ function handleAuthLocked_(key, email, name) {
     // First time this key has ever been used.
     if (!email) {
       var flags0 = testPrepFlags_(row);
-      return { ok: true, name: row.Name, needsEmail: true, satTaken: !!row.SATTakenAt, actTaken: false, testPrep: flags0.testPrep, showSat: flags0.showSat, showAct: flags0.showAct };
+      return { ok: true, name: row.Name, needsEmail: true, satTaken: !!row.SATTakenAt, testPrep: flags0.testPrep, showSat: flags0.showSat };
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return { ok: false, error: 'bad_email' };
@@ -486,18 +530,16 @@ function handleAuthLocked_(key, email, name) {
     needsEmail: false,
     driveFolderUrl: row.DriveFolderUrl || '',
     satTaken: !!row.SATTakenAt,
-    actTaken: false,
     testPrep: flags.testPrep,
     showSat: flags.showSat,
-    showAct: flags.showAct,
     grantedAt: isoOrNull_(grantedAtValue),
     testDate: isoOrNull_(row.TestDate),
     // Set once, during the first-login onboarding sequence (see
     // handleSaveOnboardingPrefs_ below) and read back on every login after
     // that — this is what makes "permanent for their account" actually
     // true, instead of resetting to standard timing before every attempt.
-    accomTimeMult: row.AccomTimeMult || null,
-    accomBreakMult: row.AccomBreakMult || null,
+    accomTimeMult: accomMultiplier_(row.AccomTimeMult),
+    accomBreakMult: accomMultiplier_(row.AccomBreakMult),
     baselineType: row.BaselineType || null,
     baselineRw: row.BaselineRW || null,
     baselineMath: row.BaselineMath || null,
@@ -540,8 +582,14 @@ function handleSaveOnboardingPrefs(rawKey, rawTestDate, rawAccomTimeMult, rawAcc
       headers.push(col);
     }
   });
+  // Trimmed lookup, matching ensureGuardianColumns_ and the guardian job —
+  // a header typed with a stray space should still resolve rather than
+  // silently write nothing.
   function setCol(col, val) {
-    var i = headers.indexOf(col);
+    var i = -1;
+    for (var h = 0; h < headers.length; h++) {
+      if (String(headers[h]).trim() === col) { i = h; break; }
+    }
     if (i !== -1) sheet.getRange(row._rowIndex, i + 1).setValue(val);
   }
 
@@ -606,11 +654,11 @@ function handleSaveOnboardingPrefs(rawKey, rawTestDate, rawAccomTimeMult, rawAcc
   }
 
   // Target score — the goal the score-bridge chart on report.html measures
-  // distance against. Loosely validated (1-1600 covers both the ACT's 1-36
-  // and the SAT's 400-1600 without this function needing to know which
-  // test the student is actually prepping for) rather than tightly, same
-  // "never trust the client, but don't need to re-derive its own form
-  // logic here" spirit as the rest of this function.
+  // distance against. Loosely validated (the SAT's own 400-1600, with the
+  // floor left at 1 so a target saved under the old ACT-era 1-36 range
+  // still round-trips rather than being silently dropped) rather than
+  // tightly, same "never trust the client, but don't need to re-derive its
+  // own form logic here" spirit as the rest of this function.
   var targetScore = Number(rawTargetScore);
   if (targetScore >= 1 && targetScore <= 1600) setCol('TargetScore', targetScore);
 
@@ -646,21 +694,34 @@ function getAssignmentsSheet_() {
   var sheet = ss.getSheetByName('Assignments');
   if (!sheet) {
     sheet = ss.insertSheet('Assignments');
-    sheet.appendRow(['Timestamp', 'Key', 'Task', 'Done', 'DoneAt', 'DueDate']);
+    sheet.appendRow(ASSIGNMENT_COLUMNS_.slice());
   }
   return sheet;
 }
+
+/* Notes is the assignment's sub-description — the paragraph a student
+   reads when they open it, as opposed to Task which is the one-line
+   title. SeriesId ties together the rows a single "repeat this every
+   day until…" created, so the whole run can later be edited or deleted
+   as one thing instead of thirty separate rows. Both are added to an
+   existing sheet automatically, the same way DueDate was. */
+var ASSIGNMENT_COLUMNS_ = ['Timestamp', 'Key', 'Task', 'Done', 'DoneAt', 'DueDate', 'Notes', 'SeriesId'];
 
 // Adds the DueDate column to an existing Assignments sheet that predates
 // it (same lazy-migration pattern as IncorrectQuestionsJSON etc. on the
 // Students sheet) — called by every admin-scheduler handler below before
 // it reads or writes DueDate, so this never has to be a one-time manual
 // step in the spreadsheet itself.
+// Kept under its original name because six call sites read as "make sure
+// the schema is current" — it now tops up every optional column, not just
+// DueDate. Safe to call on a sheet from any era of this file.
 function ensureAssignmentDueDateColumn_(sheet, headers) {
-  if (headers.indexOf('DueDate') === -1) {
-    sheet.getRange(1, sheet.getLastColumn() + 1).setValue('DueDate');
-    headers.push('DueDate');
-  }
+  ASSIGNMENT_COLUMNS_.forEach(function (name) {
+    if (headers.indexOf(name) === -1) {
+      sheet.getRange(1, headers.length + 1).setValue(name);
+      headers.push(name);
+    }
+  });
   return headers;
 }
 
@@ -688,6 +749,8 @@ function getAssignments_(key, name) {
   var doneCol = headers.indexOf('Done');
   var tsCol = headers.indexOf('Timestamp');
   var dueCol = headers.indexOf('DueDate'); // -1 on a sheet that predates this column — treated as "no due date" below, same as a blank cell
+  var notesCol = headers.indexOf('Notes');
+  var seriesCol = headers.indexOf('SeriesId');
   if (keyCol === -1 || taskCol === -1) return [];
 
   var out = [];
@@ -698,6 +761,7 @@ function getAssignments_(key, name) {
     out.push({
       row: i + 1, // 1-based sheet row — sent back by the client on toggle
       task: task,
+      notes: notesCol !== -1 ? String(data[i][notesCol] || '') : '',
       done: truthy_(data[i][doneCol]),
       assignedAt: tsCol !== -1 ? isoOrNull_(data[i][tsCol]) : null,
       dueDate: dueCol !== -1 ? isoOrNull_(data[i][dueCol]) : null
@@ -839,6 +903,8 @@ function handleGetAssignmentsCalendar(rawKey, rawStart, rawEnd) {
   var doneCol = headers.indexOf('Done');
   var tsCol = headers.indexOf('Timestamp');
   var dueCol = headers.indexOf('DueDate');
+  var notesCol = headers.indexOf('Notes');
+  var seriesCol = headers.indexOf('SeriesId');
 
   var out = [];
   for (var i = 1; i < data.length; i++) {
@@ -848,6 +914,8 @@ function handleGetAssignmentsCalendar(rawKey, rawStart, rawEnd) {
     out.push({
       row: i + 1,
       task: task,
+      notes: notesCol !== -1 ? String(data[i][notesCol] || '') : '',
+      seriesId: seriesCol !== -1 ? String(data[i][seriesCol] || '') : '',
       done: truthy_(data[i][doneCol]),
       assignedAt: tsCol !== -1 ? isoOrNull_(data[i][tsCol]) : null,
       dueDate: dueCol !== -1 ? isoOrNull_(data[i][dueCol]) : null,
@@ -944,6 +1012,8 @@ function handleGetAdminAssignments(rawAdminKey, rawKey) {
   var doneCol = headers.indexOf('Done');
   var tsCol = headers.indexOf('Timestamp');
   var dueCol = headers.indexOf('DueDate');
+  var notesCol = headers.indexOf('Notes');
+  var seriesCol = headers.indexOf('SeriesId');
 
   var out = [];
   for (var i = 1; i < data.length; i++) {
@@ -953,6 +1023,8 @@ function handleGetAdminAssignments(rawAdminKey, rawKey) {
     out.push({
       row: i + 1,
       task: task,
+      notes: notesCol !== -1 ? String(data[i][notesCol] || '') : '',
+      seriesId: seriesCol !== -1 ? String(data[i][seriesCol] || '') : '',
       done: truthy_(data[i][doneCol]),
       assignedAt: tsCol !== -1 ? isoOrNull_(data[i][tsCol]) : null,
       dueDate: dueCol !== -1 ? isoOrNull_(data[i][dueCol]) : null
@@ -965,19 +1037,40 @@ function handleGetAdminAssignments(rawAdminKey, rawKey) {
 // date, so a drag-selected range in the calendar (the "repeat this task
 // on several days" convenience) becomes several independently
 // completable/deletable rows rather than one recurring entry.
-function handleCreateAdminAssignment(rawAdminKey, rawKey, rawTask, rawDueDates) {
+// A repeating assignment ("10 minutes of vocabulary, every day until the
+// test") is stored as one ROW PER DAY rather than as a rule expanded at
+// read time. That's what makes each day's instance independently
+// tickable — which is the entire point of a daily habit on a calendar —
+// and it keeps every existing read path working unchanged. The rows a
+// single repeat creates all carry the same SeriesId, so they can still be
+// edited or dropped as one series later (see the `scope` parameter on
+// update/delete below).
+var MAX_ASSIGNMENT_OCCURRENCES_ = 200;
+
+function newSeriesId_() {
+  return 's' + new Date().getTime().toString(36) + Math.random().toString(36).slice(2, 8);
+}
+
+function handleCreateAdminAssignment(rawAdminKey, rawKey, rawTask, rawDueDates, rawNotes) {
   if (!ADMIN_KEY || rawAdminKey !== ADMIN_KEY) return { ok: false, error: 'unauthorized' };
   var key = String(rawKey || '').trim().toUpperCase();
   var task = String(rawTask || '').trim();
+  var notes = String(rawNotes || '').trim();
   var dates = Array.isArray(rawDueDates) ? rawDueDates : [];
   if (!key || !task || !dates.length) return { ok: false, error: 'missing_fields' };
+  // A runaway "repeat daily until 2040" would otherwise write thousands of
+  // rows; the client caps this too, this is the backstop.
+  if (dates.length > MAX_ASSIGNMENT_OCCURRENCES_) return { ok: false, error: 'too_many_occurrences' };
 
   var studentsSheet = getSheet_();
   if (!findRow_(studentsSheet, key)) return { ok: false, error: 'bad_key' };
 
   var sheet = getAssignmentsSheet_();
   var headers = ensureAssignmentDueDateColumn_(sheet, sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0]);
-  var created = 0;
+  var seriesId = dates.length > 1 ? newSeriesId_() : '';
+  var notesCol = headers.indexOf('Notes');
+  var seriesCol = headers.indexOf('SeriesId');
+  var rows = [];
   dates.forEach(function (d) {
     var parts = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(d || ''));
     if (!parts) return; // silently skips a malformed date rather than failing the whole batch
@@ -989,18 +1082,26 @@ function handleCreateAdminAssignment(rawAdminKey, rawKey, rawTask, rawDueDates) 
     row[headers.indexOf('Done')] = false;
     row[headers.indexOf('DoneAt')] = '';
     row[headers.indexOf('DueDate')] = dueDate;
-    sheet.appendRow(row);
-    created++;
+    if (notesCol !== -1) row[notesCol] = sheetSafe_(notes);
+    if (seriesCol !== -1) row[seriesCol] = seriesId;
+    rows.push(row);
   });
-  if (!created) return { ok: false, error: 'no_valid_dates' };
-  return { ok: true, created: created };
+  if (!rows.length) return { ok: false, error: 'no_valid_dates' };
+  // One write for the whole series instead of an appendRow per day — a
+  // 90-day repeat was 90 separate round trips to the sheet.
+  sheet.getRange(sheet.getLastRow() + 1, 1, rows.length, headers.length).setValues(rows);
+  return { ok: true, created: rows.length, seriesId: seriesId };
 }
 
 // patch: { task?, dueDate? ("YYYY-MM-DD" or null to clear), done? } — only
 // the keys present are written, so a drag-to-reschedule (dueDate alone)
 // doesn't touch task/done, and the edit popover's Save doesn't touch
 // fields the admin didn't change.
-function handleUpdateAdminAssignment(rawAdminKey, rawKey, rawRow, rawPatch) {
+// rawScope 'series' applies the task/notes edit to every row sharing this
+// one's SeriesId — "actually, make it 15 minutes of vocab, not 10" should
+// be one edit, not thirty. dueDate and done are deliberately NEVER
+// series-wide: they're what makes each occurrence its own thing.
+function handleUpdateAdminAssignment(rawAdminKey, rawKey, rawRow, rawPatch, rawScope) {
   if (!ADMIN_KEY || rawAdminKey !== ADMIN_KEY) return { ok: false, error: 'unauthorized' };
   var key = String(rawKey || '').trim().toUpperCase();
   var row = Number(rawRow);
@@ -1011,12 +1112,25 @@ function handleUpdateAdminAssignment(rawAdminKey, rawKey, rawRow, rawPatch) {
   if (row > sheet.getLastRow()) return { ok: false, error: 'bad_row' };
   var headers = ensureAssignmentDueDateColumn_(sheet, sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0]);
   var keyCol = headers.indexOf('Key');
+  var notesCol = headers.indexOf('Notes');
+  var seriesCol = headers.indexOf('SeriesId');
 
   var rowKey = String(sheet.getRange(row, keyCol + 1).getValue()).trim().toUpperCase();
   if (rowKey !== key) return { ok: false, error: 'key_mismatch' };
 
+  // Which rows this edit touches: just this one, or the whole series.
+  var targetRows = [row];
+  if (String(rawScope || '') === 'series' && seriesCol !== -1) {
+    var seriesId = String(sheet.getRange(row, seriesCol + 1).getValue() || '').trim();
+    if (seriesId) targetRows = rowsInSeries_(sheet, headers, key, seriesId);
+  }
+
   if (typeof patch.task === 'string' && patch.task.trim()) {
-    sheet.getRange(row, headers.indexOf('Task') + 1).setValue(sheetSafe_(patch.task.trim()));
+    var taskCol = headers.indexOf('Task') + 1;
+    targetRows.forEach(function (r) { sheet.getRange(r, taskCol).setValue(sheetSafe_(patch.task.trim())); });
+  }
+  if (Object.prototype.hasOwnProperty.call(patch, 'notes') && notesCol !== -1) {
+    targetRows.forEach(function (r) { sheet.getRange(r, notesCol + 1).setValue(sheetSafe_(String(patch.notes || '').trim())); });
   }
   if (Object.prototype.hasOwnProperty.call(patch, 'dueDate')) {
     var dueCol = headers.indexOf('DueDate') + 1;
@@ -1033,10 +1147,29 @@ function handleUpdateAdminAssignment(rawAdminKey, rawKey, rawRow, rawPatch) {
     sheet.getRange(row, doneCol).setValue(!!patch.done);
     sheet.getRange(row, doneAtCol).setValue(patch.done ? new Date() : '');
   }
-  return { ok: true };
+  return { ok: true, updated: targetRows.length };
 }
 
-function handleDeleteAdminAssignment(rawAdminKey, rawKey, rawRow) {
+// Every row belonging to one repeat, for one student. Scoped by key as
+// well as SeriesId so a stale id can never reach another student's rows.
+function rowsInSeries_(sheet, headers, key, seriesId) {
+  var keyCol = headers.indexOf('Key');
+  var seriesCol = headers.indexOf('SeriesId');
+  if (keyCol === -1 || seriesCol === -1 || !seriesId) return [];
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 2) return [];
+  var lo = Math.min(keyCol, seriesCol), hi = Math.max(keyCol, seriesCol);
+  var block = sheet.getRange(2, lo + 1, lastRow - 1, hi - lo + 1).getValues();
+  var out = [];
+  for (var i = 0; i < block.length; i++) {
+    if (String(block[i][keyCol - lo] || '').trim().toUpperCase() !== key) continue;
+    if (String(block[i][seriesCol - lo] || '').trim() !== seriesId) continue;
+    out.push(i + 2);
+  }
+  return out;
+}
+
+function handleDeleteAdminAssignment(rawAdminKey, rawKey, rawRow, rawScope) {
   if (!ADMIN_KEY || rawAdminKey !== ADMIN_KEY) return { ok: false, error: 'unauthorized' };
   var key = String(rawKey || '').trim().toUpperCase();
   var row = Number(rawRow);
@@ -1049,8 +1182,19 @@ function handleDeleteAdminAssignment(rawAdminKey, rawKey, rawRow) {
   var rowKey = String(sheet.getRange(row, keyCol + 1).getValue()).trim().toUpperCase();
   if (rowKey !== key) return { ok: false, error: 'key_mismatch' };
 
+  var seriesCol = headers.indexOf('SeriesId');
+  if (String(rawScope || '') === 'series' && seriesCol !== -1) {
+    var seriesId = String(sheet.getRange(row, seriesCol + 1).getValue() || '').trim();
+    var rows = seriesId ? rowsInSeries_(sheet, headers, key, seriesId) : [];
+    if (rows.length > 1) {
+      // Bottom-up: deleting a row shifts every row below it up by one.
+      rows.sort(function (a, b) { return b - a; }).forEach(function (r) { sheet.deleteRow(r); });
+      return { ok: true, deleted: rows.length };
+    }
+  }
+
   sheet.deleteRow(row);
-  return { ok: true };
+  return { ok: true, deleted: 1 };
 }
 
 /* ═══ ADMIN CALENDAR ═══ the sessions half of admin.html's scheduler.
@@ -1172,6 +1316,8 @@ function handleGetAdminCalendar(rawAdminKey, rawKey, rawStart, rawEnd) {
     var doneCol = asHeaders.indexOf('Done');
     var tsCol = asHeaders.indexOf('Timestamp');
     var dueCol = asHeaders.indexOf('DueDate');
+    var notesCol = asHeaders.indexOf('Notes');
+    var seriesCol = asHeaders.indexOf('SeriesId');
     for (var i = 1; i < asData.length; i++) {
       var rowKey = String(asData[i][keyCol] || '').trim().toUpperCase();
       if (!rowKey) continue;
@@ -1192,6 +1338,8 @@ function handleGetAdminCalendar(rawAdminKey, rawKey, rawStart, rawEnd) {
         key: rowKey,
         studentName: nameByKey[rowKey] || '',
         task: task,
+        notes: notesCol !== -1 ? String(asData[i][notesCol] || '') : '',
+        seriesId: seriesCol !== -1 ? String(asData[i][seriesCol] || '') : '',
         done: truthy_(asData[i][doneCol]),
         assignedAt: tsCol !== -1 ? isoOrNull_(asData[i][tsCol]) : null,
         dueDate: due ? due.toISOString() : null,
@@ -1287,13 +1435,12 @@ function handleGetStudentDetail(rawAdminKey, rawKey) {
     baselineType: row.BaselineType || null,
     baselineRw: Number(row.BaselineRW) || null,
     baselineMath: Number(row.BaselineMath) || null,
-    accomTimeMult: row.AccomTimeMult || null,
-    accomBreakMult: row.AccomBreakMult || null,
+    accomTimeMult: accomMultiplier_(row.AccomTimeMult),
+    accomBreakMult: accomMultiplier_(row.AccomBreakMult),
     guardianName: row.GuardianName || '',
     guardianEmail: row.GuardianEmail || '',
     satTaken: !!row.SATTakenAt,
     showSat: flags.showSat,
-    showAct: flags.showAct,
     progressUpdatedAt: isoOrNull_(row.ProgressUpdatedAt)
   };
 
@@ -1617,16 +1764,14 @@ var ASSIGN_HOMEWORK_HTML_ = '<!DOCTYPE html><html><head><base target="_top">' +
   '</script></body></html>';
 
 /* =========================================================================
-   ONE REAL DIAGNOSTIC PER TEST TYPE
+   ONE REAL DIAGNOSTIC
    -------------------------------------------------------------------------
-   The portal calls this right after a student finishes a diagnostic for
-   the first time for a given test type (SAT or ACT) — see index.html's
-   finishDiagnostic(). It stamps SATTakenAt/ACTTakenAt so that on any later
-   attempt at the SAME test type, handleAuth's satTaken/actTaken flags tell
-   the portal to skip emailing Luca and show practice-only copy instead —
-   a student can't keep re-submitting the same diagnostic hoping for a
-   better score to land in Luca's inbox. Taking the OTHER test type for the
-   first time is unaffected and still emails normally.
+   The portal calls this right after a student finishes the diagnostic for
+   the first time — see index.html's finishDiagnostic(). It stamps
+   SATTakenAt so that on any later attempt, handleAuth's satTaken flag
+   tells the portal to skip emailing Luca and show practice-only copy
+   instead — a student can't keep re-submitting the same diagnostic hoping
+   for a better score to land in Luca's inbox.
 
    Deliberately idempotent (only writes if the cell is currently blank) so
    it's safe to call more than once for the same key/test without losing
@@ -1635,7 +1780,7 @@ function handleMarkDiagnosticTaken(rawKey, rawTest) {
   if (!rawKey) return { ok: false, error: 'missing_key' };
   var key = String(rawKey).trim().toUpperCase();
   var test = String(rawTest || '').trim().toUpperCase();
-  if (test !== 'SAT' && test !== 'ACT') return { ok: false, error: 'bad_test' };
+  if (test !== 'SAT') return { ok: false, error: 'bad_test' };
 
   var sheet = getSheet_();
   var row = findRow_(sheet, key);
@@ -1674,7 +1819,7 @@ function handleSubmitDiagnostic(rawKey, rawTest, score, reportLink, reportText, 
   if (!rawKey) return { ok: false, error: 'missing_key' };
   var key = String(rawKey).trim().toUpperCase();
   var test = String(rawTest || '').trim().toUpperCase();
-  if (test !== 'SAT' && test !== 'ACT') return { ok: false, error: 'bad_test' };
+  if (test !== 'SAT') return { ok: false, error: 'bad_test' };
 
   var sheet = getSheet_();
   var row = findRow_(sheet, key);
@@ -1780,14 +1925,14 @@ function handleSubmitDiagnostic(rawKey, rawTest, score, reportLink, reportText, 
 // Sibling of handleSubmitDiagnostic above, for full practice-test attempts
 // (portal/practice-tests.js, e.g. "SAT Practice Test 2") instead of the
 // diagnostic. Deliberately NOT the same function: handleSubmitDiagnostic
-// hard-rejects any test value other than 'SAT'/'ACT' (line ~600 above),
+// hard-rejects any test value other than 'SAT' (line ~600 above),
 // which a practice test title like "SAT Practice Test 2" would fail. This
 // version takes a free-text title instead and otherwise mirrors the same
 // two-durable-stores-before-email pattern (DiagnosticLog row + a Drive
 // .txt file), reusing the same logDiagnosticResult_ helper so both flows
 // show up in one place for Luca to review. Rows/files from practice tests
 // are distinguishable by the Test column containing the full test title
-// ("SAT Practice Test 2") instead of just "SAT"/"ACT".
+// ("SAT Practice Test 2") instead of just "SAT".
 function handleSubmitPracticeTest(rawKey, rawTitle, score, reportLink, reportText, rawTestId, scoreFields) {
   if (!rawKey) return { ok: false, error: 'missing_key' };
   var key = String(rawKey).trim().toUpperCase();
@@ -1868,7 +2013,7 @@ function handleSubmitPracticeTest(rawKey, rawTitle, score, reportLink, reportTex
 // DriveFileUrl | EmailSent | EmailError.
 var ATTEMPTS_HEADERS_ = ['Kind', 'Timestamp', 'Key', 'Name', 'TestType', 'Source', 'TestId', 'TestTitle',
   'Score', 'Composite', 'ScaleMin', 'ScaleMax', 'RW', 'Math', 'WeakestLabel', 'WeakestCorrect', 'WeakestTotal',
-  'ReportLink', 'AttemptId', 'Report', 'DriveSaved', 'DriveFileUrl', 'EmailSent', 'EmailError'];
+  'ReportLink', 'AttemptId', 'Interrupted', 'AwayMinutes', 'Report', 'DriveSaved', 'DriveFileUrl', 'EmailSent', 'EmailError'];
 function getAttemptsSheet_() {
   var ss = SpreadsheetApp.openById(SHEET_ID);
   var sheet = ss.getSheetByName('Attempts');
@@ -1937,6 +2082,17 @@ function logDiagnosticResult_(key, name, test, score, reportLink, reportText, dr
     out[col.WeakestCorrect] = weakest ? (Number(weakest.correct) || '') : '';
     out[col.WeakestTotal] = weakest ? (Number(weakest.total) || '') : '';
     out[col.AttemptId] = sf.attemptId ? String(sf.attemptId) : '';
+    // Test integrity: whether this attempt ran straight through, or was
+    // interrupted (closed and reopened, or left unattended until a
+    // section's clock expired). Recorded on the row so a score taken under
+    // non-standard conditions is visible in the roster without opening the
+    // report. Blank rather than FALSE when the client didn't report either
+    // way — an attempt from before this was tracked cannot claim to have
+    // been clean.
+    if (col.Interrupted !== undefined && sf.interrupted !== undefined) {
+      out[col.Interrupted] = sf.interrupted ? 'YES' : '';
+      out[col.AwayMinutes] = sf.awayMs ? Math.round(Number(sf.awayMs) / 60000) : '';
+    }
   }
   sheet.appendRow(out);
 }
@@ -2263,8 +2419,8 @@ function handleGetProgress(rawKey) {
 // The testTag prefix every IncorrectQuestionsJSON/SavedQuestionsJSON key
 // carries (see index.html's report renderer: testTag + '|' + sectionKey +
 // '|' + moduleName + '|' + moduleIndex) — a practice test's own id
-// (row.TestId, e.g. "sat-practice-2"), or 'diag-' + the SAT/ACT type for
-// the diagnostic. `row` here is any object with Source/TestId/TestType
+// (row.TestId, e.g. "sat-practice-2"), or 'diag-SAT' for the
+// diagnostic. `row` here is any object with Source/TestId/TestType
 // fields, not necessarily a full Attempts-sheet row.
 function testTagForAttemptRow_(row) {
   if (row.Source === 'practice-test' && row.TestId) return String(row.TestId);
@@ -2511,7 +2667,10 @@ function handleSyncScoreHistory(rawKey, rawEntry) {
   out[col.Kind] = 'score';
   out[col.Timestamp] = new Date();
   out[col.Key] = key;
-  out[col.TestType] = (entry.testType === 'ACT' ? 'ACT' : 'SAT');
+  // Anything that isn't a recognized type is stored as SAT — the only
+  // program that exists now. Retired ACT rows already in this sheet keep
+  // whatever they were written with; this only governs new writes.
+  out[col.TestType] = 'SAT';
   out[col.Source] = (entry.source === 'practice-test' ? 'practice-test' : 'diagnostic');
   out[col.TestId] = entry.testId || '';
   out[col.TestTitle] = sheetSafe_(entry.testTitle || '');
@@ -2540,6 +2699,10 @@ function handleSyncScoreHistory(rawKey, rawEntry) {
   // index.html) instead of double-counting it once this endpoint's
   // results are merged in alongside the local copy.
   out[col.AttemptId] = entry.attemptId ? String(entry.attemptId) : '';
+  if (col.Interrupted !== undefined && entry.interrupted !== undefined) {
+    out[col.Interrupted] = entry.interrupted ? 'YES' : '';
+    out[col.AwayMinutes] = entry.awayMs ? Math.round(Number(entry.awayMs) / 60000) : '';
+  }
   sheet2.appendRow(out);
   return { ok: true };
 }
@@ -3403,7 +3566,7 @@ var GUARDIAN_SUMMARY_TREND_MAX = 5;
 // it. Only full practice tests feed the weekly update.
 //
 // A diagnostic is tagged Source:'diagnostic' with an empty TestId and a
-// bare "SAT"/"ACT" title (see handleSubmitDiagnostic); a practice test
+// bare "SAT" title (see handleSubmitDiagnostic); a practice test
 // carries a real TestId and a full title like "SAT Practice Test 2".
 // Older rows predating the Source column are identified by that same
 // shape, so nothing slips through on a blank.
@@ -3712,6 +3875,7 @@ function previewGuardianSummaries() {
   var col = {};
   headers.forEach(function (h, i) { col[String(h).trim()] = i; });
   var now = new Date();
+  var tz = Session.getScriptTimeZone() || 'America/New_York';
   var windowMs = GUARDIAN_ACTIVITY_WINDOW_DAYS * 24 * 60 * 60 * 1000;
   var lines = [];
 
@@ -3741,6 +3905,23 @@ function previewGuardianSummaries() {
     if ((now - latestDate) > windowMs) {
       lines.push('SKIP  ' + name + ' — last test was ' + days + ' days ago (window is ' + GUARDIAN_ACTIVITY_WINDOW_DAYS + ')');
       continue;
+    }
+
+    // Same LastGuardianSummaryAt gates the real send applies. Without
+    // these the preview drifts optimistic the moment the first emails go
+    // out — reporting SEND for a parent who would actually be skipped,
+    // which is exactly when you'd be leaning on it.
+    var lastSent = row[col.LastGuardianSummaryAt];
+    if (lastSent instanceof Date) {
+      if (Utilities.formatDate(lastSent, tz, 'yyyy-MM-dd') === Utilities.formatDate(now, tz, 'yyyy-MM-dd')) {
+        lines.push('SKIP  ' + name + ' — already emailed today');
+        continue;
+      }
+      if (GUARDIAN_SKIP_REPEAT_SCORES && latestDate <= lastSent) {
+        lines.push('SKIP  ' + name + ' — no new score since the last email (' +
+                   Utilities.formatDate(lastSent, tz, 'MMM d') + ')');
+        continue;
+      }
     }
 
     var weakest = weakestSkillForStudent_(key);

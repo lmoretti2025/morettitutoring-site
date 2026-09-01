@@ -152,6 +152,53 @@ folder you've shared broadly in the past.
 
 ---
 
+## Redeploying after a code change (the one that bites)
+
+**Editing `portal/Code.gs` here changes nothing on its own.** Apps Script
+keeps serving the *last deployed version* — so the old code answers every
+request, quietly ignoring any field it has never heard of. Nothing errors.
+The admin page says "saved", the sheet just doesn't get the new column, and
+the feature looks broken for no visible reason.
+
+Any time `portal/Code.gs` changes, do this:
+
+1. Open the Apps Script project (script.google.com → Moretti Portal Backend).
+2. Select all in the editor and paste in the current contents of
+   `portal/Code.gs`. Save.
+3. **Deploy → Manage deployments → the pencil (edit) icon → Version:
+   *New version* → Deploy.**
+
+Step 3 is the one that's easy to miss: saving the file, or creating a
+*new deployment* instead of a new *version* of the existing one, both
+leave the live URL pointing at the old code.
+
+### How to tell which version is live
+
+The backend reports its own version (`BACKEND_VERSION` near the top of
+`Code.gs`). The admin page checks it on load and shows a red banner naming
+exactly what won't stick if the deployment is behind. Bump
+`BACKEND_VERSION` — and add to `BACKEND_CAPABILITIES` — whenever you add
+something the pages depend on, and bump `REQUIRED_BACKEND_VERSION` in
+`admin.html` to match.
+
+To check by hand:
+
+```
+curl -sL -X POST <your /exec URL> -H 'Content-Type: application/json' \
+  -d '{"action":"version"}'
+```
+
+`unknown_action` means the deployment predates this check entirely, i.e.
+it's definitely out of date.
+
+### Pushing the site itself
+
+`index.html`, `admin.html` and `report.html` are served from the repo, so
+those need a normal `git push` — separate from the Apps Script deploy
+above. A change to the calendar or the report usually needs **both**.
+
+---
+
 ## Adding a new student going forward
 
 No code, no manual Drive sharing. Just add a row to the **Students**
