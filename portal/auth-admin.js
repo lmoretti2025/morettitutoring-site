@@ -693,7 +693,15 @@
     if (waiting.length) {
       html += '<div class="mta-sec">Invited &mdash; not claimed yet</div>';
       waiting.forEach(function (s) {
+        // An invite nobody claimed is the commonest dead lead of all -- the
+        // link went out, the family went quiet. Dismiss tucks it away with
+        // the row kept; Delete removes it, with the same refusal-then-
+        // confirm if any recorded work exists (it will not, for these).
         html += card(s, inviteButtons(s, 'Re-send') +
+          (s.archived
+            ? '<button class="mta-b" data-act="unarchive">Restore</button>'
+            : '<button class="mta-b" data-act="archive">Dismiss</button>') +
+          '<button class="mta-b warn" data-act="delete">Delete</button>' +
           (canReset(s) ? '<button class="mta-b warn" data-act="reset">Reset login</button>' : ''),
           '<div class="mta-meta">sent ' + esc(ago(s.inviteSentAt)) +
           ' &middot; a new link replaces the old one</div>');
