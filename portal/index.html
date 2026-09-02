@@ -7454,55 +7454,6 @@ window.Portal = {
 
   function armSplashHint() {
     document.getElementById('onb-splash-hint').classList.add('onb-splash-hint-visible');
-    playOnbChime();
-  }
-
-  /* The logo's arrival, with sound. Synthesised rather than loaded from a
-     file: nothing to download, nothing to license, and no way for a
-     missing asset to turn into a console error on a student's first
-     screen. Four notes of a C-major arpeggio on soft triangle waves,
-     timed against the 2.4s mark animation so the last note lands as the
-     logo settles.
-
-     Everything here is best-effort and silent on failure. Two ways it
-     legitimately never plays, both fine:
-       - Autoplay policy. Browsers refuse audio before a user gesture. On
-         the normal path the student has just clicked Continue on the name
-         beat, so the context is allowed; when the name beat is skipped
-         the logo IS the first screen and there has been no gesture yet,
-         so it stays silent rather than throwing.
-       - No Web Audio at all (old or locked-down browser).
-     Onboarding runs once per student, so this is a once-ever sound. It is
-     deliberately quiet (peak gain 0.06) — someone may well be opening
-     this in a classroom. */
-  function playOnbChime() {
-    try {
-      var Ctx = window.AudioContext || window.webkitAudioContext;
-      if (!Ctx) return;
-      var ctx = new Ctx();
-      if (ctx.state === 'suspended' && ctx.resume) ctx.resume();
-      var t0 = ctx.currentTime + 0.15;   // matches the mark animation's own delay
-      // C5, E5, G5, C6 — a plain major arpeggio. Nothing clever; it needs
-      // to read as a brand sting, not a melody.
-      var notes = [523.25, 659.25, 783.99, 1046.50];
-      notes.forEach(function (hz, i) {
-        var start = t0 + i * 0.18;
-        var osc = ctx.createOscillator();
-        var gain = ctx.createGain();
-        osc.type = 'triangle';
-        osc.frequency.value = hz;
-        // Soft attack, long decay — a hard edge on a sine reads as a
-        // system beep, which is the one thing this must not sound like.
-        gain.gain.setValueAtTime(0.0001, start);
-        gain.gain.exponentialRampToValueAtTime(i === 3 ? 0.06 : 0.045, start + 0.05);
-        gain.gain.exponentialRampToValueAtTime(0.0001, start + (i === 3 ? 1.5 : 0.7));
-        osc.connect(gain).connect(ctx.destination);
-        osc.start(start);
-        osc.stop(start + (i === 3 ? 1.6 : 0.8));
-      });
-      // Release the hardware once the tail has finished.
-      setTimeout(function () { try { ctx.close(); } catch (e) {} }, 3200);
-    } catch (e) { /* no sound, no problem — never block the sequence */ }
   }
 
   /* Beat 0 -> beat 1. The name is written through MorettiAuth (same
@@ -7811,7 +7762,7 @@ window.Portal = {
       onbBaselineType = null;
       onbBaselineRw = null;
       onbBaselineMath = null;
-      onbGoTo('onb-guardian');
+      onbShowGuardian();
       return;
     }
     var range = onbBaselineRange();
@@ -7830,15 +7781,22 @@ window.Portal = {
     onbBaselineType = document.querySelector('#onbBaselineTestOpts .is-on').getAttribute('data-val');
     onbBaselineRw = rw;
     onbBaselineMath = math;
-    onbGoTo('onb-guardian');
+    onbShowGuardian();
   });
 
   // Beat 6c: parent/guardian contact — optional, same idiom as baseline
   // above. Email gets a basic format check (only when non-blank — the
   // whole step is skippable), same regex the key-entry email field uses
-  // elsewhere in this file. Nothing downstream reads these values yet;
-  // they're just carried through to saveOnboardingPrefs for Luca to use
-  // later (see Code.gs's GuardianName/GuardianEmail columns).
+  // elsewhere in this file.
+  //
+  // A skipped or blank answer is sent as UNDEFINED (JSON.stringify drops
+  // the key), never null. Code.gs treats null as "clear the cell" — that
+  // is what the Settings pane's deliberate "No contact" card means — so
+  // sending it from here meant every student who left "Not needed"
+  // selected silently erased the parent address Luca had typed into the
+  // row when he added them. The admin panel then showed "no contact on
+  // file" and could no longer email an invite. First-run onboarding can
+  // add or correct a contact; only Settings can remove one.
   var onbHasGuardian = false;
   document.querySelectorAll('[data-onb-guardian-card]').forEach(function (card, i) {
     card.addEventListener('click', function () {
@@ -7849,12 +7807,27 @@ window.Portal = {
       document.getElementById('onbGuardianEmailError').style.display = 'none';
     });
   });
-  var onbGuardianName = null;
-  var onbGuardianEmail = null;
+  var onbGuardianName;
+  var onbGuardianEmail;
+  // Luca may already have the parent on file (a Quick add, the New student
+  // dialog, or the website form). Show it rather than ask again, with the
+  // "Add a contact" card pre-selected so the student sees what is there.
+  function onbShowGuardian() {
+    var d = onboardAuthData || {};
+    var nameIn = document.getElementById('onbGuardianNameInput');
+    var emailIn = document.getElementById('onbGuardianEmailInput');
+    if (!nameIn.value && d.guardianName) nameIn.value = d.guardianName;
+    if (!emailIn.value && d.guardianEmail) emailIn.value = d.guardianEmail;
+    if (d.guardianName || d.guardianEmail) {
+      var cards = document.querySelectorAll('[data-onb-guardian-card]');
+      if (cards[1] && !cards[1].classList.contains('is-selected')) cards[1].click();
+    }
+    onbGoTo('onb-guardian');
+  }
   document.getElementById('onb-guardian-continue').addEventListener('click', function () {
     if (!onbHasGuardian) {
-      onbGuardianName = null;
-      onbGuardianEmail = null;
+      onbGuardianName = undefined;
+      onbGuardianEmail = undefined;
       onbAfterGuardian();
       return;
     }
@@ -7867,8 +7840,8 @@ window.Portal = {
       return;
     }
     document.getElementById('onbGuardianEmailError').style.display = 'none';
-    onbGuardianName = nameInput.value.trim() || null;
-    onbGuardianEmail = email || null;
+    onbGuardianName = nameInput.value.trim() || undefined;
+    onbGuardianEmail = email || undefined;
     onbAfterGuardian();
   });
   // SAT students still have accommodations to answer; everyone else is

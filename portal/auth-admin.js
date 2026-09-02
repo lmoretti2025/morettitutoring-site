@@ -695,10 +695,14 @@
     } catch (e) { return String(iso); }
   }
 
-  // A row with no email can only be delivered as a link, so do not offer a
-  // button that is guaranteed to come back "no_recipient".
+  // A row with no email cannot be emailed blind, so the one-click button
+  // (which would only come back "no_recipient") is replaced by one that
+  // asks for an address first. The link is the primary action either way;
+  // the address typed there is used for that one send and not saved.
   function inviteButtons(s, label) {
-    return (s.guardianEmail ? '<button class="mta-b pri" data-act="invite">' + label + '</button>' : '') +
+    return (s.guardianEmail
+        ? '<button class="mta-b pri" data-act="invite">' + label + '</button>'
+        : '<button class="mta-b" data-act="invite-to">' + label + ' to\u2026</button>') +
       '<button class="mta-b' + (s.guardianEmail ? '' : ' pri') + '" data-act="link">Copy link</button>';
   }
 
@@ -826,6 +830,18 @@
         if (a === 'invite') {
           act(c, 'Sending…', { action: 'sendInvite', adminKey: adminKey(), key: key, deliver: 'email' },
             function (d) { return 'Invite emailed to ' + d.sentTo + '.'; });
+        } else if (a === 'invite-to') {
+          var to = window.prompt(
+            'Email the invite for ' + key + ' to which address?\n\n' +
+            'This row has no email on file. The address is used for this one send and is not saved to the row.', '');
+          if (to == null) return;
+          to = to.trim().toLowerCase();
+          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) {
+            c.querySelector('.mta-status').textContent = "That doesn't look like an email address.";
+            return;
+          }
+          act(c, 'Sending…', { action: 'sendInvite', adminKey: adminKey(), key: key, deliver: 'email', to: to },
+            function (d) { return 'Invite emailed to ' + d.sentTo + '.'; });
         } else if (a === 'link') {
           act(c, 'Making a link…', { action: 'sendInvite', adminKey: adminKey(), key: key, deliver: 'link' },
             function (d) {
@@ -858,10 +874,17 @@
           if (!window.confirm(
                 'Reset the login for ' + key + '?\n\n' +
                 'This unlinks their Google account, signs them out everywhere, and revokes that ' +
-                "address's access to their files folder. Their scores, reports and the folder itself " +
-                'are untouched. You can send a fresh invite afterwards.')) return;
+                "address's access to their files folder. If that sign-in supplied the name on the row " +
+                'or went through the intro questions, those are cleared too, so the right person is asked ' +
+                'again. Scores, reports and the folder itself are untouched. You can send a fresh invite afterwards.')) return;
           act(c, 'Resetting…', { action: 'resetStudentAuth', adminKey: adminKey(), key: key },
-            function (d) { return 'Reset' + (d.revokedEmail ? ' — ' + d.revokedEmail + ' no longer has access.' : '.'); });
+            function (d) {
+              var bits = [];
+              if (d.revokedEmail) bits.push(d.revokedEmail + ' no longer has access');
+              if (d.nameCleared) bits.push('their name taken off the row');
+              if (d.onboardingCleared) bits.push('intro answers cleared');
+              return 'Reset' + (bits.length ? ' — ' + bits.join(', ') + '.' : '.');
+            });
         }
       });
     });

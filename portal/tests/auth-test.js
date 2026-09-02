@@ -1142,6 +1142,94 @@ test('generated keys never collide with the roster', () => {
   assert.strictEqual(seen.size, 40);
 });
 
+test('a reset also removes the name and intro answers the wrong sign-in supplied', () => {
+  // The scenario this whole feature exists for: a parent opens the invite
+  // on their own phone. Their Google name lands on the row and names the
+  // Drive folder; they click through the intro sequence. Undoing only the
+  // pairing would greet the real student as the parent, never ask their
+  // name, and skip the intro sequence entirely.
+  const env = makeEnv({ rows: [] });
+  const key = env.handleCreateStudent('ADMINSECRET', { guardianEmail: 'parent@x.com' }).key;
+  const link = env.handleSendInvite('ADMINSECRET', key, '', 'link').link;
+  const token = decodeURIComponent(/\?invite=(.+)$/.exec(link)[1]);
+  isOk(env.handleClaimInvite(env.token('parent@x.com', 'SUBP', { name: 'Sarah Chen' }), token));
+  assert.strictEqual(env.rowFor(key).Name, 'Sarah Chen');
+  assert.strictEqual(env.rowFor(key).LoginName, 'Sarah Chen');
+  assert.strictEqual(env.folderName.v, 'Sarah Chen — ' + key);
+  // The parent finishes the intro sequence.
+  env.noteOnboarded_(key);
+  env.setCell_(env.studentsSheet, env.findRow_(env.studentsSheet, key), 'AccomTimeMult', 1.5);
+
+  const out = env.handleResetStudentAuth('ADMINSECRET', key);
+  isOk(out);
+  assert.strictEqual(out.nameCleared, true);
+  assert.strictEqual(out.onboardingCleared, true);
+  const row = env.rowFor(key);
+  assert.strictEqual(row.Name, '', 'the wrong name is gone');
+  assert.strictEqual(row.LoginName, '');
+  assert.strictEqual(row.OnboardedAt, '');
+  assert.strictEqual(row.AccomTimeMult, '', 'otherwise needsOnboarding stays false');
+  assert.strictEqual(row.GuardianEmail, 'parent@x.com', 'the address Luca typed survives, so Send invite still works');
+  assert.strictEqual(env.folderName.v, '— ' + key, 'folder back to the unnamed form renameFolderIfUnnamed_ looks for');
+
+  // The right student claims a fresh link and is treated as brand new.
+  const link2 = env.handleSendInvite('ADMINSECRET', key, '', 'link').link;
+  const token2 = decodeURIComponent(/\?invite=(.+)$/.exec(link2)[1]);
+  const student = env.handleClaimInvite(env.token('owen@x.com', 'SUBO', { name: 'Owen Chen' }), token2);
+  isOk(student);
+  assert.strictEqual(student.needsOnboarding, true);
+  assert.strictEqual(student.name, 'Owen Chen', 'their own Google name lands, now that the cell is blank');
+  assert.strictEqual(env.rowFor(key).LoginName, 'Owen Chen');
+});
+
+test('a reset never touches a name Luca typed, or a name from the website form', () => {
+  const env = makeEnv({ rows: [['OWEN01', 'Owen Chen', '', '', '', true, '', '']] });
+  const parent = env.token('sarah.chen@x.com', 'SUBP', { name: 'Sarah Chen' });
+  env.handleClaimKey(parent, 'OWEN01');
+  env.handleDecideClaim('ADMINSECRET', 'OWEN01', 'approve');
+  const out = env.handleResetStudentAuth('ADMINSECRET', 'OWEN01');
+  isOk(out);
+  assert.strictEqual(out.nameCleared, false);
+  assert.strictEqual(env.rowFor('OWEN01').Name, 'Owen Chen');
+});
+
+test('a name the student typed at setName is undone by a reset just like a Google one', () => {
+  const env = makeEnv({ rows: [['K1', '', '', 'x@x.com', '', true, '', '']] });
+  const session = env.handleGoogleAuth(env.token('x@x.com', 'S1', { name: 'lowercase' })).session;
+  assert.strictEqual(env.rowFor('K1').Name, '', 'a one-word Google name is not stored');
+  isOk(env.handleSetName(session, 'Typed Name'));
+  assert.strictEqual(env.rowFor('K1').LoginName, 'Typed Name');
+  isOk(env.handleResetStudentAuth('ADMINSECRET', 'K1'));
+  assert.strictEqual(env.rowFor('K1').Name, '');
+});
+
+test('a reset leaves alone a student who onboarded before the OnboardedAt stamp existed', () => {
+  // Only AccomTimeMult marks them as onboarded; that must survive, or the
+  // reset would send a long-standing student through the intro again.
+  const env = makeEnv({ rows: [['ABC123', 'Alex Reed', '', 'alex@x.com', new Date(), true, 1, '']] });
+  isOk(env.handleGoogleAuth(env.token('alex@x.com', 'SUBA')));
+  const out = env.handleResetStudentAuth('ADMINSECRET', 'ABC123');
+  isOk(out);
+  assert.strictEqual(out.onboardingCleared, false);
+  assert.strictEqual(env.rowFor('ABC123').AccomTimeMult, 1);
+});
+
+test('signing in stamps LastSeenAt; resuming re-stamps only once it has gone stale', () => {
+  const env = makeEnv({ rows: [['ABC123', 'Alex Reed', '', 'alex@x.com', new Date(), true, 1, new Date()]] });
+  const first = env.handleGoogleAuth(env.token('alex@x.com', 'SUBA'));
+  isOk(first);
+  const stamped = env.rowFor('ABC123').LastSeenAt;
+  assert.ok(stamped instanceof Date, 'sign-in stamps it');
+
+  isOk(env.handleResume(first.session));
+  assert.strictEqual(env.rowFor('ABC123').LastSeenAt, stamped, 'a resume minutes later is not a write');
+
+  env.setCell_(env.studentsSheet, env.findRow_(env.studentsSheet, 'ABC123'), 'LastSeenAt',
+    new Date(Date.now() - 7 * 3600 * 1000));
+  isOk(env.handleResume(first.session));
+  assert.ok(env.rowFor('ABC123').LastSeenAt.getTime() > Date.now() - 60000, 'a stale one is refreshed');
+});
+
 test('resetting a login also kills any outstanding invite', () => {
   // Otherwise the reset is theatre: the account just removed still holds a
   // live link straight back into the same row.
