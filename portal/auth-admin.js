@@ -779,16 +779,38 @@
   };
   window.mtaRefreshAccess = refresh;
 
+  /* Show or hide the tab to match the gates, without a network call. The
+     panel's visibility used to be decided only inside refresh(), which ran
+     at boot, four more times over the first four seconds, and then once a
+     minute. A cold Apps Script start routinely takes longer than four
+     seconds to answer admin.html's own roster request, so every early
+     check saw the password gate still up, hid the panel, and nothing
+     looked again until the minute poll -- the tab was simply missing.
+     Watch the DOM instead: #gate is hidden by a style change and the
+     Google gate is appended and shown the same way, so a MutationObserver
+     sees every transition the moment it happens. The first time the page
+     turns out to be unlocked, fetch the queue. */
+  var wasShown = false;
+  function syncVisibility() {
+    if (!root) return;
+    var show = !gateIsUp() && !!adminKey();
+    root.style.display = show ? '' : 'none';
+    if (show && !wasShown) { wasShown = true; refresh(); }
+    if (!show) wasShown = false;
+  }
+
   function boot() {
     ensureRoot();
     if (root) root.style.display = 'none';   // hidden until proven unlocked
-    refresh();
-    /* Neither gate necessarily exists when this script boots -- admin.html
-       builds #gate as the page parses, and the Google gate is created
-       lazily on first show. A single check at boot therefore sees no gate,
-       concludes the page is unlocked, and shows the panel over whichever
-       gate appears a moment later. Re-check over the first few seconds. */
-    [300, 900, 2000, 4000].forEach(function (ms) { setTimeout(refresh, ms); });
+    syncVisibility();
+    try {
+      new MutationObserver(syncVisibility).observe(document.documentElement, {
+        attributes: true, attributeFilter: ['style', 'class'], childList: true, subtree: true
+      });
+    } catch (e) {}
+    /* Belt and braces: cheap (no network), and it covers a browser without
+       MutationObserver or a gate hidden some way the observer misses. */
+    setInterval(syncVisibility, 1000);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
