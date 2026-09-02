@@ -1252,6 +1252,79 @@ test('a student who onboarded before the stamp existed is not sent through it ag
   assert.strictEqual(login.needsOnboarding, false);
 });
 
+test('a claim left over from someone else cannot take a row that is already paired', () => {
+  // A parent files a claim; Luca instead invites the student, who claims
+  // it. The parent's claim is still on the row and its approval email is
+  // live for 14 days. Approving it used to overwrite the student's pairing.
+  const env = makeEnv({ rows: [] });
+  const key = env.handleCreateStudent('ADMINSECRET', { guardianEmail: 'parent@x.com' }).key;
+  isOk(env.handleClaimKey(env.token('parent@x.com', 'SUBP', { name: 'Sarah Chen' }), key).pending ? { ok: true } : { ok: false });
+  assert.strictEqual(env.rowFor(key).PendingSub, 'SUBP');
+
+  env.handleSendInvite('ADMINSECRET', key);
+  assert.strictEqual(env.rowFor(key).PendingSub, '', 'sending the invite answers the claim');
+
+  const t = decodeURIComponent(/\?invite=([^\s]+)/.exec(env.sentMail[env.sentMail.length - 1].body)[1]);
+  const student = env.handleClaimInvite(env.token('owen@x.com', 'SUBO', { name: 'Owen Chen' }), t);
+  isOk(student);
+  isErr(env.handleDecideClaim('ADMINSECRET', key, 'approve'), 'no_pending_claim');
+  assert.strictEqual(env.rowFor(key).GoogleSub, 'SUBO', 'the student keeps the row');
+  assert.strictEqual(env.authGuard_({ action: 'getProgress', session: student.session }), null,
+    'and their session still works');
+});
+
+test('a stale claim left on a row by an older deployment is cleared at the next login', () => {
+  // Rows in the live sheet today can still carry a pending claim that was
+  // orphaned when the row got paired another way. The next sign-in cleans
+  // it, so the panel stops queueing it and it can never be approved over
+  // the student who actually owns the row.
+  const env = makeEnv({ rows: [['K1', 'Owen Chen', '', 'owen@x.com', '', true, '', '']] });
+  env.ensureAuthColumns_(env.studentsSheet);
+  const seeded = env.findRow_(env.studentsSheet, 'K1');
+  env.setCell_(env.studentsSheet, seeded, 'PendingSub', 'SUBX');
+  env.setCell_(env.studentsSheet, seeded, 'PendingEmail', 'stranger@x.com');
+  assert.strictEqual(env.rowFor('K1').PendingSub, 'SUBX');
+
+  isOk(env.handleGoogleAuth(env.token('owen@x.com', 'SUBO')));
+  assert.strictEqual(env.rowFor('K1').PendingSub, '', 'the stale claim is gone');
+  isErr(env.handleDecideClaim('ADMINSECRET', 'K1', 'approve'), 'no_pending_claim');
+});
+
+test('deleting a student is refused when the attempts count cannot be read', () => {
+  // countAttemptsForKey_ returns -1 there; every guard tested `> 0`, so the
+  // row was deleted and its attempts orphaned.
+  const env = makeEnv({ rows: [['K1', 'Owen Chen', '', 'owen@x.com', new Date(), true, 1, new Date()]] });
+  env.attemptsSheet.appendRow([new Date(), 'K1', 'score', 1200]);
+  const realOpen = env.SpreadsheetApp.openById;
+  env.SpreadsheetApp.openById = function () { throw new Error('sheet unreadable'); };
+  const out = env.handleDeleteStudent('ADMINSECRET', 'K1');
+  env.SpreadsheetApp.openById = realOpen;
+  isErr(out, 'attempts_unreadable');
+  assert.ok(env.rowFor('K1'), 'the row survives');
+});
+
+test('a student who inquires for themselves is not filed as their own parent', () => {
+  // GuardianEmail is who the weekly parent progress email goes to, so this
+  // sent a child their own parent report and recorded no parent at all.
+  const env = makeEnv({ rows: [] });
+  env.provisionLeadNow_({ name: 'Owen Chen', email: 'owen.m@gmail.com', role: 'Student', elapsedMs: 9000 });
+  const key = env.handleAccessRoster('ADMINSECRET').students[0].key;
+  const row = env.rowFor(key);
+  assert.strictEqual(row.GrantedEmail, 'owen.m@gmail.com', 'their own address pre-approves them');
+  assert.strictEqual(row.GuardianEmail, '', 'and no parent is invented');
+  assert.strictEqual(row.Status, 'Ready', 'the sheet column agrees with the panel');
+});
+
+test('a parent inquiry still files the parent, and only the parent', () => {
+  const env = makeEnv({ rows: [] });
+  env.provisionLeadNow_({ name: 'Sarah Chen', email: 'sarah@x.com', role: 'Parent', elapsedMs: 9000 });
+  const key = env.handleAccessRoster('ADMINSECRET').students[0].key;
+  const row = env.rowFor(key);
+  assert.strictEqual(row.GuardianEmail, 'sarah@x.com');
+  assert.strictEqual(row.GrantedEmail, '', 'a parent address must never pre-approve a login');
+  assert.strictEqual(row.Status, 'Inquiry');
+});
+
 test('resetting a login also kills any outstanding invite', () => {
   // Otherwise the reset is theatre: the account just removed still holds a
   // live link straight back into the same row.
@@ -1780,6 +1853,46 @@ test("a valid session cannot be pointed at another student's row", () => {
   const body = { action: 'getProgress', key: 'ZZZ999', session: s };  // Alex asking for Blake
   assert.strictEqual(env.authGuard_(body), null, 'the request itself is valid');
   assert.strictEqual(body.key, 'ABC123', "the key is forced back to the session's own student");
+});
+
+test('a reset locks an already-open tab out of every student action, not just resume', () => {
+  // The whole point of Reset login: the wrong person is IN. A client that
+  // simply never reloads never calls resume, so checking the pairing only
+  // there left them with full read/write on the row for the token's life.
+  const env = makeEnv({ rows: [['ABC123', 'Alex Reed', '', 'parent@x.com', new Date(), true, 1, new Date()]] });
+  const session = env.handleGoogleAuth(env.token('parent@x.com', 'SUBP')).session;
+  assert.strictEqual(env.authGuard_({ action: 'getScoreHistory', session: session }), null, 'works before the reset');
+
+  isOk(env.handleResetStudentAuth('ADMINSECRET', 'ABC123'));
+  env.STUDENT_ACTIONS.forEach(action => {
+    isErr(env.authGuard_({ action: action, session: session }), 'session_revoked');
+  });
+  isErr(env.handleSetName(session, 'Wrong Person'), 'session_revoked');
+});
+
+test('a reset does not disturb a DIFFERENT student who is signed in', () => {
+  const env = makeEnv({ rows: [
+    ['ABC123', 'Alex Reed', '', 'alex@x.com', new Date(), true, 1, new Date()],
+    ['ZZZ999', 'Blake Chen', '', 'blake@x.com', new Date(), true, 1, new Date()]
+  ] });
+  const alex = env.handleGoogleAuth(env.token('alex@x.com', 'SUB1')).session;
+  isOk(env.handleResetStudentAuth('ADMINSECRET', 'ZZZ999'));
+  assert.strictEqual(env.authGuard_({ action: 'getProgress', session: alex }), null);
+});
+
+test('the right student keeps working after claiming a reset row', () => {
+  const env = makeEnv({ rows: [] });
+  const key = env.handleCreateStudent('ADMINSECRET', { guardianEmail: 'parent@x.com' }).key;
+  env.handleSendInvite('ADMINSECRET', key);
+  const t1 = decodeURIComponent(/\?invite=([^\s]+)/.exec(env.sentMail[0].body)[1]);
+  isOk(env.handleClaimInvite(env.token('parent@x.com', 'SUBP', { name: 'Sarah Chen' }), t1));
+  isOk(env.handleResetStudentAuth('ADMINSECRET', key));
+  isOk(env.handleSendInvite('ADMINSECRET', key));
+  const t2 = decodeURIComponent(/\?invite=([^\s]+)/.exec(env.sentMail[env.sentMail.length - 1].body)[1]);
+  const student = env.handleClaimInvite(env.token('owen@x.com', 'SUBO', { name: 'Owen Chen' }), t2);
+  isOk(student);
+  // The session issued AFTER the reset carries the bumped TokenVersion.
+  assert.strictEqual(env.authGuard_({ action: 'getProgress', session: student.session }), null);
 });
 
 test('public actions are not gated', () => {

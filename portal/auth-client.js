@@ -108,12 +108,22 @@ window.MorettiAuth = (function () {
       try {
         var url = (typeof input === 'string') ? input : (input && input.url);
         var base = backendUrl();
-        if (session && base && url && String(url).indexOf(base) === 0 &&
+        /* THE STORED TOKEN, NOT JUST THE IN-MEMORY ONE. `session` is only
+           assigned by handle()/start(), and index.html skips start()
+           entirely when restoreState() has already put the student back
+           after a same-tab refresh -- which is routine, and which mobile
+           browsers do on their own to a backgrounded tab. Reading only the
+           variable meant every request after such a refresh went out with
+           no session at all and came back `unauthorized`: assignments,
+           progress, and a finished diagnostic that then never reached
+           Luca. The store is the durable copy; fall back to it. */
+        var tok = session || readStore();
+        if (tok && base && url && String(url).indexOf(base) === 0 &&
             init && init.body && typeof init.body === 'string' &&
             String(init.method || '').toUpperCase() === 'POST') {
           var payload = JSON.parse(init.body);
           if (payload && payload.action && !payload.adminKey && !payload.session) {
-            payload.session = session;
+            payload.session = tok;
             // Copied, never mutated in place: callers reuse their init
             // objects (markDiagnosticTaken's retry does exactly that), and
             // rewriting one out from under a caller is the kind of bug
@@ -295,6 +305,12 @@ window.MorettiAuth = (function () {
         return 'The server is still finishing your last attempt — wait a moment and try again.';
       case 'network':
         return "Couldn't reach the server. Check your connection and try again, or " + CONTACT + '.';
+      // Raised by the request guard when the pairing behind a token is gone
+      // (a Reset login, or the row re-issued to someone else). Retrying is
+      // hopeless; signing in again is not.
+      case 'session_revoked':
+      case 'unauthorized':
+        return 'Your sign-in is no longer valid \u2014 reload the page and sign in again, or ' + CONTACT + '.';
       default:
         return "That key wasn't recognized. Double-check it, or " + CONTACT + '.';
     }
@@ -561,8 +577,25 @@ window.MorettiAuth = (function () {
     if (!stored) return renderSignIn();
 
     session = stored;
+    // The sign-in pane is the default-visible one and its button slot is
+    // empty until renderSignIn runs, so a slow resume (Apps Script cold
+    // starts run into several seconds) showed a "Sign in" panel with
+    // nothing to click. Say what is happening instead.
+    status('#mta-signin-error', 'Signing you in\u2026');
     return post({ action: 'resume', session: stored }).then(function (data) {
       if (data && data.ok && data.key) { handle(data); return; }
+
+      /* COULD NOT ASK IS NOT A NO. post() turns any failed fetch into
+         {error:'network'}, and this used to treat that exactly like a
+         revoked session -- so one blip on a school wifi, or an Apps Script
+         cold start that times out, permanently deleted a perfectly good
+         login and made the student sign in from scratch. Only a real
+         answer from the server clears the stored token. */
+      if (data && data.error === 'network') {
+        return Promise.resolve(renderSignIn()).then(function () {
+          err('#mta-signin-error', keyErrorMessage('network'));
+        });
+      }
       // Expired, revoked, or unpaired in admin. Not an error worth showing
       // — it is simply time to sign in again.
       session = null;
@@ -593,6 +626,17 @@ window.MorettiAuth = (function () {
      means the retired panel is never painted at all. It is safe to hide
      unconditionally: key-only login is closed server-side, so that panel
      could not log anyone in even if it were shown. */
+  /* INSTALLED AT LOAD, NOT FROM start(). index.html only calls start() when
+     restoreState() did NOT already put a student back -- so after a same-tab
+     refresh (routine, and something mobile browsers do to a backgrounded tab
+     on their own) start() never ran, the wrapper was never installed, and
+     every backend call went out unauthenticated. Installing here makes the
+     session survive a refresh whether or not the sign-in overlay is needed.
+     Safe to do unconditionally: the wrapper only touches POSTs to the
+     backend that carry an `action` and no credentials of their own, and it
+     attaches nothing when there is no stored token. */
+  installFetchWrapper();
+
   (function hideRetiredKeyScreen() {
     try {
       var st = document.createElement('style');

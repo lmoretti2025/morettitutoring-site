@@ -1031,9 +1031,16 @@
         // student gone from the screen -- which looked like the roster had
         // been deleted. Keep what is on screen and say what happened instead.
         if (data && data.error === 'unauthorized') {
-          gateErrorEl.textContent = 'Wrong admin key.';
-          showView('gate');
           try { sessionStorage.removeItem(SESSION_KEY); } catch (e) {}
+          /* The password gate below is retired -- authGuard_ rejects a typed
+             ADMIN_KEY outright now -- so showing it on an expired session
+             stranded Luca in a box that could never let him back in. The
+             Google gate is the only way in, and mtaAdminSignOut re-raises
+             it. The old view is kept purely as a fallback for the case
+             where the sign-in script itself failed to load. */
+          if (typeof window.mtaAdminSignOut === 'function') { window.mtaAdminSignOut(); return false; }
+          gateErrorEl.textContent = 'Your sign-in has expired \u2014 reload the page to sign in again.';
+          showView('gate');
           return false;
         }
         if (currentView === 'gate') gateErrorEl.textContent = 'Could not load the roster just now \u2014 try again.';

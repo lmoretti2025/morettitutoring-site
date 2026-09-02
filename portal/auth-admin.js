@@ -74,6 +74,44 @@
       });
   }
 
+  /* An admin session lasts 14 days, and it can also stop being valid mid-
+     tab if the address is dropped from ADMIN_EMAILS. Every caller used to
+     treat the resulting 'unauthorized' as an ordinary failure: the poll
+     said "could not refresh" once a minute forever, and admin.html's own
+     Refresh fell back to the RETIRED password box, which the backend can
+     no longer accept -- so the only way back in was for Luca to work out
+     for himself that he should reload the page. Hand it to the Google gate
+     instead, which is the one thing that can actually fix it. */
+  function reGateIfSignedOut(data) {
+    if (!data || data.error !== 'unauthorized') return false;
+    if (typeof window.mtaAdminSignOut === 'function') { window.mtaAdminSignOut(); return true; }
+    return false;
+  }
+
+  /* Raw backend codes are not an error message. These are the ones a person
+     can actually do something about; anything else falls back to the code,
+     which still beats nothing when something genuinely unexpected arrives. */
+  var ACTION_ERRORS = {
+    no_pending_claim: 'That request was already decided \u2014 refreshing.',
+    already_paired: 'They have already signed in, so there is nothing to send \u2014 refreshing.',
+    bad_key: 'That row no longer exists \u2014 refreshing.',
+    no_recipient: 'No usable email address on this row. Use Copy link instead.',
+    mail_failed: 'Google would not send the email. Use Copy link instead.',
+    busy_try_again: 'The server was busy with something else. Try that again in a moment.',
+    attempts_unreadable: "Could not read this student's test history, so nothing was deleted. Try again shortly.",
+    network: 'No answer came back \u2014 it may still have gone through. Refreshing to check.',
+    lost_answer: 'No answer came back \u2014 it may still have gone through. Refreshing to check.'
+  };
+  function actionFailure(data) {
+    var code = (data && data.error) || 'unknown error';
+    return ACTION_ERRORS[code] || ('Failed: ' + code);
+  }
+  // Codes that mean the card on screen is stale: the row moved on without
+  // us, or the answer went missing and the write may well have landed.
+  // Either way, replacing the card beats leaving a red line under a button
+  // that is now inviting a duplicate click.
+  var STALE_AFTER = /^(no_pending_claim|already_paired|bad_key|network|lost_answer)$/;
+
   function esc(s) {
     return String(s == null ? '' : s)
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -555,8 +593,10 @@
           refresh();
         }, 1200);
       } else {
-        st.textContent = 'Failed: ' + ((data && data.error) || 'unknown error');
+        if (reGateIfSignedOut(data)) return;
+        st.textContent = actionFailure(data);
         Array.prototype.forEach.call(btns, function (b) { b.disabled = false; });
+        if (data && STALE_AFTER.test(data.error)) refresh();
       }
     });
   }
@@ -598,7 +638,8 @@
         });
         return;
       }
-      st.textContent = 'Failed: ' + ((data && data.error) || 'unknown error');
+      if (reGateIfSignedOut(data)) return;
+      st.textContent = actionFailure(data);
       Array.prototype.forEach.call(btns, function (b) { b.disabled = false; });
     });
   }
@@ -927,6 +968,7 @@
     post({ action: 'accessRoster', adminKey: k }).then(function (data) {
       loading = false;
       if (!data || !data.ok) {
+        if (reGateIfSignedOut(data)) return;
         loadFailed = true;
         if (open) render();
         return;

@@ -8002,7 +8002,14 @@ window.Portal = {
     clearState();
     clearResumeSnapshot(currentStudent && currentStudent.key);
     if (assignPollTimer) { clearInterval(assignPollTimer); assignPollTimer = null; }
-    resetKeyScreen();
+    /* Leave, rather than fall back to the retired key screen. resetKeyScreen()
+       activates #screen-key, which auth-client.js hides unconditionally now
+       that key-only login is gone -- so exiting from inside a test (the two
+       exit controls that are BUTTONS, not links: #dx-exit-btn and
+       #dx-break-exit-btn) left the student on a red nav bar and an
+       otherwise blank page, recoverable only by reloading. The link-based
+       exits already go here; this makes the buttons agree with them. */
+    window.location.href = '../index.html';
   }
   var exitLinkIds = ['nav-logo-exit', 'sidebar-logo-exit', 'nav-exit-link', 'dx-exit-btn', 'dx-break-exit-btn'];
   exitLinkIds.forEach(function (id) {
