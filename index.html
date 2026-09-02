@@ -827,7 +827,12 @@
                  portal/Code.gs, which checks it again server-side). -->
             <div class="hp-field" aria-hidden="true">
               <label for="rf-hp">Leave this field blank</label>
-              <input type="text" id="rf-hp" name="companyWebsite" tabindex="-1" autocomplete="off">
+              <!-- The name is deliberately meaningless. It used to be
+                   "companyWebsite", and browser autofill classified that as a
+                   website/company field and filled it in along with the
+                   parent's name, phone and email -- so on any computer with a
+                   saved address the form looked sent and never was. -->
+              <input type="text" id="rf-hp" name="rf_x7q2" tabindex="-1" autocomplete="off" data-lpignore="true" data-1p-ignore data-form-type="other">
             </div>
             <div class="form-field"><label class="form-label" for="rf-name">Parent Name</label><input class="form-input" type="text" id="rf-name" name="parentName" required></div>
             <div class="form-row">
@@ -979,6 +984,17 @@
       if (!name || !phone || !email || !role || !grade || !topic) { alert('Please fill in every field.'); return; }
       var honeypot = document.getElementById('rf-hp').value;
       var elapsedMs = Date.now() - reserveFormReadyAt;
+      // Autofill can stamp a value into the honeypot at the same moment it
+      // fills the real fields, and a person then submits in good faith. A
+      // bot that fills every field types into it; autofill leaves the
+      // field's autofill styling behind. If the browser says this field was
+      // autofilled, do not hold it against the visitor.
+      if (honeypot) {
+        var hpEl = document.getElementById('rf-hp');
+        [':autofill', ':-webkit-autofill'].forEach(function (sel) {
+          try { if (hpEl.matches(sel)) honeypot = ''; } catch (err) { /* selector unsupported here */ }
+        });
+      }
       // A tripped honeypot or an implausibly fast submit (under 2.5s for a
       // 6-field form) reads as a bot — silently pretend success instead of
       // erroring, so a scripted bot has no signal to react/adapt to, and
