@@ -379,12 +379,9 @@
 <main>
   <div id="gate">
     <div class="eyebrow">Admin</div>
-    <h1>Enter admin key</h1>
-    <p>This page isn't linked from the student portal and shows every student at once — Luca only.</p>
-    <div id="gate-form">
-      <input type="password" id="gate-key" placeholder="Admin key" autocomplete="off">
-      <button id="gate-submit" type="button">View roster</button>
-    </div>
+    <h1>Admin</h1>
+    <p>This page isn't linked from the student portal and shows every student at once — Luca only.
+       Sign in with Google below.</p>
     <div id="gate-checking" style="display:none;">Signing you in&hellip;</div>
     <div id="gate-error"></div>
   </div>
@@ -816,8 +813,6 @@
   // most recent request before touching anything.
   var rosterLoadSeq = 0;
 
-  var gateKeyEl = $('gate-key');
-  var gateSubmitEl = $('gate-submit');
   var gateErrorEl = $('gate-error');
   var summaryRowEl = $('summary-row');
   var bodyEl = $('roster-body');
@@ -1020,10 +1015,9 @@
   // mid-edit because one refresh request happened to time out.
   function loadRoster(key, silent) {
     var seq = ++rosterLoadSeq;
-    if (!silent) { gateSubmitEl.disabled = true; gateErrorEl.textContent = ''; setStatus(''); }
+    if (!silent) { gateErrorEl.textContent = ''; setStatus(''); }
     return postToBackend({ action: 'getRoster', adminKey: key }).then(function (data) {
       if (seq !== rosterLoadSeq) return false; // superseded by a newer load
-      gateSubmitEl.disabled = false;
       setGateChecking(false);
       if (!data || !data.ok) {
         if (silent) return false;
@@ -1058,7 +1052,6 @@
       return true;
     }).catch(function () {
       if (seq !== rosterLoadSeq) return false; // superseded by a newer load
-      gateSubmitEl.disabled = false;
       setGateChecking(false);
       if (silent) return false;
       if (currentView === 'gate') gateErrorEl.textContent = 'Network error \u2014 check your connection and try again.';
@@ -1066,13 +1059,6 @@
       return false;
     });
   }
-
-  gateSubmitEl.addEventListener('click', function () {
-    var key = gateKeyEl.value.trim();
-    if (!key) { gateErrorEl.textContent = 'Enter the admin key.'; return; }
-    loadRoster(key);
-  });
-  gateKeyEl.addEventListener('keydown', function (e) { if (e.key === 'Enter') gateSubmitEl.click(); });
 
   $('nav-roster').addEventListener('click', goToRoster);
   $('nav-allcal').addEventListener('click', openAllCalendar);
@@ -1111,7 +1097,6 @@
   // back on its own if the session turns out to be bad.
   var gateSlowTimer = null;
   function setGateChecking(on) {
-    $('gate-form').style.display = on ? 'none' : '';
     $('gate-checking').style.display = on ? 'block' : 'none';
     $('gate-checking').textContent = 'Signing you in\u2026';
     clearTimeout(gateSlowTimer);

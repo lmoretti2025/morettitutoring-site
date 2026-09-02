@@ -676,35 +676,26 @@ window.MorettiAuth = (function () {
     } catch (e) {}
   }
 
-  /* ═══ SUPPRESS THE RETIRED KEY SCREEN ═══
-     #screen-key is marked `class="screen active"` in index.html's static
-     markup, so the browser paints it as soon as it parses that element --
-     around line 3000 of a 19,000-line file. MorettiAuth.start() does not
-     run until the main script finishes, thousands of lines later, so there
-     is a real window where the OLD "enter your access key" panel is on
-     screen before this overlay covers it. On a fresh load that reads as a
-     flash; after a sign-out (which reloads the page) it is long enough to
-     look like the portal has reverted to the old login.
-
-     This file is loaded BEFORE that markup, so a style rule injected here
-     means the retired panel is never painted at all. It is safe to hide
-     unconditionally: key-only login is closed server-side, so that panel
-     could not log anyone in even if it were shown. */
-  (function hideRetiredKeyScreen() {
+  /* ═══ NO LOGGED-IN CHROME BEFORE SIGN-IN ═══
+     index.html's markup is parsed and painted long before
+     MorettiAuth.start() runs at the end of a 19,000-line file, so anything
+     marked visible in that static markup flashes on screen first. This file
+     is loaded BEFORE that markup, so a style rule injected here lands in
+     time. (It used to suppress the retired key-entry panel too; that markup
+     has since been deleted outright.) */
+  (function hideNavUntilSignedIn() {
     try {
       var st = document.createElement('style');
-      st.id = 'mta-hide-legacy-key-screen';
-      /* #main-nav is the red bar. It is in the static markup too, so on a
-         cold load it paints along with #screen-key and sits there until the
-         overlay covers it -- which reads as the portal flashing its logged-in
-         chrome at someone who has not signed in yet. Hidden by a class on
+      st.id = 'mta-hide-nav-until-signed-in';
+      /* #main-nav is the red bar. On a cold load it paints and sits there
+         until the overlay covers it -- which reads as the portal flashing
+         its logged-in chrome at someone who has not signed in yet. Hidden
+         by a class on
          <html> rather than a bare rule, because it has to come BACK the
          moment a student is handed to the portal (see hide()), and the
          onboarding sequence toggles its own .nav-hidden on the same element
          afterwards. */
-      st.textContent =
-        '#screen-key{display:none !important;}' +
-        'html.mta-auth-pending #main-nav{display:none !important;}';
+      st.textContent = 'html.mta-auth-pending #main-nav{display:none !important;}';
       document.documentElement.classList.add('mta-auth-pending');
       (document.head || document.documentElement).appendChild(st);
     } catch (e) { /* if this fails the overlay still covers it, just later */ }
