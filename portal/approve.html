@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Portal access request &mdash; Moretti Test Prep</title>
+<link rel="icon" href="../favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<!--
+  APPROVAL PAGE. Opened from the "someone is asking for access" email, on
+  Luca's phone, usually within a minute of the request.
+
+  It lives here, on the website, rather than being rendered by Apps Script.
+  Any page an Apps Script web app serves with HtmlService hands its visitor
+  a google.script.run channel straight into the project's functions, and
+  that channel does NOT pass through doPost -- so authGuard_ never sees it.
+  With the deployment set to "Anyone", that made every non-private function
+  callable by anyone who opened the URL. See doGet in Code.gs.
+
+  So: a plain file that talks to the same JSON API as the rest of the
+  portal. The signed token in the URL is the credential; it only ever
+  existed inside an email to Luca's own address.
+-->
+<style>
+  :root { --red:#B0271C; --ink:#1a1a1a; --muted:#767676; }
+  * { box-sizing: border-box; }
+  body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+         max-width:520px; margin:0 auto; padding:28px 20px 60px; color:var(--ink);
+         line-height:1.5; -webkit-text-size-adjust:100%; }
+  h1 { font-size:22px; margin:0 0 18px; }
+  table { border-collapse:collapse; font-size:15px; margin:0 0 18px; width:100%; }
+  td { padding:6px 14px 6px 0; vertical-align:top; }
+  td:first-child { color:var(--muted); white-space:nowrap; width:1%; }
+  .warn { color:var(--muted); font-size:14px; }
+  .alert { background:#FEF3C7; border-left:4px solid #D97706; padding:12px 14px; margin:0 0 18px; }
+  .row { display:flex; gap:10px; margin-top:22px; flex-wrap:wrap; }
+  button { font:inherit; padding:12px 20px; border-radius:6px; border:1px solid #ccc;
+           background:#fff; cursor:pointer; color:var(--ink); }
+  button.primary { background:var(--red); border-color:var(--red); color:#fff; font-weight:600; }
+  button:disabled { opacity:.5; cursor:default; }
+  #status { margin-top:18px; font-size:15px; }
+  .muted { color:var(--muted); }
+</style>
+</head>
+<body>
+<h1 id="head">Portal access request</h1>
+<div id="main" class="muted">Loading&hellip;</div>
+<div id="status"></div>
+
+<script>
+var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwsLMGq3lhBEPObcas0k8gVS67NX9y4wXKG6RgzKtlBOT2SXfREK6vBpvvM19w9s1m6/exec';
+
+function esc(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function $(id) { return document.getElementById(id); }
+function token() {
+  var m = /[?&]claim=([^&#]+)/.exec(window.location.search || '');
+  return m ? decodeURIComponent(m[1]) : '';
+}
+/* A plain-string body keeps this a CORS "simple request". Apps Script web
+   apps do not answer the preflight OPTIONS that a JSON content-type would
+   trigger, which is why every page in this portal posts exactly this way. */
+function post(payload) {
+  return fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) })
+    .then(function (r) { return r.json(); })
+    .catch(function () { return { ok: false, error: 'network' }; });
+}
+function when(iso) {
+  if (!iso) return '';
+  var d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  return d.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+}
+
+var TOKEN = token();
+
+function load() {
+  if (!TOKEN) return expired();
+  post({ action: 'claimInfo', token: TOKEN }).then(function (d) {
+    if (!d || !d.ok) {
+      // A read is safe to retry, unlike the decision below.
+      if (d && d.error === 'network') {
+        $('main').innerHTML = 'Could not reach the server. <button id="again">Try again</button>';
+        $('again').onclick = function () { $('main').textContent = 'Loading…'; $('status').textContent = ''; load(); };
+        return;
+      }
+      return expired();
+    }
+    if (d.state === 'handled') {
+      $('head').textContent = 'Already handled';
+      $('main').innerHTML = '<p>There is no request waiting on key <b>' + esc(d.key) + '</b> any more ' +
+        '&mdash; it has already been approved or declined.</p>';
+      return;
+    }
+    render(d);
+  });
+}
+
+function expired() {
+  $('head').textContent = 'Link expired';
+  $('main').innerHTML =
+    '<p>This approval link is no longer valid &mdash; they expire after 14 days, and each one stops ' +
+    'working once the request has been handled.</p>' +
+    '<p>Open <b>admin.html</b> and use the Portal access panel to review any outstanding requests.</p>';
+}
+
+function render(d) {
+  // Always restate the heading: a retry that follows an error state
+  // would otherwise keep the error's heading above a live request.
+  $('head').textContent = 'Portal access request';
+  $('main').innerHTML =
+    (d.nameMismatch
+      ? '<p class="alert"><b>Check this one.</b> The Google account is named <b>' + esc(d.googleName) +
+        '</b>, but this key is for <b>' + esc(d.rosterName) + '</b>. If a parent signed in on their own ' +
+        'account instead of forwarding the link, decline &mdash; approving would lock the student out of ' +
+        'their own portal.</p>'
+      : '') +
+    '<table>' +
+      '<tr><td>Roster name</td><td><b>' + esc(d.rosterName || '—') + '</b></td></tr>' +
+      '<tr><td>Access key</td><td><b>' + esc(d.key) + '</b></td></tr>' +
+      '<tr><td>Google name</td><td>' + esc(d.googleName || '—') + '</td></tr>' +
+      '<tr><td>Google email</td><td><b>' + esc(d.googleEmail) + '</b></td></tr>' +
+      (d.requestedAt ? '<tr><td>Asked</td><td>' + esc(when(d.requestedAt)) + '</td></tr>' : '') +
+    '</table>' +
+    '<p class="warn">Approve only if that email belongs to the student you gave this key to. ' +
+    'Declining is harmless &mdash; they keep no access either way, and can request again.</p>' +
+    '<div class="row">' +
+      '<button id="approve" class="primary">Approve access</button>' +
+      '<button id="decline">Decline</button>' +
+    '</div>';
+  $('approve').onclick = function () { decide('approve'); };
+  $('decline').onclick = function () { decide('decline'); };
+}
+
+function decide(decision) {
+  var btns = document.querySelectorAll('button');
+  for (var i = 0; i < btns.length; i++) btns[i].disabled = true;
+  $('status').textContent = 'Working…';
+  post({ action: 'decideClaimByToken', token: TOKEN, decision: decision }).then(function (j) {
+    if (j && j.ok) {
+      $('status').textContent = decision === 'approve'
+        ? 'Approved. They are being let in now, and have been emailed.'
+        : 'Declined. Nothing was granted.';
+      return;
+    }
+    /* Never "try again" on a decision whose answer went missing: the write
+       may well have landed. Say so, and point at the one place that can
+       show the truth. */
+    if (j && j.error === 'network') {
+      $('status').textContent = 'No answer came back — the decision may still have gone through. ' +
+        'Check admin.html rather than deciding again.';
+      return;
+    }
+    if (j && j.error === 'no_pending_claim') {
+      $('status').textContent = 'That request was already decided elsewhere.';
+      return;
+    }
+    if (j && j.error === 'already_paired') {
+      $('status').textContent = 'This student has already signed in, so nothing was changed.';
+      return;
+    }
+    $('status').textContent = 'Could not complete: ' + ((j && j.error) || 'unknown error');
+    for (var i = 0; i < btns.length; i++) btns[i].disabled = false;
+  });
+}
+
+load();
+</script>
+</body>
+</html>

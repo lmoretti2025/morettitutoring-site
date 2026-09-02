@@ -1315,6 +1315,85 @@ test('a student who inquires for themselves is not filed as their own parent', (
   assert.strictEqual(row.Status, 'Ready', 'the sheet column agrees with the panel');
 });
 
+test('the same family inquiring twice gets one row and one key, not two', () => {
+  const env = makeEnv({ rows: [] });
+  const lead = { name: 'Sarah Chen', email: 'sarah@x.com', role: 'Parent', elapsedMs: 9000 };
+  env.provisionLeadNow_(lead);
+  env.provisionLeadNow_(lead);           // a retry after a "network error"
+  const roster = env.handleAccessRoster('ADMINSECRET').students;
+  assert.strictEqual(roster.length, 1, 'one family, one row');
+  // They are not yet set up, so the second inquiry still hands Luca the link.
+  const ready = env.sentMail.filter(m => /portal/i.test(m.subject || ''));
+  assert.ok(ready.length >= 2, 'he is still told about the second inquiry');
+});
+
+test('a family already using the portal does not get a fresh row or another invite', () => {
+  const env = makeEnv({ rows: [] });
+  env.provisionLeadNow_({ name: 'Sarah Chen', email: 'sarah@x.com', role: 'Parent', elapsedMs: 9000 });
+  const key = env.handleAccessRoster('ADMINSECRET').students[0].key;
+  env.handleSendInvite('ADMINSECRET', key);
+  const t = decodeURIComponent(/\?invite=([^\s]+)/.exec(env.sentMail[env.sentMail.length - 1].body)[1]);
+  isOk(env.handleClaimInvite(env.token('owen@x.com', 'SUBO', { name: 'Owen Chen' }), t));
+
+  const before = env.sentMail.length;
+  env.provisionLeadNow_({ name: 'Sarah Chen', email: 'sarah@x.com', role: 'Parent', elapsedMs: 9000 });
+  assert.strictEqual(env.handleAccessRoster('ADMINSECRET').students.length, 1, 'still one row');
+  assert.strictEqual(env.sentMail.length, before, 'and no pointless setup email');
+});
+
+test('a dismissed lead who inquires again starts a fresh row', () => {
+  // Dismissing is how a dead lead is recorded; a real new inquiry from that
+  // family should not resurrect it.
+  const env = makeEnv({ rows: [] });
+  env.provisionLeadNow_({ name: 'Sarah Chen', email: 'sarah@x.com', role: 'Parent', elapsedMs: 9000 });
+  const key = env.handleAccessRoster('ADMINSECRET').students[0].key;
+  // handleSetStudentArchived lives in Code.gs, which this sandbox does not
+  // load, and it is also what creates the column. The cell is what the
+  // dedupe actually reads, so make it the same way that handler would.
+  env.studentsSheet.getRange(1, env.studentsSheet.getLastColumn() + 1).setValue('Archived');
+  const dead = env.findRow_(env.studentsSheet, key);
+  env.setCell_(env.studentsSheet, dead, 'Archived', true);
+  assert.strictEqual(env.rowFor(key).Archived, true, 'the row really is dismissed');
+  env.provisionLeadNow_({ name: 'Sarah Chen', email: 'sarah@x.com', role: 'Parent', elapsedMs: 9000 });
+  assert.strictEqual(env.handleAccessRoster('ADMINSECRET').students.length, 2);
+});
+
+test('the approval and setup pages are readable as data, and only with their token', () => {
+  const env = makeEnv({ rows: [['K1', 'Owen Chen', '', '', '', true, '', '']] });
+  isErr(env.handleClaimInfo('garbage'), 'bad_token');
+  isErr(env.handleSetupInfo('garbage'), 'bad_token');
+
+  env.handleClaimKey(env.token('sarah@x.com', 'SUBP', { name: 'Sarah Chen' }), 'K1');
+  const claimLink = /approve\.html\?claim=([^\s"<]+)/.exec(env.sentMail[0].htmlBody || env.sentMail[0].body);
+  assert.ok(claimLink, 'the approval email points at the website page');
+  const info = env.handleClaimInfo(decodeURIComponent(claimLink[1]));
+  isOk(info);
+  assert.strictEqual(info.state, 'pending');
+  assert.strictEqual(info.googleEmail, 'sarah@x.com');
+  assert.strictEqual(info.nameMismatch, true, 'the parent warning survives the move off Apps Script');
+
+  isOk(env.handleDecideClaim('ADMINSECRET', 'K1', 'decline'));
+  assert.strictEqual(env.handleClaimInfo(decodeURIComponent(claimLink[1])).state, 'handled');
+});
+
+test('the setup page can tell "not invited yet" from "invited already"', () => {
+  // Without this the page offered an identical button that silently killed
+  // the invite the family already had.
+  const env = makeEnv({ rows: [] });
+  env.provisionLeadNow_({ name: 'Sarah Chen', email: 'sarah@x.com', role: 'Parent', elapsedMs: 9000 });
+  const setupLink = /setup\.html\?setup=([^\s"<]+)/.exec(env.sentMail[env.sentMail.length - 1].body);
+  assert.ok(setupLink, 'the lead email points at the website page');
+  const tok = decodeURIComponent(setupLink[1]);
+
+  assert.strictEqual(env.handleSetupInfo(tok).state, 'new');
+  isOk(env.handleSetupFromToken(tok, 'link'));
+  assert.strictEqual(env.handleSetupInfo(tok).state, 'invited');
+
+  const t = decodeURIComponent(/\?invite=(.+)$/.exec(env.handleSendInvite('ADMINSECRET', env.handleSetupInfo(tok).key, '', 'link').link)[1]);
+  isOk(env.handleClaimInvite(env.token('owen@x.com', 'SUBO', { name: 'Owen Chen' }), t));
+  assert.strictEqual(env.handleSetupInfo(tok).state, 'claimed');
+});
+
 test('a parent inquiry still files the parent, and only the parent', () => {
   const env = makeEnv({ rows: [] });
   env.provisionLeadNow_({ name: 'Sarah Chen', email: 'sarah@x.com', role: 'Parent', elapsedMs: 9000 });
