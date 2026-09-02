@@ -136,6 +136,13 @@
      read as the same control. */
   .mini { display: inline-block; border: 1px solid var(--border); background: var(--white); color: var(--mid); font-family: var(--hel); font-size: 0.72rem; font-weight: 700; padding: 0.25rem 0.6rem; border-radius: 999px; cursor: pointer; white-space: nowrap; text-decoration: none; line-height: 1.5; }
   .mini:hover { border-color: var(--red); color: var(--red); }
+  .mini.danger { color: var(--red); border-color: rgba(176,39,28,0.35); }
+  .mini.danger:hover { background: var(--red); color: #fff; border-color: var(--red); }
+  .mini:disabled { opacity: 0.55; cursor: default; }
+  .danger-card { border-color: rgba(176,39,28,0.25); margin-top: 2rem; }
+  .danger-card .card-hed { color: var(--red); }
+  .stu-delete-status { font-size: 0.8rem; color: var(--mid); margin-top: 0.75rem; min-height: 1.1em; line-height: 1.5; }
+  .stu-delete-status.error { color: var(--red); font-weight: 600; }
   .mini.solid { background: var(--red); border-color: var(--red); color: #fff; }
   .mini.solid:hover { background: #8f1f16; color: #fff; }
   .mini:disabled { opacity: 0.45; cursor: default; border-color: var(--border); color: var(--faint); }
@@ -463,6 +470,20 @@
         <div id="hw-undated"></div>
       </div>
     </section>
+
+    <!-- Bottom of the page on purpose: this is the one control here that
+         cannot be undone from the admin, so it sits after everything a
+         normal visit needs, not beside Assign homework. Same two-step rule
+         as the Portal access panel: a student with recorded tests is
+         refused first and asked again with the count. -->
+    <div class="card danger-card" id="stu-delete-card">
+      <h2 class="card-hed">Delete this account</h2>
+      <p class="card-sub">Removes the roster row, unlinks their Google sign-in, and revokes their access to the Drive folder. The folder itself and its files are left in Drive. If they have recorded tests you will be asked once more before those scores go too.</p>
+      <div class="stu-actions">
+        <button type="button" class="mini danger" id="stu-delete-btn">Delete account</button>
+      </div>
+      <div class="stu-delete-status" id="stu-delete-status"></div>
+    </div>
   </div>
 
   <!-- ═══ EVERY STUDENT ═══ the week/month as Luca actually works it:
@@ -917,6 +938,64 @@
     if (student) openStudent(student, btn.getAttribute('data-tab') || 'reports');
   });
 
+  /* Delete account, from the student page. Two steps when there is
+     recorded work: the first request is refused with the count and the
+     button becomes "Delete anyway"; only that second click sends force,
+     which removes the Attempts rows with the row. Writes are never retried
+     by postToBackend, so a slow answer cannot delete twice. */
+  var stuDeleteForce = false;
+  function resetDeleteCard() {
+    stuDeleteForce = false;
+    var btn = $('stu-delete-btn');
+    btn.disabled = false;
+    btn.textContent = 'Delete account';
+    $('stu-delete-status').textContent = '';
+    $('stu-delete-status').className = 'stu-delete-status';
+  }
+  $('stu-delete-btn').addEventListener('click', function () {
+    if (!currentStudent) return;
+    var key = currentStudent.key, name = currentStudent.name || key;
+    var status = $('stu-delete-status');
+    var btn = $('stu-delete-btn');
+    var msg = stuDeleteForce
+      ? 'Delete ' + name + ' (' + key + ') AND every recorded test?\n\nThis cannot be undone from here.'
+      : 'Delete ' + name + ' (' + key + ')?\n\nThis removes the roster row and their portal login. Their Drive folder is not deleted.';
+    if (!window.confirm(msg)) return;
+    btn.disabled = true;
+    status.className = 'stu-delete-status';
+    status.textContent = 'Deleting\u2026';
+    var payload = { action: 'deleteStudent', adminKey: adminKey(), key: key };
+    if (stuDeleteForce) payload.force = true;
+    postToBackend(payload).then(function (data) {
+      if (data && data.ok) {
+        allStudents = allStudents.filter(function (s) { return s.key !== key; });
+        renderSummary();
+        renderTable();
+        resetDeleteCard();
+        setStatus('Deleted ' + (data.deletedName || name) + '.');
+        goToRoster();
+        if (window.mtaRefreshAccess) window.mtaRefreshAccess();
+        return;
+      }
+      if (data && data.error === 'has_recorded_work') {
+        var n = data.attempts || 0;
+        stuDeleteForce = true;
+        btn.disabled = false;
+        btn.textContent = 'Delete anyway';
+        status.className = 'stu-delete-status error';
+        status.textContent = 'This student has ' + n + ' recorded test' + (n === 1 ? '' : 's') + '. Deleting removes those scores too. Click again to confirm, or use Hide on the roster to keep the scores and just tuck the student away.';
+        return;
+      }
+      btn.disabled = false;
+      status.className = 'stu-delete-status error';
+      status.textContent = 'Could not delete: ' + ((data && data.error) || 'unknown error') + '.';
+    }).catch(function () {
+      btn.disabled = false;
+      status.className = 'stu-delete-status error';
+      status.textContent = 'Network error \u2014 nothing was deleted. Try again.';
+    });
+  });
+
   document.querySelectorAll('thead th[data-sort]').forEach(function (th) {
     th.addEventListener('click', function () {
       var key = th.getAttribute('data-sort');
@@ -1044,6 +1123,7 @@
   function openStudent(student, tab) {
     currentStudent = student;
     currentDetail = null;
+    resetDeleteCard();
     $('stu-name').firstChild.textContent = student.name;
     $('stu-key').textContent = student.key;
     $('stu-meta').innerHTML = '<span>Loading&hellip;</span>';
