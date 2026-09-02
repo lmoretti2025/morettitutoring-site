@@ -4,6 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
+<!-- The token in the query string is a credential. It is deliberately NOT
+     scrubbed from the address bar the way auth-client.js scrubs ?invite=:
+     this page has no session of its own, so scrubbing would make a plain
+     reload say "link expired". Referrer is blocked instead, which is the
+     part that could leak it off this machine. -->
+<meta name="referrer" content="no-referrer">
 <title>Set up their portal &mdash; Moretti Test Prep</title>
 <link rel="icon" href="../favicon.ico" sizes="16x16 32x32 48x48">
 <link rel="apple-touch-icon" href="../apple-touch-icon.png">
@@ -69,6 +75,23 @@ function post(payload) {
     .then(function (r) { return r.json(); })
     .catch(function () { return { ok: false, error: 'network' }; });
 }
+/* Raw backend codes are not an error message, and this is the phone-first
+   surface: the admin panel has had sentences for these for a while, so the
+   page opened from an email should not be the one printing `busy_try_again`.
+   Anything unmapped still falls through to the code, which beats silence. */
+var PAGE_ERRORS = {
+  busy_try_again: 'The server was busy with something else. Try that again in a moment.',
+  bad_key: 'That student row no longer exists.',
+  no_pending_claim: 'That request was already decided elsewhere.',
+  already_paired: 'They have already signed in, so nothing was changed.',
+  no_recipient: 'No usable email address on this row.',
+  bad_token: 'This link is no longer valid.'
+};
+function failureText(j, fallbackPrefix) {
+  var code = (j && j.error) || 'unknown error';
+  return PAGE_ERRORS[code] || (fallbackPrefix + code);
+}
+
 function when(iso) {
   if (!iso) return '';
   var d = new Date(iso);
@@ -77,11 +100,15 @@ function when(iso) {
 }
 
 var TOKEN = token();
-var INFO = null;
+// Newest load wins: 'Try again' while a slow first request is still out
+// otherwise lets the older answer land last and overwrite a good render.
+var loadSeq = 0;
 
 function load() {
   if (!TOKEN) return expired();
+  var mine = ++loadSeq;
   post({ action: 'setupInfo', token: TOKEN }).then(function (d) {
+    if (mine !== loadSeq) return;
     if (!d || !d.ok) {
       if (d && d.error === 'network') {
         $('main').innerHTML = 'Could not reach the server. <button id="again">Try again</button>';
@@ -90,14 +117,15 @@ function load() {
       }
       if (d && d.error === 'bad_key') {
         $('head').textContent = 'Not found';
+  $('main').className = '';
         $('main').innerHTML = '<p>That roster row no longer exists.</p>';
         return;
       }
       return expired();
     }
-    INFO = d;
     if (d.state === 'claimed') {
       $('head').textContent = 'Already set up';
+  $('main').className = '';
       $('main').innerHTML = '<p><b>' + esc(d.name || d.key) + '</b> is already signed in and using the ' +
         'portal. Nothing to do.</p>';
       return;
@@ -108,6 +136,7 @@ function load() {
 
 function expired() {
   $('head').textContent = 'Link expired';
+  $('main').className = '';
   $('main').innerHTML =
     '<p>This setup link is no longer valid.</p>' +
     '<p>Open <b>admin.html</b> and use the Portal access panel instead.</p>';
@@ -116,6 +145,7 @@ function expired() {
 function render(d) {
   // See approve.html: never inherit a previous state's heading.
   $('head').textContent = 'Set up their portal';
+  $('main').className = '';
   var invited = d.state === 'invited';
   $('main').innerHTML =
     (invited
@@ -176,12 +206,33 @@ function go(deliver) {
       $('status').textContent = 'They have already signed in, so there is nothing to send.';
       return;
     }
+    /* THE WORST CASE ON THIS PAGE. handleSendInvite writes the new nonce
+       BEFORE it calls MailApp, so a send that throws (the daily quota is the
+       realistic cause) has already revoked the link the family were holding
+       and delivered nothing in its place. Saying "could not do that" and
+       re-arming the same button would leave them stranded with a dead link
+       and no signal. Copy-a-link is now the only way to hand one over. */
+    if (j && j.error === 'mail_failed') {
+      $('status').textContent = 'Google would not send that email \u2014 usually the daily sending limit. ' +
+        'The earlier invite link has already been replaced, so use "Copy a new link" below and send it ' +
+        'to them yourself.';
+      var alertBox = document.querySelector('.alert');
+      if (alertBox) {
+        alertBox.innerHTML = '<b>The earlier link is no longer valid.</b> It was replaced when this send ' +
+          'was attempted, and the email did not go out. Copy a new link and send it yourself.';
+      }
+      var mailBtn = $('mail');
+      if (mailBtn) mailBtn.disabled = true;      // sending again would just fail again
+      var linkBtn = $('link');
+      if (linkBtn) linkBtn.disabled = false;
+      return;
+    }
     if (j && j.error === 'no_recipient') {
       $('status').textContent = 'No usable email address on this row — use Copy a link instead.';
       for (var k = 0; k < btns.length; k++) btns[k].disabled = false;
       return;
     }
-    $('status').textContent = 'Could not do that: ' + ((j && j.error) || 'error');
+    $('status').textContent = failureText(j, 'Could not do that: ');
     for (var n = 0; n < btns.length; n++) btns[n].disabled = false;
   });
 }

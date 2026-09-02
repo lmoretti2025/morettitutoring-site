@@ -94,6 +94,35 @@ window.MorettiAuth = (function () {
     try { if (v) localStorage.setItem(STORE, v); else localStorage.removeItem(STORE); } catch (e) {}
   }
 
+  /* index.html's own sessionStorage snapshot. Named here because a dead
+     session has to clear BOTH: that snapshot is what makes index.html skip
+     MorettiAuth.start() after a refresh, so leaving it behind would restore
+     the student into a portal whose every request is refused. */
+  var PORTAL_STATE = 'moretti_portal_state';
+  var SIGNED_OUT = 'mta_signed_out';
+
+  /* THE BACKEND HAS TOLD US THIS SESSION IS OVER. Since the request guard
+     started re-checking the pairing on every action (which is what makes
+     Reset login immediate), a revoked student sitting in an open tab got
+     `session_revoked` from every call -- and nothing anywhere handled it.
+     No message, no sign-in prompt, and refreshing did not help: the portal
+     restores itself from sessionStorage, skips start(), and fails silently
+     again. The tab was unrecoverable without closing it.
+
+     One reload, with both stores cleared, puts them back at the sign-in
+     screen with a reason -- which is the honest outcome whether they were
+     reset by mistake or were the wrong person all along. */
+  var sessionDead = false;
+  function onSessionDead() {
+    if (sessionDead) return;
+    sessionDead = true;
+    session = null;
+    writeStore(null);
+    try { sessionStorage.removeItem(PORTAL_STATE); } catch (e) {}
+    try { sessionStorage.setItem(SIGNED_OUT, 'revoked'); } catch (e) {}
+    try { window.location.reload(); } catch (e) {}
+  }
+
   /* ═══ THE ONE PLACE EVERY BACKEND CALL PICKS UP ITS SESSION ═══
      See the file header for why this is a wrapper and not ~12 edits.
      Everything about it is scoped as tightly as it can be while still
@@ -105,6 +134,7 @@ window.MorettiAuth = (function () {
     if (typeof window.fetch !== 'function' || window.__mtaFetchWrapped) return;
     var original = window.fetch;
     window.fetch = function (input, init) {
+      var credentialled = false;
       try {
         var url = (typeof input === 'string') ? input : (input && input.url);
         var base = backendUrl();
@@ -132,10 +162,28 @@ window.MorettiAuth = (function () {
             for (var k in init) if (Object.prototype.hasOwnProperty.call(init, k)) next[k] = init[k];
             next.body = JSON.stringify(payload);
             init = next;
+            credentialled = true;
           }
         }
       } catch (e) { /* not our request, or not JSON — pass it through untouched */ }
-      return original.call(this, input, init);
+      var out = original.call(this, input, init);
+      /* Only for calls we credentialled: read a COPY so the caller still gets
+         an untouched, unread body. Any failure here is ignored -- this is a
+         safety net, never the reason a request breaks. */
+      if (credentialled) {
+        try {
+          out.then(function (r) {
+            try {
+              r.clone().json().then(function (d) {
+                if (d && d.ok === false &&
+                    (d.error === 'session_revoked' || d.error === 'unauthorized')) onSessionDead();
+              }, function () {});
+            } catch (e) {}
+            return r;
+          }, function () {});
+        } catch (e) {}
+      }
+      return out;
     };
     window.__mtaFetchWrapped = true;
   }
@@ -573,8 +621,22 @@ window.MorettiAuth = (function () {
       return Promise.resolve();
     }
 
+    /* Set by onSessionDead just before the reload that brought us here. */
+    var signedOutReason = null;
+    try {
+      signedOutReason = sessionStorage.getItem(SIGNED_OUT);
+      if (signedOutReason) sessionStorage.removeItem(SIGNED_OUT);
+    } catch (e) {}
+
     var stored = readStore();
-    if (!stored) return renderSignIn();
+    if (!stored) {
+      return Promise.resolve(renderSignIn()).then(function () {
+        if (signedOutReason === 'revoked') {
+          err('#mta-signin-error',
+            'Your access to this portal was reset. Sign in again, or ' + CONTACT + ' if you think that is a mistake.');
+        }
+      });
+    }
 
     session = stored;
     // The sign-in pane is the default-visible one and its button slot is
@@ -597,7 +659,9 @@ window.MorettiAuth = (function () {
         });
       }
       // Expired, revoked, or unpaired in admin. Not an error worth showing
-      // — it is simply time to sign in again.
+      // — it is simply time to sign in again. The status line must go, or
+      // the panel sits there claiming it is still signing them in.
+      status('#mta-signin-error', '');
       session = null;
       writeStore(null);
       return renderSignIn();
@@ -626,17 +690,6 @@ window.MorettiAuth = (function () {
      means the retired panel is never painted at all. It is safe to hide
      unconditionally: key-only login is closed server-side, so that panel
      could not log anyone in even if it were shown. */
-  /* INSTALLED AT LOAD, NOT FROM start(). index.html only calls start() when
-     restoreState() did NOT already put a student back -- so after a same-tab
-     refresh (routine, and something mobile browsers do to a backgrounded tab
-     on their own) start() never ran, the wrapper was never installed, and
-     every backend call went out unauthenticated. Installing here makes the
-     session survive a refresh whether or not the sign-in overlay is needed.
-     Safe to do unconditionally: the wrapper only touches POSTs to the
-     backend that carry an `action` and no credentials of their own, and it
-     attaches nothing when there is no stored token. */
-  installFetchWrapper();
-
   (function hideRetiredKeyScreen() {
     try {
       var st = document.createElement('style');
