@@ -1230,6 +1230,28 @@ test('signing in stamps LastSeenAt; resuming re-stamps only once it has gone sta
   assert.ok(env.rowFor('ABC123').LastSeenAt.getTime() > Date.now() - 60000, 'a stale one is refreshed');
 });
 
+test('an intro-sequence stamp left by a previous pairing does not skip it for the next account', () => {
+  // The row was onboarded (by whoever) a day ago, then reset under a
+  // deployment that did not clear the stamp. The account pairing now must
+  // still be asked -- and once they finish, must NOT be asked again.
+  const dayAgo = new Date(Date.now() - 86400000);
+  const env = makeEnv({ rows: [['K1', 'Owen Chen', '', 'owen@x.com', '', true, 1.5, dayAgo]] });
+  const login = env.handleGoogleAuth(env.token('owen@x.com', 'SUBO'));
+  isOk(login);
+  assert.strictEqual(login.needsOnboarding, true, 'the stamp predates this pairing');
+
+  env.noteOnboarded_('K1');
+  assert.ok(env.rowFor('K1').OnboardedAt.getTime() > dayAgo.getTime(), 'the stale stamp is replaced');
+  assert.strictEqual(env.handleResume(login.session).needsOnboarding, false);
+  env.noteOnboarded_('K1');   // a Settings save later must not keep re-stamping
+});
+
+test('a student who onboarded before the stamp existed is not sent through it again', () => {
+  const env = makeEnv({ rows: [['K2', 'Alex Reed', '', 'alex@x.com', new Date(), true, 1, '']] });
+  const login = env.handleGoogleAuth(env.token('alex@x.com', 'SUBA'));
+  assert.strictEqual(login.needsOnboarding, false);
+});
+
 test('resetting a login also kills any outstanding invite', () => {
   // Otherwise the reset is theatre: the account just removed still holds a
   // live link straight back into the same row.
