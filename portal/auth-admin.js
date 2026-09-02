@@ -153,6 +153,12 @@
       '#mta-access .mta-name{font-weight:600;}',
       '#mta-access .mta-sub{color:var(--mid,rgba(17,17,17,0.58));font-size:0.76rem;margin-top:2px;word-break:break-word;}',
       '#mta-access .mta-meta{color:var(--faint,rgba(17,17,17,0.28));font-size:0.72rem;margin-top:3px;}',
+      /* The onboarding answers. Sits between the key line and the buttons,
+         tinted so it reads as the student's own words rather than as more
+         system metadata. */
+      '#mta-access .mta-onb{color:var(--mid,rgba(17,17,17,0.55));font-size:0.72rem;',
+      'margin-top:5px;line-height:1.5;border-left:2px solid var(--gold,#c9a84c);padding-left:7px;}',
+      '#mta-access .mta-onb b{color:var(--text,#111);font-weight:700;}',
       '#mta-access .mta-acts{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}',
       '#mta-access button.mta-b,#mta-modal button.mta-b{font:inherit;font-size:0.75rem;font-weight:600;',
       'padding:0.4rem 0.75rem;border-radius:999px;border:1px solid var(--border,rgba(17,17,17,0.12));',
@@ -628,10 +634,65 @@
           (s.grade ? ' &middot; ' + esc(s.grade) : '') +
           (s.source ? ' &middot; ' + esc(s.source) : '') +
           (s.subjectOnly ? ' &middot; subject only' : '') + '</div>' +
+        onboardingLine(s) +
         (extra || '') +
         '<div class="mta-acts">' + actions + '</div>' +
         '<div class="mta-status"></div>' +
       '</div>';
+  }
+
+  /* What the student typed during the intro sequence. All of it was
+     already being written to the Students sheet; none of it was visible
+     here, so the only way to read a new student's answers was to open the
+     spreadsheet -- reported as "I'm not seeing any info regarding all the
+     stuff they put in". The auth log deliberately records sign-in events
+     only, so it was never going to show this.
+
+     Rendered as one wrap-around line rather than a table: most of these
+     are blank for most rows (a student answers them once, during
+     onboarding), and empty table cells read as missing data rather than
+     as a question that has not been reached yet. Nothing is emitted at
+     all when every field is empty. */
+  function onboardingLine(s) {
+    var bits = [];
+    if (s.goal) bits.push('wants <b>' + esc(GOAL_LABELS[s.goal] || s.goal) + '</b>');
+    if (s.testDate) bits.push('test ' + esc(shortDate(s.testDate)));
+    if (s.targetScore) bits.push('target <b>' + esc(s.targetScore) + '</b>');
+    // Baseline is only meaningful as a pair, and it is the one number Luca
+    // actually starts planning from.
+    if (s.baselineRw || s.baselineMath) {
+      var total = (Number(s.baselineRw) || 0) + (Number(s.baselineMath) || 0);
+      bits.push('baseline ' + (s.baselineType ? esc(s.baselineType.toUpperCase()) + ' ' : '') +
+        esc(String(total)) + ' (' + esc(s.baselineRw || '?') + ' RW / ' + esc(s.baselineMath || '?') + ' M)');
+    }
+    // 1x is "no accommodation" and is not worth a chip; only a real
+    // multiplier changes how a test gets built.
+    var acc = [];
+    if (s.accomTimeMult && Number(s.accomTimeMult) > 1) acc.push(esc(s.accomTimeMult) + 'x time');
+    if (s.accomBreakMult && Number(s.accomBreakMult) > 1) acc.push(esc(s.accomBreakMult) + 'x breaks');
+    if (acc.length) bits.push('accommodations: ' + acc.join(', '));
+    if (!bits.length) return '';
+    return '<div class="mta-onb">' + bits.join(' &middot; ') + '</div>';
+  }
+
+  var GOAL_LABELS = {
+    sat: 'SAT prep',
+    admissions: 'college admissions',
+    tutoring: 'general tutoring'
+  };
+
+  /* The roster sends ISO; a full timestamp in a dense list is noise.
+     Formatted in UTC deliberately. A test date is a calendar day, not a
+     moment: the sheet stores it midnight UTC, and rendering that in a
+     timezone behind UTC moves it to the previous day -- an SAT on Nov 7
+     displayed as "Nov 6" to a tutor planning around it. */
+  function shortDate(iso) {
+    try {
+      var d = new Date(iso);
+      if (isNaN(d.getTime())) return String(iso);
+      return d.toLocaleDateString(undefined,
+        { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+    } catch (e) { return String(iso); }
   }
 
   // A row with no email can only be delivered as a link, so do not offer a

@@ -1045,7 +1045,20 @@ test('accessRoster returns access fields only — no scores or reports', () => {
   const env = makeEnv({ rows: [['ABC123', 'Alex Reed', '', 'a@x.com', new Date(), true, 1, new Date(), '', 'p@x.com']] });
   const out = env.handleAccessRoster('ADMINSECRET');
   isOk(out);
-  const keys = Object.keys(out.students[0]).join(',');
+  /* This endpoint must never become a general dump of a student's work.
+     The bar is deliberately crude -- a substring match on field names --
+     because it should catch a careless addition, not just the exact
+     columns that existed when it was written.
+
+     The exemptions below are the onboarding answers: numbers the STUDENT
+     typed about themselves during the intro sequence (a target they are
+     aiming for, the PSAT/SAT score they came in with), on an endpoint that
+     already requires a verified admin session. They are not results the
+     portal produced, which is what the guard is actually protecting --
+     graded attempts, reports, per-question analytics. Anything else
+     carrying these words still fails, including a real score column. */
+  const ALLOWED = ['targetScore', 'baselineRw', 'baselineMath', 'baselineType'];
+  const keys = Object.keys(out.students[0]).filter(k => ALLOWED.indexOf(k) === -1).join(',');
   ['Score', 'Report', 'IncorrectQuestions', 'SkillStats', 'Attempt'].forEach(bad => {
     assert.ok(keys.indexOf(bad) === -1, 'must not expose ' + bad + ' — got ' + keys);
   });
@@ -1754,6 +1767,39 @@ test('the opening fade cannot leave the shell invisible for reduced-motion users
      the whole sequence at zero opacity -- a blank dark screen. */
   const m = /prefers-reduced-motion: reduce\) \{\s*#screen-onboard\.is-dark\.onb-opening \.onboard-shell \{ animation: none; opacity: 1; \}/;
   assert.ok(m.test(INDEX_HTML), 'reduced-motion must pin the shell visible, not just disable the animation');
+});
+
+
+test('every column accessRoster returns is actually indexed', () => {
+  /* get() guards with `idx[c] === -1`, but a column missing from the idx
+     list leaves idx[c] UNDEFINED -- which is not -1 -- so it reads
+     data[r][undefined] and returns blank with no error anywhere. 'Goal'
+     shipped that way: the field was in the payload, always empty. This
+     compares the two lists instead of spot-checking one name. */
+  const fn = AUTH_GS.slice(AUTH_GS.indexOf('function handleAccessRoster'));
+  const body = fn.slice(0, fn.indexOf('\nfunction ', 10));
+  const indexed = new Set();
+  const listMatch = body.match(/\[([^\]]*?)\]\.forEach\(function \(c\) \{\s*idx\[c\]/s);
+  assert.ok(listMatch, 'could not find the indexed-column list');
+  (listMatch[1].match(/'([A-Za-z]+)'/g) || []).forEach(q => indexed.add(q.replace(/'/g, '')));
+
+  const used = new Set();
+  (body.match(/get\(i,\s*'([A-Za-z]+)'\)/g) || [])
+    .forEach(m => used.add(m.match(/'([A-Za-z]+)'/)[1]));
+
+  const missing = [...used].filter(c => !indexed.has(c));
+  assert.deepStrictEqual(missing, [],
+    'columns read by get() but never indexed (they silently return blank): ' + missing.join(', '));
+});
+
+test('the roster carries the onboarding answers to the admin panel', () => {
+  // Written to the sheet all along; there was nowhere to see them.
+  ['testDate', 'targetScore', 'baselineRw', 'baselineMath', 'accomTimeMult', 'goal']
+    .forEach(f => assert.ok(new RegExp(f + ':').test(AUTH_GS),
+      'accessRoster must return ' + f));
+  const admin = fs.readFileSync(path.join(__dirname, '..', 'auth-admin.js'), 'utf8');
+  assert.ok(/function onboardingLine/.test(admin), 'the panel must render them');
+  assert.ok(/onboardingLine\(s\)/.test(admin), 'onboardingLine must be called from the row markup');
 });
 
 console.log('\n' + (failed === 0
