@@ -1694,6 +1694,68 @@ test('every student-facing action in Code.gs is listed in STUDENT_ACTIONS', () =
     'these Code.gs actions are ungated — add them to STUDENT_ACTIONS in auth.gs: ' + missing.join(', '));
 });
 
+
+/* ═══ THE DARK ONBOARDING ACT ═══
+   The name question moved out of auth-client.js's white sign-in overlay
+   and into the portal's dark sequence (fade in -> name -> logo). That
+   handoff spans three files and has no single function to unit-test, so
+   these guard the wiring that makes it work -- each one failed at some
+   point while it was being built. */
+
+const AUTH_CLIENT = fs.readFileSync(path.join(__dirname, '..', 'auth-client.js'), 'utf8');
+const INDEX_HTML = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+
+test('the sign-in overlay defers the name question to the onboarding act', () => {
+  /* Without the !data.needsOnboarding guard BOTH ask: the white overlay
+     panel appears in front of the dark sequence it is introducing, the
+     student types their name twice, and the second ask is a no-op because
+     handleSetName never overwrites. */
+  assert.ok(/data\.needsName && !nameAsked && !data\.needsOnboarding/.test(AUTH_CLIENT),
+    'auth-client.js must skip its own name pane when the portal will run onboarding');
+});
+
+test('auth-client exposes setName for the portal name beat to call', () => {
+  // The session lives inside auth-client's closure, so the portal cannot
+  // assemble this request itself.
+  assert.ok(/setName:\s*function/.test(AUTH_CLIENT), 'MorettiAuth.setName must be exported');
+  assert.ok(/MorettiAuth\.setName\(/.test(INDEX_HTML), 'the portal name beat must call it');
+});
+
+test('the name beat exists and comes before the logo', () => {
+  const name = INDEX_HTML.indexOf('id="onb-name"');
+  const splash = INDEX_HTML.indexOf('id="onb-splash"');
+  assert.ok(name !== -1, '#onb-name pane is missing');
+  assert.ok(splash !== -1, '#onb-splash pane is missing');
+  assert.ok(name < splash, 'the name beat must be authored before the logo beat');
+});
+
+test('the backend still tells the client when a name is needed', () => {
+  // The whole beat is keyed on this flag; a rename here silently skips it.
+  assert.ok(/needsName:\s*!cellText_\(row\.Name\)/.test(AUTH_GS),
+    'studentPayload_ must still emit needsName');
+});
+
+test('the nav is hidden without animating into the dark act', () => {
+  /* #main-nav is display:none behind the sign-in overlay, so it becomes
+     visible and untransformed the instant the overlay lifts. Adding
+     .nav-hidden alone animates it from visible to gone -- the red bar
+     flashing across the first onboarding screen that got reported. */
+  assert.ok(/#main-nav\.nav-instant \{ transition: none; \}/.test(INDEX_HTML),
+    '.nav-instant escape hatch is missing');
+  assert.ok(/hideNavInstantly/.test(INDEX_HTML), 'goToOnboardSplash must hide the nav instantly');
+  // The forced reflow is what makes it instant; without it the browser
+  // coalesces both class changes and the transition runs anyway.
+  assert.ok(/void nav\.offsetHeight;/.test(INDEX_HTML),
+    'the reflow between add and remove of .nav-instant is load-bearing');
+});
+
+test('the opening fade cannot leave the shell invisible for reduced-motion users', () => {
+  /* animation:none on a keyframe whose `from` is opacity:0 would strand
+     the whole sequence at zero opacity -- a blank dark screen. */
+  const m = /prefers-reduced-motion: reduce\) \{\s*#screen-onboard\.is-dark\.onb-opening \.onboard-shell \{ animation: none; opacity: 1; \}/;
+  assert.ok(m.test(INDEX_HTML), 'reduced-motion must pin the shell visible, not just disable the animation');
+});
+
 console.log('\n' + (failed === 0
   ? '\x1b[32m' + passed + ' passed\x1b[0m'
   : '\x1b[31m' + failed + ' failed\x1b[0m, ' + passed + ' passed') + '\n');

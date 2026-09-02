@@ -367,7 +367,15 @@ window.MorettiAuth = (function () {
        is genuinely blank (see needsName in auth.gs). It runs here, before
        the handoff, because everything downstream — settle()'s greeting,
        the onboarding welcome, the guardian emails — assumes a real name. */
-    if (data.needsName && !nameAsked) {
+    /* ...unless the portal is about to run its own dark onboarding act,
+       which now opens WITH this question (see #onb-name in index.html).
+       Asking here as well would ask twice, and the first ask would be the
+       ugly one: a white overlay panel in front of the dark sequence it is
+       introducing. needsName is passed through untouched in that case, so
+       the portal knows to show its beat. A student who needs a name but
+       is NOT onboarding (a blank cell on an already-settled row) still
+       gets asked here — that path has no dark act to hand off to. */
+    if (data.needsName && !nameAsked && !data.needsOnboarding) {
       nameAsked = true;
       host.querySelector('#mta-name-sub').textContent =
         'First and last, as you would write it on a test registration.';
@@ -611,6 +619,14 @@ window.MorettiAuth = (function () {
     start: start,
     signOut: signOut,
     session: function () { return session; },
-    isSignedIn: function () { return !!session; }
+    isSignedIn: function () { return !!session; },
+    /* Exposed for the portal's own name beat (#onb-name), which took over
+       this question from the overlay above. The session lives in here, so
+       the write has to go through here too rather than the portal
+       assembling its own request. Resolves to the same student payload
+       every other call in this file returns. */
+    setName: function (name) {
+      return post({ action: 'setName', session: session, name: name });
+    }
   };
 })();
