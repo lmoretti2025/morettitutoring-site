@@ -1,5 +1,5 @@
 /* =========================================================================
-   MORETTI SAT/ACT PRACTICE TESTS — sourced directly from official College
+   MORETTI SAT PRACTICE TESTS — sourced directly from official College
    Board digital-SAT practice tests (the nondigital/linear-form PDFs), per
    Luca's explicit direction. Each test below is built from ONE official
    test's own two modules (English: 33+33; Math: 27+27), scaled down into

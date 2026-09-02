@@ -568,6 +568,29 @@ window.MorettiAuth = (function () {
     } catch (e) {}
   }
 
+  /* ═══ SUPPRESS THE RETIRED KEY SCREEN ═══
+     #screen-key is marked `class="screen active"` in index.html's static
+     markup, so the browser paints it as soon as it parses that element --
+     around line 3000 of a 19,000-line file. MorettiAuth.start() does not
+     run until the main script finishes, thousands of lines later, so there
+     is a real window where the OLD "enter your access key" panel is on
+     screen before this overlay covers it. On a fresh load that reads as a
+     flash; after a sign-out (which reloads the page) it is long enough to
+     look like the portal has reverted to the old login.
+
+     This file is loaded BEFORE that markup, so a style rule injected here
+     means the retired panel is never painted at all. It is safe to hide
+     unconditionally: key-only login is closed server-side, so that panel
+     could not log anyone in even if it were shown. */
+  (function hideRetiredKeyScreen() {
+    try {
+      var st = document.createElement('style');
+      st.id = 'mta-hide-legacy-key-screen';
+      st.textContent = '#screen-key{display:none !important;}';
+      (document.head || document.documentElement).appendChild(st);
+    } catch (e) { /* if this fails the overlay still covers it, just later */ }
+  })();
+
   installFetchWrapper();
 
   return {
