@@ -38,6 +38,21 @@
   var root = null, listEl = null, badgeEl = null, tabEl = null;
   var students = [];
   var open = false, query = '', loading = false, showArchived = false;
+  /* THE POLL MUST NOT REDRAW OVER SOMEBODY'S CLICK. Two separate races, both
+     of which showed up as "I pressed Approve and it went back to how it
+     was":
+
+     busy      counts writes in flight. render() rebuilds the whole list
+               with innerHTML, so a poll landing mid-request replaced the
+               card with a fresh one whose buttons were enabled and whose
+               state was the pre-action state -- one stray second click and
+               the same invite goes out twice. The card's own success text
+               went to a detached node nobody ever saw.
+     rosterSeq makes the NEWEST answer win. refresh() used to bail out while
+               another was loading, so an action's own refresh was dropped
+               and the older, pre-action snapshot landed afterwards and
+               reverted the row on screen for up to a minute. */
+  var busy = 0, rosterSeq = 0, refreshQueued = false;
   var loaded = false;        // has any roster answer ever arrived?
   var loadFailed = false;    // did the most recent attempt fail?
 
@@ -585,12 +600,14 @@
     Array.prototype.forEach.call(btns, function (b) { b.disabled = true; });
     var st = card.querySelector('.mta-status');
     st.textContent = label;
+    busy++;
     post(payload).then(function (data) {
+      busy--;
       if (data && data.ok) {
         st.textContent = done(data);
         setTimeout(function () {
           if (apply) { apply(data); render(); }
-          refresh();
+          refresh(true);
         }, 1200);
       } else {
         if (reGateIfSignedOut(data)) return;
@@ -612,13 +629,15 @@
     Array.prototype.forEach.call(btns, function (b) { b.disabled = true; });
     var st = card.querySelector('.mta-status');
     st.textContent = 'Deleting\u2026';
+    busy++;
     post(payload).then(function (data) {
+      busy--;
       if (data && data.ok) {
         st.textContent = data.deletedName ? 'Deleted ' + data.deletedName + '.' : 'Deleted.';
         setTimeout(function () {
           students = students.filter(function (x) { return x.key !== key; });
           render();
-          refresh();
+          refresh(true);
         }, 1200);
         return;
       }
@@ -956,21 +975,29 @@
     return false;
   }
 
-  function refresh() {
+  function refresh(force) {
     if (gateIsUp()) { if (root) root.style.display = 'none'; return; }
     var k = adminKey();
     // admin.html gates itself behind the admin key; until that gate is
     // passed there is nothing to ask for and nothing worth showing.
     if (!k) { if (root) root.style.display = 'none'; return; }
     if (root) root.style.display = '';
-    if (loading) return;
+    // A forced refresh (one that follows a write) is never dropped; it just
+    // supersedes whatever is in flight.
+    if (loading && !force) { refreshQueued = true; return; }
+    var seq = ++rosterSeq;
     loading = true;
     post({ action: 'accessRoster', adminKey: k }).then(function (data) {
       loading = false;
+      // Superseded by a newer request -- typically the one an action fired
+      // the moment it succeeded. Answering with this older snapshot would
+      // undo what the admin just watched happen.
+      if (seq !== rosterSeq) return;
+      if (refreshQueued) { refreshQueued = false; refresh(true); return; }
       if (!data || !data.ok) {
         if (reGateIfSignedOut(data)) return;
         loadFailed = true;
-        if (open) render();
+        if (open && !busy) render();
         return;
       }
       loaded = true;
@@ -982,7 +1009,7 @@
       badgeEl.textContent = n;
       badgeEl.style.display = n ? '' : 'none';
       tabEl.style.opacity = n ? '1' : '0.75';
-      if (open) render();
+      if (open && !busy) render();
     });
   }
 

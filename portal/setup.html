@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Set up their portal &mdash; Moretti Test Prep</title>
+<link rel="icon" href="../favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<!--
+  ONE-TAP SETUP PAGE, opened from the "new inquiry" email. Same reason as
+  approve.html for living on the website instead of being served by Apps
+  Script: an HtmlService page hands its visitor a google.script.run channel
+  into the project that bypasses doPost's guard entirely. See doGet in
+  Code.gs.
+
+  The one thing this page must get right beyond that: SENDING AGAIN IS NOT
+  FREE. Every send mints a new single-use nonce, which instantly kills the
+  invite link the family already has. So the page reads the row's state
+  first and says plainly when an invite is already outstanding, instead of
+  offering an identical button that quietly destroys it.
+-->
+<style>
+  :root { --red:#B0271C; --ink:#1a1a1a; --muted:#767676; }
+  * { box-sizing: border-box; }
+  body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+         max-width:520px; margin:0 auto; padding:28px 20px 60px; color:var(--ink);
+         line-height:1.5; -webkit-text-size-adjust:100%; }
+  h1 { font-size:22px; margin:0 0 18px; }
+  table { border-collapse:collapse; font-size:15px; margin:0 0 18px; width:100%; }
+  td { padding:6px 14px 6px 0; vertical-align:top; }
+  td:first-child { color:var(--muted); white-space:nowrap; width:1%; }
+  .warn { color:var(--muted); font-size:14px; }
+  .alert { background:#FEF3C7; border-left:4px solid #D97706; padding:12px 14px; margin:0 0 18px; }
+  .row { display:flex; gap:10px; margin-top:22px; flex-wrap:wrap; }
+  button { font:inherit; padding:12px 20px; border-radius:6px; border:1px solid #ccc;
+           background:#fff; cursor:pointer; color:var(--ink); }
+  button.primary { background:var(--red); border-color:var(--red); color:#fff; font-weight:600; }
+  button:disabled { opacity:.5; cursor:default; }
+  #status { margin-top:18px; font-size:15px; }
+  .linkbox { margin-top:12px; padding:12px 14px; background:#f6f6f6; border-radius:6px;
+             font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:13px; word-break:break-all; }
+  .muted { color:var(--muted); }
+</style>
+</head>
+<body>
+<h1 id="head">Set up their portal</h1>
+<div id="main" class="muted">Loading&hellip;</div>
+<div id="status"></div>
+<div id="out"></div>
+
+<script>
+var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwsLMGq3lhBEPObcas0k8gVS67NX9y4wXKG6RgzKtlBOT2SXfREK6vBpvvM19w9s1m6/exec';
+
+function esc(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function $(id) { return document.getElementById(id); }
+function token() {
+  var m = /[?&]setup=([^&#]+)/.exec(window.location.search || '');
+  return m ? decodeURIComponent(m[1]) : '';
+}
+// Plain-string body: a CORS "simple request", which is all an Apps Script
+// web app will answer. Same as every other page in this portal.
+function post(payload) {
+  return fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) })
+    .then(function (r) { return r.json(); })
+    .catch(function () { return { ok: false, error: 'network' }; });
+}
+function when(iso) {
+  if (!iso) return '';
+  var d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+}
+
+var TOKEN = token();
+var INFO = null;
+
+function load() {
+  if (!TOKEN) return expired();
+  post({ action: 'setupInfo', token: TOKEN }).then(function (d) {
+    if (!d || !d.ok) {
+      if (d && d.error === 'network') {
+        $('main').innerHTML = 'Could not reach the server. <button id="again">Try again</button>';
+        $('again').onclick = function () { $('main').textContent = 'Loading…'; $('status').textContent = ''; load(); };
+        return;
+      }
+      if (d && d.error === 'bad_key') {
+        $('head').textContent = 'Not found';
+        $('main').innerHTML = '<p>That roster row no longer exists.</p>';
+        return;
+      }
+      return expired();
+    }
+    INFO = d;
+    if (d.state === 'claimed') {
+      $('head').textContent = 'Already set up';
+      $('main').innerHTML = '<p><b>' + esc(d.name || d.key) + '</b> is already signed in and using the ' +
+        'portal. Nothing to do.</p>';
+      return;
+    }
+    render(d);
+  });
+}
+
+function expired() {
+  $('head').textContent = 'Link expired';
+  $('main').innerHTML =
+    '<p>This setup link is no longer valid.</p>' +
+    '<p>Open <b>admin.html</b> and use the Portal access panel instead.</p>';
+}
+
+function render(d) {
+  // See approve.html: never inherit a previous state's heading.
+  $('head').textContent = 'Set up their portal';
+  var invited = d.state === 'invited';
+  $('main').innerHTML =
+    (invited
+      ? '<p class="alert"><b>An invite is already out.</b> Sent ' + esc(when(d.invitedAt) || 'earlier') +
+        '. Sending another one <b>replaces</b> it &mdash; the link they already have stops working ' +
+        'immediately. Only do this if they never got it, or it has expired.</p>'
+      : '') +
+    '<table>' +
+      '<tr><td>Name</td><td><b>' + esc(d.name || d.guardianName || '—') + '</b></td></tr>' +
+      '<tr><td>Email</td><td><b>' + esc(d.email || '—') + '</b></td></tr>' +
+      '<tr><td>Phone</td><td>' + esc(d.phone || '—') + '</td></tr>' +
+      '<tr><td>Access key</td><td><b>' + esc(d.key) + '</b></td></tr>' +
+    '</table>' +
+    '<p class="warn">The invite must be opened by the <b>student</b> and signed in with the student’s ' +
+    'own Google account &mdash; that becomes their login and is where their files get shared.</p>' +
+    '<div class="row">' +
+      (d.email
+        ? '<button id="mail" class="primary">' + (invited ? 'Send a new invite to ' : 'Email it to ') +
+          esc(d.email) + '</button>'
+        : '') +
+      '<button id="link">' + (invited ? 'Copy a new link' : 'Copy a link to paste') + '</button>' +
+    '</div>';
+  var m = $('mail');
+  if (m) m.onclick = function () { go('email'); };
+  $('link').onclick = function () { go('link'); };
+}
+
+function go(deliver) {
+  var btns = document.querySelectorAll('button');
+  for (var i = 0; i < btns.length; i++) btns[i].disabled = true;
+  $('status').textContent = 'Working…';
+  post({ action: 'setupFromToken', token: TOKEN, deliver: deliver }).then(function (j) {
+    if (j && j.ok) {
+      if (deliver === 'email') {
+        $('status').textContent = 'Sent to ' + j.sentTo + '.';
+      } else {
+        $('status').textContent = 'Copy this and paste it to them:';
+        $('out').innerHTML = '<div class="linkbox">' + esc(j.link) + '</div>';
+        try {
+          navigator.clipboard.writeText(j.link).then(function () {
+            $('status').textContent = 'Copied. Paste it to them:';
+          }, function () {});
+        } catch (e) {}
+      }
+      return;
+    }
+    /* Deliberately NOT "try again", and the buttons stay disabled. The send
+       may well have succeeded with only the reply going missing, and
+       pressing again mints a fresh nonce that kills the link just
+       delivered. */
+    if (j && j.error === 'network') {
+      $('status').textContent = 'No answer came back — the invite may still have been sent. ' +
+        'Check the Portal access panel in admin.html before sending again: sending again replaces ' +
+        'the earlier link.';
+      return;
+    }
+    if (j && j.error === 'already_paired') {
+      $('status').textContent = 'They have already signed in, so there is nothing to send.';
+      return;
+    }
+    if (j && j.error === 'no_recipient') {
+      $('status').textContent = 'No usable email address on this row — use Copy a link instead.';
+      for (var k = 0; k < btns.length; k++) btns[k].disabled = false;
+      return;
+    }
+    $('status').textContent = 'Could not do that: ' + ((j && j.error) || 'error');
+    for (var n = 0; n < btns.length; n++) btns[n].disabled = false;
+  });
+}
+
+load();
+</script>
+</body>
+</html>
