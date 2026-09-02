@@ -555,6 +555,48 @@
     });
   }
 
+  /* Delete is two-step when the student has recorded work. The first
+     request is refused with the count; the card then offers "Delete anyway",
+     and only that second, explicit click sends force:true, which removes
+     the Attempts rows along with the roster row. */
+  function deleteFlow(card, key, force) {
+    var payload = { action: 'deleteStudent', adminKey: adminKey(), key: key };
+    if (force) payload.force = true;
+    var btns = card.querySelectorAll('button');
+    Array.prototype.forEach.call(btns, function (b) { b.disabled = true; });
+    var st = card.querySelector('.mta-status');
+    st.textContent = 'Deleting\u2026';
+    post(payload).then(function (data) {
+      if (data && data.ok) {
+        st.textContent = data.deletedName ? 'Deleted ' + data.deletedName + '.' : 'Deleted.';
+        setTimeout(function () {
+          students = students.filter(function (x) { return x.key !== key; });
+          render();
+          refresh();
+        }, 1200);
+        return;
+      }
+      if (data && data.error === 'has_recorded_work') {
+        var n = data.attempts || 0;
+        st.innerHTML = 'This student has ' + n + ' recorded test' + (n === 1 ? '' : 's') + '. ' +
+          'Deleting removes those scores too. ' +
+          '<button class="mta-b warn" id="mta-del-force">Delete anyway</button> ' +
+          '<button class="mta-b" id="mta-del-keep">Keep</button>';
+        st.querySelector('#mta-del-force').addEventListener('click', function () {
+          if (!window.confirm('Delete ' + key + ' AND their ' + n + ' recorded test' + (n === 1 ? '' : 's') + '?\n\nThis cannot be undone from the panel.')) return;
+          deleteFlow(card, key, true);
+        });
+        st.querySelector('#mta-del-keep').addEventListener('click', function () {
+          st.textContent = '';
+          Array.prototype.forEach.call(btns, function (b) { b.disabled = false; });
+        });
+        return;
+      }
+      st.textContent = 'Failed: ' + ((data && data.error) || 'unknown error');
+      Array.prototype.forEach.call(btns, function (b) { b.disabled = false; });
+    });
+  }
+
   /* Is there actually a login to reset? An inquiry nobody has claimed has
      no pairing and no bound address, so the button would be noise — and a
      destructive-looking button that does nothing is worse than none. */
@@ -737,9 +779,7 @@
                 'This removes the roster row entirely. It is refused if the student has any ' +
                 'recorded tests or scores \u2014 use Dismiss for those instead.\n\n' +
                 'Their Drive folder is NOT deleted; you can remove it yourself if you want it gone.')) return;
-          act(c, 'Deleting\u2026', { action: 'deleteStudent', adminKey: adminKey(), key: key },
-            function (d) { return d.deletedName ? 'Deleted ' + d.deletedName + '.' : 'Deleted.'; },
-            function () { students = students.filter(function (x) { return x.key !== key; }); });
+          deleteFlow(c, key, false);
         } else if (a === 'archive' || a === 'unarchive') {
           act(c, a === 'archive' ? 'Dismissing\u2026' : 'Restoring\u2026',
             { action: 'setStudentArchived', adminKey: adminKey(), key: key, archived: a === 'archive' },
