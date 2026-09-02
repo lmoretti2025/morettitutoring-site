@@ -3187,7 +3187,7 @@ window.Portal = {
     <div class="onb-pane" id="onb-welcome">
       <div class="kicker">Welcome</div>
       <h1 class="panel-hed" id="onb-welcome-hed">Welcome.</h1>
-      <p class="panel-sub">Let's find out exactly where you're starting from &mdash; everything from here is built around that.</p>
+      <p class="panel-sub" id="onb-welcome-sub">Let's find out exactly where you're starting from &mdash; everything from here is built around that.</p>
       <div class="onb-dots"></div>
       <button class="key-btn" data-onb-next>Continue</button>
     </div>
@@ -3200,12 +3200,12 @@ window.Portal = {
         <div class="onb-pillar">
           <span class="menu-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="1.5"/><rect x="9" y="2" width="6" height="3" rx="1"/><path d="M9 12.5l2 2 4-4.5"/></svg></span>
           <div class="onb-pillar-title">Real data first.</div>
-          <div class="onb-pillar-body">Every plan starts with a full diagnostic, not a guess.</div>
+          <div class="onb-pillar-body" id="onb-pillar-1-body">Every plan starts with a full diagnostic, not a guess.</div>
         </div>
         <div class="onb-pillar">
           <span class="menu-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg></span>
           <div class="onb-pillar-title">One plan, built around you.</div>
-          <div class="onb-pillar-body">Luca designs your program from your actual results.</div>
+          <div class="onb-pillar-body" id="onb-pillar-2-body">Luca designs your program from your actual results.</div>
         </div>
         <div class="onb-pillar">
           <span class="menu-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c0-3.5 3.1-6 7-6s7 2.5 7 6"/></svg></span>
@@ -3226,10 +3226,10 @@ window.Portal = {
         <div class="onb-roadmap-line"></div>
         <div class="onb-roadmap-line-fill"></div>
         <div class="onb-roadmap-track">
-          <div class="onb-rstep"><span class="onb-rstep-num">1</span><div class="onb-rstep-title">Diagnostic</div><div class="onb-rstep-body">A full, real, timed test.</div></div>
-          <div class="onb-rstep"><span class="onb-rstep-num">2</span><div class="onb-rstep-title">Your custom plan</div><div class="onb-rstep-body">Built around the results.</div></div>
+          <div class="onb-rstep"><span class="onb-rstep-num">1</span><div class="onb-rstep-title" id="onb-rstep-1-title">Diagnostic</div><div class="onb-rstep-body" id="onb-rstep-1-body">A full, real, timed test.</div></div>
+          <div class="onb-rstep"><span class="onb-rstep-num">2</span><div class="onb-rstep-title">Your custom plan</div><div class="onb-rstep-body" id="onb-rstep-2-body">Built around the results.</div></div>
           <div class="onb-rstep"><span class="onb-rstep-num">3</span><div class="onb-rstep-title">Weekly sessions</div><div class="onb-rstep-body">In person or online.</div></div>
-          <div class="onb-rstep"><span class="onb-rstep-num">4</span><div class="onb-rstep-title">Track progress</div><div class="onb-rstep-body">Every test sharpens the plan.</div></div>
+          <div class="onb-rstep"><span class="onb-rstep-num">4</span><div class="onb-rstep-title">Track progress</div><div class="onb-rstep-body" id="onb-rstep-4-body">Every test sharpens the plan.</div></div>
         </div>
       </div>
       <div class="onb-dots"></div>
@@ -3413,7 +3413,7 @@ window.Portal = {
     <div class="onb-pane" id="onb-handoff">
       <img class="onb-handoff-mark" src="../target-icon-white.png" alt="">
       <h1 class="panel-hed" id="onb-handoff-hed">You're all set.</h1>
-      <p class="panel-sub">Let's see where you're starting from.</p>
+      <p class="panel-sub" id="onb-handoff-sub">Let's see where you're starting from.</p>
       <div class="onb-dots"></div>
       <button class="key-btn" id="onb-start-diagnostic">Start My Diagnostic</button>
       <a href="#" class="key-help" id="onb-later" style="display:block; text-decoration:none;">I'll do this later</a>
@@ -7356,7 +7356,15 @@ window.Portal = {
      every beat's "Continue" routes through; it also renders the progress
      dots and drives them off ONB_STEPS below rather than each pane
      tracking its own position. */
-  var ONB_STEPS = ['onb-welcome', 'onb-pillars', 'onb-roadmap', 'onb-testdate', 'onb-target', 'onb-baseline', 'onb-guardian', 'onb-accom', 'onb-handoff'];
+  // Two sequences, chosen by the "what are you here for?" answer (onbGoal,
+  // set on the dark act). Test date, target score, baseline score and
+  // accommodations are all SAT questions -- a student here for college
+  // admissions or general tutoring never sees them; they go straight from
+  // the roadmap to the guardian step and then the handoff.
+  var ONB_STEPS_SAT = ['onb-welcome', 'onb-pillars', 'onb-roadmap', 'onb-testdate', 'onb-target', 'onb-baseline', 'onb-guardian', 'onb-accom', 'onb-handoff'];
+  var ONB_STEPS_OTHER = ['onb-welcome', 'onb-pillars', 'onb-roadmap', 'onb-guardian', 'onb-handoff'];
+  var ONB_STEPS = ONB_STEPS_SAT;
+  function onbIsSat() { return onbGoal === 'sat' || onbGoal === null; }
   var onboardAuthData = null; // the auth response, held onto until the sequence's final beat actually settles into the app
 
   function onbGoTo(paneId) {
@@ -7442,55 +7450,6 @@ window.Portal = {
 
   function armSplashHint() {
     document.getElementById('onb-splash-hint').classList.add('onb-splash-hint-visible');
-    playOnbChime();
-  }
-
-  /* The logo's arrival, with sound. Synthesised rather than loaded from a
-     file: nothing to download, nothing to license, and no way for a
-     missing asset to turn into a console error on a student's first
-     screen. Four notes of a C-major arpeggio on soft triangle waves,
-     timed against the 2.4s mark animation so the last note lands as the
-     logo settles.
-
-     Everything here is best-effort and silent on failure. Two ways it
-     legitimately never plays, both fine:
-       - Autoplay policy. Browsers refuse audio before a user gesture. On
-         the normal path the student has just clicked Continue on the name
-         beat, so the context is allowed; when the name beat is skipped
-         the logo IS the first screen and there has been no gesture yet,
-         so it stays silent rather than throwing.
-       - No Web Audio at all (old or locked-down browser).
-     Onboarding runs once per student, so this is a once-ever sound. It is
-     deliberately quiet (peak gain 0.06) — someone may well be opening
-     this in a classroom. */
-  function playOnbChime() {
-    try {
-      var Ctx = window.AudioContext || window.webkitAudioContext;
-      if (!Ctx) return;
-      var ctx = new Ctx();
-      if (ctx.state === 'suspended' && ctx.resume) ctx.resume();
-      var t0 = ctx.currentTime + 0.15;   // matches the mark animation's own delay
-      // C5, E5, G5, C6 — a plain major arpeggio. Nothing clever; it needs
-      // to read as a brand sting, not a melody.
-      var notes = [523.25, 659.25, 783.99, 1046.50];
-      notes.forEach(function (hz, i) {
-        var start = t0 + i * 0.18;
-        var osc = ctx.createOscillator();
-        var gain = ctx.createGain();
-        osc.type = 'triangle';
-        osc.frequency.value = hz;
-        // Soft attack, long decay — a hard edge on a sine reads as a
-        // system beep, which is the one thing this must not sound like.
-        gain.gain.setValueAtTime(0.0001, start);
-        gain.gain.exponentialRampToValueAtTime(i === 3 ? 0.06 : 0.045, start + 0.05);
-        gain.gain.exponentialRampToValueAtTime(0.0001, start + (i === 3 ? 1.5 : 0.7));
-        osc.connect(gain).connect(ctx.destination);
-        osc.start(start);
-        osc.stop(start + (i === 3 ? 1.6 : 0.8));
-      });
-      // Release the hardware once the tail has finished.
-      setTimeout(function () { try { ctx.close(); } catch (e) {} }, 3200);
-    } catch (e) { /* no sound, no problem — never block the sequence */ }
   }
 
   /* Beat 0 -> beat 1. The name is written through MorettiAuth (same
@@ -7587,6 +7546,28 @@ window.Portal = {
     var firstName = (data.name || '').split(' ')[0] || 'there';
     document.getElementById('onb-welcome-hed').textContent = 'Welcome, ' + firstName + '.';
     document.getElementById('onb-handoff-hed').textContent = "You're all set, " + firstName + '.';
+    var sat = onbIsSat();
+    ONB_STEPS = sat ? ONB_STEPS_SAT : ONB_STEPS_OTHER;
+    // The light act's copy is written around the diagnostic. A student who
+    // is not here for the SAT gets the same beats with the test taken out
+    // of the wording, and a handoff that opens the portal instead of
+    // offering a test they will never take.
+    document.getElementById('onb-welcome-sub').textContent = sat
+      ? "Let's find out exactly where you're starting from \u2014 everything from here is built around that."
+      : "Let's get a couple of details down \u2014 everything from here is built around you.";
+    document.getElementById('onb-pillar-1-body').textContent = sat
+      ? 'Every plan starts with a full diagnostic, not a guess.'
+      : 'Every plan starts with where you actually are, not a guess.';
+    document.getElementById('onb-pillar-2-body').textContent = sat
+      ? 'Luca designs your program from your actual results.'
+      : 'Luca designs your program around your goals and your coursework.';
+    document.getElementById('onb-rstep-1-title').textContent = sat ? 'Diagnostic' : 'First session';
+    document.getElementById('onb-rstep-1-body').textContent = sat ? 'A full, real, timed test.' : 'We map out where you are and what you need.';
+    document.getElementById('onb-rstep-2-body').textContent = sat ? 'Built around the results.' : 'Built around your goals.';
+    document.getElementById('onb-rstep-4-body').textContent = sat ? 'Every test sharpens the plan.' : 'Every session sharpens the plan.';
+    document.getElementById('onb-handoff-sub').textContent = sat ? "Let's see where you're starting from." : 'Your portal is ready.';
+    document.getElementById('onb-start-diagnostic').textContent = sat ? 'Start My Diagnostic' : 'Open My Portal';
+    document.getElementById('onb-later').style.display = sat ? 'block' : 'none';
     renderOnbDateGrid();
     // Target-score range/placeholder depends on which test(s) this student
     // actually preps for (data.showSat, the same flag the rest of the
@@ -7821,7 +7802,7 @@ window.Portal = {
     if (!onbHasGuardian) {
       onbGuardianName = null;
       onbGuardianEmail = null;
-      onbGoTo('onb-accom');
+      onbAfterGuardian();
       return;
     }
     var nameInput = document.getElementById('onbGuardianNameInput');
@@ -7835,8 +7816,17 @@ window.Portal = {
     document.getElementById('onbGuardianEmailError').style.display = 'none';
     onbGuardianName = nameInput.value.trim() || null;
     onbGuardianEmail = email || null;
-    onbGoTo('onb-accom');
+    onbAfterGuardian();
   });
+  // SAT students still have accommodations to answer; everyone else is
+  // done asking here, so their answers are saved now (standard timing --
+  // there was no accommodations question to say otherwise) and they go
+  // straight to the handoff.
+  function onbAfterGuardian() {
+    if (onbIsSat()) { onbGoTo('onb-accom'); return; }
+    onbSavePrefs(1, 1);
+    onbGoTo('onb-handoff');
+  }
 
   // Beat 7: accommodations. Choosing "Standard" collapses the extended
   // options; choosing "I have accommodations" opens the shared panel
@@ -7885,11 +7875,16 @@ window.Portal = {
     var breakMult = onbAccomHasAccoms ? parseFloat(breakOpt.getAttribute('data-val')) : 1;
     accommodations.timeMult = timeMult;
     accommodations.breakMult = breakMult;
-    // Best-effort, fire-and-forget — same pattern as markDiagnosticTaken()
-    // above. The choice already took effect locally (accommodations var,
-    // just above) regardless of whether this call succeeds, so a network
-    // hiccup here doesn't block the sequence or lose the student's answer
-    // for THIS session; it just might not carry over to a future login.
+    onbSavePrefs(timeMult, breakMult);
+    onbGoTo('onb-handoff');
+  });
+  // Best-effort, fire-and-forget — same pattern as markDiagnosticTaken()
+  // above. The choices already took effect locally regardless of whether
+  // this call succeeds, so a network hiccup here doesn't block the
+  // sequence or lose the student's answers for THIS session; it just
+  // might not carry over to a future login. Called once per onboarding,
+  // from whichever step is the last question on the student's path.
+  function onbSavePrefs(timeMult, breakMult) {
     try {
       fetch(APPS_SCRIPT_URL, {
         method: 'POST',
@@ -7897,8 +7892,7 @@ window.Portal = {
         body: JSON.stringify({ action: 'saveOnboardingPrefs', key: pendingKey, testDate: onbSelectedTestDate, accomTimeMult: timeMult, accomBreakMult: breakMult, baselineType: onbBaselineType, baselineRw: onbBaselineRw, baselineMath: onbBaselineMath, guardianName: onbGuardianName, guardianEmail: onbGuardianEmail, targetScore: onbTargetScore, goal: onbGoal })
       }).catch(function () {});
     } catch (e) {}
-    onbGoTo('onb-handoff');
-  });
+  }
 
   // Beat 8: handoff. This is where the student actually "arrives" —
   // settle() (defined above) is only called now, not at the top of the
@@ -7906,7 +7900,7 @@ window.Portal = {
   // assignments, the countdown, etc.) exists until onboarding is done.
   document.getElementById('onb-start-diagnostic').addEventListener('click', function () {
     settle(onboardAuthData);
-    goToDiagnostic();
+    if (onbIsSat()) goToDiagnostic();
   });
   document.getElementById('onb-later').addEventListener('click', function (e) {
     e.preventDefault();
