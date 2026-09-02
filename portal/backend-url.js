@@ -22,11 +22,11 @@
      portal/math-review.html
      portal/approve.html   portal/setup.html
 
-   portal/Code.gs holds the one unavoidable copy — it is the backend, and
-   its "Assign homework" dialog is served from inside the spreadsheet where
-   this file is not reachable. It asks Apps Script for its own URL at run
-   time rather than hardcoding it, so there is still nothing to keep in
-   sync by hand.
+   portal/Code.gs holds the one unavoidable copy, as `WEB_APP_URL` near the
+   top of that file — it is the backend, and its "Assign homework" dialog is
+   rendered inside the spreadsheet where this file is not reachable. Two
+   places, both named and both commented, instead of nine scattered
+   literals. Change them together.
 
    `portal/tests/verify-deployment.js` reads this file when no URL is given
    on the command line, and `portal/tests/set-client-id.js` rewrites it.
