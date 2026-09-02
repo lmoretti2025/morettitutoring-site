@@ -22,7 +22,8 @@ const path = require('path');
 
 const DIR = path.join(__dirname, '..');
 const ID_FILES  = ['auth.gs', 'auth-client.js', 'auth-admin-signin.js'];
-const URL_FILES = ['index.html', 'math-review.html', 'auth-admin.js', 'auth-admin-signin.js'];
+// The backend URL lives in exactly one file now.
+const URL_FILES = ['backend-url.js'];
 const ID_RE  = /((?:GOOGLE_)?CLIENT_ID\s*=\s*')([^']*)(')/;
 const URL_RE = /https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec/g;
 

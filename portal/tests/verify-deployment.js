@@ -15,7 +15,7 @@
  * a checklist for those at the end of AUTH_INTEGRATION.md.
  *
  * Run:  node portal/tests/verify-deployment.js <exec-url>
- *       (omit the URL and it reads the one in auth-admin.js)
+ *       (omit the URL and it reads the one in backend-url.js)
  *
  * Exits non-zero if anything is wrong.
  */
@@ -27,12 +27,12 @@ const http = require('http');
 
 let URL_ = process.argv[2];
 if (!URL_) {
-  const src = fs.readFileSync(path.join(__dirname, '..', 'auth-admin.js'), 'utf8');
+  const src = fs.readFileSync(path.join(__dirname, '..', 'backend-url.js'), 'utf8');
   const m = /https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec/.exec(src);
   URL_ = m && m[0];
 }
 if (!URL_) {
-  console.error('No deployment URL given and none found in auth-admin.js.');
+  console.error('No deployment URL given and none found in backend-url.js.');
   process.exit(2);
 }
 
@@ -46,7 +46,8 @@ if (!URL_) {
    page keeps hitting the OLD one, unchanged, because the URL baked into
    the four client files never moved. So before testing anything, check the
    URL under test against the URL the portal actually uses. */
-const CLIENTS = ['index.html', 'math-review.html', 'auth-admin.js', 'auth-admin-signin.js'];
+// One definition now, so there is nothing left to disagree.
+const CLIENTS = ['backend-url.js'];
 const shipped = new Map();
 for (const f of CLIENTS) {
   try {

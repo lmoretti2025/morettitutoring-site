@@ -30,7 +30,8 @@
 (function () {
   'use strict';
 
-  var URL_ = 'https://script.google.com/macros/s/AKfycbwsLMGq3lhBEPObcas0k8gVS67NX9y4wXKG6RgzKtlBOT2SXfREK6vBpvvM19w9s1m6/exec';
+  // backend-url.js, loaded first by every page that includes this file.
+  var URL_ = window.APPS_SCRIPT_URL || '';
   var SESSION_KEY = 'moretti_admin_key';   // the entry admin.html writes on unlock
   var POLL_MS = 60000;
   var SOURCES = ['Website', 'Phone call', 'Text message', 'Facebook Messenger', 'Referral', 'In person', 'Other'];
