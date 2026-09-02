@@ -197,6 +197,96 @@
      in this business is most of them. Only one field is required, because
      at the moment Luca fills this in he has just put the phone down and
      that is genuinely all he reliably has. */
+  /* ═══ QUICK ADD ═══ one field, because one field is all that is actually
+     required. Luca is usually mid-text or mid-Messenger when he does this,
+     often on a phone, and the seven-field form was asking him to transcribe
+     things the system finds out by itself: the student's name arrives when
+     they sign in, their email arrives with it, the grade and goal are asked
+     during onboarding. So this takes whatever he has -- an email address or
+     a phone number -- and hands back a link to paste into the conversation
+     he is already in. The full form is still there for when he wants to
+     record more up front. */
+  function quickAddFlow() {
+    var m = modal(
+      '<h3>Quick add</h3>' +
+      '<p class="hint">Paste an email address <b>or</b> a phone number &mdash; whichever you have. ' +
+      'Everything else (name, grade, what they want help with) arrives by itself when the student ' +
+      'signs in.</p>' +
+      '<label>Email or phone</label>' +
+      '<input id="mta-q-in" placeholder="dana@example.com  or  (201) 555-0100" autofocus>' +
+      '<div class="chk"><input type="checkbox" id="mta-q-student">' +
+      '<span>That address is the <b>student\u2019s own</b>, not a parent\u2019s &mdash; ' +
+      'pre-approves them, so they just sign in with no invite at all.</span></div>' +
+      '<div class="err" id="mta-q-err"></div>' +
+      '<div class="acts">' +
+        '<button class="mta-b" id="mta-q-cancel">Cancel</button>' +
+        '<button class="mta-b pri" id="mta-q-go">Add</button>' +
+      '</div>' +
+      '<div id="mta-q-out"></div>');
+
+    var err = m.querySelector('#mta-q-err');
+    var out = m.querySelector('#mta-q-out');
+    m.querySelector('#mta-q-cancel').addEventListener('click', function () { closeModal(); refresh(); });
+    m.querySelector('#mta-q-in').addEventListener('keydown', function (e) { if (e.key === 'Enter') submit(); });
+    m.querySelector('#mta-q-go').addEventListener('click', submit);
+
+    function submit() {
+      var raw = m.querySelector('#mta-q-in').value.trim();
+      var isStudent = m.querySelector('#mta-q-student').checked;
+      if (!raw) { err.textContent = 'Paste an email address or a phone number.'; return; }
+      var looksEmail = raw.indexOf('@') !== -1;
+      if (looksEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(raw)) {
+        err.textContent = "That email doesn't look right \u2014 check it.";
+        return;
+      }
+      // Digits only, so "(201) 555-0100" and "201-555-0100" both pass.
+      if (!looksEmail && raw.replace(/\D/g, '').length < 7) {
+        err.textContent = "That doesn't look like an email address or a phone number.";
+        return;
+      }
+      if (!looksEmail && isStudent) {
+        err.textContent = 'A phone number cannot pre-approve anyone \u2014 untick that, or paste ' +
+          "the student's email address instead.";
+        return;
+      }
+      err.textContent = '';
+      var btn = m.querySelector('#mta-q-go');
+      btn.disabled = true; btn.textContent = 'Adding\u2026';
+
+      var student = { source: 'Text message' };
+      if (looksEmail && isStudent) student.studentEmail = raw;
+      else if (looksEmail) student.guardianEmail = raw;
+      else student.phone = raw;
+
+      post({ action: 'createStudent', adminKey: adminKey(), student: student }).then(function (d) {
+        btn.disabled = false; btn.textContent = 'Add';
+        if (!d || !d.ok) { err.textContent = 'Could not add: ' + ((d && d.error) || 'unknown error'); return; }
+        refresh();
+        if (looksEmail && isStudent) {
+          out.innerHTML = '<p class="hint" style="margin-top:1rem;">Done. <b>' + esc(raw) + '</b> is ' +
+            'pre-approved &mdash; they just sign in. Nothing to send.</p>' +
+            '<div class="keybig">' + esc(d.key) + '</div>';
+          return;
+        }
+        // Mint a link straight away: he is mid-conversation and the whole
+        // point is that he does not have to come back for a second step.
+        post({ action: 'sendInvite', adminKey: adminKey(), key: d.key, deliver: 'link' }).then(function (r) {
+          if (!r || !r.ok) { err.textContent = 'Row added, but could not make a link: ' +
+            ((r && r.error) || 'error') + '. Use Send invite on the row below.'; return; }
+          var msg = inviteMessage(r.link, '');
+          copyText(msg).then(function (ok) {
+            out.innerHTML = '<p class="hint" style="margin-top:1rem;">' +
+              (ok ? 'Message copied &mdash; paste it into your text or Messenger thread.'
+                  : 'Could not copy automatically &mdash; select the text below.') +
+              ' Key <b>' + esc(d.key) + '</b>.</p>' +
+              '<div class="linkbox">' + esc(msg).replace(/\n/g, '<br>') + '</div>';
+          });
+          refresh();
+        });
+      });
+    }
+  }
+
   function newStudentFlow() {
     var m = modal(
       '<h3>New student</h3>' +
@@ -387,7 +477,8 @@
       '<div class="mta-body" id="mta-body" style="display:none;">' +
         '<div class="mta-head">' +
           '<h3>Portal access</h3>' +
-          '<button class="mta-b pri" id="mta-new">+ New student</button>' +
+          '<button class="mta-b pri" id="mta-quick">+ Quick add</button>' +
+          '<button class="mta-b" id="mta-new">Full form</button>' +
           '<button class="mta-b" id="mta-close">Hide</button>' +
         '</div>' +
         '<div class="mta-scroll" id="mta-list"></div>' +
@@ -409,6 +500,7 @@
       root.querySelector('#mta-body').style.display = 'none';
     });
     root.querySelector('#mta-new').addEventListener('click', newStudentFlow);
+    root.querySelector('#mta-quick').addEventListener('click', quickAddFlow);
     return root;
   }
 

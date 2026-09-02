@@ -65,6 +65,7 @@ function makeSheet(headers, rows) {
     getLastColumn() { return grid[0].length; },
     getLastRow() { return grid.length; },
     getDataRange() { pad(); return { getValues: () => grid.map(r => r.slice()) }; },
+    deleteColumn(c) { grid.forEach(r => r.splice(c - 1, 1)); },
     getRange(row, col, numRows, numCols) {
       pad();
       const nr = numRows || 1, nc = numCols || 1;
@@ -113,6 +114,7 @@ function makeEnv(opts) {
   );
   const sheets = { Students: students, Leads: leads };
   const sent = [];
+  const logLines = [];
   const shared = new Set();   // who currently has Drive access, per grant/revoke
   const lockHeld = { v: false };
   const folderName = { v: ' \u2014 ABC123' };  // how Code.gs names a folder for a nameless row
@@ -195,9 +197,16 @@ function makeEnv(opts) {
     NOTIFY_EMAIL: 'luca@example.com',
     getSheet_: () => students,
     getLeadsSheet_: () => leads,
+    // Code.gs's own lead handler, reduced to what the intercept depends on:
+    // it appends to Leads and returns ok:true even for a honeypot hit.
+    handleSubmitLead: (name, phone, email) => {
+      if (!name || !email) return { ok: false, error: 'missing_name_or_email' };
+      leads.appendRow([new Date(), name, email, phone, '', '', '', '', '', '']);
+      return { ok: true };
+    },
     truthy_: v => v === true || (typeof v === 'string' && /^(true|yes|y|1)$/i.test(v.trim())),
     toDateOrNull_: v => { if (!v && v !== 0) return null; const d = (v instanceof Date) ? v : new Date(v); return isNaN(d.getTime()) ? null : d; },
-    Logger: { log() {} },
+    Logger: { log(m) { logLines.push(String(m)); } },
     sheetSafe_: v => String(v == null ? '' : v),
     grantFolderAccess_: (url, email) => { if (url && email) shared.add(email); },
     extractFolderId_: url => String(url || '').split('/').pop(),
@@ -255,6 +264,7 @@ function makeEnv(opts) {
   sandbox.folderName = folderName;
   sandbox.leadsSheet = leads;
   sandbox.studentsSheet = students;
+  sandbox.logLines = logLines;
   sandbox.logSheet = () => sheets.AuthLog;
   sandbox.rowFor = key => {
     const g = students._grid;
@@ -1198,6 +1208,23 @@ test('the two hand-run admin tools are gated in Code.gs itself', () => {
 
 console.log('\nSource encoding\n');
 
+test('Code.gs is pure ASCII too', () => {
+  /* Same reason as auth.gs, and it bit twice: pasting Code.gs into the Apps
+     Script editor mangled all 974 of its special characters, and unlike
+     auth.gs a good number of those sit inside the lead follow-up and weekly
+     guardian email templates -- i.e. text that goes to parents. pbcopy
+     round-trips UTF-8 cleanly, so it is the editor paste that corrupts it;
+     ASCII-only source is immune either way. */
+  const src = fs.readFileSync(path.join(__dirname, '..', 'Code.gs'), 'utf8');
+  const bad = [];
+  src.split('\n').forEach((line, i) => {
+    for (const ch of line) {
+      if (ch.charCodeAt(0) > 127) { bad.push('line ' + (i + 1)); break; }
+    }
+  });
+  assert.deepStrictEqual(bad.slice(0, 5), [], 'non-ASCII in Code.gs: ' + bad.slice(0, 5).join(', '));
+});
+
 test('auth.gs is pure ASCII', () => {
   /* This one is not hypothetical. auth.gs originally contained real em-dash
      characters; copying it into the Apps Script editor mangled them, and the
@@ -1363,6 +1390,163 @@ test('C7. a typo in the student email is caught before a key is issued', () => {
   isErr(env.handleCreateStudent('ADMINSECRET', { studentEmail: 'owen.m@@gmail' }), 'bad_email');
   assert.strictEqual(env.studentsSheet._grid.slice(1).filter(r => r[0]).length, 0,
     'no half-made row is left behind');
+});
+
+console.log('\nOne-tap setup from the inquiry email\n');
+
+test('a website inquiry creates the row immediately and emails a one-tap link', () => {
+  const env = makeEnv({ rows: [], leads: [] });
+  const out = env.authRoute_({ action: 'submitLead', name: 'Dana Marsh', email: 'dana@marsh.com',
+                               phone: '555', role: 'Parent', grade: '11th', topic: 'SAT Prep',
+                               elapsedMs: 9000 });
+  isOk(out);
+  const keys = env.studentsSheet._grid.slice(1).map(r => r[0]).filter(Boolean);
+  assert.strictEqual(keys.length, 1, 'row exists straight away, not in 15 minutes');
+  const row = env.rowFor(keys[0]);
+  assert.strictEqual(row.GuardianEmail, 'dana@marsh.com');
+  assert.strictEqual(row.Status, 'Inquiry', 'still grants nothing');
+  const mail = env.sentMail.find(m => /portal ready to send/.test(m.subject || ''));
+  assert.ok(mail, 'Luca gets the actionable email');
+  assert.ok(mail.body.indexOf('?setup=') !== -1, 'carrying a one-tap setup link');
+  assert.ok(mail.body.indexOf(keys[0]) !== -1, 'and the access key');
+});
+
+test('the one-tap link sends the invite, and only for its own row', () => {
+  const env = makeEnv({ rows: [], leads: [] });
+  env.authRoute_({ action: 'submitLead', name: 'Dana Marsh', email: 'dana@marsh.com',
+                   role: 'Parent', topic: 'SAT Prep', elapsedMs: 9000 });
+  const key = env.studentsSheet._grid.slice(1).map(r => r[0]).filter(Boolean)[0];
+  const token = decodeURIComponent(/\?setup=([^\s]+)/.exec(env.sentMail.at(-1).body)[1]);
+
+  const r = env.handleSetupFromToken(token, 'email');
+  isOk(r);
+  assert.strictEqual(r.sentTo, 'dana@marsh.com');
+  assert.strictEqual(env.rowFor(key).Status, 'Invited');
+
+  isErr(env.handleSetupFromToken('forged.token', 'email'), 'bad_token');
+});
+
+test('the link can hand back a pasteable invite instead of emailing', () => {
+  const env = makeEnv({ rows: [], leads: [] });
+  env.authRoute_({ action: 'submitLead', name: 'Dana Marsh', email: 'dana@marsh.com',
+                   role: 'Parent', elapsedMs: 9000 });
+  const token = decodeURIComponent(/\?setup=([^\s]+)/.exec(env.sentMail.at(-1).body)[1]);
+  const before = env.sentMail.length;
+  const r = env.handleSetupFromToken(token, 'link');
+  isOk(r);
+  assert.ok(/\?invite=/.test(r.link));
+  assert.strictEqual(env.sentMail.length, before, 'and sends nothing');
+});
+
+test('a honeypot submission creates NO row and NO email', () => {
+  // handleSubmitLead answers ok:true for bots on purpose, so the intercept
+  // has to re-check rather than trust that.
+  const env = makeEnv({ rows: [], leads: [] });
+  env.authRoute_({ action: 'submitLead', name: 'Bot', email: 'bot@x.com', hp: 'filled', elapsedMs: 9000 });
+  env.authRoute_({ action: 'submitLead', name: 'Fast Bot', email: 'fast@x.com', elapsedMs: 300 });
+  assert.strictEqual(env.studentsSheet._grid.slice(1).filter(r => r[0]).length, 0, 'no rows');
+  assert.strictEqual(env.sentMail.filter(m => /portal ready/.test(m.subject || '')).length, 0, 'no emails');
+});
+
+test('a student-role inquiry is pre-approved and needs no invite at all', () => {
+  const env = makeEnv({ rows: [], leads: [] });
+  env.authRoute_({ action: 'submitLead', name: 'Owen Marsh', email: 'owen.m@gmail.com',
+                   role: 'Student', topic: 'SAT Prep', elapsedMs: 9000 });
+  const key = env.studentsSheet._grid.slice(1).map(r => r[0]).filter(Boolean)[0];
+  assert.strictEqual(env.rowFor(key).GrantedEmail, 'owen.m@gmail.com');
+  isOk(env.handleGoogleAuth(env.token('owen.m@gmail.com', 'SUBO', { name: 'Owen Marsh' })));
+});
+
+test('the timer does not create a second row for an already-provisioned lead', () => {
+  const env = makeEnv({ rows: [], leads: [] });
+  env.setupLeadProvisioning();
+  env.authRoute_({ action: 'submitLead', name: 'Dana Marsh', email: 'dana@marsh.com',
+                   role: 'Parent', elapsedMs: 9000 });
+  env.provisionNewLeads();
+  assert.strictEqual(env.studentsSheet._grid.slice(1).filter(r => r[0]).length, 1, 'exactly one row');
+});
+
+console.log('\nRetiring dead sheet columns\n');
+
+test('cleanUpRetiredColumns refuses to run if the migration is incomplete', () => {
+  const env = makeEnv({ rows: [
+    ['SUB001', 'Subject Only', '', 'b@x.com', new Date(), false, 1, new Date(), '', '']
+  ] });
+  // SubjectOnly not ticked yet for a non-SAT student -> migration incomplete
+  env.cleanUpRetiredColumns();
+  assert.ok(env.logLines.some(l => /STOPPED/.test(l)), 'refuses: ' + env.logLines.join(' | '));
+  assert.notStrictEqual(env.studentsSheet._grid[0].indexOf('SAT'), -1, 'SAT column still present');
+});
+
+test('after a correct migration it deletes SAT and preserves every other column', () => {
+  const env = makeEnv({ rows: [
+    ['SAT001', 'Sat Student', '', 'a@x.com', new Date(), true, 1, new Date(), '', ''],
+    ['SUB001', 'Subject Only', '', 'b@x.com', new Date(), false, 1, new Date(), '', '']
+  ] });
+  env.migrateToSubjectOnly();
+  const before = env.studentsSheet._grid[0].slice();
+  env.cleanUpRetiredColumns();
+  const after = env.studentsSheet._grid[0];
+  assert.strictEqual(after.indexOf('SAT'), -1, 'SAT gone');
+  before.filter(h => h !== 'SAT').forEach(h => {
+    assert.notStrictEqual(after.indexOf(h), -1, 'kept column: ' + h);
+  });
+  assert.strictEqual(env.rowFor('SUB001').SubjectOnly, true, "and the subject-only student's flag survived");
+  assert.strictEqual(env.rowFor('SAT001').Name, 'Sat Student', 'and row data did not shift');
+});
+
+test('a row created AFTER the migration does not block the cleanup', () => {
+  // Both cells blank is the correct steady state for every new student.
+  // Treating that as "unmigrated" made the cleanup refuse to run on a
+  // healthy sheet -- which is how this was found, on Luca's real roster.
+  const env = makeEnv({ rows: [
+    ['OLD001', 'Sat Student',  '', 'a@x.com', new Date(), true,  1, new Date(), '', ''],
+    ['NEW001', 'New Student',  '', 'b@x.com', new Date(), '',    1, new Date(), '', '']
+  ] });
+  env.migrateToSubjectOnly();
+  env.cleanUpRetiredColumns();
+  assert.ok(!env.logLines.some(l => /STOPPED/.test(l)), 'should not stop: ' + env.logLines.join(' | '));
+  assert.strictEqual(env.studentsSheet._grid[0].indexOf('SAT'), -1, 'SAT deleted');
+});
+
+test('no SubjectOnly column at all blocks the cleanup', () => {
+  const env = makeEnv({ rows: [
+    ['SUB001', 'Subject Only', '', 'b@x.com', new Date(), false, 1, new Date(), '', '']
+  ] });
+  env.cleanUpRetiredColumns();   // migration never run, column absent
+  assert.ok(env.logLines.some(l => /STOPPED/.test(l) && /migrateToSubjectOnly/.test(l)),
+    'got: ' + env.logLines.join(' | '));
+  assert.notStrictEqual(env.studentsSheet._grid[0].indexOf('SAT'), -1, 'nothing deleted');
+});
+
+test('a non-SAT student whose SubjectOnly got cleared blocks the cleanup', () => {
+  // The dangerous case: SAT explicitly unticked (a real subject-only
+  // student) but SubjectOnly blank. Deleting SAT here would silently flip
+  // them to seeing SAT material.
+  const env = makeEnv({ rows: [
+    ['SUB001', 'Subject Only', '', 'b@x.com', new Date(), false, 1, new Date(), '', '']
+  ] });
+  env.migrateToSubjectOnly();                       // creates + ticks SubjectOnly
+  const g = env.studentsSheet._grid;
+  g[1][g[0].indexOf('SubjectOnly')] = '';           // someone clears it by hand
+  env.logLines.length = 0;
+  env.cleanUpRetiredColumns();
+  assert.ok(env.logLines.some(l => /STOPPED/.test(l) && /not migrated/.test(l)),
+    'got: ' + env.logLines.join(' | '));
+  assert.notStrictEqual(g[0].indexOf('SAT'), -1, 'nothing deleted');
+});
+
+test('a row ticked in BOTH columns blocks the cleanup', () => {
+  const env = makeEnv({ rows: [
+    ['ODD001', 'Contradiction', '', 'c@x.com', new Date(), true, 1, new Date(), '', '']
+  ] });
+  env.migrateToSubjectOnly();
+  const g = env.studentsSheet._grid;
+  g[1][g[0].indexOf('SubjectOnly')] = true;         // now ticked in both
+  env.logLines.length = 0;
+  env.cleanUpRetiredColumns();
+  assert.ok(env.logLines.some(l => /STOPPED/.test(l) && /ticked in both/.test(l)),
+    'got: ' + env.logLines.join(' | '));
 });
 
 console.log('\nSessions\n');

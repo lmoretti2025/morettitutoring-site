@@ -2,7 +2,7 @@
    MORETTI DIAGNOSTIC QUESTION BANKS — shared by index.html (the test)
    and report.html (the printable results PDF). Edit questions here.
 
-   SAT only — the ACT program is retired and its banks are deleted.
+   SAT only.
 
    Sections are real, modular, and adaptive, matching the digital SAT's
    actual structure: Module 1 (fixed) -> scored -> Module 2 Easier or
@@ -178,10 +178,7 @@ window.SECTION_BANKS = {
   'math':            { label: 'Math',              module1: window.MATH_MODULE1, module2Easier: window.MATH_MODULE2_EASIER, module2Harder: window.MATH_MODULE2_HARDER }
 };
 
-/* SAT only. The ACT program is retired — its four section banks, its
-   window.PASSAGES map (every entry was an ACT English/Reading passage; SAT
-   R&W bakes its passage into the question's own text), and the whole ACT
-   test format are deleted rather than left unreachable. */
+/* SAT only. */
 window.TEST_FORMATS = {
   SAT: { label: 'SAT', order: ['reading-writing', 'math'] }
 };

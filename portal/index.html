@@ -255,6 +255,17 @@
   @keyframes onbHintFade { to { color: rgba(255,255,255,0.4); } }
   .onb-kicker { font-family: var(--hel); font-size: 0.6rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.7rem; text-align: center; }
 
+  /* "What are you here for?" (onb-goal) — dark-pane cards, so this uses
+     its own light-on-dark styling rather than reusing .onb-accom-card
+     (that component assumes a white background). No is-selected state
+     needed: picking a card advances straight to the next beat, so the
+     card is never seen again after the click that answers it. */
+  .onb-goal-cards { display: flex; flex-direction: column; gap: 0.8rem; margin-top: 1.7rem; text-align: left; }
+  .onb-goal-card { border: 1.5px solid rgba(255,255,255,0.18); border-radius: 12px; padding: 1rem 1.2rem; cursor: pointer; transition: border-color 0.15s var(--ease), background 0.15s var(--ease); }
+  .onb-goal-card:hover, .onb-goal-card:focus-visible { border-color: rgba(255,255,255,0.45); background: rgba(255,255,255,0.05); }
+  .onb-goal-card-title { font-family: var(--hel); font-size: 0.92rem; font-weight: 700; color: #fff; }
+  .onb-goal-card-note { font-size: 0.74rem; color: rgba(255,255,255,0.55); margin-top: 0.2rem; }
+
   .onb-dots { display: flex; justify-content: center; gap: 0.4rem; margin: 1.6rem 0 1rem; }
   .onb-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--border); transition: background 0.2s var(--ease), width 0.2s var(--ease); }
   .onb-dark .onb-dot { background: rgba(255,255,255,0.25); }
@@ -3060,6 +3071,34 @@ window.Portal = {
       <div class="onb-hint" id="onb-splash-hint">Click to continue</div>
     </div>
 
+    <!-- Beat 1b: what this student is here for — one question, still on
+         the dark splash background, before the fade to white (see
+         transitionOnboardToLight()). Picking a card answers and advances
+         in one motion (no separate Continue button — nothing else on this
+         beat needs confirming). Saved as `goal` in the same
+         saveOnboardingPrefs call as everything else in this sequence, so
+         a new student's row already shows why they signed up instead of
+         that sitting blank until it's filled in by hand. -->
+    <div class="onb-pane onb-dark" id="onb-goal">
+      <div class="kicker onb-mid-text">One quick thing</div>
+      <h1 class="panel-hed onb-light-text">What are you here for?</h1>
+      <p class="panel-sub onb-mid-text">This just helps Luca get your plan started on the right foot.</p>
+      <div class="onb-goal-cards">
+        <div class="onb-goal-card" data-onb-goal-card data-val="sat">
+          <div class="onb-goal-card-title">SAT Prep</div>
+          <div class="onb-goal-card-note">Test-day score, from diagnostic to plan.</div>
+        </div>
+        <div class="onb-goal-card" data-onb-goal-card data-val="admissions">
+          <div class="onb-goal-card-title">College Admissions</div>
+          <div class="onb-goal-card-note">Essays, applications, the whole process.</div>
+        </div>
+        <div class="onb-goal-card" data-onb-goal-card data-val="tutoring">
+          <div class="onb-goal-card-title">General Tutoring</div>
+          <div class="onb-goal-card-note">Coursework, a specific class, ongoing support.</div>
+        </div>
+      </div>
+    </div>
+
     <!-- Act 1, beat 2: name/email capture — same fields, same ids, same
          validation/submit logic as the old email-step (see the script
          block below), just restyled dark and relocated here. -->
@@ -4241,9 +4280,8 @@ window.Portal = {
 </div>
 
 <!-- ═══ SCREEN 3c — TEST OVERVIEW (shown once, before the first section's
-     own intro). The "which test are you prepping for?" screen that used to
-     sit here is gone with the ACT program — the diagnostic is the SAT
-     diagnostic, so goToDiagnostic() starts it directly. ═══ -->
+     own intro). There's only ever one diagnostic — the SAT diagnostic —
+     so goToDiagnostic() starts it directly. ═══ -->
 <div class="screen" id="screen-test-overview">
   <div class="panel-wide">
     <div class="kicker" id="overview-kicker">SAT Diagnostic</div>
@@ -5471,8 +5509,8 @@ window.Portal = {
     });
   }
   // Routes straight into the diagnostic. There used to be a "which test
-  // are you prepping for?" screen here; with the ACT program retired there
-  // is only one diagnostic, so this starts it directly.
+  // are you prepping for?" screen here; there's only one diagnostic now,
+  // so this starts it directly.
   function goToDiagnostic() {
     // Entering the DIAGNOSTIC flow, so drop any practice test that was
     // selected earlier in this session. Without this, a student who
@@ -7231,6 +7269,7 @@ window.Portal = {
   function resetKeyScreen() {
     pendingKey = null;
     pendingName = null;
+    onbGoal = null;
     keyInput.value = '';
     emailStepNameInput.value = '';
     emailInput.value = '';
@@ -7301,8 +7340,22 @@ window.Portal = {
   }
   document.getElementById('onb-splash').addEventListener('click', function () {
     // Name and email both come from the verified Google account now, so the
-    // old identity-capture beat has nothing left to ask for.
-    transitionOnboardToLight(onboardAuthData);
+    // old identity-capture beat has nothing left to ask for — straight to
+    // "what are you here for?" instead, still on the dark background.
+    onbGoTo('onb-goal');
+  });
+
+  // Beat 1b: "what are you here for?" — see the HTML comment above this
+  // pane for why it lives here. Picking a card both answers and advances;
+  // the actual write to the sheet happens later, batched into the same
+  // saveOnboardingPrefs call as the rest of this sequence (see its POST
+  // body below).
+  var onbGoal = null; // 'sat' | 'admissions' | 'tutoring' | null
+  document.querySelectorAll('[data-onb-goal-card]').forEach(function (card) {
+    card.addEventListener('click', function () {
+      onbGoal = card.getAttribute('data-val');
+      transitionOnboardToLight(onboardAuthData);
+    });
   });
 
   // Beat 2: name/email capture — unchanged fields/logic from the old
@@ -7642,7 +7695,7 @@ window.Portal = {
       fetch(APPS_SCRIPT_URL, {
         method: 'POST',
         keepalive: true,
-        body: JSON.stringify({ action: 'saveOnboardingPrefs', key: pendingKey, testDate: onbSelectedTestDate, accomTimeMult: timeMult, accomBreakMult: breakMult, baselineType: onbBaselineType, baselineRw: onbBaselineRw, baselineMath: onbBaselineMath, guardianName: onbGuardianName, guardianEmail: onbGuardianEmail, targetScore: onbTargetScore })
+        body: JSON.stringify({ action: 'saveOnboardingPrefs', key: pendingKey, testDate: onbSelectedTestDate, accomTimeMult: timeMult, accomBreakMult: breakMult, baselineType: onbBaselineType, baselineRw: onbBaselineRw, baselineMath: onbBaselineMath, guardianName: onbGuardianName, guardianEmail: onbGuardianEmail, targetScore: onbTargetScore, goal: onbGoal })
       }).catch(function () {});
     } catch (e) {}
     onbGoTo('onb-handoff');
@@ -8950,8 +9003,8 @@ window.Portal = {
   // The real SAT provides a reference sheet on Math only.
   var SECTIONS_WITH_REFERENCE = { 'math': true };
 
-  // Always 'SAT' now that the ACT program is retired. Kept as a variable
-  // rather than inlined because it's what the report payload's `t` field
+  // Always 'SAT'. Kept as a variable rather than inlined because it's
+  // what the report payload's `t` field
   // and every score-history entry's testType are written from, and those
   // records (including ones already stored) are read back by test type.
   var testChoice = null;
@@ -9165,9 +9218,8 @@ window.Portal = {
 
      There used to be a second path here for questions carrying a
      `passageId` into a window.PASSAGES map, with a line-numbered margin
-     gutter and `refNum` highlighting. That was ACT English/Reading
-     machinery — every passage record was an ACT one, and no SAT question
-     ever carried a passageId — so it went with the ACT program. */
+     gutter and `refNum` highlighting. No SAT question ever carried a
+     passageId, so that path was removed. */
   var dxShellEl       = document.getElementById('dx-shell');
   var passagePaneEl   = document.getElementById('dx-passage-pane');
   var passageBodyEl   = document.getElementById('dx-passage-body');
@@ -14861,7 +14913,14 @@ window.Portal = {
         var correct = attempted.filter(function (id) { return p.attempts[id].correct; });
         var acc = attempted.length ? Math.round((correct.length / attempted.length) * 100) : 0;
         var pct = qids.length ? Math.round((attempted.length / qids.length) * 100) : 0;
-        var isDone = attempted.length > 0 && attempted.length === qids.length;
+        // "Completed" means "started" (attempted at least one question in
+        // this skill), not "attempted literally every question" — a
+        // skill's own pool runs from a dozen questions up into the
+        // hundreds (median ~119), so requiring 100% coverage made this
+        // filter dead in practice: "Completed" always came back empty and
+        // "Not completed" always came back as every skill, no matter how
+        // much a student had actually practiced.
+        var isDone = attempted.length > 0;
         return { s: s, attempted: attempted, correct: correct, acc: acc, pct: pct, isDone: isDone };
       }).filter(function (row) {
         if (completedFilter === 'done') return row.isDone;
@@ -15910,8 +15969,20 @@ window.Portal = {
       qModalQuestionPane.appendChild(metaEl);
     }
 
+    // Full Explanation and Save are Question Bank-only — every other
+    // source that opens this same shared modal (a numbered practice
+    // test's or the diagnostic's own results, both via renderNativeReport)
+    // carries a testTitle like "Practice Test 2" or "SAT Diagnostic", not
+    // "Question Bank"/"Question Bank Questions" (the latter comes from
+    // resolveQuestionBankKey_, used when Saved & Mistakes shows a
+    // previously-saved QB question). Matched as a prefix rather than an
+    // exact string because those are the two different testTitles a real
+    // QB row can carry depending on whether it arrived via the live
+    // runner or via resolveQuestionBankKey_.
+    var isQbRow = /^Question Bank/.test(r.testTitle || '');
+
     modalExplainOpen = false;
-    if (q.explanation) {
+    if (isQbRow && q.explanation) {
       var explainBlock = document.createElement('div');
       explainBlock.className = 'q-modal-explain-block';
       explainBlock.id = 'q-modal-explain-block';
@@ -15929,7 +16000,7 @@ window.Portal = {
     // `data` — this modal is shared with contexts (Saved & Mistakes) that
     // have no single report `data` to read that from, and every row
     // already knows its own source test either way.
-    if (r.key) {
+    if (isQbRow && r.key) {
       qModalSaveBtn.style.display = '';
       var paintModalSaveBtn = function () {
         var isSaved = qModalIsSaved(r.key);

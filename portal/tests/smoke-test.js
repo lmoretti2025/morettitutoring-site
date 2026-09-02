@@ -99,7 +99,7 @@ function runInSandbox(code, exportNames) {
 
 // ═══════════════════════════════════════════════════════════════════════
 // 1. SCORE CURVES — index.html and report.html each keep their own copy
-//    (by design, per the comment at index.html's SCORE_ACT_CURVE — report.html
+//    (by design, per the comment at index.html's SCORE_RW_CURVE — report.html
 //    rebuilds sections from a base64 payload instead of live state, "different
 //    inputs, same math"). If one gets edited and the other doesn't, scores
 //    silently diverge between the in-app report and the emailed one.
@@ -109,7 +109,6 @@ section('Score curves (index.html vs report.html)');
 // index.html names its versions with a "SCORE_" prefix and calls the
 // interpolators scoreScaleFromPct/scoreModuleWeightFromPct/scoreSatSectionScore.
 const idxCode = [
-  extractArray(INDEX_HTML, 'SCORE_ACT_CURVE'),
   extractArray(INDEX_HTML, 'SCORE_RW_CURVE'),
   extractArray(INDEX_HTML, 'SCORE_MATH_CURVE'),
   extractLineStartingWith(INDEX_HTML, 'var SCORE_RW_MODULE_WEIGHT_CURVE'),
@@ -120,14 +119,13 @@ const idxCode = [
   extractFunction(INDEX_HTML, 'scoreSatSectionScore'),
 ].join('\n');
 const idxScoring = runInSandbox(idxCode, [
-  'SCORE_ACT_CURVE', 'SCORE_RW_CURVE', 'SCORE_MATH_CURVE',
+  'SCORE_RW_CURVE', 'SCORE_MATH_CURVE',
   'scoreScaleFromPct', 'scoreSatSectionScore',
 ]);
 
-// report.html names its versions ACT_CURVE/RW_CURVE/MATH_CURVE and calls the
+// report.html names its versions RW_CURVE/MATH_CURVE and calls the
 // interpolators scaleFromPct/moduleWeightFromPct/satSectionScore.
 const reportCode = [
-  extractArray(REPORT_HTML, 'ACT_CURVE'),
   extractArray(REPORT_HTML, 'RW_CURVE'),
   extractArray(REPORT_HTML, 'MATH_CURVE'),
   extractLineStartingWith(REPORT_HTML, 'var RW_MODULE_WEIGHT_CURVE'),
@@ -138,7 +136,7 @@ const reportCode = [
   extractFunction(REPORT_HTML, 'satSectionScore'),
 ].join('\n');
 const reportScoring = runInSandbox(reportCode, [
-  'ACT_CURVE', 'RW_CURVE', 'MATH_CURVE',
+  'RW_CURVE', 'MATH_CURVE',
   'scaleFromPct', 'satSectionScore',
 ]);
 
@@ -147,9 +145,6 @@ test('SAT R&W curve is identical in both files', () => {
 });
 test('SAT Math curve is identical in both files', () => {
   sameValue(idxScoring.SCORE_MATH_CURVE, reportScoring.MATH_CURVE);
-});
-test('ACT composite curve is identical in both files', () => {
-  sameValue(idxScoring.SCORE_ACT_CURVE, reportScoring.ACT_CURVE);
 });
 
 // Known fixture points (independent of the curve arrays above — these are

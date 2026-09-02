@@ -21,18 +21,24 @@
      for values this file already had under other names (#fff/--ink/
      'Poppins'/'Caladea'), added so CSS ported straight from index.html's
      report redesign (which uses those names) works unmodified. */
-  :root { --red:#EF4444; --gold:#C9A84C; --ink:#1a1a1a; --mid:rgba(17,17,17,0.6); --faint:rgba(17,17,17,0.32); --border:rgba(17,17,17,0.12); --bg:#f2f2f2; --green:#16A34A; --tan:#A97C50; --white:#fff; --text:#1a1a1a; --hel:'Poppins',sans-serif; --display:'Caladea',Georgia,serif; --shadow: 0 2px 16px rgba(17,17,17,0.055); }
+  :root { --red:#EF4444; --gold:#C9A84C; --ink:#1a1a1a; --mid:rgba(17,17,17,0.6); --faint:rgba(17,17,17,0.32); --border:rgba(17,17,17,0.12); --bg:#f2f2f2; --green:#16A34A; --tan:#A97C50; --white:#fff; --text:#1a1a1a; --hel:'Poppins',sans-serif; --display:'Caladea',Georgia,serif; --shadow: 0 2px 16px rgba(17,17,17,0.055); --embed-col: 960px; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Poppins', sans-serif; font-weight: 300; color: var(--ink); background: #e8e4dc; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .page { width: 8.5in; min-height: 11in; margin: 24px auto; background: #fff; padding: 0.6in 0.65in; box-shadow: 0 10px 40px rgba(0,0,0,0.15); }
   .toolbar { max-width: 8.5in; margin: 16px auto 0; display: flex; justify-content: flex-end; gap: 10px; }
   /* Seamless-in-portal mode (see the embedded-detection script right
-     after <body> opens) — strips exactly the styling that makes .page
-     read as a printable document sitting on a desk (fixed 8.5in width,
-     drop shadow, cream margin gutter around a white rectangle) so it
-     instead just flows as a plain content panel, full width, no visible
-     frame — the same "part of the page" treatment every other screen in
-     the portal gets. Deliberately leaves .page's own white background
+     after <body> opens) — strips the styling that makes .page read as a
+     printable document sitting on a desk (rigid 8.5in width, drop
+     shadow, cream margin gutter) so it flows as a plain content panel,
+     the same "part of the page" treatment every other screen in the
+     portal gets. It still holds a --embed-col measure and centers,
+     though: unpinned from 8.5in the layout stretches to whatever the
+     admin window is, and every fixed-px type size and grid in here was
+     drawn against a page-width column, so on a wide monitor a stretched
+     report reads as blown-up and sparse rather than roomy. 960px is a
+     little more generous than the print measure without leaving the
+     range these blocks were designed for; below it the page is simply
+     full width. Deliberately leaves .page's own white background
      alone rather than trying to match it to the portal's cream body:
      every card inside (.section-card, .bridge-wrap, .topics-list, etc.)
      was built assuming a white backdrop and has no fill color of its
@@ -40,8 +46,9 @@
      "boxed white document" for "boxed transparent cards with no visible
      card," which reads as more broken, not less. */
   body.embedded { background: transparent; }
-  body.embedded .page { width: 100%; max-width: none; min-height: 0; margin: 0; padding: 1.75rem clamp(1rem, 4vw, 2.75rem) 3rem; box-shadow: none; }
-  body.embedded .toolbar { max-width: none; margin: 0; padding: 14px clamp(1rem, 4vw, 2.75rem) 0; }
+  body.embedded .page { width: 100%; max-width: var(--embed-col); min-height: 0; margin: 0 auto; padding: 1.5rem clamp(1rem, 3vw, 2rem) 3rem; box-shadow: none; }
+  body.embedded .toolbar { max-width: var(--embed-col); margin: 0 auto; padding: 14px clamp(1rem, 3vw, 2rem) 0; }
+  body.embedded #demo-banner { max-width: var(--embed-col) !important; }
   .toolbar button { background: var(--red); color: #fff; border: none; font-family: 'Poppins'; font-weight: 600; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; padding: 10px 22px; cursor: pointer; }
   .hdr { display: flex; align-items: center; gap: 16px; border-bottom: 3px solid var(--red); padding-bottom: 14px; margin-bottom: 18px; }
   .hdr img { height: 40px; }
@@ -904,7 +911,7 @@
   // top of the modal ("Math", "Math – Module 2"), so older saved reports
   // still get the calculator instead of silently losing it.
   function qModalIsMathRow(r) {
-    if (r && r.sectionKey) return /^(math|act-math)$/.test(r.sectionKey);
+    if (r && r.sectionKey) return r.sectionKey === 'math';
     return /math/i.test(modalLabel || '');
   }
 
@@ -991,18 +998,13 @@
       qModalQuestionPane.appendChild(timing);
     }
 
+    // Full Explanation is Question Bank-only (see the identical gate in
+    // index.html's own copy of this modal) — this report is always a
+    // diagnostic's or a numbered practice test's results, never Question
+    // Bank, so it's unconditionally hidden here rather than gated on a
+    // testTitle check that would never come out true anyway.
     modalExplainOpen = false;
-    if (q.explanation) {
-      var explainBlock = document.createElement('div');
-      explainBlock.className = 'q-modal-explain-block';
-      explainBlock.id = 'q-modal-explain-block';
-      explainBlock.innerHTML = '<div class="pb-explain-hed">Full Explanation</div>' + q.explanation;
-      qModalQuestionPane.appendChild(explainBlock);
-      qModalExplainBtn.style.display = '';
-      qModalExplainBtn.textContent = 'Explanation';
-    } else {
-      qModalExplainBtn.style.display = 'none';
-    }
+    qModalExplainBtn.style.display = 'none';
 
     qModalHideToggle.checked = modalHideAnswer;
     qModalHideChoicesToggle.checked = modalHideChoices;
