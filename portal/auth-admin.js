@@ -37,7 +37,7 @@
 
   var root = null, listEl = null, badgeEl = null, tabEl = null;
   var students = [];
-  var open = false, query = '', loading = false;
+  var open = false, query = '', loading = false, showArchived = false;
 
   function adminKey() {
     try { return sessionStorage.getItem(SESSION_KEY); } catch (e) { return null; }
@@ -524,7 +524,9 @@
      no pairing and no bound address, so the button would be noise — and a
      destructive-looking button that does nothing is worse than none. */
   function canReset(s) {
-    return s.status === 'Active' || !!s.grantedEmail;
+    // Anything with an account paired, an address bound, or a claim waiting.
+    // A brand-new Inquiry has none of those, so the button would do nothing.
+    return s.status === 'Active' || s.status === 'Ready' || !!s.grantedEmail || !!s.pending;
   }
 
   function card(s, actions, extra) {
@@ -563,16 +565,19 @@
   }
 
   function render() {
-    var needs = [], waiting = [];
+    /* Two separate jobs, and conflating them is what made working rows look
+       missing. The QUEUE (Needs you / Invited) stays strictly things to act
+       on -- 'Ready' and 'Active' are correctly absent from it, since both
+       resolve without Luca. But a panel that shows only a queue offers no
+       way to confirm a row exists at all, so a lead that provisioned
+       perfectly reads as "nothing was created". Everything else therefore
+       gets its own section below the queue: visible, but not shouting. */
+    var needs = [], waiting = [], settled = [];
     students.forEach(function (s) {
-      // Archived students are retired; they belong in admin.html's roster
-      // history, never in a queue of things to do.
-      if (s.archived) return;
+      if (s.archived && !showArchived) return;
       if (s.pending || s.status === 'Inquiry') needs.push(s);
       else if (s.status === 'Invited') waiting.push(s);
-      // 'Ready' is deliberately absent from both: an address is on file, so
-      // the student pairs by themselves the moment they sign in. Nothing
-      // for Luca to do, so nothing shown. Still reachable via search.
+      else settled.push(s);                       // Ready + Active
     });
 
     var html = '<div class="mta-sec">Needs you</div>';
@@ -588,6 +593,9 @@
           '<br>Approve only if that is the student this key is for.</div>');
       } else {
         html += card(s, inviteButtons(s, 'Send invite') +
+          (s.archived
+            ? '<button class="mta-b" data-act="unarchive">Restore</button>'
+            : '<button class="mta-b" data-act="archive">Dismiss</button>') +
           (canReset(s) ? '<button class="mta-b warn" data-act="reset">Reset login</button>' : ''));
       }
     });
@@ -600,6 +608,25 @@
           '<div class="mta-meta">sent ' + esc(ago(s.inviteSentAt)) +
           ' &middot; a new link replaces the old one</div>');
       });
+    }
+
+    if (settled.length) {
+      html += '<div class="mta-sec">Set up &mdash; nothing needed</div>';
+      settled.forEach(function (s) {
+        html += card(s,
+          (s.status === 'Ready' ? inviteButtons(s, 'Send invite') : '') +
+          (canReset(s) ? '<button class="mta-b warn" data-act="reset">Reset login</button>' : ''),
+          s.status === 'Ready'
+            ? '<div class="mta-meta">Pre-approved &mdash; they can sign in whenever. No invite needed.</div>'
+            : '<div class="mta-meta">Signed in' + (s.grantedAt ? ' ' + esc(ago(s.grantedAt)) : '') + '</div>');
+      });
+    }
+
+    var archivedCount = students.filter(function (s) { return s.archived; }).length;
+    if (archivedCount) {
+      html += '<div style="padding:0.6rem 1rem 0.2rem;">' +
+        '<button class="mta-b" id="mta-arch-toggle">' +
+        (showArchived ? 'Hide' : 'Show') + ' ' + archivedCount + ' dismissed</button></div>';
     }
 
     html += '<div class="mta-sec">Find a student</div>' +
@@ -621,6 +648,9 @@
     }
 
     listEl.innerHTML = html;
+
+    var tog = listEl.querySelector('#mta-arch-toggle');
+    if (tog) tog.addEventListener('click', function () { showArchived = !showArchived; render(); });
 
     var qEl = listEl.querySelector('#mta-q');
     if (qEl) {
@@ -649,6 +679,10 @@
         } else if (a === 'decline') {
           act(c, 'Declining…', { action: 'decideClaim', adminKey: adminKey(), key: key, decision: 'decline' },
             function () { return 'Declined. Nothing was granted.'; });
+        } else if (a === 'archive' || a === 'unarchive') {
+          act(c, a === 'archive' ? 'Dismissing\u2026' : 'Restoring\u2026',
+            { action: 'setStudentArchived', adminKey: adminKey(), key: key, archived: a === 'archive' },
+            function () { return a === 'archive' ? 'Dismissed.' : 'Restored.'; });
         } else if (a === 'reset') {
           if (!window.confirm(
                 'Reset the login for ' + key + '?\n\n' +
@@ -662,7 +696,17 @@
     });
   }
 
+  /* The gate script restores a stored session into sessionStorage on boot,
+     BEFORE the page has visually unlocked -- so "a token exists" was never
+     the right question, and asking it is why this panel appeared on top of
+     the sign-in screen. Ask whether the gate is still on screen instead. */
+  function gateIsUp() {
+    var g = document.getElementById('mta-admin-gate');
+    return !!g && g.style.display !== 'none';
+  }
+
   function refresh() {
+    if (gateIsUp()) { if (root) root.style.display = 'none'; return; }
     var k = adminKey();
     // admin.html gates itself behind the admin key; until that gate is
     // passed there is nothing to ask for and nothing worth showing.
