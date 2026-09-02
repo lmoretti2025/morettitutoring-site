@@ -1226,6 +1226,145 @@ test('the escapes still produce real characters, not literal backslash-u', () =>
   assert.strictEqual('\u2014', String.fromCharCode(0x2014), 'escape resolves to an em-dash');
 });
 
+console.log('\nThe three ways a student actually gets a key\n');
+
+/* Journey A: a parent inquires through the website.
+   Nobody types anything: the lead becomes a row with a key on its own. */
+test('A. website inquiry -> row -> invite -> student signs in -> fully set up', () => {
+  const env = makeEnv({ rows: [], leads: [] });
+  env.setupLeadProvisioning();
+  env.leadsSheet.appendRow([new Date(Date.now() + 1000), 'Dana Marsh', 'dana@marsh.com', '555',
+                            '11th', 'SAT Prep', '', '', 'Yes', 'Parent']);
+  env.provisionNewLeads();
+
+  const g = env.leadsSheet._grid;
+  const key = g[1][g[0].indexOf('PortalKey')];
+  assert.ok(/^[A-Z]{3}[2-9]{4}$/.test(key), 'a key is generated: ' + key);
+
+  let row = env.rowFor(key);
+  assert.strictEqual(row.GuardianEmail, 'dana@marsh.com', 'parent wired to the Friday email');
+  assert.strictEqual(row.Name, '', 'student names themselves later');
+  assert.strictEqual(row.Status, 'Inquiry');
+  assert.strictEqual(row.GoogleSub, '', 'an inquiry grants nothing');
+  assert.strictEqual(env.sharedWith.size, 0, 'and no files are shared yet');
+
+  // Luca clicks Send invite.
+  isOk(env.handleSendInvite('ADMINSECRET', key));
+  assert.strictEqual(env.rowFor(key).Status, 'Invited');
+  const token = decodeURIComponent(/\?invite=([^\s]+)/.exec(env.sentMail.at(-1).body)[1]);
+
+  // The student opens it and signs in with a nickname-y Google name.
+  const out = env.handleClaimInvite(env.token('owen.m@gmail.com', 'SUBO', { name: 'owen' }), token);
+  isOk(out);
+  assert.strictEqual(out.needsName, true, 'nickname is not stored; student is asked');
+  isOk(env.handleSetName(out.session, 'Owen Marsh'));
+
+  row = env.rowFor(key);
+  assert.strictEqual(row.Name, 'Owen Marsh');
+  assert.strictEqual(row.GrantedEmail, 'owen.m@gmail.com', "student's email arrives verified, never asked for");
+  assert.strictEqual(row.Status, 'Active');
+  assert.ok(env.sharedWith.has('owen.m@gmail.com'), 'files folder shared to the student');
+  assert.strictEqual(env.rowFor(key).SubjectOnly, '', 'SAT prep by default');
+  assert.strictEqual(out.needsOnboarding, true, 'and onboarding runs');
+});
+
+/* Journey B: phone / text / Messenger. Luca types what little he has. */
+test('B. Luca creates the row by hand -> invite -> student signs in', () => {
+  const env = makeEnv({ rows: [] });
+  const key = env.handleCreateStudent('ADMINSECRET', {
+    guardianName: 'Dana Marsh', guardianEmail: 'dana@marsh.com',
+    phone: '(201) 555-0100', source: 'Phone call'
+  }).key;
+
+  let row = env.rowFor(key);
+  assert.strictEqual(row.Status, 'Inquiry');
+  assert.strictEqual(row.Source, 'Phone call');
+  assert.strictEqual(row.GoogleSub, '');
+
+  isOk(env.handleSendInvite('ADMINSECRET', key));
+  const token = decodeURIComponent(/\?invite=([^\s]+)/.exec(env.sentMail.at(-1).body)[1]);
+  const out = env.handleClaimInvite(env.token('owen.m@gmail.com', 'SUBO', { name: 'Owen Marsh' }), token);
+  isOk(out);
+  assert.ok(out.session);
+
+  row = env.rowFor(key);
+  assert.strictEqual(row.Name, 'Owen Marsh', 'a full Google name is accepted straight away');
+  assert.strictEqual(row.GrantedEmail, 'owen.m@gmail.com');
+  assert.strictEqual(row.GuardianEmail, 'dana@marsh.com', 'parent still gets the Friday email');
+  assert.strictEqual(row.Status, 'Active');
+});
+
+/* Journey C: the parent gives Luca ONLY the child's email address.
+   The ideal outcome is the instant-pairing path: no key, no invite, no
+   approval - the student just signs in and is recognised. */
+test("C. only the child's email is known -> student signs in, nothing else needed", () => {
+  const env = makeEnv({ rows: [] });
+  const key = env.handleCreateStudent('ADMINSECRET', {
+    studentEmail: 'owen.m@gmail.com', guardianName: 'Dana Marsh', source: 'Text message'
+  }).key;
+
+  const row = env.rowFor(key);
+  assert.strictEqual(row.GrantedEmail, 'owen.m@gmail.com',
+    "the child's address belongs in GrantedEmail, not GuardianEmail");
+  assert.strictEqual(row.GuardianEmail, '', 'and must NOT become the guardian contact');
+
+  // No invite, no key: the student just signs in.
+  const out = env.handleGoogleAuth(env.token('owen.m@gmail.com', 'SUBO', { name: 'Owen Marsh' }));
+  isOk(out);
+  assert.ok(out.session, 'straight in - Luca typing the address IS the approval');
+  assert.strictEqual(env.rowFor(key).Status, 'Active');
+  assert.ok(env.sharedWith.has('owen.m@gmail.com'));
+});
+
+test("C2. a child's address must not be mistaken for the guardian's", () => {
+  // Guards the wrong-but-tempting shortcut: putting the student's address
+  // in guardianEmail. That silently aims the weekly PARENT progress email
+  // at the student, which defeats the point of sending it.
+  const env = makeEnv({ rows: [] });
+  const key = env.handleCreateStudent('ADMINSECRET', { studentEmail: 'owen.m@gmail.com' }).key;
+  assert.notStrictEqual(env.rowFor(key).GuardianEmail, 'owen.m@gmail.com');
+});
+
+test('C3. a bad student email is rejected at creation, not stored', () => {
+  const env = makeEnv({ rows: [] });
+  isErr(env.handleCreateStudent('ADMINSECRET', { studentEmail: 'not-an-email' }), 'bad_email');
+});
+
+test('C4. both emails together: student pre-approved, parent on the summary', () => {
+  const env = makeEnv({ rows: [] });
+  const key = env.handleCreateStudent('ADMINSECRET', {
+    studentEmail: 'owen.m@gmail.com', guardianEmail: 'dana@marsh.com', guardianName: 'Dana Marsh'
+  }).key;
+  const row = env.rowFor(key);
+  assert.strictEqual(row.GrantedEmail, 'owen.m@gmail.com');
+  assert.strictEqual(row.GuardianEmail, 'dana@marsh.com');
+  isOk(env.handleGoogleAuth(env.token('owen.m@gmail.com', 'SUBO', { name: 'Owen Marsh' })));
+});
+
+test('C5. the same address for both is refused rather than guessed at', () => {
+  const env = makeEnv({ rows: [] });
+  isErr(env.handleCreateStudent('ADMINSECRET', {
+    studentEmail: 'family@x.com', guardianEmail: 'family@x.com'
+  }), 'same_email_for_both');
+});
+
+test('C6. a pre-approved address cannot be claimed by a different account', () => {
+  // Luca typing the address approves THAT address, nobody else.
+  const env = makeEnv({ rows: [] });
+  const key = env.handleCreateStudent('ADMINSECRET', { studentEmail: 'owen.m@gmail.com' }).key;
+  assert.strictEqual(env.handleGoogleAuth(env.token('someone.else@x.com', 'SUBX', { name: 'Someone Else' })).needsKey,
+    true, 'a stranger is not recognised');
+  isErr(env.handleClaimKey(env.token('someone.else@x.com', 'SUBX', { name: 'Someone Else' }), key), 'email_mismatch');
+  assert.strictEqual(env.rowFor(key).GoogleSub, '', 'and the row stays unpaired');
+});
+
+test('C7. a typo in the student email is caught before a key is issued', () => {
+  const env = makeEnv({ rows: [] });
+  isErr(env.handleCreateStudent('ADMINSECRET', { studentEmail: 'owen.m@@gmail' }), 'bad_email');
+  assert.strictEqual(env.studentsSheet._grid.slice(1).filter(r => r[0]).length, 0,
+    'no half-made row is left behind');
+});
+
 console.log('\nSessions\n');
 
 test('a valid session resumes without re-authenticating', () => {
