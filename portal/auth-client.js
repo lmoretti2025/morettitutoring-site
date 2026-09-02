@@ -245,6 +245,9 @@ window.MorettiAuth = (function () {
   function hide() {
     stopPoll();
     if (host) host.style.display = 'none';
+    // Handing off to the portal: give the page its chrome back and let
+    // index.html's own onboarding take over hiding it if it wants to.
+    document.documentElement.classList.remove('mta-auth-pending');
   }
 
   function err(id, msg) {
@@ -586,7 +589,18 @@ window.MorettiAuth = (function () {
     try {
       var st = document.createElement('style');
       st.id = 'mta-hide-legacy-key-screen';
-      st.textContent = '#screen-key{display:none !important;}';
+      /* #main-nav is the red bar. It is in the static markup too, so on a
+         cold load it paints along with #screen-key and sits there until the
+         overlay covers it -- which reads as the portal flashing its logged-in
+         chrome at someone who has not signed in yet. Hidden by a class on
+         <html> rather than a bare rule, because it has to come BACK the
+         moment a student is handed to the portal (see hide()), and the
+         onboarding sequence toggles its own .nav-hidden on the same element
+         afterwards. */
+      st.textContent =
+        '#screen-key{display:none !important;}' +
+        'html.mta-auth-pending #main-nav{display:none !important;}';
+      document.documentElement.classList.add('mta-auth-pending');
       (document.head || document.documentElement).appendChild(st);
     } catch (e) { /* if this fails the overlay still covers it, just later */ }
   })();

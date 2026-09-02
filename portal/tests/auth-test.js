@@ -66,6 +66,7 @@ function makeSheet(headers, rows) {
     getLastRow() { return grid.length; },
     getDataRange() { pad(); return { getValues: () => grid.map(r => r.slice()) }; },
     deleteColumn(c) { grid.forEach(r => r.splice(c - 1, 1)); },
+    deleteRow(r) { grid.splice(r - 1, 1); },
     getRange(row, col, numRows, numCols) {
       pad();
       const nr = numRows || 1, nc = numCols || 1;
@@ -112,7 +113,8 @@ function makeEnv(opts) {
     ['Timestamp', 'Name', 'Email', 'Phone', 'Grade', 'Subject', 'Message', 'Stage', 'IsUSA', 'Role'],
     opts.leads || []
   );
-  const sheets = { Students: students, Leads: leads };
+  const attempts = makeSheet(['Timestamp', 'Key', 'Kind', 'Composite'], []);
+  const sheets = { Students: students, Leads: leads, Attempts: attempts };
   const sent = [];
   const logLines = [];
   const shared = new Set();   // who currently has Drive access, per grant/revoke
@@ -263,6 +265,7 @@ function makeEnv(opts) {
   sandbox.sharedWith = shared;
   sandbox.folderName = folderName;
   sandbox.leadsSheet = leads;
+  sandbox.attemptsSheet = attempts;
   sandbox.studentsSheet = students;
   sandbox.logLines = logLines;
   sandbox.logSheet = () => sheets.AuthLog;
@@ -1547,6 +1550,48 @@ test('a row ticked in BOTH columns blocks the cleanup', () => {
   env.cleanUpRetiredColumns();
   assert.ok(env.logLines.some(l => /STOPPED/.test(l) && /ticked in both/.test(l)),
     'got: ' + env.logLines.join(' | '));
+});
+
+console.log('\nDeleting a row (as opposed to dismissing it)\n');
+
+test('a junk row deletes, and the whole row is logged first', () => {
+  const env = makeEnv({ rows: [] });
+  const key = env.handleCreateStudent('ADMINSECRET', { guardianEmail: 'junk@x.com', guardianName: 'Junk Lead' }).key;
+  const before = env.studentsSheet._grid.length;
+  const r = env.handleDeleteStudent('ADMINSECRET', key);
+  isOk(r);
+  assert.strictEqual(r.deletedName, 'Junk Lead');
+  assert.strictEqual(env.studentsSheet._grid.length, before - 1, 'row is gone');
+  assert.strictEqual(env.rowFor(key), null);
+  const logged = env.logSheet()._grid.some(r2 => String(r2[1]) === 'student_deleted' && String(r2[5]).includes('junk@x.com'));
+  assert.ok(logged, 'the deleted row is recoverable from AuthLog');
+});
+
+test('a student with recorded work is REFUSED, not deleted', () => {
+  const env = makeEnv({ rows: [] });
+  const key = env.handleCreateStudent('ADMINSECRET', { guardianEmail: 'real@x.com' }).key;
+  env.attemptsSheet.appendRow([new Date(), key, 'log', 1200]);
+  const r = env.handleDeleteStudent('ADMINSECRET', key);
+  isErr(r, 'has_recorded_work');
+  assert.strictEqual(r.attempts, 1);
+  assert.ok(env.rowFor(key), 'row survives');
+});
+
+test('deleting revokes Drive access for the bound address first', () => {
+  const env = makeEnv({ rows: [] });
+  const key = env.handleCreateStudent('ADMINSECRET', { studentEmail: 'owen@x.com' }).key;
+  isOk(env.handleGoogleAuth(env.token('owen@x.com', 'SUBO', { name: 'Owen Marsh' })));
+  assert.ok(env.sharedWith.has('owen@x.com'));
+  isOk(env.handleDeleteStudent('ADMINSECRET', key));
+  assert.ok(!env.sharedWith.has('owen@x.com'), 'access revoked before the row went');
+});
+
+test('delete needs the admin key, and a bad key is refused', () => {
+  const env = makeEnv({ rows: [] });
+  const key = env.handleCreateStudent('ADMINSECRET', { guardianEmail: 'a@x.com' }).key;
+  isErr(env.handleDeleteStudent('nope', key), 'unauthorized');
+  isErr(env.handleDeleteStudent('ADMINSECRET', 'ZZZZ0000'), 'bad_key');
+  assert.ok(env.rowFor(key), 'nothing deleted');
 });
 
 console.log('\nSessions\n');

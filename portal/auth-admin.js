@@ -596,6 +596,7 @@
           (s.archived
             ? '<button class="mta-b" data-act="unarchive">Restore</button>'
             : '<button class="mta-b" data-act="archive">Dismiss</button>') +
+          '<button class="mta-b warn" data-act="delete">Delete</button>' +
           (canReset(s) ? '<button class="mta-b warn" data-act="reset">Reset login</button>' : ''));
       }
     });
@@ -679,6 +680,18 @@
         } else if (a === 'decline') {
           act(c, 'Declining…', { action: 'decideClaim', adminKey: adminKey(), key: key, decision: 'decline' },
             function () { return 'Declined. Nothing was granted.'; });
+        } else if (a === 'delete') {
+          /* Deliberately blunter than the reset confirmation: this removes
+             the row itself. The server refuses if the student has any
+             recorded work, so the honest thing to promise here is "test rows
+             and dead leads", not "anything". */
+          if (!window.confirm(
+                'Permanently delete ' + key + '?\n\n' +
+                'This removes the roster row entirely. It is refused if the student has any ' +
+                'recorded tests or scores \u2014 use Dismiss for those instead.\n\n' +
+                'Their Drive folder is NOT deleted; you can remove it yourself if you want it gone.')) return;
+          act(c, 'Deleting\u2026', { action: 'deleteStudent', adminKey: adminKey(), key: key },
+            function (d) { return d.deletedName ? 'Deleted ' + d.deletedName + '.' : 'Deleted.'; });
         } else if (a === 'archive' || a === 'unarchive') {
           act(c, a === 'archive' ? 'Dismissing\u2026' : 'Restoring\u2026',
             { action: 'setStudentArchived', adminKey: adminKey(), key: key, archived: a === 'archive' },
@@ -701,8 +714,24 @@
      the right question, and asking it is why this panel appeared on top of
      the sign-in screen. Ask whether the gate is still on screen instead. */
   function gateIsUp() {
-    var g = document.getElementById('mta-admin-gate');
-    return !!g && g.style.display !== 'none';
+    /* TWO different gates can be on screen and the panel must stay clear of
+       both. Checking only the Google one was the bug: admin.html has its own
+       password gate (#gate), an ordinary in-flow element with no z-index, so
+       this panel -- position:fixed at z-index 8000 -- floated straight over
+       the password field.
+
+       Visibility is measured, not inferred from an inline style: #gate is
+       hidden by the page's own script, and #mta-admin-gate is position:fixed
+       (so offsetParent is null even when it is plainly visible). A measured
+       height is the only test that is right for both. */
+    var ids = ['mta-admin-gate', 'gate'];
+    for (var i = 0; i < ids.length; i++) {
+      var el = document.getElementById(ids[i]);
+      if (!el) continue;
+      if (getComputedStyle(el).display === 'none') continue;
+      if (el.getBoundingClientRect().height > 0) return true;
+    }
+    return false;
   }
 
   function refresh() {
@@ -750,7 +779,17 @@
   };
   window.mtaRefreshAccess = refresh;
 
-  function boot() { ensureRoot(); refresh(); }
+  function boot() {
+    ensureRoot();
+    if (root) root.style.display = 'none';   // hidden until proven unlocked
+    refresh();
+    /* Neither gate necessarily exists when this script boots -- admin.html
+       builds #gate as the page parses, and the Google gate is created
+       lazily on first show. A single check at boot therefore sees no gate,
+       concludes the page is unlocked, and shows the panel over whichever
+       gate appears a moment later. Re-check over the first few seconds. */
+    [300, 900, 2000, 4000].forEach(function (ms) { setTimeout(refresh, ms); });
+  }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
   setInterval(refresh, POLL_MS);
