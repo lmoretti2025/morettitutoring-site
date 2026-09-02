@@ -191,10 +191,6 @@
   .key-input { width: 100%; font-family: var(--hel); font-size: 1rem; letter-spacing: 0.06em; text-align: center; text-transform: uppercase; padding: 1.05rem 1.2rem; border: 1px solid var(--border); background: var(--white); color: var(--text); margin-bottom: 1rem; }
   .key-input:focus { outline: none; border-color: var(--red); }
   .key-error { display: none; font-size: 0.78rem; color: var(--red); text-align: center; margin-bottom: 1rem; line-height: 1.6; }
-  .email-input-wrap { position: relative; }
-  .email-notice { display: none; position: absolute; bottom: calc(100% + 0.6rem); left: 50%; transform: translateX(-50%); width: max-content; max-width: 260px; font-size: 0.72rem; color: var(--white, #fff); text-align: center; line-height: 1.5; background: var(--text, #222); border-radius: 6px; padding: 0.6rem 0.8rem; box-shadow: 0 4px 14px rgba(0,0,0,0.18); z-index: 5; }
-  .email-notice { --arrow-shift: 0px; }
-  .email-notice::after { content: ''; position: absolute; top: 100%; left: calc(50% + var(--arrow-shift)); transform: translateX(-50%); border: 6px solid transparent; border-top-color: var(--text, #222); }
   .key-btn { display: block; width: 100%; background: var(--red); color: #fff; font-family: var(--hel); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; padding: 1.05rem; border: none; cursor: pointer; transition: opacity 0.2s; }
   /* Once inside the diagnostic-taking flow itself, primary actions switch
      to the same navy/gold palette as the rest of the Bluebook-style test
@@ -3075,28 +3071,10 @@ window.Portal = {
 </nav>
 
 <!-- ═══ SCREEN 1 — ACCESS KEY ═══ -->
-<div class="screen active" id="screen-key">
-  <div class="panel">
-    <div class="kicker">Student Portal</div>
-
-    <div id="key-step">
-      <h1 class="panel-hed">Enter your access key</h1>
-      <p class="panel-sub">Luca gave you a personal key when you signed up. Enter it below to get started.</p>
-      <input type="text" class="key-input" id="key-input" placeholder="ACCESS KEY" autocomplete="off" autocapitalize="characters">
-      <p class="key-error" id="key-error">That key wasn't recognized. Double-check it, or text Luca at (201) 275-2791.</p>
-      <button class="key-btn" id="key-submit">Continue</button>
-      <p class="key-help">Don't have a key yet? Call or text Luca at (201) 275-2791 to get set up.</p>
-    </div>
-  </div>
-</div>
-
 <!-- ═══ SCREEN 1b — FIRST-LOGIN ONBOARDING SEQUENCE ═══
      Runs once, only the very first time a brand-new key is used — the
-     same "needsEmail" signal that used to just show a plain email-capture
-     panel now launches this instead (see tryKey()/goToOnboardSplash()
-     below). A returning student with an email already on file skips this
-     entirely and goes straight from key entry to screen-menu, exactly as
-     before this existed.
+     first Google sign-in for a student the roster has never seen. A
+     returning student skips it entirely and goes straight to screen-menu.
 
      Two acts, one screen: DARK (splash + the same name/email capture that
      used to be its own light "email-step" panel — #main-nav is hidden via
@@ -3170,23 +3148,6 @@ window.Portal = {
     <!-- Act 1, beat 2: name/email capture — same fields, same ids, same
          validation/submit logic as the old email-step (see the script
          block below), just restyled dark and relocated here. -->
-    <div class="onb-pane onb-dark" id="onb-identity">
-      <div class="onb-kicker" id="email-step-kicker">Almost there</div>
-      <h1 class="panel-hed onb-light-text" id="email-step-hed"><span id="email-step-hed-text">One more thing</span><span id="email-step-name"></span></h1>
-      <p class="panel-sub onb-mid-text" id="email-step-sub">First time using this key — enter your email and we'll automatically share your files with you.</p>
-      <div id="email-step-name-wrap" style="display:none;">
-        <input type="text" class="key-input" id="email-step-name-input" placeholder="Full name" autocomplete="name" style="text-transform:none;">
-        <p class="key-error" id="email-step-name-error">Please enter your full first and last name to continue.</p>
-      </div>
-      <div class="email-input-wrap">
-        <div class="email-notice" id="email-notice">Please use your main email — your files will be shared exclusively to this address, not any others.</div>
-        <input type="email" class="key-input" id="email-input" placeholder="you@email.com" autocomplete="email" style="text-transform:none;">
-      </div>
-      <p class="key-error" id="email-error">That doesn't look like a valid email — double-check it and try again.</p>
-      <button class="key-btn" id="email-submit">Unlock My Files</button>
-      <a href="#" class="key-help onb-mid-text" id="email-back" style="display:block; text-decoration:none;">&larr; Use a different key</a>
-    </div>
-
     <!-- Act 2, beat 3: welcome (name filled in from the auth response). -->
     <div class="onb-pane" id="onb-welcome">
       <div class="kicker">Welcome</div>
@@ -5134,7 +5095,7 @@ window.Portal = {
     // fetch() — a bare fetch() has no timeout, so a bad Apps Script cold
     // start just sits there indefinitely with nothing to trigger a retry.
     // postToBackend bounds each attempt and retries a few times before
-    // this catches and falls back — same fix as callAuth() above, same
+    // this catches and falls back — same fix as postToBackend(), same
     // root cause. The stale local callback above already covers the
     // "nothing to look at yet" gap this used to leave.
     progressFetchPromise = postToBackend({ action: 'getProgress', key: key })
@@ -5211,7 +5172,7 @@ window.Portal = {
     }, 1500);
   };
 
-  var activeScreenId = 'screen-key';
+
   var STORAGE_KEY = 'moretti_portal_state';
 
   // Screens that count as "genuinely mid-diagnostic" — used both by
@@ -5344,18 +5305,16 @@ window.Portal = {
     } catch (e) { return null; }
   }
 
+  // Nothing is active until a student is settled: the sign-in overlay
+  // covers the page until then.
+  var activeScreenId = null;
+
   /* ═══ SCREEN ROUTING ═══ */
   var screens = {};
   document.querySelectorAll('.screen').forEach(function (el) { screens[el.id] = el; });
-  // #screen-key is marked active directly in the static HTML (it's the
-  // very first thing a visitor sees) rather than being reached through
-  // show() — every OTHER screen only ever becomes visible by going through
-  // show(), which is what adds .screen-visible to fade it in. Without this,
-  // #screen-key would sit at opacity:0 forever, since nothing ever calls
-  // show('screen-key') on a fresh page load. Added synchronously here
-  // (before first paint), so the key screen still just appears normally
-  // rather than fading in — no navigation happened, so there's nothing to
-  // transition from.
+  // A screen marked .active in the static HTML has never been through
+  // show(), which is what adds .screen-visible, so it would sit at
+  // opacity:0 forever. Done synchronously here, before first paint.
   document.querySelectorAll('.screen.active').forEach(function (el) { el.classList.add('screen-visible'); });
   // Students who are only doing subject tutoring (not SAT prep) don't
   // get the Diagnostics or SAT Resources cards on the home menu — only
@@ -5670,33 +5629,8 @@ window.Portal = {
      at which point the backend both unlocks the portal AND grants that
      email Viewer access on the student's Drive folder(s) automatically. */
   var keyStep    = document.getElementById('key-step');
-  var keyInput   = document.getElementById('key-input');
-  var keyError   = document.getElementById('key-error');
-  var keySubmit  = document.getElementById('key-submit');
-  var emailInput = document.getElementById('email-input');
-  var emailError = document.getElementById('email-error');
-  var emailSubmit = document.getElementById('email-submit');
-  var emailStepName = document.getElementById('email-step-name');
-  var emailStepHedText = document.getElementById('email-step-hed-text');
-  var emailStepSub = document.getElementById('email-step-sub');
-  var emailStepNameWrap = document.getElementById('email-step-name-wrap');
-  var emailStepNameInput = document.getElementById('email-step-name-input');
-  var emailStepNameError = document.getElementById('email-step-name-error');
   var pendingKey = null;
   var pendingName = null;
-
-  // Sends { action:'auth', key, email } to the backend. The body is sent
-  // as a plain string (not application/json) on purpose — that keeps the
-  // request inside the CORS "simple request" rules so the browser doesn't
-  // send a preflight OPTIONS request first, which Apps Script Web Apps
-  // don't handle. Returns a parsed response object, or { ok:false,
-  // error:'network' } if the request itself failed (offline, blocked, etc).
-  function callAuth(key, email, name, onRetry) {
-    // Retries on transient failures (see postToBackend) so a single Apps
-    // Script cold start or dropped redirect doesn't read as "can't log in".
-    return postToBackend({ action: 'auth', key: key, email: email || '', name: name || '' }, { onRetry: onRetry })
-      .catch(function () { return { ok: false, error: 'network' }; });
-  }
 
   // Fire-and-forget: stamps SATTakenAt on this key's row so any
   // later attempt at the same test type is recognized as a practice
@@ -7334,35 +7268,7 @@ window.Portal = {
     }
   }
 
-  function resetKeyScreen() {
-    pendingKey = null;
-    pendingName = null;
-    onbGoal = null;
-    keyInput.value = '';
-    emailStepNameInput.value = '';
-    emailInput.value = '';
-    keyError.style.display = 'none';
-    emailStepNameError.style.display = 'none';
-    emailError.style.display = 'none';
-    document.getElementById('email-notice').style.display = 'none';
-    document.getElementById('main-nav').classList.remove('nav-hidden');
-    document.getElementById('screen-onboard').classList.remove('is-dark');
-    document.getElementById('screen-onboard').classList.remove('onb-opening');
-    document.getElementById('onb-name-input').value = '';
-    document.getElementById('onb-name-error').style.display = 'none';
-    onbGoTo('onb-splash');
-    /* NOT show('screen-key'). That panel is the retired key-entry screen and
-       auth-client.js hides it unconditionally now that key-only login is
-       closed, so landing on it means landing on a blank page. The whole path
-       here (#onb-identity and its "use a different key" control) is
-       unreachable in the Google-sign-in flow, but leaving a function that
-       strands whoever does reach it is a trap for the next change. Sign-in
-       is what "start over" means now, and that is what a reload shows. */
-    clearState();
-    window.location.reload();
-  }
-
-  /* ═══ FIRST-LOGIN ONBOARDING SEQUENCE ═══
+    /* ═══ FIRST-LOGIN ONBOARDING SEQUENCE ═══
      One pane visible at a time inside #screen-onboard (see the HTML and
      its CSS comment for the full shape). onbGoTo() is the one function
      every beat's "Continue" routes through; it also renders the progress
@@ -7524,23 +7430,6 @@ window.Portal = {
     });
   });
 
-  // Beat 2: name/email capture — unchanged fields/logic from the old
-  // "email-step" panel, just living here now. A brand-new key with no
-  // name on file yet shows the name field ABOVE the email field; a key
-  // Luca already pre-registered with a name just asks for email.
-  function goToOnboardIdentity() {
-    var needsName = !pendingName || !String(pendingName).trim();
-    emailStepHedText.textContent = needsName ? "Welcome! Let's get you set up" : 'One more thing';
-    emailStepName.textContent = (!needsName && pendingName) ? (', ' + pendingName.split(' ')[0]) : '';
-    emailStepNameWrap.style.display = needsName ? 'block' : 'none';
-    document.getElementById('email-step-kicker').style.display = needsName ? 'none' : '';
-    emailStepSub.textContent = needsName
-      ? "First time using this key — enter your name and email and we'll automatically share your files with you."
-      : "First time using this key — enter your email and we'll automatically share your files with you.";
-    onbGoTo('onb-identity');
-    if (needsName) { emailStepNameInput.focus(); } else { emailInput.focus(); }
-  }
-
   // The moment identity capture succeeds: background fades from dark to
   // white and #main-nav slides back down (both are plain CSS transitions
   // triggered by removing these two classes — see the CSS), then beat 3
@@ -7591,70 +7480,8 @@ window.Portal = {
     onbGoTo('onb-welcome');
   }
 
-  function tryKey() {
-    var raw = keyInput.value.trim().toUpperCase();
-    if (!raw) { keyError.textContent = authErrorMessage(); keyError.style.display = 'block'; return; }
-    keyError.style.display = 'none';
-    keySubmit.disabled = true;
-    keySubmit.textContent = 'Checking…';
-    // A cold Apps Script start can take several retries to land — without
-    // this, the button just says "Checking…" through the whole stretch,
-    // which reads as frozen rather than working. This doesn't make it
-    // faster, but a visibly-changing button is the difference between
-    // "still working" and "did this break?"
-    callAuth(raw, null, function (attemptNum) { keySubmit.textContent = 'Still checking… (' + attemptNum + ')'; }).then(function (data) {
-      keySubmit.disabled = false;
-      keySubmit.textContent = 'Continue';
-      if (!data.ok) {
-        keyError.textContent = authErrorMessage(data.error);
-        keyError.style.display = 'block';
-        return;
-      }
-      pendingKey = raw;
-      pendingName = data.name;
-      if (data.needsEmail) {
-        goToOnboardSplash();
-      } else {
-        settle(data);
-      }
-    });
-  }
-  document.getElementById('key-submit').addEventListener('click', tryKey);
-  keyInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') tryKey(); });
-
-  function trySubmitEmail() {
-    var needsName = emailStepNameWrap.style.display !== 'none';
-    var name = pendingName;
-    if (needsName) {
-      name = emailStepNameInput.value.trim();
-      if (!name || name.indexOf(' ') === -1) {
-        emailStepNameError.textContent = 'Please enter your full first and last name to continue.';
-        emailStepNameError.style.display = 'block';
-        return;
-      }
-      emailStepNameError.style.display = 'none';
-    }
-    var email = emailInput.value.trim();
-    if (!email) { emailError.textContent = authErrorMessage('bad_email'); emailError.style.display = 'block'; return; }
-    emailError.style.display = 'none';
-    emailSubmit.disabled = true;
-    emailSubmit.textContent = 'Unlocking…';
-    callAuth(pendingKey, email, name, function (attemptNum) { emailSubmit.textContent = 'Still unlocking… (' + attemptNum + ')'; }).then(function (data) {
-      emailSubmit.disabled = false;
-      emailSubmit.textContent = 'Unlock My Files';
-      if (!data.ok) {
-        emailError.textContent = authErrorMessage(data.error);
-        emailError.style.display = 'block';
-        return;
-      }
-      transitionOnboardToLight(data);
-    });
-  }
-  document.getElementById('email-submit').addEventListener('click', trySubmitEmail);
-  emailInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') trySubmitEmail(); });
-  emailStepNameInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') trySubmitEmail(); });
-  document.getElementById('email-back').addEventListener('click', function (e) { e.preventDefault(); resetKeyScreen(); });
-
+  
+  
   // Beat 6: test date — same national SAT dates and registration
   // deadlines as test-dates.html, filtered the same way that page filters
   // itself (a date drops once TODAY is past its OWN registration
@@ -7958,36 +7785,7 @@ window.Portal = {
   // click/tap into the field — files get shared to whatever address they
   // type here, so this heads off support pings from a mistyped or
   // secondary inbox.
-  var emailNotice = document.getElementById('email-notice');
-  function positionEmailNotice() {
-    // Bubble is centered on the input by default (left:50%, transform:
-    // translateX(-50%)) — on a narrow phone screen that can push it past
-    // the edge of the viewport. Nudge it back in bounds instead of
-    // letting it clip, and keep the arrow pointing at the input either way.
-    emailNotice.style.left = '50%';
-    emailNotice.style.transform = 'translateX(-50%)';
-    var margin = 8;
-    var rect = emailNotice.getBoundingClientRect();
-    var shift = 0;
-    if (rect.left < margin) shift = margin - rect.left;
-    else if (rect.right > window.innerWidth - margin) shift = (window.innerWidth - margin) - rect.right;
-    if (shift !== 0) {
-      emailNotice.style.left = 'calc(50% + ' + shift + 'px)';
-      emailNotice.style.setProperty('--arrow-shift', (-shift) + 'px');
-    } else {
-      emailNotice.style.removeProperty('--arrow-shift');
-    }
-  }
-  emailInput.addEventListener('focus', function () {
-    emailNotice.style.display = 'block';
-    requestAnimationFrame(positionEmailNotice);
-  });
-  emailInput.addEventListener('blur', function () { emailNotice.style.display = 'none'; });
-  window.addEventListener('resize', function () {
-    if (emailNotice.style.display === 'block') positionEmailNotice();
-  });
-
-  /* Leaving the portal via the logo or "Exit Portal" — not just the menu's
+    /* Leaving the portal via the logo or "Exit Portal" — not just the menu's
      "Log out" — should also fully reset things, so coming back always asks
      for the key again. This is a DELIBERATE exit, so it clears both the
      sessionStorage refresh-resume AND the cross-session resume snapshot
@@ -8010,13 +7808,11 @@ window.Portal = {
     clearState();
     clearResumeSnapshot(currentStudent && currentStudent.key);
     if (assignPollTimer) { clearInterval(assignPollTimer); assignPollTimer = null; }
-    /* Leave, rather than fall back to the retired key screen. resetKeyScreen()
-       activates #screen-key, which auth-client.js hides unconditionally now
-       that key-only login is gone -- so exiting from inside a test (the two
-       exit controls that are BUTTONS, not links: #dx-exit-btn and
-       #dx-break-exit-btn) left the student on a red nav bar and an
-       otherwise blank page, recoverable only by reloading. The link-based
-       exits already go here; this makes the buttons agree with them. */
+    /* Leave, rather than fall back to a screen. The two exit controls that
+       are BUTTONS rather than links (#dx-exit-btn and #dx-break-exit-btn)
+       used to land on the retired key-entry panel, which was hidden -- a red
+       nav bar and an otherwise blank page. The link-based exits already come
+       here; this makes the buttons agree with them. */
     window.location.href = '../index.html';
   }
   var exitLinkIds = ['nav-logo-exit', 'sidebar-logo-exit', 'nav-exit-link', 'dx-exit-btn', 'dx-break-exit-btn'];
@@ -11625,7 +11421,7 @@ window.Portal = {
     // and nobody can spoof the display name. The old browser EmailJS send
     // was replayable by anyone who viewed the page source — that's removed.
     // Body sent as a plain string (no JSON content-type) to stay within the
-    // CORS "simple request" rules Apps Script needs, matching callAuth().
+    // CORS "simple request" rules Apps Script needs, matching postToBackend().
     postToBackend(Object.assign({
       action: 'submitDiagnostic',
       key: currentStudent.key,
@@ -17604,20 +17400,6 @@ window.renderNativeReport = function (data) {
     });
     return dom;
   }
-  // Per-skill correct/total within a section: { skill: { c, t, dom } }.
-  // Drives the section-card skill list, which now reads as "correct out of
-  // attempted" per skill rather than "share of misses".
-  function sectionSkillStats(s5) {
-    var out = {};
-    Object.keys(s5.domains).forEach(function (d) {
-      var st = s5.domains[d].skillStats || {};
-      Object.keys(st).forEach(function (sk) {
-        out[sk] = { c: st[sk].c, t: st[sk].t, dom: d };
-      });
-    });
-    return out;
-  }
-
   /* ═══ PATH TO TARGET SCORE — "score bridge" waterfall ═══
      Bars show REAL, unscaled composite points recoverable per skill — not
      values force-fit to sum to whatever target the parent happens to
@@ -18272,60 +18054,6 @@ window.renderNativeReport = function (data) {
   // chart, which is what made the section pies and bridge segments look
   // like they'd been colored by two different people.
   var palette = BRAND_PALETTE;
-
-  // The section-card skill list. Every row now reads the SAME way as the
-  // domain rows below it and the score tiles up top: "correct / attempted
-  // (percent)", with the bar filling toward 100% and colored by how the
-  // student did (red under 50%, gold in between, green at/above 75%). The
-  // old version showed each skill's SHARE OF THE SECTION'S MISSES instead
-  // — e.g. "Boundaries 4 (29%)" meaning "4 of your 14 R&W misses were in
-  // Boundaries, = 29% of misses". That's a genuinely confusing statistic
-  // for a parent: the number wasn't out of the questions attempted, and
-  // the bar didn't mean performance, so a longer red bar looked like a
-  // worse score when it actually just meant "more of the misses piled up
-  // here". Now a long green bar = did well, a short red bar = struggled,
-  // consistent everywhere on the page.
-  //
-  // Only skills the student actually MISSED at least one question in are
-  // listed here, weakest first — this block is the "what to work on"
-  // view, so a skill answered perfectly isn't a focus item (the full
-  // by-area picture is the domain rows directly below). Capped at 5 rows;
-  // any remaining weak skills are noted as a count rather than crammed in.
-  function sectionSkillBars(s5) {
-    var wrap = document.createElement('div');
-    wrap.className = 'sc-bars';
-
-    var stats = sectionSkillStats(s5);
-    var weak = Object.keys(stats).map(function (sk) {
-      var v = stats[sk];
-      return { name: sk, c: v.c, t: v.t, pct: v.t ? v.c / v.t : 0, missed: v.t - v.c };
-    }).filter(function (e) { return e.missed > 0; })
-      .sort(function (a, b) { return a.pct - b.pct || b.missed - a.missed; });
-
-    if (!weak.length) {
-      wrap.innerHTML = '<div class="sc-bar-empty">Nothing missed in this section.</div>';
-      return wrap;
-    }
-
-    var MAX_SKILL_ROWS = 5;
-    weak.slice(0, MAX_SKILL_ROWS).forEach(function (e) {
-      var pct = Math.round(e.pct * 100);
-      var cls = e.pct < 0.5 ? 'weak' : (e.pct >= 0.75 ? 'strong' : '');
-      var row = document.createElement('div');
-      row.className = 'sc-bar-row';
-      row.innerHTML = '<div class="sc-bar-label"><span>' + e.name + '</span><span>' + e.c + '/' + e.t + ' (' + pct + '%)</span></div>' +
-        '<div class="sc-bar-track"><div class="sc-bar-fill ' + cls + '" style="width:' + pct + '%"></div></div>';
-      wrap.appendChild(row);
-    });
-    var hidden = weak.length - MAX_SKILL_ROWS;
-    if (hidden > 0) {
-      var more = document.createElement('div');
-      more.className = 'sc-bar-empty';
-      more.textContent = '+ ' + hidden + ' more ' + (hidden === 1 ? 'skill' : 'skills') + ' with a miss — see the area totals below';
-      wrap.appendChild(more);
-    }
-    return wrap;
-  }
 
   // Condensed module snapshot tiles — module name, a correct/incorrect/
   // omitted count line, a plain color grid (no question numbers — this is
