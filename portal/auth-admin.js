@@ -50,17 +50,27 @@
      though the script ran. For the one read this panel makes that is just a
      lost answer, so ask again. Writes are never retried: the script already
      ran, and re-sending would create, invite or delete twice. */
-  var RETRY_READS = { accessRoster: 1 };
+  var RETRY_READS = { accessRoster: 'students' };   // value: the field a real answer carries
   function post(payload, attempt) {
     attempt = attempt || 0;
+    var field = RETRY_READS[payload.action];
+    var canRetry = !!field && attempt < 2;
+    function again() {
+      return new Promise(function (r) { setTimeout(r, 1500 * (attempt + 1)); })
+        .then(function () { return post(payload, attempt + 1); });
+    }
     return fetch(URL_, { method: 'POST', body: JSON.stringify(payload) })
       .then(function (r) { return r.json(); })
-      .catch(function () {
-        if (RETRY_READS[payload.action] && attempt < 2) {
-          return new Promise(function (r) { setTimeout(r, 1500 * (attempt + 1)); })
-            .then(function () { return post(payload, attempt + 1); });
+      .then(function (data) {
+        // A stalling service has answered a POST with its GET health reply
+        // ({ok:true, message}) -- ok, but with no roster in it. Never take
+        // that for an empty roster.
+        if (field && data && data.ok && !(field in data)) {
+          return canRetry ? again() : { ok: false, error: 'lost_answer' };
         }
-        return { ok: false, error: 'network' };
+        return data;
+      }, function () {
+        return canRetry ? again() : { ok: false, error: 'network' };
       });
   }
 
