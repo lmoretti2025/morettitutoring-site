@@ -44,7 +44,7 @@ window.MorettiAuth = (function () {
      design. What makes it safe is that the BACKEND checks every ID token
      was issued for this exact client id (verifyGoogleIdToken_ in auth.gs),
      so a token minted for some other site cannot be replayed here. */
-  var CLIENT_ID = 'PASTE_YOUR_OAUTH_CLIENT_ID.apps.googleusercontent.com';
+  var CLIENT_ID = '742313412130-kck7ihjd9el1kolac0hnmep3h1b2vbrh.apps.googleusercontent.com';
 
   var STORE = 'moretti_session';
   var GSI_SRC = 'https://accounts.google.com/gsi/client';
@@ -248,7 +248,11 @@ window.MorettiAuth = (function () {
   }
 
   function err(id, msg) {
-    var el = host.querySelector(id);
+    // ensureHost() rather than trusting `host` to be set: every current
+    // caller reaches here after start() has built it, but a null host would
+    // throw inside the very handler that exists to REPORT a failure — which
+    // turns a recoverable error into a blank screen.
+    var el = ensureHost().querySelector(id);
     el.textContent = msg || '';
     el.style.color = '';           // back to the .key-error red
     el.style.display = msg ? 'block' : 'none';
@@ -257,7 +261,7 @@ window.MorettiAuth = (function () {
   // Same element, different meaning — "Checking…" is not a failure, and
   // rendering it in the error colour makes a working sign-in look broken.
   function status(id, msg) {
-    var el = host.querySelector(id);
+    var el = ensureHost().querySelector(id);
     el.textContent = msg || '';
     el.style.color = 'rgba(17,17,17,0.6)';
     el.style.display = msg ? 'block' : 'none';
