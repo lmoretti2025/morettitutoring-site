@@ -579,16 +579,34 @@
   // script ran fine. For a read that is just a lost answer, so ask again
   // before giving up. Writes are deliberately NOT retried -- the script
   // already ran, and re-sending would create or send twice.
-  var RETRY_READS = { getRoster: 1, version: 1, getStudentDetail: 1, getAdminAssignments: 1, getAdminCalendar: 1 };
+  // The value is the field a real answer always carries. When the service
+  // is stalling it has been seen to answer a POST with its GET health reply
+  // instead -- {ok:true, message:"...running"} -- which parses fine, says
+  // ok, and has no roster in it. Taken at face value that drew an empty
+  // roster with zero students, so a reply missing its field is treated the
+  // same as a lost one: ask again.
+  var RETRY_READS = { getRoster: 'students', version: 'version', getStudentDetail: '', getAdminAssignments: '', getAdminCalendar: '' };
+  function looksLost(action, data) {
+    var field = RETRY_READS[action];
+    return !!field && data && data.ok && !(field in data);
+  }
   function postToBackend(payload, attempt) {
     attempt = attempt || 0;
+    var canRetry = (payload.action in RETRY_READS) && attempt < 2;
+    function again() {
+      return new Promise(function (r) { setTimeout(r, 1500 * (attempt + 1)); })
+        .then(function () { return postToBackend(payload, attempt + 1); });
+    }
     return fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) })
       .then(function (res) { return res.json(); })
-      .catch(function (err) {
-        if (RETRY_READS[payload.action] && attempt < 2) {
-          return new Promise(function (r) { setTimeout(r, 1500 * (attempt + 1)); })
-            .then(function () { return postToBackend(payload, attempt + 1); });
+      .then(function (data) {
+        if (looksLost(payload.action, data)) {
+          if (canRetry) return again();
+          throw new Error('lost_answer');
         }
+        return data;
+      }, function (err) {
+        if (canRetry) return again();
         throw err;
       });
   }
@@ -729,6 +747,11 @@
     postToBackend({ action: 'version', adminKey: adminKey() }).then(function (data) {
       // An old deployment doesn't know the action at all — which is itself
       // the answer.
+      // No answer, or an answer with no version in it, says nothing about
+      // the deployment -- only a real "unknown_action" or a lower number
+      // does. Leave the banner alone rather than accuse a fine deployment
+      // of being stale because the service hiccupped.
+      if (!data || (data.ok && data.version === undefined)) return;
       var version = (data && data.ok && data.version) || 0;
       if (version >= REQUIRED_BACKEND_VERSION) {
         backendStoresNotes = true;
@@ -996,9 +1019,17 @@
   // autofills the password made it look doubly broken. There is nothing to
   // type during that stretch, so show that instead of the form; it comes
   // back on its own if the session turns out to be bad.
+  var gateSlowTimer = null;
   function setGateChecking(on) {
     $('gate-form').style.display = on ? 'none' : '';
     $('gate-checking').style.display = on ? 'block' : 'none';
+    $('gate-checking').textContent = 'Signing you in\u2026';
+    clearTimeout(gateSlowTimer);
+    // The backend sometimes takes a minute or more to answer at all. Say
+    // so, rather than leaving a line that looks frozen.
+    if (on) gateSlowTimer = setTimeout(function () {
+      $('gate-checking').textContent = 'Still signing you in \u2014 the server is slow to answer right now. This can take a minute or two.';
+    }, 8000);
   }
   var savedKey = adminKey();
   if (savedKey) { setGateChecking(true); loadRoster(savedKey); }
