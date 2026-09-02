@@ -112,6 +112,40 @@ function post(payload, redirects) {
   });
 }
 
+/* A GET, following redirects, returning the raw body and content type. Only
+   one thing needs this, and it is important enough to be worth the extra
+   helper -- see the "serves no HTML" check. */
+function get(query, redirects) {
+  return new Promise((resolve, reject) => {
+    const u = new URL(URL_ + query);
+    const lib = u.protocol === 'http:' ? http : https;
+    lib.get({ hostname: u.hostname, port: u.port || undefined, path: u.pathname + u.search }, res => {
+      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+        if ((redirects || 0) > 5) return reject(new Error('too many redirects'));
+        res.resume();
+        return resolve(getUrl(res.headers.location, (redirects || 0) + 1));
+      }
+      let d = '';
+      res.on('data', c => d += c);
+      res.on('end', () => resolve({ body: d, type: String(res.headers['content-type'] || '') }));
+    }).on('error', reject);
+  });
+}
+function getUrl(loc, redirects) {
+  return new Promise((resolve, reject) => {
+    (loc.startsWith('http:') ? http : https).get(loc, res => {
+      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+        if (redirects > 5) return reject(new Error('too many redirects'));
+        res.resume();
+        return resolve(getUrl(res.headers.location, redirects + 1));
+      }
+      let d = '';
+      res.on('data', c => d += c);
+      res.on('end', () => resolve({ body: d, type: String(res.headers['content-type'] || '') }));
+    }).on('error', reject);
+  });
+}
+
 let pass = 0, fail = 0;
 const notes = [];
 async function check(name, fn) {
@@ -230,6 +264,28 @@ function bad(msg, hint) { const e = new Error(msg); e.hint = hint; return e; }
   });
 
   console.log('\nStill public, and should be\n');
+
+  await check('the deployment serves NO HTML page', async () => {
+    /* THE ONE THAT MUST NEVER REGRESS. Any page an Apps Script web app
+       serves with HtmlService hands its visitor a google.script.run channel
+       into this project's functions -- and that channel does not go through
+       doPost, so authGuard_ never sees it. With the deployment set to
+       "Anyone", that made every non-private function callable by a stranger,
+       as Luca. It was live, and confirmed live, until doGet was reduced to
+       ContentService. Re-introducing it is a two-line edit, so it gets a
+       guard rather than a memo. */
+    const r = await get('?claim=verify-no-html');
+    const body = String(r.body || '');
+    if (/<html|<!doctype/i.test(body) || /google\.script\.run/.test(body)) {
+      throw bad('doGet is serving an HTML page again (' + r.type + ')',
+        'Any HtmlService page exposes google.script.run to anonymous visitors. ' +
+        'doGet must return ContentService only; the approval and setup pages ' +
+        'live at portal/approve.html and portal/setup.html on the website.');
+    }
+    if (!/morettitutoring\.com\/portal\/approve\.html/.test(body)) {
+      notes.push('an old ?claim= link no longer names the new page — check doGet\'s redirect text');
+    }
+  });
 
   await check('the marketing lead form still works', async () => {
     // Honeypot filled — accepted and silently dropped, exactly as designed,

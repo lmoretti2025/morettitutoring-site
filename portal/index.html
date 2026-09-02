@@ -7351,7 +7351,15 @@ window.Portal = {
     document.getElementById('onb-name-input').value = '';
     document.getElementById('onb-name-error').style.display = 'none';
     onbGoTo('onb-splash');
-    show('screen-key');
+    /* NOT show('screen-key'). That panel is the retired key-entry screen and
+       auth-client.js hides it unconditionally now that key-only login is
+       closed, so landing on it means landing on a blank page. The whole path
+       here (#onb-identity and its "use a different key" control) is
+       unreachable in the Google-sign-in flow, but leaving a function that
+       strands whoever does reach it is a trap for the next change. Sign-in
+       is what "start over" means now, and that is what a reload shows. */
+    clearState();
+    window.location.reload();
   }
 
   /* ═══ FIRST-LOGIN ONBOARDING SEQUENCE ═══

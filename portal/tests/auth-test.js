@@ -191,7 +191,6 @@ function makeEnv(opts) {
       deleteTrigger: () => {},
       newTrigger: () => ({ timeBased: function () { return this; }, everyMinutes: function () { return this; }, create() {} })
     },
-    HtmlService: { createHtmlOutput: h => ({ _h: h, setTitle() { return this; } }) },
 
     // ── Code.gs constants + helpers auth.gs calls into ──
     SHEET_ID: 'sheet',
@@ -1315,30 +1314,114 @@ test('a student who inquires for themselves is not filed as their own parent', (
   assert.strictEqual(row.Status, 'Ready', 'the sheet column agrees with the panel');
 });
 
-test('the same family inquiring twice gets one row and one key, not two', () => {
+test('a student inquiring twice with their own address does not get a second key', () => {
+  const env = makeEnv({ rows: [] });
+  const lead = { name: 'Owen Chen', email: 'owen@x.com', role: 'Student', elapsedMs: 9000 };
+  env.provisionLeadNow_(lead);
+  env.provisionLeadNow_(lead);           // a retry after a "network error"
+  assert.strictEqual(env.handleAccessRoster('ADMINSECRET').students.length, 1,
+    'their own address is a login, so it is the same person');
+});
+
+test('a parent inquiring about a SECOND CHILD gets a second row, flagged as related', () => {
+  // The sibling trap: a parent's address is shared by every child they have.
+  // Treating it as "same student" dropped the second child entirely, and no
+  // retry would ever create them, because the lead was stamped with the
+  // first child's key.
   const env = makeEnv({ rows: [] });
   const lead = { name: 'Sarah Chen', email: 'sarah@x.com', role: 'Parent', elapsedMs: 9000 };
   env.provisionLeadNow_(lead);
-  env.provisionLeadNow_(lead);           // a retry after a "network error"
+  env.provisionLeadNow_(lead);
   const roster = env.handleAccessRoster('ADMINSECRET').students;
-  assert.strictEqual(roster.length, 1, 'one family, one row');
-  // They are not yet set up, so the second inquiry still hands Luca the link.
-  const ready = env.sentMail.filter(m => /portal/i.test(m.subject || ''));
-  assert.ok(ready.length >= 2, 'he is still told about the second inquiry');
+  assert.strictEqual(roster.length, 2, 'the second child gets a row of their own');
+  assert.notStrictEqual(roster[0].key, roster[1].key);
+  const last = env.sentMail[env.sentMail.length - 1];
+  assert.ok(/already on row/.test(last.body), 'and Luca is told the rows share an address');
+  assert.ok(new RegExp(roster[0].key).test(last.body), 'naming the row it shares it with');
 });
 
-test('a family already using the portal does not get a fresh row or another invite', () => {
+test('a student already using the portal is not sent another setup email', () => {
   const env = makeEnv({ rows: [] });
-  env.provisionLeadNow_({ name: 'Sarah Chen', email: 'sarah@x.com', role: 'Parent', elapsedMs: 9000 });
+  env.provisionLeadNow_({ name: 'Owen Chen', email: 'owen@x.com', role: 'Student', elapsedMs: 9000 });
   const key = env.handleAccessRoster('ADMINSECRET').students[0].key;
-  env.handleSendInvite('ADMINSECRET', key);
-  const t = decodeURIComponent(/\?invite=([^\s]+)/.exec(env.sentMail[env.sentMail.length - 1].body)[1]);
-  isOk(env.handleClaimInvite(env.token('owen@x.com', 'SUBO', { name: 'Owen Chen' }), t));
+  isOk(env.handleGoogleAuth(env.token('owen@x.com', 'SUBO', { name: 'Owen Chen' })));
 
   const before = env.sentMail.length;
-  env.provisionLeadNow_({ name: 'Sarah Chen', email: 'sarah@x.com', role: 'Parent', elapsedMs: 9000 });
+  env.provisionLeadNow_({ name: 'Owen Chen', email: 'owen@x.com', role: 'Student', elapsedMs: 9000 });
   assert.strictEqual(env.handleAccessRoster('ADMINSECRET').students.length, 1, 'still one row');
   assert.strictEqual(env.sentMail.length, before, 'and no pointless setup email');
+});
+
+test('a dismissed row does not swallow the fresh one when the student signs in', () => {
+  // Lead provisioning gives a returning family a NEW row rather than
+  // resurrecting a dismissed one. If sign-in still matched the dismissed
+  // row, that new row and its invite would be dead on arrival.
+  const env = makeEnv({ rows: [['OLD111', 'Alex Reed', '', 'alex@x.com', new Date(), true, 1, new Date()]] });
+  env.studentsSheet.getRange(1, env.studentsSheet.getLastColumn() + 1).setValue('Archived');
+  const old = env.findRow_(env.studentsSheet, 'OLD111');
+  env.setCell_(env.studentsSheet, old, 'GoogleSub', 'SUB1');
+  env.setCell_(env.studentsSheet, old, 'Archived', true);
+
+  env.provisionLeadNow_({ name: 'Alex Reed', email: 'alex@x.com', role: 'Student', elapsedMs: 9000 });
+  const fresh = env.handleAccessRoster('ADMINSECRET').students.filter(r => r.key !== 'OLD111')[0];
+  assert.ok(fresh, 'a fresh row was created');
+
+  const out = env.handleGoogleAuth(env.token('alex@x.com', 'SUB1'));
+  isOk(out);
+  assert.strictEqual(out.key, fresh.key, 'sign-in lands on the live row, not the dismissed one');
+});
+
+test('an archived row is still honoured when it is the only match', () => {
+  const env = makeEnv({ rows: [['OLD111', 'Alex Reed', '', 'alex@x.com', new Date(), true, 1, new Date()]] });
+  env.studentsSheet.getRange(1, env.studentsSheet.getLastColumn() + 1).setValue('Archived');
+  const old = env.findRow_(env.studentsSheet, 'OLD111');
+  env.setCell_(env.studentsSheet, old, 'GoogleSub', 'SUB1');
+  env.setCell_(env.studentsSheet, old, 'Archived', true);
+  const out = env.handleGoogleAuth(env.token('alex@x.com', 'SUB1'));
+  isOk(out);
+  assert.strictEqual(out.key, 'OLD111', 'tidied away is not locked out');
+});
+
+test("a reset clears the wrong person's answers but keeps the parent Luca typed", () => {
+  const env = makeEnv({ rows: [] });
+  const key = env.handleCreateStudent('ADMINSECRET', { guardianEmail: 'parent@x.com', guardianName: 'Sarah Chen' }).key;
+  env.handleSendInvite('ADMINSECRET', key);
+  const t = decodeURIComponent(/\?invite=([^\s]+)/.exec(env.sentMail[0].body)[1]);
+  isOk(env.handleClaimInvite(env.token('parent@x.com', 'SUBP', { name: 'Sarah Chen' }), t));
+
+  // The parent clicks through the whole intro sequence.
+  const row = env.findRow_(env.studentsSheet, key);
+  ['TestDate', 'TargetScore', 'Goal', 'BaselineType', 'BaselineRW', 'BaselineMath'].forEach(c => {
+    env.studentsSheet.getRange(1, env.studentsSheet.getLastColumn() + 1).setValue(c);
+  });
+  const row2 = env.findRow_(env.studentsSheet, key);
+  env.setCell_(env.studentsSheet, row2, 'TestDate', '2026-11-07');
+  env.setCell_(env.studentsSheet, row2, 'TargetScore', 1500);
+  env.setCell_(env.studentsSheet, row2, 'AccomTimeMult', 1.5);
+  env.noteOnboarded_(key);
+
+  isOk(env.handleResetStudentAuth('ADMINSECRET', key));
+  const after = env.rowFor(key);
+  assert.strictEqual(after.TestDate, '', "the parent's test date is gone");
+  assert.strictEqual(after.TargetScore, '', 'and their target');
+  assert.strictEqual(after.AccomTimeMult, '', 'and their accommodations');
+  assert.strictEqual(after.GuardianEmail, 'parent@x.com', 'but the contact Luca typed survives');
+  assert.strictEqual(after.GuardianName, 'Sarah Chen');
+});
+
+test('a student who gave their own address can still be EMAILED their invite', () => {
+  // Their address is in GrantedEmail and there is no guardian at all, so a
+  // GuardianEmail-only lookup refused every one of these with no_recipient.
+  const env = makeEnv({ rows: [] });
+  env.provisionLeadNow_({ name: 'Owen Chen', email: 'owen@x.com', role: 'Student', elapsedMs: 9000 });
+  const key = env.handleAccessRoster('ADMINSECRET').students[0].key;
+  const out = env.handleSendInvite('ADMINSECRET', key);
+  isOk(out);
+  assert.strictEqual(out.sentTo, 'owen@x.com');
+
+  const setupLink = /setup\.html\?setup=([^\s"<]+)/.exec(env.sentMail[0].body);
+  assert.strictEqual(env.handleSetupInfo(decodeURIComponent(setupLink[1])).email, 'owen@x.com',
+    'and the page shows an address, so it offers the button');
 });
 
 test('a dismissed lead who inquires again starts a fresh row', () => {

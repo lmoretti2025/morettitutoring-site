@@ -4,6 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
+<!-- The token in the query string is a credential. It is deliberately NOT
+     scrubbed from the address bar the way auth-client.js scrubs ?invite=:
+     this page has no session of its own, so scrubbing would make a plain
+     reload say "link expired". Referrer is blocked instead, which is the
+     part that could leak it off this machine. -->
+<meta name="referrer" content="no-referrer">
 <title>Portal access request &mdash; Moretti Test Prep</title>
 <link rel="icon" href="../favicon.ico" sizes="16x16 32x32 48x48">
 <link rel="apple-touch-icon" href="../apple-touch-icon.png">
@@ -69,6 +75,23 @@ function post(payload) {
     .then(function (r) { return r.json(); })
     .catch(function () { return { ok: false, error: 'network' }; });
 }
+/* Raw backend codes are not an error message, and this is the phone-first
+   surface: the admin panel has had sentences for these for a while, so the
+   page opened from an email should not be the one printing `busy_try_again`.
+   Anything unmapped still falls through to the code, which beats silence. */
+var PAGE_ERRORS = {
+  busy_try_again: 'The server was busy with something else. Try that again in a moment.',
+  bad_key: 'That student row no longer exists.',
+  no_pending_claim: 'That request was already decided elsewhere.',
+  already_paired: 'They have already signed in, so nothing was changed.',
+  no_recipient: 'No usable email address on this row.',
+  bad_token: 'This link is no longer valid.'
+};
+function failureText(j, fallbackPrefix) {
+  var code = (j && j.error) || 'unknown error';
+  return PAGE_ERRORS[code] || (fallbackPrefix + code);
+}
+
 function when(iso) {
   if (!iso) return '';
   var d = new Date(iso);
@@ -77,10 +100,15 @@ function when(iso) {
 }
 
 var TOKEN = token();
+// Newest load wins: 'Try again' while a slow first request is still out
+// otherwise lets the older answer land last and overwrite a good render.
+var loadSeq = 0;
 
 function load() {
   if (!TOKEN) return expired();
+  var mine = ++loadSeq;
   post({ action: 'claimInfo', token: TOKEN }).then(function (d) {
+    if (mine !== loadSeq) return;
     if (!d || !d.ok) {
       // A read is safe to retry, unlike the decision below.
       if (d && d.error === 'network') {
@@ -92,6 +120,7 @@ function load() {
     }
     if (d.state === 'handled') {
       $('head').textContent = 'Already handled';
+  $('main').className = '';
       $('main').innerHTML = '<p>There is no request waiting on key <b>' + esc(d.key) + '</b> any more ' +
         '&mdash; it has already been approved or declined.</p>';
       return;
@@ -102,6 +131,7 @@ function load() {
 
 function expired() {
   $('head').textContent = 'Link expired';
+  $('main').className = '';
   $('main').innerHTML =
     '<p>This approval link is no longer valid &mdash; they expire after 14 days, and each one stops ' +
     'working once the request has been handled.</p>' +
@@ -112,6 +142,7 @@ function render(d) {
   // Always restate the heading: a retry that follows an error state
   // would otherwise keep the error's heading above a live request.
   $('head').textContent = 'Portal access request';
+  $('main').className = '';
   $('main').innerHTML =
     (d.nameMismatch
       ? '<p class="alert"><b>Check this one.</b> The Google account is named <b>' + esc(d.googleName) +
@@ -163,7 +194,7 @@ function decide(decision) {
       $('status').textContent = 'This student has already signed in, so nothing was changed.';
       return;
     }
-    $('status').textContent = 'Could not complete: ' + ((j && j.error) || 'unknown error');
+    $('status').textContent = failureText(j, 'Could not complete: ');
     for (var i = 0; i < btns.length; i++) btns[i].disabled = false;
   });
 }

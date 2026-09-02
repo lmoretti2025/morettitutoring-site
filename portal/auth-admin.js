@@ -52,7 +52,7 @@
                another was loading, so an action's own refresh was dropped
                and the older, pre-action snapshot landed afterwards and
                reverted the row on screen for up to a minute. */
-  var busy = 0, rosterSeq = 0, refreshQueued = false;
+  var busy = 0, rosterSeq = 0, refreshQueued = false, signedOut = false;
   var loaded = false;        // has any roster answer ever arrived?
   var loadFailed = false;    // did the most recent attempt fail?
 
@@ -97,8 +97,19 @@
      no longer accept -- so the only way back in was for Luca to work out
      for himself that he should reload the page. Hand it to the Google gate
      instead, which is the one thing that can actually fix it. */
-  function reGateIfSignedOut(data) {
+  function reGateIfSignedOut(data, userInitiated) {
     if (!data || data.error !== 'unauthorized') return false;
+    /* mtaAdminSignOut reloads the page. That is right when Luca just clicked
+       something, and wrong when it comes from the once-a-minute poll: a
+       session lapsing while he is halfway through the new-student form would
+       throw the form away with no warning. From the poll, say so and let him
+       reload when he is ready. */
+    if (!userInitiated) {
+      loadFailed = true;
+      signedOut = true;
+      if (open) render();
+      return true;
+    }
     if (typeof window.mtaAdminSignOut === 'function') { window.mtaAdminSignOut(); return true; }
     return false;
   }
@@ -602,19 +613,24 @@
     st.textContent = label;
     busy++;
     post(payload).then(function (data) {
-      busy--;
       if (data && data.ok) {
         st.textContent = done(data);
+        // busy is released INSIDE the timeout, not before it: the card is
+        // only rebuilt down there, so releasing early left a 1.2s window in
+        // which a poll could redraw the pre-action card with live buttons --
+        // the same double-approve race, just narrower.
         setTimeout(function () {
           if (apply) { apply(data); render(); }
+          busy--;
           refresh(true);
         }, 1200);
-      } else {
-        if (reGateIfSignedOut(data)) return;
-        st.textContent = actionFailure(data);
-        Array.prototype.forEach.call(btns, function (b) { b.disabled = false; });
-        if (data && STALE_AFTER.test(data.error)) refresh();
+        return;
       }
+      busy--;
+      if (reGateIfSignedOut(data, true)) return;
+      st.textContent = actionFailure(data);
+      Array.prototype.forEach.call(btns, function (b) { b.disabled = false; });
+      if (data && STALE_AFTER.test(data.error)) refresh();
     });
   }
 
@@ -631,16 +647,17 @@
     st.textContent = 'Deleting\u2026';
     busy++;
     post(payload).then(function (data) {
-      busy--;
       if (data && data.ok) {
         st.textContent = data.deletedName ? 'Deleted ' + data.deletedName + '.' : 'Deleted.';
         setTimeout(function () {
           students = students.filter(function (x) { return x.key !== key; });
           render();
+          busy--;
           refresh(true);
         }, 1200);
         return;
       }
+      busy--;
       if (data && data.error === 'has_recorded_work') {
         var n = data.attempts || 0;
         st.innerHTML = 'This student has ' + n + ' recorded test' + (n === 1 ? '' : 's') + '. ' +
@@ -657,7 +674,7 @@
         });
         return;
       }
-      if (reGateIfSignedOut(data)) return;
+      if (reGateIfSignedOut(data, true)) return;
       st.textContent = actionFailure(data);
       Array.prototype.forEach.call(btns, function (b) { b.disabled = false; });
     });
@@ -792,7 +809,11 @@
 
     var html = '';
     if (loadFailed) {
-      html += '<div class="mta-empty" style="padding:0.6rem 1rem;">Could not refresh just now \u2014 showing the last list. It retries every minute.</div>';
+      html += '<div class="mta-empty" style="padding:0.6rem 1rem;">' +
+        (signedOut
+          ? 'Your admin sign-in has expired \u2014 reload the page to sign in again. Nothing here will update until you do.'
+          : 'Could not refresh just now \u2014 showing the last list. It retries every minute.') +
+        '</div>';
     }
     html += '<div class="mta-sec">Needs you</div>';
     if (!needs.length) html += '<div class="mta-empty">Nothing waiting.</div>';
@@ -988,14 +1009,14 @@
     var seq = ++rosterSeq;
     loading = true;
     post({ action: 'accessRoster', adminKey: k }).then(function (data) {
-      loading = false;
       // Superseded by a newer request -- typically the one an action fired
       // the moment it succeeded. Answering with this older snapshot would
-      // undo what the admin just watched happen.
+      // undo what the admin just watched happen. Return BEFORE clearing
+      // `loading`, which belongs to the request that is still running.
       if (seq !== rosterSeq) return;
-      if (refreshQueued) { refreshQueued = false; refresh(true); return; }
+      loading = false;
       if (!data || !data.ok) {
-        if (reGateIfSignedOut(data)) return;
+        if (reGateIfSignedOut(data, false)) return;
         loadFailed = true;
         if (open && !busy) render();
         return;
@@ -1010,6 +1031,9 @@
       badgeEl.style.display = n ? '' : 'none';
       tabEl.style.opacity = n ? '1' : '0.75';
       if (open && !busy) render();
+      // A refresh that arrived while this one was in flight: this answer is
+      // already drawn, so the queued one is a follow-up, not a replacement.
+      if (refreshQueued) { refreshQueued = false; refresh(true); }
     });
   }
 
