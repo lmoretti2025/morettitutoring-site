@@ -210,6 +210,17 @@
      visible exactly as before. ═══ */
   #main-nav { transition: transform 0.6s cubic-bezier(0.16,1,0.3,1); }
   #main-nav.nav-hidden { transform: translateY(-100%); }
+  /* Suppresses that transition for one frame. The nav is display:none
+     behind auth-client.js's sign-in overlay (html.mta-auth-pending), so
+     the moment the overlay lifts it becomes visible and UNTRANSFORMED --
+     adding .nav-hidden then animates it from visible to gone, which reads
+     as a red bar flashing across the top of the first onboarding screen
+     before sliding away. Reported as "the red bar at the top shows and
+     THEN goes to the sign-in screen". Hiding has to be instant; the
+     slide-back-DOWN when onboarding turns light is still animated, which
+     is why this is a separate one-frame class and not a blanket
+     transition:none. */
+  #main-nav.nav-instant { transition: none; }
 
   /* ═══ EXAM WATERMARK ═══ hidden by default; toggled to .visible in
      lockstep with #main-nav.nav-hidden (see show() in the JS). Fixed +
@@ -246,6 +257,36 @@
   .onb-dark .panel-sub, .onb-dark .onb-mid-text { color: rgba(255,255,255,0.68); }
   .onb-dark .key-help, .onb-dark .kicker { color: rgba(255,255,255,0.5); }
   .onb-dark .key-error { color: var(--gold); }
+
+  /* The very first thing a new student sees. #screen-onboard is already
+     dark by the time it is shown, so without this the whole dark act
+     SNAPS on — the old flow hid that behind the white auth overlay, but
+     the name beat now opens the sequence and there is nothing left to
+     cover the cut. A slow fade from black gives the sequence a beginning
+     instead of a jump. It runs once, on the shell, so the beat that
+     follows (the logo) still gets its own entrance. */
+  #screen-onboard.is-dark.onb-opening .onboard-shell { animation: onbOpenFade 2.2s ease forwards; }
+  @keyframes onbOpenFade { from { opacity: 0; } to { opacity: 1; } }
+  /* A two-second fade is exactly the kind of thing this setting is for.
+     `none` on an animation whose `from` state is opacity:0 would leave the
+     shell invisible, so this pins it visible rather than just disabling. */
+  @media (prefers-reduced-motion: reduce) {
+    #screen-onboard.is-dark.onb-opening .onboard-shell { animation: none; opacity: 1; }
+    .onb-mark { animation: none; opacity: 1; transform: none; }
+  }
+
+  /* The name beat. Deliberately sparse: on the dark ground there is one
+     question and one field, so nothing competes with it. */
+  #onb-name .key-input { text-transform: none; text-align: center; }
+  #onb-name .panel-sub { margin-bottom: 1.5rem; }
+  .onb-name-field { max-width: 380px; margin: 0 auto; }
+  .onb-dark .key-input {
+    background: rgba(255,255,255,0.06);
+    border-color: rgba(255,255,255,0.22);
+    color: #fff;
+  }
+  .onb-dark .key-input::placeholder { color: rgba(255,255,255,0.35); }
+  .onb-dark .key-input:focus { border-color: var(--gold); background: rgba(255,255,255,0.09); }
 
   #onb-splash { cursor: pointer; padding: 3rem 0; }
   .onb-mark { width: min(520px, 88%); height: auto; opacity: 0; transform: scale(0.82); animation: onbMarkRise 2.4s cubic-bezier(0.22,1.2,0.36,1) 0.15s forwards; }
@@ -3063,6 +3104,29 @@ window.Portal = {
      "onboarding product" bolted on). -->
 <div class="screen" id="screen-onboard">
   <div class="onboard-shell" id="onboard-shell">
+
+    <!-- Act 1, beat 0: the name. This used to be asked on auth-client.js's
+         WHITE sign-in overlay, before the dark act began; it moved here so
+         the first thing a new student does happens against the dark ground
+         and the logo lands AFTER they have introduced themselves, not
+         before. Only shown when the roster cell is genuinely blank
+         (needsName from the backend) — Google supplies a usable name for
+         most students, and re-asking people who already have one on file
+         would be a beat that exists for nobody.
+
+         The field is the only thing on screen on purpose. It is also the
+         one beat in this sequence with a real backend write behind it
+         (setName), so unlike the goal cards it needs its own button and
+         its own error line rather than advancing on click. -->
+    <div class="onb-pane onb-dark" id="onb-name">
+      <h1 class="panel-hed onb-light-text">First, what should I call you?</h1>
+      <p class="panel-sub onb-mid-text">First and last, as you would write it on a test registration.</p>
+      <div class="onb-name-field">
+        <input type="text" class="key-input" id="onb-name-input" placeholder="Your full name" autocomplete="name">
+        <p class="key-error" id="onb-name-error" style="display:none;">Please enter your full first and last name to continue.</p>
+        <button class="key-btn" id="onb-name-submit">Continue</button>
+      </div>
+    </div>
 
     <!-- Act 1, beat 1: the brand moment. Auto-advances; click/tap also
          advances immediately for anyone who doesn't want to wait. -->
@@ -7279,6 +7343,9 @@ window.Portal = {
     document.getElementById('email-notice').style.display = 'none';
     document.getElementById('main-nav').classList.remove('nav-hidden');
     document.getElementById('screen-onboard').classList.remove('is-dark');
+    document.getElementById('screen-onboard').classList.remove('onb-opening');
+    document.getElementById('onb-name-input').value = '';
+    document.getElementById('onb-name-error').style.display = 'none';
     onbGoTo('onb-splash');
     show('screen-key');
   }
@@ -7328,16 +7395,144 @@ window.Portal = {
     });
   });
 
-  // Beat 1: the brand moment. Waits for the student to click/tap — no
-  // auto-advance — so the (much larger, slower-fading) logo has room to
-  // breathe before anyone moves on.
+  /* Opens the dark act. Two possible first beats: the name question when
+     the backend says the roster cell is blank (needsName), otherwise the
+     logo. Either way the shell fades up from black first — see the
+     .onb-opening CSS.
+
+     The splash hint is armed here rather than in the markup because its
+     animation has a delay baked in: arming it on a pane that is still
+     display:none would burn that delay while nobody is looking, and the
+     "Click to continue" line would already be sitting there when the
+     logo finally appeared. */
   function goToOnboardSplash() {
-    document.getElementById('main-nav').classList.add('nav-hidden');
-    document.getElementById('screen-onboard').classList.add('is-dark');
-    onbGoTo('onb-splash');
-    document.getElementById('onb-splash-hint').classList.add('onb-splash-hint-visible');
+    var screen = document.getElementById('screen-onboard');
+    hideNavInstantly();
+    screen.classList.add('is-dark');
+    screen.classList.add('onb-opening');
+    var needsName = !!(onboardAuthData && onboardAuthData.needsName);
+    if (needsName) {
+      onbGoTo('onb-name');
+    } else {
+      armSplashHint();
+      onbGoTo('onb-splash');
+    }
     show('screen-onboard');
+    if (needsName) {
+      // Focus, but only once the fade has actually started, so the caret
+      // does not appear on a field nobody can see yet.
+      setTimeout(function () {
+        try { document.getElementById('onb-name-input').focus(); } catch (e) {}
+      }, 900);
+    }
   }
+
+  /* Puts the nav in its hidden position with no animation -- see
+     #main-nav.nav-instant. The forced reflow between adding and removing
+     the class is load-bearing: without reading offsetHeight the browser
+     coalesces both class changes into one style recalculation and the
+     transition it is meant to skip runs anyway. */
+  function hideNavInstantly() {
+    var nav = document.getElementById('main-nav');
+    nav.classList.add('nav-instant');
+    nav.classList.add('nav-hidden');
+    void nav.offsetHeight;
+    nav.classList.remove('nav-instant');
+  }
+
+  function armSplashHint() {
+    document.getElementById('onb-splash-hint').classList.add('onb-splash-hint-visible');
+    playOnbChime();
+  }
+
+  /* The logo's arrival, with sound. Synthesised rather than loaded from a
+     file: nothing to download, nothing to license, and no way for a
+     missing asset to turn into a console error on a student's first
+     screen. Four notes of a C-major arpeggio on soft triangle waves,
+     timed against the 2.4s mark animation so the last note lands as the
+     logo settles.
+
+     Everything here is best-effort and silent on failure. Two ways it
+     legitimately never plays, both fine:
+       - Autoplay policy. Browsers refuse audio before a user gesture. On
+         the normal path the student has just clicked Continue on the name
+         beat, so the context is allowed; when the name beat is skipped
+         the logo IS the first screen and there has been no gesture yet,
+         so it stays silent rather than throwing.
+       - No Web Audio at all (old or locked-down browser).
+     Onboarding runs once per student, so this is a once-ever sound. It is
+     deliberately quiet (peak gain 0.06) — someone may well be opening
+     this in a classroom. */
+  function playOnbChime() {
+    try {
+      var Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return;
+      var ctx = new Ctx();
+      if (ctx.state === 'suspended' && ctx.resume) ctx.resume();
+      var t0 = ctx.currentTime + 0.15;   // matches the mark animation's own delay
+      // C5, E5, G5, C6 — a plain major arpeggio. Nothing clever; it needs
+      // to read as a brand sting, not a melody.
+      var notes = [523.25, 659.25, 783.99, 1046.50];
+      notes.forEach(function (hz, i) {
+        var start = t0 + i * 0.18;
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.value = hz;
+        // Soft attack, long decay — a hard edge on a sine reads as a
+        // system beep, which is the one thing this must not sound like.
+        gain.gain.setValueAtTime(0.0001, start);
+        gain.gain.exponentialRampToValueAtTime(i === 3 ? 0.06 : 0.045, start + 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + (i === 3 ? 1.5 : 0.7));
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(start);
+        osc.stop(start + (i === 3 ? 1.6 : 0.8));
+      });
+      // Release the hardware once the tail has finished.
+      setTimeout(function () { try { ctx.close(); } catch (e) {} }, 3200);
+    } catch (e) { /* no sound, no problem — never block the sequence */ }
+  }
+
+  /* Beat 0 -> beat 1. The name is written through MorettiAuth (same
+     `setName` the sign-in overlay used to call) BEFORE the logo appears,
+     so if the write fails the student is still on the field that can fix
+     it rather than three beats downstream. */
+  function submitOnboardName() {
+    var input = document.getElementById('onb-name-input');
+    var btn = document.getElementById('onb-name-submit');
+    var errEl = document.getElementById('onb-name-error');
+    var name = input.value.trim().replace(/\s+/g, ' ');
+    if (!name || name.indexOf(' ') === -1) {
+      errEl.textContent = 'Please enter your full first and last name to continue.';
+      errEl.style.display = 'block';
+      return;
+    }
+    errEl.style.display = 'none';
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+    MorettiAuth.setName(name).then(function (data) {
+      btn.disabled = false;
+      btn.textContent = 'Continue';
+      if (!data || !data.ok) {
+        errEl.textContent = (data && data.error === 'bad_name')
+          ? 'Please enter your full first and last name to continue.'
+          : 'Could not save that just now — check your connection and try again.';
+        errEl.style.display = 'block';
+        return;
+      }
+      // The fresh payload carries the name every later beat greets them
+      // by, so it replaces the one we arrived with rather than sitting
+      // beside it.
+      onboardAuthData = data;
+      pendingName = data.name || name;
+      armSplashHint();
+      onbGoTo('onb-splash');
+    });
+  }
+  document.getElementById('onb-name-submit').addEventListener('click', submitOnboardName);
+  document.getElementById('onb-name-input').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') submitOnboardName();
+  });
   document.getElementById('onb-splash').addEventListener('click', function () {
     // Name and email both come from the verified Google account now, so the
     // old identity-capture beat has nothing left to ask for — straight to
@@ -7384,6 +7579,10 @@ window.Portal = {
   function transitionOnboardToLight(data) {
     onboardAuthData = data;
     document.getElementById('screen-onboard').classList.remove('is-dark');
+    // The opening fade belongs to the dark act only; leaving it armed
+    // would re-run it on the white half every time this class list is
+    // touched again.
+    document.getElementById('screen-onboard').classList.remove('onb-opening');
     document.getElementById('main-nav').classList.remove('nav-hidden');
     var firstName = (data.name || '').split(' ')[0] || 'there';
     document.getElementById('onb-welcome-hed').textContent = 'Welcome, ' + firstName + '.';
