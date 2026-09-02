@@ -1196,6 +1196,36 @@ test('the two hand-run admin tools are gated in Code.gs itself', () => {
   });
 });
 
+console.log('\nSource encoding\n');
+
+test('auth.gs is pure ASCII', () => {
+  /* This one is not hypothetical. auth.gs originally contained real em-dash
+     characters; copying it into the Apps Script editor mangled them, and the
+     live approval page went out reading "no longer valid ,Ai they expire"
+     — with the same corruption waiting to go into invite emails sent to
+     parents. Keeping the file ASCII-only makes it immune to whatever
+     encoding a clipboard, an editor or a paste decides to use. Characters
+     that need to REACH a reader are written as \u escapes, so the output is
+     unchanged; only the bytes on disk are constrained. */
+  const src = fs.readFileSync(path.join(__dirname, '..', 'auth.gs'), 'utf8');
+  const bad = [];
+  src.split('\n').forEach((line, i) => {
+    for (const ch of line) {
+      if (ch.charCodeAt(0) > 127) { bad.push('line ' + (i + 1) + ': U+' + ch.charCodeAt(0).toString(16)); break; }
+    }
+  });
+  assert.deepStrictEqual(bad.slice(0, 5), [],
+    'non-ASCII found (use a \\uXXXX escape in strings, ASCII in comments): ' + bad.slice(0, 5).join(', '));
+});
+
+test('the escapes still produce real characters, not literal backslash-u', () => {
+  // Guards the other direction: the fix must not have turned user-facing
+  // em-dashes into the seven literal characters \u2014.
+  const src = fs.readFileSync(path.join(__dirname, '..', 'auth.gs'), 'utf8');
+  assert.ok(src.indexOf('\\u2014') !== -1, 'expected escaped em-dashes in strings');
+  assert.strictEqual('\u2014', String.fromCharCode(0x2014), 'escape resolves to an em-dash');
+});
+
 console.log('\nSessions\n');
 
 test('a valid session resumes without re-authenticating', () => {
