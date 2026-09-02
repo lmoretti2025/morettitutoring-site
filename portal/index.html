@@ -3027,7 +3027,7 @@ window.Portal = {
       <span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a1 1 0 0 1 1-1h5l2 2h9a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7z"/></svg></span>
       <span class="sidebar-label">Files</span>
     </a>
-    <div class="sb-divider"><span>Learn</span></div>
+    <div class="sb-divider" id="sidebar-learn-divider"><span>Learn</span></div>
     <a href="#" class="sidebar-item" data-nav="practice-tests" id="sidebar-practice-tests">
       <span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2"/><path d="M9 2h6"/></svg></span>
       <span class="sidebar-label">Practice Tests</span>
@@ -5553,6 +5553,14 @@ window.Portal = {
     setNav('sidebar-incorrect-questions', resourcesHidden);
     setNav('sidebar-challenge-questions', resourcesHidden || !showSat);
     setNav('sidebar-question-bank', resourcesHidden || !showSat);
+    // The "Learn" heading only earns its place when at least one item is
+    // under it. A subject-only student has none, so it goes too -- a label
+    // over nothing reads as something failing to load.
+    var anyLearn = ['sidebar-practice-tests', 'sidebar-question-bank', 'sidebar-challenge-questions', 'sidebar-vocab', 'sidebar-incorrect-questions'].some(function (id) {
+      var el = document.getElementById(id);
+      return el && el.style.display !== 'none';
+    });
+    setNav('sidebar-learn-divider', !anyLearn);
   }
   var SIDEBAR_SCREENS = { 'screen-menu': 1, 'screen-calendar': 1, 'screen-practice-tests': 1, 'screen-resources': 1, 'screen-vocab': 1, 'screen-incorrect-questions': 1, 'screen-sat-resources': 1, 'screen-challenge-questions': 1, 'screen-question-bank': 1 };
   var SIDEBAR_NAV_FOR_SCREEN = { 'screen-menu': 'home', 'screen-calendar': 'calendar', 'screen-practice-tests': 'practice-tests', 'screen-resources': 'files', 'screen-vocab': 'vocab', 'screen-incorrect-questions': 'incorrect-questions', 'screen-challenge-questions': 'challenge-questions', 'screen-question-bank': 'question-bank' };
@@ -7898,13 +7906,26 @@ window.Portal = {
   // settle() (defined above) is only called now, not at the top of the
   // sequence, so nothing about the app's normal state (currentStudent,
   // assignments, the countdown, etc.) exists until onboarding is done.
-  document.getElementById('onb-start-diagnostic').addEventListener('click', function () {
+  // The auth response was captured before onboarding started, so it still
+  // carries the roster's default (SAT prep) for a brand-new row. The goal
+  // the student just picked is what saveOnboardingPrefs writes to the
+  // sheet as SubjectOnly; apply the same answer here so THIS session's
+  // portal matches the next login's instead of asking a tutoring student
+  // to take an SAT diagnostic.
+  function onbSettle() {
+    if (!onbIsSat()) {
+      onboardAuthData.showSat = false;
+      onboardAuthData.testPrep = false;
+    }
     settle(onboardAuthData);
+  }
+  document.getElementById('onb-start-diagnostic').addEventListener('click', function () {
+    onbSettle();
     if (onbIsSat()) goToDiagnostic();
   });
   document.getElementById('onb-later').addEventListener('click', function (e) {
     e.preventDefault();
-    settle(onboardAuthData);
+    onbSettle();
   });
 
   // Nudge the student toward entering their main email the moment they

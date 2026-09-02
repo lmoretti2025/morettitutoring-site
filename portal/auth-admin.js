@@ -38,15 +38,30 @@
   var root = null, listEl = null, badgeEl = null, tabEl = null;
   var students = [];
   var open = false, query = '', loading = false, showArchived = false;
+  var loaded = false;        // has any roster answer ever arrived?
+  var loadFailed = false;    // did the most recent attempt fail?
 
   function adminKey() {
     try { return sessionStorage.getItem(SESSION_KEY); } catch (e) { return null; }
   }
 
-  function post(payload) {
+  /* Apps Script answers a POST with a redirect to its "echo" host, and that
+     hop fails now and then (a 404, or an HTML page instead of JSON) even
+     though the script ran. For the one read this panel makes that is just a
+     lost answer, so ask again. Writes are never retried: the script already
+     ran, and re-sending would create, invite or delete twice. */
+  var RETRY_READS = { accessRoster: 1 };
+  function post(payload, attempt) {
+    attempt = attempt || 0;
     return fetch(URL_, { method: 'POST', body: JSON.stringify(payload) })
       .then(function (r) { return r.json(); })
-      .catch(function () { return { ok: false, error: 'network' }; });
+      .catch(function () {
+        if (RETRY_READS[payload.action] && attempt < 2) {
+          return new Promise(function (r) { setTimeout(r, 1500 * (attempt + 1)); })
+            .then(function () { return post(payload, attempt + 1); });
+        }
+        return { ok: false, error: 'network' };
+      });
   }
 
   function esc(s) {
@@ -493,7 +508,11 @@
     tabEl.addEventListener('click', function () {
       open = !open;
       root.querySelector('#mta-body').style.display = open ? 'flex' : 'none';
-      if (open) refresh();
+      // Draw what is already known the moment the panel opens -- the badge
+      // was computed from a roster fetched at boot, so the list is usually
+      // ready to show. Waiting on a fresh fetch first left the panel blank
+      // for the whole of a cold start, which read as broken.
+      if (open) { render(); refresh(); }
     });
     root.querySelector('#mta-close').addEventListener('click', function () {
       open = false;
@@ -504,7 +523,10 @@
     return root;
   }
 
-  function act(card, label, payload, done) {
+  /* `apply`, when given, updates the local list to match what the server
+     just did, so the panel reflects the change immediately even if the
+     follow-up fetch is slow or its answer gets lost on the way back. */
+  function act(card, label, payload, done, apply) {
     var btns = card.querySelectorAll('button');
     Array.prototype.forEach.call(btns, function (b) { b.disabled = true; });
     var st = card.querySelector('.mta-status');
@@ -512,7 +534,10 @@
     post(payload).then(function (data) {
       if (data && data.ok) {
         st.textContent = done(data);
-        setTimeout(refresh, 1200);
+        setTimeout(function () {
+          if (apply) { apply(data); render(); }
+          refresh();
+        }, 1200);
       } else {
         st.textContent = 'Failed: ' + ((data && data.error) || 'unknown error');
         Array.prototype.forEach.call(btns, function (b) { b.disabled = false; });
@@ -572,6 +597,14 @@
        way to confirm a row exists at all, so a lead that provisioned
        perfectly reads as "nothing was created". Everything else therefore
        gets its own section below the queue: visible, but not shouting. */
+    // Nothing to draw yet: say which of the two reasons it is, rather than
+    // an empty white box.
+    if (!students.length && !loaded) {
+      listEl.innerHTML = '<div class="mta-empty">' +
+        (loading || !loadFailed ? 'Loading\u2026' : 'Could not reach the server just now \u2014 it will try again shortly.') +
+        '</div>';
+      return;
+    }
     var needs = [], waiting = [], settled = [];
     students.forEach(function (s) {
       if (s.archived && !showArchived) return;
@@ -580,7 +613,11 @@
       else settled.push(s);                       // Ready + Active
     });
 
-    var html = '<div class="mta-sec">Needs you</div>';
+    var html = '';
+    if (loadFailed) {
+      html += '<div class="mta-empty" style="padding:0.6rem 1rem;">Could not refresh just now \u2014 showing the last list. It retries every minute.</div>';
+    }
+    html += '<div class="mta-sec">Needs you</div>';
     if (!needs.length) html += '<div class="mta-empty">Nothing waiting.</div>';
     needs.forEach(function (s) {
       if (s.pending) {
@@ -691,11 +728,13 @@
                 'recorded tests or scores \u2014 use Dismiss for those instead.\n\n' +
                 'Their Drive folder is NOT deleted; you can remove it yourself if you want it gone.')) return;
           act(c, 'Deleting\u2026', { action: 'deleteStudent', adminKey: adminKey(), key: key },
-            function (d) { return d.deletedName ? 'Deleted ' + d.deletedName + '.' : 'Deleted.'; });
+            function (d) { return d.deletedName ? 'Deleted ' + d.deletedName + '.' : 'Deleted.'; },
+            function () { students = students.filter(function (x) { return x.key !== key; }); });
         } else if (a === 'archive' || a === 'unarchive') {
           act(c, a === 'archive' ? 'Dismissing\u2026' : 'Restoring\u2026',
             { action: 'setStudentArchived', adminKey: adminKey(), key: key, archived: a === 'archive' },
-            function () { return a === 'archive' ? 'Dismissed.' : 'Restored.'; });
+            function () { return a === 'archive' ? 'Dismissed.' : 'Restored.'; },
+            function () { if (s.key) s.archived = (a === 'archive'); });
         } else if (a === 'reset') {
           if (!window.confirm(
                 'Reset the login for ' + key + '?\n\n' +
@@ -745,7 +784,13 @@
     loading = true;
     post({ action: 'accessRoster', adminKey: k }).then(function (data) {
       loading = false;
-      if (!data || !data.ok) return;
+      if (!data || !data.ok) {
+        loadFailed = true;
+        if (open) render();
+        return;
+      }
+      loaded = true;
+      loadFailed = false;
       students = data.students || [];
       var n = students.filter(function (s) {
         return !s.archived && (s.pending || s.status === 'Inquiry');
