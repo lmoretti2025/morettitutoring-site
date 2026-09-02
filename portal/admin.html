@@ -66,6 +66,7 @@
   #gate button:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(176,39,28,0.28); }
   #gate button:disabled { opacity: 0.6; cursor: default; transform: none; box-shadow: none; }
   #gate-error { color: var(--red); font-size: 0.8rem; font-weight: 600; margin-top: 0.7rem; min-height: 1.1em; }
+  #gate-checking { color: var(--mid); font-size: 0.85rem; font-weight: 600; padding: 0.75rem 0; }
 
   /* ═══ SHARED ═══ */
   .card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow); padding: 1.25rem 1.4rem; margin-bottom: 1.25rem; }
@@ -373,8 +374,11 @@
     <div class="eyebrow">Admin</div>
     <h1>Enter admin key</h1>
     <p>This page isn't linked from the student portal and shows every student at once — Luca only.</p>
-    <input type="password" id="gate-key" placeholder="Admin key" autocomplete="off">
-    <button id="gate-submit" type="button">View roster</button>
+    <div id="gate-form">
+      <input type="password" id="gate-key" placeholder="Admin key" autocomplete="off">
+      <button id="gate-submit" type="button">View roster</button>
+    </div>
+    <div id="gate-checking" style="display:none;">Signing you in&hellip;</div>
     <div id="gate-error"></div>
   </div>
 
@@ -382,7 +386,6 @@
     <div class="deploy-banner" id="deploy-banner" style="display:none;"></div>
     <div class="summary-row" id="summary-row"></div>
     <div class="filter-row">
-      <label><input type="checkbox" id="filter-flagged"> Needs attention only</label>
       <label id="filter-hidden-wrap" style="display:none;"><input type="checkbox" id="filter-hidden"> Show hidden <span class="count-pill" id="hidden-count"></span></label>
     </div>
     <div class="roster-table-wrap">
@@ -571,9 +574,23 @@
   function $(id) { return document.getElementById(id); }
 
   /* ═══ SHARED HELPERS ═══ */
-  function postToBackend(payload) {
+  // Apps Script answers a POST with a redirect to its "echo" host, and that
+  // hop fails now and then with a 404 or an HTML error page even though the
+  // script ran fine. For a read that is just a lost answer, so ask again
+  // before giving up. Writes are deliberately NOT retried -- the script
+  // already ran, and re-sending would create or send twice.
+  var RETRY_READS = { getRoster: 1, version: 1, getStudentDetail: 1, getAdminAssignments: 1, getAdminCalendar: 1 };
+  function postToBackend(payload, attempt) {
+    attempt = attempt || 0;
     return fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) })
-      .then(function (res) { return res.json(); });
+      .then(function (res) { return res.json(); })
+      .catch(function (err) {
+        if (RETRY_READS[payload.action] && attempt < 2) {
+          return new Promise(function (r) { setTimeout(r, 1500 * (attempt + 1)); })
+            .then(function () { return postToBackend(payload, attempt + 1); });
+        }
+        throw err;
+      });
   }
 
   function adminKey() {
@@ -756,7 +773,6 @@
   var gateErrorEl = $('gate-error');
   var summaryRowEl = $('summary-row');
   var bodyEl = $('roster-body');
-  var filterFlaggedEl = $('filter-flagged');
   var filterHiddenEl = $('filter-hidden');
 
   function isFlagged(s) {
@@ -796,7 +812,6 @@
     $('hidden-count').textContent = hiddenCount;
 
     var rows = allStudents.filter(function (s) { return showHidden || !s.archived; });
-    if (filterFlaggedEl.checked) rows = rows.filter(isFlagged);
     rows.sort(function (a, b) {
       var va = sortValue(a, sortKey), vb = sortValue(b, sortKey);
       if (va < vb) return -1 * sortDir;
@@ -889,7 +904,6 @@
       renderTable();
     });
   });
-  filterFlaggedEl.addEventListener('change', renderTable);
   filterHiddenEl.addEventListener('change', renderTable);
 
   // silent: this is a background top-up of the roster's numbers (after a
@@ -904,16 +918,22 @@
     return postToBackend({ action: 'getRoster', adminKey: key }).then(function (data) {
       if (seq !== rosterLoadSeq) return false; // superseded by a newer load
       gateSubmitEl.disabled = false;
+      setGateChecking(false);
       if (!data || !data.ok) {
         if (silent) return false;
-        var msg = (data && data.error === 'unauthorized') ? 'Wrong admin key.' : 'Could not load the roster. Try again.';
-        // Always surface the gate on failure — a Refresh click or the
-        // auto-continue-on-reload path below can hit this branch while
-        // the roster is already showing, and gate-error lives inside
-        // #gate, so leaving it hidden means the error is never seen.
-        gateErrorEl.textContent = msg;
-        showView('gate');
-        try { sessionStorage.removeItem(SESSION_KEY); } catch (e) {}
+        // Only a rejected key means the session is bad. Every other failure
+        // (a cold start timing out, the echo hop 404ing, a sheet hiccup) used
+        // to be handled the same way -- back to the gate, session wiped, every
+        // student gone from the screen -- which looked like the roster had
+        // been deleted. Keep what is on screen and say what happened instead.
+        if (data && data.error === 'unauthorized') {
+          gateErrorEl.textContent = 'Wrong admin key.';
+          showView('gate');
+          try { sessionStorage.removeItem(SESSION_KEY); } catch (e) {}
+          return false;
+        }
+        if (currentView === 'gate') gateErrorEl.textContent = 'Could not load the roster just now \u2014 try again.';
+        else setStatus('Could not refresh the roster just now \u2014 the list shown may be a little stale. Try Refresh again.', true);
         return false;
       }
       try { sessionStorage.setItem(SESSION_KEY, key); } catch (e) {}
@@ -926,9 +946,10 @@
     }).catch(function () {
       if (seq !== rosterLoadSeq) return false; // superseded by a newer load
       gateSubmitEl.disabled = false;
+      setGateChecking(false);
       if (silent) return false;
-      gateErrorEl.textContent = 'Network error — check your connection and try again.';
-      showView('gate');
+      if (currentView === 'gate') gateErrorEl.textContent = 'Network error \u2014 check your connection and try again.';
+      else setStatus('Network error \u2014 the list shown may be a little stale. Try Refresh again.', true);
       return false;
     });
   }
@@ -969,8 +990,18 @@
   // Auto-continue if this browser already unlocked the roster this
   // session — avoids re-typing the key on every reload without ever
   // persisting it to disk (sessionStorage clears when the tab closes).
+  // While that stored session is being checked, the gate used to sit
+  // there as a normal password form with its button disabled -- so it
+  // looked like a form whose button was stuck pressed, and a browser that
+  // autofills the password made it look doubly broken. There is nothing to
+  // type during that stretch, so show that instead of the form; it comes
+  // back on its own if the session turns out to be bad.
+  function setGateChecking(on) {
+    $('gate-form').style.display = on ? 'none' : '';
+    $('gate-checking').style.display = on ? 'block' : 'none';
+  }
   var savedKey = adminKey();
-  if (savedKey) loadRoster(savedKey);
+  if (savedKey) { setGateChecking(true); loadRoster(savedKey); }
 
   /* ═══════════════════════════════════════════════════════════════════
      ONE STUDENT — reports tab
