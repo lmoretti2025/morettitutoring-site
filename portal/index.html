@@ -394,7 +394,7 @@
   .assign-text { font-family: var(--hel); font-size: 0.9rem; color: var(--text); line-height: 1.35; }
   .assign-item.assign-done { cursor: default; }
   .assign-item.assign-done .assign-text { color: var(--text-muted, #9a9a9a); text-decoration: line-through; }
-  .assign-item.assign-done input[type="checkbox"] { cursor: default; }
+  .assign-item.assign-done input[type="checkbox"] { cursor: pointer; }
   /* Both This Week and Score Progress used to pin to the page's far
      corners at ≥1260px, out of the normal column, as part of the old
      "home fits one viewport" design. Dropped along with that design (see
@@ -1839,6 +1839,18 @@
   .pb-note.pb-note-wrong { background: #f8ecea; color: var(--red); }
   .pb-explain { font-family: var(--serif); margin-top: 1.1rem; font-size: 0.86rem; line-height: 1.6; color: var(--text); background: var(--bg); border-radius: 10px; padding: 0.9rem 1.1rem; }
   .pb-explain-hed { font-family: var(--hel); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); margin-bottom: 0.35rem; }
+  /* Collapsible variant (Question Bank only, see buildCollapsibleExplain) —
+     a submitted question's explanation starts closed so Next stays right
+     under the choices instead of pushed offscreen by a full paragraph. */
+  .pb-explain-toggle { display: flex; align-items: center; gap: 0.4rem; cursor: pointer; margin-bottom: 0; }
+  .pb-explain-toggle:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; border-radius: 4px; }
+  .pb-explain-arrow { display: inline-block; font-size: 0.6rem; transition: transform 0.15s ease; transform: rotate(0deg); }
+  .pb-explain-hint { font-family: var(--hel); font-weight: 400; letter-spacing: 0; text-transform: none; color: var(--faint); font-size: 0.66rem; }
+  .pb-explain-body { display: none; margin-top: 0.6rem; }
+  .pb-explain-collapsed .pb-explain-body { display: none; }
+  .pb-explain:not(.pb-explain-collapsed) .pb-explain-body { display: block; }
+  .pb-explain:not(.pb-explain-collapsed) .pb-explain-arrow { transform: rotate(90deg); }
+  .pb-explain:not(.pb-explain-collapsed) .pb-explain-hed { margin-bottom: 0.35rem; }
 
   /* ═══ MY INCORRECT QUESTIONS — reuses pb-q-meta/pb-passage/pb-q-card/
      pb-note/pb-explain/dx-choice styling above. Now a self-quiz rather
@@ -2628,7 +2640,7 @@
   .cal-detail-check { display: flex; align-items: center; gap: 0.55rem; font-family: var(--hel); font-size: 0.9rem; font-weight: 600; color: var(--text); cursor: pointer; }
   .cal-detail-check input { accent-color: var(--green); width: 18px; height: 18px; cursor: pointer; }
   .cal-detail-check.is-done { color: var(--green); }
-  .cal-detail-check.is-done input { cursor: default; }
+  .cal-detail-check.is-done input { cursor: pointer; }
   .cal-detail-go { font-family: var(--hel); font-size: 0.8rem; font-weight: 700; color: var(--red); text-decoration: none; }
   .cal-detail-go:hover { text-decoration: underline; }
 
@@ -2663,11 +2675,25 @@
        visibly overlapped the week below. */
     #cal-body { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
     #screen-calendar .cal-month { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
-    /* 84px is the floor at which a day still reads: the date disc, one
-       chip, and the "+N more" line. Below that the month stops being
-       something you can actually scan. */
-    #screen-calendar .cal-month-grid { flex: 1 1 auto; min-height: 0; grid-auto-rows: minmax(84px, 1fr); align-items: stretch; }
+    /* 100px is the floor at which a day still reads: the date disc, two
+       chips, and the "+N more" line — i.e. exactly what the month cap now
+       renders, measured with the tightened spacing below. It was 84, which
+       was set when chips could still shrink to fit; now that they hold
+       their height, 84 clipped the more-link off the bottom of any busy
+       day. Below this the page scrolls a little rather than hiding the one
+       thing that says the day has more on it. */
+    #screen-calendar .cal-month-grid { flex: 1 1 auto; min-height: 0; grid-auto-rows: minmax(100px, 1fr); align-items: stretch; }
     #screen-calendar .cal-mday { min-height: 0; height: 100%; overflow-y: auto; scrollbar-width: thin; }
+    /* Pinned to the viewport, a tile only has about 100px to work with, and
+       two chips plus the "+N more" line wanted ~123. Dropping the cap to 2
+       bought 21 of that; these buy the rest, so the more-link sits inside
+       the tile instead of below its fold — which is the whole point of the
+       cap, since a count nobody can see is the same as no count. Scoped to
+       the static layout: the base tile keeps its roomier spacing wherever
+       the page is free to grow. */
+    #screen-calendar .cal-mday { padding: 0.45rem 0.5rem 0.4rem; gap: 0.18rem; }
+    #screen-calendar .cal-mday-num { width: 1.5rem; height: 1.5rem; font-size: 0.9rem; margin-bottom: 0; }
+    #screen-calendar .cal-chip { padding: 0.12rem 0.4rem; }
     /* The week view fills the same space, one tall column per day. */
     #screen-calendar .cal-week { flex: 1 1 auto; min-height: 0; grid-auto-rows: minmax(160px, 1fr); }
     #screen-calendar .cal-day { min-height: 0; height: 100%; overflow-y: auto; scrollbar-width: thin; }
@@ -2708,10 +2734,10 @@
   .cal-day.is-today .cal-day-num { background: var(--red); color: #fff; font-weight: 700; }
   .cal-day-empty { font-size: 0.75rem; color: var(--faint); }
 
-  .cal-session { background: rgba(62,107,140,0.12); border: none; border-radius: 10px; padding: 0.4rem 0.55rem; font-size: 0.74rem; color: #2f5470; cursor: pointer; }
+  .cal-session { background: rgba(62,107,140,0.12); border: none; border-radius: 10px; padding: 0.4rem 0.55rem; font-size: 0.74rem; color: #2f5470; cursor: pointer; flex-shrink: 0; }
   .cal-session b { display: block; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #3E6B8C; margin-bottom: 0.1rem; }
 
-  .cal-task { display: flex; align-items: flex-start; gap: 0.45rem; background: var(--white); border-radius: 10px; padding: 0.45rem 0.55rem; font-size: 0.78rem; line-height: 1.35; cursor: pointer; transition: box-shadow 0.14s var(--ease); }
+  .cal-task { display: flex; align-items: flex-start; gap: 0.45rem; background: var(--white); border-radius: 10px; padding: 0.45rem 0.55rem; font-size: 0.78rem; line-height: 1.35; cursor: pointer; transition: box-shadow 0.14s var(--ease); flex-shrink: 0; }
   .cal-task:hover { box-shadow: 0 4px 12px rgba(17,17,17,0.10); }
   .cal-task input { accent-color: var(--green); width: 15px; height: 15px; margin: 0.1rem 0 0; flex: 0 0 auto; cursor: pointer; }
   .cal-task.is-done { color: var(--faint); text-decoration: line-through; }
@@ -2750,7 +2776,13 @@
      marks it — no border needed to say it. */
   .cal-mday-num { font-family: var(--display); font-size: 0.98rem; color: var(--text); width: 1.85rem; height: 1.85rem; margin-bottom: 0.1rem; display: flex; align-items: center; justify-content: center; border-radius: 50%; flex-shrink: 0; }
   .cal-mday.is-today .cal-mday-num { background: var(--red); color: #fff; font-weight: 700; }
-  .cal-chip { font-size: 0.7rem; line-height: 1.3; border-radius: 7px; padding: 0.2rem 0.45rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  /* flex-shrink:0 matters more than it looks: these are flex children of
+     a day tile whose height is a fraction of the viewport, so by default
+     a day with several items shrinks every chip below one line of text.
+     The text then spills out of its own box and reads as two events
+     merged into each other. Holding their natural height instead lets
+     the tile's own overflow-y:auto do the work it was added for. */
+  .cal-chip { font-size: 0.7rem; line-height: 1.3; border-radius: 7px; padding: 0.2rem 0.45rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 0; }
   .cal-chip.task { background: rgba(176,39,28,0.12); color: var(--red); }
   .cal-chip.task.is-done { background: var(--bg); color: var(--faint); text-decoration: line-through; }
   .cal-task .cal-has-notes { font-style: normal; color: var(--faint); letter-spacing: 0.08em; }
@@ -2758,7 +2790,7 @@
   .cal-task:focus-visible, .cal-session:focus-visible, .cal-mday:focus-visible { outline: 2px solid var(--red); outline-offset: 1px; }
   .cal-task input { pointer-events: none; }
   .cal-chip.sess { background: rgba(62,107,140,0.14); color: #3E6B8C; }
-  .cal-more { font-size: 0.64rem; color: var(--faint); padding-left: 0.15rem; }
+  .cal-more { font-size: 0.64rem; color: var(--faint); padding-left: 0.15rem; flex-shrink: 0; }
 
   @media (max-width: 780px) {
     /* A month cell is ~50px wide on a phone, which truncates every chip to
@@ -2871,6 +2903,11 @@ window.Portal = {
   window.GOOGLE_MEET_URL = 'https://meet.google.com/kgd-inuf-wzi';
 </script>
 
+<!-- Google sign-in + the signed-session fetch wrapper (auth-client.js).
+     Loaded immediately after APPS_SCRIPT_URL is set, so the wrapper is
+     installed before anything in the page can call the backend. -->
+<script src="auth-client.js"></script>
+
 <!-- Pre-login-only top bar now (key entry, onboarding, marketing-style
      screens) — once a student is in the app shell this whole bar hides
      (see #main-nav.nav-app-shell in the CSS) and the sidebar below takes
@@ -2974,7 +3011,7 @@ window.Portal = {
     <div class="nav-profile-menu" id="nav-profile-menu">
       <div class="nav-profile-name" id="nav-profile-name">&nbsp;</div>
       <a href="#" class="nav-profile-item" id="nav-profile-settings">Account Settings</a>
-      <a href="#" class="nav-profile-item" id="nav-profile-switch-key">Use a different key</a>
+      <a href="#" class="nav-profile-item" id="nav-profile-switch-key">Sign out</a>
       <div class="nav-profile-divider"></div>
       <a href="../index.html" class="nav-profile-item" id="nav-profile-exit">Exit Portal</a>
     </div>
@@ -4595,7 +4632,7 @@ window.Portal = {
         <a href="#" class="dx-break-exit-link" id="dx-break-exit-btn">Exit Portal</a>
       </div>
       <div class="dx-break-info">
-        <h1>Diagnostic Break</h1>
+        <h1 id="dx-break-title">Diagnostic Break</h1>
         <p>Take a breather — resume whenever you're ready. On the real test, you'd wait out the full clock, so use this time the way you would then.</p>
         <hr>
         <h2>Take a Break: Do Not Close Your Device</h2>
@@ -5711,15 +5748,14 @@ window.Portal = {
       var cb = document.createElement('input');
       cb.type = 'checkbox';
       cb.checked = !!item.done;
-      cb.disabled = !!item.done; // one-way — no unchecking from the portal
       var span = document.createElement('span');
       span.className = 'assign-text';
       span.textContent = item.task;
       row.appendChild(cb);
       row.appendChild(span);
       wrap.appendChild(row);
+      cb.addEventListener('change', function () { toggleAssignmentRow(item, row, cb); });
       if (!item.done) {
-        cb.addEventListener('change', function () { completeAssignment(item, row, cb); });
         var go = assignmentShortcut(item.task);
         // Kept OUTSIDE the <label> on purpose: a link inside it would put
         // the "go there" tap inside the checkbox's own hit area, and a
@@ -5844,11 +5880,11 @@ window.Portal = {
       if (activeScreenId === 'screen-menu') loadAssignments();
     }, 3 * 60 * 1000);
   }
-  // Checking a box is one-way: mark the row done and struck-through right
-  // where it sits (no removal, no undo from the portal), then tell the
-  // backend. Fire-and-forget — if the request fails, the checkbox just
-  // reverts to unchecked/enabled on the next loadAssignments() refresh
-  // instead of anything being lost.
+  // Checking a box marks the row done and struck-through right where it
+  // sits (no removal), then tells the backend — and unchecking does the
+  // reverse, so a mis-click is recoverable here and not only on the
+  // calendar screen. On failure the row is put back the way it was rather
+  // than left showing a state that never reached the sheet.
   /* ═══ CALENDAR SCREEN ═══
      The Home checklist answers "what do I do today"; this answers "what
      does my week look like" — which is the question a student actually
@@ -6061,7 +6097,13 @@ window.Portal = {
     return out.join('');
   }
 
-  var CAL_MONTH_CHIP_MAX = 3;
+  // Two, not three. The month grid is pinned to the viewport (see the
+  // static-layout block), so a tile is a fixed fraction of the window
+  // height — and once chips stopped shrinking to fit, three of them plus
+  // the "+N more" line no longer cleared that height and the more-link
+  // fell below the fold, where nothing tells you the day has anything
+  // else on it. Two fits, and the count carries the rest.
+  var CAL_MONTH_CHIP_MAX = 2;
   function calRenderMonth(vis, byDay, todayKey) {
     var month = calState.anchor.getMonth();
     var out = ['<div class="cal-month"><div class="cal-month-head">'];
@@ -6102,28 +6144,35 @@ window.Portal = {
     return out.join('');
   }
 
-  // Ticking something off here writes through the same one-way toggle the
-  // Home checklist uses, and hands the fresh list back to that checklist
-  // too — otherwise Home would keep showing as outstanding something the
-  // student just ticked off on this screen.
+  // Ticking something off here writes through the same toggle the Home
+  // checklist uses, and hands the fresh list back to that checklist too —
+  // otherwise Home would keep showing as outstanding something the student
+  // just ticked off on this screen.
+  //
+  // Both directions: a student who ticks the wrong row, or starts something
+  // and finds they aren't actually finished, needs a way back. The backend
+  // has always handled done:false (it clears DoneAt too) — only the portal
+  // refused to send it, which left a mis-click permanently wrong.
   function calToggle(row) {
     var item = calState.items.filter(function (a) { return a.row === row; })[0];
-    if (!item || item.done) return;
-    item.done = true;
+    if (!item) return;
+    var was = !!item.done;
+    item.done = !was;
     calRender();
+    calSyncDetail(item);
     fetch(APPS_SCRIPT_URL, {
       method: 'POST',
-      body: JSON.stringify({ action: 'toggleAssignment', key: currentStudent.key, row: row, done: true })
+      body: JSON.stringify({ action: 'toggleAssignment', key: currentStudent.key, row: row, done: !was })
     })
       .then(function (r) { return r.json(); })
       .then(function (data) {
-        if (!data || !data.ok) { item.done = false; calRender(); calSyncDetail(item); return; }
+        if (!data || !data.ok) { item.done = was; calRender(); calSyncDetail(item); return; }
         if (data.assignments && currentStudent) {
           currentStudent.assignments = data.assignments;
           renderAssignments();
         }
       })
-      .catch(function () { item.done = false; calRender(); calSyncDetail(item); });
+      .catch(function () { item.done = was; calRender(); calSyncDetail(item); });
   }
 
   // If the popup is still open on this assignment, put its checkbox back
@@ -6132,7 +6181,6 @@ window.Portal = {
   function calSyncDetail(item) {
     if (!calDetailRow || calDetailRow !== item.row) return;
     document.getElementById('cal-detail-done').checked = !!item.done;
-    document.getElementById('cal-detail-done').disabled = !!item.done;
     document.getElementById('cal-detail-check-row').classList.toggle('is-done', !!item.done);
     document.getElementById('cal-detail-check-label').textContent = item.done ? 'Done' : 'Mark as done';
   }
@@ -6172,7 +6220,7 @@ window.Portal = {
     checkRow.style.display = '';
     checkRow.classList.toggle('is-done', !!item.done);
     checkbox.checked = !!item.done;
-    checkbox.disabled = !!item.done; // one-way, same as the Home checklist
+    checkbox.disabled = false; // tickable both ways — see calToggle
     document.getElementById('cal-detail-check-label').textContent = item.done ? 'Done' : 'Mark as done';
 
     // "Take Practice Test 3" should get you to the test, from here too —
@@ -6239,11 +6287,10 @@ window.Portal = {
     });
     document.getElementById('cal-detail-done').addEventListener('change', function () {
       if (!calDetailRow) return;
-      var row = calDetailRow;
-      document.getElementById('cal-detail-done').disabled = true;
-      document.getElementById('cal-detail-check-row').classList.add('is-done');
-      document.getElementById('cal-detail-check-label').textContent = 'Done';
-      calToggle(row);
+      // calToggle flips the item and calls calSyncDetail, which repaints
+      // this row's label and tick in whichever direction it went — and puts
+      // them back if the write fails.
+      calToggle(calDetailRow);
     });
     document.getElementById('cal-prev').addEventListener('click', function () {
       calState.anchor = calState.view === 'week'
@@ -6329,23 +6376,29 @@ window.Portal = {
     calEnsureData(true);
   };
 
-  function completeAssignment(item, row, cb) {
-    item.done = true;
-    row.classList.add('assign-done');
-    cb.checked = true;
-    cb.disabled = true;
+  function toggleAssignmentRow(item, row, cb) {
+    var was = !!item.done;
+    item.done = !was;
+    row.classList.toggle('assign-done', item.done);
+    cb.checked = item.done;
+    function revert() {
+      item.done = was;
+      row.classList.toggle('assign-done', was);
+      cb.checked = was;
+    }
     fetch(APPS_SCRIPT_URL, {
       method: 'POST',
-      body: JSON.stringify({ action: 'toggleAssignment', key: currentStudent.key, row: item.row, done: true })
+      body: JSON.stringify({ action: 'toggleAssignment', key: currentStudent.key, row: item.row, done: !was })
     })
       .then(function (r) { return r.json(); })
       .then(function (data) {
-        if (data && data.ok && data.assignments) {
+        if (!data || !data.ok) { revert(); return; }
+        if (data.assignments) {
           currentStudent.assignments = data.assignments;
           renderAssignments();
         }
       })
-      .catch(function () {});
+      .catch(revert);
   }
 
   /* ═══ SCORE PROGRESS WIDGET ═══
@@ -7247,7 +7300,9 @@ window.Portal = {
     show('screen-onboard');
   }
   document.getElementById('onb-splash').addEventListener('click', function () {
-    goToOnboardIdentity();
+    // Name and email both come from the verified Google account now, so the
+    // old identity-capture beat has nothing left to ask for.
+    transitionOnboardToLight(onboardAuthData);
   });
 
   // Beat 2: name/email capture — unchanged fields/logic from the old
@@ -7824,8 +7879,8 @@ window.Portal = {
     clearResumeSnapshot(currentStudent && currentStudent.key);
     if (assignPollTimer) { clearInterval(assignPollTimer); assignPollTimer = null; }
     currentStudent = null;
-    resetKeyScreen();
-    show('screen-key');
+    MorettiAuth.signOut();
+    location.reload();
   }
   var navProfile = document.getElementById('nav-profile');
   var navProfileBtn = document.getElementById('nav-profile-btn');
@@ -8518,8 +8573,18 @@ window.Portal = {
     resumeOverlay.classList.remove('active');
     var snap = pendingResumeSnapshot;
     pendingResumeSnapshot = null;
-    if (snap) applyRestoredState(snap, true); // come-back-later resume — restore remaining time, don't count time away
-    else goToDiagnostic();
+    if (!snap) { goToDiagnostic(); return; }
+    // Same practice-tests.js race as the accidental-refresh restore path
+    // above (see its comment) — unlikely by the time a student has read
+    // the modal and clicked Yes, but not impossible on a slow connection,
+    // and the cost of waiting when it's already loaded is zero.
+    if (snap.practiceTestId && !(window.SAT_PRACTICE_TESTS && window.SAT_PRACTICE_TESTS.length)) {
+      (window.__practiceTestsReady || Promise.resolve()).then(function () {
+        applyRestoredState(snap, true); // come-back-later resume — restore remaining time, don't count time away
+      });
+    } else {
+      applyRestoredState(snap, true);
+    }
   });
   document.getElementById('resume-no').addEventListener('click', function () {
     resumeOverlay.classList.remove('active');
@@ -9052,6 +9117,19 @@ window.Portal = {
         };
       }
     }
+    // practiceTestId set but its own section data couldn't be resolved
+    // (practice-tests.js — ~2.6MB, loaded async — still mid-download, a
+    // network hiccup during that load, or genuinely missing data for this
+    // test/section) used to silently fall through to SECTION_BANKS[key]
+    // below, which is the plain DIAGNOSTIC bank — completely different
+    // questions. A student well into a practice test's Math section who
+    // hit this would suddenly see diagnostic content and "Diagnostic" in
+    // the banner with no indication anything was wrong. The diagnostic
+    // bank is only ever the right fallback when there's no practice test
+    // running at all — surfacing a clear error here (via the fatal-error
+    // overlay, same as every other uncaught error in this app) is far
+    // safer than silently substituting the wrong test's content.
+    if (practiceTestId) throw new Error('bankFor: could not resolve section "' + key + '" for practice test ' + practiceTestId + ' — practice-tests.js may still be loading or its data is missing this section.');
     return SECTION_BANKS[key];
   }
   function currentSectionKey() { return activeSectionKeys[sectionIndex]; }
@@ -9926,6 +10004,13 @@ window.Portal = {
   function tickBreak() {
     var rawRemaining = breakEndsAt - Date.now();
     breakTimerEl.textContent = formatTimer(Math.max(0, rawRemaining));
+    // practice-tests.js loads asynchronously and can still be mid-download
+    // when the break screen first renders (especially right after a
+    // refresh-restore) — activePracticeTest() would silently resolve to
+    // null and updateBreakTitle() would stick on the diagnostic fallback
+    // for the whole break. Re-checking every tick self-corrects the moment
+    // the data actually arrives, at negligible cost.
+    updateBreakTitle();
     if (rawRemaining <= 0) {
       stopBreakTimer(); // otherwise this keeps firing every second while the away-overlay sits open, below
       if (-rawRemaining > AWAY_THRESHOLD_MS) showAwayOverlay('break', advanceFromBreak);
@@ -9934,6 +10019,16 @@ window.Portal = {
   }
   function stopBreakTimer() {
     if (breakInterval) { clearInterval(breakInterval); breakInterval = null; }
+  }
+  // Names the break after whatever test is actually in progress — a numbered
+  // practice test must never say "Diagnostic Break" on its own break screen.
+  function updateBreakTitle() {
+    var titleEl = document.getElementById('dx-break-title');
+    if (!titleEl) return;
+    var pt = activePracticeTest();
+    titleEl.textContent = pt
+      ? (practiceTestNameParts(pt).name + ' Break')
+      : (testChoice + ' Diagnostic Break');
   }
   function startBreak() {
     breakKind = 'section';
@@ -10416,7 +10511,13 @@ window.Portal = {
   // submitting from the Check Your Work screen will do next.
   function computeSubmitLabel() {
     var secKey = activeSectionKeys[sectionIndex];
-    return (sectionHasModules(secKey) && moduleStage === 'module1') ? 'Submit Module' : (isLastSection() ? 'Submit Diagnostic' : 'Next Section');
+    if (sectionHasModules(secKey) && moduleStage === 'module1') return 'Submit Module';
+    if (!isLastSection()) return 'Next Section';
+    // A numbered practice test must never end on "Submit Diagnostic" — see
+    // updateBreakTitle() above for the same class of hardcoded-diagnostic-
+    // label bug on the between-section break screen.
+    var pt = activePracticeTest();
+    return 'Submit ' + (pt ? practiceTestNameParts(pt).name : (testChoice + ' Diagnostic'));
   }
   function showCheckScreen() {
     commitPendingFrAnswer(); // "Go to Review Page" from the nav modal doesn't pass through goTo()
@@ -11358,6 +11459,7 @@ window.Portal = {
       }
     } else if (state.screen === 'dx-break-screen' && state.testChoice && Array.isArray(state.activeSectionKeys) && state.activeSectionKeys.length) {
       testChoice = state.testChoice;
+      practiceTestId = state.practiceTestId || null;
       activeSectionKeys = state.activeSectionKeys;
       completedSections = Array.isArray(state.completedSections) ? state.completedSections : [];
       // The interruption log has to survive the very reopen it records.
@@ -11446,9 +11548,46 @@ window.Portal = {
       // fromAway=false: this is the accidental in-tab-refresh path, so the
       // section timer honors its original absolute end time rather than
       // the remaining-time treatment the come-back-later path gets.
-      applyRestoredState(state, false);
+      //
+      // A refresh mid-PRACTICE-TEST (as opposed to mid-diagnostic) needs
+      // window.SAT_PRACTICE_TESTS — bankFor() throws a clear error rather
+      // than silently substituting diagnostic content if it isn't there
+      // yet (see bankFor()'s own comment), but practice-tests.js (~2.6MB)
+      // loads asynchronously and can easily still be mid-download at this
+      // exact synchronous point in page parsing. Without waiting for it,
+      // that throw was landing right here, caught by this try/catch, and
+      // silently dumping the student back to the key-entry gate — a
+      // refreshed mid-practice-test attempt looked like it evaporated.
+      // Diagnostic-only resumes (no practiceTestId) skip the wait entirely
+      // since they never touch that data.
+      if (state.practiceTestId && !(window.SAT_PRACTICE_TESTS && window.SAT_PRACTICE_TESTS.length)) {
+        (window.__practiceTestsReady || Promise.resolve()).then(function () {
+          try { applyRestoredState(state, false); }
+          catch (e2) { show('screen-menu'); }
+        });
+      } else {
+        applyRestoredState(state, false);
+      }
     } catch (e) { /* corrupt or blocked storage — just start fresh */ }
   })();
+
+  /* ═══ SIGN-IN ═══ (auth-client.js). Only when restoreState() did not
+     already put a student back after a same-tab refresh. Resumes a stored
+     session silently, so a returning student sees no login at all. */
+  if (!currentStudent) {
+    MorettiAuth.start({
+      onStudent: function (data) {
+        pendingKey = data.key;
+        pendingName = data.name;
+        if (data.needsOnboarding) {
+          onboardAuthData = data;
+          goToOnboardSplash();
+        } else {
+          settle(data);
+        }
+      }
+    });
+  }
 })();
 </script>
 
@@ -13761,6 +13900,11 @@ window.Portal = {
 
     var isMath = r.sectionKey === 'math';
     calcBtnEl.style.display = isMath ? '' : 'none';
+    // Same reference-sheet button the real exam uses (#dx-reference-btn,
+    // already wired globally to openReference()) — math-only there too,
+    // so match that gating exactly rather than inventing a new rule.
+    var refBtnEl = document.getElementById('dx-reference-btn');
+    if (refBtnEl) refBtnEl.style.display = isMath ? '' : 'none';
     if (window.dxSetMathMode) window.dxSetMathMode(isMath);
     if (!isMath && window.dxCloseCalculator) window.dxCloseCalculator();
 
@@ -14115,6 +14259,16 @@ window.Portal = {
     }
     renderRunnerQuestion();
   }
+  // Moves on without touching runnerState at all — no attempt recorded,
+  // no score change — so a skipped question is exactly as untouched as
+  // one never opened. Only offered before a question's been submitted
+  // (see the skip button's own visibility in renderRunnerQuestion()); once
+  // submitted, Next already does this same index++ + re-render.
+  function skipRunnerQuestion() {
+    if (runnerIndex >= runnerQueue.length) return;
+    runnerIndex++;
+    renderRunnerQuestion();
+  }
   function renderRunnerQuestion() {
     var qtextEl = document.getElementById('dx-qtext');
     var choicesEl = document.getElementById('dx-choices');
@@ -14175,6 +14329,11 @@ window.Portal = {
 
     var isMath = r.sectionKey === 'math';
     calcBtnEl.style.display = isMath ? '' : 'none';
+    // Same reference-sheet button the real exam uses (#dx-reference-btn,
+    // already wired globally to openReference()) — math-only there too,
+    // so match that gating exactly rather than inventing a new rule.
+    var refBtnEl = document.getElementById('dx-reference-btn');
+    if (refBtnEl) refBtnEl.style.display = isMath ? '' : 'none';
     if (window.dxSetMathMode) window.dxSetMathMode(isMath);
     if (!isMath && window.dxCloseCalculator) window.dxCloseCalculator();
 
@@ -14232,6 +14391,23 @@ window.Portal = {
 
     nextBtnEl.textContent = st.submitted ? (runnerIndex + 1 < runnerQueue.length ? 'Next' : 'See Results') : 'Submit';
     if (!st.submitted) frInputEl.oninput = function () { st.rawAnswer = frInputEl.value; };
+    // #dx-nav-row/#dx-card are shared with every other runner (and the
+    // real exam engine, which never shows Skip at all) — always tear down
+    // any leftover skip button before conditionally re-adding a fresh one
+    // bound to THIS module's skipRunnerQuestion, so a stale button from a
+    // different runner's closure (or one left over from a submitted
+    // question) can never linger or fire the wrong handler.
+    var oldSkipBtn = document.getElementById('dx-skip-btn');
+    if (oldSkipBtn) oldSkipBtn.parentNode.removeChild(oldSkipBtn);
+    if (!st.submitted) {
+      var skipBtnEl = document.createElement('button');
+      skipBtnEl.type = 'button';
+      skipBtnEl.id = 'dx-skip-btn';
+      skipBtnEl.className = 'dx-btn dx-btn-back';
+      skipBtnEl.textContent = 'Skip';
+      skipBtnEl.addEventListener('click', skipRunnerQuestion);
+      navRowEl.insertBefore(skipBtnEl, nextBtnEl);
+    }
   }
 
   var wired = false;
@@ -15034,6 +15210,45 @@ window.Portal = {
     }
     renderRunnerQuestion();
   }
+  // Moves on without touching runnerState at all — no attempt recorded, no
+  // score change, and critically no recordQuestionBankMistake() call — so
+  // a skipped question never shows up in Saved & Mistakes and is exactly
+  // as untouched as one never opened. Only offered before a question's
+  // been submitted (see the skip button's own visibility in
+  // renderRunnerQuestion()); once submitted, Next already does this same
+  // index++ + re-render.
+  function skipRunnerQuestion() {
+    if (runnerIndex >= runnerQueue.length) return;
+    runnerIndex++;
+    renderRunnerQuestion();
+  }
+  // Starts closed so submitting an answer never pushes Next off-screen
+  // behind a full paragraph — the explanation is still one click away via
+  // the header, it just doesn't force a scroll to reach Next. Shared by
+  // all three question types below (mc, fr, mc-image) rather than each
+  // wiring its own toggle.
+  function buildCollapsibleExplain(bodyHtml) {
+    var wrap = document.createElement('div');
+    wrap.className = 'pb-explain pb-explain-collapsed';
+    var hed = document.createElement('div');
+    hed.className = 'pb-explain-hed pb-explain-toggle';
+    hed.setAttribute('role', 'button');
+    hed.setAttribute('tabindex', '0');
+    hed.innerHTML = 'Full Explanation <span class="pb-explain-hint">(tap to expand)</span><span class="pb-explain-arrow" aria-hidden="true">&#9656;</span>';
+    var body = document.createElement('div');
+    body.className = 'pb-explain-body';
+    body.innerHTML = bodyHtml;
+    function toggle() {
+      wrap.classList.toggle('pb-explain-collapsed');
+      var hintEl = hed.querySelector('.pb-explain-hint');
+      if (hintEl) hintEl.textContent = wrap.classList.contains('pb-explain-collapsed') ? '(tap to expand)' : '(tap to collapse)';
+    }
+    hed.addEventListener('click', toggle);
+    hed.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } });
+    wrap.appendChild(hed);
+    wrap.appendChild(body);
+    return wrap;
+  }
   // Available on every question regardless of whether it's been answered
   // yet, or answered right — saving was previously only reachable through
   // a wrong answer elsewhere in the app, which meant there was no way to
@@ -15136,6 +15351,13 @@ window.Portal = {
     // falls through to the module-wide currentSubject exactly as before.
     var isMath = (r._qbSubject || currentSubject) === 'math';
     calcBtnEl.style.display = isMath ? '' : 'none';
+    // Same reference-sheet button the real exam uses (#dx-reference-btn,
+    // already wired globally to openReference()) — math-only there too,
+    // so match that gating exactly rather than inventing a new rule. This
+    // runner's isMath is computed differently from the other two (see the
+    // comment above), but the toggle itself is identical.
+    var refBtnEl = document.getElementById('dx-reference-btn');
+    if (refBtnEl) refBtnEl.style.display = isMath ? '' : 'none';
     if (window.dxSetMathMode) window.dxSetMathMode(isMath);
     if (!isMath && window.dxCloseCalculator) window.dxCloseCalculator();
     renderSaveBtn(r);
@@ -15183,9 +15405,7 @@ window.Portal = {
       choicesEl.appendChild(ansWrap);
       nextBtnEl.disabled = !st.submitted && st.chosenIndex == null;
       if (st.submitted && r.explImg) {
-        var explainImg = document.createElement('div');
-        explainImg.className = 'pb-explain';
-        explainImg.innerHTML = '<div class="pb-explain-hed">Full Explanation</div><img src="' + r.explImg + '" alt="Explanation figure" style="max-width:100%;">';
+        var explainImg = buildCollapsibleExplain('<img src="' + r.explImg + '" alt="Explanation figure" style="max-width:100%;">');
         navRowEl.parentNode.insertBefore(explainImg, navRowEl);
       }
     } else if (r.type === 'fr') {
@@ -15221,9 +15441,7 @@ window.Portal = {
           frRowEl.parentNode.insertBefore(frCorrect, frNote.nextSibling);
         }
         if (r.explanation) {
-          var frExplain = document.createElement('div');
-          frExplain.className = 'pb-explain';
-          frExplain.innerHTML = '<div class="pb-explain-hed">Full Explanation</div>' + r.explanation;
+          var frExplain = buildCollapsibleExplain(r.explanation);
           navRowEl.parentNode.insertBefore(frExplain, navRowEl);
         }
       }
@@ -15268,13 +15486,28 @@ window.Portal = {
       });
       nextBtnEl.disabled = !st.submitted && st.chosenIndex == null;
       if (st.submitted && r.explanation) {
-        var explain = document.createElement('div');
-        explain.className = 'pb-explain';
-        explain.innerHTML = '<div class="pb-explain-hed">Full Explanation</div>' + r.explanation;
+        var explain = buildCollapsibleExplain(r.explanation);
         navRowEl.parentNode.insertBefore(explain, navRowEl);
       }
     }
     nextBtnEl.textContent = st.submitted ? (runnerIndex + 1 < runnerQueue.length ? 'Next' : 'See Results') : 'Submit';
+    // #dx-nav-row/#dx-card are shared with every other runner (and the
+    // real exam engine, which never shows Skip at all) — always tear down
+    // any leftover skip button before conditionally re-adding a fresh one
+    // bound to THIS module's skipRunnerQuestion, so a stale button from a
+    // different runner's closure (or one left over from a submitted
+    // question) can never linger or fire the wrong handler.
+    var oldSkipBtn = document.getElementById('dx-skip-btn');
+    if (oldSkipBtn) oldSkipBtn.parentNode.removeChild(oldSkipBtn);
+    if (!st.submitted) {
+      var skipBtnEl = document.createElement('button');
+      skipBtnEl.type = 'button';
+      skipBtnEl.id = 'dx-skip-btn';
+      skipBtnEl.className = 'dx-btn dx-btn-back';
+      skipBtnEl.textContent = 'Skip';
+      skipBtnEl.addEventListener('click', skipRunnerQuestion);
+      navRowEl.insertBefore(skipBtnEl, nextBtnEl);
+    }
   }
 
   var wired = false;
@@ -15401,6 +15634,21 @@ window.Portal = {
   }
   function splitPassageForModal(text) {
     text = String(text || '').trim();
+    // Fast path for the OLD format (practice-tests.js/banks.js — stimulus
+    // baked into `text`, ending in the question sentence, joined by a
+    // literal "<br><br>"), same as My Incorrect Questions' splitPassage()
+    // tries first. Falls through to the trigger-phrase scan below for the
+    // marker-free format question-bank.js was reworked to use this
+    // session — without this fast path, an old-format R&W question could
+    // fail to split (the raw "<br><br>" text sitting inside it confuses
+    // the sentence-boundary scanner) and show no divider when it should
+    // have one.
+    var brIdx = text.lastIndexOf('<br><br>');
+    if (brIdx !== -1) {
+      var brPassage = text.slice(0, brIdx);
+      var brQuestion = text.slice(brIdx + 8);
+      if (brPassage.trim() && brQuestion.trim()) return { passage: brPassage, question: brQuestion };
+    }
     var qMark = text.lastIndexOf('?');
     if (qMark === -1) return null;
     var triggerIdx = lastQuestionTriggerIndexModal(text.slice(0, qMark + 1));
@@ -15624,7 +15872,14 @@ window.Portal = {
     // it as unsure, not just whether they got it right.
     qModalFlagPillEl.style.display = r.marked ? '' : 'none';
 
-    var split = splitPassageForModal(q.text);
+    // Math questions have no real passage — splitPassageForModal's
+    // heuristics are tuned for R&W's passage-then-prompt shape, and a math
+    // question's own setup sentence ending in a period right before its
+    // "...?" question sentence matches that shape well enough to falsely
+    // trigger a split, wedging a divider into a question that should never
+    // show one. qModalIsMathRow(r) is the same signal the calculator
+    // button's own math-only gating already trusts a few lines down.
+    var split = qModalIsMathRow(r) ? null : splitPassageForModal(q.text);
     qModalPassagePane.innerHTML = split ? split.passage : '';
 
     qModalQuestionPane.innerHTML = '';

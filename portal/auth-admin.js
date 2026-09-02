@@ -402,9 +402,15 @@
     // A row with a claim waiting is technically still "Inquiry" — nobody is
     // paired yet — but labelling it that way buries the one thing on this
     // panel that is actually asking Luca a question.
-    var pill = s.pending ? { cls: 'inq', text: 'Wants in' }
+    var pill = s.archived ? { cls: 'inv', text: 'Archived' }
+      : s.pending ? { cls: 'inq', text: 'Wants in' }
       : s.status === 'Active' ? { cls: 'act', text: 'Active' }
       : s.status === 'Invited' ? { cls: 'inv', text: 'Invited' }
+      // 'Ready' means an address is on file and the student pairs by
+      // themselves on first sign-in — no action, so it must not be
+      // mislabelled 'Inquiry', which is the one word on this panel that
+      // means "do something about me".
+      : s.status === 'Ready' ? { cls: 'act', text: 'Ready' }
       : { cls: 'inq', text: 'Inquiry' };
     return '<div class="mta-row" data-key="' + esc(s.key) + '">' +
         '<div class="mta-name">' + esc(s.name || s.guardianName || '(no name yet)') +
@@ -430,8 +436,14 @@
   function render() {
     var needs = [], waiting = [];
     students.forEach(function (s) {
+      // Archived students are retired; they belong in admin.html's roster
+      // history, never in a queue of things to do.
+      if (s.archived) return;
       if (s.pending || s.status === 'Inquiry') needs.push(s);
       else if (s.status === 'Invited') waiting.push(s);
+      // 'Ready' is deliberately absent from both: an address is on file, so
+      // the student pairs by themselves the moment they sign in. Nothing
+      // for Luca to do, so nothing shown. Still reachable via search.
     });
 
     var html = '<div class="mta-sec">Needs you</div>';
@@ -533,7 +545,9 @@
       loading = false;
       if (!data || !data.ok) return;
       students = data.students || [];
-      var n = students.filter(function (s) { return s.pending || s.status === 'Inquiry'; }).length;
+      var n = students.filter(function (s) {
+        return !s.archived && (s.pending || s.status === 'Inquiry');
+      }).length;
       badgeEl.textContent = n;
       badgeEl.style.display = n ? '' : 'none';
       tabEl.style.opacity = n ? '1' : '0.75';

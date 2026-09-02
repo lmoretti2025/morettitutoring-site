@@ -76,30 +76,45 @@
   /* ═══ ROSTER ═══ */
   #roster { display: none; }
   .summary-row { display: flex; gap: 0.9rem; margin-bottom: 1.4rem; flex-wrap: wrap; }
-  .summary-tile { flex: 1 1 150px; background: var(--white); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); padding: 0.9rem 1.1rem; }
-  .summary-tile .num { font-family: var(--display); font-size: 1.6rem; color: var(--text); }
-  .summary-tile .lbl { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); margin-top: 0.15rem; }
+  .summary-tile { flex: 1 1 150px; background: var(--white); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); padding: 1.15rem 1.3rem; transition: box-shadow 0.16s var(--ease), transform 0.16s var(--ease); }
+  .summary-tile:hover { box-shadow: 0 10px 26px rgba(17,17,17,0.09); transform: translateY(-1px); }
+  .summary-tile .num { font-family: var(--display); font-size: 2rem; line-height: 1.05; color: var(--text); }
+  .summary-tile .lbl { font-size: 0.66rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); margin-top: 0.3rem; }
   .summary-tile.flagged .num { color: var(--red); }
-  .summary-tile .sub { font-size: 0.72rem; color: var(--faint); margin-top: 0.2rem; }
+  .summary-tile .sub { font-size: 0.72rem; color: var(--faint); margin-top: 0.25rem; }
 
-  .filter-row { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1rem; }
-  .filter-row label { font-size: 0.8rem; color: var(--mid); display: flex; align-items: center; gap: 0.4rem; cursor: pointer; user-select: none; }
+  .filter-row { display: flex; align-items: center; gap: 1.1rem; margin-bottom: 1rem; flex-wrap: wrap; }
+  .filter-row label { font-size: 0.8rem; color: var(--mid); display: flex; align-items: center; gap: 0.45rem; cursor: pointer; user-select: none; }
+  .filter-row label:hover { color: var(--text); }
+  .count-pill { font-size: 0.68rem; font-weight: 700; background: var(--bg); color: var(--mid); border-radius: 999px; padding: 0.1rem 0.45rem; }
+  /* The hide control sits quietly until the row is hovered — it's a
+     tidying action, not something to invite on every glance. */
+  .mini.icon-btn { padding: 0.25rem 0.5rem; font-size: 0.85rem; line-height: 1; color: var(--faint); opacity: 0; transition: opacity 0.14s, color 0.14s, border-color 0.14s; }
+  tbody tr:hover .mini.icon-btn, tbody tr.is-archived .mini.icon-btn { opacity: 1; }
+  .mini.icon-btn:hover { color: var(--red); border-color: var(--red); }
   .filter-row input[type="checkbox"] { accent-color: var(--red); width: 15px; height: 15px; cursor: pointer; }
 
-  .roster-table-wrap { background: var(--white); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; }
+  .roster-table-wrap { background: var(--white); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); overflow: hidden; }
   .roster-table-scroll { overflow-x: auto; }
   table { width: 100%; border-collapse: collapse; font-size: 0.82rem; min-width: 780px; }
-  thead th { text-align: left; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--faint); padding: 0.8rem 0.9rem; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  thead th { text-align: left; font-size: 0.63rem; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; color: var(--faint); padding: 0.95rem 1.1rem; border-bottom: 1px solid var(--border); white-space: nowrap; background: #fcfcfc; }
   thead th[data-sort] { cursor: pointer; }
   thead th[data-sort]:hover { color: var(--red); }
   thead th .arrow { opacity: 0.4; font-size: 0.6rem; margin-left: 0.2rem; }
-  tbody td { padding: 0.75rem 0.9rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  tbody td { padding: 0.95rem 1.1rem; border-bottom: 1px solid rgba(17,17,17,0.06); vertical-align: middle; }
   tbody tr:last-child td { border-bottom: none; }
-  tbody tr:hover { background: #fbfbfb; }
+  tbody tr { transition: background 0.12s; }
+  tbody tr:hover { background: #fafafa; }
+  /* A hidden student stays legible but visibly set aside. */
+  tbody tr.is-archived { opacity: 0.5; }
+  tbody tr.is-archived:hover { opacity: 0.8; background: #fafafa; }
   .name-cell { font-weight: 700; }
   .name-cell .student-link { background: none; border: none; padding: 0; font: inherit; color: var(--text); cursor: pointer; text-align: left; }
   .name-cell .student-link:hover { color: var(--red); text-decoration: underline; }
   .name-cell .key { display: block; font-weight: 400; font-size: 0.7rem; color: var(--faint); font-family: monospace; margin-top: 0.1rem; }
+  /* Score and its delta belong on one line — "1210 (SAT) ▲ 100" wrapping
+     mid-figure reads as two different numbers. */
+  tbody td:nth-child(2) { white-space: nowrap; }
   .delta { font-weight: 700; }
   .delta.up { color: var(--green); }
   .delta.down { color: var(--red); }
@@ -168,18 +183,59 @@
   .skill-row .sk-frac { flex: 0 0 74px; text-align: right; font-size: 0.75rem; color: var(--mid); }
 
   /* ═══ REPORT VIEWER ═══ the student's own report.html, opened in place
-     over the admin page. report.html detects being framed and drops its
-     printable-page chrome on its own (see its body.embedded rules), so
-     this is just a frame plus a way out of it. */
+     over the admin page. report.html detects being framed and narrows to
+     a centered document column on its own (see its body.embedded rules),
+     so this is just a frame plus a way out of it. The wrap is the portal
+     grey rather than white so that column reads as a page sitting on the
+     admin background instead of bleeding into an edgeless white field. */
   #report-viewer { display: none; position: fixed; inset: 0; z-index: 200; background: var(--bg); flex-direction: column; }
   #report-viewer.open { display: flex; }
   #report-bar { flex: 0 0 auto; background: var(--red); color: #fff; display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.7rem 1.1rem; }
   #report-bar .rb-title { font-family: var(--display); font-size: 0.95rem; }
   #report-bar .rb-title small { display: block; font-family: var(--hel); font-size: 0.66rem; opacity: 0.85; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 0.1rem; }
   #report-bar .rb-actions { display: flex; gap: 0.5rem; }
-  #report-frame-wrap { flex: 1 1 auto; overflow: hidden; background: var(--white); }
+  #report-frame-wrap { flex: 1 1 auto; overflow: hidden; background: var(--bg); }
   #report-frame-wrap iframe { width: 100%; height: 100%; border: none; display: block; }
   #report-loading { padding: 2.5rem; text-align: center; color: var(--mid); font-size: 0.85rem; }
+
+  /* A row that exists on screen but not yet in the sheet. Deliberately
+     subtle — the point of painting first is that the calendar looks
+     finished, so this should read as "settling", not as a warning. */
+  .fc-event.is-pending { opacity: 0.62; }
+  .fc-event.is-pending .fc-event-title::after { content: ' ·'; opacity: 0.7; }
+
+  /* ═══ SCORE PROGRESS ═══ the same bar chart the student sees on their
+     own Home screen, ported from index.html so the two pages show one
+     picture of a student's progress rather than two different ones. Class
+     names are kept identical to that file's on purpose: when the chart
+     changes there, the diff to bring it across is obvious. Same hover
+     tooltip (test, composite, weakest area); the click target differs
+     because the destinations differ — a student is sent to their own
+     results, Luca is sent to the report for that attempt. */
+  .spc-chart-wrap { position: relative; display: flex; align-items: center; gap: 1.1rem; }
+  .spc-score-top { flex: 1 1 0; min-width: 0; border-right: 1px solid var(--border); padding-right: 1.1rem; align-self: center; }
+  .spc-composite-num { font-family: var(--display); font-weight: 700; font-size: 2.1rem; color: var(--text); line-height: 1; }
+  .spc-composite-delta { font-family: var(--hel); font-size: 0.8rem; font-weight: 700; color: var(--green); margin-top: 0.3rem; }
+  .spc-bars-col { flex: 1 1 0; min-width: 0; }
+  .spc-bar-chart-wrap { position: relative; }
+  .spc-bars { height: 52px; display: flex; align-items: flex-end; gap: 6px; cursor: pointer; }
+  .spc-bars .spc-bar { flex: 1; min-height: 3px; background: linear-gradient(180deg, var(--gold), var(--red)); border-radius: 4px 4px 0 0; opacity: 0.85; transition: height 0.9s cubic-bezier(0.22,1,0.3,1), opacity 0.15s var(--ease); }
+  .spc-bars .spc-bar:last-child { opacity: 1; }
+  .spc-bars .spc-bar:hover { opacity: 1; }
+  .spc-bar-labels { display: flex; justify-content: space-between; font-family: var(--hel); font-size: 0.68rem; color: var(--faint); margin-top: 0.5rem; }
+  .spc-target-line { position: absolute; left: 0; right: 0; border-top: 1.5px dashed var(--gold); pointer-events: none; }
+  .spc-target-line span { position: absolute; right: 0; top: -18px; font-family: var(--hel); font-size: 0.68rem; font-weight: 700; color: var(--gold); white-space: nowrap; }
+  .spc-hit { cursor: pointer; }
+  .spc-hit:focus { outline: none; }
+  .spc-hit:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
+  /* On <body>, not in the card: the card clips, and a tip on the first or
+     last bar needs to overhang it. */
+  .spc-tip { display: none; position: fixed; z-index: 260; background: var(--text); color: #fff; border-radius: 8px; padding: 0.5rem 0.7rem; font-family: var(--hel); font-size: 0.68rem; line-height: 1.45; width: max-content; max-width: 230px; pointer-events: none; box-shadow: 0 8px 22px rgba(17,17,17,0.28); }
+  .spc-tip-hed { font-weight: 700; }
+  .spc-tip-score { color: var(--gold); font-weight: 700; }
+  .spc-tip-weak { margin-top: 0.25rem; opacity: 0.88; }
+  .spc-tip-muted { opacity: 0.6; font-style: italic; }
+  .spc-tip-cue { margin-top: 0.4rem; color: var(--gold); font-weight: 700; }
 
   /* ═══ CALENDARS ═══ FullCalendar handles all the grid/drag mechanics;
      these rules just re-skin its default look with the portal's own
@@ -225,6 +281,7 @@
   .cal-chip.hw-outline { border-style: solid !important; border-width: 1.5px !important; background: #fff !important; }
   .cal-chip.sess-unmatched { background: rgba(17,17,17,0.28) !important; }
   .sched-hint { font-size: 0.76rem; color: var(--faint); margin-top: 0.9rem; text-align: center; }
+  .sched-hint kbd { font-family: ui-monospace, Menlo, monospace; font-size: 0.72rem; background: rgba(17,17,17,0.06); border-radius: 4px; padding: 0.05rem 0.3rem; }
   .cal-legend { display: flex; flex-wrap: wrap; gap: 0.35rem 1rem; font-size: 0.75rem; color: var(--mid); margin-bottom: 0.9rem; align-items: center; }
   .cal-legend .swatch { display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 0.35rem; vertical-align: -1px; }
   .cal-note { font-size: 0.76rem; color: var(--red); font-weight: 600; margin-bottom: 0.8rem; }
@@ -325,7 +382,8 @@
     <div class="deploy-banner" id="deploy-banner" style="display:none;"></div>
     <div class="summary-row" id="summary-row"></div>
     <div class="filter-row">
-      <label><input type="checkbox" id="filter-flagged"> Show only students needing attention (assignments behind, or 10+ days quiet)</label>
+      <label><input type="checkbox" id="filter-flagged"> Needs attention only</label>
+      <label id="filter-hidden-wrap" style="display:none;"><input type="checkbox" id="filter-hidden"> Show hidden <span class="count-pill" id="hidden-count"></span></label>
     </div>
     <div class="roster-table-wrap">
       <div class="roster-table-scroll">
@@ -395,7 +453,7 @@
       <div class="cal-wrap">
         <div class="cal-host" id="sched-calendar"></div>
       </div>
-      <p class="sched-hint">Click a day to add a task. Drag across several days to assign the same task to all of them. Drag an existing task to reschedule it, or click it to edit or delete. Click a session to assign work due that day.</p>
+      <p class="sched-hint">Click a day to add a task. Drag across several days to assign the same task to all of them. Drag an existing task to reschedule it &mdash; hold <kbd>&#8997;</kbd> while dragging to copy it instead. Click a task to edit or delete it, or a session to assign work due that day.</p>
       <div class="card" id="hw-undated-card" style="display:none; margin-top:1.25rem;">
         <h2>Undated tasks</h2>
         <p class="card-sub">Assigned without a due date (from the Sheet's own Assign Homework menu) — drag them onto a day by giving them a date here.</p>
@@ -479,6 +537,12 @@
     <div id="sched-modal-error"></div>
   </div>
 </div>
+
+<!-- Google sign-in for the admin. Must load BEFORE this page's own script,
+     so the signed admin session is in sessionStorage by the time the
+     auto-continue boot code below reads it. Replaces the ADMIN_KEY
+     password prompt entirely. -->
+<script src="auth-admin-signin.js"></script>
 
 <script>
 (function () {
@@ -629,12 +693,13 @@
 
   // What this build of admin.html needs the deployment to understand. Kept
   // beside the version constant in Code.gs — bump both together.
-  var REQUIRED_BACKEND_VERSION = 5;
+  var REQUIRED_BACKEND_VERSION = 6;
   var CAPABILITY_LABELS = {
     calendar: 'the calendar and student pages',
     dueDates: 'due dates',
     notes: 'assignment descriptions',
-    series: 'repeating assignments'
+    series: 'repeating assignments',
+    archive: 'hiding inactive students'
   };
 
   function joinList(items) {
@@ -692,6 +757,7 @@
   var summaryRowEl = $('summary-row');
   var bodyEl = $('roster-body');
   var filterFlaggedEl = $('filter-flagged');
+  var filterHiddenEl = $('filter-hidden');
 
   function isFlagged(s) {
     var behindOnAssignments = s.assignTotal > 0 && s.assignDone < s.assignTotal;
@@ -701,9 +767,12 @@
   }
 
   function renderSummary() {
-    var total = allStudents.length;
-    var flagged = allStudents.filter(isFlagged).length;
-    var withScore = allStudents.filter(function (s) { return s.composite != null; }).length;
+    // Hidden students are out of the picture entirely — they shouldn't
+    // inflate "needs attention" with work nobody's doing any more.
+    var active = allStudents.filter(function (s) { return !s.archived; });
+    var total = active.length;
+    var flagged = active.filter(isFlagged).length;
+    var withScore = active.filter(function (s) { return s.composite != null; }).length;
     summaryRowEl.innerHTML =
       '<div class="summary-tile"><div class="num">' + total + '</div><div class="lbl">Students</div></div>' +
       '<div class="summary-tile' + (flagged ? ' flagged' : '') + '"><div class="num">' + flagged + '</div><div class="lbl">Need attention</div></div>' +
@@ -720,7 +789,13 @@
   }
 
   function renderTable() {
-    var rows = allStudents.slice();
+    var showHidden = filterHiddenEl.checked;
+    var hiddenCount = allStudents.filter(function (s) { return s.archived; }).length;
+    // The toggle only appears once there's something to reveal.
+    $('filter-hidden-wrap').style.display = hiddenCount ? '' : 'none';
+    $('hidden-count').textContent = hiddenCount;
+
+    var rows = allStudents.filter(function (s) { return showHidden || !s.archived; });
     if (filterFlaggedEl.checked) rows = rows.filter(isFlagged);
     rows.sort(function (a, b) {
       var va = sortValue(a, sortKey), vb = sortValue(b, sortKey);
@@ -756,7 +831,7 @@
       var activityCell = '<span class="' + activityCls + '">' + relativeTime(s.lastActivityAt) + '</span>';
 
       var k = escHtml(s.key);
-      return '<tr>' +
+      return '<tr' + (s.archived ? ' class="is-archived"' : '') + '>' +
         '<td class="name-cell"><button type="button" class="student-link" data-key="' + k + '" data-tab="reports">' + escHtml(s.name) + '</button>' +
           '<span class="key">' + k + '</span></td>' +
         '<td>' + scoreCell + '</td>' +
@@ -766,6 +841,9 @@
         '<td><div class="row-actions">' +
           '<button type="button" class="mini student-link" data-key="' + k + '" data-tab="reports">Reports</button>' +
           '<button type="button" class="mini solid student-link" data-key="' + k + '" data-tab="homework">Schedule</button>' +
+          '<button type="button" class="mini icon-btn archive-btn" data-key="' + k + '" data-archived="' + (s.archived ? '1' : '0') + '" title="' +
+            (s.archived ? 'Show this student on the roster again' : 'Hide this student from the roster') + '" aria-label="' +
+            (s.archived ? 'Unhide' : 'Hide') + '">' + (s.archived ? '&#8617;' : '&times;') + '</button>' +
         '</div></td>' +
         '</tr>';
     }).join('');
@@ -775,6 +853,26 @@
   // would leak/re-attach) — matches the click to the student it belongs
   // to by key rather than closing over a specific row element.
   bodyEl.addEventListener('click', function (e) {
+    var arch = e.target.closest('.archive-btn');
+    if (arch) {
+      var akey = arch.getAttribute('data-key');
+      var next = arch.getAttribute('data-archived') !== '1';
+      var student = allStudents.find(function (s) { return s.key === akey; });
+      if (!student) return;
+      // Optimistic: the row moves out of (or back into) the list at once,
+      // and reverts if the write doesn't take.
+      student.archived = next;
+      renderTable();
+      postToBackend({ action: 'setStudentArchived', adminKey: adminKey(), key: akey, archived: next })
+        .then(function (data) {
+          if (data && data.ok) return;
+          student.archived = !next;
+          renderTable();
+          setStatus(next ? 'Could not hide that student — try again.' : 'Could not unhide that student — try again.', true);
+        })
+        .catch(function () { student.archived = !next; renderTable(); setStatus('Network error — try again.', true); });
+      return;
+    }
     var btn = e.target.closest('.student-link');
     if (!btn) return;
     var student = allStudents.find(function (s) { return s.key === btn.getAttribute('data-key'); });
@@ -792,6 +890,7 @@
     });
   });
   filterFlaggedEl.addEventListener('change', renderTable);
+  filterHiddenEl.addEventListener('change', renderTable);
 
   // silent: this is a background top-up of the roster's numbers (after a
   // homework edit changed someone's "x of y done"), not something the
@@ -931,11 +1030,21 @@
         return;
       }
       currentDetail = data;
-      renderStudentMeta(data);
-      renderStudentTiles(data);
-      renderTrend(data);
-      renderAttempts(data);
-      renderSkills(data);
+      // Rendering is wrapped separately so a bug in one of these — a field
+      // an older backend doesn't send, a shape that changed — reports
+      // itself as what it is. Sharing the outer catch meant any render
+      // exception told Luca "network error", which sends you off checking
+      // your wifi over a null field.
+      try {
+        renderStudentMeta(data);
+        renderStudentTiles(data);
+        renderTrend(data);
+        renderAttempts(data);
+        renderSkills(data);
+      } catch (err) {
+        if (window.console && console.error) console.error('[admin] student render failed:', err);
+        $('stu-meta').innerHTML = '<span style="color:var(--red);">Loaded this student, but could not draw the page. Details are in the browser console.</span>';
+      }
     }).catch(function () {
       $('stu-meta').innerHTML = '<span style="color:var(--red);">Network error loading this student.</span>';
     });
@@ -992,58 +1101,226 @@
     tiles.push('<div class="summary-tile"><div class="num">' + (target || '—') + '</div>' +
       '<div class="lbl">Target</div>' +
       '<div class="sub">' + (target && latest ? (target - latest.composite > 0 ? (target - latest.composite) + ' to go' : 'Target met') : '&nbsp;') + '</div></div>');
-    tiles.push('<div class="summary-tile"><div class="num">' + data.incorrectCount + '</div>' +
+    // Defaulted rather than printed raw: an older deployment, or any
+    // response missing these, otherwise renders the word "undefined" in
+    // 2rem type where a number should be.
+    var misses = data.incorrectCount || 0;
+    var saved = data.savedCount || 0;
+    tiles.push('<div class="summary-tile"><div class="num">' + misses + '</div>' +
       '<div class="lbl">Outstanding misses</div>' +
-      '<div class="sub">' + data.savedCount + ' saved question' + (data.savedCount === 1 ? '' : 's') + '</div></div>');
+      '<div class="sub">' + saved + ' saved question' + (saved === 1 ? '' : 's') + '</div></div>');
     $('stu-tiles').innerHTML = tiles.join('');
   }
 
-  /* Score trend — hand-rolled SVG (see the note in this file's <style>).
-     Oldest attempt on the left; the student's target, if they set one,
-     as a dashed gold line so "are they on track" is one glance. */
+  /* ═══ SCORE PROGRESS ═══ the student's own Home-screen bar chart,
+     rendered here from the admin's attempt feed. Ported rather than
+     reimplemented so both pages tell the same story with the same shapes:
+     one bar per scored attempt oldest-to-newest, the latest composite
+     called out with its change since the first, and the target as a
+     dashed line when it falls inside the scale.
+
+     The one deliberate difference is where a click goes. On Home a bar
+     takes the student to their own results; here it opens that attempt's
+     report in the viewer, which is the thing Luca actually wants two
+     clicks away while looking at a roster. */
+  function trendShortLabel(a) {
+    if (a.source === 'baseline') return 'Base';
+    if (a.source === 'practice-test' && a.testId) {
+      var m = /(\d+)\s*$/.exec(a.testId);
+      if (m) return 'PT ' + m[1];
+    }
+    return 'Diag';
+  }
+
+  // Two attempts of the same test read as duplicate labels, which makes
+  // the axis look wrong rather than repeated — number them instead.
+  function trendLabels(entries) {
+    var base = entries.map(trendShortLabel);
+    var counts = {};
+    base.forEach(function (l) { counts[l] = (counts[l] || 0) + 1; });
+    var seen = {};
+    return base.map(function (l) {
+      if (counts[l] <= 1) return l;
+      seen[l] = (seen[l] || 0) + 1;
+      return l + ' \u2013 Attempt ' + seen[l];
+    });
+  }
+
+  function trendEntryTitle(a) {
+    var t = String(a.testTitle || '').replace(/^SAT\s+/i, '').replace(/\s+[\u2014\u2013-]\s+.*$/, '');
+    return t || (a.source === 'practice-test' ? 'Practice test' : 'Diagnostic');
+  }
+
+  var trendEntries = [];   // chart index -> attempt, for the tooltip and click
+  var trendTip = null;
+
+  function trendTipEl() {
+    if (trendTip && trendTip.isConnected) return trendTip;
+    trendTip = document.createElement('div');
+    trendTip.className = 'spc-tip';
+    trendTip.setAttribute('role', 'tooltip');
+    document.body.appendChild(trendTip);
+    return trendTip;
+  }
+
+  function trendAttemptFor(hit) {
+    return trendEntries[Number(hit.getAttribute('data-i'))] || null;
+  }
+
+  function showTrendTip(hit) {
+    var a = trendAttemptFor(hit);
+    if (!a) return;
+    var tip = trendTipEl();
+    tip.textContent = '';
+    function line(cls, text) {
+      var d = document.createElement('div');
+      d.className = cls;
+      d.textContent = text;   // skill labels are ours, but keep it text-only regardless
+      tip.appendChild(d);
+    }
+    line('spc-tip-hed', trendEntryTitle(a));
+    line('spc-tip-score', String(a.composite) + (a.at ? ' \u00b7 ' + formatDay(a.at) : ''));
+    if (a.weakest && a.weakest.label) {
+      line('spc-tip-weak', 'Weakest: ' + a.weakest.label +
+        (a.weakest.total ? ' (' + a.weakest.correct + '/' + a.weakest.total + ')' : ''));
+    } else {
+      line('spc-tip-weak spc-tip-muted', 'No skill breakdown saved for this one.');
+    }
+    line('spc-tip-cue', a.reportRow ? 'Click to open this report \u2192' : 'No saved report for this one');
+    // Positioned in viewport coordinates because the tip is fixed and
+    // lives on <body>; clamped so a bar at either end doesn't push it off.
+    tip.style.visibility = 'hidden';
+    tip.style.display = 'block';
+    var hitRect = hit.getBoundingClientRect();
+    var tipRect = tip.getBoundingClientRect();
+    var left = (hitRect.left + hitRect.width / 2) - tipRect.width / 2;
+    left = Math.max(6, Math.min(left, window.innerWidth - tipRect.width - 6));
+    var top = hitRect.top - tipRect.height - 6;
+    if (top < 2) top = hitRect.bottom + 6;
+    tip.style.left = Math.round(left) + 'px';
+    tip.style.top = Math.round(top) + 'px';
+    tip.style.visibility = '';
+  }
+
+  function hideTrendTip() { if (trendTip) trendTip.style.display = 'none'; }
+
   function renderTrend(data) {
-    var pts = data.attempts.filter(function (a) { return a.composite; }).slice().reverse();
     var host = $('stu-trend');
-    if (pts.length < 2) {
-      host.innerHTML = '<div class="empty">' +
-        (pts.length === 1 ? 'One scored attempt so far — a trend needs at least two.' : 'No scored attempts yet.') +
-        '</div>';
+    // Oldest first. composite == null is a real attempt whose score sync
+    // never landed — it has no height on this axis, so it is left out
+    // rather than drawn as a zero.
+    var entries = (data.attempts || []).filter(function (a) { return a.composite != null; }).slice().reverse();
+    trendEntries = entries;
+    hideTrendTip();
+    if (!entries.length) {
+      host.innerHTML = '<div class="empty">No scored attempts yet.</div>';
       return;
     }
-    var W = 640, H = 190, padL = 38, padR = 30, padT = 24, padB = 30;
-    var target = data.student.targetScore || null;
-    var vals = pts.map(function (p) { return p.composite; });
-    if (target) vals = vals.concat([target]);
-    var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
-    if (hi === lo) { hi = lo + 10; lo = lo - 10; }
-    var pad = (hi - lo) * 0.15;
-    lo -= pad; hi += pad;
 
-    function x(i) { return padL + (pts.length === 1 ? 0 : i * (W - padL - padR) / (pts.length - 1)); }
-    function y(v) { return padT + (hi - v) * (H - padT - padB) / (hi - lo); }
+    var MIN = 400, MAX = 1600;
+    var target = (data.student && Number(data.student.targetScore)) || null;
+    var last = entries[entries.length - 1];
+    var labels = trendLabels(entries);
 
-    var parts = [];
-    parts.push('<svg class="trend-svg" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" role="img" aria-label="Composite score over time">');
-    // horizontal gridlines at the extremes of the plotted range
-    [hi, (hi + lo) / 2, lo].forEach(function (v) {
-      parts.push('<line class="grid" x1="' + padL + '" y1="' + y(v).toFixed(1) + '" x2="' + (W - padR) + '" y2="' + y(v).toFixed(1) + '"></line>');
-      parts.push('<text x="4" y="' + (y(v) + 3).toFixed(1) + '">' + Math.round(v) + '</text>');
-    });
-    if (target) {
-      parts.push('<line class="target-line" x1="' + padL + '" y1="' + y(target).toFixed(1) + '" x2="' + (W - padR) + '" y2="' + y(target).toFixed(1) + '"></line>');
-      parts.push('<text x="' + (W - padR) + '" y="' + (y(target) - 5).toFixed(1) + '" text-anchor="end" style="fill:var(--gold); font-weight:700;">target ' + target + '</text>');
+    var deltaHtml = '';
+    if (entries.length > 1) {
+      var delta = last.composite - entries[0].composite;
+      if (delta !== 0) {
+        deltaHtml = '<div class="spc-composite-delta">' + (delta > 0 ? '\u2191 ' : '\u2193 ') +
+          Math.abs(delta) + ' pts since ' + escHtml(labels[0]) + '</div>';
+      }
     }
-    parts.push('<polyline class="line" points="' + pts.map(function (p, i) { return x(i).toFixed(1) + ',' + y(p.composite).toFixed(1); }).join(' ') + '"></polyline>');
-    pts.forEach(function (p, i) {
-      parts.push('<circle class="dot" cx="' + x(i).toFixed(1) + '" cy="' + y(p.composite).toFixed(1) + '" r="3.5"></circle>');
-      parts.push('<text class="val" x="' + x(i).toFixed(1) + '" y="' + (y(p.composite) - 9).toFixed(1) + '" text-anchor="middle">' + p.composite + '</text>');
-      var d = new Date(p.at);
-      var label = isNaN(d.getTime()) ? '' : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-      parts.push('<text x="' + x(i).toFixed(1) + '" y="' + (H - 8) + '" text-anchor="middle">' + label + '</text>');
+
+    var barsHtml = '', labelsHtml = '';
+    entries.forEach(function (a, i) {
+      var frac = Math.max(0, Math.min(1, (a.composite - MIN) / (MAX - MIN)));
+      barsHtml += '<div class="spc-bar spc-hit" style="height:' + Math.max(2, Math.round(frac * 100)) +
+        '%" data-i="' + i + '" tabindex="0" role="button" aria-label="' +
+        escHtml(trendEntryTitle(a) + ', ' + a.composite) + '"></div>';
+      labelsHtml += '<span>' + escHtml(labels[i]) + '</span>';
     });
-    parts.push('</svg>');
-    host.innerHTML = parts.join('');
+
+    var targetHtml = '';
+    if (target && target >= MIN && target <= MAX) {
+      var tFrac = (target - MIN) / (MAX - MIN);
+      targetHtml = '<div class="spc-target-line" style="bottom:' + Math.round(tFrac * 100) + '%"><span>Target ' + target + '</span></div>';
+    }
+
+    host.innerHTML =
+      '<div class="spc-chart-wrap">' +
+        '<div class="spc-score-top"><div>' +
+          '<div class="spc-composite-num">' + last.composite + '</div>' + deltaHtml +
+        '</div></div>' +
+        '<div class="spc-bars-col">' +
+          '<div class="spc-bar-chart-wrap">' + targetHtml + '<div class="spc-bars">' + barsHtml + '</div></div>' +
+          '<div class="spc-bar-labels">' + labelsHtml + '</div>' +
+        '</div>' +
+      '</div>';
+
+    animateTrendBars(host);
   }
+
+  // Bars grow from zero on render rather than snapping in — same treatment
+  // as Home. Skipped outright for anyone who asked for reduced motion.
+  function animateTrendBars(host) {
+    var bars = host.querySelectorAll('.spc-bar');
+    if (!bars.length) return;
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    // The animation collapses the bars to 0% and restores them a frame
+    // later. requestAnimationFrame does NOT fire in a background tab, so
+    // on its own that leaves every bar flat at 0% for as long as the tab
+    // stays hidden — the chart looks empty rather than animating. Skip the
+    // whole thing when hidden, and keep a timer behind the frame so the
+    // real heights go back even if the callback never arrives.
+    if (document.hidden) return;
+    var targets = [];
+    Array.prototype.forEach.call(bars, function (b) { targets.push(b.style.height); b.style.height = '0%'; });
+    void host.offsetHeight; // commit the 0% before animating away from it
+    var restored = false;
+    function restore() {
+      if (restored) return;
+      restored = true;
+      Array.prototype.forEach.call(bars, function (b, i) { b.style.height = targets[i]; });
+    }
+    requestAnimationFrame(restore);
+    setTimeout(restore, 400);
+  }
+
+  // Delegated so it survives every re-render of the card.
+  (function wireTrend() {
+    var host = $('stu-trend');
+    if (!host) return;
+    host.addEventListener('mouseover', function (e) {
+      var hit = e.target.closest && e.target.closest('.spc-hit');
+      if (hit) showTrendTip(hit);
+    });
+    host.addEventListener('mouseout', function (e) {
+      var hit = e.target.closest && e.target.closest('.spc-hit');
+      if (hit) hideTrendTip();
+    });
+    host.addEventListener('focusin', function (e) {
+      var hit = e.target.closest && e.target.closest('.spc-hit');
+      if (hit) showTrendTip(hit);
+    });
+    host.addEventListener('focusout', hideTrendTip);
+    host.addEventListener('click', function (e) {
+      var hit = e.target.closest && e.target.closest('.spc-hit');
+      if (!hit) return;
+      var a = trendAttemptFor(hit);
+      if (!a) return;
+      if (!a.reportRow) { showTrendTip(hit); return; } // nothing to open — leave the tip saying so
+      hideTrendTip();
+      openReport(a);
+    });
+    host.addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      var hit = e.target.closest && e.target.closest('.spc-hit');
+      if (!hit) return;
+      e.preventDefault();
+      var a = trendAttemptFor(hit);
+      if (a && a.reportRow) { hideTrendTip(); openReport(a); }
+    });
+  })();
 
   function attemptLabel(a) {
     if (a.testTitle) return a.testTitle;
@@ -1201,6 +1478,24 @@
 
   function firstName(name) { return String(name || '').trim().split(/\s+/)[0] || ''; }
 
+  // Option on a Mac (Alt on Windows/Linux — the same physical key), which
+  // is the system-wide "drag to duplicate" modifier: Finder, Apple
+  // Calendar and Google Calendar all use it.
+  var dragCopyHeld = false;
+  function isCopyModifier(jsEvent) {
+    return !!(jsEvent && jsEvent.altKey);
+  }
+
+  // A one-off message in the calendar's own note strip, cleared after a
+  // few seconds — for things with no modal open to report into.
+  var calNoteTimer = null;
+  function flashCalNote(msg) {
+    var el = currentView === 'allcal' ? $('allcal-note') : $('hw-cal-note');
+    setCalNote(el, msg);
+    if (calNoteTimer) clearTimeout(calNoteTimer);
+    calNoteTimer = setTimeout(function () { setCalNote(el, ''); }, 5000);
+  }
+
   var ICS_NOTE = 'The tutoring calendar could not be read, so no sessions are shown. (Check CALENDAR_ICS_URL in the Apps Script project properties.) Homework is unaffected.';
   var LOAD_NOTE = 'Could not load this calendar — check your connection, then hit Refresh.';
   function setCalNote(el, msg) {
@@ -1281,6 +1576,101 @@
     return dates.length ? dates : [toDateStr(info.start)];
   }
 
+  /* ═══ OPTIMISTIC WRITES ═══
+     Apps Script is slow — a cold start runs into whole seconds — and every
+     write here used to wait for the round trip and then fire a SECOND one
+     to re-read the calendar before anything appeared. Two cold starts back
+     to back is why adding a task felt broken: you hit Save, the modal sat
+     there, and the day you were looking at stayed empty.
+
+     So every write below paints first and reconciles after. The event shows
+     up the instant you hit Save or release a drag, the request goes out
+     behind it, and the only thing that moves afterwards is a failure
+     putting it back.
+
+     One re-read is still needed after a create — createAdminAssignment
+     answers with a count and a series id, not row numbers, and an event
+     with no row can't be opened or dragged — but it's debounced and
+     silent, so laying down six days of a repeat costs one refetch rather
+     than six, underneath a calendar that already looks right. */
+  function activeCalendar() {
+    if (currentView === 'student') return schedCalendar;
+    if (currentView === 'allcal') return allCalendar;
+    return null;
+  }
+
+  var reconcileTimer = null;
+  function scheduleReconcile() {
+    if (reconcileTimer) clearTimeout(reconcileTimer);
+    reconcileTimer = setTimeout(function () { reconcileTimer = null; refreshActiveCalendar(); }, 600);
+  }
+
+  // Events for rows the sheet doesn't have yet. The 'tmp' id prefix is load
+  // bearing: eventClick uses it to tell "still saving" from a real row, so
+  // a fast double-click can't open an editor that would post a row number
+  // nothing will match.
+  var optimisticSeq = 0;
+  function optimisticEvents(spec) {
+    var isAll = currentView === 'allcal';
+    var color = isAll ? studentColor(spec.studentKey) : null;
+    return (spec.dates || []).map(function (day) {
+      return {
+        id: 'tmp' + (++optimisticSeq),
+        title: (spec.seriesish ? '↻ ' : '') +
+          (isAll ? (firstName(spec.studentName) + ' — ' + spec.task) : spec.task),
+        start: day,
+        allDay: true,
+        classNames: (isAll ? ['cal-chip', 'hw-outline'] : ['sched-event']).concat(['is-pending']),
+        backgroundColor: isAll ? '#ffffff' : undefined,
+        borderColor: color || undefined,
+        textColor: color || undefined,
+        editable: false,
+        extendedProps: {
+          kind: 'assignment', row: 0, pending: true, done: false,
+          task: spec.task, notes: spec.notes || '', seriesId: '',
+          studentKey: spec.studentKey, studentName: spec.studentName,
+          dueDate: day, dueDay: day
+        }
+      };
+    });
+  }
+
+  // A reconcile refetch replaces the SOURCE's events, and an optimistic
+  // event was added by hand rather than by the source — so it survives the
+  // refetch and the row shows up twice, once real and once pending. Clear
+  // them the moment fresh data lands, which is the moment they stop being
+  // the only copy on screen.
+  function clearPendingEvents(cal) {
+    if (!cal) return;
+    withBatch(cal, function () {
+      cal.getEvents().forEach(function (ev) {
+        if (ev.extendedProps && ev.extendedProps.pending) { try { ev.remove(); } catch (e) {} }
+      });
+    });
+  }
+
+  // batchRendering matters for repeats: addEvent re-renders the month on
+  // every call, so laying down a 90-day series one event at a time spent
+  // about a second redrawing — which is exactly the delay this whole
+  // change exists to remove. One redraw for the batch instead.
+  function withBatch(cal, fn) {
+    if (cal && typeof cal.batchRendering === 'function') { var r; cal.batchRendering(function () { r = fn(); }); return r; }
+    return fn();
+  }
+  function addOptimistic(specs) {
+    var cal = activeCalendar();
+    if (!cal) return [];
+    return withBatch(cal, function () {
+      return specs.map(function (e) { return cal.addEvent(e); }).filter(Boolean);
+    });
+  }
+  function dropOptimistic(added) {
+    if (!added || !added.length) return;
+    withBatch(activeCalendar(), function () {
+      added.forEach(function (ev) { try { ev.remove(); } catch (e) {} });
+    });
+  }
+
   function refreshActiveCalendar() {
     if (schedCalendar && currentView === 'student') schedCalendar.refetchEvents();
     if (allCalendar && currentView === 'allcal') allCalendar.refetchEvents();
@@ -1330,22 +1720,61 @@
       },
       eventClick: function (info) {
         var p = info.event.extendedProps;
+        // Still in flight: it has no row yet, so there is nothing to open.
+        if (p.pending) { flashCalNote('Still saving that one — give it a second.'); return; }
         if (p.kind === 'session') {
           openCreateModal([toDateStr(info.event.start)], currentStudent.key, currentStudent.name, '', 'Due the day of this session');
         } else {
           openEditModal(p);
         }
       },
+      // Remembered from the drag's own events: the drop's jsEvent is the
+      // most reliable read (what was held at release), but capturing the
+      // start too means a modifier pressed for the whole gesture still
+      // counts if the drop event arrives without one.
+      eventDragStart: function (info) { dragCopyHeld = isCopyModifier(info.jsEvent); },
       eventDrop: function (info) {
         var p = info.event.extendedProps;
         if (p.kind !== 'assignment') { info.revert(); return; }
+        var copy = isCopyModifier(info.jsEvent) || dragCopyHeld;
+        dragCopyHeld = false;
+        var targetDay = toDateStr(info.event.start);
+
+        if (copy) {
+          // Duplicate, don't move: the original snaps back and a fresh
+          // assignment lands on the day it was dragged to. Deliberately a
+          // standalone row — copying one day of a repeat shouldn't quietly
+          // enrol the copy in that series — and always not-done, since a
+          // copy is work still to do.
+          info.revert();
+          var copied = addOptimistic(optimisticEvents({
+            studentKey: p.studentKey, studentName: p.studentName,
+            task: p.task, notes: p.notes || '', dates: [targetDay], seriesish: false
+          }));
+          postToBackend({
+            action: 'createAdminAssignment', adminKey: adminKey(), key: p.studentKey,
+            task: p.task, dueDates: [targetDay], notes: p.notes || ''
+          }).then(function (data) {
+            if (!data || !data.ok) { dropOptimistic(copied); flashCalNote('Could not copy that one — try again.'); return; }
+            scheduleReconcile();
+          }).catch(function () {
+            dropOptimistic(copied);
+            flashCalNote('Could not copy that one — check your connection.');
+          });
+          return;
+        }
+
         postToBackend({
           action: 'updateAdminAssignment', adminKey: adminKey(), key: p.studentKey,
-          row: p.row, patch: { dueDate: toDateStr(info.event.start) }
+          row: p.row, patch: { dueDate: targetDay }
         }).then(function (data) {
-          if (!data || !data.ok) info.revert();
-          else refreshActiveCalendar(); // re-reads so extendedProps.dueDate isn't left stale
-        }).catch(function () { info.revert(); });
+          if (!data || !data.ok) { info.revert(); flashCalNote('Could not move that one — it has been put back.'); return; }
+          // The drop already drew it in the right place; the only thing left
+          // stale is the event's own copy of its due date, and that can be
+          // set here instead of re-reading the whole month.
+          info.event.setExtendedProp('dueDate', targetDay);
+          info.event.setExtendedProp('dueDay', targetDay);
+        }).catch(function () { info.revert(); flashCalNote('Could not move that one — check your connection.'); });
       }
     });
     schedCalendar.render();
@@ -1363,6 +1792,7 @@
         hwUndated = (data.assignments || []).filter(function (a) { return !a.dueDate; });
         renderUndated();
         success(buildEvents(data, false));
+        clearPendingEvents(schedCalendar);
       })
       .catch(function (err) { failure(err); });
   }
@@ -1444,6 +1874,7 @@
       events: fetchAllEvents,
       eventClick: function (info) {
         var p = info.event.extendedProps;
+        if (p.pending) { flashCalNote('Still saving that one — give it a second.'); return; }
         if (p.kind === 'session') {
           if (!p.matched.length) return; // a session with no student in the title — nothing to assign to
           var who = p.matched[0];
@@ -1469,6 +1900,7 @@
         noteBackendCapability(data);
         renderAllLegend(data);
         success(buildEvents(data, true));
+        clearPendingEvents(allCalendar);
       })
       .catch(function (err) { failure(err); });
   }
@@ -1696,20 +2128,78 @@
         return;
       }
     }
-    saveBtn.disabled = true;
-    var request = modalMode === 'create'
-      ? postToBackend({ action: 'createAdminAssignment', adminKey: adminKey(), key: modalStudentKey, task: task, dueDates: dates, notes: notes })
-      : postToBackend({
-          action: 'updateAdminAssignment', adminKey: adminKey(), key: modalStudentKey, row: modalAssignment.row,
-          patch: { task: task, notes: notes, done: modalDoneEl.checked, dueDate: modalDateEl.value || null },
-          scope: modalScope
-        });
-    request.then(function (data) {
-      saveBtn.disabled = false;
-      if (!data || !data.ok) { modalErrorEl.textContent = 'Could not save. Try again.'; return; }
+    // Paint, then close, then write. See the OPTIMISTIC WRITES note above:
+    // the modal is gone and the day is filled in before the request has
+    // even left, and a failure is what moves things, not a success.
+    // Everything the request needs, read BEFORE closeModal() — it nulls
+    // modalStudentKey and modalAssignment, and this handler now runs on
+    // past the close rather than finishing inside it.
+    var studentName = modalStudentName;
+    var studentKey = modalStudentKey;
+    var mode = modalMode;
+    var scope = modalScope;
+    var assignment = modalAssignment;
+    var markedDone = modalDoneEl.checked;
+    var pickedDate = modalDateEl.value || null;
+
+    if (mode === 'create') {
+      var added = addOptimistic(optimisticEvents({
+        studentKey: studentKey, studentName: studentName, task: task,
+        notes: notes, dates: dates, seriesish: dates.length > 1
+      }));
       closeModal();
-      refreshActiveCalendar();
-    }).catch(function () { saveBtn.disabled = false; modalErrorEl.textContent = 'Network error — try again.'; });
+      postToBackend({ action: 'createAdminAssignment', adminKey: adminKey(), key: studentKey, task: task, dueDates: dates, notes: notes })
+        .then(function (data) {
+          if (!data || !data.ok) {
+            dropOptimistic(added);
+            flashCalNote(data && data.error === 'too_many_occurrences'
+              ? 'That repeat was too long to save — pick an earlier end date.'
+              : 'Could not save that one — it has been taken back off the calendar.');
+            return;
+          }
+          scheduleReconcile();
+        })
+        .catch(function () {
+          dropOptimistic(added);
+          flashCalNote('Could not save that one — check your connection. It has been taken back off the calendar.');
+        });
+      return;
+    }
+
+    // An edit can move the day, rename it, or tick it off, so the cheapest
+    // honest repaint is to drop the old event and lay down a fresh one.
+    var cal = activeCalendar();
+    var old = cal && cal.getEventById('a' + assignment.row);
+    var restore = old ? {
+      id: old.id, title: old.title, start: old.startStr, allDay: old.allDay,
+      classNames: old.classNames.slice(), backgroundColor: old.backgroundColor,
+      borderColor: old.borderColor, textColor: old.textColor,
+      extendedProps: Object.assign({}, old.extendedProps)
+    } : null;
+    var newDay = pickedDate || assignment.dueDay || assignment.dueDate;
+    var replacement = addOptimistic(optimisticEvents({
+      studentKey: studentKey, studentName: studentName, task: task,
+      notes: notes, dates: newDay ? [newDay] : [], seriesish: !!assignment.seriesId
+    }));
+    if (old) { try { old.remove(); } catch (e) {} }
+    closeModal();
+    postToBackend({
+      action: 'updateAdminAssignment', adminKey: adminKey(), key: studentKey, row: assignment.row,
+      patch: { task: task, notes: notes, done: markedDone, dueDate: pickedDate },
+      scope: scope
+    }).then(function (data) {
+      if (!data || !data.ok) {
+        dropOptimistic(replacement);
+        if (restore && activeCalendar()) activeCalendar().addEvent(restore);
+        flashCalNote('Could not save that change — it has been put back.');
+        return;
+      }
+      scheduleReconcile();
+    }).catch(function () {
+      dropOptimistic(replacement);
+      if (restore && activeCalendar()) activeCalendar().addEvent(restore);
+      flashCalNote('Could not save that change — check your connection. It has been put back.');
+    });
   });
 
   deleteBtn.addEventListener('click', function () {
@@ -1721,16 +2211,56 @@
       modalErrorEl.textContent = '';
       return;
     }
-    deleteBtn.disabled = true;
-    postToBackend({ action: 'deleteAdminAssignment', adminKey: adminKey(), key: modalStudentKey, row: modalAssignment.row, scope: modalScope })
+    var delKey = modalStudentKey;
+    var delRow = modalAssignment.row;
+    var delScope = modalScope;
+    var delSeries = modalAssignment.seriesId || '';
+
+    // Take it off the calendar now. Deleting a whole series takes every day
+    // of it, which is the point of the scope switch — so gather them before
+    // removing anything, or the snapshot needed to undo a failed delete
+    // goes with them.
+    var delCal = activeCalendar();
+    var doomed = [];
+    if (delCal) {
+      delCal.getEvents().forEach(function (ev) {
+        var ep = ev.extendedProps;
+        if (!ep || ep.kind !== 'assignment') return;
+        var hit = (delScope === 'series' && delSeries) ? (ep.seriesId === delSeries) : (ep.row === delRow);
+        if (hit) doomed.push({ ev: ev, snapshot: {
+          id: ev.id, title: ev.title, start: ev.startStr, allDay: ev.allDay,
+          classNames: ev.classNames.slice(), backgroundColor: ev.backgroundColor,
+          borderColor: ev.borderColor, textColor: ev.textColor,
+          extendedProps: Object.assign({}, ep)
+        } });
+      });
+      withBatch(delCal, function () {
+        doomed.forEach(function (d) { try { d.ev.remove(); } catch (e) {} });
+      });
+    }
+    closeModal();
+
+    function putBack() {
+      var back = activeCalendar();
+      if (!back) return;
+      withBatch(back, function () {
+        doomed.forEach(function (d) { back.addEvent(d.snapshot); });
+      });
+    }
+    postToBackend({ action: 'deleteAdminAssignment', adminKey: adminKey(), key: delKey, row: delRow, scope: delScope })
       .then(function (data) {
-        deleteBtn.disabled = false;
-        if (!data || !data.ok) { modalErrorEl.textContent = 'Could not delete. Try again.'; return; }
-        closeModal();
-        refreshActiveCalendar();
-      }).catch(function () { deleteBtn.disabled = false; modalErrorEl.textContent = 'Network error — try again.'; });
+        if (!data || !data.ok) { putBack(); flashCalNote('Could not delete that — it has been put back.'); return; }
+        scheduleReconcile();
+      }).catch(function () {
+        putBack();
+        flashCalNote('Could not delete that — check your connection. It has been put back.');
+      });
   });
 })();
 </script>
+<!-- The Portal access panel: invites, the approval queue, login resets.
+     Builds its own markup and styles itself from this file's own CSS
+     variables — removing this tag removes the feature completely. -->
+<script src="auth-admin.js"></script>
 </body>
 </html>

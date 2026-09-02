@@ -101,6 +101,8 @@ function makeSheet(headers, rows) {
 function makeEnv(opts) {
   opts = opts || {};
   const students = makeSheet(
+    // Deliberately the DOCUMENTED base schema plus the two columns the old
+    // fixtures used. The bare-schema case is exercised separately below.
     ['Key', 'Name', 'DriveFolderUrl', 'GrantedEmail', 'GrantedAt', 'SAT', 'AccomTimeMult', 'OnboardedAt',
      'GuardianName', 'GuardianEmail'],
     opts.rows || []
@@ -112,6 +114,7 @@ function makeEnv(opts) {
   const sheets = { Students: students, Leads: leads };
   const sent = [];
   const shared = new Set();   // who currently has Drive access, per grant/revoke
+  const lockHeld = { v: false };
   const folderName = { v: ' \u2014 ABC123' };  // how Code.gs names a folder for a nameless row
   const CLIENT_ID = 'test-client.apps.googleusercontent.com';
 
@@ -162,7 +165,19 @@ function makeEnv(opts) {
       const r = tokeninfo(url);
       return { getResponseCode: () => r.code, getContentText: () => r.text };
     } },
-    LockService: { getScriptLock: () => ({ waitLock() {}, releaseLock() {} }) },
+    /* Deliberately NOT reentrant. Apps Script does not promise that taking
+       the script lock twice in one execution succeeds, and the failure it
+       would cause (provisionNewLeads deadlocking on every lead, forever,
+       silently) is invisible against a no-op fake. Modelling the strict
+       behaviour is what makes a nested-lock regression fail here instead
+       of in production. */
+    LockService: { getScriptLock: () => ({
+      waitLock() {
+        if (lockHeld.v) throw new Error('lock is already held by this execution');
+        lockHeld.v = true;
+      },
+      releaseLock() { lockHeld.v = false; }
+    }) },
     MailApp: { sendEmail(o) { sent.push(o); } },
     ScriptApp: {
       getService: () => ({ getUrl: () => 'https://script.example/exec' }),
@@ -240,6 +255,7 @@ function makeEnv(opts) {
   sandbox.folderName = folderName;
   sandbox.leadsSheet = leads;
   sandbox.studentsSheet = students;
+  sandbox.logSheet = () => sheets.AuthLog;
   sandbox.rowFor = key => {
     const g = students._grid;
     const kc = g[0].indexOf('Key');
@@ -859,6 +875,327 @@ test('a phone-only family still reaches a working portal end to end', () => {
   assert.strictEqual(env.folderName.v, 'Owen Marsh \u2014 ' + key);
 });
 
+console.log('\nAdmin sign-in — killing the last password\n');
+
+test('the admin key no longer works over HTTP, on any admin action', () => {
+  // It has been sitting in a git-committed file. Continuing to honour it
+  // would leave the exact credential this replaces still live.
+  const env = makeEnv({ rows: [['ABC123', 'Alex Reed', '', 'a@x.com', new Date(), true, 1, new Date(), '', '']] });
+  env.ADMIN_ACTIONS.forEach(action => {
+    const body = { action, adminKey: 'ADMINSECRET' };
+    isErr(env.authGuard_(body), 'unauthorized');
+    assert.strictEqual(body.adminKey, '', 'and the secret is scrubbed from the request');
+  });
+});
+
+test('a Google account on the admin list gets a session', () => {
+  const env = makeEnv({ rows: [] });
+  env.ADMIN_EMAILS = ['luca@example.com'];
+  const out = env.handleAdminGoogleAuth(env.token('luca@example.com', 'LUCASUB', { name: 'Luca Moretti' }));
+  isOk(out);
+  assert.ok(out.session);
+  assert.strictEqual(out.email, 'luca@example.com');
+});
+
+test('any other Google account is refused and logged', () => {
+  const env = makeEnv({ rows: [] });
+  env.ADMIN_EMAILS = ['luca@example.com'];
+  isErr(env.handleAdminGoogleAuth(env.token('someone@else.com', 'X', { name: 'Someone' })), 'not_an_admin');
+  const log = env.logSheet()._grid.slice(1).map(r => r[1]);
+  assert.ok(log.indexOf('admin_denied') !== -1, 'the attempt is recorded: ' + log.join(','));
+});
+
+test('an admin session unlocks admin actions and hands the real key to the handlers', () => {
+  const env = makeEnv({ rows: [] });
+  env.ADMIN_EMAILS = ['luca@example.com'];
+  const sess = env.handleAdminGoogleAuth(env.token('luca@example.com', 'LUCASUB', { name: 'Luca' })).session;
+  const body = { action: 'getRoster', adminKey: sess };
+  assert.strictEqual(env.authGuard_(body), null, 'the request is allowed through');
+  assert.strictEqual(body.adminKey, 'ADMINSECRET',
+    "the real key is substituted so Code.gs's own checks keep working untouched");
+});
+
+test('removing an address from the list locks that session out immediately', () => {
+  const env = makeEnv({ rows: [] });
+  env.ADMIN_EMAILS = ['luca@example.com', 'assistant@example.com'];
+  const sess = env.handleAdminGoogleAuth(env.token('assistant@example.com', 'ASUB', { name: 'A' })).session;
+  assert.strictEqual(env.authGuard_({ action: 'getRoster', adminKey: sess }), null);
+  env.ADMIN_EMAILS = ['luca@example.com'];   // revoked
+  isErr(env.authGuard_({ action: 'getRoster', adminKey: sess }), 'unauthorized');
+});
+
+test('a student session cannot be used as an admin session, or the reverse', () => {
+  const env = makeEnv({ rows: [['ABC123', 'Alex Reed', '', 'a@x.com', new Date(), true, 1, new Date(), '', '']] });
+  env.ADMIN_EMAILS = ['luca@example.com'];
+  const studentSess = env.handleGoogleAuth(env.token('a@x.com', 'SUB1')).session;
+  const adminSess = env.handleAdminGoogleAuth(env.token('luca@example.com', 'LUCASUB', { name: 'L' })).session;
+  // Both are HMAC-signed by the same secret, so the `t` type tag is the
+  // only thing keeping them apart. It has to hold.
+  isErr(env.authGuard_({ action: 'getRoster', adminKey: studentSess }), 'unauthorized');
+  isErr(env.authGuard_({ action: 'getProgress', session: adminSess, key: 'ABC123' }), 'unauthorized');
+});
+
+test('a forged admin session is refused', () => {
+  const env = makeEnv({ rows: [] });
+  env.ADMIN_EMAILS = ['luca@example.com'];
+  const good = env.handleAdminGoogleAuth(env.token('luca@example.com', 'L', { name: 'L' })).session;
+  const parts = good.split('.');
+  const payload = JSON.parse(Buffer.from(parts[0].replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString());
+  payload.e = 'attacker@evil.com';
+  const forged = Buffer.from(JSON.stringify(payload)).toString('base64')
+    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '') + '.' + parts[1];
+  isErr(env.authGuard_({ action: 'getRoster', adminKey: forged }), 'unauthorized');
+  isErr(env.authGuard_({ action: 'getRoster', adminKey: '' }), 'unauthorized');
+});
+
+test('every ADMIN_KEY-gated action in the codebase is listed in ADMIN_ACTIONS', () => {
+  // Same fail-safe reasoning as STUDENT_ACTIONS, except this list fails
+  // CLOSED: a missing action falls through to a handler whose ADMIN_KEY
+  // check can no longer pass, locking Luca out rather than opening a door.
+  // Still worth catching here rather than in production.
+  const codeGs = fs.readFileSync(path.join(__dirname, '..', 'Code.gs'), 'utf8');
+  const authGs = fs.readFileSync(path.join(__dirname, '..', 'auth.gs'), 'utf8');
+  const dispatched = new Set();
+  let m;
+  const re = /body\.action === '([a-zA-Z]+)'/g;
+  while ((m = re.exec(codeGs)) !== null) dispatched.add(m[1]);
+  const re2 = /case '([a-zA-Z]+)':/g;
+  while ((m = re2.exec(authGs)) !== null) dispatched.add(m[1]);
+
+  const usesAdminKey = new Set();
+  dispatched.forEach(a => {
+    // Bounded to the dispatch line and the ONE line under it. A wider
+    // window walks straight into the next else-if branch and reports
+    // public actions like `version` as admin-gated, purely because an
+    // admin action happens to be dispatched a few lines below them.
+    const call = new RegExp("body\\.action === '" + a + "'\\)\\s*\\{[^\\n]*\\n[^\\n]*body\\.adminKey");
+    const call2 = new RegExp("case '" + a + "':[^\\n]*body\\.adminKey");
+    if (call.test(codeGs) || call2.test(authGs)) usesAdminKey.add(a);
+  });
+  assert.ok(usesAdminKey.size > 8, 'expected to find the admin actions; found ' + usesAdminKey.size);
+
+  const listed = new Set(env0.ADMIN_ACTIONS);
+  const missing = [];
+  usesAdminKey.forEach(a => { if (!listed.has(a)) missing.push(a); });
+  assert.deepStrictEqual(missing, [],
+    'these adminKey-gated actions are missing from ADMIN_ACTIONS in auth.gs: ' + missing.join(', '));
+});
+
+console.log('\nThe approval email link, and the pending list\n');
+
+test('the one-tap email link approves without any admin key', () => {
+  const env = makeEnv({ rows: [['NEWKEY1', '', '', '', '', true, '', '', '', '']] });
+  const t = env.token('new@x.com', 'SUB2', { name: 'New Student' });
+  env.handleClaimKey(t, 'NEWKEY1', 'New Student');
+  // The token is the credential — it only ever existed inside an email
+  // delivered to NOTIFY_EMAIL.
+  const link = /\?claim=([^\s"']+)/.exec(env.sentMail[0].body)[1];
+  isOk(env.authRoute_({ action: 'decideClaimByToken', token: decodeURIComponent(link), decision: 'approve' }));
+  assert.strictEqual(env.rowFor('NEWKEY1').GoogleSub, 'SUB2');
+});
+
+test('a forged or replayed claim token is refused', () => {
+  const env = makeEnv({ rows: [['NEWKEY1', '', '', '', '', true, '', '', '', '']] });
+  const t = env.token('new@x.com', 'SUB2', { name: 'New Student' });
+  env.handleClaimKey(t, 'NEWKEY1', 'New Student');
+  const link = decodeURIComponent(/\?claim=([^\s"']+)/.exec(env.sentMail[0].body)[1]);
+  isErr(env.authRoute_({ action: 'decideClaimByToken', token: link.slice(0, -2) + 'xx', decision: 'approve' }), 'bad_token');
+  isErr(env.authRoute_({ action: 'decideClaimByToken', token: 'garbage', decision: 'approve' }), 'bad_token');
+  // Replay after it has been handled finds nothing left to approve.
+  isOk(env.authRoute_({ action: 'decideClaimByToken', token: link, decision: 'approve' }));
+  isErr(env.authRoute_({ action: 'decideClaimByToken', token: link, decision: 'approve' }), 'no_pending_claim');
+});
+
+test('a session token cannot be replayed as an approval link, or the reverse', () => {
+  // Both are HMAC-signed with the same secret; the `t` type tag is the only
+  // thing separating them.
+  const env = makeEnv({ rows: [['ABC123', 'Alex Reed', '', 'a@x.com', new Date(), true, 1, new Date(), '', '']] });
+  const sess = env.handleGoogleAuth(env.token('a@x.com', 'SUB1')).session;
+  isErr(env.authRoute_({ action: 'decideClaimByToken', token: sess, decision: 'approve' }), 'bad_token');
+  isErr(env.handleResume(env.signToken_({ t: 'claim', k: 'ABC123', s: 'SUB1' }, 600)), 'bad_session');
+});
+
+test('the pending list shows waiting claims and nothing else', () => {
+  const env = makeEnv({ rows: [
+    ['NEWKEY1', '', '', '', '', true, '', '', '', ''],
+    ['ABC123', 'Alex Reed', '', 'a@x.com', new Date(), true, 1, new Date(), '', '']
+  ] });
+  env.handleClaimKey(env.token('new@x.com', 'SUB2', { name: 'New Student' }), 'NEWKEY1');
+  const out = env.handleListPendingClaims('ADMINSECRET');
+  isOk(out);
+  assert.strictEqual(out.pending.length, 1);
+  assert.strictEqual(out.pending[0].key, 'NEWKEY1');
+  assert.strictEqual(out.pending[0].email, 'new@x.com');
+});
+
+test('accessRoster returns access fields only — no scores or reports', () => {
+  const env = makeEnv({ rows: [['ABC123', 'Alex Reed', '', 'a@x.com', new Date(), true, 1, new Date(), '', 'p@x.com']] });
+  const out = env.handleAccessRoster('ADMINSECRET');
+  isOk(out);
+  const keys = Object.keys(out.students[0]).join(',');
+  ['Score', 'Report', 'IncorrectQuestions', 'SkillStats', 'Attempt'].forEach(bad => {
+    assert.ok(keys.indexOf(bad) === -1, 'must not expose ' + bad + ' — got ' + keys);
+  });
+  // An address on file but no Google pairing yet: 'Ready', not 'Inquiry'.
+  assert.strictEqual(out.students[0].status, 'Ready');
+});
+
+test("today's roster does not flood the queue on day one", () => {
+  // Every existing student has a GrantedEmail and no GoogleSub. They pair
+  // by themselves on first sign-in, so none of them is an action for Luca.
+  const env = makeEnv({ rows: [
+    ['STU001', 'A One', '', 'a@x.com', new Date(), true, 1, new Date(), '', ''],
+    ['STU002', 'B Two', '', 'b@x.com', new Date(), true, 1, new Date(), '', ''],
+    ['NEW001', '', '', '', '', true, '', '', '', '']
+  ] });
+  const out = env.handleAccessRoster('ADMINSECRET');
+  const byKey = {};
+  out.students.forEach(s => { byKey[s.key] = s.status; });
+  assert.strictEqual(byKey.STU001, 'Ready');
+  assert.strictEqual(byKey.STU002, 'Ready');
+  assert.strictEqual(byKey.NEW001, 'Inquiry', 'only the genuinely new row needs anything');
+});
+
+test('a Ready student signs in with no key, no invite and no approval', () => {
+  const env = makeEnv({ rows: [['STU001', 'A One', '', 'a@x.com', new Date(), true, 1, new Date(), '', '']] });
+  assert.strictEqual(env.handleAccessRoster('ADMINSECRET').students[0].status, 'Ready');
+  const out = env.handleGoogleAuth(env.token('a@x.com', 'SUB1'));
+  isOk(out);
+  assert.ok(out.session);
+  assert.strictEqual(env.handleAccessRoster('ADMINSECRET').students[0].status, 'Active');
+});
+
+test('lead provisioning does not deadlock on its own script lock', () => {
+  // provisionNewLeads holds the lock while it walks the Leads sheet. If it
+  // reached for it again per lead, every lead would be skipped and never
+  // marked — retried forever, looking switched on and doing nothing.
+  const env = makeEnv({ rows: [], leads: [] });
+  env.setupLeadProvisioning();
+  env.leadsSheet.appendRow([new Date(Date.now() + 1000), 'A Parent', 'a@x.com', '', '11th', '', '', '', '', 'Parent']);
+  env.leadsSheet.appendRow([new Date(Date.now() + 2000), 'B Parent', 'b@x.com', '', '12th', '', '', '', '', 'Parent']);
+  env.provisionNewLeads();
+  const g = env.leadsSheet._grid;
+  const pk = g[0].indexOf('PortalKey');
+  assert.ok(g[1][pk], 'first lead provisioned');
+  assert.ok(g[2][pk], 'second lead provisioned — proves the lock was not re-taken per lead');
+  assert.strictEqual(env.studentsSheet._grid.slice(1).filter(r => r[0]).length, 2);
+});
+
+test('every locked entry point releases the lock, including on refusal', () => {
+  const env = makeEnv({ rows: [['ABC123', 'Alex Reed', '', 'a@x.com', new Date(), true, 1, new Date(), '', '']] });
+  // A refusal path: bad key on a claim. If it leaked the lock, the very
+  // next locked call would throw instead of answering.
+  isErr(env.handleClaimKey(env.token('x@x.com', 'S9', { name: 'X Y' }), 'NOSUCH'), 'bad_key');
+  isOk(env.handleGoogleAuth(env.token('a@x.com', 'SUB1')));
+  isOk(env.handleCreateStudent('ADMINSECRET', { guardianEmail: 'p@x.com' }));
+});
+
+test('a roster with no Key column fails loudly instead of creating dead rows', () => {
+  // The quiet version of this bug appends a row with no key: findRow_ can
+  // never match it, no invite can reach it, and the AuthLog has already
+  // recorded a key that was never stored.
+  const env = makeEnv({ rows: [] });
+  const g = env.studentsSheet._grid;
+  g[0][g[0].indexOf('Key')] = 'NotTheKeyColumn';
+  let threw = null;
+  try { env.handleCreateStudent('ADMINSECRET', { guardianEmail: 'p@x.com' }); }
+  catch (e) { threw = String(e.message || e); }
+  assert.ok(threw && /Key/.test(threw), 'expected a clear error, got: ' + threw);
+  assert.strictEqual(env.studentsSheet._grid.length, 1, 'and no row was appended');
+});
+
+test('generated keys never collide with the roster', () => {
+  const env = makeEnv({ rows: [] });
+  const seen = new Set();
+  for (let i = 0; i < 40; i++) {
+    const r = env.handleCreateStudent('ADMINSECRET', { guardianEmail: 'p' + i + '@x.com' });
+    isOk(r);
+    assert.ok(!seen.has(r.key), 'duplicate key issued: ' + r.key);
+    seen.add(r.key);
+  }
+  assert.strictEqual(seen.size, 40);
+});
+
+test('resetting a login also kills any outstanding invite', () => {
+  // Otherwise the reset is theatre: the account just removed still holds a
+  // live link straight back into the same row.
+  const env = makeEnv({ rows: [] });
+  const key = env.handleCreateStudent('ADMINSECRET', { guardianEmail: 'parent@x.com' }).key;
+  const link = env.handleSendInvite('ADMINSECRET', key, '', 'link').link;
+  const token = decodeURIComponent(/\?invite=(.+)$/.exec(link)[1]);
+  isOk(env.handleClaimInvite(env.token('wrong@x.com', 'SUBW', { name: 'Wrong Person' }), token));
+
+  isOk(env.handleResetStudentAuth('ADMINSECRET', key));
+  assert.strictEqual(env.rowFor(key).InviteNonce, '', 'the invite is consumed/cleared');
+  isErr(env.handleClaimInvite(env.token('wrong@x.com', 'SUBW', { name: 'Wrong Person' }), token), 'invite_expired');
+});
+
+test('a reset before the invite is ever claimed also kills the link', () => {
+  const env = makeEnv({ rows: [] });
+  const key = env.handleCreateStudent('ADMINSECRET', { guardianEmail: 'parent@x.com' }).key;
+  const link = env.handleSendInvite('ADMINSECRET', key, '', 'link').link;
+  const token = decodeURIComponent(/\?invite=(.+)$/.exec(link)[1]);
+  assert.strictEqual(env.rowFor(key).Status, 'Invited');
+  isOk(env.handleResetStudentAuth('ADMINSECRET', key));
+  isErr(env.handleClaimInvite(env.token('x@x.com', 'S', { name: 'A B' }), token), 'invite_expired');
+  assert.strictEqual(env.rowFor(key).Status, 'Inquiry', 'and the sheet says so');
+});
+
+test("the sheet's Status column tracks reality, not just the panel", () => {
+  const env = makeEnv({ rows: [['STU001', 'A One', '', 'a@x.com', new Date(), true, 1, new Date(), '', '']] });
+  // A pre-Google student: the column has never been written at all.
+  assert.strictEqual(env.rowFor('STU001').Status, undefined);
+  isOk(env.handleGoogleAuth(env.token('a@x.com', 'SUB1')));
+  assert.strictEqual(env.rowFor('STU001').Status, 'Active', 'first sign-in stamps it');
+  // And an approval through the queue stamps it too.
+  const env2 = makeEnv({ rows: [['NEW001', '', '', '', '', true, '', '', '', '']] });
+  const t = env2.token('new@x.com', 'SUB2', { name: 'New Student' });
+  env2.handleClaimKey(t, 'NEW001');
+  env2.handleDecideClaim('ADMINSECRET', 'NEW001', 'approve');
+  assert.strictEqual(env2.rowFor('NEW001').Status, 'Active');
+});
+
+test("a lead's parent email survives a sheet that has no Guardian columns yet", () => {
+  // Code.gs creates GuardianName/GuardianEmail lazily — first onboarding
+  // completion, or first run of the weekly job. On a new deployment neither
+  // has happened, and without the column the address is dropped silently.
+  // That address IS the reason lead provisioning exists.
+  const env = makeEnv({ rows: [], leads: [] });
+  const g = env.studentsSheet._grid;
+  ['GuardianName', 'GuardianEmail'].forEach(c => {
+    const i = g[0].indexOf(c);
+    if (i !== -1) g.forEach(r => r.splice(i, 1));
+  });
+  assert.strictEqual(g[0].indexOf('GuardianEmail'), -1, 'starting from the bare schema');
+
+  env.setupLeadProvisioning();
+  env.leadsSheet.appendRow([new Date(Date.now() + 1000), 'Sarah Chen', 'sarah@x.com', '555', '11th',
+                            'SAT Prep', '', '', 'Yes', 'Parent']);
+  env.provisionNewLeads();
+  const key = env.leadsSheet._grid[1][env.leadsSheet._grid[0].indexOf('PortalKey')];
+  const row = env.rowFor(key);
+  assert.strictEqual(row.GuardianEmail, 'sarah@x.com', "the parent's address must survive");
+  assert.strictEqual(row.GuardianName, 'Sarah Chen');
+});
+
+test('the two hand-run admin tools are gated in Code.gs itself', () => {
+  // A source-level assertion because the gate lives in doPost's dispatch
+  // chain, not in a function this suite can call. These two were open to
+  // the entire internet: one returns every student's key, name and report
+  // link to any unauthenticated POST, the other writes into the Attempts
+  // sheet. If a future dispatcher rewrite drops the check, this fails.
+  const codeGs = fs.readFileSync(path.join(__dirname, '..', 'Code.gs'), 'utf8');
+  ['listBlankComposite', 'backfillCompositeFields'].forEach(action => {
+    const m = new RegExp("body\\.action === '" + action + "'\\)\\s*\\{([\\s\\S]{0,900}?)\\n    \\} else")
+      .exec(codeGs);
+    assert.ok(m, 'could not find the ' + action + ' dispatch branch');
+    assert.ok(/body\.adminKey === ADMIN_KEY/.test(m[1]),
+      action + ' is dispatched WITHOUT an admin-key check — it is open to anyone');
+    assert.ok(/unauthorized/.test(m[1]),
+      action + ' does not refuse with unauthorized');
+  });
+});
+
 console.log('\nSessions\n');
 
 test('a valid session resumes without re-authenticating', () => {
@@ -943,11 +1280,9 @@ test('every student-facing action in Code.gs is listed in STUDENT_ACTIONS', () =
 
   // Everything that is deliberately NOT a student action.
   const publicActions = new Set(['auth', 'submitLead', 'version']);
-  const adminActions = new Set([
-    'getRoster', 'getAdminAssignments', 'createAdminAssignment', 'updateAdminAssignment',
-    'deleteAdminAssignment', 'getAdminCalendar', 'getStudentDetail', 'getAttemptReport',
-    'listBlankComposite', 'backfillCompositeFields'
-  ]);
+  // Derived from auth.gs rather than restated, so the two coverage tests
+  // can never disagree about which actions are admin-only.
+  const adminActions = new Set(env0.ADMIN_ACTIONS);
   // Guard against this test quietly passing because the regex matched
   // nothing (a dispatcher rewrite, a moved file) — an empty set would
   // "prove" every action is gated.
