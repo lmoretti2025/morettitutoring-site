@@ -1774,11 +1774,15 @@
   .qb-toolbar .iq-dropdown-btn:hover { background: rgba(17,17,17,0.07); }
   .qb-toolbar .iq-dropdown.open .iq-dropdown-btn { background: rgba(17,17,17,0.07); border: none; }
 
-  .qb-practice-all-bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; background: var(--white); border: none; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); border-radius: 0; padding: 1.1rem 0; margin-bottom: 0; box-shadow: none; }
-  .qb-practice-all-title { font-family: var(--display); font-weight: 700; font-size: 0.95rem; color: var(--text); margin-bottom: 0.2rem; }
-  .qb-practice-all-sub { font-size: 0.78rem; color: var(--mid); }
   .qb-start-btn { flex-shrink: 0; background: rgba(17,17,17,0.06); color: var(--mid); border: none; border-radius: 999px; padding: 0.6rem 1.15rem; font-family: var(--hel); font-size: 0.78rem; font-weight: 700; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 0.35rem; transition: background 0.15s var(--ease), color 0.15s var(--ease); }
   .qb-start-btn:hover { background: var(--red); color: #fff; }
+  /* "Select all" lives in the header checkbox now (see #qb-select-all) —
+     one selection model, one Start action, instead of a second "Practice
+     all topics" button competing with the topic checkboxes for the same
+     job. A plain, undecorated native checkbox reads clearly as "select
+     all" sitting above a column of the exact same checkboxes. */
+  .qb-th-check { position: relative; }
+  #qb-select-all { cursor: pointer; }
 
   /* table-layout:fixed forces the Progress/Accuracy columns to their exact
      specified widths on every row, full stop — with the default auto
@@ -4062,17 +4066,9 @@ window.Portal = {
       <div class="iq-dropdown" id="qb-completed-dropdown"></div>
     </div>
 
-    <div class="qb-practice-all-bar">
-      <div>
-        <div class="qb-practice-all-title">Practice all topics</div>
-        <div class="qb-practice-all-sub" id="qb-practice-all-sub">Start practicing all skills.</div>
-      </div>
-      <button type="button" class="qb-start-btn" id="qb-practice-all-btn">Start practice</button>
-    </div>
-
     <table class="qb-table">
       <thead>
-        <tr><th class="qb-th-check"></th><th>Topic</th><th class="qb-th-progress">Progress</th><th class="qb-th-acc">Accuracy</th></tr>
+        <tr><th class="qb-th-check"><input type="checkbox" id="qb-select-all" title="Select all topics"></th><th>Topic</th><th class="qb-th-progress">Progress</th><th class="qb-th-acc">Accuracy</th></tr>
       </thead>
       <tbody id="qb-skills-tbody"></tbody>
     </table>
@@ -7458,6 +7454,55 @@ window.Portal = {
 
   function armSplashHint() {
     document.getElementById('onb-splash-hint').classList.add('onb-splash-hint-visible');
+    playOnbChime();
+  }
+
+  /* The logo's arrival, with sound. Synthesised rather than loaded from a
+     file: nothing to download, nothing to license, and no way for a
+     missing asset to turn into a console error on a student's first
+     screen. Four notes of a C-major arpeggio on soft triangle waves,
+     timed against the 2.4s mark animation so the last note lands as the
+     logo settles.
+
+     Everything here is best-effort and silent on failure. Two ways it
+     legitimately never plays, both fine:
+       - Autoplay policy. Browsers refuse audio before a user gesture. On
+         the normal path the student has just clicked Continue on the name
+         beat, so the context is allowed; when the name beat is skipped
+         the logo IS the first screen and there has been no gesture yet,
+         so it stays silent rather than throwing.
+       - No Web Audio at all (old or locked-down browser).
+     Onboarding runs once per student, so this is a once-ever sound. It is
+     deliberately quiet (peak gain 0.06) — someone may well be opening
+     this in a classroom. */
+  function playOnbChime() {
+    try {
+      var Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return;
+      var ctx = new Ctx();
+      if (ctx.state === 'suspended' && ctx.resume) ctx.resume();
+      var t0 = ctx.currentTime + 0.15;   // matches the mark animation's own delay
+      // C5, E5, G5, C6 — a plain major arpeggio. Nothing clever; it needs
+      // to read as a brand sting, not a melody.
+      var notes = [523.25, 659.25, 783.99, 1046.50];
+      notes.forEach(function (hz, i) {
+        var start = t0 + i * 0.18;
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.value = hz;
+        // Soft attack, long decay — a hard edge on a sine reads as a
+        // system beep, which is the one thing this must not sound like.
+        gain.gain.setValueAtTime(0.0001, start);
+        gain.gain.exponentialRampToValueAtTime(i === 3 ? 0.06 : 0.045, start + 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + (i === 3 ? 1.5 : 0.7));
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(start);
+        osc.stop(start + (i === 3 ? 1.6 : 0.8));
+      });
+      // Release the hardware once the tail has finished.
+      setTimeout(function () { try { ctx.close(); } catch (e) {} }, 3200);
+    } catch (e) { /* no sound, no problem — never block the sequence */ }
   }
 
   /* Beat 0 -> beat 1. The name is written through MorettiAuth (same
@@ -14555,6 +14600,14 @@ window.Portal = {
     backBtnEl.disabled = true;
 
     if (runnerIndex >= runnerQueue.length) {
+      // See the identical comment in the Question Bank runner's own copy
+      // of this branch — Skip advances runnerIndex the same as a real
+      // answer does, so skipping through most/all of a round reaches here
+      // too, and scoring against runnerQueue.length made that look
+      // identical to a genuinely completed round.
+      var attemptedCount = runnerQueue.filter(function (q) { var st = runnerState[q.qid]; return st && st.submitted; }).length;
+      var skippedCount = runnerQueue.length - attemptedCount;
+      if (attemptedCount === 0) { endRunner(); return; }
       document.getElementById('dx-notice-text').textContent = 'PRACTICE MODE — DONE';
       qtextEl.innerHTML = '';
       choicesEl.style.display = 'none';
@@ -14570,8 +14623,8 @@ window.Portal = {
       var summary = document.createElement('div');
       summary.id = 'chal-runner-summary';
       summary.className = 'iq-runner-summary';
-      summary.innerHTML = '<div class="iq-runner-summary-score">' + runnerScore + ' / ' + runnerQueue.length + '</div>' +
-        '<div class="iq-runner-summary-lab">correct this round</div>' +
+      summary.innerHTML = '<div class="iq-runner-summary-score">' + runnerScore + ' / ' + attemptedCount + '</div>' +
+        '<div class="iq-runner-summary-lab">correct this round' + (skippedCount ? ' &middot; ' + skippedCount + ' skipped' : '') + '</div>' +
         '<button type="button" class="key-btn" id="chal-runner-done" type="button">Done</button>';
       document.getElementById('dx-card').insertBefore(summary, navRowEl);
       document.getElementById('chal-runner-done').addEventListener('click', endRunner);
@@ -15115,6 +15168,7 @@ window.Portal = {
     var p = loadProgress();
     var groups = {};
     var order = [];
+    var visibleSkillNames = [];
     allSkills().forEach(function (s) {
       if (!groups[s.domain]) { groups[s.domain] = []; order.push(s.domain); }
       groups[s.domain].push(s);
@@ -15144,6 +15198,7 @@ window.Portal = {
       if (!skillRows.length) return;
       rowsHtml += '<tr class="qb-domain-row"><td colspan="4">' + escHtmlQb(domain) + '</td></tr>';
       skillRows.forEach(function (row) {
+        visibleSkillNames.push(row.s.skill);
         var s = row.s;
         var hasEnough = row.attempted.length >= WEAK_MIN_ATTEMPTS;
         var isWeak = hasEnough && row.acc < WEAK_ACC_THRESHOLD;
@@ -15170,6 +15225,24 @@ window.Portal = {
     });
     tbody.innerHTML = rowsHtml;
 
+    // "Select all" reflects the CURRENTLY VISIBLE rows (after Difficulty/
+    // Source/Completed filtering — visibleSkillNames, not the unfiltered
+    // allSkills()), same as what an individual checkbox click operates
+    // over. Checked when every visible row is selected, indeterminate
+    // when some but not all are (so it never silently claims "all" while
+    // a filtered-out row is secretly excluded), unchecked when none are.
+    // Called after EVERY selection change, not just a select-all click —
+    // an individual row toggle changes this state just as much and the
+    // header checkbox needs to stay in sync with it either way.
+    var selectAllCb = document.getElementById('qb-select-all');
+    function syncSelectAllCheckbox() {
+      if (!selectAllCb) return;
+      var visibleSelectedCount = visibleSkillNames.filter(function (name) { return selectedSkills.indexOf(name) !== -1; }).length;
+      selectAllCb.checked = visibleSkillNames.length > 0 && visibleSelectedCount === visibleSkillNames.length;
+      selectAllCb.indeterminate = visibleSelectedCount > 0 && visibleSelectedCount < visibleSkillNames.length;
+    }
+    syncSelectAllCheckbox();
+
     Array.prototype.forEach.call(tbody.querySelectorAll('.qb-skill-row'), function (tr) {
       var skillName = tr.getAttribute('data-skill');
       var cb = tr.querySelector('.qb-skill-check');
@@ -15177,16 +15250,24 @@ window.Portal = {
         var i = selectedSkills.indexOf(skillName);
         if (i === -1) selectedSkills.push(skillName); else selectedSkills.splice(i, 1);
         cb.checked = selectedSkills.indexOf(skillName) !== -1;
+        syncSelectAllCheckbox();
         renderSelectionBar();
       }
       cb.addEventListener('click', function (e) { e.stopPropagation(); toggle(); });
       tr.querySelector('.qb-skill-name-cell').addEventListener('click', function (e) { e.preventDefault(); toggle(); });
     });
 
-    var allSkillNames = allSkills().map(function (s) { return s.skill; });
-    var subjectLabel = currentSubject === 'math' ? 'Math' : 'Reading & Writing';
-    var subEl = document.getElementById('qb-practice-all-sub');
-    if (subEl) subEl.textContent = 'Start practicing all ' + allSkillNames.length + ' skills in ' + subjectLabel + '.';
+    if (selectAllCb) {
+      selectAllCb.onclick = function () {
+        if (selectAllCb.checked) {
+          visibleSkillNames.forEach(function (name) { if (selectedSkills.indexOf(name) === -1) selectedSkills.push(name); });
+        } else {
+          selectedSkills = selectedSkills.filter(function (name) { return visibleSkillNames.indexOf(name) === -1; });
+        }
+        renderSkillsList();
+        renderSelectionBar();
+      };
+    }
   }
 
   function showHome() {
@@ -15581,6 +15662,18 @@ window.Portal = {
 
     if (runnerIndex >= runnerQueue.length) {
       stopQbTimer();
+      // Reaching the end of the queue isn't the same as having practiced
+      // it — Skip advances runnerIndex exactly like a real answer does, so
+      // skipping through every question (or most of them) lands here just
+      // as surely as genuinely finishing does. Scoring against
+      // runnerQueue.length regardless made a round that was mostly
+      // skipped look identical to one actually completed ("0 / 253
+      // correct", implying 253 real attempts). Scoring against
+      // attemptedCount instead — and skipping the summary altogether when
+      // nothing was attempted at all — makes the number honest either way.
+      var attemptedCount = runnerQueue.filter(function (q) { var st = runnerState[q.qid]; return st && st.submitted; }).length;
+      var skippedCount = runnerQueue.length - attemptedCount;
+      if (attemptedCount === 0) { endRunner(); return; }
       document.getElementById('dx-notice-text').textContent = 'PRACTICE MODE — DONE';
       qtextEl.innerHTML = '';
       choicesEl.style.display = 'none';
@@ -15593,8 +15686,8 @@ window.Portal = {
       var summary = document.createElement('div');
       summary.id = 'qb-runner-summary';
       summary.className = 'iq-runner-summary';
-      summary.innerHTML = '<div class="iq-runner-summary-score">' + runnerScore + ' / ' + runnerQueue.length + '</div>' +
-        '<div class="iq-runner-summary-lab">correct this round</div>' +
+      summary.innerHTML = '<div class="iq-runner-summary-score">' + runnerScore + ' / ' + attemptedCount + '</div>' +
+        '<div class="iq-runner-summary-lab">correct this round' + (skippedCount ? ' &middot; ' + skippedCount + ' skipped' : '') + '</div>' +
         '<button type="button" class="key-btn" id="qb-runner-done" type="button">Done</button>';
       document.getElementById('dx-card').insertBefore(summary, navRowEl);
       document.getElementById('qb-runner-done').addEventListener('click', endRunner);
@@ -15829,10 +15922,6 @@ window.Portal = {
       if (backBtn) backBtn.addEventListener('click', function (e) { e.preventDefault(); showHome(); });
       var homeBackBtn = document.getElementById('question-bank-back');
       if (homeBackBtn) homeBackBtn.addEventListener('click', function (e) { e.preventDefault(); if (window.showScreen) window.showScreen('screen-menu'); });
-      var practiceAllBtn = document.getElementById('qb-practice-all-btn');
-      if (practiceAllBtn) practiceAllBtn.addEventListener('click', function () {
-        startRunner(allSkills().map(function (s) { return s.skill; }), currentSubject === 'math' ? 'Math' : 'Reading & Writing');
-      });
       var selectionStartBtn = document.getElementById('qb-selection-start-btn');
       if (selectionStartBtn) selectionStartBtn.addEventListener('click', function () {
         if (!selectedSkills.length) return;
