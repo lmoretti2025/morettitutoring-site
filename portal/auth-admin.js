@@ -207,6 +207,11 @@
       '<input id="mta-f-gemail" type="email" placeholder="sarah@example.com">' +
       '<p class="hint" style="margin:0.35rem 0 0;">Leave blank if you do not have it. You will get a link to ' +
       'text or message instead. Note the Friday progress email needs an address, so add one later if you want that.</p>' +
+      '<label>Student’s email <span style="text-transform:none;font-weight:400;">— optional</span></label>' +
+      '<input id="mta-f-semail" type="email" placeholder="owen@example.com">' +
+      '<p class="hint" style="margin:0.35rem 0 0;">If the parent gave you the <b>child’s</b> address, put it ' +
+      'here, not above. They can then just sign in — no key, no invite, no approval. Leave blank if you do ' +
+      'not have it; it arrives by itself when they sign in.</p>' +
       '<label>Phone <span style="text-transform:none;font-weight:400;">— optional</span></label>' +
       '<input id="mta-f-phone" placeholder="(201) 555-0100">' +
       '<label>Student name <span style="text-transform:none;font-weight:400;">— optional</span></label>' +
@@ -232,9 +237,22 @@
       var btn = m.querySelector('#mta-f-create');
       var err = m.querySelector('#mta-f-err');
       var email = m.querySelector('#mta-f-gemail').value.trim();
+      var semail = m.querySelector('#mta-f-semail').value.trim();
       var gname = m.querySelector('#mta-f-gname').value.trim();
-      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        err.textContent = "That email doesn't look right — check it, or leave it blank.";
+      var RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (email && !RE.test(email)) {
+        err.textContent = "That parent email doesn't look right \u2014 check it, or leave it blank.";
+        return;
+      }
+      if (semail && !RE.test(semail)) {
+        err.textContent = "That student email doesn't look right \u2014 check it, or leave it blank.";
+        return;
+      }
+      // Checked here as well as on the server so Luca is told BEFORE a key
+      // is issued rather than after.
+      if (semail && email && semail.toLowerCase() === email.toLowerCase()) {
+        err.textContent = 'Those are the same address. A shared family mailbox goes in ONE of the two ' +
+          'fields \u2014 whichever the portal should belong to.';
         return;
       }
       err.textContent = '';
@@ -242,6 +260,7 @@
       btn.textContent = 'Creating…';
       post({ action: 'createStudent', adminKey: adminKey(), student: {
         guardianEmail: email,
+        studentEmail: semail,
         guardianName: gname,
         phone: m.querySelector('#mta-f-phone').value.trim(),
         name: m.querySelector('#mta-f-name').value.trim(),
@@ -256,7 +275,7 @@
           return;
         }
         refresh();
-        deliverFlow(data.key, email, gname);
+        deliverFlow(data.key, email, gname, semail);
       });
     });
     m.querySelector('#mta-f-gname').focus();
@@ -265,7 +284,25 @@
   /* Handing the invite over. Three ways, because there are three ways this
      conversation is actually happening: an email thread, a text or
      Messenger chat, or a phone call where nothing can be sent at all. */
-  function deliverFlow(key, email, gname) {
+  function deliverFlow(key, email, gname, studentEmail) {
+    /* Pre-approved means there is nothing to send. Saying so plainly is the
+       point: otherwise Luca dutifully sends an invite the student never
+       needed, and a second credential exists for no reason. */
+    if (studentEmail) {
+      var pm = modal(
+        '<h3>Ready \u2014 nothing to send</h3>' +
+        '<p class="hint">Created, and <b>' + esc(studentEmail) + '</b> is pre-approved. They just open the ' +
+        'portal and sign in with that Google account. No key, no invite, no approval.</p>' +
+        '<div class="keybig">' + esc(key) + '</div>' +
+        '<p class="hint">That key is only a spare, for if they end up signing in on a different address.</p>' +
+        '<div class="acts"><button class="mta-b pri" id="mta-d-done2">Done</button></div>');
+      pm.querySelector('#mta-d-done2').addEventListener('click', function () { closeModal(); refresh(); });
+      return;
+    }
+    deliverInviteFlow(key, email, gname);
+  }
+
+  function deliverInviteFlow(key, email, gname) {
     var m = modal(
       '<h3>Send the invite</h3>' +
       '<p class="hint">Created &mdash; access key below. Nobody can get in until this invite is used, ' +
