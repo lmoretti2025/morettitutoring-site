@@ -30,7 +30,7 @@ driven through the actual onboarding UI click-by-click, not just read).
   (added, tested, then reverted — not left in the file).
 - Full onboarding flow verified end-to-end with mocked `auth`/
   `saveOnboardingPrefs` responses: the new `onb-target` step shows at the
-  right point with the right range/placeholder for SAT vs ACT, blocks an
+  right point with the right range/placeholder, blocks an
   empty submit with the correct error copy, and the entered value reaches
   the `saveOnboardingPrefs` POST body correctly.
 - Account Settings target field verified: populates from
@@ -53,7 +53,7 @@ weren't both showing for real students (test case: Nikolas Pinto, key
 "Attempt 1, Attempt 2, ..." list instead of only ever linking the latest.
 
 **Root cause** (confirmed by calling the live Apps Script URL directly):
-the "Completed" badge is server-driven (`satTaken`/`actTaken`, works
+the "Completed" badge is server-driven (`satTaken`, works
 fine), but the "View Results" *link* only ever lived in
 `localStorage['moretti_score_history_<key>']` on the one browser that took
 the test — `syncScoreHistoryToBackend()` was already sending the full
@@ -84,8 +84,7 @@ so the badge showed "Completed" but the menu never rendered.
   is *mid*-flow — null on a student who opened Practice Tests straight
   from the nav, which meant the diagnostic tile's menu could silently
   never appear even with local data. New `diagnosticTestType()` falls back
-  to `currentStudent.satTaken`/`actTaken`/`showSat`/`showAct` when
-  `testChoice` isn't set yet.
+  to `currentStudent.satTaken`/`showSat` when `testChoice` isn't set yet.
 - **New**: `buildPtMenuHtml()`/`wirePtMenu()` now take a list of attempts
   instead of one link. A single completed attempt still shows a plain
   "View Results" item; more than one expands into "Attempt 1 — Aug 5
