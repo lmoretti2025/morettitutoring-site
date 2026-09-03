@@ -604,6 +604,45 @@
        unreadable horizontal line. */
     .q-detail, .q-detail * { white-space: normal; }
   }
+  /* ═══ FLUSH SECTIONS ═══ Only the score summary at the top of this report
+     is a card. Everything below it — the bridge chart, the diagnosis split,
+     the skill rollup, the time budget, the pacing trace — used to carry the
+     same white/bordered/shadowed panel chrome, which stacked five nearly
+     identical boxes down one page and made the lower half read as five
+     unrelated documents instead of one argument. Stripped to flush content:
+     the .sec-hed rule is the only divider the lower half needs, and each
+     block now sits on the page the way the per-section score tiles at the
+     top already do (see .section-card, unboxed earlier for exactly this
+     reason). Horizontal padding goes to zero so every block shares one left
+     edge with the heading above it. Deliberately last in the sheet, after
+     the responsive overrides that also set padding on these same classes,
+     so it wins without having to hunt each of them down. */
+  .bridge-card, .dx-card, .skilldx-card, .budget-card, .timing-card {
+    background: transparent; border: none; border-radius: 0; box-shadow: none; padding: 0;
+  }
+  .bridge-wrap { padding: 6px 0 0; }
+  .bridge-card > #bridge-note-outer { padding: 0; }
+
+  /* ═══ PACING VERDICT ═══ the one-line plain-English read of the module
+     the trace below is showing ("the clock ran out at question 18 of 27").
+     The other two evidence sections each open with a sentence naming what
+     the reader is about to look at; this one used to open with a chart and
+     leave its headline as an 8px annotation floating inside it, next to the
+     module-clock label it collided with. Rewritten per module by
+     renderModule(). */
+  /* Chart now runs the full measure (the arrows moved into its header —
+     see the carousel markup) and the nav sits beside the module counter. */
+  .timing-carousel { display: block; }
+  .timing-chart-card { width: 100%; overflow: visible; }
+  .timing-nav { display: inline-flex; align-items: center; gap: 2px; flex-shrink: 0; }
+  .timing-nav-btn { width: 24px; height: 24px; }
+  .timing-nav-btn svg { width: 13px; height: 13px; }
+  .timing-module-counter { min-width: 44px; text-align: center; }
+  @media print { .timing-nav { display: none; } }
+
+  .pace-verdict { font-size: 12px; line-height: 1.6; color: var(--ink); margin: 0 0 12px; }
+  .pace-verdict strong { font-weight: 700; }
+  .pace-verdict .pace-ran-out { color: var(--red); }
 </style>
 </head>
 <body>
@@ -671,7 +710,7 @@
   <!-- 3. CLOCK — whether the section was ever going to fit. -->
   <div class="sec-hed" id="timing-hed" style="display:none;">3 &middot; Whether the clock lasted</div>
   <div class="timing-card" id="timing-card" style="display:none;">
-    <p class="chart-sub" id="timing-allocation-sub" style="display:none;">One module at a time. Cumulative time spent against what these questions were budgeted &mdash; where the line crosses the module clock is where the section effectively ended. The gap between the two solid lines is time spent going back to questions already answered.</p>
+    <p class="chart-sub" id="timing-allocation-sub" style="display:none;">One module at a time &mdash; the running total of time spent against what these questions were budgeted for.</p>
     <div id="timing-allocation" style="display:none;"></div>
   </div>
 
@@ -2010,8 +2049,44 @@
     var num = document.createElement('div');
     num.className = 'tile-score ' + (big ? 'big' : 'small');
     num.textContent = (scaledScore !== null && scaledScore !== undefined) ? scaledScore : (Math.round(p * 100) + '%');
+    // Opt this number into the count-up tween (see animateScoreTiles
+    // below) — same treatment the composite gets on the portal's Home
+    // screen. Only real scaled scores, never the percent fallback: the
+    // tween writes a bare integer, so counting a "76%" up would drop the
+    // sign for the whole 900ms. The final value is written above FIRST and
+    // the tween starts on the next frame, so printing before it runs shows
+    // the real score rather than a zero.
+    if (typeof scaledScore === 'number' && isFinite(scaledScore)) num.setAttribute('data-count-to', scaledScore);
     tile.appendChild(num);
     return tile;
+  }
+
+  /* Counts each [data-count-to] element up from 0 to its real value instead
+     of having the score just appear — the same tween, duration and easing
+     the portal's Home screen uses on its composite (see animateCountUp in
+     index.html), so a student who watches their score land on Home sees it
+     land the same way here. Keyed off a data attribute rather than the tile
+     ids so any future stat can opt in. Skipped entirely under
+     prefers-reduced-motion, and it does not run for print: window.print()
+     from the toolbar happens long after 900ms, and the pre-written final
+     value covers a print fired mid-tween. */
+  function animateScoreTiles(root) {
+    var els = root.querySelectorAll('[data-count-to]');
+    if (!els.length) return;
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    Array.prototype.forEach.call(els, function (el) {
+      var target = Number(el.getAttribute('data-count-to'));
+      if (!isFinite(target)) return;
+      var duration = 900, start = null;
+      function ease(t) { return 1 - Math.pow(1 - t, 3); } // cubic ease-out — fast start, gentle settle
+      function tick(ts) {
+        if (start === null) start = ts;
+        var progress = Math.min(1, (ts - start) / duration);
+        el.textContent = String(Math.round(target * ease(progress)));
+        if (progress < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    });
   }
 
   function barRow(label, c, t, cls) {
@@ -3412,15 +3487,29 @@
     if (!moduleViews.length) return;
     var CHART_W = 640;
 
+    /* The module arrows live in this chart's own header row, on the right
+       next to the "2 of 4" counter, rather than flanking the chart as a
+       carousel. Two reasons, both of them consequences of this section no
+       longer being a card: a chart pinned to CHART_W px between two 30px
+       buttons sat visibly inset from the flush section heading above it,
+       and arrows parked in the vertical middle of the plot, greyed at 25%
+       when disabled, read as chart decoration — most readers never found
+       out there were four modules. Beside the counter they read as what
+       they are, and the chart itself now runs the full measure and shares
+       a left edge with every heading on the page. */
     wrap.innerHTML =
-      '<div class="timing-carousel">' +
-        '<button type="button" class="timing-nav-btn" id="timing-prev-btn" aria-label="Previous module"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>' +
-        '<div class="timing-chart-card" style="width:' + CHART_W + 'px;">' +
-          '<div class="timing-chart-hed"><span id="timing-module-label"></span><span class="timing-module-counter" id="timing-module-counter"></span></div>' +
-          '<svg class="pace-trace" id="pace-trace" viewBox="0 0 ' + CHART_W + ' 196" role="img"></svg>' +
-          '<div class="pace-legend" id="pace-legend"></div>' +
+      '<div class="timing-chart-card">' +
+        '<div class="timing-chart-hed">' +
+          '<span id="timing-module-label"></span>' +
+          '<span class="timing-nav">' +
+            '<button type="button" class="timing-nav-btn" id="timing-prev-btn" aria-label="Previous module"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>' +
+            '<span class="timing-module-counter" id="timing-module-counter"></span>' +
+            '<button type="button" class="timing-nav-btn" id="timing-next-btn" aria-label="Next module"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>' +
+          '</span>' +
         '</div>' +
-        '<button type="button" class="timing-nav-btn" id="timing-next-btn" aria-label="Next module"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>' +
+        '<p class="pace-verdict" id="pace-verdict"></p>' +
+        '<svg class="pace-trace" id="pace-trace" viewBox="0 0 ' + CHART_W + ' 196" role="img"></svg>' +
+        '<div class="pace-legend" id="pace-legend"></div>' +
       '</div>';
 
     var labelEl = document.getElementById('timing-module-label');
@@ -3454,11 +3543,59 @@
        renders nothing if time-budgets.js didn't load. */
     var paceSvg = document.getElementById('pace-trace');
     var paceLegend = document.getElementById('pace-legend');
+    var paceVerdictEl = document.getElementById('pace-verdict');
+
+    /* The sentence this whole section exists to say, written above the
+       chart rather than left for the reader to derive from it. Two clauses,
+       always in the same order:
+
+         1. Did the clock last? Either it ran out at a specific question
+            (the finding), or it did not (and by how much).
+         2. Was the pace ever going to last? First-look time against what
+            these questions were budgeted — which is the answer to a
+            DIFFERENT question than clause 1, because a student can finish
+            inside the clock while still being well over budget on the
+            questions they did reach, and that student's next section is the
+            one that breaks.
+
+       Return-trip time is folded into clause 2 rather than given a clause
+       of its own; the shaded band and its legend entry already carry it,
+       and "Habits worth naming" narrates it at length further down. */
+    function paceVerdict(pts, cf, cb, ct, clockMs, cross) {
+      var NOTABLE = 30000; // half a minute — below this, "over budget" is noise, not a finding
+      var out = [];
+      if (cross && cross.n < pts.length) {
+        var left = pts.length - cross.n;
+        out.push('<strong class="pace-ran-out">The clock ran out at question ' + cross.n +
+          ' of ' + pts.length + '.</strong> The last ' + left + ' question' + (left === 1 ? '' : 's') +
+          ' never got real time.');
+      } else if (clockMs && ct < clockMs) {
+        out.push('<strong>Finished with ' + formatDuration(clockMs - ct) + ' still on the clock.</strong>');
+      } else {
+        out.push('<strong>Every question got a look inside the module clock.</strong>');
+      }
+      var debt = cf - cb;
+      if (debt > NOTABLE) {
+        out.push('First looks ran ' + formatDuration(debt) + ' past what these questions were budgeted' +
+          (ct - cf > NOTABLE ? ', before counting the ' + formatDuration(ct - cf) + ' spent going back to them' : '') + '.');
+      } else if (debt < -NOTABLE) {
+        out.push('First looks came in ' + formatDuration(-debt) + ' inside what these questions were budgeted.');
+      } else {
+        out.push('First looks landed on what these questions were budgeted.');
+      }
+      return out.join(' ');
+    }
     function renderPaceTrace(mv) {
       if (!paceSvg) return;
       paceSvg.innerHTML = '';
       if (!window.TIME_BUDGETS) { paceSvg.style.display = 'none'; paceLegend.style.display = 'none'; return; }
-      var W = CHART_W, H = 196, L = 34, R = 12, T = 14, B = 28;
+      // R (right gutter) is wide enough to hold the direct labels written
+      // at the end of each line below. Labelling the lines in place is what
+      // lets the legend under this chart drop from six entries to two: a
+      // reader never has to carry "red = first look, dashed = budget, gold =
+      // including return trips, dotted = module clock" down to a key and
+      // back up again.
+      var W = CHART_W, H = 196, L = 34, R = 92, T = 14, B = 28;
       var iw = W - L - R, ih = H - T - B;
 
       var pts = [], cb = 0, cf = 0, ct = 0, anyRevisit = false;
@@ -3525,15 +3662,38 @@
       // Marked on the TOTAL line, since total time is what the clock sees.
       var cross = null;
       if (clockMs) { for (var ci = 0; ci < pts.length; ci++) { if (pts[ci].ct >= clockMs) { cross = pts[ci]; break; } } }
+      // The dot alone, with no text beside it: this used to carry an "Out
+      // of time at Q18 of 27" label in 8px red, which is both the single
+      // most important sentence in this section and the smallest type on
+      // the page, and which sat close enough to the module-clock label to
+      // collide with it. That sentence is now the verdict line above the
+      // chart (see paceVerdict), where it is read first rather than found.
       if (cross && cross.n < pts.length) {
         svgEl('circle', { cx: xAtN(cross.n), cy: yAt(cross.ct), r: 4,
           fill: 'var(--red)', stroke: 'var(--white)', 'stroke-width': 1.5 });
-        var lbl = svgEl('text', { y: yAt(cross.ct) - 9, class: 'pace-note', fill: 'var(--red)' },
-          'Out of time at Q' + cross.n + ' of ' + pts.length);
-        // flip the label inboard near the right edge so it can't run off
-        if (xAtN(cross.n) > L + iw * 0.6) { lbl.setAttribute('x', xAtN(cross.n) - 7); lbl.setAttribute('text-anchor', 'end'); }
-        else { lbl.setAttribute('x', xAtN(cross.n) + 7); }
       }
+
+      /* Direct labels at the right end of each line, instead of a legend
+         entry per line. Written into the R gutter opened above. Labels are
+         nudged apart when two lines finish within a few pixels of each
+         other, so a module where the student landed exactly on budget still
+         reads as two labels rather than one overstruck smudge. */
+      (function labelLineEnds() {
+        var xEnd = L + iw + 6;
+        var wants = [{ y: yAt(cb), text: 'On budget', fill: 'rgba(17,17,17,0.55)' }];
+        if (anyRevisit) wants.push({ y: yAt(ct), text: 'With return trips', fill: 'var(--gold)' });
+        wants.push({ y: yAt(cf), text: 'Your pace', fill: cf >= cb ? 'var(--red)' : 'var(--green)' });
+        wants.sort(function (a, b) { return a.y - b.y; });
+        for (var i = 1; i < wants.length; i++) {
+          if (wants[i].y - wants[i - 1].y < 11) wants[i].y = wants[i - 1].y + 11;
+        }
+        // keep the whole stack inside the plot box if the nudging pushed it out
+        var overflow = wants[wants.length - 1].y - (T + ih);
+        if (overflow > 0) wants.forEach(function (w) { w.y -= overflow; });
+        wants.forEach(function (w) {
+          svgEl('text', { x: xEnd, y: w.y + 3, class: 'pace-note', fill: w.fill }, w.text);
+        });
+      })();
 
       [1, Math.ceil(pts.length / 2), pts.length].forEach(function (q) {
         svgEl('text', { x: xAtN(q), y: H - B + 13, 'text-anchor': 'middle', class: 'pace-ax' }, q);
@@ -3564,15 +3724,17 @@
       });
 
       var debt = cf - cb;
+      /* Two entries, not six. The four LINE entries this used to carry are
+         now written at the end of the lines themselves (see labelLineEnds
+         above) and on the module-clock rule; what is left is the only thing
+         a swatch can say better than an in-place label, which is what each
+         of the two shaded bands is worth in minutes. */
       paceLegend.innerHTML =
-        '<span><i style="border-top-color:' + (cf >= cb ? 'var(--red)' : 'var(--green)') + '"></i>First look at each question</span>' +
-        '<span><i class="dash" style="border-top-color:rgba(17,17,17,0.42)"></i>Budgeted for these questions</span>' +
-        (anyRevisit ? '<span><i style="border-top-color:var(--gold)"></i>Including return trips</span>' : '') +
-        (clockMs ? '<span><i class="dot" style="border-top-color:var(--ink)"></i>Module clock</span>' : '') +
         '<span><i class="fill" style="background:' + (cf >= cb ? 'rgba(239,68,68,0.10)' : 'rgba(22,163,74,0.10)') + '"></i>' +
-          (debt >= 0 ? formatDuration(debt) + ' over budget' : formatDuration(-debt) + ' under') + '</span>' +
+          (debt >= 0 ? formatDuration(debt) + ' over budget' : formatDuration(-debt) + ' under budget') + '</span>' +
         (anyRevisit ? '<span><i class="fill" style="background:rgba(201,168,76,0.20)"></i>' +
-          formatDuration(ct - cf) + ' going back</span>' : '');
+          formatDuration(ct - cf) + ' spent going back</span>' : '');
+      paceVerdictEl.innerHTML = paceVerdict(pts, cf, cb, ct, clockMs, cross);
       paceSvg.setAttribute('aria-label', 'Cumulative time for ' + mv.label + ': ' + formatDuration(cf) +
         ' on first looks against ' + formatDuration(cb) + ' budgeted, ' + formatDuration(ct) + ' including return trips' +
         (clockMs ? ', on a ' + Math.round(mv.clockMin) + ' minute clock' : '') + '.');
@@ -3910,6 +4072,10 @@
   })();
 
   document.getElementById('page1').style.display = 'block';
+  // After the page is visible, not before — a tween started while the
+  // container is display:none burns its whole 900ms unseen and the score
+  // simply appears at full value, which is the thing this exists to avoid.
+  animateScoreTiles(document.getElementById('score-tiles'));
 
   // The question-by-question table is real detail, but it's not what most
   // parents open this report for — it stays off by default (both on
