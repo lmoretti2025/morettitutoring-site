@@ -166,6 +166,46 @@ window.MorettiAuth = (function () {
     } catch (e) { return false; }
   }
 
+  /* ═══ LAST-KNOWN STUDENT ═══
+     index.html's restoreState() already puts a student straight back after
+     a SAME-TAB refresh, from sessionStorage. Close the tab and that is
+     gone, while the 30-day session token in localStorage survives -- so
+     reopening the portal meant staring at a sign-in panel for the length of
+     one Apps Script round trip (~1.2s warm, 5-6s cold) to be told what the
+     browser already knew.
+
+     This is the same payload, kept where it outlives the tab, so the portal
+     can paint immediately and the round trip becomes a background check
+     instead of a gate. Deliberately WITHOUT the session token: that already
+     lives under STORE, and one copy of a credential is enough. */
+  var STUDENT_CACHE = 'moretti_last_student';
+  // Well inside the session's own 30-day life, so the cache can never be
+  // the reason a student is let in.
+  var STUDENT_CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+
+  function writeStudentCache(data) {
+    try {
+      if (!data || !data.key) return;
+      var copy = {}, k;
+      for (k in data) if (Object.prototype.hasOwnProperty.call(data, k) && k !== 'session') copy[k] = data[k];
+      copy.__cachedAt = Date.now();
+      localStorage.setItem(STUDENT_CACHE, JSON.stringify(copy));
+    } catch (e) { /* private browsing — the slow path still works */ }
+  }
+  function readStudentCache() {
+    try {
+      var raw = localStorage.getItem(STUDENT_CACHE);
+      if (!raw) return null;
+      var d = JSON.parse(raw);
+      if (!d || !d.key) return null;
+      if (!d.__cachedAt || (Date.now() - d.__cachedAt) > STUDENT_CACHE_MAX_AGE_MS) return null;
+      return d;
+    } catch (e) { return null; }
+  }
+  function clearStudentCache() {
+    try { localStorage.removeItem(STUDENT_CACHE); } catch (e) {}
+  }
+
   var PORTAL_STATE = 'moretti_portal_state';
   var SIGNED_OUT = 'mta_signed_out';
 
@@ -186,6 +226,7 @@ window.MorettiAuth = (function () {
     sessionDead = true;
     session = null;
     writeStore(null);
+    clearStudentCache();
     try { sessionStorage.removeItem(PORTAL_STATE); } catch (e) {}
     try { sessionStorage.setItem(SIGNED_OUT, 'revoked'); } catch (e) {}
     try { window.location.reload(); } catch (e) {}
@@ -473,6 +514,10 @@ window.MorettiAuth = (function () {
       } catch (e) {}
       var data = pendingStayData;
       pendingStayData = null;
+      // Second handoff into the portal, and it bypasses handle()'s tail --
+      // so the cache has to be written here too, or a student who answered
+      // this prompt would never get the fast path on their next visit.
+      writeStudentCache(data);
       hide();
       if (data) onStudent(data);
     }
@@ -688,6 +733,7 @@ window.MorettiAuth = (function () {
       return;
     }
 
+    writeStudentCache(data);
     hide();
     if (onStudent) onStudent(data);
   }
@@ -946,13 +992,57 @@ window.MorettiAuth = (function () {
     }
 
     session = stored;
-    // The sign-in pane is the default-visible one and its button slot is
-    // empty until renderSignIn runs, so a slow resume (Apps Script cold
-    // starts run into several seconds) showed a "Sign in" panel with
-    // nothing to click. Say what is happening instead.
-    status('#mta-signin-error', 'Signing you in\u2026');
+
+    /* PAINT FIRST, CHECK AFTER. With a session token and a recent payload
+       for it, everything needed to draw the portal is already on the
+       device -- so draw it, and let the resume round trip run behind it as
+       a check rather than a gate. The student is looking at their own home
+       screen while the 1.2-6s happens.
+
+       Three cases are deliberately excluded, because each one needs the
+       server's answer BEFORE anything is drawn:
+         - needsOnboarding: the dark intro sequence runs once, and running
+           it off stale cache could replay or skip it.
+         - needsName: a form whose answer the server has to accept.
+         - shouldOfferStay(): a one-time question. Skipping it via the fast
+           path every time would mean it is never asked at all.
+       Nothing is trusted here that was not already trusted: the session
+       token is what grants access, every subsequent request carries it,
+       and the fetch wrapper tears the session down the moment the backend
+       says it is revoked. */
+    var cached = readStudentCache();
+    var paintedFromCache = false;
+    if (cached && !cached.needsOnboarding && !cached.needsName && !shouldOfferStay()) {
+      paintedFromCache = true;
+      hide();
+      if (onStudent) onStudent(cached);
+    } else {
+      // The sign-in pane is the default-visible one and its button slot is
+      // empty until renderSignIn runs, so a slow resume (Apps Script cold
+      // starts run into several seconds) showed a "Sign in" panel with
+      // nothing to click. Say what is happening instead.
+      status('#mta-signin-error', 'Signing you in\u2026');
+    }
+
     return resumeRequest(stored).then(function (data) {
-      if (data && data.ok && data.key) { handle(data); return; }
+      if (data && data.ok && data.key) {
+        /* Already painted: refresh the cache for next time and stay out of
+           the way. Handing this to handle() would re-run the whole handoff
+           -- re-entering the portal underneath a student who is already
+           reading it, and resetting whatever screen they had opened. */
+        if (paintedFromCache) { writeStudentCache(data); return; }
+        handle(data);
+        return;
+      }
+      /* Painted from cache and the answer never came. Leave them where they
+         are: the session is untouched, every request the portal makes
+         carries it, and a genuinely dead session is caught by the fetch
+         wrapper on the first one. Throwing up a sign-in panel over a portal
+         they are already using would be the worse call. */
+      if (paintedFromCache && data && data.error === 'network') return;
+      /* Painted from cache and the server says no. The cache is wrong and
+         has to go before the reload, or the next load paints it again. */
+      if (paintedFromCache) { clearStudentCache(); onSessionDead(); return; }
 
       /* COULD NOT ASK IS NOT A NO. post() turns any failed fetch into
          {error:'network'}, and this used to treat that exactly like a
@@ -978,6 +1068,7 @@ window.MorettiAuth = (function () {
   function signOut() {
     session = null;
     writeStore(null);
+    clearStudentCache();
     /* Signing out is the student saying stop, so it clears the standing
        "stay signed in" choice too -- otherwise One Tap would put them
        straight back in and the sign-out would look broken. */
