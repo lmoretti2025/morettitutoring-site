@@ -383,18 +383,6 @@
   }
 
   /* ═══ MENU SCREEN ═══ */
-  /* Beta notice — a blocking modal (same overlay/card shape as
-     .resume-overlay/.resume-modal above), not a dismissible banner. Shown
-     every fresh login (see showBetaModal() in the JS) and must be
-     acknowledged before a student can interact with anything underneath —
-     the overlay itself, not just the card, covers the full viewport, so
-     there's nothing to click through to until "Got it" is pressed. */
-  .beta-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(17,17,17,0.55); z-index: 700; align-items: center; justify-content: center; padding: 1.5rem; }
-  .beta-modal-overlay.active { display: flex; }
-  .beta-modal { background: var(--white); width: 100%; max-width: 420px; padding: 2rem 2rem 1.75rem; text-align: center; box-shadow: 0 24px 64px rgba(0,0,0,0.3); border-top: 3px solid var(--gold); }
-  .beta-modal-hed { font-family: var(--display); font-weight: 700; font-size: 1.15rem; color: var(--text); margin-bottom: 0.7rem; }
-  .beta-modal-sub { font-family: var(--hel); font-size: 0.85rem; color: var(--mid); line-height: 1.65; margin-bottom: 1.6rem; }
-  .beta-modal .key-btn { margin: 0; }
   /* Default state (no JS, no .pre-reveal) is fully visible — the reveal
      animation only ever ADDS .pre-reveal then removes it a frame later
      (see revealGreeting()), so a JS error can never leave the greeting
@@ -438,11 +426,22 @@
      ribbon and still overflowed the card on longer labels. */
   .assign-row { display: flex; flex-direction: column; align-items: flex-start; gap: 0.4rem; }
   .assign-item { display: flex; align-items: flex-start; gap: 0.65rem; cursor: pointer; transition: opacity 0.2s var(--ease), transform 0.2s var(--ease); }
-  .assign-item input[type="checkbox"] { margin-top: 0.2rem; width: 17px; height: 17px; flex-shrink: 0; accent-color: var(--red); cursor: pointer; }
+  .assign-item input[type="checkbox"] { margin-top: 0; width: 17px; height: 17px; flex-shrink: 0; accent-color: var(--red); cursor: pointer; }
   .assign-text { font-family: var(--hel); font-size: 0.9rem; color: var(--text); line-height: 1.35; }
   .assign-item.assign-done { cursor: default; }
   .assign-item.assign-done .assign-text { color: var(--text-muted, #9a9a9a); text-decoration: line-through; }
   .assign-item.assign-done input[type="checkbox"] { cursor: pointer; }
+  /* Same red wash the calendar already uses for a task whose day has been
+     and gone (.cal-task.is-overdue) — one meaning, one colour, wherever a
+     student meets it. The tag spells it out, since a background tint alone
+     is not something everyone can see. */
+  .assign-row.is-overdue { background: rgba(176,39,28,0.06); border-radius: 8px; padding: 0.4rem 0.55rem; margin: -0.4rem -0.55rem; }
+  .assign-overdue-tag { flex-shrink: 0; font-family: var(--hel); font-size: 0.58rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--red); border: 1px solid rgba(176,39,28,0.3); border-radius: 999px; padding: 0.1rem 0.4rem; margin-top: 0.02rem; }
+  /* Luca's own note on the task. It lives on the calendar's detail popup
+     already; on Home there was nowhere for it to go and it simply never
+     reached the student. Sits OUTSIDE the <label> (like .assign-go, for
+     the same reason) so reading a note can't tick the task off. */
+  .assign-note { font-family: var(--hel); font-size: 0.78rem; line-height: 1.5; color: var(--mid); margin-left: 1.55rem; }
   /* Both This Week and Score Progress used to pin to the page's far
      corners at ≥1260px, out of the normal column, as part of the old
      "home fits one viewport" design. Dropped along with that design (see
@@ -726,12 +725,17 @@
      hover (see .home-shortcut-card) — matches the motion-primitives-style
      treatment approved in the Home Screen Concept C mockup. */
   .home-shortcuts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1.3rem; }
+  #home-shortcut-ask { order: 99; }
   .home-shortcut-badge { position: absolute; top: 1rem; right: 1rem; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 0.2rem 0.5rem; border-radius: 5px; background: rgba(176,39,28,0.07); color: var(--red); }
   .home-shortcut-badge.done { background: rgba(63,143,95,0.09); color: #3f8f5f; }
   .home-shortcut-card {
     background: transparent; border: 1px solid transparent; border-radius: 14px; box-shadow: none;
     padding: 1.15rem 1.3rem; text-align: left; cursor: pointer; font-family: var(--hel);
     display: flex; flex-direction: column; align-items: flex-start; width: 100%;
+    /* Ask Luca is an <a> (a mailto: deserves to be a real link) while the
+       rest are <button>s — these two keep the two elements looking
+       identical instead of one arriving underlined and link-coloured. */
+    text-decoration: none; color: inherit;
     position: relative; overflow: hidden; transform-style: preserve-3d;
     transition: transform 0.25s var(--ease), background 0.25s var(--ease), border-color 0.25s var(--ease), box-shadow 0.25s var(--ease);
   }
@@ -866,7 +870,7 @@
      redesigned home cards. */
   .assign-item input[type="checkbox"] {
     appearance: none; -webkit-appearance: none; width: 19px; height: 19px; border-radius: 5px;
-    border: 1.5px solid var(--border); margin-top: 0.15rem; position: relative; background: var(--white); accent-color: unset;
+    border: 1.5px solid var(--border); margin-top: 0; position: relative; background: var(--white); accent-color: unset;
   }
   .assign-item input[type="checkbox"]:checked { background: var(--green); border-color: var(--green); }
   .assign-item input[type="checkbox"]:checked::after {
@@ -1042,6 +1046,19 @@
   .pt-modal-hed { font-family: var(--display); font-weight: 700; font-size: 1.4rem; color: var(--text); margin: 0 2rem 0.35rem 0; }
   .pt-modal-sub { font-family: var(--hel); font-size: 0.88rem; color: var(--mid); line-height: 1.5; margin-bottom: 1.3rem; }
   .pt-choice-list { display: flex; flex-direction: column; gap: 0.6rem; }
+
+  /* Beta notice — a blocking modal, not a dismissible banner. It reuses
+     .resume-overlay/.resume-modal wholesale (rounded card, fade-and-rise,
+     reduced-motion opt-out) and overrides only the gold rule that marks it
+     as the one modal carrying a status message rather than a choice. Shown
+     every fresh login (see showBetaModal() in the JS) and must be
+     acknowledged before a student can interact with anything underneath —
+     the overlay itself, not just the card, covers the full viewport, so
+     there's nothing to click through to until "Got it" is pressed. */
+  .beta-modal { border-radius: 18px; border-top: 3px solid var(--gold); }
+  .beta-modal-hed { font-family: var(--display); font-weight: 700; font-size: 1.15rem; color: var(--text); margin-bottom: 0.7rem; }
+  .beta-modal-sub { font-family: var(--hel); font-size: 0.85rem; color: var(--mid); line-height: 1.65; margin-bottom: 1.6rem; }
+  .beta-modal .key-btn { margin: 0; }
   .pt-choice { display: flex; align-items: flex-start; gap: 0.85rem; width: 100%; text-align: left; background: #f5f5f5; border: 1px solid transparent; border-radius: 12px; padding: 0.95rem 1.1rem; cursor: pointer; font: inherit; font-family: var(--hel); color: var(--text); transition: background 0.15s var(--ease), border-color 0.15s var(--ease); }
   .pt-choice:hover { background: #efefef; }
   .pt-choice.on { background: rgba(176,39,28,0.05); border-color: var(--red); }
@@ -1965,34 +1982,23 @@
      same real-exam practice runner Challenge Questions uses. Analytics
      row reuses .chal-stat directly (identical tiles, different numbers) —
      see window.qbModuleInit() near the end of the file. */
-  /* ═══ QB HOME — STATS + WEAKNESS PRACTICE ═══ replaces the old 4-tile
-     .chal-stats-row grid (Attempted/Accuracy/Saved/Streak as four separate
-     disconnected cards). Saved Questions and Study Streak are gone
-     entirely; the remaining two follow the native report's own .raw-stat
-     language instead — one connected card with a hairline divider between
-     stats and a round icon anchoring each, rather than a bare number in
-     its own box (see the .raw-stat rule's own comment for why: "a bare
-     number strip reads as disconnected boxes with nothing to anchor the
-     eye"). Right next to it, same width class, is the weakness-practice
-     card — same red-gradient shape as Vocabulary's .vp-tenmin-card so this
-     screen's own "just start something focused" CTA matches the one
-     students already know from there. */
-  .qb-home-row { display: flex; align-items: stretch; gap: 1.2rem; margin-bottom: 1.8rem; flex-wrap: wrap; }
-  .qb-raw-stats { flex: 1 1 320px; display: flex; background: var(--white); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); overflow: hidden; }
-  .qb-raw-stat { flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.7rem; padding: 1rem 1.1rem; border-left: 1px solid var(--border); }
-  .qb-raw-stat:first-child { border-left: none; }
-  .qb-raw-stat-icon { flex-shrink: 0; width: 26px; height: 26px; color: var(--red); }
-  .qb-raw-stat-icon svg { width: 100%; height: 100%; display: block; }
-  .qb-raw-stat-text { min-width: 0; }
-  .qb-raw-stat-lab { font-family: var(--hel); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--faint); margin-bottom: 0.2rem; }
-  .qb-raw-stat-num { font-family: var(--hel); font-size: 1.35rem; font-weight: 700; color: var(--text); }
-  @media (max-width: 560px) {
-    .qb-raw-stats { flex-wrap: wrap; }
-    .qb-raw-stat { flex: 1 1 50%; border-left: none; border-top: 1px solid var(--border); }
-    .qb-raw-stat:nth-child(-n+2) { border-top: none; }
-  }
-  .qb-weak-card { flex: 1 1 320px; margin-top: 0; }
-  @media (max-width: 900px) { .qb-home-row { flex-direction: column; } }
+  /* ═══ QB HOME — WEAKNESS PRACTICE + SECTION HEADS ═══ the weakness card
+     runs full width above the subject tiles now (it used to share a row
+     with a two-stat card; the stats moved down into Question Analytics
+     below, where the other six live). Same red-gradient .vp-tenmin-card
+     shape as Vocabulary's own "just start something focused" CTA, so the
+     one students already know from there reads identically here. */
+  .qb-weak-card { margin-top: 0; margin-bottom: 1.8rem; }
+
+  /* Small icon + title pair that opens each band of this screen
+     ("Question Bank", then "Question Analytics"), so the tiles and the
+     charts read as two labelled sections of one page rather than an
+     undifferentiated stack of cards. */
+  .qb-sec-hed { display: flex; align-items: center; gap: 0.55rem; margin: 0 0 0.95rem; }
+  .qb-sec-icon { width: 18px; height: 18px; flex-shrink: 0; color: var(--mid); }
+  .qb-sec-icon svg { width: 100%; height: 100%; display: block; }
+  .qb-sec-title { font-family: var(--hel); font-size: 1rem; font-weight: 700; color: var(--text); margin: 0; }
+  .qb-sec-hed + .qb-subjects, .qb-sec-hed + .qb-stat-grid { margin-bottom: 1.8rem; }
   .qb-subjects { display: flex; gap: 1.2rem; flex-wrap: wrap; }
   .qb-subject { flex: 1 1 300px; position: relative; overflow: hidden; border: none; border-radius: 14px; padding: 1.6rem 1.7rem; min-height: 150px; cursor: pointer; text-align: left; display: flex; flex-direction: column; justify-content: space-between; gap: 1.1rem; box-shadow: var(--shadow); background: linear-gradient(135deg, var(--red) 0%, #c9a84c 130%); transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease); }
   .qb-subject:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); }
@@ -2008,6 +2014,104 @@
   .qb-subject-empty .qb-subject-title, .qb-subject-empty .qb-subject-count { color: var(--text); }
   .qb-subject-empty .qb-subject-open { display: none; }
   @media (max-width: 640px) { .qb-subjects { flex-direction: column; } }
+
+  /* Watermark art in the top-right of each subject tile — inline SVG, not
+     a PNG, so it inherits the tile's white-on-gradient treatment, stays
+     crisp at any width, and costs no extra request. Deliberately clipped
+     by the tile's own overflow:hidden so it bleeds off the corner rather
+     than sitting in it as a self-contained icon. */
+  .qb-subject-art { position: absolute; top: -6px; right: -10px; width: 118px; height: 118px; opacity: 0.17; pointer-events: none; }
+  .qb-subject-art svg { width: 100%; height: 100%; display: block; }
+  .qb-subject-body, .qb-subject-open { position: relative; z-index: 1; }
+  @media (max-width: 420px) { .qb-subject-art { display: none; } }
+
+  /* ═══ QUESTION ANALYTICS ═══ four headline stats, an activity trend, and
+     a per-subject breakdown grid — all painted by renderAnalytics() off
+     the same attempts map the tiles above use. The four stats are separate
+     cards (not the single connected strip this screen used to carry)
+     because there are four of them now and one of them owns a button;
+     a faint watermark in each keeps a lone number from reading as a bare
+     box, which is the same job the old strip's round icons did. */
+  .qb-stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+  .qb-stat { position: relative; overflow: hidden; background: var(--white); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); padding: 1rem 1.1rem 1.05rem; min-height: 92px; }
+  .qb-stat-lab { font-family: var(--hel); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--faint); margin-bottom: 0.45rem; }
+  .qb-stat-num { font-family: var(--hel); font-size: 1.6rem; font-weight: 700; color: var(--text); line-height: 1.1; }
+  .qb-stat-art { position: absolute; right: -8px; bottom: -10px; width: 78px; height: 52px; color: var(--text); opacity: 0.055; pointer-events: none; }
+  .qb-stat-art svg { width: 100%; height: 100%; display: block; }
+  .qb-stat-btn { position: relative; z-index: 1; margin-top: 0.5rem; background: rgba(17,17,17,0.05); color: var(--mid); border: none; border-radius: 999px; padding: 0.32rem 0.72rem; font-family: var(--hel); font-size: 0.7rem; font-weight: 700; cursor: pointer; transition: background 0.15s var(--ease), color 0.15s var(--ease); }
+  .qb-stat-btn:hover { background: var(--red); color: #fff; }
+  @media (max-width: 860px) { .qb-stat-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 420px) { .qb-stat-grid { grid-template-columns: 1fr; } }
+
+  /* Shared card chrome for the trend panel and every breakdown panel, so
+     the whole analytics band is one visual system. */
+  .qb-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); padding: 1.2rem 1.3rem 1.3rem; }
+  .qb-card-hed { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+  .qb-card-title { font-family: var(--hel); font-size: 0.9rem; font-weight: 700; color: var(--text); margin: 0; }
+  .qb-card-sub { font-family: var(--hel); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--faint); }
+  .qb-card-note { font-family: var(--hel); font-size: 0.74rem; color: var(--mid); margin: 0.45rem 0 0; line-height: 1.5; }
+  .qb-empty { font-family: var(--hel); font-size: 0.78rem; color: var(--faint); text-align: center; padding: 2rem 0.5rem; line-height: 1.5; }
+
+  .qb-trend-card { margin-bottom: 1.2rem; }
+  .qb-trend-legend { display: flex; align-items: center; gap: 1rem; font-family: var(--hel); font-size: 0.74rem; color: var(--mid); }
+  .qb-trend-key { display: inline-flex; align-items: center; gap: 0.35rem; }
+  .qb-trend-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+  .qb-trend-dot.ok { background: var(--green); }
+  .qb-trend-dot.bad { background: var(--red); }
+  /* Matches the dashed average rule drawn inside the plot, so the legend
+     entry reads as a key to that line rather than a third bar colour. */
+  .qb-trend-dash { width: 14px; height: 0; border-top: 1px dashed var(--faint); display: inline-block; }
+  .qb-trend-key b { color: var(--text); }
+  /* The plot is a single inline SVG with a fixed viewBox scaled to the
+     card's width — one element to repaint, no per-bar DOM, and it stays
+     legible from a phone up to a wide desktop without a media query. */
+  .qb-trend-plot { margin-top: 1rem; }
+  .qb-trend-plot svg { width: 100%; height: auto; display: block; overflow: visible; }
+  .qb-trend-grid { stroke: var(--border); stroke-width: 1; }
+  .qb-trend-avg { stroke: var(--faint); stroke-width: 1; stroke-dasharray: 4 4; }
+  /* In viewBox units, not CSS pixels — the plot's 660-unit box scales down
+     to the card's width, so 13 here lands near 10px on a desktop card. */
+  .qb-trend-lab { font-family: var(--hel); font-size: 13px; fill: var(--faint); }
+  .qb-trend-bar-ok { fill: var(--green); }
+  .qb-trend-bar-bad { fill: var(--red); }
+
+  /* Two columns of subject panels (Reading & Writing left, Math right),
+     one row per metric, so the same metric always sits at the same height
+     on both sides and reads as a direct comparison. */
+  .qb-analytics-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.2rem; }
+  @media (max-width: 780px) { .qb-analytics-grid { grid-template-columns: 1fr; } }
+
+  .qb-topic-list { margin-top: 1rem; display: flex; flex-direction: column; gap: 0.85rem; }
+  .qb-topic-row { display: grid; grid-template-columns: 1fr 96px 42px; align-items: center; gap: 0.7rem; }
+  .qb-topic-name { font-family: var(--hel); font-size: 0.78rem; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .qb-topic-name span { display: block; font-size: 0.66rem; color: var(--faint); }
+  .qb-topic-track { height: 7px; border-radius: 999px; background: rgba(17,17,17,0.07); overflow: hidden; }
+  .qb-topic-fill { height: 100%; border-radius: 999px; background: var(--red); transition: width 0.4s var(--ease); }
+  .qb-topic-fill.strong { background: var(--green); }
+  .qb-topic-fill.mid { background: var(--gold); }
+  .qb-topic-pct { font-family: var(--hel); font-size: 0.78rem; font-weight: 700; color: var(--text); text-align: right; }
+
+  /* Donut + legend rows, used by both the time-share and accuracy-by-
+     difficulty panels. The ring is one <circle> per slice with a
+     stroke-dasharray/offset pair — same technique as the native report's
+     skill donuts, no library. */
+  .qb-donut-wrap { display: flex; align-items: center; gap: 1.4rem; margin-top: 1rem; flex-wrap: wrap; }
+  .qb-donut { position: relative; width: 116px; height: 116px; flex-shrink: 0; }
+  .qb-donut svg { width: 100%; height: 100%; display: block; transform: rotate(-90deg); }
+  .qb-donut-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+  .qb-donut-big { font-family: var(--hel); font-size: 1.05rem; font-weight: 700; color: var(--text); line-height: 1.15; }
+  .qb-donut-small { font-family: var(--hel); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--faint); }
+  .qb-donut-legend { flex: 1 1 130px; display: flex; flex-direction: column; gap: 0.6rem; min-width: 0; }
+  .qb-legend-row { display: flex; align-items: center; gap: 0.5rem; font-family: var(--hel); font-size: 0.76rem; color: var(--mid); }
+  .qb-legend-swatch { width: 9px; height: 9px; border-radius: 2px; flex-shrink: 0; }
+  .qb-legend-row b { margin-left: auto; color: var(--text); font-weight: 700; }
+  /* Accuracy-by-difficulty variant: a proportional bar instead of a colour
+     swatch, since a swatch there reads as a key to the green/red ring
+     beside it — which it isn't (the ring is right-vs-wrong overall). */
+  .qb-legend-row-bar { display: grid; grid-template-columns: 54px 1fr 38px; gap: 0.5rem; align-items: center; }
+  .qb-legend-row-bar .qb-topic-track { display: block; }
+  .qb-legend-row-bar .qb-topic-fill { display: block; }
+  .qb-legend-row-bar b { margin-left: 0; text-align: right; }
 
   .qb-skills-back { display: inline-block; font-family: var(--hel); font-size: 0.78rem; font-weight: 700; color: var(--mid); text-decoration: none; margin-bottom: 0.9rem; transition: color 0.15s var(--ease); }
   .qb-skills-back:hover { color: var(--red); }
@@ -2544,28 +2648,28 @@
 #pt-native-report .pace-legend i.fill { height: 8px; width: 10px; border: none; border-radius: 2px; }
 
 #pt-native-report .timing-gridline { position: absolute; width: 1px; background: currentColor; opacity: 0.07; }
-  /* ═══ THE DIAGNOSIS ═══ one card, above the three evidence sections,
-     naming which of content / method / clock is actually driving this
-     attempt. Three meters sized by how many points each is plausibly
-     costing, so the reader sees the ranking before the argument. */
+  /* ═══ THE DIAGNOSIS ═══ mirrors report.html's identical rewrite (kept in
+     sync by hand) — see that copy's comment for the full rationale on the
+     compaction: one count per item instead of two, and bar labels that
+     reuse the same plain phrases the three section headings below already
+     use instead of a fourth vocabulary. */
 #pt-native-report .dx-card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow); padding: 20px 24px; }
-#pt-native-report .dx-verdict { font-size: 12.5px; line-height: 1.62; color: var(--ink); margin: 0 0 16px; }
+#pt-native-report .dx-verdict { font-size: 12.5px; line-height: 1.62; color: var(--ink); margin: 0 0 14px; }
 #pt-native-report .dx-verdict strong { font-weight: 700; }
 #pt-native-report .dx-verdict .dx-lead { color: var(--red); font-weight: 700; }
-  /* One bar, three parts of a whole — not three separate meters. These
-     three numbers add up to every question this report can attribute to
-     something fixable, so a shared bar is both the more compact form and
-     the more truthful one. */
-#pt-native-report .dx-split { display: flex; height: 26px; border-radius: 5px; overflow: hidden; margin-bottom: 10px; }
-#pt-native-report .dx-part { display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff; min-width: 0; }
+  /* One bar, three parts of a whole — not three separate meters. A visible
+     gap between segments is what reads as "three parts of a whole" instead
+     of a single progress bar; each part carries its own small radius so
+     the gap shows through cleanly. */
+#pt-native-report .dx-split { display: flex; gap: 3px; height: 24px; margin-bottom: 8px; }
+#pt-native-report .dx-part { display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff; min-width: 0; border-radius: 4px; }
 #pt-native-report .dx-part.content { background: var(--red); }
 #pt-native-report .dx-part.method { background: var(--tan); }
 #pt-native-report .dx-part.clock { background: #4E6070; }
-#pt-native-report .dx-key { display: flex; flex-wrap: wrap; gap: 4px 18px; font-size: 9.5px; color: var(--mid); }
-#pt-native-report .dx-key span { display: inline-flex; align-items: baseline; gap: 5px; }
-#pt-native-report .dx-key i { width: 8px; height: 8px; border-radius: 2px; display: inline-block; flex-shrink: 0; position: relative; top: 1px; }
-#pt-native-report .dx-key b { color: var(--ink); font-weight: 700; }
-#pt-native-report .dx-key em { font-style: normal; color: var(--faint); }
+#pt-native-report .dx-labels { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 10.5px; color: var(--ink); }
+#pt-native-report .dx-labels span { display: inline-flex; align-items: baseline; gap: 5px; }
+#pt-native-report .dx-labels i { width: 8px; height: 8px; border-radius: 2px; display: inline-block; flex-shrink: 0; position: relative; top: 1px; }
+#pt-native-report .dx-labels b { font-weight: 700; }
 #pt-native-report .timing-gridlabel { position: absolute; transform: translateX(-50%); font-size: 8.5px; color: var(--faint); font-variant-numeric: tabular-nums; }
 #pt-native-report .timing-rowlabel { position: absolute; left: -8px; transform: translate(-100%, -50%); font-size: 8px; color: var(--faint); font-variant-numeric: tabular-nums; }
 #pt-native-report .timing-xcaption { position: absolute; left: 50%; transform: translateX(-50%); font-size: 8.5px; color: var(--faint); }
@@ -2964,6 +3068,34 @@
   #pt-native-report .pace-verdict { font-family: var(--hel); font-size: 0.82rem; line-height: 1.6; color: var(--text); margin: 0 0 0.8rem; }
   #pt-native-report .pace-verdict strong { font-weight: 700; }
   #pt-native-report .pace-verdict .pace-ran-out { color: var(--red); }
+
+  /* ═══ CHART ENTRANCE ANIMATIONS ═══ mirrors report.html's block of the
+     same name (kept in sync by hand). See armChartBars/armCanvasWipe/
+     animateOnReveal in the script for what sets these start/end states, and
+     see report.html's CHART_EASE comment for why this exact
+     cubic-bezier(0.16,1,0.3,1) curve (== --ease elsewhere in this file) is
+     shared by every animation on the report, CSS-driven or JS-driven. */
+  #pt-native-report .dx-part,
+  #pt-native-report .skilldx-seg,
+  #pt-native-report .budget-meter-budget,
+  #pt-native-report .budget-meter-actual,
+  #pt-native-report .budget-gap-rule { transition: width 1.4s cubic-bezier(0.16,1,0.3,1); }
+  #pt-native-report .budget-gap-actual { transition: left 1.4s cubic-bezier(0.16,1,0.3,1); }
+  #pt-native-report .chart-wipe { transition: clip-path 1.7s cubic-bezier(0.16,1,0.3,1); clip-path: inset(0 0 0 0); }
+  #pt-native-report .chart-wipe-closed { clip-path: inset(0 100% 0 0); }
+  @media (prefers-reduced-motion: reduce) {
+    #pt-native-report .dx-part, #pt-native-report .skilldx-seg,
+    #pt-native-report .budget-meter-budget, #pt-native-report .budget-meter-actual,
+    #pt-native-report .budget-gap-rule, #pt-native-report .budget-gap-actual,
+    #pt-native-report .chart-wipe { transition: none; }
+  }
+  @media print {
+    #pt-native-report .dx-part, #pt-native-report .skilldx-seg,
+    #pt-native-report .budget-meter-budget, #pt-native-report .budget-meter-actual,
+    #pt-native-report .budget-gap-rule, #pt-native-report .budget-gap-actual,
+    #pt-native-report .chart-wipe { transition: none; }
+    #pt-native-report .chart-wipe-closed { clip-path: none; }
+  }
   /* ═══ STUDENT CALENDAR ═══ their own homework and sessions on one grid,
      day by day. Hand-rolled rather than pulled from a calendar library:
      the portal ships no third-party JS on this path today, and what a
@@ -3965,13 +4097,13 @@ window.Portal = {
               <span class="home-shortcut-title">My Files</span>
               <span class="home-shortcut-body" id="home-shortcut-files-body">Everything Luca has shared with you — notes, worksheets, and past work.</span>
             </button>
-            <button type="button" class="home-shortcut-card" id="home-shortcut-ask" style="display:none;">
+            <a class="home-shortcut-card" id="home-shortcut-ask" href="#" style="display:none;">
               <span class="home-shortcut-icon gold">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 15a2 2 0 0 1-2 2H8l-4 4V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9Z"/></svg>
               </span>
               <span class="home-shortcut-title">Ask Luca</span>
               <span class="home-shortcut-body" id="home-shortcut-ask-body">Stuck on something before your next session? Reach out.</span>
-            </button>
+            </a>
             <button type="button" class="home-shortcut-card" id="home-shortcut-weak">
               <span class="home-shortcut-icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4.2"/><circle cx="12" cy="12" r="0.6" fill="currentColor" stroke="none"/></svg>
@@ -4294,56 +4426,113 @@ window.Portal = {
       <p class="panel-sub">Every official College Board Reading &amp; Writing question, organized by skill — pick a subject, then a skill, to start practicing.</p>
     </div>
 
-    <div class="qb-home-row">
-      <div class="qb-raw-stats">
-        <div class="qb-raw-stat">
-          <span class="qb-raw-stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.1" fill="currentColor" stroke="none"/></svg></span>
-          <div class="qb-raw-stat-text">
-            <div class="qb-raw-stat-lab">Questions Attempted</div>
-            <div class="qb-raw-stat-num" id="qb-stat-attempted">0</div>
-          </div>
-        </div>
-        <div class="qb-raw-stat">
-          <span class="qb-raw-stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5L16 9"/></svg></span>
-          <div class="qb-raw-stat-text">
-            <div class="qb-raw-stat-lab">Current Accuracy</div>
-            <div class="qb-raw-stat-num" id="qb-stat-accuracy">0%</div>
-          </div>
-        </div>
+    <!-- Pulls each subject's single weakest skill (lowest accuracy, min
+         sample size — same weakestSkillIn()/HOME_*_DOMAINS bar the Home
+         dashboard's own mini skill cards use, via the
+         window.getWeakestSkillsForQb bridge) and runs both back to back
+         in one session — see startWeaknessPractice() in the script. -->
+    <div class="vp-tenmin-card qb-weak-card" id="qb-weak-card">
+      <div class="vp-tenmin-icon">&#127919;</div>
+      <div class="vp-tenmin-copy">
+        <div class="vp-tenmin-title">Practice Your Weaknesses</div>
+        <div class="vp-tenmin-sub">A focused 50-question round — 25 from your weakest Reading &amp; Writing skill, 25 from your weakest Math skill.</div>
       </div>
-      <!-- Pulls each subject's single weakest skill (lowest accuracy, min
-           sample size — same weakestSkillIn()/HOME_*_DOMAINS bar the Home
-           dashboard's own mini skill cards use, via the
-           window.getWeakestSkillsForQb bridge) and runs both back to back
-           in one session — see startWeaknessPractice() in the script. -->
-      <div class="vp-tenmin-card qb-weak-card" id="qb-weak-card">
-        <div class="vp-tenmin-icon">&#127919;</div>
-        <div class="vp-tenmin-copy">
-          <div class="vp-tenmin-title">Practice Your Weaknesses</div>
-          <div class="vp-tenmin-sub">A focused 50-question round — 25 from your weakest Reading &amp; Writing skill, 25 from your weakest Math skill.</div>
-        </div>
-        <button class="vp-tenmin-btn" id="qb-weak-btn" type="button">Start <span>&rarr;</span></button>
-      </div>
+      <button class="vp-tenmin-btn" id="qb-weak-btn" type="button">Start <span>&rarr;</span></button>
+    </div>
+
+    <div class="qb-sec-hed">
+      <span class="qb-sec-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/><path d="M9 9v11"/></svg></span>
+      <h2 class="qb-sec-title">Question Bank</h2>
     </div>
 
     <div class="qb-subjects">
       <button type="button" class="qb-subject" id="qb-subject-rw">
+        <!-- Decorative watermark art, the counterpart to the Math tile's
+             ruler/compass: drawn inline rather than shipped as a PNG so it
+             inherits the tile's own white-on-gradient treatment and stays
+             crisp at any tile width. aria-hidden — it says nothing the
+             title doesn't. -->
+        <span class="qb-subject-art" aria-hidden="true">
+          <svg viewBox="0 0 120 120" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 34c14-7 28-7 42 2v58c-14-9-28-9-42-2z"/>
+            <path d="M102 34c-14-7-28-7-42 2v58c14-9 28-9 42-2z"/>
+            <path d="M60 36v58"/>
+            <path d="M28 50c8-3 16-3 22 1M28 66c8-3 16-3 22 1"/>
+            <path d="M92 50c-8-3-16-3-22 1M92 66c-8-3-16-3-22 1"/>
+            <path d="M78 12l14 14-30 30-16 2 2-16z"/>
+          </svg>
+        </span>
         <div class="qb-subject-body">
           <div class="qb-subject-title">Reading &amp; Writing</div>
           <div class="qb-subject-count" id="qb-subject-rw-count">&mdash; of &mdash; solved</div>
           <div class="qb-subject-bar"><div class="qb-subject-bar-fill" id="qb-subject-rw-bar"></div></div>
         </div>
-        <span class="qb-subject-open">Browse skills <span class="chal-deck-arrow">&rarr;</span></span>
+        <span class="qb-subject-open">Open <span class="chal-deck-arrow">&rarr;</span></span>
       </button>
       <button type="button" class="qb-subject qb-subject-math" id="qb-subject-math">
+        <span class="qb-subject-art" aria-hidden="true">
+          <svg viewBox="0 0 120 120" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 96h76L60 20z"/>
+            <path d="M46 96l30-60M38 80h44M34 68h22M52 56h18"/>
+            <path d="M12 108h96"/>
+          </svg>
+        </span>
         <div class="qb-subject-body">
           <div class="qb-subject-title">Math</div>
           <div class="qb-subject-count" id="qb-subject-math-count">&mdash; of &mdash; solved</div>
           <div class="qb-subject-bar"><div class="qb-subject-bar-fill" id="qb-subject-math-bar"></div></div>
         </div>
-        <span class="qb-subject-open">Browse skills <span class="chal-deck-arrow">&rarr;</span></span>
+        <span class="qb-subject-open">Open <span class="chal-deck-arrow">&rarr;</span></span>
       </button>
     </div>
+
+    <!-- ═══ QUESTION ANALYTICS ═══ everything below is painted by
+         renderAnalytics() (see window.qbModuleInit()) straight off the
+         same attempts map (attempts[qid] = {correct, attemptedAt, ms})
+         that drives the two subject tiles above — joined against each
+         question's own domain/skill/difficulty in question-bank.js, so no
+         second store and no server round-trip. Every panel renders its own
+         empty state when a student hasn't practised enough yet; nothing
+         here is gated or teased. -->
+    <div class="qb-sec-hed">
+      <span class="qb-sec-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20v-3"/></svg></span>
+      <h2 class="qb-sec-title">Question Analytics</h2>
+    </div>
+
+    <div class="qb-stat-grid">
+      <div class="qb-stat">
+        <div class="qb-stat-lab">Questions Attempted</div>
+        <div class="qb-stat-num" id="qb-stat-attempted">0</div>
+        <span class="qb-stat-art" aria-hidden="true"><svg viewBox="0 0 60 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="30" cy="20" r="16"/><circle cx="30" cy="20" r="8"/></svg></span>
+      </div>
+      <div class="qb-stat">
+        <div class="qb-stat-lab">Current Accuracy</div>
+        <div class="qb-stat-num" id="qb-stat-accuracy">0%</div>
+        <span class="qb-stat-art" aria-hidden="true"><svg viewBox="0 0 60 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 34l14-12 12 8 14-18 12 6"/></svg></span>
+      </div>
+      <div class="qb-stat">
+        <div class="qb-stat-lab">Saved Questions</div>
+        <div class="qb-stat-num" id="qb-stat-saved">0</div>
+        <button type="button" class="qb-stat-btn" id="qb-stat-saved-btn">View Saved</button>
+        <span class="qb-stat-art" aria-hidden="true"><svg viewBox="0 0 60 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 4h16v32L30 28l-8 8z"/></svg></span>
+      </div>
+      <div class="qb-stat">
+        <div class="qb-stat-lab">Study Streak</div>
+        <div class="qb-stat-num" id="qb-stat-streak">0</div>
+        <span class="qb-stat-art" aria-hidden="true"><svg viewBox="0 0 60 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M30 4c6 8-2 11 0 16 2-3 6-4 6-4 4 8 8 8 8 14a14 14 0 0 1-28 0c0-9 10-14 14-26z"/></svg></span>
+      </div>
+    </div>
+
+    <div class="qb-card qb-trend-card">
+      <div class="qb-card-hed">
+        <h3 class="qb-card-title">Activity trend</h3>
+        <div class="qb-trend-legend" id="qb-trend-legend"></div>
+      </div>
+      <p class="qb-card-note">Every question you've answered in the last 14 days, correct in green and wrong in red. The dashed line is your daily average.</p>
+      <div class="qb-trend-plot" id="qb-trend-plot"></div>
+    </div>
+
+    <div class="qb-analytics-grid" id="qb-analytics-grid"></div>
 
     <a href="#" class="menu-back-link" id="question-bank-back">&larr; Back to home</a>
   </div>
@@ -4989,9 +5178,9 @@ window.Portal = {
 <!-- ═══ BETA NOTICE MODAL ═══ blocking, shown every fresh login (see
      showBetaModal() in the script below) — a student must click "Got it"
      before the overlay clears and anything underneath becomes reachable. -->
-<div class="beta-modal-overlay" id="beta-modal-overlay">
-  <div class="beta-modal">
-    <div class="beta-modal-hed">This portal is still in beta</div>
+<div class="resume-overlay" id="beta-modal-overlay">
+  <div class="resume-modal beta-modal" role="dialog" aria-modal="true" aria-labelledby="beta-modal-hed">
+    <div class="beta-modal-hed" id="beta-modal-hed">This portal is still in beta</div>
     <p class="beta-modal-sub">Luca's actively testing it and adding new content, so you might run into the occasional rough edge. If something looks off or isn't working, please reach out — your feedback goes straight to fixing it.</p>
     <button class="key-btn" id="beta-modal-ok" type="button">Got it</button>
   </div>
@@ -5791,16 +5980,7 @@ window.Portal = {
      publishes is the phone number in the marketing page's hero/footer, so
      that's what the Ask Luca tile uses. Fill in `email` here and the tile
      switches to a prefilled mailto without any other change. */
-  var LUCA_CONTACT = { email: '', phone: '2012752791', phoneDisplay: '(201) 275-2791' };
-  document.getElementById('home-shortcut-ask').addEventListener('click', function () {
-    if (LUCA_CONTACT.email) {
-      var who = (currentStudent && currentStudent.name) || '';
-      window.location.href = 'mailto:' + LUCA_CONTACT.email +
-        '?subject=' + encodeURIComponent('Question from ' + who);
-    } else if (LUCA_CONTACT.phone) {
-      window.location.href = 'tel:' + LUCA_CONTACT.phone;
-    }
-  });
+  var LUCA_CONTACT = { email: 'morettitutoring@gmail.com', phone: '2012752791', phoneDisplay: '(201) 275-2791' };
 
   /* ═══ SUBJECT-TUTORING HOME ═══ one function, called from
      renderHomePies() on every visit to Home, that swaps "Your Overview"
@@ -5848,15 +6028,25 @@ window.Portal = {
       if (pairBack) pairBack.style.display = '';
     }
 
-    // Shortcut tiles: the three that go somewhere a subject student can
-    // actually reach, and none of the five SAT ones.
-    var SUBJECT_TILES = { 'home-shortcut-thisweek': 1, 'home-shortcut-files': 1, 'home-shortcut-ask': 1 };
+    /* Which tiles each home shows. Both lists are six-or-fewer so the
+       three-column grid stays full rows, and Ask Luca is on BOTH (its
+       `order` in the CSS keeps it last in either set).
+
+       Question Bank is what came off the SAT home to make room. Of the six
+       that were there it's the only one that is both a plain duplicate of
+       a sidebar item AND already covered by a better-aimed tile — Practice
+       Your Weaknesses pulls from that same bank and picks what to serve,
+       which is the harder half. The others each do something the sidebar
+       can't: This Week carries a live count, Practice Tests carries
+       progress, Saved & Mistakes is personal to that student, and
+       10-Minute Vocab is a mode rather than a screen. The tile stays in
+       the DOM (hidden), so swapping the choice is an edit to one array. */
+    var SUBJECT_TILES = ['home-shortcut-thisweek', 'home-shortcut-files', 'home-shortcut-ask'];
+    var SAT_TILES = ['home-shortcut-thisweek', 'home-shortcut-weak', 'home-shortcut-vocab',
+                     'home-shortcut-pt', 'home-shortcut-mistakes', 'home-shortcut-ask'];
+    var shown = on ? SUBJECT_TILES : SAT_TILES;
     document.querySelectorAll('.home-shortcut-card').forEach(function (el) {
-      var mine = !!SUBJECT_TILES[el.id];
-      // Off the subject home, the two new tiles are the ones that hide and
-      // the original six all come back.
-      el.style.display = on ? (mine ? '' : 'none')
-        : (el.id === 'home-shortcut-files' || el.id === 'home-shortcut-ask' ? 'none' : '');
+      el.style.display = shown.indexOf(el.id) === -1 ? 'none' : '';
     });
 
     // "This Week" as a tile duplicates the checklist sitting right below
@@ -5864,11 +6054,27 @@ window.Portal = {
     // proper and says so.
     var twTitle = document.querySelector('#home-shortcut-thisweek .home-shortcut-title');
     if (twTitle) twTitle.textContent = on ? 'My Calendar' : 'This Week';
+    // renderHomeShortcutTeasers() fills this tile with the next task's
+    // name, which is the right teaser when the tile IS the only view of
+    // the list. Here the full list sits directly below it, so the tile
+    // stops repeating it and points at what the calendar adds instead:
+    // sessions, and work that isn't due yet. The count badge stays.
+    var twBody = document.getElementById('home-shortcut-thisweek-body');
+    if (twBody) twBody.__subjectCopy = on ? 'Your sessions and everything coming up, week by week.' : null;
 
+    // Naming the student in the subject line saves Luca working out who
+    // "I don't get question 3" came from — the portal already knows.
+    var ask = document.getElementById('home-shortcut-ask');
     var askBody = document.getElementById('home-shortcut-ask-body');
+    var who = (currentStudent && currentStudent.name) || '';
+    if (ask) {
+      ask.href = LUCA_CONTACT.email
+        ? 'mailto:' + LUCA_CONTACT.email + '?subject=' + encodeURIComponent('Question from ' + who)
+        : 'tel:' + LUCA_CONTACT.phone;
+    }
     if (askBody) {
       askBody.textContent = LUCA_CONTACT.email
-        ? 'Stuck on something before your next session? Send Luca a message.'
+        ? 'Stuck on something before your next session? Email Luca at ' + LUCA_CONTACT.email + '.'
         : 'Stuck on something before your next session? Call or text ' + LUCA_CONTACT.phoneDisplay + '.';
     }
 
@@ -6302,9 +6508,14 @@ window.Portal = {
     if (emptyEl) emptyEl.style.display = 'none';
     assignCard.style.display = '';
     assignList.innerHTML = '';
+    // Midnight today, so "overdue" means the due DAY has passed rather
+    // than some hours-from-now arithmetic — a task due today is not late.
+    var todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
     items.forEach(function (item) {
+      var dueMs = item.dueDate ? Date.parse(item.dueDate) : NaN;
+      var overdue = !item.done && !isNaN(dueMs) && dueMs < todayStart.getTime();
       var wrap = document.createElement('div');
-      wrap.className = 'assign-row';
+      wrap.className = 'assign-row' + (overdue ? ' is-overdue' : '');
       var row = document.createElement('label');
       row.className = 'assign-item' + (item.done ? ' assign-done' : '');
       var cb = document.createElement('input');
@@ -6315,7 +6526,19 @@ window.Portal = {
       span.textContent = item.task;
       row.appendChild(cb);
       row.appendChild(span);
+      if (overdue) {
+        var tag = document.createElement('span');
+        tag.className = 'assign-overdue-tag';
+        tag.textContent = 'Overdue';
+        row.appendChild(tag);
+      }
       wrap.appendChild(row);
+      if (item.notes && !item.done) {
+        var note = document.createElement('div');
+        note.className = 'assign-note';
+        note.textContent = item.notes;
+        wrap.appendChild(note);
+      }
       cb.addEventListener('change', function () { toggleAssignmentRow(item, row, cb); });
       if (!item.done) {
         var go = assignmentShortcut(item.task);
@@ -6340,12 +6563,16 @@ window.Portal = {
     var badge = document.getElementById('home-shortcut-thisweek-badge');
     var body = document.getElementById('home-shortcut-thisweek-body');
     if (badge && body) {
-      if (!remaining.length) {
-        badge.style.display = 'none';
+      badge.style.display = remaining.length ? '' : 'none';
+      if (remaining.length) badge.textContent = remaining.length + ' to do';
+      // See applySubjectHome(): on the subject home the checklist is right
+      // below this tile, so the tile describes the calendar instead of
+      // reciting the same tasks a second time.
+      if (body.__subjectCopy) {
+        body.textContent = body.__subjectCopy;
+      } else if (!remaining.length) {
         body.textContent = items.length ? 'All caught up for now.' : "Nothing on deck yet — check back after your next session.";
       } else {
-        badge.style.display = '';
-        badge.textContent = remaining.length + (remaining.length === 1 ? ' to do' : ' to do');
         body.textContent = remaining[0].task + (remaining.length > 1 ? ' (+' + (remaining.length - 1) + ' more)' : '');
       }
     }
@@ -7672,8 +7899,17 @@ window.Portal = {
     document.getElementById('ns-daychip-num').textContent = ok ? String(d.getDate()) : '';
   }
 
+  // True only when the server has explicitly answered "there is no next
+  // session". Deliberately NOT set when the lookup merely FAILS — that
+  // case keeps the join link on purpose (see the fallback branch below),
+  // because a student with a session in ten minutes still needs a way in
+  // when iCloud is unreachable. "There is nothing to join" and "we could
+  // not find out" are different answers and only the first should take
+  // the button away.
+  var nsNoSession = false;
   function setJoinLink() {
     var meetUrl = window.GOOGLE_MEET_URL || '';
+    if (nsNoSession) { nsJoin.style.display = 'none'; return; }
     if (meetUrl && meetUrl.indexOf('PLACEHOLDER') === -1) {
       nsJoin.href = meetUrl;
       if (nsJoinUrl) nsJoinUrl.textContent = meetUrl;
@@ -7759,6 +7995,7 @@ window.Portal = {
     if (nsTime) nsTime.textContent = '';
     setNsRel('');
     setNsDayChip(null);
+    nsNoSession = false;
     setJoinLink();
 
     fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'nextSession', key: currentStudent.key, debug: DEBUG_MODE }) })
@@ -7790,9 +8027,12 @@ window.Portal = {
         } else if (data && data.ok && !data.next) {
           nsLabel.textContent = '';
           nsDate.textContent = 'No sessions scheduled yet.';
-          if (nsTime) nsTime.textContent = '';
+          // The hero card is the whole point of this layout, so this state
+          // says what happens next instead of stopping at a dead end.
+          if (nsTime) nsTime.textContent = 'Luca will put your next one on the calendar.';
           setNsRel('');
           setNsDayChip(null);
+          nsNoSession = true;
         } else {
           // Lookup failed — server error, calendar unreachable, offline,
           // whatever. The link itself (set above, before this fetch even
@@ -15493,9 +15733,20 @@ window.Portal = {
     // window.saveReportQuestion — see qbIsSaved() below).
     if (window.syncQbAttempts) window.syncQbAttempts(p.attempts);
   }
-  function recordAttempt(qid, wasCorrect) {
+  // `ms` is how long the question was on screen before it was submitted —
+  // added for the "Time by difficulty" analytics panel, which had no time
+  // data at all before it (Question Bank recorded only correct/when, while
+  // the Challenge Questions runner right above has always timed its own).
+  // Purely additive: mergeQbAttempts_ is last-write-wins on attemptedAt and
+  // never inspects the rest of the record, so it rides along to the backend
+  // and other devices with no schema change. Attempts recorded BEFORE this
+  // shipped carry no ms — every time panel filters on `ms > 0` and reports
+  // its own sample size rather than silently averaging over a partial set.
+  function recordAttempt(qid, wasCorrect, ms) {
     var p = loadProgress();
-    p.attempts[qid] = { correct: wasCorrect, attemptedAt: new Date().toISOString() };
+    var rec = { correct: wasCorrect, attemptedAt: new Date().toISOString() };
+    if (ms > 0) rec.ms = ms;
+    p.attempts[qid] = rec;
     saveProgress(p);
   }
   // Merges in whatever this student's OTHER devices have synced for
@@ -15567,6 +15818,346 @@ window.Portal = {
       mathBtn.classList.toggle('qb-subject-empty', mathEmpty);
       if (mathEmpty) document.getElementById('qb-subject-math-count').textContent = 'Coming soon';
     }
+
+    // Same trigger as the tiles above — nav in, session end, cross-device
+    // merge — so the charts can never show a different snapshot than the
+    // two numbers right beside them.
+    renderAnalytics();
+  }
+
+  /* ═══ QUESTION ANALYTICS ═══ everything under the "Question Analytics"
+     heading on the QB home is painted here, and every number comes from
+     ONE source: the same attempts map (attempts[qid] = {correct,
+     attemptedAt, ms}) the subject tiles above already read, joined against
+     each question's own domain/skill/difficulty in question-bank.js /
+     question-bank-math.js. No second store, no server round-trip, nothing
+     precomputed — which is why it can just re-run wholesale on every
+     renderStats() (nav in, session end, cross-device merge) rather than
+     tracking its own invalidation.
+
+     Charts are hand-rolled inline SVG rather than a library: the native
+     report next door already draws its rings the same way, the whole page
+     is one self-contained HTML file with no build step, and a bar chart
+     plus two donuts is not worth 200KB of dependency.
+
+     Every panel renders its own empty state when there isn't enough data
+     to say anything honest yet. Nothing here is gated, teased, or blurred. */
+
+  var QB_DIFFS = [
+    { key: 'easy',   label: 'Easy',   color: '#5E8B6F' },
+    { key: 'medium', label: 'Medium', color: '#C9A84C' },
+    { key: 'hard',   label: 'Hard',   color: '#B0271C' }
+  ];
+  var QB_TREND_DAYS = 14;
+
+  function qbFmtTime(ms) {
+    if (!ms) return '—';
+    var totalSec = Math.round(ms / 1000);
+    var m = Math.floor(totalSec / 60), sec = totalSec % 60;
+    return m > 0 ? (m + 'm ' + sec + 's') : (sec + 's');
+  }
+  // Floors an ISO timestamp to its LOCAL calendar day. Deliberately not
+  // UTC: a student practising at 9pm Pacific would otherwise land on
+  // tomorrow's bar (and break their streak by appearing to skip today).
+  function qbDayKey(d) {
+    return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
+  }
+
+  // Flattens the attempts map into a list of records that each carry the
+  // question's own metadata, so every panel below can just filter this one
+  // array instead of re-walking the pools. Attempts whose qid is no longer
+  // in either bank (a question retired or re-keyed since it was answered)
+  // are dropped — they have no skill or difficulty to file under.
+  function qbAttemptRecords() {
+    var p = loadProgress();
+    var byQid = {};
+    ['rw', 'math'].forEach(function (subject) {
+      poolFor(subject).forEach(function (q) { byQid[q.qid] = { q: q, subject: subject }; });
+    });
+    var out = [];
+    Object.keys(p.attempts || {}).forEach(function (qid) {
+      var meta = byQid[qid];
+      if (!meta) return;
+      var a = p.attempts[qid];
+      var when = new Date(a.attemptedAt);
+      out.push({
+        qid: qid,
+        subject: meta.subject,
+        skill: meta.q.skill || '—',
+        domain: meta.q.domain || '',
+        difficulty: String(meta.q.difficulty || '').toLowerCase(),
+        correct: !!a.correct,
+        ms: a.ms > 0 ? a.ms : 0,
+        when: isNaN(when.getTime()) ? null : when
+      });
+    });
+    return out;
+  }
+
+  // Longest run of consecutive calendar days ending TODAY (or yesterday —
+  // a streak shouldn't die at midnight before the student has had a chance
+  // to practise, only once a full day has gone by unused).
+  function qbStudyStreak(records) {
+    var days = {};
+    records.forEach(function (r) { if (r.when) days[qbDayKey(r.when)] = true; });
+    var cursor = new Date();
+    if (!days[qbDayKey(cursor)]) cursor.setDate(cursor.getDate() - 1);
+    var streak = 0;
+    while (days[qbDayKey(cursor)]) { streak++; cursor.setDate(cursor.getDate() - 1); }
+    return streak;
+  }
+
+  /* ── Activity trend ── one stacked bar per day for the last 14 days,
+     correct on the bottom in green and wrong stacked above it in red, with
+     a dashed line at the daily average. Drawn into a fixed 320x120 viewBox
+     scaled to the card's width, so it stays legible on a phone without a
+     second layout. */
+  function qbDailyAverage(records) {
+    var recent = records.filter(function (r) {
+      if (!r.when) return false;
+      var cutoff = new Date();
+      cutoff.setHours(0, 0, 0, 0);
+      cutoff.setDate(cutoff.getDate() - (QB_TREND_DAYS - 1));
+      return r.when >= cutoff;
+    });
+    return Math.round((recent.length / QB_TREND_DAYS) * 10) / 10;
+  }
+
+  function qbRenderTrend(records) {
+    var plotEl = document.getElementById('qb-trend-plot');
+    var legendEl = document.getElementById('qb-trend-legend');
+    if (!plotEl) return;
+
+    var buckets = [];
+    var cursor = new Date();
+    cursor.setHours(0, 0, 0, 0);
+    cursor.setDate(cursor.getDate() - (QB_TREND_DAYS - 1));
+    for (var i = 0; i < QB_TREND_DAYS; i++) {
+      buckets.push({ key: qbDayKey(cursor), date: new Date(cursor), correct: 0, wrong: 0 });
+      cursor.setDate(cursor.getDate() + 1);
+    }
+    var byKey = {};
+    buckets.forEach(function (b) { byKey[b.key] = b; });
+
+    var totalCorrect = 0, totalWrong = 0;
+    records.forEach(function (r) {
+      if (r.correct) totalCorrect++; else totalWrong++;
+      var b = r.when && byKey[qbDayKey(r.when)];
+      if (!b) return;
+      if (r.correct) b.correct++; else b.wrong++;
+    });
+
+    if (legendEl) {
+      legendEl.innerHTML =
+        '<span class="qb-trend-key"><i class="qb-trend-dot ok"></i><b>' + totalCorrect + '</b> Correct</span>' +
+        '<span class="qb-trend-key"><i class="qb-trend-dot bad"></i><b>' + totalWrong + '</b> Wrong</span>' +
+        '<span class="qb-trend-key"><i class="qb-trend-dash"></i><b>' + qbDailyAverage(records) + '</b>/day avg</span>';
+    }
+
+    var inWindow = buckets.reduce(function (n, b) { return n + b.correct + b.wrong; }, 0);
+    if (!inWindow) {
+      plotEl.innerHTML = '<div class="qb-empty">No questions answered in the last ' + QB_TREND_DAYS + ' days.<br>Your daily activity shows up here once you start a session.</div>';
+      return;
+    }
+
+    // Sized so the viewBox is WIDER than the card ever is, meaning the
+    // browser scales the drawing (and its text) down rather than up —
+    // text set in viewBox units at a 320-wide box rendered ~1.5x
+    // oversized on a desktop-width card.
+    var W = 660, H = 230, padL = 30, padB = 26, padT = 10;
+    var plotW = W - padL, plotH = H - padB - padT;
+    var maxDay = Math.max.apply(null, buckets.map(function (b) { return b.correct + b.wrong; }));
+    // Round the axis up to a whole number of ticks so the gridlines land on
+    // integers — a "2.5 questions" gridline is meaningless here.
+    var ticks = Math.min(4, Math.max(1, maxDay));
+    var top = Math.ceil(maxDay / ticks) * ticks;
+    var avg = inWindow / QB_TREND_DAYS;
+    var slot = plotW / QB_TREND_DAYS;
+    var barW = Math.min(30, slot * 0.55);
+
+    var svg = ['<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Questions answered per day over the last ' + QB_TREND_DAYS + ' days">'];
+    for (var t = 0; t <= ticks; t++) {
+      var v = (top / ticks) * t;
+      var y = padT + plotH - (v / top) * plotH;
+      svg.push('<line class="qb-trend-grid" x1="' + padL + '" y1="' + y + '" x2="' + W + '" y2="' + y + '"/>');
+      svg.push('<text class="qb-trend-lab" x="' + (padL - 7) + '" y="' + (y + 4) + '" text-anchor="end">' + Math.round(v) + '</text>');
+    }
+    var avgY = padT + plotH - (avg / top) * plotH;
+    svg.push('<line class="qb-trend-avg" x1="' + padL + '" y1="' + avgY + '" x2="' + W + '" y2="' + avgY + '"/>');
+    // Unlabelled here — the legend above names it, and any annotation
+    // inside the plot collides with whichever bars reach the average.
+
+    buckets.forEach(function (b, idx) {
+      var cx = padL + slot * idx + slot / 2;
+      var x = cx - barW / 2;
+      var total = b.correct + b.wrong;
+      if (total) {
+        var hCorrect = (b.correct / top) * plotH;
+        var hWrong = (b.wrong / top) * plotH;
+        var yWrong = padT + plotH - hCorrect - hWrong;
+        if (hWrong > 0) svg.push('<rect class="qb-trend-bar-bad" x="' + x + '" y="' + yWrong + '" width="' + barW + '" height="' + hWrong + '" rx="2"/>');
+        if (hCorrect > 0) svg.push('<rect class="qb-trend-bar-ok" x="' + x + '" y="' + (padT + plotH - hCorrect) + '" width="' + barW + '" height="' + hCorrect + '" rx="2"/>');
+      }
+      // Label every other day so 14 dates don't collide at phone widths.
+      if (idx % 2 === 1 || idx === QB_TREND_DAYS - 1) {
+        var lab = b.date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+        svg.push('<text class="qb-trend-lab" x="' + cx + '" y="' + (H - 6) + '" text-anchor="middle">' + escHtmlQb(lab) + '</text>');
+      }
+    });
+    svg.push('</svg>');
+    plotEl.innerHTML = svg.join('');
+  }
+
+  /* ── Donut ── one <circle> per slice, sharing a single circumference and
+     walking an offset around it. Same technique the native report's skill
+     rings use; the -90deg rotation on .qb-donut svg starts the first slice
+     at twelve o'clock instead of three. */
+  function qbDonutHtml(slices, bigText, smallText) {
+    var R = 42, C = 2 * Math.PI * R;
+    var total = slices.reduce(function (n, s) { return n + s.value; }, 0);
+    var parts = ['<svg viewBox="0 0 100 100" aria-hidden="true">'];
+    parts.push('<circle cx="50" cy="50" r="' + R + '" fill="none" stroke="rgba(17,17,17,0.07)" stroke-width="12"/>');
+    var offset = 0;
+    slices.forEach(function (s) {
+      if (!total || s.value <= 0) return;
+      var len = (s.value / total) * C;
+      parts.push('<circle cx="50" cy="50" r="' + R + '" fill="none" stroke="' + s.color + '" stroke-width="12"' +
+                 ' stroke-dasharray="' + len + ' ' + (C - len) + '" stroke-dashoffset="' + (-offset) + '"/>');
+      offset += len;
+    });
+    parts.push('</svg>');
+    return '<div class="qb-donut">' + parts.join('') +
+      '<div class="qb-donut-center"><div class="qb-donut-big">' + escHtmlQb(bigText) + '</div>' +
+      '<div class="qb-donut-small">' + escHtmlQb(smallText) + '</div></div></div>';
+  }
+
+  function qbCardHtml(subjectLabel, title, body) {
+    return '<div class="qb-card"><div class="qb-card-hed"><h3 class="qb-card-title">' + escHtmlQb(subjectLabel) + '</h3>' +
+      '<span class="qb-card-sub">' + escHtmlQb(title) + '</span></div>' + body + '</div>';
+  }
+
+  // Accuracy per skill, worst first — the ordering is the point of the
+  // panel, since the row a student most needs to see is the one at the
+  // bottom of the list, not the alphabetically first. Skills with fewer
+  // than QB_MIN_TOPIC_SAMPLE attempts are held back: one lucky question is
+  // not a 100% and one unlucky one is not a 0%.
+  var QB_MIN_TOPIC_SAMPLE = 3;
+  function qbTopicPanel(subjectLabel, subjectRecords) {
+    var bySkill = {};
+    subjectRecords.forEach(function (r) {
+      var b = bySkill[r.skill] || (bySkill[r.skill] = { skill: r.skill, domain: r.domain, total: 0, correct: 0 });
+      b.total++;
+      if (r.correct) b.correct++;
+    });
+    var rows = Object.keys(bySkill).map(function (k) { return bySkill[k]; })
+      .filter(function (b) { return b.total >= QB_MIN_TOPIC_SAMPLE; })
+      .sort(function (a, b) { return (a.correct / a.total) - (b.correct / b.total); });
+
+    if (!rows.length) {
+      return qbCardHtml(subjectLabel, 'Accuracy by topic',
+        '<div class="qb-empty">Answer at least ' + QB_MIN_TOPIC_SAMPLE + ' questions in a topic<br>and its accuracy appears here.</div>');
+    }
+    var html = ['<div class="qb-topic-list">'];
+    rows.forEach(function (b) {
+      var pct = Math.round((b.correct / b.total) * 100);
+      var tone = pct >= 80 ? 'strong' : (pct >= 60 ? 'mid' : '');
+      html.push('<div class="qb-topic-row">' +
+        '<div class="qb-topic-name" title="' + escHtmlQb(b.skill) + '">' + escHtmlQb(b.skill) +
+          '<span>' + b.correct + ' of ' + b.total + ' correct</span></div>' +
+        '<div class="qb-topic-track"><div class="qb-topic-fill ' + tone + '" style="width:' + pct + '%"></div></div>' +
+        '<div class="qb-topic-pct">' + pct + '%</div></div>');
+    });
+    html.push('</div>');
+    return qbCardHtml(subjectLabel, 'Accuracy by topic', html.join(''));
+  }
+
+  // Where the student's time actually goes, split by question difficulty.
+  // Only attempts carrying a `ms` count (see recordAttempt) — attempts
+  // recorded before timing shipped have none, so the panel says how many
+  // questions it's speaking for rather than quietly averaging a subset.
+  function qbTimePanel(subjectLabel, subjectRecords) {
+    var timed = subjectRecords.filter(function (r) { return r.ms > 0; });
+    if (!timed.length) {
+      return qbCardHtml(subjectLabel, 'Time by difficulty',
+        '<div class="qb-empty">No timed questions yet.<br>Your next practice session starts the clock.</div>');
+    }
+    var totalMs = 0;
+    var slices = QB_DIFFS.map(function (d) {
+      var group = timed.filter(function (r) { return r.difficulty === d.key; });
+      var ms = group.reduce(function (n, r) { return n + r.ms; }, 0);
+      totalMs += ms;
+      return { key: d.key, label: d.label, color: d.color, value: ms, count: group.length };
+    });
+    var legend = slices.map(function (s) {
+      var avg = s.count ? qbFmtTime(Math.round(s.value / s.count)) : '—';
+      return '<div class="qb-legend-row"><i class="qb-legend-swatch" style="background:' + s.color + '"></i>' +
+        escHtmlQb(s.label) + '<b>' + escHtmlQb(avg) + '</b></div>';
+    }).join('');
+    var body = '<div class="qb-donut-wrap">' + qbDonutHtml(slices, qbFmtTime(totalMs), 'Total') +
+      '<div class="qb-donut-legend">' + legend +
+      '<div class="qb-card-note">Average per question, across ' + timed.length + ' timed question' + (timed.length === 1 ? '' : 's') + '.</div>' +
+      '</div></div>';
+    return qbCardHtml(subjectLabel, 'Time by difficulty', body);
+  }
+
+  function qbAccuracyByDifficultyPanel(subjectLabel, subjectRecords) {
+    if (!subjectRecords.length) {
+      return qbCardHtml(subjectLabel, 'Accuracy by difficulty',
+        '<div class="qb-empty">Nothing answered in this subject yet.</div>');
+    }
+    var overallCorrect = subjectRecords.filter(function (r) { return r.correct; }).length;
+    var overallPct = Math.round((overallCorrect / subjectRecords.length) * 100);
+    // The ring is the overall split (right vs wrong), and the legend below
+    // breaks that same set out by difficulty — so the big number in the
+    // middle and the rows underneath are always describing one population.
+    var slices = [
+      { label: 'Correct', color: '#5E8B6F', value: overallCorrect },
+      { label: 'Wrong',   color: '#B0271C', value: subjectRecords.length - overallCorrect }
+    ];
+    var legend = QB_DIFFS.map(function (d) {
+      var group = subjectRecords.filter(function (r) { return r.difficulty === d.key; });
+      var pct = group.length ? Math.round((group.filter(function (r) { return r.correct; }).length / group.length) * 100) : null;
+      return '<div class="qb-legend-row qb-legend-row-bar"><span>' + escHtmlQb(d.label) + '</span>' +
+        '<span class="qb-topic-track"><span class="qb-topic-fill" style="background:' + d.color + ';width:' + (pct === null ? 0 : pct) + '%"></span></span>' +
+        '<b>' + (pct === null ? '—' : pct + '%') + '</b></div>';
+    }).join('');
+    var body = '<div class="qb-donut-wrap">' + qbDonutHtml(slices, overallPct + '%', 'Overall') +
+      '<div class="qb-donut-legend">' + legend +
+      '<div class="qb-card-note">' + overallCorrect + ' of ' + subjectRecords.length + ' correct.</div>' +
+      '</div></div>';
+    return qbCardHtml(subjectLabel, 'Accuracy by difficulty', body);
+  }
+
+  function renderAnalytics() {
+    var gridEl = document.getElementById('qb-analytics-grid');
+    var records = qbAttemptRecords();
+
+    var savedEl = document.getElementById('qb-stat-saved');
+    if (savedEl) savedEl.textContent = String(Object.keys(qbSavedByKey()).length);
+    var streakEl = document.getElementById('qb-stat-streak');
+    if (streakEl) {
+      var streak = qbStudyStreak(records);
+      streakEl.textContent = streak + (streak === 1 ? ' day' : ' days');
+    }
+
+    qbRenderTrend(records);
+    if (!gridEl) return;
+
+    // Column order is Reading & Writing then Math, one metric per row, so
+    // the same metric sits at the same height on both sides — that's the
+    // whole reason this is a grid and not two stacked per-subject columns.
+    var subjects = [
+      { key: 'rw', label: 'Reading & Writing' },
+      { key: 'math', label: 'Math' }
+    ];
+    var byKey = { rw: [], math: [] };
+    records.forEach(function (r) { byKey[r.subject].push(r); });
+
+    var out = [];
+    [qbTopicPanel, qbTimePanel, qbAccuracyByDifficultyPanel].forEach(function (panel) {
+      subjects.forEach(function (s) { out.push(panel(s.label, byKey[s.key])); });
+    });
+    gridEl.innerHTML = out.join('');
   }
 
   function escHtmlQb(s) { return window.Portal.escHtml(s); }
@@ -15948,6 +16539,7 @@ window.Portal = {
   var runnerState = {};
   var runnerScore = 0;
   var runnerSkillLabel = '';
+  var questionShownAt = 0;
 
   // skillNames: array of skill names to draw from (one for a single-topic
   // "Practice" click, all of them for "Practice all topics", a checked
@@ -16186,7 +16778,7 @@ window.Portal = {
       }
       st.submitted = true;
       if (st.correct) runnerScore++;
-      recordAttempt(r.qid, st.correct);
+      recordAttempt(r.qid, st.correct, questionShownAt ? (Date.now() - questionShownAt) : 0);
       // Feeds Saved & Mistakes' Mistakes Log too (see window.
       // recordQuestionBankMistake's own comment) — same call clears a
       // question that's since been answered correctly, so a Question Bank
@@ -16337,7 +16929,14 @@ window.Portal = {
 
     navRowEl.style.display = '';
     var r = runnerQueue[runnerIndex];
+    var isNewQuestion = !runnerState[r.qid];
     var st = runnerState[r.qid] || (runnerState[r.qid] = {});
+    // Stamped on a question's FIRST render only, so re-rendering (choice
+    // click, eliminate toggle, save) doesn't restart the clock — same
+    // shape as the Challenge Questions runner's own questionShownAt.
+    // Feeds the `ms` on each recorded attempt, which is what the
+    // "Time by difficulty" analytics panel reads.
+    if (isNewQuestion) questionShownAt = Date.now();
     document.getElementById('dx-notice-text').textContent = 'PRACTICE MODE — QUESTION ' + (runnerIndex + 1) + ' OF ' + runnerQueue.length;
     var cardHedEl = document.querySelector('#dx-card .dx-card-hed');
     if (cardHedEl) cardHedEl.style.display = '';
@@ -16559,6 +17158,19 @@ window.Portal = {
       });
       var weakBtn = document.getElementById('qb-weak-btn');
       if (weakBtn) weakBtn.addEventListener('click', startWeaknessPractice);
+      // The Saved Questions stat counts the SAME Saved & Mistakes "Saved
+      // Questions" tab every other tool writes to (see qbSavedByKey), so
+      // its button goes there rather than to a Question-Bank-only list —
+      // clicking the sidebar item runs that screen's own navigateTo()
+      // wiring (module init included) instead of duplicating it here.
+      var savedBtn = document.getElementById('qb-stat-saved-btn');
+      if (savedBtn) savedBtn.addEventListener('click', function () {
+        var sidebarItem = document.getElementById('sidebar-incorrect-questions');
+        if (!sidebarItem) return;
+        sidebarItem.click();
+        var savedTab = document.getElementById('iq-tab-saved');
+        if (savedTab) savedTab.click();
+      });
       var backBtn = document.getElementById('qb-skills-back');
       if (backBtn) backBtn.addEventListener('click', function (e) { e.preventDefault(); showHome(); });
       var homeBackBtn = document.getElementById('question-bank-back');
@@ -17356,7 +17968,28 @@ window.renderNativeReport = function (data) {
     function genAnswers(qs, wrongRate, weakSkill, key) {
       var answers = [], marked = [], times = [], firsts = [], correct = 0;
       var diff = { easy: { c: 0, t: 0 }, medium: { c: 0, t: 0 }, hard: { c: 0, t: 0 } };
+      // Mirrors report.html's identical fix — see that copy for the full
+      // rationale. Short version: the real engine force-submits a module
+      // the instant its clock hits zero, so a student still working when
+      // time is called does not get to keep answering late, they get cut
+      // off and everything after is blank. cumMs tracks the running total
+      // the same way the pacing trace's own `ct` does, and once it would
+      // meet or pass the module's real clock, every question from there on
+      // is generated as never-reached instead of getting a full synthetic
+      // answer and time regardless of how large demoPace made it.
+      var perModuleMs = ((window.SECTION_MODULE_TIME_LIMITS && window.SECTION_MODULE_TIME_LIMITS[key]) || 0) * 60000 * demoAccomMult;
+      var cumMs = 0;
       qs.forEach(function (q) {
+        var dtag = diff[q.difficulty];
+        var outOfClock = perModuleMs > 0 && cumMs >= perModuleMs;
+        if (outOfClock) {
+          if (dtag) dtag.t++; // still counts toward the bank's total, same as the random-blank roll below
+          answers.push(null);
+          marked.push(false); // never reached it, so there was nothing to flag
+          times.push(0);
+          firsts.push(0);
+          return;
+        }
         var wrong = rand() < wrongRate;
         if (!hasTarget && weakSkill && q.skill === weakSkill) wrong = rand() < WEAK_WRONG;
         var given;
@@ -17380,7 +18013,6 @@ window.renderNativeReport = function (data) {
           var wrongVal = (q.answer || 0) + 1;
           given = wrong ? { raw: String(wrongVal), value: wrongVal } : { raw: String(q.answer), value: q.answer };
         }
-        var dtag = diff[q.difficulty];
         // A random "left it blank" roll only makes sense for the no-target
         // default demo. When a specific score is requested, this needs to
         // be reachable EXACTLY — including the true floor (every question
@@ -17415,6 +18047,7 @@ window.renderNativeReport = function (data) {
         var baseMs = budMs * demoPaceFor(q);
         var totalMs = Math.round(wrong ? baseMs * (1.15 + rand() * 0.5) : baseMs * (0.78 + rand() * 0.34));
         times.push(totalMs);
+        cumMs += totalMs;
         // Some questions get a return trip, so the demo exercises the
         // first-look-vs-total split the pacing trace and the second-guessing
         // flag are built on. Flagged questions come back more often, which
@@ -18059,7 +18692,7 @@ window.renderNativeReport = function (data) {
     // student watched land there lands the same way when they open the
     // report. Only real scaled scores, never the percent fallback: the
     // tween writes a bare integer, so counting a "76%" up would drop the
-    // sign for the whole 900ms. The final value is written above FIRST and
+    // sign for the whole 1.8s. The final value is written above FIRST and
     // the tween starts on the next frame, so a print fired mid-tween still
     // shows the real score rather than a zero.
     if (typeof scaledScore === 'number' && isFinite(scaledScore)) num.setAttribute('data-count-to', scaledScore);
@@ -18067,13 +18700,50 @@ window.renderNativeReport = function (data) {
     return tile;
   }
 
+  /* ═══ CHART ENTRANCE ANIMATIONS ═══ mirrors report.html's block of the
+     same name (kept in sync by hand). See that copy for the full
+     rationale — condensed here: ARM (synchronous, at render time) puts a
+     chart into its zeroed/clipped starting state; RELEASE (on first
+     scroll into view) hands back the real values for the CSS transition
+     to travel to. Two phases so a chart already in the viewport at render
+     time never paints at full size for a frame before snapping to zero.
+     No-ops under prefers-reduced-motion or with no IntersectionObserver,
+     in both of which the un-animated state is simply the final state. */
+  function prefersReducedMotion() {
+    return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  }
+
+  // Mirrors report.html's identical helper. See that copy for the full
+  // rationale on why every rAF tween on this report shares this one curve
+  // with the CSS bar/wipe transitions below, rather than an approximate
+  // power-curve shorthand.
+  function cubicBezierEase(x1, y1, x2, y2) {
+    function a(p1, p2) { return 1 - 3 * p2 + 3 * p1; }
+    function b(p1, p2) { return 3 * p2 - 6 * p1; }
+    function c(p1) { return 3 * p1; }
+    function bezierX(t) { return ((a(x1, x2) * t + b(x1, x2)) * t + c(x1)) * t; }
+    function bezierY(t) { return ((a(y1, y2) * t + b(y1, y2)) * t + c(y1)) * t; }
+    function derivX(t) { return 3 * a(x1, x2) * t * t + 2 * b(x1, x2) * t + c(x1); }
+    function solveT(x) {
+      var t = x;
+      for (var i = 0; i < 8; i++) {
+        var dx = bezierX(t) - x, d = derivX(t);
+        if (Math.abs(d) < 1e-6) break;
+        t -= dx / d;
+      }
+      return Math.min(1, Math.max(0, t));
+    }
+    return function (x) { return bezierY(solveT(x)); };
+  }
+  var CHART_EASE = cubicBezierEase(0.16, 1, 0.3, 1);
+
   /* Counts each [data-count-to] element up from 0 to its real value instead
-     of having the score just appear. Same tween, duration and easing as
-     animateCountUp() on the Home screen — a local copy rather than a call
-     into it, because this renderer is a self-contained closure that
-     deliberately keeps its own copies of the helpers it needs (see the
-     "Small local copies" note above renderNativeReport). Skipped entirely
-     under prefers-reduced-motion. */
+     of having the score just appear. Started life as a straight port of
+     animateCountUp() on the Home screen; now runs on CHART_EASE at report
+     speed instead, so the composite lands with the same slow, parabolic
+     settle as every chart below it on this page rather than Home's
+     quicker one-number reveal. Mirrors report.html's identical function.
+     Skipped entirely under prefers-reduced-motion. */
   function animateScoreTiles(root) {
     if (!root) return;
     var els = root.querySelectorAll('[data-count-to]');
@@ -18082,15 +18752,71 @@ window.renderNativeReport = function (data) {
     Array.prototype.forEach.call(els, function (el) {
       var target = Number(el.getAttribute('data-count-to'));
       if (!isFinite(target)) return;
-      var duration = 900, start = null;
-      function ease(t) { return 1 - Math.pow(1 - t, 3); } // cubic ease-out — fast start, gentle settle
+      var duration = 1800, start = null;
       function tick(ts) {
         if (start === null) start = ts;
         var progress = Math.min(1, (ts - start) / duration);
-        el.textContent = String(Math.round(target * ease(progress)));
+        el.textContent = String(Math.round(target * CHART_EASE(progress)));
         if (progress < 1) requestAnimationFrame(tick);
       }
       requestAnimationFrame(tick);
+    });
+  }
+
+  function whenVisible(el, fn) {
+    if (!el) return;
+    if (!('IntersectionObserver' in window)) { fn(); return; }
+    var io = new IntersectionObserver(function (entries) {
+      for (var i = 0; i < entries.length; i++) {
+        if (entries[i].isIntersecting) { io.disconnect(); fn(); return; }
+      }
+    }, { threshold: 0.12 });
+    io.observe(el);
+  }
+
+  function armChartBars(root) {
+    var GROW = '.dx-part, .skilldx-seg, .budget-meter-budget, .budget-meter-actual, .budget-gap-rule';
+    var bars = Array.prototype.slice.call(root.querySelectorAll(GROW));
+    var dots = Array.prototype.slice.call(root.querySelectorAll('.budget-gap-actual'));
+    if (!bars.length && !dots.length) return null;
+    var STEP = 90, MAX_DELAY = 650, seen = [];
+    function delayFor(parent) {
+      var i = seen.indexOf(parent);
+      if (i < 0) { seen.push(parent); i = seen.length - 1; }
+      return Math.min(i * STEP, MAX_DELAY);
+    }
+    var restore = [];
+    bars.forEach(function (el) {
+      restore.push({ el: el, prop: 'width', to: el.style.width });
+      el.style.transitionDelay = delayFor(el.parentNode) + 'ms';
+      el.style.width = '0%';
+    });
+    dots.forEach(function (dot) {
+      var tick = dot.parentNode.querySelector('.budget-gap-target');
+      if (!tick || !tick.style.left) return;
+      restore.push({ el: dot, prop: 'left', to: dot.style.left });
+      dot.style.transitionDelay = delayFor(dot.parentNode) + 'ms';
+      dot.style.left = 'calc(' + tick.style.left + ' - 4px)';
+    });
+    return function () {
+      restore.forEach(function (r) { r.el.style[r.prop] = r.to; });
+    };
+  }
+
+  function armCanvasWipe(root) {
+    var cv = root.querySelector('canvas');
+    if (!cv) return null;
+    cv.classList.add('chart-wipe', 'chart-wipe-closed');
+    return function () { cv.classList.remove('chart-wipe-closed'); };
+  }
+
+  function animateOnReveal(root, arm) {
+    if (!root || prefersReducedMotion()) return;
+    var release = arm(root);
+    if (!release) return;
+    whenVisible(root, function () {
+      void root.offsetHeight;
+      requestAnimationFrame(release);
     });
   }
 
@@ -18494,6 +19220,9 @@ window.renderNativeReport = function (data) {
       openQuestionModal(matches, 0, item.label);
     }
 
+    // Wiped in once, the first time the reader reaches it — not on every
+    // redraw. Mirrors report.html's identical guard.
+    var bridgeAnimated = false;
     renderBridge();
 
     function renderBridge() {
@@ -18520,6 +19249,7 @@ window.renderNativeReport = function (data) {
         canvasWrap.appendChild(msg2);
       } else {
         canvasWrap.appendChild(drawBridge(shownItems, currentComposite, reachable, targetScore, applyTargetChange, onBarClick));
+        if (!bridgeAnimated) { bridgeAnimated = true; animateOnReveal(canvasWrap, armCanvasWipe); }
 
         if (!noteOuter) { bridgeWrap.appendChild(outer); return; }
 
@@ -19391,6 +20121,7 @@ window.renderNativeReport = function (data) {
     '</div>';
     document.getElementById('skilldx-hed').style.display = '';
     document.getElementById('skilldx-card').style.display = '';
+    animateOnReveal(document.getElementById('skilldx-card'), armChartBars);
   })();
 
   var take = [];
@@ -19664,7 +20395,11 @@ window.renderNativeReport = function (data) {
       if (m2.length) moduleViews.push({ label: sec.label + ' – Module 2' + (sec.variant ? ' (' + sec.variant + ')' : ''), rows: m2, key: sec.key, clockMin: perModuleMin, mult: (budgetRollups[sec.key] || {}).mult || 1 });
     });
     moduleViews = moduleViews.map(function (mv) {
+      // totalQuestions is the module's real size, captured BEFORE the
+      // zero-time filter below drops every question the student never
+      // reached. Mirrors report.html's identical fix.
       return { label: mv.label, key: mv.key, clockMin: mv.clockMin, mult: mv.mult,
+               totalQuestions: mv.rows.length,
                rows: mv.rows.filter(function (r) { return r.timeMs > 0; }) };
     }).filter(function (mv) { return mv.rows.length >= 2; });
     if (!moduleViews.length) return;
@@ -19734,6 +20469,27 @@ window.renderNativeReport = function (data) {
     var paceLegend = document.getElementById('pace-legend');
     var paceVerdictEl = document.getElementById('pace-verdict');
 
+    /* State for the trace's left-to-right wipe. Mirrors report.html's
+       identical block. */
+    var PACE_CLIP_ID = 'pace-clip';
+    var paceClipRect = null, paceClipFull = 0, paceRevealed = false, paceWipeGen = 0;
+
+    function animatePaceWipe() {
+      var rect = paceClipRect, full = paceClipFull;
+      if (!rect || !full || prefersReducedMotion()) return;
+      var gen = ++paceWipeGen, duration = 1700, start = null;
+      rect.setAttribute('width', 0);
+      function tick(ts) {
+        if (gen !== paceWipeGen) return;
+        if (start === null) start = ts;
+        var progress = Math.min(1, (ts - start) / duration);
+        rect.setAttribute('width', (full * CHART_EASE(progress)).toFixed(2));
+        if (progress < 1) requestAnimationFrame(tick);
+        else rect.setAttribute('width', full);
+      }
+      requestAnimationFrame(tick);
+    }
+
     /* The sentence this whole section exists to say, written above the
        chart rather than left for the reader to derive from it. Two clauses,
        always in the same order:
@@ -19751,13 +20507,18 @@ window.renderNativeReport = function (data) {
        of its own; the shaded band and its legend entry already carry it,
        and "Habits worth naming" narrates it at length further down.
        Mirrors report.html. */
-    function paceVerdict(pts, cf, cb, ct, clockMs, cross) {
+    function paceVerdict(pts, cf, cb, ct, clockMs, cross, totalQ) {
       var NOTABLE = 30000; // half a minute — below this, "over budget" is noise, not a finding
       var out = [];
-      if (cross && cross.n < pts.length) {
-        var left = pts.length - cross.n;
+      // totalQ (the module's real question count), not pts.length (how
+      // many of those got a recorded time) — mirrors report.html's
+      // identical fix; see that copy for why comparing against pts.length
+      // silently suppressed this whole branch for any attempt that
+      // actually ran out of time.
+      if (cross && cross.n < totalQ) {
+        var left = totalQ - cross.n;
         out.push('<strong class="pace-ran-out">The clock ran out at question ' + cross.n +
-          ' of ' + pts.length + '.</strong> The last ' + left + ' question' + (left === 1 ? '' : 's') +
+          ' of ' + totalQ + '.</strong> The last ' + left + ' question' + (left === 1 ? '' : 's') +
           ' never got real time.');
       } else if (clockMs && ct < clockMs) {
         out.push('<strong>Finished with ' + formatDuration(clockMs - ct) + ' still on the clock.</strong>');
@@ -19802,15 +20563,22 @@ window.renderNativeReport = function (data) {
       if (pts.length < 2) { paceSvg.style.display = 'none'; paceLegend.style.display = 'none'; return; }
       paceSvg.style.display = ''; paceLegend.style.display = '';
 
+      // The module's real size, not how many of its questions got a
+      // recorded time. Mirrors report.html's identical fix.
+      var totalQ = mv.totalQuestions || pts.length;
       var clockMs = (mv.clockMin || 0) * 60000;
       var yMaxMs = Math.max(cb, ct, clockMs) * 1.08;
-      var xAtN = function (i) { return L + (i / pts.length) * iw; };
+      var xAtN = function (i) { return L + (i / totalQ) * iw; };
       var yAt = function (ms) { return T + ih - (ms / yMaxMs) * ih; };
+      // Where svgEl() appends — reassigned below so the frame (gridlines,
+      // axis labels) goes onto the svg directly while data marks go into
+      // one clipped group. Mirrors report.html's identical setup.
+      var svgTarget = paceSvg;
       function svgEl(tag, attrs, text) {
         var e = document.createElementNS('http://www.w3.org/2000/svg', tag);
         for (var k in attrs) if (attrs.hasOwnProperty(k)) e.setAttribute(k, attrs[k]);
         if (text != null) e.textContent = text;
-        paceSvg.appendChild(e); return e;
+        svgTarget.appendChild(e); return e;
       }
 
       var stepMin = yMaxMs / 60000 > 45 ? 20 : (yMaxMs / 60000 > 20 ? 10 : 5);
@@ -19819,6 +20587,21 @@ window.renderNativeReport = function (data) {
         svgEl('text', { x: L - 6, y: yAt(m * 60000) + 3, 'text-anchor': 'end', class: 'pace-ax' }, m);
       }
       svgEl('text', { x: 2, y: T - 3, class: 'pace-ax' }, 'min');
+
+      /* Left-to-right reveal: every data mark from here down goes into one
+         group clipped by a rectangle that grows from the y-axis across the
+         plot (see animatePaceWipe). Mirrors report.html's identical setup —
+         see that copy for the full rationale on why this sits here rather
+         than at the top of the render. */
+      var defs = svgEl('defs', {});
+      svgTarget = defs;
+      var clipEl = svgEl('clipPath', { id: PACE_CLIP_ID });
+      svgTarget = clipEl;
+      paceClipFull = W;
+      paceClipRect = svgEl('rect', { x: L, y: 0,
+        width: (paceRevealed || prefersReducedMotion()) ? W : 0, height: H });
+      svgTarget = paceSvg;
+      svgTarget = svgEl('g', { 'clip-path': 'url(#' + PACE_CLIP_ID + ')' });
 
       // Debt against budget: shaded between the budget line and the
       // first-look line, since that is the like-for-like pair.
@@ -19859,7 +20642,7 @@ window.renderNativeReport = function (data) {
       // the page, and which sat close enough to the module-clock label to
       // collide with it. That sentence is now the verdict line above the
       // chart (see paceVerdict), where it is read first rather than found.
-      if (cross && cross.n < pts.length) {
+      if (cross && cross.n < totalQ) {
         svgEl('circle', { cx: xAtN(cross.n), cy: yAt(cross.ct), r: 4,
           fill: 'var(--red)', stroke: 'var(--white)', 'stroke-width': 1.5 });
       }
@@ -19886,14 +20669,18 @@ window.renderNativeReport = function (data) {
         });
       })();
 
-      [1, Math.ceil(pts.length / 2), pts.length].forEach(function (q) {
+      // Back out of the clipped group — the x-axis labels are frame, not
+      // data, and the tooltip hit targets below must not be clipped.
+      svgTarget = paceSvg;
+
+      [1, Math.ceil(totalQ / 2), totalQ].forEach(function (q) {
         svgEl('text', { x: xAtN(q), y: H - B + 13, 'text-anchor': 'middle', class: 'pace-ax' }, q);
       });
       svgEl('text', { x: L + iw / 2, y: H - 3, 'text-anchor': 'middle', class: 'pace-ax' }, 'Question');
 
       pts.forEach(function (p) {
-        var hit = svgEl('rect', { x: xAtN(p.n) - iw / (pts.length * 2), y: T,
-          width: iw / pts.length, height: ih, fill: 'transparent' });
+        var hit = svgEl('rect', { x: xAtN(p.n) - iw / (totalQ * 2), y: T,
+          width: iw / totalQ, height: ih, fill: 'transparent' });
         hit.style.cursor = 'pointer';
         hit.addEventListener('mousemove', function (e) {
           tooltip.innerHTML = '<b>Question ' + p.n + '</b>' + (p.r.sk || '') +
@@ -19925,7 +20712,7 @@ window.renderNativeReport = function (data) {
           (debt >= 0 ? formatDuration(debt) + ' over budget' : formatDuration(-debt) + ' under budget') + '</span>' +
         (anyRevisit ? '<span><i class="fill" style="background:rgba(201,168,76,0.20)"></i>' +
           formatDuration(ct - cf) + ' spent going back</span>' : '');
-      paceVerdictEl.innerHTML = paceVerdict(pts, cf, cb, ct, clockMs, cross);
+      paceVerdictEl.innerHTML = paceVerdict(pts, cf, cb, ct, clockMs, cross, totalQ);
       paceSvg.setAttribute('aria-label', 'Cumulative time for ' + mv.label + ': ' + formatDuration(cf) +
         ' on first looks against ' + formatDuration(cb) + ' budgeted, ' + formatDuration(ct) + ' including return trips' +
         (clockMs ? ', on a ' + Math.round(mv.clockMin) + ' minute clock' : '') + '.');
@@ -19935,6 +20722,7 @@ window.renderNativeReport = function (data) {
       var mv = moduleViews[moduleIdx];
       hideTimingTooltip();
       renderPaceTrace(mv);
+      if (paceRevealed) animatePaceWipe();
       labelEl.textContent = mv.label;
       counterEl.textContent = (moduleIdx + 1) + ' of ' + moduleViews.length;
       prevBtn.disabled = moduleIdx === 0;
@@ -19948,6 +20736,12 @@ window.renderNativeReport = function (data) {
     document.getElementById('timing-card').style.display = '';
     document.getElementById('timing-allocation-sub').style.display = '';
     wrap.style.display = '';
+    // First render armed the clip shut (see renderPaceTrace); open it when
+    // the reader actually gets here. Mirrors report.html.
+    whenVisible(document.getElementById('timing-card'), function () {
+      paceRevealed = true;
+      animatePaceWipe();
+    });
   })();
 
   /* ═══ INTEGRITY BANNER ═══
@@ -20026,11 +20820,11 @@ window.renderNativeReport = function (data) {
     if (!(content + method + clock)) return;
 
     var items = [
-      { key: 'content', n: content, name: 'Content', sub: 'worked hard, still missed',
+      { key: 'content', n: content, name: 'Content', barLabel: 'didn\u2019t know it',
         line: 'the questions that got real, deliberate time and still came back wrong' },
-      { key: 'method',  n: method,  name: 'Method',  sub: 'right, but too expensive',
+      { key: 'method',  n: method,  name: 'Method',  barLabel: 'took too long',
         line: 'right answers bought at a price the rest of the section could not afford' },
-      { key: 'clock',   n: clock,   name: 'The clock', sub: 'never really attempted',
+      { key: 'clock',   n: clock,   name: 'The clock', barLabel: 'ran out of clock',
         line: 'questions reached only after the time was effectively gone, or not at all' }
     ].sort(function (a, b) { return b.n - a.n; });
     var max = items[0].n || 1, total = content + method + clock;
@@ -20063,15 +20857,15 @@ window.renderNativeReport = function (data) {
         return '<span class="dx-part ' + i.key + '" style="width:' + pct.toFixed(1) + '%">' +
           (pct >= 9 ? i.n : '') + '</span>';
       }).join('') + '</div>' +
-      '<div class="dx-key">' + fixed.map(function (i) {
+      '<div class="dx-labels">' + fixed.map(function (i) {
         return '<span><i class="' + i.key + '" style="background:' +
           (i.key === 'content' ? 'var(--red)' : i.key === 'method' ? 'var(--tan)' : '#4E6070') + '"></i>' +
-          '<b>' + i.n + '</b> ' + esc(i.name.toLowerCase() === 'the clock' ? 'lost to the clock' : i.name.toLowerCase()) +
-          ' <em>&mdash; ' + esc(i.sub) + '</em></span>';
+          '<b>' + i.n + '</b> ' + esc(i.barLabel) + '</span>';
       }).join('') + '</div>';
     document.getElementById('dx-hed').style.display = '';
     document.getElementById('dx-verdict-card').style.display = '';
     document.getElementById('dx-verdict-card').className = 'dx-card';
+    animateOnReveal(document.getElementById('dx-verdict-card'), armChartBars);
   })();
 
   /* ═══ TIME BUDGET CARD ═══ see report.html's identical function (this
@@ -20254,11 +21048,12 @@ window.renderNativeReport = function (data) {
     document.getElementById('budget-hed').style.display = '';
     document.getElementById('budget-sub').style.display = '';
     card.style.display = '';
+    animateOnReveal(card, armChartBars);
   })();
 
   document.getElementById('page1').style.display = 'block';
   // After the container is visible, not before — a tween started while the
-  // report is display:none burns its whole 900ms unseen and the score simply
+  // report is display:none burns its whole tween unseen and the score simply
   // appears at full value, which is the thing this exists to avoid.
   animateScoreTiles(document.getElementById('score-tiles'));
 
