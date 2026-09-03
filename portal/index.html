@@ -920,17 +920,53 @@
   .resume-modal-row { display: flex; gap: 0.75rem; }
   .resume-modal-row .key-btn { margin: 0; }
 
+  /* ═══ LEAVE THE EXAM? ═══ replaces a native window.confirm(), which no
+     browser lets you style and which reads as a browser warning rather than
+     part of the test. Same backdrop as the other overlays; softer corners
+     and a right-aligned button pair, so the safe choice (stay) sits where
+     the eye lands first and the destructive one is deliberate. */
+  .leave-overlay { display: none; position: fixed; inset: 0; background: rgba(17,17,17,0.55); z-index: 900; align-items: center; justify-content: center; padding: 1.5rem; }
+  .leave-overlay.active { display: flex; }
+  .leave-modal { background: var(--white); width: 100%; max-width: 430px; border-radius: 16px; padding: 1.9rem 1.9rem 1.5rem; box-shadow: 0 24px 64px rgba(0,0,0,0.3); text-align: left; }
+  .leave-modal-hed { font-family: var(--display); font-weight: 700; font-size: 1.45rem; color: var(--text); margin-bottom: 0.6rem; }
+  .leave-modal-sub { font-family: var(--hel); font-size: 0.95rem; color: var(--mid); line-height: 1.55; margin-bottom: 1.6rem; }
+  .leave-modal-row { display: flex; gap: 0.7rem; justify-content: flex-end; flex-wrap: wrap; }
+  .leave-btn { font: inherit; font-family: var(--hel); font-size: 0.95rem; font-weight: 600; padding: 0.75rem 1.35rem; border-radius: 10px; border: none; cursor: pointer; transition: background 0.15s var(--ease); }
+  .leave-btn-stay { background: #f0f0f0; color: var(--text); }
+  .leave-btn-stay:hover { background: #e6e6e6; }
+  .leave-btn-go { background: var(--red); color: var(--white); }
+  .leave-btn-go:hover { background: #8f1f16; }
+  @media (max-width: 460px) { .leave-modal-row { justify-content: stretch; } .leave-btn { flex: 1; } }
+
   /* ═══ "HOW DO YOU WANT TO SIT THIS?" ═══ the chooser that opens when a
-     practice test is tapped. Stacked full-width choices rather than a row
-     of buttons: there are up to four, one is a resume, and on a phone a
-     row would either wrap badly or shrink the tap targets. */
-  .pt-choice-list { display: flex; flex-direction: column; gap: 0.6rem; text-align: left; }
-  .pt-choice { display: block; width: 100%; text-align: left; border: 1px solid var(--line, #ddd); background: var(--white); padding: 0.85rem 1rem; cursor: pointer; font: inherit; color: var(--text); transition: border-color 0.15s, background 0.15s; }
-  .pt-choice:hover { border-color: var(--red); background: rgba(176,39,28,0.03); }
-  .pt-choice-title { display: block; font-family: var(--hel); font-weight: 700; font-size: 0.9rem; margin-bottom: 0.2rem; }
-  .pt-choice-note { display: block; font-family: var(--hel); font-size: 0.78rem; color: var(--mid); line-height: 1.5; }
-  .pt-choice-resume { border-color: var(--red); background: rgba(176,39,28,0.04); }
-  .pt-choice-cancel { margin-top: 0.9rem; background: none; border: none; font: inherit; font-size: 0.8rem; color: var(--mid); cursor: pointer; text-decoration: underline; }
+     practice test is tapped. Options are RADIOS with an explicit Continue,
+     not buttons that fire on click: picking how to spend the next two hours
+     deserves a beat to change your mind, and a mis-tap on a phone should
+     not start a timed test. */
+  .pt-modal { position: relative; border-radius: 18px; padding: 1.9rem 1.9rem 1.5rem; text-align: left; max-width: 460px; }
+  .pt-modal-close { position: absolute; top: 1rem; right: 1rem; width: 32px; height: 32px; border: none; background: none; border-radius: 50%; cursor: pointer; color: var(--mid); font-size: 1.35rem; line-height: 1; display: flex; align-items: center; justify-content: center; transition: background 0.15s var(--ease), color 0.15s var(--ease); }
+  .pt-modal-close:hover { background: #f0f0f0; color: var(--text); }
+  .pt-modal-hed { font-family: var(--display); font-weight: 700; font-size: 1.4rem; color: var(--text); margin: 0 2rem 0.35rem 0; }
+  .pt-modal-sub { font-family: var(--hel); font-size: 0.88rem; color: var(--mid); line-height: 1.5; margin-bottom: 1.3rem; }
+  .pt-choice-list { display: flex; flex-direction: column; gap: 0.6rem; }
+  .pt-choice { display: flex; align-items: flex-start; gap: 0.85rem; width: 100%; text-align: left; background: #f5f5f5; border: 1px solid transparent; border-radius: 12px; padding: 0.95rem 1.1rem; cursor: pointer; font: inherit; font-family: var(--hel); color: var(--text); transition: background 0.15s var(--ease), border-color 0.15s var(--ease); }
+  .pt-choice:hover { background: #efefef; }
+  .pt-choice.on { background: rgba(176,39,28,0.05); border-color: var(--red); }
+  /* The radio is drawn rather than an <input> so its ring matches the brand
+     red at the same weight as the rest of the portal's controls. */
+  .pt-choice-radio { flex-shrink: 0; width: 19px; height: 19px; margin-top: 0.12rem; border-radius: 50%; border: 2px solid #bdbdbd; position: relative; transition: border-color 0.15s var(--ease); }
+  .pt-choice.on .pt-choice-radio { border-color: var(--red); }
+  .pt-choice.on .pt-choice-radio::after { content: ''; position: absolute; inset: 3px; border-radius: 50%; background: var(--red); }
+  .pt-choice-text { min-width: 0; }
+  .pt-choice-title { display: block; font-weight: 700; font-size: 0.92rem; margin-bottom: 0.15rem; }
+  .pt-choice-note { display: block; font-size: 0.79rem; color: var(--mid); line-height: 1.5; }
+  .pt-modal-actions { display: flex; gap: 0.7rem; justify-content: flex-end; margin-top: 1.5rem; flex-wrap: wrap; }
+  .pt-modal-btn { font: inherit; font-family: var(--hel); font-size: 0.92rem; font-weight: 600; padding: 0.7rem 1.4rem; border-radius: 10px; cursor: pointer; transition: background 0.15s var(--ease); }
+  .pt-modal-cancel { background: var(--white); border: 1px solid var(--border); color: var(--text); }
+  .pt-modal-cancel:hover { background: #f5f5f5; }
+  .pt-modal-go { background: var(--red); border: 1px solid var(--red); color: var(--white); }
+  .pt-modal-go:hover { background: #8f1f16; }
+  @media (max-width: 460px) { .pt-modal-actions { justify-content: stretch; } .pt-modal-btn { flex: 1; } }
 
   /* ═══ "WELCOME BACK" AWAY OVERLAY ═══ see AWAY_THRESHOLD_MS in the main
      script — shown instead of silently auto-submitting when a section or
@@ -4703,16 +4739,33 @@ window.Portal = {
   </div>
 </div>
 
+<!-- ═══ LEAVE THE EXAM? ═══ shown instead of a browser confirm() when a
+     student tries to leave mid-test. See exitPortal() in the script. -->
+<div class="leave-overlay" id="leave-overlay">
+  <div class="leave-modal" role="dialog" aria-modal="true" aria-labelledby="leave-modal-hed">
+    <div class="leave-modal-hed" id="leave-modal-hed">Leave the exam?</div>
+    <p class="leave-modal-sub">You're in the middle of a timed test. Your answers so far are saved, but leaving will exit the exam.</p>
+    <div class="leave-modal-row">
+      <button class="leave-btn leave-btn-stay" id="leave-stay" type="button">Stay in exam</button>
+      <button class="leave-btn leave-btn-go" id="leave-go" type="button">Leave exam</button>
+    </div>
+  </div>
+</div>
+
 <!-- ═══ PRACTICE TEST CHOICE ═══ opened by tapping a practice test. Offers
      the full test or either half on its own, plus a resume when this exact
      test has an unfinished sitting saved. Built here rather than generated
      in JS so the copy is greppable with the rest of the portal's wording. -->
 <div class="resume-overlay" id="pt-choice-overlay">
-  <div class="resume-modal">
-    <div class="resume-modal-hed" id="pt-choice-hed">Practice Test</div>
-    <p class="resume-modal-sub" id="pt-choice-sub">How do you want to sit this one?</p>
-    <div class="pt-choice-list" id="pt-choice-list"></div>
-    <button type="button" class="pt-choice-cancel" id="pt-choice-cancel">Cancel</button>
+  <div class="resume-modal pt-modal" role="dialog" aria-modal="true" aria-labelledby="pt-choice-hed">
+    <button type="button" class="pt-modal-close" id="pt-choice-close" aria-label="Close">&times;</button>
+    <div class="pt-modal-hed" id="pt-choice-hed">Practice Test</div>
+    <p class="pt-modal-sub" id="pt-choice-sub">How do you want to sit this one?</p>
+    <div class="pt-choice-list" id="pt-choice-list" role="radiogroup" aria-labelledby="pt-choice-hed"></div>
+    <div class="pt-modal-actions">
+      <button type="button" class="pt-modal-btn pt-modal-cancel" id="pt-choice-cancel">Cancel</button>
+      <button type="button" class="pt-modal-btn pt-modal-go" id="pt-choice-go">Continue</button>
+    </div>
   </div>
 </div>
 
@@ -7884,20 +7937,58 @@ window.Portal = {
      "your progress will be lost" should never be offered to resume that
      same attempt later. If they're in the middle of a diagnostic (or its
      break screen), confirm first. */
+  var leaveOverlayEl = document.getElementById('leave-overlay');
+  var pendingLeave = null;
+  function openLeaveModal(onConfirm) {
+    pendingLeave = onConfirm;
+    leaveOverlayEl.classList.add('active');
+    var stay = document.getElementById('leave-stay');
+    if (stay && stay.focus) stay.focus();   // the safe choice takes the keyboard
+  }
+  function closeLeaveModal() {
+    leaveOverlayEl.classList.remove('active');
+    pendingLeave = null;
+  }
+  document.getElementById('leave-stay').addEventListener('click', closeLeaveModal);
+  document.getElementById('leave-go').addEventListener('click', function () {
+    var go = pendingLeave;
+    closeLeaveModal();
+    if (go) go();
+  });
+  // Escape and the backdrop both mean "stay" -- the destructive option is
+  // never the one you get by dismissing.
+  leaveOverlayEl.addEventListener('click', function (e) { if (e.target === leaveOverlayEl) closeLeaveModal(); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && leaveOverlayEl.classList.contains('active')) closeLeaveModal();
+  });
+
   function exitPortal(e) {
     if (iqPracticeActive) {
       if (e) e.preventDefault();
       if (window.dxPracticeExitHandler) window.dxPracticeExitHandler();
       return;
     }
+    /* Mid-test, this is a real decision, so it gets a real dialog rather
+       than a browser confirm(). The exit controls are a mix of buttons and
+       links, so the default is ALWAYS prevented here and the navigation is
+       done by doExit() only once the student has actually chosen. */
     if (MID_DIAGNOSTIC_SCREENS[activeScreenId]) {
-      if (!window.confirm('Are you sure? Your progress will be lost and you\'ll have to start from the beginning.')) {
-        if (e) e.preventDefault();
-        return;
-      }
+      if (e) e.preventDefault();
+      openLeaveModal(doExit);
+      return;
     }
+    doExit();
+  }
+
+  function doExit() {
     clearState();
-    clearResumeSnapshot(currentStudent && currentStudent.key);
+    /* The resume snapshot is deliberately KEPT. It used to be cleared here,
+       back when this dialog told the student their progress would be lost --
+       that was true then, because the come-back-later resume was broken and
+       nothing could have reopened the attempt anyway. It works now, so the
+       honest thing is to let them pick the test back up, which is what the
+       dialog promises. Finishing a test still clears it (finishDiagnostic),
+       as does starting the same one over. */
     if (assignPollTimer) { clearInterval(assignPollTimer); assignPollTimer = null; }
     /* Leave, rather than fall back to a screen. The two exit controls that
        are BUTTONS rather than links (#dx-exit-btn and #dx-break-exit-btn)
@@ -7951,11 +8042,25 @@ window.Portal = {
     return snap;
   }
 
-  function ptChoiceRow(kind, title, note, extraClass) {
-    return '<button type="button" class="pt-choice' + (extraClass ? ' ' + extraClass : '') + '" data-pt-choice="' + kind + '">' +
-      '<span class="pt-choice-title">' + title + '</span>' +
-      '<span class="pt-choice-note">' + note + '</span>' +
+  function ptChoiceRow(kind, title, note) {
+    return '<button type="button" class="pt-choice" role="radio" aria-checked="false" data-pt-choice="' + kind + '">' +
+      '<span class="pt-choice-radio"></span>' +
+      '<span class="pt-choice-text">' +
+        '<span class="pt-choice-title">' + title + '</span>' +
+        '<span class="pt-choice-note">' + note + '</span>' +
+      '</span>' +
     '</button>';
+  }
+  function selectPtChoice(btn) {
+    Array.prototype.forEach.call(document.querySelectorAll('#pt-choice-list .pt-choice'), function (b) {
+      var on = b === btn;
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-checked', on ? 'true' : 'false');
+    });
+  }
+  function selectedPtChoice() {
+    var on = document.querySelector('#pt-choice-list .pt-choice.on');
+    return on ? on.getAttribute('data-pt-choice') : null;
   }
 
   function openPtChoice(test) {
@@ -7973,7 +8078,7 @@ window.Portal = {
       var wasSectionOnly = !!snap.sectionOnly;
       rows += ptChoiceRow('resume', 'Resume where you left off',
         'You have an unfinished sitting of this test' + (wasSectionOnly ? ' (' + secName + ' only)' : ', part-way through ' + secName) +
-        '. Your answers and the time you had left are still saved.', 'pt-choice-resume');
+        '. Your answers and the time you had left are still saved.');
     }
     rows += ptChoiceRow('full', 'Full test',
       'Reading &amp; Writing and Math, timed like the real thing. This is the only way to get a 400&ndash;1600 score.');
@@ -7985,7 +8090,11 @@ window.Portal = {
     document.getElementById('pt-choice-sub').textContent = snap
       ? 'Pick up where you left off, or start this test fresh.'
       : 'How do you want to sit this one?';
-    document.getElementById('pt-choice-list').innerHTML = rows;
+    var listEl = document.getElementById('pt-choice-list');
+    listEl.innerHTML = rows;
+    // Pre-select the likeliest intent: picking up an unfinished sitting if
+    // there is one, otherwise the full test.
+    selectPtChoice(listEl.querySelector('.pt-choice'));
     ptChoiceOverlay.classList.add('active');
   }
 
@@ -7995,15 +8104,23 @@ window.Portal = {
   }
 
   document.getElementById('pt-choice-cancel').addEventListener('click', closePtChoice);
+  document.getElementById('pt-choice-close').addEventListener('click', closePtChoice);
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && ptChoiceOverlay.classList.contains('active')) closePtChoice();
+  });
   // Clicking the dimmed backdrop is the other way everyone expects to
   // dismiss a modal; clicks inside the card must not count.
   ptChoiceOverlay.addEventListener('click', function (e) { if (e.target === ptChoiceOverlay) closePtChoice(); });
 
   document.getElementById('pt-choice-list').addEventListener('click', function (e) {
     var btn = e.target.closest('[data-pt-choice]');
-    if (!btn || !ptChoiceTest) return;
-    var kind = btn.getAttribute('data-pt-choice');
+    if (btn) selectPtChoice(btn);
+  });
+
+  document.getElementById('pt-choice-go').addEventListener('click', function () {
+    var kind = selectedPtChoice();
     var test = ptChoiceTest;
+    if (!kind || !test) return;
     closePtChoice();
 
     if (kind === 'resume') {
