@@ -256,10 +256,105 @@ window.MorettiAuth = (function () {
     window.__mtaFetchWrapped = true;
   }
 
-  function post(payload) {
-    return fetch(backendUrl(), { method: 'POST', body: JSON.stringify(payload) })
+  /* Apps Script answers a POST with a redirect to its "echo" host, and that
+     second hop fails now and then -- a 404, or an HTML page where JSON
+     should be -- even though the script itself ran fine. auth-admin.js has
+     documented and handled this for its roster read since it was written;
+     the two SIGN-IN paths never got the same treatment, so a single lost
+     hop was the difference between a student being logged in and being told
+     "Couldn't reach the server". Measured against the live backend: ~1.2s
+     warm, 5-6s cold, and the occasional outright lost answer.
+
+     Retried: `resume` and `googleAuth`. Both are safe to repeat -- resume
+     only reads, and googleAuth's write path is explicitly idempotent and
+     lock-guarded (ensureFolderAndGrant_ is gated on the cells it writes
+     still being empty, which is why a returning student never re-triggers
+     the Drive share email).
+
+     NOT retried: claimInvite, which mints and consumes a single-use nonce.
+     Same rule auth-admin.js states -- writes are never retried, the script
+     already ran. Its own caller already recovers from a lost claim by
+     falling through to googleAuth. */
+  var RETRY_ACTIONS = { resume: true, googleAuth: true };
+
+  /* Does this reply actually answer the question we asked? Deliberately a
+     whitelist of the shapes the backend documents, NOT "does it carry a
+     key" -- googleAuth answers a brand-new student with { ok:true,
+     pending:true } or { ok:true, needsKey:true }, and neither has a key in
+     it. Treating those as lost answers would retry a perfectly good reply
+     three times and then fail the student with a network error, which is
+     the precise flow a first-time student is in. */
+  function isAuthAnswer(data) {
+    if (!data || data.ok !== true) return false;
+    return ('key' in data) || data.pending === true || data.needsKey === true || data.needsEmail === true;
+  }
+  var POST_TIMEOUT_MS = 20000;
+  var POST_MAX_ATTEMPTS = 3;
+
+  function post(payload, attempt) {
+    attempt = attempt || 0;
+    var field = RETRY_ACTIONS[payload && payload.action];
+    var canRetry = !!field && attempt < (POST_MAX_ATTEMPTS - 1);
+    function again() {
+      // Backoff with jitter: a cold start needs a moment, and three clients
+      // retrying in lockstep is its own small stampede.
+      var wait = 700 * Math.pow(2, attempt) + Math.floor(Math.random() * 400);
+      return new Promise(function (r) { setTimeout(r, wait); })
+        .then(function () { return post(payload, attempt + 1); });
+    }
+    /* No timeout at all before this: a hop that never answers left the
+       promise pending for the browser's own multi-minute default, which is
+       the "it just sits there for a minute" half of the complaint. */
+    var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, POST_TIMEOUT_MS);
+    var opts = { method: 'POST', body: JSON.stringify(payload) };
+    if (ctrl) opts.signal = ctrl.signal;
+    return fetch(backendUrl(), opts)
       .then(function (r) { return r.json(); })
-      .catch(function () { return { ok: false, error: 'network' }; });
+      .then(function (data) {
+        clearTimeout(timer);
+        // A stalling deployment answering a POST with its GET health reply
+        // ({ok:true, message}) -- an answer, but not the one we asked for.
+        if (field && data && data.ok === true && !isAuthAnswer(data)) {
+          return canRetry ? again() : { ok: false, error: 'network' };
+        }
+        return data;
+      }, function () {
+        clearTimeout(timer);
+        return canRetry ? again() : { ok: false, error: 'network' };
+      });
+  }
+
+  /* ═══ PRE-FLIGHT RESUME ═══
+     The resume round-trip used to begin only once index.html (1.4MB) had
+     finished parsing and called start(). Measured against the live backend
+     that round-trip is ~1.2s warm and 5-6s cold, and every millisecond of
+     it was spent AFTER the page was otherwise ready -- pure dead time on
+     the critical path, serialized behind work it has nothing to do with.
+
+     Firing it here, the moment this file runs, overlaps it with the rest of
+     the download and parse instead. backend-url.js is loaded before this
+     file, so the URL is already known. Costs nothing when there is no saved
+     session: a student signing in for the first time skips it entirely. */
+  var preflightResume = null, preflightToken = null;
+  try {
+    var preTok = readStore();
+    if (preTok && backendUrl()) {
+      preflightToken = preTok;
+      preflightResume = post({ action: 'resume', session: preTok });
+    }
+  } catch (e) { preflightResume = null; preflightToken = null; }
+
+  // The in-flight pre-flight if it was for this exact token, otherwise a
+  // fresh request. Consumed once: a second caller must ask again rather
+  // than re-read an answer that is by then old.
+  function resumeRequest(token) {
+    if (preflightResume && preflightToken === token) {
+      var p = preflightResume;
+      preflightResume = null; preflightToken = null;
+      return p;
+    }
+    return post({ action: 'resume', session: token });
   }
 
   /* ═══ THE SIGN-IN SURFACE ═══ built, not marked up — see the file header.
@@ -812,7 +907,7 @@ window.MorettiAuth = (function () {
       var storedForInvite = readStore();
       var wantKey = inviteKeyOf(invite);
       if (storedForInvite && wantKey) {
-        return post({ action: 'resume', session: storedForInvite }).then(function (data) {
+        return resumeRequest(storedForInvite).then(function (data) {
           if (data && data.ok && data.key && String(data.key).toUpperCase() === wantKey) {
             resumedStudent = data;
             session = storedForInvite;
@@ -856,7 +951,7 @@ window.MorettiAuth = (function () {
     // starts run into several seconds) showed a "Sign in" panel with
     // nothing to click. Say what is happening instead.
     status('#mta-signin-error', 'Signing you in\u2026');
-    return post({ action: 'resume', session: stored }).then(function (data) {
+    return resumeRequest(stored).then(function (data) {
       if (data && data.ok && data.key) { handle(data); return; }
 
       /* COULD NOT ASK IS NOT A NO. post() turns any failed fetch into
