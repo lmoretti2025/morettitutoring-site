@@ -6,136 +6,184 @@
 <meta name="robots" content="noindex, nofollow">
 <title>Portal preview (local only)</title>
 <!--
-  ═══ LOCAL PREVIEW ═══ open the portal on your own machine without signing
-  in, so a change can be looked at in ten seconds.
+  ═══ LOCAL PREVIEW ═══ open the portal on your own machine.
 
-  WHY THIS EXISTS. Google sign-in refuses a loopback origin unless that
-  exact origin is registered on the OAuth client, so http://localhost:8744
-  comes back "Error 400: invalid_request" no matter what you type. Fixing
-  that properly means adding the origin in Google Cloud Console (see the
-  note at the bottom of this page) -- worth doing once if you want to test
-  the real sign-in, and completely unnecessary if you only want to see what
-  a screen looks like.
+  WHY. Google sign-in refuses a loopback origin unless that exact origin is
+  registered on the OAuth client, so http://localhost:PORT comes back
+  "Error 400: invalid_request" no matter what you type. Two ways round it:
 
-  WHAT IT DOES. Loads portal/index.html with window.fetch stubbed, so the
-  portal believes it is signed in as a made-up student. Every backend reply
-  is invented here in the browser.
+  REAL ACCOUNT (what you usually want). The portal's session token is a
+  signed string the backend checks on its own; it does not care which origin
+  sends it. So sign in once on the live site, copy the token, paste it here,
+  and localhost talks to the real backend as the real account -- your own
+  data, your local code.
 
-  WHAT IT IS NOT. Not a way into anything. It grants no access and reads no
-  real data -- it only feeds the page fake answers on your own machine. It
-  refuses to run anywhere but a loopback address, so it is inert if it ever
-  reaches the live site.
+  FAKE STUDENT. No token, no backend: every reply is invented in the
+  browser. Good for looking at layout, useless for looking at data.
+
+  Refuses to run anywhere but a loopback address either way.
 -->
 <style>
-  body { margin: 0; font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f2f2f2; color: #111; }
-  .gate { max-width: 620px; margin: 0 auto; padding: 3rem 1.5rem; line-height: 1.6; }
-  h1 { font-family: Georgia, serif; font-size: 1.6rem; margin: 0 0 0.75rem; }
-  p { color: rgba(17,17,17,0.62); font-size: 0.95rem; }
-  code { background: rgba(17,17,17,0.06); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em; }
-  .row { display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 1.5rem 0; }
-  a.btn { display: inline-block; text-decoration: none; font-size: 0.88rem; font-weight: 600; padding: 0.7rem 1.1rem; border-radius: 10px; background: #fff; border: 1px solid rgba(17,17,17,0.12); color: #111; }
-  a.btn:hover { border-color: #C9A84C; }
-  a.btn.primary { background: #B0271C; border-color: #B0271C; color: #fff; }
-  .note { font-size: 0.82rem; border-top: 1px solid rgba(17,17,17,0.12); margin-top: 2rem; padding-top: 1.25rem; }
+  :root { --red:#B0271C; --bg:#f2f2f2; --text:#111; --mid:rgba(17,17,17,0.6); --border:rgba(17,17,17,0.14); }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:'Poppins',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:var(--bg); color:var(--text); }
+  .wrap { max-width:640px; margin:0 auto; padding:2.5rem 1.5rem 4rem; line-height:1.6; }
+  h1 { font-family:Georgia,serif; font-size:1.6rem; margin:0 0 0.4rem; }
+  h2 { font-family:Georgia,serif; font-size:1.05rem; margin:2.2rem 0 0.5rem; }
+  p { color:var(--mid); font-size:0.92rem; }
+  ol { color:var(--mid); font-size:0.92rem; padding-left:1.2rem; }
+  li { margin-bottom:0.5rem; }
+  code { background:rgba(17,17,17,0.06); padding:0.15rem 0.4rem; border-radius:4px; font-size:0.85em; word-break:break-all; }
+  pre { background:#fff; border:1px solid var(--border); border-radius:8px; padding:0.85rem 1rem; font-size:0.78rem; overflow-x:auto; margin:0.6rem 0; }
+  textarea { width:100%; min-height:90px; font-family:ui-monospace,Menlo,monospace; font-size:0.75rem; padding:0.75rem; border:1px solid var(--border); border-radius:8px; resize:vertical; }
+  .row { display:flex; flex-wrap:wrap; gap:0.6rem; margin:1rem 0 0; }
+  button, a.btn { font:inherit; font-size:0.88rem; font-weight:600; padding:0.7rem 1.1rem; border-radius:10px; background:#fff; border:1px solid var(--border); color:var(--text); cursor:pointer; text-decoration:none; display:inline-block; }
+  button:hover, a.btn:hover { border-color:#C9A84C; }
+  .primary { background:var(--red); border-color:var(--red); color:#fff; }
+  .msg { font-size:0.85rem; margin-top:0.75rem; min-height:1.2em; }
+  .ok { color:#16A34A; font-weight:600; }
+  .bad { color:var(--red); font-weight:600; }
+  .divider { border:0; border-top:1px solid var(--border); margin:2.5rem 0 0; }
 </style>
 </head>
 <body>
-<div class="gate" id="gate">
+<div class="wrap" id="wrap">
   <h1>Portal preview</h1>
-  <p id="msg">Checking…</p>
-  <div class="row" id="links" style="display:none;">
-    <a class="btn primary" href="?go=1">Open the portal</a>
-    <a class="btn" href="?go=1&amp;screen=vocab">Vocabulary</a>
-    <a class="btn" href="?go=1&amp;screen=practice-tests">Practice Tests</a>
-    <a class="btn" href="?go=1&amp;screen=question-bank">Question Bank</a>
-    <a class="btn" href="?go=1&amp;onboarding=1">First-login sequence</a>
-  </div>
-  <div class="note" id="note" style="display:none;">
-    <p><b>This is fake data.</b> Nothing here touches the real backend or any student's record.</p>
-    <p>To use the <i>real</i> Google sign-in on localhost instead, add your local
-    origin (for example <code>http://localhost:8744</code>) to <b>Authorized JavaScript
-    origins</b> on the OAuth client in Google Cloud Console → APIs &amp; Services →
-    Credentials. That is a one-time change, and it is what the
-    <code>Error 400: invalid_request</code> is asking for.</p>
+  <p id="intro">Checking…</p>
+
+  <div id="body" style="display:none;">
+    <h2>Open as a real account (real data)</h2>
+    <ol>
+      <li>Open <code id="liveLink">https://morettitutoring.com/portal/</code> and sign in as the account you want &mdash; for the demo row, that is the Google account tied to key <b>ZQJ9845</b>.</li>
+      <li>On that page open the browser console and run:
+        <pre id="snippet">copy(localStorage.getItem('moretti_session'))</pre>
+        That puts the session token on your clipboard. (If <code>copy()</code> is unavailable, run <code>localStorage.getItem('moretti_session')</code> and copy the quoted string by hand.)</li>
+      <li>Paste it here and open the portal:</li>
+    </ol>
+    <textarea id="token" placeholder="Paste the session token here" spellcheck="false"></textarea>
+    <div class="row">
+      <button class="primary" id="useToken">Open portal as that account</button>
+      <button id="clearToken">Forget stored token</button>
+    </div>
+    <div class="msg" id="tokenMsg"></div>
+    <p style="font-size:0.82rem;margin-top:0.9rem;">The token stays on this machine. It is the same one the live site already
+    keeps in your browser, and it expires on its own. Signing out on the live site does not
+    invalidate this copy &mdash; use <b>Forget stored token</b> when you are done.</p>
+
+    <hr class="divider">
+
+    <h2>Open with a made-up student (layout only)</h2>
+    <p>No backend at all &mdash; every answer is invented here. Useful for checking a screen, useless for checking data.</p>
+    <div class="row">
+      <a class="btn" href="?fake=1">Portal</a>
+      <a class="btn" href="?fake=1&amp;screen=vocab">Vocabulary</a>
+      <a class="btn" href="?fake=1&amp;screen=practice-tests">Practice Tests</a>
+      <a class="btn" href="?fake=1&amp;screen=question-bank">Question Bank</a>
+      <a class="btn" href="?fake=1&amp;onboarding=1">First-login sequence</a>
+    </div>
+
+    <hr class="divider">
+    <h2>Or fix sign-in properly</h2>
+    <p>Add this page's origin &mdash; <code id="originNow"></code> &mdash; under <b>Authorized JavaScript origins</b>
+    on the OAuth client in Google Cloud Console &rarr; APIs &amp; Services &rarr; Credentials. One-time change, and it is
+    exactly what <code>Error 400: invalid_request</code> is asking for. After that the normal Google button works here.</p>
   </div>
 </div>
 
 <script>
 (function () {
   var host = location.hostname;
-  var loopback = host === 'localhost' || host === '127.0.0.1' || host === '[::1]' || host === '';
-  var msg = document.getElementById('msg');
+  var loopback = host === 'localhost' || host === '127.0.0.1' || host === '[::1]';
+  var intro = document.getElementById('intro');
 
   if (!loopback) {
-    msg.innerHTML = 'This page only runs on a local address. Nothing to see here.';
+    intro.textContent = 'This page only runs on a local address. Nothing to see here.';
+    return;
+  }
+  if (location.protocol === 'file:') {
+    intro.innerHTML = 'Opened straight from disk, so it cannot read index.html. Serve the folder first: ' +
+      '<code>python3 -m http.server 8744</code> from the repo root, then open ' +
+      '<code>http://localhost:8744/portal/preview.html</code>.';
     return;
   }
 
   var params = new URLSearchParams(location.search);
-  if (!params.get('go')) {
-    msg.innerHTML = 'Open the portal with a made-up student, so you can look at a screen without signing in.';
-    document.getElementById('links').style.display = '';
-    document.getElementById('note').style.display = '';
+
+  /* ── Fake-student route ── */
+  if (params.get('fake')) {
+    intro.textContent = 'Loading the portal with a made-up student…';
+    var wantScreen = params.get('screen') || '';
+    var onboarding = params.get('onboarding') === '1';
+    fetch('index.html').then(function (r) {
+      if (!r.ok) throw new Error('index.html returned ' + r.status);
+      return r.text();
+    }).then(function (html) {
+      var student = {
+        ok:true, session:'preview', key:'PREVIEW1', name:'Avery Preview', email:'preview@example.com',
+        needsOnboarding:onboarding, needsName:false, showSat:true, testPrep:true, satTaken:!onboarding,
+        grantedAt:'2026-01-01T00:00:00Z', testDate:'2026-11-07', targetScore:1400,
+        tests:[], assignments:[], driveFolderUrl:''
+      };
+      var boot = '<scr' + 'ipt>(function(){' +
+        'var S=' + JSON.stringify(student) + ',W=' + JSON.stringify(wantScreen) + ';' +
+        'sessionStorage.removeItem("mta_signed_out");localStorage.setItem("moretti_session","preview");' +
+        'var real=window.fetch;window.fetch=function(u,i){var b=null;try{b=JSON.parse(i&&i.body);}catch(e){}' +
+        'if(!b||!b.action)return real.apply(this,arguments);var o={ok:true};' +
+        'if(b.action==="resume"||b.action==="googleAuth")o=S;' +
+        'else if(b.action==="getScoreHistory")o={ok:true,entries:[]};' +
+        'else if(b.action==="getAssignments")o={ok:true,assignments:[]};' +
+        'return Promise.resolve({ok:true,status:200,clone:function(){return this;},' +
+        'json:function(){return Promise.resolve(o);},text:function(){return Promise.resolve(JSON.stringify(o));}});};' +
+        'window.addEventListener("load",function(){badge("PREVIEW - fake data");' +
+        'if(W){setTimeout(function(){var n=document.querySelector(\'[data-nav="\'+W+\'"]\');if(n)n.click();},1500);}});' +
+        'function badge(t){var d=document.createElement("div");d.textContent=t;' +
+        'd.setAttribute("style","position:fixed;bottom:12px;right:12px;z-index:99999;background:#B0271C;color:#fff;' +
+        'font:600 11px/1 Poppins,sans-serif;letter-spacing:.08em;padding:8px 12px;border-radius:20px;' +
+        'box-shadow:0 6px 18px rgba(0,0,0,.25);pointer-events:none;");document.body.appendChild(d);}' +
+        '})();</scr' + 'ipt>';
+      document.open(); document.write(boot + html); document.close();
+    }).catch(function (e) {
+      intro.innerHTML = '<span class="bad">Could not load index.html:</span> ' + e.message +
+        '. Make sure you are serving the repo (<code>python3 -m http.server 8744</code>) and opened this at ' +
+        '<code>/portal/preview.html</code>.';
+    });
     return;
   }
 
-  msg.textContent = 'Loading the portal…';
+  /* ── Chooser ── */
+  intro.textContent = 'Open the portal on this machine without going through Google sign-in.';
+  document.getElementById('body').style.display = '';
+  document.getElementById('originNow').textContent = location.origin;
+  document.getElementById('liveLink').textContent = 'https://morettitutoring.com/portal/';
 
-  var wantScreen = params.get('screen') || '';
-  var onboarding = params.get('onboarding') === '1';
+  var msg = document.getElementById('tokenMsg');
+  var box = document.getElementById('token');
+  try { box.value = localStorage.getItem('moretti_session') || ''; } catch (e) {}
 
-  fetch('index.html').then(function (r) { return r.text(); }).then(function (html) {
-    var student = {
-      ok: true, session: 'preview', key: 'PREVIEW1', name: 'Avery Preview',
-      email: 'preview@example.com',
-      needsOnboarding: onboarding, needsName: false,
-      showSat: true, testPrep: true, satTaken: !onboarding,
-      grantedAt: '2026-01-01T00:00:00Z',
-      testDate: '2026-11-07', targetScore: 1400,
-      tests: [], assignments: [], driveFolderUrl: ''
-    };
+  document.getElementById('useToken').addEventListener('click', function () {
+    var t = (box.value || '').trim().replace(/^["']|["']$/g, '');
+    if (!t) { msg.innerHTML = '<span class="bad">Paste a token first.</span>'; return; }
+    // The portal's tokens are header.payload.signature, same shape as a JWT.
+    if (t.split('.').length !== 3) {
+      msg.innerHTML = '<span class="bad">That does not look like a session token</span> — it should be three ' +
+        'dot-separated chunks. Copy the whole quoted string.';
+      return;
+    }
+    try { localStorage.setItem('moretti_session', t); } catch (e) {
+      msg.innerHTML = '<span class="bad">Could not save it — storage is blocked in this browser.</span>'; return;
+    }
+    try { sessionStorage.removeItem('moretti_portal_state'); sessionStorage.removeItem('mta_signed_out'); } catch (e) {}
+    msg.innerHTML = '<span class="ok">Saved. Opening the portal…</span>';
+    setTimeout(function () { location.href = 'index.html'; }, 500);
+  });
 
-    /* Injected ahead of the portal's own scripts so the stub is in place
-       before anything calls out. Only requests carrying an `action` are
-       intercepted; everything else (the page's own assets) goes through
-       untouched. */
-    var boot =
-      '<scr' + 'ipt>(function(){' +
-      'var STUDENT=' + JSON.stringify(student) + ';' +
-      'var WANT=' + JSON.stringify(wantScreen) + ';' +
-      'sessionStorage.removeItem("mta_signed_out");' +
-      'localStorage.setItem("moretti_session","preview");' +
-      'var real=window.fetch;' +
-      'window.fetch=function(u,i){' +
-        'var b=null; try{b=JSON.parse(i&&i.body);}catch(e){}' +
-        'if(!b||!b.action) return real.apply(this,arguments);' +
-        'var out={ok:true};' +
-        'if(b.action==="resume"||b.action==="googleAuth"||b.action==="claimInvite") out=STUDENT;' +
-        'else if(b.action==="getScoreHistory") out={ok:true,entries:[]};' +
-        'else if(b.action==="getAssignments") out={ok:true,assignments:[]};' +
-        'else if(b.action==="nextSession") out={ok:true,session:null};' +
-        'return Promise.resolve({ok:true,status:200,clone:function(){return this;},' +
-          'json:function(){return Promise.resolve(out);},' +
-          'text:function(){return Promise.resolve(JSON.stringify(out));}});' +
-      '};' +
-      'window.addEventListener("load",function(){' +
-        'var tag=document.createElement("div");' +
-        'tag.textContent="PREVIEW - fake data";' +
-        'tag.setAttribute("style","position:fixed;bottom:12px;right:12px;z-index:99999;' +
-          'background:#B0271C;color:#fff;font:600 11px/1 Poppins,sans-serif;letter-spacing:.08em;' +
-          'padding:8px 12px;border-radius:20px;box-shadow:0 6px 18px rgba(0,0,0,.25);pointer-events:none;");' +
-        'document.body.appendChild(tag);' +
-        'if(WANT){setTimeout(function(){' +
-          'var nav=document.querySelector(\'[data-nav="\'+WANT+\'"]\');if(nav)nav.click();' +
-        '},1500);}' +
-      '});' +
-      '})();</scr' + 'ipt>';
-
-    document.open();
-    document.write(boot + html);
-    document.close();
-  }).catch(function (e) {
-    msg.textContent = 'Could not load index.html from this folder: ' + e;
+  document.getElementById('clearToken').addEventListener('click', function () {
+    try {
+      localStorage.removeItem('moretti_session');
+      sessionStorage.removeItem('moretti_portal_state');
+    } catch (e) {}
+    box.value = '';
+    msg.innerHTML = '<span class="ok">Cleared from this machine.</span>';
   });
 })();
 </script>

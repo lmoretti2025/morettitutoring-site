@@ -98,6 +98,31 @@ window.MorettiAuth = (function () {
      session has to clear BOTH: that snapshot is what makes index.html skip
      MorettiAuth.start() after a refresh, so leaving it behind would restore
      the student into a portal whose every request is refused. */
+  /* "Stay signed in" is the student's own per-device choice. It turns on
+     Google's One Tap auto-select, which is what actually stops a returning
+     student being dropped on the sign-in screen: the session token already
+     survives 30 days, but the moment it lapses -- or they open the portal in
+     another browser -- the only way back in without a chooser is One Tap.
+
+     Deliberately opt-in and deliberately per-device. Auto-select was off by
+     design here (see renderSignIn) because a silent re-login on a shared
+     family laptop is exactly the failure this login system was built to
+     prevent. Asking makes it the student's decision rather than a default
+     that quietly signs a parent's browser into a child's portal. */
+  var pendingStayData = null;
+  var STAY = 'moretti_stay_signed_in';
+  var STAY_SNOOZE = 'moretti_stay_snooze';
+  function staySignedIn() {
+    try { return localStorage.getItem(STAY) === '1'; } catch (e) { return false; }
+  }
+  function shouldOfferStay() {
+    try {
+      if (localStorage.getItem(STAY)) return false;         // already answered
+      var until = Number(localStorage.getItem(STAY_SNOOZE) || 0);
+      return !(until && Date.now() < until);
+    } catch (e) { return false; }
+  }
+
   var PORTAL_STATE = 'moretti_portal_state';
   var SIGNED_OUT = 'mta_signed_out';
 
@@ -262,8 +287,42 @@ window.MorettiAuth = (function () {
             '<a href="#" id="mta-pending-switch">Start over</a></p>' +
         '</div>' +
 
+        /* Offered once, AFTER a student is already in, so it is never
+           standing between them and the portal on a first visit. */
+        '<div id="mta-stay" style="display:none;">' +
+          '<h1 class="panel-hed">Stay signed in on this device?</h1>' +
+          '<p class="panel-sub">Next time you open the portal it will just open, instead of asking you to sign in again.</p>' +
+          '<ul class="mta-stay-list">' +
+            '<li>Only on this device.</li>' +
+            '<li>You can sign out whenever you want.</li>' +
+            '<li>Say no if this is a shared or family computer.</li>' +
+          '</ul>' +
+          '<div class="mta-stay-row">' +
+            '<button class="key-btn" id="mta-stay-yes" type="button">Stay signed in</button>' +
+            '<button class="key-btn mta-stay-secondary" id="mta-stay-no" type="button">Not now</button>' +
+          '</div>' +
+          '<p class="key-help"><a href="#" id="mta-stay-never">Don\'t ask again</a></p>' +
+        '</div>' +
+
       '</div>';
     document.body.appendChild(host);
+
+    /* Answering any of the three hands the student straight on to the
+       portal -- the offer never costs them a second click to get in. */
+    function answerStay(choice) {
+      try {
+        if (choice === 'yes') localStorage.setItem(STAY, '1');
+        else if (choice === 'never') localStorage.setItem(STAY, '0');
+        else localStorage.setItem(STAY_SNOOZE, String(Date.now() + 30 * 24 * 3600 * 1000));
+      } catch (e) {}
+      var data = pendingStayData;
+      pendingStayData = null;
+      hide();
+      if (data) onStudent(data);
+    }
+    host.querySelector('#mta-stay-yes').addEventListener('click', function () { answerStay('yes'); });
+    host.querySelector('#mta-stay-no').addEventListener('click', function () { answerStay('later'); });
+    host.querySelector('#mta-stay-never').addEventListener('click', function (e) { e.preventDefault(); answerStay('never'); });
 
     host.querySelector('#mta-who-student').addEventListener('click', function () { renderSignIn(); });
     host.querySelector('#mta-who-parent').addEventListener('click', function (e) {
@@ -294,7 +353,7 @@ window.MorettiAuth = (function () {
 
   function pane(which) {
     ensureHost();
-    ['who', 'signin', 'key', 'name', 'pending'].forEach(function (p) {
+    ['who', 'signin', 'key', 'name', 'pending', 'stay'].forEach(function (p) {
       host.querySelector('#mta-' + p).style.display = (p === which) ? 'block' : 'none';
     });
     host.style.display = 'flex';
@@ -453,6 +512,16 @@ window.MorettiAuth = (function () {
     // portal rather than trapping them on a form that never accepts an
     // answer; a blank name is cosmetic, a locked-out student is not.
 
+    /* Ask once, and only for a student who is past their first visit --
+       a brand-new student has the name beat and the whole intro sequence
+       ahead of them, and a dialog stacked in front of that is noise. They
+       get asked on a later login instead. */
+    if (shouldOfferStay() && !data.needsOnboarding && !data.needsName) {
+      pendingStayData = data;
+      pane('stay');
+      return;
+    }
+
     hide();
     if (onStudent) onStudent(data);
   }
@@ -583,12 +652,20 @@ window.MorettiAuth = (function () {
       google.accounts.id.initialize({
         client_id: CLIENT_ID,
         callback: onCredential,
+        /* Only ever true because the student asked for it on this device.
+           With it on, prompt() below signs a returning student straight in
+           instead of showing the account chooser. */
         // No One Tap auto-select: this portal keeps its own session, and a
         // silent re-login on a shared family device is exactly the thing
         // this whole change exists to stop being automatic.
-        auto_select: false,
+        auto_select: staySignedIn(),
         cancel_on_tap_outside: true
       });
+      if (staySignedIn()) {
+        // Best effort: if One Tap cannot show (blocked, no Google session,
+        // FedCM off) the button below is still sitting there.
+        try { google.accounts.id.prompt(); } catch (e) {}
+      }
       var target = host.querySelector('#mta-gbtn');
       target.innerHTML = '';
       google.accounts.id.renderButton(target, {
@@ -671,6 +748,10 @@ window.MorettiAuth = (function () {
   function signOut() {
     session = null;
     writeStore(null);
+    /* Signing out is the student saying stop, so it clears the standing
+       "stay signed in" choice too -- otherwise One Tap would put them
+       straight back in and the sign-out would look broken. */
+    try { localStorage.removeItem(STAY); localStorage.removeItem(STAY_SNOOZE); } catch (e) {}
     try {
       if (window.google && google.accounts && google.accounts.id) google.accounts.id.disableAutoSelect();
     } catch (e) {}

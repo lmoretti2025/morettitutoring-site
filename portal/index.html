@@ -913,12 +913,35 @@
 
   /* ═══ "CONTINUE WHERE YOU LEFT OFF?" PROMPT ═══ */
   .resume-overlay { display: none; position: fixed; inset: 0; background: rgba(17,17,17,0.55); z-index: 700; align-items: center; justify-content: center; padding: 1.5rem; }
-  .resume-overlay.active { display: flex; }
-  .resume-modal { background: var(--white); width: 100%; max-width: 420px; padding: 2rem 2rem 1.75rem; text-align: center; box-shadow: 0 24px 64px rgba(0,0,0,0.3); }
+  .resume-overlay.active { display: flex; animation: mtaOverlayIn 0.18s var(--ease); }
+  .resume-modal { background: var(--white); width: 100%; max-width: 420px; border-radius: 16px; padding: 2rem 2rem 1.75rem; text-align: center; box-shadow: 0 24px 64px rgba(0,0,0,0.3); }
+  /* The card rises a few pixels as it fades, so it reads as arriving in
+     front of the page rather than being switched on. */
+  .resume-overlay.active .resume-modal { animation: mtaModalIn 0.22s var(--ease); }
+  @keyframes mtaOverlayIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes mtaModalIn { from { opacity: 0; transform: translateY(10px) scale(0.985); } to { opacity: 1; transform: none; } }
+  /* Motion is a nicety; never make anyone ill for it. */
+  @media (prefers-reduced-motion: reduce) {
+    .resume-overlay.active, .resume-overlay.active .resume-modal,
+    .leave-overlay.active, .leave-overlay.active .leave-modal { animation: none; }
+  }
   .resume-modal-hed { font-family: var(--display); font-weight: 700; font-size: 1.05rem; color: var(--text); margin-bottom: 0.6rem; }
   .resume-modal-sub { font-family: var(--hel); font-size: 0.85rem; color: var(--mid); line-height: 1.6; margin-bottom: 1.6rem; }
   .resume-modal-row { display: flex; gap: 0.75rem; }
   .resume-modal-row .key-btn { margin: 0; }
+
+  /* ═══ STAY SIGNED IN? ═══ the one-time offer inside the sign-in overlay
+     (auth-client.js). Reassurance is the whole job here, so the three
+     promises are a checked list rather than a paragraph nobody reads. */
+  .mta-stay-list { list-style: none; margin: 0 0 1.6rem; padding: 0; text-align: left; display: flex; flex-direction: column; gap: 0.6rem; }
+  .mta-stay-list li { position: relative; padding-left: 1.75rem; font-family: var(--hel); font-size: 0.86rem; color: var(--mid); line-height: 1.5; }
+  .mta-stay-list li::before { content: ''; position: absolute; left: 0; top: 0.1rem; width: 17px; height: 17px; border-radius: 50%; border: 1.5px solid var(--green); }
+  .mta-stay-list li::after { content: ''; position: absolute; left: 5px; top: 0.42rem; width: 6px; height: 3px; border-left: 1.5px solid var(--green); border-bottom: 1.5px solid var(--green); transform: rotate(-45deg); }
+  .mta-stay-row { display: flex; gap: 0.7rem; }
+  .mta-stay-row .key-btn { margin: 0; }
+  .mta-stay-secondary { background: var(--white); color: var(--text); border: 1px solid var(--border); }
+  .mta-stay-secondary:hover { background: #f5f5f5; }
+  @media (max-width: 460px) { .mta-stay-row { flex-direction: column; } }
 
   /* ═══ LEAVE THE EXAM? ═══ replaces a native window.confirm(), which no
      browser lets you style and which reads as a browser warning rather than
@@ -926,7 +949,8 @@
      and a right-aligned button pair, so the safe choice (stay) sits where
      the eye lands first and the destructive one is deliberate. */
   .leave-overlay { display: none; position: fixed; inset: 0; background: rgba(17,17,17,0.55); z-index: 900; align-items: center; justify-content: center; padding: 1.5rem; }
-  .leave-overlay.active { display: flex; }
+  .leave-overlay.active { display: flex; animation: mtaOverlayIn 0.18s var(--ease); }
+  .leave-overlay.active .leave-modal { animation: mtaModalIn 0.22s var(--ease); }
   .leave-modal { background: var(--white); width: 100%; max-width: 430px; border-radius: 16px; padding: 1.9rem 1.9rem 1.5rem; box-shadow: 0 24px 64px rgba(0,0,0,0.3); text-align: left; }
   .leave-modal-hed { font-family: var(--display); font-weight: 700; font-size: 1.45rem; color: var(--text); margin-bottom: 0.6rem; }
   .leave-modal-sub { font-family: var(--hel); font-size: 0.95rem; color: var(--mid); line-height: 1.55; margin-bottom: 1.6rem; }
