@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Portal preview (local only)</title>
+<!--
+  ═══ LOCAL PREVIEW ═══ open the portal on your own machine without signing
+  in, so a change can be looked at in ten seconds.
+
+  WHY THIS EXISTS. Google sign-in refuses a loopback origin unless that
+  exact origin is registered on the OAuth client, so http://localhost:8744
+  comes back "Error 400: invalid_request" no matter what you type. Fixing
+  that properly means adding the origin in Google Cloud Console (see the
+  note at the bottom of this page) -- worth doing once if you want to test
+  the real sign-in, and completely unnecessary if you only want to see what
+  a screen looks like.
+
+  WHAT IT DOES. Loads portal/index.html with window.fetch stubbed, so the
+  portal believes it is signed in as a made-up student. Every backend reply
+  is invented here in the browser.
+
+  WHAT IT IS NOT. Not a way into anything. It grants no access and reads no
+  real data -- it only feeds the page fake answers on your own machine. It
+  refuses to run anywhere but a loopback address, so it is inert if it ever
+  reaches the live site.
+-->
+<style>
+  body { margin: 0; font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f2f2f2; color: #111; }
+  .gate { max-width: 620px; margin: 0 auto; padding: 3rem 1.5rem; line-height: 1.6; }
+  h1 { font-family: Georgia, serif; font-size: 1.6rem; margin: 0 0 0.75rem; }
+  p { color: rgba(17,17,17,0.62); font-size: 0.95rem; }
+  code { background: rgba(17,17,17,0.06); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em; }
+  .row { display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 1.5rem 0; }
+  a.btn { display: inline-block; text-decoration: none; font-size: 0.88rem; font-weight: 600; padding: 0.7rem 1.1rem; border-radius: 10px; background: #fff; border: 1px solid rgba(17,17,17,0.12); color: #111; }
+  a.btn:hover { border-color: #C9A84C; }
+  a.btn.primary { background: #B0271C; border-color: #B0271C; color: #fff; }
+  .note { font-size: 0.82rem; border-top: 1px solid rgba(17,17,17,0.12); margin-top: 2rem; padding-top: 1.25rem; }
+</style>
+</head>
+<body>
+<div class="gate" id="gate">
+  <h1>Portal preview</h1>
+  <p id="msg">Checking…</p>
+  <div class="row" id="links" style="display:none;">
+    <a class="btn primary" href="?go=1">Open the portal</a>
+    <a class="btn" href="?go=1&amp;screen=vocab">Vocabulary</a>
+    <a class="btn" href="?go=1&amp;screen=practice-tests">Practice Tests</a>
+    <a class="btn" href="?go=1&amp;screen=question-bank">Question Bank</a>
+    <a class="btn" href="?go=1&amp;onboarding=1">First-login sequence</a>
+  </div>
+  <div class="note" id="note" style="display:none;">
+    <p><b>This is fake data.</b> Nothing here touches the real backend or any student's record.</p>
+    <p>To use the <i>real</i> Google sign-in on localhost instead, add your local
+    origin (for example <code>http://localhost:8744</code>) to <b>Authorized JavaScript
+    origins</b> on the OAuth client in Google Cloud Console → APIs &amp; Services →
+    Credentials. That is a one-time change, and it is what the
+    <code>Error 400: invalid_request</code> is asking for.</p>
+  </div>
+</div>
+
+<script>
+(function () {
+  var host = location.hostname;
+  var loopback = host === 'localhost' || host === '127.0.0.1' || host === '[::1]' || host === '';
+  var msg = document.getElementById('msg');
+
+  if (!loopback) {
+    msg.innerHTML = 'This page only runs on a local address. Nothing to see here.';
+    return;
+  }
+
+  var params = new URLSearchParams(location.search);
+  if (!params.get('go')) {
+    msg.innerHTML = 'Open the portal with a made-up student, so you can look at a screen without signing in.';
+    document.getElementById('links').style.display = '';
+    document.getElementById('note').style.display = '';
+    return;
+  }
+
+  msg.textContent = 'Loading the portal…';
+
+  var wantScreen = params.get('screen') || '';
+  var onboarding = params.get('onboarding') === '1';
+
+  fetch('index.html').then(function (r) { return r.text(); }).then(function (html) {
+    var student = {
+      ok: true, session: 'preview', key: 'PREVIEW1', name: 'Avery Preview',
+      email: 'preview@example.com',
+      needsOnboarding: onboarding, needsName: false,
+      showSat: true, testPrep: true, satTaken: !onboarding,
+      grantedAt: '2026-01-01T00:00:00Z',
+      testDate: '2026-11-07', targetScore: 1400,
+      tests: [], assignments: [], driveFolderUrl: ''
+    };
+
+    /* Injected ahead of the portal's own scripts so the stub is in place
+       before anything calls out. Only requests carrying an `action` are
+       intercepted; everything else (the page's own assets) goes through
+       untouched. */
+    var boot =
+      '<scr' + 'ipt>(function(){' +
+      'var STUDENT=' + JSON.stringify(student) + ';' +
+      'var WANT=' + JSON.stringify(wantScreen) + ';' +
+      'sessionStorage.removeItem("mta_signed_out");' +
+      'localStorage.setItem("moretti_session","preview");' +
+      'var real=window.fetch;' +
+      'window.fetch=function(u,i){' +
+        'var b=null; try{b=JSON.parse(i&&i.body);}catch(e){}' +
+        'if(!b||!b.action) return real.apply(this,arguments);' +
+        'var out={ok:true};' +
+        'if(b.action==="resume"||b.action==="googleAuth"||b.action==="claimInvite") out=STUDENT;' +
+        'else if(b.action==="getScoreHistory") out={ok:true,entries:[]};' +
+        'else if(b.action==="getAssignments") out={ok:true,assignments:[]};' +
+        'else if(b.action==="nextSession") out={ok:true,session:null};' +
+        'return Promise.resolve({ok:true,status:200,clone:function(){return this;},' +
+          'json:function(){return Promise.resolve(out);},' +
+          'text:function(){return Promise.resolve(JSON.stringify(out));}});' +
+      '};' +
+      'window.addEventListener("load",function(){' +
+        'var tag=document.createElement("div");' +
+        'tag.textContent="PREVIEW - fake data";' +
+        'tag.setAttribute("style","position:fixed;bottom:12px;right:12px;z-index:99999;' +
+          'background:#B0271C;color:#fff;font:600 11px/1 Poppins,sans-serif;letter-spacing:.08em;' +
+          'padding:8px 12px;border-radius:20px;box-shadow:0 6px 18px rgba(0,0,0,.25);pointer-events:none;");' +
+        'document.body.appendChild(tag);' +
+        'if(WANT){setTimeout(function(){' +
+          'var nav=document.querySelector(\'[data-nav="\'+WANT+\'"]\');if(nav)nav.click();' +
+        '},1500);}' +
+      '});' +
+      '})();</scr' + 'ipt>';
+
+    document.open();
+    document.write(boot + html);
+    document.close();
+  }).catch(function (e) {
+    msg.textContent = 'Could not load index.html from this folder: ' + e;
+  });
+})();
+</script>
+</body>
+</html>
