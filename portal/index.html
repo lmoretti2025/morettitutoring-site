@@ -1406,6 +1406,40 @@
      span, 1 / -1) — that's what actually makes two cards share a row
      instead of each one claiming the whole grid regardless of viewport. */
   #pt-test-list .menu-card-wide { grid-column: auto; }
+
+  /* ═══ FLUSH UNTIL HOVER ═══ the same treatment as the Home screen's
+     shortcut tiles (see .home-shortcut-card): the card sits flush with the
+     page at rest and only becomes a bordered, shadowed, white tile under
+     the cursor, with a gold glow that follows the pointer. Scoped to
+     #pt-test-list so the .menu-card default (a permanently bordered tile)
+     still applies everywhere else it is used. */
+  #pt-test-list .menu-card {
+    background: transparent; border-color: transparent; box-shadow: none;
+    transform-style: preserve-3d;
+    transition: transform 0.25s var(--ease), background 0.25s var(--ease),
+                border-color 0.25s var(--ease), box-shadow 0.25s var(--ease);
+  }
+  /* The 2px gradient rule that slides across .menu-card on hover belongs to
+     the bordered treatment; the glow replaces it here. */
+  #pt-test-list .menu-card::before { content: none; }
+  #pt-test-list .menu-card::after {
+    content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+    background: radial-gradient(200px circle at var(--mx, 50%) var(--my, 50%), rgba(201,168,76,0.16), transparent 70%);
+    opacity: 0; transition: opacity 0.35s ease;
+  }
+  #pt-test-list .menu-card:hover {
+    background: var(--white); border-color: var(--gold); box-shadow: var(--shadow-hover);
+    transform: none;   /* the tilt is applied inline; do not fight it */
+  }
+  #pt-test-list .menu-card:hover::after { opacity: 1; }
+  /* At rest the badge would float as a white chip on the bare page. */
+  #pt-test-list .menu-card-badge { background: transparent; transition: background 0.25s var(--ease); }
+  #pt-test-list .menu-card:hover .menu-card-badge { background: var(--white); }
+  #pt-test-list .pt-card-done .menu-card-badge { background: transparent; }
+  #pt-test-list .pt-card-done:hover .menu-card-badge { background: rgba(63,143,95,0.09); }
+  @media (prefers-reduced-motion: reduce) {
+    #pt-test-list .menu-card { transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease; }
+  }
   /* No height:100dvh/overflow:hidden pinning here on purpose (an earlier
      version tried to keep the whole picker inside one fixed viewport,
      Home-screen-style) — a CSS Grid squeezed into a height-constrained
@@ -5432,23 +5466,24 @@ window.Portal = {
   // Cursor-tracked glow + subtle tilt on the two Home shortcut cards — see
   // .home-shortcut-card in the CSS for the flush-until-hover treatment
   // this drives (--mx/--my position the glow, the transform is the tilt).
-  (function () {
-    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    document.querySelectorAll('.home-shortcut-card').forEach(function (card) {
-      card.addEventListener('mousemove', function (e) {
-        var r = card.getBoundingClientRect();
-        var x = e.clientX - r.left, y = e.clientY - r.top;
-        card.style.setProperty('--mx', x + 'px');
-        card.style.setProperty('--my', y + 'px');
-        if (!reduceMotion) {
-          var rx = ((y / r.height) - 0.5) * -5;
-          var ry = ((x / r.width) - 0.5) * 5;
-          card.style.transform = 'perspective(700px) rotateX(' + rx.toFixed(2) + 'deg) rotateY(' + ry.toFixed(2) + 'deg) translateY(-2px)';
-        }
-      });
-      card.addEventListener('mouseleave', function () { card.style.transform = ''; });
+  var REDUCE_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function wireCardGlow(card) {
+    if (!card || card.__glowWired) return;
+    card.__glowWired = true;   // renderPracticeTestList() rebuilds its list often
+    card.addEventListener('mousemove', function (e) {
+      var r = card.getBoundingClientRect();
+      var x = e.clientX - r.left, y = e.clientY - r.top;
+      card.style.setProperty('--mx', x + 'px');
+      card.style.setProperty('--my', y + 'px');
+      if (!REDUCE_MOTION) {
+        var rx = ((y / r.height) - 0.5) * -5;
+        var ry = ((x / r.width) - 0.5) * 5;
+        card.style.transform = 'perspective(700px) rotateX(' + rx.toFixed(2) + 'deg) rotateY(' + ry.toFixed(2) + 'deg) translateY(-2px)';
+      }
     });
-  })();
+    card.addEventListener('mouseleave', function () { card.style.transform = ''; });
+  }
+  document.querySelectorAll('.home-shortcut-card').forEach(wireCardGlow);
 
   function applyTestPrepGating() {
     var showSat = !!(currentStudent && currentStudent.showSat);
@@ -8593,6 +8628,7 @@ window.Portal = {
       (attempts.length ? buildPtMenuHtml(attempts) : '');
     card.addEventListener('click', startDiagnosticFlow);
     if (attempts.length) wirePtMenu(card, attempts);
+    wireCardGlow(card);   // same flush-until-hover treatment as the Home tiles
     return card;
   }
   function renderPracticeTestList() {
@@ -8676,6 +8712,7 @@ window.Portal = {
         (attempts.length ? buildPtMenuHtml(attempts) : '');
       card.addEventListener('click', function () { openPtChoice(test); });
       if (attempts.length) wirePtMenu(card, attempts);
+      wireCardGlow(card);   // same flush-until-hover treatment as the Home tiles
       list.appendChild(card);
     });
   }
