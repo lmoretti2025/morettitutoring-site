@@ -50,6 +50,48 @@ window.MorettiAuth = (function () {
   var GSI_SRC = 'https://accounts.google.com/gsi/client';
   var POLL_MS = 4000;
   var CONTACT = 'text Luca at (201) 275-2791';
+  var GSI_TIMEOUT_MS = 12000;
+
+  /* Google Identity Services refuses to run inside an embedded browser --
+     the viewer you get when a link is tapped from inside Gmail, Instagram,
+     WhatsApp or Messenger. Google answers `disallowed_useragent`, the
+     sign-in never opens, and the page simply sits there. Nothing in this
+     flow could say so, and "the link isn't opening and says it is not
+     responding" is precisely what that looks like from the other side --
+     with not one request reaching the server to leave a trace.
+
+     ADVISORY, NEVER BLOCKING. User-agent sniffing is wrong in both
+     directions (iOS SFSafariViewController carries no Safari token yet
+     signs in perfectly well), so this only ever ADDS a note; the Google
+     button stays exactly where it was underneath it. */
+  function inAppBrowserName() {
+    var ua = navigator.userAgent || '';
+    if (/FBAN|FBAV|FB_IAB/i.test(ua)) return 'Facebook';
+    if (/Instagram/i.test(ua)) return 'Instagram';
+    if (/Messenger/i.test(ua)) return 'Messenger';
+    if (/WhatsApp/i.test(ua)) return 'WhatsApp';
+    if (/Snapchat/i.test(ua)) return 'Snapchat';
+    if (/TikTok|musical_ly/i.test(ua)) return 'TikTok';
+    if (/\bLine\//i.test(ua)) return 'LINE';
+    if (/GSA\//.test(ua)) return 'the Google app';
+    if (/;\s*wv\)/.test(ua)) return 'an in-app browser';          // Android WebView
+    if (/(iPhone|iPod|iPad)/.test(ua) && /AppleWebKit/.test(ua)
+        && !/Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS/.test(ua)) return 'an in-app browser';
+    return null;
+  }
+
+  /* The key an invite token is for, read WITHOUT verifying it -- the server
+     still checks the signature on every call. Used only to decide whether a
+     session already on this device belongs to the same student the link is
+     for, so nothing security-relevant rests on it. */
+  function inviteKeyOf(token) {
+    try {
+      var body = String(token).split('.')[0].replace(/-/g, '+').replace(/_/g, '/');
+      while (body.length % 4) body += '=';
+      var p = JSON.parse(decodeURIComponent(escape(atob(body))));
+      return String(p.k || '').toUpperCase() || null;
+    } catch (e) { return null; }
+  }
 
   var session = null;
   var idToken = null;      // held only for the duration of a sign-in attempt
@@ -59,6 +101,7 @@ window.MorettiAuth = (function () {
   var nameAsked = false;   // one ask only — see the needsName branch in handle()
   var host = null;
   var invite = null;       // the ?invite= token, if this visit came from an invite email
+  var resumedStudent = null; // a live session already on this device, when it belongs to the invited student
 
   function backendUrl() { return window.APPS_SCRIPT_URL || ''; }
 
@@ -232,6 +275,24 @@ window.MorettiAuth = (function () {
       '<div class="panel" style="text-align:center;">' +
         '<div class="kicker">Student Portal</div>' +
 
+        /* An invite link opened on a device already signed in AS THE SAME
+           STUDENT. That is the common case once the invite has been used:
+           the only URL the family kept is the invite, so every trip back to
+           the portal comes through it. Forcing a fresh Google sign-in there
+           threw away a perfectly good session -- and if Google happened to
+           be blocked (see inAppBrowserName) it stranded them on a page that
+           could not work, with their own valid session sitting unused in
+           localStorage a few lines away. */
+        '<div id="mta-continue" style="display:none;">' +
+          '<h1 class="panel-hed">You&rsquo;re already set up</h1>' +
+          '<p class="panel-sub">This device is signed in as <b id="mta-continue-who"></b>. ' +
+            'That invite link was one-time and has already been used &mdash; you don&rsquo;t need it again.</p>' +
+          '<button class="key-btn" id="mta-continue-go">Continue to the portal</button>' +
+          '<p class="key-help" style="margin-top:1rem;">From now on just open ' +
+            '<b>morettitutoring.com/portal</b> &mdash; worth bookmarking.</p>' +
+          '<p class="key-help"><a href="#" id="mta-continue-other">This isn&rsquo;t me &mdash; sign in as someone else</a></p>' +
+        '</div>' +
+
         '<div id="mta-who" style="display:none;">' +
           '<h1 class="panel-hed">Before you sign in</h1>' +
           '<p class="panel-sub">This link sets up the <b>student&rsquo;s</b> portal account. ' +
@@ -324,6 +385,16 @@ window.MorettiAuth = (function () {
     host.querySelector('#mta-stay-no').addEventListener('click', function () { answerStay('later'); });
     host.querySelector('#mta-stay-never').addEventListener('click', function (e) { e.preventDefault(); answerStay('never'); });
 
+    host.querySelector('#mta-continue-go').addEventListener('click', function () {
+      if (resumedStudent) { invite = null; handle(resumedStudent); }
+    });
+    host.querySelector('#mta-continue-other').addEventListener('click', function (e) {
+      e.preventDefault();
+      // Genuinely a different person on a shared device: drop the resumed
+      // session and fall back to the original who-are-you flow.
+      resumedStudent = null; session = null; writeStore(null);
+      pane('who');
+    });
     host.querySelector('#mta-who-student').addEventListener('click', function () { renderSignIn(); });
     host.querySelector('#mta-who-parent').addEventListener('click', function (e) {
       e.preventDefault();
@@ -353,7 +424,7 @@ window.MorettiAuth = (function () {
 
   function pane(which) {
     ensureHost();
-    ['who', 'signin', 'key', 'name', 'pending', 'stay'].forEach(function (p) {
+    ['continue', 'who', 'signin', 'key', 'name', 'pending', 'stay'].forEach(function (p) {
       host.querySelector('#mta-' + p).style.display = (p === which) ? 'block' : 'none';
     });
     host.style.display = 'flex';
@@ -610,17 +681,41 @@ window.MorettiAuth = (function () {
   }
 
   /* ═══ GOOGLE IDENTITY SERVICES ═══ */
+  /* onerror alone was not enough. It fires when the request FAILS, but a
+     filtered network or a captive portal can leave the request hanging
+     instead, and then this promise never settled at all: no button, no
+     error, no explanation -- a blank panel forever. The timeout turns that
+     into something a student can act on. */
   function loadGsi() {
     return new Promise(function (resolve, reject) {
       if (window.google && google.accounts && google.accounts.id) return resolve();
+      var settled = false;
+      function finish(fn, arg) { if (settled) return; settled = true; clearTimeout(timer); fn(arg); }
+      var timer = setTimeout(function () { finish(reject, new Error('gsi_timeout')); }, GSI_TIMEOUT_MS);
       var s = document.createElement('script');
       s.src = GSI_SRC;
       s.async = true;
       s.defer = true;
-      s.onload = function () { resolve(); };
-      s.onerror = function () { reject(new Error('gsi_blocked')); };
+      s.onload = function () { finish(resolve); };
+      s.onerror = function () { finish(reject, new Error('gsi_blocked')); };
       document.head.appendChild(s);
     });
+  }
+
+  /* Everything we can tell a student whose sign-in cannot start. Named
+     rather than inlined because three different failures end here: the
+     script being blocked, the script hanging, and the button rendering
+     empty inside an embedded browser. */
+  function signInUnavailableHelp() {
+    var app = inAppBrowserName();
+    if (app) {
+      return 'Google will not allow sign-in inside ' + app + '. Open this page in Safari or Chrome instead: ' +
+        'press and hold the link and choose "Open in Browser", or type ' +
+        'morettitutoring.com/portal into your browser yourself.';
+    }
+    return "Google's sign-in could not start \u2014 an ad blocker, a content blocker or a school network filter is " +
+      'the usual cause, and tapping a link from inside an app (Gmail, Instagram, WhatsApp) does it too. ' +
+      'Try opening morettitutoring.com/portal in Safari or Chrome, or ' + CONTACT + '.';
   }
 
   function onCredential(response) {
@@ -672,10 +767,22 @@ window.MorettiAuth = (function () {
         theme: 'outline', size: 'large', text: 'signin_with',
         shape: 'rectangular', logo_alignment: 'left', width: 280
       });
+      /* Say it BEFORE they try, when we can already tell: the button will
+         render here and simply do nothing when tapped. */
+      if (inAppBrowserName()) err('#mta-signin-error', signInUnavailableHelp());
+      /* And say it after, for the embedded browsers no user-agent test
+         catches: the script loads, initialize() succeeds, and renderButton
+         quietly produces an empty div. Only speaks up if nothing rendered
+         and nothing has been said already. */
+      setTimeout(function () {
+        var t = host && host.querySelector('#mta-gbtn');
+        if (!t || t.querySelector('iframe, div[role="button"]')) return;
+        var slot = host.querySelector('#mta-signin-error');
+        if (slot && slot.textContent.trim()) return;
+        err('#mta-signin-error', signInUnavailableHelp());
+      }, 3500);
     }).catch(function () {
-      err('#mta-signin-error',
-        "Google's sign-in script could not load — an ad blocker, a content blocker or a school network filter is the usual cause. " +
-        'Try another browser or turn the blocker off for this site, or ' + CONTACT + '.');
+      err('#mta-signin-error', signInUnavailableHelp());
     });
   }
 
@@ -688,11 +795,39 @@ window.MorettiAuth = (function () {
     ensureHost();
 
     invite = takeInviteFromUrl();
-    // An invite arriving on a device that is ALREADY signed in as someone
-    // else is the shared-family-laptop case. Resuming the old session would
-    // silently swallow the invite; the who-pane lets the new student take
-    // over the tab instead.
+    /* An invite arriving on a device ALREADY signed in as someone else is
+       the shared-family-laptop case: resuming the old session would
+       silently swallow the invite, so the who-pane lets the new student
+       take the tab over.
+
+       But the same link arriving on a device signed in as THE STUDENT IT IS
+       FOR is not that -- it is just a student coming back through the only
+       URL they kept. That used to be treated identically, throwing away a
+       working session and demanding a fresh Google sign-in; when Google was
+       blocked (an in-app browser) it stranded them completely, with their
+       own valid session sitting unused in localStorage. So: resume first,
+       and only fall back to the who-pane if the session turns out to belong
+       to somebody else. */
     if (invite) {
+      var storedForInvite = readStore();
+      var wantKey = inviteKeyOf(invite);
+      if (storedForInvite && wantKey) {
+        return post({ action: 'resume', session: storedForInvite }).then(function (data) {
+          if (data && data.ok && data.key && String(data.key).toUpperCase() === wantKey) {
+            resumedStudent = data;
+            session = storedForInvite;
+            host.querySelector('#mta-continue-who').textContent =
+              data.name || data.email || 'this student';
+            pane('continue');
+            return;
+          }
+          // Someone else's session, or it could not be resumed -- original
+          // behaviour. A network failure lands here too, which is right:
+          // the invite still needs to work on a flaky connection.
+          session = null;
+          pane('who');
+        });
+      }
       session = null;
       pane('who');
       return Promise.resolve();
