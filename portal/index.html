@@ -9787,6 +9787,22 @@ window.Portal = {
      number. */
   function ptTileState(opts) {
     var snap = opts.snapshot, result = opts.result;
+    /* A snapshot older than a recorded result for the SAME test is spent —
+       that attempt finished, and what is left in storage is the last
+       autosave taken moments before it did. finishDiagnostic clears the
+       snapshot on the normal path, but it only ever clears the CURRENT
+       one, so an abandoned attempt at test A could sit in storage while
+       test B was played to the end, and A's tile went on offering "Resume"
+       for an attempt whose result was already on the card next to it.
+       Comparing timestamps settles it without having to enumerate the
+       paths: a genuine retake-in-progress saves AFTER the result it is
+       retaking, so it still wins. Missing timestamps on either side fall
+       through to the old snapshot-first behaviour. */
+    if (snap && result) {
+      var snapAt = (typeof snap.savedAt === 'number') ? snap.savedAt : null;
+      var resultAt = result.date ? Date.parse(result.date) : null;
+      if (snapAt !== null && resultAt !== null && !isNaN(resultAt) && snapAt <= resultAt) snap = null;
+    }
     if (snap) {
       var mins = (typeof snap.sectionTimerRemainingMs === 'number')
         ? Math.max(0, Math.round(snap.sectionTimerRemainingMs / 60000)) : null;
@@ -9972,8 +9988,34 @@ window.Portal = {
     var toggle = wrap.querySelector('[data-pt-menu-toggle]');
     if (!dropdown || !toggle) return;
     var r = toggle.getBoundingClientRect();
-    dropdown.style.top = (r.bottom + 6) + 'px';
     dropdown.style.right = (window.innerWidth - r.right) + 'px';
+
+    /* Flip up when there is no room below, and clamp to the viewport.
+       This used to be an unconditional top = toggle.bottom + 6, which is
+       fine for a card near the top of the list and wrong for every card
+       below it: a fixed-position element placed past the fold sits off the
+       bottom of the window, and since the practice-test list grows with
+       every attempt, the menu on a lower card opened somewhere far below
+       the test it belonged to. Measuring the dropdown first (it is display
+       block by the time this runs, so it has a real height) is what makes
+       the decision possible at all. */
+    var MARGIN = 8;
+    var h = dropdown.offsetHeight || 0;
+    var below = window.innerHeight - r.bottom - MARGIN;
+    var above = r.top - MARGIN;
+    var top;
+    if (h <= below || below >= above) {
+      top = r.bottom + 6;                       // normal: hangs under the button
+    } else {
+      top = r.top - h - 6;                      // flipped: sits above it
+    }
+    // Never let it leave the window, whichever side it went to.
+    top = Math.max(MARGIN, Math.min(top, window.innerHeight - h - MARGIN));
+    dropdown.style.top = top + 'px';
+    // A menu taller than the window scrolls inside itself rather than
+    // running off both edges.
+    dropdown.style.maxHeight = (window.innerHeight - 2 * MARGIN) + 'px';
+    dropdown.style.overflowY = 'auto';
   }
   // stopPropagation on every click inside the menu — without it, clicking
   // the "View Results" button (or an "Attempt N" item) would bubble up to
@@ -9992,7 +10034,15 @@ window.Portal = {
           wrap.classList.add('open');
           card.classList.add('pt-menu-card-open'); // see .menu-card.pt-menu-card-open in the CSS
           toggle.setAttribute('aria-expanded', 'true');
+          // After .open, so the dropdown is displayed and has a measurable
+          // height — the flip-up decision needs it.
           positionPtMenuDropdown(wrap);
+          // A fixed-position menu does not travel with the card, so it has
+          // to be repositioned while it is open or it detaches from its
+          // button. Listeners are removed by closeAllPtMenus.
+          ptMenuReposition = function () { positionPtMenuDropdown(wrap); };
+          window.addEventListener('scroll', ptMenuReposition, true);
+          window.addEventListener('resize', ptMenuReposition);
         }
       });
     }
@@ -10075,7 +10125,15 @@ window.Portal = {
       } catch (e) { /* ignore */ }
     });
   }
+  // Set while a menu is open so the scroll/resize listeners it installed
+  // can be taken off again when it closes.
+  var ptMenuReposition = null;
   function closeAllPtMenus() {
+    if (ptMenuReposition) {
+      window.removeEventListener('scroll', ptMenuReposition, true);
+      window.removeEventListener('resize', ptMenuReposition);
+      ptMenuReposition = null;
+    }
     document.querySelectorAll('[data-pt-menu-wrap].open').forEach(function (w) {
       w.classList.remove('open');
       var t = w.querySelector('[data-pt-menu-toggle]');
@@ -10084,11 +10142,10 @@ window.Portal = {
     document.querySelectorAll('.pt-menu-card-open').forEach(function (c) { c.classList.remove('pt-menu-card-open'); });
   }
   document.addEventListener('click', closeAllPtMenus);
-  // The dropdown's position is computed once, at open time, from the
-  // toggle's screen position — scrolling the (now-scrollable, see
-  // #pt-test-list) list afterward would leave it visually detached from
-  // its button, so scrolling just closes it instead of re-tracking it.
-  document.getElementById('pt-test-list').addEventListener('scroll', closeAllPtMenus);
+  // The dropdown now re-tracks its button on scroll (see the listeners
+  // installed in wirePtMenu), so scrolling the list no longer has to close
+  // it to avoid leaving it visually detached. The listener is capture-phase
+  // on window, which already covers this container's own scrolling.
   // Sends a student straight to the picker with one test called out —
   // used by the "Take me there" shortcut on an assignment that names a
   // numbered test. Deliberately stops at the picker instead of launching
@@ -11425,7 +11482,15 @@ window.Portal = {
       : (pt ? ('Begin ' + practiceTestNameParts(pt).name)
             : ('Begin ' + testChoice + ' Diagnostic'));
 
-    document.getElementById('overview-back').textContent = pt ? '← Back to Practice Tests' : '← Back to menu';
+    /* "Back to menu" is only the right destination for a student who has
+       not taken the diagnostic yet — for them the menu IS where this
+       started. Once it is done, the diagnostic lives on the Practice Tests
+       screen alongside everything else, so that is where back goes: the
+       label named a place that was no longer the one they came from. Same
+       treatment a numbered practice test already got. */
+    var backToPt = !!pt || !!(currentStudent && currentStudent.satTaken);
+    document.getElementById('overview-back').textContent = backToPt ? '← Back to Practice Tests' : '← Back to menu';
+    document.getElementById('overview-back').setAttribute('data-back-to', backToPt ? 'pt' : 'menu');
 
     renderOverviewTiming();
 
@@ -11510,9 +11575,13 @@ window.Portal = {
   // practiceTestId set) still backs out to the menu.
   document.getElementById('overview-back').addEventListener('click', function (e) {
     e.preventDefault();
-    var wasPracticeTest = !!practiceTestId;
+    // Follows the label. A completed-diagnostic retake is reached from the
+    // Practice Tests screen even though practiceTestId is null (it is not a
+    // numbered test), so keying purely off practiceTestId sent that student
+    // to the menu while the link they clicked said Practice Tests.
+    var goPt = this.getAttribute('data-back-to') === 'pt' || !!practiceTestId;
     practiceTestId = null;
-    if (wasPracticeTest) { renderPracticeTestList(); show('screen-practice-tests'); }
+    if (goPt) { renderPracticeTestList(); show('screen-practice-tests'); }
     else { show('screen-menu'); }
   });
   document.getElementById('overview-start').addEventListener('click', function () { startSection(0); });
