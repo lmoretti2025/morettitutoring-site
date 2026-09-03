@@ -920,6 +920,18 @@
   .resume-modal-row { display: flex; gap: 0.75rem; }
   .resume-modal-row .key-btn { margin: 0; }
 
+  /* ═══ "HOW DO YOU WANT TO SIT THIS?" ═══ the chooser that opens when a
+     practice test is tapped. Stacked full-width choices rather than a row
+     of buttons: there are up to four, one is a resume, and on a phone a
+     row would either wrap badly or shrink the tap targets. */
+  .pt-choice-list { display: flex; flex-direction: column; gap: 0.6rem; text-align: left; }
+  .pt-choice { display: block; width: 100%; text-align: left; border: 1px solid var(--line, #ddd); background: var(--white); padding: 0.85rem 1rem; cursor: pointer; font: inherit; color: var(--text); transition: border-color 0.15s, background 0.15s; }
+  .pt-choice:hover { border-color: var(--red); background: rgba(176,39,28,0.03); }
+  .pt-choice-title { display: block; font-family: var(--hel); font-weight: 700; font-size: 0.9rem; margin-bottom: 0.2rem; }
+  .pt-choice-note { display: block; font-family: var(--hel); font-size: 0.78rem; color: var(--mid); line-height: 1.5; }
+  .pt-choice-resume { border-color: var(--red); background: rgba(176,39,28,0.04); }
+  .pt-choice-cancel { margin-top: 0.9rem; background: none; border: none; font: inherit; font-size: 0.8rem; color: var(--mid); cursor: pointer; text-decoration: underline; }
+
   /* ═══ "WELCOME BACK" AWAY OVERLAY ═══ see AWAY_THRESHOLD_MS in the main
      script — shown instead of silently auto-submitting when a section or
      break timer is discovered to have expired by a large margin (the tab
@@ -4648,6 +4660,19 @@ window.Portal = {
   </div>
 </div>
 
+<!-- ═══ PRACTICE TEST CHOICE ═══ opened by tapping a practice test. Offers
+     the full test or either half on its own, plus a resume when this exact
+     test has an unfinished sitting saved. Built here rather than generated
+     in JS so the copy is greppable with the rest of the portal's wording. -->
+<div class="resume-overlay" id="pt-choice-overlay">
+  <div class="resume-modal">
+    <div class="resume-modal-hed" id="pt-choice-hed">Practice Test</div>
+    <p class="resume-modal-sub" id="pt-choice-sub">How do you want to sit this one?</p>
+    <div class="pt-choice-list" id="pt-choice-list"></div>
+    <button type="button" class="pt-choice-cancel" id="pt-choice-cancel">Cancel</button>
+  </div>
+</div>
+
 <!-- ═══ "WELCOME BACK" AWAY OVERLAY ═══ see AWAY_THRESHOLD_MS / the
      tickSectionTimer()/tickBreak() comments in the script below. -->
 <div class="away-overlay" id="away-overlay">
@@ -5233,6 +5258,7 @@ window.Portal = {
       testChoice: testChoice,
       practiceTestId: practiceTestId,
       activeSectionKeys: activeSectionKeys,
+      sectionOnly: sectionOnly,
       sectionIndex: sectionIndex,
       completedSections: completedSections,
       current: current,
@@ -5279,10 +5305,27 @@ window.Portal = {
   function resumeStorageKey(key) { return 'moretti_portal_resume_' + key; }
   function syncResumeSnapshot(payload) {
     if (!currentStudent || !currentStudent.key) return;
-    var eligible = MID_DIAGNOSTIC_SCREENS[activeScreenId] && !!payload.testChoice && !alreadyTakenThisTestType();
+    /* alreadyTakenThisTestType() is about the DIAGNOSTIC -- a student sits
+       that once, so a stale snapshot of it is worthless. It has nothing to
+       say about practice tests, which are taken repeatedly and, by
+       definition, mostly AFTER the diagnostic. Applying it to both meant no
+       practice test was ever saved for the very students who take them, so
+       there was never anything to resume. */
+    var eligible = MID_DIAGNOSTIC_SCREENS[activeScreenId] && !!payload.testChoice &&
+      (!!payload.practiceTestId || !alreadyTakenThisTestType());
+    /* SAVE WHEN THERE IS SOMETHING TO SAVE, AND OTHERWISE LEAVE IT ALONE.
+       This used to clear the snapshot whenever it was not eligible -- and
+       show() calls saveState() on EVERY screen change, so the first thing
+       that happened when a student came back and landed on the menu was
+       that their unfinished test was deleted, before anything could offer
+       it to them. The come-back-later resume could therefore never fire;
+       only the same-tab refresh (which reads sessionStorage instead) ever
+       worked. Ending a test is not something to infer from "we are not on
+       a test screen right now": the paths that genuinely end one all clear
+       it explicitly -- finishing (finishDiagnostic), leaving deliberately
+       (exitPortal), declining the offer, and starting the same test over. */
     try {
       if (eligible) localStorage.setItem(resumeStorageKey(currentStudent.key), JSON.stringify(payload));
-      else localStorage.removeItem(resumeStorageKey(currentStudent.key));
     } catch (e) { /* private browsing / storage disabled — fail silently */ }
   }
   function clearResumeSnapshot(studentKey) {
@@ -5299,8 +5342,12 @@ window.Portal = {
       if (!raw) return null;
       var state = JSON.parse(raw);
       if (!state || !state.testChoice || !MID_DIAGNOSTIC_SCREENS[state.screen]) return null;
-      var alreadyTaken = !!currentStudent.satTaken;
-      if (alreadyTaken) { clearResumeSnapshot(currentStudent.key); return null; }
+      // See syncResumeSnapshot: satTaken retires a stale DIAGNOSTIC and says
+      // nothing about a practice test.
+      if (!state.practiceTestId && currentStudent.satTaken) {
+        clearResumeSnapshot(currentStudent.key);
+        return null;
+      }
       return state;
     } catch (e) { return null; }
   }
@@ -7840,6 +7887,106 @@ window.Portal = {
     }
     resumeOverlay.classList.add('active');
   }
+  /* ═══ HOW DO YOU WANT TO SIT THIS TEST? ═══
+     Tapping a practice test used to start the full thing immediately. It
+     now asks, because two things a student actually wants were impossible:
+     picking up a test they had already started, and sitting one half on its
+     own (an hour of Math on a school night, rather than the two-and-a-bit
+     hours the full test needs).
+
+     The resume row only appears for THIS test. There is a single saved
+     sitting per student -- one test in progress at a time is the real
+     shape of this -- so a snapshot belonging to a different test must not
+     offer to "resume" here and then drop them into something else. */
+  var ptChoiceOverlay = document.getElementById('pt-choice-overlay');
+  var ptChoiceTest = null;
+
+  function resumableSnapshotFor(testId) {
+    var snap = getResumeSnapshot();
+    if (!snap || snap.practiceTestId !== testId) return null;
+    return snap;
+  }
+
+  function ptChoiceRow(kind, title, note, extraClass) {
+    return '<button type="button" class="pt-choice' + (extraClass ? ' ' + extraClass : '') + '" data-pt-choice="' + kind + '">' +
+      '<span class="pt-choice-title">' + title + '</span>' +
+      '<span class="pt-choice-note">' + note + '</span>' +
+    '</button>';
+  }
+
+  function openPtChoice(test) {
+    ptChoiceTest = test;
+    var name = practiceTestNameParts(test).name;
+    document.getElementById('pt-choice-hed').textContent = name;
+
+    var snap = resumableSnapshotFor(test.id);
+    var rows = '';
+    if (snap) {
+      // Name the section they stopped in: "resume" is a lot more
+      // reassuring when it says exactly what it is going to reopen.
+      var secKey = (snap.activeSectionKeys || [])[snap.sectionIndex || 0];
+      var secName = secKey === 'math' ? 'Math' : 'Reading & Writing';
+      var wasSectionOnly = !!snap.sectionOnly;
+      rows += ptChoiceRow('resume', 'Resume where you left off',
+        'You have an unfinished sitting of this test' + (wasSectionOnly ? ' (' + secName + ' only)' : ', part-way through ' + secName) +
+        '. Your answers and the time you had left are still saved.', 'pt-choice-resume');
+    }
+    rows += ptChoiceRow('full', 'Full test',
+      'Reading &amp; Writing and Math, timed like the real thing. This is the only way to get a 400&ndash;1600 score.');
+    rows += ptChoiceRow('reading-writing', 'Reading &amp; Writing only',
+      'Just the two R&amp;W modules. You get a section score out of 800 and a full breakdown, but no 400&ndash;1600 score.');
+    rows += ptChoiceRow('math', 'Math only',
+      'Just the two Math modules. You get a section score out of 800 and a full breakdown, but no 400&ndash;1600 score.');
+
+    document.getElementById('pt-choice-sub').textContent = snap
+      ? 'Pick up where you left off, or start this test fresh.'
+      : 'How do you want to sit this one?';
+    document.getElementById('pt-choice-list').innerHTML = rows;
+    ptChoiceOverlay.classList.add('active');
+  }
+
+  function closePtChoice() {
+    ptChoiceOverlay.classList.remove('active');
+    ptChoiceTest = null;
+  }
+
+  document.getElementById('pt-choice-cancel').addEventListener('click', closePtChoice);
+  // Clicking the dimmed backdrop is the other way everyone expects to
+  // dismiss a modal; clicks inside the card must not count.
+  ptChoiceOverlay.addEventListener('click', function (e) { if (e.target === ptChoiceOverlay) closePtChoice(); });
+
+  document.getElementById('pt-choice-list').addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-pt-choice]');
+    if (!btn || !ptChoiceTest) return;
+    var kind = btn.getAttribute('data-pt-choice');
+    var test = ptChoiceTest;
+    closePtChoice();
+
+    if (kind === 'resume') {
+      var snap = resumableSnapshotFor(test.id);
+      if (!snap) { startPracticeTest(test.id); return; }   // vanished between opening and clicking
+      // Same practice-tests.js load race the other resume paths guard.
+      if (!(window.SAT_PRACTICE_TESTS && window.SAT_PRACTICE_TESTS.length)) {
+        (window.__practiceTestsReady || Promise.resolve()).then(function () {
+          applyRestoredState(snap, true);
+        });
+      } else {
+        applyRestoredState(snap, true);
+      }
+      return;
+    }
+
+    /* Starting fresh throws away a saved sitting of THIS test -- that is
+       what "start over" means, and leaving it would have the card offer to
+       resume a test they just restarted. Confirm first: an unfinished
+       sitting is real work. */
+    var existing = resumableSnapshotFor(test.id);
+    if (existing && !window.confirm('Start this test again from the beginning?\n\nYour unfinished sitting of it will be discarded.')) return;
+    if (existing) clearResumeSnapshot(currentStudent && currentStudent.key);
+
+    startPracticeTest(test.id, kind === 'full' ? null : kind);
+  });
+
   // Same "resume or start fresh" check the old home-screen diagnostic card
   // used — now the click handler for the Diagnostic tile inside the
   // Practice Tests picker (see renderPracticeTestList()) instead, since the
@@ -8293,6 +8440,12 @@ window.Portal = {
     var byId = {};
     mergedScoreHistory().forEach(function (e) {
       if (!e || e.source !== 'practice-test' || !e.testId) return;
+      /* Section-only sittings deliberately do NOT mark a test done. A
+         student who sat just the Math half should still be offered the
+         whole test, and taking it should not read as a retake. Their
+         section report is still reachable from the card's menu, which is
+         built from practiceTestAttempts() rather than from this. */
+      if (e.mode === 'section') return;
       var prev = byId[e.testId];
       if (!prev || String(e.date || '') > String(prev.date || '')) byId[e.testId] = e;
     });
@@ -8379,11 +8532,24 @@ window.Portal = {
   function attemptMenuItems(attemptsOldestFirst) {
     return attemptsOldestFirst.map(function (e, i) {
       var d = shortDate(e.date);
-      var label = attemptsOldestFirst.length > 1
-        ? 'Attempt ' + (i + 1) + (d ? ' — ' + d : '') + (e.composite ? ' (' + e.composite + ')' : '')
-        : 'View Results';
+      /* A section-only sitting is named for what it was. It has no
+         composite, so without this it would read "Attempt 2 — Sep 3" with
+         no score at all, next to a full attempt showing 1210 — which reads
+         as a missing score rather than a different kind of sitting. */
+      var isSection = e.mode === 'section' && e.sectionKey;
+      var sectionName = e.sectionKey === 'math' ? 'Math' : 'Reading & Writing';
+      var label;
+      if (isSection) {
+        label = sectionName + ' only' + (d ? ' — ' + d : '') +
+          (typeof e.sectionScore === 'number' ? ' (' + e.sectionScore + ')' : '');
+      } else {
+        label = attemptsOldestFirst.length > 1
+          ? 'Attempt ' + (i + 1) + (d ? ' — ' + d : '') + (e.composite ? ' (' + e.composite + ')' : '')
+          : 'View Results';
+      }
       return {
         label: label,
+        mode: e.mode || 'full',
         link: toRelativeReportLink(e.reportLinkRelative || e.reportLink),
         testTag: testTagForScoreEntry(e),
         attemptId: e.attemptId || null
@@ -8474,18 +8640,24 @@ window.Portal = {
       // "you've already taken this" everywhere in the portal. The score
       // itself lives in the body copy just below.
       var badge = result ? '<span class="menu-card-badge badge-done">Completed</span>' : '';
+      var sectionOnlyCount = practiceTestAttempts(test.id).filter(function (a) { return a.mode === 'section'; }).length;
       var body = result
         ? 'You took this on ' + (shortDate(result.date) || 'record') +
           (result.composite ? ' and scored ' + result.composite : '') +
           '. You can retake it &mdash; your new score is saved alongside the old one.'
-        : 'Full adaptive SAT format &mdash; ' + totalQ + ' questions across Reading &amp; Writing and Math, timed like the real test.';
+        : (sectionOnlyCount
+            ? 'You have sat ' + (sectionOnlyCount === 1 ? 'one section' : sectionOnlyCount + ' sections') +
+              ' of this test. The full test is still available &mdash; a single section has no 400&ndash;1600 score.'
+            : 'Full adaptive SAT format &mdash; ' + totalQ + ' questions across Reading &amp; Writing and Math, timed like the real test.');
       // Two descriptions of the same thing: a one-line meta for the compact
       // tile grid (which has to fit 11 tests in one screen) and the full
       // sentence for the stacked layout on narrow windows. CSS picks one.
       var meta = result
         ? (result.composite ? 'Scored ' + result.composite : 'Taken') + (shortDate(result.date) ? ' &middot; ' + shortDate(result.date) : '')
-        : totalQ + ' questions &middot; timed';
-      var attempts = result ? attemptMenuItems(practiceTestAttempts(test.id)) : [];
+        : (sectionOnlyCount ? 'Section practised &middot; full test available' : totalQ + ' questions &middot; timed');
+      // Not gated on `result`: a test sat only in halves has no `result`
+      // (see practiceTestResultsById) but still has reports to open.
+      var attempts = attemptMenuItems(practiceTestAttempts(test.id));
       card.innerHTML = badge +
         '<span class="' + (num ? 'pt-num' : 'menu-card-icon') + '">' + (num || '&#9201;') + '</span>' +
         '<div class="pt-card-text"><div class="menu-card-title">' + parts.name + '</div>' +
@@ -8493,7 +8665,7 @@ window.Portal = {
         '<div class="pt-meta">' + meta + '</div>' +
         '<div class="menu-card-body pt-body-long">' + body + '</div></div>' +
         (attempts.length ? buildPtMenuHtml(attempts) : '');
-      card.addEventListener('click', function () { startPracticeTest(test.id); });
+      card.addEventListener('click', function () { openPtChoice(test); });
       if (attempts.length) wirePtMenu(card, attempts);
       list.appendChild(card);
     });
@@ -8508,8 +8680,11 @@ window.Portal = {
   var DELETE_ICON_SVG = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>';
   function buildPtMenuHtml(attempts) {
     if (attempts.length === 1) {
+      // attemptMenuItems() labels a lone FULL attempt "View Results", and a
+      // lone section sitting by its section — use whichever it gave us.
       return '<div class="pt-menu-wrap" data-pt-menu-wrap>' +
-        '<button type="button" class="pt-view-results-btn" data-pt-view-results data-pt-attempt-idx="0">View Results</button>' +
+        '<button type="button" class="pt-view-results-btn" data-pt-view-results data-pt-attempt-idx="0">' +
+          (attempts[0].label || 'View Results') + '</button>' +
         '<button type="button" class="pt-attempt-delete" data-pt-delete data-pt-attempt-idx="0" title="Delete this result" aria-label="Delete this result">' + DELETE_ICON_SVG + '</button>' +
       '</div>';
     }
@@ -9052,6 +9227,13 @@ window.Portal = {
   // records (including ones already stored) are read back by test type.
   var testChoice = null;
   var activeSectionKeys = [];  // populated sections only, in the real test's order
+  /* null for a normal full test, or the one section key ('math' /
+     'reading-writing') when the student chose to sit just that half. Kept
+     as its own flag rather than inferred from activeSectionKeys.length,
+     because "one section because that is all they chose" and "one section
+     because the other bank happens to be empty" have to be told apart at
+     scoring time: the first must never produce a 400-1600 composite. */
+  var sectionOnly = null;
   var sectionIndex = 0;
   // Test-center accommodations, chosen on the overview screen before the
   // diagnostic starts. timeMult scales every section's module time limit
@@ -9890,9 +10072,11 @@ window.Portal = {
     finishCurrentModule();
   }
 
-  function startTest(choice) {
+  function startTest(choice, onlySectionKey) {
     testChoice = choice;
+    sectionOnly = onlySectionKey || null;
     activeSectionKeys = TEST_FORMATS[choice].order.filter(function (key) {
+      if (sectionOnly && key !== sectionOnly) return false;
       return bankFor(key).module1.length > 0;
     });
     completedSections = [];
@@ -9905,9 +10089,9 @@ window.Portal = {
   // module-routing/timer code path behaves identically) — practiceTestId is
   // the only new piece of state, and bankFor() is the only place that reads
   // it, so nothing else below needs to know the difference.
-  function startPracticeTest(testId) {
+  function startPracticeTest(testId, onlySectionKey) {
     practiceTestId = testId;
-    startTest('SAT');
+    startTest('SAT', onlySectionKey);
   }
 
   // One-time overview shown before the first
@@ -9927,9 +10111,17 @@ window.Portal = {
   function showTestOverview() {
     var pt = activePracticeTest();
     document.getElementById('overview-kicker').textContent = pt ? practiceTestNameParts(pt).name : (testChoice + ' Diagnostic');
-    document.getElementById('overview-sub').textContent = pt
-      ? 'This is ' + practiceTestNameParts(pt).name + ' — a full, timed, adaptive practice test in the same Module 1 / Module 2 format as the real digital SAT. Read this over, then begin when you\'re ready.'
-      : 'The sections, order, and timing below match the real test exactly. Read this over, then begin when you\'re ready.';
+    /* Section-only sittings get their own sentence. Telling a student
+       sitting 44 minutes of Math that this is "a full practice test" is
+       simply wrong, and it is the screen where they decide to commit. */
+    var secName = sectionOnly === 'math' ? 'Math' : 'Reading & Writing';
+    document.getElementById('overview-sub').textContent = sectionOnly
+      ? (pt ? practiceTestNameParts(pt).name + ' — ' : '') + secName + ' only: both modules of that section, ' +
+        'timed exactly as on the real test. You will get a section score out of 800 and a full breakdown, ' +
+        'but not a 400–1600 score — that needs both halves.'
+      : (pt
+          ? 'This is ' + practiceTestNameParts(pt).name + ' — a full, timed, adaptive practice test in the same Module 1 / Module 2 format as the real digital SAT. Read this over, then begin when you\'re ready.'
+          : 'The sections, order, and timing below match the real test exactly. Read this over, then begin when you\'re ready.');
 
     var retakeEl = document.getElementById('overview-retake-notice');
     if (!pt && alreadyTakenThisTestType()) {
@@ -9963,9 +10155,12 @@ window.Portal = {
 
     // Was hardcoded to "Begin Diagnostic" — so the last thing a student
     // saw before starting Practice Test 3 was the word "Diagnostic".
-    document.getElementById('overview-start').textContent = pt
-      ? ('Begin ' + practiceTestNameParts(pt).name)
-      : ('Begin ' + testChoice + ' Diagnostic');
+    // The button names what is actually about to start, so a half-sitting
+    // never reads as committing to the whole test.
+    document.getElementById('overview-start').textContent = sectionOnly
+      ? ('Begin ' + secName)
+      : (pt ? ('Begin ' + practiceTestNameParts(pt).name)
+            : ('Begin ' + testChoice + ' Diagnostic'));
 
     document.getElementById('overview-back').textContent = pt ? '← Back to Practice Tests' : '← Back to menu';
 
@@ -11246,7 +11441,22 @@ window.Portal = {
       var rwScaled = rwSec ? scoreSatSectionScore(rwSec, SCORE_RW_CURVE) : null;
       var mathScaled = mathSec ? scoreSatSectionScore(mathSec, SCORE_MATH_CURVE) : null;
       if (rwScaled !== null && mathScaled !== null) { composite = rwScaled + mathScaled; scaleMin = 400; scaleMax = 1600; }
-      if (composite === null) return;
+
+      /* A SECTION-ONLY SITTING HAS NO COMPOSITE, AND MUST NOT INVENT ONE.
+         Half a test scores 200-800, not 400-1600, so writing it into the
+         same field the Score Progress chart and the roster read from would
+         show every one of these as a catastrophic drop. The entry is still
+         worth keeping -- it carries the section score and the report link,
+         so "Math only -- Sep 3 (620)" can appear alongside the full
+         attempts -- it simply leaves `composite` null, which every consumer
+         already skips (see the roster's own `if (!composite) continue`). */
+      var onlyScaled = null;
+      if (composite === null && sectionOnly) {
+        onlyScaled = sectionOnly === 'math' ? mathScaled : rwScaled;
+        if (onlyScaled === null) return;
+      } else if (composite === null) {
+        return;
+      }
       var entry = {
         date: new Date().toISOString(),
         // Lets this same attempt's local copy and its server-synced mirror
@@ -11260,6 +11470,11 @@ window.Portal = {
         testId: ptDoneEarly ? ptDoneEarly.id : null,
         testTitle: ptDoneEarly ? ptDoneEarly.title : (testChoice + ' Diagnostic'),
         composite: composite, scaleMin: scaleMin, scaleMax: scaleMax,
+        /* Set only for a section-only sitting. `mode` is what every reader
+           checks before treating this as a whole test. */
+        mode: sectionOnly ? 'section' : 'full',
+        sectionKey: sectionOnly || undefined,
+        sectionScore: (onlyScaled !== null && onlyScaled !== undefined) ? onlyScaled : undefined,
         // SAT-only section split (rw/math already computed above) — feeds
         // the Home screen's Most Recent Test card sub-score line.
         rw: (testChoice === 'SAT' && typeof rwScaled === 'number') ? rwScaled : undefined,
@@ -11349,7 +11564,22 @@ window.Portal = {
     // always sees their own score link AND Luca is notified every time —
     // there's no "first attempt only" gating, and no satTaken
     // stamping (that flag is diagnostic-specific).
-    if (ptDone) {
+    /* A SECTION-ONLY SITTING IS PRACTICE, NOT A RESULT TO REPORT. It has no
+       400-1600 score, so sending it as a completed practice test would put
+       an unscored attempt in front of Luca and imply the test was taken.
+       The student still gets their section score and their report; the
+       backend simply is not told. Their score history entry is still
+       written locally (see recordComposite), so the card's menu can reopen
+       this report later. */
+    if (ptDone && sectionOnly) {
+      setViewResultsLink(reportLinkRelative);
+      var secName = sectionOnly === 'math' ? 'Math' : 'Reading & Writing';
+      document.getElementById('done-message').textContent =
+        'Nice work — that was the ' + secName + ' section on its own, so there is no 400–1600 score for it. ' +
+        'Your section score and full breakdown are below, saved on this device.';
+      statusEl.textContent = '';
+      show('screen-done');
+    } else if (ptDone) {
       setViewResultsLink(reportLinkRelative);
       document.getElementById('done-message').textContent = 'Nice work! Your results just went to Luca — no need to send anything yourself.';
       statusEl.textContent = 'Sending your results…';
@@ -11468,6 +11698,7 @@ window.Portal = {
       testChoice = state.testChoice;
       practiceTestId = state.practiceTestId || null;
       activeSectionKeys = state.activeSectionKeys;
+      sectionOnly = state.sectionOnly || null;
       completedSections = Array.isArray(state.completedSections) ? state.completedSections : [];
       // The interruption log has to survive the very reopen it records.
       awayEvents = Array.isArray(state.awayEvents) ? state.awayEvents : [];
@@ -11556,6 +11787,7 @@ window.Portal = {
       testChoice = state.testChoice;
       practiceTestId = state.practiceTestId || null;
       activeSectionKeys = state.activeSectionKeys;
+      sectionOnly = state.sectionOnly || null;
       completedSections = Array.isArray(state.completedSections) ? state.completedSections : [];
       // The interruption log has to survive the very reopen it records.
       awayEvents = Array.isArray(state.awayEvents) ? state.awayEvents : [];
