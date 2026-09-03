@@ -77,6 +77,7 @@
     <div class="row">
       <a class="btn" href="?fake=1">Portal</a>
       <a class="btn" href="?fake=1&amp;subject=1">Portal (subject tutoring, no SAT)</a>
+      <a class="btn" href="?fake=1&amp;subject=1&amp;nosession=1">Subject tutoring, nothing scheduled</a>
       <a class="btn" href="?fake=1&amp;screen=vocab">Vocabulary</a>
       <a class="btn" href="?fake=1&amp;screen=practice-tests">Practice Tests</a>
       <a class="btn" href="?fake=1&amp;screen=question-bank">Question Bank</a>
@@ -120,6 +121,10 @@
     // data to invent, so what it needs faked is the two things it does
     // show: a next session off Luca's calendar, and assigned work.
     var subject = params.get('subject') === '1';
+    // &nosession=1 — the hero card with nothing to lead with, which is
+    // what a subject student sees before Luca has put anything on the
+    // calendar. Worth being able to look at on purpose.
+    var noSession = params.get('nosession') === '1';
     fetch('index.html').then(function (r) {
       if (!r.ok) throw new Error('index.html returned ' + r.status);
       return r.text();
@@ -127,10 +132,14 @@
       // Three days out, at 6:30pm, so the hero card's relative line
       // ("In 3 days") has something real to compute from.
       var soon = new Date(); soon.setDate(soon.getDate() + 3); soon.setHours(18, 30, 0, 0);
+      // Deliberately covers all four row states the Home checklist can be
+      // in: overdue, dated-and-due, undated, and done.
+      var yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 2);
       var fakeAssignments = subject ? [
-        { row: 2, task: 'Finish the chapter 7 problem set', done: false, notes: 'Skip #14 — we will do it together.' },
-        { row: 3, task: 'Re-read the essay draft out loud', done: false, notes: '' },
-        { row: 4, task: 'Vocabulary from Tuesday', done: true, notes: '' }
+        { row: 2, task: 'Finish the chapter 7 problem set', done: false, notes: 'Skip #14 — we will do it together.', dueDate: yesterday.toISOString() },
+        { row: 3, task: 'Re-read the essay draft out loud', done: false, notes: '', dueDate: new Date().toISOString() },
+        { row: 4, task: 'Bring your lab notebook', done: false, notes: 'The one with the graphs in it.', dueDate: null },
+        { row: 5, task: 'Vocabulary from Tuesday', done: true, notes: '', dueDate: null }
       ] : [];
       var student = {
         ok:true, session:'preview', key:'PREVIEW1', name:'Avery Preview', email:'preview@example.com',
@@ -149,7 +158,7 @@
         'if(b.action==="resume"||b.action==="googleAuth")o=S;' +
         'else if(b.action==="getScoreHistory")o={ok:true,entries:[]};' +
         'else if(b.action==="getAssignments")o={ok:true,assignments:S.assignments};' +
-        'else if(b.action==="nextSession")o={ok:true,next:{startIso:' + JSON.stringify(soon.toISOString()) + ',allDay:false,title:"Avery - tutoring"}};' +
+        'else if(b.action==="nextSession")o=' + (noSession ? '{ok:true,next:null}' : '{ok:true,next:{startIso:' + JSON.stringify(soon.toISOString()) + ',allDay:false,title:"Avery - tutoring"}}') + ';' +
         'else if(b.action==="getAssignmentsCalendar")o={ok:true,assignments:S.assignments,sessions:[{startIso:' + JSON.stringify(soon.toISOString()) + ',allDay:false,title:"Avery - tutoring"}]};' +
         'return Promise.resolve({ok:true,status:200,clone:function(){return this;},' +
         'json:function(){return Promise.resolve(o);},text:function(){return Promise.resolve(JSON.stringify(o));}});};' +
