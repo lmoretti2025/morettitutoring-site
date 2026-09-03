@@ -1515,8 +1515,12 @@
      confidence a progress number needs. */
   #screen-vocab { --vp-mastered: #16A34A; }
 
-  .vp-prog-card, .vp-quick-card, .vp-custom { background: var(--white); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow); padding: 1.5rem 1.6rem; }
-  .vp-quick-card, .vp-custom { margin-top: 1.1rem; }
+  /* No cards. The three groups are separated by space and their own
+     labels, not by boxes drawn around them -- a container border adds a
+     line for every group and says nothing the whitespace does not. */
+  .vp-prog-card, .vp-quick-card, .vp-custom { background: none; border: none; box-shadow: none; padding: 0; }
+  .vp-quick-card { margin-top: 2.6rem; }
+  .vp-custom { margin-top: 2.6rem; }
 
   .vp-prog-top { display: flex; align-items: baseline; gap: 0.65rem; flex-wrap: wrap; margin-bottom: 1.15rem; }
   .vp-prog-num { font-family: var(--display); font-size: 3.1rem; font-weight: 700; line-height: 1; color: var(--vp-mastered); font-variant-numeric: tabular-nums; }
@@ -1535,8 +1539,10 @@
   .vp-legend-num { font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
 
   .vp-quick { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; }
-  .vp-quick-btn { text-align: left; font: inherit; font-family: var(--hel); color: var(--text); background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 1.15rem 1.25rem; cursor: pointer; display: flex; flex-direction: column; gap: 0.3rem; transition: border-color 0.18s var(--ease), box-shadow 0.18s var(--ease), transform 0.18s var(--ease); }
-  .vp-quick-btn:hover { border-color: var(--gold); box-shadow: var(--shadow-hover); transform: translateY(-2px); }
+  /* Flush until hover, the same move the Home tiles make: nothing is drawn
+     around it at rest, and it lifts into a card when the pointer arrives. */
+  .vp-quick-btn { text-align: left; font: inherit; font-family: var(--hel); color: var(--text); background: none; border: 1px solid transparent; border-radius: 12px; padding: 1.15rem 1.25rem; cursor: pointer; display: flex; flex-direction: column; gap: 0.3rem; transition: background 0.18s var(--ease), border-color 0.18s var(--ease), box-shadow 0.18s var(--ease), transform 0.18s var(--ease); }
+  .vp-quick-btn:hover { background: var(--white); border-color: var(--gold); box-shadow: var(--shadow-hover); transform: translateY(-2px); }
   .vp-quick-primary { background: var(--red); border-color: var(--red); color: var(--white); }
   .vp-quick-primary:hover { border-color: var(--red); }
   .vp-quick-title { font-weight: 700; font-size: 1rem; display: flex; align-items: center; gap: 0.55rem; }
@@ -1548,7 +1554,8 @@
   .vp-quick-btn.is-empty:hover { border-color: var(--border); box-shadow: none; transform: none; }
   .vp-quick-btn.is-empty .vp-count-pill { background: rgba(17,17,17,0.06); color: var(--mid); }
 
-  .vp-custom-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; cursor: pointer; }
+  .vp-custom-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; cursor: pointer; padding: 0.75rem; margin: -0.75rem; border-radius: 10px; transition: background 0.15s var(--ease); }
+  .vp-custom-head:hover { background: rgba(17,17,17,0.035); }
   .vp-custom-hed { font-family: var(--display); font-size: 1.05rem; font-weight: 700; margin: 0 0 0.15rem; }
   .vp-custom-hint { font-size: 0.78rem; color: var(--mid); }
   .vp-chev { color: var(--faint); flex-shrink: 0; transition: transform 0.2s var(--ease); }
@@ -1561,12 +1568,13 @@
      student meets one control pattern across the portal. The .on class is
      already toggled by the existing handler, so this is style only. */
   .vp-mode-cards { display: flex; flex-direction: column; gap: 0.55rem; }
-  .vp-mode-card { display: flex; flex-direction: column; align-items: flex-start; gap: 0.1rem; width: 100%; text-align: left; font: inherit; font-family: var(--hel); color: var(--text); background: #f5f5f5; border: 1px solid transparent; border-radius: 12px; padding: 0.85rem 1rem 0.85rem 2.9rem; cursor: pointer; position: relative; transition: background 0.15s var(--ease), border-color 0.15s var(--ease); }
-  .vp-mode-card:hover { background: #efefef; }
-  .vp-mode-card.on { background: rgba(176,39,28,0.05); border-color: var(--red); }
-  .vp-mode-card::before { content: ''; position: absolute; left: 1rem; top: 1rem; width: 18px; height: 18px; border-radius: 50%; border: 2px solid #bdbdbd; transition: border-color 0.15s var(--ease); }
+  .vp-mode-card { display: flex; flex-direction: column; align-items: flex-start; gap: 0.1rem; width: 100%; text-align: left; font: inherit; font-family: var(--hel); color: var(--text); background: none; border: none; border-radius: 10px; padding: 0.7rem 0.75rem 0.7rem 2.65rem; cursor: pointer; position: relative; transition: background 0.15s var(--ease); }
+  .vp-mode-card:hover { background: rgba(17,17,17,0.035); }
+  /* Selection is the filled radio and the red heading -- no slab behind it. */
+  .vp-mode-card.on .vp-mode-card-hed { color: var(--red); }
+  .vp-mode-card::before { content: ''; position: absolute; left: 0.75rem; top: 0.85rem; width: 18px; height: 18px; border-radius: 50%; border: 2px solid #bdbdbd; transition: border-color 0.15s var(--ease); }
   .vp-mode-card.on::before { border-color: var(--red); }
-  .vp-mode-card::after { content: ''; position: absolute; left: calc(1rem + 5px); top: calc(1rem + 5px); width: 8px; height: 8px; border-radius: 50%; background: var(--red); opacity: 0; transition: opacity 0.15s var(--ease); }
+  .vp-mode-card::after { content: ''; position: absolute; left: calc(0.75rem + 5px); top: calc(0.85rem + 5px); width: 8px; height: 8px; border-radius: 50%; background: var(--red); opacity: 0; transition: opacity 0.15s var(--ease); }
   .vp-mode-card.on::after { opacity: 1; }
   .vp-mode-card-icon { display: none; }
   .vp-mode-card-hed { font-weight: 700; font-size: 0.9rem; }
