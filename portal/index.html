@@ -752,10 +752,24 @@
   .home-shortcut-body { font-size: 0.78rem; line-height: 1.55; color: var(--mid); }
 
   @media (max-width: 640px) {
-    .overview-card { flex-direction: column; }
+    /* Same `flex: 1 1 0` trap one level up: those two halves are sized to
+       split the card's WIDTH, so turning the card into a column made
+       "basis 0" mean zero height and align-items:center stopped them
+       filling the width — the whole card rendered 2px tall. Both halves
+       size from their content on a phone, and stretch across it. */
+    .overview-card { flex-direction: column; align-items: stretch; }
+    .overview-card > .score-progress-card,
+    .overview-card > .home-stats-row { flex: 0 0 auto; }
     .overview-card .score-progress-card { border-right: none; border-bottom: 1px solid var(--border); }
-    .home-stats-row { flex-direction: column; }
-    .home-stats-row > * { border-left: none; border-top: 1px solid var(--border); }
+    /* Going column turns `flex: 1 1 0` below from "share the width
+       equally" into "start from zero HEIGHT", and this row's own
+       align-items:center stops each tile taking the full width either — so
+       every tile collapsed to roughly a third of its content and the
+       card's overflow:hidden cropped the remainder. On a phone the Next
+       Session tile was a 37px sliver with 107px of content in it. Sizing
+       from content is what column direction wants here. */
+    .home-stats-row { flex-direction: column; align-items: stretch; }
+    .home-stats-row > * { border-left: none; border-top: 1px solid var(--border); flex: 0 0 auto; }
     .home-stats-row > *:first-child { border-top: none; }
     .home-shortcuts { grid-template-columns: 1fr; }
   }
@@ -781,6 +795,61 @@
   }
   .home-stats-row .mini-session-card.next-session-card::before { display: none; }
   .mini-session-eyebrow { font-family: var(--hel); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mid); margin-bottom: 0.65rem; }
+
+  /* ═══ SUBJECT-TUTORING HOME ═══ see applySubjectHome(). A student who
+     isn't doing SAT prep has no scores, no practice tests and no question
+     bank — hiding "Your Overview" wholesale (which is what used to happen)
+     took the Next Session tile and the whole shortcut grid down with it,
+     because both live inside it, and left Home as nothing but the
+     greeting. So the SAT-only CHILDREN are hidden instead and the section
+     is re-pointed at the three things every student does have: their next
+     session, their assigned work, and their files.
+
+     The session tile is the hero here rather than the third segment of a
+     four-part strip, so it takes back the size that the .home-stats-row
+     rules deliberately strip from it. Nothing in this block applies
+     without .is-subject, so the SAT home is untouched. */
+  .home-overview.is-subject .overview-card { display: block; }
+  .home-overview.is-subject .home-stats-row { margin-top: 0; }
+  .home-overview.is-subject .mini-session-card.next-session-card {
+    padding: 1.6rem 1.7rem;
+    display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
+  }
+  /* Tears the date off the sentence and sets it opposite, so the hero has
+     two things to look at instead of one small cluster stranded in a very
+     wide card. Same date as .ns-date beside it — nothing new is claimed,
+     it just gives the card a second anchor and makes the day scannable. */
+  .ns-daychip { display: none; }
+  .home-overview.is-subject .ns-daychip.has-day {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    flex: 0 0 auto; width: 82px; padding: 0.7rem 0; border-radius: 12px;
+    background: var(--bg); border: 1px solid var(--border);
+  }
+  .ns-daychip-mon { font-family: var(--hel); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--red); }
+  .ns-daychip-num { font-family: var(--display); font-weight: 700; font-size: 1.9rem; line-height: 1.1; color: var(--text); }
+  .home-overview.is-subject .ns-date { font-size: 1.75rem; line-height: 1.15; }
+  .home-overview.is-subject .ns-time { font-size: 0.95rem; margin-top: 0.3rem; }
+  .home-overview.is-subject .ns-join { margin-top: 1.05rem; font-size: 0.76rem; padding: 0.42rem 0.9rem; }
+  /* Only ever populated for this layout, and only when there IS a next
+     session to be relative to — see loadNextSession(). */
+  .ns-rel { display: none; font-family: var(--hel); font-size: 0.78rem; font-weight: 700; color: var(--red); margin-top: 0.55rem; }
+  .home-overview.is-subject .ns-rel.has-rel { display: block; }
+  /* This Week is a shortcut TILE on the SAT home (hence .home-top-row's
+     display:none), but on the subject home it's one of only two sources of
+     real content, so the actual checklist comes back — tickable, in full,
+     with the latest-test card beside it staying hidden. */
+  .home-top-row.is-subject { display: flex; gap: 1.2rem; align-items: stretch; margin-top: 1.7rem; }
+  .home-top-row.is-subject .assign-card { flex: 0 1 calc((200% - 1rem) / 3); }
+  .assign-empty { font-family: var(--hel); font-size: 0.82rem; line-height: 1.7; color: var(--mid); margin: 0; }
+  @media (max-width: 640px) {
+    .home-overview.is-subject .ns-date { font-size: 1.4rem; }
+    .home-overview.is-subject .ns-daychip.has-day { display: none; }
+    .home-top-row.is-subject .assign-card { flex: 1 1 auto; }
+    /* The collapse this used to work around is fixed for every tile in
+       .home-stats-row's own column rules above; only the tighter padding
+       is still this layout's business. */
+    .home-overview.is-subject .mini-session-card.next-session-card { padding: 1.3rem 1.4rem; }
+  }
 
   .latest-test-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 1.2rem 1.4rem; box-shadow: var(--shadow); }
   .lt-label { font-family: var(--hel); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mid); margin-bottom: 0.9rem; }
@@ -1466,6 +1535,12 @@
      span, 1 / -1) — that's what actually makes two cards share a row
      instead of each one claiming the whole grid regardless of viewport. */
   #pt-test-list .menu-card-wide { grid-column: auto; }
+  /* Every tile exactly the same height. The descriptions are gone, so the
+     only thing left that could differ is a title wrapping or a note line on
+     one test and not another -- 1fr rows make the grid settle that, rather
+     than each row sizing to its own content. */
+  #pt-test-list { grid-auto-rows: 1fr; }
+  #pt-test-list .menu-card { height: 100%; }
 
   /* ═══ FLUSH UNTIL HOVER ═══ the same treatment as the Home screen's
      shortcut tiles (see .home-shortcut-card): the card sits flush with the
@@ -2844,6 +2919,51 @@
   #pt-native-report .bridge-tooltip { display: none; position: fixed; z-index: 60; background: var(--text); color: #fff; border-radius: 8px; padding: 0.5rem 0.7rem; font-family: var(--hel); font-size: 0.72rem; line-height: 1.4; pointer-events: none; box-shadow: 0 8px 20px rgba(17,17,17,0.25); white-space: nowrap; }
   #pt-native-report .bridge-tooltip b { display: block; font-size: 0.78rem; margin-bottom: 0.15rem; }
   #pt-native-report .bridge-tooltip .bridge-tooltip-hint { display: block; margin-top: 0.25rem; color: rgba(255,255,255,0.65); font-size: 0.64rem; }
+
+  /* ═══ FLUSH SECTIONS ═══ mirrors report.html's block of the same name
+     (kept in sync by hand, like the rest of this report's CSS). Only the
+     score summary at the top of a report is a card; the bridge chart, the
+     diagnosis split, the skill rollup, the time budget and the pacing
+     trace used to carry the same white/bordered/shadowed chrome, which
+     stacked five nearly identical panels down the page and made the lower
+     half read as five unrelated documents instead of one argument. Flush
+     content instead: the .sec-hed rule is the only divider needed, and
+     each block sits on the page the way the per-section score tiles at
+     the top already do. Deliberately placed after every rule that sets
+     padding or a border on these classes, so it wins without having to
+     hunt each of them down individually. */
+  #pt-native-report .bridge-card,
+  #pt-native-report .dx-card,
+  #pt-native-report .skilldx-card,
+  #pt-native-report .budget-card,
+  #pt-native-report .timing-card {
+    background: transparent; border: none; border-radius: 0; box-shadow: none; padding: 0;
+  }
+  #pt-native-report .bridge-wrap { border: none; box-shadow: none; border-radius: 0; padding: 0.4rem 0 0; }
+  #pt-native-report .bridge-card > #bridge-note-outer { padding: 0; }
+  #pt-native-report .bridge-card > .bridge-card-subhed { padding: 1.4rem 0 0.9rem; }
+
+  /* Chart runs the full measure now that there is no card inset to sit
+     inside, and its module arrows moved into its own header row beside the
+     counter — see the carousel markup in renderNativeReport. */
+  #pt-native-report .timing-carousel { display: block; }
+  #pt-native-report .timing-chart-card { width: 100%; padding: 0; overflow: visible; }
+  #pt-native-report .timing-nav { display: inline-flex; align-items: center; gap: 0.15rem; flex-shrink: 0; }
+  #pt-native-report .timing-nav-btn { width: 26px; height: 26px; }
+  #pt-native-report .timing-nav-btn svg { width: 14px; height: 14px; }
+  #pt-native-report .timing-module-counter { min-width: 3rem; text-align: center; }
+  @media print { #pt-native-report .timing-nav { display: none; } }
+
+  /* ═══ PACING VERDICT ═══ the one-line plain-English read of the module
+     the trace below is showing ("the clock ran out at question 18 of 27").
+     The other two evidence sections each open with a sentence naming what
+     the reader is about to look at; this one used to open with a chart and
+     leave its headline as an 8px annotation floating inside it, next to
+     the module-clock label it collided with. Rewritten per module by
+     renderModule(). */
+  #pt-native-report .pace-verdict { font-family: var(--hel); font-size: 0.82rem; line-height: 1.6; color: var(--text); margin: 0 0 0.8rem; }
+  #pt-native-report .pace-verdict strong { font-weight: 700; }
+  #pt-native-report .pace-verdict .pace-ran-out { color: var(--red); }
   /* ═══ STUDENT CALENDAR ═══ their own homework and sessions on one grid,
      day by day. Hand-rolled rather than pulled from a calendar library:
      the portal ships no third-party JS on this path today, and what a
@@ -3745,7 +3865,7 @@ window.Portal = {
            most recent test + the two skill-breakdown donuts (top 3 skills
            each). -->
         <div class="home-overview" id="home-overview" style="display:none;">
-          <h2 class="home-overview-hed"><svg class="home-overview-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10"/><path d="M11 20V4"/><path d="M18 20v-7"/></svg>Your Overview</h2>
+          <h2 class="home-overview-hed"><svg class="home-overview-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10"/><path d="M11 20V4"/><path d="M18 20v-7"/></svg><span id="home-overview-hed-text">Your Overview</span></h2>
           <div class="home-overview-filters">
             <div class="ov-filter" id="home-test-filter">
               <button type="button" class="ov-filter-btn" id="home-test-filter-btn">
@@ -3789,14 +3909,28 @@ window.Portal = {
                 </div>
               </div>
               <div class="next-session-card mini-session-card" id="next-session-card" style="display:none;">
+                <!-- .ns-main / #ns-daychip only mean anything on the
+                     subject-tutoring home, where this tile is the hero and
+                     splits into text-left / date-right. In the SAT overview
+                     strip the wrapper is inert and the chip is hidden. -->
+                <div class="ns-main">
                 <div class="mini-session-eyebrow">Next Session</div>
                 <div class="ns-label" id="ns-label">Your next scheduled session is on:</div>
                 <div class="ns-date" id="ns-date">&mdash;</div>
                 <div class="ns-time" id="ns-time"></div>
+                <!-- "in 3 days" / "tomorrow" — populated by loadNextSession()
+                     and shown only on the subject-tutoring home, where this
+                     card is the hero and has the room for it. -->
+                <div class="ns-rel" id="ns-rel"></div>
                 <a href="#" class="ns-join" id="ns-join" style="display:none;" target="_blank" rel="noopener">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 10l5-3v10l-5-3"/><rect x="3" y="6" width="12" height="12" rx="2"/></svg>
                   Join call<span id="ns-join-url" style="display:none;"></span>
                 </a>
+                </div>
+                <div class="ns-daychip" id="ns-daychip" aria-hidden="true">
+                  <span class="ns-daychip-mon" id="ns-daychip-mon"></span>
+                  <span class="ns-daychip-num" id="ns-daychip-num"></span>
+                </div>
               </div>
             </div>
           </div>
@@ -3817,6 +3951,26 @@ window.Portal = {
               </span>
               <span class="home-shortcut-title">This Week</span>
               <span class="home-shortcut-body" id="home-shortcut-thisweek-body">See what's on deck for this week.</span>
+            </button>
+            <!-- SUBJECT-TUTORING ONLY (see applySubjectHome()) — a student
+                 who isn't doing SAT prep has no practice tests, question
+                 bank or vocabulary to jump into, so the four tiles below
+                 are hidden for them and these two take their place. They
+                 point at the two things every student has regardless of
+                 program: their Drive folder and a way to reach Luca. -->
+            <button type="button" class="home-shortcut-card" id="home-shortcut-files" style="display:none;">
+              <span class="home-shortcut-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a1 1 0 0 1 1-1h5l2 2h9a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7z"/></svg>
+              </span>
+              <span class="home-shortcut-title">My Files</span>
+              <span class="home-shortcut-body" id="home-shortcut-files-body">Everything Luca has shared with you — notes, worksheets, and past work.</span>
+            </button>
+            <button type="button" class="home-shortcut-card" id="home-shortcut-ask" style="display:none;">
+              <span class="home-shortcut-icon gold">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 15a2 2 0 0 1-2 2H8l-4 4V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9Z"/></svg>
+              </span>
+              <span class="home-shortcut-title">Ask Luca</span>
+              <span class="home-shortcut-body" id="home-shortcut-ask-body">Stuck on something before your next session? Reach out.</span>
             </button>
             <button type="button" class="home-shortcut-card" id="home-shortcut-weak">
               <span class="home-shortcut-icon">
@@ -3865,6 +4019,7 @@ window.Portal = {
         <div class="assign-card" id="assign-card" style="display:none;">
           <div class="assign-label">This Week</div>
           <div class="assign-list" id="assign-list"></div>
+          <p class="assign-empty" id="assign-empty" style="display:none;">Nothing on deck right now. Luca adds your work after each session — it’ll show up here and on your calendar.</p>
           <!-- This card shows only what's due now (see getAssignments' own
                date/session filtering); the calendar is where the rest of
                the week lives, so give it a way through from here. -->
@@ -4315,7 +4470,7 @@ window.Portal = {
 
   <div class="sec-hed" id="timing-hed" style="display:none;">3 &middot; Whether the clock lasted</div>
   <div class="timing-card" id="timing-card" style="display:none;">
-    <p class="chart-sub" id="timing-allocation-sub" style="display:none;">One module at a time. Cumulative time spent against what these questions were budgeted &mdash; where the line crosses the module clock is where the section effectively ended. The gap between the two solid lines is time spent going back to questions already answered.</p>
+    <p class="chart-sub" id="timing-allocation-sub" style="display:none;">One module at a time &mdash; the running total of time spent against what these questions were budgeted for.</p>
     <div id="timing-allocation" style="display:none;"></div>
   </div>
 
@@ -5630,6 +5785,95 @@ window.Portal = {
   document.getElementById('home-shortcut-pt').addEventListener('click', function () { goToGatedNav('sidebar-practice-tests', 'practice-tests'); });
   document.getElementById('home-shortcut-mistakes').addEventListener('click', function () { goToGatedNav('sidebar-incorrect-questions', 'incorrect-questions'); });
   document.getElementById('home-shortcut-qb').addEventListener('click', function () { goToGatedNav('sidebar-question-bank', 'question-bank'); });
+  document.getElementById('home-shortcut-files').addEventListener('click', function () { goToGatedNav('sidebar-files', 'files'); });
+
+  /* ═══ HOW LUCA IS REACHED ═══ the only contact channel this site
+     publishes is the phone number in the marketing page's hero/footer, so
+     that's what the Ask Luca tile uses. Fill in `email` here and the tile
+     switches to a prefilled mailto without any other change. */
+  var LUCA_CONTACT = { email: '', phone: '2012752791', phoneDisplay: '(201) 275-2791' };
+  document.getElementById('home-shortcut-ask').addEventListener('click', function () {
+    if (LUCA_CONTACT.email) {
+      var who = (currentStudent && currentStudent.name) || '';
+      window.location.href = 'mailto:' + LUCA_CONTACT.email +
+        '?subject=' + encodeURIComponent('Question from ' + who);
+    } else if (LUCA_CONTACT.phone) {
+      window.location.href = 'tel:' + LUCA_CONTACT.phone;
+    }
+  });
+
+  /* ═══ SUBJECT-TUTORING HOME ═══ one function, called from
+     renderHomePies() on every visit to Home, that swaps "Your Overview"
+     between its two forms. Everything it touches is an existing element
+     with an existing style — see the .is-subject CSS block — so there's no
+     second home screen to keep in sync, and passing false restores the
+     SAT layout exactly (it runs on every Home visit, not once at login,
+     so it can't strand a stale layout behind a currentStudent swap).
+
+     What a subject student actually has to show is thin and worth being
+     honest about: their next session, whatever Luca assigned, and their
+     files. So the section leads with the session as a hero card instead of
+     a score chart, the checklist comes back in full underneath, and the
+     shortcut grid drops to the three tiles that go somewhere real. */
+  function applySubjectHome(on) {
+    var overviewEl = document.getElementById('home-overview');
+    if (!overviewEl) return;
+    overviewEl.classList.toggle('is-subject', !!on);
+    var topRow = document.querySelector('.home-top-row');
+    if (topRow) topRow.classList.toggle('is-subject', !!on);
+    if (on) overviewEl.style.display = '';
+
+    var hedText = document.getElementById('home-overview-hed-text');
+    if (hedText) hedText.textContent = on ? 'Your Week' : 'Your Overview';
+
+    // SAT-only children of the section. Left alone when `on` is false:
+    // each is owned by its own renderer (renderScoreProgress,
+    // fillMiniSkillCard, renderHomeTestFilter), which decides its
+    // visibility from real data, and overriding that here would show an
+    // empty chart to a test-prep student who has no tests yet.
+    var filters = overviewEl.querySelector('.home-overview-filters');
+    if (filters) filters.style.display = on ? 'none' : '';
+    if (on) {
+      var spc = document.getElementById('score-progress-card');
+      if (spc) spc.style.display = 'none';
+      var pair = overviewEl.querySelector('.mini-skill-pair');
+      if (pair) pair.style.display = 'none';
+      // Next Session is the hero of this layout, so it can't wait on the
+      // calendar lookup to claim its space — loadNextSession() fills it.
+      if (nsCard) nsCard.style.display = '';
+      var ltCard = document.getElementById('latest-test-card');
+      if (ltCard) ltCard.style.display = 'none';
+    } else {
+      var pairBack = overviewEl.querySelector('.mini-skill-pair');
+      if (pairBack) pairBack.style.display = '';
+    }
+
+    // Shortcut tiles: the three that go somewhere a subject student can
+    // actually reach, and none of the five SAT ones.
+    var SUBJECT_TILES = { 'home-shortcut-thisweek': 1, 'home-shortcut-files': 1, 'home-shortcut-ask': 1 };
+    document.querySelectorAll('.home-shortcut-card').forEach(function (el) {
+      var mine = !!SUBJECT_TILES[el.id];
+      // Off the subject home, the two new tiles are the ones that hide and
+      // the original six all come back.
+      el.style.display = on ? (mine ? '' : 'none')
+        : (el.id === 'home-shortcut-files' || el.id === 'home-shortcut-ask' ? 'none' : '');
+    });
+
+    // "This Week" as a tile duplicates the checklist sitting right below
+    // it on this layout, so it becomes the way through to the calendar
+    // proper and says so.
+    var twTitle = document.querySelector('#home-shortcut-thisweek .home-shortcut-title');
+    if (twTitle) twTitle.textContent = on ? 'My Calendar' : 'This Week';
+
+    var askBody = document.getElementById('home-shortcut-ask-body');
+    if (askBody) {
+      askBody.textContent = LUCA_CONTACT.email
+        ? 'Stuck on something before your next session? Send Luca a message.'
+        : 'Stuck on something before your next session? Call or text ' + LUCA_CONTACT.phoneDisplay + '.';
+    }
+
+    renderAssignments();  // repaints the checklist under this layout's rules
+  }
   // Cursor-tracked glow + subtle tilt on the two Home shortcut cards — see
   // .home-shortcut-card in the CSS for the flush-until-hover treatment
   // this drives (--mx/--my position the glow, the transform is the tilt).
@@ -6035,7 +6279,27 @@ window.Portal = {
   var assignPollTimer = null;
   function renderAssignments() {
     var items = (currentStudent && currentStudent.assignments) || [];
-    if (!items.length) { assignCard.style.display = 'none'; assignList.innerHTML = ''; renderHomeShortcutTeasers(); return; }
+    var emptyEl = document.getElementById('assign-empty');
+    // On the subject home the card is one of only two things carrying real
+    // content, so it stays put and says "nothing yet" rather than
+    // vanishing — a card that disappears reads as something that failed to
+    // load when there's nothing else on the page to anchor it. Everywhere
+    // else the old behaviour is unchanged.
+    var subjectHome = document.getElementById('home-overview');
+    subjectHome = subjectHome && subjectHome.classList.contains('is-subject');
+    if (!items.length) {
+      assignList.innerHTML = '';
+      if (subjectHome) {
+        assignCard.style.display = '';
+        if (emptyEl) emptyEl.style.display = '';
+      } else {
+        assignCard.style.display = 'none';
+        if (emptyEl) emptyEl.style.display = 'none';
+      }
+      renderHomeShortcutTeasers();
+      return;
+    }
+    if (emptyEl) emptyEl.style.display = 'none';
     assignCard.style.display = '';
     assignList.innerHTML = '';
     items.forEach(function (item) {
@@ -7351,7 +7615,15 @@ window.Portal = {
     // charts and skill breakdowns before Luca's had a chance to look at it.
     var overviewEl = document.getElementById('home-overview');
     var isTestPrep = !!(currentStudent && currentStudent.showSat);
-    var showOverview = isTestPrep && !isGrantedLocked();
+    // A subject-tutoring student gets the section re-pointed at what they
+    // DO have rather than hidden (see applySubjectHome() — hiding it took
+    // Next Session and the shortcut grid down with it and left Home blank).
+    // A test-prep student inside the new-key hold still gets it hidden
+    // outright: they have score data coming, it just isn't theirs to see
+    // yet, so a substitute layout would be the wrong promise.
+    applySubjectHome(!isTestPrep);
+    if (!isTestPrep) return;
+    var showOverview = !isGrantedLocked();
     if (overviewEl) overviewEl.style.display = showOverview ? '' : 'none';
     if (!showOverview) return;
     renderHomeTestFilter();
@@ -7378,6 +7650,27 @@ window.Portal = {
   var nsTime  = document.getElementById('ns-time');
   var nsJoin  = document.getElementById('ns-join');
   var nsJoinUrl = document.getElementById('ns-join-url');
+  var nsRel   = document.getElementById('ns-rel');
+  // The .has-rel class, not just the text, is what makes this visible —
+  // see .ns-rel in the CSS, where it's display:none until BOTH this class
+  // and the subject layout are in play.
+  function setNsRel(text) {
+    if (!nsRel) return;
+    nsRel.textContent = text || '';
+    nsRel.classList.toggle('has-rel', !!text);
+  }
+  var nsDayChip = document.getElementById('ns-daychip');
+  // Passing no ISO (or an unparseable one) empties the chip — every
+  // non-upcoming branch of the lookup calls it that way, so a stale date
+  // can't outlive the state that put it there.
+  function setNsDayChip(iso) {
+    if (!nsDayChip) return;
+    var d = iso ? new Date(iso) : null;
+    var ok = d && !isNaN(d.getTime());
+    nsDayChip.classList.toggle('has-day', !!ok);
+    document.getElementById('ns-daychip-mon').textContent = ok ? d.toLocaleDateString(undefined, { month: 'short' }) : '';
+    document.getElementById('ns-daychip-num').textContent = ok ? String(d.getDate()) : '';
+  }
 
   function setJoinLink() {
     var meetUrl = window.GOOGLE_MEET_URL || '';
@@ -7404,6 +7697,25 @@ window.Portal = {
   // above still does the single-sentence version other states need
   // (in-progress, no session, error), which don't split cleanly into a
   // date and a time.
+  /* "in 3 days" for the subject home's hero session card. Counted in
+     whole CALENDAR days (both dates floored to midnight), not elapsed
+     hours — a session at 9am tomorrow is "tomorrow", not "in 15 hours",
+     and that has to agree with the date printed directly above it. */
+  function sessionRelativeText(iso) {
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    var then = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    var now = new Date();
+    var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    var days = Math.round((then - today) / 86400000);
+    if (days < 0) return '';
+    if (days === 0) return 'Today';
+    if (days === 1) return 'Tomorrow';
+    if (days < 7) return 'In ' + days + ' days';
+    if (days < 14) return 'Next week';
+    return 'In ' + Math.round(days / 7) + ' weeks';
+  }
+
   function formatSessionDateParts(iso, allDay) {
     var d = new Date(iso);
     if (isNaN(d.getTime())) return { date: iso, time: '' };
@@ -7441,10 +7753,12 @@ window.Portal = {
   // connection at all.
   function loadNextSession() {
     if (!currentStudent || !currentStudent.key) return;
-    nsCard.style.display = 'block';
+    nsCard.style.display = '';
     nsLabel.textContent = '';
     nsDate.textContent = 'Loading…';
     if (nsTime) nsTime.textContent = '';
+    setNsRel('');
+    setNsDayChip(null);
     setJoinLink();
 
     fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'nextSession', key: currentStudent.key, debug: DEBUG_MODE }) })
@@ -7462,23 +7776,31 @@ window.Portal = {
           if (inProgress) {
             nsLabel.textContent = '📅 Your session is happening now — join below:';
             nsDate.textContent = 'Happening now';
+            setNsRel('');
+            setNsDayChip(null);
             if (nsTime) nsTime.textContent = 'Started at ' + formatSessionDate(data.next.startIso, data.next.allDay).replace(/^.*at /, '');
           } else {
             nsLabel.textContent = '📅 Your next scheduled session is on:';
             var parts = formatSessionDateParts(data.next.startIso, data.next.allDay);
             nsDate.textContent = parts.date;
             if (nsTime) nsTime.textContent = parts.time;
+            setNsRel(sessionRelativeText(data.next.startIso));
+            setNsDayChip(data.next.startIso);
           }
         } else if (data && data.ok && !data.next) {
           nsLabel.textContent = '';
           nsDate.textContent = 'No sessions scheduled yet.';
           if (nsTime) nsTime.textContent = '';
+          setNsRel('');
+          setNsDayChip(null);
         } else {
           // Lookup failed — server error, calendar unreachable, offline,
           // whatever. The link itself (set above, before this fetch even
           // ran) stays put regardless; only this text falls back.
           nsLabel.textContent = '';
           nsDate.textContent = DEBUG_MODE ? 'Request failed — see debug output below.' : "Couldn't load your session time, but you can still join here:";
+          setNsRel('');
+          setNsDayChip(null);
         }
         // Always re-affirm the join link after the lookup resolves too —
         // belt and suspenders, in case anything above ever changes.
@@ -8852,10 +9174,9 @@ window.Portal = {
       (hasCompletedADiagnostic ? '<span class="menu-card-badge badge-done">Completed</span>' : '<span class="menu-card-badge badge-todo">Start here</span>') +
       '<span class="menu-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="1.5"/><rect x="9" y="2" width="6" height="3" rx="1"/><path d="M9 12.5l2 2 4-4.5"/></svg></span>' +
       '<div class="pt-card-text"><div class="menu-card-title">Diagnostic</div>' +
-      '<div class="pt-meta">' + (hasCompletedADiagnostic ? 'Already taken' : 'Take this first') + '</div>' +
-      '<div class="menu-card-body pt-body-long">' + (hasCompletedADiagnostic
-        ? 'Done &mdash; Luca has your results. The numbered tests below are for ongoing practice, not a retake of this.'
-        : 'Your starting point &mdash; it\'s how Luca sees where you are and builds your plan around real data.') + '</div></div>' +
+      // No description here either, so the diagnostic tile is exactly the
+      // same height as the eleven numbered ones beside it.
+      '<div class="pt-meta">' + (hasCompletedADiagnostic ? 'Already taken' : 'Take this first') + '</div></div>' +
       (attempts.length ? buildPtMenuHtml(attempts) : '');
     card.addEventListener('click', startDiagnosticFlow);
     if (attempts.length) wirePtMenu(card, attempts);
@@ -8916,15 +9237,11 @@ window.Portal = {
       // "you've already taken this" everywhere in the portal. The score
       // itself lives in the body copy just below.
       var badge = result ? '<span class="menu-card-badge badge-done">Completed</span>' : '';
+      /* No per-tile description. Eleven tiles each carrying a sentence made
+         a wall of near-identical copy, and because the sentences differed in
+         length the tiles could not be the same height. Everything that
+         actually varies is in the one-line meta below. */
       var sectionOnlyCount = practiceTestAttempts(test.id).filter(function (a) { return a.mode === 'section'; }).length;
-      var body = result
-        ? 'You took this on ' + (shortDate(result.date) || 'record') +
-          (result.composite ? ' and scored ' + result.composite : '') +
-          '. You can retake it &mdash; your new score is saved alongside the old one.'
-        : (sectionOnlyCount
-            ? 'You have sat ' + (sectionOnlyCount === 1 ? 'one section' : sectionOnlyCount + ' sections') +
-              ' of this test. The full test is still available &mdash; a single section has no 400&ndash;1600 score.'
-            : 'Full adaptive SAT format &mdash; ' + totalQ + ' questions across Reading &amp; Writing and Math, timed like the real test.');
       // Two descriptions of the same thing: a one-line meta for the compact
       // tile grid (which has to fit 11 tests in one screen) and the full
       // sentence for the stacked layout on narrow windows. CSS picks one.
@@ -8938,8 +9255,7 @@ window.Portal = {
         '<span class="' + (num ? 'pt-num' : 'menu-card-icon') + '">' + (num || '&#9201;') + '</span>' +
         '<div class="pt-card-text"><div class="menu-card-title">' + parts.name + '</div>' +
         (parts.note ? '<div class="pt-note">' + parts.note + '</div>' : '') +
-        '<div class="pt-meta">' + meta + '</div>' +
-        '<div class="menu-card-body pt-body-long">' + body + '</div></div>' +
+        '<div class="pt-meta">' + meta + '</div></div>' +
         (attempts.length ? buildPtMenuHtml(attempts) : '');
       card.addEventListener('click', function () { openPtChoice(test); });
       if (attempts.length) wirePtMenu(card, attempts);
@@ -17738,8 +18054,44 @@ window.renderNativeReport = function (data) {
     var num = document.createElement('div');
     num.className = 'tile-score ' + (big ? 'big' : 'small');
     num.textContent = (scaledScore !== null && scaledScore !== undefined) ? scaledScore : (Math.round(p * 100) + '%');
+    // Opt this number into the count-up tween (see animateScoreTiles below)
+    // — the same treatment the composite already gets on Home, so a score a
+    // student watched land there lands the same way when they open the
+    // report. Only real scaled scores, never the percent fallback: the
+    // tween writes a bare integer, so counting a "76%" up would drop the
+    // sign for the whole 900ms. The final value is written above FIRST and
+    // the tween starts on the next frame, so a print fired mid-tween still
+    // shows the real score rather than a zero.
+    if (typeof scaledScore === 'number' && isFinite(scaledScore)) num.setAttribute('data-count-to', scaledScore);
     tile.appendChild(num);
     return tile;
+  }
+
+  /* Counts each [data-count-to] element up from 0 to its real value instead
+     of having the score just appear. Same tween, duration and easing as
+     animateCountUp() on the Home screen — a local copy rather than a call
+     into it, because this renderer is a self-contained closure that
+     deliberately keeps its own copies of the helpers it needs (see the
+     "Small local copies" note above renderNativeReport). Skipped entirely
+     under prefers-reduced-motion. */
+  function animateScoreTiles(root) {
+    if (!root) return;
+    var els = root.querySelectorAll('[data-count-to]');
+    if (!els.length) return;
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    Array.prototype.forEach.call(els, function (el) {
+      var target = Number(el.getAttribute('data-count-to'));
+      if (!isFinite(target)) return;
+      var duration = 900, start = null;
+      function ease(t) { return 1 - Math.pow(1 - t, 3); } // cubic ease-out — fast start, gentle settle
+      function tick(ts) {
+        if (start === null) start = ts;
+        var progress = Math.min(1, (ts - start) / duration);
+        el.textContent = String(Math.round(target * ease(progress)));
+        if (progress < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    });
   }
 
   function barRow(label, c, t, cls) {
@@ -19318,16 +19670,29 @@ window.renderNativeReport = function (data) {
     if (!moduleViews.length) return;
     var CHART_W = 640;
 
+    /* The module arrows live in this chart's own header row, on the right
+       beside the "2 of 4" counter, rather than flanking the chart as a
+       carousel. Two reasons, both consequences of this section no longer
+       being a card (see the FLUSH SECTIONS block in the stylesheet): a
+       chart pinned to CHART_W px between two nav buttons sat visibly inset
+       from the flush section heading above it, and arrows parked in the
+       vertical middle of the plot, greyed at 25% when disabled, read as
+       chart decoration — most readers never found out there were four
+       modules at all. Beside the counter they read as what they are, and
+       the chart now runs the full measure. Mirrors report.html. */
     wrap.innerHTML =
-      '<div class="timing-carousel">' +
-        '<button type="button" class="timing-nav-btn" id="timing-prev-btn" aria-label="Previous module"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>' +
-        '<div class="timing-chart-card" style="width:' + CHART_W + 'px;">' +
-          '<div class="timing-chart-hed"><span id="timing-module-label"></span><span class="timing-module-counter" id="timing-module-counter"></span></div>' +
-          '<svg class="pace-trace" id="pace-trace" viewBox="0 0 ' + CHART_W + ' 196" role="img"></svg>' +
-          '<div class="pace-legend" id="pace-legend"></div>' +
-
+      '<div class="timing-chart-card">' +
+        '<div class="timing-chart-hed">' +
+          '<span id="timing-module-label"></span>' +
+          '<span class="timing-nav">' +
+            '<button type="button" class="timing-nav-btn" id="timing-prev-btn" aria-label="Previous module"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>' +
+            '<span class="timing-module-counter" id="timing-module-counter"></span>' +
+            '<button type="button" class="timing-nav-btn" id="timing-next-btn" aria-label="Next module"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>' +
+          '</span>' +
         '</div>' +
-        '<button type="button" class="timing-nav-btn" id="timing-next-btn" aria-label="Next module"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>' +
+        '<p class="pace-verdict" id="pace-verdict"></p>' +
+        '<svg class="pace-trace" id="pace-trace" viewBox="0 0 ' + CHART_W + ' 196" role="img"></svg>' +
+        '<div class="pace-legend" id="pace-legend"></div>' +
       '</div>';
 
     var labelEl = document.getElementById('timing-module-label');
@@ -19367,11 +19732,61 @@ window.renderNativeReport = function (data) {
        renders nothing if time-budgets.js didn't load. */
     var paceSvg = document.getElementById('pace-trace');
     var paceLegend = document.getElementById('pace-legend');
+    var paceVerdictEl = document.getElementById('pace-verdict');
+
+    /* The sentence this whole section exists to say, written above the
+       chart rather than left for the reader to derive from it. Two clauses,
+       always in the same order:
+
+         1. Did the clock last? Either it ran out at a specific question
+            (the finding), or it did not (and by how much).
+         2. Was the pace ever going to last? First-look time against what
+            these questions were budgeted — which answers a DIFFERENT
+            question than clause 1, because a student can finish inside the
+            clock while still being well over budget on the questions they
+            did reach, and that student's next section is the one that
+            breaks.
+
+       Return-trip time is folded into clause 2 rather than given a clause
+       of its own; the shaded band and its legend entry already carry it,
+       and "Habits worth naming" narrates it at length further down.
+       Mirrors report.html. */
+    function paceVerdict(pts, cf, cb, ct, clockMs, cross) {
+      var NOTABLE = 30000; // half a minute — below this, "over budget" is noise, not a finding
+      var out = [];
+      if (cross && cross.n < pts.length) {
+        var left = pts.length - cross.n;
+        out.push('<strong class="pace-ran-out">The clock ran out at question ' + cross.n +
+          ' of ' + pts.length + '.</strong> The last ' + left + ' question' + (left === 1 ? '' : 's') +
+          ' never got real time.');
+      } else if (clockMs && ct < clockMs) {
+        out.push('<strong>Finished with ' + formatDuration(clockMs - ct) + ' still on the clock.</strong>');
+      } else {
+        out.push('<strong>Every question got a look inside the module clock.</strong>');
+      }
+      var debt = cf - cb;
+      if (debt > NOTABLE) {
+        out.push('First looks ran ' + formatDuration(debt) + ' past what these questions were budgeted' +
+          (ct - cf > NOTABLE ? ', before counting the ' + formatDuration(ct - cf) + ' spent going back to them' : '') + '.');
+      } else if (debt < -NOTABLE) {
+        out.push('First looks came in ' + formatDuration(-debt) + ' inside what these questions were budgeted.');
+      } else {
+        out.push('First looks landed on what these questions were budgeted.');
+      }
+      return out.join(' ');
+    }
+
     function renderPaceTrace(mv) {
       if (!paceSvg) return;
       paceSvg.innerHTML = '';
       if (!window.TIME_BUDGETS) { paceSvg.style.display = 'none'; paceLegend.style.display = 'none'; return; }
-      var W = CHART_W, H = 196, L = 34, R = 12, T = 14, B = 28;
+      // R (right gutter) is wide enough to hold the direct labels written
+      // at the end of each line below. Labelling the lines in place is what
+      // lets the legend under this chart drop from six entries to two: a
+      // reader never has to carry "red = first look, dashed = budget, gold =
+      // including return trips, dotted = module clock" down to a key and
+      // back up again.
+      var W = CHART_W, H = 196, L = 34, R = 92, T = 14, B = 28;
       var iw = W - L - R, ih = H - T - B;
 
       var pts = [], cb = 0, cf = 0, ct = 0, anyRevisit = false;
@@ -19438,15 +19853,38 @@ window.renderNativeReport = function (data) {
       // Marked on the TOTAL line, since total time is what the clock sees.
       var cross = null;
       if (clockMs) { for (var ci = 0; ci < pts.length; ci++) { if (pts[ci].ct >= clockMs) { cross = pts[ci]; break; } } }
+      // The dot alone, with no text beside it: this used to carry an "Out
+      // of time at Q18 of 27" label in 8px red, which is both the single
+      // most important sentence in this section and the smallest type on
+      // the page, and which sat close enough to the module-clock label to
+      // collide with it. That sentence is now the verdict line above the
+      // chart (see paceVerdict), where it is read first rather than found.
       if (cross && cross.n < pts.length) {
         svgEl('circle', { cx: xAtN(cross.n), cy: yAt(cross.ct), r: 4,
           fill: 'var(--red)', stroke: 'var(--white)', 'stroke-width': 1.5 });
-        var lbl = svgEl('text', { y: yAt(cross.ct) - 9, class: 'pace-note', fill: 'var(--red)' },
-          'Out of time at Q' + cross.n + ' of ' + pts.length);
-        // flip the label inboard near the right edge so it can't run off
-        if (xAtN(cross.n) > L + iw * 0.6) { lbl.setAttribute('x', xAtN(cross.n) - 7); lbl.setAttribute('text-anchor', 'end'); }
-        else { lbl.setAttribute('x', xAtN(cross.n) + 7); }
       }
+
+      /* Direct labels at the right end of each line, instead of a legend
+         entry per line. Written into the R gutter opened above. Labels are
+         nudged apart when two lines finish within a few pixels of each
+         other, so a module where the student landed exactly on budget still
+         reads as two labels rather than one overstruck smudge. */
+      (function labelLineEnds() {
+        var xEnd = L + iw + 6;
+        var wants = [{ y: yAt(cb), text: 'On budget', fill: 'rgba(17,17,17,0.55)' }];
+        if (anyRevisit) wants.push({ y: yAt(ct), text: 'With return trips', fill: 'var(--gold)' });
+        wants.push({ y: yAt(cf), text: 'Your pace', fill: cf >= cb ? 'var(--red)' : 'var(--green)' });
+        wants.sort(function (a, b) { return a.y - b.y; });
+        for (var i = 1; i < wants.length; i++) {
+          if (wants[i].y - wants[i - 1].y < 11) wants[i].y = wants[i - 1].y + 11;
+        }
+        // keep the whole stack inside the plot box if the nudging pushed it out
+        var overflow = wants[wants.length - 1].y - (T + ih);
+        if (overflow > 0) wants.forEach(function (w) { w.y -= overflow; });
+        wants.forEach(function (w) {
+          svgEl('text', { x: xEnd, y: w.y + 3, class: 'pace-note', fill: w.fill }, w.text);
+        });
+      })();
 
       [1, Math.ceil(pts.length / 2), pts.length].forEach(function (q) {
         svgEl('text', { x: xAtN(q), y: H - B + 13, 'text-anchor': 'middle', class: 'pace-ax' }, q);
@@ -19477,15 +19915,17 @@ window.renderNativeReport = function (data) {
       });
 
       var debt = cf - cb;
+      /* Two entries, not six. The four LINE entries this used to carry are
+         now written at the end of the lines themselves (see labelLineEnds
+         above) and on the module-clock rule; what is left is the only thing
+         a swatch can say better than an in-place label, which is what each
+         of the two shaded bands is worth in minutes. */
       paceLegend.innerHTML =
-        '<span><i style="border-top-color:' + (cf >= cb ? 'var(--red)' : 'var(--green)') + '"></i>First look at each question</span>' +
-        '<span><i class="dash" style="border-top-color:rgba(17,17,17,0.42)"></i>Budgeted for these questions</span>' +
-        (anyRevisit ? '<span><i style="border-top-color:var(--gold)"></i>Including return trips</span>' : '') +
-        (clockMs ? '<span><i class="dot" style="border-top-color:var(--ink)"></i>Module clock</span>' : '') +
         '<span><i class="fill" style="background:' + (cf >= cb ? 'rgba(239,68,68,0.10)' : 'rgba(22,163,74,0.10)') + '"></i>' +
-          (debt >= 0 ? formatDuration(debt) + ' over budget' : formatDuration(-debt) + ' under') + '</span>' +
+          (debt >= 0 ? formatDuration(debt) + ' over budget' : formatDuration(-debt) + ' under budget') + '</span>' +
         (anyRevisit ? '<span><i class="fill" style="background:rgba(201,168,76,0.20)"></i>' +
-          formatDuration(ct - cf) + ' going back</span>' : '');
+          formatDuration(ct - cf) + ' spent going back</span>' : '');
+      paceVerdictEl.innerHTML = paceVerdict(pts, cf, cb, ct, clockMs, cross);
       paceSvg.setAttribute('aria-label', 'Cumulative time for ' + mv.label + ': ' + formatDuration(cf) +
         ' on first looks against ' + formatDuration(cb) + ' budgeted, ' + formatDuration(ct) + ' including return trips' +
         (clockMs ? ', on a ' + Math.round(mv.clockMin) + ' minute clock' : '') + '.');
@@ -19817,6 +20257,10 @@ window.renderNativeReport = function (data) {
   })();
 
   document.getElementById('page1').style.display = 'block';
+  // After the container is visible, not before — a tween started while the
+  // report is display:none burns its whole 900ms unseen and the score simply
+  // appears at full value, which is the thing this exists to avoid.
+  animateScoreTiles(document.getElementById('score-tiles'));
 
   // The question-by-question table is real detail, but it's not what most
   // parents open this report for — it stays off by default (both on
