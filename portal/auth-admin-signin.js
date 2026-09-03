@@ -53,10 +53,49 @@
     try { sessionStorage.removeItem(PAGE_KEY); } catch (e) {}
   }
 
-  function post(payload) {
-    return fetch(URL_, { method: 'POST', body: JSON.stringify(payload) })
+  /* Same lost-hop problem auth-admin.js documents for its roster read: Apps
+     Script redirects a POST to its echo host and that hop intermittently
+     answers a 404 or an HTML page even though the script ran. The roster
+     read has retried around it for a long time; THIS file -- the sign-in
+     that has to succeed before the roster is even asked for -- did not, so
+     one lost hop meant "couldn't reach the server" and a manual reload.
+     Both actions here establish or check a session rather than creating
+     anything, so repeating them is safe. */
+  // Value is the field a genuine answer carries, same convention as
+  // auth-admin.js: adminGoogleAuth returns { ok, session, email, name },
+  // and accessRoster (used here only to test a stored session) returns
+  // { ok, students }.
+  var RETRY_ACTIONS = { adminGoogleAuth: 'session', accessRoster: 'students' };
+  var POST_TIMEOUT_MS = 20000;
+  var POST_MAX_ATTEMPTS = 3;
+
+  function post(payload, attempt) {
+    attempt = attempt || 0;
+    var field = RETRY_ACTIONS[payload && payload.action];
+    var canRetry = !!field && attempt < (POST_MAX_ATTEMPTS - 1);
+    function again() {
+      var wait = 700 * Math.pow(2, attempt) + Math.floor(Math.random() * 400);
+      return new Promise(function (r) { setTimeout(r, wait); })
+        .then(function () { return post(payload, attempt + 1); });
+    }
+    var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, POST_TIMEOUT_MS);
+    var opts = { method: 'POST', body: JSON.stringify(payload) };
+    if (ctrl) opts.signal = ctrl.signal;
+    return fetch(URL_, opts)
       .then(function (r) { return r.json(); })
-      .catch(function () { return { ok: false, error: 'network' }; });
+      .then(function (data) {
+        clearTimeout(timer);
+        // The GET health reply again ({ok:true, message}) -- never mistake
+        // it for a successful sign-in.
+        if (field && data && data.ok === true && !(field in data)) {
+          return canRetry ? again() : { ok: false, error: 'network' };
+        }
+        return data;
+      }, function () {
+        clearTimeout(timer);
+        return canRetry ? again() : { ok: false, error: 'network' };
+      });
   }
 
   var host = null;
