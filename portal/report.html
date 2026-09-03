@@ -2440,7 +2440,21 @@
     var rwScaled = satSectionScore(rw, RW_CURVE);
     var mathScaled = satSectionScore(mathSec, MATH_CURVE);
     var composite = (rwScaled !== null && mathScaled !== null) ? rwScaled + mathScaled : null;
-    tilesEl.appendChild(scoreTile('Composite (400–1600)', totalC, totalQ, composite, true));
+    /* Composite only exists when BOTH sections were taken — it is the sum
+       of the two scaled scores. On a single-section attempt (a Math-only
+       run, say) satSectionScore returns null for the missing half, so
+       composite is null, and scoreTile's fallback printed the raw percent
+       correct under a "Composite (400-1600)" label: an 11% sitting where a
+       400-1600 figure belongs. Nonsense twice over — wrong scale, and a
+       composite that was never computed.
+
+       So the composite tile is only built when there is a composite. A
+       single-section attempt promotes that section to the big tile
+       instead, which is the only real scaled score it has. */
+    var singleSection = (composite === null || composite === undefined);
+    if (!singleSection) {
+      tilesEl.appendChild(scoreTile('Composite (400–1600)', totalC, totalQ, composite, true));
+    }
     /* ═══ SCORE BAND ═══ the composite needs to carry its own imprecision,
        but as part of the number rather than as a paragraph of methodology
        under it. A three-sentence footnote about curve variance sitting in
@@ -2492,8 +2506,13 @@
         bigTile.appendChild(rangeEl);
       }
     }
-    if (rw) tilesEl.appendChild(scoreTile('Reading & Writing (200–800)', rw.c, rw.t, rwScaled, false));
-    if (mathSec) tilesEl.appendChild(scoreTile('Math (200–800)', mathSec.c, mathSec.t, mathScaled, false));
+    // On a single-section attempt the surviving section IS the headline, so
+    // it takes the big tile rather than sitting in the small row next to an
+    // empty space where the composite would have been.
+    if (rw) tilesEl.appendChild(scoreTile('Reading & Writing (200–800)', rw.c, rw.t, rwScaled,
+      singleSection && rwScaled !== null && rwScaled !== undefined));
+    if (mathSec) tilesEl.appendChild(scoreTile('Math (200–800)', mathSec.c, mathSec.t, mathScaled,
+      singleSection && mathScaled !== null && mathScaled !== undefined));
     var routedEasier = [rw, mathSec].some(function (s) { return s && s.variant === 'Easier'; });
     scoreCaption.textContent = 'The fraction under each score is raw percent correct on this diagnostic. The score itself reads that off College Board\'s own published raw-to-scaled conversion table (Reading & Writing and Math have separate tables), then adjusts for which module the misses fell in — because the SAT is adaptive, missing questions in Module 1 costs more than missing the same number in Module 2' + (routedEasier ? ', and a weaker Module 1 also routes that section to the easier Module 2' : '') + '; the real digital SAT curve varies by test, so this is a close estimate, not the exact official scoring.';
   } else {
