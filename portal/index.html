@@ -12517,6 +12517,14 @@ window.Portal = {
       attemptId: entry.attemptId, composite: entry.composite,
       scaleMin: entry.scaleMin, scaleMax: entry.scaleMax,
       rw: entry.rw, math: entry.math, weakest: entry.weakest || null,
+      /* WHICH HALF, AND WHAT IT SCORED. Omitted here originally because a
+         section-only sitting was never sent at all, so there was nothing
+         for these to describe. Now that it is sent, they are what tell the
+         server this is half a test: logDiagnosticResult_ writes a row only
+         when it can see a composite OR a section score, so leaving these
+         out would have quietly discarded the attempt a second time, one
+         layer further down. */
+      mode: entry.mode, sectionKey: entry.sectionKey, sectionScore: entry.sectionScore,
       // Test integrity, so the roster can show it without opening the
       // report (see the Interrupted column in Code.gs).
       interrupted: entry.interrupted, awayMs: entry.awayMs
@@ -12931,21 +12939,52 @@ window.Portal = {
     // always sees their own score link AND Luca is notified every time —
     // there's no "first attempt only" gating, and no satTaken
     // stamping (that flag is diagnostic-specific).
-    /* A SECTION-ONLY SITTING IS PRACTICE, NOT A RESULT TO REPORT. It has no
-       400-1600 score, so sending it as a completed practice test would put
-       an unscored attempt in front of Luca and imply the test was taken.
-       The student still gets their section score and their report; the
-       backend simply is not told. Their score history entry is still
-       written locally (see recordComposite), so the card's menu can reopen
-       this report later. */
+    /* A SECTION-ONLY SITTING IS STILL A SITTING, AND IT GETS LOGGED.
+       This used to return without contacting the backend at all: the
+       student saw their section score, and nothing about the attempt ever
+       reached the Attempts sheet -- no score, no date, no record it
+       happened. The stated reason was that a subject line reading "New SAT
+       Practice Test 4 - <name> - 18/44" would read as a whole test taken
+       badly. That was a
+       real problem with the NOTIFICATION, not a reason to lose the data,
+       and it is fixed where it belongs: the subject line now says "Math
+       only, 430 (200-800)", and the row carries Mode/SectionKey/
+       SectionScore with Composite deliberately empty, so nothing that
+       reads a composite mistakes half a test for a whole one.
+
+       The student-facing message is unchanged apart from no longer
+       claiming the result is only on this device. */
     if (ptDone && sectionOnly) {
       setViewResultsLink(reportLinkRelative);
       var secName = sectionOnly === 'math' ? 'Math' : 'Reading & Writing';
       document.getElementById('done-message').textContent =
         'Nice work — that was the ' + secName + ' section on its own, so there is no 400–1600 score for it. ' +
-        'Your section score and full breakdown are below, saved on this device.';
-      statusEl.textContent = '';
+        'Your section score and full breakdown are below.';
+      statusEl.textContent = 'Saving your results…';
       show('screen-done');
+      postToBackend(Object.assign({
+        action: 'submitPracticeTest',
+        key: currentStudent.key,
+        test: ptDone.title,
+        testId: ptDone.id,
+        score: totalCorrect + '/' + totalQuestions,
+        reportLink: reportLink,
+        report: report
+      }, scoreEntryFields(scoreEntryForSubmit)), { timeoutMs: 60000, attempts: 3 })
+        .then(function (data) {
+          if (data && data.ok) { statusEl.textContent = 'Saved.'; }
+          else { throw new Error((data && data.error) || 'send_failed'); }
+        })
+        .catch(function () {
+          // The student's own copy is already written locally, so this is
+          // about Luca's record, not theirs -- worded so they do not think
+          // their work vanished.
+          statusEl.textContent = 'Your section score is saved on this device, but it may not have reached Luca. ' +
+            'Text him at (201) 275-2791 with your key (' + currentStudent.key + ') if it does not show up.';
+          statusEl.classList.add('err');
+        });
+      practiceTestId = null;
+      return;
     } else if (ptDone) {
       setViewResultsLink(reportLinkRelative);
       document.getElementById('done-message').textContent = 'Nice work! Your results just went to Luca — no need to send anything yourself.';
