@@ -2916,6 +2916,30 @@
      of a single progress bar; each part carries its own small radius so
      the gap shows through cleanly. */
 #pt-native-report .dx-split { display: flex; gap: 3px; height: 24px; margin-bottom: 8px; }
+  /* The bar is now the way in to the questions behind it. Hover/press
+     treatment matches the bridge chart's segments: the hovered piece
+     lifts slightly and the rest recede, so it reads as 'this one' rather
+     than as a decorative highlight. The open segment stays lifted while
+     its list is showing. */
+#pt-native-report .dx-part { border: none; font: inherit; font-size: 10px; font-weight: 700; color: #fff; cursor: pointer;
+    padding: 0; appearance: none; -webkit-appearance: none;
+    transition: width 0.9s var(--ease, ease), filter 0.15s ease, transform 0.15s ease, opacity 0.15s ease; }
+#pt-native-report .dx-split:hover .dx-part { opacity: 0.55; }
+#pt-native-report .dx-split .dx-part:hover, #pt-native-report .dx-part.dx-open { opacity: 1; filter: brightness(1.08); transform: translateY(-1px); }
+#pt-native-report .dx-part:focus-visible { outline: 2px solid var(--ink, #111); outline-offset: 2px; }
+#pt-native-report .dx-lab-btn { background: none; border: none; font: inherit; cursor: pointer; padding: 0; color: inherit;
+    display: inline-flex; align-items: center; gap: 6px; border-bottom: 1px solid transparent; transition: border-color 0.15s ease, opacity 0.15s ease; }
+#pt-native-report .dx-lab-btn:hover { border-bottom-color: currentColor; }
+#pt-native-report .dx-lab-btn.dx-open { border-bottom-color: currentColor; }
+#pt-native-report .dx-detail { margin-top: 12px; border-top: 1px solid var(--border); padding-top: 10px; }
+#pt-native-report .dx-detail-hed { font-size: 9.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mid); margin-bottom: 8px; }
+#pt-native-report .dx-detail-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; max-height: 260px; overflow-y: auto; }
+#pt-native-report .dx-detail-list li { display: flex; align-items: baseline; gap: 10px; font-size: 11px; padding: 5px 6px; border-radius: 5px; }
+#pt-native-report .dx-detail-list li:nth-child(odd) { background: rgba(17,17,17,0.03); }
+#pt-native-report .dxd-q { font-weight: 700; min-width: 34px; flex-shrink: 0; }
+#pt-native-report .dxd-skill { flex: 1 1 auto; min-width: 0; }
+#pt-native-report .dxd-sec { color: var(--faint); font-size: 10px; flex-shrink: 0; }
+#pt-native-report .dxd-time { color: var(--mid); font-variant-numeric: tabular-nums; flex-shrink: 0; }
 #pt-native-report .dx-part { display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff; min-width: 0; border-radius: 4px; }
 #pt-native-report .dx-part.content { background: var(--red); }
 #pt-native-report .dx-part.method { background: var(--tan); }
@@ -3206,6 +3230,14 @@
   #pt-native-report .score-tiles { display: flex; align-items: stretch; gap: 0; margin-bottom: 0; flex-wrap: wrap; }
   #pt-native-report .score-tile { flex: 1 1 180px; min-width: 0; background: transparent; border: none; border-radius: 0; padding: 1.4rem 1.75rem; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
   #pt-native-report .score-tile.big { flex: 0 0 auto; min-width: 220px; border-right: 1px solid var(--border); }
+  /* The big tile's border-right divides it from the R&W/Math column beside
+     it. A single-section attempt has no such column -- groupSmallScoreTiles
+     returns early with nothing to wrap -- so the big tile is the only child
+     and that divider became a bar hanging in empty space next to the one
+     score. :last-child is exactly the condition: the small-tiles wrapper is
+     appended AFTER the big tile whenever it exists, so the big tile is last
+     only when it stands alone. */
+  #pt-native-report .score-tiles > .score-tile.big:last-child { border-right: none; }
   #pt-native-report .score-tile .tile-lab { font-family: var(--hel); font-size: 0.68rem; letter-spacing: 0.09em; margin: 0 0 0.4rem; }
   #pt-native-report .score-tile .tile-score { font-family: var(--hel); color: var(--text); }
   #pt-native-report .score-tile .tile-score.big { font-size: 2.5rem; }
@@ -3225,6 +3257,9 @@
   @media (max-width: 700px) {
     #pt-native-report .score-tiles { flex-direction: column; }
     #pt-native-report .score-tile.big { border-right: none; border-bottom: 1px solid var(--border); width: 100%; }
+    /* Stacked, the divider becomes a border-bottom -- same stray bar under
+       a lone section score, so the same exemption applies. */
+    #pt-native-report .score-tiles > .score-tile.big:last-child { border-bottom: none; }
     #pt-native-report .raw-stats { flex-wrap: wrap; }
     #pt-native-report .raw-stat:nth-child(-n+2) { border-bottom: 1px solid var(--border); }
   }
@@ -22063,21 +22098,44 @@ window.renderNativeReport = function (data) {
      the other two. */
   (function renderDiagnosis() {
     var content = 0, method = 0, clock = 0;
+    /* The same three tests, but keeping the rows as well as the tally, so
+       the bar can be opened to show WHICH questions are in each bucket
+       rather than only how many. A row is stored once per bucket it lands
+       in; a question can legitimately be in two (missed after a long
+       think, in a stretch that was already past the clock), and the bar's
+       own counts have always double-counted that the same way. */
+    var buckets = { content: [], method: [], clock: [] };
+    function bucket(k, sec, r, why) {
+      if (buckets[k].some(function (x) { return x.r === r; })) return;
+      buckets[k].push({ sec: sec, r: r, why: why });
+    }
     sections.forEach(function (sec) {
       var roll = budgetRollups[sec.key];
       var usingFirst = sec.rows.some(function (r) { return r.firstVisitMs != null; });
       var correctTimes = sec.rows.filter(function (r) { return r.ok && r.q.type === 'mc' && pacingTimeMs(r) > 0; }).map(pacingTimeMs);
       var typical = median(correctTimes);
       sec.rows.forEach(function (r) {
-        if (r.skipped) { clock++; return; }
-        if (!r.ok && typical && pacingTimeMs(r) >= typical * STUCK_REL) content++;
+        if (r.skipped) { clock++; bucket('clock', sec, r, 'never reached'); return; }
+        if (!r.ok && typical && pacingTimeMs(r) >= typical * STUCK_REL) {
+          content++; bucket('content', sec, r, 'worked at it, still missed');
+        }
       });
-      if (roll) method += roll.correctOverBudget;
+      if (roll) {
+        method += roll.correctOverBudget;
+        // The rollup collects these itself (see correctOverBudgetRows in
+        // time-budgets.js) so the list and the count cannot drift apart.
+        (roll.correctOverBudgetRows || []).forEach(function (r) {
+          bucket('method', sec, r, 'right, but well over budget');
+        });
+      }
       // Questions that came after the module's clock was already spent —
       // answered, but not really attempted.
       if (roll && sec.timeAllottedMin > 0) {
         var budget = sec.timeAllottedMin * 60000, run = 0, past = 0;
-        sec.rows.forEach(function (r) { run += (r.timeMs || 0); if (run > budget) past++; });
+        sec.rows.forEach(function (r) {
+          run += (r.timeMs || 0);
+          if (run > budget) { past++; bucket('clock', sec, r, 'clock already spent'); }
+        });
         clock += past;
       }
     });
@@ -22143,14 +22201,64 @@ window.renderNativeReport = function (data) {
       '<div class="dx-split">' + fixed.map(function (i) {
         if (!i.n) return '';
         var pct = i.n / total * 100;
-        return '<span class="dx-part ' + i.key + '" style="width:' + pct.toFixed(1) + '%">' +
-          (pct >= 9 ? i.n : '') + '</span>';
+        return '<button type="button" class="dx-part ' + i.key + '" data-dx-key="' + i.key + '"' +
+          ' aria-expanded="false" title="' + esc(i.n + ' \u2014 ' + i.barLabel + '. Click to see which questions.') + '"' +
+          ' style="width:' + pct.toFixed(1) + '%">' + (pct >= 9 ? i.n : '') + '</button>';
       }).join('') + '</div>' +
       '<div class="dx-labels">' + fixed.map(function (i) {
-        return '<span><i class="' + i.key + '" style="background:' +
+        if (!i.n) return '<span><i class="' + i.key + '" style="background:' +
           (i.key === 'content' ? 'var(--red)' : i.key === 'method' ? 'var(--tan)' : '#4E6070') + '"></i>' +
           '<b>' + i.n + '</b> ' + esc(i.barLabel) + '</span>';
-      }).join('') + '</div>';
+        return '<button type="button" class="dx-lab-btn" data-dx-key="' + i.key + '" aria-expanded="false">' +
+          '<i class="' + i.key + '" style="background:' +
+          (i.key === 'content' ? 'var(--red)' : i.key === 'method' ? 'var(--tan)' : '#4E6070') + '"></i>' +
+          '<b>' + i.n + '</b> ' + esc(i.barLabel) + '</button>';
+      }).join('') + '</div>' +
+      '<div class="dx-detail" id="dx-detail" hidden></div>';
+
+    /* ═══ OPENING A SEGMENT ═══ the bar says how many; this says which.
+       Both the segment and its label open the same panel: on a phone a
+       9%-wide sliver is not a credible tap target and the label row is.
+       Clicking the open one closes it. See report.html's identical block. */
+    var dxCardEl = document.getElementById('dx-verdict-card');
+    var detailEl = document.getElementById('dx-detail');
+    var openKey = null;
+    function rowLabel(e) {
+      var q = e.r.q || {};
+      var num = (e.r.number != null ? e.r.number : (e.r.n != null ? e.r.n : null));
+      var secLab = (e.sec && e.sec.label) ? e.sec.label : '';
+      var secs = Math.round((pacingTimeMs(e.r) || e.r.timeMs || 0) / 1000);
+      var time = secs > 0 ? (secs >= 60 ? Math.floor(secs / 60) + 'm ' + (secs % 60) + 's' : secs + 's') : '';
+      return { num: num, sec: secLab, skill: q.skill || q.domain || '', time: time };
+    }
+    function renderDetail(key) {
+      var list = buckets[key] || [];
+      var item = fixed.filter(function (i) { return i.key === key; })[0] || { barLabel: '' };
+      if (!list.length) { detailEl.hidden = true; return; }
+      detailEl.innerHTML =
+        '<div class="dx-detail-hed">' + esc(list.length + ' ' +
+          (list.length === 1 ? 'question' : 'questions') + ' \u2014 ' + item.barLabel) + '</div>' +
+        '<ol class="dx-detail-list">' + list.map(function (e) {
+          var d = rowLabel(e);
+          return '<li><span class="dxd-q">' + (d.num != null ? 'Q' + esc(d.num) : '\u2014') + '</span>' +
+            '<span class="dxd-skill">' + esc(d.skill || d.sec) + '</span>' +
+            (d.sec && d.skill ? '<span class="dxd-sec">' + esc(d.sec) + '</span>' : '') +
+            (d.time ? '<span class="dxd-time">' + esc(d.time) + '</span>' : '') + '</li>';
+        }).join('') + '</ol>';
+      detailEl.hidden = false;
+    }
+    Array.prototype.forEach.call(dxCardEl.querySelectorAll('[data-dx-key]'), function (el) {
+      el.addEventListener('click', function () {
+        var key = el.getAttribute('data-dx-key');
+        openKey = (openKey === key) ? null : key;
+        Array.prototype.forEach.call(dxCardEl.querySelectorAll('[data-dx-key]'), function (o) {
+          var on = openKey !== null && o.getAttribute('data-dx-key') === openKey;
+          o.setAttribute('aria-expanded', on ? 'true' : 'false');
+          o.classList.toggle('dx-open', on);
+        });
+        if (openKey === null) detailEl.hidden = true; else renderDetail(openKey);
+      });
+    });
     document.getElementById('dx-hed').style.display = '';
     document.getElementById('dx-verdict-card').style.display = '';
     document.getElementById('dx-verdict-card').className = 'dx-card';
