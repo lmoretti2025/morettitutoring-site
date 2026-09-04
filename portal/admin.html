@@ -362,6 +362,32 @@
     .cal-wrap { overflow-x: auto; }
     .cal-host { min-width: 560px; }
   }
+  /* ═══ SKELETONS ═══
+     The backend is ~1.4s at the median with a long tail (one measured
+     request took 14.6s), and every panel on this page used to answer that
+     with the grey word "Loading..." in an empty card. A shape that matches
+     what is coming reads as work in progress; a single word reads as a
+     page that has given up.
+
+     Deliberately low-contrast and slow: this is furniture, not an
+     animation to watch. prefers-reduced-motion drops the sweep and leaves
+     the shapes, which still say "something is coming" without moving. */
+  @keyframes sk-sweep { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+  .sk { border-radius: 6px; background: linear-gradient(90deg, rgba(17,17,17,0.05) 25%, rgba(17,17,17,0.09) 37%, rgba(17,17,17,0.05) 63%); background-size: 200% 100%; animation: sk-sweep 1.6s linear infinite; }
+  .sk-line { height: 11px; margin: 9px 0; }
+  .sk-row { display: flex; align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+  .sk-row:last-child { border-bottom: none; }
+  .sk-grow { flex: 1 1 auto; }
+  .sk-block { height: 20px; }
+  @media (prefers-reduced-motion: reduce) { .sk { animation: none; } }
+
+  /* No pending-button treatment here, deliberately. Every write on this
+     page already guards itself: act() disables the whole card and holds a
+     busy flag against the poll, Delete disables its own button, and the
+     archive toggle and calendar copy are optimistic with a revert. Adding
+     a spinner would have been a second mechanism competing with a working
+     one. */
+
   /* ═══ ACROSS ALL THEIR TESTS ═══ deliberately plain: this is a working
      panel Luca reads before a session, not a chart to admire. Numbers
      right-aligned and tabular so columns compare down the page. */
@@ -472,7 +498,7 @@
       <div class="card" id="stu-analysis-card">
         <h2>Across all their tests</h2>
         <p class="card-sub" id="stu-analysis-sub">Pooled from every attempt &mdash; more evidence per skill than any single report can have.</p>
-        <div id="stu-analysis"><div class="empty">Loading&hellip;</div></div>
+        <div id="stu-analysis"></div>
       </div>
     </section>
 
@@ -1151,12 +1177,12 @@
     resetDeleteCard();
     $('stu-name').firstChild.textContent = student.name;
     $('stu-key').textContent = student.key;
-    $('stu-meta').innerHTML = '<span>Loading&hellip;</span>';
+    $('stu-meta').innerHTML = '<span class="sk sk-line" style="display:inline-block;width:190px;vertical-align:middle;"></span>';
     $('stu-actions').innerHTML = '';
     $('stu-tiles').innerHTML = '';
-    $('stu-attempts').innerHTML = '<tr><td colspan="5" class="empty">Loading&hellip;</td></tr>';
-    $('stu-skills').innerHTML = '<div class="empty">Loading&hellip;</div>';
-    $('stu-analysis').innerHTML = '<div class="empty">Loading&hellip;</div>';
+    $('stu-attempts').innerHTML = skRows(4, 5);
+    $('stu-skills').innerHTML = skLines(4);
+    $('stu-analysis').innerHTML = '<div class="sk sk-block" style="width:100%;margin-bottom:14px"></div>' + skLines(3);
     $('stu-trend').innerHTML = '';
     $('hw-next').innerHTML = '<span class="ns-none">Checking the calendar&hellip;</span>';
     // Cleared, not just hidden: this list is filled by the calendar fetch,
@@ -1550,6 +1576,29 @@
   var CT_BAND = 0.25;          // same +/-25% on-pace band time-budgets.js uses
   var CT_RUSHED = 0.5;         // wrong in under half the budget = not really attempted
   var CT_DIFF_NAME = ['easy', 'medium', 'hard'];
+
+  /* Skeletons shaped like the thing that is loading -- a table gets rows,
+     a list gets lines. `n` is how many, so the placeholder is roughly the
+     height of the real answer and the page does not jump when it lands. */
+  function skRows(n, cols) {
+    var out = '';
+    for (var i = 0; i < n; i++) {
+      out += '<tr>';
+      for (var c = 0; c < cols; c++) {
+        out += '<td><div class="sk sk-line" style="width:' + (c === 0 ? 70 : (c === cols - 1 ? 40 : 55)) + '%"></div></td>';
+      }
+      out += '</tr>';
+    }
+    return out;
+  }
+  function skLines(n) {
+    var out = '';
+    for (var i = 0; i < n; i++) {
+      out += '<div class="sk-row"><div class="sk sk-line sk-grow" style="max-width:' + (72 - i * 7) + '%"></div>' +
+             '<div class="sk sk-line" style="width:44px"></div></div>';
+    }
+    return out;
+  }
 
   function ctSecs(n) { return n >= 60 ? Math.floor(n / 60) + 'm ' + (n % 60) + 's' : n + 's'; }
   function ctEsc(v) { return String(v == null ? '' : v).replace(/[&<>"]/g, function (c) {
