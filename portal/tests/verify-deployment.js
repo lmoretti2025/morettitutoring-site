@@ -82,7 +82,41 @@ if (distinct.size > 1) {
 // Apps Script answers on a redirect; follow it, and send the body as plain
 // text exactly the way the portal does (that keeps it a CORS simple request
 // and is what the deployment expects).
-function post(payload, redirects) {
+/* Apps Script answers a POST with a 302 to its echo host, and that second
+   hop intermittently returns a 404, an HTML page or nothing at all even
+   though the script ran. A BROWSER never sees this -- measured 35 out of 35
+   clean from fetch(), sequential and in parallel -- because it follows the
+   redirect natively. Node, following it by hand, does not get so lucky.
+
+   That distinction matters here more than anywhere: this suite checks
+   SECURITY gates, and a lost hop makes a gate that is working perfectly
+   report as wide open. It did exactly that -- four gates "failed" in one
+   run and every one of them, checked individually, refused correctly. A
+   security suite that cries wolf is worse than no suite, because you learn
+   to disbelieve it.
+
+   So a non-answer is retried rather than reported. A real answer -- any
+   parseable JSON, including a refusal -- is returned immediately and never
+   retried: the point is to distinguish "the endpoint did not speak" from
+   "the endpoint said something I did not want to hear". */
+const POST_ATTEMPTS = 3;
+async function post(payload, redirects) {
+  let last = null;
+  for (let attempt = 0; attempt < POST_ATTEMPTS; attempt++) {
+    if (attempt) await new Promise(r => setTimeout(r, 1200 * attempt));
+    try {
+      last = await postOnce(payload, redirects);
+    } catch (e) {
+      last = { __raw: 'request failed: ' + e.message };
+      continue;
+    }
+    // __raw means it did not come back as JSON -- a lost hop, not an answer.
+    if (!last || last.__raw === undefined) return last;
+  }
+  return last;
+}
+
+function postOnce(payload, redirects) {
   return new Promise((resolve, reject) => {
     const body = JSON.stringify(payload);
     const u = new URL(URL_);
