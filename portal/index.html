@@ -142,13 +142,27 @@
   .nav-profile-item { display: block; width: 100%; text-align: left; background: none; border: none; font-family: var(--hel); font-size: 0.8rem; color: var(--text); padding: 0.55rem 0.7rem; border-radius: 6px; cursor: pointer; text-decoration: none; }
   .nav-profile-item:hover { background: var(--bg); color: var(--red); }
 
-  .screen { display: none; min-height: 100vh; padding: 9rem 1.5rem 4rem; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.22s var(--ease); }
+  /* Switching tabs used to be a bare 0.22s brightness change, which at that
+     speed reads as a flicker rather than as motion. Now the screen also
+     rises a few pixels as it fades, over a slightly longer beat, so a tab
+     change reads as content arriving and settling rather than the page
+     being swapped underneath you.
+
+     The rise is deliberately small (10px) and the duration deliberately
+     short of "slow" (0.34s): this fires on every single navigation, and
+     anything longer starts to feel like latency instead of polish. The
+     transform resolves to none at rest -- important, because a transformed
+     element becomes the containing block for any position:fixed descendant,
+     and that must not outlive the transition. */
+  .screen { display: none; min-height: 100vh; padding: 9rem 1.5rem 4rem; align-items: center; justify-content: center; opacity: 0; transform: translateY(10px); transition: opacity 0.34s var(--ease), transform 0.34s var(--ease); }
   .screen.active { display: flex; }
-  .screen.active.screen-visible { opacity: 1; }
+  .screen.active.screen-visible { opacity: 1; transform: none; }
   /* Anyone with prefers-reduced-motion never sees the fade start — jump
      straight to visible instead of transitioning. */
   @media (prefers-reduced-motion: reduce) {
-    .screen { transition: none; }
+    /* transform too, not just the transition: without resetting it the
+       screen would sit permanently 10px low for anyone who opts out. */
+    .screen { transition: none; transform: none; }
   }
 
   /* ═══ LOADING SKELETON ═══ shimmer placeholder shown while Chart.js is
@@ -549,15 +563,20 @@
   .pt-menu-item-row { display: flex; align-items: stretch; gap: 0.3rem; }
   .pt-menu-item-row .pt-menu-item { flex: 1; min-width: 0; }
   .pt-menu-item-delete { border: none; width: 30px; }
-  /* Rendered as position:fixed (see positionPtMenuDropdown() in the JS),
-     computed from the toggle button's own bounding rect at the moment it
-     opens — NOT absolutely positioned relative to the card. A card sitting
-     in a 2-column scrolling grid has other cards both beside and below it
-     that would otherwise paint over an absolutely-positioned dropdown
-     (or clip it, since the grid itself scrolls with overflow:auto); fixed
-     positioning escapes both problems and the very high z-index keeps it
-     above every other card regardless of DOM order. */
-  .pt-menu-dropdown { display: none; position: fixed; background: var(--white); border: 1px solid var(--border); border-radius: 8px; box-shadow: var(--shadow-hover); min-width: 160px; padding: 0.35rem; z-index: 99999; }
+  /* Anchored to its own button, in CSS. This was position:fixed with the
+     top/right computed in JS from the toggle's bounding rect, because the
+     grid it sits in used to scroll with overflow:auto and would have
+     clipped an absolutely-positioned menu. That grid now scrolls at the
+     page level and nothing above it clips any more, so the reason is gone
+     and the cost was not: a fixed element positioned by arithmetic detaches
+     from its button the instant any input to that arithmetic is off --
+     window.innerHeight reading 0 in a hidden or not-yet-laid-out pane, or a
+     full-page screenshot resizing the viewport mid-measure -- and it lands
+     hundreds of pixels away, over an unrelated card. Anchored in layout it
+     cannot drift: no rect maths, no scroll listener, no resize listener.
+     The high z-index still keeps it above sibling cards regardless of DOM
+     order, and .pt-menu-card-open lifts the card's own overflow:hidden. */
+  .pt-menu-dropdown { display: none; position: absolute; top: calc(100% + 6px); right: 0; background: var(--white); border: 1px solid var(--border); border-radius: 8px; box-shadow: var(--shadow-hover); min-width: 160px; padding: 0.35rem; z-index: 99999; }
   .pt-menu-wrap.open .pt-menu-dropdown { display: block; }
   /* :active (not just :hover) also has to be neutralized here — CSS
      applies :active to an element's ancestors too while a descendant is
@@ -622,7 +641,8 @@
      it a row of its own instead. */
   @media (max-width: 600px) {
     #pt-test-list .menu-card { flex-wrap: wrap; }
-    #pt-test-list .pt-menu-wrap { position: static; flex: 0 0 100%; margin: 0.6rem 0 0 0; }
+    /* stays position:relative -- the dropdown anchors to it */
+    #pt-test-list .pt-menu-wrap { flex: 0 0 100%; margin: 0.6rem 0 0 0; }
   }
   /* Applied when a student arrives from an assignment that names a
      specific test — pulls the eye to the one card they were sent for. */
@@ -6669,6 +6689,16 @@ window.Portal = {
         requestAnimationFrame(function () {
           requestAnimationFrame(function () { activeEl.classList.add('screen-visible'); });
         });
+        /* Belt and braces. A screen's resting state is opacity:0, and the
+           class that lifts it is added from inside rAF -- which browsers do
+           not run at all while the document is hidden. Navigate, switch
+           browser tab before it paints, and both callbacks are still
+           queued: the class is never added and the screen sits invisible
+           until something else re-renders it. setTimeout is not throttled
+           the same way, so this guarantees the screen becomes visible even
+           if the animation never gets a chance to play. Adding the class
+           twice is a no-op. */
+        setTimeout(function () { activeEl.classList.add('screen-visible'); }, 250);
       }
     }
   }
@@ -10013,45 +10043,10 @@ window.Portal = {
       '<div class="pt-menu-dropdown" data-pt-menu-dropdown>' + items + '</div>' +
     '</div>';
   }
-  // Placed as position:fixed (see the .pt-menu-dropdown comment in the
-  // CSS) so it always paints above every card regardless of scroll
-  // position or DOM order — computed fresh from the toggle's own
-  // bounding rect each time it opens, right-aligned to the button the
-  // same way the old absolutely-positioned version was.
-  function positionPtMenuDropdown(wrap) {
-    var dropdown = wrap.querySelector('[data-pt-menu-dropdown]');
-    var toggle = wrap.querySelector('[data-pt-menu-toggle]');
-    if (!dropdown || !toggle) return;
-    var r = toggle.getBoundingClientRect();
-    dropdown.style.right = (window.innerWidth - r.right) + 'px';
-
-    /* Flip up when there is no room below, and clamp to the viewport.
-       This used to be an unconditional top = toggle.bottom + 6, which is
-       fine for a card near the top of the list and wrong for every card
-       below it: a fixed-position element placed past the fold sits off the
-       bottom of the window, and since the practice-test list grows with
-       every attempt, the menu on a lower card opened somewhere far below
-       the test it belonged to. Measuring the dropdown first (it is display
-       block by the time this runs, so it has a real height) is what makes
-       the decision possible at all. */
-    var MARGIN = 8;
-    var h = dropdown.offsetHeight || 0;
-    var below = window.innerHeight - r.bottom - MARGIN;
-    var above = r.top - MARGIN;
-    var top;
-    if (h <= below || below >= above) {
-      top = r.bottom + 6;                       // normal: hangs under the button
-    } else {
-      top = r.top - h - 6;                      // flipped: sits above it
-    }
-    // Never let it leave the window, whichever side it went to.
-    top = Math.max(MARGIN, Math.min(top, window.innerHeight - h - MARGIN));
-    dropdown.style.top = top + 'px';
-    // A menu taller than the window scrolls inside itself rather than
-    // running off both edges.
-    dropdown.style.maxHeight = (window.innerHeight - 2 * MARGIN) + 'px';
-    dropdown.style.overflowY = 'auto';
-  }
+  // positionPtMenuDropdown() used to live here, computing a fixed
+  // position for the menu from the toggle's bounding rect. The menu is
+  // anchored to its button in CSS now (see .pt-menu-dropdown), so there is
+  // no arithmetic left to get wrong.
   // stopPropagation on every click inside the menu — without it, clicking
   // the "View Results" button (or an "Attempt N" item) would bubble up to
   // the card's own click listener and immediately start/retake the test
@@ -10069,15 +10064,6 @@ window.Portal = {
           wrap.classList.add('open');
           card.classList.add('pt-menu-card-open'); // see .menu-card.pt-menu-card-open in the CSS
           toggle.setAttribute('aria-expanded', 'true');
-          // After .open, so the dropdown is displayed and has a measurable
-          // height — the flip-up decision needs it.
-          positionPtMenuDropdown(wrap);
-          // A fixed-position menu does not travel with the card, so it has
-          // to be repositioned while it is open or it detaches from its
-          // button. Listeners are removed by closeAllPtMenus.
-          ptMenuReposition = function () { positionPtMenuDropdown(wrap); };
-          window.addEventListener('scroll', ptMenuReposition, true);
-          window.addEventListener('resize', ptMenuReposition);
         }
       });
     }
@@ -10162,13 +10148,7 @@ window.Portal = {
   }
   // Set while a menu is open so the scroll/resize listeners it installed
   // can be taken off again when it closes.
-  var ptMenuReposition = null;
   function closeAllPtMenus() {
-    if (ptMenuReposition) {
-      window.removeEventListener('scroll', ptMenuReposition, true);
-      window.removeEventListener('resize', ptMenuReposition);
-      ptMenuReposition = null;
-    }
     document.querySelectorAll('[data-pt-menu-wrap].open').forEach(function (w) {
       w.classList.remove('open');
       var t = w.querySelector('[data-pt-menu-toggle]');
