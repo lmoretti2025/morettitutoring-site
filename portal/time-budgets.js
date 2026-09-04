@@ -387,6 +387,11 @@
       budgetMs: 0, actualMs: 0, counted: 0, estimatedCount: 0,
       overCount: 0, underCount: 0, onPaceCount: 0,
       correctOverBudget: 0,
+      // The rows behind that count, so a report can show WHICH questions
+      // they were rather than only how many. Collected here, next to the
+      // test that defines them, so the list and the number can never
+      // disagree about what "over budget but still right" means.
+      correctOverBudgetRows: [],
       surplusMs: 0, overrunMs: 0,
       skills: {}
     };
@@ -432,7 +437,7 @@
       // A right answer that cost well over budget is a STRATEGY failure
       // even though it scored — the single read this whole file exists to
       // make possible, and one the accuracy-only view can never show.
-      if (r.ok && delta > budgetMs * BAND) out.correctOverBudget++;
+      if (r.ok && delta > budgetMs * BAND) { out.correctOverBudget++; out.correctOverBudgetRows.push(r); }
 
       var s = out.skills[canon.skill] || (out.skills[canon.skill] = {
         skill: canon.skill, domain: canon.domain,
