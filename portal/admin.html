@@ -362,6 +362,26 @@
     .cal-wrap { overflow-x: auto; }
     .cal-host { min-width: 560px; }
   }
+  /* ═══ ACROSS ALL THEIR TESTS ═══ deliberately plain: this is a working
+     panel Luca reads before a session, not a chart to admire. Numbers
+     right-aligned and tabular so columns compare down the page. */
+  .ct-block { margin-bottom: 22px; }
+  .ct-block:last-child { margin-bottom: 0; }
+  .ct-hed { font-size: 11px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--mid); margin-bottom: 8px; }
+  .ct-split { display: flex; gap: 2px; height: 20px; margin-bottom: 8px; }
+  .ct-part { border-radius: 3px; min-width: 2px; }
+  .ct-legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 12px; color: var(--mid); }
+  .ct-legend i { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+  .ct-legend b { color: var(--ink, #111); font-weight: 700; }
+  .ct-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .ct-table td { padding: 7px 0; border-bottom: 1px solid var(--border); vertical-align: baseline; }
+  .ct-table tr:last-child td { border-bottom: none; }
+  .ct-skill { font-weight: 600; }
+  .ct-sub { display: block; font-weight: 400; font-size: 11px; color: var(--faint, #999); }
+  .ct-num, .ct-vs, .ct-over, .ct-n { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .ct-vs, .ct-n { color: var(--faint, #999); font-size: 12px; }
+  .ct-over { color: var(--red); font-weight: 600; }
+  .ct-over.ct-quiet { color: var(--faint, #999); font-weight: 400; }
 </style>
 </head>
 <body>
@@ -448,6 +468,11 @@
         <h2>Weakest skills</h2>
         <p class="card-sub" id="stu-skills-sub">From their most recent completed test — the same breakdown "Practice My Weak Spots" uses.</p>
         <div id="stu-skills"></div>
+      </div>
+      <div class="card" id="stu-analysis-card">
+        <h2>Across all their tests</h2>
+        <p class="card-sub" id="stu-analysis-sub">Pooled from every attempt &mdash; more evidence per skill than any single report can have.</p>
+        <div id="stu-analysis"><div class="empty">Loading&hellip;</div></div>
       </div>
     </section>
 
@@ -565,7 +590,8 @@
      so the signed admin session is in sessionStorage by the time the
      auto-continue boot code below reads it. Replaces the ADMIN_KEY
      password prompt entirely. -->
-<script src="backend-url.js"></script>
+<script src="time-budgets.js"></script>
+  <script src="backend-url.js"></script>
 <script src="auth-admin-signin.js"></script>
 
 <script>
@@ -1130,6 +1156,7 @@
     $('stu-tiles').innerHTML = '';
     $('stu-attempts').innerHTML = '<tr><td colspan="5" class="empty">Loading&hellip;</td></tr>';
     $('stu-skills').innerHTML = '<div class="empty">Loading&hellip;</div>';
+    $('stu-analysis').innerHTML = '<div class="empty">Loading&hellip;</div>';
     $('stu-trend').innerHTML = '';
     $('hw-next').innerHTML = '<span class="ns-none">Checking the calendar&hellip;</span>';
     // Cleared, not just hidden: this list is filled by the calendar fetch,
@@ -1168,6 +1195,7 @@
         $('stu-meta').innerHTML = '<span style="color:var(--red);">Could not load this student.</span>';
         $('stu-attempts').innerHTML = '<tr><td colspan="5" class="empty">Could not load their test reports.</td></tr>';
         $('stu-skills').innerHTML = '<div class="empty">&mdash;</div>';
+        $('stu-analysis').innerHTML = '<div class="empty">&mdash;</div>';
         return;
       }
       currentDetail = data;
@@ -1182,6 +1210,7 @@
         renderTrend(data);
         renderAttempts(data);
         renderSkills(data);
+        renderCrossTest(data);
       } catch (err) {
         if (window.console && console.error) console.error('[admin] student render failed:', err);
         $('stu-meta').innerHTML = '<span style="color:var(--red);">Loaded this student, but could not draw the page. Details are in the browser console.</span>';
@@ -1504,6 +1533,185 @@
     if (!btn || !currentDetail) return;
     openReport(currentDetail.attempts[Number(btn.getAttribute('data-idx'))]);
   });
+
+  /* ═══ ACROSS ALL THEIR TESTS ═══
+     Everything here is pooled from the compact per-question record each
+     attempt now writes (see the qStats comment in index.html): section,
+     skill, difficulty, right/wrong/never-answered, and seconds.
+
+     Pooling is the whole point. One report has four Words in Context
+     questions behind its verdict; five reports have twenty, and twenty is
+     the difference between a hunch and an instruction. It is also the only
+     place two questions can be asked at all: is this getting better, and
+     does it happen every time.
+
+     Attempts with no record are skipped rather than counted as zeroes --
+     anything sat before this shipped simply has nothing to say. */
+  var CT_BAND = 0.25;          // same +/-25% on-pace band time-budgets.js uses
+  var CT_RUSHED = 0.5;         // wrong in under half the budget = not really attempted
+  var CT_DIFF_NAME = ['easy', 'medium', 'hard'];
+
+  function ctSecs(n) { return n >= 60 ? Math.floor(n / 60) + 'm ' + (n % 60) + 's' : n + 's'; }
+  function ctEsc(v) { return String(v == null ? '' : v).replace(/[&<>"]/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+
+  function renderCrossTest(data) {
+    var host = $('stu-analysis');
+    var withStats = (data.attempts || []).filter(function (a) {
+      return a.qStats && a.qStats.q && a.qStats.q.length;
+    });
+    if (!withStats.length) {
+      host.innerHTML = '<div class="empty">No per-question data yet. It is recorded from each test taken from now on ' +
+        '&mdash; older attempts predate it and cannot be filled in from here.</div>';
+      return;
+    }
+
+    var bucket = { mastered: 0, inefficient: 0, stuck: 0, rushed: 0, missed: 0, unreached: 0 };
+    var bySkill = {};   // skillKey -> pooled totals
+    var totalQ = 0;
+
+    withStats.forEach(function (att, attIdx) {
+      var qs = att.qStats;
+      qs.q.forEach(function (row) {
+        var sectionKey = qs.s[row[0]] || '';
+        var skillKey = qs.k[row[1]] || '';
+        var parts = skillKey.split(' → ');
+        var domain = parts.length > 1 ? parts[0] : '';
+        var skill = parts.length > 1 ? parts[1] : skillKey;
+        var diff = CT_DIFF_NAME[row[2]] || 'medium';
+        var result = row[3];
+        var secs = row[4] || 0;
+        totalQ++;
+
+        var b = bySkill[skillKey] || (bySkill[skillKey] = {
+          skill: skill, domain: domain, section: sectionKey,
+          total: 0, wrong: 0, secs: 0, timed: 0, budget: 0, tests: {}, missedIn: {}
+        });
+        b.total++;
+        b.tests[attIdx] = 1;
+
+        // Budget for THIS question. timeMult 1: this is Luca's read of the
+        // work, not a compliance score against an accommodation.
+        var budget = 70;
+        if (window.TIME_BUDGETS) {
+          var bd = window.TIME_BUDGETS.budgetSecondsFor(sectionKey, domain, skill, diff, 1);
+          if (bd && bd.seconds) budget = bd.seconds;
+        }
+        b.budget += budget;
+        if (secs > 0) { b.secs += secs; b.timed++; }
+
+        if (result === 2) { bucket.unreached++; return; }
+        if (result === 1) {
+          if (secs > budget * (1 + CT_BAND)) bucket.inefficient++;
+          else bucket.mastered++;
+          return;
+        }
+        b.wrong++;
+        b.missedIn[attIdx] = 1;
+        if (secs > 0 && secs < budget * CT_RUSHED) bucket.rushed++;
+        else if (secs > budget * (1 + CT_BAND)) bucket.stuck++;
+        else bucket.missed++;
+      });
+    });
+
+    var skills = Object.keys(bySkill).map(function (k) {
+      var b = bySkill[k];
+      b.avg = b.timed ? Math.round(b.secs / b.timed) : 0;
+      b.budgetAvg = b.total ? Math.round(b.budget / b.total) : 0;
+      b.over = b.avg - b.budgetAvg;
+      b.testCount = Object.keys(b.tests).length;
+      b.missedTestCount = Object.keys(b.missedIn).length;
+      return b;
+    });
+
+    var html = '';
+
+    /* ── 1. the split ───────────────────────────────────────────────── */
+    var order = [
+      { k: 'mastered',    lab: 'right, on pace',        col: '#3f7d54' },
+      { k: 'inefficient', lab: 'right but slow',        col: '#A9C4B4' },
+      { k: 'stuck',       lab: 'worked at it, missed',  col: '#B0271C' },
+      { k: 'rushed',      lab: 'missed in a hurry',     col: '#C9A84C' },
+      { k: 'missed',      lab: 'missed, on pace',       col: '#8a8a8a' },
+      { k: 'unreached',   lab: 'never reached',         col: '#4E6070' }
+    ].filter(function (o) { return bucket[o.k] > 0; });
+    html += '<div class="ct-block"><div class="ct-hed">' + totalQ + ' questions across ' +
+      withStats.length + (withStats.length === 1 ? ' test' : ' tests') + '</div>' +
+      '<div class="ct-split">' + order.map(function (o) {
+        return '<span class="ct-part" style="width:' + (bucket[o.k] / totalQ * 100).toFixed(1) +
+          '%;background:' + o.col + '" title="' + ctEsc(bucket[o.k] + ' ' + o.lab) + '"></span>';
+      }).join('') + '</div>' +
+      '<div class="ct-legend">' + order.map(function (o) {
+        return '<span><i style="background:' + o.col + '"></i><b>' + bucket[o.k] + '</b> ' + o.lab + '</span>';
+      }).join('') + '</div></div>';
+
+    /* ── 2. slowest against budget ──────────────────────────────────── */
+    var slow = skills.filter(function (b) { return b.timed >= 3 && b.over > 0; })
+      .sort(function (a, c) { return c.over - a.over; }).slice(0, 6);
+    html += '<div class="ct-block"><div class="ct-hed">Slowest against budget</div>';
+    html += slow.length
+      ? '<table class="ct-table"><tbody>' + slow.map(function (b) {
+          return '<tr><td class="ct-skill">' + ctEsc(b.skill) + '<span class="ct-sub">' + ctEsc(b.section === 'math' ? 'Math' : 'Reading & Writing') + '</span></td>' +
+            '<td class="ct-num">' + ctSecs(b.avg) + '</td>' +
+            '<td class="ct-vs">vs ' + ctSecs(b.budgetAvg) + '</td>' +
+            '<td class="ct-over">+' + ctSecs(b.over) + '</td>' +
+            '<td class="ct-n">' + b.timed + 'q</td></tr>';
+        }).join('') + '</tbody></table>'
+      : '<div class="empty">Nothing consistently over budget.</div>';
+    html += '</div>';
+
+    /* ── 3. missed more than once ───────────────────────────────────── */
+    /* Ranked by HOW BADLY, not just how often. Sorting on "missed in N
+       tests" alone looked authoritative and said nothing: once a student
+       has three tests behind them almost every skill has been missed in
+       all three, so a skill at 8/27 sat next to one at 24/30 as though
+       they were the same problem. Rate is the signal; the test count is
+       what makes it trustworthy rather than a one-off bad section. Four
+       questions minimum so a single miss in a rare skill cannot top the
+       list. */
+    var recurring = skills.filter(function (b) { return b.missedTestCount >= 2 && b.total >= 4 && b.wrong; })
+      .sort(function (a, c) { return (c.wrong / c.total) - (a.wrong / a.total); }).slice(0, 6);
+    html += '<div class="ct-block"><div class="ct-hed">Missed in more than one test</div>';
+    html += recurring.length
+      ? '<table class="ct-table"><tbody>' + recurring.map(function (b) {
+          return '<tr><td class="ct-skill">' + ctEsc(b.skill) + '<span class="ct-sub">' + ctEsc(b.section === 'math' ? 'Math' : 'Reading & Writing') + '</span></td>' +
+            '<td class="ct-num">' + Math.round(b.wrong / b.total * 100) + '% wrong</td>' +
+            '<td class="ct-vs">' + b.wrong + ' of ' + b.total + '</td>' +
+            '<td class="ct-n">in ' + b.missedTestCount + ' of ' + b.testCount + ' tests</td></tr>';
+        }).join('') + '</tbody></table>'
+      : '<div class="empty">' + (withStats.length < 2
+          ? 'Needs a second test before anything can repeat.'
+          : 'No skill missed in more than one test.') + '</div>';
+    html += '</div>';
+
+    /* ── 4. consistency ─────────────────────────────────────────────── */
+    // Full sittings only: a section-only attempt has no composite and its
+    // one section would drag a range it was never comparable to.
+    var full = (data.attempts || []).filter(function (a) { return a.mode !== 'section' && a.composite != null; });
+    if (full.length >= 2) {
+      var spread = function (vals) {
+        var v = vals.filter(function (x) { return typeof x === 'number' && x; });
+        if (v.length < 2) return null;
+        return { lo: Math.min.apply(null, v), hi: Math.max.apply(null, v) };
+      };
+      var rows = [
+        { lab: 'Composite', s: spread(full.map(function (a) { return a.composite; })) },
+        { lab: 'Reading & Writing', s: spread(full.map(function (a) { return a.rw; })) },
+        { lab: 'Math', s: spread(full.map(function (a) { return a.math; })) }
+      ].filter(function (r) { return r.s; });
+      if (rows.length) {
+        html += '<div class="ct-block"><div class="ct-hed">Consistency across ' + full.length + ' full tests</div>' +
+          '<table class="ct-table"><tbody>' + rows.map(function (r) {
+            var range = r.s.hi - r.s.lo;
+            return '<tr><td class="ct-skill">' + r.lab + '</td>' +
+              '<td class="ct-num">' + r.s.lo + '&ndash;' + r.s.hi + '</td>' +
+              '<td class="ct-over' + (range >= 80 ? '' : ' ct-quiet') + '">' + range + ' point spread</td></tr>';
+          }).join('') + '</tbody></table></div>';
+      }
+    }
+
+    host.innerHTML = html;
+  }
 
   function renderSkills(data) {
     var host = $('stu-skills');
