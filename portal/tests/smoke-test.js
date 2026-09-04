@@ -196,8 +196,15 @@ test('module split moves the score away from the balanced baseline, monotonicall
 section('Skill diagnosis classification (index.html vs report.html)');
 
 function loadSeverity(source) {
+  // Used to also pull `var MIN_SAMPLE = 3, SIGNAL_MIN_COUNT = 2, ...`. The
+  // MIN_SAMPLE floor (ignore a skill with fewer than 3 questions) was
+  // dropped from both files, and the declaration is now just
+  // `var SIGNAL_MIN_COUNT = 2, SIGNAL_MIN_SHARE = 0.3;` -- so scraping for
+  // the old literal threw and took the whole suite down with it, including
+  // the index-vs-report parity check this function exists to run. Anchored
+  // on the constants severityOf actually reads instead.
   const code = [
-    extractLineStartingWith(source, 'var MIN_SAMPLE = 3'),
+    extractLineStartingWith(source, 'var SIGNAL_MIN_COUNT = 2'),
     extractFunction(source, 'severityOf'),
   ].join('\n');
   return runInSandbox(code, ['severityOf']).severityOf;
