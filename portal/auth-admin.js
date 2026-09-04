@@ -35,6 +35,13 @@
   var SESSION_KEY = 'moretti_admin_key';   // the entry admin.html writes on unlock
   var POLL_MS = 60000;
   var SOURCES = ['Website', 'Phone call', 'Text message', 'Facebook Messenger', 'Referral', 'In person', 'Other'];
+  /* Where a pre-approved student is sent. Not a token and not per-student:
+     they sign in with Google and the row is matched on the address that
+     comes back, so this is the same plain URL for everyone. Kept here
+     rather than built from location, because this panel is only ever
+     loaded from admin.html and the address it should hand out is the
+     public one, not whatever host Luca happens to be testing on. */
+  var PORTAL_URL = 'https://morettitutoring.com/portal/';
 
   var root = null, listEl = null, badgeEl = null, tabEl = null;
   var students = [];
@@ -124,6 +131,11 @@
     bad_key: 'That row no longer exists \u2014 refreshing.',
     no_recipient: 'No usable email address on this row. Use Copy link instead.',
     mail_failed: 'Google would not send the email. Use Copy link instead.',
+    /* Raised by the sign-in email only. It carries no credential, so the
+       one thing it needs is an address to send to -- and the row having a
+       PARENT address is not good enough here, because the whole point is
+       that the student signs in as themselves. */
+    no_student_email: "No student email on this row, so there is nothing to sign in as. Send the parent an invite instead.",
     busy_try_again: 'The server was busy with something else. Try that again in a moment.',
     attempts_unreadable: "Could not read this student's test history, so nothing was deleted. Try again shortly.",
     network: 'No answer came back \u2014 it may still have gone through. Refreshing to check.',
@@ -187,6 +199,28 @@
       "\n\nIt needs to be opened by the student on their own device, and signed in with their own " +
       'Google account — that becomes their login and is where I share their notes and practice materials. ' +
       'The link works once and expires in 14 days.\n\n— Luca';
+  }
+
+  /* The other half of inviteMessage, for a student who is already
+     pre-approved. Deliberately NOT an invite: there is no link to click,
+     no key to type and nothing that expires, because their address is
+     already on the row and Google is what proves who they are. Saying
+     "sign in with your own Google account" rather than naming the address
+     is on purpose -- a student reading their own name back at them is
+     fine, but the address may be a parent's phone-typed guess, and being
+     told to use an address that turns out to be wrong is a dead end with
+     no error message anywhere.
+
+     Same shape as inviteMessage so both can be pasted into a text thread
+     rather than sent as mail when that is the conversation already open. */
+  function signInMessage(name) {
+    return (name ? 'Hi ' + name + ' — ' : 'Hi — ') +
+      'your student portal is ready:\n\n' + PORTAL_URL +
+      "\n\nThere's no password and nothing to set up. Press Student Login and sign in with your own " +
+      'Google account — the one on your school or personal email. That becomes your login, and it is ' +
+      'where I share your notes, practice tests and score reports.\n\n' +
+      'Open it in Safari or Chrome rather than tapping through from inside another app — Google blocks ' +
+      "sign-in in those.\n\n— Luca";
   }
 
   /* ═══ STYLES ═══ scoped under the panel's own ids so nothing here can
@@ -475,13 +509,53 @@
        point: otherwise Luca dutifully sends an invite the student never
        needed, and a second credential exists for no reason. */
     if (studentEmail) {
+      /* "Nothing to send" was true about CREDENTIALS and wrong about the
+         conversation: the student is pre-approved, so no invite is needed,
+         but nobody has told them the portal exists or what to do with it.
+         That is the whole gap -- a perfectly provisioned account nobody
+         ever mentions. So the same "nothing to mint" message now comes
+         with the one thing that IS worth sending. */
       var pm = modal(
-        '<h3>Ready \u2014 nothing to send</h3>' +
+        '<h3>Ready \u2014 no invite needed</h3>' +
         '<p class="hint">Created, and <b>' + esc(studentEmail) + '</b> is pre-approved. They just open the ' +
-        'portal and sign in with that Google account. No key, no invite, no approval.</p>' +
+        'portal and sign in with that Google account. No key, no invite, no approval \u2014 but they do ' +
+        'need telling.</p>' +
         '<div class="keybig">' + esc(key) + '</div>' +
+        '<div class="acts" style="justify-content:flex-start;">' +
+          '<button class="mta-b pri" id="mta-d-semail">Email them the details</button>' +
+          '<button class="mta-b" id="mta-d-scopy">Copy message</button>' +
+        '</div>' +
+        '<div id="mta-d-sout"></div>' +
+        '<div class="err" id="mta-d-serr"></div>' +
         '<p class="hint">That key is only a spare, for if they end up signing in on a different address.</p>' +
-        '<div class="acts"><button class="mta-b pri" id="mta-d-done2">Done</button></div>');
+        '<div class="acts"><button class="mta-b" id="mta-d-done2">Done</button></div>');
+      var sout = pm.querySelector('#mta-d-sout');
+      var serr = pm.querySelector('#mta-d-serr');
+      pm.querySelector('#mta-d-semail').addEventListener('click', function () {
+        var b = pm.querySelector('#mta-d-semail');
+        b.disabled = true;
+        serr.textContent = '';
+        sout.innerHTML = '<p class="hint" style="margin-top:0.8rem;">Sending\u2026</p>';
+        post({ action: 'sendStudentSignIn', adminKey: adminKey(), key: key }).then(function (d) {
+          b.disabled = false;
+          if (!d || !d.ok) {
+            sout.innerHTML = '';
+            serr.textContent = actionFailure(d);
+            return;
+          }
+          sout.innerHTML = '<p class="hint" style="margin-top:0.8rem;">Sent to <b>' + esc(d.sentTo) +
+            '</b>. Nothing in it expires.</p>';
+        });
+      });
+      pm.querySelector('#mta-d-scopy').addEventListener('click', function () {
+        var msg = signInMessage('');
+        copyText(msg).then(function (ok) {
+          sout.innerHTML = '<p class="hint" style="margin-top:0.8rem;">' +
+            (ok ? 'Message copied &mdash; paste it straight in.'
+                : 'Could not copy automatically &mdash; select the text below.') + '</p>' +
+            '<div class="linkbox">' + esc(msg).replace(/\n/g, '<br>') + '</div>';
+        });
+      });
       pm.querySelector('#mta-d-done2').addEventListener('click', function () { closeModal(); refresh(); });
       return;
     }
@@ -707,7 +781,12 @@
     return '<div class="mta-row" data-key="' + esc(s.key) + '">' +
         '<div class="mta-name">' + esc(s.name || s.guardianName || '(no name yet)') +
           '<span class="mta-pill ' + pill.cls + '">' + esc(pill.text) + '</span></div>' +
-        '<div class="mta-sub">' + esc(s.grantedEmail || s.guardianEmail || s.phone || 'no contact on file') + '</div>' +
+        /* grantedEmail first because it is the address they actually signed
+           in with; studentEmail next because on a pre-approved row it is
+           the one the panel is about to email, and showing the parent's
+           there instead would make "Email the student" look like it was
+           aimed at the wrong person. */
+        '<div class="mta-sub">' + esc(s.grantedEmail || s.studentEmail || s.guardianEmail || s.phone || 'no contact on file') + '</div>' +
         '<div class="mta-meta">key <b>' + esc(s.key) + '</b>' +
           (s.grade ? ' &middot; ' + esc(s.grade) : '') +
           (s.source ? ' &middot; ' + esc(s.source) : '') +
@@ -773,11 +852,27 @@
     } catch (e) { return String(iso); }
   }
 
-  // A row with no email cannot be emailed blind, so the one-click button
-  // (which would only come back "no_recipient") is replaced by one that
-  // asks for an address first. The link is the primary action either way;
-  // the address typed there is used for that one send and not saved.
+  /* THE STUDENT'S OWN ADDRESS CHANGES WHAT "SEND" MEANS. When it is on the
+     row they are already pre-approved: there is nothing to mint, nothing to
+     claim and nothing to approve, so an invite would hand them a single-use
+     setup link for a door that is already open -- a second credential for
+     no reason, and one that expires and confuses. What they are missing is
+     not access, it is the sentence telling them to go and use it.
+
+     So the button becomes "Email the student", posting a different action
+     that carries no token at all (see the sendInvite note in the dispatcher
+     for why it must not be that one). Copy message hands back the same
+     words for a text thread instead.
+
+     With no student address nothing below changes: a row with a parent
+     email gets the one-click invite, and a row with neither gets the
+     ask-for-an-address variant, because a blind send would only come back
+     "no_recipient". */
   function inviteButtons(s, label) {
+    if (s.studentEmail) {
+      return '<button class="mta-b pri" data-act="signin-email">Email the student</button>' +
+        '<button class="mta-b" data-act="signin-copy">Copy message</button>';
+    }
     return (s.guardianEmail
         ? '<button class="mta-b pri" data-act="invite">' + label + '</button>'
         : '<button class="mta-b" data-act="invite-to">' + label + ' to\u2026</button>') +
@@ -858,11 +953,24 @@
     if (settled.length) {
       html += '<div class="mta-sec">Set up &mdash; nothing needed</div>';
       settled.forEach(function (s) {
+        /* 'Ready' means an address is on file and the student pairs on
+           first sign-in. This used to render inviteButtons() unconditionally,
+           so a row whose student address was already pre-approved still
+           showed "Send invite" -- and pressing it emailed the PARENT a setup
+           link the student did not need. Now the student address gets the
+           sign-in email and a row with only a parent address keeps the
+           invite, which is the one case where an invite is still the right
+           thing to send. */
         html += card(s,
-          (s.status === 'Ready' ? inviteButtons(s, 'Send invite') : '') +
+          (s.status === 'Ready'
+            ? (s.studentEmail
+                ? inviteButtons(s, '')
+                : inviteButtons(s, 'Send invite'))
+            : '') +
           (canReset(s) ? '<button class="mta-b warn" data-act="reset">Reset login</button>' : ''),
           s.status === 'Ready'
-            ? '<div class="mta-meta">Pre-approved &mdash; they can sign in whenever. No invite needed.</div>'
+            ? '<div class="mta-meta">Pre-approved &mdash; they can sign in whenever. ' +
+              (s.studentEmail ? 'Email below just tells them so.' : 'No invite needed.') + '</div>'
             : '<div class="mta-meta">Signed in' + (s.grantedAt ? ' ' + esc(ago(s.grantedAt)) : '') + '</div>');
       });
     }
@@ -881,7 +989,7 @@
     if (query) {
       var q = query.toLowerCase();
       var hits = students.filter(function (s) {
-        return [s.name, s.key, s.grantedEmail, s.guardianEmail, s.guardianName, s.phone]
+        return [s.name, s.key, s.grantedEmail, s.studentEmail, s.guardianEmail, s.guardianName, s.phone]
           .join(' ').toLowerCase().indexOf(q) !== -1;
       }).slice(0, 8);
       if (!hits.length) html += '<div class="mta-empty">No match.</div>';
@@ -909,7 +1017,29 @@
         var key = c.getAttribute('data-key');
         var s = students.filter(function (x) { return x.key === key; })[0] || {};
         var a = b.getAttribute('data-act');
-        if (a === 'invite') {
+        if (a === 'signin-email') {
+          /* DELIBERATELY NOT sendInvite. Every sendInvite mints a fresh
+             single-use nonce, and minting one silently kills any link
+             already in a family's inbox (see the note in deliverInviteFlow
+             and the same warning in setup.html). This email carries no
+             credential at all -- just the portal address and what to do
+             when they get there -- so it must not be capable of
+             invalidating anything. Hence its own backend action.
+
+             The address comes back from the server rather than being echoed
+             from the row, so what is confirmed on screen is what Google was
+             actually handed. */
+          act(c, 'Sending…', { action: 'sendStudentSignIn', adminKey: adminKey(), key: key },
+            function (d) { return 'Sign-in details emailed to ' + d.sentTo + '. Nothing expires.'; });
+        } else if (a === 'signin-copy') {
+          // No server call: there is nothing to mint, so the message can be
+          // built here and pasted into whatever thread is already open.
+          copyText(signInMessage((s.name || '').split(' ')[0])).then(function (ok) {
+            c.querySelector('.mta-status').textContent = ok
+              ? 'Message copied — paste it into your text or Messenger thread.'
+              : 'Could not copy automatically — open the student email action instead.';
+          });
+        } else if (a === 'invite') {
           act(c, 'Sending…', { action: 'sendInvite', adminKey: adminKey(), key: key, deliver: 'email' },
             function (d) { return 'Invite emailed to ' + d.sentTo + '.'; });
         } else if (a === 'invite-to') {
