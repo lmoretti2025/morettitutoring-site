@@ -786,7 +786,7 @@
            the one the panel is about to email, and showing the parent's
            there instead would make "Email the student" look like it was
            aimed at the wrong person. */
-        '<div class="mta-sub">' + esc(s.grantedEmail || s.studentEmail || s.guardianEmail || s.phone || 'no contact on file') + '</div>' +
+        '<div class="mta-sub">' + esc(s.grantedEmail || s.guardianEmail || s.phone || 'no contact on file') + '</div>' +
         '<div class="mta-meta">key <b>' + esc(s.key) + '</b>' +
           (s.grade ? ' &middot; ' + esc(s.grade) : '') +
           (s.source ? ' &middot; ' + esc(s.source) : '') +
@@ -852,6 +852,22 @@
     } catch (e) { return String(iso); }
   }
 
+  /* THE ROSTER ALREADY CARRIES THIS -- there is no separate studentEmail
+     field and there does not need to be. A student's own address is stored
+     in GrantedEmail, and statusFor_ defines 'Ready' as exactly "an address
+     is on file but nothing is paired yet", which is pre-approved and not
+     yet signed in. createStudentRow_ only ever writes the student address
+     into that column, and handleCreateStudent refuses it outright if it
+     equals the guardian's, so a 'Ready' row's grantedEmail is the
+     student's own address by construction.
+
+     'Active' is deliberately excluded even though its grantedEmail is also
+     the student's: they have already signed in, so telling them how to
+     would be nonsense. */
+  function studentEmailOf(s) {
+    return (s && s.status === 'Ready' && s.grantedEmail) ? s.grantedEmail : '';
+  }
+
   /* THE STUDENT'S OWN ADDRESS CHANGES WHAT "SEND" MEANS. When it is on the
      row they are already pre-approved: there is nothing to mint, nothing to
      claim and nothing to approve, so an invite would hand them a single-use
@@ -869,7 +885,7 @@
      ask-for-an-address variant, because a blind send would only come back
      "no_recipient". */
   function inviteButtons(s, label) {
-    if (s.studentEmail) {
+    if (studentEmailOf(s)) {
       return '<button class="mta-b pri" data-act="signin-email">Email the student</button>' +
         '<button class="mta-b" data-act="signin-copy">Copy message</button>';
     }
@@ -962,15 +978,11 @@
            invite, which is the one case where an invite is still the right
            thing to send. */
         html += card(s,
-          (s.status === 'Ready'
-            ? (s.studentEmail
-                ? inviteButtons(s, '')
-                : inviteButtons(s, 'Send invite'))
-            : '') +
+          (s.status === 'Ready' ? inviteButtons(s, 'Send invite') : '') +
           (canReset(s) ? '<button class="mta-b warn" data-act="reset">Reset login</button>' : ''),
           s.status === 'Ready'
             ? '<div class="mta-meta">Pre-approved &mdash; they can sign in whenever. ' +
-              (s.studentEmail ? 'Email below just tells them so.' : 'No invite needed.') + '</div>'
+              (studentEmailOf(s) ? 'The button just tells them so.' : 'No invite needed.') + '</div>'
             : '<div class="mta-meta">Signed in' + (s.grantedAt ? ' ' + esc(ago(s.grantedAt)) : '') + '</div>');
       });
     }
@@ -989,7 +1001,7 @@
     if (query) {
       var q = query.toLowerCase();
       var hits = students.filter(function (s) {
-        return [s.name, s.key, s.grantedEmail, s.studentEmail, s.guardianEmail, s.guardianName, s.phone]
+        return [s.name, s.key, s.grantedEmail, s.guardianEmail, s.guardianName, s.phone]
           .join(' ').toLowerCase().indexOf(q) !== -1;
       }).slice(0, 8);
       if (!hits.length) html += '<div class="mta-empty">No match.</div>';
