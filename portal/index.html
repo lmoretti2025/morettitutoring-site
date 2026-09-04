@@ -12514,6 +12514,7 @@ window.Portal = {
          out would have quietly discarded the attempt a second time, one
          layer further down. */
       mode: entry.mode, sectionKey: entry.sectionKey, sectionScore: entry.sectionScore,
+      qStats: entry.qStats,
       // Test integrity, so the roster can show it without opening the
       // report (see the Interrupted column in Code.gs).
       interrupted: entry.interrupted, awayMs: entry.awayMs
@@ -12595,11 +12596,36 @@ window.Portal = {
     var sectionResults = []; // [{ label, correct, total }] — feeds the visual score report
     var incorrectRecords = []; // feeds recordIncorrectQuestions() below — every question, correct or not (correct ones clear a stale prior entry)
     var scoreSections = []; // [{ key, c, t, c1, t1, c2, t2 }] — feeds the Score Progress composite calc below, same shape report.html's own scoring functions expect
+    /* ═══ COMPACT PER-QUESTION RECORD ═══ three facts per question — which
+       skill, right or wrong, how long — and nothing else. This is what the
+       Home analytics aggregate across every attempt.
+
+       It exists SEPARATELY from the full report payload on purpose. That
+       payload is 25-35k characters and lives in one Attempts-sheet cell,
+       and Google Sheets silently truncates a cell at 50,000 — so building
+       analytics on it would mean building on data that can be quietly
+       corrupt, and unpacking 30k of base64 per attempt on every Home
+       render. This record is ~2-3k for a full test: it cannot approach the
+       cap, and it is already in the shape the analytics want.
+
+       Dictionaries for section and skill because a skill name runs to 70
+       characters and repeating it 98 times would be most of the payload.
+       Seconds rather than milliseconds because every budget in
+       time-budgets.js is in seconds and nothing here cares about
+       sub-second precision. */
+    var qStats = { v: 1, s: [], k: [], q: [] };
+    function qsIdx(list, val) {
+      var i = list.indexOf(val);
+      if (i === -1) { list.push(val); i = list.length - 1; }
+      return i;
+    }
+    var QS_DIFF = { easy: 0, medium: 1, hard: 2 };
     var ptDoneEarly = activePracticeTest(); // same call as ptDone further below, just needed before that point for the incorrect-question keys/labels
 
     completedSections.forEach(function (sec) {
       var bank = bankFor(sec.key);
       var qs = sectionQuestions(bank, sec.module2Variant);
+      var qsSecIdx = qsIdx(qStats.s, sec.key);
       var mod1Len = bank.module1.length;
       var secCorrect = 0;
       var secC1 = 0, secT1 = 0, secC2 = 0, secT2 = 0;
@@ -12619,6 +12645,20 @@ window.Portal = {
         if (!skills[skillKey]) skills[skillKey] = { correct: 0, total: 0 };
         skills[skillKey].total++;
         if (correct) skills[skillKey].correct++;
+
+        /* [section, skill, difficulty, result, seconds]
+           difficulty 0/1/2 = easy/medium/hard (1 when a question carries no
+           difficulty, matching how the banks treat an unlabelled one)
+           result 1 = correct, 0 = answered wrong, 2 = never answered --
+           kept apart from wrong because "ran out of clock" and "got it
+           wrong" are different problems and the analytics separate them. */
+        qStats.q.push([
+          qsSecIdx,
+          qsIdx(qStats.k, skillKey),
+          QS_DIFF[q.difficulty] === undefined ? 1 : QS_DIFF[q.difficulty],
+          correct ? 1 : ((given === null || given === undefined || given === '') ? 2 : 0),
+          Math.round(((sec.questionTimeMs && sec.questionTimeMs[i]) || 0) / 1000)
+        ]);
 
         var wasMarked = !!((sec.everMarked && sec.everMarked[i]) || (sec.marked && sec.marked[i]));
         if (wasMarked) { markedTotal++; if (correct) markedCorrect++; }
@@ -12836,6 +12876,9 @@ window.Portal = {
         composite: composite, scaleMin: scaleMin, scaleMax: scaleMax,
         /* Set only for a section-only sitting. `mode` is what every reader
            checks before treating this as a whole test. */
+        // The compact per-question record (see qStats above) — what the
+        // Home analytics read across every attempt.
+        qStats: qStats,
         mode: sectionOnly ? 'section' : 'full',
         sectionKey: sectionOnly || undefined,
         sectionScore: (onlyScaled !== null && onlyScaled !== undefined) ? onlyScaled : undefined,
