@@ -21,7 +21,7 @@
      for values this file already had under other names (#fff/--ink/
      'Poppins'/'Caladea'), added so CSS ported straight from index.html's
      report redesign (which uses those names) works unmodified. */
-  :root { --red:#EF4444; --gold:#C9A84C; --ink:#1a1a1a; --mid:rgba(17,17,17,0.6); --faint:rgba(17,17,17,0.32); --border:rgba(17,17,17,0.12); --bg:#f2f2f2; --green:#16A34A; --tan:#A97C50; --white:#fff; --text:#1a1a1a; --hel:'Poppins',sans-serif; --display:'Caladea',Georgia,serif; --shadow: 0 2px 16px rgba(17,17,17,0.055); --embed-col: 960px; }
+  :root { --red:#EF4444; --gold:#C9A84C; --ink:#1a1a1a; --mid:rgba(17,17,17,0.6); --faint:rgba(17,17,17,0.58); --border:rgba(17,17,17,0.12); --bg:#f2f2f2; --green:#16A34A; --tan:#A97C50; --white:#fff; --text:#1a1a1a; --hel:'Poppins',sans-serif; --display:'Caladea',Georgia,serif; --shadow: 0 2px 16px rgba(17,17,17,0.055); --embed-col: 960px; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Poppins', sans-serif; font-weight: 300; color: var(--ink); background: #e8e4dc; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .page { width: 8.5in; min-height: 11in; margin: 24px auto; background: #fff; padding: 0.6in 0.65in; box-shadow: 0 10px 40px rgba(0,0,0,0.15); }
@@ -86,7 +86,22 @@
   /* Sits directly under the composite figure, sized as a caption to it —
      the imprecision travels with the number instead of as a paragraph of
      methodology below the card. */
-  .tile-range { font-family: var(--hel); font-size: 9.5px; font-weight: 500; letter-spacing: 0.02em; color: var(--faint); margin-top: 5px; font-variant-numeric: tabular-nums; }
+  .tile-range { font-family: var(--hel); font-size: 11px; font-weight: 500; letter-spacing: 0.02em; color: var(--faint); margin-top: 5px; font-variant-numeric: tabular-nums; }
+  /* ═══ STUDY PLAN ═══ */
+  .plan-card { border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; background: var(--white); }
+  .plan-lede { font-size: 11px; line-height: 1.65; color: var(--ink); margin: 0 0 11px; }
+  .plan-lede b { font-weight: 700; }
+  .plan-rows { display: flex; flex-direction: column; gap: 9px; }
+  .plan-row { display: grid; grid-template-columns: 74px 1fr; gap: 12px; align-items: start; }
+  .plan-hours { font-family: var(--hel); font-weight: 700; font-size: 12.5px; color: var(--ink); line-height: 1.25; }
+  .plan-hours span { display: block; font-size: 9.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--faint); margin-top: 2px; }
+  .plan-what { font-size: 10.5px; line-height: 1.6; color: var(--ink); }
+  .plan-what b { font-weight: 700; }
+  .plan-what em { font-style: normal; color: var(--mid); }
+  .plan-meter { display: flex; height: 7px; border-radius: 999px; overflow: hidden; margin: 3px 0 12px; background: var(--border); }
+  .plan-meter i { display: block; height: 100%; }
+  .plan-foot { font-size: 10.5px; line-height: 1.6; color: var(--mid); margin: 11px 0 0; padding-top: 9px; border-top: 1px solid var(--border); }
+  @media print { .plan-card { page-break-inside: avoid; break-inside: avoid; } }
   .sec-hed { font-size: 10.5px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mid); border-bottom: 1px solid var(--border); padding-bottom: 6px; margin: 22px 0 12px; }
   .bar-row { margin-bottom: 6px; }
   .bar-label { display: flex; justify-content: space-between; font-size: 10.5px; font-weight: 600; margin-bottom: 3px; }
@@ -168,8 +183,10 @@
   .budget-meter-actual { position: absolute; left: 0; top: 50%; bottom: 0; background: var(--gold); }
   .budget-meter-actual.over { background: var(--red); }
   .budget-meter-clock { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--ink); opacity: 0.55; }
-  .budget-legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 8.5px; color: var(--faint); margin-bottom: 6px; }
-  .budget-legend i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; font-style: normal; }
+  /* Chips, type and swatch all come from .dxk-legend now (see the CHART
+     KIT block) — this only positions it, since here the key sits ABOVE the
+     skill rows it explains rather than below a chart. */
+  .budget-legend { margin: 2px 0 8px; }
   .budget-stats { display: flex; gap: 18px; flex-wrap: wrap; font-size: 9.5px; color: var(--mid); }
   .budget-stats b { color: var(--ink); font-weight: 700; }
   .budget-skill-hed { font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); margin: 9px 0 4px; }
@@ -201,7 +218,7 @@
   .budget-gap-actual { position: absolute; top: 2.5px; width: 8px; height: 8px; border-radius: 50%; background: var(--red); }
   .budget-concentration { font-size: 10px; line-height: 1.55; color: var(--mid); margin: 7px 0 2px; }
   .budget-concentration strong { color: var(--ink); font-weight: 700; }
-  .budget-more { font-size: 9px; color: var(--faint); margin-top: 5px; }
+  .budget-more { font-size: 10.5px; color: var(--faint); margin-top: 5px; }
   /* Debt bar is centred on zero: right of centre = over budget, left =
      under. One shared pixel scale across the rows so lengths compare. */
   .budget-debt { flex: 0 0 108px; position: relative; height: 8px; background: rgba(17,17,17,0.05); border-radius: 2px; }
@@ -209,7 +226,7 @@
   .budget-debt-fill { position: absolute; top: 0; bottom: 0; border-radius: 2px; }
   .budget-debt-fill.over { background: var(--red); left: 50%; }
   .budget-debt-fill.under { background: #5e8b6f; right: 50%; }
-  .budget-note { font-size: 9.5px; line-height: 1.6; color: var(--mid); margin: 10px 0 0; }
+  .budget-note { font-size: 10.5px; line-height: 1.6; color: var(--mid); margin: 10px 0 0; }
   .budget-note strong { color: var(--ink); font-weight: 700; }
   /* Keep a section's meter, stats, and its skill rows together when this
      prints to PDF — same rule the other card sections already carry (see
@@ -240,26 +257,120 @@
   .skilldx-seg.mastered { background: #3f7d54; }
   .skilldx-seg.inefficient { background: #A9C4B4; }
   .skilldx-seg.stuck { background: var(--red); }
+  .skilldx-seg.onpace { background: #8B8177; }
   .skilldx-seg.rushed { background: var(--gold); }
   .skilldx-n { font-size: 9px; font-weight: 400; color: var(--faint); }
-  .skilldx-thin { font-size: 9.5px; line-height: 1.6; color: var(--faint); margin: 9px 0 0; padding-top: 8px; border-top: 1px solid var(--border); }
+  .skilldx-thin { font-size: 10.5px; line-height: 1.6; color: var(--faint); margin: 9px 0 0; padding-top: 8px; border-top: 1px solid var(--border); }
   .skilldx-thin strong { color: var(--mid); font-weight: 700; }
-  .skilldx-legend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border); font-size: 9.5px; color: var(--mid); }
-  .skilldx-legend span { display: inline-flex; align-items: center; gap: 4px; }
   .skilldx-dot { width: 7px; height: 7px; border-radius: 2px; display: inline-block; flex-shrink: 0; }
   .skilldx-dot.mastered { background: #3f7d54; }
   .skilldx-dot.inefficient { background: #A9C4B4; }
   .skilldx-dot.stuck { background: var(--red); }
+  .skilldx-dot.onpace { background: #8B8177; }
   .skilldx-dot.rushed { background: var(--gold); }
   @media (max-width: 480px) {
     .skilldx-card { padding: 14px 12px; }
     .skilldx-row-top { flex-wrap: wrap; gap: 4px 8px; }
-    .skilldx-legend { gap: 8px 10px; }
   }
   /* Small caption under a section heading — used by the Time budget and
      the pacing-trace sections. (Was .quadrant-sub, back when the
      confidence quadrant owned it.) */
-  .chart-sub { font-size: 9px; color: var(--faint); margin: -6px 0 8px; line-height: 1.6; }
+  .chart-sub { font-size: 10.5px; color: var(--faint); margin: -6px 0 8px; line-height: 1.6; }
+
+  /* ═══ CHART KIT ═══ ported from the homepage's diagnostic panels
+     (index-v2.html, the .dxpanel block) so that every chart in this
+     report shares ONE segmented control, ONE tooltip and ONE hover
+     grammar rather than each block inventing its own. Before this, the
+     six chart blocks below had four different ways to scope a view
+     (a carousel of arrows, a native title= tooltip, a click-to-open
+     panel, nothing at all) and three different legend shapes, which is
+     what made the report read as six tools instead of one instrument.
+
+     The homepage's *proportions* are ported, not its literal values: it
+     is a rem-based web page at ~16px body, this is a print document at
+     ~11px, so every size here is the homepage's scaled to that measure.
+     Its palette is deliberately NOT ported — see the --red note at the
+     top of this file; the report keeps its own saturated red.
+
+     Naming: dxk- ("diagnostic kit") to stay clear of the existing dx-
+     prefix, which belongs to the What-went-wrong card alone. ═══ */
+
+  /* ── The segmented pill. Scopes a chart to whole-test / one section /
+     one module. Replaces the arrow carousel the pacing block used: with
+     two or three choices, showing them all is both smaller and more
+     honest than a next-button that hides how many there are. ── */
+  .dxk-toggle { display: inline-flex; gap: 3px; border: 1px solid var(--border); border-radius: 999px;
+    padding: 2px; margin: 0 0 11px; max-width: 100%; }
+  .dxk-toggle button { border: none; background: transparent; font: inherit; font-size: 9.5px; font-weight: 700;
+    letter-spacing: 0.04em; padding: 5px 13px; border-radius: 999px; cursor: pointer; color: var(--mid);
+    white-space: nowrap; appearance: none; -webkit-appearance: none;
+    transition: background 0.3s ease, color 0.3s ease; }
+  .dxk-toggle button:hover { color: var(--ink); }
+  .dxk-toggle button[aria-pressed="true"] { background: var(--ink); color: #fff; }
+  .dxk-toggle button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+  /* ── The shared tooltip. One dark chip, positioned against whichever
+     .dxk-plot it lives in, following the pointer. Every chart that wants
+     a hover readout now writes data-tip on the mark and gets this; the
+     native title= attribute it replaces was slow to appear, unstyleable,
+     and invisible on touch. pointer-events:none so it can never eat the
+     hover that is keeping it open. ── */
+  .dxk-plot { position: relative; }
+  .dxk-tip { position: absolute; left: 0; top: 0; pointer-events: none; z-index: 6;
+    background: var(--ink); color: #fff; font-size: 10px; line-height: 1.45; font-weight: 400;
+    padding: 6px 9px; border-radius: 3px; white-space: nowrap; text-align: left;
+    opacity: 0; transform: translate(-50%, -118%); transition: opacity 0.18s ease;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.28); }
+  .dxk-tip.on { opacity: 1; }
+  /* The one figure the tooltip exists to deliver, lifted out of the
+     sentence around it — same job .dxtip b does on the homepage. A tint
+     of the report's own red, lightened enough to clear AA on the dark
+     chip (the #EF4444 body red does not, at this size). */
+  .dxk-tip b { color: #FF9A93; font-weight: 700; }
+  .dxk-tip .dim { color: rgba(255,255,255,0.62); }
+
+  /* ── The hover grammar. Hovering one mark recedes its siblings, so the
+     hovered thing reads as "this one out of these" rather than as a
+     decorative highlight. Applied by putting .dxk-marks on the container
+     and .dxk-hit on each mark. ── */
+  .dxk-hit { transition: opacity 0.18s ease, filter 0.18s ease, transform 0.18s ease; }
+  .dxk-marks:hover .dxk-hit { opacity: 0.5; }
+  .dxk-marks .dxk-hit:hover, .dxk-hit.dxk-open { opacity: 1; filter: brightness(1.08); }
+  .dxk-marks .dxk-hit:focus-visible { opacity: 1; outline: 2px solid var(--ink); outline-offset: 2px; }
+  /* SVG marks cannot take translateY without a transform-box, and lifting
+     a point in a scatter would move it off its own coordinates — so the
+     lift is for block-level marks only. */
+  .dxk-marks div.dxk-hit:hover, div.dxk-hit.dxk-open { transform: translateY(-1px); }
+
+  /* ── Legend chips, one shape for all six blocks. ── */
+  .dxk-legend { display: flex; flex-wrap: wrap; gap: 5px 16px; margin-top: 11px; font-size: 10px; color: var(--ink); }
+  .dxk-legend span { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+  .dxk-legend i { width: 9px; height: 9px; border-radius: 2px; display: inline-block; flex-shrink: 0; font-style: normal; }
+  .dxk-legend i.rule { height: 0; width: 14px; border-top-width: 2px; border-top-style: solid; border-radius: 0; }
+  .dxk-legend i.dash { border-top-style: dashed; }
+  .dxk-legend i.dot { border-top-style: dotted; }
+
+  /* ── Caption above a chart ("8 missed questions") and footnote below
+     ("Each needs a different intervention."), both lifted from the
+     homepage panels. The footnote's hairline rule is what separates a
+     caveat from the chart it qualifies. ── */
+  .dxk-count { font-size: 10px; color: var(--mid); margin: 0 0 7px; }
+  .dxk-count b { color: var(--ink); font-weight: 700; }
+  /* The un-ruled sibling of .dxk-foot: a line that belongs TO the chart
+     directly above it (the homepage sets this same line inside the SVG),
+     where .dxk-foot's hairline would wrongly read as a section break. */
+  .dxk-note { font-size: 9.5px; line-height: 1.55; color: var(--mid); margin: 7px 0 0; }
+  .dxk-foot { margin-top: 11px; padding-top: 8px; border-top: 1px solid var(--border);
+    font-size: 9.5px; line-height: 1.55; color: var(--mid); }
+  .dxk-foot strong { color: var(--ink); font-weight: 700; }
+
+  /* Print gets the whole-test view with no controls and no floating chip:
+     a pill that cannot be pressed is furniture, and a tooltip is a hover
+     state that has no meaning on paper. */
+  @media print { .dxk-toggle, .dxk-tip { display: none !important; } }
+  @media (max-width: 480px) {
+    .dxk-toggle button { padding: 5px 10px; font-size: 9px; }
+  }
   /* ═══ INTEGRITY BANNER ═══ shown when the attempt recorded any
    interruption. Sits above the scores, not buried below them: whether a
    score was produced under real test conditions changes how every number
@@ -268,14 +379,13 @@
 .integrity-hed { font-size: 10px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: #8a6d1f; margin-bottom: 5px; }
 .integrity-body { font-size: 11px; line-height: 1.65; color: var(--ink); }
 .integrity-body b { font-weight: 700; }
-.timing-carousel { display: flex; align-items: center; justify-content: center; gap: 6px; }
-  .timing-nav-btn { flex-shrink: 0; width: 30px; height: 30px; border-radius: 50%; border: none; background: none; color: var(--mid); display: flex; align-items: center; justify-content: center; cursor: pointer; }
-  .timing-nav-btn svg { width: 15px; height: 15px; }
-  .timing-nav-btn:disabled { opacity: 0.25; cursor: default; }
   .timing-chart-card { overflow: visible; }
-  .timing-chart-hed { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+  /* The module pills sit at the right of this row; align-items:center (not
+     baseline) is what keeps a pill's box vertically centred against the
+     module name rather than hanging off its text baseline. */
+  .timing-chart-hed { display: flex; align-items: center; justify-content: space-between; gap: 10px 14px; flex-wrap: wrap; margin-bottom: 8px; }
   .timing-chart-hed span:first-child { font-size: 12px; font-weight: 700; color: var(--ink); }
-  .timing-module-counter { font-size: 10px; color: var(--faint); white-space: nowrap; }
+  .timing-chart-hed .dxk-toggle { margin: 0; }
   /* ═══ PACING TRACE ═══ cumulative time spent against cumulative time
      budgeted, one module at a time, sharing this card's module carousel.
      The bar timeline below it says WHERE each question sat; this says
@@ -285,15 +395,30 @@
      is carried by which side of the budget line the trace sits on, so the
      single accent colour never has to encode polarity on its own. */
   .pace-trace { display: block; width: 100%; height: auto; overflow: visible; margin-bottom: 4px; }
-  .pace-grid { stroke: rgba(17,17,17,0.08); stroke-width: 1; }
-  .pace-ax { font-family: 'Poppins', sans-serif; font-size: 8px; fill: var(--faint); }
-  .pace-note { font-family: 'Poppins', sans-serif; font-size: 8px; font-weight: 700; letter-spacing: 0.04em; }
-  .pace-legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 8.5px; color: var(--mid); margin: 2px 0 12px; }
-  .pace-legend span { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
-  .pace-legend i { display: inline-block; width: 14px; height: 0; border-top-width: 2px; border-top-style: solid; }
-  .pace-legend i.dash { border-top-style: dashed; }
-  .pace-legend i.dot { border-top-style: dotted; }
-  .pace-legend i.fill { height: 8px; width: 10px; border: none; border-radius: 2px; }
+  .pace-grid { stroke: rgba(17,17,17,0.07); stroke-width: 1; }
+  /* The zero line is the one gridline that is a real edge rather than a
+     reference value, so it carries a little more weight than the rest. */
+  .pace-base { stroke: rgba(17,17,17,0.18); stroke-width: 1; }
+  .pace-ax { font-family: 'Poppins', sans-serif; font-size: 10px; fill: var(--faint); }
+  /* Every label written INSIDE the plot gets a white halo drawn behind its
+     own glyphs (paint-order puts the stroke under the fill). Without it the
+     module-clock caption and the line-end labels sit directly on gridlines
+     and on the traces themselves, and at 8px that is the difference between
+     a label and a smudge. */
+  .pace-note { font-family: 'Poppins', sans-serif; font-size: 8px; font-weight: 700; letter-spacing: 0.04em;
+    paint-order: stroke; stroke: #fff; stroke-width: 2.5px; stroke-linejoin: round; }
+  /* Hover guide: a vertical rule at the question under the pointer with a
+     dot where it meets each trace, so the tooltip's three figures can be
+     located on the chart instead of only read. */
+  .pace-guide { pointer-events: none; opacity: 0; transition: opacity 0.14s ease; }
+  .pace-guide.on { opacity: 1; }
+  .pace-guide line { stroke: rgba(17,17,17,0.32); stroke-width: 1; stroke-dasharray: 3 3; }
+  .pace-guide circle { stroke: #fff; stroke-width: 1.5; }
+  @media print { .pace-guide { display: none; } }
+  /* Chips come from .dxk-legend (see the CHART KIT block); this only sets
+     the spacing, since the key sits between the trace and the section
+     below it rather than at the foot of a card. */
+  .pace-legend { margin: 2px 0 12px; }
   /* ═══ THE DIAGNOSIS ═══ one card, above the three evidence sections,
      naming which of content / method / clock is actually driving this
      attempt. Three meters sized by how many points each is plausibly
@@ -321,19 +446,21 @@
      instead of a single progress bar — each part carries its own small
      radius so the gap shows through cleanly instead of exposing a square
      inner edge against the outer curve. */
-  .dx-split { display: flex; gap: 3px; height: 24px; margin-bottom: 8px; }
-  .dx-part { display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff; min-width: 0; border-radius: 4px; }
-  /* The bar is now the way in to the questions behind it. Hover/press
-     treatment matches the bridge chart's segments: the hovered piece
-     lifts slightly and the rest recede, so it reads as 'this one' rather
-     than as a decorative highlight. The open segment stays lifted while
-     its list is showing. */
-  .dx-part { border: none; font: inherit; font-size: 10px; font-weight: 700; color: #fff; cursor: pointer;
-    padding: 0; appearance: none; -webkit-appearance: none;
-    transition: width 0.9s var(--ease, ease), filter 0.15s ease, transform 0.15s ease, opacity 0.15s ease; }
-  .dx-split:hover .dx-part { opacity: 0.55; }
-  .dx-split .dx-part:hover,   .dx-part.dx-open { opacity: 1; filter: brightness(1.08); transform: translateY(-1px); }
-  .dx-part:focus-visible { outline: 2px solid var(--ink, #111); outline-offset: 2px; }
+  /* Sized to the homepage's version of this bar (index-v2.html) rather
+     than to the thin 24px meter this used to be: it is the one chart on
+     page 1 that a parent reads first, and at 24px with a 10px count it
+     read as a progress bar rather than as the headline finding. Hover,
+     recede and lift all come from the .dxk- kit now — see .dxk-hit — so
+     this bar and every other chart in the report share one behaviour. */
+  .dx-split { display: flex; gap: 4px; height: 38px; margin-bottom: 0; }
+  .dx-part { display: flex; align-items: center; justify-content: center; min-width: 0; border-radius: 4px;
+    border: none; font: inherit; font-size: 13px; font-weight: 700; color: #fff; cursor: pointer;
+    padding: 0; appearance: none; -webkit-appearance: none; }
+  /* A cause with nothing in it under the current scope collapses to zero
+     width; it stays in the DOM so the bar can morph between scopes rather
+     than being torn down and rebuilt, but it must not be hoverable,
+     tabbable, or announced while it is not there. */
+  .dx-part[disabled] { pointer-events: none; }
   .dx-lab-btn { background: none; border: none; font: inherit; cursor: pointer; padding: 0; color: inherit;
     display: inline-flex; align-items: center; gap: 6px; border-bottom: 1px solid transparent; transition: border-color 0.15s ease, opacity 0.15s ease; }
   .dx-lab-btn:hover { border-bottom-color: currentColor; }
@@ -350,17 +477,19 @@
   .dx-part.content { background: var(--red); }
   .dx-part.method { background: var(--tan); }
   .dx-part.clock { background: #4E6070; }
-  .dx-labels { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 10.5px; color: var(--ink); }
-  .dx-labels span { display: inline-flex; align-items: baseline; gap: 5px; }
-  .dx-labels i { width: 8px; height: 8px; border-radius: 2px; display: inline-block; flex-shrink: 0; position: relative; top: 1px; }
-  .dx-labels b { font-weight: 700; }
+  /* The cause key is a .dxk-legend now (see the CHART KIT block); only
+     the button behaviour below is still this card's own. */
   .timing-gridlabel { position: absolute; transform: translateX(-50%); font-size: 8px; color: var(--faint); font-variant-numeric: tabular-nums; }
-  @media print { .timing-nav-btn { display: none; } }
 
   /* ═══ QUESTION TILES (upgraded sc-qgrid) — hover preview + click to open
      the full question in a modal, instead of just a native title tooltip. ═══ */
   .sc-qgrid-cell { cursor: pointer; position: relative; }
-  .sc-qgrid-tooltip { position: absolute; z-index: 50; bottom: calc(100% + 5px); left: 50%; transform: translateX(-50%); width: 190px; background: var(--ink); color: #fff; border-radius: 4px; padding: 6px 8px; font-size: 8.5px; line-height: 1.4; pointer-events: none; box-shadow: 0 6px 18px rgba(0,0,0,0.25); display: none; }
+  /* The same chip as .dxk-tip, positioned by CSS off the cell rather than
+     by JS off the pointer — a grid cell is its own hover target. Metrics
+     are copied rather than inherited because this one anchors above the
+     cell, so it cannot share .dxk-tip's transform. Keeps its fixed width:
+     unlike the other tooltips this one wraps to several lines. */
+  .sc-qgrid-tooltip { position: absolute; z-index: 50; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); width: 190px; background: var(--ink); color: #fff; border-radius: 3px; padding: 6px 9px; font-size: 9px; line-height: 1.45; pointer-events: none; box-shadow: 0 6px 18px rgba(0,0,0,0.28); display: none; }
   .sc-qgrid-cell:hover .sc-qgrid-tooltip { display: block; }
   .sc-qgrid-tooltip b { display: block; margin-bottom: 2px; }
   .sc-qgrid-tooltip .ok { color: #9fd8b4; }
@@ -478,9 +607,60 @@
      so the glyph itself lands on the flex-centered point. */
   .sc-qgrid-cell { width: 15px; height: 15px; border-radius: 2px; font-size: 7px; font-weight: 700; line-height: 1; display: flex; align-items: center; justify-content: center; border: 1px solid transparent; }
   .sc-qgrid-cell span { line-height: 1; }
-  .sc-qgrid-cell.ok { background: rgba(94,139,111,0.16); color: var(--green); border-color: rgba(94,139,111,0.4); }
-  .sc-qgrid-cell.bad { background: rgba(176,39,28,0.12); color: var(--red); border-color: rgba(176,39,28,0.4); }
+  .sc-qgrid-cell.ok { background: rgba(47,125,79,0.20); color: #2F7D4F; border-color: rgba(47,125,79,0.55); }
+  /* Same ring cue as the solid variant above, sized for the smaller tile. */
+  .sc-qgrid-cell.bad { background: rgba(176,39,28,0.12); color: var(--red); border-color: rgba(176,39,28,0.55); box-shadow: inset 0 0 0 2px #fff; }
   .sc-qgrid-cell.skip { background: #fff; color: var(--faint); border-color: var(--border); }
+  /* ═══ FLAGGED FOR REVIEW ═══ the student marked this question during
+     the test. Drawn as a small "!" riding ON the tile rather than as a
+     fourth fill colour: the three fills already carry correct / incorrect
+     / omitted, and "I wasn't sure about this one" is an orthogonal fact
+     about the same question — it has to sit on top of a status, not
+     compete with it for one. Deliberately not the ⚑ the question modal
+     uses: at 17px a flag glyph is an unreadable smudge, while "!" stays
+     legible down to about 8px and carries the same "look at this" read. */
+  /* Centred on the GLYPH, not on its line box. Flex centring aligns the
+     span's box, and a line box reserves descender space that "!" does not
+     use — so the ink lands high by (ascent - descent) / 2 relative to the
+     box middle. Measured in Poppins that is 0.45px at 11px, i.e. 0.04em,
+     which is why this is expressed in em and holds at both tile sizes. */
+  .sc-qgrid-flag { font-weight: 800; line-height: 1; pointer-events: none;
+    font-size: 10px; transform: translateY(0.04em); }
+  /* On the light-wash variant the cell already sets its own status colour
+     and the "!" simply inherits it. On the solid-fill tiles at the top of
+     the report it has to be knocked out in white instead, or a green "!"
+     lands on a green tile and disappears. */
+  .section-card .sc-qgrid-cell.ok .sc-qgrid-flag,
+  .section-card .sc-qgrid-cell.bad .sc-qgrid-flag { color: #fff; }
+  .section-card .sc-qgrid-cell.skip .sc-qgrid-flag { color: var(--mid); }
+  .section-card .sc-qgrid-flag { font-size: 11px; }
+  .sc-qgrid-tooltip .flag { display: block; margin-top: 3px; color: rgba(255,255,255,0.62); }
+  .sc-count.flag { color: var(--mid); }
+  /* A miniature of the tile itself, not the bare character: written inline
+     as text, "6 flagged !" reads as an exclamation ON the sentence rather
+     than as the mark being explained. Boxed, it is unmistakably a key. */
+  /* The key rides at the END of this count, after the label, so that the
+     NUMBER starts at the column edge like every other count in the grid.
+     Leading, it indented "6" by the width of the swatch and the numbers
+     stopped lining up down the column — which is the one thing a column of
+     counts has to get right.
+
+     The row is a flex line rather than inline text so the swatch centres
+     against the type instead of hanging off its baseline: vertical-align
+     put the box 3.4px below the digits' optical centre, and any px value
+     that fixed it would have been a magic number tied to this font size.
+     align-items:center lands within half a pixel and survives a resize. */
+  .sc-count.flag { display: inline-flex; align-items: center; }
+  /* padding-top, not a transform: the "!" here is a bare text node in a
+     flex box, so there is no element to nudge. Same optical correction as
+     .sc-qgrid-flag above — centring aligns the line box, and the descender
+     space it reserves is space this glyph does not use. Under the global
+     border-box the fixed 13px height is unchanged; the padding only shifts
+     the centred content, by half of it. */
+  .sc-qgrid-flag-key { display: inline-flex; align-items: center; justify-content: center;
+    flex: none; width: 13px; height: 13px; border-radius: 4px; background: var(--mid); color: #fff;
+    font-style: normal; font-size: 9px; font-weight: 800; line-height: 1;
+    padding-top: 0.08em; margin-left: 5px; }
 
   /* Bridge chart card — now the sole content of "Path to target score"
      (the old "Top 5 weakest skills" list that used to append below the
@@ -517,12 +697,17 @@
   .bridge-canvas-wrap { text-align: center; overflow-x: auto; }
   .bridge-canvas-inner { position: relative; display: inline-block; }
   .bridge-empty { font-size: 11px; color: var(--mid); padding: 6px 0; }
-  /* Hover/click affordance on each recoverable-points bar — a small
-     floating card following the cursor (percent correct + raw fraction),
-     positioned with JS (see the mousemove handler in drawBridge()). */
-  .bridge-tooltip { display: none; position: fixed; z-index: 60; background: var(--ink); color: #fff; border-radius: 8px; padding: 8px 11px; font-family: 'Poppins', sans-serif; font-size: 11.5px; line-height: 1.4; pointer-events: none; box-shadow: 0 8px 20px rgba(17,17,17,0.25); white-space: nowrap; }
-  .bridge-tooltip b { display: block; font-size: 12.5px; margin-bottom: 2px; }
-  .bridge-tooltip .bridge-tooltip-hint { display: block; margin-top: 4px; color: rgba(255,255,255,0.65); font-size: 10.2px; }
+  /* Hover/click affordance on each recoverable-points bar. This used to
+     be its own floating card — different radius, different type size,
+     different anchor (offset down-right of the cursor) from every other
+     hover readout in the report. It is now the kit's .dxk-tip wearing one
+     modifier: the bars live on a <canvas>, so there is no DOM mark to
+     hang data-tip on and the chip has to be positioned by hand from the
+     hit-test — hence position:fixed against client coordinates rather
+     than the kit's absolute-within-.dxk-plot. Everything else (colour,
+     radius, the red accent on the figure, the timing) is shared. */
+  .dxk-tip-fixed { position: fixed; z-index: 60; transform: translate(-50%, -128%); }
+  .dxk-tip-hint { display: block; margin-top: 4px; font-size: 9.5px; color: rgba(255,255,255,0.62); }
   /* Section snapshot tiles — module name, a plain color grid (no question
      numbers, no per-module time/domain breakdown), average time per
      question. Sits directly under the score card, ahead of the bridge
@@ -536,16 +721,56 @@
   .section-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: 24px; margin: 17.6px 0 0; }
   @media (max-width: 640px) { .section-cards { grid-template-columns: repeat(2, 1fr); } }
   .section-card { background: transparent; border: none; border-radius: 0; box-shadow: none; padding: 0; }
-  .section-card .sc-title { font-family: var(--hel); font-size: 13.12px; font-weight: 700; color: var(--text); margin-bottom: 8px; min-height: 34px; display: flex; align-items: flex-end; }
-  .sc-counts { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 11.2px; margin-bottom: 9.6px; min-height: 35px; }
+  /* min-height holds TWO lines, not one and a bit. Half the module labels
+     on an adaptive form carry a "(Harder)"/"(Easier)" suffix and wrap; at
+     34px only the single-line titles were being padded to a common height,
+     so the two-line cards pushed their counts and question grid 6px lower
+     than their neighbours' — the exact misalignment this property exists
+     to prevent. 40px is what two lines actually measure at this size. */
+  .section-card .sc-title { font-family: var(--hel); font-size: 13.12px; font-weight: 700; color: var(--text); margin-bottom: 8px; min-height: 40px; display: flex; align-items: flex-end; }
+  /* Two fixed columns, not a wrapping flex row. With four counts in a
+     ~155px card these were always going to take two lines; packed by flex
+     they took them raggedly — "0 omitted" started under "20 correct" while
+     the flagged count began wherever "0 omitted" happened to end, aligned
+     with nothing. A grid puts every count in a column, so the second row
+     reads as a second row rather than as leftovers. It is two rows either
+     way, three counts or four, so a card with no flagged questions stays
+     exactly as tall as one with them and all four question grids below
+     still start at the same y.
+
+     Columns are sized to their content, not to equal fractions: split
+     50/50 a ~155px card gives each count about 72px, which is a hair
+     under what "! 6 flagged" needs — so it wrapped to two lines in three
+     of the four cards and not in the fourth, and the grids below them
+     stopped lining up. max-content lets each column be as wide as its
+     widest count and no wider; the pair still fits the card with room to
+     spare, and minmax(0, ...) lets them give way rather than overflow if
+     a card is ever narrower than its contents. */
+  .sc-counts { display: grid; grid-template-columns: repeat(2, minmax(0, max-content));
+    justify-content: start; align-items: start; gap: 7px 14px; margin-bottom: 9.6px; min-height: 35px; }
   .sc-count { font-family: var(--hel); font-size: 12.8px; font-weight: 700; color: var(--faint); }
   .sc-count.ok { color: var(--green); }
   .sc-count.bad { color: var(--red); }
   .sc-count span { font-weight: 500; opacity: 0.75; margin-left: 0.2em; font-size: 0.85em; }
   .section-card .sc-qgrid { gap: 5px; }
   .section-card .sc-qgrid-cell { width: 17px; height: 17px; border-radius: 5px; border: none; }
-  .section-card .sc-qgrid-cell.ok { background: var(--green); }
-  .section-card .sc-qgrid-cell.bad { background: var(--red); }
+  /* ═══ NOT COLOUR ALONE ═══ correct #16A34A and incorrect #EF4444 sit at a
+     luminance contrast of 1.14:1 -- all but identical in brightness. On a
+     colour screen the hues carry it; on the mono printer this report is
+     explicitly built to be sent to (print-color-adjust: exact, a Print /
+     Save as PDF button in the toolbar) both convert to the same mid grey,
+     and the most-scanned graphic on the page becomes an undifferentiated
+     field of squares. The same pair is the classic red/green confusion for
+     deuteranopia, which is ~8% of boys -- a large share of the readership.
+
+     So state is carried by SHAPE as well as hue: correct is a solid tile,
+     incorrect is a ring (a solid tile with its middle knocked out), and
+     unattempted stays an empty outline. Three shapes that survive
+     greyscale, any colour vision, and a bad printer. The green is also
+     darkened, which widens the greyscale gap rather than relying on the
+     shape alone. */
+  .section-card .sc-qgrid-cell.ok { background: #2F7D4F; }
+  .section-card .sc-qgrid-cell.bad { background: var(--red); box-shadow: inset 0 0 0 2.5px #fff; }
   .section-card .sc-qgrid-cell.skip { background: transparent; border: 1.5px solid var(--border); }
   .sc-meta { font-family: var(--hel); font-size: 11.52px; color: var(--faint); margin-top: 11.2px; }
   .sc-meta .ok { color: var(--green); font-weight: 700; }
@@ -697,15 +922,8 @@
      leave its headline as an 8px annotation floating inside it, next to the
      module-clock label it collided with. Rewritten per module by
      renderModule(). */
-  /* Chart now runs the full measure (the arrows moved into its header —
-     see the carousel markup) and the nav sits beside the module counter. */
-  .timing-carousel { display: block; }
+  /* Chart runs the full measure; the module pills sit in its header. */
   .timing-chart-card { width: 100%; overflow: visible; }
-  .timing-nav { display: inline-flex; align-items: center; gap: 2px; flex-shrink: 0; }
-  .timing-nav-btn { width: 24px; height: 24px; }
-  .timing-nav-btn svg { width: 13px; height: 13px; }
-  .timing-module-counter { min-width: 44px; text-align: center; }
-  @media print { .timing-nav { display: none; } }
 
   /* min-height holds two lines: verdict length varies by one line between
      modules ("Finished with 4m 59s still on the clock..." is one, the
@@ -740,11 +958,23 @@
      cubicBezierEase), so every animation on this page — CSS-driven or
      rAF-driven — decelerates on the same shape. transitionDelay is set
      per-element in JS (armChartBars) to stagger sibling rows/segments. */
+  /* The hover properties are listed here too, not just on .dxk-hit. This
+     is a `transition` SHORTHAND on the same elements and it sits later in
+     the stylesheet, so naming only `width` here would reset opacity,
+     filter and transform to no transition at all — the kit's hover would
+     snap instead of easing, on exactly the marks that are hovered most. */
   .dx-part,
   .skilldx-seg,
   .budget-meter-budget,
   .budget-meter-actual,
-  .budget-gap-rule { transition: width 2s cubic-bezier(0.45,0.5,0.3,1); }
+  .budget-gap-rule { transition: width 2s cubic-bezier(0.45,0.5,0.3,1),
+      opacity 0.18s ease, filter 0.18s ease, transform 0.18s ease; }
+  /* A scope change is a response to a click, not an arrival: the 2s settle
+     above is right for a chart coming onto the screen and far too slow for
+     a control the reader just pressed. The class is added by the toggle
+     handler, so the first reveal still gets the full 2s. */
+  .dx-split.dx-morph .dx-part { transition: width 0.55s cubic-bezier(0.45,0.5,0.3,1),
+      opacity 0.18s ease, filter 0.18s ease, transform 0.18s ease; }
   .budget-gap-actual { transition: left 2s cubic-bezier(0.45,0.5,0.3,1); }
 
   /* The bridge waterfall draws into a <canvas> (see drawBridge/
@@ -845,6 +1075,14 @@
 
   <div class="sec-hed" id="behavior-hed" style="display:none;">Habits worth naming</div>
   <div id="behavior-section" style="display:none;"></div>
+
+  <!-- ═══ THE PLAN ═══ Everything above this point diagnoses. Nothing above
+       it prescribes, and a diagnosis a family cannot act on is a diagnosis
+       that changes no score. This turns the three causes into hours: the
+       split follows the SAME question counts the diagnosis card ranks, so
+       the plan cannot drift from the finding it came from. -->
+  <div class="sec-hed" id="plan-hed" style="display:none;">What the next four weeks look like</div>
+  <div id="plan-section" style="display:none;"></div>
   <a href="#" class="detail-toggle" id="detail-toggle">Show full question-by-question detail (click any question to see it) &darr;</a>
   <div class="ftr"><span>Moretti Test Prep &amp; Tutoring · Cranford, NJ · (201) 275-2791</span><span id="ftr-date"></span></div>
 
@@ -932,10 +1170,22 @@
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;');
   }
-  // Shared categorical palette for every multi-color chart on this report
-  // (section pies, bridge segments) — tints/shades of the same five brand
-  // colors rather than a mixed bag of unrelated hues.
-  var BRAND_PALETTE = ['#B0271C', '#C9A84C', '#5E8B6F', '#243447', '#A97C50', '#7A3B32', '#8C9A6E', '#8B6F47'];
+  /* Bar colours for the score bridge — the only chart that still reads
+     this (the second reference, `palette` further down, has no consumers).
+
+     Taken straight from the new homepage's own variables (index-v2.html
+     :root — --red, --gold, --red-lift, --gold-deep, --muted, --body) so
+     the two surfaces read as one system. What went is what had no
+     counterpart there: the sage green and the navy, which were the two
+     bars that most obviously belonged to a different chart.
+
+     Ordered to alternate red / gold / neutral, which keeps the two reds
+     and the two golds apart — six is one more than the bridge normally
+     draws, so in practice no colour repeats within a chart. The homepage
+     paints every step bar one red because its version is a four-bar mock;
+     here the bars are per-skill hover targets with their own tooltips, so
+     they stay distinguishable. */
+  var BRAND_PALETTE = ['#B0271C', '#C9A84C', '#8B8177', '#D24234', '#9A7C22', '#4A4139'];
 
   // Strips HTML (question text carries its own inline formatting/figures —
   // see esc()'s comment above) down to plain text for the hover tooltip,
@@ -1975,7 +2225,7 @@
       var dom = q.domain, sk = q.skill || q.domain;
       (domains[dom] = domains[dom] || { c: 0, t: 0 }).t++; if (ok) domains[dom].c++;
       (skills[sk] = skills[sk] || { c: 0, t: 0, dom: dom }).t++; if (ok) skills[sk].c++;
-      var sd = (secDomains[dom] = secDomains[dom] || { c: 0, t: 0, missedSkills: {}, skillStats: {} });
+      var sd = (secDomains[dom] = secDomains[dom] || { c: 0, t: 0, missedSkills: {}, skippedSkills: {}, skillStats: {} });
       sd.t++; if (ok) sd.c++;
       // Per-skill correct/total within this section — lets the skill list
       // report "3/6 correct" instead of only "missed 4", which reads far
@@ -1983,6 +2233,13 @@
       var skStat = (sd.skillStats[sk] = sd.skillStats[sk] || { c: 0, t: 0 });
       skStat.t++; if (ok) skStat.c++;
       if (!ok) sd.missedSkills[sk] = (sd.missedSkills[sk] || 0) + 1;
+      /* NEVER REACHED, tracked apart from answered-wrong. Both are !ok, so
+         missedSkills alone cannot tell them apart -- and the score bridge
+         used to bill a question the clock ate to the skill it happened to
+         belong to, which reads to a parent as a content gap to re-teach.
+         missedSkills keeps its old meaning (everything not correct); this
+         is the subset that was never answered, so a consumer can subtract. */
+      if (given === null || given === undefined) sd.skippedSkills[sk] = (sd.skippedSkills[sk] || 0) + 1;
       // given should be a plain 0-based choice index for mc, or an
       // {raw,value} object for fr — but a corrupted/stale answers[]
       // entry (e.g. an fr-shaped object landing in an mc slot from some
@@ -2061,11 +2318,13 @@
       if (dtag) { dtag.t++; if (r.ok) dtag.c++; }
       timeTotal += r.timeMs || 0;
       if (r.ok) timeCorrect += r.timeMs || 0; else timeIncorrect += r.timeMs || 0;
-      var sd = (domains[r.dom] = domains[r.dom] || { c: 0, t: 0, missedSkills: {}, skillStats: {} });
+      var sd = (domains[r.dom] = domains[r.dom] || { c: 0, t: 0, missedSkills: {}, skippedSkills: {}, skillStats: {} });
       sd.t++; if (r.ok) sd.c++;
       var skStat = (sd.skillStats[r.sk] = sd.skillStats[r.sk] || { c: 0, t: 0 });
       skStat.t++; if (r.ok) skStat.c++;
       if (!r.ok) sd.missedSkills[r.sk] = (sd.missedSkills[r.sk] || 0) + 1;
+      // See the skippedSkills comment in the per-question pass above.
+      if (r.skipped) sd.skippedSkills[r.sk] = (sd.skippedSkills[r.sk] || 0) + 1;
       if (!r.ok && r.q.type === 'mc' && r.givenIdx !== null && r.givenIdx !== undefined) {
         missedMc++;
         var letter = LETTERS[r.givenIdx];
@@ -2153,6 +2412,32 @@
   }
 
   var pct = totalQ ? Math.round(totalC / totalQ * 100) : 0;
+
+  /* ═══ GUESSING LIFT ═══ computed once, here, because two different parts
+     of this report need exactly the same number and must not disagree about
+     it: the note under "Habits worth naming" that reports it in words, and
+     the score band on the composite tile.
+
+     With four options a wrong answer implies roughly three others'-worth of
+     wrong guesses that landed -- the standard formula-score correction,
+     right minus wrong/(options-1). Grid-ins are excluded from both terms:
+     they cannot be guessed into, and counting them would inflate it.
+
+     This is a FLOOR. R - W/(k-1) assumes wrong answers are uniform picks
+     across all four options; real students eliminate distractors, and the
+     correction scales hard with that (guessing among two rather than four
+     roughly triples it). Four options is the most generous assumption
+     available, which is what makes the figure a lower bound. */
+  var guessLift = (function () {
+    var mcC = 0, mcW = 0;
+    sections.forEach(function (sec) {
+      sec.rows.forEach(function (r) {
+        if (!r.q || r.q.type !== 'mc' || r.skipped) return;
+        if (r.ok) mcC++; else mcW++;
+      });
+    });
+    return { correct: mcC, wrong: mcW, lift: mcW / 3 };
+  })();
   var first = (data.n || 'Student').split(' ')[0];
   var dateStr = data.dt || new Date().toISOString().slice(0, 10);
   // data.ts (added alongside dt — see finishDiagnostic's payload in
@@ -2399,6 +2684,94 @@
     });
   }
 
+  /* ═══ CHART KIT ═══ the behaviour half of the .dxk- CSS block near the
+     top of this file. Two helpers, shared by all six chart blocks below,
+     so a hover readout or a scope control is three lines at the call site
+     instead of a bespoke implementation per chart.
+
+     Kept deliberately small. These do positioning and state only — every
+     chart still builds its own marks and writes its own copy, because the
+     thing worth sharing between a waterfall and a scatter is the grammar,
+     not the drawing. ═══ */
+
+  /* Gives `plot` the shared floating tooltip, driven by a data-tip
+     attribute (HTML, so a number can be wrapped in <b>) on any descendant
+     mark. Idempotent: re-rendering a chart's innards does NOT need to
+     re-wire it, because the listeners live on the container and resolve
+     the mark at event time. */
+  function dxkWire(plot) {
+    if (!plot || plot.__dxkWired) return plot && plot.__dxkTip;
+    plot.__dxkWired = true;
+    plot.classList.add('dxk-plot');
+    var tip = document.createElement('div');
+    tip.className = 'dxk-tip';
+    tip.setAttribute('aria-hidden', 'true');
+    plot.appendChild(tip);
+    plot.__dxkTip = tip;
+    function hide() { tip.classList.remove('on'); }
+    function place(html, x, y) {
+      tip.innerHTML = html;
+      tip.classList.add('on');
+      // Measured AFTER filling, because the chip is sized by its own text
+      // and a long skill name is easily wider than the card it sits in.
+      // Without the clamp the chip runs off the page edge on exactly the
+      // rows whose labels most need reading.
+      var half = tip.offsetWidth / 2, w = plot.clientWidth, m = 4;
+      tip.style.left = (w > tip.offsetWidth + m * 2
+        ? Math.max(half + m, Math.min(w - half - m, x)) : w / 2) + 'px';
+      tip.style.top = y + 'px';
+    }
+    function markFrom(e) {
+      var t = e.target;
+      return (t && t.closest) ? t.closest('[data-tip]') : null;
+    }
+    plot.addEventListener('pointermove', function (e) {
+      var m = markFrom(e);
+      if (!m) { hide(); return; }
+      var r = plot.getBoundingClientRect();
+      place(m.getAttribute('data-tip'), e.clientX - r.left, e.clientY - r.top);
+    });
+    plot.addEventListener('pointerleave', hide);
+    // Keyboard parity: a mark reachable by Tab shows the same readout a
+    // pointer would, anchored to the mark itself rather than to a cursor
+    // that isn't there.
+    plot.addEventListener('focusin', function (e) {
+      var m = markFrom(e);
+      if (!m) { hide(); return; }
+      var r = plot.getBoundingClientRect(), b = m.getBoundingClientRect();
+      place(m.getAttribute('data-tip'), b.left - r.left + b.width / 2, b.top - r.top);
+    });
+    plot.addEventListener('focusout', hide);
+    return tip;
+  }
+
+  /* Builds the segmented pill. `opts` is [{key, label}], the first is
+     pressed to start, and `onPick(key)` fires on every press including a
+     re-press of the current one (harmless, and it keeps the handler free
+     of "did this actually change" bookkeeping). Returns the element for
+     the caller to place. */
+  function dxkToggle(opts, onPick, ariaLabel) {
+    var wrap = document.createElement('div');
+    wrap.className = 'dxk-toggle';
+    wrap.setAttribute('role', 'group');
+    wrap.setAttribute('aria-label', ariaLabel || 'Choose a view');
+    opts.forEach(function (o, i) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = o.label;
+      b.setAttribute('data-dxk-key', o.key);
+      b.setAttribute('aria-pressed', i === 0 ? 'true' : 'false');
+      b.addEventListener('click', function () {
+        Array.prototype.forEach.call(wrap.children, function (c) {
+          c.setAttribute('aria-pressed', c === b ? 'true' : 'false');
+        });
+        onPick(o.key, o);
+      });
+      wrap.appendChild(b);
+    });
+    return wrap;
+  }
+
   function barRow(label, c, t, cls) {
     var p2 = t ? Math.round(c / t * 100) : 0;
     var row = document.createElement('div');
@@ -2543,7 +2916,25 @@
          the part that was plainly wrong, which was holding the band
          CONSTANT while the amount of evidence underneath it moved. */
       var attemptedQ = Math.max(1, totalQ - skipped);
-      var SCORE_SEM = headlineBase * Math.sqrt(totalQ / attemptedQ);
+      /* GUESSED-RIGHT ANSWERS CARRY NO INFORMATION, and the band has to say
+         so. The sqrt(total/attempted) term above already encodes the right
+         idea -- a score estimated from fewer responses is estimated less
+         precisely -- but it only counted questions left blank. A question
+         answered by guessing is just as uninformative about ability as one
+         left blank; it simply happens to have landed on an answer. Leaving
+         those in the denominator meant a student whose raw count was lifted
+         by a dozen lucky guesses got exactly the same band as one who
+         guessed on nothing, which is the same mistake the old flat +/-40
+         made, one level down.
+
+         Subtracting the lift is deliberately symmetric rather than a
+         downward shift of the point estimate: this report scores the way
+         the real exam scores, and the real exam counts a lucky guess. What
+         is honest to say is that the number is less precisely measured, not
+         that it is secretly lower -- so the band widens both ways and the
+         composite itself is left alone. */
+      var informativeQ = Math.max(1, attemptedQ - guessLift.lift);
+      var SCORE_SEM = headlineBase * Math.sqrt(totalQ / informativeQ);
       var bigTile = tilesEl.querySelector('.score-tile.big');
       if (bigTile) {
         var rangeEl = document.createElement('div');
@@ -2620,18 +3011,41 @@
 
   })();
 
-  // Per-section, per-skill missed-question counts — shared by the section
-  // pie charts below and the score-bridge waterfall, so both read the
-  // exact same underlying numbers.
+  /* Per-section, per-skill counts for the score-bridge waterfall.
+     ANSWERED WRONG ONLY -- a question the clock never let the student reach
+     is not evidence about that question's skill, and billing it to one was
+     the single largest misattribution on this report. On a pacing-limited
+     attempt the never-reached questions cluster at the END of a module, so
+     they all landed on whichever domains happen to sit there: the bridge
+     would tell a parent to re-teach Standard English Conventions when over
+     half of that bar was questions their child never saw. Those points are
+     real and still shown -- see sectionSkillSkipped() and the clock bar the
+     bridge builds from it -- they are just no longer shown as content. */
   function sectionSkillMiss(s5) {
     var skillMiss = {};
     Object.keys(s5.domains).forEach(function (d) {
       var missedSkills = s5.domains[d].missedSkills;
+      var skippedSkills = s5.domains[d].skippedSkills || {};
       Object.keys(missedSkills).forEach(function (sk) {
-        skillMiss[sk] = (skillMiss[sk] || 0) + missedSkills[sk];
+        // missedSkills is everything not correct; skippedSkills is the
+        // never-answered subset of it. The difference is answered-and-wrong.
+        var answeredWrong = missedSkills[sk] - (skippedSkills[sk] || 0);
+        if (answeredWrong > 0) skillMiss[sk] = (skillMiss[sk] || 0) + answeredWrong;
       });
     });
     return skillMiss;
+  }
+  // How many questions this section never reached at all. Returned as a
+  // plain count rather than per-skill: the whole point is that WHICH skill
+  // a never-reached question belonged to carries no information about the
+  // student, only about where the form happened to put it.
+  function sectionSkippedCount(s5) {
+    var n = 0;
+    Object.keys(s5.domains).forEach(function (d) {
+      var skippedSkills = s5.domains[d].skippedSkills || {};
+      Object.keys(skippedSkills).forEach(function (sk) { n += skippedSkills[sk]; });
+    });
+    return n;
   }
   // Which domain (the test's own broader content category, e.g. "Algebra")
   // each missed skill in this section falls under — used by the score
@@ -2751,11 +3165,23 @@
     var scoreMin = 400;
 
     var bridgeItems = [];
+    // Points sitting behind questions the clock never allowed, pooled across
+    // sections into ONE bar. Kept out of the per-skill list entirely: these
+    // are the same points, attributed to the thing that actually cost them.
+    var clockPoints = 0, clockQuestions = 0;
     {
       sections.forEach(function (s) {
-        var skillMiss = sectionSkillMiss(s);
+        var skillMiss = sectionSkillMiss(s);          // answered wrong only
+        var skippedHere = sectionSkippedCount(s);     // never reached at all
         var skillDom = sectionSkillDomain(s);
-        var totalMissed = Object.keys(skillMiss).reduce(function (a, k) { return a + skillMiss[k]; }, 0);
+        var wrongTotal = Object.keys(skillMiss).reduce(function (a, k) { return a + skillMiss[k]; }, 0);
+        /* The DENOMINATOR still counts every question that was not correct,
+           never-reached included. sectionRecoverable below is the points from
+           fixing ALL of them, so dividing it by the answered-wrong count
+           alone would quietly hand the clock's share of the points to the
+           content skills -- the exact misattribution this split exists to
+           remove, reintroduced through the arithmetic. */
+        var totalMissed = wrongTotal + skippedHere;
         if (!totalMissed) return;
         var sectionCurve = (s.key === 'reading-writing') ? RW_CURVE : (s.key === 'math' ? MATH_CURVE : null);
         var baseScaled = (s.key === 'reading-writing') ? rwScaled : (s.key === 'math' ? mathScaled : null);
@@ -2764,6 +3190,10 @@
         var sectionRecoverable = fullFixScaled - baseScaled;
         if (sectionRecoverable <= 0) return;
         var perMiss = sectionRecoverable / totalMissed;
+        if (skippedHere > 0) {
+          clockPoints += skippedHere * perMiss;
+          clockQuestions += skippedHere;
+        }
         Object.keys(skillMiss).forEach(function (sk) {
           var pts = skillMiss[sk] * perMiss;
           // attempts = how many questions of this skill the form actually
@@ -2782,10 +3212,15 @@
     // version, it's driven by the real score ceiling, never by whatever
     // target a parent happens to type in, so the bars underneath never
     // change when the target changes.
-    var rawTotalRecoverable = bridgeItems.reduce(function (a, e) { return a + e.points; }, 0);
+    // The clock bar's points are part of the same pool and must be inside
+    // both the ceiling test and the scaling below -- left out of the total
+    // they would push the bars past the top of the scale, and left out of
+    // the scaling they would stay full size while every content bar shrank.
+    var rawTotalRecoverable = bridgeItems.reduce(function (a, e) { return a + e.points; }, 0) + clockPoints;
     var headroom = scoreMax - currentComposite;
     if (rawTotalRecoverable > headroom && rawTotalRecoverable > 0) {
       var capScale = headroom / rawTotalRecoverable;
+      clockPoints = clockPoints * capScale;
       // Rebuilds each item, so it has to carry EVERY field forward — it
       // silently dropped `attempts` and left the named-bar gate below
       // comparing undefined against the threshold, which is false for all
@@ -2876,10 +3311,26 @@
     }).concat(shownDomainItems.map(function (it) {
       return { label: it.label + (it.n > 1 ? ' (' + it.n + ' skills)' : ''), points: it.points, filterType: 'domain', filterName: it.dom };
     }));
+    /* The clock bar goes LAST and outside the TOTAL_MAX_BARS competition.
+       Last because the waterfall then reads as "content, then the clock" --
+       the same order the diagnosis card puts them in. Outside the cap
+       because it is not one opportunity among several: it is the one bar on
+       this chart that no amount of re-teaching moves, and dropping it for a
+       sixth skill name would put the report back to implying every missed
+       point is a content point. Its colour is the diagnosis card's own
+       clock slate (#4E6070), not a palette entry, so the two sections
+       visibly agree about what "ran out of clock" looks like. */
+    var clockShown = (clockPoints > 0 && clockQuestions > 0);
+    if (clockShown) {
+      shownItems.push({
+        label: 'Never reached (' + clockQuestions + ' question' + (clockQuestions === 1 ? '' : 's') + ')',
+        points: clockPoints, filterType: 'clock', filterName: '*', color: '#4E6070'
+      });
+    }
 
     // The bars now always sum to exactly this — no more overshoot past
     // the endpoint bar.
-    var totalRecoverable = bridgeItems.reduce(function (a, e) { return a + e.points; }, 0);
+    var totalRecoverable = bridgeItems.reduce(function (a, e) { return a + e.points; }, 0) + clockPoints;
     // The real SAT only ever reports composites in 10-point steps (its
     // section scores are each 200-800 in 10s) — currentComposite is
     // already guaranteed to land on a multiple of 10 since it's the sum
@@ -2929,6 +3380,12 @@
       sections.forEach(function (s) {
         s.rows.forEach(function (r) {
           if (r.ok) return;
+          // The clock bar owns exactly the never-reached questions, and the
+          // skill/domain bars now own exactly the answered-wrong ones, so
+          // these three sets partition the misses with no overlap -- the
+          // same partition the points above were split on.
+          if (item.filterType === 'clock') { if (r.skipped) out.push(r); return; }
+          if (r.skipped) return;
           if (item.filterType === 'skill' && r.sk === item.filterName) out.push(r);
           else if (item.filterType === 'domain' && r.dom === item.filterName) out.push(r);
         });
@@ -3003,7 +3460,32 @@
            — not because the diagnostic predicts a perfect score, but
            because "every question right" IS a perfect score. The bars are
            still the useful part: they say where the points sit. */
-        var baseText = 'Each bar is the composite points sitting behind one skill on this form. Hover a bar for that skill\'s accuracy, or click it to see those questions.';
+        /* Says what the bars ARE, and names the clock bar separately when
+           there is one. The old sentence promised every bar was a skill,
+           which stopped being true once never-reached questions were pulled
+           out of the skill attribution and given their own bar -- and that
+           bar is the one most likely to be misread as "another topic to
+           study" if the copy does not say otherwise. */
+        /* ═══ WHERE THE POINTS ARE, NOT WHAT TO DO FIRST ═══
+           This chart and the two sections under it answer different
+           questions, and a reader with no way to tell that will read three
+           different instructions off one page. The bars rank by SIZE of
+           opportunity; "What went wrong" ranks by CAUSE, and section 1 ranks
+           by what the evidence can actually separate from this student's own
+           baseline. A big bar with no matching finding in section 1 is not a
+           contradiction -- it means the points are real but this one form
+           could not prove that area is a weakness rather than ordinary
+           scatter -- and saying so here is cheaper than letting a parent
+           discover the tension and trust neither.
+
+           Deliberately NOT solved by hiding bars that section 1 declines to
+           name. A uniformly weak student produces almost no separated areas
+           by construction, so that gate would empty the chart for exactly
+           the reader who most needs to see where the points sit. */
+        var baseText = clockShown
+          ? 'Each coloured bar is the composite points sitting behind one skill on this form. The slate bar at the right is different: those are points on questions the clock never allowed, and no amount of re-teaching moves them — the fix there is pacing, not content. Hover any bar for detail, or click it to see those questions.'
+          : 'Each bar is the composite points sitting behind one skill on this form. Hover a bar for that skill\'s accuracy, or click it to see those questions.';
+        baseText += ' This chart is sized by where the points are, not by what to work on first — the sections below rank that, and a large bar here without a matching finding there means the points are real but this one form could not separate that area from ' + first + '\u2019s own average.';
         baseText += ' The dashed bar on the right, ' + reachable + ', is what ' + first + ' would score with every single miss corrected' +
           (hitCeiling ? ' — the top of the scale' : '') +
           '. It is a ceiling, not a projection: no diagnostic can tell you how much of it is actually reachable, and real gains are a fraction of it.';
@@ -3083,7 +3565,7 @@
          ceiling was a perfect score. It was never a forecast; it was the
          definition of the quantity being restated. */
       var bars = [{ label: 'Current', val: startVal, isEndpoint: true, isStart: true }]
-        .concat(items.map(function (e) { return { label: e.label, points: e.points, tag: e.tag, filterType: e.filterType, filterName: e.filterName }; }))
+        .concat(items.map(function (e) { return { label: e.label, points: e.points, tag: e.tag, filterType: e.filterType, filterName: e.filterName, color: e.color }; }))
         .concat([{ label: 'Every miss fixed', val: endVal, isEndpoint: true, isCeiling: true }]);
 
       // Width grows with the bar count (more likely now that a low
@@ -3157,7 +3639,14 @@
       // Hit regions for the mid-chart (non-endpoint) bars, rebuilt on every
       // paint() call — used by the mousemove/click handlers below.
       var barRects = [];
-      function paint(curTargetVal) {
+      /* `hoverItem` gives the canvas the same hover grammar every DOM
+         chart in the report gets from .dxk-hit: the bar under the cursor
+         holds its colour and the other recoverable-points bars drop to
+         half, so it reads as "this one out of these". The two endpoint
+         bars (Current, and the every-miss-fixed ceiling) are deliberately
+         left alone — they are the scale this chart is measured against,
+         not members of the set being compared. */
+      function paint(curTargetVal, hoverItem) {
         ctx.clearRect(0, 0, w, h);
         barRects = [];
         cv.setAttribute('aria-label', 'Score bridge from current composite ' + startVal + ' to ' + endVal + ', the ceiling if every miss on this form were corrected, with a target reference line at ' + curTargetVal + '. Drag the dashed line, or use the target field above the chart, to change it. Hover or click a bar for that skill\'s accuracy and missed questions.');
@@ -3211,7 +3700,7 @@
               ctx.restore();
               ctx.fillStyle = 'rgba(17,17,17,0.55)';
             } else {
-              ctx.fillStyle = '#243447';
+              ctx.fillStyle = '#4A4139';
               roundTopRect(ctx, bx, topY, barW, baseY - topY, 4);
               ctx.fillStyle = '#1a1a1a';
             }
@@ -3225,7 +3714,11 @@
             var toY = y(toVal);
             var top = Math.min(fromY, toY), bot = Math.max(fromY, toY);
             var segH = Math.max(bot - top, 2);
-            ctx.fillStyle = colors[(i - 1) % colors.length];
+            ctx.globalAlpha = (hoverItem && b !== hoverItem) ? 0.5 : 1;
+            // An explicit per-bar colour wins over the cycling palette --
+            // used by the clock bar so it reads as a different KIND of
+            // thing, not the next skill in the rotation.
+            ctx.fillStyle = b.color || colors[(i - 1) % colors.length];
             // These segments float mid-chart — neither end sits on the
             // baseline the way the Current/ceiling bars do — so unlike
             // those two, BOTH ends round here, not just the top; a flat
@@ -3248,11 +3741,12 @@
             // sliver still shows as recoverable rather than rounding to +0.
             var barLabelPts = isSAT ? Math.max(10, roundToTen(b.points)) : Math.round(b.points);
             ctx.fillText('+' + barLabelPts, bx + barW / 2, top - 7);
+            ctx.globalAlpha = 1;
             running = toVal;
           }
           // x-axis label (rotated-free: full text, wrapped to as many
           // lines as it needs — see the padB/h measurement above).
-          ctx.fillStyle = 'rgba(17,17,17,0.6)';
+          ctx.fillStyle = '#8B8177';
           ctx.font = '600 9.5px Poppins, sans-serif';
           ctx.textAlign = 'center';
           wrapCanvasLabel(ctx, b.label, bx + barW / 2, padT + plotH + 15, gapW - 10, labelLineH);
@@ -3337,34 +3831,54 @@
       }
 
       // Floating tooltip — a plain sibling <div> next to the canvas
-      // (position:fixed, see .bridge-tooltip in the stylesheet), not
-      // drawn on the canvas itself, so its text stays real DOM (readable,
-      // selectable) rather than more canvas drawing code.
+      // (the kit's chip in its .dxk-tip-fixed variant, see the stylesheet),
+      // not drawn on the canvas itself, so its text stays real DOM
+      // (readable, selectable) rather than more canvas drawing code.
       var wrap = document.createElement('div');
       wrap.className = 'bridge-canvas-inner';
       wrap.appendChild(cv);
       var tooltip = document.createElement('div');
-      tooltip.className = 'bridge-tooltip';
+      tooltip.className = 'dxk-tip dxk-tip-fixed';
+      tooltip.setAttribute('aria-hidden', 'true');
       wrap.appendChild(tooltip);
       function statsForItem(item) {
         if (item.filterType === 'skill') return skills[item.filterName];
         if (item.filterType === 'domain') return domains[item.filterName];
         return null;
       }
+      // Same sentence shape the kit's other tooltips use — name, then the
+      // one figure the hover exists to deliver in the accent, then the raw
+      // fraction it came from, dimmed.
       function showTooltip(clientX, clientY, item) {
+        /* The clock bar has no accuracy to report -- an accuracy on
+           questions nobody answered is not a number -- so it gets its own
+           line rather than falling through statsForItem() to null and
+           silently showing no tooltip at all, which is what a bar with no
+           hover reads as: broken. */
+        if (item.filterType === 'clock') {
+          tooltip.innerHTML = esc(item.label) + ' &nbsp;<b>' + Math.round(item.points) + ' pts</b> ' +
+            '<span class="dim">questions the clock never allowed</span>' +
+            '<span class="dxk-tip-hint">Click to see these questions</span>';
+          tooltip.style.left = clientX + 'px';
+          tooltip.style.top = clientY + 'px';
+          tooltip.classList.add('on');
+          return;
+        }
         var stat = statsForItem(item);
-        if (!stat || !stat.t) { tooltip.style.display = 'none'; return; }
+        if (!stat || !stat.t) { hideTooltip(); return; }
         var pct = Math.round(stat.c / stat.t * 100);
-        tooltip.innerHTML = '<b>' + item.label + '</b>' + pct + '% correct (' + stat.c + '/' + stat.t + ')' +
-          '<span class="bridge-tooltip-hint">Click to see these questions</span>';
-        tooltip.style.left = (clientX + 14) + 'px';
-        tooltip.style.top = (clientY + 14) + 'px';
-        tooltip.style.display = 'block';
+        tooltip.innerHTML = esc(item.label) + ' &nbsp;<b>' + pct + '%</b> ' +
+          '<span class="dim">' + stat.c + ' of ' + stat.t + ' correct</span>' +
+          '<span class="dxk-tip-hint">Click to see these questions</span>';
+        tooltip.style.left = clientX + 'px';
+        tooltip.style.top = clientY + 'px';
+        tooltip.classList.add('on');
       }
-      function hideTooltip() { tooltip.style.display = 'none'; }
+      function hideTooltip() { tooltip.classList.remove('on'); }
 
       var isDraggingTarget = false;
       var pendingBarItem = null;
+      var hoverItem = null;
       cv.addEventListener('pointerdown', function (e) {
         var hit = hitTestBar(e.clientX, e.clientY);
         cv.setPointerCapture(e.pointerId);
@@ -3382,15 +3896,26 @@
           return;
         }
         var hit = hitTestBar(e.clientX, e.clientY);
-        if (hit) {
+        var item = hit ? hit.item : null;
+        // Repaint only when the bar under the cursor actually CHANGES.
+        // Redrawing the whole waterfall on every pointermove is both
+        // wasteful and visibly janky on a long skill list.
+        if (item !== hoverItem) {
+          hoverItem = item;
+          axis = paint(dragTarget, hoverItem);
+        }
+        if (item) {
           cv.style.cursor = 'pointer';
-          showTooltip(e.clientX, e.clientY, hit.item);
+          showTooltip(e.clientX, e.clientY, item);
         } else {
           cv.style.cursor = 'ns-resize';
           hideTooltip();
         }
       });
-      cv.addEventListener('pointerleave', function () { hideTooltip(); });
+      cv.addEventListener('pointerleave', function () {
+        hideTooltip();
+        if (hoverItem) { hoverItem = null; axis = paint(dragTarget, null); }
+      });
       cv.addEventListener('pointerup', function () {
         if (isDraggingTarget) {
           isDraggingTarget = false;
@@ -3483,10 +4008,17 @@
     var incorrectN = s5.t - s5.c - omitted;
     var countsEl = document.createElement('div');
     countsEl.className = 'sc-counts';
+    // The flagged tally is what stops the "!" on the tiles below from being
+    // an unexplained glyph on a parent-facing page. Shown only when there
+    // is at least one, so a student who never used the flag does not get a
+    // "0 flagged" that reads as a missing feature.
+    var flaggedN = s5.rows.filter(function (r) { return r.marked; }).length;
     countsEl.innerHTML =
       '<span class="sc-count ok">' + s5.c + ' <span>correct</span></span>' +
       '<span class="sc-count bad">' + incorrectN + ' <span>incorrect</span></span>' +
-      '<span class="sc-count">' + omitted + ' <span>omitted</span></span>';
+      '<span class="sc-count">' + omitted + ' <span>omitted</span></span>' +
+      (flaggedN ? '<span class="sc-count flag">' + flaggedN +
+        ' <span>flagged</span><i class="sc-qgrid-flag-key" aria-hidden="true">!</i></span>' : '');
     card.appendChild(countsEl);
 
     var gridEl = document.createElement('div');
@@ -3498,8 +4030,22 @@
       tip.className = 'sc-qgrid-tooltip';
       var statusWord = r.skipped ? 'Unattempted' : (r.ok ? 'Correct' : 'Incorrect');
       var statusCls = r.skipped ? '' : (r.ok ? 'ok' : 'bad');
-      tip.innerHTML = '<b class="' + statusCls + '">Q' + r.n + ' — ' + statusWord + '</b>';
+      tip.innerHTML = '<b class="' + statusCls + '">Q' + r.n + ' — ' + statusWord + '</b>' +
+        (r.marked ? '<span class="flag">Flagged for review</span>' : '');
       cell.appendChild(tip);
+      // The mark goes in as its own element rather than as the cell's text
+      // so the absolutely-positioned tooltip above stays unaffected by the
+      // cell's flex centring.
+      if (r.marked) {
+        cell.classList.add('flagged');
+        var fl = document.createElement('span');
+        fl.className = 'sc-qgrid-flag';
+        fl.setAttribute('aria-hidden', 'true');
+        fl.textContent = '!';
+        cell.appendChild(fl);
+      }
+      cell.setAttribute('aria-label', 'Question ' + r.n + ', ' + statusWord +
+        (r.marked ? ', flagged for review' : ''));
       cell.addEventListener('click', function () { openQuestionModal(s5.rows, rIdx, s5.label); });
       gridEl.appendChild(cell);
     });
@@ -3584,15 +4130,27 @@
      it is a lower bar than exceeding a median — 1.6x a target that already
      accounts for this question's skill and difficulty is a lot of room. */
   var STUCK_BUDGET_REL = 1.5;
+  /* The budget-relative counterpart to RUSHED_REL, and the line below which
+     a wrong answer is genuinely hurried rather than merely not-slow. 0.5 is
+     admin.html's CT_RUSHED, deliberately: the per-form report and the
+     across-forms view should not disagree about what "rushed" means. */
+  var RUSHED_BUDGET_REL = 0.5;
   var behaviorFlags = [];
   // Mastered/Inefficient/Stuck/Rushed rollup per skill — see
   // renderSkillDiagnosis() and skillBuckets in index.html's identical block
   // for the full reasoning (this is the standalone report's own copy, kept
   // in sync by hand). Replaced the old section-level "Where to focus"
   // headline (focusCandidates) with this finer-grained, per-skill version.
+  /* ═══ PLAN INPUTS ═══ The study plan below is deliberately not allowed to
+     re-derive anything. It reads the exact counts the diagnosis card ranked
+     and the exact areas section 1 was willing to name, so a plan can never
+     recommend work the evidence above it did not support. Populated by
+     those two sections as they render; the plan renders last and bails out
+     if either is missing. */
+  var planInputs = { causes: null, leadKey: null, areas: null };
   var skillBuckets = {};
   function bucketFor(skillName) {
-    return skillBuckets[skillName] || (skillBuckets[skillName] = { mastered: 0, inefficient: 0, stuck: 0, rushed: 0, total: 0, hardTotal: 0 });
+    return skillBuckets[skillName] || (skillBuckets[skillName] = { mastered: 0, inefficient: 0, stuck: 0, onpace: 0, rushed: 0, total: 0, hardTotal: 0 });
   }
   /* ═══ DOMAIN BUCKETS ═══ the same four-way classification rolled up to
      the test's own content domains rather than its individual skills.
@@ -3613,7 +4171,7 @@
   var domainBucketsDx = {};
   function domainBucketFor(domName) {
     return domainBucketsDx[domName] || (domainBucketsDx[domName] =
-      { mastered: 0, inefficient: 0, stuck: 0, rushed: 0, total: 0, hardTotal: 0, skills: {} });
+      { mastered: 0, inefficient: 0, stuck: 0, onpace: 0, rushed: 0, total: 0, hardTotal: 0, skills: {} });
   }
   // Late-night attempt: a diagnostic finished well outside normal waking
   // hours is exactly the kind of context Luca already factors in by hand
@@ -3725,20 +4283,45 @@
         }
         slow = qBudgetMs ? (pacingTimeMs(r) >= qBudgetMs * STUCK_BUDGET_REL)
                          : (pacingTimeMs(r) >= stuckCutoff);
+        /* ═══ THREE TIME BANDS, NOT TWO ═══
+           `slow` alone made this binary, so EVERY wrong answer that was not
+           slow fell into `rushed` -- including one that took 1.4x its
+           budget, which is slower than target and the opposite of rushed.
+           The legend then labelled that bucket "Wrong, fast" and the
+           severity-2 headline told the student to slow down and check their
+           work on questions they had already spent longer than average on.
+
+           `hurried` is the genuine speed test, at the same 0.5x-of-budget
+           line the cross-test view in admin.html uses, so the two
+           classifiers finally mean the same thing by the word. What is
+           left in the middle -- wrong, at a normal pace -- is its own
+           bucket: a real and very common outcome that was previously
+           invisible because it was being reported as haste. */
+        var hurried = qBudgetMs ? (pacingTimeMs(r) < qBudgetMs * RUSHED_BUDGET_REL)
+                                : (pacingTimeMs(r) < cutoff);
         var b = bucketFor(r.sk);
         b.total++;
         if (r.q.difficulty === 'hard') b.hardTotal++;
         if (r.ok) { if (slow) b.inefficient++; else b.mastered++; }
-        else { if (slow) b.stuck++; else b.rushed++; }
+        else if (slow) b.stuck++;
+        else if (hurried) b.rushed++;
+        else b.onpace++;
         // Same question, counted again at domain grain. Skills are kept per
         // domain so the detail line under a ranked domain can name what is
         // actually inside it without re-deriving anything.
         if (r.dom) {
           var db = domainBucketFor(r.dom);
+          // Which section this area belongs to. An SAT domain lives in
+          // exactly one section (Algebra is Math, Craft & Structure is
+          // R&W), so this is a fact about the area, not a last-write-wins
+          // guess — it is what lets section 1 be narrowed to one section.
+          db.sec = s7.key;
           db.total++;
           if (r.q.difficulty === 'hard') db.hardTotal++;
           if (r.ok) { if (slow) db.inefficient++; else db.mastered++; }
-          else { if (slow) db.stuck++; else db.rushed++; }
+          else if (slow) db.stuck++;
+          else if (hurried) db.rushed++;
+          else db.onpace++;
           var ds = db.skills[r.sk] || (db.skills[r.sk] = { total: 0, missed: 0, stuck: 0 });
           ds.total++;
           if (!r.ok) { ds.missed++; if (slow) ds.stuck++; }
@@ -3857,14 +4440,9 @@
      inflate the correction. Shown only when the gap is big enough to
      change how the raw count should be read. */
   (function chanceCorrectedFlag() {
-    var mcC = 0, mcW = 0;
-    sections.forEach(function (sec) {
-      sec.rows.forEach(function (r) {
-        if (!r.q || r.q.type !== 'mc' || r.skipped) return;
-        if (r.ok) mcC++; else mcW++;
-      });
-    });
-    var lift = mcW / 3;
+    // Same numbers the score band above widened on -- see guessLift.
+    var mcC = guessLift.correct, mcW = guessLift.wrong;
+    var lift = guessLift.lift;
     if (mcC > 0 && lift >= 2) {
       /* AT LEAST, not "about". R - W/(k-1) assumes wrong answers are
          uniform random picks across all four options. Students eliminate
@@ -3906,8 +4484,17 @@
        but nothing is RANKED on a 3-question sample any more. */
     var allRows = Object.keys(domainBucketsDx).map(function (dm) {
       var b = domainBucketsDx[dm];
-      return { skill: dm, isDomain: true, skills: b.skills,
-               mastered: b.mastered, inefficient: b.inefficient, stuck: b.stuck, rushed: b.rushed,
+      return { skill: dm, isDomain: true, skills: b.skills, sec: b.sec,
+               mastered: b.mastered, inefficient: b.inefficient, stuck: b.stuck,
+               onpace: b.onpace, rushed: b.rushed,
+               /* The content signal is every miss that was NOT hurried --
+                  laboured over (stuck) or answered at a normal working pace
+                  (onpace). Both mean the same thing diagnostically: real
+                  effort went in and the answer was still wrong. Splitting
+                  them for display is useful; splitting them for the
+                  significance test would halve the evidence behind the one
+                  claim this section exists to make. */
+               content: b.stuck + b.onpace,
                total: b.total, hardShare: b.total ? b.hardTotal / b.total : 0 };
     });
     var rows = allRows.filter(function (r) { return r.total >= MIN_JUDGEABLE_N; });
@@ -3918,11 +4505,11 @@
        assumed, so "stuck more than usual" means more than usual FOR THIS
        STUDENT — a globally slow student should not have every domain
        flagged as a content gap. */
-    var poolTotal = 0, poolStuck = 0, poolRushed = 0, poolInefficient = 0;
+    var poolTotal = 0, poolContent = 0, poolRushed = 0, poolInefficient = 0;
     rows.forEach(function (r) {
-      poolTotal += r.total; poolStuck += r.stuck; poolRushed += r.rushed; poolInefficient += r.inefficient;
+      poolTotal += r.total; poolContent += r.content; poolRushed += r.rushed; poolInefficient += r.inefficient;
     });
-    var baseStuck = poolTotal ? poolStuck / poolTotal : 0;
+    var baseContent = poolTotal ? poolContent / poolTotal : 0;
     var baseRushed = poolTotal ? poolRushed / poolTotal : 0;
     var baseIneff = poolTotal ? poolInefficient / poolTotal : 0;
 
@@ -3964,14 +4551,14 @@
         if (shrunkRate(count, r.total, base) < base * 1.5) return false;
         return wilsonInterval(count, r.total).lo > base;
       }
-      if (passes(r.stuck, baseStuck)) return 3;
+      if (passes(r.content, baseContent)) return 3;
       if (passes(r.rushed, baseRushed)) return 2;
       if (passes(r.inefficient, baseIneff)) return 1;
       return 0;
     }
     rows.forEach(function (r) {
       r.severity = severityOf(r);
-      var lead = r.severity === 3 ? { n: r.stuck, base: baseStuck }
+      var lead = r.severity === 3 ? { n: r.content, base: baseContent }
                : r.severity === 2 ? { n: r.rushed, base: baseRushed }
                : { n: r.inefficient, base: baseIneff };
       r.leadN = lead.n;
@@ -3991,7 +4578,19 @@
       if (b.severity !== a.severity) return b.severity - a.severity;
       return b.rank - a.rank;
     });
-    var signalRows = rows.filter(function (r) { return r.severity > 0; }).slice(0, 6);
+    /* The full ranked list, no longer truncated here. The cap moved into
+       the draw below so that it applies PER SCOPE: slicing to six across
+       the whole test and then filtering to Math could show an empty Math
+       tab on a report whose Math signals all ranked seventh and lower. */
+    var allSignalRows = rows.filter(function (r) { return r.severity > 0; });
+    // Only areas that cleared the separation test -- the plan names these
+    // and nothing else, so it cannot put a topic in front of a parent that
+    // section 1 declined to stand behind.
+    planInputs.areas = allSignalRows.map(function (r) {
+      return { name: r.skill, sec: r.sec, severity: r.severity, n: r.total,
+               lead: r.leadN, topSkills: r.topSkills || [] };
+    });
+    var signalRows = allSignalRows.slice(0, 6);
     var headEl = document.getElementById('skilldx-headline');
     var tableEl = document.getElementById('skilldx-table');
     if (!signalRows.length) {
@@ -4025,104 +4624,172 @@
           '&mdash; what questions cost, and whether the clock lasted &mdash; rather than at a topic list.</p>';
       return;
     }
-    var top = signalRows[0];
-    var diffPrefix = top.hardShare >= 0.6 ? 'Hard ' : '';
-    /* Hedged to the evidence. The old copy asserted a causal
-       discrimination — "That's a knowledge gap, NOT a pacing one" — off as
-       few as 5 questions, which is a claim the sample cannot carry no
-       matter how the numbers fall. It now says what was seen, gives the
-       interval, and recommends a check rather than a diagnosis. The
-       recommendation is unchanged in substance; only its certainty is. */
-    /* Two sentences: what was seen and what to do, then how far to trust
-       it. The previous version spent four, and the middle two restated the
-       skill name and counts that the row directly beneath already shows. */
-    var ciTxt = ' Small sample (true rate ' + Math.round(top.ci.lo * 100) + '&ndash;' +
-      Math.round(top.ci.hi * 100) + '%), so treat it as the first lead, not a verdict.';
-    // The skills inside the lead domain, named as detail. This is where a
-    // tutor gets the specificity that used to be claimed as a ranked
-    // finding — same information, no longer presented as an inference the
-    // sample cannot carry.
-    var detail = top.topSkills && top.topSkills.length
-      ? ' The misses here were in ' + top.topSkills.map(function (x) {
-          return esc(x.name) + ' (' + x.missed + ' of ' + x.total + ')';
-        }).join(', ') + '.'
-      : '';
-    var headline = top.severity === 3
-      ? '<strong>Start here: ' + esc(diffPrefix + top.skill) + '.</strong> ' + top.stuck + ' of ' + top.total + ' took real time and still came back wrong &mdash; review the content before drilling speed.' + detail + ciTxt
-      : top.severity === 2
-      ? '<strong>Start here: ' + esc(diffPrefix + top.skill) + '.</strong> ' + top.rushed + ' of ' + top.total + ' were answered fast and wrong &mdash; slow down and check work before re-teaching.' + detail + ciTxt
-      : '<strong>Start here: ' + esc(diffPrefix + top.skill) + '.</strong> ' + top.inefficient + ' of ' + top.total + ' correct answers took far longer than typical &mdash; worth light speed drills later.' + detail + ciTxt;
-    headEl.innerHTML = '<div class="behavior-focus">' + headline + '</div>';
-    tableEl.innerHTML = signalRows.map(function (r) {
-      var tagCls = r.severity === 3 ? 'gap' : r.severity === 2 ? 'pacing' : 'slow';
-      var tagLabel = r.severity === 3 ? 'Content gap' : r.severity === 2 ? 'Pacing' : 'Getting there';
-      function seg(n, cls) { return n ? '<div class="skilldx-seg ' + cls + '" style="width:' + (n / r.total * 100) + '%;" title="' + n + ' ' + cls + '"></div>' : ''; }
-      // Sample size travels WITH the claim. A reader comparing two rows had
-      // no way to tell that one rests on 11 questions and the other on 5.
-      return '<div class="skilldx-row">' +
-        '<div class="skilldx-row-main">' +
-          '<div class="skilldx-row-top"><span class="skilldx-row-name">' + esc(r.skill) +
-            ' <span class="skilldx-n">' + r.total + 'q</span></span>' +
-            '<span class="skilldx-tag ' + tagCls + '">' + tagLabel + '</span></div>' +
-          '<div class="skilldx-track">' + seg(r.mastered, 'mastered') + seg(r.inefficient, 'inefficient') + seg(r.stuck, 'stuck') + seg(r.rushed, 'rushed') + '</div>' +
-        '</div>' +
-      '</div>';
-    }).join('') +
+    /* ═══ HEADLINE ═══ built for whichever row leads the current scope,
+       rather than once for the whole test. Same sentences as before; they
+       just take their subject as an argument now. */
+    function headlineFor(top) {
+      var diffPrefix = top.hardShare >= 0.6 ? 'Hard ' : '';
+      /* Hedged to the evidence. The old copy asserted a causal
+         discrimination — "That's a knowledge gap, NOT a pacing one" — off
+         as few as 5 questions, which is a claim the sample cannot carry no
+         matter how the numbers fall. It now says what was seen, gives the
+         interval, and recommends a check rather than a diagnosis. The
+         recommendation is unchanged in substance; only its certainty is. */
+      var ciTxt = ' Small sample (true rate ' + Math.round(top.ci.lo * 100) + '&ndash;' +
+        Math.round(top.ci.hi * 100) + '%), so treat it as the first lead, not a verdict.';
+      // The skills inside the lead domain, named as detail. This is where a
+      // tutor gets the specificity that used to be claimed as a ranked
+      // finding — same information, no longer presented as an inference the
+      // sample cannot carry.
+      var detail = top.topSkills && top.topSkills.length
+        ? ' The misses here were in ' + top.topSkills.map(function (x) {
+            return esc(x.name) + ' (' + x.missed + ' of ' + x.total + ')';
+          }).join(', ') + '.'
+        : '';
+      var open = '<strong>Start here: ' + esc(diffPrefix + top.skill) + '.</strong> ';
+      /* Severity 3 now covers every unhurried miss, so the sentence has to
+         say which kind actually dominates rather than asserting "took real
+         time" over a count that may be mostly normal-paced misses. Both
+         readings point at content; they differ in what the session should
+         look like, which is worth a parent and a tutor knowing. */
+      var contentTxt;
+      if (top.severity === 3) {
+        contentTxt = top.stuck >= top.onpace
+          ? open + top.content + ' of ' + top.total + ' were missed after real time went into them &mdash; review the content before drilling speed.'
+          : open + top.content + ' of ' + top.total + ' were missed at a normal working pace &mdash; not rushed and not laboured, which points at the material itself rather than at how it was worked.';
+      }
+      return (top.severity === 3
+        ? contentTxt
+        : top.severity === 2
+        ? open + top.rushed + ' of ' + top.total + ' were answered in well under the time they should take, and came back wrong &mdash; slow down and check work before re-teaching.'
+        : open + top.inefficient + ' of ' + top.total + ' correct answers took far longer than typical &mdash; worth light speed drills later.'
+      ) + detail + ciTxt;
+    }
+
+    /* The four states a question can land in, and how each reads in a
+       hover. Written as a phrase rather than the bare class name the old
+       native title= showed ("3 stuck"), which was internal vocabulary
+       leaking onto the page. */
+    var SEG_LABEL = { mastered: 'right, on time', inefficient: 'right, slow',
+                      stuck: 'wrong, slow', onpace: 'wrong, on pace', rushed: 'wrong, fast' };
+    var SEG_ORDER = ['mastered', 'inefficient', 'stuck', 'onpace', 'rushed'];
+
+    function rowsHtml(list) {
+      return list.map(function (r) {
+        var tagCls = r.severity === 3 ? 'gap' : r.severity === 2 ? 'pacing' : 'slow';
+        var tagLabel = r.severity === 3 ? 'Content gap' : r.severity === 2 ? 'Pacing' : 'Getting there';
+        function seg(n, cls) {
+          if (!n) return '';
+          return '<div class="skilldx-seg dxk-hit ' + cls + '" style="width:' + (n / r.total * 100) + '%;"' +
+            ' data-tip="' + esc(r.skill) + " &nbsp;<b>" + n + '</b> ' +
+            "<span class='dim'>of " + r.total + ' &middot; ' + SEG_LABEL[cls] + '</span>"></div>';
+        }
+        // Sample size travels WITH the claim. A reader comparing two rows had
+        // no way to tell that one rests on 11 questions and the other on 5.
+        return '<div class="skilldx-row">' +
+          '<div class="skilldx-row-main">' +
+            '<div class="skilldx-row-top"><span class="skilldx-row-name">' + esc(r.skill) +
+              ' <span class="skilldx-n">' + r.total + 'q</span></span>' +
+              '<span class="skilldx-tag ' + tagCls + '">' + tagLabel + '</span></div>' +
+            '<div class="skilldx-track dxk-marks">' +
+              SEG_ORDER.map(function (k) { return seg(r[k], k); }).join('') +
+            '</div>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+
     /* Only the states actually drawn above get a key. With two rows on
        screen at most three of the four ever appear, and a legend listing
        colours that are nowhere in the chart is a reader's problem to
        resolve, not information. */
-    (function () {
-      var present = { mastered: 0, inefficient: 0, stuck: 0, rushed: 0 };
-      signalRows.forEach(function (r) {
-        ['mastered', 'inefficient', 'stuck', 'rushed'].forEach(function (k) { if (r[k]) present[k]++; });
+    function legendHtml(list) {
+      var LABEL = { mastered: 'Right, on time', inefficient: 'Right, slow',
+                    stuck: 'Wrong, slow', onpace: 'Wrong, on pace', rushed: 'Wrong, fast' };
+      var keys = SEG_ORDER.filter(function (k) {
+        return list.some(function (r) { return r[k]; });
       });
-      var LABEL = { mastered: 'Right, on time', inefficient: 'Right, slow', stuck: 'Wrong, slow', rushed: 'Wrong, fast' };
-      var keys = ['mastered', 'inefficient', 'stuck', 'rushed'].filter(function (k) { return present[k]; });
       if (!keys.length) return '';
-      return '<div class="skilldx-legend">' + keys.map(function (k) {
+      return '<div class="dxk-legend">' + keys.map(function (k) {
         return '<span><i class="skilldx-dot ' + k + '"></i>' + LABEL[k] + '</span>';
       }).join('') + '</div>';
-    })() +
+    }
+
     // Named, not silently dropped: "this diagnostic did not see enough of
     // these to say" is itself something a parent should be told, and it is
     // the honest answer to "why isn't my kid's weak topic on this list."
-    /* One sentence, not a roll-call. Listing all ~20 thin skills by name
-       was itself the thing this report keeps getting wrong: volume where
-       insight belongs. What a parent needs from this is the coverage fact
-       — most of the skill map got one to three questions, so silence here
-       is not a clean bill of health — plus the handful sitting just under
-       the line, which are the ones a second form would actually settle. */
-    /* Always shown. This is the report telling the reader what grain it can
-       actually speak at, and it must not be conditional on something
-       happening to fall short — at domain grain nothing does, which is
-       exactly when a reader most needs to be told that the resolution
-       moved. The skill names above are real and useful to a tutor; what
-       they are not is a ranking, and this says so. */
-    '<p class="skilldx-thin"><strong>Reading this:</strong> these are content areas, not individual skills. ' +
-      'This form gives each area ' + (function () {
-        var ns = allRows.map(function (r) { return r.total; }).sort(function (a, b) { return a - b; });
-        return ns.length ? ns[0] + '&ndash;' + ns[ns.length - 1] : '';
-      })() + ' questions; individual skills get ' + (function () {
-        // Same source as the area figure — both are counts of questions
-        // actually classified here, not bank totals, so the two numbers in
-        // one sentence cannot come from different denominators.
-        var sn = Object.keys(skillBuckets).map(function (k) { return skillBuckets[k].total; })
-          .filter(function (n) { return n > 0; }).sort(function (a, b) { return a - b; });
-        return sn.length ? sn[0] + '&ndash;' + sn[sn.length - 1] : 'far fewer';
-      })() + ', too few to rank one against another on a single form. ' +
-      'The skills named above are where the misses fell inside their area &mdash; treat them as where to look, not as an order to work through.</p>' +
-    (thinRows.length
-      ? (function () {
-          var sorted = thinRows.slice().sort(function (a, b) { return b.total - a.total; });
-          var lo = sorted[sorted.length - 1].total, hi = sorted[0].total;
-          return '<p class="skilldx-thin"><strong>Coverage:</strong> ' + thinRows.length + ' of ' +
-            (thinRows.length + rows.length) + ' areas appeared ' +
-            (lo === hi ? lo + ' time' + (lo === 1 ? '' : 's') : lo + '&ndash;' + hi + ' times') +
-            ' each on this form &mdash; too few to judge, so they are neither flagged above nor cleared. ' +
-            'A second form settles them.</p>';
-        })()
-      : '');
+    /* Always shown, and always about the whole form regardless of which
+       scope is selected — it describes what this test could resolve, which
+       is a property of the form and not of the section being viewed. */
+    var COVERAGE =
+      '<p class="skilldx-thin"><strong>Reading this:</strong> these are content areas, not individual skills. ' +
+        'This form gives each area ' + (function () {
+          var ns = allRows.map(function (r) { return r.total; }).sort(function (a, b) { return a - b; });
+          return ns.length ? ns[0] + '&ndash;' + ns[ns.length - 1] : '';
+        })() + ' questions; individual skills get ' + (function () {
+          // Same source as the area figure — both are counts of questions
+          // actually classified here, not bank totals, so the two numbers in
+          // one sentence cannot come from different denominators.
+          var sn = Object.keys(skillBuckets).map(function (k) { return skillBuckets[k].total; })
+            .filter(function (n) { return n > 0; }).sort(function (a, b) { return a - b; });
+          return sn.length ? sn[0] + '&ndash;' + sn[sn.length - 1] : 'far fewer';
+        })() + ', too few to rank one against another on a single form. ' +
+        'The skills named above are where the misses fell inside their area &mdash; treat them as where to look, not as an order to work through.</p>' +
+      (thinRows.length
+        ? (function () {
+            var sorted = thinRows.slice().sort(function (a, b) { return b.total - a.total; });
+            var lo = sorted[sorted.length - 1].total, hi = sorted[0].total;
+            return '<p class="skilldx-thin"><strong>Coverage:</strong> ' + thinRows.length + ' of ' +
+              (thinRows.length + rows.length) + ' areas appeared ' +
+              (lo === hi ? lo + ' time' + (lo === 1 ? '' : 's') : lo + '&ndash;' + hi + ' times') +
+              ' each on this form &mdash; too few to judge, so they are neither flagged above nor cleared. ' +
+              'A second form settles them.</p>';
+          })()
+        : '');
+
+    /* ═══ SCOPE ═══ the same pill the other charts carry. The ranking and
+       the baseline it is measured against stay whole-test on purpose —
+       "more than usual for this student" means more than usual across
+       everything they sat, not more than usual for the six Math questions
+       in front of you — so this narrows WHICH ranked areas are shown, and
+       changes no number inside any of them. */
+    var SK_SEC_SHORT = { 'reading-writing': 'R&W', 'math': 'Math' };
+    function skRows(scope) {
+      return (scope === '*' ? allSignalRows
+        : allSignalRows.filter(function (r) { return r.sec === scope; })).slice(0, 6);
+    }
+    var skScopes = [{ key: '*', label: 'Whole test' }].concat(
+      sections.filter(function (sec) {
+        return allSignalRows.some(function (r) { return r.sec === sec.key; });
+      }).map(function (sec) {
+        return { key: sec.key, label: SK_SEC_SHORT[sec.key] || sec.label };
+      }));
+
+    /* Built once so that dxkWire's tooltip — a child of #skilldx-plot —
+       survives a scope change; only the rows and the key inside it are
+       re-rendered. */
+    tableEl.innerHTML =
+      '<div class="dxk-plot" id="skilldx-plot">' +
+        '<div id="skilldx-rows"></div><div id="skilldx-key"></div>' +
+      '</div>' + COVERAGE;
+    var rowsEl = document.getElementById('skilldx-rows');
+    var keyEl = document.getElementById('skilldx-key');
+
+    function drawSk(scope) {
+      var list = skRows(scope);
+      headEl.innerHTML = list.length ? '<div class="behavior-focus">' + headlineFor(list[0]) + '</div>' : '';
+      rowsEl.innerHTML = rowsHtml(list);
+      keyEl.innerHTML = legendHtml(list);
+    }
+
+    if (skScopes.length > 2) {
+      var skHost = document.createElement('div');
+      skHost.appendChild(dxkToggle(skScopes, drawSk, 'Choose section'));
+      tableEl.parentNode.insertBefore(skHost, tableEl);
+    }
+    dxkWire(document.getElementById('skilldx-plot'));
+    drawSk('*');
+
     document.getElementById('skilldx-hed').style.display = '';
     document.getElementById('skilldx-card').style.display = '';
     animateOnReveal(document.getElementById('skilldx-card'), armChartBars);
@@ -4302,10 +4969,11 @@
 
   (function renderTimingAllocation() {
     var wrap = document.getElementById('timing-allocation');
+    var TIMING_SEC_SHORT = { 'reading-writing': 'R&W', 'math': 'Math' };
     var moduleViews = [];
     sections.forEach(function (sec) {
       if (!sec.hasModules) {
-        moduleViews.push({ label: sec.label, rows: sec.rows });
+        moduleViews.push({ label: sec.label, short: TIMING_SEC_SHORT[sec.key] || sec.label, rows: sec.rows });
         return;
       }
       var m1 = sec.rows.filter(function (r) { return r.moduleIndex === 0; });
@@ -4314,8 +4982,13 @@
       // so the pacing trace resets per module and compares against half the
       // section's accommodation-adjusted allotment, not the whole thing.
       var perModuleMin = sec.timeAllottedMin ? sec.timeAllottedMin / 2 : 0;
-      if (m1.length) moduleViews.push({ label: sec.label + ' – Module 1', rows: m1, key: sec.key, clockMin: perModuleMin, mult: (budgetRollups[sec.key] || {}).mult || 1 });
-      if (m2.length) moduleViews.push({ label: sec.label + ' – Module 2' + (sec.variant ? ' (' + sec.variant + ')' : ''), rows: m2, key: sec.key, clockMin: perModuleMin, mult: (budgetRollups[sec.key] || {}).mult || 1 });
+      // `short` is the pill label. "Reading & Writing – Module 2 (Harder)"
+      // is the right thing to print above the chart and far too long to sit
+      // in a segmented control next to three others, so each view carries
+      // both: the full name in the header, the abbreviation in the pill.
+      var abbr = TIMING_SEC_SHORT[sec.key] || sec.label;
+      if (m1.length) moduleViews.push({ label: sec.label + ' – Module 1', short: abbr + ' 1', rows: m1, key: sec.key, clockMin: perModuleMin, mult: (budgetRollups[sec.key] || {}).mult || 1 });
+      if (m2.length) moduleViews.push({ label: sec.label + ' – Module 2' + (sec.variant ? ' (' + sec.variant + ')' : ''), short: abbr + ' 2', rows: m2, key: sec.key, clockMin: perModuleMin, mult: (budgetRollups[sec.key] || {}).mult || 1 });
     });
     moduleViews = moduleViews.map(function (mv) {
       // totalQuestions is the module's real size — captured BEFORE the
@@ -4346,50 +5019,55 @@
       for (var li = mv.rows.length - 1; li >= 0; li--) {
         if (mv.rows[li].timeMs > 0) { lastReached = li; break; }
       }
-      return { label: mv.label, key: mv.key, clockMin: mv.clockMin, mult: mv.mult,
+      return { label: mv.label, short: mv.short, key: mv.key, clockMin: mv.clockMin, mult: mv.mult,
                totalQuestions: mv.rows.length,
                rows: mv.rows.slice(0, lastReached + 1) };
     }).filter(function (mv) { return mv.rows.length >= 2; });
     if (!moduleViews.length) return;
     var CHART_W = 640;
 
-    /* The module arrows live in this chart's own header row, on the right
-       next to the "2 of 4" counter, rather than flanking the chart as a
-       carousel. Two reasons, both of them consequences of this section no
-       longer being a card: a chart pinned to CHART_W px between two 30px
-       buttons sat visibly inset from the flush section heading above it,
-       and arrows parked in the vertical middle of the plot, greyed at 25%
-       when disabled, read as chart decoration — most readers never found
-       out there were four modules. Beside the counter they read as what
-       they are, and the chart itself now runs the full measure and shares
-       a left edge with every heading on the page. */
+    /* The modules are a segmented control now, not a prev/next carousel —
+       the same .dxk-toggle every other chart in this report uses.
+
+       The arrows were a long-standing failure of this chart. Parked in the
+       header, greyed at 25% when disabled, they read as decoration: most
+       readers never found out there were four modules at all, because
+       nothing on screen said so except a "2 of 4" counter next to two
+       icons. A control that shows its options cannot hide them. It is also
+       strictly smaller here — four pills fit the header row that two
+       buttons and a counter already occupied — and it lets a reader jump
+       straight from R&W 1 to Math 2 instead of pressing next three times.
+
+       The full module name still prints on the left of the header; the
+       pills carry the abbreviation (see `short` above). */
     wrap.innerHTML =
       '<div class="timing-chart-card">' +
         '<div class="timing-chart-hed">' +
           '<span id="timing-module-label"></span>' +
-          '<span class="timing-nav">' +
-            '<button type="button" class="timing-nav-btn" id="timing-prev-btn" aria-label="Previous module"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>' +
-            '<span class="timing-module-counter" id="timing-module-counter"></span>' +
-            '<button type="button" class="timing-nav-btn" id="timing-next-btn" aria-label="Next module"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>' +
-          '</span>' +
+          '<span id="timing-module-pills"></span>' +
         '</div>' +
         '<div class="pace-swap" id="pace-swap">' +
           '<p class="pace-verdict" id="pace-verdict"></p>' +
-          '<svg class="pace-trace" id="pace-trace" viewBox="0 0 ' + CHART_W + ' 260" role="img"></svg>' +
-          '<div class="pace-legend" id="pace-legend"></div>' +
+          '<div class="dxk-plot" id="pace-plot">' +
+            '<svg class="pace-trace" id="pace-trace" viewBox="0 0 ' + CHART_W + ' 260" role="img"></svg>' +
+          '</div>' +
+          '<div class="dxk-legend pace-legend" id="pace-legend"></div>' +
         '</div>' +
       '</div>';
 
     var labelEl = document.getElementById('timing-module-label');
-    var counterEl = document.getElementById('timing-module-counter');
-    var prevBtn = document.getElementById('timing-prev-btn');
-    var nextBtn = document.getElementById('timing-next-btn');
     var moduleIdx = 0;
 
-    var tooltip = document.createElement('div');
-    tooltip.className = 'bridge-tooltip';
-    document.getElementById('timing-card').appendChild(tooltip);
-    function hideTimingTooltip() { tooltip.style.display = 'none'; }
+    /* This chart's hit targets are invisible full-height <rect>s over each
+       question, redrawn on every module switch — so the tooltip cannot
+       live inside the SVG that gets replaced. It hangs on #pace-plot, the
+       stable wrapper around it, and the kit's container listener resolves
+       whichever rect is current at event time. */
+    var pacePlot = document.getElementById('pace-plot');
+    dxkWire(pacePlot);
+    function hideTimingTooltip() {
+      if (pacePlot.__dxkTip) pacePlot.__dxkTip.classList.remove('on');
+    }
 
     /* Builds the cumulative pacing trace for one module: the running total
        of time actually spent, against the running total of what these
@@ -4584,10 +5262,13 @@
 
       var stepMin = yMaxMs / 60000 > 45 ? 20 : (yMaxMs / 60000 > 20 ? 10 : 5);
       for (var m = 0; m <= yMaxMs / 60000; m += stepMin) {
-        svgEl('line', { x1: L, x2: L + iw, y1: yAt(m * 60000), y2: yAt(m * 60000), class: 'pace-grid' });
+        svgEl('line', { x1: L, x2: L + iw, y1: yAt(m * 60000), y2: yAt(m * 60000),
+          class: m === 0 ? 'pace-base' : 'pace-grid' });
         svgEl('text', { x: L - 6, y: yAt(m * 60000) + 3, 'text-anchor': 'end', class: 'pace-ax' }, m);
       }
-      svgEl('text', { x: 2, y: T - 3, class: 'pace-ax' }, 'min');
+      // Right-aligned with the numbers it captions rather than floating in
+      // the top-left corner of the SVG, which read as a stray word.
+      svgEl('text', { x: L - 6, y: T - 4, 'text-anchor': 'end', class: 'pace-ax' }, 'min');
 
       /* ═══ NEVER-REACHED REGION ═══ when the clock cut a module off, the
          questions after the cutoff have no recorded time and so are absent
@@ -4658,22 +5339,94 @@
       paceClipFull = W;
       paceClipRect = svgEl('rect', { x: L, y: 0,
         width: (paceRevealed || prefersReducedMotion()) ? W : 0, height: H });
+      /* Band fills, as vertical gradients rather than flat washes. A band
+         between two cumulative lines is widest where the two diverge, which
+         is usually late and high in the plot; a flat 10% wash there reads as
+         a solid block, while the same fill fading toward the baseline keeps
+         the LINES as the figure and the area as support. */
+      svgTarget = defs;
+      function vGrad(id, stops) {
+        var g = svgEl('linearGradient', { id: id, gradientUnits: 'userSpaceOnUse',
+          x1: 0, y1: T, x2: 0, y2: T + ih });
+        var prev = svgTarget; svgTarget = g;
+        stops.forEach(function (st) {
+          svgEl('stop', { offset: st[0], 'stop-color': st[1], 'stop-opacity': st[2] });
+        });
+        svgTarget = prev;
+        return 'url(#' + id + ')';
+      }
+      /* Kept light on purpose. Where the return-trips line runs past the
+         budget line the two bands genuinely overlap, and their fills
+         compound — at any real strength that overlap turns a distinct
+         green and gold into one muddy olive wedge, which reads as a third
+         category that does not exist. These top out only a little above
+         the flat washes they replace; the gradient is doing the work. */
+      var debtFill = cf >= cb
+        ? vGrad('pace-g-over',  [[0, '#EF4444', 0.17], [1, '#EF4444', 0.035]])
+        : vGrad('pace-g-under', [[0, '#16A34A', 0.16], [1, '#16A34A', 0.03]]);
+      var backFill = vGrad('pace-g-back', [[0, '#C9A84C', 0.34], [1, '#C9A84C', 0.12]]);
+
       svgTarget = paceSvg;
       svgTarget = svgEl('g', { 'clip-path': 'url(#' + PACE_CLIP_ID + ')' });
 
+      /* ═══ SMOOTHING ═══ monotone cubic (Fritsch–Carlson), deliberately
+         NOT a plain Catmull-Rom. These series are cumulative, so they can
+         only ever rise; an ordinary spline overshoots wherever a flat run
+         meets a steep one, and an overshoot here would draw elapsed time
+         going backwards — a shape that cannot physically happen and that a
+         reader would take as a finding. Monotone interpolation passes
+         through every plotted point exactly and provably cannot overshoot
+         between them, so this is a smoother reading of the same numbers
+         rather than different numbers. A flat stretch (a question that
+         cost no time) stays honestly flat, because the slope at a turning
+         point is forced to zero. */
+      function smoothD(P) {
+        var n = P.length, i;
+        if (!n) return '';
+        if (n < 3) return 'M ' + P.map(function (q) { return q[0].toFixed(2) + ' ' + q[1].toFixed(2); }).join(' L ');
+        var dx = [], dy = [], sl = [], m = [];
+        for (i = 0; i < n - 1; i++) {
+          dx.push(P[i + 1][0] - P[i][0]);
+          dy.push(P[i + 1][1] - P[i][1]);
+          sl.push(dx[i] ? dy[i] / dx[i] : 0);
+        }
+        m[0] = sl[0];
+        for (i = 1; i < n - 1; i++) {
+          if (sl[i - 1] * sl[i] <= 0) { m[i] = 0; continue; }
+          var w1 = 2 * dx[i] + dx[i - 1], w2 = dx[i] + 2 * dx[i - 1];
+          m[i] = (w1 + w2) / (w1 / sl[i - 1] + w2 / sl[i]);
+        }
+        m[n - 1] = sl[n - 2];
+        var d = 'M ' + P[0][0].toFixed(2) + ' ' + P[0][1].toFixed(2);
+        for (i = 0; i < n - 1; i++) {
+          var h = dx[i] / 3;
+          d += ' C ' + (P[i][0] + h).toFixed(2) + ' ' + (P[i][1] + m[i] * h).toFixed(2) +
+               ' ' + (P[i + 1][0] - h).toFixed(2) + ' ' + (P[i + 1][1] - m[i + 1] * h).toFixed(2) +
+               ' ' + P[i + 1][0].toFixed(2) + ' ' + P[i + 1][1].toFixed(2);
+        }
+        return d;
+      }
+      // Every series starts from the same origin — 0 questions, 0 minutes —
+      // so the bands close cleanly at the left edge without a seam.
+      function seriesPts(key) {
+        return [[xAtN(0), yAt(0)]].concat(pts.map(function (p) { return [xAtN(p.n), yAt(p[key])]; }));
+      }
+      // An area between two smoothed curves has to be built from the SAME
+      // curves, or its edge drifts off the line it is supposed to hug: draw
+      // the top, then the bottom in reverse, turning its leading moveto
+      // into a lineto so the two join into one closed shape.
+      function band(topKey, botKey, fill) {
+        var d = smoothD(seriesPts(topKey)) + ' ' +
+                smoothD(seriesPts(botKey).reverse()).replace(/^M/, 'L') + ' Z';
+        svgEl('path', { d: d, fill: fill });
+      }
+
       // Debt against budget: shaded between the budget line and the
       // first-look line, since that is the like-for-like pair.
-      var fTop = pts.map(function (p) { return xAtN(p.n) + ',' + yAt(p.cf); });
-      var bBot = pts.slice().reverse().map(function (p) { return xAtN(p.n) + ',' + yAt(p.cb); });
-      svgEl('polygon', { points: xAtN(0) + ',' + yAt(0) + ' ' + fTop.join(' ') + ' ' + bBot.join(' '),
-        fill: cf >= cb ? 'rgba(239,68,68,0.10)' : 'rgba(22,163,74,0.10)' });
+      band('cf', 'cb', debtFill);
       // Return trips: shaded between first-look and total. Drawn only when
       // there actually were any, so an uninterrupted run shows one line.
-      if (anyRevisit) {
-        var tTop = pts.map(function (p) { return xAtN(p.n) + ',' + yAt(p.ct); });
-        var fBot = pts.slice().reverse().map(function (p) { return xAtN(p.n) + ',' + yAt(p.cf); });
-        svgEl('polygon', { points: tTop.join(' ') + ' ' + fBot.join(' '), fill: 'rgba(201,168,76,0.30)' });
-      }
+      if (anyRevisit) band('ct', 'cf', backFill);
 
       if (clockMs) {
         svgEl('line', { x1: L, x2: L + iw, y1: yAt(clockMs), y2: yAt(clockMs),
@@ -4682,13 +5435,27 @@
           opacity: 0.72 }, 'Module clock — ' + Math.round(mv.clockMin) + ' min');
       }
       function line(key, attrs) {
-        var d = 'M ' + xAtN(0) + ' ' + yAt(0) + ' ' + pts.map(function (p) { return 'L ' + xAtN(p.n) + ' ' + yAt(p[key]); }).join(' ');
-        attrs.d = d; attrs.fill = 'none'; attrs['stroke-linecap'] = 'round'; attrs['stroke-linejoin'] = 'round';
+        attrs.d = smoothD(seriesPts(key));
+        attrs.fill = 'none'; attrs['stroke-linecap'] = 'round'; attrs['stroke-linejoin'] = 'round';
         svgEl('path', attrs);
       }
+      var firstStroke = cf >= cb ? 'var(--red)' : 'var(--green)';
       line('cb', { stroke: 'rgba(17,17,17,0.42)', 'stroke-width': 2, 'stroke-dasharray': '5 4' });
-      if (anyRevisit) line('ct', { stroke: 'var(--gold)', 'stroke-width': 1.25, opacity: 0.9 });
-      line('cf', { stroke: cf >= cb ? 'var(--red)' : 'var(--green)', 'stroke-width': 2 });
+      if (anyRevisit) line('ct', { stroke: 'var(--gold)', 'stroke-width': 1.5, opacity: 0.95 });
+      line('cf', { stroke: firstStroke, 'stroke-width': 2.25 });
+
+      /* A dot where each line stops. Three traces ending in mid-air at
+         slightly different heights read as an unfinished drawing; a
+         terminal cap says the line arrived somewhere, and it gives the
+         direct label in the gutter beside it something to attach to. */
+      var lastP = pts[pts.length - 1];
+      function endDot(key, fill, r) {
+        svgEl('circle', { cx: xAtN(lastP.n), cy: yAt(lastP[key]), r: r || 3,
+          fill: fill, stroke: 'var(--white)', 'stroke-width': 1.25 });
+      }
+      endDot('cb', 'rgba(17,17,17,0.42)', 2.5);
+      if (anyRevisit) endDot('ct', 'var(--gold)', 2.5);
+      endDot('cf', firstStroke);
 
       // the moment the module's clock ran out, if it did
       // Marked on the TOTAL line, since total time is what the clock sees.
@@ -4737,21 +5504,39 @@
       });
       svgEl('text', { x: L + iw / 2, y: H - 3, 'text-anchor': 'middle', class: 'pace-ax' }, 'Question');
 
+      /* ═══ HOVER GUIDE ═══ a vertical rule at the question under the
+         pointer, with a dot where it crosses each trace. The tooltip beside
+         it already gives the three figures; this is what lets a reader
+         LOCATE them — without it, "elapsed 14m 20s vs 12m budgeted" is a
+         pair of numbers with no position on a chart whose whole subject is
+         where the two lines diverge. Declared before the hit rects so their
+         handlers can close over it, appended after them so it paints on
+         top; assignment happens before any pointer event can fire. */
+      var guide, guideLine, guideDots = [];
+
       pts.forEach(function (p) {
+        // Same sentence shape as every other tooltip in the report: what it
+        // is, the figure in the accent, then the comparison it is against.
+        var tip = '<b>Q' + p.n + '</b> ' + esc(p.r.sk || '') +
+          "<span class='dxk-tip-hint'>First look <b>" + formatDuration(p.qf) + '</b> vs ' +
+            formatDuration(p.qb) + ' budgeted' +
+          (p.back > 500 ? '<br>Came back for <b>' + formatDuration(p.back) + '</b>' +
+            (p.r.marked ? ' (flagged)' : ' (not flagged)') : '') +
+          '<br>Elapsed <b>' + formatDuration(p.cf) + '</b> vs ' + formatDuration(p.cb) + ' budgeted' +
+          '<br>Click to see this question</span>';
         var hit = svgEl('rect', { x: xAtN(p.n) - iw / (totalQ * 2), y: T,
-          width: iw / totalQ, height: ih, fill: 'transparent' });
+          width: iw / totalQ, height: ih, fill: 'transparent', 'data-tip': tip });
         hit.style.cursor = 'pointer';
-        hit.addEventListener('mousemove', function (e) {
-          tooltip.innerHTML = '<b>Question ' + p.n + '</b>' + (p.r.sk || '') +
-            '<br>First look: ' + formatDuration(p.qf) + ' vs ' + formatDuration(p.qb) + ' budgeted' +
-            (p.back > 500 ? '<br>Came back for: ' + formatDuration(p.back) + (p.r.marked ? ' (flagged)' : ' (not flagged)') : '') +
-            '<br>Elapsed: ' + formatDuration(p.cf) + ' vs ' + formatDuration(p.cb) + ' budgeted' +
-            '<span class="bridge-tooltip-hint">Click to see this question</span>';
-          tooltip.style.left = (e.clientX + 14) + 'px';
-          tooltip.style.top = (e.clientY + 14) + 'px';
-          tooltip.style.display = 'block';
+        hit.addEventListener('pointerenter', function () {
+          if (!guide) return;
+          guideLine.setAttribute('x1', xAtN(p.n));
+          guideLine.setAttribute('x2', xAtN(p.n));
+          guideDots.forEach(function (g) {
+            g.el.setAttribute('cx', xAtN(p.n));
+            g.el.setAttribute('cy', yAt(p[g.key]));
+          });
+          guide.classList.add('on');
         });
-        hit.addEventListener('mouseleave', hideTimingTooltip);
         // openQuestionModal takes (rows, index, label) — passing a single
         // row object as the list meant modalIndex resolved to NaN and the
         // modal opened whatever the previous caller had left behind, from
@@ -4759,6 +5544,22 @@
         // this question's index in that list.
         hit.addEventListener('click', function () { hideTimingTooltip(); openQuestionModal(mv.rows, p.n - 1, mv.label); });
       });
+
+      // Built last so it paints above the traces, and hidden again whenever
+      // the pointer leaves the plot entirely — a guide left standing over a
+      // chart nobody is pointing at reads as a marked value.
+      guide = svgEl('g', { class: 'pace-guide' });
+      var gPrev = svgTarget;
+      svgTarget = guide;
+      guideLine = svgEl('line', { x1: L, x2: L, y1: T, y2: T + ih });
+      guideDots = [{ key: 'cb', fill: 'rgba(17,17,17,0.55)' }]
+        .concat(anyRevisit ? [{ key: 'ct', fill: 'var(--gold)' }] : [])
+        .concat([{ key: 'cf', fill: firstStroke }]);
+      guideDots.forEach(function (g) {
+        g.el = svgEl('circle', { cx: L, cy: T, r: 3.5, fill: g.fill });
+      });
+      svgTarget = gPrev;
+      paceSvg.addEventListener('pointerleave', function () { guide.classList.remove('on'); });
 
       var debt = cf - cb;
       /* Two entries, not six. The four LINE entries this used to carry are
@@ -4801,9 +5602,6 @@
       hideTimingTooltip();
       renderPaceTrace(mv);
       labelEl.textContent = mv.label;
-      counterEl.textContent = (moduleIdx + 1) + ' of ' + moduleViews.length;
-      prevBtn.disabled = moduleIdx === 0;
-      nextBtn.disabled = moduleIdx === moduleViews.length - 1;
     }
 
     /* dir: +1 paging forward, -1 back, 0 for the initial render.
@@ -4844,8 +5642,21 @@
          { opacity: 1, transform: 'translateX(0)' }],
         { duration: SWAP_IN_MS, easing: 'cubic-bezier(0.12,1,0.15,1)' });
     }
-    prevBtn.addEventListener('click', function () { if (moduleIdx > 0) { moduleIdx--; renderModule(-1); } });
-    nextBtn.addEventListener('click', function () { if (moduleIdx < moduleViews.length - 1) { moduleIdx++; renderModule(1); } });
+    /* One pill per module. The slide direction still carries which way the
+       reader moved through the test — picking Math 2 from R&W 1 slides in
+       from the right, going back slides from the left — which a carousel
+       got for free and a segmented control has to be told. */
+    if (moduleViews.length > 1) {
+      document.getElementById('timing-module-pills').appendChild(
+        dxkToggle(moduleViews.map(function (mv, i) { return { key: String(i), label: mv.short || mv.label }; }),
+          function (key) {
+            var next = Number(key);
+            if (next === moduleIdx) return;
+            var dir = next > moduleIdx ? 1 : -1;
+            moduleIdx = next;
+            renderModule(dir);
+          }, 'Choose module'));
+    }
     renderModule(0);
 
     document.getElementById('timing-hed').style.display = '';
@@ -4915,13 +5726,15 @@
      that honestly for content, and there is no defensible conversion for
      the other two. */
   (function renderDiagnosis() {
-    var content = 0, method = 0, clock = 0;
-    /* The same three tests, but keeping the rows as well as the tally, so
-       the bar can be opened to show WHICH questions are in each bucket
-       rather than only how many. A row is stored once per bucket it lands
-       in; a question can legitimately be in two (missed after a long
-       think, in a stretch that was already past the clock), and the bar's
-       own counts have always double-counted that the same way. */
+    /* Three tests, keeping the rows themselves rather than only a tally,
+       so the bar can be opened to show WHICH questions are in each bucket
+       and can be narrowed to one section. A row is stored once per bucket
+       it lands in; a question can legitimately be in two (missed after a
+       long think, in a stretch that was already past the clock), which is
+       counted once in each and is the honest reading — it is evidence for
+       both. What it is NOT counted as is twice in the same bucket, which
+       is what the old running tallies did to a skipped question and what
+       made the bar and its own question list disagree. */
     var buckets = { content: [], method: [], clock: [] };
     function bucket(k, sec, r, why) {
       if (buckets[k].some(function (x) { return x.r === r; })) return;
@@ -4933,15 +5746,14 @@
       var correctTimes = sec.rows.filter(function (r) { return r.ok && r.q.type === 'mc' && pacingTimeMs(r) > 0; }).map(pacingTimeMs);
       var typical = median(correctTimes);
       sec.rows.forEach(function (r) {
-        if (r.skipped) { clock++; bucket('clock', sec, r, 'never reached'); return; }
+        if (r.skipped) { bucket('clock', sec, r, 'never reached'); return; }
         if (!r.ok && typical && pacingTimeMs(r) >= typical * STUCK_REL) {
-          content++; bucket('content', sec, r, 'worked at it, still missed');
+          bucket('content', sec, r, 'worked at it, still missed');
         }
       });
+      // The rollup collects these itself (see correctOverBudgetRows in
+      // time-budgets.js) so the list and the count cannot drift apart.
       if (roll) {
-        method += roll.correctOverBudget;
-        // The rollup collects these itself (see correctOverBudgetRows in
-        // time-budgets.js) so the list and the count cannot drift apart.
         (roll.correctOverBudgetRows || []).forEach(function (r) {
           bucket('method', sec, r, 'right, but well over budget');
         });
@@ -4949,103 +5761,167 @@
       // Questions that came after the module's clock was already spent —
       // answered, but not really attempted.
       if (roll && sec.timeAllottedMin > 0) {
-        var budget = sec.timeAllottedMin * 60000, run = 0, past = 0;
+        var budget = sec.timeAllottedMin * 60000, run = 0;
         sec.rows.forEach(function (r) {
           run += (r.timeMs || 0);
-          if (run > budget) { past++; bucket('clock', sec, r, 'clock already spent'); }
+          if (run > budget) bucket('clock', sec, r, 'clock already spent');
         });
-        clock += past;
       }
     });
-    if (!(content + method + clock)) return;
+    /* ═══ ONE SOURCE FOR BOTH NUMBERS ═══
+       The bar and the list below it are both drawn from buckets[] now,
+       not from the content/method/clock tallies above. Those tallies
+       double-count in one place by design — a skipped question increments
+       `clock` once as "never reached" and again in the past-the-clock
+       sweep — while bucket() refuses to store the same row twice. The bar
+       could therefore read 9 above a list of 7, with neither number wrong
+       on its own terms and nothing to tell a reader which to believe. */
+    // Whole-test counts, published for the plan. Same buckets[] the bar and
+    // the question lists are drawn from -- not the tallies, which
+    // double-count by design (see the note directly above).
+    planInputs.causes = { content: buckets.content.length, method: buckets.method.length, clock: buckets.clock.length };
+    var CAUSES = [
+      { key: 'content', barLabel: 'didn’t know it',  name: 'Content', section: 1,
+        color: 'var(--red)', short: 'questions worked at and still missed' },
+      { key: 'method',  barLabel: 'took too long',        name: 'Method',  section: 2,
+        color: 'var(--tan)', short: 'right answers that cost too much time' },
+      { key: 'clock',   barLabel: 'ran out of clock',     name: 'Pacing',  section: 3,
+        color: '#4E6070',    short: 'questions the clock never really allowed' }
+    ];
+    if (!CAUSES.some(function (c) { return buckets[c.key].length; })) return;
 
-    var items = [
-      { key: 'content', n: content, name: 'Content', barLabel: 'didn\u2019t know it',
-        line: 'the questions that got real, deliberate time and still came back wrong' },
-      { key: 'method',  n: method,  name: 'Method',  barLabel: 'took too long',
-        line: 'right answers bought at a price the rest of the section could not afford' },
-      { key: 'clock',   n: clock,   name: 'The clock', barLabel: 'ran out of clock',
-        line: 'questions reached only after the time was effectively gone, or not at all' }
-    ].sort(function (a, b) { return b.n - a.n; });
-    var max = items[0].n || 1, total = content + method + clock;
-    var lead = items[0], second = items[1];
+    var SEC_SHORT = { 'reading-writing': 'R&W', 'math': 'Math' };
+    function scopeName(k) {
+      if (k === '*') return '';
+      var sec = sections.filter(function (s) { return s.key === k; })[0];
+      return SEC_SHORT[k] || (sec ? sec.label : k);
+    }
+    // One bucket, narrowed to a single section when the toggle is off
+    // "whole test".
+    function rowsFor(key, scope) {
+      var list = buckets[key] || [];
+      return scope === '*' ? list : list.filter(function (e) { return e.sec.key === scope; });
+    }
 
-    // Only call one of them the lead when it is genuinely ahead; a near-tie
-    // is a real finding too, and claiming a winner would misrepresent it.
-    var decisive = lead.n >= second.n * 1.5 && lead.n >= 3;
-    /* One line, not a paragraph. This used to recite every count in prose
-       ("Of the 61 questions this diagnostic can attribute to something
-       fixable, 31 are...") directly above a bar and a label row that show
-       exactly those same counts — three renderings of one fact, and the
-       prose one was the longest and the slowest to read. The numbers now
-       live in the bar and its labels alone; the sentence does the one job
-       they cannot, which is to say which of the three is the story and
-       where to go next. */
-    var SECTION_FOR = { content: 1, method: 2, clock: 3 };
-    function leadName(i) { return esc(i.name === 'The clock' ? 'Pacing' : i.name); }
-    /* Three cases, not two. The "no single cause dominates" fallback used to
-       catch everything that wasn't decisive — including a strong attempt
-       where only ONE of the three has any questions in it at all, because
-       `decisive` also requires lead.n >= 3 and a 1450 scorer can have the
-       whole of their fixable loss be two content questions. Telling that
-       reader "the fix is spread across all three sections" is simply false:
-       two of the three are zero. So a single contributing cause gets said
-       plainly, and the genuinely-mixed fallback no longer claims "all
-       three" (which was also wrong whenever exactly two contributed). */
-    var nonZero = items.filter(function (i) { return i.n > 0; });
-    // Short forms of each cause's description — the long `line` versions
-    // ran the verdict to two lines above a bar that says the same thing.
-    var SHORT = {
-      content: 'questions worked at and still missed',
-      method: 'right answers that cost too much time',
-      clock: 'questions the clock never really allowed'
-    };
-    var verdict = nonZero.length === 1
-      ? '<span class="dx-lead">' + leadName(lead) + ' is the only thing costing points</span> &mdash; ' +
-        SHORT[lead.key] + '. See section ' + SECTION_FOR[lead.key] + '.'
-      : decisive
-      ? '<span class="dx-lead">' + leadName(lead) + ' is the main story</span> &mdash; ' +
-        SHORT[lead.key] + '. Start with section ' + SECTION_FOR[lead.key] + '.'
-      : '<strong>No single cause dominates.</strong> The fix is spread across all three sections below.';
-
-    // Fixed order in the bar (content, method, clock) regardless of size,
-    // so the same colour always means the same thing from one report to
-    // the next; the verdict sentence above carries the ranking.
-    var fixed = ['content', 'method', 'clock'].map(function (k) {
-      return items.filter(function (i) { return i.key === k; })[0];
+    /* The toggle only offers a section that actually has something in it:
+       a pill leading to an empty chart is a dead end, and on a strong
+       attempt one whole section routinely has nothing to attribute. With
+       fewer than two contributing sections there is nothing to toggle
+       BETWEEN, so the control is dropped rather than shown as a single
+       pill that changes nothing. */
+    var liveSections = sections.filter(function (sec) {
+      return CAUSES.some(function (c) { return rowsFor(c.key, sec.key).length; });
     });
-    document.getElementById('dx-card').innerHTML =
-      '<p class="dx-verdict">' + verdict + '</p>' +
-      '<div class="dx-split">' + fixed.map(function (i) {
-        if (!i.n) return '';
-        var pct = i.n / total * 100;
-        // The count shows inside the segment when there's room for it, but
-        // the label row below is the one place it's GUARANTEED to appear —
-        // a thin sliver (a handful of questions out of 74) used to lose its
-        // own number entirely rather than duplicating it like every other
-        // segment did.
-        return '<button type="button" class="dx-part ' + i.key + '" data-dx-key="' + i.key + '"' +
-          ' aria-expanded="false" title="' + esc(i.n + ' — ' + i.barLabel + '. Click to see which questions.') + '"' +
-          ' style="width:' + pct.toFixed(1) + '%">' + (pct >= 9 ? i.n : '') + '</button>';
-      }).join('') + '</div>' +
-      '<div class="dx-labels">' + fixed.map(function (i) {
-        if (!i.n) return '<span><i class="' + i.key + '" style="background:' +
-          (i.key === 'content' ? 'var(--red)' : i.key === 'method' ? 'var(--tan)' : '#4E6070') + '"></i>' +
-          '<b>' + i.n + '</b> ' + esc(i.barLabel) + '</span>';
-        return '<button type="button" class="dx-lab-btn" data-dx-key="' + i.key + '" aria-expanded="false">' +
-          '<i class="' + i.key + '" style="background:' +
-          (i.key === 'content' ? 'var(--red)' : i.key === 'method' ? 'var(--tan)' : '#4E6070') + '"></i>' +
-          '<b>' + i.n + '</b> ' + esc(i.barLabel) + '</button>';
-      }).join('') + '</div>' +
+    var scopes = [{ key: '*', label: 'Whole test' }].concat(
+      liveSections.map(function (sec) { return { key: sec.key, label: scopeName(sec.key) }; }));
+
+    /* ═══ THE VERDICT ═══ recomputed for whichever scope is showing. It
+       used to be a whole-test sentence above a whole-test bar; now that
+       the bar narrows to one section, a fixed sentence would be actively
+       wrong half the time — "Content is the main story" standing over a
+       Math bar that is entirely clock. */
+    function verdictFor(scope) {
+      var ranked = CAUSES.map(function (c) { return { c: c, n: rowsFor(c.key, scope).length }; })
+        .sort(function (a, b) { return b.n - a.n; });
+      var live = ranked.filter(function (r) { return r.n > 0; });
+      var lead = ranked[0], second = ranked[1];
+      var where = scope === '*' ? '' : 'In ' + esc(scopeName(scope)) + ', ';
+      // Sentence-case only when this sentence starts the line; after an
+      // "In Math, " prefix the cause is mid-sentence and must not be.
+      function nm(n) { return where ? n.charAt(0).toLowerCase() + n.slice(1) : n; }
+      // Only call one of them the lead when it is genuinely ahead. A
+      // near-tie is a real finding too, and naming a winner misreports it.
+      var decisive = lead.n >= second.n * 1.5 && lead.n >= 3;
+      if (live.length === 1) {
+        return where + '<span class="dx-lead">' + esc(nm(lead.c.name)) +
+          ' is the only thing costing points</span> &mdash; ' + lead.c.short +
+          '. See section ' + lead.c.section + '.';
+      }
+      if (decisive) {
+        return where + '<span class="dx-lead">' + esc(nm(lead.c.name)) +
+          ' is the main story</span> &mdash; ' + lead.c.short +
+          '. Start with section ' + lead.c.section + '.';
+      }
+      /* The mixed case names the sections that actually contribute. The
+         old copy said "spread across all three sections below" for every
+         non-decisive attempt, which was wrong whenever exactly two of the
+         three had anything in them. */
+      var secs = live.map(function (r) { return r.c.section; }).sort();
+      return where + '<strong>' + (where ? 'no' : 'No') + ' single cause dominates</strong> &mdash; ' +
+        'the fix is spread across sections ' +
+        secs.slice(0, -1).join(', ') + ' and ' + secs[secs.length - 1] + '.';
+    }
+
+    var card = document.getElementById('dx-card');
+    /* Built once and then updated in place, rather than re-rendered per
+       scope: keeping the three segments in the DOM is what lets the bar
+       MORPH when a section is picked (see the width transition on
+       .dx-part) instead of blinking out and back. It also means the
+       tooltip and click wiring below is attached exactly once. */
+    card.innerHTML =
+      '<p class="dx-verdict" id="dx-verdict"></p>' +
+      '<div id="dx-scope"></div>' +
+      '<div class="dxk-plot" id="dx-plot">' +
+        '<p class="dxk-count" id="dx-count"></p>' +
+        '<div class="dx-split dxk-marks" id="dx-split">' +
+          CAUSES.map(function (c) {
+            return '<button type="button" class="dx-part dxk-hit ' + c.key + '"' +
+              ' data-dx-key="' + c.key + '" aria-expanded="false" style="width:0%"></button>';
+          }).join('') +
+        '</div>' +
+      '</div>' +
+      '<p class="dxk-note" id="dx-note"></p>' +
+      '<div class="dxk-legend" id="dx-legend">' +
+        CAUSES.map(function (c) {
+          return '<button type="button" class="dx-lab-btn" data-dx-key="' + c.key + '" aria-expanded="false">' +
+            '<i style="background:' + c.color + '"></i><b></b>&nbsp;' + esc(c.barLabel) + '</button>';
+        }).join('') +
+      '</div>' +
       '<div class="dx-detail" id="dx-detail" hidden></div>';
 
-    /* ═══ OPENING A SEGMENT ═══ the bar says how many; this says which.
-       Both the segment and its label below open the same panel, because on
-       a phone a 9%-wide sliver is not a credible tap target and the label
-       row is. Clicking the open one closes it, so the bar is a toggle
-       rather than a thing that can only ever expand. */
+    var scope = '*', openKey = null;
+    var splitEl = document.getElementById('dx-split');
+    var legendEl = document.getElementById('dx-legend');
     var detailEl = document.getElementById('dx-detail');
-    var openKey = null;
+
+    function draw() {
+      var counts = {}, total = 0;
+      CAUSES.forEach(function (c) {
+        counts[c.key] = rowsFor(c.key, scope).length;
+        total += counts[c.key];
+      });
+      document.getElementById('dx-verdict').innerHTML = verdictFor(scope);
+      document.getElementById('dx-count').innerHTML =
+        '<b>' + total + '</b> question' + (total === 1 ? '' : 's') + ' cost points' +
+        (scope === '*' ? '' : ' in ' + esc(scopeName(scope)));
+      CAUSES.forEach(function (c) {
+        var n = counts[c.key], pct = total ? n / total * 100 : 0;
+        var seg = splitEl.querySelector('[data-dx-key="' + c.key + '"]');
+        seg.style.width = pct.toFixed(1) + '%';
+        // The count shows inside the segment only where there is room for
+        // it — a 4% sliver is about 20px wide, enough for the colour and
+        // nothing else. The legend below is where every count is
+        // guaranteed to appear.
+        seg.textContent = pct >= 9 ? n : '';
+        seg.setAttribute('data-tip', esc(c.barLabel) +
+          ' &nbsp;<b>' + n + '</b> <span class="dim">of ' + total + '</span>');
+        seg.disabled = !n;
+        seg.setAttribute('aria-hidden', n ? 'false' : 'true');
+        var lab = legendEl.querySelector('[data-dx-key="' + c.key + '"]');
+        lab.querySelector('b').textContent = n;
+        lab.disabled = !n;
+        lab.style.opacity = n ? '' : '0.38';
+      });
+      document.getElementById('dx-note').textContent = total
+        ? 'Each needs a different intervention. Click a band to see which questions.'
+        : '';
+      // A scope change can pull the open list out from under itself — the
+      // reader had "took too long" open on the whole test and then picked
+      // R&W, which has none. Re-render it where it survives, close it
+      // where it doesn't, rather than leaving a stale list on screen.
+      setOpen(openKey !== null && counts[openKey] ? openKey : null);
+    }
+
     function rowLabel(e) {
       var q = e.r.q || {};
       var num = (e.r.number != null ? e.r.number : (e.r.n != null ? e.r.n : null));
@@ -5055,42 +5931,59 @@
       var time = secs > 0 ? (secs >= 60 ? Math.floor(secs / 60) + 'm ' + (secs % 60) + 's' : secs + 's') : '';
       return { num: num, sec: secLab, skill: skill, time: time, why: e.why };
     }
-    function renderDetail(key) {
-      var list = buckets[key] || [];
-      var item = fixed.filter(function (i) { return i.key === key; })[0] || { barLabel: '' };
-      if (!list.length) { detailEl.hidden = true; return; }
+
+    /* ═══ OPENING A SEGMENT ═══ the bar says how many; this says which.
+       Both the segment and its legend entry open the same panel, because
+       on a phone a 9%-wide sliver is not a credible tap target and the
+       legend row is. Clicking the open one closes it, so the bar is a
+       toggle rather than a thing that can only ever expand. */
+    function setOpen(key) {
+      openKey = key;
+      Array.prototype.forEach.call(card.querySelectorAll('[data-dx-key]'), function (o) {
+        var on = key !== null && o.getAttribute('data-dx-key') === key;
+        o.setAttribute('aria-expanded', on ? 'true' : 'false');
+        o.classList.toggle('dxk-open', on);
+      });
+      if (key === null) { detailEl.hidden = true; detailEl.innerHTML = ''; return; }
+      var list = rowsFor(key, scope);
+      var cause = CAUSES.filter(function (c) { return c.key === key; })[0];
       detailEl.innerHTML =
         '<div class="dx-detail-hed">' + esc(list.length + ' ' +
-          (list.length === 1 ? 'question' : 'questions') + ' \u2014 ' + item.barLabel) + '</div>' +
+          (list.length === 1 ? 'question' : 'questions') + ' — ' + cause.barLabel) + '</div>' +
         '<ol class="dx-detail-list">' + list.map(function (e) {
           var d = rowLabel(e);
-          return '<li><span class="dxd-q">' + (d.num != null ? 'Q' + esc(d.num) : '\u2014') + '</span>' +
+          return '<li><span class="dxd-q">' + (d.num != null ? 'Q' + esc(d.num) : '—') + '</span>' +
             '<span class="dxd-skill">' + esc(d.skill || d.sec) + '</span>' +
             (d.sec && d.skill ? '<span class="dxd-sec">' + esc(d.sec) + '</span>' : '') +
             (d.time ? '<span class="dxd-time">' + esc(d.time) + '</span>' : '') + '</li>';
         }).join('') + '</ol>';
       detailEl.hidden = false;
     }
-    Array.prototype.forEach.call(
-      document.getElementById('dx-card').querySelectorAll('[data-dx-key]'),
-      function (el) {
-        el.addEventListener('click', function () {
-          var key = el.getAttribute('data-dx-key');
-          openKey = (openKey === key) ? null : key;
-          Array.prototype.forEach.call(
-            document.getElementById('dx-card').querySelectorAll('[data-dx-key]'),
-            function (o) {
-              var on = openKey !== null && o.getAttribute('data-dx-key') === openKey;
-              o.setAttribute('aria-expanded', on ? 'true' : 'false');
-              o.classList.toggle('dx-open', on);
-            });
-          if (openKey === null) detailEl.hidden = true; else renderDetail(openKey);
-        });
-      });
+
+    card.addEventListener('click', function (ev) {
+      var el = ev.target.closest ? ev.target.closest('[data-dx-key]') : null;
+      if (!el || !card.contains(el)) return;
+      var key = el.getAttribute('data-dx-key');
+      setOpen(openKey === key ? null : key);
+    });
+
+    if (scopes.length > 2) {
+      document.getElementById('dx-scope').appendChild(
+        dxkToggle(scopes, function (key) {
+          // Swap the 2s first-reveal easing for the click-response one the
+          // first time the reader actually presses a pill.
+          splitEl.classList.add('dx-morph');
+          scope = key;
+          draw();
+        }, 'Choose section'));
+    }
+    dxkWire(document.getElementById('dx-plot'));
+    draw();
+
     document.getElementById('dx-hed').style.display = '';
-    document.getElementById('dx-card').style.display = '';
-    document.getElementById('dx-card').className = 'dx-card';
-    animateOnReveal(document.getElementById('dx-card'), armChartBars);
+    card.style.display = '';
+    card.className = 'dx-card';
+    animateOnReveal(card, armChartBars);
   })();
 
   /* ═══ TIME BUDGET CARD ═══ the verdict the Timing chart above only
@@ -5197,7 +6090,8 @@
         return '<div class="budget-row">' +
           '<span class="budget-row-name">' + esc(x.skill) +
             ' <span class="budget-row-dom">' + esc(x.domain || '') + '</span></span>' +
-          '<span class="budget-gap" title="' + fmtSec(x.actualMs / x.n) + ' each, target ' + fmtSec(x.budgetMs / x.n) + '">' +
+          '<span class="budget-gap dxk-hit" data-tip="' + esc(x.skill) + ' &nbsp;<b>' + fmtSec(x.actualMs / x.n) +
+            "</b> each <span class='dim'>&middot; target " + fmtSec(x.budgetMs / x.n) + ' &middot; +' + fmtMin(x.debtMs) + ' lost</span>">' +
             '<span class="budget-gap-rule" style="left:' + tPct.toFixed(1) + '%; width:' + Math.max(0, aPct - tPct).toFixed(1) + '%"></span>' +
             '<span class="budget-gap-target" style="left:' + tPct.toFixed(1) + '%"></span>' +
             '<span class="budget-gap-actual" style="left:calc(' + aPct.toFixed(1) + '% - 4px)"></span>' +
@@ -5220,10 +6114,13 @@
           '</span>' +
           '<span class="budget-verdict ' + verdictCls + '">' + verdictTxt + '</span>' +
         '</div>' +
-        '<div class="budget-meter">' +
-          '<span class="budget-meter-budget" style="width:' + (r.budgetMs / scaleMax * 100).toFixed(1) + '%"></span>' +
-          '<span class="budget-meter-actual' + (ratio > 1 ? ' over' : '') + '" style="width:' + (r.actualMs / scaleMax * 100).toFixed(1) + '%"></span>' +
-          (clockPct !== null ? '<span class="budget-meter-clock" style="left:' + clockPct.toFixed(1) + '%"></span>' : '') +
+        '<div class="budget-meter dxk-marks">' +
+          '<span class="budget-meter-budget dxk-hit" style="width:' + (r.budgetMs / scaleMax * 100).toFixed(1) + '%"' +
+            ' data-tip="Target &nbsp;<b>' + fmtMin(r.budgetMs) + "</b> <span class='dim'>for the questions attempted</span>\"></span>" +
+          '<span class="budget-meter-actual dxk-hit' + (ratio > 1 ? ' over' : '') + '" style="width:' + (r.actualMs / scaleMax * 100).toFixed(1) + '%"' +
+            ' data-tip="Actual &nbsp;<b>' + fmtMin(r.actualMs) + "</b> <span class='dim'>" + esc(verdictTxt) + '</span>"></span>' +
+          (clockPct !== null ? '<span class="budget-meter-clock dxk-hit" style="left:' + clockPct.toFixed(1) + '%"' +
+            ' data-tip="Section clock &nbsp;<b>' + Math.round(sec.timeAllottedMin) + "m</b> <span class='dim'>both modules</span>\"></span>" : '') +
         '</div>' +
         /* One line where there were two. The swatch figures and the count
            line were separate rows saying overlapping things — "Budget 44m,
@@ -5232,7 +6129,7 @@
            banked-surplus figure dropped: it is the least actionable of the
            three counts and it is the one the pacing section below explains
            properly anyway. */
-        '<div class="budget-legend">' +
+        '<div class="dxk-legend budget-legend">' +
           '<span><i style="background:rgba(17,17,17,0.22)"></i>Budget ' + fmtMin(r.budgetMs) + '</span>' +
           '<span><i style="background:' + (ratio > 1 ? 'var(--red)' : 'var(--gold)') + '"></i>Actual ' + fmtMin(r.actualMs) + '</span>' +
           (clockMs ? '<span><i style="background:var(--ink);opacity:0.55"></i>Clock ' + Math.round(sec.timeAllottedMin) + 'm</span>' : '') +
@@ -5286,12 +6183,146 @@
         ' scaled down proportionally to stay inside the clock. The comparison between skills is unaffected.');
     }
     card.innerHTML = html + (notes.length ? '<p class="budget-note">' + notes.join(' ') + '</p>' : '');
+    // One tooltip for the whole card: the meters and every skill dot plot
+    // inside it resolve through the same container listener.
+    dxkWire(card);
 
     document.getElementById('budget-sub-first').textContent = first;
     document.getElementById('budget-hed').style.display = '';
     document.getElementById('budget-sub').style.display = '';
     card.style.display = '';
     animateOnReveal(card, armChartBars);
+  })();
+
+  /* ═══ THE PLAN ═══ ────────────────────────────────────────────────────
+     Everything above diagnoses; this is the only part that prescribes, and
+     it is the part that decides whether any of the rest changes a score.
+
+     Two rules govern it.
+
+     1. IT INVENTS NOTHING. The hours split follows the same content /
+        method / clock question counts the diagnosis card ranked, and it
+        names only the areas section 1 was willing to stand behind. If those
+        sections could not produce a finding, this produces a plan built on
+        the causes alone rather than making one up.
+
+     2. IT BUDGETS A REAL WEEK. 4-5 hours, because that is what a student
+        with school and a sport actually has, and a plan that assumes more
+        is a plan that gets abandoned in week two. The point of splitting a
+        fixed budget rather than listing everything worth doing is that the
+        arithmetic forces the trade-off to be made HERE, on the evidence,
+        instead of silently at the kitchen table.
+
+     The three causes want genuinely different work, which is why the hours
+     cannot simply follow the biggest bar:
+       CONTENT -> re-teaching, then drilling. Slow, and the only one that
+         needs a tutor in the room.
+       METHOD  -> timed sets on questions already understood. Cheap per
+         hour and the fastest-moving of the three.
+       CLOCK   -> whole timed modules under real conditions. Cannot be
+         drilled in ten-minute pieces; needs one long sitting a week. */
+  (function renderStudyPlan() {
+    var causes = planInputs.causes;
+    if (!causes) return;
+    var total = causes.content + causes.method + causes.clock;
+    if (!total) return;
+
+    var WEEKLY_LO = 4, WEEKLY_HI = 5;
+    var areas = (planInputs.areas || []);
+    var secName = { 'reading-writing': 'Reading & Writing', 'math': 'Math' };
+
+    /* Hours follow the question counts, with two corrections that the raw
+       proportions get wrong.
+
+       A floor, because a cause with real questions behind it and zero hours
+       against it reads as "ignore this", which is not what a small share
+       means. And a cap on clock work: past about one long timed sitting a
+       week it stops teaching anything new and starts just consuming the
+       week -- the fix for pacing is a strategy applied under time pressure,
+       not more time pressure. */
+    var raw = { content: causes.content / total, method: causes.method / total, clock: causes.clock / total };
+    var hours = {};
+    var mid = (WEEKLY_LO + WEEKLY_HI) / 2;
+    ['content', 'method', 'clock'].forEach(function (k) {
+      hours[k] = causes[k] > 0 ? Math.max(0.5, Math.round(raw[k] * mid * 2) / 2) : 0;
+    });
+    if (hours.clock > 1.5) hours.clock = 1.5;
+
+    // Re-normalise back into the 4-5h envelope after the floor and cap have
+    // pushed it out of shape, then round to the nearest half hour again --
+    // a plan that says "1.37 hours" is a plan nobody follows.
+    var sum = hours.content + hours.method + hours.clock;
+    if (sum > 0 && (sum > WEEKLY_HI || sum < WEEKLY_LO)) {
+      var scale = mid / sum;
+      ['content', 'method', 'clock'].forEach(function (k) {
+        if (hours[k] > 0) hours[k] = Math.max(0.5, Math.round(hours[k] * scale * 2) / 2);
+      });
+      if (hours.clock > 1.5) hours.clock = 1.5;
+    }
+    var weekly = hours.content + hours.method + hours.clock;
+
+    function hrs(h) { return h === Math.floor(h) ? String(h) : (h < 1 ? '' : String(Math.floor(h))) + '½'; }
+    function unitFor(h) { return h === 1 ? 'hr / week' : 'hrs / week'; }
+
+    // The areas this plan is allowed to name, most severe first, capped at
+    // three: a week with four content topics in it is a week where none of
+    // them gets enough time to move.
+    var contentAreas = areas.slice(0, 3);
+    var areaTxt = contentAreas.length
+      ? contentAreas.map(function (a) { return '<b>' + esc(a.name) + '</b>'; }).join(', ')
+      : null;
+
+    var rows = [];
+    if (hours.content > 0) {
+      rows.push({
+        h: hours.content, unit: unitFor(hours.content), color: 'var(--red)',
+        what: '<b>Content.</b> ' + (areaTxt
+          ? 'Re-teach then drill ' + areaTxt + ' &mdash; in that order, because drilling a topic that was never taught properly just rehearses the wrong method. ' +
+            '<em>' + causes.content + ' question' + (causes.content === 1 ? '' : 's') + ' on this form got real effort and still came back wrong.</em>'
+          : 'Work the questions this form got wrong after real effort. ' +
+            '<em>No single area separated from ' + first + '’s own average, so this is breadth &mdash; spread it across the misses rather than picking one topic.</em>')
+      });
+    }
+    if (hours.method > 0) {
+      rows.push({
+        h: hours.method, unit: unitFor(hours.method), color: 'var(--tan)',
+        what: '<b>Method.</b> Timed sets on questions ' + first + ' can already do, with a per-question clock running. The goal is not accuracy &mdash; it is the same accuracy, faster. ' +
+          '<em>' + causes.method + ' right answer' + (causes.method === 1 ? '' : 's') + ' here cost more time than they should have, and the questions later in the section paid for it.</em>'
+      });
+    }
+    if (hours.clock > 0) {
+      rows.push({
+        h: hours.clock, unit: unitFor(hours.clock), color: '#4E6070',
+        what: '<b>Pacing.</b> One full timed module a week, in one sitting, under real conditions &mdash; phone away, clock visible, no restarts. Review it the next day, not the same night. ' +
+          '<em>' + causes.clock + ' question' + (causes.clock === 1 ? '' : 's') + ' on this form were never really available to be answered.</em>'
+      });
+    }
+    if (!rows.length) return;
+
+    var meter = rows.map(function (r) {
+      return '<i style="width:' + (r.h / weekly * 100).toFixed(1) + '%;background:' + r.color + '"></i>';
+    }).join('');
+
+    var lead = ['content', 'method', 'clock'].reduce(function (a, k) { return causes[k] > causes[a] ? k : a; }, 'content');
+    var leadWord = { content: 'content', method: 'method', clock: 'pacing' }[lead];
+
+    var html = '<div class="plan-card">' +
+      '<p class="plan-lede">About <b>' + hrs(weekly) + ' hours a week</b>, split the way this diagnostic actually came apart &mdash; weighted toward <b>' + leadWord + '</b>, which cost the most questions here. ' +
+        'The split is the point: an hour spent on the wrong one of these three does close to nothing, which is why it is written down rather than left to judgement in the moment.</p>' +
+      '<div class="plan-meter">' + meter + '</div>' +
+      '<div class="plan-rows">' +
+        rows.map(function (r) {
+          return '<div class="plan-row"><div class="plan-hours">' + hrs(r.h) + '<span>' + r.unit + '</span></div>' +
+            '<div class="plan-what">' + r.what + '</div></div>';
+        }).join('') +
+      '</div>' +
+      '<p class="plan-foot">This is a starting allocation off one diagnostic, not a syllabus. It should be re-cut after the next full-length test &mdash; the shares above are the shape of <em>this</em> attempt, and the fastest-moving of the three is usually method, so the split that is right in week one is rarely still right in week five.</p>' +
+    '</div>';
+
+    var host = document.getElementById('plan-section');
+    host.innerHTML = html;
+    document.getElementById('plan-hed').style.display = '';
+    host.style.display = '';
   })();
 
   document.getElementById('page1').style.display = 'block';

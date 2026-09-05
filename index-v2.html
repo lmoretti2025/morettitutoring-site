@@ -21,6 +21,11 @@
 {"@context":"https://schema.org","@type":"EducationalOrganization","name":"Moretti Test Prep & Tutoring","url":"https://morettitutoring.com/","telephone":"+1-201-275-2791","address":{"@type":"PostalAddress","addressLocality":"Cranford","addressRegion":"NJ","addressCountry":"US"},"founder":{"@type":"Person","name":"Luca Moretti","alumniOf":"Northwestern University"},"areaServed":["Cranford NJ","Westfield NJ","Mountainside NJ","Scotch Plains NJ","Summit NJ","Short Hills NJ","New Providence NJ","Berkeley Heights NJ","Online — United States"]}
 </script>
 <style>
+@font-face{
+  font-family:'Duera Expanded Black';
+  src:url('duera-expanded-black.ttf') format('truetype');
+  font-weight:900;font-style:normal;font-display:swap;
+}
 :root{
   --void:#0C0A09; --void-2:#171312;
   --paper:#FFFFFF; --surface:#FFFFFF; --sunk:#F4F4F3;
@@ -78,18 +83,18 @@ nav.is-red .navlinks a:hover{color:#fff}
 nav.is-red .navlinks a::after{background:#fff}
 nav.is-red .navcta{border-color:rgba(255,255,255,.6)}
 nav.is-red .navcta:hover{background:#fff;border-color:#fff;color:var(--red)}
-nav .shell{max-width:none;display:flex;align-items:center;gap:2.6rem;padding:.85rem clamp(1.25rem,3vw,2.8rem)}
+nav .shell{max-width:none;display:flex;align-items:center;gap:1.9rem;padding:.85rem clamp(1.25rem,3vw,2.8rem)}
 .nav-logo img{height:50px;width:auto;transition:opacity .2s}
 .nav-logo:hover img{opacity:.82}
 @media(max-width:560px){.nav-logo img{height:38px}}
-.navlinks{display:flex;gap:1.9rem;align-items:center;font-size:.84rem;color:rgba(237,231,229,.72)}
+.navlinks{display:flex;gap:1.9rem;align-items:center;margin-left:.7rem;font-size:.84rem;color:rgba(237,231,229,.72)}
 .navlogin{margin-left:auto;font-size:.84rem;color:rgba(237,231,229,.72);position:relative;padding-bottom:2px;transition:color .2s}
 .navlogin:hover{color:#fff}
 .navlogin::after{content:'';position:absolute;left:0;right:0;bottom:-2px;height:1px;background:var(--red-lift);transform:scaleX(0);transform-origin:right;transition:transform .42s var(--ease)}
 .navlogin:hover::after{transform:scaleX(1);transform-origin:left}
 nav.is-red .navlogin::after{background:#fff}
 .navlinks a{transition:color .2s}.navlinks a:hover{color:#fff}
-.navcta{margin-left:1.5rem;background:transparent;color:#fff;border:1px solid rgba(255,255,255,.34);padding:.6rem 1.2rem;font-size:.68rem;font-weight:600;letter-spacing:.11em;text-transform:uppercase;border-radius:2px;transition:background .28s var(--ease),border-color .28s var(--ease),color .28s var(--ease)}
+.navcta{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.34);padding:.6rem 1.2rem;font-size:.68rem;font-weight:600;letter-spacing:.11em;text-transform:uppercase;border-radius:2px;transition:background .28s var(--ease),border-color .28s var(--ease),color .28s var(--ease)}
 .navcta:hover{background:var(--red);border-color:var(--red);color:#fff}
 /* sliding underline on the nav links (fluid-tab technique, no JS) */
 .navlinks a{position:relative;padding-bottom:2px}
@@ -98,7 +103,11 @@ nav.is-red .navlogin::after{background:#fff}
 @media(max-width:820px){.navlinks,.navlogin{display:none}}
 
 /* ── HERO (dark, brand mark) ── */
-.hero{background:var(--void);color:#fff;position:relative;overflow:hidden;min-height:calc(100svh - 104px);display:flex;flex-direction:column}
+.landing{position:relative;background:#000}
+.hero{background:transparent;color:#fff;position:relative;overflow-x:clip;overflow-y:visible;min-height:calc(68svh - 104px);display:flex;flex-direction:column;
+  /* the generic section padding (99px top and bottom) is what used to open a
+     black band between the hero and the video; the hero keeps only a little. */
+  padding-bottom:calc(clamp(4rem,16.5vh,12rem) + var(--voverlap));border-bottom:none}
 .hero .shell{position:relative;z-index:3;max-width:none;margin:0;width:100%;padding-left:clamp(1.25rem,3vw,2.8rem);padding-right:clamp(1.25rem,3vw,2.8rem);padding-bottom:clamp(1.6rem,2.6vw,2.2rem);
   flex:1;display:flex;flex-direction:column;justify-content:flex-start;padding-top:calc(clamp(2rem,5vh,4rem) + 82px);padding-bottom:clamp(1.2rem,3vh,2.6rem)}
 .hcopy{max-width:none}
@@ -106,64 +115,112 @@ h1{font-family:var(--display);font-weight:700;font-size:clamp(2.7rem,9.5vw,8.4re
 h1 em{font-style:normal;color:var(--red-lift)}
 .hero .lbl{color:rgba(255,255,255,.5)}
 .hero .lbl::before{color:var(--red-lift)}
-.hero .sub{font-size:clamp(.98rem,1.25vw,1.09rem);margin-top:1.5rem;max-width:52ch;color:rgba(237,231,229,.72)}
 .ctas{display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1.8rem}
 .hero .btn-a{background:var(--red);color:#fff}.hero .btn-a:hover{background:var(--red-lift);transform:translateY(-2px)}
 .hero .btn-b{border-color:rgba(255,255,255,.4);color:#fff}.hero .btn-b:hover{border-color:#fff;transform:translateY(-2px)}
 .reassure{margin-top:1rem;font-size:.77rem;color:rgba(237,231,229,.5)}
 
-/* three disciplines, sitting under the headline */
-.tiles{margin-top:clamp(1.6rem,3vw,2.6rem)}
-.disciplines{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(.5rem,1vw,.9rem);
-  max-width:min(940px,78%)}
-.disciplines a{position:relative;display:block;padding:clamp(.9rem,1.6vw,1.15rem) clamp(.9rem,1.5vw,1.15rem);
-  border-radius:4px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.09);
-  transition:transform .5s var(--spring),background .35s var(--ease),border-color .35s var(--ease),box-shadow .5s var(--ease)}
-.disciplines a:hover{transform:translateY(-8px) scale(1.025);background:rgba(255,255,255,.075);
-  border-color:rgba(210,66,52,.55);box-shadow:0 16px 34px rgba(0,0,0,.45)}
-.disciplines b{display:block;font-size:clamp(.86rem,1.05vw,.98rem);font-weight:600;color:#fff;letter-spacing:-.005em}
-.disciplines i{display:block;font-style:normal;font-size:clamp(.7rem,.85vw,.78rem);line-height:1.45;
-  color:rgba(237,231,229,.55);margin-top:.3rem;transition:color .35s var(--ease)}
-.disciplines a:hover i{color:rgba(237,231,229,.8)}
-@media(max-width:820px){.disciplines{grid-template-columns:1fr;max-width:none}}
+/* Three flush panels closing the landing: no gutters, hairline rules between
+   them, and the one under the cursor takes room from the other two. The height
+   is fixed and the content bottom-anchored, so revealing the detail grows the
+   panel upward instead of moving the video. */
+.trio{display:flex;width:var(--trioW,100%);max-width:100%;position:relative;z-index:3;
+  margin-top:clamp(1rem,2.6vh,2rem);height:clamp(145px,18vh,172px)}
+.tri{position:relative;flex:1 1 0;min-width:0;display:flex;flex-direction:column;justify-content:flex-end;
+  box-shadow:inset 0 0 0 1px transparent;
+  padding:clamp(.55rem,1vw,.85rem) clamp(.85rem,1.3vw,1.15rem);overflow:hidden;border-radius:3px;
+  transition:flex-grow .8s var(--spring),background .45s var(--ease),box-shadow .45s var(--ease)}
+.tri::before{content:'';position:absolute;left:0;right:0;top:0;height:2px;background:var(--red-lift);
+  transform:scaleX(0);transform-origin:left;transition:transform .6s var(--ease)}
+/* the outline arrives with the panel rather than sitting there all the time */
+.tri:hover,.tri:focus-visible,.tri.is-open{flex-grow:1.75;background:rgba(255,255,255,.045);outline:none;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.16)}
+.tri:hover::before,.tri:focus-visible::before,.tri.is-open::before{transform:scaleX(1)}
+.tri-k{font-size:.62rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--red-lift)}
+.tri-t{font-family:var(--display);font-weight:700;font-size:clamp(1rem,1.35vw,1.28rem);letter-spacing:-.02em;
+  color:#fff;margin-top:.3rem;line-height:1.1}
+.tri-d,.tri-go{opacity:0;transform:translateY(9px);
+  transition:opacity .55s var(--ease),transform .55s var(--ease)}
+.tri-d{font-size:.82rem;line-height:1.55;color:rgba(237,231,229,.66);max-width:52ch;margin-top:.5rem;
+  height:calc(.82rem * 1.55 * 2);overflow:hidden}
+.tri-go{font-size:.7rem;font-weight:600;letter-spacing:.13em;text-transform:uppercase;color:rgba(237,231,229,.8);margin-top:.45rem;white-space:nowrap}
+.tri:hover .tri-d,.tri:focus-visible .tri-d,.tri.is-open .tri-d,
+.tri:hover .tri-go,.tri:focus-visible .tri-go,.tri.is-open .tri-go{opacity:1;transform:none}
+.tri:hover .tri-go,.tri:focus-visible .tri-go,.tri.is-open .tri-go{transition-delay:.07s}
+/* arrives on the tail of the hero sequence, one after another */
+.trio .tri{animation:triRise 1.5s var(--ease) both}
+.trio .tri:nth-child(1){animation-delay:3.5s}
+.trio .tri:nth-child(2){animation-delay:3.68s}
+.trio .tri:nth-child(3){animation-delay:3.86s}
+@keyframes triRise{from{opacity:0;transform:translateY(20px);filter:blur(8px)}to{opacity:1;transform:none;filter:none}}
+/* the video comes up with the panels, more slowly because it is a bigger object */
+.vstage{animation:vidRise 2.4s var(--ease) 3.9s both}
+@keyframes vidRise{from{opacity:0;transform:translateY(26px);filter:blur(12px)}to{opacity:1;transform:none;filter:none}}
+@media(max-width:820px){
+  .trio{flex-direction:column;height:auto}
+  .trio{width:100%}
+  .tri{padding:1.15rem clamp(1.25rem,3vw,2.8rem)}
+  .tri+.tri{border-left:none;border-top:1px solid rgba(255,255,255,.13)}
+  .tri-d,.tri-go{opacity:1;transform:none;margin-top:.5rem}
+  .tri-d{height:auto}
+}
+@media(prefers-reduced-motion:reduce){
+  .trio .tri,.vstage{animation:none;opacity:1;transform:none;filter:none}
+  .tri,.tri-d,.tri-go,.tri::before{transition:none}
+}
+
+/* crosshair — you are aiming at the mark. It is bounded by the hero, so the
+   video and its testimonial band are what visually terminate the field. */
+.xhair{position:absolute;inset:0;overflow:hidden;z-index:4;pointer-events:none;opacity:0;transition:opacity .5s var(--ease)}
+.xhair.live{opacity:1}
+.xhair i{position:absolute;background:linear-gradient(var(--xdir),transparent,rgba(210,66,52,.42) 22%,rgba(210,66,52,.42) 78%,transparent)}
+/* the pair is rotated as one unit about the cursor, so the rules cross as an X.
+   JS drives the `translate` property and leaves this `rotate` alone. */
+.xhair .xcross{position:absolute;left:0;top:0;width:0;height:0;rotate:45deg}
+.xhair .xh{left:-75vmax;width:150vmax;height:1px;top:0;--xdir:90deg}
+.xhair .xv{top:-75vmax;height:150vmax;width:1px;left:0;--xdir:180deg}
+.xhair .xdot{position:absolute;width:34px;height:34px;margin:-17px 0 0 -17px;border:1px solid rgba(210,66,52,.55);border-radius:50%}
+.xhair .xdot::after{content:'';position:absolute;inset:14px;border-radius:50%;background:rgba(210,66,52,.9)}
+@media(hover:none),(prefers-reduced-motion:reduce){.xhair{display:none}}
 
 /* the brand mark, at architectural scale */
-.mark{position:absolute;right:-11%;top:50%;transform:translateY(-50%);width:min(1120px,70vw);aspect-ratio:1;pointer-events:none;z-index:1;opacity:.78}
+.mark{position:absolute;right:-11%;top:49svh;transform:translateY(-50%);width:min(1120px,70vw);aspect-ratio:1;pointer-events:none;z-index:1;opacity:.78}
 .mark svg{width:100%;height:100%;overflow:visible}
 .mark .st3{fill:var(--red-lift)}
 .mark .st4{fill:#0C0A09;opacity:.32}
 .mark::before{content:'';position:absolute;left:47%;top:53%;width:92%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;
   background:radial-gradient(circle,rgba(210,66,52,.40) 0%,rgba(200,50,38,.20) 34%,rgba(176,39,28,.07) 56%,transparent 72%);
-  opacity:0;animation:glowIn 1.7s var(--ease) 2.6s forwards}
+  opacity:0;animation:glowIn 2.1s var(--ease) 2.3s forwards}
 /* once it has arrived, the glow breathes */
 .mark.go::after{content:'';position:absolute;left:47%;top:53%;width:92%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;
   background:radial-gradient(circle,rgba(210,66,52,.30) 0%,rgba(176,39,28,.10) 42%,transparent 70%);
-  opacity:0;animation:glowPulse 4.6s ease-in-out 4.3s infinite}
+  opacity:0;animation:glowPulse 5.4s ease-in-out 6.2s infinite}
 @keyframes glowIn{to{opacity:1}}
 @keyframes glowPulse{0%,100%{opacity:.25;transform:translate(-50%,-50%) scale(.94)}50%{opacity:.85;transform:translate(-50%,-50%) scale(1.06)}}
 @media(prefers-reduced-motion:reduce){.mark::before{animation:none;opacity:1}.mark.go::after{animation:none;opacity:.4}}
 
 #ringOuter,#ringInner{transform-box:view-box;transform-origin:947px 1057px;opacity:0}
-.mark.go #ringOuter{animation:ringIn 1.55s var(--springy) 2.6s both}
-.mark.go #ringInner{animation:ringIn 1.55s var(--springy) 2.82s both}
+.mark.go #ringOuter{animation:ringIn 1.9s var(--springy) 2s both}
+.mark.go #ringInner{animation:ringIn 1.9s var(--springy) 2.4s both}
 @keyframes ringIn{from{opacity:0;transform:scale(.68)}to{opacity:1;transform:scale(1)}}
 #arrow{transform-box:view-box;transform-origin:947px 1057px;opacity:0}
-.mark.go #arrow{animation:arrowIn 1.35s var(--spring) 3.25s both}
+.mark.go #arrow{animation:arrowIn 1.9s var(--spring) 3.4s both}
 @keyframes arrowIn{0%{opacity:0;transform:translate(620px,-620px)}35%{opacity:1}100%{opacity:1;transform:translate(0,0)}}
 #shadows{opacity:0}
-.mark.go #shadows{animation:fadeIn .8s var(--ease) 3.92s both}
+.mark.go #shadows{animation:fadeIn 1.1s var(--ease) 5.35s both}
 @keyframes fadeIn{to{opacity:1}}
 #impact{transform-box:view-box;transform-origin:947px 1057px;opacity:0;fill:none;stroke:var(--red-lift);stroke-width:14}
-.mark.go #impact{animation:impact 1.35s var(--ease) 3.86s forwards}
+.mark.go #impact{animation:impact 1.6s var(--ease) 5.25s forwards}
 @keyframes impact{0%{opacity:.85;transform:scale(.12)}100%{opacity:0;transform:scale(1.05)}}
 
 /* Sequence, on load and never gated behind an observer:
-   label wipes in, then each headline line left-to-right, then the mark, then the stats. */
+   label wipes in, the headline lines follow overlapping, and the mark strikes
+   underneath them — the mark strikes at roughly five and a quarter seconds. */
 h1 .ln{display:block}
-.hcopy .lbl,h1 .ln{animation:wipeIn 2s var(--ease) both}
-.hcopy .lbl{animation-duration:.85s;animation-delay:.15s}
+.hcopy .lbl,h1 .ln{animation:wipeIn 2.3s var(--ease) both}
+.hcopy .lbl{animation-duration:1.1s;animation-delay:.25s}
 h1 .ln:nth-child(1){animation-delay:.7s}
-h1 .ln:nth-child(2){animation-delay:1.9s}
+h1 .ln:nth-child(2){animation-delay:1.6s}
 @keyframes wipeIn{
   0%{opacity:0;clip-path:inset(0 100% 0 0);filter:blur(9px);transform:translateY(12px)}
   55%{opacity:1}
@@ -174,62 +231,62 @@ h1 .ln:nth-child(2){animation-delay:1.9s}
 @media(max-width:820px){
   .mark{right:-34%;top:60%;width:min(680px,116vw);opacity:.16}
   .hero .shell{min-height:auto}
-  .disciplines{gap:0 1.1rem}
 }
 @media(prefers-reduced-motion:reduce){
   .mark.go #ringOuter,.mark.go #ringInner,.mark.go #arrow,.mark.go #shadows,.hcopy>*{animation:none;opacity:1;transform:none;filter:none}
   .mark.go #impact{animation:none;opacity:0}
 }
 
-/* VIDEO + testimonials, side by side */
-.videosec{background:var(--void)}
+/* ── VIDEO: a smaller frame held hard against the left edge, with the
+   testimonial band running out of its right side and off the screen.
+   (This is the single treatment — the old full-bleed and single-column
+   rules that used to sit here have been folded in.) ── */
+/* The frame's size drives the overlap: the strip is centred on the frame, so
+   pulling the section up by half the frame (less half the strip) lands the
+   strip's top edge exactly on the hero's bottom edge. */
+:root{--vframeW:clamp(320px,64vw,980px);--vframeH:calc(var(--vframeW) * 9 / 16);
+  --vstrip:34px;--vstripup:clamp(1rem,7vh,5rem);
+  --vbandtop:calc((var(--vframeH) - var(--vstrip)) / 2 - var(--vstripup));
+  --voverlap:var(--vbandtop)}
+.videosec{background:transparent;border-bottom:none;padding-top:0;
+  margin-top:calc(var(--voverlap) * -1);position:relative;z-index:5}
 .videosec .wide{max-width:none;padding:0}
-.vstage{position:relative}
-.vstage .videoframe{border:none;border-radius:0;aspect-ratio:21/9}
-@media(max-width:820px){.vstage .videoframe{aspect-ratio:16/10}}
-/* the testimonial band lies across the video, a little above its centre */
-.vstage .tickerband{position:absolute;left:0;right:0;top:41%;z-index:3;margin:0}
-.vside{display:flex;flex-direction:column;justify-content:center;padding:clamp(1.4rem,3vw,2.6rem) 0}
-.vside .lbl{color:rgba(237,231,229,.5);margin-bottom:1rem}
-.vside .lbl::before{color:var(--red-lift)}
-.vside .carousel{border:none;background:transparent;border-radius:0;flex:1;display:flex;align-items:center}
-.vside .qmark{top:-.28em;left:-.06em}
-.vside .navpill{margin-top:.4rem}
-.vside .slide{padding:0}
-.vside .slide blockquote{font-size:clamp(1rem,1.5vw,1.24rem)}
-
-/* legacy single-column treatment kept for reference */
-.videosec{background:var(--void);border-bottom:none}
-.videosec .shell{padding-top:clamp(3.4rem,6.5vw,5.4rem);padding-bottom:clamp(3.4rem,6.5vw,5.4rem)}
-.videosec .shead{margin-bottom:clamp(1.6rem,3vw,2.4rem);max-width:60ch}
-.videosec .shead h2{color:#fff}
-.videosec .shead p{color:rgba(237,231,229,.66)}
-.videosec .morelink{color:rgba(237,231,229,.72)}
-.videosec .morelink:hover{color:#fff}
-/* the frame and the carousel share an edge, so the quotes read as coming out of the video */
-.videoframe{position:relative;aspect-ratio:16/9;overflow:hidden;background:#000;
-  border:1px solid rgba(255,255,255,.13);border-bottom:none;border-radius:3px 3px 0 0}
-.videosec .carousel{border-top:none;border-radius:0 0 3px 3px;margin-top:0}
-@media(max-width:920px){.videoframe{aspect-ratio:16/10}}
+.vstage{position:relative;display:flex;align-items:flex-start}
+.videoframe{position:relative;flex:0 0 var(--vframeW);aspect-ratio:16/9;overflow:hidden;
+  background:#000;border:none;border-radius:0}
 .videoframe>img{width:100%;height:100%;object-fit:cover;object-position:center 38%;filter:saturate(.82);transition:transform 1.1s var(--ease)}
 .videoframe:hover>img{transform:scale(1.03)}
 .videoframe .grad{position:absolute;inset:0;background:linear-gradient(180deg,rgba(12,10,9,.26) 0%,rgba(12,10,9,.3) 40%,rgba(12,10,9,.94) 100%)}
 .playwrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
-.playbtn{width:72px;height:72px;border-radius:50%;border:1.5px solid rgba(255,255,255,.55);display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.07);transition:background .25s var(--ease),border-color .25s,transform .25s var(--ease)}
+.playbtn{width:64px;height:64px;border-radius:50%;border:1.5px solid rgba(255,255,255,.55);display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.07);transition:background .25s var(--ease),border-color .25s,transform .25s var(--ease)}
 .videoframe:hover .playbtn{background:rgba(255,255,255,.17);border-color:#fff;transform:scale(1.07)}
-.videocap{position:absolute;left:0;right:0;bottom:0;padding:1.45rem;color:#fff;z-index:2}
-.videocap .who{font-size:.64rem;letter-spacing:.17em;text-transform:uppercase;color:rgba(255,255,255,.6);font-weight:600}
-.videocap .what{font-family:var(--display);font-size:1.02rem;font-weight:700;margin-top:.28rem;line-height:1.33;color:#fff}
+.videocap{position:absolute;left:0;right:0;bottom:0;padding:1.15rem 1.3rem;color:#fff;z-index:2}
+.videocap .who{font-size:.62rem;letter-spacing:.17em;text-transform:uppercase;color:rgba(255,255,255,.6);font-weight:600}
+.videocap .what{font-family:var(--display);font-size:.96rem;font-weight:700;margin-top:.28rem;line-height:1.34;color:#fff}
+/* the band is attached to the frame: it starts at its right edge and runs out */
+/* the column beside the frame: the strip at a measured height, the note under it */
+.vcol{flex:1 1 auto;min-width:0;position:relative;padding-top:var(--vbandtop)}
+.vstage .tickerband{margin:0}
+.vstage .tickerband>.tickerwrap{flex:1 1 auto;min-width:0}
+.vnote{margin:0;padding:clamp(2.4rem,4.6vw,4rem) clamp(1.5rem,3vw,2.8rem) clamp(1.5rem,3vw,2.6rem);
+  font-size:clamp(.95rem,1.28vw,1.18rem);line-height:1.6;color:rgba(237,231,229,.7);max-width:56ch}
+.vnote b{color:#fff;font-weight:600}
+@media(max-width:820px){
+  :root{--voverlap:0px}
+  .vstage{display:block}
+  .videoframe{flex:none;width:100%;aspect-ratio:16/10}
+  .vcol{padding-top:0}
+  .vnote{padding:clamp(1.3rem,4vw,1.9rem) clamp(1.25rem,3vw,2.8rem)}
+}
 
 /* ── GOLD TICKER (kept from original) ── */
-.tickerband{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:1.15rem 0;background:var(--sunk)}
-.tickerwrap{overflow:hidden;-webkit-mask-image:linear-gradient(to right,transparent 0%,#000 9%,#000 91%,transparent 100%);mask-image:linear-gradient(to right,transparent 0%,#000 9%,#000 91%,transparent 100%)}
+.tickerband{border:none;padding:0;height:var(--vstrip);display:flex;align-items:center;background:var(--sunk)}
+.tickerwrap{overflow:hidden;-webkit-mask-image:linear-gradient(to right,transparent 0%,#000 3%,#000 90%,transparent 100%);mask-image:linear-gradient(to right,transparent 0%,#000 3%,#000 90%,transparent 100%)}
 .tickertrack{display:flex;align-items:center;width:max-content;animation:ticker 46s linear infinite;will-change:transform}
-.tickertrack{animation-duration:46s}
-.tickerband:hover .tickertrack{animation-duration:150s}
-.tickeritem{font-size:.755rem;font-weight:600;letter-spacing:.23em;text-transform:uppercase;color:var(--gold-deep);white-space:nowrap;padding:0 1.9rem}
-.tickeritem b{color:var(--red);font-weight:700}
-.tickersep{font-size:.42rem;color:rgba(154,124,34,.45);flex-shrink:0}
+.tickeritem{font-size:.98rem;font-weight:700;letter-spacing:.01em;text-transform:none;color:var(--ink);white-space:nowrap;padding:0 2.25rem}
+.tickeritem strong{color:var(--red);font-weight:700}
+.tickeritem .tauth{margin-left:.6rem;font-size:.62rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+.tickersep{font-size:.55rem;color:var(--red);flex-shrink:0}
 @keyframes ticker{0%{transform:translate3d(0,0,0)}100%{transform:translate3d(-50%,0,0)}}
 
 /* ══ CONTACT: fewer words beside the form, tighter fields ══ */
@@ -255,14 +312,38 @@ h1 .ln:nth-child(2){animation-delay:1.9s}
 .bookcard .fsub{margin-top:.4rem}
 .bookcard .fnote{margin-top:.7rem;font-size:.73rem;color:var(--muted);text-align:center}
 
+/* ══ TESTIMONIALS: a deck of cards rather than a grid of boxes ══ */
+.tdeck{display:grid;margin-top:clamp(1.8rem,3.4vw,2.8rem);padding-bottom:52px;cursor:pointer}
+.tcard{grid-area:1 / 1;background:var(--sunk);border:1px solid var(--line);border-radius:6px;
+  padding:clamp(1.7rem,3.4vw,3rem);transform-origin:50% 100%;
+  transition:transform .8s var(--spring),opacity .8s var(--ease),filter .8s var(--ease)}
+.tcard[data-pos="0"]{z-index:5;transform:none;opacity:1;filter:none}
+.tcard[data-pos="1"]{z-index:4;transform:translateY(18px) scale(.962) rotate(-.7deg);opacity:.5;filter:blur(1.5px)}
+.tcard[data-pos="2"]{z-index:3;transform:translateY(34px) scale(.926) rotate(.9deg);opacity:.26;filter:blur(3px)}
+.tcard[data-pos="3"]{z-index:2;transform:translateY(46px) scale(.9);opacity:0;filter:blur(4px)}
+.tcard[data-pos="out"]{z-index:6;transform:translateY(-46px) scale(1.03) rotate(-1.8deg);opacity:0;filter:blur(5px)}
+.tcard blockquote{margin:0;font-family:var(--display);font-weight:400;
+  font-size:clamp(1.08rem,1.9vw,1.62rem);line-height:1.46;letter-spacing:-.014em;color:var(--ink)}
+.tcard blockquote::before{content:'\201C';display:block;font-size:2.4em;line-height:.5;color:rgba(176,39,28,.32);margin-bottom:.26em}
+.tcard figcaption{margin-top:1.5rem;display:flex;align-items:center;gap:.6rem;font-size:.76rem;
+  letter-spacing:.05em;color:var(--muted)}
+.tcard figcaption::before{content:'\25C6';color:var(--red);font-size:.7rem}
+.tgain{color:var(--red);font-weight:600}
+.tdots{display:flex;gap:.5rem;margin-top:clamp(1rem,2vw,1.5rem)}
+.tdots button{width:26px;height:3px;border:none;border-radius:2px;padding:0;cursor:pointer;
+  background:rgba(17,17,17,.16);transition:background .4s var(--ease),width .4s var(--ease)}
+.tdots button[aria-current="true"]{background:var(--red);width:44px}
+.tdots button:hover{background:rgba(17,17,17,.4)}
+@media(prefers-reduced-motion:reduce){.tcard{transition:none}}
+
 /* ══ TESTIMONIALS, standing on their own ══ */
-.tsec{background:var(--void);border-bottom:none}
+.tsec{background:var(--paper);border-bottom:none}
 .tsec .wide{max-width:none;padding:0 clamp(1.25rem,3vw,2.8rem)}
-.tsec .shead h2{color:#fff}
-.tsec .lbl{color:rgba(237,231,229,.5)}
-.tsec .lbl::before{color:var(--red-lift)}
-.tsec .morelink{color:rgba(237,231,229,.72)}
-.tsec .morelink:hover{color:#fff}
+.tsec .shead h2{color:var(--ink)}
+.tsec .lbl{color:var(--muted)}
+.tsec .lbl::before{color:var(--red)}
+.tsec .morelink{color:var(--body)}
+.tsec .morelink:hover{color:var(--ink)}
 .tgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:rgba(255,255,255,.13);
   border-top:1px solid rgba(255,255,255,.13);border-bottom:1px solid rgba(255,255,255,.13)}
 @media(max-width:860px){.tgrid{grid-template-columns:1fr}}
@@ -274,16 +355,90 @@ h1 .ln:nth-child(2){animation-delay:1.9s}
 .tq figcaption::before{content:'\25C6';color:var(--red-lift);font-size:.7rem}
 
 /* programme panels: a centred mark in place of a photograph */
-.phmark{background:var(--void);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
-.phmark::before{content:'';position:absolute;left:50%;top:50%;width:118%;aspect-ratio:1;transform:translate(-50%,-50%);
-  border-radius:50%;background:radial-gradient(circle,rgba(176,39,28,.30) 0%,rgba(176,39,28,.09) 45%,transparent 70%)}
-.gmark{position:relative;text-align:center;padding:1.4rem}
-.gg{display:block;font-family:var(--display);font-weight:700;line-height:.94;letter-spacing:-.035em;color:var(--red-lift)}
-.gs{display:block;margin-top:.7rem;font-size:.66rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:rgba(237,231,229,.5)}
-.offer:hover .gg{transform:scale(1.04)}
-.gg{transition:transform .6s var(--ease)}
+
+
+/* The section is built over one enormous word, running right to left across
+   the full width of the page and arriving with the same slow blurred rise as
+   the numbers upstairs. It breaks out of the shell to reach both edges. */
+.statwrap{position:relative}
+.statbg{position:absolute;left:calc(50% - 50vw);width:100vw;top:50%;transform:translateY(-50%);
+  z-index:0;pointer-events:none;overflow:hidden}
+.statbg-track{display:flex;width:max-content;animation:statSlide 130s linear infinite;will-change:transform}
+.statbg-track span{font-family:'Duera Expanded Black','Archivo Black',var(--display),sans-serif;font-weight:900;
+  font-size:clamp(6rem,27vw,26rem);line-height:1.08;letter-spacing:-.015em;text-transform:uppercase;
+  color:#fff;white-space:nowrap;padding-right:.3em}
+@keyframes statSlide{0%{transform:translate3d(0,0,0)}100%{transform:translate3d(-50%,0,0)}}
+.js.anim .statbg.rv{opacity:0;transform:translateY(-50%) translateY(34px);filter:blur(16px)}
+.js.anim .statbg.rv.in{opacity:.1;transform:translateY(-50%);filter:none;
+  transition:opacity 2.9s var(--ease),transform 2.9s var(--ease),filter 2.9s var(--ease)}
+.statbg{opacity:.1}
+#diagnostic{padding-top:clamp(6rem,11vw,10.5rem);padding-bottom:clamp(9rem,17vw,17rem)}
+#diagnostic .shell{max-width:none;padding-left:clamp(1.25rem,3vw,2.8rem);padding-right:clamp(1.25rem,3vw,2.8rem)}
+.statfront{position:relative;z-index:2;display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);
+  gap:clamp(1rem,2.4vw,2.6rem);align-items:center;max-width:1500px;margin-inline:auto}
+/* the block is centred on the page as a whole; the tab row stays at its
+   column's left edge so it keeps sitting right beside the copy */
+.statfront .vt{max-width:900px}
+.statfront .shead{max-width:none;margin-bottom:0}
+.statfront .shead p{max-width:none}
+.statfront .vt{max-width:none;margin-top:0}
+.statfront .vt-body{grid-template-columns:minmax(0,150px) minmax(0,1fr)}
+@media(max-width:1000px){
+  .statfront{grid-template-columns:1fr;gap:1.8rem}
+  .statfront .shead{max-width:none}
+}
+@media(max-width:900px){.statbg-track span{font-size:clamp(3.4rem,26vw,11rem)}}
+
+/* ── the instruments: a guided pass through the kinds of plot behind a plan.
+      Tabs carry a sliding pill; the figure and caption cross-fade out of a
+      blur, and it advances on its own until someone takes hold of it. ── */
+.vt{margin-top:clamp(2rem,4vw,3.2rem)}
+.vt-tabs{position:relative;display:flex;flex-wrap:wrap;gap:.3rem;padding:.3rem;width:fit-content;max-width:100%;
+  border:1px solid rgba(255,255,255,.14);border-radius:99px}
+.vt-pill{position:absolute;top:0;left:0;width:0;height:0;border-radius:99px;background:var(--red);z-index:0;
+  pointer-events:none;transition:transform .55s var(--spring),width .55s var(--spring),height .55s var(--spring)}
+.vt-tab{position:relative;z-index:1;border:none;background:transparent;font:inherit;font-size:.7rem;font-weight:600;
+  letter-spacing:.1em;text-transform:uppercase;color:rgba(237,231,229,.6);padding:.55rem 1rem;border-radius:99px;
+  cursor:pointer;white-space:nowrap;transition:color .35s var(--ease)}
+.vt-tab:hover{color:#fff}
+.vt-tab[aria-selected="true"]{color:#fff}
+.vt-body{display:grid;grid-template-columns:minmax(0,210px) minmax(0,1fr);gap:clamp(1.4rem,3vw,2.8rem);
+  align-items:center;margin-top:clamp(1.5rem,2.8vw,2.4rem)}
+@media(max-width:720px){.vt-body{grid-template-columns:1fr;gap:1.2rem}}
+.vt-figs,.vt-caps{display:grid}
+.vt-figs>*,.vt-caps>*{grid-area:1 / 1;opacity:0;filter:blur(9px);transform:translateY(10px);pointer-events:none;
+  transition:opacity .55s var(--ease),filter .55s var(--ease),transform .55s var(--ease)}
+.vt-figs>.on,.vt-caps>.on{opacity:1;filter:none;transform:none;pointer-events:auto}
+.vt-figs svg{width:100%;height:auto;display:block;overflow:visible}
+.vt-cap h3{font-family:var(--display);font-weight:700;font-size:clamp(1.05rem,1.65vw,1.38rem);letter-spacing:-.015em;
+  color:#fff;margin:0 0 .5rem}
+.vt-cap p{margin:0;font-size:clamp(.88rem,1.06vw,1rem);line-height:1.62;color:rgba(237,231,229,.7);max-width:56ch}
+.vt-mark{stroke:var(--red-lift);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.vt-band{fill:rgba(210,66,52,.18)}
+.vt-bar{fill:rgba(210,66,52,.55)}
+.vt-bar-2{fill:rgba(237,231,229,.22)}
+.vt-axis{stroke:rgba(255,255,255,.22);stroke-width:1}
+.vt-dot{fill:var(--red-lift)}
+.vt-dot-2{fill:rgba(237,231,229,.42)}
+@media(prefers-reduced-motion:reduce){.vt-figs>*,.vt-caps>*,.vt-pill{transition:none}}
 
 /* ══ DIAGNOSTIC: scrollable gallery of the report's real charts ══ */
+/* the section runs black; the chart panels stay light so the plots keep
+   their contrast, reading as cards laid on it */
+#diagnostic{background:#000;color:#EDE7E5;border-bottom:none}
+#diagnostic .shead h2{color:#fff}
+#diagnostic .shead p{color:rgba(237,231,229,.7)}
+#diagnostic .lbl{color:rgba(237,231,229,.5)}
+#diagnostic .lbl::before{color:var(--red-lift)}
+#diagnostic .dxr{border-bottom-color:rgba(255,255,255,.12)}
+#diagnostic .dxr h3{color:#fff}
+#diagnostic .dxr p{color:rgba(237,231,229,.66)}
+#diagnostic .dxi{color:var(--red-lift)}
+#diagnostic .dxscroll{scrollbar-color:rgba(255,255,255,.22) transparent}
+#diagnostic .dxscroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.22)}
+#diagnostic .dxnav button{background:transparent;border-color:rgba(255,255,255,.22);color:#EDE7E5}
+#diagnostic .dxnav button:hover{background:#fff;color:#000;border-color:#fff}
+#diagnostic .dxnav button[disabled]:hover{background:transparent;color:#EDE7E5;border-color:rgba(255,255,255,.22)}
 .dxscroll-wrap{position:relative;margin-top:clamp(1.8rem,3.4vw,2.8rem)}
 .dxscroll{display:flex;gap:clamp(1rem,1.8vw,1.6rem);overflow-x:auto;scroll-snap-type:x mandatory;
   padding:.4rem .3rem 1.4rem;margin:0 -.3rem;scrollbar-width:thin;scrollbar-color:var(--line) transparent}
@@ -324,19 +479,20 @@ h1 .ln:nth-child(2){animation-delay:1.9s}
 .dxtoggle button[aria-pressed="true"]{background:var(--void);color:#fff}
 
 /* ── PROOF ── */
-.proof{background:var(--void);color:#EDE7E5;border-top:1px solid rgba(255,255,255,.10)}
-@keyframes statRise{from{opacity:0;transform:translateY(34px);filter:blur(12px)}to{opacity:1;transform:none;filter:none}}
-/* three tiles across the bottom of the first screen */
-.disciplines a{animation:statRise 1.2s var(--ease) both}
-.disciplines a:nth-child(1){animation-delay:4.2s}
-.disciplines a:nth-child(2){animation-delay:4.4s}
-.disciplines a:nth-child(3){animation-delay:4.6s}
+.proof{background:#000;color:#EDE7E5;border-top:none}
 .proof .shell{max-width:none;padding:0 clamp(1.25rem,3vw,2.8rem);display:grid;grid-template-columns:repeat(4,1fr);gap:1px}
 @media(max-width:820px){.proof .shell{grid-template-columns:repeat(2,1fr)}}
 .pcell{padding:clamp(2.6rem,5vw,4.6rem) 1.4rem;position:relative}
 .proof .shell{padding-top:0;padding-bottom:0}
 
-.pcell+.pcell::before{content:"";position:absolute;left:0;top:24%;bottom:24%;width:1px;background:rgba(255,255,255,.12)}
+/* the numbers arrive one after another, slowly, out of a blur — the same
+   character as the headline rather than the quick generic .rv reveal */
+.js.anim .pcell.rv{opacity:0;transform:translateY(30px);filter:blur(12px)}
+.js.anim .pcell.rv.in{opacity:1;transform:none;filter:none;
+  transition:opacity 2.9s var(--ease),transform 2.9s var(--ease),filter 2.9s var(--ease)}
+.js.anim .pcell.rv.d1.in{transition-delay:.62s}
+.js.anim .pcell.rv.d2.in{transition-delay:1.24s}
+.js.anim .pcell.rv.d3.in{transition-delay:1.86s}
 .pcell .n{font-family:var(--display);font-weight:700;font-size:clamp(3.4rem,8.4vw,7.6rem);color:#fff;line-height:.98;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
 .pcell .n small{font-size:.5em;color:var(--red-lift)}
 .pcell .c{font-size:.82rem;color:rgba(237,231,229,.6);margin-top:1.1rem;line-height:1.55;max-width:24ch}
@@ -351,10 +507,6 @@ section{padding:clamp(3.6rem,7vw,6.2rem) 0;border-bottom:1px solid var(--line)}
 .btn{transition:background .25s var(--ease),color .25s,border-color .25s,transform .35s var(--spring)}
 .btn-a:hover,.btn-b:hover{transform:translateY(-2px)}
 .btn-a:active,.btn-b:active{transform:translateY(0) scale(.985)}
-.offer{transition:border-color .35s var(--ease),transform .45s var(--spring),box-shadow .45s var(--ease)}
-.offer:hover{transform:translateY(-6px)}
-.offer .ph img{transition:transform .8s var(--springy),filter .5s}
-.offer:hover .ph img{transform:scale(1.06)}
 .creds span{transition:border-color .3s,color .3s,transform .35s var(--spring)}
 .creds span:hover{transform:translateY(-2px)}
 .playbtn{transition:background .3s var(--ease),border-color .3s,transform .5s var(--spring)}
@@ -430,20 +582,68 @@ section{padding:clamp(3.6rem,7vw,6.2rem) 0;border-bottom:1px solid var(--line)}
 .dxr p{font-size:.86rem}
 
 /* ── PROGRAMS ── */
-.offers{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(1rem,2vw,1.5rem)}
-@media(max-width:900px){.offers{grid-template-columns:1fr}}
-.offer{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:3px;overflow:hidden;transition:border-color .3s var(--ease),transform .3s var(--ease),box-shadow .3s var(--ease)}
-.offer:hover{border-color:rgba(17,17,17,.28);transform:translateY(-4px);box-shadow:0 26px 46px -34px rgba(17,17,17,.55)}
-.offer .ph{aspect-ratio:16/10;overflow:hidden;background:var(--void)}
-.offer .ph img{width:100%;height:100%;object-fit:cover;filter:saturate(.82) brightness(.9);transition:transform .7s var(--ease),filter .5s}
-.offer:hover .ph img{transform:scale(1.045);filter:saturate(.95) brightness(1)}
-.offer .in{padding:1.3rem 1.35rem 1.45rem;display:flex;flex-direction:column;flex:1}
-.offer .k{font-size:.585rem;font-weight:600;letter-spacing:.19em;text-transform:uppercase;color:var(--red)}
-.offer h3{font-family:var(--display);font-weight:700;font-size:1.28rem;margin:.48rem 0 .55rem;line-height:1.2}
-.offer p{font-size:.855rem;flex:1}
-.offer .cov{margin-top:.95rem;padding-top:.85rem;border-top:1px solid var(--hair);font-size:.735rem;color:var(--muted);line-height:1.5}
-.offer .go{margin-top:1.1rem;font-size:.71rem;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:var(--ink);display:inline-flex;gap:.4rem;align-items:center;transition:gap .25s var(--ease),color .2s}
-.offer:hover .go{color:var(--red);gap:.7rem}
+/* ── PROGRAMS: a grid of three; the card under the cursor lifts its drawer.
+      The drawer animates with grid-template-rows 0fr → 1fr, so the copy sets
+      its own height — nothing is measured, nothing can clip. ── */
+/* the SAT card sits in the middle, wider than its neighbours and lifted off
+   the line they share */
+.pg{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.32fr) minmax(0,1fr);
+  gap:clamp(.9rem,1.6vw,1.4rem);align-items:center}
+.pgcard--lead{transform:translateY(-28px);box-shadow:0 34px 60px -32px rgba(17,17,17,.55)}
+.pgcard--lead:hover,.pgcard--lead:focus-visible{transform:translateY(-38px)}
+.pgcard--lead .pgglyph b{font-size:clamp(3.4rem,6.2vw,5.4rem)}
+.pgcard--lead h3{font-size:clamp(1.24rem,1.75vw,1.55rem)}
+@media(max-width:900px){
+  .pg{grid-template-columns:1fr}
+  .pgcard--lead{transform:none}
+  .pgcard--lead:hover,.pgcard--lead:focus-visible{transform:translateY(-6px)}
+}
+.pgcard{position:relative;display:block;overflow:hidden;border-radius:4px;background:var(--void);aspect-ratio:4/5;
+  transition:transform .5s var(--spring),box-shadow .5s var(--ease)}
+.pgcard:hover,.pgcard:focus-visible{transform:translateY(-6px);box-shadow:0 30px 54px -30px rgba(17,17,17,.6);outline:none}
+/* every card carries a mark rather than a photograph */
+.pgglyph{position:absolute;inset:0;z-index:0;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;background:var(--void);overflow:hidden;text-align:center;padding:1.2rem}
+.pgglyph::before{content:'';position:absolute;left:50%;top:50%;width:124%;aspect-ratio:1;transform:translate(-50%,-50%);
+  border-radius:50%;background:radial-gradient(circle,rgba(176,39,28,.42) 0%,rgba(176,39,28,.12) 46%,transparent 70%);
+  transition:transform .9s var(--ease)}
+.pgcard:hover .pgglyph::before{transform:translate(-50%,-50%) scale(1.08)}
+.pgglyph b{position:relative;font-family:var(--display);font-weight:700;font-size:clamp(2.8rem,5vw,4.3rem);
+  letter-spacing:-.035em;line-height:1;color:var(--red-lift);transition:transform .6s var(--ease)}
+.pgcard:hover .pgglyph b{transform:scale(1.05)}
+.pgglyph sup{font-size:.28em;letter-spacing:0;margin-left:.05em;vertical-align:super}
+.pgglyph .pgsub{position:relative;margin-top:.85rem;font-size:.63rem;font-weight:600;letter-spacing:.19em;
+  text-transform:uppercase;color:rgba(237,231,229,.5)}
+/* the integral wants a little more room than a word does */
+.pgart{position:relative;width:min(78%,240px)}
+.pgart svg{width:100%;height:auto;display:block;overflow:visible;
+  transition:transform .7s var(--ease)}
+.pgcard:hover .pgart svg{transform:scale(1.05)}
+.pgart .ln{fill:none;stroke:var(--red-lift);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.pgart .ln-2{fill:none;stroke:rgba(237,231,229,.34);stroke-width:1.6;stroke-linecap:round}
+.pgart .grid{stroke:rgba(255,255,255,.13);stroke-width:1}
+.pgart .fillrd{fill:rgba(210,66,52,.26)}
+.pgart .page{fill:rgba(255,255,255,.06);stroke:rgba(255,255,255,.22);stroke-width:1.6}
+.pgart .rule{stroke:rgba(237,231,229,.32);stroke-width:2.6;stroke-linecap:round}
+.pgart .rule-rd{stroke:var(--red-lift);stroke-width:2.6;stroke-linecap:round}
+.pgart .sym{fill:var(--red-lift)}
+.pgveil{position:absolute;inset:0;z-index:1;
+  background:linear-gradient(180deg,rgba(12,10,9,.08) 0%,rgba(12,10,9,.44) 50%,rgba(12,10,9,.94) 100%)}
+.pgbody{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:clamp(1.1rem,1.9vw,1.5rem);color:#fff}
+.pgk{display:block;font-size:.585rem;font-weight:600;letter-spacing:.19em;text-transform:uppercase;color:var(--red-lift)}
+.pgcard h3{font-family:var(--display);font-weight:700;font-size:clamp(1.12rem,1.5vw,1.34rem);line-height:1.18;
+  margin:.4rem 0 0;color:#fff}
+.pgdrawer{display:grid;grid-template-rows:0fr;transition:grid-template-rows .65s var(--ease)}
+.pgcard:hover .pgdrawer,.pgcard:focus-visible .pgdrawer{grid-template-rows:1fr}
+.pgdrawer > div{overflow:hidden;min-height:0}
+.pgdrawer p{margin:.62rem 0 0;font-size:.85rem;line-height:1.55;color:rgba(237,231,229,.84)}
+.pgcov{display:block;margin-top:.7rem;padding-top:.65rem;border-top:1px solid rgba(255,255,255,.2);
+  font-size:.7rem;line-height:1.5;color:rgba(237,231,229,.62)}
+.pggo{display:inline-flex;align-items:center;gap:.4rem;margin-top:.85rem;font-size:.68rem;font-weight:600;
+  letter-spacing:.12em;text-transform:uppercase;color:#fff;transition:gap .25s var(--ease)}
+.pgcard:hover .pggo{gap:.72rem}
+@media(hover:none){.pgdrawer{grid-template-rows:1fr}}
+@media(prefers-reduced-motion:reduce){.pgcard,.pgmedia img,.pgdrawer,.pgglyph::before{transition:none}}
 
 /* ── METHOD ── */
 .method{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:3px;overflow:hidden}
@@ -456,12 +656,23 @@ section{padding:clamp(3.6rem,7vw,6.2rem) 0;border-bottom:1px solid var(--line)}
 
 
 /* ── INSTRUCTOR ── */
-.instr{display:grid;grid-template-columns:.82fr 1.18fr;gap:clamp(1.8rem,4.2vw,3.4rem);align-items:center}
+.instr{display:grid;grid-template-columns:.78fr 1.22fr;gap:clamp(2rem,4.6vw,4rem);align-items:center}
 @media(max-width:900px){.instr{grid-template-columns:1fr}}
-.instr .pic{position:relative;aspect-ratio:1/1;overflow:hidden;border-radius:3px;background:var(--void)}
-.instr .pic img{width:100%;height:100%;object-fit:cover;object-position:center 20%;filter:grayscale(.18) contrast(1.04)}
-.creds{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:1.35rem}
-.creds span{font-size:.7rem;border:1px solid var(--line);padding:.4rem .78rem;color:var(--body);border-radius:2px;transition:border-color .22s,color .22s}
+/* the crop the original homepage uses for this portrait, kept exactly */
+.instr .pic{position:relative;aspect-ratio:1/1;overflow:hidden;border-radius:4px;background:var(--void)}
+.instr .pic img{width:100%;height:100%;object-fit:cover;object-position:center top;
+  transform:scale(1.5) translate(15%,10%);transform-origin:center;
+  filter:grayscale(.12) contrast(1.04);transition:transform .9s var(--ease),filter .6s var(--ease)}
+.instr .pic:hover img{transform:scale(1.56) translate(15%,10%);filter:grayscale(0) contrast(1.05)}
+.instr .pic::after{content:'';position:absolute;inset:0;pointer-events:none;
+  box-shadow:inset 0 0 0 1px rgba(17,17,17,.1);border-radius:4px}
+.instr .ihed{font-family:var(--display);font-weight:700;font-size:clamp(1.55rem,2.9vw,2.2rem);
+  line-height:1.14;letter-spacing:-.018em;margin-top:.7rem}
+.instr .ilead{margin-top:1.15rem;font-size:.98rem;line-height:1.68;max-width:56ch}
+.creds{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:1.5rem}
+.creds span{font-size:.685rem;letter-spacing:.02em;border:1px solid var(--line);padding:.44rem .82rem;
+  color:var(--body);border-radius:99px;transition:border-color .22s,color .22s,background .22s}
+.creds span:hover{background:var(--sunk)}
 .creds span:hover{border-color:var(--ink);color:var(--ink)}
 .gbox{margin-top:1.9rem;border-left:3px solid var(--red);padding:1.05rem 0 1.05rem 1.25rem;background:linear-gradient(90deg,rgba(176,39,28,.045),transparent 65%)}
 .gbox .k{font-size:.605rem;font-weight:600;letter-spacing:.21em;text-transform:uppercase;color:var(--red)}
@@ -519,8 +730,41 @@ table.dates b{color:var(--red);font-weight:600}
 .morelink:hover{border-bottom-color:#fff}
 
 /* ── RESERVE ── */
-.capture{background:var(--void);color:#EDE7E5;border-bottom:none}
-.capture .shell{display:grid;grid-template-columns:.95fr 1.05fr;gap:clamp(2rem,4.5vw,3.6rem);align-items:start;padding-top:clamp(3.4rem,6.5vw,5.5rem);padding-bottom:clamp(3.4rem,6.5vw,5.5rem)}
+/* ── RESERVE: the close. A black field with the mark's glow behind it, the
+      three steps spelled out on the left, and the form as glass rather than
+      a white box dropped on the page. ── */
+.capture{background:#000;color:#EDE7E5;border-bottom:none;position:relative;overflow:hidden;
+  border-top:1px solid rgba(255,255,255,.08)}
+.capture::before{content:'';position:absolute;left:-14%;bottom:-38%;width:64vw;aspect-ratio:1;border-radius:50%;
+  pointer-events:none;background:radial-gradient(circle,rgba(176,39,28,.24) 0%,rgba(176,39,28,.07) 44%,transparent 70%)}
+.capture .shell{position:relative;z-index:1;max-width:none;
+  padding:clamp(4.5rem,9vw,8rem) clamp(1.25rem,3vw,2.8rem);
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.92fr);gap:clamp(2.4rem,6vw,6rem);align-items:center}
+@media(max-width:900px){.capture .shell{grid-template-columns:1fr;gap:2.4rem}}
+.capture h2{font-family:var(--display);font-weight:700;letter-spacing:-.022em;
+  font-size:clamp(1.9rem,4.2vw,3.4rem);line-height:1.08;color:#fff;margin-top:.75rem}
+.capsteps{margin-top:clamp(1.9rem,3.4vw,2.8rem);display:grid;gap:1.2rem;max-width:44ch}
+.capstep{display:grid;grid-template-columns:1.9rem 1fr;gap:1rem;align-items:start}
+.capstep i{font-family:var(--display);font-style:normal;font-weight:700;font-size:.95rem;color:var(--red-lift);
+  border-top:2px solid var(--red);padding-top:.4rem}
+.capstep b{display:block;font-size:.95rem;font-weight:600;color:#fff;letter-spacing:-.005em}
+.capstep span{display:block;margin-top:.22rem;font-size:.85rem;line-height:1.55;color:rgba(237,231,229,.62)}
+/* the form, as glass on the black rather than a white card */
+.capture .bookcard{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.13);border-radius:6px;
+  padding:clamp(1.4rem,2.6vw,2.15rem);backdrop-filter:blur(6px)}
+.capture .bookcard .fl{color:rgba(237,231,229,.6)}
+.capture .bookcard .fi{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.17);color:#fff}
+.capture .bookcard .fi::placeholder{color:rgba(237,231,229,.34)}
+.capture .bookcard .fi:focus{background:rgba(255,255,255,.08);border-color:var(--red-lift);
+  box-shadow:0 0 0 3px rgba(210,66,52,.2)}
+/* native dropdowns render their list on the system surface, so keep it legible */
+.capture .bookcard select.fi option{color:#111;background:#fff}
+.capture .bookcard .fradio label{border-color:rgba(255,255,255,.17);color:#EDE7E5}
+.capture .bookcard .fradio label:hover{border-color:rgba(255,255,255,.55);background:rgba(255,255,255,.05)}
+.capture .bookcard .fsub{padding:1.08rem;font-size:.78rem;letter-spacing:.13em;border-radius:3px}
+.capture .bookcard .fsub:hover{background:var(--red-lift)}
+.capture .bookcard .fnote{color:rgba(237,231,229,.5)}
+.capture .capside .phonebox{margin-top:clamp(1.8rem,3vw,2.4rem)}
 @media(max-width:900px){.capture .shell{grid-template-columns:1fr}}
 .capture .lbl{color:rgba(237,231,229,.5)!important}
 .capture .lbl::before{color:var(--red-lift)}
@@ -555,16 +799,20 @@ textarea.fi{resize:vertical;min-height:76px}
 .fmsg.err{color:var(--red)}
 
 footer{background:var(--void);color:rgba(237,231,229,.48);font-size:.79rem;border-top:1px solid rgba(255,255,255,.08)}
-footer .shell{display:flex;justify-content:space-between;gap:2rem;flex-wrap:wrap;padding-top:2.3rem;padding-bottom:2.3rem}
+footer .shell{max-width:none;display:flex;align-items:center;justify-content:space-between;gap:1.6rem;flex-wrap:wrap;
+  padding:1.15rem clamp(1.25rem,3vw,2.8rem)}
 footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#fff}
-.footer-phone{display:inline-block;font-style:italic;font-family:Georgia,'Times New Roman',serif;font-size:1.12rem;color:#fff!important;margin:.45rem 0 .65rem}
-.footer-links a{margin-right:1rem;font-size:.75rem}
+.footer-phone{display:inline-block;font-style:italic;font-family:Georgia,'Times New Roman',serif;font-size:1rem;color:#fff!important;margin:0 0 0 .5rem}
+.footer-links a{margin-right:.95rem;font-size:.73rem}
+.footer-links a:last-child{margin-right:0}
+.footer-id{display:flex;align-items:center;flex-wrap:wrap;gap:.15rem .6rem}
+.footer-id p{margin:0}
 .footer-right{display:flex;align-items:center}
-.footer-linkedin{display:inline-block;margin-top:.85rem;color:rgba(237,231,229,.55)}
+.footer-linkedin{display:inline-block;margin:0;color:rgba(237,231,229,.55)}
 
 @media (prefers-reduced-motion:reduce){
   *{transition:none!important;scroll-behavior:auto!important}
-  .tickertrack,.repbars i,.newsbar .dot{animation:none!important}
+  .tickertrack,.repbars i,.newsbar .dot,.statbg-track{animation:none!important}
   .js.anim .rv{opacity:1!important;transform:none!important;filter:none!important}
 }
 </style>
@@ -594,14 +842,15 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
   <div class="navlinks">
     <a href="#diagnostic">Diagnostic</a>
     <a href="#programs">Programs</a>
-    <a href="#results">Results</a>
+    <a href="#testimonials">Results</a>
   </div>
   <a class="navlogin" href="portal/index.html">Student Login</a>
   <a class="navcta shimmer" href="#start"><span>Contact</span></a>
 </div></nav>
 
+<div class="landing">
 <section class="hero">
-  <div class="xhair" id="xhair" aria-hidden="true"><i class="xh"></i><i class="xv"></i><span class="xdot"></span></div>
+  <div class="xhair" id="xhair" aria-hidden="true"><span class="xcross"><i class="xh"></i><i class="xv"></i><span class="xdot"></span></span></div>
   <div class="mark go" aria-hidden="true">
 <svg viewBox="0 0 2000 2000" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
       <circle id="impact" cx="947" cy="1057" r="300"/>
@@ -620,18 +869,29 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
   <div class="shell">
     <div class="hcopy">
       <h1><span class="ln">Most students aim.</span><span class="ln"><em>Ours calibrate.</em></span></h1>
-      <div class="tiles">
-        <div class="disciplines">
-          <a href="#programs"><b>Mathematics</b><i>Algebra 1 through Multivariable Calculus</i></a>
-          <a href="#programs"><b>The digital SAT</b><i>Twelve weeks, guaranteed in writing</i></a>
-          <a href="#programs"><b>College admissions</b><i>The essays that finish the application</i></a>
-        </div>
-      </div>
+    </div>
+
+    <div class="trio">
+    <a class="tri" href="prep-course.html">
+      <span class="tri-k">College entrance exams</span>
+      <span class="tri-t">The SAT Program</span>
+      <span class="tri-d">Twelve weeks, one instructor, guarantee in writing.</span>
+      <span class="tri-go">Explore the program &rarr;</span>
+    </a>
+    <a class="tri" href="math-program.html">
+      <span class="tri-k">Algebra 1 &rarr; Multivariable</span>
+      <span class="tri-t">Mathematics</span>
+      <span class="tri-d">Built around your student&rsquo;s actual course and textbook.</span>
+      <span class="tri-go">Explore the program &rarr;</span>
+    </a>
+    <a class="tri" href="applications.html">
+      <span class="tri-k">College admissions</span>
+      <span class="tri-t">Admissions Writing</span>
+      <span class="tri-d">The personal statement and every supplemental.</span>
+      <span class="tri-go">Explore the program &rarr;</span>
+      </a>
     </div>
   </div>
-
-
-
 </section>
 
 
@@ -639,150 +899,151 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
 
 
 <section class="videosec" id="results"><div class="wide">
-  <div class="vstage rv">
+  <div class="vstage">
     <div class="videoframe">
       <img src="photo-2-web.jpg" alt="Luca Moretti teaching a one-on-one session">
       <div class="grad"></div>
       <div class="playwrap"><div class="playbtn"><svg width="19" height="23" viewBox="0 0 20 24" fill="#fff" aria-hidden="true"><path d="M0 0l20 12L0 24z"/></svg></div></div>
       <div class="videocap">
         <div class="who">Luca Moretti &middot; Founder</div>
-        <div class="what">&ldquo;Six of the eight Ivies just brought the SAT back. Here&rsquo;s what that means for your junior.&rdquo;</div>
+        <div class="what">Elite one-on-one preparation for the most selective universities in the country.</div>
       </div>
     </div>
-    <div class="tickerband"><div class="tickerwrap"><div class="tickertrack" id="tick"></div></div></div>
+    <div class="vcol">
+      <div class="tickerband"><div class="tickerwrap"><div class="tickertrack" id="tick"></div></div></div>
+      <p class="vnote">Generic tutoring explains tonight&rsquo;s assignment and expires the moment the hour ends. Every plan here starts with a real diagnostic, adapts as a student improves, and is backed by a private portal &mdash; adaptive practice, a weak-spot tracker, and a running log of every missed question &mdash; so we are always working on exactly what is costing points.</p>
+    </div>
   </div>
 </div></section>
+</div><!-- /.landing -->
 
 <div class="proof"><div class="shell">
-  <div class="pcell rv">
+  <div class="pcell rv rv-strict">
     <div class="n"><span class="countup" data-count="36">0</span>%</div>
     <div class="c"><b>Highest score increase</b> achieved by a student on the Moretti Method</div>
   </div>
-  <div class="pcell rv d1">
-    <div class="n"><span class="countup" data-count="1500">0</span><small>+</small></div>
+  <div class="pcell rv rv-strict d1">
+    <div class="n"><span class="countup" data-delay="620" data-count="1500">0</span><small>+</small></div>
     <div class="c"><b>SAT scores for high-reaching students</b> &mdash; hundreds of points up from where they started</div>
   </div>
-  <div class="pcell rv d2">
-    <div class="n">+<span class="countup" data-count="200">0</span></div>
+  <div class="pcell rv rv-strict d2">
+    <div class="n">+<span class="countup" data-delay="1240" data-count="200">0</span></div>
     <div class="c"><b>Largest single-section gain</b> on record, SAT Math</div>
   </div>
-  <div class="pcell rv d3">
-    <div class="n"><span class="countup" data-count="50">0</span><small>+</small></div>
+  <div class="pcell rv rv-strict d3">
+    <div class="n"><span class="countup" data-delay="1860" data-count="50">0</span><small>+</small></div>
     <div class="c"><b>Students supported</b> through course math, testing and applications over 8+ years</div>
   </div>
 </div></div>
 
 <section id="diagnostic"><div class="shell">
-  <div class="shead rv">
-    <div class="lbl">The diagnostic</div>
-    <h2>Every program begins with a real test.</h2>
-    <p>A full-length, timed, adaptive SAT taken at home. What comes back is not a score &mdash; it is a report that separates what your student doesn&rsquo;t know from what the clock took from them, because those need completely different fixes.</p>
-  </div>
-
-  <div class="dxscroll-wrap rv d1">
-    <div class="dxscroll" id="dxscroll">
-
-      <article class="dxpanel">
-        <div class="pk">Path to target score</div>
-        <h3>Where the next 110 points are.</h3>
-        <p class="pcap">Every point between today&rsquo;s score and the target, attributed to the skill that will produce it.</p>
-        <div class="dxplot"><div id="cBridge"></div><div class="dxtip" id="tBridge"></div></div>
-        <div class="dxfootnote">Hover any step. Bars are the score; the floating blocks are what each block of work is worth.</div>
-      </article>
-
-      <article class="dxpanel">
-        <div class="pk">What went wrong</div>
-        <h3>One wrong answer, three fixes.</h3>
-        <p class="pcap">Every miss sorted into what actually caused it &mdash; because re-teaching a skill will not fix a clock problem.</p>
-        <div class="dxtoggle" role="group" aria-label="Choose section">
-          <button type="button" data-sec="all" aria-pressed="true">Whole test</button>
-          <button type="button" data-sec="math" aria-pressed="false">Math</button>
-          <button type="button" data-sec="rw" aria-pressed="false">R&amp;W</button>
-        </div>
-        <div class="dxplot"><div id="cWrong"></div><div class="dxtip" id="tWrong"></div></div>
-        <div class="dxlegend">
-          <span><i style="background:#B0271C"></i>Didn&rsquo;t know it</span>
-          <span><i style="background:#C9A84C"></i>Took too long</span>
-          <span><i style="background:#4A4139"></i>Ran out of clock</span>
-        </div>
-      </article>
-
-      <article class="dxpanel">
-        <div class="pk">Where the time went</div>
-        <h3>Pacing against the budget.</h3>
-        <p class="pcap">Seconds per question on the first pass, and the extra time spent revisiting questions already answered.</p>
-        <div class="dxplot"><div id="cPace"></div><div class="dxtip" id="tPace"></div></div>
-        <div class="dxfootnote">The dashed line is the per-question budget. The lighter band is time spent on return trips &mdash; second-guessing, not solving.</div>
-      </article>
-
-      <article class="dxpanel">
-        <div class="pk">Skills, ranked</div>
-        <h3>Ordered by points recoverable.</h3>
-        <p class="pcap">So week one starts on whatever moves the score most, rather than whatever comes first in a textbook.</p>
-        <div class="dxplot"><div id="cSkills"></div><div class="dxtip" id="tSkills"></div></div>
-        <div class="dxfootnote">Hatched bars appeared 1&ndash;4 times on this form &mdash; too few to judge, so they are neither flagged nor cleared. A second form settles them.</div>
-      </article>
-
-      <article class="dxpanel">
-        <div class="pk">Habits worth naming</div>
-        <h3>Accuracy against time spent.</h3>
-        <p class="pcap">Each dot is one question. The quadrant it lands in says which habit is costing points.</p>
-        <div class="dxplot"><div id="cQuad"></div><div class="dxtip" id="tQuad"></div></div>
-        <div class="dxfootnote">Slow and wrong is a knowledge gap. Fast and wrong is carelessness. They need opposite interventions.</div>
-      </article>
-
+  <div class="statwrap">
+    <div class="statbg rv rv-strict" aria-hidden="true">
+      <div class="statbg-track"><span>Superior Statistics</span><span>Superior Statistics</span><span>Superior Statistics</span><span>Superior Statistics</span></div>
     </div>
-    <div class="dxnav">
-      <button type="button" id="dxPrev" aria-label="Previous chart"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
-      <button type="button" id="dxNext" aria-label="Next chart"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>
+    <div class="statfront">
+      <div class="shead rv">
+        <div class="lbl">The analysis</div>
+        <h2>Guesswork is the most expensive tutoring there is.</h2>
+        <p>Northwestern statistics, top of the class in three years, pointed at one student at a time. Instinct says a student is &ldquo;weak in algebra.&rdquo; The instruments say which twenty questions are costing the points, which order to take them in, and how much confidence that claim has actually earned. Your family opens the same charts in the portal, updated as the work happens.</p>
+      </div>
+  <div class="vt" id="vizTour">
+    <div class="vt-tabs" role="tablist" aria-label="Kinds of analysis behind a plan">
+      <span class="vt-pill" aria-hidden="true"></span>
+      <button class="vt-tab" type="button" role="tab" aria-selected="true" aria-controls="vtc0" id="vtt0">Confidence bands</button>
+      <button class="vt-tab" type="button" role="tab" aria-selected="false" aria-controls="vtc1" id="vtt1" tabindex="-1">Point attribution</button>
+      <button class="vt-tab" type="button" role="tab" aria-selected="false" aria-controls="vtc2" id="vtt2" tabindex="-1">Error taxonomy</button>
+      <button class="vt-tab" type="button" role="tab" aria-selected="false" aria-controls="vtc4" id="vtt4" tabindex="-1">Trend over sittings</button>
+    </div>
+
+    <div class="vt-body">
+      <div class="vt-figs" aria-hidden="true">
+        <div class="vt-fig on"><svg viewBox="0 0 200 120" role="img"><path class="vt-band" d="M8 84 C60 74 96 50 192 26 L192 56 C96 78 60 96 8 102 Z"/><path class="vt-mark" d="M8 93 C60 85 96 64 192 41"/><circle class="vt-dot" cx="8" cy="93" r="3.5"/><circle class="vt-dot" cx="100" cy="72" r="3.5"/><circle class="vt-dot" cx="192" cy="41" r="3.5"/></svg></div>
+        <div class="vt-fig"><svg viewBox="0 0 200 120" role="img"><rect class="vt-bar" x="6" y="78" width="30" height="36"/><rect class="vt-bar-2" x="46" y="62" width="30" height="16"/><rect class="vt-bar" x="46" y="78" width="30" height="36"/><rect class="vt-bar-2" x="86" y="44" width="30" height="18"/><rect class="vt-bar" x="86" y="62" width="30" height="52"/><rect class="vt-bar-2" x="126" y="30" width="30" height="14"/><rect class="vt-bar" x="126" y="44" width="30" height="70"/><rect class="vt-bar" x="166" y="30" width="30" height="84"/><path class="vt-mark" d="M6 74 L196 26" stroke-dasharray="4 5" stroke-width="1.5"/></svg></div>
+        <div class="vt-fig"><svg viewBox="0 0 200 120" role="img"><rect class="vt-bar" x="6" y="18" width="104" height="20" rx="2"/><rect class="vt-bar-2" x="114" y="18" width="80" height="20" rx="2"/><rect class="vt-bar" x="6" y="52" width="62" height="20" rx="2"/><rect class="vt-bar-2" x="72" y="52" width="122" height="20" rx="2"/><rect class="vt-bar" x="6" y="86" width="138" height="20" rx="2"/><rect class="vt-bar-2" x="148" y="86" width="46" height="20" rx="2"/></svg></div>
+        <div class="vt-fig"><svg viewBox="0 0 200 120" role="img"><path class="vt-band" d="M8 96 C64 88 120 60 192 24 L192 52 C120 84 64 100 8 108 Z"/><path class="vt-mark" d="M8 102 C64 94 120 72 192 38"/><circle class="vt-dot" cx="8" cy="102" r="4"/><circle class="vt-dot" cx="70" cy="92" r="4"/><circle class="vt-dot" cx="132" cy="66" r="4"/><circle class="vt-dot" cx="192" cy="38" r="4"/></svg></div>
+      </div>
+
+      <div class="vt-caps">
+        <div class="vt-cap on" id="vtc0" role="tabpanel" aria-labelledby="vtt0"><h3>A score is a range, not a point.</h3><p>Every estimate carries the interval it actually sits in. It is the difference between &ldquo;you gained forty points&rdquo; and &ldquo;you gained four, and four is noise&rdquo; &mdash; and it decides whether we change the plan or hold it.</p></div>
+        <div class="vt-cap" id="vtc1" role="tabpanel" aria-labelledby="vtt1" hidden><h3>Every point, attributed to a skill.</h3><p>A waterfall from today&rsquo;s score to the target, each step charged to the skill that produces it. Week one starts at the tallest bar rather than at whatever comes first in a textbook.</p></div>
+        <div class="vt-cap" id="vtc2" role="tabpanel" aria-labelledby="vtt2" hidden><h3>A wrong answer is not one thing.</h3><p>Each miss is sorted by what caused it &mdash; content never learned, a question misread, or time that ran out. Re-teaching a skill will not fix a clock problem, so the three are never treated alike.</p></div>
+        <div class="vt-cap" id="vtc4" role="tabpanel" aria-labelledby="vtt4" hidden><h3>Improvement has to clear the noise.</h3><p>Every sitting on one axis, with the trend and the uncertainty around it. A rise only counts as progress once it is larger than the variation we would expect from the same student on a different morning.</p></div>
+      </div>
     </div>
   </div>
-
-  <div class="dxread rv d2" style="margin-top:clamp(2rem,3.6vw,3rem)">
-    <div class="dxr"><span class="dxi">1</span><div><h3>A range, not a guess</h3><p>Every score comes with the band it actually sits in. Precision you can trust beats a number that only sounds confident.</p></div></div>
-    <div class="dxr"><span class="dxi">2</span><div><h3>Skills ranked by points recoverable</h3><p>So week one starts on the thing that moves the score most &mdash; not on whatever comes first in a textbook.</p></div></div>
-    <div class="dxr"><span class="dxi">3</span><div><h3>Where the time actually went</h3><p>Question by question, including minutes spent revisiting questions already answered. Second-guessing is a habit, and it is faster to fix than a knowledge gap.</p></div></div>
-    <div class="dxr"><span class="dxi">4</span><div><h3>Honest about small samples</h3><p>Skills seen only once or twice are flagged as unsettled rather than judged. A second sitting resolves them.</p></div></div>
+    </div>
   </div>
 </div></section>
 
 <section id="programs"><div class="shell">
   <div class="shead rv">
     <div class="lbl">What we teach</div>
-    <h2>Three programs. One method behind all of them.</h2>
-    <p>A real diagnostic, an individualized plan, and a guarantee tied to the outcome &mdash; whether the goal is a score, a grade, or an acceptance.</p>
   </div>
-  <div class="offers">
-    <a class="offer rv d1" href="prep-course.html">
-      <div class="ph phmark"><div class="gmark"><span class="gg" style="font-size:clamp(3.2rem,6vw,5.2rem)">SAT</span><span class="gs">the digital test</span></div></div>
-      <div class="in">
-        <div class="k">College Entrance Exams</div>
-        <h3>The 12-Week SAT Program</h3>
-        <p>Twelve weekly one-on-one sessions built from your student&rsquo;s diagnostic, with full-length timed testing, weekly office hours, and a written update to you every week.</p>
-        <div class="cov">SAT &middot; PSAT &middot; AP &amp; IB exams &middot; test-day strategy</div>
-        <span class="go">Explore the program &rarr;</span>
-      </div>
-    </a>
-    <a class="offer rv d2" href="math-program.html">
-      <div class="ph phmark"><div class="gmark"><span class="gg" style="font-size:clamp(4.4rem,8vw,7rem)">&#8747;</span><span class="gs">Algebra 1 &rarr; Multivariable</span></div></div>
-      <div class="in">
-        <div class="k">Mathematics</div>
+  <div class="pg">
+
+    <a class="pgcard rv" href="math-program.html">
+      <span class="pgglyph" aria-hidden="true">
+        <span class="pgart"><svg viewBox="0 0 240 190" role="img" aria-hidden="true">
+            <g class="grid"><path d="M20 30h200M20 70h200M20 110h200M20 150h200"/><path d="M60 18v146M100 18v146M140 18v146M180 18v146"/></g>
+            <path class="fillrd" d="M52 150 C90 150 96 74 128 58 C158 43 178 74 196 100 L196 150 Z"/>
+            <path class="ln" d="M40 152 C86 152 94 70 128 54 C160 39 182 72 202 104"/>
+            <path class="ln-2" d="M20 164h204M28 18v150"/>
+            <path class="ln-2" d="M52 150v14M196 150v14" stroke-dasharray="3 5"/>
+            <text class="sym" x="120" y="50" font-family="Georgia, 'Times New Roman', serif" font-size="30" font-style="italic"><tspan font-size="52" dy="4">&#8747;</tspan><tspan dy="-4" dx="3">f(x)</tspan><tspan dx="2">dx</tspan></text>
+          </svg></span>
+        <span class="pgsub">Algebra 1 &rarr; Multivariable</span>
+      </span>
+      <span class="pgveil" aria-hidden="true"></span>
+      <div class="pgbody">
+        <span class="pgk">Mathematics</span>
         <h3>The Math Mastery Program</h3>
-        <p>Not homework help. A diagnostic-driven curriculum built around your student&rsquo;s actual course and textbook, with support between sessions and a guarantee tied to the grade.</p>
-        <div class="cov">Algebra 1 &middot; Geometry &middot; Algebra 2 &middot; Precalculus &middot; AP Calculus AB &amp; BC &middot; AP Statistics &middot; Multivariable Calculus &middot; IB Mathematics</div>
-        <span class="go">Explore the program &rarr;</span>
+        <div class="pgdrawer"><div>
+          <p>Not homework help. A diagnostic-driven curriculum built around your student&rsquo;s actual course and textbook, with support between sessions and a guarantee tied to the grade.</p>
+          <span class="pgcov">Algebra 1 &middot; Geometry &middot; Algebra 2 &middot; Precalculus &middot; AP Calculus AB &amp; BC &middot; AP Statistics &middot; Multivariable &middot; IB Mathematics</span>
+          <span class="pggo">Explore the program &rarr;</span>
+        </div></div>
       </div>
     </a>
-    <a class="offer rv d3" href="applications.html">
-      <div class="ph phmark"><div class="gmark"><span class="gg" style="font-size:clamp(3.2rem,6vw,5.2rem)">650</span><span class="gs">words, personal statement</span></div></div>
-      <div class="in">
-        <div class="k">College Admissions</div>
+
+    <a class="pgcard pgcard--lead rv d1" href="prep-course.html">
+      <span class="pgglyph" aria-hidden="true"><b>SAT<sup>&reg;</sup></b><span class="pgsub">the digital test</span></span>
+      <span class="pgveil" aria-hidden="true"></span>
+      <div class="pgbody">
+        <span class="pgk">College entrance exams</span>
+        <h3>The 12-Week SAT&reg; Program</h3>
+        <div class="pgdrawer"><div>
+          <p>Twelve weekly one-on-one sessions built from your student&rsquo;s diagnostic, with full-length timed testing, weekly office hours, and a written update to you every week.</p>
+          <span class="pgcov">SAT&reg; &middot; PSAT/NMSQT&reg; &middot; AP &amp; IB exams &middot; test-day strategy</span>
+          <span class="pggo">Explore the program &rarr;</span>
+        </div></div>
+      </div>
+    </a>
+
+    <a class="pgcard rv d2" href="applications.html">
+      <span class="pgglyph" aria-hidden="true">
+        <span class="pgart"><svg viewBox="0 0 240 190" role="img" aria-hidden="true">
+            <rect class="page" x="46" y="12" width="150" height="164" rx="4" transform="rotate(-4 121 94)" opacity=".5"/>
+            <rect class="page" x="56" y="20" width="150" height="164" rx="4"/>
+            <g class="rule"><path d="M74 62h114M74 80h114M74 98h92"/></g>
+            <path class="rule-rd" d="M74 116h74"/>
+            <g class="rule"><path d="M74 134h114M74 152h58" opacity=".55"/></g>
+            <text class="sym" x="74" y="50" font-family="Georgia, serif" font-size="52" text-anchor="start">&#8220;</text>
+          </svg></span>
+        <span class="pgsub">the personal statement</span>
+      </span>
+      <span class="pgveil" aria-hidden="true"></span>
+      <div class="pgbody">
+        <span class="pgk">College admissions</span>
         <h3>Essays &amp; Applications</h3>
-        <p>One-on-one coaching for the personal statement and every supplemental &mdash; brainstorming, structure, and real revision. Your student writes every word; we make sure every word earns its place.</p>
-        <div class="cov">Personal statement &middot; supplementals for every school &middot; deadline tracking &middot; rolling enrollment</div>
-        <span class="go">Explore the program &rarr;</span>
+        <div class="pgdrawer"><div>
+          <p>One-on-one coaching for the personal statement and every supplemental &mdash; brainstorming, structure, and real revision. Your student writes every word; we make sure every word earns its place.</p>
+          <span class="pgcov">Personal statement &middot; supplementals for every school &middot; deadline tracking &middot; rolling enrollment</span>
+          <span class="pggo">Explore the program &rarr;</span>
+        </div></div>
       </div>
     </a>
+
   </div>
 </div></section>
 
@@ -793,24 +1054,28 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
     <div class="lbl">Testimonials</div>
     <h2>In their words.</h2>
   </div>
-  <div class="tgrid">
-    <figure class="tq rv">
+
+  <div class="tdeck rv" id="tdeck" role="group" aria-label="What families say">
+    <figure class="tcard">
       <blockquote>My daughter has gone from a <span class="tgain">C</span> to an <span class="tgain">A</span> grade student in math. I truly can&rsquo;t say enough praise for Luca. He is calm, sensitive, and able to customize his tutoring to achieve the needed learning. My daughter now feels confident in math and proud of her accomplishments.</blockquote>
       <figcaption>Patti M., parent</figcaption>
     </figure>
-    <figure class="tq rv d1">
+    <figure class="tcard">
       <blockquote>She improved her SAT Math score by approximately <span class="tgain">200 points</span>, exceeding our expectations. One of Luca&rsquo;s greatest strengths is his ability to quickly identify a student&rsquo;s knowledge gaps and develop a structured, personalized lesson plan. He was always professional, punctual, and prepared for every session.</blockquote>
       <figcaption>Michele C., parent</figcaption>
     </figure>
-    <figure class="tq rv d2">
+    <figure class="tcard">
       <blockquote>They went into test day feeling confident and <span class="tgain">scored a 1520</span>! Luca&rsquo;s tutoring was incredibly engaging and completely transformed how my child approached studying. I cannot recommend it enough to any parent looking to help their child succeed.</blockquote>
       <figcaption>Jessie C., parent</figcaption>
     </figure>
-    <figure class="tq rv d3">
+    <figure class="tcard">
       <blockquote>If anyone can help you tolerate math and actually master the skill, it&rsquo;s Luca! He took the time to break down the underlying concepts, never moving on until he was certain I fully understood. Thanks to Luca, I went from a student who was barely passing with a <span class="tgain">D</span> to someone who actually enjoys math.</blockquote>
       <figcaption>A student</figcaption>
     </figure>
   </div>
+
+  <div class="tdots" id="tdots" role="tablist" aria-label="Choose a review"></div>
+
   <p class="rv d2" style="margin-top:clamp(1.6rem,3vw,2.4rem);font-size:.86rem"><a href="testimonials.html" class="morelink">Read every review &rarr;</a></p>
 </div></section>
 
@@ -819,8 +1084,8 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
     <div class="pic rv"><img src="Portrait.jpg" alt="Luca Moretti" loading="lazy"></div>
     <div class="rv d1">
       <div class="lbl">Your instructor</div>
-      <h2 style="font-family:var(--display);font-size:clamp(1.55rem,2.9vw,2.2rem);margin-top:.65rem;line-height:1.16">Luca Moretti &mdash; founder, and the person who teaches every session.</h2>
-      <p style="margin-top:1.15rem;font-size:.96rem;max-width:56ch">Generic tutoring explains tonight&rsquo;s assignment and expires the moment the hour ends. Every plan here starts with a real diagnostic, adapts as a student improves, and is backed by a private portal &mdash; adaptive practice, a weak-spot tracker, and a running log of every missed question &mdash; so we are always working on exactly what is costing points.</p>
+      <h2 class="ihed">Luca Moretti &mdash; founder, and the person who teaches every session.</h2>
+      <p class="ilead">Every session is taught by me. Not an assistant, not a rotating staff. I read the diagnostic, I build the plan, and I sit with your student for all twelve weeks &mdash; which is the only way a plan actually adapts as they improve, rather than being handed off and repeated.</p>
       <div class="creds">
         <span>Northwestern University, B.A. Statistics &mdash; in three years</span>
         <span>Dean&rsquo;s List</span>
@@ -861,8 +1126,15 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
 <section id="start" class="capture"><div class="shell">
   <div class="capside">
     <div class="lbl rv" style="color:rgba(237,231,229,.55)">Reserve your seat</div>
-    <h2 class="rv d1">Ready to get started?</h2>
-    <p class="lead rv d2">A strategy call within 24 hours, then the free diagnostic. No charge either way.</p>
+    <h2 class="rv d1">Start with the diagnostic. Decide after you have seen it.</h2>
+    <p class="lead rv d2">A strategy call within 24 hours, then a full-length diagnostic at no charge. You will have the report &mdash; and the plan that comes out of it &mdash; before anyone asks you for a decision.</p>
+
+    <div class="capsteps rv d2">
+      <div class="capstep"><i>01</i><div><b>You send this form</b><span>Two minutes, and no payment details at any point.</span></div></div>
+      <div class="capstep"><i>02</i><div><b>We talk within 24 hours</b><span>With me, not a coordinator, and about your student specifically.</span></div></div>
+      <div class="capstep"><i>03</i><div><b>The diagnostic, free</b><span>A real timed test, and the written plan it produces. Then you decide.</span></div></div>
+    </div>
+
     <a class="phonebox rv d3" href="tel:2012752791">
       <span class="pl">Prefer to talk now?</span>
       <span class="pn">(201) 275-2791</span>
@@ -908,7 +1180,7 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
 </div></section>
 
 <footer><div class="shell">
-  <div>
+  <div class="footer-id">
     <p>Moretti Test Prep &amp; Tutoring, located in Cranford NJ</p>
     <a href="tel:2012752791" class="footer-phone">(201) 275-2791</a>
     <div class="footer-links">
@@ -978,13 +1250,23 @@ mtaSafe(function(){
   var io=new IntersectionObserver(function(en){
     en.forEach(function(x){ if(x.isIntersecting){show(x.target);io.unobserve(x.target);} });
   },{rootMargin:'0px 0px -8% 0px',threshold:.08});
+  var ioStrict=new IntersectionObserver(function(en){
+    en.forEach(function(x){ if(x.isIntersecting){show(x.target);ioStrict.unobserve(x.target);} });
+  },{rootMargin:'0px 0px -12% 0px',threshold:.35});
   els.forEach(function(e){
-    if(e.getBoundingClientRect().top < window.innerHeight*0.95) show(e); else io.observe(e);
+    var strict=e.classList.contains('rv-strict');
+    if(!strict && e.getBoundingClientRect().top < window.innerHeight*0.95) show(e);
+    else (strict?ioStrict:io).observe(e);
   });
   window.addEventListener('load',function(){
-    els.forEach(function(e){ if(e.getBoundingClientRect().top<window.innerHeight) show(e); });
+    els.forEach(function(e){
+      if(e.classList.contains('rv-strict')) return;
+      if(e.getBoundingClientRect().top<window.innerHeight) show(e);
+    });
   });
-  setTimeout(function(){ els.forEach(show); },4000);
+  setTimeout(function(){
+    els.forEach(function(e){ if(!e.classList.contains('rv-strict')) show(e); });
+  },4000);
 });
 
 
@@ -1010,19 +1292,144 @@ mtaSafe(function(){
   if(now-seen>DAY) setTimeout(open,700);
 });
 
+/* ── the trio is sized to the headline itself: it runs to the end of the
+      longest line rather than the full width of the page ── */
+mtaSafe(function(){
+  var trio=document.querySelector('.trio'),
+      lines=[].slice.call(document.querySelectorAll('h1 .ln'));
+  if(!trio||!lines.length) return;
+  function fit(){
+    if(window.matchMedia('(max-width:820px)').matches){ trio.style.removeProperty('--trioW'); return; }
+    var w=0;
+    lines.forEach(function(l){
+      var r=document.createRange(); r.selectNodeContents(l);
+      w=Math.max(w, r.getBoundingClientRect().width);
+    });
+    if(w>0) trio.style.setProperty('--trioW', Math.round(w)+'px');
+  }
+  fit();
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(fit);
+  var t=0;
+  addEventListener('resize',function(){ clearTimeout(t); t=setTimeout(fit,120); },{passive:true});
+});
+
+/* ── the panels take turns opening on their own, until the cursor takes over.
+      Starts a second after the last one has finished arriving. ── */
+mtaSafe(function(){
+  var trio=document.querySelector('.trio');
+  if(!trio) return;
+  var tiles=[].slice.call(trio.querySelectorAll('.tri'));
+  if(tiles.length<2) return;
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if(window.matchMedia('(max-width:820px)').matches) return;
+  var START=6400, DWELL=3000, i=-1, held=false, timer=0;
+  function clear(){ tiles.forEach(function(t){ t.classList.remove('is-open'); }); }
+  function tick(){
+    if(!held && !document.hidden){
+      clear();
+      i=(i+1)%tiles.length;
+      tiles[i].classList.add('is-open');
+    }
+    timer=setTimeout(tick, DWELL);
+  }
+  timer=setTimeout(tick, START);
+  // a real hover wins: drop the automatic one and hold until the cursor leaves
+  trio.addEventListener('pointerenter',function(){ held=true; clear(); },{passive:true});
+  trio.addEventListener('pointerleave',function(){ held=false; },{passive:true});
+  document.addEventListener('visibilitychange',function(){ if(document.hidden) clear(); });
+});
+
+
+
+/* ── the testimonial deck: the top card is read, the pile advances behind it ── */
+mtaSafe(function(){
+  var deck=document.getElementById('tdeck'), dots=document.getElementById('tdots');
+  if(!deck) return;
+  var cards=[].slice.call(deck.querySelectorAll('.tcard'));
+  if(cards.length<2) return;
+  var i=0, held=false, timer=0,
+      reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function paint(prev){
+    cards.forEach(function(c,k){
+      var off=(k-i+cards.length)%cards.length;
+      // the card just left sails up and out rather than dropping to the back
+      if(k===prev && off!==0) c.setAttribute('data-pos','out');
+      else c.setAttribute('data-pos', off>3?'3':String(off));
+      c.setAttribute('aria-hidden', off===0?'false':'true');
+    });
+    if(dots) [].forEach.call(dots.children,function(b,k){ b.setAttribute('aria-current',k===i?'true':'false'); });
+  }
+  function go(n){ var prev=i; i=(n+cards.length)%cards.length; paint(prev); }
+  if(dots){
+    cards.forEach(function(c,k){
+      var b=document.createElement('button');
+      b.type='button'; b.setAttribute('aria-label','Review '+(k+1)+' of '+cards.length);
+      b.addEventListener('click',function(e){ e.stopPropagation(); go(k); });
+      dots.appendChild(b);
+    });
+  }
+  paint(-1);
+  deck.addEventListener('click',function(){ go(i+1); });
+  deck.addEventListener('pointerenter',function(){ held=true; },{passive:true});
+  deck.addEventListener('pointerleave',function(){ held=false; },{passive:true});
+  function tick(){ if(!held && !document.hidden) go(i+1); timer=setTimeout(tick,6500); }
+  if(!reduce) timer=setTimeout(tick,6500);
+});
+
+/* ── the instruments tour: sliding pill, blurred cross-fade, self-advancing
+      until a click or a hover puts someone else in charge ── */
+mtaSafe(function(){
+  var root=document.getElementById('vizTour'); if(!root) return;
+  var tabs=[].slice.call(root.querySelectorAll('.vt-tab')),
+      figs=[].slice.call(root.querySelectorAll('.vt-figs > *')),
+      caps=[].slice.call(root.querySelectorAll('.vt-caps > *')),
+      pill=root.querySelector('.vt-pill');
+  if(tabs.length<2||!pill) return;
+  var i=0, timer=0, auto=true, held=false,
+      reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function movePill(){
+    var t=tabs[i];
+    pill.style.width=t.offsetWidth+'px';
+    pill.style.height=t.offsetHeight+'px';
+    pill.style.transform='translate('+t.offsetLeft+'px,'+t.offsetTop+'px)';
+  }
+  function go(nx){
+    i=(nx+tabs.length)%tabs.length;
+    tabs.forEach(function(t,k){ t.setAttribute('aria-selected',k===i?'true':'false'); t.tabIndex=k===i?0:-1; });
+    figs.forEach(function(f,k){ f.classList.toggle('on',k===i); });
+    caps.forEach(function(c,k){ c.classList.toggle('on',k===i); c.hidden=false; });
+    movePill();
+  }
+  function tick(){
+    if(auto && !held && !document.hidden) go(i+1);
+    timer=setTimeout(tick,4600);
+  }
+  go(0);
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(movePill);
+  addEventListener('resize',movePill,{passive:true});
+  tabs.forEach(function(t,k){
+    t.addEventListener('click',function(){ auto=false; go(k); });
+    t.addEventListener('keydown',function(e){
+      if(e.key!=='ArrowRight'&&e.key!=='ArrowLeft') return;
+      e.preventDefault(); auto=false; go(i+(e.key==='ArrowRight'?1:-1)); tabs[i].focus();
+    });
+  });
+  root.addEventListener('pointerenter',function(){ held=true; },{passive:true});
+  root.addEventListener('pointerleave',function(){ held=false; },{passive:true});
+  if(!reduce) timer=setTimeout(tick,4600);
+});
+
 /* ── hero crosshair: eases toward the cursor instead of snapping to it ── */
 mtaSafe(function(){
   var hero=document.querySelector('.hero'), x=document.getElementById('xhair');
   if(!hero||!x) return;
   if(window.matchMedia('(hover:none)').matches) return;
   if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  var h=x.querySelector('.xh'), v=x.querySelector('.xv'), d=x.querySelector('.xdot');
+  var cross=x.querySelector('.xcross'); if(!cross) return;
   var tx=0,ty=0,cx=0,cy=0,on=false,raf=0;
   function loop(){
     cx+=(tx-cx)*0.014; cy+=(ty-cy)*0.014;
-    h.style.transform='translateY('+(cy-0.5)+'px)';
-    v.style.transform='translateX('+(cx-0.5)+'px)';
-    d.style.transform='translate('+cx+'px,'+cy+'px)';
+    cross.style.translate=cx+'px '+cy+'px';
     if(Math.abs(tx-cx)>0.25||Math.abs(ty-cy)>0.25){ raf=requestAnimationFrame(loop); } else { raf=0; }
   }
   hero.addEventListener('pointermove',function(e){
@@ -1234,14 +1641,35 @@ mtaSafe(function(){
   })();
 });
 
-/* ── gold ticker ── */
+/* ── testimonial ticker, out of the video's right edge ── */
 mtaSafe(function(){
-  var items=['Scored a <b>1520</b>','<b>+200</b> points SAT Math','<b>C</b> to an <b>A</b> in math','<b>+140</b> points, math','<b>D</b> to a <b>B</b>, finals passed','1500+ SAT instructor','Northwestern statistics','8+ years teaching','Score guarantee in writing'];
+  var items=[
+    ['Actually <strong>enjoys math</strong> now','A Student'],
+    ['Got the score I wanted','A Student'],
+    ['<strong>C to an A</strong> in math','Patti M.'],
+    ['Scored a <strong>1520</strong>!','Jessie C.'],
+    ['<strong>+200 points</strong> on SAT Math','Michele C.'],
+    ['<strong>D to a B</strong>, finals passed','A Student']
+  ];
   var t=document.getElementById('tick'); if(!t) return;
   var h='';
   for(var p=0;p<2;p++) for(var i=0;i<items.length;i++)
-    h+='<span class="tickeritem">'+items[i]+'</span><span class="tickersep">&#9670;</span>';
+    h+='<span class="tickeritem">&ldquo;'+items[i][0]+'&rdquo;<span class="tauth">'+items[i][1]+'</span></span><span class="tickersep">&#9670;</span>';
   t.innerHTML=h;
+});
+
+/* Hovering slows the strip. Swapping animation-duration in CSS makes it jump —
+   the elapsed time is re-read against the new duration — so the running
+   animation's playback rate is changed instead, which keeps its position. */
+mtaSafe(function(){
+  var band=document.querySelector('.tickerband'), track=document.getElementById('tick');
+  if(!band||!track||!track.getAnimations) return;
+  function rate(r){
+    var a=track.getAnimations()[0]; if(!a) return;
+    if(a.updatePlaybackRate) a.updatePlaybackRate(r); else a.playbackRate=r;
+  }
+  band.addEventListener('pointerenter',function(){ rate(0.3); },{passive:true});
+  band.addEventListener('pointerleave',function(){ rate(1); },{passive:true});
 });
 
 
@@ -1318,7 +1746,7 @@ mtaSafe(function(){
     if(wait){ setTimeout(function(){ el.removeAttribute('data-delay'); el.dataset.done=''; run(el); }, wait); return; }
     var to=+el.getAttribute('data-count'), from=+(el.getAttribute('data-from')||0);
     if(reduce){ el.textContent=to; return; }
-    var t0=null, dur=2400;
+    var t0=null, dur=3600;
     function step(ts){
       if(!t0)t0=ts;
       var k=Math.min(1,(ts-t0)/dur);
