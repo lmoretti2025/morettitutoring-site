@@ -99,6 +99,29 @@ window.MorettiAuth = (function () {
   var pollTimer = null;
   var wasPending = false;  // so a claim that gets DECLINED reads as declined, not as "enter a key"
   var nameAsked = false;   // one ask only — see the needsName branch in handle()
+  /* ═══ MODAL MODE ═══ set by the marketing site (index.html) before this
+     file loads:  window.MORETTI_AUTH_MODE = 'modal'.
+
+     Same flow, different frame. On the portal this file owns the whole
+     window: it paints an opaque surface over a page nobody may see yet,
+     wraps fetch so the portal's own calls carry the session, and hides the
+     red nav until a student is in. On the home page it owns nothing --
+     it is a dialog over a public page that was already working before it
+     opened, and every one of those three behaviours would be wrong there
+     (an opaque overlay, a wrapper around the lead form's POSTs, and a
+     hidden site nav). So each is gated on this, and nothing else changes:
+     the panes, the backend calls and the session are literally the same. */
+  var MODAL = false;
+  try { MODAL = (window.MORETTI_AUTH_MODE === 'modal'); } catch (e) {}
+
+  /* Every animation below is skipped when the device asks for less motion.
+     Read once: this is a preference, not a state to poll. */
+  var REDUCE = false;
+  try {
+    REDUCE = window.matchMedia &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  } catch (e) {}
+
   var host = null;
   var invite = null;       // the ?invite= token, if this visit came from an invite email
   var resumedStudent = null; // a live session already on this device, when it belongs to the invited student
@@ -398,6 +421,92 @@ window.MorettiAuth = (function () {
     return post({ action: 'resume', session: token });
   }
 
+  /* The card chrome, and the ONLY CSS this file ships. Everything inside
+     the card is still index.html's own classes (see the file header); these
+     rules add the card itself -- a muted outer shell holding a white inner
+     panel -- and are scoped to #mta-auth so nothing else on the portal can
+     be reached by them. */
+  function injectCardStyles() {
+    if (document.getElementById('mta-auth-css')) return;
+    var st = document.createElement('style');
+    st.id = 'mta-auth-css';
+    st.textContent =
+      '#mta-auth .panel{max-width:420px;}' +
+      '#mta-auth .mta-card{background:#eae6e0;border:1px solid var(--border,rgba(17,17,17,0.12));' +
+        'border-radius:28px;padding:8px;box-shadow:0 18px 44px rgba(17,17,17,0.08);}' +
+      '#mta-auth .mta-card-inner{background:var(--white,#fff);border-radius:22px;' +
+        'padding:2.25rem 1.6rem 1.9rem;box-shadow:0 2px 4px rgba(17,17,17,0.10);}' +
+      '#mta-auth .mta-card-foot{padding:0.95rem 1rem 0.55rem;text-align:center;' +
+        'font-size:0.74rem;line-height:1.7;color:var(--faint,rgba(17,17,17,0.28));}' +
+      '#mta-auth .kicker{margin-bottom:0.9rem;}' +
+      '#mta-auth .panel-sub{margin-bottom:1.5rem;}' +
+      '#mta-auth .key-help{margin-top:1.1rem;}' +
+      '#mta-auth .key-btn{border-radius:10px;}' +
+      '#mta-auth .key-input{border-radius:10px;}' +
+      '@media (max-width:420px){#mta-auth .mta-card-inner{padding:1.9rem 1.1rem 1.5rem;}}' +
+
+      /* MODAL ONLY. On the portal every class below is already defined by
+         index.html and this file deliberately borrows them; the home page
+         has none of them, so the dialog has to bring its own. Scoped to
+         .mta-modal so the portal's versions are never overridden. */
+      /* index-v2.html's modal easing, deliberately: --ease for the backdrop,
+         --springy for the card, so the dialog moves like the rest of the
+         redesign instead of inventing a third motion language. */
+      '#mta-auth.mta-modal{backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);' +
+        'animation:mta-fade .35s cubic-bezier(.22,1,.36,1) both;}' +
+      '@keyframes mta-fade{from{opacity:0;}to{opacity:1;}}' +
+      '#mta-auth.mta-modal .mta-card{animation:mta-rise .5s cubic-bezier(.16,1.2,.3,1) both;}' +
+      '@keyframes mta-rise{from{opacity:0;transform:translateY(20px) scale(.97);}' +
+        'to{opacity:1;transform:none;}}' +
+      // One pane replacing another inside the card (see pane()).
+      '@keyframes mta-pane-in{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}' +
+      // Closing: the reverse, short enough not to be in the way.
+      '#mta-auth.mta-modal.mta-closing{animation:mta-fade .18s ease-in reverse both;}' +
+      '#mta-auth.mta-modal.mta-closing .mta-card{animation:mta-rise .18s ease-in reverse both;}' +
+      '#mta-auth.mta-modal .mta-card-inner{position:relative;}' +
+      '#mta-auth.mta-modal .mta-close{position:absolute;top:0.5rem;right:0.6rem;width:32px;height:32px;' +
+        'border:none;background:none;font-size:1.5rem;line-height:1;cursor:pointer;' +
+        'color:rgba(17,17,17,0.35);padding:0;}' +
+      '#mta-auth.mta-modal .mta-close:hover{color:rgba(17,17,17,0.7);}' +
+      '#mta-auth.mta-modal .panel{font-family:var(--hel,\'Poppins\',Helvetica,Arial,sans-serif);}' +
+      '#mta-auth.mta-modal .kicker{display:flex;align-items:center;justify-content:center;gap:0.45rem;' +
+        'font-size:0.58rem;font-weight:600;letter-spacing:0.24em;text-transform:uppercase;' +
+        'color:var(--red,#B0271C);}' +
+      '#mta-auth.mta-modal .kicker::before{content:\'\\25C6\';font-size:0.4rem;}' +
+      '#mta-auth.mta-modal .panel-hed{font-family:var(--display,Georgia,serif);font-weight:700;' +
+        'font-size:clamp(1.5rem,3vw,2rem);line-height:1.3;color:var(--text,#111);margin:0 0 0.75rem;}' +
+      '#mta-auth.mta-modal .panel-sub{font-size:0.88rem;line-height:1.75;' +
+        'color:var(--mid,rgba(17,17,17,0.58));margin:0 0 1.5rem;}' +
+      '#mta-auth.mta-modal .key-input{width:100%;font-family:inherit;font-size:1rem;letter-spacing:0.06em;' +
+        'text-align:center;text-transform:uppercase;padding:1.05rem 1.2rem;border-radius:10px;' +
+        'border:1px solid var(--border,rgba(17,17,17,0.12));background:#fff;color:var(--text,#111);' +
+        'margin-bottom:1rem;}' +
+      '#mta-auth.mta-modal .key-input:focus{outline:none;border-color:var(--red,#B0271C);}' +
+      '#mta-auth.mta-modal .key-btn{display:block;width:100%;background:var(--red,#B0271C);color:#fff;' +
+        'font-family:inherit;font-size:0.78rem;font-weight:700;letter-spacing:0.14em;' +
+        'text-transform:uppercase;padding:1.05rem;border:none;border-radius:10px;cursor:pointer;}' +
+      '#mta-auth.mta-modal .key-btn:hover{opacity:0.86;}' +
+      '#mta-auth.mta-modal .mta-stay-secondary{background:transparent;color:var(--mid,rgba(17,17,17,0.58));' +
+        'border:1px solid var(--border,rgba(17,17,17,0.12));}' +
+      '#mta-auth.mta-modal .mta-stay-row{display:flex;gap:0.7rem;}' +
+      '#mta-auth.mta-modal .mta-stay-list{list-style:none;margin:0 0 1.6rem;padding:0;text-align:left;' +
+        'display:flex;flex-direction:column;gap:0.6rem;font-size:0.86rem;' +
+        'color:var(--mid,rgba(17,17,17,0.58));}' +
+      '#mta-auth.mta-modal .key-error{display:none;font-size:0.78rem;color:var(--red,#B0271C);' +
+        'margin:0 0 1rem;line-height:1.6;}' +
+      '#mta-auth.mta-modal .key-help{font-size:0.75rem;line-height:1.7;' +
+        'color:var(--faint,rgba(17,17,17,0.28));}' +
+      '#mta-auth.mta-modal .key-help a,#mta-auth.mta-modal .panel-sub a{color:var(--red,#B0271C);}' +
+
+      /* Nothing above is load-bearing: every pane is already in its final
+         position before its animation runs, so removing the motion removes
+         only the motion. */
+      '@media (prefers-reduced-motion:reduce){' +
+        '#mta-auth .mta-card,#mta-auth.mta-modal,#mta-auth.mta-modal .mta-card,' +
+        '#mta-auth .mta-card-inner>div{animation:none!important;transition:none!important;}}';
+    document.head.appendChild(st);
+  }
+
   /* ═══ THE SIGN-IN SURFACE ═══ built, not marked up — see the file header.
      One container, three panes, only one visible at a time. */
   function ensureHost() {
@@ -406,9 +515,21 @@ window.MorettiAuth = (function () {
     host.id = 'mta-auth';
     host.setAttribute('style',
       'position:fixed;inset:0;z-index:9000;display:flex;align-items:center;' +
-      'justify-content:center;padding:2rem 1.5rem;background:#fff;overflow-y:auto;');
+      'justify-content:center;padding:2rem 1.25rem;overflow-y:auto;background:' +
+      (MODAL ? 'rgba(17,17,17,0.55)' : 'var(--bg,#f2f2f2)') + ';');
+    if (MODAL) {
+      host.className = 'mta-modal';
+      host.setAttribute('role', 'dialog');
+      host.setAttribute('aria-modal', 'true');
+      host.setAttribute('aria-label', 'Student sign-in');
+    }
+    injectCardStyles();
     host.innerHTML =
       '<div class="panel" style="text-align:center;">' +
+       '<div class="mta-card">' +
+        '<div class="mta-card-inner">' +
+        (MODAL ? '<button type="button" id="mta-close" class="mta-close" ' +
+          'aria-label="Close sign-in">&times;</button>' : '') +
         '<div class="kicker">Student Portal</div>' +
 
         /* An invite link opened on a device already signed in AS THE SAME
@@ -501,6 +622,12 @@ window.MorettiAuth = (function () {
           '<p class="key-help"><a href="#" id="mta-stay-never">Don\'t ask again</a></p>' +
         '</div>' +
 
+        '</div>' +
+        /* Outside the white card, on the muted band -- the one line that is
+           true on every pane, so it never has to be repeated inside them. */
+        '<div class="mta-card-foot">Stuck? ' +
+          CONTACT.charAt(0).toUpperCase() + CONTACT.slice(1) + '.</div>' +
+       '</div>' +
       '</div>';
     document.body.appendChild(host);
 
@@ -535,6 +662,18 @@ window.MorettiAuth = (function () {
       resumedStudent = null; session = null; writeStore(null);
       pane('who');
     });
+    /* A dialog over a working page has to be leaveable -- the close button,
+       the backdrop and Escape all mean the same thing. On the portal there
+       is nothing behind it to go back to, so none of this is wired up. */
+    if (MODAL) {
+      host.querySelector('#mta-close').addEventListener('click', closeModal);
+      host.addEventListener('click', function (e) { if (e.target === host) closeModal(); });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && host && host.style.display !== 'none') closeModal();
+        else trapFocus(e);
+      });
+    }
+
     host.querySelector('#mta-who-student').addEventListener('click', function () { renderSignIn(); });
     host.querySelector('#mta-who-parent').addEventListener('click', function (e) {
       e.preventDefault();
@@ -562,17 +701,108 @@ window.MorettiAuth = (function () {
     return host;
   }
 
+  /* ═══ ONE PANE TO THE NEXT ═══ the panes are the same card with different
+     contents, and swapping display:none for display:block made the card
+     snap to a new height with the new text already in place -- the roughest
+     moment in the whole flow, and it happens on every step of it.
+
+     So: measure, swap, measure, and let the card travel between the two
+     heights while the incoming pane fades up under it. Pure decoration --
+     the display swap is still synchronous and still the thing that decides
+     what is on screen, so nothing downstream has to wait for or know about
+     the animation. Skipped outright under prefers-reduced-motion. */
+  var paneAnim = null;
   function pane(which) {
     ensureHost();
+    var card = host.querySelector('.mta-card-inner');
+    var from = (!REDUCE && host.style.display !== 'none' && card) ? card.offsetHeight : 0;
+
     ['continue', 'who', 'signin', 'key', 'name', 'pending', 'stay'].forEach(function (p) {
       host.querySelector('#mta-' + p).style.display = (p === which) ? 'block' : 'none';
     });
     host.style.display = 'flex';
+
+    if (from) {
+      if (paneAnim) { clearTimeout(paneAnim); paneAnim = null; }
+      card.style.height = 'auto';
+      var to = card.offsetHeight;
+      if (to !== from) {
+        card.style.overflow = 'hidden';
+        card.style.height = from + 'px';
+        card.getBoundingClientRect();                 // commit the start height
+        card.style.transition = 'height .38s cubic-bezier(.16,1,.3,1)';
+        card.style.height = to + 'px';
+      }
+      /* Cleared on a timer rather than transitionend: the height is set to
+         auto afterwards precisely because the content may still change
+         (a status line, an error), and a transition that never fires --
+         identical heights, an interrupted swap -- must not leave the card
+         pinned to a stale pixel height. */
+      paneAnim = setTimeout(function () {
+        card.style.transition = ''; card.style.height = ''; card.style.overflow = '';
+        paneAnim = null;
+      }, 420);
+      var el = host.querySelector('#mta-' + which);
+      el.style.animation = 'none';
+      el.getBoundingClientRect();
+      el.style.animation = 'mta-pane-in .34s cubic-bezier(.16,1,.3,1) both';
+    }
+  }
+
+  /* Shut the dialog and give the page back: the poll has to stop (it is a
+     4s timer against the backend that would otherwise keep running behind a
+     closed dialog) and the scroll lock has to come off. Nothing about the
+     session is touched -- closing is "not now", not "sign me out". */
+  function closeModal() {
+    stopPoll();
+    if (REDUCE || !host) { hide(); return; }
+    /* Let it fall away rather than blink out. hide() is still what actually
+       ends it -- the class only buys the 180ms of animation before it. */
+    host.classList.add('mta-closing');
+    setTimeout(function () {
+      if (host) host.classList.remove('mta-closing');
+      hide();
+    }, 180);
+  }
+
+  /* ═══ THE HOME-PAGE ENTRY POINT ═══ opens the same sign-in as a dialog.
+     Deliberately NOT start(): start() is the portal's boot sequence, which
+     resumes a session and hands the student to the page it is sitting on.
+     Here there is no portal to hand them to -- the caller passes an
+     onStudent that sends them to one. */
+  var returnFocusTo = null;
+  function openSignIn(opts) {
+    onStudent = (opts && opts.onStudent) || function () {};
+    ensureHost();
+    invite = takeInviteFromUrl();
+    try { document.documentElement.style.overflow = 'hidden'; } catch (e) {}
+    /* Whatever was clicked to open this gets the focus back when it closes,
+       so a keyboard visitor is returned to the link they were on rather than
+       to the top of the page. */
+    try { returnFocusTo = document.activeElement; } catch (e) { returnFocusTo = null; }
+    var p = Promise.resolve(renderSignIn());
+    try { host.querySelector('#mta-close').focus(); } catch (e) {}
+    return p;
+  }
+
+  // Tab must not walk out of a modal dialog into the page behind it.
+  function trapFocus(e) {
+    if (e.key !== 'Tab' || !host || host.style.display === 'none') return;
+    var f = host.querySelectorAll('a[href], button:not([disabled]), input, iframe, [tabindex]:not([tabindex="-1"])');
+    if (!f.length) return;
+    var first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
   }
 
   function hide() {
     stopPoll();
     if (host) host.style.display = 'none';
+    if (MODAL) {
+      try { document.documentElement.style.overflow = ''; } catch (e) {}
+      try { if (returnFocusTo && returnFocusTo.focus) returnFocusTo.focus(); } catch (e) {}
+      returnFocusTo = null;
+    }
     // Handing off to the portal: give the page its chrome back and let
     // index.html's own onboarding take over hiding it if it wants to.
     document.documentElement.classList.remove('mta-auth-pending');
@@ -906,7 +1136,7 @@ window.MorettiAuth = (function () {
       target.innerHTML = '';
       google.accounts.id.renderButton(target, {
         theme: 'outline', size: 'large', text: 'signin_with',
-        shape: 'rectangular', logo_alignment: 'left', width: 280
+        shape: 'pill', logo_alignment: 'left', width: 300
       });
       /* Say it BEFORE they try, when we can already tell: the button will
          render here and simply do nothing when tapped. */
@@ -1086,6 +1316,7 @@ window.MorettiAuth = (function () {
      time. (It used to suppress the retired key-entry panel too; that markup
      has since been deleted outright.) */
   (function hideNavUntilSignedIn() {
+    if (MODAL) return;   // #main-nav on the home page is that site's own nav
     try {
       var st = document.createElement('style');
       st.id = 'mta-hide-nav-until-signed-in';
@@ -1103,10 +1334,20 @@ window.MorettiAuth = (function () {
     } catch (e) { /* if this fails the overlay still covers it, just later */ }
   })();
 
-  installFetchWrapper();
+  /* Not in modal mode: the home page's only backend call is the lead form,
+     which is nobody's session and must not be given one -- nor should a
+     stray `unauthorized` from it be able to trip onSessionDead() and reload
+     the page out from under a visitor mid-form. */
+  if (!MODAL) installFetchWrapper();
 
   return {
     start: start,
+    openSignIn: openSignIn,
+    /* "Is there a session on this device?" -- asked by the home page to
+       decide between opening the dialog and just going to the portal, which
+       will resume that session by itself. Reads the store, not the in-memory
+       `session`, because on the home page start() never ran. */
+    hasSession: function () { return !!readStore(); },
     signOut: signOut,
     session: function () { return session; },
     isSignedIn: function () { return !!session; },

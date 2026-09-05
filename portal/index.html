@@ -1836,18 +1836,25 @@
   /* Modes become the same radio row the practice-test chooser uses, so a
      student meets one control pattern across the portal. The .on class is
      already toggled by the existing handler, so this is style only. */
-  .vp-mode-cards { display: flex; flex-direction: column; gap: 0.55rem; }
-  .vp-mode-card { display: flex; flex-direction: column; align-items: flex-start; gap: 0.1rem; width: 100%; text-align: left; font: inherit; font-family: var(--hel); color: var(--text); background: none; border: none; border-radius: 10px; padding: 0.7rem 0.75rem 0.7rem 2.65rem; cursor: pointer; position: relative; transition: background 0.15s var(--ease); }
-  .vp-mode-card:hover { background: rgba(17,17,17,0.035); }
+  /* Same card the Question Bank's topics use: the card is the control, the
+     fill is the state. Was a column of bespoke radio dots — a second
+     selection idiom on a screen that already had card-shaped set pickers
+     sitting directly above it. */
+  .vp-mode-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 0.5rem; }
+  .vp-mode-card { position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: flex-start; gap: 0.15rem; width: 100%; text-align: left; font: inherit; font-family: var(--hel); color: var(--text); background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 0.65rem 0.75rem; cursor: pointer; transition: border-color 0.18s var(--ease), background 0.18s var(--ease), transform 0.22s cubic-bezier(0.22,1.1,0.32,1), box-shadow 0.22s var(--ease); }
+  .vp-mode-card:hover { border-color: rgba(17,17,17,0.28); transform: translateY(-2px); box-shadow: var(--shadow); }
+  .vp-mode-card:active { transform: translateY(0) scale(0.985); }
   /* Selection is the filled radio and the red heading -- no slab behind it. */
-  .vp-mode-card.on .vp-mode-card-hed { color: var(--red); }
-  .vp-mode-card::before { content: ''; position: absolute; left: 0.75rem; top: 0.85rem; width: 18px; height: 18px; border-radius: 50%; border: 2px solid #bdbdbd; transition: border-color 0.15s var(--ease); }
-  .vp-mode-card.on::before { border-color: var(--red); }
-  .vp-mode-card::after { content: ''; position: absolute; left: calc(0.75rem + 5px); top: calc(0.85rem + 5px); width: 8px; height: 8px; border-radius: 50%; background: var(--red); opacity: 0; transition: opacity 0.15s var(--ease); }
-  .vp-mode-card.on::after { opacity: 1; }
+  .vp-mode-card.on { background: var(--red); border-color: var(--red); }
+  .vp-mode-card.on .vp-mode-card-hed, .vp-mode-card.on .vp-mode-card-sub { color: #fff; }
+  .vp-mode-card.on:hover { border-color: var(--red); }
+  /* The same corner tick the topic cards use, centred by transform. */
+  .vp-mode-card::after { content: ''; position: absolute; top: 8px; right: 10px; width: 4.5px; height: 8px; border: solid #fff; border-width: 0 2px 2px 0; transform: translateY(-2px) rotate(45deg) scale(0.6); opacity: 0; transition: opacity 0.18s var(--ease), transform 0.22s cubic-bezier(0.22,1.1,0.32,1); }
+  .vp-mode-card.on::after { opacity: 1; transform: rotate(45deg) scale(1); }
+  @media (prefers-reduced-motion: reduce) { .vp-mode-card, .vp-mode-card::after { transition: none; } }
   .vp-mode-card-icon { display: none; }
-  .vp-mode-card-hed { font-weight: 700; font-size: 0.9rem; }
-  .vp-mode-card-sub { font-size: 0.78rem; color: var(--mid); line-height: 1.45; }
+  .vp-mode-card-hed { font-weight: 700; font-size: 0.84rem; padding-right: 1rem; }
+  .vp-mode-card-sub { font-size: 0.74rem; color: var(--mid); line-height: 1.45; }
 
   @media (max-width: 620px) { .vp-quick { grid-template-columns: 1fr; } }
 
@@ -2060,41 +2067,33 @@
   #iq-filters .iq-dropdown-btn { width: auto; padding: 0.48rem 0.85rem; font-size: 0.76rem; white-space: nowrap; background: rgba(17,17,17,0.045); border: none; border-radius: 999px; }
   #iq-filters .iq-dropdown-btn:hover { background: rgba(17,17,17,0.07); border: none; }
   #iq-filters .iq-dropdown.open .iq-dropdown-btn { background: rgba(17,17,17,0.07); border: none; }
+  /* Domain and Skill can run to dozens of entries, so they scroll inside
+     the panel rather than becoming a wall of chips. */
+  .iq-checklist { max-height: 148px; overflow-y: auto; scrollbar-gutter: stable; border: 1px solid var(--border); border-radius: 10px; padding: 0.25rem; }
+  .iq-checklist .iq-dropdown-option { border-radius: 7px; }
+  .iq-filter-panel { width: min(370px, calc(100vw - 3rem)); max-height: min(72vh, 560px); overflow-y: auto; }
+  #iq-filters { display: flex; }
+  .iq-selection-bar-note { font-size: 0.78rem; }
+  .qb-selection-bar .iq-practice-btn { white-space: nowrap; }
+
   .iq-filters-badge { background: var(--red); color: #fff; border-radius: 999px; padding: 0.05rem 0.42rem; font-size: 0.68rem; font-weight: 700; }
   /* The single "Filters" panel lists the five categories as rows; each
      row's own checkbox list pops out to the right instead of everything
      being stacked open in one long scroll — was five separate ~80px-wide
      panels (one per filter button), then briefly one panel with all five
      stacked open, now this nested flyout instead. */
-  /* .iq-dropdown-panel.iq-filters-panel (compound, not just .iq-filters-panel)
-     — needs to out-specificity the base .iq-dropdown-panel's overflow-y:auto
-     declared later in this file, not just out-order it. Equal-specificity
-     single-class selectors are decided by source order, and that rule was
-     silently winning despite this one looking like it should — the flyout
-     opened fine but was clipped to the panel's own scroll box, forcing a
-     student to scroll sideways INSIDE the filters panel to see it, instead
-     of the flyout actually escaping to sit beside it. */
-  .iq-dropdown-panel.iq-filters-panel { right: auto; width: 210px; padding: 0.4rem; overflow: visible; max-height: none; }
-  .iq-filter-cat { position: relative; }
-  .iq-filter-cat-row { display: flex; align-items: center; gap: 0.5rem; width: 100%; background: none; border: none; border-radius: 8px; padding: 0.55rem 0.6rem; font-family: var(--hel); font-size: 0.82rem; color: var(--text); cursor: pointer; text-align: left; }
-  .iq-filter-cat-row:hover, .iq-filter-cat.open .iq-filter-cat-row { background: var(--bg); }
-  .iq-filter-cat-label { flex-shrink: 0; }
-  .iq-filter-cat-summary { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: right; font-size: 0.74rem; color: var(--red); font-weight: 600; }
-  .iq-filter-cat-caret { flex-shrink: 0; font-size: 0.9rem; color: var(--faint); }
-  .iq-filter-cat.open > .iq-filter-cat-row .iq-filter-cat-caret { color: var(--red); }
-  .iq-filter-flyout { display: none; position: absolute; top: 0; left: calc(100% + 8px); z-index: 45; width: 230px; max-height: 300px; overflow-y: auto; scrollbar-gutter: stable; background: var(--white); border: none; border-radius: 16px; box-shadow: 0 12px 32px rgba(17,17,17,0.14); padding: 0.5rem; }
-  /* .open is the ONLY thing that shows a flyout — driven by JS for both
-     click and hover (see the mouseenter listener above openOnly()) rather
-     than a plain CSS :hover rule, which left the browser genuinely
-     unsure which category was "hovered" once the cursor crossed into a
-     flyout hanging over an adjacent row. */
-  .iq-filter-cat.open .iq-filter-flyout { display: block; }
+  .iq-filters-badge { background: var(--red); color: #fff; border-radius: 999px; padding: 0.05rem 0.42rem; font-size: 0.68rem; font-weight: 700; }
+  /* The single "Filters" panel lists the five categories as rows; each
+     row's own checkbox list pops out to the right instead of everything
+     being stacked open in one long scroll — was five separate ~80px-wide
+     panels (one per filter button), then briefly one panel with all five
+     stacked open, now this nested flyout instead. */
+  /* Kept from the retired flyout: the note a category shows when its list
+     is empty (a section with no mistakes in it, say). */
   .iq-filter-section-empty { font-size: 0.78rem; color: var(--faint); padding: 0.3rem 0.55rem; }
-  @media (max-width: 480px) {
-    .iq-filter-flyout { left: auto; right: calc(100% + 8px); } /* flips to the left edge on narrow screens where a right-side flyout would run off-screen */
-  }
-  .iq-practice-btn { flex-shrink: 0; margin-left: auto; background: var(--text); color: #fff; border: none; border-radius: 999px; padding: 0.6rem 1.2rem; font-family: var(--hel); font-size: 0.78rem; font-weight: 700; cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 0.3rem; transition: filter 0.15s var(--ease), transform 0.15s var(--ease); }
-  .iq-practice-btn:hover:not(:disabled) { filter: brightness(1.3); transform: translateY(-1px); }
+  /* Inside the floating bar now, so it takes .qb-start-btn's white-on-dark
+     treatment; only the disabled state is still its own. */
+  .iq-practice-btn:disabled { opacity: 0.5; cursor: default; }
   .iq-practice-btn:disabled { opacity: 0.45; cursor: default; transform: none; }
 
   /* ═══ CHALLENGE QUESTIONS ═══ two big "open the whole deck" cards
@@ -2175,6 +2174,24 @@
      shape as Vocabulary's own "just start something focused" CTA, so the
      one students already know from there reads identically here. */
   .qb-weak-card { margin-top: 0; margin-bottom: 1.5rem; }
+  /* The round-size stepper on the red card — inherits white, so the
+     stepper's own currentColor-based styling needs no override. */
+  /* With the stepper and the split button both on this row, the copy must
+     be allowed to keep a readable width and the controls to wrap under it
+     — otherwise expanding the split squeezed the title into a three-line
+     column. */
+  /* The choices have to open WHERE Start was, not on a new line — so the
+     title gives up width first, and only a genuinely narrow card wraps. */
+  .qb-weak-card .vp-tenmin-copy { flex: 1 1 12rem; min-width: 7rem; }
+  @media (max-width: 720px) { .qb-weak-card { flex-wrap: wrap; } }
+  /* Hovers like the "Open →" buttons on the two bank cards below: a small
+     lift, and the arrow leads. */
+  .qb-weak-card .vp-tenmin-btn { transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease), opacity 0.2s var(--ease); }
+  .qb-weak-card .vp-tenmin-btn:hover { transform: translateY(-2px); opacity: 1; box-shadow: var(--shadow-hover); }
+  .qb-weak-card .vp-tenmin-btn span { display: inline-block; transition: transform 0.2s var(--ease); }
+  .qb-weak-card .vp-tenmin-btn:hover span { transform: translateX(3px); }
+  .qb-round-size { flex-shrink: 0; display: flex; flex-direction: row; align-items: center; gap: 0.55rem; color: #fff; }
+  .qb-round-size-lab { font-family: var(--hel); font-size: 0.58rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.7); }
 
   /* Small icon + title pair that opens each band of this screen
      ("Question Bank", then "Question Analytics"), so the tiles and the
@@ -2397,13 +2414,53 @@
   .qb-skills-back { display: inline-block; font-family: var(--hel); font-size: 0.78rem; font-weight: 700; color: var(--mid); text-decoration: none; margin-bottom: 0.9rem; transition: color 0.15s var(--ease); }
   .qb-skills-back:hover { color: var(--red); }
 
-  /* Difficulty/Completed filter dropdowns reuse .iq-dropdown* (Saved &
-     Mistakes' checkbox-dropdown component) for visual consistency — see
-     buildCheckboxDropdown()/buildRadioDropdown() in window.qbModuleInit(). */
+  /* Filters here are the .qb-filterbar chips built in renderFilters().
+     Saved & Mistakes still uses the .iq-dropdown* component for its own
+     much longer filter lists. */
   /* Flat, white, borderless — filter pills are a plain light-gray fill
      with no border (see .qb-toolbar .iq-dropdown-btn override below),
      "Practice all topics" and the table are separated from the page only
      by thin hairlines, not cards/shadows. */
+  /* ═══ FILTER BAR ═══ replaces the three dropdowns. Everything a filter
+     knows is now visible without opening anything, and changing one is a
+     single click instead of open-click-close. */
+  .qb-filterbar { display: flex; align-items: center; gap: 0.7rem; margin-bottom: 1.1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
+  .qb-filter-menu { position: relative; }
+  .qb-filter-btn { display: inline-flex; align-items: center; gap: 0.45rem; font-family: var(--hel); font-size: 0.78rem; font-weight: 600; color: var(--text); background: rgba(17,17,17,0.045); border: none; border-radius: 999px; padding: 0.5rem 0.95rem; cursor: pointer; transition: background 0.18s var(--ease); }
+  .qb-filter-btn:hover, .qb-filter-menu.open .qb-filter-btn { background: rgba(17,17,17,0.08); }
+  .qb-filter-btn svg { width: 14px; height: 14px; }
+  /* [hidden] loses to an explicit display, so it needs saying here — the
+     badge was rendering a "0" on a screen with no filters set. */
+  .qb-filter-count[hidden] { display: none; }
+  .qb-filter-count { display: inline-flex; align-items: center; justify-content: center; min-width: 17px; height: 17px; padding: 0 5px; border-radius: 999px; background: var(--red); color: #fff; font-size: 0.62rem; font-weight: 700; }
+  .qb-filter-panel { position: absolute; top: calc(100% + 8px); left: 0; z-index: 50; display: none; width: min(340px, calc(100vw - 3rem)); background: var(--white); border-radius: 16px; box-shadow: 0 16px 44px rgba(17,17,17,0.16); padding: 1rem 1.1rem 0.85rem; }
+  .qb-filter-menu.open .qb-filter-panel { display: block; transform-origin: top left; animation: iqPanelIn 0.22s var(--ease); }
+  .qb-filter-row { display: flex; flex-direction: column; gap: 0.45rem; margin-bottom: 0.9rem; }
+  .qb-filter-foot { display: flex; align-items: center; gap: 0.6rem; padding-top: 0.3rem; border-top: 1px solid var(--border); margin-top: 0.2rem; }
+  .qb-filter-done { margin-left: auto; border: none; background: var(--text); color: #fff; font-family: var(--hel); font-size: 0.72rem; font-weight: 700; border-radius: 999px; padding: 0.45rem 1.1rem; cursor: pointer; transition: background 0.18s var(--ease); }
+  .qb-filter-done:hover { background: var(--red); }
+  @media (prefers-reduced-motion: reduce) { .qb-filter-menu.open .qb-filter-panel { animation: none; } }
+  .qb-filter-lab { font-family: var(--hel); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; color: var(--faint); }
+  .qb-chips { display: flex; gap: 0.35rem; }
+  .qb-chip { border: 1px solid var(--border); background: var(--white); color: var(--mid); font-family: var(--hel); font-size: 0.75rem; font-weight: 600; border-radius: 999px; padding: 0.36rem 0.8rem; cursor: pointer; transition: background 0.18s var(--ease), color 0.18s var(--ease), border-color 0.18s var(--ease), transform 0.18s cubic-bezier(0.22,1.1,0.32,1); }
+  .qb-chip:hover { border-color: var(--text); color: var(--text); }
+  .qb-chip:active { transform: scale(0.95); }
+  .qb-chip.on { background: var(--red); border-color: var(--red); color: #fff; }
+  /* The one exclusive choice, so it reads as one control with a moving
+     selection rather than three independent buttons — the indicator is the
+     same travelling pill the sidebar uses (fluid-ui.js). */
+  .qb-seg { position: relative; display: flex; gap: 0.15rem; background: rgba(17,17,17,0.05); border-radius: 999px; padding: 3px; }
+  .qb-seg-btn { position: relative; z-index: 1; border: none; background: none; font-family: var(--hel); font-size: 0.75rem; font-weight: 600; color: var(--mid); border-radius: 999px; padding: 0.36rem 0.8rem; cursor: pointer; white-space: nowrap; transition: color 0.18s var(--ease); }
+  .qb-seg-btn:hover { color: var(--text); }
+  .qb-seg-btn.active { color: var(--text); }
+  .qb-seg .mta-fluid-ind { background: var(--white); box-shadow: 0 1px 3px rgba(17,17,17,0.16); }
+  .qb-filter-reset[hidden] { display: none; }
+  .qb-filter-reset { border: none; background: none; font-family: var(--hel); font-size: 0.72rem; font-weight: 600; color: var(--red); cursor: pointer; padding: 0.3rem 0; }
+  .qb-filter-reset:hover { text-decoration: underline; }
+
+  .qb-selection-dot { opacity: 0.45; margin: 0 0.45rem; }
+  #qb-selection-q { font-variant-numeric: tabular-nums; }
+
   .qb-toolbar { display: flex; gap: 0.6rem; margin-bottom: 1.3rem; }
   .qb-toolbar .iq-dropdown-btn { width: auto; padding: 0.5rem 0.9rem; font-size: 0.78rem; background: rgba(17,17,17,0.045); border: none; border-radius: 999px; }
   .qb-toolbar .iq-dropdown-btn:hover { background: rgba(17,17,17,0.07); }
@@ -2411,51 +2468,51 @@
 
   .qb-start-btn { flex-shrink: 0; background: rgba(17,17,17,0.06); color: var(--mid); border: none; border-radius: 999px; padding: 0.6rem 1.15rem; font-family: var(--hel); font-size: 0.78rem; font-weight: 700; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 0.35rem; transition: background 0.15s var(--ease), color 0.15s var(--ease); }
   .qb-start-btn:hover { background: var(--red); color: #fff; }
-  /* "Select all" lives in the header checkbox now (see #qb-select-all) —
-     one selection model, one Start action, instead of a second "Practice
-     all topics" button competing with the topic checkboxes for the same
-     job. A plain, undecorated native checkbox reads clearly as "select
-     all" sitting above a column of the exact same checkboxes. */
-  .qb-th-check { position: relative; }
-  #qb-select-all { cursor: pointer; }
+  /* ═══ TOPIC CARDS ═══ the selectable unit in both banks. One card per
+     skill: name, how much of it you have done, and how you are doing on it.
+     The card IS the control — there is no checkbox, so there is no 18px
+     target to hit and no mark to centre inside a bubble. */
+  .qb-topics { display: flex; flex-direction: column; gap: 1.7rem; margin-top: 1.4rem; }
+  .qb-topic-group-hed { display: flex; align-items: baseline; gap: 0.65rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
+  .qb-topic-group-name { font-family: var(--display); font-size: 1.05rem; font-weight: 700; color: var(--text); }
+  .qb-topic-group-meta { font-family: var(--hel); font-size: 0.7rem; color: var(--faint); }
+  .qb-topic-group-all { margin-left: auto; border: none; background: none; font-family: var(--hel); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--red); cursor: pointer; padding: 0.2rem 0; white-space: nowrap; }
+  .qb-topic-group-all:hover { text-decoration: underline; }
+  .qb-topic-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(196px, 1fr)); gap: 0.5rem; }
+  .qb-topic { position: relative; overflow: hidden; text-align: left; display: flex; flex-direction: column; gap: 0.45rem; padding: 0.6rem 0.7rem 0.55rem; border: 1px solid var(--border); border-radius: 10px; background: var(--white); cursor: pointer; font-family: var(--hel); transition: border-color 0.18s var(--ease), background 0.18s var(--ease), transform 0.22s cubic-bezier(0.22,1.1,0.32,1), box-shadow 0.22s var(--ease); }
+  .qb-topic:hover { border-color: rgba(17,17,17,0.28); transform: translateY(-2px); box-shadow: var(--shadow); }
+  .qb-topic:active { transform: translateY(0) scale(0.985); }
+  .qb-topic-name { font-size: 0.78rem; font-weight: 600; color: var(--text); line-height: 1.3; padding-right: 1.1rem; }
+  .qb-topic-foot { display: flex; align-items: center; gap: 0.45rem; margin-top: auto; }
+  .qb-topic-bar { flex: 1 1 auto; min-width: 26px; height: 3px; border-radius: 999px; background: rgba(17,17,17,0.08); overflow: hidden; }
+  .qb-topic-bar i { display: block; height: 100%; border-radius: 999px; background: var(--gold); transition: width 0.4s var(--ease); }
+  .qb-topic-frac { font-size: 0.64rem; font-weight: 600; color: var(--faint); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .qb-topic-acc { display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.64rem; font-weight: 700; color: var(--faint); white-space: nowrap; }
+  .qb-topic-acc.has-data { color: var(--text); }
+  /* Selected: the card fills. Nothing to look for, nothing to miss. */
+  .qb-topic.on { background: var(--red); border-color: var(--red); }
+  .qb-topic.on .qb-topic-name, .qb-topic.on .qb-topic-frac, .qb-topic.on .qb-topic-acc, .qb-topic.on .qb-topic-acc.has-data { color: #fff; }
+  .qb-topic.on .qb-topic-bar { background: rgba(255,255,255,0.28); }
+  .qb-topic.on .qb-topic-bar i { background: #fff; }
+  .qb-topic.on .qb-weak-tag, .qb-topic.on .qb-strong-tag { background: rgba(255,255,255,0.22); color: #fff; }
+  .qb-topic.on .qb-strength-dot { background: #fff; }
+  .qb-topic.on:hover { border-color: var(--red); }
+  /* The tick confirming a pick, drawn on the card's own corner rather than
+     in a box of its own. */
+  /* The tick is centred in its corner square by transform rather than by
+     eyeballed offsets — the -58% lifts the mark by the amount rotating a
+     checkmark 45 degrees drops its optical centre. */
+  .qb-topic-mark { position: absolute; top: 0; right: 0; width: 26px; height: 26px; opacity: 0; transform: scale(0.6); transform-origin: top right; transition: opacity 0.18s var(--ease), transform 0.24s cubic-bezier(0.22,1.1,0.32,1); }
+  .qb-topic-mark::before { content: ''; position: absolute; inset: 0; background: rgba(255,255,255,0.18); border-bottom-left-radius: 10px; }
+  .qb-topic-mark::after { content: ''; position: absolute; left: 50%; top: 50%; width: 4.5px; height: 8px; border: solid #fff; border-width: 0 2px 2px 0; transform: translate(-50%, -58%) rotate(45deg); }
+  .qb-topic.on .qb-topic-mark { opacity: 1; transform: none; }
+  .qb-topic-empty { font-family: var(--hel); font-size: 0.86rem; color: var(--mid); padding: 2.5rem 0; text-align: center; }
+  @media (prefers-reduced-motion: reduce) { .qb-topic, .qb-topic-mark, .qb-topic-bar i { transition: none; } }
 
-  /* table-layout:fixed forces the Progress/Accuracy columns to their exact
-     specified widths on every row, full stop — with the default auto
-     layout the browser is free to recompute column widths from cell
-     content (and a colspan domain-header row like .qb-domain-row can
-     perturb that), which is what let the accuracy dot's column drift
-     between renders. Fixed layout removes that source of drift entirely;
-     the unset Topic column just takes whatever width is left over. */
-  .qb-table { width: 100%; table-layout: fixed; border-collapse: collapse; background: var(--white); border: none; border-radius: 0; overflow: visible; box-shadow: none; margin-top: 0.5rem; }
-  .qb-table th { text-align: left; font-family: var(--hel); font-size: 0.66rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--faint); padding: 1.1rem 0.5rem 0.6rem; border-bottom: none; }
-  .qb-table .qb-th-check { width: 40px; }
-  .qb-table .qb-th-progress { width: 160px; }
-  /* Right-aligned to match .qb-acc-cell's own right alignment below —
-     left-aligning the header while the body's dot+value pair sits flush
-     right (deliberately, so the dot's position stays static row to row)
-     put the header label and its own column's values out of line with
-     each other. */
-  .qb-table .qb-th-acc { width: 90px; text-align: right; }
-  .qb-domain-row td { padding: 1.3rem 0.5rem 0.5rem; font-family: var(--display); font-size: 1.05rem; font-weight: 700; color: var(--text); background: none; border-top: none; text-transform: none; letter-spacing: normal; }
-  .qb-domain-row:first-child td { padding-top: 0.5rem; }
-  .qb-skill-row td { padding: 0.85rem 0.5rem; border-bottom: 1px solid var(--border); font-size: 0.86rem; color: var(--text); vertical-align: middle; }
-  .qb-skill-row:hover td { background: rgba(17,17,17,0.015); }
-  .qb-skill-row input[type="checkbox"] { width: 18px; height: 18px; border-radius: 999px; accent-color: var(--red); cursor: pointer; appearance: none; -webkit-appearance: none; border: 1.5px solid var(--border); background: #fff; position: relative; }
-  .qb-skill-row input[type="checkbox"]:checked { background: var(--red); border-color: var(--red); }
-  .qb-skill-row input[type="checkbox"]:checked::after { content: ''; position: absolute; left: 5px; top: 1px; width: 5px; height: 9px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
-  .qb-skill-name-cell { display: flex; align-items: center; gap: 0.6rem; cursor: pointer; }
-  .qb-weak-tag { display: inline-flex; align-items: center; gap: 0.25rem; background: rgba(176,39,28,0.09); color: var(--red); font-family: var(--hel); font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; border-radius: 999px; padding: 0.2rem 0.55rem; }
-  /* Same pill as .qb-weak-tag, colors only — .qb-weak-tag stays for layout. */
-  .qb-strong-tag { background: rgba(63,125,84,0.1); color: #3f7d54; }
-  .qb-progress-cell { display: flex; align-items: center; gap: 0.6rem; }
-  .qb-progress-track { flex: 1 1 auto; height: 5px; border-radius: 999px; background: rgba(17,17,17,0.07); overflow: hidden; min-width: 60px; }
-  .qb-progress-fill { height: 100%; border-radius: 999px; background: var(--gold); }
   .qb-progress-frac { font-size: 0.76rem; color: var(--mid); white-space: nowrap; }
   /* Right-aligned, fixed-width value so the strength dot lands in the same
      horizontal spot on every row regardless of "0%" vs "100%" text width —
      the dot's position must stay static once a section has multiple rows. */
-  .qb-acc-cell { display: flex; align-items: center; justify-content: flex-end; gap: 0.45rem; font-weight: 600; color: var(--faint); }
-  .qb-acc-cell.has-data { color: var(--text); }
   .qb-acc-value { display: inline-block; min-width: 2.6em; text-align: right; }
   .qb-strength-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; background: var(--faint); }
   .qb-strength-dot.weak { background: var(--red); }
@@ -2465,6 +2522,26 @@
   .qb-selection-bar { position: fixed; left: 50%; bottom: 1.5rem; transform: translateX(-50%); z-index: 60; display: flex; align-items: center; gap: 1rem; background: var(--text); color: #fff; border-radius: 999px; padding: 0.7rem 0.8rem 0.7rem 1.3rem; box-shadow: 0 12px 30px rgba(17,17,17,0.28); font-family: var(--hel); font-size: 0.82rem; font-weight: 600; }
   .qb-selection-bar .qb-start-btn { background: #fff; color: var(--text); }
   .qb-selection-bar .qb-start-btn:hover { background: var(--gold); color: #fff; }
+  /* The bar used to be switched on and off with display alone, so the one
+     control that confirms "you have picked something" appeared as a jump
+     cut at the bottom of the screen. It now rises into place and drops
+     back out. Both keyframes keep the translateX(-50%) that centres it —
+     an animation that omits it would snap the bar to the right first. */
+  .qb-selection-bar.qb-bar-in { animation: qbBarIn 0.34s var(--ease); }
+  .qb-selection-bar.qb-bar-out { animation: qbBarIn 0.18s ease-in reverse both; }
+  @keyframes qbBarIn {
+    from { opacity: 0; transform: translateX(-50%) translateY(14px) scale(0.97); }
+    to   { opacity: 1; transform: translateX(-50%); }
+  }
+  /* And the count itself pops when it changes, so adding a topic registers
+     without the student having to re-read the sentence. */
+  #qb-selection-topics, #iq-selection-n { display: inline-block; }
+  #qb-selection-topics.qb-count-pop, #iq-selection-n.qb-count-pop { animation: qbCountPop 0.3s var(--ease); }
+  @keyframes qbCountPop { 0% { transform: scale(1); } 40% { transform: scale(1.12); } 100% { transform: scale(1); } }
+  @media (prefers-reduced-motion: reduce) {
+    .qb-selection-bar.qb-bar-in, .qb-selection-bar.qb-bar-out,
+    #qb-selection-topics.qb-count-pop { animation: none; }
+  }
 
   /* Math questions' answer choices are an image (see question-bank-math.js)
      — these plain lettered buttons underneath are what's actually
@@ -2473,10 +2550,10 @@
   .qb-letter-row { display: flex; gap: 0.7rem; margin-top: 0.9rem; }
   .qb-letter-choice { flex: 0 0 auto; width: 48px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
   .qb-letter-choice .dx-choice-letter { margin: 0; }
-  @media (max-width: 640px) {
-    .qb-th-acc, .qb-acc-cell { display: none; }
-    .qb-th-progress { width: auto; }
-  }
+  /* On a phone the cards go one per row and the accuracy figure keeps its
+     place — there is room for it inside a card in a way there was not in a
+     four-column table. */
+  @media (max-width: 560px) { .qb-topic-grid { grid-template-columns: 1fr; } }
   /* ═══ PRACTICE RUNNER — one question at a time, rendered straight into
      the real exam's own #dx-card (see startPracticeRunner/
      renderRunnerQuestion in the JS) — only the end-of-round summary needs
@@ -2496,7 +2573,12 @@
      scrollbar reserves its space up front instead of narrowing the panel
      the moment it appears. */
   .iq-dropdown-panel { display: none; position: absolute; top: calc(100% + 8px); left: 0; right: 0; z-index: 40; max-height: 260px; overflow-y: auto; scrollbar-gutter: stable; background: var(--white); border: none; border-radius: 16px; box-shadow: 0 12px 32px rgba(17,17,17,0.14); padding: 0.5rem; }
-  .iq-dropdown.open .iq-dropdown-panel { display: block; }
+  /* Shared by the Question Bank toolbar and Saved & Mistakes' filters —
+     one dropdown component, so animating it here makes both screens open
+     the same way. */
+  .iq-dropdown.open .iq-dropdown-panel { display: block; transform-origin: top center; animation: iqPanelIn 0.22s var(--ease); }
+  @keyframes iqPanelIn { from { opacity: 0; transform: translateY(-6px) scale(0.985); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .iq-dropdown.open .iq-dropdown-panel { animation: none; } }
   .iq-dropdown-option { display: flex; align-items: center; gap: 0.65rem; padding: 0.55rem 0.6rem; border-radius: 10px; cursor: pointer; font-family: var(--hel); font-size: 0.82rem; color: var(--text); transition: background 0.12s var(--ease); }
   .iq-dropdown-option:hover { background: var(--bg); }
   /* Custom rounded checkbox — replaces the native square one so every
@@ -2771,7 +2853,29 @@
    (module context, full list) or from a filtered set (a bridge bar's
    "see those questions") both just work. */
 .q-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(17,17,17,0.55); z-index: 9000; align-items: center; justify-content: center; padding: 3vh 3vw; }
-.q-modal-overlay.open { display: flex; }
+.q-modal-overlay.open { display: flex; animation: mtaOverlayIn 0.2s var(--ease); }
+/* The one modal in the portal that was still being switched on. Every other
+   overlay here (resume, leave, beta) already fades its backdrop and rises
+   its card — this one is opened from more places than any of them (a
+   mistakes row, a weak-skill card, the report's timing chart, a bridge
+   bar's "see those questions") and hard-cut from all of them. Same two
+   keyframes those use, so there is one arrival gesture in the portal, not
+   two. */
+.q-modal-overlay.open .q-modal { animation: mtaModalIn 0.28s var(--ease); }
+.q-modal-overlay.closing { animation: mtaOverlayIn 0.16s var(--ease) reverse both; }
+.q-modal-overlay.closing .q-modal { animation: mtaModalIn 0.16s var(--ease) reverse both; }
+/* Previous/Next used to replace the question in place, which reads as the
+   page glitching rather than as movement through a list. The body now
+   enters from the side it came from, so paging has a direction. */
+.q-modal-body.qm-page-next { animation: qmPageNext 0.26s var(--ease); }
+.q-modal-body.qm-page-prev { animation: qmPagePrev 0.26s var(--ease); }
+@keyframes qmPageNext { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: none; } }
+@keyframes qmPagePrev { from { opacity: 0; transform: translateX(-16px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .q-modal-overlay.open, .q-modal-overlay.open .q-modal,
+  .q-modal-overlay.closing, .q-modal-overlay.closing .q-modal,
+  .q-modal-body.qm-page-next, .q-modal-body.qm-page-prev { animation: none; }
+}
 .q-modal { display: flex; flex-direction: column; width: 100%; max-width: 1400px; height: 100%; max-height: 900px; background: #fff; border-radius: 20px; box-shadow: 0 40px 90px rgba(0,0,0,0.45); overflow: hidden; }
 .q-modal-hed { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 24px; border-bottom: 1px solid var(--border); flex-shrink: 0; flex-wrap: wrap; }
 .q-modal-hed-left { display: flex; align-items: center; gap: 10px; }
@@ -3720,7 +3824,11 @@ window.Portal = {
 
      Paste your Apps Script Web App deployment URL below once it's live.
      ===================================================================== -->
-<script src="backend-url.js"></script>
+<!-- ?v= on every local script is a cache-busting stamp: browsers were
+     serving stale copies of these files after a deploy. Bump the date on
+     ALL of them together when any one changes:
+       sed -i '' 's/?v=20260905y/?v=<new>/g' portal/*.html  -->
+<script src="backend-url.js?v=20260905y"></script>
 <script>
 
   // Luca's standing Google Meet room — the "Online? Join here" link on
@@ -3732,7 +3840,7 @@ window.Portal = {
 <!-- Google sign-in + the signed-session fetch wrapper (auth-client.js).
      Loaded immediately after APPS_SCRIPT_URL is set, so the wrapper is
      installed before anything in the page can call the backend. -->
-<script src="auth-client.js"></script>
+<script src="auth-client.js?v=20260905y"></script>
 
 <!-- Pre-login-only top bar now (key entry, onboarding, marketing-style
      screens) — once a student is in the app shell this whole bar hides
@@ -4452,7 +4560,10 @@ window.Portal = {
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4.2"/><circle cx="12" cy="12" r="0.6" fill="currentColor" stroke="none"/></svg>
               </span>
               <span class="home-shortcut-title">Practice Your Weaknesses</span>
-              <span class="home-shortcut-body">25 questions from your weakest R&amp;W skill, 25 from Math &mdash; pulled fresh each time.</span>
+              <!-- Deliberately no numbers: the round's length is the student's
+                   own setting on the Question Bank card now, so a hardcoded
+                   "25 and 25" here would be wrong the moment they change it. -->
+              <span class="home-shortcut-body">A focused round from your weakest Reading &amp; Writing and Math skills &mdash; pulled fresh each time.</span>
             </button>
             <button type="button" class="home-shortcut-card" id="home-shortcut-vocab">
               <span class="home-shortcut-icon gold">
@@ -4638,47 +4749,50 @@ window.Portal = {
         <button type="button" class="iq-tab" data-tab="saved" id="iq-tab-saved">Saved Questions</button>
       </div>
 
-      <!-- ONE "Filters" button opens ONE panel listing the five categories
-           (Source/Section/Domain/Skill/Difficulty) as rows; clicking a row
-           pops its checkbox list out to the RIGHT instead of everything
-           being stacked open at once — same underlying filter state and
-           cascading logic, just a nested flyout instead of one long panel. -->
+      <!-- The same filter control the Question Bank uses: one button, one
+           panel, everything in it visible at once. This screen used to nest
+           a flyout inside that panel — five rows, each opening its own
+           sub-menu to the right — so narrowing by skill meant open, click a
+           row, click a checkbox, and read a summary word to find out what
+           you had done. Short lists are chips; Domain and Skill stay as
+           checkbox lists because they run to dozens of entries, but they
+           are IN the panel now rather than behind it. -->
       <div id="iq-filters">
-        <div class="iq-dropdown" id="iq-filters-dropdown">
-          <button type="button" class="iq-dropdown-btn iq-filters-btn" id="iq-filters-btn">
+        <div class="qb-filter-menu" id="iq-filter-menu">
+          <button type="button" class="qb-filter-btn" id="iq-filters-btn" aria-expanded="false" aria-haspopup="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M7 12h10M11 18h2"/></svg>
             <span>Filters</span>
-            <span class="iq-filters-badge" id="iq-filters-badge" style="display:none;"></span>
-            <span class="iq-dropdown-caret">&#9662;</span>
+            <span class="qb-filter-count" id="iq-filters-badge" hidden></span>
           </button>
-          <div class="iq-dropdown-panel iq-filters-panel">
-            <div class="iq-filter-cat" data-cat="test">
-              <button type="button" class="iq-filter-cat-row"><span class="iq-filter-cat-label">Source</span><span class="iq-filter-cat-summary" id="iq-test-summary">All</span><span class="iq-filter-cat-caret">&#8250;</span></button>
-              <div class="iq-filter-flyout" id="iq-test-pills"></div>
-            </div>
-            <div class="iq-filter-cat" data-cat="section">
-              <button type="button" class="iq-filter-cat-row"><span class="iq-filter-cat-label">Section</span><span class="iq-filter-cat-summary" id="iq-section-summary">All</span><span class="iq-filter-cat-caret">&#8250;</span></button>
-              <div class="iq-filter-flyout" id="iq-section-pills"></div>
-            </div>
-            <div class="iq-filter-cat" data-cat="domain">
-              <button type="button" class="iq-filter-cat-row"><span class="iq-filter-cat-label">Domain</span><span class="iq-filter-cat-summary" id="iq-domain-summary">All</span><span class="iq-filter-cat-caret">&#8250;</span></button>
-              <div class="iq-filter-flyout" id="iq-domain-pills"></div>
-            </div>
-            <div class="iq-filter-cat" data-cat="skill">
-              <button type="button" class="iq-filter-cat-row"><span class="iq-filter-cat-label">Skill</span><span class="iq-filter-cat-summary" id="iq-skill-summary">All</span><span class="iq-filter-cat-caret">&#8250;</span></button>
-              <div class="iq-filter-flyout" id="iq-skill-pills"></div>
-            </div>
-            <div class="iq-filter-cat" data-cat="difficulty">
-              <button type="button" class="iq-filter-cat-row"><span class="iq-filter-cat-label">Difficulty</span><span class="iq-filter-cat-summary" id="iq-difficulty-summary">All</span><span class="iq-filter-cat-caret">&#8250;</span></button>
-              <div class="iq-filter-flyout" id="iq-difficulty-pills"></div>
+          <div class="qb-filter-panel iq-filter-panel" id="iq-filter-panel">
+            <div class="qb-filter-row"><span class="qb-filter-lab">Source</span><div class="qb-chips" id="iq-test-pills"></div></div>
+            <div class="qb-filter-row"><span class="qb-filter-lab">Section</span><div class="qb-chips" id="iq-section-pills"></div></div>
+            <div class="qb-filter-row"><span class="qb-filter-lab">Difficulty</span><div class="qb-chips" id="iq-difficulty-pills"></div></div>
+            <div class="qb-filter-row"><span class="qb-filter-lab">Domain</span><div class="iq-checklist" id="iq-domain-pills"></div></div>
+            <div class="qb-filter-row"><span class="qb-filter-lab">Skill</span><div class="iq-checklist" id="iq-skill-pills"></div></div>
+            <div class="qb-filter-foot">
+              <button type="button" class="qb-filter-reset" id="iq-filter-reset" hidden>Reset</button>
+              <button type="button" class="qb-filter-done" id="iq-filter-done">Done</button>
             </div>
           </div>
         </div>
-        <button type="button" class="iq-practice-btn" id="iq-practice-btn">Practice Selected Mistakes <span id="iq-practice-count">(0)</span></button>
       </div>
       <div class="vp-pool-count" id="iq-pool-count"></div>
     </div>
 
     <div id="iq-list"></div>
+
+    <!-- Same floating bar the Question Bank uses. The action used to sit at
+         the top of the screen next to the filters, which is exactly where
+         you are not after scrolling a long mistakes list. Here the "N" is
+         the filtered set, not a hand-picked one — practising your mistakes
+         means practising the ones you are looking at. -->
+    <div class="qb-selection-bar" id="iq-selection-bar" style="display:none;">
+      <!-- The whole phrase lives in the span: setPracticeCount writes it
+           there so the plural is decided in one place. -->
+      <span id="iq-selection-count"><span id="iq-selection-n">0 questions</span></span>
+      <button type="button" class="qb-start-btn iq-practice-btn" id="iq-practice-btn">Practice <span id="iq-practice-count">(0)</span></button>
+    </div>
 
     <a href="#" class="menu-back-link" id="incorrect-questions-back">&larr; Back to home</a>
   </div>
@@ -4778,7 +4892,10 @@ window.Portal = {
       <div class="vp-tenmin-icon">&#127919;</div>
       <div class="vp-tenmin-copy">
         <div class="vp-tenmin-title">Practice Your Weaknesses</div>
-        <div class="vp-tenmin-sub">A focused 50-question round — 25 from your weakest Reading &amp; Writing skill, 25 from your weakest Math skill.</div>
+        <!-- Deliberately empty: the stepper and the Start choices say what
+             this round is now. Kept as a node because startWeaknessPractice()
+             writes its "not enough practice data yet" message here. -->
+        <div class="vp-tenmin-sub" id="qb-weak-sub"></div>
       </div>
       <button class="vp-tenmin-btn" id="qb-weak-btn" type="button">Start <span>&rarr;</span></button>
     </div>
@@ -4921,22 +5038,65 @@ window.Portal = {
       <p class="panel-sub">Progress and accuracy are tracked per skill, on this device.</p>
     </div>
 
-    <div class="qb-toolbar">
-      <div class="iq-dropdown" id="qb-diff-dropdown"></div>
-      <div class="iq-dropdown" id="qb-source-dropdown"></div>
-      <div class="iq-dropdown" id="qb-completed-dropdown"></div>
+    <!-- The filters used to be three dropdown menus. Every one of them held
+         two or three options — a menu is a lot of machinery for a choice
+         between Easy, Medium and Hard, and it hid the current state behind
+         a click ("Difficulty: 2 of 3" tells you nothing about WHICH two).
+         They are on the page now: chips you toggle, and a segmented
+         control for the one genuinely exclusive choice. -->
+    <!-- One button, one panel. The filters were a permanent bar across the
+         top of the screen — four rows of controls a student sets once and
+         then scrolls past on every visit. They live behind this now, with
+         the button carrying a summary so nothing has to be opened to see
+         what is on. -->
+    <div class="qb-filterbar">
+      <div class="qb-filter-menu" id="qb-filter-menu">
+        <button type="button" class="qb-filter-btn" id="qb-filter-btn" aria-expanded="false" aria-haspopup="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M7 12h10M11 18h2"/></svg>
+          <span id="qb-filter-btn-lab">Filters</span>
+          <span class="qb-filter-count" id="qb-filter-count" hidden></span>
+        </button>
+        <div class="qb-filter-panel" id="qb-filter-panel">
+          <div class="qb-filter-row">
+            <span class="qb-filter-lab">Difficulty</span>
+            <div class="qb-chips" id="qb-diff-chips"></div>
+          </div>
+          <div class="qb-filter-row" id="qb-source-group" style="display:none;">
+            <span class="qb-filter-lab">Source</span>
+            <div class="qb-chips" id="qb-source-chips"></div>
+          </div>
+          <div class="qb-filter-row">
+            <span class="qb-filter-lab">Show</span>
+            <div class="qb-seg" id="qb-completed-seg"></div>
+          </div>
+          <!-- How many questions the round itself should be. "All" means
+               every question the selected topics hold under these filters. -->
+          <div class="qb-filter-row">
+            <span class="qb-filter-lab">Session length</span>
+            <div id="qb-size-slider"></div>
+          </div>
+          <div class="qb-filter-foot">
+            <button type="button" class="qb-filter-reset" id="qb-filter-reset" hidden>Reset</button>
+            <button type="button" class="qb-filter-done" id="qb-filter-done">Done</button>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <table class="qb-table">
-      <thead>
-        <tr><th class="qb-th-check"><input type="checkbox" id="qb-select-all" title="Select all topics"></th><th>Topic</th><th class="qb-th-progress">Progress</th><th class="qb-th-acc">Accuracy</th></tr>
-      </thead>
-      <tbody id="qb-skills-tbody"></tbody>
-    </table>
+    <!-- Topics were a checkbox table: a column of small circular targets down
+         the left, a select-all box in a header row, and the actual content of
+         each row (its name, its progress, how you are doing on it) pushed out
+         to the right of the thing you were aiming at. Picking six topics meant
+         six trips to an 18px circle.
+
+         They are cards now. The whole card is the target, its state is the
+         card's own fill rather than a mark inside a bubble, and the numbers
+         live on the thing they describe. -->
+    <div class="qb-topics" id="qb-skills-list"></div>
   </div>
 
   <div class="qb-selection-bar" id="qb-selection-bar" style="display:none;">
-    <span id="qb-selection-count">0 topics selected</span>
+    <span id="qb-selection-count"><span id="qb-selection-topics">0 topics</span><span class="qb-selection-dot">&middot;</span><span id="qb-selection-q">0</span> questions</span>
     <button type="button" class="qb-start-btn" id="qb-selection-start-btn">Start <span class="chal-deck-arrow">&rarr;</span></button>
   </div>
 </div>
@@ -5690,9 +5850,13 @@ window.Portal = {
   </div>
 </div>
 
-<script src="banks.js"></script>
-<script src="time-budgets.js"></script>
-<script src="challenge-questions.js"></script>
+<!-- Travelling sidebar pill + tab underline, and the end-of-round
+     count-up. Pure decoration, self-wiring, safe to remove — see the
+     header in fluid-ui.js. -->
+<script src="fluid-ui.js?v=20260905y"></script>
+<script src="banks.js?v=20260905y"></script>
+<script src="time-budgets.js?v=20260905y"></script>
+<script src="challenge-questions.js?v=20260905y"></script>
 <script>
   /* practice-tests.js is ~2.6MB uncompressed (the 11 full practice tests,
      including every embedded figure's markup) — big enough that loading
@@ -5719,7 +5883,7 @@ window.Portal = {
      comments for why. */
   window.__practiceTestsReady = new Promise(function (resolve) {
     var s = document.createElement('script');
-    s.src = 'practice-tests.js';
+    s.src = 'practice-tests.js?v=20260905y';
     // Settled, not loaded: an error resolves too, and a screen
     // needs to stop saying "loading" either way.
     function settle() { window.__practiceTestsSettled = true; resolve(); }
@@ -5741,7 +5905,7 @@ window.Portal = {
      just re-renders once this resolves — see its own comment. */
   window.__questionBankReady = new Promise(function (resolve) {
     var s = document.createElement('script');
-    s.src = 'question-bank.js';
+    s.src = 'question-bank.js?v=20260905y';
     // Settled, not loaded: an error resolves too, and a screen
     // needs to stop saying "loading" either way.
     function settle() { window.__questionBankSettled = true; resolve(); }
@@ -5766,7 +5930,7 @@ window.Portal = {
      qbModuleInit re-renders once both banks resolve. */
   window.__questionBankMathReady = new Promise(function (resolve) {
     var s = document.createElement('script');
-    s.src = 'question-bank-math.js';
+    s.src = 'question-bank-math.js?v=20260905y';
     // Settled, not loaded: an error resolves too, and a screen
     // needs to stop saying "loading" either way.
     function settle() { window.__questionBankMathSettled = true; resolve(); }
@@ -7243,7 +7407,11 @@ window.Portal = {
     noteEl.innerHTML = notes.join('<br>');
     noteEl.style.display = notes.length ? 'block' : 'none';
 
-    if (calState.loading && !calState.items.length) { body.innerHTML = '<div class="cal-loading">Loading your calendar&hellip;</div>'; return; }
+    if (calState.loading && !calState.items.length) {
+      if (window.mtaSkeleton) window.mtaSkeleton(body, { rows: 4, height: '66px' });
+      else body.innerHTML = '<div class="cal-loading">Loading your calendar&hellip;</div>';
+      return;
+    }
     if (calState.failed && !calState.items.length) {
       body.innerHTML = '<div class="cal-empty">' + (calState.failReason === 'network'
         ? 'Couldn’t reach the internet just now — check your connection and try again.'
@@ -14779,6 +14947,7 @@ window.Portal = {
       '<div class="vp-score-sub">marked "got it"' + (reviewed ? ' · ' + reviewed + ' still to review' : '') + '</div>' +
       (reviewed ? '<button class="vp-primary" id="vp-review" type="button">Review the ' + reviewed + ' you\'re still learning</button>' : '') +
       '<button class="vp-primary" id="vp-restart" type="button" style="' + (reviewed ? 'background:transparent;color:var(--red);border:1px solid var(--red)' : '') + '">Start over</button></div>';
+    if (window.mtaCountUp) window.mtaCountUp(stageEl.querySelector('.vp-score'), (fc.order.length - reviewed), { suffix: '/' + fc.order.length });
     if (reviewed) document.getElementById('vp-review').addEventListener('click', function () { fc.order = shuffle(fc.still); fc.idx = 0; fc.flipped = false; fc.still = []; drawFlash(); });
     document.getElementById('vp-restart').addEventListener('click', renderFlash);
   }
@@ -14840,6 +15009,7 @@ window.Portal = {
     var n = qz.order.length, s = qz.score;
     stageEl.innerHTML = '<div class="vp-summary vp-pop"><div class="vp-score">' + s + '/' + n + '</div><div class="vp-score-sub">' + Math.round(s / n * 100) + '% correct</div><button class="vp-primary" id="vp-again" type="button">Try again</button></div>';
     document.getElementById('vp-again').addEventListener('click', function () { renderQuiz(qz.kind); });
+    if (window.mtaCountUp) window.mtaCountUp(stageEl.querySelector('.vp-score'), s, { suffix: '/' + n });
   }
 
   /* ═══ 10-MINUTE PRACTICE ═══ a fixed ten-minute timed round, no sets/
@@ -14935,6 +15105,7 @@ window.Portal = {
       '<button class="vp-primary" id="vp-tenmin-done" type="button" style="background:transparent;color:var(--red);border:1px solid var(--red)">Back to Vocabulary</button></div>';
     document.getElementById('vp-tenmin-again').addEventListener('click', startTenMinPractice);
     document.getElementById('vp-tenmin-done').addEventListener('click', exitTenMin);
+    if (window.mtaCountUp) window.mtaCountUp(tenMinInnerEl.querySelector('.vp-score'), tenMin.correct, { suffix: '/' + tenMin.answered });
   }
   function exitTenMin() {
     tenMin.active = false;
@@ -15336,21 +15507,73 @@ window.Portal = {
     if (selDomains.length && selDomains.length < availableDomains().length) narrowed++;
     if (selSkills.length && selSkills.length < availableSkills().length) narrowed++;
     if (selDifficulties.length && selDifficulties.length < DIFFICULTIES.length) narrowed++;
-    if (narrowed > 0) { badge.textContent = String(narrowed); badge.style.display = ''; }
-    else { badge.style.display = 'none'; }
+    badge.textContent = String(narrowed);
+    badge.hidden = narrowed === 0;
+    var resetEl = document.getElementById('iq-filter-reset');
+    if (resetEl) resetEl.hidden = narrowed === 0;
+  }
+
+  /* Chips, for the filters whose whole option list fits on a line or two —
+     the same control the Question Bank uses, so both screens filter the
+     same way. Domain and Skill keep checkbox lists (renderCheckboxOptions
+     below): dozens of entries do not become chips, they become a wall. */
+  function renderChipOptions(container, options, labelFn, selectedArr, onChange) {
+    if (!container) return;
+    container.innerHTML = '';
+    if (!options.length) {
+      var empty = document.createElement('div');
+      empty.className = 'iq-filter-section-empty';
+      empty.textContent = 'None available';
+      container.appendChild(empty);
+      return;
+    }
+    options.forEach(function (opt) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      var on = selectedArr.indexOf(opt) !== -1;
+      b.className = 'qb-chip' + (on ? ' on' : '');
+      b.textContent = labelFn(opt);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      b.addEventListener('click', function () {
+        var i = selectedArr.indexOf(opt);
+        // Never all-off: an empty filter shows nothing, which reads as a
+        // broken screen rather than as a filter.
+        if (i === -1) selectedArr.push(opt);
+        else if (selectedArr.length > 1) selectedArr.splice(i, 1);
+        else return;
+        var nowOn = selectedArr.indexOf(opt) !== -1;
+        b.classList.toggle('on', nowOn);
+        b.setAttribute('aria-pressed', nowOn ? 'true' : 'false');
+        onChange();
+      });
+      container.appendChild(b);
+    });
+  }
+
+  // Everything at once, for the paths that change several filters (Reset,
+  // a preset arriving from Home or a score report).
+  function renderAllFilters() {
+    renderSectionPills();
+    renderDomainPills();
+    renderSkillPills();
+    renderDifficultyPills();
+    renderTestPills();
+    updateFiltersBadge();
   }
 
   function renderSectionPills() {
-    renderCheckboxOptions(sectionPillsEl, sectionKeys, sectionLabelFor, selSections, function () {
+    renderChipOptions(sectionPillsEl, sectionKeys, sectionLabelFor, selSections, function () {
+      // Section narrows what Domain and Skill can offer, so those two lists
+      // are rebuilt — the chip just clicked is not, which is what keeps the
+      // panel steady under the cursor.
       var newDomains = availableDomains();
       selDomains = selDomains.filter(function (d) { return newDomains.indexOf(d) !== -1; });
-      renderSectionPills();
       onDomainsChanged();
       updateFiltersBadge();
-    }, 'iq-section-summary');
+    });
   }
   function renderDomainPills() {
-    renderCheckboxOptions(domainPillsEl, availableDomains(), function (d) { return d; }, selDomains, function () { onDomainsChanged(); updateFiltersBadge(); }, 'iq-domain-summary');
+    renderCheckboxOptions(domainPillsEl, availableDomains(), function (d) { return d; }, selDomains, function () { onDomainsChanged(); updateFiltersBadge(); });
   }
   function onDomainsChanged() {
     var newSkills = availableSkills();
@@ -15360,16 +15583,16 @@ window.Portal = {
     renderList();
   }
   function renderSkillPills() {
-    renderCheckboxOptions(skillPillsEl, availableSkills(), function (s) { return s; }, selSkills, function () { renderSkillPills(); renderList(); updateFiltersBadge(); }, 'iq-skill-summary');
+    renderCheckboxOptions(skillPillsEl, availableSkills(), function (s) { return s; }, selSkills, function () { renderSkillPills(); renderList(); updateFiltersBadge(); });
   }
   function renderDifficultyPills() {
-    renderCheckboxOptions(difficultyPillsEl, DIFFICULTIES, difficultyLabel, selDifficulties, function () { renderDifficultyPills(); renderList(); updateFiltersBadge(); }, 'iq-difficulty-summary');
+    renderChipOptions(difficultyPillsEl, DIFFICULTIES, difficultyLabel, selDifficulties, function () { renderList(); updateFiltersBadge(); });
   }
   // Independent of Section/Domain/Skill's cascade — same as Difficulty —
   // since "which test was this on" is a separate dimension from the
   // skill taxonomy, not a level within it.
   function renderTestPills() {
-    renderCheckboxOptions(testPillsEl, testKeys, function (t) { return t; }, selTests, function () { renderTestPills(); renderList(); updateFiltersBadge(); }, 'iq-test-summary');
+    renderChipOptions(testPillsEl, testKeys, function (t) { return t; }, selTests, function () { renderList(); updateFiltersBadge(); });
   }
 
   // My Incorrect Questions mixes rows from TWO different sources with two
@@ -15557,9 +15780,43 @@ window.Portal = {
     });
   }
 
+  /* The count IS the filtered set on this screen — there is no per-row
+     picking here, so "practice these" means the questions currently on
+     screen. The bar arrives when there are any and drops away when the
+     filters empty the list, on the same two keyframes the Question Bank's
+     bar uses. */
+  var iqBarTimer = null;
   function setPracticeCount(n) {
     practiceCountEl.textContent = '(' + n + ')';
     practiceBtnEl.disabled = n === 0;
+    var bar = document.getElementById('iq-selection-bar');
+    var nEl = document.getElementById('iq-selection-n');
+    if (!bar || !nEl) return;
+    var reduce = false;
+    try { reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+    var showing = bar.style.display !== 'none';
+    if (iqBarTimer) { clearTimeout(iqBarTimer); iqBarTimer = null; }
+    if (n > 0) {
+      var text = n.toLocaleString() + ' question' + (n === 1 ? '' : 's');
+      var changed = nEl.textContent !== text;
+      nEl.textContent = text;
+      bar.classList.remove('qb-bar-out');
+      if (!showing) {
+        bar.style.display = 'flex';
+        if (!reduce) { bar.classList.remove('qb-bar-in'); bar.getBoundingClientRect(); bar.classList.add('qb-bar-in'); }
+      } else if (changed && !reduce) {
+        nEl.classList.remove('qb-count-pop'); nEl.getBoundingClientRect(); nEl.classList.add('qb-count-pop');
+      }
+    } else if (showing) {
+      if (reduce) { bar.style.display = 'none'; return; }
+      bar.classList.remove('qb-bar-in');
+      bar.classList.add('qb-bar-out');
+      iqBarTimer = setTimeout(function () {
+        bar.style.display = 'none';
+        bar.classList.remove('qb-bar-out');
+        iqBarTimer = null;
+      }, 180);
+    }
   }
 
   var BOOKMARK_SVG = '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 3.5h12a1 1 0 0 1 1 1V21l-7-4.2L5 21V4.5a1 1 0 0 1 1-1z"/></svg>';
@@ -15577,7 +15834,7 @@ window.Portal = {
     var filtered = currentFiltered();
     setPracticeCount(filtered.length);
     if (!filtered.length) {
-      poolCountEl.textContent = '0 questions match these filters.';
+      poolCountEl.textContent = 'No questions match these filters.';
       listEl.innerHTML = '';
       return;
     }
@@ -15725,6 +15982,12 @@ window.Portal = {
         '<button type="button" class="key-btn" id="iq-runner-done" type="button">Done</button>';
       document.getElementById('dx-card').insertBefore(summary, navRowEl);
       document.getElementById('iq-runner-done').addEventListener('click', endPracticeRunner);
+      /* The one number a student is waiting for at the end of a round,
+         landing the way the report's score tiles do. The " / n" is carried
+         as a suffix so only the score counts (fluid-ui.js). */
+      if (window.mtaCountUp) window.mtaCountUp(
+        summary.querySelector('.iq-runner-summary-score'), runnerScore,
+        { suffix: ' / ' + runnerQueue.length });
       return;
     }
 
@@ -15872,43 +16135,38 @@ window.Portal = {
         if (practiceBtnEl.disabled) return;
         startPracticeRunner();
       });
-      // Single "Filters" button opens/closes the one shared panel holding
-      // all five category groups — same open/close tracking (openDropdown/
-      // closeDropdown) every other dropdown here already uses, so an
-      // outside click or opening a different dropdown closes it the same way.
+      /* The filter menu: one panel, opened by one button, closed by Done,
+         Escape or a click outside. No flyouts and no per-category open
+         state to track — everything in the panel is already visible. */
       (function () {
-        var dropdownEl = document.getElementById('iq-filters-dropdown');
+        var menu = document.getElementById('iq-filter-menu');
         var btnEl = document.getElementById('iq-filters-btn');
-        btnEl.addEventListener('click', function () {
-          var isOpen = dropdownEl.classList.contains('open');
-          closeDropdown();
-          if (!isOpen) { dropdownEl.classList.add('open'); openDropdown = dropdownEl; }
-        });
-        // Each category row (Source/Section/Domain/Skill/Difficulty) pops
-        // its own checkbox list out to the right — clicking a row toggles
-        // just that one open, closing any other category's flyout in the
-        // same panel first (at most one flyout open at a time).
-        var cats = dropdownEl.querySelectorAll('.iq-filter-cat');
-        function openOnly(cat) {
-          Array.prototype.forEach.call(cats, function (c) { c.classList.toggle('open', c === cat); });
+        var doneEl = document.getElementById('iq-filter-done');
+        var resetEl = document.getElementById('iq-filter-reset');
+        function setOpen(open) {
+          menu.classList.toggle('open', open);
+          btnEl.setAttribute('aria-expanded', open ? 'true' : 'false');
         }
-        Array.prototype.forEach.call(cats, function (cat) {
-          cat.querySelector('.iq-filter-cat-row').addEventListener('click', function () {
-            var wasOpen = cat.classList.contains('open');
-            Array.prototype.forEach.call(cats, function (c) { c.classList.remove('open'); });
-            if (!wasOpen) cat.classList.add('open');
-          });
-          // Also opens on hover, not just click — but driven by JS
-          // (explicitly closing every other category first), not a plain
-          // CSS :hover rule. Rows sit ~39px apart while a flyout can run
-          // up to 300px tall, so a plain :hover rule left the browser's
-          // hover state genuinely ambiguous the instant the cursor
-          // crossed from one row into the flyout hanging below/beside the
-          // row above it — which is what made every flyout look like it
-          // was stuck rendering inside the first category's space instead
-          // of cleanly popping out next to whichever row was actually
-          // meant to be open.
-          cat.addEventListener('mouseenter', function () { openOnly(cat); });
+        btnEl.addEventListener('click', function (e) {
+          e.stopPropagation();
+          closeDropdown();                    // any other dropdown on the screen
+          setOpen(!menu.classList.contains('open'));
+        });
+        doneEl.addEventListener('click', function () { setOpen(false); });
+        document.addEventListener('click', function (e) {
+          if (menu.classList.contains('open') && !menu.contains(e.target)) setOpen(false);
+        });
+        document.addEventListener('keydown', function (e) {
+          if (e.key === 'Escape' && menu.classList.contains('open')) setOpen(false);
+        });
+        resetEl.addEventListener('click', function () {
+          selTests = testKeys.slice();
+          selSections = sectionKeys.slice();
+          selDifficulties = DIFFICULTIES.slice();
+          selDomains = availableDomains();
+          selSkills = availableSkills();
+          renderAllFilters();
+          renderList();
         });
       })();
       tabSavedEl.addEventListener('click', function () { setActiveTab('saved'); });
@@ -15925,7 +16183,9 @@ window.Portal = {
     tabMistakesEl.classList.toggle('active', activeTab === 'mistakes');
     filtersEl.style.display = activeTab === 'mistakes' ? '' : 'none';
 
-    listEl.innerHTML = '<div class="pb-empty-note">Loading your latest results…</div>';
+    // A shape rather than a sentence — see mtaSkeleton in fluid-ui.js.
+    if (window.mtaSkeleton) window.mtaSkeleton(listEl, { rows: 5, height: '52px' });
+    else listEl.innerHTML = '<div class="pb-empty-note">Loading your latest results…</div>';
     poolCountEl.textContent = '';
     setPracticeCount(0);
     loadRecords(function () {
@@ -15943,12 +16203,7 @@ window.Portal = {
       selDifficulties = DIFFICULTIES.slice();
       selTests = testKeys.slice();
 
-      renderSectionPills();
-      renderDomainPills();
-      renderSkillPills();
-      renderDifficultyPills();
-      renderTestPills();
-      updateFiltersBadge();
+      renderAllFilters();
       renderList();
     });
   };
@@ -16174,6 +16429,12 @@ window.Portal = {
         '<button type="button" class="key-btn" id="chal-runner-done" type="button">Done</button>';
       document.getElementById('dx-card').insertBefore(summary, navRowEl);
       document.getElementById('chal-runner-done').addEventListener('click', endRunner);
+      /* The one number a student is waiting for at the end of a round,
+         landing the way the report's score tiles do. The " / n" is carried
+         as a suffix so only the score counts (fluid-ui.js). */
+      if (window.mtaCountUp) window.mtaCountUp(
+        summary.querySelector('.iq-runner-summary-score'), runnerScore,
+        { suffix: ' / ' + attemptedCount });
       return;
     }
 
@@ -16821,10 +17082,10 @@ window.Portal = {
     selectedSkills = [skill];
     renderSkillsList();
     renderSelectionBar();
-    // Put the row on screen — the skills table is long, and an alphabetical
-    // list gives no hint where a just-ticked topic landed.
-    var row = document.querySelector('#qb-skills-tbody input[type="checkbox"]:checked');
-    if (row && row.scrollIntoView) row.scrollIntoView({ block: 'center' });
+    // Put the card on screen — the list is long, and nothing else hints
+    // where a topic opened from elsewhere in the portal has landed.
+    var card = document.querySelector('#qb-skills-list .qb-topic.on');
+    if (card && card.scrollIntoView) card.scrollIntoView({ block: 'center', behavior: 'smooth' });
   }
 
   function renderAnalytics() {
@@ -16996,235 +17257,424 @@ window.Portal = {
   // Small checkbox-dropdown builder, same visual language as Saved &
   // Mistakes' filter pills (.iq-dropdown*) but self-contained — that
   // module's own version is private to its own closure.
-  function buildCheckboxDropdown(container, label, options, labelFn, selectedArr, onChange) {
-    var wasOpen = container.classList.contains('open');
-    container.innerHTML = '';
-    container.classList.toggle('open', wasOpen);
-    var btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'iq-dropdown-btn';
-    var summary = selectedArr.length === options.length ? 'All' : selectedArr.length + ' of ' + options.length;
-    btn.innerHTML = '<span>' + escHtmlQb(label) + ': ' + escHtmlQb(summary) + '</span><span class="iq-dropdown-caret">&#9662;</span>';
-    btn.addEventListener('click', function () {
-      var isOpen = container.classList.contains('open');
-      closeQbDropdown();
-      if (!isOpen) { container.classList.add('open'); openQbDropdown = container; }
-    });
-    container.appendChild(btn);
-    var panel = document.createElement('div');
-    panel.className = 'iq-dropdown-panel';
-    options.forEach(function (opt) {
-      var row = document.createElement('label');
-      row.className = 'iq-dropdown-option';
-      var cb = document.createElement('input');
-      cb.type = 'checkbox';
-      cb.checked = selectedArr.indexOf(opt) !== -1;
-      cb.addEventListener('change', function () {
-        var i = selectedArr.indexOf(opt);
-        if (cb.checked) { if (i === -1) selectedArr.push(opt); }
-        else if (i !== -1 && selectedArr.length > 1) selectedArr.splice(i, 1);
-        else cb.checked = true; // never allow zero difficulties selected — nothing left to practice
-        onChange();
-      });
-      row.appendChild(cb);
-      row.appendChild(document.createTextNode(labelFn(opt)));
-      panel.appendChild(row);
-    });
-    container.appendChild(panel);
-  }
-  function buildRadioDropdown(container, label, options, selectedGetter, onSelect) {
-    var wasOpen = container.classList.contains('open');
-    container.innerHTML = '';
-    container.classList.toggle('open', wasOpen);
-    var current = options.filter(function (o) { return o.value === selectedGetter(); })[0];
-    var btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'iq-dropdown-btn';
-    btn.innerHTML = '<span>' + escHtmlQb(label) + ': ' + escHtmlQb(current ? current.label : '') + '</span><span class="iq-dropdown-caret">&#9662;</span>';
-    btn.addEventListener('click', function () {
-      var isOpen = container.classList.contains('open');
-      closeQbDropdown();
-      if (!isOpen) { container.classList.add('open'); openQbDropdown = container; }
-    });
-    container.appendChild(btn);
-    var panel = document.createElement('div');
-    panel.className = 'iq-dropdown-panel';
-    options.forEach(function (opt) {
-      var row = document.createElement('label');
-      row.className = 'iq-dropdown-option';
-      var rb = document.createElement('input');
-      rb.type = 'radio';
-      rb.name = 'qb-radio-' + label;
-      rb.checked = opt.value === selectedGetter();
-      rb.addEventListener('change', function () { onSelect(opt.value); });
-      row.appendChild(rb);
-      row.appendChild(document.createTextNode(opt.label));
-      panel.appendChild(row);
-    });
-    container.appendChild(panel);
-  }
+  /* ═══ THE FILTER BAR ═══ chips and one segmented control, replacing three
+     dropdown menus.
 
-  function renderFilters() {
-    var diffContainer = document.getElementById('qb-diff-dropdown');
-    var sourceContainer = document.getElementById('qb-source-dropdown');
-    var completedContainer = document.getElementById('qb-completed-dropdown');
-    if (diffContainer) {
-      buildCheckboxDropdown(diffContainer, 'Difficulty', ['easy', 'medium', 'hard'], function (d) { return d.charAt(0).toUpperCase() + d.slice(1); }, selectedDifficulties, function () {
-        renderFilters();
-        renderSkillsList();
+     The menus were wrong twice over. Mechanically, ticking an option called
+     renderFilters(), which wiped and rebuilt all three dropdowns —
+     including the open one, with the mouse inside it — so the panel
+     flickered, replayed its animation and dropped keyboard focus on every
+     click. And in substance: a menu is a lot of machinery for a choice
+     between Easy, Medium and Hard, and it hid the answer behind a click.
+     "Difficulty: 2 of 3" never said which two.
+
+     Built once per subject and then only re-styled. Toggling a chip is a
+     class change plus a list re-render — there is no panel left to lose. */
+  var qbFiltersBuilt = null;      // which subject the current bar was built for
+  var qbMenuWired = false;        // document-level menu listeners: once only
+  function renderFilters(force) {
+    var diffChips = document.getElementById('qb-diff-chips');
+    var sourceGroup = document.getElementById('qb-source-group');
+    var sourceChips = document.getElementById('qb-source-chips');
+    var seg = document.getElementById('qb-completed-seg');
+    var reset = document.getElementById('qb-filter-reset');
+    if (!diffChips || !seg) return;
+
+    var sources = availableSources(currentSubject);
+    var rebuild = force || qbFiltersBuilt !== currentSubject;
+
+    if (rebuild) {
+      qbFiltersBuilt = currentSubject;
+
+      diffChips.innerHTML = '';
+      ['easy', 'medium', 'hard'].forEach(function (d) {
+        diffChips.appendChild(chip(d.charAt(0).toUpperCase() + d.slice(1), selectedDifficulties, d));
       });
-    }
-    if (sourceContainer) {
-      var sources = availableSources(currentSubject);
+
       if (sources.length < 2) {
-        sourceContainer.style.display = 'none';
+        sourceGroup.style.display = 'none';
       } else {
-        sourceContainer.style.display = '';
-        buildCheckboxDropdown(sourceContainer, 'Source', sources, function (s) { return s; }, selectedSources, function () {
-          renderFilters();
+        sourceGroup.style.display = '';
+        sourceChips.innerHTML = '';
+        sources.forEach(function (src) { sourceChips.appendChild(chip(src, selectedSources, src)); });
+      }
+
+      seg.innerHTML = '';
+      [{ value: 'all', label: 'All' },
+       { value: 'not', label: 'Not started' },
+       { value: 'done', label: 'Started' }].forEach(function (opt) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'qb-seg-btn' + (completedFilter === opt.value ? ' active' : '');
+        b.textContent = opt.label;
+        b.setAttribute('data-value', opt.value);
+        b.addEventListener('click', function () {
+          if (completedFilter === opt.value) return;
+          completedFilter = opt.value;
+          Array.prototype.forEach.call(seg.querySelectorAll('.qb-seg-btn'), function (other) {
+            other.classList.toggle('active', other === b);
+          });
+          syncResetVisibility();
           renderSkillsList();
         });
+        seg.appendChild(b);
+      });
+      // The travelling indicator, same component as the sidebar's pill.
+      if (window.mtaFluid) window.mtaFluid.attach(seg, { item: '.qb-seg-btn', mode: 'pill' });
+
+      /* Session length. The track runs 10 up to QB_SIZE_MAX, and its last
+         stop is not a number but "All" — the default, and what this screen
+         always did before there was a choice. Anything past the top of a
+         slider is unbounded, so that is where All belongs. */
+      var sizeHost = document.getElementById('qb-size-slider');
+      if (sizeHost && window.mtaSlider) {
+        sizeHost.innerHTML = '';
+        var st = window.mtaSlider({
+          min: QB_SIZE_MIN, max: QB_SIZE_MAX, step: QB_SIZE_STEP,
+          value: qbSessionSize === 0 ? QB_SIZE_MAX : qbSessionSize,
+          label: 'questions in this round',
+          unit: 'questions',
+          format: function (v) { return v >= QB_SIZE_MAX ? 'All' : String(v); },
+          onChange: function (v) {
+            qbSessionSize = v >= QB_SIZE_MAX ? 0 : v;
+            try { localStorage.setItem(QB_SIZE_KEY, String(qbSessionSize)); } catch (e) {}
+            syncResetVisibility();
+            renderSelectionBar();     // the bar promises what Start will give
+          }
+        });
+        sizeHost.appendChild(st.el);
       }
-    }
-    if (completedContainer) {
-      buildRadioDropdown(completedContainer, 'Completed', [
-        { value: 'all', label: 'All' },
-        { value: 'done', label: 'Completed' },
-        { value: 'not', label: 'Not completed' }
-      ], function () { return completedFilter; }, function (val) {
-        completedFilter = val;
-        closeQbDropdown();
-        renderFilters();
-        renderSkillsList();
-      });
-    }
-  }
 
-  function renderSelectionBar() {
-    var bar = document.getElementById('qb-selection-bar');
-    var countEl = document.getElementById('qb-selection-count');
-    if (!bar) return;
-    if (selectedSkills.length) {
-      bar.style.display = 'flex';
-      countEl.textContent = selectedSkills.length + ' topic' + (selectedSkills.length === 1 ? '' : 's') + ' selected';
-    } else {
-      bar.style.display = 'none';
-    }
-  }
-
-  function renderSkillsList() {
-    var tbody = document.getElementById('qb-skills-tbody');
-    if (!tbody) return;
-    var p = loadProgress();
-    var groups = {};
-    var order = [];
-    var visibleSkillNames = [];
-    allSkills().forEach(function (s) {
-      if (!groups[s.domain]) { groups[s.domain] = []; order.push(s.domain); }
-      groups[s.domain].push(s);
-    });
-    var rowsHtml = '';
-    order.forEach(function (domain) {
-      var skillRows = groups[domain].map(function (s) {
-        var qids = s.questions.map(function (q) { return q.qid; });
-        var attempted = qids.filter(function (id) { return p.attempts[id]; });
-        var correct = attempted.filter(function (id) { return p.attempts[id].correct; });
-        var acc = attempted.length ? Math.round((correct.length / attempted.length) * 100) : 0;
-        var pct = qids.length ? Math.round((attempted.length / qids.length) * 100) : 0;
-        // "Completed" means "started" (attempted at least one question in
-        // this skill), not "attempted literally every question" — a
-        // skill's own pool runs from a dozen questions up into the
-        // hundreds (median ~119), so requiring 100% coverage made this
-        // filter dead in practice: "Completed" always came back empty and
-        // "Not completed" always came back as every skill, no matter how
-        // much a student had actually practiced.
-        var isDone = attempted.length > 0;
-        return { s: s, attempted: attempted, correct: correct, acc: acc, pct: pct, isDone: isDone };
-      }).filter(function (row) {
-        if (completedFilter === 'done') return row.isDone;
-        if (completedFilter === 'not') return !row.isDone;
-        return true;
-      });
-      if (!skillRows.length) return;
-      rowsHtml += '<tr class="qb-domain-row"><td colspan="4">' + escHtmlQb(domain) + '</td></tr>';
-      skillRows.forEach(function (row) {
-        visibleSkillNames.push(row.s.skill);
-        var s = row.s;
-        var hasEnough = row.attempted.length >= WEAK_MIN_ATTEMPTS;
-        var isWeak = hasEnough && row.acc < WEAK_ACC_THRESHOLD;
-        var isStrong = hasEnough && row.acc >= STRONG_ACC_THRESHOLD;
-        // red/amber/green — same three-way read as the strength dot next
-        // to the percentage; "amber" also covers every row that hasn't
-        // hit WEAK_MIN_ATTEMPTS yet (not enough of a sample to call it
-        // either way), same as the tag showing neither Weak nor Strong.
-        var strengthCls = isWeak ? 'weak' : isStrong ? 'strong' : 'mid';
-        var tagHtml = isWeak ? ' <span class="qb-weak-tag">&#9889; Weak</span>'
-          : isStrong ? ' <span class="qb-weak-tag qb-strong-tag">&#10003; Strong</span>' : '';
-        var checked = selectedSkills.indexOf(s.skill) !== -1;
-        rowsHtml += '<tr class="qb-skill-row" data-skill="' + escHtmlQb(s.skill) + '">' +
-          '<td><input type="checkbox" class="qb-skill-check" ' + (checked ? 'checked' : '') + '></td>' +
-          '<td><label class="qb-skill-name-cell">' + escHtmlQb(s.skill) + tagHtml + '</label></td>' +
-          '<td><div class="qb-progress-cell"><div class="qb-progress-track"><div class="qb-progress-fill" style="width:' + row.pct + '%;"></div></div>' +
-            '<span class="qb-progress-frac">' + row.attempted.length + '/' + s.questions.length + '</span></div></td>' +
-          '<td><div class="qb-acc-cell' + (row.attempted.length ? ' has-data' : '') + '">' +
-            (row.attempted.length ? '<span class="qb-strength-dot ' + strengthCls + '"></span>' : '') +
-            '<span class="qb-acc-value">' + (row.attempted.length ? row.acc + '%' : '&mdash;') + '</span>' +
-          '</div></td>' +
-        '</tr>';
-      });
-    });
-    tbody.innerHTML = rowsHtml;
-
-    // "Select all" reflects the CURRENTLY VISIBLE rows (after Difficulty/
-    // Source/Completed filtering — visibleSkillNames, not the unfiltered
-    // allSkills()), same as what an individual checkbox click operates
-    // over. Checked when every visible row is selected, indeterminate
-    // when some but not all are (so it never silently claims "all" while
-    // a filtered-out row is secretly excluded), unchecked when none are.
-    // Called after EVERY selection change, not just a select-all click —
-    // an individual row toggle changes this state just as much and the
-    // header checkbox needs to stay in sync with it either way.
-    var selectAllCb = document.getElementById('qb-select-all');
-    function syncSelectAllCheckbox() {
-      if (!selectAllCb) return;
-      var visibleSelectedCount = visibleSkillNames.filter(function (name) { return selectedSkills.indexOf(name) !== -1; }).length;
-      selectAllCb.checked = visibleSkillNames.length > 0 && visibleSelectedCount === visibleSkillNames.length;
-      selectAllCb.indeterminate = visibleSelectedCount > 0 && visibleSelectedCount < visibleSkillNames.length;
-    }
-    syncSelectAllCheckbox();
-
-    Array.prototype.forEach.call(tbody.querySelectorAll('.qb-skill-row'), function (tr) {
-      var skillName = tr.getAttribute('data-skill');
-      var cb = tr.querySelector('.qb-skill-check');
-      function toggle() {
-        var i = selectedSkills.indexOf(skillName);
-        if (i === -1) selectedSkills.push(skillName); else selectedSkills.splice(i, 1);
-        cb.checked = selectedSkills.indexOf(skillName) !== -1;
-        syncSelectAllCheckbox();
-        renderSelectionBar();
+      /* The menu itself. Closes on Done, on Escape, and on a click outside
+         it — but NOT on a click inside, so several filters can be set in
+         one visit. */
+      var menu = document.getElementById('qb-filter-menu');
+      var btn = document.getElementById('qb-filter-btn');
+      var done = document.getElementById('qb-filter-done');
+      function setMenu(open) {
+        menu.classList.toggle('open', open);
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
       }
-      cb.addEventListener('click', function (e) { e.stopPropagation(); toggle(); });
-      tr.querySelector('.qb-skill-name-cell').addEventListener('click', function (e) { e.preventDefault(); toggle(); });
-    });
+      // onclick (not addEventListener) so re-building the bar for the other
+      // subject replaces these rather than stacking a second copy.
+      btn.onclick = function (e) { e.stopPropagation(); setMenu(!menu.classList.contains('open')); };
+      done.onclick = function () { setMenu(false); };
+      // The document-level pair is bound ONCE for the life of the page —
+      // the bar is rebuilt per subject, and these would otherwise pile up.
+      if (!qbMenuWired) {
+        qbMenuWired = true;
+        document.addEventListener('click', function (e) {
+          var m = document.getElementById('qb-filter-menu');
+          if (m && m.classList.contains('open') && !m.contains(e.target)) {
+            m.classList.remove('open');
+            var fb = document.getElementById('qb-filter-btn');
+            if (fb) fb.setAttribute('aria-expanded', 'false');
+          }
+        });
+        document.addEventListener('keydown', function (e) {
+          if (e.key !== 'Escape') return;
+          var m = document.getElementById('qb-filter-menu');
+          if (m && m.classList.contains('open')) {
+            m.classList.remove('open');
+            var fb = document.getElementById('qb-filter-btn');
+            if (fb) fb.setAttribute('aria-expanded', 'false');
+          }
+        });
+      }
 
-    if (selectAllCb) {
-      selectAllCb.onclick = function () {
-        if (selectAllCb.checked) {
-          visibleSkillNames.forEach(function (name) { if (selectedSkills.indexOf(name) === -1) selectedSkills.push(name); });
-        } else {
-          selectedSkills = selectedSkills.filter(function (name) { return visibleSkillNames.indexOf(name) === -1; });
-        }
+      reset.onclick = function () {
+        selectedDifficulties.length = 0;
+        ['easy', 'medium', 'hard'].forEach(function (d) { selectedDifficulties.push(d); });
+        selectedSources.length = 0;
+        availableSources(currentSubject).forEach(function (src) { selectedSources.push(src); });
+        completedFilter = 'all';
+        qbSessionSize = 0;
+        try { localStorage.setItem(QB_SIZE_KEY, '0'); } catch (e) {}
+        renderFilters(true);
         renderSkillsList();
         renderSelectionBar();
       };
     }
+    syncResetVisibility();
+
+    /* One toggle chip over a multi-select array. Never lets the last one
+       off — an empty difficulty set leaves nothing to practice, which the
+       old dropdown also guarded against. */
+    function chip(label, arr, value) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'qb-chip' + (arr.indexOf(value) !== -1 ? ' on' : '');
+      b.textContent = label;
+      b.setAttribute('aria-pressed', arr.indexOf(value) !== -1 ? 'true' : 'false');
+      b.addEventListener('click', function () {
+        var i = arr.indexOf(value);
+        if (i === -1) arr.push(value);
+        else if (arr.length > 1) arr.splice(i, 1);
+        else return;                      // the last one stays on
+        var on = arr.indexOf(value) !== -1;
+        b.classList.toggle('on', on);
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
+        syncResetVisibility();
+        renderSkillsList();
+      });
+      return b;
+    }
+
+    function syncResetVisibility() {
+      var srcs = availableSources(currentSubject);
+      var active = 0;
+      if (selectedDifficulties.length !== 3) active++;
+      if (completedFilter !== 'all') active++;
+      if (srcs.length > 1 && selectedSources.length !== srcs.length) active++;
+      if (qbSessionSize !== 0) active++;
+      reset.hidden = active === 0;
+
+      /* The button says what is on without being opened: the count badge,
+         and the session length when one is set — the one filter whose value
+         a student wants to see at a glance before pressing Start. */
+      var lab = document.getElementById('qb-filter-btn-lab');
+      var badge = document.getElementById('qb-filter-count');
+      if (lab) lab.textContent = qbSessionSize ? qbSessionSize + '-question round' : 'Filters';
+      if (badge) {
+        var shown = qbSessionSize ? active - 1 : active;
+        badge.hidden = shown === 0;
+        badge.textContent = String(shown);
+      }
+    }
   }
+
+  /* skill -> how many questions it contributes under the current filters,
+     refreshed on every list render. */
+  var qbSkillQuestionCounts = {};
+  var qbListWired = false;
+
+  /* How long the round should be. 0 means "all of them" and is the default,
+     which is what this screen always did — the choice is new, the default
+     is not. Remembered per device, like the weakness card's own size. */
+  var QB_SIZE_KEY = 'qb_session_size';
+  var QB_SIZE_MIN = 10, QB_SIZE_MAX = 100, QB_SIZE_STEP = 5;
+  var qbSessionSize = (function () {
+    try {
+      var n = parseInt(localStorage.getItem(QB_SIZE_KEY), 10);
+      if (isFinite(n) && (n === 0 || (n >= QB_SIZE_MIN && n <= QB_SIZE_MAX))) return n;
+    } catch (e) {}
+    return 0;                       // All
+  })();
+
+  var qbBarTimer = null;
+  function qbReduceMotion() {
+    try { return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
+    catch (e) { return false; }
+  }
+  function renderSelectionBar() {
+    var bar = document.getElementById('qb-selection-bar');
+    var countEl = document.getElementById('qb-selection-count');
+    if (!bar) return;
+    var showing = bar.style.display !== 'none';
+    if (qbBarTimer) { clearTimeout(qbBarTimer); qbBarTimer = null; }
+    if (selectedSkills.length) {
+      /* "3 topics" never answered the question a student actually has,
+         which is how long this will take. The question count does, and it
+         is the number Start is about to hand them. */
+      var topicsEl = document.getElementById('qb-selection-topics');
+      var qEl = document.getElementById('qb-selection-q');
+      var available = selectedSkills.reduce(function (n, name) {
+        return n + (qbSkillQuestionCounts[name] || 0);
+      }, 0);
+      var questions = (qbSessionSize && qbSessionSize < available) ? qbSessionSize : available;
+      var text = selectedSkills.length + ' topic' + (selectedSkills.length === 1 ? '' : 's');
+      var changed = topicsEl.textContent !== text || qEl.textContent !== questions.toLocaleString();
+      topicsEl.textContent = text;
+      if (changed && window.mtaCountUp && showing) {
+        window.mtaCountUp(qEl, questions, { duration: 500 });
+      } else {
+        qEl.textContent = questions.toLocaleString();
+      }
+      bar.classList.remove('qb-bar-out');
+      // Only animate the ARRIVAL — replaying the rise on every subsequent
+      // tick would have the bar bouncing each time a topic is ticked.
+      if (!showing) {
+        bar.style.display = 'flex';
+        if (!qbReduceMotion()) {
+          bar.classList.remove('qb-bar-in');
+          bar.getBoundingClientRect();
+          bar.classList.add('qb-bar-in');
+        }
+      } else if (changed && !qbReduceMotion()) {
+        var topics = document.getElementById('qb-selection-topics');
+        topics.classList.remove('qb-count-pop');
+        topics.getBoundingClientRect();
+        topics.classList.add('qb-count-pop');
+      }
+    } else if (showing) {
+      if (qbReduceMotion()) { bar.style.display = 'none'; return; }
+      bar.classList.remove('qb-bar-in');
+      bar.classList.add('qb-bar-out');
+      qbBarTimer = setTimeout(function () {
+        bar.style.display = 'none';
+        bar.classList.remove('qb-bar-out');
+        qbBarTimer = null;
+      }, 180);
+    }
+  }
+
+  /* ═══ THE TOPIC LIST ═══ one card per skill, grouped by domain.
+
+     Was a checkbox table. The row's content sat to the RIGHT of the control
+     that selected it, so every pick was a trip to an 18px circle, and the
+     circle's state (tick, dash, empty) was the only thing carrying the
+     selection. A card carries its own state in its fill, is the size of the
+     thing it describes, and puts the numbers on the topic they belong to. */
+  function renderSkillsList() {
+    var host = document.getElementById('qb-skills-list');
+    if (!host) return;
+    var p = loadProgress();
+    qbSkillQuestionCounts = {};
+    var groups = {}, order = [], visibleSkillNames = [], practicable = [];
+    allSkills().forEach(function (s) {
+      if (!groups[s.domain]) { groups[s.domain] = []; order.push(s.domain); }
+      groups[s.domain].push(s);
+    });
+
+    // The same two tests startRunner() applies when it builds a queue.
+    function passesFilters(q) {
+      return selectedDifficulties.indexOf(q.difficulty) !== -1 &&
+        selectedSources.indexOf(q.source || 'Non-Bluebook') !== -1;
+    }
+
+    var html = '';
+    order.forEach(function (domain) {
+      var rows = groups[domain].map(function (s) {
+        var qs = s.questions.filter(passesFilters);
+        var attempted = qs.filter(function (q) { return p.attempts[q.qid]; });
+        var correct = attempted.filter(function (q) { return p.attempts[q.qid].correct; });
+        var acc = attempted.length ? Math.round((correct.length / attempted.length) * 100) : 0;
+        var pct = qs.length ? Math.round((attempted.length / qs.length) * 100) : 0;
+        // "Completed" means started, not exhausted — see the note this
+        // replaces: a skill's pool runs into the hundreds, so requiring
+        // 100% coverage made the filter useless in both directions.
+        return { s: s, n: qs.length, attempted: attempted.length, acc: acc, pct: pct, isDone: attempted.length > 0 };
+      }).filter(function (row) {
+        if (!row.n) return false;               // emptied by the filters
+        // Still practicable even if the Show filter is about to hide it —
+        // see the selection sweep at the end of this function.
+        practicable.push(row.s.skill);
+        if (completedFilter === 'done') return row.isDone;
+        if (completedFilter === 'not') return !row.isDone;
+        return true;
+      });
+      if (!rows.length) return;
+
+      var domainQs = rows.reduce(function (n, r) { return n + r.n; }, 0);
+      var cards = rows.map(function (row) {
+        visibleSkillNames.push(row.s.skill);
+        qbSkillQuestionCounts[row.s.skill] = row.n;
+        var enough = row.attempted >= WEAK_MIN_ATTEMPTS;
+        var isWeak = enough && row.acc < WEAK_ACC_THRESHOLD;
+        var isStrong = enough && row.acc >= STRONG_ACC_THRESHOLD;
+        var strengthCls = isWeak ? 'weak' : isStrong ? 'strong' : 'mid';
+        var tag = isWeak ? ' <span class="qb-weak-tag">&#9889; Weak</span>'
+          : isStrong ? ' <span class="qb-weak-tag qb-strong-tag">&#10003; Strong</span>' : '';
+        var on = selectedSkills.indexOf(row.s.skill) !== -1;
+        return '<button type="button" class="qb-topic' + (on ? ' on' : '') + '" ' +
+            'data-skill="' + escHtmlQb(row.s.skill) + '" aria-pressed="' + (on ? 'true' : 'false') + '">' +
+            '<span class="qb-topic-mark" aria-hidden="true"></span>' +
+            '<span class="qb-topic-name">' + escHtmlQb(row.s.skill) + tag + '</span>' +
+            '<span class="qb-topic-foot">' +
+              '<span class="qb-topic-bar"><i style="width:' + row.pct + '%;"></i></span>' +
+              '<span class="qb-topic-frac">' + row.attempted + '/' + row.n + '</span>' +
+              '<span class="qb-topic-acc' + (row.attempted ? ' has-data' : '') + '">' +
+                (row.attempted ? '<span class="qb-strength-dot ' + strengthCls + '"></span>' + row.acc + '%' : '&mdash;') +
+              '</span>' +
+            '</span>' +
+          '</button>';
+      }).join('');
+
+      html += '<section class="qb-topic-group" data-domain="' + escHtmlQb(domain) + '">' +
+        '<div class="qb-topic-group-hed">' +
+          '<span class="qb-topic-group-name">' + escHtmlQb(domain) + '</span>' +
+          '<span class="qb-topic-group-meta">' + rows.length + ' topic' + (rows.length === 1 ? '' : 's') +
+            ' &middot; ' + domainQs.toLocaleString() + ' questions</span>' +
+          '<button type="button" class="qb-topic-group-all"></button>' +
+        '</div>' +
+        '<div class="qb-topic-grid">' + cards + '</div>' +
+      '</section>';
+    });
+
+    host.innerHTML = html || '<div class="qb-topic-empty">No topics match these filters. ' +
+      'Try turning a difficulty back on, or switch “Show” back to All.</div>';
+
+    /* ── wiring ── */
+    function cardsIn(group) { return Array.prototype.slice.call(group.querySelectorAll('.qb-topic')); }
+    function syncGroupButtons() {
+      Array.prototype.forEach.call(host.querySelectorAll('.qb-topic-group'), function (g) {
+        var cards = cardsIn(g);
+        var on = cards.filter(function (c) { return c.classList.contains('on'); }).length;
+        var btn = g.querySelector('.qb-topic-group-all');
+        btn.textContent = on === cards.length ? 'Clear' : 'Select all';
+      });
+    }
+    function paint(card, on) {
+      card.classList.toggle('on', on);
+      card.setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
+    /* ONCE. renderSkillsList runs again on every filter change, and adding
+       a delegated listener each time stacked them: with two attached, one
+       click toggled the same topic twice and it looked like the card simply
+       did not respond. The handler reads the DOM it is called on, so it
+       does not need re-binding when the list is rebuilt. */
+    if (!qbListWired) {
+      qbListWired = true;
+      host.addEventListener('click', onListClick);
+    }
+
+    function onListClick(e) {
+      var groupBtn = e.target.closest('.qb-topic-group-all');
+      if (groupBtn) {
+        var group = groupBtn.closest('.qb-topic-group');
+        var cards = cardsIn(group);
+        var allOn = cards.every(function (c) { return c.classList.contains('on'); });
+        cards.forEach(function (c) {
+          var name = c.getAttribute('data-skill');
+          var i = selectedSkills.indexOf(name);
+          if (allOn && i !== -1) selectedSkills.splice(i, 1);
+          else if (!allOn && i === -1) selectedSkills.push(name);
+          paint(c, !allOn);
+        });
+        syncGroupButtons();
+        renderSelectionBar();
+        return;
+      }
+      var card = e.target.closest('.qb-topic');
+      if (!card) return;
+      var skill = card.getAttribute('data-skill');
+      var idx = selectedSkills.indexOf(skill);
+      if (idx === -1) selectedSkills.push(skill); else selectedSkills.splice(idx, 1);
+      paint(card, idx === -1);
+      syncGroupButtons();
+      renderSelectionBar();
+    }
+    syncGroupButtons();
+
+    /* Drop a selection only when the topic has genuinely nothing left to
+       practice under the difficulty/source filters — otherwise the bar
+       would count questions Start cannot give. Being hidden by the Show
+       filter is NOT that: "Started" only changes what is on screen, and
+       flipping it should not quietly empty a student's basket. */
+    selectedSkills = selectedSkills.filter(function (name) { return practicable.indexOf(name) !== -1; });
+    renderSelectionBar();
+  }
+
 
   function showHome() {
     closeQbDropdown();
     document.getElementById('qb-home-view').style.display = '';
     document.getElementById('qb-skills-view').style.display = 'none';
-    document.getElementById('qb-selection-bar').style.display = 'none';
+    var qbBar = document.getElementById('qb-selection-bar');
+    // Leaving the screen entirely — no exit animation to play, but the
+    // classes have to go or the next arrival replays a half-finished one.
+    qbBar.classList.remove('qb-bar-in', 'qb-bar-out');
+    qbBar.style.display = 'none';
     renderStats();
   }
   function showSkills(subject) {
@@ -17314,6 +17764,10 @@ window.Portal = {
       if (a && a.correct) solved.push(q); else notSolved.push(q);
     });
     var queue = shuffle(notSolved).concat(shuffle(solved));
+    /* Not-yet-solved questions are already at the front, so capping here
+       keeps the shortest round the most useful one rather than a random
+       slice of everything. */
+    if (qbSessionSize && queue.length > qbSessionSize) queue = queue.slice(0, qbSessionSize);
     runnerQueue = queue;
     runnerIndex = 0;
     runnerState = {};
@@ -17332,6 +17786,27 @@ window.Portal = {
   // it (Words in Context alone has 250+) doesn't turn "a focused round"
   // into an unbounded marathon.
   var QB_WEAKNESS_SESSION_CAP = 25;
+  /* The weakness round used to be a fixed 50 (25 per subject). It is now
+     the student's to set on the card itself -- see the stepper wired up in
+     the init block below -- because "a focused round" means different
+     things on a school night and on a Sunday. Remembered per device;
+     QB_WEAKNESS_SESSION_CAP stays as the default it starts from. */
+  var QB_ROUND_KEY = 'qb_weak_round_size';
+  var QB_ROUND_MIN = 10, QB_ROUND_MAX = 100, QB_ROUND_STEP = 5;
+  var qbRoundSize = (function () {
+    try {
+      var n = parseInt(localStorage.getItem(QB_ROUND_KEY), 10);
+      if (isFinite(n) && n >= QB_ROUND_MIN && n <= QB_ROUND_MAX) return n;
+    } catch (e) {}
+    return QB_WEAKNESS_SESSION_CAP * 2;
+  })();
+  // R&W takes the odd one on an odd total, matching the order the queue is
+  // built in below.
+  function qbRoundSplit() {
+    var rw = Math.ceil(qbRoundSize / 2);
+    return { rw: rw, math: qbRoundSize - rw };
+  }
+
   // "Practice Your Weaknesses" — pulls the single weakest skill in EACH
   // subject (via window.getWeakestSkillsForQb, the bridge to Home's own
   // weakestSkillIn()/HOME_*_DOMAINS) and runs both back to back in one
@@ -17406,7 +17881,10 @@ window.Portal = {
       return tagged;
     });
   }
-  function startWeaknessPractice() {
+  /* `opts.only` ('rw' | 'math') comes from the split button on the card —
+     the same round, with the other subject's half set to zero. */
+  function startWeaknessPractice(opts) {
+    var only = (opts && opts.only) || null;
     var btn = document.getElementById('qb-weak-btn');
     var subEl = document.querySelector('#qb-weak-card .vp-tenmin-sub');
     var defaultSub = subEl ? subEl.textContent : '';
@@ -17434,8 +17912,11 @@ window.Portal = {
       // hasn't gotten right yet, not just the first 25 in whatever order
       // the skill happened to store them — a skill with fewer than the cap
       // just contributes however many it has (unchanged from before).
-      var queue = splitSolved(weaknessPoolFor('rw', weak.rw)).slice(0, QB_WEAKNESS_SESSION_CAP)
-        .concat(splitSolved(weaknessPoolFor('math', weak.math)).slice(0, QB_WEAKNESS_SESSION_CAP));
+      var caps = only === 'rw' ? { rw: qbRoundSize, math: 0 }
+        : only === 'math' ? { rw: 0, math: qbRoundSize }
+        : qbRoundSplit();
+      var queue = splitSolved(weaknessPoolFor('rw', weak.rw)).slice(0, caps.rw)
+        .concat(splitSolved(weaknessPoolFor('math', weak.math)).slice(0, caps.math));
       if (!queue.length) {
         // A weak skill/domain was found, but nothing in Question Bank
         // matches it even at the domain level — genuinely possible for
@@ -17642,6 +18123,12 @@ window.Portal = {
         '<button type="button" class="key-btn" id="qb-runner-done" type="button">Done</button>';
       document.getElementById('dx-card').insertBefore(summary, navRowEl);
       document.getElementById('qb-runner-done').addEventListener('click', endRunner);
+      /* The one number a student is waiting for at the end of a round,
+         landing the way the report's score tiles do. The " / n" is carried
+         as a suffix so only the score counts (fluid-ui.js). */
+      if (window.mtaCountUp) window.mtaCountUp(
+        summary.querySelector('.iq-runner-summary-score'), runnerScore,
+        { suffix: ' / ' + attemptedCount });
       return;
     }
 
@@ -17879,7 +18366,46 @@ window.Portal = {
         showSkills('math');
       });
       var weakBtn = document.getElementById('qb-weak-btn');
-      if (weakBtn) weakBtn.addEventListener('click', startWeaknessPractice);
+      /* No direct listener when the split control is available — Start
+         opens the choices there, and the chosen chip is what runs. This is
+         the fallback for a page where fluid-ui.js did not load. */
+      if (weakBtn && !window.mtaSplitButton) {
+        weakBtn.addEventListener('click', function () { startWeaknessPractice(); });
+      }
+      /* The round-size stepper, built rather than marked up so the card
+         still renders exactly as before if fluid-ui.js is missing. */
+      var weakCard = document.getElementById('qb-weak-card');
+      if (weakCard && weakBtn && window.mtaStepper) {
+        var wrap = document.createElement('div');
+        wrap.className = 'qb-round-size';
+        var lab = document.createElement('span');
+        lab.className = 'qb-round-size-lab';
+        lab.textContent = 'Questions';
+        var st = window.mtaStepper({
+          value: qbRoundSize, min: QB_ROUND_MIN, max: QB_ROUND_MAX, step: QB_ROUND_STEP,
+          label: 'questions in this round',
+          onChange: function (n) {
+            qbRoundSize = n;
+            try { localStorage.setItem(QB_ROUND_KEY, String(n)); } catch (e) {}
+          }
+        });
+        wrap.appendChild(lab);
+        wrap.appendChild(st.el);
+        weakCard.insertBefore(wrap, weakBtn);
+      }
+      /* Start, with the two single-subject rounds folded behind it. Taking
+         only the Math half used to mean leaving this card entirely: back
+         out to the subject cards, into the skill list, and find the weak
+         skill yourself — which this card had already worked out. */
+      if (weakBtn && window.mtaSplitButton) {
+        window.mtaSplitButton({
+          primary: weakBtn,
+          actions: [
+            { label: 'R&W', onSelect: function () { startWeaknessPractice({ only: 'rw' }); } },
+            { label: 'Math', onSelect: function () { startWeaknessPractice({ only: 'math' }); } }
+          ]
+        });
+      }
       // The Saved Questions stat counts the SAME Saved & Mistakes "Saved
       // Questions" tab every other tool writes to (see qbSavedByKey), so
       // its button goes there rather than to a Question-Bank-only list —
@@ -18346,10 +18872,40 @@ window.Portal = {
     modalCalcOpen = false;
     qModalBodyEl.classList.remove('calc-open');
     renderModalQuestion();
+    if (qModalCloseTimer) { clearTimeout(qModalCloseTimer); qModalCloseTimer = null; }
+    qModalOverlay.classList.remove('closing');
     qModalOverlay.classList.add('open');
   }
   window.openQuestionModal = openQuestionModal;
-  function closeQuestionModal() { qModalOverlay.classList.remove('open'); }
+  /* Closing plays the arrival in reverse instead of the modal vanishing.
+     The class is only ever the 160ms of animation — .open coming off is
+     still what actually closes it, so an interrupted close (reopening
+     mid-fade) is just a cleared timer. */
+  var qModalCloseTimer = null;
+  function closeQuestionModal() {
+    if (qmReduceMotion()) { qModalOverlay.classList.remove('open'); return; }
+    qModalOverlay.classList.add('closing');
+    qModalCloseTimer = setTimeout(function () {
+      qModalOverlay.classList.remove('open');
+      qModalOverlay.classList.remove('closing');
+      qModalCloseTimer = null;
+    }, 160);
+  }
+  function qmReduceMotion() {
+    try { return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
+    catch (e) { return false; }
+  }
+  // Replays the enter animation on the body after a paged re-render. The
+  // class has to come off and the layout be read back before it goes on
+  // again, or the same animation never restarts.
+  function qmPage(dir) {
+    renderModalQuestion();
+    if (qmReduceMotion() || !qModalBodyEl) return;
+    var cls = dir > 0 ? 'qm-page-next' : 'qm-page-prev';
+    qModalBodyEl.classList.remove('qm-page-next', 'qm-page-prev');
+    qModalBodyEl.getBoundingClientRect();
+    qModalBodyEl.classList.add(cls);
+  }
   if (qModalOverlay) {
     document.getElementById('q-modal-close').addEventListener('click', closeQuestionModal);
     qModalCalcBtn.addEventListener('click', function () {
@@ -18379,10 +18935,10 @@ window.Portal = {
       if (block) block.classList.toggle('open', modalExplainOpen);
     });
     qModalPrevBtn.addEventListener('click', function () {
-      if (modalIndex > 0) { modalIndex--; renderModalQuestion(); }
+      if (modalIndex > 0) { modalIndex--; qmPage(-1); }
     });
     qModalNextBtn.addEventListener('click', function () {
-      if (modalIndex < modalRows.length - 1) { modalIndex++; renderModalQuestion(); }
+      if (modalIndex < modalRows.length - 1) { modalIndex++; qmPage(1); }
     });
   }
 

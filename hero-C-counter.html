@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hero concepts — Moretti</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caladea:wght@400;700&family=Poppins:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --void:#0C0A09; --void-2:#171312;
+  --paper:#FFFFFF; --surface:#FFFFFF; --sunk:#F4F4F3;
+  --ink:#111111; --body:#4A4139; --muted:#8B8177;
+  --line:rgba(17,17,17,.12); --hair:rgba(17,17,17,.065);
+  --red:#B0271C; --red-lift:#D24234; --gold:#C9A84C; --gold-deep:#9A7C22;
+  --display:'Caladea',Georgia,'Times New Roman',serif;
+  --sans:'Poppins','Helvetica Neue',Helvetica,Arial,sans-serif;
+  --gut:clamp(1.25rem,5vw,4.5rem);
+  --ease:cubic-bezier(.22,1,.36,1);
+  --spring:cubic-bezier(.34,1.4,.64,1);
+  --springy:cubic-bezier(.16,1.2,.3,1);
+}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--body);font-family:var(--sans);font-weight:300;-webkit-font-smoothing:antialiased}
+img{max-width:100%;display:block}
+a{text-decoration:none;color:inherit}
+h1,h2{margin:0;color:var(--ink)}
+p{margin:0}
+.tag{position:sticky;top:0;z-index:50;background:var(--void);color:#fff;padding:.7rem 1.5rem;font-size:.65rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;display:flex;gap:1rem;align-items:baseline}
+.tag b{color:var(--red-lift)}
+.tag span{margin-left:auto;font-weight:300;letter-spacing:.04em;text-transform:none;color:rgba(255,255,255,.55);font-size:.72rem}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:1.05rem 1.9rem;font-size:.76rem;font-weight:600;letter-spacing:.11em;text-transform:uppercase;border-radius:2px;transition:transform .35s var(--spring),background .25s}
+.btn-a{background:var(--red);color:#fff}.btn-a:hover{transform:translateY(-2px)}
+.btn-w{background:#fff;color:var(--ink)}.btn-w:hover{transform:translateY(-2px)}
+.btn-o{border:1px solid rgba(255,255,255,.4);color:#fff}.btn-o:hover{border-color:#fff;transform:translateY(-2px)}
+.lbl{font-size:.61rem;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}
+.lbl::before{content:'\25C6';color:var(--red);margin-right:.55em;font-size:.85em;letter-spacing:0}
+
+/* ═══ A · THE TARGET ═══ */
+.hA{background:var(--void);color:#fff;padding:clamp(3rem,7vw,6rem) clamp(1.25rem,5vw,4.5rem);position:relative;overflow:hidden;min-height:80vh;display:flex;align-items:center}
+.hA .rings{position:absolute;right:-8%;top:50%;transform:translateY(-50%);width:min(760px,70vw);aspect-ratio:1;pointer-events:none}
+.hA .rings i{position:absolute;inset:0;margin:auto;border:1px solid rgba(255,255,255,.10);border-radius:50%}
+.hA .rings i:nth-child(1){width:100%;height:100%}
+.hA .rings i:nth-child(2){width:74%;height:74%}
+.hA .rings i:nth-child(3){width:50%;height:50%;border-color:rgba(176,39,28,.5)}
+.hA .rings i:nth-child(4){width:27%;height:27%;border-color:rgba(176,39,28,.75)}
+.hA .rings i:nth-child(5){width:9%;height:9%;background:var(--red);border-color:var(--red);box-shadow:0 0 40px rgba(176,39,28,.8)}
+.hA .rings.go i{animation:ringIn .9s var(--springy) both}
+.hA .rings.go i:nth-child(2){animation-delay:.08s}.hA .rings.go i:nth-child(3){animation-delay:.16s}
+.hA .rings.go i:nth-child(4){animation-delay:.24s}.hA .rings.go i:nth-child(5){animation-delay:.34s}
+@keyframes ringIn{from{opacity:0;transform:scale(.72)}to{opacity:1;transform:scale(1)}}
+.hA .in{position:relative;z-index:2;max-width:660px}
+.hA .lbl{color:rgba(255,255,255,.5)}.hA .lbl::before{color:var(--red-lift)}
+.hA h1{font-family:var(--display);font-weight:700;font-size:clamp(2.3rem,5.6vw,4.4rem);line-height:1.03;letter-spacing:-.022em;color:#fff;margin-top:1.2rem}
+.hA h1 em{font-style:normal;color:var(--red-lift)}
+.hA p{margin-top:1.5rem;font-size:clamp(1rem,1.35vw,1.12rem);color:rgba(237,231,229,.72);max-width:46ch}
+.hA .acts{display:flex;gap:.8rem;flex-wrap:wrap;margin-top:2.1rem}
+
+/* ═══ B · THE DIPTYCH ═══ */
+.hB{display:grid;grid-template-columns:1fr 1fr;min-height:86vh}
+@media(max-width:900px){.hB{grid-template-columns:1fr}}
+.hB .left{background:var(--void);color:#fff;display:flex;flex-direction:column;justify-content:center;padding:clamp(2.5rem,6vw,5.5rem)}
+.hB .lbl{color:rgba(255,255,255,.45)}.hB .lbl::before{color:var(--red-lift)}
+.hB h1{font-family:var(--display);font-weight:700;font-size:clamp(2rem,4.4vw,3.5rem);line-height:1.08;color:#fff;margin-top:1.1rem;letter-spacing:-.018em}
+.hB h1 em{font-style:normal;color:var(--red-lift)}
+.hB p{margin-top:1.4rem;color:rgba(237,231,229,.7);font-size:1rem;max-width:40ch}
+.hB .acts{display:flex;gap:.8rem;flex-wrap:wrap;margin-top:2rem}
+.hB .right{position:relative;overflow:hidden;background:var(--void);min-height:44vh}
+.hB .right img{width:100%;height:100%;object-fit:cover;filter:saturate(.8)}
+.hB .stamp{position:absolute;left:0;bottom:0;background:var(--red);color:#fff;padding:1.1rem 1.5rem;max-width:74%}
+.hB .stamp b{display:block;font-family:var(--display);font-size:1.5rem;line-height:1}
+.hB .stamp span{display:block;font-size:.7rem;letter-spacing:.13em;text-transform:uppercase;opacity:.85;margin-top:.3rem}
+
+/* ═══ C · THE COUNTER ═══ */
+.hC{background:var(--paper);padding:clamp(3rem,7vw,6rem) clamp(1.25rem,5vw,4.5rem);text-align:center;min-height:82vh;display:flex;flex-direction:column;justify-content:center;align-items:center}
+.hC .num{display:flex;align-items:baseline;justify-content:center;gap:clamp(.6rem,2vw,1.6rem);font-family:var(--sans);font-weight:800;font-size:clamp(3.6rem,13vw,10.5rem);line-height:.9;letter-spacing:-.045em;color:var(--ink);font-variant-numeric:tabular-nums}
+.hC .num .to{color:var(--red)}
+.hC .num .ar{font-size:.34em;font-weight:300;color:var(--muted);transform:translateY(-.35em)}
+.hC h1{font-family:var(--display);font-weight:700;font-size:clamp(1.5rem,3.4vw,2.6rem);line-height:1.15;margin-top:1.9rem;max-width:20ch;letter-spacing:-.01em}
+.hC p{margin-top:1.2rem;font-size:1rem;max-width:52ch;color:var(--body)}
+.hC .acts{display:flex;gap:.8rem;flex-wrap:wrap;margin-top:2.1rem;justify-content:center}
+.hC .fine{margin-top:1.3rem;font-size:.75rem;color:var(--muted)}
+
+/* ═══ D · THE WORD CYCLE ═══ */
+.hD{position:relative;min-height:86vh;display:flex;align-items:center;overflow:hidden;background:var(--void)}
+.hD>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:saturate(.72) brightness(.55)}
+.hD .veil{position:absolute;inset:0;background:linear-gradient(100deg,rgba(12,10,9,.94) 0%,rgba(12,10,9,.72) 46%,rgba(12,10,9,.30) 100%)}
+.hD .in{position:relative;z-index:2;padding:clamp(2.5rem,6vw,6rem);max-width:900px}
+.hD .lbl{color:rgba(255,255,255,.5)}.hD .lbl::before{color:var(--red-lift)}
+.hD h1{font-family:var(--display);font-weight:700;font-size:clamp(2.1rem,5vw,4rem);line-height:1.06;color:#fff;margin-top:1.2rem;letter-spacing:-.02em}
+.hD .cyc{display:block;height:1.12em;overflow:hidden;position:relative}
+.hD .cyc b{position:absolute;left:0;top:0;color:var(--red-lift);font-weight:700;white-space:nowrap;opacity:0;transform:translateY(100%)}
+.hD .cyc b.on{animation:cycIn .6s var(--springy) forwards}
+.hD .cyc b.out{animation:cycOut .5s var(--ease) forwards}
+@keyframes cycIn{from{opacity:0;transform:translateY(100%)}to{opacity:1;transform:none}}
+@keyframes cycOut{from{opacity:1;transform:none}to{opacity:0;transform:translateY(-100%)}}
+.hD p{margin-top:1.5rem;color:rgba(237,231,229,.78);font-size:clamp(1rem,1.3vw,1.1rem);max-width:46ch}
+.hD .acts{display:flex;gap:.8rem;flex-wrap:wrap;margin-top:2.1rem}
+</style>
+</head><body>
+<div class="tag"><b>Concept C</b> The Counter <span>Typography as the whole hero. The number climbs when it enters view.</span></div>
+<section class="hC">
+  <div class="num"><span id="cFrom">1400</span><span class="ar">&rarr;</span><span class="to" id="cTo">1400</span></div>
+  <h1>That is not a projection.<br>That is one student&rsquo;s score report.</h1>
+  <p>Twelve weeks, one instructor, and a plan built from a real diagnostic rather than a generic syllabus. If the score doesn&rsquo;t move, we keep teaching &mdash; free &mdash; until it does.</p>
+  <div class="acts"><a class="btn btn-a" href="#">Begin with a free diagnostic</a><a class="btn" style="border:1px solid var(--line);color:var(--ink)" href="#">See the programs</a></div>
+  <p class="fine">Mathematics &middot; the digital SAT &middot; college admissions &mdash; in person in Cranford, or online.</p>
+</section>
+<script>
+/* C — counter climbs into view, decelerating hard */
+(function(){
+  var el=document.getElementById('cTo'); if(!el) return;
+  var ran=false;
+  function run(){
+    if(ran) return; ran=true;
+    var from=1400,to=1560,t0=null,dur=2600;
+    function step(ts){ if(!t0)t0=ts;
+      var k=Math.min(1,(ts-t0)/dur), e=1-Math.pow(1-k,6);
+      el.textContent=Math.round(from+(to-from)*e);
+      if(k<1) requestAnimationFrame(step); else el.textContent=to;
+    } requestAnimationFrame(step);
+  }
+  if('IntersectionObserver' in window){
+    new IntersectionObserver(function(en){en.forEach(function(x){if(x.isIntersecting&&x.intersectionRatio>.5)run();});},{threshold:[0,.5,1]}).observe(el);
+  } else run();
+})();
+
+/* D — rotating discipline */
+(function(){
+  var host=document.getElementById('cyc'); if(!host) return;
+  var words=['mathematics','the digital SAT','the essays'], i=0, cur=null;
+  function make(t){ var b=document.createElement('b'); b.textContent=' '+t+' '; host.appendChild(b); return b; }
+  cur=make(words[0]); cur.classList.add('on');
+  setInterval(function(){
+    var old=cur;
+    old.classList.remove('on'); old.classList.add('out');
+    setTimeout(function(){ old.remove(); },520);
+    i=(i+1)%words.length;
+    cur=make(words[i]); requestAnimationFrame(function(){ cur.classList.add('on'); });
+  },2800);
+})();
+</script>
+</body></html>
