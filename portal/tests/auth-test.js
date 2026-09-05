@@ -2064,6 +2064,46 @@ test('public actions are not gated', () => {
   });
 });
 
+/* ═══ THE HOMEWORK DIALOG'S OWN TOKEN ═══
+   assignHomeworkFromDialog writes an assignment row for ANY key it is
+   given, so it must not be reachable by a student session — and the
+   spreadsheet dialog that legitimately calls it holds no session at all.
+   It is gated by a signed 'hwdialog' token minted in
+   showAssignHomeworkDialog_, which only runs for someone who already has
+   the spreadsheet open. These two tests pin both halves of that. */
+test("a session token cannot be replayed as the homework dialog's token", () => {
+  const env = makeEnv({ rows: [['ABC123', 'Alex Reed', '', 'alex@x.com', new Date(), true, 1, new Date()]] });
+  const session = env.handleGoogleAuth(env.token('alex@x.com', 'SUB1')).session;
+  // A real, valid, unexpired student session — rejected purely on its type
+  // tag, which is the whole reason signToken_ carries one.
+  assert.strictEqual(env.readToken_(session, 'hwdialog'), null);
+  // And the reverse, so the tag cannot be borrowed in either direction.
+  const dialogToken = env.signToken_({ t: 'hwdialog' }, 3600);
+  assert.strictEqual(env.verifySession_(dialogToken), null);
+  assert.ok(env.readToken_(dialogToken, 'hwdialog'), 'a genuine dialog token must still verify');
+});
+
+test('a forged or expired homework-dialog token is refused', () => {
+  const env = makeEnv({ rows: [] });
+  const forged = Buffer.from(JSON.stringify({ t: 'hwdialog', x: 4102444800 }))
+    .toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '') + '.notasignature';
+  assert.strictEqual(env.readToken_(forged, 'hwdialog'), null, 'an unsigned token must not pass');
+  assert.strictEqual(env.readToken_(env.signToken_({ t: 'hwdialog' }, -1), 'hwdialog'), null, 'an expired token must not pass');
+  assert.strictEqual(env.readToken_('', 'hwdialog'), null);
+  assert.strictEqual(env.readToken_(undefined, 'hwdialog'), null);
+});
+
+/* ═══ nextSession's DEBUG PAYLOAD ═══ it used to return every SUMMARY on
+   the shared tutoring calendar — every other client's name and session
+   time — to any caller holding a key, which is every student. */
+test('the nextSession debug payload cannot name other students', () => {
+  const codeGs = fs.readFileSync(path.join(__dirname, '..', 'Code.gs'), 'utf8');
+  assert.ok(!/allSummaries/.test(codeGs),
+    'handleNextSession is dumping every calendar summary again — debug must report only this student\'s matches');
+  assert.ok(/matchedSummaries: upcoming\.map/.test(codeGs),
+    'expected the debug payload to report only the matched events');
+});
+
 test('every student-facing action in Code.gs is listed in STUDENT_ACTIONS', () => {
   // The list fails OPEN — an action missing from it runs unauthenticated.
   // This reads Code.gs's own dispatcher so adding a handler there without
@@ -2076,6 +2116,19 @@ test('every student-facing action in Code.gs is listed in STUDENT_ACTIONS', () =
 
   // Everything that is deliberately NOT a student action.
   const publicActions = new Set(['auth', 'submitLead', 'version']);
+  /* Gated by their own signed token rather than by a session: the
+     credential is minted server-side, for one caller, and travels in the
+     request body. Exempt from STUDENT_ACTIONS — but the exemption is only
+     honest while the handler really does verify the token, so that is
+     asserted below rather than declared here and trusted. */
+  const tokenGatedActions = new Map([
+    ['assignHomeworkFromDialog', /readToken_\(\s*rawDialogToken\s*,\s*'hwdialog'\s*\)/]
+  ]);
+  tokenGatedActions.forEach((check, action) => {
+    assert.ok(check.test(codeGs),
+      action + ' claims to be token-gated but Code.gs no longer verifies its token — ' +
+      'either restore the check or move it into STUDENT_ACTIONS');
+  });
   // Derived from auth.gs rather than restated, so the two coverage tests
   // can never disagree about which actions are admin-only.
   const adminActions = new Set(env0.ADMIN_ACTIONS);
@@ -2086,7 +2139,7 @@ test('every student-facing action in Code.gs is listed in STUDENT_ACTIONS', () =
   const listed = new Set(env0.STUDENT_ACTIONS);
   const missing = [];
   dispatched.forEach(a => {
-    if (!publicActions.has(a) && !adminActions.has(a) && !listed.has(a)) missing.push(a);
+    if (!publicActions.has(a) && !adminActions.has(a) && !tokenGatedActions.has(a) && !listed.has(a)) missing.push(a);
   });
   assert.deepStrictEqual(missing, [],
     'these Code.gs actions are ungated — add them to STUDENT_ACTIONS in auth.gs: ' + missing.join(', '));

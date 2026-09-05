@@ -897,6 +897,50 @@
 </footer>
 
 <script src="portal/backend-url.js"></script>
+<!-- STUDENT SIGN-IN, ON THIS PAGE. Every "Student Login" link used to be a
+     trip to the portal's own login screen; now it opens the same sign-in as
+     a dialog here, and only a signed-in student is actually sent to
+     /portal. This is the portal's own auth-client.js, loaded in modal mode
+     (see MODAL in that file) -- it paints nothing and wraps nothing until a
+     link below is clicked. The session it writes is localStorage on this
+     origin, which is exactly where the portal looks for it, so the student
+     lands there already signed in. -->
+<script>window.MORETTI_AUTH_MODE = 'modal';</script>
+<script src="portal/auth-client.js"></script>
+<script>
+(function () {
+  var PORTAL = 'portal/index.html';
+  document.addEventListener('click', function (e) {
+    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    var a = e.target && e.target.closest ? e.target.closest('a[href="' + PORTAL + '"]') : null;
+    if (!a) return;
+    // auth-client.js blocked or failed to load: leave the link alone, so the
+    // worst case is the old behaviour rather than a dead button.
+    if (!window.MorettiAuth) return;
+    e.preventDefault();
+    // Already signed in on this device -- no reason to ask again; the portal
+    // resumes the session on arrival.
+    if (window.MorettiAuth.hasSession()) { window.location.href = PORTAL; return; }
+    open();
+  });
+
+  function open() {
+    window.MorettiAuth.openSignIn({
+      onStudent: function () { window.location.href = PORTAL; }
+    });
+  }
+
+  /* #signin opens it on arrival -- what portal-login-v2.html (the retired
+     standalone sign-in page) now redirects to, and a link anyone can send. */
+  function openFromHash() {
+    if (location.hash !== '#signin' || !window.MorettiAuth) return;
+    if (window.MorettiAuth.hasSession()) { window.location.href = PORTAL; return; }
+    open();
+  }
+  window.addEventListener('hashchange', openFromHash);
+  openFromHash();
+})();
+</script>
 <script>
 (function () {
   'use strict';

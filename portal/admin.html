@@ -616,9 +616,9 @@
      so the signed admin session is in sessionStorage by the time the
      auto-continue boot code below reads it. Replaces the ADMIN_KEY
      password prompt entirely. -->
-<script src="time-budgets.js"></script>
-  <script src="backend-url.js"></script>
-<script src="auth-admin-signin.js"></script>
+<script src="time-budgets.js?v=20260905"></script>
+  <script src="backend-url.js?v=20260905"></script>
+<script src="auth-admin-signin.js?v=20260905"></script>
 
 <script>
 (function () {
@@ -1803,9 +1803,20 @@
   // iframe src / window.open. Anything that isn't the report page itself
   // (a javascript: or data: URL that somehow ended up in that column) is
   // refused rather than loaded.
+  //
+  // The old regex also allowed a bare `https://`, which meant ANY site. That
+  // column is written from the student's own submitPracticeTest body and is
+  // stored verbatim, so a student could name any URL they liked and have it
+  // framed inside this admin page -- cross-origin, so it could not read the
+  // session, but a convincing place to draw a fake "signed out, sign in
+  // again" panel. relativeReportLink has already rewritten the one
+  // legitimate absolute form (REPORT_ABS_PREFIX) to a relative link by the
+  // time we get here, so that branch could only ever have matched a foreign
+  // URL. A link that somehow isn't the report page now fails closed and
+  // openReport says so, which is visible rather than silent.
   function safeReportLink(link) {
     var rel = relativeReportLink(link);
-    return /^(report\.html([?#]|$)|https:\/\/)/.test(rel) ? rel : '';
+    return /^report\.html([?#]|$)/.test(rel) ? rel : '';
   }
 
   var reportViewerLink = '';
@@ -2659,6 +2670,6 @@
 <!-- The Portal access panel: invites, the approval queue, login resets.
      Builds its own markup and styles itself from this file's own CSS
      variables — removing this tag removes the feature completely. -->
-<script src="auth-admin.js"></script>
+<script src="auth-admin.js?v=20260905"></script>
 </body>
 </html>
