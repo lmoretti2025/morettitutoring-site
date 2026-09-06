@@ -35,7 +35,7 @@ function one(seed){
 
   // 1. buckets partition the questions, exactly
   rows.forEach(r=>{
-    const sum=r.mastered+r.inefficient+r.stuck+r.onpace+r.rushed;
+    const sum=r.mastered+r.skimmed+r.inefficient+r.stuck+r.onpace+r.rushed;
     check('buckets partition total', sum===r.total, {seed,dom:r.skill,sum,total:r.total});
     check('content = stuck + onpace', r.content===r.stuck+r.onpace, {seed,dom:r.skill});
     check('no negative buckets', [r.mastered,r.inefficient,r.stuck,r.onpace,r.rushed].every(v=>v>=0), {seed});
@@ -88,7 +88,7 @@ function one(seed){
      drifts, this fails rather than shipping a false sentence. */
   if(named.length){
     const top=named[0];
-    const missesOf=r=>r.total-(r.mastered+r.inefficient);
+    const missesOf=r=>r.total-(r.mastered+r.inefficient+r.skimmed);
     const isBiggestPile=r=>rows.every(o=>o===r||missesOf(o)<=missesOf(r));
     /* The claim the copy makes is "pile of MISSES", so the quantity it
        compares must be every wrong answer, not the content-attributed
@@ -99,6 +99,14 @@ function one(seed){
       rows.every(r=>missesOf(r)>=r.content), {seed});
     check('all misses = stuck + onpace + rushed',
       rows.every(r=>missesOf(r)===r.stuck+r.onpace+r.rushed), {seed});
+    /* A skimmed answer is RIGHT. It must never be counted as a miss, and it
+       must never be counted as command -- those are the two ways the new
+       bucket can silently corrupt a number that used to be sound. */
+    check('skimmed never counted as a miss',
+      rows.every(r=>r.total-(r.mastered+r.inefficient+r.skimmed)===r.stuck+r.onpace+r.rushed), {seed});
+    check('command <= raw accuracy',
+      rows.every(r=>(r.mastered+r.inefficient)<=(r.mastered+r.inefficient+r.skimmed)), {seed});
+    check('skimmed >= 0', rows.every(r=>r.skimmed>=0), {seed});
     /* The lead is NOT generally the biggest pile -- that is the whole
        reason the superlative had to be gated. If this ever stopped being
        true the gate would be dead code and the finding would be stale. */

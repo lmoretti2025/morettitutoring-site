@@ -441,10 +441,10 @@ table.dates tr.gone td,table.dates tr.gone td.dt{color:var(--muted);font-weight:
     </div>
   </div>
   <div class="rv d2">
-    <div class="dnext">
+    <div class="dnext" id="dnext">
       <span class="k">Next sitting with room to prepare</span>
-      <span class="d">December 5, 2026</span>
-      <span class="w">Register by <b>November 20</b> &middot; to be ready, prep starts <b>this month</b></span>
+      <span class="d" id="dnext-date">December 5, 2026</span>
+      <span class="w">Register by <b id="dnext-reg">November 20</b> &middot; start now for the full twelve weeks</span>
     </div>
   </div>
 </div></section>
@@ -459,14 +459,14 @@ table.dates tr.gone td,table.dates tr.gone td.dt{color:var(--muted);font-weight:
     <table class="dates">
       <thead><tr><th>Test date</th><th>Registration deadline</th><th>Changes / late registration</th><th></th></tr></thead>
       <tbody>
-        <tr class="gone"><td class="dt">August 22, 2026</td><td>August 7, 2026</td><td>August 11, 2026</td><td class="st">Registration closed</td></tr>
-        <tr class="gone"><td class="dt">September 12, 2026</td><td>August 28, 2026</td><td>September 1, 2026</td><td class="st">Registration closed</td></tr>
-        <tr><td class="dt">October 3, 2026</td><td>September 18, 2026</td><td>September 22, 2026</td><td class="st">Too soon for twelve weeks</td></tr>
-        <tr><td class="dt">November 7, 2026</td><td>October 23, 2026</td><td>October 27, 2026</td><td class="st">Too soon for twelve weeks</td></tr>
-        <tr class="soon"><td class="dt">December 5, 2026</td><td>November 20, 2026</td><td>November 24, 2026</td><td class="st">Start prep now</td></tr>
-        <tr><td class="dt">March 6, 2027</td><td>February 19, 2027</td><td>February 23, 2027</td><td class="st">Room to prepare</td></tr>
-        <tr><td class="dt">May 1, 2027</td><td>April 16, 2027</td><td>April 20, 2027</td><td class="st">Room to prepare</td></tr>
-        <tr><td class="dt">June 5, 2027</td><td>May 21, 2027</td><td>May 25, 2027</td><td class="st">Room to prepare</td></tr>
+        <tr class="gone" data-test="2026-08-22" data-reg="2026-08-07" data-close="2026-08-11"><td class="dt">August 22, 2026</td><td>August 7, 2026</td><td>August 11, 2026</td><td class="st">Registration closed</td></tr>
+        <tr class="gone" data-test="2026-09-12" data-reg="2026-08-28" data-close="2026-09-01"><td class="dt">September 12, 2026</td><td>August 28, 2026</td><td>September 1, 2026</td><td class="st">Registration closed</td></tr>
+        <tr data-test="2026-10-03" data-reg="2026-09-18" data-close="2026-09-22"><td class="dt">October 3, 2026</td><td>September 18, 2026</td><td>September 22, 2026</td><td class="st">Too soon for twelve weeks</td></tr>
+        <tr data-test="2026-11-07" data-reg="2026-10-23" data-close="2026-10-27"><td class="dt">November 7, 2026</td><td>October 23, 2026</td><td>October 27, 2026</td><td class="st">Too soon for twelve weeks</td></tr>
+        <tr class="soon" data-test="2026-12-05" data-reg="2026-11-20" data-close="2026-11-24"><td class="dt">December 5, 2026</td><td>November 20, 2026</td><td>November 24, 2026</td><td class="st">Start prep now</td></tr>
+        <tr data-test="2027-03-06" data-reg="2027-02-19" data-close="2027-02-23"><td class="dt">March 6, 2027</td><td>February 19, 2027</td><td>February 23, 2027</td><td class="st">Room to prepare</td></tr>
+        <tr data-test="2027-05-01" data-reg="2027-04-16" data-close="2027-04-20"><td class="dt">May 1, 2027</td><td>April 16, 2027</td><td>April 20, 2027</td><td class="st">Room to prepare</td></tr>
+        <tr data-test="2027-06-05" data-reg="2027-05-21" data-close="2027-05-25"><td class="dt">June 5, 2027</td><td>May 21, 2027</td><td>May 25, 2027</td><td class="st">Room to prepare</td></tr>
       </tbody>
     </table>
   </div>
@@ -542,6 +542,54 @@ document.documentElement.classList.add('js');
     e.preventDefault();
     this.innerHTML='<p style="color:#fff;font-size:1rem;line-height:1.6">Thank you &mdash; your request is in. Luca will be in touch within the hour.</p>';
   });
+})();
+
+/* ── the schedule dates itself ──────────────────────────────────────────
+   The status column and the card above the table used to be hand-set, which
+   meant they were only true in the month they were written. Both are now
+   derived from the dates already in each row: registration is closed once the
+   late-registration date has passed, a sitting is too soon once twelve weeks
+   no longer fit before it, and the first one that does fit is the one the
+   card names. Adding next year's dates to the table is all that is needed. */
+(function(){
+  var WEEKS12=84;
+  var MON=['January','February','March','April','May','June','July',
+           'August','September','October','November','December'];
+  var rows=[].slice.call(document.querySelectorAll('table.dates tbody tr[data-test]'));
+  if(!rows.length) return;
+
+  function d(iso){ var a=iso.split('-'); return new Date(+a[0], +a[1]-1, +a[2]); }
+  var today=new Date(); today.setHours(0,0,0,0);
+  var ready=new Date(today); ready.setDate(ready.getDate()+WEEKS12);
+
+  var firstFit=null;
+  rows.forEach(function(tr){
+    var st=tr.querySelector('td.st'); if(!st) return;
+    tr.classList.remove('gone','soon');
+    if(d(tr.getAttribute('data-close')) < today){
+      tr.classList.add('gone'); st.textContent='Registration closed'; return;
+    }
+    if(d(tr.getAttribute('data-test')) < ready){
+      st.textContent='Too soon for twelve weeks'; return;
+    }
+    if(!firstFit){
+      firstFit=tr; tr.classList.add('soon'); st.textContent='Start prep now'; return;
+    }
+    st.textContent='Room to prepare';
+  });
+
+  /* the card above the table names that same sitting */
+  var card=document.getElementById('dnext');
+  if(!card) return;
+  if(!firstFit){ card.style.display='none'; return; }   /* table has run out */
+  var dateCell=firstFit.querySelector('td.dt'),
+      dEl=document.getElementById('dnext-date'),
+      rEl=document.getElementById('dnext-reg');
+  if(dEl && dateCell) dEl.textContent=dateCell.textContent;
+  if(rEl){
+    var r=d(firstFit.getAttribute('data-reg'));
+    rEl.textContent=MON[r.getMonth()]+' '+r.getDate();
+  }
 })();
 
 /* ── top bar: flush over the hero, red once the hero is behind you ── */

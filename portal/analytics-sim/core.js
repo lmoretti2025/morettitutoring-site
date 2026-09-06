@@ -201,7 +201,11 @@ var MATH_CURVE = [
   var STUCK_BUDGET_REL = 1.5;
 
   var RUSHED_BUDGET_REL = 0.5;
+  /* Engagement floor -- see the long note in report.html. Budget-relative on
+     purpose: the test is not "fast for them", it is "too fast to have read
+     the stimulus". Calibrated on 1,503 real answers. */
+  var TOO_FAST_BUDGET_REL = 0.15;
 module.exports = { MATH_MODULE_WEIGHT_CURVE, RW_MODULE_WEIGHT_CURVE, RW_CURVE, MATH_CURVE, scaleFromPct, roundToTen, moduleWeightFromPct,
   satSectionScore, zForTwoSided, wilsonInterval, PRIOR_STRENGTH, shrunkRate, MIN_JUDGEABLE_N,
   DOMAIN_REACH, SKILL_REACH, HARD_REACH_CAP, REACH_LABEL, reachFor, reachForRow, median,
-  RUSHED_REL, RUSHED_ABS_CAP, LUCKY_REL, LUCKY_ABS_CAP, STUCK_REL, STUCK_BUDGET_REL, RUSHED_BUDGET_REL };
+  RUSHED_REL, RUSHED_ABS_CAP, LUCKY_REL, LUCKY_ABS_CAP, STUCK_REL, STUCK_BUDGET_REL, RUSHED_BUDGET_REL, TOO_FAST_BUDGET_REL };

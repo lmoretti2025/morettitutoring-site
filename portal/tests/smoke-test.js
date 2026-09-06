@@ -195,35 +195,63 @@ test('module split moves the score away from the balanced baseline, monotonicall
 // ═══════════════════════════════════════════════════════════════════════
 section('Skill diagnosis classification (index.html vs report.html)');
 
+/* severityOf() is no longer a pure function of the row. It closes over the
+   STUDENT'S OWN baseline rate for each failure mode (baseContent /
+   baseRushed / baseIneff, computed across every judgeable domain) and over
+   the shrinkage prior and Wilson interval that the separation gate runs
+   against those baselines. Scraping the function alone therefore evaluated
+   to a ReferenceError on baseContent and took all six fixtures with it.
+
+   So the harness now pulls the whole dependency set and hands the baselines
+   in explicitly. That is not just a repair — the baselines ARE the rule now
+   ("worse than usual FOR THIS STUDENT", not "bad in absolute terms"), and a
+   fixture that cannot set them cannot test it. The last case below is the
+   one that only exists because of this: a domain missing three of five,
+   which every other fixture ranks as a content gap, is correctly NOT named
+   for a student who misses that often everywhere. */
 function loadSeverity(source) {
-  // Used to also pull `var MIN_SAMPLE = 3, SIGNAL_MIN_COUNT = 2, ...`. The
-  // MIN_SAMPLE floor (ignore a skill with fewer than 3 questions) was
-  // dropped from both files, and the declaration is now just
-  // `var SIGNAL_MIN_COUNT = 2, SIGNAL_MIN_SHARE = 0.3;` -- so scraping for
-  // the old literal threw and took the whole suite down with it, including
-  // the index-vs-report parity check this function exists to run. Anchored
-  // on the constants severityOf actually reads instead.
   const code = [
     extractLineStartingWith(source, 'var SIGNAL_MIN_COUNT = 2'),
+    extractLineStartingWith(source, 'var PRIOR_STRENGTH'),
+    extractFunction(source, 'wilsonInterval'),
+    extractFunction(source, 'shrunkRate'),
+    'var baseContent = 0, baseRushed = 0, baseIneff = 0;',
     extractFunction(source, 'severityOf'),
+    // The shim, not the real thing: it only sets the three closure variables
+    // the report itself computes from the pooled rows before calling in.
+    'function severityWith(r, base) {',
+    '  base = base || {};',
+    '  baseContent = base.content || 0;',
+    '  baseRushed = base.rushed || 0;',
+    '  baseIneff = base.inefficient || 0;',
+    '  return severityOf(r);',
+    '}',
   ].join('\n');
-  return runInSandbox(code, ['severityOf']).severityOf;
+  return runInSandbox(code, ['severityWith']).severityWith;
 }
 const idxSeverityOf = loadSeverity(INDEX_HTML);
 const reportSeverityOf = loadSeverity(REPORT_HTML);
 
+// The two field names matter and neither is the obvious one. `content` is
+// stuck + on-pace misses (every miss that was not hurried) and `notRead` is
+// rushed + skimmed (every question that went by too fast to have been read)
+// -- those are what severityOf reads. Bare `stuck` and `rushed` have not
+// been inputs since each pair was pooled for the significance test, and a
+// fixture built on them silently scores every row as "no signal".
+const FLAT = { content: 0, rushed: 0, inefficient: 0 };  // baseline rates, not counts
 const severityFixtures = [
-  { name: 'dominant Stuck (content gap) ranks 3', r: { stuck: 3, rushed: 0, inefficient: 0, total: 5 }, expect: 3 },
-  { name: 'dominant Rushed (pacing) ranks 2', r: { stuck: 0, rushed: 3, inefficient: 0, total: 5 }, expect: 2 },
-  { name: 'dominant Inefficient (slow but right) ranks 1', r: { stuck: 0, rushed: 0, inefficient: 3, total: 5 }, expect: 1 },
-  { name: 'mostly Mastered, no signal, ranks 0', r: { stuck: 0, rushed: 0, inefficient: 0, total: 5 }, expect: 0 },
-  { name: 'below the count floor (1 stuck of 5) ranks 0 even if the share would clear', r: { stuck: 1, rushed: 0, inefficient: 0, total: 3 }, expect: 0 },
-  { name: 'Stuck outranks Rushed even with a smaller raw count (2 stuck vs 3 rushed, both huge shares)', r: { stuck: 2, rushed: 3, inefficient: 0, total: 5 }, expect: 3 },
+  { name: 'dominant content gap ranks 3', r: { content: 3, notRead: 0, inefficient: 0, total: 5 }, base: FLAT, expect: 3 },
+  { name: 'dominant not-read (pacing) ranks 2', r: { content: 0, notRead: 3, inefficient: 0, total: 5 }, base: FLAT, expect: 2 },
+  { name: 'dominant Inefficient (slow but right) ranks 1', r: { content: 0, notRead: 0, inefficient: 3, total: 5 }, base: FLAT, expect: 1 },
+  { name: 'mostly Mastered, no signal, ranks 0', r: { content: 0, notRead: 0, inefficient: 0, total: 5 }, base: FLAT, expect: 0 },
+  { name: 'below the count floor (1 miss of 3) ranks 0 even if the share would clear', r: { content: 1, notRead: 0, inefficient: 0, total: 3 }, base: FLAT, expect: 0 },
+  { name: 'content outranks pacing even with a smaller raw count (2 content vs 3 not-read, both huge shares)', r: { content: 2, notRead: 3, inefficient: 0, total: 5 }, base: FLAT, expect: 3 },
+  { name: 'a domain that only matches the student\'s own baseline is not named at all', r: { content: 3, notRead: 0, inefficient: 0, total: 5 }, base: { content: 0.6, rushed: 0, inefficient: 0 }, expect: 0 },
 ];
 severityFixtures.forEach(function (fx) {
   test(fx.name, () => {
-    assert.strictEqual(idxSeverityOf(fx.r), fx.expect, 'index.html severityOf mismatch');
-    assert.strictEqual(reportSeverityOf(fx.r), fx.expect, 'report.html severityOf mismatch');
+    assert.strictEqual(idxSeverityOf(fx.r, fx.base), fx.expect, 'index.html severityOf mismatch');
+    assert.strictEqual(reportSeverityOf(fx.r, fx.base), fx.expect, 'report.html severityOf mismatch');
   });
 });
 

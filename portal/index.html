@@ -476,7 +476,11 @@
      equals. */
   /* ═══ ACROSS YOUR TESTS ═══ deliberately quieter than Score Progress:
      that card is the headline, this is the follow-up underneath it. */
-  .xt-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem 1.7rem 1.4rem; margin: 0 auto 1.6rem; max-width: 720px; box-shadow: var(--shadow); }
+  /* The top margin is doing real work: this card's previous sibling is the
+     shortcut-tile grid, which carries no bottom margin of its own, so at 0
+     the card's border sat flush against the last row of tile copy and the
+     two bands read as one. */
+  .xt-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem 1.7rem 1.4rem; margin: 2.4rem auto 1.6rem; max-width: 720px; box-shadow: var(--shadow); }
   .xt-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.55rem; }
   .xt-label { font-family: var(--hel); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--mid); }
   .xt-evidence { font-family: var(--hel); font-size: 0.72rem; font-weight: 600; color: var(--mid); background: rgba(17,17,17,0.05); border-radius: 999px; padding: 0.2rem 0.6rem; white-space: nowrap; }
@@ -499,7 +503,7 @@
   .xt-foot { font-size: 0.73rem; line-height: 1.55; color: var(--mid); margin: 1.1rem 0 0; padding-top: 0.8rem; border-top: 1px solid var(--border); }
   .xt-cta { display: inline-block; margin-top: 0.7rem; font-family: var(--hel); font-size: 0.78rem; font-weight: 700; color: var(--red); background: none; border: none; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
   @media (max-width: 620px) {
-    .xt-card { padding: 1.2rem 1.1rem; border-radius: 10px; }
+    .xt-card { padding: 1.2rem 1.1rem; border-radius: 10px; margin-top: 1.8rem; }
     .xt-head { gap: 0.4rem; }
   }
   .score-progress-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem 1.7rem 1.3rem; margin: 0 auto 1.6rem; max-width: 720px; box-shadow: var(--shadow); position: relative; }
@@ -2761,6 +2765,8 @@
 #pt-native-report .score-tile .tile-lab { font-size: 8px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mid); margin-top: 5px; }
 #pt-native-report .score-tile .tile-lab.big { font-size: 9.5px; }
 /* Caption to the composite figure — see report.html's identical rule. */
+#pt-native-report .tile-unworked { font-family: var(--hel); font-size: 0.7rem; line-height: 1.45; color: var(--ink); background: #FBF3E7; border-left: 2px solid var(--gold); padding: 0.45rem 0.55rem; margin-top: 0.5rem; text-align: left; max-width: 21rem; }
+#pt-native-report .tile-unworked strong { font-weight: 600; }
 #pt-native-report .tile-range { font-family: var(--hel); font-size: 0.7rem; font-weight: 500; letter-spacing: 0.02em; color: var(--faint); margin-top: 0.3rem; font-variant-numeric: tabular-nums; }
   /* ═══ STUDY PLAN ═══ */
 #pt-native-report .plan-card { border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; background: var(--white); }
@@ -3365,6 +3371,9 @@
 #pt-native-report .skilldx-tag.solid { background: rgba(17,17,17,0.06); color: var(--mid); }
 #pt-native-report .skilldx-track { display: flex; height: 8px; border-radius: 4px; overflow: hidden; background: var(--bg); }
 #pt-native-report .skilldx-seg.mastered { background: #3f7d54; }
+/* Right, but under the engagement floor. Striped rather than solid: it
+   reads as "this looked right" without reading as earned. */
+#pt-native-report .skilldx-seg.skimmed { background: repeating-linear-gradient(135deg, #3f7d54 0 3px, #A9B9A4 3px 6px); }
 #pt-native-report .skilldx-seg.inefficient { background: #A9C4B4; }
 #pt-native-report .skilldx-seg.stuck { background: var(--red); }
 #pt-native-report .skilldx-seg.onpace { background: #8B8177; }
@@ -8488,6 +8497,16 @@ window.Portal = {
   function xtSectionLabel(key) {
     return key === 'math' ? 'Math' : (key === 'reading-writing' ? 'Reading & Writing' : '');
   }
+
+  /* rowHtml() below called a bare esc() that does not exist in THIS script
+     block — the one by that name lives in the vocabulary block further
+     down, inside its own IIFE. So the card threw a ReferenceError the
+     moment it had an actual row to draw, which took out every render queued
+     after it in show() (Home's pies, the recent-test card and the shortcut
+     teasers all sit on the same line). The empty-state and one-test paths
+     never touch it, which is why it looked fine until a student had two
+     tests with a repeating skill. Same one-liner the other blocks use. */
+  function esc(s) { return window.Portal.escHtml(s); }
 
   function renderCrossTestHome() {
     var host = document.getElementById('xt-card');
@@ -16295,12 +16314,20 @@ window.Portal = {
   var runnerIndex = 0;
   var runnerState = {};
   var runnerScore = 0;
+  /* See the Question Bank runner's own runnerReached for the full argument.
+     Null until the student leaves a round early, where it freezes at the
+     question they walked out on. This runner has no Skip button, so every
+     question up to that point was submitted — which makes it exactly the
+     denominator the score card wants. */
+  var runnerReached = null;
+
   function startPracticeRunner() {
     runnerQueue = currentFiltered();
     if (!runnerQueue.length) return;
     runnerIndex = 0;
     runnerState = {};
     runnerScore = 0;
+    runnerReached = null;
     window.dxPracticeNextHandler = runnerAdvance;
     window.dxPracticeExitHandler = endPracticeRunner;
     window.dxPracticeLetterHandler = selectRunnerChoice;
@@ -16320,7 +16347,24 @@ window.Portal = {
     st.chosenIndex = i;
     renderRunnerQuestion();
   }
+  /* Exit Practice, mid-round. Same argument as the other two runners: a
+     student who has answered anything has earned the number, and leaving
+     part way through a selected-mistakes set is ordinary rather than an
+     abandonment. First press shows the score card, second one leaves; a
+     round with nothing answered exits immediately, as before. */
   function endPracticeRunner() {
+    if (runnerIndex < runnerQueue.length) {
+      var answered = runnerQueue.some(function (q) {
+        var st = runnerState[q.key];
+        return st && st.submitted;
+      });
+      if (answered) {
+        runnerReached = runnerIndex;
+        runnerIndex = runnerQueue.length;
+        renderRunnerQuestion();
+        return;
+      }
+    }
     if (window.dxEndIncorrectPractice) window.dxEndIncorrectPractice();
     if (window.showScreen) window.showScreen('screen-incorrect-questions');
     renderList();
@@ -16387,6 +16431,17 @@ window.Portal = {
     backBtnEl.disabled = true; // linear queue — no back navigation, matches Submit-then-Next flow
 
     if (runnerIndex >= runnerQueue.length) {
+      /* Scored over what was ANSWERED, not over the queue. With no Skip
+         button in this runner the two are the same number on a round run to
+         the end, so finishing normally reads exactly as it always did; they
+         diverge only on an early exit, where scoring against the full queue
+         would charge the student for questions they never opened. */
+      var attemptedCount = runnerQueue.filter(function (q) {
+        var st = runnerState[q.key];
+        return st && st.submitted;
+      }).length;
+      var leftCount = Math.max(0, runnerQueue.length - (runnerReached === null ? runnerQueue.length : runnerReached));
+      if (attemptedCount === 0) { runnerReached = null; endPracticeRunner(); return; }
       document.getElementById('dx-notice-text').textContent = 'PRACTICE MODE — DONE';
       qtextEl.innerHTML = '';
       choicesEl.style.display = 'none';
@@ -16402,8 +16457,9 @@ window.Portal = {
       var summary = document.createElement('div');
       summary.id = 'iq-runner-summary';
       summary.className = 'iq-runner-summary';
-      summary.innerHTML = '<div class="iq-runner-summary-score">' + runnerScore + ' / ' + runnerQueue.length + '</div>' +
-        '<div class="iq-runner-summary-lab">correct this round</div>' +
+      summary.innerHTML = '<div class="iq-runner-summary-score">' + runnerScore + ' / ' + attemptedCount + '</div>' +
+        '<div class="iq-runner-summary-lab">correct this round' +
+          (leftCount ? ' &middot; ' + leftCount + ' left in the round' : '') + '</div>' +
         '<button type="button" class="key-btn" id="iq-runner-done" type="button">Done</button>';
       document.getElementById('dx-card').insertBefore(summary, navRowEl);
       document.getElementById('iq-runner-done').addEventListener('click', endPracticeRunner);
@@ -16412,7 +16468,7 @@ window.Portal = {
          as a suffix so only the score counts (fluid-ui.js). */
       if (window.mtaCountUp) window.mtaCountUp(
         summary.querySelector('.iq-runner-summary-score'), runnerScore,
-        { suffix: ' / ' + runnerQueue.length });
+        { suffix: ' / ' + attemptedCount });
       return;
     }
 
@@ -16745,6 +16801,12 @@ window.Portal = {
   var runnerScore = 0;
   var questionShownAt = 0;
 
+  /* See the Question Bank runner's own runnerReached for the full argument.
+     Null until the student leaves a round early, where it freezes at the
+     question they walked out on, so the completion card can tell a question
+     they SKIPPED apart from one they simply never got to. */
+  var runnerReached = null;
+
   function startRunner(sectionKey) {
     var pool = sectionKey === 'math' ? (window.CHALLENGE_MATH || []) : (window.CHALLENGE_RW || []);
     if (!pool.length) return;
@@ -16752,6 +16814,7 @@ window.Portal = {
     runnerIndex = 0;
     runnerState = {};
     runnerScore = 0;
+    runnerReached = null;
     var label = sectionKey === 'math' ? 'Challenge: Math' : 'Challenge: Reading & Writing';
     window.dxPracticeNextHandler = runnerAdvance;
     window.dxPracticeExitHandler = endRunner;
@@ -16770,7 +16833,25 @@ window.Portal = {
     st.chosenIndex = i;
     renderRunnerQuestion();
   }
+  /* Exit Practice, mid-deck. Same argument as the Question Bank runner's
+     endRunner(): these decks are 45 and 82 questions long, so stopping part
+     way through IS how a session normally ends, and walking out to a bare
+     screen was the one place work already done went uncounted. First press
+     shows the score card, second one leaves. An untouched deck exits
+     immediately, exactly as before. */
   function endRunner() {
+    if (runnerIndex < runnerQueue.length) {
+      var answered = runnerQueue.some(function (q) {
+        var st = runnerState[q.key];
+        return st && st.submitted;
+      });
+      if (answered) {
+        runnerReached = runnerIndex;
+        runnerIndex = runnerQueue.length;
+        renderRunnerQuestion();
+        return;
+      }
+    }
     if (window.dxEndIncorrectPractice) window.dxEndIncorrectPractice();
     if (window.showScreen) window.showScreen('screen-challenge-questions');
     renderStats();
@@ -16831,9 +16912,20 @@ window.Portal = {
       // answer does, so skipping through most/all of a round reaches here
       // too, and scoring against runnerQueue.length made that look
       // identical to a genuinely completed round.
-      var attemptedCount = runnerQueue.filter(function (q) { var st = runnerState[q.qid]; return st && st.submitted; }).length;
-      var skippedCount = runnerQueue.length - attemptedCount;
-      if (attemptedCount === 0) { endRunner(); return; }
+      /* `q.key`, NOT `q.qid`. This filter was copied from the Question Bank
+         runner, whose questions carry a qid; challenge-questions.js keys its
+         items on `key`, and every other line in this closure reads
+         runnerState[r.key]. So the lookup found nothing on every question,
+         attemptedCount was permanently 0, and the `=== 0` bail below fired
+         on EVERY round -- including one answered start to finish. The score
+         card built underneath had never once been shown to a student. */
+      var attemptedCount = runnerQueue.filter(function (q) { var st = runnerState[q.key]; return st && st.submitted; }).length;
+      // Counted over what the student REACHED — runnerReached is only
+      // non-null after an early exit, and what lies past it was never seen.
+      var reachedCount = runnerReached === null ? runnerQueue.length : runnerReached;
+      var skippedCount = Math.max(0, reachedCount - attemptedCount);
+      var leftCount = Math.max(0, runnerQueue.length - reachedCount);
+      if (attemptedCount === 0) { runnerReached = null; endRunner(); return; }
       document.getElementById('dx-notice-text').textContent = 'PRACTICE MODE — DONE';
       qtextEl.innerHTML = '';
       choicesEl.style.display = 'none';
@@ -16849,8 +16941,12 @@ window.Portal = {
       var summary = document.createElement('div');
       summary.id = 'chal-runner-summary';
       summary.className = 'iq-runner-summary';
+      var summaryNote = [];
+      if (skippedCount) summaryNote.push(skippedCount + ' skipped');
+      if (leftCount) summaryNote.push(leftCount + ' left in the deck');
       summary.innerHTML = '<div class="iq-runner-summary-score">' + runnerScore + ' / ' + attemptedCount + '</div>' +
-        '<div class="iq-runner-summary-lab">correct this round' + (skippedCount ? ' &middot; ' + skippedCount + ' skipped' : '') + '</div>' +
+        '<div class="iq-runner-summary-lab">correct this round' +
+          (summaryNote.length ? ' &middot; ' + summaryNote.join(' &middot; ') : '') + '</div>' +
         '<button type="button" class="key-btn" id="chal-runner-done" type="button">Done</button>';
       document.getElementById('dx-card').insertBefore(summary, navRowEl);
       document.getElementById('chal-runner-done').addEventListener('click', endRunner);
@@ -18133,6 +18229,14 @@ window.Portal = {
   var runnerScore = 0;
   var runnerSkillLabel = '';
   var questionShownAt = 0;
+  /* How many questions the student actually GOT TO. Null until they leave
+     a round early, where it freezes at the question they walked out on --
+     see endRunner(). It exists so the completion card can tell "skipped"
+     apart from "never reached": a 253-question round abandoned at question
+     six has 247 questions the student never saw, and counting those as
+     skips would print a number that is technically the subtraction and
+     factually a lie. */
+  var runnerReached = null;
 
   // skillNames: array of skill names to draw from (one for a single-topic
   // "Practice" click, all of them for "Practice all topics", a checked
@@ -18198,6 +18302,7 @@ window.Portal = {
     runnerState = {};
     runnerScore = 0;
     runnerSkillLabel = label;
+    runnerReached = null;
     window.dxPracticeNextHandler = runnerAdvance;
     window.dxPracticeExitHandler = endRunner;
     window.dxPracticeLetterHandler = selectRunnerChoice;
@@ -18357,6 +18462,7 @@ window.Portal = {
       runnerState = {};
       runnerScore = 0;
       runnerSkillLabel = 'Your Weakest Skills';
+      runnerReached = null;
       window.dxPracticeNextHandler = runnerAdvance;
       window.dxPracticeExitHandler = endRunner;
       window.dxPracticeLetterHandler = selectRunnerChoice;
@@ -18379,7 +18485,31 @@ window.Portal = {
     st.chosenIndex = i;
     renderRunnerQuestion();
   }
+  /* Exit Practice, mid-round. A student who has answered anything has
+     earned the same score card as one who ran the queue out -- leaving at
+     question twelve of forty is the normal way to end a Question Bank
+     session, not an abandonment, and dropping them straight back on the
+     skills list with no number was the one place in the portal where work
+     done disappeared without being counted.
+
+     So the first press lands on the completion card (scored over what they
+     ACTUALLY attempted, same as finishing does) and the second one -- from
+     Done, or from Exit Practice again -- leaves for real. Nothing to
+     answer, nothing to show: an untouched round exits immediately, exactly
+     as it did before. */
   function endRunner() {
+    if (runnerIndex < runnerQueue.length) {
+      var answered = runnerQueue.some(function (q) {
+        var st = runnerState[q.qid];
+        return st && st.submitted;
+      });
+      if (answered) {
+        runnerReached = runnerIndex;
+        runnerIndex = runnerQueue.length;
+        renderRunnerQuestion();
+        return;
+      }
+    }
     stopQbTimer();
     if (window.dxEndIncorrectPractice) window.dxEndIncorrectPractice();
     if (window.showScreen) window.showScreen('screen-question-bank');
@@ -18529,8 +18659,13 @@ window.Portal = {
       // attemptedCount instead — and skipping the summary altogether when
       // nothing was attempted at all — makes the number honest either way.
       var attemptedCount = runnerQueue.filter(function (q) { var st = runnerState[q.qid]; return st && st.submitted; }).length;
-      var skippedCount = runnerQueue.length - attemptedCount;
-      if (attemptedCount === 0) { endRunner(); return; }
+      // Counted over what the student REACHED rather than over the whole
+      // queue — runnerReached is only non-null when they left early, and
+      // the questions past that point were never seen, let alone skipped.
+      var reachedCount = runnerReached === null ? runnerQueue.length : runnerReached;
+      var skippedCount = Math.max(0, reachedCount - attemptedCount);
+      var leftCount = Math.max(0, runnerQueue.length - reachedCount);
+      if (attemptedCount === 0) { runnerReached = null; endRunner(); return; }
       document.getElementById('dx-notice-text').textContent = 'PRACTICE MODE — DONE';
       qtextEl.innerHTML = '';
       choicesEl.style.display = 'none';
@@ -18543,8 +18678,12 @@ window.Portal = {
       var summary = document.createElement('div');
       summary.id = 'qb-runner-summary';
       summary.className = 'iq-runner-summary';
+      var summaryNote = [];
+      if (skippedCount) summaryNote.push(skippedCount + ' skipped');
+      if (leftCount) summaryNote.push(leftCount + ' left in the round');
       summary.innerHTML = '<div class="iq-runner-summary-score">' + runnerScore + ' / ' + attemptedCount + '</div>' +
-        '<div class="iq-runner-summary-lab">correct this round' + (skippedCount ? ' &middot; ' + skippedCount + ' skipped' : '') + '</div>' +
+        '<div class="iq-runner-summary-lab">correct this round' +
+          (summaryNote.length ? ' &middot; ' + summaryNote.join(' &middot; ') : '') + '</div>' +
         '<button type="button" class="key-btn" id="qb-runner-done" type="button">Done</button>';
       document.getElementById('dx-card').insertBefore(summary, navRowEl);
       document.getElementById('qb-runner-done').addEventListener('click', endRunner);
@@ -20858,6 +20997,51 @@ window.renderNativeReport = function (data) {
         var hi = Math.min(headlineMax, Math.ceil(hiRaw / 10) * 10);
         rangeEl.textContent = 'range ' + lo + '\u2013' + hi;
         bigTile.appendChild(rangeEl);
+        /* ═══ WHEN THE BAND IS THE WRONG INSTRUMENT ═══
+           A range says "same quantity, measured less precisely". That is
+           not what a barely-worked attempt is. A student who hands in a
+           98-question exam in 47 of the 201 minutes available has produced
+           an accurate measurement of what they do when they do not engage,
+           which is a different quantity from what they know -- and widening
+           a band quietly asserts the two are the same one.
+
+           It also cannot be signed. Guessing pushes the raw count ABOVE
+           what the student knows; leaving most of the clock unspent holds
+           it BELOW what the same knowledge would produce with real effort.
+           Both are present on exactly these attempts and there is no
+           principled way to net them, so nothing here shifts the score or
+           the band -- it says plainly what the number is and is not.
+
+           Wiring this into the band instead was measured first and
+           rejected: feeding the skimmed count into informativeQ moved one
+           real attempt's standard error from 41.7 to 43.0 and its printed
+           range not at all, and moved the other's by nothing, because a
+           blitzer's misses are already inside lift = wrong/3.
+
+           GATED HARD, because this sits next to the score. Whole-attempt
+           unused time at 40% (the per-section flag fires at 15%) AND a
+           guess lift of at least 10% of right answers. On the real
+           attempts that is 3 of 18, all of them heavily blitzed low
+           scorers; the 95/98 student who finished 37% early with a 0%
+           lift is left alone, which is the case that matters. */
+        var UNWORKED_UNUSED_SHARE = 0.40, UNWORKED_LIFT_SHARE = 0.10;
+        var usedMs = 0, allotMs = 0;
+        sections.forEach(function (s) {
+          if (s.timeAllottedMin > 0 && s.timeTotal > 0) {
+            usedMs += s.timeTotal; allotMs += s.timeAllottedMin * 60000;
+          }
+        });
+        var unusedShare = allotMs ? (allotMs - usedMs) / allotMs : 0;
+        var liftShareTile = guessLift.correct ? guessLift.lift / guessLift.correct : 0;
+        if (allotMs && unusedShare >= UNWORKED_UNUSED_SHARE && liftShareTile >= UNWORKED_LIFT_SHARE) {
+          var noteEl = document.createElement('div');
+          noteEl.className = 'tile-unworked';
+          noteEl.innerHTML = '<strong>Read this one with care.</strong> ' + first + ' worked ' +
+            Math.round(usedMs / 60000) + ' of ' + Math.round(allotMs / 60000) + ' available minutes. ' +
+            'Guessing lifts this number and questions that went by too fast to have been worked hold it down, ' +
+            'so it is not a clean read of what ' + first + ' knows &mdash; in either direction. See Habits worth naming.';
+          bigTile.appendChild(noteEl);
+        }
       }
     }
     var routedEasier = [rw, mathSec].some(function (s) { return s && s.variant === 'Easier'; });
@@ -22280,6 +22464,32 @@ window.renderNativeReport = function (data) {
      admin.html's CT_RUSHED, deliberately: the per-form report and the
      across-forms view should not disagree about what "rushed" means. */
   var RUSHED_BUDGET_REL = 0.5;
+  /* ═══ THE ENGAGEMENT FLOOR ═══
+     The timing axis only ever modelled ONE direction of failure: too slow.
+     stuck, inefficient and the clock bucket are all "time ran out" states.
+     There was no path by which going too FAST reached the analysis, because
+     `hurried` is measured against the student's own median -- so a student
+     who blitzed the entire section has a blitzing median and nothing looks
+     hurried relative to it. A real attempt: Reading and Writing submitted
+     with 40 of 64 minutes unused, 17 questions missed there, and exactly
+     2 of 98 questions classified rushed.
+
+     This is the other end. It is BUDGET-relative, not self-relative, and
+     deliberately so: the question is not "fast for them", it is "fast
+     enough that the stimulus cannot have been read". An Information and
+     Ideas question carries a passage and is budgeted at 95 seconds; eleven
+     seconds is not a quick answer, it is an unread one. Conventions is
+     budgeted at 40 and is a single sentence, so the same eleven seconds
+     means something entirely different -- which is exactly why the budget
+     table, not the clock, has to set the line.
+
+     CALIBRATED on 1,503 real multiple-choice answers with a budget.
+     Accuracy is flat at 65-79% all the way down to 0.18x of budget, then
+     falls off: 0.08-0.12x is 50%, under 0.08x is 33% against a 25% chance
+     floor. 0.15x sits below the elbow and above the noise. Only 45 of the
+     1,503 answers live under it, so this fires on the extreme and leaves
+     ordinary fast work alone. */
+  var TOO_FAST_BUDGET_REL = 0.15;
   var behaviorFlags = [];
   // ═══ SKILL DIAGNOSIS ROLLUP ═══ the Stuck/Pacing/Guess-landed flags below
   // already classify individual OUTLIER questions per section; this instead
@@ -22306,7 +22516,7 @@ window.renderNativeReport = function (data) {
   var planInputs = { causes: null, leadKey: null, areas: null };
   var skillBuckets = {};
   function bucketFor(skillName) {
-    return skillBuckets[skillName] || (skillBuckets[skillName] = { mastered: 0, inefficient: 0, stuck: 0, onpace: 0, rushed: 0, total: 0 });
+    return skillBuckets[skillName] || (skillBuckets[skillName] = { mastered: 0, skimmed: 0, inefficient: 0, stuck: 0, onpace: 0, rushed: 0, total: 0 });
   }
   /* ═══ DOMAIN BUCKETS ═══ the same four-way classification rolled up to
      the test's own content domains rather than its individual skills.
@@ -22327,7 +22537,7 @@ window.renderNativeReport = function (data) {
   var domainBucketsDx = {};
   function domainBucketFor(domName) {
     return domainBucketsDx[domName] || (domainBucketsDx[domName] =
-      { mastered: 0, inefficient: 0, stuck: 0, onpace: 0, rushed: 0, total: 0, skills: {} });
+      { mastered: 0, skimmed: 0, inefficient: 0, stuck: 0, onpace: 0, rushed: 0, total: 0, skills: {} });
   }
   // Late-night attempt: a diagnostic finished well outside normal waking
   // hours is exactly the kind of context Luca already factors in by hand
@@ -22391,6 +22601,35 @@ window.renderNativeReport = function (data) {
     var cutoff = Math.min(typical * RUSHED_REL, RUSHED_ABS_CAP);
     var luckyCutoff = Math.min(typical * LUCKY_REL, LUCKY_ABS_CAP);
     var stuckCutoff = typical * STUCK_REL;
+    /* ═══ A GATE THAT WAS TRIED AND REMOVED -- DO NOT PUT IT BACK ═══
+       The discount below was briefly made conditional: only treat a
+       below-floor right answer as unearned if THIS student's fast answers
+       were measurably worse than their slow ones. It looked principled and
+       it was wrong twice over.
+
+       CONFOUNDED. A student's below-floor set is not a random sample of
+       their questions -- it is the long ones. On the attempt that motivated
+       this, the below-floor set was almost entirely Information and Ideas
+       passage questions and the above-floor set was 32 of 40 short items:
+       Words in Context, Boundaries, Transitions. The test compared question
+       TYPES and reported it as a comparison of speeds. It "showed" her fast
+       work holding up at 71% against 68%, which was two different exams.
+
+       DEGENERATE WHERE IT MATTERS. It asks whether a student is worse when
+       fast, which needs them to also be slow somewhere. A student who
+       blitzes an entire section has no above-floor baseline in it -- the
+       same attempt had exactly two passage questions worked at a normal
+       pace out of fourteen. The test cannot be computed for precisely the
+       students it exists to judge.
+
+       The budget table is already the control: it encodes that a Command of
+       Evidence question carries a passage and a table and needs 95 seconds,
+       where Boundaries is one sentence and needs 40. 0.15x of 95 seconds is
+       fourteen. Nobody reads a passage, a table and four options in
+       fourteen seconds, and no accuracy statistic computed after the fact
+       makes that physically possible. The real attempt included an
+       8-second Cross-Text Connections answer -- a question with two
+       passages in it. That is the finding, and it does not need a hedge. */
     var rushedWrong = [], luckyCorrect = [], stuckWrong = [];
     s7.rows.forEach(function (r) {
       if (!(pacingTimeMs(r) > 0)) return;
@@ -22471,9 +22710,16 @@ window.renderNativeReport = function (data) {
            had. Self-relative adapts to the student, so it cannot. */
         var hurried = typical ? (pacingTimeMs(r) < cutoff)
                               : (qBudgetMs ? pacingTimeMs(r) < qBudgetMs * RUSHED_BUDGET_REL : false);
+        /* Below the engagement floor the answer carries no information
+           about the material either way, so it is pulled out of BOTH
+           verdicts: a right answer stops counting as mastery, and a wrong
+           answer stops counting as a content gap and becomes what it
+           actually is, a pacing failure. */
+        var tooFast = qBudgetMs ? (pacingTimeMs(r) < qBudgetMs * TOO_FAST_BUDGET_REL) : false;
         var b = bucketFor(r.sk);
         b.total++;
-        if (r.ok) { if (slow) b.inefficient++; else b.mastered++; }
+        if (r.ok) { if (tooFast) b.skimmed++; else if (slow) b.inefficient++; else b.mastered++; }
+        else if (tooFast) b.rushed++;
         else if (slow) b.stuck++;
         else if (hurried) b.rushed++;
         else b.onpace++;
@@ -22487,7 +22733,8 @@ window.renderNativeReport = function (data) {
           // last-write-wins guess. See report.html's identical line.
           db.sec = s7.key;
           db.total++;
-          if (r.ok) { if (slow) db.inefficient++; else db.mastered++; }
+          if (r.ok) { if (tooFast) db.skimmed++; else if (slow) db.inefficient++; else db.mastered++; }
+          else if (tooFast) db.rushed++;
           else if (slow) db.stuck++;
           else if (hurried) db.rushed++;
           else db.onpace++;
@@ -22709,7 +22956,7 @@ window.renderNativeReport = function (data) {
     var allRows = Object.keys(domainBucketsDx).map(function (dm) {
       var b = domainBucketsDx[dm];
       return { skill: dm, isDomain: true, skills: b.skills, sec: b.sec,
-               mastered: b.mastered, inefficient: b.inefficient, stuck: b.stuck,
+               mastered: b.mastered, skimmed: b.skimmed, inefficient: b.inefficient, stuck: b.stuck,
                onpace: b.onpace, rushed: b.rushed,
                /* The content signal is every miss that was NOT hurried --
                   laboured over (stuck) or answered at a normal working pace
@@ -22719,6 +22966,9 @@ window.renderNativeReport = function (data) {
                   significance test would halve the evidence behind the one
                   claim this section exists to make. */
                content: b.stuck + b.onpace,
+               /* Every question that went by too fast to have been read,
+                  whether or not the answer landed. See severityOf. */
+               notRead: b.rushed + b.skimmed,
                total: b.total };
     });
     var rows = allRows.filter(function (r) { return r.total >= MIN_JUDGEABLE_N; });
@@ -22731,12 +22981,43 @@ window.renderNativeReport = function (data) {
        flagged as a content gap. */
     var poolTotal = 0, poolContent = 0, poolRushed = 0, poolInefficient = 0;
     rows.forEach(function (r) {
-      poolTotal += r.total; poolContent += r.content; poolRushed += r.rushed; poolInefficient += r.inefficient;
+      poolTotal += r.total; poolContent += r.content; poolRushed += r.notRead; poolInefficient += r.inefficient;
     });
     var baseContent = poolTotal ? poolContent / poolTotal : 0;
     var baseRushed = poolTotal ? poolRushed / poolTotal : 0;
     var baseIneff = poolTotal ? poolInefficient / poolTotal : 0;
 
+    /* TWO different numbers, and conflating them is a bug in either
+       direction.
+
+       rightOf  is how many the student actually got right. It includes
+       the skimmed ones, because they ARE right and the score counted
+       them -- a report that prints a number contradicting its own score
+       is worthless.
+
+       commandOf is how much of the area the student can be said to KNOW.
+       It excludes the skimmed ones, because an answer given in a tenth
+       of the time the question needs is not evidence of anything. This
+       is the number the shaky-foundation gates read: on a real attempt
+       Information and Ideas came back 74% right at a median 11 seconds
+       against a 95-second budget, and treating that as command is how a
+       guessed section passes for a strength. */
+    function rightOf(r) { return r.mastered + r.inefficient + (r.skimmed || 0); }
+    function commandOf(r) { return r.total ? (r.mastered + r.inefficient) / r.total : 0; }
+    function missesOf(r) { return r.total - rightOf(r); }
+    /* The percentage and the count in the same sentence have to be the same
+       quantity. commandOf excludes the skimmed answers and rightOf includes
+       them, so pairing one with the other printed "57% (9 of 14)" -- and
+       9 of 14 is 64%. When they differ the sentence has to say why, because
+       the gap IS the finding. */
+    function commandPhrase(r) {
+      var solid = r.mastered + r.inefficient;
+      var pct = Math.round(commandOf(r) * 100) + '%';
+      return r.skimmed
+        ? pct + ' (' + solid + ' of ' + r.total + ' worked properly; ' + r.skimmed + ' more came back right ' +
+          'but went by too fast to have been read)'
+        : pct + ' (' + solid + ' of ' + r.total + ')';
+    }
     function severityOf(r) {
       /* A signal must pass both tests.
 
@@ -22796,14 +23077,25 @@ window.renderNativeReport = function (data) {
         return wilsonInterval(count, r.total).lo > base;
       }
       if (passes(r.content, baseContent)) return 3;
-      if (passes(r.rushed, baseRushed)) return 2;
+      /* ═══ PACING COUNTS THE BEHAVIOUR, NOT THE OUTCOME ═══
+         This tested r.rushed, which is too-fast MISSES only. A question
+         answered in a tenth of its budget says exactly the same thing
+         about how the section was worked whether the answer happened to
+         land or not -- and on a fast guesser most of them land, so the
+         signal was being hidden by its own successes. A real attempt had
+         Information and Ideas at 74% right, 8 of those 14 right answers
+         given under the floor, and the pacing test saw 3 questions instead
+         of 11 and stayed silent about the most important thing on the
+         page. notRead is rushed + skimmed: every question that went by too
+         fast to count. */
+      if (passes(r.notRead, baseRushed)) return 2;
       if (passes(r.inefficient, baseIneff)) return 1;
       return 0;
     }
     rows.forEach(function (r) {
       r.severity = severityOf(r);
       var lead = r.severity === 3 ? { n: r.content, base: baseContent }
-               : r.severity === 2 ? { n: r.rushed, base: baseRushed }
+               : r.severity === 2 ? { n: r.notRead, base: baseRushed }
                : { n: r.inefficient, base: baseIneff };
       r.leadN = lead.n;
       r.ci = wilsonInterval(lead.n, r.total);
@@ -22875,11 +23167,14 @@ window.renderNativeReport = function (data) {
         var pRow = null;
         allRows.forEach(function (r) { if (r.skill === pName) pRow = r; });
         if (pRow && pRow.total) {
-          var pRight = pRow.mastered + pRow.inefficient;
-          if (pRight / pRow.total < PREREQ_SHAKY_BELOW) {
+          var pRight = rightOf(pRow);              // the score's number
+          if (commandOf(pRow) < PREREQ_SHAKY_BELOW) {   // the knowledge number
             planInputs.prereq = { name: pName, blocks: pTop.skill, kind: pKind,
                                   right: pRight, total: pRow.total,
-                                  pct: Math.round(pRight / pRow.total * 100) };
+                                  /* Same rule as the headline: the % and the
+                                     count must describe one quantity. */
+                                  phrase: commandPhrase(pRow),
+                                  pct: Math.round(commandOf(pRow) * 100) };
           }
         }
       }
@@ -22926,7 +23221,25 @@ window.renderNativeReport = function (data) {
       /* Zero is not "a few, spread thin" -- it is nothing at all, and on a
          near-perfect attempt that deserves saying plainly rather than
          through a template built for small-but-nonzero. */
-      tableEl.innerHTML = contentMissed === 0
+      /* ═══ "NO DATA" IS NOT "NOTHING WRONG" ═══
+         allRows is built by the classification pass, and that pass skips a
+         section with no usable per-question timing -- it cannot tell a
+         laboured miss from a rushed one without a clock. So an attempt
+         saved before the timing columns existed produces ZERO rows, and
+         zero rows walked straight into the branch below and told the
+         family "Nothing was missed on content."
+
+         On a real attempt that sentence was printed to a student who had
+         missed 43 of 98. It is the most damaging thing this report is
+         capable of saying, and it was one absent array away at all times.
+         Missing evidence gets its own branch. */
+      var missedAll = totalQ - totalC - skipped;
+      tableEl.innerHTML = (!allRows.length && missedAll > 0)
+        ? '<p class="behavior-clean"><strong>This attempt did not save per-question timing, so there is nothing here to rank.</strong> ' +
+          first + ' missed ' + missedAll + ' question' + (missedAll === 1 ? '' : 's') +
+          ' &mdash; that part is certain. What this section does is separate a miss that real work went into from one that went by too fast to count, and that separation needs the clock. Without it, ranking areas would be guesswork dressed up as a finding. ' +
+          'The score above is unaffected &mdash; that is read straight off the answers. Almost everything else in this report reads the clock, which is why so little of it is here; a fresh full-length test is what would fill it in.</p>'
+        : contentMissed === 0
         ? '<p class="behavior-clean"><strong>Nothing was missed on content.</strong> ' +
           first + ' answered every question that was reached correctly, so there is no content here to re-teach and ' +
           'nothing for this section to rank. What is left is how long the right answers took &mdash; that is Efficiency below.</p>'
@@ -23014,7 +23327,6 @@ window.renderNativeReport = function (data) {
          every wrong answer, not just the content-attributed ones, because
          that is the number a reader compares against the "R of N" figures
          quoted elsewhere in the same sentence. */
-      function missesOf(r) { return r.total - (r.mastered + r.inefficient); }
       /* severity IS the lead cause: 3 content, 2 rushing, 1 slow-but-right. */
       function causeWord(r) { return r.severity === 2 ? 'pacing' : 'losing time'; }
       function isBiggestPile(r) {
@@ -23025,8 +23337,8 @@ window.renderNativeReport = function (data) {
       var preName = DOMAIN_PREREQ[top.skill], preRow = null;
       if (preName) allRows.forEach(function (r) { if (r.skill === preName) preRow = r; });
       if (preRow && preRow.total) {
-        var preRight = preRow.mastered + preRow.inefficient;
-        var preAcc = preRight / preRow.total;
+        var preRight = rightOf(preRow);           // what the score says
+        var preAcc = commandOf(preRow);           // what they can be said to know
         if (preAcc < PREREQ_SHAKY_BELOW) {
           /* "The biggest pile of misses" was asserted, never checked, and
              was false on 31.6% of the attempts where this fires -- an area
@@ -23043,7 +23355,7 @@ window.renderNativeReport = function (data) {
              under a dependent domain routinely shows up as TIME rather than
              as wrong answers -- but the sentence has to say which one it is
              looking at. */
-          var atStr = Math.round(preAcc * 100) + '% there (' + preRight + ' of ' + preRow.total + ')';
+          var atStr = commandPhrase(preRow).replace('%', '% there', 1);
           if (top.severity === 3) {
             return '<strong>Start here: ' + esc(preName) + '.</strong> ' +
               (isBiggestPile(top)
@@ -23068,8 +23380,8 @@ window.renderNativeReport = function (data) {
         var alreadyNamed = false;
         allSignalRows.forEach(function (r) { if (r.skill === fndName) alreadyNamed = true; });
         if (fndRow && fndRow.total && !alreadyNamed) {
-          var fndRight = fndRow.mastered + fndRow.inefficient;
-          var fndAcc = fndRight / fndRow.total;
+          var fndRight = rightOf(fndRow);
+          var fndAcc = commandOf(fndRow);
           if (fndAcc < PREREQ_SHAKY_BELOW) {
             /* The closing comparison is checked, not assumed. The first
                version said the named area was "the bigger pile of misses",
@@ -23102,7 +23414,7 @@ window.renderNativeReport = function (data) {
                 fndMissed + ' of ' + fndRow.total + '. Take the cheap points first.';
             return '<strong>Start here: ' + esc(fndName) + '.</strong> ' +
               'It did not separate from ' + first + '\u2019s own average, so it is not on the list below &mdash; ' +
-              'but at ' + Math.round(fndAcc * 100) + '% (' + fndRight + ' of ' + fndRow.total + ') it is worth more than ' +
+              'but at ' + commandPhrase(fndRow) + ' it is worth more than ' +
               'anything that did. Punctuation and sentence-structure rules are a closed set that can be taught outright, ' +
               'they are about a quarter of this section, and they move in weeks. ' + cmp;
           }
@@ -23132,9 +23444,10 @@ window.renderNativeReport = function (data) {
        hover. Written as a phrase rather than the bare class name the old
        native title= showed ("3 stuck"), which was internal vocabulary
        leaking onto the page. */
-    var SEG_LABEL = { mastered: 'right, on time', inefficient: 'right, slow',
+    var SEG_LABEL = { mastered: 'right, on time', skimmed: 'right, but too fast to have read it',
+                      inefficient: 'right, slow',
                       stuck: 'wrong, slow', onpace: 'wrong, on pace', rushed: 'wrong, fast' };
-    var SEG_ORDER = ['mastered', 'inefficient', 'stuck', 'onpace', 'rushed'];
+    var SEG_ORDER = ['mastered', 'skimmed', 'inefficient', 'stuck', 'onpace', 'rushed'];
 
     function rowsHtml(list) {
       return list.map(function (r) {
@@ -23170,7 +23483,12 @@ window.renderNativeReport = function (data) {
                  interval is on the LEAD cause, and severity 1 leads on
                  `inefficient`, which is questions answered CORRECTLY but
                  slowly. Those are not misses, so that row says so. */
-              ' <span class="skilldx-ci">true ' + (r.severity === 1 ? 'slow' : 'miss') + ' rate ' +
+              /* Each severity leads on a different quantity, so the label
+                 has to follow it: 3 counts misses, 2 counts questions that
+                 went by too fast (right ones included, which is the whole
+                 point), 1 counts right-but-slow. */
+              ' <span class="skilldx-ci">true ' +
+                (r.severity === 3 ? 'miss' : r.severity === 2 ? 'rush' : 'slow') + ' rate ' +
                 Math.round(r.ci.lo * 100) +
                 '&ndash;' + Math.round(r.ci.hi * 100) + '%</span>' +
               // Says WHY this row sits where it does. Without it the order
@@ -24265,6 +24583,22 @@ window.renderNativeReport = function (data) {
         // Self-relative first -- see the note in the classification pass above.
         var hurried = typical ? (tMs < Math.min(typical * RUSHED_REL, RUSHED_ABS_CAP))
                               : (qBudgetMs ? tMs < qBudgetMs * RUSHED_BUDGET_REL : false);
+        /* Under the engagement floor the question was not read, so the
+           miss is a pacing failure and belongs to the clock. Without this
+           the only way to reach the clock bucket was running OUT of time --
+           `skipped` or an overrun module -- and a student who submits
+           forty minutes early scores zero pacing hours while every one of
+           those misses is billed to content they may well know. */
+        /* tMs > 0 IS LOAD-BEARING. An attempt with no timing at all reads
+           as zero milliseconds on every question, and zero is below every
+           floor -- so without this guard the floor billed all 43 misses on
+           a real timing-less attempt to the clock, and the report told a
+           55/98 student that pacing was the only thing costing them points
+           and prescribed 1.5 hours a week of it. Missing data is not speed. */
+        if (qBudgetMs && tMs > 0 && tMs < qBudgetMs * TOO_FAST_BUDGET_REL) {
+          bucket('clock', sec, r, 'answered too fast to have read it');
+          return;
+        }
         // A genuinely rushed wrong answer is deliberately NOT content: it is
         // not evidence the material was unknown, and section 1 already
         // reports it as its own kind of problem.
@@ -24869,8 +25203,8 @@ window.renderNativeReport = function (data) {
       rows.push({
         h: hours.content, unit: unitFor(hours.content), color: 'var(--red)',
         what: '<b>Content.</b> ' + (pre
-          ? '<b>' + esc(pre.name) + ' first</b> &mdash; ' + first + ' is at ' + pre.pct + '% there (' +
-            pre.right + ' of ' + pre.total + '), and ' +
+          ? '<b>' + esc(pre.name) + ' first</b> &mdash; ' + first + ' is at ' +
+            pre.phrase.replace('%', '% there', 1) + ', and ' +
             (pre.kind === 'prereq'
               ? esc(pre.blocks) + ' is built on top of it. '
               : 'it is a closed set of rules that moves in weeks, where ' + esc(pre.blocks) +
@@ -24896,7 +25230,7 @@ window.renderNativeReport = function (data) {
       rows.push({
         h: hours.clock, unit: unitFor(hours.clock), color: '#4E6070',
         what: '<b>Pacing.</b> One full timed module a week, in one sitting, under real conditions &mdash; phone away, clock visible, no restarts. Review it the next day, not the same night. ' +
-          '<em>' + causes.clock + ' question' + (causes.clock === 1 ? '' : 's') + ' on this form were never really available to be answered.</em>'
+          '<em>' + causes.clock + ' question' + (causes.clock === 1 ? '' : 's') + ' on this form ' + (causes.clock === 1 ? 'was' : 'were') + ' never really answered &mdash; either time ran out before ' + first + ' got there, or it went by too fast to have been read.</em>'
       });
     }
     if (!rows.length) return;

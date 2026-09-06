@@ -50,11 +50,14 @@ function bucketRows(rows, sectionKey) {
     const t = r.timeMs;
     const slow    = qBudgetMs ? (t >= qBudgetMs * C.STUCK_BUDGET_REL) : (t >= stuckCutoff);
     const hurried = typical ? (t < cutoff) : (qBudgetMs ? t < qBudgetMs * C.RUSHED_BUDGET_REL : false);
+    // t > 0 guard: missing timing is not speed. See report.html.
+    const tooFast = (qBudgetMs && t > 0) ? (t < qBudgetMs * C.TOO_FAST_BUDGET_REL) : false;
     const db = domains[r.dom] || (domains[r.dom] = {
-      mastered:0, inefficient:0, stuck:0, onpace:0, rushed:0,
+      mastered:0, skimmed:0, inefficient:0, stuck:0, onpace:0, rushed:0,
       total:0, skills:{}, sec:sectionKey });
     db.total++;
-    if (r.ok) { if (slow) db.inefficient++; else db.mastered++; }
+    if (r.ok) { if (tooFast) db.skimmed++; else if (slow) db.inefficient++; else db.mastered++; }
+    else if (tooFast) db.rushed++;
     else if (slow) db.stuck++;
     else if (hurried) db.rushed++;
     else db.onpace++;
@@ -70,9 +73,10 @@ function toAllRows(domainMaps) {
   for (const m of domainMaps) for (const [k, v] of Object.entries(m)) merged[k] = v;
   return Object.entries(merged).map(([dm, b]) => ({
     skill: dm, isDomain: true, skills: b.skills, sec: b.sec,
-    mastered: b.mastered, inefficient: b.inefficient, stuck: b.stuck,
+    mastered: b.mastered, skimmed: b.skimmed, inefficient: b.inefficient, stuck: b.stuck,
     onpace: b.onpace, rushed: b.rushed,
     content: b.stuck + b.onpace,
+    notRead: b.rushed + b.skimmed,
     total: b.total
   }));
 }

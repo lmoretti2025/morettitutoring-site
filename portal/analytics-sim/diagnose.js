@@ -10,7 +10,7 @@ function diagnose(allRows) {
     var rows = allRows.filter(function (r) { return r.total >= MIN_JUDGEABLE_N; });
     var poolTotal = 0, poolContent = 0, poolRushed = 0, poolInefficient = 0;
     rows.forEach(function (r) {
-      poolTotal += r.total; poolContent += r.content; poolRushed += r.rushed; poolInefficient += r.inefficient;
+      poolTotal += r.total; poolContent += r.content; poolRushed += r.notRead; poolInefficient += r.inefficient;
     });
     var baseContent = poolTotal ? poolContent / poolTotal : 0;
     var baseRushed = poolTotal ? poolRushed / poolTotal : 0;
@@ -74,14 +74,16 @@ function diagnose(allRows) {
         return wilsonInterval(count, r.total).lo > base;
       }
       if (passes(r.content, baseContent)) return 3;
-      if (passes(r.rushed, baseRushed)) return 2;
+      /* rushed + skimmed: every question that went by too fast to count,
+         whether or not the answer landed. See report.html. */
+      if (passes(r.notRead, baseRushed)) return 2;
       if (passes(r.inefficient, baseIneff)) return 1;
       return 0;
     }
     rows.forEach(function (r) {
       r.severity = severityOf(r);
       var lead = r.severity === 3 ? { n: r.content, base: baseContent }
-               : r.severity === 2 ? { n: r.rushed, base: baseRushed }
+               : r.severity === 2 ? { n: r.notRead, base: baseRushed }
                : { n: r.inefficient, base: baseIneff };
       r.leadN = lead.n;
       r.ci = wilsonInterval(lead.n, r.total);
