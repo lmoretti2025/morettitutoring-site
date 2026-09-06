@@ -362,37 +362,58 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
 @media(max-width:1000px){.satstage > .shell{grid-template-columns:1fr}}
 @keyframes sealSpin{to{transform:rotate(360deg)}}
 
-/* ── the included card: steps through what the programme gives you ── */
-.ftour{justify-self:center;width:100%;max-width:440px;animation:satIn 1.1s var(--ease) 1.9s both}
-.ft-card{position:relative;background:var(--surface);border-radius:22px;
-  box-shadow:0 34px 70px -34px rgba(0,0,0,.9);padding:clamp(1.5rem,2.6vw,2.1rem);
-  display:flex;flex-direction:column;align-items:center;text-align:center}
-.ft-head{font-size:.6rem;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}
-.ft-stage{position:relative;display:grid;place-items:center;min-height:118px;margin-top:1rem;width:100%}
-.ft-iconbg{position:absolute;width:88px;height:88px;border-radius:24px;background:var(--sunk);
-  box-shadow:inset 0 2px 8px rgba(17,17,17,.07)}
-/* the plate is positioned, so the icons have to be lifted above it */
-.ft-icons{position:relative;z-index:1;display:grid;place-items:center}
-.ft-icons > span{grid-area:1 / 1;display:grid;place-items:center;color:var(--red);opacity:0;
-  transform:scale(.92) translateY(8px);filter:blur(3px);
-  transition:opacity .32s var(--ease),transform .32s var(--ease),filter .32s var(--ease)}
-.ft-icons > span.on{opacity:1;transform:none;filter:none}
-.ft-icons svg{width:40px;height:40px;fill:none;stroke:currentColor;stroke-width:2.2;
+/* ══ WHAT'S INCLUDED: the whole list, with one row open ══════════════════
+   Was a one-at-a-time carousel in a white card. Two problems: five of the six
+   things being sold were hidden at any moment, so the hero's first frame --
+   the one a skimming parent actually sees -- carried a single feature; and a
+   bright panel on a black stage read as an inert box rather than as part of
+   the hero. Every title is visible now, the active row opens, and the rail
+   under it shows how long it has. Motion that says something.
+
+   The open/close uses grid-template-rows 0fr->1fr, so no height is ever
+   measured and a row can hold any amount of text. */
+.ftour{width:100%;justify-self:center;max-width:560px;
+  animation:satIn 1.1s var(--ease) 3.65s both}
+.ft-head{font-size:.62rem;font-weight:600;letter-spacing:.24em;text-transform:uppercase;
+  color:rgba(237,231,229,.5);margin-bottom:.85rem}
+.ft-list{list-style:none;margin:0;padding:0;border-radius:16px;overflow:hidden;
+  background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.13);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.ft-item + .ft-item{border-top:1px solid rgba(255,255,255,.08)}
+.ft-row{position:relative;width:100%;display:flex;align-items:center;gap:.85rem;
+  padding:.92rem 1.05rem;margin:0;border:none;background:transparent;cursor:pointer;
+  font:inherit;text-align:left;color:rgba(237,231,229,.6);
+  transition:color .25s var(--ease),background .25s var(--ease)}
+.ft-row:hover{color:#fff;background:rgba(255,255,255,.045)}
+.ft-row:focus-visible{outline:2px solid var(--red-lift);outline-offset:-2px}
+.ft-item.is-on .ft-row{color:#fff;background:rgba(255,255,255,.06)}
+.ft-ico{flex:none;display:grid;place-items:center;width:34px;height:34px;border-radius:10px;
+  background:rgba(255,255,255,.06);color:rgba(237,231,229,.5);
+  transition:background .3s var(--ease),color .3s var(--ease)}
+.ft-item.is-on .ft-ico{background:rgba(210,66,52,.16);color:var(--red-lift)}
+.ft-ico svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2.1;
   stroke-linecap:round;stroke-linejoin:round}
-.ft-texts{display:grid;width:100%;margin-top:1.3rem}
-.ft-texts > div{grid-area:1 / 1;opacity:0;transform:translateY(14px);pointer-events:none;
-  transition:opacity .32s var(--ease),transform .32s var(--ease)}
-.ft-texts > div.on{opacity:1;transform:none;pointer-events:auto}
-.ft-texts h3{font-family:var(--display);font-weight:700;letter-spacing:-.015em;color:var(--ink);
-  font-size:clamp(1.1rem,1.5vw,1.32rem);line-height:1.2}
-.ft-texts p{margin-top:.6rem;font-size:.9rem;line-height:1.55;color:var(--body);max-width:34ch;
-  margin-left:auto;margin-right:auto}
-.ft-dots{display:flex;gap:.55rem;margin-top:1.4rem}
-.ft-dots button{width:10px;height:10px;padding:0;border:none;border-radius:50%;cursor:pointer;
-  background:rgba(17,17,17,.16);transition:background .35s var(--ease),transform .35s var(--spring)}
-.ft-dots button[aria-selected="true"]{background:var(--red);transform:scale(1.3)}
-.ft-dots button:hover{background:rgba(17,17,17,.4)}
-@media(prefers-reduced-motion:reduce){.ft-icons > span,.ft-texts > div,.ft-dots button{transition:none}}
+.ft-name{flex:1;min-width:0;font-family:var(--display);font-weight:700;letter-spacing:-.012em;
+  font-size:clamp(.95rem,1.15vw,1.05rem);line-height:1.25}
+/* Fills across the row over the dwell, so the advance is legible rather than
+   a jump out of nowhere. Paused while the pointer is on the list. */
+.ft-bar{position:absolute;left:0;right:0;bottom:-1px;height:2px;transform:scaleX(0);
+  transform-origin:left;background:var(--red-lift)}
+.ft-item.is-on .ft-bar{animation:ftFill var(--ft-dwell,4.6s) linear forwards}
+.ftour.is-held .ft-item.is-on .ft-bar{animation-play-state:paused}
+@keyframes ftFill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.ft-detail{display:grid;grid-template-rows:0fr;transition:grid-template-rows .5s var(--ease)}
+.ft-item.is-on .ft-detail{grid-template-rows:1fr}
+.ft-detail > div{overflow:hidden}
+.ft-detail p{margin:0;padding:0 1.05rem 1rem calc(1.05rem + 34px + .85rem);
+  font-size:.87rem;line-height:1.6;color:rgba(237,231,229,.62)}
+@media(max-width:520px){
+  .ft-detail p{padding-left:1.05rem}
+}
+@media(prefers-reduced-motion:reduce){
+  .ft-detail{transition:none}
+  .ft-item.is-on .ft-bar{animation:none;transform:scaleX(1)}
+}
 
 .satstage > .shell{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);
   gap:clamp(2rem,5vw,4.5rem);align-items:center}
@@ -402,40 +423,6 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
 /* ── the included card, at the scale the hero deserves ── */
 .satstage > .shell{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(2rem,4.5vw,4rem)}
 @media(max-width:1000px){.satstage > .shell{grid-template-columns:1fr}}
-.ftour{max-width:600px;width:100%}
-.ft-card{max-width:none;width:100%;border-radius:26px;padding:clamp(2rem,3.4vw,3rem);
-  box-shadow:0 42px 90px -40px rgba(0,0,0,.95)}
-.ft-head{font-size:.66rem;letter-spacing:.24em}
-.ft-stage{min-height:168px;margin-top:1.4rem}
-.ft-iconbg{width:124px;height:124px;border-radius:32px}
-.ft-icons svg{width:58px;height:58px;stroke-width:2}
-.ft-texts{margin-top:1.9rem}
-.ft-texts h3{font-size:clamp(1.35rem,1.95vw,1.75rem);line-height:1.16}
-.ft-texts p{margin-top:.85rem;font-size:clamp(.95rem,1.1vw,1.06rem);line-height:1.6;max-width:38ch}
-.ft-dots{margin-top:1.9rem;gap:.65rem}
-.ft-dots button{width:12px;height:12px}
-@media(max-width:1000px){.ftour{margin-inline:auto}}
-
-/* ── the card, larger again, with arrows either side of the dots ── */
-.ftour{max-width:none}
-.ft-card{padding:clamp(2.3rem,3.8vw,3.4rem);border-radius:30px}
-.ft-head{font-size:.7rem;letter-spacing:.26em}
-.ft-stage{min-height:196px;margin-top:1.6rem}
-.ft-iconbg{width:146px;height:146px;border-radius:38px}
-.ft-icons svg{width:68px;height:68px;stroke-width:1.9}
-.ft-texts{margin-top:2.1rem}
-.ft-texts h3{font-size:clamp(1.5rem,2.2vw,2rem);line-height:1.14}
-.ft-texts p{margin-top:1rem;font-size:clamp(1rem,1.18vw,1.14rem);line-height:1.6;max-width:36ch}
-.ft-nav{display:flex;align-items:center;justify-content:center;gap:clamp(.9rem,1.8vw,1.5rem);margin-top:2.2rem}
-.ft-dots{margin-top:0}
-.ft-arrow{width:42px;height:42px;flex:none;display:grid;place-items:center;padding:0;cursor:pointer;
-  border:1px solid var(--line);border-radius:50%;background:var(--surface);color:var(--ink);
-  transition:background .28s var(--ease),border-color .28s var(--ease),color .28s var(--ease),transform .28s var(--ease)}
-.ft-arrow svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2.2;
-  stroke-linecap:round;stroke-linejoin:round}
-.ft-arrow:hover{background:var(--red);border-color:var(--red);color:#fff;transform:translateY(-2px)}
-.ft-arrow:active{transform:translateY(0)}
-@media(prefers-reduced-motion:reduce){.ft-arrow{transition:none}}
 
 /* the split pairs its two halves wherever it appears, not only in one row */
 .split2{display:grid;grid-template-columns:1fr 1fr;border-radius:12px;overflow:hidden;
@@ -476,33 +463,57 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
     <p class="sat-count"><span class="lbl" style="margin:0">Algebra 1 &rarr; Multivariable Calculus &middot; Cranford, NJ and online</span></p>
   </div>
   <div class="ftour" id="ftour">
-    <div class="ft-card">
-      <div class="ft-head">What&rsquo;s included</div>
-      <div class="ft-stage">
-        <span class="ft-iconbg" aria-hidden="true"></span>
-        <div class="ft-icons" aria-hidden="true">
-          <span class="on"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M18 34a8 8 0 1 1 12 0M24 8v8M12 14l5 5M36 14l-5 5"/></svg></span>
-          <span><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M13 6h16l8 8v28H13zM29 6v8h8M17 26h14M17 33h9"/></svg></span>
-          <span><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M7 12h34v24H7zM7 15l17 12 17-12"/></svg></span>
-          <span><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 40h32M8 40V10M14 31l8-9 6 5 10-13M32 14h6v6"/></svg></span>
-          <span><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 8a16 16 0 1 0 0 32 16 16 0 0 0 0-32zM24 15v9l6 4"/></svg></span>
-          <span><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M9 20h30v21H9zM17 20v-6a7 7 0 0 1 14 0v6"/></svg></span>
-        </div>
-      </div>
-      <div class="ft-texts">
-        <div class="on"><h3>Weekly one-on-one sessions</h3><p>One or two a week, 60&ndash;90 minutes depending on the course, paced to your student.</p></div>
-        <div><h3>Diagnostic-driven curriculum</h3><p>Built on their actual course and textbook. The diagnostic often finds the real gap a year or two back.</p></div>
-        <div><h3>Support between sessions</h3><p>Stuck on tonight&rsquo;s assignment? Message any time &mdash; help doesn&rsquo;t wait for the next session.</p></div>
-        <div><h3>Progress reports every cycle</h3><p>What improved, what is next, and how the grade is tracking. Written, not verbal.</p></div>
-        <div><h3>Test &amp; quiz strategy</h3><p>The pacing and error-checking habits that protect points on school assessments.</p></div>
-        <div><h3>A private student portal</h3><p>Practice sets, session notes and progress tracking in one login.</p></div>
-      </div>
-      <div class="ft-nav">
-        <button class="ft-arrow" type="button" id="ftprev" aria-label="Previous item"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
-        <div class="ft-dots" id="ftdots" role="tablist" aria-label="What is included"></div>
-        <button class="ft-arrow" type="button" id="ftnext" aria-label="Next item"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
-      </div>
-    </div>
+    <div class="ft-head">What&rsquo;s included</div>
+    <ul class="ft-list">
+      <li class="ft-item is-on">
+        <button class="ft-row" type="button" aria-expanded="true">
+          <span class="ft-ico" aria-hidden="true"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M18 34a8 8 0 1 1 12 0M24 8v8M12 14l5 5M36 14l-5 5"/></svg></span>
+          <span class="ft-name">Weekly one-on-one sessions</span>
+          <span class="ft-bar" aria-hidden="true"></span>
+        </button>
+        <div class="ft-detail"><div><p>One or two a week, 60&ndash;90 minutes depending on the course, paced to your student.</p></div></div>
+      </li>
+      <li class="ft-item">
+        <button class="ft-row" type="button" aria-expanded="false">
+          <span class="ft-ico" aria-hidden="true"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M13 6h16l8 8v28H13zM29 6v8h8M17 26h14M17 33h9"/></svg></span>
+          <span class="ft-name">Diagnostic-driven curriculum</span>
+          <span class="ft-bar" aria-hidden="true"></span>
+        </button>
+        <div class="ft-detail"><div><p>Built on their actual course and textbook. The diagnostic often finds the real gap a year or two back.</p></div></div>
+      </li>
+      <li class="ft-item">
+        <button class="ft-row" type="button" aria-expanded="false">
+          <span class="ft-ico" aria-hidden="true"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M7 12h34v24H7zM7 15l17 12 17-12"/></svg></span>
+          <span class="ft-name">Support between sessions</span>
+          <span class="ft-bar" aria-hidden="true"></span>
+        </button>
+        <div class="ft-detail"><div><p>Stuck on tonight&rsquo;s assignment? Message any time &mdash; help doesn&rsquo;t wait for the next session.</p></div></div>
+      </li>
+      <li class="ft-item">
+        <button class="ft-row" type="button" aria-expanded="false">
+          <span class="ft-ico" aria-hidden="true"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 40h32M8 40V10M14 31l8-9 6 5 10-13M32 14h6v6"/></svg></span>
+          <span class="ft-name">Progress reports every cycle</span>
+          <span class="ft-bar" aria-hidden="true"></span>
+        </button>
+        <div class="ft-detail"><div><p>What improved, what is next, and how the grade is tracking. Written, not verbal.</p></div></div>
+      </li>
+      <li class="ft-item">
+        <button class="ft-row" type="button" aria-expanded="false">
+          <span class="ft-ico" aria-hidden="true"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 8a16 16 0 1 0 0 32 16 16 0 0 0 0-32zM24 15v9l6 4"/></svg></span>
+          <span class="ft-name">Test &amp; quiz strategy</span>
+          <span class="ft-bar" aria-hidden="true"></span>
+        </button>
+        <div class="ft-detail"><div><p>The pacing and error-checking habits that protect points on school assessments.</p></div></div>
+      </li>
+      <li class="ft-item">
+        <button class="ft-row" type="button" aria-expanded="false">
+          <span class="ft-ico" aria-hidden="true"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M9 20h30v21H9zM17 20v-6a7 7 0 0 1 14 0v6"/></svg></span>
+          <span class="ft-name">A private student portal</span>
+          <span class="ft-bar" aria-hidden="true"></span>
+        </button>
+        <div class="ft-detail"><div><p>Practice sets, session notes and progress tracking in one login.</p></div></div>
+      </li>
+    </ul>
   </div>
   </div>
 </header>
@@ -670,38 +681,37 @@ document.documentElement.classList.add('js');
 
 /* ── the included card: auto-advancing, dots and arrows ── */
 (function(){
+  /* One row open at a time, advancing on its own until the pointer lands on
+     the list. Clicking a row opens it and restarts the clock, so a parent who
+     takes over is never fighting the timer. */
   var root=document.getElementById('ftour'); if(!root) return;
-  var icons=[].slice.call(root.querySelectorAll('.ft-icons > span')),
-      texts=[].slice.call(root.querySelectorAll('.ft-texts > div')),
-      dots=document.getElementById('ftdots');
-  if(!texts.length||!dots) return;
-  var i=0, held=false, timer=0,
+  var items=[].slice.call(root.querySelectorAll('.ft-item'));
+  if(!items.length) return;
+  var DWELL=4600, i=-1, timer=0,
       reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  texts.forEach(function(t,k){
-    var b=document.createElement('button');
-    b.type='button'; b.setAttribute('role','tab');
-    b.setAttribute('aria-label',t.querySelector('h3').textContent);
-    b.addEventListener('click',function(){ go(k); });
-    dots.appendChild(b);
-  });
   function go(n){
-    i=(n+texts.length)%texts.length;
-    icons.forEach(function(e,k){ e.classList.toggle('on',k===i); });
-    texts.forEach(function(e,k){ e.classList.toggle('on',k===i); });
-    [].forEach.call(dots.children,function(b,k){ b.setAttribute('aria-selected',k===i?'true':'false'); });
+    i=(n+items.length)%items.length;
+    items.forEach(function(el,k){
+      var on=k===i;
+      el.classList.toggle('is-on',on);
+      el.querySelector('.ft-row').setAttribute('aria-expanded',on?'true':'false');
+    });
+    /* Restart the rail: the animation only replays if it is cleared and the
+       element reflowed in between. */
+    var bar=items[i].querySelector('.ft-bar');
+    if(bar){ bar.style.animation='none'; void bar.offsetWidth; bar.style.animation=''; }
   }
-  go(0);
-  var prev=document.getElementById('ftprev'), next=document.getElementById('ftnext');
-  if(prev) prev.addEventListener('click',function(){ go(i-1); });
-  if(next) next.addEventListener('click',function(){ go(i+1); });
-  root.addEventListener('keydown',function(e){
-    if(e.key==='ArrowRight'){e.preventDefault();go(i+1);}
-    if(e.key==='ArrowLeft'){e.preventDefault();go(i-1);}
+  function schedule(){ clearTimeout(timer); if(!reduce) timer=setTimeout(function(){ go(i+1); schedule(); },DWELL); }
+  items.forEach(function(el,k){
+    el.querySelector('.ft-row').addEventListener('click',function(){ go(k); schedule(); });
   });
-  root.addEventListener('pointerenter',function(){held=true;},{passive:true});
-  root.addEventListener('pointerleave',function(){held=false;},{passive:true});
-  function tick(){ if(!held&&!document.hidden) go(i+1); timer=setTimeout(tick,4000); }
-  if(!reduce) timer=setTimeout(tick,4000);
+  root.addEventListener('keydown',function(e){
+    if(e.key==='ArrowDown'||e.key==='ArrowRight'){e.preventDefault();go(i+1);schedule();}
+    if(e.key==='ArrowUp'||e.key==='ArrowLeft'){e.preventDefault();go(i-1);schedule();}
+  });
+  root.addEventListener('pointerenter',function(){ root.classList.add('is-held'); clearTimeout(timer); },{passive:true});
+  root.addEventListener('pointerleave',function(){ root.classList.remove('is-held'); schedule(); },{passive:true});
+  go(0); schedule();
 })();
 </script>
 </body>
