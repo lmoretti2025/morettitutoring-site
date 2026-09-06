@@ -254,8 +254,22 @@ h1 .ln:nth-child(2){animation-delay:1.6s}
 .vstage{position:relative;display:flex;align-items:flex-start}
 .videoframe{position:relative;flex:0 0 var(--vframeW);aspect-ratio:16/9;overflow:hidden;
   background:#000;border:none;border-radius:0}
-.videoframe>img{width:100%;height:100%;object-fit:cover;object-position:center 38%;filter:saturate(.82);transition:transform 1.1s var(--ease)}
-.videoframe:hover>img{transform:scale(1.03)}
+/* standing in for the video until it is recorded: three stills, cross-faded */
+.vslides{position:absolute;inset:0;overflow:hidden}
+.vslides img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 38%;
+  filter:saturate(.82);opacity:0;animation:vfade 16.5s linear infinite;
+  transition:transform 1.1s var(--ease)}
+.vslides img:nth-child(1){animation-delay:0s}
+.vslides img:nth-child(2){animation-delay:5.5s}
+.vslides img:nth-child(3){animation-delay:11s}
+.videoframe:hover .vslides img{transform:scale(1.03)}
+@keyframes vfade{
+  0%{opacity:0} 3%{opacity:1} 30%{opacity:1} 36%{opacity:0} 100%{opacity:0}
+}
+@media(prefers-reduced-motion:reduce){
+  .vslides img{animation:none;opacity:0}
+  .vslides img:nth-child(1){opacity:1}
+}
 .videoframe .grad{position:absolute;inset:0;background:linear-gradient(180deg,rgba(12,10,9,.26) 0%,rgba(12,10,9,.3) 40%,rgba(12,10,9,.94) 100%)}
 .playwrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
 .playbtn{width:64px;height:64px;border-radius:50%;border:1.5px solid rgba(255,255,255,.55);display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.07);transition:background .25s var(--ease),border-color .25s,transform .25s var(--ease)}
@@ -312,47 +326,61 @@ h1 .ln:nth-child(2){animation-delay:1.6s}
 .bookcard .fsub{margin-top:.4rem}
 .bookcard .fnote{margin-top:.7rem;font-size:.73rem;color:var(--muted);text-align:center}
 
-/* ══ TESTIMONIALS: a deck of cards rather than a grid of boxes ══ */
-.tdeck{display:grid;margin-top:clamp(1.8rem,3.4vw,2.8rem);padding-bottom:52px;cursor:pointer}
-.tcard{grid-area:1 / 1;background:var(--sunk);border:1px solid var(--line);border-radius:6px;
-  padding:clamp(1.7rem,3.4vw,3rem);transform-origin:50% 100%;
-  transition:transform .8s var(--spring),opacity .8s var(--ease),filter .8s var(--ease)}
-.tcard[data-pos="0"]{z-index:5;transform:none;opacity:1;filter:none}
-.tcard[data-pos="1"]{z-index:4;transform:translateY(18px) scale(.962) rotate(-.7deg);opacity:.5;filter:blur(1.5px)}
-.tcard[data-pos="2"]{z-index:3;transform:translateY(34px) scale(.926) rotate(.9deg);opacity:.26;filter:blur(3px)}
-.tcard[data-pos="3"]{z-index:2;transform:translateY(46px) scale(.9);opacity:0;filter:blur(4px)}
-.tcard[data-pos="out"]{z-index:6;transform:translateY(-46px) scale(1.03) rotate(-1.8deg);opacity:0;filter:blur(5px)}
-.tcard blockquote{margin:0;font-family:var(--display);font-weight:400;
-  font-size:clamp(1.08rem,1.9vw,1.62rem);line-height:1.46;letter-spacing:-.014em;color:var(--ink)}
-.tcard blockquote::before{content:'\201C';display:block;font-size:2.4em;line-height:.5;color:rgba(176,39,28,.32);margin-bottom:.26em}
-.tcard figcaption{margin-top:1.5rem;display:flex;align-items:center;gap:.6rem;font-size:.76rem;
-  letter-spacing:.05em;color:var(--muted)}
-.tcard figcaption::before{content:'\25C6';color:var(--red);font-size:.7rem}
-.tgain{color:var(--red);font-weight:600}
-.tdots{display:flex;gap:.5rem;margin-top:clamp(1rem,2vw,1.5rem)}
-.tdots button{width:26px;height:3px;border:none;border-radius:2px;padding:0;cursor:pointer;
-  background:rgba(17,17,17,.16);transition:background .4s var(--ease),width .4s var(--ease)}
-.tdots button[aria-current="true"]{background:var(--red);width:44px}
-.tdots button:hover{background:rgba(17,17,17,.4)}
-@media(prefers-reduced-motion:reduce){.tcard{transition:none}}
 
-/* ══ TESTIMONIALS, standing on their own ══ */
-.tsec{background:var(--paper);border-bottom:none}
-.tsec .wide{max-width:none;padding:0 clamp(1.25rem,3vw,2.8rem)}
-.tsec .shead h2{color:var(--ink)}
-.tsec .lbl{color:var(--muted)}
-.tsec .lbl::before{color:var(--red)}
-.tsec .morelink{color:var(--body)}
-.tsec .morelink:hover{color:var(--ink)}
-.tgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:rgba(255,255,255,.13);
-  border-top:1px solid rgba(255,255,255,.13);border-bottom:1px solid rgba(255,255,255,.13)}
-@media(max-width:860px){.tgrid{grid-template-columns:1fr}}
-.tq{margin:0;background:var(--void);padding:clamp(1.8rem,3.4vw,3.2rem);display:flex;flex-direction:column;justify-content:space-between}
-.tq blockquote{margin:0;font-family:var(--display);font-weight:400;
-  font-size:clamp(1.05rem,1.75vw,1.42rem);line-height:1.5;letter-spacing:-.012em;color:#F6F2F0}
-.tq blockquote::before{content:'\201C';display:block;font-size:2.6em;line-height:.5;color:rgba(210,66,52,.42);margin-bottom:.28em}
-.tq figcaption{margin-top:1.6rem;display:flex;align-items:center;gap:.6rem;font-size:.76rem;letter-spacing:.05em;color:rgba(237,231,229,.55)}
-.tq figcaption::before{content:'\25C6';color:var(--red-lift);font-size:.7rem}
+/* ── RHYTHM through the middle of the page. Programs, testimonials and the
+      instructor were three white blocks in a row after two black ones, so the
+      page flatlined between the diagnostic and the form. Now it alternates:
+      black · paper · white · black · paper · black. ── */
+#programs{background:var(--sunk)}
+
+/* the instructor section carries the page's second black moment */
+#instructor{background:#000;color:#EDE7E5;border-bottom:none}
+#instructor .lbl{color:rgba(237,231,229,.5)}
+#instructor .lbl::before{color:var(--red-lift)}
+#instructor .ihed{color:#fff}
+#instructor .ilead{color:rgba(237,231,229,.72)}
+#instructor .creds span{border-color:rgba(255,255,255,.2);color:rgba(237,231,229,.7)}
+#instructor .creds span:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.45);color:#fff}
+#instructor .instr .pic::after{box-shadow:inset 0 0 0 1px rgba(255,255,255,.16)}
+#instructor .gbox{border-left-color:var(--red-lift);
+  background:linear-gradient(90deg,rgba(210,66,52,.12),transparent 68%)}
+#instructor .gbox .k{color:var(--red-lift)}
+#instructor .gbox h3{color:#fff}
+#instructor .gbox p{color:rgba(237,231,229,.72)}
+
+
+/* the proof lives inside the section it is proving — claim, then evidence,
+   with no section boundary in between */
+.proofstrip{margin-top:clamp(2.8rem,5.5vw,4.6rem);padding-top:clamp(1.9rem,3.6vw,3rem);
+  border-top:1px solid var(--line)}
+.proofstrip > .lbl{margin-bottom:clamp(.9rem,1.8vw,1.4rem)}
+.proofstrip .tdeck{margin-top:clamp(.8rem,1.8vw,1.4rem)}
+.proofstrip .morelink{color:var(--body)}
+.proofstrip .morelink:hover{color:var(--ink)}
+
+/* ══ TESTIMONIALS: a wall — every quote legible at a glance ══ */
+.twall{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(1rem,1.8vw,1.5rem);
+  margin-top:clamp(1rem,2vw,1.6rem)}
+@media(max-width:820px){.twall{grid-template-columns:1fr}}
+.twall .tq{position:relative;overflow:hidden;margin:0;display:flex;flex-direction:column;
+  background:var(--surface);border:1px solid var(--line);border-radius:8px;
+  padding:clamp(1.45rem,2.5vw,2.05rem);box-shadow:0 1px 2px rgba(17,17,17,.04);
+  transition:border-color .35s var(--ease),transform .45s var(--ease),box-shadow .45s var(--ease)}
+.twall .tq:hover{border-color:rgba(17,17,17,.2);transform:translateY(-4px);
+  box-shadow:0 24px 44px -28px rgba(17,17,17,.45)}
+/* the mark sits in the corner in place of a quote glyph */
+.twall .tq::before{content:'';position:absolute;top:clamp(.85rem,1.5vw,1.15rem);right:clamp(.85rem,1.5vw,1.15rem);
+  width:clamp(34px,3.2vw,46px);aspect-ratio:1;pointer-events:none;opacity:.14;
+  background:url('target-icon-white.png') no-repeat center/contain;
+  transition:opacity .45s var(--ease),transform .5s var(--ease)}
+.twall .tq:hover::before{opacity:.3;transform:scale(1.08)}
+.twall blockquote{position:relative;margin:0;font-family:var(--display);font-weight:400;
+  font-size:clamp(1rem,1.28vw,1.16rem);line-height:1.58;letter-spacing:-.008em;color:var(--ink)}
+/* pinned to the foot of the card, so the attributions line up across a row */
+.twall figcaption{margin-top:auto;padding-top:clamp(1.05rem,1.9vw,1.5rem);display:flex;align-items:center;
+  gap:.6rem;font-size:.7rem;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:var(--muted)}
+.twall figcaption::before{content:'';flex:none;width:18px;height:1px;background:var(--red)}
+.tgain{color:var(--red);font-weight:600;white-space:nowrap}
 
 /* programme panels: a centred mark in place of a photograph */
 
@@ -374,6 +402,31 @@ h1 .ln:nth-child(2){animation-delay:1.6s}
 .statbg{opacity:.1}
 #diagnostic{padding-top:clamp(6rem,11vw,10.5rem);padding-bottom:clamp(9rem,17vw,17rem)}
 #diagnostic .shell{max-width:none;padding-left:clamp(1.25rem,3vw,2.8rem);padding-right:clamp(1.25rem,3vw,2.8rem)}
+/* a hand-drawn double underline, struck under "free" once the section arrives */
+.uline{position:relative;display:inline-block;white-space:nowrap}
+.uline-svg{position:absolute;left:-3%;right:-3%;bottom:-.34em;width:106%;height:.42em;overflow:visible;
+  pointer-events:none}
+.uline-svg path{fill:none;stroke:var(--red-lift);stroke-width:3.4;stroke-linecap:round;
+  stroke-dasharray:var(--len,200);stroke-dashoffset:var(--len,200)}
+.capture.drawn .uline-svg .u1{animation:ulineDraw .62s var(--ease) .15s forwards}
+.capture.drawn .uline-svg .u2{animation:ulineDraw .58s var(--ease) .52s forwards}
+@keyframes ulineDraw{to{stroke-dashoffset:0}}
+@media(prefers-reduced-motion:reduce){
+  .uline-svg path{stroke-dashoffset:0;animation:none}
+}
+
+/* the section closes on the offer it has just spent itself arguing for */
+.statclose{position:relative;z-index:2;max-width:64ch;margin:clamp(2.6rem,5vw,4.4rem) auto 0;text-align:center}
+.statclose p{margin:0;font-size:clamp(.95rem,1.18vw,1.1rem);line-height:1.66;color:rgba(237,231,229,.74)}
+.statclose b{color:#fff;font-weight:600}
+.statcta{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:.9rem;
+  margin-top:clamp(1.5rem,2.8vw,2.2rem)}
+.ctanote{font-size:.68rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(237,231,229,.42)}
+.statcta .btn{background:var(--red);color:#fff;border:1px solid var(--red);padding:1.15rem 2.5rem;
+  font-size:.78rem;letter-spacing:.13em;box-shadow:0 18px 44px -22px rgba(210,66,52,.85)}
+.statcta .btn:hover{background:var(--red-lift);border-color:var(--red-lift);transform:translateY(-2px)}
+.statcta .btn i{font-style:normal;transition:transform .3s var(--ease)}
+.statcta .btn:hover i{transform:translateX(4px)}
 .statfront{position:relative;z-index:2;display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);
   gap:clamp(1rem,2.4vw,2.6rem);align-items:center;max-width:1500px;margin-inline:auto}
 /* the block is centred on the page as a whole; the tab row stays at its
@@ -420,6 +473,11 @@ h1 .ln:nth-child(2){animation-delay:1.6s}
 .vt-axis{stroke:rgba(255,255,255,.22);stroke-width:1}
 .vt-dot{fill:var(--red-lift)}
 .vt-dot-2{fill:rgba(237,231,229,.42)}
+/* a mid-weight neutral rule and a hollow shape, so each instrument can be
+   drawn as its own kind of picture rather than another two-tone bar chart */
+.vt-rule{stroke:rgba(237,231,229,.38);stroke-width:2;stroke-linecap:round;fill:none}
+.vt-hollow{fill:none;stroke:rgba(237,231,229,.42);stroke-width:1.6}
+.vt-tick{stroke:rgba(255,255,255,.3);stroke-width:1.5;stroke-linecap:round}
 @media(prefers-reduced-motion:reduce){.vt-figs>*,.vt-caps>*,.vt-pill{transition:none}}
 
 /* ══ DIAGNOSTIC: scrollable gallery of the report's real charts ══ */
@@ -598,12 +656,30 @@ section{padding:clamp(3.6rem,7vw,6.2rem) 0;border-bottom:1px solid var(--line)}
   .pgcard--lead{transform:none}
   .pgcard--lead:hover,.pgcard--lead:focus-visible{transform:translateY(-6px)}
 }
-.pgcard{position:relative;display:block;overflow:hidden;border-radius:4px;background:var(--void);aspect-ratio:4/5;
+/* Backlight: a red halo cast behind the card, and a slow float. The bob uses
+   the `translate` property so it composes with the hover/lead `transform`
+   instead of fighting it. */
+@keyframes pgFloat{0%,100%{translate:0 0}50%{translate:0 -9px}}
+@keyframes pgGlow{0%,100%{opacity:.55}50%{opacity:1}}
+.pgcard{animation:pgFloat 6.5s ease-in-out infinite}
+.pg > .pgcard:nth-child(1){animation-delay:-.4s}
+.pg > .pgcard:nth-child(2){animation-delay:-2.6s}
+.pg > .pgcard:nth-child(3){animation-delay:-4.8s}
+.pgcard::after{content:'';position:absolute;inset:-14% -10% -18%;z-index:-1;pointer-events:none;
+  border-radius:50%;filter:blur(34px);animation:pgGlow 7s ease-in-out infinite;
+  background:radial-gradient(ellipse at 50% 60%,rgba(176,39,28,.42) 0%,rgba(176,39,28,.16) 45%,transparent 72%);
+  transition:opacity .5s var(--ease)}
+.pgcard:hover::after,.pgcard:focus-visible::after{opacity:1;
+  background:radial-gradient(ellipse at 50% 60%,rgba(210,66,52,.6) 0%,rgba(176,39,28,.24) 46%,transparent 74%)}
+.pgcard{position:relative;display:block;overflow:visible;border-radius:4px;background:var(--void);aspect-ratio:4/5;
   transition:transform .5s var(--spring),box-shadow .5s var(--ease)}
 .pgcard:hover,.pgcard:focus-visible{transform:translateY(-6px);box-shadow:0 30px 54px -30px rgba(17,17,17,.6);outline:none}
 /* every card carries a mark rather than a photograph */
+.pgcard{isolation:isolate}
+.pgcard > .pgglyph,.pgcard > .pgveil{border-radius:4px}
 .pgglyph{position:absolute;inset:0;z-index:0;display:flex;flex-direction:column;align-items:center;
-  justify-content:center;background:var(--void);overflow:hidden;text-align:center;padding:1.2rem}
+  justify-content:center;background:var(--void);overflow:hidden;text-align:center;padding:1.2rem;
+  border-radius:4px}
 .pgglyph::before{content:'';position:absolute;left:50%;top:50%;width:124%;aspect-ratio:1;transform:translate(-50%,-50%);
   border-radius:50%;background:radial-gradient(circle,rgba(176,39,28,.42) 0%,rgba(176,39,28,.12) 46%,transparent 70%);
   transition:transform .9s var(--ease)}
@@ -629,7 +705,8 @@ section{padding:clamp(3.6rem,7vw,6.2rem) 0;border-bottom:1px solid var(--line)}
 .pgart .sym{fill:var(--red-lift)}
 .pgveil{position:absolute;inset:0;z-index:1;
   background:linear-gradient(180deg,rgba(12,10,9,.08) 0%,rgba(12,10,9,.44) 50%,rgba(12,10,9,.94) 100%)}
-.pgbody{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:clamp(1.1rem,1.9vw,1.5rem);color:#fff}
+.pgbody{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:clamp(1.1rem,1.9vw,1.5rem);color:#fff;
+  border-radius:0 0 4px 4px;overflow:hidden}
 .pgk{display:block;font-size:.585rem;font-weight:600;letter-spacing:.19em;text-transform:uppercase;color:var(--red-lift)}
 .pgcard h3{font-family:var(--display);font-weight:700;font-size:clamp(1.12rem,1.5vw,1.34rem);line-height:1.18;
   margin:.4rem 0 0;color:#fff}
@@ -643,7 +720,10 @@ section{padding:clamp(3.6rem,7vw,6.2rem) 0;border-bottom:1px solid var(--line)}
   letter-spacing:.12em;text-transform:uppercase;color:#fff;transition:gap .25s var(--ease)}
 .pgcard:hover .pggo{gap:.72rem}
 @media(hover:none){.pgdrawer{grid-template-rows:1fr}}
-@media(prefers-reduced-motion:reduce){.pgcard,.pgmedia img,.pgdrawer,.pgglyph::before{transition:none}}
+@media(prefers-reduced-motion:reduce){
+  .pgcard,.pgmedia img,.pgdrawer,.pgglyph::before{transition:none}
+  .pgcard,.pgcard::after{animation:none}
+}
 
 /* ── METHOD ── */
 .method{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:3px;overflow:hidden}
@@ -705,7 +785,6 @@ table.dates b{color:var(--red);font-weight:600}
 .slide{grid-area:1/1;padding:clamp(2rem,4.2vw,3.4rem) clamp(1.6rem,4vw,3.4rem) clamp(1.4rem,2.6vw,2rem);display:flex;flex-direction:column;justify-content:center;opacity:0;transform:translateY(14px);pointer-events:none;transition:opacity .65s var(--ease),transform .65s var(--ease)}
 .slide.on{opacity:1;transform:none;pointer-events:auto}
 .slide blockquote{margin:0;font-family:var(--display);font-size:clamp(1.06rem,1.95vw,1.45rem);line-height:1.55;color:#F6F2F0;max-width:64ch}
-.tgain{color:var(--gold);font-weight:700;white-space:nowrap}
 .slide .attr{margin-top:1.6rem;display:flex;align-items:center;gap:.65rem;font-size:.78rem;color:rgba(237,231,229,.6);letter-spacing:.03em}
 .slide .attr::before{content:'\25C6';color:var(--red-lift);font-size:.72rem}
 
@@ -737,21 +816,72 @@ table.dates b{color:var(--red);font-weight:600}
   border-top:1px solid rgba(255,255,255,.08)}
 .capture::before{content:'';position:absolute;left:-14%;bottom:-38%;width:64vw;aspect-ratio:1;border-radius:50%;
   pointer-events:none;background:radial-gradient(circle,rgba(176,39,28,.24) 0%,rgba(176,39,28,.07) 44%,transparent 70%)}
-.capture .shell{position:relative;z-index:1;max-width:none;
-  padding:clamp(4.5rem,9vw,8rem) clamp(1.25rem,3vw,2.8rem);
-  display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.92fr);gap:clamp(2.4rem,6vw,6rem);align-items:center}
-@media(max-width:900px){.capture .shell{grid-template-columns:1fr;gap:2.4rem}}
+/* sized so the section and the footer land on one screen together. The
+   generic section padding is dropped — the shell carries it, and the
+   min-height does the rest. */
+.capture{min-height:calc(100svh - 64px);display:flex;align-items:center;padding:0}
+.capture .shell{position:relative;z-index:1;max-width:none;width:100%;
+  padding:clamp(.8rem,1.8vh,1.6rem) clamp(1.25rem,3vw,2.8rem)}
+/* on a short screen the type and the fields come down with it */
+@media(max-height:880px){
+  .capture h2{font-size:clamp(1.32rem,2.2vw,1.78rem)}
+  .capintro{margin-bottom:.8rem}
+  .capintro .lead{font-size:.86rem;margin-top:.55rem}
+  .capture .bookcard{padding:.95rem 1.1rem}
+  .capture .bookcard .ff{margin-bottom:.48rem}
+  .capture .bookcard .fi{padding:.5rem .7rem;font-size:.85rem}
+  .capture .bookcard .fsub{padding:.78rem}
+}
+@media(max-height:800px){
+  .capture .shell{padding-top:.5rem;padding-bottom:.5rem}
+  .capintro{margin-bottom:.55rem}
+  .capture h2{font-size:1.22rem}
+  .capintro .lead{font-size:.79rem;margin-top:.4rem;line-height:1.45}
+  .capture .bookcard{padding:.78rem .95rem}
+  .capture .bookcard .ff{margin-bottom:.36rem}
+  .capture .bookcard .fl{font-size:.57rem;margin-bottom:.18rem}
+  .capture .bookcard .fi{padding:.4rem .65rem;font-size:.82rem}
+  .capture .bookcard textarea.fi{height:46px}
+  .capture .bookcard .fradio label{padding:.38rem .28rem;font-size:.76rem}
+  .capture .bookcard .fsub{padding:.62rem;font-size:.7rem}
+  .capture .bookcard .fnote{margin-top:.32rem;font-size:.66rem}
+  .capphone{margin-top:.55rem;font-size:.72rem}
+}
+.capintro{max-width:46ch;margin:0 auto clamp(1rem,2.2vh,1.7rem);text-align:center}
 .capture h2{font-family:var(--display);font-weight:700;letter-spacing:-.022em;
-  font-size:clamp(1.9rem,4.2vw,3.4rem);line-height:1.08;color:#fff;margin-top:.75rem}
-.capsteps{margin-top:clamp(1.9rem,3.4vw,2.8rem);display:grid;gap:1.2rem;max-width:44ch}
-.capstep{display:grid;grid-template-columns:1.9rem 1fr;gap:1rem;align-items:start}
-.capstep i{font-family:var(--display);font-style:normal;font-weight:700;font-size:.95rem;color:var(--red-lift);
-  border-top:2px solid var(--red);padding-top:.4rem}
-.capstep b{display:block;font-size:.95rem;font-weight:600;color:#fff;letter-spacing:-.005em}
-.capstep span{display:block;margin-top:.22rem;font-size:.85rem;line-height:1.55;color:rgba(237,231,229,.62)}
+  font-size:clamp(1.5rem,2.7vw,2.2rem);line-height:1.12;color:#fff;margin-top:.55rem}
+.capintro .lead{margin-top:.7rem;font-size:clamp(.88rem,1.02vw,.97rem);line-height:1.55;
+  color:rgba(237,231,229,.7)}
+.capdate{margin:clamp(.7rem,1.4vh,1.1rem) auto 0;font-size:.79rem;line-height:1.5;color:rgba(237,231,229,.62)}
+.capdate .cdk{font-size:.6rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--red-lift);
+  margin-right:.45rem}
+.capdate b{color:#fff;font-weight:600}
+.capdate a{margin-left:.5rem;color:rgba(237,231,229,.8);border-bottom:1px solid rgba(255,255,255,.25);
+  padding-bottom:1px;transition:color .25s var(--ease),border-color .25s var(--ease)}
+.capdate a:hover{color:#fff;border-bottom-color:#fff}
+.capphone{margin:clamp(.8rem,1.6vh,1.2rem) auto 0;text-align:center;font-size:.76rem;
+  letter-spacing:.06em;color:rgba(237,231,229,.5)}
+.capphone a{margin-left:.5rem;font-family:var(--display);font-weight:700;font-size:1.06rem;
+  letter-spacing:-.01em;color:#fff;transition:color .25s var(--ease)}
+.capphone a:hover{color:var(--red-lift)}
 /* the form, as glass on the black rather than a white card */
-.capture .bookcard{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.13);border-radius:6px;
-  padding:clamp(1.4rem,2.6vw,2.15rem);backdrop-filter:blur(6px)}
+.capture .bookcard{max-width:600px;margin:0 auto;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.13);border-radius:6px;
+  padding:clamp(1.05rem,1.9vw,1.55rem);backdrop-filter:blur(6px)}
+.capture .bookcard .ff{margin-bottom:.6rem}
+.capture .bookcard .frow{gap:.6rem}
+.capture .bookcard .frow-3{grid-template-columns:1.3fr minmax(0,1fr) minmax(0,1fr)}
+.capture .bookcard .frow-3 > .ff{min-width:0}
+.capture .bookcard .frow-3 .fi{font-size:.8rem;padding-left:.6rem;padding-right:.4rem}
+@media(max-width:560px){.capture .bookcard .frow-3{grid-template-columns:1fr}}
+.capture .bookcard .fl{font-size:.63rem;margin-bottom:.26rem}
+.capture .bookcard .fi{padding:.6rem .78rem;font-size:.88rem}
+.capture .bookcard textarea.fi{min-height:0}
+.capture .bookcard .fradio{gap:.35rem}
+.capture .bookcard .fradio label{min-width:0;padding:.42rem .3rem;font-size:.78rem;white-space:nowrap;gap:.35rem}
+.capture .bookcard .frow .ff{display:flex;flex-direction:column;justify-content:flex-end}
+.capture .bookcard .fradio label{padding:.55rem .5rem;font-size:.83rem}
+.capture .bookcard .fnote{margin-top:.5rem;font-size:.7rem}
 .capture .bookcard .fl{color:rgba(237,231,229,.6)}
 .capture .bookcard .fi{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.17);color:#fff}
 .capture .bookcard .fi::placeholder{color:rgba(237,231,229,.34)}
@@ -761,10 +891,9 @@ table.dates b{color:var(--red);font-weight:600}
 .capture .bookcard select.fi option{color:#111;background:#fff}
 .capture .bookcard .fradio label{border-color:rgba(255,255,255,.17);color:#EDE7E5}
 .capture .bookcard .fradio label:hover{border-color:rgba(255,255,255,.55);background:rgba(255,255,255,.05)}
-.capture .bookcard .fsub{padding:1.08rem;font-size:.78rem;letter-spacing:.13em;border-radius:3px}
+.capture .bookcard .fsub{padding:.88rem;font-size:.74rem;letter-spacing:.13em;border-radius:3px;margin-top:.2rem}
 .capture .bookcard .fsub:hover{background:var(--red-lift)}
 .capture .bookcard .fnote{color:rgba(237,231,229,.5)}
-.capture .capside .phonebox{margin-top:clamp(1.8rem,3vw,2.4rem)}
 @media(max-width:900px){.capture .shell{grid-template-columns:1fr}}
 .capture .lbl{color:rgba(237,231,229,.5)!important}
 .capture .lbl::before{color:var(--red-lift)}
@@ -815,6 +944,10 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
   .tickertrack,.repbars i,.newsbar .dot,.statbg-track{animation:none!important}
   .js.anim .rv{opacity:1!important;transform:none!important;filter:none!important}
 }
+
+/* the sweep is white by default; on pale buttons it has to be dark to show */
+.btn-b::after,.pcbtn::after,.ttbtn::after,.faqbtn.btn-b::after{
+  background:linear-gradient(90deg,transparent 0%,rgba(17,17,17,.13) 50%,transparent 100%)}
 </style>
 </head>
 <body>
@@ -832,7 +965,7 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
     <p class="modal-sub">Families who spent four years hearing &ldquo;test-optional&rdquo; now have a score to plan for, and junior year is the window to do it in.</p>
     <div class="modal-acts">
       <a class="btn btn-a shimmer" href="#start" data-close><span>Book the free diagnostic</span></a>
-      <button class="btn btn-b" data-close>Not right now</button>
+      <button class="btn btn-b shimmer" data-close><span>Not right now</span></button>
     </div>
   </div>
 </div>
@@ -872,19 +1005,19 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
     </div>
 
     <div class="trio">
-    <a class="tri" href="prep-course.html">
+    <a class="tri" href="prep-course-v2.html">
       <span class="tri-k">College entrance exams</span>
       <span class="tri-t">The SAT Program</span>
       <span class="tri-d">Twelve weeks, one instructor, guarantee in writing.</span>
       <span class="tri-go">Explore the program &rarr;</span>
     </a>
-    <a class="tri" href="math-program.html">
+    <a class="tri" href="math-program-v2.html">
       <span class="tri-k">Algebra 1 &rarr; Multivariable</span>
       <span class="tri-t">Mathematics</span>
       <span class="tri-d">Built around your student&rsquo;s actual course and textbook.</span>
       <span class="tri-go">Explore the program &rarr;</span>
     </a>
-    <a class="tri" href="applications.html">
+    <a class="tri" href="applications-v2.html">
       <span class="tri-k">College admissions</span>
       <span class="tri-t">Admissions Writing</span>
       <span class="tri-d">The personal statement and every supplemental.</span>
@@ -901,9 +1034,12 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
 <section class="videosec" id="results"><div class="wide">
   <div class="vstage">
     <div class="videoframe">
-      <img src="photo-2-web.jpg" alt="Luca Moretti teaching a one-on-one session">
+      <div class="vslides">
+        <img src="photo-2-web.jpg" alt="Luca Moretti teaching a one-on-one session">
+        <img src="photo-1-web.jpg" alt="Working through algebra on a tablet during a session">
+        <img src="photo-3-web.jpg" alt="Luca Moretti working through problems with a student">
+      </div>
       <div class="grad"></div>
-      <div class="playwrap"><div class="playbtn"><svg width="19" height="23" viewBox="0 0 20 24" fill="#fff" aria-hidden="true"><path d="M0 0l20 12L0 24z"/></svg></div></div>
       <div class="videocap">
         <div class="who">Luca Moretti &middot; Founder</div>
         <div class="what">Elite one-on-one preparation for the most selective universities in the country.</div>
@@ -943,35 +1079,48 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
     </div>
     <div class="statfront">
       <div class="shead rv">
-        <div class="lbl">The analysis</div>
-        <h2>Guesswork is the most expensive tutoring there is.</h2>
-        <p>Northwestern statistics, top of the class in three years, pointed at one student at a time. Instinct says a student is &ldquo;weak in algebra.&rdquo; The instruments say which twenty questions are costing the points, which order to take them in, and how much confidence that claim has actually earned. Your family opens the same charts in the portal, updated as the work happens.</p>
+        <div class="lbl">The diagnostic</div>
+        <h2>Every tutoring company runs a diagnostic. Almost all of them stop at the number.</h2>
+        <p>A number can&rsquo;t see that your child knew the material and simply ran out of clock. It can&rsquo;t see that four of those right answers were lucky guesses. It can&rsquo;t see that the same student, on a different Saturday, scores forty points higher for no reason at all. Two students can hand in the same 1180 and need opposite things. All of that is measurable &mdash; it just takes more work than printing a score and naming a weak topic. Your report measures it: every question timed, every finding weighed against how much of it could be luck. So when it does point at something, that thing is real.</p>
       </div>
   <div class="vt" id="vizTour">
-    <div class="vt-tabs" role="tablist" aria-label="Kinds of analysis behind a plan">
+    <div class="vt-tabs" role="tablist" aria-label="What’s behind the plan">
       <span class="vt-pill" aria-hidden="true"></span>
-      <button class="vt-tab" type="button" role="tab" aria-selected="true" aria-controls="vtc0" id="vtt0">Confidence bands</button>
-      <button class="vt-tab" type="button" role="tab" aria-selected="false" aria-controls="vtc1" id="vtt1" tabindex="-1">Point attribution</button>
-      <button class="vt-tab" type="button" role="tab" aria-selected="false" aria-controls="vtc2" id="vtt2" tabindex="-1">Error taxonomy</button>
-      <button class="vt-tab" type="button" role="tab" aria-selected="false" aria-controls="vtc4" id="vtt4" tabindex="-1">Trend over sittings</button>
+      <button class="vt-tab" type="button" role="tab" aria-selected="true" aria-controls="vtc0" id="vtt0">How sure we are</button>
+      <button class="vt-tab" type="button" role="tab" aria-selected="false" aria-controls="vtc1" id="vtt1" tabindex="-1">Luck or a real gap</button>
+      <button class="vt-tab" type="button" role="tab" aria-selected="false" aria-controls="vtc2" id="vtt2" tabindex="-1">Three kinds of mistake</button>
+      <button class="vt-tab" type="button" role="tab" aria-selected="false" aria-controls="vtc3" id="vtt3" tabindex="-1">Where the points are</button>
+      <button class="vt-tab" type="button" role="tab" aria-selected="false" aria-controls="vtc4" id="vtt4" tabindex="-1">Real progress</button>
     </div>
 
     <div class="vt-body">
       <div class="vt-figs" aria-hidden="true">
-        <div class="vt-fig on"><svg viewBox="0 0 200 120" role="img"><path class="vt-band" d="M8 84 C60 74 96 50 192 26 L192 56 C96 78 60 96 8 102 Z"/><path class="vt-mark" d="M8 93 C60 85 96 64 192 41"/><circle class="vt-dot" cx="8" cy="93" r="3.5"/><circle class="vt-dot" cx="100" cy="72" r="3.5"/><circle class="vt-dot" cx="192" cy="41" r="3.5"/></svg></div>
-        <div class="vt-fig"><svg viewBox="0 0 200 120" role="img"><rect class="vt-bar" x="6" y="78" width="30" height="36"/><rect class="vt-bar-2" x="46" y="62" width="30" height="16"/><rect class="vt-bar" x="46" y="78" width="30" height="36"/><rect class="vt-bar-2" x="86" y="44" width="30" height="18"/><rect class="vt-bar" x="86" y="62" width="30" height="52"/><rect class="vt-bar-2" x="126" y="30" width="30" height="14"/><rect class="vt-bar" x="126" y="44" width="30" height="70"/><rect class="vt-bar" x="166" y="30" width="30" height="84"/><path class="vt-mark" d="M6 74 L196 26" stroke-dasharray="4 5" stroke-width="1.5"/></svg></div>
-        <div class="vt-fig"><svg viewBox="0 0 200 120" role="img"><rect class="vt-bar" x="6" y="18" width="104" height="20" rx="2"/><rect class="vt-bar-2" x="114" y="18" width="80" height="20" rx="2"/><rect class="vt-bar" x="6" y="52" width="62" height="20" rx="2"/><rect class="vt-bar-2" x="72" y="52" width="122" height="20" rx="2"/><rect class="vt-bar" x="6" y="86" width="138" height="20" rx="2"/><rect class="vt-bar-2" x="148" y="86" width="46" height="20" rx="2"/></svg></div>
-        <div class="vt-fig"><svg viewBox="0 0 200 120" role="img"><path class="vt-band" d="M8 96 C64 88 120 60 192 24 L192 52 C120 84 64 100 8 108 Z"/><path class="vt-mark" d="M8 102 C64 94 120 72 192 38"/><circle class="vt-dot" cx="8" cy="102" r="4"/><circle class="vt-dot" cx="70" cy="92" r="4"/><circle class="vt-dot" cx="132" cy="66" r="4"/><circle class="vt-dot" cx="192" cy="38" r="4"/></svg></div>
+        <div class="vt-fig on"><svg viewBox="0 0 200 120" role="img"><line class="vt-axis" x1="12" y1="92" x2="188" y2="92"/><line class="vt-tick" x1="12" y1="88" x2="12" y2="98"/><line class="vt-tick" x1="188" y1="88" x2="188" y2="98"/><line class="vt-mark" x1="21" y1="59" x2="135" y2="59" stroke-width="2.5"/><line class="vt-mark" x1="21" y1="43" x2="21" y2="75" stroke-width="2.5"/><line class="vt-mark" x1="135" y1="43" x2="135" y2="75" stroke-width="2.5"/><circle class="vt-dot" cx="56" cy="59" r="7"/><circle cx="56" cy="59" r="11" class="vt-hollow"/></svg></div>
+        <div class="vt-fig"><svg viewBox="0 0 200 120" role="img"><line class="vt-mark" x1="8" y1="65" x2="192" y2="65" stroke-dasharray="5 5" stroke-width="1.5"/><line class="vt-axis" x1="28" y1="20" x2="28" y2="50"/><circle class="vt-dot-2" cx="28" cy="20" r="3.4"/><circle class="vt-dot" cx="28" cy="50" r="4.2"/><line class="vt-axis" x1="64" y1="100" x2="64" y2="78"/><circle class="vt-dot-2" cx="64" cy="100" r="3.4"/><circle class="vt-dot" cx="64" cy="78" r="4.2"/><line class="vt-axis" x1="100" y1="32" x2="100" y2="54"/><circle class="vt-dot-2" cx="100" cy="32" r="3.4"/><circle class="vt-dot" cx="100" cy="54" r="4.2"/><line class="vt-axis" x1="136" y1="108" x2="136" y2="80"/><circle class="vt-dot-2" cx="136" cy="108" r="3.4"/><circle class="vt-dot" cx="136" cy="80" r="4.2"/><line class="vt-axis" x1="172" y1="44" x2="172" y2="58"/><circle class="vt-dot-2" cx="172" cy="44" r="3.4"/><circle class="vt-dot" cx="172" cy="58" r="4.2"/></svg></div>
+        <div class="vt-fig"><svg viewBox="0 0 200 120" role="img"><rect class="vt-bar" x="10" y="46" width="80" height="30" rx="3"/><rect class="vt-bar-2" x="94" y="46" width="58" height="30" rx="3"/><rect class="vt-hollow" x="156" y="46" width="34" height="30" rx="3" stroke-dasharray="4 3"/><line class="vt-tick" x1="50" y1="84" x2="50" y2="92"/><line class="vt-tick" x1="123" y1="84" x2="123" y2="92"/><line class="vt-tick" x1="173" y1="84" x2="173" y2="92"/></svg></div>
+        <div class="vt-fig"><svg viewBox="0 0 200 120" role="img"><rect class="vt-bar" x="14" y="36" width="26" height="74" rx="2"/><rect class="vt-bar-2" x="52" y="54" width="26" height="56" rx="2"/><rect class="vt-bar-2" x="90" y="68" width="26" height="42" rx="2"/><rect class="vt-bar-2" x="128" y="81" width="26" height="29" rx="2"/><rect class="vt-bar-2" x="166" y="91" width="26" height="19" rx="2"/><path class="vt-mark" d="M21 26 L27 18 L33 26" stroke-width="2.4"/><line class="vt-axis" x1="8" y1="110" x2="192" y2="110"/></svg></div>
+        <div class="vt-fig"><svg viewBox="0 0 200 120" role="img"><rect class="vt-band" x="8" y="46" width="184" height="40" rx="4"/><line class="vt-axis" x1="8" y1="66" x2="192" y2="66" stroke-dasharray="4 4"/><line class="vt-rule" x1="58" y1="80" x2="58" y2="54"/><circle class="vt-dot-2" cx="58" cy="80" r="4"/><circle class="vt-dot-2" cx="58" cy="54" r="4"/><line class="vt-mark" x1="140" y1="80" x2="140" y2="20"/><circle class="vt-dot" cx="140" cy="80" r="4.5"/><circle class="vt-dot" cx="140" cy="20" r="5.5"/></svg></div>
       </div>
 
       <div class="vt-caps">
-        <div class="vt-cap on" id="vtc0" role="tabpanel" aria-labelledby="vtt0"><h3>A score is a range, not a point.</h3><p>Every estimate carries the interval it actually sits in. It is the difference between &ldquo;you gained forty points&rdquo; and &ldquo;you gained four, and four is noise&rdquo; &mdash; and it decides whether we change the plan or hold it.</p></div>
-        <div class="vt-cap" id="vtc1" role="tabpanel" aria-labelledby="vtt1" hidden><h3>Every point, attributed to a skill.</h3><p>A waterfall from today&rsquo;s score to the target, each step charged to the skill that produces it. Week one starts at the tallest bar rather than at whatever comes first in a textbook.</p></div>
-        <div class="vt-cap" id="vtc2" role="tabpanel" aria-labelledby="vtt2" hidden><h3>A wrong answer is not one thing.</h3><p>Each miss is sorted by what caused it &mdash; content never learned, a question misread, or time that ran out. Re-teaching a skill will not fix a clock problem, so the three are never treated alike.</p></div>
-        <div class="vt-cap" id="vtc4" role="tabpanel" aria-labelledby="vtt4" hidden><h3>Improvement has to clear the noise.</h3><p>Every sitting on one axis, with the trend and the uncertainty around it. A rise only counts as progress once it is larger than the variation we would expect from the same student on a different morning.</p></div>
+        <div class="vt-cap on" id="vtc0" role="tabpanel" aria-labelledby="vtt0"><h3>Four questions can&rsquo;t give you a percentage.</h3><p>Your child answers four questions on one topic and gets three wrong. Most reports print 25% and move on. But four questions is barely better than a coin toss &mdash; the true number could be anywhere from 5% to 70%. That range has a name, a Wilson interval, and all it does is state honestly how much four questions can tell you. We print that range beside every area we name. Narrow means we know; wide means we do not. And nothing gets named at all unless the range clears your child&rsquo;s own average &mdash; which is why an honest report sometimes names nothing.</p></div>
+        <div class="vt-cap" id="vtc1" role="tabpanel" aria-labelledby="vtt1" hidden><h3>The worst-looking topic is usually bad luck.</h3><p>There are eight topics on the SAT. Look at eight small samples and one of them will always look alarming &mdash; that is chance, not your child. So before anything is ranked, every topic is pulled back toward your child&rsquo;s own average, hardest where there is least evidence. It has to still look bad afterwards before we will name it.</p></div>
+        <div class="vt-cap" id="vtc2" role="tabpanel" aria-labelledby="vtt2" hidden><h3>A right answer can still be a problem.</h3><p>Mistakes are not all the same thing. Some questions your child genuinely did not know. Some they got right &mdash; but it took three times longer than it should have, and that time came straight out of the questions at the end. Some they never really reached. Each one needs a different week of work, so the report counts them separately and shows you every question in each pile.</p></div>
+        <div class="vt-cap" id="vtc3" role="tabpanel" aria-labelledby="vtt3" hidden><h3>We start where the points are.</h3><p>The topic with the worst percentage is usually the smallest corner of the test. Algebra is about twice the size of geometry on every SAT, so the same five mistakes are worth twice as much there &mdash; and algebra can be taught from scratch in a way circle theorems cannot. So we rank by what the points are worth and how teachable they are. A hard question never counts as easy just because its topic usually is.</p></div>
+        <div class="vt-cap" id="vtc4" role="tabpanel" aria-labelledby="vtt4" hidden><h3>A gain has to beat a good morning.</h3><p>The same student, on two different days, having learned nothing in between, can score sixty points apart. So under sixty points your portal says <em>steady</em> &mdash; and still shows you the number it refused to call progress. Over sixty, the gain is real. That is the one number everybody else rounds in their own favour.</p></div>
       </div>
     </div>
   </div>
+
+    </div>
+
+    <div class="statclose rv">
+      <p>You get all of it from a <b>free diagnostic</b> &mdash; one timed sitting &mdash; and the report is yours whether or not we ever work together. If we do, those same charts stay open in your portal as the work happens.</p>
+    </div>
+
+    <div class="statcta rv">
+      <a class="btn shimmer" href="#start"><span><span>Take your FREE diagnostic</span><i>&rarr;</i></span></a>
+      <span class="ctanote">No card. No call required.</span>
     </div>
   </div>
 </div></section>
@@ -979,10 +1128,11 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
 <section id="programs"><div class="shell">
   <div class="shead rv">
     <div class="lbl">What we teach</div>
+    <h2>Three programs. One instructor. One standard.</h2>
   </div>
   <div class="pg">
 
-    <a class="pgcard rv" href="math-program.html">
+    <a class="pgcard rv" href="math-program-v2.html">
       <span class="pgglyph" aria-hidden="true">
         <span class="pgart"><svg viewBox="0 0 240 190" role="img" aria-hidden="true">
             <g class="grid"><path d="M20 30h200M20 70h200M20 110h200M20 150h200"/><path d="M60 18v146M100 18v146M140 18v146M180 18v146"/></g>
@@ -999,14 +1149,14 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
         <span class="pgk">Mathematics</span>
         <h3>The Math Mastery Program</h3>
         <div class="pgdrawer"><div>
-          <p>Not homework help. A diagnostic-driven curriculum built around your student&rsquo;s actual course and textbook, with support between sessions and a guarantee tied to the grade.</p>
+          <p>Not homework help. A diagnostic-driven curriculum built around your student&rsquo;s actual course and textbook, with support between sessions and a written report at the end of every cycle.</p>
           <span class="pgcov">Algebra 1 &middot; Geometry &middot; Algebra 2 &middot; Precalculus &middot; AP Calculus AB &amp; BC &middot; AP Statistics &middot; Multivariable &middot; IB Mathematics</span>
           <span class="pggo">Explore the program &rarr;</span>
         </div></div>
       </div>
     </a>
 
-    <a class="pgcard pgcard--lead rv d1" href="prep-course.html">
+    <a class="pgcard pgcard--lead rv d1" href="prep-course-v2.html">
       <span class="pgglyph" aria-hidden="true"><b>SAT<sup>&reg;</sup></b><span class="pgsub">the digital test</span></span>
       <span class="pgveil" aria-hidden="true"></span>
       <div class="pgbody">
@@ -1020,7 +1170,7 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
       </div>
     </a>
 
-    <a class="pgcard rv d2" href="applications.html">
+    <a class="pgcard rv d2" href="applications-v2.html">
       <span class="pgglyph" aria-hidden="true">
         <span class="pgart"><svg viewBox="0 0 240 190" role="img" aria-hidden="true">
             <rect class="page" x="46" y="12" width="150" height="164" rx="4" transform="rotate(-4 121 94)" opacity=".5"/>
@@ -1045,39 +1195,35 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
     </a>
 
   </div>
-</div></section>
 
-
-
-<section id="testimonials" class="tsec"><div class="wide">
-  <div class="shead rv">
-    <div class="lbl">Testimonials</div>
-    <h2>In their words.</h2>
-  </div>
-
-  <div class="tdeck rv" id="tdeck" role="group" aria-label="What families say">
-    <figure class="tcard">
+  <div class="proofstrip" id="testimonials">
+    <div class="lbl rv">Testimonials</div>
+  <div class="twall rv">
+    <figure class="tq">
       <blockquote>My daughter has gone from a <span class="tgain">C</span> to an <span class="tgain">A</span> grade student in math. I truly can&rsquo;t say enough praise for Luca. He is calm, sensitive, and able to customize his tutoring to achieve the needed learning. My daughter now feels confident in math and proud of her accomplishments.</blockquote>
       <figcaption>Patti M., parent</figcaption>
     </figure>
-    <figure class="tcard">
+    <figure class="tq">
       <blockquote>She improved her SAT Math score by approximately <span class="tgain">200 points</span>, exceeding our expectations. One of Luca&rsquo;s greatest strengths is his ability to quickly identify a student&rsquo;s knowledge gaps and develop a structured, personalized lesson plan. He was always professional, punctual, and prepared for every session.</blockquote>
       <figcaption>Michele C., parent</figcaption>
     </figure>
-    <figure class="tcard">
+    <figure class="tq">
       <blockquote>They went into test day feeling confident and <span class="tgain">scored a 1520</span>! Luca&rsquo;s tutoring was incredibly engaging and completely transformed how my child approached studying. I cannot recommend it enough to any parent looking to help their child succeed.</blockquote>
       <figcaption>Jessie C., parent</figcaption>
     </figure>
-    <figure class="tcard">
+    <figure class="tq">
       <blockquote>If anyone can help you tolerate math and actually master the skill, it&rsquo;s Luca! He took the time to break down the underlying concepts, never moving on until he was certain I fully understood. Thanks to Luca, I went from a student who was barely passing with a <span class="tgain">D</span> to someone who actually enjoys math.</blockquote>
       <figcaption>A student</figcaption>
     </figure>
   </div>
 
-  <div class="tdots" id="tdots" role="tablist" aria-label="Choose a review"></div>
-
-  <p class="rv d2" style="margin-top:clamp(1.6rem,3vw,2.4rem);font-size:.86rem"><a href="testimonials.html" class="morelink">Read every review &rarr;</a></p>
+  <p class="rv d2" style="margin-top:clamp(1.2rem,2.4vw,1.9rem);font-size:.86rem"><a href="testimonials-v2.html" class="morelink">Read every review &rarr;</a></p>
+  </div>
 </div></section>
+
+
+
+
 
 <section id="instructor"><div class="shell">
   <div class="instr">
@@ -1103,42 +1249,13 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
   </div>
 </div></section>
 
-<section id="timing"><div class="shell">
-  <div class="shead rv">
-    <div class="lbl">Timing</div>
-    <h2>Work backward from the test date.</h2>
-    <p>The SAT program runs twelve weeks. Most families miss the date they wanted because they were still deciding on the one before it.</p>
-  </div>
-  <div class="scroller rv d1">
-    <table class="dates">
-      <thead><tr><th>Test date</th><th>Register by</th><th>Start prep by</th><th></th></tr></thead>
-      <tbody>
-        <tr class="soon"><td class="dt">December 5, 2026</td><td>November 20</td><td><b>This month</b></td><td class="st">Open now</td></tr>
-        <tr><td class="dt">March 6, 2027</td><td>February 19</td><td>Mid-December</td><td class="st">Spring junior sitting</td></tr>
-        <tr><td class="dt">May 1, 2027</td><td>April 16</td><td>Early February</td><td class="st">Spring junior sitting</td></tr>
-        <tr><td class="dt">June 5, 2027</td><td>May 21</td><td>Mid-March</td><td class="st">Last before senior year</td></tr>
-      </tbody>
-    </table>
-  </div>
-  <p style="margin-top:1.2rem;font-size:.84rem"><a href="test-dates.html" style="color:var(--ink);border-bottom:1px solid var(--line);padding-bottom:2px">See every upcoming test date &rarr;</a></p>
-</div></section>
 
 <section id="start" class="capture"><div class="shell">
-  <div class="capside">
+  <div class="capintro">
     <div class="lbl rv" style="color:rgba(237,231,229,.55)">Reserve your seat</div>
-    <h2 class="rv d1">Start with the diagnostic. Decide after you have seen it.</h2>
-    <p class="lead rv d2">A strategy call within 24 hours, then a full-length diagnostic at no charge. You will have the report &mdash; and the plan that comes out of it &mdash; before anyone asks you for a decision.</p>
-
-    <div class="capsteps rv d2">
-      <div class="capstep"><i>01</i><div><b>You send this form</b><span>Two minutes, and no payment details at any point.</span></div></div>
-      <div class="capstep"><i>02</i><div><b>We talk within 24 hours</b><span>With me, not a coordinator, and about your student specifically.</span></div></div>
-      <div class="capstep"><i>03</i><div><b>The diagnostic, free</b><span>A real timed test, and the written plan it produces. Then you decide.</span></div></div>
-    </div>
-
-    <a class="phonebox rv d3" href="tel:2012752791">
-      <span class="pl">Prefer to talk now?</span>
-      <span class="pn">(201) 275-2791</span>
-    </a>
+    <h2 class="rv d1">Start with the <span class="uline">free<svg class="uline-svg" viewBox="0 0 120 22" preserveAspectRatio="none" aria-hidden="true"><path class="u1" d="M3 9.5C22 5.6 47 4.4 70 5.2c17 .6 33 2 46 3.4"/><path class="u2" d="M6 16.4C26 12.8 52 11.6 76 12.2c15 .4 29 1.5 39 2.7"/></svg></span> diagnostic.</h2>
+    <p class="lead rv d2">A call within 24 hours, then a full-length timed test at no charge &mdash; and the report is yours either way.</p>
+    <p class="capdate rv d2"><span class="cdk">Next sitting</span> December 5 &mdash; to be ready, prep starts <b>this month</b>. <a href="test-dates-v2.html">All dates &rarr;</a></p>
   </div>
 
   <div class="bookcard rv d2">
@@ -1152,31 +1269,33 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
         <div class="ff"><label class="fl" for="rf-phone">Phone</label><input class="fi" type="tel" id="rf-phone" name="phone" placeholder="e.g. (201) 555-0100" required></div>
         <div class="ff"><label class="fl" for="rf-email">Email</label><input class="fi" type="email" id="rf-email" name="email" required></div>
       </div>
-      <div class="ff">
-        <span class="fl">You are a</span>
-        <div class="fradio">
-          <label><input type="radio" name="role" value="Parent" required> Parent</label>
-          <label><input type="radio" name="role" value="Student"> Student</label>
+      <div class="frow frow-3">
+        <div class="ff">
+          <span class="fl">You are a</span>
+          <div class="fradio">
+            <label><input type="radio" name="role" value="Parent" required> Parent</label>
+            <label><input type="radio" name="role" value="Student"> Student</label>
+          </div>
         </div>
-      </div>
-      <div class="frow">
         <div class="ff"><label class="fl" for="rf-grade">Grade</label>
           <select class="fi" id="rf-grade" name="grade" required>
-            <option value="">Select a grade</option><option value="9th or below">9th or below</option><option value="10th">10th</option><option value="11th">11th</option><option value="12th">12th</option>
+            <option value="">Grade&hellip;</option><option value="9th or below">9th or below</option><option value="10th">10th</option><option value="11th">11th</option><option value="12th">12th</option>
           </select></div>
-        <div class="ff"><label class="fl" for="rf-topic">Help needed with</label>
+        <div class="ff"><label class="fl" for="rf-topic">Help with</label>
           <select class="fi" id="rf-topic" name="topic" required>
-            <option value="">Select a topic</option><option value="SAT Prep">SAT Prep</option><option value="Mathematics">Mathematics</option><option value="College Admissions &amp; Essays">College Admissions &amp; Essays</option><option value="Something else / Not sure yet">Something else / Not sure yet</option>
+            <option value="">Topic&hellip;</option><option value="SAT Prep">SAT prep</option><option value="Mathematics">Mathematics</option><option value="College Admissions &amp; Essays">Admissions</option><option value="Something else / Not sure yet">Not sure yet</option>
           </select></div>
       </div>
       <div class="ff"><label class="fl" for="rf-message">Anything we should know <em>&mdash; optional</em></label>
-        <textarea class="fi" id="rf-message" name="message" rows="3" placeholder="Current scores, goals, timeline&hellip;"></textarea></div>
-      <button type="submit" class="fsub" id="rf-submit">Reserve My Seat</button>
-      <p class="fnote" id="rf-note">We&rsquo;ll get back to you within 24 hours.</p>
+        <textarea class="fi" id="rf-message" name="message" rows="2" placeholder="Current scores, goals, timeline&hellip;"></textarea></div>
+      <button type="submit" class="fsub shimmer" id="rf-submit"><span>Reserve My Seat</span></button>
+      <p class="fnote" id="rf-note">We&rsquo;ll get back to you within 24 hours. Pricing is set per program and we go through it on that call &mdash; the diagnostic itself costs nothing either way.</p>
       <p id="rf-success" class="fmsg ok">Thanks &mdash; check your email for confirmation. We&rsquo;ll follow up personally within 24 hours.</p>
       <p id="rf-error" class="fmsg err">Something went wrong. Please call (201) 275-2791 directly.</p>
     </form>
   </div>
+
+  <p class="capphone rv d3">Prefer to talk now?<a href="tel:2012752791">(201) 275-2791</a></p>
 </div></section>
 
 <footer><div class="shell">
@@ -1184,7 +1303,7 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
     <p>Moretti Test Prep &amp; Tutoring, located in Cranford NJ</p>
     <a href="tel:2012752791" class="footer-phone">(201) 275-2791</a>
     <div class="footer-links">
-      <a href="test-dates.html">Test Dates</a><a href="testimonials.html">Results</a><a href="portal/index.html">Student Login</a><a href="terms.html">Terms</a><a href="privacy.html">Privacy</a>
+      <a href="test-dates-v2.html">Test Dates</a><a href="testimonials-v2.html">Results</a><a href="portal/index.html">Student Login</a><a href="terms.html">Terms</a><a href="privacy.html">Privacy</a>
     </div>
   </div>
   <div class="footer-right">
@@ -1313,6 +1432,24 @@ mtaSafe(function(){
   addEventListener('resize',function(){ clearTimeout(t); t=setTimeout(fit,120); },{passive:true});
 });
 
+/* ── the double underline under "free": drawn when the section is reached ── */
+mtaSafe(function(){
+  var sec=document.querySelector('.capture'), wrap=document.querySelector('.uline');
+  if(!sec||!wrap) return;
+  /* dash length has to match each path, or the stroke starts part-drawn */
+  [].forEach.call(wrap.querySelectorAll('path'),function(p){
+    var len=p.getTotalLength();
+    p.style.setProperty('--len', len);
+    p.style.strokeDasharray=len;
+    p.style.strokeDashoffset=len;
+  });
+  if(!('IntersectionObserver' in window)){ sec.classList.add('drawn'); return; }
+  var io=new IntersectionObserver(function(en){
+    en.forEach(function(x){ if(x.isIntersecting){ sec.classList.add('drawn'); io.disconnect(); } });
+  },{threshold:.25});
+  io.observe(sec);
+});
+
 /* ── the panels take turns opening on their own, until the cursor takes over.
       Starts a second after the last one has finished arriving. ── */
 mtaSafe(function(){
@@ -1340,41 +1477,6 @@ mtaSafe(function(){
 });
 
 
-
-/* ── the testimonial deck: the top card is read, the pile advances behind it ── */
-mtaSafe(function(){
-  var deck=document.getElementById('tdeck'), dots=document.getElementById('tdots');
-  if(!deck) return;
-  var cards=[].slice.call(deck.querySelectorAll('.tcard'));
-  if(cards.length<2) return;
-  var i=0, held=false, timer=0,
-      reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  function paint(prev){
-    cards.forEach(function(c,k){
-      var off=(k-i+cards.length)%cards.length;
-      // the card just left sails up and out rather than dropping to the back
-      if(k===prev && off!==0) c.setAttribute('data-pos','out');
-      else c.setAttribute('data-pos', off>3?'3':String(off));
-      c.setAttribute('aria-hidden', off===0?'false':'true');
-    });
-    if(dots) [].forEach.call(dots.children,function(b,k){ b.setAttribute('aria-current',k===i?'true':'false'); });
-  }
-  function go(n){ var prev=i; i=(n+cards.length)%cards.length; paint(prev); }
-  if(dots){
-    cards.forEach(function(c,k){
-      var b=document.createElement('button');
-      b.type='button'; b.setAttribute('aria-label','Review '+(k+1)+' of '+cards.length);
-      b.addEventListener('click',function(e){ e.stopPropagation(); go(k); });
-      dots.appendChild(b);
-    });
-  }
-  paint(-1);
-  deck.addEventListener('click',function(){ go(i+1); });
-  deck.addEventListener('pointerenter',function(){ held=true; },{passive:true});
-  deck.addEventListener('pointerleave',function(){ held=false; },{passive:true});
-  function tick(){ if(!held && !document.hidden) go(i+1); timer=setTimeout(tick,6500); }
-  if(!reduce) timer=setTimeout(tick,6500);
-});
 
 /* ── the instruments tour: sliding pill, blurred cross-fade, self-advancing
       until a click or a hover puts someone else in charge ── */
@@ -1757,10 +1859,30 @@ mtaSafe(function(){
     requestAnimationFrame(step);
   }
   if(!('IntersectionObserver' in window)){ cells.forEach(run); return; }
+  /* A ratio of 0.6 was only detected if a sampling frame happened to land
+     inside it — scroll past quickly and the numbers stayed on zero for good.
+     Lower bar to trigger, plus a scroll sweep so nothing can be missed. */
   var io=new IntersectionObserver(function(en){
-    en.forEach(function(x){ if(x.isIntersecting && x.intersectionRatio>=0.6){ run(x.target); io.unobserve(x.target); } });
-  },{threshold:[0,0.6,1]});
+    en.forEach(function(x){ if(x.isIntersecting && x.intersectionRatio>=0.2){ run(x.target); io.unobserve(x.target); } });
+  },{threshold:[0,.2,.6,1],rootMargin:'0px 0px -8% 0px'});
   cells.forEach(function(c){ io.observe(c); });
+
+  function sweep(){
+    var h=window.innerHeight||document.documentElement.clientHeight||0;
+    cells.forEach(function(c){
+      if(c.dataset.done) return;
+      var r=c.getBoundingClientRect();
+      if(r.bottom>0 && r.top<h) run(c);        // on screen now
+      else if(r.bottom<=0) run(c);             // already scrolled past
+    });
+  }
+  var pending=false;
+  addEventListener('scroll',function(){
+    if(pending) return; pending=true;
+    requestAnimationFrame(function(){ pending=false; sweep(); });
+  },{passive:true});
+  addEventListener('resize',sweep,{passive:true});
+  window.addEventListener('load',sweep);
 });
 
 mtaSafe(function(){

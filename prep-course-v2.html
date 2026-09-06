@@ -59,16 +59,45 @@ p{margin:0}
 .newsbar a:hover{border-bottom-color:#fff}
 
 /* ── NAV ── */
-nav{background:rgba(12,10,9,.92);backdrop-filter:saturate(160%) blur(12px);border-bottom:1px solid rgba(255,255,255,.08);position:sticky;top:0;z-index:60}
-nav .shell{display:flex;align-items:center;gap:2rem;padding-top:.9rem;padding-bottom:.9rem}
-.nav-logo img{height:38px;width:auto;transition:opacity .2s}
+/* Base is solid black so the bar is legible even if the script never runs.
+   .at-top makes it flush with the hero; .is-red is the scrolled state. */
+nav{background:var(--void);border-bottom:1px solid rgba(255,255,255,.07);position:fixed;top:0;left:0;right:0;z-index:60;
+  transition:background .55s var(--ease),border-color .55s var(--ease)}
+/* the bar overlays the hero, so the hero clears it with padding rather than a spacer */
+
+nav.at-top{background:transparent;border-bottom-color:transparent}
+nav.is-red{background:var(--red);border-bottom-color:rgba(255,255,255,.16)}
+nav.is-red .navlinks a:hover{color:#fff}
+nav.is-red .navlinks a::after{background:#fff}
+nav.is-red .navcta{border-color:rgba(255,255,255,.6)}
+nav.is-red .navcta:hover{background:#fff;border-color:#fff;color:var(--red)}
+nav .shell{max-width:none;display:flex;align-items:center;gap:1.9rem;padding:.85rem clamp(1.25rem,3vw,2.8rem)}
+.nav-logo img{height:50px;width:auto;transition:opacity .2s}
 .nav-logo:hover img{opacity:.82}
-@media(max-width:560px){.nav-logo img{height:30px}}
-.navlinks{margin-left:auto;display:flex;gap:1.7rem;align-items:center;font-size:.8rem;color:rgba(237,231,229,.7)}
+@media(max-width:560px){.nav-logo img{height:38px}}
+.navlinks{display:flex;gap:1.9rem;align-items:center;margin-left:.7rem;font-size:.84rem;color:rgba(237,231,229,.72)}
+.navlogin{margin-left:auto;font-size:.84rem;color:rgba(237,231,229,.72);position:relative;padding-bottom:2px;transition:color .2s}
+.navlogin:hover{color:#fff}
+.navlogin::after{content:'';position:absolute;left:0;right:0;bottom:-2px;height:1px;background:var(--red-lift);transform:scaleX(0);transform-origin:right;transition:transform .42s var(--ease)}
+.navlogin:hover::after{transform:scaleX(1);transform-origin:left}
+nav.is-red .navlogin::after{background:#fff}
 .navlinks a{transition:color .2s}.navlinks a:hover{color:#fff}
-.navlinks .navcta{background:var(--red);color:#fff;padding:.6rem 1.2rem;font-size:.68rem;font-weight:600;letter-spacing:.11em;text-transform:uppercase;border-radius:2px;transition:background .22s var(--ease)}
-.navlinks .navcta:hover{background:#fff;color:var(--void)}
-@media(max-width:900px){.navlinks a:not(.navcta){display:none}}
+.navcta{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.34);padding:.6rem 1.2rem;font-size:.68rem;font-weight:600;letter-spacing:.11em;text-transform:uppercase;border-radius:2px;transition:background .28s var(--ease),border-color .28s var(--ease),color .28s var(--ease)}
+.navcta:hover{background:var(--red);border-color:var(--red);color:#fff}
+/* sliding underline on the nav links (fluid-tab technique, no JS) */
+.navlinks a{position:relative;padding-bottom:2px}
+.navlinks a::after{content:'';position:absolute;left:0;right:0;bottom:-2px;height:1px;background:var(--red-lift);transform:scaleX(0);transform-origin:right;transition:transform .42s var(--ease)}
+.navlinks a:hover::after{transform:scaleX(1);transform-origin:left}
+@media(max-width:820px){.navlinks,.navlogin{display:none}}
+
+/* ── shimmer button ── */
+.shimmer{position:relative;overflow:hidden;isolation:isolate}
+.shimmer>span{position:relative;z-index:2}
+.shimmer::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;transform:translateX(-100%);
+  background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.30) 50%,transparent 100%);
+  transition:transform .7s var(--ease)}
+.shimmer:hover::after,.shimmer:focus-visible::after{transform:translateX(100%)}
+@media(prefers-reduced-motion:reduce){.shimmer::after{display:none}}
 
 /* ── HERO ── */
 .hero .shell{display:grid;grid-template-columns:1.04fr .96fr;gap:clamp(2rem,5vw,4.2rem);padding-top:clamp(2.6rem,5.5vw,4.6rem);padding-bottom:clamp(2.4rem,5vw,4rem);align-items:center}
@@ -142,7 +171,6 @@ section{padding:clamp(3.6rem,7vw,6.2rem) 0;border-bottom:1px solid var(--line)}
 .reading .num{font-family:Georgia,'Times New Roman',serif;font-style:italic;font-weight:700;color:var(--red);font-size:1.02rem}
 .reading h3{font-size:.9rem;font-weight:600;margin-bottom:.16rem}
 .reading p{font-size:.845rem}
-
 
 /* interactive score explorer */
 .slider-row{display:flex;align-items:center;gap:1rem;margin-top:1.4rem;padding-top:1.15rem;border-top:1px solid var(--hair)}
@@ -246,21 +274,22 @@ table.dates b{color:var(--red);font-weight:600}
 .formnote{font-size:.71rem;color:rgba(237,231,229,.42);text-align:center}
 
 footer{background:var(--void);color:rgba(237,231,229,.48);font-size:.79rem;border-top:1px solid rgba(255,255,255,.08)}
-footer .shell{display:flex;justify-content:space-between;gap:2rem;flex-wrap:wrap;padding-top:2.3rem;padding-bottom:2.3rem}
+footer .shell{max-width:none;display:flex;align-items:center;justify-content:space-between;gap:1.6rem;flex-wrap:wrap;
+  padding:1.15rem clamp(1.25rem,3vw,2.8rem)}
 footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#fff}
-.footer-phone{display:inline-block;font-style:italic;font-family:Georgia,'Times New Roman',serif;font-size:1.12rem;color:#fff!important;margin:.45rem 0 .65rem}
-.footer-links a{margin-right:1rem;font-size:.75rem}
-.footer-right{text-align:right}@media(max-width:640px){.footer-right{text-align:left}}
-.footer-serving-hed{font-size:.585rem;font-weight:600;letter-spacing:.21em;text-transform:uppercase;color:rgba(237,231,229,.38)}
-.footer-towns{margin-top:.45rem;line-height:1.7;font-size:.77rem}
-.footer-linkedin{display:inline-block;margin-top:.85rem;color:rgba(237,231,229,.55)}
+.footer-phone{display:inline-block;font-style:italic;font-family:Georgia,'Times New Roman',serif;font-size:1rem;color:#fff!important;margin:0 0 0 .5rem}
+.footer-links a{margin-right:.95rem;font-size:.73rem}
+.footer-links a:last-child{margin-right:0}
+.footer-id{display:flex;align-items:center;flex-wrap:wrap;gap:.15rem .6rem}
+.footer-id p{margin:0}
+.footer-right{display:flex;align-items:center}
+.footer-linkedin{display:inline-block;margin:0;color:rgba(237,231,229,.55)}
 
 @media (prefers-reduced-motion:reduce){
   *{transition:none!important;scroll-behavior:auto!important}
   .tickertrack,.repbars i,.newsbar .dot{animation:none!important}
   .js .rv{opacity:1!important;transform:none!important;filter:none!important}
 }
-
 
 /* ── HOW IT WORKS: what varies vs what never does ── */
 .split{display:grid;grid-template-columns:1fr 1fr;gap:clamp(1rem,2.4vw,1.8rem);align-items:start}
@@ -315,201 +344,649 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
 .gband h2{font-family:var(--display);color:#fff;font-size:clamp(1.55rem,3.1vw,2.35rem);margin:.75rem auto .9rem;max-width:20ch;line-height:1.16}
 .gband p{color:rgba(237,231,229,.72);font-size:.95rem;max-width:60ch;margin:0 auto}
 
+/* ── the instructor, stated the same way on every programme page ── */
+.iband{background:#000;color:#EDE7E5}
+.iband .shell{padding-top:clamp(3.4rem,6vw,5rem);padding-bottom:clamp(3.4rem,6vw,5rem)}
+.iband .lbl{color:rgba(237,231,229,.5)}
+.iband .lbl::before{color:var(--red-lift)}
+.iwrap{display:grid;grid-template-columns:.34fr 1.66fr;gap:clamp(1.6rem,3.6vw,3rem);align-items:center}
+@media(max-width:760px){.iwrap{grid-template-columns:1fr}}
+.iwrap .pic{position:relative;aspect-ratio:1;overflow:hidden;border-radius:4px;background:var(--void);max-width:260px}
+.iwrap .pic img{width:100%;height:100%;object-fit:cover;object-position:center top;
+  transform:scale(1.5) translate(15%,10%);transform-origin:center;filter:grayscale(.12) contrast(1.04)}
+.iband h2{font-family:var(--display);font-weight:700;font-size:clamp(1.4rem,2.5vw,1.95rem);line-height:1.16;
+  letter-spacing:-.018em;color:#fff;margin-top:.6rem}
+.iband p{margin-top:.9rem;font-size:.95rem;line-height:1.66;color:rgba(237,231,229,.72);max-width:60ch}
+.creds{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:1.4rem}
+.creds span{font-size:.685rem;letter-spacing:.02em;border:1px solid rgba(255,255,255,.2);padding:.44rem .82rem;
+  border-radius:99px;color:rgba(237,231,229,.7);transition:border-color .22s,color .22s,background .22s}
+.creds span:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.45);color:#fff}
+
+/* ── the other two programmes, so no page is a dead end ── */
+.alsoband{background:var(--sunk)}
+.alsoband .shell{padding-top:clamp(2.8rem,5vw,4rem);padding-bottom:clamp(2.8rem,5vw,4rem)}
+.also{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(.9rem,1.8vw,1.4rem);
+  margin-top:clamp(1.1rem,2.2vw,1.7rem)}
+@media(max-width:700px){.also{grid-template-columns:1fr}}
+.alsocard{display:block;background:var(--surface);border:1px solid var(--line);border-radius:6px;
+  padding:clamp(1.1rem,2vw,1.5rem);transition:border-color .3s var(--ease),transform .4s var(--ease),box-shadow .4s var(--ease)}
+.alsocard:hover{border-color:rgba(17,17,17,.24);transform:translateY(-4px);box-shadow:0 22px 40px -28px rgba(17,17,17,.45)}
+.alsocard .k{font-size:.6rem;font-weight:600;letter-spacing:.19em;text-transform:uppercase;color:var(--red)}
+.alsocard h3{font-family:var(--display);font-weight:700;font-size:1.2rem;margin:.4rem 0 .35rem;letter-spacing:-.012em}
+.alsocard p{font-size:.87rem;line-height:1.55;color:var(--body)}
+.alsocard .go{display:inline-block;margin-top:.75rem;font-size:.68rem;font-weight:600;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink)}
+.alsocard:hover .go{color:var(--red)}
+
+/* the fixed bar overlays the hero, so the hero clears it (last, so it wins) */
+nav,nav.at-top,nav.is-red{background:var(--red)}
+nav{border-bottom:1px solid rgba(255,255,255,.18)}
+nav.at-top{border-bottom-color:transparent}
+nav .navlinks a:hover,nav .navlogin:hover{color:#fff}
+nav .navlinks a::after,nav .navlogin::after{background:#fff}
+nav .navcta{border-color:rgba(255,255,255,.6)}
+nav .navcta:hover{background:#fff;border-color:#fff;color:var(--red)}
+.hero .shell,.phero .shell{padding-top:calc(clamp(2.6rem,5.5vw,4.6rem) + 82px)}
+
+/* ══ FEATURE TOUR: what the programme includes, stepped through on arrival ══ */
+.ft-card{position:relative;width:100%;max-width:410px;margin-inline:auto;background:var(--surface);
+  border:1px solid var(--line);border-radius:28px;box-shadow:0 24px 56px -34px rgba(17,17,17,.5);
+  padding:clamp(1.5rem,2.5vw,2.1rem);display:flex;flex-direction:column;align-items:center;overflow:hidden}
+.ft-head{font-size:.6rem;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}
+.ft-stage{position:relative;display:grid;place-items:center;min-height:120px;margin-top:.9rem;width:100%}
+.ft-iconbg{position:absolute;width:92px;height:92px;border-radius:26px;background:var(--sunk);
+  box-shadow:inset 0 2px 8px rgba(17,17,17,.07)}
+.ft-icons{display:grid;place-items:center}
+.ft-icons > span{grid-area:1 / 1;display:grid;place-items:center;color:var(--red);opacity:0;
+  transform:scale(.92) translateY(8px);filter:blur(3px);
+  transition:opacity .3s var(--ease),transform .3s var(--ease),filter .3s var(--ease)}
+.ft-icons > span.on{opacity:1;transform:none;filter:none}
+.ft-texts{display:grid;width:100%;margin-top:clamp(1.3rem,2.2vw,1.8rem);text-align:center}
+.ft-texts > div{grid-area:1 / 1;opacity:0;transform:translateY(16px);pointer-events:none;
+  transition:opacity .3s var(--ease),transform .3s var(--ease)}
+.ft-texts > div.on{opacity:1;transform:none;pointer-events:auto}
+.ft-texts h3{font-family:var(--display);font-weight:700;letter-spacing:-.015em;color:var(--ink);
+  font-size:clamp(1.12rem,1.55vw,1.36rem);line-height:1.2}
+.ft-texts p{margin-top:.6rem;font-size:clamp(.88rem,1.02vw,.96rem);line-height:1.55;color:var(--body)}
+.ft-dots{display:flex;gap:.6rem;margin-top:clamp(1.3rem,2.2vw,1.8rem)}
+.ft-dots button{width:11px;height:11px;padding:0;border:none;border-radius:50%;cursor:pointer;
+  background:rgba(17,17,17,.16);transition:background .35s var(--ease),transform .35s var(--spring)}
+.ft-dots button[aria-selected="true"]{background:var(--red);transform:scale(1.25)}
+.ft-dots button:hover{background:rgba(17,17,17,.38)}
+@media(prefers-reduced-motion:reduce){
+  .ft-icons > span,.ft-texts > div,.ft-dots button{transition:none}
+}
+
+/* ── the close ── */
+.pcta{background:var(--red);color:#fff;text-align:center;border-bottom:none}
+.pcta .shell{padding-top:clamp(3.6rem,7vw,6rem);padding-bottom:clamp(3.6rem,7vw,6rem)}
+.pcta h2{font-family:var(--display);font-weight:700;color:#fff;letter-spacing:-.022em;
+  font-size:clamp(1.7rem,3.5vw,2.7rem);line-height:1.14}
+.pcta p{margin:1rem auto 0;max-width:54ch;font-size:clamp(.95rem,1.15vw,1.06rem);line-height:1.6;
+  color:rgba(255,255,255,.85)}
+.pcbtn{margin-top:clamp(1.7rem,3.2vw,2.5rem);background:#fff;color:var(--red);border:1px solid #fff;
+  border-radius:0;padding:1.15rem 2.7rem;font-size:.76rem;letter-spacing:.15em}
+.pcbtn:hover{background:rgba(255,255,255,.88);color:var(--red);transform:translateY(-2px)}
+
+/* ══ FAQ: two columns of disclosures, one open at a time ══ */
+.faqsec{background:var(--sunk);border-bottom:none}
+.faqhead{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:1.4rem;
+  margin-bottom:clamp(1.8rem,3.4vw,2.6rem)}
+.faqhead .in{max-width:44ch}
+.faqbadge{display:inline-flex;align-items:center;border:1px solid rgba(176,39,28,.28);background:rgba(176,39,28,.08);
+  color:var(--red);border-radius:99px;padding:.34rem .85rem;font-size:.63rem;font-weight:600;
+  letter-spacing:.16em;text-transform:uppercase;margin-bottom:.9rem}
+.faqhead h2{font-family:var(--display);font-weight:700;letter-spacing:-.018em;line-height:1.12;
+  font-size:clamp(1.6rem,3.1vw,2.4rem)}
+.faqhead p{margin-top:.9rem;font-size:.98rem;line-height:1.62}
+.faqbtn{flex:none;border-radius:99px;background:var(--red);color:#fff;border:1px solid var(--red);
+  padding:.95rem 1.9rem;font-size:.72rem;letter-spacing:.12em}
+.faqbtn:hover{background:var(--red-lift);border-color:var(--red-lift);transform:translateY(-2px)}
+.faqgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.55rem}
+@media(max-width:820px){.faqgrid{grid-template-columns:1fr}}
+.faqcol{display:flex;flex-direction:column;gap:.55rem}
+.faqitem{background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden;
+  transition:box-shadow .3s var(--ease),border-color .3s var(--ease),background .3s var(--ease)}
+.faqitem[open]{border-color:var(--red);box-shadow:0 0 0 1px var(--red);background:rgba(176,39,28,.04)}
+.faqitem summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;
+  gap:1rem;padding:1.15rem 1.4rem;font-size:.96rem;font-weight:500;color:var(--ink)}
+.faqitem summary::-webkit-details-marker{display:none}
+.faqitem summary:hover{color:var(--red)}
+.faqchev{flex:none;width:15px;height:15px;color:var(--muted);transform:rotate(180deg);
+  transition:transform .3s var(--ease),color .3s var(--ease)}
+.faqitem[open] .faqchev{transform:rotate(0deg);color:var(--red)}
+.faqitem .faqa{padding:0 1.4rem 1.3rem;font-size:.9rem;line-height:1.65;color:var(--body)}
+@media(prefers-reduced-motion:reduce){.faqchev,.faqitem{transition:none}}
+
+/* the sweep is white by default; on pale buttons it has to be dark to show */
+.btn-b::after,.pcbtn::after,.ttbtn::after,.faqbtn.btn-b::after{
+  background:linear-gradient(90deg,transparent 0%,rgba(17,17,17,.13) 50%,transparent 100%)}
+
+/* ══ SAT LANDING: one black stage — the promise, then the twelve weeks ══ */
+.satstage{background:#000;color:#EDE7E5;position:relative;overflow:hidden}
+.satstage::before{content:'';position:absolute;right:-16%;top:-40%;width:64vw;aspect-ratio:1;border-radius:50%;
+  pointer-events:none;background:radial-gradient(circle,rgba(176,39,28,.34) 0%,rgba(176,39,28,.09) 44%,transparent 70%)}
+.satstage > .shell{position:relative;z-index:1;
+  padding-top:calc(clamp(3.4rem,7vw,6rem) + 82px);padding-bottom:clamp(2.4rem,4.6vw,3.6rem)}
+.satstage .lbl{color:rgba(237,231,229,.55)}
+.satstage .lbl::before{color:var(--red-lift)}
+.satstage .lbl sup{font-size:.7em;vertical-align:super}
+.sat-h1{font-family:var(--display);font-weight:700;color:#fff;margin-top:1rem;
+  font-size:clamp(2.3rem,6vw,4.9rem);line-height:1.04;letter-spacing:-.036em}
+.sat-h1 .ln{display:block;animation:wipeIn 1.7s var(--ease) both}
+.sat-h1 .ln:nth-child(1){animation-delay:.2s}
+.sat-h1 .ln:nth-child(2){animation-delay:.72s}
+.sat-h1 em{font-style:normal;color:var(--red-lift)}
+@keyframes wipeIn{
+  0%{opacity:0;clip-path:inset(-.25em 100% -.25em 0);filter:blur(9px);transform:translateY(12px)}
+  55%{opacity:1}
+  100%{opacity:1;clip-path:inset(-.25em -.12em -.25em 0);filter:blur(0);transform:none}
+}
+.sat-lead{margin-top:1.5rem;max-width:60ch;font-size:clamp(.98rem,1.22vw,1.12rem);line-height:1.62;
+  color:rgba(237,231,229,.74);animation:satIn 1s var(--ease) 1.3s both}
+.sat-ctas{display:flex;flex-wrap:wrap;gap:.75rem;margin-top:2rem;animation:satIn 1s var(--ease) 1.5s both}
+@keyframes satIn{from{opacity:0;transform:translateY(14px);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
+.btn-red{background:var(--red);color:#fff;border:1px solid var(--red)}
+.btn-red:hover{background:var(--red-lift);border-color:var(--red-lift);transform:translateY(-2px)}
+
+/* the band: how long is left, and the twelve weeks themselves */
+.satband{position:relative;z-index:1;border-top:1px solid rgba(255,255,255,.14);
+  background:linear-gradient(180deg,rgba(255,255,255,.03),transparent)}
+.satband-in{display:grid;grid-template-columns:auto minmax(0,1fr);gap:clamp(1.6rem,4vw,4rem);align-items:center;
+  padding-top:clamp(1.6rem,3vw,2.4rem);padding-bottom:clamp(1.8rem,3.4vw,2.8rem)}
+@media(max-width:820px){.satband-in{grid-template-columns:1fr;gap:1.4rem}}
+.sb-count{display:flex;align-items:baseline;gap:.85rem;animation:satIn 1s var(--ease) 1.7s both}
+.sb-n{font-family:'Duera Expanded Black','Archivo Black',var(--display),sans-serif;font-weight:900;
+  font-size:clamp(3.4rem,8vw,7rem);line-height:.82;letter-spacing:-.02em;color:var(--red-lift)}
+.sb-l{font-size:.7rem;font-weight:600;letter-spacing:.17em;text-transform:uppercase;
+  color:rgba(237,231,229,.62);max-width:11ch;line-height:1.45}
+.wk-strip{display:grid;grid-template-columns:repeat(12,1fr);gap:5px}
+.wk-strip i{display:block;height:clamp(34px,4vw,58px);border-radius:3px;background:rgba(255,255,255,.08);
+  position:relative;overflow:hidden}
+.wk-strip i::after{content:'';position:absolute;inset:0;background:var(--red);transform:scaleY(0);
+  transform-origin:bottom;transition:transform .55s var(--ease)}
+.wk-strip i.on::after{transform:scaleY(1)}
+.wk-strip i b{position:relative;z-index:2;display:block;text-align:center;padding-top:.4rem;
+  font-size:.58rem;font-weight:600;letter-spacing:.06em;color:rgba(255,255,255,.8)}
+.wk-foot{display:flex;justify-content:space-between;gap:1rem;margin-top:.8rem;
+  font-size:.64rem;letter-spacing:.11em;text-transform:uppercase;color:rgba(237,231,229,.45)}
+@media(max-width:520px){.wk-foot{flex-direction:column;gap:.25rem}}
+@media(prefers-reduced-motion:reduce){
+  .sat-h1 .ln,.sat-lead,.sat-ctas,.sb-count{animation:none;opacity:1;clip-path:none;filter:none;transform:none}
+  .wk-strip i::after{transition:none}
+}
+
+/* the answers now carry a little structure of their own */
+.faqa b{color:var(--ink);font-weight:600}
+.faqa br{line-height:1.9}
+
+/* the red rule travels across the phase you are in */
+.ph::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--red);
+  transform:scaleX(0);transform-origin:left;transition:transform .7s var(--ease)}
+.ph.on::after{transform:scaleX(1)}
+.ph-n{font-family:'Duera Expanded Black','Archivo Black',var(--display),sans-serif;font-weight:900;
+  font-size:clamp(1.6rem,3.4vw,2.9rem);line-height:.9;color:rgba(237,231,229,.22);
+  transition:color .5s var(--ease),transform .5s var(--spring)}
+.ph.on .ph-n{color:var(--red-lift);transform:translateY(-2px)}
+.ph-main{display:block;min-width:0}
+.ph-name{display:block;font-family:var(--display);font-weight:700;letter-spacing:-.02em;line-height:1.1;
+  font-size:clamp(1.35rem,2.8vw,2.15rem);color:rgba(237,231,229,.62);transition:color .5s var(--ease)}
+.ph.on .ph-name,.ph:hover .ph-name{color:#fff}
+/* rows open on their own content height — nothing measured, nothing clipped */
+.ph-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .65s var(--ease)}
+.ph.on .ph-body{grid-template-rows:1fr}
+.ph-body > span{overflow:hidden;min-height:0}
+.ph-desc{display:block;margin-top:.85rem;max-width:62ch;font-size:clamp(.95rem,1.12vw,1.05rem);line-height:1.62;
+  color:rgba(237,231,229,.72);opacity:0;transform:translateY(8px);
+  transition:opacity .5s var(--ease) .1s,transform .5s var(--ease) .1s}
+.ph.on .ph-desc{opacity:1;transform:none}
+.ph-chips{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:1.05rem;opacity:0;transform:translateY(8px);
+  transition:opacity .5s var(--ease) .18s,transform .5s var(--ease) .18s}
+.ph.on .ph-chips{opacity:1;transform:none}
+.ph-chips span{font-size:.7rem;font-weight:600;letter-spacing:.03em;color:rgba(237,231,229,.8);
+  border:1px solid rgba(255,255,255,.22);border-radius:99px;padding:.42rem .85rem;white-space:nowrap}
+.ph.on .ph-chips span{border-color:rgba(210,66,52,.55);background:rgba(210,66,52,.1);color:#fff}
+@media(max-width:560px){
+  .ph{grid-template-columns:1fr;gap:.3rem}
+  .ph-chips span{white-space:normal}
+}
+@media(prefers-reduced-motion:reduce){
+  .ph,.ph::after,.ph-n,.ph-name,.ph-body,.ph-desc,.ph-chips{transition:none}
+}
+
+/* ══════ THE 12-WEEK SAT PROGRAM ══════
+   Five stages: the promise, what you get, the case, the questions, the ask.
+   Everything runs edge to edge, as the homepage does. ══════ */
+.satstage > .shell,.getsec .shell,.casesec .shell,.faqsec .shell,.pcta .shell{max-width:none;
+  padding-left:clamp(1.25rem,3vw,2.8rem);padding-right:clamp(1.25rem,3vw,2.8rem)}
+
+/* ── 1. the promise, at full scale ── */
+.satstage{background:#000;color:#EDE7E5;position:relative;overflow:hidden;border-bottom:none}
+.satstage::before{content:'';position:absolute;right:-14%;top:-38%;width:60vw;aspect-ratio:1;border-radius:50%;
+  pointer-events:none;background:radial-gradient(circle,rgba(176,39,28,.34) 0%,rgba(176,39,28,.09) 44%,transparent 70%)}
+.satstage > .shell{position:relative;z-index:1;
+  padding-top:calc(clamp(4rem,8vw,7rem) + 82px);padding-bottom:clamp(3.6rem,7vw,6rem)}
+.satstage .lbl{color:rgba(237,231,229,.55)}
+.satstage .lbl::before{color:var(--red-lift)}
+.satstage .lbl sup{font-size:.7em;vertical-align:super}
+.sat-h1{font-family:var(--display);font-weight:700;color:#fff;margin-top:1.1rem;
+  font-size:clamp(2.5rem,7vw,6rem);line-height:1.02;letter-spacing:-.038em;max-width:16ch}
+.sat-h1 .ln{display:block;animation:wipeIn 1.8s var(--ease) both}
+.sat-h1 .ln:nth-child(1){animation-delay:.2s}
+.sat-h1 .ln:nth-child(2){animation-delay:.78s}
+.sat-h1 em{font-style:normal;color:var(--red-lift)}
+@keyframes wipeIn{
+  0%{opacity:0;clip-path:inset(-.25em 100% -.25em 0);filter:blur(9px);transform:translateY(12px)}
+  55%{opacity:1}
+  100%{opacity:1;clip-path:inset(-.25em -.12em -.25em 0);filter:blur(0);transform:none}
+}
+.sat-lead{margin-top:1.6rem;max-width:64ch;font-size:clamp(.98rem,1.18vw,1.1rem);line-height:1.66;
+  color:rgba(237,231,229,.74);animation:satIn 1s var(--ease) 1.5s both}
+.sat-ctas{display:flex;flex-wrap:wrap;gap:.75rem;margin-top:2rem;animation:satIn 1s var(--ease) 1.7s both}
+.sat-count{margin-top:1.5rem;animation:satIn 1s var(--ease) 1.9s both}
+.sat-count .lbl{color:rgba(237,231,229,.62)}
+.sat-count #wkdays{color:var(--red-lift);font-weight:700}
+@keyframes satIn{from{opacity:0;transform:translateY(14px);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
+.btn-red{background:var(--red);color:#fff;border:1px solid var(--red)}
+.btn-red:hover{background:var(--red-lift);border-color:var(--red-lift);transform:translateY(-2px)}
+
+/* ── 2. what you get: the six, beside the four that produce them ── */
+.getsec{background:var(--sunk);border-bottom:none}
+.get-head{max-width:56ch;margin-bottom:clamp(1.8rem,3.4vw,2.8rem)}
+.get-head h2{font-family:var(--display);font-weight:700;letter-spacing:-.022em;line-height:1.12;
+  font-size:clamp(1.6rem,3.2vw,2.5rem);margin-top:.8rem}
+.get-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:clamp(1rem,2vw,1.6rem);
+  align-items:stretch}
+@media(max-width:940px){.get-grid{grid-template-columns:1fr}}
+.get-col{background:var(--surface);border:1px solid var(--line);border-radius:14px;
+  padding:clamp(1.5rem,2.8vw,2.3rem)}
+.get-col--dark{background:#000;color:#EDE7E5;border-color:#000}
+.get-k{font-size:.6rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--red);
+  margin-bottom:clamp(1.1rem,2vw,1.6rem)}
+.get-col--dark .get-k{color:var(--red-lift)}
+.featlist{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:clamp(1rem,2vw,1.5rem)}
+@media(max-width:620px){.featlist{grid-template-columns:1fr}}
+.featlist li{display:grid;grid-template-columns:26px 1fr;gap:.2rem .8rem;align-items:start}
+.featlist svg{grid-row:1 / span 2;width:24px;height:24px;fill:none;stroke:var(--red);stroke-width:2.2;
+  stroke-linecap:round;stroke-linejoin:round}
+.featlist b{font-size:.95rem;font-weight:600;color:var(--ink);line-height:1.3}
+.featlist span{font-size:.83rem;line-height:1.5;color:var(--body)}
+.phaselist{list-style:none;margin:0;padding:0;display:grid;gap:1.05rem}
+.phaselist li{display:grid;grid-template-columns:2.1rem 1fr;gap:.15rem .8rem;align-items:baseline}
+.phaselist i{grid-row:1 / span 2;font-family:'Duera Expanded Black','Archivo Black',var(--display),sans-serif;
+  font-style:normal;font-weight:900;font-size:1.15rem;color:var(--red-lift);line-height:1}
+.phaselist b{font-family:var(--display);font-weight:700;font-size:1.02rem;color:#fff}
+.phaselist span{font-size:.83rem;line-height:1.52;color:rgba(237,231,229,.66)}
+.get-col--dark .wk-strip{display:grid;grid-template-columns:repeat(12,1fr);gap:3px;
+  margin-top:clamp(1.4rem,2.6vw,2rem)}
+.wk-strip i{display:block;height:26px;border-radius:2px;background:rgba(255,255,255,.09);
+  position:relative;overflow:hidden}
+.wk-strip i::after{content:'';position:absolute;inset:0;background:var(--red);transform:scaleY(0);
+  transform-origin:bottom;transition:transform .5s var(--ease)}
+.wk-strip i.on::after{transform:scaleY(1)}
+.wk-strip i b{position:relative;z-index:2;display:block;text-align:center;padding-top:.28rem;
+  font-size:.5rem;font-weight:600;color:rgba(255,255,255,.75)}
+.wk-foot{display:flex;justify-content:space-between;gap:1rem;margin-top:.7rem;
+  font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(237,231,229,.45)}
+
+/* ── 3. the case: three arguments, one section ── */
+.casesec{background:#000;color:#EDE7E5;border-bottom:none}
+.casesec .lbl{color:rgba(237,231,229,.5)}
+.casesec .lbl::before{color:var(--red-lift)}
+.case-head{max-width:56ch;margin-bottom:clamp(1.6rem,3vw,2.4rem)}
+.case-head h2{font-family:var(--display);font-weight:700;color:#fff;letter-spacing:-.022em;line-height:1.12;
+  font-size:clamp(1.6rem,3.2vw,2.5rem);margin-top:.8rem}
+.case-row{display:grid;grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr);gap:clamp(1.6rem,4vw,4rem);
+  align-items:center;padding:clamp(1.8rem,3.4vw,2.8rem) 0;border-top:1px solid rgba(255,255,255,.14)}
+@media(max-width:940px){.case-row{grid-template-columns:1fr;gap:1.6rem}}
+.case-copy h3{font-family:var(--display);font-weight:700;color:#fff;letter-spacing:-.015em;line-height:1.18;
+  font-size:clamp(1.2rem,2.1vw,1.65rem)}
+.case-copy p{margin-top:.85rem;font-size:.95rem;line-height:1.62;color:rgba(237,231,229,.7);max-width:46ch}
+.case-figs{display:grid;gap:clamp(1.2rem,2.4vw,2rem)}
+.case-figs.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.case-figs.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(max-width:700px){.case-figs.three,.case-figs.two{grid-template-columns:1fr}}
+.case-figs b{display:block;font-family:'Duera Expanded Black','Archivo Black',var(--display),sans-serif;
+  font-weight:900;font-size:clamp(2.1rem,4.4vw,3.6rem);line-height:.88;letter-spacing:-.03em;color:var(--red-lift)}
+.case-figs b i{font-style:normal;font-size:.42em;letter-spacing:0}
+.case-figs .down b{color:#fff}
+.case-figs span{display:block;margin-top:.7rem;font-size:.8rem;line-height:1.5;color:rgba(237,231,229,.6);
+  max-width:26ch}
+.case-row--split .split2{display:grid;grid-template-columns:1fr 1fr;border-radius:12px;overflow:hidden;
+  border:1px solid rgba(255,255,255,.16)}
+@media(max-width:760px){.case-row--split .split2{grid-template-columns:1fr}}
+.sp-a,.sp-b{padding:clamp(1.2rem,2.2vw,1.8rem)}
+.sp-a{background:rgba(255,255,255,.05)}
+.sp-b{background:rgba(176,39,28,.1)}
+.sp-k{font-size:.58rem;font-weight:600;letter-spacing:.19em;text-transform:uppercase;color:var(--red-lift);
+  margin-bottom:.9rem}
+.split2 ul{list-style:none;margin:0;padding:0;display:grid;gap:.6rem}
+.split2 li{position:relative;padding-left:1.35rem;font-size:.83rem;line-height:1.52;color:rgba(237,231,229,.7)}
+.split2 li b{color:#fff;font-weight:600}
+.sp-a li::before{content:'';position:absolute;left:0;top:.6em;height:2px;background:var(--red-lift);
+  border-radius:2px;width:10px;animation:spVary 5.5s ease-in-out infinite}
+.sp-a li:nth-child(2)::before{animation-delay:-1.1s}
+.sp-a li:nth-child(3)::before{animation-delay:-2.2s}
+.sp-a li:nth-child(4)::before{animation-delay:-3.3s}
+.sp-a li:nth-child(5)::before{animation-delay:-4.4s}
+@keyframes spVary{0%,100%{width:5px}50%{width:14px}}
+.sp-b li::before{content:'';position:absolute;left:1px;top:.34em;width:8px;height:4px;
+  border-left:2px solid var(--red-lift);border-bottom:2px solid var(--red-lift);transform:rotate(-45deg)}
+
+/* ── 5. the ask ── */
+.pcta{background:var(--red);color:#fff;text-align:center;border-bottom:none}
+.pcta .shell{padding-top:clamp(3.4rem,6.5vw,5.5rem);padding-bottom:clamp(3.4rem,6.5vw,5.5rem)}
+.pcta h2{font-family:var(--display);font-weight:700;color:#fff;letter-spacing:-.022em;
+  font-size:clamp(1.7rem,3.5vw,2.7rem);line-height:1.14}
+.pcta p{margin:1rem auto 0;max-width:54ch;font-size:clamp(.95rem,1.15vw,1.06rem);line-height:1.6;
+  color:rgba(255,255,255,.85)}
+.cta-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(1.2rem,2.6vw,2.4rem);
+  max-width:900px;margin:clamp(2rem,3.6vw,2.8rem) auto 0;text-align:left}
+@media(max-width:760px){.cta-steps{grid-template-columns:1fr}}
+.cta-steps > div{border-top:2px solid rgba(255,255,255,.5);padding-top:.85rem}
+.cta-steps i{font-family:var(--display);font-style:normal;font-weight:700;font-size:.8rem;
+  color:rgba(255,255,255,.7);letter-spacing:.14em}
+.cta-steps b{display:block;margin-top:.4rem;font-size:.95rem;font-weight:600;color:#fff}
+.cta-steps span{display:block;margin-top:.25rem;font-size:.85rem;line-height:1.5;color:rgba(255,255,255,.75)}
+.pcbtn{margin-top:clamp(1.8rem,3.2vw,2.6rem);background:#fff;color:var(--red);border:1px solid #fff;
+  border-radius:0;padding:1.15rem 2.7rem;font-size:.76rem;letter-spacing:.15em}
+.pcbtn:hover{background:rgba(255,255,255,.88);color:var(--red);transform:translateY(-2px)}
+@media(prefers-reduced-motion:reduce){
+  .sat-h1 .ln,.sat-lead,.sat-ctas,.sat-count{animation:none;opacity:1;clip-path:none;filter:none;transform:none}
+  .sp-a li::before{animation:none;width:10px}
+  .wk-strip i::after{transition:none}
+}
+
+/* ── the hero seal: the promise, stamped ── */
+.satstage > .shell{display:grid;grid-template-columns:minmax(0,1.12fr) minmax(0,.88fr);
+  gap:clamp(2rem,5vw,5rem);align-items:center}
+@media(max-width:1000px){.satstage > .shell{grid-template-columns:1fr}}
+.seal{position:relative;justify-self:center;width:clamp(230px,26vw,420px);aspect-ratio:1;
+  display:grid;place-items:center;animation:satIn 1.2s var(--ease) 1.9s both}
+.seal::before{content:'';position:absolute;inset:-14%;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,rgba(210,66,52,.32) 0%,rgba(176,39,28,.1) 46%,transparent 72%)}
+.seal-ring{position:absolute;inset:0;animation:sealSpin 34s linear infinite}
+.seal-ring text{font-family:var(--sans);font-size:8.4px;font-weight:600;letter-spacing:.34em;
+  text-transform:uppercase;fill:rgba(237,231,229,.72)}
+.seal-edge{position:absolute;inset:6%;border:1px solid rgba(255,255,255,.22);border-radius:50%}
+.seal-edge::after{content:'';position:absolute;inset:7%;border:1px solid rgba(210,66,52,.5);border-radius:50%}
+.seal-core{position:relative;width:42%;aspect-ratio:1;display:grid;place-items:center}
+.seal-core img{width:100%;height:auto;opacity:.95}
+.seal-tag{position:absolute;bottom:14%;left:50%;transform:translateX(-50%);white-space:nowrap;
+  font-size:.56rem;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--red-lift)}
+@keyframes sealSpin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.seal-ring{animation:none}.seal{animation:none;opacity:1}}
+
+/* ── the included card: steps through what the programme gives you ── */
+.ftour{justify-self:center;width:100%;max-width:440px;animation:satIn 1.1s var(--ease) 1.9s both}
+.ft-card{position:relative;background:var(--surface);border-radius:22px;
+  box-shadow:0 34px 70px -34px rgba(0,0,0,.9);padding:clamp(1.5rem,2.6vw,2.1rem);
+  display:flex;flex-direction:column;align-items:center;text-align:center}
+.ft-head{font-size:.6rem;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}
+.ft-stage{position:relative;display:grid;place-items:center;min-height:118px;margin-top:1rem;width:100%}
+.ft-iconbg{position:absolute;width:88px;height:88px;border-radius:24px;background:var(--sunk);
+  box-shadow:inset 0 2px 8px rgba(17,17,17,.07)}
+/* the plate is positioned, so the icons have to be lifted above it */
+.ft-icons{position:relative;z-index:1;display:grid;place-items:center}
+.ft-icons > span{grid-area:1 / 1;display:grid;place-items:center;color:var(--red);opacity:0;
+  transform:scale(.92) translateY(8px);filter:blur(3px);
+  transition:opacity .32s var(--ease),transform .32s var(--ease),filter .32s var(--ease)}
+.ft-icons > span.on{opacity:1;transform:none;filter:none}
+.ft-icons svg{width:40px;height:40px;fill:none;stroke:currentColor;stroke-width:2.2;
+  stroke-linecap:round;stroke-linejoin:round}
+.ft-texts{display:grid;width:100%;margin-top:1.3rem}
+.ft-texts > div{grid-area:1 / 1;opacity:0;transform:translateY(14px);pointer-events:none;
+  transition:opacity .32s var(--ease),transform .32s var(--ease)}
+.ft-texts > div.on{opacity:1;transform:none;pointer-events:auto}
+.ft-texts h3{font-family:var(--display);font-weight:700;letter-spacing:-.015em;color:var(--ink);
+  font-size:clamp(1.1rem,1.5vw,1.32rem);line-height:1.2}
+.ft-texts p{margin-top:.6rem;font-size:.9rem;line-height:1.55;color:var(--body);max-width:34ch;
+  margin-left:auto;margin-right:auto}
+.ft-dots{display:flex;gap:.55rem;margin-top:1.4rem}
+.ft-dots button{width:10px;height:10px;padding:0;border:none;border-radius:50%;cursor:pointer;
+  background:rgba(17,17,17,.16);transition:background .35s var(--ease),transform .35s var(--spring)}
+.ft-dots button[aria-selected="true"]{background:var(--red);transform:scale(1.3)}
+.ft-dots button:hover{background:rgba(17,17,17,.4)}
+@media(prefers-reduced-motion:reduce){.ft-icons > span,.ft-texts > div,.ft-dots button{transition:none}}
+
+.satstage > .shell{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);
+  gap:clamp(2rem,5vw,4.5rem);align-items:center}
+@media(max-width:1000px){.satstage > .shell{grid-template-columns:1fr;gap:2.4rem}}
+.sat-copy{min-width:0}
+
+/* ── the included card, at the scale the hero deserves ── */
+.satstage > .shell{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(2rem,4.5vw,4rem)}
+@media(max-width:1000px){.satstage > .shell{grid-template-columns:1fr}}
+.ftour{max-width:600px;width:100%}
+.ft-card{max-width:none;width:100%;border-radius:26px;padding:clamp(2rem,3.4vw,3rem);
+  box-shadow:0 42px 90px -40px rgba(0,0,0,.95)}
+.ft-head{font-size:.66rem;letter-spacing:.24em}
+.ft-stage{min-height:168px;margin-top:1.4rem}
+.ft-iconbg{width:124px;height:124px;border-radius:32px}
+.ft-icons svg{width:58px;height:58px;stroke-width:2}
+.ft-texts{margin-top:1.9rem}
+.ft-texts h3{font-size:clamp(1.35rem,1.95vw,1.75rem);line-height:1.16}
+.ft-texts p{margin-top:.85rem;font-size:clamp(.95rem,1.1vw,1.06rem);line-height:1.6;max-width:38ch}
+.ft-dots{margin-top:1.9rem;gap:.65rem}
+.ft-dots button{width:12px;height:12px}
+@media(max-width:1000px){.ftour{margin-inline:auto}}
+
+/* ── the card, larger again, with arrows either side of the dots ── */
+.ftour{max-width:none}
+.ft-card{padding:clamp(2.3rem,3.8vw,3.4rem);border-radius:30px}
+.ft-head{font-size:.7rem;letter-spacing:.26em}
+.ft-stage{min-height:196px;margin-top:1.6rem}
+.ft-iconbg{width:146px;height:146px;border-radius:38px}
+.ft-icons svg{width:68px;height:68px;stroke-width:1.9}
+.ft-texts{margin-top:2.1rem}
+.ft-texts h3{font-size:clamp(1.5rem,2.2vw,2rem);line-height:1.14}
+.ft-texts p{margin-top:1rem;font-size:clamp(1rem,1.18vw,1.14rem);line-height:1.6;max-width:36ch}
+.ft-nav{display:flex;align-items:center;justify-content:center;gap:clamp(.9rem,1.8vw,1.5rem);margin-top:2.2rem}
+.ft-dots{margin-top:0}
+.ft-arrow{width:42px;height:42px;flex:none;display:grid;place-items:center;padding:0;cursor:pointer;
+  border:1px solid var(--line);border-radius:50%;background:var(--surface);color:var(--ink);
+  transition:background .28s var(--ease),border-color .28s var(--ease),color .28s var(--ease),transform .28s var(--ease)}
+.ft-arrow svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2.2;
+  stroke-linecap:round;stroke-linejoin:round}
+.ft-arrow:hover{background:var(--red);border-color:var(--red);color:#fff;transform:translateY(-2px)}
+.ft-arrow:active{transform:translateY(0)}
+@media(prefers-reduced-motion:reduce){.ft-arrow{transition:none}}
+
+/* the split pairs its two halves wherever it appears, not only in one row */
+.split2{display:grid;grid-template-columns:1fr 1fr;border-radius:12px;overflow:hidden;
+  border:1px solid rgba(255,255,255,.16)}
+@media(max-width:760px){.split2{grid-template-columns:1fr}}
+/* do / don't: a tick for what we do, a cross for what we don't */
+.split2--dodont .sp-b{background:rgba(255,255,255,.04)}
+.split2--dodont .sp-a li::before{content:'';position:absolute;left:1px;top:.34em;width:8px;height:4px;
+  border-left:2px solid var(--red-lift);border-bottom:2px solid var(--red-lift);transform:rotate(-45deg);
+  background:none;animation:none;border-radius:0}
+.split2--dodont .sp-b li::before{content:'\00d7';position:absolute;left:0;top:-.05em;width:auto;height:auto;
+  border:none;transform:none;background:none;animation:none;
+  color:rgba(237,231,229,.55);font-size:1.05rem;line-height:1.4;font-weight:600}
+
+/* ── "Free." lands last, in gold, and keeps catching the light ── */
+.freeword{display:inline-block;
+  background:linear-gradient(100deg,#A8842A 0%,#C9A84C 30%,#F7EAB6 46%,#E8CE7A 54%,#C9A84C 70%,#A8842A 100%);
+  background-size:240% 100%;background-position:120% 0;
+  -webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;
+  animation:freeIn 1s var(--ease) 2.55s both, freeShine 5s var(--ease) 3.5s infinite}
+@keyframes freeIn{
+  from{opacity:0;transform:translateY(14px) scale(.94);filter:blur(10px)}
+  to{opacity:1;transform:none;filter:none}
+}
+@keyframes freeShine{0%{background-position:130% 0}60%,100%{background-position:-30% 0}}
+
+/* ── the split leads this row; the copy sits to its right ── */
+.case-row--flip{grid-template-columns:minmax(0,1.18fr) minmax(0,.82fr)}
+.case-row--flip .case-copy{order:2}
+.case-row--flip .split2{order:1}
+@media(max-width:940px){
+  .case-row--flip{grid-template-columns:1fr}
+  .case-row--flip .case-copy{order:1}
+  .case-row--flip .split2{order:2}
+}
+
+/* ── the scroll reveal: deeper blur, longer fade ── */
+.js .rv{opacity:0;transform:translateY(26px);filter:blur(11px)}
+.js .rv.in{opacity:1;transform:none;filter:none;
+  transition:opacity 1.15s var(--ease),transform 1.15s var(--ease),filter 1.15s var(--ease)}
+.js .rv.d1.in{transition-delay:.12s}
+.js .rv.d2.in{transition-delay:.24s}
+.js .rv.d3.in{transition-delay:.36s}
+@media(prefers-reduced-motion:reduce){
+  .freeword{animation:none;opacity:1;-webkit-text-fill-color:#C9A84C;color:#C9A84C}
+  .js .rv{opacity:1;transform:none;filter:none}
+}
 </style>
 </head>
 <body>
 
-<div class="newsbar"><div class="shell">
-  <span class="dot"></span>
-  <span><b>The SAT is required again.</b> 60+ colleges have reinstated a testing requirement for the class of 2027 — including six of the eight Ivies.</span>
-  <a href="#start">Book the free diagnostic&nbsp;&rarr;</a>
-</div></div>
-
 <nav><div class="shell">
   <a class="nav-logo" href="index-v2.html"><img src="logo-caladea-white.png" alt="Moretti Test Prep &amp; Tutoring"></a>
   <div class="navlinks">
-    <a href="#weeks">How It Works</a>
-    <a href="#included">What&rsquo;s Included</a>
-    <a href="#timing">Test Dates</a>
-    <a href="index-v2.html#programs">All Programs</a>
-    <a href="portal/index.html">Student Login</a>
-    <a class="navcta" href="#start">Free Diagnostic</a>
+    <a href="index-v2.html#diagnostic">Diagnostic</a>
+    <a href="index-v2.html#programs">Programs</a>
+    <a href="testimonials-v2.html">Results</a>
   </div>
+  <a class="navlogin" href="portal/index.html">Student Login</a>
+  <a class="navcta shimmer" href="index-v2.html#start"><span>Contact</span></a>
 </div></nav>
 
-<div class="phero"><div class="shell">
-  <div>
-    <div class="crumb rv"><a href="/">Home</a> &nbsp;/&nbsp; College Entrance Exams</div>
-    <div class="lbl rv" style="margin-top:.9rem">The 12-Week SAT Program</div>
-    <h1 class="rv d1">Twelve weeks, one instructor,<br><em>and a guarantee tied to the score.</em></h1>
-    <p class="sub rv d2">Every plan begins with a full-length diagnostic and is built from what that test finds. Most students work with me online, from anywhere in the country. Every session is taught by Luca Moretti personally &mdash; there are no junior tutors and no rotating staff.</p>
-    <div class="ctas rv d3">
-      <a class="btn btn-a" href="#start">Start with the free diagnostic</a>
-      <a class="btn btn-b" href="#weeks">How the program works</a>
-    </div>
-    <p class="reassure rv d4">Start at least three months before your target test date.</p>
-  </div>
-  <div class="videoframe rv d2">
-    <img src="photo-1-web.jpg" alt="An online SAT tutoring session in progress">
-    <div class="grad"></div>
-    <div class="videocap">
-      <div class="who">Online nationwide &middot; in person in Cranford, NJ</div>
-      <div class="what">Same materials, same portal, same instructor &mdash; wherever your student sits.</div>
+<header class="satstage">
+  <div class="shell">
+  <div class="sat-copy">
+    <div class="lbl">The 12-Week SAT<sup>&reg;</sup> Program</div>
+    <h1 class="sat-h1"><span class="ln">If the score doesn&rsquo;t improve,</span><span class="ln"><em>we keep teaching.</em> <span class="freeword">Free.</span></span></h1>
+    <p class="sat-lead">Twelve weeks. One instructor. Complete the program and if the official score doesn&rsquo;t beat the diagnostic baseline, we keep going at no charge &mdash; in writing.</p>
+    <div class="sat-ctas">
+      <a class="btn btn-red shimmer" href="index-v2.html#start"><span>Start with the free diagnostic</span></a>
     </div>
   </div>
-</div></div>
-
-<div class="tickerband"><div class="tickerwrap"><div class="tickertrack" id="tick"></div></div></div>
-
-<section><div class="shell">
-  <div class="shead rv">
-    <div class="lbl">Why now</div>
-    <h2>The test is required again.</h2>
-    <p>More than 60 colleges and university systems have reinstated a testing requirement for the 2027 cycle, including six of the eight Ivy League universities, with Columbia joining by 2027. Families who spent four years hearing &ldquo;test-optional&rdquo; now have a score to plan for &mdash; and junior year is the window to do it in.</p>
-  </div>
-  <div class="ainote rv d1">
-    <div class="k">On AI</div>
-    <p>In one study, students who used ChatGPT for homework scored 48% better on practice problems and 17% worse on a closed-book test. AI explains concepts well. It does not build the recall a student needs under time pressure, which is exactly what the practice work in this program is built to develop.</p>
-  </div>
-</div></section>
-
-<section id="weeks"><div class="shell">
-  <div class="shead rv">
-    <div class="lbl">How the program works</div>
-    <h2>No two plans look the same. The standard behind them does.</h2>
-    <p>There is no fixed weekly syllabus, and that is deliberate &mdash; the order and the pace are set by what your student&rsquo;s diagnostic finds, not by a schedule written before we met them. What doesn&rsquo;t move is everything on the right.</p>
-  </div>
-  <div class="split rv d1">
-    <div class="col">
-      <div class="colhed"><span class="ck">Built for your student</span><h3>Set by the diagnostic</h3></div>
-      <ul class="clist">
-        <li><b>Which skills we work on</b> &mdash; and in what order. Points recoverable, not syllabus order.</li>
-        <li><b>How long each one takes.</b> Some close in a session; some take three.</li>
-        <li><b>When full-length tests fall</b> &mdash; placed where they will actually tell us something.</li>
-        <li><b>How much homework,</b> matched to how far beyond the syllabus your student wants to go.</li>
-        <li><b>How the plan changes</b> as gaps close and new ones surface.</li>
-      </ul>
-    </div>
-    <div class="col fixed">
-      <div class="colhed"><span class="ck">The same for everyone</span><h3>Never varies</h3></div>
-      <ul class="clist">
-        <li><b>A full-length diagnostic first,</b> before a single session is planned.</li>
-        <li><b>A target test date chosen together</b> in week two, with the plan sequenced around it.</li>
-        <li><b>One weekly one-on-one session,</b> roughly an hour, at a consistent time.</li>
-        <li><b>Luca teaches every session</b> &mdash; no junior tutors, no rotating staff.</li>
-        <li><b>Weekly office hours,</b> open to every student in the program at no extra charge.</li>
-        <li><b>A written email to you every week</b> &mdash; what we covered, how it went, what&rsquo;s next.</li>
-        <li><b>A progress report at the end of every phase,</b> tracking against the target score.</li>
-        <li><b>Sessions extended or added</b> in the final weeks before the test if the plan calls for it.</li>
-        <li><b>The guarantee,</b> in writing.</li>
-      </ul>
+  <div class="ftour" id="ftour">
+    <div class="ft-card">
+      <div class="ft-head">What&rsquo;s included</div>
+      <div class="ft-stage">
+        <span class="ft-iconbg" aria-hidden="true"></span>
+        <div class="ft-icons" aria-hidden="true">
+          <span class="on"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M18 34a8 8 0 1 1 12 0M24 8v8M12 14l5 5M36 14l-5 5"/></svg></span>
+          <span><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M13 6h16l8 8v28H13zM29 6v8h8M17 26h14M17 33h9"/></svg></span>
+          <span><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 8a16 16 0 1 0 0 32 16 16 0 0 0 0-32zM24 15v9l6 4"/></svg></span>
+          <span><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M7 12h34v24H7zM7 15l17 12 17-12"/></svg></span>
+          <span><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M9 20h30v21H9zM17 20v-6a7 7 0 0 1 14 0v6"/></svg></span>
+          <span><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 40h32M8 40V10M14 31l8-9 6 5 10-13M32 14h6v6"/></svg></span>
+        </div>
+      </div>
+      <div class="ft-texts">
+        <div class="on"><h3>Twelve weekly sessions</h3><p>Roughly an hour each, at a consistent weekly time. Extended or added in the final weeks before the test.</p></div>
+        <div><h3>Full-length practice testing</h3><p>Timed SAT tests with materials provided, taken at home, then scored and reviewed question by question.</p></div>
+        <div><h3>Weekly office hours</h3><p>An open online hour, once a week, for anyone in the program. No appointment and no extra charge.</p></div>
+        <div><h3>A weekly email to parents</h3><p>What we covered, how your student handled it, and what is next. You never have to ask how it is going.</p></div>
+        <div><h3>A private student portal</h3><p>Adaptive practice mirroring the real digital SAT, a weak-spot tracker, and every missed question logged.</p></div>
+        <div><h3>Progress reports</h3><p>Written at the end of every phase, tracked against the target score you set in week two.</p></div>
+      </div>
+      <div class="ft-nav">
+        <button class="ft-arrow" type="button" id="ftprev" aria-label="Previous item"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+        <div class="ft-dots" id="ftdots" role="tablist" aria-label="What is included"></div>
+        <button class="ft-arrow" type="button" id="ftnext" aria-label="Next item"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+      </div>
     </div>
   </div>
-</div></section>
+  </div>
+</header>
 
-<section id="included"><div class="shell">
-  <div class="shead rv">
-    <div class="lbl">What&rsquo;s included</div>
-    <h2>Everything the plan needs. Nothing generic.</h2>
+<section class="casesec"><div class="shell">
+  <div class="case-head rv">
+    <div class="lbl">The case</div>
+    <h2>Why now, why not a chatbot, and what actually stays fixed.</h2>
   </div>
-  <div class="incl rv d1">
-    <div class="icell"><h3>Twelve weekly one-on-one sessions</h3><p>Roughly an hour each, at a consistent weekly time. Sessions can be extended or added in the final weeks before a test date.</p></div>
-    <div class="icell"><h3>Full-length practice testing</h3><p>Timed SAT tests with materials provided, taken at home under real conditions, then scored and reviewed question by question.</p></div>
-    <div class="icell"><h3>Weekly office hours</h3><p>An open online hour, once a week, for any student in the program. No appointment and no extra charge &mdash; bring a homework question, a practice question marked wrong, or anything that came up since the last session.</p></div>
-    <div class="icell"><h3>A weekly email to parents</h3><p>A short written update every week: what we covered, how your student handled it, what is next, and anything worth watching. You will never have to ask how it is going.</p></div>
-    <div class="icell"><h3>A private student portal</h3><p>Adaptive practice tests that mirror the real digital SAT&rsquo;s module routing, a weak-spot tracker, a running log of every missed question, and session notes.</p></div>
-    <div class="icell"><h3>Progress reports at every phase</h3><p>Written, not verbal: what improved, what is next, and how the target score is tracking against the date you picked in week two.</p></div>
-  </div>
-</div></section>
 
-<section><div class="shell">
-  <div class="shead rv"><div class="lbl">The Moretti Method</div><h2>The thinking behind every plan.</h2></div>
-  <div class="method rv d1">
-    <div class="mstep"><div class="k">01</div><h3>Evaluate</h3><p>A full-length, timed, adaptive diagnostic shows which skills cost points and where the time goes.</p></div>
-    <div class="mstep"><div class="k">02</div><h3>Design</h3><p>A session-by-session plan sequenced around what that test found, and around a target date chosen together.</p></div>
-    <div class="mstep"><div class="k">03</div><h3>Practice</h3><p>Deliberate repetition on the skills that move the score, plus the pacing habits that protect points already earned.</p></div>
-    <div class="mstep"><div class="k">04</div><h3>Adapt</h3><p>Every phase ends in a test and a written report, so the plan adjusts on evidence rather than on impression.</p></div>
-  </div>
-</div></section>
-
-<section><div class="shell">
-  <div class="shead rv"><div class="lbl">How sessions work</div><h2>Online, in person, and what happens if a week is missed.</h2></div>
-  <div class="how rv d1">
-    <div class="hcell"><div class="k">Online</div><p>Most students work with me online, from anywhere in the country, using the same materials and the same portal as in-person students.</p></div>
-    <div class="hcell"><div class="k">In person</div><p>Available in Cranford, New Jersey. In-person sessions are held exclusively at the Cranford Public Library, unless another location is agreed in advance.</p></div>
-    <div class="hcell"><div class="k">Missed weeks</div><p>Tell me in advance and we reschedule within the same week where possible. The program pauses and picks up where it left off, so no week of the plan is lost.</p></div>
-  </div>
-</div></section>
-
-<section id="timing"><div class="shell">
-  <div class="shead rv">
-    <div class="lbl">Upcoming SAT dates</div>
-    <h2>Work backward from the test date.</h2>
-    <p>The program runs twelve weeks, so start at least three months before your target date.</p>
-  </div>
-  <div class="scroller rv d1">
-    <table class="dates">
-      <thead><tr><th>Test date</th><th>Register by</th><th>Start prep by</th><th></th></tr></thead>
-      <tbody>
-        <tr class="soon"><td class="dt">December 5, 2026</td><td>November 20</td><td><b>This month</b></td><td class="st">Open now</td></tr>
-        <tr><td class="dt">March 6, 2027</td><td>February 19</td><td>Mid-December</td><td class="st">Spring junior sitting</td></tr>
-        <tr><td class="dt">May 1, 2027</td><td>April 16</td><td>Early February</td><td class="st">Spring junior sitting</td></tr>
-        <tr><td class="dt">June 5, 2027</td><td>May 21</td><td>Mid-March</td><td class="st">Last before senior year</td></tr>
-      </tbody>
-    </table>
-  </div>
-  <p style="margin-top:1.2rem;font-size:.84rem"><a href="test-dates.html" style="color:var(--ink);border-bottom:1px solid var(--line);padding-bottom:2px">See every upcoming test date &rarr;</a></p>
-</div></section>
-
-<div class="gband"><div class="shell">
-  <div class="k">The guarantee</div>
-  <h2>If the score doesn&rsquo;t improve, we keep teaching. Free.</h2>
-  <p>Complete the program &mdash; all twelve sessions and the assigned homework &mdash; and if your student&rsquo;s official SAT score does not improve from their diagnostic baseline, we keep working with them at no additional charge until it does. No family is asked to keep paying for a result that hasn&rsquo;t arrived. Ask any other program in New Jersey to put that in writing.</p>
-</div></div>
-
-<section><div class="shell">
-  <div class="shead rv">
-    <div class="lbl">Start here</div>
-    <h2>Week one is free, and you can stop there.</h2>
-    <p>The diagnostic and its report cost nothing and commit you to nothing. You keep the report whether or not you enrol.</p>
-  </div>
-  <div class="steps rv d1">
-    <div class="step"><h3>Your student takes the test at home</h3><p>Two hours, timed, whenever suits. Both sections, two modules each, adaptive exactly like the real digital SAT.</p></div>
-    <div class="step"><h3>I send the written report</h3><p>Skills, timing, and answering patterns &mdash; including which misses were knowledge, which were pacing, and which were the clock.</p></div>
-    <div class="step"><h3>We talk it through</h3><p>Fifteen minutes on the phone. No pressure, and no obligation to continue.</p></div>
-  </div>
-</div></section>
-
-<section id="start" class="capture"><div class="shell">
-  <div>
-    <h2>Start with the free diagnostic.</h2>
-    <p class="lead">Your student takes the test at home. We send the written report. Then fifteen minutes on the phone, no pressure &mdash; and you keep the report either way.</p>
-  </div>
-  <form class="form" method="post" action="#" id="lead">
-    <div class="row">
-      <input type="text" name="name" placeholder="Your name" required autocomplete="name">
-      <input type="email" name="email" placeholder="Email" required autocomplete="email">
+  <div class="case-row rv">
+    <div class="case-copy">
+      <h3>The test is required again.</h3>
+      <p>Families who spent four years hearing &ldquo;test-optional&rdquo; now have a score to plan for &mdash; and junior year is the window.</p>
     </div>
-    <div class="row">
-      <select name="grade" required aria-label="Student's grade"><option value="">Student&rsquo;s grade</option><option>9th</option><option>10th</option><option>11th</option><option>12th</option></select>
-      <select name="target" required aria-label="Target test date"><option value="">Target test date</option><option>Dec 5, 2026</option><option>Mar 6, 2027</option><option>May 1, 2027</option><option>Jun 5, 2027</option><option>Not sure yet</option></select>
+    <div class="case-figs three">
+      <div><b>60<i>+</i></b><span>colleges have reinstated a testing requirement</span></div>
+      <div><b>6<i>&#8202;of&#8202;8</i></b><span>Ivy League universities, Columbia by 2027</span></div>
+      <div><b>2027</b><span>the cycle it lands on &mdash; this year&rsquo;s juniors</span></div>
     </div>
-    <button type="submit">Send me the diagnostic</button>
-    <p class="formnote">Four fields. Luca replies within the hour, personally.</p>
-  </form>
+  </div>
+
+  <div class="case-row rv">
+    <div class="case-copy">
+      <h3>AI explains. It does not build recall.</h3>
+      <p>In one study, students who used ChatGPT for homework scored better on the practice problems and worse on the closed-book test &mdash; which is the one that counts.</p>
+    </div>
+    <div class="case-figs two">
+      <div class="up"><b>+48%</b><span>on practice problems, with the help available</span></div>
+      <div class="down"><b>&minus;17%</b><span>on the closed-book test, once it was gone</span></div>
+    </div>
+  </div>
+
+  <div class="case-row case-row--split case-row--flip rv">
+    <div class="case-copy">
+      <h3>No two plans look the same. The standard behind them does.</h3>
+      <p>There is no fixed weekly syllabus, and that is deliberate. The order and the pace come from the diagnostic. Everything under &ldquo;never varies&rdquo; holds for every student.</p>
+    </div>
+    <div class="split2">
+      <div class="sp-a">
+        <div class="sp-k">Set by the diagnostic</div>
+        <ul><li><b>Which skills we work on</b> &mdash; and in what order. Points recoverable, not syllabus order.</li><li><b>How long each one takes.</b> Some close in a session; some take three.</li><li><b>When full-length tests fall</b> &mdash; placed where they will actually tell us something.</li><li><b>How much homework,</b> matched to how far beyond the syllabus your student wants to go.</li><li><b>How the plan changes</b> as gaps close and new ones surface.</li></ul>
+      </div>
+      <div class="sp-b">
+        <div class="sp-k">Never varies</div>
+        <ul><li><b>A full-length diagnostic first,</b> before a single session is planned.</li><li><b>A target test date chosen together</b> in week two, with the plan sequenced around it.</li><li><b>One weekly one-on-one session,</b> roughly an hour, at a consistent time.</li><li><b>Luca teaches every session</b> &mdash; no junior tutors, no rotating staff.</li><li><b>Weekly office hours,</b> open to every student at no extra charge.</li><li><b>A written email to you every week</b> &mdash; what we covered, how it went, what&rsquo;s next.</li><li><b>A progress report at the end of every phase,</b> tracking against the target score.</li><li><b>Sessions extended or added</b> in the final weeks before the test if the plan calls for it.</li><li><b>The guarantee,</b> in writing.</li></ul>
+      </div>
+    </div>
+  </div>
+</div></section>
+
+<section class="faqsec"><div class="shell">
+  <div class="faqhead rv">
+    <div class="in">
+      <span class="faqbadge">FAQ</span>
+      <h2>What parents ask.</h2>
+      <p>If something here isn&rsquo;t covered, ask me directly &mdash; I answer these myself.</p>
+    </div>
+    <a class="btn faqbtn shimmer" href="index-v2.html#start"><span>Ask a question</span></a>
+  </div>
+  <div class="faqgrid">
+      <div class="faqcol">
+        <details class="faqitem rv" name="faq-prep-course-v2.html"><summary>Do you meet in person or online?<svg class="faqchev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6l5 5 5-5"/></svg></summary><div class="faqa"><b>Online.</b> Most students work with me online, from anywhere in the country, using the same materials and the same portal as in-person students.<br><br><b>In person.</b> Available in Cranford, New Jersey. In-person sessions are held <b>exclusively at the Cranford Public Library</b>.<br><br>Same materials, same method, same instructor either way — and many families mix the two.</div></details>
+        <details class="faqitem rv" name="faq-prep-course-v2.html"><summary>How long is each session?<svg class="faqchev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6l5 5 5-5"/></svg></summary><div class="faqa">Sessions run about an hour, scheduled weekly at a consistent time. In the final weeks before a test date we can extend or add sessions as the plan requires.</div></details>
+        <details class="faqitem rv" name="faq-prep-course-v2.html"><summary>When should my student start preparing?<svg class="faqchev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6l5 5 5-5"/></svg></summary><div class="faqa">Work backward from the target test date: the program takes twelve weeks, so start at least three months out. For most juniors that means beginning in the fall or early winter for spring test dates.</div></details>
+        <details class="faqitem rv" name="faq-prep-course-v2.html"><summary>Which test date should we target?<svg class="faqchev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6l5 5 5-5"/></svg></summary><div class="faqa">The first official sitting that leaves room for one retake before application deadlines. We map this out together in week two so the whole season is planned from the start.</div></details>
+      </div>
+      <div class="faqcol">
+        <details class="faqitem rv" name="faq-prep-course-v2.html"><summary>Who does the teaching?<svg class="faqchev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6l5 5 5-5"/></svg></summary><div class="faqa">Luca. Every session, every week. There are no handoffs to junior tutors and no rotating staff — the person who builds your student's plan is the person who teaches it.</div></details>
+        <details class="faqitem rv" name="faq-prep-course-v2.html"><summary>What if we miss a week or a session?<svg class="faqchev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6l5 5 5-5"/></svg></summary><div class="faqa">Tell me in advance and we reschedule within the same week where possible. <b>The program pauses and picks up where it left off</b>, so no week of the plan is lost.</div></details>
+        <details class="faqitem rv" name="faq-prep-course-v2.html"><summary>Is sophomore year too early?<svg class="faqchev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6l5 5 5-5"/></svg></summary><div class="faqa">For the formal 12-week program, usually yes — junior year is the sweet spot. But sophomores with foundation gaps in algebra or reading benefit enormously from course tutoring first, so the prep program starts from strength.</div></details>
+      </div>
+  </div>
+</div></section>
+
+<section class="pcta"><div class="shell">
+  <h2 class="rv">Start with the free diagnostic.</h2>
+  <p class="rv d1">Nothing to pay and nothing to commit to &mdash; you keep the written report either way.</p>
+  <div class="cta-steps rv d1">
+    <div><i>1</i><b>Your student takes the test at home</b><span>Two hours, timed, whenever suits.</span></div>
+    <div><i>2</i><b>I send the written report</b><span>Skills, timing, and answering patterns.</span></div>
+    <div><i>3</i><b>We talk it through</b><span>Fifteen minutes on the phone, no pressure.</span></div>
+  </div>
+  <a class="btn pcbtn shimmer rv d2" href="index-v2.html#start"><span>Reserve your seat</span></a>
 </div></section>
 
 <footer><div class="shell">
-  <div>
+  <div class="footer-id">
     <p>Moretti Test Prep &amp; Tutoring, located in Cranford NJ</p>
     <a href="tel:2012752791" class="footer-phone">(201) 275-2791</a>
     <div class="footer-links">
-      <a href="test-dates.html">Test Dates</a><a href="testimonials.html">Results</a><a href="portal/index.html">Student Login</a><a href="terms.html">Terms</a><a href="privacy.html">Privacy</a>
+      <a href="test-dates-v2.html">Test Dates</a><a href="testimonials-v2.html">Results</a><a href="portal/index.html">Student Login</a><a href="terms.html">Terms</a><a href="privacy.html">Privacy</a>
     </div>
   </div>
   <div class="footer-right">
-    <div class="footer-serving-hed">Serving</div>
-    <div class="footer-towns">Cranford &middot; Westfield &middot; Mountainside<br>Scotch Plains &middot; Summit &middot; Short Hills<br>New Providence &middot; Berkeley Heights</div>
     <a href="https://www.linkedin.com/company/moretti-test-prep-and-tutoring/?viewAsMember=true" class="footer-linkedin" target="_blank" rel="noopener" aria-label="LinkedIn"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.47-.9 1.63-1.85 3.36-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.72v20.55C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.72C24 .77 23.2 0 22.22 0z"/></svg></a>
   </div>
 </div></footer>
@@ -528,11 +1005,94 @@ document.documentElement.classList.add('js');
   var io=new IntersectionObserver(function(en){en.forEach(function(x){if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target);}});},{rootMargin:'0px 0px -8% 0px',threshold:.08});
   els.forEach(function(e){ if(e.getBoundingClientRect().top<window.innerHeight*0.95){e.classList.add('in');} else {io.observe(e);} });
   window.addEventListener('load',function(){els.forEach(function(e){if(e.getBoundingClientRect().top<window.innerHeight)e.classList.add('in');});});
+  /* last resort: never leave the page invisible if the observer never fires */
+  setTimeout(function(){els.forEach(function(e){e.classList.add('in');});},4000);
 })();
-document.getElementById('lead').addEventListener('submit',function(e){
-  e.preventDefault();
-  this.innerHTML='<p style="color:#fff;font-size:1rem;line-height:1.6">Thank you &mdash; your request is in. Luca will be in touch within the hour.</p>';
-});
+/* the reserve form only exists on pages that carry one */
+(function(){
+  var f=document.getElementById('lead'); if(!f) return;
+  f.addEventListener('submit',function(e){
+    e.preventDefault();
+    this.innerHTML='<p style="color:#fff;font-size:1rem;line-height:1.6">Thank you &mdash; your request is in. Luca will be in touch within the hour.</p>';
+  });
+})();
+
+/* ── top bar: flush over the hero, red once the hero is behind you ── */
+(function(){
+  var nav=document.querySelector('nav'); if(!nav) return;
+  var hero=document.querySelector('.satstage,.phero,.hero');
+  function apply(){
+    var y=window.pageYOffset||document.documentElement.scrollTop||0;
+    var edge=hero?Math.max(80,hero.offsetHeight-nav.offsetHeight-40):120;
+    nav.classList.toggle('at-top', y<40);
+    nav.classList.toggle('is-red', y>=edge);
+  }
+  var tick=false;
+  addEventListener('scroll',function(){ if(tick) return; tick=true;
+    requestAnimationFrame(function(){ apply(); tick=false; }); },{passive:true});
+  addEventListener('resize',apply,{passive:true});
+  apply();
+})();
+
+/* ── landing board: days to the next sitting, and the twelve weeks filling ── */
+(function(){
+  var strip=document.getElementById('wkstrip'), days=document.getElementById('wkdays'),
+      label=document.getElementById('wklabel');
+  if(!strip) return;
+  for(var w=1;w<=12;w++){
+    var i=document.createElement('i');
+    i.innerHTML='<b>'+(w<10?'0'+w:w)+'</b>';
+    strip.appendChild(i);
+  }
+  var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var cells=[].slice.call(strip.children);
+  if(reduce) cells.forEach(function(c){ c.classList.add('on'); });
+  else cells.forEach(function(c,k){ setTimeout(function(){ c.classList.add('on'); }, 500+k*110); });
+
+  if(days){
+    var target=new Date('2026-12-05T00:00:00');
+    var d=Math.max(0,Math.ceil((target-new Date())/86400000));
+    days.textContent=d;
+    if(label) label.textContent = (d===1?'day':'days')+' until the December sitting';
+  }
+})();
+
+
+/* ── the included card: auto-advancing, dots and arrows ── */
+(function(){
+  var root=document.getElementById('ftour'); if(!root) return;
+  var icons=[].slice.call(root.querySelectorAll('.ft-icons > span')),
+      texts=[].slice.call(root.querySelectorAll('.ft-texts > div')),
+      dots=document.getElementById('ftdots');
+  if(!texts.length||!dots) return;
+  var i=0, held=false, timer=0,
+      reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  texts.forEach(function(t,k){
+    var b=document.createElement('button');
+    b.type='button'; b.setAttribute('role','tab');
+    b.setAttribute('aria-label',t.querySelector('h3').textContent);
+    b.addEventListener('click',function(){ go(k); });
+    dots.appendChild(b);
+  });
+  function go(n){
+    i=(n+texts.length)%texts.length;
+    icons.forEach(function(e,k){ e.classList.toggle('on',k===i); });
+    texts.forEach(function(e,k){ e.classList.toggle('on',k===i); });
+    [].forEach.call(dots.children,function(b,k){ b.setAttribute('aria-selected',k===i?'true':'false'); });
+  }
+  go(0);
+  var prev=document.getElementById('ftprev'), next=document.getElementById('ftnext');
+  if(prev) prev.addEventListener('click',function(){ go(i-1); });
+  if(next) next.addEventListener('click',function(){ go(i+1); });
+  root.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'){e.preventDefault();go(i+1);}
+    if(e.key==='ArrowLeft'){e.preventDefault();go(i-1);}
+  });
+  root.addEventListener('pointerenter',function(){held=true;},{passive:true});
+  root.addEventListener('pointerleave',function(){held=false;},{passive:true});
+  function tick(){ if(!held&&!document.hidden) go(i+1); timer=setTimeout(tick,4000); }
+  if(!reduce) timer=setTimeout(tick,4000);
+})();
 </script>
 </body>
 </html>
