@@ -9129,14 +9129,24 @@ window.Portal = {
           // reading a time that looks like it's already gone.
           var startMs = Date.parse(data.next.startIso);
           var inProgress = !data.next.allDay && !isNaN(startMs) && startMs <= Date.now();
+          /* Office hours sit on this card on the same terms as a session --
+             whichever comes first is the one shown -- but they are a drop-in
+             open to the whole program, not an appointment this student is
+             expected at. Only the wording separates them; everything else
+             (the join link, the day chip, the countdown) is identical. */
+          var isOh = !!data.next.officeHours;
           if (inProgress) {
-            nsLabel.textContent = '📅 Your session is happening now — join below:';
+            nsLabel.textContent = isOh
+              ? '📅 Office hours are happening now — drop in below:'
+              : '📅 Your session is happening now — join below:';
             nsDate.textContent = 'Happening now';
             setNsRel('');
             setNsDayChip(null);
             if (nsTime) nsTime.textContent = 'Started at ' + formatSessionDate(data.next.startIso, data.next.allDay).replace(/^.*at /, '');
           } else {
-            nsLabel.textContent = '📅 Your next scheduled session is on:';
+            nsLabel.textContent = isOh
+              ? '📅 Office hours — open to every student, no appointment:'
+              : '📅 Your next scheduled session is on:';
             var parts = formatSessionDateParts(data.next.startIso, data.next.allDay);
             nsDate.textContent = parts.date;
             if (nsTime) nsTime.textContent = parts.time;
