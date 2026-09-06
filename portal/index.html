@@ -4013,7 +4013,13 @@ window.Portal = {
 <!-- Google sign-in + the signed-session fetch wrapper (auth-client.js).
      Loaded immediately after APPS_SCRIPT_URL is set, so the wrapper is
      installed before anything in the page can call the backend. -->
-<script src="auth-client.js?v=20260905y"></script>
+<!-- Bumped past the shared 20260905y tag on its own: this file gained
+     MorettiAuth.refresh() and the onRefresh hook, and a returning student
+     holding the cached copy would get neither. The guards degrade quietly
+     (`else if (MorettiAuth.refresh)`), which is exactly why the stale copy
+     would have gone unnoticed. Only this one file changed, so only this one
+     tag moves — the ~12MB of question banks below keep theirs. -->
+<script src="auth-client.js?v=20260906a"></script>
 
 <!-- Pre-login-only top bar now (key entry, onboarding, marketing-style
      screens) — once a student is in the app shell this whole bar hides
@@ -4387,7 +4393,7 @@ window.Portal = {
     <div class="onb-pane" id="onb-accom">
       <div class="kicker">One More Thing</div>
       <h1 class="panel-hed onb-pillars-hed">Do you test with accommodations?</h1>
-      <p class="panel-sub">If your school has approved extended time or breaks, tell us once &mdash; we'll apply it to every future diagnostic and practice test automatically.</p>
+      <p class="panel-sub">If your school has approved extended time or breaks, tell me once &mdash; I'll apply it to every future diagnostic and practice test automatically.</p>
       <div class="onb-accom-cards">
         <div class="onb-accom-card is-selected" data-onb-accom-card>
           <div class="onb-accom-row">
@@ -6717,7 +6723,7 @@ window.Portal = {
       emptyEl.style.display = 'block';
       dashboardEl.style.display = 'none';
     } else if (processing) {
-      subEl.textContent = 'Please wait while we process your diagnostic for access to the full portal.';
+      subEl.textContent = 'Please wait while I process your diagnostic for access to the full portal.';
       ctaBtn.style.display = 'none';
       emptyEl.style.display = 'block';
       dashboardEl.style.display = 'none';
@@ -6990,6 +6996,82 @@ window.Portal = {
     });
     setNav('sidebar-learn-divider', !anyLearn);
   }
+
+  /* ═══ THE PROGRAM CAN CHANGE UNDER A STUDENT WHO IS ALREADY LOOKING ═══
+     Everything about the shape of this portal -- which home layout, which
+     sidebar items, whether there is a countdown at all -- is decided from
+     currentStudent, and currentStudent used to be settled exactly once per
+     sign-in and then never questioned. Two paths kept it that way:
+
+       - auth-client's fast paint draws from the cached payload and files
+         the fresh one away for next time (its own comment explains why it
+         must not re-run the handoff), so the first visit after a change
+         showed the old portal.
+       - restoreState() below rebuilds the student from the same-tab
+         sessionStorage snapshot, and the `if (!currentStudent)` guard on
+         MorettiAuth.start() means nothing asks the server at all -- so the
+         old portal survived every reload for as long as the tab lived.
+
+     Move a student between SAT prep and subject tutoring and the result was
+     a portal missing Practice Tests, Question Bank, Challenge Questions,
+     Vocabulary and Saved & Mistakes -- or wrongly offering all five.
+
+     This is the correction, and it is deliberately the smallest one that
+     works: update the fields, then re-run the SAME gating calls a screen
+     change already makes. No show(), so nobody's screen moves under them.
+     Nothing at all happens mid-attempt -- an exam is the one moment when
+     rearranging the furniture is worse than being a few minutes stale, and
+     the next load will pick it up anyway. */
+  function applyStudentRefresh(data) {
+    if (!data || !data.ok || !currentStudent) return;
+    // A payload for somebody else is not a refresh -- it is a different
+    // student, which is the sign-in path's problem, not this one's.
+    if (String(data.key || '').toUpperCase() !== String(currentStudent.key || '').toUpperCase()) return;
+
+    var next = {
+      // Same derivation as settle(), so the two cannot drift on the one
+      // field that decides the whole layout.
+      showSat: data.showSat !== undefined ? !!data.showSat : !!data.testPrep,
+      testPrep: !!data.testPrep,
+      satTaken: !!data.satTaken,
+      grantedAt: data.grantedAt || null,
+      testDate: data.testDate || null,
+      targetScore: data.targetScore || null,
+      driveFolderUrl: data.driveFolderUrl || '',
+      accomTimeMult: data.accomTimeMult || null,
+      accomBreakMult: data.accomBreakMult || null
+    };
+    var changed = Object.keys(next).some(function (k) { return currentStudent[k] !== next[k]; });
+    if (!changed) return;
+
+    /* Mid-exam, do nothing whatsoever -- not even the quiet field update.
+       The timer is derived from accommodations and the attempt is already
+       running on the values it started with; changing them underneath it
+       is a worse outcome than a stale sidebar the student cannot see from
+       inside the exam shell anyway. */
+    if (MID_DIAGNOSTIC_SCREENS[activeScreenId]) return;
+    if (window.dxIsPracticeActive && window.dxIsPracticeActive()) return;
+
+    Object.keys(next).forEach(function (k) { currentStudent[k] = next[k]; });
+    // Or the snapshot restoreState() reads on the next refresh is still the
+    // stale one, and this whole correction is undone by a reload.
+    saveState();
+    if (typeof applyStoredAccommodations === 'function') applyStoredAccommodations();
+
+    renderTestCountdown();
+    renderNavProfile();
+    applySidebarGating();
+    // The rest of the home is only worth rebuilding if they are looking at
+    // it; every other screen re-derives on its way in through show().
+    if (activeScreenId === 'screen-menu') {
+      renderHomeState();
+      applyTestPrepGating();
+      applyTestCardStates();
+      renderHomePies();          // owns applySubjectHome() -- the home layout swap
+      renderHomeShortcutTeasers();
+    }
+  }
+
   var SIDEBAR_SCREENS = { 'screen-menu': 1, 'screen-calendar': 1, 'screen-practice-tests': 1, 'screen-resources': 1, 'screen-vocab': 1, 'screen-incorrect-questions': 1, 'screen-sat-resources': 1, 'screen-challenge-questions': 1, 'screen-question-bank': 1 };
   var SIDEBAR_NAV_FOR_SCREEN = { 'screen-menu': 'home', 'screen-calendar': 'calendar', 'screen-practice-tests': 'practice-tests', 'screen-resources': 'files', 'screen-vocab': 'vocab', 'screen-incorrect-questions': 'incorrect-questions', 'screen-challenge-questions': 'challenge-questions', 'screen-question-bank': 'question-bank' };
   var sidebarEl = document.getElementById('portal-sidebar');
@@ -9306,7 +9388,7 @@ window.Portal = {
       ? 'Luca designs your program from your actual results.'
       : 'Luca designs your program around your goals and your coursework.';
     document.getElementById('onb-rstep-1-title').textContent = sat ? 'Diagnostic' : 'First session';
-    document.getElementById('onb-rstep-1-body').textContent = sat ? 'A full, real, timed test.' : 'We map out where you are and what you need.';
+    document.getElementById('onb-rstep-1-body').textContent = sat ? 'A full, real, timed test.' : 'I map out where you are and what you need.';
     document.getElementById('onb-rstep-2-body').textContent = sat ? 'Built around the results.' : 'Built around your goals.';
     document.getElementById('onb-rstep-4-body').textContent = sat ? 'Every test sharpens the plan.' : 'Every session sharpens the plan.';
     document.getElementById('onb-handoff-sub').textContent = sat ? "Let's see where you're starting from." : 'Your portal is ready.';
@@ -13970,8 +14052,20 @@ window.Portal = {
         } else {
           settle(data);
         }
-      }
+      },
+      /* Only fires on the fast path, where the portal was drawn from the
+         cached payload and the resume behind it disagreed. The full
+         sign-in path goes through settle(), which applies everything. */
+      onRefresh: applyStudentRefresh
     });
+  } else if (MorettiAuth.refresh) {
+    /* restoreState() put this student back from the same-tab snapshot, so
+       start() above never runs -- and until now that meant nothing ever
+       asked the server whether the snapshot was still true. Ask, quietly,
+       and hand the answer to the same in-place update the fast path uses.
+       Deliberately unawaited and deliberately silent: this is a correction,
+       not a gate, and the portal is already fully usable without it. */
+    MorettiAuth.refresh().then(applyStudentRefresh);
   }
 })();
 </script>
