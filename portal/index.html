@@ -2370,6 +2370,13 @@
   .qb-card-note { font-family: var(--hel); font-size: 0.74rem; color: var(--mid); margin: 0.45rem 0 0; line-height: 1.5; }
   .qb-empty { font-family: var(--hel); font-size: 0.78rem; color: var(--faint); text-align: center; padding: 1.6rem 0.5rem; line-height: 1.5; }
 
+  /* The wrapper owns the border, radius and shadow now; the two halves give
+     theirs up and are separated by a single hairline, so the band reads as
+     one surface. overflow:hidden keeps the stats strip's own square corners
+     inside the wrapper's rounded ones. */
+  .qb-statband { background: var(--white); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); overflow: hidden; }
+  .qb-statband .qb-raw-stats { background: none; border: none; border-radius: 0; box-shadow: none; }
+  .qb-statband .qb-trend-card { margin-top: 0; background: none; border: none; border-radius: 0; box-shadow: none; border-top: 1px solid var(--border); }
   .qb-trend-card { margin-top: 1.5rem; }
   .qb-trend-legend { display: flex; align-items: center; gap: 1rem; font-family: var(--hel); font-size: 0.74rem; color: var(--mid); }
   .qb-trend-key { display: inline-flex; align-items: center; gap: 0.35rem; }
@@ -5195,6 +5202,12 @@ window.Portal = {
          "a bare number strip reads as disconnected boxes with nothing to
          anchor the eye"). Numbers count up on reveal, on the same
          CHART_EASE curve the report's own charts use. -->
+    <!-- The four figures and the trend are one object, not two stacked
+         cards: the numbers say where this student stands, the plot says how
+         they got there, and a border between them made that read as two
+         unrelated readouts. Same hairline treatment the four stats already
+         use among themselves. -->
+    <div class="qb-statband">
     <div class="qb-raw-stats" id="qb-raw-stats">
       <div class="qb-raw-stat">
         <span class="qb-raw-stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.1" fill="currentColor" stroke="none"/></svg></span>
@@ -5243,6 +5256,7 @@ window.Portal = {
       </div>
       <p class="qb-card-note">Every question you've answered in the last 14 days, correct in green and wrong in red. The dashed line is your daily average.</p>
       <div class="qb-trend-plot" id="qb-trend-plot"></div>
+    </div>
     </div>
 
     <!-- Deliberately NOT in cards: from here down the analytics sit
