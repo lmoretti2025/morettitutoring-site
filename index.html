@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Moretti Test Prep &amp; Tutoring — SAT, Math &amp; College Admissions | Cranford, NJ</title>
-<meta name="description" content="One-on-one preparation in mathematics, the SAT, and college admissions in Cranford, NJ and online. From Algebra 1 through Multivariable Calculus, taught by one instructor and backed by a guarantee in writing: sixty points above the diagnostic baseline, or we keep teaching free.">
+<meta name="description" content="One-on-one preparation in mathematics, the SAT, and college admissions in Cranford, NJ and online. From Algebra 1 through Multivariable Calculus, taught by one instructor and backed by a guarantee in writing: sixty points above the diagnostic baseline or the agreed target score, whichever comes first, or we keep teaching free.">
 <meta property="og:title" content="Moretti Test Prep &amp; Tutoring">
 <meta property="og:description" content="The standard your student is actually capable of. One-on-one preparation in mathematics, the SAT, and college admissions — taught by one instructor, to one standard.">
 <meta property="og:type" content="website">
@@ -246,6 +246,25 @@ h1 .ln:nth-child(2){animation-delay:1.6s}
   100%{opacity:1;clip-path:inset(0 -.12em 0 0);filter:blur(0);transform:none}
 }
 
+/* The mark is anchored to the right edge of the viewport, which is right up
+   to about 1800px. Past that the headline has stopped growing -- its text
+   ends at ~1084px however wide the screen gets -- but the anchor keeps
+   travelling, so on a large monitor the target drifts off on its own.
+   Above the crossover it is centred in the space between the end of the
+   headline and the edge of the page instead:
+
+       left = (100vw + 1084 - 1120) / 2  =  50vw - 18px
+
+   1834px is where that lands on exactly the same place the old anchor did
+   -- measured, not derived: the -11% resolves against the hero box, not the
+   viewport -- so the two meet without a jump and nothing at or below a
+   1728px window changes at all. Its size is left alone -- the mark is
+   aspect-ratio:1, so widening it drives it off the top and bottom of the
+   hero rather than filling the gap. */
+@media(min-width:1834px){
+  .mark{left:calc(50vw - 18px);right:auto}
+}
+}
 @media(max-width:980px){.mark{right:-16%;width:min(600px,70vw);opacity:.42}}
 @media(max-width:820px){
   .mark{right:-34%;top:60%;width:min(680px,116vw);opacity:.16}
@@ -797,7 +816,8 @@ section{padding:clamp(3.6rem,7vw,6.2rem) 0;border-bottom:1px solid var(--line)}
 .gbox{margin-top:1.9rem;border-left:3px solid var(--red);padding:1.05rem 0 1.05rem 1.25rem;background:linear-gradient(90deg,rgba(176,39,28,.045),transparent 65%)}
 .gbox .k{font-size:.605rem;font-weight:600;letter-spacing:.21em;text-transform:uppercase;color:var(--red)}
 .gbox h3{font-family:var(--display);font-size:clamp(1.18rem,2.2vw,1.5rem);font-weight:700;margin:.5rem 0 .55rem;line-height:1.22}
-.gbox p{font-size:.885rem}
+.gbox p{font-size:.885rem;margin:0}
+.gbox p + p{margin-top:.7rem}
 
 /* ── TIMING ── */
 .scroller{overflow-x:auto;border:1px solid var(--line);border-radius:3px;background:var(--surface)}
@@ -1112,7 +1132,7 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
   </div>
   <div class="pcell rv rv-strict d2">
     <div class="n"><span class="countup" data-delay="1240" data-count="100">0</span><small>+</small></div>
-    <div class="c"><b>Students taught one-on-one</b> in course math, testing and admissions since 2018</div>
+    <div class="c"><b>Students taught one-on-one</b> in course math, testing and admissions</div>
   </div>
   <div class="pcell rv rv-strict d3">
     <div class="n"><span class="countup" data-delay="1860" data-count="60">0</span></div>
@@ -1134,28 +1154,25 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
   <div class="vt" id="vizTour">
     <div class="vt-tabs" role="tablist" aria-label="What’s behind the plan">
       <span class="vt-pill" aria-hidden="true"></span>
-      <button class="vt-tab" type="button" role="tab" aria-selected="true" aria-controls="vtc0" id="vtt0">How sure we are</button>
-      <button class="vt-tab" type="button" role="tab" aria-selected="false" aria-controls="vtc1" id="vtt1" tabindex="-1">Luck or a real gap</button>
-      <button class="vt-tab" type="button" role="tab" aria-selected="false" aria-controls="vtc2" id="vtt2" tabindex="-1">Three kinds of mistake</button>
-      <button class="vt-tab" type="button" role="tab" aria-selected="false" aria-controls="vtc3" id="vtt3" tabindex="-1">Where the points are</button>
-      <button class="vt-tab" type="button" role="tab" aria-selected="false" aria-controls="vtc4" id="vtt4" tabindex="-1">Real progress</button>
+      <button class="vt-tab" type="button" role="tab" aria-selected="true" aria-controls="vtc0" id="vtt0">Luck or a real gap</button>
+      <button class="vt-tab" type="button" role="tab" aria-selected="false" aria-controls="vtc1" id="vtt1" tabindex="-1">Three kinds of mistake</button>
+      <button class="vt-tab" type="button" role="tab" aria-selected="false" aria-controls="vtc2" id="vtt2" tabindex="-1">Where the points are</button>
+      <button class="vt-tab" type="button" role="tab" aria-selected="false" aria-controls="vtc3" id="vtt3" tabindex="-1">Real progress</button>
     </div>
 
     <div class="vt-body">
       <div class="vt-figs" aria-hidden="true">
         <div class="vt-fig on"><svg viewBox="0 0 200 120" role="img"><line class="vt-axis" x1="12" y1="92" x2="188" y2="92"/><line class="vt-tick" x1="12" y1="88" x2="12" y2="98"/><line class="vt-tick" x1="188" y1="88" x2="188" y2="98"/><line class="vt-mark" x1="21" y1="59" x2="135" y2="59" stroke-width="2.5"/><line class="vt-mark" x1="21" y1="43" x2="21" y2="75" stroke-width="2.5"/><line class="vt-mark" x1="135" y1="43" x2="135" y2="75" stroke-width="2.5"/><circle class="vt-dot" cx="56" cy="59" r="7"/><circle cx="56" cy="59" r="11" class="vt-hollow"/></svg></div>
-        <div class="vt-fig"><svg viewBox="0 0 200 120" role="img"><line class="vt-mark" x1="8" y1="65" x2="192" y2="65" stroke-dasharray="5 5" stroke-width="1.5"/><line class="vt-axis" x1="28" y1="20" x2="28" y2="50"/><circle class="vt-dot-2" cx="28" cy="20" r="3.4"/><circle class="vt-dot" cx="28" cy="50" r="4.2"/><line class="vt-axis" x1="64" y1="100" x2="64" y2="78"/><circle class="vt-dot-2" cx="64" cy="100" r="3.4"/><circle class="vt-dot" cx="64" cy="78" r="4.2"/><line class="vt-axis" x1="100" y1="32" x2="100" y2="54"/><circle class="vt-dot-2" cx="100" cy="32" r="3.4"/><circle class="vt-dot" cx="100" cy="54" r="4.2"/><line class="vt-axis" x1="136" y1="108" x2="136" y2="80"/><circle class="vt-dot-2" cx="136" cy="108" r="3.4"/><circle class="vt-dot" cx="136" cy="80" r="4.2"/><line class="vt-axis" x1="172" y1="44" x2="172" y2="58"/><circle class="vt-dot-2" cx="172" cy="44" r="3.4"/><circle class="vt-dot" cx="172" cy="58" r="4.2"/></svg></div>
         <div class="vt-fig"><svg viewBox="0 0 200 120" role="img"><rect class="vt-bar" x="10" y="46" width="80" height="30" rx="3"/><rect class="vt-bar-2" x="94" y="46" width="58" height="30" rx="3"/><rect class="vt-hollow" x="156" y="46" width="34" height="30" rx="3" stroke-dasharray="4 3"/><line class="vt-tick" x1="50" y1="84" x2="50" y2="92"/><line class="vt-tick" x1="123" y1="84" x2="123" y2="92"/><line class="vt-tick" x1="173" y1="84" x2="173" y2="92"/></svg></div>
         <div class="vt-fig"><svg viewBox="0 0 200 120" role="img"><rect class="vt-bar" x="14" y="36" width="26" height="74" rx="2"/><rect class="vt-bar-2" x="52" y="54" width="26" height="56" rx="2"/><rect class="vt-bar-2" x="90" y="68" width="26" height="42" rx="2"/><rect class="vt-bar-2" x="128" y="81" width="26" height="29" rx="2"/><rect class="vt-bar-2" x="166" y="91" width="26" height="19" rx="2"/><path class="vt-mark" d="M21 26 L27 18 L33 26" stroke-width="2.4"/><line class="vt-axis" x1="8" y1="110" x2="192" y2="110"/></svg></div>
         <div class="vt-fig"><svg viewBox="0 0 200 120" role="img"><rect class="vt-band" x="8" y="46" width="184" height="40" rx="4"/><line class="vt-axis" x1="8" y1="66" x2="192" y2="66" stroke-dasharray="4 4"/><line class="vt-rule" x1="58" y1="80" x2="58" y2="54"/><circle class="vt-dot-2" cx="58" cy="80" r="4"/><circle class="vt-dot-2" cx="58" cy="54" r="4"/><line class="vt-mark" x1="140" y1="80" x2="140" y2="20"/><circle class="vt-dot" cx="140" cy="80" r="4.5"/><circle class="vt-dot" cx="140" cy="20" r="5.5"/></svg></div>
       </div>
 
       <div class="vt-caps">
-        <div class="vt-cap on" id="vtc0" role="tabpanel" aria-labelledby="vtt0"><h3>Four questions can&rsquo;t give you a percentage.</h3><p>Your child answers four questions on one topic and gets three wrong. Most reports print 25% and move on. But four questions is barely better than a coin toss &mdash; the true number could be anywhere from 5% to 70%. That range has a name, a Wilson interval, and all it does is state honestly how much four questions can tell you. We print that range beside every area we name. Narrow means we know; wide means we do not. And nothing gets named at all unless the range clears your child&rsquo;s own average &mdash; which is why an honest report sometimes names nothing.</p></div>
-        <div class="vt-cap" id="vtc1" role="tabpanel" aria-labelledby="vtt1" hidden><h3>The worst-looking topic is usually bad luck.</h3><p>There are eight topics on the SAT. Look at eight small samples and one of them will always look alarming &mdash; that is chance, not your child. So before anything is ranked, every topic is pulled back toward your child&rsquo;s own average, hardest where there is least evidence. It has to still look bad afterwards before we will name it.</p></div>
-        <div class="vt-cap" id="vtc2" role="tabpanel" aria-labelledby="vtt2" hidden><h3>A right answer can still be a problem.</h3><p>Mistakes are not all the same thing. Some questions your child genuinely did not know. Some they got right &mdash; but it took three times longer than it should have, and that time came straight out of the questions at the end. Some they never really reached. Each one needs a different week of work, so the report counts them separately and shows you every question in each pile.</p></div>
-        <div class="vt-cap" id="vtc3" role="tabpanel" aria-labelledby="vtt3" hidden><h3>We start where the points are.</h3><p>The topic with the worst percentage is usually the smallest corner of the test. Algebra is about twice the size of geometry on every SAT, so the same five mistakes are worth twice as much there &mdash; and algebra can be taught from scratch in a way circle theorems cannot. So we rank by what the points are worth and how teachable they are. A hard question never counts as easy just because its topic usually is.</p></div>
-        <div class="vt-cap" id="vtc4" role="tabpanel" aria-labelledby="vtt4" hidden><h3>A gain has to beat a good morning.</h3><p>The same student, on two different days, having learned nothing in between, can score sixty points apart. So under sixty points your portal says <em>steady</em> &mdash; and still shows you the number it refused to call progress. Over sixty, the gain is real. That is the one number everybody else rounds in their own favor.</p></div>
+        <div class="vt-cap on" id="vtc0" role="tabpanel" aria-labelledby="vtt0"><h3>Four questions can&rsquo;t give you a percentage.</h3><p>Your child answers four questions on one topic and gets three wrong. Most reports print 25% and move on &mdash; but four questions is barely better than a coin toss, and the true number could be anywhere from 5% to 70%. That range has a name, a Wilson interval, and it is printed beside every area we name: narrow means we know, wide means we do not. Look at eight topics through samples that small and one will always look alarming by chance alone, so each is first pulled back toward your child&rsquo;s own average, hardest where the evidence is thinnest. It has to still look bad afterwards before we will name it &mdash; which is why an honest report sometimes names nothing.</p></div>
+        <div class="vt-cap" id="vtc1" role="tabpanel" aria-labelledby="vtt1" hidden><h3>A right answer can still be a problem.</h3><p>Mistakes are not all the same thing. Some questions your child genuinely did not know. Some they got right &mdash; but it took three times longer than it should have, and that time came straight out of the questions at the end. Some they never really reached. Each one needs a different week of work, so the report counts them separately and shows you every question in each pile.</p></div>
+        <div class="vt-cap" id="vtc2" role="tabpanel" aria-labelledby="vtt2" hidden><h3>We start where the points are.</h3><p>The topic with the worst percentage is usually the smallest corner of the test. Algebra is about twice the size of geometry on every SAT, so the same five mistakes are worth twice as much there &mdash; and algebra can be taught from scratch in a way circle theorems cannot. So we rank by what the points are worth and how teachable they are. A hard question never counts as easy just because its topic usually is.</p></div>
+        <div class="vt-cap" id="vtc3" role="tabpanel" aria-labelledby="vtt3" hidden><h3>A gain has to beat a good morning.</h3><p>The same student, on two different days, having learned nothing in between, can score sixty points apart. So under sixty points your portal says <em>steady</em> &mdash; and still shows you the number it refused to call progress. Over sixty, the gain is real. That is the one number everybody else rounds in their own favor.</p></div>
       </div>
     </div>
   </div>
@@ -1177,6 +1194,7 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
   <div class="shead rv">
     <div class="lbl">What we teach</div>
     <h2>Three programs. One instructor. One standard.</h2>
+    <p>Weekly one-to-one sessions &mdash; online from anywhere in the country, or in person in Cranford, New Jersey.</p>
   </div>
   <div class="pg">
 
@@ -1290,7 +1308,8 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
       <div class="gbox">
         <div class="k">The guarantee</div>
         <h3>Sixty points, or we keep teaching. Free.</h3>
-        <p>Sixty points is where this site starts calling a gain real &mdash; below that, the same student can move that far on a good morning. So the guarantee is held to that number, not to <em>any</em> improvement. Attend the twelve sessions and hand in the work between them, and if your student&rsquo;s official score is not at least sixty points above their diagnostic baseline, we keep going at no additional charge until it is. No family is asked to keep paying for a result that hasn&rsquo;t arrived.</p>
+        <p>Sixty points is the number this page has been building to. The guarantee is held to it, not to <em>any</em> improvement. Attend the twelve sessions and hand in the work between them, and if your student&rsquo;s official score is not at least sixty points above their diagnostic baseline &mdash; or at the target we set together in week two, whichever comes first &mdash; we keep going at no additional charge until it is.</p>
+        <p>Near a perfect score there are not always sixty points left to win, which is why the target is the other half of the bar. A student starting at 1520 is not held to 1580 to satisfy a guarantee; a student starting at 1100 is not let off with twenty. You have both numbers in writing before the first session, and no family is asked to keep paying for a result that hasn&rsquo;t arrived.</p>
       </div>
     </div>
   </div>
@@ -1339,7 +1358,7 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
       <div class="ff"><label class="fl" for="rf-message">Anything we should know <em>&mdash; optional</em></label>
         <textarea class="fi" id="rf-message" name="message" rows="2" placeholder="Current scores, goals, timeline&hellip;"></textarea></div>
       <button type="submit" class="fsub shimmer" id="rf-submit"><span>Book my one-on-one</span></button>
-      <p class="fnote" id="rf-note">We&rsquo;ll get back to you within 24 hours. Pricing is set per program and we go through it on that call &mdash; the diagnostic itself costs nothing either way.</p>
+      <p class="fnote" id="rf-note">We&rsquo;ll get back to you within 24 hours. The diagnostic and its report cost nothing either way, and you have the price in writing before anything starts. <a href="prep-course.html#faq">How pricing works &rarr;</a></p>
       <p id="rf-success" class="fmsg ok">Thanks &mdash; check your email for confirmation. We&rsquo;ll follow up personally within 24 hours.</p>
       <p id="rf-error" class="fmsg err">Something went wrong. Please call (201) 275-2791 directly.</p>
     </form>

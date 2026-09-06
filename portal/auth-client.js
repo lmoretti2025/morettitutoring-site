@@ -96,6 +96,12 @@ window.MorettiAuth = (function () {
   var session = null;
   var idToken = null;      // held only for the duration of a sign-in attempt
   var onStudent = null;
+  /* Fired when the fast path has ALREADY painted from cache and the resume
+     behind it comes back saying something different. onStudent would be the
+     wrong call there -- it re-enters the portal underneath a student who is
+     reading it. This one hands over the fresh payload and lets the portal
+     decide how little to touch. See the paint-first block in start(). */
+  var onRefresh = null;
   var pollTimer = null;
   var wasPending = false;  // so a claim that gets DECLINED reads as declined, not as "enter a key"
   var nameAsked = false;   // one ask only — see the needsName branch in handle()
@@ -1162,6 +1168,7 @@ window.MorettiAuth = (function () {
      one, so a returning student never sees a login at all. */
   function start(opts) {
     onStudent = (opts && opts.onStudent) || function () {};
+    onRefresh = (opts && opts.onRefresh) || null;
     installFetchWrapper();
     ensureHost();
 
@@ -1259,8 +1266,22 @@ window.MorettiAuth = (function () {
         /* Already painted: refresh the cache for next time and stay out of
            the way. Handing this to handle() would re-run the whole handoff
            -- re-entering the portal underneath a student who is already
-           reading it, and resetting whatever screen they had opened. */
-        if (paintedFromCache) { writeStudentCache(data); return; }
+           reading it, and resetting whatever screen they had opened.
+
+           "Stay out of the way" was doing too much of it, though. Updating
+           the cache and nothing else meant anything that decides WHAT THE
+           PORTAL SHOWS was a whole page load behind the server: change a
+           student between SAT prep and subject tutoring and their very next
+           visit still drew the old home and the old sidebar, because the
+           answer saying otherwise arrived and was filed away unread. The
+           payload now goes to the portal as well, which re-applies its
+           gating in place and leaves the screen alone -- see
+           applyStudentRefresh() in index.html. */
+        if (paintedFromCache) {
+          writeStudentCache(data);
+          if (onRefresh) { try { onRefresh(data); } catch (e) {} }
+          return;
+        }
         handle(data);
         return;
       }
@@ -1348,6 +1369,30 @@ window.MorettiAuth = (function () {
        will resume that session by itself. Reads the store, not the in-memory
        `session`, because on the home page start() never ran. */
     hasSession: function () { return !!readStore(); },
+    /* ASK THE SERVER WHO THIS STUDENT IS NOW, WITHOUT SIGNING THEM IN AGAIN.
+       start() is the only thing that ever resumed a session, and index.html
+       skips it entirely when restoreState() has already put a student back
+       from the same-tab snapshot -- deliberately, so an accidental refresh
+       mid-exam does not restart the handoff. The cost was that the snapshot
+       was never checked against anything for the life of the tab: a student
+       whose program changed kept the old portal through every reload until
+       they closed it.
+
+       This is the missing half. No panes, no handoff, no screen change --
+       it resumes, refreshes the cache, and resolves with the payload for
+       the caller to diff. A dead or unreachable session resolves null
+       rather than rejecting: the fetch wrapper already tears down a
+       genuinely revoked session on the portal's next request, and a blip
+       on the wifi must not be the reason a working portal reacts at all. */
+    refresh: function () {
+      var stored = readStore();
+      if (!stored) return Promise.resolve(null);
+      if (!session) session = stored;
+      return resumeRequest(stored).then(function (data) {
+        if (data && data.ok && data.key) { writeStudentCache(data); return data; }
+        return null;
+      }, function () { return null; });
+    },
     signOut: signOut,
     session: function () { return session; },
     isSignedIn: function () { return !!session; },
