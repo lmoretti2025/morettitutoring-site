@@ -490,7 +490,13 @@
      shortcut-tile grid, which carries no bottom margin of its own, so at 0
      the card's border sat flush against the last row of tile copy and the
      two bands read as one. */
-  .xt-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem 1.7rem 1.4rem; margin: 2.4rem auto 1.6rem; max-width: 720px; box-shadow: var(--shadow); }
+  /* NOT A CARD. This is a section of Home in its own right, headed like
+     "Your Overview" and spanning the same width -- it is a child of
+     .home-overview, so width:100% is that same span exactly. The rows below
+     already carry their own hairlines, so nothing is lost by dropping the
+     card's background, border and shadow. */
+  .xt-card { width: 100%; max-width: none; margin: 2.4rem 0 1.6rem; padding: 0; background: none; border: none; border-radius: 0; box-shadow: none; }
+  .xt-hed { margin-bottom: 0; }
   .xt-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.55rem; }
   .xt-label { font-family: var(--hel); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--mid); }
   .xt-evidence { font-family: var(--hel); font-size: 0.72rem; font-weight: 600; color: var(--mid); background: rgba(17,17,17,0.05); border-radius: 999px; padding: 0.2rem 0.6rem; white-space: nowrap; }
@@ -513,7 +519,7 @@
   .xt-foot { font-size: 0.73rem; line-height: 1.55; color: var(--mid); margin: 1.1rem 0 0; padding-top: 0.8rem; border-top: 1px solid var(--border); }
   .xt-cta { display: inline-block; margin-top: 0.7rem; font-family: var(--hel); font-size: 0.78rem; font-weight: 700; color: var(--red); background: none; border: none; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
   @media (max-width: 620px) {
-    .xt-card { padding: 1.2rem 1.1rem; border-radius: 10px; margin-top: 1.8rem; }
+    .xt-card { padding: 0; margin-top: 1.8rem; }
     .xt-head { gap: 0.4rem; }
   }
   .score-progress-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem 1.7rem 1.3rem; margin: 0 auto 1.6rem; max-width: 720px; box-shadow: var(--shadow); position: relative; }
@@ -8141,9 +8147,51 @@ window.Portal = {
   // fetch just hasn't landed yet (in which case an empty
   // serverScoreHistoryEntries must NOT be read as "delete everything").
   var serverScoreHistoryFetched = false;
+  /* ═══ WHY THE CHART USED TO POP ═══
+     The instant paint comes from localStorage, which only ever holds the
+     attempts taken ON THIS DEVICE -- for most students that is the one
+     diagnostic they sat here, or nothing. Everything else arrives with the
+     server's answer a second or two later, so Home opened showing a single
+     point and then visibly grew to seven once the fetch landed. Nothing was
+     broken; the first frame was just built from a fraction of the data.
+
+     So the server's own answer is cached too, under its own key rather than
+     mixed into the local-attempts store (that store means "taken here", and
+     deleteAttempt/reconcile both read it that way). Next visit paints the
+     complete history immediately and the fetch merely confirms it.
+
+     serverScoreHistoryFetched deliberately stays FALSE while the cache is in
+     use: it is what tells reconcileLocalScoreHistory the server has actually
+     spoken, and a cached copy is not the server speaking. */
+  var SERVER_HISTORY_KEY_ = 'moretti_server_history_';
+  function loadCachedServerHistory(key) {
+    try {
+      var raw = localStorage.getItem(SERVER_HISTORY_KEY_ + key);
+      if (!raw) return [];
+      var data = JSON.parse(raw);
+      return (data && Array.isArray(data.entries)) ? data.entries : [];
+    } catch (e) { return []; }
+  }
+  function saveCachedServerHistory(key, entries) {
+    try {
+      localStorage.setItem(SERVER_HISTORY_KEY_ + key, JSON.stringify({ entries: entries || [] }));
+    } catch (e) { /* quota or private browsing -- the fetch still paints it this visit */ }
+  }
+
   function loadServerScoreHistory() {
     var key = currentStudent && currentStudent.key;
     if (!key) return;
+    /* Paint last visit's copy first so the first frame is already complete.
+       Skipped once the real answer is in, so a refresh mid-session never
+       steps backwards onto older data. */
+    if (!serverScoreHistoryFetched && !serverScoreHistoryEntries.length) {
+      var cached = loadCachedServerHistory(key);
+      if (cached.length) {
+        serverScoreHistoryEntries = cached;
+        if (activeScreenId === 'screen-menu') { renderScoreProgress(); renderCrossTestHome(); renderRecentTestCard(); }
+        else if (activeScreenId === 'screen-practice-tests' && !anyPtMenuOpen()) renderPracticeTestList();
+      }
+    }
     fetch(APPS_SCRIPT_URL, {
       method: 'POST',
       body: JSON.stringify({ action: 'getScoreHistory', key: key })
@@ -8151,6 +8199,7 @@ window.Portal = {
       if (!data || !data.ok || !Array.isArray(data.entries)) return;
       serverScoreHistoryEntries = data.entries;
       serverScoreHistoryFetched = true;
+      saveCachedServerHistory(key, data.entries);
       reconcileLocalScoreHistory();
       repairMissingQStats();
       if (activeScreenId === 'screen-menu') { renderScoreProgress(); renderCrossTestHome(); renderRecentTestCard(); }
@@ -8624,6 +8673,20 @@ window.Portal = {
      tests with a repeating skill. Same one-liner the other blocks use. */
   function esc(s) { return window.Portal.escHtml(s); }
 
+  /* Headed like "Your Overview" beside it -- same face, same size, same red
+     20px mark -- because it is a peer section of Home, not a callout inside
+     one. The mark is a trend line rather than Overview's bars: this section
+     is about movement across tests, not one test's shape. */
+  function xtHeadHtml(evidence) {
+    return '<div class="xt-head">' +
+      '<h2 class="home-overview-hed xt-hed">' +
+      '<svg class="home-overview-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+      '<path d="M4 4v16h16"/><path d="M7 15l4-5 3 3 5-7"/></svg>' +
+      'Your Statistics</h2>' +
+      (evidence ? '<div class="xt-evidence">' + evidence + '</div>' : '') +
+      '</div>';
+  }
+
   function renderCrossTestHome() {
     var host = document.getElementById('xt-card');
     if (!host) return;
@@ -8643,8 +8706,7 @@ window.Portal = {
        for sitting it. */
     if (withStats.length < XT_MIN_TESTS) {
       host.innerHTML =
-        '<div class="xt-head"><div class="xt-label">Across Your Tests</div>' +
-        '<div class="xt-evidence">1 test so far</div></div>' +
+        xtHeadHtml('1 test so far') +
         '<p class="xt-lede">Your report breaks down the test you have taken. What it cannot tell you yet is which mistakes were a bad morning and which ones keep happening &mdash; that needs a second test to compare against.</p>' +
         '<p class="xt-lede" style="margin-bottom:0;">After your next full test, this card will show the topics that came up wrong <strong>more than once</strong>, and the ones you have already fixed.</p>';
       host.style.display = '';
@@ -8702,8 +8764,7 @@ window.Portal = {
 
     if (!back.length && !fixed.length) {
       host.innerHTML =
-        '<div class="xt-head"><div class="xt-label">Across Your Tests</div>' +
-        '<div class="xt-evidence">' + withStats.length + ' tests &middot; ' + pooledQ + ' questions</div></div>' +
+        xtHeadHtml(withStats.length + ' tests &middot; ' + pooledQ + ' questions') +
         '<p class="xt-lede" style="margin-bottom:0;">Nothing is repeating. Across all ' + withStats.length +
         ' of your tests, no topic has come up wrong more than once &mdash; your mistakes are landing in different places each time rather than piling into the same few. That is a good sign: it points at focus and pacing on the day rather than at a topic you have not learned.</p>';
       host.style.display = '';
@@ -8729,8 +8790,7 @@ window.Portal = {
     }
 
     var html =
-      '<div class="xt-head"><div class="xt-label">Across Your Tests</div>' +
-      '<div class="xt-evidence">' + withStats.length + ' tests &middot; ' + pooledQ + ' questions</div></div>' +
+      xtHeadHtml(withStats.length + ' tests &middot; ' + pooledQ + ' questions') +
       '<p class="xt-lede">Each test report looks at that test on its own. This looks at all of them together &mdash; which is the only way to tell a bad morning apart from a topic you actually need to go back to.</p>';
 
     if (back.length) {
@@ -9153,9 +9213,14 @@ window.Portal = {
       nsOhWhen.textContent = parts.date + (parts.time ? ' · ' + parts.time : '');
       nsOhSub.textContent = 'Open to every student — no appointment needed.';
     }
+    /* The room is the same one every session uses, and it is the whole
+       point of the line -- a student reading "Tuesday, 6:00 PM" with no way
+       in has to go and find the link. Shown whether or not the hour has
+       started, exactly like the session's own Join call above it. */
     var meetUrl = window.GOOGLE_MEET_URL || '';
-    if (live && meetUrl && meetUrl.indexOf('PLACEHOLDER') === -1) {
+    if (meetUrl && meetUrl.indexOf('PLACEHOLDER') === -1) {
       nsOhJoin.href = meetUrl;
+      nsOhJoin.textContent = live ? 'Drop in now' : 'Drop in';
       nsOhJoin.style.display = 'inline-block';
     } else {
       nsOhJoin.style.display = 'none';
@@ -10922,6 +10987,19 @@ window.Portal = {
       }
     } catch (e) { /* ignore */ }
     serverScoreHistoryEntries = serverScoreHistoryEntries.filter(function (e) { return !matchesDeletedAttempt(e); });
+    /* The persisted copy of the server's answer has to be pruned too, or a
+       deleted attempt walks back onto the chart on the next page load --
+       which is exactly the bug the in-memory filter above exists to stop. */
+    try {
+      var srvRaw = localStorage.getItem(SERVER_HISTORY_KEY_ + key);
+      if (srvRaw) {
+        var srvData = JSON.parse(srvRaw);
+        if (srvData && Array.isArray(srvData.entries)) {
+          srvData.entries = srvData.entries.filter(function (e) { return !matchesDeletedAttempt(e); });
+          localStorage.setItem(SERVER_HISTORY_KEY_ + key, JSON.stringify(srvData));
+        }
+      }
+    } catch (e) { /* ignore */ }
     ['moretti_incorrect_qs_' + key, 'moretti_saved_qs_' + key].forEach(function (storageKey) {
       try {
         var raw = localStorage.getItem(storageKey);
