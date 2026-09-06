@@ -3839,6 +3839,12 @@
 
   .cal-session { background: rgba(62,107,140,0.12); border: none; border-radius: 10px; padding: 0.4rem 0.55rem; font-size: 0.74rem; color: #2f5470; cursor: pointer; flex-shrink: 0; }
   .cal-session b { display: block; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #3E6B8C; margin-bottom: 0.1rem; }
+  /* Office hours are open to every student, so they must not look like the
+     one-to-one booking directly above them in the same column. */
+  .cal-session.is-oh { background: rgba(201,168,76,0.16); color: #6b551b; }
+  .cal-session.is-oh b { color: var(--gold, #9A7C22); }
+  .cal-session .cal-oh-tag { display: block; font-size: 0.62rem; font-weight: 600; letter-spacing: 0.05em; color: #8a7433; margin-top: 0.12rem; }
+  .cal-chip.sess.is-oh { background: rgba(201,168,76,0.22); color: #6b551b; }
 
   .cal-task { display: flex; align-items: flex-start; gap: 0.45rem; background: var(--white); border-radius: 10px; padding: 0.45rem 0.55rem; font-size: 0.78rem; line-height: 1.35; cursor: pointer; transition: box-shadow 0.14s var(--ease); flex-shrink: 0; }
   .cal-task:hover { box-shadow: 0 4px 12px rgba(17,17,17,0.10); }
@@ -3907,6 +3913,7 @@
     .cal-chip { width: 6px; height: 6px; padding: 0; border-radius: 50%; overflow: hidden; text-indent: -999px; flex: 0 0 auto; }
     .cal-chip.task { background: var(--red); }
     .cal-chip.sess { background: #3E6B8C; }
+    .cal-chip.sess.is-oh { background: #9A7C22; }
     .cal-chip.task.is-done { background: var(--faint); }
     .cal-more { display: none; }
 
@@ -7656,7 +7663,9 @@ window.Portal = {
   function calSessionHtml(sess, idx) {
     var d = new Date(sess.startIso);
     var when = sess.allDay ? 'All day' : d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
-    return '<div class="cal-session" data-session="' + idx + '" role="button" tabindex="0"><b>' + calEscape(when) + '</b>' + calEscape(sess.title) + '</div>';
+    return '<div class="cal-session' + (sess.officeHours ? ' is-oh' : '') + '" data-session="' + idx + '" role="button" tabindex="0">' +
+      '<b>' + calEscape(when) + '</b>' + calEscape(sess.title) +
+      (sess.officeHours ? '<span class="cal-oh-tag">Open to every student &mdash; drop in</span>' : '') + '</div>';
   }
 
   function calRender() {
@@ -7778,7 +7787,7 @@ window.Portal = {
       day.sessions.forEach(function (sess) {
         if (shown >= cap) return;
         shown++;
-        out.push('<span class="cal-chip sess" role="button" tabindex="0" data-session="' + calState.sessions.indexOf(sess) + '">' + calEscape(sess.title) + '</span>');
+        out.push('<span class="cal-chip sess' + (sess.officeHours ? ' is-oh' : '') + '" role="button" tabindex="0" data-session="' + calState.sessions.indexOf(sess) + '">' + calEscape(sess.title) + '</span>');
       });
       day.tasks.forEach(function (t) {
         if (shown >= cap) return;
@@ -7890,7 +7899,7 @@ window.Portal = {
 
   function calOpenSessionDetail(sess) {
     calDetailRow = null;
-    document.getElementById('cal-detail-kind').textContent = 'Tutoring session';
+    document.getElementById('cal-detail-kind').textContent = sess.officeHours ? 'Office hours' : 'Tutoring session';
     document.getElementById('cal-detail-kind').className = 'cal-detail-kind session';
     document.getElementById('cal-detail-title').textContent = sess.title;
     var d = new Date(sess.startIso);
@@ -7899,7 +7908,12 @@ window.Portal = {
     document.getElementById('cal-detail-when').textContent = d.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' }) +
       (sess.allDay ? '' : ' · ' + t(d) + (end ? ' – ' + t(end) : ''));
     var notesEl = document.getElementById('cal-detail-notes');
-    notesEl.textContent = '';
+    /* Says out loud that this one is not a booking of theirs -- otherwise a
+       shared hour on their own calendar reads as an appointment they are
+       expected at, which is the opposite of a drop-in. */
+    notesEl.textContent = sess.officeHours
+      ? 'Open to every student in the program \u2014 drop in with whatever you are stuck on. No appointment needed, and nothing extra to pay.'
+      : '';
     notesEl.className = 'cal-detail-notes';
     document.getElementById('cal-detail-check-row').style.display = 'none';
     document.getElementById('cal-detail-go').style.display = 'none';
