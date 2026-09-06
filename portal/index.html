@@ -424,6 +424,16 @@
   .ns-join { display: inline-flex; align-items: center; gap: 0.35rem; margin-top: 0.65rem; font-family: var(--hel); font-size: 0.72rem; font-weight: 700; color: var(--red); text-decoration: none; background: rgba(201,168,76,0.16); border-radius: 999px; padding: 0.32rem 0.75rem; }
   .ns-join svg { width: 13px; height: 13px; flex-shrink: 0; }
   .ns-join:hover { opacity: 0.85; }
+  /* Subordinate by construction: a hairline above it, smaller type, and the
+     gold used for "open to everyone" throughout the portal — so it reads as
+     something also available, never as the appointment above it. */
+  .ns-oh { margin-top: 0.95rem; padding-top: 0.8rem; border-top: 1px solid rgba(17,17,17,0.07); }
+  .ns-oh-k { font-family: var(--hel); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #7A6018; margin-bottom: 0.22rem; }
+  .ns-oh-when { font-family: var(--hel); font-size: 0.82rem; font-weight: 500; color: var(--text); font-variant-numeric: tabular-nums; }
+  .ns-oh-sub { font-family: var(--hel); font-size: 0.71rem; color: var(--mid); margin-top: 0.1rem; }
+  .ns-oh.is-now .ns-oh-when { color: var(--red); font-weight: 600; }
+  .ns-oh-join { display: inline-block; margin-top: 0.45rem; font-family: var(--hel); font-size: 0.68rem; font-weight: 700; color: var(--red); text-decoration: none; background: rgba(201,168,76,0.16); border-radius: 999px; padding: 0.26rem 0.7rem; }
+  .ns-oh-join:hover { opacity: 0.85; }
 
   /* ═══ THIS WEEK'S ASSIGNMENTS — home-screen checklist. Populated from
      the Assignments sheet tab (see Code.gs); each row is one task with a
@@ -4695,6 +4705,16 @@ window.Portal = {
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 10l5-3v10l-5-3"/><rect x="3" y="6" width="12" height="12" rx="2"/></svg>
                   Join call<span id="ns-join-url" style="display:none;"></span>
                 </a>
+                <!-- Office hours: shared with the whole program, so it sits
+                     UNDER the student's own session rather than competing
+                     with it for the headline. Hidden outright when there are
+                     none upcoming, so the card keeps its old height. -->
+                <div class="ns-oh" id="ns-oh" hidden>
+                  <div class="ns-oh-k">Office hours</div>
+                  <div class="ns-oh-when" id="ns-oh-when"></div>
+                  <div class="ns-oh-sub" id="ns-oh-sub"></div>
+                  <a href="#" class="ns-oh-join" id="ns-oh-join" style="display:none;" target="_blank" rel="noopener">Drop in</a>
+                </div>
                 </div>
                 <div class="ns-daychip" id="ns-daychip" aria-hidden="true">
                   <span class="ns-daychip-mon" id="ns-daychip-mon"></span>
@@ -8992,6 +9012,10 @@ window.Portal = {
      just stays hidden instead of showing an error on the home screen. */
   var nsCard  = document.getElementById('next-session-card');
   var nsLabel = document.getElementById('ns-label');
+  var nsOh = document.getElementById('ns-oh');
+  var nsOhWhen = document.getElementById('ns-oh-when');
+  var nsOhSub = document.getElementById('ns-oh-sub');
+  var nsOhJoin = document.getElementById('ns-oh-join');
   var nsDate  = document.getElementById('ns-date');
   var nsTime  = document.getElementById('ns-time');
   var nsJoin  = document.getElementById('ns-join');
@@ -9106,6 +9130,39 @@ window.Portal = {
   // lookup below only ever refines the LABEL/DATE text (which session,
   // starting when) — it never hides the link, on success, failure, or no
   // connection at all.
+  /* THE SHARED HOUR IS NOT AN APPOINTMENT. It sits under the student's own
+     session, in the gold the portal uses for "open to everyone", and says so
+     in words -- because a time and a join button on a student's own card is
+     otherwise indistinguishable from something they are expected at.
+     Deliberately not routed through #ns-label: that element is display:none
+     in the stylesheet above, so anything written to it is invisible. */
+  function renderOfficeHours(oh) {
+    if (!nsOh) return;
+    if (!oh || !oh.startIso) { nsOh.hidden = true; return; }
+    var startMs = Date.parse(oh.startIso);
+    if (isNaN(startMs)) { nsOh.hidden = true; return; }
+    // Same 20-minute grace the session half uses, so a drop-in that has just
+    // begun still reads as joinable rather than as already gone.
+    var live = !oh.allDay && startMs <= Date.now();
+    nsOh.classList.toggle('is-now', live);
+    if (live) {
+      nsOhWhen.textContent = 'Happening now';
+      nsOhSub.textContent = 'Open to every student — drop in with whatever you are stuck on.';
+    } else {
+      var parts = formatSessionDateParts(oh.startIso, oh.allDay);
+      nsOhWhen.textContent = parts.date + (parts.time ? ' · ' + parts.time : '');
+      nsOhSub.textContent = 'Open to every student — no appointment needed.';
+    }
+    var meetUrl = window.GOOGLE_MEET_URL || '';
+    if (live && meetUrl && meetUrl.indexOf('PLACEHOLDER') === -1) {
+      nsOhJoin.href = meetUrl;
+      nsOhJoin.style.display = 'inline-block';
+    } else {
+      nsOhJoin.style.display = 'none';
+    }
+    nsOh.hidden = false;
+  }
+
   function loadNextSession() {
     if (!currentStudent || !currentStudent.key) return;
     nsCard.style.display = '';
@@ -9115,6 +9172,7 @@ window.Portal = {
     setNsRel('');
     setNsDayChip(null);
     nsNoSession = false;
+    if (nsOh) nsOh.hidden = true;
     setJoinLink();
 
     fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'nextSession', key: currentStudent.key, debug: DEBUG_MODE }) })
@@ -9122,6 +9180,10 @@ window.Portal = {
       .catch(function (err) { return { ok: false, error: 'network', message: String(err) }; })
       .then(function (data) {
         renderNextSessionDebug(data);
+        /* Independent of the session branches below -- office hours show
+           whether or not this student has a booking, and a failed lookup
+           simply leaves the line hidden. */
+        renderOfficeHours(data && data.ok ? data.officeHours : null);
         if (data && data.ok && data.next) {
           // If the session's start time has already passed (the backend
           // keeps it showing for 20 minutes after it begins), frame it as
@@ -9129,24 +9191,14 @@ window.Portal = {
           // reading a time that looks like it's already gone.
           var startMs = Date.parse(data.next.startIso);
           var inProgress = !data.next.allDay && !isNaN(startMs) && startMs <= Date.now();
-          /* Office hours sit on this card on the same terms as a session --
-             whichever comes first is the one shown -- but they are a drop-in
-             open to the whole program, not an appointment this student is
-             expected at. Only the wording separates them; everything else
-             (the join link, the day chip, the countdown) is identical. */
-          var isOh = !!data.next.officeHours;
           if (inProgress) {
-            nsLabel.textContent = isOh
-              ? '📅 Office hours are happening now — drop in below:'
-              : '📅 Your session is happening now — join below:';
+            nsLabel.textContent = '📅 Your session is happening now — join below:';
             nsDate.textContent = 'Happening now';
             setNsRel('');
             setNsDayChip(null);
             if (nsTime) nsTime.textContent = 'Started at ' + formatSessionDate(data.next.startIso, data.next.allDay).replace(/^.*at /, '');
           } else {
-            nsLabel.textContent = isOh
-              ? '📅 Office hours — open to every student, no appointment:'
-              : '📅 Your next scheduled session is on:';
+            nsLabel.textContent = '📅 Your next scheduled session is on:';
             var parts = formatSessionDateParts(data.next.startIso, data.next.allDay);
             nsDate.textContent = parts.date;
             if (nsTime) nsTime.textContent = parts.time;
