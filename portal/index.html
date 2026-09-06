@@ -515,7 +515,14 @@
   .xt-count.good { color: #2F7D4F; }
   .xt-bar { grid-column: 1 / -1; height: 6px; border-radius: 999px; background: rgba(17,17,17,0.07); overflow: hidden; }
   .xt-bar i { display: block; height: 100%; background: var(--red); border-radius: 999px; }
-  .xt-when { grid-column: 1 / -1; font-size: 0.73rem; color: var(--mid); }
+  .xt-when { font-size: 0.73rem; color: var(--mid); }
+  .xt-rowfoot { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: 0.7rem; flex-wrap: wrap; }
+  .xt-practice { font-family: var(--hel); font-size: 0.72rem; font-weight: 700; color: var(--red); background: rgba(176,39,28,0.07); border: none; border-radius: 999px; padding: 0.3rem 0.75rem; cursor: pointer; white-space: nowrap; transition: background 0.15s var(--ease), color 0.15s var(--ease); }
+  .xt-practice:hover { background: var(--red); color: #fff; }
+  .xt-practice:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+  .xt-practice span { display: inline-block; transition: transform 0.15s var(--ease); }
+  .xt-practice:hover span { transform: translateX(2px); }
+  @media (prefers-reduced-motion: reduce) { .xt-practice span { transition: none; } }
   .xt-foot { font-size: 0.73rem; line-height: 1.55; color: var(--mid); margin: 1.1rem 0 0; padding-top: 0.8rem; border-top: 1px solid var(--border); }
   .xt-cta { display: inline-block; margin-top: 0.7rem; font-family: var(--hel); font-size: 0.78rem; font-weight: 700; color: var(--red); background: none; border: none; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
   @media (max-width: 620px) {
@@ -8775,11 +8782,19 @@ window.Portal = {
       var pct = b.total ? Math.round(b.wrong / b.total * 100) : 0;
       var sec = xtSectionLabel(b.section);
       if (kind === 'back') {
+        /* Only on the repeating skills. "You have fixed this" needs no
+           button -- pointing a student at a topic they have just closed is
+           the opposite of what the row says. */
+        var subject = b.section === 'math' ? 'math' : 'rw';
         return '<div class="xt-row">' +
           '<div class="xt-name">' + esc(b.skill) + (sec ? '<span class="xt-sec">' + esc(sec) + '</span>' : '') + '</div>' +
           '<div class="xt-count">' + b.wrong + ' of ' + b.total + ' wrong</div>' +
           '<div class="xt-bar"><i style="width:' + pct + '%"></i></div>' +
-          '<div class="xt-when">Came up wrong in ' + b.missedTests + ' of the ' + b.testCount + ' tests that included it.</div>' +
+          '<div class="xt-rowfoot">' +
+            '<span class="xt-when">Came up wrong in ' + b.missedTests + ' of the ' + b.testCount + ' tests that included it.</span>' +
+            '<button type="button" class="xt-practice" data-qb-subject="' + subject + '" data-qb-skill="' + esc(b.skill) + '">' +
+              'Practice this <span aria-hidden="true">&rarr;</span></button>' +
+          '</div>' +
           '</div>';
       }
       return '<div class="xt-row">' +
@@ -8812,6 +8827,26 @@ window.Portal = {
 
     host.innerHTML = html;
     host.style.display = '';
+    /* Delegated and armed once: renderCrossTestHome() replaces this markup
+       wholesale on every render, so a listener on the buttons themselves
+       would be thrown away with them. */
+    if (!host.dataset.xtWired) {
+      host.dataset.xtWired = '1';
+      host.addEventListener('click', function (e) {
+        var btn = e.target.closest ? e.target.closest('.xt-practice') : null;
+        if (!btn) return;
+        var subject = btn.getAttribute('data-qb-subject');
+        var skill = btn.getAttribute('data-qb-skill');
+        /* Same two steps the sidebar's own Question Bank link takes, so the
+           module is initialised before anything asks it to select a topic.
+           If the skill cannot be practised (Math temporarily off, or no
+           questions behind it), qbPracticeSkill returns quietly and the
+           student is still on the Question Bank rather than nowhere. */
+        show('screen-question-bank');
+        if (window.qbModuleInit) window.qbModuleInit();
+        if (window.qbPractice && window.qbPractice.open) window.qbPractice.open(subject, skill);
+      });
+    }
   }
 
   function renderScoreProgress() {
@@ -17856,6 +17891,16 @@ window.Portal = {
     var card = document.querySelector('#qb-skills-list .qb-topic.on');
     if (card && card.scrollIntoView) card.scrollIntoView({ block: 'center', behavior: 'smooth' });
   }
+
+  /* THE ONE DOOR IN. "Your Statistics" on Home names the skills that keep
+     coming back, and the useful next move from there is to drill one -- but
+     that section lives in another script block entirely, so it cannot reach
+     qbPracticeSkill() directly. Exposed here rather than reimplemented
+     there, so the "stop at the skills view with the topic ticked" behaviour
+     documented above stays in one place. */
+  window.qbPractice = {
+    open: function (subject, skill) { qbPracticeSkill(subject, skill); }
+  };
 
   function renderAnalytics() {
     var gridEl = document.getElementById('qb-analytics-grid');
