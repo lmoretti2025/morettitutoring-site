@@ -574,13 +574,9 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
 /* White, matching the report's own ground, so there is no card edge between
    the page and the document — it reads as one surface. */
 .rptwrap{background:#fff;border:none;padding:0 0 clamp(2rem,5vh,3.5rem)}
-.rptbar{max-width:1560px;margin:0 auto;padding:clamp(1.1rem,2.6vh,1.8rem) clamp(1rem,3vw,2rem) clamp(.6rem,1.4vh,1rem);
-  display:flex;flex-wrap:wrap;gap:.5rem 1.4rem;align-items:baseline;justify-content:space-between}
+.rptbar{max-width:1560px;margin:0 auto;padding:clamp(1.1rem,2.6vh,1.8rem) clamp(1rem,3vw,2rem) clamp(.6rem,1.4vh,1rem)}
 .rptbar p{font-size:.8rem;color:#7A736B;line-height:1.55;max-width:66ch}
 .rptbar p b{color:var(--ink);font-weight:600}
-.rptbar a{font-size:.7rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--red);
-  border-bottom:1px solid rgba(176,39,28,.35);white-space:nowrap}
-.rptbar a:hover{border-bottom-color:var(--red)}
 
 .stage{position:relative;width:100%;margin:0 auto}
 .stage iframe{display:block;width:100%;height:2600px;border:0;background:transparent;overflow:hidden}
@@ -623,7 +619,7 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
 
 <section class="dhero"><div class="shell">
   <div class="eyeb">The free diagnostic</div>
-  <h1>Most tutors open with a phone call. I open with <em>this</em>.</h1>
+  <h1>Most tutors open with a phone call. I open with <em>this.</em></h1>
   <p>This is the real report, running live on this page, exactly as a student opens it in their
   portal. Nothing is held back for a sales call.</p>
   <div class="acts">
@@ -637,7 +633,6 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
     <p><b>Live, not a screenshot.</b> Hover a bar in the path-to-target chart for that skill&rsquo;s
     accuracy, click one to see the questions behind it, or drag the dashed target line. Synthetic
     data for a student called Demo &mdash; no real student&rsquo;s results are published here.</p>
-    <a href="portal/report.html?demo=1&amp;score=1250&amp;weak=math&amp;embed=public&amp;v=20260907" target="_blank" rel="noopener">Open on its own &nearr;</a>
   </div>
 
   <div class="stage" id="stage">
@@ -706,11 +701,11 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
     if (!latest) return;
     layer.innerHTML = '';
 
-    var GAP = 22;
+    var GAP = 34;
     var colLeft  = latest.colLeft;
     var colRight = latest.colLeft + latest.colWidth;
     var margin = Math.min(colLeft, stage.clientWidth - colRight);
-    var width = Math.floor(margin - GAP - 10);
+    var width = Math.floor(margin - GAP - 8);
     if (width < 130) return;                 // the list below covers it
     width = Math.min(width, 250);
 
@@ -748,19 +743,28 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
       var nr = note.getBoundingClientRect();
       var left = note.classList.contains('l');
 
-      // start just off the note's inner edge, on its first line
-      var x1 = (left ? nr.right - sr.left : nr.left - sr.left) + (left ? 8 : -8);
-      var y1 = nr.top - sr.top + 13;
+      /* Start underneath the note, set back toward its outer edge, rather
+         than on the inner edge — the note sits hard against the column, so
+         starting there left about four pixels to draw in and the arrow read
+         as a tick. From below it can run the note's whole width before it
+         turns in, which is what gives it the sweep of a drawn one. */
+      // vary where each one sets off, so nine identical spans don't give
+      // the game away
+      var inset = 0.12 + (i % 4) * 0.055;
+      var x1 = left
+        ? nr.left - sr.left + nr.width * inset
+        : nr.right - sr.left - nr.width * inset;
+      var y1 = nr.bottom - sr.top + 6 + (i % 3) * 3;
       // land just short of the report column, level with the section
-      var x2 = (left ? colLeft : colRight) + (left ? -10 : 10);
+      var x2 = (left ? colLeft : colRight) + (left ? -12 : 12);
       var y2 = top + 22;
 
-      // bow the arc away from the straight line, alternating so a column of
-      // them doesn't read as a machine-drawn set
+      // bow it away from the straight line, alternating and varying so a
+      // column of them doesn't read as a machine-drawn set
       var dx = x2 - x1, dy = y2 - y1;
-      var bow = (30 + (i % 3) * 9) * (i % 2 ? -1 : 1);
-      var cx = x1 + dx * 0.45 - (dy / Math.max(1, Math.abs(dy))) * 0;
-      var cy = y1 + dy * 0.55 + bow;
+      var bow = (26 + (i % 3) * 10) * (i % 2 ? -1 : 1);
+      var cx = x1 + dx * 0.55;
+      var cy = y1 + dy * 0.30 + bow;
 
       var g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
       var p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
