@@ -1908,9 +1908,24 @@
     // time, so wrongRate/seedBase are the only things that vary between
     // calls) and returns both the generated sections and the composite
     // the real scoring functions would actually display for them.
+    /* &weak=math (or &weak=rw) skews the synthetic student's misses toward
+       one section instead of spreading them evenly. Demo-only: this whole
+       generator runs behind DEMO_MODE, so a real attempt's report never
+       reaches it. The bisection above still solves for the requested
+       composite — this only changes how the misses are distributed
+       between the two sections to get there. */
+    var demoWeak = (location.search.match(/[?&]weak=(\w+)/) || [])[1];
+    var DEMO_SKEW = {
+      math: { 'math': 1.75, 'reading-writing': 0.55 },
+      rw:   { 'math': 0.55, 'reading-writing': 1.75 }
+    }[demoWeak] || null;
+    function demoSkewFor(key) { return DEMO_SKEW ? (DEMO_SKEW[key] || 1) : 1; }
+
     function trial(wrongRate, seedBase) {
       seed = seedBase;
-      var secs = sectionKeys.map(function (key) { return genSection(key, wrongRate); });
+      var secs = sectionKeys.map(function (key) {
+        return genSection(key, Math.min(0.95, wrongRate * demoSkewFor(key)));
+      });
       var composite = null;
       var rwSec = secs.filter(function (s) { return s.k === 'reading-writing'; })[0];
       var mathSec = secs.filter(function (s) { return s.k === 'math'; })[0];
