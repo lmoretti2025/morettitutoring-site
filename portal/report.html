@@ -86,7 +86,7 @@
   /* Sits directly under the composite figure, sized as a caption to it —
      the imprecision travels with the number instead of as a paragraph of
      methodology below the card. */
-  .tile-unworked { font-family: var(--hel); font-size: 11px; line-height: 1.45; color: var(--ink); background: #FBF3E7; border-left: 2px solid var(--gold); padding: 7px 9px; margin-top: 8px; text-align: left; max-width: 340px; }
+  .tile-unworked { font-family: var(--hel); font-size: 11px; line-height: 1.5; color: var(--ink); background: #FBF3E7; border-top: 1px solid var(--border); border-left: 3px solid var(--gold); padding: 10px 14px; margin: 0; text-align: left; }
   .tile-unworked strong { font-weight: 600; }
   .tile-range { font-family: var(--hel); font-size: 11px; font-weight: 500; letter-spacing: 0.02em; color: var(--faint); margin-top: 5px; font-variant-numeric: tabular-nums; }
   /* ═══ STUDY PLAN ═══ */
@@ -3011,7 +3011,13 @@
             Math.round(usedMs / 60000) + ' of ' + Math.round(allotMs / 60000) + ' available minutes. ' +
             'Guessing lifts this number and questions that went by too fast to have been worked hold it down, ' +
             'so it is not a clean read of what ' + first + ' knows &mdash; in either direction. See Habits worth naming.';
-          bigTile.appendChild(noteEl);
+          /* Under the score row, not inside the composite tile. The tile is
+             flex:0 0 auto, so a 340px note set its width to ~400px, and the
+             Reading/Math pair (flex-basis 320px) could no longer fit beside
+             it -- they wrapped to a line of their own and left a blank half
+             where they had been. As a band it also gets the full measure to
+             be read in, which a caution about the headline number deserves. */
+          tilesEl.parentNode.insertBefore(noteEl, tilesEl.nextSibling);
         }
       }
     }
