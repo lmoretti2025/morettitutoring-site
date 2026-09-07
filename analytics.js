@@ -31,7 +31,7 @@
   'use strict';
 
   var CONFIG = {
-    ga4:          'G-XXXXXXXXXX',
+    ga4:          'G-7HBH1KFEZM',
     metaPixel:    'XXXXXXXXXXXXXXX',
     googleAds:    '',
     adsLeadLabel: ''
