@@ -593,10 +593,14 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
 .note.in{opacity:1;transform:none}
 .note.l{text-align:right}
 .note.r{text-align:left}
-.note::after{content:'';position:absolute;top:.55em;width:clamp(16px,2vw,34px);height:1px;
-  background:rgba(138,42,30,.42)}
-.note.l::after{right:-.7rem;rotate:4deg}
-.note.r::after{left:-.7rem;rotate:-4deg}
+/* the leader is a drawn arc (see .arrows), not a rule on the note */
+.arrows{position:absolute;inset:0;pointer-events:none;overflow:visible;z-index:1}
+.arrows path,.arrows polyline{fill:none;stroke:rgba(138,42,30,.62);stroke-width:1.6;
+  stroke-linecap:round;stroke-linejoin:round}
+.arrows .head{stroke-width:1.7}
+.arrows g{opacity:0;transition:opacity .7s var(--ease)}
+.arrows g.in{opacity:1}
+@media(prefers-reduced-motion:reduce){.arrows g{transition:none;opacity:1}}
 
 /* no margin to write in — the notes become a short list */
 .notelist{display:none;max-width:1560px;margin:0 auto;padding:clamp(1.6rem,4vw,2.4rem) clamp(1rem,3vw,2rem) 0}
@@ -605,7 +609,7 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
 .notelist li{font-family:'Caveat',cursive;font-size:1.24rem;line-height:1.34;color:#8A2A1E;
   padding-left:1.1rem;position:relative}
 .notelist li::before{content:'';position:absolute;left:0;top:.6em;width:12px;height:1px;background:rgba(138,42,30,.42)}
-@media(max-width:1500px){ .notes{display:none} .notelist{display:block} }
+@media(max-width:1500px){ .notes,.arrows{display:none} .notelist{display:block} }
 @media(prefers-reduced-motion:reduce){.note{transition:none;opacity:1;transform:none}}
 
 .dcta{background:var(--void);color:#fff;padding:clamp(3.5rem,8vh,5.5rem) 0;text-align:center}
@@ -633,12 +637,13 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
     <p><b>Live, not a screenshot.</b> Hover a bar in the path-to-target chart for that skill&rsquo;s
     accuracy, click one to see the questions behind it, or drag the dashed target line. Synthetic
     data for a student called Demo &mdash; no real student&rsquo;s results are published here.</p>
-    <a href="portal/report.html?demo=1&amp;score=1250&amp;weak=math&amp;embed=public" target="_blank" rel="noopener">Open on its own &nearr;</a>
+    <a href="portal/report.html?demo=1&amp;score=1250&amp;weak=math&amp;embed=public&amp;v=20260907" target="_blank" rel="noopener">Open on its own &nearr;</a>
   </div>
 
   <div class="stage" id="stage">
-    <iframe id="rptframe" src="portal/report.html?demo=1&amp;score=1250&amp;weak=math&amp;embed=public" scrolling="no"
+    <iframe id="rptframe" src="portal/report.html?demo=1&amp;score=1250&amp;weak=math&amp;embed=public&amp;v=20260907" scrolling="no"
             title="Sample SAT diagnostic report for a fictional student"></iframe>
+    <svg class="arrows" id="arrows" aria-hidden="true"></svg>
     <div class="notes" id="notes"></div>
   </div>
 
@@ -719,9 +724,65 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
       note.style.width = width + 'px';
       if (n.side === 'l') note.style.right = Math.round(stage.clientWidth - colLeft + GAP) + 'px';
       else                note.style.left  = Math.round(colRight + GAP) + 'px';
+      note.dataset.sel = n.sel;
       layer.appendChild(note);
     });
+    drawArrows(colLeft, colRight);
     reveal();
+  }
+
+  /* A drawn arc from each note to the thing it points at. Curved and slightly
+     uneven on purpose — a straight rule reads as a diagram callout, and these
+     are meant to read as someone's margin notes. */
+  function drawArrows(colLeft, colRight) {
+    var svg = document.getElementById('arrows');
+    svg.innerHTML = '';
+    var sr = stage.getBoundingClientRect();
+    svg.setAttribute('viewBox', '0 0 ' + Math.round(sr.width) + ' ' + Math.round(stage.clientHeight));
+    svg.setAttribute('width', Math.round(sr.width));
+    svg.setAttribute('height', Math.round(stage.clientHeight));
+
+    Array.prototype.forEach.call(layer.querySelectorAll('.note'), function (note, i) {
+      var top = latest.anchors[note.dataset.sel];
+      if (top === undefined) return;
+      var nr = note.getBoundingClientRect();
+      var left = note.classList.contains('l');
+
+      // start just off the note's inner edge, on its first line
+      var x1 = (left ? nr.right - sr.left : nr.left - sr.left) + (left ? 8 : -8);
+      var y1 = nr.top - sr.top + 13;
+      // land just short of the report column, level with the section
+      var x2 = (left ? colLeft : colRight) + (left ? -10 : 10);
+      var y2 = top + 22;
+
+      // bow the arc away from the straight line, alternating so a column of
+      // them doesn't read as a machine-drawn set
+      var dx = x2 - x1, dy = y2 - y1;
+      var bow = (30 + (i % 3) * 9) * (i % 2 ? -1 : 1);
+      var cx = x1 + dx * 0.45 - (dy / Math.max(1, Math.abs(dy))) * 0;
+      var cy = y1 + dy * 0.55 + bow;
+
+      var g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      var p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      p.setAttribute('d', 'M ' + x1.toFixed(1) + ' ' + y1.toFixed(1) +
+                          ' Q ' + cx.toFixed(1) + ' ' + cy.toFixed(1) +
+                          ' ' + x2.toFixed(1) + ' ' + y2.toFixed(1));
+      g.appendChild(p);
+
+      // arrowhead, angled along the curve's final direction
+      var ang = Math.atan2(y2 - cy, x2 - cx);
+      var L = 8;
+      var h = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+      h.setAttribute('class', 'head');
+      h.setAttribute('points',
+        (x2 - L * Math.cos(ang - 0.42)).toFixed(1) + ',' + (y2 - L * Math.sin(ang - 0.42)).toFixed(1) + ' ' +
+        x2.toFixed(1) + ',' + y2.toFixed(1) + ' ' +
+        (x2 - L * Math.cos(ang + 0.42)).toFixed(1) + ',' + (y2 - L * Math.sin(ang + 0.42)).toFixed(1));
+      g.appendChild(h);
+
+      g.dataset.for = note.dataset.sel;
+      svg.appendChild(g);
+    });
   }
 
   function reveal() {
@@ -732,7 +793,11 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
     }
     var io = new IntersectionObserver(function (es) {
       es.forEach(function (e) {
-        if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+        if (!e.isIntersecting) return;
+        e.target.classList.add('in');
+        var g = document.querySelector('#arrows g[data-for="' + e.target.dataset.sel + '"]');
+        if (g) g.classList.add('in');
+        io.unobserve(e.target);
       });
     }, { threshold: 0, rootMargin: '-6% 0px -10% 0px' });
     Array.prototype.forEach.call(notes, function (n) { io.observe(n); });
