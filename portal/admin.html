@@ -83,7 +83,6 @@
   .summary-tile:hover { box-shadow: 0 10px 26px rgba(17,17,17,0.09); transform: translateY(-1px); }
   .summary-tile .num { font-family: var(--display); font-size: 2rem; line-height: 1.05; color: var(--text); }
   .summary-tile .lbl { font-size: 0.66rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); margin-top: 0.3rem; }
-  .summary-tile.flagged .num { color: var(--red); }
   .summary-tile .sub { font-size: 0.72rem; color: var(--faint); margin-top: 0.25rem; }
 
   .filter-row { display: flex; align-items: center; gap: 1.1rem; margin-bottom: 1rem; flex-wrap: wrap; }
@@ -715,7 +714,15 @@
   function relativeTime(iso) {
     var d = daysAgo(iso);
     if (d == null) return 'Never';
-    if (d < 1) return 'Today';
+    if (d < 1) {
+      /* "Today" is the least useful thing this column can say: it is true
+         from a minute after a sign-in until midnight. Minutes and hours tell
+         you whether someone is on the site now or was here this morning. */
+      var mins = (Date.now() - new Date(iso).getTime()) / 60000;
+      if (mins < 1) return 'Just now';
+      if (mins < 60) return Math.round(mins) + 'm ago';
+      return Math.floor(mins / 60) + 'h ago';
+    }
     if (d < 2) return 'Yesterday';
     if (d < 14) return Math.floor(d) + ' days ago';
     var weeks = Math.floor(d / 7);
@@ -889,27 +896,18 @@
   var bodyEl = $('roster-body');
   var filterHiddenEl = $('filter-hidden');
 
-  function isFlagged(s) {
-    var behindOnAssignments = s.assignTotal > 0 && s.assignDone < s.assignTotal;
-    var d = daysAgo(s.lastActivityAt);
-    var quiet = d == null || d >= STALE_DAYS;
-    return behindOnAssignments || quiet;
-  }
-
   function onlineCount(list) {
     return list.filter(function (s) { return s.online; }).length;
   }
 
   function renderSummary() {
-    // Hidden students are out of the picture entirely — they shouldn't
-    // inflate "needs attention" with work nobody's doing any more.
+    // Hidden students are out of the picture entirely — an archived row
+    // should not be counted in a summary of who is being taught.
     var active = allStudents.filter(function (s) { return !s.archived; });
     var total = active.length;
-    var flagged = active.filter(isFlagged).length;
     var withScore = active.filter(function (s) { return s.composite != null; }).length;
     summaryRowEl.innerHTML =
       '<div class="summary-tile"><div class="num">' + total + '</div><div class="lbl">Students</div></div>' +
-      '<div class="summary-tile' + (flagged ? ' flagged' : '') + '"><div class="num">' + flagged + '</div><div class="lbl">Need attention</div></div>' +
       '<div class="summary-tile"><div class="num">' + withScore + '</div><div class="lbl">With a score on file</div></div>' +
       /* Only when somebody actually is. A permanent "0 on the site now"
          tile would be a tile that is wrong-looking almost all day; this
