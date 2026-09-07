@@ -349,58 +349,48 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
 @media(max-width:1000px){.satstage > .shell{grid-template-columns:1fr}}
 @keyframes sealSpin{to{transform:rotate(360deg)}}
 
-/* ══ WHAT'S INCLUDED: the whole list, with one row open ══════════════════
-   Was a one-at-a-time carousel in a white card. Two problems: five of the six
-   things being sold were hidden at any moment, so the hero's first frame --
-   the one a skimming parent actually sees -- carried a single feature; and a
-   bright panel on a black stage read as an inert box rather than as part of
-   the hero. Every title is visible now, the active row opens, and the rail
-   under it shows how long it has. Motion that says something.
+/* ══ WHAT'S INCLUDED: an inventory that ticks itself off ═════════════════
+   Third shape for this panel, and the reasoning is the same each time: a
+   parent skimming the hero should learn what the programme contains without
+   waiting or clicking. A carousel showed one of six. An accordion showed six
+   titles but rationed the lines under them. This shows all six whole, and
+   spends its motion confirming them rather than revealing them -- the ticks
+   draw down the list once as the hero settles, then it is a static panel.
 
-   The open/close uses grid-template-rows 0fr->1fr, so no height is ever
-   measured and a row can hold any amount of text. */
+   The rows are legible with the script dead -- only the ticks depend on it,
+   and a timer adds them to every row if the sequence is ever interrupted. */
 .ftour{width:100%;justify-self:center;max-width:560px;
-  animation:satIn 1.1s var(--ease) 3.65s both}
-.ft-head{font-size:.62rem;font-weight:600;letter-spacing:.24em;text-transform:uppercase;
-  color:rgba(237,231,229,.5);margin-bottom:.85rem}
-.ft-list{list-style:none;margin:0;padding:0;border-radius:16px;overflow:hidden;
+  animation:satIn 1.1s var(--ease) 3.5s both}
+.ft-head{display:flex;align-items:baseline;gap:.6rem;margin-bottom:.9rem}
+.ft-head b{font-size:.62rem;font-weight:600;letter-spacing:.24em;text-transform:uppercase;
+  color:rgba(237,231,229,.5)}
+.ft-head span{font-size:.62rem;letter-spacing:.06em;color:rgba(237,231,229,.32)}
+.ft-list{list-style:none;margin:0;padding:.4rem;border-radius:16px;
   background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.13);
   backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
-.ft-item + .ft-item{border-top:1px solid rgba(255,255,255,.08)}
-.ft-row{position:relative;width:100%;display:flex;align-items:center;gap:.85rem;
-  padding:.92rem 1.05rem;margin:0;border:none;background:transparent;cursor:pointer;
-  font:inherit;text-align:left;color:rgba(237,231,229,.6);
-  transition:color .25s var(--ease),background .25s var(--ease)}
-.ft-row:hover{color:#fff;background:rgba(255,255,255,.045)}
-.ft-row:focus-visible{outline:2px solid var(--red-lift);outline-offset:-2px}
-.ft-item.is-on .ft-row{color:#fff;background:rgba(255,255,255,.06)}
-.ft-ico{flex:none;display:grid;place-items:center;width:34px;height:34px;border-radius:10px;
-  background:rgba(255,255,255,.06);color:rgba(237,231,229,.5);
-  transition:background .3s var(--ease),color .3s var(--ease)}
-.ft-item.is-on .ft-ico{background:rgba(210,66,52,.16);color:var(--red-lift)}
-.ft-ico svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2.1;
+.ft-item{display:flex;align-items:flex-start;gap:.85rem;padding:.72rem .8rem;border-radius:11px;
+  transition:background .25s var(--ease)}
+.ft-item:hover{background:rgba(255,255,255,.05)}
+.ft-check{flex:none;display:grid;place-items:center;width:26px;height:26px;margin-top:.1rem;
+  border:1px solid rgba(255,255,255,.2);border-radius:8px;background:rgba(255,255,255,.03);
+  transition:border-color .45s var(--ease),background .45s var(--ease)}
+.ft-item.is-checked .ft-check{border-color:var(--red-lift);background:rgba(210,66,52,.16)}
+.ft-check svg{width:15px;height:15px;fill:none;stroke:var(--red-lift);stroke-width:2.6;
   stroke-linecap:round;stroke-linejoin:round}
-.ft-name{flex:1;min-width:0;font-family:var(--display);font-weight:700;letter-spacing:-.012em;
-  font-size:clamp(.95rem,1.15vw,1.05rem);line-height:1.25}
-/* Fills across the row over the dwell, so the advance is legible rather than
-   a jump out of nowhere. Paused while the pointer is on the list. */
-.ft-bar{position:absolute;left:0;right:0;bottom:-1px;height:2px;transform:scaleX(0);
-  transform-origin:left;background:var(--red-lift)}
-.ft-item.is-on .ft-bar{animation:ftFill var(--ft-dwell,4.6s) linear forwards}
-.ftour.is-held .ft-item.is-on .ft-bar{animation-play-state:paused}
-@keyframes ftFill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
-.ft-detail{display:grid;grid-template-rows:0fr;transition:grid-template-rows .5s var(--ease)}
-.ft-item.is-on .ft-detail{grid-template-rows:1fr}
-.ft-detail > div{overflow:hidden}
-.ft-detail p{margin:0;padding:0 1.05rem 1rem calc(1.05rem + 34px + .85rem);
-  font-size:.87rem;line-height:1.6;color:rgba(237,231,229,.62)}
-@media(max-width:520px){
-  .ft-detail p{padding-left:1.05rem}
-}
+/* One continuous stroke, so the tick draws rather than fades in. */
+.ft-check svg path{stroke-dasharray:22;stroke-dashoffset:22;
+  transition:stroke-dashoffset .5s var(--ease)}
+.ft-item.is-checked .ft-check svg path{stroke-dashoffset:0}
+.ft-txt{min-width:0}
+.ft-name{display:block;font-family:var(--display);font-weight:700;letter-spacing:-.012em;
+  font-size:clamp(.95rem,1.12vw,1.04rem);line-height:1.25;color:#fff}
+.ft-desc{display:block;margin-top:.2rem;font-size:.83rem;line-height:1.55;
+  color:rgba(237,231,229,.58)}
 @media(prefers-reduced-motion:reduce){
-  .ft-detail{transition:none}
-  .ft-item.is-on .ft-bar{animation:none;transform:scaleX(1)}
+  .ft-check,.ft-check svg path{transition:none}
 }
+
+@keyframes ftFill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 
 .satstage > .shell{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);
   gap:clamp(2rem,5vw,4.5rem);
@@ -454,55 +444,49 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
     <p class="sat-count"><span class="lbl" style="margin:0">Rolling enrollment &middot; in person or online &middot; every essay, every deadline</span></p>
   </div>
   <div class="ftour" id="ftour">
-    <div class="ft-head">What&rsquo;s included</div>
+    <div class="ft-head"><b>What&rsquo;s included</b><span>&mdash; all of it, every student</span></div>
     <ul class="ft-list">
-      <li class="ft-item is-on">
-        <button class="ft-row" type="button" aria-expanded="true">
-          <span class="ft-ico" aria-hidden="true"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M18 34a8 8 0 1 1 12 0M24 8v8M12 14l5 5M36 14l-5 5"/></svg></span>
+      <li class="ft-item">
+        <span class="ft-check" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.6 4.6L19 7.6"/></svg></span>
+        <span class="ft-txt">
           <span class="ft-name">One-on-one coaching sessions</span>
-          <span class="ft-bar" aria-hidden="true"></span>
-        </button>
-        <div class="ft-detail"><div><p>Weekly or biweekly, in person or online, for as long as application season requires.</p></div></div>
+          <span class="ft-desc">Weekly or biweekly, in person or online, for as long as application season requires.</span>
+        </span>
       </li>
       <li class="ft-item">
-        <button class="ft-row" type="button" aria-expanded="false">
-          <span class="ft-ico" aria-hidden="true"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M13 6h16l8 8v28H13zM29 6v8h8M17 26h14M17 33h9"/></svg></span>
+        <span class="ft-check" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.6 4.6L19 7.6"/></svg></span>
+        <span class="ft-txt">
           <span class="ft-name">Every major essay covered</span>
-          <span class="ft-bar" aria-hidden="true"></span>
-        </button>
-        <div class="ft-detail"><div><p>The personal statement plus supplementals for every school &mdash; coordinated so they don&rsquo;t repeat.</p></div></div>
+          <span class="ft-desc">The personal statement plus supplementals for every school &mdash; coordinated so they don&rsquo;t repeat.</span>
+        </span>
       </li>
       <li class="ft-item">
-        <button class="ft-row" type="button" aria-expanded="false">
-          <span class="ft-ico" aria-hidden="true"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 24h32M24 8v32"/></svg></span>
+        <span class="ft-check" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.6 4.6L19 7.6"/></svg></span>
+        <span class="ft-txt">
           <span class="ft-name">Real revision, not one pass</span>
-          <span class="ft-bar" aria-hidden="true"></span>
-        </button>
-        <div class="ft-detail"><div><p>Feedback continues until the essay is ready, not until a session count runs out.</p></div></div>
+          <span class="ft-desc">Feedback continues until the essay is ready, not until a session count runs out.</span>
+        </span>
       </li>
       <li class="ft-item">
-        <button class="ft-row" type="button" aria-expanded="false">
-          <span class="ft-ico" aria-hidden="true"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M10 10h28v30H10zM10 18h28M18 8v6M30 8v6M17 27h6M17 33h12"/></svg></span>
+        <span class="ft-check" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.6 4.6L19 7.6"/></svg></span>
+        <span class="ft-txt">
           <span class="ft-name">Deadline tracking</span>
-          <span class="ft-bar" aria-hidden="true"></span>
-        </button>
-        <div class="ft-detail"><div><p>Early Action, Early Decision and Regular Decision mapped out together, so nothing sneaks up.</p></div></div>
+          <span class="ft-desc">Early Action, Early Decision and Regular Decision mapped out together, so nothing sneaks up.</span>
+        </span>
       </li>
       <li class="ft-item">
-        <button class="ft-row" type="button" aria-expanded="false">
-          <span class="ft-ico" aria-hidden="true"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M7 12h34v24H7zM7 15l17 12 17-12"/></svg></span>
+        <span class="ft-check" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.6 4.6L19 7.6"/></svg></span>
+        <span class="ft-txt">
           <span class="ft-name">After-hours support</span>
-          <span class="ft-bar" aria-hidden="true"></span>
-        </button>
-        <div class="ft-detail"><div><p>Stuck on a supplement the night before it is due? Message any time.</p></div></div>
+          <span class="ft-desc">Stuck on a supplement the night before it is due? Message any time.</span>
+        </span>
       </li>
       <li class="ft-item">
-        <button class="ft-row" type="button" aria-expanded="false">
-          <span class="ft-ico" aria-hidden="true"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M9 20h30v21H9zM17 20v-6a7 7 0 0 1 14 0v6"/></svg></span>
+        <span class="ft-check" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.6 4.6L19 7.6"/></svg></span>
+        <span class="ft-txt">
           <span class="ft-name">A private student portal</span>
-          <span class="ft-bar" aria-hidden="true"></span>
-        </button>
-        <div class="ft-detail"><div><p>Drafts, feedback and deadlines organized in one login.</p></div></div>
+          <span class="ft-desc">Drafts, feedback and deadlines organized in one login.</span>
+        </span>
       </li>
     </ul>
   </div>
@@ -678,37 +662,25 @@ document.documentElement.classList.add('js');
 
 /* ── the included card: auto-advancing, dots and arrows ── */
 (function(){
-  /* One row open at a time, advancing on its own until the pointer lands on
-     the list. Clicking a row opens it and restarts the clock, so a parent who
-     takes over is never fighting the timer. */
+  /* Ticks the list once, as the hero settles, then leaves it alone. The rows
+     are readable before, during and after -- the animation confirms what is
+     already on screen rather than revealing it, so nothing here is
+     load-bearing.
+
+     No IntersectionObserver: this panel lives in the hero, so it is on screen
+     by definition and there is nothing to wait for. The delay is timed off
+     the hero's own entrance (the .ftour animation lands at 3.5s) so the ticks
+     do not compete with the headline wipe. */
   var root=document.getElementById('ftour'); if(!root) return;
   var items=[].slice.call(root.querySelectorAll('.ft-item'));
   if(!items.length) return;
-  var DWELL=4600, i=-1, timer=0,
-      reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  function go(n){
-    i=(n+items.length)%items.length;
-    items.forEach(function(el,k){
-      var on=k===i;
-      el.classList.toggle('is-on',on);
-      el.querySelector('.ft-row').setAttribute('aria-expanded',on?'true':'false');
-    });
-    /* Restart the rail: the animation only replays if it is cleared and the
-       element reflowed in between. */
-    var bar=items[i].querySelector('.ft-bar');
-    if(bar){ bar.style.animation='none'; void bar.offsetWidth; bar.style.animation=''; }
-  }
-  function schedule(){ clearTimeout(timer); if(!reduce) timer=setTimeout(function(){ go(i+1); schedule(); },DWELL); }
+  function all(){ items.forEach(function(el){ el.classList.add('is-checked'); }); }
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){ all(); return; }
   items.forEach(function(el,k){
-    el.querySelector('.ft-row').addEventListener('click',function(){ go(k); schedule(); });
+    setTimeout(function(){ el.classList.add('is-checked'); }, 4200+k*190);
   });
-  root.addEventListener('keydown',function(e){
-    if(e.key==='ArrowDown'||e.key==='ArrowRight'){e.preventDefault();go(i+1);schedule();}
-    if(e.key==='ArrowUp'||e.key==='ArrowLeft'){e.preventDefault();go(i-1);schedule();}
-  });
-  root.addEventListener('pointerenter',function(){ root.classList.add('is-held'); clearTimeout(timer); },{passive:true});
-  root.addEventListener('pointerleave',function(){ root.classList.remove('is-held'); schedule(); },{passive:true});
-  go(0); schedule();
+  /* Last resort: never leave the panel half-ticked if a timer is dropped. */
+  setTimeout(all,9000);
 })();
 </script>
 </body>
