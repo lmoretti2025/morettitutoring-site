@@ -442,7 +442,7 @@ document.documentElement.classList.add('js');
     var target=pad(word);
     cells.forEach(function(c,i){
       if(reduce){ c.textContent=target[i]; return; }
-      var stop=performance.now()+delay+260+i*55;
+      var stop=performance.now()+delay+190+i*38;
       (function tick(){
         if(performance.now()>=stop){ turn(c,target[i]); return; }
         turn(c,GLYPH.charAt(Math.floor(Math.random()*GLYPH.length)));
@@ -452,13 +452,14 @@ document.documentElement.classList.add('js');
   }
   function settle(){
     for(var r=0;r<ROWS;r++){
-      settleRow(rows[r], WORDS[(idx+r)%WORDS.length], r*260);
+      settleRow(rows[r], WORDS[(idx+r)%WORDS.length], r*180);
     }
     idx=(idx+ROWS)%WORDS.length;
   }
   settle();
-  /* long dwell: the board is meant to be read, not watched */
-  if(!reduce) setInterval(settle,6000);
+  /* Still long enough to read a full row, but the board turns over often
+     enough to feel alive rather than parked. */
+  if(!reduce) setInterval(settle,4200);
 })();
 </script>
 </body>
