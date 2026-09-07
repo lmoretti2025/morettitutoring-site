@@ -2024,6 +2024,28 @@ mtaSafe(function(){
       });
   });
 });
+
+/* ── one of the parents' own sentences, chosen per visit ──────────────────
+   Deliberately at LOAD, not on a timer. The programme tiles beside this can
+   rotate because they are labels -- you take one in at a glance and nothing
+   is lost if it changes. A quote is a sentence, read left to right, and
+   swapping it out mid-read loses the reader. This way the range shows across
+   visits and nobody ever watches it change.
+
+   Every line is a verbatim excerpt from a review on the Results page, with
+   the outcome bolded and the name attached; the markup already holds the
+   first one, so a dead script leaves a real quote on screen. */
+mtaSafe(function(){
+  var el = document.querySelector('.hproof'); if (!el) return;
+  var QUOTES = [
+    ['They went into test day feeling confident and <b>scored a 1520</b>.', 'Jessie C., parent'],
+    ['She improved her SAT Math score by approximately <b>200 points</b>, exceeding our expectations.', 'Michele C., parent'],
+    ['As a direct result of his tutoring, my daughter&rsquo;s math score improved by <b>140 points</b>.', 'Pam S., parent'],
+    ['My daughter has gone from a <b>C to an A</b> grade student in math.', 'Patti M., parent']
+  ];
+  var q = QUOTES[Math.floor(Math.random() * QUOTES.length)];
+  el.innerHTML = '&ldquo;' + q[0] + '&rdquo;<i>' + q[1] + '</i>';
+});
 </script>
 </body>
 </html>
