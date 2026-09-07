@@ -25571,10 +25571,17 @@ window.renderNativeReport = function (data) {
       '<p class="plan-foot">This is a starting allocation off one test, not a syllabus. It should be re-cut after the next full-length test &mdash; the shares above are the shape of <em>this</em> attempt, and the fastest-moving of the three is usually method, so the split that is right in week one is rarely still right in week five.</p>' +
     '</div>';
 
-    var host = document.getElementById('plan-section');
-    host.innerHTML = html;
-    document.getElementById('plan-hed').style.display = '';
-    host.style.display = '';
+    /* Diagnostics only. A four-week split is an opening allocation read off
+       a baseline; on practice test 5 of a running programme the plan already
+       exists, and re-cutting it from one mid-programme test would argue with
+       the plan the student is actually on. data.ptTitle is set only for a
+       numbered practice test. */
+    if (!data.ptTitle) {
+      var host = document.getElementById('plan-section');
+      host.innerHTML = html;
+      document.getElementById('plan-hed').style.display = '';
+      host.style.display = '';
+    }
   })();
 
   document.getElementById('page1').style.display = 'block';
