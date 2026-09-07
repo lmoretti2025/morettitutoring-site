@@ -759,6 +759,21 @@ section{padding:clamp(3.6rem,7vw,6.2rem) 0;border-bottom:1px solid var(--line)}
 .gcue{display:inline-flex;align-items:center;gap:.5rem;font-size:.68rem;font-weight:600;
   letter-spacing:.14em;text-transform:uppercase;color:rgba(237,231,229,.55);margin-top:.35rem}
 .gcue svg{width:15px;height:15px;transition:transform .35s var(--ease)}
+/* The SAT hero's own entrance, re-timed for a band you scroll onto rather
+   than land on: the label, then the two headline lines wiping in one after
+   the other, then the cue. .ghed opts out of the generic .rv treatment
+   because its lines carry the animation themselves. */
+.ghed .ln{display:block}
+.ghed em{font-style:normal;color:var(--red-lift)}
+.js .ghed.rv{opacity:1;transform:none;filter:none}
+.js .ghed.rv .ln{opacity:0}
+.js .ghed.rv.in .ln{animation:wipeIn 1.5s var(--ease) both}
+.js .ghed.rv.in .ln:nth-child(2){animation-delay:.42s}
+.js .gcue.rv.in{transition-delay:1.35s}
+@media(prefers-reduced-motion:reduce){
+  .js .ghed.rv .ln{opacity:1}
+  .js .ghed.rv.in .ln{animation:none}
+}
 .gdrop[open] .gcue svg{transform:rotate(180deg)}
 .gbody{display:grid;grid-template-columns:minmax(0,1.02fr) minmax(0,.98fr);
   gap:clamp(1.8rem,4.5vw,4rem);padding-bottom:clamp(2.6rem,5vw,4rem)}
@@ -1084,9 +1099,9 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
 <section id="guarantee" class="gsec"><div class="shell">
   <details class="gdrop">
     <summary>
-      <span class="gk">The guarantee</span>
-      <h2 class="ghed">The score goes up, or we keep teaching. Free.</h2>
-      <span class="gcue"><span class="gcue-t">How it works</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 9l7 7 7-7"/></svg></span>
+      <span class="gk rv">The guarantee</span>
+      <h2 class="ghed rv"><span class="ln">The score goes up,</span><span class="ln">or we keep teaching. <em>Free.</em></span></h2>
+      <span class="gcue rv"><span class="gcue-t">How it works</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 9l7 7 7-7"/></svg></span>
     </summary>
     <div class="gbody">
       <div><dl class="gterms">
