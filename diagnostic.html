@@ -632,11 +632,11 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
     <p><b>Live, not a screenshot.</b> Hover a bar in the path-to-target chart for that skill&rsquo;s
     accuracy, click one to see the questions behind it, or drag the dashed target line. Synthetic
     data for a student called Demo &mdash; no real student&rsquo;s results are published here.</p>
-    <a href="portal/report.html?demo=1&amp;score=1250&amp;weak=math" target="_blank" rel="noopener">Open on its own &nearr;</a>
+    <a href="portal/report.html?demo=1&amp;score=1250&amp;weak=math&amp;embed=public" target="_blank" rel="noopener">Open on its own &nearr;</a>
   </div>
 
   <div class="stage" id="stage">
-    <iframe id="rptframe" src="portal/report.html?demo=1&amp;score=1250&amp;weak=math" scrolling="no"
+    <iframe id="rptframe" src="portal/report.html?demo=1&amp;score=1250&amp;weak=math&amp;embed=public" scrolling="no"
             title="Sample SAT diagnostic report for a fictional student"></iframe>
     <div class="notes" id="notes"></div>
   </div>
@@ -658,15 +658,15 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
 <script>
 (function () {
   var NOTES = [
-    { sel: '#score-card',        side: 'l', text: 'A range, not a number — the same student moves about 60 points on a different Saturday, with no studying in between.' },
+    { sel: '#score-card',        side: 'l', text: 'A range, not a number \u2014 the same student moves about 60 points on a different Saturday, with no studying in between.' },
     { sel: '#section-breakdown', side: 'r', text: 'Every question, module by module. Green right, red wrong, and the ones flagged for review marked.' },
     { sel: '#bridge-card',       side: 'l', text: 'Sized by where the points are, not by what looks worst. Algebra is twice the size of geometry, so the same five mistakes are worth twice as much.' },
-    { sel: '#dx-card',           side: 'r', text: 'Three problems that look identical on a score report — and this says which one is actually driving the score.' },
-    { sel: '#skilldx-card',      side: 'l', text: 'Named only when the evidence survives being pulled back toward the student’s own average. Four questions cannot give you a percentage.' },
+    { sel: '#dx-card',           side: 'r', text: 'Three problems that look identical on a score report \u2014 and this says which one is actually driving the score.' },
+    { sel: '#skilldx-card',      side: 'l', text: 'Named only when the evidence survives being pulled back toward the student\u2019s own average. Four questions cannot give you a percentage.' },
     { sel: '#budget-card',       side: 'r', text: 'Right answers that cost too much time. That time came out of the questions at the end.' },
-    { sel: '#timing-card',       side: 'l', text: 'The gap under the module clock is the reserve — finishing far early means it was never used.' },
+    { sel: '#timing-card',       side: 'l', text: 'The gap under the module clock is the reserve \u2014 finishing far early means it was never used.' },
     { sel: '#behavior-section',  side: 'r', text: 'Second-guessing: going back to questions that were never flagged. A habit, not a knowledge gap.' },
-    { sel: '#plan-section',      side: 'l', text: 'And then the part almost nobody writes down — the diagnosis turned into hours a week.' }
+    { sel: '#plan-section',      side: 'l', text: 'And then the part almost nobody writes down \u2014 the diagnosis turned into hours a week.' }
   ];
 
   var frame = document.getElementById('rptframe'),
@@ -678,72 +678,43 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
     var li = document.createElement('li'); li.textContent = n.text; list.appendChild(li);
   });
 
-  function doc() { try { return frame.contentDocument; } catch (e) { return null; } }
+  /* The report measures itself and posts the numbers out (see the embed
+     channel at the bottom of portal/report.html). Reading its DOM from here
+     only ever worked by same-origin accident — opened from disk, or served
+     from anywhere else, the browser blocks it and the page silently kept the
+     inner scrollbar, the operator chrome and a guessed height. */
+  var latest = null;
 
-  /* The report is the portal's page. Two things it shows its own operator
-     have no business on a public page — the demo banner and the print
-     toolbar — and the embedded column is narrower than the bridge chart,
-     which is why that chart was scrolling sideways. Both are fixed by
-     styling the frame from out here rather than editing the portal. */
-  function dress() {
-    var d = doc();
-    if (!d || !d.head || d.getElementById('mt-public-embed')) return;
-    var st = d.createElement('style');
-    st.id = 'mt-public-embed';
-    st.textContent =
-      ':root{--embed-col:1180px !important}' +
-      '#demo-banner,.toolbar{display:none !important}' +
-      'body.embedded .page{padding-top:.75rem}' +
-      '.bridge-canvas-wrap{overflow-x:visible}';
-    d.head.appendChild(st);
-  }
-
-  /* Grow the frame to its content so there is no inner scrollbar and the
-     page scrolls as one document. */
-  function fit() {
-    var d = doc();
-    if (!d || !d.body) return;
-    /* Measure the content, never documentElement: <html> stretches to fill
-       whatever height this function just gave the frame, so feeding it back
-       in makes each pass taller than the last. */
-    var page = d.querySelector('.page');
-    var h = Math.max(
-      d.body.scrollHeight,
-      page ? Math.ceil(page.getBoundingClientRect().height) + 24 : 0
-    );
-    if (h > 400 && Math.abs(h - frame.clientHeight) > 2) frame.style.height = h + 'px';
-  }
+  window.addEventListener('message', function (e) {
+    var m = e.data;
+    if (!m || m.type !== 'moretti-report') return;
+    if (e.source !== frame.contentWindow) return;
+    latest = m;
+    if (m.height && Math.abs(m.height - frame.clientHeight) > 2) {
+      frame.style.height = m.height + 'px';
+    }
+    place();
+  });
 
   function place() {
-    var d = doc();
-    if (!d) return;
+    if (!latest) return;
     layer.innerHTML = '';
-    var page = d.querySelector('.page');
-    if (!page) return;
-    var pr = page.getBoundingClientRect();
-    var frameLeft = 0;                                   // frame spans the stage
-    var colLeft  = frameLeft + pr.left;
-    var colRight = frameLeft + pr.right;
 
-    /* Write in whatever margin the column actually leaves, rather than a
-       fixed width that can end up sitting on top of the report. */
     var GAP = 22;
+    var colLeft  = latest.colLeft;
+    var colRight = latest.colLeft + latest.colWidth;
     var margin = Math.min(colLeft, stage.clientWidth - colRight);
     var width = Math.floor(margin - GAP - 10);
-    if (width < 130) { layer.innerHTML = ''; return; }   // the list covers it
+    if (width < 130) return;                 // the list below covers it
     width = Math.min(width, 250);
 
     NOTES.forEach(function (n) {
-      var el = d.querySelector(n.sel);
-      if (!el) return;
-      if (d.defaultView.getComputedStyle(el).display === 'none') return;
-      var r = el.getBoundingClientRect();
-      if (!r.height) return;
-
+      var top = latest.anchors[n.sel];
+      if (top === undefined) return;
       var note = document.createElement('div');
       note.className = 'note ' + n.side;
       note.textContent = n.text;
-      note.style.top = Math.round(r.top + d.defaultView.scrollY + 8) + 'px';
+      note.style.top = (top + 8) + 'px';
       note.style.width = width + 'px';
       if (n.side === 'l') note.style.right = Math.round(stage.clientWidth - colLeft + GAP) + 'px';
       else                note.style.left  = Math.round(colRight + GAP) + 'px';
@@ -766,25 +737,7 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
     Array.prototype.forEach.call(notes, function (n) { io.observe(n); });
   }
 
-  var settle;
-  function sync() { dress(); fit(); clearTimeout(settle); settle = setTimeout(place, 140); }
-
-  frame.addEventListener('load', function () {
-    dress();
-    /* the charts build after load and keep changing height for a while, so
-       measure repeatedly rather than once, then watch for later changes */
-    var n = 0, t = setInterval(function () { sync(); if (++n > 40) clearInterval(t); }, 400);
-    var d = doc();
-    if (d) {
-      try { new ResizeObserver(sync).observe(d.body); } catch (e) {}
-      try {
-        new MutationObserver(sync).observe(d.body, { childList: true, subtree: true, attributes: true });
-      } catch (e) {}
-      d.addEventListener('click', function () { setTimeout(sync, 350); }, true);
-    }
-  });
-
-  window.addEventListener('resize', sync);
+  window.addEventListener('resize', place);
 })();
 </script>
 
