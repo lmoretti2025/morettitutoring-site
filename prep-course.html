@@ -431,27 +431,28 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
   transition:border-color .25s var(--ease),color .25s var(--ease)}
 .case-figs a:hover,.case-figs a:focus-visible{color:#fff;border-bottom-color:#fff}
 .case-figs span{display:block;margin-top:.7rem;font-size:.8rem;line-height:1.5;color:rgba(237,231,229,.6);
-  max-width:26ch}
-.case-row--split .split2{display:grid;grid-template-columns:1fr 1fr;border-radius:12px;overflow:hidden;
-  border:1px solid rgba(255,255,255,.16)}
-@media(max-width:760px){.case-row--split .split2{grid-template-columns:1fr}}
-.sp-a,.sp-b{padding:clamp(1.2rem,2.2vw,1.8rem)}
-.sp-a{background:rgba(255,255,255,.05)}
-.sp-b{background:rgba(176,39,28,.1)}
-.sp-k{font-size:.58rem;font-weight:600;letter-spacing:.19em;text-transform:uppercase;color:var(--red-lift);
-  margin-bottom:.9rem}
-.split2 ul{list-style:none;margin:0;padding:0;display:grid;gap:.6rem}
-.split2 li{position:relative;padding-left:1.35rem;font-size:.83rem;line-height:1.52;color:rgba(237,231,229,.7)}
-.split2 li b{color:#fff;font-weight:600}
-.sp-a li::before{content:'';position:absolute;left:0;top:.6em;height:2px;background:var(--red-lift);
-  border-radius:2px;width:10px;animation:spVary 5.5s ease-in-out infinite}
-.sp-a li:nth-child(2)::before{animation-delay:-1.1s}
-.sp-a li:nth-child(3)::before{animation-delay:-2.2s}
-.sp-a li:nth-child(4)::before{animation-delay:-3.3s}
-.sp-a li:nth-child(5)::before{animation-delay:-4.4s}
+  max-width:26ch}/* ── a worked example, in place of the old two-column list ──────────────
+   Abstract bullets ("how long each one takes") kept raising the question they
+   were meant to answer. Two concrete plans from the same starting score make
+   the same point without asking anyone to hold a rule in their head, and the
+   note at the foot keeps it honest about being an illustration. */
+.planex{border:1px solid rgba(255,255,255,.16);border-radius:12px;padding:clamp(1.1rem,2vw,1.5rem)}
+.planex-k{font-size:.58rem;font-weight:600;letter-spacing:.19em;text-transform:uppercase;
+  color:var(--red-lift);margin-bottom:1.1rem}
+.planex-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(1.1rem,2.2vw,1.9rem)}
+@media(max-width:760px){.planex-grid{grid-template-columns:1fr;gap:1.4rem}}
+.planex-who{font-family:var(--display);font-weight:700;font-size:1rem;color:#fff;margin-bottom:.3rem}
+.planex-find{font-size:.83rem;line-height:1.55;color:rgba(237,231,229,.62);margin:0 0 .8rem}
+.planex-grid ul{list-style:none;margin:0;padding:0;display:grid;gap:.5rem}
+.planex-grid li{display:grid;grid-template-columns:auto 1fr;gap:.6rem;align-items:baseline;
+  font-size:.84rem;line-height:1.45;color:rgba(237,231,229,.85)}
+.planex-grid li i{font-style:normal;font-size:.63rem;font-weight:700;letter-spacing:.09em;
+  text-transform:uppercase;color:rgba(237,231,229,.42);white-space:nowrap;
+  padding-top:.15rem}
+.planex-note{margin:1.1rem 0 0;padding-top:.85rem;border-top:1px solid rgba(255,255,255,.1);
+  font-size:.74rem;line-height:1.5;color:rgba(237,231,229,.45)}
+
 @keyframes spVary{0%,100%{width:5px}50%{width:14px}}
-.sp-b li::before{content:'';position:absolute;left:1px;top:.34em;width:8px;height:4px;
-  border-left:2px solid var(--red-lift);border-bottom:2px solid var(--red-lift);transform:rotate(-45deg)}
 
 /* ── 5. the ask ── */
 .pcta{background:var(--red);color:#fff;text-align:center;border-bottom:none}
@@ -473,7 +474,6 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
 .pcbtn:hover{background:rgba(255,255,255,.88);color:var(--red);transform:translateY(-2px)}
 @media(prefers-reduced-motion:reduce){
   .sat-h1 .ln,.sat-lead,.sat-ctas,.sat-count{animation:none;opacity:1;clip-path:none;filter:none;transform:none}
-  .sp-a li::before{animation:none;width:10px}
 }
 
 /* ── the hero seal: the promise, stamped ── */
@@ -499,19 +499,6 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
 .satstage > .shell{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(2rem,4.5vw,4rem)}
 @media(max-width:1000px){.satstage > .shell{grid-template-columns:1fr}}
 
-/* the split pairs its two halves wherever it appears, not only in one row */
-.split2{display:grid;grid-template-columns:1fr 1fr;border-radius:12px;overflow:hidden;
-  border:1px solid rgba(255,255,255,.16)}
-@media(max-width:760px){.split2{grid-template-columns:1fr}}
-/* do / don't: a tick for what we do, a cross for what we don't */
-.split2--dodont .sp-b{background:rgba(255,255,255,.04)}
-.split2--dodont .sp-a li::before{content:'';position:absolute;left:1px;top:.34em;width:8px;height:4px;
-  border-left:2px solid var(--red-lift);border-bottom:2px solid var(--red-lift);transform:rotate(-45deg);
-  background:none;animation:none;border-radius:0}
-.split2--dodont .sp-b li::before{content:'\00d7';position:absolute;left:0;top:-.05em;width:auto;height:auto;
-  border:none;transform:none;background:none;animation:none;
-  color:rgba(237,231,229,.55);font-size:1.05rem;line-height:1.4;font-weight:600}
-
 /* ── "Free." lands last, in gold, and keeps catching the light ── */
 .freeword{display:inline-block;
   background:linear-gradient(100deg,#A8842A 0%,#C9A84C 30%,#F7EAB6 46%,#E8CE7A 54%,#C9A84C 70%,#A8842A 100%);
@@ -523,16 +510,6 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
   to{opacity:1;transform:none;filter:none}
 }
 @keyframes freeShine{0%{background-position:130% 0}60%,100%{background-position:-30% 0}}
-
-/* ── the split leads this row; the copy sits to its right ── */
-.case-row--flip{grid-template-columns:minmax(0,1.18fr) minmax(0,.82fr)}
-.case-row--flip .case-copy{order:2}
-.case-row--flip .split2{order:1}
-@media(max-width:940px){
-  .case-row--flip{grid-template-columns:1fr}
-  .case-row--flip .case-copy{order:1}
-  .case-row--flip .split2{order:2}
-}
 
 /* ── the scroll reveal: deeper blur, longer fade ── */
 .js .rv{opacity:0;transform:translateY(26px);filter:blur(11px)}
@@ -623,7 +600,7 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
 <section class="casesec"><div class="shell">
   <div class="case-head rv">
     <div class="lbl">The case</div>
-    <h2>Why now, why not a chatbot, and what actually stays fixed.</h2>
+    <h2>Why now, why not a chatbot, and why no two plans match.</h2>
   </div>
 
   <div class="case-row rv">
@@ -649,20 +626,34 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
     </div>
   </div>
 
-  <div class="case-row case-row--split case-row--flip rv">
+  <div class="case-row rv">
     <div class="case-copy">
-      <h3>No two plans look the same. The standard behind them does.</h3>
-      <p>There is no fixed weekly syllabus, and that is deliberate. The order and the pace come from the diagnostic. Everything under &ldquo;never varies&rdquo; holds for every student.</p>
+      <h3>The plan comes from the diagnostic, not from a syllabus.</h3>
+      <p>Every student gets the same twelve weeks. Almost nobody gets them in the same order. The report ranks each skill by how many points it is costing and how teachable it is, and the weeks are built from that ranking: which skills come first, how many sessions each one needs, and where the full-length tests fall so the result actually tells us something. When a gap closes early, everything behind it moves up.</p>
     </div>
-    <div class="split2">
-      <div class="sp-a">
-        <div class="sp-k">Set by the diagnostic</div>
-        <ul><li><b>Which skills we work on</b> &mdash; and in what order. Points recoverable, not syllabus order.</li><li><b>How long each one takes.</b> Some close in a session; some take three.</li><li><b>When full-length tests fall</b> &mdash; placed where they will actually tell us something.</li><li><b>How much homework,</b> matched to how far beyond the syllabus your student wants to go.</li><li><b>How the plan changes</b> as gaps close and new ones surface.</li></ul>
+    <div class="planex">
+      <div class="planex-k">Same 1180 baseline &mdash; two different twelve weeks</div>
+      <div class="planex-grid">
+        <div>
+          <div class="planex-who">Student A</div>
+          <p class="planex-find">Missed 9 of 24 questions on punctuation and clause boundaries. Algebra came back clean.</p>
+          <ul>
+            <li><i>Wk 1&ndash;3</i><span>Boundaries, then transitions</span></li>
+            <li><i>Wk 4</i><span>First full-length test</span></li>
+            <li><i>Wk 5&ndash;12</i><span>Advanced math, then timing</span></li>
+          </ul>
+        </div>
+        <div>
+          <div class="planex-who">Student B</div>
+          <p class="planex-find">Reading was fine. The algebra errors traced back to linear equations from two years earlier.</p>
+          <ul>
+            <li><i>Wk 1&ndash;5</i><span>Linear equations, rebuilt</span></li>
+            <li><i>Wk 6</i><span>First full-length test</span></li>
+            <li><i>Wk 7&ndash;12</i><span>Nonlinear functions, then reading</span></li>
+          </ul>
+        </div>
       </div>
-      <div class="sp-b">
-        <div class="sp-k">Never varies</div>
-        <ul><li><b>A full-length diagnostic first,</b> before a single session is planned.</li><li><b>A target test date chosen together</b> in week two, with the plan sequenced around it.</li><li><b>One weekly one-on-one session,</b> roughly an hour, at a consistent time.</li><li><b>Luca teaches every session</b> &mdash; no junior tutors, no rotating staff.</li><li><b>Weekly office hours,</b> open to every student at no extra charge.</li><li><b>A written email to you every week</b> &mdash; what we covered, how it went, what&rsquo;s next.</li><li><b>A progress report at the end of every phase,</b> tracking against the target score.</li><li><b>Sessions extended or added</b> in the final weeks before the test if the plan calls for it.</li><li><b>The guarantee,</b> in writing.</li></ul>
-      </div>
+      <p class="planex-note">An illustration of how two reports produce two plans &mdash; not two real students.</p>
     </div>
   </div>
 </div></section>

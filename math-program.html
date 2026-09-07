@@ -305,27 +305,28 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
 .case-figs b i{font-style:normal;font-size:.42em;letter-spacing:0}
 .case-figs .down b{color:#fff}
 .case-figs span{display:block;margin-top:.7rem;font-size:.8rem;line-height:1.5;color:rgba(237,231,229,.6);
-  max-width:26ch}
-.case-row--split .split2{display:grid;grid-template-columns:1fr 1fr;border-radius:12px;overflow:hidden;
-  border:1px solid rgba(255,255,255,.16)}
-@media(max-width:760px){.case-row--split .split2{grid-template-columns:1fr}}
-.sp-a,.sp-b{padding:clamp(1.2rem,2.2vw,1.8rem)}
-.sp-a{background:rgba(255,255,255,.05)}
-.sp-b{background:rgba(176,39,28,.1)}
-.sp-k{font-size:.58rem;font-weight:600;letter-spacing:.19em;text-transform:uppercase;color:var(--red-lift);
-  margin-bottom:.9rem}
-.split2 ul{list-style:none;margin:0;padding:0;display:grid;gap:.6rem}
-.split2 li{position:relative;padding-left:1.35rem;font-size:.83rem;line-height:1.52;color:rgba(237,231,229,.7)}
-.split2 li b{color:#fff;font-weight:600}
-.sp-a li::before{content:'';position:absolute;left:0;top:.6em;height:2px;background:var(--red-lift);
-  border-radius:2px;width:10px;animation:spVary 5.5s ease-in-out infinite}
-.sp-a li:nth-child(2)::before{animation-delay:-1.1s}
-.sp-a li:nth-child(3)::before{animation-delay:-2.2s}
-.sp-a li:nth-child(4)::before{animation-delay:-3.3s}
-.sp-a li:nth-child(5)::before{animation-delay:-4.4s}
+  max-width:26ch}/* ── a worked example, in place of the old two-column list ──────────────
+   Abstract bullets ("how long each one takes") kept raising the question they
+   were meant to answer. Two concrete plans from the same starting score make
+   the same point without asking anyone to hold a rule in their head, and the
+   note at the foot keeps it honest about being an illustration. */
+.planex{border:1px solid rgba(255,255,255,.16);border-radius:12px;padding:clamp(1.1rem,2vw,1.5rem)}
+.planex-k{font-size:.58rem;font-weight:600;letter-spacing:.19em;text-transform:uppercase;
+  color:var(--red-lift);margin-bottom:1.1rem}
+.planex-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(1.1rem,2.2vw,1.9rem)}
+@media(max-width:760px){.planex-grid{grid-template-columns:1fr;gap:1.4rem}}
+.planex-who{font-family:var(--display);font-weight:700;font-size:1rem;color:#fff;margin-bottom:.3rem}
+.planex-find{font-size:.83rem;line-height:1.55;color:rgba(237,231,229,.62);margin:0 0 .8rem}
+.planex-grid ul{list-style:none;margin:0;padding:0;display:grid;gap:.5rem}
+.planex-grid li{display:grid;grid-template-columns:auto 1fr;gap:.6rem;align-items:baseline;
+  font-size:.84rem;line-height:1.45;color:rgba(237,231,229,.85)}
+.planex-grid li i{font-style:normal;font-size:.63rem;font-weight:700;letter-spacing:.09em;
+  text-transform:uppercase;color:rgba(237,231,229,.42);white-space:nowrap;
+  padding-top:.15rem}
+.planex-note{margin:1.1rem 0 0;padding-top:.85rem;border-top:1px solid rgba(255,255,255,.1);
+  font-size:.74rem;line-height:1.5;color:rgba(237,231,229,.45)}
+
 @keyframes spVary{0%,100%{width:5px}50%{width:14px}}
-.sp-b li::before{content:'';position:absolute;left:1px;top:.34em;width:8px;height:4px;
-  border-left:2px solid var(--red-lift);border-bottom:2px solid var(--red-lift);transform:rotate(-45deg)}
 
 /* ── 5. the ask ── */
 .pcta{background:var(--red);color:#fff;text-align:center;border-bottom:none}
@@ -347,7 +348,6 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
 .pcbtn:hover{background:rgba(255,255,255,.88);color:var(--red);transform:translateY(-2px)}
 @media(prefers-reduced-motion:reduce){
   .sat-h1 .ln,.sat-lead,.sat-ctas,.sat-count{animation:none;opacity:1;clip-path:none;filter:none;transform:none}
-  .sp-a li::before{animation:none;width:10px}
 }
 
 /* the ladder panel: what we teach / what we do */
@@ -422,18 +422,6 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
 .satstage > .shell{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(2rem,4.5vw,4rem)}
 @media(max-width:1000px){.satstage > .shell{grid-template-columns:1fr}}
 
-/* the split pairs its two halves wherever it appears, not only in one row */
-.split2{display:grid;grid-template-columns:1fr 1fr;border-radius:12px;overflow:hidden;
-  border:1px solid rgba(255,255,255,.16)}
-@media(max-width:760px){.split2{grid-template-columns:1fr}}
-/* do / don't: a tick for what we do, a cross for what we don't */
-.split2--dodont .sp-b{background:rgba(255,255,255,.04)}
-.split2--dodont .sp-a li::before{content:'';position:absolute;left:1px;top:.34em;width:8px;height:4px;
-  border-left:2px solid var(--red-lift);border-bottom:2px solid var(--red-lift);transform:rotate(-45deg);
-  background:none;animation:none;border-radius:0}
-.split2--dodont .sp-b li::before{content:'\00d7';position:absolute;left:0;top:-.05em;width:auto;height:auto;
-  border:none;transform:none;background:none;animation:none;
-  color:rgba(237,231,229,.55);font-size:1.05rem;line-height:1.4;font-weight:600}
 </style>
 </head>
 <body>
@@ -513,7 +501,7 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
 <section class="casesec"><div class="shell">
   <div class="case-head rv">
     <div class="lbl">The case</div>
-    <h2>Why this is not homework help, and what never changes.</h2>
+    <h2>Why this is not homework help, and why the plan starts where it does.</h2>
   </div>
 
   <div class="case-row rv">
@@ -527,10 +515,33 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
   </div>
 
   <div class="case-row rv">
-    <div class="case-copy"><h3>No two plans look the same. The standard behind them does.</h3><p>Math support is ongoing rather than tied to a single test date, so the program runs in cycles. Everything under &ldquo;never varies&rdquo; holds in every one of them.</p></div>
-    <div class="split2">
-      <div class="sp-a"><div class="sp-k">Set by the diagnostic</div><ul><li><b>Where we start</b> &mdash; often a prior year&rsquo;s material, because that is usually where the real gap is.</li><li><b>How fast we move,</b> and whether that is one session a week or two.</li><li><b>Which topics get the time,</b> ordered by what the current course is about to demand.</li><li><b>Whether the goal is catching up or getting ahead</b> &mdash; strong students use this to move ahead.</li></ul></div>
-      <div class="sp-b"><div class="sp-k">Never varies</div><ul><li><b>A real diagnostic first,</b> before any plan is written.</li><li><b>Luca teaches every session</b> &mdash; no junior tutors, no rotating staff.</li><li><b>Messaging between sessions,</b> so help doesn&rsquo;t wait a week.</li><li><b>A written progress report</b> at the end of every eight-week cycle.</li><li><b>No obligation to renew.</b> Every cycle ends with a decision that is yours.</li></ul></div>
+    <div class="case-copy">
+      <h3>The plan comes from the diagnostic, not from the chapter your student is on.</h3>
+      <p>The cycle is eight weeks either way, but what fills it is decided by what the diagnostic finds &mdash; and it usually finds the break a year or two before the current course. So the first weeks often go somewhere the syllabus has already left behind, and the chapter your student is actually being graded on gets easier because the thing underneath it finally holds.</p>
+    </div>
+    <div class="planex">
+      <div class="planex-k">Same B&minus; in Algebra 2 &mdash; two different cycles</div>
+      <div class="planex-grid">
+        <div>
+          <div class="planex-who">Student A</div>
+          <p class="planex-find">Quadratics were the visible problem. The diagnostic found fraction operations and negative exponents underneath them.</p>
+          <ul>
+            <li><i>Wk 1&ndash;3</i><span>Exponent rules and fractions</span></li>
+            <li><i>Wk 4&ndash;5</i><span>Back to quadratics</span></li>
+            <li><i>Wk 6&ndash;8</i><span>Current chapter, on pace</span></li>
+          </ul>
+        </div>
+        <div>
+          <div class="planex-who">Student B</div>
+          <p class="planex-find">The Algebra 2 material was solid. The lost marks were sign slips and pace under test conditions.</p>
+          <ul>
+            <li><i>Wk 1&ndash;2</i><span>Error-checking habits</span></li>
+            <li><i>Wk 3&ndash;5</i><span>Timed problem sets</span></li>
+            <li><i>Wk 6&ndash;8</i><span>Ahead of the class, into precalculus</span></li>
+          </ul>
+        </div>
+      </div>
+      <p class="planex-note">An illustration of how two reports produce two cycles &mdash; not two real students.</p>
     </div>
   </div>
 
