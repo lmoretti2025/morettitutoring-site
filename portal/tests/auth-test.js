@@ -154,6 +154,8 @@ function makeEnv(opts) {
     })(),
     Utilities: {
       getUuid: () => crypto.randomUUID(),
+      // Only ever used for a human-readable stamp in a log cell.
+      formatDate: d => new Date(d).toISOString(),
       base64EncodeWebSafe(v) {
         const buf = Buffer.isBuffer(v) ? v : (Array.isArray(v) ? Buffer.from(v) : Buffer.from(String(v), 'utf8'));
         return buf.toString('base64').replace(/\+/g, '-').replace(/\//g, '_');
@@ -183,6 +185,25 @@ function makeEnv(opts) {
       releaseLock() { lockHeld.v = false; }
     }) },
     MailApp: { sendEmail(o) { sent.push(o); } },
+    /* Presence lives here rather than in the sheet -- see the PRESENCE
+       block in auth.gs. Modelled as a real store, not a no-op: "the second
+       ping inside the gap does NOT open a second visit" is only a test if
+       the first ping is actually remembered. */
+    CacheService: (() => {
+      const store = {};
+      const api = {
+        get: k => (k in store ? store[k] : null),
+        put: (k, v) => { store[k] = String(v); },
+        getAll: keys => {
+          const out = {};
+          keys.forEach(k => { if (k in store) out[k] = store[k]; });
+          return out;
+        },
+        remove: k => { delete store[k]; }
+      };
+      return { getScriptCache: () => api, __store: store };
+    })(),
+    Session: { getScriptTimeZone: () => 'America/New_York' },
     ScriptApp: {
       getService: () => ({ getUrl: () => 'https://script.example/exec' }),
       // setupLeadProvisioning installs a time trigger; nothing here needs
@@ -2238,6 +2259,163 @@ test('the roster carries the onboarding answers to the admin panel', () => {
   const admin = fs.readFileSync(path.join(__dirname, '..', 'auth-admin.js'), 'utf8');
   assert.ok(/function onboardingLine/.test(admin), 'the panel must render them');
   assert.ok(/onboardingLine\(s\)/.test(admin), 'onboardingLine must be called from the row markup');
+});
+
+
+/* ═══ PRESENCE ═══ "who is on the site right now", and the log that
+   records it. The rules worth protecting here are about VOLUME as much as
+   correctness: the portal pings once a minute per open tab, and a bug that
+   turns each of those into a row would put tens of thousands of rows a
+   month into the same sheet the roster lives in. So the tests below check
+   what does NOT get written at least as carefully as what does. */
+console.log('\nPresence and the sign-in log\n');
+
+const ROW = ['ABC123', 'Alex Reed', '', 'alex@x.com', new Date(), true, 1, new Date()];
+
+// Rewrites the cached heartbeat as if it had happened `minsAgo` minutes
+// ago -- the only way to cross the visit gap without waiting for it.
+function backdatePresence(env, key, minsAgo, field) {
+  const store = env.CacheService.__store;
+  const id = 'pres_' + key;
+  const p = JSON.parse(store[id]);
+  p[field || 't'] -= minsAgo * 60000;
+  if (!field) { p.s -= minsAgo * 60000; }
+  store[id] = JSON.stringify(p);
+}
+function logRows(env, event) {
+  const g = env.logSheet()._grid;
+  return g.filter(r => String(r[1]) === event);
+}
+
+test('a ping marks the student online and opens one visit in the log', () => {
+  const env = makeEnv({ rows: [ROW] });
+  isOk(env.handlePing('ABC123', 'Practice tests'));
+  const p = env.presenceMap_(['ABC123'])['ABC123'];
+  assert.ok(p && p.online, 'the student should read as online immediately after a ping');
+  assert.strictEqual(p.where, 'Practice tests');
+  assert.strictEqual(logRows(env, 'online').length, 1, 'exactly one visit row');
+});
+
+test('a minute-by-minute heartbeat does NOT write a row per beat', () => {
+  const env = makeEnv({ rows: [ROW] });
+  for (let i = 0; i < 30; i++) env.handlePing('ABC123', 'Home');
+  assert.strictEqual(logRows(env, 'online').length, 1,
+    'half an hour of heartbeats must still be one visit, not thirty rows');
+});
+
+test('silence longer than the gap starts a new visit', () => {
+  const env = makeEnv({ rows: [ROW] });
+  env.handlePing('ABC123', 'Home');
+  backdatePresence(env, 'ABC123', 45);
+  env.handlePing('ABC123', 'Home');
+  assert.strictEqual(logRows(env, 'online').length, 2, 'a later sitting is its own row');
+});
+
+test('an open visit is rewritten in place, not appended to', () => {
+  const env = makeEnv({ rows: [ROW] });
+  env.handlePing('ABC123', 'Home');
+  const before = logRows(env, 'online')[0][5];
+  // Old enough for the periodic rewrite, but well inside the visit gap.
+  backdatePresence(env, 'ABC123', 5);
+  env.handlePing('ABC123', 'Taking a test');
+  const rows = logRows(env, 'online');
+  assert.strictEqual(rows.length, 1, 'still one visit');
+  assert.notStrictEqual(rows[0][5], before, 'the detail cell should have moved on');
+  assert.ok(/Taking a test/.test(String(rows[0][5])), 'and should say where they are now');
+});
+
+test('a ping cannot report somebody else as online', () => {
+  const env = makeEnv({ rows: [
+    ROW, ['ZZZ999', 'Blake Chen', '', 'blake@x.com', new Date(), true, 1, new Date()]
+  ] });
+  const alex = env.handleGoogleAuth(env.token('alex@x.com', 'SUB1')).session;
+  const body = { action: 'ping', key: 'ZZZ999', session: alex, where: 'Home' };
+  assert.strictEqual(env.authGuard_(body), null, 'the request itself is valid');
+  assert.strictEqual(body.key, 'ABC123', "the guard forces the ping onto the session's own row");
+  isOk(env.authRoute_(body));
+  assert.ok(!env.presenceMap_(['ZZZ999'])['ZZZ999'], 'Blake must not be shown as online');
+});
+
+test('a ping stamps LastSeenAt so the roster stops saying "Never"', () => {
+  const env = makeEnv({ rows: [ROW] });
+  env.handlePing('ABC123', 'Home');
+  assert.ok(env.rowFor('ABC123').LastSeenAt, 'a visit is activity');
+});
+
+test('a visit label from the client cannot inject markup into the log', () => {
+  const env = makeEnv({ rows: [ROW] });
+  env.handlePing('ABC123', '<img src=x onerror=alert(1)>');
+  assert.ok(!/[<>]/.test(String(logRows(env, 'online')[0][5])), 'angle brackets are stripped');
+});
+
+test('the sign-in log needs the admin key', () => {
+  const env = makeEnv({ rows: [ROW] });
+  isErr(env.handleAuthLog('nope', {}), 'unauthorized');
+  isErr(env.handleAuthLog('', {}), 'unauthorized');
+  isOk(env.handleAuthLog('ADMINSECRET', {}));
+});
+
+test('the log reports sign-ins, names and who is on right now', () => {
+  const env = makeEnv({ rows: [ROW] });
+  isOk(env.handleGoogleAuth(env.token('alex@x.com', 'SUB1')));
+  env.handlePing('ABC123', 'Vocab');
+  const out = env.handleAuthLog('ADMINSECRET', {});
+  assert.ok(out.events.length >= 2, 'the sign-in and the visit are both recorded');
+  assert.strictEqual(out.events[0].key, 'ABC123');
+  assert.ok(out.events.some(e => e.event === 'login'), 'the sign-in is in there');
+  assert.strictEqual(out.events[0].name, 'Alex Reed', 'keys are resolved to names');
+  assert.strictEqual(out.online.length, 1);
+  assert.strictEqual(out.online[0].where, 'Vocab');
+});
+
+test('the log can be narrowed to one student', () => {
+  const env = makeEnv({ rows: [
+    ROW, ['ZZZ999', 'Blake Chen', '', 'blake@x.com', new Date(), true, 1, new Date()]
+  ] });
+  env.handlePing('ABC123', 'Home');
+  env.handlePing('ZZZ999', 'Home');
+  const out = env.handleAuthLog('ADMINSECRET', { key: 'zzz999' });
+  assert.ok(out.events.length, 'there is something to show');
+  assert.ok(out.events.every(e => e.key === 'ZZZ999'), 'and it is all one student');
+});
+
+test('presence is never the reason a request fails', () => {
+  // Apps Script's cache is best-effort; a script whose cache is unavailable
+  // must still let students in and still answer the panel.
+  const env = makeEnv({ rows: [ROW] });
+  env.CacheService.getScriptCache = () => { throw new Error('cache down'); };
+  isOk(env.handlePing('ABC123', 'Home'));
+  isOk(env.handleGoogleAuth(env.token('alex@x.com', 'SUB1')));
+  const out = env.handleAccessRoster('ADMINSECRET');
+  isOk(out);
+  assert.strictEqual(out.students[0].online, false, 'unknown reads as offline, not as broken');
+});
+
+test('the roster carries presence to both admin surfaces', () => {
+  const env = makeEnv({ rows: [ROW] });
+  env.handlePing('ABC123', 'Question bank');
+  const s = env.handleAccessRoster('ADMINSECRET').students[0];
+  assert.strictEqual(s.online, true);
+  assert.strictEqual(s.presenceWhere, 'Question bank');
+  const admin = fs.readFileSync(path.join(__dirname, '..', 'admin.html'), 'utf8');
+  assert.ok(/live-dot/.test(admin), 'the roster table needs the online dot');
+  assert.ok(/action: 'authLog'/.test(admin), 'and something that keeps it up to date');
+  const panel = fs.readFileSync(path.join(__dirname, '..', 'auth-admin.js'), 'utf8');
+  assert.ok(/function onlineStrip/.test(panel) && /onlineStrip\(\)/.test(panel),
+    'the access panel needs the "on the site now" strip');
+  assert.ok(/function activityLogFlow/.test(panel), 'and a way into the log');
+});
+
+test('the portal actually sends the heartbeat', () => {
+  // The whole feature is dead without this half, and nothing else in this
+  // suite would notice: every backend test above calls handlePing directly.
+  const client = fs.readFileSync(path.join(__dirname, '..', 'auth-client.js'), 'utf8');
+  assert.ok(/action: 'ping'/.test(client), 'auth-client must send a ping');
+  assert.ok(/startHeartbeat\(\)/.test(client), 'and must start the heartbeat');
+  assert.ok(/document\.hidden/.test(client), 'a hidden tab is not a student using the site');
+  const portal = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+  assert.ok(/MorettiAuth\.setActivity\(id\)/.test(portal),
+    'the portal must report which screen it is on');
 });
 
 console.log('\n' + (failed === 0

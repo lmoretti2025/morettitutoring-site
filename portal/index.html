@@ -7159,6 +7159,10 @@ window.Portal = {
   }
   function show(id) {
     activeScreenId = id;
+    // Tells the presence heartbeat where they are, so the admin panel and
+    // the auth log read "on Practice tests" rather than just "online".
+    // A label only -- see setActivity in auth-client.js.
+    try { if (window.MorettiAuth && MorettiAuth.setActivity) MorettiAuth.setActivity(id); } catch (e) {}
     Object.keys(screens).forEach(function (k) {
       var isActive = k === id;
       screens[k].classList.toggle('active', isActive);

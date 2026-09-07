@@ -219,6 +219,13 @@ window.MorettiAuth = (function () {
       for (k in data) if (Object.prototype.hasOwnProperty.call(data, k) && k !== 'session') copy[k] = data[k];
       copy.__cachedAt = Date.now();
       localStorage.setItem(STUDENT_CACHE, JSON.stringify(copy));
+      /* Every path that ends with a real student -- sign-in, resume,
+         paint-from-cache-then-confirm -- passes through here, which makes
+         it the one hook the heartbeat needs. Inside the try only because
+         it belongs with the write it follows; a private-mode failure above
+         it is caught below and the heartbeat starts from the boot check
+         at the foot of this file instead. */
+      startHeartbeat();
     } catch (e) { /* private browsing — the slow path still works */ }
   }
   function readStudentCache() {
@@ -253,12 +260,123 @@ window.MorettiAuth = (function () {
   function onSessionDead() {
     if (sessionDead) return;
     sessionDead = true;
+    stopHeartbeat();
     session = null;
     writeStore(null);
     clearStudentCache();
     try { sessionStorage.removeItem(PORTAL_STATE); } catch (e) {}
     try { sessionStorage.setItem(SIGNED_OUT, 'revoked'); } catch (e) {}
     try { window.location.reload(); } catch (e) {}
+  }
+
+  /* ═══ PRESENCE HEARTBEAT ═══
+     The portal says "I am still here" once a minute while its tab is
+     visible, and the backend turns that into two things: a live
+     online/offline dot beside the name in admin.html, and one row per
+     visit in the AuthLog that records where they were and for how long
+     (see the PRESENCE block in auth.gs).
+
+     WHY A HEARTBEAT AND NOT A PAGE VIEW. Nothing else in this file fires
+     again once a student is in. resume happens on load, and a portal left
+     open through a two-hour study session makes no further auth call at
+     all -- so "are they on it now" had no signal to read, and LastSeenAt
+     could be six hours stale by design.
+
+     THREE THINGS IT DELIBERATELY IS NOT:
+       Not credentialled by the fetch wrapper. The session is attached
+       here, which means the wrapper leaves the answer alone and a failed
+       ping can never reload the page out from under a student mid-exam.
+       Revocation is still honoured, just explicitly, below.
+       Not sent by a hidden tab. A portal forgotten in a background tab is
+       not a student using the site, and reporting it as one is worse than
+       reporting nothing.
+       Not sent from the marketing site. auth-client.js also runs in modal
+       mode on the home page, where there is no portal to be present in. */
+  var PING_MS = 60000;
+  var pingTimer = null;
+  var lastPingAt = 0;
+  var activity = '';         // set by the portal's own screen switcher
+
+  /* What the log will say they were doing. The portal passes a screen id
+     through setActivity(); anything else falls back to the page, which is
+     what the smaller portal pages (vocab, math review, a report) get. */
+  var SCREEN_LABELS = {
+    'screen-menu': 'Home',
+    'screen-onboard': 'Getting set up',
+    'screen-settings': 'Settings',
+    'screen-calendar': 'Calendar',
+    'screen-resources': 'Resources',
+    'screen-sat-resources': 'SAT resources',
+    'screen-incorrect-questions': 'Incorrect questions',
+    'screen-challenge-questions': 'Challenge questions',
+    'screen-question-bank': 'Question bank',
+    'screen-practice-tests': 'Practice tests',
+    'screen-vocab': 'Vocab',
+    'screen-test-overview': 'Test overview',
+    'screen-intro': 'Starting a test',
+    'dx-screen': 'Taking a test',
+    'dx-module-over-screen': 'Between modules',
+    'dx-break-screen': 'On a break',
+    'screen-done': 'Finished a test'
+  };
+  function pageLabel() {
+    var path = '';
+    try { path = String(window.location.pathname || ''); } catch (e) {}
+    var file = path.split('/').pop();
+    if (!file || file === 'index.html') return 'The portal';
+    return file.replace(/\.html?$/, '').replace(/[-_]/g, ' ')
+               .replace(/^./, function (c) { return c.toUpperCase(); });
+  }
+  function whereLabel() {
+    if (activity && SCREEN_LABELS[activity]) return SCREEN_LABELS[activity];
+    if (activity) return activity;
+    return pageLabel();
+  }
+
+  function ping(force) {
+    var tok = session || readStore();
+    if (!tok || sessionDead || MODAL) return;
+    try { if (document.hidden && !force) return; } catch (e) {}
+    var now = Date.now();
+    // A visibility change and the timer landing together must not send two.
+    if (!force && (now - lastPingAt) < (PING_MS - 5000)) return;
+    lastPingAt = now;
+    post({ action: 'ping', session: tok, where: whereLabel() }).then(function (data) {
+      /* The one thing a ping is allowed to act on. Every other student
+         action goes through the fetch wrapper, which tears a revoked
+         session down on the next request -- but an idle tab makes no
+         requests, which is exactly the tab a reset is aimed at. This gives
+         "Reset login" a worst case of one minute even when nobody is
+         touching the keyboard. A network failure answers 'network' and is
+         ignored, deliberately: a lost hop is not a revocation. */
+      if (data && data.ok === false &&
+          (data.error === 'unauthorized' || data.error === 'session_revoked')) {
+        stopHeartbeat();
+        onSessionDead();
+      }
+    }, function () { /* offline; the next beat tries again */ });
+  }
+
+  var heartbeatOn = false, visibilityBound = false;
+  function startHeartbeat() {
+    if (heartbeatOn || MODAL) return;
+    heartbeatOn = true;
+    pingTimer = setInterval(function () { ping(false); }, PING_MS);
+    if (!visibilityBound) {
+      visibilityBound = true;
+      try {
+        // Coming back to the tab is itself the news -- send at once rather
+        // than leaving them offline for up to a minute after they return.
+        document.addEventListener('visibilitychange', function () {
+          if (!document.hidden) ping(true);
+        });
+      } catch (e) {}
+    }
+    ping(true);
+  }
+  function stopHeartbeat() {
+    heartbeatOn = false;
+    if (pingTimer) { clearInterval(pingTimer); pingTimer = null; }
   }
 
   /* ═══ THE ONE PLACE EVERY BACKEND CALL PICKS UP ITS SESSION ═══
@@ -1361,6 +1479,15 @@ window.MorettiAuth = (function () {
      the page out from under a visitor mid-form. */
   if (!MODAL) installFetchWrapper();
 
+  /* THE HEARTBEAT'S SECOND WAY IN. writeStudentCache() covers every path
+     that ends in a fresh payload, but index.html routinely skips all of
+     them: restoreState() puts a student back from the same-tab snapshot
+     and start() never runs (deliberately -- see refresh() below). That
+     student is unmistakably on the site, so a stored session on a portal
+     page is enough to start beating. An invalid one gets a single
+     unauthorized answer and is dealt with there. */
+  try { if (!MODAL && readStore()) startHeartbeat(); } catch (e) {}
+
   return {
     start: start,
     openSignIn: openSignIn,
@@ -1403,6 +1530,24 @@ window.MorettiAuth = (function () {
        every other call in this file returns. */
     setName: function (name) {
       return post({ action: 'setName', session: session, name: name });
-    }
+    },
+    /* Called by the portal's screen switcher (show() in index.html) so the
+       admin panel can say "on Practice tests" rather than only "in the
+       portal". Purely a label -- it grants nothing, reads nothing, and a
+       page that never calls it still reports its own filename. Moving
+       somewhere new is worth saying at once rather than up to a minute
+       later, so it beats early. */
+    setActivity: function (id) {
+      var next = String(id || '');
+      if (next === activity) return;
+      activity = next;
+      /* Forced, so it does not wait out the minute -- but not so forced
+         that clicking through five screens sends five pings. */
+      if (heartbeatOn && (Date.now() - lastPingAt) > 5000) ping(true);
+    },
+    /* "Is this student on the site right now" is answered by the heartbeat;
+       exposed so a page that restores a student some other way can start
+       it, and so it can be checked from the console. */
+    startPresence: startHeartbeat
   };
 })();

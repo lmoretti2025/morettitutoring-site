@@ -302,9 +302,208 @@
       'line-height:1.5;margin-top:0.5rem;}',
       '#mta-modal .keybig{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:1.3rem;',
       'font-weight:700;letter-spacing:0.06em;text-align:center;padding:0.7rem;background:var(--bg,#f2f2f2);',
-      'border-radius:8px;margin-top:0.5rem;}'
+      'border-radius:8px;margin-top:0.5rem;}',
+      /* PRESENCE + LOG. The dot is the one thing on this panel that means
+         "right now", so it is the only thing that moves. */
+      '.mta-dot{display:inline-block;width:8px;height:8px;border-radius:50%;flex:none;',
+      'background:var(--green,#5E8B6F);margin-right:6px;vertical-align:middle;',
+      'animation:mtaPulse 2.2s ease-in-out infinite;}',
+      '@keyframes mtaPulse{0%{box-shadow:0 0 0 0 rgba(94,139,111,0.5);}',
+      '70%{box-shadow:0 0 0 6px rgba(94,139,111,0);}100%{box-shadow:0 0 0 0 rgba(94,139,111,0);}}',
+      '@media (prefers-reduced-motion:reduce){.mta-dot{animation:none;}}',
+      '#mta-access .mta-live{padding:0.1rem 1rem 0.5rem;}',
+      '#mta-access .mta-liverow{display:flex;align-items:center;gap:6px;flex-wrap:wrap;',
+      'font-size:0.82rem;padding:0.25rem 0;}',
+      '#mta-access .mta-livewhere{font-size:0.72rem;font-weight:700;padding:0.1rem 0.45rem;border-radius:999px;',
+      'background:rgba(94,139,111,0.12);color:var(--green,#5E8B6F);}',
+      '#mta-access .mta-livesince{font-size:0.72rem;color:var(--faint,rgba(17,17,17,0.4));}',
+      '#mta-access .mta-live-none{padding:0.7rem 1rem 0.2rem;font-size:0.78rem;',
+      'color:var(--faint,rgba(17,17,17,0.4));}',
+      '.mta-linkbtn{background:none;border:0;padding:0;margin-left:0.5rem;font:inherit;font-size:0.72rem;',
+      'font-weight:700;letter-spacing:0.04em;color:var(--red,#B0271C);cursor:pointer;text-decoration:underline;',
+      'text-transform:none;}',
+      '#mta-modal .mta-logwrap{margin-top:0.7rem;max-height:52vh;overflow:auto;',
+      'border:1px solid var(--border,rgba(17,17,17,0.12));border-radius:10px;}',
+      '#mta-modal .mta-logrow{display:grid;grid-template-columns:6.5rem 1fr;gap:0.6rem;padding:0.5rem 0.7rem;',
+      'border-bottom:1px solid var(--border,rgba(17,17,17,0.08));font-size:0.8rem;}',
+      '#mta-modal .mta-logrow:last-child{border-bottom:0;}',
+      '#mta-modal .mta-logrow.warn{background:rgba(176,39,28,0.05);}',
+      '#mta-modal .mta-logtime{color:var(--faint,rgba(17,17,17,0.4));font-size:0.72rem;',
+      'white-space:nowrap;padding-top:1px;}',
+      '#mta-modal .mta-logwho{font-weight:700;}',
+      '#mta-modal .mta-logkey{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:0.68rem;',
+      'font-weight:400;color:var(--faint,rgba(17,17,17,0.4));}',
+      '#mta-modal .mta-logwhat{color:var(--mid,rgba(17,17,17,0.58));font-size:0.76rem;}',
+      '#mta-modal .mta-logdetail{color:var(--faint,rgba(17,17,17,0.4));}',
+      '#mta-modal .mta-empty{padding:1rem;text-align:center;color:var(--faint,rgba(17,17,17,0.4));font-size:0.8rem;}'
     ].join('');
     document.head.appendChild(css);
+  }
+
+
+  /* ═══ WHO IS ON NOW, AND THE SIGN-IN LOG ═══
+     Two views of the same record. The strip at the top of the panel is
+     the live one -- the portal heartbeats once a minute (see the PRESENCE
+     block in auth.gs), so a green name means that student has the portal
+     open at this moment and the label says which screen. The log below is
+     the durable one: every sign-in, claim, approval, reset and visit the
+     backend has recorded since Google auth went live. All of it was
+     already being written to an AuthLog tab; none of it was readable
+     without opening the spreadsheet.
+
+     THE LOG IS A MODAL, THE STRIP IS NOT. "Is anyone on right now" is a
+     glance, and a glance must not cost a click. "When did this student
+     last log on" is a question you sit down to, and it wants the room. */
+  var EVENT_LABELS = {
+    online: 'On the site',
+    login: 'Signed in',
+    invite_claimed: 'Claimed an invite',
+    pair_by_email: 'Paired to their Google account',
+    pair_preapproved: 'Paired (pre-approved address)',
+    claim_pending: 'Asked for access',
+    claim_approved: 'Access approved',
+    claim_declined: 'Access declined',
+    claim_rejected: 'Access refused',
+    claim_bad_key: 'Wrong key entered',
+    claim_stale: 'Stale claim dropped',
+    claim_dropped: 'Claim dropped',
+    name_set: 'Set their name',
+    auth_reset: 'Login reset',
+    invite_sent: 'Invite emailed',
+    invite_link_created: 'Invite link made',
+    signin_email_sent: 'Sign-in email sent',
+    student_created: 'Added to the roster',
+    student_deleted: 'Removed from the roster',
+    attempts_deleted: 'Test history removed',
+    lead_provisioned: 'Inquiry provisioned',
+    lead_duplicate: 'Inquiry (already on file)',
+    admin_login: 'Admin signed in',
+    admin_denied: 'Admin sign-in refused'
+  };
+  // The ones that are somebody trying to get in and failing, or an account
+  // being taken away. Coloured, because they are the rows worth noticing.
+  var EVENT_WARN = {
+    claim_rejected: 1, claim_bad_key: 1, claim_declined: 1,
+    admin_denied: 1, auth_reset: 1, student_deleted: 1
+  };
+
+  function eventLabel(e) { return EVENT_LABELS[e] || e.replace(/_/g, ' '); }
+
+  function clockTime(iso) {
+    if (!iso) return '';
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    var day = '';
+    var today = new Date();
+    var sameDay = d.toDateString() === today.toDateString();
+    var yest = new Date(today.getTime() - 86400000);
+    if (sameDay) day = 'Today';
+    else if (d.toDateString() === yest.toDateString()) day = 'Yesterday';
+    else day = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    return day + ' ' + d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+  }
+
+  /* Drawn from accessRoster, which now carries presence, so it costs no
+     extra request and refreshes on the panel's own poll. */
+  function onlineStrip() {
+    var on = students.filter(function (s) { return s.online; });
+    if (!on.length) {
+      return '<div class="mta-live-none">Nobody is on the site right now. ' +
+        '<button class="mta-linkbtn" id="mta-log-open">Sign-in log</button></div>';
+    }
+    return '<div class="mta-sec">On the site now' +
+        '<button class="mta-linkbtn" id="mta-log-open">Sign-in log</button></div>' +
+      '<div class="mta-live">' + on.map(function (s) {
+        return '<div class="mta-liverow">' +
+          '<span class="mta-dot"></span>' +
+          '<b>' + esc(s.name || s.grantedEmail || s.key) + '</b>' +
+          (s.presenceWhere ? '<span class="mta-livewhere">' + esc(s.presenceWhere) + '</span>' : '') +
+          (s.presenceSince ? '<span class="mta-livesince">since ' + esc(clockTime(s.presenceSince)) + '</span>' : '') +
+          '</div>';
+      }).join('') + '</div>';
+  }
+
+  var logTimer = null, logFilter = '';
+  function stopLogPoll() { if (logTimer) { clearInterval(logTimer); logTimer = null; } }
+
+  function activityLogFlow() {
+    logFilter = '';
+    // A failure from a previous open must not greet the next one.
+    logFailed = false;
+    var m = modal(
+      '<h3 style="margin:0 0 0.2rem;">Sign-in log</h3>' +
+      '<div class="mta-sub" style="margin-bottom:0.6rem;">Every sign-in, visit, claim and reset the portal has recorded, newest first. ' +
+      'A visit row grows while the student is on the site and stops when they leave.</div>' +
+      '<input class="mta-in" id="mta-log-q" placeholder="Filter by name, key, email or what happened">' +
+      '<div class="mta-logwrap" id="mta-log-list"><div class="mta-empty">Loading…</div></div>' +
+      '<div class="acts"><button class="mta-b" id="mta-log-close">Close</button></div>');
+    // The poll belongs to this modal and must not outlive it -- closeModal
+    // removes the node, so anything still ticking would be writing into a
+    // detached element forever.
+    m.addEventListener('click', function (e) { if (e.target === m) stopLogPoll(); });
+    m.querySelector('#mta-log-close').addEventListener('click', function () { stopLogPoll(); closeModal(); });
+    m.querySelector('#mta-log-q').addEventListener('input', function (e) {
+      logFilter = String(e.target.value || '').toLowerCase();
+      renderLog();
+    });
+    loadLog();
+    stopLogPoll();
+    logTimer = setInterval(function () {
+      if (!document.getElementById('mta-modal')) { stopLogPoll(); return; }
+      loadLog();
+    }, 30000);
+  }
+
+  var logEvents = [], logOnline = [], logFailed = false;
+  function loadLog() {
+    post({ action: 'authLog', adminKey: adminKey(), limit: 250 }).then(function (data) {
+      if (!document.getElementById('mta-log-list')) { stopLogPoll(); return; }
+      if (!data || !data.ok) {
+        if (reGateIfSignedOut(data, false)) { stopLogPoll(); return; }
+        logFailed = true; renderLog(); return;
+      }
+      logFailed = false;
+      logEvents = data.events || [];
+      logOnline = data.online || [];
+      renderLog();
+    });
+  }
+
+  function renderLog() {
+    var el = document.getElementById('mta-log-list');
+    if (!el) return;
+    if (logFailed && !logEvents.length) {
+      el.innerHTML = '<div class="mta-empty">Could not reach the server just now — it retries every 30 seconds.</div>';
+      return;
+    }
+    var onKeys = {};
+    logOnline.forEach(function (o) { onKeys[o.key] = o; });
+    var rows = logEvents.filter(function (e) {
+      if (!logFilter) return true;
+      return (e.name + ' ' + e.key + ' ' + e.email + ' ' + eventLabel(e.event) + ' ' + e.detail)
+        .toLowerCase().indexOf(logFilter) !== -1;
+    });
+    if (!rows.length) {
+      el.innerHTML = '<div class="mta-empty">' +
+        (logEvents.length ? 'Nothing matches that.' : 'Nothing logged yet.') + '</div>';
+      return;
+    }
+    el.innerHTML = rows.map(function (e) {
+      var live = e.event === 'online' && onKeys[e.key];
+      return '<div class="mta-logrow' + (EVENT_WARN[e.event] ? ' warn' : '') + '">' +
+        '<div class="mta-logtime">' + esc(clockTime(e.at)) + '</div>' +
+        '<div>' +
+          '<div class="mta-logwho">' +
+            (live ? '<span class="mta-dot"></span>' : '') +
+            esc(e.name || e.email || e.key || '—') +
+            (e.key ? ' <span class="mta-logkey">' + esc(e.key) + '</span>' : '') +
+          '</div>' +
+          '<div class="mta-logwhat">' + esc(eventLabel(e.event)) +
+            (e.detail ? ' · <span class="mta-logdetail">' + esc(e.detail) + '</span>' : '') +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
   }
 
   /* ═══ MODAL ═══ */
@@ -927,6 +1126,7 @@
           : 'Could not refresh just now \u2014 showing the last list. It retries every minute.') +
         '</div>';
     }
+    html += onlineStrip();
     html += '<div class="mta-sec">Needs you</div>';
     if (!needs.length) html += '<div class="mta-empty">Nothing waiting.</div>';
     needs.forEach(function (s) {
@@ -1013,6 +1213,9 @@
     }
 
     listEl.innerHTML = html;
+
+    var logBtn = listEl.querySelector('#mta-log-open');
+    if (logBtn) logBtn.addEventListener('click', activityLogFlow);
 
     var tog = listEl.querySelector('#mta-arch-toggle');
     if (tog) tog.addEventListener('click', function () { showArchived = !showArchived; render(); });

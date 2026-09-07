@@ -126,6 +126,21 @@
   .assign-pill.behind { background: rgba(176,39,28,0.1); color: var(--red); }
   .assign-pill.done { background: rgba(94,139,111,0.12); color: var(--green); }
   .stale { color: var(--red); font-weight: 700; }
+  /* PRESENCE. The dot is the whole feature at a glance: green and gently
+     breathing means that student has the portal open right now (the
+     heartbeat in auth-client.js), grey means they do not. Deliberately
+     small -- it sits beside the name and must not out-shout the score. */
+  .live-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--border); margin-right: 0.4rem; vertical-align: middle; flex: none; }
+  .live-dot.on { background: var(--green); box-shadow: 0 0 0 0 rgba(94,139,111,0.55); animation: livePulse 2.2s var(--ease) infinite; }
+  @keyframes livePulse {
+    0%   { box-shadow: 0 0 0 0 rgba(94,139,111,0.5); }
+    70%  { box-shadow: 0 0 0 6px rgba(94,139,111,0); }
+    100% { box-shadow: 0 0 0 0 rgba(94,139,111,0); }
+  }
+  @media (prefers-reduced-motion: reduce) { .live-dot.on { animation: none; } }
+  .live-now { color: var(--green); font-weight: 700; }
+  .live-where { display: block; color: var(--faint); font-size: 0.72rem; font-weight: 400; }
+  .summary-tile.live .num { color: var(--green); }
   .weakest-label { font-size: 0.78rem; }
   .weakest-frac { color: var(--faint); font-size: 0.72rem; }
   .row-actions { display: flex; gap: 0.35rem; justify-content: flex-end; }
@@ -801,7 +816,7 @@
 
   // What this build of admin.html needs the deployment to understand. Kept
   // beside the version constant in Code.gs — bump both together.
-  var REQUIRED_BACKEND_VERSION = 9;
+  var REQUIRED_BACKEND_VERSION = 12;
   var CAPABILITY_LABELS = {
     calendar: 'the calendar and student pages',
     dueDates: 'due dates',
@@ -811,7 +826,8 @@
     lastSeen: 'sign-ins counting as activity',
     resetUndo: 'a full undo on Reset login',
     revokeNow: 'Reset login taking effect immediately',
-    noHtml: 'the approval and setup pages being served from the site'
+    noHtml: 'the approval and setup pages being served from the site',
+    presence: 'the green dot showing who is on the site right now, and the sign-in log'
   };
 
   function joinList(items) {
@@ -880,6 +896,10 @@
     return behindOnAssignments || quiet;
   }
 
+  function onlineCount(list) {
+    return list.filter(function (s) { return s.online; }).length;
+  }
+
   function renderSummary() {
     // Hidden students are out of the picture entirely — they shouldn't
     // inflate "needs attention" with work nobody's doing any more.
@@ -890,7 +910,14 @@
     summaryRowEl.innerHTML =
       '<div class="summary-tile"><div class="num">' + total + '</div><div class="lbl">Students</div></div>' +
       '<div class="summary-tile' + (flagged ? ' flagged' : '') + '"><div class="num">' + flagged + '</div><div class="lbl">Need attention</div></div>' +
-      '<div class="summary-tile"><div class="num">' + withScore + '</div><div class="lbl">With a score on file</div></div>';
+      '<div class="summary-tile"><div class="num">' + withScore + '</div><div class="lbl">With a score on file</div></div>' +
+      /* Only when somebody actually is. A permanent "0 on the site now"
+         tile would be a tile that is wrong-looking almost all day; this
+         one appears when there is news and gets out of the way when there
+         is not. */
+      (onlineCount(active)
+        ? '<div class="summary-tile live"><div class="num">' + onlineCount(active) + '</div><div class="lbl">On the site now</div></div>'
+        : '');
   }
 
   function sortValue(s, key) {
@@ -941,11 +968,20 @@
 
       var d = daysAgo(s.lastActivityAt);
       var activityCls = (d == null || d >= STALE_DAYS) ? 'stale' : '';
-      var activityCell = '<span class="' + activityCls + '">' + relativeTime(s.lastActivityAt) + '</span>';
+      /* "Online now" replaces the relative date rather than sitting beside
+         it: they are answers to the same question, and the live one is
+         strictly better while it is true. What they are looking at goes
+         underneath, from the portal's own screen switcher. */
+      var activityCell = s.online
+        ? '<span class="live-now">Online now</span>' +
+          (s.presenceWhere ? '<span class="live-where">' + escHtml(s.presenceWhere) + '</span>' : '')
+        : '<span class="' + activityCls + '">' + relativeTime(s.lastActivityAt) + '</span>';
 
       var k = escHtml(s.key);
       return '<tr' + (s.archived ? ' class="is-archived"' : '') + '>' +
-        '<td class="name-cell"><button type="button" class="student-link" data-key="' + k + '" data-tab="reports">' + escHtml(s.name) + '</button>' +
+        '<td class="name-cell"><span class="live-dot' + (s.online ? ' on' : '') + '" title="' +
+          (s.online ? 'On the site now' : 'Not on the site') + '"></span>' +
+          '<button type="button" class="student-link" data-key="' + k + '" data-tab="reports">' + escHtml(s.name) + '</button>' +
           '<span class="key">' + k + '</span></td>' +
         '<td>' + scoreCell + '</td>' +
         '<td>' + weakestCell + '</td>' +
@@ -1114,6 +1150,45 @@
       return false;
     });
   }
+
+  /* ═══ PRESENCE POLL ═══
+     getRoster is the expensive read in this file -- every attempt, every
+     assignment, for every student -- and presence changes on a one-minute
+     heartbeat. Polling the roster to keep a dot honest would be the
+     wrong trade, so this asks for the live half only: a cache read on the
+     backend plus the roster's names, then the dots are repainted in
+     place. It runs only while the roster is the view on screen and the
+     tab is actually being looked at, so a laptop asleep on a desk polls
+     nothing. */
+  var PRESENCE_POLL_MS = 45000;
+  function pollPresence() {
+    var key = adminKey();
+    if (!key || currentView !== 'roster' || !allStudents.length) return;
+    try { if (document.hidden) return; } catch (e) {}
+    postToBackend({ action: 'authLog', adminKey: key, limit: 1 }).then(function (data) {
+      if (!data || !data.ok) return;
+      var on = {};
+      (data.online || []).forEach(function (o) { on[o.key] = o; });
+      var changed = false;
+      allStudents.forEach(function (s) {
+        var live = !!on[s.key];
+        var where = live ? (on[s.key].where || '') : '';
+        if (s.online !== live || (s.presenceWhere || '') !== where) changed = true;
+        s.online = live;
+        s.presenceWhere = where;
+      });
+      // Only when something actually moved: renderTable() rebuilds every
+      // row, and doing that every 45 seconds for no reason would fight
+      // anything Luca is in the middle of reading.
+      if (changed) { renderSummary(); renderTable(); }
+    }).catch(function () { /* a missed poll is a stale dot, nothing more */ });
+  }
+  setInterval(pollPresence, PRESENCE_POLL_MS);
+  try {
+    document.addEventListener('visibilitychange', function () {
+      if (!document.hidden) pollPresence();
+    });
+  } catch (e) {}
 
   $('nav-roster').addEventListener('click', goToRoster);
   $('nav-allcal').addEventListener('click', openAllCalendar);
