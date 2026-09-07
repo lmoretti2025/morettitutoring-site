@@ -715,12 +715,30 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
       var note = document.createElement('div');
       note.className = 'note ' + n.side;
       note.textContent = n.text;
-      note.style.top = (top + 8) + 'px';
       note.style.width = width + 'px';
       if (n.side === 'l') note.style.right = Math.round(stage.clientWidth - colLeft + GAP) + 'px';
       else                note.style.left  = Math.round(colRight + GAP) + 'px';
       note.dataset.sel = n.sel;
+      note.style.top = '0px';
       layer.appendChild(note);
+
+      /* Sit the note ABOVE what it points at, so the arrow can leave from
+         underneath it and descend into the target. Anchored level with the
+         target instead, the arrow has to climb back up and crosses straight
+         through the handwriting. */
+      var h = note.getBoundingClientRect().height;
+      var above = top - h - 14;
+      if (above >= 4) {
+        note.style.top = Math.round(above) + 'px';
+        note.dataset.above = '1';
+      } else {
+        /* Not enough room above — sit it below instead and mirror the whole
+           thing, rather than falling back to a stub line off the inner edge.
+           The arrow then leaves from over the note and climbs into the
+           target, and still gets the note's width to run. */
+        note.style.top = Math.round(top + 30) + 'px';
+        note.dataset.above = '0';
+      }
     });
     drawArrows(colLeft, colRight);
     reveal();
@@ -748,23 +766,35 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
          starting there left about four pixels to draw in and the arrow read
          as a tick. From below it can run the note's whole width before it
          turns in, which is what gives it the sweep of a drawn one. */
+      var isAbove = note.dataset.above === '1';
       // vary where each one sets off, so nine identical spans don't give
       // the game away
       var inset = 0.12 + (i % 4) * 0.055;
-      var x1 = left
-        ? nr.left - sr.left + nr.width * inset
-        : nr.right - sr.left - nr.width * inset;
-      var y1 = nr.bottom - sr.top + 6 + (i % 3) * 3;
-      // land just short of the report column, level with the section
-      var x2 = (left ? colLeft : colRight) + (left ? -12 : 12);
-      var y2 = top + 22;
+      var x1, y1;
+      if (isAbove) {
+        // out from under the note, back toward its outer edge, so the line
+        // gets the note's full width to run before it turns in
+        x1 = left ? nr.left - sr.left + nr.width * inset
+                  : nr.right - sr.left - nr.width * inset;
+        y1 = nr.bottom - sr.top + 6;
+      } else {
+        // mirrored: out from over the note, climbing into the target
+        x1 = left ? nr.left - sr.left + nr.width * inset
+                  : nr.right - sr.left - nr.width * inset;
+        y1 = nr.top - sr.top - 6;
+      }
+      // land on the visible card edge, not the padding box around it
+      var edge = left ? (latest.contentLeft !== undefined ? latest.contentLeft : colLeft)
+                      : (latest.contentRight !== undefined ? latest.contentRight : colRight);
+      var x2 = edge + (left ? -9 : 9);
+      var y2 = top + 16;
 
-      // bow it away from the straight line, alternating and varying so a
-      // column of them doesn't read as a machine-drawn set
+      // a single control point, bowed to the outside of the turn so the
+      // curve never doubles back over the note
       var dx = x2 - x1, dy = y2 - y1;
-      var bow = (26 + (i % 3) * 10) * (i % 2 ? -1 : 1);
-      var cx = x1 + dx * 0.55;
-      var cy = y1 + dy * 0.30 + bow;
+      var bow = (14 + (i % 3) * 7) * (isAbove ? 1 : -1);
+      var cx = x1 + dx * 0.62;
+      var cy = y1 + dy * 0.18 + bow;
 
       var g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
       var p = document.createElementNS('http://www.w3.org/2000/svg', 'path');

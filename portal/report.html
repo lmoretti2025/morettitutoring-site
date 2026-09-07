@@ -7266,11 +7266,19 @@
       anchors[sel] = Math.round(r.top + window.scrollY);
     });
     var pr = page.getBoundingClientRect();
+    /* .page carries horizontal padding, so its box is wider than the cards
+       inside it. An annotation that points at the box stops short of the
+       thing it is pointing at, so post the content edge too. */
+    var ps = getComputedStyle(page);
+    var padL = parseFloat(ps.paddingLeft) || 0;
+    var padR = parseFloat(ps.paddingRight) || 0;
     var msg = {
       type: 'moretti-report',
       height: Math.ceil(Math.max(document.body.scrollHeight, pr.height + 24)),
       colLeft: Math.round(pr.left),
       colWidth: Math.round(pr.width),
+      contentLeft: Math.round(pr.left + padL),
+      contentRight: Math.round(pr.right - padR),
       anchors: anchors
     };
     var json = JSON.stringify(msg);
