@@ -541,6 +541,9 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
 }
 </style>
 <script src="analytics.js" defer></script>
+<!-- Defines window.APPS_SCRIPT_URL, which the form handler at the foot of this
+     page reads. Same file, same URL, same backend as the homepage form. -->
+<script src="portal/backend-url.js"></script>
 </head>
 <body>
 
@@ -615,6 +618,52 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
 .dcta .btn-a{background:var(--red);color:#fff;margin-top:2rem}
 .dcta .btn-a:hover{background:var(--red-lift)}
 .dcta .fine{margin-top:1rem;font-size:.78rem;color:rgba(237,231,229,.5)}
+
+/* ── THE ENQUIRY FORM ──────────────────────────────────────────────────
+   The same form as index.html #start: same markup, same ids, same handler,
+   same Apps Script call. Nothing new was built for this page. It is here
+   because both "Book the free diagnostic" buttons used to point back at the
+   homepage, so the one page carrying the live sample report was the one page
+   that could not start a diagnostic.
+
+   The rules below are index.html's own form rules, copied verbatim, plus the
+   dark-ground overrides this section needs. If the form on the homepage is
+   ever restyled, restyle it here too. */
+.dcta .bookcard{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.14);
+  border-radius:3px;padding:clamp(1.4rem,2.6vw,2rem);max-width:620px;margin:0 auto;text-align:left}
+.dcta .hp-field{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.dcta .ff{margin-bottom:.9rem}
+.dcta .frow{display:grid;grid-template-columns:1fr 1fr;gap:.85rem}
+@media(max-width:560px){.dcta .frow{grid-template-columns:1fr}}
+.dcta .fl{display:block;font-size:.63rem;font-weight:600;letter-spacing:.14em;
+  text-transform:uppercase;color:rgba(237,231,229,.6);margin-bottom:.4rem}
+.dcta .fl em{font-style:normal;font-weight:400;letter-spacing:.02em;text-transform:none}
+.dcta .fi{width:100%;padding:.8rem .9rem;background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.17);border-radius:2px;color:#fff;
+  font-family:var(--sans);font-size:.9rem;font-weight:300;
+  transition:border-color .2s,background .2s}
+.dcta .fi::placeholder{color:rgba(237,231,229,.34)}
+.dcta .fi:focus{outline:none;border-color:var(--red-lift);background:rgba(255,255,255,.08)}
+.dcta textarea.fi{resize:vertical;min-height:74px}
+/* 16px under 600px wide, because iOS Safari zooms the page in when a field
+   smaller than that takes focus and never zooms back out. Most people
+   reaching this page arrive from a phone. */
+@media(max-width:600px){.dcta .fi,.dcta textarea.fi{font-size:16px}}
+.dcta .fsub{width:100%;margin-top:.4rem;padding:1rem;background:var(--red);color:#fff;
+  border:none;border-radius:2px;font-family:var(--sans);font-size:.76rem;font-weight:600;
+  letter-spacing:.11em;text-transform:uppercase;cursor:pointer;transition:background .22s var(--ease)}
+.dcta .fsub:hover{background:var(--red-lift)}
+.dcta .fsub:disabled{opacity:.6;cursor:default}
+.dcta .fnote{margin-top:.7rem;font-size:.72rem;line-height:1.55;
+  color:rgba(237,231,229,.55);text-align:center}
+.dcta .fmsg{display:none;margin-top:.7rem;font-size:.8rem;line-height:1.6;text-align:center}
+.dcta .fmsg.ok{color:var(--gold)}
+.dcta .fmsg.err{color:var(--red-lift)}
+.dcta .capphone{margin-top:clamp(1rem,2vw,1.4rem);font-size:.76rem;letter-spacing:.06em;
+  color:rgba(237,231,229,.5)}
+.dcta .capphone a{margin-left:.5rem;font-family:var(--display);font-weight:700;
+  font-size:1.06rem;letter-spacing:-.01em;color:#fff;transition:color .25s var(--ease)}
+.dcta .capphone a:hover{color:var(--red-lift)}
 </style>
 
 <section class="dhero"><div class="shell">
@@ -623,8 +672,8 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
   <p>This is the real report, running live on this page, exactly as a student opens it in their
   portal. Nothing is held back for a sales call.</p>
   <div class="acts">
-    <a class="btn btn-a shimmer" href="index.html#start"><span>Book the free diagnostic</span></a>
-    <span class="fine">No card. No call required.</span>
+    <a class="btn btn-a shimmer" href="#start"><span>Book the free diagnostic</span></a>
+    <span class="fine">No card. I reply personally, usually within the hour.</span>
   </div>
 </div></section>
 
@@ -648,12 +697,34 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
   </div>
 </section>
 
-<section class="dcta"><div class="shell">
+<!-- id="start" so the hero button, and any bookmark ending #start, lands on
+     the form rather than on another page. -->
+<section class="dcta" id="start"><div class="shell">
   <h2>Your student&rsquo;s report, at no cost</h2>
   <p>One timed sitting at home, whenever suits. A written report either way &mdash; and it is
   yours to keep and to take anywhere, whether or not we ever work together.</p>
-  <a class="btn btn-a shimmer" href="index.html#start"><span>Book the free diagnostic</span></a>
-  <p class="fine">No card. No call required. Reply within 24 hours.</p>
+
+  <div class="bookcard">
+    <form id="reserve-form" novalidate>
+      <div class="hp-field" aria-hidden="true">
+        <label for="rf-hp">Leave this field blank</label>
+        <input type="text" id="rf-hp" name="rf_x7q2" tabindex="-1" autocomplete="off" data-lpignore="true" data-1p-ignore data-form-type="other">
+      </div>
+      <div class="frow">
+        <div class="ff"><label class="fl" for="rf-name">Your name</label><input class="fi" type="text" id="rf-name" name="parentName" required></div>
+        <div class="ff"><label class="fl" for="rf-phone">Phone</label><input class="fi" type="tel" id="rf-phone" name="phone" placeholder="e.g. (201) 555-0100" required></div>
+      </div>
+      <div class="ff"><label class="fl" for="rf-email">Email</label><input class="fi" type="email" id="rf-email" name="email" required></div>
+      <div class="ff"><label class="fl" for="rf-message">What your student needs help with <em>&mdash; optional</em></label>
+        <textarea class="fi" id="rf-message" name="message" rows="2" placeholder="Grade, subject, current scores, timeline&hellip;"></textarea></div>
+      <button type="submit" class="fsub shimmer" id="rf-submit"><span>Book my one-on-one</span></button>
+      <p class="fnote" id="rf-note">I reply personally, usually within the hour. The diagnostic and its report cost nothing either way, and you have the price in writing before anything starts. <a href="prep-course.html#faq">How pricing works &rarr;</a></p>
+      <p id="rf-success" class="fmsg ok">Thanks &mdash; check your email for confirmation. I&rsquo;ll follow up personally, usually within the hour.</p>
+      <p id="rf-error" class="fmsg err">Something went wrong. Please call (201) 275-2791 directly.</p>
+    </form>
+  </div>
+
+  <p class="capphone">Prefer to talk now?<a href="tel:2012752791">(201) 275-2791</a></p>
 </div></section>
 
 <script>
@@ -953,6 +1024,77 @@ document.documentElement.classList.add('js');
       card.style.transform='perspective(700px) rotateX('+rx.toFixed(2)+'deg) rotateY('+ry.toFixed(2)+'deg) translateY(-2px)';
     },{passive:true});
     card.addEventListener('mouseleave',function(){ card.style.transform=''; },{passive:true});
+  });
+})();
+</script>
+
+<!-- ── THE ENQUIRY FORM HANDLER ────────────────────────────────────────────
+     Copied verbatim from index.html. Same honeypot, same timing gate, same
+     Apps Script action, same MTrack.lead conversion. Deliberately a copy and
+     not a new shared module: the ask was for this page to use the form that
+     already exists, not for a new system.
+
+     THAT MEANS THE TWO COPIES CAN DRIFT. If you change the handler on the
+     homepage, change it here. The ids are identical (rf-name, rf-phone,
+     rf-email, rf-message, rf-hp, rf-submit, rf-note, rf-success, rf-error),
+     so a diff of the two blocks should come back empty.
+     ──────────────────────────────────────────────────────────────────────── -->
+<script>
+(function () {
+  var LEAD_BACKEND_URL = window.APPS_SCRIPT_URL;   // portal/backend-url.js
+  var readyAt = Date.now();
+  var form = document.getElementById('reserve-form');
+  if (!form) return;
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var name  = document.getElementById('rf-name').value.trim();
+    var phone = document.getElementById('rf-phone').value.trim();
+    var email = document.getElementById('rf-email').value.trim();
+    var message = document.getElementById('rf-message').value.trim();
+    if (!name || !phone || !email) { alert('Please fill in your name, phone and email.'); return; }
+
+    var honeypot = document.getElementById('rf-hp').value;
+    var elapsedMs = Date.now() - readyAt;
+    // Autofill can stamp the honeypot at the same moment it fills the real
+    // fields. If the browser says the field was autofilled, don't hold it
+    // against a real visitor.
+    if (honeypot) {
+      var hpEl = document.getElementById('rf-hp');
+      [':autofill', ':-webkit-autofill'].forEach(function (sel) {
+        try { if (hpEl.matches(sel)) honeypot = ''; } catch (err) {}
+      });
+    }
+    var note = document.getElementById('rf-note'),
+        ok   = document.getElementById('rf-success'),
+        bad  = document.getElementById('rf-error'),
+        btn  = document.getElementById('rf-submit');
+
+    // Tripped honeypot or an implausibly fast submit reads as a bot —
+    // show success and skip the network call, so it has no signal to adapt to.
+    if (honeypot || elapsedMs < 2500) {
+      note.style.display='none'; ok.style.display='block'; bad.style.display='none';
+      form.reset(); return;
+    }
+    btn.disabled = true; btn.textContent = 'Sending…';
+    fetch(LEAD_BACKEND_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action:'submitLead', name:name, phone:phone, email:email,
+                             message:message, hp:honeypot, elapsedMs:elapsedMs })
+    }).then(function(res){ return res.json(); })
+      .then(function(data){
+        if (!data || !data.ok) throw new Error('submit_failed');
+        note.style.display='none'; ok.style.display='block'; bad.style.display='none';
+        try {
+          if (window.MTrack) window.MTrack.lead({ source: 'diagnostic_form', has_message: message ? 1 : 0 });
+        } catch (err) {}
+        form.reset();
+        btn.disabled=false; btn.textContent='Book my one-on-one';
+      })
+      .catch(function(){
+        bad.style.display='block'; ok.style.display='none';
+        btn.disabled=false; btn.textContent='Book my one-on-one';
+      });
   });
 })();
 </script>
