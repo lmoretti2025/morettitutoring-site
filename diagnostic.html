@@ -609,6 +609,10 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
   padding-left:1.1rem;position:relative}
 .notelist li::before{content:'';position:absolute;left:0;top:.6em;width:12px;height:1px;background:rgba(138,42,30,.42)}
 @media(max-width:1500px){ .notes,.arrows{display:none} .notelist{display:block} }
+/* On a phone the list is separated from the report by a full screen of
+   scrolling, so it reads as notes about nothing. The report still shows;
+   only the commentary goes. */
+@media(max-width:820px){ .notelist{display:none} }
 @media(prefers-reduced-motion:reduce){.note{transition:none;opacity:1;transform:none}}
 
 .dcta{background:var(--void);color:#fff;padding:clamp(3.5rem,8vh,5.5rem) 0;text-align:center}
@@ -717,7 +721,7 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
       <div class="ff"><label class="fl" for="rf-email">Email</label><input class="fi" type="email" id="rf-email" name="email" required></div>
       <div class="ff"><label class="fl" for="rf-message">What your student needs help with <em>&mdash; optional</em></label>
         <textarea class="fi" id="rf-message" name="message" rows="2" placeholder="Grade, subject, current scores, timeline&hellip;"></textarea></div>
-      <button type="submit" class="fsub shimmer" id="rf-submit"><span>Book my one-on-one</span></button>
+      <button type="submit" class="fsub shimmer" id="rf-submit"><span>Take my Diagnostic</span></button>
       <p class="fnote" id="rf-note">I reply personally, usually within the hour. The diagnostic and its report cost nothing either way, and you have the price in writing before anything starts. <a href="prep-course.html#faq">How pricing works &rarr;</a></p>
       <p id="rf-success" class="fmsg ok">Thanks &mdash; check your email for confirmation. I&rsquo;ll follow up personally, usually within the hour.</p>
       <p id="rf-error" class="fmsg err">Something went wrong. Please call (201) 275-2791 directly.</p>
@@ -1089,11 +1093,11 @@ document.documentElement.classList.add('js');
           if (window.MTrack) window.MTrack.lead({ source: 'diagnostic_form', has_message: message ? 1 : 0 });
         } catch (err) {}
         form.reset();
-        btn.disabled=false; btn.textContent='Book my one-on-one';
+        btn.disabled=false; btn.textContent='Take my Diagnostic';
       })
       .catch(function(){
         bad.style.display='block'; ok.style.display='none';
-        btn.disabled=false; btn.textContent='Book my one-on-one';
+        btn.disabled=false; btn.textContent='Take my Diagnostic';
       });
   });
 })();
