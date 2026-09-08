@@ -16085,12 +16085,28 @@ window.Portal = {
   function loadRecords(callback) {
     if (!window.fetchPortalProgress) { records = []; callback(); return; }
     // Kicked off in parallel, not chained — fetchPortalProgress is an Apps
-    // Script round-trip (the slower of the two in practice), while
-    // practice-tests.js is a same-origin static file that's normally
-    // already loaded (or close to it) well before this screen is even
-    // opened. Only the final resolve step below actually needs to wait
-    // for both.
-    var readyPromise = window.__practiceTestsReady || Promise.resolve();
+    // Script round-trip (the slower of the two in practice), while these
+    // are same-origin static files that are normally already loaded (or
+    // close to it) well before this screen is even opened. Only the final
+    // resolve step below actually needs to wait for them.
+    //
+    // ALL THREE BANKS, not just practice-tests.js. This waited on
+    // practice-tests only, but resolveQuestionByKey routes any 'qb|' key
+    // to resolveQuestionBankKey_, which reads window.QUESTION_BANK /
+    // window.QUESTION_BANK_MATH and returns null when the question is not
+    // in the pool yet. Those two files are ~8.5MB and load async, so a
+    // student who opened Saved & Mistakes before they landed got every
+    // Question Bank row silently dropped by the `if (!resolved)` filter
+    // below — and a row that never resolves never gets its
+    // testTitle:'Question Bank Questions', which is exactly what gates the
+    // Save button in the review modal (`isQbRow`). Hence "the first time,
+    // it won't let me save it", then fine on a later visit once the banks
+    // had finished downloading in the background.
+    var readyPromise = Promise.all([
+      window.__practiceTestsReady || Promise.resolve(),
+      window.__questionBankReady || Promise.resolve(),
+      window.__questionBankMathReady || Promise.resolve()
+    ]);
     window.fetchPortalProgress(function (progress) {
       var byKey = (progress.incorrectQuestions && typeof progress.incorrectQuestions === 'object') ? progress.incorrectQuestions : {};
       var savedByKey = (progress.savedQuestions && typeof progress.savedQuestions === 'object') ? progress.savedQuestions : {};
@@ -16700,6 +16716,79 @@ window.Portal = {
     }
     renderRunnerQuestion();
   }
+  /* ═══ SAVE, FROM INSIDE A PRACTICE ROUND ═══
+     The Question Bank runner grew this (see its renderSaveBtn) and this one
+     never did, so practising a mistake was the one place in the portal where
+     a question could be in front of you and there was no way to bookmark it.
+     The empty state on this very screen says "you can save questions when
+     reviewing your score reports and study off question banks", which was an
+     accurate description of a gap rather than a design.
+
+     Same button, same shell (#dx-card .dx-card-hed), same
+     window.saveReportQuestion bridge, same star glyphs, so it looks and
+     behaves identically to the Question Bank one a student has already used.
+
+     Read live out of localStorage on every paint rather than trusting the
+     record's own isSaved: that field is a snapshot from loadRecords() and the
+     student may have toggled the same question from the review modal earlier
+     in the session. r.isSaved is updated alongside it so the list and the
+     Saved tab are right the moment the round is exited. */
+  function iqIsSaved(key) {
+    try {
+      var studentKey = window.getPortalStudentKey ? window.getPortalStudentKey() : null;
+      if (!studentKey) return false;
+      var raw = localStorage.getItem('moretti_saved_qs_' + studentKey);
+      if (!raw) return false;
+      var parsed = JSON.parse(raw);
+      return !!(parsed && parsed.byKey && parsed.byKey[key]);
+    } catch (e) { return false; }
+  }
+
+  function renderRunnerSaveBtn(r) {
+    var hedEl = document.querySelector('#dx-card .dx-card-hed');
+    if (!hedEl || !r || !r.key) return;
+    /* All three runners share this one #dx-card shell, so a round started
+       straight after a Question Bank session can arrive with that runner's
+       own #qb-save-btn still sitting in the header, wired to the question it
+       was looking at. Clear anything that is not ours before adding ours —
+       same reasoning as the .iq-runner-summary sweep above. */
+    Array.prototype.forEach.call(hedEl.querySelectorAll('.dx-mark-btn'), function (el) {
+      if (el.id !== 'iq-runner-save-btn') el.parentNode.removeChild(el);
+    });
+    var btn = document.getElementById('iq-runner-save-btn');
+    if (!btn) {
+      btn = document.createElement('button');
+      btn.type = 'button';
+      btn.id = 'iq-runner-save-btn';
+      btn.className = 'dx-mark-btn';
+      hedEl.appendChild(btn);
+    }
+    function paint() {
+      var on = iqIsSaved(r.key);
+      btn.innerHTML = on ? '&#9733; Saved' : '&#9734; Save';
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
+    paint();
+    btn.onclick = function () {
+      if (!window.saveReportQuestion) return;
+      var st = runnerState[r.key];
+      if (iqIsSaved(r.key)) {
+        window.saveReportQuestion({ key: r.key, remove: true });
+        r.isSaved = false;
+      } else {
+        window.saveReportQuestion({
+          key: r.key,
+          given: (st && st.submitted) ? (r.type === 'fr' ? st.rawAnswer : st.chosenIndex) : null,
+          correct: (st && st.submitted) ? st.correct : null,
+          testTitle: r.testTitle || '',
+          savedAt: new Date().toISOString()
+        });
+        r.isSaved = true;
+      }
+      paint();
+    };
+  }
+
   function renderRunnerQuestion() {
     var qtextEl = document.getElementById('dx-qtext');
     var choicesEl = document.getElementById('dx-choices');
@@ -16781,6 +16870,7 @@ window.Portal = {
     var qnumTileEl = document.getElementById('dx-qnum-tile');
     if (qnumTileEl) { qnumTileEl.textContent = runnerIndex + 1; qnumTileEl.style.display = ''; }
     var st = runnerState[r.key] || (runnerState[r.key] = {});
+    renderRunnerSaveBtn(r);
     var split = splitPassage(r);
     var questionText = split ? split.question : r.text;
     qtextEl.innerHTML = questionText;
