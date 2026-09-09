@@ -283,3 +283,73 @@ An audit of the 20 items already published under `source: "Moretti Test Prep & T
 - **5 of the 20 are re-skins of items already live in `challenge-questions.js`.** A student
   working both decks meets the same question twice.
 - **8 of the 20 are not hard** by the current standard: one easy, seven medium.
+
+---
+
+## 11. Rounds AA–AE: five consecutive 0/8, and what they settled
+
+Thirty-nine items across five batches, every one blocked. The batches were not worse than
+earlier ones — the diagnosis in round AE was blunt and correct: **"It hit hard fine. It hit
+novel badly."** Step counts were at or above the bank's own hard median. Novelty, not
+difficulty, is the binding constraint.
+
+### What the reviews established about figures
+
+- **Figure necessity is real.** 14 of 43 hard geometry `<img>` items (33%) carry *no number
+  in their prose at all*, against **2 of 227** geometry items that have no figure. A figure
+  exists in this bank because it carries what the prose does not. I once measured the
+  opposite and retired the necessity axis on that basis; the measurement was wrong.
+- **Withholding makes a figure necessary but does not make an item hard.** Withholding is
+  more common at easy (58%) than at hard (31%). Orthogonal axes; the bank satisfies both.
+- **Grid-in does not rescue a to-scale figure — it makes it worse.** With options, a student
+  must at least separate them; with a grid-in and an accurate drawing they read the answer
+  straight off. Three of five figures in one batch were solvable with a ruler or protractor
+  to within 0.3%.
+- The "all hard angle-answer figure items are grid-in" rule I built two batches on had a
+  true n of **2**. Zero-of-two happens 25% of the time under a coin flip. It was noise.
+
+### Tooling added in response
+
+| Tool | What it catches |
+|---|---|
+| `figure_fidelity()` in `emit.py` | Parses every emitted SVG, computes drawn angles and lengths, and refuses any item whose **answer** is measurable off the figure. Reproduces every measurability defect the reviewers had found by hand, including a ruler attack that read 39.01 against a stored answer of 39. Now runs inside `validate()`. |
+| `register_report.py` | Flags every 2- and 3-gram in a stem with zero occurrences among the 1,937 real stems. Caught all seven off-register phrases a reviewer found by hand; measured at ~81% precision. Noisy by design — read the flags, do not gate on them. |
+| Mechanic dedupe, cross-skill | The check used to skip comparisons when the prior item was filed under a different skill, so a mechanic could be laundered past it by refiling. Now compares across all skills. |
+| 38 backfilled mech labels | All four early Geometry batches had null mechanics, making them invisible to the dedupe — the direct cause of three blocks in one round. On backfill the check immediately caught those same collisions. |
+| Point-label markup | The bank writes `<i>AB</i>` (122 stems) and per-letter `<i>A</i><i>B</i>` (2). The emitter now joins runs of single-capital italics, which also fixes `<i>xy</i>-plane` (213 stems vs 0). |
+
+### Measurement discipline
+
+Three consecutive rounds found the *measurements* wrong, not just the items. The rules now:
+count **items whose stem matches**, never raw occurrences (the latter inflates stem
+frequency 5–8×); strip tags before matching but expect the strip to break the phrase
+(`the x-axis` scores 0 because the bank writes `<i>x</i>-axis`); reconstruct stacked
+fractions first (a reviewer reported a bank key as wrong because `199/2` tag-strips to
+`1992`); and never calibrate against the 76 Moretti-sourced items.
+
+**Absence is two-valued and the distinction is expensive.** Two good items were deleted
+because `inside the circle` is 0/1,937 — but `in the interior of` is licensed by hard item
+`acd30391`. The wording was dead; the concept was not.
+
+### Where the seams actually are
+
+Hard Circles is **43% arc / central angle / radian / tangent-segment** (18 of 42), not
+coordinate algebra as I had assumed; only 5 of 42 carry a figure and 16 are grid-in.
+Tangency *as a condition to solve for* is 0/1,937 — the bank's four tangent items all hand
+you the point of contact.
+
+---
+
+## 12. Two live-product findings, neither caused by this project
+
+1. **11 live items have set-valued answers the portal cannot grade.** `checkFrAnswer`
+   (`portal/index.html:16619`, `:17306`, `:17701`) compares against a single stored
+   `answerValue` and accepts only `|a − b| < 0.05`. Ten of the eleven are College Board's
+   own — for example `7cb3a8ee`, `|x − 5| = 10`, "What is one possible solution?", stored
+   answer 15: a student who answers −5 is marked wrong today. The fix is an accepted-set
+   field; **not applied**, since it changes live grading behaviour.
+2. **Seven blocked figure items are still live in the bank** (`3e5b345e`, `56ed15b5`,
+   `d561c3e3`, `da42eda1`, `aebc543d`, `5d7be0eb`, `75928d05`). A removal script is staged
+   at `gen/remove_blocked_fig1.py`, dry-run by default, **not run**. One of them,
+   `56ed15b5`, now looks wrongly blocked: it is the altitude-to-the-hypotenuse mechanism,
+   which the bank itself tags hard at `6a3fbec3`.
