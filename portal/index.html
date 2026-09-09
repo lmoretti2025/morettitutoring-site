@@ -3990,6 +3990,20 @@
      now just delegate here instead of reimplementing the logic, so there
      is exactly one real copy to fix or extend. ═══ -->
 <script>
+/* Questions that ask for "one possible" answer have more than one correct response.
+   The grader stores a single answerValue, so a student who entered a different
+   correct answer was marked wrong. Each list below is taken from that item's own
+   published explanation and was re-derived independently before being added. */
+window.FR_ALTERNATES = {
+  "7cb3a8ee": ["-5"],                  /* |x-5| = 10        -> 15 or -5      */
+  "c7789423": ["-7"],                  /* |x-2| = 9         -> 11 or -7      */
+  "364a2d25": ["9"],                   /* x+y=17, xy=72     -> x = 8 or 9    */
+  "fcdf87b7": ["0"],                   /* the two curves    -> x = 0 or 3    */
+  "97e50fa2": ["2"],                   /* f(a) = g(a)       -> a = 2 or 8    */
+  "eeb4143c": ["15/4", "25/6"]         /* area 48..60, y an integer          */
+};
+</script>
+<script>
 window.Portal = {
   // The strictest of the three escaping variants this file used to have
   // (also handles both quote characters, not just &/</>) — safe as the
@@ -16616,13 +16630,18 @@ window.Portal = {
     var n = parseFloat(s);
     return isNaN(n) ? null : n;
   }
-  function checkFrAnswer(raw, expected) {
+  function checkFrAnswer(raw, expected, qid) {
     var a = String(raw == null ? '' : raw).trim();
-    var b = String(expected == null ? '' : expected).trim();
     if (!a) return false;
-    if (a.toLowerCase() === b.toLowerCase()) return true;
-    var an = parseSimpleNumeric(a), bn = parseSimpleNumeric(b);
-    return (an !== null && bn !== null && Math.abs(an - bn) < 0.05);
+    var accept = [expected].concat((window.FR_ALTERNATES || {})[qid] || []);
+    for (var i = 0; i < accept.length; i++) {
+      var b = String(accept[i] == null ? '' : accept[i]).trim();
+      if (!b) continue;
+      if (a.toLowerCase() === b.toLowerCase()) return true;
+      var an = parseSimpleNumeric(a), bn = parseSimpleNumeric(b);
+      if (an !== null && bn !== null && Math.abs(an - bn) < 0.05) return true;
+    }
+    return false;
   }
 
   // Quiz mode: the correct answer (and, for mc, which choice you picked
@@ -16880,7 +16899,7 @@ window.Portal = {
       } else if (r.type === 'fr') {
         var input = document.getElementById('dx-fr-input');
         st.rawAnswer = input ? input.value : '';
-        st.correct = checkFrAnswer(st.rawAnswer, r.answerValue);
+        st.correct = checkFrAnswer(st.rawAnswer, r.answerValue, r.qid);
         given = { raw: st.rawAnswer, value: parseSimpleNumeric(st.rawAnswer) };
       }
       st.submitted = true;
@@ -17303,13 +17322,18 @@ window.Portal = {
     var n = parseFloat(s);
     return isNaN(n) ? null : n;
   }
-  function checkFrAnswer(raw, expected) {
+  function checkFrAnswer(raw, expected, qid) {
     var a = String(raw == null ? '' : raw).trim();
-    var b = String(expected == null ? '' : expected).trim();
     if (!a) return false;
-    if (a.toLowerCase() === b.toLowerCase()) return true;
-    var an = parseSimpleNumeric(a), bn = parseSimpleNumeric(b);
-    return (an !== null && bn !== null && Math.abs(an - bn) < 0.05);
+    var accept = [expected].concat((window.FR_ALTERNATES || {})[qid] || []);
+    for (var i = 0; i < accept.length; i++) {
+      var b = String(accept[i] == null ? '' : accept[i]).trim();
+      if (!b) continue;
+      if (a.toLowerCase() === b.toLowerCase()) return true;
+      var an = parseSimpleNumeric(a), bn = parseSimpleNumeric(b);
+      if (an !== null && bn !== null && Math.abs(an - bn) < 0.05) return true;
+    }
+    return false;
   }
 
   // ═══ CUMULATIVE ANALYTICS ═══ one running tally across both decks (not
@@ -17440,7 +17464,7 @@ window.Portal = {
       } else if (r.type === 'fr') {
         var input = document.getElementById('dx-fr-input');
         st.rawAnswer = input ? input.value : '';
-        st.correct = checkFrAnswer(st.rawAnswer, r.answer);
+        st.correct = checkFrAnswer(st.rawAnswer, r.answer, r.qid);
       }
       st.submitted = true;
       if (st.correct) runnerScore++;
@@ -17698,13 +17722,18 @@ window.Portal = {
     var n = parseFloat(s);
     return isNaN(n) ? null : n;
   }
-  function checkFrAnswer(raw, expected) {
+  function checkFrAnswer(raw, expected, qid) {
     var a = String(raw == null ? '' : raw).trim();
-    var b = String(expected == null ? '' : expected).trim();
     if (!a) return false;
-    if (a.toLowerCase() === b.toLowerCase()) return true;
-    var an = parseSimpleNumeric(a), bn = parseSimpleNumeric(b);
-    return (an !== null && bn !== null && Math.abs(an - bn) < 0.05);
+    var accept = [expected].concat((window.FR_ALTERNATES || {})[qid] || []);
+    for (var i = 0; i < accept.length; i++) {
+      var b = String(accept[i] == null ? '' : accept[i]).trim();
+      if (!b) continue;
+      if (a.toLowerCase() === b.toLowerCase()) return true;
+      var an = parseSimpleNumeric(a), bn = parseSimpleNumeric(b);
+      if (an !== null && bn !== null && Math.abs(an - bn) < 0.05) return true;
+    }
+    return false;
   }
 
   var skillsCache = {}; // subject -> [{ domain, skill, questions: [...] }], built once per subject
@@ -19113,7 +19142,7 @@ window.Portal = {
       if (r.type === 'fr') {
         var frInputEl = document.getElementById('dx-fr-input');
         st.rawAnswer = frInputEl ? frInputEl.value : '';
-        st.correct = checkFrAnswer(st.rawAnswer, r.answerValue);
+        st.correct = checkFrAnswer(st.rawAnswer, r.answerValue, r.qid);
         given = st.rawAnswer;
       } else {
         st.correct = (st.chosenIndex === r.correct);
