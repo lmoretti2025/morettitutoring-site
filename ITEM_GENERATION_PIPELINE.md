@@ -353,3 +353,66 @@ you the point of contact.
    at `gen/remove_blocked_fig1.py`, dry-run by default, **not run**. One of them,
    `56ed15b5`, now looks wrongly blocked: it is the altitude-to-the-hypotenuse mechanism,
    which the bank itself tags hard at `6a3fbec3`.
+
+---
+
+## 13. Rounds AF–AG: the duplicate gate was broken, and fixing it is the finding
+
+Two more 0/8 rounds — 47 consecutive blocked items. **Zero of them were blocked for being
+too easy.** Both reviewers said so explicitly, and one put it bluntly: *"It hit hard fine.
+It hit novel badly."* Step counts sat at or above the bank's own hard median for the skill.
+**Novelty is the entire binding constraint**, and the instrument that was supposed to
+measure novelty had three independent defects.
+
+### Defect 1 — the similarity gate was anti-correlated with the thing it measures
+
+`originality()` included literal digit strings in its token sets, so **changing only the
+numbers lowered the score.** One item scored 0.746 against a 0.75 threshold — missed by
+0.004 — and scores **0.939** with digits stripped. Removing digits and dropping the
+threshold to 0.60 catches five of eight items in that batch at generation time, plus three
+more across two other staged batches.
+
+### Defect 2 — it silently skipped 20% of everything
+
+The gate returned "no comparable stem" for any item with fewer than 8 long words, which
+excluded **72 of 355 staged items and 1,014 of 5,160 corpus objects** — concentrated in
+exactly the algebra skills whose stems are display math plus one short sentence
+(Equivalent Expressions worst: 153 corpus objects invisible, and 15 of my own 26 staged
+items in that skill never compared against anything). Adding structural tokens drawn from
+the mathematics itself — radical indices, exponents, fraction and absolute-value markers,
+variable count — cut that to **2 of 355 staged (1%) and 274 of 5,160 corpus (5%)**.
+
+### Defect 3 — the mechanic-label check has a 0/8 detection rate
+
+Word-overlap Jaccard on prose labels scored **0.00–0.30** on eight items where at least
+five were genuine mechanism duplicates, because the labels name the *downstream* step while
+the collision is *upstream*. Backfilling 38 null labels helped (it immediately caught three
+collisions two reviewers had found by hand) but does not fix the metric. The real fix is an
+atomic mechanism-id set per item, colliding on set overlap; not yet built.
+
+### What the gate can and cannot prove
+
+Auditing the 76 live items with the repaired gate flagged 15 at ≥0.60 against College Board
+items. **On inspection the top six are all different mathematics sharing a stem sentence** —
+`13(cos B) + 12(sin B)` versus `cos L`; an exponential quadratic-in-disguise versus a
+polynomial; imposing `b = 0` to pin a parameter versus plain expansion. So the score is a
+**lead, not a verdict**, and the gate is now two-tier: ≥0.75 is an error, 0.60–0.75 is
+printed for the adversarial reviewer to adjudicate.
+
+### Two real defects in shipped items, both mine
+
+- **A Python precedence bug that deleted a derivation.** `'…' + 'text' + s_ if False else '…'`
+  parses as `(everything_to_the_left) if False else (…)`, so the entire first half of an
+  explanation was discarded before emission. The HTML stayed well-formed, the key stayed
+  right, and every downstream gate passed. Only a source-level check can see this;
+  `lint_src.py` now reports exactly **1 hit across all 34 generator files** — the real one.
+- **A degenerate item.** A "second circle through a given point" turned out to pass through
+  a point already on the first circle, so the two circles were identical and the given point
+  was never used.
+
+### Standing correction
+
+`sector` is 0/1,937 in stems and explanations alike — but a previous round deleted two good
+items because `inside the circle` is 0/1,937, when hard item `acd30391` licenses **"in the
+interior of"**. Absence of a wording is not absence of a concept, and the two are worth
+distinguishing before deleting anything.
