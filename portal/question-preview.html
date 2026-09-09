@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Question preview — by source</title>
+<style>
+  :root{--red:#B0271C;--bg:#f2f2f2;--text:#111;--mid:rgba(17,17,17,.6);--border:rgba(17,17,17,.14)}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Poppins',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+  .wrap{max-width:860px;margin:0 auto;padding:2rem 1.5rem 4rem}
+  h1{font-family:Georgia,serif;font-size:1.5rem;margin:0 0 .3rem}
+  .sub{color:var(--mid);font-size:.9rem;margin:0 0 1.4rem}
+  select{font:inherit;padding:.5rem .7rem;border:1px solid var(--border);border-radius:8px;background:#fff}
+  .q{background:#fff;border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.3rem;margin:1rem 0}
+  .meta{font:600 .72rem ui-monospace,Menlo,monospace;color:var(--mid);letter-spacing:.02em;margin-bottom:.6rem;
+        display:flex;gap:.6rem;flex-wrap:wrap;align-items:center}
+  .tag{background:rgba(17,17,17,.06);padding:.1rem .45rem;border-radius:5px}
+  .tag.hard{background:rgba(176,39,28,.1);color:var(--red)}
+  .stem{font-size:1rem}
+  ol.ch{list-style:upper-alpha;margin:.9rem 0 0;padding-left:1.5rem}
+  ol.ch li{margin:.25rem 0;padding:.2rem .4rem;border-radius:6px}
+  ol.ch li.key{background:rgba(22,163,74,.12);font-weight:600}
+  .fr{margin-top:.9rem;padding:.45rem .7rem;background:rgba(22,163,74,.12);border-radius:6px;
+      display:inline-block;font-weight:600}
+  .exp{margin-top:.9rem;border-top:1px solid var(--border);padding-top:.7rem;font-size:.87rem;color:var(--mid)}
+  .exp summary{cursor:pointer;font-weight:600;color:var(--text)}
+  table{border-collapse:collapse;margin:.6rem auto}
+  th,td{padding:4px 10px;border:1px solid var(--border)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Question preview</h1>
+  <p class="sub">Renders items straight from <code>question-bank-math.js</code>, exactly as the portal will draw them. Correct answer highlighted.</p>
+  <label>Source: <select id="src"></select></label>
+  <div id="out"></div>
+</div>
+<script src="question-bank-math.js"></script>
+<script>
+(function(){
+  var B = window.QUESTION_BANK_MATH || [];
+  var sel = document.getElementById('src'), out = document.getElementById('out');
+  var sources = Object.keys(B.reduce(function(a,x){a[x.source]=1;return a;},{})).sort();
+  sources.forEach(function(s){
+    var o=document.createElement('option'); o.value=s;
+    o.textContent = s + ' (' + B.filter(function(x){return x.source===s;}).length + ')';
+    sel.appendChild(o);
+  });
+  var pref='Moretti Test Prep & Tutoring';
+  if(sources.indexOf(pref)>-1) sel.value=pref;
+  var only=(new URLSearchParams(location.search).get('q')||'').split(',').filter(Boolean);
+  function draw(){
+    var items=B.filter(function(x){return x.source===sel.value;});
+    if(only.length) items=B.filter(function(x){return only.indexOf(x.qid)>-1;});
+    out.innerHTML = items.map(function(r,n){
+      var body;
+      if(r.type==='mc'){
+        body='<ol class="ch">'+r.choices.map(function(c,i){
+          return '<li class="'+(i===r.correct?'key':'')+'">'+c+'</li>';}).join('')+'</ol>';
+      } else {
+        body='<div class="fr">Answer: '+r.answerValue+'</div>';
+      }
+      var exp = r.explanation ? '<details class="exp"><summary>Explanation</summary><div>'+r.explanation+'</div></details>' : '';
+      return '<div class="q"><div class="meta">'
+        +'<span>'+(n+1)+'</span>'
+        +'<span class="tag">'+r.qid+'</span>'
+        +'<span class="tag '+(r.difficulty==='hard'?'hard':'')+'">'+r.difficulty+'</span>'
+        +'<span class="tag">'+r.type.toUpperCase()+'</span>'
+        +'<span>'+r.skill+'</span></div>'
+        +'<div class="stem">'+r.text+'</div>'+body+exp+'</div>';
+    }).join('');
+  }
+  sel.addEventListener('change',draw); draw();
+})();
+</script>
+</body>
+</html>

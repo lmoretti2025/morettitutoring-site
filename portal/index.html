@@ -202,7 +202,6 @@
   .panel { width: 100%; max-width: 460px; }
   .panel-wide { width: 100%; max-width: 760px; }
   .kicker { display: flex; align-items: center; gap: 0.45rem; font-size: 0.58rem; font-weight: 600; letter-spacing: 0.24em; text-transform: uppercase; color: var(--red); margin-bottom: 1.25rem; justify-content: center; }
-  .kicker::before { content: '◆'; font-size: 0.4rem; }
   .panel-hed { font-family: var(--display); font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 700; color: var(--text); text-align: center; margin-bottom: 0.75rem; line-height: 1.3; }
   .panel-sub { font-size: 0.88rem; color: var(--mid); text-align: center; line-height: 1.75; margin-bottom: 2.25rem; }
 
@@ -1313,6 +1312,12 @@
   .dx-passage-body { font-family: var(--serif); font-size: 0.98rem; line-height: 1.85; color: var(--text); }
   .dx-passage-body p { margin-bottom: 1.1rem; }
   .dx-passage-body { cursor: text; }
+  /* The stem is highlightable too now, so it gets the same affordance.
+     Figures inside it are not, and keep the ordinary arrow. */
+  .dx-qtext { cursor: text; }
+  .q-text, #q-modal-passage-pane { cursor: text; }
+  .dx-qtext svg, .dx-qtext img, .dx-qtext table,
+  .q-text svg, .q-text img, .q-text table { cursor: default; }
   .dx-user-highlight { cursor: pointer; border-radius: 1px; }
   .dx-user-highlight.dx-hl-yellow { background: #fff3a0; }
   .dx-user-highlight.dx-hl-yellow:hover { background: #ffe985; }
@@ -1328,7 +1333,7 @@
      via JS (see openHighlightToolbar()) using the selection/mark's
      bounding rect, so it always sits directly over whatever it applies
      to regardless of scroll position. */
-  .dx-hl-toolbar { position: fixed; z-index: 500; display: none; align-items: center; gap: 0.5rem; background: var(--white); border-radius: 999px; padding: 0.5rem 0.7rem; box-shadow: 0 10px 28px rgba(17,17,17,0.22); }
+  .dx-hl-toolbar { position: fixed; z-index: 9500; display: none; align-items: center; gap: 0.5rem; background: var(--white); border-radius: 999px; padding: 0.5rem 0.7rem; box-shadow: 0 10px 28px rgba(17,17,17,0.22); }
   .dx-hl-toolbar.active { display: flex; }
   .dx-hl-swatch { width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid rgba(17,17,17,0.12); cursor: pointer; padding: 0; transition: transform 0.12s var(--ease); }
   .dx-hl-swatch:hover { transform: scale(1.1); }
@@ -3346,6 +3351,14 @@
 #pt-native-report .budget-legend { margin: 0.15rem 0 0.5rem; }
 #pt-native-report .budget-stats { display: flex; gap: 20px; flex-wrap: wrap; font-size: 10.5px; color: var(--mid); }
 #pt-native-report .budget-stats b { color: var(--ink); font-weight: 700; }
+/* ═══ CLICK-THROUGH TO THE QUESTIONS ═══ mirrors report.html. Scoped to
+   #pt-native-report like every other rule in this block, so it cannot leak
+   into the portal's own chrome. */
+#pt-native-report .qx-open { cursor: pointer; }
+#pt-native-report .qx-open:hover, #pt-native-report .qx-open:focus-visible { background: rgba(17,17,17,0.035); }
+#pt-native-report .dx-detail-list li.qx-open:hover { background: rgba(17,17,17,0.05); border-radius: 5px; }
+#pt-native-report .skilldx-row.qx-open:hover, #pt-native-report .budget-row.qx-open:hover { border-radius: 6px; }
+#pt-native-report .qx-open:focus-visible { outline: 2px solid var(--red); outline-offset: 1px; }
 #pt-native-report .budget-skill-hed { font-size: 9.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); margin: 0.6rem 0 0.25rem; }
   /* ═══ WHERE THE TIME WENT ═══ a Pareto over the skills that ran past
      budget: bar length is that skill's SHARE of the section's total lost
@@ -12049,25 +12062,75 @@ window.Portal = {
     closeHlToolbar();
   });
 
-  passageBodyEl.addEventListener('mouseup', function () {
+  /* The toolbar serves the question stem as well as the passage.
+     #dx-qtext is a single node shared by all four things that put a
+     question on screen — the timed engine and the three separate
+     renderRunnerQuestion() functions (selected-mistakes practice, the
+     question-bank runner, and review) — so binding it once here covers
+     every one of them. Math has no passage pane at all, which is why it
+     had no highlighter before; its whole stem lives in #dx-qtext.
+     Reading & Writing question stems become highlightable as a
+     consequence, since they share the node. That matches Bluebook, which
+     lets you highlight the question and not just the passage. */
+  /* A selector rather than a fixed element list, matched with closest():
+     the review modal and the report's question boxes build a fresh
+     .q-text on every render, so anything bound to the elements
+     themselves would go stale the moment a different question opened. */
+  var HL_ROOT_SEL = '#dx-passage-body, #dx-qtext, #q-modal-passage-pane, .q-text';
+
+  function hlRootOf(node) {
+    if (!node) return null;
+    var el = node.nodeType === 1 ? node : node.parentElement;
+    return el && el.closest ? el.closest(HL_ROOT_SEL) : null;
+  }
+
+  /* The toolbar is authored inside #dx-main, which is fine while the only
+     place you could highlight was the test runner. The review modal lives
+     elsewhere in the DOM and opens over a hidden runner, so a toolbar
+     nested in that hidden subtree would never paint. Reparenting it to
+     <body> also takes it out of reach of any transformed ancestor, which
+     would otherwise break position:fixed. */
+  if (hlToolbar.parentNode !== document.body) document.body.appendChild(hlToolbar);
+
+  /* Math stems carry inline <svg> figures and the odd <table>. Wrapping a
+     range in a <mark> means extract-and-reinsert when it crosses element
+     boundaries, so a selection reaching into a diagram would tear the
+     diagram out of the stem and rebuild it inside the mark. Refuse those
+     rather than risk the figure — there is nothing to highlight in a
+     graph anyway. */
+  function hlRangeHitsFigure(range, root) {
+    var figs = root.querySelectorAll('svg, img, table');
+    for (var i = 0; i < figs.length; i++) {
+      if (range.intersectsNode(figs[i])) return true;
+    }
+    return false;
+  }
+
+  function hlHandleMouseUp() {
     var sel = window.getSelection();
     if (!sel || sel.isCollapsed || sel.rangeCount === 0) return;
     var range = sel.getRangeAt(0);
-    if (!passageBodyEl.contains(range.commonAncestorContainer)) return;
+    var root = hlRootOf(range.commonAncestorContainer);
+    if (!root) return;
     if (range.toString().trim() === '') { sel.removeAllRanges(); return; }
+    if (hlRangeHitsFigure(range, root)) { sel.removeAllRanges(); return; }
 
     // A selection that overlaps an existing highlight is ambiguous (which
     // one, if it spans more than one?) — bail out to the simple "click a
     // highlight to edit it" path instead of guessing.
-    var existing = passageBodyEl.querySelectorAll('.dx-user-highlight');
+    var existing = root.querySelectorAll('.dx-user-highlight');
     for (var i = 0; i < existing.length; i++) {
       if (range.intersectsNode(existing[i])) { sel.removeAllRanges(); return; }
     }
     openHlToolbarForRange(range.cloneRange());
-  });
-  passageBodyEl.addEventListener('click', function (e) {
-    var hit = e.target.closest && e.target.closest('.dx-user-highlight');
-    if (hit) { openHlToolbarForMark(hit); return; }
+  }
+
+  function hlHandleClick(e) {
+    if (!e.target.closest) return;
+    // The toolbar's own buttons have their own handlers; never dismiss on them.
+    if (e.target.closest('#dx-hl-toolbar')) return;
+    var hit = e.target.closest('.dx-user-highlight');
+    if (hit && hlRootOf(hit)) { openHlToolbarForMark(hit); return; }
     // A genuine drag-to-select gesture (mousedown → drag → mouseup) also
     // fires a plain 'click' event on release, immediately after the
     // mouseup handler above opens the toolbar for that selection — this
@@ -12075,17 +12138,19 @@ window.Portal = {
     // highlighting looked like it did nothing (a synthetic
     // dispatchEvent('mouseup') in testing doesn't trigger this, only a
     // real mouse interaction does). A live, non-collapsed selection still
-    // anchored in the passage means this click is part of that same
-    // gesture, not a separate dismiss-click, so skip closing.
+    // anchored in a highlightable root means this click is part of that
+    // same gesture, not a separate dismiss-click, so skip closing.
     var sel = window.getSelection();
-    if (sel && !sel.isCollapsed && passageBodyEl.contains(sel.anchorNode)) return;
-    if (!e.target.closest('#dx-hl-toolbar')) closeHlToolbar();
-  });
-  document.addEventListener('click', function (e) {
-    if (!hlToolbar.classList.contains('active')) return;
-    if (hlToolbar.contains(e.target) || passageBodyEl.contains(e.target)) return;
-    closeHlToolbar();
-  });
+    if (sel && !sel.isCollapsed && hlRootOf(sel.anchorNode)) return;
+    if (hlToolbar.classList.contains('active')) closeHlToolbar();
+  }
+
+  /* Delegated at the document, which merges what used to be two separate
+     click paths (open-a-mark on the root, dismiss on the document) into
+     one ordered handler: mark first, then the toolbar's own buttons, then
+     the drag-gesture guard, then dismiss. */
+  document.addEventListener('mouseup', hlHandleMouseUp);
+  document.addEventListener('click', hlHandleClick);
 
   // Despite the name, this doesn't shuffle anything — every section (flat
   // item pools) is presented in exactly the order it's
@@ -16395,6 +16460,125 @@ window.Portal = {
     if (ABBREVIATION_RE_IQ.test(text.slice(Math.max(0, i - 4), i))) return false;
     return true;
   }
+  /* ═══ R&W PASSAGE FORMATTING ═══════════════════════════════════════
+     The R&W bank stores every line break as a literal "\n" — all 1,823
+     questions, carrying almost no <br> of its own — and HTML collapses
+     those to spaces. Collapsing is usually right: they are the source
+     PDF's column wrapping, not paragraph breaks, and turning them all
+     into <br> slices sentences mid-thought. But three kinds of break in
+     that bank are real, and were being flattened along with the rest.
+
+     The wrap width is measurable. Line lengths across the bank spike hard
+     at 130-149 characters (about 4,000 lines) and fall away below 120,
+     which is the PDF's own column. That threshold is what QB_WRAP_MIN
+     encodes, and it is the only reason verse can be recovered at all. */
+  var QB_WRAP_MIN = 120;
+
+  /* (1) Words broken across a column wrap: "Poe (1809-\n1849)" was
+     rendering as "(1809- 1849)" with a stray space. 43 questions. */
+  function qbHealHyphenWraps(t) {
+    return t.replace(/([A-Za-z0-9])-\n([A-Za-z0-9])/g, '$1-$2');
+  }
+
+  /* (2) Verse. 30 questions are poems, sonnets or verse plays, and a
+     sonnet flattened into one paragraph is unreadable as poetry — these
+     are Central Ideas questions where the line IS the unit of meaning.
+     Only the attributed verse questions get this treatment; ordinary
+     prose keeps collapsing, because there the short lines are genuinely
+     just wrapping and breaking on them would look ragged. */
+  /* Deliberately not requiring "adapted from": the attribution is
+     sometimes just "The following text is X's 1920 poem", and that
+     phrasing was slipping through and getting flattened into prose. */
+  var QB_VERSE_RE = /following text is\b[^\n]*\b(?:poem|play|sonnet|verse)\b/i;
+  function qbFormatVerse(passage) {
+    var lines = passage.split('\n'), out = [], wrapped = false;
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i];
+      if (out.length && wrapped) out[out.length - 1] += ' ' + line.trim();
+      else out.push(line.trim());
+      wrapped = line.length >= QB_WRAP_MIN;   // a full-width line continues
+    }
+    out = out.filter(function (l) { return l; });
+    return out.length > 1 ? out.join('<br>') : passage;
+  }
+
+  /* (3) Note lists. 203 "a student has taken the following notes"
+     questions arrive as one run-on paragraph with the bullets welded into
+     the sentence introducing them. A note is always a complete sentence,
+     so a line NOT ending in sentence punctuation is a wrapped
+     continuation of the one before it — rejoin those and every break left
+     is real. 50 of the 203 need that rejoin; bulleting on raw \n alone
+     would cut them in half, the same mistake an earlier version of the
+     splitter made. "<br>&bull; " matches how practice-tests.js already
+     writes this question type, so both banks render alike with no new CSS. */
+  function qbFormatNotes(passage) {
+    var open = /has taken the following notes:[ \t]*\n/.exec(passage);
+    if (!open) return passage;
+    var startAt = open.index + open[0].length;
+    var rest = passage.slice(startAt);
+    var tailAt = rest.search(/\n[ \t]*The student\b/);   // the goal sentence ends the list
+    var body = tailAt === -1 ? rest : rest.slice(0, tailAt);
+    var tail = tailAt === -1 ? '' : rest.slice(tailAt + 1);
+
+    var notes = [];
+    body.split('\n').forEach(function (line) {
+      line = line.trim();
+      if (!line) return;
+      var prev = notes.length ? notes[notes.length - 1] : null;
+      if (prev !== null && !/[.!?"\u201D)]$/.test(prev)) notes[notes.length - 1] = prev + ' ' + line;
+      else notes.push(line);
+    });
+    if (notes.length < 2) return passage;
+    return passage.slice(0, startAt).replace(/\n$/, '')
+      + '<br>&bull; ' + notes.join('<br>&bull; ')
+      + (tail ? '<br><br>' + tail.trim() : '');
+  }
+
+  /* The single entry point all three splitters share. Defined once rather
+     than copied into each: this file just had two copies of a math
+     detector drift apart, and that put a stray divider on 118 math
+     questions. */
+  /* (4) Ordinary prose. Same width test as the verse pass, joined as
+     paragraphs rather than lines. Everything at or above the PDF's column
+     width is a wrap and gets glued to the next line; anything short of it
+     ended early because the author ended it, so it becomes a paragraph.
+
+     Measured over every prose question in the bank: 1,518 breaks land on
+     a finished sentence, 7 cut mid-sentence, and 4 of those 7 are the
+     stranded-superscript defect rather than a misjudged break. So this
+     restores roughly fifteen hundred lost paragraph breaks at a cost of
+     three wrong ones.
+
+     "Text 1"/"Text 2" force a new block whatever the previous line's
+     length. Without that, a paired-passage label landing after a
+     full-width line gets welded onto the end of the passage above it,
+     which is the one case the width test alone gets wrong. */
+  function qbBreakBlocks(passage) {
+    var lines = passage.split('\n'), blocks = [], wrapped = false;
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i], label = /^Text \d\b/.test(line.trim());
+      if (blocks.length && wrapped && !label) blocks[blocks.length - 1] += ' ' + line.trim();
+      else blocks.push(line.trim());
+      wrapped = line.length >= QB_WRAP_MIN;
+    }
+    blocks = blocks.filter(function (b) { return b; });
+    return blocks.length > 1 ? blocks.join('<br><br>') : (blocks[0] || '');
+  }
+
+  window.qbFormatPassage = function (passage) {
+    passage = qbHealHyphenWraps(String(passage || '').trim());
+    if (QB_VERSE_RE.test(passage)) return qbFormatVerse(passage);
+    /* The note path keeps collapsing its head and tail: both are single
+       prose sentences around the list, and the list itself is already
+       bulleted on a stricter sentence test than the width one. */
+    if (/has taken the following notes:/.test(passage)) {
+      return qbFormatNotes(passage)
+        .replace(/\n(Text \d)/g, '<br><br>$1')
+        .replace(/\n/g, ' ');
+    }
+    return qbBreakBlocks(passage);
+  };
+
   function splitPassageIqTrigger(text) {
     text = String(text || '').trim();
     var qMark = text.lastIndexOf('?');
@@ -16411,9 +16595,7 @@ window.Portal = {
       }
     }
     if (boundary === -1) return null;
-    var passage = text.slice(0, boundary + 1).trim()
-      .replace(/\n(Text \d)/g, '<br><br>$1')
-      .replace(/\n/g, ' ');
+    var passage = window.qbFormatPassage(text.slice(0, boundary + 1));
     var question = text.slice(boundary + 1).trim();
     if (!passage || !question) return null;
     return { passage: passage, question: question };
@@ -18136,9 +18318,7 @@ window.Portal = {
     // new paired passage actually starts (Cross-Text Connections' "Text 1"
     // / "Text 2" labels are the one fixed marker every skill's data uses
     // for that).
-    var passage = text.slice(0, boundary + 1).trim()
-      .replace(/\n(Text \d)/g, '<br><br>$1')
-      .replace(/\n/g, ' ');
+    var passage = window.qbFormatPassage(text.slice(0, boundary + 1));
     var question = text.slice(boundary + 1).trim();
     if (!passage || !question) return null;
     return { passage: passage, question: question };
@@ -18155,7 +18335,15 @@ window.Portal = {
   // not a persisted view, so there's no reason to remember a filter or
   // selection from a previous visit.
   var selectedDifficulties = ['easy', 'medium', 'hard'];
-  var completedFilter = 'all'; // 'all' | 'done' | 'not'
+  /* Opening on "Not started" rather than "All": this screen exists to build
+     a practice round, and a question already attempted is the least useful
+     thing to put in one. Seeing everything is a deliberate choice, so it
+     costs a click; skipping what you have done is the common case, so it
+     costs none. Named once because four places have to agree on it —
+     the initial value, Reset, the per-visit reset in showSkills(), and the
+     badge that counts how many filters are off their default. */
+  var QB_COMPLETED_DEFAULT = 'not'; // 'all' | 'done' | 'not'
+  var completedFilter = QB_COMPLETED_DEFAULT;
   var selectedSkills = [];
   // All distinct q.source values present in the current subject's pool
   // (e.g. "Non-Bluebook", "August 2026 SAT") — computed fresh each time
@@ -18309,7 +18497,7 @@ window.Portal = {
         ['easy', 'medium', 'hard'].forEach(function (d) { selectedDifficulties.push(d); });
         selectedSources.length = 0;
         availableSources(currentSubject).forEach(function (src) { selectedSources.push(src); });
-        completedFilter = 'all';
+        completedFilter = QB_COMPLETED_DEFAULT;
         qbSessionSize = 0;
         try { localStorage.setItem(QB_SIZE_KEY, '0'); } catch (e) {}
         renderFilters(true);
@@ -18346,7 +18534,7 @@ window.Portal = {
       var srcs = availableSources(currentSubject);
       var active = 0;
       if (selectedDifficulties.length !== 3) active++;
-      if (completedFilter !== 'all') active++;
+      if (completedFilter !== QB_COMPLETED_DEFAULT) active++;
       if (srcs.length > 1 && selectedSources.length !== srcs.length) active++;
       if (qbSessionSize !== 0) active++;
       reset.hidden = active === 0;
@@ -18606,7 +18794,7 @@ window.Portal = {
     document.getElementById('qb-skills-hed').textContent = currentSubject === 'math' ? 'Math' : 'Reading & Writing';
     selectedDifficulties = ['easy', 'medium', 'hard'];
     selectedSources = availableSources(currentSubject);
-    completedFilter = 'all';
+    completedFilter = QB_COMPLETED_DEFAULT;
     selectedSkills = [];
     renderFilters();
     renderSkillsList();
@@ -19491,9 +19679,7 @@ window.Portal = {
       }
     }
     if (boundary === -1) return null;
-    var passage = text.slice(0, boundary + 1).trim()
-      .replace(/\n(Text \d)/g, '<br><br>$1')
-      .replace(/\n/g, ' ');
+    var passage = window.qbFormatPassage(text.slice(0, boundary + 1));
     var question = text.slice(boundary + 1).trim();
     if (!passage || !question) return null;
     return { passage: passage, question: question };
@@ -19610,8 +19796,18 @@ window.Portal = {
   // 'qb|' branch), so it's reliable even when q.domain uses a legacy
   // domain names this doesn't recognize — same section keys
   // MATH_SECTION_KEYS gates the real exam's calculator button on.
+  /* Three rungs, most trustworthy first. sectionKey is authoritative when
+     the row carries one; the "|math|" key test is what this used to do
+     alone, kept for rows built before sectionKey was threaded through; and
+     the modal's own label ("Math", "Math - Module 2") catches anything
+     older still. Keying off the substring alone meant any row with a
+     missing or differently-shaped key silently read as Reading & Writing,
+     which both wedged a divider into the question and hid the calculator
+     button that gates on this same function. */
   function qModalIsMathRow(r) {
-    return !!(r && r.key && /\|math\|/.test(r.key));
+    if (r && r.sectionKey) return r.sectionKey === 'math';
+    if (r && r.key && /\|math\|/.test(r.key)) return true;
+    return /math/i.test(modalLabel || '');
   }
 
   function renderModalAnswerArea(r, q, hideAnswer, hideChoices) {
@@ -19828,6 +20024,20 @@ window.Portal = {
   // index: rowsList's starting position. label: context text for the
   // header ("R&W — Module 1", a skill name, etc.) — combined with the
   // position to read like "R&W — Module 1 — Question 12 of 27".
+  /* Questions behind a named area. Knowledge names DOMAINS, the time budget
+     names SKILLS, and a question row carries both, so one matcher serves
+     both rather than two that can disagree. */
+  function qxRowsForName(name, secKey) {
+    var out = [];
+    (sections || []).forEach(function (sec) {
+      if (secKey && secKey !== '*' && sec.key !== secKey) return;
+      (sec.rows || []).forEach(function (r) {
+        if (r.sk === name || r.dom === name) out.push(r);
+      });
+    });
+    return out;
+  }
+
   function openQuestionModal(rowsList, index, label) {
     modalRows = rowsList;
     modalIndex = Math.max(0, Math.min(index, rowsList.length - 1));
@@ -23862,7 +24072,8 @@ window.renderNativeReport = function (data) {
         }
         // Sample size travels WITH the claim. A reader comparing two rows had
         // no way to tell that one rests on 11 questions and the other on 5.
-        return '<div class="skilldx-row">' +
+        return '<div class="skilldx-row qx-open" data-qx-name="' + esc(r.skill) +
+          '" data-qx-sec="' + esc(r.sec || '*') + '" tabindex="0" role="button">' +
           '<div class="skilldx-row-main">' +
             '<div class="skilldx-row-top"><span class="skilldx-row-name">' + esc(r.skill) +
               ' <span class="skilldx-n">' + r.total + 'q</span>' +
@@ -23999,6 +24210,19 @@ window.renderNativeReport = function (data) {
       headEl.innerHTML = list.length ? '<div class="behavior-focus">' + headlineFor(list[0]) + '</div>' : '';
       rowsEl.innerHTML = rowsHtml(list);
       keyEl.innerHTML = legendHtml(list);
+      rowsEl.onclick = function (ev) {
+        var row = ev.target.closest ? ev.target.closest('[data-qx-name]') : null;
+        if (!row) return;
+        var name = row.getAttribute('data-qx-name');
+        var qs = qxRowsForName(name, scope === '*' ? row.getAttribute('data-qx-sec') : scope);
+        if (qs.length) openQuestionModal(qs, 0, name);
+      };
+      rowsEl.onkeydown = function (ev) {
+        if (ev.key !== 'Enter' && ev.key !== ' ') return;
+        var row = ev.target.closest ? ev.target.closest('[data-qx-name]') : null;
+        if (!row) return;
+        ev.preventDefault(); row.click();
+      };
     }
 
     if (skScopes.length > 2) {
@@ -25231,14 +25455,28 @@ window.renderNativeReport = function (data) {
       detailEl.innerHTML =
         '<div class="dx-detail-hed">' + esc(list.length + ' ' +
           (list.length === 1 ? 'question' : 'questions') + ' — ' + cause.barLabel) + '</div>' +
-        '<ol class="dx-detail-list">' + list.map(function (e) {
+        '<ol class="dx-detail-list">' + list.map(function (e, qi) {
           var d = rowLabel(e);
-          return '<li><span class="dxd-q">' + (d.num != null ? 'Q' + esc(d.num) : '—') + '</span>' +
+          return '<li class="qx-open" data-qx-idx="' + qi + '" tabindex="0" role="button">' +
+            '<span class="dxd-q">' + (d.num != null ? 'Q' + esc(d.num) : '—') + '</span>' +
             '<span class="dxd-skill">' + esc(d.skill || d.sec) + '</span>' +
             (d.sec && d.skill ? '<span class="dxd-sec">' + esc(d.sec) + '</span>' : '') +
             (d.time ? '<span class="dxd-time">' + esc(d.time) + '</span>' : '') + '</li>';
         }).join('') + '</ol>';
       detailEl.hidden = false;
+      detailEl.onclick = function (ev) {
+        var li = ev.target.closest ? ev.target.closest('[data-qx-idx]') : null;
+        if (!li) return;
+        var i = parseInt(li.getAttribute('data-qx-idx'), 10);
+        if (isNaN(i) || !list[i]) return;
+        openQuestionModal(list.map(function (e) { return e.r; }), i, cause.barLabel);
+      };
+      detailEl.onkeydown = function (ev) {
+        if (ev.key !== 'Enter' && ev.key !== ' ') return;
+        var li = ev.target.closest ? ev.target.closest('[data-qx-idx]') : null;
+        if (!li) return;
+        ev.preventDefault(); li.click();
+      };
     }
 
     card.addEventListener('click', function (ev) {
@@ -25362,7 +25600,8 @@ window.renderNativeReport = function (data) {
       var rowsHtml = rows.map(function (x) {
         var tPct = (x.budgetMs / x.n) / maxPerQ * 100;
         var aPct = (x.actualMs / x.n) / maxPerQ * 100;
-        return '<div class="budget-row">' +
+        return '<div class="budget-row qx-open" data-qx-name="' + esc(x.skill) +
+          '" data-qx-sec="' + esc(sec.key) + '" tabindex="0" role="button">' +
           '<span class="budget-row-name">' + esc(x.skill) +
             ' <span class="budget-row-dom">' + esc(x.domain || '') + '</span></span>' +
           '<span class="budget-gap dxk-hit" data-tip="' + esc(x.skill) + ' &nbsp;<b>' + fmtSec(x.actualMs / x.n) +
@@ -25458,6 +25697,21 @@ window.renderNativeReport = function (data) {
         ' scaled down proportionally to stay inside the clock. The comparison between skills is unaffected.');
     }
     card.innerHTML = html + (notes.length ? '<p class="budget-note">' + notes.join(' ') + '</p>' : '');
+    if (!card.__qxBound) {
+      card.__qxBound = true;
+      card.addEventListener('click', function (ev) {
+        var row = ev.target.closest ? ev.target.closest('[data-qx-name]') : null;
+        if (!row || !card.contains(row)) return;
+        var qs = qxRowsForName(row.getAttribute('data-qx-name'), row.getAttribute('data-qx-sec'));
+        if (qs.length) openQuestionModal(qs, 0, row.getAttribute('data-qx-name'));
+      });
+      card.addEventListener('keydown', function (ev) {
+        if (ev.key !== 'Enter' && ev.key !== ' ') return;
+        var row = ev.target.closest ? ev.target.closest('[data-qx-name]') : null;
+        if (!row || !card.contains(row)) return;
+        ev.preventDefault(); row.click();
+      });
+    }
     // One tooltip for the whole card — the meters and every skill dot plot
     // inside it resolve through the same container listener.
     dxkWire(card);

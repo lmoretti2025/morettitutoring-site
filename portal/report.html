@@ -210,6 +210,16 @@
   .budget-legend { margin: 2px 0 8px; }
   .budget-stats { display: flex; gap: 18px; flex-wrap: wrap; font-size: 9.5px; color: var(--mid); }
   .budget-stats b { color: var(--ink); font-weight: 700; }
+  /* ═══ CLICK-THROUGH TO THE QUESTIONS ═══ every row that names a cause,
+     an area or a skill opens the same question modal the bridge chart and
+     the timing chart already use. A finding you cannot get from the
+     finding to the evidence for is a claim; this makes all three sections
+     browsable the way "What went wrong" already half was. */
+  .qx-open { cursor: pointer; }
+  .qx-open:hover, .qx-open:focus-visible { background: rgba(17,17,17,0.035); }
+  .dx-detail-list li.qx-open:hover { background: rgba(17,17,17,0.05); border-radius: 5px; }
+  .skilldx-row.qx-open:hover, .budget-row.qx-open:hover { border-radius: 6px; }
+  .qx-open:focus-visible { outline: 2px solid var(--red); outline-offset: 1px; }
   .budget-skill-hed { font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); margin: 9px 0 4px; }
   /* ═══ WHERE THE TIME WENT ═══ a Pareto over the skills that ran past
      budget: bar length is that skill's SHARE of the section's total lost
@@ -1412,7 +1422,14 @@
     }
     qModalFlagPillEl.style.display = r.marked ? '' : 'none';
 
-    var split = splitPassageForModal(q.text);
+    /* Math questions have no passage. splitPassageForModal's heuristics
+       are tuned for R&W's passage-then-prompt shape, and a math question's
+       own setup sentence ending in a period right before its "...?"
+       sentence matches that shape well enough to falsely trigger a split,
+       wedging a divider into a question that should never show one.
+       qModalIsMathRow(r) is the same signal the calculator button above
+       already gates on. */
+    var split = qModalIsMathRow(r) ? null : splitPassageForModal(q.text);
     qModalPassagePane.innerHTML = split ? split.passage : '';
 
     qModalQuestionPane.innerHTML = '';
@@ -1448,6 +1465,21 @@
     qModalQuestionPane.scrollTop = 0;
     qModalPassagePane.scrollTop = 0;
     applyModalCalcState(r);
+  }
+
+  /* Questions behind a named area. The Knowledge section names DOMAINS and
+     the time budget names SKILLS, and a question row carries both (.dom and
+     .sk), so one matcher serves both rather than two that can disagree.
+     secKey narrows to one section; '*' or null means the whole test. */
+  function qxRowsForName(name, secKey) {
+    var out = [];
+    (sections || []).forEach(function (sec) {
+      if (secKey && secKey !== '*' && sec.key !== secKey) return;
+      (sec.rows || []).forEach(function (r) {
+        if (r.sk === name || r.dom === name) out.push(r);
+      });
+    });
+    return out;
   }
 
   function openQuestionModal(rowsList, index, label) {
@@ -5391,7 +5423,8 @@
         }
         // Sample size travels WITH the claim. A reader comparing two rows had
         // no way to tell that one rests on 11 questions and the other on 5.
-        return '<div class="skilldx-row">' +
+        return '<div class="skilldx-row qx-open" data-qx-name="' + esc(r.skill) +
+          '" data-qx-sec="' + esc(r.sec || '*') + '" tabindex="0" role="button">' +
           '<div class="skilldx-row-main">' +
             '<div class="skilldx-row-top"><span class="skilldx-row-name">' + esc(r.skill) +
               ' <span class="skilldx-n">' + r.total + 'q</span>' +
@@ -5528,6 +5561,20 @@
       headEl.innerHTML = list.length ? '<div class="behavior-focus">' + headlineFor(list[0]) + '</div>' : '';
       rowsEl.innerHTML = rowsHtml(list);
       keyEl.innerHTML = legendHtml(list);
+      // Rebound on every scope change, because the rows are rebuilt each time.
+      rowsEl.onclick = function (ev) {
+        var row = ev.target.closest ? ev.target.closest('[data-qx-name]') : null;
+        if (!row) return;
+        var name = row.getAttribute('data-qx-name');
+        var qs = qxRowsForName(name, scope === '*' ? row.getAttribute('data-qx-sec') : scope);
+        if (qs.length) openQuestionModal(qs, 0, name);
+      };
+      rowsEl.onkeydown = function (ev) {
+        if (ev.key !== 'Enter' && ev.key !== ' ') return;
+        var row = ev.target.closest ? ev.target.closest('[data-qx-name]') : null;
+        if (!row) return;
+        ev.preventDefault(); row.click();
+      };
     }
 
     if (skScopes.length > 2) {
@@ -6220,6 +6267,47 @@
           fill: 'var(--red)', stroke: 'var(--white)', 'stroke-width': 1.5 });
       }
 
+      /* ═══ WHERE THE MISSES LANDED ═══ a rug along the baseline: one tick
+         per question that got a look, drawn only where the answer was
+         wrong.
+
+         The chart above it already shows WHEN the pace went off target. It
+         did not show what that cost, so a reader had to take on faith that
+         drifting past the budget line turned into lost points. With the rug
+         under it the two facts sit on one x-axis and the argument makes
+         itself: the line pulls away from target here, and the ticks bunch
+         up right after.
+
+         Deliberately a rug and not dots on the pace line. Red dots on a red
+         line would be read as part of the trace, and there is already one
+         red dot on this chart carrying a different meaning entirely (the
+         moment the clock ran out). Keeping misses off the lines and on
+         their own row means neither has to compete.
+
+         Only questions in `pts` are drawn, so a module the clock cut off
+         contributes no ticks after the cutoff — those are already accounted
+         for by the hatched never-reached band, and marking them wrong here
+         would count the same lost points twice.
+
+         Inside the clipped group on purpose: the rug wipes in left to right
+         with the lines, so a reader watches the misses arrive in the same
+         reading order as the pace that produced them. */
+      var missPts = pts.filter(function (p) { return p.r && p.r.ok === false; });
+      if (missPts.length) {
+        var rugY = T + ih;
+        missPts.forEach(function (p) {
+          svgEl('line', { x1: xAtN(p.n), x2: xAtN(p.n), y1: rugY - 3, y2: rugY + 7,
+            stroke: 'var(--red)', 'stroke-width': 2, 'stroke-linecap': 'round',
+            opacity: 0.85 });
+        });
+        /* Named on the chart rather than left to the legend alone: the rug
+           is the one mark here whose meaning is not guessable from its
+           shape. Written into the left gutter at the baseline, which is
+           empty on every module. */
+        svgEl('text', { x: L - 6, y: rugY + 11, 'text-anchor': 'end',
+          class: 'pace-ax', fill: 'var(--red)' }, 'miss');
+      }
+
       /* Direct labels at the right end of each line, instead of a legend
          entry per line. Written into the R gutter opened above. Labels are
          nudged apart when two lines finish within a few pixels of each
@@ -6319,11 +6407,17 @@
         '<span><i class="fill" style="background:' + (cf >= cb ? 'rgba(239,68,68,0.10)' : 'rgba(22,163,74,0.10)') + '"></i>' +
           (debt >= 0 ? formatDuration(debt) + ' over target pace' : formatDuration(-debt) + ' under target pace') + '</span>' +
         (anyRevisit ? '<span><i class="fill" style="background:rgba(201,168,76,0.20)"></i>' +
-          formatDuration(ct - cf) + ' spent going back</span>' : '');
+          formatDuration(ct - cf) + ' spent going back</span>' : '') +
+        (missPts.length ? '<span><i class="fill" style="background:var(--red)"></i>' +
+          missPts.length + (missPts.length === 1 ? ' miss' : ' misses') +
+          ' on the baseline</span>' : '');
       paceVerdictEl.innerHTML = paceVerdict(pts, cf, cb, ct, clockMs, cross, totalQ);
       paceSvg.setAttribute('aria-label', 'Cumulative time for ' + mv.label + ': ' + formatDuration(cf) +
         ' on first looks against ' + formatDuration(cb) + ' budgeted, ' + formatDuration(ct) + ' including return trips' +
-        (clockMs ? ', on a ' + Math.round(mv.clockMin) + ' minute clock' : '') + '.');
+        (clockMs ? ', on a ' + Math.round(mv.clockMin) + ' minute clock' : '') + '.' +
+        (missPts.length ? ' ' + missPts.length + ' question' + (missPts.length === 1 ? '' : 's') +
+          ' answered incorrectly, marked along the baseline at question ' +
+          missPts.map(function (p) { return p.n; }).join(', ') + '.' : ''));
     }
 
     /* ═══ MODULE SWAP ═══ paging between modules used to hard-cut the chart
@@ -6771,14 +6865,32 @@
       detailEl.innerHTML =
         '<div class="dx-detail-hed">' + esc(list.length + ' ' +
           (list.length === 1 ? 'question' : 'questions') + ' — ' + cause.barLabel) + '</div>' +
-        '<ol class="dx-detail-list">' + list.map(function (e) {
+        '<ol class="dx-detail-list">' + list.map(function (e, qi) {
           var d = rowLabel(e);
-          return '<li><span class="dxd-q">' + (d.num != null ? 'Q' + esc(d.num) : '—') + '</span>' +
+          // qx-idx indexes `list`, so the modal opens ON the question clicked
+          // and can then page through the rest of the same cause.
+          return '<li class="qx-open" data-qx-idx="' + qi + '" tabindex="0" role="button">' +
+            '<span class="dxd-q">' + (d.num != null ? 'Q' + esc(d.num) : '—') + '</span>' +
             '<span class="dxd-skill">' + esc(d.skill || d.sec) + '</span>' +
             (d.sec && d.skill ? '<span class="dxd-sec">' + esc(d.sec) + '</span>' : '') +
             (d.time ? '<span class="dxd-time">' + esc(d.time) + '</span>' : '') + '</li>';
         }).join('') + '</ol>';
       detailEl.hidden = false;
+
+      // Delegated once per open, on the element that was just rebuilt.
+      detailEl.onclick = function (ev) {
+        var li = ev.target.closest ? ev.target.closest('[data-qx-idx]') : null;
+        if (!li) return;
+        var i = parseInt(li.getAttribute('data-qx-idx'), 10);
+        if (isNaN(i) || !list[i]) return;
+        openQuestionModal(list.map(function (e) { return e.r; }), i, cause.barLabel);
+      };
+      detailEl.onkeydown = function (ev) {
+        if (ev.key !== 'Enter' && ev.key !== ' ') return;
+        var li = ev.target.closest ? ev.target.closest('[data-qx-idx]') : null;
+        if (!li) return;
+        ev.preventDefault(); li.click();
+      };
     }
 
     card.addEventListener('click', function (ev) {
@@ -6908,7 +7020,8 @@
       var rowsHtml = rows.map(function (x) {
         var tPct = (x.budgetMs / x.n) / maxPerQ * 100;
         var aPct = (x.actualMs / x.n) / maxPerQ * 100;
-        return '<div class="budget-row">' +
+        return '<div class="budget-row qx-open" data-qx-name="' + esc(x.skill) +
+          '" data-qx-sec="' + esc(sec.key) + '" tabindex="0" role="button">' +
           '<span class="budget-row-name">' + esc(x.skill) +
             ' <span class="budget-row-dom">' + esc(x.domain || '') + '</span></span>' +
           '<span class="budget-gap dxk-hit" data-tip="' + esc(x.skill) + ' &nbsp;<b>' + fmtSec(x.actualMs / x.n) +
@@ -7004,6 +7117,24 @@
         ' scaled down proportionally to stay inside the clock. The comparison between skills is unaffected.');
     }
     card.innerHTML = html + (notes.length ? '<p class="budget-note">' + notes.join(' ') + '</p>' : '');
+    /* Each skill row opens the questions behind it, scoped to the section
+       whose card it sits on — the same skill can run over in both.
+       Bound once on the card, which survives re-renders of its contents. */
+    if (!card.__qxBound) {
+      card.__qxBound = true;
+      card.addEventListener('click', function (ev) {
+        var row = ev.target.closest ? ev.target.closest('[data-qx-name]') : null;
+        if (!row || !card.contains(row)) return;
+        var qs = qxRowsForName(row.getAttribute('data-qx-name'), row.getAttribute('data-qx-sec'));
+        if (qs.length) openQuestionModal(qs, 0, row.getAttribute('data-qx-name'));
+      });
+      card.addEventListener('keydown', function (ev) {
+        if (ev.key !== 'Enter' && ev.key !== ' ') return;
+        var row = ev.target.closest ? ev.target.closest('[data-qx-name]') : null;
+        if (!row || !card.contains(row)) return;
+        ev.preventDefault(); row.click();
+      });
+    }
     // One tooltip for the whole card: the meters and every skill dot plot
     // inside it resolve through the same container listener.
     dxkWire(card);
