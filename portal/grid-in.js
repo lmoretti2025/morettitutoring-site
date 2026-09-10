@@ -93,34 +93,10 @@
     return (typed === t.truncated || typed === t.rounded) && fillsBox(entry);
   }
 
-  // A few keys are stored already rounded: 9.667 for 29/3, -0.3267 for
-  // -49/150. Such a key fills the answer box and is not a simple fraction
-  // (lowest-terms denominator over 100, which rules out exact keys such as
-  // .0625 = 1/16 or 86.875 = 695/8). All it says about the real answer is
-  // that it rounds to the key, so accept whatever is a correct entry for
-  // some value that rounds to it: 29/3, 9.666 and 9.667 all pass for 9.667.
-  function isRoundedKey(key) {
-    return !key.frac && !!key.value && key.value.d > 100 && fillsBox(key);
-  }
-
-  function acceptsRounded(entry, key) {
-    var k = key.places.length, target = digitsOf(key);
-    if (entry.frac) return entry.value.neg === key.neg && toPlaces(entry.value, k).rounded === target;
-    if (!sameSign(entry, key.neg) || !fillsBox(entry)) return false;
-    var typed = digitsOf(entry), kE = entry.places.length;
-    if (kE > k) {
-      var head = entry.intPart + entry.places.slice(0, k);
-      return magnitude(entry.places.charAt(k) >= '5' ? plusOne(head) : head) === target;
-    }
-    // The values that round to the key span less than one unit at the
-    // entry's precision, so only the two ends of that span matter.
-    var n = Number(target), s = Math.pow(10, k);
-    var lo = toPlaces({ n: 2 * n - 1, d: 2 * s }, kE), hi = toPlaces({ n: 20 * n + 9, d: 20 * s }, kE);
-    return [lo.truncated, lo.rounded, hi.truncated, hi.rounded].indexOf(typed) !== -1;
-  }
-
   // raw: what the student typed. keys: the answer key, or an array of keys
   // (the stored answer plus any window.FR_ALTERNATES for that question).
+  // A key must be the exact answer — store 29/3, not 9.667, or 29/3 itself
+  // is marked wrong. tests/grid-in-test.js flags keys that look rounded.
   function gridInCorrect(raw, keys) {
     var a = clean(raw);
     if (!a) return false;
@@ -131,18 +107,11 @@
       if (!b) continue;
       if (a.toLowerCase() === b.toLowerCase()) return true;
       var key = parse(b);
-      if (!entry || !key || !key.value) continue;
-      if (accepts(entry, key.value)) return true;
-      if (isRoundedKey(key) && acceptsRounded(entry, key)) return true;
+      if (entry && key && key.value && accepts(entry, key.value)) return true;
     }
     return false;
   }
 
   root.gridInCorrect = gridInCorrect;
-  if (typeof module !== 'undefined' && module.exports) {
-    module.exports = {
-      gridInCorrect: gridInCorrect,
-      isRoundedKey: function (key) { var k = parse(clean(key)); return !!k && isRoundedKey(k); }
-    };
-  }
+  if (typeof module !== 'undefined' && module.exports) module.exports = { gridInCorrect: gridInCorrect };
 })(typeof window !== 'undefined' ? window : this);

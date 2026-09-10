@@ -11,7 +11,9 @@
  *     of ways to enter a correct answer" line passes;
  *   - near misses fail: a neighbouring fraction (5/13 for 5/12), the key
  *     written short (.42, .417), and the key off by 0.01-0.04, which the
- *     old absolute 0.05 tolerance accepted.
+ *     old absolute 0.05 tolerance accepted;
+ *   - the key is the exact answer, not a rounded one (9.667 for 29/3
+ *     would make 29/3 itself wrong).
  * It also checks that index.html and report.html load grid-in.js and
  * have no grader of their own left.
  *
@@ -24,7 +26,7 @@ const vm = require('vm');
 
 const PORTAL = path.join(__dirname, '..');
 const read = (f) => fs.readFileSync(path.join(PORTAL, f), 'utf8');
-const { gridInCorrect, isRoundedKey } = require(path.join(PORTAL, 'grid-in.js'));
+const { gridInCorrect } = require(path.join(PORTAL, 'grid-in.js'));
 
 let passed = 0, failed = 0;
 const failures = [];
@@ -52,7 +54,7 @@ function add(where, q) {
   if (!q || q.type !== 'fr') return;
   const key = String(q.answerValue != null ? q.answerValue : q.answer);
   const qid = q.qid || null;
-  items.push({ where, qid, key, keys: [key].concat((qid && ALTS[qid]) || []), expl: q.explanation || '' });
+  items.push({ where, qid, key, keys: [key].concat((qid && ALTS[qid]) || []), expl: q.explanation || '', text: q.text || '' });
 }
 (W.QUESTION_BANK_MATH || []).forEach((q) => add('question-bank-math ' + q.qid, q));
 (W.CHALLENGE_MATH || []).forEach((q, i) => add('challenge ' + (q.key || i), q));
@@ -141,20 +143,6 @@ for (const [raw, key, want] of [
   ['.66', '2/3', false], ['0.67', '2/3', false], ['.667', '2/3', false],
 ]) check(gridInCorrect(raw, key) === want, `"${raw}" against ${key} should be ${want ? 'accepted' : 'rejected'}`);
 
-// Keys stored already rounded, with the exact answer each was rounded
-// from (re-derived from the question): the exact answer and both of its
-// box forms must pass, and the next box value over must not.
-for (const [key, exact, near] of [
-  ['-2.8333', '-17/6', '-2.834'],   // banks.js MATH_MODULE1 #20: y = 6x + 22 shifted down 5
-  ['9.667', '29/3', '9.668'],       // sat-practice-2: sum of the roots of 3x^2 - 29x + 56
-  ['6.556', '59/9', '6.557'],       // sat-practice-2: 9x - 10y = 59 at y = 0
-  ['-0.3267', '-49/150', '-.3268'], // sat-practice-2: t = -2.352 / 7.2
-]) {
-  check(isRoundedKey(key), `${key} is recognised as an already-rounded key`);
-  for (const f of [exact].concat(boxForms(rational(exact))))
-    check(gridInCorrect(f, key), `"${f}" (the exact answer ${exact}) against rounded key ${key} should be accepted`);
-  check(!gridInCorrect(near, key), `"${near}" against rounded key ${key} should be rejected`);
-}
 console.log('  ' + (failures.length ? '\x1b[31m' + failures.length + ' failed so far\x1b[0m' : '\x1b[32mok\x1b[0m'));
 
 // ---- 3. every grid-in in every bank ----
@@ -176,7 +164,7 @@ for (const it of items) {
     check(gridInCorrect(k, it.keys), `${where}: its own key/alternate "${k}" is rejected`);
     const v = rational(k);
     if (!v) continue;
-    if (!isRoundedKey(k)) for (const f of boxForms(v)) check(gridInCorrect(f, it.keys), `${where}: SAT box form "${f}" of ${k} is rejected`);
+    for (const f of boxForms(v)) check(gridInCorrect(f, it.keys), `${where}: SAT box form "${f}" of ${k} is rejected`);
     if (v.d !== 1n && /\//.test(k)) check(gridInCorrect((v.neg ? '-' : '') + 2n * v.n + '/' + 2n * v.d, it.keys), `${where}: equivalent fraction of ${k} is rejected`);
   }
   for (const f of noteForms(it.expl)) {
@@ -205,12 +193,6 @@ for (const it of items) {
     if (!mv || accepted(mv)) continue;
     // A short form is only a near miss if it isn't itself a legal box-filling entry.
     if (it.keys.some((k) => { const v = rational(k); return v && boxForms(v).includes(m); })) continue;
-    // For a key that is itself rounded, anything that rounds to the key is fair game.
-    if (it.keys.some((k) => {
-      if (!isRoundedKey(k)) return false;
-      const kv = rational(k), kk = (k.split('.')[1] || '').length;
-      return kv.neg === mv.neg && places(mv, kk).round === places(kv, kk).round;
-    })) continue;
     nearMissCount++;
     if (oldRule(m, it.keys)) oldRuleNearMisses++;
     check(!gridInCorrect(m, it.keys), `${where}: near miss "${m}" is accepted`);
@@ -219,8 +201,43 @@ for (const it of items) {
 console.log(`  ${noteCount} explanation forms, ${nearMissCount} near misses checked`);
 console.log(`  (the old absolute 0.05 rule accepted ${oldRuleNearMisses} of those near misses)`);
 
-const rounded = [...new Set(items.flatMap((it) => it.keys).filter(isRoundedKey))];
-console.log('  keys treated as already rounded: ' + rounded.join(', '));
+// ---- 4. every key is the exact answer ----
+// A rounded key marks the exact answer wrong: with 9.667 stored for 29/3, a
+// student who enters 29/3 fails. Two signs of one: the explanation calls
+// the key approximate ("29/3 ≈ 9.667"), or the key is a decimal that fills
+// the answer box without being a simple fraction (lowest terms over 100).
+// Questions that ask for a rounded answer are exempt; so are the keys
+// below, which were checked and really are exact.
+section('Keys are exact answers');
+const KNOWN_EXACT = { '.0014': '0.001% of 140 g (question-bank-math 8213b1b3)' };
+// Flagged, not yet decided. Reported on every run instead of failing it.
+const KNOWN_OPEN = {
+  '40077b34': 'the answer is 120 + 120√3 (irrational), so no decimal key is exact; ' +
+              '327.85 lets 327.9 pass and fails 327.846. Needs a content decision.',
+};
+const gcd = (a, b) => (b ? gcd(b, a % b) : a);
+const plain = (html) => html.replace(/<[^>]+>/g, ' ').replace(/&minus;|−/g, '-').replace(/&nbsp;/g, ' ');
+let keysChecked = 0;
+const stillOpen = new Set();
+for (const it of items) {
+  if (/\bnearest\b|\bround(ed)?\b/i.test(plain(it.text))) continue;
+  for (const k of it.keys) {
+    const v = rational(k);
+    if (!v) continue;
+    keysChecked++;
+    const lowest = v.n ? v.d / gcd(v.n, v.d) : 1n;
+    const fillsBox = !/\//.test(k) && k.length >= (v.neg ? 6 : 5);
+    const approx = (plain(it.expl).match(/(?:≈|approximately)\s*-?\d*\.?\d+/g) || []).map((a) => rational(a.replace(/^\D+(?=-?[\d.])/, '')));
+    const problem = (fillsBox && lowest > 100n && !KNOWN_EXACT[k]) ? `key ${k} looks rounded; store the exact answer`
+      : approx.some((a) => sameValue(a, v)) ? `the explanation calls the key ${k} approximate` : null;
+    if (problem && KNOWN_OPEN[it.qid]) { stillOpen.add(it.qid); continue; }
+    check(!problem, `${it.where}: ${problem}`);
+  }
+}
+for (const qid of Object.keys(KNOWN_OPEN))
+  check(stillOpen.has(qid), `KNOWN_OPEN ${qid} is no longer flagged; remove it from the list`);
+console.log(`  ${keysChecked} keys checked`);
+for (const qid of stillOpen) console.log(`  \x1b[33m! open: ${qid}: ${KNOWN_OPEN[qid]}\x1b[0m`);
 
 console.log('\n' + '─'.repeat(50));
 if (failures.length) {
