@@ -210,15 +210,9 @@ console.log(`  (the old absolute 0.05 rule accepted ${oldRuleNearMisses} of thos
 // below, which were checked and really are exact.
 section('Keys are exact answers');
 const KNOWN_EXACT = { '.0014': '0.001% of 140 g (question-bank-math 8213b1b3)' };
-// Flagged, not yet decided. Reported on every run instead of failing it.
-const KNOWN_OPEN = {
-  '40077b34': 'the answer is 120 + 120√3 (irrational), so no decimal key is exact; ' +
-              '327.85 lets 327.9 pass and fails 327.846. Needs a content decision.',
-};
 const gcd = (a, b) => (b ? gcd(b, a % b) : a);
 const plain = (html) => html.replace(/<[^>]+>/g, ' ').replace(/&minus;|−/g, '-').replace(/&nbsp;/g, ' ');
 let keysChecked = 0;
-const stillOpen = new Set();
 for (const it of items) {
   if (/\bnearest\b|\bround(ed)?\b/i.test(plain(it.text))) continue;
   for (const k of it.keys) {
@@ -230,14 +224,10 @@ for (const it of items) {
     const approx = (plain(it.expl).match(/(?:≈|approximately)\s*-?\d*\.?\d+/g) || []).map((a) => rational(a.replace(/^\D+(?=-?[\d.])/, '')));
     const problem = (fillsBox && lowest > 100n && !KNOWN_EXACT[k]) ? `key ${k} looks rounded; store the exact answer`
       : approx.some((a) => sameValue(a, v)) ? `the explanation calls the key ${k} approximate` : null;
-    if (problem && KNOWN_OPEN[it.qid]) { stillOpen.add(it.qid); continue; }
     check(!problem, `${it.where}: ${problem}`);
   }
 }
-for (const qid of Object.keys(KNOWN_OPEN))
-  check(stillOpen.has(qid), `KNOWN_OPEN ${qid} is no longer flagged; remove it from the list`);
 console.log(`  ${keysChecked} keys checked`);
-for (const qid of stillOpen) console.log(`  \x1b[33m! open: ${qid}: ${KNOWN_OPEN[qid]}\x1b[0m`);
 
 console.log('\n' + '─'.repeat(50));
 if (failures.length) {
