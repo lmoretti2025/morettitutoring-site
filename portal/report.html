@@ -1176,6 +1176,7 @@
 <script src="banks.js?v=20260905"></script>
 <script src="practice-tests.js?v=20260905"></script>
 <script src="time-budgets.js?v=20260905"></script>
+<script src="grid-in.js?v=20260910a"></script>
 <script>
 (function () {
   'use strict';
@@ -2102,34 +2103,15 @@
     return label;
   }
 
-  // Parses either a plain decimal ("0.75") or a fraction string ("1/3")
-  // into a number — used for both the student's own typed answer AND
-  // q.answer below, since q.answer is stored as plain text and isn't
-  // always a decimal (11 questions across practice-tests.js are
-  // fraction strings as of this fix). Comparing a parsed numeric value
-  // straight against an un-parsed q.answer string (the bug this
-  // replaces) silently made every fraction-formatted answer
-  // ungradeable — Number("1/3") is NaN, so the Math.abs(...) < 0.05
-  // check was always false regardless of what was entered.
-  function parseFractionOrDecimal(str) {
-    str = (str == null ? '' : String(str)).trim();
-    if (str.indexOf('/') !== -1) {
-      var p = str.split('/');
-      if (p.length === 2) {
-        var num = parseFloat(p[0]), den = parseFloat(p[1]);
-        if (!isNaN(num) && !isNaN(den) && den !== 0) return num / den;
-      }
-    }
-    var v = parseFloat(str.replace(/[^0-9.\-]/g, ''));
-    return isNaN(v) ? null : v;
-  }
+  // A saved fr answer is { raw, value }; grade what the student typed
+  // (raw) with the shared grid-in rule in grid-in.js — the SAT's rule
+  // depends on how the answer was written, not just its value. q.answer
+  // may be an integer, a decimal or a fraction string like "1/3".
   function isCorrect(q, given) {
     if (given === null || given === undefined) return false;
     if (q.type === 'mc') return given === q.correct;
-    var v = (typeof given === 'object') ? given.value : null;
-    if (v === null && typeof given === 'object') { v = parseFractionOrDecimal(given.raw); }
-    var target = parseFractionOrDecimal(q.answer);
-    return v !== null && target !== null && Math.abs(v - target) < 0.05;
+    if (typeof given !== 'object') return false;
+    return window.gridInCorrect(given.raw != null ? given.raw : given.value, q.answer);
   }
 
   // Formats a millisecond duration as "1h 12m 04s" / "12m 04s" / "38s",

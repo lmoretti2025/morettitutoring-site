@@ -21,26 +21,14 @@ function questionsFor(att, sec){
     ? wb.MATH_MODULE1.concat(sec.v==='Harder'?wb.MATH_MODULE2_HARDER:wb.MATH_MODULE2_EASIER)
     : wb.RW_MODULE1.concat(sec.v==='Harder'?wb.RW_MODULE2_HARDER:wb.RW_MODULE2_EASIER);
 }
-/* isCorrect + parseFractionOrDecimal EXTRACTED VERBATIM from report.html */
-  function parseFractionOrDecimal(str) {
-    str = (str == null ? '' : String(str)).trim();
-    if (str.indexOf('/') !== -1) {
-      var p = str.split('/');
-      if (p.length === 2) {
-        var num = parseFloat(p[0]), den = parseFloat(p[1]);
-        if (!isNaN(num) && !isNaN(den) && den !== 0) return num / den;
-      }
-    }
-    var v = parseFloat(str.replace(/[^0-9.\-]/g, ''));
-    return isNaN(v) ? null : v;
-  }
+/* isCorrect EXTRACTED VERBATIM from report.html; the grid-in rule itself is
+   the shipped grid-in.js */
+const window={gridInCorrect:require(path.join(P,'grid-in.js')).gridInCorrect};
   function isCorrect(q, given) {
     if (given === null || given === undefined) return false;
     if (q.type === 'mc') return given === q.correct;
-    var v = (typeof given === 'object') ? given.value : null;
-    if (v === null && typeof given === 'object') { v = parseFractionOrDecimal(given.raw); }
-    var target = parseFractionOrDecimal(q.answer);
-    return v !== null && target !== null && Math.abs(v - target) < 0.05;
+    if (typeof given !== 'object') return false;
+    return window.gridInCorrect(given.raw != null ? given.raw : given.value, q.answer);
   }
 
 function rowsFor(att){
