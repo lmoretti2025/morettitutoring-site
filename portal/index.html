@@ -3965,6 +3965,109 @@
     .cal-day.is-empty { display: none; }  /* an empty day is just noise in a stacked list */
     .cal-title { order: -1; flex: 1 1 100%; text-align: left; font-size: 1.3rem; }
   }
+
+  /* ═══ RUSH ══════════════════════════════════════════════════════════ */
+  .rush-decks { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 1rem; margin-top: 1.6rem; }
+  @media (max-width: 720px) { .rush-decks { grid-template-columns: 1fr; } }
+  .rush-deck { appearance: none; text-align: left; cursor: pointer; display: flex; flex-direction: column; gap: 0.45rem;
+    padding: 1.4rem 1.5rem 1.3rem; border-radius: 16px; border: 1px solid var(--border); background: var(--white);
+    box-shadow: var(--shadow); font-family: var(--hel); color: var(--text);
+    transition: transform .28s cubic-bezier(.22,1,.36,1), box-shadow .28s cubic-bezier(.22,1,.36,1), border-color .28s; }
+  .rush-deck:hover, .rush-deck:focus-visible { transform: translateY(-3px); box-shadow: var(--shadow-hover); border-color: rgba(176,39,28,.35); outline: none; }
+  .rush-deck-k { font-size: .6rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--red); }
+  .rush-deck-t { font-family: var(--display); font-size: 1.45rem; font-weight: 700; letter-spacing: -.02em; }
+  .rush-deck-d { font-size: .8rem; color: var(--mid); line-height: 1.5; }
+  .rush-deck-go { margin-top: .5rem; font-size: .74rem; font-weight: 600; color: var(--text); }
+
+  .rush-history { margin-top: 1.8rem; }
+  .rush-history-hed { font-size: .6rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--faint); margin-bottom: .6rem; }
+  .rush-history-row { display: flex; gap: 1rem; align-items: baseline; padding: .55rem 0; border-top: 1px solid var(--border); font-size: .8rem; }
+  .rush-history-row b { font-weight: 600; }
+  .rush-history-row .rh-when { color: var(--faint); margin-left: auto; font-size: .72rem; }
+
+  /* ── this question's time: a bar on the line between the exam header and
+     the question, draining right to left, green to yellow to red. No
+     number on it. Past zero it stays full-width red and the counter beside
+     the session timer takes over. ── */
+  #dx-topbar { position: relative; }
+  .rush-bar { position: absolute; left: 0; right: 0; bottom: -2px; height: 4px; background: rgba(17,17,17,.07); z-index: 3; pointer-events: none; }
+  .rush-bar i { display: block; height: 100%; width: 100%; background: #3F9E68; }
+  /* Same line as the session timer, just to its right. Positioned off the
+     timer rather than laid out beside it, so the timer stays centred in the
+     header whether or not the counter is showing. */
+  #dx-timer-wrap { position: relative; }
+  .rush-over { position: absolute; left: 100%; top: 50%; transform: translateY(-50%); margin-left: .7rem; white-space: nowrap;
+    font-family: var(--hel); font-size: .92rem; font-weight: 700; color: #B0271C; font-variant-numeric: tabular-nums; }
+  #dx-screen [hidden] { display: none !important; }
+
+  /* ── the pace pop-up ── */
+  .rush-modal { position: fixed; inset: 0; z-index: 800; display: grid; place-items: center; padding: 1.2rem;
+    background: rgba(17,17,17,.46); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); }
+  .rush-modal[hidden] { display: none; }
+  .rush-modal-card { width: min(520px, 100%); background: var(--white); border-radius: 20px; padding: 1.6rem 1.6rem 1.3rem;
+    box-shadow: 0 30px 70px rgba(17,17,17,.3); animation: rushPop .32s cubic-bezier(.22,1,.36,1); }
+  @keyframes rushPop { from { opacity: 0; transform: translateY(10px) scale(.98); } to { opacity: 1; transform: none; } }
+  .rush-modal-k { font-size: .6rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--red); }
+  .rush-modal-hed { font-family: var(--display); font-size: 1.5rem; font-weight: 700; letter-spacing: -.02em; margin: .35rem 0 .3rem; }
+  .rush-modal-sub { font-size: .8rem; line-height: 1.5; color: var(--mid); margin: 0 0 1.1rem; }
+  .rush-modal-card { max-height: calc(100vh - 2.4rem); overflow-y: auto; }
+  .rush-form { display: flex; flex-direction: column; gap: 1.05rem; margin-top: .9rem; }
+  .rush-row { display: flex; flex-direction: column; gap: .45rem; }
+  .rush-row .qb-chips { display: flex; flex-wrap: wrap; gap: .4rem; }
+  .rush-pace-read { display: flex; flex-direction: column; gap: .15rem; margin-top: .15rem; }
+  .rush-pace-read b { font-size: .9rem; font-weight: 700; }
+  .rush-pace-read span { font-size: .74rem; color: var(--mid); line-height: 1.45; }
+  .rush-count { margin-right: auto; font-size: .74rem; color: var(--mid); }
+  .rush-count b { color: var(--text); }
+  .rush-go:disabled { opacity: .4; cursor: default; filter: none; }
+  .rush-go, .rush-cancel { white-space: nowrap; flex: none; }
+  .rush-sum-list { max-height: 320px; overflow-y: auto; }
+  .rush-paces { display: flex; flex-direction: column; gap: .55rem; }
+  .rush-pace { appearance: none; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: .2rem 1rem; width: 100%;
+    text-align: left; cursor: pointer; padding: .85rem 1rem; border-radius: 12px; border: 1.5px solid var(--border); background: var(--white);
+    font-family: var(--hel); color: var(--text); transition: border-color .15s, background .15s; }
+  .rush-pace:hover { border-color: rgba(17,17,17,.3); }
+  .rush-pace[aria-checked="true"] { border-color: var(--text); background: rgba(17,17,17,.035); }
+  .rush-pace-name { font-size: .88rem; font-weight: 700; }
+  .rush-pace-mult { font-size: .72rem; font-weight: 600; color: var(--faint); font-variant-numeric: tabular-nums; }
+  .rush-pace-eg { grid-column: 1 / -1; font-size: .74rem; color: var(--mid); }
+  /* the band itself: where this pace sits between Fast and Slowest */
+  .rush-band { grid-column: 1 / -1; position: relative; height: 4px; border-radius: 2px; background: rgba(17,17,17,.08); margin-top: .35rem; }
+  .rush-band i { position: absolute; top: -3px; width: 10px; height: 10px; border-radius: 50%; background: var(--text); transform: translateX(-50%); }
+  .rush-pace[aria-checked="true"] .rush-band i { background: var(--red); }
+  .rush-modal-foot { display: flex; justify-content: flex-end; gap: .6rem; margin-top: 1.3rem; }
+  .rush-cancel { appearance: none; border: 0; background: none; cursor: pointer; font-family: var(--hel); font-size: .8rem; font-weight: 600; color: var(--mid); padding: .7rem 1rem; }
+  .rush-go { appearance: none; border: 0; cursor: pointer; background: var(--red); color: #fff; font-family: var(--hel);
+    font-size: .8rem; font-weight: 700; padding: .75rem 1.5rem; border-radius: 999px; }
+  .rush-go:hover { filter: brightness(1.08); }
+
+  /* ── the tint: a red vignette that closes in as a question's clock runs
+     down. Driven by --rush-heat (0..1) from the runner's animation loop.
+     Edges go first and the centre stays clear, so it builds pressure
+     without ever covering the text being read. Never blocks input. ── */
+  /* Above the sidebar and header (700) so the whole window closes in, below
+     the pace pop-up (800). pointer-events:none, so it never eats a click. */
+  .rush-tint { position: fixed; inset: 0; z-index: 700; pointer-events: none; opacity: 0;
+    background: radial-gradient(ellipse at center, rgba(176,39,28,0) 40%, rgba(176,39,28,.62) 100%);
+    transition: opacity .45s ease-out; }
+  #screen-rush [hidden] { display: none !important; }
+  .rush-tint.expired { animation: rushThrob 1.6s ease-in-out infinite; }
+  @keyframes rushThrob { 0%,100% { opacity: .78; } 50% { opacity: .96; } }
+  @media (prefers-reduced-motion: reduce) { .rush-tint.expired { animation: none; opacity: .85; } .rush-modal-card { animation: none; } }
+
+  /* ── the round's timing, added to the runner's own completion card ── */
+  .rush-sum { width: 100%; max-width: 520px; margin: 1rem auto 1.2rem; text-align: left; }
+  .rush-sum-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: .7rem; margin-bottom: .9rem; }
+  .rush-sum-stats div { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: .8rem .9rem; }
+  .rush-sum-stats b { display: block; font-family: var(--display); font-size: 1.5rem; letter-spacing: -.02em; }
+  .rush-sum-stats span { display: block; font-size: .68rem; color: var(--mid); margin-top: .2rem; line-height: 1.4; }
+  .rush-sum-list { background: var(--white); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .rush-sum-row { display: grid; grid-template-columns: 1.6rem 1fr auto auto; gap: .7rem; align-items: center; padding: .55rem .9rem; border-top: 1px solid var(--border); font-size: .76rem; }
+  .rush-sum-row:first-child { border-top: 0; }
+  .rush-sum-row .rs-n { font-weight: 700; color: var(--faint); }
+  .rush-sum-row .rs-time { font-variant-numeric: tabular-nums; color: var(--mid); }
+  .rush-sum-row .rs-time.over { color: #B0271C; font-weight: 600; }
+  .rush-sum-row .rs-res.ok { color: var(--green); font-weight: 700; } .rush-sum-row .rs-res.bad { color: #B0271C; font-weight: 700; }
 </style>
 </head>
 <body>
@@ -4160,6 +4263,10 @@ window.Portal = {
     <a href="#" class="sidebar-item" data-nav="question-bank" id="sidebar-question-bank">
       <span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4" width="17" height="16" rx="1.5"/><path d="M8 9h8"/><path d="M8 12.5h8"/><path d="M8 16h5"/></svg></span>
       <span class="sidebar-label">Question Bank</span>
+    </a>
+    <a href="#" class="sidebar-item" data-nav="rush" id="sidebar-rush">
+      <span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13.5" r="7.5"/><path d="M12 13.5V9.8"/><path d="M9.5 3h5"/><path d="M12 3v2.8"/><path d="M18.4 7.6l1.4-1.4"/></svg></span>
+      <span class="sidebar-label">Rush</span>
     </a>
     <a href="#" class="sidebar-item" data-nav="challenge-questions" id="sidebar-challenge-questions">
       <span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.5-2 5-2 5s3.5-.5 5-2c.8-.8.8-2.2 0-3s-2.2-.8-3 0Z"/><path d="M9 15l-1.5-1.5L15 6c1.5-1.5 4-2.5 6-2.5s-1 4.5-2.5 6l-7.5 7.5L9 15Z"/><path d="M15 6c0 2 1.5 5 4.5 4.5"/><circle cx="15.5" cy="8.5" r="1"/></svg></span>
@@ -5559,6 +5666,52 @@ window.Portal = {
 
 <!-- ═══ SCREEN 3b-i — VOCABULARY PRACTICE (embedded; only reachable from
      the SAT Resources screen inside the portal — no standalone URL) ═══ -->
+<!-- ═══ RUSH ═══ timed practice against the per-skill budgets in
+     time-budgets.js. Self-contained on purpose: it keeps its own history
+     and never writes to the question bank's attempts map, so a round taken
+     under the clock cannot overwrite a careful answer and drag a skill into
+     Practice Your Weaknesses, or spend questions out of the bank's
+     "Not started" pool. See the rush module script at the end of the file. -->
+<div class="screen has-sidebar" id="screen-rush">
+  <div class="panel-wide" id="rush-home">
+    <div class="vp-head">
+      <div class="kicker">Learn</div>
+      <h1 class="panel-hed">Rush</h1>
+      <p class="panel-sub">Questions against the clock, in the same test screen you practise in. Every question gets its own time, set by its skill and difficulty, so a Words in Context item isn&rsquo;t timed like a Cross-Text one.</p>
+    </div>
+    <div class="rush-decks">
+      <button type="button" class="rush-deck" data-rush-subject="rw">
+        <span class="rush-deck-k">Reading &amp; Writing</span>
+        <span class="rush-deck-t">Rush R&amp;W</span>
+        <span class="rush-deck-d">Transitions at 45 seconds, Cross-Text at 105.</span>
+        <span class="rush-deck-go">Set up a round <span aria-hidden="true">&rarr;</span></span>
+      </button>
+      <button type="button" class="rush-deck" data-rush-subject="math">
+        <span class="rush-deck-k">Math</span>
+        <span class="rush-deck-t">Rush Math</span>
+        <span class="rush-deck-d">Scaled by difficulty and domain, 43 to 127 seconds.</span>
+        <span class="rush-deck-go">Set up a round <span aria-hidden="true">&rarr;</span></span>
+      </button>
+    </div>
+    <div class="rush-history" id="rush-history" hidden></div>
+  </div>
+
+  <div class="rush-modal" id="rush-modal" hidden role="dialog" aria-modal="true" aria-labelledby="rush-modal-hed">
+    <div class="rush-modal-card">
+      <div class="rush-modal-k" id="rush-modal-k">Reading &amp; Writing</div>
+      <h2 class="rush-modal-hed" id="rush-modal-hed">Set up your Rush</h2>
+      <div class="rush-form" id="rush-form"></div>
+      <div class="rush-modal-foot">
+        <span class="rush-count" id="rush-count" aria-live="polite"></span>
+        <button type="button" class="rush-cancel" id="rush-cancel">Cancel</button>
+        <button type="button" class="rush-go" id="rush-go">Start Rush</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="rush-tint" id="rush-tint" aria-hidden="true"></div>
+</div>
+
 <div class="screen has-sidebar" id="screen-vocab">
   <div class="panel-wide">
     <div class="vp-head">
@@ -5756,13 +5909,16 @@ window.Portal = {
       </div>
       <div class="ref-cell">
         <svg viewBox="0 0 170 130" style="color:var(--text);">
-          <polygon points="25,105 145,105 145,20" fill="none" stroke="currentColor" stroke-width="2"/>
-          <polyline points="133,105 133,93 145,93" fill="none" stroke="currentColor" stroke-width="1.5"/>
-          <text x="82" y="123" font-size="14" fill="currentColor" text-anchor="middle">x&radic;3</text>
-          <text x="160" y="66" font-size="14" fill="currentColor" text-anchor="middle">x</text>
-          <text x="76" y="55" font-size="14" fill="currentColor" text-anchor="middle">2x</text>
-          <text x="44" y="94" font-size="12" fill="currentColor" text-anchor="middle">30&deg;</text>
-          <text x="126" y="38" font-size="12" fill="currentColor" text-anchor="middle">60&deg;</text>
+          <!-- True 30-60-90: legs 114 : 66 = sqrt(3) : 1, so the corner marked
+               30 degrees really is 30. Angle labels are placed by measurement,
+               on each corner's bisector, fully inside and clear of both edges. -->
+          <polygon points="28,106 142,106 142,40" fill="none" stroke="currentColor" stroke-width="2"/>
+          <polyline points="130,106 130,94 142,94" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <text x="85" y="123" font-size="14" fill="currentColor" text-anchor="middle">x&radic;3</text>
+          <text x="156" y="78" font-size="14" fill="currentColor" text-anchor="middle">x</text>
+          <text x="76" y="64" font-size="14" fill="currentColor" text-anchor="middle">2x</text>
+          <text x="82.6" y="95.8" font-size="12" fill="currentColor" text-anchor="middle">30&deg;</text>
+          <text x="127.3" y="69.9" font-size="12" fill="currentColor" text-anchor="middle">60&deg;</text>
         </svg>
         <div class="ref-special-label">30-60-90</div>
       </div>
@@ -5773,8 +5929,10 @@ window.Portal = {
           <text x="75" y="143" font-size="14" fill="currentColor" text-anchor="middle">s</text>
           <text x="141" y="78" font-size="14" fill="currentColor" text-anchor="middle">s</text>
           <text x="65" y="68" font-size="14" fill="currentColor" text-anchor="middle">s&radic;2</text>
-          <text x="44" y="114" font-size="12" fill="currentColor" text-anchor="middle">45&deg;</text>
-          <text x="106" y="40" font-size="12" fill="currentColor" text-anchor="middle">45&deg;</text>
+          <!-- Both 45s inside their corners; the top one used to sit above
+               the hypotenuse, outside the triangle altogether. -->
+          <text x="62.4" y="113.7" font-size="12" fill="currentColor" text-anchor="middle">45&deg;</text>
+          <text x="109.5" y="66.7" font-size="12" fill="currentColor" text-anchor="middle">45&deg;</text>
         </svg>
         <div class="ref-special-label">45-45-90</div>
       </div>
@@ -5871,6 +6029,8 @@ window.Portal = {
     </div>
     <div class="dx-timer-wrap" id="dx-timer-wrap" style="display:none;">
       <span class="dx-timer" id="dx-timer">60:00</span>
+      <!-- Rush only: how far past this question's time the student is. -->
+      <span class="rush-over" id="rush-over" role="timer" aria-label="Total time over budget this round" hidden></span>
       <button type="button" class="dx-timer-toggle" id="dx-timer-toggle">Hide</button>
     </div>
     <div class="dx-progress-wrap">
@@ -5895,6 +6055,8 @@ window.Portal = {
         <span class="dx-progress-caret">&#9660;</span>
       </button>
     </div>
+    <!-- Rush only: this question's time, drawn along the header's bottom edge. -->
+    <div class="rush-bar" id="rush-bar" aria-hidden="true" hidden><i id="rush-bar-fill"></i></div>
   </div>
   <div class="dx-timer-toast" id="dx-timer-toast" style="display:none;">You have five minutes remaining.</div>
   <div id="dx-shell">
@@ -6351,6 +6513,9 @@ window.Portal = {
   // together on a shared/school computer. Deliberately exposes ONLY the
   // key, not the whole student object.
   window.getPortalStudentKey = function () { return (currentStudent && currentStudent.key) || null; };
+  // Rush scales every budget by this, so a student on extended time is
+  // timed against the clock they actually sit with, not the standard one.
+  window.getPortalAccomMult = function () { return (currentStudent && Number(currentStudent.accomTimeMult)) || 1; };
 
   // Last-resort fallback for fetchPortalProgress() below, read straight
   // from THIS device's own localStorage cache (see recordIncorrectQuestions
@@ -7068,10 +7233,11 @@ window.Portal = {
     setNav('sidebar-incorrect-questions', resourcesHidden);
     setNav('sidebar-challenge-questions', resourcesHidden || !showSat);
     setNav('sidebar-question-bank', resourcesHidden || !showSat);
+    setNav('sidebar-rush', resourcesHidden || !showSat);
     // The "Learn" heading only earns its place when at least one item is
     // under it. A subject-only student has none, so it goes too -- a label
     // over nothing reads as something failing to load.
-    var anyLearn = ['sidebar-practice-tests', 'sidebar-question-bank', 'sidebar-challenge-questions', 'sidebar-vocab', 'sidebar-incorrect-questions'].some(function (id) {
+    var anyLearn = ['sidebar-practice-tests', 'sidebar-question-bank', 'sidebar-rush', 'sidebar-challenge-questions', 'sidebar-vocab', 'sidebar-incorrect-questions'].some(function (id) {
       var el = document.getElementById(id);
       return el && el.style.display !== 'none';
     });
@@ -7153,8 +7319,8 @@ window.Portal = {
     }
   }
 
-  var SIDEBAR_SCREENS = { 'screen-menu': 1, 'screen-calendar': 1, 'screen-practice-tests': 1, 'screen-resources': 1, 'screen-vocab': 1, 'screen-incorrect-questions': 1, 'screen-sat-resources': 1, 'screen-challenge-questions': 1, 'screen-question-bank': 1 };
-  var SIDEBAR_NAV_FOR_SCREEN = { 'screen-menu': 'home', 'screen-calendar': 'calendar', 'screen-practice-tests': 'practice-tests', 'screen-resources': 'files', 'screen-vocab': 'vocab', 'screen-incorrect-questions': 'incorrect-questions', 'screen-challenge-questions': 'challenge-questions', 'screen-question-bank': 'question-bank' };
+  var SIDEBAR_SCREENS = { 'screen-menu': 1, 'screen-calendar': 1, 'screen-practice-tests': 1, 'screen-resources': 1, 'screen-vocab': 1, 'screen-incorrect-questions': 1, 'screen-sat-resources': 1, 'screen-challenge-questions': 1, 'screen-question-bank': 1, 'screen-rush': 1 };
+  var SIDEBAR_NAV_FOR_SCREEN = { 'screen-menu': 'home', 'screen-calendar': 'calendar', 'screen-practice-tests': 'practice-tests', 'screen-resources': 'files', 'screen-vocab': 'vocab', 'screen-incorrect-questions': 'incorrect-questions', 'screen-challenge-questions': 'challenge-questions', 'screen-question-bank': 'question-bank', 'screen-rush': 'rush' };
   var sidebarEl = document.getElementById('portal-sidebar');
   var mainNavEl = document.getElementById('main-nav');
   var examWatermarkEl = document.getElementById('exam-watermark');
@@ -10202,6 +10368,7 @@ window.Portal = {
     else if (nav === 'incorrect-questions') { show('screen-incorrect-questions'); if (window.iqModuleInit) window.iqModuleInit(); }
     else if (nav === 'challenge-questions') { show('screen-challenge-questions'); if (window.challengeModuleInit) window.challengeModuleInit(); }
     else if (nav === 'question-bank') { show('screen-question-bank'); if (window.qbModuleInit) window.qbModuleInit(); }
+    else if (nav === 'rush') { show('screen-rush'); if (window.rushModuleInit) window.rushModuleInit(); }
     else if (nav === 'diagnostic') { ptListReturnScreen = 'screen-menu'; renderPracticeTestList(); show('screen-practice-tests'); }
   }
   // Home screen's two "Jump Back In" shortcuts — navigate into the real
@@ -10241,7 +10408,8 @@ window.Portal = {
     { label: 'Vocabulary', nav: 'vocab' },
     { label: 'Saved & Mistakes', nav: 'incorrect-questions' },
     { label: 'Challenge Questions', nav: 'challenge-questions' },
-    { label: 'Question Bank', nav: 'question-bank' }
+    { label: 'Question Bank', nav: 'question-bank' },
+    { label: 'Rush', nav: 'rush' }
   ];
   var navSearchWrap = document.getElementById('nav-search');
   var navSearchInput = document.getElementById('nav-search-input');
@@ -19031,6 +19199,193 @@ window.Portal = {
   }
   /* `opts.only` ('rw' | 'math') comes from the split button on the card —
      the same round, with the other subject's half set to zero. */
+  /* ═══ RUSH ═══ a timed round in this same runner. Started from the Rush
+     tab (window.startRushRound). The runner is unchanged except for four
+     hooks, each guarded by rushCfg:
+       - renderRunnerQuestion starts a per-question countdown off
+         questionShownAt, drawn as #rush-bar on the header's bottom edge
+         with #rush-over beside the session timer once past zero;
+       - runnerAdvance keeps the answer out of recordAttempt() and the
+         Mistakes Log and stores it on the round instead, so a rushed miss
+         can't overwrite a careful answer or push a skill into Practice
+         Your Weaknesses;
+       - the completion card gets the round's timing;
+       - endRunner goes back to the Rush tab, not the skills view.
+     The tint builds steadily over each question's last 15 seconds. The clock
+     is soft: running out turns the ring red and the tint
+     throbs. The question stays answerable and the overage is recorded. */
+  var RUSH_HIST_KEY = 'qb_rush_history';
+  var RUSH_TINT_FROM_MS = 15000;   // the tint starts with this much time left
+  var rushCfg = null, rushQid = null, rushBudgetMs = 0, rushExpired = false, rushRaf = 0;
+
+  function rushTint() {
+    var t = document.getElementById('rush-tint');
+    // Authored inside the Rush tab, but the round runs on the exam screen,
+    // where that tab is display:none. Lives on <body> so it can be seen.
+    if (t && t.parentNode !== document.body) document.body.appendChild(t);
+    return t;
+  }
+  function rushBudgetFor(q) {
+    var TB = window.TIME_BUDGETS;
+    var accom = (window.getPortalAccomMult && window.getPortalAccomMult()) || 1;
+    var r = TB && TB.budgetSecondsFor(rushCfg.subject === 'math' ? 'math' : 'reading-writing', q.domain, q.skill, q.difficulty, accom);
+    var sec = (r && r.seconds) || (rushCfg.subject === 'math' ? 75 : 70);
+    return Math.max(10, Math.round(sec * rushCfg.mult)) * 1000;
+  }
+  function rushStop() {
+    if (rushRaf) cancelAnimationFrame(rushRaf);
+    rushRaf = 0;
+    var t = rushTint();
+    // Clearing (answered, next question, leaving) fades rather than snaps.
+    if (t) { t.style.transition = ''; t.classList.remove('expired'); t.style.opacity = '0'; }
+  }
+  function rushPaint() {
+    var left = rushBudgetMs - (Date.now() - questionShownAt);
+    var frac = Math.max(0, left / rushBudgetMs);
+    var fill = document.getElementById('rush-bar-fill'), over = document.getElementById('rush-over');
+    if (left > 0) {
+      fill.style.width = (frac * 100).toFixed(2) + '%';
+      fill.style.background = rushBarColor(frac);
+    } else {
+      fill.style.width = '100%';
+      fill.style.background = '#B0271C';
+    }
+    // The ROUND's overtime, not this question's: everything already banked
+    // from answered questions plus whatever this one is running over by. It
+    // stays up between questions, so the student can see the cost add up.
+    var total = rushCfg.overMs + Math.max(0, -left);
+    if (total >= 1000) {
+      var o = Math.floor(total / 1000);
+      over.textContent = '+' + Math.floor(o / 60) + ':' + (o % 60 < 10 ? '0' : '') + (o % 60);
+      over.hidden = false;
+    } else {
+      over.hidden = true;
+    }
+    // Clear until the last 15 seconds, then builds steadily (linearly) to
+    // full strength at zero. Seconds rather than a share of the budget, so
+    // the warning means the same thing on a 38s question and a 105s one.
+    // After zero it throbs.
+    var t = rushTint();
+    // No CSS transition while counting down: it would restart every frame
+    // and leave the screen trailing the clock. The fade is for clearing only.
+    t.style.transition = 'none';
+    if (left > 0) {
+      var x = left >= RUSH_TINT_FROM_MS ? 0 : 1 - left / RUSH_TINT_FROM_MS;
+      t.style.opacity = x.toFixed(3);
+    } else if (!rushExpired) {
+      rushExpired = true;
+      t.style.opacity = '';
+      t.classList.add('expired');
+    }
+  }
+  function rushTick() {
+    rushRaf = 0;
+    if (!rushCfg || !rushQid) return;
+    var st = runnerState[rushQid];
+    if (st && st.submitted) return;
+    rushPaint();
+    rushRaf = requestAnimationFrame(rushTick);
+  }
+  function rushStartQuestion(q) {
+    rushStop();
+    rushQid = q.qid;
+    rushBudgetMs = rushBudgetFor(q);
+    rushExpired = false;
+    document.getElementById('rush-bar').hidden = false;
+    rushPaint();   // also puts the round's banked overtime back up   // full bar at once, not a blank waiting on the first frame
+    rushRaf = requestAnimationFrame(rushTick);
+  }
+  /* Green while there is room, through yellow at the halfway point, to red
+     as it runs out. Blended, not stepped, so the change is felt gradually. */
+  function rushBarColor(frac) {
+    var G = [63, 158, 104], Y = [227, 178, 60], R = [176, 39, 28], a, b, t;
+    if (frac >= 0.5) { a = Y; b = G; t = (frac - 0.5) / 0.5; } else { a = R; b = Y; t = frac / 0.5; }
+    return 'rgb(' + a.map(function (c, i) { return Math.round(c + (b[i] - c) * t); }).join(',') + ')';
+  }
+  function rushHideClock() { document.getElementById('rush-bar').hidden = true; document.getElementById('rush-over').hidden = true; }
+  function rushFmt(ms) { var x = Math.round(ms / 1000); return x >= 60 ? Math.floor(x / 60) + 'm ' + (x % 60) + 's' : x + 's'; }
+  function rushEsc(v) { return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function rushSummary(summary) {
+    var R = rushCfg.results;
+    if (!R.length) return;
+    var inTime = R.filter(function (x) { return !x.over; }).length;
+    var ratios = R.map(function (x) { return x.ms / x.budgetMs; }).sort(function (a, b) { return a - b; });
+    var m = ratios.length >> 1, med = ratios.length % 2 ? ratios[m] : (ratios[m - 1] + ratios[m]) / 2;
+    try {
+      var h = JSON.parse(localStorage.getItem(RUSH_HIST_KEY) || '[]');
+      h.unshift({ at: new Date().toISOString(), subject: rushCfg.subject, pace: rushCfg.pace, mult: rushCfg.mult, n: R.length,
+        correct: R.filter(function (x) { return x.correct; }).length, inTime: inTime, ratio: +med.toFixed(3) });
+      localStorage.setItem(RUSH_HIST_KEY, JSON.stringify(h.slice(0, 20)));
+    } catch (e) {}
+    var block = document.createElement('div');
+    block.className = 'rush-sum';
+    block.innerHTML =
+      '<div class="rush-sum-stats">' +
+        '<div><b>' + inTime + ' / ' + R.length + '</b><span>inside the time</span></div>' +
+        '<div><b>' + med.toFixed(2) + '&times;</b><span>median time against budget. Under 1 is ahead of pace.</span></div>' +
+        '<div><b>' + (rushCfg.overMs >= 1000 ? '+' + rushFmt(rushCfg.overMs) : 'None') + '</b><span>total time over, across the round</span></div>' +
+      '</div>' +
+      '<div class="rush-sum-list">' + R.map(function (x, i) {
+        return '<div class="rush-sum-row"><span class="rs-n">' + (i + 1) + '</span><span class="rs-skill">' + rushEsc(x.skill) + '</span>' +
+          '<span class="rs-time' + (x.over ? ' over' : '') + '">' + rushFmt(x.ms) + ' / ' + rushFmt(x.budgetMs) + '</span>' +
+          '<span class="rs-res ' + (x.correct ? 'ok' : 'bad') + '">' + (x.correct ? '&#10003;' : '&#10007;') + '</span></div>';
+      }).join('') + '</div>';
+    summary.insertBefore(block, summary.querySelector('#qb-runner-done'));
+  }
+  /* The same filters the Question Bank's own panel offers, applied here so
+     the Rush menu's live count and the round itself can never disagree,
+     and so "Not started" reads the same attempts map the bank does. */
+  function rushPool(subject, f) {
+    f = f || {};
+    var p = loadProgress();
+    return poolFor(subject).filter(function (q) {
+      if (!q || !q.text) return false;
+      if (q.type === 'fr') { if (q.answerValue == null) return false; }
+      else if (!(Array.isArray(q.choices) && q.choices.length >= 2 && typeof q.correct === 'number')) return false;
+      if (f.difficulties && f.difficulties.indexOf(q.difficulty) === -1) return false;
+      if (f.sources && f.sources.indexOf(q.source || 'Non-Bluebook') === -1) return false;
+      if (f.domains && f.domains.indexOf(q.domain) === -1) return false;
+      var tried = !!p.attempts[q.qid];
+      if (f.show === 'not' && tried) return false;
+      if (f.show === 'done' && !tried) return false;
+      return true;
+    });
+  }
+  window.rushMatchCount = function (subject, f) { return rushPool(subject, f).length; };
+  window.rushFacets = function (subject) {
+    var src = {}, dom = {}, sources = [], domains = [];
+    poolFor(subject).forEach(function (q) {
+      var s0 = q.source || 'Non-Bluebook';
+      if (!src[s0]) { src[s0] = 1; sources.push(s0); }
+      if (q.domain && !dom[q.domain]) { dom[q.domain] = 1; domains.push(q.domain); }
+    });
+    return { sources: sources, domains: domains };
+  };
+  // opts: { filters, size (0 = every matching question), mult, paceName }
+  function startRushRound(subject, opts) {
+    opts = opts || {};
+    var pool = rushPool(subject, opts.filters);
+    if (!pool.length) return false;
+    currentSubject = subject;
+    rushCfg = { subject: subject, pace: opts.paceName || '', mult: opts.mult || 1, results: [], overMs: 0 };
+    rushQid = null;
+    var queue = shuffle(pool);
+    runnerQueue = opts.size > 0 ? queue.slice(0, opts.size) : queue;
+    runnerIndex = 0;
+    runnerState = {};
+    runnerScore = 0;
+    runnerSkillLabel = 'Rush';
+    runnerReached = null;
+    window.dxPracticeNextHandler = runnerAdvance;
+    window.dxPracticeExitHandler = endRunner;
+    window.dxPracticeLetterHandler = selectRunnerChoice;
+    if (window.dxStartIncorrectPractice) window.dxStartIncorrectPractice('Rush: ' + (subject === 'math' ? 'Math' : 'Reading & Writing'));
+    startQbTimer();
+    renderRunnerQuestion();
+    return true;
+  }
+  window.startRushRound = startRushRound;
+
   function startWeaknessPractice(opts) {
     var only = (opts && opts.only) || null;
     var btn = document.getElementById('qb-weak-btn');
@@ -19129,6 +19484,14 @@ window.Portal = {
       }
     }
     stopQbTimer();
+    if (rushCfg) {
+      rushCfg = null; rushQid = null; rushStop();
+      rushHideClock();
+      if (window.dxEndIncorrectPractice) window.dxEndIncorrectPractice();
+      if (window.showScreen) window.showScreen('screen-rush');
+      if (window.rushModuleInit) window.rushModuleInit();
+      return;
+    }
     if (window.dxEndIncorrectPractice) window.dxEndIncorrectPractice();
     if (window.showScreen) window.showScreen('screen-question-bank');
     showSkills(currentSubject);
@@ -19150,6 +19513,17 @@ window.Portal = {
       }
       st.submitted = true;
       if (st.correct) runnerScore++;
+      if (rushCfg) {
+        var rushMs = questionShownAt ? (Date.now() - questionShownAt) : 0;
+        // Paint first, THEN bank this question's overage: painting after
+        // would count it twice (banked total + live overage).
+        rushPaint();
+        rushCfg.overMs += Math.max(0, rushMs - rushBudgetMs);
+        rushCfg.results.push({ skill: r.skill, correct: st.correct, ms: rushMs, budgetMs: rushBudgetMs, over: rushMs > rushBudgetMs });
+        rushStop();
+        renderRunnerQuestion();
+        return;
+      }
       recordAttempt(r.qid, st.correct, questionShownAt ? (Date.now() - questionShownAt) : 0);
       // Feeds Saved & Mistakes' Mistakes Log too (see window.
       // recordQuestionBankMistake's own comment) — same call clears a
@@ -19284,7 +19658,7 @@ window.Portal = {
       var skippedCount = Math.max(0, reachedCount - attemptedCount);
       var leftCount = Math.max(0, runnerQueue.length - reachedCount);
       if (attemptedCount === 0) { runnerReached = null; endRunner(); return; }
-      document.getElementById('dx-notice-text').textContent = 'PRACTICE MODE — DONE';
+      document.getElementById('dx-notice-text').textContent = (rushCfg ? 'RUSH' : 'PRACTICE MODE') + ' — DONE';
       qtextEl.innerHTML = '';
       choicesEl.style.display = 'none';
       navRowEl.style.display = 'none';
@@ -19304,6 +19678,7 @@ window.Portal = {
           (summaryNote.length ? ' &middot; ' + summaryNote.join(' &middot; ') : '') + '</div>' +
         '<button type="button" class="key-btn" id="qb-runner-done" type="button">Done</button>';
       document.getElementById('dx-card').insertBefore(summary, navRowEl);
+      if (rushCfg) { rushStop(); rushHideClock(); rushSummary(summary); }
       document.getElementById('qb-runner-done').addEventListener('click', endRunner);
       /* The one number a student is waiting for at the end of a round,
          landing the way the report's score tiles do. The " / n" is carried
@@ -19324,7 +19699,8 @@ window.Portal = {
     // Feeds the `ms` on each recorded attempt, which is what the
     // "Time by difficulty" analytics panel reads.
     if (isNewQuestion) questionShownAt = Date.now();
-    document.getElementById('dx-notice-text').textContent = 'PRACTICE MODE — QUESTION ' + (runnerIndex + 1) + ' OF ' + runnerQueue.length;
+    if (rushCfg) { if (st.submitted) rushStop(); else if (rushQid !== r.qid) rushStartQuestion(r); }
+    document.getElementById('dx-notice-text').textContent = (rushCfg ? 'RUSH' : 'PRACTICE MODE') + ' — QUESTION ' + (runnerIndex + 1) + ' OF ' + runnerQueue.length;
     var cardHedEl = document.querySelector('#dx-card .dx-card-hed');
     if (cardHedEl) cardHedEl.style.display = '';
     var qnumTileEl = document.getElementById('dx-qnum-tile');
@@ -25979,6 +26355,202 @@ window.renderNativeReport = function (data) {
     });
   }
 };
+})();
+</script>
+<script>
+/* ═══ RUSH TAB ═══ the set-up menu. A round runs in the Question Bank's own
+   exam runner (window.startRushRound, in that module), so it looks and
+   behaves exactly like every other practice session. The menu offers the
+   bank's own filters, drawn with the bank's own chips, segmented control
+   and slider, so it reads as the same tool:
+     pace       slider 0.85x to 1.15x; the name, description and example
+                times follow the thumb
+     difficulty / source / topic   chips, the last one in a group stays on
+     show       All / Not started / Started, the same as the bank's
+     length     slider, last stop "All" = every matching question
+   The count beside Start comes from the same filter the round uses. */
+(function () {
+  var STOPS = [
+    { v: 85,  name: 'Fast',                  blurb: 'The floor of the band. Test-day pace with nothing left over.' },
+    { v: 90,  name: 'Quick',                 blurb: 'Well under budget, with a little room.' },
+    { v: 95,  name: 'Brisk',                 blurb: 'Just under budget.' },
+    { v: 100, name: 'Standard',              blurb: 'The time each question is budgeted for.' },
+    { v: 105, name: 'Steady',                blurb: 'A little over budget, room to check your work.' },
+    { v: 110, name: 'Measured',              blurb: 'Near the top of the band.' },
+    { v: 115, name: 'Slowest you should go', blurb: 'The ceiling. Consistently past this and the section runs out.' }
+  ];
+  var LEN_MIN = 10, LEN_MAX = 100, LEN_STEP = 5;       // LEN_MAX is the "All" stop
+  var PREF_KEY = 'qb_rush_prefs', HIST_KEY = 'qb_rush_history';
+  var DIFFS = ['easy', 'medium', 'hard'];
+  var SHOWS = [{ v: 'all', label: 'All' }, { v: 'not', label: 'Not started' }, { v: 'done', label: 'Started' }];
+  var subject = null, wired = false, f = null, prefs = null;
+
+  function $(id) { return document.getElementById(id); }
+  function esc(v) { return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function stopFor(v) { return STOPS.reduce(function (a, b) { return Math.abs(b.v - v) < Math.abs(a.v - v) ? b : a; }); }
+  function accom() { var m = window.getPortalAccomMult ? window.getPortalAccomMult() : 1; return m > 0 ? m : 1; }
+
+  function loadPrefs() {
+    var d = { pace: 100, len: LEN_MAX, difficulties: DIFFS.slice(), show: 'all', bySubject: {} };
+    try { var x = JSON.parse(localStorage.getItem(PREF_KEY) || 'null'); if (x) for (var k in d) if (x[k] != null) d[k] = x[k]; } catch (e) {}
+    return d;
+  }
+  function savePrefs() {
+    prefs.difficulties = f.difficulties.slice(); prefs.show = f.show;
+    prefs.bySubject[subject] = { sources: f.sources.slice(), domains: f.domains.slice() };
+    try { localStorage.setItem(PREF_KEY, JSON.stringify(prefs)); } catch (e) {}
+  }
+
+  function example(v) {
+    var k = accom() * v / 100;
+    return subject === 'math'
+      ? 'An easy question gets ' + Math.round(48 * k) + 's, a hard one ' + Math.round(115 * k) + 's.'
+      : 'Words in Context gets ' + Math.round(45 * k) + 's, Cross-Text Connections ' + Math.round(105 * k) + 's.';
+  }
+
+  /* ── the bank's chip, with the bank's rule: the last one on stays on ── */
+  function chips(host, items, arr) {
+    items.forEach(function (it) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'qb-chip' + (arr.indexOf(it.v) !== -1 ? ' on' : '');
+      b.textContent = it.label;
+      b.setAttribute('aria-pressed', String(arr.indexOf(it.v) !== -1));
+      b.addEventListener('click', function () {
+        var i = arr.indexOf(it.v);
+        if (i === -1) arr.push(it.v); else if (arr.length > 1) arr.splice(i, 1); else return;
+        var on = arr.indexOf(it.v) !== -1;
+        b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on));
+        changed();
+      });
+      host.appendChild(b);
+    });
+  }
+  function row(label) {
+    var r = document.createElement('div'); r.className = 'rush-row';
+    r.innerHTML = '<span class="qb-filter-lab">' + esc(label) + '</span>';
+    $('rush-form').appendChild(r); return r;
+  }
+
+  function buildForm() {
+    var form = $('rush-form'); form.innerHTML = '';
+    var facets = window.rushFacets ? window.rushFacets(subject) : { sources: [], domains: [] };
+    var mine = prefs.bySubject[subject] || {};
+    // Saved choices, trimmed to what this subject actually has.
+    function keep(saved, all) { var k = (saved || []).filter(function (x) { return all.indexOf(x) !== -1; }); return k.length ? k : all.slice(); }
+    f = { difficulties: keep(prefs.difficulties, DIFFS), sources: keep(mine.sources, facets.sources),
+          domains: keep(mine.domains, facets.domains), show: prefs.show };
+
+    // Pace
+    var pr = row('Pace'), read = document.createElement('div');
+    read.className = 'rush-pace-read';
+    function paintPace(v) {
+      var st = stopFor(v);
+      read.innerHTML = '<b>' + esc(st.name) + '</b><span>' + esc(st.blurb) + ' ' + esc(example(v)) + '</span>';
+    }
+    var ps = window.mtaSlider({ min: 85, max: 115, step: 5, value: prefs.pace, dots: 7, label: 'Pace',
+      format: function (v) { return (v / 100).toFixed(2) + '×'; },
+      onChange: function (v) { prefs.pace = v; paintPace(v); try { localStorage.setItem(PREF_KEY, JSON.stringify(prefs)); } catch (e) {} } });
+    pr.appendChild(ps.el); pr.appendChild(read); paintPace(prefs.pace);
+
+    // Difficulty
+    var dr = row('Difficulty'), dc = document.createElement('div'); dc.className = 'qb-chips';
+    chips(dc, DIFFS.map(function (d) { return { v: d, label: d.charAt(0).toUpperCase() + d.slice(1) }; }), f.difficulties);
+    dr.appendChild(dc);
+
+    // Source, only when there is a choice to make (the bank does the same)
+    if (facets.sources.length > 1) {
+      var sr = row('Source'), sc = document.createElement('div'); sc.className = 'qb-chips';
+      chips(sc, facets.sources.map(function (x) { return { v: x, label: x }; }), f.sources);
+      sr.appendChild(sc);
+    }
+
+    // Topic
+    var tr = row('Topic'), tc = document.createElement('div'); tc.className = 'qb-chips';
+    chips(tc, facets.domains.map(function (x) { return { v: x, label: x }; }), f.domains);
+    tr.appendChild(tc);
+
+    // Show
+    var shr = row('Show'), seg = document.createElement('div'); seg.className = 'qb-seg';
+    SHOWS.forEach(function (o) {
+      var b = document.createElement('button'); b.type = 'button';
+      b.className = 'qb-seg-btn' + (f.show === o.v ? ' active' : ''); b.textContent = o.label;
+      b.addEventListener('click', function () {
+        if (f.show === o.v) return; f.show = o.v;
+        Array.prototype.forEach.call(seg.querySelectorAll('.qb-seg-btn'), function (x) { x.classList.toggle('active', x === b); });
+        changed();
+      });
+      seg.appendChild(b);
+    });
+    shr.appendChild(seg);
+    if (window.mtaFluid) window.mtaFluid.attach(seg, { item: '.qb-seg-btn', mode: 'pill' });
+
+    // Round length, last stop = every matching question
+    var lr = row('Round length');
+    var ls = window.mtaSlider({ min: LEN_MIN, max: LEN_MAX, step: LEN_STEP, value: prefs.len, label: 'questions in this round', unit: 'questions',
+      format: function (v) { return v >= LEN_MAX ? 'All' : String(v); },
+      onChange: function (v) { prefs.len = v; changed(); } });
+    lr.appendChild(ls.el);
+    changed();
+  }
+
+  function changed() {
+    savePrefs();
+    var n = window.rushMatchCount ? window.rushMatchCount(subject, f) : 0;
+    var take = prefs.len >= LEN_MAX ? n : Math.min(n, prefs.len);
+    $('rush-count').innerHTML = n
+      ? '<b>' + n + '</b> question' + (n === 1 ? '' : 's') + ' match' + (n === 1 ? 'es' : '') +
+        (take < n ? ' &middot; this round <b>' + take + '</b>' : ' &middot; this round is all of them')
+      : 'No questions match these filters.';
+    $('rush-go').disabled = !n;
+  }
+
+  function openModal(subj) {
+    subject = subj; prefs = loadPrefs();
+    $('rush-modal-k').textContent = subj === 'math' ? 'Math' : 'Reading & Writing';
+    $('rush-modal').hidden = false;
+    $('rush-form').innerHTML = '<div class="rush-count">Loading the question bank&hellip;</div>';
+    Promise.all([window.__questionBankReady || Promise.resolve(), window.__questionBankMathReady || Promise.resolve()]).then(buildForm);
+  }
+  function closeModal() { $('rush-modal').hidden = true; }
+  function go() {
+    if ($('rush-go').disabled || !f) return;
+    var st = stopFor(prefs.pace);
+    closeModal();
+    var ok = window.startRushRound && window.startRushRound(subject, {
+      filters: f, size: prefs.len >= LEN_MAX ? 0 : prefs.len, mult: prefs.pace / 100, paceName: st.name });
+    if (!ok) alert('No questions match those filters.');
+  }
+
+  function ago(iso) {
+    var d = (Date.now() - new Date(iso).getTime()) / 1000;
+    if (d < 90) return 'just now'; if (d < 3600) return Math.round(d / 60) + ' min ago';
+    if (d < 86400) return Math.round(d / 3600) + ' h ago'; var n = Math.round(d / 86400); return n + (n === 1 ? ' day ago' : ' days ago');
+  }
+  function renderHistory() {
+    var h = []; try { h = JSON.parse(localStorage.getItem(HIST_KEY) || '[]'); } catch (e) {}
+    var el = $('rush-history');
+    if (!h.length) { el.hidden = true; el.innerHTML = ''; return; }
+    el.hidden = false;
+    el.innerHTML = '<div class="rush-history-hed">Recent rounds</div>' + h.slice(0, 5).map(function (r) {
+      var pace = r.mult ? stopFor(Math.round(r.mult * 100)).name + ' ' + Number(r.mult).toFixed(2) + '×' : (r.pace || '');
+      return '<div class="rush-history-row"><b>' + (r.subject === 'math' ? 'Math' : 'R&amp;W') + '</b>' +
+        '<span>' + esc(pace) + '</span><span>' + r.correct + '/' + r.n + ' right</span>' +
+        '<span>' + r.inTime + '/' + r.n + ' in time</span><span class="rh-when">' + esc(ago(r.at)) + '</span></div>';
+    }).join('');
+  }
+
+  function wire() {
+    if (wired) return; wired = true;
+    Array.prototype.forEach.call(document.querySelectorAll('[data-rush-subject]'), function (b) {
+      b.addEventListener('click', function () { openModal(b.getAttribute('data-rush-subject')); });
+    });
+    $('rush-go').addEventListener('click', go);
+    $('rush-cancel').addEventListener('click', closeModal);
+    $('rush-modal').addEventListener('click', function (e) { if (e.target === this) closeModal(); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !$('rush-modal').hidden) closeModal(); });
+  }
+  window.rushModuleInit = function () { wire(); closeModal(); renderHistory(); };
 })();
 </script>
 </body>

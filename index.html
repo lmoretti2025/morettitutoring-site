@@ -140,7 +140,9 @@ h1 em{font-style:normal;color:var(--red-lift)}
 .tri{position:relative;flex:1 1 0;min-width:0;display:flex;flex-direction:column;justify-content:flex-end;
   box-shadow:inset 0 0 0 1px transparent;
   padding:clamp(.55rem,1vw,.85rem) clamp(.85rem,1.3vw,1.15rem);overflow:hidden;border-radius:3px;
-  transition:flex-grow .8s var(--spring),background .45s var(--ease),box-shadow .45s var(--ease)}
+  /* --ease, not --spring: an overshoot makes the panels bounce past their width
+     and back, which re-wraps the text inside them and reads as a wobble */
+  transition:flex-grow .8s var(--ease),background .45s var(--ease),box-shadow .45s var(--ease)}
 .tri::before{content:'';position:absolute;left:0;right:0;top:0;height:2px;background:var(--red-lift);
   transform:scaleX(0);transform-origin:left;transition:transform .6s var(--ease)}
 /* the outline arrives with the panel rather than sitting there all the time */
@@ -1582,15 +1584,25 @@ mtaSafe(function(){
   if(tiles.length<2) return;
   if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   if(window.matchMedia('(max-width:820px)').matches) return;
-  var START=6400, DWELL=3000, i=-1, held=false, timer=0;
+  var START=6400, DWELL=3000, REST=1100, i=-1, held=false, timer=0, rested=false;
   function clear(){ tiles.forEach(function(t){ t.classList.remove('is-open'); }); }
   function tick(){
+    var wait=DWELL;
     if(!held && !document.hidden){
       clear();
-      i=(i+1)%tiles.length;
-      tiles[i].classList.add('is-open');
+      if(i===tiles.length-1 && !rested){
+        // Wrapping from the last panel to the first would close one end of the
+        // row and open the other in the same instant: both outer panels resize,
+        // the middle one slides across, and two outlines cross-fade at opposite
+        // ends. Settle into the even row first, then open the first panel.
+        rested=true; wait=REST;
+      } else {
+        rested=false;
+        i=(i+1)%tiles.length;
+        tiles[i].classList.add('is-open');
+      }
     }
-    timer=setTimeout(tick, DWELL);
+    timer=setTimeout(tick, wait);
   }
   timer=setTimeout(tick, START);
   // a real hover wins: drop the automatic one and hold until the cursor leaves
