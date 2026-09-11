@@ -16202,7 +16202,7 @@ window.Portal = {
 
       seg.innerHTML = '';
       [{ value: 'all', label: 'All' },
-       { value: 'not', label: 'Not started' },
+       { value: 'not', label: 'Not completed' },
        { value: 'done', label: 'Started' }].forEach(function (opt) {
         var b = document.createElement('button');
         b.type = 'button';
@@ -16444,16 +16444,17 @@ window.Portal = {
         var correct = attempted.filter(function (q) { return p.attempts[q.qid].correct; });
         var acc = attempted.length ? Math.round((correct.length / attempted.length) * 100) : 0;
         var pct = qs.length ? Math.round((attempted.length / qs.length) * 100) : 0;
-        // "Completed" means started, not exhausted: a skill's pool runs into the
-        // hundreds, so requiring 100% coverage would make the filter useless.
-        return { s: s, n: qs.length, attempted: attempted.length, acc: acc, pct: pct, isDone: attempted.length > 0 };
+        // isDone = started (at least one answered); isComplete = every question answered.
+        return { s: s, n: qs.length, attempted: attempted.length, acc: acc, pct: pct, isDone: attempted.length > 0, isComplete: attempted.length >= qs.length };
       }).filter(function (row) {
         if (!row.n) return false;               // emptied by the filters
         // Still practicable even if the Show filter is about to hide it —
         // see the selection sweep at the end of this function.
         practicable.push(row.s.skill);
         if (completedFilter === 'done') return row.isDone;
-        if (completedFilter === 'not') return !row.isDone;
+        // "Not completed" (the default) hides only skills with nothing left to
+        // answer; hiding every started skill emptied whole domains like Algebra.
+        if (completedFilter === 'not') return !row.isComplete;
         return true;
       });
       if (!rows.length) return;
