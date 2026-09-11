@@ -1269,6 +1269,7 @@
     var timeMult = Number(s.accomTimeMult);
     if (isFinite(timeMult) && timeMult > 1) bits.push('<span>Accommodations <b>' + timeMult + '&times; time</b></span>');
     if (s.grantedEmail) bits.push('<span>' + escHtml(s.grantedEmail) + '</span>');
+    else if (s.leadEmail) bits.push('<span>Inquired as ' + escHtml(s.leadEmail) + '</span>');
     if (s.guardianEmail) bits.push('<span>Parent ' + escHtml(s.guardianName || '') + ' &lt;' + escHtml(s.guardianEmail) + '&gt;</span>');
     if (!bits.length) bits.push('<span class="empty" style="padding:0;">No onboarding details on file yet.</span>');
     $('stu-meta').innerHTML = bits.join('');
@@ -1828,6 +1829,11 @@
         // showing the previous student's report.
         var frame = document.createElement('iframe');
         frame.setAttribute('title', 'Test report');
+        // Sandboxed without allow-same-origin: the report is built from data
+        // a student's browser wrote, and this page holds the admin session.
+        // Scripts still run and the report still draws; it just can't reach
+        // this origin's storage or this window.
+        frame.setAttribute('sandbox', 'allow-scripts allow-modals allow-popups allow-downloads');
         frame.src = reportViewerLink;
         wrap.innerHTML = '';
         wrap.appendChild(frame);

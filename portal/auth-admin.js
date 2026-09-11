@@ -923,7 +923,7 @@
         /* grantedEmail first: the address they sign in with, and on a
            pre-approved row the one "Email the student" goes to, so showing
            the parent's would look misdirected. */
-        '<div class="mta-sub">' + esc(s.grantedEmail || s.guardianEmail || s.phone || 'no contact on file') + '</div>' +
+        '<div class="mta-sub">' + esc(s.grantedEmail || s.guardianEmail || s.leadEmail || s.phone || 'no contact on file') + '</div>' +
         '<div class="mta-meta">key <b>' + esc(s.key) + '</b>' +
           (s.grade ? ' &middot; ' + esc(s.grade) : '') +
           (s.source ? ' &middot; ' + esc(s.source) : '') +
@@ -1108,7 +1108,7 @@
     if (query) {
       var q = query.toLowerCase();
       var hits = students.filter(function (s) {
-        return [s.name, s.key, s.grantedEmail, s.guardianEmail, s.guardianName, s.phone]
+        return [s.name, s.key, s.grantedEmail, s.guardianEmail, s.leadEmail, s.guardianName, s.phone]
           .join(' ').toLowerCase().indexOf(q) !== -1;
       }).slice(0, 8);
       if (!hits.length) html += '<div class="mta-empty">No match.</div>';

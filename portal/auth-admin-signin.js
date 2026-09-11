@@ -25,7 +25,7 @@
   // backend-url.js, loaded first by every page that includes this file.
   var URL_ = window.APPS_SCRIPT_URL || '';
 
-  var STORE = 'moretti_admin_session';   // ours, survives a tab close
+  var STORE = 'moretti_admin_session';   // ours, for this tab only (see below)
   var PAGE_KEY = 'moretti_admin_key';    // the entry admin.html already reads
   var GSI_SRC = 'https://accounts.google.com/gsi/client';
 
@@ -33,14 +33,21 @@
      Mirror any stored session into the host page's entry now, before its
      own script runs, or the page shows its gate needlessly. An expired
      token just fails the page's first call and drops back to this gate. */
+  /* sessionStorage, not localStorage. The admin token used to live in
+     localStorage for its full 14 days, readable by script on any page of
+     this origin in any tab -- so one injection anywhere on the site handed
+     over the roster. Now it lasts as long as the tab, and the old copy is
+     removed on the first load after this change. */
+  try { localStorage.removeItem(STORE); } catch (e) {}
   var stored = null;
-  try { stored = localStorage.getItem(STORE); } catch (e) {}
+  try { stored = sessionStorage.getItem(STORE); } catch (e) {}
   if (stored) {
     try { sessionStorage.setItem(PAGE_KEY, stored); } catch (e) {}
   }
 
   function clearSession() {
     try { localStorage.removeItem(STORE); } catch (e) {}
+    try { sessionStorage.removeItem(STORE); } catch (e) {}
     try { sessionStorage.removeItem(PAGE_KEY); } catch (e) {}
   }
 
@@ -163,7 +170,7 @@
         }
         return;
       }
-      try { localStorage.setItem(STORE, data.session); } catch (e) {}
+      try { sessionStorage.setItem(STORE, data.session); } catch (e) {}
       try { sessionStorage.setItem(PAGE_KEY, data.session); } catch (e) {}
       // Reload rather than driving the host page's unlock: its boot code
       // already handles a present credential, and a clean re-run is more
@@ -191,7 +198,7 @@
   }
 
   window.mtaAdminSignOut = function () { clearSession(); window.location.reload(); };
-  window.mtaAdminSession = function () { try { return localStorage.getItem(STORE); } catch (e) { return null; } };
+  window.mtaAdminSession = function () { try { return sessionStorage.getItem(STORE); } catch (e) { return null; } };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
   else start();

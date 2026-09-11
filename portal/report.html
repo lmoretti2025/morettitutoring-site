@@ -1636,6 +1636,34 @@
   }
   var DEMO_MODE = /[?&]demo=1\b/.test(location.search);
 
+  // The #d= data is whatever the link says, and anyone can write a link.
+  // The name and several other fields reach the page as HTML, on the same
+  // origin as the portal and admin sessions, so a crafted link would run
+  // its script with their access. Clean every field once, here: text loses
+  // markup characters, everything else must have the shape the portal
+  // writes, and a link with no usable section fails like a corrupt one.
+  function cleanLinkData(d) {
+    if (!d || typeof d !== 'object' || Array.isArray(d) || !Array.isArray(d.s)) return null;
+    function text(v, max) {
+      return typeof v === 'string' ? v.replace(/[<>&"`\u0000-\u001f\u007f]/g, '').trim().slice(0, max) : '';
+    }
+    d.n = text(d.n, 80) || 'Student';
+    d.t = /^[A-Za-z]{2,8}$/.test(d.t) ? d.t : 'SAT';
+    d.dt = /^\d{4}-\d{2}-\d{2}$/.test(d.dt) ? d.dt : '';
+    if ((typeof d.ts !== 'string' && typeof d.ts !== 'number') || isNaN(new Date(d.ts))) d.ts = null;
+    d.ptTitle = text(d.ptTitle, 80);
+    d.pt = (typeof d.pt === 'string' && /^[\w-]{1,60}$/.test(d.pt)) ? d.pt : null;
+    d.iv = Array.isArray(d.iv) ? d.iv.filter(function (e) { return e && typeof e === 'object'; })
+      .map(function (e) { return { k: String(e.k), s: e.s, ms: Number(e.ms) || 0, at: e.at }; }) : undefined;
+    var banks = window.SECTION_BANKS || {};
+    d.s = d.s.filter(function (sec) {
+      if (!sec || typeof sec !== 'object' || !Object.prototype.hasOwnProperty.call(banks, sec.k)) return false;
+      if (sec.v != null && !/^[A-Za-z]{1,12}$/.test(sec.v)) sec.v = null;
+      return true;
+    });
+    return d.s.length ? d : null;
+  }
+
   var data;
   if (DEMO_MODE) {
     data = buildDemoData();
@@ -1646,6 +1674,7 @@
       data = JSON.parse(decodeURIComponent(escape(atob(raw))));
     } catch (e) { fail(); return; }
   }
+  data = cleanLinkData(data);
   if (!data || !data.s || !window.SECTION_BANKS) { fail(); return; }
 
   // Practice-test attempts (see portal/practice-tests.js) set data.pt to the
