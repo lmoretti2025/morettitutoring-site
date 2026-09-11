@@ -1249,6 +1249,10 @@
   .dx-qnum-tile { flex-shrink: 0; align-self: stretch; width: 34px; display: flex; align-items: center; justify-content: center; background: #000; color: #fff; font-family: var(--hel); font-weight: 700; font-size: 0.9rem; }
   .dx-mark-btn { display: inline-flex; align-items: center; gap: 0.35rem; background: none; border: none; border-bottom: 1px dashed var(--mid); color: var(--mid); font-family: var(--hel); font-size: 0.66rem; font-weight: 600; letter-spacing: 0.04em; padding: 0.15rem 0; cursor: pointer; transition: color 0.2s, border-color 0.2s; }
   .dx-mark-btn.on { color: var(--gold); border-color: var(--gold); }
+  /* Save in the practice runners: an outlined button, so it reads as an action, not a label */
+  .dx-mark-btn.dx-save-btn { border: 1px solid var(--border); border-radius: 999px; padding: 0.32rem 0.8rem; background: var(--white); color: var(--text); font-size: 0.72rem; }
+  .dx-mark-btn.dx-save-btn:hover { border-color: var(--gold); }
+  .dx-mark-btn.dx-save-btn[aria-pressed="true"] { background: #fbf4dd; border-color: var(--gold); color: #7a5f12; }
   .dx-abc-btn { margin-left: auto; flex-shrink: 0; background: var(--dx-blue); color: #fff; border: none; font-family: var(--hel); font-weight: 800; font-size: 0.62rem; letter-spacing: 0.03em; padding: 0.38rem 0.6rem; cursor: pointer; transition: opacity 0.2s; }
   .dx-abc-btn:hover { opacity: 0.85; }
   .dx-abc-btn.on { background: var(--gold); color: #111; }
@@ -10363,6 +10367,14 @@ window.Portal = {
   window.dxIsPracticeActive = function () { return iqPracticeActive; };
   window.dxSetMathMode = function (on) { dxShellEl.classList.toggle('math-mode', !!on); };
   window.dxCloseCalculator = function () { closeCalculator(); };
+  // Each practice runner adds its own Save to the shared question header;
+  // clear them so one runner's button (wired to its question) never shows in another.
+  function removePracticeSaveBtns() {
+    ['qb-save-btn', 'iq-runner-save-btn'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.parentNode.removeChild(el);
+    });
+  }
   window.dxStartIncorrectPractice = function (label) {
     iqPracticeActive = true;
     document.getElementById('dx-notice-text').textContent = 'PRACTICE MODE — NOT TIMED, NOT SCORED';
@@ -10375,6 +10387,7 @@ window.Portal = {
     var mobileJump = document.querySelector('.dx-mobile-jump');
     if (mobileJump) mobileJump.style.display = 'none';
     document.getElementById('dx-mark').style.display = 'none';
+    removePracticeSaveBtns();
     // Answer Eliminator stays usable in practice mode: it toggles the shared
     // #dx-choices.eliminator-on class every choice-rendering path reads.
     var exitLabel = document.querySelector('#dx-exit-btn span');
@@ -10397,6 +10410,7 @@ window.Portal = {
     if (mobileJump) mobileJump.style.display = '';
     document.getElementById('dx-mark').style.display = '';
     document.getElementById('dx-abc-toggle').style.display = '';
+    removePracticeSaveBtns();
     var exitLabel = document.querySelector('#dx-exit-btn span');
     if (exitLabel) exitLabel.textContent = 'Exit';
   };
@@ -14891,15 +14905,14 @@ window.Portal = {
        button (e.g. #qb-save-btn) can still be in the header, wired to its
        own question. Remove anything not ours before adding ours (same as
        the .iq-runner-summary sweep above). */
-    Array.prototype.forEach.call(hedEl.querySelectorAll('.dx-mark-btn'), function (el) {
-      if (el.id !== 'iq-runner-save-btn') el.parentNode.removeChild(el);
-    });
+    var other = document.getElementById('qb-save-btn');
+    if (other) other.parentNode.removeChild(other);
     var btn = document.getElementById('iq-runner-save-btn');
     if (!btn) {
       btn = document.createElement('button');
       btn.type = 'button';
       btn.id = 'iq-runner-save-btn';
-      btn.className = 'dx-mark-btn';
+      btn.className = 'dx-mark-btn dx-save-btn';
       hedEl.appendChild(btn);
     }
     function paint() {
@@ -17090,16 +17103,22 @@ window.Portal = {
   function renderSaveBtn(r) {
     var hedEl = document.querySelector('#dx-card .dx-card-hed');
     if (!hedEl) return;
+    var other = document.getElementById('iq-runner-save-btn');
+    if (other) other.parentNode.removeChild(other);
     var btn = document.getElementById('qb-save-btn');
     if (!btn) {
       btn = document.createElement('button');
       btn.type = 'button';
       btn.id = 'qb-save-btn';
-      btn.className = 'dx-mark-btn';
+      btn.className = 'dx-mark-btn dx-save-btn';
       hedEl.appendChild(btn);
     }
     var qbKey = 'qb|' + currentSubject + '|' + r.qid;
-    function paint() { btn.innerHTML = qbIsSaved(qbKey) ? '&#9733; Saved' : '&#9734; Save'; }
+    function paint() {
+      var on = qbIsSaved(qbKey);
+      btn.innerHTML = on ? '&#9733; Saved' : '&#9734; Save';
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
     paint();
     btn.onclick = function () {
       if (!window.saveReportQuestion) return;
