@@ -1174,7 +1174,10 @@
 </div>
 
 <script src="banks.js?v=20260910a"></script>
-<script src="practice-tests.js?v=20260910a"></script>
+<script>
+  // The public sample report (?demo=1) never reads a practice test, so skip the 2.9MB file there.
+  if (!/[?&]demo=1\b/.test(location.search)) document.write('<script src="practice-tests.js?v=20260910a"><\/script>');
+</script>
 <script src="time-budgets.js?v=20260905"></script>
 <script src="grid-in.js?v=20260910a"></script>
 <script>
@@ -3813,7 +3816,7 @@
            by construction, so that gate would empty the chart for exactly
            the reader who most needs to see where the points sit. */
         var baseText = clockShown
-          ? 'Each coloured bar is the composite points sitting behind one skill on this form. The slate bar at the right is different: those are points on questions the clock never allowed, and no amount of re-teaching moves them — the fix there is pacing, not content. Hover any bar for detail, or click it to see those questions.'
+          ? 'Each colored bar is the composite points sitting behind one skill on this form. The slate bar at the right is different: those are points on questions the clock never allowed, and no amount of re-teaching moves them — the fix there is pacing, not content. Hover any bar for detail, or click it to see those questions.'
           : 'Each bar is the composite points sitting behind one skill on this form. Hover a bar for that skill\'s accuracy, or click it to see those questions.';
         baseText += ' This chart is sized by where the points are, not by what to work on first — the sections below rank that, and a large bar here without a matching finding there means the points are real but this one form could not separate that area from ' + first + '\u2019s own average.';
         baseText += ' The dashed bar on the right, ' + reachable + ', is what ' + first + ' would score with every single miss corrected' +
@@ -7307,7 +7310,7 @@
       : clockOnly
       ? 'About <b>' + hrs(weekly) + ' hour' + (weekly === 1 ? '' : 's') + ' a week</b>, and deliberately not more. Everything this test could attribute went to the clock rather than to the material, so there is no content to re-teach and no method to drill &mdash; adding hours of either to fill out a longer week would be inventing work the evidence does not support.'
       : 'About <b>' + hrs(weekly) + ' hours a week</b>, split the way this test actually came apart &mdash; weighted toward <b>' + leadWord + '</b>, which cost the most questions here. ' +
-        'The split is the point: an hour spent on the wrong one of these three does close to nothing, which is why it is written down rather than left to judgement in the moment.';
+        'The split is the point: an hour spent on the wrong one of these three does close to nothing, which is why it is written down rather than left to judgment in the moment.';
     var html = '<div class="plan-card">' +
       '<p class="plan-lede">' + lede + '</p>' +
       '<div class="plan-meter">' + meter + '</div>' +

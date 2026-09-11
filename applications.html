@@ -281,6 +281,9 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
 .casesec{background:#000;color:#EDE7E5;border-bottom:none}
 .casesec .lbl{color:rgba(237,231,229,.5)}
 .casesec .lbl::before{color:var(--red-lift)}
+.case-head{max-width:56ch;margin-bottom:clamp(1.6rem,3vw,2.4rem)}
+.case-head h2{font-family:var(--display);font-weight:700;color:#fff;letter-spacing:-.022em;line-height:1.12;
+  font-size:clamp(1.6rem,3.2vw,2.5rem);margin-top:.8rem}
 .case-row{display:grid;grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr);gap:clamp(1.6rem,4vw,4rem);
   align-items:center;padding:clamp(1.8rem,3.4vw,2.8rem) 0;border-top:1px solid rgba(255,255,255,.14)}
 @media(max-width:940px){.case-row{grid-template-columns:1fr;gap:1.6rem}}
@@ -440,6 +443,37 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
 .split2--dodont .sp-b li::before{content:'\00d7';position:absolute;left:0;top:-.05em;width:auto;height:auto;
   border:none;transform:none;background:none;animation:none;
   color:rgba(237,231,229,.55);font-size:1.05rem;line-height:1.4;font-weight:600}
+
+/* phone menu: below 820px the nav links and the login are hidden, so the burger is the only way to them (same as the homepage) */
+.navburger{display:none;flex-direction:column;justify-content:center;gap:5px;width:42px;height:34px;padding:0 9px;
+  background:transparent;border:1px solid rgba(255,255,255,.34);border-radius:2px;cursor:pointer;
+  transition:background .28s var(--ease),border-color .28s var(--ease)}
+.navburger span{display:block;height:1.5px;background:#fff;border-radius:2px;transition:transform .35s var(--ease)}
+.navburger[aria-expanded="true"] span:nth-child(1){transform:translateY(3.25px) rotate(45deg)}
+.navburger[aria-expanded="true"] span:nth-child(2){transform:translateY(-3.25px) rotate(-45deg)}
+nav.is-red .navburger{border-color:rgba(255,255,255,.6)}
+.navmenu{display:none;flex-direction:column;background:var(--void);
+  border-top:1px solid rgba(255,255,255,.09);padding:.2rem clamp(1.25rem,3vw,2.8rem) .9rem}
+nav.is-red .navmenu{background:var(--red);border-top-color:rgba(255,255,255,.2)}
+.navmenu a{display:block;padding:.85rem 0;font-size:.95rem;color:rgba(237,231,229,.82);text-decoration:none;
+  border-bottom:1px solid rgba(255,255,255,.08);transition:color .2s}
+.navmenu a:last-child{border-bottom:none}
+.navmenu a:hover{color:#fff}
+@media(max-width:820px){
+  .navcta{margin-left:auto}
+  .navburger{display:flex}
+  .navmenu.open{display:flex}
+}
+/* phones: logo, button and burger have to share one row. The logo must never
+   shrink (flexbox was squashing it to half its width), the button never goes
+   narrower than its longest word, and the burger keeps its size. */
+.nav-logo,.navburger{flex-shrink:0}
+.navcta{min-width:min-content}
+@media(max-width:560px){
+  nav .shell{gap:.6rem}
+  .navcta{padding-left:.8rem;padding-right:.8rem;letter-spacing:.08em}
+}
+@media(max-width:374px){.nav-logo img{height:28px}}
 </style>
 <script src="analytics.js" defer></script>
 </head>
@@ -453,7 +487,15 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
     <a href="testimonials.html">Results</a>
   </div>
   <a class="navlogin" href="portal/index.html">Student Login</a>
-  <a class="navcta shimmer" href="#start"><span>Free diagnostic</span></a>
+  <a class="navcta shimmer" href="index.html#start"><span>Free diagnostic</span></a>
+  <button type="button" class="navburger" id="navburger" aria-label="Menu" aria-expanded="false" aria-controls="navmenu"><span></span><span></span></button>
+</div>
+<div class="navmenu" id="navmenu">
+  <a href="index.html#diagnostic">Diagnostic</a>
+  <a href="index.html#programs">Programs</a>
+  <a href="testimonials.html">Results</a>
+  <a href="test-dates.html">Test dates</a>
+  <a href="portal/index.html">Student login</a>
 </div></nav>
 
 <header class="satstage">
@@ -518,6 +560,11 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
 </header>
 
 <section class="casesec"><div class="shell">
+  <div class="case-head rv">
+    <div class="lbl">The case</div>
+    <h2>Who writes the essays, and who coaches them.</h2>
+  </div>
+
   <div class="case-row rv">
     <div class="case-copy"><h3>Admissions readers can tell a coached essay from a written one.</h3><p>So can we, which is why this line is not negotiable. Your student is the author and the applicant. We make the essays the strongest part of the file, and nothing more.</p></div>
     <div class="split2 split2--dodont">
@@ -594,7 +641,7 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
     </div>
   </div>
   <div class="footer-right">
-    <a href="https://www.linkedin.com/company/moretti-test-prep-and-tutoring/?viewAsMember=true" class="footer-linkedin" target="_blank" rel="noopener" aria-label="LinkedIn"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.47-.9 1.63-1.85 3.36-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.72v20.55C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.72C24 .77 23.2 0 22.22 0z"/></svg></a>
+    <a href="https://www.linkedin.com/company/moretti-test-prep-and-tutoring/" class="footer-linkedin" target="_blank" rel="noopener" aria-label="LinkedIn"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.47-.9 1.63-1.85 3.36-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.72v20.55C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.72C24 .77 23.2 0 22.22 0z"/></svg></a>
   </div>
 </div></footer>
 
@@ -723,6 +770,17 @@ document.documentElement.classList.add('js');
     },{passive:true});
     card.addEventListener('mouseleave',function(){ card.style.transform=''; },{passive:true});
   });
+})();
+</script>
+<script>
+/* phone menu toggle (same behavior as the homepage) */
+(function(){
+  var b=document.getElementById('navburger'), m=document.getElementById('navmenu');
+  if(!b||!m) return;
+  function set(open){ b.setAttribute('aria-expanded', open?'true':'false'); m.classList.toggle('open', open); }
+  b.addEventListener('click', function(){ set(b.getAttribute('aria-expanded')!=='true'); });
+  m.addEventListener('click', function(e){ if(e.target.tagName==='A') set(false); });
+  addEventListener('resize', function(){ if(innerWidth>820) set(false); }, {passive:true});
 })();
 </script>
 </body>
