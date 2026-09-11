@@ -10171,10 +10171,34 @@ window.Portal = {
        here; this makes the buttons agree with them. */
     window.location.href = '../index.html';
   }
-  var exitLinkIds = ['nav-logo-exit', 'sidebar-logo-exit', 'nav-exit-link', 'dx-exit-btn', 'dx-break-exit-btn'];
-  exitLinkIds.forEach(function (id) {
+  /* The test's own Exit buttons leave the TEST, not the portal: a practice
+     test goes back to the practice-test list, the diagnostic back to Home.
+     Reloading (rather than switching screens in place) is what guarantees
+     the section timer and autosave stop; the saved screen is what the
+     same-tab restore in restoreState() reopens. The resume snapshot is left
+     alone, so the attempt can still be picked back up. */
+  function returnToPortal() {
+    if (assignPollTimer) { clearInterval(assignPollTimer); assignPollTimer = null; }
+    activeScreenId = practiceTestId ? 'screen-practice-tests' : 'screen-menu';
+    saveState();
+    window.location.reload();
+  }
+  function exitTest(e) {
+    if (e) e.preventDefault();
+    if (iqPracticeActive) {
+      if (window.dxPracticeExitHandler) window.dxPracticeExitHandler();
+      return;
+    }
+    if (MID_DIAGNOSTIC_SCREENS[activeScreenId]) { openLeaveModal(returnToPortal); return; }
+    returnToPortal();
+  }
+  ['nav-logo-exit', 'sidebar-logo-exit', 'nav-exit-link'].forEach(function (id) {
     var el = document.getElementById(id);
     if (el) el.addEventListener('click', exitPortal);
+  });
+  ['dx-exit-btn', 'dx-break-exit-btn'].forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el) el.addEventListener('click', exitTest);
   });
 
   /* ═══ SCREEN 2: MENU ═══ */

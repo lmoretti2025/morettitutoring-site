@@ -699,6 +699,7 @@ nav.is-red .navmenu{background:var(--red);border-top-color:rgba(255,255,255,.2)}
 .dcta .fmsg{display:none;margin-top:.7rem;font-size:.8rem;line-height:1.6;text-align:center}
 .dcta .fmsg.ok{color:var(--gold)}
 .dcta .fmsg.err{color:var(--red-lift)}
+.dcta .fi[aria-invalid="true"]{border-color:var(--red-lift)}
 .dcta .capphone{margin-top:clamp(1rem,2vw,1.4rem);font-size:.76rem;letter-spacing:.06em;
   color:rgba(237,231,229,.5)}
 .dcta .capphone a{margin-left:.5rem;font-family:var(--display);font-weight:700;
@@ -758,6 +759,7 @@ nav.is-red .navmenu{background:var(--red);border-top-color:rgba(255,255,255,.2)}
       <div class="ff"><label class="fl" for="rf-message">What your student needs help with <em>(optional)</em></label>
         <textarea class="fi" id="rf-message" name="message" rows="2" placeholder="Grade, subject, current scores, timeline&hellip;"></textarea></div>
       <button type="submit" class="fsub shimmer" id="rf-submit"><span>Take my Diagnostic</span></button>
+      <p id="rf-invalid" class="fmsg err" role="alert"></p>
       <p class="fnote" id="rf-note">I reply personally, usually within the hour. The diagnostic and its report cost nothing either way, and you have the price in writing before anything starts. <a href="prep-course.html#faq">How pricing works &rarr;</a></p>
       <p id="rf-success" class="fmsg ok">Thanks. Check your email for confirmation. I&rsquo;ll follow up personally, usually within the hour.</p>
       <p id="rf-error" class="fmsg err">Something went wrong. Please call (201) 275-2791 directly.</p>
@@ -1085,6 +1087,34 @@ document.documentElement.classList.add('js');
   var readyAt = Date.now();
   var form = document.getElementById('reserve-form');
   if (!form) return;
+  /* Missing or malformed fields are named inline, under the button, and the
+     first one gets the cursor. This used to be a browser alert() box. */
+  var invalidMsg = document.getElementById('rf-invalid');
+  function checkFields(name, phone, email) {
+    var checks = [
+      ['rf-name',  !name, 'your name'],
+      ['rf-phone', phone.replace(/\D/g, '').length < 7, phone ? 'a full phone number' : 'a phone number'],
+      ['rf-email', !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email), email ? 'a complete email address' : 'an email address']
+    ];
+    var wanted = [], first = null;
+    checks.forEach(function (c) {
+      var el = document.getElementById(c[0]);
+      el.setAttribute('aria-invalid', c[1] ? 'true' : 'false');
+      if (c[1]) { wanted.push(c[2]); if (!first) first = el; }
+    });
+    if (!first) { invalidMsg.style.display = 'none'; return true; }
+    invalidMsg.textContent = 'Please add ' + (wanted.length === 1 ? wanted[0]
+      : wanted.slice(0, -1).join(', ') + ' and ' + wanted[wanted.length - 1]) + '.';
+    invalidMsg.style.display = 'block';
+    first.focus();
+    return false;
+  }
+  ['rf-name', 'rf-phone', 'rf-email'].forEach(function (id) {
+    var el = document.getElementById(id);
+    el.addEventListener('input', function () {
+      if (el.getAttribute('aria-invalid') === 'true' && el.value.trim()) el.setAttribute('aria-invalid', 'false');
+    });
+  });
 
   form.addEventListener('submit', function (e) {
     e.preventDefault();
@@ -1092,7 +1122,7 @@ document.documentElement.classList.add('js');
     var phone = document.getElementById('rf-phone').value.trim();
     var email = document.getElementById('rf-email').value.trim();
     var message = document.getElementById('rf-message').value.trim();
-    if (!name || !phone || !email) { alert('Please fill in your name, phone and email.'); return; }
+    if (!checkFields(name, phone, email)) return;
 
     var honeypot = document.getElementById('rf-hp').value;
     var elapsedMs = Date.now() - readyAt;
