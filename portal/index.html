@@ -90,7 +90,7 @@
   .nav-search-results { display: none; position: absolute; top: calc(100% + 8px); left: 0; right: 0; background: var(--white); border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow-hover); padding: 0.4rem; z-index: 90; max-height: 320px; overflow-y: auto; }
   .nav-search.is-open .nav-search-results { display: block; }
   .nav-search-result { display: block; width: 100%; text-align: left; background: none; border: none; font-family: var(--hel); font-size: 0.82rem; color: var(--text); padding: 0.6rem 0.7rem; border-radius: 6px; cursor: pointer; }
-  .nav-search-result:hover, .nav-search-result.is-focused { background: var(--bg); color: var(--red); }
+  .nav-search-result:hover { background: var(--bg); color: var(--red); }
   .nav-search-empty { font-family: var(--hel); font-size: 0.78rem; color: var(--faint); padding: 0.6rem 0.7rem; }
 
   /* ═══ SIDEBAR BRAND — logo + a big, glanceable test-day countdown ═══
@@ -249,7 +249,6 @@
   .onb-hint { margin-top: 1.6rem; font-family: var(--hel); font-size: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0); }
   .onb-splash-hint-visible { animation: onbHintFade 0.6s ease 1.8s forwards; }
   @keyframes onbHintFade { to { color: rgba(255,255,255,0.4); } }
-  .onb-kicker { font-family: var(--hel); font-size: 0.6rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.7rem; text-align: center; }
 
   /* "What are you here for?" (onb-goal) cards: own light-on-dark styling,
      since .onb-accom-card assumes a white background. No selected state:
@@ -404,7 +403,6 @@
   .xt-card { width: 100%; max-width: none; margin: 2.4rem 0 1.6rem; padding: 0; background: none; border: none; border-radius: 0; box-shadow: none; }
   .xt-hed { margin-bottom: 0; }
   .xt-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.55rem; }
-  .xt-label { font-family: var(--hel); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--mid); }
   .xt-evidence { font-family: var(--hel); font-size: 0.72rem; font-weight: 600; color: var(--mid); background: rgba(17,17,17,0.05); border-radius: 999px; padding: 0.2rem 0.6rem; white-space: nowrap; }
   .xt-lede { font-size: 0.85rem; line-height: 1.6; color: var(--text); margin: 0 0 1.1rem; }
   .xt-group + .xt-group { margin-top: 1.3rem; }
@@ -430,7 +428,6 @@
   .xt-practice:hover span { transform: translateX(2px); }
   @media (prefers-reduced-motion: reduce) { .xt-practice span { transition: none; } }
   .xt-foot { font-size: 0.73rem; line-height: 1.55; color: var(--mid); margin: 1.1rem 0 0; padding-top: 0.8rem; border-top: 1px solid var(--border); }
-  .xt-cta { display: inline-block; margin-top: 0.7rem; font-family: var(--hel); font-size: 0.78rem; font-weight: 700; color: var(--red); background: none; border: none; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
   @media (max-width: 620px) {
     .xt-card { padding: 0; margin-top: 1.8rem; }
     .xt-head { gap: 0.4rem; }
@@ -481,7 +478,6 @@
      chip): whether the test is done and whether it's one-time or
      repeatable, so students don't retake the diagnostic by mistake. */
   .menu-card-badge { position: absolute; top: 0.9rem; right: 0.9rem; font-size: 0.52rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.25rem 0.55rem; border: 1px solid var(--border); color: var(--faint); background: var(--white); }
-  .menu-card-badge.badge-done { border-color: #3f8f5f; color: #3f8f5f; background: rgba(63,143,95,0.09); }
   .menu-card-badge.badge-todo { border-color: var(--red); color: var(--red); background: rgba(176,39,28,0.07); }
   .menu-card-wide .menu-card-title { padding-right: 6.5rem; } /* keep long titles clear of the badge */
   /* Big test number on a practice-test card, so "take Practice Test 1"
@@ -1170,10 +1166,6 @@
      above (#dx-notice-bar/#dx-topbar/#dx-shell/#dx-main), so the practice
      test screen (own IDs, avoiding collisions with the diagnostic's) can
      reuse the layout. Other dx- classes are reused as-is. */
-  .pt-notice-bar { background: var(--dx-navy); color: #fff; text-align: center; padding: 0.55rem 1rem; font-family: var(--hel); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; }
-  .pt-topbar { padding: 0.75rem 2rem; display: flex; align-items: center; justify-content: space-between; background: var(--white); border-bottom: 1px solid var(--border); }
-  .pt-shell { display: flex; flex: 1; }
-  .pt-main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 3rem 2.5rem; }
 
   /* ═══ QUESTION NAVIGATOR — a dismissible popup (opened from the
      progress button), matching Bluebook's own module question-picker,
@@ -1363,13 +1355,9 @@
   .pt-report-hed-download:hover { filter: brightness(0.92); }
 
   /* ═══ SCORE REPORT — printable, parent-facing diagnostic breakdown ═══ */
-  .sr-bar-fill.strong { background: #5E8B6F; }
-  .sr-bar-fill.weak { background: var(--gold); }
 
   @media print {
     body * { visibility: hidden; }
-    #score-report, #score-report * { visibility: visible; }
-    #score-report { display: block !important; position: absolute; left: 0; top: 0; width: 100%; border: none; padding: 0.5in; }
   }
 
   /* Default (narrow/short windows): the picker is a normal stacked list
@@ -1565,7 +1553,6 @@
   .vp-mode-card::after { content: ''; position: absolute; top: 8px; right: 10px; width: 4.5px; height: 8px; border: solid #fff; border-width: 0 2px 2px 0; transform: translateY(-2px) rotate(45deg) scale(0.6); opacity: 0; transition: opacity 0.18s var(--ease), transform 0.22s cubic-bezier(0.22,1.1,0.32,1); }
   .vp-mode-card.on::after { opacity: 1; transform: rotate(45deg) scale(1); }
   @media (prefers-reduced-motion: reduce) { .vp-mode-card, .vp-mode-card::after { transition: none; } }
-  .vp-mode-card-icon { display: none; }
   .vp-mode-card-hed { font-weight: 700; font-size: 0.84rem; padding-right: 1rem; }
   .vp-mode-card-sub { font-size: 0.74rem; color: var(--mid); line-height: 1.45; }
 
@@ -1619,17 +1606,7 @@
   /* ═══ STATS ROW ═══ Mastered/Learning/Not started counts, derived from
      progress.seen + progress.stillLearning (see statsCounts() in the JS),
      plus an overall % mastered bar. Read-only. */
-  .vp-stats-row { display: flex; align-items: center; gap: 1.75rem; background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 1.1rem 1.3rem; flex-wrap: wrap; }
-  .vp-stat { text-align: center; }
-  .vp-stat-num { display: block; font-family: var(--display); font-weight: 700; font-size: 1.4rem; line-height: 1.1; color: var(--text); }
-  .vp-stat-num.vp-stat-mastered { color: #3f7d54; }
-  .vp-stat-num.vp-stat-learning { color: var(--gold); }
-  .vp-stat-label { display: block; font-size: 0.62rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--faint); margin-top: 0.15rem; }
-  .vp-stat-progress { flex: 1 1 160px; min-width: 140px; }
-  .vp-stat-progress-track { height: 6px; background: var(--bg); border-radius: 3px; overflow: hidden; }
-  .vp-stat-progress-fill { height: 100%; background: linear-gradient(90deg, var(--gold), #3f7d54); width: 0; transition: width 0.4s cubic-bezier(.3,.6,.3,1); }
-  .vp-stat-progress-label { display: block; font-size: 0.68rem; color: var(--faint); margin-top: 0.4rem; text-align: right; }
-  @media (max-width: 560px) { .vp-stats-row { gap: 1.1rem; } .vp-stat-progress { flex-basis: 100%; order: 10; } }
+  @media (max-width: 560px) {   }
 
   /* ═══ 10-MINUTE PRACTICE ═══ the headline feature: a timed, adaptive
      drill that runs for exactly ten minutes regardless of word count (see
@@ -1659,19 +1636,7 @@
      progressStorageKey()/loadProgress() in the JS), so it survives across
      visits. */
   .vp-still-panel { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 1.1rem 1.2rem; margin-top: 1.1rem; }
-  .vp-still-hed { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; margin-bottom: 0.15rem; }
-  .vp-still-title { font-family: var(--hel); font-size: 0.85rem; font-weight: 700; color: var(--text); }
-  .vp-still-count { font-family: var(--hel); font-size: 0.7rem; font-weight: 600; color: var(--red); background: #f8ecea; border-radius: 999px; padding: 0.15rem 0.6rem; }
-  .vp-still-empty { font-size: 0.8rem; color: var(--mid); margin-top: 0.4rem; }
-  .vp-still-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.7rem 0 0.9rem; }
-  .vp-still-chip { font-family: var(--hel); font-size: 0.74rem; color: var(--text); background: #faf6ee; border: 1px solid var(--border); border-radius: 999px; padding: 0.3rem 0.7rem; }
-  .vp-still-more { font-family: var(--hel); font-size: 0.74rem; color: var(--faint); padding: 0.3rem 0.2rem; }
-  .vp-still-btn { font-family: var(--hel); font-size: 0.78rem; font-weight: 700; color: var(--red); background: transparent; border: 1px solid var(--red); border-radius: 8px; padding: 0.55rem 0.9rem; cursor: pointer; transition: background 0.15s var(--ease), color 0.15s var(--ease), transform 0.12s var(--ease); }
-  .vp-still-btn:hover { background: var(--red); color: #fff; transform: translateY(-1px); }
-  .vp-still-btn:disabled { opacity: 0.4; cursor: default; }
-  .vp-still-btn:disabled:hover { background: transparent; color: var(--red); transform: none; }
   .vp-modes { display: flex; gap: 0.4rem; margin-top: 1.1rem; border: 1px solid var(--border); border-radius: 8px; padding: 0.3rem; background: var(--white); }
-  .vp-mode-btn.on { background: var(--red); color: #fff; }
   .vp-change-link { display: inline-block; font-family: var(--hel); font-size: 0.78rem; font-weight: 600; color: var(--mid); text-decoration: none; margin-bottom: 0.8rem; transition: color 0.12s var(--ease); }
   .vp-change-link:hover { color: var(--text); }
   .vp-stage { margin-top: 0.4rem; }
@@ -1713,7 +1678,6 @@
   .vp-prompt { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 1.4rem 1.35rem; margin-bottom: 1rem; }
   .vp-prompt .vp-plabel { font-size: 0.56rem; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; color: var(--faint); margin-bottom: 0.5rem; }
   .vp-prompt .vp-ptext { font-size: 1.12rem; line-height: 1.5; }
-  .vp-prompt .vp-ptext.vp-big { font-family: var(--display); font-size: 1.55rem; }
   .vp-opts { display: flex; flex-direction: column; gap: 0.55rem; }
   .vp-opt { font-family: var(--hel); font-size: 0.94rem; text-align: left; background: var(--white); border: 1px solid var(--border); border-radius: 9px; padding: 0.85rem 1rem; cursor: pointer; opacity: 0; animation: vpRise 0.3s cubic-bezier(.2,.7,.3,1) forwards; transition: border-color 0.15s var(--ease), background 0.15s var(--ease), color 0.15s var(--ease), transform 0.12s var(--ease); }
   .vp-opt:hover:not(:disabled) { border-color: var(--mid); transform: translateX(2px); }
@@ -1751,7 +1715,6 @@
   .iq-tab-count { background: rgba(17,17,17,0.06); color: var(--mid); border-radius: 999px; padding: 0.1rem 0.5rem; font-size: 0.72rem; font-weight: 700; }
   .iq-tab.active .iq-tab-count { background: rgba(176,39,28,0.12); color: var(--red); }
   .pb-empty-saved { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 0.6rem; padding: 3rem 1.5rem; }
-  .pb-empty-saved .pb-empty-icon { color: var(--faint); opacity: 0.6; }
   .pb-empty-saved .pb-empty-title { font-family: var(--display); font-size: 1.15rem; font-weight: 700; color: var(--text); }
   .pb-empty-saved .pb-empty-sub { font-size: 0.82rem; color: var(--mid); max-width: 30rem; }
 
@@ -1762,19 +1725,14 @@
      button — see #iq-filters below. */
   #iq-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem 0.9rem; margin: 1.1rem 0 0.4rem; }
   #iq-filters .iq-dropdown { margin-bottom: 0; }
-  #iq-filters .iq-dropdown-btn { width: auto; padding: 0.48rem 0.85rem; font-size: 0.76rem; white-space: nowrap; background: rgba(17,17,17,0.045); border: none; border-radius: 999px; }
-  #iq-filters .iq-dropdown-btn:hover { background: rgba(17,17,17,0.07); border: none; }
-  #iq-filters .iq-dropdown.open .iq-dropdown-btn { background: rgba(17,17,17,0.07); border: none; }
   /* Domain and Skill can run to dozens of entries, so they scroll inside
      the panel rather than becoming a wall of chips. */
   .iq-checklist { max-height: 148px; overflow-y: auto; scrollbar-gutter: stable; border: 1px solid var(--border); border-radius: 10px; padding: 0.25rem; }
   .iq-checklist .iq-dropdown-option { border-radius: 7px; }
   .iq-filter-panel { width: min(370px, calc(100vw - 3rem)); max-height: min(72vh, 560px); overflow-y: auto; }
   #iq-filters { display: flex; }
-  .iq-selection-bar-note { font-size: 0.78rem; }
   .qb-selection-bar .iq-practice-btn { white-space: nowrap; }
 
-  .iq-filters-badge { background: var(--red); color: #fff; border-radius: 999px; padding: 0.05rem 0.42rem; font-size: 0.68rem; font-weight: 700; }
   .iq-filters-badge { background: var(--red); color: #fff; border-radius: 999px; padding: 0.05rem 0.42rem; font-size: 0.68rem; font-weight: 700; }
   /* Kept from the retired flyout: the note a category shows when its list
      is empty (a section with no mistakes in it, say). */
@@ -1872,7 +1830,7 @@
   .qb-sec-title { font-family: var(--hel); font-size: 1rem; font-weight: 700; color: var(--text); margin: 0; }
   .qb-sec-note { margin-left: auto; font-family: var(--hel); font-size: 0.7rem; color: var(--faint); }
   .qb-sec-hed-tight { margin-top: 1.9rem; margin-bottom: 0; }
-  .qb-sec-hed + .qb-subjects, .qb-sec-hed + .qb-stat-grid { margin-bottom: 1.5rem; }
+  .qb-sec-hed+.qb-subjects { margin-bottom: 1.5rem; }
   .qb-subjects { display: flex; gap: 1.2rem; flex-wrap: wrap; }
   .qb-subject { flex: 1 1 300px; position: relative; overflow: hidden; border: none; border-radius: 14px; padding: 1.35rem 1.5rem; min-height: 132px; cursor: pointer; text-align: left; display: flex; flex-direction: column; justify-content: space-between; gap: 1.1rem; box-shadow: var(--shadow); background: linear-gradient(135deg, var(--red) 0%, #c9a84c 130%); transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease); }
   .qb-subject:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); }
@@ -2101,10 +2059,6 @@
   .qb-selection-dot { opacity: 0.45; margin: 0 0.45rem; }
   #qb-selection-q { font-variant-numeric: tabular-nums; }
 
-  .qb-toolbar { display: flex; gap: 0.6rem; margin-bottom: 1.3rem; }
-  .qb-toolbar .iq-dropdown-btn { width: auto; padding: 0.5rem 0.9rem; font-size: 0.78rem; background: rgba(17,17,17,0.045); border: none; border-radius: 999px; }
-  .qb-toolbar .iq-dropdown-btn:hover { background: rgba(17,17,17,0.07); }
-  .qb-toolbar .iq-dropdown.open .iq-dropdown-btn { background: rgba(17,17,17,0.07); border: none; }
 
   .qb-start-btn { flex-shrink: 0; background: rgba(17,17,17,0.06); color: var(--mid); border: none; border-radius: 999px; padding: 0.6rem 1.15rem; font-family: var(--hel); font-size: 0.78rem; font-weight: 700; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 0.35rem; transition: background 0.15s var(--ease), color 0.15s var(--ease); }
   .qb-start-btn:hover { background: var(--red); color: #fff; }
@@ -2147,10 +2101,8 @@
   .qb-topic-empty { font-family: var(--hel); font-size: 0.86rem; color: var(--mid); padding: 2.5rem 0; text-align: center; }
   @media (prefers-reduced-motion: reduce) { .qb-topic, .qb-topic-mark, .qb-topic-bar i { transition: none; } }
 
-  .qb-progress-frac { font-size: 0.76rem; color: var(--mid); white-space: nowrap; }
   /* Right-aligned, fixed-width value so the strength dot sits in the same
      spot on every row regardless of "0%" vs "100%". */
-  .qb-acc-value { display: inline-block; min-width: 2.6em; text-align: right; }
   .qb-strength-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; background: var(--faint); }
   .qb-strength-dot.weak { background: var(--red); }
   .qb-strength-dot.mid { background: var(--gold); }
@@ -2196,21 +2148,14 @@
   .iq-runner-summary-lab { font-size: 0.82rem; color: var(--mid); margin-bottom: 1.5rem; }
   .iq-runner-summary .key-btn { display: inline-block; width: auto; min-width: 160px; }
   .iq-dropdown { position: relative; margin-bottom: 0.6rem; }
-  .iq-dropdown-btn { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; font-family: var(--hel); font-size: 0.82rem; font-weight: 600; color: var(--text); background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 0.65rem 0.9rem; cursor: pointer; transition: border-color 0.15s var(--ease), box-shadow 0.15s var(--ease); text-align: left; }
-  .iq-dropdown-btn:hover { border-color: var(--mid); }
-  .iq-dropdown.open .iq-dropdown-btn { border-color: var(--red); box-shadow: 0 0 0 3px rgba(176,39,28,0.1); }
-  .iq-dropdown-caret { font-size: 0.62rem; color: var(--mid); transition: transform 0.15s var(--ease); }
-  .iq-dropdown.open .iq-dropdown-caret { transform: rotate(180deg); }
   /* Large radius, no border (the shadow separates it), and
      scrollbar-gutter so a long list's scrollbar doesn't narrow the panel
      when it appears. */
-  .iq-dropdown-panel { display: none; position: absolute; top: calc(100% + 8px); left: 0; right: 0; z-index: 40; max-height: 260px; overflow-y: auto; scrollbar-gutter: stable; background: var(--white); border: none; border-radius: 16px; box-shadow: 0 12px 32px rgba(17,17,17,0.14); padding: 0.5rem; }
   /* Shared by the Question Bank toolbar and Saved & Mistakes' filters —
      one dropdown component, so animating it here makes both screens open
      the same way. */
-  .iq-dropdown.open .iq-dropdown-panel { display: block; transform-origin: top center; animation: iqPanelIn 0.22s var(--ease); }
   @keyframes iqPanelIn { from { opacity: 0; transform: translateY(-6px) scale(0.985); } to { opacity: 1; transform: none; } }
-  @media (prefers-reduced-motion: reduce) { .iq-dropdown.open .iq-dropdown-panel { animation: none; } }
+  @media (prefers-reduced-motion: reduce) {  }
   .iq-dropdown-option { display: flex; align-items: center; gap: 0.65rem; padding: 0.55rem 0.6rem; border-radius: 10px; cursor: pointer; font-family: var(--hel); font-size: 0.82rem; color: var(--text); transition: background 0.12s var(--ease); }
   .iq-dropdown-option:hover { background: var(--bg); }
   /* Custom rounded checkbox — replaces the native square one so every
@@ -2263,9 +2208,6 @@
      pb-q-card/pb-note/pb-explain/dx-choice styling above. A self-quiz:
      unanswered choices (.iq-quiz-choice) are clickable; answered ones
      render as .iq-quiz-answered, which is non-interactive. */
-  .iq-item .iq-quiz-answered { cursor: default; }
-  .iq-item .iq-quiz-answered:hover { border-color: var(--border); }
-  .iq-item .iq-quiz-choice:hover { border-color: var(--gold); background: rgba(201,168,76,0.06); }
 
   /* ═══ COMPACT ROW LIST ═══ collapsed by default: a row of pills
      (category/difficulty/wrong attempts) plus a one-line preview. Clicking
@@ -2298,24 +2240,14 @@
      stylesheet: `transition` is a shorthand, so this rule has to come after
      each element's own transition rule to add transform instead of being
      overwritten by it. */
-  .key-btn, .menu-card, .sidebar-item, .assign-item, .onb-date-opt,
-  .onb-accom-card, .onb-accom-opt, .nav-search-result, .nav-profile-item,
-  .pie-legend-item, .res-drive-btn, .res-drive-btn-outline, .ov-filter-btn,
-  .ov-filter-option {
+  .key-btn,.menu-card,.sidebar-item,.assign-item,.onb-date-opt,.onb-accom-card,.onb-accom-opt,.nav-search-result,.nav-profile-item,.res-drive-btn,.res-drive-btn-outline,.ov-filter-btn,.ov-filter-option {
     transition: transform 0.08s var(--ease), background 0.15s var(--ease), border-color 0.15s var(--ease), color 0.15s var(--ease), box-shadow 0.2s var(--ease), opacity 0.2s var(--ease);
   }
-  .key-btn:active, .menu-card:not(.disabled):active, .sidebar-item:active,
-  .assign-item:not(.assign-done):active, .onb-date-opt:active,
-  .onb-accom-card:active, .onb-accom-opt:active, .nav-search-result:active,
-  .nav-profile-item:active, .pie-legend-item:active, .res-drive-btn:active,
-  .res-drive-btn-outline:active, .ov-filter-btn:active, .ov-filter-option:active {
+  .key-btn:active,.menu-card:not(.disabled):active,.sidebar-item:active,.assign-item:not(.assign-done):active,.onb-date-opt:active,.onb-accom-card:active,.onb-accom-opt:active,.nav-search-result:active,.nav-profile-item:active,.res-drive-btn:active,.res-drive-btn-outline:active,.ov-filter-btn:active,.ov-filter-option:active {
     transform: scale(0.97);
   }
   @media (prefers-reduced-motion: reduce) {
-    .key-btn, .menu-card, .sidebar-item, .assign-item, .onb-date-opt,
-    .onb-accom-card, .onb-accom-opt, .nav-search-result, .nav-profile-item,
-    .pie-legend-item, .res-drive-btn, .res-drive-btn-outline, .ov-filter-btn,
-    .ov-filter-option { transition: none; }
+    .key-btn,.menu-card,.sidebar-item,.assign-item,.onb-date-opt,.onb-accom-card,.onb-accom-opt,.nav-search-result,.nav-profile-item,.res-drive-btn,.res-drive-btn-outline,.ov-filter-btn,.ov-filter-option { transition: none; }
   }
 
   /* ═══ NATIVE REPORT STYLES ═══ ported from report.html's <style> block,
@@ -2340,7 +2272,6 @@
 #pt-native-report .score-tile .tile-score { font-family: 'Caladea', serif; font-weight: 700; color: var(--ink); line-height: 1; }
 #pt-native-report .score-tile .tile-score.big { font-size: 32px; }
 #pt-native-report .score-tile .tile-score.small { font-size: 19px; }
-#pt-native-report .score-tile .tile-frac { font-size: 8.5px; color: var(--faint); margin-top: 5px; }
 #pt-native-report .score-tile .tile-lab { font-size: 8px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mid); margin-top: 5px; }
 #pt-native-report .score-tile .tile-lab.big { font-size: 9.5px; }
 /* Caption to the composite figure — see report.html's identical rule. */
@@ -2369,7 +2300,6 @@
 #pt-native-report .bar-fill { height: 100%; background: var(--gold); border-radius: 4px; }
 #pt-native-report .bar-fill.weak { background: var(--red); }
 #pt-native-report .bar-fill.strong { background: var(--green); }
-#pt-native-report .score-caption { display: none; }
 /* "Since last time", see renderSinceLastTime(). Colored text only, no
    card, so it reads as a caption under the score tiles. */
 #pt-native-report .score-since-last { text-align: center; font-family: 'Poppins', sans-serif; font-size: 12px; font-weight: 600; margin: 6px 0 2px; }
@@ -2392,57 +2322,16 @@
  }
   /* One-time explainer above the first subject block, since "a bar with
      a dot on it" needs a caption the first time. */
-  #pt-native-report .skillbreak-intro { font-size: 0.82rem; color: var(--mid); line-height: 1.55; margin: 0 0 1.75rem; max-width: 640px; }
   /* ═══ ACCURACY BY TOPIC ═══ one block per subject, an accuracy tracker
      per domain row. Tier thresholds: see the section cards' accuracy
      by-topic pass in the script. */
   /* The two subjects side by side (R&W | Math), since each subject's row
      list is narrow. */
-  #pt-native-report .atb-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 0 2.5rem; }
-  #pt-native-report .atb-section { margin-bottom: 2rem; }
-  #pt-native-report .atb-hed-row { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
-  #pt-native-report .atb-hed { font-family: var(--hel); font-size: 0.95rem; font-weight: 700; color: var(--text); }
-  #pt-native-report .atb-subhed { font-family: var(--hel); font-size: 0.72rem; color: var(--mid); margin-top: 0.15rem; }
-  #pt-native-report .atb-legend { display: flex; gap: 0.6rem; font-family: var(--hel); font-size: 0.62rem; color: var(--mid); flex-wrap: wrap; }
-  #pt-native-report .atb-legend span { display: inline-flex; align-items: center; gap: 0.3rem; white-space: nowrap; }
-  #pt-native-report .atb-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
-  #pt-native-report .atb-dot.high { background: var(--green); }
-  #pt-native-report .atb-dot.mid { background: var(--atb-amber, #F59E0B); }
-  #pt-native-report .atb-dot.low { background: var(--red); }
-  #pt-native-report .atb-rows { display: flex; flex-direction: column; gap: 0.9rem; }
-  #pt-native-report .atb-row { display: flex; align-items: center; gap: 0.9rem; }
-  #pt-native-report .atb-row-left { flex: 0 0 128px; min-width: 0; }
-  #pt-native-report .atb-domain-name { font-family: var(--hel); font-size: 0.78rem; font-weight: 700; color: var(--text); line-height: 1.25; }
-  #pt-native-report .atb-domain-attempts { font-family: var(--hel); font-size: 0.66rem; color: var(--faint); margin-top: 0.2rem; }
-  #pt-native-report .atb-focus-tag { color: var(--red); font-weight: 700; }
   /* One continuous track filled to the actual accuracy, with a handle dot
      on the fill's edge, so it reads as "how far along" like a slider. */
-  #pt-native-report .atb-tracker { position: relative; flex: 1 1 90px; min-width: 60px; display: flex; align-items: center; }
-  #pt-native-report .atb-track { position: relative; width: 100%; height: 6px; border-radius: 999px; background: #ece5d6; overflow: visible; }
-  #pt-native-report .atb-track-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 999px; }
-  #pt-native-report .atb-track-fill.low { background: var(--red); }
-  #pt-native-report .atb-track-fill.mid { background: var(--atb-amber, #F59E0B); }
-  #pt-native-report .atb-track-fill.high { background: var(--green); }
-  #pt-native-report .atb-handle-dot { position: absolute; top: 50%; width: 13px; height: 13px; border-radius: 50%; background: #fff; border: 3px solid currentColor; box-shadow: 0 1px 3px rgba(17,17,17,0.25); transform: translate(-50%, -50%); }
-  #pt-native-report .atb-handle-dot.low { color: var(--red); }
-  #pt-native-report .atb-handle-dot.mid { color: var(--atb-amber, #F59E0B); }
-  #pt-native-report .atb-handle-dot.high { color: var(--green); }
-  #pt-native-report .atb-pct { flex: 0 0 42px; text-align: right; font-family: var(--hel); font-weight: 700; font-size: 1.02rem; }
-  #pt-native-report .atb-pct.low { color: var(--red); }
-  #pt-native-report .atb-pct.mid { color: var(--atb-amber, #F59E0B); }
-  #pt-native-report .atb-pct.high { color: var(--green); }
   @media (max-width: 480px) {
-    #pt-native-report .atb-grid { grid-template-columns: 1fr; }
-    #pt-native-report .atb-row { flex-wrap: wrap; gap: 0.5rem 0.8rem; }
-    #pt-native-report .atb-row-left { flex: 1 1 100%; }
-    #pt-native-report .atb-tracker { flex: 1 1 auto; order: 3; width: 100%; }
-    #pt-native-report .atb-pct { flex: 0 0 auto; margin-left: auto; }
   }
 #pt-native-report .chart-sub { font-size: 10.5px; color: var(--faint); margin: -6px 0 8px; line-height: 1.6; }
-#pt-native-report .quad-dot { stroke: #fff; stroke-width: 1; }
-#pt-native-report .quad-dot.ok { fill: var(--green); }
-#pt-native-report .quad-dot.bad { fill: var(--red); }
-#pt-native-report .quad-dot:hover { stroke: var(--ink); }
 
  }
 
@@ -2641,7 +2530,6 @@
 #pt-native-report .timing-chart-hed { display: flex; align-items: center; justify-content: space-between; gap: 10px 14px; flex-wrap: wrap; margin-bottom: 10px; font-family: 'Poppins', sans-serif; }
 #pt-native-report .timing-chart-hed .dxk-toggle { margin: 0; }
 #pt-native-report .timing-chart-hed span:first-child { font-size: 12.5px; font-weight: 700; color: var(--ink); }
-#pt-native-report .timing-chart-plot { position: relative; }
   /* ═══ PACING TRACE ═══ cumulative time spent vs. cumulative time
      budgeted, one module at a time, sharing this card's module carousel.
      The student's line is the accent, the budget is a neutral dashed
@@ -2671,7 +2559,6 @@
      sits between the trace and the section below it. */
 #pt-native-report .pace-legend { margin: 2px 0 12px; }
 
-#pt-native-report .timing-gridline { position: absolute; width: 1px; background: currentColor; opacity: 0.07; }
 
   /* ═══ CHART KIT ═══ mirrors report.html's identical block (kept in sync
      by hand; see that copy for the rationale). One segmented control,
@@ -2717,9 +2604,6 @@
 #pt-native-report .dxk-count { font-size: 10px; color: var(--mid); margin: 0 0 7px; }
 #pt-native-report .dxk-count b { color: var(--ink); font-weight: 700; }
 #pt-native-report .dxk-note { font-size: 9.5px; line-height: 1.55; color: var(--mid); margin: 7px 0 0; }
-#pt-native-report .dxk-foot { margin-top: 11px; padding-top: 8px; border-top: 1px solid var(--border);
-    font-size: 9.5px; line-height: 1.55; color: var(--mid); }
-#pt-native-report .dxk-foot strong { color: var(--ink); font-weight: 700; }
 
   @media print { #pt-native-report .dxk-toggle, #pt-native-report .dxk-tip { display: none !important; } }
   @media (max-width: 480px) { #pt-native-report .dxk-toggle button { padding: 5px 10px; font-size: 9px; } }
@@ -2744,7 +2628,6 @@
 #pt-native-report .dx-lab-btn { background: none; border: none; font: inherit; cursor: pointer; padding: 0; color: inherit;
     display: inline-flex; align-items: center; gap: 6px; border-bottom: 1px solid transparent; transition: border-color 0.15s ease, opacity 0.15s ease; }
 #pt-native-report .dx-lab-btn:hover { border-bottom-color: currentColor; }
-#pt-native-report .dx-lab-btn.dx-open { border-bottom-color: currentColor; }
 #pt-native-report .dx-detail { margin-top: 12px; border-top: 1px solid var(--border); padding-top: 10px; }
 #pt-native-report .dx-detail-hed { font-size: 9.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mid); margin-bottom: 8px; }
 #pt-native-report .dx-detail-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; max-height: 260px; overflow-y: auto; }
@@ -2759,12 +2642,6 @@
 #pt-native-report .dx-part.clock { background: #4E6070; }
   /* The cause key is a .dxk-legend now (see the CHART KIT block); only
      the button behaviour below is still this card's own. */
-#pt-native-report .timing-gridlabel { position: absolute; transform: translateX(-50%); font-size: 8.5px; color: var(--faint); font-variant-numeric: tabular-nums; }
-#pt-native-report .timing-rowlabel { position: absolute; left: -8px; transform: translate(-100%, -50%); font-size: 8px; color: var(--faint); font-variant-numeric: tabular-nums; }
-#pt-native-report .timing-xcaption { position: absolute; left: 50%; transform: translateX(-50%); font-size: 8.5px; color: var(--faint); }
-#pt-native-report .timing-bar { position: absolute; border-radius: 2px; cursor: pointer; }
-#pt-native-report .timing-bar-ok { background: var(--green); }
-#pt-native-report .timing-bar-bad { background: var(--red); }
 #pt-native-report .bridge-wrap { border: 1px solid var(--border); border-radius: 14px; padding: 14px 18px; margin-bottom: 2px; }
 #pt-native-report .bridge-target-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 6px; font-size: 10.5px; color: var(--mid); }
 #pt-native-report .bridge-target-row .bt-lab { font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; font-size: 9.5px; }
@@ -2778,25 +2655,11 @@
 #pt-native-report .bridge-canvas-wrap { text-align: center; overflow-x: auto; }
 #pt-native-report .bridge-canvas-inner { position: relative; display: inline-block; }
 #pt-native-report .bridge-empty { font-size: 11px; color: var(--mid); padding: 6px 0; }
-#pt-native-report .bridge-note { font-size: 9px; color: var(--faint); margin-top: 8px; }
 #pt-native-report .bridge-other-note { margin-top: 6px; margin-bottom: 0; }
 #pt-native-report .section-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-bottom: 2px; }
 #pt-native-report .section-card { border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; }
 #pt-native-report .section-card .sc-hed { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 3px; }
 #pt-native-report .section-card .sc-title { font-family: 'Caladea', serif; font-size: 13px; font-weight: 700; }
-#pt-native-report .section-card .sc-score { font-size: 11px; color: var(--mid); }
-#pt-native-report .section-card .sc-incorrect { font-size: 10px; color: var(--red); font-weight: 600; margin-bottom: 6px; }
-#pt-native-report .sc-time-item.ok { color: var(--green); }
-#pt-native-report .sc-time-item.bad { color: var(--red); }
-#pt-native-report .sc-time-item.ok .sc-time-label, #pt-native-report .sc-time-item.bad .sc-time-label { color: inherit; opacity: 0.75; }
-#pt-native-report .sc-bars { margin-bottom: 6px; }
-#pt-native-report .sc-bars .sc-bar-row { margin-bottom: 5px; }
-#pt-native-report .sc-bars .sc-bar-label { display: flex; justify-content: space-between; font-size: 9px; margin-bottom: 2px; }
-#pt-native-report .sc-bars .sc-bar-track { height: 6px; background: #eee7da; border-radius: 3px; overflow: hidden; }
-#pt-native-report .sc-bars .sc-bar-fill { height: 100%; background: var(--gold); }
-#pt-native-report .sc-bars .sc-bar-fill.weak { background: var(--red); }
-#pt-native-report .sc-bars .sc-bar-fill.strong { background: var(--green); }
-#pt-native-report .sc-bars .sc-bar-empty { font-size: 9px; color: var(--faint); }
   /* Still in use after the "What this tells us" section was dropped:
      Habits worth naming renders its flag list with this same class. */
 #pt-native-report .takeaways { list-style: none; }
@@ -2832,8 +2695,6 @@
   /* Chips, type and swatch come from .dxk-legend now; this only positions
      the key, which sits ABOVE the skill rows it explains. */
 #pt-native-report .budget-legend { margin: 0.15rem 0 0.5rem; }
-#pt-native-report .budget-stats { display: flex; gap: 20px; flex-wrap: wrap; font-size: 10.5px; color: var(--mid); }
-#pt-native-report .budget-stats b { color: var(--ink); font-weight: 700; }
 /* ═══ CLICK-THROUGH TO THE QUESTIONS ═══ mirrors report.html. Scoped to
    #pt-native-report like every other rule in this block, so it cannot leak
    into the portal's own chrome. */
@@ -2875,7 +2736,6 @@
 @media print { #pt-native-report .budget-sec { page-break-inside: avoid; break-inside: avoid; } }
 @media (max-width: 640px) {
   #pt-native-report .budget-card { padding: 1rem 0.9rem; }
-  #pt-native-report .budget-debt { flex-basis: 64px; }
 }
 /* ═══ SKILL DIAGNOSIS ═══ Mastered/Inefficient/Stuck/Rushed rollup, see
    skillBuckets/renderSkillDiagnosis(). Same card chrome as .timing-card. */
@@ -3105,7 +2965,6 @@
      children outside .bridge-wrap, so they need matching horizontal
      padding to line up with the chart. */
   #pt-native-report .bridge-card > #bridge-note-outer { padding: 0 1.75rem; }
-  #pt-native-report .bridge-card > .bridge-card-subhed { margin: 0; padding: 1.4rem 1.75rem 0.9rem; border-top: 1px solid var(--border); }
   #pt-native-report .bridge-note-block { font-size: 0.6rem; color: var(--faint); margin: 0 0 0.9rem; line-height: 1.5; }
   #pt-native-report .bridge-note-block .bridge-other-note { margin-bottom: 0.4rem; }
 
@@ -3123,7 +2982,6 @@
   }
   #pt-native-report .bridge-wrap { border: none; box-shadow: none; border-radius: 0; padding: 0.4rem 0 0; }
   #pt-native-report .bridge-card > #bridge-note-outer { padding: 0; }
-  #pt-native-report .bridge-card > .bridge-card-subhed { padding: 1.4rem 0 0.9rem; }
 
   /* Chart runs the full width (no card inset); its module arrows sit in
      its header row beside the counter (see the carousel markup in
@@ -3247,13 +3105,13 @@
   }
   #screen-calendar .cal-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
   #screen-calendar .cal-nav { display: flex; align-items: center; gap: 0.35rem; }
-  .cal-arrow, .cal-today, .cal-view-btn {
+  .cal-arrow,.cal-view-btn {
     font-family: var(--hel); font-weight: 600; font-size: 0.82rem; color: var(--text);
     background: var(--white); border: 1px solid var(--border); border-radius: 999px;
     padding: 0.4rem 0.85rem; cursor: pointer; transition: border-color 0.12s, color 0.12s, background 0.12s;
   }
   .cal-arrow { padding: 0.4rem 0.75rem; font-size: 1rem; line-height: 1; }
-  .cal-arrow:hover, .cal-today:hover, .cal-view-btn:hover { border-color: var(--red); color: var(--red); }
+  .cal-arrow:hover,.cal-view-btn:hover { border-color: var(--red); color: var(--red); }
   .cal-view-btn.is-on { background: var(--red); border-color: var(--red); color: #fff; }
   .cal-title { font-family: var(--display); font-size: 1.5rem; letter-spacing: 0.01em; text-align: center; flex: 1 1 auto; }
   .cal-views { display: flex; gap: 0.35rem; }
@@ -3401,7 +3259,6 @@
   @keyframes rushPop { from { opacity: 0; transform: translateY(10px) scale(.98); } to { opacity: 1; transform: none; } }
   .rush-modal-k { font-size: .6rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--red); }
   .rush-modal-hed { font-family: var(--display); font-size: 1.5rem; font-weight: 700; letter-spacing: -.02em; margin: .35rem 0 .3rem; }
-  .rush-modal-sub { font-size: .8rem; line-height: 1.5; color: var(--mid); margin: 0 0 1.1rem; }
   .rush-modal-card { max-height: calc(100vh - 2.4rem); overflow-y: auto; }
   .rush-form { display: flex; flex-direction: column; gap: 1.05rem; margin-top: .9rem; }
   .rush-row { display: flex; flex-direction: column; gap: .45rem; }
@@ -3414,19 +3271,7 @@
   .rush-go:disabled { opacity: .4; cursor: default; filter: none; }
   .rush-go, .rush-cancel { white-space: nowrap; flex: none; }
   .rush-sum-list { max-height: 320px; overflow-y: auto; }
-  .rush-paces { display: flex; flex-direction: column; gap: .55rem; }
-  .rush-pace { appearance: none; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: .2rem 1rem; width: 100%;
-    text-align: left; cursor: pointer; padding: .85rem 1rem; border-radius: 12px; border: 1.5px solid var(--border); background: var(--white);
-    font-family: var(--hel); color: var(--text); transition: border-color .15s, background .15s; }
-  .rush-pace:hover { border-color: rgba(17,17,17,.3); }
-  .rush-pace[aria-checked="true"] { border-color: var(--text); background: rgba(17,17,17,.035); }
-  .rush-pace-name { font-size: .88rem; font-weight: 700; }
-  .rush-pace-mult { font-size: .72rem; font-weight: 600; color: var(--faint); font-variant-numeric: tabular-nums; }
-  .rush-pace-eg { grid-column: 1 / -1; font-size: .74rem; color: var(--mid); }
   /* the band itself: where this pace sits between Fast and Slowest */
-  .rush-band { grid-column: 1 / -1; position: relative; height: 4px; border-radius: 2px; background: rgba(17,17,17,.08); margin-top: .35rem; }
-  .rush-band i { position: absolute; top: -3px; width: 10px; height: 10px; border-radius: 50%; background: var(--text); transform: translateX(-50%); }
-  .rush-pace[aria-checked="true"] .rush-band i { background: var(--red); }
   .rush-modal-foot { display: flex; justify-content: flex-end; gap: .6rem; margin-top: 1.3rem; }
   .rush-cancel { appearance: none; border: 0; background: none; cursor: pointer; font-family: var(--hel); font-size: .8rem; font-weight: 600; color: var(--mid); padding: .7rem 1rem; }
   .rush-go { appearance: none; border: 0; cursor: pointer; background: var(--red); color: #fff; font-family: var(--hel);
@@ -6424,16 +6269,6 @@ window.Portal = {
     } catch (e) {}
   }
 
-  function authErrorMessage(err) {
-    if (err === 'email_mismatch') return 'This key is already linked to a different email. Text Luca at (201) 275-2791 if that seems wrong.';
-    if (err === 'bad_email') return "That doesn't look like a valid email — double-check it and try again.";
-    if (err === 'network') return "Couldn't reach the server. Check your connection and try again, or text Luca at (201) 275-2791.";
-    // handleAuth serializes concurrent logins with a lock (see Code.gs) so
-    // a slow login can't fire a duplicate Drive share — this only fires if
-    // that lock is still held 30s later, which should be essentially never.
-    if (err === 'busy_try_again') return 'The server is still finishing your last login attempt — wait a moment and try again.';
-    return "That key wasn't recognized. Double-check it, or text Luca at (201) 275-2791.";
-  }
 
   // Blocking beta notice, shown on every fresh login (settle()) and
   // same-tab refresh (restoreState()), with no dismissed-state persistence.
@@ -10350,7 +10185,6 @@ window.Portal = {
     return SECTION_BANKS[key];
   }
   function currentSectionKey() { return activeSectionKeys[sectionIndex]; }
-  function currentBank() { return bankFor(currentSectionKey()); }
   function sectionHasModules(key) { return !!bankFor(key).module2Easier; }
   function moduleQuestions(bank, stage, variant) {
     if (!bank.module2Easier) return bank.module1; // non-adaptive section: single fixed module
