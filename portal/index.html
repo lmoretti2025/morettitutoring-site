@@ -6190,7 +6190,7 @@ window.Portal = {
 <div class="leave-overlay" id="leave-overlay">
   <div class="leave-modal" role="dialog" aria-modal="true" aria-labelledby="leave-modal-hed">
     <div class="leave-modal-hed" id="leave-modal-hed">Leave the exam?</div>
-    <p class="leave-modal-sub">You're in the middle of a timed test. Your answers so far are saved, but leaving will exit the exam.</p>
+    <p class="leave-modal-sub">You're in the middle of a timed test. Your answers so far are saved and you can resume later, but the clock keeps running while you're away.</p>
     <div class="leave-modal-row">
       <button class="leave-btn leave-btn-stay" id="leave-stay" type="button">Stay in exam</button>
       <button class="leave-btn leave-btn-go" id="leave-go" type="button">Leave exam</button>
@@ -10274,9 +10274,15 @@ window.Portal = {
       var secKey = (snap.activeSectionKeys || [])[snap.sectionIndex || 0];
       var secName = secKey === 'math' ? 'Math' : 'Reading & Writing';
       var wasSectionOnly = !!snap.sectionOnly;
+      // The clock kept running while they were away, so say what is
+      // actually left rather than promising the time they had.
+      var msLeft = (typeof snap.sectionTimerEndsAt === 'number') ? snap.sectionTimerEndsAt - Date.now() : null;
+      var mLeft = msLeft !== null && msLeft > 0 ? Math.ceil(msLeft / 60000) : 0;
       rows += ptChoiceRow('resume', 'Resume where you left off',
         'You have an unfinished sitting of this test' + (wasSectionOnly ? ' (' + secName + ' only)' : ', part-way through ' + secName) +
-        '. Your answers and the time you had left are still saved.');
+        '. Your answers are saved. ' + (msLeft === null ? ''
+          : msLeft > 0 ? 'The clock kept running while you were away, so ' + mLeft + ' minute' + (mLeft === 1 ? '' : 's') + ' of this module ' + (mLeft === 1 ? 'is' : 'are') + ' left.'
+          : 'The clock ran out on this module while you were away, so it will be submitted as it stands.'));
     }
     rows += ptChoiceRow('full', 'Full test',
       'Reading &amp; Writing and Math, timed like the real thing. This is the only way to get a 400&ndash;1600 score.');
@@ -11000,14 +11006,18 @@ window.Portal = {
       if (snapAt !== null && resultAt !== null && !isNaN(resultAt) && snapAt <= resultAt) snap = null;
     }
     if (snap) {
-      var mins = (typeof snap.sectionTimerRemainingMs === 'number')
-        ? Math.max(0, Math.round(snap.sectionTimerRemainingMs / 60000)) : null;
+      /* The section clock keeps running while the student is away (see
+         applyRestoredState), so the time left is measured against the saved
+         END time, not the remaining time as it stood when they left. */
+      var msLeft = (typeof snap.sectionTimerEndsAt === 'number') ? snap.sectionTimerEndsAt - Date.now()
+        : (typeof snap.sectionTimerRemainingMs === 'number') ? snap.sectionTimerRemainingMs : null;
       return {
         cls: ' pt-card-live',
         score: '',
         meta: '<span class="pt-live-dot"></span>' +
           (snap.moduleStage === 'module2' ? 'Module 2' : 'Module 1') +
-          (mins !== null ? ' &middot; ' + mins + ' min left' : ' &middot; in progress'),
+          (msLeft === null ? ' &middot; in progress'
+            : msLeft > 0 ? ' &middot; ' + Math.ceil(msLeft / 60000) + ' min left' : ' &middot; time ran out'),
         resume: true
       };
     }
