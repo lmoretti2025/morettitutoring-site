@@ -5358,7 +5358,7 @@ window.Portal = {
 <script src="fluid-ui.js?v=20260905y"></script>
 <script src="banks.js?v=20260910a"></script>
 <script src="time-budgets.js?v=20260905y"></script>
-<script src="challenge-questions.js?v=20260905y"></script>
+<script src="challenge-questions.js?v=20260911a"></script>
 <script src="grid-in.js?v=20260910a"></script>
 <script>
   /* practice-tests.js is ~2.6MB, so a blocking <script> delayed every later
@@ -14207,6 +14207,18 @@ window.Portal = {
   // resolves full text/choices/domain/skill from banks.js/practice-tests.js
   // by key, merged with the stored attempt fields. Keys that no longer
   // resolve (question removed/renumbered) are dropped.
+  /* Mistakes and saves are keyed by position (test|section|module|index), so
+     a test whose questions are later replaced leaves its old records pointing
+     at new questions the student never saw, with their old answer marked
+     against them. Practice Test 11 was replaced on 3 Sept 2026 at 16:49 ET;
+     records made on it before then are left out. */
+  var RETIRED_BEFORE = { 'sat-practice-11': Date.parse('2026-09-03T20:49:00Z') };
+  function isRetiredRecord(key, when) {
+    var cutoff = RETIRED_BEFORE[String(key).split('|')[0]];
+    var t = Date.parse(when || '');
+    return !!cutoff && !isNaN(t) && t < cutoff;
+  }
+
   function loadRecords(callback) {
     if (!window.fetchPortalProgress) { records = []; callback(); return; }
     // Kicked off in parallel with fetchPortalProgress (the slower Apps Script
@@ -14227,7 +14239,7 @@ window.Portal = {
       readyPromise.then(function () {
         records = Object.keys(byKey).map(function (k) {
           var stored = byKey[k];
-          if (!stored) return null;
+          if (!stored || isRetiredRecord(k, stored.attemptedAt)) return null;
           var resolved = window.resolveQuestionByKey ? window.resolveQuestionByKey(k) : null;
           if (!resolved) return null;
           resolved.key = k; // stable id for the Test filter and quizState above
@@ -14245,6 +14257,7 @@ window.Portal = {
         Object.keys(savedByKey).forEach(function (k) {
           if (mistakeKeys[k]) return; // already covered above, isSaved already set
           var stored = savedByKey[k];
+          if (!stored || isRetiredRecord(k, stored.savedAt)) return;
           var resolved = window.resolveQuestionByKey ? window.resolveQuestionByKey(k) : null;
           if (!resolved || !resolved.text) return;
           resolved.key = k;
@@ -15061,22 +15074,7 @@ window.Portal = {
           });
         }
         choicesEl.appendChild(row);
-        if (st.submitted && (st.chosenIndex === i || r.correctIndex === i) && r.choiceNotes && r.choiceNotes[i]) {
-          var note = document.createElement('div');
-          note.className = 'pb-note ' + (r.correctIndex === i ? 'pb-note-correct' : 'pb-note-wrong');
-          note.innerHTML = r.choiceNotes[i];
-          choicesEl.appendChild(note);
-        }
       });
-      /* Question-bank questions carry one whole-question `explanation` instead
-         of per-choice `choiceNotes`, which the loop above only renders. Show
-         it once under the choices when there are no choiceNotes. */
-      if (st.submitted && !r.choiceNotes && r.explanation) {
-        var exp = document.createElement('div');
-        exp.className = 'pb-note ' + (st.correct ? 'pb-note-correct' : 'pb-note-wrong');
-        exp.innerHTML = r.explanation;
-        choicesEl.appendChild(exp);
-      }
       nextBtnEl.disabled = !st.submitted && st.chosenIndex == null;
     } else if (r.type === 'fr') {
       choicesEl.style.display = 'none';
@@ -15097,11 +15095,14 @@ window.Portal = {
       }
     }
 
-    if (st.submitted && r.explanation) {
-      var explain = document.createElement('div');
-      explain.className = 'pb-explain';
-      explain.innerHTML = '<div class="pb-explain-hed">Full Explanation</div>' + r.explanation;
-      navRowEl.parentNode.insertBefore(explain, navRowEl);
+    /* One collapsed "Full Explanation" after submitting, as in the Question
+       Bank runner. Practice-test questions carry per-choice notes instead of
+       an explanation, so those are listed there, one per choice. */
+    var explainHtml = st.submitted ? (r.explanation || (r.choiceNotes || []).map(function (n, i) {
+      return n ? '<p><strong>Choice ' + LETTERS[i] + '.</strong> ' + n + '</p>' : '';
+    }).join('')) : '';
+    if (explainHtml && window.dxBuildCollapsibleExplain) {
+      navRowEl.parentNode.insertBefore(window.dxBuildCollapsibleExplain(explainHtml), navRowEl);
     }
 
     nextBtnEl.textContent = st.submitted ? (runnerIndex + 1 < runnerQueue.length ? 'Next' : 'See Results') : 'Submit';
@@ -17098,6 +17099,7 @@ window.Portal = {
     wrap.appendChild(body);
     return wrap;
   }
+  window.dxBuildCollapsibleExplain = buildCollapsibleExplain;   // the Saved & Mistakes runner shows explanations the same way
   // Shown on every question, answered or not, right or wrong, so any
   // question can be bookmarked mid-session.
   function renderSaveBtn(r) {
