@@ -1,34 +1,23 @@
 /* =========================================================================
    MORETTI STUDENT PORTAL — FLUID UI
    -------------------------------------------------------------------------
-   Two motion primitives for index.html, kept out of it. Both are PURE
-   DECORATION: nothing here decides what is on screen, what is selected, or
-   what a student can click. Delete this file and the portal still works,
-   one shade less smooth — which is the standard anything animating an
-   18,000-line page it does not own should be held to.
+   Motion primitives for index.html, kept out of it. PURE DECORATION:
+   nothing here decides what is on screen, what is selected, or what a
+   student can click. Delete this file and the portal still works.
 
    WHAT IT ADDS.
-     1. window.mtaFluid — a travelling indicator for any set of items where
-        one carries .active. The portal had two of these, both cutting:
-        the sidebar's white pill jumped from item to item, and Saved &
-        Mistakes' red underline blinked between the two tabs. Now the
-        indicator slides.
-     2. window.mtaCountUp — one count-up tween for numbers that appear all
-        at once. The portal already counts up its scores in three places
-        (Home's composite, the report's score tiles, Question Bank's stats);
-        the end-of-round score, which is the one number a student is
-        actually waiting for, was not one of them.
+     1. window.mtaFluid: a sliding indicator for any set of items where one
+        carries .active (the sidebar pill, Saved & Mistakes' underline).
+     2. window.mtaCountUp: a count-up tween for numbers that appear at once
+        (used for the end-of-round score).
 
-   WHY A MutationObserver AND NOT A HOOK. The .active class on a sidebar
-   item is set in one place today, but the portal has several paths into a
-   screen (the nav click, deep links, the onboarding sequence, a report
-   opening the Mistakes tab with a preset). Watching the class is what makes
-   the indicator correct on every one of them without this file knowing any
-   of them exist — and without a single edit inside the navigation code.
+   WHY A MutationObserver AND NOT A HOOK. The portal has several paths into
+   a screen (nav click, deep links, onboarding, a report opening Mistakes
+   with a preset). Watching the .active class keeps the indicator correct
+   on all of them without editing the navigation code.
 
-   STYLES ARE INJECTED HERE, deliberately, for the same reason: this brings
-   its own ~15 rules rather than adding another block to index.html's
-   stylesheet for a feature that is optional by design.
+   STYLES ARE INJECTED HERE for the same reason: the feature is optional,
+   so it brings its own rules instead of adding to index.html's stylesheet.
    ========================================================================= */
 (function () {
   'use strict';
@@ -39,10 +28,10 @@
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   } catch (e) {}
 
-  /* ═══ STYLES ═══ scoped to the indicator and to the two containers it is
-     attached to. The two `.mta-fluid-on` rules are the only thing here that
-     reaches into the portal's own styling, and both do the same small job:
-     stop the item painting the state that the indicator is now painting. */
+  /* ═══ STYLES ═══ scoped to the indicator and the containers it attaches
+     to. The two `.mta-fluid-on` rules are the only reach into the portal's
+     own styling: they stop the item painting the state the indicator now
+     paints. */
   function injectStyles() {
     if (document.getElementById('mta-fluid-css')) return;
     var st = document.createElement('style');
@@ -61,10 +50,9 @@
       '.iq-tabs.mta-fluid-on .iq-tab.active{border-bottom-color:transparent;}' +
       '@media (prefers-reduced-motion:reduce){.mta-fluid-ind{transition:none;}}' +
 
-      /* ── STEPPER ── a numeric control whose digits roll rather than
-         swap. Colours come from currentColor and two custom properties so
-         the same control works on the portal's white cards and on the red
-         gradient card it currently lives on. */
+      /* ── STEPPER ── a numeric control whose digits roll rather than swap.
+         Colors come from currentColor and two custom properties, so it works
+         on both white cards and the red gradient card. */
       '.mta-stepper{display:inline-flex;align-items:center;gap:.55rem;border-radius:999px;' +
         'border:1px solid var(--mta-step-line,rgba(255,255,255,.35));padding:.25rem;' +
         'font-family:var(--hel,inherit);}' +
@@ -93,11 +81,9 @@
         'to{transform:translateY(-80%) scale(.6);opacity:0;filter:blur(2px);}}' +
       '@keyframes mtaRollOutDown{from{transform:none;opacity:1;filter:none;}' +
         'to{transform:translateY(80%) scale(.6);opacity:0;filter:blur(2px);}}' +
-      /* The input sits ON TOP of the digit slots, and it is transparent --
-         so without this the number being typed reads on top of the number
-         being replaced. The slots go, not the input's transparency: a
-         solid input would need to match whatever surface the stepper is
-         sitting on, and it sits on two different ones already. */
+      /* The input sits transparently ON TOP of the digit slots, so the slots
+         hide while editing. A solid input would have to match whichever
+         surface the stepper sits on, and it sits on two. */
       '.mta-step-value.mta-step-editing .mta-step-slot{opacity:0;}' +
       '.mta-step-input{position:absolute;inset:0;width:100%;height:100%;border:none;background:transparent;' +
         'color:inherit;font:inherit;text-align:center;padding:0;font-variant-numeric:tabular-nums;}' +
@@ -105,16 +91,14 @@
       '@media (prefers-reduced-motion:reduce){.mta-step-btn,.mta-step-slot span{animation:none!important;' +
         'transition:none!important;}}' +
 
-      /* ── SPLIT BUTTON ── one primary action with its variants folded up
-         behind a caret. The extra actions expand from a real measured
-         width, so the row grows the way a drawer opens rather than
-         popping to its full size. */
+      /* ── SPLIT BUTTON ── one primary action with its variants folded behind
+         a caret. The extras expand from a measured width, so the row opens
+         like a drawer instead of popping. */
       '.mta-split{display:inline-flex;align-items:center;}' +
-      /* overflow:hidden is what makes the max-width collapse read as a
-         drawer -- but it clips VERTICALLY too, which was cutting the top
-         off the primary button when it lifts on hover. The padding gives
-         the lift somewhere to go; the negative margin keeps the control
-         the same size on the card. */
+      /* overflow:hidden makes the max-width collapse read as a drawer, but it
+         also clips vertically and would cut off the primary button's hover
+         lift. The padding gives the lift room; the negative margin keeps the
+         control's size unchanged. */
       '.mta-split-primary,.mta-split-more{display:flex;align-items:center;gap:.4rem;overflow:hidden;' +
         'padding:6px 0;margin:-6px 0;' +
         'transition:max-width .42s cubic-bezier(.22,1.1,.32,1),opacity .22s linear;}' +
@@ -131,10 +115,9 @@
       '@media (prefers-reduced-motion:reduce){.mta-split-more,.mta-split-primary,.mta-split-action{' +
         'transition:none!important;}}' +
 
-      /* ── SLIDER ── a value you drag rather than a set of buttons you pick
-         from. The fill runs under the thumb, the dots mark the track, and
-         the number above rolls a digit at a time (same machinery as the
-         stepper). */
+      /* ── SLIDER ── a draggable value. The fill runs under the thumb, dots
+         mark the track, and the number rolls digit by digit (same machinery
+         as the stepper). */
       '.mta-slider{display:flex;flex-direction:column;gap:.5rem;width:100%;}' +
       '.mta-slider-head{display:flex;align-items:baseline;gap:.35rem;}' +
       '.mta-slider-val{display:flex;gap:1px;font-size:1.5rem;font-weight:800;line-height:1;' +
@@ -160,11 +143,9 @@
       '.mta-slider.dragging .mta-slider-fill,.mta-slider.dragging .mta-slider-thumb{transition:none;}' +
       '@media (prefers-reduced-motion:reduce){.mta-slider-fill,.mta-slider-thumb{transition:none;}}' +
 
-      /* ── SKELETON ── shown while a screen waits on the backend. The
-         portal's own measurements put an Apps Script round trip at ~1.2s
-         warm and 5-6s cold, which is a long time to sit under the word
-         "Loading". A shape that matches what is coming says the same thing
-         and says it about the actual content. */
+      /* ── SKELETON ── shown while a screen waits on the backend (an Apps
+         Script round trip is ~1.2s warm, 5-6s cold). A shape matching the
+         coming content says "loading" about the actual content. */
       '.mta-skel{display:flex;flex-direction:column;gap:.7rem;}' +
       '.mta-skel-row{height:var(--mta-skel-h,44px);border-radius:10px;position:relative;overflow:hidden;' +
         'background:rgba(17,17,17,.05);}' +
@@ -177,19 +158,17 @@
   }
 
   /* ═══ THE TRAVELLING INDICATOR ═══
-     Measures the active item and moves one absolutely-positioned element to
-     it. offsetLeft/offsetTop are read against the container (which this
-     makes position:relative), so a horizontally-scrolled container — the
-     sidebar is a scrolling strip on mobile — needs no special handling: the
-     indicator scrolls with the items because it is positioned against the
-     same padding box they are. */
+     Measures the active item and moves one absolutely positioned element to
+     it. offsetLeft/offsetTop are read against the container (made
+     position:relative), so a horizontally scrolled container (the mobile
+     sidebar strip) needs no special handling: the indicator scrolls with
+     the items. */
   function attach(container, opts) {
     if (!container) return null;
     if (container.__mtaFluid) {
-      /* Already attached -- unless the container's contents were rebuilt
-         underneath us and took the indicator with them (the Question Bank
-         rebuilds its segmented control when the subject changes). Then this
-         is a fresh attach, not a no-op. */
+      /* Already attached, unless the contents were rebuilt and took the
+         indicator with them (Question Bank rebuilds its segmented control on
+         subject change). Then this is a fresh attach. */
       if (container.querySelector('.mta-fluid-ind')) { container.__mtaFluid.sync(); return container.__mtaFluid; }
       container.__mtaFluid = null;
     }
@@ -204,11 +183,9 @@
     container.insertBefore(ind, container.firstChild);
     container.classList.add('mta-fluid-on');
 
-    /* First placement must not animate -- an indicator sliding in from the
-       top-left corner on load is a worse first impression than no
-       indicator at all. Also re-armed whenever the active item goes away,
-       so coming back to a screen places the indicator instead of flying it
-       across from wherever it was last. */
+    /* First placement must not animate (no sliding in from the top-left on
+       load). Re-armed whenever the active item goes away, so returning to a
+       screen places the indicator instead of flying it across. */
     var placeInstantly = true;
 
     function sync() {
@@ -233,11 +210,9 @@
       keepInView(el);
     }
 
-    /* On phones the sidebar is a horizontally scrolling strip, and the item
-       for the screen you are actually on is frequently off the right-hand
-       edge of it -- open Vocabulary and the strip still shows Home. The
-       indicator was about to slide somewhere nobody could see. Bring it
-       into view instead; only ever when the strip really does scroll. */
+    /* On phones the sidebar is a horizontally scrolling strip, and the active
+       item is often off-screen. Scroll it into view, but only when the strip
+       actually scrolls. */
     function keepInView(el) {
       if (container.scrollWidth <= container.clientWidth + 1) return;
       var left = el.offsetLeft, right = left + el.offsetWidth;
@@ -254,13 +229,10 @@
       catch (e) { container.scrollLeft = to; }
     }
 
-    /* Coalesced to one measurement per frame: a class change, a resize and
-       a font swap can easily all land together. requestAnimationFrame is
-       the right clock while the tab is visible and the WRONG one when it is
-       not -- browsers stop firing it in a hidden tab, so a student who
-       switches screens, switches tabs, and comes back would find the
-       indicator still on the screen they left. A timer keeps it honest
-       there; the geometry is correct either way, only the timing differs. */
+    /* Coalesced to one measurement per frame (a class change, resize and font
+       swap can land together). rAF does not fire in hidden tabs, so a timer
+       is used there to keep the indicator current; the geometry is the same
+       either way, only the timing differs. */
     var queued = false;
     function schedule() {
       if (queued) return;
@@ -285,11 +257,9 @@
     return container.__mtaFluid;
   }
 
-  /* ═══ COUNT-UP ═══ same curve the report's score tiles land on, so the
-     end-of-round score and the report agree about how a number arrives.
-     `suffix` keeps the "/ 12" (or a "%") intact while only the counting
-     part moves — the portal's older count-up helpers write a bare integer
-     and would eat it. */
+  /* ═══ COUNT-UP ═══ same curve as the report's score tiles. `suffix` (and
+     `prefix`) keep "/ 12" or "%" intact while only the number counts; the
+     portal's older count-up helpers write a bare integer. */
   function countUp(el, target, opts) {
     if (!el) return;
     opts = opts || {};
@@ -297,10 +267,8 @@
     target = Number(target);
     if (!isFinite(target)) return;
     function land() { el.textContent = prefix + target + suffix; }
-    /* A hidden tab gets the number, not the tween: requestAnimationFrame
-       does not run there, so the count would sit at 0 until the student
-       came back and then play for an audience that has already read the
-       screen. Nobody is watching -- just land it. */
+    /* A hidden tab gets the final number, not the tween: rAF does not run
+       there, so the count would sit at 0 until the student returned. */
     if (REDUCE || !window.requestAnimationFrame || document.hidden) { land(); return; }
     var duration = opts.duration || 900, start = null;
     // Out-cubic: quick off the mark, long settle.
@@ -316,15 +284,12 @@
   }
 
   /* ═══ STEPPER ═══ a numeric control with plus/minus and rolling digits.
-     Ported from a React/Framer component (Watermelon UI's Stepper) into
-     the portal's own vanilla CSS: same idea -- only the digits that
-     actually changed move, and they enter from the direction of travel --
-     without pulling a 40KB animation runtime into an 18,000-line page that
-     has no build step.
+     A vanilla port of Watermelon UI's React/Framer Stepper: only the digits
+     that changed move, entering from the direction of travel, without a
+     40KB animation runtime on a page with no build step.
 
-     Double-click (or Enter / a tap-and-hold-free focus) turns the number
-     into an input, so a student going from 50 to 20 types it instead of
-     pressing minus six times. Arrow keys work on the focused value too. */
+     Double-click or Enter turns the number into an input for typing a
+     value; arrow keys work on the focused value too. */
   function stepper(opts) {
     opts = opts || {};
     var min = opts.min == null ? 0 : opts.min;
@@ -361,11 +326,9 @@
        string got longer. */
     function paint(next, dir) {
       var from = String(value), to = String(next);
-      /* Anything still on its way out goes NOW. Waiting on animationend
-         alone was leaving the old number stacked under the new one when a
-         value was typed rather than stepped -- the commit happens on a
-         keypress, not on a frame, so two paints can land inside one
-         animation. */
+      /* Remove anything still animating out NOW rather than waiting on
+         animationend: a typed commit happens on a keypress, so two paints can
+         land inside one animation and stack the old number under the new. */
       Array.prototype.forEach.call(val.querySelectorAll('.mta-roll-out-up,.mta-roll-out-down'),
         function (n) { if (n.parentNode) n.parentNode.removeChild(n); });
       var slots = val.querySelectorAll('.mta-step-slot');
@@ -393,9 +356,9 @@
         if (dir && !REDUCE) fresh.className = dir > 0 ? 'mta-roll-in-up' : 'mta-roll-in-down';
         if (old && dir && !REDUCE && !document.hidden) {
           old.className = dir > 0 ? 'mta-roll-out-up' : 'mta-roll-out-down';
-          /* animationend is the clean signal and a timer is the honest
-             backstop: it does not fire in a hidden tab, and a digit that
-             never leaves stacks the old number on top of the new one. */
+          /* animationend does not fire in a hidden tab, so the timer is the
+             backstop: a digit that never leaves stacks the old number over
+             the new. */
           var done = function () { if (old.parentNode) old.parentNode.removeChild(old); };
           old.addEventListener('animationend', done);
           setTimeout(done, 420);
@@ -490,13 +453,11 @@
   }
 
   /* ═══ SPLIT BUTTON ═══ wraps an EXISTING primary button rather than
-     replacing it, so whatever already styles that button, disables it
-     mid-request, or holds a reference to it by id keeps working -- the
-     split only adds a caret and the variants behind it.
+     replacing it, so its styling, mid-request disabling and id references
+     keep working; the split only adds a caret and the variants.
 
-     Collapsed is the resting state on purpose: the primary action is the
-     one nearly everyone wants, and the alternatives should cost a click
-     to see, not a decision to ignore. */
+     Collapsed by default: the primary action is what nearly everyone
+     wants, and alternatives should cost a click to see. */
   function splitButton(opts) {
     opts = opts || {};
     var primary = opts.primary;
@@ -545,11 +506,10 @@
     measure();
     pWrap.style.maxWidth = primaryW + 'px';
 
-    /* The primary click OPENS rather than acts. That is the whole point of
-       the control here: "Start" is a question — which of these? — and the
-       answer is the thing that runs. So the card must not also keep a
-       direct listener on the button, or one click would both ask and
-       answer (see the wiring in index.html). */
+    /* The primary click OPENS rather than acts: "Start" asks which variant,
+       and the chosen variant runs. So the card must not also keep a direct
+       listener on the button, or one click would do both (see the wiring in
+       index.html). */
     var open = false;
     function setOpen(next) {
       open = next;
@@ -573,14 +533,13 @@
     return { el: wrap, close: function () { setOpen(false); } };
   }
 
-  /* ═══ SLIDER ═══ ported from a React/Framer adaptive slider: gradient
-     fill, dotted track, a thumb that rides it, and a value that rolls its
-     digits. A real <input type="range"> sits invisible on top, so keyboard,
-     touch and screen readers get the control they already understand and
-     none of the drag maths is ours.
+  /* ═══ SLIDER ═══ port of a React/Framer adaptive slider: gradient fill,
+     dotted track, riding thumb, rolling digits. An invisible <input
+     type="range"> sits on top, so keyboard, touch and screen readers get a
+     native control and none of the drag math is ours.
 
-     `format` lets a caller name a value rather than print it — the Question
-     Bank calls its maximum "All" instead of a number. */
+     `format` lets a caller name a value (Question Bank shows its maximum
+     as "All"). */
   function slider(opts) {
     opts = opts || {};
     var min = opts.min == null ? 0 : opts.min;
@@ -727,10 +686,9 @@
   window.mtaFluid = { attach: attach };
   window.mtaCountUp = countUp;
 
-  /* ═══ SELF-WIRING ═══ the two places in the portal that have a set of
-     items with one .active. Both are in index.html's static markup, so
-     there is nothing to wait for beyond the DOM; the indicator stays
-     hidden until its screen is actually laid out. */
+  /* ═══ SELF-WIRING ═══ the two sets of .active items in the portal. Both
+     are in index.html's static markup, so only the DOM is needed; the
+     indicator stays hidden until its screen is laid out. */
   function init() {
     attach(document.querySelector('.sb-links'), { item: '.sidebar-item', mode: 'pill' });
     attach(document.getElementById('iq-tabs'), { item: '.iq-tab', mode: 'underline' });

@@ -2,29 +2,20 @@
    MORETTI PORTAL ADMIN — THE ACCESS PANEL
    -------------------------------------------------------------------------
    Adds a "Portal access" panel to portal/admin.html with ONE <script> tag
-   and no other edit to that file. It builds its own markup, reads the admin
-   key from the same sessionStorage entry admin.html already writes on
-   unlock, and styles itself from admin.html's own CSS variables so it does
-   not read as bolted on.
+   and no other edit. It builds its own markup, reads the admin key from
+   the sessionStorage entry admin.html writes on unlock, and styles itself
+   from admin.html's CSS variables. Delete the script tag and admin.html is
+   unchanged.
 
-   WHY IT INJECTS RATHER THAN SHIPPING MARKUP. admin.html is a live file
-   with other work happening in it. Everything here is additive and
-   removable — delete the script tag and admin.html is exactly as it was.
-   If it earns a permanent home later, this markup moves into that file.
+   AN ACTION QUEUE, NOT A SECOND ROSTER. It shows only rows needing action
+   (an inquiry with no invite sent, an unclaimed invite, a claim awaiting
+   approval), plus a search box for login resets.
 
-   WHY IT IS AN ACTION QUEUE, NOT A SECOND ROSTER. admin.html already lists
-   every student. Duplicating that would be noise. This shows only rows
-   where there is something to DO — an inquiry with no invite sent, an
-   invite not yet claimed, a claim waiting on approval — plus a search box
-   so any student can be found for a login reset.
-
-   EVERY CHANNEL, NOT JUST THE WEBSITE FORM. Most families do not arrive
-   through a form. They call, they text, they message on Facebook. So the
-   invite is a LINK first and an email second: "Copy invite link" hands
-   back the same single-use token to paste into whatever conversation is
-   already open, and "Copy message" hands back the whole thing written out.
-   A family who never gives an email at all still gets in — theirs arrives
-   by itself, verified, when the student signs in with Google.
+   EVERY CHANNEL. Most families call, text or message rather than use the
+   form, so the invite is a LINK first: "Copy invite link" returns the
+   single-use token to paste anywhere, and "Copy message" the full text.
+   A family with no email still gets in; the address arrives verified when
+   the student signs in with Google.
    ========================================================================= */
 
 (function () {
@@ -35,31 +26,23 @@
   var SESSION_KEY = 'moretti_admin_key';   // the entry admin.html writes on unlock
   var POLL_MS = 60000;
   var SOURCES = ['Website', 'Phone call', 'Text message', 'Facebook Messenger', 'Referral', 'In person', 'Other'];
-  /* Where a pre-approved student is sent. Not a token and not per-student:
-     they sign in with Google and the row is matched on the address that
-     comes back, so this is the same plain URL for everyone. Kept here
-     rather than built from location, because this panel is only ever
-     loaded from admin.html and the address it should hand out is the
-     public one, not whatever host Luca happens to be testing on. */
+  /* Where a pre-approved student is sent: one plain URL for everyone, since
+     rows are matched on the Google address at sign-in. Hardcoded rather
+     than built from location so it is always the public address, not a
+     test host. */
   var PORTAL_URL = 'https://morettitutoring.com/portal/';
 
   var root = null, listEl = null, badgeEl = null, tabEl = null;
   var students = [];
   var open = false, query = '', loading = false, showArchived = false;
-  /* THE POLL MUST NOT REDRAW OVER SOMEBODY'S CLICK. Two separate races, both
-     of which showed up as "I pressed Approve and it went back to how it
-     was":
+  /* THE POLL MUST NOT REDRAW OVER A CLICK.
 
-     busy      counts writes in flight. render() rebuilds the whole list
-               with innerHTML, so a poll landing mid-request replaced the
-               card with a fresh one whose buttons were enabled and whose
-               state was the pre-action state -- one stray second click and
-               the same invite goes out twice. The card's own success text
-               went to a detached node nobody ever saw.
-     rosterSeq makes the NEWEST answer win. refresh() used to bail out while
-               another was loading, so an action's own refresh was dropped
-               and the older, pre-action snapshot landed afterwards and
-               reverted the row on screen for up to a minute. */
+     busy      counts writes in flight. render() rebuilds the list with
+               innerHTML, so a poll mid-request would restore the
+               pre-action card with live buttons (inviting a duplicate
+               click) and lose its success text.
+     rosterSeq makes the NEWEST answer win, so an older pre-action
+               snapshot can never land after an action's own refresh. */
   var busy = 0, rosterSeq = 0, refreshQueued = false, signedOut = false;
   var loaded = false;        // has any roster answer ever arrived?
   var loadFailed = false;    // did the most recent attempt fail?
@@ -97,21 +80,15 @@
       });
   }
 
-  /* An admin session lasts 14 days, and it can also stop being valid mid-
-     tab if the address is dropped from ADMIN_EMAILS. Every caller used to
-     treat the resulting 'unauthorized' as an ordinary failure: the poll
-     said "could not refresh" once a minute forever, and admin.html's own
-     Refresh fell back to the RETIRED password box, which the backend can
-     no longer accept -- so the only way back in was for Luca to work out
-     for himself that he should reload the page. Hand it to the Google gate
-     instead, which is the one thing that can actually fix it. */
+  /* An admin session lasts 14 days and also ends if the address is dropped
+     from ADMIN_EMAILS. On 'unauthorized', hand off to the Google gate, the
+     only thing that can fix it, rather than treating it as an ordinary
+     failure. */
   function reGateIfSignedOut(data, userInitiated) {
     if (!data || data.error !== 'unauthorized') return false;
-    /* mtaAdminSignOut reloads the page. That is right when Luca just clicked
-       something, and wrong when it comes from the once-a-minute poll: a
-       session lapsing while he is halfway through the new-student form would
-       throw the form away with no warning. From the poll, say so and let him
-       reload when he is ready. */
+    /* mtaAdminSignOut reloads the page: right after a click, wrong from the
+       minute poll, where it could discard a half-filled form. From the poll,
+       say so and let Luca reload when ready. */
     if (!userInitiated) {
       loadFailed = true;
       signedOut = true;
@@ -131,10 +108,9 @@
     bad_key: 'That row no longer exists \u2014 refreshing.',
     no_recipient: 'No usable email address on this row. Use Copy link instead.',
     mail_failed: 'Google would not send the email. Use Copy link instead.',
-    /* Raised by the sign-in email only. It carries no credential, so the
-       one thing it needs is an address to send to -- and the row having a
-       PARENT address is not good enough here, because the whole point is
-       that the student signs in as themselves. */
+    /* Sign-in email only. It carries no credential, but needs the STUDENT's
+       address: a parent address is not enough, since the student signs in
+       as themselves. */
     no_student_email: "No student email on this row, so there is nothing to sign in as. Send the parent an invite instead.",
     busy_try_again: 'The server was busy with something else. Try that again in a moment.',
     attempts_unreadable: "Could not read this student's test history, so nothing was deleted. Try again shortly.",
@@ -145,10 +121,9 @@
     var code = (data && data.error) || 'unknown error';
     return ACTION_ERRORS[code] || ('Failed: ' + code);
   }
-  // Codes that mean the card on screen is stale: the row moved on without
-  // us, or the answer went missing and the write may well have landed.
-  // Either way, replacing the card beats leaving a red line under a button
-  // that is now inviting a duplicate click.
+  // Codes meaning the card is stale (the row moved on, or the answer was
+  // lost and the write may have landed): replace the card rather than
+  // leave a button inviting a duplicate click.
   var STALE_AFTER = /^(no_pending_claim|already_paired|bad_key|network|lost_answer)$/;
 
   function esc(s) {
@@ -167,11 +142,9 @@
     return Math.round(hrs / 24) + 'd ago';
   }
 
-  /* navigator.clipboard needs a secure context. admin.html is served over
-     https so it is available in practice, but a fallback matters here more
-     than usual: the whole point of "copy link" is that Luca is mid-message
-     to a parent, and silently copying nothing would have him paste the
-     previous clipboard contents into a real conversation. */
+  /* navigator.clipboard needs a secure context. The fallback matters: a
+     silent failed copy would have Luca paste old clipboard contents into a
+     real conversation with a parent. */
   function copyText(text) {
     if (navigator.clipboard && navigator.clipboard.writeText) {
       return navigator.clipboard.writeText(text).then(function () { return true; },
@@ -201,18 +174,11 @@
       'The link works once and expires in 14 days.\n\n— Luca';
   }
 
-  /* The other half of inviteMessage, for a student who is already
-     pre-approved. Deliberately NOT an invite: there is no link to click,
-     no key to type and nothing that expires, because their address is
-     already on the row and Google is what proves who they are. Saying
-     "sign in with your own Google account" rather than naming the address
-     is on purpose -- a student reading their own name back at them is
-     fine, but the address may be a parent's phone-typed guess, and being
-     told to use an address that turns out to be wrong is a dead end with
-     no error message anywhere.
-
-     Same shape as inviteMessage so both can be pasted into a text thread
-     rather than sent as mail when that is the conversation already open. */
+  /* The counterpart to inviteMessage for a pre-approved student: no link,
+     no key, nothing that expires, since Google proves who they are. It says
+     "your own Google account" rather than naming the address, which may be
+     a parent's mistyped guess. Same shape as inviteMessage so either can be
+     pasted into a text thread. */
   function signInMessage(name) {
     return (name ? 'Hi ' + name + ' — ' : 'Hi — ') +
       'your student portal is ready:\n\n' + PORTAL_URL +
@@ -224,9 +190,8 @@
   }
 
   /* ═══ STYLES ═══ scoped under the panel's own ids so nothing here can
-     reach admin.html's elements. Colours come from its :root variables,
-     with literal fallbacks so this still looks deliberate if those are
-     ever renamed. */
+     reach admin.html's elements. Colors come from its :root variables,
+     with literal fallbacks in case those are renamed. */
   function injectStyles() {
     if (document.getElementById('mta-access-css')) return;
     var css = document.createElement('style');
@@ -342,18 +307,13 @@
 
 
   /* ═══ WHO IS ON NOW, AND THE SIGN-IN LOG ═══
-     Two views of the same record. The strip at the top of the panel is
-     the live one -- the portal heartbeats once a minute (see the PRESENCE
-     block in auth.gs), so a green name means that student has the portal
-     open at this moment and the label says which screen. The log below is
-     the durable one: every sign-in, claim, approval, reset and visit the
-     backend has recorded since Google auth went live. All of it was
-     already being written to an AuthLog tab; none of it was readable
-     without opening the spreadsheet.
+     Two views of the AuthLog. The strip at the top is live: the portal
+     pings once a minute (see the PRESENCE block in auth.gs), so a green
+     name has the portal open now, labeled with its screen. The log below is
+     durable: every sign-in, claim, approval, reset and visit recorded.
 
-     THE LOG IS A MODAL, THE STRIP IS NOT. "Is anyone on right now" is a
-     glance, and a glance must not cost a click. "When did this student
-     last log on" is a question you sit down to, and it wants the room. */
+     THE LOG IS A MODAL, THE STRIP IS NOT: a glance should not cost a
+     click; a history lookup wants the room. */
   var EVENT_LABELS = {
     online: 'On the site',
     login: 'Signed in',
@@ -521,20 +481,13 @@
     return m;
   }
 
-  /* The intake form. This is the path for every family who did NOT come
-     through the website — a phone call, a text, a Messenger thread — which
-     in this business is most of them. Only one field is required, because
-     at the moment Luca fills this in he has just put the phone down and
-     that is genuinely all he reliably has. */
-  /* ═══ QUICK ADD ═══ one field, because one field is all that is actually
-     required. Luca is usually mid-text or mid-Messenger when he does this,
-     often on a phone, and the seven-field form was asking him to transcribe
-     things the system finds out by itself: the student's name arrives when
-     they sign in, their email arrives with it, the grade and goal are asked
-     during onboarding. So this takes whatever he has -- an email address or
-     a phone number -- and hands back a link to paste into the conversation
-     he is already in. The full form is still there for when he wants to
-     record more up front. */
+  /* The intake form, for families who did NOT come through the website
+     (a call, a text, a Messenger thread), which is most of them. Only one
+     field is required. */
+  /* ═══ QUICK ADD ═══ one field (an email or a phone number), returning a
+     link to paste into the conversation Luca is already in. Name and email
+     arrive at sign-in; grade and goal during onboarding. The full form is
+     still there to record more up front. */
   function quickAddFlow() {
     var m = modal(
       '<h3>Quick add</h3>' +
@@ -704,16 +657,11 @@
      conversation is actually happening: an email thread, a text or
      Messenger chat, or a phone call where nothing can be sent at all. */
   function deliverFlow(key, email, gname, studentEmail) {
-    /* Pre-approved means there is nothing to send. Saying so plainly is the
-       point: otherwise Luca dutifully sends an invite the student never
-       needed, and a second credential exists for no reason. */
+    /* Pre-approved means no invite: sending one would create a needless
+       second credential. */
     if (studentEmail) {
-      /* "Nothing to send" was true about CREDENTIALS and wrong about the
-         conversation: the student is pre-approved, so no invite is needed,
-         but nobody has told them the portal exists or what to do with it.
-         That is the whole gap -- a perfectly provisioned account nobody
-         ever mentions. So the same "nothing to mint" message now comes
-         with the one thing that IS worth sending. */
+      /* No invite is needed, but the student still has to be told the portal
+         exists, so offer the sign-in message instead. */
       var pm = modal(
         '<h3>Ready \u2014 no invite needed</h3>' +
         '<p class="hint">Created, and <b>' + esc(studentEmail) + '</b> is pre-approved. They just open the ' +
@@ -807,10 +755,9 @@
         });
       });
     }
-    // NOTE: each of these mints a FRESH link, which invalidates the one
-    // before it. That is the single-use guarantee doing its job, but it
-    // means copying a link after emailing one silently kills the emailed
-    // one — so say so rather than letting Luca find out from a parent.
+    // NOTE: each of these mints a FRESH link, which invalidates the previous
+    // one (single-use). Copying a link after emailing one kills the emailed
+    // link, so say so.
     m.querySelector('#mta-d-link').addEventListener('click', function () {
       mint('link', function (d) {
         copyText(d.link).then(function (ok) {
@@ -862,10 +809,8 @@
     tabEl.addEventListener('click', function () {
       open = !open;
       root.querySelector('#mta-body').style.display = open ? 'flex' : 'none';
-      // Draw what is already known the moment the panel opens -- the badge
-      // was computed from a roster fetched at boot, so the list is usually
-      // ready to show. Waiting on a fresh fetch first left the panel blank
-      // for the whole of a cold start, which read as broken.
+      // Draw the roster fetched at boot as soon as the panel opens, then
+      // refresh; waiting on a fresh fetch leaves it blank through a cold start.
       if (open) { render(); refresh(); }
     });
     root.querySelector('#mta-close').addEventListener('click', function () {
@@ -889,10 +834,8 @@
     post(payload).then(function (data) {
       if (data && data.ok) {
         st.textContent = done(data);
-        // busy is released INSIDE the timeout, not before it: the card is
-        // only rebuilt down there, so releasing early left a 1.2s window in
-        // which a poll could redraw the pre-action card with live buttons --
-        // the same double-approve race, just narrower.
+        // Release busy INSIDE the timeout, where the card is rebuilt: releasing
+        // earlier lets a poll redraw the pre-action card with live buttons.
         setTimeout(function () {
           if (apply) { apply(data); render(); }
           busy--;
@@ -964,27 +907,22 @@
   }
 
   function card(s, actions, extra) {
-    // A row with a claim waiting is technically still "Inquiry" — nobody is
-    // paired yet — but labelling it that way buries the one thing on this
-    // panel that is actually asking Luca a question.
+    // A row with a claim waiting is technically "Inquiry" (nobody paired
+    // yet), but it is the one row actually asking Luca a question.
     var pill = s.archived ? { cls: 'inv', text: 'Archived' }
       : s.pending ? { cls: 'inq', text: 'Wants in' }
       : s.status === 'Active' ? { cls: 'act', text: 'Active' }
       : s.status === 'Invited' ? { cls: 'inv', text: 'Invited' }
-      // 'Ready' means an address is on file and the student pairs by
-      // themselves on first sign-in — no action, so it must not be
-      // mislabelled 'Inquiry', which is the one word on this panel that
-      // means "do something about me".
+      // 'Ready': an address is on file and the student pairs on first sign-in.
+      // No action needed, so not 'Inquiry', which means "act on me".
       : s.status === 'Ready' ? { cls: 'act', text: 'Ready' }
       : { cls: 'inq', text: 'Inquiry' };
     return '<div class="mta-row" data-key="' + esc(s.key) + '">' +
         '<div class="mta-name">' + esc(s.name || s.guardianName || '(no name yet)') +
           '<span class="mta-pill ' + pill.cls + '">' + esc(pill.text) + '</span></div>' +
-        /* grantedEmail first because it is the address they actually signed
-           in with; studentEmail next because on a pre-approved row it is
-           the one the panel is about to email, and showing the parent's
-           there instead would make "Email the student" look like it was
-           aimed at the wrong person. */
+        /* grantedEmail first: the address they sign in with, and on a
+           pre-approved row the one "Email the student" goes to, so showing
+           the parent's would look misdirected. */
         '<div class="mta-sub">' + esc(s.grantedEmail || s.guardianEmail || s.phone || 'no contact on file') + '</div>' +
         '<div class="mta-meta">key <b>' + esc(s.key) + '</b>' +
           (s.grade ? ' &middot; ' + esc(s.grade) : '') +
@@ -997,18 +935,11 @@
       '</div>';
   }
 
-  /* What the student typed during the intro sequence. All of it was
-     already being written to the Students sheet; none of it was visible
-     here, so the only way to read a new student's answers was to open the
-     spreadsheet -- reported as "I'm not seeing any info regarding all the
-     stuff they put in". The auth log deliberately records sign-in events
-     only, so it was never going to show this.
-
-     Rendered as one wrap-around line rather than a table: most of these
-     are blank for most rows (a student answers them once, during
-     onboarding), and empty table cells read as missing data rather than
-     as a question that has not been reached yet. Nothing is emitted at
-     all when every field is empty. */
+  /* What the student entered during onboarding (already stored in the
+     Students sheet; the auth log records sign-in events only). One
+     wrap-around line rather than a table, since most fields are blank for
+     most rows and empty cells read as missing data. Emits nothing when
+     every field is empty. */
   function onboardingLine(s) {
     var bits = [];
     if (s.goal) bits.push('wants <b>' + esc(GOAL_LABELS[s.goal] || s.goal) + '</b>');
@@ -1037,11 +968,9 @@
     tutoring: 'general tutoring'
   };
 
-  /* The roster sends ISO; a full timestamp in a dense list is noise.
-     Formatted in UTC deliberately. A test date is a calendar day, not a
-     moment: the sheet stores it midnight UTC, and rendering that in a
-     timezone behind UTC moves it to the previous day -- an SAT on Nov 7
-     displayed as "Nov 6" to a tutor planning around it. */
+  /* Short date from the roster's ISO string, formatted in UTC on purpose:
+     a test date is a calendar day stored as midnight UTC, and a timezone
+     behind UTC would show the previous day. */
   function shortDate(iso) {
     try {
       var d = new Date(iso);
@@ -1051,38 +980,25 @@
     } catch (e) { return String(iso); }
   }
 
-  /* THE ROSTER ALREADY CARRIES THIS -- there is no separate studentEmail
-     field and there does not need to be. A student's own address is stored
-     in GrantedEmail, and statusFor_ defines 'Ready' as exactly "an address
-     is on file but nothing is paired yet", which is pre-approved and not
-     yet signed in. createStudentRow_ only ever writes the student address
-     into that column, and handleCreateStudent refuses it outright if it
-     equals the guardian's, so a 'Ready' row's grantedEmail is the
-     student's own address by construction.
-
-     'Active' is deliberately excluded even though its grantedEmail is also
-     the student's: they have already signed in, so telling them how to
-     would be nonsense. */
+  /* No separate studentEmail field is needed. statusFor_ defines 'Ready' as
+     "an address is on file, nothing paired yet", and GrantedEmail only ever
+     holds the student's address (createStudentRow_ writes only that, and
+     handleCreateStudent rejects the guardian's), so a 'Ready' row's
+     grantedEmail is the student's own. 'Active' is excluded: they have
+     already signed in. */
   function studentEmailOf(s) {
     return (s && s.status === 'Ready' && s.grantedEmail) ? s.grantedEmail : '';
   }
 
-  /* THE STUDENT'S OWN ADDRESS CHANGES WHAT "SEND" MEANS. When it is on the
-     row they are already pre-approved: there is nothing to mint, nothing to
-     claim and nothing to approve, so an invite would hand them a single-use
-     setup link for a door that is already open -- a second credential for
-     no reason, and one that expires and confuses. What they are missing is
-     not access, it is the sentence telling them to go and use it.
+  /* WITH THE STUDENT'S OWN ADDRESS, "SEND" CHANGES MEANING. They are
+     pre-approved, so an invite would be a needless, expiring second
+     credential. The button becomes "Email the student", a separate action
+     carrying no token (see the sendInvite note in the dispatcher); Copy
+     message returns the same words for a text thread.
 
-     So the button becomes "Email the student", posting a different action
-     that carries no token at all (see the sendInvite note in the dispatcher
-     for why it must not be that one). Copy message hands back the same
-     words for a text thread instead.
-
-     With no student address nothing below changes: a row with a parent
-     email gets the one-click invite, and a row with neither gets the
-     ask-for-an-address variant, because a blind send would only come back
-     "no_recipient". */
+     Without a student address: a parent email gets the one-click invite,
+     and a row with neither gets the ask-for-an-address variant (a blind
+     send would just return "no_recipient"). */
   function inviteButtons(s, label) {
     if (studentEmailOf(s)) {
       return '<button class="mta-b pri" data-act="signin-email">Email the student</button>' +
@@ -1095,13 +1011,10 @@
   }
 
   function render() {
-    /* Two separate jobs, and conflating them is what made working rows look
-       missing. The QUEUE (Needs you / Invited) stays strictly things to act
-       on -- 'Ready' and 'Active' are correctly absent from it, since both
-       resolve without Luca. But a panel that shows only a queue offers no
-       way to confirm a row exists at all, so a lead that provisioned
-       perfectly reads as "nothing was created". Everything else therefore
-       gets its own section below the queue: visible, but not shouting. */
+    /* Two jobs. The QUEUE (Needs you / Invited) is strictly things to act on;
+       'Ready' and 'Active' resolve without Luca, so they are absent. Every
+       other row gets its own quieter section below, so the panel can still
+       confirm a row exists. */
     // Nothing to draw yet: say which of the two reasons it is, rather than
     // an empty white box.
     if (!students.length && !loaded) {
@@ -1151,10 +1064,9 @@
     if (waiting.length) {
       html += '<div class="mta-sec">Invited &mdash; not claimed yet</div>';
       waiting.forEach(function (s) {
-        // An invite nobody claimed is the commonest dead lead of all -- the
-        // link went out, the family went quiet. Dismiss tucks it away with
-        // the row kept; Delete removes it, with the same refusal-then-
-        // confirm if any recorded work exists (it will not, for these).
+        // An unclaimed invite is the commonest dead lead. Dismiss archives it
+        // and keeps the row; Delete removes it (refused-then-confirm if any
+        // recorded work exists).
         html += card(s, inviteButtons(s, 'Re-send') +
           (s.archived
             ? '<button class="mta-b" data-act="unarchive">Restore</button>'
@@ -1169,14 +1081,9 @@
     if (settled.length) {
       html += '<div class="mta-sec">Set up &mdash; nothing needed</div>';
       settled.forEach(function (s) {
-        /* 'Ready' means an address is on file and the student pairs on
-           first sign-in. This used to render inviteButtons() unconditionally,
-           so a row whose student address was already pre-approved still
-           showed "Send invite" -- and pressing it emailed the PARENT a setup
-           link the student did not need. Now the student address gets the
-           sign-in email and a row with only a parent address keeps the
-           invite, which is the one case where an invite is still the right
-           thing to send. */
+        /* 'Ready': an address is on file and the student pairs on first
+           sign-in. inviteButtons() gives a student address the sign-in email
+           and a parent-only row the invite. */
         html += card(s,
           (s.status === 'Ready' ? inviteButtons(s, 'Send invite') : '') +
           (canReset(s) ? '<button class="mta-b warn" data-act="reset">Reset login</button>' : ''),
@@ -1233,17 +1140,11 @@
         var s = students.filter(function (x) { return x.key === key; })[0] || {};
         var a = b.getAttribute('data-act');
         if (a === 'signin-email') {
-          /* DELIBERATELY NOT sendInvite. Every sendInvite mints a fresh
-             single-use nonce, and minting one silently kills any link
-             already in a family's inbox (see the note in deliverInviteFlow
-             and the same warning in setup.html). This email carries no
-             credential at all -- just the portal address and what to do
-             when they get there -- so it must not be capable of
-             invalidating anything. Hence its own backend action.
-
-             The address comes back from the server rather than being echoed
-             from the row, so what is confirmed on screen is what Google was
-             actually handed. */
+          /* DELIBERATELY NOT sendInvite: that mints a fresh single-use nonce,
+             which kills any link already in a family's inbox (see
+             deliverInviteFlow and setup.html). This email carries no
+             credential, so it has its own backend action. The address shown
+             comes back from the server, so it is what was actually used. */
           act(c, 'Sending…', { action: 'sendStudentSignIn', adminKey: adminKey(), key: key },
             function (d) { return 'Sign-in details emailed to ' + d.sentTo + '. Nothing expires.'; });
         } else if (a === 'signin-copy') {
@@ -1282,10 +1183,9 @@
           act(c, 'Declining…', { action: 'decideClaim', adminKey: adminKey(), key: key, decision: 'decline' },
             function () { return 'Declined. Nothing was granted.'; });
         } else if (a === 'delete') {
-          /* Deliberately blunter than the reset confirmation: this removes
-             the row itself. The server refuses if the student has any
-             recorded work, so the honest thing to promise here is "test rows
-             and dead leads", not "anything". */
+          /* Blunter than the reset confirmation: this removes the row. The server
+             refuses if the student has recorded work, so promise only "test
+             rows and dead leads". */
           if (!window.confirm(
                 'Permanently delete ' + key + '?\n\n' +
                 'This removes the roster row entirely. It is refused if the student has any ' +
@@ -1318,20 +1218,14 @@
   }
 
   /* The gate script restores a stored session into sessionStorage on boot,
-     BEFORE the page has visually unlocked -- so "a token exists" was never
-     the right question, and asking it is why this panel appeared on top of
-     the sign-in screen. Ask whether the gate is still on screen instead. */
+     BEFORE the page unlocks, so "a token exists" is the wrong test. Ask
+     whether a gate is still on screen instead. */
   function gateIsUp() {
-    /* TWO different gates can be on screen and the panel must stay clear of
-       both. Checking only the Google one was the bug: admin.html has its own
-       password gate (#gate), an ordinary in-flow element with no z-index, so
-       this panel -- position:fixed at z-index 8000 -- floated straight over
-       the password field.
-
-       Visibility is measured, not inferred from an inline style: #gate is
-       hidden by the page's own script, and #mta-admin-gate is position:fixed
-       (so offsetParent is null even when it is plainly visible). A measured
-       height is the only test that is right for both. */
+    /* Stay clear of BOTH gates: the Google one and admin.html's password
+       gate (#gate), which has no z-index, so this fixed z-index 8000 panel
+       would float over it. Visibility is measured, not inferred: #gate is
+       hidden by script, and #mta-admin-gate is position:fixed (offsetParent
+       is null even when visible). */
     var ids = ['mta-admin-gate', 'gate'];
     for (var i = 0; i < ids.length; i++) {
       var el = document.getElementById(ids[i]);
@@ -1355,10 +1249,9 @@
     var seq = ++rosterSeq;
     loading = true;
     post({ action: 'accessRoster', adminKey: k }).then(function (data) {
-      // Superseded by a newer request -- typically the one an action fired
-      // the moment it succeeded. Answering with this older snapshot would
-      // undo what the admin just watched happen. Return BEFORE clearing
-      // `loading`, which belongs to the request that is still running.
+      // Superseded by a newer request (typically an action's own refresh), so
+      // this older snapshot must not land. Return BEFORE clearing `loading`,
+      // which belongs to the request still running.
       if (seq !== rosterSeq) return;
       loading = false;
       if (!data || !data.ok) {
@@ -1405,17 +1298,11 @@
   };
   window.mtaRefreshAccess = refresh;
 
-  /* Show or hide the tab to match the gates, without a network call. The
-     panel's visibility used to be decided only inside refresh(), which ran
-     at boot, four more times over the first four seconds, and then once a
-     minute. A cold Apps Script start routinely takes longer than four
-     seconds to answer admin.html's own roster request, so every early
-     check saw the password gate still up, hid the panel, and nothing
-     looked again until the minute poll -- the tab was simply missing.
-     Watch the DOM instead: #gate is hidden by a style change and the
-     Google gate is appended and shown the same way, so a MutationObserver
-     sees every transition the moment it happens. The first time the page
-     turns out to be unlocked, fetch the queue. */
+  /* Show or hide the tab to match the gates, without a network call. A
+     MutationObserver sees each gate transition (#gate hidden by a style
+     change, the Google gate appended and shown) the moment it happens,
+     rather than waiting on refresh() through a slow cold start. The first
+     time the page is unlocked, fetch the queue. */
   var wasShown = false;
   function syncVisibility() {
     if (!root) return;

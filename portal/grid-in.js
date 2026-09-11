@@ -1,23 +1,18 @@
 /* =====================================================================
    GRID-IN GRADING — the one copy of the rule for student-produced-
-   response ("fr") answers. index.html (the diagnostic, Question Bank,
-   Challenge Questions, the review quiz, the native report) and
-   report.html all call window.gridInCorrect(); tests/grid-in-test.js
-   requires this file directly.
+   response ("fr") answers. index.html and report.html call
+   window.gridInCorrect(); tests/grid-in-test.js requires this file.
 
    What the digital SAT accepts, and so what this accepts:
    - An exact answer: an integer, a decimal, or a fraction equal to the
      key (5/12, 10/24, .375 for 3/8). Mixed numbers ("3 1/2") are not.
    - A decimal that is the key rounded OR truncated, provided it fills
      the answer box: 5 characters for a positive answer, 6 for a
-     negative one, counting the decimal point, the minus sign and a
-     leading zero. For 5/12 that is .4166, .4167, 0.416 or 0.417, but not
-     .42 or .417. For 7/6 it is 1.166 or 1.167. This is College Board's
-     own rule; the "Note that ... are examples of ways to enter a correct
-     answer" lines in the bank's explanations follow it.
+     negative one, counting the decimal point, minus sign and a leading
+     zero. For 5/12: .4166, .4167, 0.416 or 0.417, but not .42 or .417.
+     This is College Board's own rule.
 
-   This replaces an absolute tolerance of 0.05, which let 5/13 pass for
-   5/12.
+   No absolute tolerance: 0.05 would let 5/13 pass for 5/12.
    ===================================================================== */
 (function (root) {
   'use strict';
@@ -95,8 +90,8 @@
 
   // raw: what the student typed. keys: the answer key, or an array of keys
   // (the stored answer plus any window.FR_ALTERNATES for that question).
-  // A key must be the exact answer — store 29/3, not 9.667, or 29/3 itself
-  // is marked wrong. tests/grid-in-test.js flags keys that look rounded.
+  // A key must be exact: store 29/3, not 9.667, or 29/3 itself is marked
+  // wrong. tests/grid-in-test.js flags keys that look rounded.
   function gridInCorrect(raw, keys) {
     var a = clean(raw);
     if (!a) return false;

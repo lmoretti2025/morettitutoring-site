@@ -42,9 +42,8 @@
     justify-content: space-between;
     gap: 1rem;
   }
-  /* Same asset, height and white-on-red treatment as the student
-     portal's own nav (see .nav-logo-img in index.html) so the two read as
-     one product rather than two apps that happen to share a colour. */
+  /* Same asset, height and white-on-red treatment as the student portal's
+     nav (see .nav-logo-img in index.html), so the two read as one product. */
   header .brand { line-height: 0; }
   header .brand-logo { height: 36px; width: auto; display: block; }
   header .brand small { display: block; line-height: 1.2; font-family: var(--hel); font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.85; margin-top: 0.35rem; }
@@ -207,11 +206,9 @@
   .skill-row .sk-frac { flex: 0 0 74px; text-align: right; font-size: 0.75rem; color: var(--mid); }
 
   /* ═══ REPORT VIEWER ═══ the student's own report.html, opened in place
-     over the admin page. report.html detects being framed and narrows to
-     a centered document column on its own (see its body.embedded rules),
-     so this is just a frame plus a way out of it. The wrap is the portal
-     grey rather than white so that column reads as a page sitting on the
-     admin background instead of bleeding into an edgeless white field. */
+     over the admin page. report.html narrows itself to a centered column
+     when framed (see its body.embedded rules), so this is just a frame plus
+     a way out. The wrap is portal grey so that column reads as a page. */
   #report-viewer { display: none; position: fixed; inset: 0; z-index: 200; background: var(--bg); flex-direction: column; }
   #report-viewer.open { display: flex; }
   #report-bar { flex: 0 0 auto; background: var(--red); color: #fff; display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.7rem 1.1rem; }
@@ -222,20 +219,15 @@
   #report-frame-wrap iframe { width: 100%; height: 100%; border: none; display: block; }
   #report-loading { padding: 2.5rem; text-align: center; color: var(--mid); font-size: 0.85rem; }
 
-  /* A row that exists on screen but not yet in the sheet. Deliberately
-     subtle — the point of painting first is that the calendar looks
-     finished, so this should read as "settling", not as a warning. */
+  /* A row on screen but not yet in the sheet. Deliberately subtle: it
+     should read as "settling", not as a warning. */
   .fc-event.is-pending { opacity: 0.62; }
   .fc-event.is-pending .fc-event-title::after { content: ' ·'; opacity: 0.7; }
 
-  /* ═══ SCORE PROGRESS ═══ the same bar chart the student sees on their
-     own Home screen, ported from index.html so the two pages show one
-     picture of a student's progress rather than two different ones. Class
-     names are kept identical to that file's on purpose: when the chart
-     changes there, the diff to bring it across is obvious. Same hover
-     tooltip (test, composite, weakest area); the click target differs
-     because the destinations differ — a student is sent to their own
-     results, Luca is sent to the report for that attempt. */
+  /* ═══ SCORE PROGRESS ═══ the same bar chart the student sees on Home,
+     ported from index.html. Class names match that file on purpose so
+     changes there are easy to bring across. Same hover tooltip; only the
+     click target differs (here it opens the report for that attempt). */
   .spc-chart-wrap { position: relative; display: flex; align-items: center; gap: 1.1rem; }
   .spc-score-top { flex: 1 1 0; min-width: 0; border-right: 1px solid var(--border); padding-right: 1.1rem; align-self: center; }
   .spc-composite-num { font-family: var(--display); font-weight: 700; font-size: 2.1rem; color: var(--text); line-height: 1; }
@@ -288,10 +280,8 @@
   .cal-host a { cursor: pointer; }
   .sched-event { border: none !important; background: var(--red) !important; padding: 1px 4px; border-radius: 5px; font-size: 0.72rem; }
   .sched-event.sched-event-done { background: var(--faint) !important; text-decoration: line-through; opacity: 0.75; }
-  /* Sessions are context, not content — they're what the homework is
-     being planned around, so they read as a quieter, cooler band that
-     can't be dragged or edited from here (the calendar itself is the
-     source of truth for those). */
+  /* Sessions are context, not content: a quieter, cooler band that can't
+     be dragged or edited here (the calendar is the source of truth). */
   .sess-event { border: none !important; background: var(--blue) !important; color: #fff !important; padding: 1px 4px; border-radius: 5px; font-size: 0.72rem; cursor: pointer; }
   .sess-event.sess-unmatched { background: var(--faint) !important; }
   /* All-students view: one colour per student, applied inline from JS —
@@ -339,10 +329,9 @@
   .scope-toggle { display: flex; gap: 0.35rem; margin-top: 0.35rem; }
   .scope-btn { flex: 1 1 0; font-family: var(--hel); font-size: 0.74rem; font-weight: 700; letter-spacing: 0; text-transform: none; padding: 0.4rem 0.5rem; border: 1px solid var(--border); background: var(--white); color: var(--mid); border-radius: 999px; cursor: pointer; }
   .scope-btn.is-on { background: var(--red); border-color: var(--red); color: #fff; }
-  /* Editing Code.gs changes nothing until Apps Script is redeployed, and
-     the old deployment answers every request while silently ignoring
-     fields it doesn't know — which reads as "it saved but didn't". This
-     says so out loud instead. */
+  /* Editing Code.gs changes nothing until Apps Script is redeployed, and an
+     old deployment silently ignores unknown fields, so a save looks like it
+     worked. This banner says so. */
   .deploy-banner { font-size: 0.82rem; line-height: 1.5; color: var(--red); background: rgba(176,39,28,0.07); border: 1px solid rgba(176,39,28,0.25); border-radius: 12px; padding: 0.8rem 1rem; margin-bottom: 1.2rem; }
   .deploy-banner b { font-weight: 700; }
   .deploy-banner code { font-family: ui-monospace, Menlo, monospace; font-size: 0.78rem; background: rgba(17,17,17,0.06); padding: 0.05rem 0.3rem; border-radius: 4px; }
@@ -377,15 +366,10 @@
     .cal-host { min-width: 560px; }
   }
   /* ═══ SKELETONS ═══
-     The backend is ~1.4s at the median with a long tail (one measured
-     request took 14.6s), and every panel on this page used to answer that
-     with the grey word "Loading..." in an empty card. A shape that matches
-     what is coming reads as work in progress; a single word reads as a
-     page that has given up.
-
-     Deliberately low-contrast and slow: this is furniture, not an
-     animation to watch. prefers-reduced-motion drops the sweep and leaves
-     the shapes, which still say "something is coming" without moving. */
+     The backend is ~1.4s at the median with a long tail, so loading panels
+     show placeholder shapes of what is coming rather than a bare
+     "Loading...". Low-contrast and slow on purpose; prefers-reduced-motion
+     drops the sweep and keeps the shapes. */
   @keyframes sk-sweep { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
   .sk { border-radius: 6px; background: linear-gradient(90deg, rgba(17,17,17,0.05) 25%, rgba(17,17,17,0.09) 37%, rgba(17,17,17,0.05) 63%); background-size: 200% 100%; animation: sk-sweep 1.6s linear infinite; }
   .sk-line { height: 11px; margin: 9px 0; }
@@ -395,12 +379,10 @@
   .sk-block { height: 20px; }
   @media (prefers-reduced-motion: reduce) { .sk { animation: none; } }
 
-  /* No pending-button treatment here, deliberately. Every write on this
-     page already guards itself: act() disables the whole card and holds a
-     busy flag against the poll, Delete disables its own button, and the
-     archive toggle and calendar copy are optimistic with a revert. Adding
-     a spinner would have been a second mechanism competing with a working
-     one. */
+  /* No pending-button treatment, deliberately: every write already guards
+     itself (act() disables the card and holds a busy flag against the poll,
+     Delete disables its button, archive and calendar copy are optimistic
+     with a revert). */
 
   /* ═══ ACROSS ALL THEIR TESTS ═══ deliberately plain: this is a working
      panel Luca reads before a session, not a chart to admire. Numbers
@@ -535,11 +517,9 @@
       </div>
     </section>
 
-    <!-- Bottom of the page on purpose: this is the one control here that
-         cannot be undone from the admin, so it sits after everything a
-         normal visit needs, not beside Assign homework. Same two-step rule
-         as the Portal access panel: a student with recorded tests is
-         refused first and asked again with the count. -->
+    <!-- Bottom of the page on purpose: the one control here that cannot be
+         undone. Same two-step rule as the Portal access panel: a student with
+         recorded tests is refused first and asked again with the count. -->
     <div class="card danger-card" id="stu-delete-card">
       <h2 class="card-hed">Delete this account</h2>
       <p class="card-sub">Removes the roster row, unlinks their Google sign-in, and revokes their access to the Drive folder. The folder itself and its files are left in Drive. If they have recorded tests you will be asked once more before those scores go too.</p>
@@ -627,9 +607,8 @@
 </div>
 
 <!-- Google sign-in for the admin. Must load BEFORE this page's own script,
-     so the signed admin session is in sessionStorage by the time the
-     auto-continue boot code below reads it. Replaces the ADMIN_KEY
-     password prompt entirely. -->
+     so the signed admin session is in sessionStorage when the auto-continue
+     boot code below reads it. -->
 <script src="time-budgets.js?v=20260905"></script>
   <script src="backend-url.js?v=20260905"></script>
 <script src="auth-admin-signin.js?v=20260905"></script>
@@ -637,18 +616,13 @@
 <script>
 (function () {
   'use strict';
-  // Same backend this whole static site already talks to — see
-  // index.html's window.APPS_SCRIPT_URL (kept in sync by hand, same as
-  // report.html's score curves; this file needs exactly one value from
-  // there, not the whole app, so it isn't worth sharing via an include).
+  // Same backend the whole static site talks to, set by backend-url.js.
   var APPS_SCRIPT_URL = window.APPS_SCRIPT_URL;   // backend-url.js
   var SESSION_KEY = 'moretti_admin_key';
   var STALE_DAYS = 10;
-  // Reports are stored with an absolute link so the copy emailed to Luca
-  // works from his inbox; rewritten to a relative one here so opening a
-  // report loads it from whatever origin admin.html itself is on
-  // (localhost while testing, the real domain in production). Same
-  // rewrite index.html does for its own in-portal results viewer.
+  // Reports are stored with an absolute link so the emailed copy works from
+  // Luca's inbox; rewritten to relative here so a report loads from
+  // whatever origin admin.html is on. index.html does the same rewrite.
   var REPORT_ABS_PREFIX = 'https://morettitutoring.com/portal/report.html';
   var TASK_PRESETS = [
     'Question Bank — 15 questions',
@@ -661,17 +635,13 @@
   function $(id) { return document.getElementById(id); }
 
   /* ═══ SHARED HELPERS ═══ */
-  // Apps Script answers a POST with a redirect to its "echo" host, and that
-  // hop fails now and then with a 404 or an HTML error page even though the
-  // script ran fine. For a read that is just a lost answer, so ask again
-  // before giving up. Writes are deliberately NOT retried -- the script
-  // already ran, and re-sending would create or send twice.
-  // The value is the field a real answer always carries. When the service
-  // is stalling it has been seen to answer a POST with its GET health reply
-  // instead -- {ok:true, message:"...running"} -- which parses fine, says
-  // ok, and has no roster in it. Taken at face value that drew an empty
-  // roster with zero students, so a reply missing its field is treated the
-  // same as a lost one: ask again.
+  // Apps Script answers a POST via a redirect to its "echo" host, and that
+  // hop sometimes fails (404 or an HTML error page) even though the script
+  // ran. Reads are retried; writes are NOT, since re-sending would act
+  // twice.
+  // The value is the field a real answer always carries. A stalling service
+  // can answer a POST with its GET health reply ({ok:true}, no data), so a
+  // reply missing that field is treated as lost.
   var RETRY_READS = { getRoster: 'students', version: 'version', getStudentDetail: '', getAdminAssignments: '', getAdminCalendar: '' };
   function looksLost(action, data) {
     var field = RETRY_READS[action];
@@ -715,9 +685,8 @@
     var d = daysAgo(iso);
     if (d == null) return 'Never';
     if (d < 1) {
-      /* "Today" is the least useful thing this column can say: it is true
-         from a minute after a sign-in until midnight. Minutes and hours tell
-         you whether someone is on the site now or was here this morning. */
+      /* Minutes and hours, not "Today": they tell you whether someone is on
+         the site now or was here this morning. */
       var mins = (Date.now() - new Date(iso).getTime()) / 60000;
       if (mins < 1) return 'Just now';
       if (mins < 60) return Math.round(mins) + 'm ago';
@@ -773,9 +742,8 @@
       ' at ' + d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
   }
 
-  // Stable per-student colour for the all-students calendar — same key
-  // always gets the same hue, so the grid reads consistently from week to
-  // week without any colours needing to be stored anywhere.
+  // Stable per-student color for the all-students calendar: the same key
+  // always hashes to the same hue, so nothing needs to be stored.
   function studentColor(key) {
     var h = 0, s = String(key || '');
     for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 360;
@@ -814,11 +782,9 @@
   var sortKey = 'name';
   var sortDir = 1;
   var rosterStale = false; // set by a homework edit made from a calendar view
-  // null = not known yet. Set from what the backend actually returns: a
-  // deployment that predates the Notes/SeriesId columns accepts a write
-  // carrying them and silently drops it, answering ok:true either way.
-  // Without this check the page cheerfully reports "saved" while the
-  // description goes nowhere — which is exactly how it behaved before.
+  // null = not known yet. Set from what the backend returns: a deployment
+  // that predates the Notes/SeriesId columns silently drops them and still
+  // answers ok:true, so "saved" can't be trusted without this.
   var backendStoresNotes = null;
 
   // What this build of admin.html needs the deployment to understand. Kept
@@ -845,12 +811,9 @@
   function checkBackendVersion() {
     var banner = $('deploy-banner');
     postToBackend({ action: 'version', adminKey: adminKey() }).then(function (data) {
-      // An old deployment doesn't know the action at all — which is itself
-      // the answer.
-      // No answer, or an answer with no version in it, says nothing about
-      // the deployment -- only a real "unknown_action" or a lower number
-      // does. Leave the banner alone rather than accuse a fine deployment
-      // of being stale because the service hiccupped.
+      // Only a real "unknown_action" or a lower version number means the
+      // deployment is stale. No answer, or one without a version, is a service
+      // hiccup, so leave the banner alone.
       if (!data || (data.ok && data.version === undefined)) return;
       var version = (data && data.ok && data.version) || 0;
       if (version >= REQUIRED_BACKEND_VERSION) {
@@ -858,10 +821,9 @@
         banner.style.display = 'none';
         return;
       }
-      // A deployment old enough not to know this action can't tell us what
-      // it supports, so don't pretend to enumerate: claiming "the calendar
-      // won't stick" when the calendar plainly works would make this
-      // banner the thing nobody believes. Name only what's actually known.
+      // A deployment too old to know this action can't report its
+      // capabilities, so name only what's actually known rather than guess
+      // what breaks.
       var have = (data && data.capabilities) || null;
       var whatBreaks;
       if (have) {
@@ -881,14 +843,10 @@
       banner.style.display = 'block';
     }).catch(function () { /* offline — the roster load will report that itself */ });
   }
-  // Two roster loads can be in flight at once — the auto-continue on page
-  // load (from a possibly stale session key) and the admin typing a key
-  // before that one lands. Apps Script latency swings between one and ten
-  // seconds, so they resolve in either order, and the older one landing
-  // last used to overwrite the newer result: a CORRECT key would show the
-  // roster, then get thrown back to the gate reading "Wrong admin key"
-  // with the session cleared. Every response now checks it's still the
-  // most recent request before touching anything.
+  // Two roster loads can be in flight at once (the page-load auto-continue
+  // and a typed key), and Apps Script latency lets them resolve in either
+  // order. Every response checks it is still the most recent request before
+  // touching anything, so an older result can't overwrite a newer one.
   var rosterLoadSeq = 0;
 
   var gateErrorEl = $('gate-error');
@@ -996,9 +954,8 @@
     }).join('');
   }
 
-  // Delegated (rows are rebuilt on every render, so a per-row listener
-  // would leak/re-attach) — matches the click to the student it belongs
-  // to by key rather than closing over a specific row element.
+  // Delegated, since rows are rebuilt on every render; matches the click to
+  // its student by key rather than closing over a row element.
   bodyEl.addEventListener('click', function (e) {
     var arch = e.target.closest('.archive-btn');
     if (arch) {
@@ -1096,12 +1053,10 @@
   });
   filterHiddenEl.addEventListener('change', renderTable);
 
-  // silent: this is a background top-up of the roster's numbers (after a
-  // homework edit changed someone's "x of y done"), not something the
-  // admin asked for. A failed background call must leave the page exactly
-  // where it is — the non-silent path below drops to the gate and throws
-  // away the session key, which would be a brutal thing to do to someone
-  // mid-edit because one refresh request happened to time out.
+  // silent: a background top-up of the roster's numbers (e.g. after a
+  // homework edit), not something the admin asked for. A failed silent call
+  // leaves the page as it is instead of taking the non-silent path, which
+  // drops to the gate and discards the session key.
   function loadRoster(key, silent) {
     var seq = ++rosterLoadSeq;
     if (!silent) { gateErrorEl.textContent = ''; setStatus(''); }
@@ -1110,19 +1065,15 @@
       setGateChecking(false);
       if (!data || !data.ok) {
         if (silent) return false;
-        // Only a rejected key means the session is bad. Every other failure
-        // (a cold start timing out, the echo hop 404ing, a sheet hiccup) used
-        // to be handled the same way -- back to the gate, session wiped, every
-        // student gone from the screen -- which looked like the roster had
-        // been deleted. Keep what is on screen and say what happened instead.
+        // Only a rejected key means the session is bad. Any other failure (cold
+        // start timeout, echo hop 404, sheet hiccup) keeps what is on screen
+        // and says what happened.
         if (data && data.error === 'unauthorized') {
           try { sessionStorage.removeItem(SESSION_KEY); } catch (e) {}
-          /* The password gate below is retired -- authGuard_ rejects a typed
-             ADMIN_KEY outright now -- so showing it on an expired session
-             stranded Luca in a box that could never let him back in. The
-             Google gate is the only way in, and mtaAdminSignOut re-raises
-             it. The old view is kept purely as a fallback for the case
-             where the sign-in script itself failed to load. */
+          /* The password gate is retired (authGuard_ rejects a typed ADMIN_KEY),
+             so an expired session goes to the Google gate via
+             mtaAdminSignOut. The old view is only a fallback for when the
+             sign-in script failed to load. */
           if (typeof window.mtaAdminSignOut === 'function') { window.mtaAdminSignOut(); return false; }
           gateErrorEl.textContent = 'Your sign-in has expired \u2014 reload the page to sign in again.';
           showView('gate');
@@ -1150,14 +1101,10 @@
   }
 
   /* ═══ PRESENCE POLL ═══
-     getRoster is the expensive read in this file -- every attempt, every
-     assignment, for every student -- and presence changes on a one-minute
-     heartbeat. Polling the roster to keep a dot honest would be the
-     wrong trade, so this asks for the live half only: a cache read on the
-     backend plus the roster's names, then the dots are repainted in
-     place. It runs only while the roster is the view on screen and the
-     tab is actually being looked at, so a laptop asleep on a desk polls
-     nothing. */
+     getRoster is the expensive read here and presence changes on a
+     one-minute heartbeat, so this fetches only the live half (a backend
+     cache read plus names) and repaints the dots in place. Runs only while
+     the roster is on screen and the tab is visible. */
   var PRESENCE_POLL_MS = 45000;
   function pollPresence() {
     var key = adminKey();
@@ -1214,15 +1161,10 @@
     }
   });
 
-  // Auto-continue if this browser already unlocked the roster this
-  // session — avoids re-typing the key on every reload without ever
-  // persisting it to disk (sessionStorage clears when the tab closes).
-  // While that stored session is being checked, the gate used to sit
-  // there as a normal password form with its button disabled -- so it
-  // looked like a form whose button was stuck pressed, and a browser that
-  // autofills the password made it look doubly broken. There is nothing to
-  // type during that stretch, so show that instead of the form; it comes
-  // back on its own if the session turns out to be bad.
+  // Auto-continue if this browser already unlocked the roster this session
+  // (sessionStorage, so the key is never persisted to disk). While that
+  // session is checked there is nothing to type, so show "Signing you in"
+  // instead of the form; the form comes back if the session is bad.
   var gateSlowTimer = null;
   function setGateChecking(on) {
     $('gate-checking').style.display = on ? 'block' : 'none';
@@ -1258,10 +1200,9 @@
     $('stu-analysis').innerHTML = '<div class="sk sk-block" style="width:100%;margin-bottom:14px"></div>' + skLines(3);
     $('stu-trend').innerHTML = '';
     $('hw-next').innerHTML = '<span class="ns-none">Checking the calendar&hellip;</span>';
-    // Cleared, not just hidden: this list is filled by the calendar fetch,
-    // which hasn't run for THIS student yet. Leaving the previous
-    // student's rows in place would show their tasks on this page — and
-    // "Give it a date" would then edit that other student's row.
+    // Cleared, not just hidden: the calendar fetch hasn't run for THIS
+    // student yet, so the previous student's rows would show here (and
+    // "Give it a date" would edit that other student's row).
     hwUndated = [];
     $('hw-undated-card').style.display = 'none';
     showView('student');
@@ -1298,11 +1239,9 @@
         return;
       }
       currentDetail = data;
-      // Rendering is wrapped separately so a bug in one of these — a field
-      // an older backend doesn't send, a shape that changed — reports
-      // itself as what it is. Sharing the outer catch meant any render
-      // exception told Luca "network error", which sends you off checking
-      // your wifi over a null field.
+      // Rendering has its own try so a render bug (a field an older backend
+      // doesn't send, a changed shape) reports itself as such rather than as
+      // a "network error".
       try {
         renderStudentMeta(data);
         renderStudentTiles(data);
@@ -1381,17 +1320,11 @@
     $('stu-tiles').innerHTML = tiles.join('');
   }
 
-  /* ═══ SCORE PROGRESS ═══ the student's own Home-screen bar chart,
-     rendered here from the admin's attempt feed. Ported rather than
-     reimplemented so both pages tell the same story with the same shapes:
-     one bar per scored attempt oldest-to-newest, the latest composite
-     called out with its change since the first, and the target as a
-     dashed line when it falls inside the scale.
-
-     The one deliberate difference is where a click goes. On Home a bar
-     takes the student to their own results; here it opens that attempt's
-     report in the viewer, which is the thing Luca actually wants two
-     clicks away while looking at a roster. */
+  /* ═══ SCORE PROGRESS ═══ the student's Home-screen bar chart, ported so
+     both pages show the same shapes: one bar per scored attempt oldest to
+     newest, the latest composite with its change since the first, and the
+     target as a dashed line when it falls inside the scale. The one
+     difference: a click here opens that attempt's report in the viewer. */
   function trendShortLabel(a) {
     if (a.source === 'baseline') return 'Base';
     if (a.source === 'practice-test' && a.testId) {
@@ -1535,12 +1468,10 @@
     var bars = host.querySelectorAll('.spc-bar');
     if (!bars.length) return;
     if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    // The animation collapses the bars to 0% and restores them a frame
-    // later. requestAnimationFrame does NOT fire in a background tab, so
-    // on its own that leaves every bar flat at 0% for as long as the tab
-    // stays hidden — the chart looks empty rather than animating. Skip the
-    // whole thing when hidden, and keep a timer behind the frame so the
-    // real heights go back even if the callback never arrives.
+    // The animation collapses bars to 0% and restores them a frame later.
+    // requestAnimationFrame doesn't fire in background tabs, which would
+    // leave the bars flat, so skip when hidden and keep a timer behind the
+    // frame that restores the heights anyway.
     if (document.hidden) return;
     var targets = [];
     Array.prototype.forEach.call(bars, function (b) { targets.push(b.style.height); b.style.height = '0%'; });
@@ -1634,18 +1565,13 @@
   });
 
   /* ═══ ACROSS ALL THEIR TESTS ═══
-     Everything here is pooled from the compact per-question record each
-     attempt now writes (see the qStats comment in index.html): section,
-     skill, difficulty, right/wrong/never-answered, and seconds.
+     Pooled from the compact per-question record each attempt writes (see
+     the qStats comment in index.html): section, skill, difficulty,
+     right/wrong/never-answered, and seconds. Pooling turns a handful of
+     questions per skill into enough to act on, and is the only way to ask
+     whether something is improving or recurs every time.
 
-     Pooling is the whole point. One report has four Words in Context
-     questions behind its verdict; five reports have twenty, and twenty is
-     the difference between a hunch and an instruction. It is also the only
-     place two questions can be asked at all: is this getting better, and
-     does it happen every time.
-
-     Attempts with no record are skipped rather than counted as zeroes --
-     anything sat before this shipped simply has nothing to say. */
+     Attempts with no record are skipped, not counted as zeroes. */
   var CT_BAND = 0.25;          // same +/-25% on-pace band time-budgets.js uses
   var CT_RUSHED = 0.5;         // wrong in under half the budget = not really attempted
   var CT_DIFF_NAME = ['easy', 'medium', 'hard'];
@@ -1783,14 +1709,10 @@
     html += '</div>';
 
     /* ── 3. missed more than once ───────────────────────────────────── */
-    /* Ranked by HOW BADLY, not just how often. Sorting on "missed in N
-       tests" alone looked authoritative and said nothing: once a student
-       has three tests behind them almost every skill has been missed in
-       all three, so a skill at 8/27 sat next to one at 24/30 as though
-       they were the same problem. Rate is the signal; the test count is
-       what makes it trustworthy rather than a one-off bad section. Four
-       questions minimum so a single miss in a rare skill cannot top the
-       list. */
+    /* Ranked by miss RATE, not by how many tests missed it: after a few tests
+       almost every skill has been missed in all of them. The test count
+       (2+) guards against a one-off bad section, and the four-question
+       minimum keeps a single miss in a rare skill off the top. */
     var recurring = skills.filter(function (b) { return b.missedTestCount >= 2 && b.total >= 4 && b.wrong; })
       .sort(function (a, c) { return (c.wrong / c.total) - (a.wrong / a.total); }).slice(0, 6);
     html += '<div class="ct-block"><div class="ct-hed">Missed in more than one test</div>';
@@ -1872,21 +1794,14 @@
     return link.indexOf(REPORT_ABS_PREFIX) === 0 ? 'report.html' + link.slice(REPORT_ABS_PREFIX.length) : link;
   }
 
-  // This string comes out of a spreadsheet cell and goes straight into an
-  // iframe src / window.open. Anything that isn't the report page itself
-  // (a javascript: or data: URL that somehow ended up in that column) is
-  // refused rather than loaded.
-  //
-  // The old regex also allowed a bare `https://`, which meant ANY site. That
-  // column is written from the student's own submitPracticeTest body and is
-  // stored verbatim, so a student could name any URL they liked and have it
-  // framed inside this admin page -- cross-origin, so it could not read the
-  // session, but a convincing place to draw a fake "signed out, sign in
-  // again" panel. relativeReportLink has already rewritten the one
-  // legitimate absolute form (REPORT_ABS_PREFIX) to a relative link by the
-  // time we get here, so that branch could only ever have matched a foreign
-  // URL. A link that somehow isn't the report page now fails closed and
-  // openReport says so, which is visible rather than silent.
+  // This string comes from a spreadsheet cell and goes straight into an
+  // iframe src / window.open, so anything but the report page is refused.
+  // The column is stored verbatim from the student's own submitPracticeTest
+  // body, so allowing any https:// URL would let a student frame a site of
+  // their choosing here (e.g. a fake sign-in panel). relativeReportLink has
+  // already rewritten the legitimate absolute form (REPORT_ABS_PREFIX), so
+  // only a relative report.html link passes; anything else fails closed and
+  // openReport says so.
   function safeReportLink(link) {
     var rel = relativeReportLink(link);
     return /^report\.html([?#]|$)/.test(rel) ? rel : '';
@@ -1985,11 +1900,9 @@
     el.textContent = msg || '';
   }
 
-  // One shape for both grids. isAll colours each chip by student — solid
-  // for a session, outlined for homework — since in the everyone view the
-  // student matters more than the kind; the single-student grid uses the
-  // flat blue/red pair instead, where the kind is the only distinction
-  // that's left to make.
+  // One shape for both grids. isAll colors each chip by student (solid for
+  // a session, outlined for homework), since there the student matters more
+  // than the kind; the single-student grid uses the flat blue/red pair.
   function noteBackendCapability(data) {
     var rows = (data && data.assignments) || [];
     if (!rows.length) return; // nothing to infer from; leave it unknown
@@ -2059,22 +1972,15 @@
   }
 
   /* ═══ OPTIMISTIC WRITES ═══
-     Apps Script is slow — a cold start runs into whole seconds — and every
-     write here used to wait for the round trip and then fire a SECOND one
-     to re-read the calendar before anything appeared. Two cold starts back
-     to back is why adding a task felt broken: you hit Save, the modal sat
-     there, and the day you were looking at stayed empty.
+     Apps Script is slow (a cold start runs into whole seconds), so every
+     write below paints first and reconciles after: the event appears on Save
+     or drag release, the request goes out behind it, and only a failure
+     moves it back.
 
-     So every write below paints first and reconciles after. The event shows
-     up the instant you hit Save or release a drag, the request goes out
-     behind it, and the only thing that moves afterwards is a failure
-     putting it back.
-
-     One re-read is still needed after a create — createAdminAssignment
-     answers with a count and a series id, not row numbers, and an event
-     with no row can't be opened or dragged — but it's debounced and
-     silent, so laying down six days of a repeat costs one refetch rather
-     than six, underneath a calendar that already looks right. */
+     A create still needs one re-read (createAdminAssignment returns a count
+     and a series id, not row numbers, and an event with no row can't be
+     opened or dragged), but it is debounced and silent, so a six-day repeat
+     costs one refetch. */
   function activeCalendar() {
     if (currentView === 'student') return schedCalendar;
     if (currentView === 'allcal') return allCalendar;
@@ -2117,11 +2023,9 @@
     });
   }
 
-  // A reconcile refetch replaces the SOURCE's events, and an optimistic
-  // event was added by hand rather than by the source — so it survives the
-  // refetch and the row shows up twice, once real and once pending. Clear
-  // them the moment fresh data lands, which is the moment they stop being
-  // the only copy on screen.
+  // A reconcile refetch replaces the source's events, but optimistic events
+  // were added by hand and survive it, so the row would show twice. Clear
+  // them as soon as fresh data lands.
   function clearPendingEvents(cal) {
     if (!cal) return;
     withBatch(cal, function () {
@@ -2132,9 +2036,8 @@
   }
 
   // batchRendering matters for repeats: addEvent re-renders the month on
-  // every call, so laying down a 90-day series one event at a time spent
-  // about a second redrawing — which is exactly the delay this whole
-  // change exists to remove. One redraw for the batch instead.
+  // every call, so a 90-day series took about a second to lay down. One
+  // redraw for the batch instead.
   function withBatch(cal, fn) {
     if (cal && typeof cal.batchRendering === 'function') { var r; cal.batchRendering(function () { r = fn(); }); return r; }
     return fn();
@@ -2156,10 +2059,9 @@
   function refreshActiveCalendar() {
     if (schedCalendar && currentView === 'student') schedCalendar.refetchEvents();
     if (allCalendar && currentView === 'allcal') allCalendar.refetchEvents();
-    // The roster's "x of y done" column is now out of date — but getRoster
-    // is by far the most expensive call this page makes (it reads the
-    // Students, Attempts and Assignments sheets), and the roster isn't
-    // even on screen. Mark it instead, and reload once, on the way back.
+    // The roster's "x of y done" is now stale, but getRoster is the most
+    // expensive call here and the roster isn't on screen. Mark it and reload
+    // once on the way back.
     rosterStale = true;
   }
 
@@ -2210,10 +2112,8 @@
           openEditModal(p);
         }
       },
-      // Remembered from the drag's own events: the drop's jsEvent is the
-      // most reliable read (what was held at release), but capturing the
-      // start too means a modifier pressed for the whole gesture still
-      // counts if the drop event arrives without one.
+      // Tracked from both drag start and drop: a copy modifier held for the
+      // whole gesture counts even if the drop event arrives without one.
       eventDragStart: function (info) { dragCopyHeld = isCopyModifier(info.jsEvent); },
       eventDrop: function (info) {
         var p = info.event.extendedProps;
@@ -2223,11 +2123,9 @@
         var targetDay = toDateStr(info.event.start);
 
         if (copy) {
-          // Duplicate, don't move: the original snaps back and a fresh
-          // assignment lands on the day it was dragged to. Deliberately a
-          // standalone row — copying one day of a repeat shouldn't quietly
-          // enrol the copy in that series — and always not-done, since a
-          // copy is work still to do.
+          // Duplicate, don't move: the original snaps back and a new assignment
+          // lands on the target day. Always a standalone, not-done row (copying
+          // one day of a repeat must not join the copy to that series).
           info.revert();
           var copied = addOptimistic(optimisticEvents({
             studentKey: p.studentKey, studentName: p.studentName,
@@ -2251,9 +2149,8 @@
           row: p.row, patch: { dueDate: targetDay }
         }).then(function (data) {
           if (!data || !data.ok) { info.revert(); flashCalNote('Could not move that one — it has been put back.'); return; }
-          // The drop already drew it in the right place; the only thing left
-          // stale is the event's own copy of its due date, and that can be
-          // set here instead of re-reading the whole month.
+          // The drop already drew it in place; only the event's own due date is
+          // stale, so set it here instead of re-reading the month.
           info.event.setExtendedProp('dueDate', targetDay);
           info.event.setExtendedProp('dueDay', targetDay);
         }).catch(function () { info.revert(); flashCalNote('Could not move that one — check your connection.'); });
@@ -2360,9 +2257,8 @@
         if (p.kind === 'session') {
           if (!p.matched.length) return; // a session with no student in the title — nothing to assign to
           var who = p.matched[0];
-          // Two students can share a first name, and the event title is
-          // the only link back to a roster row — so say out loud which one
-          // this is about to be assigned to rather than picking silently.
+          // Two students can share a first name and the title is the only link to
+          // a roster row, so say which one this assigns to rather than guessing.
           openCreateModal([toDateStr(info.event.start)], who.key, who.name, '',
             p.matched.length > 1 ? 'Several students match this session title' : 'Due the day of this session');
         } else {
@@ -2443,11 +2339,9 @@
     modalTaskEl.focus();
   });
 
-  /* ═══ RECURRENCE ═══ a repeat is expanded here into the list of days it
-     covers, and the backend writes one row per day (see
-     handleCreateAdminAssignment's comment for why rows rather than a
-     stored rule: each day has to be tickable on its own, which is the
-     whole point of "10 minutes of vocab, every day"). */
+  /* ═══ RECURRENCE ═══ a repeat is expanded here into the days it covers,
+     and the backend writes one row per day so each day is tickable on its
+     own (see handleCreateAdminAssignment). */
   var MAX_OCCURRENCES = 200;
   function expandRepeat(baseDates, mode, untilStr) {
     if (mode === 'none' || !untilStr) return baseDates.slice();
@@ -2610,12 +2504,9 @@
         return;
       }
     }
-    // Paint, then close, then write. See the OPTIMISTIC WRITES note above:
-    // the modal is gone and the day is filled in before the request has
-    // even left, and a failure is what moves things, not a success.
-    // Everything the request needs, read BEFORE closeModal() — it nulls
-    // modalStudentKey and modalAssignment, and this handler now runs on
-    // past the close rather than finishing inside it.
+    // Paint, then close, then write (see OPTIMISTIC WRITES above): a failure
+    // is what moves things, not a success. Read everything the request needs
+    // BEFORE closeModal(), which nulls modalStudentKey and modalAssignment.
     var studentName = modalStudentName;
     var studentKey = modalStudentKey;
     var mode = modalMode;
@@ -2698,10 +2589,8 @@
     var delScope = modalScope;
     var delSeries = modalAssignment.seriesId || '';
 
-    // Take it off the calendar now. Deleting a whole series takes every day
-    // of it, which is the point of the scope switch — so gather them before
-    // removing anything, or the snapshot needed to undo a failed delete
-    // goes with them.
+    // Remove from the calendar now. Gather every day of a series before
+    // removing any, so the snapshot for undoing a failed delete survives.
     var delCal = activeCalendar();
     var doomed = [];
     if (delCal) {
@@ -2740,9 +2629,9 @@
   });
 })();
 </script>
-<!-- The Portal access panel: invites, the approval queue, login resets.
-     Builds its own markup and styles itself from this file's own CSS
-     variables — removing this tag removes the feature completely. -->
+<!-- Portal access panel (invites, approval queue, login resets). Builds
+     its own markup and styles from this file's CSS variables; removing this
+     tag removes the feature. -->
 <script src="auth-admin.js?v=20260905"></script>
 </body>
 </html>

@@ -8,18 +8,16 @@
 <!--
   ═══ LOCAL PREVIEW ═══ open the portal on your own machine.
 
-  WHY. Google sign-in refuses a loopback origin unless that exact origin is
-  registered on the OAuth client, so http://localhost:PORT comes back
-  "Error 400: invalid_request" no matter what you type. Two ways round it:
+  WHY. Google sign-in refuses a loopback origin that is not registered on
+  the OAuth client, so localhost gets "Error 400: invalid_request". Two
+  ways round it:
 
-  REAL ACCOUNT (what you usually want). The portal's session token is a
-  signed string the backend checks on its own; it does not care which origin
-  sends it. So sign in once on the live site, copy the token, paste it here,
-  and localhost talks to the real backend as the real account -- your own
-  data, your local code.
+  REAL ACCOUNT (usual). The session token is a signed string the backend
+  checks regardless of origin. Sign in on the live site, copy the token,
+  paste it here, and localhost talks to the real backend as that account.
 
   FAKE STUDENT. No token, no backend: every reply is invented in the
-  browser. Good for looking at layout, useless for looking at data.
+  browser. Good for layout, useless for data.
 
   Refuses to run anywhere but a loopback address either way.
 -->
@@ -116,10 +114,9 @@
     intro.textContent = 'Loading the portal with a made-up student…';
     var wantScreen = params.get('screen') || '';
     var onboarding = params.get('onboarding') === '1';
-    // A student who isn't doing SAT prep sees a different home screen
-    // entirely (see applySubjectHome() in index.html). It has no score
-    // data to invent, so what it needs faked is the two things it does
-    // show: a next session off Luca's calendar, and assigned work.
+    // A non-SAT student sees a different home screen (applySubjectHome() in
+    // index.html). It shows no scores, so only a next session and assigned
+    // work need faking.
     var subject = params.get('subject') === '1';
     // &nosession=1 — the hero card with nothing to lead with, which is
     // what a subject student sees before Luca has put anything on the

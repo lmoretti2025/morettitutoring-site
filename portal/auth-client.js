@@ -1,49 +1,37 @@
 /* =========================================================================
    MORETTI STUDENT PORTAL — SIGN-IN (front end)
    -------------------------------------------------------------------------
-   THIS IS A SEPARATE FILE ON PURPOSE. It is designed to be dropped into
-   portal/index.html with a single <script> tag and TWO small edits, rather
-   than woven through the 18,000-line page — see portal/AUTH_INTEGRATION.md.
+   A separate file on purpose: it drops into portal/index.html with one
+   <script> tag and two small edits (see portal/AUTH_INTEGRATION.md).
 
-   WHAT IT REPLACES. The portal used to authenticate by having the student
-   type an access key, which the backend looked up and answered with that
-   student's entire record. The key was therefore a password: unexpiring,
-   unrevocable, and readable off a screenshot or a shoulder. This file
-   makes a verified Google identity the credential instead, and demotes the
-   key to a ONE-TIME CLAIM CODE that pairs an account to a roster row and
-   then never works again.
+   A verified Google identity is the credential. The access key is only a
+   ONE-TIME CLAIM CODE that pairs an account to a roster row.
 
    WHAT IT OWNS.
-     - A full-screen sign-in surface, injected at runtime. It deliberately
-       renders no markup into index.html's own HTML: it builds its own
-       container and fills it using index.html's EXISTING classes (.panel,
-       .kicker, .panel-hed, .key-input, .key-btn, .key-error, .key-help),
-       so it matches the portal exactly without shipping a second stylesheet
-       or touching a single existing element.
-     - The signed session token: stored in localStorage, sent on every
-       backend call, and traded for a fresh one on each page load.
-     - The pending-approval wait, including the poll that lets a student
-       straight in the moment Luca taps approve.
+     - A full-screen sign-in surface, injected at runtime and built from
+       index.html's EXISTING classes (.panel, .kicker, .panel-hed, .key-input,
+       .key-btn, .key-error, .key-help), so it needs no second stylesheet
+       and touches no existing element.
+     - The session token: stored in localStorage, sent on every backend
+       call, and traded for a fresh one on each page load.
+     - The pending-approval wait, including the poll that lets a student in
+       as soon as Luca approves.
 
-   THE fetch() WRAPPER. Roughly two dozen call sites in index.html post to
-   the Apps Script backend, some through postToBackend() and some through
-   bare fetch(). Every one of them now has to carry the session token.
-   Rather than edit ~12 call sites (and rely on nobody ever forgetting the
-   13th — a forgotten one is a broken feature, silently), this file wraps
-   window.fetch once and attaches the token to any POST aimed at the
-   backend. It is a deliberate, narrow interception: same-origin-irrelevant,
-   backend-URL-only, POST-only, JSON-body-only, and it never touches a
-   request that already carries a session or an adminKey.
+   THE fetch() WRAPPER. Many call sites in index.html post to the backend,
+   some via postToBackend() and some via bare fetch(), and all need the
+   session token. Rather than edit each one (a missed one breaks silently),
+   this wraps window.fetch once. It is narrow: backend URL only, POST only,
+   JSON body only, and it never touches a request that already carries a
+   session or an adminKey.
    ========================================================================= */
 
 window.MorettiAuth = (function () {
   'use strict';
 
   /* ═══ SET THIS — the same OAuth Web client ID as auth.gs ═══
-     Not a secret: it ships in this file and is visible in page source by
-     design. What makes it safe is that the BACKEND checks every ID token
-     was issued for this exact client id (verifyGoogleIdToken_ in auth.gs),
-     so a token minted for some other site cannot be replayed here. */
+     Not a secret; it is public by design. The backend checks every ID token
+     was issued for this client id (verifyGoogleIdToken_ in auth.gs), so a
+     token minted for another site cannot be replayed here. */
   var CLIENT_ID = '742313412130-kck7ihjd9el1kolac0hnmep3h1b2vbrh.apps.googleusercontent.com';
 
   var STORE = 'moretti_session';
@@ -52,18 +40,14 @@ window.MorettiAuth = (function () {
   var CONTACT = 'text Luca at (201) 275-2791';
   var GSI_TIMEOUT_MS = 12000;
 
-  /* Google Identity Services refuses to run inside an embedded browser --
-     the viewer you get when a link is tapped from inside Gmail, Instagram,
-     WhatsApp or Messenger. Google answers `disallowed_useragent`, the
-     sign-in never opens, and the page simply sits there. Nothing in this
-     flow could say so, and "the link isn't opening and says it is not
-     responding" is precisely what that looks like from the other side --
-     with not one request reaching the server to leave a trace.
+  /* Google Identity Services refuses to run in embedded browsers (links
+     tapped inside Gmail, Instagram, WhatsApp, Messenger): Google answers
+     `disallowed_useragent`, sign-in never opens, and no request reaches the
+     server.
 
-     ADVISORY, NEVER BLOCKING. User-agent sniffing is wrong in both
-     directions (iOS SFSafariViewController carries no Safari token yet
-     signs in perfectly well), so this only ever ADDS a note; the Google
-     button stays exactly where it was underneath it. */
+     ADVISORY, NEVER BLOCKING. User-agent sniffing is wrong both ways (iOS
+     SFSafariViewController has no Safari token yet signs in fine), so this
+     only adds a note; the Google button stays underneath it. */
   function inAppBrowserName() {
     var ua = navigator.userAgent || '';
     if (/FBAN|FBAV|FB_IAB/i.test(ua)) return 'Facebook';
@@ -96,11 +80,10 @@ window.MorettiAuth = (function () {
   var session = null;
   var idToken = null;      // held only for the duration of a sign-in attempt
   var onStudent = null;
-  /* Fired when the fast path has ALREADY painted from cache and the resume
-     behind it comes back saying something different. onStudent would be the
-     wrong call there -- it re-enters the portal underneath a student who is
-     reading it. This one hands over the fresh payload and lets the portal
-     decide how little to touch. See the paint-first block in start(). */
+  /* Used when the fast path ALREADY painted from cache and the resume
+     returns something different: hands the fresh payload to the portal
+     instead of re-entering it via onStudent. See the paint-first block in
+     start(). */
   var onRefresh = null;
   var pollTimer = null;
   var wasPending = false;  // so a claim that gets DECLINED reads as declined, not as "enter a key"
@@ -108,15 +91,12 @@ window.MorettiAuth = (function () {
   /* ═══ MODAL MODE ═══ set by the marketing site (index.html) before this
      file loads:  window.MORETTI_AUTH_MODE = 'modal'.
 
-     Same flow, different frame. On the portal this file owns the whole
-     window: it paints an opaque surface over a page nobody may see yet,
-     wraps fetch so the portal's own calls carry the session, and hides the
-     red nav until a student is in. On the home page it owns nothing --
-     it is a dialog over a public page that was already working before it
-     opened, and every one of those three behaviours would be wrong there
-     (an opaque overlay, a wrapper around the lead form's POSTs, and a
-     hidden site nav). So each is gated on this, and nothing else changes:
-     the panes, the backend calls and the session are literally the same. */
+     Same flow, different frame. On the portal this file paints an opaque
+     surface, wraps fetch, and hides the red nav until a student is in. On
+     the home page it is a dialog over a working public page, where all
+     three would be wrong (the wrapper would catch the lead form's POSTs).
+     So each is gated on this; panes, backend calls and session are the
+     same. */
   var MODAL = false;
   try { MODAL = (window.MORETTI_AUTH_MODE === 'modal'); } catch (e) {}
 
@@ -134,12 +114,9 @@ window.MorettiAuth = (function () {
 
   function backendUrl() { return window.APPS_SCRIPT_URL || ''; }
 
-  /* Pulls ?invite=… out of the URL and immediately removes it from the
-     address bar. Scrubbing matters: the token is single-use but live until
-     claimed, and leaving it in the URL puts it into browser history, into
-     any bookmark the student makes, and into the Referer header of every
-     outbound link they click from the portal. replaceState keeps them on
-     the same page with no reload. */
+  /* Pulls ?invite=… from the URL and removes it from the address bar. The
+     token is live until claimed, and leaving it in the URL leaks it into
+     history, bookmarks and Referer headers. replaceState avoids a reload. */
   function takeInviteFromUrl() {
     var m = /[?&]invite=([^&#]+)/.exec(window.location.search || '');
     if (!m) return null;
@@ -170,17 +147,12 @@ window.MorettiAuth = (function () {
      session has to clear BOTH: that snapshot is what makes index.html skip
      MorettiAuth.start() after a refresh, so leaving it behind would restore
      the student into a portal whose every request is refused. */
-  /* "Stay signed in" is the student's own per-device choice. It turns on
-     Google's One Tap auto-select, which is what actually stops a returning
-     student being dropped on the sign-in screen: the session token already
-     survives 30 days, but the moment it lapses -- or they open the portal in
-     another browser -- the only way back in without a chooser is One Tap.
+  /* "Stay signed in" is the student's per-device, opt-in choice. It turns on
+     One Tap auto-select, the only way back in without a chooser once the
+     30-day session lapses or in another browser.
 
-     Deliberately opt-in and deliberately per-device. Auto-select was off by
-     design here (see renderSignIn) because a silent re-login on a shared
-     family laptop is exactly the failure this login system was built to
-     prevent. Asking makes it the student's decision rather than a default
-     that quietly signs a parent's browser into a child's portal. */
+     Off by default (see renderSignIn) because a silent re-login on a shared
+     family laptop is what this login system exists to prevent. */
   var pendingStayData = null;
   var STAY = 'moretti_stay_signed_in';
   var STAY_SNOOZE = 'moretti_stay_snooze';
@@ -196,17 +168,11 @@ window.MorettiAuth = (function () {
   }
 
   /* ═══ LAST-KNOWN STUDENT ═══
-     index.html's restoreState() already puts a student straight back after
-     a SAME-TAB refresh, from sessionStorage. Close the tab and that is
-     gone, while the 30-day session token in localStorage survives -- so
-     reopening the portal meant staring at a sign-in panel for the length of
-     one Apps Script round trip (~1.2s warm, 5-6s cold) to be told what the
-     browser already knew.
-
-     This is the same payload, kept where it outlives the tab, so the portal
-     can paint immediately and the round trip becomes a background check
-     instead of a gate. Deliberately WITHOUT the session token: that already
-     lives under STORE, and one copy of a credential is enough. */
+     restoreState() in index.html only survives a same-tab refresh. This
+     keeps the same payload where it outlives the tab, so the portal paints
+     immediately and the resume round trip (~1.2s warm, 5-6s cold) becomes a
+     background check instead of a gate. Deliberately WITHOUT the session
+     token, which already lives under STORE. */
   var STUDENT_CACHE = 'moretti_last_student';
   // Well inside the session's own 30-day life, so the cache can never be
   // the reason a student is let in.
@@ -219,12 +185,10 @@ window.MorettiAuth = (function () {
       for (k in data) if (Object.prototype.hasOwnProperty.call(data, k) && k !== 'session') copy[k] = data[k];
       copy.__cachedAt = Date.now();
       localStorage.setItem(STUDENT_CACHE, JSON.stringify(copy));
-      /* Every path that ends with a real student -- sign-in, resume,
-         paint-from-cache-then-confirm -- passes through here, which makes
-         it the one hook the heartbeat needs. Inside the try only because
-         it belongs with the write it follows; a private-mode failure above
-         it is caught below and the heartbeat starts from the boot check
-         at the foot of this file instead. */
+      /* Every path that ends with a real student (sign-in, resume,
+         paint-from-cache) passes here, so this is the heartbeat's hook. If a
+         private-mode failure above skips it, the boot check at the foot of
+         this file starts the heartbeat instead. */
       startHeartbeat();
     } catch (e) { /* private browsing — the slow path still works */ }
   }
@@ -245,17 +209,10 @@ window.MorettiAuth = (function () {
   var PORTAL_STATE = 'moretti_portal_state';
   var SIGNED_OUT = 'mta_signed_out';
 
-  /* THE BACKEND HAS TOLD US THIS SESSION IS OVER. Since the request guard
-     started re-checking the pairing on every action (which is what makes
-     Reset login immediate), a revoked student sitting in an open tab got
-     `session_revoked` from every call -- and nothing anywhere handled it.
-     No message, no sign-in prompt, and refreshing did not help: the portal
-     restores itself from sessionStorage, skips start(), and fails silently
-     again. The tab was unrecoverable without closing it.
-
-     One reload, with both stores cleared, puts them back at the sign-in
-     screen with a reason -- which is the honest outcome whether they were
-     reset by mistake or were the wrong person all along. */
+  /* THE BACKEND SAYS THIS SESSION IS OVER (`session_revoked`, e.g. after
+     Reset login). Refreshing alone cannot recover: the portal restores from
+     sessionStorage and skips start(). One reload with both stores cleared
+     returns the student to the sign-in screen with a reason. */
   var sessionDead = false;
   function onSessionDead() {
     if (sessionDead) return;
@@ -270,28 +227,18 @@ window.MorettiAuth = (function () {
   }
 
   /* ═══ PRESENCE HEARTBEAT ═══
-     The portal says "I am still here" once a minute while its tab is
-     visible, and the backend turns that into two things: a live
-     online/offline dot beside the name in admin.html, and one row per
-     visit in the AuthLog that records where they were and for how long
-     (see the PRESENCE block in auth.gs).
+     While its tab is visible, the portal pings once a minute. The backend
+     turns that into the online dot in admin.html and one AuthLog row per
+     visit (see the PRESENCE block in auth.gs). Nothing else fires once a
+     student is in, so without it there is no "on it now" signal.
 
-     WHY A HEARTBEAT AND NOT A PAGE VIEW. Nothing else in this file fires
-     again once a student is in. resume happens on load, and a portal left
-     open through a two-hour study session makes no further auth call at
-     all -- so "are they on it now" had no signal to read, and LastSeenAt
-     could be six hours stale by design.
-
-     THREE THINGS IT DELIBERATELY IS NOT:
-       Not credentialled by the fetch wrapper. The session is attached
-       here, which means the wrapper leaves the answer alone and a failed
-       ping can never reload the page out from under a student mid-exam.
-       Revocation is still honoured, just explicitly, below.
-       Not sent by a hidden tab. A portal forgotten in a background tab is
-       not a student using the site, and reporting it as one is worse than
-       reporting nothing.
-       Not sent from the marketing site. auth-client.js also runs in modal
-       mode on the home page, where there is no portal to be present in. */
+     WHAT IT IS NOT:
+       Not credentialled by the fetch wrapper: the session is attached here,
+       so a failed ping can never reload the page mid-exam. Revocation is
+       still handled explicitly, below.
+       Not sent by a hidden tab: a forgotten background tab is not a
+       student using the site.
+       Not sent in modal mode on the home page, where there is no portal. */
   var PING_MS = 60000;
   var pingTimer = null;
   var lastPingAt = 0;
@@ -342,13 +289,9 @@ window.MorettiAuth = (function () {
     if (!force && (now - lastPingAt) < (PING_MS - 5000)) return;
     lastPingAt = now;
     post({ action: 'ping', session: tok, where: whereLabel() }).then(function (data) {
-      /* The one thing a ping is allowed to act on. Every other student
-         action goes through the fetch wrapper, which tears a revoked
-         session down on the next request -- but an idle tab makes no
-         requests, which is exactly the tab a reset is aimed at. This gives
-         "Reset login" a worst case of one minute even when nobody is
-         touching the keyboard. A network failure answers 'network' and is
-         ignored, deliberately: a lost hop is not a revocation. */
+      /* The one thing a ping acts on. An idle tab makes no requests for the
+         fetch wrapper to catch, so this gives "Reset login" a worst case of
+         one minute. 'network' is ignored: a lost hop is not a revocation. */
       if (data && data.ok === false &&
           (data.error === 'unauthorized' || data.error === 'session_revoked')) {
         stopHeartbeat();
@@ -380,12 +323,10 @@ window.MorettiAuth = (function () {
   }
 
   /* ═══ THE ONE PLACE EVERY BACKEND CALL PICKS UP ITS SESSION ═══
-     See the file header for why this is a wrapper and not ~12 edits.
-     Everything about it is scoped as tightly as it can be while still
-     catching every call: only POSTs, only to the backend URL, only bodies
-     that parse as JSON carrying an `action`, and never a request that has
-     already got its own credentials (adminKey — admin.html and
-     math-review.html authenticate as Luca, not as a student). */
+     See the file header for why this is a wrapper. Scoped tightly: POSTs to
+     the backend URL only, JSON bodies with an `action` only, and never a
+     request with its own credentials (adminKey: admin.html and
+     math-review.html authenticate as Luca). */
   function installFetchWrapper() {
     if (typeof window.fetch !== 'function' || window.__mtaFetchWrapped) return;
     var original = window.fetch;
@@ -394,15 +335,11 @@ window.MorettiAuth = (function () {
       try {
         var url = (typeof input === 'string') ? input : (input && input.url);
         var base = backendUrl();
-        /* THE STORED TOKEN, NOT JUST THE IN-MEMORY ONE. `session` is only
-           assigned by handle()/start(), and index.html skips start()
-           entirely when restoreState() has already put the student back
-           after a same-tab refresh -- which is routine, and which mobile
-           browsers do on their own to a backgrounded tab. Reading only the
-           variable meant every request after such a refresh went out with
-           no session at all and came back `unauthorized`: assignments,
-           progress, and a finished diagnostic that then never reached
-           Luca. The store is the durable copy; fall back to it. */
+        /* Fall back to the STORED token: `session` is only set by
+           handle()/start(), and index.html skips start() when restoreState()
+           restores the student after a same-tab refresh (which mobile
+           browsers do on their own). Without this, those requests go out
+           with no session and come back `unauthorized`. */
         var tok = session || readStore();
         if (tok && base && url && String(url).indexOf(base) === 0 &&
             init && init.body && typeof init.body === 'string' &&
@@ -410,10 +347,8 @@ window.MorettiAuth = (function () {
           var payload = JSON.parse(init.body);
           if (payload && payload.action && !payload.adminKey && !payload.session) {
             payload.session = tok;
-            // Copied, never mutated in place: callers reuse their init
-            // objects (markDiagnosticTaken's retry does exactly that), and
-            // rewriting one out from under a caller is the kind of bug
-            // that only shows up on the retry path.
+            // Copied, never mutated: callers reuse their init objects (e.g.
+            // markDiagnosticTaken's retry).
             var next = {};
             for (var k in init) if (Object.prototype.hasOwnProperty.call(init, k)) next[k] = init[k];
             next.body = JSON.stringify(payload);
@@ -445,33 +380,21 @@ window.MorettiAuth = (function () {
   }
 
   /* Apps Script answers a POST with a redirect to its "echo" host, and that
-     second hop fails now and then -- a 404, or an HTML page where JSON
-     should be -- even though the script itself ran fine. auth-admin.js has
-     documented and handled this for its roster read since it was written;
-     the two SIGN-IN paths never got the same treatment, so a single lost
-     hop was the difference between a student being logged in and being told
-     "Couldn't reach the server". Measured against the live backend: ~1.2s
-     warm, 5-6s cold, and the occasional outright lost answer.
+     hop sometimes fails (a 404, or HTML instead of JSON) even though the
+     script ran. Measured: ~1.2s warm, 5-6s cold, occasionally lost.
 
-     Retried: `resume` and `googleAuth`. Both are safe to repeat -- resume
-     only reads, and googleAuth's write path is explicitly idempotent and
-     lock-guarded (ensureFolderAndGrant_ is gated on the cells it writes
-     still being empty, which is why a returning student never re-triggers
-     the Drive share email).
+     Retried: `resume` and `googleAuth`. Both are safe to repeat: resume only
+     reads, and googleAuth's write path is idempotent and lock-guarded
+     (ensureFolderAndGrant_ only writes cells that are still empty).
 
-     NOT retried: claimInvite, which mints and consumes a single-use nonce.
-     Same rule auth-admin.js states -- writes are never retried, the script
-     already ran. Its own caller already recovers from a lost claim by
-     falling through to googleAuth. */
+     NOT retried: claimInvite, which consumes a single-use nonce. Its caller
+     recovers from a lost claim by falling through to googleAuth. */
   var RETRY_ACTIONS = { resume: true, googleAuth: true };
 
-  /* Does this reply actually answer the question we asked? Deliberately a
-     whitelist of the shapes the backend documents, NOT "does it carry a
-     key" -- googleAuth answers a brand-new student with { ok:true,
-     pending:true } or { ok:true, needsKey:true }, and neither has a key in
-     it. Treating those as lost answers would retry a perfectly good reply
-     three times and then fail the student with a network error, which is
-     the precise flow a first-time student is in. */
+  /* Does this reply answer the question? A whitelist of documented shapes,
+     NOT "has a key": googleAuth answers a new student with { ok:true,
+     pending:true } or { ok:true, needsKey:true }, and retrying those as lost
+     answers would fail a first-time student with a network error. */
   function isAuthAnswer(data) {
     if (!data || data.ok !== true) return false;
     return ('key' in data) || data.pending === true || data.needsKey === true || data.needsEmail === true;
@@ -490,9 +413,8 @@ window.MorettiAuth = (function () {
       return new Promise(function (r) { setTimeout(r, wait); })
         .then(function () { return post(payload, attempt + 1); });
     }
-    /* No timeout at all before this: a hop that never answers left the
-       promise pending for the browser's own multi-minute default, which is
-       the "it just sits there for a minute" half of the complaint. */
+    /* Without a timeout, a hop that never answers leaves the promise
+       pending for the browser's multi-minute default. */
     var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
     var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, POST_TIMEOUT_MS);
     var opts = { method: 'POST', body: JSON.stringify(payload) };
@@ -514,16 +436,10 @@ window.MorettiAuth = (function () {
   }
 
   /* ═══ PRE-FLIGHT RESUME ═══
-     The resume round-trip used to begin only once index.html (1.4MB) had
-     finished parsing and called start(). Measured against the live backend
-     that round-trip is ~1.2s warm and 5-6s cold, and every millisecond of
-     it was spent AFTER the page was otherwise ready -- pure dead time on
-     the critical path, serialized behind work it has nothing to do with.
-
-     Firing it here, the moment this file runs, overlaps it with the rest of
-     the download and parse instead. backend-url.js is loaded before this
-     file, so the URL is already known. Costs nothing when there is no saved
-     session: a student signing in for the first time skips it entirely. */
+     Fires the resume round trip (~1.2s warm, 5-6s cold) as soon as this
+     file runs, overlapping it with index.html's download and parse instead
+     of waiting for start(). backend-url.js loads before this file, so the
+     URL is known. Skipped when there is no saved session. */
   var preflightResume = null, preflightToken = null;
   try {
     var preTok = readStore();
@@ -545,11 +461,9 @@ window.MorettiAuth = (function () {
     return post({ action: 'resume', session: token });
   }
 
-  /* The card chrome, and the ONLY CSS this file ships. Everything inside
-     the card is still index.html's own classes (see the file header); these
-     rules add the card itself -- a muted outer shell holding a white inner
-     panel -- and are scoped to #mta-auth so nothing else on the portal can
-     be reached by them. */
+  /* The card chrome, the ONLY CSS this file ships: a muted outer shell
+     holding a white inner panel. Everything inside uses index.html's own
+     classes (see the file header). Scoped to #mta-auth. */
   function injectCardStyles() {
     if (document.getElementById('mta-auth-css')) return;
     var st = document.createElement('style');
@@ -569,13 +483,11 @@ window.MorettiAuth = (function () {
       '#mta-auth .key-input{border-radius:10px;}' +
       '@media (max-width:420px){#mta-auth .mta-card-inner{padding:1.9rem 1.1rem 1.5rem;}}' +
 
-      /* MODAL ONLY. On the portal every class below is already defined by
-         index.html and this file deliberately borrows them; the home page
-         has none of them, so the dialog has to bring its own. Scoped to
-         .mta-modal so the portal's versions are never overridden. */
-      /* index-v2.html's modal easing, deliberately: --ease for the backdrop,
-         --springy for the card, so the dialog moves like the rest of the
-         redesign instead of inventing a third motion language. */
+      /* MODAL ONLY. The home page lacks index.html's classes, so the dialog
+         brings its own, scoped to .mta-modal so the portal's are never
+         overridden. */
+      /* index-v2.html's modal easing (--ease for the backdrop, --springy for
+         the card), so the dialog moves like the rest of the redesign. */
       '#mta-auth.mta-modal{backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);' +
         'animation:mta-fade .35s cubic-bezier(.22,1,.36,1) both;}' +
       '@keyframes mta-fade{from{opacity:0;}to{opacity:1;}}' +
@@ -657,13 +569,9 @@ window.MorettiAuth = (function () {
         '<div class="kicker">Student Portal</div>' +
 
         /* An invite link opened on a device already signed in AS THE SAME
-           STUDENT. That is the common case once the invite has been used:
-           the only URL the family kept is the invite, so every trip back to
-           the portal comes through it. Forcing a fresh Google sign-in there
-           threw away a perfectly good session -- and if Google happened to
-           be blocked (see inAppBrowserName) it stranded them on a page that
-           could not work, with their own valid session sitting unused in
-           localStorage a few lines away. */
+           STUDENT, the common case since the invite is often the only URL
+           the family kept. Reuse the session rather than forcing a fresh
+           Google sign-in, which may be blocked (see inAppBrowserName). */
         '<div id="mta-continue" style="display:none;">' +
           '<h1 class="panel-hed">You&rsquo;re already set up</h1>' +
           '<p class="panel-sub">This device is signed in as <b id="mta-continue-who"></b>. ' +
@@ -765,9 +673,8 @@ window.MorettiAuth = (function () {
       } catch (e) {}
       var data = pendingStayData;
       pendingStayData = null;
-      // Second handoff into the portal, and it bypasses handle()'s tail --
-      // so the cache has to be written here too, or a student who answered
-      // this prompt would never get the fast path on their next visit.
+      // Second handoff into the portal, bypassing handle()'s tail, so the
+      // cache must be written here too or the next visit loses the fast path.
       writeStudentCache(data);
       hide();
       if (data) onStudent(data);
@@ -825,16 +732,11 @@ window.MorettiAuth = (function () {
     return host;
   }
 
-  /* ═══ ONE PANE TO THE NEXT ═══ the panes are the same card with different
-     contents, and swapping display:none for display:block made the card
-     snap to a new height with the new text already in place -- the roughest
-     moment in the whole flow, and it happens on every step of it.
-
-     So: measure, swap, measure, and let the card travel between the two
-     heights while the incoming pane fades up under it. Pure decoration --
-     the display swap is still synchronous and still the thing that decides
-     what is on screen, so nothing downstream has to wait for or know about
-     the animation. Skipped outright under prefers-reduced-motion. */
+  /* ═══ ONE PANE TO THE NEXT ═══ the panes share one card, and a plain
+     display swap makes it snap to the new height. So: measure, swap,
+     measure, and animate the height while the incoming pane fades up. Pure
+     decoration: the synchronous display swap still decides what is on
+     screen. Skipped under prefers-reduced-motion. */
   var paneAnim = null;
   function pane(which) {
     ensureHost();
@@ -857,11 +759,9 @@ window.MorettiAuth = (function () {
         card.style.transition = 'height .38s cubic-bezier(.16,1,.3,1)';
         card.style.height = to + 'px';
       }
-      /* Cleared on a timer rather than transitionend: the height is set to
-         auto afterwards precisely because the content may still change
-         (a status line, an error), and a transition that never fires --
-         identical heights, an interrupted swap -- must not leave the card
-         pinned to a stale pixel height. */
+      /* Cleared on a timer, not transitionend: a transition may never fire
+         (identical heights, an interrupted swap), and the card must not stay
+         pinned to a stale height while its content can still change. */
       paneAnim = setTimeout(function () {
         card.style.transition = ''; card.style.height = ''; card.style.overflow = '';
         paneAnim = null;
@@ -873,10 +773,9 @@ window.MorettiAuth = (function () {
     }
   }
 
-  /* Shut the dialog and give the page back: the poll has to stop (it is a
-     4s timer against the backend that would otherwise keep running behind a
-     closed dialog) and the scroll lock has to come off. Nothing about the
-     session is touched -- closing is "not now", not "sign me out". */
+  /* Close the dialog: stop the 4s backend poll and remove the scroll
+     lock. The session is untouched; closing means "not now", not sign
+     out. */
   function closeModal() {
     stopPoll();
     if (REDUCE || !host) { hide(); return; }
@@ -890,10 +789,8 @@ window.MorettiAuth = (function () {
   }
 
   /* ═══ THE HOME-PAGE ENTRY POINT ═══ opens the same sign-in as a dialog.
-     Deliberately NOT start(): start() is the portal's boot sequence, which
-     resumes a session and hands the student to the page it is sitting on.
-     Here there is no portal to hand them to -- the caller passes an
-     onStudent that sends them to one. */
+     Not start(), which is the portal's boot sequence; here the caller's
+     onStudent sends the student to the portal. */
   var returnFocusTo = null;
   function openSignIn(opts) {
     onStudent = (opts && opts.onStudent) || function () {};
@@ -933,10 +830,8 @@ window.MorettiAuth = (function () {
   }
 
   function err(id, msg) {
-    // ensureHost() rather than trusting `host` to be set: every current
-    // caller reaches here after start() has built it, but a null host would
-    // throw inside the very handler that exists to REPORT a failure — which
-    // turns a recoverable error into a blank screen.
+    // ensureHost() rather than trusting `host`: a null host would throw
+    // inside the handler that exists to report a failure.
     var el = ensureHost().querySelector(id);
     el.textContent = msg || '';
     el.style.color = '';           // back to the .key-error red
@@ -952,12 +847,10 @@ window.MorettiAuth = (function () {
     el.style.display = msg ? 'block' : 'none';
   }
 
-  /* Deliberately vague about WHY a key failed, with one exception. Telling
-     a stranger apart from a student is the whole job here, and "that key
-     exists but belongs to someone else" is a useful oracle for anyone
-     guessing keys. The exception is email_mismatch, where the person
-     almost certainly IS the right student signed in on the wrong Google
-     account, and a vague error would just strand them. */
+  /* Deliberately vague about WHY a key failed: "that key belongs to someone
+     else" is a useful oracle for anyone guessing keys. The exception is
+     email_mismatch, where the person is almost certainly the right student
+     on the wrong Google account. */
   function keyErrorMessage(code) {
     switch (code) {
       case 'email_mismatch':
@@ -1015,10 +908,9 @@ window.MorettiAuth = (function () {
           CONTACT.charAt(0).toUpperCase() + CONTACT.slice(1) + ' if you think that is a mistake.');
         return;
       }
-      // Naming the account they are about to bind, right next to the key
-      // box, is the last chance to catch a parent signing in as themselves
-      // on a key meant for their child — the moment it is claimed, undoing
-      // it needs Luca to reset the row.
+      // Name the account about to be bound next to the key box: the last
+      // chance to catch a parent claiming a child's key as themselves, since
+      // undoing a claim needs Luca to reset the row.
       host.querySelector('#mta-key-sub').innerHTML =
         'Signed in as <b>' + escapeText(data.email || 'your Google account') + '</b>. ' +
         'One time only: enter the access key to link <i>this</i> account to the student&rsquo;s file. ' +
@@ -1031,12 +923,9 @@ window.MorettiAuth = (function () {
       host.querySelector('#mta-key-input').focus();
       return;
     }
-    // A full student payload — we are in. The `key` check is not
-    // ceremony: an { ok:true } answer that is none of the three cases
-    // above means the backend and this file disagree about the protocol
-    // (an old deployment answering a new client, most likely), and
-    // handing that to the portal as a logged-in student would fail
-    // somewhere much less obvious than here.
+    // A full student payload: we are in. An { ok:true } answer that fits none
+    // of the cases above means the backend and this file disagree on the
+    // protocol (likely an old deployment), so fail visibly here.
     if (!data.key || !data.session) {
       err('#mta-signin-error',
         'The portal reached the server but got an answer it did not understand. ' +
@@ -1049,20 +938,14 @@ window.MorettiAuth = (function () {
     idToken = null;
     wasPending = false;
 
-    /* The last surviving piece of the old name/email capture beat. Email
-       now comes from the verified Google account, and so does the name
-       WHEN Google has a usable one — this only fires when the roster cell
-       is genuinely blank (see needsName in auth.gs). It runs here, before
-       the handoff, because everything downstream — settle()'s greeting,
-       the onboarding welcome, the guardian emails — assumes a real name. */
-    /* ...unless the portal is about to run its own dark onboarding act,
-       which now opens WITH this question (see #onb-name in index.html).
-       Asking here as well would ask twice, and the first ask would be the
-       ugly one: a white overlay panel in front of the dark sequence it is
-       introducing. needsName is passed through untouched in that case, so
-       the portal knows to show its beat. A student who needs a name but
-       is NOT onboarding (a blank cell on an already-settled row) still
-       gets asked here — that path has no dark act to hand off to. */
+    /* Name capture, only when the roster cell is blank (see needsName in
+       auth.gs); email and usually name come from Google. Runs before the
+       handoff because settle()'s greeting, the onboarding welcome and the
+       guardian emails assume a real name. */
+    /* ...unless the portal is about to run its onboarding sequence, which
+       opens with this question (#onb-name in index.html); needsName passes
+       through so it asks once. A student who needs a name but is NOT
+       onboarding is still asked here. */
     if (data.needsName && !nameAsked && !data.needsOnboarding) {
       nameAsked = true;
       host.querySelector('#mta-name-sub').textContent =
@@ -1072,15 +955,12 @@ window.MorettiAuth = (function () {
       host.querySelector('#mta-name-input').focus();
       return;
     }
-    // If it STILL comes back needing a name after one round trip, the write
-    // is failing somewhere we cannot see from here. Let them into the
-    // portal rather than trapping them on a form that never accepts an
-    // answer; a blank name is cosmetic, a locked-out student is not.
+    // If it STILL needs a name after one round trip, the write is failing
+    // somewhere unseen. Let them in anyway: a blank name is cosmetic, a
+    // locked-out student is not.
 
-    /* Ask once, and only for a student who is past their first visit --
-       a brand-new student has the name beat and the whole intro sequence
-       ahead of them, and a dialog stacked in front of that is noise. They
-       get asked on a later login instead. */
+    /* Ask once, and only past a student's first visit: a new student has the
+       onboarding sequence ahead of them, so they are asked on a later login. */
     if (shouldOfferStay() && !data.needsOnboarding && !data.needsName) {
       pendingStayData = data;
       pane('stay');
@@ -1176,11 +1056,9 @@ window.MorettiAuth = (function () {
   }
 
   /* ═══ GOOGLE IDENTITY SERVICES ═══ */
-  /* onerror alone was not enough. It fires when the request FAILS, but a
-     filtered network or a captive portal can leave the request hanging
-     instead, and then this promise never settled at all: no button, no
-     error, no explanation -- a blank panel forever. The timeout turns that
-     into something a student can act on. */
+  /* The timeout covers what onerror misses: a filtered network or captive
+     portal can leave the request hanging, which would otherwise leave a
+     blank panel forever. */
   function loadGsi() {
     return new Promise(function (resolve, reject) {
       if (window.google && google.accounts && google.accounts.id) return resolve();
@@ -1245,9 +1123,8 @@ window.MorettiAuth = (function () {
         /* Only ever true because the student asked for it on this device.
            With it on, prompt() below signs a returning student straight in
            instead of showing the account chooser. */
-        // No One Tap auto-select: this portal keeps its own session, and a
-        // silent re-login on a shared family device is exactly the thing
-        // this whole change exists to stop being automatic.
+        // Auto-select only when the student opted into "stay signed in": a
+        // silent re-login on a shared family device must not be the default.
         auto_select: staySignedIn(),
         cancel_on_tap_outside: true
       });
@@ -1265,10 +1142,9 @@ window.MorettiAuth = (function () {
       /* Say it BEFORE they try, when we can already tell: the button will
          render here and simply do nothing when tapped. */
       if (inAppBrowserName()) err('#mta-signin-error', signInUnavailableHelp());
-      /* And say it after, for the embedded browsers no user-agent test
-         catches: the script loads, initialize() succeeds, and renderButton
-         quietly produces an empty div. Only speaks up if nothing rendered
-         and nothing has been said already. */
+      /* Also check afterwards, for embedded browsers no user-agent test
+         catches, where renderButton quietly produces an empty div. Speaks
+         only if nothing rendered and nothing has been said. */
       setTimeout(function () {
         var t = host && host.querySelector('#mta-gbtn');
         if (!t || t.querySelector('iframe, div[role="button"]')) return;
@@ -1281,9 +1157,9 @@ window.MorettiAuth = (function () {
     });
   }
 
-  /* ═══ ENTRY POINT ═══ called once by index.html instead of showing the
-     old key screen. Resumes an existing session silently when there is
-     one, so a returning student never sees a login at all. */
+  /* ═══ ENTRY POINT ═══ called once by index.html. Resumes an existing
+     session silently when there is one, so a returning student never sees
+     a login. */
   function start(opts) {
     onStudent = (opts && opts.onStudent) || function () {};
     onRefresh = (opts && opts.onRefresh) || null;
@@ -1291,19 +1167,11 @@ window.MorettiAuth = (function () {
     ensureHost();
 
     invite = takeInviteFromUrl();
-    /* An invite arriving on a device ALREADY signed in as someone else is
-       the shared-family-laptop case: resuming the old session would
-       silently swallow the invite, so the who-pane lets the new student
-       take the tab over.
-
-       But the same link arriving on a device signed in as THE STUDENT IT IS
-       FOR is not that -- it is just a student coming back through the only
-       URL they kept. That used to be treated identically, throwing away a
-       working session and demanding a fresh Google sign-in; when Google was
-       blocked (an in-app browser) it stranded them completely, with their
-       own valid session sitting unused in localStorage. So: resume first,
-       and only fall back to the who-pane if the session turns out to belong
-       to somebody else. */
+    /* An invite on a device signed in as someone ELSE is the shared-laptop
+       case: the who-pane lets the new student take over. On a device signed
+       in as the invite's own student, it is just a return visit through the
+       only URL they kept. So resume first, and fall back to the who-pane
+       only if the session belongs to someone else. */
     if (invite) {
       var storedForInvite = readStore();
       var wantKey = inviteKeyOf(invite);
@@ -1317,9 +1185,8 @@ window.MorettiAuth = (function () {
             pane('continue');
             return;
           }
-          // Someone else's session, or it could not be resumed -- original
-          // behaviour. A network failure lands here too, which is right:
-          // the invite still needs to work on a flaky connection.
+          // Someone else's session, or resume failed (including a network
+          // failure, so the invite still works on a flaky connection).
           session = null;
           pane('who');
         });
@@ -1348,23 +1215,15 @@ window.MorettiAuth = (function () {
 
     session = stored;
 
-    /* PAINT FIRST, CHECK AFTER. With a session token and a recent payload
-       for it, everything needed to draw the portal is already on the
-       device -- so draw it, and let the resume round trip run behind it as
-       a check rather than a gate. The student is looking at their own home
-       screen while the 1.2-6s happens.
+    /* PAINT FIRST, CHECK AFTER. With a session token and a recent payload,
+       draw the portal now and let the resume run behind it as a check.
 
-       Three cases are deliberately excluded, because each one needs the
-       server's answer BEFORE anything is drawn:
-         - needsOnboarding: the dark intro sequence runs once, and running
-           it off stale cache could replay or skip it.
-         - needsName: a form whose answer the server has to accept.
-         - shouldOfferStay(): a one-time question. Skipping it via the fast
-           path every time would mean it is never asked at all.
-       Nothing is trusted here that was not already trusted: the session
-       token is what grants access, every subsequent request carries it,
-       and the fetch wrapper tears the session down the moment the backend
-       says it is revoked. */
+       Excluded, since each needs the server's answer first:
+         - needsOnboarding: stale cache could replay or skip the intro.
+         - needsName: a form the server has to accept.
+         - shouldOfferStay(): a one-time question the fast path would skip.
+       Nothing new is trusted: every request carries the session token, and
+       the fetch wrapper tears it down once the backend says revoked. */
     var cached = readStudentCache();
     var paintedFromCache = false;
     if (cached && !cached.needsOnboarding && !cached.needsName && !shouldOfferStay()) {
@@ -1372,29 +1231,17 @@ window.MorettiAuth = (function () {
       hide();
       if (onStudent) onStudent(cached);
     } else {
-      // The sign-in pane is the default-visible one and its button slot is
-      // empty until renderSignIn runs, so a slow resume (Apps Script cold
-      // starts run into several seconds) showed a "Sign in" panel with
-      // nothing to click. Say what is happening instead.
+      // The sign-in pane is visible by default with an empty button slot until
+      // renderSignIn runs, so during a slow resume say what is happening.
       status('#mta-signin-error', 'Signing you in\u2026');
     }
 
     return resumeRequest(stored).then(function (data) {
       if (data && data.ok && data.key) {
-        /* Already painted: refresh the cache for next time and stay out of
-           the way. Handing this to handle() would re-run the whole handoff
-           -- re-entering the portal underneath a student who is already
-           reading it, and resetting whatever screen they had opened.
-
-           "Stay out of the way" was doing too much of it, though. Updating
-           the cache and nothing else meant anything that decides WHAT THE
-           PORTAL SHOWS was a whole page load behind the server: change a
-           student between SAT prep and subject tutoring and their very next
-           visit still drew the old home and the old sidebar, because the
-           answer saying otherwise arrived and was filed away unread. The
-           payload now goes to the portal as well, which re-applies its
-           gating in place and leaves the screen alone -- see
-           applyStudentRefresh() in index.html. */
+        /* Already painted: refresh the cache and hand the payload to
+           onRefresh, not handle(), which would re-enter the portal and reset
+           the open screen. The portal re-applies its gating in place (see
+           applyStudentRefresh() in index.html). */
         if (paintedFromCache) {
           writeStudentCache(data);
           if (onRefresh) { try { onRefresh(data); } catch (e) {} }
@@ -1403,30 +1250,24 @@ window.MorettiAuth = (function () {
         handle(data);
         return;
       }
-      /* Painted from cache and the answer never came. Leave them where they
-         are: the session is untouched, every request the portal makes
-         carries it, and a genuinely dead session is caught by the fetch
-         wrapper on the first one. Throwing up a sign-in panel over a portal
-         they are already using would be the worse call. */
+      /* Painted from cache and no answer came: leave them there. Every
+         request carries the session, and the fetch wrapper catches a truly
+         dead one on the first. */
       if (paintedFromCache && data && data.error === 'network') return;
       /* Painted from cache and the server says no. The cache is wrong and
          has to go before the reload, or the next load paints it again. */
       if (paintedFromCache) { clearStudentCache(); onSessionDead(); return; }
 
       /* COULD NOT ASK IS NOT A NO. post() turns any failed fetch into
-         {error:'network'}, and this used to treat that exactly like a
-         revoked session -- so one blip on a school wifi, or an Apps Script
-         cold start that times out, permanently deleted a perfectly good
-         login and made the student sign in from scratch. Only a real
-         answer from the server clears the stored token. */
+         {error:'network'}; only a real server answer clears the stored
+         token, so a wifi blip or cold-start timeout keeps the login. */
       if (data && data.error === 'network') {
         return Promise.resolve(renderSignIn()).then(function () {
           err('#mta-signin-error', keyErrorMessage('network'));
         });
       }
-      // Expired, revoked, or unpaired in admin. Not an error worth showing
-      // — it is simply time to sign in again. The status line must go, or
-      // the panel sits there claiming it is still signing them in.
+      // Expired, revoked, or unpaired in admin: just time to sign in again.
+      // Clear the status line so the panel stops saying it is signing in.
       status('#mta-signin-error', '');
       session = null;
       writeStore(null);
@@ -1448,25 +1289,18 @@ window.MorettiAuth = (function () {
   }
 
   /* ═══ NO LOGGED-IN CHROME BEFORE SIGN-IN ═══
-     index.html's markup is parsed and painted long before
-     MorettiAuth.start() runs at the end of a 19,000-line file, so anything
-     marked visible in that static markup flashes on screen first. This file
-     is loaded BEFORE that markup, so a style rule injected here lands in
-     time. (It used to suppress the retired key-entry panel too; that markup
-     has since been deleted outright.) */
+     index.html's markup paints long before MorettiAuth.start() runs at the
+     end of the file, so anything visible in it flashes first. This file
+     loads BEFORE that markup, so a style rule injected here lands in time. */
   (function hideNavUntilSignedIn() {
     if (MODAL) return;   // #main-nav on the home page is that site's own nav
     try {
       var st = document.createElement('style');
       st.id = 'mta-hide-nav-until-signed-in';
-      /* #main-nav is the red bar. On a cold load it paints and sits there
-         until the overlay covers it -- which reads as the portal flashing
-         its logged-in chrome at someone who has not signed in yet. Hidden
-         by a class on
-         <html> rather than a bare rule, because it has to come BACK the
-         moment a student is handed to the portal (see hide()), and the
-         onboarding sequence toggles its own .nav-hidden on the same element
-         afterwards. */
+      /* #main-nav is the red bar, which would otherwise flash at a student
+         not yet signed in. Hidden via a class on <html> rather than a bare
+         rule, because hide() must bring it back and onboarding later toggles
+         its own .nav-hidden on the same element. */
       st.textContent = 'html.mta-auth-pending #main-nav{display:none !important;}';
       document.documentElement.classList.add('mta-auth-pending');
       (document.head || document.documentElement).appendChild(st);
@@ -1474,18 +1308,15 @@ window.MorettiAuth = (function () {
   })();
 
   /* Not in modal mode: the home page's only backend call is the lead form,
-     which is nobody's session and must not be given one -- nor should a
-     stray `unauthorized` from it be able to trip onSessionDead() and reload
-     the page out from under a visitor mid-form. */
+     which must not get a session, nor trip onSessionDead() and reload the
+     page mid-form. */
   if (!MODAL) installFetchWrapper();
 
-  /* THE HEARTBEAT'S SECOND WAY IN. writeStudentCache() covers every path
-     that ends in a fresh payload, but index.html routinely skips all of
-     them: restoreState() puts a student back from the same-tab snapshot
-     and start() never runs (deliberately -- see refresh() below). That
-     student is unmistakably on the site, so a stored session on a portal
-     page is enough to start beating. An invalid one gets a single
-     unauthorized answer and is dealt with there. */
+  /* THE HEARTBEAT'S SECOND WAY IN. When restoreState() restores a student
+     from the same-tab snapshot, start() never runs (see refresh() below) and
+     writeStudentCache() is skipped. A stored session on a portal page is
+     enough to start; an invalid one gets a single unauthorized answer and
+     is handled there. */
   try { if (!MODAL && readStore()) startHeartbeat(); } catch (e) {}
 
   return {
@@ -1497,20 +1328,14 @@ window.MorettiAuth = (function () {
        `session`, because on the home page start() never ran. */
     hasSession: function () { return !!readStore(); },
     /* ASK THE SERVER WHO THIS STUDENT IS NOW, WITHOUT SIGNING THEM IN AGAIN.
-       start() is the only thing that ever resumed a session, and index.html
-       skips it entirely when restoreState() has already put a student back
-       from the same-tab snapshot -- deliberately, so an accidental refresh
-       mid-exam does not restart the handoff. The cost was that the snapshot
-       was never checked against anything for the life of the tab: a student
-       whose program changed kept the old portal through every reload until
-       they closed it.
+       index.html skips start() when restoreState() restores from the
+       same-tab snapshot (so a refresh mid-exam does not restart the
+       handoff), so nothing else checks that snapshot for the life of the tab.
 
-       This is the missing half. No panes, no handoff, no screen change --
-       it resumes, refreshes the cache, and resolves with the payload for
-       the caller to diff. A dead or unreachable session resolves null
-       rather than rejecting: the fetch wrapper already tears down a
-       genuinely revoked session on the portal's next request, and a blip
-       on the wifi must not be the reason a working portal reacts at all. */
+       No panes, no handoff: it resumes, refreshes the cache, and resolves
+       with the payload for the caller to diff. A dead or unreachable
+       session resolves null rather than rejecting; the fetch wrapper handles
+       real revocation on the next request. */
     refresh: function () {
       var stored = readStore();
       if (!stored) return Promise.resolve(null);
@@ -1523,20 +1348,16 @@ window.MorettiAuth = (function () {
     signOut: signOut,
     session: function () { return session; },
     isSignedIn: function () { return !!session; },
-    /* Exposed for the portal's own name beat (#onb-name), which took over
-       this question from the overlay above. The session lives in here, so
-       the write has to go through here too rather than the portal
-       assembling its own request. Resolves to the same student payload
-       every other call in this file returns. */
+    /* For the portal's own name step (#onb-name). The session lives here,
+       so the write goes through here. Resolves to the usual student
+       payload. */
     setName: function (name) {
       return post({ action: 'setName', session: session, name: name });
     },
     /* Called by the portal's screen switcher (show() in index.html) so the
-       admin panel can say "on Practice tests" rather than only "in the
-       portal". Purely a label -- it grants nothing, reads nothing, and a
-       page that never calls it still reports its own filename. Moving
-       somewhere new is worth saying at once rather than up to a minute
-       later, so it beats early. */
+       admin panel can show the current screen. Purely a label; it grants
+       nothing. A page that never calls it reports its own filename. A
+       change of screen pings early rather than waiting up to a minute. */
     setActivity: function (id) {
       var next = String(id || '');
       if (next === activity) return;

@@ -1,28 +1,21 @@
 /* =========================================================================
    MORETTI PORTAL — ADMIN SIGN-IN GATE
    -------------------------------------------------------------------------
-   Replaces the typed admin password on portal/admin.html (and
-   portal/math-review.html) with Google sign-in restricted to the addresses
-   in ADMIN_EMAILS in auth.gs.
+   Google sign-in for portal/admin.html and portal/math-review.html,
+   restricted to ADMIN_EMAILS in auth.gs.
 
-   ONE <script> TAG, NO OTHER EDIT. Both pages read their credential from
-   sessionStorage['moretti_admin_key'] and send it as `adminKey` on every
-   request. So this file puts a signed ADMIN SESSION TOKEN in that entry;
-   the backend verifies it and substitutes the real ADMIN_KEY before any
-   handler sees the request (see authGuard_ in auth.gs). Every existing call
-   on those pages authenticates unchanged, and the browser never holds the
-   actual secret.
+   ONE <script> TAG, NO OTHER EDIT. Both pages send
+   sessionStorage['moretti_admin_key'] as `adminKey`. This file puts a
+   signed ADMIN SESSION TOKEN there; the backend verifies it and
+   substitutes the real ADMIN_KEY before any handler runs (authGuard_ in
+   auth.gs). The browser never holds the actual secret.
 
-   LOAD IT FIRST — before each page's own script — so the token is already
-   in sessionStorage when their "auto-continue if this browser already
-   unlocked" boot code runs. That is what makes a returning admin land
-   straight on the roster instead of on a gate.
+   LOAD IT FIRST, before each page's own script, so the token is in place
+   when their auto-continue boot code runs.
 
-   IF SIGN-IN EVER FAILS, the way back in is auth.gs at script.google.com:
-   fix GOOGLE_CLIENT_ID or ADMIN_EMAILS and redeploy. That needs the Google
-   account that owns the script, so it is not a weaker door. There is no
-   password fallback over HTTP on purpose — one would keep alive exactly
-   the credential this removes.
+   IF SIGN-IN FAILS, fix GOOGLE_CLIENT_ID or ADMIN_EMAILS in auth.gs at
+   script.google.com and redeploy (needs the script owner's account).
+   There is deliberately no password fallback.
    ========================================================================= */
 
 (function () {
@@ -37,11 +30,9 @@
   var GSI_SRC = 'https://accounts.google.com/gsi/client';
 
   /* ── SYNCHRONOUS, BEFORE ANYTHING ELSE ──────────────────────────────
-     Mirror any stored session into the entry the host page reads, right
-     now, while its own script has not run yet. Miss this window and the
-     page shows its gate and the admin re-authenticates for nothing. The
-     token is verified a moment later; an expired one just fails the
-     page's own first call and drops it back to this gate. */
+     Mirror any stored session into the host page's entry now, before its
+     own script runs, or the page shows its gate needlessly. An expired
+     token just fails the page's first call and drops back to this gate. */
   var stored = null;
   try { stored = localStorage.getItem(STORE); } catch (e) {}
   if (stored) {
@@ -53,14 +44,9 @@
     try { sessionStorage.removeItem(PAGE_KEY); } catch (e) {}
   }
 
-  /* Same lost-hop problem auth-admin.js documents for its roster read: Apps
-     Script redirects a POST to its echo host and that hop intermittently
-     answers a 404 or an HTML page even though the script ran. The roster
-     read has retried around it for a long time; THIS file -- the sign-in
-     that has to succeed before the roster is even asked for -- did not, so
-     one lost hop meant "couldn't reach the server" and a manual reload.
-     Both actions here establish or check a session rather than creating
-     anything, so repeating them is safe. */
+  /* Apps Script's redirect to its echo host intermittently answers a 404 or
+     HTML even though the script ran (see auth-admin.js). Both actions here
+     only establish or check a session, so repeating them is safe. */
   // Value is the field a genuine answer carries, same convention as
   // auth-admin.js: adminGoogleAuth returns { ok, session, email, name },
   // and accessRoster (used here only to test a stored session) returns
@@ -179,29 +165,25 @@
       }
       try { localStorage.setItem(STORE, data.session); } catch (e) {}
       try { sessionStorage.setItem(PAGE_KEY, data.session); } catch (e) {}
-      // Reload rather than trying to drive the host page's own unlock: its
-      // boot code already does exactly the right thing when the credential
-      // is present, and re-running it from a clean state is far more
-      // robust than reaching into its internals from out here.
+      // Reload rather than driving the host page's unlock: its boot code
+      // already handles a present credential, and a clean re-run is more
+      // robust than reaching into its internals.
       window.location.reload();
     });
   }
 
-  /* Verify whatever we mirrored in. Runs alongside the host page's own
-     first request, so a good session costs nothing visible; a bad one
-     replaces the page with the gate rather than leaving the admin looking
-     at that page's "wrong admin key" error, which would now be misleading
-     — there is no key to get wrong. */
+  /* Verify whatever we mirrored in. Runs alongside the host page's first
+     request, so a good session costs nothing visible; a bad one shows the
+     gate instead of that page's misleading "wrong admin key" error. */
   function start() {
     ensureHost();
     if (!stored) { showGate(); return; }
     post({ action: 'accessRoster', adminKey: stored }).then(function (data) {
       if (data && data.ok) return;                          // signed in, nothing to do
-      // ONLY an actual auth failure signs someone out. A network blip, a
-      // sheet error, a cold-start timeout — none of those mean the session
-      // is bad, and treating them as if they were would throw Luca back to
-      // the gate, where signing in again cannot fix a broken sheet. That is
-      // a loop, and it looks exactly like being locked out of his own admin.
+      // ONLY an actual auth failure signs someone out. A network blip, sheet
+      // error or cold-start timeout does not mean the session is bad, and
+      // sending the admin back to the gate for one would loop, since signing
+      // in again cannot fix a broken sheet.
       if (!data || data.error !== 'unauthorized') return;
       clearSession();
       showGate();

@@ -1,13 +1,13 @@
 /* ────────────────────────────────────────────────────────────────────────────
    Moretti Test Prep & Tutoring — site analytics
 
-   One file, loaded on the public marketing pages only. The portal is
-   deliberately excluded (see PORTAL PATHS below) so the privacy policy's
-   promise that the portal carries no trackers stays literally true.
+   Loaded on the public marketing pages only. The portal is excluded (see
+   PORTAL PATHS below) so the privacy policy's promise that the portal
+   carries no trackers stays true.
 
    ── TO TURN THIS ON ────────────────────────────────────────────────────────
-   Fill in the two IDs in CONFIG. Until an ID is filled in, that vendor is
-   never loaded and no request is made — so this file is safe to ship as-is.
+   Fill in the IDs in CONFIG. A vendor with no ID is never loaded and no
+   request is made, so this file is safe to ship as-is.
 
      ga4        Google Analytics 4 measurement ID, looks like  G-ABC1234XYZ
                 analytics.google.com → Admin → Data streams → your web stream
@@ -18,14 +18,13 @@
 
    ── WHAT IT SENDS ──────────────────────────────────────────────────────────
      page_view       automatic, every page
-     generate_lead   the enquiry form submitted successfully   (Meta: Lead)
+     generate_lead   the inquiry form submitted successfully   (Meta: Lead)
      contact_phone   a click on the phone number               (Meta: Contact)
      view_diagnostic scrolled to the diagnostic section on the homepage
 
    ── TO CHECK IT IS WORKING ─────────────────────────────────────────────────
-   Add ?mtdebug=1 to any URL. Every event is then logged to the browser
-   console and kept in window.MTrack.log for inspection. Debug is automatic
-   on localhost.
+   Add ?mtdebug=1 to any URL. Every event is then logged to the console and
+   kept in window.MTrack.log. Debug is automatic on localhost.
    ──────────────────────────────────────────────────────────────────────── */
 (function (w, d) {
   'use strict';
@@ -190,18 +189,15 @@
           return;
         }
       }
-      /* Measured against a band across the middle of the screen rather than a
-         fraction of the section. The diagnostic section is taller than a phone
-         viewport, so a percentage-of-element threshold can never be reached on
-         a small screen and the event would silently never fire. */
+      /* Measured against a band across the middle of the screen, not a fraction
+         of the section: the section is taller than a phone viewport, so a
+         percentage threshold could never be reached there. */
     }, { threshold: 0, rootMargin: '-35% 0px -35% 0px' });
     io.observe(target);
   }
 
-  /* A deferred script normally runs before DOMContentLoaded, but not if the
-     browser has already finished parsing — in which case that event has been
-     and gone and a listener for it would never fire. Check the state instead
-     of assuming it. */
+  /* A deferred script normally runs before DOMContentLoaded, but not if
+     parsing has already finished, so check readyState instead of assuming. */
   if (d.readyState === 'loading') d.addEventListener('DOMContentLoaded', watchDiagnostic);
   else watchDiagnostic();
 

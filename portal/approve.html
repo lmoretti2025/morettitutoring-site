@@ -4,29 +4,26 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<!-- The token in the query string is a credential. It is deliberately NOT
-     scrubbed from the address bar the way auth-client.js scrubs ?invite=:
-     this page has no session of its own, so scrubbing would make a plain
-     reload say "link expired". Referrer is blocked instead, which is the
-     part that could leak it off this machine. -->
+<!-- The token in the query string is a credential. It is NOT scrubbed
+     from the address bar (unlike ?invite= in auth-client.js): this page has
+     no session, so a reload would say "link expired". Referrer is blocked
+     instead, which is how it could leak. -->
 <meta name="referrer" content="no-referrer">
 <title>Portal access request &mdash; Moretti Test Prep</title>
 <link rel="icon" href="../favicon.ico" sizes="16x16 32x32 48x48">
 <link rel="apple-touch-icon" href="../apple-touch-icon.png">
 <!--
-  APPROVAL PAGE. Opened from the "someone is asking for access" email, on
-  Luca's phone, usually within a minute of the request.
+  APPROVAL PAGE. Opened from the "someone is asking for access" email,
+  usually on Luca's phone.
 
-  It lives here, on the website, rather than being rendered by Apps Script.
-  Any page an Apps Script web app serves with HtmlService hands its visitor
-  a google.script.run channel straight into the project's functions, and
-  that channel does NOT pass through doPost -- so authGuard_ never sees it.
-  With the deployment set to "Anyone", that made every non-private function
-  callable by anyone who opened the URL. See doGet in Code.gs.
+  It lives on the website rather than being rendered by Apps Script: any
+  HtmlService page hands its visitor a google.script.run channel into the
+  project that does NOT pass through doPost, so authGuard_ never sees it.
+  With the deployment set to "Anyone", that exposes every non-private
+  function. See doGet in Code.gs.
 
-  So: a plain file that talks to the same JSON API as the rest of the
-  portal. The signed token in the URL is the credential; it only ever
-  existed inside an email to Luca's own address.
+  So this is a plain file using the portal's JSON API. The signed token in
+  the URL is the credential; it only exists in an email to Luca's address.
 -->
 <style>
   :root { --red:#B0271C; --ink:#1a1a1a; --muted:#767676; }
@@ -76,10 +73,8 @@ function post(payload) {
     .then(function (r) { return r.json(); })
     .catch(function () { return { ok: false, error: 'network' }; });
 }
-/* Raw backend codes are not an error message, and this is the phone-first
-   surface: the admin panel has had sentences for these for a while, so the
-   page opened from an email should not be the one printing `busy_try_again`.
-   Anything unmapped still falls through to the code, which beats silence. */
+/* Human sentences for backend codes: this page is opened from an email
+   on a phone. Anything unmapped falls through to the raw code. */
 var PAGE_ERRORS = {
   busy_try_again: 'The server was busy with something else. Try that again in a moment.',
   bad_key: 'That student row no longer exists.',

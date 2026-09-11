@@ -114,9 +114,9 @@ nav.is-red .navmenu{background:var(--red);border-top-color:rgba(255,255,255,.2)}
   .navburger{display:flex}
   .navmenu.open{display:flex}
 }
-/* phones: logo, button and burger have to share one row. The logo must never
-   shrink (flexbox was squashing it to half its width), the button never goes
-   narrower than its longest word, and the burger keeps its size. */
+/* phones: logo, button and burger share one row. The logo never shrinks,
+   the button never goes narrower than its longest word, and the burger
+   keeps its size. */
 .nav-logo,.navburger{flex-shrink:0}
 .navcta{min-width:min-content}
 @media(max-width:560px){
@@ -134,11 +134,10 @@ nav.is-red .navmenu{background:var(--red);border-top-color:rgba(255,255,255,.2)}
 .hero .shell{position:relative;z-index:3;max-width:none;margin:0;width:100%;padding-left:clamp(1.25rem,3vw,2.8rem);padding-right:clamp(1.25rem,3vw,2.8rem);padding-bottom:clamp(1.6rem,2.6vw,2.2rem);
   flex:1;display:flex;flex-direction:column;justify-content:flex-start;padding-top:calc(clamp(2rem,5vh,4rem) + 82px);padding-bottom:clamp(1.2rem,3vh,2.6rem)}
 .hcopy{max-width:none}
-/* The floor shrinks to whatever still fits the screen. "Most students aim."
-   is 7.73em wide and never wraps, so a fixed 2.7rem floor pushed it past the
-   edge on any phone narrower than ~375px (the full stop vanished at 360,
-   "aim." ran off at 320). 7.95em leaves room for the fallback font. At
-   390px and up the floor is still 2.7rem, so nothing changes there. */
+/* The floor shrinks to what fits the screen: "Most students aim." is
+   7.73em wide and never wraps, so a fixed 2.7rem floor overflows phones
+   narrower than ~375px. 7.95em leaves room for the fallback font. At 390px
+   and up the floor is still 2.7rem. */
 h1{font-family:var(--display);font-weight:700;font-size:clamp(min(2.7rem, calc((100vw - 2.5rem) / 7.95)),9.5vw,8.4rem);line-height:.92;letter-spacing:-.042em;margin-top:0;color:#fff;text-wrap:nowrap}
 h1 em{font-style:normal;color:var(--red-lift)}
 .hero .lbl{color:rgba(255,255,255,.5)}
@@ -241,9 +240,9 @@ h1 em{font-style:normal;color:var(--red-lift)}
 .mark.go #impact{animation:impact 1.6s var(--ease) 5.25s forwards}
 @keyframes impact{0%{opacity:.85;transform:scale(.12)}100%{opacity:0;transform:scale(1.05)}}
 
-/* Sequence, on load and never gated behind an observer:
-   label wipes in, the headline lines follow overlapping, and the mark strikes
-   underneath them — the mark strikes at roughly five and a quarter seconds. */
+/* Sequence, on load and never gated behind an observer: the label wipes
+   in, the headline lines follow overlapping, and the mark strikes
+   underneath them at about 5.25s. */
 /* max-content, so each line's box IS its text: the wipe's clip-path is
    measured from the box, and a box narrower than its own nowrap text was
    clipping the end of the line off. */
@@ -258,21 +257,17 @@ h1 .ln:nth-child(2){animation-delay:1.6s}
   100%{opacity:1;clip-path:inset(0 -.12em 0 0);filter:blur(0);transform:none}
 }
 
-/* The mark is anchored to the right edge of the viewport, which is right up
-   to about 1800px. Past that the headline has stopped growing -- its text
-   ends at ~1084px however wide the screen gets -- but the anchor keeps
-   travelling, so on a large monitor the target drifts off on its own.
-   Above the crossover it is centred in the space between the end of the
-   headline and the edge of the page instead:
+/* The mark is anchored to the viewport's right edge, which works up to
+   about 1800px. Past that the headline stops growing (its text ends at
+   ~1084px) but the anchor keeps moving, so above the crossover the mark is
+   centered between the headline's end and the page edge instead:
 
        left = (100vw + 1084 - 1120) / 2  =  50vw - 18px
 
-   1834px is where that lands on exactly the same place the old anchor did
-   -- measured, not derived: the -11% resolves against the hero box, not the
-   viewport -- so the two meet without a jump and nothing at or below a
-   1728px window changes at all. Its size is left alone -- the mark is
-   aspect-ratio:1, so widening it drives it off the top and bottom of the
-   hero rather than filling the gap. */
+   1834px is where that matches the old anchor (measured, not derived: the
+   -11% resolves against the hero box), so there is no jump. Size is left
+   alone: the mark is aspect-ratio:1, so widening it would push it off the
+   top and bottom of the hero. */
 @media(min-width:1834px){
   .mark{left:calc(50vw - 18px);right:auto}
 }
@@ -287,9 +282,7 @@ h1 .ln:nth-child(2){animation-delay:1.6s}
 }
 
 /* ── VIDEO: a smaller frame held hard against the left edge, with the
-   testimonial band running out of its right side and off the screen.
-   (This is the single treatment — the old full-bleed and single-column
-   rules that used to sit here have been folded in.) ── */
+   testimonial band running out of its right side and off the screen. ── */
 /* The frame's size drives the overlap: the strip is centred on the frame, so
    pulling the section up by half the frame (less half the strip) lands the
    strip's top edge exactly on the hero's bottom edge. */
@@ -367,10 +360,9 @@ h1 .ln:nth-child(2){animation-delay:1.6s}
 .bookcard .fsub{margin-top:.4rem}
 .bookcard .fnote{margin-top:.7rem;font-size:.73rem;color:var(--muted);text-align:center}
 
-/* ── RHYTHM through the middle of the page. Programs, testimonials and the
-      instructor were three white blocks in a row after two black ones, so the
-      page flatlined between the diagnostic and the form. Now it alternates:
-      black · paper · white · black · paper · black. ── */
+/* ── RHYTHM through the middle of the page. Sections alternate
+      black · paper · white · black · paper · black, so the stretch between
+      the diagnostic and the form does not flatline. ── */
 #programs{background:var(--sunk);overflow-x:clip}  /* the cards' glow reaches 10% past each side; on phones that ran off screen */
 
 /* the instructor section carries the page's second black moment */
@@ -393,15 +385,13 @@ h1 .ln:nth-child(2){animation-delay:1.6s}
 .proofstrip .morelink:hover{color:var(--ink)}
 
 /* ══ TESTIMONIALS: a drifting wall ═════════════════════════════════
-   Two lanes running in opposite directions, slowly, pausing on hover.
-   The reason it is this and not a grid: four quotes in a grid is as many
-   as the page can hold, and there are ten reviews. A lane costs the same
-   height whether it carries four or forty, so the wall shows nine.
-   Both lanes are built from one set of cards that JS clones, and the
-   animation travels exactly -50%, so the seam lands on an identical card
-   and never shows. Cards carry their own right margin rather than the
-   lane using gap, because a gap between the two halves would not be
-   halved by -50% and the loop would jump every cycle. */
+   Two lanes running in opposite directions, slowly, pausing on hover. A
+   lane costs the same height whatever it carries, so the wall shows more
+   reviews than a grid could. Both lanes are built from one set of cards
+   that JS clones, and the animation travels exactly -50%, so the seam
+   lands on an identical card. Cards carry their own right margin instead
+   of the lane using gap, because a gap would not be halved by -50% and
+   the loop would jump every cycle. */
 .tmarq{--tmark:clamp(27px,2.5vw,36px);position:relative;overflow:hidden;
   margin-top:clamp(1.4rem,2.6vw,2.2rem);
   margin-left:calc(50% - 50vw);width:100vw;
@@ -597,11 +587,9 @@ h1 .ln:nth-child(2){animation-delay:1.6s}
 .proof .shell{max-width:none;padding:0 clamp(1.25rem,3vw,2.8rem);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px}
 @media(max-width:820px){.proof .shell{grid-template-columns:repeat(2,1fr)}}
 .pcell{padding:clamp(2.6rem,5vw,4.6rem) 1.4rem;position:relative;text-align:center}
-/* THE ASK, IN THE HERO. It used to live only at the foot of the page, so a
-   parent who was already convinced by the headline had nowhere to go but
-   scroll. The proof sits beside it rather than under it -- one real
-   sentence from one real parent, which is the only thing that earns a
-   place next to a button this early. */
+/* THE ASK, IN THE HERO, so a parent convinced by the headline has
+   somewhere to go. The proof sits beside it: one real sentence from one
+   real parent. */
 .hcta{display:flex;align-items:center;gap:clamp(1rem,2.4vw,2rem);flex-wrap:wrap;
   margin-top:clamp(1.6rem,3vw,2.4rem);
   /* Lands with the first programme tile, in the tiles' own motion, so the
@@ -709,15 +697,12 @@ section{padding:clamp(3.6rem,7vw,6.2rem) 0;border-bottom:1px solid var(--line)}
   border-radius:50%;filter:blur(34px);animation:pgGlow 7s ease-in-out infinite;
   background:radial-gradient(ellipse at 50% 60%,rgba(176,39,28,.42) 0%,rgba(176,39,28,.16) 45%,transparent 72%);
   transition:opacity .5s var(--ease),inset .55s var(--ease),filter .55s var(--ease)}
-/* ═══ THE CURSOR'S CARD, UNMISTAKABLY ═══ the hover state used to set
-   opacity:1 on a layer that pgGlow was already animating, and a running
-   animation beats a plain declaration -- so the only thing hover actually
-   changed was the gradient's colour stops, under a blur, at 42% alpha.
-   Killing the animation is what lets the opacity land; the halo then grows
-   past the card edges, blooms brighter and softer, and the two cards the
-   cursor is NOT on pull their own glow back so the lit one reads as the
-   only one on. :not(:hover) keeps that dimming off the hovered card
-   outright rather than relying on which rule wins the cascade. */
+/* ═══ THE CURSOR'S CARD, UNMISTAKABLY ═══ pgGlow animates this layer's
+   opacity, and a running animation beats a plain declaration, so hover
+   must kill the animation for opacity:1 to land. The halo then grows past
+   the card edges, and the cards the cursor is NOT on dim their glow so the
+   lit one reads as the only one on. :not(:hover) keeps that dimming off
+   the hovered card regardless of cascade order. */
 .pgcard:hover::after,.pgcard:focus-visible::after{animation:none;opacity:1;
   inset:-34% -28% -38%;filter:blur(58px);
   background:radial-gradient(ellipse at 50% 58%,rgba(240,96,78,.95) 0%,rgba(214,60,44,.66) 34%,rgba(176,39,28,.3) 60%,transparent 80%)}
@@ -734,11 +719,8 @@ section{padding:clamp(3.6rem,7vw,6.2rem) 0;border-bottom:1px solid var(--line)}
 .pgglyph::before{content:'';position:absolute;left:50%;top:50%;width:124%;aspect-ratio:1;transform:translate(-50%,-50%);
   border-radius:50%;background:radial-gradient(circle,rgba(176,39,28,.42) 0%,rgba(176,39,28,.12) 46%,transparent 70%);
   transition:transform .9s var(--ease)}
-/* The inner wash used to brighten and swell on hover as well, so the card
-   face itself changed value under the cursor -- the light read as coming
-   through the card rather than from behind it. The halo on ::after is the
-   backlight; the face stays put, so the only thing that changes is what is
-   lit behind it. */
+/* The inner wash stays put on hover: the halo on ::after is the
+   backlight, so only what is lit behind the card changes, not the face. */
 .pgglyph::before{transition:transform .9s var(--ease)}
 .pgglyph b{position:relative;font-family:var(--display);font-weight:700;font-size:clamp(2.8rem,5vw,4.3rem);
   letter-spacing:-.035em;line-height:1;color:var(--red-lift);transition:transform .6s var(--ease)}
@@ -800,10 +782,9 @@ section{padding:clamp(3.6rem,7vw,6.2rem) 0;border-bottom:1px solid var(--line)}
 .instr .ihed{font-family:var(--display);font-weight:700;font-size:clamp(1.55rem,2.9vw,2.2rem);
   line-height:1.14;letter-spacing:-.018em;margin-top:.7rem}
 .instr .ilead{margin-top:1.15rem;font-size:.98rem;line-height:1.68;max-width:56ch}
-/* Northwestern in its own serif and its own purple, as it was on the old
-   About section. The brand value is rgb(63,30,104), which is all but
-   invisible on this black -- so it is lifted to a tint of the same hue that
-   still reads as Northwestern rather than as a generic link colour. */
+/* Northwestern in its own serif and purple. The brand value rgb(63,30,104)
+   is nearly invisible on black, so it is lifted to a tint of the same hue
+   that still reads as Northwestern rather than a generic link color. */
 .nu-link{font-family:'Goudy Old Style','Sorts Mill Goudy',Georgia,serif;font-weight:700;
   font-size:1.06em;color:#A98BD8;text-decoration:none;
   border-bottom:1px solid transparent;transition:color .2s,border-color .2s}
@@ -813,19 +794,16 @@ section{padding:clamp(3.6rem,7vw,6.2rem) 0;border-bottom:1px solid var(--line)}
   color:var(--body);border-radius:99px;transition:border-color .22s,color .22s,background .22s}
 .creds span:hover{background:var(--sunk)}
 .creds span:hover{border-color:var(--ink);color:var(--ink)}
-/* THE THREE PARTS, LABELLED. The guarantee used to be two paragraphs, and
-   readers came away unsure which half was the promise and which was the
-   reasoning behind it -- one parent read the sixty as a forecast rather than
-   a threshold. Numbered because it genuinely is a sequence: what you do,
-   what the test is, what happens if it is not met. */
+/* THE THREE PARTS, LABELED, so readers can tell the promise from the
+   reasoning (the sixty is a threshold, not a forecast). Numbered because
+   it is a sequence: what you do, what the test is, what happens if it is
+   not met. */
 /* ══ THE GUARANTEE ═══════════════════════════════════════════════════════
-   Its own band between the numbers and the diagnostic, rather than a note in
-   the margin of the instructor bio -- it is the single most load-bearing
-   promise on the site and it was being read last, if at all. Closed by
-   default: the headline IS the guarantee, and the terms are there for the
-   parent who wants them without making everyone else scroll past them.
-   Both neighbours are black, so this earns its separation from scale and a
-   pair of hairlines rather than another colour. */
+   Its own band between the numbers and the diagnostic: it is the most
+   load-bearing promise on the site. Closed by default: the headline IS the
+   guarantee, and the terms are there for the parent who wants them.
+   Both neighbors are black, so it is separated by scale and a pair of
+   hairlines rather than another color. */
 .gsec{background:#000;color:#EDE7E5;border-bottom:none;padding:0}
 .gdrop{border-top:1px solid rgba(255,255,255,.14);border-bottom:1px solid rgba(255,255,255,.14)}
 .gdrop summary{list-style:none;cursor:pointer;display:grid;gap:.85rem;
@@ -1459,14 +1437,12 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}footer a:hover{color:#f
 </div></footer>
 
 <script src="portal/backend-url.js"></script>
-<!-- STUDENT SIGN-IN, ON THIS PAGE. Every "Student Login" link used to be a
-     trip to the portal's own login screen; now it opens the same sign-in as
-     a dialog here, and only a signed-in student is actually sent to
-     /portal. This is the portal's own auth-client.js, loaded in modal mode
-     (see MODAL in that file) -- it paints nothing and wraps nothing until a
-     link below is clicked. The session it writes is localStorage on this
-     origin, which is exactly where the portal looks for it, so the student
-     lands there already signed in. -->
+<!-- STUDENT SIGN-IN, ON THIS PAGE. "Student Login" links open the portal's
+     sign-in as a dialog here, and only a signed-in student is sent to
+     /portal. This is the portal's own auth-client.js in modal mode (see
+     MODAL in that file): it paints nothing until a link below is clicked.
+     The session goes to localStorage on this origin, where the portal looks
+     for it, so the student lands already signed in. -->
 <script>window.MORETTI_AUTH_MODE = 'modal';</script>
 <script src="portal/auth-client.js"></script>
 <script>
@@ -1911,10 +1887,9 @@ mtaSafe(function(){
   addEventListener('resize', function(){ if(innerWidth>820) set(false); }, {passive:true});
 });
 
-/* ── the sitting named beside the form used to be hardcoded, and went
-      stale the moment that date passed. Pick the first SAT that still has
-      the full twelve weeks in front of it. The markup ships with today's
-      correct answer, so this only has to keep it true. ── */
+/* ── the sitting named beside the form: the first SAT that still has
+      the full twelve weeks in front of it. The markup ships with the
+      correct answer, so this only keeps it true. ── */
 mtaSafe(function(){
   var el=document.getElementById('cd-fit'); if(!el) return;
 /* ── The drifting testimonial wall ──────────────────────────────────
@@ -2080,9 +2055,8 @@ mtaSafe(function(){
     requestAnimationFrame(step);
   }
   if(!('IntersectionObserver' in window)){ cells.forEach(run); return; }
-  /* A ratio of 0.6 was only detected if a sampling frame happened to land
-     inside it — scroll past quickly and the numbers stayed on zero for good.
-     Lower bar to trigger, plus a scroll sweep so nothing can be missed. */
+  /* A low 0.2 trigger (0.6 is easy to skip on a fast scroll, leaving the
+     numbers at zero), plus a scroll sweep so nothing is missed. */
   var io=new IntersectionObserver(function(en){
     en.forEach(function(x){ if(x.isIntersecting && x.intersectionRatio>=0.2){ run(x.target); io.unobserve(x.target); } });
   },{threshold:[0,.2,.6,1],rootMargin:'0px 0px -8% 0px'});
@@ -2147,10 +2121,9 @@ mtaSafe(function(){
     var phone = document.getElementById('rf-phone').value.trim();
     var email = document.getElementById('rf-email').value.trim();
     var message = document.getElementById('rf-message').value.trim();
-    /* Three required fields, for something that costs nothing. Grade, subject
-       and whether you are the parent or the student are all answerable in the
-       first thirty seconds of the call; asking for them here turned a free
-       diagnostic into a quoting form. */
+    /* Only name, phone and email are required: grade, subject and parent vs
+       student are answered in the first minute of the call, and asking here
+       turns a free diagnostic into a quoting form. */
     if (!checkFields(name, phone, email)) return;
 
     var honeypot = document.getElementById('rf-hp').value;
@@ -2185,9 +2158,8 @@ mtaSafe(function(){
         if (!data || !data.ok) throw new Error('submit_failed');
         note.style.display='none'; ok.style.display='block'; bad.style.display='none';
         // The conversion. Fired only on a confirmed write to the sheet, so a
-        // failed submit or a tripped honeypot never counts as a lead.
-        // No name, phone or email is passed on — the analytics tools are told
-        // that a lead happened, never who it was.
+        // failed submit or tripped honeypot never counts. No name, phone or
+        // email is passed: analytics learn that a lead happened, never who.
         try {
           if (window.MTrack) window.MTrack.lead({ source: 'site_form', has_message: message ? 1 : 0 });
         } catch (err) {}
@@ -2202,11 +2174,9 @@ mtaSafe(function(){
 });
 
 /* ── one of the parents' own sentences, chosen per visit ──────────────────
-   Deliberately at LOAD, not on a timer. The programme tiles beside this can
-   rotate because they are labels -- you take one in at a glance and nothing
-   is lost if it changes. A quote is a sentence, read left to right, and
-   swapping it out mid-read loses the reader. This way the range shows across
-   visits and nobody ever watches it change.
+   Chosen at LOAD, not on a timer: a quote is read left to right, and
+   swapping it mid-read loses the reader (the program tiles can rotate
+   because they are glanceable labels).
 
    Every line is a verbatim excerpt from a review on the Results page, with
    the outcome bolded and the name attached; the markup already holds the
