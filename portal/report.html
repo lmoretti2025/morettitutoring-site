@@ -1091,13 +1091,13 @@
 
   <!-- 2. METHOD — right answers bought at too high a price. -->
   <div class="sec-hed" id="budget-hed" style="display:none;">Efficiency</div>
-  <p class="chart-sub" id="budget-sub" style="display:none;">Right answers that cost more time than they should have. Measured against a fixed target, not <span id="budget-sub-first"></span>&rsquo;s own average &mdash; so being evenly slow still shows up.</p>
+  <p class="chart-sub" id="budget-sub" style="display:none;">Right answers that cost more time than they should have. Measured against a fixed target, not <span id="budget-sub-first"></span>&rsquo;s own average, so being evenly slow still shows up.</p>
   <div class="budget-card" id="budget-card" style="display:none;"></div>
 
   <!-- 3. CLOCK — whether the section was ever going to fit. -->
   <div class="sec-hed" id="timing-hed" style="display:none;">Pacing</div>
   <div class="timing-card" id="timing-card" style="display:none;">
-    <p class="chart-sub" id="timing-allocation-sub" style="display:none;">One module at a time &mdash; the running total of time spent against the target pace for these questions. The target deliberately adds up to <em>less</em> than the module clock: that gap is the reserve, there to be spent on the questions that run long and on the review pass at the end. So tracking the target and finishing a few minutes early is the plan working &mdash; finishing <em>far</em> early means the reserve was never used.</p>
+    <p class="chart-sub" id="timing-allocation-sub" style="display:none;">One module at a time: the running total of time spent against the target pace for these questions. The target deliberately adds up to <em>less</em> than the module clock: that gap is the reserve, there to be spent on the questions that run long and on the review pass at the end. So tracking the target and finishing a few minutes early is the plan working. Finishing <em>far</em> early means the reserve was never used.</p>
     <div id="timing-allocation" style="display:none;"></div>
   </div>
 
@@ -2503,7 +2503,7 @@
   if (attemptDate && isNaN(attemptDate.getTime())) attemptDate = null;
   var timeStr = attemptDate ? attemptDate.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : null;
 
-  document.getElementById('r-title').textContent = data.n + ' — ' + (data.ptTitle ? data.ptTitle + ' Report' : data.t + ' Diagnostic Report');
+  document.getElementById('r-title').textContent = data.n + ' · ' + (data.ptTitle ? data.ptTitle + ' Report' : data.t + ' Diagnostic Report');
   document.getElementById('r-sub').textContent = 'Administered ' + dateStr + (timeStr ? ' at ' + timeStr : '') + ' · Moretti student portal';
   document.getElementById('r-sub2').textContent = data.n + ' · ' + data.t + ' Diagnostic · ' + dateStr;
   var ftrDate = document.getElementById('ftr-date');
@@ -3818,7 +3818,7 @@
         var baseText = clockShown
           ? 'Each colored bar is the composite points sitting behind one skill on this form. The slate bar at the right is different: those are points on questions the clock never allowed, and no amount of re-teaching moves them — the fix there is pacing, not content. Hover any bar for detail, or click it to see those questions.'
           : 'Each bar is the composite points sitting behind one skill on this form. Hover a bar for that skill\'s accuracy, or click it to see those questions.';
-        baseText += ' This chart is sized by where the points are, not by what to work on first — the sections below rank that, and a large bar here without a matching finding there means the points are real but this one form could not separate that area from ' + first + '\u2019s own average.';
+        baseText += ' This chart is sized by where the points are, not by what to work on first. The sections below rank that, and a large bar here without a matching finding there means the points are real but this one form could not separate that area from ' + first + '\u2019s own average.';
         baseText += ' The dashed bar on the right, ' + reachable + ', is what ' + first + ' would score with every single miss corrected' +
           (hitCeiling ? ' — the top of the scale' : '') +
           '. It is a ceiling, not a projection: no test can tell you how much of it is actually reachable, and real gains are a fraction of it.';
@@ -3844,7 +3844,7 @@
             '% of everything missed here, so it needs sustained work across most of the list above, not a few fixes.';
         } else {
           targetText = 'The dashed line marks the target of ' + targetScore + '. That is ' + Math.round(shareOfPool * 100) +
-            '% of everything missed here — reachable by closing the largest gaps above rather than all of them.';
+            '% of everything missed here, reachable by closing the largest gaps above rather than all of them.';
         }
         note.textContent = baseText + ' ' + targetText;
         noteOuter.appendChild(note);
@@ -4559,7 +4559,7 @@
         // the surplus those targets bank is the whole point). The finding
         // here is not "finished early" — it is "finished early, with
         // questions still wrong, having never spent the reserve on them."
-        behaviorFlags.push('<strong>Unused time (' + s7.label + '):</strong> ' + first + ' submitted with roughly ' + Math.round(leftoverMin) + ' of ' + Math.round(s7.timeAllottedMin) + ' minutes still on the clock (about ' + Math.round(leftoverShare * 100) + '% of the section) while still missing ' + missedHere + ' question' + (missedHere === 1 ? '' : 's') + ' here. The per-question targets already bank a few minutes of reserve, so finishing a little early is expected &mdash; this is more than that, and it went unspent on questions that needed it. Worth checking whether ' + first + ' is submitting out of habit rather than using the full section to go back and recheck answers.');
+        behaviorFlags.push('<strong>Unused time (' + s7.label + '):</strong> ' + first + ' submitted with roughly ' + Math.round(leftoverMin) + ' of ' + Math.round(s7.timeAllottedMin) + ' minutes still on the clock (about ' + Math.round(leftoverShare * 100) + '% of the section) while still missing ' + missedHere + ' question' + (missedHere === 1 ? '' : 's') + ' here. The per-question targets already bank a few minutes of reserve, so finishing a little early is expected. This is more than that, and it went unspent on questions that needed it. Worth checking whether ' + first + ' is submitting out of habit rather than using the full section to go back and recheck answers.');
       }
     }
   });
@@ -4750,7 +4750,7 @@
          and well-evidenced read — 6 of 12 missed questions in Math got real
          effort, on n=12, which is worth saying. Naming WHICH skills is
          section 1's job, and it is now equipped to do it properly. */
-      behaviorFlags.push('<strong>Stuck flag (' + s7.label + '):</strong> ' + stuckWrong.length + ' of ' + missedForFlags + ' missed multiple-choice questions here took well over ' + first + '’s own typical time on a correct answer — real, deliberate effort that still came back wrong, not a rushed guess. That points at content rather than pacing; Knowledge below names the specific skills where the evidence supports it.');
+      behaviorFlags.push('<strong>Stuck flag (' + s7.label + '):</strong> ' + stuckWrong.length + ' of ' + missedForFlags + ' missed multiple-choice questions here took well over ' + first + '’s own typical time on a correct answer: real, deliberate effort that still came back wrong, not a rushed guess. That points at content rather than pacing; Knowledge below names the specific skills where the evidence supports it.');
     }
     if (missedForFlags >= 4 && rushedWrong.length / missedForFlags >= 0.5) {
       var wSkills = topSkillNames(rushedWrong, 3).join(', ');
@@ -5234,8 +5234,8 @@
       /* The numbers moved onto the rows themselves (see rowsHtml), so this
          sentence no longer repeats them three inches above where they now
          appear -- it keeps the framing and points at them instead. */
-      var ciTxt = ' Small sample, so treat it as the first lead rather than a verdict &mdash; ' +
-        'the range beside each area is how wide the honest answer still is.';
+      var ciTxt = ' Small sample, so treat it as the first lead rather than a verdict. ' +
+        'The range beside each area is how wide the honest answer still is.';
       // The skills inside the lead domain, named as detail. This is where a
       // tutor gets the specificity that used to be claimed as a ranked
       // finding — same information, no longer presented as an inference the
@@ -5377,7 +5377,7 @@
       if (top.severity === 3) {
         contentTxt = top.stuck >= top.onpace
           ? open + top.content + ' of ' + top.total + ' were missed after real time went into them &mdash; review the content before drilling speed.'
-          : open + top.content + ' of ' + top.total + ' were missed at a normal working pace &mdash; not rushed and not laboured, which points at the material itself rather than at how it was worked.';
+          : open + top.content + ' of ' + top.total + ' were missed at a normal working pace, neither rushed nor labored, which points at the material itself rather than at how it was worked.';
       }
       return (top.severity === 3
         ? contentTxt
@@ -5476,7 +5476,7 @@
        scope is selected — it describes what this test could resolve, which
        is a property of the form and not of the section being viewed. */
     var COVERAGE =
-      '<p class="skilldx-thin"><strong>The order:</strong> these are ranked by how many points an area is costing and how reachable it is &mdash; not by percentage wrong. ' +
+      '<p class="skilldx-thin"><strong>The order:</strong> these are ranked by how many points an area is costing and how reachable it is, not by percentage wrong. ' +
         'A big area like Algebra or Standard English Conventions can show a gentler percentage than a small one like Geometry and Trigonometry and still be worth far more, because it is a bigger share of every form and because nothing has to be true first before it can be taught. ' +
         'Percentage alone would send ' + first + ' to the content that appears least often and is hardest to reach.</p>' +
       '<p class="skilldx-thin"><strong>Reading this:</strong> these are content areas, not individual skills. ' +
@@ -5491,7 +5491,7 @@
             .filter(function (n) { return n > 0; }).sort(function (a, b) { return a - b; });
           return sn.length ? sn[0] + '&ndash;' + sn[sn.length - 1] : 'far fewer';
         })() + ', too few to rank one against another on a single form. ' +
-        'The skills named above are where the misses fell inside their area &mdash; treat them as where to look, not as an order to work through.</p>' +
+        'The skills named above are where the misses fell inside their area. Treat them as where to look, not as an order to work through.</p>' +
       (thinRows.length
         ? (function () {
             var sorted = thinRows.slice().sort(function (a, b) { return b.total - a.total; });
@@ -6212,7 +6212,7 @@
         svgEl('line', { x1: L, x2: L + iw, y1: yAt(clockMs), y2: yAt(clockMs),
           stroke: 'var(--ink)', 'stroke-width': 1.25, 'stroke-dasharray': '2 3', opacity: 0.55 });
         svgEl('text', { x: L + 4, y: yAt(clockMs) - 5, class: 'pace-note', fill: 'var(--ink)',
-          opacity: 0.72 }, 'Module clock — ' + Math.round(mv.clockMin) + ' min');
+          opacity: 0.72 }, 'Module clock: ' + Math.round(mv.clockMin) + ' min');
       }
       function line(key, attrs) {
         attrs.d = smoothD(seriesPts(key));
@@ -6717,16 +6717,16 @@
            read the words "costing points" anywhere on this card. */
         if (lead.c.key === 'method') {
           return where + '<span class="dx-lead">' + esc(nm('Method')) +
-            ' is the only thing showing</span> &mdash; and it cost time rather than points: ' +
+            ' is the only thing showing</span>, and it cost time rather than points: ' +
             'every question here was answered correctly, just slowly. See ' + esc(lead.c.section) + ' below.';
         }
         return where + '<span class="dx-lead">' + esc(nm(lead.c.name)) +
-          ' is the only thing costing points</span> &mdash; ' + lead.c.short +
+          ' is the only thing costing points</span>: ' + lead.c.short +
           '. See ' + esc(lead.c.section) + ' below.';
       }
       if (decisive) {
         return where + '<span class="dx-lead">' + esc(nm(lead.c.name)) +
-          ' is the main story</span> &mdash; ' + lead.c.short +
+          ' is the main story</span>: ' + lead.c.short +
           '. Start with ' + esc(lead.c.section) + ' below.';
       }
       /* The mixed case names the sections that actually contribute. The
@@ -7060,7 +7060,7 @@
             rowsHtml +
             '<p class="budget-concentration">' +
               (spread === 'few'
-                ? '<strong>Only ' + over.length + ' skill' + (over.length === 1 ? '' : 's') + ' ran past budget here at all</strong> &mdash; ' +
+                ? '<strong>Only ' + over.length + ' skill' + (over.length === 1 ? '' : 's') + ' ran past budget here at all</strong>, and ' +
                   'everything else came in on target. As narrow a target as it gets.'
                 : spread === 'concentrated'
                 ? '<strong>' + toMost + ' skill' + (toMost === 1 ? '' : 's') + ' account' + (toMost === 1 ? 's' : '') +
@@ -7072,8 +7072,8 @@
                      share are 2-3 question samples, the concentration is real as
                      a description of THIS form and unproven as a target. */
                   (over.slice(0, toMost).every(function (x) { return x.n >= MIN_JUDGEABLE_N; })
-                    ? ' &mdash; narrow enough to drill directly.'
-                    : ' &mdash; though the skills carrying it appeared only a handful of times, so confirm on a second form before building a plan around them.')
+                    ? ', narrow enough to drill directly.'
+                    : ', though the skills carrying it appeared only a handful of times, so confirm on a second form before building a plan around them.')
                 : spread === 'domain'
                 ? '<strong>' + Math.round(domainShare * 100) + '% of the time lost here is in ' + esc(topDomain.domain) +
                   '</strong>, across ' + domainSkills + ' of its skills rather than one. That is one problem, not ' + domainSkills +
@@ -7276,7 +7276,7 @@
             '<em>' + causes.content + ' question' + (causes.content === 1 ? '' : 's') +
             ' on this form got real effort and still came back wrong.</em>'
           : areaTxt
-          ? 'Re-teach then drill ' + areaTxt + ' &mdash; in that order, because drilling a topic that was never taught properly just rehearses the wrong method. ' +
+          ? 'Re-teach then drill ' + areaTxt + ', in that order, because drilling a topic that was never taught properly just rehearses the wrong method. ' +
             '<em>' + causes.content + ' question' + (causes.content === 1 ? '' : 's') + ' on this form got real effort and still came back wrong.</em>'
           : 'Work the questions this form got wrong. ' +
             '<em>No single area separated from ' + first + '’s own average, so this is breadth &mdash; spread it across the misses rather than picking one topic.</em>')
@@ -7309,7 +7309,7 @@
       ? 'About <b>' + hrs(weekly) + ' hour a week</b>, and only that. Nothing on this attempt actually cost ' + first + ' any points &mdash; every question that came up was answered correctly. What the timing shows is ' + causes.method + ' of those correct answers running well over the time they should take, which is worth keeping an eye on because it is the thing that would bite first on a harder form. There is no content to re-teach here.'
       : clockOnly
       ? 'About <b>' + hrs(weekly) + ' hour' + (weekly === 1 ? '' : 's') + ' a week</b>, and deliberately not more. Everything this test could attribute went to the clock rather than to the material, so there is no content to re-teach and no method to drill &mdash; adding hours of either to fill out a longer week would be inventing work the evidence does not support.'
-      : 'About <b>' + hrs(weekly) + ' hours a week</b>, split the way this test actually came apart &mdash; weighted toward <b>' + leadWord + '</b>, which cost the most questions here. ' +
+      : 'About <b>' + hrs(weekly) + ' hours a week</b>, split the way this test actually came apart and weighted toward <b>' + leadWord + '</b>, which cost the most questions here. ' +
         'The split is the point: an hour spent on the wrong one of these three does close to nothing, which is why it is written down rather than left to judgment in the moment.';
     var html = '<div class="plan-card">' +
       '<p class="plan-lede">' + lede + '</p>' +
@@ -7320,7 +7320,7 @@
             '<div class="plan-what">' + r.what + '</div></div>';
         }).join('') +
       '</div>' +
-      '<p class="plan-foot">This is a starting allocation off one test, not a syllabus. It should be re-cut after the next full-length test &mdash; the shares above are the shape of <em>this</em> attempt, and the fastest-moving of the three is usually method, so the split that is right in week one is rarely still right in week five.</p>' +
+      '<p class="plan-foot">This is a starting allocation off one test, not a syllabus. It should be re-cut after the next full-length test. The shares above are the shape of <em>this</em> attempt, and the fastest-moving of the three is usually method, so the split that is right in week one is rarely still right in week five.</p>' +
     '</div>';
 
     /* Diagnostics only. A four-week split is an opening allocation read off
