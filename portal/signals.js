@@ -711,12 +711,13 @@ var MorettiSignals = (function () {
   // entries: { composite, rw?, math?, testId?, mode? }. Section-only sittings
   // and the hardest test are not comparable to full tests.
   function isTrendComparable(e) {
+    if (!e) return false;
     // The self-reported baseline (PSAT or an outside SAT, typed in) is a
     // starting point to show, not a test to average in.
     // A sitting the clock ran out on while the student was away, or with more
     // than 10 minutes away, measures the interruption, not the student.
     var interrupted = e.interrupted === true || e.interrupted === 'ranout' || (typeof e.awayMin === 'number' && e.awayMin > 10);
-    return !!e && typeof e.composite === 'number' && isFinite(e.composite) && e.testId !== HARDEST_TEST_ID &&
+    return typeof e.composite === 'number' && isFinite(e.composite) && e.testId !== HARDEST_TEST_ID &&
       e.mode !== 'section' && e.source !== 'baseline' && !interrupted;
   }
   function levelOf(list) {
