@@ -67,9 +67,12 @@
     }
   }
 
-  var useGa4   = configured(CONFIG.ga4)       && !onPortal;
-  var useMeta  = configured(CONFIG.metaPixel) && !onPortal;
-  var useAds   = configured(CONFIG.googleAds) && !onPortal;
+  // Only the live site counts: local previews and dev servers were being
+  // recorded as real visits.
+  var liveHost = /(^|\.)morettitutoring\.com$/.test(w.location.hostname);
+  var useGa4   = configured(CONFIG.ga4)       && !onPortal && liveHost;
+  var useMeta  = configured(CONFIG.metaPixel) && !onPortal && liveHost;
+  var useAds   = configured(CONFIG.googleAds) && !onPortal && liveHost;
 
   /* ── Google (GA4, and Google Ads through the same tag) ─────────────────── */
   w.dataLayer = w.dataLayer || [];
