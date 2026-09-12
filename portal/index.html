@@ -5300,7 +5300,7 @@ window.Portal = {
      header in fluid-ui.js. -->
 <script src="fluid-ui.js?v=20260905y"></script>
 <script src="banks.js?v=20260910a"></script>
-<script src="signals.js?v=20260912b"></script>
+<script src="signals.js?v=20260912c"></script>
 <script src="desmos-tags.js?v=20260912a"></script>
 <script src="time-budgets.js?v=20260905y"></script>
 <script src="challenge-questions.js?v=20260911a"></script>
@@ -12368,7 +12368,14 @@ window.Portal = {
           var curves = { 'reading-writing': SCORE_RW_CURVE, 'math': SCORE_MATH_CURVE };
           return window.MorettiSignals.summarizeAttempt(payload.s.map(function (s) {
             var bank = bankFor(s.k);
-            return { sec: s, questions: sectionQuestions(bank, s.v), module1Length: bank.module2Easier ? bank.module1.length : undefined };
+            // Each question's time target, scaled for extended time, for the
+            // Desmos over-use and "over target without Desmos" counts.
+            var mult = (window.TIME_BUDGETS && s.tl) ? window.TIME_BUDGETS.timeMultFromAllotted(s.k, !!bank.module2Easier, s.tl) : 1;
+            var budgetSec = window.TIME_BUDGETS ? function (q) {
+              var bq = window.TIME_BUDGETS.budgetSecondsFor(s.k, q.domain, q.skill, q.difficulty, mult || 1);
+              return bq && bq.ms ? bq.ms / 1000 : null;
+            } : undefined;
+            return { sec: s, questions: sectionQuestions(bank, s.v), module1Length: bank.module2Easier ? bank.module1.length : undefined, budgetSec: budgetSec };
           }), {
             grade: isCorrect,
             // Desmos favourability per question, once a reviewed tag file
@@ -20449,6 +20456,11 @@ window.renderNativeReport = function (data) {
        passage-and-table question is about fourteen seconds, and nobody
        reads that much in fourteen seconds. */
     var rushedWrong = [], luckyCorrect = [], stuckWrong = [];
+    // The flags' denominator: multiple-choice misses that were answered and
+    // timed, the same population their numerators come from. Dividing by
+    // every miss (blanks included) diluted the 50% gates for students who
+    // left questions blank (audit 2026-09-12).
+    var mcMissAnswered = 0;
     s7.rows.forEach(function (r) {
       if (r.skipped) return; // never answered: not content, not haste (see report.html)
       if (!(pacingTimeMs(r) > 0)) return;
@@ -20460,6 +20472,7 @@ window.renderNativeReport = function (data) {
          defined for grid-ins too. Including them matters most in Math,
          where grid-ins are concentrated. */
       if (r.q.type === 'mc') {
+        if (!r.ok) mcMissAnswered++;
         if (!r.ok && hurry(r)) rushedWrong.push({ sk: r.sk });
         if (!r.ok && pacingTimeMs(r) >= stuckCutoff) stuckWrong.push({ sk: r.sk });
         if (r.ok && r.q.difficulty === 'hard' && pacingTimeMs(r) < luckyCutoff) luckyCorrect.push({ sk: r.sk });
@@ -20539,21 +20552,21 @@ window.renderNativeReport = function (data) {
     // "needs content review" (stuck) from "spend more time here" (rushed),
     // which the skill breakdown alone cannot. Same sample-size gate as the
     // pacing flag.
-    var missedForFlags = s7.missedMcAll || s7.missedMc;
+    var missedForFlags = mcMissAnswered;
     if (missedForFlags >= 4 && stuckWrong.length / missedForFlags >= 0.5) {
       /* Does not name skills. Named skills here would come off 2-3 questions
          each (skills section 1 says it cannot judge), and would answer
          section 1's question with a different, self-relative statistic that
          can disagree with it. The section-level count is kept as a separate,
          well-evidenced read; naming skills is section 1's job. */
-      behaviorFlags.push('<strong>Worked hard, still missed (' + s7.label + '):</strong> ' + stuckWrong.length + ' of ' + missedForFlags + ' missed multiple-choice questions here took well over your usual time for a right answer. That is real effort that still came back wrong, not a rushed guess, so the fix is knowledge, not speed. <strong>Next:</strong> relearn before timed practice; “What to relearn” above says where to start.');
+      behaviorFlags.push('<strong>Worked hard, still missed (' + s7.label + '):</strong> ' + stuckWrong.length + ' of the ' + missedForFlags + ' multiple-choice questions you answered and missed here took well over your usual time for a right answer. That is real effort that still came back wrong, not a rushed guess, so the fix is knowledge, not speed. <strong>Next:</strong> relearn before timed practice; “What to relearn” above says where to start.');
     }
     if (missedForFlags >= 4 && rushedWrong.length / missedForFlags >= 0.5) {
       var wSkills = topSkillNames(rushedWrong, 3).join(', ');
       var rushedBasis = usingFirstPass
         ? 'given well under your usual first look at a question you got right'
         : 'answered in well under your usual time for a right answer';
-      behaviorFlags.push('<strong>Answered too fast (' + s7.label + '):</strong> ' + rushedWrong.length + ' of ' + missedForFlags + ' missed multiple-choice questions here were ' + rushedBasis + '. That looks like rushing more than not knowing.' + (wSkills ? ' Most were in ' + wSkills + '.' : '') + ' <strong>Next test:</strong> read each question to the end before choosing.');
+      behaviorFlags.push('<strong>Answered too fast (' + s7.label + '):</strong> ' + rushedWrong.length + ' of the ' + missedForFlags + ' multiple-choice questions you answered and missed here were ' + rushedBasis + '. That looks like rushing more than not knowing.' + (wSkills ? ' Most were in ' + wSkills + '.' : '') + ' <strong>Next test:</strong> read each question to the end before choosing.');
     }
     var hardCorrectN = s7.diff.hard.c;
     if (hardCorrectN >= 3 && luckyCorrect.length >= 2 && luckyCorrect.length / hardCorrectN >= 0.4) {

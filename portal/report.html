@@ -3805,6 +3805,11 @@
        passage question is about 14 seconds, too little to read a passage, a
        table and four options. */
     var rushedWrong = [], luckyCorrect = [], stuckWrong = [];
+    // The flags' denominator: multiple-choice misses that were answered and
+    // timed, the same population their numerators come from. Dividing by
+    // every miss (blanks included) diluted the 50% gates for students who
+    // left questions blank (audit 2026-09-12).
+    var mcMissAnswered = 0;
     s7.rows.forEach(function (r) {
       // A question left blank was never answered, so it says nothing about
       // the material or about haste; "What went wrong" already counts it as
@@ -3820,6 +3825,7 @@
          concentrated in Math, so excluding them would starve the Math areas
          of evidence. */
       if (r.q.type === 'mc') {
+        if (!r.ok) mcMissAnswered++;
         if (!r.ok && hurry(r)) rushedWrong.push({ sk: r.sk });
         if (!r.ok && pacingTimeMs(r) >= stuckCutoff) stuckWrong.push({ sk: r.sk });
         if (r.ok && r.q.difficulty === 'hard' && pacingTimeMs(r) < luckyCutoff) luckyCorrect.push({ sk: r.sk });
@@ -3896,21 +3902,21 @@
     // Stuck flag: missed questions where real, deliberate time was spent
     // (the counterpart to the Pacing flag below). See index.html's
     // identical block.
-    var missedForFlags = s7.missedMcAll || s7.missedMc;
+    var missedForFlags = mcMissAnswered;
     if (missedForFlags >= 4 && stuckWrong.length / missedForFlags >= 0.5) {
       /* Does not name skills. Stuck-question skills rest on 2-3 questions each
          (exactly what section 1 says it cannot judge) and would use a
          different, self-relative statistic from section 1's, so the two
          could disagree. The section-level count is kept because it is
          separately well evidenced; naming skills is section 1's job. */
-      behaviorFlags.push('<strong>Worked hard, still missed (' + s7.label + '):</strong> ' + stuckWrong.length + ' of ' + missedForFlags + ' missed multiple-choice questions here took well over your usual time for a right answer. That is real effort that still came back wrong, not a rushed guess, so the fix is knowledge, not speed. <strong>Next:</strong> relearn before timed practice; “What to relearn” above says where to start.');
+      behaviorFlags.push('<strong>Worked hard, still missed (' + s7.label + '):</strong> ' + stuckWrong.length + ' of the ' + missedForFlags + ' multiple-choice questions you answered and missed here took well over your usual time for a right answer. That is real effort that still came back wrong, not a rushed guess, so the fix is knowledge, not speed. <strong>Next:</strong> relearn before timed practice; “What to relearn” above says where to start.');
     }
     if (missedForFlags >= 4 && rushedWrong.length / missedForFlags >= 0.5) {
       var wSkills = topSkillNames(rushedWrong, 3).join(', ');
       var rushedBasis = usingFirstPass
         ? 'given well under your usual first look at a question you got right'
         : 'answered in well under your usual time for a right answer';
-      behaviorFlags.push('<strong>Answered too fast (' + s7.label + '):</strong> ' + rushedWrong.length + ' of ' + missedForFlags + ' missed multiple-choice questions here were ' + rushedBasis + '. That looks like rushing more than not knowing.' + (wSkills ? ' Most were in ' + wSkills + '.' : '') + ' <strong>Next test:</strong> read each question to the end before choosing.');
+      behaviorFlags.push('<strong>Answered too fast (' + s7.label + '):</strong> ' + rushedWrong.length + ' of the ' + missedForFlags + ' multiple-choice questions you answered and missed here were ' + rushedBasis + '. That looks like rushing more than not knowing.' + (wSkills ? ' Most were in ' + wSkills + '.' : '') + ' <strong>Next test:</strong> read each question to the end before choosing.');
     }
     var hardCorrectN = s7.diff.hard.c;
     if (hardCorrectN >= 3 && luckyCorrect.length >= 2 && luckyCorrect.length / hardCorrectN >= 0.4) {

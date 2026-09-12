@@ -307,11 +307,30 @@ var MorettiSignals = (function () {
     return { old: old, elim: elim };
   }
 
+  /* -- reference-sheet items (SIGNALS_SPEC.md 3.4) ----------------------
+     The digital SAT's reference sheet gives the sphere, cone, pyramid and
+     cylinder formulas and the two special right triangles. A miss on one
+     of those items with the sheet never opened is a retrieval gap, not a
+     content gap. Deliberately narrow: Pythagoras, circle area and
+     rectangle area are known cold, so a miss there says nothing about
+     the sheet. Measured on the bank: 13 unique items (2026-09-12). */
+  var RS_SOLIDS = /sphere|hemisphere|\bcone|pyramid|cylind/;
+  var RS_SPECIAL = /\b(30|45|60)\s*(\u00b0|degrees?)|30-60-90|45-45-90/;
+  function refSheetItem(q) {
+    if (!q || q.domain !== 'Geometry and Trigonometry') return false;
+    var t = String(q.text || '').replace(/&deg;/g, '\u00b0').replace(/<[^>]+>/g, ' ').replace(/&[a-z]+;/g, ' ').toLowerCase();
+    return RS_SOLIDS.test(t) || (/triangle/.test(t) && RS_SPECIAL.test(t));
+  }
+
   /* -- one attempt -> the compact summary stored as SignalsJSON ---------
      parts: [{ sec, questions, module1Length, moduleSec }]
      cfg:   grade(q, answer)                         required
             scoreSection(sectionKey, correct[], module1Length) -> scaled score   optional; enables dPts
-            dz(q) -> 0|1|2                            optional; Desmos-favourability tag (not built yet)
+            dz(q) -> 0|1|2                            optional; Desmos-favourability tag (portal/desmos-tags.js)
+            rs(q) -> boolean                          optional; reference-sheet item, default refSheetItem
+   Per part, budgetSec(q) -> seconds | null (optional): the question's time
+   target (time-budgets.js, scaled for extended time). Enables Desmos
+   over-use and the "over budget without Desmos" half of the coaching gate.
      Returns null if no section carries signals. */
   function summarizeAttempt(parts, cfg) {
     var decoded = [];
@@ -330,8 +349,11 @@ var MorettiSignals = (function () {
       v: 1, chg: chg, lift: lift,
       keyOut: 0, keyOutBySkill: {}, near: 0, blindMedHard: 0,
       elim: { mc: 0, used: 0 },
-      rev: [], calc: { mathQ: 0, active: 0, openOnly: 0, fav: null, favActive: null, favMissNoUse: null, untagged: null },
-      ref: { opens: 0 },
+      rev: [], calc: { mathQ: 0, active: 0, openOnly: 0, fav: null, favActive: null, favMissNoUse: null, untagged: null,
+                       favSlowNoUse: null, candidates: null, overUse: null },
+      // rsQ: reference-sheet items seen; rsMissNoRef: of those, missed with
+      // the sheet never opened on them (a retrieval gap).
+      ref: { opens: 0, rsQ: 0, rsMissNoRef: 0 },
       // Return trips to a question after its first real look, split by
       // whether the question was flagged (the report's reopened-answers
       // flag reads the same split), and questions switched 3+ times within
@@ -368,6 +390,11 @@ var MorettiSignals = (function () {
           }
         }
         out.ref.opens += r.refOpens;
+        var isRs = typeof cfg.rs === 'function' ? !!cfg.rs(p.questions[r.q]) : refSheetItem(p.questions[r.q]);
+        if (isRs && r.visits > 0) {
+          out.ref.rsQ++;
+          if (!r.finalOk && r.refOpens === 0) out.ref.rsMissNoRef++;
+        }
         if (r.revisits > 0) {
           out.revisit.q++;
           if (r.flagged) out.revisit.flagged++; else { out.revisit.unflagged++; out.revisit.secUnflagged += r.revisitSec; }
@@ -386,16 +413,29 @@ var MorettiSignals = (function () {
         });
         if (typeof cfg.dz === 'function') {
           if (out.calc.fav === null) { out.calc.fav = 0; out.calc.favActive = 0; out.calc.favMissNoUse = 0; out.calc.untagged = 0; }
+          var budgetOk = typeof p.budgetSec === 'function';
+          if (budgetOk && out.calc.overUse === null) { out.calc.overUse = 0; out.calc.favSlowNoUse = 0; }
           rows.forEach(function (r, i) {
             var tag = cfg.dz(p.questions[i]);
             // A question whose text changed gets a new key and no tag; count
             // it rather than let it drop out of the Desmos figures unseen.
             if (typeof tag !== 'number') { out.calc.untagged++; return; }
-            if (tag !== 2 || r.visits === 0) return;
+            if (r.visits === 0) return;
+            var budget = budgetOk ? p.budgetSec(p.questions[i]) : null;
+            var over = typeof budget === 'number' && budget > 0 && r.timeSec > budget;
+            // Over-use: active Desmos on a no-help question that also ran
+            // over its time target (3.4). Using it and staying on time is fine.
+            if (tag === 0 && r.calcActive && over) out.calc.overUse++;
+            if (tag !== 2) return;
             out.calc.fav++;
             if (r.calcActive) out.calc.favActive++;
             else if (!r.finalOk) out.calc.favMissNoUse++;
+            else if (over) out.calc.favSlowNoUse++;
           });
+          // The coaching gate counts fast-route questions missed OR over
+          // their target without active Desmos (3.4); the parent fact stays
+          // on misses alone.
+          out.calc.candidates = out.calc.favMissNoUse + (out.calc.favSlowNoUse || 0);
         }
       }
 
@@ -442,7 +482,8 @@ var MorettiSignals = (function () {
     var now = nowMs || Date.now(), since = now - days * 86400000;
     var L = { attempts: 0, dropped: 0, chg: { h: 0, r: 0, ww: 0, sw: 0, unfl: { h: 0, r: 0 }, rev: { h: 0, r: 0 }, late: { h: 0, r: 0 } },
               near: 0, keyOut: 0, blindMedHard: 0, elim: { mc: 0, used: 0 },
-              calc: { mathQ: 0, active: 0, fav: 0, favActive: 0, favMissNoUse: 0 } };
+              calc: { mathQ: 0, active: 0, fav: 0, favActive: 0, favMissNoUse: 0, favSlowNoUse: 0, candidates: 0, overUse: 0 },
+              ref: { rsQ: 0, rsMissNoRef: 0 } };
     var when = function (at) {
       if (at instanceof Date) return at.getTime();
       if (typeof at === 'number' && isFinite(at)) return at < 1e11 ? at * 1000 : at;
@@ -473,7 +514,9 @@ var MorettiSignals = (function () {
       if (s.calc) {
         L.calc.mathQ += num(s.calc.mathQ); L.calc.active += num(s.calc.active);
         L.calc.fav += num(s.calc.fav); L.calc.favActive += num(s.calc.favActive); L.calc.favMissNoUse += num(s.calc.favMissNoUse);
+        L.calc.favSlowNoUse += num(s.calc.favSlowNoUse); L.calc.candidates += num(s.calc.candidates); L.calc.overUse += num(s.calc.overUse);
       }
+      if (s.ref) { L.ref.rsQ += num(s.ref.rsQ); L.ref.rsMissNoRef += num(s.ref.rsMissNoRef); }
     });
     return L;
   }
@@ -709,6 +752,7 @@ var MorettiSignals = (function () {
     changeImproved: changeImproved,
     probGreater: probGreater,
     parentFacts: parentFacts,
+    refSheetItem: refSheetItem,
     frValue: frValue,
     wilson: wilson,
     betaCdf: betaCdf,
