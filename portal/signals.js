@@ -49,7 +49,7 @@ var MorettiSignals = (function () {
   };
   function opt(o, k) { return (o && o[k] !== undefined) ? o[k] : DEFAULTS[k]; }
 
-  /* ── small helpers ─────────────────────────────────────────────────── */
+  /* -- small helpers --------------------------------------------------- */
   function hexAt(str, i) {
     if (typeof str !== 'string' || i >= str.length) return 0;
     var v = parseInt(str.charAt(i), 16);
@@ -102,7 +102,7 @@ var MorettiSignals = (function () {
   // crossing-out", which would silently read as k = 4.
   function maskOk(str, n) { return typeof str === 'string' && str.length === n && /^[0-9a-f]*$/.test(str); }
 
-  /* ── one section's questions ────────────────────────────────────────
+  /* -- one section's questions ----------------------------------------
      sec:       a payload section ({k, a, m, sv, el, eu, vl, rv, co, cf, rf, tl, ...})
      questions: the section's questions in the same order as sec.a
                 (Module 1 followed by the Module 2 variant that was served)
@@ -286,7 +286,7 @@ var MorettiSignals = (function () {
     return { recorded: true, sectionKey: sec.k, rows: rows, modules: modules };
   }
 
-  /* ── the elimination-aware guessing correction ───────────────────────
+  /* -- the elimination-aware guessing correction -----------------------
      Knowledge-or-guess model: an unknown question is guessed uniformly
      among the k choices not crossed out. With the key among them, a guess
      is right with probability 1/k and wrong with (k-1)/k, so each wrong
@@ -307,7 +307,7 @@ var MorettiSignals = (function () {
     return { old: old, elim: elim };
   }
 
-  /* ── one attempt → the compact summary stored as SignalsJSON ─────────
+  /* -- one attempt -> the compact summary stored as SignalsJSON ---------
      parts: [{ sec, questions, module1Length, moduleSec }]
      cfg:   grade(q, answer)                         required
             scoreSection(sectionKey, correct[], module1Length) -> scaled score   optional; enables dPts
@@ -429,7 +429,7 @@ var MorettiSignals = (function () {
     return out;
   }
 
-  /* ── pooling attempts ───────────────────────────────────────────────
+  /* -- pooling attempts -----------------------------------------------
      entries: [{ at, signals, testId?, mode? }] (testId/mode from the same
      Attempts row). `signals` is the summary object or its JSON
      text (the SignalsJSON cell is text). `at` is a Date, epoch ms (or
@@ -478,7 +478,7 @@ var MorettiSignals = (function () {
     return L;
   }
 
-  /* ── Beta machinery ─────────────────────────────────────────────── */
+  /* -- Beta machinery ----------------------------------------------- */
   function lgamma(x) { // Lanczos, g = 7
     var c = [0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313,
              -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
@@ -529,7 +529,7 @@ var MorettiSignals = (function () {
     return { lo: Math.max(0, mid - half), hi: Math.min(1, mid + half), p: p };
   }
 
-  /* ── do this student's answer changes help? ─────────────────────────
+  /* -- do this student's answer changes help? -------------------------
      h = changes wrong->right, r = right->wrong (pooled). Each such change
      helps with unknown probability p; prior Beta with mean mu and
      strength kappa. A verdict needs the posterior probability on one side
@@ -580,7 +580,7 @@ var MorettiSignals = (function () {
     return { improved: p >= opt(cfg, 'gateHurt'), p: p };
   }
 
-  /* ── what a parent may be told ──────────────────────────────────────
+  /* -- what a parent may be told --------------------------------------
      Gated, structured facts; the wording lives in the email templates.
      Only facts whose gates pass are returned (SIGNALS_SPEC.md section 5):
      nothing here says "not enough data". Frequency limits (once every
@@ -621,7 +621,7 @@ var MorettiSignals = (function () {
     return facts;
   }
 
-  /* ═══ HOW MUCH A SCORE MOVES ON ITS OWN ═══
+  /* === HOW MUCH A SCORE MOVES ON ITS OWN ===
      Moved here from portal/index.html (2026-09-12) so the portal's progress
      chart and the family emails (emails.gs) judge score changes the same way.
      Test-retest SD of one section score by level, in scaled points, from
