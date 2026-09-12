@@ -2394,24 +2394,40 @@
       singleSection && mathScaled !== null && mathScaled !== undefined));
 
     /* ═══ SCORE BAND ═══ the composite needs to carry its own imprecision,
-       as part of the number ("890, range 850-930") rather than a footnote.
+       as part of the number ("1190, range 1110-1270") rather than a footnote.
 
-       ±SCORE_SEM is a plain-English stand-in for measurement error, not a
-       computed CI: the real exam's published SEM is about this size, and a
-       homemade diagnostic on an approximated curve can't be tighter. */
+       A conditional standard error per section, from this test's own
+       curve: how many scaled points one question is worth at the student's
+       raw score (the curve's local slope, over +/-2 questions) times the
+       binomial spread of the raw score, sqrt(n p(1-p)) with p = (c+1)/(n+2).
+       Sections combine as independent errors; the band is +/-1.28 of that,
+       which should hold the true score on this test about 4 times in 5.
+
+       It replaces a fixed +/-40 (30 for one section) scaled by
+       sqrt(total/informative), which rounding turned into +/-50 for almost
+       everyone and which held the true score only 63-69% of the time in
+       simulation (55-64% for composites in the 1000s-1200s, where one
+       question is worth the most). This band covered it 84-89% of the time,
+       and is narrower near 400 and 1600 and wider mid-scale, where a raw
+       question moves the score most (stats audit, 2026-09-12). Guessing no
+       longer widens it: the real exam's scoring already absorbs guessing,
+       and the old term pointed the wrong way (low scorers guess most but sit
+       on the flat part of the curve). The guessing estimate stays in
+       "Habits worth naming". */
     if (headlineVal !== null && headlineVal !== undefined) {
-      /* The band widens when the attempt carries less information: standard
-         error scales roughly as 1/sqrt(n), so the base is scaled by
-         sqrt(total / attempted) (98 of 98 keeps ±40, 80 of 98 gives about
-         ±45). Still an approximation, not a computed CI. */
-      var attemptedQ = Math.max(1, totalQ - skipped);
-      /* Guessed-right answers carry no information about ability, just like
-         blanks, so the estimated guess lift is also removed from the
-         informative count. This widens the band symmetrically instead of
-         shifting the score: the real exam counts a lucky guess, so the
-         composite itself is left alone. */
-      var informativeQ = Math.max(1, attemptedQ - guessLift.lift);
-      var SCORE_SEM = headlineBase * Math.sqrt(totalQ / informativeQ);
+      var sectionCsem = function (key, c, n) {
+        if (!(n > 0)) return 0;
+        var curve = key === 'math' ? MATH_CURVE : RW_CURVE;
+        var lo = Math.max(0, c - 2), hi = Math.min(n, c + 2);
+        if (hi <= lo) return 0;
+        var slope = (scaleFromPct(100 * hi / n, curve) - scaleFromPct(100 * lo / n, curve)) / (hi - lo);
+        var p = (c + 1) / (n + 2);
+        return slope * Math.sqrt(n * p * (1 - p));
+      };
+      var csemSq = 0;
+      if (rw && rwScaled !== null && rwScaled !== undefined) csemSq += Math.pow(sectionCsem('reading-writing', rw.c, rw.t), 2);
+      if (mathSec && mathScaled !== null && mathScaled !== undefined) csemSq += Math.pow(sectionCsem('math', mathSec.c, mathSec.t), 2);
+      var SCORE_SEM = csemSq > 0 ? 1.2816 * Math.sqrt(csemSq) : headlineBase;
       var bigTile = tilesEl.querySelector('.score-tile.big');
       if (bigTile) {
         var rangeEl = document.createElement('div');
@@ -2423,6 +2439,7 @@
         var lo = Math.max(headlineMin, Math.floor(loRaw / 10) * 10);
         var hi = Math.min(headlineMax, Math.ceil(hiRaw / 10) * 10);
         rangeEl.textContent = 'range ' + lo + '\u2013' + hi;
+        rangeEl.title = 'Measurement error on this test: the true score should fall in this range about 4 times in 5.';
         bigTile.appendChild(rangeEl);
         /* ═══ WHEN THE BAND IS THE WRONG INSTRUMENT ═══
            A barely-worked attempt (e.g. 98 questions in 47 of 201 minutes)
@@ -2462,7 +2479,7 @@
       }
     }
     var routedEasier = [rw, mathSec].some(function (s) { return s && s.variant === 'Easier'; });
-    scoreCaption.textContent = 'The fraction under each score is raw percent correct on this test. The score itself reads that off College Board\'s own published raw-to-scaled conversion table (Reading & Writing and Math have separate tables), then adjusts for which module the misses fell in — because the SAT is adaptive, missing questions in Module 1 costs more than missing the same number in Module 2' + (routedEasier ? ', and a weaker Module 1 also routes that section to the easier Module 2' : '') + '; the real digital SAT curve varies by test, so this is a close estimate, not the exact official scoring.';
+    scoreCaption.textContent = 'The fraction under each score is raw percent correct on this test. The score itself reads that off an approximate digital-SAT curve fitted to a public score calculator (Reading & Writing and Math have separate curves), then adjusts for which module the misses fell in — because the SAT is adaptive, missing questions in Module 1 costs more than missing the same number in Module 2' + (routedEasier ? ', and a weaker Module 1 also routes that section to the easier Module 2' : '') + '; the real digital SAT curve varies by test, so this is a close estimate, not the exact official scoring.';
   } else {
     tilesEl.style.display = 'none';
   }
@@ -3647,6 +3664,52 @@
   // back to the cumulative total for rows with no first-pass data (older
   // saved reports, or a question never visited).
   function pacingTimeMs(r) { return (r.firstVisitMs != null) ? r.firstVisitMs : r.timeMs; }
+  /* ═══ HURRIED, RELATIVE TO THE QUESTION AND THE STUDENT ═══
+     A wrong answer is hurried when its time, as a share of that question's
+     own budget, is under RUSHED_REL of the student's typical share on the
+     questions they got right. The old rule was one section-wide cutoff in
+     seconds (min(0.5 x median correct time, 20s)), which judged short
+     questions harshly and long ones leniently: Conventions budgets run
+     about 40s and Information and Ideas about 92s, so at real pace (0.66x
+     budget, sd 0.78) a Conventions miss fell under the cutoff 31% of the
+     time against 6%. With no gap at all, 30% of Conventions misses read as
+     rushed against 6% of Information and Ideas misses, which starved the
+     two foundation domains of content evidence: a planted gap was found
+     31% of the time in Conventions and Algebra against 67% in Information
+     and Ideas. Relative to budget, Conventions detection roughly doubles
+     and false alarms fall (stats audit, 2026-09-12). Needs five timed
+     right answers; otherwise the old seconds rule, then the budget rule. */
+  /* Was this section short of time? Any question left blank; or at least
+     95% of the section clock used; or, where the visit log exists (see
+     SIGNALS_SPEC.md), a module whose review page was never reached or was
+     reached with under 5% of its time left. */
+  function sectionClockPressed(sec) {
+    if (sec.rows.some(function (r) { return r.skipped; })) return true;
+    if (sec.timeAllottedMin > 0 && sec.timeTotal >= 0.95 * sec.timeAllottedMin * 60000) return true;
+    var raw = (data.s || []).filter(function (s) { return s.k === sec.key; })[0];
+    if (raw && raw.sv === 1 && Array.isArray(raw.rv) && raw.tl > 0) {
+      var perModuleSec = raw.tl * 60 / raw.rv.length;
+      return raw.rv.some(function (t) { return t === null || (perModuleSec - t) < 0.05 * perModuleSec; });
+    }
+    return false;
+  }
+  function hurriedJudge(s7, sectionMult, typical) {
+    var budgetOf = function (r) {
+      if (!window.TIME_BUDGETS || !r.q) return 0;
+      var bq = window.TIME_BUDGETS.budgetSecondsFor(s7.key, r.q.domain, r.sk || r.dom, r.q.difficulty, sectionMult);
+      return (bq && bq.ms) || 0;
+    };
+    var ratios = s7.rows.filter(function (r) { return r.ok && r.q && r.q.type === 'mc' && pacingTimeMs(r) > 0 && budgetOf(r) > 0; })
+      .map(function (r) { return pacingTimeMs(r) / budgetOf(r); });
+    var typicalRatio = ratios.length >= 5 ? median(ratios) : 0;
+    var secondsCutoff = typical ? Math.min(typical * RUSHED_REL, RUSHED_ABS_CAP) : 0;
+    return function (r) {
+      var t = pacingTimeMs(r), bms = budgetOf(r);
+      if (typicalRatio && bms) return t / bms < RUSHED_REL * typicalRatio;
+      if (typical) return t < secondsCutoff;
+      return bms ? t < bms * RUSHED_BUDGET_REL : false;
+    };
+  }
   sections.forEach(function (s7) {
     var usingFirstPass = s7.rows.some(function (r) { return r.firstVisitMs != null; });
     var correctTimes = s7.rows.filter(function (r) { return r.ok && r.q.type === 'mc' && pacingTimeMs(r) > 0; }).map(pacingTimeMs);
@@ -3656,6 +3719,7 @@
     var cutoff = Math.min(typical * RUSHED_REL, RUSHED_ABS_CAP);
     var luckyCutoff = Math.min(typical * LUCKY_REL, LUCKY_ABS_CAP);
     var stuckCutoff = typical * STUCK_REL;
+    var hurry = hurriedJudge(s7, sectionMult, typical);
     /* ═══ A GATE THAT WAS TRIED AND REMOVED -- DO NOT PUT IT BACK ═══
        Do not make the below-floor discount conditional on this student's
        fast answers being measurably worse than their slow ones. That test is:
@@ -3673,6 +3737,10 @@
        table and four options. */
     var rushedWrong = [], luckyCorrect = [], stuckWrong = [];
     s7.rows.forEach(function (r) {
+      // A question left blank was never answered, so it says nothing about
+      // the material or about haste; "What went wrong" already counts it as
+      // clock. Letting it through here filed it as a content miss.
+      if (r.skipped) return;
       if (!(pacingTimeMs(r) > 0)) return;
       /* The three lists below are about GUESSING (fast and wrong, or a hard
          one landed implausibly fast), which only means something with
@@ -3683,7 +3751,7 @@
          concentrated in Math, so excluding them would starve the Math areas
          of evidence. */
       if (r.q.type === 'mc') {
-        if (!r.ok && pacingTimeMs(r) < cutoff) rushedWrong.push({ sk: r.sk });
+        if (!r.ok && hurry(r)) rushedWrong.push({ sk: r.sk });
         if (!r.ok && pacingTimeMs(r) >= stuckCutoff) stuckWrong.push({ sk: r.sk });
         if (r.ok && r.q.difficulty === 'hard' && pacingTimeMs(r) < luckyCutoff) luckyCorrect.push({ sk: r.sk });
       }
@@ -3717,8 +3785,7 @@
            1.13x the student's own correct time. A budget cut measures how
            quick the student is, not the question. The budget rule applies
            only when there is no self-relative baseline. */
-        var hurried = typical ? (pacingTimeMs(r) < cutoff)
-                              : (qBudgetMs ? pacingTimeMs(r) < qBudgetMs * RUSHED_BUDGET_REL : false);
+        var hurried = hurry(r);
         /* Below the engagement floor the answer carries no information
            about the material either way, so it is pulled out of BOTH
            verdicts: a right answer stops counting as mastery, and a wrong
@@ -4251,7 +4318,11 @@
       return (top.severity === 3
         ? contentTxt
         : top.severity === 2
-        ? open + top.rushed + ' of ' + top.total + ' were answered in well under the time they should take, and came back wrong &mdash; slow down and check work before re-teaching.'
+        // The pacing flag tests rushed misses AND right answers too fast to
+        // have been read (notRead), so the sentence quotes that same count.
+        ? open + (top.notRead != null ? top.notRead : top.rushed) + ' of ' + top.total + ' were answered in well under the time they should take' +
+          (top.notRead != null && top.notRead !== top.rushed ? ' (' + top.rushed + ' of them wrong)' : ', and came back wrong') +
+          ' &mdash; slow down and check work before re-teaching.'
         : open + top.inefficient + ' of ' + top.total + ' correct answers took far longer than typical &mdash; worth light speed drills later.'
       ) + detail + ciTxt;
     }
@@ -5249,6 +5320,7 @@
       var correctTimes = sec.rows.filter(function (r) { return r.ok && r.q.type === 'mc' && pacingTimeMs(r) > 0; }).map(pacingTimeMs);
       var typical = median(correctTimes);
       var secMult = (roll && roll.mult) || 1;
+      var hurry = hurriedJudge(sec, secMult, typical);
       sec.rows.forEach(function (r) {
         if (r.skipped) { bucket('clock', sec, r, 'never reached'); return; }
         if (r.ok) return;
@@ -5264,9 +5336,9 @@
           qBudgetMs = (bq && bq.ms) || 0;
         }
         var tMs = pacingTimeMs(r);
-        // Self-relative first -- see the note in the classification pass above.
-        var hurried = typical ? (tMs < Math.min(typical * RUSHED_REL, RUSHED_ABS_CAP))
-                              : (qBudgetMs ? tMs < qBudgetMs * RUSHED_BUDGET_REL : false);
+        // Relative to the question's budget and the student's own pace; the
+        // same rule as the classification pass (see hurriedJudge).
+        var hurried = hurry(r);
         /* Under the engagement floor the question was not read, so the miss is a
            pacing failure and belongs to the clock. Otherwise the clock bucket
            only catches running OUT of time, and a student who submits early
@@ -5288,9 +5360,17 @@
       });
       // The rollup collects these itself (see correctOverBudgetRows in
       // time-budgets.js) so the list and the count cannot drift apart.
-      if (roll) {
+      /* ═══ METHOD ONLY COSTS SOMETHING WHEN THE CLOCK WAS SHORT ═══
+         A right answer that ran over budget lost nothing if the student
+         still had time to spare. Counted unconditionally, ordinary noise in
+         per-question time (sd ~0.7 on the log scale) put 12-14 right answers
+         per diagnostic into Method for a student with no habit at all, made
+         Method the lead cause for a quarter to a third of such students, and
+         gave it about a third of the weekly plan (stats audit, 2026-09-12).
+         Now counted only for a section that shows clock pressure. */
+      if (roll && sectionClockPressed(sec)) {
         (roll.correctOverBudgetRows || []).forEach(function (r) {
-          bucket('method', sec, r, 'right, but well over budget');
+          bucket('method', sec, r, 'right, but well over budget while time was short');
         });
       }
       // Questions that came after the module's clock was already spent —
@@ -5839,10 +5919,13 @@
     function hrs(h) { return h === Math.floor(h) ? String(h) : (h < 1 ? '' : String(Math.floor(h))) + '½'; }
     function unitFor(h) { return h === 1 ? 'hr / week' : 'hrs / week'; }
 
-    // The areas this plan is allowed to name, most severe first, capped at
-    // three: a week with four content topics in it is a week where none of
-    // them gets enough time to move.
-    var contentAreas = areas.slice(0, 3);
+    // The areas this plan is allowed to name under content, most severe
+    // first, capped at three: a week with four content topics in it is a
+    // week where none of them gets enough time to move. Content gaps only
+    // (severity 3): an area flagged for pacing or for slow-but-right work
+    // listed under "re-teach" would prescribe the wrong fix, which it did
+    // in about a third of plans.
+    var contentAreas = areas.filter(function (a) { return a.severity === 3; }).slice(0, 3);
     var areaTxt = contentAreas.length
       ? contentAreas.map(function (a) { return '<b>' + esc(a.name) + '</b>'; }).join(', ')
       : null;
@@ -5893,10 +5976,16 @@
     var leadWord = { content: 'content', method: 'method', clock: 'pacing' }[lead];
 
     var lede = maintenanceOnly
-      ? 'About <b>' + hrs(weekly) + ' hour a week</b>, and only that. Nothing on this attempt actually cost ' + first + ' any points &mdash; every question that came up was answered correctly. What the timing shows is ' + causes.method + ' of those correct answers running well over the time they should take, which is worth keeping an eye on because it is the thing that would bite first on a harder form. There is no content to re-teach here.'
+      ? 'About <b>' + hrs(weekly) + ' hour a week</b>, and only that. Nothing on this attempt actually cost ' + first + ' any points &mdash; every question that came up was answered correctly' +
+        (causes.method > 0
+          ? '. What the timing shows is ' + causes.method + ' of those correct answers running well over the time they should take while the clock was short, which is worth keeping an eye on because it is the thing that would bite first on a harder form.'
+          : ', with time to spare.') +
+        ' There is no content to re-teach here.'
       : clockOnly
       ? 'About <b>' + hrs(weekly) + ' hour' + (weekly === 1 ? '' : 's') + ' a week</b>, and deliberately not more. Everything this test could attribute went to the clock rather than to the material, so there is no content to re-teach and no method to drill &mdash; adding hours of either to fill out a longer week would be inventing work the evidence does not support.'
-      : 'About <b>' + hrs(weekly) + ' hours a week</b>, split the way this test actually came apart and weighted toward <b>' + leadWord + '</b>, which cost the most questions here. ' +
+      : 'About <b>' + hrs(weekly) + ' hours a week</b>, split the way this test actually came apart and weighted toward <b>' + leadWord + '</b>, ' +
+        // Method questions were answered correctly: they cost time, not questions.
+        (lead === 'method' ? 'where the most time went on questions that were answered but ran long. ' : 'which cost the most questions here. ') +
         'The split is the point: an hour spent on the wrong one of these three does close to nothing, which is why it is written down rather than left to judgment in the moment.';
     var html = '<div class="plan-card">' +
       '<p class="plan-lede">' + lede + '</p>' +

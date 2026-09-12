@@ -7684,8 +7684,14 @@ window.Portal = {
      window.fetchPortalProgress' skillStats), not the raw miss count.
      Clicking a name opens My Incorrect Questions with that skill preselected
      (see `preset` on window.iqModuleInit). */
-  var HOME_MATH_DOMAINS = { 'Advanced Math': 1, 'Algebra': 1, 'Geometry & Trigonometry': 1, 'Problem-Solving & Data Analysis': 1 };
-  var HOME_RW_DOMAINS = { 'Craft & Structure': 1, 'Information & Ideas': 1, 'Standard English Conventions': 1, 'Expression of Ideas': 1 };
+  // Keyed by the domain name with "&" written as "and", which is how every
+  // question bank spells it. These used "&", so the Craft and Structure,
+  // Information and Ideas, Geometry and Trigonometry and Problem-Solving
+  // and Data Analysis skills could never be picked as the weakest;
+  // homeDomainKey() folds either spelling to one key.
+  var HOME_MATH_DOMAINS = { 'advanced math': 1, 'algebra': 1, 'geometry and trigonometry': 1, 'problem-solving and data analysis': 1 };
+  var HOME_RW_DOMAINS = { 'craft and structure': 1, 'information and ideas': 1, 'standard english conventions': 1, 'expression of ideas': 1 };
+  function homeDomainKey(d) { return String(d || '').replace(/&/g, ' and ').replace(/\s+/g, ' ').trim().toLowerCase(); }
   var MATH_SECTION_KEYS = { 'math': 1 };
   var HOME_WEAK_SKILL_MIN_ATTEMPTS = 3; // fewer than this and one miss/hit swings the % too wildly to call it "the" weak spot
 
@@ -7709,7 +7715,7 @@ window.Portal = {
     var best = null;
     Object.keys(skillStats || {}).forEach(function (key) {
       var s = skillStats[key];
-      if (!s || !domainSet[s.domain] || !s.total || s.total < HOME_WEAK_SKILL_MIN_ATTEMPTS) return;
+      if (!s || !domainSet[homeDomainKey(s.domain)] || !s.total || s.total < HOME_WEAK_SKILL_MIN_ATTEMPTS) return;
       var pct = s.correct / s.total;
       if (!best || pct < best.pct || (pct === best.pct && s.total > best.total)) {
         // domain lets outside callers (window.getWeakestSkillsForQb) place the
@@ -9997,13 +10003,19 @@ window.Portal = {
     if (questionEnterTime !== null && current >= 0 && current < questionTimeMs.length) {
       questionTimeMs[current] = (questionTimeMs[current] || 0) + (Date.now() - questionEnterTime);
     }
-    // Record first-pass duration only the first time the question is left.
+    // Record the first-look duration the first time the question is left
+    // WITH AN ANSWER ON IT. Next skips an unanswered question, and a skip's
+    // few seconds are not an attempt: freezing them as the "first look"
+    // would make every skipped-then-answered question read as rushed, bill
+    // it to the clock, and count the real work on it as second-guessing. So
+    // a question left blank keeps accumulating, and its first look is all
+    // on-screen time up to the visit in which it was first answered.
     // Reading questionTimeMs[current] (which survives a resume, see
-    // restoreState) keeps this correct across a mid-first-look refresh.
-    // Guarded on questionFirstVisitedAt so a question never shown can't be
+    // restoreState) keeps this correct across a mid-look refresh. Guarded
+    // on questionFirstVisitedAt so a question never shown can't be
     // finalized at 0.
     if (current >= 0 && current < questionFirstVisitDurationMs.length &&
-        questionFirstVisitedAt[current] != null &&
+        questionFirstVisitedAt[current] != null && answers[current] != null &&
         (questionFirstVisitDurationMs[current] === null || questionFirstVisitDurationMs[current] === undefined)) {
       questionFirstVisitDurationMs[current] = questionTimeMs[current] || 0;
     }
@@ -10023,7 +10035,7 @@ window.Portal = {
       questionTimeMs[current] = (questionTimeMs[current] || 0) + (at - questionEnterTime);
     }
     if (current >= 0 && current < questionFirstVisitDurationMs.length &&
-        questionFirstVisitedAt[current] != null &&
+        questionFirstVisitedAt[current] != null && answers[current] != null &&
         (questionFirstVisitDurationMs[current] === null || questionFirstVisitDurationMs[current] === undefined)) {
       questionFirstVisitDurationMs[current] = questionTimeMs[current] || 0;
     }
@@ -11274,6 +11286,12 @@ window.Portal = {
   // Module 1 + Module 2 into one completedSections entry (the shape
   // report.html expects) and move to the next section or finish.
   function finishCurrentModule() {
+    // The clock can end a module while a question is still on screen
+    // (autoSubmitSection). Close it first, so its last stretch of time,
+    // a grid-in typed at the buzzer, and its visit all count. On the usual
+    // path the review page already closed it and this does nothing.
+    commitPendingFrAnswer();
+    flushQuestionTime();
     stopSectionTimer();
     sectionTimerEndsAt = null;
     var secKey = activeSectionKeys[sectionIndex];
@@ -18916,13 +18934,24 @@ window.renderNativeReport = function (data) {
          sqrt(total / attempted) (98 of 98 keeps ±40, 80 of 98 gives about
          ±45). Still an approximation around the real exam's published SEM,
          not a computed CI. */
-      var attemptedQ = Math.max(1, totalQ - skipped);
-      /* Guessed-right answers carry no information about ability, same as a
-         blank, so the estimated guess lift is also removed from the
-         informative count. This widens the band symmetrically; the score
-         itself is left alone, since the real exam counts a lucky guess too. */
-      var informativeQ = Math.max(1, attemptedQ - guessLift.lift);
-      var SCORE_SEM = headlineBase * Math.sqrt(totalQ / informativeQ);
+      /* Conditional standard error from this test's own curve, the same as
+         report.html (see the SCORE BAND note there): local slope of the
+         curve times the binomial spread of the raw score, sections combined
+         as independent errors, +/-1.28 of it for a range that should hold
+         the true score about 4 times in 5. Replaces the fixed +/-40/30. */
+      var sectionCsem = function (key, c, n) {
+        if (!(n > 0)) return 0;
+        var curve = key === 'math' ? MATH_CURVE : RW_CURVE;
+        var lo = Math.max(0, c - 2), hi = Math.min(n, c + 2);
+        if (hi <= lo) return 0;
+        var slope = (scaleFromPct(100 * hi / n, curve) - scaleFromPct(100 * lo / n, curve)) / (hi - lo);
+        var p = (c + 1) / (n + 2);
+        return slope * Math.sqrt(n * p * (1 - p));
+      };
+      var csemSq = 0;
+      if (rw && rwScaled !== null && rwScaled !== undefined) csemSq += Math.pow(sectionCsem('reading-writing', rw.c, rw.t), 2);
+      if (mathSec && mathScaled !== null && mathScaled !== undefined) csemSq += Math.pow(sectionCsem('math', mathSec.c, mathSec.t), 2);
+      var SCORE_SEM = csemSq > 0 ? 1.2816 * Math.sqrt(csemSq) : headlineBase;
       var bigTile = tilesEl.querySelector('.score-tile.big');
       if (bigTile) {
         var rangeEl = document.createElement('div');
@@ -18934,6 +18963,7 @@ window.renderNativeReport = function (data) {
         var lo = Math.max(headlineMin, Math.floor(loRaw / 10) * 10);
         var hi = Math.min(headlineMax, Math.ceil(hiRaw / 10) * 10);
         rangeEl.textContent = 'range ' + lo + '\u2013' + hi;
+        rangeEl.title = 'Measurement error on this test: the true score should fall in this range about 4 times in 5.';
         bigTile.appendChild(rangeEl);
         /* ═══ WHEN THE BAND IS THE WRONG INSTRUMENT ═══
            A range means "same quantity, measured less precisely". A barely
@@ -18968,7 +18998,7 @@ window.renderNativeReport = function (data) {
       }
     }
     var routedEasier = [rw, mathSec].some(function (s) { return s && s.variant === 'Easier'; });
-    scoreCaption.textContent = 'The fraction under each score is raw percent correct on this test. The score itself reads that off College Board\'s own published raw-to-scaled conversion table (Reading & Writing and Math have separate tables), then adjusts for which module the misses fell in — because the SAT is adaptive, missing questions in Module 1 costs more than missing the same number in Module 2' + (routedEasier ? ', and a weaker Module 1 also routes that section to the easier Module 2' : '') + '; the real digital SAT curve varies by test, so this is a close estimate, not the exact official scoring.';
+    scoreCaption.textContent = 'The fraction under each score is raw percent correct on this test. The score itself reads that off an approximate digital-SAT curve fitted to a public score calculator (Reading & Writing and Math have separate curves), then adjusts for which module the misses fell in — because the SAT is adaptive, missing questions in Module 1 costs more than missing the same number in Module 2' + (routedEasier ? ', and a weaker Module 1 also routes that section to the easier Module 2' : '') + '; the real digital SAT curve varies by test, so this is a close estimate, not the exact official scoring.';
   } else {
     tilesEl.style.display = 'none';
   }
@@ -20201,6 +20231,36 @@ window.renderNativeReport = function (data) {
   // revisit. Falls back to the cumulative total when there is no
   // first-pass data (older reports, never-visited questions).
   function pacingTimeMs(r) { return (r.firstVisitMs != null) ? r.firstVisitMs : r.timeMs; }
+  // Was this section short of time? Identical to report.html.
+  function sectionClockPressed(sec) {
+    if (sec.rows.some(function (r) { return r.skipped; })) return true;
+    if (sec.timeAllottedMin > 0 && sec.timeTotal >= 0.95 * sec.timeAllottedMin * 60000) return true;
+    var raw = (data.s || []).filter(function (s) { return s.k === sec.key; })[0];
+    if (raw && raw.sv === 1 && Array.isArray(raw.rv) && raw.tl > 0) {
+      var perModuleSec = raw.tl * 60 / raw.rv.length;
+      return raw.rv.some(function (t) { return t === null || (perModuleSec - t) < 0.05 * perModuleSec; });
+    }
+    return false;
+  }
+  // Hurried relative to the question's own budget and the student's own
+  // pace -- identical to report.html's hurriedJudge; see the note there.
+  function hurriedJudge(s7, sectionMult, typical) {
+    var budgetOf = function (r) {
+      if (!window.TIME_BUDGETS || !r.q) return 0;
+      var bq = window.TIME_BUDGETS.budgetSecondsFor(s7.key, r.q.domain, r.sk || r.dom, r.q.difficulty, sectionMult);
+      return (bq && bq.ms) || 0;
+    };
+    var ratios = s7.rows.filter(function (r) { return r.ok && r.q && r.q.type === 'mc' && pacingTimeMs(r) > 0 && budgetOf(r) > 0; })
+      .map(function (r) { return pacingTimeMs(r) / budgetOf(r); });
+    var typicalRatio = ratios.length >= 5 ? median(ratios) : 0;
+    var secondsCutoff = typical ? Math.min(typical * RUSHED_REL, RUSHED_ABS_CAP) : 0;
+    return function (r) {
+      var t = pacingTimeMs(r), bms = budgetOf(r);
+      if (typicalRatio && bms) return t / bms < RUSHED_REL * typicalRatio;
+      if (typical) return t < secondsCutoff;
+      return bms ? t < bms * RUSHED_BUDGET_REL : false;
+    };
+  }
   sections.forEach(function (s7) {
     var usingFirstPass = s7.rows.some(function (r) { return r.firstVisitMs != null; });
     var correctTimes = s7.rows.filter(function (r) { return r.ok && r.q.type === 'mc' && pacingTimeMs(r) > 0; }).map(pacingTimeMs);
@@ -20210,6 +20270,7 @@ window.renderNativeReport = function (data) {
     var cutoff = Math.min(typical * RUSHED_REL, RUSHED_ABS_CAP);
     var luckyCutoff = Math.min(typical * LUCKY_REL, LUCKY_ABS_CAP);
     var stuckCutoff = typical * STUCK_REL;
+    var hurry = hurriedJudge(s7, sectionMult, typical);
     /* ═══ A GATE THAT WAS TRIED AND REMOVED -- DO NOT PUT IT BACK ═══
        Do not make the below-floor discount conditional on this student's
        fast answers being measurably worse than their slow ones.
@@ -20227,6 +20288,7 @@ window.renderNativeReport = function (data) {
        reads that much in fourteen seconds. */
     var rushedWrong = [], luckyCorrect = [], stuckWrong = [];
     s7.rows.forEach(function (r) {
+      if (r.skipped) return; // never answered: not content, not haste (see report.html)
       if (!(pacingTimeMs(r) > 0)) return;
       /* The three lists below are about GUESSING (fast and wrong, or a hard
          one landed implausibly fast), which only means something with
@@ -20236,7 +20298,7 @@ window.renderNativeReport = function (data) {
          defined for grid-ins too. Including them matters most in Math,
          where grid-ins are concentrated. */
       if (r.q.type === 'mc') {
-        if (!r.ok && pacingTimeMs(r) < cutoff) rushedWrong.push({ sk: r.sk });
+        if (!r.ok && hurry(r)) rushedWrong.push({ sk: r.sk });
         if (!r.ok && pacingTimeMs(r) >= stuckCutoff) stuckWrong.push({ sk: r.sk });
         if (r.ok && r.q.difficulty === 'hard' && pacingTimeMs(r) < luckyCutoff) luckyCorrect.push({ sk: r.sk });
       }
@@ -20271,8 +20333,7 @@ window.renderNativeReport = function (data) {
            1.13x the student's own correct time. A budget cut measures "this
            student is quick", not the question. The budget is used only when
            there is no self-relative baseline. */
-        var hurried = typical ? (pacingTimeMs(r) < cutoff)
-                              : (qBudgetMs ? pacingTimeMs(r) < qBudgetMs * RUSHED_BUDGET_REL : false);
+        var hurried = hurry(r); // relative to budget and own pace; see hurriedJudge
         /* Below the engagement floor the answer carries no information
            about the material either way, so it is pulled out of BOTH
            verdicts: a right answer stops counting as mastery, and a wrong
@@ -20808,7 +20869,9 @@ window.renderNativeReport = function (data) {
       return (top.severity === 3
         ? contentTxt
         : top.severity === 2
-        ? open + top.rushed + ' of ' + top.total + ' were answered in well under the time they should take, and came back wrong &mdash; slow down and check work before re-teaching.'
+        ? open + (top.notRead != null ? top.notRead : top.rushed) + ' of ' + top.total + ' were answered in well under the time they should take' +
+          (top.notRead != null && top.notRead !== top.rushed ? ' (' + top.rushed + ' of them wrong)' : ', and came back wrong') +
+          ' &mdash; slow down and check work before re-teaching.'
         : open + top.inefficient + ' of ' + top.total + ' correct answers took far longer than typical &mdash; worth light speed drills later.'
       ) + detail + ciTxt;
     }
@@ -21800,6 +21863,7 @@ window.renderNativeReport = function (data) {
       var correctTimes = sec.rows.filter(function (r) { return r.ok && r.q.type === 'mc' && pacingTimeMs(r) > 0; }).map(pacingTimeMs);
       var typical = median(correctTimes);
       var secMult = (roll && roll.mult) || 1;
+      var hurry = hurriedJudge(sec, secMult, typical);
       sec.rows.forEach(function (r) {
         if (r.skipped) { bucket('clock', sec, r, 'never reached'); return; }
         if (r.ok) return;
@@ -21816,8 +21880,7 @@ window.renderNativeReport = function (data) {
         }
         var tMs = pacingTimeMs(r);
         // Self-relative first -- see the note in the classification pass above.
-        var hurried = typical ? (tMs < Math.min(typical * RUSHED_REL, RUSHED_ABS_CAP))
-                              : (qBudgetMs ? tMs < qBudgetMs * RUSHED_BUDGET_REL : false);
+        var hurried = hurry(r); // same rule as the classification pass
         /* Under the engagement floor the question was not read, so the miss is a
            pacing failure and belongs to the clock. Otherwise the clock bucket
            is reachable only by running out of time, and a student who submits
@@ -21837,11 +21900,12 @@ window.renderNativeReport = function (data) {
                              : (typical && tMs >= typical * STUCK_REL);
         bucket('content', sec, r, slow ? 'worked at it, still missed' : 'missed at a normal pace');
       });
-      if (roll) {
+      // Method only when the section was short of time; see report.html.
+      if (roll && sectionClockPressed(sec)) {
         // The rollup collects these itself (see correctOverBudgetRows in
         // time-budgets.js) so the list and the count cannot drift apart.
         (roll.correctOverBudgetRows || []).forEach(function (r) {
-          bucket('method', sec, r, 'right, but well over budget');
+          bucket('method', sec, r, 'right, but well over budget while time was short');
         });
       }
       // Questions that came after the module's clock was already spent —
@@ -22396,7 +22460,8 @@ window.renderNativeReport = function (data) {
     // The areas this plan is allowed to name, most severe first, capped at
     // three: a week with four content topics in it is a week where none of
     // them gets enough time to move.
-    var contentAreas = areas.slice(0, 3);
+    // Content gaps only (severity 3); see report.html.
+    var contentAreas = areas.filter(function (a) { return a.severity === 3; }).slice(0, 3);
     var areaTxt = contentAreas.length
       ? contentAreas.map(function (a) { return '<b>' + esc(a.name) + '</b>'; }).join(', ')
       : null;
@@ -22447,10 +22512,15 @@ window.renderNativeReport = function (data) {
     var leadWord = { content: 'content', method: 'method', clock: 'pacing' }[lead];
 
     var lede = maintenanceOnly
-      ? 'About <b>' + hrs(weekly) + ' hour a week</b>, and only that. Nothing on this attempt actually cost ' + first + ' any points &mdash; every question that came up was answered correctly. What the timing shows is ' + causes.method + ' of those correct answers running well over the time they should take, which is worth keeping an eye on because it is the thing that would bite first on a harder form. There is no content to re-teach here.'
+      ? 'About <b>' + hrs(weekly) + ' hour a week</b>, and only that. Nothing on this attempt actually cost ' + first + ' any points &mdash; every question that came up was answered correctly' +
+        (causes.method > 0
+          ? '. What the timing shows is ' + causes.method + ' of those correct answers running well over the time they should take while the clock was short, which is worth keeping an eye on because it is the thing that would bite first on a harder form.'
+          : ', with time to spare.') +
+        ' There is no content to re-teach here.'
       : clockOnly
       ? 'About <b>' + hrs(weekly) + ' hour' + (weekly === 1 ? '' : 's') + ' a week</b>, and deliberately not more. Everything this test could attribute went to the clock rather than to the material, so there is no content to re-teach and no method to drill &mdash; adding hours of either to fill out a longer week would be inventing work the evidence does not support.'
-      : 'About <b>' + hrs(weekly) + ' hours a week</b>, split the way this test actually came apart and weighted toward <b>' + leadWord + '</b>, which cost the most questions here. ' +
+      : 'About <b>' + hrs(weekly) + ' hours a week</b>, split the way this test actually came apart and weighted toward <b>' + leadWord + '</b>, ' +
+        (lead === 'method' ? 'where the most time went on questions that were answered but ran long. ' : 'which cost the most questions here. ') +
         'The split is the point: an hour spent on the wrong one of these three does close to nothing, which is why it is written down rather than left to judgment in the moment.';
     var html = '<div class="plan-card">' +
       '<p class="plan-lede">' + lede + '</p>' +
