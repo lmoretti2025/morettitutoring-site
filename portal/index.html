@@ -3271,6 +3271,45 @@
   .rush-sum-row .rs-time { font-variant-numeric: tabular-nums; color: var(--mid); }
   .rush-sum-row .rs-time.over { color: #B0271C; font-weight: 600; }
   .rush-sum-row .rs-res.ok { color: var(--green); font-weight: 700; } .rush-sum-row .rs-res.bad { color: #B0271C; font-weight: 700; }
+
+  /* ═══ THE PLAIN LAYER ═══ see renderPlainLayer(). The one-minute summary,
+     the "How this works" buttons, and what they hide. Hidden only while the
+     page is in plain mode and that section (or everything) is not opened;
+     print prints what is open. */
+  #pt-native-report .plain-summary { border: 1px solid var(--border); border-radius: 12px; background: var(--white); padding: 16px 18px 14px; margin: 18px 0 4px; font-family: var(--hel); color: var(--ink); }
+  #pt-native-report .plain-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+  #pt-native-report .plain-head h2 { font-family: var(--display); font-size: 21px; font-weight: 700; letter-spacing: 0; text-transform: none; color: var(--ink); text-wrap: balance; }
+  #pt-native-report .plain-score { font-size: 13.5px; line-height: 1.55; font-weight: 400; margin: 0 0 12px; max-width: 62ch; }
+  #pt-native-report .plain-score b,
+  #pt-native-report .plain-lede,
+  #pt-native-report .plain-steps b,
+  #pt-native-report .plain-well b { font-weight: 600; }
+  #pt-native-report .plain-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding-top: 12px; border-top: 1px solid var(--border); }
+  @media (max-width: 640px) { #pt-native-report .plain-cols { grid-template-columns: 1fr; gap: 14px; } }
+  #pt-native-report .plain-label { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--mid); margin-bottom: 6px; }
+  #pt-native-report .plain-lede { font-size: 12.5px; line-height: 1.5; margin: 0 0 6px; }
+  #pt-native-report .plain-list,
+  #pt-native-report .plain-steps { font-size: 12.5px; line-height: 1.5; font-weight: 400; padding-left: 18px; margin: 0; }
+  #pt-native-report .plain-list li,
+  #pt-native-report .plain-steps li { margin: 0 0 5px; }
+  #pt-native-report .plain-list li::marker { color: var(--faint); }
+  #pt-native-report .plain-steps li::marker { font-weight: 700; color: var(--mid); }
+  #pt-native-report .plain-well { font-size: 12px; line-height: 1.5; font-weight: 400; margin: 6px 0 0; }
+  #pt-native-report .plain-foot { font-size: 10.5px; line-height: 1.5; color: var(--faint); margin: 10px 0 0; }
+  #pt-native-report .how-btn { float: right; font-family: var(--hel); font-size: 10px; font-weight: 500; letter-spacing: 0.01em; text-transform: none; color: var(--mid); background: transparent; border: 1px solid var(--border); border-radius: 999px; padding: 2px 10px; margin: -3px 0 0 10px; cursor: pointer; line-height: 1.5; }
+  #pt-native-report .how-btn:hover { color: var(--ink); border-color: var(--mid); }
+  #pt-native-report .how-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  #pt-native-report .how-btn[aria-expanded="true"],
+  #pt-native-report .how-btn[aria-pressed="true"] { color: var(--ink); background: rgba(17,17,17,0.05); }
+  #pt-native-report .plain-head .how-btn { float: none; margin: 0; }
+  #pt-native-report #page1.plain-on:not(.how-all):not(.how-bridge) .bridge-note-block,
+  #pt-native-report #page1.plain-on:not(.how-all):not(.how-skilldx) .skilldx-thin,
+  #pt-native-report #page1.plain-on:not(.how-all):not(.how-skilldx) .skilldx-ci,
+  #pt-native-report #page1.plain-on:not(.how-all):not(.how-budget) #budget-sub,
+  #pt-native-report #page1.plain-on:not(.how-all):not(.how-budget) .budget-cum,
+  #pt-native-report #page1.plain-on:not(.how-all):not(.how-timing) #timing-allocation-sub,
+  #pt-native-report #page1.plain-on:not(.how-all):not(.how-plan) .plan-foot { display: none !important; }
+  @media print { #pt-native-report .how-btn { display: none !important; } #pt-native-report .plain-summary { page-break-inside: avoid; break-inside: avoid; } }
 </style>
 </head>
 <body>
@@ -4528,14 +4567,15 @@ window.Portal = {
       <div class="score-caption" id="score-caption"></div>
     </div>
   </div>
+  <div class="plain-summary" id="plain-summary" style="display:none;"></div>
   <div id="section-breakdown"></div>
-  <div class="sec-hed">Path to target score</div>
+  <div class="sec-hed" id="bridge-hed">Path to target score</div>
   <div class="bridge-card" id="bridge-card">
     <div id="score-bridge"></div>
     <div id="bridge-note-outer"></div>
   </div>
 
-  <div class="sec-hed" id="dx-hed" style="display:none;">What went wrong</div>
+  <div class="sec-hed" id="dx-hed" style="display:none;">Where the points went</div>
   <!-- Must not be id="dx-card": the real exam-engine card further down uses
        that id, and getElementById returns the first match, so a duplicate
        here breaks the runners' cleanup of stale .pb-explain/.pb-note and
@@ -4546,29 +4586,29 @@ window.Portal = {
        ranking, and the diagnosis card points at them by name. This one
        rarely fires (a domain's 9-15 questions per form will not separate
        it from a student's own average). -->
-  <div class="sec-hed" id="skilldx-hed" style="display:none;">Knowledge</div>
+  <div class="sec-hed" id="skilldx-hed" style="display:none;">What to relearn</div>
   <div class="skilldx-card" id="skilldx-card" style="display:none;">
     <div id="skilldx-headline"></div>
     <div id="skilldx-table"></div>
   </div>
 
-  <div class="sec-hed" id="budget-hed" style="display:none;">Efficiency</div>
+  <div class="sec-hed" id="budget-hed" style="display:none;">Right answers that took too long</div>
   <p class="chart-sub" id="budget-sub" style="display:none;">Right answers that cost more time than they should have. Measured against a fixed target, not <span id="budget-sub-first"></span>&rsquo;s own average, so being evenly slow still shows up.</p>
   <div class="budget-card" id="budget-card" style="display:none;"></div>
 
-  <div class="sec-hed" id="timing-hed" style="display:none;">Pacing</div>
+  <div class="sec-hed" id="timing-hed" style="display:none;">How you used the clock</div>
   <div class="timing-card" id="timing-card" style="display:none;">
     <p class="chart-sub" id="timing-allocation-sub" style="display:none;">One module at a time: the running total of time spent against the target pace for these questions. The target deliberately adds up to <em>less</em> than the module clock: that gap is the reserve, there to be spent on the questions that run long and on the review pass at the end. So tracking the target and finishing a few minutes early is the plan working. Finishing <em>far</em> early means the reserve was never used.</p>
     <div id="timing-allocation" style="display:none;"></div>
   </div>
 
-  <div class="sec-hed" id="behavior-hed" style="display:none;">Habits worth naming</div>
+  <div class="sec-hed" id="behavior-hed" style="display:none;">How you worked the test</div>
   <div id="behavior-section" style="display:none;"></div>
 
   <!-- ═══ THE PLAN ═══ Turns the diagnosis into hours. The split follows
        the same question counts the diagnosis card ranks, so the plan cannot
        drift from the finding. -->
-  <div class="sec-hed" id="plan-hed" style="display:none;">What the next four weeks look like</div>
+  <div class="sec-hed" id="plan-hed" style="display:none;">Your next four weeks</div>
   <div id="plan-section" style="display:none;"></div>
   <a href="#" class="detail-toggle" id="detail-toggle">Show full question-by-question detail (click any question to see it) &darr;</a>
   <div class="ftr"><span>Moretti Test Prep &amp; Tutoring · Cranford, NJ · (201) 275-2791</span><span id="ftr-date"></span></div>
@@ -18976,18 +19016,9 @@ window.renderNativeReport = function (data) {
       singleSection && mathScaled !== null && mathScaled !== undefined));
 
     /* ═══ SCORE BAND ═══ the composite carries its imprecision as part of the
-       number ("890, range 850-930") rather than a methodology footnote.
-
-       ±SCORE_SEM is a plain-English stand-in for measurement error, not a
-       computed CI: the real exam's published SEM is around this size, and a
-       one-form diagnostic on an approximated curve can't be tighter.
-       Deliberately a round number. */
+       number ("890, range 850-930") rather than a methodology footnote. */
+    var reportBand = null;   // read by the plain layer's score sentence
     if (headlineVal !== null && headlineVal !== undefined) {
-      /* The band widens when the attempt carries less information: standard
-         error scales roughly as 1/sqrt(n), so the base is scaled by
-         sqrt(total / attempted) (98 of 98 keeps ±40, 80 of 98 gives about
-         ±45). Still an approximation around the real exam's published SEM,
-         not a computed CI. */
       /* Conditional standard error from this test's own curve, the same as
          report.html (see the SCORE BAND note there): local slope of the
          curve times the binomial spread of the raw score, sections combined
@@ -19017,6 +19048,7 @@ window.renderNativeReport = function (data) {
         var lo = Math.max(headlineMin, Math.floor(loRaw / 10) * 10);
         var hi = Math.min(headlineMax, Math.ceil(hiRaw / 10) * 10);
         rangeEl.textContent = 'range ' + lo + '\u2013' + hi;
+        reportBand = { val: headlineVal, lo: lo, hi: hi };
         rangeEl.title = 'Measurement error on this test: the true score should fall in this range about 4 times in 5.';
         bigTile.appendChild(rangeEl);
         /* ═══ WHEN THE BAND IS THE WRONG INSTRUMENT ═══
@@ -19046,7 +19078,7 @@ window.renderNativeReport = function (data) {
           noteEl.innerHTML = '<strong>Read this one with care.</strong> ' + first + ' worked ' +
             Math.round(usedMs / 60000) + ' of ' + Math.round(allotMs / 60000) + ' available minutes. ' +
             'Guessing lifts this number and questions that went by too fast to have been worked hold it down, ' +
-            'so it is not a clean read of what ' + first + ' knows &mdash; in either direction. See Habits worth naming.';
+            'so it is not a clean read of what ' + first + ' knows &mdash; in either direction. See “How you worked the test” below.';
           bigTile.appendChild(noteEl);
         }
       }
@@ -20271,7 +20303,7 @@ window.renderNativeReport = function (data) {
   if (attemptDate) {
     var attemptHour = attemptDate.getHours();
     if (attemptHour >= 22 || attemptHour < 5) {
-      behaviorFlags.push('<strong>Late-night attempt:</strong> this test was submitted at ' + timeStr + ' local time. Fatigue at that hour can suppress performance in ways that have nothing to do with content knowledge — worth asking ' + first + ' when this was actually taken before treating a lower-than-expected score as a real ceiling, and worth scheduling the next one earlier in the day if this pattern repeats.');
+      behaviorFlags.push('<strong>Taken late at night:</strong> this test was handed in at ' + timeStr + '. Tiredness at that hour can lower a score without saying anything about what ' + first + ' knows, so check when it was actually taken before reading much into a low number. <strong>Next test:</strong> take it earlier in the day.');
     }
   }
   // Unused time is flagged only when BOTH >=5 minutes AND >=15% of the
@@ -20291,7 +20323,7 @@ window.renderNativeReport = function (data) {
         // bank a reserve), so this doesn't contradict the Time budget card.
         // The finding is "finished early, with questions wrong, reserve
         // unspent."
-        behaviorFlags.push('<strong>Unused time (' + s7.label + '):</strong> ' + first + ' submitted with roughly ' + Math.round(leftoverMin) + ' of ' + Math.round(s7.timeAllottedMin) + ' minutes still on the clock (about ' + Math.round(leftoverShare * 100) + '% of the section) while still missing ' + missedHere + ' question' + (missedHere === 1 ? '' : 's') + ' here. The per-question targets already bank a few minutes of reserve, so finishing a little early is expected. This is more than that, and it went unspent on questions that needed it. Worth checking whether ' + first + ' is submitting out of habit rather than using the full section to go back and recheck answers.');
+        behaviorFlags.push('<strong>Time left on the clock (' + s7.label + '):</strong> ' + first + ' handed in with about ' + Math.round(leftoverMin) + ' of ' + Math.round(s7.timeAllottedMin) + ' minutes left (' + Math.round(leftoverShare * 100) + '% of the section) and ' + missedHere + ' question' + (missedHere === 1 ? '' : 's') + ' wrong. A few spare minutes is normal; this is more than that. <strong>Next test:</strong> spend the leftover time rechecking flagged questions before submitting.');
       }
     }
   });
@@ -20453,19 +20485,19 @@ window.renderNativeReport = function (data) {
          section 1's question with a different, self-relative statistic that
          can disagree with it. The section-level count is kept as a separate,
          well-evidenced read; naming skills is section 1's job. */
-      behaviorFlags.push('<strong>Stuck flag (' + s7.label + '):</strong> ' + stuckWrong.length + ' of ' + missedForFlags + ' missed multiple-choice questions here took well over ' + first + '’s own typical time on a correct answer: real, deliberate effort that still came back wrong, not a rushed guess. That points at content rather than pacing; Knowledge below names the specific skills where the evidence supports it.');
+      behaviorFlags.push('<strong>Worked hard, still missed (' + s7.label + '):</strong> ' + stuckWrong.length + ' of ' + missedForFlags + ' missed multiple-choice questions here took well over ' + first + '’s usual time for a right answer. That is real effort that still came back wrong, not a rushed guess, so the fix is knowledge, not speed. <strong>Next:</strong> relearn before timed practice; “What to relearn” below names the areas the evidence supports.');
     }
     if (missedForFlags >= 4 && rushedWrong.length / missedForFlags >= 0.5) {
       var wSkills = topSkillNames(rushedWrong, 3).join(', ');
       var rushedBasis = usingFirstPass
         ? 'spent well under ' + first + '’s own average FIRST-LOOK time on questions answered correctly (whether or not ' + first + ' ever came back to them)'
         : 'answered in well under ' + first + '’s own average time on questions answered correctly';
-      behaviorFlags.push('<strong>Pacing flag (' + s7.label + '):</strong> ' + rushedWrong.length + ' of ' + missedForFlags + ' missed multiple-choice questions here were ' + rushedBasis + ' — a rushed-guess pattern more than ' + rushedWrong.length + ' independently reasoned wrong answers.' + (wSkills ? ' Heaviest in: ' + wSkills + '.' : '') + ' Worth a pacing conversation before treating all of these as pure content gaps.');
+      behaviorFlags.push('<strong>Answered too fast (' + s7.label + '):</strong> ' + rushedWrong.length + ' of ' + missedForFlags + ' missed multiple-choice questions here were ' + rushedBasis + '. That looks like rushing more than not knowing.' + (wSkills ? ' Most were in ' + wSkills + '.' : '') + ' <strong>Next test:</strong> read each question to the end before choosing.');
     }
     var hardCorrectN = s7.diff.hard.c;
     if (hardCorrectN >= 3 && luckyCorrect.length >= 2 && luckyCorrect.length / hardCorrectN >= 0.4) {
       var lSkills = topSkillNames(luckyCorrect, 3).join(', ');
-      behaviorFlags.push('<strong>Guess-landed flag (' + s7.label + '):</strong> ' + luckyCorrect.length + ' harder question' + (luckyCorrect.length === 1 ? '' : 's') + (lSkills ? ' (' + lSkills + ')' : '') + ' here were answered correctly in a fraction of ' + first + '’s typical time — consistent with a guess landing right rather than a solved problem. The raw score in this area may read a bit higher than true command of the material.');
+      behaviorFlags.push('<strong>Quick right answers on hard questions (' + s7.label + '):</strong> ' + luckyCorrect.length + ' harder question' + (luckyCorrect.length === 1 ? '' : 's') + (lSkills ? ' (' + lSkills + ')' : '') + ' here were answered right in a fraction of ' + first + '’s usual time, which looks more like a lucky guess than a solved problem. The score in this area may be a little higher than what ' + first + ' can do reliably.');
     }
   });
   /* Budget-relative flags. These are the two reads the self-relative
@@ -20511,18 +20543,18 @@ window.renderNativeReport = function (data) {
       var perUnflagged = rv.unflaggedMs / rv.unflaggedQuestions;
       var perFlagged = rv.flaggedQuestions > 0 ? rv.flaggedMs / rv.flaggedQuestions : 0;
       if (!perFlagged || perUnflagged >= perFlagged * 1.25) {
-        behaviorFlags.push('<strong>Second-guessing (' + s8.label + '):</strong> ' +
-          first + ' went back to ' + rv.unflaggedQuestions + ' questions that were never flagged for review, about ' +
+        behaviorFlags.push('<strong>Went back to settled answers (' + s8.label + '):</strong> ' +
+          first + ' went back to ' + rv.unflaggedQuestions + ' questions that were never flagged, about ' +
           Math.round(perUnflagged / 1000) + 's each' +
           (perFlagged ? ' &mdash; against ' + Math.round(perFlagged / 1000) + 's each on the ones that were flagged' : '') +
-          '. Revisiting a question you marked is the review pass doing its job; revisiting one you had already committed to and moved past is usually second-guessing, and it spends the clock the harder questions at the end of the section needed.');
+          '. Going back to a flagged question is the review working. Reopening one that was already settled usually is not, and it uses time the last questions need. <strong>Next test:</strong> flag anything you are unsure of, and go back only to those.');
       }
     }
 
   });
 
   if (markedT === 0 && totalQ >= 40) {
-    behaviorFlags.push(first + ' never used the "flag for review" feature across all ' + totalQ + ' questions' + (skipped < totalQ - totalC ? ', despite ' + (totalQ - totalC) + ' misses' : '') + '. Combined with the timing patterns above, this points at pushing through uncertain questions rather than marking them to revisit — a fixable pacing habit worth raising directly with ' + first + '.');
+    behaviorFlags.push(first + ' never used "flag for review" on any of the ' + totalQ + ' questions' + (skipped < totalQ - totalC ? ', with ' + (totalQ - totalC) + ' missed' : '') + '. Pushing through an unsure question without marking it leaves nothing to come back to. <strong>Next test:</strong> flag every question you are not sure of.');
   }
   /* ═══ CHANCE-CORRECTED COUNT ═══ lives with the other "how to read this
      attempt" notes, next to the guess-landed flag.
@@ -20548,12 +20580,12 @@ window.renderNativeReport = function (data) {
          lift grows fast as options shrink (8 questions among four, 12 among
          three, 25 among two, at this wrong rate). Four is the most generous
          assumption, so the figure is a floor. */
-      behaviorFlags.push('<strong>Guessing lifts the raw count:</strong> of the ' + mcC +
+      behaviorFlags.push('<strong>Some right answers were likely guesses:</strong> of the ' + mcC +
         ' multiple-choice questions ' + first + ' got right, <strong>at least ' + Math.round(lift) +
-        '</strong> are what guessing alone would produce at this wrong-answer rate &mdash; more if ' + first +
-        ' was typically down to two or three plausible choices rather than four. ' +
+        '</strong> are what guessing alone would produce at this many wrong answers (more, if ' + first +
+        ' was usually down to two or three choices). ' +
         'That is about ' + Math.round(liftShare * 100) + '% of them. ' +
-        'The score is calculated the way the real exam calculates it; this is a note on how much of it is likely to repeat.');
+        'The score is worked out the way the real exam does it; this is about how much of it is likely to repeat.');
     }
   })();
 
@@ -20839,7 +20871,7 @@ window.renderNativeReport = function (data) {
         : contentMissed === 0
         ? '<p class="behavior-clean"><strong>Nothing was missed on content.</strong> ' +
           first + ' answered every question that was reached correctly, so there is no content here to re-teach and ' +
-          'nothing for this section to rank. What is left is how long the right answers took &mdash; that is Efficiency below.</p>'
+          'nothing for this section to rank. What is left is how long the right answers took &mdash; that is “Right answers that took too long” below.</p>'
         : contentShare >= 0.15
         ? '<p class="behavior-clean"><strong>No single area stands out &mdash; because most of them are affected.</strong> ' +
           first + ' is at ' + Math.round(accAll * 100) + '% on the questions actually attempted, and the ' + contentMissed +
@@ -20849,7 +20881,7 @@ window.renderNativeReport = function (data) {
         : '<p class="behavior-clean"><strong>No content area separates from ' + first + '\u2019s own average.</strong> ' +
           'At ' + Math.round(accAll * 100) + '% on attempted questions, the ' + contentMissed + ' content miss' +
           (contentMissed === 1 ? '' : 'es') + ' really are few and spread thin, so there is no body of content worth ' +
-          're-teaching. That points the work at Efficiency and Pacing below &mdash; what questions cost, and whether the clock ' +
+          're-teaching. That points the work at the two time sections below &mdash; what questions cost, and whether the clock ' +
           'lasted &mdash; rather than at a topic list.</p>';
       return;
     }
@@ -21002,7 +21034,7 @@ window.renderNativeReport = function (data) {
     function rowsHtml(list) {
       return list.map(function (r) {
         var tagCls = r.severity === 3 ? 'gap' : r.severity === 2 ? 'pacing' : 'slow';
-        var tagLabel = r.severity === 3 ? 'Content gap' : r.severity === 2 ? 'Pacing' : 'Getting there';
+        var tagLabel = r.severity === 3 ? 'Relearn' : r.severity === 2 ? 'Too fast' : 'Slow but right';
         function seg(n, cls) {
           if (!n) return '';
           return '<div class="skilldx-seg dxk-hit ' + cls + '" style="width:' + (n / r.total * 100) + '%;"' +
@@ -22045,11 +22077,11 @@ window.renderNativeReport = function (data) {
     // double-count by design (see the note directly above).
     planInputs.causes = { content: buckets.content.length, method: buckets.method.length, clock: buckets.clock.length };
     var CAUSES = [
-      { key: 'content', barLabel: 'didn’t know it',  name: 'Content', section: 'Knowledge',
+      { key: 'content', barLabel: 'didn’t know it',  name: 'Content', section: 'What to relearn',
         color: 'var(--red)', short: 'questions genuinely attempted and still missed' },
-      { key: 'method',  barLabel: 'took too long',        name: 'Method',  section: 'Efficiency',
+      { key: 'method',  barLabel: 'took too long',        name: 'Method',  section: 'Right answers that took too long',
         color: 'var(--tan)', short: 'right answers that cost too much time' },
-      { key: 'clock',   barLabel: 'ran out of clock',     name: 'Pacing',  section: 'Pacing',
+      { key: 'clock',   barLabel: 'ran out of clock',     name: 'Pacing',  section: 'How you used the clock',
         color: '#4E6070',    short: 'questions the clock never really allowed' }
     ];
     if (!CAUSES.some(function (c) { return buckets[c.key].length; })) return;
@@ -22102,16 +22134,16 @@ window.renderNativeReport = function (data) {
         if (lead.c.key === 'method') {
           return where + '<span class="dx-lead">' + esc(nm('Method')) +
             ' is the only thing showing</span>, and it cost time rather than points: ' +
-            'every question here was answered correctly, just slowly. See ' + esc(lead.c.section) + ' below.';
+            'every question here was answered correctly, just slowly. See “' + esc(lead.c.section) + '” below.';
         }
         return where + '<span class="dx-lead">' + esc(nm(lead.c.name)) +
           ' is the only thing costing points</span>: ' + lead.c.short +
-          '. See ' + esc(lead.c.section) + ' below.';
+          '. See “' + esc(lead.c.section) + '” below.';
       }
       if (decisive) {
         return where + '<span class="dx-lead">' + esc(nm(lead.c.name)) +
           ' is the main story</span>: ' + lead.c.short +
-          '. Start with ' + esc(lead.c.section) + ' below.';
+          '. Start with “' + esc(lead.c.section) + '” below.';
       }
       /* The mixed case names only the sections that actually contribute. */
       // Named in the order they appear on the page, not sorted alphabetically.
@@ -22655,11 +22687,191 @@ window.renderNativeReport = function (data) {
        from one test would argue with it. data.ptTitle is set only for a
        numbered practice test. */
     if (!data.ptTitle) {
+      planInputs.weekly = weekly; planInputs.weeklyText = hrs(weekly);
       var host = document.getElementById('plan-section');
       host.innerHTML = html;
       document.getElementById('plan-hed').style.display = '';
       host.style.display = '';
     }
+  })();
+
+  /* ═══ THE PLAIN LAYER ═══
+     Everything above is the evidence; this is the part a 16-year-old should
+     be able to read in a minute and act on. Measured on the public sample
+     before it existed: about 1,000 words and 130 numbers before the first
+     sentence about what to do, method paragraphs inside every finding, and
+     labels that graded the student ("Stuck flag") instead of the work.
+     After: 87 words and 23 numbers before the first step, the summary at
+     reading grade ~5, the habit notes from grade 10.9 to 6.6. Now:
+
+       1. A one-minute summary under the score: the score as a range in
+          words ("about 4 chances in 5", not +/-1.28 CSEM), where the points
+          went as counts, one thing going well, and at most three next steps,
+          each tied to the evidence it rests on.
+       2. Each section keeps its finding; its method notes (how the chart is
+          sized, why the order, what the target pace means, the interval on
+          every row) sit behind a "How this works" button in its heading.
+       3. "Show every calculation" (or ?view=tutor) opens all of them.
+          Printing prints what is open, so a PDF for a parent comes out plain
+          and the tutor can open everything first for a full one.
+
+     The design follows the feedback and risk-communication evidence (Kluger
+     & DeNisi 1996; Hattie & Timperley 2007; Wisniewski et al. 2020;
+     van der Bles et al. 2020; Wintle et al. 2019; Zikmund-Fisher et al.
+     2008): feedback about the task and the next step helps, feedback about
+     the person can backfire, and a range stated with a frequency is
+     understood better than a margin and costs no trust.
+
+     Nothing here recomputes a statistic. It reads what the sections above
+     already decided (planInputs, domainBucketsDx, reportBand, the headline),
+     so the summary cannot say something the evidence did not. Visibility
+     is done with classes on the page root rather than by moving elements,
+     because several sections re-render in place when a toggle is used. */
+  (function renderPlainLayer() {
+    try {
+      var root = document.getElementById('page1');
+      var box = document.getElementById('plain-summary');
+      if (!root || !box) return;
+      // A fresh report starts plain, whatever the last one had open.
+      root.className = root.className.replace(/(^|\s)how-\S+/g, '').trim();
+      root.classList.add('plain-on');
+      if (/[?&]view=tutor\b/.test(location.search)) root.classList.add('how-all');
+      var escP = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (ch) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]; }); };
+      var count = function (n, one, many) { return n + ' ' + (n === 1 ? one : (many || one + 's')); };
+
+      /* ── "How this works" per section, only where there is something to open ── */
+      var HOW = [
+        ['bridge-hed', 'bridge', '.bridge-note-block'],
+        ['skilldx-hed', 'skilldx', '.skilldx-thin, .skilldx-ci'],
+        ['budget-hed', 'budget', '#budget-sub, .budget-cum'],
+        ['timing-hed', 'timing', '#timing-allocation-sub'],
+        ['plan-hed', 'plan', '.plan-foot']
+      ];
+      HOW.forEach(function (h) {
+        var hed = document.getElementById(h[0]);
+        if (!hed || hed.style.display === 'none' || hed.querySelector('.how-btn') || !root.querySelector(h[2])) return;
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'how-btn';
+        b.setAttribute('aria-expanded', 'false');
+        b.textContent = 'How this works';
+        b.addEventListener('click', function () {
+          var on = root.classList.toggle('how-' + h[1]);
+          b.setAttribute('aria-expanded', on ? 'true' : 'false');
+          b.textContent = on ? 'Hide the method' : 'How this works';
+        });
+        hed.appendChild(b);
+      });
+
+      /* ── 1. the one-minute summary ── */
+      var c = planInputs.causes || { content: 0, method: 0, clock: 0 };
+
+      // The score as a range, in words. The band is the true-score interval
+      // (see SCORE BAND), so it is phrased as "your real level", not as
+      // where a retest would land: a retest spreads wider than this.
+      var scoreHtml = (reportBand && reportBand.val != null)
+        ? '<p class="plain-score">You scored <b>' + reportBand.val + '</b>. One test can’t pin a score down exactly: ' +
+          'your real level is most likely between <b>' + reportBand.lo + '</b> and <b>' + reportBand.hi + '</b> (about 4 chances in 5).</p>'
+        : '';
+
+      // Where the points went. Method is right answers, so it is time, not
+      // points, and is said that way.
+      var lostN = c.content + c.clock;
+      var lede = !lostN
+        ? (c.method ? 'Every question you answered, you got right. What cost you was time.' : 'Nothing on this test cost you points that we could trace to a cause.')
+        : c.content >= 1.5 * c.clock
+        ? 'Most of what you lost was on questions you worked through and still got wrong, not on the clock.'
+        : c.clock >= 1.5 * c.content
+        ? 'Most of what you lost was to the clock, not to what you know.'
+        : 'What you lost is split between questions you got wrong and questions the clock took.';
+      // Lost points biggest first; the slow right answers always last, since
+      // they cost time rather than points.
+      var lines = [
+        { n: c.content, t: count(c.content, 'question') + ' you worked on and still got wrong' },
+        { n: c.clock, t: count(c.clock, 'question') + ' the clock didn’t really let you answer: left blank, rushed past, or reached after time ran out' }
+      ].filter(function (x) { return x.n > 0; }).sort(function (a, b) { return b.n - a.n; });
+      if (c.method > 0) lines.push({ n: c.method, t: count(c.method, 'right answer') + ' that took so long that later questions ran short on time' });
+      var lostHtml = '<p class="plain-lede">' + lede + '</p>' +
+        (lines.length ? '<ul class="plain-list">' + lines.map(function (x) { return '<li>' + x.t + '.</li>'; }).join('') + '</ul>' : '');
+
+      // One real strength, with its number: the best area with enough
+      // questions to mean something. No strength clears the bar, none is said.
+      var best = null;
+      Object.keys(domainBucketsDx || {}).forEach(function (d) {
+        var b = domainBucketsDx[d], right = b.mastered + b.skimmed + b.inefficient, p = b.total ? right / b.total : 0;
+        if (b.total >= 8 && p >= 0.85 && (!best || p > best.p || (p === best.p && b.total > best.n))) best = { name: d, right: right, n: b.total, p: p };
+      });
+      if (best) lostHtml += '<p class="plain-well"><b>Going well:</b> ' + escP(best.name) + ', ' + best.right + ' of ' + best.n + ' right.</p>';
+
+      // The area the knowledge section starts with, and what it was named for.
+      var startHere = '';
+      var sh = document.querySelector('#skilldx-headline strong');
+      if (sh) startHere = sh.textContent.replace(/^Start here:\s*/, '').replace(/\.\s*$/, '');
+      var leadArea = null, pre = planInputs.prereq;
+      (planInputs.areas || []).forEach(function (a) { if (!leadArea && a.name === startHere) leadArea = a; });
+
+      var steps = [];
+      if (startHere && pre && pre.name === startHere) {
+        steps.push('Start with <b>' + escP(startHere) + '</b>. You got ' + pre.right + ' of ' + pre.total + ' right there, and ' +
+          (pre.kind === 'prereq' ? escP(pre.blocks) + ' is built on it.' : 'its rules can be learned in a few weeks.') +
+          ' In the Question Bank, do its easy and medium questions before the hard ones.');
+      } else if (leadArea && leadArea.severity === 3) {
+        var skills = (leadArea.topSkills || []).map(function (s) { return s.name || s; }).filter(Boolean).slice(0, 2);
+        // "More than the rest of your test predicts" is what the gap test
+        // measures (misses beyond this student's own level), and it is why
+        // 3 misses of 14 can lead for a strong student.
+        steps.push('Start with <b>' + escP(startHere) + '</b>' + (skills.length ? ', especially ' + skills.map(escP).join(' and ') : '') +
+          '. You missed ' + leadArea.lead + ' of ' + leadArea.n + ' there after working on them, more than the rest of your test predicts. ' +
+          'In the Question Bank, do the easy and medium questions before the hard ones.');
+      } else if (leadArea && leadArea.severity === 2) {
+        steps.push('Slow down on <b>' + escP(startHere) + '</b>. ' + leadArea.lead + ' of ' + leadArea.n +
+          ' questions there went by faster than they could be read. Read the whole question before you choose.');
+      } else if (c.content >= 3) {
+        steps.push('Go over the questions you got wrong with your tutor. They are spread across several areas rather than one, so the fix is going through them, not drilling one topic.');
+      }
+      // One habit for the clock, the biggest one this test shows.
+      var spare = null;
+      (sections || []).forEach(function (s) {
+        if (!(s.timeAllottedMin > 0 && s.timeTotal > 0)) return;
+        var leftMin = (s.timeAllottedMin * 60000 - s.timeTotal) / 60000, wrong = s.t - s.c;
+        if (leftMin >= 5 && leftMin / s.timeAllottedMin >= 0.15 && wrong > 0 && (!spare || leftMin > spare.min)) spare = { label: s.label, min: Math.round(leftMin), wrong: wrong };
+      });
+      var reopened = (behaviorFlags || []).some(function (f) { return f.indexOf('<strong>Went back to settled answers') === 0; });
+      if (c.clock >= 3 && c.clock >= c.content / 2) {
+        steps.push('Answer every question. When one is taking too long, pick your best answer, flag it, and come back at the end if there is time.');
+      } else if (spare) {
+        steps.push('Use the whole clock. You finished ' + escP(spare.label) + ' with about ' + spare.min + ' minutes left and ' + count(spare.wrong, 'question') +
+          ' wrong. Spend that time rechecking the questions you flagged.');
+      } else if (reopened) {
+        steps.push('Only go back to questions you flagged. Reopening answers you had already settled used time the last questions needed.');
+      } else if (c.method >= 3) {
+        steps.push('When a question has taken twice as long as it should, pick your best answer, flag it, and move on.');
+      }
+      steps.push('Look at the questions you missed: open the question-by-question list at the bottom of this report. Each one opens the question itself.');
+      var hoursHtml = planInputs.weekly > 0
+        ? '<p class="plain-well">About <b>' + planInputs.weeklyText + ' hour' + (planInputs.weekly === 1 ? '' : 's') + ' a week</b> for now. “Your next four weeks” below splits it up.</p>'
+        : '';
+
+      box.innerHTML =
+        '<div class="plain-head"><h2>Your report in one minute</h2>' +
+          '<button type="button" class="how-btn how-all-btn"></button></div>' +
+        scoreHtml +
+        '<div class="plain-cols">' +
+          '<div><div class="plain-label">Where your points went</div>' + lostHtml + '</div>' +
+          '<div><div class="plain-label">Do these next</div><ol class="plain-steps">' +
+            steps.slice(0, 3).map(function (s) { return '<li>' + s + '</li>'; }).join('') + '</ol>' + hoursHtml + '</div>' +
+        '</div>' +
+        '<p class="plain-foot">The rest of the report is the evidence for this. Each section has a <b>How this works</b> button if you want the method.</p>';
+      var allBtn = box.querySelector('.how-all-btn');
+      function syncAll() {
+        var on = root.classList.contains('how-all');
+        allBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+        allBtn.textContent = on ? 'Hide the calculations' : 'Show every calculation';
+      }
+      allBtn.addEventListener('click', function () { root.classList.toggle('how-all'); syncAll(); });
+      syncAll();
+      box.style.display = '';
+    } catch (e) { if (window.console) console.warn('plain layer:', e); }
   })();
 
   document.getElementById('page1').style.display = 'block';
