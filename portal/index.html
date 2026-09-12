@@ -5300,7 +5300,7 @@ window.Portal = {
      header in fluid-ui.js. -->
 <script src="fluid-ui.js?v=20260905y"></script>
 <script src="banks.js?v=20260910a"></script>
-<script src="signals.js?v=20260912a"></script>
+<script src="signals.js?v=20260912b"></script>
 <script src="desmos-tags.js?v=20260912a"></script>
 <script src="time-budgets.js?v=20260905y"></script>
 <script src="challenge-questions.js?v=20260911a"></script>
@@ -7193,62 +7193,18 @@ window.Portal = {
     });
   }
 
-  /* ═══ HOW MUCH A SCORE MOVES ON ITS OWN ═══
-     Test-retest SD of one section score by level, in scaled points, from
-     simulation on the real forms, routing and curves (stats audit,
-     2026-09-12): sampling error plus ordinary day-to-day variation. Largest
-     mid-scale, where one question is worth the most. */
-  var SECTION_SEM_TABLE = [[200, 30], [386, 45], [483, 57], [608, 60], [702, 43], [750, 30], [800, 22]];
-  function sectionSem(level) {
-    var t = SECTION_SEM_TABLE;
-    if (!(level > t[0][0])) return t[0][1];
-    for (var i = 1; i < t.length; i++) {
-      if (level <= t[i][0]) return t[i - 1][1] + (t[i][1] - t[i - 1][1]) * (level - t[i - 1][0]) / (t[i][0] - t[i - 1][0]);
-    }
-    return t[t.length - 1][1];
-  }
-  function compositeSem(e) {
-    var rw = (typeof e.rw === 'number') ? e.rw : e.composite / 2;
-    var m = (typeof e.math === 'number') ? e.math : e.composite / 2;
-    return Math.sqrt(Math.pow(sectionSem(rw), 2) + Math.pow(sectionSem(m), 2));
-  }
+  /* How much a score moves on its own, and whether a change is real: shared
+     with the family emails, so both live in signals.js (sectionSem,
+     compositeSem, scoreChange, pairChange; the hardest test is excluded
+     there). These names are kept so the code below reads as before. */
+  // If signals.js failed to load, the chart simply shows no change verdict.
+  var MS_ = window.MorettiSignals || {};
+  var sectionSem = MS_.sectionSem || function () { return 0; };
+  var compositeSem = MS_.compositeSem || function () { return 0; };
+  var scoreChange = MS_.scoreChange || function () { return null; };
+  var HARDEST_TEST_ID = MS_.HARDEST_TEST_ID || 'sat-practice-11';
   // The in-portal report (a separate script) reads these for "Since last time".
   window.MorettiScoreNoise = { sectionSem: sectionSem, compositeSem: compositeSem };
-  /* Has the composite really changed? The average of the first k scored
-     full tests against the average of the last k (k = up to 3, and no more
-     than half of them), called a change only past 1.645 standard errors of
-     that difference: a gain that big turns up by chance about 1 time in
-     20. Two single sittings differ by chance by 75-140 points (SD), so a
-     single pair can rarely certify a realistic gain; pooling tests is what
-     makes one visible. The "Hardest (No Scaling)" test is left out: every
-     question on it is hard, and the same student scores roughly 87 points
-     lower on it, so it would read as a drop. Returns null with fewer than
-     two comparable tests. */
-  /* The hardest test (id sat-practice-11, shown as Practice Test 12) is kept
-     off the progress chart and out of the change test. */
-  var HARDEST_TEST_ID = 'sat-practice-11';
-  function scoreChange(entries) {
-    var usable = (entries || []).filter(function (e) {
-      return e && typeof e.composite === 'number' && e.testId !== HARDEST_TEST_ID;
-    });
-    if (usable.length < 2) return null;
-    var k = Math.max(1, Math.min(3, Math.floor(usable.length / 2)));
-    var first = usable.slice(0, k), latest = usable.slice(usable.length - k);
-    var avg = function (a, f) { return a.reduce(function (s, e) { return s + f(e); }, 0) / a.length; };
-    var delta = Math.round(avg(latest, function (e) { return e.composite; }) - avg(first, function (e) { return e.composite; }));
-    /* The error is read off the table at the student's AVERAGE level across
-       these tests, not at each observed score: the error peaks mid-scale,
-       so a noisy score that happens to land away from the peak would be
-       given too little error and a chance swing would read as real (13-14%
-       false changes against 10% nominal when evaluated per score). Rounded
-       up to the next 10, so the printed threshold never understates it. */
-    var haveSections = usable.every(function (e) { return typeof e.rw === 'number' && typeof e.math === 'number'; });
-    var level = { composite: avg(usable, function (e) { return e.composite; }) };
-    if (haveSections) { level.rw = avg(usable, function (e) { return e.rw; }); level.math = avg(usable, function (e) { return e.math; }); }
-    var sdDiff = compositeSem(level) * Math.sqrt(2 / k);
-    var threshold = Math.ceil(1.645 * sdDiff / 10) * 10;
-    return { delta: delta, threshold: threshold, k: k, real: Math.abs(delta) >= threshold };
-  }
 
   function buildScoreBarChart(entries, scaleMin, scaleMax, target) {
     var n = entries.length;
@@ -19152,8 +19108,15 @@ window.renderNativeReport = function (data) {
       var raw = localStorage.getItem('moretti_score_history_' + data.k);
       entries = (JSON.parse(raw) || {}).entries || [];
     } catch (e) { entries = []; }
+    /* Only comparable full tests on both sides: the hardest test and
+       section-only sittings would read as a drop or a jump that isn't one
+       (MorettiSignals.isTrendComparable, shared with the emails). */
+    var MS = window.MorettiSignals;
+    if (!MS || !MS.pairChange) return;
+    var thisEntry = { composite: thisComposite, rw: rwScaled, math: mathScaled, testId: data.pt || null };
+    if (!MS.isTrendComparable(thisEntry)) return;
     var prior = entries.filter(function (e) {
-      return e && e.testType === data.t && typeof e.composite === 'number' && Date.parse(e.date) < thisTs;
+      return e && e.testType === data.t && MS.isTrendComparable(e) && Date.parse(e.date) < thisTs;
     }).sort(function (a, b) { return Date.parse(b.date) - Date.parse(a.date); })[0];
     if (!prior) return; // first attempt of this test type this browser knows about — nothing to compare against
     var delta = thisComposite - prior.composite;
@@ -19162,13 +19125,11 @@ window.renderNativeReport = function (data) {
        1.645 standard errors of the difference; anything smaller is shown
        plainly as within ordinary variation. See scoreChange() in the portal
        script, which does the same across several tests. */
-    var noise = window.MorettiScoreNoise;
-    // Error read at the average of the two levels (see scoreChange), rounded up.
-    var both = typeof rwScaled === 'number' && typeof mathScaled === 'number' && typeof prior.rw === 'number' && typeof prior.math === 'number';
-    var lvl = { composite: (thisComposite + prior.composite) / 2 };
-    if (both) { lvl.rw = (rwScaled + prior.rw) / 2; lvl.math = (mathScaled + prior.math) / 2; }
-    var thr = noise ? Math.ceil(1.645 * Math.SQRT2 * noise.compositeSem(lvl) / 10) * 10 : 0;
-    var clear = !thr || Math.abs(delta) >= thr;
+    // Error read at the average of the two levels, rounded up (pairChange).
+    var pc = MS.pairChange(prior, thisEntry);
+    if (!pc) return;
+    var thr = pc.threshold;
+    var clear = pc.real;
     var cls = !clear ? 'flat' : delta > 0 ? 'up' : delta < 0 ? 'down' : 'flat';
     var arrow = !clear ? '&#8212;' : delta > 0 ? '&#9650;' : delta < 0 ? '&#9660;' : '&#8212;';
     var deltaText = delta === 0 ? 'No change' : (delta > 0 ? '+' : '') + delta;
@@ -22642,9 +22603,22 @@ window.renderNativeReport = function (data) {
       }
     }
     var weekly = hours.content + hours.method + hours.clock;
+    /* ═══ STRONG STUDENTS: VOLUME, NOT A SHORTER WEEK ═══
+       Luca's call (2026-09-12): "strong students should be doing lots of
+       tests and refining any skills that pool to be incorrect." Under twelve
+       lost questions, one test can't say which misses are real (a miss on a
+       three-question skill is an anecdote), so the week keeps its 4-5 hours
+       but becomes mostly full practice tests, and the drilling goes to the
+       skills whose misses POOL across tests (Home's "Your Statistics" card,
+       from two tests on). This replaces the taper that shrank the week
+       toward an hour, which also covered the old one-hour maintenance week. */
+    var strong = pointsLost < FULL_WEEK_AT;
+    var STRONG_TEST_HOURS = 3, STRONG_SHARPEN_HOURS = 1.5;
+    if (strong) weekly = STRONG_TEST_HOURS + STRONG_SHARPEN_HOURS;
+    planInputs.mode = strong ? 'tests' : null;
     /* Nothing was actually lost -- scale the week down to maintenance
        rather than inventing four hours of work to fill it. */
-    var maintenanceOnly = (pointsLost === 0);
+    var maintenanceOnly = (pointsLost === 0) && !strong;
     if (maintenanceOnly) {
       hours.content = 0; hours.clock = 0;
       hours.method = MAINTENANCE_HOURS;
@@ -22654,7 +22628,7 @@ window.renderNativeReport = function (data) {
     // whose ONLY cost was the clock. There is no content or method work the
     // evidence supports, and padding the week with invented drilling to hit
     // a four-hour target would be the plan lying to look thorough.
-    var clockOnly = (cmTotal === 0);
+    var clockOnly = (cmTotal === 0) && !strong;
 
     function hrs(h) { return h === Math.floor(h) ? String(h) : (h < 1 ? '' : String(Math.floor(h))) + '½'; }
     function unitFor(h) { return h === 1 ? 'hr / week' : 'hrs / week'; }
@@ -22710,6 +22684,25 @@ window.renderNativeReport = function (data) {
           '<em>' + causes.clock + ' question' + (causes.clock === 1 ? '' : 's') + ' on this test ' + (causes.clock === 1 ? 'was' : 'were') + ' never really answered: either time ran out first, or it went by too fast to have been read.</em>'
       });
     }
+    if (strong) {
+      // The skills this test's misses landed in, as the first place to look
+      // until a second test shows which ones pool.
+      var missSkills = [];
+      (planInputs.contentRows || []).forEach(function (x) { if (x.sk && missSkills.indexOf(x.sk) === -1) missSkills.push(x.sk); });
+      rows = [{
+        h: STRONG_TEST_HOURS, unit: unitFor(STRONG_TEST_HOURS), color: '#4E6070',
+        what: '<b>Practice tests.</b> One full timed practice test every week, in one sitting, phone away, reviewed the next day. ' +
+          'At this level each test has only a few questions left to win, and more tests are how you find the ones that keep costing you.' +
+          (causes.clock > 0 ? ' <em>' + causes.clock + ' question' + (causes.clock === 1 ? '' : 's') + ' here ran into the clock, so pace each test as you go.</em>' : '')
+      }, {
+        h: STRONG_SHARPEN_HOURS, unit: unitFor(STRONG_SHARPEN_HOURS), color: 'var(--red)',
+        what: '<b>Sharpen.</b> Drill the skills your misses pool in, starting with ' +
+          (areaTxt ? areaTxt + ', where this test found a real gap' :
+            missSkills.length ? 'this test’s: ' + missSkills.slice(0, 3).map(esc).join('; ') : 'the questions this test caught') +
+          '. From your second test on, the “Your Statistics” card on Home lists the topics that came up wrong more than once; ' +
+          'those come first, in the Question Bank and in Saved &amp; Mistakes.'
+      }];
+    }
     if (!rows.length) return;
 
     var meter = rows.map(function (r) {
@@ -22719,7 +22712,12 @@ window.renderNativeReport = function (data) {
     var lead = ['content', 'method', 'clock'].reduce(function (a, k) { return causes[k] > causes[a] ? k : a; }, 'content');
     var leadWord = { content: 'relearning', method: 'speed', clock: 'pacing' }[lead];
 
-    var lede = maintenanceOnly
+    var lede = strong
+      ? 'About <b>' + hrs(weekly) + ' hours a week</b>, mostly full practice tests. ' +
+        (pointsLost === 0
+          ? 'Nothing on this test cost you points, so the job now is finding the few questions a harder test would catch, and that takes more full tests.'
+          : 'You lost only ' + pointsLost + ' question' + (pointsLost === 1 ? '' : 's') + ' here, so the job now is finding the few that keep costing you, and that takes more tests, not a longer topic list.')
+      : maintenanceOnly
       ? 'About <b>' + hrs(weekly) + ' hour a week</b>, and only that. Nothing on this attempt actually cost you any points &mdash; every question that came up was answered correctly' +
         (causes.method > 0
           ? '. What the timing shows is ' + causes.method + ' of those correct answers running well over the time they should take while the clock was short, which is worth keeping an eye on because it is the thing that would bite first on a harder test.'
@@ -23033,6 +23031,12 @@ window.renderNativeReport = function (data) {
       } else if (c.method >= 3) {
         steps.push('When a question has taken twice as long as it should, pick your best answer, flag it, and move on.');
       }
+      /* Strong students: the week is tests (see the plan). Said as a step on
+         every report, practice tests included, where the plan isn't shown. */
+      if (lostN < 12 && !(blanks >= 3)) {
+        steps.push('Take a full practice test every week. At your level each test has only a few questions left to win, ' +
+          'and from your second test on, the “Your Statistics” card on Home shows which topics keep coming back.');
+      }
       // Blanks took the first step, but slow right answers are their own
       // habit, and the plan spends the most hours on them: name where.
       if (blanks >= 3 && c.method >= 5 && (planInputs.methodSkills || []).length) {
@@ -23062,7 +23066,8 @@ window.renderNativeReport = function (data) {
       var leadWork = ['content', 'method', 'clock'].reduce(function (a, k) { return c[k] > c[a] ? k : a; }, 'content');
       var planLine = planInputs.weekly > 0
         ? ' The plan is about ' + planInputs.weeklyText + (planInputs.weekly === 1 ? ' hour' : ' hours') + ' a week, mostly ' +
-          { content: 'relearning', method: 'timed practice', clock: 'timed practice' }[leadWork] + '.'
+          (planInputs.mode === 'tests' ? 'full practice tests'
+            : { content: 'relearning', method: 'timed practice', clock: 'timed practice' }[leadWork]) + '.'
         : '';
       var parentHtml = '<p class="plain-parent"><b>For parents:</b> ' + problem + planLine +
         ' The best help at home is protecting those hours, and making the next practice test one quiet, timed sitting' +

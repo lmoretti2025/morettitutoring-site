@@ -572,6 +572,80 @@ var MorettiSignals = (function () {
     return facts;
   }
 
+  /* ═══ HOW MUCH A SCORE MOVES ON ITS OWN ═══
+     Moved here from portal/index.html (2026-09-12) so the portal's progress
+     chart and the family emails (emails.gs) judge score changes the same way.
+     Test-retest SD of one section score by level, in scaled points, from
+     simulation on the real forms, routing and curves (stats audit,
+     2026-09-12): sampling error plus ordinary day-to-day variation. Largest
+     mid-scale, where one question is worth the most. */
+  var SECTION_SEM_TABLE = [[200, 30], [386, 45], [483, 57], [608, 60], [702, 43], [750, 30], [800, 22]];
+  function sectionSem(level) {
+    var t = SECTION_SEM_TABLE;
+    if (!(level > t[0][0])) return t[0][1];
+    for (var i = 1; i < t.length; i++) {
+      if (level <= t[i][0]) return t[i - 1][1] + (t[i][1] - t[i - 1][1]) * (level - t[i - 1][0]) / (t[i][0] - t[i - 1][0]);
+    }
+    return t[t.length - 1][1];
+  }
+  // e: { composite, rw?, math? }; missing sections are split evenly.
+  function compositeSem(e) {
+    var rw = (typeof e.rw === 'number') ? e.rw : e.composite / 2;
+    var m = (typeof e.math === 'number') ? e.math : e.composite / 2;
+    return Math.sqrt(Math.pow(sectionSem(rw), 2) + Math.pow(sectionSem(m), 2));
+  }
+  /* The hardest practice test (id sat-practice-11, shown as Practice Test 12
+     since 2026-09-12): every question on it is hard and the same student
+     scores roughly 87 points lower on it, so it stays out of every trend,
+     drop, improvement or target comparison. */
+  var HARDEST_TEST_ID = 'sat-practice-11';
+  // entries: { composite, rw?, math?, testId?, mode? }. Section-only sittings
+  // and the hardest test are not comparable to full tests.
+  function isTrendComparable(e) {
+    return !!e && typeof e.composite === 'number' && isFinite(e.composite) && e.testId !== HARDEST_TEST_ID && e.mode !== 'section';
+  }
+  function levelOf(list) {
+    var avg = function (f) { return list.reduce(function (s, e) { return s + f(e); }, 0) / list.length; };
+    var level = { composite: avg(function (e) { return e.composite; }) };
+    var haveSections = list.every(function (e) { return typeof e.rw === 'number' && typeof e.math === 'number'; });
+    if (haveSections) { level.rw = avg(function (e) { return e.rw; }); level.math = avg(function (e) { return e.math; }); }
+    return level;
+  }
+  /* Has the composite really changed? Entries oldest first. The average of
+     the first k comparable full tests against the average of the last k
+     (k = up to 3, and no more than half of them), called a change only past
+     1.645 standard errors of that difference: a gain that big turns up by
+     chance about 1 time in 20. Two single sittings differ by chance by
+     75-140 points (SD), so one pair rarely certifies a realistic gain;
+     pooling tests is what makes one visible. The error is read at the
+     student's AVERAGE level across these tests (evaluated per score it gave
+     13-14% false changes against 10% nominal) and rounded up to the next 10.
+     Returns null with fewer than two comparable tests. */
+  function scoreChange(entries) {
+    var usable = (entries || []).filter(isTrendComparable);
+    if (usable.length < 2) return null;
+    var k = Math.max(1, Math.min(3, Math.floor(usable.length / 2)));
+    var first = usable.slice(0, k), latest = usable.slice(usable.length - k);
+    var mean = function (a) { return a.reduce(function (s, e) { return s + e.composite; }, 0) / a.length; };
+    var delta = Math.round(mean(latest) - mean(first));
+    var sdDiff = compositeSem(levelOf(usable)) * Math.sqrt(2 / k);
+    var threshold = Math.ceil(1.645 * sdDiff / 10) * 10;
+    return { delta: delta, threshold: threshold, k: k, n: usable.length, real: Math.abs(delta) >= threshold };
+  }
+  /* One test against the one before it (the emails' "score drop" and
+     "personal best" moments). Same noise model, k = 1, so the threshold is
+     about 190-200 points mid-scale and about 100 near 1500: a single-test
+     swing smaller than that is ordinary variation and should not be
+     reported as news (the old 50-point drop flag fired for about a third of
+     students who had not changed). Returns null if either test is not
+     comparable. */
+  function pairChange(prev, latest) {
+    if (!isTrendComparable(prev) || !isTrendComparable(latest)) return null;
+    var delta = Math.round(latest.composite - prev.composite);
+    var threshold = Math.ceil(1.645 * Math.SQRT2 * compositeSem(levelOf([prev, latest])) / 10) * 10;
+    return { delta: delta, threshold: threshold, real: Math.abs(delta) >= threshold };
+  }
+
   return {
     DEFAULTS: DEFAULTS,
     itemKey: itemKey,
@@ -586,7 +660,14 @@ var MorettiSignals = (function () {
     frValue: frValue,
     wilson: wilson,
     betaCdf: betaCdf,
-    betaQuantile: betaQuantile
+    betaQuantile: betaQuantile,
+    SECTION_SEM_TABLE: SECTION_SEM_TABLE,
+    sectionSem: sectionSem,
+    compositeSem: compositeSem,
+    HARDEST_TEST_ID: HARDEST_TEST_ID,
+    isTrendComparable: isTrendComparable,
+    scoreChange: scoreChange,
+    pairChange: pairChange
   };
 })();
 if (typeof module !== 'undefined' && module.exports) module.exports = MorettiSignals;

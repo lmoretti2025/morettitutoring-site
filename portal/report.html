@@ -6041,9 +6041,22 @@
       }
     }
     var weekly = hours.content + hours.method + hours.clock;
+    /* ═══ STRONG STUDENTS: VOLUME, NOT A SHORTER WEEK ═══
+       Luca's call (2026-09-12): "strong students should be doing lots of
+       tests and refining any skills that pool to be incorrect." Under twelve
+       lost questions, one test can't say which misses are real (a miss on a
+       three-question skill is an anecdote), so the week keeps its 4-5 hours
+       but becomes mostly full practice tests, and the drilling goes to the
+       skills whose misses POOL across tests (Home's "Your Statistics" card,
+       from two tests on). This replaces the taper that shrank the week
+       toward an hour, which also covered the old one-hour maintenance week. */
+    var strong = pointsLost < FULL_WEEK_AT;
+    var STRONG_TEST_HOURS = 3, STRONG_SHARPEN_HOURS = 1.5;
+    if (strong) weekly = STRONG_TEST_HOURS + STRONG_SHARPEN_HOURS;
+    planInputs.mode = strong ? 'tests' : null;
     /* Nothing was actually lost -- scale the week down to maintenance
        rather than inventing four hours of work to fill it. */
-    var maintenanceOnly = (pointsLost === 0);
+    var maintenanceOnly = (pointsLost === 0) && !strong;
     if (maintenanceOnly) {
       hours.content = 0; hours.clock = 0;
       hours.method = MAINTENANCE_HOURS;
@@ -6052,7 +6065,7 @@
     // The one case outside the envelope: an attempt whose ONLY cost was the
     // clock. No content or method work is supported, so the week is not
     // padded with invented drilling.
-    var clockOnly = (cmTotal === 0);
+    var clockOnly = (cmTotal === 0) && !strong;
 
     function hrs(h) { return h === Math.floor(h) ? String(h) : (h < 1 ? '' : String(Math.floor(h))) + '½'; }
     function unitFor(h) { return h === 1 ? 'hr / week' : 'hrs / week'; }
@@ -6110,6 +6123,25 @@
           '<em>' + causes.clock + ' question' + (causes.clock === 1 ? '' : 's') + ' on this test ' + (causes.clock === 1 ? 'was' : 'were') + ' never really answered: either time ran out first, or it went by too fast to have been read.</em>'
       });
     }
+    if (strong) {
+      // The skills this test's misses landed in, as the first place to look
+      // until a second test shows which ones pool.
+      var missSkills = [];
+      (planInputs.contentRows || []).forEach(function (x) { if (x.sk && missSkills.indexOf(x.sk) === -1) missSkills.push(x.sk); });
+      rows = [{
+        h: STRONG_TEST_HOURS, unit: unitFor(STRONG_TEST_HOURS), color: '#4E6070',
+        what: '<b>Practice tests.</b> One full timed practice test every week, in one sitting, phone away, reviewed the next day. ' +
+          'At this level each test has only a few questions left to win, and more tests are how you find the ones that keep costing you.' +
+          (causes.clock > 0 ? ' <em>' + causes.clock + ' question' + (causes.clock === 1 ? '' : 's') + ' here ran into the clock, so pace each test as you go.</em>' : '')
+      }, {
+        h: STRONG_SHARPEN_HOURS, unit: unitFor(STRONG_SHARPEN_HOURS), color: 'var(--red)',
+        what: '<b>Sharpen.</b> Drill the skills your misses pool in, starting with ' +
+          (areaTxt ? areaTxt + ', where this test found a real gap' :
+            missSkills.length ? 'this test’s: ' + missSkills.slice(0, 3).map(esc).join('; ') : 'the questions this test caught') +
+          '. From your second test on, the “Your Statistics” card on Home lists the topics that came up wrong more than once; ' +
+          'those come first, in the Question Bank and in Saved &amp; Mistakes.'
+      }];
+    }
     if (!rows.length) return;
 
     var meter = rows.map(function (r) {
@@ -6119,7 +6151,12 @@
     var lead = ['content', 'method', 'clock'].reduce(function (a, k) { return causes[k] > causes[a] ? k : a; }, 'content');
     var leadWord = { content: 'relearning', method: 'speed', clock: 'pacing' }[lead];
 
-    var lede = maintenanceOnly
+    var lede = strong
+      ? 'About <b>' + hrs(weekly) + ' hours a week</b>, mostly full practice tests. ' +
+        (pointsLost === 0
+          ? 'Nothing on this test cost you points, so the job now is finding the few questions a harder test would catch, and that takes more full tests.'
+          : 'You lost only ' + pointsLost + ' question' + (pointsLost === 1 ? '' : 's') + ' here, so the job now is finding the few that keep costing you, and that takes more tests, not a longer topic list.')
+      : maintenanceOnly
       ? 'About <b>' + hrs(weekly) + ' hour a week</b>, and only that. Nothing on this attempt actually cost you any points &mdash; every question that came up was answered correctly' +
         (causes.method > 0
           ? '. What the timing shows is ' + causes.method + ' of those correct answers running well over the time they should take while the clock was short, which is worth keeping an eye on because it is the thing that would bite first on a harder test.'
@@ -6433,6 +6470,12 @@
       } else if (c.method >= 3) {
         steps.push('When a question has taken twice as long as it should, pick your best answer, flag it, and move on.');
       }
+      /* Strong students: the week is tests (see the plan). Said as a step on
+         every report, practice tests included, where the plan isn't shown. */
+      if (lostN < 12 && !(blanks >= 3)) {
+        steps.push('Take a full practice test every week. At your level each test has only a few questions left to win, ' +
+          'and from your second test on, the “Your Statistics” card on Home shows which topics keep coming back.');
+      }
       // Blanks took the first step, but slow right answers are their own
       // habit, and the plan spends the most hours on them: name where.
       if (blanks >= 3 && c.method >= 5 && (planInputs.methodSkills || []).length) {
@@ -6462,7 +6505,8 @@
       var leadWork = ['content', 'method', 'clock'].reduce(function (a, k) { return c[k] > c[a] ? k : a; }, 'content');
       var planLine = planInputs.weekly > 0
         ? ' The plan is about ' + planInputs.weeklyText + (planInputs.weekly === 1 ? ' hour' : ' hours') + ' a week, mostly ' +
-          { content: 'relearning', method: 'timed practice', clock: 'timed practice' }[leadWork] + '.'
+          (planInputs.mode === 'tests' ? 'full practice tests'
+            : { content: 'relearning', method: 'timed practice', clock: 'timed practice' }[leadWork]) + '.'
         : '';
       var parentHtml = '<p class="plain-parent"><b>For parents:</b> ' + problem + planLine +
         ' The best help at home is protecting those hours, and making the next practice test one quiet, timed sitting' +
