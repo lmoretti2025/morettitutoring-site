@@ -5315,7 +5315,7 @@ window.Portal = {
      await this promise. */
   window.__practiceTestsReady = new Promise(function (resolve) {
     var s = document.createElement('script');
-    s.src = 'practice-tests.js?v=20260910a';
+    s.src = 'practice-tests.js?v=20260912a';
     // Settled, not loaded: an error resolves too, and a screen
     // needs to stop saying "loading" either way.
     function settle() { window.__practiceTestsSettled = true; resolve(); }
@@ -7141,7 +7141,20 @@ window.Portal = {
       if (e && e.attemptId && seen[e.attemptId]) return;
       merged.push(e);
     });
-    return merged;
+    /* A practice test's title is saved with each attempt, but tests can be
+       renumbered (Practice Tests 11 and 12 swapped on 2026-09-12), so the
+       label comes from the current test list whenever it has loaded. */
+    var tests = window.SAT_PRACTICE_TESTS || [];
+    if (!tests.length) return merged;
+    var titleById = {};
+    tests.forEach(function (t) { titleById[t.id] = t.title; });
+    return merged.map(function (e) {
+      if (!e || !e.testId || !titleById[e.testId] || e.testTitle === titleById[e.testId]) return e;
+      var copy = {};
+      for (var k in e) if (Object.prototype.hasOwnProperty.call(e, k)) copy[k] = e[k];
+      copy.testTitle = titleById[e.testId];
+      return copy;
+    });
   }
 
   // "PT 7" for a practice test, "Diag" for the diagnostic, "Base" for the
@@ -7150,6 +7163,8 @@ window.Portal = {
   function scoreEntryShortLabel(e) {
     if (e.source === 'baseline') return 'Base';
     if (e.source === 'practice-test' && e.testId) {
+      var t = (window.SAT_PRACTICE_TESTS || []).filter(function (x) { return x.id === e.testId; })[0];
+      if (t && t.number) return 'PT ' + t.number;
       var m = /(\d+)\s*$/.exec(e.testId);
       if (m) return 'PT ' + m[1];
     }
@@ -7208,9 +7223,12 @@ window.Portal = {
      question on it is hard, and the same student scores roughly 87 points
      lower on it, so it would read as a drop. Returns null with fewer than
      two comparable tests. */
+  /* The hardest test (id sat-practice-11, shown as Practice Test 12) is kept
+     off the progress chart and out of the change test. */
+  var HARDEST_TEST_ID = 'sat-practice-11';
   function scoreChange(entries) {
     var usable = (entries || []).filter(function (e) {
-      return e && typeof e.composite === 'number' && e.testId !== 'sat-practice-11';
+      return e && typeof e.composite === 'number' && e.testId !== HARDEST_TEST_ID;
     });
     if (usable.length < 2) return null;
     var k = Math.max(1, Math.min(3, Math.floor(usable.length / 2)));
@@ -7688,7 +7706,9 @@ window.Portal = {
     var entries = mergedScoreHistory().filter(function (e) { return homeTestIncluded(homeTestLabel(e.testTitle)) && e.composite != null; });
     // Shows as soon as there's any score: a single point is still useful,
     // and buildScoreLineSvg() centers a lone point.
-    var allSat = entries.filter(function (e) { return e.testType === 'SAT'; });
+    var allSat = entries.filter(function (e) { return e.testType === 'SAT' && e.testId !== HARDEST_TEST_ID; });
+    // Said once under the chart, so a student who took it doesn't think it went missing.
+    var hardestTaken = entries.some(function (e) { return e.testId === HARDEST_TEST_ID; });
     var baseline = baselineScoreEntry();
     if (!allSat.length && !baseline) { scoreProgressCard.style.display = 'none'; scoreProgressChartsEl.innerHTML = ''; return; }
     var satShown = allSat.slice(-SCORE_PROGRESS_MAX_POINTS);
@@ -7711,6 +7731,9 @@ window.Portal = {
       chartIndex++;
     }
     if (satShown.length >= 1) addChart('SAT Composite (400–1600)', satShown, 400, 1600, allSat.length, 'SAT');
+    if (satShown.length >= 1 && hardestTaken) {
+      html += '<div class="spc-note">Practice Test 12 isn’t on this chart: every question on it is hard, so it would read as a drop.</div>';
+    }
     scoreProgressChartsEl.innerHTML = html;
     scoreProgressCard.style.display = '';
     animateScoreBars();
@@ -9235,7 +9258,11 @@ window.Portal = {
   /* ═══ PRACTICE TESTS — NAMING, COMPLETION STATE, PICKER ═══
 
      Everything keys off the test number N:
-       - practiceTestNumber() pulls N from the id ('sat-practice-3' -> 3):
+       - practiceTestNumber() is the test's "number" field when it has one,
+         else N from the id ('sat-practice-3' -> 3). The id never changes
+         once students have taken a test (mistakes and saves are keyed by
+         it), so renumbering a test sets "number", not the id: the hardest
+         test, sat-practice-11, is shown as Practice Test 12 (2026-09-12):
          what Luca says out loud, what the card shows, and what an
          assignment like "take practice test 3" is matched against.
        - practiceTestResultsById() marks finished tests (with score) so a
@@ -9245,6 +9272,7 @@ window.Portal = {
      Cards are built from window.SAT_PRACTICE_TESTS (practice-tests.js), so
      adding a test needs no code change here. */
   function practiceTestNumber(test) {
+    if (test && test.number) return String(test.number);
     var m = /(\d+)\s*$/.exec(String((test && test.id) || ''));
     return m ? m[1] : null;
   }
@@ -14515,7 +14543,8 @@ window.Portal = {
   /* Mistakes and saves are keyed by position (test|section|module|index), so
      a test whose questions are later replaced leaves its old records pointing
      at new questions the student never saw, with their old answer marked
-     against them. Practice Test 11 was replaced on 3 Sept 2026 at 16:49 ET;
+     against them. The hardest test (id sat-practice-11, then shown as
+     Practice Test 11, now 12) was replaced on 3 Sept 2026 at 16:49 ET;
      records made on it before then are left out. */
   var RETIRED_BEFORE = { 'sat-practice-11': Date.parse('2026-09-03T20:49:00Z') };
   function isRetiredRecord(key, when) {
@@ -18819,6 +18848,13 @@ window.renderNativeReport = function (data) {
     });
     return { correct: mcC, wrong: mcW, lift: mcW / 3 };
   })();
+  // Tests can be renumbered (Practice Tests 11 and 12 swapped on
+  // 2026-09-12), so the report names the test as it is numbered now, found
+  // by its id, which never changes. The saved title is the fallback.
+  if (data.pt) {
+    var ptNow = (window.SAT_PRACTICE_TESTS || []).filter(function (t) { return t.id === data.pt; })[0];
+    if (ptNow && ptNow.title) data.ptTitle = ptNow.title;
+  }
   var first = (data.n || 'Student').split(' ')[0];
   var dateStr = data.dt || new Date().toISOString().slice(0, 10);
   // data.ts (see finishDiagnostic's payload in index.html) is a real

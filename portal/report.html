@@ -994,7 +994,7 @@
 <script src="banks.js?v=20260910a"></script>
 <script>
   // The public sample report (?demo=1) never reads a practice test, so skip the 2.9MB file there.
-  if (!/[?&]demo=1\b/.test(location.search)) document.write('<script src="practice-tests.js?v=20260910a"><\/script>');
+  if (!/[?&]demo=1\b/.test(location.search)) document.write('<script src="practice-tests.js?v=20260912a"><\/script>');
 </script>
 <script src="time-budgets.js?v=20260905"></script>
 <script src="grid-in.js?v=20260910a"></script>
@@ -2076,6 +2076,13 @@
     });
     return { correct: mcC, wrong: mcW, lift: mcW / 3 };
   })();
+  // Tests can be renumbered (Practice Tests 11 and 12 swapped on
+  // 2026-09-12), so the report names the test as it is numbered now, found
+  // by its id, which never changes. The saved title is the fallback.
+  if (data.pt) {
+    var ptNow = (window.SAT_PRACTICE_TESTS || []).filter(function (t) { return t.id === data.pt; })[0];
+    if (ptNow && ptNow.title) data.ptTitle = ptNow.title;
+  }
   var first = (data.n || 'Student').split(' ')[0];
   var dateStr = data.dt || new Date().toISOString().slice(0, 10);
   // data.ts is the attempt's real instant (see finishDiagnostic in
