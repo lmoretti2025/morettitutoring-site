@@ -1648,6 +1648,35 @@
   // its script with their access. Clean every field once, here: text loses
   // markup characters, everything else must have the shape the portal
   // writes, and a link with no usable section fails like a corrupt one.
+  // The behaviour signals (SIGNALS_SPEC.md section 2): nothing here reads
+  // them yet, but they come from the same untrusted link, so any field that
+  // doesn't have exactly the shape the portal writes is removed now, before
+  // some later section starts using it.
+  function cleanSignals(sec) {
+    var num = function (x) { return typeof x === 'number' && isFinite(x) && x >= 0 && x < 1e6; };
+    var idx = function (k) { return /^\d{1,3}$/.test(k); };
+    var sparseOk = function (o, valOk) {
+      if (o == null) return true;
+      if (typeof o !== 'object' || Array.isArray(o)) return false;
+      return Object.keys(o).length <= 200 && Object.keys(o).every(function (k) { return idx(k) && valOk(o[k]); });
+    };
+    var ansOk = function (a) {
+      return (typeof a === 'number' && a >= -1 && a <= 3 && a % 1 === 0) ||
+             (typeof a === 'string' && /^[0-9.\/-]{0,12}$/.test(a));
+    };
+    if (sec.sv !== 1) { ['sv', 'el', 'eu', 'vl', 'rv', 'co', 'cf', 'rf'].forEach(function (k) { delete sec[k]; }); return; }
+    if (!(typeof sec.el === 'string' && /^[0-9a-f]{0,200}$/.test(sec.el))) delete sec.el;
+    if (!(typeof sec.eu === 'string' && /^[0-9a-f]{0,200}$/.test(sec.eu))) delete sec.eu;
+    if (!(Array.isArray(sec.vl) && sec.vl.length <= 2000 && sec.vl.every(function (v) {
+      return Array.isArray(v) && v.length === 5 && typeof v[0] === 'number' && v[0] % 1 === 0 && v[0] >= 0 && v[0] < 200 &&
+             num(v[1]) && num(v[2]) && ansOk(v[3]) && typeof v[4] === 'number' && v[4] % 1 === 0 && v[4] >= 0 && v[4] < 100;
+    }))) delete sec.vl;
+    if (!(Array.isArray(sec.rv) && sec.rv.length <= 2 && sec.rv.every(function (x) { return x === null || num(x); }))) delete sec.rv;
+    if (!sparseOk(sec.co, num)) delete sec.co;
+    if (!sparseOk(sec.cf, function (v) { return Array.isArray(v) && v.length === 2 && num(v[0]) && num(v[1]); })) delete sec.cf;
+    if (!sparseOk(sec.rf, function (v) { return Array.isArray(v) && v.length === 2 && num(v[0]) && num(v[1]); })) delete sec.rf;
+  }
+
   function cleanLinkData(d) {
     if (!d || typeof d !== 'object' || Array.isArray(d) || !Array.isArray(d.s)) return null;
     function text(v, max) {
@@ -1665,6 +1694,7 @@
     d.s = d.s.filter(function (sec) {
       if (!sec || typeof sec !== 'object' || !Object.prototype.hasOwnProperty.call(banks, sec.k)) return false;
       if (sec.v != null && !/^[A-Za-z]{1,12}$/.test(sec.v)) sec.v = null;
+      cleanSignals(sec);
       return true;
     });
     return d.s.length ? d : null;

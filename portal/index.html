@@ -5254,6 +5254,7 @@ window.Portal = {
      header in fluid-ui.js. -->
 <script src="fluid-ui.js?v=20260905y"></script>
 <script src="banks.js?v=20260910a"></script>
+<script src="signals.js?v=20260912a"></script>
 <script src="time-budgets.js?v=20260905y"></script>
 <script src="challenge-questions.js?v=20260911a"></script>
 <script src="grid-in.js?v=20260910a"></script>
@@ -5643,6 +5644,7 @@ window.Portal = {
       var checkpointNow = Date.now();
       questionTimeMs[current] = (questionTimeMs[current] || 0) + (checkpointNow - questionEnterTime);
       questionEnterTime = checkpointNow;
+      sigCheckpoint(checkpointNow);
     }
     var payload = {
       student: currentStudent,
@@ -5663,6 +5665,7 @@ window.Portal = {
       questionFirstVisitedAt: questionFirstVisitedAt,
       questionLastViewedAt: questionLastViewedAt,
       questionFirstVisitDurationMs: questionFirstVisitDurationMs,
+      signals: sigStateForSave(),
       qOrder: qOrder,
       sectionTimerEndsAt: sectionTimerEndsAt,
       // Section time left at this save. An in-tab refresh honors the absolute
@@ -9752,8 +9755,8 @@ window.Portal = {
   /* ═══ REFERENCE SHEET MODAL — floats over intro or dx-screen, doesn't
      touch the screen-routing system so it can't disrupt test state. ═══ */
   var refOverlay = document.getElementById('ref-overlay');
-  function openReference() { refOverlay.classList.add('active'); }
-  function closeReference() { refOverlay.classList.remove('active'); }
+  function openReference() { refOverlay.classList.add('active'); sigRefToggle(true); }
+  function closeReference() { refOverlay.classList.remove('active'); sigRefToggle(false); }
   document.getElementById('intro-reference-link').addEventListener('click', function (e) { e.preventDefault(); openReference(); });
   document.getElementById('dx-reference-btn').addEventListener('click', openReference);
   document.getElementById('ref-close').addEventListener('click', closeReference);
@@ -10005,6 +10008,7 @@ window.Portal = {
       questionFirstVisitDurationMs[current] = questionTimeMs[current] || 0;
     }
     questionEnterTime = null;
+    sigVisitEnd(Date.now());
   }
   /* Closes out the on-screen question at instant `at` instead of now, and
      stops its clock. Used after a long away-gap: the section timer has
@@ -10014,6 +10018,7 @@ window.Portal = {
   function pauseQuestionTimeAt(at) {
     if (questionEnterTime === null) return;
     if (at == null || at < questionEnterTime) { flushQuestionTime(); return; }
+    sigVisitEnd(at);
     if (current >= 0 && current < questionTimeMs.length) {
       questionTimeMs[current] = (questionTimeMs[current] || 0) + (at - questionEnterTime);
     }
@@ -10034,6 +10039,252 @@ window.Portal = {
     if (questionFirstVisitedAt[i] === null || questionFirstVisitedAt[i] === undefined) questionFirstVisitedAt[i] = now;
     questionLastViewedAt[i] = now;
     questionEnterTime = now;
+    sigVisitBegin(i, now);
+  }
+
+  /* === BEHAVIOUR SIGNALS: CAPTURE ONLY ===
+     What a student did on each question beyond the final answer: a log of
+     every visit (with the answer showing when the visit ended, so an answer
+     change is a difference between visits rather than a click while
+     reading), every choice ever crossed out, time with the calculator open
+     and time actually clicked into it, and reference-sheet use. Nothing on
+     screen reads any of this yet; it rides along on the attempt for the
+     report and the parent emails to use later. Definitions and the
+     statistics built on it: SIGNALS_SPEC.md in the repo root, and
+     signals.js.
+
+     Indexed by presentation position during the module, like answers[];
+     finishCurrentModule() maps it to bank order. Every hook is wrapped so a
+     bug here can never break the test itself. */
+  var sigVisitLog = [];     // [[q, t0Ms, durMs, endAns, switches], ...] in visit order
+  var sigElimEver = [];     // [q] = 4-bit mask of every choice ever crossed out
+  var sigCalcOpenMs = [];   // [q] = ms the calculator panel was open while q was on screen
+  var sigCalcFocusMs = [];  // [q] = ms with focus inside the Desmos frame while q was on screen
+  var sigCalcFocusN = [];   // [q] = separate entries into the Desmos frame
+  var sigRefOpens = [];     // [q] = reference-sheet opens while q was on screen
+  var sigRefMs = [];        // [q] = ms the reference sheet was open while q was on screen
+  var sigReviewAtMs = null; // ms into the module when the review page was first reached
+  var sigModuleStartAt = null;
+  var sigOpen = -1;         // index into sigVisitLog of the visit in progress, or -1
+  var sigSegAt = null;      // start of the part of the open visit not yet added to it
+  var sigNavBreak = true;   // the student left the question on purpose since its last visit
+  var sigCalcOpenAt = null, sigCalcFocusAt = null, sigRefAt = null;
+
+  function sigSafe(fn) {
+    return function () {
+      try { return fn.apply(this, arguments); } catch (e) { if (window.console) console.warn('signals:', e); }
+    };
+  }
+
+  function sigResetModule(n) {
+    sigVisitLog = [];
+    sigElimEver = new Array(n).fill(0);
+    sigCalcOpenMs = new Array(n).fill(0);
+    sigCalcFocusMs = new Array(n).fill(0);
+    sigCalcFocusN = new Array(n).fill(0);
+    sigRefOpens = new Array(n).fill(0);
+    sigRefMs = new Array(n).fill(0);
+    sigReviewAtMs = null;
+    sigModuleStartAt = Date.now();
+    sigOpen = -1; sigSegAt = null; sigNavBreak = true;
+    sigCalcOpenAt = null; sigCalcFocusAt = null; sigRefAt = null;
+  }
+  // The answer on screen in the log's encoding: MC 0-3 or -1 for blank;
+  // grid-in the raw text, or '' for blank.
+  function sigAnswerCode(i) {
+    var a = answers[i], q = currentQs[i];
+    if (q && q.type === 'fr') return (a && a.raw != null) ? String(a.raw) : '';
+    return (typeof a === 'number') ? a : -1;
+  }
+  function sigCalcIsOpen() { return !!(dxShellEl && dxShellEl.classList.contains('calc-open')); }
+  function sigCalcFrame() {
+    var m = document.getElementById('dx-calc-mount');
+    return m ? m.querySelector('iframe.dx-calc-frame') : null;
+  }
+  function sigCalcHasFocus() {
+    var f = sigCalcFrame();
+    return !!(f && document.activeElement === f && document.visibilityState === 'visible');
+  }
+  // Folds every running segment (visit, calculator open, calculator focus,
+  // reference sheet) into the open visit's question, up to `now`.
+  function sigAccrue(now) {
+    if (sigOpen < 0 || !sigVisitLog[sigOpen]) return;
+    var v = sigVisitLog[sigOpen], q = v[0];
+    if (sigSegAt !== null) { v[2] += Math.max(0, now - sigSegAt); sigSegAt = now; }
+    if (sigCalcOpenAt !== null) { sigCalcOpenMs[q] += Math.max(0, now - sigCalcOpenAt); sigCalcOpenAt = now; }
+    if (sigCalcFocusAt !== null) { sigCalcFocusMs[q] += Math.max(0, now - sigCalcFocusAt); sigCalcFocusAt = now; }
+    if (sigRefAt !== null) { sigRefMs[q] += Math.max(0, now - sigRefAt); sigRefAt = now; }
+    v[3] = sigAnswerCode(q);
+  }
+  // Returning to the same question with no deliberate departure in between
+  // (a refresh, an away-gap, a save) continues the same entry rather than
+  // counting as a revisit.
+  var sigVisitBegin = sigSafe(function (i, now) {
+    if (sigModuleStartAt === null || i < 0 || i >= sigElimEver.length) return;
+    if (sigOpen >= 0 && sigVisitLog[sigOpen] && sigVisitLog[sigOpen][0] === i) return; // already open
+    if (sigOpen >= 0) sigVisitEnd(now);
+    var last = sigVisitLog[sigVisitLog.length - 1];
+    if (last && last[0] === i && !sigNavBreak) {
+      sigOpen = sigVisitLog.length - 1;
+    } else {
+      sigVisitLog.push([i, Math.max(0, now - sigModuleStartAt), 0, sigAnswerCode(i), 0]);
+      sigOpen = sigVisitLog.length - 1;
+    }
+    sigNavBreak = false;
+    sigPicked = false;
+    sigSegAt = now;
+    sigCalcOpenAt = sigCalcIsOpen() ? now : null;
+    sigCalcFocusAt = sigCalcHasFocus() ? now : null;
+    sigRefAt = (refOverlay && refOverlay.classList.contains('active')) ? now : null;
+  });
+  var sigVisitEnd = sigSafe(function (now) {
+    if (sigOpen < 0) return;
+    sigAccrue(now);
+    sigOpen = -1; sigSegAt = null;
+    sigCalcOpenAt = null; sigCalcFocusAt = null; sigRefAt = null;
+  });
+  var sigCheckpoint = sigSafe(function (now) { sigAccrue(now); });
+  /* Within-visit switches: the student picked an answer during this look,
+     then picked a different one (or crossed out the one just picked)
+     before leaving. Replacing an answer committed on an EARLIER visit is
+     not a switch; it is an answer change, which the visit-end answers
+     already record, and counting it here too would count one change of
+     mind twice. */
+  var sigPicked = false;    // an answer has been picked during the open visit
+  var sigPick = sigSafe(function (replacing) {
+    if (sigOpen < 0 || !sigVisitLog[sigOpen]) return;
+    if (sigPicked && replacing) sigVisitLog[sigOpen][4]++;
+    sigPicked = true;
+  });
+  var sigUnpick = sigSafe(function () {
+    if (sigOpen >= 0 && sigVisitLog[sigOpen] && sigPicked) sigVisitLog[sigOpen][4]++;
+  });
+  var sigElim = sigSafe(function (i) { if (current >= 0 && current < sigElimEver.length) sigElimEver[current] |= (1 << i); });
+  var sigLeave = sigSafe(function () { sigNavBreak = true; });
+  var sigReviewReached = sigSafe(function () {
+    sigNavBreak = true;
+    if (sigReviewAtMs === null && sigModuleStartAt !== null) sigReviewAtMs = Date.now() - sigModuleStartAt;
+  });
+  var sigCalcToggle = sigSafe(function (open) {
+    var now = Date.now();
+    sigAccrue(now);
+    if (open) { if (sigOpen >= 0) sigCalcOpenAt = now; }
+    else { sigCalcOpenAt = null; sigCalcFocusAt = null; }
+  });
+  var sigRefToggle = sigSafe(function (open) {
+    var now = Date.now();
+    sigAccrue(now);
+    if (open) { if (sigOpen >= 0) { sigRefOpens[sigVisitLog[sigOpen][0]]++; sigRefAt = now; } }
+    else sigRefAt = null;
+  });
+  // The Desmos frame is cross-origin, so its contents can't be read. Focus
+  // moving into it is visible: the page's window blurs while the frame
+  // becomes the active element. A tab switch also blurs the window, but the
+  // page is then hidden, so it doesn't count.
+  window.addEventListener('blur', function () {
+    setTimeout(sigSafe(function () {
+      if (activeScreenId !== 'dx-screen' || sigOpen < 0 || sigCalcFocusAt !== null || !sigCalcHasFocus()) return;
+      var now = Date.now();
+      sigAccrue(now);
+      sigCalcFocusAt = now;
+      sigCalcFocusN[sigVisitLog[sigOpen][0]]++;
+    }), 0);
+  });
+  window.addEventListener('focus', sigSafe(function () {
+    if (sigCalcFocusAt === null) return;
+    sigAccrue(Date.now());
+    sigCalcFocusAt = null;
+  }));
+  document.addEventListener('visibilitychange', sigSafe(function () {
+    if (document.visibilityState === 'visible' || sigCalcFocusAt === null) return;
+    sigAccrue(Date.now());
+    sigCalcFocusAt = null;
+  }));
+  // This module's signals in bank order, for module1Buffer/completedSections.
+  function sigModuleSnapshot() {
+    try {
+      var toBank = function (p) { return (qOrder && qOrder[p] != null) ? qOrder[p] : p; };
+      var mask = function (list) {
+        var m = 0;
+        (list || []).forEach(function (c) { if (c >= 0 && c < 4) m |= (1 << c); });
+        return m;
+      };
+      var hex = function (m) { return (m || 0).toString(16); };
+      return {
+        n: sigElimEver.length,
+        el: canonical(elims.map(mask)).map(hex).join(''),
+        eu: canonical(sigElimEver.map(function (m, p) { return m | mask(elims[p]); })).map(hex).join(''),
+        vl: sigVisitLog.map(function (v) { return [toBank(v[0]), v[1], v[2], v[3], v[4]]; }),
+        rv: sigReviewAtMs,
+        co: canonical(sigCalcOpenMs), cf: canonical(sigCalcFocusMs), cn: canonical(sigCalcFocusN),
+        ro: canonical(sigRefOpens), rm: canonical(sigRefMs)
+      };
+    } catch (e) { return null; }
+  }
+  // One record per section, the shape the payload carries. A two-module
+  // section joins Module 1 and Module 2: Module 2's question indices are
+  // offset by Module 1's length (the same convention as answers[]), and
+  // each visit's start time stays relative to its own module's start, so
+  // the index says which module a visit belongs to. rv holds one
+  // review-page time per module.
+  function sigCombine(m1, m2, twoModules) {
+    try {
+      if (!m2 || (twoModules && !m1)) return null;
+      var parts = twoModules ? [m1, m2] : [m2];
+      var out = { el: '', eu: '', vl: [], rv: [], co: [], cf: [], cn: [], ro: [], rm: [] };
+      var offset = 0;
+      parts.forEach(function (m) {
+        out.el += m.el; out.eu += m.eu;
+        m.vl.forEach(function (v) { out.vl.push([v[0] + offset, v[1], v[2], v[3], v[4]]); });
+        out.rv.push(m.rv);
+        ['co', 'cf', 'cn', 'ro', 'rm'].forEach(function (k) { out[k] = out[k].concat(m[k]); });
+        offset += m.n;
+      });
+      return out;
+    } catch (e) { return null; }
+  }
+  // The section's signals as they ride on the attempt payload (the report
+  // link and the server copy). Times in seconds to 0.1 s; calculator and
+  // reference data only for questions where they were used. sv marks the
+  // capture version, so the statistics can tell "not recorded" (no sv)
+  // from "recorded and zero". Field guide: SIGNALS_SPEC.md section 2.
+  function sigPayloadFields(sig) {
+    if (!sig) return {};
+    try {
+      var tenth = function (ms) { return Math.round((ms || 0) / 100) / 10; };
+      var sparse = function (arr, f) {
+        var o = {}, any = false;
+        (arr || []).forEach(function (x, i) { var v = f(x, i); if (v != null) { o[i] = v; any = true; } });
+        return any ? o : undefined;
+      };
+      return {
+        sv: 1,
+        el: sig.el, eu: sig.eu,
+        vl: sig.vl.map(function (v) { return [v[0], tenth(v[1]), tenth(v[2]), v[3], v[4]]; }),
+        rv: sig.rv.map(function (x) { return x == null ? null : tenth(x); }),
+        co: sparse(sig.co, function (ms) { return ms > 0 ? tenth(ms) : null; }),
+        cf: sparse(sig.cf, function (ms, i) { return (ms > 0 || sig.cn[i] > 0) ? [tenth(ms), sig.cn[i] || 0] : null; }),
+        rf: sparse(sig.ro, function (n, i) { return (n > 0 || sig.rm[i] > 0) ? [n, tenth(sig.rm[i])] : null; })
+      };
+    } catch (e) { return {}; }
+  }
+  function sigStateForSave() {
+    return { vl: sigVisitLog, eu: sigElimEver, co: sigCalcOpenMs, cf: sigCalcFocusMs, cn: sigCalcFocusN,
+             ro: sigRefOpens, rm: sigRefMs, rv: sigReviewAtMs, t0: sigModuleStartAt };
+  }
+  function sigRestore(st, n) {
+    var arr = function (a) { return (Array.isArray(a) && a.length === n) ? a : new Array(n).fill(0); };
+    sigResetModule(n);
+    if (!st || typeof st !== 'object') return;
+    sigVisitLog = Array.isArray(st.vl)
+      ? st.vl.filter(function (v) { return Array.isArray(v) && v.length === 5 && v[0] >= 0 && v[0] < n; })
+      : [];
+    sigElimEver = arr(st.eu);
+    sigCalcOpenMs = arr(st.co); sigCalcFocusMs = arr(st.cf); sigCalcFocusN = arr(st.cn);
+    sigRefOpens = arr(st.ro); sigRefMs = arr(st.rm);
+    sigReviewAtMs = (typeof st.rv === 'number') ? st.rv : null;
+    if (typeof st.t0 === 'number') sigModuleStartAt = st.t0;
+    sigNavBreak = false; // a restore resumes the question it left off on
   }
 
   /* ═══ ADAPTIVE SAT MODULES ═══
@@ -10227,10 +10478,12 @@ window.Portal = {
     dxShellEl.classList.add('calc-open');
     document.getElementById('dx-calculator-btn').classList.add('on');
     ensureDesmosCalculator(document.getElementById('dx-calc-mount'));
+    sigCalcToggle(true);
   }
   function closeCalculator() {
     dxShellEl.classList.remove('calc-open');
     document.getElementById('dx-calculator-btn').classList.remove('on');
+    sigCalcToggle(false);
   }
   document.getElementById('dx-calculator-btn').addEventListener('click', function () {
     if (dxShellEl.classList.contains('calc-open')) closeCalculator(); else openCalculator();
@@ -10988,6 +11241,7 @@ window.Portal = {
     questionLastViewedAt = new Array(qs.length).fill(null);
     questionFirstVisitDurationMs = new Array(qs.length).fill(null);
     questionEnterTime = null;
+    sigResetModule(qs.length);
     diagnosticSubmitted = false;
 
     var sectionLabel = bank.label;
@@ -11036,8 +11290,10 @@ window.Portal = {
         questionTimeMs: canonical(questionTimeMs),
         questionFirstVisitedAt: canonical(questionFirstVisitedAt),
         questionLastViewedAt: canonical(questionLastViewedAt),
-        questionFirstVisitDurationMs: canonical(questionFirstVisitDurationMs)
+        questionFirstVisitDurationMs: canonical(questionFirstVisitDurationMs),
+        signals: sigModuleSnapshot()
       };
+      sigModuleStartAt = null; // nothing more is logged until the next module starts
       moduleStage = 'module2';
       // Digital SAT accommodation: extended-time students get a 5-minute break
       // between a section's two modules; standard-time students go straight to
@@ -11048,6 +11304,8 @@ window.Portal = {
     }
 
     var finalAnswers, finalMarked, finalEverMarked, finalQuestionTimeMs, finalQuestionFirstVisitedAt, finalQuestionLastViewedAt, finalQuestionFirstVisitDurationMs;
+    var finalSignals = sigCombine(hasTwoModules ? module1Buffer.signals : null, sigModuleSnapshot(), hasTwoModules);
+    sigModuleStartAt = null;
     if (hasTwoModules) {
       finalAnswers = module1Buffer.answers.concat(canonical(answers));
       finalMarked = module1Buffer.marked.concat(canonical(marked));
@@ -11068,7 +11326,8 @@ window.Portal = {
     completedSections.push({
       key: secKey, label: bankFor(secKey).label, answers: finalAnswers, marked: finalMarked, everMarked: finalEverMarked, module2Variant: module2Variant,
       questionTimeMs: finalQuestionTimeMs, questionFirstVisitedAt: finalQuestionFirstVisitedAt, questionLastViewedAt: finalQuestionLastViewedAt,
-      questionFirstVisitDurationMs: finalQuestionFirstVisitDurationMs
+      questionFirstVisitDurationMs: finalQuestionFirstVisitDurationMs,
+      signals: finalSignals
     });
     moduleStage = 'module1';
     module2Variant = null;
@@ -11212,7 +11471,11 @@ window.Portal = {
           ev.stopPropagation();
           var list = elims[current];
           var at = list.indexOf(i);
-          if (at === -1) { list.push(i); if (answers[current] === i) answers[current] = null; }
+          if (at === -1) {
+            list.push(i);
+            sigElim(i);
+            if (answers[current] === i) { answers[current] = null; sigUnpick(); }
+          }
           else { list.splice(at, 1); }
           renderQuestion();
         });
@@ -11233,7 +11496,10 @@ window.Portal = {
     }
 
     backBtn.disabled = current === 0;
-    nextBtn.disabled = answers[current] == null;
+    // Bluebook lets a student move on without answering, and skipping to
+    // come back later is a strategy worth measuring (SIGNALS_SPEC.md), so
+    // Next is always available.
+    nextBtn.disabled = false;
     nextBtn.textContent = !isLastQuestionInSection() ? 'Next' : 'Go to Review Page';
     progLabel.textContent = 'Question ' + (current + 1) + ' of ' + qs.length;
     if (qnumTile) qnumTile.textContent = current + 1;
@@ -11244,9 +11510,10 @@ window.Portal = {
   }
 
   function selectMcAnswer(i) {
-    // Selecting a choice only records it and enables Next — it does not
+    // Selecting a choice only records it — it does not
     // advance on its own. The student must press Next (or Enter for a
     // grid-in) to move on, matching the real digital SAT.
+    sigPick(answers[current] != null && answers[current] !== i);
     answers[current] = i;
     renderQuestion();
   }
@@ -11278,8 +11545,11 @@ window.Portal = {
     if (e.key !== 'Enter') return;
     e.preventDefault();
     if (iqPracticeActive) { if (!nextBtn.disabled) nextBtn.click(); return; }
+    // Enter in an empty box does nothing, so a stray keypress can't skip a
+    // question; Next still skips on purpose.
+    if (!frInput.value.trim()) return;
     submitFrAnswer();
-    if (!nextBtn.disabled) nextBtn.click(); // records the answer, then advances — same as pressing Enter on an MC question
+    nextBtn.click(); // records the answer, then advances — same as pressing Enter on an MC question
   });
   // Backstop: if the box loses focus for any reason not covered by the
   // navigation hooks above, bank the value then too rather than trusting
@@ -11299,7 +11569,6 @@ window.Portal = {
       var newPos = Math.max(0, sel - removedBeforeCursor);
       frInput.setSelectionRange(newPos, newPos);
     }
-    nextBtn.disabled = frInput.value.trim() === '';
   });
 
   function goTo(index) {
@@ -11307,6 +11576,7 @@ window.Portal = {
     commitPendingFrAnswer(); // before the early return — a typed grid-in must survive even a no-op navigation
     if (index < 0 || index >= qs.length || index === current) return;
     flushQuestionTime();
+    sigLeave();
     card.classList.add('fading');
     setTimeout(function () {
       current = index;
@@ -11336,7 +11606,7 @@ window.Portal = {
       return;
     }
     if (e.key === 'ArrowLeft') { e.preventDefault(); goTo(current - 1); }
-    else if (e.key === 'ArrowRight') { e.preventDefault(); if (answers[current] != null) goTo(current + 1); }
+    else if (e.key === 'ArrowRight') { e.preventDefault(); goTo(current + 1); }
     else if (e.key === 'Enter') { e.preventDefault(); if (!nextBtn.disabled) nextBtn.click(); }
     else {
       var letterIdx = ['a', 'b', 'c', 'd'].indexOf(e.key.toLowerCase());
@@ -11346,7 +11616,6 @@ window.Portal = {
   nextBtn.addEventListener('click', function () {
     if (iqPracticeActive) { if (window.dxPracticeNextHandler) window.dxPracticeNextHandler(); return; }
     if (activeQuestions()[current].type === 'fr') { recordFrAnswer(); }
-    if (answers[current] == null) return;
     if (!isLastQuestionInSection()) { goTo(current + 1); }
     else { showCheckScreen(); }
   });
@@ -11387,6 +11656,7 @@ window.Portal = {
   function showCheckScreen() {
     commitPendingFrAnswer(); // "Go to Review Page" from the nav modal doesn't pass through goTo()
     flushQuestionTime();
+    sigReviewReached();
     var secKey = activeSectionKeys[sectionIndex];
     var bank = bankFor(secKey);
     var moduleLabel = sectionHasModules(secKey) ? (moduleStage === 'module1' ? 'Module 1' : 'Module 2') : 'Module 1';
@@ -11669,6 +11939,7 @@ window.Portal = {
          section-only attempt. */
       mode: entry.mode, sectionKey: entry.sectionKey, sectionScore: entry.sectionScore,
       qStats: entry.qStats,
+      signals: entry.signals || null,   // SignalsJSON column (Code.gs)
       // Test integrity, so the roster can show it without opening the
       // report (see the Interrupted column in Code.gs).
       interrupted: entry.interrupted, awayMs: entry.awayMs
@@ -11872,7 +12143,7 @@ window.Portal = {
         return { k: e.kind, s: e.sec, ms: e.ms, at: e.at };
       }),
       s: completedSections.map(function (sec) {
-        return {
+        return Object.assign({
           // m = "ever flagged for review," not the final state (see everMarked),
           // so the report's flag column and "never used flag" check reflect
           // what actually happened.
@@ -11892,7 +12163,7 @@ window.Portal = {
           // accommodation-adjusted; see allottedMinutesFor). report.html treats
           // a falsy tl as "no unused-time read" rather than dividing by zero.
           tl: allottedMinutesFor(sec.key)
-        };
+        }, sigPayloadFields(sec.signals));
       })
     };
     var reportPayloadB64 = '';
@@ -11936,6 +12207,39 @@ window.Portal = {
       } else if (composite === null) {
         return;
       }
+      /* Behaviour-signal summary (signals.js, SIGNALS_SPEC.md section 4):
+         answer changes, the elimination-aware guessing lift, near misses,
+         the review pass, calculator use. Stored on the attempt so the admin
+         page and parent emails can read it without decoding the report.
+         Nothing on screen reads it yet. Scored with this page's own curves,
+         so "points from changing answers" matches the score shown. */
+      var signalsSummary = (function () {
+        try {
+          if (!window.MorettiSignals) return null;
+          var curves = { 'reading-writing': SCORE_RW_CURVE, 'math': SCORE_MATH_CURVE };
+          return window.MorettiSignals.summarizeAttempt(payload.s.map(function (s) {
+            var bank = bankFor(s.k);
+            return { sec: s, questions: sectionQuestions(bank, s.v), module1Length: bank.module2Easier ? bank.module1.length : undefined };
+          }), {
+            grade: isCorrect,
+            // Desmos favourability per question, once a reviewed tag file
+            // (window.DESMOS_TAGS, keyed by MorettiSignals.itemKey) is
+            // loaded. Until then the calculator counts are recorded without
+            // it and the "where Desmos pays" fields stay null.
+            dz: window.DESMOS_TAGS ? function (q) {
+              var t = window.DESMOS_TAGS[window.MorettiSignals.itemKey(q)];
+              return typeof t === 'number' ? t : null;
+            } : undefined,
+            scoreSection: function (key, correct, m1) {
+              var curve = curves[key];
+              if (!curve) return null;
+              var t = correct.length, c = 0, c1 = 0, c2 = 0;
+              correct.forEach(function (ok, i) { if (ok) { c++; if (i < m1) c1++; else c2++; } });
+              return scoreSatSectionScore({ t: t, c: c, t1: m1, c1: c1, t2: t - m1, c2: c2 }, curve);
+            }
+          });
+        } catch (e) { return null; }
+      })();
       var entry = {
         date: new Date().toISOString(),
         // Lets the local copy and its server-synced mirror (handleGetScoreHistory
@@ -11952,6 +12256,7 @@ window.Portal = {
         // The compact per-question record (see qStats above) — what the
         // Home analytics read across every attempt.
         qStats: qStats,
+        signals: signalsSummary,
         mode: sectionOnly ? 'section' : 'full',
         sectionKey: sectionOnly || undefined,
         sectionScore: (onlyScaled !== null && onlyScaled !== undefined) ? onlyScaled : undefined,
@@ -12210,6 +12515,7 @@ window.Portal = {
         // is what makes flushQuestionTime's first-departure snapshot correct
         // across a refresh mid-first-look — see its comment above.
         questionFirstVisitDurationMs = (Array.isArray(state.questionFirstVisitDurationMs) && state.questionFirstVisitDurationMs.length === qs.length) ? state.questionFirstVisitDurationMs : new Array(qs.length).fill(null);
+        sigRestore(state.signals, qs.length);
         current = Math.min(Math.max(state.current || 0, 0), qs.length - 1);
         document.getElementById('dx-student-label').textContent = currentStudent.name;
         var moduleLabelSuffix = sectionHasModules(secKey) ? (' — ' + (moduleStage === 'module1' ? 'Module 1' : 'Module 2')) : '';
