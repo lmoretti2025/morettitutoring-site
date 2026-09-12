@@ -3681,7 +3681,7 @@
   if (attemptDate) {
     var attemptHour = attemptDate.getHours();
     if (attemptHour >= 22 || attemptHour < 5) {
-      behaviorFlags.push('<strong>Taken late at night:</strong> this test was handed in at ' + timeStr + '. Tiredness at that hour can lower a score without saying anything about what you know, so check when it was actually taken before reading much into a low number. <strong>Next test:</strong> take it earlier in the day.');
+      behaviorFlags.push('<strong>Taken late at night:</strong> this test was handed in at ' + timeStr + '. Tiredness at that hour can lower a score without saying anything about what you know, so this one may understate you. <strong>Next test:</strong> take it earlier in the day.');
     }
   }
   // Unused time is flagged only when BOTH >=5 minutes AND >=15% of the
@@ -3880,7 +3880,7 @@
          different, self-relative statistic from section 1's, so the two
          could disagree. The section-level count is kept because it is
          separately well evidenced; naming skills is section 1's job. */
-      behaviorFlags.push('<strong>Worked hard, still missed (' + s7.label + '):</strong> ' + stuckWrong.length + ' of ' + missedForFlags + ' missed multiple-choice questions here took well over your usual time for a right answer. That is real effort that still came back wrong, not a rushed guess, so the fix is knowledge, not speed. <strong>Next:</strong> relearn before timed practice; “What to relearn” above names the areas the evidence supports.');
+      behaviorFlags.push('<strong>Worked hard, still missed (' + s7.label + '):</strong> ' + stuckWrong.length + ' of ' + missedForFlags + ' missed multiple-choice questions here took well over your usual time for a right answer. That is real effort that still came back wrong, not a rushed guess, so the fix is knowledge, not speed. <strong>Next:</strong> relearn before timed practice; “What to relearn” above says where to start.');
     }
     if (missedForFlags >= 4 && rushedWrong.length / missedForFlags >= 0.5) {
       var wSkills = topSkillNames(rushedWrong, 3).join(', ');
@@ -3927,7 +3927,10 @@
        with depth (eight 20s glances would equal two long revisits). Needs a
        real margin (1.25x), not any excess. */
     var rv = roll.revisit;
-    if (rv && rv.unflaggedMs >= 120000 && rv.unflaggedQuestions >= 3) {
+    // Reopening a settled answer only costs something when the clock was
+    // short. With ten minutes spare it is the review the report asks for
+    // elsewhere, and flagging it contradicted "use the whole clock".
+    if (rv && rv.unflaggedMs >= 120000 && rv.unflaggedQuestions >= 3 && sectionClockPressed(s8)) {
       var perUnflagged = rv.unflaggedMs / rv.unflaggedQuestions;
       var perFlagged = rv.flaggedQuestions > 0 ? rv.flaggedMs / rv.flaggedQuestions : 0;
       if (!perFlagged || perUnflagged >= perFlagged * 1.25) {
@@ -3969,10 +3972,9 @@
          fast with fewer options (e.g. 8 among four, 12 among three, 25 among
          two). Four is the most generous assumption, so the figure is a
          floor. */
-      behaviorFlags.push('<strong>Some right answers were likely guesses:</strong> about <strong>' + Math.round(lift) +
-        '</strong> of your ' + mcC + ' right multiple-choice answers were probably lucky guesses, maybe more. ' +
-        'That is what guessing alone produces with this many wrong, and it is normal when time runs short. ' +
-        'They count, just as on the real SAT, but that part of the score may not repeat on the next test.');
+      behaviorFlags.push('<strong>Some right answers were probably guesses:</strong> with this many wrong, guessing alone would account for about <strong>' +
+        Math.round(lift) + '</strong> of your ' + mcC + ' right multiple-choice answers. ' +
+        'That is normal, and they count, just as on the real SAT. It only means the next score could come out a little higher or lower.');
     }
   })();
 
@@ -3984,7 +3986,9 @@
   bWrap.style.display = '';
   bWrap.innerHTML = behaviorFlags.length
     ? '<ul class="takeaways">' + behaviorFlags.map(function (f) { return '<li>' + f + '</li>'; }).join('') + '</ul>'
-    : '<p class="behavior-clean">No pacing or timing red flags on this attempt — your scores here look like a real read of where things stand, not an artifact of rushing, guessing, or fatigue.</p>';
+    : (skipped > 0
+      ? '<p class="behavior-clean">Nothing else to flag in how you worked the test. Running out of time is covered in the sections above.</p>'
+      : '<p class="behavior-clean">Nothing unusual in how you worked the test: no signs of rushing, heavy guessing or tiredness, so the score is a fair read of where you are.</p>');
 
 
   /* ═══ renderSkillDiagnosis() ═══ see index.html's identical function for
@@ -4292,11 +4296,10 @@
           'You got ' + Math.round(accAll * 100) + '% of the questions you answered right, and the ' + contentMissed +
           ' you worked on and missed are spread fairly evenly rather than piled into one area. ' +
           'So the work is core material across the board: drilling one area would leave the rest untouched.</p>'
-        : '<p class="behavior-clean"><strong>No content area separates from your own average.</strong> ' +
-          'At ' + Math.round(accAll * 100) + '% on attempted questions, the ' + contentMissed + ' content miss' +
-          (contentMissed === 1 ? '' : 'es') + ' really are few and spread thin, so there is no body of content worth ' +
-          're-teaching. That points the work at the two time sections below &mdash; what questions cost, and whether the clock ' +
-          'lasted &mdash; rather than at a topic list.</p>';
+        : '<p class="behavior-clean"><strong>Nothing to relearn as a topic.</strong> ' +
+          'At ' + Math.round(accAll * 100) + '% of the questions you answered, the ' + contentMissed + ' miss' +
+          (contentMissed === 1 ? '' : 'es') + ' you worked on ' + (contentMissed === 1 ? 'is' : 'are') + ' few and spread out, so go through ' +
+          (contentMissed === 1 ? 'it' : 'them one by one') + ' rather than studying a topic list.</p>';
       return;
     }
     /* ═══ HEADLINE ═══ built for whichever row leads the current scope,
@@ -4443,8 +4446,9 @@
         ? open + (top.notRead != null ? top.notRead : top.rushed) + ' of ' + top.total + ' were answered in well under the time they should take' +
           (top.notRead != null && top.notRead !== top.rushed ? ' (' + top.rushed + ' of them wrong)' : ', and came back wrong') +
           ' &mdash; slow down and check work before re-teaching.'
-        : open + top.inefficient + ' of ' + top.total + ' correct answers took far longer than typical &mdash; worth light speed drills later.'
-      ) + detail + ciTxt;
+        : '<strong>Nothing here needs relearning.</strong> ' + esc(top.skill) + ' was slow but right: ' + top.inefficient + ' of ' + top.total +
+          ' right answers took far longer than typical. That is speed work, covered in “Where the time went”.'
+      ) + (top.severity === 1 ? '' : detail + ciTxt);
     }
 
     /* The four states a question can land in, as hover phrases rather than
@@ -5513,6 +5517,17 @@
     // the question lists are drawn from -- not the tallies, which
     // double-count by design (see the note directly above).
     planInputs.causes = { content: buckets.content.length, method: buckets.method.length, clock: buckets.clock.length };
+    // For the summary: the content misses one by one (a strong student's
+    // three misses are the whole story), and the skills the slow right
+    // answers came from (so "speed work" can say where).
+    planInputs.contentRows = buckets.content.map(function (e) {
+      return { sk: e.r.sk, diff: e.r.q && e.r.q.difficulty, slow: e.why === 'worked at it, still missed' };
+    });
+    planInputs.methodSkills = (function () {
+      var n = {};
+      buckets.method.forEach(function (e) { n[e.r.sk] = (n[e.r.sk] || 0) + 1; });
+      return Object.keys(n).sort(function (a, b) { return n[b] - n[a]; }).slice(0, 2);
+    })();
     var CAUSES = [
       { key: 'content', barLabel: 'wrong after real work',  name: 'Content', section: 'What to relearn',
         color: 'var(--red)', short: 'questions worked through and still missed' },
@@ -5642,9 +5657,10 @@
         lab.disabled = !n;
         lab.style.opacity = n ? '' : '0.38';
       });
-      document.getElementById('dx-note').textContent = total
-        ? 'Each kind needs a different fix. Tap or click a bar to see the questions.'
-        : '';
+      var kinds = CAUSES.filter(function (c) { return counts[c.key] > 0; }).length;
+      document.getElementById('dx-note').textContent = !total ? ''
+        : kinds > 1 ? 'Each kind needs a different fix. Tap or click a bar to see the questions.'
+        : 'Tap or click the bar to see the questions.';
       // A scope change can leave the open list with nothing in it. Re-render it
       // where it survives and close it where it doesn't, rather than leave a
       // stale list on screen.
@@ -5878,6 +5894,8 @@
                  inside ordinary question-to-question variation. */
               (lostTotal < 120000
                 ? '<strong>Only ' + fmtMin(lostTotal) + ' ran over in all</strong>, too little to be worth practising for.'
+                : ratio < 1.1
+                ? '<strong>On target pace overall.</strong> A few skills ran over and others came in under, which is normal. Nothing here needs speed work.'
                 : spread === 'few'
                 ? '<strong>Only ' + over.length + ' skill' + (over.length === 1 ? '' : 's') + ' ran over here</strong>; everything else came in on time. That is as narrow as it gets.'
                 : spread === 'concentrated'
@@ -5906,9 +5924,8 @@
     // never carries boilerplate a reader has to learn to skip.
     var notes = [];
     if (budgetAnyAccom) {
-      notes.push('<strong>Extended time applied.</strong> Every target on this page is scaled by ' +
-        'your approved multiplier, so &ldquo;on pace&rdquo; here means on pace for the clock ' +
-        'you actually sit with &mdash; not the standard-time clock.');
+      notes.push('<strong>Extended time applied.</strong> Every target on this page is set for your extended-time clock, ' +
+        'not the standard one, so &ldquo;on pace&rdquo; means on pace for the time you actually have.');
     }
     if (budgetCompressedCount > 0) {
       var many = budgetCompressedCount > 1;
@@ -6073,7 +6090,9 @@
     if (hours.method > 0) {
       rows.push({
         h: hours.method, unit: unitFor(hours.method), color: 'var(--tan)',
-        what: '<b>Speed.</b> Timed sets from the Question Bank on skills you already get right, with a clock running on each question. The goal is not accuracy &mdash; it is the same accuracy, faster. ' +
+        what: '<b>Speed.</b> Timed sets from the Question Bank on skills you already get right' +
+          ((planInputs.methodSkills || []).length ? ', starting with ' + planInputs.methodSkills.map(esc).join(' and ') : '') +
+          ', with a clock running on each question.' + ' The goal is not accuracy &mdash; it is the same accuracy, faster. ' +
           '<em>' + causes.method + ' right answer' + (causes.method === 1 ? '' : 's') + ' here cost more time than they should have, and the questions later in the section paid for it.</em>'
       });
     }
@@ -6101,7 +6120,7 @@
         ' There is no content to re-teach here.'
       : clockOnly
       ? 'About <b>' + hrs(weekly) + ' hour' + (weekly === 1 ? '' : 's') + ' a week</b>, and deliberately not more. Everything this test could attribute went to the clock rather than to the material, so there is no content to re-teach and no method to drill &mdash; adding hours of either to fill out a longer week would be inventing work the evidence does not support.'
-      : 'About <b>' + hrs(weekly) + ' hours a week</b> of practice, split the way this test went, with the most on <b>' + leadWord + '</b>' +
+      : 'About <b>' + hrs(weekly) + (weekly === 1 ? ' hour' : ' hours') + ' a week</b> of practice, split the way this test went, with the most on <b>' + leadWord + '</b>' +
         // Method questions were answered correctly: they cost time, not questions.
         (lead === 'method' ? ', where right answers ran long.' : ', which cost the most questions.') +
         (rows.length > 1 ? ' Keep to the split: an hour on the wrong kind of work does very little.' : '');
@@ -6275,7 +6294,12 @@
         var b = domainBucketsDx[d], right = b.mastered + b.skimmed + b.inefficient, p = b.total ? right / b.total : 0;
         if (b.total >= 8 && p >= 0.85 && (!best || p > best.p || (p === best.p && b.total > best.n))) best = { name: d, right: right, n: b.total, p: p };
       });
+      var nBlank = typeof skipped === 'number' ? skipped : 0, nAll = typeof totalQ === 'number' ? totalQ : 0;
       if (best) lostHtml += '<p class="plain-well"><b>Going well:</b> ' + escP(best.name) + ', ' + best.right + ' of ' + best.n + ' right.</p>';
+      // No strong area is not no strength: answering everything inside the
+      // clock is real, and it tells a struggling student where the work isn't.
+      else if (nAll && !nBlank) lostHtml += '<p class="plain-well"><b>Going well:</b> you answered all ' + nAll + ' questions' +
+        (!c.clock && !c.method ? ', and the clock was not a problem, so the work is the material, not speed.' : '.') + '</p>';
 
       // The area the knowledge section starts with, and what it was named for.
       var startHere = '';
@@ -6329,7 +6353,7 @@
       var namedSkill = function (n) { return escP(n) + (GLOSS[n] ? ' (' + GLOSS[n] + ')' : ''); };
       // A lead resting on under 20 questions says so, beside the claim
       // rather than further down the page.
-      var thin = function (n) { return n < 20 ? ' That is only ' + n + ' questions, so the next test will confirm it.' : ''; };
+      var thin = function (n) { return n < 20 ? ' That is only ' + n + ' questions, so the next test will show whether it holds.' : ''; };
       var QB = 'In the Question Bank in your portal, do the easy and medium questions before the hard ones.';
 
       var steps = [];
@@ -6355,10 +6379,24 @@
       } else if (leadArea && leadArea.severity === 2) {
         steps.push('Slow down on ' + named(startHere) + '. ' + leadArea.lead + ' of ' + leadArea.n +
           ' questions there went by faster than they could be read. Read the whole question before you choose.');
-      } else if (c.content >= 3) {
-        // Spread-out misses ARE the question list, so this step carries the link.
-        steps.push('Go through the questions you got wrong, with your tutor: <a href="#" class="plain-detail-link">open the question-by-question list</a>. ' +
-          'They are spread across several areas, so the fix is working through them, not drilling one topic.');
+      } else if (c.content > 0 && c.content <= 5 && (planInputs.contentRows || []).length) {
+        /* A strong student's few misses are the whole story, so name them.
+           "After a long time on it" is the stuck case; the rest were missed
+           at a normal pace, which is where careless slips live. */
+        steps.push('Your ' + count(c.content, 'miss', 'misses') + ': ' + planInputs.contentRows.map(function (x) {
+            return escP(x.sk) + ' (' + (x.diff ? x.diff : '') + (x.slow ? (x.diff ? ', ' : '') + 'after a long time on it' : '') + ')';
+          }).join('; ').replace(/ \(\)/g, '') + '. With so few, each is worth a close look: <a href="#" class="plain-detail-link">open the question list</a> ' +
+          'and decide whether it was a slip or something you didn’t know.');
+      } else if (c.content > 5 && c.content >= c.clock) {
+        // Spread-out misses ARE the question list, so this step carries the
+        // link, and the foundation areas (the report's own reach model) are
+        // where to begin.
+        var secKeys = (sections || []).map(function (s) { return s.key; });
+        var starts = [];
+        if (secKeys.indexOf('reading-writing') !== -1) starts.push('Standard English Conventions (grammar and punctuation) in Reading and Writing');
+        if (secKeys.indexOf('math') !== -1) starts.push('Algebra in Math');
+        steps.push('Go through the questions you got wrong, easy and medium ones first: <a href="#" class="plain-detail-link">open the question-by-question list</a>. ' +
+          'They are spread across several areas' + (starts.length ? ', so start with ' + starts.join(' and ') + ': the rest builds on them.' : '.'));
       }
       // One habit for the clock, the biggest one this test shows.
       var spare = null;
@@ -6366,7 +6404,9 @@
         if (!(s.timeAllottedMin > 0 && s.timeTotal > 0)) return;
         var leftMin = (s.timeAllottedMin * 60000 - s.timeTotal) / 60000, wrong = s.t - s.c;
         if (leftMin >= 5 && leftMin / s.timeAllottedMin >= 0.15 && wrong > 0 && (!spare || leftMin > spare.min)) {
-          spare = { label: s.label, min: Math.round(leftMin), wrong: wrong, both: s.hasModules };
+          // Extended time when the clock is well over the standard 64 (R&W) or 70 (Math) minutes.
+          var std = s.key === 'math' ? 70 : 64;
+          spare = { label: s.label, min: Math.round(leftMin), wrong: wrong, both: s.hasModules, accom: s.timeAllottedMin > std * 1.2 };
         }
       });
       var reopened = (behaviorFlags || []).some(function (f) { return f.indexOf('<strong>Went back to answers already chosen') === 0; });
@@ -6379,17 +6419,49 @@
            that felt safe, so the habit is to flag the least-sure ones first. */
         steps.push('Use the whole clock. You finished ' + escP(spare.label) + ' with about ' + spare.min + ' minutes left' +
           (spare.both ? ' across its two modules' : '') + ' and ' + count(spare.wrong, 'question') + ' wrong. ' +
-          'Before you submit, flag the questions you are least sure of and spend the spare time on those.');
-      } else if (reopened) {
+          'Before you submit, flag the questions you are least sure of and spend the spare time on those.' +
+          (spare.accom ? ' Take every practice test on your extended-time clock, so using all of it becomes a habit.' : ''));
+      } else if (reopened && c.clock + c.method > 0) {
         steps.push('Only go back to questions you flagged. Reopening answers you had already chosen used time the last questions needed.');
       } else if (c.method >= 3) {
         steps.push('When a question has taken twice as long as it should, pick your best answer, flag it, and move on.');
+      }
+      // Blanks took the first step, but slow right answers are their own
+      // habit, and the plan spends the most hours on them: name where.
+      if (blanks >= 3 && c.method >= 5 && (planInputs.methodSkills || []).length) {
+        steps.push('Get faster where right answers ran long, starting with ' + planInputs.methodSkills.map(escP).join(' and ') +
+          '. The timed sets for that are in the plan below.');
       }
       if (!steps.some(function (x) { return x.indexOf('plain-detail-link') !== -1; })) {
         steps.push('Go through the questions you missed: <a href="#" class="plain-detail-link">open the question-by-question list</a>. Each one opens the question itself.');
       }
       var hoursHtml = planInputs.weekly > 0
         ? '<p class="plain-well">About <b>' + planInputs.weeklyText + ' hour' + (planInputs.weekly === 1 ? '' : 's') + ' a week</b> of practice for now. “Your next four weeks” below splits it up.</p>'
+        : '';
+
+      /* For a parent on a phone: the one problem, the plan, what helps at
+         home. Built only from what the summary above already says. */
+      var late = (behaviorFlags || []).some(function (f) { return f.indexOf('<strong>Taken late at night') === 0; });
+      var nAnswered = nAll - nBlank, accA = nAnswered > 0 && typeof totalC === 'number' ? Math.round(100 * totalC / nAnswered) : null;
+      var who = escP(first);
+      var problem = !lostN ? 'Nothing on this test cost points; the only thing to watch is time.'
+        : (c.clock >= 1.5 * c.content && accA !== null)
+        ? who + ' got ' + accA + '% of the questions they answered right. The problem is time: ' +
+          (nBlank ? nBlank + ' were left blank.' : c.clock + ' never got real time.')
+        : (leadArea && leadArea.severity === 3)
+        ? 'The main gap is ' + escP(startHere) + (GLOSS[startHere] ? ' (' + GLOSS[startHere] + ')' : '') + '.'
+        : c.content > 5 ? 'The misses are spread across the material rather than one topic.'
+        : 'Only ' + count(c.content, 'question') + ' were missed after real work, so there is no topic to fix, just those to go through.';
+      var leadWork = ['content', 'method', 'clock'].reduce(function (a, k) { return c[k] > c[a] ? k : a; }, 'content');
+      var planLine = planInputs.weekly > 0
+        ? ' The plan is about ' + planInputs.weeklyText + (planInputs.weekly === 1 ? ' hour' : ' hours') + ' a week, mostly ' +
+          { content: 'relearning', method: 'timed practice', clock: 'timed practice' }[leadWork] + '.'
+        : '';
+      var parentHtml = '<p class="plain-parent"><b>For parents:</b> ' + problem + planLine +
+        ' The best help at home is protecting those hours, and making the next practice test one quiet, timed sitting' +
+        (late ? ' earlier in the day' : '') + ', with the phone in another room.</p>';
+      var lateHtml = late
+        ? '<p class="plain-well"><b>Worth knowing:</b> this test was handed in late at night. Tiredness can cost points, so this score may understate you. Take the next one earlier in the day.</p>'
         : '';
 
       box.innerHTML =
@@ -6399,9 +6471,9 @@
         '<div class="plain-cols">' +
           '<div><div class="plain-label">Where your points went</div>' + lostHtml + '</div>' +
           '<div><div class="plain-label">Do these next</div><ol class="plain-steps">' +
-            steps.slice(0, 3).map(function (s) { return '<li>' + s + '</li>'; }).join('') + '</ol>' + hoursHtml + '</div>' +
+            steps.slice(0, 3).map(function (s) { return '<li>' + s + '</li>'; }).join('') + '</ol>' + hoursHtml + lateHtml + '</div>' +
         '</div>' +
-        '<p class="plain-parent"><b>For parents:</b> the best help at home is protecting those practice hours. Make the next practice test one quiet, timed sitting, with the phone in another room.</p>' +
+        parentHtml +
         '<p class="plain-foot">The rest of the report is the evidence for this. Each section has a <b>How this works</b> button if you want the method.</p>';
       var allBtn = box.querySelector('.how-all-btn');
       function syncAll() {
