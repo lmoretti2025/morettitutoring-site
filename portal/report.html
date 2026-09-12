@@ -2515,7 +2515,8 @@
     var stats = [
       { lab: 'Correct', val: totalC + '/' + totalQ, cls: '', icon: ICONS.correct },
       { lab: 'Wrong', val: String(wrongCount), cls: wrongCount > 0 ? 'bad' : '', icon: ICONS.wrong },
-      { lab: 'Accuracy', val: accuracyPct + '%', cls: accuracyPct >= 75 ? 'ok' : (accuracyPct < 50 ? 'bad' : ''), icon: ICONS.accuracy },
+      // Nothing attempted has no accuracy, not 0% (shown in red).
+      { lab: 'Accuracy', val: attempted ? accuracyPct + '%' : '—', cls: !attempted ? '' : accuracyPct >= 75 ? 'ok' : (accuracyPct < 50 ? 'bad' : ''), icon: ICONS.accuracy },
       { lab: 'Unattempted', val: String(skipped), cls: skipped > 0 ? 'bad' : '', icon: ICONS.unattempted }
     ];
     wrap.innerHTML = stats.map(function (s) {
