@@ -826,6 +826,9 @@
   .plain-head h2 { font-family: var(--display); font-size: 21px; font-weight: 700; letter-spacing: 0; text-transform: none; color: var(--ink); text-wrap: balance; }
   .plain-score { font-size: 13.5px; line-height: 1.55; font-weight: 400; margin: 0 0 12px; max-width: 62ch; }
   .plain-score b, .plain-lede, .plain-steps b, .plain-well b { font-weight: 600; }
+  .plain-dots { margin: -4px 0 12px; max-width: 360px; }
+  .plain-dots svg { display: block; width: 100%; height: auto; }
+  .plain-dots-cap { font-size: 11px; line-height: 1.45; color: var(--mid); margin: 3px 0 0; }
   .plain-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding-top: 12px; border-top: 1px solid var(--border); }
   @media (max-width: 640px) { .plain-cols { grid-template-columns: 1fr; gap: 14px; } }
   .plain-label { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--mid); margin-bottom: 6px; }
@@ -2476,7 +2479,7 @@
         var lo = Math.max(headlineMin, Math.floor(loRaw / 10) * 10);
         var hi = Math.min(headlineMax, Math.ceil(hiRaw / 10) * 10);
         rangeEl.textContent = 'range ' + lo + '\u2013' + hi;
-        reportBand = { val: headlineVal, lo: lo, hi: hi };
+        reportBand = { val: headlineVal, lo: lo, hi: hi, sd: SCORE_SEM / 1.2816, min: headlineMin, max: headlineMax };
         rangeEl.title = 'Measurement error on this test: the true score should fall in this range about 4 times in 5.';
         bigTile.appendChild(rangeEl);
         /* ═══ WHEN THE BAND IS THE WRONG INSTRUMENT ═══
@@ -6205,6 +6208,46 @@
           'your real level is most likely between <b>' + reportBand.lo + '</b> and <b>' + reportBand.hi + '</b> (about 4 chances in 5).</p>'
         : '';
 
+      /* The same range as twenty dots, a quantile dotplot (Kay et al. 2016;
+         Fernandes et al. 2018, where it beat intervals for real decisions).
+         Each dot is an equally likely value of the true score: the 2.5th,
+         7.5th, ... 97.5th percentiles of the band's normal error. Counting the
+         dots inside the range is "4 chances in 5" made visible. The axis is
+         fixed in points (+/-200 composite, +/-100 one section), so a less
+         certain score really does draw wider. */
+      var dotsHtml = '';
+      if (scoreHtml && reportBand.sd > 0) {
+        var Z20 = [-1.960, -1.440, -1.150, -0.935, -0.755, -0.598, -0.454, -0.319, -0.189, -0.063,
+                   0.063, 0.189, 0.319, 0.454, 0.598, 0.755, 0.935, 1.150, 1.440, 1.960];
+        var DW = 320, DR = 4.2, DD = 2 * DR + 0.8, half = reportBand.max > 800 ? 200 : 100;
+        var dLo = Math.max(reportBand.min, reportBand.val - half), dHi = Math.min(reportBand.max, reportBand.val + half);
+        var dx = function (v) { return 12 + (Math.max(dLo, Math.min(dHi, v)) - dLo) / ((dHi - dLo) || 1) * (DW - 24); };
+        var stack = {}, inside = 0, circles = [];
+        Z20.forEach(function (z) {
+          var v = reportBand.val + z * reportBand.sd, bin = Math.round(dx(v) / DD);
+          var k = stack[bin] = (stack[bin] || 0) + 1, inR = v >= reportBand.lo && v <= reportBand.hi;
+          if (inR) inside++;
+          circles.push({ x: bin * DD, k: k, inR: inR });
+        });
+        var tall = Math.max.apply(null, circles.map(function (d) { return d.k; }));
+        var base = tall * DD + 2, H = base + 16;
+        var clampX = function (x) { return Math.max(14, Math.min(DW - 14, x)); };
+        dotsHtml = '<div class="plain-dots"><svg viewBox="0 0 ' + DW + ' ' + H + '" role="img" aria-label="' +
+            inside + ' of 20 equally likely values of your real level fall between ' + reportBand.lo + ' and ' + reportBand.hi + '">' +
+          '<rect x="' + dx(reportBand.lo).toFixed(1) + '" y="0" width="' + (dx(reportBand.hi) - dx(reportBand.lo)).toFixed(1) + '" height="' + base +
+            '" fill="rgba(201,168,76,0.16)"/>' +
+          '<line x1="8" x2="' + (DW - 8) + '" y1="' + base + '" y2="' + base + '" stroke="rgba(17,17,17,0.18)" stroke-width="1"/>' +
+          circles.map(function (d) {
+            return '<circle cx="' + d.x.toFixed(1) + '" cy="' + (base - DR - 1 - (d.k - 1) * DD).toFixed(1) + '" r="' + DR +
+              '" fill="' + (d.inR ? '#1a1a1a' : 'rgba(17,17,17,0.22)') + '"/>';
+          }).join('') +
+          [reportBand.lo, reportBand.hi].map(function (v) {
+            return '<text x="' + clampX(dx(v)).toFixed(1) + '" y="' + (base + 12) + '" text-anchor="middle" font-size="10" ' +
+              'font-family="Poppins, sans-serif" fill="rgba(17,17,17,0.6)">' + v + '</text>';
+          }).join('') +
+          '</svg><p class="plain-dots-cap">Each dot is an equally likely value for your real level. ' + inside + ' of the 20 are inside the range.</p></div>';
+      }
+
       // Where the points went. Method is right answers, so it is time, not
       // points, and is said that way.
       var lostN = c.content + c.clock;
@@ -6352,7 +6395,7 @@
       box.innerHTML =
         '<div class="plain-head"><h2>Your report in one minute</h2>' +
           '<button type="button" class="how-btn how-all-btn"></button></div>' +
-        scoreHtml +
+        scoreHtml + dotsHtml +
         '<div class="plain-cols">' +
           '<div><div class="plain-label">Where your points went</div>' + lostHtml + '</div>' +
           '<div><div class="plain-label">Do these next</div><ol class="plain-steps">' +
