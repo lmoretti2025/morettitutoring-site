@@ -7855,7 +7855,7 @@ window.Portal = {
       callback({
         rw: rw ? { skill: rw.skill, domain: rw.domain } : null,
         math: math ? { skill: math.skill, domain: math.domain } : null
-      });
+      }, !!progress.isStale);
     });
   };
 
@@ -16943,7 +16943,15 @@ window.Portal = {
     var subEl = document.querySelector('#qb-weak-card .vp-tenmin-sub');
     var defaultSub = subEl ? subEl.textContent : '';
     if (btn) btn.disabled = true;
-    window.getWeakestSkillsForQb(function (weak) {
+    /* fetchPortalProgress answers twice (the local cache at once, then the
+       server), and starting a round on each answer replaced the question on
+       screen a few seconds in. Start once: on the cached answer if it already
+       names a weak skill, otherwise on the server's. */
+    var started = false;
+    window.getWeakestSkillsForQb(function (weak, stale) {
+      if (started) return;
+      if (stale && !weak.rw && !weak.math) return;
+      started = true;
       if (btn) btn.disabled = false;
       if (!weak.rw && !weak.math) {
         if (subEl) subEl.textContent = "Not enough practice data yet to find a weak spot — take a diagnostic or practice test first, then this'll have something to work with.";
