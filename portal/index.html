@@ -20180,6 +20180,7 @@ window.renderNativeReport = function (data) {
      those two sections as they render; the plan renders last and bails out
      if either is missing. */
   var planInputs = { causes: null, leadKey: null, areas: null };
+  var irtItems = []; // for irtContentTest; see report.html
   var skillBuckets = {};
   function bucketFor(skillName) {
     return skillBuckets[skillName] || (skillBuckets[skillName] = { mastered: 0, skimmed: 0, inefficient: 0, stuck: 0, onpace: 0, rushed: 0, total: 0 });
@@ -20351,6 +20352,7 @@ window.renderNativeReport = function (data) {
         // domain so the detail line under a ranked domain can name what is
         // actually inside it without re-deriving anything.
         if (r.dom) {
+          irtItems.push({ sec: s7.key, dom: r.dom, diff: r.q.difficulty, ok: !!r.ok, tooFast: !!tooFast });
           var db = domainBucketFor(r.dom);
           // Which section this area belongs to — an SAT domain lives in
           // exactly one, so this is a fact about the area rather than a
@@ -20504,7 +20506,53 @@ window.renderNativeReport = function (data) {
      verdict up top, then a table showing WHY with the same four-color
      breakdown. Only rows with an actual signal (gap/pacing/slow) are shown;
      "Solid" rows would repeat the bridge chart. */
+  // The difficulty-aware content-gap test -- identical to report.html's
+  // irtContentTest; see the note there for the model and the evidence.
+  var IRT_OFFSETS = { easy: 0.71, medium: 0, hard: -0.29 };
+  var IRT_POP_MU = 1.20, IRT_POP_SD = 1.22, IRT_SECTION_SD = 0.61, IRT_Z = 2.24, IRT_MIN_EXCESS = 1.5;
+  function irtContentTest(items) {
+    var inf = items.filter(function (it) { return !it.tooFast; });
+    if (inf.length < 20) return null;
+    var sig = function (x) { return 1 / (1 + Math.exp(-x)); };
+    var off = function (it) { return IRT_OFFSETS[it.diff] || 0; };
+    function mapTheta(its, mu, tau) {
+      var th = mu;
+      for (var iter = 0; iter < 50; iter++) {
+        var gr = -(th - mu) * tau, h = -tau;
+        its.forEach(function (it) { var p = sig(th + off(it)); gr += (it.ok ? 1 : 0) - p; h -= p * (1 - p); });
+        var step = gr / h;
+        th -= step;
+        if (Math.abs(step) < 1e-7) break;
+      }
+      return th;
+    }
+    var popTau = 1 / (IRT_POP_SD * IRT_POP_SD), secTau = 1 / (IRT_SECTION_SD * IRT_SECTION_SD);
+    var overall = mapTheta(inf, IRT_POP_MU, popTau);
+    var theta = {}, wTot = {};
+    ['reading-writing', 'math'].forEach(function (g) {
+      var its = inf.filter(function (it) { return it.sec === g; });
+      if (!its.length) return;
+      var th = mapTheta(its, overall, secTau);
+      theta[g] = th;
+      wTot[g] = its.reduce(function (a, it) { var p = sig(th + off(it)); return a + p * (1 - p); }, 0) + secTau;
+    });
+    var byDom = {};
+    inf.forEach(function (it) {
+      if (theta[it.sec] === undefined) return;
+      var p = sig(theta[it.sec] + off(it));
+      var d = byDom[it.dom] || (byDom[it.dom] = { S: 0, W: 0, g: it.sec });
+      d.S += p - (it.ok ? 1 : 0);
+      d.W += p * (1 - p);
+    });
+    Object.keys(byDom).forEach(function (k) {
+      var d = byDom[k], V = Math.max(1e-9, d.W - d.W * d.W / wTot[d.g]);
+      d.z = d.S / Math.sqrt(V);
+      d.flag = d.z > IRT_Z && d.S >= IRT_MIN_EXCESS;
+    });
+    return byDom;
+  }
   (function renderSkillDiagnosis() {
+    var irt = irtContentTest(irtItems);
     // 3, not stricter, to match this report's other single-attempt skill
     // gates (HOME_WEAK_SKILL_MIN_ATTEMPTS, MIN_QUESTIONS): a module rarely
     // gives one skill more than a few attempts, so a stricter floor would
@@ -20599,7 +20647,7 @@ window.renderNativeReport = function (data) {
         if (shrunkRate(count, r.total, base) - base < SIGNAL_MIN_MARGIN) return false;
         return wilsonInterval(count, r.total).lo > base;
       }
-      if (passes(r.content, baseContent)) return 3;
+      if (irt ? !!(irt[r.skill] && irt[r.skill].flag) : passes(r.content, baseContent)) return 3;
       /* ═══ PACING COUNTS THE BEHAVIOUR, NOT THE OUTCOME ═══
          A question answered far under budget says the same thing about pacing
          whether or not the answer landed, and a fast guesser lands many. So
@@ -20628,7 +20676,7 @@ window.renderNativeReport = function (data) {
       r.rank = shrunkRate(lead.n, r.total, lead.base);
       // Points at stake, weighted by what a student can actually be taught
       // next. lead.n is a COUNT, so the size of the domain is already in it.
-      r.priority = lead.n * r.reach.w;
+      r.priority = (r.severity === 3 && irt && irt[r.skill]) ? irt[r.skill].S * r.reach.w : lead.n * r.reach.w;
       // The skills inside this domain that carried the misses, biggest first.
       // Descriptive only: never ranked, gated on, or recommended on their own.
       r.topSkills = Object.keys(r.skills || {})

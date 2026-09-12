@@ -3610,6 +3610,10 @@
      above did not support. Filled in as those sections render; the plan
      renders last and bails out if either is missing. */
   var planInputs = { causes: null, leadKey: null, areas: null };
+  // One entry per classified, answered question, for the content-gap test
+  // in renderSkillDiagnosis (see irtContentTest): section, domain, tagged
+  // difficulty, result, and whether it went by too fast to have been read.
+  var irtItems = [];
   var skillBuckets = {};
   function bucketFor(skillName) {
     return skillBuckets[skillName] || (skillBuckets[skillName] = { mastered: 0, skimmed: 0, inefficient: 0, stuck: 0, onpace: 0, rushed: 0, total: 0 });
@@ -3803,6 +3807,7 @@
         // domain so the detail line under a ranked domain can name what is
         // actually inside it without re-deriving anything.
         if (r.dom) {
+          irtItems.push({ sec: s7.key, dom: r.dom, diff: r.q.difficulty, ok: !!r.ok, tooFast: !!tooFast });
           var db = domainBucketFor(r.dom);
           // Which section this area belongs to. An SAT domain lives in exactly
           // one section, so this is a fact, not a last-write-wins guess; it
@@ -3945,8 +3950,76 @@
   /* ═══ renderSkillDiagnosis() ═══ see index.html's identical function for
      the full reasoning (this is the standalone report's own copy, kept in
      sync by hand). */
+  /* ═══ CONTENT GAPS: A DIFFICULTY-AWARE TEST ═══
+     Is a domain missed more than this student's own ability predicts, given
+     how hard its questions were? A Rasch model with the difficulty offsets
+     calibrated on real attempts (analytics-sim README: easy +0.71, medium 0,
+     hard -0.29 logits). Ability is estimated per section (MAP), with the
+     section shrunk toward the student's overall ability (prior sd 0.61), and
+     the overall toward the population (N(1.20, 1.22^2)). For each domain,
+     S = sum of (p_i - y_i) over its questions: the misses beyond what that
+     ability predicts. Its null variance, corrected for estimating the ability from
+     the same answers, is V = W_d - W_d^2 / (W_section + tau). Flagged when
+     S / sqrt(V) > 2.24 and at least 1.5 questions in excess. Questions too
+     fast to have been read are left out, as elsewhere.
+
+     It replaces a raw-count gate (share missed vs the student's pooled
+     rate across both sections, shrunk with a fixed prior strength, plus a
+     Wilson bound). In 20,000+ simulated students that gate named an area
+     for 28% of students with no gap at all, and was thrown by differences
+     between a student's Math and Reading & Writing. At the same
+     sensitivity this test names an area for 10.5%, is right 88% of the time
+     when it names one (72% before), picks a wrong top priority about 64%
+     less often, and names the same area on a retest 91% of the time (77%)
+     (stats audit, 2026-09-12). Falls back to the old gate with fewer than
+     20 usable questions. */
+  var IRT_OFFSETS = { easy: 0.71, medium: 0, hard: -0.29 };
+  var IRT_POP_MU = 1.20, IRT_POP_SD = 1.22, IRT_SECTION_SD = 0.61, IRT_Z = 2.24, IRT_MIN_EXCESS = 1.5;
+  function irtContentTest(items) {
+    var inf = items.filter(function (it) { return !it.tooFast; });
+    if (inf.length < 20) return null;
+    var sig = function (x) { return 1 / (1 + Math.exp(-x)); };
+    var off = function (it) { return IRT_OFFSETS[it.diff] || 0; };
+    function mapTheta(its, mu, tau) {
+      var th = mu;
+      for (var iter = 0; iter < 50; iter++) {
+        var gr = -(th - mu) * tau, h = -tau;
+        its.forEach(function (it) { var p = sig(th + off(it)); gr += (it.ok ? 1 : 0) - p; h -= p * (1 - p); });
+        var step = gr / h;
+        th -= step;
+        if (Math.abs(step) < 1e-7) break;
+      }
+      return th;
+    }
+    var popTau = 1 / (IRT_POP_SD * IRT_POP_SD), secTau = 1 / (IRT_SECTION_SD * IRT_SECTION_SD);
+    var overall = mapTheta(inf, IRT_POP_MU, popTau);
+    var theta = {}, wTot = {};
+    ['reading-writing', 'math'].forEach(function (g) {
+      var its = inf.filter(function (it) { return it.sec === g; });
+      if (!its.length) return;
+      var th = mapTheta(its, overall, secTau);
+      theta[g] = th;
+      wTot[g] = its.reduce(function (a, it) { var p = sig(th + off(it)); return a + p * (1 - p); }, 0) + secTau;
+    });
+    var byDom = {};
+    inf.forEach(function (it) {
+      if (theta[it.sec] === undefined) return;
+      var p = sig(theta[it.sec] + off(it));
+      var d = byDom[it.dom] || (byDom[it.dom] = { S: 0, W: 0, g: it.sec });
+      d.S += p - (it.ok ? 1 : 0);
+      d.W += p * (1 - p);
+    });
+    Object.keys(byDom).forEach(function (k) {
+      var d = byDom[k], V = Math.max(1e-9, d.W - d.W * d.W / wTot[d.g]);
+      d.z = d.S / Math.sqrt(V);
+      d.flag = d.z > IRT_Z && d.S >= IRT_MIN_EXCESS;
+    });
+    return byDom;
+  }
+
   (function renderSkillDiagnosis() {
     var SIGNAL_MIN_COUNT = 2, SIGNAL_MIN_SHARE = 0.3, SIGNAL_MIN_MARGIN = 0.15;
+    var irt = irtContentTest(irtItems);
     /* Ranked at DOMAIN grain (see the domainBucketsDx comment). Skills stay
        in the data as descriptive detail under a ranked domain, but nothing
        is ranked on a 3-question sample. */
@@ -4038,7 +4111,9 @@
         if (shrunkRate(count, r.total, base) - base < SIGNAL_MIN_MARGIN) return false;
         return wilsonInterval(count, r.total).lo > base;
       }
-      if (passes(r.content, baseContent)) return 3;
+      // Content: the difficulty-aware test when there is enough data (see
+      // irtContentTest), the raw gate otherwise.
+      if (irt ? !!(irt[r.skill] && irt[r.skill].flag) : passes(r.content, baseContent)) return 3;
       /* ═══ PACING COUNTS THE BEHAVIOUR, NOT THE OUTCOME ═══
          A question answered far under its budget says the same thing about
          how the section was worked whether or not the answer landed, and on
@@ -4069,7 +4144,10 @@
       r.rank = shrunkRate(lead.n, r.total, lead.base);
       // Points at stake, weighted by what a student can actually be taught
       // next. lead.n is a COUNT, so the size of the domain is already in it.
-      r.priority = lead.n * r.reach.w;
+      // A content gap found by the difficulty-aware test is ranked by its
+      // EXCESS misses (beyond what the student's ability predicts), the
+      // quantity that test measures and the one validated in simulation.
+      r.priority = (r.severity === 3 && irt && irt[r.skill]) ? irt[r.skill].S * r.reach.w : lead.n * r.reach.w;
       // The skills inside this domain that actually carried the misses,
       // biggest first. Descriptive only — never ranked, never gated on,
       // never the subject of a recommendation on their own.
