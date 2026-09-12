@@ -341,7 +341,56 @@
   #sched-delete-btn.armed { background: var(--red); color: #fff; }
   #sched-modal-error { color: var(--red); font-size: 0.78rem; font-weight: 600; margin-top: 0.6rem; min-height: 1em; }
 
+  /* ═══ EMAIL FAMILIES ═══ compose on the left, who gets it and exactly
+     what they will see on the right. Send stays disabled until the preview
+     matches what is in the boxes. */
+  #broadcast { display: none; }
+  .bc-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1.25rem; align-items: start; }
+  .bc-grid > * { min-width: 0; }
+  .bc-fld { display: block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--faint); margin-bottom: 0.9rem; }
+  .bc-fld input, .bc-fld select, .bc-fld textarea { display: block; width: 100%; font-family: var(--hel); font-size: 0.88rem; font-weight: 400; letter-spacing: 0; text-transform: none; color: var(--text); padding: 0.55rem 0.7rem; border: 1.5px solid var(--border); border-radius: 10px; margin-top: 0.3rem; background: var(--white); }
+  .bc-fld textarea { min-height: 240px; resize: vertical; line-height: 1.5; }
+  .bc-fld input:focus, .bc-fld select:focus, .bc-fld textarea:focus { outline: none; border-color: var(--red); }
+  .bc-chk { display: flex; align-items: center; gap: 0.5rem; font-size: 0.84rem; color: var(--mid); margin: -0.3rem 0 1rem; cursor: pointer; }
+  .bc-chk input, .bc-row input { accent-color: var(--red); width: 15px; height: 15px; flex: none; }
+  .bc-hint { font-size: 0.74rem; color: var(--faint); margin: -0.4rem 0 1rem; line-height: 1.5; }
+  .bc-hint code { font-family: ui-monospace, Menlo, monospace; font-size: 0.72rem; background: var(--bg); color: var(--mid); padding: 0 0.25rem; border-radius: 4px; }
+  .bc-actions { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+  .bc-actions .mini { font-size: 0.78rem; padding: 0.4rem 0.85rem; }
+  .bc-actions .mini.armed { background: var(--text); border-color: var(--text); color: #fff; }
+  .bc-status { font-size: 0.8rem; line-height: 1.5; margin-top: 0.8rem; min-height: 1.2em; color: var(--mid); }
+  .bc-status.ok { color: var(--green); font-weight: 600; }
+  .bc-status.err { color: var(--red); font-weight: 600; }
+  .bc-list { max-height: 340px; overflow-y: auto; margin: 0 -0.2rem; padding: 0 0.2rem; }
+  .bc-row { display: flex; align-items: flex-start; gap: 0.6rem; padding: 0.55rem 0; border-bottom: 1px solid var(--border); font-size: 0.84rem; }
+  .bc-row:last-child { border-bottom: none; }
+  .bc-row input { margin-top: 0.2rem; cursor: pointer; }
+  .bc-row input:disabled { cursor: default; }
+  .bc-who { flex: 1 1 auto; min-width: 0; }
+  .bc-row.is-off .bc-who { opacity: 0.55; }
+  .bc-name { background: none; border: none; padding: 0; font: inherit; font-weight: 700; color: var(--text); cursor: pointer; text-align: left; }
+  .bc-name:hover { color: var(--red); text-decoration: underline; }
+  .bc-addr { display: block; font-size: 0.72rem; color: var(--faint); overflow-wrap: anywhere; }
+  .bc-tag { font-size: 0.66rem; font-weight: 700; padding: 0.1rem 0.45rem; border-radius: 999px; background: var(--bg); color: var(--mid); white-space: nowrap; }
+  .bc-tag.sent { background: rgba(94,139,111,0.12); color: var(--green); }
+  .bc-tag.warn { background: rgba(176,39,28,0.08); color: var(--red); }
+  .bc-meta { font-size: 0.76rem; color: var(--mid); line-height: 1.55; margin-bottom: 0.8rem; overflow-wrap: anywhere; }
+  .bc-meta b { color: var(--text); }
+  .bc-mail { border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.1rem; background: #fff; overflow-x: auto; }
+  .bc-mail.is-stale { opacity: 0.45; }
+  .bc-hist-row { display: flex; gap: 1rem; align-items: baseline; padding: 0.55rem 0; border-bottom: 1px solid var(--border); font-size: 0.82rem; }
+  .bc-hist-row:last-child { border-bottom: none; }
+  .bc-hist-row .bc-when { color: var(--faint); white-space: nowrap; font-variant-numeric: tabular-nums; min-width: 6.5rem; }
+  .bc-hist-row .bc-subj { flex: 1 1 auto; min-width: 0; font-weight: 600; overflow-wrap: anywhere; }
+  .bc-hist-row .bc-n { color: var(--mid); white-space: nowrap; }
+  /* Rehearsal: until goLive runs in Apps Script, every copy comes to Luca. */
+  .bc-rehearsal { background: #1d1b18; color: #fff; border-radius: 12px; padding: 0.85rem 1rem; margin-bottom: 1.2rem; font-size: 0.82rem; line-height: 1.5; }
+  .bc-rehearsal b { color: var(--gold); letter-spacing: 0.06em; text-transform: uppercase; font-size: 0.72rem; display: block; margin-bottom: 0.15rem; }
+  @media (max-width: 900px) { .bc-grid { grid-template-columns: minmax(0, 1fr); } }
+
   @media (max-width: 620px) {
+    /* Four nav buttons on a phone: the short label keeps them on one row. */
+    .nav-long { display: none; }
     main { padding: 1.25rem 1rem 3rem; }
     .cal-wrap { padding: 0.85rem; }
     /* The three nav buttons don't fit beside the wordmark on a phone —
@@ -409,6 +458,7 @@
   <nav id="topnav">
     <button type="button" class="nav-btn is-on" id="nav-roster">Roster</button>
     <button type="button" class="nav-btn" id="nav-allcal">All sessions</button>
+    <button type="button" class="nav-btn" id="nav-broadcast">Email<span class="nav-long"> families</span></button>
     <button type="button" class="nav-btn" id="refresh-btn">Refresh</button>
   </nav>
 </header>
@@ -535,6 +585,58 @@
     <p class="sched-hint">Click a session to assign that student homework for that day. Click a homework chip to open that student's page.</p>
   </div>
 
+  <!-- ═══ EMAIL FAMILIES ═══ one message, sent as a separate email to each
+       family (emails.gs: handleBroadcastPrepare / handleSendBroadcast). -->
+  <div id="broadcast">
+    <h1 class="sched-hed">Email families</h1>
+    <div class="bc-rehearsal" id="bc-rehearsal" style="display:none;">
+      <b>Rehearsal mode</b>
+      Nothing from this page reaches a family yet. Every copy comes to you, marked [Rehearsal], showing who it would have gone to.
+      To switch on real sending, run <code>goLive</code> in Apps Script.
+    </div>
+    <div class="bc-grid">
+      <div class="card">
+        <h2>Message</h2>
+        <p class="card-sub">Each family gets its own email from your Gmail, so nobody sees anyone else&rsquo;s address and replies come back to you alone.</p>
+        <label class="bc-fld">To
+          <select id="bc-audience"><option value="current">Current families</option></select>
+        </label>
+        <label class="bc-chk"><input type="checkbox" id="bc-students"> Also send to the students</label>
+        <label class="bc-fld">Subject
+          <input type="text" id="bc-subject" maxlength="200" placeholder="e.g. No sessions Thanksgiving week" autocomplete="off">
+        </label>
+        <label class="bc-fld">Message
+          <textarea id="bc-body"></textarea>
+        </label>
+        <p class="bc-hint"><code>{parent}</code> and <code>{student}</code> become each family&rsquo;s first names. A blank line starts a new paragraph, and links become clickable.</p>
+        <div class="bc-actions">
+          <button type="button" class="mini" id="bc-preview-btn">Preview</button>
+          <button type="button" class="mini" id="bc-test-btn" disabled>Send a test to me</button>
+          <button type="button" class="mini" id="bc-draft-btn" disabled>Save as Gmail drafts</button>
+          <button type="button" class="mini solid" id="bc-send-btn" disabled>Send</button>
+        </div>
+        <div class="bc-status" id="bc-status"></div>
+      </div>
+      <div>
+        <div class="card">
+          <h2>Recipients <span class="count-pill" id="bc-count"></span></h2>
+          <p class="card-sub" id="bc-rec-sub">Untick anyone who shouldn&rsquo;t get this. Paused families start unticked.</p>
+          <div class="bc-list" id="bc-recipients"></div>
+        </div>
+        <div class="card">
+          <h2>Preview</h2>
+          <p class="card-sub" id="bc-preview-sub">Write a subject and message, then press Preview. Click a name to see that family&rsquo;s version.</p>
+          <div id="bc-preview"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Sent before</h2>
+      <p class="card-sub">The most recent messages from this page. Every family&rsquo;s copy is on the EmailLog tab.</p>
+      <div id="bc-history"></div>
+    </div>
+  </div>
+
   <div id="status-msg"></div>
 </main>
 
@@ -635,7 +737,7 @@
   // The value is the field a real answer always carries. A stalling service
   // can answer a POST with its GET health reply ({ok:true}, no data), so a
   // reply missing that field is treated as lost.
-  var RETRY_READS = { getRoster: 'students', version: 'version', getStudentDetail: '', getAdminAssignments: '', getAdminCalendar: '' };
+  var RETRY_READS = { getRoster: 'students', version: 'version', getStudentDetail: '', getAdminAssignments: '', getAdminCalendar: '', broadcastPrepare: 'families' };
   function looksLost(action, data) {
     var field = RETRY_READS[action];
     return !!field && data && data.ok && !(field in data);
@@ -749,9 +851,9 @@
     el.className = isError ? 'error' : '';
   }
 
-  /* ═══ VIEW SWITCHING ═══ four full-page views (gate / roster / one
-     student / everyone's calendar), only one visible at a time. */
-  var VIEWS = { gate: $('gate'), roster: $('roster'), student: $('student'), allcal: $('allcal') };
+  /* ═══ VIEW SWITCHING ═══ five full-page views (gate / roster / one
+     student / everyone's calendar / email families), one visible at a time. */
+  var VIEWS = { gate: $('gate'), roster: $('roster'), student: $('student'), allcal: $('allcal'), broadcast: $('broadcast') };
   var currentView = 'gate';
 
   function showView(name) {
@@ -760,6 +862,7 @@
     $('topnav').style.display = (name === 'gate') ? 'none' : 'flex';
     $('nav-roster').classList.toggle('is-on', name === 'roster' || name === 'student');
     $('nav-allcal').classList.toggle('is-on', name === 'allcal');
+    $('nav-broadcast').classList.toggle('is-on', name === 'broadcast');
     // FullCalendar measures itself on render; a calendar that was built
     // while its container was display:none comes out zero-height until
     // it's told to re-measure once it's actually on screen.
@@ -782,7 +885,7 @@
 
   // What this build of admin.html needs the deployment to understand. Kept
   // beside the version constant in Code.gs — bump both together.
-  var REQUIRED_BACKEND_VERSION = 12;
+  var REQUIRED_BACKEND_VERSION = 13;
   var CAPABILITY_LABELS = {
     calendar: 'the calendar and student pages',
     dueDates: 'due dates',
@@ -793,7 +896,8 @@
     resetUndo: 'a full undo on Reset login',
     revokeNow: 'Reset login taking effect immediately',
     noHtml: 'the approval and setup pages being served from the site',
-    presence: 'the green dot showing who is on the site right now, and the sign-in log'
+    presence: 'the green dot showing who is on the site right now, and the sign-in log',
+    broadcast: 'Email families (it also needs emails.gs pasted in as its own script file)'
   };
 
   function joinList(items) {
@@ -1130,6 +1234,7 @@
 
   $('nav-roster').addEventListener('click', goToRoster);
   $('nav-allcal').addEventListener('click', openAllCalendar);
+  $('nav-broadcast').addEventListener('click', openBroadcast);
   $('student-back-btn').addEventListener('click', goToRoster);
 
   $('refresh-btn').addEventListener('click', function () {
@@ -1144,6 +1249,8 @@
       if (schedCalendar) schedCalendar.refetchEvents();
       rosterStale = false;
       loadRoster(key, true).then(done);
+    } else if (currentView === 'broadcast') {
+      loadBroadcast(false).then(done, done);
     } else if (currentView === 'allcal') {
       if (allCalendar) allCalendar.refetchEvents();
       rosterStale = false;
@@ -2625,6 +2732,342 @@
         putBack();
         flashCalNote('Could not delete that — check your connection. It has been put back.');
       });
+  });
+
+  /* ═══════════════════════════════════════════════════════════════════
+     EMAIL FAMILIES
+     One message, one email per family (emails.gs). Three rules shape this:
+       - Send is only enabled when the preview shows what is in the boxes
+         right now, so what goes out is what Luca last read.
+       - Every message carries an id, and the backend logs each family
+         against it. A lost answer is followed by a re-read of who is marked
+         sent, and pressing Send again reaches only the families still
+         missing; nobody gets it twice.
+       - The text is kept in this browser as it is typed, so a reload or a
+         closed tab does not lose a long message.
+     ═══════════════════════════════════════════════════════════════════ */
+  var BC_DRAFT_KEY = 'moretti_admin_broadcast_draft';
+  var BC_TEMPLATE = 'Hi {parent},\n\n\n\nBest,\nLuca';
+  var bc = {
+    id: newBroadcastId(), audience: 'current', families: [], ticked: {},
+    previewKey: '', previewSig: null, previewName: '', armed: false, busy: false,
+    seq: 0, restored: false, quota: null, notifyEmail: '', rehearsal: false
+  };
+
+  function newBroadcastId() {
+    try { if (window.crypto && crypto.randomUUID) return crypto.randomUUID(); } catch (e) {}
+    return 'b' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
+  }
+  function bcPlural(n, one, many) { return n + ' ' + (n === 1 ? one : many); }
+
+  function bcSaveDraft() {
+    try {
+      localStorage.setItem(BC_DRAFT_KEY, JSON.stringify({
+        id: bc.id, audience: bc.audience, students: $('bc-students').checked,
+        subject: $('bc-subject').value, body: $('bc-body').value
+      }));
+    } catch (e) {}
+  }
+  function bcRestoreDraft() {
+    var d = null;
+    try { d = JSON.parse(localStorage.getItem(BC_DRAFT_KEY) || 'null'); } catch (e) {}
+    if (d && typeof d === 'object') {
+      if (d.id && /^[A-Za-z0-9-]{8,64}$/.test(d.id)) bc.id = d.id;
+      if (d.audience) bc.audience = String(d.audience);
+      $('bc-students').checked = !!d.students;
+      $('bc-subject').value = d.subject || '';
+      $('bc-body').value = d.body || '';
+    }
+    if (!$('bc-body').value) $('bc-body').value = BC_TEMPLATE;
+  }
+  function bcClearDraft() { try { localStorage.removeItem(BC_DRAFT_KEY); } catch (e) {} }
+
+  // What the preview has to match before anything can be sent.
+  function bcContentSig() {
+    return JSON.stringify([bc.audience, $('bc-students').checked, $('bc-subject').value, $('bc-body').value]);
+  }
+  function bcHasText() {
+    var body = $('bc-body').value.replace(/\{parent\}|Hi\s*,|Best,\s*Luca/g, '').trim();
+    return !!($('bc-subject').value.trim() && body);
+  }
+  function bcTickedKeys() {
+    return bc.families.filter(function (f) { return bc.ticked[f.key] && f.to.length && !f.sent; })
+      .map(function (f) { return f.key; });
+  }
+
+  function bcStatus(msg, kind) {
+    var el = $('bc-status');
+    el.textContent = msg || '';
+    el.className = 'bc-status' + (kind ? ' ' + kind : '');
+  }
+
+  function bcErrorText(d) {
+    var e = d && d.error;
+    if (e === 'unknown_action') return 'The live backend doesn’t know this yet. Paste emails.gs, Code.gs and auth.gs into Apps Script, then Deploy → Manage deployments → edit → New version.';
+    if (e === 'unauthorized') return 'Not authorized. Sign in again; if that doesn’t fix it, auth.gs in Apps Script is older than this page.';
+    if (e === 'server_error' && /is not defined/.test(d.message || '')) return 'emails.gs isn’t in the Apps Script project yet. Add it as its own script file and redeploy.';
+    if (e === 'quota') return 'That needs ' + d.needed + ' emails and Gmail allows ' + d.quota + ' more today. Untick some families, or send the rest tomorrow.';
+    if (e === 'missing_subject') return 'Add a subject.';
+    if (e === 'missing_body') return 'The message is empty.';
+    if (e === 'subject_too_long') return 'The subject is too long (200 characters at most).';
+    if (e === 'body_too_long') return 'The message is too long (10,000 characters at most).';
+    if (e === 'no_recipients') return 'Nobody is ticked.';
+    if (e === 'busy_try_again') return 'The daily email run is going right now. Try again in a minute.';
+    if (e === 'send_failed') return 'Gmail refused the test email. Try again in a minute.';
+    return 'Something went wrong' + (e ? ' (' + e + ')' : '') + '.';
+  }
+
+  function openBroadcast() {
+    if (!bc.restored) { bcRestoreDraft(); bc.restored = true; }
+    showView('broadcast');
+    loadBroadcast(false);
+  }
+
+  function loadBroadcast(withPreview) {
+    var seq = ++bc.seq;
+    var sigAtRequest = bcContentSig();
+    var req = { action: 'broadcastPrepare', adminKey: adminKey(), audience: bc.audience,
+                includeStudents: $('bc-students').checked, broadcastId: bc.id };
+    if (withPreview) {
+      req.subject = $('bc-subject').value;
+      req.body = $('bc-body').value;
+      req.previewKey = bc.previewKey;
+    }
+    if (!bc.families.length) {
+      $('bc-recipients').innerHTML = [1, 2, 3].map(function () {
+        return '<div class="sk-row"><div class="sk sk-block" style="width:15px"></div><div class="sk-grow"><div class="sk sk-line" style="width:45%"></div><div class="sk sk-line" style="width:70%"></div></div></div>';
+      }).join('');
+    }
+    return postToBackend(req).then(function (data) {
+      if (seq !== bc.seq) return;
+      if (!data || !data.ok) { bcStatus(bcErrorText(data), 'err'); if (!bc.families.length) $('bc-recipients').innerHTML = ''; return; }
+      // "Current" is decided by the calendar (emails.gs); without it the
+      // list would look convincingly, and wrongly, empty.
+      if (data.calendarOk === false) bcStatus('Couldn’t read your calendar just now, so the “current” lists may be empty or short. Try Refresh in a minute.', 'err');
+      bc.audience = data.audience;
+      bc.rehearsal = !!data.rehearsal;
+      $('bc-rehearsal').style.display = bc.rehearsal ? 'block' : 'none';
+      bc.quota = data.quota;
+      bc.notifyEmail = data.notifyEmail || '';
+      bcRenderAudiences(data.audiences || []);
+      bc.families = data.families || [];
+      bc.families.forEach(function (f) {
+        if (f.sent) bc.ticked[f.key] = false;
+        else if (!(f.key in bc.ticked)) bc.ticked[f.key] = !!(f.to.length && !f.paused);
+      });
+      bcRenderRecipients();
+      bcRenderHistory(data.history || []);
+      if (withPreview) {
+        bcRenderPreview(data.preview);
+        bc.previewSig = data.preview ? sigAtRequest : null;
+        if (!data.preview) bcStatus('There’s nobody in this group to preview.', 'err');
+      }
+      bcUpdateButtons();
+    }).catch(function () {
+      if (seq !== bc.seq) return;
+      bcStatus('Could not reach the backend. Check your connection and try again.', 'err');
+    });
+  }
+
+  function bcRenderAudiences(list) {
+    $('bc-audience').innerHTML = list.map(function (a) {
+      return '<option value="' + escHtml(a.id) + '"' + (a.id === bc.audience ? ' selected' : '') + '>' +
+        escHtml(a.label) + ' (' + a.count + ')</option>';
+    }).join('');
+  }
+
+  function bcRenderRecipients() {
+    var fams = bc.families;
+    if (!fams.length) {
+      $('bc-recipients').innerHTML = '<div class="empty">Nobody in this group.</div>';
+    } else {
+      var students = $('bc-students').checked;
+      $('bc-recipients').innerHTML = fams.map(function (f) {
+        var tags = [];
+        if (f.sent) tags.push('<span class="bc-tag sent">Sent</span>');
+        if (f.paused) tags.push('<span class="bc-tag">Paused</span>');
+        if (!f.to.length) tags.push('<span class="bc-tag warn">No ' + (students ? '' : 'parent ') + 'email</span>');
+        var off = f.sent || !f.to.length || !bc.ticked[f.key];
+        return '<div class="bc-row' + (off ? ' is-off' : '') + '">' +
+          '<input type="checkbox" data-key="' + escHtml(f.key) + '" aria-label="Send to ' + escHtml(f.name) + '"' +
+            (bc.ticked[f.key] && !f.sent ? ' checked' : '') + (f.sent || !f.to.length ? ' disabled' : '') + '>' +
+          '<div class="bc-who"><button type="button" class="bc-name" data-preview="' + escHtml(f.key) + '">' + escHtml(f.name) + '</button>' +
+            '<span class="bc-addr">' + (f.to.length ? escHtml(f.to.join(', ')) : 'Nothing on file to send to') + '</span></div>' +
+          tags.join(' ') +
+        '</div>';
+      }).join('');
+    }
+    bcRenderCount();
+  }
+
+  function bcRenderCount() {
+    var keys = bcTickedKeys();
+    var addrs = bc.families.filter(function (f) { return keys.indexOf(f.key) !== -1; })
+      .reduce(function (n, f) { return n + f.to.length; }, 0);
+    $('bc-count').textContent = keys.length + ' of ' + bc.families.length;
+    var sent = bc.families.filter(function (f) { return f.sent; }).length;
+    $('bc-rec-sub').textContent =
+      bcPlural(keys.length, 'family', 'families') + ' ticked, ' + bcPlural(addrs, 'address', 'addresses') +
+      (sent ? ' · ' + sent + ' already sent this message' : '') +
+      (bc.quota != null ? ' · Gmail allows ' + bc.quota + ' more today' : '') + '.';
+  }
+
+  function bcRenderPreview(p) {
+    if (!p) { $('bc-preview').innerHTML = '<div class="empty">Nothing to preview yet.</div>'; bc.previewName = ''; return; }
+    bc.previewKey = p.key;
+    bc.previewName = p.name;
+    // p.html is built by the backend's own renderer, which escapes
+    // everything typed into it -- the same HTML the family will receive.
+    $('bc-preview').innerHTML =
+      '<div class="bc-meta"><b>To</b> ' + (p.to.length ? escHtml(p.to.join(', ')) : '(no address on file)') +
+      '<br><b>Subject</b> ' + escHtml(p.subject) + '</div>' +
+      '<div class="bc-mail" id="bc-mail">' + p.html + '</div>';
+  }
+
+  function bcRenderHistory(list) {
+    $('bc-history').innerHTML = list.length ? list.map(function (h) {
+      var n = h.rehearsed ? bcPlural(h.rehearsed, 'family', 'families') + ' (rehearsal, to you)'
+            : h.drafted ? bcPlural(h.families, 'draft', 'drafts') : bcPlural(h.families, 'family', 'families');
+      return '<div class="bc-hist-row"><span class="bc-when">' + escHtml(formatDay(h.at)) + '</span>' +
+        '<span class="bc-subj">' + escHtml(h.subject) + '</span><span class="bc-n">' + n + '</span></div>';
+    }).join('') : '<div class="empty">Nothing sent from here yet.</div>';
+  }
+
+  function bcDisarm() {
+    if (!bc.armed) return;
+    bc.armed = false;
+    bcStatus('');
+  }
+
+  function bcUpdateButtons() {
+    var n = bcTickedKeys().length;
+    var fresh = !!bc.previewSig && bc.previewSig === bcContentSig();
+    $('bc-send-btn').disabled = !n || !fresh || bc.busy;
+    $('bc-draft-btn').disabled = !n || !fresh || bc.busy;
+    $('bc-test-btn').disabled = !fresh || bc.busy || !bc.previewKey;
+    $('bc-preview-btn').disabled = bc.busy;
+    $('bc-send-btn').classList.toggle('armed', bc.armed);
+    $('bc-send-btn').textContent = bc.rehearsal
+      ? (bc.armed ? 'Confirm: rehearse ' : 'Rehearse ') + bcPlural(n, 'family', 'families') + ' (to you)'
+      : (bc.armed ? 'Confirm: send to ' : 'Send to ') + bcPlural(n, 'family', 'families');
+    $('bc-test-btn').title = bc.notifyEmail ? 'Sends ' + (bc.previewName || 'the previewed family') + '’s version to ' + bc.notifyEmail : '';
+    var mail = $('bc-mail');
+    if (mail) mail.classList.toggle('is-stale', !fresh);
+    $('bc-preview-sub').textContent = !bc.previewSig
+      ? 'Write a subject and message, then press Preview. Click a name to see that family’s version.'
+      : fresh ? 'Exactly what ' + (bc.previewName || 'this family') + ' will get. Click another name to see theirs.'
+              : 'The message has changed since this preview. Press Preview again before sending.';
+  }
+
+  function bcSend(mode) {
+    var keys = mode === 'test' ? [bc.previewKey] : bcTickedKeys();
+    if (!keys.length || !keys[0]) return;
+    bc.busy = true;
+    bc.armed = false;
+    bcUpdateButtons();
+    bcStatus(mode === 'send' ? 'Sending to ' + bcPlural(keys.length, 'family', 'families') + '… keep this tab open.'
+           : mode === 'draft' ? 'Saving drafts in Gmail…' : 'Sending a test…');
+    postToBackend({
+      action: 'sendBroadcast', adminKey: adminKey(), broadcastId: bc.id, mode: mode,
+      audience: bc.audience, includeStudents: $('bc-students').checked,
+      subject: $('bc-subject').value, body: $('bc-body').value, keys: keys
+    }).then(function (d) {
+      bc.busy = false;
+      if (!d || !d.ok) { bcStatus(bcErrorText(d), 'err'); bcUpdateButtons(); return; }
+      if (d.test) {
+        bcStatus('Test sent to ' + d.to + ', showing ' + (d.as || 'one family') + '’s version.', 'ok');
+        bcUpdateButtons();
+        return;
+      }
+      var done = d.sent.length;
+      var msg = d.rehearsal
+        ? 'Rehearsed: ' + bcPlural(done, 'copy', 'copies') + ' sent to you, each marked [Rehearsal]. No family received anything.'
+        : (mode === 'draft' ? 'Saved ' + bcPlural(done, 'draft', 'drafts') + ' in Gmail. Send them from your Drafts folder.'
+                            : 'Sent to ' + bcPlural(done, 'family', 'families') + '.');
+      var skippedNoAddr = d.skipped.filter(function (x) { return x.reason === 'no email address'; }).length;
+      if (skippedNoAddr) msg += ' ' + bcPlural(skippedNoAddr, 'family has', 'families have') + ' no address on file.';
+      if (d.failed.length || d.remaining.length) {
+        var left = d.failed.length + d.remaining.length;
+        bcStatus(msg + ' ' + bcPlural(left, 'family', 'families') + ' still to go' +
+          (d.failed.length ? ' (Gmail refused ' + d.failed.length + ')' : '') +
+          '. Press the button again to finish; families already done are skipped.', 'err');
+        loadBroadcast(false);
+        return;
+      }
+      // Finished. A fresh id and an empty form, so an accidental second
+      // press cannot send this message again under a new id.
+      bcClearDraft();
+      bc.id = newBroadcastId();
+      bc.ticked = {};
+      bc.previewSig = null;
+      bc.previewKey = '';
+      $('bc-subject').value = '';
+      $('bc-body').value = BC_TEMPLATE;
+      $('bc-preview').innerHTML = '';
+      loadBroadcast(false).then(function () { bcStatus(msg, 'ok'); });
+      bcStatus(msg, 'ok');
+    }).catch(function () {
+      // The script may well have run: Apps Script loses answers on the way
+      // back. Ask the backend who is marked sent for THIS id, then say so.
+      bc.busy = false;
+      if (mode === 'test') {
+        bcStatus('No answer came back. Check your inbox; the test may still have arrived.', 'err');
+        bcUpdateButtons();
+        return;
+      }
+      bcStatus('No answer came back. Checking which families were sent…', 'err');
+      loadBroadcast(false).then(function () {
+        var sent = bc.families.filter(function (f) { return f.sent; }).length;
+        var left = bcTickedKeys().length;
+        bcStatus('No answer came back, but ' + bcPlural(sent, 'family is', 'families are') + ' marked sent for this message. ' +
+          (left ? 'Press the button again to reach the other ' + bcPlural(left, 'family', 'families') + '; nobody gets it twice.'
+                : 'Nobody ticked is left to send to.'), sent ? 'ok' : 'err');
+      });
+    });
+  }
+
+  $('bc-audience').addEventListener('change', function () {
+    bc.audience = this.value;
+    bcDisarm(); bcSaveDraft();
+    loadBroadcast(!!bc.previewSig && bcHasText());
+  });
+  $('bc-students').addEventListener('change', function () {
+    bcDisarm(); bcSaveDraft();
+    loadBroadcast(!!bc.previewSig && bcHasText());
+  });
+  ['bc-subject', 'bc-body'].forEach(function (id) {
+    $(id).addEventListener('input', function () { bcDisarm(); bcSaveDraft(); bcUpdateButtons(); });
+  });
+  $('bc-recipients').addEventListener('change', function (e) {
+    var key = e.target && e.target.getAttribute('data-key');
+    if (!key) return;
+    bc.ticked[key] = e.target.checked;
+    e.target.closest('.bc-row').classList.toggle('is-off', !e.target.checked);
+    bcDisarm(); bcRenderCount(); bcUpdateButtons();
+  });
+  $('bc-recipients').addEventListener('click', function (e) {
+    var btn = e.target.closest && e.target.closest('[data-preview]');
+    if (!btn) return;
+    bc.previewKey = btn.getAttribute('data-preview');
+    if (bcHasText()) { bcStatus(''); loadBroadcast(true); }
+    else bcStatus('Write a subject and message first, then click a name to see that family’s version.');
+  });
+  $('bc-preview-btn').addEventListener('click', function () {
+    if (!bcHasText()) { bcStatus('Write a subject and a message first.', 'err'); return; }
+    bcDisarm(); bcStatus('');
+    loadBroadcast(true);
+  });
+  $('bc-test-btn').addEventListener('click', function () { bcSend('test'); });
+  $('bc-draft-btn').addEventListener('click', function () { bcSend('draft'); });
+  $('bc-send-btn').addEventListener('click', function () {
+    if (!bc.armed) {
+      bc.armed = true;
+      bcUpdateButtons();
+      bcStatus(bc.rehearsal ? 'Press again: each family’s copy comes to you, marked [Rehearsal]. Nobody else gets anything.'
+                            : 'Press again to send. Each family gets its own email, right away.');
+      return;
+    }
+    bcSend('send');
   });
 })();
 </script>

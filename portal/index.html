@@ -5432,11 +5432,26 @@ window.Portal = {
   // keeps a new student's home bare until Luca has reviewed their
   // diagnostic.
   var RESOURCES_LOCK_DAYS = 3;
-  function isGrantedLocked() {
+  /* ═══ THE SESSION LOCK ═══ decided server-side from Luca's calendar (see
+     portalAccessFor_ in emails.gs) and carried on the sign-in payload as
+     portalLocked. Nothing but the diagnostic opens until a session is on
+     the calendar, and it closes again a few weeks after the last one. It
+     rides on the new-key hold below rather than being a second system:
+     every screen, card and sidebar item that already waits on that hold
+     waits on this too. Home says which of the two it is. */
+  function isSessionLocked() {
+    return !!(currentStudent && currentStudent.portalLocked);
+  }
+  // The original new-key hold on its own: the first RESOURCES_LOCK_DAYS
+  // after first login, while Luca reviews the diagnostic.
+  function isNewKeyHold() {
     if (!currentStudent || !currentStudent.grantedAt) return false;
     var grantedMs = Date.parse(currentStudent.grantedAt);
     if (isNaN(grantedMs)) return false;
     return ((Date.now() - grantedMs) / (24 * 60 * 60 * 1000)) < RESOURCES_LOCK_DAYS;
+  }
+  function isGrantedLocked() {
+    return isSessionLocked() || isNewKeyHold();
   }
 
   // NOTE: do NOT send diagnostic emails client-side (e.g. EmailJS). Its keys
@@ -5811,9 +5826,24 @@ window.Portal = {
     var hasCompletedADiagnostic = !!(currentStudent && currentStudent.satTaken);
     var needsDiagnostic = isTestPrep && !hasCompletedADiagnostic;
     var processing = hasCompletedADiagnostic && isGrantedLocked();
+    var sessionLocked = isSessionLocked();
+    var lapsed = sessionLocked && currentStudent.portalLockReason === 'lapsed';
     if (needsDiagnostic) {
-      subEl.textContent = 'You still need to take your diagnostic before you can access other features.';
+      subEl.textContent = sessionLocked
+        ? (lapsed ? 'Your portal is paused until your next session is scheduled. You can still take your diagnostic.'
+                  : 'The rest of your portal opens once your first session is scheduled. While you wait, take your free diagnostic.')
+        : 'You still need to take your diagnostic before you can access other features.';
       ctaBtn.style.display = '';
+      emptyEl.style.display = 'block';
+      dashboardEl.style.display = 'none';
+    } else if (sessionLocked) {
+      subEl.textContent = lapsed
+        ? 'Your portal is paused until your next session is scheduled. Questions? Text Luca at ' + LUCA_CONTACT.phoneDisplay + '.'
+        : (hasCompletedADiagnostic ? 'Thanks for taking your diagnostic. ' : '') +
+          'The rest of your portal opens once your first session is scheduled.' +
+          (hasCompletedADiagnostic && isTestPrep && !isNewKeyHold() ? ' Your diagnostic results are under Practice Tests.' : '') +
+          ' Questions? Text Luca at ' + LUCA_CONTACT.phoneDisplay + '.';
+      ctaBtn.style.display = 'none';
       emptyEl.style.display = 'block';
       dashboardEl.style.display = 'none';
     } else if (processing) {
@@ -5966,7 +5996,7 @@ window.Portal = {
     var hasCompletedADiagnostic = !!(currentStudent && currentStudent.satTaken);
     var diagnosticOnly = isTestPrep && !hasCompletedADiagnostic;
     if (resCard) resCard.style.display = isTestPrep ? '' : 'none';
-    if (filesCard) filesCard.style.display = diagnosticOnly ? 'none' : '';
+    if (filesCard) filesCard.style.display = (diagnosticOnly || isSessionLocked()) ? 'none' : '';
     if (resCard) resCard.style.display = diagnosticOnly ? 'none' : (isTestPrep ? '' : 'none');
 
     // SAT Resources also stays locked for a new key's first
@@ -5995,7 +6025,7 @@ window.Portal = {
   function applyResourcesGating() {
     var showSat = !!(currentStudent && currentStudent.showSat);
     var vocabCard = document.querySelector('.menu-card[data-route="vocab"]');
-    if (vocabCard) vocabCard.style.display = showSat ? '' : 'none';
+    if (vocabCard) vocabCard.style.display = (showSat && !isSessionLocked()) ? '' : 'none';
   }
 
   /* ═══ SIDEBAR GATING ═══ same rules as applyTestPrepGating(), re-derived
@@ -6012,12 +6042,17 @@ window.Portal = {
       var el = document.getElementById(id);
       if (el) el.style.display = hidden ? 'none' : '';
     }
-    setNav('sidebar-files', diagnosticOnly);
+    var sessionLocked = isSessionLocked();
+    setNav('sidebar-files', diagnosticOnly || sessionLocked);
+    setNav('sidebar-calendar', sessionLocked);
     // Practice Tests holds the diagnostic (see renderPracticeTestList()), so
     // it stays reachable for any test-prep student who hasn't taken it.
     // After the diagnostic, the numbered tests fall under the new-key hold
     // like SAT Resources and Your Overview.
-    setNav('sidebar-practice-tests', !isTestPrep || (hasCompletedADiagnostic && grantedLocked));
+    // During the session lock (but past the new-key hold) Practice Tests
+    // stays reachable for the diagnostic and its results alone; see
+    // renderPracticeTestList().
+    setNav('sidebar-practice-tests', !isTestPrep || (hasCompletedADiagnostic && isNewKeyHold()));
     setNav('sidebar-vocab', resourcesHidden || !showSat);
     setNav('sidebar-incorrect-questions', resourcesHidden);
     setNav('sidebar-challenge-questions', resourcesHidden || !showSat);
@@ -6058,7 +6093,9 @@ window.Portal = {
       targetScore: data.targetScore || null,
       driveFolderUrl: data.driveFolderUrl || '',
       accomTimeMult: data.accomTimeMult || null,
-      accomBreakMult: data.accomBreakMult || null
+      accomBreakMult: data.accomBreakMult || null,
+      portalLocked: !!data.portalLocked,
+      portalLockReason: data.portalLockReason || ''
     };
     var changed = Object.keys(next).some(function (k) { return currentStudent[k] !== next[k]; });
     if (!changed) return;
@@ -6078,6 +6115,12 @@ window.Portal = {
     renderTestCountdown();
     renderNavProfile();
     applySidebarGating();
+    // Locked while standing on a screen the lock now hides (a reload restores
+    // the last screen): back to Home, which says why.
+    if (isSessionLocked() && activeScreenId && activeScreenId !== 'screen-menu' && SIDEBAR_SCREENS[activeScreenId]) {
+      var navHere = SIDEBAR_NAV_FOR_SCREEN[activeScreenId];
+      if (!navAllowed(navHere)) show('screen-menu');
+    }
     // The rest of the home is only worth rebuilding if they are looking at
     // it; every other screen re-derives on its way in through show().
     if (activeScreenId === 'screen-menu') {
@@ -6261,6 +6304,8 @@ window.Portal = {
       guardianName: data.guardianName || null,
       guardianEmail: data.guardianEmail || null,
       targetScore: data.targetScore || null,
+      portalLocked: !!data.portalLocked,
+      portalLockReason: data.portalLockReason || '',
       tests: data.tests || [],
       assignments: data.assignments || []
     };
@@ -8845,7 +8890,25 @@ window.Portal = {
      One dispatcher shared by the sidebar, top-bar search results, and
      right-rail quick links, all routing into the same screens as the
      .menu-card handler above. */
+  /* Every route into a screen goes through navigateTo -- the sidebar, the
+     top-bar search, Home's shortcuts -- so the gate lives here, not only in
+     which sidebar items are drawn. (The search used to reach the Question
+     Bank for a student whose sidebar hid it.) A destination is allowed
+     exactly when its sidebar item is shown; the diagnostic, which lives in
+     Practice Tests, whenever it has not been taken. */
+  function navAllowed(nav) {
+    if (!nav || nav === 'home') return true;
+    if (!currentStudent) return true;
+    applySidebarGating();
+    if (nav === 'diagnostic') {
+      if (currentStudent.showSat && !currentStudent.satTaken) return true;
+      nav = 'practice-tests';
+    }
+    var sb = document.getElementById('sidebar-' + nav);
+    return !sb || sb.style.display !== 'none';
+  }
   function navigateTo(nav) {
+    if (!navAllowed(nav)) { show('screen-menu'); return; }
     if (nav === 'home') { show('screen-menu'); }
     else if (nav === 'calendar') { show('screen-calendar'); if (window.calendarModuleInit) window.calendarModuleInit(); }
     else if (nav === 'files') { renderResources(); show('screen-resources'); }
@@ -9488,6 +9551,16 @@ window.Portal = {
       lockedNote.className = 'panel-sub pt-locked-note';
       lockedNote.textContent = 'Complete your diagnostic above to unlock Practice Tests 1–' + tests.length + '.';
       list.appendChild(lockedNote);
+      return;
+    }
+    // The session lock: the diagnostic (and its results) above, nothing else.
+    if (isTestPrep && isSessionLocked()) {
+      var sessionNote = document.createElement('p');
+      sessionNote.className = 'panel-sub pt-locked-note';
+      sessionNote.textContent = 'Practice Tests 1–' + tests.length +
+        (currentStudent.portalLockReason === 'lapsed' ? ' open again once your next session is scheduled.'
+                                                      : ' open once your first session is scheduled.');
+      list.appendChild(sessionNote);
       return;
     }
     var done = practiceTestResultsById();
