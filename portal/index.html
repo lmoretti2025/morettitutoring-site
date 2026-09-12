@@ -1728,25 +1728,10 @@
   .pb-empty-saved .pb-empty-title { font-family: var(--display); font-size: 1.15rem; font-weight: 700; color: var(--text); }
   .pb-empty-saved .pb-empty-sub { font-size: 0.82rem; color: var(--mid); max-width: 30rem; }
 
-  /* ═══ CHECKBOX DROPDOWNS ═══ used by My Incorrect Questions' filters: a
-     button with a one-line summary ("All" / "3 of 8 selected") that opens
-     a checkbox panel below it. */
-  /* One row: the single "Filters" dropdown + the red practice-launch
-     button — see #iq-filters below. */
-  #iq-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem 0.9rem; margin: 1.1rem 0 0.4rem; }
-  #iq-filters .iq-dropdown { margin-bottom: 0; }
-  /* Domain and Skill can run to dozens of entries, so they scroll inside
-     the panel rather than becoming a wall of chips. */
-  .iq-checklist { max-height: 148px; overflow-y: auto; scrollbar-gutter: stable; border: 1px solid var(--border); border-radius: 10px; padding: 0.25rem; }
-  .iq-checklist .iq-dropdown-option { border-radius: 7px; }
-  .iq-filter-panel { width: min(370px, calc(100vw - 3rem)); max-height: min(72vh, 560px); overflow-y: auto; }
-  #iq-filters { display: flex; }
   .qb-selection-bar .iq-practice-btn { white-space: nowrap; }
 
-  .iq-filters-badge { background: var(--red); color: #fff; border-radius: 999px; padding: 0.05rem 0.42rem; font-size: 0.68rem; font-weight: 700; }
   /* Kept from the retired flyout: the note a category shows when its list
      is empty (a section with no mistakes in it, say). */
-  .iq-filter-section-empty { font-size: 0.78rem; color: var(--faint); padding: 0.3rem 0.55rem; }
   /* Inside the floating bar now, so it takes .qb-start-btn's white-on-dark
      treatment; only the disabled state is still its own. */
   .iq-practice-btn:disabled { opacity: 0.5; cursor: default; }
@@ -2024,31 +2009,17 @@
   .qb-skills-back { display: inline-block; font-family: var(--hel); font-size: 0.78rem; font-weight: 700; color: var(--mid); text-decoration: none; margin-bottom: 0.9rem; transition: color 0.15s var(--ease); }
   .qb-skills-back:hover { color: var(--red); }
 
-  /* Filters here are the .qb-filterbar chips built in renderFilters().
-     Saved & Mistakes still uses the .iq-dropdown* component for its own
-     much longer filter lists. */
+  /* Practice choices (difficulty, source, show, round length) live in the
+     shared set-up menu (portalSetupMenu), drawn with .qb-chip / .qb-seg. */
   /* Flat, white, borderless: filter pills are a light-gray fill (see the
      .qb-toolbar .iq-dropdown-btn override below), and "Practice all
      topics" and the table are separated only by hairlines. */
   /* ═══ FILTER BAR ═══ replaces the three dropdowns. Everything a filter
      knows is now visible without opening anything, and changing one is a
      single click instead of open-click-close. */
-  .qb-filterbar { display: flex; align-items: center; gap: 0.7rem; margin-bottom: 1.1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
-  .qb-filter-menu { position: relative; }
-  .qb-filter-btn { display: inline-flex; align-items: center; gap: 0.45rem; font-family: var(--hel); font-size: 0.78rem; font-weight: 600; color: var(--text); background: rgba(17,17,17,0.045); border: none; border-radius: 999px; padding: 0.5rem 0.95rem; cursor: pointer; transition: background 0.18s var(--ease); }
-  .qb-filter-btn:hover, .qb-filter-menu.open .qb-filter-btn { background: rgba(17,17,17,0.08); }
-  .qb-filter-btn svg { width: 14px; height: 14px; }
   /* [hidden] loses to an explicit display, so it needs saying here — the
      badge was rendering a "0" on a screen with no filters set. */
-  .qb-filter-count[hidden] { display: none; }
-  .qb-filter-count { display: inline-flex; align-items: center; justify-content: center; min-width: 17px; height: 17px; padding: 0 5px; border-radius: 999px; background: var(--red); color: #fff; font-size: 0.62rem; font-weight: 700; }
-  .qb-filter-panel { position: absolute; top: calc(100% + 8px); left: 0; z-index: 50; display: none; width: min(340px, calc(100vw - 3rem)); background: var(--white); border-radius: 16px; box-shadow: 0 16px 44px rgba(17,17,17,0.16); padding: 1rem 1.1rem 0.85rem; }
-  .qb-filter-menu.open .qb-filter-panel { display: block; transform-origin: top left; animation: iqPanelIn 0.22s var(--ease); }
-  .qb-filter-row { display: flex; flex-direction: column; gap: 0.45rem; margin-bottom: 0.9rem; }
-  .qb-filter-foot { display: flex; align-items: center; gap: 0.6rem; padding-top: 0.3rem; border-top: 1px solid var(--border); margin-top: 0.2rem; }
-  .qb-filter-done { margin-left: auto; border: none; background: var(--text); color: #fff; font-family: var(--hel); font-size: 0.72rem; font-weight: 700; border-radius: 999px; padding: 0.45rem 1.1rem; cursor: pointer; transition: background 0.18s var(--ease); }
-  .qb-filter-done:hover { background: var(--red); }
-  @media (prefers-reduced-motion: reduce) { .qb-filter-menu.open .qb-filter-panel { animation: none; } }
+  @media (prefers-reduced-motion: reduce) {  }
   .qb-filter-lab { font-family: var(--hel); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; color: var(--faint); }
   .qb-chips { display: flex; gap: 0.35rem; }
   .qb-chip { border: 1px solid var(--border); background: var(--white); color: var(--mid); font-family: var(--hel); font-size: 0.75rem; font-weight: 600; border-radius: 999px; padding: 0.36rem 0.8rem; cursor: pointer; transition: background 0.18s var(--ease), color 0.18s var(--ease), border-color 0.18s var(--ease), transform 0.18s cubic-bezier(0.22,1.1,0.32,1); }
@@ -2062,9 +2033,6 @@
   .qb-seg-btn:hover { color: var(--text); }
   .qb-seg-btn.active { color: var(--text); }
   .qb-seg .mta-fluid-ind { background: var(--white); box-shadow: 0 1px 3px rgba(17,17,17,0.16); }
-  .qb-filter-reset[hidden] { display: none; }
-  .qb-filter-reset { border: none; background: none; font-family: var(--hel); font-size: 0.72rem; font-weight: 600; color: var(--red); cursor: pointer; padding: 0.3rem 0; }
-  .qb-filter-reset:hover { text-decoration: underline; }
 
   .qb-selection-dot { opacity: 0.45; margin: 0 0.45rem; }
   #qb-selection-q { font-variant-numeric: tabular-nums; }
@@ -2166,22 +2134,9 @@
      the same way. */
   @keyframes iqPanelIn { from { opacity: 0; transform: translateY(-6px) scale(0.985); } to { opacity: 1; transform: none; } }
   @media (prefers-reduced-motion: reduce) {  }
-  .iq-dropdown-option { display: flex; align-items: center; gap: 0.65rem; padding: 0.55rem 0.6rem; border-radius: 10px; cursor: pointer; font-family: var(--hel); font-size: 0.82rem; color: var(--text); transition: background 0.12s var(--ease); }
-  .iq-dropdown-option:hover { background: var(--bg); }
   /* Custom rounded checkbox — replaces the native square one so every
      dropdown in the app shares the same soft, modern checkmark style
      (same pattern as This Week's checklist on Home). */
-  .iq-dropdown-option input[type="checkbox"] {
-    appearance: none; -webkit-appearance: none; flex-shrink: 0; width: 18px; height: 18px; border-radius: 6px;
-    border: 1.5px solid var(--border); background: var(--white); position: relative; cursor: pointer;
-    transition: background 0.12s var(--ease), border-color 0.12s var(--ease);
-  }
-  .iq-dropdown-option input[type="checkbox"]:checked { background: var(--red); border-color: var(--red); }
-  .iq-dropdown-option input[type="checkbox"]:checked::after {
-    content: ''; position: absolute; left: 5px; top: 1px; width: 5px; height: 10px;
-    border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg);
-  }
-  .iq-dropdown-option-all { border-bottom: 1px solid var(--border); margin-bottom: 0.3rem; padding-bottom: 0.7rem; font-weight: 700; }
   .pb-empty-note { font-size: 0.8rem; color: var(--mid); margin-top: 0.4rem; }
 
   /* pb-q-meta/pb-passage/pb-q-card/pb-q-text/pb-note(+variants)/
@@ -4272,29 +4227,6 @@ window.Portal = {
         <button type="button" class="iq-tab" data-tab="saved" id="iq-tab-saved">Saved Questions</button>
       </div>
 
-      <!-- Same filter control as the Question Bank: one button, one panel, all
-           options visible. Short lists are chips; Domain and Skill are
-           checkbox lists because they run to dozens of entries. -->
-      <div id="iq-filters">
-        <div class="qb-filter-menu" id="iq-filter-menu">
-          <button type="button" class="qb-filter-btn" id="iq-filters-btn" aria-expanded="false" aria-haspopup="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M7 12h10M11 18h2"/></svg>
-            <span>Filters</span>
-            <span class="qb-filter-count" id="iq-filters-badge" hidden></span>
-          </button>
-          <div class="qb-filter-panel iq-filter-panel" id="iq-filter-panel">
-            <div class="qb-filter-row"><span class="qb-filter-lab">Source</span><div class="qb-chips" id="iq-test-pills"></div></div>
-            <div class="qb-filter-row"><span class="qb-filter-lab">Section</span><div class="qb-chips" id="iq-section-pills"></div></div>
-            <div class="qb-filter-row"><span class="qb-filter-lab">Difficulty</span><div class="qb-chips" id="iq-difficulty-pills"></div></div>
-            <div class="qb-filter-row"><span class="qb-filter-lab">Domain</span><div class="iq-checklist" id="iq-domain-pills"></div></div>
-            <div class="qb-filter-row"><span class="qb-filter-lab">Skill</span><div class="iq-checklist" id="iq-skill-pills"></div></div>
-            <div class="qb-filter-foot">
-              <button type="button" class="qb-filter-reset" id="iq-filter-reset" hidden>Reset</button>
-              <button type="button" class="qb-filter-done" id="iq-filter-done">Done</button>
-            </div>
-          </div>
-        </div>
-      </div>
       <div class="vp-pool-count" id="iq-pool-count"></div>
     </div>
 
@@ -4530,48 +4462,6 @@ window.Portal = {
 
   <div class="panel-wide" id="qb-skills-view" style="display:none;">
     <a href="#" class="qb-skills-back" id="qb-skills-back">&larr; Question Bank</a>
-    <div class="vp-head">
-      <h1 class="panel-hed" id="qb-skills-hed">Reading &amp; Writing</h1>
-      <p class="panel-sub">Progress and accuracy are tracked per skill, on this device.</p>
-    </div>
-
-    <!-- Filters are chips you toggle (so the current state is visible), plus
-         a segmented control for the one exclusive choice. -->
-    <!-- One button, one panel. The button carries a summary so the active
-         filters are visible without opening it. -->
-    <div class="qb-filterbar">
-      <div class="qb-filter-menu" id="qb-filter-menu">
-        <button type="button" class="qb-filter-btn" id="qb-filter-btn" aria-expanded="false" aria-haspopup="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M7 12h10M11 18h2"/></svg>
-          <span id="qb-filter-btn-lab">Filters</span>
-          <span class="qb-filter-count" id="qb-filter-count" hidden></span>
-        </button>
-        <div class="qb-filter-panel" id="qb-filter-panel">
-          <div class="qb-filter-row">
-            <span class="qb-filter-lab">Difficulty</span>
-            <div class="qb-chips" id="qb-diff-chips"></div>
-          </div>
-          <div class="qb-filter-row" id="qb-source-group" style="display:none;">
-            <span class="qb-filter-lab">Source</span>
-            <div class="qb-chips" id="qb-source-chips"></div>
-          </div>
-          <div class="qb-filter-row">
-            <span class="qb-filter-lab">Show</span>
-            <div class="qb-seg" id="qb-completed-seg"></div>
-          </div>
-          <!-- How many questions the round itself should be. "All" means
-               every question the selected topics hold under these filters. -->
-          <div class="qb-filter-row">
-            <span class="qb-filter-lab">Session length</span>
-            <div id="qb-size-slider"></div>
-          </div>
-          <div class="qb-filter-foot">
-            <button type="button" class="qb-filter-reset" id="qb-filter-reset" hidden>Reset</button>
-            <button type="button" class="qb-filter-done" id="qb-filter-done">Done</button>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <!-- Topics are cards: the whole card is the click target, selection is
          the card's fill, and the numbers sit on the card they describe. -->
@@ -14168,34 +14058,18 @@ window.Portal = {
   }
 
   var records = [];          // flattened from the backend fetch — reloaded every time the screen opens
-  var sectionKeys = [];
-  var domainsBySection = {}; // sectionKey -> [domain, ...]
-  var skillsByDomain = {};   // domain -> [skill, ...]
-  var testKeys = [];         // distinct test labels ("Diagnostic", "Practice Test 1", ...)
-
-  var selSections = [], selDomains = [], selSkills = [], selDifficulties = [], selTests = [];
+  /* Opened from Home or a score report with one skill or domain in mind:
+     the list shows just those until "Show all". Everything else is chosen
+     in the practice set-up menu (openIqSetup). */
+  var focus = null;          // { skill } | { domain } | null
   // Per-question self-quiz progress for this visit: { [record key]:
   // { chosenIndex } for mc, or { rawAnswer, correct } for fr }. In-memory
   // only, since it's not a scored attempt. Keyed by record key so it
   // survives renderList() rebuilding the DOM.
   var quizState = {};
-  // The currently open dropdown, if any: opening one closes others, and
-  // outside clicks close it. Checked on 'mousedown', before a checkbox's
-  // click/change rebuilds the panel DOM, so a checkbox click is never
-  // misread as "outside."
-  var openDropdown = null;
-  function closeDropdown() {
-    if (openDropdown) openDropdown.classList.remove('open');
-    openDropdown = null;
-  }
-  document.addEventListener('mousedown', function (e) {
-    if (openDropdown && !openDropdown.contains(e.target)) closeDropdown();
-  });
-  var listEl, poolCountEl, sectionPillsEl, domainPillsEl, skillPillsEl, difficultyPillsEl, testPillsEl, practiceBtnEl, practiceCountEl, filtersEl, tabSavedEl, tabMistakesEl, tabMistakesCountEl;
+  var listEl, poolCountEl, practiceBtnEl, practiceCountEl, tabSavedEl, tabMistakesEl, tabMistakesCountEl;
   var initialized = false;
-  // 'saved' | 'mistakes' — which tab is showing. Saved Questions skips the
-  // filter bar (it's already a curated list, not a "build a session"
-  // screen) — #iq-filters only shows on Mistakes.
+  // 'saved' | 'mistakes', which tab is showing.
   var activeTab = 'mistakes';
   var SECTION_ORDER = ['reading-writing', 'math'];
   // A record is a "mistake" if it came from incorrectQuestions (savedCorrect
@@ -14281,203 +14155,15 @@ window.Portal = {
     });
   }
 
-  function rebuildTaxonomy() {
-    sectionKeys = [];
-    domainsBySection = {};
-    skillsByDomain = {};
-    testKeys = [];
-    // Filter options only need to cover the Mistakes Log — Saved Questions
-    // has no filter bar (see baseRecords() above).
-    mistakeRecords().forEach(function (r) {
-      if (sectionKeys.indexOf(r.sectionKey) === -1) sectionKeys.push(r.sectionKey);
-      if (!domainsBySection[r.sectionKey]) domainsBySection[r.sectionKey] = [];
-      if (domainsBySection[r.sectionKey].indexOf(r.domain) === -1) domainsBySection[r.sectionKey].push(r.domain);
-      if (!skillsByDomain[r.domain]) skillsByDomain[r.domain] = [];
-      if (skillsByDomain[r.domain].indexOf(r.skill) === -1) skillsByDomain[r.domain].push(r.skill);
-      if (testKeys.indexOf(r.testLabel) === -1) testKeys.push(r.testLabel);
-    });
-    // Diagnostic first, then Practice Test 1, 2, 3… in numeric order —
-    // not alphabetical, which would put "Practice Test 10" before
-    // "Practice Test 2".
-    testKeys.sort(function (a, b) {
+  // "Diagnostic", then Practice Test 1, 2, 3... in number order ("10" after "9").
+  function sortTestLabels(list) {
+    return list.sort(function (a, b) {
       var na = /(\d+)\s*$/.exec(a), nb = /(\d+)\s*$/.exec(b);
       if (!na && !nb) return a.localeCompare(b);
       if (!na) return -1;
       if (!nb) return 1;
       return Number(na[1]) - Number(nb[1]);
     });
-  }
-
-  // Cascading options, same rule as the Question Practice module: a level
-  // falls back to the full list whenever nothing's chosen at the level
-  // above it.
-  function availableDomains() {
-    var sections = selSections.length ? selSections : sectionKeys;
-    var out = [];
-    sections.forEach(function (s) { (domainsBySection[s] || []).forEach(function (d) { if (out.indexOf(d) === -1) out.push(d); }); });
-    return out;
-  }
-  function availableSkills() {
-    var domains = selDomains.length ? selDomains : Object.keys(skillsByDomain);
-    var out = [];
-    domains.forEach(function (d) { (skillsByDomain[d] || []).forEach(function (s) { if (out.indexOf(s) === -1) out.push(s); }); });
-    return out;
-  }
-
-  // Checkbox list: one "All" plus one per option, written into `container`.
-  // Used for all five filter categories, which share one "Filters" dropdown
-  // (#iq-filters-dropdown), so this builds only the rows, no button/panel.
-  function renderCheckboxOptions(container, options, labelFn, selectedArr, onChange, summaryId) {
-    container.innerHTML = '';
-    if (summaryId) {
-      var summaryEl = document.getElementById(summaryId);
-      if (summaryEl) {
-        summaryEl.textContent = options.length === 0 ? 'None available'
-          : selectedArr.length === options.length ? 'All'
-          : selectedArr.length === 0 ? 'None'
-          : selectedArr.length + ' of ' + options.length;
-      }
-    }
-
-    if (!options.length) {
-      var empty = document.createElement('div');
-      empty.className = 'iq-filter-section-empty';
-      empty.textContent = 'None available';
-      container.appendChild(empty);
-      return;
-    }
-
-    if (options.length > 1) {
-      var allRow = document.createElement('label');
-      allRow.className = 'iq-dropdown-option iq-dropdown-option-all';
-      var allCb = document.createElement('input');
-      allCb.type = 'checkbox';
-      allCb.checked = selectedArr.length === options.length;
-      allCb.addEventListener('change', function () {
-        selectedArr.splice(0, selectedArr.length);
-        if (allCb.checked) options.forEach(function (o) { selectedArr.push(o); });
-        onChange();
-      });
-      allRow.appendChild(allCb);
-      allRow.appendChild(document.createTextNode('All'));
-      container.appendChild(allRow);
-    }
-
-    options.forEach(function (opt) {
-      var row = document.createElement('label');
-      row.className = 'iq-dropdown-option';
-      var cb = document.createElement('input');
-      cb.type = 'checkbox';
-      cb.checked = selectedArr.indexOf(opt) !== -1;
-      cb.addEventListener('change', function () {
-        var i = selectedArr.indexOf(opt);
-        if (cb.checked) { if (i === -1) selectedArr.push(opt); }
-        else if (i !== -1) selectedArr.splice(i, 1);
-        onChange();
-      });
-      row.appendChild(cb);
-      row.appendChild(document.createTextNode(labelFn(opt)));
-      container.appendChild(row);
-    });
-  }
-
-  // Badge on the "Filters" button showing how many categories are narrowed
-  // (not "All").
-  function updateFiltersBadge() {
-    var badge = document.getElementById('iq-filters-badge');
-    if (!badge) return;
-    var narrowed = 0;
-    if (selTests.length && selTests.length < testKeys.length) narrowed++;
-    if (selSections.length && selSections.length < sectionKeys.length) narrowed++;
-    if (selDomains.length && selDomains.length < availableDomains().length) narrowed++;
-    if (selSkills.length && selSkills.length < availableSkills().length) narrowed++;
-    if (selDifficulties.length && selDifficulties.length < DIFFICULTIES.length) narrowed++;
-    badge.textContent = String(narrowed);
-    badge.hidden = narrowed === 0;
-    var resetEl = document.getElementById('iq-filter-reset');
-    if (resetEl) resetEl.hidden = narrowed === 0;
-  }
-
-  /* Chips, for the filters whose whole option list fits on a line or two —
-     the same control the Question Bank uses, so both screens filter the
-     same way. Domain and Skill keep checkbox lists (renderCheckboxOptions
-     below): dozens of entries do not become chips, they become a wall. */
-  function renderChipOptions(container, options, labelFn, selectedArr, onChange) {
-    if (!container) return;
-    container.innerHTML = '';
-    if (!options.length) {
-      var empty = document.createElement('div');
-      empty.className = 'iq-filter-section-empty';
-      empty.textContent = 'None available';
-      container.appendChild(empty);
-      return;
-    }
-    options.forEach(function (opt) {
-      var b = document.createElement('button');
-      b.type = 'button';
-      var on = selectedArr.indexOf(opt) !== -1;
-      b.className = 'qb-chip' + (on ? ' on' : '');
-      b.textContent = labelFn(opt);
-      b.setAttribute('aria-pressed', on ? 'true' : 'false');
-      b.addEventListener('click', function () {
-        var i = selectedArr.indexOf(opt);
-        // Never all-off: an empty filter shows nothing, which reads as a
-        // broken screen rather than as a filter.
-        if (i === -1) selectedArr.push(opt);
-        else if (selectedArr.length > 1) selectedArr.splice(i, 1);
-        else return;
-        var nowOn = selectedArr.indexOf(opt) !== -1;
-        b.classList.toggle('on', nowOn);
-        b.setAttribute('aria-pressed', nowOn ? 'true' : 'false');
-        onChange();
-      });
-      container.appendChild(b);
-    });
-  }
-
-  // Everything at once, for the paths that change several filters (Reset,
-  // a preset arriving from Home or a score report).
-  function renderAllFilters() {
-    renderSectionPills();
-    renderDomainPills();
-    renderSkillPills();
-    renderDifficultyPills();
-    renderTestPills();
-    updateFiltersBadge();
-  }
-
-  function renderSectionPills() {
-    renderChipOptions(sectionPillsEl, sectionKeys, sectionLabelFor, selSections, function () {
-      // Section narrows what Domain and Skill can offer, so those two lists
-      // are rebuilt — the chip just clicked is not, which is what keeps the
-      // panel steady under the cursor.
-      var newDomains = availableDomains();
-      selDomains = selDomains.filter(function (d) { return newDomains.indexOf(d) !== -1; });
-      onDomainsChanged();
-      updateFiltersBadge();
-    });
-  }
-  function renderDomainPills() {
-    renderCheckboxOptions(domainPillsEl, availableDomains(), function (d) { return d; }, selDomains, function () { onDomainsChanged(); updateFiltersBadge(); });
-  }
-  function onDomainsChanged() {
-    var newSkills = availableSkills();
-    selSkills = selSkills.filter(function (s) { return newSkills.indexOf(s) !== -1; });
-    renderDomainPills();
-    renderSkillPills();
-    renderList();
-  }
-  function renderSkillPills() {
-    renderCheckboxOptions(skillPillsEl, availableSkills(), function (s) { return s; }, selSkills, function () { renderSkillPills(); renderList(); updateFiltersBadge(); });
-  }
-  function renderDifficultyPills() {
-    renderChipOptions(difficultyPillsEl, DIFFICULTIES, difficultyLabel, selDifficulties, function () { renderList(); updateFiltersBadge(); });
-  }
-  // Independent of Section/Domain/Skill's cascade — same as Difficulty —
-  // since "which test was this on" is a separate dimension from the
-  // skill taxonomy, not a level within it.
-  function renderTestPills() {
-    renderChipOptions(testPillsEl, testKeys, function (t) { return t; }, selTests, function () { renderList(); updateFiltersBadge(); });
   }
 
   // Rows come in two formats: practice-test/diagnostic misses (stimulus in
@@ -14729,14 +14415,8 @@ window.Portal = {
 
   function currentFiltered() {
     var base = baseRecords();
-    if (activeTab !== 'mistakes') return base; // Saved Questions ignores the filter bar entirely — it's hidden on this tab
-    return base.filter(function (r) {
-      return selSections.indexOf(r.sectionKey) !== -1 &&
-        selDomains.indexOf(r.domain) !== -1 &&
-        selSkills.indexOf(r.skill) !== -1 &&
-        selDifficulties.indexOf(r.difficulty) !== -1 &&
-        selTests.indexOf(r.testLabel) !== -1;
-    });
+    if (activeTab !== 'mistakes' || !focus) return base;
+    return base.filter(function (r) { return focus.skill ? r.skill === focus.skill : r.domain === focus.domain; });
   }
 
   /* The count is the filtered set on this screen (no per-row picking), so
@@ -14790,13 +14470,11 @@ window.Portal = {
     }
     var filtered = currentFiltered();
     setPracticeCount(filtered.length);
-    if (!filtered.length) {
-      poolCountEl.textContent = 'No questions match these filters.';
-      listEl.innerHTML = '';
-      return;
-    }
-    poolCountEl.textContent = filtered.length + ' question' + (filtered.length === 1 ? '' : 's') +
-      (filtered.length === base.length ? '' : (' shown (of ' + base.length + ' total ' + (activeTab === 'saved' ? 'saved' : 'missed') + ')'));
+    var plural = function (n) { return n + ' question' + (n === 1 ? '' : 's'); };
+    poolCountEl.innerHTML = filtered.length === base.length ? escHtml(plural(filtered.length))
+      : escHtml(plural(filtered.length) + ' in ' + (focus.skill || focus.domain) + ' \u00b7 ') +
+        '<a href="#" class="iq-focus-clear">Show all ' + base.length + '</a>';
+    if (!filtered.length) { listEl.innerHTML = ''; return; }
 
     // Flat, most-recent-first (`filtered` is already sorted by loadRecords),
     // each row showing its section/difficulty as a pill instead of being
@@ -14826,8 +14504,71 @@ window.Portal = {
      the score card's denominator. */
   var runnerReached = null;
 
-  function startPracticeRunner() {
-    runnerQueue = currentFiltered();
+  /* ═══ PRACTICE SET-UP ═══ Practice opens the shared set-up menu (the Rush
+     tab's dialog) over what the list shows: section, source, difficulty,
+     topic and round length. Topics follow the sections chosen. */
+  var IQ_LEN_MIN = 5, IQ_LEN_MAX = 50, IQ_LEN_STEP = 5;       // the last stop is "All"
+  var IQ_LEN_KEY = 'iq_practice_len';
+  function openIqSetup() {
+    var recs = currentFiltered();
+    if (!recs.length || !window.portalSetupMenu) return;
+    function uniq(fn) {
+      var out = [];
+      recs.forEach(function (r) { var v = fn(r); if (v && out.indexOf(v) === -1) out.push(v); });
+      return out;
+    }
+    var sections = SECTION_ORDER.filter(function (k) { return recs.some(function (r) { return r.sectionKey === k; }); });
+    var tests = sortTestLabels(uniq(function (r) { return r.testLabel; }));
+    var diffs = DIFFICULTIES.filter(function (d) { return recs.some(function (r) { return r.difficulty === d; }); });
+    var len = IQ_LEN_MAX;
+    try { var saved = parseInt(localStorage.getItem(IQ_LEN_KEY), 10); if (saved >= IQ_LEN_MIN && saved <= IQ_LEN_MAX) len = saved; } catch (e) {}
+    var state = { sections: sections.slice(), tests: tests.slice(), difficulties: diffs.slice(), domains: null, len: len };
+    function domainsFor(st) {
+      return uniq(function (r) { return st.sections.indexOf(r.sectionKey) !== -1 ? r.domain : null; });
+    }
+    function pool(st) {
+      return recs.filter(function (r) {
+        return st.sections.indexOf(r.sectionKey) !== -1 && st.tests.indexOf(r.testLabel) !== -1 &&
+          st.difficulties.indexOf(r.difficulty) !== -1 && st.domains.indexOf(r.domain) !== -1;
+      });
+    }
+    window.portalSetupMenu({
+      kicker: activeTab === 'saved' ? 'Saved Questions' : 'Mistakes Log',
+      title: 'Set up your practice',
+      go: 'Start practice',
+      state: state,
+      rows: function (st) {
+        // Topics follow the sections: keep the ones still offered, or all of them.
+        var doms = domainsFor(st);
+        st.domains = (st.domains || doms).filter(function (d) { return doms.indexOf(d) !== -1; });
+        if (!st.domains.length) st.domains = doms.slice();
+        var rows = [];
+        if (sections.length > 1) rows.push({ key: 'sections', label: 'Section', type: 'chips', rebuild: true,
+          items: sections.map(function (k) { return { v: k, label: sectionLabelFor(k) }; }) });
+        if (tests.length > 1) rows.push({ key: 'tests', label: 'Source', type: 'chips',
+          items: tests.map(function (t) { return { v: t, label: t }; }) });
+        if (diffs.length > 1) rows.push({ key: 'difficulties', label: 'Difficulty', type: 'chips',
+          items: diffs.map(function (d) { return { v: d, label: difficultyLabel(d) }; }) });
+        if (doms.length > 1) rows.push({ key: 'domains', label: 'Topic', type: 'chips',
+          items: doms.map(function (d) { return { v: d, label: d }; }) });
+        rows.push({ key: 'len', label: 'Round length', type: 'slider', min: IQ_LEN_MIN, max: IQ_LEN_MAX, step: IQ_LEN_STEP,
+          unit: 'questions', format: function (v) { return v >= IQ_LEN_MAX ? 'All' : String(v); } });
+        return rows;
+      },
+      count: function (st) {
+        var n = pool(st).length;
+        return { n: n, take: st.len >= IQ_LEN_MAX ? n : Math.min(n, st.len) };
+      },
+      onChange: function (st) { try { localStorage.setItem(IQ_LEN_KEY, String(st.len)); } catch (e) {} },
+      onGo: function (st) {
+        var q = pool(st);
+        startPracticeRunner(st.len >= IQ_LEN_MAX ? q : q.slice(0, st.len));
+      }
+    });
+  }
+
+  function startPracticeRunner(queue) {
+    runnerQueue = queue || currentFiltered();
     if (!runnerQueue.length) return;
     runnerIndex = 0;
     runnerState = {};
@@ -15126,7 +14867,6 @@ window.Portal = {
     activeTab = tab;
     tabSavedEl.classList.toggle('active', tab === 'saved');
     tabMistakesEl.classList.toggle('active', tab === 'mistakes');
-    filtersEl.style.display = tab === 'mistakes' ? '' : 'none';
     renderList();
   }
 
@@ -15135,55 +14875,21 @@ window.Portal = {
       initialized = true;
       listEl = document.getElementById('iq-list');
       poolCountEl = document.getElementById('iq-pool-count');
-      sectionPillsEl = document.getElementById('iq-section-pills');
-      domainPillsEl = document.getElementById('iq-domain-pills');
-      skillPillsEl = document.getElementById('iq-skill-pills');
-      difficultyPillsEl = document.getElementById('iq-difficulty-pills');
-      testPillsEl = document.getElementById('iq-test-pills');
       practiceBtnEl = document.getElementById('iq-practice-btn');
       practiceCountEl = document.getElementById('iq-practice-count');
-      filtersEl = document.getElementById('iq-filters');
       tabSavedEl = document.getElementById('iq-tab-saved');
       tabMistakesEl = document.getElementById('iq-tab-mistakes');
       tabMistakesCountEl = document.getElementById('iq-tab-mistakes-count');
       practiceBtnEl.addEventListener('click', function () {
         if (practiceBtnEl.disabled) return;
-        startPracticeRunner();
+        openIqSetup();
       });
-      /* The filter menu: one panel, opened by one button, closed by Done,
-         Escape or a click outside. No flyouts and no per-category open
-         state to track — everything in the panel is already visible. */
-      (function () {
-        var menu = document.getElementById('iq-filter-menu');
-        var btnEl = document.getElementById('iq-filters-btn');
-        var doneEl = document.getElementById('iq-filter-done');
-        var resetEl = document.getElementById('iq-filter-reset');
-        function setOpen(open) {
-          menu.classList.toggle('open', open);
-          btnEl.setAttribute('aria-expanded', open ? 'true' : 'false');
-        }
-        btnEl.addEventListener('click', function (e) {
-          e.stopPropagation();
-          closeDropdown();                    // any other dropdown on the screen
-          setOpen(!menu.classList.contains('open'));
-        });
-        doneEl.addEventListener('click', function () { setOpen(false); });
-        document.addEventListener('click', function (e) {
-          if (menu.classList.contains('open') && !menu.contains(e.target)) setOpen(false);
-        });
-        document.addEventListener('keydown', function (e) {
-          if (e.key === 'Escape' && menu.classList.contains('open')) setOpen(false);
-        });
-        resetEl.addEventListener('click', function () {
-          selTests = testKeys.slice();
-          selSections = sectionKeys.slice();
-          selDifficulties = DIFFICULTIES.slice();
-          selDomains = availableDomains();
-          selSkills = availableSkills();
-          renderAllFilters();
-          renderList();
-        });
-      })();
+      poolCountEl.addEventListener('click', function (e) {
+        if (!e.target.closest('.iq-focus-clear')) return;
+        e.preventDefault();
+        focus = null;
+        renderList();
+      });
       tabSavedEl.addEventListener('click', function () { setActiveTab('saved'); });
       tabMistakesEl.addEventListener('click', function () { setActiveTab('mistakes'); });
       wireQuizInteractions();
@@ -15194,7 +14900,7 @@ window.Portal = {
     activeTab = 'mistakes';
     tabSavedEl.classList.toggle('active', activeTab === 'saved');
     tabMistakesEl.classList.toggle('active', activeTab === 'mistakes');
-    filtersEl.style.display = activeTab === 'mistakes' ? '' : 'none';
+    focus = preset && preset.skill ? { skill: preset.skill } : preset && preset.domain ? { domain: preset.domain } : null;
 
     // A shape rather than a sentence — see mtaSkeleton in fluid-ui.js.
     if (window.mtaSkeleton) window.mtaSkeleton(listEl, { rows: 5, height: '52px' });
@@ -15202,19 +14908,9 @@ window.Portal = {
     poolCountEl.textContent = '';
     setPracticeCount(0);
     loadRecords(function () {
-      rebuildTaxonomy();
       tabMistakesCountEl.textContent = mistakeRecords().length;
-      // Default to everything selected so the list is populated on open;
-      // this is a review tool, not a session builder.
-      selSections = sectionKeys.slice();
-      selDomains = availableDomains();
-      if (preset && preset.domain && selDomains.indexOf(preset.domain) !== -1) selDomains = [preset.domain];
-      var skillOptions = availableSkills();
-      selSkills = (preset && preset.skill && skillOptions.indexOf(preset.skill) !== -1) ? [preset.skill] : skillOptions;
-      selDifficulties = DIFFICULTIES.slice();
-      selTests = testKeys.slice();
-
-      renderAllFilters();
+      // A focus that matches nothing (a stale link) falls back to the whole log.
+      if (focus && !currentFiltered().length) focus = null;
       renderList();
     });
   };
@@ -16145,12 +15841,8 @@ window.Portal = {
   // entered (see showSkills()); this is a session builder, so nothing is
   // remembered between visits.
   var selectedDifficulties = ['easy', 'medium', 'hard'];
-  /* Opens on "Not started" rather than "All": this screen builds a practice
-     round, and already-attempted questions are the least useful in one.
-     Named once because four places must agree: the initial value, Reset,
-     the per-visit reset in showSkills(), and the off-default filter badge. */
-  var QB_COMPLETED_DEFAULT = 'not'; // 'all' | 'done' | 'not'
-  var completedFilter = QB_COMPLETED_DEFAULT;
+  // Set by the set-up menu before a round: 'all' | 'not' (not started) | 'done' (started).
+  var qbShow = 'all';
   var selectedSkills = [];
   // All distinct q.source values present in the current subject's pool
   // (e.g. "Non-Bluebook", "August 2026 SAT") — computed fresh each time
@@ -16180,175 +15872,6 @@ window.Portal = {
      control flickers and loses keyboard focus mid-click. */
   var qbFiltersBuilt = null;      // which subject the current bar was built for
   var qbMenuWired = false;        // document-level menu listeners: once only
-  function renderFilters(force) {
-    var diffChips = document.getElementById('qb-diff-chips');
-    var sourceGroup = document.getElementById('qb-source-group');
-    var sourceChips = document.getElementById('qb-source-chips');
-    var seg = document.getElementById('qb-completed-seg');
-    var reset = document.getElementById('qb-filter-reset');
-    if (!diffChips || !seg) return;
-
-    var sources = availableSources(currentSubject);
-    var rebuild = force || qbFiltersBuilt !== currentSubject;
-
-    if (rebuild) {
-      qbFiltersBuilt = currentSubject;
-
-      diffChips.innerHTML = '';
-      ['easy', 'medium', 'hard'].forEach(function (d) {
-        diffChips.appendChild(chip(d.charAt(0).toUpperCase() + d.slice(1), selectedDifficulties, d));
-      });
-
-      if (sources.length < 2) {
-        sourceGroup.style.display = 'none';
-      } else {
-        sourceGroup.style.display = '';
-        sourceChips.innerHTML = '';
-        sources.forEach(function (src) { sourceChips.appendChild(chip(src, selectedSources, src)); });
-      }
-
-      seg.innerHTML = '';
-      [{ value: 'all', label: 'All' },
-       { value: 'not', label: 'Not completed' },
-       { value: 'done', label: 'Started' }].forEach(function (opt) {
-        var b = document.createElement('button');
-        b.type = 'button';
-        b.className = 'qb-seg-btn' + (completedFilter === opt.value ? ' active' : '');
-        b.textContent = opt.label;
-        b.setAttribute('data-value', opt.value);
-        b.addEventListener('click', function () {
-          if (completedFilter === opt.value) return;
-          completedFilter = opt.value;
-          Array.prototype.forEach.call(seg.querySelectorAll('.qb-seg-btn'), function (other) {
-            other.classList.toggle('active', other === b);
-          });
-          syncResetVisibility();
-          renderSkillsList();
-        });
-        seg.appendChild(b);
-      });
-      // The travelling indicator, same component as the sidebar's pill.
-      if (window.mtaFluid) window.mtaFluid.attach(seg, { item: '.qb-seg-btn', mode: 'pill' });
-
-      /* Session length. The track runs 10 up to QB_SIZE_MAX, and its last
-         stop is "All" (the default), since past the top of a slider is
-         unbounded. */
-      var sizeHost = document.getElementById('qb-size-slider');
-      if (sizeHost && window.mtaSlider) {
-        sizeHost.innerHTML = '';
-        var st = window.mtaSlider({
-          min: QB_SIZE_MIN, max: QB_SIZE_MAX, step: QB_SIZE_STEP,
-          value: qbSessionSize === 0 ? QB_SIZE_MAX : qbSessionSize,
-          label: 'questions in this round',
-          unit: 'questions',
-          format: function (v) { return v >= QB_SIZE_MAX ? 'All' : String(v); },
-          onChange: function (v) {
-            qbSessionSize = v >= QB_SIZE_MAX ? 0 : v;
-            try { localStorage.setItem(QB_SIZE_KEY, String(qbSessionSize)); } catch (e) {}
-            syncResetVisibility();
-            renderSelectionBar();     // the bar promises what Start will give
-          }
-        });
-        sizeHost.appendChild(st.el);
-      }
-
-      /* The menu itself. Closes on Done, on Escape, and on a click outside
-         it — but NOT on a click inside, so several filters can be set in
-         one visit. */
-      var menu = document.getElementById('qb-filter-menu');
-      var btn = document.getElementById('qb-filter-btn');
-      var done = document.getElementById('qb-filter-done');
-      function setMenu(open) {
-        menu.classList.toggle('open', open);
-        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-      }
-      // onclick (not addEventListener) so re-building the bar for the other
-      // subject replaces these rather than stacking a second copy.
-      btn.onclick = function (e) { e.stopPropagation(); setMenu(!menu.classList.contains('open')); };
-      done.onclick = function () { setMenu(false); };
-      // The document-level pair is bound ONCE for the life of the page —
-      // the bar is rebuilt per subject, and these would otherwise pile up.
-      if (!qbMenuWired) {
-        qbMenuWired = true;
-        document.addEventListener('click', function (e) {
-          var m = document.getElementById('qb-filter-menu');
-          if (m && m.classList.contains('open') && !m.contains(e.target)) {
-            m.classList.remove('open');
-            var fb = document.getElementById('qb-filter-btn');
-            if (fb) fb.setAttribute('aria-expanded', 'false');
-          }
-        });
-        document.addEventListener('keydown', function (e) {
-          if (e.key !== 'Escape') return;
-          var m = document.getElementById('qb-filter-menu');
-          if (m && m.classList.contains('open')) {
-            m.classList.remove('open');
-            var fb = document.getElementById('qb-filter-btn');
-            if (fb) fb.setAttribute('aria-expanded', 'false');
-          }
-        });
-      }
-
-      reset.onclick = function () {
-        selectedDifficulties.length = 0;
-        ['easy', 'medium', 'hard'].forEach(function (d) { selectedDifficulties.push(d); });
-        selectedSources.length = 0;
-        availableSources(currentSubject).forEach(function (src) { selectedSources.push(src); });
-        completedFilter = QB_COMPLETED_DEFAULT;
-        qbSessionSize = 0;
-        try { localStorage.setItem(QB_SIZE_KEY, '0'); } catch (e) {}
-        renderFilters(true);
-        renderSkillsList();
-        renderSelectionBar();
-      };
-    }
-    syncResetVisibility();
-
-    /* One toggle chip over a multi-select array. Never lets the last one
-       off — an empty difficulty set leaves nothing to practice, which the
-       old dropdown also guarded against. */
-    function chip(label, arr, value) {
-      var b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'qb-chip' + (arr.indexOf(value) !== -1 ? ' on' : '');
-      b.textContent = label;
-      b.setAttribute('aria-pressed', arr.indexOf(value) !== -1 ? 'true' : 'false');
-      b.addEventListener('click', function () {
-        var i = arr.indexOf(value);
-        if (i === -1) arr.push(value);
-        else if (arr.length > 1) arr.splice(i, 1);
-        else return;                      // the last one stays on
-        var on = arr.indexOf(value) !== -1;
-        b.classList.toggle('on', on);
-        b.setAttribute('aria-pressed', on ? 'true' : 'false');
-        syncResetVisibility();
-        renderSkillsList();
-      });
-      return b;
-    }
-
-    function syncResetVisibility() {
-      var srcs = availableSources(currentSubject);
-      var active = 0;
-      if (selectedDifficulties.length !== 3) active++;
-      if (completedFilter !== QB_COMPLETED_DEFAULT) active++;
-      if (srcs.length > 1 && selectedSources.length !== srcs.length) active++;
-      if (qbSessionSize !== 0) active++;
-      reset.hidden = active === 0;
-
-      /* The button shows the active-filter count and, when set, the session
-         length: the one value a student wants to see before pressing Start. */
-      var lab = document.getElementById('qb-filter-btn-lab');
-      var badge = document.getElementById('qb-filter-count');
-      if (lab) lab.textContent = qbSessionSize ? qbSessionSize + '-question round' : 'Filters';
-      if (badge) {
-        var shown = qbSessionSize ? active - 1 : active;
-        badge.hidden = shown === 0;
-        badge.textContent = String(shown);
-      }
-    }
-  }
-
   /* skill -> how many questions it contributes under the current filters,
      refreshed on every list render. */
   var qbSkillQuestionCounts = {};
@@ -16386,7 +15909,7 @@ window.Portal = {
       var available = selectedSkills.reduce(function (n, name) {
         return n + (qbSkillQuestionCounts[name] || 0);
       }, 0);
-      var questions = (qbSessionSize && qbSessionSize < available) ? qbSessionSize : available;
+      var questions = available;
       var text = selectedSkills.length + ' topic' + (selectedSkills.length === 1 ? '' : 's');
       var changed = topicsEl.textContent !== text || qEl.textContent !== questions.toLocaleString();
       topicsEl.textContent = text;
@@ -16454,14 +15977,8 @@ window.Portal = {
         // isDone = started (at least one answered); isComplete = every question answered.
         return { s: s, n: qs.length, attempted: attempted.length, acc: acc, pct: pct, isDone: attempted.length > 0, isComplete: attempted.length >= qs.length };
       }).filter(function (row) {
-        if (!row.n) return false;               // emptied by the filters
-        // Still practicable even if the Show filter is about to hide it —
-        // see the selection sweep at the end of this function.
+        if (!row.n) return false;
         practicable.push(row.s.skill);
-        if (completedFilter === 'done') return row.isDone;
-        // "Not completed" (the default) hides only skills with nothing left to
-        // answer; hiding every started skill emptied whole domains like Algebra.
-        if (completedFilter === 'not') return !row.isComplete;
         return true;
       });
       if (!rows.length) return;
@@ -16502,8 +16019,7 @@ window.Portal = {
       '</section>';
     });
 
-    host.innerHTML = html || '<div class="qb-topic-empty">No topics match these filters. ' +
-      'Try turning a difficulty back on, or switch “Show” back to All.</div>';
+    host.innerHTML = html || '<div class="qb-topic-empty">No topics to show yet.</div>';
 
     /* ── wiring ── */
     function cardsIn(group) { return Array.prototype.slice.call(group.querySelectorAll('.qb-topic')); }
@@ -16580,12 +16096,9 @@ window.Portal = {
     currentSubject = subject || 'rw';
     document.getElementById('qb-home-view').style.display = 'none';
     document.getElementById('qb-skills-view').style.display = '';
-    document.getElementById('qb-skills-hed').textContent = currentSubject === 'math' ? 'Math' : 'Reading & Writing';
     selectedDifficulties = ['easy', 'medium', 'hard'];
     selectedSources = availableSources(currentSubject);
-    completedFilter = QB_COMPLETED_DEFAULT;
     selectedSkills = [];
-    renderFilters();
     renderSkillsList();
     renderSelectionBar();
   }
@@ -16645,15 +16158,16 @@ window.Portal = {
   function startRunner(skillNames, label) {
     var entries = allSkills().filter(function (s) { return skillNames.indexOf(s.skill) !== -1; });
     var pool = [];
+    var p = loadProgress();
     entries.forEach(function (s) {
       s.questions.forEach(function (q) {
         if (selectedDifficulties.indexOf(q.difficulty) === -1) return;
         if (selectedSources.indexOf(q.source || 'Non-Bluebook') === -1) return;
+        if (qbShow !== 'all' && (qbShow === 'not') === !!p.attempts[q.qid]) return;
         pool.push(q);
       });
     });
     if (!pool.length) return;
-    var p = loadProgress();
     var notSolved = [], solved = [];
     pool.forEach(function (q) {
       var a = p.attempts[q.qid];
@@ -17376,6 +16890,76 @@ window.Portal = {
     }
   }
 
+  /* ═══ PRACTICE SET-UP ═══ Start opens the shared set-up menu (the Rush
+     tab's dialog) over the topics picked on this screen: difficulty,
+     source, what to show and round length. Choices are remembered per
+     device. */
+  var QB_PREF_KEY = 'qb_practice_prefs';
+  function openQbSetup() {
+    if (!selectedSkills.length || !window.portalSetupMenu) return;
+    var skills = selectedSkills.slice();
+    var qs = [];
+    allSkills().forEach(function (s) { if (skills.indexOf(s.skill) !== -1) qs = qs.concat(s.questions); });
+    var sources = [];
+    qs.forEach(function (q) { var src = q.source || 'Non-Bluebook'; if (sources.indexOf(src) === -1) sources.push(src); });
+    var DIFFS = ['easy', 'medium', 'hard'];
+    var prefs = {};
+    try { prefs = JSON.parse(localStorage.getItem(QB_PREF_KEY) || '{}') || {}; } catch (e) {}
+    function keep(saved, all) {
+      var k = (saved || []).filter(function (x) { return all.indexOf(x) !== -1; });
+      return k.length ? k : all.slice();
+    }
+    var p = loadProgress();
+    var state = {
+      difficulties: keep(prefs.difficulties, DIFFS),
+      sources: keep(prefs.sources, sources),
+      show: prefs.show || 'not',
+      len: qbSessionSize === 0 ? QB_SIZE_MAX : qbSessionSize
+    };
+    function pool(st) {
+      return qs.filter(function (q) {
+        if (st.difficulties.indexOf(q.difficulty) === -1) return false;
+        if (st.sources.indexOf(q.source || 'Non-Bluebook') === -1) return false;
+        return st.show === 'all' || (st.show === 'not') !== !!p.attempts[q.qid];
+      });
+    }
+    var label = skills.length === 1 ? skills[0] : skills.length + ' skills';
+    window.portalSetupMenu({
+      kicker: (currentSubject === 'math' ? 'Math' : 'Reading & Writing') + ' \u00b7 ' +
+        (skills.length === 1 ? skills[0] : skills.length + ' topics'),
+      title: 'Set up your practice',
+      go: 'Start practice',
+      state: state,
+      rows: function () {
+        var rows = [{ key: 'difficulties', label: 'Difficulty', type: 'chips',
+          items: DIFFS.map(function (d) { return { v: d, label: d.charAt(0).toUpperCase() + d.slice(1) }; }) }];
+        if (sources.length > 1) rows.push({ key: 'sources', label: 'Source', type: 'chips',
+          items: sources.map(function (x) { return { v: x, label: x }; }) });
+        rows.push({ key: 'show', label: 'Show', type: 'seg',
+          items: [{ v: 'all', label: 'All' }, { v: 'not', label: 'Not started' }, { v: 'done', label: 'Started' }] });
+        rows.push({ key: 'len', label: 'Round length', type: 'slider', min: QB_SIZE_MIN, max: QB_SIZE_MAX, step: QB_SIZE_STEP,
+          unit: 'questions', format: function (v) { return v >= QB_SIZE_MAX ? 'All' : String(v); } });
+        return rows;
+      },
+      count: function (st) {
+        var n = pool(st).length;
+        return { n: n, take: st.len >= QB_SIZE_MAX ? n : Math.min(n, st.len) };
+      },
+      onChange: function (st) {
+        try { localStorage.setItem(QB_PREF_KEY, JSON.stringify({ difficulties: st.difficulties, sources: st.sources, show: st.show })); } catch (e) {}
+        qbSessionSize = st.len >= QB_SIZE_MAX ? 0 : st.len;
+        try { localStorage.setItem(QB_SIZE_KEY, String(qbSessionSize)); } catch (e) {}
+      },
+      onGo: function (st) {
+        selectedDifficulties = st.difficulties.slice();
+        selectedSources = st.sources.slice();
+        qbShow = st.show;
+        qbSessionSize = st.len >= QB_SIZE_MAX ? 0 : st.len;
+        startRunner(skills, label);
+      }
+    });
+  }
+
   var wired = false;
   var qbReadyRerendered = false;
   // Exposed so the Home screen's "Practice Your Weaknesses" shortcut can
@@ -17400,7 +16984,7 @@ window.Portal = {
                    window.__questionBankMathReady || Promise.resolve()]).then(function () {
         qbReadyRerendered = true;
         var skillsVisible = document.getElementById('qb-skills-view').style.display !== 'none';
-        if (skillsVisible) { renderFilters(); renderSkillsList(); } else { showHome(); }
+        if (skillsVisible) renderSkillsList(); else showHome();
       });
     }
     if (!wired) {
@@ -17467,11 +17051,7 @@ window.Portal = {
       var homeBackBtn = document.getElementById('question-bank-back');
       if (homeBackBtn) homeBackBtn.addEventListener('click', function (e) { e.preventDefault(); if (window.showScreen) window.showScreen('screen-menu'); });
       var selectionStartBtn = document.getElementById('qb-selection-start-btn');
-      if (selectionStartBtn) selectionStartBtn.addEventListener('click', function () {
-        if (!selectedSkills.length) return;
-        var label = selectedSkills.length === 1 ? selectedSkills[0] : selectedSkills.length + ' skills';
-        startRunner(selectedSkills.slice(), label);
-      });
+      if (selectionStartBtn) selectionStartBtn.addEventListener('click', openQbSetup);
     }
   };
 })();
@@ -22806,6 +22386,124 @@ window.renderNativeReport = function (data) {
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !$('rush-modal').hidden) closeModal(); });
   }
   window.rushModuleInit = function () { wire(); closeModal(); renderHistory(); };
+})();
+</script>
+<script>
+/* ═══ SET-UP MENU ═══ the Rush tab's "Set up your Rush" dialog, shared: the
+   Question Bank and Saved & Mistakes open it when a student presses
+   Start/Practice. Same card, chips, segmented control and slider as Rush.
+     opts.rows(state)  -> [{ key, label, type: 'chips'|'seg'|'slider', items, rebuild, min, max, step, unit, format }]
+     opts.count(state) -> { n: matching questions, take: this round }
+     opts.onChange(state), opts.onGo(state)
+   A chip row keeps its last chip on. rebuild: true redraws the form after a
+   change, for rows other rows depend on. */
+(function () {
+  var el = null, current = null;
+  function $(id) { return document.getElementById(id); }
+  function esc(v) { return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function build() {
+    el = document.createElement('div');
+    el.className = 'rush-modal';
+    el.id = 'setup-modal';
+    el.hidden = true;
+    el.setAttribute('role', 'dialog');
+    el.setAttribute('aria-modal', 'true');
+    el.setAttribute('aria-labelledby', 'setup-modal-hed');
+    el.innerHTML = '<div class="rush-modal-card">' +
+      '<div class="rush-modal-k" id="setup-modal-k"></div>' +
+      '<h2 class="rush-modal-hed" id="setup-modal-hed"></h2>' +
+      '<div class="rush-form" id="setup-modal-form"></div>' +
+      '<div class="rush-modal-foot">' +
+        '<span class="rush-count" id="setup-modal-count" aria-live="polite"></span>' +
+        '<button type="button" class="rush-cancel" id="setup-modal-cancel">Cancel</button>' +
+        '<button type="button" class="rush-go" id="setup-modal-go"></button>' +
+      '</div></div>';
+    document.body.appendChild(el);
+    el.addEventListener('click', function (e) { if (e.target === el) close(); });
+    $('setup-modal-cancel').addEventListener('click', close);
+    $('setup-modal-go').addEventListener('click', function () {
+      if (this.disabled || !current) return;
+      var o = current;
+      close();
+      o.onGo(o.state);
+    });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !el.hidden) close(); });
+  }
+  function close() { if (el) el.hidden = true; current = null; }
+  function update() {
+    var c = current.count(current.state);
+    $('setup-modal-count').innerHTML = c.n
+      ? '<b>' + c.n + '</b> question' + (c.n === 1 ? '' : 's') + ' match' + (c.n === 1 ? 'es' : '') +
+        (c.take < c.n ? ' &middot; this round <b>' + c.take + '</b>' : ' &middot; this round is all of them')
+      : 'No questions match these choices.';
+    $('setup-modal-go').disabled = !c.n;
+    if (current.onChange) current.onChange(current.state);
+  }
+  function render() {
+    var o = current, form = $('setup-modal-form');
+    form.innerHTML = '';
+    o.rows(o.state).forEach(function (r) {
+      var row = document.createElement('div');
+      row.className = 'rush-row';
+      row.innerHTML = '<span class="qb-filter-lab">' + esc(r.label) + '</span>';
+      if (r.type === 'chips') {
+        var host = document.createElement('div');
+        host.className = 'qb-chips';
+        var arr = o.state[r.key];
+        r.items.forEach(function (it) {
+          var b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'qb-chip' + (arr.indexOf(it.v) !== -1 ? ' on' : '');
+          b.textContent = it.label;
+          b.setAttribute('aria-pressed', String(arr.indexOf(it.v) !== -1));
+          b.addEventListener('click', function () {
+            var i = arr.indexOf(it.v);
+            if (i === -1) arr.push(it.v); else if (arr.length > 1) arr.splice(i, 1); else return;
+            if (r.rebuild) { render(); return; }
+            var on = arr.indexOf(it.v) !== -1;
+            b.classList.toggle('on', on);
+            b.setAttribute('aria-pressed', String(on));
+            update();
+          });
+          host.appendChild(b);
+        });
+        row.appendChild(host);
+      } else if (r.type === 'seg') {
+        var seg = document.createElement('div');
+        seg.className = 'qb-seg';
+        r.items.forEach(function (it) {
+          var b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'qb-seg-btn' + (o.state[r.key] === it.v ? ' active' : '');
+          b.textContent = it.label;
+          b.addEventListener('click', function () {
+            if (o.state[r.key] === it.v) return;
+            o.state[r.key] = it.v;
+            Array.prototype.forEach.call(seg.querySelectorAll('.qb-seg-btn'), function (x) { x.classList.toggle('active', x === b); });
+            update();
+          });
+          seg.appendChild(b);
+        });
+        row.appendChild(seg);
+        if (window.mtaFluid) window.mtaFluid.attach(seg, { item: '.qb-seg-btn', mode: 'pill' });
+      } else if (r.type === 'slider' && window.mtaSlider) {
+        var sl = window.mtaSlider({ min: r.min, max: r.max, step: r.step, value: o.state[r.key], label: r.label, unit: r.unit,
+          format: r.format, onChange: function (v) { o.state[r.key] = v; update(); } });
+        row.appendChild(sl.el);
+      }
+      form.appendChild(row);
+    });
+    update();
+  }
+  window.portalSetupMenu = function (opts) {
+    if (!el) build();
+    current = opts;
+    $('setup-modal-k').textContent = opts.kicker || '';
+    $('setup-modal-hed').textContent = opts.title || 'Set up your practice';
+    $('setup-modal-go').textContent = opts.go || 'Start practice';
+    el.hidden = false;
+    render();
+  };
 })();
 </script>
 </body>
