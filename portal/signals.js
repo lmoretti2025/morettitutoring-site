@@ -156,7 +156,10 @@ var MorettiSignals = (function () {
         allSeenAt = fv ? Math.max(allSeenAt, fv.t0 + fv.dur) : Infinity;
       }
       var rvm = Array.isArray(sec.rv) ? sec.rv[m] : null;
-      if (typeof rvm === 'number' && rvm >= allSeenAt) { reviewStart.push(rvm); continue; }
+      // Times are stored to 0.1 s, so a review arrival the same millisecond
+      // as the last first look can round just below it: v2 records rv only
+      // after everything was seen (trusted as is), v1 gets 0.2 s of slack.
+      if (typeof rvm === 'number' && (sec.sv >= 2 || rvm + 0.2 >= allSeenAt)) { reviewStart.push(rvm); continue; }
       var lastQ = m === 0 ? m1 - 1 : n - 1;
       var fl = (visits[lastQ] || []).filter(function (v) { return v.dur >= glance; })[0];
       reviewStart.push(fl ? Math.max(fl.t0 + fl.dur, allSeenAt) : Infinity);
@@ -175,7 +178,7 @@ var MorettiSignals = (function () {
 
       // Answer changes are differences between successive visit-end answers
       // (blank visits in between don't reset the comparison).
-      var changes = [], prev = null, initial = null, answeredAt = null, switches = 0;
+      var changes = [], prev = null, initial = null, answeredAt = null, switches = 0, maxSwitches = 0;
       // The answer standing when review began: the last visit-end answer of
       // any visit that started before it (blank if none).
       var standing = null, visitedBeforeReview = false;
@@ -184,6 +187,7 @@ var MorettiSignals = (function () {
       });
       vs.forEach(function (v) {
         switches += v.sw;
+        if (v.sw > maxSwitches) maxSwitches = v.sw;
         var a = logAnswer(Q, v.end);
         if (a === null) return;
         if (initial === null) { initial = a; answeredAt = v; }
@@ -224,7 +228,7 @@ var MorettiSignals = (function () {
         flagged: flagged,
         visits: vs.length, realVisits: real.length, revisits: Math.max(0, real.length - 1), revisitSec: revisitSec,
         timeSec: vs.reduce(function (s, v) { return s + v.dur; }, 0),
-        changes: changes, switches: switches,
+        changes: changes, switches: switches, maxSwitches: maxSwitches,
         skipFirst: skipFirst,
         skipThenAnswer: skipFirst && final !== null,
         answeredInReview: !!(answeredAt && answeredAt.t0 >= reviewStart[mod]),
@@ -391,16 +395,21 @@ var MorettiSignals = (function () {
         }
         out.ref.opens += r.refOpens;
         var isRs = typeof cfg.rs === 'function' ? !!cfg.rs(p.questions[r.q]) : refSheetItem(p.questions[r.q]);
-        if (isRs && r.visits > 0) {
+        /* A real look (not a glance) and a wrong ANSWER: a blank or a 0.3 s
+           glance at the buzzer is a pacing fact, not a retrieval gap. The
+           sheet left open from an earlier question counts as open (rf keeps
+           its seconds even with no new open). */
+        if (isRs && r.realVisits > 0) {
           out.ref.rsQ++;
-          if (!r.finalOk && r.refOpens === 0) out.ref.rsMissNoRef++;
+          if (r.final !== null && !r.finalOk && r.refOpens === 0 && r.refSec === 0) out.ref.rsMissNoRef++;
         }
         if (r.revisits > 0) {
           out.revisit.q++;
           if (r.flagged) out.revisit.flagged++; else { out.revisit.unflagged++; out.revisit.secUnflagged += r.revisitSec; }
           out.revisit.sec += r.revisitSec;
         }
-        if (r.switches >= 3) out.waverQ++;
+        // Wavering is 3+ switches within ONE look (spec 3.1), not summed across looks.
+        if (r.maxSwitches >= 3) out.waverQ++;
       });
       var gl = guessingLift(rows);
       lift.old += gl.old; lift.elim += gl.elim;
@@ -420,7 +429,8 @@ var MorettiSignals = (function () {
             // A question whose text changed gets a new key and no tag; count
             // it rather than let it drop out of the Desmos figures unseen.
             if (typeof tag !== 'number') { out.calc.untagged++; return; }
-            if (r.visits === 0) return;
+            // A real look, not a glance at the buzzer (same reason as rsQ).
+            if (r.realVisits === 0) return;
             var budget = budgetOk ? p.budgetSec(p.questions[i]) : null;
             var over = typeof budget === 'number' && budget > 0 && r.timeSec > budget;
             // Over-use: active Desmos on a no-help question that also ran
@@ -429,7 +439,7 @@ var MorettiSignals = (function () {
             if (tag !== 2) return;
             out.calc.fav++;
             if (r.calcActive) out.calc.favActive++;
-            else if (!r.finalOk) out.calc.favMissNoUse++;
+            else if (r.final !== null && !r.finalOk) out.calc.favMissNoUse++;
             else if (over) out.calc.favSlowNoUse++;
           });
           // The coaching gate counts fast-route questions missed OR over
@@ -496,27 +506,31 @@ var MorettiSignals = (function () {
       if (typeof s === 'string') { try { s = JSON.parse(s); } catch (err) { s = null; } }
       var t = when(e.at);
       if (!s || s.v !== 1 || isNaN(t)) { if (e.signals) L.dropped++; return; }
+      if (!(t >= since && t <= now + 86400000)) return;
       // Capture ran but the summary could not be made or kept: counted, not pooled.
       if (s.err) { L.errored = (L.errored || 0) + 1; return; }
-      if (!(t >= since && t <= now + 86400000)) return;
       var c = s.chg || {};
       L.attempts++;
       L.chg.h += num(c.h); L.chg.r += num(c.r); L.chg.ww += num(c.ww); L.chg.sw += num(c.sw);
       ['unfl', 'rev', 'late'].forEach(function (k) { if (c[k]) { L.chg[k].h += num(c[k].h); L.chg[k].r += num(c[k].r); } });
-      L.near += num(s.near); L.keyOut += num(s.keyOut);
-      // On the hardest test every question is medium or hard, so its blind
-      // guesses would swamp this count; it stays out (as it does from every
-      // score comparison). Callers comparing an early and a late window
-      // (changeImproved) should also build both windows without it.
-      if (e.testId !== HARDEST_TEST_ID) L.blindMedHard += num(s.blindMedHard);
-      else L.hardest = (L.hardest || 0) + 1;
+      /* The hardest test (every question medium or hard) stays out of every
+         MISS-based pool: near misses, key-out misses, blind guesses, Desmos
+         and reference-sheet misses would all read as habits there. Answer
+         changes and elimination use still pool (each is its own event).
+         Callers comparing an early and a late window (changeImproved)
+         should build both windows without it too. */
+      var hardest = e.testId === HARDEST_TEST_ID;
+      if (hardest) L.hardest = (L.hardest || 0) + 1;
+      if (!hardest) { L.near += num(s.near); L.keyOut += num(s.keyOut); L.blindMedHard += num(s.blindMedHard); }
       if (s.elim) { L.elim.mc += num(s.elim.mc); L.elim.used += num(s.elim.used); }
       if (s.calc) {
         L.calc.mathQ += num(s.calc.mathQ); L.calc.active += num(s.calc.active);
-        L.calc.fav += num(s.calc.fav); L.calc.favActive += num(s.calc.favActive); L.calc.favMissNoUse += num(s.calc.favMissNoUse);
-        L.calc.favSlowNoUse += num(s.calc.favSlowNoUse); L.calc.candidates += num(s.calc.candidates); L.calc.overUse += num(s.calc.overUse);
+        if (!hardest) {
+          L.calc.fav += num(s.calc.fav); L.calc.favActive += num(s.calc.favActive); L.calc.favMissNoUse += num(s.calc.favMissNoUse);
+          L.calc.favSlowNoUse += num(s.calc.favSlowNoUse); L.calc.candidates += num(s.calc.candidates); L.calc.overUse += num(s.calc.overUse);
+        }
       }
-      if (s.ref) { L.ref.rsQ += num(s.ref.rsQ); L.ref.rsMissNoRef += num(s.ref.rsMissNoRef); }
+      if (s.ref && !hardest) { L.ref.rsQ += num(s.ref.rsQ); L.ref.rsMissNoRef += num(s.ref.rsMissNoRef); }
     });
     return L;
   }
@@ -637,6 +651,9 @@ var MorettiSignals = (function () {
      (wrong->right or right->wrong), which is what the sentence must say. */
   function parentFacts(ledger, last, cfg) {
     var facts = [];
+    // Facts about the latest attempt are not drawn from the hardest test
+    // (cfg.lastTestId): its misses would read as habits.
+    if (cfg && cfg.lastTestId === HARDEST_TEST_ID) last = null;
     if (ledger && ledger.chg) {
       var v = changeVerdict(ledger.chg.h, ledger.chg.r, cfg);
       if (v.state === 'help') facts.push({ id: 'changes-help', fixed: v.h, of: v.flips });
@@ -696,8 +713,11 @@ var MorettiSignals = (function () {
   function isTrendComparable(e) {
     // The self-reported baseline (PSAT or an outside SAT, typed in) is a
     // starting point to show, not a test to average in.
+    // A sitting the clock ran out on while the student was away, or with more
+    // than 10 minutes away, measures the interruption, not the student.
+    var interrupted = e.interrupted === true || e.interrupted === 'ranout' || (typeof e.awayMin === 'number' && e.awayMin > 10);
     return !!e && typeof e.composite === 'number' && isFinite(e.composite) && e.testId !== HARDEST_TEST_ID &&
-      e.mode !== 'section' && e.source !== 'baseline';
+      e.mode !== 'section' && e.source !== 'baseline' && !interrupted;
   }
   function levelOf(list) {
     var avg = function (f) { return list.reduce(function (s, e) { return s + f(e); }, 0) / list.length; };

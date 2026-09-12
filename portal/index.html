@@ -2617,7 +2617,7 @@
 #pt-native-report .bridge-target-row .bt-static { display: none; font-weight: 600; font-size: 13px; color: var(--red); }
 /* overflow-x:auto at all sizes: .bridge-card has overflow:hidden, so a
    chart wider than its column would otherwise be silently cropped. */
-#pt-native-report .bridge-canvas-wrap { text-align: center; overflow-x: auto; }
+#pt-native-report .bridge-canvas-wrap { text-align: center; overflow: hidden; }
 #pt-native-report .bridge-canvas-inner { position: relative; display: inline-block; }
 #pt-native-report .bridge-empty { font-size: 11px; color: var(--mid); padding: 6px 0; }
 #pt-native-report .bridge-other-note { margin-top: 6px; margin-bottom: 0; }
@@ -2823,7 +2823,7 @@
 #pt-native-report .score-tiles { gap: 10px; }
 #pt-native-report .score-tile { padding: 8px 12px 7px; min-width: 84px; }
 #pt-native-report .score-tile.big { min-width: 108px; padding: 12px 16px 9px; }
-#pt-native-report .bridge-canvas-wrap { overflow-x: auto; }
+#pt-native-report .bridge-canvas-wrap { overflow: hidden; }
 #pt-native-report table { display: block; overflow-x: auto; white-space: nowrap; }
 .q-detail, .q-detail * { white-space: normal; }
 
@@ -3284,9 +3284,9 @@
   #pt-native-report .plain-lede,
   #pt-native-report .plain-steps b,
   #pt-native-report .plain-well b { font-weight: 600; }
-  #pt-native-report .plain-dots { margin: -4px 0 12px; max-width: 360px; }
-  #pt-native-report .plain-dots svg { display: block; width: 100%; height: auto; }
-  #pt-native-report .plain-dots-cap { font-size: 11px; line-height: 1.45; color: var(--mid); margin: 3px 0 0; }
+  #pt-native-report .plain-range { margin: -2px 0 12px; max-width: 380px; }
+  #pt-native-report .plain-range svg { display: block; width: 100%; height: auto; }
+  #pt-native-report .plain-range-cap { font-size: 11px; line-height: 1.45; color: var(--mid); margin: 2px 0 0; }
   #pt-native-report .plain-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding-top: 12px; border-top: 1px solid var(--border); }
   @media (max-width: 640px) { #pt-native-report .plain-cols { grid-template-columns: 1fr; gap: 14px; } }
   #pt-native-report .plain-label { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--mid); margin-bottom: 6px; }
@@ -5300,7 +5300,7 @@ window.Portal = {
      header in fluid-ui.js. -->
 <script src="fluid-ui.js?v=20260905y"></script>
 <script src="banks.js?v=20260910a"></script>
-<script src="signals.js?v=20260912c"></script>
+<script src="signals.js?v=20260912d"></script>
 <script src="desmos-tags.js?v=20260912a"></script>
 <script src="time-budgets.js?v=20260905y"></script>
 <script src="challenge-questions.js?v=20260911a"></script>
@@ -10226,13 +10226,15 @@ window.Portal = {
     sigReviewPageLeave(now);
     var last = sigVisitLog[sigVisitLog.length - 1];
     if (last && last[0] === i && !sigNavBreak) {
+      // The same visit continuing (a refresh, an away-gap): a pick made
+      // earlier in it still counts, so a later change is a switch.
       sigOpen = sigVisitLog.length - 1;
     } else {
       sigVisitLog.push([i, Math.max(0, now - sigModuleStartAt), 0, sigAnswerCode(i), 0]);
       sigOpen = sigVisitLog.length - 1;
+      sigPicked = false;
     }
     sigNavBreak = false;
-    sigPicked = false;
     sigSegAt = now;
     sigCalcOpenAt = sigCalcIsOpen() ? now : null;
     sigCalcFocusAt = sigCalcHasFocus() ? now : null;
@@ -10398,7 +10400,10 @@ window.Portal = {
   function sigStateForSave() {
     return { vl: sigVisitLog, eu: sigElimEver, co: sigCalcOpenMs, cf: sigCalcFocusMs, cn: sigCalcFocusN,
              ro: sigRefOpens, rm: sigRefMs, rv: sigReviewAtMs, t0: sigModuleStartAt,
-             nb: sigNavBreak, rpMs: sigReviewPageMs };
+             nb: sigNavBreak, pk: sigPicked,
+             // A review-page stay still in progress is closed at the save, so
+             // a refresh on the review page doesn't lose it.
+             rpMs: sigReviewPageMs + (sigReviewPageAt !== null ? Math.max(0, Date.now() - sigReviewPageAt) : 0) };
   }
   function sigRestore(st, n) {
     var arr = function (a) { return (Array.isArray(a) && a.length === n) ? a : new Array(n).fill(0); };
@@ -10419,6 +10424,9 @@ window.Portal = {
        from before the review and erased it (audit 2026-09-12). Saves from
        before this field existed keep the old behaviour. */
     sigNavBreak = (typeof st.nb === 'boolean') ? st.nb : false;
+    // A pick made earlier in the same visit, so a switch across the refresh
+    // still counts as one.
+    sigPicked = !sigNavBreak && st.pk === true;
   }
 
   /* ═══ ADAPTIVE SAT MODULES ═══
@@ -11055,6 +11063,8 @@ window.Portal = {
           pauseQuestionTimeAt(lastLiveTickAt);
           recordInterruption('gap', gap);
           if (qWasOpen) beginQuestionTime(current);
+          // Time away on the review page isn't time on the review page.
+          else if (sigReviewPageAt !== null) sigReviewPageAt = Math.min(Date.now(), sigReviewPageAt + gap);
         }
       }
       lastKnownSectionRemainingMs = remaining;
@@ -12364,7 +12374,8 @@ window.Portal = {
          so "points from changing answers" matches the score shown. */
       var signalsSummary = (function () {
         try {
-          if (!window.MorettiSignals) return null;
+          // A marker, not a blank, if signals.js didn't load.
+          if (!window.MorettiSignals) return { v: 1, err: 'signals.js not loaded' };
           var curves = { 'reading-writing': SCORE_RW_CURVE, 'math': SCORE_MATH_CURVE };
           return window.MorettiSignals.summarizeAttempt(payload.s.map(function (s) {
             var bank = bankFor(s.k);
@@ -19087,7 +19098,11 @@ window.renderNativeReport = function (data) {
         if (hi <= lo) return 0;
         var slope = (scaleFromPct(100 * hi / n, curve) - scaleFromPct(100 * lo / n, curve)) / (hi - lo);
         var p = (c + 1) / (n + 2);
-        return slope * Math.sqrt(n * p * (1 - p));
+        /* At a perfect or near-zero section, n.p.(1-p) is about 1 and the
+           band collapses to 780-800; in simulation that held the true score
+           0 times in 161 (review3-sim). A 25-point floor per section there. */
+        var se = slope * Math.sqrt(n * p * (1 - p));
+        return (c >= n - 1 || c <= 1) ? Math.max(se, 25) : se;
       };
       var csemSq = 0;
       if (rw && rwScaled !== null && rwScaled !== undefined) csemSq += Math.pow(sectionCsem('reading-writing', rw.c, rw.t), 2);
@@ -19713,6 +19728,25 @@ window.renderNativeReport = function (data) {
     // redraw. Mirrors report.html's identical guard.
     var bridgeAnimated = false;
     renderBridge();
+    /* Re-fit when the space changes: first reveal (the card measures 0 while
+       hidden), rotation, window resize. Width only, so a redraw's own height
+       change can't loop. One observer per card: the portal re-renders reports
+       in place, and an older report's observer must not redraw. */
+    (function () {
+      var fitW = bridgeWrap.clientWidth;
+      var refit = function () {
+        var nw = bridgeWrap.clientWidth;
+        if (nw && Math.abs(nw - fitW) > 4) { fitW = nw; renderBridge(); }
+      };
+      if (bridgeWrap.__fitOff) bridgeWrap.__fitOff();
+      if (window.ResizeObserver) {
+        var ro = new ResizeObserver(refit); ro.observe(bridgeWrap);
+        bridgeWrap.__fitOff = function () { ro.disconnect(); };
+      } else {
+        window.addEventListener('resize', refit);
+        bridgeWrap.__fitOff = function () { window.removeEventListener('resize', refit); };
+      }
+    })();
 
     function renderBridge() {
       bridgeWrap.innerHTML = '';
@@ -19848,6 +19882,29 @@ window.renderNativeReport = function (data) {
       /* The right-hand bar is an ARITHMETIC CEILING, not a projection, and is
          labeled and drawn as one: every miss on this form turned into a hit
          is the top of the scale by construction, not a forecast. */
+      /* ═══ NEVER WIDER THAN THE PAGE ═══
+         Sized to the space the chart actually has (Luca, 2026-09-12: it must
+         never scroll sideways), capped for the printed page. If that leaves
+         a bar column too narrow to read (under 56px), the smallest bars fold
+         into one "Other areas" bar, so the total is unchanged; the clock bar
+         is never folded. The card can be hidden when this runs, so a width of
+         0 falls back to the viewport and the card re-fits once it is shown
+         (see the observer after renderBridge). */
+      var availW = Math.floor(bridgeWrap.clientWidth || Math.min(window.innerWidth || 630, 1300) - 48);
+      var w = Math.max(280, Math.min(1300, availW));
+      var padL = w < 480 ? 38 : 50, padR = w < 480 ? 58 : 100, padT = 24;
+      var maxMid = Math.max(2, Math.floor((w - padL - padR) / 56) - 2);
+      if (items.length > maxMid) {
+        var clockIt = items.filter(function (e) { return e.filterType === 'clock'; });
+        var others = items.filter(function (e) { return e.filterType !== 'clock'; });
+        var room = Math.max(1, maxMid - clockIt.length - 1);
+        var keepSet = others.slice().sort(function (a, b) { return b.points - a.points; }).slice(0, room);
+        var folded = others.filter(function (e) { return keepSet.indexOf(e) === -1; });
+        var foldedPts = folded.reduce(function (a, e) { return a + e.points; }, 0);
+        items = others.filter(function (e) { return keepSet.indexOf(e) !== -1; })
+          .concat(folded.length ? [{ label: 'Other areas (' + folded.length + ')', points: foldedPts, filterType: null, filterName: null }] : [])
+          .concat(clockIt);
+      }
       var bars = [{ label: 'Current', val: startVal, isEndpoint: true, isStart: true }]
         .concat(items.map(function (e) { return { label: e.label, points: e.points, tag: e.tag, filterType: e.filterType, filterName: e.filterName, color: e.color }; }))
         .concat([{ label: 'Every miss fixed', val: endVal, isEndpoint: true, isCeiling: true }]);
@@ -19855,7 +19912,7 @@ window.renderNativeReport = function (data) {
       // Width grows with the bar count so bars and labels don't get squeezed,
       // capped to fit the Practice Tests panel (#screen-practice-tests
       // .panel-wide) minus the card padding.
-      var w = Math.min(1300, Math.max(900, 130 * bars.length)), padL = 50, padR = 100, padT = 24;
+      // (width, padding and folding are set above, before the bars are built)
       var n = bars.length;
       var plotW = w - padL - padR;
       var gapW = plotW / n;
@@ -20378,13 +20435,17 @@ window.renderNativeReport = function (data) {
       var leftoverMs = allottedMs - s7.timeTotal;
       var leftoverMin = leftoverMs / 60000;
       var leftoverShare = leftoverMs / allottedMs;
-      var missedHere = s7.t - s7.c;
-      if (leftoverMin >= UNUSED_MIN_MINUTES && leftoverShare >= UNUSED_MIN_SHARE && missedHere > 0) {
+      /* Wrong answers, not blanks (a blank isn't "wrong"), and only when
+         every answered question was timed, or the time left is overstated. */
+      var blanksHere = s7.rows.filter(function (r) { return r.skipped; }).length;
+      var missedHere = s7.t - s7.c - blanksHere;
+      var fullyTimed7 = s7.rows.every(function (r) { return r.skipped || r.timeMs > 0; });
+      if (fullyTimed7 && leftoverMin >= UNUSED_MIN_MINUTES && leftoverShare >= UNUSED_MIN_SHARE && missedHere > 0) {
         // Acknowledges that some leftover is by design (the per-question targets
         // bank a reserve), so this doesn't contradict the Time budget card.
         // The finding is "finished early, with questions wrong, reserve
         // unspent."
-        behaviorFlags.push('<strong>Time left on the clock (' + s7.label + '):</strong> You handed in with about ' + Math.round(leftoverMin) + ' of ' + Math.round(s7.timeAllottedMin) + ' minutes left (' + Math.round(leftoverShare * 100) + '% of the section) and ' + missedHere + ' question' + (missedHere === 1 ? '' : 's') + ' wrong. A few spare minutes is normal; this is more than that. <strong>Next test:</strong> before submitting, flag the questions you are least sure of and spend the spare time on those.');
+        behaviorFlags.push('<strong>Time left on the clock (' + s7.label + '):</strong> You handed in with about ' + Math.round(leftoverMin) + ' of ' + Math.round(s7.timeAllottedMin) + ' minutes left (' + Math.round(leftoverShare * 100) + '% of the section) and ' + missedHere + ' question' + (missedHere === 1 ? '' : 's') + ' wrong' + (blanksHere ? ' and ' + blanksHere + ' left blank' : '') + '. <strong>Next test:</strong> before submitting, flag the questions you are least sure of and spend the spare time on those.');
       }
     }
   });
@@ -20394,13 +20455,45 @@ window.renderNativeReport = function (data) {
   // first-pass data (older reports, never-visited questions).
   function pacingTimeMs(r) { return (r.firstVisitMs != null) ? r.firstVisitMs : r.timeMs; }
   // Was this section short of time? Identical to report.html.
+  /* ═══ WAS THE CLOCK SHORT? ═══
+     Read from when the FIRST PASS ended, i.e. when every question in a
+     module had been seen once, against that module's clock. Total time
+     included review, so a student who finished early and reviewed to the
+     end was marked short of time: 93.6% of such students in simulation
+     (review3-sim, 2026-09-12), which switched the Method bucket back on for
+     them. A blank alone isn't pressure either; one skipped question with 29
+     minutes left is a skip. Evidence, best first:
+       1. the visit log (capture v1/v2): first-pass end, or an unseen question;
+       2. older records: first-look time summed per module, or the module's
+          last question never reached. */
   function sectionClockPressed(sec) {
-    if (sec.rows.some(function (r) { return r.skipped; })) return true;
-    if (sec.timeAllottedMin > 0 && sec.timeTotal >= 0.95 * sec.timeAllottedMin * 60000) return true;
+    var mods = sec.hasModules ? 2 : 1;
+    var modMs = sec.timeAllottedMin > 0 ? sec.timeAllottedMin * 60000 / mods : 0;
+    if (!(modMs > 0)) return sec.rows.some(function (r) { return r.skipped; });
+    var m1 = sec.hasModules ? sec.rows.filter(function (r) { return (r.moduleIndex || 0) === 0; }).length : sec.rows.length;
     var raw = (data.s || []).filter(function (s) { return s.k === sec.key; })[0];
-    if (raw && (raw.sv === 1 || raw.sv === 2) && Array.isArray(raw.rv) && raw.tl > 0) {
-      var perModuleSec = raw.tl * 60 / raw.rv.length;
-      return raw.rv.some(function (t) { return t === null || (perModuleSec - t) < 0.05 * perModuleSec; });
+    if (raw && (raw.sv === 1 || raw.sv === 2) && Array.isArray(raw.vl) && raw.vl.length) {
+      var firstEnd = {};
+      raw.vl.forEach(function (v) {
+        if (!Array.isArray(v) || typeof v[0] !== 'number') return;
+        if (firstEnd[v[0]] === undefined) firstEnd[v[0]] = (Number(v[1]) || 0) + (Number(v[2]) || 0);
+      });
+      for (var m = 0; m < mods; m++) {
+        var lo = m === 0 ? 0 : m1, hi = m === 0 ? m1 : sec.rows.length, end = 0;
+        for (var q = lo; q < hi; q++) {
+          if (firstEnd[q] === undefined) return true;   // never reached
+          end = Math.max(end, firstEnd[q]);
+        }
+        if (end * 1000 >= 0.95 * modMs) return true;
+      }
+      return false;
+    }
+    for (var mm = 0; mm < mods; mm++) {
+      var inMod = sec.rows.filter(function (r) { return (r.moduleIndex || 0) === mm; });
+      var firstPass = inMod.reduce(function (a, r) { return a + (pacingTimeMs(r) || 0); }, 0);
+      var last = inMod[inMod.length - 1];
+      if (firstPass >= 0.95 * modMs) return true;
+      if (last && last.skipped && !(pacingTimeMs(last) > 0)) return true;
     }
     return false;
   }
@@ -20474,7 +20567,17 @@ window.renderNativeReport = function (data) {
       if (r.q.type === 'mc') {
         if (!r.ok) mcMissAnswered++;
         if (!r.ok && hurry(r)) rushedWrong.push({ sk: r.sk });
-        if (!r.ok && pacingTimeMs(r) >= stuckCutoff) stuckWrong.push({ sk: r.sk });
+        /* Stuck is relative to what THIS question should cost (1.5x its
+           budget, the four-way classification's rule). 1.6x the student's
+           median right-answer time flagged 42% of students without the habit,
+           because long passage questions clear it by length alone
+           (review3-sim: 7.8% with the budget rule). */
+        var stuckBudget = 0;
+        if (window.TIME_BUDGETS) {
+          var sbq = window.TIME_BUDGETS.budgetSecondsFor(s7.key, r.q.domain, r.sk || r.dom, r.q.difficulty, sectionMult);
+          stuckBudget = (sbq && sbq.ms) || 0;
+        }
+        if (!r.ok && (stuckBudget ? pacingTimeMs(r) >= stuckBudget * STUCK_BUDGET_REL : pacingTimeMs(r) >= stuckCutoff)) stuckWrong.push({ sk: r.sk });
         if (r.ok && r.q.difficulty === 'hard' && pacingTimeMs(r) < luckyCutoff) luckyCorrect.push({ sk: r.sk });
       }
       if (r.sk) {
@@ -20520,8 +20623,7 @@ window.renderNativeReport = function (data) {
         if (r.ok) { if (tooFast) b.skimmed++; else if (slow) b.inefficient++; else b.mastered++; }
         else if (tooFast) b.rushed++;
         else if (slow) b.stuck++;
-        else if (hurried) b.rushed++;
-        else b.onpace++;
+        else b.onpace++;   // quick but above the floor is not "rushed" (see renderDiagnosis)
         // Same question, counted again at domain grain. Skills are kept per
         // domain so the detail line under a ranked domain can name what is
         // actually inside it without re-deriving anything.
@@ -20536,7 +20638,6 @@ window.renderNativeReport = function (data) {
           if (r.ok) { if (tooFast) db.skimmed++; else if (slow) db.inefficient++; else db.mastered++; }
           else if (tooFast) db.rushed++;
           else if (slow) db.stuck++;
-          else if (hurried) db.rushed++;
           else db.onpace++;
           var ds = db.skills[r.sk] || (db.skills[r.sk] = { total: 0, missed: 0, missedHard: 0, stuck: 0 });
           ds.total++;
@@ -20686,6 +20787,9 @@ window.renderNativeReport = function (data) {
   // irtContentTest; see the note there for the model and the evidence.
   var IRT_OFFSETS = { easy: 0.71, medium: 0, hard: -0.29 };
   var IRT_POP_MU = 1.20, IRT_POP_SD = 1.22, IRT_SECTION_SD = 0.61, IRT_Z = 2.24, IRT_MIN_EXCESS = 1.5;
+  // The bar for telling a student to plan around a gap (summary, parent
+  // line, four-week plan); IRT_Z only admits a hedged lead into the evidence.
+  var CLEAR_GAP_Z = 2.8;
   function irtContentTest(items) {
     var inf = items.filter(function (it) { return !it.tooFast; });
     if (inf.length < 20) return null;
@@ -20875,7 +20979,10 @@ window.renderNativeReport = function (data) {
     // section 1 declined to stand behind.
     planInputs.areas = allSignalRows.map(function (r) {
       return { name: r.skill, sec: r.sec, severity: r.severity, n: r.total,
-               lead: r.leadN, topSkills: r.topSkills || [] };
+               lead: r.leadN, topSkills: r.topSkills || [],
+               // The content-gap test's z (null when the section had too few
+               // items and the older gate decided).
+               z: (irt && irt[r.skill]) ? irt[r.skill].z : null };
     });
     /* The plan must know about the same prerequisite the headline warns
        about, or the two contradict each other on the same page. */
@@ -20898,7 +21005,7 @@ window.renderNativeReport = function (data) {
         allRows.forEach(function (r) { if (r.skill === pName) pRow = r; });
         if (pRow && pRow.total) {
           var pRight = rightOf(pRow);              // the score's number
-          if (commandOf(pRow) < PREREQ_SHAKY_BELOW) {   // the knowledge number
+          if (commandOf(pRow) < PREREQ_SHAKY_BELOW && data.pt !== ((window.MorettiSignals && window.MorettiSignals.HARDEST_TEST_ID) || 'sat-practice-11')) {   // the knowledge number
             planInputs.prereq = { name: pName, blocks: pTop.skill, kind: pKind,
                                   right: pRight, total: pRow.total,
                                   /* Same rule as the headline: the % and the
@@ -20944,10 +21051,13 @@ window.renderNativeReport = function (data) {
           'You missed ' + missedAll + ' question' + (missedAll === 1 ? '' : 's') +
           ' &mdash; that part is certain. What this section does is separate a miss that real work went into from one that went by too fast to count, and that separation needs the clock. Without it, ranking areas would be guesswork dressed up as a finding. ' +
           'The score above is unaffected &mdash; that is read straight off the answers. Almost everything else in this report reads the clock, which is why so little of it is here; a fresh full-length test is what would fill it in.</p>'
+        : contentMissed === 0 && missedAll > 0
+        ? '<p class="behavior-clean"><strong>No content verdict.</strong> ' +
+          'Every wrong answer here came faster than a question can be read, so none of them says what you know. ' +
+          '“How you used the clock” below shows where the time went.</p>'
         : contentMissed === 0
         ? '<p class="behavior-clean"><strong>Nothing was missed on content.</strong> ' +
-          'You answered every question that was reached correctly, so there is no content here to re-teach and ' +
-          'nothing for this section to rank. What is left is how long the right answers took &mdash; that is “Where the time went” below.</p>'
+          'Every question you answered, you got right, so there is nothing here to relearn.</p>'
         : contentShare >= 0.15
         ? '<p class="behavior-clean"><strong>No single area stands out, because the misses are spread across most of them.</strong> ' +
           'You got ' + Math.round(accAll * 100) + '% of the questions you answered right, and the ' + contentMissed +
@@ -21009,7 +21119,11 @@ window.renderNativeReport = function (data) {
         allRows.forEach(function (o) { if (o !== r && missesOf(o) > mine) best = false; });
         return best;
       }
-      var preName = DOMAIN_PREREQ[top.skill], preRow = null;
+      var HARDEST_PT = (window.MorettiSignals && window.MorettiSignals.HARDEST_TEST_ID) || 'sat-practice-11';
+      /* Not on the hardest test: every question there is hard, so the
+         absolute 70% bar for a shaky foundation fires for students who
+         don't have one (31.5% false "Start here" vs 23.8%; review3-sim). */
+      var preName = data.pt === HARDEST_PT ? null : DOMAIN_PREREQ[top.skill], preRow = null;
       if (preName) allRows.forEach(function (r) { if (r.skill === preName) preRow = r; });
       if (preRow && preRow.total) {
         var preRight = rightOf(preRow);           // what the score says
@@ -21089,7 +21203,7 @@ window.renderNativeReport = function (data) {
       if (top.severity === 3) {
         contentTxt = top.stuck >= top.onpace
           ? open + top.content + ' of ' + top.total + ' were missed after real time went into them, so relearn the material before working on speed.'
-          : open + top.content + ' of ' + top.total + ' were missed at a normal pace, not rushed and not stuck, so the problem is the material, not the timing.';
+          : open + top.content + ' of ' + top.total + ' were missed after being worked through, not skipped past and not stuck on, so the problem is the material, not the timing.';
       }
       return (top.severity === 3
         ? contentTxt
@@ -22118,11 +22232,12 @@ window.renderNativeReport = function (data) {
           bucket('clock', sec, r, 'answered too fast to have read it');
           return;
         }
-        // A genuinely rushed wrong answer is NOT content: it is not evidence
-        // the material was unknown. It is a pacing loss, and it has to land
-        // somewhere, or "where your points went" says nothing was lost for a
-        // student who rushed every miss (audit 2026-09-12).
-        if (hurried) { bucket('clock', sec, r, 'answered in a rush'); return; }
+        /* A quick miss ABOVE the reading floor is a content miss. Speed
+           relative to the student's own pace is not evidence of rushing: in
+           the report's own calibration accuracy stays flat down to 0.18x of
+           a question's budget, and in simulation 70% of what a "hurried"
+           rule billed to pace were questions the student didn't know
+           (review3-sim, 2026-09-12). Only the floor above is pace. */
         if (!(tMs > 0)) { bucket('content', sec, r, 'missed (no timing saved)'); return; }
         var slow = qBudgetMs ? (tMs >= qBudgetMs * STUCK_BUDGET_REL)
                              : (typical && tMs >= typical * STUCK_REL);
@@ -22162,6 +22277,16 @@ window.renderNativeReport = function (data) {
     // the question lists are drawn from -- not the tallies, which
     // double-count by design (see the note directly above).
     planInputs.causes = { content: buckets.content.length, method: buckets.method.length, clock: buckets.clock.length };
+    /* What "lost to pace" was made of, so the summary can say it and give
+       the matching advice. A below-floor answer in a section whose first
+       pass ended late was a guess as time ran out; with time to spare it was
+       answered faster than it could be read. */
+    planInputs.pace = { blank: 0, ranOut: 0, tooFast: 0 };
+    buckets.clock.forEach(function (e) {
+      if (e.why === 'never reached') planInputs.pace.blank++;
+      else if (e.why === 'answered too fast to have read it' && !sectionClockPressed(e.sec)) planInputs.pace.tooFast++;
+      else planInputs.pace.ranOut++;
+    });
     // For the summary: the content misses one by one (a strong student's
     // three misses are the whole story), and the skills the slow right
     // answers came from (so "speed work" can say where).
@@ -22661,7 +22786,9 @@ window.renderNativeReport = function (data) {
        shrinks toward a one-hour floor rather than padding with work that is
        not there. */
     var FULL_WEEK_AT = 12;
-    var target = Math.max(1, half(mid * Math.min(1, pointsLost / FULL_WEEK_AT)));
+    // Both scale with the sitting's length (44 questions for Math alone).
+    var fullWeekAt = FULL_WEEK_AT * ((typeof totalQ === 'number' && totalQ > 0 ? totalQ : 98) / 98);
+    var target = Math.max(1, half(mid * Math.min(1, pointsLost / fullWeekAt)));
     var hours = { content: 0, method: 0, clock: 0 };
     hours.clock = causes.clock > 0 ? Math.min(1.5, Math.max(0.5, half(raw.clock * target))) : 0;
     if (hours.clock > target) hours.clock = half(target);
@@ -22693,10 +22820,15 @@ window.renderNativeReport = function (data) {
     // Also a week whose only losses were to pace (blanks, rushing, the
     // clock): no topic to relearn, so the full week goes to tests, rather
     // than the old one-and-a-half-hour pacing-only week.
-    var strong = pointsLost < FULL_WEEK_AT || (causes.content + causes.method === 0);
+    // 12 lost on a full 98-question test, scaled to the sitting's length.
+    var strong = pointsLost < fullWeekAt;
+    // Everything lost went to pace (blanks, the clock, too-fast answers):
+    // nothing to relearn, so the week is timed practice, worded for pace.
+    var paceOnly = !strong && pointsLost > 0 && causes.content + causes.method === 0;
+    strong = strong || paceOnly;
     var STRONG_TEST_HOURS = 3, STRONG_SHARPEN_HOURS = 1.5;
     if (strong) weekly = STRONG_TEST_HOURS + STRONG_SHARPEN_HOURS;
-    planInputs.mode = strong ? 'tests' : null;
+    planInputs.mode = paceOnly ? 'pace' : strong ? 'tests' : null;
     /* Nothing was actually lost -- scale the week down to maintenance
        rather than inventing four hours of work to fill it. */
     var maintenanceOnly = (pointsLost === 0) && !strong;
@@ -22718,7 +22850,11 @@ window.renderNativeReport = function (data) {
     // three: a week with four content topics in it is a week where none of
     // them gets enough time to move.
     // Content gaps only (severity 3); see report.html.
-    var contentAreas = areas.filter(function (a) { return a.severity === 3; }).slice(0, 3);
+    /* Only a CLEAR gap is planned around: z >= 2.8 on the content-gap test
+       (2.7% false leads per student in simulation, against 12% at the 2.24
+       used to show a hedged first lead in "What to relearn"; review3-sim).
+       A lead from the older gate (too few items for the test) has no z. */
+    var contentAreas = areas.filter(function (a) { return a.severity === 3 && a.lead > 0 && (a.z == null || a.z >= CLEAR_GAP_Z); }).slice(0, 3);
     // How many of the content misses the named areas hold, so a plan built on
     // one area says what happens to the rest.
     var areaMiss = contentAreas.reduce(function (a, x) { return a + (x.lead || 0); }, 0);
@@ -22773,13 +22909,17 @@ window.renderNativeReport = function (data) {
       rows = [{
         h: STRONG_TEST_HOURS, unit: unitFor(STRONG_TEST_HOURS), color: '#4E6070',
         what: '<b>Practice tests.</b> One full timed practice test every week, in one sitting, phone away, reviewed the next day. ' +
-          'At this level each test has only a few questions left to win, and more tests are how you find the ones that keep costing you.' +
-          (causes.clock > 0 ? ' <em>' + causes.clock + ' question' + (causes.clock === 1 ? '' : 's') + ' here ran into the clock, so pace each test as you go.</em>' : '')
+          (paceOnly
+            ? 'Practise the pace itself: answer every question, move on from one that stalls, and read each one to the end before choosing.'
+            : 'At this level each test has only a few questions left to win, and more tests are how you find the ones that keep costing you.' +
+              (causes.clock > 0 ? ' <em>' + causes.clock + ' question' + (causes.clock === 1 ? '' : 's') + ' here ' + (causes.clock === 1 ? 'was' : 'were') + ' lost to pace, so pace each test as you go.</em>' : ''))
       }, {
         h: STRONG_SHARPEN_HOURS, unit: unitFor(STRONG_SHARPEN_HOURS), color: 'var(--red)',
-        what: '<b>Sharpen.</b> Drill the skills your misses pool in, starting with ' +
-          (areaTxt ? areaTxt + ', where this test found a real gap' :
-            missSkills.length ? 'this test’s: ' + missSkills.slice(0, 3).map(esc).join('; ') : 'the questions this test caught') +
+        what: paceOnly
+          ? '<b>Timed sets.</b> Short timed sets from the Question Bank at a steady pace, with a clock on each question, so the pace holds on the real test.'
+          : '<b>Sharpen.</b> Drill the skills your misses pool in' +
+          (areaTxt ? ', starting with ' + areaTxt + ', where this test found a clear gap' :
+            missSkills.length ? ', starting with this test’s: ' + missSkills.slice(0, 3).map(esc).join('; ') : '') +
           '. From your second test on, the “Your Statistics” card on Home lists the topics that came up wrong more than once; ' +
           'those come first, in the Question Bank and in Saved &amp; Mistakes.'
       }];
@@ -22795,8 +22935,8 @@ window.renderNativeReport = function (data) {
 
     var lede = strong
       ? 'About <b>' + hrs(weekly) + ' hours a week</b>, mostly full practice tests. ' +
-        (causes.content + causes.method === 0 && pointsLost > 0
-          ? 'Everything this test lost went to pace, so the work is taking full tests at a steady pace, not relearning topics.'
+        (paceOnly
+          ? 'Everything this test lost went to pace, not to what you know, so the whole week is timed practice.'
           : pointsLost === 0
           ? 'Nothing on this test cost you points, so the job now is finding the few questions a harder test would catch, and that takes more full tests.'
           : 'You lost only ' + pointsLost + ' question' + (pointsLost === 1 ? '' : 's') + ' here, so the job now is finding the few that keep costing you, and that takes more tests, not a longer topic list.')
@@ -22915,72 +23055,77 @@ window.renderNativeReport = function (data) {
           'your real level is most likely between <b>' + reportBand.lo + '</b> and <b>' + reportBand.hi + '</b> (about 4 chances in 5).' +
           // The hardest test reads about 87 points low against the others.
           (data.pt && data.pt === ((window.MorettiSignals && window.MorettiSignals.HARDEST_TEST_ID) || 'sat-practice-11')
-            ? ' This was the hardest practice test, where the same student scores about 87 points lower than on the others, so compare it only with itself.' : '') + '</p>'
+            ? (reportBand.max > 800
+              ? ' This was the hardest practice test, where the same student scores about 87 points lower than on the others, so compare it only with itself.'
+              : ' This was the hardest practice test, where the same student scores noticeably lower than on the others, so compare it only with itself.') : '') + '</p>'
         : '';
 
-      /* The same range as twenty dots, a quantile dotplot (Kay et al. 2016;
-         Fernandes et al. 2018, where it beat intervals for real decisions).
-         Each dot is an equally likely value of the true score: the 2.5th,
-         7.5th, ... 97.5th percentiles of the band's normal error. Counting the
-         dots inside the range is "4 chances in 5" made visible. The axis is
-         fixed in points (+/-200 composite, +/-100 one section), so a less
-         certain score really does draw wider. */
-      var dotsHtml = '';
-      if (scoreHtml && reportBand.sd > 0) {
-        var Z20 = [-1.960, -1.440, -1.150, -0.935, -0.755, -0.598, -0.454, -0.319, -0.189, -0.063,
-                   0.063, 0.189, 0.319, 0.454, 0.598, 0.755, 0.935, 1.150, 1.440, 1.960];
-        var DW = 320, DR = 4.2, DD = 2 * DR + 0.8, half = reportBand.max > 800 ? 200 : 100;
-        var dLo = Math.max(reportBand.min, reportBand.val - half), dHi = Math.min(reportBand.max, reportBand.val + half);
-        var dx = function (v) { return 12 + (Math.max(dLo, Math.min(dHi, v)) - dLo) / ((dHi - dLo) || 1) * (DW - 24); };
-        var stack = {}, inside = 0, circles = [];
-        Z20.forEach(function (z) {
-          // Clamped to the scale: a true score can't be above the top or below
-          // the floor, and an unclamped dot drawn at the edge but counted as
-          // outside made "4 in 5" read "9 of 20" at 1600 (audit 2026-09-12).
-          var v = Math.min(reportBand.max, Math.max(reportBand.min, reportBand.val + z * reportBand.sd)), bin = Math.round(dx(v) / DD);
-          var k = stack[bin] = (stack[bin] || 0) + 1, inR = v >= reportBand.lo && v <= reportBand.hi;
-          if (inR) inside++;
-          circles.push({ x: bin * DD, k: k, inR: inR });
+      /* ═══ THE RANGE, ON THE REAL SCALE ═══
+         One line on the section or composite scale, the likely range shaded,
+         the score marked and labelled, the range's ends labelled: exactly
+         what the sentence above says. It is THIS test's measurement error
+         (see SCORE BAND), so it does not move with later tests or with the
+         habit signals; a pooled "current level" belongs on the progress
+         chart, not here. Replaces a 20-dot quantile strip that read as data
+         (Luca, 2026-09-12). */
+      var rangeHtml = '';
+      if (scoreHtml && reportBand.max > reportBand.min) {
+        var RW_ = 320, X0 = 16, X1 = RW_ - 16, AY = 30;
+        var sx = function (v) { return X0 + (Math.max(reportBand.min, Math.min(reportBand.max, v)) - reportBand.min) / (reportBand.max - reportBand.min) * (X1 - X0); };
+        var clampLbl = function (x) { return Math.max(14, Math.min(RW_ - 14, x)); };
+        var bl = sx(reportBand.lo), bh = sx(reportBand.hi), bv = sx(reportBand.val);
+        var txt = function (x, y, anchor, size, weight, fill, s) {
+          return '<text x="' + x.toFixed(1) + '" y="' + y + '" text-anchor="' + anchor + '" font-size="' + size + '" font-weight="' + weight +
+            '" font-family="Poppins, sans-serif" fill="' + fill + '">' + s + '</text>';
+        };
+        // Range-end labels sit under the band; a scale-end label is dropped
+        // when a range label would sit on top of it.
+        var loX = clampLbl(bl), hiX = clampLbl(bh);
+        if (hiX - loX < 34) { var mid = (loX + hiX) / 2; loX = clampLbl(mid - 17); hiX = clampLbl(mid + 17); }
+        var scaleLbls = [[reportBand.min, X0, 'start'], [reportBand.max, X1, 'end']].filter(function (e) {
+          return Math.abs(sx(e[0]) - bl) > 30 && Math.abs(sx(e[0]) - bh) > 30;
         });
-        var tall = Math.max.apply(null, circles.map(function (d) { return d.k; }));
-        var base = tall * DD + 2, H = base + 16;
-        var clampX = function (x) { return Math.max(14, Math.min(DW - 14, x)); };
-        dotsHtml = '<div class="plain-dots"><svg viewBox="0 0 ' + DW + ' ' + H + '" role="img" aria-label="' +
-            inside + ' of 20 equally likely values of your real level fall between ' + reportBand.lo + ' and ' + reportBand.hi + '">' +
-          '<rect x="' + dx(reportBand.lo).toFixed(1) + '" y="0" width="' + (dx(reportBand.hi) - dx(reportBand.lo)).toFixed(1) + '" height="' + base +
-            '" fill="rgba(201,168,76,0.16)"/>' +
-          '<line x1="8" x2="' + (DW - 8) + '" y1="' + base + '" y2="' + base + '" stroke="rgba(17,17,17,0.18)" stroke-width="1"/>' +
-          circles.map(function (d) {
-            return '<circle cx="' + d.x.toFixed(1) + '" cy="' + (base - DR - 1 - (d.k - 1) * DD).toFixed(1) + '" r="' + DR +
-              '" fill="' + (d.inR ? '#1a1a1a' : 'rgba(17,17,17,0.22)') + '"/>';
-          }).join('') +
-          [reportBand.lo, reportBand.hi].map(function (v) {
-            return '<text x="' + clampX(dx(v)).toFixed(1) + '" y="' + (base + 12) + '" text-anchor="middle" font-size="10" ' +
-              'font-family="Poppins, sans-serif" fill="rgba(17,17,17,0.6)">' + v + '</text>';
-          }).join('') +
-          '</svg><p class="plain-dots-cap">Each dot is an equally likely value for your real level. ' + inside + ' of the 20 are inside the range.</p></div>';
+        rangeHtml = '<div class="plain-range"><svg viewBox="0 0 ' + RW_ + ' 58" role="img" aria-label="Score ' + reportBand.val +
+            ' on the ' + reportBand.min + ' to ' + reportBand.max + ' scale; likely range ' + reportBand.lo + ' to ' + reportBand.hi + '">' +
+          '<line x1="' + X0 + '" x2="' + X1 + '" y1="' + AY + '" y2="' + AY + '" stroke="rgba(17,17,17,0.22)" stroke-width="2" stroke-linecap="round"/>' +
+          '<rect x="' + bl.toFixed(1) + '" y="' + (AY - 7) + '" width="' + Math.max(2, bh - bl).toFixed(1) + '" height="14" rx="7" fill="rgba(201,168,76,0.35)"/>' +
+          '<circle cx="' + bv.toFixed(1) + '" cy="' + AY + '" r="6" fill="#1a1a1a"/>' +
+          txt(clampLbl(bv), 14, 'middle', 11, 700, '#1a1a1a', reportBand.val) +
+          txt(loX, 52, 'middle', 10, 600, 'rgba(17,17,17,0.7)', reportBand.lo) +
+          txt(hiX, 52, 'middle', 10, 600, 'rgba(17,17,17,0.7)', reportBand.hi) +
+          scaleLbls.map(function (e) { return txt(e[1], 52, e[2], 9, 400, 'rgba(17,17,17,0.45)', e[0]); }).join('') +
+          '</svg><p class="plain-range-cap">Shaded: the likely range for your real level. Dot: your score on this test.</p></div>';
       }
 
-      // Where the points went. Method is right answers, so it is time, not
-      // points, and is said that way.
+      /* ═══ WHERE THE POINTS WENT ═══
+         "Lost to pace" is split by what actually happened (planInputs.pace,
+         from the diagnosis buckets): left blank, reached with no time left,
+         or answered faster than a question can be read while time remained.
+         Each needs different advice, so each gets its own words. Claims about
+         time need every answered question timed. */
+      var pace = planInputs.pace || { blank: 0, ranOut: 0, tooFast: 0 };
       var lostN = c.content + c.clock;
-      // An old report with no per-question timing can count the misses but
-      // can't say which were worked through or which ran into the clock.
-      var timed = (sections || []).some(function (s) { return s.rows.some(function (r) { return r.timeMs > 0; }); });
-      var lede = !timed && lostN
-        ? 'This report has no per-question timing, so it can count what you missed but not say which questions ran into the clock.'
-        : !lostN
+      var fullyTimed = (sections || []).every(function (s) { return s.rows.every(function (r) { return r.skipped || r.timeMs > 0; }); });
+      var joinAnd = function (a) { return a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1]; };
+      var paceParts = [];
+      if (pace.blank) paceParts.push(pace.blank + ' left blank');
+      if (pace.ranOut) paceParts.push(pace.ranOut + ' reached with no time left');
+      if (pace.tooFast) paceParts.push(pace.tooFast + ' answered faster than ' + (pace.tooFast === 1 ? 'it' : 'they') + ' could be read');
+      var tooFastMost = pace.tooFast >= 3 && pace.tooFast > pace.blank + pace.ranOut;
+      var lede = !lostN
         ? (c.method ? 'Every question you answered, you got right. What cost you was time.' : 'Nothing on this test cost you points.')
+        : !fullyTimed
+        ? 'This test’s timing wasn’t fully saved, so the report can count what you missed but can’t say which questions ran into the clock.'
         : c.content >= 1.5 * c.clock
         ? 'Most of what you lost was on questions you worked through and still got wrong, not on the clock.'
         : c.clock >= 1.5 * c.content
-        ? 'Most of what you lost was to pace (rushing or running out of time), not to what you know.'
-        : 'What you lost is split between questions you got wrong and questions the clock took.';
-      // Lost points biggest first; the slow right answers always last, since
-      // they cost time rather than points.
+        ? (tooFastMost ? 'Most of what you lost was to answering faster than the questions could be read, not to what you know.'
+          : !pace.ranOut && !pace.tooFast ? 'What you lost was questions left blank, not what you know.'
+          : 'Most of what you lost was to the clock, not to what you know.')
+        : 'What you lost is split between questions you got wrong and questions lost to pace.';
       var lines = [
-        { n: c.content, t: count(c.content, 'question') + (timed ? ' you worked on and still got wrong' : ' answered wrong') },
-        { n: c.clock, t: count(c.clock, 'question') + ' lost to pace: left blank, rushed through, or reached with no real time left' }
+        { n: c.content, t: count(c.content, 'question') + (fullyTimed ? ' you worked on and still got wrong' : ' answered wrong') },
+        { n: c.clock, t: count(c.clock, 'question') + ' lost to pace: ' + joinAnd(paceParts) }
       ].filter(function (x) { return x.n > 0; }).sort(function (a, b) { return b.n - a.n; });
       if (c.method > 0) lines.push({ n: c.method, t: count(c.method, 'right answer') + ' that took so long that later questions ran short on time' });
       var lostHtml = '<p class="plain-lede">' + lede + '</p>' +
@@ -22998,9 +23143,7 @@ window.renderNativeReport = function (data) {
       // No strong area is not no strength: answering everything inside the
       // clock is real, and it tells a struggling student where the work isn't.
       else if (nAll && !nBlank) lostHtml += '<p class="plain-well"><b>Going well:</b> you answered all ' + nAll + ' questions' +
-        // Only claim the clock was fine when the timing was actually saved.
-        (!c.clock && !c.method && (sections || []).some(function (s) { return s.rows.some(function (r) { return r.timeMs > 0; }); })
-          ? ', and the clock was not a problem, so the work is the material, not speed.' : '.') + '</p>';
+        (!c.clock && !c.method && fullyTimed ? ', and the clock was not a problem, so the work is the material, not speed.' : '.') + '</p>';
 
       // The area the knowledge section starts with, and what it was named for.
       var startHere = '';
@@ -23008,6 +23151,13 @@ window.renderNativeReport = function (data) {
       if (sh) startHere = sh.textContent.replace(/^Start here:\s*/, '').replace(/\.\s*$/, '');
       var leadArea = null, pre = planInputs.prereq;
       (planInputs.areas || []).forEach(function (a) { if (!leadArea && a.name === startHere) leadArea = a; });
+      /* A gap the student is told to plan around must be CLEAR: z >= 2.8 on
+         the content-gap test (see CLEAR_GAP_Z). A lead between 2.24 and 2.8
+         is still shown, hedged, in "What to relearn", and here as something
+         to check rather than a plan. */
+      var clearLead = !!(leadArea && leadArea.severity === 3 && leadArea.lead > 0 && (leadArea.z == null || leadArea.z >= CLEAR_GAP_Z));
+      var weakLead = !!(leadArea && leadArea.severity === 3 && leadArea.lead > 0 && !clearLead);
+      var preLead = !!(startHere && pre && pre.name === startHere);
 
       /* What an area is, in a student's words. The College Board's names
          ("Form, Structure, and Sense") say nothing to someone who has not
@@ -23056,46 +23206,52 @@ window.renderNativeReport = function (data) {
       // rather than further down the page.
       var thin = function (n) { return n < 20 ? ' That is only ' + n + ' questions, so the next test will show whether it holds.' : ''; };
       var QB = 'In the Question Bank in your portal, do the easy and medium questions before the hard ones.';
+      /* Reviewing a question: the tiles in the question grids under this
+         card open it (with the student's answer), so the steps point there. */
+      var nWrong = nAll - (typeof totalC === 'number' ? totalC : 0) - nBlank;
+      var TILES = '<span class="plain-tiles">tap ' + (nWrong > 0 && nBlank > 0 ? 'each red (wrong) or empty (blank) tile' : nBlank > 0 && !nWrong ? 'each empty (blank) tile' : 'each red tile') +
+        ' in the question grids below</span>';
+      var hasTiles = function (x) { return x.indexOf('plain-tiles') !== -1; };
 
       var steps = [];
       /* Blanks first: on the digital SAT a wrong answer costs nothing, so a
          blank is the one point that is free to take back. */
-      var blanks = typeof skipped === 'number' ? skipped : 0;
+      var blanks = nBlank;
       if (blanks >= 3) {
         steps.push('Answer every question, even with a guess. A wrong answer costs nothing on the SAT, and you left ' + blanks +
           ' blank. When one is taking too long, pick your best answer, flag it, and move on.');
       }
-      if (startHere && pre && pre.name === startHere) {
+      if (preLead) {
         steps.push('Start with ' + named(startHere) + '. You got ' + pre.right + ' of ' + pre.total + ' right there, and ' +
           (pre.kind === 'prereq' ? escP(pre.blocks) + ' is built on it.' : 'its rules can be learned in a few weeks.') +
           thin(pre.total) + ' ' + QB);
-      } else if (leadArea && leadArea.severity === 3) {
+      } else if (clearLead) {
         var skills = (leadArea.topSkills || []).map(function (s) { return s.name || s; }).filter(Boolean).slice(0, 2);
         // "More than the rest of your test would lead us to expect" is what
-        // the gap test measures (misses beyond this student's own level), and
-        // it is why 3 misses of 14 can lead for a strong student.
+        // the gap test measures (misses beyond this student's own level).
         steps.push('Start with ' + named(startHere) + (skills.length ? ', especially ' + skills.map(namedSkill).join(' and ') : '') +
           '. You missed ' + leadArea.lead + ' of ' + leadArea.n + ' there after working on them, more than the rest of your test would lead us to expect.' +
           thin(leadArea.n) + ' ' + QB);
-      } else if (leadArea && leadArea.severity === 2) {
+      } else if (weakLead) {
+        steps.push('Go through the questions you got wrong: ' + TILES + '. One area, ' + named(startHere) +
+          ', came out weaker than the rest of your test, but not clearly enough to plan around yet; the next test will show whether it holds.');
+      } else if (leadArea && leadArea.severity === 2 && leadArea.lead > 0) {
         steps.push('Slow down on ' + named(startHere) + '. ' + leadArea.lead + ' of ' + leadArea.n +
-          ' questions there went by faster than they could be read. Read the whole question before you choose.');
+          ' questions there were answered faster than they could be read. Read the whole question before you choose.');
       } else if (c.content > 0 && c.content <= 5 && (planInputs.contentRows || []).length) {
         /* A strong student's few misses are the whole story, so name them.
            "After a long time on it" is the stuck case; the rest were missed
            at a normal pace, which is where careless slips live. */
         steps.push('Your ' + count(c.content, 'miss', 'misses') + ': ' + planInputs.contentRows.map(function (x) {
             return escP(x.sk) + ' (' + (x.diff ? x.diff : '') + (x.slow ? (x.diff ? ', ' : '') + 'after a long time on it' : '') + ')';
-          }).join('; ').replace(/ \(\)/g, '') + '. With so few, each is worth a close look: <a href="#" class="plain-detail-link">open the question list</a> ' +
-          'and decide whether it was a slip or something you didn’t know.');
+          }).join('; ').replace(/ \(\)/g, '') + '. With so few, each is worth a close look: ' + TILES +
+          ', and decide whether each was a slip or something you didn’t know.');
       } else if (c.content > 5 && c.content >= c.clock) {
-        // Spread-out misses ARE the question list, so this step carries the
-        // link, and the foundation areas (the report's own reach model) are
-        // where to begin.
+        // Spread-out misses: the foundation areas (the report's own reach
+        // model) are where to begin, if they are actually shaky here and
+        // aren't the area going well.
         var secKeys = (sections || []).map(function (s) { return s.key; });
         var starts = [];
-        // A foundation area is named only if it is actually shaky here (the
-        // same bar as the prerequisite caution) and isn't the one going well.
         var shaky = function (dom) {
           var b = (domainBucketsDx || {})[dom];
           if (!b || !b.total || (best && best.name === dom)) return false;
@@ -23103,14 +23259,19 @@ window.renderNativeReport = function (data) {
         };
         if (secKeys.indexOf('reading-writing') !== -1 && shaky('Standard English Conventions')) starts.push('Standard English Conventions (grammar and punctuation) in Reading and Writing');
         if (secKeys.indexOf('math') !== -1 && shaky('Algebra')) starts.push('Algebra in Math');
-        steps.push('Go through the questions you got wrong, easy and medium ones first: <a href="#" class="plain-detail-link">open the question-by-question list</a>. ' +
-          'They are spread across several areas' + (starts.length ? ', so start with ' + starts.join(' and ') + ': the rest builds on them.' : '.'));
+        steps.push('Go through the questions you got wrong, easy and medium ones first: ' + TILES + '. ' +
+          'They are spread across several areas' +
+          (starts.length ? ', so start with ' + starts.join(' and ') + (starts.length === 1 ? ': it is the foundation the rest builds on.' : ': they are the foundation the rest builds on.') : '.'));
       }
-      // One habit for the clock, the biggest one this test shows.
+
+      // One habit for the clock, the biggest one this test shows. Time left
+      // is read only where every answered question was timed.
       var spare = null;
       (sections || []).forEach(function (s) {
         if (!(s.timeAllottedMin > 0 && s.timeTotal > 0)) return;
-        var leftMin = (s.timeAllottedMin * 60000 - s.timeTotal) / 60000, wrong = s.t - s.c;
+        if (!s.rows.every(function (r) { return r.skipped || r.timeMs > 0; })) return;
+        var sBlank = s.rows.filter(function (r) { return r.skipped; }).length;
+        var leftMin = (s.timeAllottedMin * 60000 - s.timeTotal) / 60000, wrong = s.t - s.c - sBlank;
         if (leftMin >= 5 && leftMin / s.timeAllottedMin >= 0.15 && wrong > 0 && (!spare || leftMin > spare.min)) {
           // Extended time when the clock is well over the standard 64 (R&W) or 70 (Math) minutes.
           var std = s.key === 'math' ? 70 : 64;
@@ -23118,9 +23279,13 @@ window.renderNativeReport = function (data) {
         }
       });
       var reopened = (behaviorFlags || []).some(function (f) { return f.indexOf('<strong>Went back to answers already chosen') === 0; });
+      var outOfTime = pace.ranOut + pace.blank;
       if (blanks >= 3) {
         // already covered by the first step
-      } else if (c.clock >= 3 && c.clock >= c.content / 2) {
+      } else if (tooFastMost) {
+        steps.push('Slow down. ' + count(pace.tooFast, 'wrong answer') + ' came faster than a question can be read' +
+          (spare ? ', while you still had time left' : '') + '. Read each question to the end before you choose.');
+      } else if (fullyTimed && outOfTime >= 3 && outOfTime >= c.content / 2) {
         steps.push('When a question is taking too long, pick your best answer, flag it, and move on. Come back at the end if there is time.');
       } else if (spare) {
         /* Not "recheck the ones you flagged": the misses are often the ones
@@ -23134,20 +23299,23 @@ window.renderNativeReport = function (data) {
       } else if (c.method >= 3) {
         steps.push('When a question has taken twice as long as it should, pick your best answer, flag it, and move on.');
       }
-      /* Strong students: the week is tests (see the plan). Said as a step on
-         every report, practice tests included, where the plan isn't shown. */
-      if (lostN < 12 && !(blanks >= 3)) {
+      /* Strong students: the week is tests (see the plan). The line is 12
+         lost questions on a full 98-question test, scaled to the sitting's
+         length (a Math-only sitting has 44). Said on every report, practice
+         tests included, where the plan isn't shown. */
+      var strongCut = 12 * (nAll || 98) / 98;
+      if (lostN < strongCut && !(blanks >= 3)) {
         steps.push('Take a full practice test every week. At your level each test has only a few questions left to win, ' +
           'and from your second test on, the “Your Statistics” card on Home shows which topics keep coming back.');
       }
       // Blanks took the first step, but slow right answers are their own
-      // habit, and the plan spends the most hours on them: name where.
+      // habit: name where.
       if (blanks >= 3 && c.method >= 5 && (planInputs.methodSkills || []).length) {
-        steps.push('Get faster where right answers ran long, starting with ' + planInputs.methodSkills.map(escP).join(' and ') +
-          '. The timed sets for that are in the plan below.');
+        steps.push('Get faster where right answers ran long, starting with ' + planInputs.methodSkills.map(escP).join(' and ') + '.' +
+          (planInputs.weekly > 0 ? ' The timed sets for that are in the plan below.' : ''));
       }
-      if (lostN + c.method > 0 && !steps.some(function (x) { return x.indexOf('plain-detail-link') !== -1; })) {
-        steps.push('Go through the questions you missed: <a href="#" class="plain-detail-link">open the question-by-question list</a>. Each one opens the question itself.');
+      if (lostN > 0 && !steps.some(hasTiles)) {
+        steps.push('Go through the questions you missed: ' + TILES + ' to see each question and your answer.');
       }
       var hoursHtml = planInputs.weekly > 0
         ? '<p class="plain-well">About <b>' + planInputs.weeklyText + ' hour' + (planInputs.weekly === 1 ? '' : 's') + ' a week</b> of practice for now. “Your next four weeks” below splits it up.</p>'
@@ -23158,18 +23326,24 @@ window.renderNativeReport = function (data) {
       var late = (behaviorFlags || []).some(function (f) { return f.indexOf('<strong>Taken late at night') === 0; });
       var nAnswered = nAll - nBlank, accA = nAnswered > 0 && typeof totalC === 'number' ? Math.round(100 * totalC / nAnswered) : null;
       var who = escP(first);
+      var wasWere = function (n) { return n === 1 ? ' was' : ' were'; };
+      var mainName = preLead || clearLead ? startHere : '';
       var problem = !lostN ? (c.method ? 'Nothing on this test cost points; the only thing to watch is time.' : 'Nothing on this test cost points.')
-        : (c.clock >= 1.5 * c.content && accA !== null)
-        ? who + ' got ' + accA + '% of the questions they answered right. The problem is time: ' +
-          (nBlank ? nBlank + ' were left blank.' : c.clock + ' were lost to pace: rushed, or reached with no time left.')
-        : (leadArea && leadArea.severity === 3)
-        ? 'The main gap is ' + escP(startHere) + (GLOSS[startHere] ? ' (' + GLOSS[startHere] + ')' : '') + '.'
+        : (c.clock >= 1.5 * c.content)
+        ? (accA !== null ? who + ' got ' + accA + '% of the questions they answered right. ' : '') +
+          (tooFastMost
+            ? 'The problem is pace, not knowledge: ' + count(pace.tooFast, 'question') + wasWere(pace.tooFast) + ' answered faster than ' + (pace.tooFast === 1 ? 'it' : 'they') + ' could be read.'
+            : !pace.ranOut && !pace.tooFast ? 'The only points lost were ' + count(pace.blank, 'question') + ' left blank.'
+            : 'The problem is time: ' + joinAnd(paceParts) + '.')
+        : mainName
+        ? 'The main gap is ' + escP(mainName) + (GLOSS[mainName] ? ' (' + GLOSS[mainName] + ')' : '') + '.'
         : c.content > 5 ? 'The misses are spread across the material rather than one topic.'
-        : 'Only ' + count(c.content, 'question') + ' were missed after real work, so there is no topic to fix, just those to go through.';
+        : count(c.content, 'question') + wasWere(c.content) + ' missed' + (fullyTimed ? ' after real work' : '') +
+          ', so there is no topic to fix, just ' + (c.content === 1 ? 'that one' : 'those') + ' to go through.';
       var leadWork = ['content', 'method', 'clock'].reduce(function (a, k) { return c[k] > c[a] ? k : a; }, 'content');
       var planLine = planInputs.weekly > 0
         ? ' The plan is about ' + planInputs.weeklyText + (planInputs.weekly === 1 ? ' hour' : ' hours') + ' a week, mostly ' +
-          (planInputs.mode === 'tests' ? 'full practice tests'
+          (planInputs.mode === 'tests' ? 'full practice tests' : planInputs.mode === 'pace' ? 'timed practice'
             : { content: 'relearning', method: 'timed practice', clock: 'timed practice' }[leadWork]) + '.'
         : '';
       var parentHtml = '<p class="plain-parent"><b>For parents:</b> ' + problem + planLine +
@@ -23182,7 +23356,7 @@ window.renderNativeReport = function (data) {
       box.innerHTML =
         '<div class="plain-head"><h2>Your report in one minute</h2>' +
           '<button type="button" class="how-btn how-all-btn"></button></div>' +
-        scoreHtml + dotsHtml +
+        scoreHtml + rangeHtml +
         '<div class="plain-cols">' +
           '<div><div class="plain-label">Where your points went</div>' + lostHtml + '</div>' +
           '<div><div class="plain-label">Do these next</div><ol class="plain-steps">' +
@@ -23197,14 +23371,6 @@ window.renderNativeReport = function (data) {
         allBtn.textContent = on ? 'Hide the calculations' : 'Show every calculation';
       }
       allBtn.addEventListener('click', function () { root.classList.toggle('how-all'); syncAll(); });
-      // The question list is collapsed by default; the link opens it.
-      var qLink = box.querySelector('.plain-detail-link');
-      if (qLink) qLink.addEventListener('click', function (ev) {
-        ev.preventDefault();
-        var p2 = document.getElementById('page2'), tg = document.getElementById('detail-toggle');
-        if (p2 && p2.style.display === 'none' && tg) tg.click();
-        else if (p2) p2.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      });
       syncAll();
       box.style.display = '';
     } catch (e) { if (window.console) console.warn('plain layer:', e); }
