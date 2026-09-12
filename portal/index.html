@@ -10160,7 +10160,10 @@ window.Portal = {
   var sigCalcFocusN = [];   // [q] = separate entries into the Desmos frame
   var sigRefOpens = [];     // [q] = reference-sheet opens while q was on screen
   var sigRefMs = [];        // [q] = ms the reference sheet was open while q was on screen
-  var sigReviewAtMs = null; // ms into the module when the review page was first reached
+  var sigReviewAtMs = null; // ms into the module of the first review-page arrival after every question was seen
+  var sigReviewPageAt = null; // when the current stay on the review page began, or null
+  var sigReviewPageMs = 0;  // total ms on the review page this module
+  var sigSubmitAtMs = null; // ms into the module when it was submitted
   var sigModuleStartAt = null;
   var sigOpen = -1;         // index into sigVisitLog of the visit in progress, or -1
   var sigSegAt = null;      // start of the part of the open visit not yet added to it
@@ -10181,7 +10184,7 @@ window.Portal = {
     sigCalcFocusN = new Array(n).fill(0);
     sigRefOpens = new Array(n).fill(0);
     sigRefMs = new Array(n).fill(0);
-    sigReviewAtMs = null;
+    sigReviewAtMs = null; sigReviewPageAt = null; sigReviewPageMs = 0; sigSubmitAtMs = null;
     sigModuleStartAt = Date.now();
     sigOpen = -1; sigSegAt = null; sigNavBreak = true;
     sigCalcOpenAt = null; sigCalcFocusAt = null; sigRefAt = null;
@@ -10220,6 +10223,7 @@ window.Portal = {
     if (sigModuleStartAt === null || i < 0 || i >= sigElimEver.length) return;
     if (sigOpen >= 0 && sigVisitLog[sigOpen] && sigVisitLog[sigOpen][0] === i) return; // already open
     if (sigOpen >= 0) sigVisitEnd(now);
+    sigReviewPageLeave(now);
     var last = sigVisitLog[sigVisitLog.length - 1];
     if (last && last[0] === i && !sigNavBreak) {
       sigOpen = sigVisitLog.length - 1;
@@ -10258,9 +10262,27 @@ window.Portal = {
   });
   var sigElim = sigSafe(function (i) { if (current >= 0 && current < sigElimEver.length) sigElimEver[current] |= (1 << i); });
   var sigLeave = sigSafe(function () { sigNavBreak = true; });
+  /* The review phase starts at the first arrival on the review page AFTER
+     every question has been seen. The page is reachable from the navigator
+     on any question, and counting an early trip (say from question 1) made
+     every later first-pass answer a "review change" and faked a review pass
+     (audit 2026-09-12). Time on the page itself is kept separately. */
+  function sigAllSeen() {
+    var seen = {}, count = 0;
+    sigVisitLog.forEach(function (v) { if (!seen[v[0]]) { seen[v[0]] = true; count++; } });
+    return count >= sigElimEver.length && sigElimEver.length > 0;
+  }
+  function sigReviewPageLeave(now) {
+    if (sigReviewPageAt === null) return;
+    sigReviewPageMs += Math.max(0, now - sigReviewPageAt);
+    sigReviewPageAt = null;
+  }
   var sigReviewReached = sigSafe(function () {
     sigNavBreak = true;
-    if (sigReviewAtMs === null && sigModuleStartAt !== null) sigReviewAtMs = Date.now() - sigModuleStartAt;
+    if (sigModuleStartAt === null) return;
+    var now = Date.now();
+    if (sigReviewPageAt === null) sigReviewPageAt = now;
+    if (sigReviewAtMs === null && sigAllSeen()) sigReviewAtMs = now - sigModuleStartAt;
   });
   var sigCalcToggle = sigSafe(function (open) {
     var now = Date.now();
@@ -10307,12 +10329,16 @@ window.Portal = {
         return m;
       };
       var hex = function (m) { return (m || 0).toString(16); };
+      // Taken as the module is submitted (finishCurrentModule is the only caller).
+      var now = Date.now();
+      sigReviewPageLeave(now);
+      if (sigModuleStartAt !== null) sigSubmitAtMs = now - sigModuleStartAt;
       return {
         n: sigElimEver.length,
         el: canonical(elims.map(mask)).map(hex).join(''),
         eu: canonical(sigElimEver.map(function (m, p) { return m | mask(elims[p]); })).map(hex).join(''),
         vl: sigVisitLog.map(function (v) { return [toBank(v[0]), v[1], v[2], v[3], v[4]]; }),
-        rv: sigReviewAtMs,
+        rv: sigReviewAtMs, rp: sigReviewPageMs, sb: sigSubmitAtMs,
         co: canonical(sigCalcOpenMs), cf: canonical(sigCalcFocusMs), cn: canonical(sigCalcFocusN),
         ro: canonical(sigRefOpens), rm: canonical(sigRefMs)
       };
@@ -10328,12 +10354,12 @@ window.Portal = {
     try {
       if (!m2 || (twoModules && !m1)) return null;
       var parts = twoModules ? [m1, m2] : [m2];
-      var out = { el: '', eu: '', vl: [], rv: [], co: [], cf: [], cn: [], ro: [], rm: [] };
+      var out = { el: '', eu: '', vl: [], rv: [], rp: [], sb: [], co: [], cf: [], cn: [], ro: [], rm: [] };
       var offset = 0;
       parts.forEach(function (m) {
         out.el += m.el; out.eu += m.eu;
         m.vl.forEach(function (v) { out.vl.push([v[0] + offset, v[1], v[2], v[3], v[4]]); });
-        out.rv.push(m.rv);
+        out.rv.push(m.rv); out.rp.push(m.rp == null ? null : m.rp); out.sb.push(m.sb == null ? null : m.sb);
         ['co', 'cf', 'cn', 'ro', 'rm'].forEach(function (k) { out[k] = out[k].concat(m[k]); });
         offset += m.n;
       });
@@ -10355,10 +10381,14 @@ window.Portal = {
         return any ? o : undefined;
       };
       return {
-        sv: 1,
+        // 2: rv is the first review-page arrival after every question was
+        // seen, and rp (seconds on the review page) / sb (submit time) exist.
+        sv: 2,
         el: sig.el, eu: sig.eu,
         vl: sig.vl.map(function (v) { return [v[0], tenth(v[1]), tenth(v[2]), v[3], v[4]]; }),
         rv: sig.rv.map(function (x) { return x == null ? null : tenth(x); }),
+        rp: (sig.rp || []).map(function (x) { return x == null ? null : tenth(x); }),
+        sb: (sig.sb || []).map(function (x) { return x == null ? null : tenth(x); }),
         co: sparse(sig.co, function (ms) { return ms > 0 ? tenth(ms) : null; }),
         cf: sparse(sig.cf, function (ms, i) { return (ms > 0 || sig.cn[i] > 0) ? [tenth(ms), sig.cn[i] || 0] : null; }),
         rf: sparse(sig.ro, function (n, i) { return (n > 0 || sig.rm[i] > 0) ? [n, tenth(sig.rm[i])] : null; })
@@ -10367,7 +10397,8 @@ window.Portal = {
   }
   function sigStateForSave() {
     return { vl: sigVisitLog, eu: sigElimEver, co: sigCalcOpenMs, cf: sigCalcFocusMs, cn: sigCalcFocusN,
-             ro: sigRefOpens, rm: sigRefMs, rv: sigReviewAtMs, t0: sigModuleStartAt };
+             ro: sigRefOpens, rm: sigRefMs, rv: sigReviewAtMs, t0: sigModuleStartAt,
+             nb: sigNavBreak, rpMs: sigReviewPageMs };
   }
   function sigRestore(st, n) {
     var arr = function (a) { return (Array.isArray(a) && a.length === n) ? a : new Array(n).fill(0); };
@@ -10381,7 +10412,13 @@ window.Portal = {
     sigRefOpens = arr(st.ro); sigRefMs = arr(st.rm);
     sigReviewAtMs = (typeof st.rv === 'number') ? st.rv : null;
     if (typeof st.t0 === 'number') sigModuleStartAt = st.t0;
-    sigNavBreak = false; // a restore resumes the question it left off on
+    if (typeof st.rpMs === 'number') sigReviewPageMs = st.rpMs;
+    /* A restore resumes the question it left off on. But if the student had
+       left it on purpose (to the review page, say), the next look is a new
+       visit: forcing false merged a review-page correction into the visit
+       from before the review and erased it (audit 2026-09-12). Saves from
+       before this field existed keep the old behaviour. */
+    sigNavBreak = (typeof st.nb === 'boolean') ? st.nb : false;
   }
 
   /* ═══ ADAPTIVE SAT MODULES ═══
@@ -11011,9 +11048,13 @@ window.Portal = {
       if (lastLiveTickAt !== null) {
         var gap = Date.now() - lastLiveTickAt;
         if (gap > AWAY_GRACE_MS) {
+          // Restart only a question that was actually open. On the review
+          // page none is, and restarting one invented a phantom revisit and
+          // counted the gap as review time on the last question.
+          var qWasOpen = questionEnterTime !== null && !dxMain.classList.contains('dx-checking');
           pauseQuestionTimeAt(lastLiveTickAt);
           recordInterruption('gap', gap);
-          beginQuestionTime(current);
+          if (qWasOpen) beginQuestionTime(current);
         }
       }
       lastKnownSectionRemainingMs = remaining;
@@ -11617,6 +11658,11 @@ window.Portal = {
     // advance on its own. The student must press Next (or Enter for a
     // grid-in) to move on, matching the real digital SAT.
     sigPick(answers[current] != null && answers[current] !== i);
+    // Picking a crossed-out choice un-crosses it, whether by click or by
+    // letter key (the key path used to leave it crossed out, a state the
+    // signals treat as bad data and discard).
+    var crossed = elims[current] ? elims[current].indexOf(i) : -1;
+    if (crossed !== -1) elims[current].splice(crossed, 1);
     answers[current] = i;
     renderQuestion();
   }
@@ -12341,7 +12387,11 @@ window.Portal = {
               return scoreSatSectionScore({ t: t, c: c, t1: m1, c1: c1, t2: t - m1, c2: c2 }, curve);
             }
           });
-        } catch (e) { return null; }
+        } catch (e) {
+          // A marker, not a blank: a failed summary must not look like an
+          // attempt from before capture existed (the backend stores it as is).
+          return { v: 1, err: 'summarize: ' + String((e && e.message) || e).slice(0, 160) };
+        }
       })();
       var entry = {
         date: new Date().toISOString(),
@@ -20341,7 +20391,7 @@ window.renderNativeReport = function (data) {
     if (sec.rows.some(function (r) { return r.skipped; })) return true;
     if (sec.timeAllottedMin > 0 && sec.timeTotal >= 0.95 * sec.timeAllottedMin * 60000) return true;
     var raw = (data.s || []).filter(function (s) { return s.k === sec.key; })[0];
-    if (raw && raw.sv === 1 && Array.isArray(raw.rv) && raw.tl > 0) {
+    if (raw && (raw.sv === 1 || raw.sv === 2) && Array.isArray(raw.rv) && raw.tl > 0) {
       var perModuleSec = raw.tl * 60 / raw.rv.length;
       return raw.rv.some(function (t) { return t === null || (perModuleSec - t) < 0.05 * perModuleSec; });
     }
@@ -20361,6 +20411,9 @@ window.renderNativeReport = function (data) {
     var secondsCutoff = typical ? Math.min(typical * RUSHED_REL, RUSHED_ABS_CAP) : 0;
     return function (r) {
       var t = pacingTimeMs(r), bms = budgetOf(r);
+      // No timing saved reads as 0 ms, which is under every cutoff; an old
+      // report would bill every miss as hurried and say nothing was lost.
+      if (!(t > 0)) return false;
       if (typicalRatio && bms) return t / bms < RUSHED_REL * typicalRatio;
       if (typical) return t < secondsCutoff;
       return bms ? t < bms * RUSHED_BUDGET_REL : false;
@@ -20370,11 +20423,15 @@ window.renderNativeReport = function (data) {
     var usingFirstPass = s7.rows.some(function (r) { return r.firstVisitMs != null; });
     var correctTimes = s7.rows.filter(function (r) { return r.ok && r.q.type === 'mc' && pacingTimeMs(r) > 0; }).map(pacingTimeMs);
     var typical = median(correctTimes);
-    if (!typical) return; // no usable timing data for this section — skip rather than guess
+    // Skip only when the section saved no timing at all. With timing but no
+    // right multiple-choice answer (typical = 0), the budget-based rules
+    // still apply; skipping it printed "did not save timing", which was false.
+    if (!s7.rows.some(function (r) { return pacingTimeMs(r) > 0; })) return;
     var sectionMult = (budgetRollups[s7.key] && budgetRollups[s7.key].mult) || 1;
     var cutoff = Math.min(typical * RUSHED_REL, RUSHED_ABS_CAP);
     var luckyCutoff = Math.min(typical * LUCKY_REL, LUCKY_ABS_CAP);
-    var stuckCutoff = typical * STUCK_REL;
+    // No own-pace baseline (no right answers to time), no "stuck" judgement.
+    var stuckCutoff = typical ? typical * STUCK_REL : Infinity;
     var hurry = hurriedJudge(s7, sectionMult, typical);
     /* ═══ A GATE THAT WAS TRIED AND REMOVED -- DO NOT PUT IT BACK ═══
        Do not make the below-floor discount conditional on this student's
@@ -21028,7 +21085,7 @@ window.renderNativeReport = function (data) {
           (top.notRead != null && top.notRead !== top.rushed ? ' (' + top.rushed + ' of them wrong)' : ', and came back wrong') +
           ' &mdash; slow down and check work before re-teaching.'
         : '<strong>Nothing here needs relearning.</strong> ' + esc(top.skill) + ' was slow but right: ' + top.inefficient + ' of ' + top.total +
-          ' right answers took far longer than typical. That is speed work, covered in “Where the time went”.'
+          ' right answers took far longer than typical. That becomes speed work on a test where the clock runs short; see “Where the time went”.'
       ) + (top.severity === 1 ? '' : detail + ciTxt);
     }
 
@@ -22048,10 +22105,12 @@ window.renderNativeReport = function (data) {
           bucket('clock', sec, r, 'answered too fast to have read it');
           return;
         }
-        // A genuinely rushed wrong answer is deliberately NOT content: it is
-        // not evidence the material was unknown, and section 1 already
-        // reports it as its own kind of problem.
-        if (hurried) return;
+        // A genuinely rushed wrong answer is NOT content: it is not evidence
+        // the material was unknown. It is a pacing loss, and it has to land
+        // somewhere, or "where your points went" says nothing was lost for a
+        // student who rushed every miss (audit 2026-09-12).
+        if (hurried) { bucket('clock', sec, r, 'answered in a rush'); return; }
+        if (!(tMs > 0)) { bucket('content', sec, r, 'missed (no timing saved)'); return; }
         var slow = qBudgetMs ? (tMs >= qBudgetMs * STUCK_BUDGET_REL)
                              : (typical && tMs >= typical * STUCK_REL);
         bucket('content', sec, r, slow ? 'worked at it, still missed' : 'missed at a normal pace');
@@ -22066,11 +22125,17 @@ window.renderNativeReport = function (data) {
       }
       // Questions that came after the module's clock was already spent —
       // answered, but not really attempted.
+      /* Per module (each has its own clock), wrong answers only (a right
+         answer lost no points), and never a question already in a bucket. It
+         used to run both modules against the whole section clock, so it
+         almost never fired, and when it did it could bill right answers. */
       if (roll && sec.timeAllottedMin > 0) {
-        var budget = sec.timeAllottedMin * 60000, run = 0;
+        var modBudget = sec.timeAllottedMin * 60000 / (sec.hasModules ? 2 : 1), runBy = {};
+        var inAny = function (r) { return ['content', 'method', 'clock'].some(function (k) { return buckets[k].some(function (x) { return x.r === r; }); }); };
         sec.rows.forEach(function (r) {
-          run += (r.timeMs || 0);
-          if (run > budget) bucket('clock', sec, r, 'clock already spent');
+          var m = r.moduleIndex || 0;
+          runBy[m] = (runBy[m] || 0) + (r.timeMs || 0);
+          if (runBy[m] > modBudget && !r.ok && !inAny(r)) bucket('clock', sec, r, 'clock already spent');
         });
       }
     });
@@ -22100,8 +22165,8 @@ window.renderNativeReport = function (data) {
         color: 'var(--red)', short: 'questions worked through and still missed' },
       { key: 'method',  barLabel: 'took too long',        name: 'Method',  section: 'Where the time went',
         color: 'var(--tan)', short: 'right answers that cost too much time' },
-      { key: 'clock',   barLabel: 'ran out of clock',     name: 'Pacing',  section: 'How you used the clock',
-        color: '#4E6070',    short: 'questions the clock didn’t leave time for' }
+      { key: 'clock',   barLabel: 'rushed or out of time',     name: 'Pacing',  section: 'How you used the clock',
+        color: '#4E6070',    short: 'questions rushed through or that the clock didn’t leave time for' }
     ];
     if (!CAUSES.some(function (c) { return buckets[c.key].length; })) return;
 
@@ -22612,7 +22677,10 @@ window.renderNativeReport = function (data) {
        skills whose misses POOL across tests (Home's "Your Statistics" card,
        from two tests on). This replaces the taper that shrank the week
        toward an hour, which also covered the old one-hour maintenance week. */
-    var strong = pointsLost < FULL_WEEK_AT;
+    // Also a week whose only losses were to pace (blanks, rushing, the
+    // clock): no topic to relearn, so the full week goes to tests, rather
+    // than the old one-and-a-half-hour pacing-only week.
+    var strong = pointsLost < FULL_WEEK_AT || (causes.content + causes.method === 0);
     var STRONG_TEST_HOURS = 3, STRONG_SHARPEN_HOURS = 1.5;
     if (strong) weekly = STRONG_TEST_HOURS + STRONG_SHARPEN_HOURS;
     planInputs.mode = strong ? 'tests' : null;
@@ -22681,7 +22749,7 @@ window.renderNativeReport = function (data) {
       rows.push({
         h: hours.clock, unit: unitFor(hours.clock), color: '#4E6070',
         what: '<b>Pacing.</b> One full timed module a week, in one sitting, under real conditions &mdash; phone away, clock visible, no restarts. Review it the next day, not the same night. ' +
-          '<em>' + causes.clock + ' question' + (causes.clock === 1 ? '' : 's') + ' on this test ' + (causes.clock === 1 ? 'was' : 'were') + ' never really answered: either time ran out first, or it went by too fast to have been read.</em>'
+          '<em>' + causes.clock + ' question' + (causes.clock === 1 ? '' : 's') + ' on this test ' + (causes.clock === 1 ? 'was' : 'were') + ' lost to pace: left blank, rushed, or reached after time ran out.</em>'
       });
     }
     if (strong) {
@@ -22714,7 +22782,9 @@ window.renderNativeReport = function (data) {
 
     var lede = strong
       ? 'About <b>' + hrs(weekly) + ' hours a week</b>, mostly full practice tests. ' +
-        (pointsLost === 0
+        (causes.content + causes.method === 0 && pointsLost > 0
+          ? 'Everything this test lost went to pace, so the work is taking full tests at a steady pace, not relearning topics.'
+          : pointsLost === 0
           ? 'Nothing on this test cost you points, so the job now is finding the few questions a harder test would catch, and that takes more full tests.'
           : 'You lost only ' + pointsLost + ' question' + (pointsLost === 1 ? '' : 's') + ' here, so the job now is finding the few that keep costing you, and that takes more tests, not a longer topic list.')
       : maintenanceOnly
@@ -22829,7 +22899,10 @@ window.renderNativeReport = function (data) {
       // where a retest would land: a retest spreads wider than this.
       var scoreHtml = (reportBand && reportBand.val != null)
         ? '<p class="plain-score">You scored <b>' + reportBand.val + '</b>. One test can’t pin a score down exactly: ' +
-          'your real level is most likely between <b>' + reportBand.lo + '</b> and <b>' + reportBand.hi + '</b> (about 4 chances in 5).</p>'
+          'your real level is most likely between <b>' + reportBand.lo + '</b> and <b>' + reportBand.hi + '</b> (about 4 chances in 5).' +
+          // The hardest test reads about 87 points low against the others.
+          (data.pt && data.pt === ((window.MorettiSignals && window.MorettiSignals.HARDEST_TEST_ID) || 'sat-practice-11')
+            ? ' This was the hardest practice test, where the same student scores about 87 points lower than on the others, so compare it only with itself.' : '') + '</p>'
         : '';
 
       /* The same range as twenty dots, a quantile dotplot (Kay et al. 2016;
@@ -22848,7 +22921,10 @@ window.renderNativeReport = function (data) {
         var dx = function (v) { return 12 + (Math.max(dLo, Math.min(dHi, v)) - dLo) / ((dHi - dLo) || 1) * (DW - 24); };
         var stack = {}, inside = 0, circles = [];
         Z20.forEach(function (z) {
-          var v = reportBand.val + z * reportBand.sd, bin = Math.round(dx(v) / DD);
+          // Clamped to the scale: a true score can't be above the top or below
+          // the floor, and an unclamped dot drawn at the edge but counted as
+          // outside made "4 in 5" read "9 of 20" at 1600 (audit 2026-09-12).
+          var v = Math.min(reportBand.max, Math.max(reportBand.min, reportBand.val + z * reportBand.sd)), bin = Math.round(dx(v) / DD);
           var k = stack[bin] = (stack[bin] || 0) + 1, inR = v >= reportBand.lo && v <= reportBand.hi;
           if (inR) inside++;
           circles.push({ x: bin * DD, k: k, inR: inR });
@@ -22875,18 +22951,23 @@ window.renderNativeReport = function (data) {
       // Where the points went. Method is right answers, so it is time, not
       // points, and is said that way.
       var lostN = c.content + c.clock;
-      var lede = !lostN
-        ? (c.method ? 'Every question you answered, you got right. What cost you was time.' : 'Nothing on this test cost you points that we could trace to a cause.')
+      // An old report with no per-question timing can count the misses but
+      // can't say which were worked through or which ran into the clock.
+      var timed = (sections || []).some(function (s) { return s.rows.some(function (r) { return r.timeMs > 0; }); });
+      var lede = !timed && lostN
+        ? 'This report has no per-question timing, so it can count what you missed but not say which questions ran into the clock.'
+        : !lostN
+        ? (c.method ? 'Every question you answered, you got right. What cost you was time.' : 'Nothing on this test cost you points.')
         : c.content >= 1.5 * c.clock
         ? 'Most of what you lost was on questions you worked through and still got wrong, not on the clock.'
         : c.clock >= 1.5 * c.content
-        ? 'Most of what you lost was to the clock, not to what you know.'
+        ? 'Most of what you lost was to pace (rushing or running out of time), not to what you know.'
         : 'What you lost is split between questions you got wrong and questions the clock took.';
       // Lost points biggest first; the slow right answers always last, since
       // they cost time rather than points.
       var lines = [
-        { n: c.content, t: count(c.content, 'question') + ' you worked on and still got wrong' },
-        { n: c.clock, t: count(c.clock, 'question') + ' the clock didn’t really let you answer: left blank, or answered in a rush with no real time left' }
+        { n: c.content, t: count(c.content, 'question') + (timed ? ' you worked on and still got wrong' : ' answered wrong') },
+        { n: c.clock, t: count(c.clock, 'question') + ' lost to pace: left blank, rushed through, or reached with no real time left' }
       ].filter(function (x) { return x.n > 0; }).sort(function (a, b) { return b.n - a.n; });
       if (c.method > 0) lines.push({ n: c.method, t: count(c.method, 'right answer') + ' that took so long that later questions ran short on time' });
       var lostHtml = '<p class="plain-lede">' + lede + '</p>' +
@@ -22904,7 +22985,9 @@ window.renderNativeReport = function (data) {
       // No strong area is not no strength: answering everything inside the
       // clock is real, and it tells a struggling student where the work isn't.
       else if (nAll && !nBlank) lostHtml += '<p class="plain-well"><b>Going well:</b> you answered all ' + nAll + ' questions' +
-        (!c.clock && !c.method ? ', and the clock was not a problem, so the work is the material, not speed.' : '.') + '</p>';
+        // Only claim the clock was fine when the timing was actually saved.
+        (!c.clock && !c.method && (sections || []).some(function (s) { return s.rows.some(function (r) { return r.timeMs > 0; }); })
+          ? ', and the clock was not a problem, so the work is the material, not speed.' : '.') + '</p>';
 
       // The area the knowledge section starts with, and what it was named for.
       var startHere = '';
@@ -22998,8 +23081,15 @@ window.renderNativeReport = function (data) {
         // where to begin.
         var secKeys = (sections || []).map(function (s) { return s.key; });
         var starts = [];
-        if (secKeys.indexOf('reading-writing') !== -1) starts.push('Standard English Conventions (grammar and punctuation) in Reading and Writing');
-        if (secKeys.indexOf('math') !== -1) starts.push('Algebra in Math');
+        // A foundation area is named only if it is actually shaky here (the
+        // same bar as the prerequisite caution) and isn't the one going well.
+        var shaky = function (dom) {
+          var b = (domainBucketsDx || {})[dom];
+          if (!b || !b.total || (best && best.name === dom)) return false;
+          return (b.mastered + b.skimmed + b.inefficient) / b.total < PREREQ_SHAKY_BELOW;
+        };
+        if (secKeys.indexOf('reading-writing') !== -1 && shaky('Standard English Conventions')) starts.push('Standard English Conventions (grammar and punctuation) in Reading and Writing');
+        if (secKeys.indexOf('math') !== -1 && shaky('Algebra')) starts.push('Algebra in Math');
         steps.push('Go through the questions you got wrong, easy and medium ones first: <a href="#" class="plain-detail-link">open the question-by-question list</a>. ' +
           'They are spread across several areas' + (starts.length ? ', so start with ' + starts.join(' and ') + ': the rest builds on them.' : '.'));
       }
@@ -23043,7 +23133,7 @@ window.renderNativeReport = function (data) {
         steps.push('Get faster where right answers ran long, starting with ' + planInputs.methodSkills.map(escP).join(' and ') +
           '. The timed sets for that are in the plan below.');
       }
-      if (!steps.some(function (x) { return x.indexOf('plain-detail-link') !== -1; })) {
+      if (lostN + c.method > 0 && !steps.some(function (x) { return x.indexOf('plain-detail-link') !== -1; })) {
         steps.push('Go through the questions you missed: <a href="#" class="plain-detail-link">open the question-by-question list</a>. Each one opens the question itself.');
       }
       var hoursHtml = planInputs.weekly > 0
@@ -23055,10 +23145,10 @@ window.renderNativeReport = function (data) {
       var late = (behaviorFlags || []).some(function (f) { return f.indexOf('<strong>Taken late at night') === 0; });
       var nAnswered = nAll - nBlank, accA = nAnswered > 0 && typeof totalC === 'number' ? Math.round(100 * totalC / nAnswered) : null;
       var who = escP(first);
-      var problem = !lostN ? 'Nothing on this test cost points; the only thing to watch is time.'
+      var problem = !lostN ? (c.method ? 'Nothing on this test cost points; the only thing to watch is time.' : 'Nothing on this test cost points.')
         : (c.clock >= 1.5 * c.content && accA !== null)
         ? who + ' got ' + accA + '% of the questions they answered right. The problem is time: ' +
-          (nBlank ? nBlank + ' were left blank.' : c.clock + ' never got real time.')
+          (nBlank ? nBlank + ' were left blank.' : c.clock + ' were lost to pace: rushed, or reached with no time left.')
         : (leadArea && leadArea.severity === 3)
         ? 'The main gap is ' + escP(startHere) + (GLOSS[startHere] ? ' (' + GLOSS[startHere] + ')' : '') + '.'
         : c.content > 5 ? 'The misses are spread across the material rather than one topic.'
@@ -23070,7 +23160,7 @@ window.renderNativeReport = function (data) {
             : { content: 'relearning', method: 'timed practice', clock: 'timed practice' }[leadWork]) + '.'
         : '';
       var parentHtml = '<p class="plain-parent"><b>For parents:</b> ' + problem + planLine +
-        ' The best help at home is protecting those hours, and making the next practice test one quiet, timed sitting' +
+        (planLine ? ' The best help at home is protecting those hours, and making' : ' The best help at home is making') + ' the next practice test one quiet, timed sitting' +
         (late ? ' earlier in the day' : '') + ', with the phone in another room.</p>';
       var lateHtml = late
         ? '<p class="plain-well"><b>Worth knowing:</b> this test was handed in late at night. Tiredness can cost points, so this score may understate you. Take the next one earlier in the day.</p>'

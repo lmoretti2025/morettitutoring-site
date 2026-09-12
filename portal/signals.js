@@ -111,7 +111,7 @@ var MorettiSignals = (function () {
                 moduleSec: [s1, s2]               allotted seconds per module (default: tl split evenly)
      Returns { recorded:false } for a section captured before signals existed. */
   function decodeSection(sec, questions, cfg) {
-    if (!sec || sec.sv !== 1 || !Array.isArray(sec.vl) || !questions || !cfg || typeof cfg.grade !== 'function') {
+    if (!sec || (sec.sv !== 1 && sec.sv !== 2) || !Array.isArray(sec.vl) || !questions || !cfg || typeof cfg.grade !== 'function') {
       return { recorded: false };
     }
     var n = questions.length;
@@ -141,14 +141,25 @@ var MorettiSignals = (function () {
 
     // Where each module's review phase starts: the first arrival on the
     // review page, else the end of the first real (not passing-through)
-    // look at the module's last question, else never.
+    // look at the module's last question, else never. Never before every
+    // question in the module has been seen: the review page is reachable
+    // from the navigator on any question, and a trip there from question 1
+    // counted every later first-pass answer as a review change and faked a
+    // review pass (audit 2026-09-12). Capture version 2 records the first
+    // arrival AFTER everything was seen; for version 1 this check is what
+    // throws out an early arrival.
     var reviewStart = [];
     for (var m = 0; m < nMods; m++) {
+      var lo = m === 0 ? 0 : m1, hi = m === 0 ? m1 : n, allSeenAt = 0;
+      for (var qq = lo; qq < hi; qq++) {
+        var fv = visits[qq][0];
+        allSeenAt = fv ? Math.max(allSeenAt, fv.t0 + fv.dur) : Infinity;
+      }
       var rvm = Array.isArray(sec.rv) ? sec.rv[m] : null;
-      if (typeof rvm === 'number') { reviewStart.push(rvm); continue; }
+      if (typeof rvm === 'number' && rvm >= allSeenAt) { reviewStart.push(rvm); continue; }
       var lastQ = m === 0 ? m1 - 1 : n - 1;
       var fl = (visits[lastQ] || []).filter(function (v) { return v.dur >= glance; })[0];
-      reviewStart.push(fl ? fl.t0 + fl.dur : Infinity);
+      reviewStart.push(fl ? Math.max(fl.t0 + fl.dur, allSeenAt) : Infinity);
     }
 
     var rows = [];
@@ -190,6 +201,8 @@ var MorettiSignals = (function () {
       });
 
       var real = vs.filter(function (v) { return v.dur >= glance; });
+      // Time on real return visits (every real look after the first).
+      var revisitSec = real.slice(1).reduce(function (s2, v) { return s2 + v.dur; }, 0);
       // A skip is any first look that ended blank, however short: pressing
       // Next straight away is the most deliberate skip there is.
       var skipFirst = !!(vs[0] && logAnswer(Q, vs[0].end) === null);
@@ -209,7 +222,7 @@ var MorettiSignals = (function () {
         final: final, finalOk: finalOk, initial: initial,
         initialOk: initial !== null && cfg.grade(Q, initial),
         flagged: flagged,
-        visits: vs.length, realVisits: real.length, revisits: Math.max(0, real.length - 1),
+        visits: vs.length, realVisits: real.length, revisits: Math.max(0, real.length - 1), revisitSec: revisitSec,
         timeSec: vs.reduce(function (s, v) { return s + v.dur; }, 0),
         changes: changes, switches: switches,
         skipFirst: skipFirst,
@@ -247,8 +260,10 @@ var MorettiSignals = (function () {
       // the score had the student submitted on reaching the review page.
       // Counting change events instead double-counts a question that was
       // answered and then corrected within the review.
-      var gain = 0;
-      if (isFinite(rs)) inMod.forEach(function (r) { gain += (r.finalOk ? 1 : 0) - (r.standingOk ? 1 : 0); });
+      // Unknown (null), not zero, when the module never reached a review.
+      var gain = null;
+      if (isFinite(rs)) { gain = 0; inMod.forEach(function (r) { gain += (r.finalOk ? 1 : 0) - (r.standingOk ? 1 : 0); }); }
+      var rpm = Array.isArray(sec.rp) ? sec.rp[mm] : null, sbm = Array.isArray(sec.sb) ? sec.sb[mm] : null;
       modules.push({
         module: mm, questions: inMod.length,
         reviewReached: Array.isArray(sec.rv) && typeof sec.rv[mm] === 'number',
@@ -257,6 +272,11 @@ var MorettiSignals = (function () {
         reviewSec: reviewSec,
         reviewFlaggedShare: reviewSec > 0 ? reviewFlaggedSec / reviewSec : null,
         reviewGain: gain,
+        // Capture v2: seconds on the review page itself, and when the module
+        // was submitted (so the time left on the clock at submit).
+        reviewPageSec: typeof rpm === 'number' ? rpm : null,
+        submitSec: typeof sbm === 'number' ? sbm : null,
+        submitReserveSec: (typeof sbm === 'number' && moduleSec[mm] > 0) ? Math.max(0, moduleSec[mm] - sbm) : null,
         // Skips as the review phase found them: seen, and still blank.
         skips: inMod.filter(function (r) { return r.blankAtReview; }).length,
         skipAnswered: inMod.filter(function (r) { return r.blankAtReview && r.final !== null; }).length,
@@ -310,8 +330,14 @@ var MorettiSignals = (function () {
       v: 1, chg: chg, lift: lift,
       keyOut: 0, keyOutBySkill: {}, near: 0, blindMedHard: 0,
       elim: { mc: 0, used: 0 },
-      rev: [], calc: { mathQ: 0, active: 0, openOnly: 0, fav: null, favActive: null, favMissNoUse: null },
-      ref: { opens: 0 }
+      rev: [], calc: { mathQ: 0, active: 0, openOnly: 0, fav: null, favActive: null, favMissNoUse: null, untagged: null },
+      ref: { opens: 0 },
+      // Return trips to a question after its first real look, split by
+      // whether the question was flagged (the report's reopened-answers
+      // flag reads the same split), and questions switched 3+ times within
+      // a look (the wavering signal).
+      revisit: { q: 0, flagged: 0, unflagged: 0, sec: 0, secUnflagged: 0 },
+      waverQ: 0
     };
     var dPts = 0, dPtsOk = typeof cfg.scoreSection === 'function';
 
@@ -342,6 +368,12 @@ var MorettiSignals = (function () {
           }
         }
         out.ref.opens += r.refOpens;
+        if (r.revisits > 0) {
+          out.revisit.q++;
+          if (r.flagged) out.revisit.flagged++; else { out.revisit.unflagged++; out.revisit.secUnflagged += r.revisitSec; }
+          out.revisit.sec += r.revisitSec;
+        }
+        if (r.switches >= 3) out.waverQ++;
       });
       var gl = guessingLift(rows);
       lift.old += gl.old; lift.elim += gl.elim;
@@ -353,9 +385,13 @@ var MorettiSignals = (function () {
           else if (r.calcOpenSec > 0) out.calc.openOnly++;
         });
         if (typeof cfg.dz === 'function') {
-          if (out.calc.fav === null) { out.calc.fav = 0; out.calc.favActive = 0; out.calc.favMissNoUse = 0; }
+          if (out.calc.fav === null) { out.calc.fav = 0; out.calc.favActive = 0; out.calc.favMissNoUse = 0; out.calc.untagged = 0; }
           rows.forEach(function (r, i) {
-            if (cfg.dz(p.questions[i]) !== 2 || r.visits === 0) return;
+            var tag = cfg.dz(p.questions[i]);
+            // A question whose text changed gets a new key and no tag; count
+            // it rather than let it drop out of the Desmos figures unseen.
+            if (typeof tag !== 'number') { out.calc.untagged++; return; }
+            if (tag !== 2 || r.visits === 0) return;
             out.calc.fav++;
             if (r.calcActive) out.calc.favActive++;
             else if (!r.finalOk) out.calc.favMissNoUse++;
@@ -370,6 +406,8 @@ var MorettiSignals = (function () {
           reserve: m.reserveSec === null ? null : Math.round(m.reserveSec),
           mins: Math.round(m.reviewSec / 6) / 10,
           gain: m.reviewGain,
+          page: m.reviewPageSec === null ? null : Math.round(m.reviewPageSec),
+          submitReserve: m.submitReserveSec === null ? null : Math.round(m.submitReserveSec),
           flaggedShare: m.reviewFlaggedShare === null ? null : Math.round(m.reviewFlaggedShare * 100) / 100,
           skips: m.skips, skipAns: m.skipAnswered, skipRight: m.skipRight
         });
@@ -384,13 +422,16 @@ var MorettiSignals = (function () {
       }
     });
     chg.dPts = dPtsOk ? dPts : null;
+    out.revisit.sec = Math.round(out.revisit.sec);
+    out.revisit.secUnflagged = Math.round(out.revisit.secUnflagged);
     lift.old = Math.round(lift.old * 100) / 100;
     lift.elim = Math.round(lift.elim * 100) / 100;
     return out;
   }
 
   /* ── pooling attempts ───────────────────────────────────────────────
-     entries: [{ at, signals }]. `signals` is the summary object or its JSON
+     entries: [{ at, signals, testId?, mode? }] (testId/mode from the same
+     Attempts row). `signals` is the summary object or its JSON
      text (the SignalsJSON cell is text). `at` is a Date, epoch ms (or
      seconds), or an ISO-8601 string; anything else is dropped, never
      guessed at ("12/09/2026" means different days in different places).
@@ -414,12 +455,20 @@ var MorettiSignals = (function () {
       if (typeof s === 'string') { try { s = JSON.parse(s); } catch (err) { s = null; } }
       var t = when(e.at);
       if (!s || s.v !== 1 || isNaN(t)) { if (e.signals) L.dropped++; return; }
+      // Capture ran but the summary could not be made or kept: counted, not pooled.
+      if (s.err) { L.errored = (L.errored || 0) + 1; return; }
       if (!(t >= since && t <= now + 86400000)) return;
       var c = s.chg || {};
       L.attempts++;
       L.chg.h += num(c.h); L.chg.r += num(c.r); L.chg.ww += num(c.ww); L.chg.sw += num(c.sw);
       ['unfl', 'rev', 'late'].forEach(function (k) { if (c[k]) { L.chg[k].h += num(c[k].h); L.chg[k].r += num(c[k].r); } });
-      L.near += num(s.near); L.keyOut += num(s.keyOut); L.blindMedHard += num(s.blindMedHard);
+      L.near += num(s.near); L.keyOut += num(s.keyOut);
+      // On the hardest test every question is medium or hard, so its blind
+      // guesses would swamp this count; it stays out (as it does from every
+      // score comparison). Callers comparing an early and a late window
+      // (changeImproved) should also build both windows without it.
+      if (e.testId !== HARDEST_TEST_ID) L.blindMedHard += num(s.blindMedHard);
+      else L.hardest = (L.hardest || 0) + 1;
       if (s.elim) { L.elim.mc += num(s.elim.mc); L.elim.used += num(s.elim.used); }
       if (s.calc) {
         L.calc.mathQ += num(s.calc.mathQ); L.calc.active += num(s.calc.active);
@@ -602,7 +651,10 @@ var MorettiSignals = (function () {
   // entries: { composite, rw?, math?, testId?, mode? }. Section-only sittings
   // and the hardest test are not comparable to full tests.
   function isTrendComparable(e) {
-    return !!e && typeof e.composite === 'number' && isFinite(e.composite) && e.testId !== HARDEST_TEST_ID && e.mode !== 'section';
+    // The self-reported baseline (PSAT or an outside SAT, typed in) is a
+    // starting point to show, not a test to average in.
+    return !!e && typeof e.composite === 'number' && isFinite(e.composite) && e.testId !== HARDEST_TEST_ID &&
+      e.mode !== 'section' && e.source !== 'baseline';
   }
   function levelOf(list) {
     var avg = function (f) { return list.reduce(function (s, e) { return s + f(e); }, 0) / list.length; };
