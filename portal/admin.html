@@ -1397,9 +1397,15 @@
     postToBackend({ action: 'adminStudentPrep', adminKey: adminKey(), key: key }).then(function (data) {
       if (!currentStudent || currentStudent.key !== key) return;
       if (!data || !data.ok || !data.prep) {
-        $('stu-prep').innerHTML = '<div class="empty">' + (data && data.error === 'unknown_action'
-          ? 'Needs the updated backend: paste prep.gs (and the new Code.gs and auth.gs) into Apps Script and redeploy.'
-          : 'Could not load session prep.') + '</div>';
+        /* Say why, with the fix: each of these has a different one, and a
+           bare "could not load" left Luca guessing (2026-09-13). */
+        var err = data && data.error, why;
+        if (err === 'unknown_action') why = 'The backend in Apps Script is older than this page. Paste prep.gs (as a script file named prep), Code.gs and auth.gs, then Deploy → Manage deployments → edit → New version.';
+        else if (err === 'unauthorized') why = 'The backend refused this request. Usually the auth.gs in Apps Script is an older copy that does not list adminStudentPrep: paste portal/auth.gs again, then deploy a new version. If it persists, sign out of this page and back in.';
+        else if (err === 'server_error') why = 'The backend hit an error: ' + escHtml(String((data && data.message) || 'no detail')) + (/is not defined/.test(String(data && data.message)) ? '. A script file is missing in Apps Script (prep.gs as "prep", emails.gs as "emails"), or the new version was not deployed.' : '');
+        else if (err === 'bad_key') why = 'This student’s key was not found on the Students sheet.';
+        else why = 'Could not load session prep' + (err ? ' (' + escHtml(String(err)) + ')' : '') + '.';
+        $('stu-prep').innerHTML = '<div class="empty">' + why + '</div>';
         return;
       }
       try { renderStudentPrep(data.prep); }
