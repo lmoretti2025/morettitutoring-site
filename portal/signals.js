@@ -762,6 +762,96 @@ var MorettiSignals = (function () {
     return { delta: delta, threshold: threshold, real: Math.abs(delta) >= threshold };
   }
 
+  /* === WHERE THE STUDENT IS NOW ===
+     Luca's decision (2026-09-12): the portal's Score Progress chart shows a
+     "current level" band, the student's POOLED level after every comparable
+     test so far. It is not a report's single-test range (one sitting's
+     score +/- its own noise), which stays exactly as it is: that range says
+     what one test measured, this band says what all of them together say
+     about the student today.
+
+     A local linear trend Kalman filter: the state is [level, gain per week].
+     Each test is the true level plus test noise (compositeSem at the
+     predicted level); between tests the level drifts (SD 10 points per
+     sqrt(week)) and the weekly gain itself drifts (SD 2 per sqrt(week)),
+     so older tests count for less and a steady gain is followed rather
+     than averaged away. The gain starts at 0 with SD 15 points a week.
+     Two tests on the same day are one moment: no drift between them.
+
+     The band is the central 80% (+/-1.2816 SD), rounded OUTWARD to tens,
+     so the printed range never claims more precision than the filter has.
+     Simulation (2026-09-12; students U(900,1450), gain N(9,7) a week, a
+     test every 1-3 weeks for 12 weeks, test noise from compositeSem): before
+     rounding the band covers the true level 79-83% of the time at every
+     number of tests, 192 points wide after one test and 120-130 after four
+     or more; rounded outward it covers 81-86% and is about 10 points wider.
+     Misses are mostly a true level ABOVE the band: the filter lags a
+     student who is improving.
+
+     entries: score-history entries ({ composite, rw?, math?, date, testId?,
+     mode?, source?, interrupted?, awayMin? }). Only comparable full tests
+     (isTrendComparable) with a readable date are used, in date order (ties
+     keep their input order). date is an ISO-8601 string, a Date or epoch
+     ms; anything else is left out rather than guessed at.
+     Returns null with no usable test, else { n, points: [{ i, date, level,
+     lo, hi }], now: { level, lo, hi } }; points are oldest first, i is the
+     entry's index in `entries`, and now is the state after the latest test. */
+  var LEVEL_Z80 = 1.2816;            // central 80%: "4 chances in 5"
+  var LEVEL_DRIFT_SD = 10;           // level drift, points per sqrt(week)
+  var LEVEL_SLOPE_DRIFT_SD = 2;      // weekly-gain drift, points/week per sqrt(week)
+  var LEVEL_SLOPE0_SD = 15;          // prior SD of the weekly gain
+  function currentLevel(entries) {
+    var DAY = 86400000, WEEK = 7 * DAY;
+    var when = function (d) {
+      if (d instanceof Date) return d.getTime();
+      if (typeof d === 'number' && isFinite(d)) return d;
+      if (typeof d === 'string' && /^\d{4}-\d{2}-\d{2}/.test(d)) return Date.parse(d);
+      return NaN;
+    };
+    var used = [];
+    (entries || []).forEach(function (e, i) {
+      if (!isTrendComparable(e)) return;
+      var ms = when(e.date);
+      if (!isFinite(ms)) return;
+      used.push({ e: e, i: i, ms: ms });
+    });
+    if (!used.length) return null;
+    used.sort(function (a, b) { return (a.ms - b.ms) || (a.i - b.i); });
+    var R = function (v) { var s = compositeSem({ composite: v }); return s * s; };
+    var round10 = function (v) { return Math.round(v / 10) * 10; };
+    var clamp = function (v) { return Math.max(400, Math.min(1600, v)); };
+    var q1 = LEVEL_DRIFT_SD * LEVEL_DRIFT_SD, q2 = LEVEL_SLOPE_DRIFT_SD * LEVEL_SLOPE_DRIFT_SD;
+    var x0 = 0, x1 = 0, p00 = 0, p01 = 0, p11 = 0, points = [];
+    used.forEach(function (u, k) {
+      var y = u.e.composite;
+      if (k === 0) {
+        x0 = y; x1 = 0;
+        p00 = R(y); p01 = 0; p11 = LEVEL_SLOPE0_SD * LEVEL_SLOPE0_SD;
+      } else {
+        var prev = used[k - 1];
+        var dt = (Math.floor(u.ms / DAY) === Math.floor(prev.ms / DAY)) ? 0 : (u.ms - prev.ms) / WEEK;
+        // Predict: x = F x, P = F P F' + Q, F = [[1, dt], [0, 1]].
+        x0 = x0 + dt * x1;
+        p00 = p00 + 2 * dt * p01 + dt * dt * p11 + q1 * dt;
+        p01 = p01 + dt * p11;
+        p11 = p11 + q2 * dt;
+        // Update with this test's composite (H = [1, 0]).
+        var r = R(x0), s = p00 + r, k0 = p00 / s, k1 = p01 / s, innov = y - x0;
+        x0 += k0 * innov; x1 += k1 * innov;
+        var n00 = (1 - k0) * p00, n01 = (1 - k0) * p01, n11 = p11 - k1 * p01;
+        p00 = n00; p01 = n01; p11 = n11;
+      }
+      var sd = Math.sqrt(Math.max(0, p00));
+      points.push({
+        i: u.i, date: u.e.date, level: clamp(round10(x0)),
+        lo: clamp(Math.floor((x0 - LEVEL_Z80 * sd) / 10) * 10),
+        hi: clamp(Math.ceil((x0 + LEVEL_Z80 * sd) / 10) * 10)
+      });
+    });
+    var last = points[points.length - 1];
+    return { n: points.length, points: points, now: { level: last.level, lo: last.lo, hi: last.hi } };
+  }
+
   return {
     DEFAULTS: DEFAULTS,
     itemKey: itemKey,
@@ -784,7 +874,8 @@ var MorettiSignals = (function () {
     HARDEST_TEST_ID: HARDEST_TEST_ID,
     isTrendComparable: isTrendComparable,
     scoreChange: scoreChange,
-    pairChange: pairChange
+    pairChange: pairChange,
+    currentLevel: currentLevel
   };
 })();
 if (typeof module !== 'undefined' && module.exports) module.exports = MorettiSignals;

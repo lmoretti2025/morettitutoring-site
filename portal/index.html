@@ -621,6 +621,25 @@
   .spc-bar-labels { display: flex; justify-content: space-between; font-family: var(--hel); font-size: 0.68rem; color: var(--faint); margin-top: 0.5rem; }
   .spc-target-line { position: absolute; left: 0; right: 0; border-top: 1.5px dashed var(--gold); pointer-events: none; }
   .spc-target-line span { position: absolute; right: 0; top: -18px; font-family: var(--hel); font-size: 0.68rem; font-weight: 700; color: var(--gold); white-space: nowrap; }
+  /* The current-level band (buildLevelBand(), Luca 2026-09-12). The SVG box
+     is 3px wider than the bars on each side, half the .spc-bars gap, which
+     puts every bar's centre at (j + 0.5) / n of it. The band and the
+     estimate's line are both drawn over the bars, the band translucent: the
+     bars rise to each score, so behind them the band was hidden. Neither
+     takes the pointer, so the bars' tooltips still work.
+     Both fade in as the bars finish growing, and not at all under reduced
+     motion (animateScoreBars() skips the bars there too). */
+  .spc-bar-chart-wrap.has-level { isolation: isolate; }
+  .spc-level-svg { position: absolute; top: 0; left: -3px; width: calc(100% + 6px); height: 100%; overflow: visible; pointer-events: none; animation: spc-level-in 0.6s var(--ease) 0.45s both; }
+  .spc-level-band polygon { fill: rgba(201,168,76,0.45); }
+  .spc-level-line polygon { fill: var(--text); fill-opacity: 0.8; }
+  @keyframes spc-level-in { from { opacity: 0; } to { opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { .spc-level-svg { animation: none; } }
+  .spc-level-now { font-family: var(--hel); font-size: 0.68rem; line-height: 1.4; color: var(--mid); margin-bottom: 0.4rem; }
+  .spc-level-now b { font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
+  .spc-level-part { white-space: nowrap; }
+  /* A key for the band: its fill with the estimate's line through it. */
+  .spc-level-key { display: inline-block; width: 12px; height: 8px; margin-right: 0.35rem; vertical-align: -0.02rem; border-radius: 2px; background: linear-gradient(to bottom, transparent 3.25px, rgba(17,17,17,0.8) 3.25px, rgba(17,17,17,0.8) 4.75px, transparent 4.75px), rgba(201,168,76,0.45); }
 
   /* One card for the whole overview block: four equal-width segments
      (score, bars, weak skills, Next Session) with one divider style. The
@@ -5351,7 +5370,7 @@ window.Portal = {
      header in fluid-ui.js. -->
 <script src="fluid-ui.js?v=20260905y"></script>
 <script src="banks.js?v=20260910a"></script>
-<script src="signals.js?v=20260912d"></script>
+<script src="signals.js?v=20260913a"></script>
 <script src="desmos-tags.js?v=20260912a"></script>
 <script src="time-budgets.js?v=20260912a"></script>
 <script src="challenge-questions.js?v=20260911a"></script>
@@ -7417,11 +7436,66 @@ window.Portal = {
   var sectionSem = MS_.sectionSem || function () { return 0; };
   var compositeSem = MS_.compositeSem || function () { return 0; };
   var scoreChange = MS_.scoreChange || function () { return null; };
+  // No signals.js, no current-level band: the chart draws exactly as before.
+  var currentLevel = MS_.currentLevel || function () { return null; };
   var HARDEST_TEST_ID = MS_.HARDEST_TEST_ID || 'sat-practice-11';
   // The in-portal report (a separate script) reads these for "Since last time".
   window.MorettiScoreNoise = { sectionSem: sectionSem, compositeSem: compositeSem };
 
-  function buildScoreBarChart(entries, scaleMin, scaleMax, target) {
+  /* ═══ WHERE THE STUDENT IS NOW ═══ Luca's decision, 2026-09-12: the
+     chart carries the student's pooled current level (currentLevel() in
+     signals.js) as a shaded band, the central 80% ("4 chances in 5"),
+     with a thin line for the estimate and one sentence above the bars.
+     This is the level ALL comparable tests point to, which is a different
+     question from a report's single-test range (one sitting +/- its own
+     noise); that range stays exactly as it is.
+
+     level: { now: { lo, hi }, pts: [{ j, level, lo, hi }] }, j being the
+     bar index in `entries`. Bars are equal flex slots with a 6px gap (see
+     .spc-bars), so bar j's centre sits at (j + 0.5) / n of a box 3px wider
+     on each side than the bars; the SVGs are drawn in that box
+     (.spc-level-svg) with one unit per slot, which keeps the band on the
+     bar centres at any width without measuring the layout. The y scale is
+     the bars' own fixed 400-1600, and currentLevel() clamps to it, so the
+     band can never be clipped. Drawn only at comparable tests (the
+     baseline, section-only and interrupted bars get none) and joined
+     straight across the bars in between. */
+  function buildLevelBand(level, n, scaleMin, scaleMax) {
+    var pts = (level && level.pts || []).filter(function (p) { return p.j >= 0 && p.j < n; })
+      .sort(function (a, b) { return a.j - b.j; });
+    if (!pts.length) return { under: '', over: '' };
+    var yOf = function (v) { return String(scaleMax - Math.max(scaleMin, Math.min(scaleMax, v))); };
+    // The first and last points run flat to the edges of their own slot,
+    // so a lone test still gets a visible band across its bar.
+    var xs = [pts[0].j], his = [pts[0].hi], los = [pts[0].lo], lvls = [pts[0].level];
+    pts.forEach(function (p) { xs.push(p.j + 0.5); his.push(p.hi); los.push(p.lo); lvls.push(p.level); });
+    var lastP = pts[pts.length - 1];
+    xs.push(lastP.j + 1); his.push(lastP.hi); los.push(lastP.lo); lvls.push(lastP.level);
+    /* The estimate's line is a thin filled strip, 1.5px of the 52px chart
+       (.spc-bars height) in score units, not a stroked polyline: a stroke
+       with vector-effect:non-scaling-stroke in a box this stretched (one
+       bar can be 200px wide for 1200 points of 52px) was drawn by Chrome
+       far past the chart's ends. */
+    var half = 0.75 * (scaleMax - scaleMin) / 52;
+    var upper = [], lower = [], lineTop = [], lineBottom = [];
+    for (var k = 0; k < xs.length; k++) {
+      upper.push(xs[k] + ',' + yOf(his[k]));
+      lower.unshift(xs[k] + ',' + yOf(los[k]));
+      var yl = Number(yOf(lvls[k]));
+      lineTop.push(xs[k] + ',' + (yl - half).toFixed(1));
+      lineBottom.unshift(xs[k] + ',' + (yl + half).toFixed(1));
+    }
+    var svg = function (cls, body) {
+      return '<svg class="spc-level-svg ' + cls + '" viewBox="0 0 ' + n + ' ' + (scaleMax - scaleMin) +
+        '" preserveAspectRatio="none" aria-hidden="true" focusable="false">' + body + '</svg>';
+    };
+    return {
+      under: svg('spc-level-band', '<polygon points="' + upper.concat(lower).join(' ') + '"/>'),
+      over: svg('spc-level-line', '<polygon points="' + lineTop.concat(lineBottom).join(' ') + '"/>')
+    };
+  }
+
+  function buildScoreBarChart(entries, scaleMin, scaleMax, target, level) {
     var n = entries.length;
     var last = entries[n - 1];
     var labels = scoreEntryLabelsWithAttempts(entries);
@@ -7460,12 +7534,30 @@ window.Portal = {
       var tFrac = Math.max(0, Math.min(1, (target - scaleMin) / (scaleMax - scaleMin)));
       targetHtml = '<div class="spc-target-line" style="bottom:' + Math.round(tFrac * 100) + '%"><span>Target ' + target + '</span></div>';
     }
+    var levelHtml = '', band = { under: '', over: '' };
+    if (level && level.now) {
+      band = buildLevelBand(level, n, scaleMin, scaleMax);
+      /* The target's label sits 18px above its line (.spc-target-line span),
+         so near the top of the 52px chart it would run into this sentence:
+         leave it room. */
+      var gap = '';
+      if (target != null) {
+        var tTop = (1 - Math.max(0, Math.min(1, (target - scaleMin) / (scaleMax - scaleMin)))) * 52;
+        if (tTop < 16) gap = ' style="margin-bottom:' + Math.round(22 - tTop) + 'px"';
+      }
+      levelHtml = '<div class="spc-level-now"' + gap + '><i class="spc-level-key" aria-hidden="true"></i>' +
+        // Two unbreakable halves, so a narrow column wraps between them
+        // rather than inside "(4 chances in 5)".
+        '<span class="spc-level-part">Likely level now: <b>' + level.now.lo + '–' + level.now.hi + '</b></span> ' +
+        '<span class="spc-level-part">(4 chances in 5)</span></div>';
+    }
     return '<div class="spc-score-top"><div>' +
         '<div class="spc-composite-num"' + (last.composite != null ? ' data-count-to="' + last.composite + '"' : '') + '>' + (last.composite != null ? '0' : '—') + '</div>' +
         deltaHtml +
       '</div></div>' +
-      '<div class="spc-bars-col">' +
-        '<div class="spc-bar-chart-wrap">' + targetHtml + '<div class="spc-bars">' + barsHtml + '</div></div>' +
+      '<div class="spc-bars-col">' + levelHtml +
+        '<div class="spc-bar-chart-wrap' + (band.under ? ' has-level' : '') + '">' + targetHtml +
+          '<div class="spc-bars">' + barsHtml + '</div>' + band.under + band.over + '</div>' +
         '<div class="spc-bar-labels">' + labelsHtml + '</div>' +
       '</div>';
   }
@@ -7884,6 +7976,21 @@ window.Portal = {
     var baseline = baselineScoreEntry();
     if (!allSat.length && !baseline) { scoreProgressCard.style.display = 'none'; scoreProgressChartsEl.innerHTML = ''; return; }
     var satShown = allSat.slice(-SCORE_PROGRESS_MAX_POINTS);
+    /* The current level reads every comparable test in the chart's
+       selection (the Tests chip applies), not only the last N bars shown,
+       so the estimate never forgets a test that scrolled off. Its points
+       are mapped back to bar positions; the baseline is left out by
+       currentLevel() itself (a typed-in starting point, not a test). */
+    var level = null;
+    try { level = currentLevel(allSat); } catch (err) { level = null; }
+    if (level) {
+      var firstShown = allSat.length - satShown.length, shift = baseline ? 1 : 0;
+      level = {
+        now: level.now,
+        pts: level.points.filter(function (p) { return p.i >= firstShown; })
+          .map(function (p) { return { j: p.i - firstShown + shift, level: p.level, lo: p.lo, hi: p.hi }; })
+      };
+    }
     // Prepended after slicing to the last N, so the baseline is always the
     // first point and never sliced off.
     if (baseline) satShown = [baseline].concat(satShown);
@@ -7894,15 +8001,15 @@ window.Portal = {
     // Only drawn when it actually falls inside the chart's scale, so a
     // stale out-of-range target can't render off the end of the axis.
     var target = (currentStudent && currentStudent.targetScore) ? Number(currentStudent.targetScore) : null;
-    function addChart(hed, shown, min, max, totalCount, typeLabel) {
+    function addChart(hed, shown, min, max, totalCount, typeLabel, lvl) {
       spcChartEntries[chartIndex] = shown;
       var chartTarget = (target && target >= min && target <= max) ? target : null;
       html += '<div class="spc-chart-hed">' + hed + '</div>' +
-        '<div class="spc-chart-wrap" data-chart="' + chartIndex + '">' + buildScoreBarChart(shown, min, max, chartTarget) + '</div>';
+        '<div class="spc-chart-wrap" data-chart="' + chartIndex + '">' + buildScoreBarChart(shown, min, max, chartTarget, lvl) + '</div>';
       if (shown.length < totalCount) html += '<div class="spc-note">Showing your last ' + shown.length + ' ' + typeLabel + ' attempts.</div>';
       chartIndex++;
     }
-    if (satShown.length >= 1) addChart('SAT Composite (400–1600)', satShown, 400, 1600, allSat.length, 'SAT');
+    if (satShown.length >= 1) addChart('SAT Composite (400–1600)', satShown, 400, 1600, allSat.length, 'SAT', level);
     if (satShown.length >= 1 && hardestTaken) {
       html += '<div class="spc-note">Practice Test 12 isn’t on this chart: every question on it is hard, so it would read as a drop.</div>';
     }
