@@ -362,6 +362,11 @@
      the section clock a dotted ceiling. Over/under is shown by which side of
      the budget line the trace sits on, so the accent never encodes polarity
      alone. */
+  .timing-view-row { display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin: -2px 0 8px; }
+  .timing-view-lab { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--mid); }
+  .route-trace { display: block; width: 100%; height: auto; margin-bottom: 4px; }
+  .route-trace .route-bar, .route-trace .route-row { cursor: pointer; }
+  .route-trace .route-row:hover { fill: rgba(201,168,76,0.08); }
   .pace-trace { display: block; width: 100%; height: auto; overflow: visible; margin-bottom: 4px; }
   .pace-grid { stroke: rgba(17,17,17,0.07); stroke-width: 1; }
   /* The zero line is the one gridline that is a real edge rather than a
@@ -989,7 +994,7 @@
   <!-- 3. CLOCK — whether the section was ever going to fit. -->
   <div class="sec-hed" id="timing-hed" style="display:none;">How you used the clock</div>
   <div class="timing-card" id="timing-card" style="display:none;">
-    <p class="chart-sub" id="timing-allocation-sub" style="display:none;">One module at a time: the running total of time spent against the target pace for these questions. The target deliberately adds up to <em>less</em> than the module clock: that gap is the reserve, there to be spent on the questions that run long and on the review pass at the end. So tracking the target and finishing a few minutes early is the plan working. Finishing <em>far</em> early means the reserve was never used.</p>
+    <p class="chart-sub" id="timing-allocation-sub" style="display:none;"><b>Route</b> draws every visit to every question in the order it happened: a black bar is a question's first look, a gold bar is going back to it, and a visit under 1.5 seconds is paging past. Answer changes are marked where they happened. <b>Pace</b> shows, one module at a time, the running total of time spent against the target pace for these questions. The target deliberately adds up to <em>less</em> than the module clock: that gap is the reserve, there to be spent on the questions that run long and on the review pass at the end. So tracking the target and finishing a few minutes early is the plan working. Finishing <em>far</em> early means the reserve was never used.</p>
     <div id="timing-allocation" style="display:none;"></div>
   </div>
 
@@ -1736,10 +1741,45 @@
       chosenSecs = trial(BASE_WRONG, 42).secs;
     }
 
+    /* A visit log for the demo's Route view, built from the times the demo
+       already has: each module's first pass in order (first-look times),
+       then its return trips in question order. Some returns change the
+       answer. Uses its own fixed draws, not rand(), so every demo student's
+       answers and scores stay exactly as they were. */
+    function demoRoute(sec) {
+      var bank = window.SECTION_BANKS && window.SECTION_BANKS[sec.k];
+      if (!bank) return undefined;
+      var qs = bank.module1.concat(sec.v ? (bank['module2' + sec.v] || []) : []);
+      var m1n = sec.t1 || bank.module1.length;
+      var draw = function (i, salt) { var x = Math.sin((i + 1) * 12.9898 + salt * 78.233) * 43758.5453; return x - Math.floor(x); };
+      var code = function (q, a) { return a == null ? (q.type === 'mc' ? -1 : '') : (typeof a === 'object' ? String(a.raw) : a); };
+      var tenth = function (ms) { return Math.round(ms / 100) / 10; };
+      var vl = [];
+      [[0, m1n], [m1n, sec.a.length]].forEach(function (rg) {
+        var t = 0, back = [];
+        for (var i = rg[0]; i < rg[1]; i++) {
+          var tot = sec.times[i] || 0, fst = sec.firsts[i] || 0, q = qs[i] || {}, fin = sec.a[i];
+          if (!(tot > 0)) continue;
+          var firstCode = code(q, fin), returns = tot > fst + 500;
+          if (returns && q.type === 'mc' && fin != null) {
+            var roll = draw(i, sec.k.length);
+            if (fin === q.correct && roll < 0.35) firstCode = (q.correct + 1) % ((q.choices || []).length || 4);
+            else if (fin !== q.correct && roll < 0.25) firstCode = q.correct;
+          }
+          vl.push([i, tenth(t), tenth(fst), firstCode, 0]);
+          t += fst;
+          if (returns) back.push([i, tot - fst, code(q, fin)]);
+        }
+        back.forEach(function (b) { vl.push([b[0], tenth(t), tenth(b[1]), b[2], 0]); t += b[1]; });
+      });
+      return vl.length ? vl : undefined;
+    }
     var s = chosenSecs.map(function (sec) {
       var visits = deriveVisits(sec.times);
       // fp = first-pass duration (sec.firsts).
-      return { k: sec.k, a: sec.a, m: sec.m, v: sec.v, tm: sec.times, fp: sec.firsts, fv: visits.fv, lv: visits.lv, tl: sec.tl };
+      var vl = demoRoute(sec);
+      return { k: sec.k, a: sec.a, m: sec.m, v: sec.v, tm: sec.times, fp: sec.firsts, fv: visits.fv, lv: visits.lv, tl: sec.tl,
+               sv: vl ? 2 : undefined, vl: vl };
     });
 
     // &late=1 fakes an 11:30pm submission so the late-night behavior flag
@@ -4991,7 +5031,8 @@
     var moduleViews = [];
     sections.forEach(function (sec) {
       if (!sec.hasModules) {
-        moduleViews.push({ label: sec.label, short: TIMING_SEC_SHORT[sec.key] || sec.label, rows: sec.rows });
+        moduleViews.push({ label: sec.label, short: TIMING_SEC_SHORT[sec.key] || sec.label, rows: sec.rows, key: sec.key,
+          clockMin: sec.timeAllottedMin || 0, mult: (budgetRollups[sec.key] || {}).mult || 1, sec: sec, lo: 0 });
         return;
       }
       var m1 = sec.rows.filter(function (r) { return r.moduleIndex === 0; });
@@ -5003,8 +5044,8 @@
       // `short` is the pill label: the full module name prints in the header
       // but is too long for a segmented control of four.
       var abbr = TIMING_SEC_SHORT[sec.key] || sec.label;
-      if (m1.length) moduleViews.push({ label: sec.label + ' – Module 1', short: abbr + ' 1', rows: m1, key: sec.key, clockMin: perModuleMin, mult: (budgetRollups[sec.key] || {}).mult || 1 });
-      if (m2.length) moduleViews.push({ label: sec.label + ' – Module 2' + (sec.variant ? ' (' + sec.variant + ')' : ''), short: abbr + ' 2', rows: m2, key: sec.key, clockMin: perModuleMin, mult: (budgetRollups[sec.key] || {}).mult || 1 });
+      if (m1.length) moduleViews.push({ label: sec.label + ' – Module 1', short: abbr + ' 1', rows: m1, key: sec.key, clockMin: perModuleMin, mult: (budgetRollups[sec.key] || {}).mult || 1, sec: sec, lo: 0 });
+      if (m2.length) moduleViews.push({ label: sec.label + ' – Module 2' + (sec.variant ? ' (' + sec.variant + ')' : ''), short: abbr + ' 2', rows: m2, key: sec.key, clockMin: perModuleMin, mult: (budgetRollups[sec.key] || {}).mult || 1, sec: sec, lo: m1.length });
     });
     moduleViews = moduleViews.map(function (mv) {
       // totalQuestions is the module's real size, captured BEFORE the
@@ -5026,7 +5067,7 @@
         if (mv.rows[li].timeMs > 0) { lastReached = li; break; }
       }
       return { label: mv.label, short: mv.short, key: mv.key, clockMin: mv.clockMin, mult: mv.mult,
-               totalQuestions: mv.rows.length,
+               totalQuestions: mv.rows.length, sec: mv.sec, lo: mv.lo, allRows: mv.rows,
                rows: mv.rows.slice(0, lastReached + 1) };
     }).filter(function (mv) { return mv.rows.length >= 2; });
     if (!moduleViews.length) return;
@@ -5042,6 +5083,12 @@
         '<div class="timing-chart-hed">' +
           '<span id="timing-module-label"></span>' +
           '<span id="timing-module-pills"></span>' +
+        '</div>' +
+        '<div class="timing-view-row" id="timing-view-row" style="display:none;"><span class="timing-view-lab">View</span><span id="timing-view-toggle"></span></div>' +
+        '<div class="route-swap" id="route-swap" style="display:none;">' +
+          '<p class="pace-verdict" id="route-verdict"></p>' +
+          '<div class="dxk-plot" id="route-plot"><svg class="route-trace" id="route-trace" role="img"></svg></div>' +
+          '<div class="dxk-legend pace-legend" id="route-legend"></div>' +
         '</div>' +
         '<div class="pace-swap" id="pace-swap">' +
           '<p class="pace-verdict" id="pace-verdict"></p>' +
@@ -5557,10 +5604,235 @@
     var SWAP_IN_MS = 300, SWITCH_WIPE_MS = 750;
     var swapAnim = null;
 
+    /* ═══ THE ROUTE ═══ every visit to every question in one module, in the
+       order it happened: time runs left to right on the module's clock,
+       questions run top to bottom, each bar is one visit. Drawn from the
+       visit log (capture v1/v2, sec.vl: [question, start s, duration s,
+       answer on leaving, switches], start relative to the module's own
+       start). The default view wherever a log exists (Luca, 2026-09-12);
+       older reports without one keep the pace view alone.
+
+       A visit shorter than the glance threshold is passing through (the
+       student paging past), drawn as a faint tick and never counted as going
+       back. A question's first look is its first longer visit; every longer
+       visit after that is going back. An answer change is a difference
+       between successive visit-end answers (blanks in between don't reset
+       it), the same definition as signals.js. */
+    var routePlot = document.getElementById('route-plot');
+    var routeSvg = document.getElementById('route-trace');
+    var routeLegend = document.getElementById('route-legend');
+    var routeVerdictEl = document.getElementById('route-verdict');
+    var routeSwap = document.getElementById('route-swap');
+    dxkWire(routePlot);
+    function hideRouteTooltip() { if (routePlot.__dxkTip) routePlot.__dxkTip.classList.remove('on'); }
+    var GLANCE_SEC = (window.MorettiSignals && window.MorettiSignals.DEFAULTS && window.MorettiSignals.DEFAULTS.glanceSec) || 1.5;
+
+    function routeDataFor(mv) {
+      if (mv.__route !== undefined) return mv.__route;
+      var out = null;
+      var raw = mv.sec ? (data.s || []).filter(function (s) { return s.k === mv.sec.key; })[0] : null;
+      if (raw && (raw.sv === 1 || raw.sv === 2) && Array.isArray(raw.vl)) {
+        var rows = mv.allRows || mv.rows, n = rows.length, lo = mv.lo || 0, seen = {}, vs = [];
+        raw.vl.forEach(function (v) {
+          if (!Array.isArray(v) || typeof v[0] !== 'number') return;
+          var q = v[0] - lo;
+          if (q < 0 || q >= n) return;
+          var id = v[0] + ':' + v[1] + ':' + v[2];
+          if (seen[id]) return;
+          seen[id] = true;
+          vs.push({ q: q, t0: Number(v[1]) || 0, dur: Number(v[2]) || 0, end: v[3] });
+        });
+        vs.sort(function (a, b) { return a.t0 - b.t0; });
+        if (vs.some(function (v) { return v.dur >= GLANCE_SEC; })) out = { visits: vs, rows: rows };
+      }
+      return (mv.__route = out);
+    }
+
+    function renderRoute(mv, rd) {
+      routeSvg.innerHTML = '';
+      var rows = rd.rows, N = rows.length, visits = rd.visits;
+      var mmss = function (s) { s = Math.max(0, Math.round(s)); return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2); };
+      var blankCode = function (a) { return a === null || a === undefined || a === -1 || a === ''; };
+      var codeRight = function (r, a) {
+        if (blankCode(a)) return false;
+        return isCorrect(r.q, typeof a === 'string' ? { raw: a } : a);
+      };
+      var same = function (a, b) { return String(a).trim() === String(b).trim(); };
+
+      // Per question: first look, going back, passing through, answer changes.
+      var firstSeen = {}, prevAns = {}, nth = {};
+      visits.forEach(function (v) {
+        v.glance = v.dur < GLANCE_SEC;
+        if (!v.glance) {
+          v.kind = firstSeen[v.q] === undefined ? 'first' : 'back';
+          if (firstSeen[v.q] === undefined) firstSeen[v.q] = v;
+          nth[v.q] = (nth[v.q] || 0) + 1;
+          v.nth = nth[v.q];
+        } else v.kind = 'glance';
+        if (!blankCode(v.end)) {
+          var p = prevAns[v.q];
+          if (p !== undefined && !same(p, v.end)) {
+            var r = rows[v.q];
+            v.change = { from: codeRight(r, p), to: codeRight(r, v.end) };
+          }
+          prevAns[v.q] = v.end;
+        }
+      });
+
+      var clockSec = (mv.clockMin || 0) * 60;
+      var lastEnd = visits.reduce(function (m, v) { return Math.max(m, v.t0 + v.dur); }, 0);
+      var xMax = Math.max(clockSec, lastEnd) || 1;
+      var budgets = rows.map(function (r) {
+        return window.TIME_BUDGETS ? window.TIME_BUDGETS.budgetSecondsFor(mv.key, r.q.domain, r.q.skill || r.dom, r.q.difficulty, mv.mult).ms / 1000 : 0;
+      });
+
+      var W = CHART_W, rowH = N > 22 ? 12 : 14, L = 44, R = 14, T = 22, B = 30;
+      var H = T + N * rowH + B, iw = W - L - R;
+      routeSvg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+      var x = function (s) { return L + Math.min(s, xMax) / xMax * iw; };
+      var yc = function (q) { return T + q * rowH + rowH / 2; };
+      var svgTarget = routeSvg;
+      function svgEl(tag, attrs, text) {
+        var e = document.createElementNS('http://www.w3.org/2000/svg', tag);
+        for (var k in attrs) if (attrs.hasOwnProperty(k)) e.setAttribute(k, attrs[k]);
+        if (text != null) e.textContent = text;
+        svgTarget.appendChild(e); return e;
+      }
+      var esc2 = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+
+      // Rows: a stripe, the result at the end, and a hit area that opens the question.
+      rows.forEach(function (r, q) {
+        if (q % 2 === 0) svgEl('rect', { x: L, y: T + q * rowH, width: iw, height: rowH, fill: 'rgba(17,17,17,0.028)' });
+        var res = r.skipped ? 'blank' : r.ok ? 'right' : 'wrong';
+        svgEl('rect', { x: L - 11, y: yc(q) - 3.5, width: 7, height: 7, rx: 1.5,
+          fill: res === 'right' ? 'var(--green)' : res === 'wrong' ? 'var(--red)' : 'none',
+          stroke: res === 'blank' ? 'rgba(17,17,17,0.35)' : 'none', 'stroke-width': 1 });
+        if (q === 0 || (q + 1) % 5 === 0 || q === N - 1)
+          svgEl('text', { x: L - 15, y: yc(q) + 3, 'text-anchor': 'end', class: 'pace-ax' }, String(q + 1));
+        var mine = visits.filter(function (v) { return v.q === q && !v.glance; });
+        var spent = mine.reduce(function (s, v) { return s + v.dur; }, 0);
+        var hit = svgEl('rect', { x: L - 30, y: T + q * rowH, width: iw + 30, height: rowH, fill: 'transparent', class: 'dxk-hit route-row',
+          'data-tip': 'Question ' + (q + 1) + ' &nbsp;<b>' + (res === 'right' ? 'right' : res === 'wrong' ? 'wrong' : 'left blank') + '</b>' +
+            " <span class='dim'>&middot; " + (mine.length ? mine.length + (mine.length === 1 ? ' visit' : ' visits') + ', ' + mmss(spent) + ' in all' : 'never opened') + '</span>' });
+        hit.addEventListener('click', function () { hideRouteTooltip(); openQuestionModal(rows, q, mv.label); });
+      });
+      // Minutes along the bottom, on a step that gives 6-9 ticks.
+      var xMin = xMax / 60, step = [2, 4, 5, 8, 10, 15, 20].filter(function (s) { return xMin / s <= 9; })[0] || 30;
+      for (var m = 0; m <= xMin + 0.01; m += step) {
+        svgEl('line', { x1: x(m * 60), x2: x(m * 60), y1: T, y2: T + N * rowH, stroke: 'rgba(17,17,17,0.07)' });
+        svgEl('text', { x: x(m * 60), y: T + N * rowH + 13, 'text-anchor': 'middle', class: 'pace-ax' }, String(m));
+      }
+      svgEl('text', { x: L + iw / 2, y: T + N * rowH + 26, 'text-anchor': 'middle', class: 'pace-ax' }, 'minutes into the module');
+      svgEl('text', { x: L - 15, y: T - 8, 'text-anchor': 'end', class: 'pace-ax' }, 'Q');
+      if (clockSec) {
+        svgEl('line', { x1: x(clockSec), x2: x(clockSec), y1: T - 6, y2: T + N * rowH, stroke: 'var(--ink)', 'stroke-dasharray': '2 3', opacity: 0.55 });
+        svgEl('text', { x: x(clockSec), y: T - 9, 'text-anchor': 'end', class: 'pace-note', fill: 'var(--ink)', opacity: 0.72 }, 'Module clock: ' + Math.round(mv.clockMin) + ' min');
+      }
+      // Target pace: where a student on target would be, question by question.
+      if (budgets.some(function (b) { return b > 0; })) {
+        var cum = 0, d = 'M ' + x(0).toFixed(1) + ' ' + T;
+        budgets.forEach(function (b, q) { cum += b; d += ' L ' + x(cum).toFixed(1) + ' ' + (T + (q + 1) * rowH).toFixed(1); });
+        svgEl('path', { d: d, fill: 'none', stroke: 'rgba(17,17,17,0.42)', 'stroke-width': 1.25, 'stroke-dasharray': '5 4' });
+      }
+      // The route: a thin line from each visit to the next, then the visits.
+      var real = visits.filter(function (v) { return !v.glance; });
+      for (var i = 1; i < real.length; i++) {
+        var a = real[i - 1], b = real[i];
+        svgEl('line', { x1: x(a.t0 + a.dur), x2: x(b.t0), y1: yc(a.q), y2: yc(b.q),
+          stroke: b.kind === 'back' ? 'rgba(201,168,76,0.8)' : 'rgba(17,17,17,0.22)', 'stroke-width': 1 });
+      }
+      visits.forEach(function (v) {
+        if (v.glance) {
+          svgEl('line', { x1: x(v.t0), x2: x(v.t0), y1: yc(v.q) - 3, y2: yc(v.q) + 3, stroke: 'rgba(17,17,17,0.28)', 'stroke-width': 1 });
+          return;
+        }
+        var bud = budgets[v.q] || 0, stuck = v.kind === 'first' && bud > 0 && v.dur >= bud * STUCK_BUDGET_REL;
+        var ch = v.change;
+        var chTxt = ch ? '<br>Changed the answer: ' + (ch.to ? 'now right' : ch.from ? '<b>was right, now wrong</b>' : 'still wrong') : '';
+        var bar = svgEl('rect', { x: x(v.t0), y: yc(v.q) - rowH * 0.32, width: Math.max(2.5, x(v.t0 + v.dur) - x(v.t0)), height: rowH * 0.64, rx: 2,
+          fill: v.kind === 'first' ? 'var(--ink)' : 'var(--gold)', class: 'dxk-hit route-bar',
+          'data-tip': 'Question ' + (v.q + 1) + ' &nbsp;<b>' + (v.kind === 'first' ? 'first look' : 'going back') + ' &middot; ' + mmss(v.dur) + '</b>' +
+            (v.kind === 'first' && bud > 0 ? " <span class='dim'>target " + mmss(bud) + '</span>' : '') +
+            (stuck ? '<br><b>Stuck: 1.5&times; the target or more</b>' : '') + chTxt +
+            "<br><span class='dim'>" + mmss(v.t0) + ' into the module</span>' });
+        bar.addEventListener('click', function () { hideRouteTooltip(); openQuestionModal(rows, v.q, mv.label); });
+        if (ch) {
+          var cx = x(v.t0 + v.dur) + 6, cy = yc(v.q), s = 4;
+          svgEl('path', { d: ch.to ? 'M ' + (cx - s) + ' ' + (cy + s * 0.8) + ' L ' + (cx + s) + ' ' + (cy + s * 0.8) + ' L ' + cx + ' ' + (cy - s) + ' Z'
+                                   : ch.from ? 'M ' + (cx - s) + ' ' + (cy - s * 0.8) + ' L ' + (cx + s) + ' ' + (cy - s * 0.8) + ' L ' + cx + ' ' + (cy + s) + ' Z'
+                                   : 'M ' + (cx - 3) + ' ' + cy + ' a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0',
+            fill: ch.to ? 'var(--green)' : ch.from ? 'var(--red)' : 'rgba(17,17,17,0.45)', 'pointer-events': 'none' });
+        }
+      });
+      // Where the first pass ended.
+      var firsts = Object.keys(firstSeen).map(function (k) { return firstSeen[k]; });
+      var fpEnd = firsts.reduce(function (m, v) { return Math.max(m, v.t0 + v.dur); }, 0);
+      var backs = real.filter(function (v) { return v.kind === 'back'; });
+      if (backs.length) {
+        svgEl('line', { x1: x(fpEnd), x2: x(fpEnd), y1: T, y2: T + N * rowH, stroke: 'var(--gold)', 'stroke-width': 1, 'stroke-dasharray': '3 3' });
+        var fpLblRight = !clockSec || x(clockSec) - x(fpEnd) > 150;
+        svgEl('text', { x: x(fpEnd) + (fpLblRight ? 4 : -4), y: T - 9, 'text-anchor': fpLblRight ? 'start' : 'end', class: 'pace-note', fill: '#9A7C22' },
+          'first pass done ' + mmss(fpEnd));
+      }
+
+      // The sentence, from the same visits.
+      var unseen = N - firsts.length;
+      var backSec = backs.reduce(function (s, v) { return s + v.dur; }, 0);
+      var backQ = {}; backs.forEach(function (v) { backQ[v.q] = true; });
+      var nBackQ = Object.keys(backQ).length;
+      var chs = visits.filter(function (v) { return v.change; });
+      var toRight = chs.filter(function (v) { return v.change.to; }).length;
+      var toWrong = chs.filter(function (v) { return v.change.from && !v.change.to; }).length;
+      var stillWrong = chs.length - toRight - toWrong;
+      var worst = null;
+      firsts.forEach(function (v) {
+        var bq = budgets[v.q] || 0;
+        if (bq > 0 && v.dur >= bq * STUCK_BUDGET_REL && v.dur >= 60 && (!worst || v.dur / bq > worst.dur / worst.b)) worst = { q: v.q, dur: v.dur, b: bq };
+      });
+      var clockTxt = clockSec ? ' of the ' + Math.round(mv.clockMin) + '-minute clock' : '';
+      var parts = [];
+      if (unseen > 0) {
+        parts.push('<strong>The first pass reached ' + firsts.length + ' of ' + N + ' questions</strong>; ' + unseen + (unseen === 1 ? ' was' : ' were') + ' never opened.');
+        // Time spent going back while questions were still unopened is the
+        // finding here: it is time the unopened ones never got.
+        if (backs.length) parts.push('Meanwhile ' + mmss(backSec) + ' went to going back to ' + nBackQ + ' earlier question' + (nBackQ === 1 ? '' : 's') + '.');
+      }
+      else if (!backs.length) parts.push('<strong>One pass, no going back:</strong> done at ' + mmss(fpEnd) + clockTxt + '.');
+      else parts.push('<strong>First pass done at ' + mmss(fpEnd) + clockTxt + ', then ' + mmss(backSec) + ' going back to ' + nBackQ + ' question' + (nBackQ === 1 ? '' : 's') + '.</strong>');
+      if (chs.length) {
+        var bits = [];
+        if (toRight) bits.push(toRight + ' to right');
+        if (toWrong) bits.push(toWrong + ' from right to wrong');
+        if (stillWrong) bits.push(stillWrong + ' still wrong');
+        parts.push('Changed ' + chs.length + ' answer' + (chs.length === 1 ? '' : 's') + ': ' + bits.join(', ') + '.');
+      }
+      if (worst) parts.push('Longest first look: question ' + (worst.q + 1) + ', ' + mmss(worst.dur) + ' against a ' + mmss(worst.b) + ' target.');
+      routeVerdictEl.innerHTML = parts.join(' ');
+      var legend = [
+        '<span><i style="background:var(--ink)"></i>first look</span>',
+        backs.length ? '<span><i style="background:var(--gold)"></i>going back</span>' : '',
+        visits.some(function (v) { return v.glance; }) ? '<span><i style="background:rgba(17,17,17,0.28);width:2px"></i>paging past</span>' : '',
+        budgets.some(function (b) { return b > 0; }) ? '<span><i style="background:none;border-top:2px dashed rgba(17,17,17,0.42);height:0;border-radius:0"></i>target pace</span>' : '',
+        toRight ? '<span style="color:var(--green)">&#9650;</span><span>changed to right</span>' : '',
+        toWrong ? '<span style="color:var(--red)">&#9660;</span><span>changed from right to wrong</span>' : '',
+        stillWrong ? '<span style="color:rgba(17,17,17,0.45)">&#9679;</span><span>changed, still wrong</span>' : '',
+        '<span><i style="background:var(--green);width:8px;height:8px"></i><i style="background:var(--red);width:8px;height:8px"></i>right / wrong at the end</span>'
+      ].join('');
+      routeLegend.innerHTML = legend;
+      routeSvg.setAttribute('aria-label', 'Route through ' + mv.label + ': ' + routeVerdictEl.textContent);
+    }
+
+    var anyRoute = moduleViews.some(function (mv) { return !!routeDataFor(mv); });
+    var timingView = anyRoute ? 'route' : 'pace';
+    function showingRoute() { return timingView === 'route' && !!routeDataFor(moduleViews[moduleIdx]); }
     function paintModule() {
       var mv = moduleViews[moduleIdx];
       hideTimingTooltip();
-      renderPaceTrace(mv);
+      hideRouteTooltip();
+      var rd = timingView === 'route' ? routeDataFor(mv) : null;
+      routeSwap.style.display = rd ? '' : 'none';
+      swapEl.style.display = rd ? 'none' : '';
+      if (rd) renderRoute(mv, rd); else renderPaceTrace(mv);
       labelEl.textContent = mv.label;
     }
 
@@ -5581,10 +5853,11 @@
          tabs or occluded panes, so waiting on onfinish would leave the arrows
          dead there. */
       paintModule();
-      if (paceRevealed) animatePaceWipe(dir ? SWITCH_WIPE_MS : undefined);
-      if (!dir || !swapEl || !swapEl.animate || prefersReducedMotion()) return;
+      if (paceRevealed && !showingRoute()) animatePaceWipe(dir ? SWITCH_WIPE_MS : undefined);
+      var swapNow = showingRoute() ? routeSwap : swapEl;
+      if (!dir || !swapNow || !swapNow.animate || prefersReducedMotion()) return;
       if (swapAnim) { swapAnim.cancel(); swapAnim = null; }
-      swapAnim = swapEl.animate(
+      swapAnim = swapNow.animate(
         [{ opacity: 0, transform: 'translateX(' + (dir > 0 ? 16 : -16) + 'px)' },
          { opacity: 1, transform: 'translateX(0)' }],
         { duration: SWAP_IN_MS, easing: 'cubic-bezier(0.12,1,0.15,1)' });
@@ -5602,6 +5875,17 @@
             moduleIdx = next;
             renderModule(dir);
           }, 'Choose module'));
+    }
+    // Route first, Pace one tap away; only where a visit log exists.
+    if (anyRoute) {
+      document.getElementById('timing-view-toggle').appendChild(
+        dxkToggle([{ key: 'route', label: 'Route' }, { key: 'pace', label: 'Pace' }], function (key) {
+          if (key === timingView) return;
+          timingView = key;
+          paintModule();
+          if (!showingRoute() && paceRevealed) animatePaceWipe(SWITCH_WIPE_MS);
+        }, 'Choose a view'));
+      document.getElementById('timing-view-row').style.display = '';
     }
     renderModule(0);
 
