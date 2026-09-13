@@ -846,14 +846,82 @@
   .how-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
   .how-btn[aria-expanded="true"], .how-btn[aria-pressed="true"] { color: var(--ink); background: rgba(17,17,17,0.05); }
   .plain-head .how-btn { float: none; margin: 0; }
-  #page1.plain-on:not(.how-all):not(.how-bridge) .bridge-note-block,
-  #page1.plain-on:not(.how-all):not(.how-skilldx) .skilldx-thin,
-  #page1.plain-on:not(.how-all):not(.how-skilldx) .skilldx-ci,
-  #page1.plain-on:not(.how-all):not(.how-skilldx) .skilldx-ci-ref,
-  #page1.plain-on:not(.how-all):not(.how-budget) #budget-sub,
-  #page1.plain-on:not(.how-all):not(.how-budget) .budget-cum,
-  #page1.plain-on:not(.how-all):not(.how-timing) #timing-allocation-sub,
-  #page1.plain-on:not(.how-all):not(.how-plan) .plan-foot { display: none !important; }
+  .page.plain-on:not(.how-all):not(.how-bridge) .bridge-note-block,
+  .page.plain-on:not(.how-all):not(.how-skilldx) .skilldx-thin,
+  .page.plain-on:not(.how-all):not(.how-skilldx) .skilldx-ci,
+  .page.plain-on:not(.how-all):not(.how-skilldx) .skilldx-ci-ref,
+  .page.plain-on:not(.how-all):not(.how-budget) #budget-sub,
+  .page.plain-on:not(.how-all):not(.how-budget) .budget-cum,
+  .page.plain-on:not(.how-all):not(.how-timing) #timing-allocation-sub,
+  .page.plain-on:not(.how-all):not(.how-plan) .plan-foot { display: none !important; }
+  /* An opened method note is marked as one, so opening them visibly changes
+     the page (they sit under charts, often below the fold). */
+  .page.plain-on .bridge-note-block, .page.plain-on .skilldx-thin, .page.plain-on #budget-sub,
+  .page.plain-on #timing-allocation-sub, .page.plain-on .plan-foot {
+    background: #FAF6EC; border: none; border-left: 3px solid var(--gold); border-radius: 0 6px 6px 0; padding: 8px 12px; }
+  .plain-status { font-size: 11.5px; line-height: 1.5; font-weight: 400; color: var(--ink); margin: 8px 0 0; }
+  .plain-status:empty { display: none; }
+
+  /* ═══ THE COVER ═══ page 1 of the diagnostic report: the one-minute
+     summary and the four-week plan, on a sheet of their own. The evidence
+     (#page1) follows as page 2. See renderPlainLayer(). */
+  .page.cover { flex-direction: column; }
+  .cover .hdr { padding-bottom: 16px; margin-bottom: 20px; }
+  .cover .hdr img { height: 46px; }
+  .cover .hdr h1 { font-size: 22px; }
+  .cover .plain-summary { border: none; border-radius: 0; padding: 0; margin: 22px 0 0; background: transparent; }
+  .cover .plain-head { margin-bottom: 10px; }
+  .cover .plain-head h2, .cover #plan-hed { font-family: var(--display); font-size: 24px; font-weight: 700; line-height: 1.15; letter-spacing: 0; text-transform: none; color: var(--ink); }
+  .cover .plain-head h2::before, .cover #plan-hed::before { content: ''; display: block; width: 28px; height: 3px; background: var(--red); margin: 0 0 9px; }
+  .cover #plan-hed { border-bottom: none; padding-bottom: 0; margin: 28px 0 12px; }
+  .cover .plain-score-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 300px); gap: 24px; align-items: center; margin: 0 0 14px; }
+  .cover .plain-score-row .plain-score, .cover .plain-score-row .plain-range { margin: 0; }
+  @media (max-width: 640px) { .cover .plain-score-row { grid-template-columns: 1fr; gap: 10px; } }
+  .cover .plain-cols { gap: 26px; padding-top: 14px; }
+  .cover > .plain-parent { margin: 24px 0 18px; padding: 12px 16px; border: none; border-left: 3px solid var(--gold); border-radius: 0 8px 8px 0; background: #FBF3E7; color: var(--ink); font-size: 12px; }
+  .cover-foot { margin-top: auto; padding-top: 12px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; gap: 6px 16px; flex-wrap: wrap; font-size: 10px; color: var(--faint); }
+  .cover-foot b { font-weight: 600; color: var(--mid); }
+  /* Page 2's head: who and which report, then what the page is. */
+  .ev-head { margin: 0 0 4px; }
+  .ev-top { display: flex; justify-content: space-between; gap: 12px; font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--mid); border-bottom: 3px solid var(--red); padding-bottom: 10px; margin-bottom: 16px; }
+  .ev-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; }
+  .ev-row h2 { font-family: var(--display); font-size: 24px; font-weight: 700; line-height: 1.15; color: var(--ink); margin: 0 0 5px; }
+  .ev-row p { font-size: 12px; line-height: 1.55; font-weight: 400; color: var(--mid); max-width: 62ch; }
+  .ev-row .how-btn { float: none; flex-shrink: 0; margin: 2px 0 0; font-size: 11px; padding: 4px 12px; }
+  @media (max-width: 640px) { .ev-row { flex-direction: column; gap: 10px; } .cover-foot { flex-direction: column; } }
+  body.embedded .page.cover, body.public-embed .page.cover { padding-bottom: 1.25rem; }
+  body.embedded .ev-head, body.public-embed .ev-head { margin-top: 1.5rem; }
+  /* On paper the cover is one sheet. Just before printing, fitCoverForPrint()
+     turns on the tighter spacing below (.cover-compact), measures the cover at
+     the printed width and, if it is still taller than a sheet, scales it down
+     to fit (--cover-zoom). Rules written as classes, not @media print, so the
+     measurement sees exactly what will print. */
+  .page.cover.cover-measure { width: 6.9in !important; min-height: 0 !important; padding: 0 !important; margin: 0 !important; box-shadow: none !important; }
+  .cover.cover-compact .hdr { padding-bottom: 10px; margin-bottom: 12px; }
+  .cover.cover-compact .hdr img { height: 36px; }
+  .cover.cover-compact .hdr h1 { font-size: 18px; }
+  .cover.cover-compact .score-tile, .cover.cover-compact .score-tile.big { padding: 0.7rem 1.2rem; }
+  .cover.cover-compact .score-tiles-small { padding: 0.4rem 0.5rem; }
+  .cover.cover-compact .raw-stat { padding: 0.55rem 1rem; }
+  .cover.cover-compact .plain-summary { margin-top: 14px; }
+  .cover.cover-compact .plain-head { margin-bottom: 6px; }
+  .cover.cover-compact .plain-head h2, .cover.cover-compact #plan-hed { font-size: 18px; }
+  .cover.cover-compact .plain-head h2::before, .cover.cover-compact #plan-hed::before { margin-bottom: 6px; }
+  .cover.cover-compact .plain-score-row { margin-bottom: 8px; gap: 18px; }
+  .cover.cover-compact .plain-score { font-size: 11.5px; }
+  .cover.cover-compact .plain-cols { gap: 20px; padding-top: 9px; }
+  .cover.cover-compact .plain-lede, .cover.cover-compact .plain-list, .cover.cover-compact .plain-steps { font-size: 10.5px; }
+  .cover.cover-compact .plain-list li, .cover.cover-compact .plain-steps li { margin-bottom: 3px; }
+  .cover.cover-compact .plain-well { font-size: 10px; margin-top: 4px; }
+  .cover.cover-compact #plan-hed { margin: 14px 0 7px; }
+  .cover.cover-compact .plan-card { padding: 10px 14px; }
+  .cover.cover-compact > .plain-parent { margin: 12px 0 8px; padding: 8px 12px; font-size: 10px; }
+  .cover.cover-compact .cover-foot { margin-top: 6px; padding-top: 8px; }
+  @media print {
+    .page.cover { page-break-after: always; break-after: page; zoom: var(--cover-zoom, 1); }
+    .cover #plan-hed { page-break-after: avoid; break-after: avoid; }
+    #demo-banner { font-size: 8.5px !important; padding: 5px 10px !important; margin: 0 auto 6px !important; }
+  }
   @media print { .how-btn { display: none !important; } .plain-summary { page-break-inside: avoid; break-inside: avoid; } }
 </style>
 </head>
@@ -870,6 +938,7 @@
 <div id="err">Couldn't read the report data from this link. Make sure the full link was copied from the results email.</div>
 <div id="demo-banner" style="display:none; max-width:8.5in; margin:16px auto 0; background:#1a1a1a; color:#fff; font-family:'Poppins',sans-serif; font-size:12px; font-weight:600; letter-spacing:0.04em; padding:10px 18px; text-align:center;">DEMO — synthetic data, no real student took this. Add &amp;score=1000/1250/1450 to the URL to preview roughly that score band, &amp;accom=1.5 or &amp;accom=2 for an extended-time attempt, &amp;pace=1.4 for a student who runs out of time, and &amp;profile=pacing for one whose problem is concentrated in the reading-heavy skills.</div>
 <div class="toolbar"><button onclick="window.print()">Print / Save as PDF</button></div>
+<div class="page cover" id="page-cover" style="display:none;"></div>
 <div class="page" id="page1" style="display:none;">
   <div class="hdr">
     <img src="../logo-caladea-dark.png" alt="Moretti Test Prep &amp; Tutoring">
@@ -3054,7 +3123,9 @@
       };
       if (bridgeWrap.__fitOff) bridgeWrap.__fitOff();
       if (window.ResizeObserver) {
-        var ro = new ResizeObserver(refit); ro.observe(bridgeWrap);
+        // Redrawn on the next frame, outside the observer's callback: a
+        // redraw inside it trips the browser's "ResizeObserver loop" error.
+        var ro = new ResizeObserver(function () { requestAnimationFrame(refit); }); ro.observe(bridgeWrap);
         bridgeWrap.__fitOff = function () { ro.disconnect(); };
       } else {
         window.addEventListener('resize', refit);
@@ -6263,9 +6334,9 @@
           : areaTxt
           ? areaTxt + ' first, then practice on ' + (contentAreas.length === 1 ? 'it' : 'them') + ', in that order: practising before the method is solid just rehearses the wrong method. ' +
             '<em>' + causes.content + ' question' + (causes.content === 1 ? '' : 's') + ' on this test got real work and still came back wrong' +
-            (areaMiss > 0 && areaMiss < causes.content ? ', ' + areaMiss + ' of them in ' + (contentAreas.length === 1 ? esc(contentAreas[0].name) : 'those areas') + '. Go through the rest one by one in the question list.' : '.') + '</em>'
+            (areaMiss > 0 && areaMiss < causes.content ? ', ' + areaMiss + ' of them in ' + (contentAreas.length === 1 ? esc(contentAreas[0].name) : 'those areas') + '. Go through the rest one by one from the question grids.' : '.') + '</em>'
           : 'Work the questions this test got wrong. ' +
-            '<em>No one area stood out from the rest of your test, so spread the time across the misses rather than picking one topic.</em>')
+            '<em>No area stood out clearly enough to build the week around, so spread the time across the misses rather than picking one topic.</em>')
       });
     }
     if (hours.method > 0) {
@@ -6396,10 +6467,30 @@
       var root = document.getElementById('page1');
       var box = document.getElementById('plain-summary');
       if (!root || !box) return;
+      /* The diagnostic opens on a cover: this summary and the four-week plan
+         on a sheet of their own, the evidence after it (Luca, 2026-09-12).
+         Practice-test reports keep the single page for now. */
+      var cover = document.getElementById('page-cover');
+      /* Drawn again in place (the portal reuses one report view), the page
+         starts from the one-sheet layout: each moved section goes back to the
+         slot it left, and what the cover added is cleared. */
+      if (cover && cover.__slots) {
+        cover.__slots.forEach(function (s) { if (s.slot.parentNode) s.slot.parentNode.replaceChild(s.el, s.slot); });
+        cover.__slots = null;
+        cover.innerHTML = '';
+        cover.style.display = 'none';
+        var oldEv = root.querySelector('.ev-head');
+        if (oldEv) oldEv.parentNode.removeChild(oldEv);
+      }
+      var coverLayout = !!cover && !data.pt;
+      var roots = coverLayout ? [root, cover] : [root];
+      var setHow = function (cls, on) { roots.forEach(function (r) { r.classList.toggle(cls, on); }); };
       // A fresh report starts plain, whatever the last one had open.
-      root.className = root.className.replace(/(^|\s)how-\S+/g, '').trim();
-      root.classList.add('plain-on');
-      if (/[?&]view=tutor\b/.test(location.search)) root.classList.add('how-all');
+      roots.forEach(function (r) {
+        r.className = r.className.replace(/(^|\s)how-\S+/g, '').trim();
+        r.classList.add('plain-on');
+      });
+      if (/[?&]view=tutor\b/.test(location.search)) setHow('how-all', true);
       var escP = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (ch) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]; }); };
       var count = function (n, one, many) { return n + ' ' + (n === 1 ? one : (many || one + 's')); };
 
@@ -6420,7 +6511,8 @@
         b.setAttribute('aria-expanded', 'false');
         b.textContent = 'How this works';
         b.addEventListener('click', function () {
-          var on = root.classList.toggle('how-' + h[1]);
+          var on = !root.classList.contains('how-' + h[1]);
+          setHow('how-' + h[1], on);
           b.setAttribute('aria-expanded', on ? 'true' : 'false');
           b.textContent = on ? 'Hide the method' : 'How this works';
         });
@@ -6593,7 +6685,7 @@
          card open it (with the student's answer), so the steps point there. */
       var nWrong = nAll - (typeof totalC === 'number' ? totalC : 0) - nBlank;
       var TILES = '<span class="plain-tiles">tap ' + (nWrong > 0 && nBlank > 0 ? 'each red (wrong) or empty (blank) tile' : nBlank > 0 && !nWrong ? 'each empty (blank) tile' : 'each red tile') +
-        ' in the question grids below</span>';
+        ' in the question grids ' + (coverLayout ? 'on page 2' : 'below') + '</span>';
       var hasTiles = function (x) { return x.indexOf('plain-tiles') !== -1; };
 
       var steps = [];
@@ -6695,12 +6787,12 @@
       // habit: name where.
       if (blanks >= 3 && c.method >= 5 && (planInputs.methodSkills || []).length) {
         steps.push('Get faster where right answers ran long, starting with ' + planInputs.methodSkills.map(escP).join(' and ') + '.' +
-          (planInputs.weekly > 0 ? ' The timed sets for that are in the plan below.' : ''));
+          (planInputs.weekly > 0 ? ' The timed sets for that are in the plan' + (coverLayout ? '' : ' below') + '.' : ''));
       }
       if (lostN > 0 && !steps.some(hasTiles)) {
         steps.push('Go through the questions you missed: ' + TILES + ' to see each question and your answer.');
       }
-      var hoursHtml = planInputs.weekly > 0
+      var hoursHtml = planInputs.weekly > 0 && !coverLayout
         ? '<p class="plain-well">About <b>' + planInputs.weeklyText + ' hour' + (planInputs.weekly === 1 ? '' : 's') + ' a week</b> of practice for now. “Your next four weeks” below splits it up.</p>'
         : '';
 
@@ -6736,24 +6828,83 @@
         ? '<p class="plain-well"><b>Worth knowing:</b> this test was handed in late at night. Tiredness can cost points, so this score may understate you. Take the next one earlier in the day.</p>'
         : '';
 
+      /* Every method note at once. On the cover it lives at the top of the
+         evidence page, where the notes are; the status line says what opened
+         and where, since most of it is below the fold. */
+      var allBtnHtml = '<button type="button" class="how-btn how-all-btn"></button>';
       box.innerHTML =
-        '<div class="plain-head"><h2>Your report in one minute</h2>' +
-          '<button type="button" class="how-btn how-all-btn"></button></div>' +
-        scoreHtml + rangeHtml +
+        '<div class="plain-head"><h2>Your report in one minute</h2>' + (coverLayout ? '' : allBtnHtml) + '</div>' +
+        (coverLayout ? '<div class="plain-score-row">' + scoreHtml + rangeHtml + '</div>' : scoreHtml + rangeHtml) +
         '<div class="plain-cols">' +
           '<div><div class="plain-label">Where your points went</div>' + lostHtml + '</div>' +
           '<div><div class="plain-label">Do these next</div><ol class="plain-steps">' +
             steps.slice(0, 3).map(function (s) { return '<li>' + s + '</li>'; }).join('') + '</ol>' + hoursHtml + lateHtml + '</div>' +
         '</div>' +
-        parentHtml +
-        '<p class="plain-foot">The rest of the report is the evidence for this. Each section has a <b>How this works</b> button if you want the method.</p>';
-      var allBtn = box.querySelector('.how-all-btn');
+        (coverLayout ? '' : parentHtml +
+          '<p class="plain-foot">The rest of the report is the evidence for this. Each section has a <b>How this works</b> button if you want the method.</p>' +
+          '<p class="plain-status" aria-live="polite"></p>');
+      if (coverLayout) {
+        var titleTxt = (document.getElementById('r-title') || {}).textContent || '';
+        [root.querySelector('.hdr'), document.getElementById('integrity-banner'), root.querySelector('.top-row'), box,
+          document.getElementById('plan-hed'), document.getElementById('plan-section')].forEach(function (el) {
+          if (!el) return;
+          var slot = document.createComment('cover slot');
+          el.parentNode.replaceChild(slot, el);
+          (cover.__slots = cover.__slots || []).push({ el: el, slot: slot });
+          cover.appendChild(el);
+        });
+        cover.insertAdjacentHTML('beforeend', parentHtml +
+          '<div class="cover-foot"><span>Moretti Test Prep &amp; Tutoring · Cranford, NJ · (201) 275-2791</span>' +
+          '<span><b>Page 2:</b> the evidence behind every line on this page</span></div>');
+        root.insertAdjacentHTML('afterbegin', '<div class="ev-head">' +
+          '<div class="ev-top"><span>' + escP(titleTxt) + '</span><span>Page 2</span></div>' +
+          '<div class="ev-row"><div><h2>The evidence</h2><p>What page 1 is built on: every question, where the points and the time went, and how the clock was used. ' +
+            'Each section’s <b>How this works</b> button shows the method behind it.</p></div>' + allBtnHtml + '</div>' +
+          '<p class="plain-status" aria-live="polite"></p></div>');
+        cover.style.display = 'flex';
+        /* One printed sheet (see .cover-compact): Letter less the browser's
+           default margins and the page's print padding leaves about 6.9 x
+           9.4 in. Measured at print time, since fonts and the student's
+           content set the height; never scaled below 72%. */
+        var fitCoverForPrint = function () {
+          cover.classList.add('cover-compact', 'cover-measure');
+          var h = cover.scrollHeight;
+          cover.classList.remove('cover-measure');
+          var banner = document.getElementById('demo-banner');
+          var avail = 9.4 * 96 - (banner && banner.offsetParent ? 34 : 0);
+          cover.style.setProperty('--cover-zoom', h > avail ? Math.max(0.72, avail / h).toFixed(3) : '1');
+        };
+        var unfitCover = function () { cover.classList.remove('cover-compact'); cover.style.removeProperty('--cover-zoom'); };
+        // Wired once per page; a later report reuses the same handlers.
+        cover.__fit = fitCoverForPrint; cover.__unfit = unfitCover;
+        if (!cover.__printWired) {
+          cover.__printWired = true;
+          var fitNow = function () { if (cover.__fit && cover.style.display !== 'none') cover.__fit(); };
+          window.addEventListener('beforeprint', fitNow);
+          window.addEventListener('afterprint', function () { if (cover.__unfit) cover.__unfit(); });
+          if (window.matchMedia) {
+            var mqPrint = window.matchMedia('print'), onMq = function (e) { if (e.matches) fitNow(); };
+            if (mqPrint.addEventListener) mqPrint.addEventListener('change', onMq); else if (mqPrint.addListener) mqPrint.addListener(onMq);
+          }
+        }
+      }
+      var allBtn = (coverLayout ? root : box).querySelector('.how-all-btn');
+      var statusEl = (coverLayout ? root : box).querySelector('.plain-status');
+      // The sections that have a note to open, by their headings.
+      var noteHeds = HOW.map(function (h) { var e = document.getElementById(h[0]); return e && e.querySelector('.how-btn') ? e : null; })
+        .filter(Boolean).map(function (e) { return (e.firstChild && e.firstChild.nodeType === 3 ? e.firstChild.textContent : '').trim(); })
+        .filter(Boolean);
       function syncAll() {
         var on = root.classList.contains('how-all');
         allBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
         allBtn.textContent = on ? 'Hide the calculations' : 'Show every calculation';
+        statusEl.innerHTML = on && noteHeds.length
+          ? 'Opened: the method notes under ' + joinAnd(noteHeds.map(function (t) {
+              return '<b>' + escP(t) + '</b>' + (coverLayout && t === 'Your next four weeks' ? ' (page 1)' : '');
+            })) + ', each in a shaded box with a gold edge.'
+          : '';
       }
-      allBtn.addEventListener('click', function () { root.classList.toggle('how-all'); syncAll(); });
+      allBtn.addEventListener('click', function () { setHow('how-all', !root.classList.contains('how-all')); syncAll(); });
       syncAll();
       box.style.display = '';
     } catch (e) { if (window.console) console.warn('plain layer:', e); }

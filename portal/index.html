@@ -3307,14 +3307,79 @@
   #pt-native-report .how-btn[aria-expanded="true"],
   #pt-native-report .how-btn[aria-pressed="true"] { color: var(--ink); background: rgba(17,17,17,0.05); }
   #pt-native-report .plain-head .how-btn { float: none; margin: 0; }
-  #pt-native-report #page1.plain-on:not(.how-all):not(.how-bridge) .bridge-note-block,
-  #pt-native-report #page1.plain-on:not(.how-all):not(.how-skilldx) .skilldx-thin,
-  #pt-native-report #page1.plain-on:not(.how-all):not(.how-skilldx) .skilldx-ci,
-  #pt-native-report #page1.plain-on:not(.how-all):not(.how-skilldx) .skilldx-ci-ref,
-  #pt-native-report #page1.plain-on:not(.how-all):not(.how-budget) #budget-sub,
-  #pt-native-report #page1.plain-on:not(.how-all):not(.how-budget) .budget-cum,
-  #pt-native-report #page1.plain-on:not(.how-all):not(.how-timing) #timing-allocation-sub,
-  #pt-native-report #page1.plain-on:not(.how-all):not(.how-plan) .plan-foot { display: none !important; }
+  #pt-native-report .page.plain-on:not(.how-all):not(.how-bridge) .bridge-note-block,
+  #pt-native-report .page.plain-on:not(.how-all):not(.how-skilldx) .skilldx-thin,
+  #pt-native-report .page.plain-on:not(.how-all):not(.how-skilldx) .skilldx-ci,
+  #pt-native-report .page.plain-on:not(.how-all):not(.how-skilldx) .skilldx-ci-ref,
+  #pt-native-report .page.plain-on:not(.how-all):not(.how-budget) #budget-sub,
+  #pt-native-report .page.plain-on:not(.how-all):not(.how-budget) .budget-cum,
+  #pt-native-report .page.plain-on:not(.how-all):not(.how-timing) #timing-allocation-sub,
+  #pt-native-report .page.plain-on:not(.how-all):not(.how-plan) .plan-foot { display: none !important; }
+  /* An opened method note is marked as one, so opening them visibly changes
+     the page (they sit under charts, often below the fold). */
+  #pt-native-report .page.plain-on .bridge-note-block, #pt-native-report .page.plain-on .skilldx-thin, #pt-native-report .page.plain-on #budget-sub,
+  #pt-native-report .page.plain-on #timing-allocation-sub, #pt-native-report .page.plain-on .plan-foot {
+    background: #FAF6EC; border: none; border-left: 3px solid var(--gold); border-radius: 0 6px 6px 0; padding: 8px 12px; }
+  #pt-native-report .plain-status { font-size: 11.5px; line-height: 1.5; font-weight: 400; color: var(--ink); margin: 8px 0 0; }
+  #pt-native-report .plain-status:empty { display: none; }
+
+  /* ═══ THE COVER ═══ page 1 of the diagnostic report: the one-minute
+     summary and the four-week plan, on a sheet of their own. The evidence
+     (#page1) follows as page 2. See renderPlainLayer(). */
+  #pt-native-report .page.cover { flex-direction: column; }
+  #pt-native-report .cover .hdr { padding-bottom: 16px; margin-bottom: 20px; }
+  #pt-native-report .cover .hdr img { height: 46px; }
+  #pt-native-report .cover .hdr h1 { font-size: 22px; }
+  #pt-native-report .cover .plain-summary { border: none; border-radius: 0; padding: 0; margin: 22px 0 0; background: transparent; }
+  #pt-native-report .cover .plain-head { margin-bottom: 10px; }
+  #pt-native-report .cover .plain-head h2, #pt-native-report .cover #plan-hed { font-family: var(--display); font-size: 24px; font-weight: 700; line-height: 1.15; letter-spacing: 0; text-transform: none; color: var(--ink); }
+  #pt-native-report .cover .plain-head h2::before, #pt-native-report .cover #plan-hed::before { content: ''; display: block; width: 28px; height: 3px; background: var(--red); margin: 0 0 9px; }
+  #pt-native-report .cover #plan-hed { border-bottom: none; padding-bottom: 0; margin: 28px 0 12px; }
+  #pt-native-report .cover .plain-score-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 300px); gap: 24px; align-items: center; margin: 0 0 14px; }
+  #pt-native-report .cover .plain-score-row .plain-score, #pt-native-report .cover .plain-score-row .plain-range { margin: 0; }
+  @media (max-width: 640px) { #pt-native-report .cover .plain-score-row { grid-template-columns: 1fr; gap: 10px; } }
+  #pt-native-report .cover .plain-cols { gap: 26px; padding-top: 14px; }
+  #pt-native-report .cover > .plain-parent { margin: 24px 0 18px; padding: 12px 16px; border: none; border-left: 3px solid var(--gold); border-radius: 0 8px 8px 0; background: #FBF3E7; color: var(--ink); font-size: 12px; }
+  #pt-native-report .cover-foot { margin-top: auto; padding-top: 12px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; gap: 6px 16px; flex-wrap: wrap; font-size: 10px; color: var(--faint); }
+  #pt-native-report .cover-foot b { font-weight: 600; color: var(--mid); }
+  /* Page 2's head: who and which report, then what the page is. */
+  #pt-native-report .ev-head { margin: 0 0 4px; }
+  #pt-native-report .ev-top { display: flex; justify-content: space-between; gap: 12px; font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--mid); border-bottom: 3px solid var(--red); padding-bottom: 10px; margin-bottom: 16px; }
+  #pt-native-report .ev-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; }
+  #pt-native-report .ev-row h2 { font-family: var(--display); font-size: 24px; font-weight: 700; line-height: 1.15; color: var(--ink); margin: 0 0 5px; }
+  #pt-native-report .ev-row p { font-size: 12px; line-height: 1.55; font-weight: 400; color: var(--mid); max-width: 62ch; }
+  #pt-native-report .ev-row .how-btn { float: none; flex-shrink: 0; margin: 2px 0 0; font-size: 11px; padding: 4px 12px; }
+  @media (max-width: 640px) { #pt-native-report .ev-row { flex-direction: column; gap: 10px; } #pt-native-report .cover-foot { flex-direction: column; } }
+  /* On paper the cover is one sheet. Just before printing, fitCoverForPrint()
+     turns on the tighter spacing below (.cover-compact), measures the cover at
+     the printed width and, if it is still taller than a sheet, scales it down
+     to fit (--cover-zoom). Rules written as classes, not @media print, so the
+     measurement sees exactly what will print. */
+  #pt-native-report .page.cover.cover-measure { width: 6.9in !important; min-height: 0 !important; padding: 0 !important; margin: 0 !important; box-shadow: none !important; }
+  #pt-native-report .cover.cover-compact .hdr { padding-bottom: 10px; margin-bottom: 12px; }
+  #pt-native-report .cover.cover-compact .hdr img { height: 36px; }
+  #pt-native-report .cover.cover-compact .hdr h1 { font-size: 18px; }
+  #pt-native-report .cover.cover-compact .score-tile, #pt-native-report .cover.cover-compact .score-tile.big { padding: 0.7rem 1.2rem; }
+  #pt-native-report .cover.cover-compact .score-tiles-small { padding: 0.4rem 0.5rem; }
+  #pt-native-report .cover.cover-compact .raw-stat { padding: 0.55rem 1rem; }
+  #pt-native-report .cover.cover-compact .plain-summary { margin-top: 14px; }
+  #pt-native-report .cover.cover-compact .plain-head { margin-bottom: 6px; }
+  #pt-native-report .cover.cover-compact .plain-head h2, #pt-native-report .cover.cover-compact #plan-hed { font-size: 18px; }
+  #pt-native-report .cover.cover-compact .plain-head h2::before, #pt-native-report .cover.cover-compact #plan-hed::before { margin-bottom: 6px; }
+  #pt-native-report .cover.cover-compact .plain-score-row { margin-bottom: 8px; gap: 18px; }
+  #pt-native-report .cover.cover-compact .plain-score { font-size: 11.5px; }
+  #pt-native-report .cover.cover-compact .plain-cols { gap: 20px; padding-top: 9px; }
+  #pt-native-report .cover.cover-compact .plain-lede, #pt-native-report .cover.cover-compact .plain-list, #pt-native-report .cover.cover-compact .plain-steps { font-size: 10.5px; }
+  #pt-native-report .cover.cover-compact .plain-list li, #pt-native-report .cover.cover-compact .plain-steps li { margin-bottom: 3px; }
+  #pt-native-report .cover.cover-compact .plain-well { font-size: 10px; margin-top: 4px; }
+  #pt-native-report .cover.cover-compact #plan-hed { margin: 14px 0 7px; }
+  #pt-native-report .cover.cover-compact .plan-card { padding: 10px 14px; }
+  #pt-native-report .cover.cover-compact > .plain-parent { margin: 12px 0 8px; padding: 8px 12px; font-size: 10px; }
+  #pt-native-report .cover.cover-compact .cover-foot { margin-top: 6px; padding-top: 8px; }
+  @media print {
+    #pt-native-report .page.cover { page-break-after: always; break-after: page; zoom: var(--cover-zoom, 1); }
+    #pt-native-report .cover #plan-hed { page-break-after: avoid; break-after: avoid; }
+  }
   @media print { #pt-native-report .how-btn { display: none !important; } #pt-native-report .plain-summary { page-break-inside: avoid; break-inside: avoid; } }
 </style>
 </head>
@@ -3381,6 +3446,9 @@ window.Portal = {
 </div>
 <script>
   window.addEventListener('error', function (e) {
+    /* Not a failure: the browser's ResizeObserver notice (a window resized
+       while a report is open). This screen replaces the whole portal. */
+    if (e && /ResizeObserver loop/.test(e.message || '')) return;
     var el = document.getElementById('portal-fatal-error');
     var detail = document.getElementById('ferr-detail');
     if (detail) detail.textContent = (e && e.message) ? e.message + (e.filename ? ' (' + e.filename.split('/').pop() + ':' + e.lineno + ')' : '') : '';
@@ -4552,6 +4620,7 @@ window.Portal = {
     <button type="button" class="pt-report-hed-download" id="pt-results-download"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M5 21h14"/></svg>Download report</button>
   </span>
 </div>
+<div class="page cover" id="page-cover" style="display:none;"></div>
 <div class="page" id="page1" style="display:none;">
   <div class="hdr">
     <img src="../logo-caladea-dark.png" alt="Moretti Test Prep &amp; Tutoring">
@@ -19813,7 +19882,9 @@ window.renderNativeReport = function (data) {
       };
       if (bridgeWrap.__fitOff) bridgeWrap.__fitOff();
       if (window.ResizeObserver) {
-        var ro = new ResizeObserver(refit); ro.observe(bridgeWrap);
+        // Redrawn on the next frame, outside the observer's callback: a
+        // redraw inside it trips the browser's "ResizeObserver loop" error.
+        var ro = new ResizeObserver(function () { requestAnimationFrame(refit); }); ro.observe(bridgeWrap);
         bridgeWrap.__fitOff = function () { ro.disconnect(); };
       } else {
         window.addEventListener('resize', refit);
@@ -22953,9 +23024,9 @@ window.renderNativeReport = function (data) {
           : areaTxt
           ? areaTxt + ' first, then practice on ' + (contentAreas.length === 1 ? 'it' : 'them') + ', in that order: practising before the method is solid just rehearses the wrong method. ' +
             '<em>' + causes.content + ' question' + (causes.content === 1 ? '' : 's') + ' on this test got real work and still came back wrong' +
-            (areaMiss > 0 && areaMiss < causes.content ? ', ' + areaMiss + ' of them in ' + (contentAreas.length === 1 ? esc(contentAreas[0].name) : 'those areas') + '. Go through the rest one by one in the question list.' : '.') + '</em>'
+            (areaMiss > 0 && areaMiss < causes.content ? ', ' + areaMiss + ' of them in ' + (contentAreas.length === 1 ? esc(contentAreas[0].name) : 'those areas') + '. Go through the rest one by one from the question grids.' : '.') + '</em>'
           : 'Work the questions this test got wrong. ' +
-            '<em>No one area stood out from the rest of your test, so spread the time across the misses rather than picking one topic.</em>')
+            '<em>No area stood out clearly enough to build the week around, so spread the time across the misses rather than picking one topic.</em>')
       });
     }
     if (hours.method > 0) {
@@ -23086,10 +23157,30 @@ window.renderNativeReport = function (data) {
       var root = document.getElementById('page1');
       var box = document.getElementById('plain-summary');
       if (!root || !box) return;
+      /* The diagnostic opens on a cover: this summary and the four-week plan
+         on a sheet of their own, the evidence after it (Luca, 2026-09-12).
+         Practice-test reports keep the single page for now. */
+      var cover = document.getElementById('page-cover');
+      /* Drawn again in place (the portal reuses one report view), the page
+         starts from the one-sheet layout: each moved section goes back to the
+         slot it left, and what the cover added is cleared. */
+      if (cover && cover.__slots) {
+        cover.__slots.forEach(function (s) { if (s.slot.parentNode) s.slot.parentNode.replaceChild(s.el, s.slot); });
+        cover.__slots = null;
+        cover.innerHTML = '';
+        cover.style.display = 'none';
+        var oldEv = root.querySelector('.ev-head');
+        if (oldEv) oldEv.parentNode.removeChild(oldEv);
+      }
+      var coverLayout = !!cover && !data.pt;
+      var roots = coverLayout ? [root, cover] : [root];
+      var setHow = function (cls, on) { roots.forEach(function (r) { r.classList.toggle(cls, on); }); };
       // A fresh report starts plain, whatever the last one had open.
-      root.className = root.className.replace(/(^|\s)how-\S+/g, '').trim();
-      root.classList.add('plain-on');
-      if (/[?&]view=tutor\b/.test(location.search)) root.classList.add('how-all');
+      roots.forEach(function (r) {
+        r.className = r.className.replace(/(^|\s)how-\S+/g, '').trim();
+        r.classList.add('plain-on');
+      });
+      if (/[?&]view=tutor\b/.test(location.search)) setHow('how-all', true);
       var escP = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (ch) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]; }); };
       var count = function (n, one, many) { return n + ' ' + (n === 1 ? one : (many || one + 's')); };
 
@@ -23110,7 +23201,8 @@ window.renderNativeReport = function (data) {
         b.setAttribute('aria-expanded', 'false');
         b.textContent = 'How this works';
         b.addEventListener('click', function () {
-          var on = root.classList.toggle('how-' + h[1]);
+          var on = !root.classList.contains('how-' + h[1]);
+          setHow('how-' + h[1], on);
           b.setAttribute('aria-expanded', on ? 'true' : 'false');
           b.textContent = on ? 'Hide the method' : 'How this works';
         });
@@ -23283,7 +23375,7 @@ window.renderNativeReport = function (data) {
          card open it (with the student's answer), so the steps point there. */
       var nWrong = nAll - (typeof totalC === 'number' ? totalC : 0) - nBlank;
       var TILES = '<span class="plain-tiles">tap ' + (nWrong > 0 && nBlank > 0 ? 'each red (wrong) or empty (blank) tile' : nBlank > 0 && !nWrong ? 'each empty (blank) tile' : 'each red tile') +
-        ' in the question grids below</span>';
+        ' in the question grids ' + (coverLayout ? 'on page 2' : 'below') + '</span>';
       var hasTiles = function (x) { return x.indexOf('plain-tiles') !== -1; };
 
       var steps = [];
@@ -23385,12 +23477,12 @@ window.renderNativeReport = function (data) {
       // habit: name where.
       if (blanks >= 3 && c.method >= 5 && (planInputs.methodSkills || []).length) {
         steps.push('Get faster where right answers ran long, starting with ' + planInputs.methodSkills.map(escP).join(' and ') + '.' +
-          (planInputs.weekly > 0 ? ' The timed sets for that are in the plan below.' : ''));
+          (planInputs.weekly > 0 ? ' The timed sets for that are in the plan' + (coverLayout ? '' : ' below') + '.' : ''));
       }
       if (lostN > 0 && !steps.some(hasTiles)) {
         steps.push('Go through the questions you missed: ' + TILES + ' to see each question and your answer.');
       }
-      var hoursHtml = planInputs.weekly > 0
+      var hoursHtml = planInputs.weekly > 0 && !coverLayout
         ? '<p class="plain-well">About <b>' + planInputs.weeklyText + ' hour' + (planInputs.weekly === 1 ? '' : 's') + ' a week</b> of practice for now. “Your next four weeks” below splits it up.</p>'
         : '';
 
@@ -23426,24 +23518,83 @@ window.renderNativeReport = function (data) {
         ? '<p class="plain-well"><b>Worth knowing:</b> this test was handed in late at night. Tiredness can cost points, so this score may understate you. Take the next one earlier in the day.</p>'
         : '';
 
+      /* Every method note at once. On the cover it lives at the top of the
+         evidence page, where the notes are; the status line says what opened
+         and where, since most of it is below the fold. */
+      var allBtnHtml = '<button type="button" class="how-btn how-all-btn"></button>';
       box.innerHTML =
-        '<div class="plain-head"><h2>Your report in one minute</h2>' +
-          '<button type="button" class="how-btn how-all-btn"></button></div>' +
-        scoreHtml + rangeHtml +
+        '<div class="plain-head"><h2>Your report in one minute</h2>' + (coverLayout ? '' : allBtnHtml) + '</div>' +
+        (coverLayout ? '<div class="plain-score-row">' + scoreHtml + rangeHtml + '</div>' : scoreHtml + rangeHtml) +
         '<div class="plain-cols">' +
           '<div><div class="plain-label">Where your points went</div>' + lostHtml + '</div>' +
           '<div><div class="plain-label">Do these next</div><ol class="plain-steps">' +
             steps.slice(0, 3).map(function (s) { return '<li>' + s + '</li>'; }).join('') + '</ol>' + hoursHtml + lateHtml + '</div>' +
         '</div>' +
-        parentHtml +
-        '<p class="plain-foot">The rest of the report is the evidence for this. Each section has a <b>How this works</b> button if you want the method.</p>';
-      var allBtn = box.querySelector('.how-all-btn');
+        (coverLayout ? '' : parentHtml +
+          '<p class="plain-foot">The rest of the report is the evidence for this. Each section has a <b>How this works</b> button if you want the method.</p>' +
+          '<p class="plain-status" aria-live="polite"></p>');
+      if (coverLayout) {
+        var titleTxt = (document.getElementById('r-title') || {}).textContent || '';
+        [root.querySelector('.hdr'), document.getElementById('integrity-banner'), root.querySelector('.top-row'), box,
+          document.getElementById('plan-hed'), document.getElementById('plan-section')].forEach(function (el) {
+          if (!el) return;
+          var slot = document.createComment('cover slot');
+          el.parentNode.replaceChild(slot, el);
+          (cover.__slots = cover.__slots || []).push({ el: el, slot: slot });
+          cover.appendChild(el);
+        });
+        cover.insertAdjacentHTML('beforeend', parentHtml +
+          '<div class="cover-foot"><span>Moretti Test Prep &amp; Tutoring · Cranford, NJ · (201) 275-2791</span>' +
+          '<span><b>Page 2:</b> the evidence behind every line on this page</span></div>');
+        root.insertAdjacentHTML('afterbegin', '<div class="ev-head">' +
+          '<div class="ev-top"><span>' + escP(titleTxt) + '</span><span>Page 2</span></div>' +
+          '<div class="ev-row"><div><h2>The evidence</h2><p>What page 1 is built on: every question, where the points and the time went, and how the clock was used. ' +
+            'Each section’s <b>How this works</b> button shows the method behind it.</p></div>' + allBtnHtml + '</div>' +
+          '<p class="plain-status" aria-live="polite"></p></div>');
+        cover.style.display = 'flex';
+        /* One printed sheet (see .cover-compact): Letter less the browser's
+           default margins and the page's print padding leaves about 6.9 x
+           9.4 in. Measured at print time, since fonts and the student's
+           content set the height; never scaled below 72%. */
+        var fitCoverForPrint = function () {
+          cover.classList.add('cover-compact', 'cover-measure');
+          var h = cover.scrollHeight;
+          cover.classList.remove('cover-measure');
+          var banner = document.getElementById('demo-banner');
+          var avail = 9.4 * 96 - (banner && banner.offsetParent ? 34 : 0);
+          cover.style.setProperty('--cover-zoom', h > avail ? Math.max(0.72, avail / h).toFixed(3) : '1');
+        };
+        var unfitCover = function () { cover.classList.remove('cover-compact'); cover.style.removeProperty('--cover-zoom'); };
+        // Wired once per page; a later report reuses the same handlers.
+        cover.__fit = fitCoverForPrint; cover.__unfit = unfitCover;
+        if (!cover.__printWired) {
+          cover.__printWired = true;
+          var fitNow = function () { if (cover.__fit && cover.style.display !== 'none') cover.__fit(); };
+          window.addEventListener('beforeprint', fitNow);
+          window.addEventListener('afterprint', function () { if (cover.__unfit) cover.__unfit(); });
+          if (window.matchMedia) {
+            var mqPrint = window.matchMedia('print'), onMq = function (e) { if (e.matches) fitNow(); };
+            if (mqPrint.addEventListener) mqPrint.addEventListener('change', onMq); else if (mqPrint.addListener) mqPrint.addListener(onMq);
+          }
+        }
+      }
+      var allBtn = (coverLayout ? root : box).querySelector('.how-all-btn');
+      var statusEl = (coverLayout ? root : box).querySelector('.plain-status');
+      // The sections that have a note to open, by their headings.
+      var noteHeds = HOW.map(function (h) { var e = document.getElementById(h[0]); return e && e.querySelector('.how-btn') ? e : null; })
+        .filter(Boolean).map(function (e) { return (e.firstChild && e.firstChild.nodeType === 3 ? e.firstChild.textContent : '').trim(); })
+        .filter(Boolean);
       function syncAll() {
         var on = root.classList.contains('how-all');
         allBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
         allBtn.textContent = on ? 'Hide the calculations' : 'Show every calculation';
+        statusEl.innerHTML = on && noteHeds.length
+          ? 'Opened: the method notes under ' + joinAnd(noteHeds.map(function (t) {
+              return '<b>' + escP(t) + '</b>' + (coverLayout && t === 'Your next four weeks' ? ' (page 1)' : '');
+            })) + ', each in a shaded box with a gold edge.'
+          : '';
       }
-      allBtn.addEventListener('click', function () { root.classList.toggle('how-all'); syncAll(); });
+      allBtn.addEventListener('click', function () { setHow('how-all', !root.classList.contains('how-all')); syncAll(); });
       syncAll();
       box.style.display = '';
     } catch (e) { if (window.console) console.warn('plain layer:', e); }
