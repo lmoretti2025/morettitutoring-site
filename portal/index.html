@@ -22048,7 +22048,11 @@ window.renderNativeReport = function (data) {
         return window.TIME_BUDGETS ? window.TIME_BUDGETS.budgetSecondsFor(mv.key, r.q.domain, r.q.skill || r.dom, r.q.difficulty, mv.mult).ms / 1000 : 0;
       });
 
-      var W = CHART_W, rowH = N > 22 ? 12 : 14, L = 44, R = 14, T = 22, B = 30;
+      /* Drawn at the plot's real width up to CHART_W, so on a phone the
+         text and rows keep their size instead of the whole chart shrinking
+         to fit (a 640-wide drawing on a 343px screen set 9px text at 5px). */
+      var W = Math.min(CHART_W, Math.max(300, routePlot.clientWidth || CHART_W));
+      var rowH = N > 22 ? 12 : 14, L = 44, R = 14, T = 34, B = 30;
       var H = T + N * rowH + B, iw = W - L - R;
       routeSvg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
       var x = function (s) { return L + Math.min(s, xMax) / xMax * iw; };
@@ -22132,8 +22136,10 @@ window.renderNativeReport = function (data) {
       var backs = real.filter(function (v) { return v.kind === 'back'; });
       if (backs.length) {
         svgEl('line', { x1: x(fpEnd), x2: x(fpEnd), y1: T, y2: T + N * rowH, stroke: 'var(--gold)', 'stroke-width': 1, 'stroke-dasharray': '3 3' });
-        var fpLblRight = !clockSec || x(clockSec) - x(fpEnd) > 150;
-        svgEl('text', { x: x(fpEnd) + (fpLblRight ? 4 : -4), y: T - 9, 'text-anchor': fpLblRight ? 'start' : 'end', class: 'pace-note', fill: '#9A7C22' },
+        // On its own line above the clock label, so the two never collide
+        // however close the first pass ended to the clock.
+        var fpLblRight = x(fpEnd) + 125 < L + iw;
+        svgEl('text', { x: x(fpEnd) + (fpLblRight ? 4 : -4), y: T - 21, 'text-anchor': fpLblRight ? 'start' : 'end', class: 'pace-note', fill: '#9A7C22' },
           'first pass done ' + mmss(fpEnd));
       }
 
@@ -22185,6 +22191,18 @@ window.renderNativeReport = function (data) {
     }
 
     var anyRoute = moduleViews.some(function (mv) { return !!routeDataFor(mv); });
+    // Redrawn when the plot's width changes (a phone rotated, a window
+    // resized), on the next frame so the redraw never runs inside the
+    // observer (see the bridge chart's refit).
+    if (anyRoute && window.ResizeObserver) {
+      var routeFitW = routePlot.clientWidth;
+      new ResizeObserver(function () {
+        requestAnimationFrame(function () {
+          var w = routePlot.clientWidth;
+          if (w && Math.abs(w - routeFitW) > 4 && showingRoute()) { routeFitW = w; paintModule(); }
+        });
+      }).observe(routePlot);
+    }
     var timingView = anyRoute ? 'route' : 'pace';
     function showingRoute() { return timingView === 'route' && !!routeDataFor(moduleViews[moduleIdx]); }
     function paintModule() {
