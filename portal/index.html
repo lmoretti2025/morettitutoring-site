@@ -3474,6 +3474,40 @@ window.Portal = {
        sed -i '' 's/?v=20260905y/?v=<new>/g' portal/*.html  -->
 <script src="backend-url.js?v=20260905y"></script>
 <script>
+  /* ═══ BROWSER ERRORS TO LUCA ═══ an error on a student's screen used to be
+     invisible unless they mentioned it (the resize crash of 2026-09-12 was
+     found by chance). Each distinct error is sent once to the ClientErrors
+     tab (logClientError in prep.gs), at most five per page load, from the
+     live site only so local previews never write to the real Sheet. The
+     browser's ResizeObserver notice and cross-origin "Script error." carry
+     nothing to act on and are skipped. */
+  (function () {
+    var sent = 0, seen = {};
+    function report(msg, src, line, col, stack) {
+      msg = String(msg || '').slice(0, 300);
+      if (!msg || sent >= 5 || /ResizeObserver loop|^Script error\.?$/.test(msg)) return;
+      var sig = msg + '|' + (line || 0);
+      if (seen[sig]) return;
+      seen[sig] = true;
+      if (!window.APPS_SCRIPT_URL || !/(^|\.)morettitutoring\.com$/.test(location.hostname)) return;
+      sent++;
+      try {
+        fetch(window.APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({
+          action: 'logClientError', page: location.pathname.slice(0, 80), msg: msg,
+          src: String(src || '').split('/').pop().slice(0, 80), line: line | 0, col: col | 0,
+          stack: String(stack || '').slice(0, 800), ua: String(navigator.userAgent || '').slice(0, 160),
+          at: new Date().toISOString() }) }).catch(function () {});
+      } catch (e) { /* reporting must never cause an error of its own */ }
+    }
+    window.addEventListener('error', function (e) {
+      if (e && e.target && e.target !== window) return;   // a failed <img>/<script> load, not a script error
+      report(e && e.message, e && e.filename, e && e.lineno, e && e.colno, e && e.error && e.error.stack);
+    });
+    window.addEventListener('unhandledrejection', function (e) {
+      var r = e && e.reason;
+      report('Unhandled promise: ' + ((r && r.message) || r), '', 0, 0, r && r.stack);
+    });
+  })();
 
   // Luca's standing Google Meet room, used by the "Online? Join here"
   // link on the portal home screen for every session.
@@ -5442,6 +5476,110 @@ window.Portal = {
     return attempt(1);
   }
 
+  /* ═══ UNSENT TESTS ═══ A finished test whose submit failed (every retry
+     spent, or a server error) is kept here and sent again on the next visit
+     and whenever the browser comes back online. Resending is always safe:
+     the server ignores an attempt it already has (claimAttempt_ in Code.gs,
+     by attemptId). Before this, a failed submit was simply lost, and
+     reconcileLocalScoreHistory() then deleted the student's own copy too,
+     because the server had never heard of it (2026-09-12). */
+  var SUBMIT_OUTBOX_PREFIX = 'moretti_submit_outbox_';
+  var SUBMIT_OUTBOX_MAX_TRIES = 12;
+  function loadSubmitOutbox(key) {
+    try { var a = JSON.parse(localStorage.getItem(SUBMIT_OUTBOX_PREFIX + key) || '[]'); return Array.isArray(a) ? a : []; }
+    catch (e) { return []; }
+  }
+  function saveSubmitOutbox(key, list) {
+    try { localStorage.setItem(SUBMIT_OUTBOX_PREFIX + key, JSON.stringify(list)); } catch (e) { /* quota: this device keeps the score either way */ }
+  }
+  function queueUnsentSubmit(payload) {
+    if (!payload || !payload.key || !payload.attemptId) return;
+    var copy = {};
+    for (var f in payload) if (Object.prototype.hasOwnProperty.call(payload, f) && f !== 'session') copy[f] = payload[f];
+    copy.queuedAt = new Date().toISOString();
+    copy.tries = 0;
+    var list = loadSubmitOutbox(payload.key).filter(function (q) { return q.attemptId !== payload.attemptId; });
+    list.push(copy);
+    saveSubmitOutbox(payload.key, list.slice(-10));
+  }
+  function isUnsentAttempt(key, attemptId) {
+    return !!attemptId && loadSubmitOutbox(key).some(function (q) { return q.attemptId === attemptId; });
+  }
+  var submitOutboxBusy = false;
+  function flushSubmitOutbox() {
+    var key = currentStudent && currentStudent.key;
+    if (!key || submitOutboxBusy) return;
+    var list = loadSubmitOutbox(key);
+    if (!list.length) return;
+    submitOutboxBusy = true;
+    var item = list[0], body = {};
+    for (var f in item) if (Object.prototype.hasOwnProperty.call(item, f) && f !== 'queuedAt' && f !== 'tries') body[f] = item[f];
+    function settle(sent) {
+      var now = loadSubmitOutbox(key);
+      now = now.filter(function (q) {
+        if (q.attemptId !== item.attemptId) return true;
+        if (sent) return false;
+        q.tries = (q.tries || 0) + 1;
+        return q.tries < SUBMIT_OUTBOX_MAX_TRIES;   // a request the server keeps refusing is not retried forever
+      });
+      saveSubmitOutbox(key, now);
+      submitOutboxBusy = false;
+      if (sent && now.length) flushSubmitOutbox();
+    }
+    postToBackend(body, { timeoutMs: 60000, attempts: 2 })
+      .then(function (data) { settle(!!(data && data.ok)); })
+      .catch(function () { settle(false); });
+  }
+  window.addEventListener('online', function () { flushSubmitOutbox(); if (window.flushPracticeOutbox) window.flushPracticeOutbox(); });
+
+  /* ═══ PRACTICE LOG ═══ every Question Bank, Challenge Questions and Rush
+     answer, queued here and sent in batches to the PracticeLog tab
+     (logPracticeAttempts in prep.gs). The bank's own store keeps only each
+     question's LATEST attempt, so without this the history of what a
+     student practised, and how it went over time, was overwritten as they
+     went. Events carry the question's skill and difficulty, so the tutor
+     view can group them without loading the 4MB banks. Kept on the device
+     until the server confirms them. */
+  var PRACTICE_OUTBOX_PREFIX = 'moretti_practice_outbox_';
+  var PRACTICE_BATCH = 200;
+  function loadPracticeOutbox(key) {
+    try { var a = JSON.parse(localStorage.getItem(PRACTICE_OUTBOX_PREFIX + key) || '[]'); return Array.isArray(a) ? a : []; }
+    catch (e) { return []; }
+  }
+  function savePracticeOutbox(key, list) {
+    try { localStorage.setItem(PRACTICE_OUTBOX_PREFIX + key, JSON.stringify(list)); } catch (e) {}
+  }
+  var practiceFlushTimer = null, practiceFlushBusy = false;
+  window.queuePracticeEvent = function (ev) {
+    var key = currentStudent && currentStudent.key;
+    if (!key || !ev) return;
+    ev.id = 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+    ev.at = new Date().toISOString();
+    var list = loadPracticeOutbox(key);
+    list.push(ev);
+    savePracticeOutbox(key, list.slice(-3000));
+    if (practiceFlushTimer) clearTimeout(practiceFlushTimer);
+    practiceFlushTimer = setTimeout(window.flushPracticeOutbox, 5000);
+  };
+  window.flushPracticeOutbox = function () {
+    var key = currentStudent && currentStudent.key;
+    if (!key || practiceFlushBusy) return;
+    var batch = loadPracticeOutbox(key).slice(0, PRACTICE_BATCH);
+    if (!batch.length) return;
+    practiceFlushBusy = true;
+    postToBackend({ action: 'logPracticeAttempts', key: key, events: batch }, { timeoutMs: 20000, attempts: 2 })
+      .then(function (data) {
+        practiceFlushBusy = false;
+        if (!(data && data.ok)) return;   // an older backend ('unknown_action') keeps them for later
+        var sent = {};
+        batch.forEach(function (e) { sent[e.id] = true; });
+        var rest = loadPracticeOutbox(key).filter(function (e) { return !sent[e.id]; });
+        savePracticeOutbox(key, rest);
+        if (rest.length) window.flushPracticeOutbox();
+      })
+      .catch(function () { practiceFlushBusy = false; });
+  };
+
   // Days a new key's SAT Resources, Your Overview and (after the
   // diagnostic) Practice Tests stay locked after first login
   // (currentStudent.grantedAt), regardless of diagnostic status; see
@@ -7107,6 +7245,9 @@ window.Portal = {
   function loadServerScoreHistory() {
     var key = currentStudent && currentStudent.key;
     if (!key) return;
+    // Anything this device could not send last time goes first.
+    flushSubmitOutbox();
+    if (window.flushPracticeOutbox) window.flushPracticeOutbox();
     /* Paint last visit's copy first so the first frame is already complete.
        Skipped once the real answer is in, so a refresh mid-session never
        steps backwards onto older data. */
@@ -7137,6 +7278,15 @@ window.Portal = {
   // longer on the server (and older than RECONCILE_GRACE_MS, so not an
   // unsynced new attempt) is purged here, so every device self-heals.
   var RECONCILE_GRACE_MS = 10 * 60 * 1000;
+  function markScoreEntryLocalOnly(attemptId) {
+    var key = currentStudent && currentStudent.key;
+    if (!key || !attemptId) return;
+    var local = loadScoreHistory();
+    var hit = false;
+    local.forEach(function (e) { if (e && e.attemptId === attemptId) { e.localOnly = true; hit = true; } });
+    if (!hit) return;
+    try { localStorage.setItem('moretti_score_history_' + key, JSON.stringify({ entries: local })); } catch (e) {}
+  }
   function reconcileLocalScoreHistory() {
     var key = currentStudent && currentStudent.key;
     if (!key || !serverScoreHistoryFetched) return;
@@ -7145,6 +7295,9 @@ window.Portal = {
     var local = loadScoreHistory();
     var kept = local.filter(function (e) {
       if (!e || !e.attemptId || serverIds[e.attemptId]) return true;
+      // A retake (never sent, by design) and a submit still waiting in the
+      // outbox are not stale: the server has not had the chance to know them.
+      if (e.localOnly || isUnsentAttempt(key, e.attemptId)) return true;
       var ts = e.date ? Date.parse(e.date) : NaN;
       return !isNaN(ts) && (Date.now() - ts) < RECONCILE_GRACE_MS;
     });
@@ -12615,7 +12768,7 @@ window.Portal = {
         'Your section score and full breakdown are below.';
       statusEl.textContent = 'Saving your results…';
       show('screen-done');
-      postToBackend(Object.assign({
+      var sectionBody = Object.assign({
         action: 'submitPracticeTest',
         key: currentStudent.key,
         test: ptDone.title,
@@ -12623,17 +12776,19 @@ window.Portal = {
         score: totalCorrect + '/' + totalQuestions,
         reportLink: reportLink,
         report: report
-      }, scoreEntryFields(scoreEntryForSubmit)), { timeoutMs: 60000, attempts: 3 })
+      }, scoreEntryFields(scoreEntryForSubmit));
+      postToBackend(sectionBody, { timeoutMs: 60000, attempts: 3 })
         .then(function (data) {
           if (data && data.ok) { statusEl.textContent = 'Saved.'; }
           else { throw new Error((data && data.error) || 'send_failed'); }
         })
         .catch(function () {
-          // The student's own copy is already written locally, so this is
-          // about Luca's record, not theirs -- worded so they do not think
-          // their work vanished.
-          statusEl.textContent = 'Your section score is saved on this device, but it may not have reached Luca. ' +
-            'Text him at (201) 275-2791 with your key (' + currentStudent.key + ') if it does not show up.';
+          // The student's own copy is already written locally, and the
+          // submit is queued (see UNSENT TESTS), so this is about when Luca
+          // gets it -- worded so they do not think their work vanished.
+          queueUnsentSubmit(sectionBody);
+          statusEl.textContent = 'Your section score is saved on this device. It has not reached Luca yet; the portal will send it ' +
+            'automatically next time you open it. If it still has not arrived tomorrow, text him at (201) 275-2791.';
           statusEl.classList.add('err');
         });
       practiceTestId = null;
@@ -12643,7 +12798,7 @@ window.Portal = {
       document.getElementById('done-message').textContent = 'Nice work! Your results just went to Luca — no need to send anything yourself.';
       statusEl.textContent = 'Sending your results…';
       show('screen-done');
-      postToBackend(Object.assign({
+      var practiceBody = Object.assign({
         action: 'submitPracticeTest',
         key: currentStudent.key,
         test: ptDone.title,
@@ -12651,16 +12806,19 @@ window.Portal = {
         score: totalCorrect + '/' + totalQuestions,
         reportLink: reportLink,
         report: report
-      }, scoreEntryFields(scoreEntryForSubmit)), { timeoutMs: 60000, attempts: 3 })
+      }, scoreEntryFields(scoreEntryForSubmit));
+      postToBackend(practiceBody, { timeoutMs: 60000, attempts: 3 })
         .then(function (data) {
           if (data && data.ok) { statusEl.textContent = 'Results delivered.'; }
           else { throw new Error((data && data.error) || 'send_failed'); }
         })
         .catch(function () {
-          // Only reached after every retry failed. Even then the send may
-          // well have gone through server-side, so word this as "may not
-          // have" rather than a flat failure.
-          statusEl.textContent = 'Your results may not have sent automatically. Please text Luca at (201) 275-2791 with your key (' + currentStudent.key + ') and score (' + totalCorrect + '/' + totalQuestions + ') so he can confirm.';
+          // Only reached after every retry failed. It is queued and resent
+          // on the next visit (see UNSENT TESTS); the send may also have
+          // gone through server-side, and a resend of one it has is ignored.
+          queueUnsentSubmit(practiceBody);
+          statusEl.textContent = 'Your results have not reached Luca yet. They are saved on this device, and the portal will send them ' +
+            'automatically next time you open it. If they still have not arrived tomorrow, text Luca at (201) 275-2791.';
           statusEl.classList.add('err');
         });
       practiceTestId = null;
@@ -12669,6 +12827,9 @@ window.Portal = {
 
     var isRetake = alreadyTakenThisTestType();
     if (isRetake) {
+      // Never sent, by design, so the server will never list it: marked so
+      // reconcileLocalScoreHistory() keeps it instead of purging it.
+      markScoreEntryLocalOnly(scoreEntryForSubmit && scoreEntryForSubmit.attemptId);
       // Already has a real (Luca-notified) attempt at this test type: this one
       // is practice only. No email, no re-stamping, and the student sees the
       // link.
@@ -12704,14 +12865,15 @@ window.Portal = {
     // the sheet, so results can't be forged or the name spoofed. Body is a
     // plain string (no JSON content-type) to stay a CORS "simple request" for
     // Apps Script, like postToBackend().
-    postToBackend(Object.assign({
+    var diagnosticBody = Object.assign({
       action: 'submitDiagnostic',
       key: currentStudent.key,
       test: testChoice,
       score: totalCorrect + '/' + totalQuestions,
       reportLink: reportLink,
       report: report
-    }, scoreEntryFields(scoreEntryForSubmit)), { timeoutMs: 60000, attempts: 3 })
+    }, scoreEntryFields(scoreEntryForSubmit));
+    postToBackend(diagnosticBody, { timeoutMs: 60000, attempts: 3 })
       .then(function (data) {
         if (data && data.ok) {
           statusEl.textContent = 'Results delivered.';
@@ -12720,10 +12882,11 @@ window.Portal = {
         }
       })
       .catch(function () {
-        // Only reached after every retry failed. Even then the send may
-        // well have gone through server-side, so word this as "may not
-        // have" rather than a flat failure.
-        statusEl.textContent = 'Your results may not have sent automatically. Please text Luca at (201) 275-2791 with your key (' + currentStudent.key + ') and score (' + totalCorrect + '/' + totalQuestions + ') so he can confirm.';
+        // Only reached after every retry failed; queued and resent on the
+        // next visit (see UNSENT TESTS).
+        queueUnsentSubmit(diagnosticBody);
+        statusEl.textContent = 'Your results have not reached Luca yet. They are saved on this device, and the portal will send them ' +
+          'automatically next time you open it. If they still have not arrived tomorrow, text Luca at (201) 275-2791.';
         statusEl.classList.add('err');
       });
   }
@@ -15548,6 +15711,12 @@ window.Portal = {
     return chalCache[k];
   }
   function withMode(m, fn) { var was = bankMode; bankMode = m; try { return fn(); } finally { bankMode = was; } }
+  // One answer to the practice log (see PRACTICE LOG in the main script).
+  function logPracticeEvent(r, correct, ms, bank) {
+    if (!window.queuePracticeEvent || !r) return;
+    window.queuePracticeEvent({ b: bank, s: currentSubject === 'math' ? 'math' : 'rw', q: String(r.qid || ''),
+      sk: String(r.skill || ''), d: String(r.difficulty || ''), c: correct ? 1 : 0, ms: ms > 0 ? Math.round(ms) : 0 });
+  }
   function bankScreenId() { return bankMode === 'challenge' ? 'screen-challenge-questions' : 'screen-question-bank'; }
   function bankKeyFor(subject, qid) { return (bankMode === 'challenge' ? 'chal|' : 'qb|') + subject + '|' + qid; }
   function prefKeyFor(k) { return bankMode === 'challenge' ? k + '_chal' : k; }
@@ -16885,11 +17054,13 @@ window.Portal = {
         rushPaint();
         rushCfg.overMs += Math.max(0, rushMs - rushBudgetMs);
         rushCfg.results.push({ skill: r.skill, correct: st.correct, ms: rushMs, budgetMs: rushBudgetMs, over: rushMs > rushBudgetMs });
+        logPracticeEvent(r, st.correct, rushMs, 'rush');
         rushStop();
         renderRunnerQuestion();
         return;
       }
       recordAttempt(r.qid, st.correct, questionShownAt ? (Date.now() - questionShownAt) : 0);
+      logPracticeEvent(r, st.correct, questionShownAt ? (Date.now() - questionShownAt) : 0, bankMode === 'challenge' ? 'chal' : 'qb');
       // Feeds the Mistakes Log (see window.recordQuestionBankMistake); the same
       // call clears a question once it's answered correctly.
       if (bankMode === 'qb' && window.recordQuestionBankMistake) {

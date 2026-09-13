@@ -75,6 +75,22 @@
   .card > .card-sub { font-size: 0.76rem; color: var(--faint); margin: 0 0 1rem; }
   .empty { color: var(--faint); font-style: italic; font-size: 0.84rem; padding: 0.6rem 0; }
 
+  /* ═══ SESSION PREP ═══ the student's last seven days, read before a
+     session (prep.gs's adminStudentPrep). Figures, not advice. */
+  .prep-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.75rem 1.25rem; margin: 0 0 1rem; }
+  .prep-stat .num { font-family: var(--display); font-size: 1.45rem; line-height: 1.1; color: var(--text); font-variant-numeric: tabular-nums; }
+  .prep-stat .lbl { font-size: 0.64rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); margin-top: 0.2rem; }
+  .prep-stat .sub { font-size: 0.74rem; color: var(--mid); margin-top: 0.15rem; }
+  .prep-next { font-size: 0.82rem; color: var(--mid); margin: 0 0 1rem; line-height: 1.6; }
+  .prep-next b { color: var(--text); font-weight: 600; }
+  .prep-topics { width: 100%; border-collapse: collapse; font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+  .prep-topics th { text-align: left; font-size: 0.64rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); padding: 0 0.5rem 0.4rem 0; }
+  .prep-topics td { padding: 0.35rem 0.5rem 0.35rem 0; border-top: 1px solid var(--border); }
+  .prep-topics td.n { text-align: right; }
+  .prep-topics .low { color: var(--red); font-weight: 600; }
+  .prep-bank { font-size: 0.66rem; font-weight: 600; color: var(--faint); margin-left: 0.35rem; }
+  .prep-note { font-size: 0.72rem; color: var(--faint); margin: 0.75rem 0 0; }
+
   /* ═══ ROSTER ═══ */
   #roster { display: none; }
   .summary-row { display: flex; gap: 0.9rem; margin-bottom: 1.4rem; flex-wrap: wrap; }
@@ -516,6 +532,11 @@
     </div>
 
     <section id="tab-reports">
+      <div class="card" id="stu-prep-card">
+        <h2>Session prep</h2>
+        <p class="card-sub" id="stu-prep-sub">The last seven days.</p>
+        <div id="stu-prep"></div>
+      </div>
       <div class="summary-row" id="stu-tiles"></div>
       <div class="card" id="stu-trend-card">
         <h2>Score progress</h2>
@@ -706,6 +727,38 @@
      boot code below reads it. -->
 <script src="time-budgets.js?v=20260912a"></script>
   <script src="backend-url.js?v=20260905"></script>
+  <script>
+    /* Browser errors on this page reach the ClientErrors tab too (prep.gs's
+       logClientError; the portal's copy explains the rules): each distinct
+       one once, at most five per load, from the live site only. */
+    (function () {
+      var sent = 0, seen = {};
+      function report(msg, src, line, col, stack) {
+        msg = String(msg || '').slice(0, 300);
+        if (!msg || sent >= 5 || /ResizeObserver loop|^Script error\.?$/.test(msg)) return;
+        var sig = msg + '|' + (line || 0);
+        if (seen[sig]) return;
+        seen[sig] = true;
+        if (!window.APPS_SCRIPT_URL || !/(^|\.)morettitutoring\.com$/.test(location.hostname)) return;
+        sent++;
+        try {
+          fetch(window.APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({
+            action: 'logClientError', page: location.pathname.slice(0, 80), msg: msg,
+            src: String(src || '').split('/').pop().slice(0, 80), line: line | 0, col: col | 0,
+            stack: String(stack || '').slice(0, 800), ua: String(navigator.userAgent || '').slice(0, 160),
+            at: new Date().toISOString() }) }).catch(function () {});
+        } catch (e) {}
+      }
+      window.addEventListener('error', function (e) {
+        if (e && e.target && e.target !== window) return;
+        report(e && e.message, e && e.filename, e && e.lineno, e && e.colno, e && e.error && e.error.stack);
+      });
+      window.addEventListener('unhandledrejection', function (e) {
+        var r = e && e.reason;
+        report('Unhandled promise: ' + ((r && r.message) || r), '', 0, 0, r && r.stack);
+      });
+    })();
+  </script>
 <script src="auth-admin-signin.js?v=20260905"></script>
 
 <script>
@@ -885,7 +938,7 @@
 
   // What this build of admin.html needs the deployment to understand. Kept
   // beside the version constant in Code.gs — bump both together.
-  var REQUIRED_BACKEND_VERSION = 13;
+  var REQUIRED_BACKEND_VERSION = 15;
   var CAPABILITY_LABELS = {
     calendar: 'the calendar and student pages',
     dueDates: 'due dates',
@@ -897,7 +950,10 @@
     revokeNow: 'Reset login taking effect immediately',
     noHtml: 'the approval and setup pages being served from the site',
     presence: 'the green dot showing who is on the site right now, and the sign-in log',
-    broadcast: 'Email families (it also needs emails.gs pasted in as its own script file)'
+    broadcast: 'Email families (it also needs emails.gs pasted in as its own script file)',
+    practiceLog: 'keeping every practice answer (it needs prep.gs pasted in as its own script file)',
+    clientErrors: 'browser errors reaching the ClientErrors tab (prep.gs)',
+    sessionPrep: 'the Session prep card on each student (prep.gs and emails.gs)'
   };
 
   function joinList(items) {
@@ -1309,6 +1365,7 @@
     selectTab(tab || 'reports');
     loadStudentDetail(student.key);
     loadNextSession(student.key);
+    loadStudentPrep(student.key);
   }
 
   document.querySelectorAll('.tabbar .tab').forEach(function (btn) {
@@ -1326,6 +1383,105 @@
       if (!schedCalendar) initSchedCalendar();
       else { schedCalendar.updateSize(); schedCalendar.refetchEvents(); }
     }
+  }
+
+  /* ═══ SESSION PREP ═══ what the student did in the last seven days and
+     what is coming up, from prep.gs (adminStudentPrep). The activity
+     numbers are the same ones the Friday parent update uses; practice by
+     topic comes from the practice log, which starts filling the day the
+     updated backend is deployed. It shows what happened; the reading of it
+     is Luca's. */
+  function loadStudentPrep(key) {
+    $('stu-prep-sub').textContent = 'The last seven days.';
+    $('stu-prep').innerHTML = skLines(3);
+    postToBackend({ action: 'adminStudentPrep', adminKey: adminKey(), key: key }).then(function (data) {
+      if (!currentStudent || currentStudent.key !== key) return;
+      if (!data || !data.ok || !data.prep) {
+        $('stu-prep').innerHTML = '<div class="empty">' + (data && data.error === 'unknown_action'
+          ? 'Needs the updated backend: paste prep.gs (and the new Code.gs and auth.gs) into Apps Script and redeploy.'
+          : 'Could not load session prep.') + '</div>';
+        return;
+      }
+      try { renderStudentPrep(data.prep); }
+      catch (err) {
+        if (window.console && console.error) console.error('[admin] session prep render failed:', err);
+        $('stu-prep').innerHTML = '<div class="empty">Loaded, but could not draw session prep. Details are in the browser console.</div>';
+      }
+    }).catch(function () {
+      if (currentStudent && currentStudent.key === key) $('stu-prep').innerHTML = '<div class="empty">Network error loading session prep.</div>';
+    });
+  }
+
+  function renderStudentPrep(p) {
+    var snap = p.snapshot || null, pr = p.practice || { n: 0, right: 0, byBank: {}, skills: [] };
+    var dayLabel = function (d) {
+      var x = new Date(String(d) + 'T12:00:00');
+      return isNaN(x.getTime()) ? String(d) : x.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    };
+    var pct = function (r, n) { return n ? Math.round(100 * r / n) + '%' : '—'; };
+    var mins = function (m) { m = Math.round(m || 0); return m >= 60 ? Math.floor(m / 60) + 'h ' + (m % 60) + 'm' : m + ' min'; };
+    $('stu-prep-sub').textContent = dayLabel(p.from) + ' – ' + dayLabel(p.to) + ' (the last seven days)';
+
+    // Practice: the log when it has the week, else the bank's own count
+    // (which only sees each question's latest attempt).
+    var logWeek = pr.logStarted && String(pr.logStarted).slice(0, 10) <= p.from;
+    var practiceN = pr.n, practiceRight = pr.right, practiceSub;
+    if (pr.n || logWeek || !snap) {
+      var parts = [];
+      [['qb', 'Question Bank'], ['chal', 'Challenge'], ['rush', 'Rush']].forEach(function (b) {
+        var x = pr.byBank && pr.byBank[b[0]];
+        if (x && x.n) parts.push(b[1] + ' ' + x.n);
+      });
+      practiceSub = pr.n ? pct(pr.right, pr.n) + ' right' + (parts.length > 1 ? ' · ' + parts.join(' · ') : '') : 'none this week';
+    } else {
+      practiceN = snap.qbCount || 0; practiceRight = snap.qbCorrect || 0;
+      practiceSub = practiceN ? pct(practiceRight, practiceN) + ' right (Question Bank)' : 'none this week';
+    }
+
+    var stats = [];
+    stats.push('<div class="prep-stat"><div class="num">' + (snap ? mins(snap.portalMin) : '—') + '</div><div class="lbl">Portal time</div>' +
+      '<div class="sub">' + (snap ? snap.sittings + ' sitting' + (snap.sittings === 1 ? '' : 's') + ' of 5+ min' : escHtml(p.snapError || 'not available')) + '</div></div>');
+    stats.push('<div class="prep-stat"><div class="num">' + practiceN + '</div><div class="lbl">Practice questions</div><div class="sub">' + practiceSub + '</div></div>');
+    stats.push('<div class="prep-stat"><div class="num">' + (snap ? (snap.vocabCount || 0) : '—') + '</div><div class="lbl">Vocabulary</div><div class="sub">words reviewed</div></div>');
+    var t = snap && snap.test;
+    var testSub = 'none this week';
+    if (t) {
+      testSub = escHtml(t.title || 'Practice test');
+      if (t.interrupted) testSub += ' · interrupted, not compared';
+      else if (t.hardest) testSub += ' · the hardest test, not compared';
+      else if (t.change) testSub += ' · ' + (t.change.delta > 0 ? '+' : '') + t.change.delta + ' vs last' + (t.change.real ? ' (a real change)' : ' (within normal variation)');
+    }
+    stats.push('<div class="prep-stat"><div class="num">' + (t ? t.composite : '—') + '</div><div class="lbl">Practice test</div><div class="sub">' + testSub + '</div></div>');
+
+    var next = [];
+    if (snap && snap.nextSession) next.push('Next session: <b>' + escHtml(snap.nextSession.when || snap.nextSession.day) + '</b>');
+    else if (snap && snap.calendarOk === false) next.push('Next session: calendar unavailable');
+    if (p.testDate) {
+      var days = Math.ceil((new Date(p.testDate).getTime() - Date.now()) / 86400000);
+      next.push('SAT: <b>' + new Date(p.testDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + '</b>' +
+        (days >= 0 ? ' (' + days + ' day' + (days === 1 ? '' : 's') + ')' : ''));
+    }
+    next.push('Homework open: <b>' + (p.openCount || 0) + '</b>' + (p.openAssignments && p.openAssignments.length
+      ? ' (' + p.openAssignments.slice(0, 3).map(function (a) { return escHtml(a.task); }).join('; ') + (p.openCount > 3 ? '; …' : '') + ')' : ''));
+
+    var topics = '';
+    if (pr.skills && pr.skills.length) {
+      topics = '<table class="prep-topics"><thead><tr><th>Topic practised</th><th class="n">Answered</th><th class="n">Right</th><th class="n">Avg time</th></tr></thead><tbody>' +
+        pr.skills.map(function (k) {
+          var low = k.n >= 3 && k.right / k.n < 0.6;
+          return '<tr><td>' + escHtml(k.skill) + (k.bank !== 'qb' ? '<span class="prep-bank">' + (k.bank === 'chal' ? 'Challenge' : 'Rush') + '</span>' : '') + '</td>' +
+            '<td class="n">' + k.n + '</td><td class="n' + (low ? ' low' : '') + '">' + pct(k.right, k.n) + '</td>' +
+            '<td class="n">' + (k.timed ? Math.round(k.secs / k.timed) + 's' : '—') + '</td></tr>';
+        }).join('') + '</tbody></table>';
+    }
+    var note = !pr.logStarted
+      ? 'Practice by topic starts appearing once the updated backend is live: every answer is logged from then on.'
+      : (!logWeek ? 'The practice log began ' + dayLabel(String(pr.logStarted).slice(0, 10)) + ', partway through this week.' : '');
+    if (p.practiceError) note = 'Practice log unreadable: ' + escHtml(p.practiceError);
+
+    $('stu-prep').innerHTML = '<div class="prep-stats">' + stats.join('') + '</div>' +
+      '<p class="prep-next">' + next.join(' &nbsp;·&nbsp; ') + '</p>' + topics +
+      (note ? '<p class="prep-note">' + note + '</p>' : '');
   }
 
   function loadStudentDetail(key) {
