@@ -1070,7 +1070,7 @@
   // The public sample report (?demo=1) never reads a practice test, so skip the 2.9MB file there.
   if (!/[?&]demo=1\b/.test(location.search)) document.write('<script src="practice-tests.js?v=20260912a"><\/script>');
 </script>
-<script src="time-budgets.js?v=20260905"></script>
+<script src="time-budgets.js?v=20260912a"></script>
 <script src="grid-in.js?v=20260910a"></script>
 <script>
 (function () {
@@ -1572,6 +1572,14 @@
         var budMs = window.TIME_BUDGETS
           ? window.TIME_BUDGETS.budgetSecondsFor(key, q.domain, q.skill, q.difficulty, demoAccomMult).ms
           : 40000;
+        /* The math targets were cut 15% on 2026-09-12 (was 48 / 75 / 115 s by
+           difficulty). A student does not get faster because a target
+           changed, so the demo's times stay anchored to the old values and
+           only what is measured against the target moves. */
+        var DEMO_MATH_TIME_BASE = { easy: 48, medium: 75, hard: 115 };
+        var nowMath = window.TIME_BUDGETS && window.TIME_BUDGETS.MATH_BY_DIFFICULTY;
+        if (key === 'math' && nowMath && nowMath[q.difficulty] && DEMO_MATH_TIME_BASE[q.difficulty])
+          budMs *= DEMO_MATH_TIME_BASE[q.difficulty] / nowMath[q.difficulty];
         var baseMs = budMs * demoPaceFor(q);
         var totalMs = Math.round(wrong ? baseMs * (1.15 + rand() * 0.5) : baseMs * (0.78 + rand() * 0.34));
         // Truncate the question that crosses the clock to the time left, so a

@@ -84,8 +84,12 @@
   /* ── SAT Math ───────────────────────────────────────────────────────
      Budgets key off DIFFICULTY first (the dominant driver), with a
      per-domain multiplier on top. Module clock is 35 min for 22 questions
-     (95s average). */
-  var MATH_BY_DIFFICULTY = { easy: 48, medium: 75, hard: 115 };
+     (95s average). Cut 15% across the board (Luca, 2026-09-12: the math
+     targets read as too slow; was 48 / 75 / 115). A typical module's
+     targets now add up to about 25 of its 35 minutes, leaving about 10 for
+     going back and the hardest questions, and only 4 of the 39 math modules
+     still need the MAX_BUDGET_SHARE squeeze below (13 did before). */
+  var MATH_BY_DIFFICULTY = { easy: 41, medium: 64, hard: 98 };
   var MATH_DOMAIN_MULT = {
     // Procedural. If these aren't fast, it's fluency, not reasoning.
     'Algebra': 0.9,
