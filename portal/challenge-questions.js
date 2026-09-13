@@ -1,7 +1,7 @@
 /* =====================================================================
    MORETTI CHALLENGE QUESTIONS — the hardest-of-the-hard practice sets,
    shown on the "Challenge Questions" screen (see #screen-challenge-
-   questions / window.challengeModuleInit() in index.html). Same object
+   questions / window.cqModuleInit() in index.html, which shows them in the Question Bank's interface). Same object
    shape as banks.js (domain/skill/difficulty/type/text/choices/correct,
    or type:"fr" with an `answer`) plus a stable `key` and `sectionKey`
    used by the practice runner and by localStorage attempt tracking.

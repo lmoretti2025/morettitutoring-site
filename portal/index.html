@@ -1737,9 +1737,9 @@
   .iq-practice-btn:disabled { opacity: 0.5; cursor: default; }
   .iq-practice-btn:disabled { opacity: 0.45; cursor: default; transform: none; }
 
-  /* ═══ CHALLENGE QUESTIONS ═══ two "open the whole deck" cards (Reading
-     & Writing / Math) plus a cumulative analytics row. See
-     window.challengeModuleInit() near the end of the file. */
+  /* ═══ CHALLENGE QUESTIONS (old deck cards) ═══ the screen now reuses the
+     Question Bank's views (window.cqModuleInit); these rules are unused
+     except .chal-deck-arrow, which the Question Bank tiles share. */
   .chal-intro { display: flex; gap: 0.9rem; align-items: flex-start; background: rgba(201,168,76,0.07); border: 1px solid rgba(201,168,76,0.35); border-radius: 12px; padding: 1.1rem 1.3rem; margin-bottom: 1.6rem; }
   .chal-intro-icon { font-size: 1.3rem; line-height: 1; flex-shrink: 0; }
   .chal-intro-hed { font-family: var(--hel); font-weight: 700; font-size: 0.88rem; color: var(--text); margin-bottom: 0.3rem; }
@@ -1768,7 +1768,7 @@
 
   /* Flat white canvas for the whole Question Bank screen — no gray page
      background showing through behind the borderless table/bars below. */
-  #screen-question-bank.screen { background: #fff; }
+  #screen-question-bank.screen, #screen-challenge-questions.screen { background: #fff; }
 
   /* ═══ CHART COLOUR ROLES ═══ every mark here is either a correct answer
      or a wrong one, so there are two roles, not a palette. Both come from
@@ -1781,7 +1781,7 @@
      alone: the trend legend labels "Correct" and "Wrong" with counts,
      correct is always the lower stack segment, and every topic row prints
      its own "c/t · N%". */
-  #screen-question-bank {
+  #screen-question-bank, #screen-challenge-questions {
     --qb-correct: #16A34A;
     --qb-wrong:   #EF4444;
 
@@ -4363,69 +4363,12 @@ window.Portal = {
   </div>
 </div>
 
-<!-- ═══ SCREEN 3b-ii-b — CHALLENGE QUESTIONS ═══ hand-picked Module 2
-     Harder-tier sets. Two decks (Reading & Writing, Math), each opened in
-     the real exam UI (#dx-screen); see window.challengeModuleInit() near
-     the end of the file. Stats are read from localStorage
-     (moretti_challenge_progress_<studentKey>). -->
-<div class="screen has-sidebar" id="screen-challenge-questions">
-  <div class="panel-wide" id="challenge-picker-view">
-    <div class="vp-head">
-      <div class="kicker">SAT Resources</div>
-      <h1 class="panel-hed">Challenge Questions</h1>
-      <p class="panel-sub">Hand-picked, extra-hard practice sets — the questions that separate a 1400 from a 1500+.</p>
-    </div>
-
-    <div class="chal-intro">
-      <span class="chal-intro-icon">💡</span>
-      <div>
-        <div class="chal-intro-hed">What are Challenge Questions?</div>
-        <div class="chal-intro-sub">These are the hardest questions Luca has — the kind you'd only see in the toughest Module 2. Getting comfortable here is what separates a great score from a near-perfect one.</div>
-      </div>
-    </div>
-
-    <div class="chal-decks">
-      <button type="button" class="chal-deck chal-deck-rw" id="chal-open-rw">
-        <div class="chal-deck-body">
-          <div class="chal-deck-title">Reading &amp; Writing</div>
-          <div class="chal-deck-count" id="chal-rw-count">&mdash; questions</div>
-          <span class="chal-deck-open">Open <span class="chal-deck-arrow">&rarr;</span></span>
-        </div>
-        <svg class="chal-deck-art" viewBox="0 0 120 120" fill="none"><path d="M20 30c15-8 30-8 40 0v65c-10-8-25-8-40 0V30Z" stroke="white" stroke-width="2.5" stroke-linejoin="round"/><path d="M100 30c-15-8-30-8-40 0v65c10-8 25-8 40 0V30Z" stroke="white" stroke-width="2.5" stroke-linejoin="round"/><path d="M60 30v65" stroke="white" stroke-width="2.5"/></svg>
-      </button>
-      <button type="button" class="chal-deck chal-deck-math" id="chal-open-math">
-        <div class="chal-deck-body">
-          <div class="chal-deck-title">Math</div>
-          <div class="chal-deck-count" id="chal-math-count">&mdash; questions</div>
-          <span class="chal-deck-open">Open <span class="chal-deck-arrow">&rarr;</span></span>
-        </div>
-        <svg class="chal-deck-art" viewBox="0 0 120 120" fill="none"><path d="M25 90 85 30" stroke="white" stroke-width="2.5" stroke-linecap="round"/><path d="M25 90 25 60 55 60Z" stroke="white" stroke-width="2.5" stroke-linejoin="round"/><circle cx="85" cy="30" r="7" stroke="white" stroke-width="2.5"/></svg>
-      </button>
-    </div>
-
-    <h2 class="chal-analytics-hed">Challenge Question Analytics</h2>
-    <div class="chal-stats-row">
-      <div class="chal-stat">
-        <div class="chal-stat-label">Questions Attempted</div>
-        <div class="chal-stat-num" id="chal-stat-attempted">0</div>
-      </div>
-      <div class="chal-stat">
-        <div class="chal-stat-label">Current Accuracy</div>
-        <div class="chal-stat-num" id="chal-stat-accuracy">0%</div>
-      </div>
-      <div class="chal-stat">
-        <div class="chal-stat-label">Correct Answers</div>
-        <div class="chal-stat-num" id="chal-stat-correct">0</div>
-      </div>
-      <div class="chal-stat">
-        <div class="chal-stat-label">Average Time</div>
-        <div class="chal-stat-num" id="chal-stat-avgtime">&mdash;</div>
-      </div>
-    </div>
-
-    <a href="#" class="menu-back-link" id="challenge-questions-back">&larr; Back to home</a>
-  </div>
-</div>
+<!-- ═══ SCREEN 3b-ii-b — CHALLENGE QUESTIONS ═══ hand-picked, extra-hard
+     sets (challenge-questions.js), in the Question Bank's own interface:
+     window.cqModuleInit() moves #qb-home-view, #qb-skills-view and
+     #qb-selection-bar in here and runs the Question Bank module in its
+     'challenge' mode (own progress store, no Practice Your Weaknesses). -->
+<div class="screen has-sidebar" id="screen-challenge-questions"></div>
 
 <!-- ═══ SCREEN 3b-ii-c — QUESTION BANK ═══ the official College Board SAT
      Reading & Writing question bank (1,780 questions, all 10 R&W skills),
@@ -8958,7 +8901,6 @@ window.Portal = {
   var ptListReturnScreen = 'screen-menu';
   document.getElementById('pt-list-back').addEventListener('click', function (e) { e.preventDefault(); show(ptListReturnScreen); });
   document.getElementById('incorrect-questions-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-menu'); });
-  document.getElementById('challenge-questions-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-menu'); });
 
   /* ═══ SIDEBAR / TOP-BAR NAVIGATION ═══
      One dispatcher shared by the sidebar, top-bar search results, and
@@ -8989,7 +8931,7 @@ window.Portal = {
     else if (nav === 'vocab') { show('screen-vocab'); if (window.vocabModuleInit) window.vocabModuleInit(); }
     else if (nav === 'practice-tests') { ptListReturnScreen = 'screen-menu'; renderPracticeTestList(); show('screen-practice-tests'); }
     else if (nav === 'incorrect-questions') { show('screen-incorrect-questions'); if (window.iqModuleInit) window.iqModuleInit(); }
-    else if (nav === 'challenge-questions') { show('screen-challenge-questions'); if (window.challengeModuleInit) window.challengeModuleInit(); }
+    else if (nav === 'challenge-questions') { show('screen-challenge-questions'); if (window.cqModuleInit) window.cqModuleInit(); }
     else if (nav === 'question-bank') { show('screen-question-bank'); if (window.qbModuleInit) window.qbModuleInit(); }
     else if (nav === 'rush') { show('screen-rush'); if (window.rushModuleInit) window.rushModuleInit(); }
     else if (nav === 'diagnostic') { ptListReturnScreen = 'screen-menu'; renderPracticeTestList(); show('screen-practice-tests'); }
@@ -10067,19 +10009,24 @@ window.Portal = {
   // typed-answer record the Saved & Mistakes runner can quiz. Legacy
   // 'mc-image' entries (old image-crop format) map onto the same 'fr' shape
   // with cropped-image srcs as the markup.
+  // Challenge Questions saves use 'chal|<subject>|<key>', resolved the same
+  // way from window.CHALLENGE_RW/CHALLENGE_MATH (challenge-questions.js).
   function resolveQuestionBankKey_(key) {
     var parts = String(key).split('|');
-    if (parts.length !== 3 || parts[0] !== 'qb') return null;
-    var subject = parts[1], qid = parts[2];
-    var pool = subject === 'math' ? (window.QUESTION_BANK_MATH || []) : (window.QUESTION_BANK || []);
-    var q = pool.filter(function (item) { return item.qid === qid; })[0];
+    if (parts.length !== 3 || (parts[0] !== 'qb' && parts[0] !== 'chal')) return null;
+    var subject = parts[1], qid = parts[2], isChal = parts[0] === 'chal';
+    var pool = isChal
+      ? (subject === 'math' ? (window.CHALLENGE_MATH || []) : (window.CHALLENGE_RW || []))
+      : (subject === 'math' ? (window.QUESTION_BANK_MATH || []) : (window.QUESTION_BANK || []));
+    var q = pool.filter(function (item) { return (isChal ? item.key : item.qid) === qid; })[0];
     if (!q) return null;
+    var bankTitle = isChal ? 'Challenge Questions' : 'Question Bank Questions';
     var sectionKey = subject === 'math' ? 'math' : 'reading-writing';
     if (q.type === 'mc-image') {
       var LETTERS_QB = ['A', 'B', 'C', 'D'];
       return {
         sectionKey: sectionKey,
-        testTitle: 'Question Bank Questions',
+        testTitle: bankTitle,
         domain: q.domain,
         skill: q.skill,
         difficulty: q.difficulty || 'medium',
@@ -10095,7 +10042,7 @@ window.Portal = {
     if (q.type === 'fr') {
       return {
         sectionKey: sectionKey,
-        testTitle: 'Question Bank Questions',
+        testTitle: bankTitle,
         domain: q.domain,
         skill: q.skill,
         difficulty: q.difficulty || 'medium',
@@ -10104,13 +10051,13 @@ window.Portal = {
         choices: null,
         correctIndex: null,
         choiceNotes: null,
-        answerValue: q.answerValue,
+        answerValue: q.answerValue !== undefined ? q.answerValue : q.answer,
         explanation: q.explanation || null
       };
     }
     return {
       sectionKey: sectionKey,
-      testTitle: 'Question Bank Questions',
+      testTitle: bankTitle,
       domain: q.domain,
       skill: q.skill,
       difficulty: q.difficulty || 'medium',
@@ -10124,7 +10071,7 @@ window.Portal = {
     };
   }
   window.resolveQuestionByKey = function (key) {
-    if (String(key || '').indexOf('qb|') === 0) return resolveQuestionBankKey_(key);
+    if (/^(qb|chal)\|/.test(String(key || ''))) return resolveQuestionBankKey_(key);
     var parts = String(key || '').split('|');
     if (parts.length !== 4) return null;
     var testTag = parts[0], sectionKey = parts[1], moduleName = parts[2], moduleIndex = parseInt(parts[3], 10);
@@ -15542,352 +15489,6 @@ window.Portal = {
 })();
 </script>
 <script>
-/* ═══ CHALLENGE QUESTIONS MODULE ═══ isolated IIFE, like My Incorrect
-   Questions above. "Open" on a deck card switches the whole screen to the
-   real exam UI via window.dxStartIncorrectPractice()/
-   dxEndIncorrectPractice(), the same bridge that runner uses. Pools are
-   the static arrays window.CHALLENGE_MATH/CHALLENGE_RW
-   (challenge-questions.js), so no filter machinery is needed. Cumulative
-   attempts, accuracy and average time per question are stored per student
-   in localStorage (moretti_challenge_progress_<studentKey>). */
-(function () {
-  'use strict';
-  var LETTERS = ['A', 'B', 'C', 'D'];
-
-  // Same fallback split My Incorrect Questions uses — R&W questions bake
-  // their stimulus straight into `text`, ending in the actual question
-  // sentence, joined by "<br><br>".
-  function splitPassage(r) {
-    if (r.sectionKey !== 'reading-writing') return null;
-    var text = r.text || '';
-    var idx = text.lastIndexOf('<br><br>');
-    if (idx === -1) return null;
-    return { passage: text.slice(0, idx), question: text.slice(idx + 8) };
-  }
-
-  // Grading rule: gridInCorrect() in grid-in.js, shared by every fr runner.
-  function checkFrAnswer(raw, expected, qid) {
-    return window.gridInCorrect(raw, [expected].concat((window.FR_ALTERNATES || {})[qid] || []));
-  }
-
-  // ═══ CUMULATIVE ANALYTICS ═══ one running tally across both decks,
-  // matching the single analytics row under both cards. Storage is keyed
-  // via window.getPortalStudentKey(), since this IIFE can't see
-  // currentStudent.
-  function progressStorageKey() {
-    var key = window.getPortalStudentKey ? window.getPortalStudentKey() : null;
-    return 'moretti_challenge_progress_' + (key || 'anon');
-  }
-  function loadProgress() {
-    try {
-      var raw = localStorage.getItem(progressStorageKey());
-      if (raw) {
-        var parsed = JSON.parse(raw);
-        if (parsed && typeof parsed === 'object') return parsed;
-      }
-    } catch (e) { /* ignore */ }
-    return { attempted: 0, correct: 0, totalTimeMs: 0 };
-  }
-  function recordAttempt(wasCorrect, timeMs) {
-    var p = loadProgress();
-    p.attempted = (p.attempted || 0) + 1;
-    if (wasCorrect) p.correct = (p.correct || 0) + 1;
-    p.totalTimeMs = (p.totalTimeMs || 0) + (timeMs > 0 ? timeMs : 0);
-    try { localStorage.setItem(progressStorageKey(), JSON.stringify(p)); } catch (e) { /* private browsing / storage disabled — fail silently */ }
-  }
-  function formatAvgTime(ms) {
-    if (!ms) return '—';
-    var totalSec = Math.round(ms / 1000);
-    var m = Math.floor(totalSec / 60), s = totalSec % 60;
-    return m > 0 ? (m + 'm ' + s + 's') : (s + 's');
-  }
-  function renderStats() {
-    var p = loadProgress();
-    var attempted = p.attempted || 0;
-    var correct = p.correct || 0;
-    var accuracy = attempted ? Math.round((correct / attempted) * 100) : 0;
-    var avgMs = attempted ? (p.totalTimeMs / attempted) : 0;
-    var attEl = document.getElementById('chal-stat-attempted');
-    var accEl = document.getElementById('chal-stat-accuracy');
-    var corEl = document.getElementById('chal-stat-correct');
-    var timeEl = document.getElementById('chal-stat-avgtime');
-    if (attEl) attEl.textContent = String(attempted);
-    if (accEl) accEl.textContent = accuracy + '%';
-    if (corEl) corEl.textContent = String(correct);
-    if (timeEl) timeEl.textContent = formatAvgTime(avgMs);
-  }
-
-  /* ═══ PRACTICE RUNNER ═══ same shape as My Incorrect Questions' runner
-     (startPracticeRunner/renderRunnerQuestion): a linear Submit-then-Next
-     queue rendered into the real exam's #dx-card. The queue is a whole
-     static deck, and each submitted answer feeds the analytics above via
-     recordAttempt(), timed from the question's first render. */
-  var runnerQueue = [];
-  var runnerIndex = 0;
-  var runnerState = {};
-  var runnerScore = 0;
-  var questionShownAt = 0;
-
-  /* See the Question Bank runner's runnerReached. Null until the student
-     leaves early, then frozen at the question they left on, so the card can
-     tell a SKIPPED question from one never reached. */
-  var runnerReached = null;
-
-  function startRunner(sectionKey) {
-    var pool = sectionKey === 'math' ? (window.CHALLENGE_MATH || []) : (window.CHALLENGE_RW || []);
-    if (!pool.length) return;
-    runnerQueue = pool;
-    runnerIndex = 0;
-    runnerState = {};
-    runnerScore = 0;
-    runnerReached = null;
-    var label = sectionKey === 'math' ? 'Challenge: Math' : 'Challenge: Reading & Writing';
-    window.dxPracticeNextHandler = runnerAdvance;
-    window.dxPracticeExitHandler = endRunner;
-    window.dxPracticeLetterHandler = selectRunnerChoice;
-    if (window.dxStartIncorrectPractice) window.dxStartIncorrectPractice(label);
-    renderRunnerQuestion();
-  }
-  // Shared by the click handler on each choice row AND the A/B/C/D keyboard
-  // shortcut (see window.dxPracticeLetterHandler).
-  function selectRunnerChoice(i) {
-    var r = runnerQueue[runnerIndex];
-    var st = r && runnerState[r.key];
-    if (!st || st.submitted) return;
-    var at = (st.elim || []).indexOf(i);
-    if (at !== -1) st.elim.splice(at, 1);
-    st.chosenIndex = i;
-    renderRunnerQuestion();
-  }
-  /* Exit Practice mid-deck, same as the Question Bank runner's endRunner():
-     stopping part way is the normal way a deck session ends. First press
-     shows the score card, second leaves; an untouched deck exits
-     immediately. */
-  function endRunner() {
-    if (runnerIndex < runnerQueue.length) {
-      var answered = runnerQueue.some(function (q) {
-        var st = runnerState[q.key];
-        return st && st.submitted;
-      });
-      if (answered) {
-        runnerReached = runnerIndex;
-        runnerIndex = runnerQueue.length;
-        renderRunnerQuestion();
-        return;
-      }
-    }
-    if (window.dxEndIncorrectPractice) window.dxEndIncorrectPractice();
-    if (window.showScreen) window.showScreen('screen-challenge-questions');
-    renderStats();
-  }
-  function runnerAdvance() {
-    if (runnerIndex >= runnerQueue.length) return; // already on the Done screen
-    var r = runnerQueue[runnerIndex];
-    var st = runnerState[r.key];
-    if (!st.submitted) {
-      var elapsed = questionShownAt ? (Date.now() - questionShownAt) : 0;
-      if (r.type === 'mc') {
-        st.correct = (st.chosenIndex === r.correct);
-      } else if (r.type === 'fr') {
-        var input = document.getElementById('dx-fr-input');
-        st.rawAnswer = input ? input.value : '';
-        st.correct = checkFrAnswer(st.rawAnswer, r.answer, r.qid);
-      }
-      st.submitted = true;
-      if (st.correct) runnerScore++;
-      recordAttempt(st.correct, elapsed);
-    } else {
-      runnerIndex++;
-    }
-    renderRunnerQuestion();
-  }
-  // Advances without touching runnerState: no attempt recorded, no score
-  // change, so a skipped question is as untouched as an unopened one. Only
-  // offered before submit (see renderRunnerQuestion()); after submit, Next
-  // does the same.
-  function skipRunnerQuestion() {
-    if (runnerIndex >= runnerQueue.length) return;
-    runnerIndex++;
-    renderRunnerQuestion();
-  }
-  function renderRunnerQuestion() {
-    var qtextEl = document.getElementById('dx-qtext');
-    var choicesEl = document.getElementById('dx-choices');
-    var frRowEl = document.getElementById('dx-fr-row');
-    var frInputEl = document.getElementById('dx-fr-input');
-    var navRowEl = document.querySelector('#dx-card .dx-nav-row');
-    var backBtnEl = document.getElementById('dx-back');
-    var nextBtnEl = document.getElementById('dx-next');
-    var calcBtnEl = document.getElementById('dx-calculator-btn');
-    // Removes any runner's leftover completion card, not just
-    // #chal-runner-summary (see the same cleanup in My Incorrect Questions).
-    document.querySelectorAll('#dx-card .iq-runner-summary').forEach(function (el) { el.parentNode.removeChild(el); });
-    var dxCardEl = document.getElementById('dx-card');
-    Array.prototype.forEach.call(dxCardEl.querySelectorAll('.pb-note, .pb-explain'), function (el) {
-      el.parentNode.removeChild(el);
-    });
-    backBtnEl.disabled = true;
-
-    if (runnerIndex >= runnerQueue.length) {
-      // Skip advances runnerIndex like an answer, so a mostly skipped round
-      // also lands here; score against attempted questions, not the queue
-      // (same as the Question Bank runner).
-      /* `q.key`, NOT `q.qid`: challenge-questions.js keys items on `key`
-         (Question Bank uses qid). With qid, attemptedCount is always 0 and
-         the `=== 0` bail below fires on every round. */
-      var attemptedCount = runnerQueue.filter(function (q) { var st = runnerState[q.key]; return st && st.submitted; }).length;
-      // Counted over what the student REACHED — runnerReached is only
-      // non-null after an early exit, and what lies past it was never seen.
-      var reachedCount = runnerReached === null ? runnerQueue.length : runnerReached;
-      var skippedCount = Math.max(0, reachedCount - attemptedCount);
-      var leftCount = Math.max(0, runnerQueue.length - reachedCount);
-      if (attemptedCount === 0) { runnerReached = null; endRunner(); return; }
-      document.getElementById('dx-notice-text').textContent = 'PRACTICE MODE — DONE';
-      qtextEl.innerHTML = '';
-      choicesEl.style.display = 'none';
-      frRowEl.style.display = 'none';
-      navRowEl.style.display = 'none';
-      calcBtnEl.style.display = 'none';
-      nextBtnEl.disabled = true;
-      var cardHedDone = document.querySelector('#dx-card .dx-card-hed');
-      if (cardHedDone) cardHedDone.style.display = 'none';
-      if (window.dxSetMathMode) window.dxSetMathMode(false);
-      if (window.dxCloseCalculator) window.dxCloseCalculator();
-      if (window.dxRenderPassagePane) window.dxRenderPassagePane({}, null);
-      var summary = document.createElement('div');
-      summary.id = 'chal-runner-summary';
-      summary.className = 'iq-runner-summary';
-      var summaryNote = [];
-      if (skippedCount) summaryNote.push(skippedCount + ' skipped');
-      if (leftCount) summaryNote.push(leftCount + ' left in the deck');
-      summary.innerHTML = '<div class="iq-runner-summary-score">' + runnerScore + ' / ' + attemptedCount + '</div>' +
-        '<div class="iq-runner-summary-lab">correct this round' +
-          (summaryNote.length ? ' &middot; ' + summaryNote.join(' &middot; ') : '') + '</div>' +
-        '<button type="button" class="key-btn" id="chal-runner-done" type="button">Done</button>';
-      document.getElementById('dx-card').insertBefore(summary, navRowEl);
-      document.getElementById('chal-runner-done').addEventListener('click', endRunner);
-      /* The one number a student is waiting for at the end of a round,
-         landing the way the report's score tiles do. The " / n" is carried
-         as a suffix so only the score counts (fluid-ui.js). */
-      if (window.mtaCountUp) window.mtaCountUp(
-        summary.querySelector('.iq-runner-summary-score'), runnerScore,
-        { suffix: ' / ' + attemptedCount });
-      return;
-    }
-
-    navRowEl.style.display = '';
-    var r = runnerQueue[runnerIndex];
-    var isNewQuestion = !runnerState[r.key];
-    var st = runnerState[r.key] || (runnerState[r.key] = {});
-    if (isNewQuestion) questionShownAt = Date.now();
-    document.getElementById('dx-notice-text').textContent = 'PRACTICE MODE — QUESTION ' + (runnerIndex + 1) + ' OF ' + runnerQueue.length;
-    var cardHedEl = document.querySelector('#dx-card .dx-card-hed');
-    if (cardHedEl) cardHedEl.style.display = '';
-    var qnumTileEl = document.getElementById('dx-qnum-tile');
-    if (qnumTileEl) { qnumTileEl.textContent = runnerIndex + 1; qnumTileEl.style.display = ''; }
-    var split = splitPassage(r);
-    var questionText = split ? split.question : r.text;
-    qtextEl.innerHTML = questionText;
-    if (window.dxRenderPassagePane) window.dxRenderPassagePane({}, split, r.key);
-
-    var isMath = r.sectionKey === 'math';
-    calcBtnEl.style.display = isMath ? '' : 'none';
-    // Same #dx-reference-btn the real exam uses (wired globally to
-    // openReference()), shown for math only, as there.
-    var refBtnEl = document.getElementById('dx-reference-btn');
-    if (refBtnEl) refBtnEl.style.display = isMath ? '' : 'none';
-    if (window.dxSetMathMode) window.dxSetMathMode(isMath);
-    if (!isMath && window.dxCloseCalculator) window.dxCloseCalculator();
-
-    if (r.type === 'mc' && r.choices) {
-      choicesEl.style.display = 'flex';
-      frRowEl.style.display = 'none';
-      choicesEl.innerHTML = '';
-      r.choices.forEach(function (c, i) {
-        var isElim = !st.submitted && (st.elim || []).indexOf(i) !== -1;
-        var cls = 'dx-choice' + (isElim ? ' eliminated' : '');
-        if (!st.submitted) {
-          if (st.chosenIndex === i) cls += ' selected';
-        } else {
-          var isCorrectChoice = r.correct === i;
-          var isChosen = st.chosenIndex === i;
-          if (isCorrectChoice) cls += ' pb-right';
-          else if (isChosen) cls += ' pb-tried-wrong';
-        }
-        var row = document.createElement('div');
-        row.className = cls;
-        row.innerHTML = '<span class="dx-choice-letter">' + LETTERS[i] + '</span><span class="dx-choice-text">' + c + '</span>' +
-          (!st.submitted ? '<span class="dx-elim" title="Cross out this answer" role="button" aria-label="Cross out this answer">&times;</span>' : '');
-        if (!st.submitted) {
-          row.addEventListener('click', function () { selectRunnerChoice(i); });
-          row.querySelector('.dx-elim').addEventListener('click', function (ev) {
-            ev.stopPropagation();
-            st.elim = st.elim || [];
-            var at = st.elim.indexOf(i);
-            if (at === -1) { st.elim.push(i); if (st.chosenIndex === i) st.chosenIndex = null; }
-            else st.elim.splice(at, 1);
-            renderRunnerQuestion();
-          });
-        }
-        choicesEl.appendChild(row);
-      });
-      nextBtnEl.disabled = !st.submitted && st.chosenIndex == null;
-    } else if (r.type === 'fr') {
-      choicesEl.style.display = 'none';
-      frRowEl.style.display = st.submitted ? 'none' : 'flex';
-      frInputEl.value = st.rawAnswer || '';
-      nextBtnEl.disabled = false;
-      if (st.submitted) {
-        var frNote = document.createElement('div');
-        frNote.className = 'pb-note ' + (st.correct ? 'pb-note-correct' : 'pb-note-wrong');
-        frNote.textContent = 'Your answer: ' + (st.rawAnswer || '(skipped)') + (st.correct ? ' — correct!' : ' — not quite');
-        frRowEl.parentNode.insertBefore(frNote, frRowEl.nextSibling);
-        if (!st.correct) {
-          var frCorrect = document.createElement('div');
-          frCorrect.className = 'pb-note pb-note-correct';
-          frCorrect.textContent = 'Correct answer: ' + String(r.answer);
-          frRowEl.parentNode.insertBefore(frCorrect, frNote.nextSibling);
-        }
-      }
-    }
-
-    nextBtnEl.textContent = st.submitted ? (runnerIndex + 1 < runnerQueue.length ? 'Next' : 'See Results') : 'Submit';
-    if (!st.submitted) frInputEl.oninput = function () { st.rawAnswer = frInputEl.value; };
-    // #dx-nav-row/#dx-card are shared with every runner (the real exam never
-    // shows Skip). Always remove any leftover skip button before re-adding
-    // one bound to THIS module's skipRunnerQuestion, so a stale button can't
-    // fire another runner's handler.
-    var oldSkipBtn = document.getElementById('dx-skip-btn');
-    if (oldSkipBtn) oldSkipBtn.parentNode.removeChild(oldSkipBtn);
-    if (!st.submitted) {
-      var skipBtnEl = document.createElement('button');
-      skipBtnEl.type = 'button';
-      skipBtnEl.id = 'dx-skip-btn';
-      skipBtnEl.className = 'dx-btn dx-btn-back';
-      skipBtnEl.textContent = 'Skip';
-      skipBtnEl.addEventListener('click', skipRunnerQuestion);
-      navRowEl.insertBefore(skipBtnEl, nextBtnEl);
-    }
-  }
-
-  var wired = false;
-  window.challengeModuleInit = function () {
-    var rwCountEl = document.getElementById('chal-rw-count');
-    var mathCountEl = document.getElementById('chal-math-count');
-    if (rwCountEl) rwCountEl.textContent = (window.CHALLENGE_RW || []).length + ' questions';
-    if (mathCountEl) mathCountEl.textContent = (window.CHALLENGE_MATH || []).length + ' questions';
-    renderStats();
-    if (!wired) {
-      wired = true;
-      var rwBtn = document.getElementById('chal-open-rw');
-      var mathBtn = document.getElementById('chal-open-math');
-      if (rwBtn) rwBtn.addEventListener('click', function () { startRunner('reading-writing'); });
-      if (mathBtn) mathBtn.addEventListener('click', function () { startRunner('math'); });
-    }
-  };
-})();
-</script>
-<script>
 /* ═══ QUESTION BANK MODULE ═══ isolated IIFE, same picker -> practice-
    runner bridge as Challenge Questions above. Two pools:
    window.QUESTION_BANK (question-bank.js, Reading & Writing) and
@@ -15913,7 +15514,70 @@ window.Portal = {
     rw: ['Standard English Conventions', 'Information and Ideas', 'Craft and Structure', 'Expression of Ideas'],
     math: ['Algebra', 'Advanced Math', 'Problem-Solving and Data Analysis', 'Geometry and Trigonometry']
   };
-  function poolFor(subject) { return subject === 'math' ? (window.QUESTION_BANK_MATH || []) : (window.QUESTION_BANK || []); }
+  function poolFor(subject) {
+    if (bankMode === 'challenge') return chalPool(subject);
+    return subject === 'math' ? (window.QUESTION_BANK_MATH || []) : (window.QUESTION_BANK || []);
+  }
+
+  /* ═══ TWO BANKS, ONE INTERFACE ═══ Challenge Questions runs through this
+     module too, in bankMode 'challenge' (Luca, 2026-09-12: "the same UI as
+     the Question Bank, analytics and all, just no Practice Your
+     Weaknesses"). In that mode the pools are window.CHALLENGE_RW /
+     CHALLENGE_MATH, progress has its own store (moretti_cq_progress_<key>,
+     never synced or merged with the Question Bank's), saves use
+     'chal|<subject>|<key>' keys, misses stay out of the Mistakes Log (it
+     feeds Home's weak-topic statistics, and these questions are harder than
+     the test), and the views are moved into whichever screen is showing.
+     Everything reached from elsewhere (Rush, Home's weakness shortcut and
+     topic links, the cross-device merge) runs in 'qb'. */
+  var bankMode = 'qb';
+  var chalCache = {};
+  function chalPool(subject) {
+    var k = subject === 'math' ? 'math' : 'rw';
+    if (chalCache[k]) return chalCache[k];
+    var src = k === 'math' ? (window.CHALLENGE_MATH || []) : (window.CHALLENGE_RW || []);
+    // Copies carrying the fields this module keys on: qid (challenge items
+    // use `key`) and a grid-in's answerValue (they call it `answer`).
+    chalCache[k] = src.map(function (q) {
+      var c = {};
+      for (var f in q) if (Object.prototype.hasOwnProperty.call(q, f)) c[f] = q[f];
+      c.qid = q.key;
+      if (c.type === 'fr' && c.answerValue === undefined) c.answerValue = q.answer;
+      return c;
+    });
+    return chalCache[k];
+  }
+  function withMode(m, fn) { var was = bankMode; bankMode = m; try { return fn(); } finally { bankMode = was; } }
+  function bankScreenId() { return bankMode === 'challenge' ? 'screen-challenge-questions' : 'screen-question-bank'; }
+  function bankKeyFor(subject, qid) { return (bankMode === 'challenge' ? 'chal|' : 'qb|') + subject + '|' + qid; }
+  function prefKeyFor(k) { return bankMode === 'challenge' ? k + '_chal' : k; }
+  var BANK_COPY = {
+    qb: { title: 'Question Bank', sub: null, back: '&larr; Question Bank', runner: 'Question Bank: ', saveTitle: 'Question Bank' },
+    challenge: { title: 'Challenge Questions',
+      sub: 'Hand-picked, extra-hard questions: the kind you would only meet in the toughest Module 2, and the ones that separate a 1400 from a 1500+. Pick a subject, then a topic, to start.',
+      back: '&larr; Challenge Questions', runner: 'Challenge: ', saveTitle: 'Challenge Questions' }
+  };
+  // Puts the views in this mode's screen and gives them its words.
+  function mountBankViews() {
+    var screen = document.getElementById(bankScreenId());
+    ['qb-home-view', 'qb-skills-view', 'qb-selection-bar'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el && screen && el.parentNode !== screen) screen.appendChild(el);
+    });
+    var home = document.getElementById('qb-home-view');
+    if (!home) return;
+    var hed = home.querySelector('.panel-hed'), sub = home.querySelector('.panel-sub'), secTitle = home.querySelector('.qb-sec-title');
+    if (BANK_COPY.qb.sub === null && sub) BANK_COPY.qb.sub = sub.innerHTML;
+    var copy = BANK_COPY[bankMode];
+    if (hed) hed.textContent = copy.title;
+    if (sub && copy.sub !== null) sub.innerHTML = copy.sub;
+    if (secTitle) secTitle.textContent = copy.title;
+    var weak = document.getElementById('qb-weak-card');
+    if (weak) weak.style.display = bankMode === 'challenge' ? 'none' : '';
+    var back = document.getElementById('qb-skills-back');
+    if (back) back.innerHTML = copy.back;
+  }
+  function setBankMode(m) { bankMode = m; mountBankViews(); }
   // Same grid-in rule as every other 'fr' runner in this file (Practice
   // Tests, Saved & Mistakes): gridInCorrect() in grid-in.js.
   function checkFrAnswer(raw, expected, qid) {
@@ -15923,7 +15587,8 @@ window.Portal = {
   var skillsCache = {}; // subject -> [{ domain, skill, questions: [...] }], built once per subject
   function allSkills(subject) {
     subject = subject || currentSubject;
-    if (skillsCache[subject]) return skillsCache[subject];
+    var cacheKey = bankMode + ':' + subject;
+    if (skillsCache[cacheKey]) return skillsCache[cacheKey];
     var bySkill = {}; // skill -> { domain, skill, questions: [] }
     poolFor(subject).forEach(function (q) {
       var entry = bySkill[q.skill] || (bySkill[q.skill] = { domain: q.domain, skill: q.skill, questions: [] });
@@ -15936,7 +15601,7 @@ window.Portal = {
       if (da !== db) return da - db;
       return a.skill.localeCompare(b.skill);
     });
-    skillsCache[subject] = list;
+    skillsCache[cacheKey] = list;
     return list;
   }
 
@@ -15946,7 +15611,7 @@ window.Portal = {
   // local-only in v1) ═══
   function progressStorageKey() {
     var key = window.getPortalStudentKey ? window.getPortalStudentKey() : null;
-    return 'moretti_qb_progress_' + (key || 'anon');
+    return (bankMode === 'challenge' ? 'moretti_cq_progress_' : 'moretti_qb_progress_') + (key || 'anon');
   }
   function loadProgress() {
     try {
@@ -15963,7 +15628,7 @@ window.Portal = {
     // Cross-device sync (window.syncQbAttempts, debounced in the main
     // script). Only attempt history syncs; `saved` here is legacy and
     // unused (saves go through window.saveReportQuestion, see qbIsSaved()).
-    if (window.syncQbAttempts) window.syncQbAttempts(p.attempts);
+    if (bankMode === 'qb' && window.syncQbAttempts) window.syncQbAttempts(p.attempts);
   }
   // `ms` is how long the question was on screen before submit, for the
   // "Time by difficulty" panel. mergeQbAttempts_ is last-write-wins on
@@ -15984,9 +15649,14 @@ window.Portal = {
   function mergeInServerQbAttempts(serverAttempts) {
     if (!serverAttempts || qbAttemptsMerged) return;
     qbAttemptsMerged = true;
-    var p = loadProgress();
-    p.attempts = window.mergeQbAttempts_ ? window.mergeQbAttempts_(p.attempts, serverAttempts) : p.attempts;
-    saveProgress(p);
+    // Always into the Question Bank's store, and repainted only while the
+    // Question Bank is the one showing (this can land after a switch).
+    withMode('qb', function () {
+      var p = loadProgress();
+      p.attempts = window.mergeQbAttempts_ ? window.mergeQbAttempts_(p.attempts, serverAttempts) : p.attempts;
+      saveProgress(p);
+    });
+    if (bankMode !== 'qb') return;
     if (typeof renderStats === 'function') renderStats();
     if (typeof renderSkillsList === 'function') renderSkillsList();
   }
@@ -16030,13 +15700,13 @@ window.Portal = {
     // this gate to block Math temporarily even when it has content.
     var mathBtn = document.getElementById('qb-subject-math');
     if (mathBtn) {
-      var mathEmpty = QB_MATH_TEMP_DISABLED || (window.QUESTION_BANK_MATH || []).length === 0;
+      var mathEmpty = (bankMode === 'qb' && QB_MATH_TEMP_DISABLED) || poolFor('math').length === 0;
       mathBtn.classList.toggle('qb-subject-empty', mathEmpty);
       if (mathEmpty) {
         /* "Coming soon" describes the content. While the Math bank is still
            downloading, show "Loading…" instead; qbModuleInit's Promise.all
            re-render replaces it with the real count. */
-        var stillLoadingMath = !QB_MATH_TEMP_DISABLED && !window.__questionBankMathSettled;
+        var stillLoadingMath = bankMode === 'qb' && !QB_MATH_TEMP_DISABLED && !window.__questionBankMathSettled;
         document.getElementById('qb-subject-math-count').textContent =
           stillLoadingMath ? 'Loading…' : 'Coming soon';
       }
@@ -16311,12 +15981,18 @@ window.Portal = {
   /* Counts a stat up from zero on the same CHART_EASE curve the report's
      own score tiles use, keeping any suffix ("%", " days") intact — the
      report's animateScoreTiles only handles bare integers. */
-  function qbCountUp(el, target, suffix) {
+  // The stats tiles are shared by the Question Bank and Challenge Questions,
+  // so only the latest render may write them: a count-up still waiting (or
+  // running) from the other screen stops instead of landing its numbers here.
+  var qbStatsGen = 0;
+  function qbCountUp(el, target, suffix, gen) {
     var anim = window.dxChartAnim;
     if (!el) return;
+    if (gen !== undefined && gen !== qbStatsGen) return;
     if (!anim || anim.prefersReducedMotion()) { el.textContent = target + (suffix || ''); return; }
     var ease = anim.ease, duration = 1400, start = null;
     function tick(ts) {
+      if (gen !== undefined && gen !== qbStatsGen) return;
       if (start === null) start = ts;
       var progress = Math.min(1, (ts - start) / duration);
       el.textContent = Math.round(target * ease(progress)) + (suffix || '');
@@ -16348,7 +16024,7 @@ window.Portal = {
      open a weak skill via qbPracticeSkill(), keeping that behavior in one
      place. */
   window.qbPractice = {
-    open: function (subject, skill) { qbPracticeSkill(subject, skill); }
+    open: function (subject, skill) { setBankMode('qb'); qbPracticeSkill(subject, skill); }
   };
 
   function renderAnalytics() {
@@ -16360,17 +16036,22 @@ window.Portal = {
     var streak = qbStudyStreak(records);
     var streakIcon = document.getElementById('qb-streak-icon');
     if (streakIcon) streakIcon.classList.toggle('is-lit', streak > 0);
-    var savedCount = Object.keys(qbSavedByKey()).length;
+    // The Question Bank counts every saved question (the shared tab);
+    // Challenge Questions counts its own.
+    var savedCount = Object.keys(qbSavedByKey()).filter(function (k) {
+      return bankMode !== 'challenge' || k.indexOf('chal|') === 0;
+    }).length;
     var accuracy = records.length ? Math.round((correctCount / records.length) * 100) : 0;
     // The four headline numbers count up together the first time the tile
     // is on screen, rather than each on its own observer — they're one
     // card, so they should land as one gesture.
+    var statsGen = ++qbStatsGen;
     if (statsEl && window.dxChartAnim) {
       window.dxChartAnim.whenVisible(statsEl, function () {
-        qbCountUp(document.getElementById('qb-stat-attempted'), records.length, '');
-        qbCountUp(document.getElementById('qb-stat-accuracy'), accuracy, '%');
-        qbCountUp(document.getElementById('qb-stat-saved'), savedCount, '');
-        qbCountUp(document.getElementById('qb-stat-streak'), streak, streak === 1 ? ' day' : ' days');
+        qbCountUp(document.getElementById('qb-stat-attempted'), records.length, '', statsGen);
+        qbCountUp(document.getElementById('qb-stat-accuracy'), accuracy, '%', statsGen);
+        qbCountUp(document.getElementById('qb-stat-saved'), savedCount, '', statsGen);
+        qbCountUp(document.getElementById('qb-stat-streak'), streak, streak === 1 ? ' day' : ' days', statsGen);
       });
     }
 
@@ -16812,7 +16493,7 @@ window.Portal = {
     window.dxPracticeNextHandler = runnerAdvance;
     window.dxPracticeExitHandler = endRunner;
     window.dxPracticeLetterHandler = selectRunnerChoice;
-    if (window.dxStartIncorrectPractice) window.dxStartIncorrectPractice('Question Bank: ' + label);
+    if (window.dxStartIncorrectPractice) window.dxStartIncorrectPractice(BANK_COPY[bankMode].runner + label);
     startQbTimer();
     renderRunnerQuestion();
   }
@@ -17025,7 +16706,8 @@ window.Portal = {
   /* The same filters the Question Bank's own panel offers, applied here so
      the Rush menu's live count and the round itself can never disagree,
      and so "Not started" reads the same attempts map the bank does. */
-  function rushPool(subject, f) {
+  function rushPool(subject, f) { return withMode('qb', function () { return rushPoolQb(subject, f); }); }
+  function rushPoolQb(subject, f) {
     f = f || {};
     var p = loadProgress();
     return poolFor(subject).filter(function (q) {
@@ -17044,7 +16726,7 @@ window.Portal = {
   window.rushMatchCount = function (subject, f) { return rushPool(subject, f).length; };
   window.rushFacets = function (subject) {
     var src = {}, dom = {}, sources = [], domains = [];
-    poolFor(subject).forEach(function (q) {
+    withMode('qb', function () { return poolFor(subject); }).forEach(function (q) {
       var s0 = q.source || 'Non-Bluebook';
       if (!src[s0]) { src[s0] = 1; sources.push(s0); }
       if (q.domain && !dom[q.domain]) { dom[q.domain] = 1; domains.push(q.domain); }
@@ -17054,6 +16736,7 @@ window.Portal = {
   // opts: { filters, size (0 = every matching question), mult, paceName }
   function startRushRound(subject, opts) {
     opts = opts || {};
+    setBankMode('qb');
     var pool = rushPool(subject, opts.filters);
     if (!pool.length) return false;
     currentSubject = subject;
@@ -17077,6 +16760,7 @@ window.Portal = {
   window.startRushRound = startRushRound;
 
   function startWeaknessPractice(opts) {
+    setBankMode('qb');
     var only = (opts && opts.only) || null;
     var btn = document.getElementById('qb-weak-btn');
     var subEl = document.querySelector('#qb-weak-card .vp-tenmin-sub');
@@ -17174,7 +16858,7 @@ window.Portal = {
       return;
     }
     if (window.dxEndIncorrectPractice) window.dxEndIncorrectPractice();
-    if (window.showScreen) window.showScreen('screen-question-bank');
+    if (window.showScreen) window.showScreen(bankScreenId());
     showSkills(currentSubject);
   }
   function runnerAdvance() {
@@ -17208,7 +16892,7 @@ window.Portal = {
       recordAttempt(r.qid, st.correct, questionShownAt ? (Date.now() - questionShownAt) : 0);
       // Feeds the Mistakes Log (see window.recordQuestionBankMistake); the same
       // call clears a question once it's answered correctly.
-      if (window.recordQuestionBankMistake) {
+      if (bankMode === 'qb' && window.recordQuestionBankMistake) {
         window.recordQuestionBankMistake({
           key: 'qb|' + currentSubject + '|' + r.qid,
           given: given,
@@ -17270,7 +16954,7 @@ window.Portal = {
       btn.className = 'dx-mark-btn dx-save-btn';
       hedEl.appendChild(btn);
     }
-    var qbKey = 'qb|' + currentSubject + '|' + r.qid;
+    var qbKey = bankKeyFor(currentSubject, r.qid);
     function paint() {
       var on = qbIsSaved(qbKey);
       btn.innerHTML = on ? '&#9733; Saved' : '&#9734; Save';
@@ -17287,7 +16971,7 @@ window.Portal = {
           key: qbKey,
           given: (st && st.submitted) ? (r.type === 'fr' ? st.rawAnswer : st.chosenIndex) : null,
           correct: (st && st.submitted) ? st.correct : null,
-          testTitle: 'Question Bank',
+          testTitle: BANK_COPY[bankMode].saveTitle,
           savedAt: new Date().toISOString()
         });
       }
@@ -17527,9 +17211,11 @@ window.Portal = {
     allSkills().forEach(function (s) { if (skills.indexOf(s.skill) !== -1) qs = qs.concat(s.questions); });
     var sources = [];
     qs.forEach(function (q) { var src = q.source || 'Non-Bluebook'; if (sources.indexOf(src) === -1) sources.push(src); });
-    var DIFFS = ['easy', 'medium', 'hard'];
+    // Only difficulties these topics have (Challenge Questions are mostly hard).
+    var DIFFS = ['easy', 'medium', 'hard'].filter(function (d) { return qs.some(function (q) { return q.difficulty === d; }); });
+    if (!DIFFS.length) DIFFS = ['easy', 'medium', 'hard'];
     var prefs = {};
-    try { prefs = JSON.parse(localStorage.getItem(QB_PREF_KEY) || '{}') || {}; } catch (e) {}
+    try { prefs = JSON.parse(localStorage.getItem(prefKeyFor(QB_PREF_KEY)) || '{}') || {}; } catch (e) {}
     function keep(saved, all) {
       var k = (saved || []).filter(function (x) { return all.indexOf(x) !== -1; });
       return k.length ? k : all.slice();
@@ -17571,9 +17257,9 @@ window.Portal = {
         return { n: n, take: st.len >= QB_SIZE_MAX ? n : Math.min(n, st.len) };
       },
       onChange: function (st) {
-        try { localStorage.setItem(QB_PREF_KEY, JSON.stringify({ difficulties: st.difficulties, sources: st.sources, show: st.show })); } catch (e) {}
+        try { localStorage.setItem(prefKeyFor(QB_PREF_KEY), JSON.stringify({ difficulties: st.difficulties, sources: st.sources, show: st.show })); } catch (e) {}
         qbSessionSize = st.len >= QB_SIZE_MAX ? 0 : st.len;
-        try { localStorage.setItem(QB_SIZE_KEY, String(qbSessionSize)); } catch (e) {}
+        try { localStorage.setItem(prefKeyFor(QB_SIZE_KEY), String(qbSessionSize)); } catch (e) {}
       },
       onGo: function (st) {
         selectedDifficulties = st.difficulties.slice();
@@ -17592,6 +17278,8 @@ window.Portal = {
   // run — same call the #qb-weak-btn click listener below makes.
   window.startWeaknessPractice = startWeaknessPractice;
   window.qbModuleInit = function () {
+    setBankMode('qb');
+    wireBank();
     showHome();
     // Pull in whatever this student's OTHER devices have synced for
     // per-question attempt history — see mergeInServerQbAttempts() above.
@@ -17612,8 +17300,12 @@ window.Portal = {
         if (skillsVisible) renderSkillsList(); else showHome();
       });
     }
-    if (!wired) {
-      wired = true;
+  };
+  // Wired once, on whichever screen opens first; the elements are the same.
+  function wireBank() {
+    if (wired) return;
+    wired = true;
+    {
       var subjectBtn = document.getElementById('qb-subject-rw');
       if (subjectBtn) subjectBtn.addEventListener('click', function () { showSkills('rw'); });
       var mathSubjectBtn = document.getElementById('qb-subject-math');
@@ -17678,6 +17370,12 @@ window.Portal = {
       var selectionStartBtn = document.getElementById('qb-selection-start-btn');
       if (selectionStartBtn) selectionStartBtn.addEventListener('click', openQbSetup);
     }
+  }
+  // Challenge Questions: the same views and runner, in 'challenge' mode.
+  window.cqModuleInit = function () {
+    setBankMode('challenge');
+    wireBank();
+    showHome();
   };
 })();
 </script>
