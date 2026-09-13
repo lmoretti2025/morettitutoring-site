@@ -5296,9 +5296,8 @@
       /* Kept light: where the return-trips and budget bands overlap, the fills
          compound, and stronger fills turn green and gold into a muddy olive
          that reads as a nonexistent third category. */
-      var debtFill = cf >= cb
-        ? vGrad('pace-g-over',  [[0, '#EF4444', 0.17], [1, '#EF4444', 0.035]])
-        : vGrad('pace-g-under', [[0, '#16A34A', 0.16], [1, '#16A34A', 0.03]]);
+      var overFill = vGrad('pace-g-over',  [[0, '#EF4444', 0.17], [1, '#EF4444', 0.035]]);
+      var underFill = vGrad('pace-g-under', [[0, '#16A34A', 0.16], [1, '#16A34A', 0.03]]);
       var backFill = vGrad('pace-g-back', [[0, '#C9A84C', 0.34], [1, '#C9A84C', 0.12]]);
 
       svgTarget = paceSvg;
@@ -5351,9 +5350,28 @@
         svgEl('path', { d: d, fill: fill });
       }
 
-      // Debt against budget: shaded between the budget line and the
-      // first-look line, since that is the like-for-like pair.
-      band('cf', 'cb', debtFill);
+      /* Ahead of or behind target, question by question. The band between
+         the first-look line and the target line is split along the target
+         line itself: red where the running total was above it (behind),
+         green where below (ahead). It used to take one colour from the last
+         question alone, so a module ahead for 25 questions and behind at
+         the finish drew red end to end (Luca, 2026-09-12). */
+      var cbEdge = smoothD(seriesPts('cb'));
+      var xFirst = xAtN(0), xLast = xAtN(pts[pts.length - 1].n);
+      function sideBand(id, edgeY, fill) {
+        var prevT = svgTarget;
+        svgTarget = defs;
+        var cp = svgEl('clipPath', { id: id });
+        svgTarget = cp;
+        svgEl('path', { d: cbEdge + ' L ' + xLast.toFixed(2) + ' ' + edgeY + ' L ' + xFirst.toFixed(2) + ' ' + edgeY + ' Z' });
+        svgTarget = prevT;
+        var g = svgEl('g', { 'clip-path': 'url(#' + id + ')' });
+        svgTarget = g;
+        band('cf', 'cb', fill);
+        svgTarget = prevT;
+      }
+      sideBand('pace-side-behind', T - 4, overFill);
+      sideBand('pace-side-ahead', T + ih + 4, underFill);
       // Return trips: shaded between first-look and total. Drawn only when
       // there actually were any, so an uninterrupted run shows one line.
       if (anyRevisit) band('ct', 'cf', backFill);
@@ -5369,7 +5387,8 @@
         attrs.fill = 'none'; attrs['stroke-linecap'] = 'round'; attrs['stroke-linejoin'] = 'round';
         svgEl('path', attrs);
       }
-      var firstStroke = cf >= cb ? 'var(--red)' : 'var(--green)';
+      // One colour whatever the result; the shading says ahead or behind.
+      var firstStroke = 'var(--ink)';
       line('cb', { stroke: 'rgba(17,17,17,0.42)', 'stroke-width': 2, 'stroke-dasharray': '5 4' });
       if (anyRevisit) line('ct', { stroke: 'var(--gold)', 'stroke-width': 1.5, opacity: 0.95 });
       line('cf', { stroke: firstStroke, 'stroke-width': 2.25 });
@@ -5425,18 +5444,25 @@
          never overstrike. */
       (function labelLineEnds() {
         var xEnd = L + iw + 6;
-        var wants = [{ y: yAt(cb), text: 'Target pace', fill: 'rgba(17,17,17,0.55)' }];
-        if (anyRevisit) wants.push({ y: yAt(ct), text: 'Including going back', fill: 'var(--gold)' });
-        wants.push({ y: yAt(cf), text: 'Your pace', fill: cf >= cb ? 'var(--red)' : 'var(--green)' });
+        var wants = [{ y: yAt(cb), text: 'Target pace', fill: 'rgba(17,17,17,0.55)', h: 11 }];
+        if (anyRevisit) wants.push({ y: yAt(ct), text: 'Including going back', fill: 'var(--gold)', h: 11 });
+        // The result in words under the label: how far over or under target
+        // the first pass finished.
+        var endGap = cf - cb;
+        wants.push({ y: yAt(cf), text: 'Your pace', fill: 'var(--ink)', h: 21,
+          sub: formatDuration(Math.abs(endGap)) + (endGap >= 0 ? ' over target' : ' under target'),
+          subFill: endGap >= 0 ? 'var(--red)' : 'var(--green)' });
         wants.sort(function (a, b) { return a.y - b.y; });
         for (var i = 1; i < wants.length; i++) {
-          if (wants[i].y - wants[i - 1].y < 11) wants[i].y = wants[i - 1].y + 11;
+          if (wants[i].y - wants[i - 1].y < wants[i - 1].h) wants[i].y = wants[i - 1].y + wants[i - 1].h;
         }
         // keep the whole stack inside the plot box if the nudging pushed it out
-        var overflow = wants[wants.length - 1].y - (T + ih);
+        var lastW = wants[wants.length - 1];
+        var overflow = lastW.y + (lastW.h - 11) - (T + ih);
         if (overflow > 0) wants.forEach(function (w) { w.y -= overflow; });
         wants.forEach(function (w) {
           svgEl('text', { x: xEnd, y: w.y + 3, class: 'pace-note', fill: w.fill }, w.text);
+          if (w.sub) svgEl('text', { x: xEnd, y: w.y + 13, class: 'pace-note', fill: w.subFill, 'font-weight': 400 }, w.sub);
         });
       })();
 
@@ -5500,13 +5526,14 @@
       svgTarget = gPrev;
       paceSvg.addEventListener('pointerleave', function () { guide.classList.remove('on'); });
 
-      var debt = cf - cb;
       /* Two entries: the line labels are written on the lines themselves (see
          labelLineEnds) and on the module-clock rule. The swatches give what
          each shaded band is worth in minutes. */
+      // A swatch for each side the first pass actually spent time on.
+      var wasBehind = pts.some(function (p) { return p.cf > p.cb; }), wasAhead = pts.some(function (p) { return p.cf < p.cb; });
       paceLegend.innerHTML =
-        '<span><i class="fill" style="background:' + (cf >= cb ? 'rgba(239,68,68,0.10)' : 'rgba(22,163,74,0.10)') + '"></i>' +
-          (debt >= 0 ? formatDuration(debt) + ' over target pace' : formatDuration(-debt) + ' under target pace') + '</span>' +
+        (wasBehind ? '<span><i class="fill" style="background:rgba(239,68,68,0.16)"></i>behind target pace</span>' : '') +
+        (wasAhead ? '<span><i class="fill" style="background:rgba(22,163,74,0.16)"></i>ahead of target pace</span>' : '') +
         (anyRevisit ? '<span><i class="fill" style="background:rgba(201,168,76,0.20)"></i>' +
           formatDuration(ct - cf) + ' spent going back</span>' : '') +
         (missPts.length ? '<span><i class="fill" style="background:var(--red)"></i>' +
@@ -6001,15 +6028,23 @@
       // the section total so the headline verdict and the counts below it
       // can never disagree with each other.
       var verdictCls = ratio >= 1.1 ? 'over' : (ratio <= 0.9 ? 'under' : 'on');
-      var verdictTxt = ratio >= 1.1
+      var verdictTxt = (sec.rows.some(function (x) { return x.firstVisitMs != null; }) ? 'First looks: ' : '') + (ratio >= 1.1
         ? '+' + fmtMin(r.debtMs) + ' over target pace'
-        : (ratio <= 0.9 ? fmtMin(-r.debtMs) + ' under target pace' : 'on target pace');
+        : (ratio <= 0.9 ? fmtMin(-r.debtMs) + ' under target pace' : 'on target pace'));
 
       // Shared pixel scale for the two stacked bars: whichever of budget,
       // actual, or the section clock is largest defines 100% width, so the
       // clock marker stays meaningful even when actual overruns it.
       var clockMs = (sec.timeAllottedMin || 0) * 60000;
-      var scaleMax = Math.max(r.budgetMs, r.actualMs, clockMs) || 1;
+      /* The pace measure is each question's FIRST look (see
+         sectionBudgetRollup); time spent going back is kept apart in
+         r.revisit. Both are drawn, so the bar shows all the time spent
+         against the clock and the verdict says it is about first looks.
+         "Used 49m" beside "Clock 64m" read as 15 spare minutes for a student
+         who had spent them going back (Luca, 2026-09-12). */
+      var hasFirst = sec.rows.some(function (x) { return x.firstVisitMs != null; });
+      var backMs = hasFirst && r.revisit ? r.revisit.ms : 0;
+      var scaleMax = Math.max(r.budgetMs, r.actualMs + backMs, clockMs) || 1;
       var clockPct = clockMs ? (clockMs / scaleMax * 100) : null;
 
       // Only skills that ran PAST budget: those are the ones the question
@@ -6095,8 +6130,13 @@
         '<div class="budget-meter dxk-marks">' +
           '<span class="budget-meter-budget dxk-hit" style="width:' + (r.budgetMs / scaleMax * 100).toFixed(1) + '%"' +
             ' data-tip="Target &nbsp;<b>' + fmtMin(r.budgetMs) + "</b> <span class='dim'>for the questions attempted</span>\"></span>" +
-          '<span class="budget-meter-actual dxk-hit' + (ratio > 1 ? ' over' : '') + '" style="width:' + (r.actualMs / scaleMax * 100).toFixed(1) + '%"' +
-            ' data-tip="Actual &nbsp;<b>' + fmtMin(r.actualMs) + "</b> <span class='dim'>" + esc(verdictTxt) + '</span>"></span>' +
+          /* One element, so it grows in as one: first looks in the solid
+             colour, going back in the pale one after it. */
+          '<span class="budget-meter-actual dxk-hit' + (ratio > 1 ? ' over' : '') + '" style="width:' + ((r.actualMs + backMs) / scaleMax * 100).toFixed(1) + '%' +
+            (backMs > 0 ? '; background: linear-gradient(to right, ' + (ratio > 1 ? 'var(--red)' : 'var(--gold)') + ' 0 ' +
+              (r.actualMs / (r.actualMs + backMs) * 100).toFixed(1) + '%, rgba(201,168,76,0.38) 0 100%)' : '') + '"' +
+            ' data-tip="' + (hasFirst ? 'First look' : 'Used') + ' &nbsp;<b>' + fmtMin(r.actualMs) + "</b> <span class='dim'>" + esc(verdictTxt) + '</span>' +
+            (backMs > 0 ? " &nbsp;&middot;&nbsp; Going back &nbsp;<b>" + fmtMin(backMs) + '</b>' : '') + '"></span>' +
           (clockPct !== null ? '<span class="budget-meter-clock dxk-hit" style="left:' + clockPct.toFixed(1) + '%"' +
             ' data-tip="Section clock &nbsp;<b>' + Math.round(sec.timeAllottedMin) + "m</b> <span class='dim'>both modules</span>\"></span>" : '') +
         '</div>' +
@@ -6105,7 +6145,8 @@
            explains it. */
         '<div class="dxk-legend budget-legend">' +
           '<span><i style="background:rgba(17,17,17,0.22)"></i>Target pace ' + fmtMin(r.budgetMs) + '</span>' +
-          '<span><i style="background:' + (ratio > 1 ? 'var(--red)' : 'var(--gold)') + '"></i>Used ' + fmtMin(r.actualMs) + '</span>' +
+          '<span><i style="background:' + (ratio > 1 ? 'var(--red)' : 'var(--gold)') + '"></i>' + (hasFirst ? 'First look ' : 'Used ') + fmtMin(r.actualMs) + '</span>' +
+          (backMs > 0 ? '<span><i style="background:rgba(201,168,76,0.38)"></i>Going back ' + fmtMin(backMs) + '</span>' : '') +
           (clockMs ? '<span><i style="background:var(--ink);opacity:0.55"></i>Clock ' + Math.round(sec.timeAllottedMin) + 'm</span>' : '') +
           '<span class="budget-stat-inline"><b>' + r.overCount + '</b> of <b>' + r.counted + '</b> questions ran well over' +
             (r.correctOverBudget ? ', <b>' + r.correctOverBudget + '</b> still right' : '') + '</span>' +
