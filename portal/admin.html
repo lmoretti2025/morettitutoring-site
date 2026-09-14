@@ -90,6 +90,45 @@
   .prep-topics .low { color: var(--red); font-weight: 600; }
   .prep-bank { font-size: 0.66rem; font-weight: 600; color: var(--faint); margin-left: 0.35rem; }
   .prep-note { font-size: 0.72rem; color: var(--faint); margin: 0.75rem 0 0; }
+  /* Homework for this session: what Luca assigned since the last session
+     that ended, done or not (prep.gs's prepHomework_). */
+  .prep-hw { margin: 0 0 1.1rem; }
+  .prep-hw-hed { font-size: 0.64rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); margin: 0 0 0.4rem; display: flex; justify-content: space-between; gap: 1rem; }
+  .prep-hw-hed span { letter-spacing: 0.04em; text-transform: none; font-weight: 600; }
+  .prep-hw ul { list-style: none; margin: 0; padding: 0; }
+  .prep-hw li { display: grid; grid-template-columns: 1.2rem 1fr auto; gap: 0.5rem; align-items: baseline; padding: 0.4rem 0; border-top: 1px solid var(--border); font-size: 0.84rem; }
+  .prep-hw-box { width: 0.9rem; height: 0.9rem; border: 1.5px solid var(--border); border-radius: 3px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem; line-height: 1; color: #fff; transform: translateY(2px); }
+  .prep-hw li.done .prep-hw-box { background: var(--green, #16A34A); border-color: var(--green, #16A34A); }
+  .prep-hw li.done .prep-hw-task { color: var(--mid); }
+  .prep-hw-notes { display: block; font-size: 0.74rem; color: var(--faint); margin-top: 0.1rem; }
+  .prep-hw-when { font-size: 0.74rem; color: var(--faint); white-space: nowrap; }
+
+  /* ═══ SOURCES ═══ where families come from (prep.gs's adminLeadFunnel),
+     and a link builder for the channels the site cannot see on its own. */
+  #sources { display: none; }
+  .src-head { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; flex-wrap: wrap; }
+  .src-head h2 { font-family: var(--display); font-size: 1.05rem; margin: 0 0 0.15rem; }
+  .src-head select { font: inherit; font-size: 0.82rem; padding: 0.3rem 0.5rem; border: 1px solid var(--border); border-radius: 8px; background: var(--white); }
+  .src-table { width: 100%; border-collapse: collapse; font-size: 0.86rem; font-variant-numeric: tabular-nums; }
+  .src-table th { text-align: left; font-size: 0.64rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); padding: 0 0.75rem 0.45rem 0; }
+  .src-table th.n, .src-table td.n { text-align: right; }
+  .src-table td { padding: 0.5rem 0.75rem 0.5rem 0; border-top: 1px solid var(--border); vertical-align: middle; }
+  .src-table tr.src-total td { font-weight: 700; border-top: 2px solid var(--border); }
+  .src-ch { font-weight: 600; }
+  .src-bar { display: inline-block; width: 90px; height: 7px; border-radius: 4px; background: rgba(17,17,17,0.06); margin-right: 0.6rem; vertical-align: middle; overflow: hidden; }
+  .src-bar i { display: block; height: 100%; background: var(--red); border-radius: 4px; }
+  .src-pct { color: var(--faint); font-size: 0.74rem; margin-left: 0.25rem; }
+  .src-leads td { font-size: 0.82rem; }
+  .src-leads .src-detail { display: block; font-size: 0.72rem; color: var(--faint); }
+  .src-yes { color: var(--green, #16A34A); font-weight: 700; }
+  .src-name { background: none; border: none; padding: 0; font: inherit; font-weight: 600; color: var(--text); cursor: pointer; text-align: left; }
+  .src-name:hover { text-decoration: underline; }
+  .src-builder { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.75rem 1rem; margin: 0 0 0.9rem; }
+  .src-builder label { display: grid; gap: 0.3rem; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--faint); }
+  .src-builder select, .src-builder input { font: inherit; font-size: 0.86rem; letter-spacing: 0; text-transform: none; font-weight: 400; color: var(--text); padding: 0.45rem 0.6rem; border: 1px solid var(--border); border-radius: 8px; background: var(--white); }
+  .src-link { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; background: rgba(17,17,17,0.035); border-radius: 10px; padding: 0.6rem 0.75rem; }
+  .src-link code { flex: 1 1 260px; font-size: 0.82rem; word-break: break-all; }
+  .src-link button, .src-link a { font: inherit; font-size: 0.78rem; font-weight: 600; padding: 0.35rem 0.8rem; border-radius: 8px; border: 1px solid var(--border); background: var(--white); color: var(--text); cursor: pointer; text-decoration: none; }
 
   /* ═══ ROSTER ═══ */
   #roster { display: none; }
@@ -475,6 +514,7 @@
     <button type="button" class="nav-btn is-on" id="nav-roster">Roster</button>
     <button type="button" class="nav-btn" id="nav-allcal">All sessions</button>
     <button type="button" class="nav-btn" id="nav-broadcast">Email<span class="nav-long"> families</span></button>
+    <button type="button" class="nav-btn" id="nav-sources">Sources</button>
     <button type="button" class="nav-btn" id="refresh-btn">Refresh</button>
   </nav>
 </header>
@@ -655,6 +695,55 @@
       <h2>Sent before</h2>
       <p class="card-sub">The most recent messages from this page. Every family&rsquo;s copy is on the EmailLog tab.</p>
       <div id="bc-history"></div>
+    </div>
+  </div>
+
+  <div id="sources">
+    <h1 class="sched-hed">Where families come from</h1>
+    <div class="card">
+      <div class="src-head">
+        <h2>Inquiries by channel</h2>
+        <select id="src-period" aria-label="Period">
+          <option value="all">All time</option>
+          <option value="90">Last 90 days</option>
+          <option value="365">Last 12 months</option>
+        </select>
+      </div>
+      <p class="card-sub">Each website inquiry is counted once, by how the family found the site. &ldquo;Took the diagnostic&rdquo; and &ldquo;Started lessons&rdquo; (a session held or booked on your calendar) show how far each channel&rsquo;s families went.</p>
+      <div id="src-table"></div>
+    </div>
+    <div class="card">
+      <h2>Recent inquiries</h2>
+      <p class="card-sub">Newest first. Tap a name to open the student.</p>
+      <div id="src-leads"></div>
+    </div>
+    <div class="card">
+      <h2>Make a link to track</h2>
+      <p class="card-sub">A friend&rsquo;s recommendation usually shows up as &ldquo;Direct&rdquo; or &ldquo;Google search&rdquo;. Give a family their own link, or put a tagged link or QR code on a flyer, and every inquiry that comes through it is credited to it.</p>
+      <div class="src-builder">
+        <label>What it&rsquo;s for
+          <select id="lb-kind">
+            <option value="referral">A family referring friends</option>
+            <option value="flyer">A flyer, poster or event</option>
+            <option value="school">A school or counselor</option>
+            <option value="instagram">Instagram</option>
+            <option value="facebook">Facebook</option>
+            <option value="other">Something else</option>
+          </select>
+        </label>
+        <label>Name for it
+          <input id="lb-label" type="text" maxlength="40" autocomplete="off" placeholder="e.g. smith">
+        </label>
+        <label>Page it opens
+          <select id="lb-page">
+            <option value="">Home page</option>
+            <option value="diagnostic.html">Free diagnostic</option>
+            <option value="prep-course.html">SAT prep course</option>
+          </select>
+        </label>
+      </div>
+      <div class="src-link"><code id="lb-out"></code><button type="button" id="lb-copy">Copy</button><a id="lb-open" href="#" target="_blank" rel="noopener">Open</a></div>
+      <p class="prep-note" id="lb-hint"></p>
     </div>
   </div>
 
@@ -906,7 +995,7 @@
 
   /* ═══ VIEW SWITCHING ═══ five full-page views (gate / roster / one
      student / everyone's calendar / email families), one visible at a time. */
-  var VIEWS = { gate: $('gate'), roster: $('roster'), student: $('student'), allcal: $('allcal'), broadcast: $('broadcast') };
+  var VIEWS = { gate: $('gate'), roster: $('roster'), student: $('student'), allcal: $('allcal'), broadcast: $('broadcast'), sources: $('sources') };
   var currentView = 'gate';
 
   function showView(name) {
@@ -916,6 +1005,7 @@
     $('nav-roster').classList.toggle('is-on', name === 'roster' || name === 'student');
     $('nav-allcal').classList.toggle('is-on', name === 'allcal');
     $('nav-broadcast').classList.toggle('is-on', name === 'broadcast');
+    $('nav-sources').classList.toggle('is-on', name === 'sources');
     // FullCalendar measures itself on render; a calendar that was built
     // while its container was display:none comes out zero-height until
     // it's told to re-measure once it's actually on screen.
@@ -938,7 +1028,7 @@
 
   // What this build of admin.html needs the deployment to understand. Kept
   // beside the version constant in Code.gs — bump both together.
-  var REQUIRED_BACKEND_VERSION = 15;
+  var REQUIRED_BACKEND_VERSION = 16;
   var CAPABILITY_LABELS = {
     calendar: 'the calendar and student pages',
     dueDates: 'due dates',
@@ -953,7 +1043,8 @@
     broadcast: 'Email families (it also needs emails.gs pasted in as its own script file)',
     practiceLog: 'keeping every practice answer (it needs prep.gs pasted in as its own script file)',
     clientErrors: 'browser errors reaching the ClientErrors tab (prep.gs)',
-    sessionPrep: 'the Session prep card on each student (prep.gs and emails.gs)'
+    sessionPrep: 'the Session prep card on each student (prep.gs and emails.gs)',
+    leadSources: 'Sources: where inquiries come from (prep.gs)'
   };
 
   function joinList(items) {
@@ -1291,6 +1382,14 @@
   $('nav-roster').addEventListener('click', goToRoster);
   $('nav-allcal').addEventListener('click', openAllCalendar);
   $('nav-broadcast').addEventListener('click', openBroadcast);
+  $('nav-sources').addEventListener('click', openSources);
+  $('src-period').addEventListener('change', function () { loadSources(this.value); });
+  ['lb-kind', 'lb-label', 'lb-page'].forEach(function (id) { $(id).addEventListener('input', renderLinkBuilder); $(id).addEventListener('change', renderLinkBuilder); });
+  $('lb-copy').addEventListener('click', function () {
+    var link = $('lb-out').textContent, btn = this;
+    var done = function () { btn.textContent = 'Copied'; setTimeout(function () { btn.textContent = 'Copy'; }, 1600); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(link).then(done, function () {});
+  });
   $('student-back-btn').addEventListener('click', goToRoster);
 
   $('refresh-btn').addEventListener('click', function () {
@@ -1467,8 +1566,28 @@
       next.push('SAT: <b>' + new Date(p.testDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + '</b>' +
         (days >= 0 ? ' (' + days + ' day' + (days === 1 ? '' : 's') + ')' : ''));
     }
-    next.push('Homework open: <b>' + (p.openCount || 0) + '</b>' + (p.openAssignments && p.openAssignments.length
+    // An older backend sends only the open count; the list replaces it.
+    var hw = p.homework;
+    if (!hw) next.push('Homework open: <b>' + (p.openCount || 0) + '</b>' + (p.openAssignments && p.openAssignments.length
       ? ' (' + p.openAssignments.slice(0, 3).map(function (a) { return escHtml(a.task); }).join('; ') + (p.openCount > 3 ? '; …' : '') + ')' : ''));
+    var hwHtml = '';
+    if (hw && hw.items) {
+      var hwDay = function (iso) { return new Date(iso).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }); };
+      var doneN = hw.items.filter(function (a) { return a.done; }).length;
+      hwHtml = '<div class="prep-hw"><div class="prep-hw-hed">Homework for this session' +
+        (hw.items.length ? '<span>' + doneN + ' of ' + hw.items.length + ' done</span>' : '') + '</div>' +
+        (hw.items.length
+          ? '<ul>' + hw.items.map(function (a) {
+              var whenTxt = a.done && a.doneAt ? 'done ' + hwDay(a.doneAt) : (a.dueDate ? 'due ' + hwDay(a.dueDate) : '');
+              return '<li' + (a.done ? ' class="done"' : '') + '><span class="prep-hw-box">' + (a.done ? '&#10003;' : '') + '</span>' +
+                '<span class="prep-hw-task">' + escHtml(a.task) + (a.notes ? '<span class="prep-hw-notes">' + escHtml(a.notes) + '</span>' : '') + '</span>' +
+                '<span class="prep-hw-when">' + whenTxt + '</span></li>';
+            }).join('') + '</ul>'
+          : '<div class="empty">Nothing assigned since the last session.</div>') +
+        '<p class="prep-note">' + (hw.since
+          ? 'Assigned since the session on ' + hwDay(hw.since) + '. Clears when the next session ends.'
+          : 'The last 14 days (your calendar could not be read for session times).') + '</p></div>';
+    }
 
     var topics = '';
     if (pr.skills && pr.skills.length) {
@@ -1486,7 +1605,7 @@
     if (p.practiceError) note = 'Practice log unreadable: ' + escHtml(p.practiceError);
 
     $('stu-prep').innerHTML = '<div class="prep-stats">' + stats.join('') + '</div>' +
-      '<p class="prep-next">' + next.join(' &nbsp;·&nbsp; ') + '</p>' + topics +
+      '<p class="prep-next">' + next.join(' &nbsp;·&nbsp; ') + '</p>' + hwHtml + topics +
       (note ? '<p class="prep-note">' + note + '</p>' : '');
   }
 
@@ -2977,6 +3096,103 @@
     if (e === 'busy_try_again') return 'The daily email run is going right now. Try again in a minute.';
     if (e === 'send_failed') return 'Gmail refused the test email. Try again in a minute.';
     return 'Something went wrong' + (e ? ' (' + e + ')' : '') + '.';
+  }
+
+  /* ═══ SOURCES ═══ each website inquiry once, by how the family found the
+     site (site.js remembers it; prep.gs's leadChannel_ names it), then how
+     far it went. Families added by hand count under the Source typed on
+     their row. Figures only. */
+  function openSources() { showView('sources'); renderLinkBuilder(); loadSources($('src-period').value); }
+  function loadSources(period) {
+    $('src-table').innerHTML = skLines(3);
+    $('src-leads').innerHTML = '';
+    postToBackend({ action: 'adminLeadFunnel', adminKey: adminKey(), period: period }).then(function (data) {
+      if (currentView !== 'sources') return;
+      if (!data || !data.ok) {
+        var err = data && data.error;
+        $('src-table').innerHTML = '<div class="empty">' + (err === 'unknown_action'
+          ? 'The backend in Apps Script is older than this page. Paste prep.gs, Code.gs and auth.gs, then Deploy \u2192 Manage deployments \u2192 edit \u2192 New version.'
+          : 'Could not load sources' + (err ? ' (' + escHtml(String(err)) + ')' : '') + '.') + '</div>';
+        return;
+      }
+      try { renderSources(data); }
+      catch (e) {
+        if (window.console && console.error) console.error('[admin] sources render failed:', e);
+        $('src-table').innerHTML = '<div class="empty">Loaded, but could not draw Sources. Details are in the browser console.</div>';
+      }
+    }).catch(function () {
+      if (currentView === 'sources') $('src-table').innerHTML = '<div class="empty">Network error loading sources.</div>';
+    });
+  }
+  function renderSources(d) {
+    var pct = function (a, b) { return b ? Math.round(100 * a / b) + '%' : '\u2014'; };
+    var ch = d.channels || [];
+    if (!ch.length) {
+      $('src-table').innerHTML = '<div class="empty">No inquiries in this period yet.</div>';
+      $('src-leads').innerHTML = '';
+      return;
+    }
+    var tot = ch.reduce(function (t, c) { t.i += c.inquiries; t.d += c.diagnostic; t.s += c.started; return t; }, { i: 0, d: 0, s: 0 });
+    var maxI = Math.max.apply(null, ch.map(function (c) { return c.inquiries; })) || 1;
+    var row = function (c) {
+      return '<tr><td class="src-ch">' + escHtml(c.channel) + '</td>' +
+        '<td class="n"><span class="src-bar"><i style="width:' + Math.round(100 * c.inquiries / maxI) + '%"></i></span>' + c.inquiries + '</td>' +
+        '<td class="n">' + c.diagnostic + '<span class="src-pct">' + pct(c.diagnostic, c.inquiries) + '</span></td>' +
+        '<td class="n">' + c.started + '<span class="src-pct">' + pct(c.started, c.inquiries) + '</span></td></tr>';
+    };
+    var notes = [];
+    if (ch.some(function (c) { return c.channel === 'Not recorded'; })) notes.push('&ldquo;Not recorded&rdquo; is an inquiry from before this tracking began, or from a browser that blocks it.');
+    if (d.calendarOk === false) notes.push('Started lessons needs your calendar, which could not be read this time.');
+    $('src-table').innerHTML = '<table class="src-table"><thead><tr><th>Channel</th><th class="n">Inquiries</th><th class="n">Took the diagnostic</th><th class="n">Started lessons</th></tr></thead><tbody>' +
+      ch.map(row).join('') +
+      '<tr class="src-total"><td>All channels</td><td class="n">' + tot.i + '</td><td class="n">' + tot.d + '<span class="src-pct">' + pct(tot.d, tot.i) + '</span></td>' +
+      '<td class="n">' + tot.s + '<span class="src-pct">' + pct(tot.s, tot.i) + '</span></td></tr></tbody></table>' +
+      (notes.length ? '<p class="prep-note">' + notes.join(' ') + '</p>' : '');
+
+    var leads = d.leads || [];
+    var when = function (iso) { return iso ? new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'added by hand'; };
+    $('src-leads').innerHTML = leads.length
+      ? '<table class="src-table src-leads"><thead><tr><th>Date</th><th>Family</th><th>Channel</th><th class="n">Diagnostic</th><th class="n">Lessons</th></tr></thead><tbody>' +
+        leads.map(function (l) {
+          var name = escHtml(l.name || l.key || '\u2014');
+          return '<tr><td>' + when(l.at) + '</td>' +
+            '<td>' + (l.key ? '<button type="button" class="src-name" data-key="' + escHtml(l.key) + '">' + name + '</button>' : name) + '</td>' +
+            '<td>' + escHtml(l.channel) + (l.detail ? '<span class="src-detail">' + escHtml(l.detail) + '</span>' : '') + '</td>' +
+            '<td class="n">' + (l.diagnostic ? '<span class="src-yes">&#10003;</span>' : '') + '</td>' +
+            '<td class="n">' + (l.started ? '<span class="src-yes">&#10003;</span>' : '') + '</td></tr>';
+        }).join('') + '</tbody></table>' +
+        (d.total > leads.length ? '<p class="prep-note">Showing the newest ' + leads.length + ' of ' + d.total + '.</p>' : '')
+      : '<div class="empty">No inquiries in this period yet.</div>';
+    Array.prototype.forEach.call(document.querySelectorAll('#src-leads .src-name'), function (b) {
+      b.addEventListener('click', function () {
+        var k = b.getAttribute('data-key');
+        var st = allStudents.filter(function (x) { return x.key === k; })[0];
+        if (st) openStudent(st);
+      });
+    });
+  }
+  /* The link builder: a ?ref= link for a family, or a tagged link for a
+     flyer or a post, so the inquiry is credited to it (site.js reads the
+     tags; leadChannel_ names the channel shown here). */
+  var LB_KINDS = {
+    referral: { ph: 'e.g. smith', channel: 'Referral link', q: function (x) { return 'ref=' + (x || 'friend'); } },
+    flyer: { ph: 'e.g. library-oct', channel: 'Flyer or event', q: function (x) { return 'utm_source=flyer&utm_campaign=' + (x || 'flyer'); } },
+    school: { ph: 'e.g. cranford-high', channel: 'School or counselor', q: function (x) { return 'utm_source=school&utm_campaign=' + (x || 'school'); } },
+    instagram: { ph: 'e.g. bio', channel: 'Instagram', q: function (x) { return 'utm_source=instagram&utm_campaign=' + (x || 'bio'); } },
+    facebook: { ph: 'e.g. town-group', channel: 'Facebook', q: function (x) { return 'utm_source=facebook&utm_campaign=' + (x || 'post'); } },
+    other: { ph: 'e.g. newsletter', channel: null, q: function (x) { return 'utm_source=' + (x || 'other'); } }
+  };
+  function renderLinkBuilder() {
+    var kind = LB_KINDS[$('lb-kind').value] || LB_KINDS.referral;
+    $('lb-label').placeholder = kind.ph;
+    var label = String($('lb-label').value || '').toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').slice(0, 40);
+    var link = 'https://morettitutoring.com/' + $('lb-page').value + '?' + kind.q(label);
+    $('lb-out').textContent = link;
+    $('lb-open').href = link;
+    var shown = kind.channel || (label ? label.charAt(0).toUpperCase() + label.slice(1) : 'Other');
+    $('lb-hint').innerHTML = 'Inquiries through this link show up as <b>' + escHtml(shown) + '</b>' +
+      ($('lb-kind').value === 'referral' && label ? ' (ref ' + escHtml(label) + ')' : '') + '. ' +
+      'For a QR code, open the link in Chrome, right-click the page and choose &ldquo;Create QR code for this page&rdquo;.';
   }
 
   function openBroadcast() {
