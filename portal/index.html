@@ -6270,7 +6270,8 @@ window.Portal = {
       accomTimeMult: data.accomTimeMult || null,
       accomBreakMult: data.accomBreakMult || null,
       portalLocked: !!data.portalLocked,
-      portalLockReason: data.portalLockReason || ''
+      portalLockReason: data.portalLockReason || '',
+      reportsOpen: !!data.reportsOpen
     };
     var changed = Object.keys(next).some(function (k) { return currentStudent[k] !== next[k]; });
     if (!changed) return;
@@ -6500,6 +6501,7 @@ window.Portal = {
       targetScore: data.targetScore || null,
       portalLocked: !!data.portalLocked,
       portalLockReason: data.portalLockReason || '',
+      reportsOpen: !!data.reportsOpen,   // may they open their first diagnostic yet (see mergedScoreHistory)
       tests: data.tests || [],
       assignments: data.assignments || []
     };
@@ -7399,10 +7401,10 @@ window.Portal = {
     var local = loadScoreHistory();
     var seen = {};
     local.forEach(function (e) { if (e && e.attemptId) seen[e.attemptId] = true; });
-    /* Students see every one of their reports (Luca, 2026-09-15). A first
-       diagnostic used to be recorded on the device with no link, and the
-       local copy wins the merge below, so the server's link (it has always
-       stored one) was never offered: fill it in from the server's copy. */
+    /* A report the student may open gets its link from the server's copy
+       when the device's has none: a first diagnostic used to be recorded
+       on the device with no link, and the local copy wins the merge below,
+       so the server's link (always stored) was never offered. */
     var serverLink = {};
     serverScoreHistoryEntries.forEach(function (e) { var l = usableReportLink(e); if (e && e.attemptId && l) serverLink[e.attemptId] = l; });
     var merged = local.map(function (e) {
@@ -7416,9 +7418,22 @@ window.Portal = {
       if (e && e.attemptId && seen[e.attemptId]) return;
       merged.push(e);
     });
-    // Nothing downstream may treat a marker as a link.
+    /* THE FIRST DIAGNOSTIC IS LUCA'S UNTIL THE STUDENT IS ON BOARD. It goes
+       to him first; once a session is held or booked on his calendar the
+       backend says reportsOpen (prep.gs reportsOpenFor_) and from then on
+       it opens here like any report, on every device (Luca, 2026-09-15).
+       The earliest diagnostic is the real one: retakes only come after it,
+       and they were always the student's. Blanking the link here covers
+       every place a report opens (tile menu, score chart, recent test). */
+    var heldBack = null;
+    if (!(currentStudent && currentStudent.reportsOpen)) {
+      merged.forEach(function (e) {
+        if (e && e.source === 'diagnostic' && (!heldBack || String(e.date || '') < String(heldBack.date || ''))) heldBack = e;
+      });
+    }
+    // Nothing downstream may treat a marker as a link, or open a held-back report.
     merged = merged.map(function (e) {
-      if (!e || usableReportLink(e) || !(e.reportLinkRelative || e.reportLink)) return e;
+      if (!e || !(e.reportLinkRelative || e.reportLink) || (e !== heldBack && usableReportLink(e))) return e;
       var copy = {};
       for (var k in e) if (Object.prototype.hasOwnProperty.call(e, k)) copy[k] = e[k];
       copy.reportLinkRelative = ''; copy.reportLink = '';
@@ -12874,9 +12889,8 @@ window.Portal = {
         // Stored so "View Results" on a completed practice-test card or the
         // diagnostic tile can reopen this report later. Local to this browser
         // only, like the rest of this entry.
-        // Every attempt's report is the student's to open, the first
-        // diagnostic included (Luca, 2026-09-15: it used to go to Luca only,
-        // and students could not find their results).
+        // Kept on every attempt, the first diagnostic included, so it can
+        // open once the student is on board (see mergedScoreHistory).
         reportLink: reportLink,
         reportLinkRelative: reportLinkRelative
       };
@@ -13026,12 +13040,15 @@ window.Portal = {
       return;
     }
 
-    // First-ever real attempt: the results go to Luca, and the student can
-    // open them too.
-    setViewResultsLink(reportLinkRelative);
+    // First-ever real attempt: the results go to Luca. A student already
+    // on board (sessions on his calendar) can open them now; otherwise they
+    // open once sessions start (see mergedScoreHistory).
+    var openNow = !!(currentStudent && currentStudent.reportsOpen);
+    setViewResultsLink(openNow ? reportLinkRelative : null);
 
-    document.getElementById('done-message').textContent =
-      'Your results just went to Luca, so there is nothing to send. You can open them below.';
+    document.getElementById('done-message').textContent = openNow
+      ? 'Your results just went to Luca, so there is nothing to send. You can open them below.'
+      : 'Your results just went to Luca \u2014 no need to send anything yourself.';
     statusEl.textContent = 'Sending your results…';
     show('screen-done');
 
