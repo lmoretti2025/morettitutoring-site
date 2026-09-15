@@ -313,7 +313,10 @@
   .onb-accom-check svg { width: 10px; height: 10px; opacity: 0; }
   .onb-accom-card.is-selected .onb-accom-check svg { opacity: 1; }
   .onb-accom-sub { max-height: 0; overflow: hidden; transition: max-height 0.35s cubic-bezier(0.16,1,0.3,1); text-align: left; }
-  .onb-accom-sub.is-open { max-height: 160px; }
+  /* Opened to its contents by setSubOpen(); this is the fallback if that
+     never runs. It was 160px, which clipped the breaks row on a phone,
+     where the two groups stack (Luca, 2026-09-15). */
+  .onb-accom-sub.is-open { max-height: 40rem; }
   /* The baseline-score sub-panel (test-type toggle, two inputs, error
      line) is taller than the accommodations one; 160px clips its inputs. */
   #onbBaselineSub.is-open { max-height: 300px; }
@@ -8767,7 +8770,7 @@ window.Portal = {
       document.querySelectorAll('[data-onb-baseline-card]').forEach(function (c) { c.classList.remove('is-selected'); });
       card.classList.add('is-selected');
       onbHasBaseline = (i === 1);
-      document.getElementById('onbBaselineSub').classList.toggle('is-open', onbHasBaseline);
+      setSubOpen(document.getElementById('onbBaselineSub'), onbHasBaseline);
       document.getElementById('onbBaselineScoreError').style.display = 'none';
       if (onbHasBaseline) updateOnbBaselineRangeText();
     });
@@ -8865,7 +8868,7 @@ window.Portal = {
       document.querySelectorAll('[data-onb-guardian-card]').forEach(function (c) { c.classList.remove('is-selected'); });
       card.classList.add('is-selected');
       onbHasGuardian = (i === 1);
-      document.getElementById('onbGuardianSub').classList.toggle('is-open', onbHasGuardian);
+      setSubOpen(document.getElementById('onbGuardianSub'), onbHasGuardian);
       document.getElementById('onbGuardianEmailError').style.display = 'none';
     });
   });
@@ -8920,13 +8923,31 @@ window.Portal = {
   // have accommodations" opens the shared panel. Continuing sets
   // `accommodations` (used by the diagnostic timer) and saves it via
   // saveOnboardingPrefs as a permanent account setting.
+  /* Opens a collapsible panel to exactly the height its contents need. A
+     fixed max-height clipped whatever sat at the bottom (on a phone the
+     breaks row, which Continue then insisted on), and a clipped row cannot
+     be tapped. Falls back to the CSS height while the panel is off screen,
+     where scrollHeight reads 0. */
+  function setSubOpen(el, open) {
+    if (!el) return;
+    el.classList.toggle('is-open', open);
+    var h = open ? el.scrollHeight : 0;
+    el.style.maxHeight = (open && h) ? h + 'px' : '';
+  }
+  // A rotation or a resize can change how the rows wrap.
+  window.addEventListener('resize', function () {
+    Array.prototype.forEach.call(document.querySelectorAll('.onb-accom-sub.is-open'), function (el) {
+      if (el.offsetParent) { el.style.maxHeight = ''; el.style.maxHeight = el.scrollHeight + 'px'; }
+    });
+  }, { passive: true });
+
   var onbAccomHasAccoms = false;
   document.querySelectorAll('[data-onb-accom-card]').forEach(function (card, i) {
     card.addEventListener('click', function () {
       document.querySelectorAll('[data-onb-accom-card]').forEach(function (c) { c.classList.remove('is-selected'); });
       card.classList.add('is-selected');
       onbAccomHasAccoms = (i === 1);
-      document.getElementById('onbAccomSub').classList.toggle('is-open', onbAccomHasAccoms);
+      setSubOpen(document.getElementById('onbAccomSub'), onbAccomHasAccoms);
       document.getElementById('onbAccomError').style.display = 'none';
     });
   });
@@ -9434,7 +9455,7 @@ window.Portal = {
       document.querySelectorAll('[data-settings-accom-card]').forEach(function (c) { c.classList.remove('is-selected'); });
       card.classList.add('is-selected');
       settingsHasAccom = (i === 1);
-      document.getElementById('settingsAccomSub').classList.toggle('is-open', settingsHasAccom);
+      setSubOpen(document.getElementById('settingsAccomSub'), settingsHasAccom);
     });
   });
   ['settingsAccomTimeOpts', 'settingsAccomBreakOpts'].forEach(function (id) {
@@ -9452,7 +9473,7 @@ window.Portal = {
       document.querySelectorAll('[data-settings-baseline-card]').forEach(function (c) { c.classList.remove('is-selected'); });
       card.classList.add('is-selected');
       settingsHasBaseline = (i === 1);
-      document.getElementById('settingsBaselineSub').classList.toggle('is-open', settingsHasBaseline);
+      setSubOpen(document.getElementById('settingsBaselineSub'), settingsHasBaseline);
       document.getElementById('settingsBaselineScoreError').style.display = 'none';
       if (settingsHasBaseline) updateSettingsBaselineRangeText();
     });
@@ -9484,7 +9505,7 @@ window.Portal = {
       document.querySelectorAll('[data-settings-guardian-card]').forEach(function (c) { c.classList.remove('is-selected'); });
       card.classList.add('is-selected');
       settingsHasGuardian = (i === 1);
-      document.getElementById('settingsGuardianSub').classList.toggle('is-open', settingsHasGuardian);
+      setSubOpen(document.getElementById('settingsGuardianSub'), settingsHasGuardian);
       document.getElementById('settingsGuardianEmailError').style.display = 'none';
     });
   });
@@ -9516,7 +9537,7 @@ window.Portal = {
 
     settingsHasAccom = Number(currentStudent.accomTimeMult) > 1 || Number(currentStudent.accomBreakMult) > 1;
     document.querySelectorAll('[data-settings-accom-card]').forEach(function (c, i) { c.classList.toggle('is-selected', (i === 1) === settingsHasAccom); });
-    document.getElementById('settingsAccomSub').classList.toggle('is-open', settingsHasAccom);
+    setSubOpen(document.getElementById('settingsAccomSub'), settingsHasAccom);
     var timeVal = currentStudent.accomTimeMult ? String(currentStudent.accomTimeMult) : '1';
     var breakVal = currentStudent.accomBreakMult ? String(currentStudent.accomBreakMult) : '1';
     document.querySelectorAll('#settingsAccomTimeOpts .onb-accom-opt').forEach(function (o) { o.classList.toggle('is-on', o.getAttribute('data-val') === timeVal); });
@@ -9524,7 +9545,7 @@ window.Portal = {
 
     settingsHasBaseline = !!currentStudent.baselineType;
     document.querySelectorAll('[data-settings-baseline-card]').forEach(function (c, i) { c.classList.toggle('is-selected', (i === 1) === settingsHasBaseline); });
-    document.getElementById('settingsBaselineSub').classList.toggle('is-open', settingsHasBaseline);
+    setSubOpen(document.getElementById('settingsBaselineSub'), settingsHasBaseline);
     var baselineType = currentStudent.baselineType || 'psat';
     document.querySelectorAll('#settingsBaselineTestOpts .onb-accom-opt').forEach(function (o) { o.classList.toggle('is-on', o.getAttribute('data-val') === baselineType); });
     document.getElementById('settingsBaselineRwInput').value = currentStudent.baselineRw || '';
@@ -9533,7 +9554,7 @@ window.Portal = {
 
     settingsHasGuardian = !!(currentStudent.guardianName || currentStudent.guardianEmail);
     document.querySelectorAll('[data-settings-guardian-card]').forEach(function (c, i) { c.classList.toggle('is-selected', (i === 1) === settingsHasGuardian); });
-    document.getElementById('settingsGuardianSub').classList.toggle('is-open', settingsHasGuardian);
+    setSubOpen(document.getElementById('settingsGuardianSub'), settingsHasGuardian);
     document.getElementById('settingsGuardianNameInput').value = currentStudent.guardianName || '';
     document.getElementById('settingsGuardianEmailInput').value = currentStudent.guardianEmail || '';
   }
