@@ -534,6 +534,30 @@
   .bc-meta { font-size: 0.76rem; color: var(--mid); line-height: 1.55; margin-bottom: 0.8rem; overflow-wrap: anywhere; }
   .bc-meta b { color: var(--text); }
   .bc-mail { border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.1rem; background: #fff; overflow-x: auto; }
+  .bc-section-hed { font-family: var(--display); font-size: 1.15rem; margin: 1.6rem 0 0.8rem; }
+
+  /* ═══ THIS FRIDAY ═══ */
+  .fp-summary { display: flex; flex-wrap: wrap; gap: 0.4rem 0.9rem; font-size: 0.82rem; color: var(--mid); margin: -0.3rem 0 1rem; }
+  .fp-summary b { color: var(--text); }
+  .fp-summary .fp-reh { flex-basis: 100%; color: #8a6d1f; }
+  .fp-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr); gap: 1.25rem; align-items: start; }
+  @media (max-width: 900px) { .fp-grid { grid-template-columns: minmax(0, 1fr); } }
+  .fp-list { max-height: 520px; overflow-y: auto; border: 1px solid var(--border); border-radius: 10px; }
+  .fp-row { display: flex; align-items: flex-start; gap: 0.6rem; width: 100%; text-align: left; background: none; border: none; border-bottom: 1px solid var(--border); padding: 0.65rem 0.8rem; font: inherit; font-size: 0.84rem; color: var(--text); cursor: pointer; }
+  .fp-row:last-child { border-bottom: none; }
+  .fp-row:hover { background: #fafafa; }
+  .fp-row.is-on { background: rgba(176,39,28,0.05); box-shadow: inset 3px 0 0 var(--red); }
+  .fp-who { flex: 1 1 auto; min-width: 0; }
+  .fp-who b { font-weight: 700; }
+  .fp-why { display: block; font-size: 0.72rem; color: var(--faint); line-height: 1.4; margin-top: 0.1rem; }
+  .fp-pill { flex: none; font-size: 0.66rem; font-weight: 700; padding: 0.12rem 0.5rem; border-radius: 999px; white-space: nowrap; margin-top: 0.1rem; }
+  .fp-pill.send { background: rgba(94,139,111,0.14); color: var(--green); }
+  .fp-pill.draft { background: rgba(201,168,76,0.18); color: #8a6d1f; }
+  .fp-pill.done, .fp-pill.off, .fp-pill.skip { background: var(--bg); color: var(--mid); }
+  .fp-view .bc-meta { margin-top: 0; }
+  .fp-view .fp-reason { font-size: 0.84rem; color: var(--mid); line-height: 1.5; margin: 0 0 0.8rem; }
+  .fp-jump { background: none; border: none; padding: 0; margin-top: 0.8rem; font: inherit; font-size: 0.78rem; font-weight: 600; color: var(--red); cursor: pointer; }
+  .fp-jump:hover { text-decoration: underline; }
   .bc-mail.is-stale { opacity: 0.45; }
   .bc-hist-row { display: flex; gap: 1rem; align-items: baseline; padding: 0.55rem 0; border-bottom: 1px solid var(--border); font-size: 0.82rem; }
   .bc-hist-row:last-child { border-bottom: none; }
@@ -705,6 +729,7 @@
             <button type="button" class="mini" id="stu-note-clear">Clear</button>
             <button type="button" class="mini solid" id="stu-note-save">Save note</button>
           </div>
+          <button type="button" class="fp-jump" id="stu-note-preview">See their Friday email &rarr;</button>
         </div>
       </div>
     </section>
@@ -848,6 +873,22 @@
       Nothing from this page reaches a family yet. Every copy comes to you, marked [Rehearsal], showing who it would have gone to.
       To switch on real sending, run <code>goLive</code> in Apps Script.
     </div>
+    <!-- THIS FRIDAY: the automatic weekly emails, as the 8am run would send
+         them (emails.gs handleFridayPreview). Read-only: nothing here sends. -->
+    <div class="card" id="fp-card">
+      <div class="card-head">
+        <h2>This Friday&rsquo;s updates</h2>
+        <button type="button" class="mini" id="fp-reload">Check again</button>
+      </div>
+      <p class="card-sub" id="fp-sub">The weekly emails go out by themselves at 8am on Fridays. This is what that run will do, as things stand now.</p>
+      <div class="fp-summary" id="fp-summary"></div>
+      <div class="fp-grid">
+        <div class="fp-list" id="fp-list"></div>
+        <div class="fp-view" id="fp-view"></div>
+      </div>
+    </div>
+
+    <h2 class="bc-section-hed">Write to families</h2>
     <div class="bc-grid">
       <div class="card">
         <h2>Message</h2>
@@ -1076,7 +1117,7 @@
   // The value is the field a real answer always carries. A stalling service
   // can answer a POST with its GET health reply ({ok:true}, no data), so a
   // reply missing that field is treated as lost.
-  var RETRY_READS = { getRoster: 'students', version: 'version', getStudentDetail: '', getAdminAssignments: '', getAdminCalendar: '', broadcastPrepare: 'families', fridayNoteGet: 'friday' };
+  var RETRY_READS = { getRoster: 'students', version: 'version', getStudentDetail: '', getAdminAssignments: '', getAdminCalendar: '', broadcastPrepare: 'families', fridayNoteGet: 'friday', fridayPreview: 'items' };
   function looksLost(action, data) {
     var field = RETRY_READS[action];
     return !!field && data && data.ok && !(field in data);
@@ -1245,7 +1286,8 @@
     leadSources: 'Sources: where inquiries come from (prep.gs)',
     fridayNote: 'the Note for Friday box on each student (emails.gs)',
     studentProgram: 'sorting students into SAT prep, tutoring and college admissions',
-    studentEdit: 'editing a student\u2019s details (second parent, second SAT date)'
+    studentEdit: 'editing a student\u2019s details (second parent, second SAT date)',
+    fridayPreview: 'the This Friday preview on Email families'
   };
 
   function joinList(items) {
@@ -1716,6 +1758,7 @@
       rosterStale = false;
       loadRoster(key, true).then(done);
     } else if (currentView === 'broadcast') {
+      loadFridayPreview();
       loadBroadcast(false).then(done, done);
     } else if (currentView === 'allcal') {
       if (allCalendar) allCalendar.refetchEvents();
@@ -2214,6 +2257,14 @@
   }
 
   $('stu-note-save').addEventListener('click', function () { saveFridayNote($('stu-note').value); });
+  $('stu-note-preview').addEventListener('click', function () {
+    if (!currentStudent || !confirmLeaveNote()) return;
+    var key = currentStudent.key;
+    if (!bc.restored) { bcRestoreDraft(); bc.restored = true; }
+    showView('broadcast');
+    loadBroadcast(false);
+    loadFridayPreview(key);
+  });
   $('stu-note-clear').addEventListener('click', function () { $('stu-note').value = ''; saveFridayNote(''); });
   $('stu-note').addEventListener('input', function () {
     if ($('stu-note').value !== noteSaved) noteStatus('Not saved yet.', 'warn');
@@ -3989,7 +4040,101 @@
     if (!bc.restored) { bcRestoreDraft(); bc.restored = true; }
     showView('broadcast');
     loadBroadcast(false);
+    loadFridayPreview();
   }
+
+  /* ═══ THIS FRIDAY ═══ the automatic weekly emails, family by family:
+     goes out, drafted for Luca, or no email and why. Built by the backend
+     with the same code the 8am run uses, so the email shown is the one
+     that will go. Nothing on this card sends anything. */
+  var fp = { seq: 0, items: [], selected: '', data: null };
+  var FP_PILL = { send: 'Goes out', draft: 'Draft for you', done: 'Already sent', off: 'Off', skip: 'No email' };
+
+  function loadFridayPreview(selectKey) {
+    var seq = ++fp.seq;
+    if (selectKey) fp.selected = selectKey;
+    $('fp-summary').innerHTML = '';
+    $('fp-list').innerHTML = skLines(4);
+    $('fp-view').innerHTML = '';
+    return postToBackend({ action: 'fridayPreview', adminKey: adminKey() }).then(function (d) {
+      if (seq !== fp.seq) return;
+      if (!d || !d.ok) {
+        var e = d && d.error;
+        $('fp-list').innerHTML = '<div class="empty" style="padding:0.8rem;">' + (e === 'unknown_action'
+          ? 'The live backend does not have this yet. Paste Code.gs, auth.gs and emails.gs into Apps Script and deploy a new version.'
+          : 'Could not build the preview' + (d && d.message ? ': ' + escHtml(d.message) : (e ? ' (' + escHtml(e) + ')' : '')) + '.') + '</div>';
+        return;
+      }
+      renderFridayPreview(d);
+    }).catch(function () {
+      if (seq === fp.seq) $('fp-list').innerHTML = '<div class="empty" style="padding:0.8rem;">Could not reach the backend. Press Check again.</div>';
+    });
+  }
+
+  function renderFridayPreview(d) {
+    fp.data = d;
+    fp.items = d.items || [];
+    $('fp-sub').textContent = 'The weekly emails go out by themselves at ' + d.runHour + 'am on Fridays. This is what the run on ' + d.fridayLabel +
+      ' will do, as things stand now. Practice done before then still counts.';
+    if (!d.calendarOk) {
+      $('fp-summary').innerHTML = '';
+      $('fp-list').innerHTML = '<div class="empty" style="padding:0.8rem;">' + escHtml(d.message || 'Your calendar could not be read.') + '</div>';
+      return;
+    }
+    var n = function (st) { return fp.items.filter(function (i) { return i.status === st; }).length; };
+    var bits = [];
+    if (n('send')) bits.push('<span><b>' + n('send') + '</b> ' + (n('send') === 1 ? 'goes out by itself' : 'go out by themselves') + '</span>');
+    if (n('draft')) bits.push('<span><b>' + n('draft') + '</b> drafted for you to look over</span>');
+    if (n('done')) bits.push('<span><b>' + n('done') + '</b> already sent</span>');
+    if (n('skip') + n('off')) bits.push('<span><b>' + (n('skip') + n('off')) + '</b> without an email</span>');
+    if (d.rehearsal) bits.push('<span class="fp-reh">Rehearsal mode: every one of these comes to you (' + escHtml(d.notifyEmail || '') + ') instead of the family, until you run goLive.</span>');
+    $('fp-summary').innerHTML = bits.join('');
+    if (!fp.items.length) {
+      $('fp-list').innerHTML = '<div class="empty" style="padding:0.8rem;">Nobody is current on your calendar, so no Friday updates this week.</div>';
+      $('fp-view').innerHTML = '';
+      return;
+    }
+    $('fp-list').innerHTML = fp.items.map(function (i) {
+      var prog = PROGRAMS[i.program] && i.program !== 'sat' ? ' <span class="prog-tag prog-' + i.program + '">' + PROGRAMS[i.program].tag + '</span>' : '';
+      return '<button type="button" class="fp-row" data-key="' + escHtml(i.key) + '">' +
+        '<span class="fp-who"><b>' + escHtml(i.name) + '</b>' + prog + '<span class="fp-why">' + escHtml(i.reason || '') + '</span></span>' +
+        '<span class="fp-pill ' + i.status + '">' + FP_PILL[i.status] + '</span></button>';
+    }).join('');
+    var pick = fp.items.filter(function (i) { return i.key === fp.selected; })[0] ||
+               fp.items.filter(function (i) { return i.html; })[0] || fp.items[0];
+    showFridayItem(pick.key, !!fp.selected);
+  }
+
+  function showFridayItem(key, scroll) {
+    var i = fp.items.filter(function (x) { return x.key === key; })[0];
+    if (!i) return;
+    fp.selected = key;
+    Array.prototype.forEach.call(document.querySelectorAll('#fp-list .fp-row'), function (r) { r.classList.toggle('is-on', r.getAttribute('data-key') === key); });
+    var open = '<button type="button" class="mini" data-open="' + escHtml(key) + '">Open ' + escHtml(firstName(i.name)) + '&rsquo;s page</button>';
+    if (!i.html) {
+      $('fp-view').innerHTML = '<p class="fp-reason"><b>' + escHtml(i.name) + ':</b> ' + escHtml(i.reason || 'No email this Friday.') + '</p>' + open;
+    } else {
+      // i.html comes from the backend's own email renderer, which escapes
+      // everything it is given: the same HTML the family receives.
+      $('fp-view').innerHTML = '<p class="fp-reason">' + escHtml(i.reason || '') + '</p>' +
+        '<div class="bc-meta"><b>To</b> ' + (i.to && i.to.length ? escHtml(i.to.join(', ')) : '(no address on file)') +
+        '<br><b>Subject</b> ' + escHtml(i.subject) + '</div><div class="bc-mail">' + i.html + '</div>' +
+        '<div style="margin-top:0.8rem;">' + open + '</div>';
+    }
+    if (scroll) $('fp-card').scrollIntoView({ block: 'start' });
+  }
+
+  $('fp-list').addEventListener('click', function (e) {
+    var r = e.target.closest('.fp-row');
+    if (r) showFridayItem(r.getAttribute('data-key'));
+  });
+  $('fp-view').addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-open]');
+    if (!b) return;
+    var st = allStudents.filter(function (x) { return x.key === b.getAttribute('data-open'); })[0];
+    if (st) openStudent(st, 'week');
+  });
+  $('fp-reload').addEventListener('click', function () { loadFridayPreview(); });
 
   function loadBroadcast(withPreview) {
     var seq = ++bc.seq;
