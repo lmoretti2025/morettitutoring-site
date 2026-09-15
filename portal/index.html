@@ -7388,14 +7388,41 @@ window.Portal = {
     });
   }
 
+  /* A report link worth opening: a real report.html#d= link. The server
+     stores a bracketed marker instead when a link is too long for its cell
+     (Code.gs capCell_), which must never be offered as a report. */
+  function usableReportLink(e) {
+    var l = e && (e.reportLinkRelative || e.reportLink);
+    return (typeof l === 'string' && l.indexOf('report.html#d=') !== -1) ? l : '';
+  }
   function mergedScoreHistory() {
     var local = loadScoreHistory();
     var seen = {};
     local.forEach(function (e) { if (e && e.attemptId) seen[e.attemptId] = true; });
-    var merged = local.slice();
+    /* Students see every one of their reports (Luca, 2026-09-15). A first
+       diagnostic used to be recorded on the device with no link, and the
+       local copy wins the merge below, so the server's link (it has always
+       stored one) was never offered: fill it in from the server's copy. */
+    var serverLink = {};
+    serverScoreHistoryEntries.forEach(function (e) { var l = usableReportLink(e); if (e && e.attemptId && l) serverLink[e.attemptId] = l; });
+    var merged = local.map(function (e) {
+      if (!e || usableReportLink(e) || !e.attemptId || !serverLink[e.attemptId]) return e;
+      var copy = {};
+      for (var k in e) if (Object.prototype.hasOwnProperty.call(e, k)) copy[k] = e[k];
+      copy.reportLinkRelative = serverLink[e.attemptId];
+      return copy;
+    });
     serverScoreHistoryEntries.forEach(function (e) {
       if (e && e.attemptId && seen[e.attemptId]) return;
       merged.push(e);
+    });
+    // Nothing downstream may treat a marker as a link.
+    merged = merged.map(function (e) {
+      if (!e || usableReportLink(e) || !(e.reportLinkRelative || e.reportLink)) return e;
+      var copy = {};
+      for (var k in e) if (Object.prototype.hasOwnProperty.call(e, k)) copy[k] = e[k];
+      copy.reportLinkRelative = ''; copy.reportLink = '';
+      return copy;
     });
     /* A practice test's title is saved with each attempt, but tests can be
        renumbered (Practice Tests 11 and 12 swapped on 2026-09-12), so the
@@ -7671,10 +7698,9 @@ window.Portal = {
       if (!hit) { hideSpcTip(); return; }
       if (spcTipShownFor === hit) {
         // Second click on a tipped point opens that attempt's report (same as
-        // "View Results"). Attempts without a reportLink (older ones, or a
-        // first diagnostic not link-visible to the student, see
-        // linkVisibleToStudent in finishDiagnostic) fall back to the
-        // weakest-domain jump.
+        // "View Results"). Attempts without a report link (older ones, or one
+        // too long for the server's cell) fall back to the weakest-domain
+        // jump.
         var e = spcEntryForHit(hit);
         var link = e && toRelativeReportLink(e.reportLinkRelative || e.reportLink);
         if (link) openTestResults(link);
@@ -9661,8 +9687,8 @@ window.Portal = {
   }
   // Every completed attempt of one practice test, oldest first, for the •••
   // menu's "Attempt N" list. Only attempts with a report link are included
-  // (see linkVisibleToStudent in finishDiagnostic); others still count as
-  // completed elsewhere but have nothing to open.
+  // (see usableReportLink); others still count as completed elsewhere but
+  // have nothing to open.
   function practiceTestAttempts(testId) {
     return mergedScoreHistory()
       .filter(function (e) { return e && e.source === 'practice-test' && e.testId === testId && (e.reportLinkRelative || e.reportLink); })
@@ -9741,10 +9767,10 @@ window.Portal = {
   // resume-or-start-fresh flow (see startDiagnosticFlow()).
   function buildDiagnosticTile(hasCompletedADiagnostic) {
     var card = document.createElement('div');
-    // Local + server-synced history (see mergedScoreHistory), populated only
-    // when the student may see the link (see linkVisibleToStudent in
-    // finishDiagnostic). A first-ever diagnostic still shows "Completed"
-    // (from the server's satTaken flag) but has no link.
+    // Local + server-synced history (see mergedScoreHistory). Every attempt
+    // with a stored report has a link, the first diagnostic included; one
+    // flagged taken by the server with no report on file shows "Completed"
+    // with nothing to open.
     var attempts = hasCompletedADiagnostic ? attemptMenuItems(diagnosticAttempts()) : [];
     /* The most recent full diagnostic sitting, for the score line. A
        first-ever diagnostic can be flagged taken by the server with no
@@ -12742,13 +12768,6 @@ window.Portal = {
     // page (localhost in testing, the real domain in production).
     var reportLink = reportPayloadB64 ? 'https://morettitutoring.com/portal/report.html#d=' + reportPayloadB64 : '';
     var reportLinkRelative = reportPayloadB64 ? 'report.html#d=' + reportPayloadB64 : '';
-    // A first-ever (Luca-notified) diagnostic shows the student nothing (see
-    // the branching below), so the link must not be stored on the
-    // score-history entry either, or the diagnostic tile's ••• menu
-    // (buildDiagnosticTile) would expose it. currentStudent.satTaken still
-    // holds the pre-attempt value here; it's set later in the first-time
-    // branch.
-    var linkVisibleToStudent = !!ptDoneEarly || alreadyTakenThisTestType();
 
     // Composite scaled score for the Score Progress chart (same math as
     // report.html's score tiles; see the SCORE_* curves). Only recorded when
@@ -12855,8 +12874,11 @@ window.Portal = {
         // Stored so "View Results" on a completed practice-test card or the
         // diagnostic tile can reopen this report later. Local to this browser
         // only, like the rest of this entry.
-        reportLink: linkVisibleToStudent ? reportLink : '',
-        reportLinkRelative: linkVisibleToStudent ? reportLinkRelative : ''
+        // Every attempt's report is the student's to open, the first
+        // diagnostic included (Luca, 2026-09-15: it used to go to Luca only,
+        // and students could not find their results).
+        reportLink: reportLink,
+        reportLinkRelative: reportLinkRelative
       };
       recordScoreHistory(entry);
       // Carried on the same reliable request as the report (see the
@@ -13004,12 +13026,12 @@ window.Portal = {
       return;
     }
 
-    // First-ever real attempt — no link for the student, results go to
-    // Luca only.
-    setViewResultsLink(null);
+    // First-ever real attempt: the results go to Luca, and the student can
+    // open them too.
+    setViewResultsLink(reportLinkRelative);
 
     document.getElementById('done-message').textContent =
-      'Your results just went to Luca — no need to send anything yourself.';
+      'Your results just went to Luca, so there is nothing to send. You can open them below.';
     statusEl.textContent = 'Sending your results…';
     show('screen-done');
 
