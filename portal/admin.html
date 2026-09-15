@@ -86,7 +86,7 @@
   .prep-topics { width: 100%; border-collapse: collapse; font-size: 0.8rem; font-variant-numeric: tabular-nums; }
   .prep-topics th { text-align: left; font-size: 0.64rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); padding: 0 0.5rem 0.4rem 0; }
   .prep-topics td { padding: 0.35rem 0.5rem 0.35rem 0; border-top: 1px solid var(--border); }
-  .prep-topics td.n { text-align: right; }
+  .prep-topics td.n, .prep-topics th.n { text-align: right; }
   .prep-topics .low { color: var(--red); font-weight: 600; }
   .prep-bank { font-size: 0.66rem; font-weight: 600; color: var(--faint); margin-left: 0.35rem; }
   .prep-note { font-size: 0.72rem; color: var(--faint); margin: 0.75rem 0 0; }
@@ -100,6 +100,7 @@
   .prep-hw-box { width: 0.9rem; height: 0.9rem; border: 1.5px solid var(--border); border-radius: 3px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem; line-height: 1; color: #fff; transform: translateY(2px); }
   .prep-hw li.done .prep-hw-box { background: var(--green, #16A34A); border-color: var(--green, #16A34A); }
   .prep-hw li.done .prep-hw-task { color: var(--mid); }
+  .prep-hw-task { min-width: 0; overflow-wrap: anywhere; }
   .prep-hw-notes { display: block; font-size: 0.74rem; color: var(--faint); margin-top: 0.1rem; }
   .prep-hw-when { font-size: 0.74rem; color: var(--faint); white-space: nowrap; }
 
@@ -175,9 +176,8 @@
   .delta.up { color: var(--green); }
   .delta.down { color: var(--red); }
   .no-score { color: var(--faint); font-style: italic; }
-  .assign-pill { display: inline-block; font-size: 0.72rem; font-weight: 700; padding: 0.2rem 0.55rem; border-radius: 999px; background: var(--bg); color: var(--mid); }
-  .assign-pill.behind { background: rgba(176,39,28,0.1); color: var(--red); }
-  .assign-pill.done { background: rgba(94,139,111,0.12); color: var(--green); }
+  .next-cell b { font-weight: 700; }
+  .next-cell .next-day { display: block; color: var(--faint); font-size: 0.72rem; }
   .stale { color: var(--red); font-weight: 700; }
   /* PRESENCE. The dot is the whole feature at a glance: green and gently
      breathing means that student has the portal open right now (the
@@ -231,9 +231,111 @@
   .stu-actions { display: flex; gap: 0.4rem; flex-wrap: wrap; }
 
   .tabbar { display: flex; gap: 0.4rem; border-bottom: 1px solid var(--border); margin-bottom: 1.3rem; }
+  /* NOTE FOR FRIDAY: one line from Luca, into the family's next Friday update
+     (emails.gs handleFridayNoteGet / handleFridayNoteSave). Beside Session
+     prep on the This week tab. */
+  #stu-note { display: block; width: 100%; font-family: var(--hel); font-size: 0.9rem; line-height: 1.5; color: var(--text); padding: 0.6rem 0.75rem; border: 1.5px solid var(--border); border-radius: 10px; resize: vertical; min-height: 64px; background: var(--white); }
+  #stu-note:focus { outline: none; border-color: var(--red); }
+  .fn-row { display: flex; align-items: center; gap: 0.45rem; margin-top: 0.6rem; flex-wrap: wrap; }
+  .fn-status { flex: 1 1 220px; font-size: 0.76rem; line-height: 1.45; color: var(--mid); }
+  .fn-status.ok { color: var(--green); font-weight: 600; }
+  .fn-status.warn { color: var(--red); font-weight: 600; }
+  .fn-row .mini { font-size: 0.78rem; padding: 0.35rem 0.85rem; }
   .tab { background: none; border: none; border-bottom: 2px solid transparent; margin-bottom: -1px; font-family: var(--hel); font-size: 0.84rem; font-weight: 700; color: var(--faint); padding: 0.55rem 0.9rem; cursor: pointer; }
   .tab:hover { color: var(--mid); }
   .tab.is-on { color: var(--red); border-bottom-color: var(--red); }
+  /* Scrolls sideways on a narrow phone. overflow clips vertically too, so
+     the grey rule is an inset shadow the active tab's own red underline
+     sits on, rather than a border the tabs hang 1px over. */
+  .tabbar { overflow-x: auto; overflow-y: hidden; scrollbar-width: none; border-bottom: none; box-shadow: inset 0 -1px 0 var(--border); }
+  .tab { white-space: nowrap; flex: none; margin-bottom: 0; }
+
+  /* ═══ PROGRAM ═══ SAT prep, subject tutoring or college admissions
+     (Code.gs programOf_). One colour each, used for the badge on the
+     student page, the tag on the roster and the filter. */
+  .prog-badge, .prog-tag { display: inline-block; font-family: var(--hel); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.04em; border-radius: 999px; padding: 0.18rem 0.6rem; border: 1px solid transparent; line-height: 1.4; white-space: nowrap; }
+  .prog-badge { cursor: pointer; }
+  .prog-sat { background: rgba(176,39,28,0.08); color: var(--red); border-color: rgba(176,39,28,0.2); }
+  .prog-tutoring { background: rgba(62,107,140,0.1); color: var(--blue); border-color: rgba(62,107,140,0.25); }
+  .prog-admissions { background: rgba(201,168,76,0.14); color: #8a6d1f; border-color: rgba(201,168,76,0.4); }
+  .prog-tag { font-size: 0.62rem; padding: 0.08rem 0.45rem; margin-left: 0.45rem; vertical-align: 1px; }
+  .seg { display: inline-flex; flex-wrap: wrap; gap: 0.3rem; }
+  .seg button { font-family: var(--hel); font-size: 0.76rem; font-weight: 700; color: var(--mid); background: var(--white); border: 1px solid var(--border); border-radius: 999px; padding: 0.3rem 0.8rem; cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem; }
+  .seg button:hover { color: var(--text); border-color: rgba(17,17,17,0.25); }
+  .seg button.is-on { background: var(--text); border-color: var(--text); color: #fff; }
+  .seg button.is-on .count-pill { background: rgba(255,255,255,0.18); color: #fff; }
+  /* A tutoring or admissions view has no SAT score or weakest skill to show. */
+  table.no-sat-cols th:nth-child(2), table.no-sat-cols td:nth-child(2),
+  table.no-sat-cols th:nth-child(3), table.no-sat-cols td:nth-child(3) { display: none; }
+
+  /* Student page layout */
+  .stu-sub { display: flex; align-items: center; flex-wrap: wrap; gap: 0.4rem 0.9rem; margin-bottom: 1rem; }
+  .stu-sub .stu-meta { margin-bottom: 0; }
+  .stu-head .stu-actions { padding-top: 0.35rem; }
+  .week-grid { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: 1.25rem; align-items: start; }
+  .week-grid > .card { margin-bottom: 0; }
+  .scores-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1.25rem; align-items: start; }
+  .scores-grid > .card { margin-bottom: 0; }
+  .scores-past { font-size: 0.8rem; color: #8a6d1f; background: rgba(201,168,76,0.12); border: 1px solid rgba(201,168,76,0.35); border-radius: 10px; padding: 0.6rem 0.9rem; margin-bottom: 1.1rem; }
+  @media (max-width: 900px) {
+    .week-grid, .scores-grid { grid-template-columns: minmax(0, 1fr); }
+    /* On a phone the note comes first: right after a session is when it is
+       opened there. */
+    #stu-note-card { order: -1; }
+  }
+  /* Four figures: two by two in the half-width column, one row when wide. */
+  .week-grid .prep-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  @media (min-width: 1060px) { .week-grid .prep-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  #stu-note-card .fn-status { flex-basis: 100%; }
+  #stu-note-clear { margin-left: auto; }
+  .prep-sec { font-size: 0.64rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); margin: 1.1rem 0 0.4rem; }
+  /* The global table rule's 780px floor is for the roster; these fit. */
+  .prep-topics, .ct-table { min-width: 0; }
+
+  /* Account tab */
+  .prog-options { display: grid; gap: 0.5rem; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  @media (max-width: 760px) { .prog-options { grid-template-columns: minmax(0, 1fr); } }
+  .prog-opt { display: flex; gap: 0.7rem; align-items: flex-start; border: 1.5px solid var(--border); border-radius: 12px; padding: 0.7rem 0.9rem; cursor: pointer; }
+  .prog-opt:hover { border-color: rgba(17,17,17,0.25); }
+  .prog-opt:has(input:checked) { border-color: var(--red); background: rgba(176,39,28,0.035); }
+  .prog-opt input { accent-color: var(--red); margin: 0.2rem 0 0; flex: none; }
+  .prog-opt b { display: block; font-size: 0.88rem; }
+  .prog-opt small { display: block; font-size: 0.76rem; color: var(--mid); line-height: 1.45; margin-top: 0.1rem; }
+  .prog-options.is-busy { opacity: 0.6; pointer-events: none; }
+  .sat-history { font-size: 0.8rem; color: var(--mid); line-height: 1.5; margin-top: 0.9rem; padding-top: 0.9rem; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 0.6rem 1rem; flex-wrap: wrap; }
+  .sat-history span { flex: 1 1 260px; }
+  .acct-list { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 0.55rem 1.25rem; margin: 0; font-size: 0.84rem; }
+  .acct-list dt { font-size: 0.66rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); padding-top: 0.15rem; }
+  .acct-list dd { margin: 0; overflow-wrap: anywhere; }
+  .acct-list .dim { color: var(--faint); }
+  .acct-list a { color: var(--red); font-weight: 600; }
+  #tab-account .danger-card { margin-top: 0; }
+  #notice { position: fixed; top: 0.9rem; left: 50%; transform: translateX(-50%); z-index: 300; max-width: min(640px, calc(100vw - 2rem));
+    display: flex; gap: 0.8rem; align-items: flex-start; background: var(--text); color: #fff; font-size: 0.84rem; line-height: 1.45;
+    padding: 0.75rem 0.9rem 0.75rem 1.1rem; border-radius: 12px; box-shadow: 0 12px 30px rgba(17,17,17,0.25); }
+  #notice button { background: none; border: none; color: rgba(255,255,255,0.7); font-size: 1.2rem; line-height: 1; cursor: pointer; padding: 0; }
+  #notice button:hover { color: #fff; }
+  .card-head { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin-bottom: 0.8rem; }
+  .card-head h2 { font-family: var(--display); font-size: 1.05rem; margin: 0; }
+
+  /* Edit details */
+  .ef fieldset { border: none; margin: 0 0 1.1rem; padding: 0 0 1.1rem; border-bottom: 1px solid var(--border); min-width: 0; }
+  .ef legend { font-size: 0.66rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--red); padding: 0; margin-bottom: 0.6rem; }
+  .ef .fld-row { flex-wrap: wrap; }
+  .ef .fld-row > .fld { flex: 1 1 150px; }
+  @media (max-width: 480px) { .ef .fld-row > .fld { flex-basis: 100%; } }   /* one field a line on a phone */
+  .ef label.fld { display: block; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--faint); margin-bottom: 0.75rem; }
+  .ef label.fld .opt { font-weight: 400; letter-spacing: 0; text-transform: none; }
+  .ef input, .ef select { display: block; width: 100%; font-family: var(--hel); font-size: 0.88rem; font-weight: 400; letter-spacing: 0; text-transform: none; color: var(--text); padding: 0.5rem 0.65rem; border: 1.5px solid var(--border); border-radius: 10px; margin-top: 0.3rem; background: var(--white); min-height: 2.4rem; }
+  .ef input:focus, .ef select:focus { outline: none; border-color: var(--red); }
+  .ef input.bad, .ef select.bad { border-color: var(--red); background: rgba(176,39,28,0.04); }
+  .ef-hint { font-size: 0.74rem; color: var(--faint); margin: -0.25rem 0 0; line-height: 1.45; }
+  .ef-chips { display: flex; flex-wrap: wrap; gap: 0.3rem; align-items: center; margin: -0.3rem 0 0.9rem; font-size: 0.72rem; color: var(--faint); }
+  .ef-chips button { font-family: var(--hel); font-size: 0.72rem; font-weight: 600; color: var(--mid); background: var(--bg); border: 1px solid transparent; border-radius: 999px; padding: 0.15rem 0.6rem; cursor: pointer; }
+  .ef-chips button:hover { border-color: var(--red); color: var(--red); }
+  .ef-actions { justify-content: flex-end; margin-top: 0; }
+  .ef-status:empty { display: none; }
+  .ef-status { margin-top: 0.7rem; }
 
   /* Score trend — hand-drawn SVG rather than a chart library: it's one
      line with a handful of points, and admin.html already carries one
@@ -281,7 +383,7 @@
   .spc-composite-num { font-family: var(--display); font-weight: 700; font-size: 2.1rem; color: var(--text); line-height: 1; }
   .spc-composite-delta { font-family: var(--hel); font-size: 0.8rem; font-weight: 700; color: var(--green); margin-top: 0.3rem; }
   .spc-bars-col { flex: 1 1 0; min-width: 0; }
-  .spc-bar-chart-wrap { position: relative; }
+  .spc-bar-chart-wrap { position: relative; margin-top: 18px; }   /* room for the target label when the target is near the top */
   .spc-bars { height: 52px; display: flex; align-items: flex-end; gap: 6px; cursor: pointer; }
   .spc-bars .spc-bar { flex: 1; min-height: 3px; background: linear-gradient(180deg, var(--gold), var(--red)); border-radius: 4px 4px 0 0; opacity: 0.85; transition: height 0.9s cubic-bezier(0.22,1,0.3,1), opacity 0.15s var(--ease); }
   .spc-bars .spc-bar:last-child { opacity: 1; }
@@ -455,8 +557,13 @@
     header .brand-logo { height: 26px; }
     #topnav { width: 100%; justify-content: space-between; }
     .nav-btn { flex: 1 1 auto; padding: 0.5rem 0.4rem; font-size: 0.72rem; }
-    .stu-head { flex-direction: column; }
+    .stu-head { flex-direction: column; gap: 0; }
+    .stu-head .stu-actions { padding-top: 0; margin-bottom: 1rem; }
     .next-session { flex-direction: column; align-items: flex-start; }
+    .tabbar { gap: 0.1rem; }
+    .tab { padding: 0.55rem 0.65rem; }
+    .acct-list { grid-template-columns: minmax(0, 1fr); gap: 0.15rem; }
+    .acct-list dd { margin-bottom: 0.55rem; }
     /* Seven day columns can't fit a phone. Scroll the calendar inside
        its own card rather than letting it widen the whole page. */
     .cal-wrap { overflow-x: auto; }
@@ -533,6 +640,7 @@
     <div class="deploy-banner" id="deploy-banner" style="display:none;"></div>
     <div class="summary-row" id="summary-row"></div>
     <div class="filter-row">
+      <div class="seg" id="prog-filter" role="group" aria-label="Show students by program"></div>
       <label id="filter-hidden-wrap" style="display:none;"><input type="checkbox" id="filter-hidden"> Show hidden <span class="count-pill" id="hidden-count"></span></label>
     </div>
     <div class="roster-table-wrap">
@@ -543,7 +651,7 @@
               <th data-sort="name">Student <span class="arrow"></span></th>
               <th data-sort="composite">Composite <span class="arrow"></span></th>
               <th data-sort="weakest">Weakest area <span class="arrow"></span></th>
-              <th data-sort="assign">Assignments <span class="arrow"></span></th>
+              <th data-sort="next">Next session <span class="arrow"></span></th>
               <th data-sort="activity">Last activity <span class="arrow"></span></th>
               <th></th>
             </tr>
@@ -554,29 +662,55 @@
     </div>
   </div>
 
-  <!-- ═══ ONE STUDENT ═══ reports on the left tab, the homework calendar
-       on the right one; both keyed off the same loaded student. -->
+  <!-- ═══ ONE STUDENT ═══ a header that says who, which program and when
+       they are next in, then four tabs in the order Luca works: this week
+       (before and after a session), scores (SAT only), the schedule, and
+       the account (program, contact details, delete). -->
   <div id="student">
     <button type="button" class="sched-back" id="student-back-btn">&larr; Back to roster</button>
     <div class="stu-head">
-      <div>
+      <div class="stu-id">
         <h1 class="sched-hed" id="stu-name">Student<span class="key" id="stu-key"></span></h1>
-        <div class="stu-meta" id="stu-meta"></div>
+        <div class="stu-sub">
+          <button type="button" class="prog-badge" id="stu-program-badge" title="Change it on the Account tab">SAT prep</button>
+          <span class="stu-meta" id="stu-meta"></span>
+        </div>
       </div>
       <div class="stu-actions" id="stu-actions"></div>
     </div>
+    <div class="next-session" id="hw-next"></div>
 
     <div class="tabbar">
-      <button type="button" class="tab is-on" data-tab="reports">Test reports</button>
-      <button type="button" class="tab" data-tab="homework">Homework &amp; sessions</button>
+      <button type="button" class="tab is-on" data-tab="week">This week</button>
+      <button type="button" class="tab" data-tab="scores" id="tab-btn-scores">Scores</button>
+      <button type="button" class="tab" data-tab="homework">Schedule</button>
+      <button type="button" class="tab" data-tab="account">Account</button>
     </div>
 
-    <section id="tab-reports">
-      <div class="card" id="stu-prep-card">
-        <h2>Session prep</h2>
-        <p class="card-sub" id="stu-prep-sub">The last seven days.</p>
-        <div id="stu-prep"></div>
+    <!-- Before a session: what they did and what was due. After it: the
+         note for the family. Side by side on a wide screen. -->
+    <section id="tab-week">
+      <div class="week-grid">
+        <div class="card" id="stu-prep-card">
+          <h2>Session prep</h2>
+          <p class="card-sub" id="stu-prep-sub">The last seven days.</p>
+          <div id="stu-prep"></div>
+        </div>
+        <div class="card" id="stu-note-card">
+          <h2>Note for Friday</h2>
+          <p class="card-sub">A line or two from this week&rsquo;s session. It goes into the family&rsquo;s next Friday update, then clears.</p>
+          <textarea id="stu-note" maxlength="600" rows="5" placeholder="e.g. Cracked the quadratic word problems today: set up three in a row on their own."></textarea>
+          <div class="fn-row">
+            <span class="fn-status" id="stu-note-status"></span>
+            <button type="button" class="mini" id="stu-note-clear">Clear</button>
+            <button type="button" class="mini solid" id="stu-note-save">Save note</button>
+          </div>
+        </div>
       </div>
+    </section>
+
+    <section id="tab-scores" style="display:none;">
+      <div class="scores-past" id="stu-scores-past" style="display:none;">SAT history from before the switch. It stays on file; the student no longer sees it.</div>
       <div class="summary-row" id="stu-tiles"></div>
       <div class="card" id="stu-trend-card">
         <h2>Score progress</h2>
@@ -590,20 +724,21 @@
           <th>Date</th><th>Test</th><th>Score</th><th>Weakest area</th><th></th>
         </tr></thead><tbody id="stu-attempts"></tbody></table></div>
       </div>
-      <div class="card">
-        <h2>Weakest skills</h2>
-        <p class="card-sub" id="stu-skills-sub">From their most recent completed test — the same breakdown "Practice My Weak Spots" uses.</p>
-        <div id="stu-skills"></div>
-      </div>
-      <div class="card" id="stu-analysis-card">
-        <h2>Across all their tests</h2>
-        <p class="card-sub" id="stu-analysis-sub">Pooled from every attempt &mdash; more evidence per skill than any single report can have.</p>
-        <div id="stu-analysis"></div>
+      <div class="scores-grid">
+        <div class="card">
+          <h2>Weakest skills</h2>
+          <p class="card-sub" id="stu-skills-sub">From their most recent completed test — the same breakdown "Practice My Weak Spots" uses.</p>
+          <div id="stu-skills"></div>
+        </div>
+        <div class="card" id="stu-analysis-card">
+          <h2>Across all their tests</h2>
+          <p class="card-sub" id="stu-analysis-sub">Pooled from every attempt &mdash; more evidence per skill than any single report can have.</p>
+          <div id="stu-analysis"></div>
+        </div>
       </div>
     </section>
 
     <section id="tab-homework" style="display:none;">
-      <div class="next-session" id="hw-next"></div>
       <div class="cal-legend">
         <span><i class="swatch" style="background:var(--blue)"></i>Tutoring session</span>
         <span><i class="swatch" style="background:var(--red)"></i>Homework due</span>
@@ -621,17 +756,75 @@
       </div>
     </section>
 
-    <!-- Bottom of the page on purpose: the one control here that cannot be
-         undone. Same two-step rule as the Portal access panel: a student with
-         recorded tests is refused first and asked again with the count. -->
-    <div class="card danger-card" id="stu-delete-card">
-      <h2 class="card-hed">Delete this account</h2>
-      <p class="card-sub">Removes the roster row, unlinks their Google sign-in, and revokes their access to the Drive folder. The folder itself and its files are left in Drive. If they have recorded tests you will be asked once more before those scores go too.</p>
-      <div class="stu-actions">
-        <button type="button" class="mini danger" id="stu-delete-btn">Delete account</button>
+    <section id="tab-account" style="display:none;">
+      <div class="card" id="stu-details-card">
+        <div class="card-head">
+          <h2>Details</h2>
+          <button type="button" class="mini" id="stu-edit-btn" disabled>Edit</button>
+        </div>
+        <dl class="acct-list" id="stu-details"></dl>
+        <!-- Edit: only what changed is sent (Code.gs handleUpdateStudentInfo),
+             and nothing is written unless every field checks out. -->
+        <form class="ef" id="stu-edit" style="display:none;" novalidate>
+          <fieldset>
+            <legend>Student</legend>
+            <label class="fld">Name<input name="name" maxlength="80" autocomplete="off"></label>
+            <p class="ef-hint">Your calendar finds sessions by first name, so keep it matching the session titles.</p>
+          </fieldset>
+          <fieldset>
+            <legend>Family</legend>
+            <div class="fld-row">
+              <label class="fld">Parent name<input name="guardianName" maxlength="80" autocomplete="off"></label>
+              <label class="fld">Parent email<input name="guardianEmail" type="email" autocomplete="off"></label>
+            </div>
+            <label class="fld">Second parent email <span class="opt">optional</span><input name="guardian2Email" type="email" autocomplete="off"></label>
+            <p class="ef-hint">Friday updates go to both parent emails. With no parent email there is no Friday update.</p>
+          </fieldset>
+          <fieldset id="stu-edit-sat">
+            <legend>SAT</legend>
+            <div class="fld-row">
+              <label class="fld">SAT date<input name="testDate" type="date"></label>
+              <label class="fld">Second SAT date <span class="opt">optional</span><input name="testDate2" type="date"></label>
+            </div>
+            <div class="ef-chips" id="stu-edit-dates"></div>
+            <div class="fld-row">
+              <label class="fld">Target<input name="targetScore" inputmode="numeric" placeholder="e.g. 1400" autocomplete="off"></label>
+              <label class="fld">Extra time<select name="accomTimeMult"><option value="1">Standard</option><option value="1.5">Time and a half</option><option value="2">Double time</option></select></label>
+              <label class="fld">Breaks<select name="accomBreakMult"><option value="1">Standard</option><option value="2">Extended</option></select></label>
+            </div>
+            <div class="fld-row">
+              <label class="fld">Baseline<select name="baselineType"><option value="">None</option><option value="psat">PSAT</option><option value="sat">SAT</option></select></label>
+              <label class="fld">Reading &amp; Writing<input name="baselineRw" inputmode="numeric" autocomplete="off"></label>
+              <label class="fld">Math<input name="baselineMath" inputmode="numeric" autocomplete="off"></label>
+            </div>
+          </fieldset>
+          <div class="fn-row ef-actions">
+            <button type="button" class="mini" id="stu-edit-cancel">Cancel</button>
+            <button type="submit" class="mini solid" id="stu-edit-save">Save changes</button>
+          </div>
+        </form>
+        <div class="fn-status ef-status" id="stu-edit-status"></div>
       </div>
-      <div class="stu-delete-status" id="stu-delete-status"></div>
-    </div>
+      <div class="card" id="stu-program-card">
+        <h2>Program</h2>
+        <p class="card-sub">What this student is here for. It decides what their portal shows, which emails the family gets, and where they sort on the roster.</p>
+        <div class="prog-options" id="stu-program-options">
+          <label class="prog-opt"><input type="radio" name="stu-program" value="sat"><span><b>SAT prep</b><small>The diagnostic, practice tests, question bank and vocabulary in their portal. Friday updates with their practice and scores, and the SAT date reminders.</small></span></label>
+          <label class="prog-opt"><input type="radio" name="stu-program" value="tutoring"><span><b>Subject tutoring</b><small>No SAT material in their portal: homework, sessions and files. The Friday update is your note, when you write one.</small></span></label>
+          <label class="prog-opt"><input type="radio" name="stu-program" value="admissions"><span><b>College admissions</b><small>Essays and applications. The same portal and emails as subject tutoring, sorted on its own.</small></span></label>
+        </div>
+        <div class="fn-row"><span class="fn-status" id="stu-program-status"></span></div>
+        <div class="sat-history" id="stu-sat-history" style="display:none;"></div>
+      </div>
+      <div class="card danger-card" id="stu-delete-card">
+        <h2 class="card-hed">Delete this account</h2>
+        <p class="card-sub">Removes the roster row, unlinks their Google sign-in, and revokes their access to the Drive folder. The folder itself and its files are left in Drive. If they have recorded tests you will be asked once more before those scores go too.</p>
+        <div class="stu-actions">
+          <button type="button" class="mini danger" id="stu-delete-btn">Delete account</button>
+        </div>
+        <div class="stu-delete-status" id="stu-delete-status"></div>
+      </div>
+    </section>
   </div>
 
   <!-- ═══ EVERY STUDENT ═══ the week/month as Luca actually works it:
@@ -749,6 +942,10 @@
 
   <div id="status-msg"></div>
 </main>
+
+<!-- A message about something that happened out of sight (a save for a
+     student Luca has since left). Pinned at the top until closed. -->
+<div id="notice" role="alert" style="display:none;"><span id="notice-text"></span><button type="button" id="notice-close" aria-label="Close">&times;</button></div>
 
 <div id="report-viewer">
   <div id="report-bar">
@@ -879,7 +1076,7 @@
   // The value is the field a real answer always carries. A stalling service
   // can answer a POST with its GET health reply ({ok:true}, no data), so a
   // reply missing that field is treated as lost.
-  var RETRY_READS = { getRoster: 'students', version: 'version', getStudentDetail: '', getAdminAssignments: '', getAdminCalendar: '', broadcastPrepare: 'families' };
+  var RETRY_READS = { getRoster: 'students', version: 'version', getStudentDetail: '', getAdminAssignments: '', getAdminCalendar: '', broadcastPrepare: 'families', fridayNoteGet: 'friday' };
   function looksLost(action, data) {
     var field = RETRY_READS[action];
     return !!field && data && data.ok && !(field in data);
@@ -1018,6 +1215,7 @@
      ROSTER
      ═══════════════════════════════════════════════════════════════════ */
   var allStudents = [];
+  var programPending = {};    // key -> program while a setStudentProgram is in flight (student page)
   var sortKey = 'name';
   var sortDir = 1;
   var rosterStale = false; // set by a homework edit made from a calendar view
@@ -1028,7 +1226,7 @@
 
   // What this build of admin.html needs the deployment to understand. Kept
   // beside the version constant in Code.gs — bump both together.
-  var REQUIRED_BACKEND_VERSION = 16;
+  var REQUIRED_BACKEND_VERSION = 19;
   var CAPABILITY_LABELS = {
     calendar: 'the calendar and student pages',
     dueDates: 'due dates',
@@ -1044,7 +1242,10 @@
     practiceLog: 'keeping every practice answer (it needs prep.gs pasted in as its own script file)',
     clientErrors: 'browser errors reaching the ClientErrors tab (prep.gs)',
     sessionPrep: 'the Session prep card on each student (prep.gs and emails.gs)',
-    leadSources: 'Sources: where inquiries come from (prep.gs)'
+    leadSources: 'Sources: where inquiries come from (prep.gs)',
+    fridayNote: 'the Note for Friday box on each student (emails.gs)',
+    studentProgram: 'sorting students into SAT prep, tutoring and college admissions',
+    studentEdit: 'editing a student\u2019s details (second parent, second SAT date)'
   };
 
   function joinList(items) {
@@ -1102,15 +1303,59 @@
     return list.filter(function (s) { return s.online; }).length;
   }
 
+  /* ═══ PROGRAM ═══ SAT prep, subject tutoring or college admissions.
+     Code.gs programOf_ reads it off SubjectOnly + Goal; a backend older
+     than v18 sends only `sat`, which reads as SAT prep or tutoring. */
+  var PROGRAMS = {
+    sat: { label: 'SAT prep' },
+    tutoring: { label: 'Subject tutoring', tag: 'Tutoring' },
+    admissions: { label: 'College admissions', tag: 'College admissions' }
+  };
+  function programOf(s) {
+    if (s && PROGRAMS[s.program]) return s.program;
+    return s && s.sat === false ? 'tutoring' : 'sat';
+  }
+  function isSat(s) { return programOf(s) === 'sat'; }
+
+  // The roster's filter, remembered in this browser.
+  var PROG_FILTER_KEY = 'mta_admin_program_filter';
+  var progFilter = 'all';
+  try { progFilter = localStorage.getItem(PROG_FILTER_KEY) || 'all'; } catch (e) {}
+  if (progFilter !== 'all' && !PROGRAMS[progFilter]) progFilter = 'all';
+  function inProgFilter(s) { return progFilter === 'all' || programOf(s) === progFilter; }
+
+  function renderProgFilter() {
+    var showHidden = filterHiddenEl.checked;
+    var pool = allStudents.filter(function (s) { return showHidden || !s.archived; });
+    var counts = { all: pool.length, sat: 0, tutoring: 0, admissions: 0 };
+    pool.forEach(function (s) { counts[programOf(s)]++; });
+    $('prog-filter').innerHTML = ['all', 'sat', 'tutoring', 'admissions'].map(function (p) {
+      var label = p === 'all' ? 'All' : (p === 'tutoring' ? 'Tutoring' : PROGRAMS[p].label);
+      return '<button type="button" data-prog="' + p + '" aria-pressed="' + (p === progFilter) + '"' + (p === progFilter ? ' class="is-on"' : '') + '>' +
+        label + ' <span class="count-pill">' + counts[p] + '</span></button>';
+    }).join('');
+  }
+  $('prog-filter').addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-prog]');
+    if (!b) return;
+    progFilter = b.getAttribute('data-prog');
+    try { localStorage.setItem(PROG_FILTER_KEY, progFilter); } catch (err) {}
+    renderSummary();
+    renderTable();
+  });
+
   function renderSummary() {
     // Hidden students are out of the picture entirely — an archived row
-    // should not be counted in a summary of who is being taught.
-    var active = allStudents.filter(function (s) { return !s.archived; });
+    // should not be counted in a summary of who is being taught. So are
+    // the ones the program filter leaves out.
+    var active = allStudents.filter(function (s) { return !s.archived && inProgFilter(s); });
     var total = active.length;
-    var withScore = active.filter(function (s) { return s.composite != null; }).length;
+    var withScore = active.filter(function (s) { return isSat(s) && s.composite != null; }).length;
     summaryRowEl.innerHTML =
-      '<div class="summary-tile"><div class="num">' + total + '</div><div class="lbl">Students</div></div>' +
-      '<div class="summary-tile"><div class="num">' + withScore + '</div><div class="lbl">With a score on file</div></div>' +
+      '<div class="summary-tile"><div class="num">' + total + '</div><div class="lbl">' +
+        (progFilter === 'all' ? 'Students' : escHtml(PROGRAMS[progFilter].label)) + '</div></div>' +
+      (progFilter === 'all' || progFilter === 'sat'
+        ? '<div class="summary-tile"><div class="num">' + withScore + '</div><div class="lbl">With a score on file</div></div>' : '') +
       /* Only when somebody actually is. A permanent "0 on the site now"
          tile would be a tile that is wrong-looking almost all day; this
          one appears when there is news and gets out of the way when there
@@ -1120,11 +1365,48 @@
         : '');
   }
 
+  /* ═══ NEXT SESSION ═══ replaces the old Assignments column: homework
+     checkboxes say little (most students never tick them), while the next
+     session on the calendar is what the roster is opened to plan around.
+     One getAdminCalendar read for everyone, the next 15 days. A title that
+     matches two students (two Alexes) is left out rather than guessed. */
+  var nextSessionByKey = {};
+  var nextSessionState = 'loading';   // loading | ok | error
+  var NEXT_SESSION_DAYS = 15;
+  function loadRosterSessions() {
+    var now = new Date(), end = new Date(now.getTime() + NEXT_SESSION_DAYS * 86400000);
+    return postToBackend({ action: 'getAdminCalendar', adminKey: adminKey(), start: toDateStr(now), end: toDateStr(end) }).then(function (data) {
+      if (!data || !data.ok || data.calendarError) { nextSessionState = 'error'; renderTable(); return; }
+      var cutoff = Date.now() - 20 * 60 * 1000, map = {};
+      (data.sessions || []).forEach(function (x) {
+        var ms = new Date(x.startIso).getTime();
+        if (isNaN(ms) || ms < cutoff || !x.matched || x.matched.length !== 1) return;
+        var k = x.matched[0].key;
+        if (!map[k] || ms < map[k].ms) map[k] = { ms: ms, allDay: !!x.allDay };
+      });
+      nextSessionByKey = map;
+      nextSessionState = 'ok';
+      renderTable();
+    }).catch(function () { nextSessionState = 'error'; renderTable(); });
+  }
+  function nextSessionCell(key) {
+    if (nextSessionState === 'loading') return '<span class="sk sk-line" style="display:inline-block;width:90px;"></span>';
+    if (nextSessionState === 'error') return '<span class="no-score" title="The calendar could not be read just now">&mdash;</span>';
+    var n = nextSessionByKey[key];
+    if (!n) return '<span class="no-score">None booked</span>';
+    var d = new Date(n.ms), today = new Date(); today.setHours(0, 0, 0, 0);
+    var days = Math.round((new Date(d.getFullYear(), d.getMonth(), d.getDate()) - today) / 86400000);
+    var dayName = days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : d.toLocaleDateString(undefined, { weekday: 'long' });
+    var time = n.allDay ? 'All day' : d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+    return '<b>' + dayName + '</b> ' + escHtml(time) +
+      (days > 1 ? '<span class="next-day">' + d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + '</span>' : '');
+  }
+
   function sortValue(s, key) {
     if (key === 'name') return s.name.toLowerCase();
-    if (key === 'composite') return s.composite == null ? -1 : s.composite;
-    if (key === 'weakest') return s.weakest ? s.weakest.label.toLowerCase() : '￿'; // sorts empties last
-    if (key === 'assign') return s.assignTotal ? s.assignDone / s.assignTotal : 2; // no assignments sorts after "all done"
+    if (key === 'composite') return (s.composite == null || !isSat(s)) ? -1 : s.composite;
+    if (key === 'weakest') return (s.weakest && isSat(s)) ? s.weakest.label.toLowerCase() : '￿'; // sorts empties last
+    if (key === 'next') { var n = nextSessionByKey[s.key]; return n ? n.ms : Infinity; }   // none booked sorts last
     if (key === 'activity') return s.lastActivityAt ? new Date(s.lastActivityAt).getTime() : -1;
     return 0;
   }
@@ -1136,7 +1418,10 @@
     $('filter-hidden-wrap').style.display = hiddenCount ? '' : 'none';
     $('hidden-count').textContent = hiddenCount;
 
-    var rows = allStudents.filter(function (s) { return showHidden || !s.archived; });
+    renderProgFilter();
+    // No SAT columns in a tutoring or admissions view.
+    bodyEl.closest('table').classList.toggle('no-sat-cols', progFilter === 'tutoring' || progFilter === 'admissions');
+    var rows = allStudents.filter(function (s) { return (showHidden || !s.archived) && inProgFilter(s); });
     rows.sort(function (a, b) {
       var va = sortValue(a, sortKey), vb = sortValue(b, sortKey);
       if (va < vb) return -1 * sortDir;
@@ -1145,26 +1430,25 @@
     });
 
     if (!rows.length) {
-      bodyEl.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--faint); padding:2rem;">No students match this filter.</td></tr>';
+      bodyEl.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--faint); padding:2rem;">' +
+        (progFilter === 'all' ? 'No students match this filter.' : 'No ' + escHtml(PROGRAMS[progFilter].label.toLowerCase()) + ' students' + (showHidden ? '' : ' on the roster') + '.') + '</td></tr>';
       return;
     }
 
     bodyEl.innerHTML = rows.map(function (s) {
-      var scoreCell = s.composite == null
+      var prog = programOf(s);
+      var scoreCell = prog !== 'sat' ? '<span class="no-score">&mdash;</span>' : s.composite == null
         ? '<span class="no-score">No score yet</span>'
         : String(s.composite) + (s.testType ? ' <span style="color:var(--faint); font-size:0.72rem;">(' + escHtml(s.testType) + ')</span>' : '') +
           (s.compositeDelta != null && s.compositeDelta !== 0
             ? ' <span class="delta ' + (s.compositeDelta > 0 ? 'up' : 'down') + '">' + (s.compositeDelta > 0 ? '&#9650;' : '&#9660;') + ' ' + Math.abs(s.compositeDelta) + '</span>'
             : '');
 
-      var weakestCell = s.weakest
+      var weakestCell = (s.weakest && prog === 'sat')
         ? '<span class="weakest-label">' + escHtml(s.weakest.label) + '</span><br><span class="weakest-frac">' + s.weakest.correct + ' / ' + s.weakest.total + ' correct</span>'
         : '<span class="no-score">&mdash;</span>';
 
-      var assignCls = s.assignTotal === 0 ? '' : (s.assignDone >= s.assignTotal ? 'done' : 'behind');
-      var assignCell = s.assignTotal === 0
-        ? '<span class="assign-pill">No assignments</span>'
-        : '<span class="assign-pill ' + assignCls + '">' + s.assignDone + ' of ' + s.assignTotal + ' done</span>';
+      var nextCell = nextSessionCell(s.key);
 
       var d = daysAgo(s.lastActivityAt);
       var activityCls = (d == null || d >= STALE_DAYS) ? 'stale' : '';
@@ -1181,14 +1465,17 @@
       return '<tr' + (s.archived ? ' class="is-archived"' : '') + '>' +
         '<td class="name-cell"><span class="live-dot' + (s.online ? ' on' : '') + '" title="' +
           (s.online ? 'On the site now' : 'Not on the site') + '"></span>' +
-          '<button type="button" class="student-link" data-key="' + k + '" data-tab="reports">' + escHtml(s.name) + '</button>' +
+          '<button type="button" class="student-link" data-key="' + k + '" data-tab="week">' + escHtml(s.name) + '</button>' +
+          (prog !== 'sat' && progFilter === 'all' ? '<span class="prog-tag prog-' + prog + '">' + PROGRAMS[prog].tag + '</span>' : '') +
           '<span class="key">' + k + '</span></td>' +
         '<td>' + scoreCell + '</td>' +
         '<td>' + weakestCell + '</td>' +
-        '<td>' + assignCell + '</td>' +
+        '<td class="next-cell">' + nextCell + '</td>' +
         '<td>' + activityCell + '</td>' +
         '<td><div class="row-actions">' +
-          '<button type="button" class="mini student-link" data-key="' + k + '" data-tab="reports">Reports</button>' +
+          (prog === 'sat'
+            ? '<button type="button" class="mini student-link" data-key="' + k + '" data-tab="scores">Scores</button>'
+            : '<button type="button" class="mini student-link" data-key="' + k + '" data-tab="week">Open</button>') +
           '<button type="button" class="mini solid student-link" data-key="' + k + '" data-tab="homework">Schedule</button>' +
           '<button type="button" class="mini icon-btn archive-btn" data-key="' + k + '" data-archived="' + (s.archived ? '1' : '0') + '" title="' +
             (s.archived ? 'Show this student on the roster again' : 'Hide this student from the roster') + '" aria-label="' +
@@ -1224,7 +1511,7 @@
     var btn = e.target.closest('.student-link');
     if (!btn) return;
     var student = allStudents.find(function (s) { return s.key === btn.getAttribute('data-key'); });
-    if (student) openStudent(student, btn.getAttribute('data-tab') || 'reports');
+    if (student) openStudent(student, btn.getAttribute('data-tab') || 'week');
   });
 
   /* Delete account, from the student page. Two steps when there is
@@ -1329,9 +1616,20 @@
       }
       try { sessionStorage.setItem(SESSION_KEY, key); } catch (e) {}
       allStudents = data.students || [];
+      // A program change still saving outranks a roster read that may
+      // predate it; and the open student page follows the new row, so
+      // later changes to it reach the roster.
+      Object.keys(programPending).forEach(function (k) {
+        allStudents.forEach(function (st) { if (st.key === k) { st.program = programPending[k]; st.sat = programPending[k] === 'sat'; } });
+      });
+      if (currentStudent) {
+        var fresh = allStudents.filter(function (st) { return st.key === currentStudent.key; })[0];
+        if (fresh) currentStudent = fresh;
+      }
       checkBackendVersion();
       renderSummary();
       renderTable();
+      loadRosterSessions();
       if (currentView === 'gate') showView('roster');
       return true;
     }).catch(function () {
@@ -1390,7 +1688,18 @@
     var done = function () { btn.textContent = 'Copied'; setTimeout(function () { btn.textContent = 'Copy'; }, 1600); };
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(link).then(done, function () {});
   });
-  $('student-back-btn').addEventListener('click', goToRoster);
+  $('student-back-btn').addEventListener('click', function () { if (confirmLeaveNote()) goToRoster(); });
+  // The top buttons that leave the student page (Refresh stays, and keeps
+  // the typed note). Capture phase, so this runs before their own handlers.
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('#nav-roster, #nav-allcal, #nav-broadcast, #nav-sources');
+    if (!b || currentView !== 'student' || confirmLeaveNote()) return;
+    e.stopPropagation();
+    e.preventDefault();
+  }, true);
+  window.addEventListener('beforeunload', function (e) {
+    if (currentView === 'student' && (noteDirty() || editDirty() || editBusy)) { e.preventDefault(); e.returnValue = ''; }
+  });
 
   $('refresh-btn').addEventListener('click', function () {
     var key = adminKey();
@@ -1401,6 +1710,8 @@
     if (currentView === 'student' && currentStudent) {
       loadStudentDetail(currentStudent.key);
       loadNextSession(currentStudent.key);
+      loadStudentPrep(currentStudent.key);
+      if (!noteDirty() && noteSaving !== noteSeq) loadFridayNote(currentStudent.key);
       if (schedCalendar) schedCalendar.refetchEvents();
       rosterStale = false;
       loadRoster(key, true).then(done);
@@ -1439,12 +1750,30 @@
      ═══════════════════════════════════════════════════════════════════ */
   var currentStudent = null;  // the roster row that was clicked
   var currentDetail = null;   // getStudentDetail's payload for that student
-  var activeTab = 'reports';
+  var activeTab = 'week';
+  var lastPrep = null;        // { key, prep }: redrawn when the program changes
+  var satHistoryShown = false; // a non-SAT student's old SAT tab, opened on request
+
+  function confirmLeaveNote() {
+    var who = (currentStudent && currentStudent.name) || 'this student';
+    var unsaved = [];
+    if (editDirty() && editBusy !== (currentStudent && currentStudent.key)) unsaved.push('changes to ' + who + '\u2019s details');
+    if (noteDirty()) unsaved.push('the Note for Friday');
+    if (!unsaved.length) return true;
+    return window.confirm('You have unsaved ' + unsaved.join(' and ') + '. Leave without saving?');
+  }
 
   function openStudent(student, tab) {
+    if (currentView === 'student' && currentStudent && currentStudent.key !== student.key && !confirmLeaveNote()) return;
     currentStudent = student;
     currentDetail = null;
+    lastPrep = null;
+    satHistoryShown = false;
     resetDeleteCard();
+    programStatus('');
+    closeEdit();
+    editStatus('');
+    $('stu-details').innerHTML = skLines(4);
     $('stu-name').firstChild.textContent = student.name;
     $('stu-key').textContent = student.key;
     $('stu-meta').innerHTML = '<span class="sk sk-line" style="display:inline-block;width:190px;vertical-align:middle;"></span>';
@@ -1461,10 +1790,16 @@
     hwUndated = [];
     $('hw-undated-card').style.display = 'none';
     showView('student');
-    selectTab(tab || 'reports');
+    applyProgramUi();
+    // 'reports' is the old name for the Scores tab. A student not on SAT
+    // prep has none, so opens on This week.
+    var t = tab === 'reports' ? 'scores' : (tab || 'week');
+    if (t === 'scores' && !isSat(student)) t = 'week';
+    selectTab(t);
     loadStudentDetail(student.key);
     loadNextSession(student.key);
     loadStudentPrep(student.key);
+    loadFridayNote(student.key);
   }
 
   document.querySelectorAll('.tabbar .tab').forEach(function (btn) {
@@ -1476,13 +1811,413 @@
     document.querySelectorAll('.tabbar .tab').forEach(function (b) {
       b.classList.toggle('is-on', b.getAttribute('data-tab') === tab);
     });
-    $('tab-reports').style.display = (tab === 'reports') ? 'block' : 'none';
-    $('tab-homework').style.display = (tab === 'homework') ? 'block' : 'none';
+    ['week', 'scores', 'homework', 'account'].forEach(function (t) {
+      $('tab-' + t).style.display = (t === tab) ? 'block' : 'none';
+    });
+    // Drawn again on the way in, so the bars grow where they can be seen
+    // rather than behind another tab.
+    if (tab === 'scores' && currentDetail) { try { renderTrend(currentDetail); } catch (e) {} }
     if (tab === 'homework') {
       if (!schedCalendar) initSchedCalendar();
       else { schedCalendar.updateSize(); schedCalendar.refetchEvents(); }
     }
   }
+
+  /* ═══ EDIT DETAILS ═══ the Account tab's Details card. The form starts
+     from what was loaded; Save sends only the fields that changed
+     (updateStudentInfo), then re-reads the student so every part of the
+     page shows the saved values. The SAT dates offer the real sittings as
+     one-click chips, so a typo cannot quietly switch off the dated emails. */
+  var editInitial = null;     // field -> value the form opened with
+  var editKey = '';           // the student the open form belongs to
+  var editBusy = '';          // key of the student whose details are saving
+  var lastDateInput = null;
+
+  function showNotice(msg) {
+    $('notice-text').textContent = msg;
+    $('notice').style.display = '';
+  }
+  $('notice-close').addEventListener('click', function () { $('notice').style.display = 'none'; });
+
+  function editStatus(msg, cls) {
+    var el = $('stu-edit-status');
+    el.textContent = msg || '';
+    el.className = 'fn-status ef-status' + (cls ? ' ' + cls : '');
+  }
+  function editForm() { return $('stu-edit'); }
+  function editField(n) { return editForm().elements[n]; }
+  function editValues() {
+    var out = {};
+    Array.prototype.forEach.call(editForm().elements, function (el) { if (el.name) out[el.name] = String(el.value || '').trim(); });
+    return out;
+  }
+  function editDirty() {
+    if (!editInitial || editForm().style.display === 'none') return false;
+    var now = editValues();
+    return Object.keys(editInitial).some(function (k) { return now[k] !== editInitial[k]; });
+  }
+  function closeEdit() {
+    editInitial = null;
+    editKey = '';
+    editForm().style.display = 'none';
+    $('stu-details').style.display = '';
+    $('stu-edit-btn').style.display = '';
+    $('stu-edit-btn').disabled = !currentDetail;
+    Array.prototype.forEach.call(editForm().querySelectorAll('.bad'), function (el) { el.classList.remove('bad'); });
+  }
+
+  function openEdit() {
+    if (!currentDetail || !currentStudent) return;
+    var s = currentDetail.student;
+    var dateOf = function (iso) { return iso ? toDateStr(new Date(iso)) : ''; };
+    var mult = function (v) { var n = Number(v); return (n === 1.5 || n === 2) ? String(n) : '1'; };
+    var init = {
+      name: s.name || currentStudent.name || '', guardianName: s.guardianName || '', guardianEmail: s.guardianEmail || '',
+      guardian2Email: s.guardian2Email || '', testDate: dateOf(s.testDate), testDate2: dateOf(s.testDate2),
+      targetScore: s.targetScore ? String(s.targetScore) : '', accomTimeMult: mult(s.accomTimeMult), accomBreakMult: mult(s.accomBreakMult),
+      baselineType: s.baselineType ? String(s.baselineType).toLowerCase() : '',
+      baselineRw: s.baselineRw ? String(s.baselineRw) : '', baselineMath: s.baselineMath ? String(s.baselineMath) : ''
+    };
+    Object.keys(init).forEach(function (k) { editField(k).value = init[k]; });
+    // A type the menu does not list reads as None, but keeps its scores.
+    if (editField('baselineType').value !== init.baselineType) editField('baselineType').value = '';
+    baselineFieldsUpdate(false);
+    editInitial = editValues();
+    editKey = currentStudent.key;
+    lastDateInput = null;
+    // SAT fields only for an SAT student; they are kept, just not shown.
+    $('stu-edit-sat').style.display = isSat(currentStudent) ? '' : 'none';
+    var today = toDateStr(new Date());
+    var dates = (s.satDates || []).filter(function (d) { return d >= today; }).slice(0, 6);
+    $('stu-edit-dates').innerHTML = dates.length
+      ? 'SAT dates: ' + dates.map(function (d) {
+          return '<button type="button" data-day="' + d + '">' + escHtml(formatDateStr(d).replace(/^\w+, /, '')) + '</button>';
+        }).join('')
+      : '';
+    editStatus('');
+    $('stu-edit-save').disabled = $('stu-edit-cancel').disabled = editBusy === currentStudent.key;
+    $('stu-details').style.display = 'none';
+    $('stu-edit-btn').style.display = 'none';
+    editForm().style.display = '';
+    editField('name').focus();
+  }
+
+  // R&W and Math mean nothing without a baseline test. Choosing "None"
+  // clears them (that is a change Luca made); opening the form only greys
+  // them out, so a row with scores but no type is never wiped by a Save
+  // that never touched it.
+  function baselineFieldsUpdate(clear) {
+    var none = !editField('baselineType').value;
+    editField('baselineRw').disabled = editField('baselineMath').disabled = none;
+    if (none && clear) { editField('baselineRw').value = ''; editField('baselineMath').value = ''; }
+  }
+
+  $('stu-edit-btn').addEventListener('click', openEdit);
+  $('stu-edit-cancel').addEventListener('click', function () { closeEdit(); editStatus(''); });
+  editField('baselineType').addEventListener('change', function () { baselineFieldsUpdate(true); });
+  ['testDate', 'testDate2'].forEach(function (n) { editField(n).addEventListener('focus', function () { lastDateInput = editField(n); }); });
+  $('stu-edit-dates').addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-day]');
+    if (!b) return;
+    // Into the date box last used; otherwise the first empty one.
+    var target = lastDateInput || (!editField('testDate').value ? editField('testDate') : editField('testDate2'));
+    target.value = b.getAttribute('data-day');
+    target.classList.remove('bad');
+  });
+  editForm().addEventListener('input', function (e) { if (e.target.classList) e.target.classList.remove('bad'); });
+
+  editForm().addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (editBusy === editKey || !editInitial || !currentStudent || currentStudent.key !== editKey) return;
+    var key = editKey, now = editValues(), fields = {};
+    Object.keys(editInitial).forEach(function (k) { if (now[k] !== editInitial[k]) fields[k] = now[k]; });
+    // The baseline is one thing on the sheet: send its three parts together.
+    if ('baselineType' in fields || 'baselineRw' in fields || 'baselineMath' in fields) {
+      fields.baselineType = now.baselineType; fields.baselineRw = now.baselineRw; fields.baselineMath = now.baselineMath;
+    }
+    if (!Object.keys(fields).length) { closeEdit(); editStatus('Nothing changed.'); return; }
+    if (fields.name === '') { editField('name').classList.add('bad'); editStatus('A student needs a name.', 'warn'); return; }
+    editBusy = key;
+    var who = currentStudent.name || key;
+    $('stu-edit-save').disabled = $('stu-edit-cancel').disabled = true;
+    editStatus('Saving\u2026');
+    var done = function () {
+      if (editBusy === key) editBusy = '';
+      if (currentStudent && currentStudent.key === key) $('stu-edit-save').disabled = $('stu-edit-cancel').disabled = false;
+    };
+    // Luca has moved on to another student: say it on the page, by name.
+    var elsewhere = function (msg) { if (!(currentStudent && currentStudent.key === key)) showNotice(who + '\u2019s details: ' + msg); };
+    postToBackend({ action: 'updateStudentInfo', adminKey: adminKey(), key: key, fields: fields }).then(function (d) {
+      done();
+      var here = currentStudent && currentStudent.key === key;
+      if (d && d.ok) {
+        if (fields.name) {
+          allStudents.forEach(function (st) { if (st.key === key) st.name = fields.name; });
+          if (here) { currentStudent.name = fields.name; $('stu-name').firstChild.textContent = fields.name; }
+          renderTable();
+        }
+        if (!here) { if (d.warnings && d.warnings.length) elsewhere('saved. ' + d.warnings.join(' ')); return; }
+        closeEdit();
+        $('stu-edit-btn').disabled = true;   // until the re-read below shows the saved values
+        editStatus(['Saved.'].concat(d.warnings || []).join(' '), (d.warnings && d.warnings.length) ? 'warn' : 'ok');
+        loadStudentDetail(key);
+        if (!noteDirty()) loadFridayNote(key);   // the parent list it shows may have changed
+        return;
+      }
+      if (!here) { elsewhere('NOT saved. ' + ((d && d.message) || (d && d.error) || 'Open the student and try again.')); return; }
+      if (d && d.error === 'invalid') {
+        var el = d.field && editField(d.field);
+        if (el) { el.classList.add('bad'); el.focus(); }
+        editStatus('Not saved. ' + (d.message || 'Check the highlighted field.'), 'warn');
+        return;
+      }
+      editStatus(d && d.error === 'unknown_action'
+        ? 'Not saved: the live backend does not have this yet. Paste Code.gs, auth.gs and emails.gs into Apps Script and deploy a new version.'
+        : 'Not saved' + (d && d.error ? ' (' + d.error + ')' : '') + '. Try again.', 'warn');
+    }).catch(function () {
+      done();
+      if (currentStudent && currentStudent.key === key) {
+        editStatus('No answer came back, so this may or may not have saved. Your changes are still in the form: press Save changes again (saving the same values twice is harmless).', 'warn');
+      } else elsewhere('no answer came back, so the changes may not have saved. Open the student to check.');
+    });
+  });
+
+  /* ═══ PROGRAM SWITCH ═══ the Account tab's three choices. Saved the
+     moment one is picked (setStudentProgram); nothing is deleted either
+     way, so there is no confirm. The page redraws at once and puts it
+     back if the save fails. */
+  function programStatus(msg, cls) {
+    var el = $('stu-program-status');
+    el.textContent = msg || '';
+    el.className = 'fn-status' + (cls ? ' ' + cls : '');
+  }
+
+  var NOTE_EXAMPLES = {
+    sat: 'e.g. Cracked the quadratic word problems today: set up three in a row on their own.',
+    tutoring: 'e.g. Worked through the unit review together; the balancing equations section finally clicked.',
+    admissions: 'e.g. The Common App essay has its opening now: we cut the first paragraph and started at the kitchen scene.'
+  };
+
+  // Everything on the student page that depends on the program.
+  function applyProgramUi() {
+    if (!currentStudent) return;
+    var p = programOf(currentStudent);
+    var badge = $('stu-program-badge');
+    badge.textContent = PROGRAMS[p].label;
+    badge.className = 'prog-badge prog-' + p;
+    var showScores = p === 'sat' || satHistoryShown;
+    var tabBtn = $('tab-btn-scores');
+    tabBtn.style.display = showScores ? '' : 'none';
+    tabBtn.textContent = p === 'sat' ? 'Scores' : 'SAT history';
+    $('stu-scores-past').style.display = (p !== 'sat' && satHistoryShown) ? '' : 'none';
+    // Disabled (not just unclickable) while this student's change is saving,
+    // so the keyboard cannot start a second one either.
+    var busy = !!programPending[currentStudent.key];
+    Array.prototype.forEach.call(document.querySelectorAll('input[name="stu-program"]'), function (r) { r.checked = r.value === p; r.disabled = busy; });
+    $('stu-program-options').classList.toggle('is-busy', busy);
+    $('stu-note').placeholder = NOTE_EXAMPLES[p];
+    $('stu-edit-sat').style.display = p === 'sat' ? '' : 'none';
+    if (!showScores && activeTab === 'scores') selectTab('week');
+    if (currentDetail) { try { renderStudentMeta(currentDetail); } catch (e) {} }
+    else renderSatHistoryLine();
+    if (lastPrep && lastPrep.key === currentStudent.key) { try { renderStudentPrep(lastPrep.prep); } catch (e) {} }
+  }
+
+  // A student moved off SAT prep keeps their tests; say so, and offer them.
+  function renderSatHistoryLine() {
+    var host = $('stu-sat-history');
+    var n = currentDetail ? (currentDetail.attempts || []).filter(function (a) { return a.composite != null; }).length : 0;
+    if (!currentStudent || isSat(currentStudent) || !n) { host.style.display = 'none'; host.innerHTML = ''; return; }
+    host.style.display = '';
+    host.innerHTML = '<span><b>' + n + ' SAT test' + (n === 1 ? '' : 's') + '</b> on file from before. They stay saved, hidden from the student and from this page.</span>' +
+      (satHistoryShown ? '' : '<button type="button" class="mini" id="stu-show-history">Show SAT history</button>');
+  }
+
+  $('stu-sat-history').addEventListener('click', function (e) {
+    if (!e.target.closest('#stu-show-history')) return;
+    satHistoryShown = true;
+    applyProgramUi();
+    selectTab('scores');
+  });
+  $('stu-program-badge').addEventListener('click', function () { selectTab('account'); });
+
+  function programError(d) {
+    var e = d && d.error;
+    if (e === 'unknown_action') return 'Not saved: the live backend does not have this yet. Paste Code.gs, auth.gs and emails.gs into Apps Script and deploy a new version.';
+    if (e === 'unauthorized') return 'Not saved: not authorized. Sign in again; if that does not fix it, auth.gs in Apps Script is older than this page.';
+    return 'Not saved' + (e ? ' (' + e + ')' : '') + '. Try again.';
+  }
+
+  function programSavedMsg(next, prev) {
+    if (next === 'sat') return 'Saved. The SAT material is back in their portal from their next visit, with everything as it was.';
+    if (prev === 'sat') return 'Saved. From their next visit the portal shows no SAT material, and the SAT emails stop. Nothing is deleted: switching back brings it all back.';
+    return 'Saved.';
+  }
+
+  // Every copy of this student's program: the roster row(s), the open page
+  // and its detail. By key, because a Refresh replaces the roster objects.
+  function setProgramLocal(key, p) {
+    allStudents.forEach(function (st) { if (st.key === key) { st.program = p; st.sat = p === 'sat'; } });
+    if (currentStudent && currentStudent.key === key) {
+      currentStudent.program = p;
+      currentStudent.sat = p === 'sat';
+      if (currentDetail && currentDetail.student) { currentDetail.student.program = p; currentDetail.student.showSat = p === 'sat'; }
+    }
+  }
+  function redrawProgram(key) {
+    if (currentStudent && currentStudent.key === key) applyProgramUi();
+    renderSummary();
+    renderTable();
+  }
+  function programStatusFor(key, msg, cls) {
+    if (currentStudent && currentStudent.key === key) programStatus(msg, cls);
+  }
+
+  $('stu-program-options').addEventListener('change', function (e) {
+    var input = e.target;
+    if (!input || input.name !== 'stu-program' || !currentStudent) return;
+    var key = currentStudent.key, next = input.value, prev = programOf(currentStudent);
+    if (next === prev || !PROGRAMS[next] || programPending[key]) return;
+    programPending[key] = next;
+    setProgramLocal(key, next);
+    satHistoryShown = false;
+    redrawProgram(key);
+    programStatus('Saving\u2026');
+    var settle = function () { delete programPending[key]; if (currentStudent && currentStudent.key === key) applyProgramUi(); };
+    postToBackend({ action: 'setStudentProgram', adminKey: adminKey(), key: key, program: next }).then(function (d) {
+      settle();
+      if (d && d.ok) { programStatusFor(key, programSavedMsg(next, prev), 'ok'); return; }
+      setProgramLocal(key, prev);
+      redrawProgram(key);
+      programStatusFor(key, programError(d), 'warn');
+    }).catch(function () {
+      // A lost answer: it may well have saved. Ask the sheet which program
+      // it holds, and say so plainly if even that cannot be read.
+      settle();
+      programStatusFor(key, 'No answer came back. Checking whether it saved\u2026', 'warn');
+      postToBackend({ action: 'getStudentDetail', adminKey: adminKey(), key: key }).then(function (d) {
+        var onFile = d && d.ok && d.student && PROGRAMS[d.student.program] ? d.student.program : null;
+        if (!onFile) throw new Error('unknown');
+        setProgramLocal(key, onFile);
+        redrawProgram(key);
+        programStatusFor(key, onFile === next ? programSavedMsg(next, prev) : 'Not saved. Try again.', onFile === next ? 'ok' : 'warn');
+      }).catch(function () {
+        programStatusFor(key, 'Could not check whether it saved. Reload the page before trusting what this shows.', 'warn');
+      });
+    });
+  });
+
+  /* ═══ NOTE FOR FRIDAY ═══ Luca types a line after a session; it waits on the
+     roster and goes into that family's next Friday update (emails.gs), then
+     clears. The status line says where it will go, or why it will not. */
+  // noteSeq counts student opens (and re-reads); a reply for an older one
+  // is dropped. noteSaving is the noteSeq a save is in flight for, so a
+  // save still going for one student never blocks the next student's.
+  var noteSeq = 0, noteSaved = '', noteKey = '', noteSaving = 0, noteLoading = false;
+  // The sheet stores the note cleaned (dashes become commas, trimmed), so
+  // "is this what I typed" compares words, not punctuation.
+  function noteLoose(t) { return String(t || '').replace(/[\s,\u2014\u2013-]+/g, ' ').trim().slice(0, 600); }
+  function noteDirty() { return !!noteKey && !noteLoading && $('stu-note').value !== noteSaved; }
+  function noteControls(on) {
+    $('stu-note').disabled = !on;
+    $('stu-note-save').disabled = $('stu-note-clear').disabled = !on;
+  }
+
+  function noteStatus(msg, cls) {
+    var el = $('stu-note-status');
+    el.textContent = msg || '';
+    el.className = 'fn-status' + (cls ? ' ' + cls : '');
+  }
+
+  function noteWhere(d) {
+    if (d.archived) return { msg: 'This student is hidden (archived), so no Friday update goes out.', cls: 'warn' };
+    if (d.paused) return { msg: 'This family is paused (GuardianPaused), so the Friday update is on hold.', cls: 'warn' };
+    if (!d.parents || !d.parents.length) return { msg: 'No parent email on file, so there is no Friday update to put it in. Add one on the Account tab, under Details.', cls: 'warn' };
+    return { msg: 'Goes into the Friday update on ' + d.friday + ', to ' + d.parents.join(', ') +
+      (d.rehearsal ? ' (rehearsal mode: the copy comes to you).' : '.'), cls: '' };
+  }
+
+  function noteError(d) {
+    var e = d && d.error;
+    if (e === 'unknown_action' || (e === 'server_error' && /is not defined/.test(d.message || ''))) {
+      return 'The live backend does not have this yet. Paste emails.gs, Code.gs and auth.gs into Apps Script and deploy a new version.';
+    }
+    if (e === 'unauthorized') return 'Not authorized. Sign in again; if that does not fix it, auth.gs in Apps Script is older than this page.';
+    return 'Could not ' + (e ? '(' + e + ')' : 'reach the backend') + '. Try again in a moment.';
+  }
+
+  // typed: after a save that got no answer, the text Luca had typed. If
+  // the sheet does not hold exactly that, it goes back in the box unsaved
+  // rather than being replaced by the older copy.
+  function loadFridayNote(key, typed) {
+    var seq = ++noteSeq;
+    noteKey = key;
+    noteSaved = '';
+    noteLoading = true;
+    if (typed == null) $('stu-note').value = '';
+    noteControls(false);
+    if (typed == null) noteStatus('Loading\u2026');
+    postToBackend({ action: 'fridayNoteGet', adminKey: adminKey(), key: key }).then(function (d) {
+      if (seq !== noteSeq) return;
+      noteLoading = false;
+      noteControls(true);
+      if (!d || !d.ok) {
+        if (typed != null) $('stu-note').value = typed;
+        noteStatus(noteError(d), 'warn');
+        return;
+      }
+      noteSaved = d.note || '';
+      var w = noteWhere(d);
+      if (typed != null && noteLoose(typed) !== noteLoose(noteSaved)) {
+        $('stu-note').value = typed;
+        noteStatus('Not saved. Your text is still here: press Save note again.', 'warn');
+        return;
+      }
+      $('stu-note').value = noteSaved;
+      noteStatus((noteSaved ? 'Saved. ' : '') + w.msg, typed != null && noteSaved && !w.cls ? 'ok' : w.cls);
+    }).catch(function () {
+      if (seq !== noteSeq) return;
+      noteLoading = false;
+      noteControls(true);
+      if (typed != null) {
+        $('stu-note').value = typed;
+        noteStatus('Could not check whether it saved. Your text is still here: press Save note again.', 'warn');
+        return;
+      }
+      noteStatus('Could not reach the backend to load the note.', 'warn');
+    });
+  }
+
+  function saveFridayNote(text) {
+    if (!noteKey || noteLoading || noteSaving === noteSeq) return;
+    var key = noteKey, seq = noteSeq;
+    noteSaving = seq;
+    $('stu-note-save').disabled = $('stu-note-clear').disabled = true;
+    noteStatus('Saving\u2026');
+    postToBackend({ action: 'fridayNoteSave', adminKey: adminKey(), key: key, note: text }).then(function (d) {
+      if (noteSaving === seq) noteSaving = 0;
+      if (seq !== noteSeq) return;          // another student (or a re-read) since
+      $('stu-note-save').disabled = $('stu-note-clear').disabled = false;
+      if (!d || !d.ok) { noteStatus(noteError(d), 'warn'); return; }
+      noteSaved = d.note || '';
+      $('stu-note').value = noteSaved;   // shows the note as it will go out (dashes become commas)
+      var w = noteWhere(d);
+      noteStatus(noteSaved ? 'Saved. ' + w.msg : 'Cleared. The Friday update goes out without a note.', noteSaved && !w.cls ? 'ok' : w.cls);
+    }).catch(function () {
+      if (noteSaving === seq) noteSaving = 0;
+      if (seq !== noteSeq) return;          // another student is open now: never touch that page
+      // A lost answer: the save may well have gone through. Re-read it,
+      // keeping what was typed.
+      noteStatus('No answer came back. Checking whether it saved\u2026', 'warn');
+      loadFridayNote(key, text);
+    });
+  }
+
+  $('stu-note-save').addEventListener('click', function () { saveFridayNote($('stu-note').value); });
+  $('stu-note-clear').addEventListener('click', function () { $('stu-note').value = ''; saveFridayNote(''); });
+  $('stu-note').addEventListener('input', function () {
+    if ($('stu-note').value !== noteSaved) noteStatus('Not saved yet.', 'warn');
+  });
 
   /* ═══ SESSION PREP ═══ what the student did in the last seven days and
      what is coming up, from prep.gs (adminStudentPrep). The activity
@@ -1507,6 +2242,7 @@
         $('stu-prep').innerHTML = '<div class="empty">' + why + '</div>';
         return;
       }
+      lastPrep = { key: key, prep: data.prep };
       try { renderStudentPrep(data.prep); }
       catch (err) {
         if (window.console && console.error) console.error('[admin] session prep render failed:', err);
@@ -1526,6 +2262,7 @@
     var pct = function (r, n) { return n ? Math.round(100 * r / n) + '%' : '—'; };
     var mins = function (m) { m = Math.round(m || 0); return m >= 60 ? Math.floor(m / 60) + 'h ' + (m % 60) + 'm' : m + ' min'; };
     $('stu-prep-sub').textContent = dayLabel(p.from) + ' – ' + dayLabel(p.to) + ' (the last seven days)';
+    var sat = isSat(currentStudent);
 
     // Practice: the log when it has the week, else the bank's own count
     // (which only sees each question's latest attempt).
@@ -1558,15 +2295,9 @@
     }
     stats.push('<div class="prep-stat"><div class="num">' + (t ? t.composite : '—') + '</div><div class="lbl">Practice test</div><div class="sub">' + testSub + '</div></div>');
 
+    // The next session and the SAT date are in the page header. An older
+    // backend sends only an open-homework count; the list replaces it.
     var next = [];
-    if (snap && snap.nextSession) next.push('Next session: <b>' + escHtml(snap.nextSession.when || snap.nextSession.day) + '</b>');
-    else if (snap && snap.calendarOk === false) next.push('Next session: calendar unavailable');
-    if (p.testDate) {
-      var days = Math.ceil((new Date(p.testDate).getTime() - Date.now()) / 86400000);
-      next.push('SAT: <b>' + new Date(p.testDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + '</b>' +
-        (days >= 0 ? ' (' + days + ' day' + (days === 1 ? '' : 's') + ')' : ''));
-    }
-    // An older backend sends only the open count; the list replaces it.
     var hw = p.homework;
     if (!hw) next.push('Homework open: <b>' + (p.openCount || 0) + '</b>' + (p.openAssignments && p.openAssignments.length
       ? ' (' + p.openAssignments.slice(0, 3).map(function (a) { return escHtml(a.task); }).join('; ') + (p.openCount > 3 ? '; …' : '') + ')' : ''));
@@ -1591,7 +2322,7 @@
 
     var topics = '';
     if (pr.skills && pr.skills.length) {
-      topics = '<table class="prep-topics"><thead><tr><th>Topic practised</th><th class="n">Answered</th><th class="n">Right</th><th class="n">Avg time</th></tr></thead><tbody>' +
+      topics = '<div class="prep-sec">Practice by topic</div><table class="prep-topics"><thead><tr><th>Topic</th><th class="n">Answered</th><th class="n">Right</th><th class="n">Avg time</th></tr></thead><tbody>' +
         pr.skills.map(function (k) {
           var low = k.n >= 3 && k.right / k.n < 0.6;
           return '<tr><td>' + escHtml(k.skill) + (k.bank !== 'qb' ? '<span class="prep-bank">' + (k.bank === 'chal' ? 'Challenge' : 'Rush') + '</span>' : '') + '</td>' +
@@ -1604,9 +2335,16 @@
       : (!logWeek ? 'The practice log began ' + dayLabel(String(pr.logStarted).slice(0, 10)) + ', partway through this week.' : '');
     if (p.practiceError) note = 'Practice log unreadable: ' + escHtml(p.practiceError);
 
+    var nextHtml = next.length ? '<p class="prep-next">' + next.join(' &nbsp;·&nbsp; ') + '</p>' : '';
+    if (!sat) {
+      // Everything the portal measures is SAT practice; for this student
+      // only the homework means anything.
+      $('stu-prep-sub').textContent = 'Homework since the last session.';
+      $('stu-prep').innerHTML = nextHtml + (hwHtml || (nextHtml ? '' : '<div class="empty">Nothing assigned since the last session.</div>'));
+      return;
+    }
     $('stu-prep').innerHTML = '<div class="prep-stats">' + stats.join('') + '</div>' +
-      '<p class="prep-next">' + next.join(' &nbsp;·&nbsp; ') + '</p>' + hwHtml + topics +
-      (note ? '<p class="prep-note">' + note + '</p>' : '');
+      nextHtml + hwHtml + topics + (note ? '<p class="prep-note">' + note + '</p>' : '');
   }
 
   function loadStudentDetail(key) {
@@ -1617,9 +2355,20 @@
         $('stu-attempts').innerHTML = '<tr><td colspan="5" class="empty">Could not load their test reports.</td></tr>';
         $('stu-skills').innerHTML = '<div class="empty">&mdash;</div>';
         $('stu-analysis').innerHTML = '<div class="empty">&mdash;</div>';
+        $('stu-details').innerHTML = '<dd class="dim">Could not load this student&rsquo;s details.</dd>';
+        $('stu-edit-btn').disabled = true;
         return;
       }
       currentDetail = data;
+      // The detail is fresher than the roster row the page opened from.
+      var p = data.student && data.student.program;
+      if (PROGRAMS[p] && !programPending[key] && p !== programOf(currentStudent)) {
+        setProgramLocal(key, p);
+        redrawProgram(key);
+      } else if (programPending[key] && data.student) {
+        data.student.program = programPending[key];
+        data.student.showSat = programPending[key] === 'sat';
+      }
       // Rendering has its own try so a render bug (a field an older backend
       // doesn't send, a changed shape) reports itself as such rather than as
       // a "network error".
@@ -1635,32 +2384,71 @@
         $('stu-meta').innerHTML = '<span style="color:var(--red);">Loaded this student, but could not draw the page. Details are in the browser console.</span>';
       }
     }).catch(function () {
+      if (!currentStudent || currentStudent.key !== key) return;
       $('stu-meta').innerHTML = '<span style="color:var(--red);">Network error loading this student.</span>';
+      $('stu-details').innerHTML = '<dd class="dim">Network error loading this student&rsquo;s details.</dd>';
     });
   }
 
+  /* The header carries only what matters every visit (for an SAT student:
+     the test date, the target, extra time). Everything else on file is on
+     the Account tab's Details. */
   function renderStudentMeta(data) {
     var s = data.student;
-    var bits = [];
-    if (s.testDate) {
-      var days = Math.ceil((new Date(s.testDate).getTime() - Date.now()) / 86400000);
-      bits.push('<span>Test date <b>' + formatDay(s.testDate) + '</b>' +
-        (days >= 0 ? ' (' + days + ' day' + (days === 1 ? '' : 's') + ' out)' : ' (past)') + '</span>');
-    }
-    if (s.targetScore) bits.push('<span>Target <b>' + s.targetScore + '</b></span>');
-    if (s.baselineRw || s.baselineMath) {
-      bits.push('<span>Baseline <b>' + ((s.baselineRw || 0) + (s.baselineMath || 0)) + '</b> (' +
-        (s.baselineRw || '—') + ' R&amp;W / ' + (s.baselineMath || '—') + ' Math)</span>');
-    }
+    var sat = isSat(currentStudent);
     // Only ever a number here — a sheet cell formatted as a time used to
     // render as "1899-12-31T17:00:00.000Z× time" on this line.
-    var timeMult = Number(s.accomTimeMult);
-    if (isFinite(timeMult) && timeMult > 1) bits.push('<span>Accommodations <b>' + timeMult + '&times; time</b></span>');
-    if (s.grantedEmail) bits.push('<span>' + escHtml(s.grantedEmail) + '</span>');
-    else if (s.leadEmail) bits.push('<span>Inquired as ' + escHtml(s.leadEmail) + '</span>');
-    if (s.guardianEmail) bits.push('<span>Parent ' + escHtml(s.guardianName || '') + ' &lt;' + escHtml(s.guardianEmail) + '&gt;</span>');
-    if (!bits.length) bits.push('<span class="empty" style="padding:0;">No onboarding details on file yet.</span>');
+    var timeMult = Number(s.accomTimeMult), breakMult = Number(s.accomBreakMult);
+    var dayText = function (iso) {
+      if (!iso) return '';
+      var days = Math.ceil((new Date(iso).getTime() - Date.now()) / 86400000);
+      return '<b>' + formatDay(iso) + '</b>' + (days >= 0 ? ' (' + days + ' day' + (days === 1 ? '' : 's') + ' out)' : ' (past)');
+    };
+    var satDay = dayText(s.testDate), satDay2 = dayText(s.testDate2);
+    // The header leads with the next sitting still to come.
+    var ahead = [s.testDate, s.testDate2].filter(function (iso) { return iso && new Date(iso).getTime() >= Date.now() - 86400000; })
+      .sort(function (a, b) { return new Date(a) - new Date(b); });
+    var bits = [];
+    if (sat) {
+      if (ahead.length) bits.push('<span>SAT ' + dayText(ahead[0]) + (ahead[1] ? ', then <b>' + formatDay(ahead[1]) + '</b>' : '') + '</span>');
+      else {
+        var last = [s.testDate, s.testDate2].filter(Boolean).sort(function (a, b) { return new Date(a) - new Date(b); }).pop();
+        bits.push(last ? '<span>SAT ' + dayText(last) + '</span>' : '<span>No SAT date yet</span>');
+      }
+      if (s.targetScore) bits.push('<span>Target <b>' + s.targetScore + '</b></span>');
+      if (isFinite(timeMult) && timeMult > 1) bits.push('<span><b>' + timeMult + '&times;</b> time</span>');
+    }
     $('stu-meta').innerHTML = bits.join('');
+
+    var rows = [];
+    var row = function (k, v) { rows.push('<dt>' + k + '</dt><dd>' + v + '</dd>'); };
+    row('Key', '<code>' + escHtml(s.key || currentStudent.key) + '</code>');
+    row('Student', s.grantedEmail
+      ? escHtml(s.grantedEmail) + (s.grantedAt ? ' <span class="dim">(signed in since ' + formatDay(s.grantedAt) + ')</span>' : '')
+      : (s.leadEmail ? 'Inquired as ' + escHtml(s.leadEmail) + ' <span class="dim">(not signed in yet)</span>' : '<span class="dim">Not signed in yet</span>'));
+    row('Parent', s.guardianEmail
+      ? (s.guardianName ? escHtml(s.guardianName) + ' ' : '') + '&lt;' + escHtml(s.guardianEmail) + '&gt;'
+      : '<span class="dim">' + (s.guardian2Email ? 'Not on file' : 'None on file, so no Friday updates') + '</span>');
+    if (s.guardian2Email) row('Second parent', escHtml(s.guardian2Email));
+    if (sat) {
+      row('SAT date', satDay || '<span class="dim">Not set</span>');
+      if (satDay2) row('Second SAT date', satDay2);
+      row('Target', s.targetScore ? String(s.targetScore) : '<span class="dim">Not set</span>');
+      if (s.baselineRw || s.baselineMath) {
+        row('Baseline', ((Number(s.baselineRw) || 0) + (Number(s.baselineMath) || 0)) + ' <span class="dim">(' + (s.baselineRw || '—') + ' R&amp;W, ' +
+          (s.baselineMath || '—') + ' Math' + (s.baselineType ? ', ' + escHtml(String(s.baselineType).toUpperCase()) : '') + ')</span>');
+      }
+      var accom = [];
+      if (isFinite(timeMult) && timeMult > 1) accom.push(timeMult + '&times; time');
+      if (isFinite(breakMult) && breakMult > 1) accom.push('extended breaks');
+      row('Accommodations', accom.length ? accom.join(', ') : '<span class="dim">Standard timing</span>');
+    }
+    row('Drive folder', s.driveFolderUrl
+      ? '<a target="_blank" rel="noopener" href="' + escHtml(s.driveFolderUrl) + '">Open in Drive</a>'
+      : '<span class="dim">Not created yet</span>');
+    $('stu-details').innerHTML = rows.join('');
+    $('stu-edit-btn').disabled = false;
+    renderSatHistoryLine();
 
     var actions = [];
     if (s.driveFolderUrl) actions.push('<a class="mini" target="_blank" rel="noopener" href="' + escHtml(s.driveFolderUrl) + '">Drive folder</a>');
@@ -2614,7 +3402,9 @@
           openCreateModal([isoToDateStr(next.startIso)], currentStudent.key, currentStudent.name, '', 'Due the day of their next session');
         });
       })
-      .catch(function () { host.innerHTML = '<span class="ns-none">Could not reach the calendar.</span>'; });
+      .catch(function () {
+        if (currentStudent && currentStudent.key === key) host.innerHTML = '<span class="ns-none">Could not reach the calendar.</span>';
+      });
   }
 
   /* ── everyone ────────────────────────────────────────────────────── */

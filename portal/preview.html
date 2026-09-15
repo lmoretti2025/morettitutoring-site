@@ -76,6 +76,7 @@
       <a class="btn" href="?fake=1">Portal</a>
       <a class="btn" href="?fake=1&amp;subject=1">Portal (subject tutoring, no SAT)</a>
       <a class="btn" href="?fake=1&amp;subject=1&amp;nosession=1">Subject tutoring, nothing scheduled</a>
+      <a class="btn" href="?fake=1&amp;subject=1&amp;formersat=1">Moved off SAT prep (old tests on file)</a>
       <a class="btn" href="?fake=1&amp;screen=vocab">Vocabulary</a>
       <a class="btn" href="?fake=1&amp;screen=practice-tests">Practice Tests</a>
       <a class="btn" href="?fake=1&amp;screen=question-bank">Question Bank</a>
@@ -122,6 +123,10 @@
     // what a subject student sees before Luca has put anything on the
     // calendar. Worth being able to look at on purpose.
     var noSession = params.get('nosession') === '1';
+    // &formersat=1 — a student Luca moved from SAT prep to tutoring or
+    // college admissions: old practice tests, a test date and a target are
+    // still on file, and none of it may show.
+    var formerSat = subject && params.get('formersat') === '1';
     fetch('index.html').then(function (r) {
       if (!r.ok) throw new Error('index.html returned ' + r.status);
       return r.text();
@@ -141,19 +146,24 @@
       var student = {
         ok:true, session:'preview', key:'PREVIEW1', name:'Avery Preview', email:'preview@example.com',
         needsOnboarding:onboarding, needsName:false,
-        showSat:!subject, testPrep:!subject, satTaken:subject ? false : !onboarding,
-        grantedAt:'2026-01-01T00:00:00Z', testDate:subject ? null : '2026-11-07',
-        targetScore:subject ? null : 1400,
+        showSat:!subject, testPrep:!subject, satTaken:subject ? formerSat : !onboarding,
+        grantedAt:'2026-01-01T00:00:00Z', testDate:(subject && !formerSat) ? null : '2026-11-07',
+        targetScore:(subject && !formerSat) ? null : 1400,
         tests:[], assignments:fakeAssignments,
         driveFolderUrl:'https://drive.google.com/drive/folders/0PREVIEWFOLDERID'
       };
+      var qs = { v: 1, s: ['rw', 'm'], k: ['Inferences', 'Linear equations'], q: Array.from({ length: 98 }, function (_, i) { return [i < 54 ? 0 : 1, i % 2, 1, i % 5 ? 1 : 0, 60]; }) };
+      var history = formerSat ? [
+        { date: '2026-05-02T15:00:00Z', testType: 'SAT', source: 'diagnostic', testTitle: '', composite: 1180, rw: 600, math: 580, qStats: qs },
+        { date: '2026-06-06T15:00:00Z', testType: 'SAT', source: 'practice-test', testId: 'sat-practice-1', testTitle: 'SAT Practice Test 2', composite: 1240, rw: 620, math: 620, qStats: qs }
+      ] : [];
       var boot = '<scr' + 'ipt>(function(){' +
-        'var S=' + JSON.stringify(student) + ',W=' + JSON.stringify(wantScreen) + ';' +
+        'var S=' + JSON.stringify(student) + ',W=' + JSON.stringify(wantScreen) + ',H=' + JSON.stringify(history) + ';' +
         'sessionStorage.removeItem("mta_signed_out");localStorage.setItem("moretti_session","preview");' +
         'var real=window.fetch;window.fetch=function(u,i){var b=null;try{b=JSON.parse(i&&i.body);}catch(e){}' +
         'if(!b||!b.action)return real.apply(this,arguments);var o={ok:true};' +
         'if(b.action==="resume"||b.action==="googleAuth")o=S;' +
-        'else if(b.action==="getScoreHistory")o={ok:true,entries:[]};' +
+        'else if(b.action==="getScoreHistory")o={ok:true,entries:H};' +
         'else if(b.action==="getAssignments")o={ok:true,assignments:S.assignments};' +
         'else if(b.action==="nextSession")o=' + (noSession ? '{ok:true,next:null}' : '{ok:true,next:{startIso:' + JSON.stringify(soon.toISOString()) + ',allDay:false,title:"Avery - tutoring"}}') + ';' +
         'else if(b.action==="getAssignmentsCalendar")o={ok:true,assignments:S.assignments,sessions:[{startIso:' + JSON.stringify(soon.toISOString()) + ',allDay:false,title:"Avery - tutoring"}]};' +

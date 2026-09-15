@@ -3945,22 +3945,22 @@ window.Portal = {
   <div class="panel-wide">
     <div class="kicker">Account</div>
     <h1 class="panel-hed" style="margin-bottom:0.6rem;">Account Settings.</h1>
-    <p class="panel-sub">Update your test date, accommodations, baseline score, or guardian contact any time.</p>
+    <p class="panel-sub" id="settings-sub">Update your test date, accommodations, baseline score, or guardian contact any time.</p>
 
-    <div class="settings-section">
+    <div class="settings-section" data-sat-only>
       <div class="onb-accom-group-label" style="margin-bottom:0.7rem;">Test Date</div>
       <div class="onb-date-grid" id="settingsDateGrid"></div>
       <button type="button" class="onb-date-opt onb-date-opt-unsure" data-settings-date-opt="unsure">Not sure yet</button>
     </div>
 
-    <div class="settings-section">
+    <div class="settings-section" data-sat-only>
       <div class="onb-accom-group-label" style="margin-bottom:0.7rem;">Target Score</div>
       <p class="panel-sub" style="text-align:left; margin:0 0 0.8rem; font-size:0.78rem;">The goal every score report measures distance against.</p>
       <input type="number" inputmode="numeric" class="key-input" id="settingsTargetInput" placeholder="e.g. 1350" style="max-width:220px; margin-bottom:0; padding:0.6rem 0.9rem; text-align:left; text-transform:none;">
       <p class="key-error" id="settingsTargetError">Enter a target between <span id="settingsTargetRangeText">400 and 1600</span>.</p>
     </div>
 
-    <div class="settings-section">
+    <div class="settings-section" data-sat-only>
       <div class="onb-accom-group-label" style="margin-bottom:0.7rem;">Testing Accommodations</div>
       <div class="onb-accom-cards">
         <div class="onb-accom-card is-selected" data-settings-accom-card>
@@ -3997,7 +3997,7 @@ window.Portal = {
       </div>
     </div>
 
-    <div class="settings-section">
+    <div class="settings-section" data-sat-only>
       <div class="onb-accom-group-label" style="margin-bottom:0.7rem;">Baseline Score</div>
       <div class="onb-accom-cards">
         <div class="onb-accom-card is-selected" data-settings-baseline-card>
@@ -5999,7 +5999,7 @@ window.Portal = {
     var isTestPrep = !!(currentStudent && currentStudent.showSat);
     var hasCompletedADiagnostic = !!(currentStudent && currentStudent.satTaken);
     var needsDiagnostic = isTestPrep && !hasCompletedADiagnostic;
-    var processing = hasCompletedADiagnostic && isGrantedLocked();
+    var processing = isTestPrep && hasCompletedADiagnostic && isGrantedLocked();
     var sessionLocked = isSessionLocked();
     var lapsed = sessionLocked && currentStudent.portalLockReason === 'lapsed';
     if (needsDiagnostic) {
@@ -6013,7 +6013,7 @@ window.Portal = {
     } else if (sessionLocked) {
       subEl.textContent = lapsed
         ? 'Your portal is paused until your next session is scheduled. Questions? Text Luca at ' + LUCA_CONTACT.phoneDisplay + '.'
-        : (hasCompletedADiagnostic ? 'Thanks for taking your diagnostic. ' : '') +
+        : (hasCompletedADiagnostic && isTestPrep ? 'Thanks for taking your diagnostic. ' : '') +
           'The rest of your portal opens once your first session is scheduled.' +
           (hasCompletedADiagnostic && isTestPrep && !isNewKeyHold() ? ' Your diagnostic results are under Practice Tests.' : '') +
           ' Questions? Text Luca at ' + LUCA_CONTACT.phoneDisplay + '.';
@@ -6264,6 +6264,7 @@ window.Portal = {
       satTaken: !!data.satTaken,
       grantedAt: data.grantedAt || null,
       testDate: data.testDate || null,
+      testDate2: data.testDate2 || null,   // a second sitting Luca set on the admin page
       targetScore: data.targetScore || null,
       driveFolderUrl: data.driveFolderUrl || '',
       accomTimeMult: data.accomTimeMult || null,
@@ -6295,13 +6296,18 @@ window.Portal = {
       var navHere = SIDEBAR_NAV_FOR_SCREEN[activeScreenId];
       if (!navAllowed(navHere)) show('screen-menu');
     }
+    // Moved off SAT prep while standing on an SAT screen: Home.
+    if (satHidden() && isSatOnlyScreen(activeScreenId)) { show('screen-menu'); return; }
     // The rest of the home is only worth rebuilding if they are looking at
     // it; every other screen re-derives on its way in through show().
     if (activeScreenId === 'screen-menu') {
       renderHomeState();
       applyTestPrepGating();
       applyTestCardStates();
+      renderScoreProgress();
+      renderCrossTestHome();
       renderHomePies();          // owns applySubjectHome() -- the home layout swap
+      renderRecentTestCard();
       renderHomeShortcutTeasers();
     }
   }
@@ -6334,7 +6340,20 @@ window.Portal = {
     practiceTestId = null;
     startTest('SAT');
   }
+  /* A tutoring or college admissions student (showSat false) never lands
+     on an SAT screen, whichever path asked. The sidebar is gated already,
+     but home cards, homework links and a restored tab call show() directly.
+     An exam already running is left to finish. */
+  // A function, not a var: show() can run before this line is reached.
+  function isSatOnlyScreen(id) {
+    return !!({ 'screen-sat-resources': 1, 'screen-practice-tests': 1, 'screen-question-bank': 1, 'screen-rush': 1,
+      'screen-challenge-questions': 1, 'screen-vocab': 1, 'screen-incorrect-questions': 1, 'screen-test-overview': 1,
+      'screen-intro': 1, 'dx-screen': 1, 'dx-break-screen': 1, 'dx-module-over-screen': 1, 'screen-done': 1 })[id];
+  }
+  function satHidden() { return !!(currentStudent && !currentStudent.showSat); }
+
   function show(id) {
+    if (isSatOnlyScreen(id) && satHidden() && !MID_DIAGNOSTIC_SCREENS[activeScreenId]) id = 'screen-menu';
     activeScreenId = id;
     // Tells the presence heartbeat where they are, so the admin panel and
     // the auth log read "on Practice tests" rather than just "online".
@@ -6470,6 +6489,7 @@ window.Portal = {
       showSat: data.showSat !== undefined ? !!data.showSat : !!data.testPrep,
       grantedAt: data.grantedAt || null,
       testDate: data.testDate || null,
+      testDate2: data.testDate2 || null,   // a second sitting Luca set on the admin page
       accomTimeMult: data.accomTimeMult || null,
       accomBreakMult: data.accomBreakMult || null,
       baselineType: data.baselineType || null,
@@ -6623,6 +6643,7 @@ window.Portal = {
      button that lands the student on that test's card. Returns null when a
      task doesn't name a test. */
   function assignmentShortcut(task) {
+    if (satHidden()) return null;
     var text = String(task || '');
     var link = document.createElement('a');
     link.className = 'assign-go';
@@ -7811,6 +7832,7 @@ window.Portal = {
   function renderCrossTestHome() {
     var host = document.getElementById('xt-card');
     if (!host) return;
+    if (satHidden()) { host.style.display = 'none'; return; }
     var entries;
     try { entries = mergedScoreHistory(); } catch (e) { entries = []; }
     var withStats = (entries || []).filter(function (e) {
@@ -7963,7 +7985,7 @@ window.Portal = {
     if (!scoreProgressCard) return;
     // Backup for renderHomePies() hiding #home-overview during the new-key
     // hold: don't populate the card under a hidden parent.
-    if (isGrantedLocked()) { scoreProgressCard.style.display = 'none'; scoreProgressChartsEl.innerHTML = ''; return; }
+    if (isGrantedLocked() || satHidden()) { scoreProgressCard.style.display = 'none'; scoreProgressChartsEl.innerHTML = ''; return; }
     // composite == null means the attempt's score-sync never landed (see
     // scoreEntryForSubmit in recordComposite()). Filtered out because
     // buildScoreLineSvg would plot it at the bottom like a 0.
@@ -8066,7 +8088,7 @@ window.Portal = {
     var cardEl = document.getElementById('latest-test-card');
     if (!cardEl) return;
     // Same new-key hold as the rest of Your Overview — see isGrantedLocked().
-    if (isGrantedLocked()) { cardEl.style.display = 'none'; return; }
+    if (isGrantedLocked() || satHidden()) { cardEl.style.display = 'none'; return; }
     var entries = mergedScoreHistory();
     var e = entries.length ? entries[entries.length - 1] : null;
     if (!e || e.rw == null || e.math == null) { cardEl.style.display = 'none'; return; }
@@ -8406,10 +8428,39 @@ window.Portal = {
   var tcDaysMain = document.getElementById('nav-countdown-num');
   var tcDaysRest = document.getElementById('nav-countdown-rest');
 
+  /* Two SAT dates can be on file (Settings sets the first; Luca can add a
+     second on the admin page). The countdown is to the next one still to
+     come, or, once both have passed, the later one (its "Good luck!"). */
+  // 'yyyy-MM-dd' as that day's local midnight. new Date('2026-10-03') would
+  // be midnight UTC: the evening before, here.
+  function localDayIso(day) {
+    var p = String(day).split('-');
+    return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2])).toISOString();
+  }
+  // A test date as local midnight of its day. An instant of exactly midnight
+  // UTC is what the old save wrote for a picked day (Code.gs sheetDay_), so
+  // it is read as that day rather than the evening before.
+  function testDayMs(v) {
+    if (!v) return NaN;
+    var s = String(v);
+    if (/^\d{4}-\d{2}-\d{2}(T00:00:00(\.000)?Z)?$/.test(s)) return Date.parse(localDayIso(s.slice(0, 10)));
+    return Date.parse(s);
+  }
+  function countdownTestMs() {
+    var startOfToday = new Date(); startOfToday.setHours(0, 0, 0, 0);
+    var days = [currentStudent.testDate, currentStudent.testDate2]
+      .map(testDayMs)
+      .filter(function (ms) { return !isNaN(ms); })
+      .sort(function (a, b) { return a - b; });
+    if (!days.length) return null;
+    var ahead = days.filter(function (ms) { return ms >= startOfToday.getTime(); });
+    return ahead.length ? ahead[0] : days[days.length - 1];
+  }
+
   function renderTestCountdown() {
-    if (!currentStudent || !currentStudent.testDate) { tcCard.classList.remove('has-date'); return; }
-    var testMs = Date.parse(currentStudent.testDate);
-    if (isNaN(testMs)) { tcCard.classList.remove('has-date'); return; }
+    if (!currentStudent || satHidden()) { tcCard.classList.remove('has-date'); return; }
+    var testMs = countdownTestMs();
+    if (testMs == null) { tcCard.classList.remove('has-date'); return; }
 
     var now = Date.now();
     var msPerDay = 24 * 60 * 60 * 1000;
@@ -9401,6 +9452,11 @@ window.Portal = {
   // so it never shows stale values from an earlier visit this session.
   function openSettingsScreen() {
     if (!currentStudent) return;   // nothing to populate before sign-in
+    var satFields = !satHidden();
+    document.querySelectorAll('#screen-settings [data-sat-only]').forEach(function (el) { el.style.display = satFields ? '' : 'none'; });
+    document.getElementById('settings-sub').textContent = satFields
+      ? 'Update your test date, accommodations, baseline score, or guardian contact any time.'
+      : 'Update your parent or guardian contact any time.';
     renderSettingsDateGrid();
     document.getElementById('settingsSaveError').style.display = 'none';
     document.getElementById('settingsSavedNote').style.display = 'none';
@@ -9531,7 +9587,7 @@ window.Portal = {
         saveError.style.display = 'block';
         return;
       }
-      currentStudent.testDate = settingsSelectedTestDate ? new Date(settingsSelectedTestDate).toISOString() : null;
+      currentStudent.testDate = settingsSelectedTestDate ? localDayIso(settingsSelectedTestDate) : null;
       currentStudent.accomTimeMult = timeMult;
       currentStudent.accomBreakMult = breakMult;
       currentStudent.baselineType = baselineType;
