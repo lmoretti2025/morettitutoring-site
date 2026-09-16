@@ -2699,7 +2699,9 @@
       btn.addEventListener('click', function () {
         var addr = btn.getAttribute('data-email-resub');
         if (!confirm('Send automatic emails to ' + addr + ' again? They unsubscribed themselves, so only do this if they asked.')) return;
-        save(btn, { emailOptOut: (s.emailOptOut || []).filter(function (e) { return e !== addr; }) }, 'resubscribing ' + addr);
+        // Just this address: the backend reads the list as it is now, so an
+        // unsubscribe that arrived after this page loaded is kept.
+        save(btn, { emailResubscribe: addr }, 'resubscribing ' + addr);
       });
     });
   }
@@ -4593,7 +4595,8 @@
     var panel = document.getElementById('mta-access');
     var tab = document.getElementById('mta-tab');
     if (!panel || !tab) return false;
-    if (panel.parentNode !== $('roster-tools')) $('roster-tools').appendChild(panel);
+    // Right after its button, so Tab goes from the button into the panel.
+    if (panel.previousElementSibling !== $('rt-access')) $('roster-tools').insertBefore(panel, $('rt-access').nextSibling);
     var body = document.getElementById('mta-body');
     var badge = document.getElementById('mta-badge');
     var syncBadge = function () {
@@ -4612,23 +4615,31 @@
       var quick = document.getElementById('mta-quick');
       if (quick) quick.click();
     });
+    var isOpen = function () { return body && body.style.display !== 'none'; };
+    var closePanel = function () { var close = document.getElementById('mta-close'); if (close) close.click(); };
+    // Escape closes it and hands focus back to its button, unless a dialog is up.
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'Escape' || !isOpen()) return;
+      if (document.getElementById('mta-modal')) return;   // auth-admin.js removes it on close
+      closePanel();
+      $('rt-access').focus();
+    });
     // A click anywhere else closes it, as a menu would. Its dialogs
     // (#mta-modal) are outside the panel and must not close it.
     document.addEventListener('click', function (e) {
-      if (!body || body.style.display === 'none') return;
+      if (!isOpen()) return;
       if ($('roster-tools').contains(e.target)) return;
       var modal = document.getElementById('mta-modal');
       if (modal && modal.contains(e.target)) return;
       if (!document.contains(e.target)) return;   // a row the panel just redrew
-      var close = document.getElementById('mta-close');
-      if (close) close.click();
+      closePanel();
     });
     return true;
   }
   (function waitForPanel(tries) {
     if (dockPortalAccess()) return;
     if (tries < 40) setTimeout(function () { waitForPanel(tries + 1); }, 250);
-    else $('rt-access').style.display = 'none';   // auth-admin.js never loaded
+    else { $('rt-access').style.display = 'none'; $('rt-add').style.display = 'none'; }   // auth-admin.js never loaded
   })(0);
 })();
 </script>

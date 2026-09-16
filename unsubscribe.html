@@ -81,7 +81,9 @@
       .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
   var m = /[#&]t=([^&]+)/.exec(window.location.hash || '');
-  var TOKEN = m ? decodeURIComponent(m[1]) : '';
+  var TOKEN = '';
+  // A link broken in copying can hold a bad % sequence: that is a bad link, not a stuck page.
+  try { TOKEN = m ? decodeURIComponent(m[1]) : ''; } catch (e) { TOKEN = ''; }
 
   // A plain string body keeps this a CORS simple request, like every portal page.
   function post(payload) {
@@ -158,6 +160,7 @@
       } else if (d && d.error === 'not_on_this_email') {
         $('status').textContent = 'That address wasn’t on this email, so nothing was changed.';
       } else if (d && d.error === 'bad_link') {
+        $('status').textContent = '';
         badLink();
       } else {
         $('status').textContent = 'That didn’t save. Try again in a moment.';
