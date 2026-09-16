@@ -146,6 +146,65 @@
     .skeleton::after { animation: none; }
   }
 
+  /* ═══ WAITING ON THE SERVER ═══ what a screen shows before the student's
+     data has arrived, instead of a confident "0" or "Nothing here yet" (see
+     IS THE STUDENT'S DATA HERE YET? in the script). Shapes where content
+     will be, a sweep across them, and a thin bar along the top while
+     anything is still on its way. */
+  #portal-sync-bar { position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 9990; pointer-events: none; overflow: hidden; opacity: 0; transition: opacity 0.3s ease; }
+  #portal-sync-bar.on { opacity: 1; }
+  #portal-sync-bar::before { content: ''; position: absolute; top: 0; bottom: 0; left: -35%; width: 35%; border-radius: 3px; background: linear-gradient(90deg, rgba(176,39,28,0), var(--red) 40%, #D24234 60%, rgba(176,39,28,0)); animation: syncSlide 1.15s cubic-bezier(0.45, 0, 0.35, 1) infinite; }
+  @keyframes syncSlide { from { left: -35%; } to { left: 100%; } }
+
+  .spc-skel { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); grid-template-rows: auto auto auto 1fr; column-gap: 1.6rem; row-gap: 0.55rem; min-height: 150px; padding-top: 0.4rem; }
+  .spc-skel-num { grid-column: 1; width: 42%; height: 2.1rem; }
+  .spc-skel-line { grid-column: 1; width: 82%; height: 0.72rem; border-radius: 6px; }
+  .spc-skel-line.short { width: 58%; }
+  .spc-skel-bars { grid-column: 2; grid-row: 1 / span 4; display: flex; align-items: flex-end; gap: 0.5rem; height: 140px; }
+  .spc-skel-bars .skeleton { flex: 1; border-radius: 6px 6px 3px 3px; }
+  @media (max-width: 620px) {
+    .spc-skel { grid-template-columns: 1fr; }
+    .spc-skel-bars { grid-column: 1; grid-row: auto; height: 96px; margin-top: 0.6rem; }
+  }
+
+  /* Text that is still coming: the same size it will be, filled with the sweep. */
+  .mini-skill-card.is-loading .mini-skill-name,
+  .mini-skill-card.is-loading .mini-skill-sub,
+  .iq-tab-count.is-loading,
+  .vp-prog-card.is-loading .vp-prog-num,
+  .vp-prog-card.is-loading .vp-prog-of,
+  .vp-prog-card.is-loading .vp-legend-num,
+  .vp-quick-btn.is-loading .vp-count-pill,
+  .vp-quick-btn.is-loading #vp-review-sub {
+    color: transparent !important; border-color: transparent !important; pointer-events: none;
+    background: linear-gradient(90deg, #ebe9e7 20%, #f7f6f5 40%, #ebe9e7 60%) 0 0 / 300% 100%;
+    animation: skelText 1.35s ease-in-out infinite; border-radius: 6px;
+  }
+  @keyframes skelText { from { background-position: 100% 0; } to { background-position: 0 0; } }
+  .mini-skill-card.is-loading .mini-skill-name { display: block; width: 78%; }
+  .mini-skill-card.is-loading .mini-skill-sub { display: block; width: 52%; min-height: 0.8em; margin-top: 0.35rem; }
+  .mini-skill-card.is-loading .mini-skill-bar-fill { width: 0 !important; }
+  .iq-tab-count.is-loading { display: inline-block; min-width: 1.5em; }
+  .vp-prog-card.is-loading .vp-prog-num { display: inline-block; min-width: 2.2ch; }
+  .vp-prog-card.is-loading .vp-prog-of { display: inline-block; min-width: 5.5em; }
+  .vp-prog-card.is-loading .vp-legend-num { display: inline-block; min-width: 1.6em; }
+  .vp-prog-card.is-loading .vp-bar-mastered,
+  .vp-prog-card.is-loading .vp-bar-learning { width: 0 !important; }
+  .vp-quick-btn.is-loading .vp-count-pill { min-width: 1.6em; }
+  .vp-quick-btn.is-loading #vp-review-sub { display: block; }
+
+  .pt-sync-note { display: flex; align-items: center; gap: 0.55rem; }
+  .pt-sync-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--red); animation: syncPulse 1.1s ease-in-out infinite; flex-shrink: 0; }
+  @keyframes syncPulse { 0%, 100% { opacity: 0.25; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    #portal-sync-bar::before { animation: none; left: 0; width: 100%; opacity: 0.45; }
+    .mini-skill-card.is-loading .mini-skill-name, .mini-skill-card.is-loading .mini-skill-sub,
+    .iq-tab-count.is-loading, .vp-prog-card.is-loading .vp-prog-num, .vp-prog-card.is-loading .vp-prog-of,
+    .vp-prog-card.is-loading .vp-legend-num, .vp-quick-btn.is-loading .vp-count-pill,
+    .vp-quick-btn.is-loading #vp-review-sub, .pt-sync-dot { animation: none; }
+  }
+
   /* Every screen in the diagnostic and Practice Test flow (overview,
      intro, break, done) is plain white; no page tint should show during
      a test. */
@@ -3574,7 +3633,7 @@ window.Portal = {
      MorettiAuth.refresh() and the onRefresh hook, and a cached copy would
      silently lack both (the guards degrade quietly). Only this tag moves;
      the question banks below keep theirs. -->
-<script src="auth-client.js?v=20260906a"></script>
+<script src="auth-client.js?v=20260916a"></script>
 
 <!-- Pre-login top bar (key entry, onboarding, marketing-style screens).
      Hidden once a student is in the app shell (see
@@ -5802,6 +5861,101 @@ window.Portal = {
   // Saved & Mistakes each call this and per-request latency is the
   // portal's biggest cost; progressFetchPromise also de-dupes concurrent
   // calls into one request.
+  /* ═══ IS THE STUDENT'S DATA HERE YET? ═══ a refresh used to render every
+     screen from whatever this browser happened to have, the moment the page
+     painted, and only then ask the server. On a phone, or on any device the
+     student had not studied on, that was nothing: "Mistakes Log 0", "0 words
+     mastered", an empty Overview. For one to six seconds (Apps Script, warm
+     to cold) the portal told a student their work was gone.
+
+     Each source now says what it knows:
+       loading  nothing trustworthy yet: show a placeholder, never "empty"
+       cached   last visit's server copy is on screen; a fresh one is coming
+       ready    the server has answered this visit
+       failed   the server could not be reached; this device's copy stands
+     Screens in other script blocks read it through window.portalDataState
+     and hear changes through window.onPortalDataChange (Luca, 2026-09-16). */
+  var portalData = { scores: 'loading', progress: 'loading' };
+  var portalDataListeners = [];
+  function setPortalData(name, state) {
+    if (portalData[name] === state) return;
+    portalData[name] = state;
+    portalDataListeners.slice().forEach(function (fn) { try { fn(name, state); } catch (e) {} });
+  }
+  window.portalDataState = function (name) { return portalData[name]; };
+  window.onPortalDataChange = function (fn) { portalDataListeners.push(fn); };
+
+  /* The thin bar across the top while anything is on its way. Counted, so
+     overlapping requests keep it up until the last one lands, and shown only
+     after a moment, so a fast answer never flickers it. */
+  var syncInFlight = 0, syncShowTimer = null;
+  function syncBar() {
+    var el = document.getElementById('portal-sync-bar');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'portal-sync-bar';
+      el.setAttribute('role', 'progressbar');
+      el.setAttribute('aria-label', 'Loading your latest work');
+      document.body.appendChild(el);
+    }
+    return el;
+  }
+  function trackSync(promise) {
+    syncInFlight++;
+    if (syncInFlight === 1) {
+      clearTimeout(syncShowTimer);
+      syncShowTimer = setTimeout(function () { if (syncInFlight > 0) syncBar().classList.add('on'); }, 250);
+    }
+    function done() {
+      syncInFlight = Math.max(0, syncInFlight - 1);
+      if (!syncInFlight) { clearTimeout(syncShowTimer); syncBar().classList.remove('on'); }
+    }
+    promise.then(done, done);
+    return promise;
+  }
+
+  /* An answer auth-client.js already has on its way (see PRE-FLIGHT DATA
+     there) if there is one, otherwise the ordinary request. A preflight that
+     came back empty-handed is not the last word: it falls through to
+     postToBackend and its retries. */
+  function backendRead(payload) {
+    var auth = window.MorettiAuth;
+    var early = (auth && auth.takePreflight) ? auth.takePreflight(payload.action, currentStudent && currentStudent.key) : null;
+    function normal() { return postToBackend(payload); }
+    if (!early) return normal();
+    return early.then(function (d) { return (d && d.ok) ? d : normal(); }, normal);
+  }
+
+  /* ═══ LAST VISIT'S PROGRESS, FROM THE SERVER ═══ this browser's own caches
+     only ever held what was done ON this browser, so they could not stand in
+     for the real thing. The server's merged answer is kept too, like score
+     history's, and painted first next time: a refresh on a device the
+     student uses shows their real mistakes and vocabulary at once, and the
+     fresh answer replaces it a moment later. */
+  var SERVER_PROGRESS_KEY_ = 'moretti_server_progress_';
+  function loadServerProgressCache(key) {
+    try {
+      var raw = localStorage.getItem(SERVER_PROGRESS_KEY_ + key);
+      var d = raw ? JSON.parse(raw) : null;
+      return (d && typeof d === 'object' && d.incorrectQuestions) ? d : null;
+    } catch (e) { return null; }
+  }
+  function saveServerProgressCache(key, result) {
+    try { localStorage.setItem(SERVER_PROGRESS_KEY_ + key, JSON.stringify(result)); }
+    catch (e) { /* quota or private browsing: the fresh answer still paints this visit */ }
+  }
+  // Last visit's server copy with this device's newer local work laid over
+  // it. Additive only: dropping anything is the fresh answer's job.
+  function progressFromCache(serverCopy, local) {
+    return {
+      incorrectQuestions: Object.assign({}, serverCopy.incorrectQuestions || {}, local.incorrectQuestions || {}),
+      savedQuestions: Object.assign({}, serverCopy.savedQuestions || {}, local.savedQuestions || {}),
+      skillStats: (serverCopy.skillStats && Object.keys(serverCopy.skillStats).length) ? serverCopy.skillStats : (local.skillStats || {}),
+      vocabProgress: window.mergeVocabProgress_(local.vocabProgress, serverCopy.vocabProgress || null),
+      qbAttempts: window.mergeQbAttempts_(local.qbAttempts, serverCopy.qbAttempts || {})
+    };
+  }
+
   var progressFetchPromise = null, progressFetchResult = null, progressFetchAt = 0;
   var PROGRESS_CACHE_TTL_MS = 60000;
   window.fetchPortalProgress = function (callback) {
@@ -5810,7 +5964,18 @@ window.Portal = {
     var localCache = loadLocalProgressCache();
     localCache.vocabProgress = loadLocalVocabProgress_(key);
     localCache.qbAttempts = loadLocalQbAttempts_(key);
-    callback(Object.assign({ isStale: true }, localCache));
+    /* The first, instant callback. fromServerCache says whether it is worth
+       drawing: with last visit's server copy it is the real picture a moment
+       out of date; without one it is only what this browser did, and a
+       screen that draws it shows "nothing" to a student who has plenty. */
+    // This visit's answer if there is one (a second screen opened later),
+    // otherwise last visit's.
+    var serverCopy = (progressFetchResult && !progressFetchResult.failed) ? progressFetchResult : loadServerProgressCache(key);
+    if (serverCopy) {
+      callback(Object.assign({ isStale: true, fromServerCache: true }, progressFromCache(serverCopy, localCache)));
+    } else {
+      callback(Object.assign({ isStale: true, fromServerCache: false }, localCache));
+    }
     if (progressFetchResult && (Date.now() - progressFetchAt) < PROGRESS_CACHE_TTL_MS) {
       callback(progressFetchResult);
       return;
@@ -5819,9 +5984,10 @@ window.Portal = {
       progressFetchPromise.then(function (result) { callback(result); });
       return;
     }
-    // Uses postToBackend for its per-attempt timeout and retries (bare
-    // fetch() has no timeout) before this falls back.
-    progressFetchPromise = postToBackend({ action: 'getProgress', key: key })
+    if (portalData.progress !== 'ready') setPortalData('progress', serverCopy ? 'cached' : 'loading');
+    // postToBackend has the per-attempt timeout and retries (bare fetch()
+    // has no timeout); backendRead uses the early answer when there is one.
+    progressFetchPromise = trackSync(backendRead({ action: 'getProgress', key: key }))
       .then(function (data) {
         var result;
         if (data && data.ok) {
@@ -5841,8 +6007,13 @@ window.Portal = {
           var mergedVocab = window.mergeVocabProgress_(localCache.vocabProgress, data.vocabProgress || null);
           var mergedQbAttempts = window.mergeQbAttempts_(localCache.qbAttempts, data.qbAttempts || {});
           result = { incorrectQuestions: mergedIncorrect, skillStats: data.skillStats || {}, savedQuestions: mergedSaved, vocabProgress: mergedVocab, qbAttempts: mergedQbAttempts };
+          saveServerProgressCache(key, result);
+          setPortalData('progress', 'ready');
         } else {
-          result = localCache;
+          // Could not ask is not "nothing": say so, and show what this
+          // device has rather than a confident empty screen.
+          result = Object.assign({ failed: true }, serverCopy ? progressFromCache(serverCopy, localCache) : localCache);
+          if (portalData.progress !== 'ready') setPortalData('progress', 'failed');
         }
         progressFetchResult = result;
         progressFetchAt = Date.now();
@@ -5852,8 +6023,10 @@ window.Portal = {
       })
       .catch(function () {
         progressFetchPromise = null;
-        callback(localCache);
-        return localCache;
+        var fallback = Object.assign({ failed: true }, serverCopy ? progressFromCache(serverCopy, localCache) : localCache);
+        if (portalData.progress !== 'ready') setPortalData('progress', 'failed');
+        callback(fallback);
+        return fallback;
       });
   };
   // Any write makes the cached read stale, so a question saved just now
@@ -6715,6 +6888,8 @@ window.Portal = {
     var ptBadge = document.getElementById('home-shortcut-pt-badge');
     if (ptBadge && typeof practiceTestResultsById === 'function') {
       var totalTests = (window.SAT_PRACTICE_TESTS || []).length;
+      // "0 of 12 done" before the tests have arrived is a claim, not a count.
+      if (portalData.scores === 'loading') { ptBadge.style.display = 'none'; totalTests = 0; }
       if (totalTests) {
         var doneCount = Object.keys(practiceTestResultsById()).length;
         ptBadge.style.display = '';
@@ -7365,6 +7540,15 @@ window.Portal = {
     } catch (e) { /* quota or private browsing -- the fetch still paints it this visit */ }
   }
 
+  // Whether last visit's server copy exists at all. An empty list is a real
+  // answer (no tests yet); a missing one means nothing is known.
+  function hasCachedServerHistory(key) {
+    try { return localStorage.getItem(SERVER_HISTORY_KEY_ + key) !== null; } catch (e) { return false; }
+  }
+  function rerenderScoreViews() {
+    if (activeScreenId === 'screen-menu') { renderScoreProgress(); renderCrossTestHome(); renderRecentTestCard(); renderHomeShortcutTeasers(); }
+    else if (activeScreenId === 'screen-practice-tests' && !anyPtMenuOpen()) renderPracticeTestList();
+  }
   function loadServerScoreHistory() {
     var key = currentStudent && currentStudent.key;
     if (!key) return;
@@ -7374,27 +7558,34 @@ window.Portal = {
     /* Paint last visit's copy first so the first frame is already complete.
        Skipped once the real answer is in, so a refresh mid-session never
        steps backwards onto older data. */
-    if (!serverScoreHistoryFetched && !serverScoreHistoryEntries.length) {
-      var cached = loadCachedServerHistory(key);
-      if (cached.length) {
-        serverScoreHistoryEntries = cached;
-        if (activeScreenId === 'screen-menu') { renderScoreProgress(); renderCrossTestHome(); renderRecentTestCard(); }
-        else if (activeScreenId === 'screen-practice-tests' && !anyPtMenuOpen()) renderPracticeTestList();
+    if (!serverScoreHistoryFetched) {
+      if (!serverScoreHistoryEntries.length && hasCachedServerHistory(key)) {
+        serverScoreHistoryEntries = loadCachedServerHistory(key);
+        setPortalData('scores', 'cached');
+        rerenderScoreViews();
+      } else if (portalData.scores === 'loading') {
+        // Nothing to show yet: the screens draw placeholders, not "no tests".
+        rerenderScoreViews();
       }
     }
-    fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      body: JSON.stringify({ action: 'getScoreHistory', key: key })
-    }).then(function (r) { return r.json(); }).then(function (data) {
-      if (!data || !data.ok || !Array.isArray(data.entries)) return;
+    /* This was a bare fetch with no timeout and no retry, so one lost hop
+       (Apps Script's redirect sometimes drops) left a student with "no tests
+       taken" until they reloaded. backendRead retries, and uses the early
+       answer auth-client.js started while the page was still loading. */
+    trackSync(backendRead({ action: 'getScoreHistory', key: key })).then(function (data) {
+      if (!data || !data.ok || !Array.isArray(data.entries)) throw new Error('no_history');
       serverScoreHistoryEntries = data.entries;
       serverScoreHistoryFetched = true;
       saveCachedServerHistory(key, data.entries);
       reconcileLocalScoreHistory();
       repairMissingQStats();
-      if (activeScreenId === 'screen-menu') { renderScoreProgress(); renderCrossTestHome(); renderRecentTestCard(); }
-      else if (activeScreenId === 'screen-practice-tests' && !anyPtMenuOpen()) renderPracticeTestList();
-    }).catch(function () { /* stays empty — same as any other best-effort fetch here */ });
+      setPortalData('scores', 'ready');
+      rerenderScoreViews();
+    }).catch(function () {
+      // Could not reach it: keep whatever is on screen, and stop showing
+      // placeholders for something that is not coming this visit.
+      if (!serverScoreHistoryFetched) { setPortalData('scores', 'failed'); rerenderScoreViews(); }
+    });
   }
   // deleteAttempt() only purges the local cache on the device that ran it.
   // Once the server list is fetched, any local entry whose attemptId is no
@@ -8118,7 +8309,26 @@ window.Portal = {
     // Said once under the chart, so a student who took it doesn't think it went missing.
     var hardestTaken = entries.some(function (e) { return e.testId === HARDEST_TEST_ID; });
     var baseline = baselineScoreEntry();
-    if (!allSat.length && !baseline) { scoreProgressCard.style.display = 'none'; scoreProgressChartsEl.innerHTML = ''; return; }
+    if (!allSat.length && !baseline) {
+      /* Still waiting on the server: hold the card's place with its shape,
+         so Your Overview is not a blank box that jumps when the tests land. */
+      if (portalData.scores === 'loading') {
+        scoreProgressCard.style.display = '';
+        scoreProgressChartsEl.innerHTML =
+          '<div class="spc-skel" aria-hidden="true">' +
+            '<div class="skeleton spc-skel-num"></div>' +
+            '<div class="skeleton spc-skel-line"></div>' +
+            '<div class="skeleton spc-skel-line short"></div>' +
+            '<div class="spc-skel-bars">' +
+              '<div class="skeleton" style="height:38%"></div><div class="skeleton" style="height:55%"></div>' +
+              '<div class="skeleton" style="height:47%"></div><div class="skeleton" style="height:70%"></div>' +
+              '<div class="skeleton" style="height:62%"></div><div class="skeleton" style="height:84%"></div>' +
+            '</div>' +
+          '</div>';
+        return;
+      }
+      scoreProgressCard.style.display = 'none'; scoreProgressChartsEl.innerHTML = ''; return;
+    }
     var satShown = allSat.slice(-SCORE_PROGRESS_MAX_POINTS);
     /* The current level reads every comparable test in the chart's
        selection (the Tests chip applies), not only the last N bars shown,
@@ -8275,6 +8485,7 @@ window.Portal = {
   function fillMiniSkillCard(cardId, nameId, subId, barId, best) {
     var cardEl = document.getElementById(cardId);
     if (!cardEl) return;
+    cardEl.classList.remove('is-loading');   // see skeletonMiniSkillCard
     if (!best) { cardEl.style.display = 'none'; return; }
     var nameEl = document.getElementById(nameId), subEl = document.getElementById(subId), barEl = document.getElementById(barId);
     var pctInt = Math.round(best.pct * 100);
@@ -8321,10 +8532,23 @@ window.Portal = {
     renderHomeTestFilter();
     if (!window.fetchPortalProgress) return;
     window.fetchPortalProgress(function (progress) {
+      // Only this browser's scraps, and the real answer still coming: draw
+      // the tiles' shape rather than hiding them.
+      if (progress.isStale && !progress.fromServerCache) {
+        skeletonMiniSkillCard('mini-math-card');
+        skeletonMiniSkillCard('mini-rw-card');
+        return;
+      }
       var skillStats = (progress.skillStats && typeof progress.skillStats === 'object') ? progress.skillStats : {};
       fillMiniSkillCard('mini-math-card', 'mini-math-name', 'mini-math-sub', 'mini-math-bar', weakestSkillIn(skillStats, HOME_MATH_DOMAINS));
       fillMiniSkillCard('mini-rw-card', 'mini-rw-name', 'mini-rw-sub', 'mini-rw-bar', weakestSkillIn(skillStats, HOME_RW_DOMAINS));
     });
+  }
+  function skeletonMiniSkillCard(cardId) {
+    var card = document.getElementById(cardId);
+    if (!card) return;
+    card.classList.add('is-loading');
+    card.style.display = '';
   }
 
   /* ═══ NEXT SESSION WIDGET ═══
@@ -10037,6 +10261,14 @@ window.Portal = {
     }
     var done = practiceTestResultsById();
     var snapshot = inProgressSnapshot();
+    // Every tile reads as untaken until the tests arrive; say so, rather
+    // than let a student think their scores are gone.
+    if (portalData.scores === 'loading') {
+      var checking = document.createElement('p');
+      checking.className = 'panel-sub pt-sync-note';
+      checking.innerHTML = '<span class="pt-sync-dot" aria-hidden="true"></span>Checking which tests you have taken\u2026';
+      list.appendChild(checking);
+    }
     tests.forEach(function (test) {
       var mathQ = ((test.sections || {}).math || {});
       var rwQ = ((test.sections || {}).readingWriting || {});
@@ -14502,15 +14734,20 @@ window.Portal = {
   // doesn't overwrite the server. Merge rule lives in mergeVocabProgress_()
   // (last-write-wins per term via termUpdatedAt; seen{} is a union).
   var vocabProgressMerged = false;
-  function mergeInServerVocabProgress(serverVocabProgress) {
+  // isFinal false: last visit's server copy, or this device's copy after a
+  // failed fetch. Shown, not saved or synced, and the real answer can still
+  // merge on top of it. Every existing caller passes one argument: final.
+  function mergeInServerVocabProgress(serverVocabProgress, isFinal) {
     if (!serverVocabProgress || vocabProgressMerged) return;
-    vocabProgressMerged = true;
+    var final = isFinal !== false;
+    if (final) vocabProgressMerged = true;
     if (window.mergeVocabProgress_) {
       progress = window.mergeVocabProgress_(progress, serverVocabProgress);
     }
-    saveProgress();
+    if (final) saveProgress();
     renderStillPanel();
     renderStatsRow();
+    if (pillsEl) renderPills();   // each set's own mastery bar, too
   }
   // Every grading action in every mode funnels through here. It writes both
   // stillLearning{} and seen{} ("Mastered" = seen and not still-learning;
@@ -14943,6 +15180,12 @@ window.Portal = {
   window.vocabModuleInit = function () {
     if (started) return;
     started = true;
+    /* Read again, now. This closure's first loadProgress() ran while the page
+       was still loading, before a student was signed in, so it read the
+       'anon' slot: empty. A student opening Vocabulary on their own device
+       saw "0 words mastered" until the server's copy arrived, and never saw
+       this device's own progress if it did not (Luca, 2026-09-16). */
+    progress = loadProgress();
     pillsEl = document.getElementById('vp-set-cards');
     stageEl = document.getElementById('vp-stage');
     vpSetupEl = document.getElementById('vp-setup');
@@ -15011,9 +15254,24 @@ window.Portal = {
     // Pull in whatever this student's OTHER devices have synced, so
     // mastered/still-learning status is consistent everywhere instead of
     // reflecting only this browser. See mergeInServerVocabProgress() above.
+    /* "0 words mastered" is a claim. When this device knows nothing about
+       the student's words and the server has not answered, the numbers
+       shimmer instead of saying zero. A device with its own progress shows
+       it at once, and the server's copy merges in quietly behind it. */
+    var vpProgCard = vpSetupEl ? vpSetupEl.querySelector('.vp-prog-card') : null;
+    function setVocabLoading(on) {
+      if (vpProgCard) vpProgCard.classList.toggle('is-loading', on);
+      if (reviewBtnEl) reviewBtnEl.classList.toggle('is-loading', on);
+    }
+    var knowsNothing = !Object.keys(progress.seen || {}).length && !Object.keys(progress.stillLearning || {}).length;
     if (window.fetchPortalProgress) {
+      if (knowsNothing && window.portalDataState && window.portalDataState('progress') !== 'ready') setVocabLoading(true);
       window.fetchPortalProgress(function (data) {
-        if (data && !data.isStale && data.vocabProgress) mergeInServerVocabProgress(data.vocabProgress);
+        if (!data) return;
+        // This browser's scraps: the real answer is on its way (see loadRecords).
+        if (data.isStale && !data.fromServerCache) return;
+        if (data.vocabProgress) mergeInServerVocabProgress(data.vocabProgress, !data.isStale && !data.failed);
+        setVocabLoading(false);
       });
     }
 
@@ -15136,6 +15394,8 @@ window.Portal = {
     return !!cutoff && !isNaN(t) && t < cutoff;
   }
 
+  // The server could not be reached and this is only this device's copy.
+  var loadFailed = false;
   function loadRecords(callback) {
     if (!window.fetchPortalProgress) { records = []; callback(); return; }
     // Kicked off in parallel with fetchPortalProgress (the slower Apps Script
@@ -15151,6 +15411,13 @@ window.Portal = {
       window.__questionBankMathReady || Promise.resolve()
     ]);
     window.fetchPortalProgress(function (progress) {
+      /* The first, instant answer without last visit's server copy is only
+         what THIS browser did. Drawing it is how a refresh showed "Nothing
+         here yet" to a student with a full log. fetchPortalProgress always
+         calls back a second time (the server's answer, or this device's copy
+         marked failed), so skipping this one just keeps the placeholder up. */
+      if (progress.isStale && !progress.fromServerCache) return;
+      loadFailed = !!progress.failed;
       var byKey = (progress.incorrectQuestions && typeof progress.incorrectQuestions === 'object') ? progress.incorrectQuestions : {};
       var savedByKey = (progress.savedQuestions && typeof progress.savedQuestions === 'object') ? progress.savedQuestions : {};
       readyPromise.then(function () {
@@ -15501,7 +15768,9 @@ window.Portal = {
       setPracticeCount(0);
       listEl.innerHTML = activeTab === 'saved'
         ? '<div class="pb-empty-saved">' + BOOKMARK_SVG + '<div class="pb-empty-title">No saved questions yet</div><div class="pb-empty-sub">You can save questions when reviewing your score reports and study off question banks.</div></div>'
-        : '<div class="pb-empty-note">Nothing here yet — once you finish a diagnostic or practice test, anything you miss will show up here, organized by section, domain, skill, and difficulty. (Getting a question right on a later attempt clears it from this list, too — this always reflects what you currently have wrong, not your full history.)</div>';
+        : loadFailed
+          ? '<div class="pb-empty-note">Your mistakes could not be loaded just now, so this is not your full list. Check your connection and refresh the page to try again.</div>'
+          : '<div class="pb-empty-note">Nothing here yet — once you finish a diagnostic or practice test, anything you miss will show up here, organized by section, domain, skill, and difficulty. (Getting a question right on a later attempt clears it from this list, too — this always reflects what you currently have wrong, not your full history.)</div>';
       return;
     }
     var filtered = currentFiltered();
@@ -15943,7 +16212,10 @@ window.Portal = {
     else listEl.innerHTML = '<div class="pb-empty-note">Loading your latest results…</div>';
     poolCountEl.textContent = '';
     setPracticeCount(0);
+    tabMistakesCountEl.textContent = '';
+    tabMistakesCountEl.classList.add('is-loading');
     loadRecords(function () {
+      tabMistakesCountEl.classList.remove('is-loading');
       tabMistakesCountEl.textContent = mistakeRecords().length;
       // A focus that matches nothing (a stale link) falls back to the whole log.
       if (focus && !currentFiltered().length) focus = null;

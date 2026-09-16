@@ -449,6 +449,51 @@ window.MorettiAuth = (function () {
     }
   } catch (e) { preflightResume = null; preflightToken = null; }
 
+  /* ═══ PRE-FLIGHT DATA ═══ the same trick for the two reads every signed-in
+     SAT student's first screen needs: their tests (getScoreHistory) and
+     their mistakes, weak skills and vocabulary (getProgress). They used to
+     start only after all of index.html had downloaded, parsed and painted,
+     which on a phone is seconds of doing nothing. Now they leave alongside
+     the resume, and the portal picks the answers up when it gets there.
+
+     Only when last visit's student is on this device, is an SAT student
+     (nobody else reads either), and is the student this token was issued
+     to. Both are reads, and the server ignores the key we would send
+     anyway: it takes the student from the signed session (authGuard_).
+
+     An answer is only good for PREFLIGHT_MAX_AGE_MS. The portal trusts the
+     server's copy enough to drop local entries it does not confirm, so a
+     read from before a test was taken must never stand in for a fresh one.
+     (Luca, 2026-09-16) */
+  var PREFLIGHT_DATA_ACTIONS = ['getProgress', 'getScoreHistory'];
+  var PREFLIGHT_MAX_AGE_MS = 90 * 1000;
+  var preflightData = {}, preflightDataKey = null, preflightDataAt = 0;
+  try {
+    var preCached = preflightToken ? readStudentCache() : null;
+    var preKey = preflightToken ? inviteKeyOf(preflightToken) : null;   // reads k from any signed token
+    // The public homepage loads this file too (the sign-in modal) and shows
+    // none of this data; asking for it there would cost two backend runs
+    // for every signed-in visit.
+    var onPortal = /\/portal\//.test(location.pathname);
+    if (onPortal && preCached && preCached.showSat && preKey && preKey === String(preCached.key || '').toUpperCase()) {
+      preflightDataKey = preKey;
+      preflightDataAt = Date.now();
+      PREFLIGHT_DATA_ACTIONS.forEach(function (action) {
+        preflightData[action] = post({ action: action, session: preflightToken });
+      });
+    }
+  } catch (e) { preflightData = {}; preflightDataKey = null; }
+  // The early answer for `action`, once, if it is for `key` and still fresh.
+  // Otherwise null, and the caller asks the ordinary way.
+  function takePreflight(action, key) {
+    var p = preflightData[action];
+    if (!p) return null;
+    delete preflightData[action];
+    if (!key || String(key).toUpperCase() !== preflightDataKey) return null;
+    if (Date.now() - preflightDataAt > PREFLIGHT_MAX_AGE_MS) return null;
+    return p;
+  }
+
   // The in-flight pre-flight if it was for this exact token, otherwise a
   // fresh request. Consumed once: a second caller must ask again rather
   // than re-read an answer that is by then old.
@@ -1322,6 +1367,7 @@ window.MorettiAuth = (function () {
   return {
     start: start,
     openSignIn: openSignIn,
+    takePreflight: takePreflight,
     /* "Is there a session on this device?" -- asked by the home page to
        decide between opening the dialog and just going to the portal, which
        will resume that session by itself. Reads the store, not the in-memory

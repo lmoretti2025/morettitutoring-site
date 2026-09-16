@@ -82,6 +82,14 @@
       <a class="btn" href="?fake=1&amp;screen=question-bank">Question Bank</a>
       <a class="btn" href="?fake=1&amp;onboarding=1">First-login sequence</a>
     </div>
+    <h2>Loading states</h2>
+    <p>A signed-in student refreshing the page with a slow backend. <b>Fresh device</b> has none of their data cached, which is the worst case.</p>
+    <div class="row">
+      <a class="btn" href="?fake=1&amp;rich=1&amp;delay=3000&amp;fresh=1">Refresh, fresh device</a>
+      <a class="btn" href="?fake=1&amp;rich=1&amp;delay=3000">Refresh, same device</a>
+      <a class="btn" href="?fake=1&amp;rich=1&amp;delay=3000&amp;fresh=1&amp;screen=incorrect-questions">Mistakes log, fresh device</a>
+      <a class="btn" href="?fake=1&amp;rich=1&amp;delay=3000&amp;fresh=1&amp;screen=vocab">Vocabulary, fresh device</a>
+    </div>
 
     <hr class="divider">
     <h2>Or fix sign-in properly</h2>
@@ -127,7 +135,19 @@
     // college admissions: old practice tests, a test date and a target are
     // still on file, and none of it may show.
     var formerSat = subject && params.get('formersat') === '1';
-    fetch('index.html').then(function (r) {
+    // &delay=2500 — every backend answer arrives this many milliseconds late,
+    // so loading states are visible instead of over before the first frame.
+    // Real Apps Script is ~1.2s warm and 5-6s cold.
+    var delayMs = Math.max(0, Math.min(20000, Number(params.get('delay')) || 0));
+    // &rich=1 — a student with something on every screen: three tests,
+    // mistakes, weak skills, vocabulary. What a refresh is supposed to show.
+    var rich = !subject && params.get('rich') === '1';
+    // &fresh=1 — this browser has none of the student's data cached, as on a
+    // new device or after clearing the browser. The student is still signed
+    // in; only the data is missing. The worst case for a refresh.
+    var fresh = params.get('fresh') === '1';
+    // no-store: a cached copy would preview yesterday's portal.
+    fetch('index.html', { cache: 'no-store' }).then(function (r) {
       if (!r.ok) throw new Error('index.html returned ' + r.status);
       return r.text();
     }).then(function (html) {
@@ -149,26 +169,64 @@
         showSat:!subject, testPrep:!subject, satTaken:subject ? formerSat : !onboarding,
         grantedAt:'2026-01-01T00:00:00Z', testDate:(subject && !formerSat) ? null : '2026-11-07',
         targetScore:(subject && !formerSat) ? null : 1400,
-        tests:[], assignments:fakeAssignments,
+        tests:[], assignments:fakeAssignments, reportsOpen:true,
         driveFolderUrl:'https://drive.google.com/drive/folders/0PREVIEWFOLDERID'
       };
       var qs = { v: 1, s: ['rw', 'm'], k: ['Inferences', 'Linear equations'], q: Array.from({ length: 98 }, function (_, i) { return [i < 54 ? 0 : 1, i % 2, 1, i % 5 ? 1 : 0, 60]; }) };
       var history = formerSat ? [
         { date: '2026-05-02T15:00:00Z', testType: 'SAT', source: 'diagnostic', testTitle: '', composite: 1180, rw: 600, math: 580, qStats: qs },
         { date: '2026-06-06T15:00:00Z', testType: 'SAT', source: 'practice-test', testId: 'sat-practice-1', testTitle: 'SAT Practice Test 2', composite: 1240, rw: 620, math: 620, qStats: qs }
+      ] : rich ? [
+        { date: '2026-08-02T15:00:00Z', testType: 'SAT', source: 'diagnostic', testTitle: '', composite: 1180, rw: 600, math: 580, qStats: qs, attemptId: 'pv-a1' },
+        { date: '2026-08-23T15:00:00Z', testType: 'SAT', source: 'practice-test', testId: 'sat-practice-1', testTitle: 'SAT Practice Test 1', composite: 1250, rw: 630, math: 620, qStats: qs, attemptId: 'pv-a2' },
+        { date: '2026-09-13T15:00:00Z', testType: 'SAT', source: 'practice-test', testId: 'sat-practice-2', testTitle: 'SAT Practice Test 2', composite: 1310, rw: 650, math: 660, qStats: qs, attemptId: 'pv-a3' }
       ] : [];
+      // Real question ids, so the Mistakes log resolves them the way it does
+      // for a real student.
+      var missed = rich ? ['rw|de55ec71', 'rw|e38b3e4f', 'rw|87aa7bab', 'rw|2903668a', 'rw|75e07a4d',
+        'math|9912e19f', 'math|4e18fc5d', 'math|f67e4efc', 'math|bcb66188', 'math|d12bca0a'] : [];
+      var incorrect = {};
+      missed.forEach(function (m, i) {
+        incorrect['qb|' + m] = { key: 'qb|' + m, given: 'B', attemptedAt: new Date(Date.now() - (i + 1) * 36e5).toISOString(), wrongAttempts: 1 + (i % 3) };
+      });
+      var vocabTerms = rich ? ['fallacious', 'culmination', 'scathing', 'paramount', 'construe', 'commendation', 'staid', 'harangue', 'consensus'] : [];
+      var vocab = { stillLearning: {}, seen: {}, termUpdatedAt: {} };
+      vocabTerms.forEach(function (t, i) {
+        vocab.seen[t] = true;
+        vocab.termUpdatedAt[t] = new Date(Date.now() - i * 6e5).toISOString();
+        if (i % 3 === 0) vocab.stillLearning[t] = true;
+      });
+      var progress = { ok: true, apiVersion: 2, incorrectQuestions: incorrect, savedQuestions: {},
+        skillStats: rich ? {
+          'Nonlinear functions': { domain: 'Advanced Math', skill: 'Nonlinear functions', correct: 3, total: 9 },
+          'Linear equations in two variables': { domain: 'Algebra', skill: 'Linear equations in two variables', correct: 7, total: 8 },
+          'Inferences': { domain: 'Information and Ideas', skill: 'Inferences', correct: 4, total: 9 },
+          'Transitions': { domain: 'Expression of Ideas', skill: 'Transitions', correct: 7, total: 8 }
+        } : {},
+        vocabProgress: vocab, qbAttempts: {} };
       var boot = '<scr' + 'ipt>(function(){' +
-        'var S=' + JSON.stringify(student) + ',W=' + JSON.stringify(wantScreen) + ',H=' + JSON.stringify(history) + ';' +
-        'sessionStorage.removeItem("mta_signed_out");localStorage.setItem("moretti_session","preview");' +
+        'var S=' + JSON.stringify(student) + ',W=' + JSON.stringify(wantScreen) + ',H=' + JSON.stringify(history) + ',P=' + JSON.stringify(progress) + ',D=' + delayMs + ';' +
+        // A session token shaped like the real thing (base64url JSON, a dot,
+        // a signature), so the portal can read which student it is for.
+        'var TOK=btoa(JSON.stringify({t:"session",k:S.key})).replace(/=+$/,"").replace(/\\+/g,"-").replace(/\\//g,"_")+".preview";' +
+        'sessionStorage.removeItem("mta_signed_out");sessionStorage.removeItem("moretti_portal_state");localStorage.setItem("moretti_session",TOK);' +
+        // What the portal keeps after a sign-in, so this opens like a refresh
+        // rather than a first visit.
+        'if(!S.needsOnboarding){var C={};for(var k in S)if(k!=="session")C[k]=S[k];C.__cachedAt=Date.now();localStorage.setItem("moretti_last_student",JSON.stringify(C));}' +
+        (fresh ? '["moretti_server_history_","moretti_server_progress_","moretti_score_history_","moretti_incorrect_qs_","moretti_saved_qs_","moretti_diag_skills_","moretti_vocab_progress_","moretti_qb_progress_"].forEach(function(p){localStorage.removeItem(p+S.key);});' : '') +
         'var real=window.fetch;window.fetch=function(u,i){var b=null;try{b=JSON.parse(i&&i.body);}catch(e){}' +
         'if(!b||!b.action)return real.apply(this,arguments);var o={ok:true};' +
         'if(b.action==="resume"||b.action==="googleAuth")o=S;' +
         'else if(b.action==="getScoreHistory")o={ok:true,entries:H};' +
+        'else if(b.action==="getProgress")o=P;' +
         'else if(b.action==="getAssignments")o={ok:true,assignments:S.assignments};' +
         'else if(b.action==="nextSession")o=' + (noSession ? '{ok:true,next:null}' : '{ok:true,next:{startIso:' + JSON.stringify(soon.toISOString()) + ',allDay:false,title:"Avery - tutoring"}}') + ';' +
         'else if(b.action==="getAssignmentsCalendar")o={ok:true,assignments:S.assignments,sessions:[{startIso:' + JSON.stringify(soon.toISOString()) + ',allDay:false,title:"Avery - tutoring"}]};' +
-        'return Promise.resolve({ok:true,status:200,clone:function(){return this;},' +
-        'json:function(){return Promise.resolve(o);},text:function(){return Promise.resolve(JSON.stringify(o));}});};' +
+        'var res={ok:true,status:200,clone:function(){return this;},' +
+        'json:function(){return Promise.resolve(JSON.parse(JSON.stringify(o)));},text:function(){return Promise.resolve(JSON.stringify(o));}};' +
+        // Writes answer at once; reads are what a slow backend holds up.
+        'var wait=/^(get|resume|next)/.test(b.action)?D:0;' +
+        'return wait?new Promise(function(r){setTimeout(function(){r(res);},wait);}):Promise.resolve(res);};' +
         'window.addEventListener("load",function(){badge("PREVIEW - fake data");' +
         'if(W){setTimeout(function(){var n=document.querySelector(\'[data-nav="\'+W+\'"]\');if(n)n.click();},1500);}});' +
         'function badge(t){var d=document.createElement("div");d.textContent=t;' +
@@ -176,6 +234,9 @@
         'font:600 11px/1 Poppins,sans-serif;letter-spacing:.08em;padding:8px 12px;border-radius:20px;' +
         'box-shadow:0 6px 18px rgba(0,0,0,.25);pointer-events:none;");document.body.appendChild(d);}' +
         '})();</scr' + 'ipt>';
+      // The beta notice opens on every sign-in and would cover the very
+      // loading states the rich preview exists to show.
+      if (rich) boot = '<style>#beta-modal-overlay{display:none!important}</style>' + boot;
       document.open(); document.write(boot + html); document.close();
     }).catch(function (e) {
       intro.innerHTML = '<span class="bad">Could not load index.html:</span> ' + e.message +
