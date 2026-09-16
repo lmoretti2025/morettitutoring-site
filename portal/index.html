@@ -1486,7 +1486,11 @@
   #portal-fatal-error h1 { font-family: var(--display); font-size: 1.4rem; color: var(--text); margin-bottom: 0.9rem; }
   #portal-fatal-error p { font-family: var(--hel); font-size: 0.85rem; color: var(--mid); line-height: 1.85; }
   #portal-fatal-error .ferr-saved { color: var(--text); font-weight: 600; }
-  #dx-tab-warning { position: fixed; left: 0; right: 0; top: 0; z-index: 9998; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 0.9rem; padding: 0.8rem 1.1rem; background: #7a5f12; color: #fff; font-family: var(--hel); font-size: 0.78rem; line-height: 1.5; text-align: center; }
+  /* In flow at the top of the page, not fixed over it: #dx-topbar carries
+     the countdown and is NOT fixed, so a bar floating over the top would
+     hide the clock. This pushes the page down instead, and sticks once the
+     student scrolls past it. */
+  #dx-tab-warning { position: sticky; top: 0; z-index: 9998; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 0.9rem; padding: 0.8rem 1.1rem; background: #7a5f12; color: #fff; font-family: var(--hel); font-size: 0.78rem; line-height: 1.5; text-align: center; }
   #dx-tab-warning button { font-family: var(--hel); font-size: 0.74rem; font-weight: 600; color: #7a5f12; background: #fff; border: none; border-radius: 999px; padding: 0.4rem 1rem; min-height: 32px; cursor: pointer; }
   #portal-fatal-error .ferr-btn { margin-top: 1.4rem; font-family: var(--hel); font-size: 0.82rem; font-weight: 600; color: #fff; background: var(--red); border: none; border-radius: 999px; padding: 0.7rem 1.6rem; min-height: 44px; cursor: pointer; }
   #portal-fatal-error .ferr-btn:hover { opacity: 0.9; }
@@ -6016,7 +6020,7 @@ window.Portal = {
     close.onclick = function () { if (bar.parentNode) bar.parentNode.removeChild(bar); };
     bar.appendChild(msg);
     bar.appendChild(close);
-    document.body.appendChild(bar);
+    document.body.insertBefore(bar, document.body.firstChild);
   }
   window.addEventListener('storage', function (e) {
     if (!currentStudent || !currentStudent.key) return;
