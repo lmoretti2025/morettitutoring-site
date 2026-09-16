@@ -3985,8 +3985,13 @@ window.Portal = {
             <div class="onb-accom-group-label">Email</div>
             <input type="email" class="key-input" id="onbGuardianEmailInput" placeholder="parent@email.com" autocomplete="email" style="margin-bottom:0; padding:0.6rem 0.9rem; text-align:left; text-transform:none;">
           </div>
+          <div style="grid-column:1 / -1;">
+            <div class="onb-accom-group-label">Second parent email <span style="text-transform:none; letter-spacing:0; font-weight:400;">(optional)</span></div>
+            <input type="email" class="key-input" id="onbGuardian2EmailInput" placeholder="another@email.com" autocomplete="off" style="margin-bottom:0; padding:0.6rem 0.9rem; text-align:left; text-transform:none;">
+          </div>
         </div>
         <p class="key-error" id="onbGuardianEmailError">That doesn't look like a valid email &mdash; double-check it, or leave it blank.</p>
+        <p class="key-error" id="onbGuardian2EmailError"></p>
       </div>
       <div class="onb-dots"></div>
       <button class="key-btn" id="onb-guardian-continue">Continue</button>
@@ -4183,8 +4188,13 @@ window.Portal = {
             <div class="onb-accom-group-label">Email</div>
             <input type="email" class="key-input" id="settingsGuardianEmailInput" placeholder="parent@email.com" autocomplete="email" style="margin-bottom:0; padding:0.6rem 0.9rem; text-align:left; text-transform:none;">
           </div>
+          <div style="grid-column:1 / -1;">
+            <div class="onb-accom-group-label">Second parent email <span style="text-transform:none; letter-spacing:0; font-weight:400;">(optional)</span></div>
+            <input type="email" class="key-input" id="settingsGuardian2EmailInput" placeholder="another@email.com" autocomplete="off" style="margin-bottom:0; padding:0.6rem 0.9rem; text-align:left; text-transform:none;">
+          </div>
         </div>
         <p class="key-error" id="settingsGuardianEmailError">That doesn't look like a valid email &mdash; double-check it, or leave it blank.</p>
+        <p class="key-error" id="settingsGuardian2EmailError"></p>
       </div>
     </div>
 
@@ -6779,6 +6789,7 @@ window.Portal = {
       baselineMath: data.baselineMath || null,
       guardianName: data.guardianName || null,
       guardianEmail: data.guardianEmail || null,
+      guardian2Email: data.guardian2Email || null,
       targetScore: data.targetScore || null,
       portalLocked: !!data.portalLocked,
       portalLockReason: data.portalLockReason || '',
@@ -9199,10 +9210,29 @@ window.Portal = {
       onbHasGuardian = (i === 1);
       setSubOpen(document.getElementById('onbGuardianSub'), onbHasGuardian);
       document.getElementById('onbGuardianEmailError').style.display = 'none';
+      document.getElementById('onbGuardian2EmailError').style.display = 'none';
     });
   });
   var onbGuardianName;
   var onbGuardianEmail;
+  var onbGuardian2Email;
+  /* THE SECOND PARENT (Luca, 2026-09-16). Optional; checked the same way as
+     the first, and refused when it repeats the first, which would only send
+     every family email twice to one inbox. Returns the address, '' for
+     blank, or null after showing why it cannot be used. */
+  function secondParentEmail(prefix, firstEmail) {
+    var input = document.getElementById(prefix + 'Guardian2EmailInput');
+    var errEl = document.getElementById(prefix + 'Guardian2EmailError');
+    var v = input.value.trim().toLowerCase();
+    var msg = '';
+    if (v && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) msg = 'That second email doesn\u2019t look right. Double-check it, or leave it blank.';
+    else if (v && firstEmail && v === String(firstEmail).trim().toLowerCase()) msg = 'That\u2019s the same as the first email. Use a different one, or leave it blank.';
+    errEl.textContent = msg;
+    errEl.style.display = msg ? 'block' : 'none';
+    refitSub(errEl);
+    if (msg) { input.focus(); return null; }
+    return v;
+  }
   // Luca may already have the parent on file (a Quick add, the New student
   // dialog, or the website form). Show it rather than ask again, with the
   // "Add a contact" card pre-selected so the student sees what is there.
@@ -9212,7 +9242,9 @@ window.Portal = {
     var emailIn = document.getElementById('onbGuardianEmailInput');
     if (!nameIn.value && d.guardianName) nameIn.value = d.guardianName;
     if (!emailIn.value && d.guardianEmail) emailIn.value = d.guardianEmail;
-    if (d.guardianName || d.guardianEmail) {
+    var email2In = document.getElementById('onbGuardian2EmailInput');
+    if (!email2In.value && d.guardian2Email) email2In.value = d.guardian2Email;
+    if (d.guardianName || d.guardianEmail || d.guardian2Email) {
       var cards = document.querySelectorAll('[data-onb-guardian-card]');
       if (cards[1] && !cards[1].classList.contains('is-selected')) cards[1].click();
     }
@@ -9222,6 +9254,7 @@ window.Portal = {
     if (!onbHasGuardian) {
       onbGuardianName = undefined;
       onbGuardianEmail = undefined;
+      onbGuardian2Email = undefined;
       onbAfterGuardian();
       return;
     }
@@ -9230,12 +9263,16 @@ window.Portal = {
     var email = emailInput.value.trim();
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       document.getElementById('onbGuardianEmailError').style.display = 'block';
+      refitSub(document.getElementById('onbGuardianEmailError'));
       emailInput.focus();
       return;
     }
     document.getElementById('onbGuardianEmailError').style.display = 'none';
+    var email2 = secondParentEmail('onb', email);
+    if (email2 === null) return;
     onbGuardianName = nameInput.value.trim() || undefined;
     onbGuardianEmail = email || undefined;
+    onbGuardian2Email = email2 || undefined;
     onbAfterGuardian();
   });
   // SAT students still have accommodations to answer; everyone else is
@@ -9257,6 +9294,15 @@ window.Portal = {
      breaks row, which Continue then insisted on), and a clipped row cannot
      be tapped. Falls back to the CSS height while the panel is off screen,
      where scrollHeight reads 0. */
+  /* An open panel's height is measured when it opens (setSubOpen), so a line
+     that appears inside it afterwards, like an email error, was clipped out
+     of sight: the student pressed Continue or Save and nothing seemed to
+     happen. Anything that shows or hides a line inside an open panel calls
+     this to measure it again (Luca, 2026-09-16). */
+  function refitSub(inner) {
+    var panel = inner && inner.closest ? inner.closest('.onb-accom-sub') : null;
+    if (panel && panel.classList.contains('is-open')) setSubOpen(panel, true);
+  }
   function setSubOpen(el, open) {
     if (!el) return;
     el.classList.toggle('is-open', open);
@@ -9316,7 +9362,7 @@ window.Portal = {
       fetch(APPS_SCRIPT_URL, {
         method: 'POST',
         keepalive: true,
-        body: JSON.stringify({ action: 'saveOnboardingPrefs', key: pendingKey, testDate: onbSelectedTestDate, accomTimeMult: timeMult, accomBreakMult: breakMult, baselineType: onbBaselineType, baselineRw: onbBaselineRw, baselineMath: onbBaselineMath, guardianName: onbGuardianName, guardianEmail: onbGuardianEmail, targetScore: onbTargetScore, goal: onbGoal })
+        body: JSON.stringify({ action: 'saveOnboardingPrefs', key: pendingKey, testDate: onbSelectedTestDate, accomTimeMult: timeMult, accomBreakMult: breakMult, baselineType: onbBaselineType, baselineRw: onbBaselineRw, baselineMath: onbBaselineMath, guardianName: onbGuardianName, guardianEmail: onbGuardianEmail, guardian2Email: onbGuardian2Email, targetScore: onbTargetScore, goal: onbGoal })
       }).catch(function () {});
     } catch (e) {}
   }
@@ -9881,11 +9927,13 @@ window.Portal = {
     document.getElementById('settingsBaselineMathInput').value = currentStudent.baselineMath || '';
     updateSettingsBaselineRangeText();
 
-    settingsHasGuardian = !!(currentStudent.guardianName || currentStudent.guardianEmail);
+    settingsHasGuardian = !!(currentStudent.guardianName || currentStudent.guardianEmail || currentStudent.guardian2Email);
     document.querySelectorAll('[data-settings-guardian-card]').forEach(function (c, i) { c.classList.toggle('is-selected', (i === 1) === settingsHasGuardian); });
     setSubOpen(document.getElementById('settingsGuardianSub'), settingsHasGuardian);
     document.getElementById('settingsGuardianNameInput').value = currentStudent.guardianName || '';
     document.getElementById('settingsGuardianEmailInput').value = currentStudent.guardianEmail || '';
+    document.getElementById('settingsGuardian2EmailInput').value = currentStudent.guardian2Email || '';
+    document.getElementById('settingsGuardian2EmailError').style.display = 'none';
   }
 
   document.getElementById('nav-profile-settings').addEventListener('click', function (e) {
@@ -9942,19 +9990,23 @@ window.Portal = {
       baselineMath = math;
     }
 
-    var guardianName = null, guardianEmail = null;
+    var guardianName = null, guardianEmail = null, guardian2Email = null;
     if (settingsHasGuardian) {
       var gNameInput = document.getElementById('settingsGuardianNameInput');
       var gEmailInput = document.getElementById('settingsGuardianEmailInput');
       var gEmail = gEmailInput.value.trim();
       if (gEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(gEmail)) {
         document.getElementById('settingsGuardianEmailError').style.display = 'block';
+        refitSub(document.getElementById('settingsGuardianEmailError'));
         gEmailInput.focus();
         return;
       }
       document.getElementById('settingsGuardianEmailError').style.display = 'none';
+      var g2 = secondParentEmail('settings', gEmail);
+      if (g2 === null) return;
       guardianName = gNameInput.value.trim() || null;
       guardianEmail = gEmail || null;
+      guardian2Email = g2 || null;
     }
 
     saveBtn.disabled = true;
@@ -9970,6 +10022,7 @@ window.Portal = {
       baselineMath: baselineMath,
       guardianName: guardianName,
       guardianEmail: guardianEmail,
+      guardian2Email: guardian2Email,
       targetScore: targetScore
     }).then(function (data) {
       saveBtn.disabled = false;
@@ -9986,6 +10039,7 @@ window.Portal = {
       currentStudent.baselineMath = baselineMath;
       currentStudent.guardianName = guardianName;
       currentStudent.guardianEmail = guardianEmail;
+      currentStudent.guardian2Email = guardian2Email;
       if (targetScore !== null) currentStudent.targetScore = targetScore;
       if (typeof applyStoredAccommodations === 'function') applyStoredAccommodations();
       renderTestCountdown();

@@ -579,6 +579,8 @@
       '<input id="mta-f-gemail" type="email" placeholder="sarah@example.com">' +
       '<p class="hint" style="margin:0.35rem 0 0;">Leave blank if you do not have it. You will get a link to ' +
       'text or message instead. Note the Friday progress email needs an address, so add one later if you want that.</p>' +
+      '<label>Second parent email <span style="text-transform:none;font-weight:400;">— optional</span></label>' +
+      '<input id="mta-f-g2email" type="email" placeholder="david@example.com">' +
       '<label>Student’s email <span style="text-transform:none;font-weight:400;">— optional</span></label>' +
       '<input id="mta-f-semail" type="email" placeholder="owen@example.com">' +
       '<p class="hint" style="margin:0.35rem 0 0;">If the parent gave you the <b>child’s</b> address, put it ' +
@@ -611,9 +613,22 @@
       var email = m.querySelector('#mta-f-gemail').value.trim();
       var semail = m.querySelector('#mta-f-semail').value.trim();
       var gname = m.querySelector('#mta-f-gname').value.trim();
+      var email2 = m.querySelector('#mta-f-g2email').value.trim();
       var RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (email && !RE.test(email)) {
         err.textContent = "That parent email doesn't look right \u2014 check it, or leave it blank.";
+        return;
+      }
+      if (email2 && !RE.test(email2)) {
+        err.textContent = "That second parent email doesn't look right \u2014 check it, or leave it blank.";
+        return;
+      }
+      if (email2 && email && email2.toLowerCase() === email.toLowerCase()) {
+        err.textContent = 'The two parent emails are the same. Put it in once, or use the second parent\u2019s own address.';
+        return;
+      }
+      if (email2 && semail && email2.toLowerCase() === semail.toLowerCase()) {
+        err.textContent = 'That second parent email is the student\u2019s own address. A parent email is where the Friday update goes.';
         return;
       }
       if (semail && !RE.test(semail)) {
@@ -632,6 +647,7 @@
       btn.textContent = 'Creating…';
       post({ action: 'createStudent', adminKey: adminKey(), student: {
         guardianEmail: email,
+        guardian2Email: email2,
         studentEmail: semail,
         guardianName: gname,
         phone: m.querySelector('#mta-f-phone').value.trim(),

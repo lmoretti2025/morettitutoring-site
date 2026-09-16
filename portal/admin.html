@@ -632,6 +632,14 @@
   .ct-vs, .ct-n { color: var(--faint, #999); font-size: 12px; }
   .ct-over { color: var(--red); font-weight: 600; }
   .ct-over.ct-quiet { color: var(--faint, #999); font-weight: 400; }
+
+  /* The Portal access panel (auth-admin.js: invites, the approval queue,
+     Quick add, Full form) shows on the main roster only (Luca, 2026-09-16).
+     On a student's page, the calendar, Email families and Sources it sat over
+     the content. Hidden with !important because auth-admin.js sets its own
+     inline display when it decides the panel may show at all. Its dialogs
+     are separate elements and are unaffected. */
+  body:not([data-view="roster"]) #mta-access { display: none !important; }
 </style>
 </head>
 <body>
@@ -1239,6 +1247,8 @@
   function showView(name) {
     Object.keys(VIEWS).forEach(function (k) { VIEWS[k].style.display = (k === name) ? 'block' : 'none'; });
     currentView = name;
+    // Read by CSS: the Portal access panel belongs to the roster alone.
+    document.body.setAttribute('data-view', name);
     $('topnav').style.display = (name === 'gate') ? 'none' : 'flex';
     $('nav-roster').classList.toggle('is-on', name === 'roster' || name === 'student');
     $('nav-allcal').classList.toggle('is-on', name === 'allcal');
@@ -4395,6 +4405,6 @@
 <!-- Portal access panel (invites, approval queue, login resets). Builds
      its own markup and styles from this file's CSS variables; removing this
      tag removes the feature. -->
-<script src="auth-admin.js?v=20260905"></script>
+<script src="auth-admin.js?v=20260916a"></script>
 </body>
 </html>
