@@ -158,12 +158,10 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}
 @media(prefers-reduced-motion:reduce){.faqchev,.faqitem{transition:none}}
 
 /* the sweep is white by default; on pale buttons it has to be dark to show */
-.pcbtn::after{
-  background:linear-gradient(90deg,transparent 0%,rgba(17,17,17,.13) 50%,transparent 100%)}
 /* ══════ THE 12-WEEK SAT PROGRAM ══════
    Five stages: the promise, what you get, the case, the questions, the ask.
    Everything runs edge to edge, as the homepage does. ══════ */
-.satstage>.shell,.casesec .shell,.faqsec .shell,.pcta .shell{max-width:none;
+.satstage>.shell,.casesec .shell,.faqsec .shell{max-width:none;
   padding-left:clamp(1.25rem,3vw,2.8rem);padding-right:clamp(1.25rem,3vw,2.8rem)}
 
 /* ── 1. the promise, at full scale ── */
@@ -240,23 +238,7 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}
   border-left:2px solid var(--red-lift);border-bottom:2px solid var(--red-lift);transform:rotate(-45deg)}
 
 /* ── 5. the ask ── */
-.pcta{background:var(--red);color:#fff;text-align:center;border-bottom:none}
-.pcta .shell{padding-top:clamp(3.4rem,6.5vw,5.5rem);padding-bottom:clamp(3.4rem,6.5vw,5.5rem)}
-.pcta h2{font-family:var(--display);font-weight:700;color:#fff;letter-spacing:-.022em;
-  font-size:clamp(1.7rem,3.5vw,2.7rem);line-height:1.14}
-.pcta p{margin:1rem auto 0;max-width:54ch;font-size:clamp(.95rem,1.15vw,1.06rem);line-height:1.6;
-  color:rgba(255,255,255,.85)}
-.cta-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(1.2rem,2.6vw,2.4rem);
-  max-width:900px;margin:clamp(2rem,3.6vw,2.8rem) auto 0;text-align:left}
-@media(max-width:760px){.cta-steps{grid-template-columns:1fr}}
-.cta-steps > div{border-top:2px solid rgba(255,255,255,.5);padding-top:.85rem}
-.cta-steps i{font-family:var(--display);font-style:normal;font-weight:700;font-size:.8rem;
-  color:rgba(255,255,255,.7);letter-spacing:.14em}
-.cta-steps b{display:block;margin-top:.4rem;font-size:.95rem;font-weight:600;color:#fff}
-.cta-steps span{display:block;margin-top:.25rem;font-size:.85rem;line-height:1.5;color:rgba(255,255,255,.75)}
-.pcbtn{margin-top:clamp(1.8rem,3.2vw,2.6rem);background:#fff;color:var(--red);border:1px solid #fff;
-  border-radius:0;padding:1.15rem 2.7rem;font-size:.76rem;letter-spacing:.15em}
-.pcbtn:hover{background:rgba(255,255,255,.88);color:var(--red);transform:translateY(-2px)}
+@media(max-width:760px){}
 @media(prefers-reduced-motion:reduce){
   .sat-h1 .ln,.sat-lead,.sat-ctas,.sat-count{animation:none;opacity:1;clip-path:none;filter:none;transform:none}
   .sp-a li::before{animation:none;width:10px}
@@ -364,7 +346,9 @@ nav.is-red .navmenu{background:var(--red);border-top-color:rgba(255,255,255,.2)}
    keeps its size. */
 </style>
 <link rel="stylesheet" href="site.css">
+<link rel="stylesheet" href="lead-form.css">
 <script src="analytics.js" defer></script>
+<script src="portal/backend-url.js"></script>
 </head>
 <body>
 
@@ -394,7 +378,7 @@ nav.is-red .navmenu{background:var(--red);border-top-color:rgba(255,255,255,.2)}
     <h1 class="sat-h1"><span class="ln">We don&rsquo;t stop</span><span class="ln"><em>at good enough.</em></span></h1>
     <p class="sat-lead">No one can honestly guarantee an admissions decision. Schools weigh far more than an essay, and anyone who promises otherwise is overselling. What we can promise: every essay gets revised until it is the strongest work your student is capable of, not until a session count runs out.</p>
     <div class="sat-ctas">
-      <a class="btn btn-red shimmer" href="index.html?start=call#start"><span>Book a free call</span></a>
+      <a class="btn btn-red shimmer" href="#start"><span>Book a free call</span></a>
     </div>
     <p class="sat-count"><span class="lbl" style="margin:0">Rolling enrollment &middot; in person or online &middot; every essay, every deadline</span></p>
   </div>
@@ -493,7 +477,7 @@ nav.is-red .navmenu{background:var(--red);border-top-color:rgba(255,255,255,.2)}
       <h2>What parents ask.</h2>
       <p>Anything not covered here, just ask. I answer these myself.</p>
     </div>
-    <a class="btn faqbtn shimmer" href="index.html#start"><span>Ask a question</span></a>
+    <a class="btn faqbtn shimmer" href="#start"><span>Ask a question</span></a>
   </div>
   <div class="faqgrid">
       <div class="faqcol">
@@ -510,15 +494,34 @@ nav.is-red .navmenu{background:var(--red);border-top-color:rgba(255,255,255,.2)}
   </div>
 </div></section>
 
-<section class="pcta"><div class="shell">
-  <h2 class="rv">Start the conversation.</h2>
-  <p class="rv d1">Tell us about your student and I&rsquo;ll follow up personally, usually within the hour. No obligation.</p>
-  <div class="cta-steps rv d1">
-    <div><i>1</i><b>We talk about your student</b><span>The list, the timeline, the story so far.</span></div>
-    <div><i>2</i><b>We map the deadlines</b><span>Early Action, ED and Regular, together.</span></div>
-    <div><i>3</i><b>Drafting starts</b><span>The personal statement first, then the rest.</span></div>
+<section id="start" class="capture"><div class="shell">
+  <div class="capintro">
+    <h2 class="rv d1">Start with a <span class="uline">free<svg class="uline-svg" viewBox="0 0 120 22" preserveAspectRatio="none" aria-hidden="true"><path class="u1" d="M3 9.5C22 5.6 47 4.4 70 5.2c17 .6 33 2 46 3.4"/><path class="u2" d="M6 16.4C26 12.8 52 11.6 76 12.2c15 .4 29 1.5 39 2.7"/></svg></span> call.</h2>
+    <p class="lead rv d2">I reply personally, usually within the hour. Tell me where your student is in the process, and we map out the essays and the deadlines together.</p>
   </div>
-  <a class="btn pcbtn shimmer rv d2" href="index.html?start=call#start"><span>Book a free call</span></a>
+
+  <div class="bookcard rv d2">
+    <form id="reserve-form" novalidate data-interest="Essays and applications">
+      <div class="hp-field" aria-hidden="true">
+        <label for="rf-hp">Leave this field blank</label>
+        <input type="text" id="rf-hp" name="rf_x7q2" tabindex="-1" autocomplete="off" data-lpignore="true" data-1p-ignore data-form-type="other">
+      </div>
+      <div class="frow">
+        <div class="ff"><label class="fl" for="rf-name">Your name</label><input class="fi" type="text" id="rf-name" name="parentName" required></div>
+        <div class="ff"><label class="fl" for="rf-phone">Phone</label><input class="fi" type="tel" id="rf-phone" name="phone" placeholder="e.g. (201) 555-0100" required></div>
+      </div>
+      <div class="ff"><label class="fl" for="rf-email">Email</label><input class="fi" type="email" id="rf-email" name="email" required></div>
+      <div class="ff"><label class="fl" for="rf-message">What your student needs help with <em>(optional)</em></label>
+        <textarea class="fi" id="rf-message" name="message" rows="2" placeholder="Grade, schools on the list, deadlines&hellip;"></textarea></div>
+      <button type="submit" class="fsub shimmer" id="rf-submit"><span>Get started</span></button>
+      <p id="rf-invalid" class="fmsg err" role="alert"></p>
+      <p class="fnote" id="rf-note">The call costs nothing either way, and you have the plan and the cost in writing before any drafting starts. <a href="#faq">How pricing works &rarr;</a></p>
+      <p id="rf-success" class="fmsg ok">Thanks, check your email for confirmation. I&rsquo;ll follow up personally, usually within the hour.</p>
+      <p id="rf-error" class="fmsg err">Something went wrong. Please call (201) 275-2791 directly.</p>
+    </form>
+  </div>
+
+  <p class="capphone rv d3">Prefer to talk now?<a href="tel:2012752791">(201) 275-2791</a></p>
 </div></section>
 
 <footer><div class="shell">
@@ -605,5 +608,6 @@ document.documentElement.classList.add('js');
 })();
 </script>
 <script src="site.js"></script>
+<script src="lead-form.js"></script>
 </body>
 </html>
