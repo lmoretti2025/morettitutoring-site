@@ -356,29 +356,6 @@ nav.is-red .navmenu{background:var(--red);border-top-color:rgba(255,255,255,.2)}
   line-height:1.2;letter-spacing:-.015em;margin-top:.55rem}
 .facts p{margin-top:.6rem;font-size:.92rem;line-height:1.62;color:rgba(237,231,229,.66);max-width:40ch}
 
-/* the process, numbered because it is one */
-.howsec{background:var(--paper)}
-.howsec .lbl,.fitsec .lbl{color:var(--red)}
-.howlist{list-style:none;margin:0;padding:0;counter-reset:how;display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(1.6rem,3vw,2.6rem) clamp(1.4rem,3vw,2.8rem)}
-@media(max-width:960px){.howlist{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:600px){.howlist{grid-template-columns:1fr}}
-.howlist li{counter-increment:how;border-top:2px solid var(--ink);padding-top:1rem}
-.howlist li::before{content:counter(how,decimal-leading-zero);display:block;font-family:var(--display);
-  font-weight:700;font-size:.85rem;letter-spacing:.08em;color:var(--red)}
-.howlist b{display:block;margin-top:.35rem;font-family:var(--display);font-weight:700;color:var(--ink);
-  font-size:clamp(1.12rem,1.6vw,1.3rem);line-height:1.25}
-.howlist p{margin-top:.5rem;font-size:.92rem;line-height:1.65}
-
-/* who it is for */
-.fitsec{background:var(--sunk);border-bottom:none}
-.fitgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.8rem}
-@media(max-width:860px){.fitgrid{grid-template-columns:1fr}}
-.fitgrid > div{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:clamp(1.2rem,2.2vw,1.6rem)}
-.fitgrid h3{font-family:var(--display);font-weight:700;font-size:clamp(1.12rem,1.6vw,1.3rem);line-height:1.25}
-.fitgrid p{margin-top:.6rem;font-size:.92rem;line-height:1.62}
-.fitnote{margin-top:clamp(1.4rem,2.6vw,2rem);max-width:72ch;font-size:.97rem;line-height:1.68}
-.fitnote b{color:var(--ink);font-weight:600}
 
 /* the keyword heading: styled as the small label above the hook */
 .satstage h1.lbl{font-family:var(--sans);font-size:.61rem;font-weight:600;line-height:1.6;letter-spacing:.22em;
@@ -386,7 +363,66 @@ nav.is-red .navmenu{background:var(--red);border-top-color:rgba(255,255,255,.2)}
 .sat-proof a{margin-left:.2rem;white-space:nowrap;color:rgba(237,231,229,.85);border-bottom:1px solid rgba(255,255,255,.3)}
 .sat-proof a:hover{color:#fff;border-bottom-color:#fff}
 
-/* what the free report shows, on the black */
+
+
+/* ── how the work runs: the six stages sit on a rising score line inside
+      a likely-range band that narrows as data comes in (the portal's own
+      picture of progress). Dots and SVG share one coordinate system in
+      percentages, so they stay aligned at any width. Below 1000px the line
+      gives way to a vertical rail. ── */
+.howsec{background:var(--paper)}
+.howsec .lbl,.fitsec .lbl{color:var(--red)}
+.route-key{display:flex;align-items:center;gap:.6rem;margin-top:.9rem;font-size:.86rem;color:var(--muted)}
+.route-key i{flex:none;width:28px;height:12px;border-radius:3px;background:rgba(176,39,28,.14);border:1px solid rgba(176,39,28,.3)}
+.route{position:relative;height:clamp(130px,14vw,170px);margin:clamp(1.2rem,2.4vw,2rem) 0 .4rem}
+.route svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.route-band{fill:rgba(176,39,28,.12)}
+.route-line{fill:none;stroke:var(--ink);stroke-width:2.5;stroke-linecap:round}
+.route-dot{position:absolute;transform:translate(-50%,-50%);display:grid;place-items:center;width:34px;height:34px;
+  border-radius:50%;background:var(--red);color:#fff;font-family:var(--display);font-weight:700;font-size:.9rem;
+  box-shadow:0 0 0 5px var(--paper)}
+.route-dot.is-last{background:var(--ink)}
+.route-steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:clamp(.8rem,1.6vw,1.4rem)}
+.route-steps li{text-align:center}
+.route-n{display:none}
+.route-steps b{display:block;font-family:var(--display);font-weight:700;color:var(--ink);font-size:clamp(1rem,1.3vw,1.15rem);line-height:1.25}
+.route-steps p{margin-top:.45rem;font-size:.86rem;line-height:1.55}
+@media(max-width:1000px){
+  .route{display:none}
+  .route-steps{grid-template-columns:1fr;gap:0;position:relative;margin-top:1.2rem;max-width:40rem}
+  .route-steps::before{content:"";position:absolute;left:16px;top:18px;bottom:18px;width:2px;
+    background:linear-gradient(var(--line),var(--red))}
+  .route-steps li{text-align:left;position:relative;padding:0 0 1.5rem 3.4rem}
+  .route-n{display:grid;place-items:center;position:absolute;left:0;top:-.1rem;width:34px;height:34px;border-radius:50%;
+    background:var(--red);color:#fff;font-family:var(--display);font-weight:700;font-size:.8rem;box-shadow:0 0 0 5px var(--paper)}
+  .route-steps li:last-child .route-n{background:var(--ink)}
+}
+
+/* ── is it the right fit: each situation carries a small example trace ── */
+.fitsec{background:var(--sunk);border-bottom:none}
+.fitgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.8rem}
+@media(max-width:860px){.fitgrid{grid-template-columns:1fr}}
+.fitgrid > div{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:clamp(1.1rem,2vw,1.5rem)}
+.fit-chart{display:block;width:100%;height:auto;max-height:110px;margin-bottom:1rem;overflow:visible}
+.fc-band{fill:rgba(176,39,28,.08);stroke:rgba(176,39,28,.25);stroke-dasharray:4 4}
+.fc-line{fill:none;stroke:var(--ink);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.fc-dot{fill:var(--ink)}
+.fc-open{fill:var(--surface);stroke:var(--red);stroke-width:2.5}
+.fc-target{stroke:var(--red);stroke-width:1.5;stroke-dasharray:5 4}
+.fc-deadline{stroke:var(--line);stroke-width:1.5;stroke-dasharray:3 4}
+.fc-t{font-family:var(--sans);font-size:11px;font-weight:500;fill:var(--muted)}
+.fc-t-red{fill:var(--red)}
+.fitgrid h3{font-family:var(--display);font-weight:700;font-size:clamp(1.12rem,1.6vw,1.3rem);line-height:1.25}
+.fitgrid p{margin-top:.6rem;font-size:.92rem;line-height:1.62}
+.fitnote{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr);gap:clamp(1rem,3vw,2.6rem);align-items:center;
+  margin-top:clamp(1.4rem,2.6vw,2rem)}
+@media(max-width:860px){.fitnote{grid-template-columns:1fr}}
+.fitnote p{font-size:.97rem;line-height:1.68}
+.fitnote .fit-promise{border-left:3px solid var(--red);padding:.2rem 0 .2rem 1.1rem;font-family:var(--display);
+  font-size:clamp(1.1rem,1.6vw,1.3rem);line-height:1.45;color:var(--ink)}
+.fit-cap{margin-top:1rem;font-size:.74rem;color:var(--muted)}
+
+/* ── the free report: four things it shows, each drawn ── */
 .reportsec{background:#000;color:#EDE7E5;border-bottom:none}
 .reportsec .shell{max-width:none;padding-left:clamp(1.25rem,3vw,2.8rem);padding-right:clamp(1.25rem,3vw,2.8rem)}
 .report-head{max-width:60ch;margin-bottom:clamp(1.8rem,3.4vw,2.6rem)}
@@ -394,16 +430,29 @@ nav.is-red .navmenu{background:var(--red);border-top-color:rgba(255,255,255,.2)}
 .report-head h2{font-family:var(--display);font-weight:700;color:#fff;letter-spacing:-.022em;line-height:1.12;
   font-size:clamp(1.6rem,3.2vw,2.5rem);margin-top:.8rem}
 .report-head p{margin-top:.9rem;font-size:.97rem;line-height:1.62;color:rgba(237,231,229,.7)}
-.reportgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(1.2rem,2.6vw,2.4rem);
-  margin-bottom:clamp(1.8rem,3.4vw,2.6rem)}
-@media(max-width:960px){.reportgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.reportgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.8rem;margin-bottom:clamp(1.6rem,3vw,2.4rem)}
+@media(max-width:1000px){.reportgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:560px){.reportgrid{grid-template-columns:1fr}}
-.reportgrid > div{border-top:1px solid rgba(255,255,255,.2);padding-top:1rem}
-.reportgrid h3{font-family:var(--display);font-weight:700;color:#fff;font-size:clamp(1.1rem,1.5vw,1.25rem);line-height:1.25}
-.reportgrid p{margin-top:.5rem;font-size:.9rem;line-height:1.62;color:rgba(237,231,229,.66)}
+.reportgrid figure{margin:0;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:14px;
+  padding:clamp(1rem,1.8vw,1.3rem);display:flex;flex-direction:column}
+.rp-chart{display:block;width:100%;height:auto;margin-bottom:1rem;overflow:visible}
+.rp-axis{stroke:rgba(255,255,255,.25);stroke-width:1.5}
+.rp-band{fill:rgba(210,66,52,.28);stroke:rgba(210,66,52,.6)}
+.rp-mark{stroke:#fff;stroke-width:2}
+.rp-seg1{fill:var(--red-lift)}
+.rp-seg2{fill:rgba(210,66,52,.5)}
+.rp-seg3{fill:rgba(255,255,255,.25)}
+.rp-bar{fill:rgba(255,255,255,.28)}
+.rp-bar-hi{fill:var(--red-lift)}
+.rp-budget{stroke:#fff;stroke-width:1.2;stroke-dasharray:4 4}
+.rp-t{font-family:var(--sans);font-size:11px;fill:rgba(237,231,229,.62)}
+.rp-t-hi{fill:#fff;font-weight:600;font-size:13px}
+.reportgrid h3{font-family:var(--display);font-weight:700;color:#fff;font-size:clamp(1.08rem,1.4vw,1.2rem);line-height:1.25}
+.reportgrid p{margin-top:.45rem;font-size:.88rem;line-height:1.58;color:rgba(237,231,229,.66)}
+.report-foot{display:flex;flex-wrap:wrap;align-items:center;gap:.8rem 1.4rem}
+.report-foot span{font-size:.76rem;color:rgba(237,231,229,.5)}
 .reportsec .btn-b{color:#fff;border:1px solid rgba(255,255,255,.34)}
 .reportsec .btn-b:hover{background:#fff;color:var(--ink);border-color:#fff}
-
 </style>
 <link rel="stylesheet" href="site.css">
 <link rel="stylesheet" href="lead-form.css">
@@ -505,28 +554,40 @@ nav.is-red .navmenu{background:var(--red);border-top-color:rgba(255,255,255,.2)}
   <div class="sechead rv">
     <span class="lbl">How the work runs</span>
     <h2>From the diagnostic to test day.</h2>
+    <p class="route-key"><i aria-hidden="true"></i>The shaded band is the range the score most likely sits in. It narrows as each practice test adds data.</p>
   </div>
-  <ol class="howlist">
-    <li class="rv"><b>The free diagnostic</b><p>Every student starts here, even with a recent score in hand. The diagnostic is a full-length timed test that shows the data behind a score: how long each answer took, which misses were real gaps and which were guesses, and which questions were never reached.</p></li>
-    <li class="rv d1"><b>We walk through the report</b><p>A short call on what the report shows. It ranks every skill by how many points it is costing and how teachable it is, the sessions follow that order, and you have the plan and the total cost in writing before the first one.</p></li>
-    <li class="rv d2"><b>One pattern at a time</b><p>Your student explains each step, then works harder versions of the question they just got right, until the method is fast and holds up on questions they have never seen. Some patterns take thirty minutes. Some take several sessions.</p></li>
-    <li class="rv"><b>Between sessions</b><p>Practice assigned in the portal from the skills we worked on, a weekly email to you on what we covered and what comes next, quick questions by message, and an open online office hour every week.</p></li>
-    <li class="rv d1"><b>Full-length checkpoints</b><p>Timed practice tests at the points where the result will tell us something. The portal separates real progress from a good or bad morning, so a sixty-point swing is never mistaken for a trend.</p></li>
-    <li class="rv d2"><b>The final weeks</b><p>The work shifts from learning to performing: pacing, which questions to leave and come back to, and the decisions that protect points on test day. No new rules at the last minute.</p></li>
+  <div class="route rv" aria-hidden="true">
+    <svg viewBox="0 0 600 140" preserveAspectRatio="none" focusable="false">
+      <path class="route-band" d="M0.0 91.0 C8.3 90.5 25.0 89.7 50.0 88.0 C75.0 86.3 116.7 84.0 150.0 81.0 C183.3 78.0 216.7 74.2 250.0 70.0 C283.3 65.8 316.7 61.2 350.0 56.0 C383.3 50.8 416.7 44.7 450.0 39.0 C483.3 33.3 525.0 25.7 550.0 22.0 C575.0 18.3 591.7 17.8 600.0 17.0 L600.0 27.0 C591.7 28.2 575.0 29.0 550.0 34.0 C525.0 39.0 483.3 49.3 450.0 57.0 C416.7 64.7 383.3 72.5 350.0 80.0 C316.7 87.5 283.3 95.2 250.0 102.0 C216.7 108.8 183.3 115.3 150.0 121.0 C116.7 126.7 75.0 132.0 50.0 136.0 C25.0 140.0 8.3 143.5 0.0 145.0 Z"/>
+      <path class="route-line" d="M0.0 118.0 C8.3 117.0 25.0 114.8 50.0 112.0 C75.0 109.2 116.7 105.3 150.0 101.0 C183.3 96.7 216.7 91.5 250.0 86.0 C283.3 80.5 316.7 74.3 350.0 68.0 C383.3 61.7 416.7 54.7 450.0 48.0 C483.3 41.3 525.0 32.3 550.0 28.0 C575.0 23.7 591.7 23.0 600.0 22.0" vector-effect="non-scaling-stroke"/>
+    </svg>
+    <span class="route-dot" style="left:8.3333%;top:80.0000%">1</span><span class="route-dot" style="left:25.0000%;top:72.1429%">2</span><span class="route-dot" style="left:41.6667%;top:61.4286%">3</span><span class="route-dot" style="left:58.3333%;top:48.5714%">4</span><span class="route-dot" style="left:75.0000%;top:34.2857%">5</span><span class="route-dot is-last" style="left:91.6667%;top:20.0000%">6</span>
+  </div>
+  <ol class="route-steps">
+      <li class="rv"><span class="route-n">01</span><b>The free diagnostic</b><p>A full-length timed test that shows the data behind the score, even if you have a recent one.</p></li>
+      <li class="rv d1"><span class="route-n">02</span><b>The report and your plan</b><p>Every skill ranked by points and teachability, with the hours and total cost in writing.</p></li>
+      <li class="rv d2"><span class="route-n">03</span><b>One pattern at a time</b><p>Harder versions of what your student just got right, until the method holds up on new questions.</p></li>
+      <li class="rv"><span class="route-n">04</span><b>Between sessions</b><p>Portal practice from the week&rsquo;s skills, the Friday email, office hours, and answers whenever needed.</p></li>
+      <li class="rv d1"><span class="route-n">05</span><b>Full-length checkpoints</b><p>Timed tests where the result tells us something. A sixty-point swing is never mistaken for a trend.</p></li>
+      <li class="rv d2"><span class="route-n">06</span><b>Test day</b><p>The final weeks go to pacing and the decisions that protect points. No new rules at the last minute.</p></li>
   </ol>
 </div></section>
 
 <section class="fitsec"><div class="shell">
   <div class="sechead rv">
     <span class="lbl">Is it the right fit?</span>
-    <h2>When one-on-one tutoring makes sense.</h2>
+    <h2>Does one of these sound like your student?</h2>
   </div>
   <div class="fitgrid">
-    <div class="rv"><h3>The score has stopped moving.</h3><p>Your student has studied and taken practice tests, and the score keeps landing in the same range. Something specific is holding it there, and it rarely shows on a score report.</p></div>
-    <div class="rv d1"><h3>The target is 1500 or higher.</h3><p>Near the top of the scale every question counts for more, and the last points come from timing and habits as much as content.</p></div>
-    <div class="rv d2"><h3>There is one attempt left.</h3><p>With applications close, there is no room for a sitting that goes sideways. The plan has to aim at the one date that counts.</p></div>
+    <div class="rv"><svg class="fit-chart" viewBox="0 0 240 96" role="img" aria-label="Example: four practice tests at 1180, 1190, 1170 and 1180"><rect class="fc-band" x="12" y="36" width="216" height="28" rx="4"/><polyline class="fc-line" points="24,52 88,44 152,56 216,48"/><circle class="fc-dot" cx="24" cy="52" r="4"/><circle class="fc-dot" cx="88" cy="44" r="4"/><circle class="fc-dot" cx="152" cy="56" r="4"/><circle class="fc-dot" cx="216" cy="48" r="4"/><text class="fc-t" x="216" y="30" text-anchor="end">1180, again</text></svg><h3>The score has stopped moving.</h3><p>Your student has studied and taken practice tests, and the score keeps landing in the same range. Something specific is holding it there, and it rarely shows on a score report.</p></div>
+    <div class="rv d1"><svg class="fit-chart" viewBox="0 0 240 96" role="img" aria-label="Example: practice tests at 1420, 1440, 1450 and 1460, below a 1500 target"><line class="fc-target" x1="12" y1="20" x2="228" y2="20"/><text class="fc-t fc-t-red" x="12" y="14">1500 target</text><polyline class="fc-line" points="24,62 88,54 152,48 216,44"/><circle class="fc-dot" cx="24" cy="62" r="4"/><circle class="fc-dot" cx="88" cy="54" r="4"/><circle class="fc-dot" cx="152" cy="48" r="4"/><circle class="fc-dot" cx="216" cy="44" r="4"/><text class="fc-t" x="216" y="80" text-anchor="end">1460</text></svg><h3>The target is 1500 or higher.</h3><p>Near the top of the scale every question counts for more, and the last points come from timing and habits as much as content.</p></div>
+    <div class="rv d2"><svg class="fit-chart" viewBox="0 0 240 96" role="img" aria-label="Example: three past scores and one sitting left before applications"><line class="fc-deadline" x1="216" y1="10" x2="216" y2="86"/><polyline class="fc-line" points="24,66 88,58 152,52 216,36"/><circle class="fc-dot" cx="24" cy="66" r="4"/><circle class="fc-dot" cx="88" cy="58" r="4"/><circle class="fc-dot" cx="152" cy="52" r="4"/><circle class="fc-open" cx="216" cy="36" r="6"/><text class="fc-t fc-t-red" x="206" y="84" text-anchor="end">last sitting</text></svg><h3>There is one attempt left.</h3><p>With applications close, there is no room for a sitting that goes sideways. The plan has to aim at the one date that counts.</p></div>
   </div>
-  <p class="fitnote rv">A group class covers the syllabus, which helps when the syllabus is the problem. It cannot watch how your student reads a question, where the time goes, or the moment they drop a method that was working. One-on-one sessions can. <b>And if a class, practicing on their own, or a later test date would serve your student better, I will tell you on the call.</b></p>
+  <div class="fitnote rv">
+    <p>A group class covers the syllabus, which helps when the syllabus is the problem. It cannot watch how your student reads a question, where the time goes, or the moment they drop a method that was working. One-on-one sessions can.</p>
+    <p class="fit-promise">If a class, practicing on their own, or a later test date would serve your student better, I will tell you on the call.</p>
+  </div>
+  <p class="fit-cap rv">Charts are examples, not real students.</p>
 </div></section>
 
 <section class="reportsec"><div class="shell">
@@ -536,12 +597,33 @@ nav.is-red .navmenu{background:var(--red);border-top-color:rgba(255,255,255,.2)}
     <p>Every student takes the diagnostic first, and you keep the report whether or not we work together.</p>
   </div>
   <div class="reportgrid">
-    <div class="rv"><h3>The score as a range</h3><p>One sitting can&rsquo;t pin a score down. The report shows the range your student most likely sits in, and later the portal calls a change real only once it clears that noise.</p></div>
-    <div class="rv d1"><h3>Three kinds of mistakes</h3><p>Questions your student didn&rsquo;t know, questions they got right but too slowly, and questions they never reached. Each one needs different work.</p></div>
-    <div class="rv d2"><h3>Where the points are</h3><p>Skills ranked by how many points they cost and how teachable they are, so the first sessions go where the score moves most.</p></div>
-    <div class="rv"><h3>Time, question by question</h3><p>Every answer measured against a fixed time budget, so a student who is evenly slow still shows up.</p></div>
+    <figure class="rv"><svg class="rp-chart" viewBox="0 0 240 90" role="img" aria-label="A score scale with the likely range 1170 to 1330 shaded and 1250 marked">
+  <line class="rp-axis" x1="10" y1="56" x2="230" y2="56"/>
+  <rect class="rp-band" x="66" y="40" width="108" height="32" rx="4"/>
+  <line class="rp-mark" x1="120" y1="32" x2="120" y2="80"/>
+  <text class="rp-t rp-t-hi" x="120" y="24" text-anchor="middle">1250</text>
+  <text class="rp-t" x="66" y="88" text-anchor="middle">1170</text>
+  <text class="rp-t" x="174" y="88" text-anchor="middle">1330</text>
+</svg><figcaption><h3>The score as a range</h3><p>One sitting can&rsquo;t pin a score down, so the report shows the range your student most likely sits in.</p></figcaption></figure>
+    <figure class="rv d1"><svg class="rp-chart" viewBox="0 0 240 90" role="img" aria-label="A bar split into three kinds of mistakes: didn't know, too slow, never reached">
+  <rect class="rp-seg1" x="10" y="30" width="112" height="24" rx="3"/>
+  <rect class="rp-seg2" x="124" y="30" width="66" height="24" rx="3"/>
+  <rect class="rp-seg3" x="192" y="30" width="38" height="24" rx="3"/>
+  <text class="rp-t" x="10" y="20">didn&#8217;t know</text>
+  <text class="rp-t" x="124" y="72">too slow</text>
+  <text class="rp-t" x="230" y="20" text-anchor="end">never reached</text>
+</svg><figcaption><h3>Three kinds of mistakes</h3><p>Didn&rsquo;t know it, got it right too slowly, or never reached it. Each one needs different work.</p></figcaption></figure>
+    <figure class="rv d2"><svg class="rp-chart" viewBox="0 0 240 90" role="img" aria-label="Skills ranked by points at stake: Algebra first, then Advanced Math, then Geometry">
+  <text class="rp-t" x="10" y="20">Algebra</text><rect class="rp-bar rp-bar-hi" x="96" y="10" width="134" height="14" rx="3"/>
+  <text class="rp-t" x="10" y="48">Adv. Math</text><rect class="rp-bar" x="96" y="38" width="88" height="14" rx="3"/>
+  <text class="rp-t" x="10" y="76">Geometry</text><rect class="rp-bar" x="96" y="66" width="44" height="14" rx="3"/>
+</svg><figcaption><h3>Where the points are</h3><p>Skills ranked by the points they cost and how teachable they are, so the first sessions go where the score moves most.</p></figcaption></figure>
+    <figure class="rv"><svg class="rp-chart" viewBox="0 0 240 90" role="img" aria-label="Time on each question against a dashed time budget, with slow questions highlighted"><rect class="rp-bar" x="12" y="48" width="14" height="30" rx="2"/><rect class="rp-bar" x="34" y="34" width="14" height="44" rx="2"/><rect class="rp-bar" x="56" y="52" width="14" height="26" rx="2"/><rect class="rp-bar rp-bar-hi" x="78" y="20" width="14" height="58" rx="2"/><rect class="rp-bar" x="100" y="44" width="14" height="34" rx="2"/><rect class="rp-bar rp-bar-hi" x="122" y="16" width="14" height="62" rx="2"/><rect class="rp-bar" x="144" y="50" width="14" height="28" rx="2"/><rect class="rp-bar" x="166" y="38" width="14" height="40" rx="2"/><rect class="rp-bar" x="188" y="56" width="14" height="22" rx="2"/><rect class="rp-bar rp-bar-hi" x="210" y="28" width="14" height="50" rx="2"/><line class="rp-budget" x1="6" y1="33" x2="234" y2="33"/><text class="rp-t" x="234" y="26" text-anchor="end">time budget</text></svg><figcaption><h3>Time, question by question</h3><p>Every answer measured against a fixed time budget, so a student who is evenly slow still shows up.</p></figcaption></figure>
   </div>
-  <a class="btn btn-b shimmer rv" href="diagnostic.html"><span>See a live sample report</span></a>
+  <div class="report-foot rv">
+    <a class="btn btn-b shimmer" href="diagnostic.html"><span>See a live sample report</span></a>
+    <span>Drawings of what the report shows. The live sample has the real charts.</span>
+  </div>
 </div></section>
 
 <section class="faqsec" id="faq"><div class="shell">
@@ -568,14 +650,6 @@ nav.is-red .navmenu{background:var(--red);border-top-color:rgba(255,255,255,.2)}
                 <details class="faqitem rv" name="faq-prep-course.html"><summary>How much does tutoring cost?<svg class="faqchev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6l5 5 5-5"/></svg></summary><div class="faqa">Sessions are billed by the hour, individually or from a prepaid pack, and how many your student needs depends on where they start and what they are aiming for: a few sessions before a retake, a full season from a standing start, Math only, two siblings at once. One posted number would be wrong for most families, so once we have seen the diagnostic I give you a recommended number of sessions and the total cost in writing, before anything is scheduled. Packs are prepaid hours that stay good for six months, and if tutoring ends early, unused hours are refunded as the <a href="terms.html">terms</a> describe. The call and the diagnostic cost nothing either way.</div></details>
         <details class="faqitem rv" name="faq-prep-course.html"><summary>Why not free practice tests or ChatGPT?<svg class="faqchev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6l5 5 5-5"/></svg></summary><div class="faqa">Use the free tests. Bluebook&rsquo;s official practice tests are the best free material there is, and your student will take them with me too. What they don&rsquo;t tell you is why the score stays where it is: which misses were gaps, which were timing, and which were guesses. AI explanations help less than they seem to, as well: in <a href="https://knowledge.wharton.upenn.edu/article/without-guardrails-generative-ai-can-harm-education/" target="_blank" rel="noopener">one study</a>, high school students who practiced with ChatGPT did better on the practice problems and worse on the test that followed. Sessions are built so the method holds up when no one is helping.</div></details>
       </div>
-  </div>
-</div></section>
-
-<section class="xsell"><div class="shell">
-  <span class="lbl">Also one-on-one with Luca</span>
-  <div class="xsell-links">
-    <a href="math-program.html"><b>Math tutoring</b><span>Algebra 1 through Multivariable Calculus</span></a>
-    <a href="applications.html"><b>College essay coaching</b><span>The personal statement and every supplemental</span></a>
   </div>
 </div></section>
 
