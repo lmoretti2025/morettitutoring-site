@@ -452,6 +452,54 @@ nav.is-red .navmenu{background:var(--red);border-top-color:rgba(255,255,255,.2)}
 .report-foot span{font-size:.76rem;color:rgba(237,231,229,.5)}
 .report-panel .btn-b{color:#fff;border:1px solid rgba(255,255,255,.34)}
 .report-panel .btn-b:hover{background:#fff;color:var(--ink);border-color:#fff}
+
+/* ══ MOTION, matched to the score report: charts wipe open left to right and
+      bars settle over about two seconds on the report's own easing, once the
+      section scrolls into view. Nothing is hidden without JS, and reduced
+      motion shows every chart finished. ══ */
+:root{--settle:cubic-bezier(.45,.5,.3,1)}
+/* the route: band and line wipe open, dots land in order as the wipe passes */
+.route svg{transition:clip-path 2.4s var(--settle) .15s;clip-path:inset(-20% 0 -20% 0)}
+.js .route.rv:not(.in) svg{clip-path:inset(-20% 100% -20% 0)}
+.route-dot{transition:transform .6s cubic-bezier(.34,1.4,.64,1),opacity .4s ease;transition-delay:calc(.35s + var(--i,0) * .36s)}
+.js .route.rv:not(.in) .route-dot{opacity:0;transform:translate(-50%,-50%) scale(.3)}
+.route-steps li{transition-delay:calc(.2s + var(--i,0) * .12s)}
+/* example traces in the fit cards */
+.fit-chart{transition:clip-path 2s var(--settle) .35s;clip-path:inset(-10% -10% -10% -10%)}
+.js .fitgrid .rv:not(.in) .fit-chart{clip-path:inset(-10% 110% -10% -10%)}
+.fc-open{transform-box:fill-box;transform-origin:center;transition:transform .6s cubic-bezier(.34,1.4,.64,1) 2s}
+.js .fitgrid .rv:not(.in) .fc-open{transform:scale(0)}
+/* the report panel: each card's drawing settles in turn */
+.rp-chart .rp-grow-x{transform-box:fill-box;transform-origin:left center;transition:transform 2s var(--settle)}
+.rp-chart .rp-grow-c{transform-box:fill-box;transform-origin:center;transition:transform 2s var(--settle)}
+.js .report-panel:not(.in) .rp-grow-x,.js .report-panel:not(.in) .rp-grow-c{transform:scaleX(0)}
+.rp-mark{transition:opacity .5s ease 1.2s}
+.js .report-panel:not(.in) .rp-mark{opacity:0}
+.reportgrid figure:nth-child(1) .rp-chart *{transition-delay:.3s}
+.reportgrid figure:nth-child(2) .rp-chart *{transition-delay:.55s}
+.reportgrid figure:nth-child(3) .rp-chart *{transition-delay:.8s}
+.reportgrid figure:nth-child(1) .rp-mark{transition-delay:1.5s}
+/* the route card: first looks draw in order, then the trips back */
+.rr-stripe{fill:rgba(255,255,255,.04)}
+.rr-ok{fill:rgba(110,210,140,.9)}
+.rr-bad{fill:var(--red-lift)}
+.rr-first{fill:rgba(255,255,255,.82)}
+.rr-back{fill:var(--gold)}
+.rr-change{stroke:var(--red-lift);stroke-width:2}
+.rp-t-gold{fill:var(--gold)}
+.rr-first,.rr-back{transform-box:fill-box;transform-origin:left center;
+  transition:transform .5s var(--settle),opacity .2s ease;transition-delay:calc(1.05s + var(--i,0) * .2s)}
+.js .report-panel:not(.in) .rr-first,.js .report-panel:not(.in) .rr-back{transform:scaleX(0);opacity:0}
+.rr-change{transition:opacity .3s ease 3s}
+.js .report-panel:not(.in) .rr-change{opacity:0}
+@media(prefers-reduced-motion:reduce){
+  .route svg,.fit-chart,.route-dot,.fc-open,.rp-grow-x,.rp-grow-c,.rp-mark,.rr-first,.rr-back,.rr-change{transition:none!important}
+  .js .route.rv:not(.in) svg,.js .fitgrid .rv:not(.in) .fit-chart{clip-path:none}
+  .js .route.rv:not(.in) .route-dot{opacity:1;transform:translate(-50%,-50%)}
+  .js .fitgrid .rv:not(.in) .fc-open,.js .report-panel:not(.in) .rp-grow-x,.js .report-panel:not(.in) .rp-grow-c,
+  .js .report-panel:not(.in) .rr-first,.js .report-panel:not(.in) .rr-back{transform:none;opacity:1}
+  .js .report-panel:not(.in) .rp-mark,.js .report-panel:not(.in) .rr-change{opacity:1}
+}
 </style>
 <link rel="stylesheet" href="site.css">
 <link rel="stylesheet" href="lead-form.css">
@@ -489,7 +537,7 @@ nav.is-red .navmenu{background:var(--red);border-top-color:rgba(255,255,255,.2)}
       <a class="btn btn-red shimmer" href="#start" data-start="diagnostic"><span>Take the free diagnostic</span></a>
       <a class="btn btn-b shimmer" href="#start" data-start="call"><span>Talk first</span></a>
     </div>
-    <p class="sat-proof"><b>+200&ndash;250</b><span>point average gain for my SAT students, from where they started to their official score. <a href="testimonials.html">Read reviews</a></span></p>
+    <p class="sat-proof"><b>+<span class="countup" data-count="200">200</span>&ndash;<span class="countup" data-count="250">250</span></b><span>point average gain for my SAT students, from where they started to their official score. <a href="testimonials.html">Read reviews</a></span></p>
   </div>
   <div class="ftour" id="ftour">
     <div class="ft-head"><b>What&rsquo;s included</b><span>&middot; all of it, every student</span></div>
@@ -498,7 +546,7 @@ nav.is-red .navmenu{background:var(--red);border-top-color:rgba(255,255,255,.2)}
         <span class="ft-check" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.6 4.6L19 7.6"/></svg></span>
         <span class="ft-txt">
           <span class="ft-name">Statistical Analysis</span>
-          <span class="ft-desc">Tools the top prep companies haven&rsquo;t built. Track behavior, pacing, guessing and answer changes on every question, and calculate the score range your child most likely falls in from the data behind every practice test.</span>
+          <span class="ft-desc">Tools the top prep companies haven&rsquo;t built: behavior, pacing and guessing tracked on every question, and the score range your child most likely falls in.</span>
         </span>
       </li>
       <li class="ft-item">
@@ -560,15 +608,15 @@ nav.is-red .navmenu{background:var(--red);border-top-color:rgba(255,255,255,.2)}
       <path class="route-band" d="M0.0 91.0 C8.3 90.5 25.0 89.7 50.0 88.0 C75.0 86.3 116.7 84.0 150.0 81.0 C183.3 78.0 216.7 74.2 250.0 70.0 C283.3 65.8 316.7 61.2 350.0 56.0 C383.3 50.8 416.7 44.7 450.0 39.0 C483.3 33.3 525.0 25.7 550.0 22.0 C575.0 18.3 591.7 17.8 600.0 17.0 L600.0 27.0 C591.7 28.2 575.0 29.0 550.0 34.0 C525.0 39.0 483.3 49.3 450.0 57.0 C416.7 64.7 383.3 72.5 350.0 80.0 C316.7 87.5 283.3 95.2 250.0 102.0 C216.7 108.8 183.3 115.3 150.0 121.0 C116.7 126.7 75.0 132.0 50.0 136.0 C25.0 140.0 8.3 143.5 0.0 145.0 Z"/>
       <path class="route-line" d="M0.0 118.0 C8.3 117.0 25.0 114.8 50.0 112.0 C75.0 109.2 116.7 105.3 150.0 101.0 C183.3 96.7 216.7 91.5 250.0 86.0 C283.3 80.5 316.7 74.3 350.0 68.0 C383.3 61.7 416.7 54.7 450.0 48.0 C483.3 41.3 525.0 32.3 550.0 28.0 C575.0 23.7 591.7 23.0 600.0 22.0" vector-effect="non-scaling-stroke"/>
     </svg>
-    <span class="route-dot" style="left:8.3333%;top:80.0000%">1</span><span class="route-dot" style="left:25.0000%;top:72.1429%">2</span><span class="route-dot" style="left:41.6667%;top:61.4286%">3</span><span class="route-dot" style="left:58.3333%;top:48.5714%">4</span><span class="route-dot" style="left:75.0000%;top:34.2857%">5</span><span class="route-dot is-last" style="left:91.6667%;top:20.0000%">6</span>
+    <span class="route-dot" style="left:8.3333%;top:80.0000%;--i:0">1</span><span class="route-dot" style="left:25.0000%;top:72.1429%;--i:1">2</span><span class="route-dot" style="left:41.6667%;top:61.4286%;--i:2">3</span><span class="route-dot" style="left:58.3333%;top:48.5714%;--i:3">4</span><span class="route-dot" style="left:75.0000%;top:34.2857%;--i:4">5</span><span class="route-dot is-last" style="left:91.6667%;top:20.0000%;--i:5">6</span>
   </div>
   <ol class="route-steps">
-      <li class="rv"><span class="route-n">01</span><b>The free diagnostic</b><p>A full-length timed test that shows the data behind the score, even if you have a recent one.</p></li>
-      <li class="rv d1"><span class="route-n">02</span><b>The report and your plan</b><p>Every skill ranked by points and teachability, with the hours and total cost in writing.</p></li>
-      <li class="rv d2"><span class="route-n">03</span><b>One pattern at a time</b><p>Harder versions of what your student just got right, until the method holds up on new questions.</p></li>
-      <li class="rv"><span class="route-n">04</span><b>Between sessions</b><p>Portal practice from the week&rsquo;s skills, the Friday email, office hours, and answers whenever needed.</p></li>
-      <li class="rv d1"><span class="route-n">05</span><b>Full-length checkpoints</b><p>Timed tests where the result tells us something. A sixty-point swing is never mistaken for a trend.</p></li>
-      <li class="rv d2"><span class="route-n">06</span><b>Test day</b><p>The final weeks go to pacing and the decisions that protect points. No new rules at the last minute.</p></li>
+      <li style="--i:0" class="rv"><span class="route-n">01</span><b>The free diagnostic</b><p>A full-length timed test that shows the data behind the score, even if you have a recent one.</p></li>
+      <li style="--i:1" class="rv d1"><span class="route-n">02</span><b>The report and your plan</b><p>Every skill ranked by points and teachability, with the hours and total cost in writing.</p></li>
+      <li style="--i:2" class="rv d2"><span class="route-n">03</span><b>One pattern at a time</b><p>Harder versions of what your student just got right, until the method holds up on new questions.</p></li>
+      <li style="--i:3" class="rv"><span class="route-n">04</span><b>Between sessions</b><p>Portal practice from the week&rsquo;s skills, the Friday email, office hours, and answers whenever needed.</p></li>
+      <li style="--i:4" class="rv d1"><span class="route-n">05</span><b>Full-length checkpoints</b><p>Timed tests where the result tells us something. A sixty-point swing is never mistaken for a trend.</p></li>
+      <li style="--i:5" class="rv d2"><span class="route-n">06</span><b>Test day</b><p>The final weeks go to pacing and the decisions that protect points. No new rules at the last minute.</p></li>
   </ol>
   <div class="report-panel rv">
     <div class="report-head">
@@ -579,26 +627,26 @@ nav.is-red .navmenu{background:var(--red);border-top-color:rgba(255,255,255,.2)}
     <div class="reportgrid">
       <figure class="rv"><svg class="rp-chart" viewBox="0 0 240 90" role="img" aria-label="A score scale with the likely range 1170 to 1330 shaded and 1250 marked">
     <line class="rp-axis" x1="10" y1="56" x2="230" y2="56"/>
-    <rect class="rp-band" x="66" y="40" width="108" height="32" rx="4"/>
+    <rect class="rp-band rp-grow-c" x="66" y="40" width="108" height="32" rx="4"/>
     <line class="rp-mark" x1="120" y1="32" x2="120" y2="80"/>
     <text class="rp-t rp-t-hi" x="120" y="24" text-anchor="middle">1250</text>
     <text class="rp-t" x="66" y="88" text-anchor="middle">1170</text>
     <text class="rp-t" x="174" y="88" text-anchor="middle">1330</text>
 </svg><figcaption><h3>The score as a range</h3><p>One sitting can&rsquo;t pin a score down, so the report shows the range your student most likely sits in.</p></figcaption></figure>
       <figure class="rv d1"><svg class="rp-chart" viewBox="0 0 240 90" role="img" aria-label="A bar split into three kinds of mistakes: didn't know, too slow, never reached">
-    <rect class="rp-seg1" x="10" y="30" width="112" height="24" rx="3"/>
-    <rect class="rp-seg2" x="124" y="30" width="66" height="24" rx="3"/>
-    <rect class="rp-seg3" x="192" y="30" width="38" height="24" rx="3"/>
+    <rect class="rp-seg1 rp-grow-x" x="10" y="30" width="112" height="24" rx="3"/>
+    <rect class="rp-seg2 rp-grow-x" x="124" y="30" width="66" height="24" rx="3"/>
+    <rect class="rp-seg3 rp-grow-x" x="192" y="30" width="38" height="24" rx="3"/>
     <text class="rp-t" x="10" y="20">didn&#8217;t know</text>
     <text class="rp-t" x="124" y="72">too slow</text>
     <text class="rp-t" x="230" y="20" text-anchor="end">never reached</text>
 </svg><figcaption><h3>Three kinds of mistakes</h3><p>Didn&rsquo;t know it, got it right too slowly, or never reached it. Each one needs different work.</p></figcaption></figure>
-      <figure class="rv d2"><svg class="rp-chart" viewBox="0 0 240 90" role="img" aria-label="Skills ranked by points at stake: Algebra first, then Advanced Math, then Geometry">
-    <text class="rp-t" x="10" y="20">Algebra</text><rect class="rp-bar rp-bar-hi" x="96" y="10" width="134" height="14" rx="3"/>
-    <text class="rp-t" x="10" y="48">Adv. Math</text><rect class="rp-bar" x="96" y="38" width="88" height="14" rx="3"/>
-    <text class="rp-t" x="10" y="76">Geometry</text><rect class="rp-bar" x="96" y="66" width="44" height="14" rx="3"/>
-</svg><figcaption><h3>Where the points are</h3><p>Skills ranked by the points they cost and how teachable they are, so the first sessions go where the score moves most.</p></figcaption></figure>
-      <figure class="rv"><svg class="rp-chart" viewBox="0 0 240 90" role="img" aria-label="Time on each question against a dashed time budget, with slow questions highlighted"><rect class="rp-bar" x="12" y="48" width="14" height="30" rx="2"/><rect class="rp-bar" x="34" y="34" width="14" height="44" rx="2"/><rect class="rp-bar" x="56" y="52" width="14" height="26" rx="2"/><rect class="rp-bar rp-bar-hi" x="78" y="20" width="14" height="58" rx="2"/><rect class="rp-bar" x="100" y="44" width="14" height="34" rx="2"/><rect class="rp-bar rp-bar-hi" x="122" y="16" width="14" height="62" rx="2"/><rect class="rp-bar" x="144" y="50" width="14" height="28" rx="2"/><rect class="rp-bar" x="166" y="38" width="14" height="40" rx="2"/><rect class="rp-bar" x="188" y="56" width="14" height="22" rx="2"/><rect class="rp-bar rp-bar-hi" x="210" y="28" width="14" height="50" rx="2"/><line class="rp-budget" x1="6" y1="33" x2="234" y2="33"/><text class="rp-t" x="234" y="26" text-anchor="end">time budget</text></svg><figcaption><h3>Time, question by question</h3><p>Every answer measured against a fixed time budget, so a student who is evenly slow still shows up.</p></figcaption></figure>
+      <figure class="rv d2"><svg class="rp-chart" viewBox="0 0 240 90" role="img" aria-label="Habits on missed questions: changed answers most often, then rushed first reads, then no eliminations">
+  <text class="rp-t" x="10" y="21">Changed answer</text><rect class="rp-bar rp-bar-hi rp-grow-x" x="112" y="11" width="118" height="14" rx="3"/>
+  <text class="rp-t" x="10" y="49">Rushed first read</text><rect class="rp-bar rp-grow-x" x="112" y="39" width="80" height="14" rx="3"/>
+  <text class="rp-t" x="10" y="77">No eliminations</text><rect class="rp-bar rp-grow-x" x="112" y="67" width="46" height="14" rx="3"/>
+</svg><figcaption><h3>Habits that cost points</h3><p>Which behaviors show up on the questions your student misses: changed answers, rushed reads, skipped eliminations. Often the habit costs more points than the content does.</p></figcaption></figure>
+      <figure class="rv"><svg class="rp-chart rp-route" viewBox="0 0 240 90" role="img" aria-label="A route through seven questions: first looks in order, two trips back, and one changed answer"><rect class="rr-stripe" x="30" y="12.0" width="202" height="9.4"/><rect class="rr-ok" x="19" y="13.7" width="6" height="6" rx="1.5"/><rect class="rr-ok" x="19" y="23.1" width="6" height="6" rx="1.5"/><rect class="rr-stripe" x="30" y="30.8" width="202" height="9.4"/><rect class="rr-bad" x="19" y="32.5" width="6" height="6" rx="1.5"/><rect class="rr-ok" x="19" y="41.9" width="6" height="6" rx="1.5"/><rect class="rr-stripe" x="30" y="49.6" width="202" height="9.4"/><rect class="rr-ok" x="19" y="51.3" width="6" height="6" rx="1.5"/><rect class="rr-ok" x="19" y="60.7" width="6" height="6" rx="1.5"/><rect class="rr-stripe" x="30" y="68.4" width="202" height="9.4"/><rect class="rr-ok" x="19" y="70.1" width="6" height="6" rx="1.5"/><rect class="rr-first" style="--i:0" x="34" y="13.6" width="19" height="6.2" rx="1.5"/><rect class="rr-first" style="--i:1" x="54" y="23.0" width="11" height="6.2" rx="1.5"/><rect class="rr-first" style="--i:2" x="66" y="32.4" width="41" height="6.2" rx="1.5"/><rect class="rr-first" style="--i:3" x="108" y="41.8" width="11" height="6.2" rx="1.5"/><rect class="rr-first" style="--i:4" x="120" y="51.2" width="17" height="6.2" rx="1.5"/><rect class="rr-first" style="--i:5" x="138" y="60.6" width="21" height="6.2" rx="1.5"/><rect class="rr-first" style="--i:6" x="160" y="70.0" width="15" height="6.2" rx="1.5"/><rect class="rr-back" style="--i:7" x="184" y="32.4" width="18" height="6.2" rx="1.5"/><rect class="rr-back" style="--i:8" x="206" y="60.6" width="10" height="6.2" rx="1.5"/><line class="rr-change" x1="202" y1="29.8" x2="202" y2="41.2"/><text class="rp-t" x="10" y="17.0">Q</text><text class="rp-t" x="232" y="88" text-anchor="end">time &rarr;</text><text class="rp-t rp-t-gold" x="182" y="79.4" text-anchor="end">back</text></svg><figcaption><h3>The route through the test</h3><p>Every visit to every question, in order: first looks, trips back, and answer changes on the module clock.</p></figcaption></figure>
     </div>
     <div class="report-foot">
       <a class="btn btn-b shimmer" href="diagnostic.html"><span>See a live sample report</span></a>
@@ -710,8 +758,26 @@ document.documentElement.classList.add('js');
   var io=new IntersectionObserver(function(en){en.forEach(function(x){if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target);}});},{rootMargin:'0px 0px -8% 0px',threshold:.08});
   els.forEach(function(e){ if(e.getBoundingClientRect().top<window.innerHeight*0.95){e.classList.add('in');} else {io.observe(e);} });
   window.addEventListener('load',function(){els.forEach(function(e){if(e.getBoundingClientRect().top<window.innerHeight)e.classList.add('in');});});
-  /* last resort: never leave the page invisible if the observer never fires */
-  setTimeout(function(){els.forEach(function(e){e.classList.add('in');});},4000);
+  /* last resort: if the observer never fires, reveal what is on screen now
+     and the rest as it scrolls in, so charts still animate when reached */
+  function sweep(){els.forEach(function(e){if(e.getBoundingClientRect().top<window.innerHeight*0.95)e.classList.add('in');});}
+  setTimeout(sweep,4000); window.addEventListener('scroll',sweep,{passive:true});
+})();
+
+/* the hero stat counts up on the report's easing, from zero to its number */
+(function(){
+  var nums=[].slice.call(document.querySelectorAll('.sat-proof .countup'));
+  if(!nums.length||window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  nums.forEach(function(el){el.textContent='0';});
+  var start=null, dur=2200, delay=1900;
+  function ease(t){return 1-Math.pow(1-t,4);}
+  function step(ts){
+    if(start===null) start=ts+delay;
+    var k=Math.max(0,Math.min(1,(ts-start)/dur));
+    nums.forEach(function(el){el.textContent=Math.round(+el.getAttribute('data-count')*ease(k));});
+    if(k<1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
 })();
 
 /* ── top bar: flush over the hero, red once the hero is behind you ── */
