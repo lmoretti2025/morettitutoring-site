@@ -2297,7 +2297,28 @@
         if (r.ok) mcC++; else mcW++;
       });
     });
-    return { correct: mcC, wrong: mcW, lift: mcW / 3 };
+    /* Elimination-aware where the test recorded crossing out (signals.js
+       guessingLift, SIGNALS_SPEC.md 3.2a): a wrong answer after narrowing to
+       k choices is evidence of 1/(k-1) lucky right answers, and of none when
+       the right answer itself was crossed out. With nothing crossed out it is
+       exactly wrong/3, so older attempts read the same as before. Applied per
+       section wherever the crossing-out masks decoded; wrong/3 elsewhere. */
+    var lift = mcW / 3, elimAware = false, MS = window.MorettiSignals;
+    if (MS && typeof MS.decodeSection === 'function' && typeof MS.guessingLift === 'function') {
+      try {
+        var sum = 0;
+        sections.forEach(function (view) {
+          var wrongHere = view.rows.filter(function (r) { return r.q && r.q.type === 'mc' && !r.skipped && !r.ok; }).length;
+          var raw = (data.s || []).filter(function (x) { return x.k === view.key; })[0];
+          var bank = raw && getBank(raw.k);
+          var d = bank ? MS.decodeSection(raw, sectionQuestions(bank, raw.v), { grade: isCorrect, module1Length: bank.module2Easier ? bank.module1.length : undefined }) : null;
+          if (d && d.recorded && d.rows.some(function (r) { return r.masks; })) { sum += MS.guessingLift(d.rows).elim; elimAware = true; }
+          else sum += wrongHere / 3;
+        });
+        lift = sum;
+      } catch (e) { lift = mcW / 3; elimAware = false; }
+    }
+    return { correct: mcC, wrong: mcW, lift: lift, elimAware: elimAware };
   })();
   // Tests can be renumbered (Practice Tests 11 and 12 swapped on
   // 2026-09-12), so the report names the test as it is numbered now, found
@@ -4307,7 +4328,7 @@
          two). Four is the most generous assumption, so the figure is a
          floor. */
       behaviorFlags.push('<strong>Some right answers were probably guesses:</strong> with this many wrong, guessing alone would account for about <strong>' +
-        Math.round(lift) + '</strong> of your ' + mcC + ' right multiple-choice answers. ' +
+        Math.round(lift) + '</strong> of your ' + mcC + ' right multiple-choice answers' + (guessLift.elimAware ? ', counting the choices you had narrowed down to' : '') + '. ' +
         'That is normal, and they count, just as on the real SAT. It only means the next score could come out a little higher or lower.');
     }
   })();
@@ -4382,13 +4403,25 @@
 
     /* 2. Answer changes: successive visit-end answers that differ (a click
        from A to C while still reading is deliberating, not a change). */
-    var ch = { WR: [], RW: [], WW: [] };
-    all.forEach(function (x) { x.r.changes.forEach(function (c) { if (ch[c.kind]) ch[c.kind].push(x); }); });
+    /* Split by why the student went back (signals.js changeReading has the
+       pooled version): a flagged question returned to is the review working;
+       an unflagged one is a check through answers the student had settled.
+       Fixes there are good catches but were questions the student was sure of,
+       so the skill still needs work; breaks there are second-guessing. */
+    var ch = { WR: [], RW: [], WW: [] }, kinds = { F: { WR: [], RW: [] }, U: { WR: [], RW: [] } };
+    all.forEach(function (x) {
+      x.r.changes.forEach(function (c) {
+        if (ch[c.kind]) ch[c.kind].push(x);
+        if (c.kind === 'WR' || c.kind === 'RW') kinds[c.flagged ? 'F' : 'U'][c.kind].push(x);
+      });
+    });
     var nChanges = ch.WR.length + ch.RW.length + ch.WW.length;
     var chFacts = [];
     if (nChanges) {
-      if (ch.WR.length) chFacts.push('<b>' + plural(ch.WR.length, 'change') + ' fixed a mistake.</b>' + qlist(ch.WR));
-      if (ch.RW.length) chFacts.push('<b>' + plural(ch.RW.length, 'change') + ' broke a right answer.</b>' + qlist(ch.RW));
+      if (kinds.F.WR.length) chFacts.push('<b>Flagged, came back, fixed it:</b> ' + plural(kinds.F.WR.length, 'question') + '. That is the review working.' + qlist(kinds.F.WR));
+      if (kinds.U.WR.length) chFacts.push('<b>Caught on a check through:</b> ' + plural(kinds.U.WR.length, 'question') + ' fixed that ' + (kinds.U.WR.length === 1 ? 'was' : 'were') + ' never flagged. Good catches, but the first answer felt sure, so the skill behind ' + (kinds.U.WR.length === 1 ? 'it' : 'them') + ' still needs work.' + qlist(kinds.U.WR));
+      if (kinds.F.RW.length) chFacts.push('<b>Flagged, then changed away from the right answer:</b> ' + plural(kinds.F.RW.length, 'question') + '. The doubt was fair; the topic is not solid yet.' + qlist(kinds.F.RW));
+      if (kinds.U.RW.length) chFacts.push('<b>Second-guessed a settled answer:</b> ' + plural(kinds.U.RW.length, 'question') + ' went from right to wrong without ever being flagged.' + qlist(kinds.U.RW));
       if (ch.WW.length) chFacts.push(plural(ch.WW.length, 'change') + ' swapped one wrong answer for another.');
       var net = ch.WR.length - ch.RW.length;
       chFacts.push('Net effect of changing answers on this test: <b>' + (net > 0 ? '+' : net < 0 ? '&minus;' : '') + plural(Math.abs(net), 'question') + '</b>.');

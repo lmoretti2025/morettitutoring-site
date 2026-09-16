@@ -611,6 +611,35 @@ var MorettiSignals = (function () {
     };
   }
 
+  /* -- what answer changes say, by why the student went back -----------
+     One pooled verdict per kind of change, since the two mean different
+     things (Luca, 2026-09-16):
+       flagged    The student marked the question as unsure and came back.
+                  Fixes are the review working as designed. Breaks mean the
+                  doubt was right but the topic is not there yet.
+       unflagged  A check through answers already settled. Fixes are good
+                  catches, but each one is a wrong answer the student was sure
+                  enough not to flag: confidence running ahead of accuracy,
+                  so the skill still needs work and unsure questions need
+                  flagging. Breaks are second-guessing.
+     chg: a summary's or ledger's chg object {h, r, unfl: {h, r}}. Every
+     change is on a return visit, so flagged = all changes minus unflagged.
+     Each kind gets changeVerdict's gates on its own counts, so a reading
+     needs several tests pooled (minFlips flips of that kind). Readings are
+     the gated facts, most urgent first; the wording lives with the reader. */
+  function changeReading(chg, cfg) {
+    chg = chg || {};
+    var hU = Math.max(0, num(chg.unfl && chg.unfl.h)), rU = Math.max(0, num(chg.unfl && chg.unfl.r));
+    var hF = Math.max(0, num(chg.h) - hU), rF = Math.max(0, num(chg.r) - rU);
+    var flagged = changeVerdict(hF, rF, cfg), unflagged = changeVerdict(hU, rU, cfg);
+    var readings = [];
+    if (unflagged.state === 'hurt') readings.push({ id: 'second-guessing', broke: rU, fixed: hU, of: unflagged.flips });
+    if (flagged.state === 'hurt') readings.push({ id: 'flagged-breaks', broke: rF, fixed: hF, of: flagged.flips });
+    if (unflagged.state === 'help') readings.push({ id: 'check-catches', fixed: hU, broke: rU, of: unflagged.flips });
+    if (flagged.state === 'help') readings.push({ id: 'flag-return-works', fixed: hF, broke: rF, of: flagged.flips });
+    return { flagged: flagged, unflagged: unflagged, readings: readings };
+  }
+
   /* P(p2 > p1) for independent Beta(a1, b1) and Beta(a2, b2): the
      integral of the first density times the second's upper tail, by
      Simpson's rule on the CDF grid. Used to say a rate has improved only
@@ -655,9 +684,15 @@ var MorettiSignals = (function () {
     // (cfg.lastTestId): its misses would read as habits.
     if (cfg && cfg.lastTestId === HARDEST_TEST_ID) last = null;
     if (ledger && ledger.chg) {
-      var v = changeVerdict(ledger.chg.h, ledger.chg.r, cfg);
-      if (v.state === 'help') facts.push({ id: 'changes-help', fixed: v.h, of: v.flips });
-      if (v.state === 'hurt') facts.push({ id: 'changes-hurt', broke: v.r, of: v.flips });
+      /* By why the student went back (changeReading). The combined verdict
+         speaks only when neither kind has enough on its own to say anything. */
+      var rd = changeReading(ledger.chg, cfg);
+      rd.readings.forEach(function (x) { facts.push(x); });
+      if (!rd.readings.length) {
+        var v = changeVerdict(ledger.chg.h, ledger.chg.r, cfg);
+        if (v.state === 'help') facts.push({ id: 'changes-help', fixed: v.h, of: v.flips });
+        if (v.state === 'hurt') facts.push({ id: 'changes-hurt', broke: v.r, of: v.flips });
+      }
       if (cfg && cfg.earlierLedger && cfg.earlierLedger.chg) {
         var imp = changeImproved(cfg.earlierLedger.chg, ledger.chg, cfg);
         if (imp.improved) facts.push({ id: 'changes-improved', p: imp.p });
@@ -860,6 +895,7 @@ var MorettiSignals = (function () {
     summarizeAttempt: summarizeAttempt,
     sumLedger: sumLedger,
     changeVerdict: changeVerdict,
+    changeReading: changeReading,
     changeImproved: changeImproved,
     probGreater: probGreater,
     parentFacts: parentFacts,
