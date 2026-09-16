@@ -45,7 +45,9 @@ var MorettiSignals = (function () {
     minFlips: 6,            // ...and at least this many correctness-flipping changes
     leanProb: 0.75,         // tutor-only "leaning" state...
     leanMinFlips: 3,        // ...never on one or two changes
-    ledgerDays: 90
+    ledgerDays: 90,
+    minAttempts: 3,         // behaviorHighlights: tests pooled before any pattern is named
+    nearMinPooled: 8        // ...and near misses (down to two choices) across them
   };
   function opt(o, k) { return (o && o[k] !== undefined) ? o[k] : DEFAULTS[k]; }
 
@@ -493,7 +495,7 @@ var MorettiSignals = (function () {
     var L = { attempts: 0, dropped: 0, chg: { h: 0, r: 0, ww: 0, sw: 0, unfl: { h: 0, r: 0 }, rev: { h: 0, r: 0 }, late: { h: 0, r: 0 } },
               near: 0, keyOut: 0, blindMedHard: 0, elim: { mc: 0, used: 0 },
               calc: { mathQ: 0, active: 0, fav: 0, favActive: 0, favMissNoUse: 0, favSlowNoUse: 0, candidates: 0, overUse: 0 },
-              ref: { rsQ: 0, rsMissNoRef: 0 } };
+              ref: { rsQ: 0, rsMissNoRef: 0 }, rev: { tests: 0, gained: 0, gain: 0 } };
     var when = function (at) {
       if (at instanceof Date) return at.getTime();
       if (typeof at === 'number' && isFinite(at)) return at < 1e11 ? at * 1000 : at;
@@ -531,6 +533,14 @@ var MorettiSignals = (function () {
         }
       }
       if (s.ref && !hardest) { L.ref.rsQ += num(s.ref.rsQ); L.ref.rsMissNoRef += num(s.ref.rsMissNoRef); }
+      // The review pass: questions it won or lost on each test that reached one.
+      if (Array.isArray(s.rev)) {
+        var reached = s.rev.filter(function (m) { return m && m.reached && typeof m.gain === 'number'; });
+        if (reached.length) {
+          var g = reached.reduce(function (t, m) { return t + m.gain; }, 0);
+          L.rev.tests++; L.rev.gain += g; if (g > 0) L.rev.gained++;
+        }
+      }
     });
     return L;
   }
@@ -716,6 +726,53 @@ var MorettiSignals = (function () {
     return facts;
   }
 
+  /* -- the patterns worth naming, pooled across tests -----------------
+     For Luca's session prep and, once he has checked it against real
+     students, one line of the Friday parent email. Nothing here is about a
+     single test: every fact pools the last `days` (default 90) and needs
+     minAttempts tests on record, so one bad morning never becomes a habit.
+     entries: as sumLedger ([{ at, signals, testId }]).
+     cfg: nowMs, days, desmosTagsReviewed (must be true for the calculator
+          fact), plus changeVerdict's gates.
+     Returns { attempts, ledger, reading, facts, tutor, pick }:
+       facts  what a parent may be told, most urgent first:
+              second-guessing   unflagged changes going right to wrong
+              check-catches     unflagged fixes: good catches, but the student
+                                felt sure of wrong answers (confidence ahead
+                                of accuracy)
+              near-misses       misses down to two choices, pooled
+              desmos            the calculator skipped where graphing is the
+                                fastest route, with misses there
+              review-pass       the review pass winning questions back
+       tutor  gated readings kept for Luca (flag-and-return working, flagged
+              changes going wrong) and the "leaning" states under the gates
+       pick   facts[0], the one a Friday email would use */
+  function behaviorHighlights(entries, cfg) {
+    var L = sumLedger(entries, cfg && cfg.nowMs, cfg && cfg.days);
+    var rd = changeReading(L.chg, cfg);
+    var out = { attempts: L.attempts, ledger: L, reading: rd, facts: [], tutor: [], pick: null };
+    var minA = opt(cfg, 'minAttempts');
+    if (L.attempts < minA) return out;
+    rd.readings.forEach(function (x) {
+      (x.id === 'second-guessing' || x.id === 'check-catches' ? out.facts : out.tutor).push(x);
+    });
+    // Miss-based pools leave out the hardest test (sumLedger), so count the rest.
+    var tests = L.attempts - (L.hardest || 0);
+    if (tests >= minA && L.near >= opt(cfg, 'nearMinPooled')) out.facts.push({ id: 'near-misses', count: L.near, tests: tests });
+    var c = L.calc;
+    if (cfg && cfg.desmosTagsReviewed === true && tests >= minA && c.fav >= 12 && c.favMissNoUse >= 4 && c.favActive * 2 <= c.fav) {
+      out.facts.push({ id: 'desmos', used: c.favActive, of: c.fav, missed: c.favMissNoUse, tests: tests });
+    }
+    if (L.rev.tests >= minA && L.rev.gain >= 3 && L.rev.gained * 2 >= L.rev.tests) {
+      out.facts.push({ id: 'review-pass', gain: L.rev.gain, tests: L.rev.tests });
+    }
+    [['flagged', rd.flagged], ['unflagged', rd.unflagged]].forEach(function (k) {
+      if (k[1].state === 'lean-help' || k[1].state === 'lean-hurt') out.tutor.push({ id: 'lean', kind: k[0], state: k[1].state, fixed: k[1].h, broke: k[1].r });
+    });
+    out.pick = out.facts[0] || null;
+    return out;
+  }
+
   /* === HOW MUCH A SCORE MOVES ON ITS OWN ===
      Moved here from portal/index.html (2026-09-12) so the portal's progress
      chart and the family emails (emails.gs) judge score changes the same way.
@@ -896,6 +953,7 @@ var MorettiSignals = (function () {
     sumLedger: sumLedger,
     changeVerdict: changeVerdict,
     changeReading: changeReading,
+    behaviorHighlights: behaviorHighlights,
     changeImproved: changeImproved,
     probGreater: probGreater,
     parentFacts: parentFacts,

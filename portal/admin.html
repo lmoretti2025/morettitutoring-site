@@ -90,6 +90,20 @@
   .prep-topics .low { color: var(--red); font-weight: 600; }
   .prep-bank { font-size: 0.66rem; font-weight: 600; color: var(--faint); margin-left: 0.35rem; }
   .prep-note { font-size: 0.72rem; color: var(--faint); margin: 0.75rem 0 0; }
+  /* Behaviour patterns, pooled across tests (prep.gs behavior) */
+  .prep-bp { margin: 0 0 1.1rem; }
+  .prep-bp-sub { font-weight: 600; letter-spacing: 0.04em; text-transform: none; margin-left: 0.4rem; }
+  .prep-bp ul { list-style: none; margin: 0; padding: 0; }
+  .prep-bp li { padding: 0.5rem 0; border-top: 1px solid var(--border); font-size: 0.82rem; line-height: 1.5; }
+  .prep-bp li b { color: var(--text); font-weight: 600; }
+  .prep-bp .tag { display: inline-block; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.1rem 0.45rem; border-radius: 999px; margin-right: 0.4rem; vertical-align: 1px; }
+  .prep-bp .tag.parent { background: rgba(176,39,28,0.1); color: var(--red); }
+  .prep-bp .tag.tutor { background: rgba(17,17,17,0.07); color: var(--mid); }
+  .prep-bp .email { display: block; margin-top: 0.25rem; font-size: 0.76rem; color: var(--mid); font-style: italic; }
+  .prep-bp table { width: 100%; border-collapse: collapse; font-size: 0.78rem; margin-top: 0.6rem; font-variant-numeric: tabular-nums; }
+  .prep-bp th { text-align: left; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); padding: 0 0.5rem 0.25rem 0; }
+  .prep-bp td { padding: 0.3rem 0.5rem 0.3rem 0; border-top: 1px solid var(--border); }
+  .prep-bp td.n, .prep-bp th.n { text-align: right; }
   /* Homework for this session: what Luca assigned since the last session
      that ended, done or not (prep.gs's prepHomework_). */
   .prep-hw { margin: 0 0 1.1rem; }
@@ -2322,6 +2336,81 @@
     });
   }
 
+  /* ═══ BEHAVIOUR PATTERNS ═══ pooled over the last 90 days (prep.gs's
+     behavior; signals.js behaviorHighlights). Everything a Friday email
+     could say is shown here first, with the sentence it would use, so Luca
+     can check it against what he sees in sessions before switching the
+     email line on (EMAIL_BEHAVIOR_LINE_ON in emails.gs). */
+  function renderBehaviorPatterns(b, err) {
+    var hed = '<div class="prep-hw-hed">Behavior patterns';
+    if (!b) return err ? '<div class="prep-bp">' + hed + '</div><p class="prep-note">Not available: ' + escHtml(err) + '</p></div>' : '';
+    var nTests = b.attempts + ' test' + (b.attempts === 1 ? '' : 's') + ' with signals';
+    hed += '<span>last 90 days &middot; ' + nTests + '</span></div>';
+    if (b.attempts < b.minAttempts) {
+      return '<div class="prep-bp">' + hed + '<p class="prep-note">Patterns start after ' + b.minAttempts +
+        ' tests with signals recorded, so one test never becomes a habit.</p></div>';
+    }
+    var TITLE = {
+      'second-guessing': 'Second-guessing settled answers',
+      'check-catches': 'Fixes caught on a check through: confidence ahead of accuracy',
+      'near-misses': 'Misses that came down to two choices',
+      'desmos': 'Calculator skipped where graphing is fastest',
+      'review-pass': 'The review pass winning questions back',
+      'flag-return-works': 'Flag and return is working',
+      'flagged-breaks': 'Flagged changes going wrong: the topic is not solid',
+      'lean': 'Leaning, not yet clear'
+    };
+    var detail = function (f) {
+      switch (f.id) {
+        case 'second-guessing': return f.broke + ' of ' + f.of + ' unflagged changes went right to wrong';
+        case 'check-catches': return f.fixed + ' of ' + f.of + ' unflagged changes fixed a mistake';
+        case 'near-misses': return f.count + ' across ' + f.tests + ' tests';
+        case 'desmos': return 'used on ' + f.used + ' of ' + f.of + ' fast-route questions; ' + f.missed + ' missed without it';
+        case 'review-pass': return '+' + f.gain + ' questions across ' + f.tests + ' tests';
+        case 'flag-return-works': return f.fixed + ' of ' + f.of + ' flagged changes fixed a mistake';
+        case 'flagged-breaks': return f.broke + ' of ' + f.of + ' flagged changes went right to wrong';
+        case 'lean': return (f.kind === 'flagged' ? 'flagged' : 'unflagged') + ' changes ' + (f.state === 'lean-hurt' ? 'lean harmful' : 'lean helpful') + ' (' + f.fixed + ' fixed, ' + f.broke + ' broke)';
+      }
+      return '';
+    };
+    var items = [];
+    (b.facts || []).forEach(function (x, i) {
+      items.push('<li><span class="tag parent">' + (i === 0 ? 'Friday pick' : 'Parent-ready') + '</span><b>' + escHtml(TITLE[x.id] || x.id) + '</b> &middot; ' + escHtml(detail(x.fact)) +
+        (x.email ? '<span class="email">' + escHtml(x.email.replace(/\*\*/g, '')) + '</span>' : '') + '</li>');
+    });
+    (b.tutor || []).forEach(function (f) {
+      items.push('<li><span class="tag tutor">Tutor only</span><b>' + escHtml(TITLE[f.id] || f.id) + '</b> &middot; ' + escHtml(detail(f)) + '</li>');
+    });
+    if (!items.length) items.push('<li>No pattern clears its bar yet. That is the normal answer on a few tests.</li>');
+
+    var STATE = { help: 'helping', hurt: 'hurting', 'lean-help': 'leaning helpful', 'lean-hurt': 'leaning harmful', silent: 'not enough yet' };
+    var ch = b.changes || {};
+    var row = function (label, v) {
+      return v ? '<tr><td>' + label + '</td><td class="n">' + v.fixed + '</td><td class="n">' + v.broke + '</td><td>' + (STATE[v.state] || v.state) + '</td></tr>' : '';
+    };
+    var P = b.pooled || {};
+    var bits = [];
+    if (P.elim && P.elim.mc) bits.push('crossing out on ' + Math.round(100 * P.elim.used / P.elim.mc) + '% of multiple choice');
+    bits.push(P.near + ' near misses');
+    if (P.keyOut) bits.push(P.keyOut + ' with the right answer crossed out');
+    if (P.blindMedHard) bits.push(P.blindMedHard + ' blind medium/hard guesses');
+    if (P.calc && P.calc.fav) bits.push('calculator on ' + P.calc.favActive + ' of ' + P.calc.fav + ' fast-route questions');
+    if (P.rev && P.rev.tests) bits.push('review ' + (P.rev.gain >= 0 ? '+' : '') + P.rev.gain + ' over ' + P.rev.tests + ' tests');
+    if (P.ref && P.ref.rsMissNoRef) bits.push(P.ref.rsMissNoRef + ' formula misses with the sheet closed');
+    if (P.hardest) bits.push('the hardest test is left out of the miss counts');
+
+    var em = b.email || {};
+    var emailNote = em.on
+      ? 'The Friday line is on: at most one pattern every ' + em.gapDays + ' days' + (em.lastSent && em.lastSent.day ? ' (last sent ' + escHtml(em.lastSent.day) + ')' : '') + '.'
+      : 'The Friday line is off. Check these against your sessions for about three weeks, then turn it on in emails.gs (EMAIL_BEHAVIOR_LINE_ON).';
+    if (!em.desmosTagsReviewed) emailNote += ' The calculator pattern waits for the reviewed Desmos tags.';
+
+    return '<div class="prep-bp">' + hed + '<ul>' + items.join('') + '</ul>' +
+      '<table><thead><tr><th>Answer changes</th><th class="n">Fixed</th><th class="n">Broke</th><th>Reading</th></tr></thead><tbody>' +
+      row('Flagged, came back', ch.flagged) + row('Unflagged, checked through', ch.unflagged) + '</tbody></table>' +
+      '<p class="prep-note">Pooled: ' + escHtml(bits.join(' · ')) + '. ' + emailNote + '</p></div>';
+  }
+
   function renderStudentPrep(p) {
     var snap = p.snapshot || null, pr = p.practice || { n: 0, right: 0, byBank: {}, skills: [] };
     var dayLabel = function (d) {
@@ -2413,7 +2502,7 @@
       return;
     }
     $('stu-prep').innerHTML = '<div class="prep-stats">' + stats.join('') + '</div>' +
-      nextHtml + hwHtml + topics + (note ? '<p class="prep-note">' + note + '</p>' : '');
+      nextHtml + hwHtml + renderBehaviorPatterns(p.behavior, p.behaviorError) + topics + (note ? '<p class="prep-note">' + note + '</p>' : '');
   }
 
   function loadStudentDetail(key) {
