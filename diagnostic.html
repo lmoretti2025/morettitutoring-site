@@ -408,7 +408,7 @@ nav.is-red .navmenu{background:var(--red);border-top-color:rgba(255,255,255,.2)}
 
 <section class="dhero"><div class="shell">
   <div class="eyeb">The free diagnostic</div>
-  <h1>Most tutors open with a phone call. I open with <em>this.</em></h1>
+  <h1>A score says where your student is. This says <em>why.</em></h1>
   <p>This is the real report, running live on this page, exactly as a student opens it in their
   portal. Nothing is held back for a sales call.</p>
   <div class="acts">
@@ -441,7 +441,7 @@ nav.is-red .navmenu{background:var(--red);border-top-color:rgba(255,255,255,.2)}
      the form rather than on another page. -->
 <section class="dcta" id="start"><div class="shell">
   <h2>Your student&rsquo;s report, at no cost</h2>
-  <p>One timed sitting at home, whenever suits. A written report either way, and it is
+  <p>One timed sitting at home, whenever it suits you. A written report either way, and it is
   yours to keep and to take anywhere, whether or not we ever work together.</p>
 
   <div class="bookcard">
@@ -457,7 +457,7 @@ nav.is-red .navmenu{background:var(--red);border-top-color:rgba(255,255,255,.2)}
       <div class="ff"><label class="fl" for="rf-email">Email</label><input class="fi" type="email" id="rf-email" name="email" required></div>
       <div class="ff"><label class="fl" for="rf-message">What your student needs help with <em>(optional)</em></label>
         <textarea class="fi" id="rf-message" name="message" rows="2" placeholder="Grade, subject, current scores, timeline&hellip;"></textarea></div>
-      <button type="submit" class="fsub shimmer" id="rf-submit"><span>Take my Diagnostic</span></button>
+      <button type="submit" class="fsub shimmer" id="rf-submit"><span>Take the free diagnostic</span></button>
       <p id="rf-invalid" class="fmsg err" role="alert"></p>
       <p class="fnote" id="rf-note">I reply personally, usually within the hour. The diagnostic and its report cost nothing either way, and you have the price in writing before anything starts. <a href="prep-course.html#faq">How pricing works &rarr;</a></p>
       <p id="rf-success" class="fmsg ok">Thanks. Check your email for confirmation. I&rsquo;ll follow up personally, usually within the hour.</p>
@@ -766,6 +766,8 @@ document.documentElement.classList.add('js');
     var phone = document.getElementById('rf-phone').value.trim();
     var email = document.getElementById('rf-email').value.trim();
     var message = document.getElementById('rf-message').value.trim();
+    /* This page is the diagnostic door; say so on the lead, as the homepage form does. */
+    message = 'Wants to start with: the free diagnostic' + (message ? '\n\n' + message : '');
     if (!checkFields(name, phone, email)) return;
 
     var honeypot = document.getElementById('rf-hp').value;
@@ -804,11 +806,11 @@ document.documentElement.classList.add('js');
           if (window.MTrack) window.MTrack.lead({ source: 'diagnostic_form', has_message: message ? 1 : 0 });
         } catch (err) {}
         form.reset();
-        btn.disabled=false; btn.textContent='Take my Diagnostic';
+        btn.disabled=false; btn.textContent='Take the free diagnostic';
       })
       .catch(function(){
         bad.style.display='block'; ok.style.display='none';
-        btn.disabled=false; btn.textContent='Take my Diagnostic';
+        btn.disabled=false; btn.textContent='Take the free diagnostic';
       });
   });
 })();
