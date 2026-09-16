@@ -2676,6 +2676,10 @@
       var who = currentStudent.name || key;
       postToBackend({ action: 'updateStudentInfo', adminKey: adminKey(), key: key, fields: fields }).then(function (d) {
         if (d && d.ok) {
+          // A backend older than v21 ignores emailResubscribe and still says ok.
+          if (fields.emailResubscribe && (d.changed || []).indexOf('EmailOptOut') === -1) {
+            showNotice(who + ': ' + failWhat + ' NOT saved. The backend is out of date: paste emails.gs and Code.gs and redeploy.');
+          }
           if (currentStudent && currentStudent.key === key) {
             loadStudentDetail(key);
             if (!noteDirty()) loadFridayNote(key);
