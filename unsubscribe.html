@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<!-- The #t= token is the credential. It sits in the fragment, so it never
+     reaches a server log, and referrers are blocked as well. -->
+<meta name="referrer" content="no-referrer">
+<title>Email preferences | Moretti Test Prep</title>
+<link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caladea:wght@700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<!--
+  UNSUBSCRIBE PAGE. Opened from the "Unsubscribe" link at the foot of every
+  automatic email (emails.gs addUnsubscribeLink_, Code.gs leadUnsubscribeLink_).
+
+  Nothing changes on load: mail scanners open links before people do, so
+  every change waits for a click. The backend checks the signed token and
+  only accepts an address that email actually went to (emails.gs
+  handleUnsubscribe). A link from a rehearsal copy changes nothing.
+-->
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  :root {
+    --red: #B0271C;
+    --bg: #f2f2f2;
+    --card: #ffffff;
+    --text: #111111;
+    --mid: rgba(17,17,17,0.62);
+    --border: rgba(17,17,17,0.12);
+    --ok: #2F6B3A;
+    --hel: 'Poppins', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    --display: 'Caladea', Georgia, serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0C0A09; --card: #1A1715; --text: #F3EFEA; --mid: rgba(243,239,234,0.66); --border: rgba(243,239,234,0.14); --ok: #7CC48A; }
+  }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--hel); font-weight: 300; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+  main { max-width: 520px; margin: 0 auto; padding: 56px 16px 72px; }
+  .brand { display: block; width: 140px; height: auto; margin: 0 0 22px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 28px 24px; }
+  h1 { font-family: var(--display); font-weight: 700; font-size: 28px; line-height: 1.2; margin: 0 0 12px; text-wrap: balance; }
+  p { margin: 0 0 14px; }
+  .muted { color: var(--mid); font-size: 14px; }
+  ul { list-style: none; margin: 20px 0 6px; padding: 0; display: grid; gap: 10px; }
+  li { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 12px 14px; border: 1px solid var(--border); border-radius: 8px; }
+  .addr { font-weight: 500; font-size: 15px; overflow-wrap: anywhere; }
+  li > span { min-width: 0; flex: 1 1 12rem; }
+  @media (max-width: 420px) { .card { padding: 22px 16px; } main { padding-top: 24px; } }
+  .state { display: block; font-size: 13px; color: var(--mid); }
+  .state.off { color: var(--ok); }
+  button { font: inherit; font-size: 14px; font-weight: 500; padding: 9px 16px; border-radius: 6px; cursor: pointer; border: 1px solid var(--red); background: var(--red); color: #fff; }
+  button.plain { background: transparent; color: var(--text); border-color: var(--border); }
+  button:disabled { opacity: .5; cursor: default; }
+  button:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+  #status { min-height: 1.6em; margin: 14px 0 0; font-size: 14px; }
+  a { color: var(--red); }
+  @media (prefers-color-scheme: dark) { .brand { background: #fff; padding: 6px 10px; border-radius: 6px; } a { color: #E0645A; } }
+</style>
+</head>
+<body>
+<main>
+  <div class="card">
+    <a href="/"><img class="brand" src="email-logo.png" alt="Moretti Test Prep"></a>
+    <h1 id="head">Email preferences</h1>
+    <div id="main"><p class="muted">Loading&hellip;</p></div>
+    <p id="status" role="status"></p>
+  </div>
+</main>
+
+<script src="portal/backend-url.js?v=20260905"></script>
+<script>
+(function () {
+  var URL_ = window.APPS_SCRIPT_URL;
+  function $(id) { return document.getElementById(id); }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+  var m = /[#&]t=([^&]+)/.exec(window.location.hash || '');
+  var TOKEN = m ? decodeURIComponent(m[1]) : '';
+
+  // A plain string body keeps this a CORS simple request, like every portal page.
+  function post(payload) {
+    return fetch(URL_, { method: 'POST', body: JSON.stringify(payload) })
+      .then(function (r) { return r.json(); })
+      .catch(function () { return { ok: false, error: 'network' }; });
+  }
+
+  var state = null;
+
+  function badLink() {
+    $('head').textContent = 'This link isn’t working';
+    $('main').innerHTML = '<p>It may have been copied only in part. Reply to any of my emails and I’ll take you off the list myself.</p>' +
+      '<p class="muted">Luca Moretti</p>';
+  }
+
+  function load() {
+    if (!TOKEN) return badLink();
+    post({ action: 'unsubscribeInfo', token: TOKEN }).then(function (d) {
+      if (d && d.ok) { state = d; return render(); }
+      if (d && d.error === 'network') {
+        $('main').innerHTML = '<p>Couldn’t reach the server.</p><button type="button" id="again">Try again</button>';
+        $('again').onclick = function () { $('main').innerHTML = '<p class="muted">Loading&hellip;</p>'; load(); };
+        return;
+      }
+      badLink();
+    });
+  }
+
+  function render() {
+    var d = state;
+    $('head').textContent = 'Email preferences';
+    var intro = d.lead
+      ? '<p>These are the follow up emails about your inquiry with Moretti Test Prep.</p>'
+      : '<p>These are the automatic emails about ' + (d.student ? '<b>' + esc(d.student) + '</b>’s' : 'your student’s') +
+        ' SAT prep, like the weekly update.</p>';
+    var list = (d.addresses || []).map(function (a, i) {
+      var btn = a.unsubscribed
+        ? (d.lead ? '' : '<button type="button" class="plain" data-i="' + i + '" data-undo="1">Subscribe again</button>')
+        : '<button type="button" data-i="' + i + '">Unsubscribe</button>';
+      return '<li><span><span class="addr">' + esc(a.email) + '</span>' +
+        '<span class="state' + (a.unsubscribed ? ' off' : '') + '">' + (a.unsubscribed ? 'Unsubscribed' : 'Getting these emails') + '</span></span>' + btn + '</li>';
+    }).join('');
+    $('main').innerHTML = intro + '<ul>' + list + '</ul>' +
+      '<p class="muted">You can always reach me by replying to any of my emails.</p>';
+    Array.prototype.forEach.call($('main').querySelectorAll('button[data-i]'), function (b) {
+      b.onclick = function () { change(d.addresses[Number(b.getAttribute('data-i'))].email, !!b.getAttribute('data-undo')); };
+    });
+  }
+
+  function change(email, undo) {
+    Array.prototype.forEach.call(document.querySelectorAll('button'), function (b) { b.disabled = true; });
+    $('status').textContent = 'Saving…';
+    post({ action: 'unsubscribe', token: TOKEN, email: email, undo: undo }).then(function (d) {
+      if (d && d.ok) {
+        var lead = state.lead;
+        state = d;
+        if (lead) state.lead = true;
+        render();
+        if (d.rehearsal) {
+          $('status').textContent = 'This link came from a test copy of the email, so nothing was changed.';
+        } else if (lead) {
+          $('status').textContent = 'Done. You won’t get any more follow up emails.';
+        } else {
+          $('status').textContent = undo
+            ? 'Done. ' + email + ' will get these emails again.'
+            : 'Done. ' + email + ' won’t get any more automatic emails.';
+        }
+        return;
+      }
+      render();
+      if (d && d.error === 'network') {
+        $('status').textContent = 'No answer came back, so it may or may not have saved. Open this link again to check.';
+      } else if (d && d.error === 'not_on_this_email') {
+        $('status').textContent = 'That address wasn’t on this email, so nothing was changed.';
+      } else if (d && d.error === 'bad_link') {
+        badLink();
+      } else {
+        $('status').textContent = 'That didn’t save. Try again in a moment.';
+      }
+    });
+  }
+
+  load();
+})();
+</script>
+</body>
+</html>

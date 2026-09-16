@@ -1291,7 +1291,7 @@
 
   // What this build of admin.html needs the deployment to understand. Kept
   // beside the version constant in Code.gs — bump both together.
-  var REQUIRED_BACKEND_VERSION = 20;
+  var REQUIRED_BACKEND_VERSION = 21;
   var CAPABILITY_LABELS = {
     calendar: 'the calendar and student pages',
     dueDates: 'due dates',
@@ -1312,7 +1312,8 @@
     studentProgram: 'sorting students into SAT prep, tutoring and college admissions',
     studentEdit: 'editing a student\u2019s details (second parent, second SAT date)',
     fridayPreview: 'the Upcoming weekly updates card on Email families',
-    weeklyTiming: 'weekly updates going the morning after each session (until then they still go on Fridays)'
+    weeklyTiming: 'weekly updates going the morning after each session (until then they still go on Fridays)',
+    unsubscribe: 'the Unsubscribe link in every automatic email, and pausing a family from its Account tab'
   };
 
   function joinList(items) {
@@ -2588,8 +2589,18 @@
       : (s.leadEmail ? 'Inquired as ' + escHtml(s.leadEmail) + ' <span class="dim">(not signed in yet)</span>' : '<span class="dim">Not signed in yet</span>'));
     row('Parent', s.guardianEmail
       ? (s.guardianName ? escHtml(s.guardianName) + ' ' : '') + '&lt;' + escHtml(s.guardianEmail) + '&gt;'
-      : '<span class="dim">' + (s.guardian2Email ? 'Not on file' : 'None on file, so no Friday updates') + '</span>');
+      : '<span class="dim">' + (s.guardian2Email ? 'Not on file' : 'None on file, so no weekly updates') + '</span>');
     if (s.guardian2Email) row('Second parent', escHtml(s.guardian2Email));
+    // Older deployments send neither field: say nothing rather than guess.
+    if (typeof s.emailsPaused === 'boolean') {
+      row('Automatic emails', s.emailsPaused
+        ? '<b>Paused</b> <span class="dim">(no weekly updates or other automatic emails)</span> <button type="button" class="mini" data-email-set="on">Turn back on</button>'
+        : 'On <button type="button" class="mini" data-email-set="pause">Pause</button>');
+    }
+    (s.emailOptOut || []).forEach(function (addr) {
+      row('Unsubscribed', escHtml(addr) + ' <span class="dim">(used the link in an email)</span> ' +
+        '<button type="button" class="mini" data-email-resub="' + escHtml(addr) + '">Resubscribe</button>');
+    });
     if (sat) {
       row('SAT date', satDay || '<span class="dim">Not set</span>');
       if (satDay2) row('Second SAT date', satDay2);
@@ -2608,6 +2619,7 @@
       : '<span class="dim">Not created yet</span>');
     $('stu-details').innerHTML = rows.join('');
     $('stu-edit-btn').disabled = false;
+    wireEmailSettings(s);
     renderSatHistoryLine();
 
     var actions = [];
@@ -2618,6 +2630,47 @@
     if (assignBtn) assignBtn.addEventListener('click', function () {
       selectTab('homework');
       openCreateModal([toDateStr(new Date())], currentStudent.key, currentStudent.name, '');
+    });
+  }
+
+  // Automatic emails on the Account tab: pause the family, or put back an
+  // address that unsubscribed itself. Saved straight away through
+  // updateStudentInfo, then the student is read again.
+  function wireEmailSettings(s) {
+    var key = currentStudent && currentStudent.key;
+    if (!key) return;
+    var save = function (btn, fields, failWhat) {
+      var buttons = $('stu-details').querySelectorAll('[data-email-set],[data-email-resub]');
+      Array.prototype.forEach.call(buttons, function (b) { b.disabled = true; });
+      btn.textContent = 'Saving\u2026';
+      var who = currentStudent.name || key;
+      postToBackend({ action: 'updateStudentInfo', adminKey: adminKey(), key: key, fields: fields }).then(function (d) {
+        if (d && d.ok) {
+          if (currentStudent && currentStudent.key === key) {
+            loadStudentDetail(key);
+            if (!noteDirty()) loadFridayNote(key);
+          }
+          return;
+        }
+        showNotice(who + ': ' + failWhat + ' NOT saved. ' + ((d && d.message) || (d && d.error) || 'Try again.'));
+        if (currentStudent && currentStudent.key === key) loadStudentDetail(key);
+      }, function () {
+        showNotice(who + ': ' + failWhat + ' NOT saved. Could not reach the backend.');
+        if (currentStudent && currentStudent.key === key) loadStudentDetail(key);
+      });
+    };
+    Array.prototype.forEach.call($('stu-details').querySelectorAll('[data-email-set]'), function (btn) {
+      btn.addEventListener('click', function () {
+        var pause = btn.getAttribute('data-email-set') === 'pause';
+        save(btn, { emailsPaused: pause }, pause ? 'pausing emails' : 'turning emails back on');
+      });
+    });
+    Array.prototype.forEach.call($('stu-details').querySelectorAll('[data-email-resub]'), function (btn) {
+      btn.addEventListener('click', function () {
+        var addr = btn.getAttribute('data-email-resub');
+        if (!confirm('Send automatic emails to ' + addr + ' again? They unsubscribed themselves, so only do this if they asked.')) return;
+        save(btn, { emailOptOut: (s.emailOptOut || []).filter(function (e) { return e !== addr; }) }, 'resubscribing ' + addr);
+      });
     });
   }
 
