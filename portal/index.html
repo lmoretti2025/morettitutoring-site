@@ -317,9 +317,11 @@
      never runs. It was 160px, which clipped the breaks row on a phone,
      where the two groups stack (Luca, 2026-09-15). */
   .onb-accom-sub.is-open { max-height: 40rem; }
-  /* The baseline-score sub-panel (test-type toggle, two inputs, error
-     line) is taller than the accommodations one; 160px clips its inputs. */
-  #onbBaselineSub.is-open { max-height: 300px; }
+  /* The baseline-score sub-panel used to carry its own 300px cap here. It
+     outranked the rule above, so the panel kept the exact bug the rule was
+     written to fix: with larger text, or when the error line wraps, the
+     message explaining why Continue is refusing gets cut off. setSubOpen()
+     measures it like every other panel now (Luca, 2026-09-16). */
   .onb-accom-sub-inner { padding-top: 1.1rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
   .onb-accom-group-label { font-size: 0.66rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--mid); margin-bottom: 0.5rem; }
   .onb-accom-opts { display: flex; flex-wrap: wrap; gap: 0.4rem; }
@@ -1287,7 +1289,13 @@
   .dx-choice { position: relative; }
   .dx-choice.eliminated { opacity: 0.45; }
   .dx-choice.eliminated .dx-choice-text { text-decoration: line-through; }
-  .dx-elim { display: none; margin-left: auto; flex-shrink: 0; width: 26px; height: 26px; align-items: center; justify-content: center; border-radius: 50%; color: var(--faint); font-size: 1rem; line-height: 1; cursor: pointer; transition: color 0.2s, background 0.2s; }
+  /* The cross-out control sits on top of the answer row it belongs to, and
+     it is on by default, so a mis-tap under a timer picks an answer instead
+     of eliminating one. The circle stays 26px; ::after widens the tap area
+     to 44px, which still fits inside the row at both paddings above
+     (Luca, 2026-09-16). */
+  .dx-elim { display: none; position: relative; margin-left: auto; flex-shrink: 0; width: 26px; height: 26px; align-items: center; justify-content: center; border-radius: 50%; color: var(--faint); font-size: 1rem; line-height: 1; cursor: pointer; transition: color 0.2s, background 0.2s; }
+  .dx-elim::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 44px; height: 44px; border-radius: 50%; }
   #dx-choices.eliminator-on .dx-elim { display: flex; }
   .dx-elim:hover { color: var(--red); background: rgba(176,39,28,0.08); }
   .dx-nav-row { display: flex; align-items: center; justify-content: space-between; }
@@ -1477,6 +1485,13 @@
   #portal-fatal-error .ferr-box { max-width: 440px; }
   #portal-fatal-error h1 { font-family: var(--display); font-size: 1.4rem; color: var(--text); margin-bottom: 0.9rem; }
   #portal-fatal-error p { font-family: var(--hel); font-size: 0.85rem; color: var(--mid); line-height: 1.85; }
+  #portal-fatal-error .ferr-saved { color: var(--text); font-weight: 600; }
+  #dx-tab-warning { position: fixed; left: 0; right: 0; top: 0; z-index: 9998; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 0.9rem; padding: 0.8rem 1.1rem; background: #7a5f12; color: #fff; font-family: var(--hel); font-size: 0.78rem; line-height: 1.5; text-align: center; }
+  #dx-tab-warning button { font-family: var(--hel); font-size: 0.74rem; font-weight: 600; color: #7a5f12; background: #fff; border: none; border-radius: 999px; padding: 0.4rem 1rem; min-height: 32px; cursor: pointer; }
+  #portal-fatal-error .ferr-btn { margin-top: 1.4rem; font-family: var(--hel); font-size: 0.82rem; font-weight: 600; color: #fff; background: var(--red); border: none; border-radius: 999px; padding: 0.7rem 1.6rem; min-height: 44px; cursor: pointer; }
+  #portal-fatal-error .ferr-btn:hover { opacity: 0.9; }
+  #portal-fatal-error .ferr-help { font-size: 0.76rem; margin-top: 1.1rem; }
+  #portal-fatal-error #ferr-detail { font-family: monospace; font-size: 0.66rem; color: var(--faint); line-height: 1.5; margin-top: 1.6rem; word-break: break-word; }
 
   /* ═══ VOCABULARY SETUP ═══ progress first, then two one-tap rounds, then
      a collapsed builder. Mastered green is the score report's #16A34A
@@ -3462,13 +3477,21 @@ window.Portal = {
 };
 </script>
 
-<!-- If something breaks while loading the portal, this catches it and
-     shows a plain-English message instead of a blank white page. -->
+<!-- If something breaks, this catches it and shows a plain-English message
+     instead of a blank white page. It used to be addressed to whoever edits
+     this file, which is no help at all to a student three hours into a test:
+     no way forward, and no hint that their work was safe. It is: saveState()
+     writes to sessionStorage and localStorage on every answer and every move
+     between questions, so reloading picks the test back up. Say so, and give
+     them the button (Luca, 2026-09-16). -->
 <div id="portal-fatal-error">
   <div class="ferr-box">
-    <h1>Something went wrong loading the portal</h1>
-    <p>Most likely the page couldn't reach the backend it needs (check APPS_SCRIPT_URL below), or an external script failed to load. Open <code>portal/index.html</code> and check your last edit, or send the detail below to Claude.</p>
-    <p id="ferr-detail" style="font-family: monospace; font-size: 0.72rem; color: var(--red); margin-top: 1rem; word-break: break-word;"></p>
+    <h1>Something went wrong</h1>
+    <p class="ferr-saved">Your answers are saved.</p>
+    <p>Reloading the page will pick you back up where you left off, with your section time protected. Nothing you have done so far is lost.</p>
+    <button type="button" class="ferr-btn" id="ferr-reload">Reload and keep going</button>
+    <p class="ferr-help">If it happens again, text Luca at (201) 275-2791. He already gets a copy of what went wrong.</p>
+    <p id="ferr-detail"></p>
   </div>
 </div>
 <script>
@@ -3480,6 +3503,10 @@ window.Portal = {
     var detail = document.getElementById('ferr-detail');
     if (detail) detail.textContent = (e && e.message) ? e.message + (e.filename ? ' (' + e.filename.split('/').pop() + ':' + e.lineno + ')' : '') : '';
     if (el) el.style.display = 'flex';
+    var again = document.getElementById('ferr-reload');
+    /* onclick, not addEventListener: a second error must not wire a second
+       handler onto the same button. */
+    if (again) again.onclick = function () { location.reload(); };
   });
 </script>
 
@@ -5398,36 +5425,42 @@ window.Portal = {
     document.head.appendChild(s);
   });
 
-  /* question-bank.js (~4MB) loads the same async way as practice-tests.js.
-     window.__questionBankReady resolves on load or error. poolFor()
-     tolerates window.QUESTION_BANK being undefined (`|| []`), and
-     qbModuleInit() re-renders once this resolves. */
-  window.__questionBankReady = new Promise(function (resolve) {
-    var s = document.createElement('script');
-    s.src = 'question-bank.js?v=20260905y';
-    // Settled, not loaded: an error resolves too, and a screen
-    // needs to stop saying "loading" either way.
-    function settle() { window.__questionBankSettled = true; resolve(); }
-    s.onload = settle;
-    s.onerror = settle;
-    document.head.appendChild(s);
-  });
+  /* ═══ THE TWO QUESTION BANKS LOAD ON FIRST USE ═══ question-bank.js (~4MB)
+     and question-bank-math.js (~5.4MB) are the largest things the portal can
+     download, and they used to start the moment the sign-in screen painted.
+     A student who only ever takes practice tests never opens either one, so
+     that was 9.6MB of a phone's data plan for nothing, competing for
+     bandwidth with the submit traffic that actually matters during a test.
 
-  /* question-bank-math.js (~4.5MB, the largest file) loads the same async
-     way as its two siblings above; nothing on the sign-in screen needs it,
-     and a synchronous parse that size can freeze mid-range phones. Readers
-     guard with `window.QUESTION_BANK_MATH || []` (see poolFor), and
-     qbModuleInit re-renders once both banks resolve. */
-  window.__questionBankMathReady = new Promise(function (resolve) {
-    var s = document.createElement('script');
-    s.src = 'question-bank-math.js?v=20260905y';
-    // Settled, not loaded: an error resolves too, and a screen
-    // needs to stop saying "loading" either way.
-    function settle() { window.__questionBankMathSettled = true; resolve(); }
-    s.onload = settle;
-    s.onerror = settle;
-    document.head.appendChild(s);
-  });
+     Reading window.__questionBankReady is what starts the download now, and
+     it returns the same promise every time after that. Every existing caller
+     already awaits these (qbModuleInit, the Saved & Mistakes resolver, the
+     Rush modal), so each one triggers the load at the exact moment it needs
+     the data, and nothing else has to change. The banks stay optional
+     everywhere they are read (`window.QUESTION_BANK || []`).
+     (Luca, 2026-09-16) */
+  function lazyBank(readyProp, src, settledProp) {
+    var promise = null;
+    Object.defineProperty(window, readyProp, {
+      configurable: true,
+      get: function () {
+        if (promise) return promise;
+        promise = new Promise(function (resolve) {
+          var s = document.createElement('script');
+          s.src = src;
+          // Settled, not loaded: an error resolves too, and a screen
+          // needs to stop saying "loading" either way.
+          function settle() { window[settledProp] = true; resolve(); }
+          s.onload = settle;
+          s.onerror = settle;
+          document.head.appendChild(s);
+        });
+        return promise;
+      }
+    });
+  }
+  lazyBank('__questionBankReady', 'question-bank.js?v=20260905y', '__questionBankSettled');
+  lazyBank('__questionBankMathReady', 'question-bank-math.js?v=20260905y', '__questionBankMathSettled');
 
   // Chart.js: only for Home's two donut charts. Loaded async like
   // practice-tests.js; renderHomePies() awaits this before drawing.
@@ -5921,7 +5954,10 @@ window.Portal = {
       module2Variant: module2Variant,
       module1Buffer: module1Buffer,
       breakEndsAt: breakEndsAt,
-      breakKind: breakKind
+      breakKind: breakKind,
+      // Which tab wrote this. See the storage listener below: it is the only
+      // way a tab can tell another tab's save from an echo of its own.
+      tabId: TAB_ID
     };
     try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(payload)); } catch (e) { /* private browsing / storage disabled — fail silently */ }
     syncResumeSnapshot(payload);
@@ -5954,6 +5990,44 @@ window.Portal = {
     if (!studentKey) return;
     try { localStorage.removeItem(resumeStorageKey(studentKey)); } catch (e) {}
   }
+
+  /* ═══ THE SAME TEST IN TWO TABS ═══ the resume snapshot is one slot per
+     student, shared by every tab in the browser. Two tabs on the same test
+     both write into it, the last save wins, and the other tab's answers go
+     without a word: a phone that restores an old tab, or a stale link
+     opened alongside, is enough to do it. Submitted attempts are already
+     safe (the backend dedupes on attemptId); this is about the answers
+     before that. A tab stamp makes the collision visible, and the student
+     is told once, while there is still time to close the other one.
+     The storage event fires only in the tabs that did NOT write, which is
+     exactly who needs to hear it (Luca, 2026-09-16). */
+  var TAB_ID = Math.random().toString(36).slice(2) + '-' + Date.now().toString(36);
+  var otherTabWarned = false;
+  function warnOtherTab() {
+    if (otherTabWarned) return;
+    otherTabWarned = true;
+    var bar = document.createElement('div');
+    bar.id = 'dx-tab-warning';
+    var msg = document.createElement('span');
+    msg.textContent = 'This test is open in another tab. Answer in one tab only: whichever you answer in last is the one that gets kept.';
+    var close = document.createElement('button');
+    close.type = 'button';
+    close.textContent = 'Got it';
+    close.onclick = function () { if (bar.parentNode) bar.parentNode.removeChild(bar); };
+    bar.appendChild(msg);
+    bar.appendChild(close);
+    document.body.appendChild(bar);
+  }
+  window.addEventListener('storage', function (e) {
+    if (!currentStudent || !currentStudent.key) return;
+    if (!e || e.key !== resumeStorageKey(currentStudent.key) || !e.newValue) return;
+    // Only a tab that is itself mid-test is losing anything.
+    if (!MID_DIAGNOSTIC_SCREENS[activeScreenId]) return;
+    try {
+      var incoming = JSON.parse(e.newValue);
+      if (incoming && incoming.tabId && incoming.tabId !== TAB_ID) warnOtherTab();
+    } catch (err) { /* unreadable snapshot: nothing useful to say */ }
+  });
   // Reads back a saved snapshot for the CURRENT student, if one exists,
   // is still genuinely mid-diagnostic, and hasn't been invalidated by a
   // completed attempt since it was saved (e.g. taken on another device).

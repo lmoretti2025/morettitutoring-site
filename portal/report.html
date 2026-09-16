@@ -1067,8 +1067,30 @@
 
 <script src="banks.js?v=20260910a"></script>
 <script>
-  // The public sample report (?demo=1) never reads a practice test, so skip the 2.9MB file there.
-  if (!/[?&]demo=1\b/.test(location.search)) document.write('<script src="practice-tests.js?v=20260912a"><\/script>');
+  /* ═══ WHO ACTUALLY NEEDS practice-tests.js ═══ only a PRACTICE TEST report
+     reads it (getBank and the test-title lookup below, both behind
+     `if (data.pt)`). A DIAGNOSTIC scores against SECTION_BANKS in banks.js,
+     already loaded above. Every report used to pull the whole 2.9MB file
+     regardless, so a family opening the diagnostic report we email them
+     after the free test, the one piece of proof the whole pitch rests on,
+     waited for every question of every other practice test to arrive first.
+
+     The report id is in the URL fragment, readable before any of this runs,
+     so the question is answerable here. An unreadable or missing fragment
+     loads the file anyway: the safe way to be wrong (Luca, 2026-09-16). */
+  (function () {
+    // The public sample report never reads a practice test.
+    if (/[?&]demo=1\b/.test(location.search)) return;
+    var needed = true;
+    try {
+      var raw = location.hash.replace(/^#d=/, '');
+      if (raw) {
+        var d = JSON.parse(decodeURIComponent(escape(atob(raw))));
+        needed = !!(d && d.pt);
+      }
+    } catch (e) { /* unreadable link: load it and let the report say so */ }
+    if (needed) document.write('<script src="practice-tests.js?v=20260912a"><\/script>');
+  })();
 </script>
 <script src="time-budgets.js?v=20260912a"></script>
 <script src="grid-in.js?v=20260910a"></script>
