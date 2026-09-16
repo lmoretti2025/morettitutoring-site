@@ -743,15 +743,15 @@
           <div id="stu-prep"></div>
         </div>
         <div class="card" id="stu-note-card">
-          <h2>Note for Friday</h2>
-          <p class="card-sub">A line or two from this week&rsquo;s session. It goes into the family&rsquo;s next Friday update, then clears.</p>
+          <h2>Note for the weekly update</h2>
+          <p class="card-sub">A line or two from this week&rsquo;s session. It goes into the family&rsquo;s next weekly update, the morning after the session, then clears.</p>
           <textarea id="stu-note" maxlength="600" rows="5" placeholder="e.g. Cracked the quadratic word problems today: set up three in a row on their own."></textarea>
           <div class="fn-row">
             <span class="fn-status" id="stu-note-status"></span>
             <button type="button" class="mini" id="stu-note-clear">Clear</button>
             <button type="button" class="mini solid" id="stu-note-save">Save note</button>
           </div>
-          <button type="button" class="fp-jump" id="stu-note-preview">See their Friday email &rarr;</button>
+          <button type="button" class="fp-jump" id="stu-note-preview">See their weekly email &rarr;</button>
         </div>
       </div>
     </section>
@@ -825,7 +825,7 @@
               <label class="fld">Parent email<input name="guardianEmail" type="email" autocomplete="off"></label>
             </div>
             <label class="fld">Second parent email <span class="opt">optional</span><input name="guardian2Email" type="email" autocomplete="off"></label>
-            <p class="ef-hint">Friday updates go to both parent emails. With no parent email there is no Friday update.</p>
+            <p class="ef-hint">Weekly updates go to both parent emails. With no parent email there is no weekly update.</p>
           </fieldset>
           <fieldset id="stu-edit-sat">
             <legend>SAT</legend>
@@ -899,10 +899,10 @@
          them (emails.gs handleFridayPreview). Read-only: nothing here sends. -->
     <div class="card" id="fp-card">
       <div class="card-head">
-        <h2>This Friday&rsquo;s updates</h2>
+        <h2>Upcoming weekly updates</h2>
         <button type="button" class="mini" id="fp-reload">Check again</button>
       </div>
-      <p class="card-sub" id="fp-sub">The weekly emails go out by themselves at 8am on Fridays. This is what that run will do, as things stand now.</p>
+      <p class="card-sub" id="fp-sub">Each family&rsquo;s update goes out by itself at 8am the morning after their session. This is when, and what it will say, as things stand now.</p>
       <div class="fp-summary" id="fp-summary"></div>
       <div class="fp-grid">
         <div class="fp-list" id="fp-list"></div>
@@ -1291,7 +1291,7 @@
 
   // What this build of admin.html needs the deployment to understand. Kept
   // beside the version constant in Code.gs — bump both together.
-  var REQUIRED_BACKEND_VERSION = 19;
+  var REQUIRED_BACKEND_VERSION = 20;
   var CAPABILITY_LABELS = {
     calendar: 'the calendar and student pages',
     dueDates: 'due dates',
@@ -1311,7 +1311,8 @@
     fridayNote: 'the Note for Friday box on each student (emails.gs)',
     studentProgram: 'sorting students into SAT prep, tutoring and college admissions',
     studentEdit: 'editing a student\u2019s details (second parent, second SAT date)',
-    fridayPreview: 'the This Friday preview on Email families'
+    fridayPreview: 'the Upcoming weekly updates card on Email families',
+    weeklyTiming: 'weekly updates going the morning after each session (until then they still go on Fridays)'
   };
 
   function joinList(items) {
@@ -1833,7 +1834,7 @@
     var who = (currentStudent && currentStudent.name) || 'this student';
     var unsaved = [];
     if (editDirty() && editBusy !== (currentStudent && currentStudent.key)) unsaved.push('changes to ' + who + '\u2019s details');
-    if (noteDirty()) unsaved.push('the Note for Friday');
+    if (noteDirty()) unsaved.push('the note for the weekly update');
     if (!unsaved.length) return true;
     return window.confirm('You have unsaved ' + unsaved.join(' and ') + '. Leave without saving?');
   }
@@ -2205,10 +2206,11 @@
   }
 
   function noteWhere(d) {
-    if (d.archived) return { msg: 'This student is hidden (archived), so no Friday update goes out.', cls: 'warn' };
-    if (d.paused) return { msg: 'This family is paused (GuardianPaused), so the Friday update is on hold.', cls: 'warn' };
-    if (!d.parents || !d.parents.length) return { msg: 'No parent email on file, so there is no Friday update to put it in. Add one on the Account tab, under Details.', cls: 'warn' };
-    return { msg: 'Goes into the Friday update on ' + d.friday + ', to ' + d.parents.join(', ') +
+    if (d.archived) return { msg: 'This student is hidden (archived), so no weekly update goes out.', cls: 'warn' };
+    if (d.paused) return { msg: 'This family is paused (GuardianPaused), so the weekly update is on hold.', cls: 'warn' };
+    if (!d.parents || !d.parents.length) return { msg: 'No parent email on file, so there is no weekly update to put it in. Add one on the Account tab, under Details.', cls: 'warn' };
+    // nextUpdate from backend v20 (updates follow sessions); an older one still names a Friday.
+    return { msg: 'Goes into the next weekly update, ' + (d.nextUpdate || ('on ' + d.friday)) + ', to ' + d.parents.join(', ') +
       (d.rehearsal ? ' (rehearsal mode: the copy comes to you).' : '.'), cls: '' };
   }
 
@@ -2277,7 +2279,7 @@
       noteSaved = d.note || '';
       $('stu-note').value = noteSaved;   // shows the note as it will go out (dashes become commas)
       var w = noteWhere(d);
-      noteStatus(noteSaved ? 'Saved. ' + w.msg : 'Cleared. The Friday update goes out without a note.', noteSaved && !w.cls ? 'ok' : w.cls);
+      noteStatus(noteSaved ? 'Saved. ' + w.msg : 'Cleared. The weekly update goes out without a note.', noteSaved && !w.cls ? 'ok' : w.cls);
     }).catch(function () {
       if (noteSaving === seq) noteSaving = 0;
       if (seq !== noteSeq) return;          // another student is open now: never touch that page
@@ -4181,8 +4183,9 @@
   function renderFridayPreview(d) {
     fp.data = d;
     fp.items = d.items || [];
-    $('fp-sub').textContent = 'The weekly emails go out by themselves at ' + d.runHour + 'am on Fridays. This is what the run on ' + d.fridayLabel +
-      ' will do, as things stand now. Practice done before then still counts.';
+    $('fp-sub').textContent = 'Each family\u2019s update goes out by itself at ' + d.runHour + 'am the morning after their session, ' +
+      'covering everything since their last one (never twice in five days, never more than eight days apart). ' +
+      'This is when and what, as things stand now: booked sessions are assumed to happen, and practice done before then still counts.';
     if (!d.calendarOk) {
       $('fp-summary').innerHTML = '';
       $('fp-list').innerHTML = '<div class="empty" style="padding:0.8rem;">' + escHtml(d.message || 'Your calendar could not be read.') + '</div>';
@@ -4197,7 +4200,7 @@
     if (d.rehearsal) bits.push('<span class="fp-reh">Rehearsal mode: every one of these comes to you (' + escHtml(d.notifyEmail || '') + ') instead of the family, until you run goLive.</span>');
     $('fp-summary').innerHTML = bits.join('');
     if (!fp.items.length) {
-      $('fp-list').innerHTML = '<div class="empty" style="padding:0.8rem;">No family has a session booked ahead or an SAT date ahead, so no Friday updates this week.</div>';
+      $('fp-list').innerHTML = '<div class="empty" style="padding:0.8rem;">No family has a session booked ahead or an SAT date ahead, so no weekly updates are coming.</div>';
       $('fp-view').innerHTML = '';
       return;
     }
@@ -4219,7 +4222,7 @@
     Array.prototype.forEach.call(document.querySelectorAll('#fp-list .fp-row'), function (r) { r.classList.toggle('is-on', r.getAttribute('data-key') === key); });
     var open = '<button type="button" class="mini" data-open="' + escHtml(key) + '">Open ' + escHtml(firstName(i.name)) + '&rsquo;s page</button>';
     if (!i.html) {
-      $('fp-view').innerHTML = '<p class="fp-reason"><b>' + escHtml(i.name) + ':</b> ' + escHtml(i.reason || 'No email this Friday.') + '</p>' + open;
+      $('fp-view').innerHTML = '<p class="fp-reason"><b>' + escHtml(i.name) + ':</b> ' + escHtml(i.reason || 'No weekly update coming.') + '</p>' + open;
     } else {
       // i.html comes from the backend's own email renderer, which escapes
       // everything it is given: the same HTML the family receives.
