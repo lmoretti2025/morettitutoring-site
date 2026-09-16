@@ -1390,12 +1390,20 @@
     // Hidden students are out of the picture entirely — an archived row
     // should not be counted in a summary of who is being taught. So are
     // the ones the program filter leaves out.
-    var active = allStudents.filter(function (s) { return !s.archived && inProgFilter(s); });
+    var pool = allStudents.filter(function (s) { return !s.archived && inProgFilter(s); });
+    // A lead who came in, was never invited, and never signed in isn't a
+    // student yet -- statusFor_ (auth.gs) calls that stage 'Inquiry'.
+    // Counting them in "Students" inflated the tile with people nobody is
+    // teaching; they get their own tile instead.
+    var active = pool.filter(function (s) { return s.status !== 'Inquiry'; });
+    var inquiries = pool.length - active.length;
     var total = active.length;
     var withScore = active.filter(function (s) { return isSat(s) && s.composite != null; }).length;
     summaryRowEl.innerHTML =
       '<div class="summary-tile"><div class="num">' + total + '</div><div class="lbl">' +
         (progFilter === 'all' ? 'Students' : escHtml(PROGRAMS[progFilter].label)) + '</div></div>' +
+      (inquiries
+        ? '<div class="summary-tile"><div class="num">' + inquiries + '</div><div class="lbl">Inquiry leads</div></div>' : '') +
       (progFilter === 'all' || progFilter === 'sat'
         ? '<div class="summary-tile"><div class="num">' + withScore + '</div><div class="lbl">With a score on file</div></div>' : '') +
       /* Only when somebody actually is. A permanent "0 on the site now"
