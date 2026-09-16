@@ -2736,6 +2736,33 @@
 #pt-native-report .takeaways li { font-size: 11px; line-height: 1.65; color: var(--mid); padding: 4px 0 4px 16px; position: relative; }
 #pt-native-report .takeaways li::before { content: '◆'; position: absolute; left: 0; top: 8px; font-size: 6px; color: var(--gold); }
 #pt-native-report .takeaways strong { color: var(--ink); }
+
+  /* ═══ BEHAVIOR PATTERNS ═══ the panel at the top of "How you worked the test". */
+  #pt-native-report .bp-wrap { margin-bottom: 14px; }
+  #pt-native-report .bp-intro { font-size: 11px; line-height: 1.6; color: var(--mid); margin-bottom: 10px; }
+  #pt-native-report .bp-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  #pt-native-report .bp-tile { border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; background: #fff; break-inside: avoid; page-break-inside: avoid; }
+  #pt-native-report .bp-k { font-size: 9.5px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--tan); }
+  #pt-native-report .bp-fig { font-size: 26px; font-weight: 700; line-height: 1.1; color: var(--ink); margin-top: 4px; font-variant-numeric: tabular-nums; }
+  #pt-native-report .bp-fig small { font-size: 13px; font-weight: 500; color: var(--mid); }
+  #pt-native-report .bp-cap { font-size: 10.5px; line-height: 1.4; color: var(--mid); }
+  #pt-native-report .bp-bar { display: flex; height: 6px; border-radius: 3px; background: rgba(17,17,17,0.07); overflow: hidden; margin: 8px 0; }
+  #pt-native-report .bp-bar i { display: block; height: 100%; }
+  #pt-native-report .bp-s-ink { background: var(--ink); }
+  #pt-native-report .bp-s-good { background: var(--green); }
+  #pt-native-report .bp-s-bad { background: var(--red); }
+  #pt-native-report .bp-s-mid { background: rgba(17,17,17,0.3); }
+  #pt-native-report .bp-s-gold { background: var(--gold); }
+  #pt-native-report .bp-facts { list-style: none; }
+  #pt-native-report .bp-facts li { font-size: 10.5px; line-height: 1.55; color: var(--mid); padding: 3px 0 3px 12px; position: relative; }
+  #pt-native-report .bp-facts li::before { content: '\25C6'; position: absolute; left: 0; top: 8px; font-size: 5px; color: var(--gold); }
+  #pt-native-report .bp-facts b { color: var(--ink); font-weight: 600; }
+  #pt-native-report .bp-qs { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+  #pt-native-report .bp-q { font-family: 'Poppins', sans-serif; font-size: 9.5px; font-weight: 600; color: var(--ink); background: #fff; border: 1px solid var(--border); border-radius: 999px; padding: 2px 8px; cursor: pointer; }
+  #pt-native-report .bp-q:hover { border-color: var(--gold); background: rgba(201,168,76,0.1); }
+  #pt-native-report .bp-note { font-style: italic; color: var(--faint); }
+  #pt-native-report .bp-tile:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  @media (max-width: 640px) { #pt-native-report .bp-grid { grid-template-columns: 1fr; } }
 #pt-native-report .takeaways .r { color: var(--red); font-weight: 700; }
 #pt-native-report .behavior-clean { font-size: 11px; line-height: 1.65; color: var(--mid); }
 /* The single synthesized "Where to focus" headline: the biggest stuck/
@@ -21355,6 +21382,184 @@ window.renderNativeReport = function (data) {
     }
   })();
 
+  /* ═══ BEHAVIOR PATTERNS ═══ what the test recorded beyond the clock
+     (SIGNALS_SPEC.md, capture v1/v2): crossing out, answer changes, the
+     review pass and skips, the graphing calculator, and the reference
+     sheet. Every figure is a fact about THIS attempt with its denominator;
+     verdicts about habits across attempts stay with the pooled ledger
+     (signals.js changeVerdict), which one test can't supply. Silent on
+     attempts captured before these signals existed, and on any section
+     whose data doesn't decode. Kept in sync by hand between report.html and
+     index.html's native report. */
+  var behaviorPatternsHtml = (function () {
+    var MS = window.MorettiSignals;
+    if (!MS || typeof MS.decodeSection !== 'function') return '';
+    var parts = [];
+    try {
+      (data.s || []).forEach(function (sec) {
+        var bank = getBank(sec.k);
+        var view = sections.filter(function (x) { return x.key === sec.k; })[0];
+        if (!bank || !view) return;
+        var qs = sectionQuestions(bank, sec.v);
+        var d = MS.decodeSection(sec, qs, { grade: isCorrect, module1Length: bank.module2Easier ? bank.module1.length : undefined });
+        if (d && d.recorded && d.rows.length === qs.length) parts.push({ sec: sec, bank: bank, view: view, qs: qs, d: d });
+      });
+    } catch (e) { return ''; }
+    if (!parts.length) return '';
+
+    var fmtClock = function (s) { s = Math.max(0, Math.round(s)); return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2); };
+    var plural = function (n, one, many) { return n + ' ' + (n === 1 ? one : (many || one + 's')); };
+    var pct = function (a, b) { return b > 0 ? Math.round(a / b * 100) : 0; };
+    // A question reference that opens the question, numbered as the rest of the report numbers it.
+    var qref = function (p, i) {
+      var r = p.view.rows[i];
+      return '<button type="button" class="bp-q" data-bp-sec="' + esc(p.sec.k) + '" data-bp-i="' + i + '">' +
+        (parts.length > 1 ? esc(p.view.label.split(' ')[0]) + ' ' : '') + 'Q' + (r ? r.n : i + 1) + '</button>';
+    };
+    var qlist = function (list) { return list.length ? '<span class="bp-qs">' + list.map(function (x) { return qref(x.p, x.i); }).join('') + '</span>' : ''; };
+    var modName = function (p, m) {
+      var two = p.d.modules.length > 1;
+      return esc(p.view.label) + (two ? ', Module ' + (m + 1) : '');
+    };
+
+    var tiles = [];
+    var all = [];
+    parts.forEach(function (p) { p.d.rows.forEach(function (r, i) { all.push({ p: p, r: r, i: i }); }); });
+    var wrong = function (x) { return x.r.final !== null && !x.r.finalOk; };
+
+    /* 1. Crossing out. Only when the masks decoded (older capture or a
+       malformed link leaves them unusable, which is "not recorded", not "never
+       crossed anything out"). */
+    var mcSeen = all.filter(function (x) { return x.r.type === 'mc' && x.r.visits > 0; });
+    var withMasks = mcSeen.filter(function (x) { return x.r.masks; });
+    if (withMasks.length) {
+      var used = withMasks.filter(function (x) { return x.r.elEver; });
+      var near = withMasks.filter(function (x) { return wrong(x) && x.r.k === 2 && !x.r.keyOutFinal; });
+      var keyOut = withMasks.filter(function (x) { return wrong(x) && x.r.keyOutEver; });
+      var blind = withMasks.filter(function (x) { return wrong(x) && x.r.k === 4 && (x.r.difficulty === 'medium' || x.r.difficulty === 'hard'); });
+      var facts = [];
+      if (near.length) facts.push('<b>' + plural(near.length, 'miss', 'misses') + '</b> came down to two choices. These are the closest points to win back.' + qlist(near));
+      if (keyOut.length) facts.push('<b>Crossed out the right answer</b> on ' + plural(keyOut.length, 'question') + ' missed. That points to a content gap to reteach.' + qlist(keyOut));
+      if (blind.length) facts.push('<b>' + plural(blind.length, 'medium or hard miss', 'medium or hard misses') + '</b> with nothing crossed out: a guess among all four where narrowing was possible.');
+      if (!facts.length) facts.push(used.length ? 'No misses traced back to crossing out: none came down to two choices, and no right answer was crossed out.' : 'Crossing out was never used. On a hard question, ruling out even one choice makes a guess count for more.');
+      tiles.push({
+        k: 'Crossing out', fig: used.length, of: withMasks.length,
+        cap: 'multiple-choice questions with at least one choice crossed out',
+        bar: [{ w: pct(used.length, withMasks.length), c: 'bp-s-ink' }],
+        facts: facts
+      });
+    }
+
+    /* 2. Answer changes: successive visit-end answers that differ (a click
+       from A to C while still reading is deliberating, not a change). */
+    var ch = { WR: [], RW: [], WW: [] };
+    all.forEach(function (x) { x.r.changes.forEach(function (c) { if (ch[c.kind]) ch[c.kind].push(x); }); });
+    var nChanges = ch.WR.length + ch.RW.length + ch.WW.length;
+    var chFacts = [];
+    if (nChanges) {
+      if (ch.WR.length) chFacts.push('<b>' + plural(ch.WR.length, 'change') + ' fixed a mistake.</b>' + qlist(ch.WR));
+      if (ch.RW.length) chFacts.push('<b>' + plural(ch.RW.length, 'change') + ' broke a right answer.</b>' + qlist(ch.RW));
+      if (ch.WW.length) chFacts.push(plural(ch.WW.length, 'change') + ' swapped one wrong answer for another.');
+      var net = ch.WR.length - ch.RW.length;
+      chFacts.push('Net effect of changing answers on this test: <b>' + (net > 0 ? '+' : net < 0 ? '&minus;' : '') + plural(Math.abs(net), 'question') + '</b>.');
+    } else {
+      chFacts.push('No answer was changed after it was first chosen.');
+    }
+    tiles.push({
+      k: 'Answer changes', fig: nChanges, of: null,
+      cap: nChanges === 1 ? 'answer changed after it was chosen' : 'answers changed after they were chosen',
+      bar: nChanges ? [{ w: pct(ch.WR.length, nChanges), c: 'bp-s-good' }, { w: pct(ch.RW.length, nChanges), c: 'bp-s-bad' }, { w: pct(ch.WW.length, nChanges), c: 'bp-s-mid' }] : [],
+      facts: chFacts
+    });
+
+    /* 3. The review pass and skips, one line per module. */
+    var revFacts = [], skipsFirst = all.filter(function (x) { return x.r.skipFirst; });
+    parts.forEach(function (p) {
+      p.d.modules.forEach(function (m) {
+        var name = modName(p, m.module);
+        if (m.reviewStartSec === null) { revFacts.push('<b>' + name + ':</b> never reached the review screen.'); return; }
+        var bits = [];
+        if (m.reserveSec !== null) bits.push('first pass done with <b>' + fmtClock(m.reserveSec) + '</b> left');
+        if (m.reviewSec >= 30) {
+          bits.push(Math.round(m.reviewSec / 6) / 10 + ' min reviewing' + (m.reviewFlaggedShare !== null ? ' (' + Math.round(m.reviewFlaggedShare * 100) + '% on flagged questions)' : ''));
+        } else bits.push('almost no time spent reviewing');
+        if (typeof m.reviewGain === 'number' && m.reviewGain !== 0) bits.push('review ' + (m.reviewGain > 0 ? 'gained <b>+' + plural(m.reviewGain, 'question') + '</b>' : 'cost <b>' + plural(-m.reviewGain, 'question') + '</b>'));
+        revFacts.push('<b>' + name + ':</b> ' + bits.join(', ') + '.');
+      });
+    });
+    if (skipsFirst.length) {
+      var skipAns = skipsFirst.filter(function (x) { return x.r.final !== null; });
+      var skipRight = skipsFirst.filter(function (x) { return x.r.finalOk; });
+      revFacts.push('<b>Skipped ' + plural(skipsFirst.length, 'question') + ' on the first look</b>' + (skipAns.length
+        ? ', came back to answer ' + skipAns.length + ', and got ' + skipRight.length + ' right.'
+        : (skipsFirst.length === 1 ? ' and never came back to answer it.' : ' and never came back to answer them.')));
+    }
+    var reached = 0, mods = 0;
+    parts.forEach(function (p) { p.d.modules.forEach(function (m) { mods++; if (m.reviewStartSec !== null) reached++; }); });
+    tiles.push({
+      k: 'Review pass', fig: reached, of: mods,
+      cap: mods === 1 ? 'module reached the review screen' : 'modules reached the review screen with time to use',
+      bar: [{ w: pct(reached, mods), c: 'bp-s-ink' }],
+      facts: revFacts
+    });
+
+    /* 4. The graphing calculator (math only). Active use means the calculator
+       held focus for at least DEFAULTS.desmosActiveSec on that question.
+       Where a reviewed tag says Desmos is the fast route, misses without it
+       are named. Students reach for it on the questions they find hard, so
+       this describes the habit, never the calculator's effect. */
+    var math = parts.filter(function (p) { return p.sec.k === 'math'; });
+    if (math.length) {
+      var mRows = [];
+      math.forEach(function (p) { p.d.rows.forEach(function (r, i) { if (r.realVisits > 0) mRows.push({ p: p, r: r, i: i }); }); });
+      var active = mRows.filter(function (x) { return x.r.calcActive; });
+      var calcFacts = [];
+      var tags = window.DESMOS_TAGS;
+      var tagOf = function (x) { if (!tags) return null; var t = tags[MS.itemKey(x.p.qs[x.i])]; return typeof t === 'number' ? t : null; };
+      var fav = tags ? mRows.filter(function (x) { return tagOf(x) === 2; }) : [];
+      if (fav.length) {
+        var favActive = fav.filter(function (x) { return x.r.calcActive; });
+        var favMiss = fav.filter(function (x) { return !x.r.calcActive && wrong(x); });
+        calcFacts.push('On the <b>' + plural(fav.length, 'question') + '</b> where graphing is the fastest route, it was used on <b>' + favActive.length + '</b>.');
+        if (favMiss.length) calcFacts.push('<b>' + plural(favMiss.length, 'miss', 'misses') + '</b> on those without the calculator: worth redoing with Desmos first.' + qlist(favMiss));
+      }
+      var openOnly = mRows.filter(function (x) { return !x.r.calcActive && x.r.calcOpenSec > 0; });
+      if (openOnly.length) calcFacts.push('Open but not used on ' + plural(openOnly.length, 'more question') + '.');
+      if (!calcFacts.length) calcFacts.push(active.length ? 'Used on ' + plural(active.length, 'question') + ' in all.' : 'The graphing calculator was never used on this test.');
+      calcFacts.push('<span class="bp-note">Students reach for the calculator on the questions they find hard, so this describes the habit and says nothing about whether the calculator helped.</span>');
+      tiles.push({
+        k: 'Graphing calculator', fig: active.length, of: mRows.length,
+        cap: 'math questions where Desmos was actively used',
+        bar: [{ w: pct(active.length, mRows.length), c: 'bp-s-gold' }],
+        facts: calcFacts
+      });
+    }
+
+    /* 5. The reference sheet: a miss on a formula-sheet item with the sheet
+       never opened is a retrieval gap. Only shown when it happened. */
+    if (typeof MS.refSheetItem === 'function') {
+      var rsAll = math.length ? all.filter(function (x) { return x.p.sec.k === 'math' && x.r.realVisits > 0 && MS.refSheetItem(x.p.qs[x.i]); }) : [];
+      var rsMiss = rsAll.filter(function (x) { return wrong(x) && x.r.refOpens === 0 && x.r.refSec === 0; });
+      if (rsMiss.length) {
+        tiles.push({
+          k: 'Reference sheet', fig: rsMiss.length, of: rsAll.length,
+          cap: 'formula questions missed with the reference sheet closed',
+          bar: [{ w: pct(rsMiss.length, rsAll.length), c: 'bp-s-bad' }],
+          facts: ['The formula was on the sheet the whole time. That is a habit to fix: open the sheet on formula questions.' + qlist(rsMiss)]
+        });
+      }
+    }
+
+    return '<div class="bp-wrap"><p class="bp-intro">What the test recorded beyond the clock: every crossed-out choice, changed answer, return trip and calculator use. Facts about this attempt; patterns across tests build up as more are taken.</p>' +
+      '<div class="bp-grid">' + tiles.map(function (t) {
+        return '<div class="bp-tile"><div class="bp-k">' + t.k + '</div>' +
+          '<div class="bp-fig">' + t.fig + (t.of !== null ? '<small>/' + t.of + '</small>' : '') + '</div>' +
+          '<div class="bp-cap">' + t.cap + '</div>' +
+          '<div class="bp-bar">' + t.bar.map(function (s) { return '<i class="' + s.c + '" style="width:' + s.w + '%"></i>'; }).join('') + '</div>' +
+          '<ul class="bp-facts">' + t.facts.map(function (f) { return '<li>' + f + '</li>'; }).join('') + '</ul></div>';
+      }).join('') + '</div></div>';
+  })();
+
   // Test-taking behavior flags are individual sentences about specific
   // patterns (late-night, unused time, guess-landed). Always shown, even
   // with zero flags, so a clean pass reads as "checked and fine". The
@@ -21362,11 +21567,19 @@ window.renderNativeReport = function (data) {
   document.getElementById('behavior-hed').style.display = '';
   var bWrap = document.getElementById('behavior-section');
   bWrap.style.display = '';
-  bWrap.innerHTML = behaviorFlags.length
+  bWrap.innerHTML = behaviorPatternsHtml + (behaviorFlags.length
     ? '<ul class="takeaways">' + behaviorFlags.map(function (f) { return '<li>' + f + '</li>'; }).join('') + '</ul>'
     : (skipped > 0
       ? '<p class="behavior-clean">Nothing else to flag in how you worked the test. Running out of time is covered in the sections above.</p>'
-      : '<p class="behavior-clean">Nothing unusual in how you worked the test: no signs of rushing, heavy guessing or tiredness, so the score is a fair read of where you are.</p>');
+      : '<p class="behavior-clean">Nothing unusual in how you worked the test: no signs of rushing, heavy guessing or tiredness, so the score is a fair read of where you are.</p>'));
+  // Question chips in the patterns panel open the question, as the tables do.
+  [].forEach.call(bWrap.querySelectorAll('.bp-q'), function (b) {
+    b.addEventListener('click', function () {
+      var v = sections.filter(function (x) { return x.key === b.getAttribute('data-bp-sec'); })[0];
+      var open = typeof openQuestionModal === 'function' ? openQuestionModal : window.openQuestionModal;
+      if (v && typeof open === 'function') open(v.rows, +b.getAttribute('data-bp-i'), v.label);
+    });
+  });
 
 
   /* ═══ renderSkillDiagnosis() ═══ turns skillBuckets (built in the
