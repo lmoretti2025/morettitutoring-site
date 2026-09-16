@@ -554,6 +554,9 @@ h1 .ln:nth-child(2){animation-delay:1.6s}
 .js.anim .pcell.rv.d3.in{transition-delay:1.86s}
 .pcell .n{font-family:var(--display);font-weight:700;font-size:clamp(3rem,5.6vw,7.6rem);color:#fff;line-height:.98;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
 .pcell .n small{font-size:.5em;color:var(--red-lift)}
+.pcell .n-range{font-size:clamp(2.1rem,4.2vw,5.6rem)}
+/* two tiles per row on a small phone: the numbers come down so "1500+" and the range both fit */
+@media(max-width:400px){.pcell{padding-left:.5rem;padding-right:.5rem}.pcell .n{font-size:2.5rem}.pcell .n-range{font-size:1.9rem}}
 /* A grade jump is a figure too, but it is letters -- the arrow carries the
    movement, so it takes the accent the other tiles give their plus sign. */
 .gradejump i{font-style:normal;color:var(--red-lift);margin:0 .06em;font-size:.72em;vertical-align:.06em}
@@ -1004,8 +1007,8 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}
     <div class="c"><b>SAT scores</b> from students I have taught, hundreds of points up from where they started</div>
   </div>
   <div class="pcell rv rv-strict d1">
-    <div class="n">+<span class="countup" data-delay="620" data-count="250">0</span></div>
-    <div class="c"><b>Average score gain</b> for my SAT students, from where they started to their official score</div>
+    <div class="n n-range">+<span class="countup" data-delay="620" data-count="200">0</span>&ndash;<span class="countup" data-delay="620" data-count="250">0</span></div>
+    <div class="c"><b>Average point gain</b> for my SAT students, from where they started to their official score</div>
   </div>
   <div class="pcell rv rv-strict d2">
     <div class="n"><span class="countup" data-delay="1240" data-count="100">0</span><small>+</small></div>
@@ -1228,8 +1231,8 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}
 
 <section id="start" class="capture"><div class="shell">
   <div class="capintro">
-    <h2 class="rv d1">Start with a <span class="uline">free<svg class="uline-svg" viewBox="0 0 120 22" preserveAspectRatio="none" aria-hidden="true"><path class="u1" d="M3 9.5C22 5.6 47 4.4 70 5.2c17 .6 33 2 46 3.4"/><path class="u2" d="M6 16.4C26 12.8 52 11.6 76 12.2c15 .4 29 1.5 39 2.7"/></svg></span> call or diagnostic.</h2>
-    <p class="lead rv d2">I reply personally, usually within the hour. Have a recent score? We talk it through. No score yet? A full-length timed test at no charge, and the report is yours either way.</p>
+    <h2 class="rv d1">Start with the <span class="uline">free<svg class="uline-svg" viewBox="0 0 120 22" preserveAspectRatio="none" aria-hidden="true"><path class="u1" d="M3 9.5C22 5.6 47 4.4 70 5.2c17 .6 33 2 46 3.4"/><path class="u2" d="M6 16.4C26 12.8 52 11.6 76 12.2c15 .4 29 1.5 39 2.7"/></svg></span> diagnostic.</h2>
+    <p class="lead rv d2">I reply personally, usually within the hour. Every plan starts with a full-length timed test at no charge, and a report on the data behind the score. Rather talk first? Choose a call.</p>
     <p class="capdate rv d2"><span class="cdk">Next open SAT</span> <b id="cd-fit">October 3</b>, register by <b id="cd-reg">September 18</b>. <a href="test-dates.html">All dates &rarr;</a></p>
   </div>
 
@@ -1242,8 +1245,8 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}
       <fieldset class="ff fchoice">
         <legend class="fl">How would you like to start?</legend>
         <div class="fchoice-opts">
-          <label for="rf-start-call"><input type="radio" id="rf-start-call" name="start" value="call"><span><b>A free call</b><i>We have a score</i></span></label>
-          <label for="rf-start-diag"><input type="radio" id="rf-start-diag" name="start" value="diagnostic"><span><b>The free diagnostic</b><i>No score yet</i></span></label>
+          <label for="rf-start-diag"><input type="radio" id="rf-start-diag" name="start" value="diagnostic"><span><b>The free diagnostic</b><i>Where every plan starts</i></span></label>
+          <label for="rf-start-call"><input type="radio" id="rf-start-call" name="start" value="call"><span><b>Talk first</b><i>A short call, then the diagnostic</i></span></label>
         </div>
       </fieldset>
       <div class="frow">
@@ -1729,7 +1732,7 @@ mtaSafe(function(){
        change. Unpicked is fine: the reply asks. */
     var startEl = form.querySelector('input[name="start"]:checked');
     var start = startEl ? startEl.value : '';
-    if (start) message = (start === 'call' ? 'Wants to start with: a free call' : 'Wants to start with: the free diagnostic') + (message ? '\n\n' + message : '');
+    if (start) message = (start === 'call' ? 'Wants to talk first, then the diagnostic' : 'Wants to start with: the free diagnostic') + (message ? '\n\n' + message : '');
     /* Only name, phone and email are required: grade, subject and parent vs
        student are answered in the first minute of the call, and asking here
        turns a free diagnostic into a quoting form. */
