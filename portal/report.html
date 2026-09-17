@@ -968,7 +968,7 @@
   if (/[?&]embed=public\b/.test(location.search)) document.body.classList.add('public-embed');
 </script>
 <div id="err">Couldn't read the report data from this link. Make sure the full link was copied from the results email.</div>
-<div id="demo-banner" style="display:none; max-width:8.5in; margin:16px auto 0; background:#1a1a1a; color:#fff; font-family:'Poppins',sans-serif; font-size:12px; font-weight:600; letter-spacing:0.04em; padding:10px 18px; text-align:center;">DEMO — synthetic data, no real student took this. Add &amp;score=1000/1250/1450 to the URL to preview roughly that score band, &amp;accom=1.5 or &amp;accom=2 for an extended-time attempt, &amp;pace=1.4 for a student who runs out of time, and &amp;profile=pacing for one whose problem is concentrated in the reading-heavy skills.</div>
+<div id="demo-banner" style="display:none; max-width:8.5in; margin:16px auto 0; background:#1a1a1a; color:#fff; font-family:'Poppins',sans-serif; font-size:12px; font-weight:600; letter-spacing:0.04em; padding:10px 18px; text-align:center;">Sample report: made-up answers, no real student took this test.<span id="demo-banner-dev" style="display:none;"> Add &amp;score=1000/1250/1450 to the URL to preview roughly that score band, &amp;accom=1.5 or &amp;accom=2 for an extended-time attempt, &amp;pace=1.4 for a student who runs out of time, and &amp;profile=pacing for one whose problem is concentrated in the reading-heavy skills.</span></div>
 <div class="toolbar"><button onclick="window.print()">Print / Save as PDF</button></div>
 <div class="page cover" id="page-cover" style="display:none;"></div>
 <div class="page" id="page1" style="display:none;">
@@ -1883,11 +1883,19 @@
                sv: vl ? 2 : undefined, vl: vl, rv: sig.rv, el: sig.el, eu: sig.eu, co: sig.co, cf: sig.cf };
     });
 
+    // The demo is taken on the most recent Saturday at 10am, local time. It
+    // used to be stamped with the viewer's clock, so a parent reading at night
+    // was told the sample test was handed in late (audit 2026-09-16).
     // &late=1 fakes an 11:30pm submission so the late-night behavior flag
     // (see behaviorFlags below) can be previewed in demo mode.
     var demoNow = new Date();
+    demoNow.setDate(demoNow.getDate() - (demoNow.getDay() + 1) % 7);
+    demoNow.setHours(10, 0, 0, 0);
+    if (demoNow > new Date()) demoNow.setDate(demoNow.getDate() - 7);
     if (/[?&]late=1\b/.test(location.search)) demoNow.setHours(23, 30, 0, 0);
-    return { n: 'Demo Student', k: 'DEMO', t: testChoice, dt: demoNow.toISOString().slice(0, 10), ts: demoNow.toISOString(), s: s };
+    var pad2 = function (x) { return (x < 10 ? '0' : '') + x; };
+    var demoDay = demoNow.getFullYear() + '-' + pad2(demoNow.getMonth() + 1) + '-' + pad2(demoNow.getDate());
+    return { n: 'Demo Student', k: 'DEMO', t: testChoice, dt: demoDay, ts: demoNow.toISOString(), s: s };
   }
   var DEMO_MODE = /[?&]demo=1\b/.test(location.search);
 
@@ -1966,6 +1974,8 @@
   if (DEMO_MODE) {
     data = buildDemoData();
     document.getElementById('demo-banner').style.display = 'block';
+    // The URL options are for previewing; a parent opening the sample sees only the label (&dev=1 shows them).
+    if (/[?&]dev=1\b/.test(location.search)) document.getElementById('demo-banner-dev').style.display = 'inline';
   } else {
     try {
       var raw = location.hash.replace(/^#d=/, '');
@@ -6775,7 +6785,7 @@
                  Under two minutes over, across a 64-70 minute section, is
                  inside ordinary question-to-question variation. */
               (lostTotal < 120000
-                ? '<strong>Only ' + fmtMin(lostTotal) + ' ran over in all</strong>, too little to be worth practising for.'
+                ? '<strong>Only ' + fmtMin(lostTotal) + ' ran over in all</strong>, too little to be worth practicing for.'
                 : ratio < 1.1
                 ? '<strong>On target pace overall.</strong> A few skills ran over and others came in under, which is normal. Nothing here needs speed work.'
                 : spread === 'few'
@@ -6966,6 +6976,15 @@
        used to show a hedged first lead in "What to relearn"; review3-sim).
        A lead from the older gate (too few items for the test) has no z. */
     var contentAreas = areas.filter(function (a) { return a.severity === 3 && a.lead > 0 && (a.z == null || a.z >= CLEAR_GAP_Z); }).slice(0, 3);
+    /* The lead "What to relearn" shows, hedged, when it is real but short of
+       CLEAR_GAP_Z. Named here too, or the plan says no area stood out right
+       beside a "Start here" for one (audit 2026-09-16). */
+    var hedgedLead = null;
+    if (!contentAreas.length) {
+      var hlEl = document.querySelector('#skilldx-headline strong');
+      var hlName = hlEl ? hlEl.textContent.replace(/^Start here:\s*/, '').replace(/\.\s*$/, '') : '';
+      areas.forEach(function (a) { if (!hedgedLead && a.name === hlName && a.severity === 3 && a.lead > 0) hedgedLead = a.name; });
+    }
     // How many of the content misses the named areas hold, so a plan built on
     // one area says what happens to the rest.
     var areaMiss = contentAreas.reduce(function (a, x) { return a + (x.lead || 0); }, 0);
@@ -6989,11 +7008,13 @@
             '<em>' + causes.content + ' question' + (causes.content === 1 ? '' : 's') +
             ' on this test got real effort and still came back wrong.</em>'
           : areaTxt
-          ? areaTxt + ' first, then practice on ' + (contentAreas.length === 1 ? 'it' : 'them') + ', in that order: practising before the method is solid just rehearses the wrong method. ' +
+          ? areaTxt + ' first, then practice on ' + (contentAreas.length === 1 ? 'it' : 'them') + ', in that order: practicing before the method is solid just rehearses the wrong method. ' +
             '<em>' + causes.content + ' question' + (causes.content === 1 ? '' : 's') + ' on this test got real work and still came back wrong' +
             (areaMiss > 0 && areaMiss < causes.content ? ', ' + areaMiss + ' of them in ' + (contentAreas.length === 1 ? esc(contentAreas[0].name) : 'those areas') + '. Go through the rest one by one from the question grids.' : '.') + '</em>'
           : 'Work the questions this test got wrong. ' +
-            '<em>No area stood out clearly enough to build the week around, so spread the time across the misses rather than picking one topic.</em>')
+            '<em>' + (hedgedLead
+              ? '<b>' + esc(hedgedLead) + '</b> came out weakest, but not clearly enough to build the week around yet, so spread the time across the misses and let the next test show whether it holds.'
+              : 'No area stood out clearly enough to build the week around, so spread the time across the misses rather than picking one topic.') + '</em>')
       });
     }
     if (hours.method > 0) {
@@ -7469,7 +7490,9 @@
             : 'The problem is time: ' + joinAnd(paceParts) + '.')
         : mainName
         ? 'The main gap is ' + escP(mainName) + (GLOSS[mainName] ? ' (' + GLOSS[mainName] + ')' : '') + '.'
-        : c.content > 5 ? 'The misses are spread across the material rather than one topic.'
+        : c.content > 5 ? (weakLead
+            ? 'The misses are spread across the material. ' + escP(startHere) + ' came out weakest, but not clearly enough yet to call it the main gap.'
+            : 'The misses are spread across the material rather than one topic.')
         : count(c.content, 'question') + wasWere(c.content) + ' missed' + (fullyTimed ? ' after real work' : '') +
           ', so there is no topic to fix, just ' + (c.content === 1 ? 'that one' : 'those') + ' to go through.';
       var leadWork = ['content', 'method', 'clock'].reduce(function (a, k) { return c[k] > c[a] ? k : a; }, 'content');

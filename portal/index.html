@@ -23845,7 +23845,7 @@ window.renderNativeReport = function (data) {
                  Under two minutes over, across a 64-70 minute section, is
                  inside ordinary question-to-question variation. */
               (lostTotal < 120000
-                ? '<strong>Only ' + fmtMin(lostTotal) + ' ran over in all</strong>, too little to be worth practising for.'
+                ? '<strong>Only ' + fmtMin(lostTotal) + ' ran over in all</strong>, too little to be worth practicing for.'
                 : ratio < 1.1
                 ? '<strong>On target pace overall.</strong> A few skills ran over and others came in under, which is normal. Nothing here needs speed work.'
                 : spread === 'few'
@@ -24036,6 +24036,15 @@ window.renderNativeReport = function (data) {
        used to show a hedged first lead in "What to relearn"; review3-sim).
        A lead from the older gate (too few items for the test) has no z. */
     var contentAreas = areas.filter(function (a) { return a.severity === 3 && a.lead > 0 && (a.z == null || a.z >= CLEAR_GAP_Z); }).slice(0, 3);
+    /* The lead "What to relearn" shows, hedged, when it is real but short of
+       CLEAR_GAP_Z. Named here too, or the plan says no area stood out right
+       beside a "Start here" for one (audit 2026-09-16). */
+    var hedgedLead = null;
+    if (!contentAreas.length) {
+      var hlEl = document.querySelector('#skilldx-headline strong');
+      var hlName = hlEl ? hlEl.textContent.replace(/^Start here:\s*/, '').replace(/\.\s*$/, '') : '';
+      areas.forEach(function (a) { if (!hedgedLead && a.name === hlName && a.severity === 3 && a.lead > 0) hedgedLead = a.name; });
+    }
     // How many of the content misses the named areas hold, so a plan built on
     // one area says what happens to the rest.
     var areaMiss = contentAreas.reduce(function (a, x) { return a + (x.lead || 0); }, 0);
@@ -24059,11 +24068,13 @@ window.renderNativeReport = function (data) {
             '<em>' + causes.content + ' question' + (causes.content === 1 ? '' : 's') +
             ' on this test got real effort and still came back wrong.</em>'
           : areaTxt
-          ? areaTxt + ' first, then practice on ' + (contentAreas.length === 1 ? 'it' : 'them') + ', in that order: practising before the method is solid just rehearses the wrong method. ' +
+          ? areaTxt + ' first, then practice on ' + (contentAreas.length === 1 ? 'it' : 'them') + ', in that order: practicing before the method is solid just rehearses the wrong method. ' +
             '<em>' + causes.content + ' question' + (causes.content === 1 ? '' : 's') + ' on this test got real work and still came back wrong' +
             (areaMiss > 0 && areaMiss < causes.content ? ', ' + areaMiss + ' of them in ' + (contentAreas.length === 1 ? esc(contentAreas[0].name) : 'those areas') + '. Go through the rest one by one from the question grids.' : '.') + '</em>'
           : 'Work the questions this test got wrong. ' +
-            '<em>No area stood out clearly enough to build the week around, so spread the time across the misses rather than picking one topic.</em>')
+            '<em>' + (hedgedLead
+              ? '<b>' + esc(hedgedLead) + '</b> came out weakest, but not clearly enough to build the week around yet, so spread the time across the misses and let the next test show whether it holds.'
+              : 'No area stood out clearly enough to build the week around, so spread the time across the misses rather than picking one topic.') + '</em>')
       });
     }
     if (hours.method > 0) {
@@ -24539,7 +24550,9 @@ window.renderNativeReport = function (data) {
             : 'The problem is time: ' + joinAnd(paceParts) + '.')
         : mainName
         ? 'The main gap is ' + escP(mainName) + (GLOSS[mainName] ? ' (' + GLOSS[mainName] + ')' : '') + '.'
-        : c.content > 5 ? 'The misses are spread across the material rather than one topic.'
+        : c.content > 5 ? (weakLead
+            ? 'The misses are spread across the material. ' + escP(startHere) + ' came out weakest, but not clearly enough yet to call it the main gap.'
+            : 'The misses are spread across the material rather than one topic.')
         : count(c.content, 'question') + wasWere(c.content) + ' missed' + (fullyTimed ? ' after real work' : '') +
           ', so there is no topic to fix, just ' + (c.content === 1 ? 'that one' : 'those') + ' to go through.';
       var leadWork = ['content', 'method', 'clock'].reduce(function (a, k) { return c[k] > c[a] ? k : a; }, 'content');
