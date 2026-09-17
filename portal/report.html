@@ -1121,8 +1121,8 @@
 </script>
 <script src="time-budgets.js?v=20260912a"></script>
 <script src="grid-in.js?v=20260910a"></script>
-<script src="signals.js?v=20260913a"></script>
-<script src="desmos-tags.js?v=20260912a"></script>
+<script src="signals.js?v=20260916b"></script>
+<script src="desmos-tags.js?v=20260916b"></script>
 <script>
 (function () {
   'use strict';
@@ -2282,13 +2282,10 @@
   var pct = totalQ ? Math.round(totalC / totalQ * 100) : 0;
 
   /* ═══ GUESSING LIFT ═══ computed once, here, because two different parts
-     of this report need the same number: the "Habits worth naming" note and
-     the composite tile's score band.
-
-     Standard formula-score correction: right minus wrong/(options-1), with
-     four options. Grid-ins are excluded (they can't be guessed into).
-     This is a FLOOR: it assumes uniform guessing across all four options,
-     while real students eliminate distractors, which raises the lift. */
+     Where the test recorded crossing out it is elimination-aware (below);
+     elsewhere it is the standard wrong/3. The score band stopped using it in
+     the 2026-09-12 stats audit; it feeds the guessing note and the
+     read-with-care check. An estimate, capped at the right answers. */
   var guessLift = (function () {
     var mcC = 0, mcW = 0;
     sections.forEach(function (sec) {
@@ -2315,7 +2312,9 @@
           if (d && d.recorded && d.rows.some(function (r) { return r.masks; })) { sum += MS.guessingLift(d.rows).elim; elimAware = true; }
           else sum += wrongHere / 3;
         });
-        lift = sum;
+        // Never more lucky answers than right answers: narrowing to two on many
+        // misses (or crossing out after answering) could otherwise push it past them.
+        lift = Math.min(sum, mcC);
       } catch (e) { lift = mcW / 3; elimAware = false; }
     }
     return { correct: mcC, wrong: mcW, lift: lift, elimAware: elimAware };
@@ -4322,11 +4321,8 @@
        attempts this fires for three. */
     var liftShare = mcC > 0 ? lift / mcC : 0;
     if (mcC > 0 && lift >= 2 && liftShare >= 0.10) {
-      /* AT LEAST, not "about". R - W/(k-1) assumes guesses are uniform across
-         all four options; students eliminate distractors, and the lift grows
-         fast with fewer options (e.g. 8 among four, 12 among three, 25 among
-         two). Four is the most generous assumption, so the figure is a
-         floor. */
+      /* An estimate, not a floor: elimination-aware where crossing out was
+         recorded (guessingLift, capped at the right answers), wrong/3 elsewhere. */
       behaviorFlags.push('<strong>Some right answers were probably guesses:</strong> with this many wrong, guessing alone would account for about <strong>' +
         Math.round(lift) + '</strong> of your ' + mcC + ' right multiple-choice answers' + (guessLift.elimAware ? ', counting the choices you had narrowed down to' : '') + '. ' +
         'That is normal, and they count, just as on the real SAT. It only means the next score could come out a little higher or lower.');
@@ -4383,6 +4379,11 @@
     parts.forEach(function (p) { p.d.rows.forEach(function (r, i) { all.push({ p: p, r: r, i: i }); }); });
     var wrong = function (x) { return x.r.final !== null && !x.r.finalOk; };
 
+    /* Plain facts only (Luca, 2026-09-16): what happened on this test, with
+       the questions it happened on. Readings of what it means (content gap,
+       guess, habit, confidence) need several tests, so they live in session
+       prep (signals.js behaviorHighlights), never on a single report. */
+
     /* 1. Crossing out. Only when the masks decoded (older capture or a
        malformed link leaves them unusable, which is "not recorded", not "never
        crossed anything out"). */
@@ -4392,12 +4393,10 @@
       var used = withMasks.filter(function (x) { return x.r.elEver; });
       var near = withMasks.filter(function (x) { return wrong(x) && x.r.k === 2 && !x.r.keyOutFinal; });
       var keyOut = withMasks.filter(function (x) { return wrong(x) && x.r.keyOutEver; });
-      var blind = withMasks.filter(function (x) { return wrong(x) && x.r.k === 4 && (x.r.difficulty === 'medium' || x.r.difficulty === 'hard'); });
       var facts = [];
-      if (near.length) facts.push('<b>' + plural(near.length, 'miss', 'misses') + '</b> came down to two choices. These are the closest points to win back.' + qlist(near));
-      if (keyOut.length) facts.push('<b>Crossed out the right answer</b> on ' + plural(keyOut.length, 'question') + ' missed. That points to a content gap to reteach.' + qlist(keyOut));
-      if (blind.length) facts.push('<b>' + plural(blind.length, 'medium or hard miss', 'medium or hard misses') + '</b> with nothing crossed out: a guess among all four where narrowing was possible.');
-      if (!facts.length) facts.push(used.length ? 'No misses traced back to crossing out: none came down to two choices, and no right answer was crossed out.' : 'Crossing out was never used. On a hard question, ruling out even one choice makes a guess count for more.');
+      if (near.length) facts.push('<b>' + plural(near.length, 'miss', 'misses') + '</b> came down to two choices.' + qlist(near));
+      if (keyOut.length) facts.push('<b>The right answer was crossed out</b> on ' + plural(keyOut.length, 'missed question') + '.' + qlist(keyOut));
+      if (!facts.length) facts.push(used.length ? 'No miss came down to two choices, and no right answer was crossed out.' : 'Crossing out was not used on this test.');
       tiles.push({
         k: 'Crossing out', fig: used.length, of: withMasks.length,
         cap: 'multiple-choice questions with at least one choice crossed out',
@@ -4406,37 +4405,29 @@
       });
     }
 
-    /* 2. Answer changes: successive visit-end answers that differ (a click
-       from A to C while still reading is deliberating, not a change). */
-    /* Split by why the student went back (signals.js changeReading has the
-       pooled version): a flagged question returned to is the review working;
-       an unflagged one is a check through answers the student had settled.
-       Fixes there are good catches but were questions the student was sure of,
-       so the skill still needs work; breaks there are second-guessing. */
-    var ch = { WR: [], RW: [], WW: [] }, kinds = { F: { WR: [], RW: [] }, U: { WR: [], RW: [] } };
-    all.forEach(function (x) {
-      x.r.changes.forEach(function (c) {
-        if (ch[c.kind]) ch[c.kind].push(x);
-        if (c.kind === 'WR' || c.kind === 'RW') kinds[c.flagged ? 'F' : 'U'][c.kind].push(x);
-      });
-    });
-    var nChanges = ch.WR.length + ch.RW.length + ch.WW.length;
+    /* 2. Answer changes, counted once per QUESTION from its first answer to
+       its final one (a question changed wrong, right, wrong, right is one
+       fix, not two fixes and a break). Flagged or not is said as a fact. */
+    var changed = all.filter(function (x) { return x.r.changes.length > 0 && x.r.initial !== null; });
+    var fixedQ = changed.filter(function (x) { return !x.r.initialOk && x.r.finalOk; });
+    var brokeQ = changed.filter(function (x) { return x.r.initialOk && !x.r.finalOk; });
+    var swapQ = changed.filter(function (x) { return !x.r.initialOk && !x.r.finalOk; });
+    var flaggedOf = function (list) { var n = list.filter(function (x) { return x.r.flagged; }).length; return n ? ' (' + n + ' flagged)' : ''; };
     var chFacts = [];
-    if (nChanges) {
-      if (kinds.F.WR.length) chFacts.push('<b>Flagged, came back, fixed it:</b> ' + plural(kinds.F.WR.length, 'question') + '. That is the review working.' + qlist(kinds.F.WR));
-      if (kinds.U.WR.length) chFacts.push('<b>Caught on a check through:</b> ' + plural(kinds.U.WR.length, 'question') + ' fixed that ' + (kinds.U.WR.length === 1 ? 'was' : 'were') + ' never flagged. Good catches, but the first answer felt sure, so the skill behind ' + (kinds.U.WR.length === 1 ? 'it' : 'them') + ' still needs work.' + qlist(kinds.U.WR));
-      if (kinds.F.RW.length) chFacts.push('<b>Flagged, then changed away from the right answer:</b> ' + plural(kinds.F.RW.length, 'question') + '. The doubt was fair; the topic is not solid yet.' + qlist(kinds.F.RW));
-      if (kinds.U.RW.length) chFacts.push('<b>Second-guessed a settled answer:</b> ' + plural(kinds.U.RW.length, 'question') + ' went from right to wrong without ever being flagged.' + qlist(kinds.U.RW));
-      if (ch.WW.length) chFacts.push(plural(ch.WW.length, 'change') + ' swapped one wrong answer for another.');
-      var net = ch.WR.length - ch.RW.length;
+    if (changed.length) {
+      if (fixedQ.length) chFacts.push('<b>Changed to the right answer:</b> ' + plural(fixedQ.length, 'question') + flaggedOf(fixedQ) + '.' + qlist(fixedQ));
+      if (brokeQ.length) chFacts.push('<b>Changed away from the right answer:</b> ' + plural(brokeQ.length, 'question') + flaggedOf(brokeQ) + '.' + qlist(brokeQ));
+      if (swapQ.length) chFacts.push(plural(swapQ.length, 'question') + ' changed from one wrong answer to another.');
+      var net = fixedQ.length - brokeQ.length;
       chFacts.push('Net effect of changing answers on this test: <b>' + (net > 0 ? '+' : net < 0 ? '&minus;' : '') + plural(Math.abs(net), 'question') + '</b>.');
     } else {
       chFacts.push('No answer was changed after it was first chosen.');
     }
+    var nChanged = changed.length;
     tiles.push({
-      k: 'Answer changes', fig: nChanges, of: null,
-      cap: nChanges === 1 ? 'answer changed after it was chosen' : 'answers changed after they were chosen',
-      bar: nChanges ? [{ w: pct(ch.WR.length, nChanges), c: 'bp-s-good' }, { w: pct(ch.RW.length, nChanges), c: 'bp-s-bad' }, { w: pct(ch.WW.length, nChanges), c: 'bp-s-mid' }] : [],
+      k: 'Answer changes', fig: nChanged, of: null,
+      cap: nChanged === 1 ? 'question with a changed answer' : 'questions with a changed answer',
+      bar: nChanged ? [{ w: pct(fixedQ.length, nChanged), c: 'bp-s-good' }, { w: pct(brokeQ.length, nChanged), c: 'bp-s-bad' }, { w: pct(swapQ.length, nChanged), c: 'bp-s-mid' }] : [],
       facts: chFacts
     });
 
@@ -4445,7 +4436,7 @@
     parts.forEach(function (p) {
       p.d.modules.forEach(function (m) {
         var name = modName(p, m.module);
-        if (m.reviewStartSec === null) { revFacts.push('<b>' + name + ':</b> never reached the review screen.'); return; }
+        if (m.reviewStartSec === null) { revFacts.push('<b>' + name + ':</b> no time left for a review pass.'); return; }
         var bits = [];
         if (m.reserveSec !== null) bits.push('first pass done with <b>' + fmtClock(m.reserveSec) + '</b> left');
         if (m.reviewSec >= 30) {
@@ -4466,35 +4457,33 @@
     parts.forEach(function (p) { p.d.modules.forEach(function (m) { mods++; if (m.reviewStartSec !== null) reached++; }); });
     tiles.push({
       k: 'Review pass', fig: reached, of: mods,
-      cap: mods === 1 ? 'module reached the review screen' : 'modules reached the review screen with time to use',
+      cap: mods === 1 ? 'module finished with time to review' : 'modules finished with time to review',
       bar: [{ w: pct(reached, mods), c: 'bp-s-ink' }],
       facts: revFacts
     });
 
     /* 4. The graphing calculator (math only). Active use means the calculator
-       held focus for at least DEFAULTS.desmosActiveSec on that question.
-       Where a reviewed tag says Desmos is the fast route, misses without it
-       are named. Students reach for it on the questions they find hard, so
-       this describes the habit, never the calculator's effect. */
+       held focus for at least DEFAULTS.desmosActiveSec on that question. The
+       fast-route lines read the Desmos tags, and only once they are marked
+       reviewed (window.DESMOS_TAGS_REVIEWED in desmos-tags.js). */
     var math = parts.filter(function (p) { return p.sec.k === 'math'; });
     if (math.length) {
       var mRows = [];
       math.forEach(function (p) { p.d.rows.forEach(function (r, i) { if (r.realVisits > 0) mRows.push({ p: p, r: r, i: i }); }); });
       var active = mRows.filter(function (x) { return x.r.calcActive; });
       var calcFacts = [];
-      var tags = window.DESMOS_TAGS;
+      var tags = window.DESMOS_TAGS_REVIEWED === true ? window.DESMOS_TAGS : null;
       var tagOf = function (x) { if (!tags) return null; var t = tags[MS.itemKey(x.p.qs[x.i])]; return typeof t === 'number' ? t : null; };
       var fav = tags ? mRows.filter(function (x) { return tagOf(x) === 2; }) : [];
       if (fav.length) {
         var favActive = fav.filter(function (x) { return x.r.calcActive; });
         var favMiss = fav.filter(function (x) { return !x.r.calcActive && wrong(x); });
         calcFacts.push('On the <b>' + plural(fav.length, 'question') + '</b> where graphing is the fastest route, it was used on <b>' + favActive.length + '</b>.');
-        if (favMiss.length) calcFacts.push('<b>' + plural(favMiss.length, 'miss', 'misses') + '</b> on those without the calculator: worth redoing with Desmos first.' + qlist(favMiss));
+        if (favMiss.length) calcFacts.push('Missed without the calculator on ' + plural(favMiss.length, 'of those', 'of those') + '.' + qlist(favMiss));
       }
       var openOnly = mRows.filter(function (x) { return !x.r.calcActive && x.r.calcOpenSec > 0; });
       if (openOnly.length) calcFacts.push('Open but not used on ' + plural(openOnly.length, 'more question') + '.');
-      if (!calcFacts.length) calcFacts.push(active.length ? 'Used on ' + plural(active.length, 'question') + ' in all.' : 'The graphing calculator was never used on this test.');
-      calcFacts.push('<span class="bp-note">Students reach for the calculator on the questions they find hard, so this describes the habit and says nothing about whether the calculator helped.</span>');
+      if (!calcFacts.length) calcFacts.push(active.length ? 'Used on ' + plural(active.length, 'question') + ' in all.' : 'The graphing calculator was not used on this test.');
       tiles.push({
         k: 'Graphing calculator', fig: active.length, of: mRows.length,
         cap: 'math questions where Desmos was actively used',
@@ -4503,8 +4492,8 @@
       });
     }
 
-    /* 5. The reference sheet: a miss on a formula-sheet item with the sheet
-       never opened is a retrieval gap. Only shown when it happened. */
+    /* 5. The reference sheet: formula-sheet questions missed with the sheet
+       never opened. Only shown when it happened. */
     if (typeof MS.refSheetItem === 'function') {
       var rsAll = math.length ? all.filter(function (x) { return x.p.sec.k === 'math' && x.r.realVisits > 0 && MS.refSheetItem(x.p.qs[x.i]); }) : [];
       var rsMiss = rsAll.filter(function (x) { return wrong(x) && x.r.refOpens === 0 && x.r.refSec === 0; });
@@ -4513,7 +4502,7 @@
           k: 'Reference sheet', fig: rsMiss.length, of: rsAll.length,
           cap: 'formula questions missed with the reference sheet closed',
           bar: [{ w: pct(rsMiss.length, rsAll.length), c: 'bp-s-bad' }],
-          facts: ['The formula was on the sheet the whole time. That is a habit to fix: open the sheet on formula questions.' + qlist(rsMiss)]
+          facts: ['The formula for ' + (rsMiss.length === 1 ? 'this question is' : 'these questions is') + ' on the reference sheet.' + qlist(rsMiss)]
         });
       }
     }

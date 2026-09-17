@@ -639,7 +639,9 @@ var MorettiSignals = (function () {
      the gated facts, most urgent first; the wording lives with the reader. */
   function changeReading(chg, cfg) {
     chg = chg || {};
-    var hU = Math.max(0, num(chg.unfl && chg.unfl.h)), rU = Math.max(0, num(chg.unfl && chg.unfl.r));
+    // The unflagged counts are part of the totals; never more than them (the summary is client-computed).
+    var hU = Math.min(Math.max(0, num(chg.unfl && chg.unfl.h)), Math.max(0, num(chg.h)));
+    var rU = Math.min(Math.max(0, num(chg.unfl && chg.unfl.r)), Math.max(0, num(chg.r)));
     var hF = Math.max(0, num(chg.h) - hU), rF = Math.max(0, num(chg.r) - rU);
     var flagged = changeVerdict(hF, rF, cfg), unflagged = changeVerdict(hU, rU, cfg);
     var readings = [];
@@ -697,7 +699,8 @@ var MorettiSignals = (function () {
       /* By why the student went back (changeReading). The combined verdict
          speaks only when neither kind has enough on its own to say anything. */
       var rd = changeReading(ledger.chg, cfg);
-      rd.readings.forEach(function (x) { facts.push(x); });
+      // The same routing as behaviorHighlights: only second-guessing is parent-facing.
+      rd.readings.forEach(function (x) { if (x.id === 'second-guessing') facts.push(x); });
       if (!rd.readings.length) {
         var v = changeVerdict(ledger.chg.h, ledger.chg.r, cfg);
         if (v.state === 'help') facts.push({ id: 'changes-help', fixed: v.h, of: v.flips });
@@ -754,7 +757,10 @@ var MorettiSignals = (function () {
     var minA = opt(cfg, 'minAttempts');
     if (L.attempts < minA) return out;
     rd.readings.forEach(function (x) {
-      (x.id === 'second-guessing' || x.id === 'check-catches' ? out.facts : out.tutor).push(x);
+      /* Only second-guessing may reach a parent. Check-through catches stay with
+         Luca (audit 2026-09-16): a student who never flags has every good catch
+         counted as unflagged, so the reading can't be told apart from a habit. */
+      (x.id === 'second-guessing' ? out.facts : out.tutor).push(x);
     });
     // Miss-based pools leave out the hardest test (sumLedger), so count the rest.
     var tests = L.attempts - (L.hardest || 0);
