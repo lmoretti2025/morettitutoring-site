@@ -1321,7 +1321,7 @@
 
   // What this build of admin.html needs the deployment to understand. Kept
   // beside the version constant in Code.gs — bump both together.
-  var REQUIRED_BACKEND_VERSION = 21;
+  var REQUIRED_BACKEND_VERSION = 22;
   var CAPABILITY_LABELS = {
     calendar: 'the calendar and student pages',
     dueDates: 'due dates',
@@ -1343,7 +1343,8 @@
     studentEdit: 'editing a student\u2019s details (second parent, second SAT date)',
     fridayPreview: 'the Upcoming weekly updates card on Emails',
     weeklyTiming: 'weekly updates going the morning after each session (until then they still go on Fridays)',
-    unsubscribe: 'the Unsubscribe link in every automatic email, and pausing a family from its Account tab'
+    unsubscribe: 'the Unsubscribe link in every automatic email, and pausing a family from its Account tab',
+    portalLock: 'the portal lock for each student on their Account tab'
   };
 
   function joinList(items) {
@@ -2631,6 +2632,25 @@
       row('Unsubscribed', escHtml(addr) + ' <span class="dim">(used the link in an email)</span> ' +
         '<button type="button" class="mini" data-email-resub="' + escHtml(addr) + '">Resubscribe</button>');
     });
+    // The portal lock, under the email switches. Older deployments send nothing: say nothing.
+    if (s.portalAccess && typeof s.portalAccess === 'object') {
+      var pa = s.portalAccess;
+      var why = {
+        session: 'a session on your calendar in the last 3 weeks or ahead',
+        not_started: 'no session on your calendar yet',
+        lapsed: 'no session in the last 3 weeks and none booked',
+        ambiguous: 'a calendar title that could be this student',
+        calendar_unavailable: 'your calendar could not be read, so it stays open'
+      }[pa.reason] || '';
+      var state = pa.override === 'open' ? '<b>Always open</b> <span class="dim">(set by you)</span>'
+        : pa.override === 'locked' ? '<b>Locked</b> <span class="dim">(set by you: only the free diagnostic)</span>'
+        : (pa.locked ? '<b>Locked</b>' : 'Open') + ' <span class="dim">(by calendar' + (why ? ': ' + why : '') + ')</span>';
+      if (!pa.live) state += ' <span class="dim">Nobody is locked out until you go live.</span>';
+      var opts = [['', 'Follow calendar'], ['open', 'Always open'], ['locked', 'Lock']].filter(function (o) { return o[0] !== pa.override; });
+      row('Portal access', state + ' ' + opts.map(function (o) {
+        return '<button type="button" class="mini" data-portal-set="' + o[0] + '">' + o[1] + '</button>';
+      }).join(' '));
+    }
     if (sat) {
       row('SAT date', satDay || '<span class="dim">Not set</span>');
       if (satDay2) row('Second SAT date', satDay2);
@@ -2670,7 +2690,7 @@
     var key = currentStudent && currentStudent.key;
     if (!key) return;
     var save = function (btn, fields, failWhat) {
-      var buttons = $('stu-details').querySelectorAll('[data-email-set],[data-email-resub]');
+      var buttons = $('stu-details').querySelectorAll('[data-email-set],[data-email-resub],[data-portal-set]');
       Array.prototype.forEach.call(buttons, function (b) { b.disabled = true; });
       btn.textContent = 'Saving\u2026';
       var who = currentStudent.name || key;
@@ -2697,6 +2717,13 @@
       btn.addEventListener('click', function () {
         var pause = btn.getAttribute('data-email-set') === 'pause';
         save(btn, { emailsPaused: pause }, pause ? 'pausing emails' : 'turning emails back on');
+      });
+    });
+    Array.prototype.forEach.call($('stu-details').querySelectorAll('[data-portal-set]'), function (btn) {
+      btn.addEventListener('click', function () {
+        var v = btn.getAttribute('data-portal-set');
+        if (v === 'locked' && !confirm('Lock ' + (currentStudent.name || 'this student') + '\u2019s portal? They can still sign in and take the free diagnostic, and nothing else, until you change this.')) return;
+        save(btn, { portalAccess: v }, v === 'locked' ? 'locking the portal' : v === 'open' ? 'opening the portal' : 'setting the portal to follow the calendar');
       });
     });
     Array.prototype.forEach.call($('stu-details').querySelectorAll('[data-email-resub]'), function (btn) {
