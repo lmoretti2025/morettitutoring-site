@@ -29,17 +29,23 @@ safe(function(){
 safe(function(){
   var el=document.getElementById('cd-fit'), rg=document.getElementById('cd-reg'); if(!el) return;
   /* keep in step with the table on test-dates.html, which is the source */
-  var DATES=[['2026-10-03','2026-09-18'],['2026-11-07','2026-10-23'],['2026-12-05','2026-11-20'],
-             ['2027-03-06','2027-02-19'],['2027-05-01','2027-04-16'],['2027-06-05','2027-05-21']];
+  /* [test, regular deadline, late deadline]. A sitting stays "next" until
+     late registration closes, as on test-dates.html: past the regular
+     deadline the line says "late registration by". */
+  var DATES=[['2026-10-03','2026-09-18','2026-09-22'],['2026-11-07','2026-10-23','2026-10-27'],['2026-12-05','2026-11-20','2026-11-24'],
+             ['2027-03-06','2027-02-19','2027-02-23'],['2027-05-01','2027-04-16','2027-04-20'],['2027-06-05','2027-05-21','2027-05-25']];
   var MON=['January','February','March','April','May','June','July',
            'August','September','October','November','December'];
   function d(iso){ var a=iso.split('-'); return new Date(+a[0], +a[1]-1, +a[2]); }
   var today=new Date(); today.setHours(0,0,0,0);
+  var lbl=document.getElementById('cd-reglbl');
   for(var i=0;i<DATES.length;i++){
-    var t=d(DATES[i][0]), r=d(DATES[i][1]);
-    if(r>=today){
+    var t=d(DATES[i][0]), r=d(DATES[i][1]), late=d(DATES[i][2]);
+    if(late>=today){
+      var onTime=r>=today, by=onTime?r:late;
       el.textContent=MON[t.getMonth()]+' '+t.getDate();
-      if(rg) rg.textContent=MON[r.getMonth()]+' '+r.getDate();
+      if(rg) rg.textContent=MON[by.getMonth()]+' '+by.getDate();
+      if(lbl) lbl.textContent=onTime?'register by':'late registration by';
       return;
     }
   }

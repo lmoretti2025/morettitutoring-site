@@ -152,8 +152,12 @@
       currency:    'USD',
       value:       detail.value || 0,
       source:      detail.source || 'site_form',
+      // Which page the inquiry came from, and the option chosen on the form
+      // ("diagnostic" or "call"), so reports show which pages bring families.
+      page:        detail.page || w.location.pathname,
       has_message: detail.has_message || 0
     };
+    if (detail.start) params.start = String(detail.start);
 
     var sent = event('generate_lead', params);
 
