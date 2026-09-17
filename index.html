@@ -586,25 +586,6 @@ section{padding:clamp(3.6rem,7vw,6.2rem) 0;border-bottom:1px solid var(--line)}
   transition:transform .7s var(--ease)}
 @media(prefers-reduced-motion:reduce){.shimmer::after{display:none}}
 
-/* ── ALERT MODAL ── */
-.modal{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;padding:1.5rem}
-.modal[hidden]{display:none}
-.modal-back{position:absolute;inset:0;background:rgba(12,10,9,.62);backdrop-filter:blur(3px);animation:mFade .35s var(--ease) both}
-.modal-card{position:relative;z-index:1;background:var(--surface);border-radius:16px;max-width:470px;width:100%;
-  padding:clamp(1.8rem,4vw,2.5rem);box-shadow:0 30px 80px -30px rgba(12,10,9,.55);animation:mIn .5s var(--springy) both}
-@keyframes mFade{from{opacity:0}to{opacity:1}}
-@keyframes mIn{from{opacity:0;transform:translateY(20px) scale(.97)}to{opacity:1;transform:none}}
-.modal-x{position:absolute;top:.9rem;right:.9rem;width:32px;height:32px;border:none;background:transparent;color:var(--muted);
-  border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s,color .2s}
-.modal-x:hover{background:var(--sunk);color:var(--ink)}
-.modal-kicker{font-size:.6rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--red)}
-.modal-card h2{font-family:var(--display);font-weight:700;font-size:clamp(1.4rem,3vw,1.85rem);margin:.6rem 0 .8rem;line-height:1.18}
-.modal-card p{font-size:.92rem;line-height:1.6}
-.modal-card p b{color:var(--ink);font-weight:600}
-.modal-sub{margin-top:.7rem;font-size:.86rem;color:var(--muted)}
-.modal-acts{display:flex;gap:.7rem;flex-wrap:wrap;margin-top:1.6rem}
-.modal-acts .btn{padding:.9rem 1.4rem;font-size:.72rem}
-
 
 /* ── PROGRAMS ── */
 /* ── PROGRAMS: a grid of three; the card under the cursor lifts its drawer.
@@ -889,23 +870,6 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}
 </head>
 <body>
 
-
-<div class="modal" id="alertModal" role="dialog" aria-modal="true" aria-labelledby="amTitle" hidden>
-  <div class="modal-back" data-close></div>
-  <div class="modal-card" role="document">
-    <button class="modal-x" data-close aria-label="Close">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
-    </button>
-    <div class="modal-kicker">For this year&rsquo;s juniors</div>
-    <h2 id="amTitle">The SAT is required again.</h2>
-    <p>More than <b>60 colleges</b> now require an SAT or ACT score, including <b>six of the eight Ivy League schools</b>, with all eight from the 2027&ndash;28 admissions cycle.</p>
-    <p class="modal-sub">Families who spent four years hearing &ldquo;test-optional&rdquo; now have a score to plan for, and junior year is the window to do it in.</p>
-    <div class="modal-acts">
-      <a class="btn btn-a shimmer" href="#start" data-close><span>Book the free diagnostic</span></a>
-      <button class="btn btn-b shimmer" data-close><span>Not right now</span></button>
-    </div>
-  </div>
-</div>
 
 <nav><div class="shell">
   <a class="nav-logo" href="/"><img src="logo-caladea-white-400.png" alt="Moretti Test Prep &amp; Tutoring"></a>
@@ -1358,28 +1322,6 @@ mtaSafe(function(){
   },4000);
 });
 
-
-/* ── reinstatement alert: shown once per visitor per day ── */
-mtaSafe(function(){
-  var ALERT_ENABLED=false;                 // muted — flip to true to bring the pop-up back
-  var m=document.getElementById('alertModal'); if(!m) return;
-  if(!ALERT_ENABLED){ m.hidden=true; document.body.style.overflow=''; return; }
-  var KEY='mta_alert_seen', now=Date.now(), DAY=864e5, seen=0;
-  try{ seen=+(localStorage.getItem(KEY)||0); }catch(e){}
-  function close(){
-    m.hidden=true;
-    document.body.style.overflow='';
-    try{ localStorage.setItem(KEY,String(Date.now())); }catch(e){}
-  }
-  function open(){
-    m.hidden=false;
-    document.body.style.overflow='hidden';
-    var f=m.querySelector('.modal-x'); if(f) f.focus();
-  }
-  m.addEventListener('click',function(e){ if(e.target.closest('[data-close]')) close(); });
-  document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&!m.hidden) close(); });
-  if(now-seen>DAY) setTimeout(open,700);
-});
 
 /* ── the trio is sized to the headline itself: it runs to the end of the
       longest line rather than the full width of the page ── */
