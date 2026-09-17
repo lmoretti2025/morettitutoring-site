@@ -4345,6 +4345,11 @@
   var behaviorPatternsHtml = (function () {
     var MS = window.MorettiSignals;
     if (!MS || typeof MS.decodeSection !== 'function') return '';
+    /* Not on the public sample (?embed=public on diagnostic.html): the demo's
+       crossing out, changes and calculator use are invented, and a habit is
+       only named once three tests are pooled (signals.js minAttempts). Luca,
+       2026-09-16: hold these back from the website until they are real. */
+    if (/[?&]embed=public\b/.test(location.search)) return '';
     var parts = [];
     try {
       (data.s || []).forEach(function (sec) {
