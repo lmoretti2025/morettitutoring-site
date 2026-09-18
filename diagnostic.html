@@ -407,6 +407,9 @@ nav.is-red .navmenu{background:var(--red);border-top-color:rgba(255,255,255,.2)}
 
   <div class="bookcard">
     <form id="reserve-form" novalidate>
+      <!-- This page IS the diagnostic door, so the lead says so, the same way
+           the other forms do when a parent picks it. -->
+      <input type="radio" id="rf-start-diag" name="start" value="diagnostic" checked hidden>
       <div class="hp-field" aria-hidden="true">
         <label for="rf-hp">Leave this field blank</label>
         <input type="text" id="rf-hp" name="rf_x7q2" tabindex="-1" autocomplete="off" data-lpignore="true" data-1p-ignore data-form-type="other">
@@ -647,106 +650,7 @@ nav.is-red .navmenu{background:var(--red);border-top-color:rgba(255,255,255,.2)}
 
 </script>
 
-<!-- ── THE ENQUIRY FORM HANDLER ────────────────────────────────────────────
-     Copied verbatim from index.html: same honeypot, timing gate, Apps
-     Script action and MTrack.lead conversion. A copy rather than a shared
-     module by choice.
-
-     THE TWO COPIES CAN DRIFT. If you change the handler on the homepage,
-     change it here. The ids are identical (rf-name, rf-phone, rf-email,
-     rf-message, rf-hp, rf-submit, rf-note, rf-success, rf-error), so a diff
-     of the two blocks should come back empty.
-     ──────────────────────────────────────────────────────────────────────── -->
-<script>
-(function () {
-  var LEAD_BACKEND_URL = window.APPS_SCRIPT_URL;   // portal/backend-url.js
-  var readyAt = Date.now();
-  var form = document.getElementById('reserve-form');
-  if (!form) return;
-  /* Missing or malformed fields are named inline, under the button, and the
-     first one gets the cursor. This used to be a browser alert() box. */
-  var invalidMsg = document.getElementById('rf-invalid');
-  function checkFields(name, phone, email) {
-    var checks = [
-      ['rf-name',  !name, 'your name'],
-      ['rf-phone', phone.replace(/\D/g, '').length < 7, phone ? 'a full phone number' : 'a phone number'],
-      ['rf-email', !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email), email ? 'a complete email address' : 'an email address']
-    ];
-    var wanted = [], first = null;
-    checks.forEach(function (c) {
-      var el = document.getElementById(c[0]);
-      el.setAttribute('aria-invalid', c[1] ? 'true' : 'false');
-      if (c[1]) { wanted.push(c[2]); if (!first) first = el; }
-    });
-    if (!first) { invalidMsg.style.display = 'none'; return true; }
-    invalidMsg.textContent = 'Please add ' + (wanted.length === 1 ? wanted[0]
-      : wanted.slice(0, -1).join(', ') + ' and ' + wanted[wanted.length - 1]) + '.';
-    invalidMsg.style.display = 'block';
-    first.focus();
-    return false;
-  }
-  ['rf-name', 'rf-phone', 'rf-email'].forEach(function (id) {
-    var el = document.getElementById(id);
-    el.addEventListener('input', function () {
-      if (el.getAttribute('aria-invalid') === 'true' && el.value.trim()) el.setAttribute('aria-invalid', 'false');
-    });
-  });
-
-  form.addEventListener('submit', function (e) {
-    e.preventDefault();
-    var name  = document.getElementById('rf-name').value.trim();
-    var phone = document.getElementById('rf-phone').value.trim();
-    var email = document.getElementById('rf-email').value.trim();
-    var message = document.getElementById('rf-message').value.trim();
-    /* This page is the diagnostic door; say so on the lead, as the homepage form does. */
-    message = 'Wants to start with: the free diagnostic' + (message ? '\n\n' + message : '');
-    if (!checkFields(name, phone, email)) return;
-
-    var honeypot = document.getElementById('rf-hp').value;
-    var elapsedMs = Date.now() - readyAt;
-    // Autofill can stamp the honeypot at the same moment it fills the real
-    // fields. If the browser says the field was autofilled, don't hold it
-    // against a real visitor.
-    if (honeypot) {
-      var hpEl = document.getElementById('rf-hp');
-      [':autofill', ':-webkit-autofill'].forEach(function (sel) {
-        try { if (hpEl.matches(sel)) honeypot = ''; } catch (err) {}
-      });
-    }
-    var note = document.getElementById('rf-note'),
-        ok   = document.getElementById('rf-success'),
-        bad  = document.getElementById('rf-error'),
-        btn  = document.getElementById('rf-submit');
-
-    // Tripped honeypot or an implausibly fast submit reads as a bot —
-    // show success and skip the network call, so it has no signal to adapt to.
-    if (honeypot || elapsedMs < 2500) {
-      note.style.display='none'; ok.style.display='block'; bad.style.display='none';
-      form.reset(); return;
-    }
-    btn.disabled = true; btn.textContent = 'Sending…';
-    fetch(LEAD_BACKEND_URL, {
-      method: 'POST',
-      body: JSON.stringify({ action:'submitLead', name:name, phone:phone, email:email,
-                             message:message, hp:honeypot, elapsedMs:elapsedMs,
-                             src: (window.MTSource && window.MTSource.forLead()) || null })
-    }).then(function(res){ return res.json(); })
-      .then(function(data){
-        if (!data || !data.ok) throw new Error('submit_failed');
-        note.style.display='none'; ok.style.display='block'; bad.style.display='none';
-        try {
-          if (window.MTrack) window.MTrack.lead({ source: 'diagnostic_form', has_message: message ? 1 : 0 });
-        } catch (err) {}
-        form.reset();
-        btn.disabled=false; btn.textContent='Take the free diagnostic';
-      })
-      .catch(function(){
-        bad.style.display='block'; ok.style.display='none';
-        btn.disabled=false; btn.textContent='Take the free diagnostic';
-      });
-  });
-})();
-</script>
+<script src="lead-form.js?v=20260918"></script>
 <script src="site.js"></script>
 </body>
 </html>

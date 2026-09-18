@@ -142,6 +142,9 @@ safe(function(){
       note.style.display='none'; ok.style.display='block'; bad.style.display='none';
       form.reset(); return;
     }
+    /* The page's own label, so a form whose button says something else
+       (the diagnostic page) comes back to its own words, not "Get started". */
+    var btnLabel = btn.textContent;
     btn.disabled = true; btn.textContent = 'Sending…';
     fetch(LEAD_BACKEND_URL, {
       method: 'POST',
@@ -159,11 +162,11 @@ safe(function(){
           if (window.MTrack) window.MTrack.lead({ source: 'site_form', page: location.pathname, start: start || 'unset', has_message: message ? 1 : 0 });
         } catch (err) {}
         form.reset();
-        btn.disabled=false; btn.textContent='Get started';
+        btn.disabled=false; btn.textContent=btnLabel;
       })
       .catch(function(){
         bad.style.display='block'; ok.style.display='none';
-        btn.disabled=false; btn.textContent='Get started';
+        btn.disabled=false; btn.textContent=btnLabel;
       });
   });
 });
