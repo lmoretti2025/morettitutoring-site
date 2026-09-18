@@ -112,6 +112,8 @@
        address: a parent address is not enough, since the student signs in
        as themselves. */
     no_student_email: "No student email on this row, so there is nothing to sign in as. Send the parent an invite instead.",
+    bad_email: "That doesn't look like an email address.",
+    email_on_another_student: 'Another student already signs in with that address. Change theirs first, or use a different one.',
     busy_try_again: 'The server was busy with something else. Try that again in a moment.',
     attempts_unreadable: "Could not read this student's test history, so nothing was deleted. Try again shortly.",
     network: 'No answer came back \u2014 it may still have gone through. Refreshing to check.',
@@ -1073,7 +1075,8 @@
             ? '<button class="mta-b" data-act="unarchive">Restore</button>'
             : '<button class="mta-b" data-act="archive">Dismiss</button>') +
           '<button class="mta-b warn" data-act="delete">Delete</button>' +
-          (canReset(s) ? '<button class="mta-b warn" data-act="reset">Reset login</button>' : ''));
+          (canReset(s) ? '<button class="mta-b" data-act="email">Change email</button>' +
+                         '<button class="mta-b warn" data-act="reset">Reset login</button>' : ''));
       }
     });
 
@@ -1088,7 +1091,8 @@
             ? '<button class="mta-b" data-act="unarchive">Restore</button>'
             : '<button class="mta-b" data-act="archive">Dismiss</button>') +
           '<button class="mta-b warn" data-act="delete">Delete</button>' +
-          (canReset(s) ? '<button class="mta-b warn" data-act="reset">Reset login</button>' : ''),
+          (canReset(s) ? '<button class="mta-b" data-act="email">Change email</button>' +
+                         '<button class="mta-b warn" data-act="reset">Reset login</button>' : ''),
           '<div class="mta-meta">sent ' + esc(ago(s.inviteSentAt)) +
           ' &middot; a new link replaces the old one</div>');
       });
@@ -1102,7 +1106,8 @@
            and a parent-only row the invite. */
         html += card(s,
           (s.status === 'Ready' ? inviteButtons(s, 'Send invite') : '') +
-          (canReset(s) ? '<button class="mta-b warn" data-act="reset">Reset login</button>' : ''),
+          (canReset(s) ? '<button class="mta-b" data-act="email">Change email</button>' +
+                         '<button class="mta-b warn" data-act="reset">Reset login</button>' : ''),
           s.status === 'Ready'
             ? '<div class="mta-meta">Pre-approved &mdash; they can sign in whenever. ' +
               (studentEmailOf(s) ? 'The button just tells them so.' : 'No invite needed.') + '</div>'
@@ -1131,7 +1136,8 @@
       hits.forEach(function (s) {
         html += card(s,
           (s.status === 'Active' ? '' : inviteButtons(s, 'Send invite')) +
-          (canReset(s) ? '<button class="mta-b warn" data-act="reset">Reset login</button>' : ''));
+          (canReset(s) ? '<button class="mta-b" data-act="email">Change email</button>' +
+                         '<button class="mta-b warn" data-act="reset">Reset login</button>' : ''));
       });
     }
 
@@ -1213,6 +1219,31 @@
             { action: 'setStudentArchived', adminKey: adminKey(), key: key, archived: a === 'archive' },
             function () { return a === 'archive' ? 'Dismissed.' : 'Restored.'; },
             function () { if (s.key) s.archived = (a === 'archive'); });
+        } else if (a === 'email') {
+          /* Changing the address on the row is not enough on its own: the
+             row stays paired to the Google account that first claimed the
+             key, and every other device is told the key belongs to someone
+             else. This clears the pairing with it. */
+          var nowAt = s.grantedEmail || '';
+          var next = window.prompt(
+            'Which address should ' + key + ' sign in with?\n\n' +
+            (nowAt ? 'Now: ' + nowAt + '\n\n' : '') +
+            'They will be signed out everywhere and the new account pairs on their next sign-in. ' +
+            'Scores, files and intro answers are untouched.', nowAt);
+          if (next === null) return;
+          next = String(next).trim().toLowerCase();
+          if (!next) return;
+          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(next)) {
+            c.querySelector('.mta-status').textContent = "That doesn't look like an email address.";
+            return;
+          }
+          act(c, 'Changing…', { action: 'changeStudentEmail', adminKey: adminKey(), key: key, email: next },
+            function (d) {
+              if (s.key) s.grantedEmail = d.email;
+              return d.repaired
+                ? 'Sign-in cleared — ' + d.email + ' can pair again on any device.'
+                : 'Now ' + d.email + (d.was ? ' (was ' + d.was + ')' : '') + '. They sign in again to pair.';
+            });
         } else if (a === 'reset') {
           if (!window.confirm(
                 'Reset the login for ' + key + '?\n\n' +

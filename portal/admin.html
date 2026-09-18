@@ -846,7 +846,10 @@
               <label class="fld">Parent name<input name="guardianName" maxlength="80" autocomplete="off"></label>
               <label class="fld">Parent email<input name="guardianEmail" type="email" autocomplete="off"></label>
             </div>
-            <label class="fld">Second parent email <span class="opt">optional</span><input name="guardian2Email" type="email" autocomplete="off"></label>
+            <div class="fld-row">
+              <label class="fld">Second parent name <span class="opt">optional</span><input name="guardian2Name" maxlength="80" autocomplete="off"></label>
+              <label class="fld">Second parent email <span class="opt">optional</span><input name="guardian2Email" type="email" autocomplete="off"></label>
+            </div>
             <p class="ef-hint">Weekly updates go to both parent emails. With no parent email there is no weekly update.</p>
           </fieldset>
           <fieldset id="stu-edit-sat">
@@ -1980,7 +1983,8 @@
     var mult = function (v) { var n = Number(v); return (n === 1.5 || n === 2) ? String(n) : '1'; };
     var init = {
       name: s.name || currentStudent.name || '', guardianName: s.guardianName || '', guardianEmail: s.guardianEmail || '',
-      guardian2Email: s.guardian2Email || '', testDate: dateOf(s.testDate), testDate2: dateOf(s.testDate2),
+      guardian2Name: s.guardian2Name || '', guardian2Email: s.guardian2Email || '',
+      testDate: dateOf(s.testDate), testDate2: dateOf(s.testDate2),
       targetScore: s.targetScore ? String(s.targetScore) : '', accomTimeMult: mult(s.accomTimeMult), accomBreakMult: mult(s.accomBreakMult),
       baselineType: s.baselineType ? String(s.baselineType).toLowerCase() : '',
       baselineRw: s.baselineRw ? String(s.baselineRw) : '', baselineMath: s.baselineMath ? String(s.baselineMath) : ''
@@ -2621,7 +2625,11 @@
     row('Parent', s.guardianEmail
       ? (s.guardianName ? escHtml(s.guardianName) + ' ' : '') + '&lt;' + escHtml(s.guardianEmail) + '&gt;'
       : '<span class="dim">' + (s.guardian2Email ? 'Not on file' : 'None on file, so no weekly updates') + '</span>');
-    if (s.guardian2Email) row('Second parent', escHtml(s.guardian2Email));
+    if (s.guardian2Email || s.guardian2Name) {
+      row('Second parent', s.guardian2Email
+        ? (s.guardian2Name ? escHtml(s.guardian2Name) + ' ' : '') + '&lt;' + escHtml(s.guardian2Email) + '&gt;'
+        : escHtml(s.guardian2Name) + ' <span class="dim">(no email, so no weekly updates to them)</span>');
+    }
     // Older deployments send neither field: say nothing rather than guess.
     if (typeof s.emailsPaused === 'boolean') {
       row('Automatic emails', s.emailsPaused

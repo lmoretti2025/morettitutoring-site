@@ -3985,8 +3985,12 @@ window.Portal = {
             <div class="onb-accom-group-label">Email</div>
             <input type="email" class="key-input" id="onbGuardianEmailInput" placeholder="parent@email.com" autocomplete="email" style="margin-bottom:0; padding:0.6rem 0.9rem; text-align:left; text-transform:none;">
           </div>
-          <div style="grid-column:1 / -1;">
-            <div class="onb-accom-group-label">Second parent email <span style="text-transform:none; letter-spacing:0; font-weight:400;">(optional)</span></div>
+          <div>
+            <div class="onb-accom-group-label">Second parent <span style="text-transform:none; letter-spacing:0; font-weight:400;">(optional)</span></div>
+            <input type="text" class="key-input" id="onbGuardian2NameInput" placeholder="Full name" autocomplete="off" style="margin-bottom:0; padding:0.6rem 0.9rem; text-align:left; text-transform:none;">
+          </div>
+          <div>
+            <div class="onb-accom-group-label">Their email <span style="text-transform:none; letter-spacing:0; font-weight:400;">(optional)</span></div>
             <input type="email" class="key-input" id="onbGuardian2EmailInput" placeholder="another@email.com" autocomplete="off" style="margin-bottom:0; padding:0.6rem 0.9rem; text-align:left; text-transform:none;">
           </div>
         </div>
@@ -4188,8 +4192,12 @@ window.Portal = {
             <div class="onb-accom-group-label">Email</div>
             <input type="email" class="key-input" id="settingsGuardianEmailInput" placeholder="parent@email.com" autocomplete="email" style="margin-bottom:0; padding:0.6rem 0.9rem; text-align:left; text-transform:none;">
           </div>
-          <div style="grid-column:1 / -1;">
-            <div class="onb-accom-group-label">Second parent email <span style="text-transform:none; letter-spacing:0; font-weight:400;">(optional)</span></div>
+          <div>
+            <div class="onb-accom-group-label">Second parent <span style="text-transform:none; letter-spacing:0; font-weight:400;">(optional)</span></div>
+            <input type="text" class="key-input" id="settingsGuardian2NameInput" placeholder="Full name" autocomplete="off" style="margin-bottom:0; padding:0.6rem 0.9rem; text-align:left; text-transform:none;">
+          </div>
+          <div>
+            <div class="onb-accom-group-label">Their email <span style="text-transform:none; letter-spacing:0; font-weight:400;">(optional)</span></div>
             <input type="email" class="key-input" id="settingsGuardian2EmailInput" placeholder="another@email.com" autocomplete="off" style="margin-bottom:0; padding:0.6rem 0.9rem; text-align:left; text-transform:none;">
           </div>
         </div>
@@ -6815,6 +6823,7 @@ window.Portal = {
       guardianName: data.guardianName || null,
       guardianEmail: data.guardianEmail || null,
       guardian2Email: data.guardian2Email || null,
+      guardian2Name: data.guardian2Name || null,
       targetScore: data.targetScore || null,
       portalLocked: !!data.portalLocked,
       portalLockReason: data.portalLockReason || '',
@@ -9241,7 +9250,7 @@ window.Portal = {
   });
   var onbGuardianName;
   var onbGuardianEmail;
-  var onbGuardian2Email;
+  var onbGuardian2Email, onbGuardian2Name;
   /* THE SECOND PARENT (Luca, 2026-09-16). Optional; checked the same way as
      the first, and refused when it repeats the first, which would only send
      every family email twice to one inbox. Returns the address, '' for
@@ -9270,7 +9279,9 @@ window.Portal = {
     if (!emailIn.value && d.guardianEmail) emailIn.value = d.guardianEmail;
     var email2In = document.getElementById('onbGuardian2EmailInput');
     if (!email2In.value && d.guardian2Email) email2In.value = d.guardian2Email;
-    if (d.guardianName || d.guardianEmail || d.guardian2Email) {
+    var name2In = document.getElementById('onbGuardian2NameInput');
+    if (!name2In.value && d.guardian2Name) name2In.value = d.guardian2Name;
+    if (d.guardianName || d.guardianEmail || d.guardian2Email || d.guardian2Name) {
       var cards = document.querySelectorAll('[data-onb-guardian-card]');
       if (cards[1] && !cards[1].classList.contains('is-selected')) cards[1].click();
     }
@@ -9281,6 +9292,7 @@ window.Portal = {
       onbGuardianName = undefined;
       onbGuardianEmail = undefined;
       onbGuardian2Email = undefined;
+      onbGuardian2Name = undefined;
       onbAfterGuardian();
       return;
     }
@@ -9299,6 +9311,7 @@ window.Portal = {
     onbGuardianName = nameInput.value.trim() || undefined;
     onbGuardianEmail = email || undefined;
     onbGuardian2Email = email2 || undefined;
+    onbGuardian2Name = document.getElementById('onbGuardian2NameInput').value.trim() || undefined;
     onbAfterGuardian();
   });
   // SAT students still have accommodations to answer; everyone else is
@@ -9388,7 +9401,7 @@ window.Portal = {
       fetch(APPS_SCRIPT_URL, {
         method: 'POST',
         keepalive: true,
-        body: JSON.stringify({ action: 'saveOnboardingPrefs', key: pendingKey, testDate: onbSelectedTestDate, accomTimeMult: timeMult, accomBreakMult: breakMult, baselineType: onbBaselineType, baselineRw: onbBaselineRw, baselineMath: onbBaselineMath, guardianName: onbGuardianName, guardianEmail: onbGuardianEmail, guardian2Email: onbGuardian2Email, targetScore: onbTargetScore, goal: onbGoal })
+        body: JSON.stringify({ action: 'saveOnboardingPrefs', key: pendingKey, testDate: onbSelectedTestDate, accomTimeMult: timeMult, accomBreakMult: breakMult, baselineType: onbBaselineType, baselineRw: onbBaselineRw, baselineMath: onbBaselineMath, guardianName: onbGuardianName, guardianEmail: onbGuardianEmail, guardian2Email: onbGuardian2Email, guardian2Name: onbGuardian2Name, targetScore: onbTargetScore, goal: onbGoal })
       }).catch(function () {});
     } catch (e) {}
   }
@@ -9953,12 +9966,13 @@ window.Portal = {
     document.getElementById('settingsBaselineMathInput').value = currentStudent.baselineMath || '';
     updateSettingsBaselineRangeText();
 
-    settingsHasGuardian = !!(currentStudent.guardianName || currentStudent.guardianEmail || currentStudent.guardian2Email);
+    settingsHasGuardian = !!(currentStudent.guardianName || currentStudent.guardianEmail || currentStudent.guardian2Email || currentStudent.guardian2Name);
     document.querySelectorAll('[data-settings-guardian-card]').forEach(function (c, i) { c.classList.toggle('is-selected', (i === 1) === settingsHasGuardian); });
     setSubOpen(document.getElementById('settingsGuardianSub'), settingsHasGuardian);
     document.getElementById('settingsGuardianNameInput').value = currentStudent.guardianName || '';
     document.getElementById('settingsGuardianEmailInput').value = currentStudent.guardianEmail || '';
     document.getElementById('settingsGuardian2EmailInput').value = currentStudent.guardian2Email || '';
+    document.getElementById('settingsGuardian2NameInput').value = currentStudent.guardian2Name || '';
     document.getElementById('settingsGuardian2EmailError').style.display = 'none';
   }
 
@@ -10016,7 +10030,7 @@ window.Portal = {
       baselineMath = math;
     }
 
-    var guardianName = null, guardianEmail = null, guardian2Email = null;
+    var guardianName = null, guardianEmail = null, guardian2Email = null, guardian2Name = null;
     if (settingsHasGuardian) {
       var gNameInput = document.getElementById('settingsGuardianNameInput');
       var gEmailInput = document.getElementById('settingsGuardianEmailInput');
@@ -10033,6 +10047,7 @@ window.Portal = {
       guardianName = gNameInput.value.trim() || null;
       guardianEmail = gEmail || null;
       guardian2Email = g2 || null;
+      guardian2Name = document.getElementById('settingsGuardian2NameInput').value.trim() || null;
     }
 
     saveBtn.disabled = true;
@@ -10049,6 +10064,7 @@ window.Portal = {
       guardianName: guardianName,
       guardianEmail: guardianEmail,
       guardian2Email: guardian2Email,
+      guardian2Name: guardian2Name,
       targetScore: targetScore
     }).then(function (data) {
       saveBtn.disabled = false;
@@ -10066,6 +10082,7 @@ window.Portal = {
       currentStudent.guardianName = guardianName;
       currentStudent.guardianEmail = guardianEmail;
       currentStudent.guardian2Email = guardian2Email;
+      currentStudent.guardian2Name = guardian2Name;
       if (targetScore !== null) currentStudent.targetScore = targetScore;
       if (typeof applyStoredAccommodations === 'function') applyStoredAccommodations();
       renderTestCountdown();
