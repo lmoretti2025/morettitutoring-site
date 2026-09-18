@@ -5925,7 +5925,9 @@ window.Portal = {
   /* The thin bar across the top while anything is on its way. Counted, so
      overlapping requests keep it up until the last one lands, and shown only
      after a moment, so a fast answer never flickers it. */
-  var syncInFlight = 0, syncShowTimer = null;
+  var syncInFlight = 0, syncShowTimer = null, syncShownAt = 0, syncHideTimer = null;
+  var SYNC_SHOW_AFTER_MS = 800;   // long enough that an ordinary refresh never flashes it
+  var SYNC_MIN_VISIBLE_MS = 500;  // once up, it stays up long enough to read
   function syncBar() {
     var el = document.getElementById('portal-sync-bar');
     if (!el) {
@@ -5937,15 +5939,38 @@ window.Portal = {
     }
     return el;
   }
-  function trackSync(promise) {
+  /* opts.quiet: a background refresh, with the screen already showing this
+     student's own (cached) work. Those must never raise the bar: the same
+     screen flickering a red line on some visits and not others reads as a
+     fault rather than as progress (Luca, 2026-09-18). The bar is for a
+     student waiting on a first answer, nothing else. */
+  function trackSync(promise, opts) {
+    if (opts && opts.quiet) return promise;
     syncInFlight++;
     if (syncInFlight === 1) {
-      clearTimeout(syncShowTimer);
-      syncShowTimer = setTimeout(function () { if (syncInFlight > 0) syncBar().classList.add('on'); }, 250);
+      clearTimeout(syncShowTimer); clearTimeout(syncHideTimer);
+      syncShowTimer = setTimeout(function () {
+        if (syncInFlight > 0) { syncShownAt = Date.now(); syncBar().classList.add('on'); }
+      }, SYNC_SHOW_AFTER_MS);
+    }
+    function hide() {
+      // A hidden tab never runs the fade, which used to leave the bar painted
+      // across the top until the student came back and moved on.
+      var el = syncBar();
+      el.classList.remove('on');
+      if (document.hidden) {
+        el.style.transition = 'none'; el.style.opacity = '0';
+        setTimeout(function () { el.style.transition = ''; el.style.opacity = ''; }, 50);
+      }
     }
     function done() {
       syncInFlight = Math.max(0, syncInFlight - 1);
-      if (!syncInFlight) { clearTimeout(syncShowTimer); syncBar().classList.remove('on'); }
+      if (syncInFlight) return;
+      clearTimeout(syncShowTimer); clearTimeout(syncHideTimer);
+      var shown = syncBar().classList.contains('on');
+      var left = shown ? SYNC_MIN_VISIBLE_MS - (Date.now() - syncShownAt) : 0;
+      if (left > 0) syncHideTimer = setTimeout(function () { if (!syncInFlight) hide(); }, left);
+      else hide();
     }
     promise.then(done, done);
     return promise;
@@ -6024,7 +6049,7 @@ window.Portal = {
     if (portalData.progress !== 'ready') setPortalData('progress', serverCopy ? 'cached' : 'loading');
     // postToBackend has the per-attempt timeout and retries (bare fetch()
     // has no timeout); backendRead uses the early answer when there is one.
-    progressFetchPromise = trackSync(backendRead({ action: 'getProgress', key: key }))
+    progressFetchPromise = trackSync(backendRead({ action: 'getProgress', key: key }), { quiet: !!serverCopy })
       .then(function (data) {
         var result;
         if (data && data.ok) {
@@ -7610,7 +7635,8 @@ window.Portal = {
        (Apps Script's redirect sometimes drops) left a student with "no tests
        taken" until they reloaded. backendRead retries, and uses the early
        answer auth-client.js started while the page was still loading. */
-    trackSync(backendRead({ action: 'getScoreHistory', key: key })).then(function (data) {
+    trackSync(backendRead({ action: 'getScoreHistory', key: key }),
+              { quiet: serverScoreHistoryFetched || serverScoreHistoryEntries.length > 0 }).then(function (data) {
       if (!data || !data.ok || !Array.isArray(data.entries)) throw new Error('no_history');
       serverScoreHistoryEntries = data.entries;
       serverScoreHistoryFetched = true;
