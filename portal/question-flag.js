@@ -1,6 +1,8 @@
 /* =====================================================================
    QUESTION FLAGS (2026-09-22)
-   A "Flag" button on every question the portal shows: practice tests,
+   A "Report issue" button on every question the portal shows (named that,
+   with a warning icon, so it can't be mistaken for Bluebook's Mark for
+   Review, which is the student's own bookmark): practice tests,
    diagnostics, Question Bank, Challenge, Rush, the Mistakes/Saved runner
    and the question review popup. The student picks what looks wrong, can
    add a note, and the flag lands on the Flagged tab of the spreadsheet for
@@ -18,8 +20,8 @@
 
    The request goes through the portal's fetch wrapper (auth-client.js),
    which attaches the student's session, so the backend knows who sent it.
-   A flag already sent from this device shows as "Flagged" and is not sent
-   twice.
+   A report already sent from this device shows as "Reported" and is not
+   sent twice.
    ===================================================================== */
 (function () {
   'use strict';
@@ -60,8 +62,13 @@
     '.qf-msg{font-size:.78rem;margin-top:.6rem;min-height:1em}' +
     '.qf-msg.err{color:#b0271c}';
 
+  /* A warning triangle, not a flag: "Mark for Review" (the student's own
+     bookmark, as in Bluebook) sits right beside this button, and two flags
+     read as the same thing (Luca, 2026-09-22). This one is "something is
+     wrong with the question", so it says so. */
   var FLAG_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" ' +
-    'stroke-linejoin="round" aria-hidden="true"><path d="M4 22V4"/><path d="M4 4h13l-2.5 4L17 12H4"/></svg>';
+    'stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>' +
+    '<line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
 
   var styled = false;
   function addStyle() {
@@ -110,13 +117,14 @@
     }).join('');
     overlay.innerHTML =
       '<div class="qf-box" role="dialog" aria-modal="true" aria-labelledby="qf-title">' +
-        '<h2 id="qf-title">Flag this question</h2>' +
-        '<p>Something off? Tell Luca what looks wrong and he\'ll check it and fix it.</p>' +
+        '<h2 id="qf-title">Report a problem with this question</h2>' +
+        '<p>This goes to Luca, not into your test. Tell him what looks wrong and he\'ll check it and fix it. ' +
+        '(To come back to a question yourself, use Mark for Review.)</p>' +
         '<div class="qf-opts">' + opts + '</div>' +
         '<textarea class="qf-note" maxlength="600" placeholder="Anything else? (optional)"></textarea>' +
         '<div class="qf-msg" aria-live="polite"></div>' +
         '<div class="qf-actions"><button type="button" class="qf-cancel">Cancel</button>' +
-        '<button type="button" class="qf-send" disabled>Send flag</button></div>' +
+        '<button type="button" class="qf-send" disabled>Send report</button></div>' +
       '</div>';
     document.body.appendChild(overlay);
     box = overlay.querySelector('.qf-box');
@@ -147,7 +155,7 @@
     msgEl.textContent = '';
     msgEl.className = 'qf-msg';
     sendBtn.disabled = true;
-    sendBtn.textContent = 'Send flag';
+    sendBtn.textContent = 'Send report';
     overlay.hidden = false;
     var first = overlay.querySelector('input[name="qf-reason"]');
     if (first) first.focus();
@@ -188,7 +196,7 @@
             close();
             return;
           }
-          if (d && d.error === 'too_many') { showErr('That\'s a lot of flags for one day. Try again tomorrow, or text Luca.'); return; }
+          if (d && d.error === 'too_many') { showErr('That\'s a lot of reports for one day. Try again tomorrow, or text Luca.'); return; }
           throw new Error((d && d.error) || 'failed');
         })
         .catch(function () {
@@ -202,13 +210,14 @@
     msgEl.textContent = text || 'Couldn\'t send that. Check your connection and try again.';
     msgEl.className = 'qf-msg err';
     sendBtn.disabled = !selectedReason();
-    sendBtn.textContent = 'Send flag';
+    sendBtn.textContent = 'Send report';
   }
 
   function paint(btn, on) {
-    btn.innerHTML = FLAG_SVG + (on ? 'Flagged' : 'Flag');
+    btn.innerHTML = FLAG_SVG + (on ? 'Reported' : 'Report issue');
     btn.setAttribute('aria-pressed', on ? 'true' : 'false');
-    btn.title = on ? 'You flagged this question for Luca' : 'Something wrong with this question? Flag it for Luca';
+    btn.title = on ? 'You reported a problem with this question to Luca'
+                   : 'Something wrong with this question (typo, wrong answer key, missing image)? Report it to Luca';
   }
 
   /* One button per container, rewired to the current question on every

@@ -5513,7 +5513,7 @@ window.Portal = {
 <script src="time-budgets.js?v=20260912a"></script>
 <script src="challenge-questions.js?v=20260911a"></script>
 <script src="grid-in.js?v=20260910a"></script>
-<script src="question-flag.js?v=20260922a"></script>
+<script src="question-flag.js?v=20260922b"></script>
 <script>
   /* practice-tests.js is ~2.6MB, so a blocking <script> delayed every later
      script (including the key-submit wiring). It loads here via an async
@@ -16026,6 +16026,8 @@ window.Portal = {
     runnerScore = 0;
     runnerReached = null;
     window.dxPracticeNextHandler = runnerAdvance;
+    window.dxPracticeBackHandler = runnerBack;
+    window.dxPracticeBackHandler = runnerBack;
     window.dxPracticeExitHandler = endPracticeRunner;
     window.dxPracticeLetterHandler = selectRunnerChoice;
     if (window.dxStartIncorrectPractice) window.dxStartIncorrectPractice('Practice: Selected Mistakes');
@@ -16053,7 +16055,9 @@ window.Portal = {
         return st && st.submitted;
       });
       if (answered) {
-        runnerReached = runnerIndex;
+        // Questions SEEN, not the current index: Back can leave the student
+        // behind the furthest one they reached.
+        runnerReached = runnerQueue.filter(function (q) { return !!runnerState[q.key]; }).length;
         runnerIndex = runnerQueue.length;
         renderRunnerQuestion();
         return;
@@ -16062,6 +16066,14 @@ window.Portal = {
     if (window.dxEndIncorrectPractice) window.dxEndIncorrectPractice();
     if (window.showScreen) window.showScreen('screen-incorrect-questions');
     renderList();
+  }
+  /* BACK (Luca, 2026-09-22): a student can return to any earlier question
+     in the round. An answered one shows as answered, with its result and
+     explanation; Next then walks forward again. */
+  function runnerBack() {
+    if (runnerIndex <= 0 || runnerIndex >= runnerQueue.length) return;
+    runnerIndex--;
+    renderRunnerQuestion();
   }
   function runnerAdvance() {
     if (runnerIndex >= runnerQueue.length) return; // already on the Done screen — nothing left to grade/advance
@@ -16175,7 +16187,7 @@ window.Portal = {
     Array.prototype.forEach.call(dxCardEl.querySelectorAll('.pb-note, .pb-explain'), function (el) {
       el.parentNode.removeChild(el);
     });
-    backBtnEl.disabled = true; // linear queue — no back navigation, matches Submit-then-Next flow
+    backBtnEl.disabled = true; // re-enabled below once a question is on screen (see runnerBack)
 
     if (runnerIndex >= runnerQueue.length) {
       /* Scored over what was ANSWERED, not the queue. With no Skip button the
@@ -16225,6 +16237,7 @@ window.Portal = {
     var qnumTileEl = document.getElementById('dx-qnum-tile');
     if (qnumTileEl) { qnumTileEl.textContent = runnerIndex + 1; qnumTileEl.style.display = ''; }
     var st = runnerState[r.key] || (runnerState[r.key] = {});
+    backBtnEl.disabled = runnerIndex === 0;
     renderRunnerSaveBtn(r);
     if (window.portalFlag) window.portalFlag.attach(cardHedEl, {
       qkey: r.key, where: 'Mistakes & Saved review' + (r.testTitle ? ' - ' + r.testTitle : ''), text: r.text
@@ -17314,6 +17327,7 @@ window.Portal = {
   var runnerScore = 0;
   var runnerSkillLabel = '';
   var questionShownAt = 0;
+  var runnerShownQid = null;   // the question last put on screen (see runnerBack)
   /* How many questions the student actually GOT TO. Null until they leave
      early, then frozen at the question they left on (see endRunner()). Lets
      the completion card tell "skipped" from "never reached", so unseen
@@ -17382,6 +17396,7 @@ window.Portal = {
     runnerSkillLabel = label;
     runnerReached = null;
     window.dxPracticeNextHandler = runnerAdvance;
+    window.dxPracticeBackHandler = runnerBack;
     window.dxPracticeExitHandler = endRunner;
     window.dxPracticeLetterHandler = selectRunnerChoice;
     if (window.dxStartIncorrectPractice) window.dxStartIncorrectPractice(BANK_COPY[bankMode].runner + label);
@@ -17641,6 +17656,7 @@ window.Portal = {
     runnerSkillLabel = 'Rush';
     runnerReached = null;
     window.dxPracticeNextHandler = runnerAdvance;
+    window.dxPracticeBackHandler = runnerBack;
     window.dxPracticeExitHandler = endRunner;
     window.dxPracticeLetterHandler = selectRunnerChoice;
     if (window.dxStartIncorrectPractice) window.dxStartIncorrectPractice('Rush: ' + (subject === 'math' ? 'Math' : 'Reading & Writing'));
@@ -17733,7 +17749,9 @@ window.Portal = {
         return st && st.submitted;
       });
       if (answered) {
-        runnerReached = runnerIndex;
+        // Questions SEEN, not the current index: Back can leave the student
+        // behind the furthest one they reached.
+        runnerReached = runnerQueue.filter(function (q) { return !!runnerState[q.qid]; }).length;
         runnerIndex = runnerQueue.length;
         renderRunnerQuestion();
         return;
@@ -17805,6 +17823,15 @@ window.Portal = {
   function skipRunnerQuestion() {
     if (runnerIndex >= runnerQueue.length) return;
     runnerIndex++;
+    renderRunnerQuestion();
+  }
+  /* BACK (Luca, 2026-09-22): return to any earlier question in the round.
+     A skipped one can still be answered; an answered one shows its result
+     and explanation, and Next walks forward again. Not in Rush, where each
+     question has its own clock. */
+  function runnerBack() {
+    if (rushCfg || runnerIndex <= 0 || runnerIndex >= runnerQueue.length) return;
+    runnerIndex--;
     renderRunnerQuestion();
   }
   // Starts collapsed so a long explanation never pushes Next off-screen.
@@ -17938,10 +17965,13 @@ window.Portal = {
     var r = runnerQueue[runnerIndex];
     var isNewQuestion = !runnerState[r.qid];
     var st = runnerState[r.qid] || (runnerState[r.qid] = {});
-    // Stamped on a question's FIRST render only, so re-renders (choice
-    // click, eliminate, save) don't restart the clock. Feeds each attempt's
-    // `ms` for the "Time by difficulty" panel.
-    if (isNewQuestion) questionShownAt = Date.now();
+    // Stamped when a question comes on screen (first time, or on returning
+    // to a skipped one with Back), not on re-renders (choice click,
+    // eliminate, save), so those don't restart the clock. Feeds each
+    // attempt's `ms` for the "Time by difficulty" panel.
+    if (isNewQuestion || (runnerShownQid !== r.qid && !st.submitted)) questionShownAt = Date.now();
+    runnerShownQid = r.qid;
+    backBtnEl.disabled = runnerIndex === 0 || !!rushCfg;
     if (rushCfg) { if (st.submitted) rushStop(); else if (rushQid !== r.qid) rushStartQuestion(r); }
     document.getElementById('dx-notice-text').textContent = (rushCfg ? 'RUSH' : 'PRACTICE MODE') + ' — QUESTION ' + (runnerIndex + 1) + ' OF ' + runnerQueue.length;
     var cardHedEl = document.querySelector('#dx-card .dx-card-hed');
