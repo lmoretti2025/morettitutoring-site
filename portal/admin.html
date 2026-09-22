@@ -256,6 +256,8 @@
      prep on the This week tab. */
   #stu-note { display: block; width: 100%; font-family: var(--hel); font-size: 0.9rem; line-height: 1.5; color: var(--text); padding: 0.6rem 0.75rem; border: 1.5px solid var(--border); border-radius: 10px; resize: vertical; min-height: 64px; background: var(--white); }
   #stu-note:focus { outline: none; border-color: var(--red); }
+  .fn-count { font-size: 0.72rem; color: var(--faint, #8a8a8a); text-align: right; margin-top: 0.3rem; }
+  .fn-count.near { color: var(--red, #b0271c); }
   .fn-row { display: flex; align-items: center; gap: 0.45rem; margin-top: 0.6rem; flex-wrap: wrap; }
   .fn-status { flex: 1 1 220px; font-size: 0.76rem; line-height: 1.45; color: var(--mid); }
   .fn-status.ok { color: var(--green); font-weight: 600; }
@@ -767,7 +769,8 @@
         <div class="card" id="stu-note-card">
           <h2>Note for the weekly update</h2>
           <p class="card-sub">A line or two from this week&rsquo;s session. It goes into the family&rsquo;s next weekly update, the morning after the session, then clears.</p>
-          <textarea id="stu-note" maxlength="600" rows="5" placeholder="e.g. Cracked the quadratic word problems today: set up three in a row on their own."></textarea>
+          <textarea id="stu-note" maxlength="2500" rows="10" placeholder="e.g. Cracked the quadratic word problems today: set up three in a row on their own."></textarea>
+          <div class="fn-count" id="stu-note-count"></div>
           <div class="fn-row">
             <span class="fn-status" id="stu-note-status"></span>
             <button type="button" class="mini" id="stu-note-clear">Clear</button>
@@ -2269,7 +2272,7 @@
     noteKey = key;
     noteSaved = '';
     noteLoading = true;
-    if (typed == null) $('stu-note').value = '';
+    if (typed == null) $('stu-note').value = ''; paintNoteCount();
     noteControls(false);
     if (typed == null) noteStatus('Loading\u2026');
     postToBackend({ action: 'fridayNoteGet', adminKey: adminKey(), key: key }).then(function (d) {
@@ -2277,25 +2280,25 @@
       noteLoading = false;
       noteControls(true);
       if (!d || !d.ok) {
-        if (typed != null) $('stu-note').value = typed;
+        if (typed != null) $('stu-note').value = typed; paintNoteCount();
         noteStatus(noteError(d), 'warn');
         return;
       }
       noteSaved = d.note || '';
       var w = noteWhere(d);
       if (typed != null && noteLoose(typed) !== noteLoose(noteSaved)) {
-        $('stu-note').value = typed;
+        $('stu-note').value = typed; paintNoteCount();
         noteStatus('Not saved. Your text is still here: press Save note again.', 'warn');
         return;
       }
-      $('stu-note').value = noteSaved;
+      $('stu-note').value = noteSaved; paintNoteCount();
       noteStatus((noteSaved ? 'Saved. ' : '') + w.msg, typed != null && noteSaved && !w.cls ? 'ok' : w.cls);
     }).catch(function () {
       if (seq !== noteSeq) return;
       noteLoading = false;
       noteControls(true);
       if (typed != null) {
-        $('stu-note').value = typed;
+        $('stu-note').value = typed; paintNoteCount();
         noteStatus('Could not check whether it saved. Your text is still here: press Save note again.', 'warn');
         return;
       }
@@ -2315,7 +2318,7 @@
       $('stu-note-save').disabled = $('stu-note-clear').disabled = false;
       if (!d || !d.ok) { noteStatus(noteError(d), 'warn'); return; }
       noteSaved = d.note || '';
-      $('stu-note').value = noteSaved;   // shows the note as it will go out (dashes become commas)
+      $('stu-note').value = noteSaved; paintNoteCount();   // shows the note as it will go out (dashes become commas)
       var w = noteWhere(d);
       noteStatus(noteSaved ? 'Saved. ' + w.msg : 'Cleared. The weekly update goes out without a note.', noteSaved && !w.cls ? 'ok' : w.cls);
     }).catch(function () {
@@ -2328,7 +2331,18 @@
     });
   }
 
-  $('stu-note-save').addEventListener('click', function () { saveFridayNote($('stu-note').value); });
+  /* Live character count: the note is clipped at FRIDAY_NOTE_MAX_ in
+     emails.gs, so say how much room is left rather than cutting silently. */
+  var NOTE_MAX = 2500;
+  function paintNoteCount() {
+    var el = $('stu-note-count');
+    if (!el) return;
+    var n = $('stu-note').value.length;
+    el.textContent = n ? n.toLocaleString() + ' / ' + NOTE_MAX.toLocaleString() : '';
+    el.classList.toggle('near', n > NOTE_MAX - 250);
+  }
+  $('stu-note').addEventListener('input', paintNoteCount);
+  $('stu-note-save').addEventListener('click', function () { saveFridayNote($('stu-note').value); paintNoteCount(); });
   $('stu-note-preview').addEventListener('click', function () {
     if (!currentStudent || !confirmLeaveNote()) return;
     var key = currentStudent.key;
@@ -2338,7 +2352,7 @@
     loadBroadcast(false);
     loadFridayPreview(key);
   });
-  $('stu-note-clear').addEventListener('click', function () { $('stu-note').value = ''; saveFridayNote(''); });
+  $('stu-note-clear').addEventListener('click', function () { $('stu-note').value = ''; paintNoteCount(); saveFridayNote(''); });
   $('stu-note').addEventListener('input', function () {
     if ($('stu-note').value !== noteSaved) noteStatus('Not saved yet.', 'warn');
   });
