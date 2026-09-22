@@ -3660,7 +3660,7 @@ window.Portal = {
      MorettiAuth.refresh() and the onRefresh hook, and a cached copy would
      silently lack both (the guards degrade quietly). Only this tag moves;
      the question banks below keep theirs. -->
-<script src="auth-client.js?v=20260916a"></script>
+<script src="auth-client.js?v=20260922a"></script>
 
 <!-- Pre-login top bar (key entry, onboarding, marketing-style screens).
      Hidden once a student is in the app shell (see
@@ -5513,6 +5513,7 @@ window.Portal = {
 <script src="time-budgets.js?v=20260912a"></script>
 <script src="challenge-questions.js?v=20260911a"></script>
 <script src="grid-in.js?v=20260910a"></script>
+<script src="question-flag.js?v=20260922a"></script>
 <script>
   /* practice-tests.js is ~2.6MB, so a blocking <script> delayed every later
      script (including the key-submit wiring). It loads here via an async
@@ -12510,12 +12511,33 @@ window.Portal = {
     return isNaN(val) ? null : val;
   }
 
+  /* Flag button (question-flag.js). The key is the same one the mistakes
+     log uses (testTag|section|module|index into the module's own list), so
+     window.resolveQuestionByKey can find the question again. */
+  function flagTestQuestion(q) {
+    if (!window.portalFlag) return;
+    var hed = document.querySelector('#dx-card .dx-card-hed');
+    var pt = activePracticeTest();
+    var secKey = currentSectionKey();
+    var moduleName = moduleStage === 'module2' ? 'module2' + (module2Variant || 'Easier') : 'module1';
+    var testTag = pt ? pt.id : ('diag-' + testChoice);
+    var title = pt ? pt.title : ((testChoice || 'SAT') + ' Diagnostic');
+    var where = title + ' - ' + (secKey === 'math' ? 'Math' : 'Reading & Writing') +
+      (sectionHasModules(secKey) ? ' Module ' + (moduleStage === 'module2' ? '2' : '1') : '') + ' - Q' + (current + 1);
+    window.portalFlag.attach(hed, {
+      qkey: testTag + '|' + secKey + '|' + moduleName + '|' + (qOrder[current] != null ? qOrder[current] : current),
+      where: where,
+      text: q && q.text
+    });
+  }
+
   function renderQuestion() {
     var qs = activeQuestions();
     var q = qs[current];
     var splitParts = splitRwPassage(q);
     qtextEl.innerHTML = splitParts ? splitParts.question : q.text;
     renderPassagePane(q, splitParts);
+    flagTestQuestion(q);
 
     if (q.type === 'mc') {
       choicesEl.style.display = 'flex';
@@ -16204,6 +16226,9 @@ window.Portal = {
     if (qnumTileEl) { qnumTileEl.textContent = runnerIndex + 1; qnumTileEl.style.display = ''; }
     var st = runnerState[r.key] || (runnerState[r.key] = {});
     renderRunnerSaveBtn(r);
+    if (window.portalFlag) window.portalFlag.attach(cardHedEl, {
+      qkey: r.key, where: 'Mistakes & Saved review' + (r.testTitle ? ' - ' + r.testTitle : ''), text: r.text
+    });
     var split = splitPassage(r);
     var questionText = split ? split.question : r.text;
     qtextEl.innerHTML = questionText;
@@ -17935,6 +17960,11 @@ window.Portal = {
     if (window.dxSetMathMode) window.dxSetMathMode(isMath);
     if (!isMath && window.dxCloseCalculator) window.dxCloseCalculator();
     renderSaveBtn(r);
+    if (window.portalFlag) window.portalFlag.attach(document.querySelector('#dx-card .dx-card-hed'), {
+      qkey: bankKeyFor(r._qbSubject || currentSubject, r.qid),
+      where: (rushCfg ? 'Rush' : BANK_COPY[bankMode].title) + (r.skill ? ' - ' + r.skill : '') + ' - ' + r.qid,
+      text: r.text || (r.qImg ? '(image question) ' + r.qImg : '')
+    });
     choicesEl.style.display = 'flex';
     choicesEl.innerHTML = '';
 
@@ -18515,6 +18545,11 @@ window.Portal = {
     // r.marked: flagged for review during the test (same field as the
     // raw-tables ⚑ column), so the popup shows whether the student was unsure.
     qModalFlagPillEl.style.display = r.marked ? '' : 'none';
+    if (window.portalFlag) window.portalFlag.attach(qModalFlagPillEl.parentNode, {
+      qkey: r.key || '',
+      where: (modalLabel ? modalLabel + ' - ' : '') + 'Question ' + (modalIndex + 1) + ' (review)',
+      text: q.text
+    });
 
     // Math questions have no passage, but a setup sentence ending in a period
     // before the "...?" question can falsely trigger splitPassageForModal's

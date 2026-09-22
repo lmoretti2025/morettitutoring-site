@@ -242,6 +242,34 @@ window.MorettiAuth = (function () {
   var PING_MS = 60000;
   var pingTimer = null;
   var lastPingAt = 0;
+
+  /* IDLE (Luca, 2026-09-22): a portal left open is not a student working.
+     Each ping says whether they have clicked, typed, scrolled or touched
+     the page within IDLE_MS; the backend credits active minutes only (see
+     ACTIVE TIME in auth.gs), so the weekly parent emails and the admin log
+     stop counting a tab left open on a desk. Mid-test the window is
+     longer: a student can read a passage or work a problem on paper for
+     several minutes without touching anything. */
+  var IDLE_MS = 5 * 60000;
+  var IDLE_TEST_MS = 12 * 60000;
+  var lastInputAt = Date.now();
+  var TEST_SCREENS = { 'dx-screen': 1, 'dx-module-over-screen': 1 };
+  function noteInput() { lastInputAt = Date.now(); }
+  try {
+    ['pointerdown', 'keydown', 'wheel', 'touchstart', 'scroll', 'input'].forEach(function (ev) {
+      window.addEventListener(ev, noteInput, { capture: true, passive: true });
+    });
+    // Moving the mouse counts too, sampled so it costs nothing.
+    var lastMove = 0;
+    window.addEventListener('mousemove', function () {
+      var t = Date.now();
+      if (t - lastMove > 5000) { lastMove = t; lastInputAt = t; }
+    }, { capture: true, passive: true });
+  } catch (e) {}
+  function isIdle(now) {
+    var limit = TEST_SCREENS[activity] ? IDLE_TEST_MS : IDLE_MS;
+    return (now - lastInputAt) > limit;
+  }
   var activity = '';         // set by the portal's own screen switcher
 
   /* What the log will say they were doing. The portal passes a screen id
@@ -280,7 +308,7 @@ window.MorettiAuth = (function () {
     return pageLabel();
   }
 
-  function ping(force) {
+  function ping(force, resumed) {
     var tok = session || readStore();
     if (!tok || sessionDead || MODAL) return;
     try { if (document.hidden && !force) return; } catch (e) {}
@@ -288,7 +316,12 @@ window.MorettiAuth = (function () {
     // A visibility change and the timer landing together must not send two.
     if (!force && (now - lastPingAt) < (PING_MS - 5000)) return;
     lastPingAt = now;
-    post({ action: 'ping', session: tok, where: whereLabel() }).then(function (data) {
+    var msg = { action: 'ping', session: tok, where: whereLabel() };
+    if (isIdle(now)) msg.idle = 1;
+    // Coming back to the tab: the time since the last ping was spent
+    // elsewhere and must not be credited.
+    if (resumed) msg.resumed = 1;
+    post(msg).then(function (data) {
       /* The one thing a ping acts on. An idle tab makes no requests for the
          fetch wrapper to catch, so this gives "Reset login" a worst case of
          one minute. 'network' is ignored: a lost hop is not a revocation. */
@@ -311,7 +344,7 @@ window.MorettiAuth = (function () {
         // Coming back to the tab is itself the news -- send at once rather
         // than leaving them offline for up to a minute after they return.
         document.addEventListener('visibilitychange', function () {
-          if (!document.hidden) ping(true);
+          if (!document.hidden) { noteInput(); ping(true, true); }
         });
       } catch (e) {}
     }
