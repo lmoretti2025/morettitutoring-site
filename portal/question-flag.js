@@ -35,12 +35,17 @@
   ];
 
   var CSS = '' +
-    '.qf-btn{display:inline-flex;align-items:center;gap:.3rem;background:none;border:1px solid transparent;border-radius:999px;' +
-      'color:var(--mid,#6b6b6b);font-family:var(--hel,inherit);font-size:.68rem;font-weight:600;letter-spacing:.03em;' +
-      'padding:.28rem .6rem;cursor:pointer;transition:color .2s,border-color .2s,background .2s;flex-shrink:0}' +
-    '.qf-btn:hover{color:#b0271c;border-color:#e6c3bf}' +
+    '.qf-btn{position:relative;display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;' +
+      'background:none;border:1px solid transparent;border-radius:50%;color:var(--mid,#8a8a8a);padding:0;cursor:pointer;' +
+      'transition:color .2s,border-color .2s,background .2s;flex-shrink:0}' +
+    '.qf-btn:hover,.qf-btn:focus-visible{color:#b0271c;border-color:#e6c3bf;background:#fff}' +
     '.qf-btn[aria-pressed="true"]{color:#b0271c;background:#fbeeed;border-color:#e6c3bf;cursor:default}' +
-    '.qf-btn svg{width:12px;height:12px}' +
+    '.qf-btn svg{width:15px;height:15px}' +
+    /* The icon alone is the button, so the words appear on hover/focus. */
+    '.qf-btn::after{content:attr(data-tip);position:absolute;top:calc(100% + 6px);left:50%;transform:translateX(-50%);white-space:nowrap;' +
+      'background:#1a1a1a;color:#fff;font:600 .66rem/1.2 var(--hel,Helvetica,Arial,sans-serif);letter-spacing:.02em;' +
+      'padding:.35rem .55rem;border-radius:5px;opacity:0;pointer-events:none;transition:opacity .15s;z-index:20}' +
+    '.qf-btn:hover::after,.qf-btn:focus-visible::after{opacity:1}' +
     '.qf-overlay{position:fixed;inset:0;z-index:100000;background:rgba(15,15,15,.45);display:flex;align-items:center;' +
       'justify-content:center;padding:16px}' +
     '.qf-overlay[hidden]{display:none}' +
@@ -214,10 +219,12 @@
   }
 
   function paint(btn, on) {
-    btn.innerHTML = FLAG_SVG + (on ? 'Reported' : 'Report issue');
+    // Icon only (Luca, 2026-09-22); the words live in the tooltip and label.
+    btn.innerHTML = FLAG_SVG;
     btn.setAttribute('aria-pressed', on ? 'true' : 'false');
-    btn.title = on ? 'You reported a problem with this question to Luca'
-                   : 'Something wrong with this question (typo, wrong answer key, missing image)? Report it to Luca';
+    var tip = on ? 'Reported to Luca' : 'Report a problem with this question';
+    btn.setAttribute('data-tip', tip);
+    btn.setAttribute('aria-label', tip);
   }
 
   /* One button per container, rewired to the current question on every

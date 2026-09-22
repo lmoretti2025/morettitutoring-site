@@ -5513,7 +5513,7 @@ window.Portal = {
 <script src="time-budgets.js?v=20260912a"></script>
 <script src="challenge-questions.js?v=20260911a"></script>
 <script src="grid-in.js?v=20260910a"></script>
-<script src="question-flag.js?v=20260922b"></script>
+<script src="question-flag.js?v=20260922c"></script>
 <script>
   /* practice-tests.js is ~2.6MB, so a blocking <script> delayed every later
      script (including the key-submit wiring). It loads here via an async
@@ -22424,6 +22424,12 @@ window.renderNativeReport = function (data) {
       });
       actionsRow.appendChild(saveBtn);
     }
+    // Report issue (question-flag.js), on the report's question rows too.
+    if (window.portalFlag) window.portalFlag.attach(actionsRow, {
+      qkey: r.key || '',
+      where: (data.ptTitle || ((data.t || 'SAT') + ' Diagnostic')) + ' report' + (r.n ? ' - Q' + r.n : ''),
+      text: q.text
+    });
 
     var txt = document.createElement('div');
     txt.className = 'q-text';
