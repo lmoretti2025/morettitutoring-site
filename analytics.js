@@ -31,7 +31,7 @@
 
   var CONFIG = {
     ga4:          'G-7HBH1KFEZM',
-    metaPixel:    'XXXXXXXXXXXXXXX',
+    metaPixel:    '2101720577398387',
     googleAds:    '',
     adsLeadLabel: ''
   };
@@ -105,6 +105,10 @@
       s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s);
     }(w, d, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
 
+    /* autoConfig off: Meta must not scrape buttons or form fields on its own.
+       It only gets the page view and the events sent below, which carry no
+       name, email or phone. The privacy policy promises exactly that. */
+    w.fbq('set', 'autoConfig', false, CONFIG.metaPixel);
     w.fbq('init', CONFIG.metaPixel);
     w.fbq('track', 'PageView');
   }
