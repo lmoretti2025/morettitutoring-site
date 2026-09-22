@@ -155,7 +155,10 @@
     var params = {
       currency:    'USD',
       value:       detail.value || 0,
-      source:      detail.source || 'site_form',
+      // NOT "source": GA4 treats an event parameter called source (or
+      // medium, or campaign) as a traffic source, which put "site_form" in
+      // the acquisition reports as if it were a referrer.
+      lead_origin: detail.source || 'site_form',
       // Which page the inquiry came from, and the option chosen on the form
       // ("diagnostic" or "call"), so reports show which pages bring families.
       page:        detail.page || w.location.pathname,

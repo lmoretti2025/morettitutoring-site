@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>College Essay Coaching in Cranford, NJ | Moretti Tutoring</title>
+<title>Online College Essay Coaching | Moretti Tutoring</title>
 <meta name="description" content="One-on-one coaching for the personal statement and every supplemental essay. Rolling enrollment through application season. The student writes every word.">
 <meta property="og:title" content="College Essay Coaching | Moretti Test Prep &amp; Tutoring">
 <meta property="og:description" content="One-on-one coaching for the personal statement and every supplemental essay. Rolling enrollment through application season. The student writes every word.">
@@ -12,6 +12,7 @@
 <meta property="og:image" content="https://morettitutoring.com/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/png" sizes="512x512" href="target-icon-white.png">
 <link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -21,7 +22,12 @@
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Caladea:wght@400;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<!-- Loaded without blocking the first paint: the stylesheet comes in as
+     print, then switches to all once it has arrived. display=swap means
+     text is readable in a fallback face until then. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caladea:wght@400;700&family=Poppins:wght@300;400;500;600;700&display=swap"
+      media="print" onload="this.media='all';this.onload=null">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caladea:wght@400;700&family=Poppins:wght@300;400;500;600;700&display=swap"></noscript>
 <style>
 :root{
   --void:#0C0A09; --void-2:#171312;
@@ -353,6 +359,8 @@ nav.is-red .navmenu{background:var(--red);border-top-color:rgba(255,255,255,.2)}
 <link rel="stylesheet" href="site.css?v=20260918">
 <link rel="stylesheet" href="lead-form.css?v=20260916b">
 <script src="analytics.js" defer></script>
+<!-- NOT deferred: the form handlers below read window.APPS_SCRIPT_URL
+     as soon as they run, and a deferred script would land after them. -->
 <script src="portal/backend-url.js"></script>
 </head>
 <body>
@@ -360,7 +368,7 @@ nav.is-red .navmenu{background:var(--red);border-top-color:rgba(255,255,255,.2)}
 <nav><div class="shell">
   <a class="nav-logo" href="index.html"><img src="logo-caladea-white-400.png" alt="Moretti Test Prep &amp; Tutoring"></a>
   <div class="navlinks">
-    <a href="index.html#diagnostic">Diagnostic</a>
+    <a href="diagnostic.html">Diagnostic</a>
     <a href="index.html#programs">Programs</a>
     <a href="testimonials.html">Results</a>
   </div>
@@ -369,7 +377,7 @@ nav.is-red .navmenu{background:var(--red);border-top-color:rgba(255,255,255,.2)}
   <button type="button" class="navburger" id="navburger" aria-label="Menu" aria-expanded="false" aria-controls="navmenu"><span></span><span></span></button>
 </div>
 <div class="navmenu" id="navmenu">
-  <a href="index.html#diagnostic">Diagnostic</a>
+  <a href="diagnostic.html">Diagnostic</a>
   <a href="index.html#programs">Programs</a>
   <a href="testimonials.html">Results</a>
   <a href="test-dates.html">Test dates</a>
@@ -506,7 +514,7 @@ nav.is-red .navmenu{background:var(--red);border-top-color:rgba(255,255,255,.2)}
 <section id="start" class="capture"><div class="shell">
   <div class="capintro">
     <h2 class="rv d1">Start with a <span class="uline">free<svg class="uline-svg" viewBox="0 0 120 22" preserveAspectRatio="none" aria-hidden="true"><path class="u1" d="M3 9.5C22 5.6 47 4.4 70 5.2c17 .6 33 2 46 3.4"/><path class="u2" d="M6 16.4C26 12.8 52 11.6 76 12.2c15 .4 29 1.5 39 2.7"/></svg></span> call.</h2>
-    <p class="lead rv d2">I reply personally, usually within the hour. Tell me where your student is in the process, and we map out the essays and the deadlines together.</p>
+    <p class="lead rv d2"><b>Early deadlines are November 1.</b> There is still time for a strong personal statement if we start this month. I reply personally, the same day. Tell me where your student is in the process, and we map out the essays and the deadlines together.</p>
   </div>
 
   <div class="bookcard rv d2">
@@ -522,10 +530,10 @@ nav.is-red .navmenu{background:var(--red);border-top-color:rgba(255,255,255,.2)}
       <div class="ff"><label class="fl" for="rf-email">Email</label><input class="fi" type="email" id="rf-email" name="email" autocomplete="email" required></div>
       <div class="ff"><label class="fl" for="rf-message">What your student needs help with <em>(optional)</em></label>
         <textarea class="fi" id="rf-message" name="message" rows="2" placeholder="Grade, schools on the list, deadlines&hellip;"></textarea></div>
-      <button type="submit" class="fsub shimmer" id="rf-submit"><span>Get started</span></button>
+      <button type="submit" class="fsub shimmer" id="rf-submit"><span>Book a free call</span></button>
       <p id="rf-invalid" class="fmsg err" role="alert"></p>
       <p class="fnote" id="rf-note">The call costs nothing either way, and you have the plan and the cost in writing before any drafting starts. <a href="#faq">How pricing works &rarr;</a></p>
-      <p id="rf-success" class="fmsg ok" role="status">Thanks, check your email for confirmation. I&rsquo;ll follow up personally, usually within the hour.</p>
+      <p id="rf-success" class="fmsg ok" role="status">Thanks, check your email for confirmation. I&rsquo;ll follow up personally, the same day.</p>
       <p id="rf-error" role="alert" class="fmsg err">Something went wrong. Please call (201) 275-2791 directly.</p>
     </form>
   </div>
