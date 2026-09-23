@@ -355,6 +355,81 @@ window.MorettiAuth = (function () {
     if (pingTimer) { clearInterval(pingTimer); pingTimer = null; }
   }
 
+  /* ═══ A SECOND COPY FOR A STALLED READ ═══ Measured 2026-09-23, 26 live
+     calls: the script itself answers in 1-2ms and most round trips take
+     about 2s, but roughly one in four stalls inside Google for 11-40s or
+     comes back as a 404 page. The stall is Google's, not ours, and it hits
+     one request, not the next one. So for the reads a student waits on,
+     if no good answer is back after HEDGE_AFTER_MS, a second copy goes out
+     and whichever good answer lands first is used. A copy that fails early
+     sends the second one straight away.
+
+     Only actions that are safe to run twice: reads, plus googleAuth and
+     claimStatus, which are lock-guarded and idempotent (see RETRY_ACTIONS
+     below). The caller's own signal still covers both copies, so its
+     timeout means what it did before. (Luca, 2026-09-23) */
+  var HEDGE_ACTIONS = {
+    resume: true, googleAuth: true, claimStatus: true,
+    getProgress: true, getScoreHistory: true,
+    nextSession: true, getAssignments: true, getAssignmentsCalendar: true
+  };
+  var HEDGE_AFTER_MS = 4000;
+
+  // A copy counts only if it is a 200 carrying JSON with an `ok` field. The
+  // stalled hop answers with a 404 page or HTML, never with that.
+  function goodCopy(r) {
+    if (!r || !r.ok) return Promise.resolve(false);
+    return r.clone().json().then(function (d) {
+      return !!d && typeof d === 'object' && typeof d.ok !== 'undefined';
+    }, function () { return false; });
+  }
+
+  // Resolves with the first good Response. If neither copy is good, it
+  // settles the way the last copy did, so callers see the same failure they
+  // saw before this existed.
+  function hedgedFetch(fetchFn, self, input, init) {
+    return new Promise(function (resolve, reject) {
+      var done = false, live = 0, backup = null;
+      function settleLast(fn, v) { if (!done && live === 0 && backup === null) { done = true; fn(v); } }
+      function launch() {
+        live++;
+        var p;
+        try { p = fetchFn.call(self, input, init); } catch (e) { p = Promise.reject(e); }
+        p.then(function (r) {
+          return goodCopy(r).then(function (good) {
+            if (done) return;
+            live--;
+            if (good) { done = true; if (backup) clearTimeout(backup); backup = null; resolve(r); return; }
+            sendBackupNow();
+            settleLast(resolve, r);
+          });
+        }, function (e) {
+          if (done) return;
+          live--;
+          sendBackupNow();
+          settleLast(reject, e);
+        });
+      }
+      function sendBackupNow() {
+        if (backup === null) return;
+        clearTimeout(backup); backup = null;
+        launch();
+      }
+      launch();
+      backup = setTimeout(function () { backup = null; if (!done) launch(); }, HEDGE_AFTER_MS);
+    });
+  }
+
+  function actionOf(init) {
+    try {
+      if (init && typeof init.body === 'string') {
+        var p = JSON.parse(init.body);
+        return (p && p.action) || '';
+      }
+    } catch (e) {}
+    return '';
+  }
+
   /* ═══ THE ONE PLACE EVERY BACKEND CALL PICKS UP ITS SESSION ═══
      See the file header for why this is a wrapper. Scoped tightly: POSTs to
      the backend URL only, JSON bodies with an `action` only, and never a
@@ -364,10 +439,13 @@ window.MorettiAuth = (function () {
     if (typeof window.fetch !== 'function' || window.__mtaFetchWrapped) return;
     var original = window.fetch;
     window.fetch = function (input, init) {
-      var credentialled = false;
+      var credentialled = false, hedge = false;
       try {
         var url = (typeof input === 'string') ? input : (input && input.url);
         var base = backendUrl();
+        hedge = !!(base && url && String(url).indexOf(base) === 0 &&
+                   init && String(init.method || '').toUpperCase() === 'POST' &&
+                   HEDGE_ACTIONS[actionOf(init)]);
         /* Fall back to the STORED token: `session` is only set by
            handle()/start(), and index.html skips start() when restoreState()
            restores the student after a same-tab refresh (which mobile
@@ -390,7 +468,7 @@ window.MorettiAuth = (function () {
           }
         }
       } catch (e) { /* not our request, or not JSON — pass it through untouched */ }
-      var out = original.call(this, input, init);
+      var out = hedge ? hedgedFetch(original, this, input, init) : original.call(this, input, init);
       /* Only for calls we credentialled: read a COPY so the caller still gets
          an untouched, unread body. Any failure here is ignored -- this is a
          safety net, never the reason a request breaks. */
@@ -452,7 +530,10 @@ window.MorettiAuth = (function () {
     var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, POST_TIMEOUT_MS);
     var opts = { method: 'POST', body: JSON.stringify(payload) };
     if (ctrl) opts.signal = ctrl.signal;
-    return fetch(backendUrl(), opts)
+    // Once installed, the wrapper hedges these itself. Before that (the
+    // pre-flight calls run as this file loads) post() does it.
+    var hedgeHere = HEDGE_ACTIONS[payload && payload.action] && !window.__mtaFetchWrapped;
+    return (hedgeHere ? hedgedFetch(fetch, window, backendUrl(), opts) : fetch(backendUrl(), opts))
       .then(function (r) { return r.json(); })
       .then(function (data) {
         clearTimeout(timer);
