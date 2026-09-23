@@ -6893,7 +6893,10 @@ window.Portal = {
     renderTestCountdown();
     renderNavProfile();
     renderAssignments(); // instant paint from the auth response...
-    loadAssignments();   // ...then a fresh fetch right behind it (see comment below)
+    /* ...and that copy is seconds old, so the refetch that used to fire
+       here is left to the poll below. One fewer backend call competing
+       with the rest of sign-in, which is where the wait was felt
+       (Luca, 2026-09-22). */
     startAssignmentsPolling();
     loadServerScoreHistory(); // fills in any completed test this browser doesn't have locally (see mergedScoreHistory)
     // Applies saved accommodations to the diagnostic timer on every login
@@ -8826,6 +8829,23 @@ window.Portal = {
     nsOh.hidden = false;
   }
 
+  /* The answer is the same all week, and the call behind it reads the
+     calendar feed. Keep the last one on this device, paint it immediately,
+     and let the fresh answer replace it (Luca, 2026-09-22). */
+  var NS_CACHE_PREFIX = 'moretti_next_session_';
+  function nsCacheKey() { return NS_CACHE_PREFIX + (currentStudent && currentStudent.key); }
+  function nsCacheRead() {
+    try {
+      var raw = sessionStorage.getItem(nsCacheKey());
+      if (!raw) return null;
+      var box = JSON.parse(raw);
+      return (box && box.at && Date.now() - box.at < 30 * 60000) ? box.data : null;
+    } catch (e) { return null; }
+  }
+  function nsCacheWrite(data) {
+    try { sessionStorage.setItem(nsCacheKey(), JSON.stringify({ at: Date.now(), data: data })); } catch (e) {}
+  }
+
   function loadNextSession() {
     if (!currentStudent || !currentStudent.key) return;
     nsCard.style.display = '';
@@ -8838,10 +8858,19 @@ window.Portal = {
     if (nsOh) nsOh.hidden = true;
     setJoinLink();
 
+    var cachedNs = nsCacheRead();
+    if (cachedNs) { try { paintNextSession(cachedNs); } catch (e) {} }
+
     fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'nextSession', key: currentStudent.key, debug: DEBUG_MODE }) })
       .then(function (r) { return r.json(); })
       .catch(function (err) { return { ok: false, error: 'network', message: String(err) }; })
       .then(function (data) {
+        if (data && data.ok) nsCacheWrite(data);
+        paintNextSession(data);
+      });
+  }
+
+  function paintNextSession(data) {
         renderNextSessionDebug(data);
         /* Independent of the session branches below -- office hours show
            whether or not this student has a booking, and a failed lookup
@@ -8886,10 +8915,9 @@ window.Portal = {
           setNsRel('');
           setNsDayChip(null);
         }
-        // Always re-affirm the join link after the lookup resolves too —
-        // belt and suspenders, in case anything above ever changes.
-        setJoinLink();
-      });
+    // Always re-affirm the join link after the lookup resolves too --
+    // belt and suspenders, in case anything above ever changes.
+    setJoinLink();
   }
 
   /* ═══ TEST-DAY COUNTDOWN ═══
