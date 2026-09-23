@@ -1703,9 +1703,32 @@
   // homework edit), not something the admin asked for. A failed silent call
   // leaves the page as it is instead of taking the non-silent path, which
   // drops to the gate and discards the session key.
+  /* SPEED (Luca, 2026-09-22: "loading students ... is super slow"). The
+     roster read is seconds of sheet work behind an Apps Script cold start,
+     and the page sat empty for all of it. The last roster this browser saw
+     is kept here and drawn at once, with the fresh one replacing it when it
+     lands. Nothing is written from the cache; it is only what to look at
+     while waiting. */
+  var ROSTER_CACHE = 'mta_admin_roster_v1';
+  function paintCachedRoster() {
+    if (allStudents.length) return false;
+    try {
+      var raw = sessionStorage.getItem(ROSTER_CACHE);
+      if (!raw) return false;
+      var cached = JSON.parse(raw);
+      if (!cached || !cached.students || !cached.students.length) return false;
+      allStudents = cached.students;
+      renderSummary();
+      renderTable();
+      if (currentView === 'gate') showView('roster');
+      setStatus('Showing the roster from your last visit while it refreshes\u2026');
+      return true;
+    } catch (e) { return false; }
+  }
+
   function loadRoster(key, silent) {
     var seq = ++rosterLoadSeq;
-    if (!silent) { gateErrorEl.textContent = ''; setStatus(''); }
+    if (!silent) { gateErrorEl.textContent = ''; setStatus(''); paintCachedRoster(); }
     return postToBackend({ action: 'getRoster', adminKey: key }).then(function (data) {
       if (seq !== rosterLoadSeq) return false; // superseded by a newer load
       setGateChecking(false);
@@ -1731,6 +1754,8 @@
       }
       try { sessionStorage.setItem(SESSION_KEY, key); } catch (e) {}
       allStudents = data.students || [];
+      try { sessionStorage.setItem(ROSTER_CACHE, JSON.stringify({ students: allStudents, at: Date.now() })); } catch (e) {}
+      if (!silent) setStatus('');
       // A program change still saving outranks a roster read that may
       // predate it; and the open student page follows the new row, so
       // later changes to it reach the roster.
