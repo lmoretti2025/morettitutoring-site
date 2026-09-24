@@ -258,6 +258,11 @@
         if (d && d.ok) return done(d, email);
         var err = d && d.error;
         if (err === 'slot_taken') { say(''); return load('That time was just taken. Here is what is open now.'); }
+        /* The same time, already theirs: an earlier try did book it and only the
+           reply was lost (the edge sends a booking again when that happens). */
+        if (err === 'already_booked' && d.start && new Date(d.start).getTime() === new Date(chosen).getTime()) {
+          return done({ start: d.start }, email);
+        }
         if (err === 'already_booked') {
           return say('You already have a call booked for ' + fmt(d.start, DAY) + ' at ' + fmt(d.start, TIME) +
                      '. To change it, reply to the invite or text ' + PHONE + '.', true);
