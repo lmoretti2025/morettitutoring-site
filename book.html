@@ -249,7 +249,8 @@
     var name = $('b-name').value.trim(), email = $('b-email').value.trim();
     if (name.length < 2) { say('Please add your name.', true); $('b-name').focus(); return; }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { say('Please check your email address.', true); $('b-email').focus(); return; }
-    $('go').disabled = true; say('Booking…');
+    // Booking checks every calendar again and makes the Meet link: 15-20 seconds (measured 2026-09-24).
+    $('go').disabled = true; say('Booking your call. This takes about 15 seconds, so please keep this page open…');
     post({ action: 'bookCall', start: chosen, token: TOKEN, name: name, email: email,
            phone: $('b-phone').value.trim(), student: $('b-student').value.trim(),
            about: $('b-about').value, notes: $('b-notes').value.trim(), website: $('b-website').value }, BOOK_TIMEOUT_MS)
