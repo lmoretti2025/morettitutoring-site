@@ -19,104 +19,202 @@
 <!--
   BOOK A CALL. Linked from the diagnostic email, the inquiry emails and the
   site's forms. The backend (portal/booking.gs) decides which times are open:
-  only right next to or between Luca's sessions, clear of everything else on
-  his calendars. This page shows them and books one. The invite, with its
-  Google Meet link, comes from Google Calendar.
+  near or between Luca's sessions, clear of everything else on his calendars.
+  This page shows them as a month (the student portal's calendar, Luca
+  2026-09-24): days with open times are tiles to click, every other day is
+  greyed out as unavailable, and a day opens a pop-up with its times and then
+  the form. The invite, with its Google Meet link, comes from Google Calendar.
+  The look follows index.html: the dark hero, paper white, red and gold.
 -->
 <style>
-  *, *::before, *::after { box-sizing: border-box; }
   :root {
-    --red: #B0271C;
-    --red-soft: rgba(176,39,28,0.08);
-    --bg: #f2f2f2;
-    --card: #ffffff;
-    --text: #111111;
-    --mid: rgba(17,17,17,0.62);
-    --border: rgba(17,17,17,0.14);
+    --void: #0C0A09; --void-2: #171312;
+    --paper: #FFFFFF; --sunk: #F6F4F1;
+    --ink: #111111; --body: #4A4139; --muted: #6E655C; --faint: #A39A90;
+    --line: rgba(17,17,17,.12); --hair: rgba(17,17,17,.065);
+    --red: #B0271C; --red-lift: #D24234; --red-soft: rgba(176,39,28,.08);
+    --gold: #C9A84C; --gold-deep: #9A7C22;
     --ok: #2F6B3A;
-    --hel: 'Poppins', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    --display: 'Caladea', Georgia, serif;
+    --display: 'Caladea', Georgia, 'Times New Roman', serif;
+    --sans: 'Poppins', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    --ease: cubic-bezier(.22,1,.36,1);
   }
-  @media (prefers-color-scheme: dark) {
-    :root { --bg: #0C0A09; --card: #1A1715; --text: #F3EFEA; --mid: rgba(243,239,234,0.66); --border: rgba(243,239,234,0.16);
-            --ok: #7CC48A; --red-soft: rgba(224,100,90,0.14); }
-  }
-  body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--hel); font-weight: 300; line-height: 1.6; -webkit-font-smoothing: antialiased; }
-  main { max-width: 640px; margin: 0 auto; padding: 48px 16px 72px; }
-  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 28px 24px; }
-  .brand { display: block; width: 140px; height: auto; margin: 0 0 22px; }
-  h1 { font-family: var(--display); font-weight: 700; font-size: 30px; line-height: 1.2; margin: 0 0 10px; text-wrap: balance; }
-  h2 { font-family: var(--display); font-weight: 700; font-size: 19px; margin: 26px 0 10px; }
-  p { margin: 0 0 14px; }
-  .muted { color: var(--mid); font-size: 14px; }
+  *, *::before, *::after { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--body); font-family: var(--sans); font-weight: 300; line-height: 1.6; -webkit-font-smoothing: antialiased; }
   a { color: var(--red); }
+  :focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
+  h1, h2, h3 { margin: 0; color: var(--ink); text-wrap: balance; }
+  p { margin: 0; }
+  .shell { max-width: 880px; margin: 0 auto; padding: 0 20px; }
+  .lbl { font-size: .62rem; font-weight: 600; letter-spacing: .22em; text-transform: uppercase; color: var(--gold); }
 
-  .day { margin: 0 0 18px; }
-  .day h3 { font-weight: 600; font-size: 14px; letter-spacing: .02em; margin: 0 0 8px; }
-  .times { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
-  .time { font: inherit; font-size: 14px; font-weight: 500; padding: 10px 8px; border-radius: 6px; cursor: pointer;
-          border: 1px solid var(--border); background: transparent; color: var(--text); }
-  .time:hover { border-color: var(--red); }
-  .time[aria-pressed="true"] { background: var(--red); border-color: var(--red); color: #fff; }
-  .time:focus-visible, .go:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+  /* ── hero ── */
+  .hero { background: radial-gradient(120% 90% at 85% 0%, #2a1512 0%, var(--void) 55%) , var(--void); color: #EDE8E2; padding: 26px 0 64px; }
+  .hero-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .hero-top img { width: 132px; height: auto; display: block; }
+  .hero-top a.back { color: rgba(237,232,226,.62); font-size: .78rem; text-decoration: none; letter-spacing: .04em; }
+  .hero-top a.back:hover { color: #fff; }
+  .hero h1 { color: #fff; font-family: var(--display); font-weight: 700; font-size: clamp(2rem, 5.2vw, 3rem); line-height: 1.08; margin: 44px 0 14px; }
+  .hero h1 em { font-style: normal; color: var(--gold); }
+  .hero p.sub { max-width: 34rem; color: rgba(237,232,226,.78); font-size: 1rem; }
+  .facts { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 22px; font-size: .8rem; color: rgba(237,232,226,.7); }
+  .facts span::before { content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--gold); margin-right: 9px; vertical-align: 2px; }
 
-  form { display: none; margin-top: 8px; padding-top: 6px; border-top: 1px solid var(--border); }
-  form.open { display: block; }
-  .chosen { background: var(--red-soft); border-radius: 8px; padding: 10px 14px; font-weight: 500; margin: 18px 0 16px; }
-  label { display: block; font-size: 13px; font-weight: 500; margin: 0 0 5px; }
-  label .opt { color: var(--mid); font-weight: 300; }
-  input, select, textarea { width: 100%; font: inherit; font-size: 15px; font-weight: 400; color: var(--text); background: var(--card);
-                            border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; margin: 0 0 14px; }
+  /* ── the calendar card, lifted over the hero ── */
+  .card { background: var(--paper); border-radius: 22px; box-shadow: 0 24px 60px rgba(12,10,9,.16), 0 2px 6px rgba(12,10,9,.06);
+          margin-top: -36px; padding: 26px 26px 22px; position: relative; }
+  .cal-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+  .cal-title { font-family: var(--display); font-size: 1.55rem; color: var(--ink); }
+  .cal-nav { display: flex; gap: 8px; }
+  .cal-arrow { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line); background: var(--paper); color: var(--ink);
+               font-size: 1.3rem; line-height: 1; cursor: pointer; transition: border-color .16s, background .16s, transform .16s var(--ease); }
+  .cal-arrow:hover:not(:disabled) { border-color: var(--red); color: var(--red); transform: translateY(-1px); }
+  .cal-arrow:disabled { opacity: .3; cursor: default; }
+  .cal-head, .cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
+  .cal-head div { font-size: .62rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--faint); text-align: center; padding-bottom: 6px; }
+  .day { position: relative; border: none; border-radius: 16px; min-height: 86px; padding: 10px 10px 9px; text-align: left; font-family: var(--sans);
+         background: var(--sunk); display: flex; flex-direction: column; justify-content: space-between; gap: 6px; }
+  .day-num { font-family: var(--display); font-size: 1.05rem; color: var(--ink); width: 1.9rem; height: 1.9rem; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+  .day.is-today .day-num { box-shadow: inset 0 0 0 1.5px var(--red); color: var(--red); font-weight: 700; }
+  .day-tag { font-size: .68rem; font-weight: 600; letter-spacing: .02em; border-radius: 999px; padding: .18rem .55rem; align-self: flex-start; white-space: nowrap; }
+  /* Open: a white tile that lifts, the way a portal day does. */
+  .day.is-open { background: var(--paper); box-shadow: inset 0 0 0 1px var(--line); cursor: pointer;
+                 transition: box-shadow .18s var(--ease), transform .18s var(--ease); }
+  .day.is-open .day-tag { background: var(--red-soft); color: var(--red); }
+  .day.is-open:hover { transform: translateY(-2px); box-shadow: 0 12px 26px rgba(17,17,17,.12), inset 0 0 0 1px rgba(176,39,28,.35); }
+  /* Unavailable: greyed, flat, not clickable. */
+  .day.is-off { background: var(--sunk); cursor: not-allowed; }
+  .day.is-off .day-num { color: var(--faint); }
+  .day.is-past { opacity: .5; }
+  .day.is-blank { background: transparent; }
+  .cal-foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 20px; margin-top: 16px; font-size: .78rem; color: var(--muted); }
+  .key { display: inline-flex; align-items: center; gap: 7px; margin-right: 16px; }
+  .key i { width: 12px; height: 12px; border-radius: 4px; display: inline-block; }
+  .notice { margin: 0 0 14px; padding: 10px 14px; border-radius: 12px; background: var(--red-soft); color: var(--red); font-size: .88rem; }
+  .state { padding: 42px 8px; text-align: center; color: var(--muted); }
+  .state b { color: var(--ink); font-weight: 600; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; padding: .95rem 1.6rem; font-family: var(--sans); font-size: .74rem; font-weight: 600;
+         letter-spacing: .11em; text-transform: uppercase; border-radius: 3px; cursor: pointer; border: 1px solid var(--red); background: var(--red); color: #fff;
+         transition: background .2s var(--ease), transform .2s var(--ease); }
+  .btn:hover:not(:disabled) { background: var(--red-lift); transform: translateY(-1px); }
+  .btn:disabled { opacity: .55; cursor: default; }
+  .btn.ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+  .text-link { font-size: .92rem; }
+  .below { text-align: center; margin: 26px 0 60px; font-size: .86rem; color: var(--muted); }
+  .spin { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--line); border-top-color: var(--red); animation: spin .8s linear infinite; margin: 0 auto 12px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── the pop-up ── */
+  .scrim { position: fixed; inset: 0; background: rgba(12,10,9,.46); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+           display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 50; opacity: 0; pointer-events: none; transition: opacity .2s var(--ease); }
+  .scrim.open { opacity: 1; pointer-events: auto; }
+  .sheet { background: var(--paper); border-radius: 22px; width: min(520px, 100%); max-height: calc(100vh - 40px); overflow-y: auto;
+           padding: 26px 24px 22px; box-shadow: 0 30px 80px rgba(12,10,9,.35); transform: translateY(12px) scale(.98); transition: transform .24s var(--ease); }
+  .scrim.open .sheet { transform: none; }
+  .sheet-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+  .sheet-head h2 { font-family: var(--display); font-size: 1.5rem; line-height: 1.15; }
+  .x { width: 36px; height: 36px; flex: 0 0 auto; border-radius: 50%; border: 1px solid var(--line); background: var(--paper); font-size: 1.1rem; cursor: pointer; color: var(--muted); }
+  .x:hover { color: var(--ink); border-color: var(--ink); }
+  .times { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; }
+  .time { font-family: var(--sans); font-size: .9rem; font-weight: 500; padding: 12px 8px; border-radius: 12px; cursor: pointer;
+          border: 1px solid var(--line); background: var(--paper); color: var(--ink); transition: border-color .15s, background .15s, color .15s, transform .15s var(--ease); }
+  .time:hover { border-color: var(--red); color: var(--red); transform: translateY(-1px); }
+  .zone { margin-top: 14px; font-size: .76rem; color: var(--muted); }
+  .chosen { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: var(--red-soft); color: var(--red); border-radius: 12px;
+            padding: 11px 14px; font-weight: 500; font-size: .92rem; margin-bottom: 18px; }
+  .chosen button { background: none; border: none; color: var(--red); font: inherit; font-size: .8rem; text-decoration: underline; cursor: pointer; padding: 0; }
+  label { display: block; font-size: .72rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 0 0 6px; }
+  label .opt { text-transform: none; letter-spacing: 0; font-weight: 400; color: var(--faint); }
+  input, select, textarea { width: 100%; font: inherit; font-size: 15px; font-weight: 400; color: var(--ink); background: var(--paper);
+                            border: 1px solid var(--line); border-radius: 10px; padding: 11px 13px; margin: 0 0 14px; transition: border-color .15s, box-shadow .15s; }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--red); box-shadow: 0 0 0 3px var(--red-soft); }
   textarea { min-height: 76px; resize: vertical; }
   .two { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
-  @media (max-width: 520px) { .two { grid-template-columns: 1fr; } .card { padding: 22px 16px; } main { padding-top: 20px; } h1 { font-size: 26px; } }
   .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
-  .go { font: inherit; font-size: 15px; font-weight: 600; padding: 12px 22px; border-radius: 6px; cursor: pointer;
-        border: 1px solid var(--red); background: var(--red); color: #fff; }
-  .go:disabled { opacity: .55; cursor: default; }
-  #status { min-height: 1.6em; margin: 12px 0 0; font-size: 14px; }
+  #status { min-height: 1.4em; margin: 12px 0 0; font-size: .86rem; color: var(--muted); }
   #status.err { color: var(--red); }
-  .done h1 { color: var(--ok); }
-  @media (prefers-color-scheme: dark) { .brand { background: #fff; padding: 6px 10px; border-radius: 6px; } a { color: #E0645A; } }
+
+  /* ── booked ── */
+  .done { text-align: center; padding: 14px 6px 8px; }
+  .done .tick { width: 58px; height: 58px; border-radius: 50%; background: rgba(47,107,58,.1); color: var(--ok); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 1.6rem; }
+  .done h2 { font-family: var(--display); font-size: 2rem; margin-bottom: 10px; }
+  .done .when { font-size: 1.08rem; color: var(--ink); font-weight: 500; margin-bottom: 14px; }
+  .done p { max-width: 30rem; margin: 0 auto 10px; }
+
+  @media (max-width: 640px) {
+    .card { padding: 18px 12px 16px; border-radius: 18px; }
+    .cal-head, .cal-grid { gap: 4px; }
+    .day { min-height: 58px; border-radius: 11px; padding: 6px 4px; align-items: center; }
+    .day-num { font-size: .95rem; width: 1.7rem; height: 1.7rem; }
+    .day-tag { font-size: 0; padding: 0; width: 7px; height: 7px; border-radius: 50%; align-self: center; }
+    .day.is-open .day-tag { background: var(--red); }
+    .cal-title { font-size: 1.25rem; }
+    .scrim { align-items: flex-end; padding: 0; }
+    .sheet { border-radius: 22px 22px 0 0; max-height: 88vh; width: 100%; }
+    .two { grid-template-columns: 1fr; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
 </head>
 <body>
-<main>
-  <div class="card">
-    <a href="/"><img class="brand" src="email-logo.png" alt="Moretti Test Prep"></a>
-    <div id="view">
-      <h1>Book a free 15-minute call</h1>
-      <p>Pick a time that works for you. We&rsquo;ll talk over Google Meet, and the link comes with the calendar invite.</p>
-      <p class="muted" id="tzline"></p>
-      <div id="slots"><p class="muted">Finding open times&hellip;</p></div>
-
-      <form id="book" novalidate>
-        <p class="chosen" id="chosen"></p>
-        <div class="two">
-          <div><label for="b-name">Your name</label><input id="b-name" autocomplete="name" required maxlength="80"></div>
-          <div><label for="b-email">Email</label><input id="b-email" type="email" autocomplete="email" required maxlength="120"></div>
-        </div>
-        <div class="two">
-          <div><label for="b-phone">Phone <span class="opt">(optional)</span></label><input id="b-phone" type="tel" autocomplete="tel" maxlength="30"></div>
-          <div><label for="b-student">Student&rsquo;s name <span class="opt">(if it&rsquo;s not you)</span></label><input id="b-student" maxlength="80"></div>
-        </div>
-        <label for="b-about">What would you like to talk about?</label>
-        <select id="b-about">
-          <option value="sat">SAT prep</option>
-          <option value="math">Math tutoring</option>
-          <option value="essays">College essays</option>
-          <option value="other">Something else</option>
-        </select>
-        <label for="b-notes">Anything I should know before we talk? <span class="opt">(optional)</span></label>
-        <textarea id="b-notes" maxlength="500"></textarea>
-        <div class="hp" aria-hidden="true"><label for="b-website">Leave this field blank</label><input id="b-website" tabindex="-1" autocomplete="off"></div>
-        <button class="go" id="go" type="submit">Book the call</button>
-        <p id="status" role="status"></p>
-      </form>
+<header class="hero">
+  <div class="shell">
+    <div class="hero-top">
+      <a href="/"><img src="logo-caladea-white-400.png" alt="Moretti Test Prep &amp; Tutoring"></a>
+      <a class="back" href="/">&larr; morettitutoring.com</a>
     </div>
+    <div class="lbl" style="margin-top:40px">Free &middot; 15 minutes &middot; Google Meet</div>
+    <h1>Pick a time <em>to talk.</em></h1>
+    <p class="sub">A quick call about where your student is and what would help most. Choose a day, then a time, and the Meet link comes with the calendar invite.</p>
+    <div class="facts"><span>SAT prep</span><span>Math tutoring</span><span>College essays</span></div>
   </div>
-  <p class="muted" style="text-align:center; margin-top:18px;">Prefer to text? <a href="sms:+12012752791">(201) 275-2791</a></p>
+</header>
+
+<main class="shell">
+  <section class="card" aria-label="Choose a day">
+    <div id="notice"></div>
+    <div id="cal"><div class="state"><div class="spin"></div>Finding open times&hellip;</div></div>
+  </section>
+  <p class="below">Prefer to text? <a href="sms:+12012752791">(201) 275-2791</a></p>
 </main>
+
+<div class="scrim" id="scrim" aria-hidden="true">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+    <div class="sheet-head">
+      <div><div class="lbl" id="sheet-lbl" style="color:var(--gold-deep)">Open times</div><h2 id="sheet-title">&nbsp;</h2></div>
+      <button type="button" class="x" id="close" aria-label="Close">&times;</button>
+    </div>
+
+    <div id="step-times">
+      <div class="times" id="times"></div>
+      <p class="zone" id="zone"></p>
+    </div>
+
+    <form id="book" novalidate hidden>
+      <div class="chosen"><span id="chosen"></span><button type="button" id="change">Change</button></div>
+      <div class="two">
+        <div><label for="b-name">Your name</label><input id="b-name" autocomplete="name" required maxlength="80"></div>
+        <div><label for="b-email">Email</label><input id="b-email" type="email" autocomplete="email" required maxlength="120"></div>
+      </div>
+      <div class="two">
+        <div><label for="b-phone">Phone <span class="opt">(optional)</span></label><input id="b-phone" type="tel" autocomplete="tel" maxlength="30"></div>
+        <div><label for="b-student">Student&rsquo;s name <span class="opt">(if not you)</span></label><input id="b-student" maxlength="80"></div>
+      </div>
+      <label for="b-about">What would you like to talk about?</label>
+      <select id="b-about">
+        <option value="sat">SAT prep</option>
+        <option value="math">Math tutoring</option>
+        <option value="essays">College essays</option>
+        <option value="other">Something else</option>
+      </select>
+      <label for="b-notes">Anything I should know first? <span class="opt">(optional)</span></label>
+      <textarea id="b-notes" maxlength="500"></textarea>
+      <div class="hp" aria-hidden="true"><label for="b-website">Leave this field blank</label><input id="b-website" tabindex="-1" autocomplete="off"></div>
+      <button class="btn" id="go" type="submit" style="width:100%">Book the call</button>
+      <p id="status" role="status"></p>
+    </form>
+  </div>
+</div>
 
 <script src="analytics.js" defer></script>
 <script src="portal/backend-url.js"></script>
@@ -137,8 +235,8 @@
      page. Google sometimes stalls for half a minute; past POST_TIMEOUT_MS the
      family sees "try again" instead of a page that never finishes. */
   var POST_TIMEOUT_MS = 20000;
-  // Booking reads every calendar fresh and writes the event: it gets longer. If
-  // it lands after all, trying again says "you already have a call booked".
+  // Booking reads every calendar again and writes the event: it gets longer. If
+  // it lands after all, trying again finds the call already theirs.
   var BOOK_TIMEOUT_MS = 45000;
   function post(payload, timeoutMs) {
     var ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
@@ -151,7 +249,7 @@
       .then(function (d) { clearTimeout(timer); return d; });
   }
 
-  /* Times are shown in the visitor's own zone. Luca's is Eastern, so anyone
+  /* Times and days are the visitor's own. Luca's zone is Eastern, so anyone
      elsewhere is told, and the confirmation says both. */
   var HERE = '';
   try { HERE = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { HERE = ''; }
@@ -173,8 +271,8 @@
     var probe = new Date().toISOString();
     return fmt(probe, { hour: 'numeric', minute: '2-digit', day: 'numeric' }) === fmt(probe, { hour: 'numeric', minute: '2-digit', day: 'numeric' }, LUCA_TZ);
   }
-
-  var chosen = null;
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function dayKey(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
 
   // What the email link, or the form they just filled in on the site, already told us.
   function fill(pre) {
@@ -186,60 +284,121 @@
   }
   try { fill(JSON.parse(sessionStorage.getItem('mt_book_prefill') || 'null')); } catch (e) { /* nothing saved */ }
 
-  function noTimes(why) {
-    $('slots').innerHTML = '<p>' + (why === 'down'
-      ? 'I can&rsquo;t show open times right now.'
-      : 'There aren&rsquo;t any open times online over the next two weeks.') +
-      ' Text me at <a href="sms:+12012752791">' + PHONE + '</a> or reply to my email, and I&rsquo;ll find one that works.</p>';
-  }
-
   /* The open times are the same for everyone, so they are asked for with no
      token: the edge keeps that list and answers at once. The link from an
      email only fills in the form, so its token goes in a request of its own
      that the times never wait for. */
   if (TOKEN) post({ action: 'getBookingSlots', token: TOKEN }).then(function (d) { if (d && d.ok) fill(d.prefill); });
 
+  var byDay = {};          // 'yyyy-mm-dd' -> [slot]
+  var months = [];         // [{ y, m }] with at least one open day, first to last
+  var shown = 0;           // index into months
+  var openDay = null, chosen = null;
+
+  function state(html) { $('cal').innerHTML = '<div class="state">' + html + '</div>'; }
+  function noTimes(why) {
+    state('<p><b>' + (why === 'down' ? 'I can&rsquo;t show open times right now.' : 'No open times in the next two weeks.') + '</b></p>' +
+          '<p style="margin-top:8px">Text me at <a href="sms:+12012752791">' + PHONE + '</a> or reply to my email, and I&rsquo;ll find a time that works.</p>');
+  }
+  function notice(text) { $('notice').innerHTML = text ? '<p class="notice">' + esc(text) + '</p>' : ''; }
+
   function load(message) {
-    $('slots').innerHTML = '<p class="muted">Finding open times&hellip;</p>';
+    notice(message || '');
+    state('<div class="spin"></div>Finding open times&hellip;');
     post({ action: 'getBookingSlots' }).then(function (d) {
       if (!d || !d.ok) {
-        $('slots').innerHTML = '<p>Couldn&rsquo;t load the open times.</p><button type="button" class="go" id="again">Try again</button>';
-        $('again').onclick = function () { load(); };
+        state('<p><b>Couldn&rsquo;t load the open times.</b></p><p style="margin-top:14px"><button type="button" class="btn" id="again">Try again</button></p>');
+        $('again').onclick = function () { load(message); };
         return;
       }
       if (d.unavailable) return noTimes('down');
       if (!d.slots.length) return noTimes('none');
-      $('tzline').textContent = sameZoneAsLuca() ? 'Times are Eastern Time.' : 'Times are shown in your time zone (' + zoneName(HERE) + ').';
-      var days = [], byDay = {};
+      byDay = {}; months = [];
       d.slots.forEach(function (s) {
-        var k = fmt(s.start, DAY);
-        if (!byDay[k]) { byDay[k] = []; days.push(k); }
-        byDay[k].push(s);
+        var t = new Date(s.start), k = dayKey(t);
+        (byDay[k] = byDay[k] || []).push(s);
+        if (!months.some(function (x) { return x.y === t.getFullYear() && x.m === t.getMonth(); })) months.push({ y: t.getFullYear(), m: t.getMonth() });
       });
-      $('slots').innerHTML = (message ? '<p id="notice" class="muted" style="color:var(--red)">' + esc(message) + '</p>' : '') +
-        days.map(function (k) {
-          return '<div class="day"><h3>' + esc(k) + '</h3><div class="times">' + byDay[k].map(function (s) {
-            return '<button type="button" class="time" aria-pressed="false" data-start="' + esc(s.start) + '">' + esc(fmt(s.start, TIME)) + '</button>';
-          }).join('') + '</div></div>';
-        }).join('');
-      Array.prototype.forEach.call($('slots').querySelectorAll('.time'), function (b) {
-        b.onclick = function () { pick(b); };
-      });
-      chosen = null;
-      $('book').classList.remove('open');
+      months.sort(function (a, b) { return a.y - b.y || a.m - b.m; });
+      shown = 0;
+      render();
     });
   }
 
-  function pick(b) {
-    Array.prototype.forEach.call($('slots').querySelectorAll('.time'), function (x) { x.setAttribute('aria-pressed', 'false'); });
-    b.setAttribute('aria-pressed', 'true');
-    chosen = b.getAttribute('data-start');
-    $('chosen').textContent = fmt(chosen, DAY) + ' at ' + fmt(chosen, TIME) + ' (15 minutes)';
-    $('book').classList.add('open');
-    $('status').textContent = ''; $('status').className = '';
-    $('chosen').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    setTimeout(function () { if (!$('b-name').value) $('b-name').focus({ preventScroll: true }); }, 300);
+  function render() {
+    var mo = months[shown], first = new Date(mo.y, mo.m, 1), today = dayKey(new Date());
+    var title = first.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+    var cells = [];
+    for (var b = 0; b < first.getDay(); b++) cells.push('<div class="day is-blank" aria-hidden="true"></div>');
+    var days = new Date(mo.y, mo.m + 1, 0).getDate();
+    for (var n = 1; n <= days; n++) {
+      var dt = new Date(mo.y, mo.m, n), k = dayKey(dt), list = byDay[k] || [];
+      var label = dt.toLocaleString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+      var cls = 'day' + (list.length ? ' is-open' : ' is-off') + (k === today ? ' is-today' : '') + (k < today ? ' is-past' : '');
+      cells.push(list.length
+        ? '<button type="button" class="' + cls + '" data-day="' + k + '" aria-label="' + esc(label) + ', ' + list.length + ' open times">' +
+            '<span class="day-num">' + n + '</span><span class="day-tag">' + list.length + (list.length === 1 ? ' time' : ' times') + '</span></button>'
+        // Grey says unavailable (the key below explains it); the word on every tile was noise.
+        : '<div class="' + cls + '" role="img" aria-label="' + esc(label) + ', unavailable"><span class="day-num">' + n + '</span></div>');
+    }
+    $('cal').innerHTML =
+      '<div class="cal-toolbar"><div class="cal-title">' + esc(title) + '</div><div class="cal-nav">' +
+        '<button type="button" class="cal-arrow" id="prev" aria-label="Previous month"' + (shown === 0 ? ' disabled' : '') + '>&lsaquo;</button>' +
+        '<button type="button" class="cal-arrow" id="next" aria-label="Next month"' + (shown === months.length - 1 ? ' disabled' : '') + '>&rsaquo;</button>' +
+      '</div></div>' +
+      '<div class="cal-head">' + ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(function (w) { return '<div>' + w + '</div>'; }).join('') + '</div>' +
+      '<div class="cal-grid">' + cells.join('') + '</div>' +
+      '<div class="cal-foot"><span><span class="key"><i style="background:#fff;box-shadow:inset 0 0 0 1px rgba(176,39,28,.45)"></i>Open, click to see times</span>' +
+      '<span class="key"><i style="background:var(--sunk)"></i>Unavailable</span></span>' +
+      '<span>' + esc(sameZoneAsLuca() ? 'Times are Eastern Time.' : 'Times are in your time zone (' + zoneName(HERE) + ').') + '</span></div>';
+    $('prev').onclick = function () { if (shown > 0) { shown--; render(); } };
+    $('next').onclick = function () { if (shown < months.length - 1) { shown++; render(); } };
+    Array.prototype.forEach.call($('cal').querySelectorAll('.day.is-open'), function (el) {
+      el.onclick = function () { openSheet(el.getAttribute('data-day')); };
+    });
   }
+
+  /* ── the pop-up ── */
+  var lastFocus = null;
+  function openSheet(k) {
+    openDay = k; chosen = null;
+    var list = byDay[k] || [];
+    $('sheet-lbl').textContent = list.length + (list.length === 1 ? ' open time' : ' open times');
+    $('sheet-title').textContent = fmt(list[0].start, DAY);
+    $('times').innerHTML = list.map(function (s) {
+      return '<button type="button" class="time" data-start="' + esc(s.start) + '">' + esc(fmt(s.start, TIME)) + '</button>';
+    }).join('');
+    $('zone').textContent = sameZoneAsLuca() ? 'Eastern Time. Each call is 15 minutes.' : 'Your time zone (' + zoneName(HERE) + '). Each call is 15 minutes.';
+    Array.prototype.forEach.call($('times').querySelectorAll('.time'), function (b) { b.onclick = function () { pick(b.getAttribute('data-start')); }; });
+    showStep('times');
+    lastFocus = document.activeElement;
+    $('scrim').classList.add('open'); $('scrim').setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    setTimeout(function () { var t = $('times').querySelector('.time'); if (t) t.focus(); }, 60);
+  }
+  function closeSheet() {
+    if ($('go').disabled) return;          // never mid-booking
+    $('scrim').classList.remove('open'); $('scrim').setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+  function showStep(which) {
+    $('step-times').hidden = which !== 'times';
+    $('book').hidden = which !== 'form';
+  }
+  function pick(start) {
+    chosen = start;
+    $('chosen').textContent = fmt(start, DAY) + ' at ' + fmt(start, TIME);
+    $('sheet-lbl').textContent = 'Almost booked';
+    $('sheet-title').textContent = 'Your details';
+    say('');
+    showStep('form');
+    setTimeout(function () { (!$('b-name').value ? $('b-name') : $('go')).focus(); }, 60);
+  }
+  $('change').onclick = function () { openSheet(openDay); };
+  $('close').onclick = closeSheet;
+  $('scrim').addEventListener('click', function (e) { if (e.target === $('scrim')) closeSheet(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && $('scrim').classList.contains('open')) closeSheet(); });
 
   function say(text, isErr) { $('status').textContent = text; $('status').className = isErr ? 'err' : ''; }
 
@@ -250,15 +409,16 @@
     if (name.length < 2) { say('Please add your name.', true); $('b-name').focus(); return; }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { say('Please check your email address.', true); $('b-email').focus(); return; }
     // Booking checks every calendar again and makes the Meet link: 15-20 seconds (measured 2026-09-24).
-    $('go').disabled = true; say('Booking your call. This takes about 15 seconds, so please keep this page open…');
+    $('go').disabled = true; $('go').textContent = 'Booking…';
+    say('This takes about 15 seconds, so please keep this page open.');
     post({ action: 'bookCall', start: chosen, token: TOKEN, name: name, email: email,
            phone: $('b-phone').value.trim(), student: $('b-student').value.trim(),
            about: $('b-about').value, notes: $('b-notes').value.trim(), website: $('b-website').value }, BOOK_TIMEOUT_MS)
       .then(function (d) {
-        $('go').disabled = false;
+        $('go').disabled = false; $('go').textContent = 'Book the call';
         if (d && d.ok) return done(d, email);
         var err = d && d.error;
-        if (err === 'slot_taken') { say(''); return load('That time was just taken. Here is what is open now.'); }
+        if (err === 'slot_taken') { closeSheet(); return load('That time was just taken. Here is what is open now.'); }
         /* The same time, already theirs: an earlier try did book it and only the
            reply was lost (the edge sends a booking again when that happens). */
         if (err === 'already_booked' && d.start && new Date(d.start).getTime() === new Date(chosen).getTime()) {
@@ -280,15 +440,19 @@
     try { if (window.MTrack) window.MTrack.event('schedule_call', { page: location.pathname, from_email: TOKEN ? 1 : 0 }); } catch (e) {}
     var start = d.start || chosen;
     var eastern = sameZoneAsLuca() ? '' : ' (' + fmt(start, TIME, LUCA_TZ) + ' Eastern)';
-    $('view').className = 'done';
-    $('view').innerHTML =
-      '<h1>You&rsquo;re booked!</h1>' +
-      '<p><b>' + esc(fmt(start, DAY)) + ' at ' + esc(fmt(start, TIME)) + '</b>' + esc(eastern) + ', for 15 minutes.</p>' +
+    $('scrim').classList.remove('open'); $('scrim').setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    notice('');
+    $('cal').innerHTML =
+      '<div class="done"><div class="tick" aria-hidden="true">&#10003;</div>' +
+      '<div class="lbl" style="color:var(--gold-deep);margin-bottom:8px">Booked</div>' +
+      '<h2>See you then!</h2>' +
+      '<p class="when">' + esc(fmt(start, DAY)) + ' at ' + esc(fmt(start, TIME)) + esc(eastern) + ', 15 minutes</p>' +
       '<p>A calendar invite with the Google Meet link is on its way to <b>' + esc(email) + '</b>. ' +
       'If it doesn&rsquo;t show up in a few minutes, check your spam folder.</p>' +
       '<p>Need a different time? Reply to the invite or text me at <a href="sms:+12012752791">' + PHONE + '</a>.</p>' +
-      '<p>Looking forward to talking with you!<br>Luca Moretti</p>';
-    window.scrollTo(0, 0);
+      '<p style="margin-top:14px">Looking forward to talking with you!<br><b style="color:var(--ink);font-weight:600">Luca Moretti</b></p></div>';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   load();
