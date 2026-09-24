@@ -1722,6 +1722,17 @@ mtaSafe(function(){
       .then(function(data){
         if (!data || !data.ok) throw new Error('submit_failed');
         note.style.display='none'; ok.style.display='block'; bad.style.display='none';
+        /* Talk first: book the call now on book.html (same as lead-form.js
+           offerCall). What they typed goes along in sessionStorage, never the URL. */
+        if (start === 'call' && !ok.querySelector('.rf-book')) {
+          try { sessionStorage.setItem('mt_book_prefill', JSON.stringify({ name: name, email: email, phone: phone, about: 'sat' })); } catch (err) {}
+          var bookLink = document.createElement('a');
+          bookLink.className = 'rf-book';
+          bookLink.href = '/book.html';
+          bookLink.textContent = 'Want to skip the back and forth? Pick a time for a free 15-minute call \u2192';
+          bookLink.style.cssText = 'display:block; margin-top:8px; font-weight:600;';
+          ok.appendChild(bookLink);
+        }
         // The conversion. Fired only on a confirmed write to the sheet, so a
         // failed submit or tripped honeypot never counts. No name, phone or
         // email is passed: analytics learn that a lead happened, never who.

@@ -128,7 +128,8 @@
   var META_STANDARD = {
     generate_lead:   'Lead',
     contact_phone:   'Contact',
-    view_diagnostic: 'ViewContent'
+    view_diagnostic: 'ViewContent',
+    schedule_call:   'Schedule'        // book.html: a call booked
   };
 
   function event(name, params) {

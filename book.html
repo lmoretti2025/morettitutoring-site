@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<!-- A #t= token from an email only fills in the form. It sits in the
+     fragment, so it never reaches a server log, and referrers are blocked. -->
+<meta name="referrer" content="no-referrer">
+<title>Book a free call | Moretti Test Prep</title>
+<meta name="description" content="Pick a time for a free 15-minute call with Luca Moretti about SAT prep, math tutoring or college essays.">
+<link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caladea:wght@400;700&family=Poppins:wght@300;400;500;600;700&display=swap"
+      media="print" onload="this.media='all';this.onload=null">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caladea:wght@400;700&family=Poppins:wght@300;400;500;600;700&display=swap"></noscript>
+<!--
+  BOOK A CALL. Linked from the diagnostic email, the inquiry emails and the
+  site's forms. The backend (portal/booking.gs) decides which times are open:
+  only right next to or between Luca's sessions, clear of everything else on
+  his calendars. This page shows them and books one. The invite, with its
+  Google Meet link, comes from Google Calendar.
+-->
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  :root {
+    --red: #B0271C;
+    --red-soft: rgba(176,39,28,0.08);
+    --bg: #f2f2f2;
+    --card: #ffffff;
+    --text: #111111;
+    --mid: rgba(17,17,17,0.62);
+    --border: rgba(17,17,17,0.14);
+    --ok: #2F6B3A;
+    --hel: 'Poppins', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    --display: 'Caladea', Georgia, serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0C0A09; --card: #1A1715; --text: #F3EFEA; --mid: rgba(243,239,234,0.66); --border: rgba(243,239,234,0.16);
+            --ok: #7CC48A; --red-soft: rgba(224,100,90,0.14); }
+  }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--hel); font-weight: 300; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+  main { max-width: 640px; margin: 0 auto; padding: 48px 16px 72px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 28px 24px; }
+  .brand { display: block; width: 140px; height: auto; margin: 0 0 22px; }
+  h1 { font-family: var(--display); font-weight: 700; font-size: 30px; line-height: 1.2; margin: 0 0 10px; text-wrap: balance; }
+  h2 { font-family: var(--display); font-weight: 700; font-size: 19px; margin: 26px 0 10px; }
+  p { margin: 0 0 14px; }
+  .muted { color: var(--mid); font-size: 14px; }
+  a { color: var(--red); }
+
+  .day { margin: 0 0 18px; }
+  .day h3 { font-weight: 600; font-size: 14px; letter-spacing: .02em; margin: 0 0 8px; }
+  .times { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
+  .time { font: inherit; font-size: 14px; font-weight: 500; padding: 10px 8px; border-radius: 6px; cursor: pointer;
+          border: 1px solid var(--border); background: transparent; color: var(--text); }
+  .time:hover { border-color: var(--red); }
+  .time[aria-pressed="true"] { background: var(--red); border-color: var(--red); color: #fff; }
+  .time:focus-visible, .go:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+
+  form { display: none; margin-top: 8px; padding-top: 6px; border-top: 1px solid var(--border); }
+  form.open { display: block; }
+  .chosen { background: var(--red-soft); border-radius: 8px; padding: 10px 14px; font-weight: 500; margin: 18px 0 16px; }
+  label { display: block; font-size: 13px; font-weight: 500; margin: 0 0 5px; }
+  label .opt { color: var(--mid); font-weight: 300; }
+  input, select, textarea { width: 100%; font: inherit; font-size: 15px; font-weight: 400; color: var(--text); background: var(--card);
+                            border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; margin: 0 0 14px; }
+  textarea { min-height: 76px; resize: vertical; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+  @media (max-width: 520px) { .two { grid-template-columns: 1fr; } .card { padding: 22px 16px; } main { padding-top: 20px; } h1 { font-size: 26px; } }
+  .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .go { font: inherit; font-size: 15px; font-weight: 600; padding: 12px 22px; border-radius: 6px; cursor: pointer;
+        border: 1px solid var(--red); background: var(--red); color: #fff; }
+  .go:disabled { opacity: .55; cursor: default; }
+  #status { min-height: 1.6em; margin: 12px 0 0; font-size: 14px; }
+  #status.err { color: var(--red); }
+  .done h1 { color: var(--ok); }
+  @media (prefers-color-scheme: dark) { .brand { background: #fff; padding: 6px 10px; border-radius: 6px; } a { color: #E0645A; } }
+</style>
+</head>
+<body>
+<main>
+  <div class="card">
+    <a href="/"><img class="brand" src="email-logo.png" alt="Moretti Test Prep"></a>
+    <div id="view">
+      <h1>Book a free 15-minute call</h1>
+      <p>Pick a time that works for you. We&rsquo;ll talk over Google Meet, and the link comes with the calendar invite.</p>
+      <p class="muted" id="tzline"></p>
+      <div id="slots"><p class="muted">Finding open times&hellip;</p></div>
+
+      <form id="book" novalidate>
+        <p class="chosen" id="chosen"></p>
+        <div class="two">
+          <div><label for="b-name">Your name</label><input id="b-name" autocomplete="name" required maxlength="80"></div>
+          <div><label for="b-email">Email</label><input id="b-email" type="email" autocomplete="email" required maxlength="120"></div>
+        </div>
+        <div class="two">
+          <div><label for="b-phone">Phone <span class="opt">(optional)</span></label><input id="b-phone" type="tel" autocomplete="tel" maxlength="30"></div>
+          <div><label for="b-student">Student&rsquo;s name <span class="opt">(if it&rsquo;s not you)</span></label><input id="b-student" maxlength="80"></div>
+        </div>
+        <label for="b-about">What would you like to talk about?</label>
+        <select id="b-about">
+          <option value="sat">SAT prep</option>
+          <option value="math">Math tutoring</option>
+          <option value="essays">College essays</option>
+          <option value="other">Something else</option>
+        </select>
+        <label for="b-notes">Anything I should know before we talk? <span class="opt">(optional)</span></label>
+        <textarea id="b-notes" maxlength="500"></textarea>
+        <div class="hp" aria-hidden="true"><label for="b-website">Leave this field blank</label><input id="b-website" tabindex="-1" autocomplete="off"></div>
+        <button class="go" id="go" type="submit">Book the call</button>
+        <p id="status" role="status"></p>
+      </form>
+    </div>
+  </div>
+  <p class="muted" style="text-align:center; margin-top:18px;">Prefer to text? <a href="sms:+12012752791">(201) 275-2791</a></p>
+</main>
+
+<script src="analytics.js" defer></script>
+<script src="portal/backend-url.js"></script>
+<script>
+(function () {
+  var URL_ = window.APPS_SCRIPT_URL;
+  var PHONE = '(201) 275-2791';
+  function $(id) { return document.getElementById(id); }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+  var m = /[#&]t=([^&]+)/.exec(window.location.hash || '');
+  var TOKEN = '';
+  try { TOKEN = m ? decodeURIComponent(m[1]) : ''; } catch (e) { TOKEN = ''; }
+
+  /* A plain string body keeps this a CORS simple request, like every other
+     page. Google sometimes stalls for half a minute; past POST_TIMEOUT_MS the
+     family sees "try again" instead of a page that never finishes. */
+  var POST_TIMEOUT_MS = 20000;
+  // Booking reads every calendar fresh and writes the event: it gets longer. If
+  // it lands after all, trying again says "you already have a call booked".
+  var BOOK_TIMEOUT_MS = 45000;
+  function post(payload, timeoutMs) {
+    var ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, timeoutMs || POST_TIMEOUT_MS);
+    var opts = { method: 'POST', body: JSON.stringify(payload) };
+    if (ctrl) opts.signal = ctrl.signal;
+    return fetch(URL_, opts)
+      .then(function (r) { return r.json(); })
+      .catch(function () { return { ok: false, error: 'network' }; })
+      .then(function (d) { clearTimeout(timer); return d; });
+  }
+
+  /* Times are shown in the visitor's own zone. Luca's is Eastern, so anyone
+     elsewhere is told, and the confirmation says both. */
+  var HERE = '';
+  try { HERE = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { HERE = ''; }
+  var LUCA_TZ = 'America/New_York';
+  function fmt(iso, opts, tz) {
+    var o = {}; for (var k in opts) o[k] = opts[k];
+    if (tz) o.timeZone = tz;
+    return new Date(iso).toLocaleString('en-US', o);
+  }
+  var DAY = { weekday: 'long', month: 'long', day: 'numeric' };
+  var TIME = { hour: 'numeric', minute: '2-digit' };
+  function zoneName(tz) {
+    try {
+      return new Intl.DateTimeFormat('en-US', { timeZone: tz, timeZoneName: 'long' }).formatToParts(new Date())
+        .filter(function (p) { return p.type === 'timeZoneName'; })[0].value;
+    } catch (e) { return tz; }
+  }
+  function sameZoneAsLuca() {
+    var probe = new Date().toISOString();
+    return fmt(probe, { hour: 'numeric', minute: '2-digit', day: 'numeric' }) === fmt(probe, { hour: 'numeric', minute: '2-digit', day: 'numeric' }, LUCA_TZ);
+  }
+
+  var chosen = null;
+
+  // What the email link, or the form they just filled in on the site, already told us.
+  function fill(pre) {
+    if (!pre) return;
+    [['b-name', pre.name], ['b-email', pre.email], ['b-phone', pre.phone], ['b-student', pre.student]].forEach(function (f) {
+      if (f[1] && !$(f[0]).value) $(f[0]).value = f[1];
+    });
+    if (pre.about && $('b-about').querySelector('option[value="' + pre.about + '"]')) $('b-about').value = pre.about;
+  }
+  try { fill(JSON.parse(sessionStorage.getItem('mt_book_prefill') || 'null')); } catch (e) { /* nothing saved */ }
+
+  function noTimes(why) {
+    $('slots').innerHTML = '<p>' + (why === 'down'
+      ? 'I can&rsquo;t show open times right now.'
+      : 'There aren&rsquo;t any open times online over the next two weeks.') +
+      ' Text me at <a href="sms:+12012752791">' + PHONE + '</a> or reply to my email, and I&rsquo;ll find one that works.</p>';
+  }
+
+  function load(message) {
+    $('slots').innerHTML = '<p class="muted">Finding open times&hellip;</p>';
+    post({ action: 'getBookingSlots', token: TOKEN }).then(function (d) {
+      if (!d || !d.ok) {
+        $('slots').innerHTML = '<p>Couldn&rsquo;t load the open times.</p><button type="button" class="go" id="again">Try again</button>';
+        $('again').onclick = function () { load(); };
+        return;
+      }
+      fill(d.prefill);
+      if (d.unavailable) return noTimes('down');
+      if (!d.slots.length) return noTimes('none');
+      $('tzline').textContent = sameZoneAsLuca() ? 'Times are Eastern Time.' : 'Times are shown in your time zone (' + zoneName(HERE) + ').';
+      var days = [], byDay = {};
+      d.slots.forEach(function (s) {
+        var k = fmt(s.start, DAY);
+        if (!byDay[k]) { byDay[k] = []; days.push(k); }
+        byDay[k].push(s);
+      });
+      $('slots').innerHTML = (message ? '<p id="notice" class="muted" style="color:var(--red)">' + esc(message) + '</p>' : '') +
+        days.map(function (k) {
+          return '<div class="day"><h3>' + esc(k) + '</h3><div class="times">' + byDay[k].map(function (s) {
+            return '<button type="button" class="time" aria-pressed="false" data-start="' + esc(s.start) + '">' + esc(fmt(s.start, TIME)) + '</button>';
+          }).join('') + '</div></div>';
+        }).join('');
+      Array.prototype.forEach.call($('slots').querySelectorAll('.time'), function (b) {
+        b.onclick = function () { pick(b); };
+      });
+      chosen = null;
+      $('book').classList.remove('open');
+    });
+  }
+
+  function pick(b) {
+    Array.prototype.forEach.call($('slots').querySelectorAll('.time'), function (x) { x.setAttribute('aria-pressed', 'false'); });
+    b.setAttribute('aria-pressed', 'true');
+    chosen = b.getAttribute('data-start');
+    $('chosen').textContent = fmt(chosen, DAY) + ' at ' + fmt(chosen, TIME) + ' (15 minutes)';
+    $('book').classList.add('open');
+    $('status').textContent = ''; $('status').className = '';
+    $('chosen').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setTimeout(function () { if (!$('b-name').value) $('b-name').focus({ preventScroll: true }); }, 300);
+  }
+
+  function say(text, isErr) { $('status').textContent = text; $('status').className = isErr ? 'err' : ''; }
+
+  $('book').addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (!chosen) return;
+    var name = $('b-name').value.trim(), email = $('b-email').value.trim();
+    if (name.length < 2) { say('Please add your name.', true); $('b-name').focus(); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { say('Please check your email address.', true); $('b-email').focus(); return; }
+    $('go').disabled = true; say('Booking…');
+    post({ action: 'bookCall', start: chosen, token: TOKEN, name: name, email: email,
+           phone: $('b-phone').value.trim(), student: $('b-student').value.trim(),
+           about: $('b-about').value, notes: $('b-notes').value.trim(), website: $('b-website').value }, BOOK_TIMEOUT_MS)
+      .then(function (d) {
+        $('go').disabled = false;
+        if (d && d.ok) return done(d, email);
+        var err = d && d.error;
+        if (err === 'slot_taken') { say(''); return load('That time was just taken. Here is what is open now.'); }
+        if (err === 'already_booked') {
+          return say('You already have a call booked for ' + fmt(d.start, DAY) + ' at ' + fmt(d.start, TIME) +
+                     '. To change it, reply to the invite or text ' + PHONE + '.', true);
+        }
+        if (err === 'bad_email') return say('Please check your email address.', true);
+        if (err === 'bad_phone') return say('Please check the phone number, or leave it blank.', true);
+        if (err === 'bad_name') return say('Please add your name.', true);
+        say('Something went wrong on my end. Please try again, or text ' + PHONE + '.', true);
+      });
+  });
+
+  function done(d, email) {
+    try { sessionStorage.removeItem('mt_book_prefill'); } catch (e) {}
+    try { if (window.MTrack) window.MTrack.event('schedule_call', { page: location.pathname, from_email: TOKEN ? 1 : 0 }); } catch (e) {}
+    var start = d.start || chosen;
+    var eastern = sameZoneAsLuca() ? '' : ' (' + fmt(start, TIME, LUCA_TZ) + ' Eastern)';
+    $('view').className = 'done';
+    $('view').innerHTML =
+      '<h1>You&rsquo;re booked!</h1>' +
+      '<p><b>' + esc(fmt(start, DAY)) + ' at ' + esc(fmt(start, TIME)) + '</b>' + esc(eastern) + ', for 15 minutes.</p>' +
+      '<p>A calendar invite with the Google Meet link is on its way to <b>' + esc(email) + '</b>. ' +
+      'If it doesn&rsquo;t show up in a few minutes, check your spam folder.</p>' +
+      '<p>Need a different time? Reply to the invite or text me at <a href="sms:+12012752791">' + PHONE + '</a>.</p>' +
+      '<p>Looking forward to talking with you!<br>Luca Moretti</p>';
+    window.scrollTo(0, 0);
+  }
+
+  load();
+})();
+</script>
+</body>
+</html>

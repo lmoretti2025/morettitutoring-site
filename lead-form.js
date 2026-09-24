@@ -102,6 +102,24 @@ safe(function(){
      which one the family was reading about. */
   var interest = form.getAttribute('data-interest') || '';
 
+  /* A family who wants to talk first (or is on a page that starts with a
+     call: math and essays have no diagnostic door) can book the call right
+     away on book.html. What they just typed goes along in sessionStorage,
+     never in the URL, so they are not asked twice. */
+  var hasDoors = !!form.querySelector('input[name="start"]');
+  var ABOUT = { 'Math tutoring': 'math', 'Essays and applications': 'essays', 'SAT tutoring': 'sat' };
+  function offerCall(okEl, start, name, email, phone) {
+    if (hasDoors && start !== 'call') return;
+    try { sessionStorage.setItem('mt_book_prefill', JSON.stringify({ name: name, email: email, phone: phone, about: ABOUT[interest] || 'sat' })); } catch (err) {}
+    if (okEl.querySelector('.rf-book')) return;
+    var a = document.createElement('a');
+    a.className = 'rf-book';
+    a.href = '/book.html';
+    a.textContent = 'Want to skip the back and forth? Pick a time for a free 15-minute call \u2192';
+    a.style.cssText = 'display:block; margin-top:8px; font-weight:600;';
+    okEl.appendChild(a);
+  }
+
   form.addEventListener('submit', function (e) {
     e.preventDefault();
     var name  = document.getElementById('rf-name').value.trim();
@@ -155,6 +173,7 @@ safe(function(){
       .then(function(data){
         if (!data || !data.ok) throw new Error('submit_failed');
         note.style.display='none'; ok.style.display='block'; bad.style.display='none';
+        offerCall(ok, start, name, email, phone);
         // The conversion. Fired only on a confirmed write to the sheet, so a
         // failed submit or tripped honeypot never counts. No name, phone or
         // email is passed: analytics learn that a lead happened, never who.
