@@ -20,5 +20,13 @@
 
    `portal/tests/verify-deployment.js` reads this file when no URL is given
    on the command line, and `portal/tests/set-client-id.js` rewrites it.
+
+   THE EDGE (2026-09-24). The site talks to api.morettitutoring.com, a
+   Cloudflare Worker (edge/worker.js) that forwards every request to the
+   Apps Script /exec URL, which now lives in edge/wrangler.toml. A new Apps
+   Script deployment URL goes THERE (and in Code.gs), then `npx wrangler
+   deploy` from edge/. Code.gs keeps calling Apps Script directly.
+   To bypass the edge, put the /exec URL back here:
+     https://script.google.com/macros/s/AKfycbwsLMGq3lhBEPObcas0k8gVS67NX9y4wXKG6RgzKtlBOT2SXfREK6vBpvvM19w9s1m6/exec
    ========================================================================= */
-window.APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwsLMGq3lhBEPObcas0k8gVS67NX9y4wXKG6RgzKtlBOT2SXfREK6vBpvvM19w9s1m6/exec';
+window.APPS_SCRIPT_URL = 'https://api.morettitutoring.com/';
