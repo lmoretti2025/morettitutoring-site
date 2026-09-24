@@ -193,15 +193,20 @@
       ' Text me at <a href="sms:+12012752791">' + PHONE + '</a> or reply to my email, and I&rsquo;ll find one that works.</p>';
   }
 
+  /* The open times are the same for everyone, so they are asked for with no
+     token: the edge keeps that list and answers at once. The link from an
+     email only fills in the form, so its token goes in a request of its own
+     that the times never wait for. */
+  if (TOKEN) post({ action: 'getBookingSlots', token: TOKEN }).then(function (d) { if (d && d.ok) fill(d.prefill); });
+
   function load(message) {
     $('slots').innerHTML = '<p class="muted">Finding open times&hellip;</p>';
-    post({ action: 'getBookingSlots', token: TOKEN }).then(function (d) {
+    post({ action: 'getBookingSlots' }).then(function (d) {
       if (!d || !d.ok) {
         $('slots').innerHTML = '<p>Couldn&rsquo;t load the open times.</p><button type="button" class="go" id="again">Try again</button>';
         $('again').onclick = function () { load(); };
         return;
       }
-      fill(d.prefill);
       if (d.unavailable) return noTimes('down');
       if (!d.slots.length) return noTimes('none');
       $('tzline').textContent = sameZoneAsLuca() ? 'Times are Eastern Time.' : 'Times are shown in your time zone (' + zoneName(HERE) + ').';
