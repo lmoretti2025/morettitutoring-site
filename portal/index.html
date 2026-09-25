@@ -3386,6 +3386,29 @@
     .cal-task.is-overdue { background: rgba(176,39,28,0.08); }
   }
 
+  /* ═══ PHONE (Luca, 2026-09-25: "make the student portal work well on my
+     phone") ═══ On a question, the Back / Skip / Submit bar stays pinned to
+     the bottom of the screen, so a student never scrolls down to answer and
+     back up to read; a short passage no longer leaves a tall empty box; the
+     Home shortcuts are compact rows instead of tall cards. */
+  @media (max-width: 760px) {
+    .dx-passage-pane { height: auto !important; max-height: 42vh; }
+    /* The question card scrolls with the page, not inside its own box, so
+       the answer bar below can pin to the bottom of the screen. */
+    #dx-shell .dx-card-wrap { overflow: visible !important; height: auto !important; max-height: none !important; }
+    #dx-card .dx-nav-row { position: sticky; bottom: 0; z-index: 6; background: var(--white);
+      margin: 0 -1.4rem; padding: 0.7rem 1.4rem calc(0.7rem + env(safe-area-inset-bottom, 0px));
+      border-top: 1px solid var(--border); box-shadow: 0 -6px 16px rgba(17,17,17,0.06); gap: 0.5rem; }
+    #dx-card .dx-nav-row .dx-btn { flex: 1 1 auto; min-height: 44px; }
+    .dx-choices { margin-bottom: 1.2rem; }
+    .dx-choice { padding: 0.8rem 0.9rem; min-height: 48px; }
+    .home-shortcuts { gap: 0.6rem; }
+    .home-shortcut-card { display: grid !important; grid-template-columns: 40px 1fr; column-gap: 0.85rem; align-items: center; padding: 0.85rem 1rem !important; text-align: left; }
+    .home-shortcut-icon { grid-row: 1 / span 2; margin-bottom: 0 !important; }
+    .home-shortcut-title { margin-bottom: 0.1rem; }
+    .home-shortcut-body { font-size: 0.74rem; line-height: 1.4; }
+  }
+
   /* ═══ RUSH ══════════════════════════════════════════════════════════ */
   .rush-decks { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 1rem; margin-top: 1.6rem; }
   @media (max-width: 720px) { .rush-decks { grid-template-columns: 1fr; } }
