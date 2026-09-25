@@ -2771,7 +2771,10 @@
     };
     var pct = function (r, n) { return n ? Math.round(100 * r / n) + '%' : '—'; };
     var mins = function (m) { m = Math.round(m || 0); return m >= 60 ? Math.floor(m / 60) + 'h ' + (m % 60) + 'm' : m + ' min'; };
-    $('stu-prep-sub').textContent = dayLabel(p.from) + ' – ' + dayLabel(p.to) + ' (the last seven days)';
+    // Since the last session ended (prep.gs), or the last seven days for a student with no session yet.
+    $('stu-prep-sub').textContent = snap && snap.since
+      ? 'Since the last session ended, ' + new Date(snap.since).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) + '. Starts over after each session.'
+      : dayLabel(p.from) + ' – ' + dayLabel(p.to) + ' (the last seven days; no session on the calendar yet)';
     var sat = isSat(currentStudent);
 
     // Practice: the log when it has the week, else the bank's own count
