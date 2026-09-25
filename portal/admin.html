@@ -2983,6 +2983,7 @@
 
     var actions = [];
     if (s.driveFolderUrl) actions.push('<a class="mini" target="_blank" rel="noopener" href="' + escHtml(s.driveFolderUrl) + '">Drive folder</a>');
+    actions.push('<button type="button" class="mini" id="stu-review-btn" title="After a family shares a good official score">Ask for a review</button>');
     actions.push('<button type="button" class="mini solid" id="stu-assign-btn">Assign homework</button>');
     $('stu-actions').innerHTML = actions.join('');
     var assignBtn = $('stu-assign-btn');
@@ -2990,6 +2991,31 @@
       selectTab('homework');
       openCreateModal([toDateStr(new Date())], currentStudent.key, currentStudent.name, '');
     });
+    var reviewBtn = $('stu-review-btn');
+    if (reviewBtn) reviewBtn.addEventListener('click', function () { askForReview(reviewBtn); });
+  }
+
+  /* ASK FOR A REVIEW (Luca, 2026-09-25): pressed after a family shares a good
+     official score. Says who it goes to and when they were last asked, and
+     only sends once confirmed (emails.gs handleReviewRequest). */
+  function askForReview(btn) {
+    if (!currentStudent) return;
+    var key = currentStudent.key, name = firstName(currentStudent.name);
+    var label = btn.textContent;
+    btn.disabled = true; btn.textContent = 'Checking\u2026';
+    var reset = function (t) { btn.disabled = false; btn.textContent = t || label; };
+    postToBackend({ action: 'reviewRequest', adminKey: adminKey(), key: key, opts: {} }).then(function (d) {
+      if (!d || !d.ok) { reset(); alert('Could not check just now' + (d && d.error ? ' (' + d.error + ')' : '') + '. Try again.'); return; }
+      if (!d.to || !d.to.length) { reset(); alert('There is no email address on file for ' + name + '\u2019s family.'); return; }
+      var when = d.lastAskedAt ? '\n\nLast asked: ' + new Date(d.lastAskedAt).toLocaleDateString(undefined, { month: 'long', day: 'numeric' }) + '.' : '';
+      if (!confirm('Send a thank-you with your Google review link to:\n' + d.to.join('\n') + when + (d.live === false ? '\n\n(Rehearsal mode: it comes to you.)' : ''))) { reset(); return; }
+      btn.textContent = 'Sending\u2026';
+      return postToBackend({ action: 'reviewRequest', adminKey: adminKey(), key: key, opts: { send: true } }).then(function (r) {
+        if (r && r.ok) { reset('Asked \u2713'); setTimeout(function () { if (btn.isConnected) btn.textContent = label; }, 4000); return; }
+        reset();
+        alert(r && r.error === 'already_today' ? name + '\u2019s family was already asked today.' : 'Could not send it just now. Try again.');
+      });
+    }, function () { reset(); alert('Network error. Try again.'); });
   }
 
   // Automatic emails on the Account tab: pause the family, or put back an
