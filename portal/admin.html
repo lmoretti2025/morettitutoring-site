@@ -3801,6 +3801,7 @@
           : ['sess-event'].concat(matched.length ? [] : ['sess-unmatched']),
         backgroundColor: color || undefined,
         borderColor: color || undefined,
+        rank: 0,
         extendedProps: { kind: 'session', matched: matched }
       });
     });
@@ -3820,6 +3821,7 @@
         backgroundColor: isAll ? '#ffffff' : undefined,
         borderColor: color || undefined,
         textColor: color || undefined,
+        rank: 1,
         extendedProps: {
           kind: 'assignment', row: a.row, done: a.done, task: a.task, notes: a.notes || '',
           seriesId: a.seriesId || '',
@@ -3884,6 +3886,7 @@
         backgroundColor: isAll ? '#ffffff' : undefined,
         borderColor: color || undefined,
         textColor: color || undefined,
+        rank: 1,
         editable: false,
         extendedProps: {
           kind: 'assignment', row: 0, pending: true, done: false,
@@ -3952,6 +3955,9 @@
       initialView: 'dayGridMonth',
       headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek' },
       fixedWeekRows: false,          // only the weeks the month needs, not a spare week of the next one
+      // Sessions and office hours always sit on top of a day, then homework (Luca, 2026-09-25).
+      eventOrder: 'rank,start,title',
+      eventOrderStrict: true,
       height: 'auto',
       selectable: true,
       editable: true,
