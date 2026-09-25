@@ -1953,6 +1953,7 @@
       renderTable();
       loadRosterSessions();
       prepAllStudents();
+      calStoreLoad(false);
       if (currentView === 'gate') showView('roster');
       return true;
     }).catch(function () {
@@ -3873,7 +3874,8 @@
 
   function refreshActiveCalendar() {
     calSkipKept = true;             // after an edit: straight to the fresh schedule
-    if (schedCalendar && currentView === 'student') schedCalendar.refetchEvents();
+    if (calStore) { calStoreLoad(true).then(redrawFromStore); }
+    else if (schedCalendar && currentView === 'student') schedCalendar.refetchEvents();
     // The roster's "x of y done" is now stale, but getRoster is the most
     // expensive call here and the roster isn't on screen. Mark it and reload
     // once on the way back.
@@ -3951,6 +3953,7 @@
             task: p.task, dueDates: [targetDay], notes: p.notes || ''
           }).then(function (data) {
             if (!data || !data.ok) { dropOptimistic(copied); flashCalNote('Could not copy that one — try again.'); return; }
+            if (data.assignments && calStore) { calStoreAdd(data.assignments, p.studentName); dropOptimistic(copied); redrawFromStore(); return; }
             scheduleReconcile();
           }).catch(function () {
             dropOptimistic(copied);
@@ -3968,11 +3971,89 @@
           // stale, so set it here instead of re-reading the month.
           info.event.setExtendedProp('dueDate', targetDay);
           info.event.setExtendedProp('dueDay', targetDay);
+          calStorePatch(p.row, { dueDay: targetDay, dueDate: new Date(targetDay + 'T12:00:00').toISOString() });
         }).catch(function () { info.revert(); flashCalNote('Could not move that one — check your connection.'); });
       }
     });
     schedCalendar.render();
   }
+
+  /* ═══ EVERY STUDENT'S SCHEDULE, IN ONE READ (Luca, 2026-09-25: "I want
+     that in particular instant") ═══ One request brings every student's
+     sessions and homework from six weeks back to five months ahead
+     (getAdminCalendar with no key), kept here and on this computer. A
+     student's Schedule tab is then cut from it with no request at all.
+     Every save updates it in place with the rows the backend sends back,
+     so what is on screen is real at once; it is re-read in the background
+     when older than two minutes. */
+  var calStore = kept('cal_all');
+  var calStoreLoading = null;
+  function calStoreRange() {
+    var now = new Date();
+    return { start: toDateStr(new Date(now.getTime() - 45 * 86400000)), end: toDateStr(new Date(now.getTime() + 150 * 86400000)) };
+  }
+  function calStoreSave() { if (calStore) keep('cal_all', calStore); }
+  function calStoreLoad(force) {
+    if (calStoreLoading) return calStoreLoading;
+    if (!force && calStore && Date.now() - calStore.at < 2 * 60000) return Promise.resolve(calStore);
+    var r = calStoreRange();
+    calStoreLoading = postToBackend({ action: 'getAdminCalendar', adminKey: adminKey(), start: r.start, end: r.end, undated: true })
+      .then(function (data) {
+        calStoreLoading = null;
+        if (!data || !data.ok) return calStore;
+        var before = calStore ? calSliceSig(currentStudent && currentStudent.key) : '';
+        calStore = { start: r.start, end: r.end, at: Date.now(), data: data };
+        calStoreSave();
+        // The student on screen: redraw only if their schedule actually changed.
+        if (schedCalendar && currentView === 'student' && activeTab === 'homework' && currentStudent &&
+            calSliceSig(currentStudent.key) !== before) schedCalendar.refetchEvents();
+        return calStore;
+      }, function () { calStoreLoading = null; return calStore; });
+    return calStoreLoading;
+  }
+  function calSlice(key, startStr, endStr) {
+    if (!calStore || !calStore.data || !key) return null;
+    var st = String(startStr || '').slice(0, 10), en = String(endStr || '').slice(0, 10);
+    if (st && st < calStore.start) return null;
+    if (en && en > calStore.end) return null;
+    var d = calStore.data;
+    return {
+      ok: true, calendarError: d.calendarError, students: d.students,
+      sessions: (d.sessions || []).filter(function (x) { return (x.matched || []).some(function (m) { return m.key === key; }); }),
+      assignments: (d.assignments || []).filter(function (a) { return a.key === key; })
+    };
+  }
+  function calSliceSig(key) {
+    var sl = key ? calSlice(key) : null;
+    return sl ? JSON.stringify([sl.sessions, sl.assignments]) : '';
+  }
+  // Keep the store in step with a save: the rows it made, changed or removed.
+  function calStoreAdd(list, studentName) {
+    if (!calStore || !calStore.data || !list) return;
+    list.forEach(function (a) { a.studentName = a.studentName || studentName || ''; calStore.data.assignments.push(a); });
+    calStoreSave();
+  }
+  function calStorePatch(row, patch, seriesId, seriesPatch) {
+    if (!calStore || !calStore.data) return;
+    calStore.data.assignments.forEach(function (a) {
+      if (a.row === row) Object.keys(patch).forEach(function (k) { a[k] = patch[k]; });
+      else if (seriesId && a.seriesId === seriesId && seriesPatch) Object.keys(seriesPatch).forEach(function (k) { a[k] = seriesPatch[k]; });
+    });
+    calStoreSave();
+  }
+  // Deleting sheet rows moves every row below them up: shift ours to match.
+  function calStoreRemoveRows(rows) {
+    if (!calStore || !calStore.data || !rows || !rows.length) return false;
+    var gone = {}; rows.forEach(function (r) { gone[r] = true; });
+    calStore.data.assignments = calStore.data.assignments.filter(function (a) { return !gone[a.row]; });
+    calStore.data.assignments.forEach(function (a) {
+      var below = rows.filter(function (r) { return r < a.row; }).length;
+      a.row -= below;
+    });
+    calStoreSave();
+    return true;
+  }
+  function redrawFromStore() { if (schedCalendar && currentView === 'student') schedCalendar.refetchEvents(); }
 
   /* The schedule as it was last seen is drawn at once (KEPT ON THIS
      COMPUTER), and the fresh one replaces it through a second, network-free
@@ -3993,6 +4074,9 @@
       clearPendingEvents(schedCalendar);
     };
     if (calFresh[name]) { var f = calFresh[name]; delete calFresh[name]; draw(f); return; }
+    // Cut from everyone's schedule: no request, no wait.
+    var sl = calSlice(key, info.startStr, info.endStr);
+    if (sl) { calSkipKept = false; draw(sl); calStoreLoad(false); return; }
     var hit = calSkipKept ? null : kept(name);
     calSkipKept = false;
     if (hit && hit.ok) draw(hit);
@@ -4039,6 +4123,16 @@
     // The roster already knows the next session: say it now, then check.
     var known = nextSessionState === 'ok' && nextSessionByKey[key];
     if (known) paintNextSession(key, { startIso: new Date(known.ms).toISOString(), allDay: known.allDay });
+    // Everyone's schedule is already here: the next session comes from it, with no request.
+    var sl = calSlice(key);
+    if (sl && !sl.calendarError) {
+      var cut = Date.now() - 20 * 60 * 1000;
+      var nx = sl.sessions.filter(function (x) { return new Date(x.startIso).getTime() >= cut; })
+        .sort(function (a, b) { return a.startIso.localeCompare(b.startIso); })[0];
+      if (nx) paintNextSession(key, nx);
+      else host.innerHTML = '<span class="ns-none">No upcoming session on the calendar matching <b>' + escHtml(firstName(currentStudent.name)) + '</b>.</span>';
+      return;
+    }
     postToBackend({ action: 'getAdminCalendar', adminKey: adminKey(), key: key, start: toDateStr(now), end: toDateStr(end) })
       .then(function (data) {
         if (!currentStudent || currentStudent.key !== key) return;
@@ -4357,6 +4451,8 @@
               : 'Could not save that one — it has been taken back off the calendar.');
             return;
           }
+          // The backend says which rows it made: the drawn tasks become real now.
+          if (data.assignments && calStore) { calStoreAdd(data.assignments, studentName); dropOptimistic(added); redrawFromStore(); return; }
           scheduleReconcile();
         })
         .catch(function () {
@@ -4392,6 +4488,14 @@
         dropOptimistic(replacement);
         if (restore && activeCalendar()) activeCalendar().addEvent(restore);
         flashCalNote('Could not save that change — it has been put back.');
+        return;
+      }
+      if (calStore) {
+        var p2 = { task: task, notes: notes, done: markedDone };
+        if (pickedDate) { p2.dueDay = pickedDate; p2.dueDate = new Date(pickedDate + 'T12:00:00').toISOString(); }
+        calStorePatch(assignment.row, p2, scope === 'series' ? assignment.seriesId : '', scope === 'series' ? { task: task, notes: notes } : null);
+        dropOptimistic(replacement);
+        redrawFromStore();
         return;
       }
       scheduleReconcile();
@@ -4448,6 +4552,8 @@
     postToBackend({ action: 'deleteAdminAssignment', adminKey: adminKey(), key: delKey, row: delRow, scope: delScope })
       .then(function (data) {
         if (!data || !data.ok) { putBack(); flashCalNote('Could not delete that — it has been put back.'); return; }
+        // Rows below the deleted ones moved up in the sheet; ours move with them.
+        if (data.rows && calStoreRemoveRows(data.rows)) { redrawFromStore(); return; }
         scheduleReconcile();
       }).catch(function () {
         putBack();
