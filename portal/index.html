@@ -5872,6 +5872,17 @@ window.Portal = {
   function isGrantedLocked() {
     return isSessionLocked() || isNewKeyHold();
   }
+  /* DIAGNOSTIC RESULTS WAIT FOR LUCA (2026-09-25). A student never opens
+     their own diagnostic report, or sees its score, while the portal is
+     locked or for DIAG_RESULTS_HOLD_DAYS after taking it: Luca goes over
+     it with the family on the call. `when` is the attempt's date or time;
+     a practice test is never held. */
+  var DIAG_RESULTS_HOLD_DAYS = 7;
+  function diagnosticResultsHeld(when) {
+    if (isGrantedLocked()) return true;
+    var t = Date.parse(String(when || ''));
+    return !isNaN(t) && (Date.now() - t) < DIAG_RESULTS_HOLD_DAYS * 86400000;
+  }
 
   // NOTE: do NOT send diagnostic emails client-side (e.g. EmailJS). Its keys
   // would live in page source, letting anyone forge a "result" from the
@@ -10372,7 +10383,12 @@ window.Portal = {
     // with a stored report has a link, the first diagnostic included; one
     // flagged taken by the server with no report on file shows "Completed"
     // with nothing to open.
-    var attempts = hasCompletedADiagnostic ? attemptMenuItems(diagnosticAttempts()) : [];
+    var diagHeld = false;
+    var attempts = hasCompletedADiagnostic ? attemptMenuItems(diagnosticAttempts().filter(function (e) {
+      if (!diagnosticResultsHeld(e && e.date)) return true;
+      diagHeld = true;
+      return false;
+    })) : [];
     /* The most recent full diagnostic sitting, for the score line. A
        first-ever diagnostic can be flagged taken by the server with no
        local entry to show (see the note above), in which case ptTileState
@@ -10389,7 +10405,11 @@ window.Portal = {
       });
       if (!diagResult) diagResult = { composite: null, date: null };
     }
+    // Held (see diagnosticResultsHeld): no score on the tile either.
+    var heldNow = hasCompletedADiagnostic && diagResult && diagnosticResultsHeld(diagResult.date);
+    if (heldNow) { diagHeld = true; diagResult = { composite: null, date: diagResult.date }; }
     var st = ptTileState({ snapshot: diagSnap, result: diagResult, idleMeta: 'Take this first' });
+    if (diagHeld && !st.resume) { st.score = ''; st.meta = 'Luca will go over your results with you on your call.'; }
     card.className = 'menu-card menu-card-wide' + st.cls;
     card.innerHTML =
       // No "Completed" badge in the scored state: the score says it, and a
@@ -10852,6 +10872,24 @@ window.Portal = {
   var pendingReportLink = null;
   function openTestResults(link) {
     if (!link) return;
+    var peek = decodeReportPayload(link);
+    if (peek && !peek.pt && diagnosticResultsHeld(peek.ts || peek.dt)) {
+      // A held diagnostic (see diagnosticResultsHeld): say so instead of opening it.
+      show('screen-practice-tests');
+      renderPracticeTestList();
+      var pickerEl = document.getElementById('pt-picker-view');
+      var note = document.getElementById('pt-diag-held-note');
+      if (!note && pickerEl) {
+        note = document.createElement('p');
+        note.id = 'pt-diag-held-note';
+        note.className = 'panel-sub pt-locked-note';
+        pickerEl.insertBefore(note, pickerEl.firstChild);
+      }
+      if (note) note.textContent = 'Your diagnostic results open after Luca goes over them with you on your call.';
+      return;
+    }
+    var staleNote = document.getElementById('pt-diag-held-note');
+    if (staleNote) staleNote.parentNode.removeChild(staleNote);
     show('screen-practice-tests');
     document.getElementById('pt-picker-view').style.display = 'none';
     document.getElementById('pt-results-view').style.display = '';
@@ -13558,6 +13596,8 @@ window.Portal = {
     // relative link for its click handler. Relative because it opens the
     // in-portal iframe viewer (see openTestResults()).
     function setViewResultsLink(link) {
+      var peekDone = link ? decodeReportPayload(link) : null;
+      if (peekDone && !peekDone.pt && diagnosticResultsHeld(peekDone.ts || peekDone.dt)) link = '';   // held: Luca goes over it first
       if (link) {
         viewResultsBtn.setAttribute('data-report-link', link);
         viewResultsBtn.style.display = 'block';
