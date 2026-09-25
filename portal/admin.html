@@ -15,7 +15,7 @@
 <style>
   :root {
     --red:    #B0271C;
-    --bg:     #F6F4F1;   /* warm, not grey (Luca, 2026-09-25); the site's --sunk */
+    --bg:     #FFFFFF;   /* plain white (Luca, 2026-09-25: no cream, no grey) */
     --white:  #ffffff;
     --text:   #111111;
     --mid:    rgba(17,17,17,0.58);
@@ -25,7 +25,7 @@
     --green:  #5E8B6F;
     --blue:   #3E6B8C;
     --hel:    'Poppins', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    --display: 'Caladea', Georgia, 'Times New Roman', serif;   /* the site's display face */
+    --display: 'Poppins', 'Helvetica Neue', Helvetica, Arial, sans-serif;   /* one modern sans throughout */
     --shadow: 0 2px 16px rgba(17,17,17,0.055);
     --ease:   cubic-bezier(0.16,1,0.3,1);
   }
@@ -98,6 +98,8 @@
   .tb-bar i { display: block; height: 100%; background: var(--red); border-radius: 99px; }
   .tb-min { text-align: right; color: var(--mid); font-variant-numeric: tabular-nums; }
   .tb-note { font-size: 0.72rem; color: var(--faint); margin-top: 0.35rem; }
+  .tb-sub { display: grid; grid-template-columns: 1fr 58px; gap: 0.7rem; padding: 0.12rem 0 0.12rem 1rem; font-size: 0.74rem; color: var(--mid); border-left: 2px solid rgba(17,17,17,0.08); margin-left: 0.2rem; }
+  .tb-sub-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .prep-next { font-size: 0.82rem; color: var(--mid); margin: 0 0 1rem; line-height: 1.6; }
   .prep-next b { color: var(--text); font-weight: 600; }
   .prep-topics { width: 100%; border-collapse: collapse; font-size: 0.8rem; font-variant-numeric: tabular-nums; }
@@ -736,13 +738,61 @@
   @media (prefers-reduced-motion: reduce) {
     .view-in, .tab-in, tr.row-in, .summary-tile, .tb-bar i, .prep-stat, .live-dot.on { animation: none !important; }
   }
+
+  /* ═══ MODERN (Luca, 2026-09-25: "I hate that cream color and all the
+     tiles, please just make it super modern looking") ═══ White, flat and
+     quiet: a light sticky header, no boxed tiles or cards (sections are
+     separated by a hairline and space), one sans typeface, black for
+     what is selected, red only for actions. */
+  body { background: #fff; }
+  header { background: rgba(255,255,255,0.86); color: #111; border-bottom: 1px solid rgba(17,17,17,0.08); position: sticky; top: 0; z-index: 50;
+    -webkit-backdrop-filter: saturate(1.4) blur(12px); backdrop-filter: saturate(1.4) blur(12px); padding: 0.75rem 1.5rem; }
+  header .brand-logo { height: 28px; }
+  header .brand small { color: rgba(17,17,17,0.45); opacity: 1; }
+  .nav-btn { background: transparent; border: 1px solid transparent; color: rgba(17,17,17,0.6); border-radius: 8px; font-weight: 600; }
+  .nav-btn:hover { background: rgba(17,17,17,0.05); color: #111; }
+  .nav-btn.is-on { background: #111; color: #fff; border-color: #111; }
+  #topnav.mta-fluid-on .nav-btn.is-on { background: transparent; border-color: transparent; color: #fff; }
+  #topnav.mta-fluid-on .nav-btn:not(.is-on):not(.nav-refresh) { border-color: transparent; }
+  #topnav .mta-fluid-pill { background: #111; border-radius: 8px; }
+  .nav-btn.nav-refresh { color: rgba(17,17,17,0.55); }
+  .nav-btn.nav-refresh::before { background: rgba(17,17,17,0.12); }
+  .nav-btn.nav-refresh:hover { background: rgba(17,17,17,0.05); }
+
+  h1, .sched-hed, .panel-hed { font-family: var(--display); font-weight: 600; letter-spacing: -0.02em; }
+  .card > h2 { font-weight: 600; letter-spacing: -0.01em; font-size: 1rem; }
+
+  /* No tiles: the numbers stand on the page. */
+  .summary-row { gap: 2.75rem; margin-bottom: 1.75rem; padding-bottom: 1.25rem; border-bottom: 1px solid rgba(17,17,17,0.08); }
+  .summary-tile, .summary-tile:hover { flex: 0 0 auto; background: none; border: none; box-shadow: none; border-radius: 0; padding: 0; transform: none; }
+  .summary-tile .num { font-weight: 600; font-size: 1.9rem; letter-spacing: -0.03em; }
+  .summary-tile.live .num { color: var(--green); }
+
+  /* No boxed cards: a hairline above each section. */
+  .card, .card:hover { background: none; border: none; border-top: 1px solid rgba(17,17,17,0.08); border-radius: 0; box-shadow: none; padding: 1.35rem 0 0.5rem; }
+  .week-grid { gap: 2.5rem; }
+  .roster-table-wrap { background: none; border: none; box-shadow: none; border-radius: 0; }
+  thead th { background: #fff; border-bottom: 1px solid rgba(17,17,17,0.1); padding-left: 0.6rem; }
+  tbody td { padding-left: 0.6rem; }
+  tbody tr:hover, tbody tr.is-archived:hover, .fp-row:hover { background: rgba(17,17,17,0.025); }
+  .next-session { background: none; border: none; border-radius: 0; box-shadow: none; border-top: 1px solid rgba(17,17,17,0.08); border-bottom: 1px solid rgba(17,17,17,0.08); padding: 0.75rem 0; }
+  .prep-stat .num { font-weight: 600; letter-spacing: -0.02em; }
+
+  .mini { border-radius: 8px; border-color: rgba(17,17,17,0.14); color: #111; font-weight: 600; }
+  .mini:hover { border-color: #111; }
+  .mini.solid { background: #111; border-color: #111; color: #fff; }
+  .mini.solid:hover { background: #000; box-shadow: 0 6px 16px rgba(17,17,17,0.18); }
+  .seg button { border-radius: 8px; }
+  #prog-filter .mta-fluid-pill { border-radius: 8px; }
+  .tb-bar i { background: #111; }
+  .tb-bar { background: rgba(17,17,17,0.07); }
 </style>
 </head>
 <body>
 
 <header>
   <div class="brand">
-    <img src="../logo-caladea-white.png" alt="Moretti Test Prep &amp; Tutoring" class="brand-logo">
+    <img src="../logo-caladea-dark.png" alt="Moretti Test Prep &amp; Tutoring" class="brand-logo">
     <small>Admin · internal use only</small>
   </div>
   <nav id="topnav">
@@ -1901,6 +1951,7 @@
       renderSummary();
       renderTable();
       loadRosterSessions();
+      prepAllStudents();
       if (currentView === 'gate') showView('roster');
       return true;
     }).catch(function () {
@@ -1982,7 +2033,7 @@
       loadNextSession(currentStudent.key);
       loadStudentPrep(currentStudent.key);
       if (!noteDirty() && noteSaving !== noteSeq) loadFridayNote(currentStudent.key);
-      if (schedCalendar) schedCalendar.refetchEvents();
+      if (schedCalendar) { calSkipKept = true; schedCalendar.refetchEvents(); }
       rosterStale = false;
       loadRoster(key, true).then(done);
     } else if (currentView === 'broadcast') {
@@ -2764,10 +2815,18 @@
     names.sort(function (a, b) { return areas[b] - areas[a]; });
     var total = names.reduce(function (n, a) { return n + areas[a]; }, 0);
     var max = areas[names[0]];
+    // Under each area, the exact things in it (Luca, 2026-09-25): which
+    // practice round, which test and module, biggest first.
+    var things = (snap && snap.portalThings) || {};
     var rows = names.map(function (a) {
+      var subs = Object.keys(things).filter(function (t) { return t.indexOf(a + ' - ') === 0 && things[t] > 0; })
+        .sort(function (x, y) { return things[y] - things[x]; });
       return '<div class="tb-row"><span class="tb-name">' + escHtml(a) + '</span>' +
         '<span class="tb-bar"><i style="width:' + Math.max(4, Math.round(100 * areas[a] / max)) + '%"></i></span>' +
-        '<span class="tb-min">' + mins(areas[a]) + '</span></div>';
+        '<span class="tb-min">' + mins(areas[a]) + '</span></div>' +
+        subs.map(function (t) {
+          return '<div class="tb-sub"><span class="tb-sub-name">' + escHtml(t.slice(a.length + 3)) + '</span><span class="tb-min">' + mins(things[t]) + '</span></div>';
+        }).join('');
     }).join('');
     var gap = Math.round((snap.portalMin || 0) - total);
     return '<div class="time-breakdown"><div class="tb-hed">Where the time went</div>' + rows +
@@ -2782,6 +2841,7 @@
       if (data && data.ok) keep('s_detail_' + key, data);
       if ((!data || !data.ok) && hit && hit.ok) return;   // keep what is on screen
       paintStudentDetail(key, data);
+      if (data && data.ok) setTimeout(function () { prefetchReports(key, data.attempts); }, 1500);
     }).catch(function () {
       if (!currentStudent || currentStudent.key !== key || (hit && hit.ok)) return;
       $('stu-meta').innerHTML = '<span style="color:var(--red);">Network error loading this student.</span>';
@@ -3503,6 +3563,23 @@
   }
 
   var reportViewerLink = '';
+  function reportKeepName(key, attempt) {
+    return 's_rep_' + key + '_' + attempt.reportRow + '_' + String(attempt.at || '').replace(/[^0-9]/g, '').slice(0, 14);
+  }
+  /* The newest reports are fetched in the background when a student is
+     opened, one at a time, so opening one is instant. */
+  function prefetchReports(key, attempts) {
+    var want = (attempts || []).filter(function (a) { return a && a.reportRow && !kept(reportKeepName(key, a)); })
+      .sort(function (a, b) { return String(b.at || '').localeCompare(String(a.at || '')); }).slice(0, 3);
+    (function next(i) {
+      if (i >= want.length || document.hidden || !currentStudent || currentStudent.key !== key) return;
+      var a = want[i];
+      postToBackend({ action: 'getAttemptReport', adminKey: adminKey(), key: key, row: a.reportRow }).then(function (d) {
+        if (d && d.ok && d.reportLink) keep(reportKeepName(key, a), { ok: true, reportLink: d.reportLink });
+      }, function () {}).then(function () { setTimeout(function () { next(i + 1); }, 300); });
+    })(0);
+  }
+
   function openReport(attempt) {
     if (!attempt || !attempt.reportRow || !currentStudent) return;
     var wrap = $('report-frame-wrap');
@@ -3512,7 +3589,14 @@
     wrap.innerHTML = '<div id="report-loading">Loading report&hellip;</div>';
     $('report-viewer').classList.add('open');
 
-    postToBackend({ action: 'getAttemptReport', adminKey: adminKey(), key: currentStudent.key, row: attempt.reportRow })
+    /* A saved report never changes, so once its link has been fetched it is
+       kept here (by student, row and time, so a moved row can never show
+       someone else's) and opens without asking Google again. */
+    var repName = reportKeepName(currentStudent.key, attempt);
+    var repHit = kept(repName);
+    (repHit && repHit.ok && repHit.reportLink ? Promise.resolve(repHit)
+      : postToBackend({ action: 'getAttemptReport', adminKey: adminKey(), key: currentStudent.key, row: attempt.reportRow })
+          .then(function (d) { if (d && d.ok && d.reportLink) keep(repName, { ok: true, reportLink: d.reportLink }); return d; }))
       .then(function (data) {
         if (!data || !data.ok || !data.reportLink) {
           wrap.innerHTML = '<div id="report-loading">This attempt has no saved report payload.</div>';
@@ -3761,6 +3845,7 @@
   }
 
   function refreshActiveCalendar() {
+    calSkipKept = true;             // after an edit: straight to the fresh schedule
     if (schedCalendar && currentView === 'student') schedCalendar.refetchEvents();
     // The roster's "x of y done" is now stale, but getRoster is the most
     // expensive call here and the roster isn't on screen. Mark it and reload
@@ -3862,21 +3947,38 @@
     schedCalendar.render();
   }
 
+  /* The schedule as it was last seen is drawn at once (KEPT ON THIS
+     COMPUTER), and the fresh one replaces it through a second, network-free
+     pass when it differs. Right after an edit the kept copy is skipped, so
+     an old version never flashes over the change just made. */
+  var calFresh = {};              // name -> a fresh answer waiting to be drawn
+  var calSkipKept = false;
   function fetchStudentEvents(info, success, failure) {
     if (!currentStudent) { success([]); return; }
     var key = currentStudent.key;
+    var name = 's_cal_' + key + '_' + String(info.startStr).slice(0, 10) + '_' + String(info.endStr).slice(0, 10);
+    var draw = function (data) {
+      setCalNote($('hw-cal-note'), data.calendarError ? ICS_NOTE : '');
+      noteBackendCapability(data);
+      hwUndated = (data.assignments || []).filter(function (a) { return !a.dueDate; });
+      renderUndated();
+      success(buildEvents(data, false));
+      clearPendingEvents(schedCalendar);
+    };
+    if (calFresh[name]) { var f = calFresh[name]; delete calFresh[name]; draw(f); return; }
+    var hit = calSkipKept ? null : kept(name);
+    calSkipKept = false;
+    if (hit && hit.ok) draw(hit);
     postToBackend({ action: 'getAdminCalendar', adminKey: adminKey(), key: key, start: info.startStr, end: info.endStr })
       .then(function (data) {
-        if (!data || !data.ok) { failure(new Error(data && data.error ? data.error : 'load_failed')); return; }
-        if (!currentStudent || currentStudent.key !== key) { success([]); return; } // navigated away mid-flight
-        setCalNote($('hw-cal-note'), data.calendarError ? ICS_NOTE : '');
-        noteBackendCapability(data);
-        hwUndated = (data.assignments || []).filter(function (a) { return !a.dueDate; });
-        renderUndated();
-        success(buildEvents(data, false));
-        clearPendingEvents(schedCalendar);
+        if (!currentStudent || currentStudent.key !== key) { if (!hit) success([]); return; } // navigated away mid-flight
+        if (!data || !data.ok) { if (!hit) failure(new Error(data && data.error ? data.error : 'load_failed')); return; }
+        var cleanOf = function (d) { var c = {}; Object.keys(d).forEach(function (k) { if (k !== 'cached') c[k] = d[k]; }); return JSON.stringify(c); };
+        keep(name, data);
+        if (!hit) { draw(data); return; }
+        if (cleanOf(hit) !== cleanOf(data) && schedCalendar) { calFresh[name] = data; schedCalendar.refetchEvents(); }
       })
-      .catch(function (err) { failure(err); });
+      .catch(function (err) { if (!hit) failure(err); });
   }
 
   function renderUndated() {
@@ -3942,6 +4044,30 @@
     });
   }
 
+  /* EVERYONE'S SESSION PREP IN ONE REQUEST (Luca, 2026-09-25). The backend
+     builds the cards for the whole roster reading each sheet once
+     (adminStudentPrepBatch in prep.gs), keeps each for ten minutes, and
+     they are kept here too, so moving between students shows prep at once.
+     At most every nine minutes; a student it did not reach in time is still
+     fetched on its own when opened. */
+  var prepBatchAt = 0;
+  function prepAllStudents() {
+    if (Date.now() - prepBatchAt < 9 * 60000) return;
+    prepBatchAt = Date.now();
+    var keys = allStudents.filter(function (s) { return !s.archived && s.status !== 'Inquiry'; }).map(function (s) { return s.key; });
+    if (!keys.length) return;
+    postToBackend({ action: 'adminStudentPrepBatch', adminKey: adminKey(), keys: keys }).then(function (d) {
+      if (!d || !d.ok || !d.preps) { prepBatchAt = 0; return; }
+      Object.keys(d.preps).forEach(function (k) {
+        var one = d.preps[k];
+        if (!one || !one.ok || !one.prep) return;
+        keep('s_prep_' + k, one);
+        // The student on screen, if their card was still loading, gets it now.
+        if (currentStudent && currentStudent.key === k && currentView === 'student' && !lastPrep) paintStudentPrep(k, one);
+      });
+    }, function () { prepBatchAt = 0; });
+  }
+
   /* HEAD START: once the roster knows who is in today and tomorrow, their
      pages are fetched in the background, one read at a time, so opening
      them before a session is instant. At most once an hour per student. */
@@ -3956,7 +4082,6 @@
       var last = kept('s_prefetched_' + k);
       if (last && Date.now() - last < 3600000) return;
       jobs.push({ k: k, action: 'getStudentDetail', name: 's_detail_' + k, ok: function (d) { return d && d.ok; } });
-      jobs.push({ k: k, action: 'adminStudentPrep', name: 's_prep_' + k, ok: function (d) { return d && d.ok && d.prep; } });
       jobs.push({ k: k, action: 'fridayNoteGet', name: 's_note_' + k, ok: function (d) { return d && d.ok; } });
     });
     if (!jobs.length) return;
