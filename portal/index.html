@@ -3215,8 +3215,8 @@
 
   /* ═══ STATIC PAGE ═══ the month fits the window instead of scrolling:
      the screen is one viewport tall, toolbar/legend/footer keep their
-     natural height, and the grid splits the rest evenly across six week
-     rows. A busy day scrolls inside its own tile. Below 780px this
+     natural height, and the grid splits the rest evenly across the
+     month's weeks (four to six). A busy day scrolls inside its own tile. Below 780px this
      reverts to normal document flow. */
   @media (min-width: 781px) {
     /* overflow:auto, not hidden: rows have a minimum height, so on a short
@@ -3230,12 +3230,15 @@
     /* Scoped to #screen-calendar so these beat the default
        .cal-mday/.cal-day min-heights defined LATER in this stylesheet;
        otherwise tiles overflow their rows and overlap the week below. */
-    #cal-body { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
-    #screen-calendar .cal-month { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+    /* min-height auto, not 0: on a window too short for every week at its
+       minimum height, the page scrolls. At 0 the rows spilled out of the
+       grid and over "Back to menu" (Luca, 2026-09-25). */
+    #cal-body { flex: 1 1 auto; min-height: auto; display: flex; flex-direction: column; }
+    #screen-calendar .cal-month { flex: 1 1 auto; min-height: auto; display: flex; flex-direction: column; }
     /* 100px is the smallest height at which a day still shows the date
        disc, two chips, and the "+N more" line. Below it the page scrolls
        rather than hiding the more-link. */
-    #screen-calendar .cal-month-grid { flex: 1 1 auto; min-height: 0; grid-auto-rows: minmax(100px, 1fr); align-items: stretch; }
+    #screen-calendar .cal-month-grid { flex: 1 1 auto; min-height: auto; grid-auto-rows: minmax(100px, 1fr); align-items: stretch; }
     #screen-calendar .cal-mday { min-height: 0; height: 100%; overflow-y: auto; scrollbar-width: thin; }
     /* Tighter spacing in the static layout so two chips plus the
        "+N more" line fit inside a ~100px tile (the more-link must stay
@@ -7154,7 +7157,11 @@ window.Portal = {
     }
     var ms = new Date(calState.anchor.getFullYear(), calState.anchor.getMonth(), 1);
     var gridStart = calAddDays(ms, -ms.getDay());
-    return { start: gridStart, end: calAddDays(gridStart, 42) };
+    /* Only the weeks the month touches (Luca, 2026-09-25): a fixed six drew a
+       whole week of the next month under a five-week month. */
+    var daysIn = new Date(ms.getFullYear(), ms.getMonth() + 1, 0).getDate();
+    var weeks = Math.ceil((ms.getDay() + daysIn) / 7);
+    return { start: gridStart, end: calAddDays(gridStart, weeks * 7) };
   }
 
   var CAL_PAD_DAYS = 40;
@@ -7320,7 +7327,8 @@ window.Portal = {
     var out = ['<div class="cal-month"><div class="cal-month-head">'];
     ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach(function (n) { out.push('<div>' + n + '</div>'); });
     out.push('</div><div class="cal-month-grid">');
-    for (var i = 0; i < 42; i++) {
+    var cells = Math.round((vis.end.getTime() - vis.start.getTime()) / 86400000);
+    for (var i = 0; i < cells; i++) {
       var d = calAddDays(vis.start, i);
       var key = calDayKey(d);
       var day = byDay[key] || { tasks: [], sessions: [] };
