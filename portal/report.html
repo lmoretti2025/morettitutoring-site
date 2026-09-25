@@ -1123,6 +1123,39 @@
 <script src="grid-in.js?v=20260910a"></script>
 <script src="signals.js?v=20260916b"></script>
 <script src="desmos-tags.js?v=20260916c"></script>
+<script src="question-flag.js?v=20260925a"></script>
+<script>
+/* FLAGS FROM THE ADMIN PAGE (Luca, 2026-09-25). admin.html shows this report
+   in a sandboxed frame with no access to its sign-in, so it says hello by
+   message, and each flag goes back up to it to send. Anywhere else (a
+   family's link) nobody says hello and no flag button appears. */
+(function () {
+  if (window.parent === window) return;
+  var seq = 0, waiting = {};
+  window.addEventListener('message', function (e) {
+    if (e.source !== window.parent || !e.data) return;
+    if (e.data.type === 'mt-admin-flag-mode') {
+      window.mtaAdminFlagMode = true;
+      window.portalFlagConfig = {
+        intro: 'Flag this question for yourself: it goes on the Flagged tab of the spreadsheet with ' +
+               'this report, so you can check it and fix it later.',
+        send: function (payload) {
+          return new Promise(function (resolve) {
+            var id = ++seq;
+            waiting[id] = resolve;
+            window.parent.postMessage({ type: 'mt-flag', id: id, flag: payload.flag }, '*');
+            setTimeout(function () { if (waiting[id]) { delete waiting[id]; resolve({ ok: false, error: 'timeout' }); } }, 30000);
+          });
+        }
+      };
+    } else if (e.data.type === 'mt-flag-result' && waiting[e.data.id]) {
+      var done = waiting[e.data.id];
+      delete waiting[e.data.id];
+      done(e.data.result || { ok: false });
+    }
+  });
+})();
+</script>
 <script>
 (function () {
   'use strict';
@@ -2189,7 +2222,11 @@
         // Which section this question came from, so the question preview
         // can offer the calculator on math questions only — the same
         // gate the live exam applies (MATH_SECTION_KEYS in index.html).
-        sectionKey: sec.k });
+        sectionKey: sec.k,
+        // The portal's own question key (index.html builds it the same way),
+        // so a flag from the admin page names the exact question.
+        key: (data.pt ? data.pt : ('diag-' + data.t)) + '|' + sec.k + '|' +
+             (i < moduleSplit ? 'module1' : ('module2' + (sec.v || 'Easier'))) + '|' + (i < moduleSplit ? i : (i - moduleSplit)) });
     });
     sections.push({
       key: sec.k, label: sectionLabel(sec.k, bank), c: c, t: qs.length, rows: rows, domains: secDomains,
@@ -5214,6 +5251,12 @@
       renderAnswerArea();
     });
     actionsRow.appendChild(toggleRow);
+    // Report issue, only when the admin page is showing this report.
+    if (window.mtaAdminFlagMode && window.portalFlag) window.portalFlag.attach(actionsRow, {
+      qkey: r.key || '',
+      where: (data.ptTitle || ((data.t || 'SAT') + ' Diagnostic')) + ' report' + (r.n ? ' - Q' + r.n : ''),
+      text: q.text
+    });
 
     var txt = document.createElement('div');
     txt.className = 'q-text';

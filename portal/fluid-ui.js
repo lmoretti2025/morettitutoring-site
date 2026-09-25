@@ -175,6 +175,8 @@
     injectStyles();
     opts = opts || {};
     var itemSel = opts.item || '.mta-fluid-item';
+    // The class that marks the chosen item: 'active' in the portal, 'is-on' on the admin page.
+    var activeSel = '.' + (opts.activeClass || 'active');
     var mode = opts.mode === 'underline' ? 'underline' : 'pill';
 
     var ind = document.createElement('span');
@@ -189,7 +191,7 @@
     var placeInstantly = true;
 
     function sync() {
-      var el = container.querySelector(itemSel + '.active');
+      var el = container.querySelector(itemSel + activeSel);
       // No active item, or the container is not laid out yet (a screen that
       // is still display:none). Hide rather than guess.
       if (!el || !el.offsetWidth) { ind.style.opacity = '0'; placeInstantly = true; return; }

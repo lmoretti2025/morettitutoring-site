@@ -250,8 +250,11 @@ window.MorettiAuth = (function () {
      stop counting a tab left open on a desk. Mid-test the window is
      longer: a student can read a passage or work a problem on paper for
      several minutes without touching anything. */
-  var IDLE_MS = 5 * 60000;
-  var IDLE_TEST_MS = 12 * 60000;
+  /* Tightened (Luca, 2026-09-25: "the time only logs if they're actually
+     studying"): two minutes without a click, key, scroll or touch is idle;
+     in a test, where a hard problem can mean minutes on paper, six. */
+  var IDLE_MS = 2 * 60000;
+  var IDLE_TEST_MS = 6 * 60000;
   var lastInputAt = Date.now();
   var TEST_SCREENS = { 'dx-screen': 1, 'dx-module-over-screen': 1 };
   function noteInput() { lastInputAt = Date.now(); }
@@ -282,7 +285,7 @@ window.MorettiAuth = (function () {
     'screen-calendar': 'Calendar',
     'screen-resources': 'Resources',
     'screen-sat-resources': 'SAT resources',
-    'screen-incorrect-questions': 'Incorrect questions',
+    'screen-incorrect-questions': 'Saved and mistakes',
     'screen-challenge-questions': 'Challenge questions',
     'screen-question-bank': 'Question bank',
     'screen-practice-tests': 'Practice tests',
@@ -302,7 +305,31 @@ window.MorettiAuth = (function () {
     return file.replace(/\.html?$/, '').replace(/[-_]/g, ' ')
                .replace(/^./, function (c) { return c.toUpperCase(); });
   }
+  /* EXACTLY WHAT THEY ARE DOING (Luca, 2026-09-25). On the test screen the
+     title bar already names it ("SAT Practice Test 4 - Math Module 2",
+     "Question Bank: Linear equations"), and the same screen runs every
+     practice round, whose exit button says "Exit Practice". So the label is
+     "Taking a test - Practice Test 4 ..." or "Practicing - Question Bank
+     ...", and the backend sums time by the part before " - ". */
+  function testScreenDetail() {
+    try {
+      var el = document.getElementById('dx-brand-label');
+      var t = el ? String(el.textContent || '').replace(/\s+/g, ' ').trim() : '';
+      return t.replace(/[\u2014\u2013]/g, '-').replace(/^SAT\s+/, '').replace(/:/g, ' -').slice(0, 44);
+    } catch (e) { return ''; }
+  }
+  function isPracticeRound() {
+    try {
+      var x = document.querySelector('#dx-exit-btn span');
+      return !!(x && /practice/i.test(x.textContent || ''));
+    } catch (e) { return false; }
+  }
   function whereLabel() {
+    if (activity === 'dx-screen') {
+      var detail = testScreenDetail();
+      var area = isPracticeRound() ? 'Practicing' : 'Taking a test';
+      return detail ? area + ' - ' + detail : area;
+    }
     if (activity && SCREEN_LABELS[activity]) return SCREEN_LABELS[activity];
     if (activity) return activity;
     return pageLabel();

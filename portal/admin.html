@@ -7,11 +7,15 @@
 <title>Roster — Moretti Test Prep &amp; Tutoring</title>
 <link rel="icon" href="../favicon.ico" sizes="16x16 32x32 48x48">
 <link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caladea:wght@400;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+<script src="fluid-ui.js?v=20260925a"></script>
 <style>
   :root {
     --red:    #B0271C;
-    --bg:     #f2f2f2;
+    --bg:     #F6F4F1;   /* warm, not grey (Luca, 2026-09-25); the site's --sunk */
     --white:  #ffffff;
     --text:   #111111;
     --mid:    rgba(17,17,17,0.58);
@@ -21,7 +25,7 @@
     --green:  #5E8B6F;
     --blue:   #3E6B8C;
     --hel:    'Poppins', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    --display: 'Iowan Old Style', Georgia, ui-serif, serif;
+    --display: 'Caladea', Georgia, 'Times New Roman', serif;   /* the site's display face */
     --shadow: 0 2px 16px rgba(17,17,17,0.055);
     --ease:   cubic-bezier(0.16,1,0.3,1);
   }
@@ -86,6 +90,14 @@
   .prep-stat .num { font-family: var(--display); font-size: 1.45rem; line-height: 1.1; color: var(--text); font-variant-numeric: tabular-nums; }
   .prep-stat .lbl { font-size: 0.64rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); margin-top: 0.2rem; }
   .prep-stat .sub { font-size: 0.74rem; color: var(--mid); margin-top: 0.15rem; }
+  .time-breakdown { margin: 0 0 1.1rem; }
+  .tb-hed { font-size: 0.64rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); margin-bottom: 0.45rem; }
+  .tb-row { display: grid; grid-template-columns: minmax(96px, 150px) 1fr 58px; align-items: center; gap: 0.7rem; padding: 0.22rem 0; font-size: 0.8rem; }
+  .tb-name { color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tb-bar { height: 8px; background: rgba(17,17,17,0.06); border-radius: 99px; overflow: hidden; }
+  .tb-bar i { display: block; height: 100%; background: var(--red); border-radius: 99px; }
+  .tb-min { text-align: right; color: var(--mid); font-variant-numeric: tabular-nums; }
+  .tb-note { font-size: 0.72rem; color: var(--faint); margin-top: 0.35rem; }
   .prep-next { font-size: 0.82rem; color: var(--mid); margin: 0 0 1rem; line-height: 1.6; }
   .prep-next b { color: var(--text); font-weight: 600; }
   .prep-topics { width: 100%; border-collapse: collapse; font-size: 0.8rem; font-variant-numeric: tabular-nums; }
@@ -238,7 +250,7 @@
 
   /* ═══ STUDENT PAGE ═══ one student, two tabs: the test reports they've
      generated, and the homework calendar those reports should be driving. */
-  #student, #allcal, #scheduler { display: none; }
+  #student, #scheduler { display: none; }
   .sched-back { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.82rem; font-weight: 600; color: var(--mid); text-decoration: none; margin-bottom: 1rem; cursor: pointer; background: none; border: none; padding: 0; font-family: var(--hel); }
   .sched-back:hover { color: var(--red); }
   .sched-hed { font-family: var(--display); font-size: 1.5rem; margin: 0 0 1.1rem; }
@@ -555,7 +567,8 @@
   .bc-tag.warn { background: rgba(176,39,28,0.08); color: var(--red); }
   .bc-meta { font-size: 0.76rem; color: var(--mid); line-height: 1.55; margin-bottom: 0.8rem; overflow-wrap: anywhere; }
   .bc-meta b { color: var(--text); }
-  .bc-mail { border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.1rem; background: #fff; overflow-x: auto; }
+  .bc-mail { border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem; background: #EDEAE4; overflow-x: auto; }
+  .bc-mail iframe { display: block; width: 100%; min-height: 320px; border: 0; border-radius: 6px; background: #fff; }
   .bc-section-hed { font-family: var(--display); font-size: 1.15rem; margin: 1.6rem 0 0.8rem; }
 
   /* ═══ THIS FRIDAY ═══ */
@@ -672,6 +685,57 @@
   .roster-tools #mta-access .mta-tab { display: none; }
   .roster-tools #mta-access .mta-body { margin-bottom: 0; }
   @media (max-width: 620px) { .roster-tools { margin-left: 0; width: 100%; } .roster-tools .mini { flex: 1 1 auto; justify-content: center; } }
+
+  /* ═══ REFRESH + MOTION (Luca, 2026-09-25: "look nicer and be smoother",
+     "nice little animations ... the same way the portal has it") ═══
+     Warm surfaces instead of grey, and the portal's motion vocabulary:
+     views rise in, rows ease in one after another on arrival, numbers
+     count up, the chosen tab / view / filter is marked by an indicator
+     that slides (fluid-ui.js, the portal's own), and bars grow. All of it
+     switches off under reduced motion. */
+  thead th { background: #FCFBF9; }
+  .fp-row:hover { background: #FBF8F4; }
+  .next-session { background: #fff; border-color: rgba(17,17,17,0.08); border-left: 3px solid var(--red); box-shadow: 0 1px 2px rgba(17,17,17,0.04), 0 8px 24px rgba(17,17,17,0.045); }
+  .name-cell { white-space: nowrap; }
+  .name-cell .prog-tag { white-space: nowrap; }
+  tbody tr:hover, tbody tr.is-archived:hover { background: #FBF8F4; }
+  .summary-tile, .roster-table-wrap, .card { border-color: rgba(17,17,17,0.08); box-shadow: 0 1px 2px rgba(17,17,17,0.04), 0 8px 24px rgba(17,17,17,0.045); }
+  .card { transition: box-shadow 0.2s var(--ease); }
+  .mini, .seg button, .nav-btn, .tab { transition: transform 0.16s var(--ease), background 0.16s linear, color 0.16s linear, border-color 0.16s linear, box-shadow 0.16s var(--ease); }
+  .mini:active, .seg button:active, .nav-btn:active { transform: scale(0.96); }
+  .mini.solid:hover { box-shadow: 0 6px 16px rgba(176,39,28,0.22); transform: translateY(-1px); }
+
+  @keyframes admRise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  @keyframes admFade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes admGrow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+  .view-in { animation: admRise 0.36s var(--ease) both; }
+  .tab-in { animation: admFade 0.26s linear both; }
+  tr.row-in { animation: admRise 0.42s var(--ease) both; animation-delay: calc(var(--i, 0) * 32ms); }
+  .summary-tile { animation: admRise 0.42s var(--ease) both; }
+  .summary-tile:nth-child(2) { animation-delay: 50ms; } .summary-tile:nth-child(3) { animation-delay: 100ms; } .summary-tile:nth-child(4) { animation-delay: 150ms; }
+  .summary-row.settled .summary-tile { animation: none; }
+  .tb-bar i { transform-origin: left center; animation: admGrow 0.7s var(--ease) both; }
+  .tb-row:nth-child(3) .tb-bar i { animation-delay: 60ms; } .tb-row:nth-child(4) .tb-bar i { animation-delay: 120ms; } .tb-row:nth-child(5) .tb-bar i { animation-delay: 180ms; } .tb-row:nth-child(6) .tb-bar i { animation-delay: 240ms; }
+  .prep-stat { animation: admRise 0.4s var(--ease) both; }
+  .prep-stat:nth-child(2) { animation-delay: 40ms; } .prep-stat:nth-child(3) { animation-delay: 80ms; } .prep-stat:nth-child(4) { animation-delay: 120ms; }
+  .live-dot.on { box-shadow: 0 0 0 0 rgba(94,139,111,0.5); animation: admPulse 2.2s ease-out infinite; }
+  @keyframes admPulse { 0% { box-shadow: 0 0 0 0 rgba(94,139,111,0.45); } 70% { box-shadow: 0 0 0 7px rgba(94,139,111,0); } 100% { box-shadow: 0 0 0 0 rgba(94,139,111,0); } }
+
+  /* The sliding indicators (fluid-ui.js). The item stops painting its own
+     "on" state while the indicator paints it. */
+  #topnav.mta-fluid-on .nav-btn { position: relative; z-index: 1; }
+  #topnav.mta-fluid-on .nav-btn.is-on { background: transparent; border-color: transparent; }
+  #topnav .mta-fluid-pill { background: #fff; border-radius: 8px; }
+  #topnav.mta-fluid-on .nav-btn:not(.is-on):not(.nav-refresh) { border-color: rgba(255,255,255,0.28); }
+  .tabbar.mta-fluid-on .tab.is-on { border-bottom-color: transparent; }
+  .tabbar.mta-fluid-on .mta-fluid-underline { bottom: 0; }
+  #prog-filter.mta-fluid-on { position: relative; }
+  #prog-filter.mta-fluid-on button { position: relative; z-index: 1; }
+  #prog-filter.mta-fluid-on button.is-on { background: transparent; border-color: transparent; }
+  #prog-filter .mta-fluid-pill { background: var(--text); border-radius: 999px; }
+  @media (prefers-reduced-motion: reduce) {
+    .view-in, .tab-in, tr.row-in, .summary-tile, .tb-bar i, .prep-stat, .live-dot.on { animation: none !important; }
+  }
 </style>
 </head>
 <body>
@@ -683,7 +747,6 @@
   </div>
   <nav id="topnav">
     <button type="button" class="nav-btn is-on" id="nav-roster">Roster</button>
-    <button type="button" class="nav-btn" id="nav-allcal">Calendar</button>
     <button type="button" class="nav-btn" id="nav-broadcast">Emails</button>
     <button type="button" class="nav-btn" id="nav-sources">Inquiries</button>
     <button type="button" class="nav-btn nav-refresh" id="refresh-btn" title="Load this page&rsquo;s data again" aria-label="Refresh">&#8635;<span class="nav-refresh-label"> Refresh</span></button>
@@ -720,7 +783,6 @@
             <tr>
               <th data-sort="name">Student <span class="arrow"></span></th>
               <th data-sort="composite">Composite <span class="arrow"></span></th>
-              <th data-sort="weakest">Weakest area <span class="arrow"></span></th>
               <th data-sort="next">Next session <span class="arrow"></span></th>
               <th data-sort="activity">Last activity <span class="arrow"></span></th>
               <th></th>
@@ -900,18 +962,6 @@
         <div class="stu-delete-status" id="stu-delete-status"></div>
       </div>
     </section>
-  </div>
-
-  <!-- ═══ EVERY STUDENT ═══ the week/month as Luca actually works it:
-       all sessions, all outstanding homework, one grid. -->
-  <div id="allcal">
-    <h1 class="sched-hed">Calendar <span class="sched-sub">sessions and homework</span></h1>
-    <div class="cal-legend" id="allcal-legend"></div>
-    <div class="cal-note" id="allcal-note" style="display:none;"></div>
-    <div class="cal-wrap">
-      <div class="cal-host" id="allcal-calendar"></div>
-    </div>
-    <p class="sched-hint">Click a session to assign that student homework for that day. Click a homework chip to open that student's page.</p>
   </div>
 
   <!-- ═══ EMAIL FAMILIES ═══ one message, sent as a separate email to each
@@ -1205,6 +1255,53 @@
     try { return sessionStorage.getItem(SESSION_KEY); } catch (e) { return null; }
   }
 
+  /* A flag sent from inside a report (report.html): only the report frame
+     this page opened is listened to, and the flag is filed under the
+     student whose report it is. */
+  var reportFrame = null, reportFrameKey = '';
+  window.addEventListener('message', function (e) {
+    var d = e.data;
+    if (!d || d.type !== 'mt-flag' || !reportFrame || e.source !== reportFrame.contentWindow) return;
+    var reply = function (result) { try { e.source.postMessage({ type: 'mt-flag-result', id: d.id, result: result }, '*'); } catch (x) {} };
+    postToBackend({ action: 'adminFlagQuestion', adminKey: adminKey(), key: reportFrameKey, flag: d.flag })
+      .then(function (r) { reply({ ok: !!(r && r.ok), error: r && r.error }); }, function () { reply({ ok: false, error: 'network' }); });
+  });
+
+  /* ═══ KEPT ON THIS COMPUTER (Luca, 2026-09-25: "everything to load a LOT
+     faster") ═══ Every read the page makes takes Google a few seconds. The
+     last answer to each (the roster, each student's details, prep, note)
+     is kept in this browser and drawn the moment a page opens; the fresh
+     answer replaces it when it lands. Nothing is ever written FROM here,
+     it is only what to look at while waiting. Signing out clears it. */
+  /* Motion helpers (see REFRESH + MOTION in the styles). */
+  function replayAnim(el, cls) {
+    if (!el) return;
+    el.classList.remove(cls);
+    void el.offsetWidth;          // restart the animation
+    el.classList.add(cls);
+  }
+  var rowsArrive = true;          // the next roster draw eases its rows in (a view change, a filter, first load)
+  function fluid(el, opts) { try { if (window.mtaFluid && el) window.mtaFluid.attach(el, opts); } catch (e) {} }
+
+  var KEEP_PREFIX = 'mta_admin_keep1_';
+  function kept(name) {
+    try { var o = JSON.parse(localStorage.getItem(KEEP_PREFIX + name) || 'null'); return o ? o.d : null; } catch (e) { return null; }
+  }
+  function keep(name, d) {
+    var v; try { v = JSON.stringify({ at: Date.now(), d: d }); } catch (e) { return; }
+    try { localStorage.setItem(KEEP_PREFIX + name, v); }
+    catch (e) {
+      // Full: let the per-student copies go (they come back on the next visit).
+      try {
+        Object.keys(localStorage).forEach(function (k) { if (k.indexOf(KEEP_PREFIX + 's_') === 0) localStorage.removeItem(k); });
+        localStorage.setItem(KEEP_PREFIX + name, v);
+      } catch (e2) { /* nothing kept; the page still works */ }
+    }
+  }
+  window.mtaAdminForgetKept = function () {
+    try { Object.keys(localStorage).forEach(function (k) { if (k.indexOf(KEEP_PREFIX) === 0) localStorage.removeItem(k); }); } catch (e) {}
+  };
+
   function escHtml(s) {
     return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
@@ -1291,23 +1388,24 @@
 
   /* ═══ VIEW SWITCHING ═══ five full-page views (gate / roster / one
      student / everyone's calendar / email families), one visible at a time. */
-  var VIEWS = { gate: $('gate'), roster: $('roster'), student: $('student'), allcal: $('allcal'), broadcast: $('broadcast'), sources: $('sources') };
+  var VIEWS = { gate: $('gate'), roster: $('roster'), student: $('student'), broadcast: $('broadcast'), sources: $('sources') };
   var currentView = 'gate';
 
   function showView(name) {
+    var changed = currentView !== name;
     Object.keys(VIEWS).forEach(function (k) { VIEWS[k].style.display = (k === name) ? 'block' : 'none'; });
+    if (changed) replayAnim(VIEWS[name], 'view-in');
+    if (name === 'roster' && changed) rowsArrive = true;
     currentView = name;
     // Read by CSS: the Portal access panel belongs to the roster alone.
     document.body.setAttribute('data-view', name);
     $('topnav').style.display = (name === 'gate') ? 'none' : 'flex';
     $('nav-roster').classList.toggle('is-on', name === 'roster' || name === 'student');
-    $('nav-allcal').classList.toggle('is-on', name === 'allcal');
     $('nav-broadcast').classList.toggle('is-on', name === 'broadcast');
     $('nav-sources').classList.toggle('is-on', name === 'sources');
     // FullCalendar measures itself on render; a calendar that was built
     // while its container was display:none comes out zero-height until
     // it's told to re-measure once it's actually on screen.
-    if (name === 'allcal' && allCalendar) allCalendar.updateSize();
     if (name === 'student' && schedCalendar && activeTab === 'homework') schedCalendar.updateSize();
     window.scrollTo(0, 0);
   }
@@ -1327,7 +1425,7 @@
 
   // What this build of admin.html needs the deployment to understand. Kept
   // beside the version constant in Code.gs — bump both together.
-  var REQUIRED_BACKEND_VERSION = 23;
+  var REQUIRED_BACKEND_VERSION = 24;
   var CAPABILITY_LABELS = {
     calendar: 'the calendar and student pages',
     dueDates: 'due dates',
@@ -1437,17 +1535,28 @@
     var pool = allStudents.filter(function (s) { return showHidden || !s.archived; });
     var counts = { all: pool.length, sat: 0, tutoring: 0, admissions: 0 };
     pool.forEach(function (s) { counts[programOf(s)]++; });
-    $('prog-filter').innerHTML = ['all', 'sat', 'tutoring', 'admissions'].map(function (p) {
-      var label = p === 'all' ? 'All' : (p === 'tutoring' ? 'Tutoring' : PROGRAMS[p].label);
-      return '<button type="button" data-prog="' + p + '" aria-pressed="' + (p === progFilter) + '"' + (p === progFilter ? ' class="is-on"' : '') + '>' +
-        label + ' <span class="count-pill">' + counts[p] + '</span></button>';
-    }).join('');
+    var host = $('prog-filter');
+    if (!host.querySelector('button[data-prog]')) {
+      host.innerHTML = ['all', 'sat', 'tutoring', 'admissions'].map(function (p) {
+        var label = p === 'all' ? 'All' : (p === 'tutoring' ? 'Tutoring' : PROGRAMS[p].label);
+        return '<button type="button" data-prog="' + p + '">' + label + ' <span class="count-pill"></span></button>';
+      }).join('');
+      fluid(host, { item: 'button', activeClass: 'is-on', mode: 'pill' });
+    }
+    // Updated in place rather than redrawn, so the dark pill slides between them.
+    Array.prototype.forEach.call(host.querySelectorAll('button[data-prog]'), function (b) {
+      var p = b.getAttribute('data-prog');
+      b.classList.toggle('is-on', p === progFilter);
+      b.setAttribute('aria-pressed', String(p === progFilter));
+      b.querySelector('.count-pill').textContent = counts[p];
+    });
   }
   $('prog-filter').addEventListener('click', function (e) {
     var b = e.target.closest('button[data-prog]');
     if (!b) return;
     progFilter = b.getAttribute('data-prog');
     try { localStorage.setItem(PROG_FILTER_KEY, progFilter); } catch (err) {}
+    rowsArrive = true;
     renderSummary();
     renderTable();
   });
@@ -1479,7 +1588,15 @@
       (onlineCount(active)
         ? '<div class="summary-tile live"><div class="num">' + onlineCount(active) + '</div><div class="lbl">On the site now</div></div>'
         : '');
+    // The first time the numbers appear they count up, as the portal's
+    // scores do; after that a repaint just shows the new number.
+    if (!summaryRowEl.classList.contains('settled') && !summaryCounted && window.mtaCountUp) {
+      summaryCounted = true;
+      Array.prototype.forEach.call(summaryRowEl.querySelectorAll('.num'), function (n) { window.mtaCountUp(n, Number(n.textContent), { duration: 800 }); });
+      setTimeout(function () { summaryRowEl.classList.add('settled'); }, 900);
+    }
   }
+  var summaryCounted = false;
 
   /* ═══ NEXT SESSION ═══ replaces the old Assignments column: homework
      checkboxes say little (most students never tick them), while the next
@@ -1492,7 +1609,7 @@
   function loadRosterSessions() {
     var now = new Date(), end = new Date(now.getTime() + NEXT_SESSION_DAYS * 86400000);
     return postToBackend({ action: 'getAdminCalendar', adminKey: adminKey(), start: toDateStr(now), end: toDateStr(end) }).then(function (data) {
-      if (!data || !data.ok || data.calendarError) { nextSessionState = 'error'; renderTable(); return; }
+      if (!data || !data.ok || data.calendarError) { if (nextSessionState !== 'ok') { nextSessionState = 'error'; renderTable(); } return; }
       var cutoff = Date.now() - 20 * 60 * 1000, map = {};
       (data.sessions || []).forEach(function (x) {
         var ms = new Date(x.startIso).getTime();
@@ -1502,8 +1619,10 @@
       });
       nextSessionByKey = map;
       nextSessionState = 'ok';
+      keep('sessions', map);
       renderTable();
-    }).catch(function () { nextSessionState = 'error'; renderTable(); });
+      prefetchSoonStudents();
+    }).catch(function () { if (nextSessionState !== 'ok') { nextSessionState = 'error'; renderTable(); } });
   }
   function nextSessionCell(key) {
     if (nextSessionState === 'loading') return '<span class="sk sk-line" style="display:inline-block;width:90px;"></span>';
@@ -1521,7 +1640,6 @@
   function sortValue(s, key) {
     if (key === 'name') return s.name.toLowerCase();
     if (key === 'composite') return (s.composite == null || !isSat(s)) ? -1 : s.composite;
-    if (key === 'weakest') return (s.weakest && isSat(s)) ? s.weakest.label.toLowerCase() : '￿'; // sorts empties last
     if (key === 'next') { var n = nextSessionByKey[s.key]; return n ? n.ms : Infinity; }   // none booked sorts last
     if (key === 'activity') return s.lastActivityAt ? new Date(s.lastActivityAt).getTime() : -1;
     return 0;
@@ -1546,7 +1664,7 @@
     });
 
     if (!rows.length) {
-      bodyEl.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--faint); padding:2rem;">' +
+      bodyEl.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--faint); padding:2rem;">' +
         (progFilter === 'all' ? 'No students match this filter.' : 'No ' + escHtml(PROGRAMS[progFilter].label.toLowerCase()) + ' students' + (showHidden ? '' : ' on the roster') + '.') + '</td></tr>';
       return;
     }
@@ -1560,22 +1678,25 @@
             ? ' <span class="delta ' + (s.compositeDelta > 0 ? 'up' : 'down') + '">' + (s.compositeDelta > 0 ? '&#9650;' : '&#9660;') + ' ' + Math.abs(s.compositeDelta) + '</span>'
             : '');
 
-      var weakestCell = (s.weakest && prog === 'sat')
-        ? '<span class="weakest-label">' + escHtml(s.weakest.label) + '</span><br><span class="weakest-frac">' + s.weakest.correct + ' / ' + s.weakest.total + ' correct</span>'
-        : '<span class="no-score">&mdash;</span>';
-
       var nextCell = nextSessionCell(s.key);
 
-      var d = daysAgo(s.lastActivityAt);
-      var activityCls = (d == null || d >= STALE_DAYS) ? 'stale' : '';
       /* "Online now" replaces the relative date rather than sitting beside
          it: they are answers to the same question, and the live one is
          strictly better while it is true. What they are looking at goes
          underneath, from the portal's own screen switcher. */
+      /* Offline, it says what they last did (Luca, 2026-09-25): the screen
+         or the exact test or practice round, and the active minutes of that
+         visit; hovering lists where the visit's time went. */
+      var lv = s.lastVisit;
+      var lvWhen = lv && lv.at && (!s.lastActivityAt || new Date(lv.at) >= new Date(s.lastActivityAt)) ? lv.at : s.lastActivityAt;
+      var lvWhere = lv ? String(lv.where || '').replace(/\s*\(idle\)$/, '') : '';
+      var lvTitle = lv && lv.areas ? Object.keys(lv.areas).map(function (a) { return a + ': ' + lv.areas[a] + ' min'; }).join(', ') : '';
       var activityCell = s.online
         ? '<span class="live-now">Online now</span>' +
           (s.presenceWhere ? '<span class="live-where">' + escHtml(s.presenceWhere) + '</span>' : '')
-        : '<span class="' + activityCls + '">' + relativeTime(s.lastActivityAt) + '</span>';
+        : '<span class="' + (daysAgo(lvWhen) == null || daysAgo(lvWhen) >= STALE_DAYS ? 'stale' : '') + '">' + relativeTime(lvWhen) + '</span>' +
+          (lvWhere ? '<span class="live-where"' + (lvTitle ? ' title="' + escHtml(lvTitle) + '"' : '') + '>' + escHtml(lvWhere) +
+            (lv.min ? ' &middot; ' + lv.min + ' min active' : '') + '</span>' : '');
 
       var k = escHtml(s.key);
       return '<tr' + (s.archived ? ' class="is-archived"' : '') + '>' +
@@ -1585,7 +1706,6 @@
           (prog !== 'sat' && progFilter === 'all' ? '<span class="prog-tag prog-' + prog + '">' + PROGRAMS[prog].tag + '</span>' : '') +
           '<span class="key">' + k + '</span></td>' +
         '<td>' + scoreCell + '</td>' +
-        '<td>' + weakestCell + '</td>' +
         '<td class="next-cell">' + nextCell + '</td>' +
         '<td>' + activityCell + '</td>' +
         '<td><div class="row-actions">' +
@@ -1598,6 +1718,13 @@
         '</div></td>' +
         '</tr>';
     }).join('');
+    // Rows ease in one after another when the roster arrives, not on every repaint.
+    if (rowsArrive) {
+      rowsArrive = false;
+      Array.prototype.forEach.call(bodyEl.querySelectorAll('tr'), function (tr, i) {
+        if (i < 18) { tr.style.setProperty('--i', i); tr.classList.add('row-in'); }
+      });
+    }
   }
 
   // Delegated, since rows are rebuilt on every render; matches the click to
@@ -1709,19 +1836,23 @@
      is kept here and drawn at once, with the fresh one replacing it when it
      lands. Nothing is written from the cache; it is only what to look at
      while waiting. */
-  var ROSTER_CACHE = 'mta_admin_roster_v1';
   function paintCachedRoster() {
     if (allStudents.length) return false;
     try {
-      var raw = sessionStorage.getItem(ROSTER_CACHE);
-      if (!raw) return false;
-      var cached = JSON.parse(raw);
+      var cached = kept('roster');
       if (!cached || !cached.students || !cached.students.length) return false;
       allStudents = cached.students;
+      var keptSessions = kept('sessions');
+      if (keptSessions && nextSessionState === 'loading') {
+        var cutoffMs = Date.now() - 20 * 60 * 1000, fresh = {};
+        Object.keys(keptSessions).forEach(function (k) { if (keptSessions[k].ms >= cutoffMs) fresh[k] = keptSessions[k]; });
+        nextSessionByKey = fresh;
+        nextSessionState = 'ok';
+      }
       renderSummary();
       renderTable();
       if (currentView === 'gate') showView('roster');
-      setStatus('Showing the roster from your last visit while it refreshes\u2026');
+      setStatus('');
       return true;
     } catch (e) { return false; }
   }
@@ -1754,7 +1885,7 @@
       }
       try { sessionStorage.setItem(SESSION_KEY, key); } catch (e) {}
       allStudents = data.students || [];
-      try { sessionStorage.setItem(ROSTER_CACHE, JSON.stringify({ students: allStudents, at: Date.now() })); } catch (e) {}
+      keep('roster', { students: allStudents });
       if (!silent) setStatus('');
       // A program change still saving outranks a roster read that may
       // predate it; and the open student page follows the new row, so
@@ -1818,7 +1949,6 @@
   } catch (e) {}
 
   $('nav-roster').addEventListener('click', goToRoster);
-  $('nav-allcal').addEventListener('click', openAllCalendar);
   $('nav-broadcast').addEventListener('click', openBroadcast);
   $('nav-sources').addEventListener('click', openSources);
   $('src-period').addEventListener('change', function () { loadSources(this.value); });
@@ -1832,7 +1962,7 @@
   // The top buttons that leave the student page (Refresh stays, and keeps
   // the typed note). Capture phase, so this runs before their own handlers.
   document.addEventListener('click', function (e) {
-    var b = e.target.closest && e.target.closest('#nav-roster, #nav-allcal, #nav-broadcast, #nav-sources');
+    var b = e.target.closest && e.target.closest('#nav-roster, #nav-broadcast, #nav-sources');
     if (!b || currentView !== 'student' || confirmLeaveNote()) return;
     e.stopPropagation();
     e.preventDefault();
@@ -1858,10 +1988,6 @@
     } else if (currentView === 'broadcast') {
       loadFridayPreview();
       loadBroadcast(false).then(done, done);
-    } else if (currentView === 'allcal') {
-      if (allCalendar) allCalendar.refetchEvents();
-      rosterStale = false;
-      loadRoster(key, true).then(done);
     } else {
       rosterStale = false;
       loadRoster(key).then(done);
@@ -1883,6 +2009,11 @@
       $('gate-checking').textContent = 'Still signing you in \u2014 the server is slow to answer right now. This can take a minute or two.';
     }, 8000);
   }
+  // The sliding indicators (fluid-ui.js): the view, the student's tab, the email tab.
+  fluid($('topnav'), { item: '.nav-btn:not(.nav-refresh)', activeClass: 'is-on', mode: 'pill' });
+  fluid(document.querySelector('#student .tabbar'), { item: '.tab', activeClass: 'is-on', mode: 'underline' });
+  fluid(document.querySelector('.em-tabbar'), { item: '.tab', activeClass: 'is-on', mode: 'underline' });
+
   var savedKey = adminKey();
   if (savedKey) { setGateChecking(true); loadRoster(savedKey); }
 
@@ -1955,6 +2086,7 @@
     ['week', 'scores', 'homework', 'account'].forEach(function (t) {
       $('tab-' + t).style.display = (t === tab) ? 'block' : 'none';
     });
+    replayAnim($('tab-' + tab), 'tab-in');
     // Drawn again on the way in, so the bars grow where they can be seen
     // rather than behind another tab.
     if (tab === 'scores' && currentDetail) { try { renderTrend(currentDetail); } catch (e) {} }
@@ -2300,10 +2432,32 @@
     if (typed == null) $('stu-note').value = ''; paintNoteCount();
     noteControls(false);
     if (typed == null) noteStatus('Loading\u2026');
+    /* The note as it was last seen, ready to read and edit at once. When the
+       fresh copy lands it replaces the text only if nothing was typed. */
+    var hit = typed == null ? kept('s_note_' + key) : null;
+    var shown = null;
+    if (hit && hit.ok) {
+      shown = hit.note || '';
+      noteSaved = shown;
+      noteLoading = false;
+      noteControls(true);
+      $('stu-note').value = shown; paintNoteCount();
+      noteStatus((shown ? 'Saved. ' : '') + noteWhere(hit).msg, noteWhere(hit).cls);
+    }
     postToBackend({ action: 'fridayNoteGet', adminKey: adminKey(), key: key }).then(function (d) {
       if (seq !== noteSeq) return;
       noteLoading = false;
       noteControls(true);
+      if (d && d.ok) keep('s_note_' + key, d);
+      if (shown != null) {
+        if (!d || !d.ok) return;                                   // keep what is on screen
+        noteSaved = d.note || '';
+        if ($('stu-note').value === shown) {                        // nothing typed: show the fresh copy
+          $('stu-note').value = noteSaved; paintNoteCount();
+          noteStatus((noteSaved ? 'Saved. ' : '') + noteWhere(d).msg, noteWhere(d).cls);
+        }
+        return;
+      }
       if (!d || !d.ok) {
         if (typed != null) $('stu-note').value = typed; paintNoteCount();
         noteStatus(noteError(d), 'warn');
@@ -2327,6 +2481,7 @@
         noteStatus('Could not check whether it saved. Your text is still here: press Save note again.', 'warn');
         return;
       }
+      if (shown != null) return;
       noteStatus('Could not reach the backend to load the note.', 'warn');
     });
   }
@@ -2343,6 +2498,7 @@
       $('stu-note-save').disabled = $('stu-note-clear').disabled = false;
       if (!d || !d.ok) { noteStatus(noteError(d), 'warn'); return; }
       noteSaved = d.note || '';
+      keep('s_note_' + key, d);
       $('stu-note').value = noteSaved; paintNoteCount();   // shows the note as it will go out (dashes become commas)
       var w = noteWhere(d);
       noteStatus(noteSaved ? 'Saved. ' + w.msg : 'Cleared. The weekly update goes out without a note.', noteSaved && !w.cls ? 'ok' : w.cls);
@@ -2391,8 +2547,20 @@
   function loadStudentPrep(key) {
     $('stu-prep-sub').textContent = 'The last seven days.';
     $('stu-prep').innerHTML = skLines(3);
+    var hit = kept('s_prep_' + key);
+    if (hit && hit.ok && hit.prep) paintStudentPrep(key, hit);
     postToBackend({ action: 'adminStudentPrep', adminKey: adminKey(), key: key }).then(function (data) {
       if (!currentStudent || currentStudent.key !== key) return;
+      if (data && data.ok && data.prep) keep('s_prep_' + key, data);
+      else if (hit && hit.ok && hit.prep) return;   // keep what is on screen
+      paintStudentPrep(key, data);
+    }).catch(function () {
+      if (currentStudent && currentStudent.key === key && !(hit && hit.ok)) $('stu-prep').innerHTML = '<div class="empty">Network error loading session prep.</div>';
+    });
+  }
+
+  function paintStudentPrep(key, data) {
+    {
       if (!data || !data.ok || !data.prep) {
         /* Say why, with the fix: each of these has a different one, and a
            bare "could not load" left Luca guessing (2026-09-13). */
@@ -2411,9 +2579,7 @@
         if (window.console && console.error) console.error('[admin] session prep render failed:', err);
         $('stu-prep').innerHTML = '<div class="empty">Loaded, but could not draw session prep. Details are in the browser console.</div>';
       }
-    }).catch(function () {
-      if (currentStudent && currentStudent.key === key) $('stu-prep').innerHTML = '<div class="empty">Network error loading session prep.</div>';
-    });
+    }
   }
 
   /* ═══ BEHAVIOUR PATTERNS ═══ pooled over the last 90 days (prep.gs's
@@ -2582,12 +2748,49 @@
       return;
     }
     $('stu-prep').innerHTML = '<div class="prep-stats">' + stats.join('') + '</div>' +
+      renderTimeBreakdown(snap, mins) +
       nextHtml + hwHtml + renderBehaviorPatterns(p.behavior, p.behaviorError) + topics + (note ? '<p class="prep-note">' + note + '</p>' : '');
   }
 
+  /* WHERE THE TIME WENT (Luca, 2026-09-25): the week's active minutes by
+     part of the portal, biggest first, as bars. Active means touching the
+     page, and moving around the portal (Home, Settings) earns nothing. Only
+     visits since this was added carry a breakdown, so the bars can add up
+     to less than the total at first; that gap is labelled, not hidden. */
+  function renderTimeBreakdown(snap, mins) {
+    var areas = snap && snap.portalAreas;
+    var names = areas ? Object.keys(areas).filter(function (a) { return areas[a] > 0; }) : [];
+    if (!names.length) return '';
+    names.sort(function (a, b) { return areas[b] - areas[a]; });
+    var total = names.reduce(function (n, a) { return n + areas[a]; }, 0);
+    var max = areas[names[0]];
+    var rows = names.map(function (a) {
+      return '<div class="tb-row"><span class="tb-name">' + escHtml(a) + '</span>' +
+        '<span class="tb-bar"><i style="width:' + Math.max(4, Math.round(100 * areas[a] / max)) + '%"></i></span>' +
+        '<span class="tb-min">' + mins(areas[a]) + '</span></div>';
+    }).join('');
+    var gap = Math.round((snap.portalMin || 0) - total);
+    return '<div class="time-breakdown"><div class="tb-hed">Where the time went</div>' + rows +
+      (gap >= 5 ? '<div class="tb-note">' + mins(gap) + ' from earlier visits, before the breakdown was recorded.</div>' : '') + '</div>';
+  }
+
   function loadStudentDetail(key) {
+    var hit = kept('s_detail_' + key);
+    if (hit && hit.ok) paintStudentDetail(key, hit);
     return postToBackend({ action: 'getStudentDetail', adminKey: adminKey(), key: key }).then(function (data) {
       if (!currentStudent || currentStudent.key !== key) return; // navigated away mid-flight
+      if (data && data.ok) keep('s_detail_' + key, data);
+      if ((!data || !data.ok) && hit && hit.ok) return;   // keep what is on screen
+      paintStudentDetail(key, data);
+    }).catch(function () {
+      if (!currentStudent || currentStudent.key !== key || (hit && hit.ok)) return;
+      $('stu-meta').innerHTML = '<span style="color:var(--red);">Network error loading this student.</span>';
+      $('stu-details').innerHTML = '<dd class="dim">Network error loading this student&rsquo;s details.</dd>';
+    });
+  }
+
+  function paintStudentDetail(key, data) {
+    {
       if (!data || !data.ok) {
         $('stu-meta').innerHTML = '<span style="color:var(--red);">Could not load this student.</span>';
         $('stu-attempts').innerHTML = '<tr><td colspan="5" class="empty">Could not load their test reports.</td></tr>';
@@ -2621,11 +2824,7 @@
         if (window.console && console.error) console.error('[admin] student render failed:', err);
         $('stu-meta').innerHTML = '<span style="color:var(--red);">Loaded this student, but could not draw the page. Details are in the browser console.</span>';
       }
-    }).catch(function () {
-      if (!currentStudent || currentStudent.key !== key) return;
-      $('stu-meta').innerHTML = '<span style="color:var(--red);">Network error loading this student.</span>';
-      $('stu-details').innerHTML = '<dd class="dim">Network error loading this student&rsquo;s details.</dd>';
-    });
+    }
   }
 
   /* The header carries only what matters every visit (for an SAT student:
@@ -3337,6 +3536,12 @@
         // this origin's storage or this window.
         frame.setAttribute('sandbox', 'allow-scripts allow-modals allow-popups allow-downloads');
         frame.src = reportViewerLink;
+        // Flags from inside the report (report.html asks this page to send them).
+        frame.addEventListener('load', function () {
+          try { frame.contentWindow.postMessage({ type: 'mt-admin-flag-mode' }, '*'); } catch (e) {}
+        });
+        reportFrame = frame;
+        reportFrameKey = currentStudent.key;
         wrap.innerHTML = '';
         wrap.appendChild(frame);
       })
@@ -3371,7 +3576,6 @@
      day, which is the whole reason they're on this grid.
      ═══════════════════════════════════════════════════════════════════ */
   var schedCalendar = null;
-  var allCalendar = null;
   var hwUndated = [];
 
   function firstName(name) { return String(name || '').trim().split(/\s+/)[0] || ''; }
@@ -3388,7 +3592,7 @@
   // few seconds — for things with no modal open to report into.
   var calNoteTimer = null;
   function flashCalNote(msg) {
-    var el = currentView === 'allcal' ? $('allcal-note') : $('hw-cal-note');
+    var el = $('hw-cal-note');
     setCalNote(el, msg);
     if (calNoteTimer) clearTimeout(calNoteTimer);
     calNoteTimer = setTimeout(function () { setCalNote(el, ''); }, 5000);
@@ -3484,7 +3688,6 @@
      costs one refetch. */
   function activeCalendar() {
     if (currentView === 'student') return schedCalendar;
-    if (currentView === 'allcal') return allCalendar;
     return null;
   }
 
@@ -3500,7 +3703,7 @@
   // nothing will match.
   var optimisticSeq = 0;
   function optimisticEvents(spec) {
-    var isAll = currentView === 'allcal';
+    var isAll = false;   // the all-students calendar is gone; kept so the event shape stays one function
     var color = isAll ? studentColor(spec.studentKey) : null;
     return (spec.dates || []).map(function (day) {
       return {
@@ -3559,7 +3762,6 @@
 
   function refreshActiveCalendar() {
     if (schedCalendar && currentView === 'student') schedCalendar.refetchEvents();
-    if (allCalendar && currentView === 'allcal') allCalendar.refetchEvents();
     // The roster's "x of y done" is now stale, but getRoster is the most
     // expensive call here and the roster isn't on screen. Mark it and reload
     // once on the way back.
@@ -3705,6 +3907,9 @@
     var host = $('hw-next');
     var now = new Date();
     var end = new Date(now.getTime() + 90 * 86400000);
+    // The roster already knows the next session: say it now, then check.
+    var known = nextSessionState === 'ok' && nextSessionByKey[key];
+    if (known) paintNextSession(key, { startIso: new Date(known.ms).toISOString(), allDay: known.allDay });
     postToBackend({ action: 'getAdminCalendar', adminKey: adminKey(), key: key, start: toDateStr(now), end: toDateStr(end) })
       .then(function (data) {
         if (!currentStudent || currentStudent.key !== key) return;
@@ -3721,87 +3926,54 @@
           host.innerHTML = '<span class="ns-none">No upcoming session on the calendar matching <b>' + escHtml(firstName(currentStudent.name)) + '</b>.</span>';
           return;
         }
-        host.innerHTML = '<span>Next session: <b>' + escHtml(formatSessionWhen(next)) + '</b></span>' +
-          '<button type="button" class="mini solid" id="hw-assign-next">Assign for that day</button>';
-        $('hw-assign-next').addEventListener('click', function () {
-          selectTab('homework');
-          openCreateModal([isoToDateStr(next.startIso)], currentStudent.key, currentStudent.name, '', 'Due the day of their next session');
-        });
+        paintNextSession(key, next);
       })
       .catch(function () {
-        if (currentStudent && currentStudent.key === key) host.innerHTML = '<span class="ns-none">Could not reach the calendar.</span>';
+        if (currentStudent && currentStudent.key === key && !known) host.innerHTML = '<span class="ns-none">Could not reach the calendar.</span>';
       });
   }
-
-  /* ── everyone ────────────────────────────────────────────────────── */
-  function openAllCalendar() {
-    showView('allcal');
-    if (!allCalendar) initAllCalendar();
-    else { allCalendar.updateSize(); allCalendar.refetchEvents(); }
-  }
-
-  function initAllCalendar() {
-    allCalendar = new FullCalendar.Calendar($('allcal-calendar'), {
-      initialView: 'timeGridWeek',
-      headerToolbar: { left: 'prev,next today', center: 'title', right: 'timeGridWeek,dayGridMonth' },
-      height: 'auto',
-      editable: false,
-      nowIndicator: true,
-      slotMinTime: '07:00:00',
-      slotMaxTime: '22:00:00',
-      expandRows: true,
-      dayMaxEvents: 5,
-      eventDidMount: function (info) { info.el.title = info.event.title; },
-      eventSourceFailure: function () { setCalNote($('allcal-note'), LOAD_NOTE); },
-      events: fetchAllEvents,
-      eventClick: function (info) {
-        var p = info.event.extendedProps;
-        if (p.pending) { flashCalNote('Still saving that one — give it a second.'); return; }
-        if (p.kind === 'session') {
-          if (!p.matched.length) return; // a session with no student in the title — nothing to assign to
-          var who = p.matched[0];
-          // Two students can share a first name and the title is the only link to
-          // a roster row, so say which one this assigns to rather than guessing.
-          openCreateModal([toDateStr(info.event.start)], who.key, who.name, '',
-            p.matched.length > 1 ? 'Several students match this session title' : 'Due the day of this session');
-        } else {
-          var student = allStudents.find(function (s) { return s.key === p.studentKey; });
-          if (student) openStudent(student, 'homework');
-        }
-      }
+  function paintNextSession(key, next) {
+    if (!currentStudent || currentStudent.key !== key) return;
+    $('hw-next').innerHTML = '<span>Next session: <b>' + escHtml(formatSessionWhen(next)) + '</b></span>' +
+      '<button type="button" class="mini solid" id="hw-assign-next">Assign for that day</button>';
+    $('hw-assign-next').addEventListener('click', function () {
+      selectTab('homework');
+      openCreateModal([isoToDateStr(next.startIso)], currentStudent.key, currentStudent.name, '', 'Due the day of their next session');
     });
-    allCalendar.render();
   }
 
-  function fetchAllEvents(info, success, failure) {
-    postToBackend({ action: 'getAdminCalendar', adminKey: adminKey(), start: info.startStr, end: info.endStr })
-      .then(function (data) {
-        if (!data || !data.ok) { failure(new Error(data && data.error ? data.error : 'load_failed')); return; }
-        setCalNote($('allcal-note'), data.calendarError ? ICS_NOTE : '');
-        noteBackendCapability(data);
-        renderAllLegend(data);
-        success(buildEvents(data, true));
-        clearPendingEvents(allCalendar);
-      })
-      .catch(function (err) { failure(err); });
+  /* HEAD START: once the roster knows who is in today and tomorrow, their
+     pages are fetched in the background, one read at a time, so opening
+     them before a session is instant. At most once an hour per student. */
+  var prefetchBusy = false;
+  function prefetchSoonStudents() {
+    if (prefetchBusy) return;
+    var horizon = Date.now() + 36 * 3600000;
+    var keys = Object.keys(nextSessionByKey).filter(function (k) { return nextSessionByKey[k].ms <= horizon; })
+      .sort(function (a, b) { return nextSessionByKey[a].ms - nextSessionByKey[b].ms; }).slice(0, 6);
+    var jobs = [];
+    keys.forEach(function (k) {
+      var last = kept('s_prefetched_' + k);
+      if (last && Date.now() - last < 3600000) return;
+      jobs.push({ k: k, action: 'getStudentDetail', name: 's_detail_' + k, ok: function (d) { return d && d.ok; } });
+      jobs.push({ k: k, action: 'adminStudentPrep', name: 's_prep_' + k, ok: function (d) { return d && d.ok && d.prep; } });
+      jobs.push({ k: k, action: 'fridayNoteGet', name: 's_note_' + k, ok: function (d) { return d && d.ok; } });
+    });
+    if (!jobs.length) return;
+    prefetchBusy = true;
+    (function next(i) {
+      if (i >= jobs.length || document.hidden) { prefetchBusy = false; return; }
+      var j = jobs[i];
+      postToBackend({ action: j.action, adminKey: adminKey(), key: j.k }).then(function (d) {
+        if (j.ok(d)) keep(j.name, d);
+        if (j.action === 'fridayNoteGet') keep('s_prefetched_' + j.k, Date.now());
+      }, function () {}).then(function () { setTimeout(function () { next(i + 1); }, 400); });
+    })(0);
   }
 
-  // Only the students actually on screen this week get a swatch — a
-  // legend listing the whole roster every week would be longer than the
-  // calendar it explains.
-  function renderAllLegend(data) {
-    var seen = {};
-    (data.sessions || []).forEach(function (s) {
-      (s.matched || []).forEach(function (m) { seen[m.key] = m.name; });
-    });
-    (data.assignments || []).forEach(function (a) { if (a.key) seen[a.key] = a.studentName || a.key; });
-    var names = Object.keys(seen).sort(function (a, b) { return String(seen[a]).localeCompare(String(seen[b])); });
-    var parts = names.map(function (k) {
-      return '<span><i class="swatch" style="background:' + studentColor(k) + '"></i>' + escHtml(seen[k]) + '</span>';
-    });
-    parts.push('<span style="color:var(--faint);">Solid = session &middot; Outlined = homework due</span>');
-    $('allcal-legend').innerHTML = parts.join('');
-  }
+  /* The all-students Calendar view was removed (Luca, 2026-09-25: "drop the
+     calendar viewer since I just have my apple calendar"). Each student's
+     Schedule tab is unchanged. */
 
   /* ═══════════════════════════════════════════════════════════════════
      TASK MODAL — create on selected day(s), or edit one existing row
@@ -4403,8 +4575,11 @@
       // everything it is given: the same HTML the family receives.
       $('fp-view').innerHTML = '<p class="fp-reason">' + escHtml(i.reason || '') + '</p>' +
         '<div class="bc-meta"><b>To</b> ' + (i.to && i.to.length ? escHtml(i.to.join(', ')) : '(no address on file)') +
-        '<br><b>Subject</b> ' + escHtml(i.subject) + '</div><div class="bc-mail">' + i.html + '</div>' +
+        '<br><b>Subject</b> ' + escHtml(i.subject) + '</div><div class="bc-mail"><iframe title="Email preview" sandbox="allow-same-origin"></iframe></div>' +
         '<div style="margin-top:0.8rem;">' + open + '</div>';
+      var f = $('fp-view').querySelector('.bc-mail iframe');
+      f.onload = function () { try { f.style.height = (f.contentDocument.documentElement.scrollHeight + 4) + 'px'; } catch (e) {} };
+      f.srcdoc = i.html;
     }
     if (scroll) $('fp-card').scrollIntoView({ block: 'start' });
   }
@@ -4519,7 +4694,11 @@
     $('bc-preview').innerHTML =
       '<div class="bc-meta"><b>To</b> ' + (p.to.length ? escHtml(p.to.join(', ')) : '(no address on file)') +
       '<br><b>Subject</b> ' + escHtml(p.subject) + '</div>' +
-      '<div class="bc-mail" id="bc-mail">' + p.html + '</div>';
+      '<div class="bc-mail" id="bc-mail"><iframe title="Email preview" sandbox="allow-same-origin"></iframe></div>';
+    // In a frame of its own: the email's own styles stay out of this page.
+    var f = $('bc-mail').querySelector('iframe');
+    f.onload = function () { try { f.style.height = (f.contentDocument.documentElement.scrollHeight + 4) + 'px'; } catch (e) {} };
+    f.srcdoc = p.html;
   }
 
   function bcRenderHistory(list) {

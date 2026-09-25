@@ -24,7 +24,11 @@
   // backend-url.js, loaded first by every page that includes this file.
   var URL_ = window.APPS_SCRIPT_URL || '';
   var SESSION_KEY = 'moretti_admin_key';   // the entry admin.html writes on unlock
-  var POLL_MS = 60000;
+  /* Every five minutes, and only while the page is in front (Luca,
+     2026-09-25, on speed): each check is a full roster read, and once a
+     minute it competed with whatever he had just clicked. Opening the
+     panel, and every action in it, still refreshes at once. */
+  var POLL_MS = 5 * 60000;
   var SOURCES = ['Website', 'Phone call', 'Text message', 'Facebook Messenger', 'Referral', 'In person', 'Other'];
   /* Where a pre-approved student is sent: one plain URL for everyone, since
      rows are matched on the Google address at sign-in. Hardcoded rather
@@ -1355,7 +1359,8 @@
     if (!root) return;
     var show = !gateIsUp() && !!adminKey();
     root.style.display = show ? '' : 'none';
-    if (show && !wasShown) { wasShown = true; refresh(); }
+    // A few seconds after unlocking, so the roster the page is drawing goes first.
+    if (show && !wasShown) { wasShown = true; setTimeout(function () { refresh(); }, 4000); }
     if (!show) wasShown = false;
   }
 
@@ -1374,5 +1379,5 @@
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
-  setInterval(refresh, POLL_MS);
+  setInterval(function () { if (!document.hidden) refresh(); }, POLL_MS);
 })();

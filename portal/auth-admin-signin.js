@@ -33,15 +33,29 @@
      Mirror any stored session into the host page's entry now, before its
      own script runs, or the page shows its gate needlessly. An expired
      token just fails the page's first call and drops back to this gate. */
-  /* sessionStorage, not localStorage. The admin token used to live in
-     localStorage for its full 14 days, readable by script on any page of
-     this origin in any tab -- so one injection anywhere on the site handed
-     over the roster. Now it lasts as long as the tab, and the old copy is
-     removed on the first load after this change. */
-  try { localStorage.removeItem(STORE); } catch (e) {}
+  /* SIGN IN ONCE (Luca, 2026-09-25: "make the admin sign in a one-time
+     thing"). The session is kept in localStorage, so a new tab, a restart
+     or a new day opens straight in, until it runs out (ADMIN_SESSION_TTL_DAYS
+     in auth.gs) or Sign out is pressed. It was sessionStorage for safety
+     against script injected elsewhere on the site; the site loads no
+     third-party script on its pages, and the token only works for an
+     address still on ADMIN_EMAILS, so taking an address off that list
+     ends every session it holds. */
   var stored = null;
-  try { stored = sessionStorage.getItem(STORE); } catch (e) {}
+  try { stored = localStorage.getItem(STORE) || sessionStorage.getItem(STORE); } catch (e) {}
+  // The token's own expiry, read locally: an expired one goes straight to
+  // the gate instead of costing a request to find out.
+  function expiresAt(tok) {
+    try {
+      var body = String(tok || '').split('.')[0].replace(/-/g, '+').replace(/_/g, '/');
+      while (body.length % 4) body += '=';
+      return Number(JSON.parse(atob(body)).x || 0) * 1000;
+    } catch (e) { return 0; }
+  }
+  if (stored && expiresAt(stored) < Date.now() + 60000) stored = null;
   if (stored) {
+    try { localStorage.setItem(STORE, stored); } catch (e) {}
+    try { sessionStorage.setItem(STORE, stored); } catch (e) {}
     try { sessionStorage.setItem(PAGE_KEY, stored); } catch (e) {}
   }
 
@@ -49,6 +63,7 @@
     try { localStorage.removeItem(STORE); } catch (e) {}
     try { sessionStorage.removeItem(STORE); } catch (e) {}
     try { sessionStorage.removeItem(PAGE_KEY); } catch (e) {}
+    try { if (window.mtaAdminForgetKept) window.mtaAdminForgetKept(); } catch (e) {}
   }
 
   /* Apps Script's redirect to its echo host intermittently answers a 404 or
@@ -170,6 +185,7 @@
         }
         return;
       }
+      try { localStorage.setItem(STORE, data.session); } catch (e) {}
       try { sessionStorage.setItem(STORE, data.session); } catch (e) {}
       try { sessionStorage.setItem(PAGE_KEY, data.session); } catch (e) {}
       // Reload rather than driving the host page's unlock: its boot code
@@ -179,26 +195,17 @@
     });
   }
 
-  /* Verify whatever we mirrored in. Runs alongside the host page's first
-     request, so a good session costs nothing visible; a bad one shows the
-     gate instead of that page's misleading "wrong admin key" error. */
+  /* No check on the way in: it used to be a whole roster read, just to
+     learn the session was fine, racing the page's own roster read for
+     Google's time. The page's first request already answers it, and a
+     session the backend refuses sends the page to mtaAdminSignOut. */
   function start() {
     ensureHost();
-    if (!stored) { showGate(); return; }
-    post({ action: 'accessRoster', adminKey: stored }).then(function (data) {
-      if (data && data.ok) return;                          // signed in, nothing to do
-      // ONLY an actual auth failure signs someone out. A network blip, sheet
-      // error or cold-start timeout does not mean the session is bad, and
-      // sending the admin back to the gate for one would loop, since signing
-      // in again cannot fix a broken sheet.
-      if (!data || data.error !== 'unauthorized') return;
-      clearSession();
-      showGate();
-    });
+    if (!stored) showGate();
   }
 
   window.mtaAdminSignOut = function () { clearSession(); window.location.reload(); };
-  window.mtaAdminSession = function () { try { return sessionStorage.getItem(STORE); } catch (e) { return null; } };
+  window.mtaAdminSession = function () { try { return localStorage.getItem(STORE) || sessionStorage.getItem(STORE); } catch (e) { return null; } };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
   else start();

@@ -123,7 +123,7 @@
     overlay.innerHTML =
       '<div class="qf-box" role="dialog" aria-modal="true" aria-labelledby="qf-title">' +
         '<h2 id="qf-title">Report a problem with this question</h2>' +
-        '<p>This goes to Luca, not into your test. Tell him what looks wrong and he\'ll check it and fix it. ' +
+        '<p class="qf-intro">This goes to Luca, not into your test. Tell him what looks wrong and he\'ll check it and fix it. ' +
         '(To come back to a question yourself, use Mark for Review.)</p>' +
         '<div class="qf-opts">' + opts + '</div>' +
         '<textarea class="qf-note" maxlength="600" placeholder="Anything else? (optional)"></textarea>' +
@@ -132,6 +132,11 @@
         '<button type="button" class="qf-send" disabled>Send report</button></div>' +
       '</div>';
     document.body.appendChild(overlay);
+    /* window.portalFlagConfig: a page that is not the student portal (the
+       report as the admin page shows it) says who is flagging and how the
+       flag travels. */
+    var cfg = window.portalFlagConfig || {};
+    if (cfg.intro) overlay.querySelector('.qf-intro').textContent = cfg.intro;
     box = overlay.querySelector('.qf-box');
     sendBtn = overlay.querySelector('.qf-send');
     noteEl = overlay.querySelector('.qf-note');
@@ -176,7 +181,8 @@
     if (!reason || !activeCtx) return;
     var ctx = activeCtx, btn = activeBtn;
     var url = window.APPS_SCRIPT_URL;
-    if (!url) { showErr(); return; }
+    var cfgSend = window.portalFlagConfig && window.portalFlagConfig.send;
+    if (!url && !cfgSend) { showErr(); return; }
     sendBtn.disabled = true;
     sendBtn.textContent = 'Sending...';
     var payload = {
@@ -192,8 +198,8 @@
     var tries = 0;
     (function attempt() {
       tries++;
-      fetch(url, { method: 'POST', body: JSON.stringify(payload) })
-        .then(function (r) { return r.json(); })
+      (cfgSend ? Promise.resolve(cfgSend(payload))
+               : fetch(url, { method: 'POST', body: JSON.stringify(payload) }).then(function (r) { return r.json(); }))
         .then(function (d) {
           if (d && d.ok) {
             markFlagged(idFor(ctx));
