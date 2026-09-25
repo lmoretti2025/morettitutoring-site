@@ -794,6 +794,8 @@
      other months' days faded; homework and sessions as soft chips told
      apart by a coloured edge rather than solid blocks of colour. */
   .cal-wrap { background: none; border: none; box-shadow: none; padding: 0; border-radius: 0; }
+  /* The roster's "table { min-width: 780px }" must not reach the calendar's own tables. */
+  .cal-host table { min-width: 0; }
   #tab-homework { scroll-margin-top: 80px; }
   .cal-host { --fc-border-color: rgba(17,17,17,0.07); --fc-today-bg-color: transparent; --fc-neutral-bg-color: #fff; }
   .cal-host .fc-scrollgrid { border: none !important; }
@@ -840,6 +842,75 @@
   .cal-host .fc-timegrid-slot-label-cushion, .cal-host .fc-timegrid-axis-cushion { font-size: 0.68rem; color: rgba(17,17,17,0.45); }
   .cal-host .fc-timegrid-now-indicator-line { border-color: var(--red); }
   .cal-legend .swatch { border-radius: 3px; }
+
+  /* ═══ PHONE (Luca, 2026-09-25: "make the admin page work well on my
+     phone") ═══ A slim header in one row, the summary in one row, filters
+     that scroll sideways instead of wrapping, the roster as one card per
+     student, and a calendar that fits the screen. */
+  @media (max-width: 640px) {
+    header { padding: 0.5rem 0.75rem; gap: 0.4rem; flex-wrap: nowrap !important; flex-direction: row !important; align-items: center !important; }
+    header .brand { flex: none; }
+    #topnav { flex-wrap: nowrap !important; margin: 0 !important; width: auto !important; }
+    header .brand-logo { height: 22px; }
+    header .brand small { display: none; }
+    #topnav { gap: 0.15rem; }
+    .nav-btn { font-size: 0.72rem; padding: 0.4rem 0.55rem; }
+    .nav-btn.nav-refresh { margin-left: 0.2rem; padding: 0.4rem; }
+    .nav-btn.nav-refresh .nav-refresh-label { display: none; }
+    .nav-btn.nav-refresh::before { left: -0.25rem; }
+    main { padding: 1rem 0.85rem 3rem; }
+
+    .summary-row { flex-wrap: nowrap; gap: 1.4rem; margin-bottom: 1rem; padding-bottom: 0.9rem; }
+    .summary-tile .num { font-size: 1.45rem; }
+    .summary-tile .lbl { font-size: 0.56rem; letter-spacing: 0.1em; }
+    .filter-row { gap: 0.6rem; }
+    #prog-filter { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; max-width: 100%; padding-bottom: 2px; }
+    #prog-filter::-webkit-scrollbar { display: none; }
+    #prog-filter button { flex: none; }
+
+    /* The roster: one card per student. */
+    .roster-table-scroll { overflow: visible; }
+    .roster-table-wrap table { min-width: 0; }
+    .roster-table-wrap thead { display: none; }
+    .roster-table-wrap tbody tr { display: grid; grid-template-columns: 1fr 1fr; gap: 0.35rem 1rem; padding: 0.95rem 0.1rem; border-bottom: 1px solid rgba(17,17,17,0.08); }
+    .roster-table-wrap tbody td { display: block; padding: 0; border: none; }
+    .roster-table-wrap tbody td.name-cell { grid-column: 1 / -1; }
+    .roster-table-wrap tbody td.c-act { grid-column: 1 / -1; }
+    .roster-table-wrap tbody td[data-label]::before { content: attr(data-label); display: block; font-size: 0.58rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(17,17,17,0.38); margin-bottom: 0.1rem; }
+    .roster-table-wrap tbody td.c-actions { grid-column: 1 / -1; }
+    .roster-table-wrap .row-actions { justify-content: flex-start; gap: 0.4rem; }
+    .roster-table-wrap .row-actions .mini { padding: 0.4rem 0.9rem; font-size: 0.76rem; }
+    .roster-table-wrap .mini.icon-btn { opacity: 1; margin-left: auto; }
+    .roster-table-wrap tbody tr:hover { background: none; }
+
+    /* A student's page. */
+    .stu-head { flex-direction: column; align-items: flex-start; gap: 0.6rem; }
+    .stu-actions { width: 100%; display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .stu-actions .mini { flex: 1 1 auto; text-align: center; padding: 0.45rem 0.7rem; }
+    .week-grid, .scores-grid { gap: 1.5rem; }
+
+    /* The calendar fits the screen: no sideways scroll, compact days. */
+    .cal-wrap { overflow: visible; }
+    .cal-host { min-width: 0 !important; }
+    .cal-host .fc-toolbar.fc-header-toolbar { gap: 0.4rem; flex-wrap: nowrap; }
+    .cal-host .fc-toolbar-title { font-size: 0.98rem; }
+    .cal-host .fc-button { padding: 0.32rem 0.55rem; font-size: 0.7rem; }
+    .cal-host .fc-prev-button, .cal-host .fc-next-button { width: 30px; height: 30px; }
+    .cal-host .fc-col-header-cell-cushion { font-size: 0.55rem; letter-spacing: 0.06em; }
+    .cal-host .fc-daygrid-day-frame { min-height: 64px; }
+    .cal-host .fc-daygrid-day-top { padding: 0.2rem 0.2rem 0; }
+    .cal-host .fc-daygrid-day-number { font-size: 0.7rem; width: 1.3rem; height: 1.3rem; }
+    .cal-host .fc-daygrid-event-harness { margin: 0 2px 2px; }
+    .cal-host .sched-event, .cal-host .sess-event { font-size: 0.6rem; padding: 1px 3px; border-left-width: 2px !important; }
+    .cal-host .fc-daygrid-event .fc-event-time { display: none; }
+    .cal-host .fc-list { border: none; }
+    .cal-host .fc-list-day-cushion { background: #fff; font-size: 0.72rem; }
+    .cal-host .fc-list-event td { font-size: 0.82rem; }
+    .cal-host .sched-event .fc-list-event-dot { border-color: var(--red); }
+    .cal-host .sched-event.sched-event-done .fc-list-event-dot { border-color: rgba(17,17,17,0.25); }
+    .cal-host .sess-event .fc-list-event-dot { border-color: var(--blue); }
+    .sched-hint { display: none; }
+  }
 </style>
 </head>
 <body>
@@ -1809,10 +1880,10 @@
           '<button type="button" class="student-link" data-key="' + k + '" data-tab="week">' + escHtml(s.name) + '</button>' +
           (prog !== 'sat' && progFilter === 'all' ? '<span class="prog-tag prog-' + prog + '">' + PROGRAMS[prog].tag + '</span>' : '') +
           '<span class="key">' + k + '</span></td>' +
-        '<td>' + scoreCell + '</td>' +
-        '<td class="next-cell">' + nextCell + '</td>' +
-        '<td>' + activityCell + '</td>' +
-        '<td><div class="row-actions">' +
+        '<td class="c-score" data-label="Composite">' + scoreCell + '</td>' +
+        '<td class="next-cell" data-label="Next session">' + nextCell + '</td>' +
+        '<td class="c-act" data-label="Last activity">' + activityCell + '</td>' +
+        '<td class="c-actions"><div class="row-actions">' +
           // The name opens the student; SAT students also get a way straight to scores.
           (prog === 'sat' ? '<button type="button" class="mini student-link" data-key="' + k + '" data-tab="scores">Scores</button>' : '') +
           '<button type="button" class="mini solid student-link" data-key="' + k + '" data-tab="homework">Schedule</button>' +
@@ -3950,10 +4021,17 @@
   }
 
   /* ── one student ─────────────────────────────────────────────────── */
+  var PHONE_Q = window.matchMedia ? window.matchMedia('(max-width: 640px)') : { matches: false };
   function initSchedCalendar() {
     schedCalendar = new FullCalendar.Calendar($('sched-calendar'), {
       initialView: 'dayGridMonth',
-      headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek' },
+      /* On a phone (Luca, 2026-09-25: "work well on my phone") the month is
+         kept but compact, and the week becomes a list, which reads on a
+         narrow screen where a timed grid cannot. */
+      headerToolbar: PHONE_Q.matches
+        ? { left: 'prev,next', center: 'title', right: 'dayGridMonth,listWeek' }
+        : { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek' },
+      buttonText: { listWeek: 'List', dayGridMonth: 'Month', timeGridWeek: 'Week', today: 'Today' },
       fixedWeekRows: false,          // only the weeks the month needs, not a spare week of the next one
       // Sessions and office hours always sit on top of a day, then homework (Luca, 2026-09-25).
       eventOrder: 'rank,start,title',
