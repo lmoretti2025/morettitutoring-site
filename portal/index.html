@@ -7888,6 +7888,16 @@ window.Portal = {
       if (e && e.attemptId && seen[e.attemptId]) return;
       merged.push(e);
     });
+    /* OLDEST FIRST, BY DATE. The server-only tests were appended after this
+       device's, so on a second device the list was out of order, and
+       everything reading it by position went wrong: scoreChange compared the
+       wrong "first" and "last" tests (a +30/week student read "real drop" 81%
+       of the time), the chart drew its bars out of order, and the Latest
+       Test card showed whichever test came last in the list (stats audit,
+       2026-09-25). An undated entry sorts first, so it can never pose as the
+       latest test. */
+    var dateKey = function (e) { var t = Date.parse(e && e.date); return isNaN(t) ? -Infinity : t; };
+    merged.sort(function (a, b) { return dateKey(a) - dateKey(b); });
     /* THE FIRST DIAGNOSTIC IS LUCA'S UNTIL THE STUDENT IS ON BOARD. It goes
        to him first; once a session is held or booked on his calendar the
        backend says reportsOpen (prep.gs reportsOpenFor_) and from then on
