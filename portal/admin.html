@@ -787,6 +787,59 @@
   #prog-filter .mta-fluid-pill { border-radius: 8px; }
   .tb-bar i { background: #111; }
   .tb-bar { background: rgba(17,17,17,0.07); }
+
+  /* ═══ CLEAN CALENDAR (Luca, 2026-09-25: "just make it a little cleaner")
+     ═══ Flat, no box around it; faint grid lines with no outer frame; the
+     month title on the left with quiet round arrows; today as a red disc;
+     other months' days faded; homework and sessions as soft chips told
+     apart by a coloured edge rather than solid blocks of colour. */
+  .cal-wrap { background: none; border: none; box-shadow: none; padding: 0; border-radius: 0; }
+  #tab-homework { scroll-margin-top: 80px; }
+  .cal-host { --fc-border-color: rgba(17,17,17,0.07); --fc-today-bg-color: transparent; --fc-neutral-bg-color: #fff; }
+  .cal-host .fc-scrollgrid { border: none !important; }
+  .cal-host .fc-scrollgrid td:last-of-type, .cal-host .fc-scrollgrid th:last-of-type { border-right: none; }
+  .cal-host .fc-col-header-cell { border: none; border-bottom: 1px solid rgba(17,17,17,0.1) !important; }
+  .cal-host .fc-col-header-cell-cushion { font-size: 0.64rem; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; color: rgba(17,17,17,0.4); padding: 0.55rem 0; text-decoration: none; }
+  .cal-host .fc-toolbar.fc-header-toolbar { margin-bottom: 1rem; align-items: center; }
+  .cal-host .fc-toolbar-title { font-family: var(--hel); font-weight: 600; font-size: 1.15rem; letter-spacing: -0.02em; }
+  .cal-host .fc-button { background: #fff !important; border: 1px solid rgba(17,17,17,0.12) !important; color: #111 !important; border-radius: 8px !important;
+    font-weight: 600; font-size: 0.76rem; padding: 0.38rem 0.75rem; transition: border-color 0.15s, background 0.15s, transform 0.15s var(--ease); }
+  .cal-host .fc-button:hover { border-color: #111 !important; }
+  .cal-host .fc-button:active { transform: scale(0.96); }
+  .cal-host .fc-button:disabled { opacity: 0.35; }
+  .cal-host .fc-prev-button, .cal-host .fc-next-button { width: 34px; height: 34px; padding: 0 !important; border-radius: 999px !important; display: inline-flex; align-items: center; justify-content: center; }
+  .cal-host .fc-button-group > .fc-button { border-radius: 0 !important; }
+  .cal-host .fc-button-group > .fc-button:first-child { border-radius: 8px 0 0 8px !important; }
+  .cal-host .fc-button-group > .fc-button:last-child { border-radius: 0 8px 8px 0 !important; }
+  .cal-host .fc-prev-button, .cal-host .fc-next-button { border-radius: 999px !important; margin-right: 0.3rem; }
+  .cal-host .fc-button-primary:not(:disabled).fc-button-active { background: #111 !important; border-color: #111 !important; color: #fff !important; }
+  .cal-host .fc-today-button { margin-left: 0.35rem !important; }
+  .cal-host .fc-daygrid-day-top { flex-direction: row; padding: 0.35rem 0.4rem 0; }
+  .cal-host .fc-daygrid-day-number { font-size: 0.78rem; font-weight: 500; color: #111; padding: 0; width: 1.6rem; height: 1.6rem; display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; text-decoration: none; }
+  .cal-host .fc-day-other .fc-daygrid-day-number { color: rgba(17,17,17,0.25); }
+  .cal-host .fc-day-other { background: rgba(17,17,17,0.012); }
+  .cal-host .fc-daygrid-day.fc-day-today .fc-daygrid-day-number { background: var(--red); color: #fff; font-weight: 700; }
+  .cal-host .fc-daygrid-day-frame { min-height: 96px; }
+  .cal-host .fc-daygrid-day:hover { background: rgba(17,17,17,0.02); }
+  .cal-host .fc-daygrid-event-harness { margin: 0 0.3rem 3px; }
+  .cal-host .fc-daygrid-more-link { font-size: 0.7rem; font-weight: 600; color: rgba(17,17,17,0.5); padding-left: 0.4rem; }
+  /* Chips: homework in a soft red with a red edge; done ones grey and struck; sessions a soft blue. */
+  .cal-host .sched-event { background: rgba(176,39,28,0.08) !important; color: #7a1a12 !important; border: none !important; border-left: 3px solid var(--red) !important;
+    border-radius: 6px; padding: 2px 6px; font-size: 0.72rem; font-weight: 500; transition: background 0.15s, transform 0.15s var(--ease); }
+  .cal-host .sched-event .fc-event-main { color: inherit !important; }
+  .cal-host .sched-event:hover { background: rgba(176,39,28,0.14) !important; transform: translateY(-1px); }
+  .cal-host .sched-event.sched-event-done { background: rgba(17,17,17,0.04) !important; color: rgba(17,17,17,0.4) !important; border-left-color: rgba(17,17,17,0.2) !important; text-decoration: line-through; opacity: 1; }
+  .cal-host .sess-event { background: rgba(62,107,140,0.1) !important; color: #2b4f69 !important; border: none !important; border-left: 3px solid var(--blue) !important;
+    border-radius: 6px; padding: 2px 6px; font-size: 0.72rem; font-weight: 500; }
+  .cal-host .sess-event .fc-event-main, .cal-host .sess-event .fc-event-time { color: inherit !important; }
+  .cal-host .sess-event .fc-daygrid-event-dot { display: none; }
+  .cal-host .sess-event.sess-unmatched { background: rgba(17,17,17,0.05) !important; color: rgba(17,17,17,0.5) !important; border-left-color: rgba(17,17,17,0.2) !important; }
+  .cal-host .fc-event.is-pending { opacity: 0.55; }
+  .cal-host .fc-highlight { background: rgba(176,39,28,0.07); }
+  .cal-host .fc-timegrid-slot { height: 2.2em; }
+  .cal-host .fc-timegrid-slot-label-cushion, .cal-host .fc-timegrid-axis-cushion { font-size: 0.68rem; color: rgba(17,17,17,0.45); }
+  .cal-host .fc-timegrid-now-indicator-line { border-color: var(--red); }
+  .cal-legend .swatch { border-radius: 3px; }
 </style>
 </head>
 <body>
@@ -925,9 +978,9 @@
 
     <section id="tab-homework" style="display:none;">
       <div class="cal-legend">
-        <span><i class="swatch" style="background:var(--blue)"></i>Tutoring session</span>
-        <span><i class="swatch" style="background:var(--red)"></i>Homework due</span>
-        <span><i class="swatch" style="background:var(--faint)"></i>Done</span>
+        <span><i class="swatch" style="background:rgba(62,107,140,0.18);box-shadow:inset 3px 0 0 var(--blue)"></i>Tutoring session</span>
+        <span><i class="swatch" style="background:rgba(176,39,28,0.14);box-shadow:inset 3px 0 0 var(--red)"></i>Homework due</span>
+        <span><i class="swatch" style="background:rgba(17,17,17,0.06);box-shadow:inset 3px 0 0 rgba(17,17,17,0.2)"></i>Done</span>
       </div>
       <div class="cal-note" id="hw-cal-note" style="display:none;"></div>
       <div class="cal-wrap">
@@ -3895,6 +3948,7 @@
     schedCalendar = new FullCalendar.Calendar($('sched-calendar'), {
       initialView: 'dayGridMonth',
       headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek' },
+      fixedWeekRows: false,          // only the weeks the month needs, not a spare week of the next one
       height: 'auto',
       selectable: true,
       editable: true,
