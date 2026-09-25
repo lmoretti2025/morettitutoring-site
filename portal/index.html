@@ -3364,6 +3364,28 @@
     .cal-title { order: -1; flex: 1 1 100%; text-align: left; font-size: 1.3rem; }
   }
 
+  /* ═══ CLEANER CHIPS (Luca, 2026-09-25: keep the day boxes, "really just how
+     the assignments look") ═══ The same chips as the admin calendar:
+     homework in a soft red and sessions in a soft blue, each with a
+     coloured edge; done work grey and struck. Wider screens only: a phone
+     keeps its dots. */
+  @media (min-width: 781px) {
+    .cal-chip { border-radius: 6px; padding: 0.2rem 0.45rem 0.2rem 0.55rem; font-weight: 500; transition: background 0.15s, transform 0.15s var(--ease); }
+    .cal-chip:hover { transform: translateY(-1px); }
+    .cal-chip.task { background: rgba(176,39,28,0.08); color: #7a1a12; box-shadow: inset 3px 0 0 var(--red); }
+    .cal-chip.task:hover { background: rgba(176,39,28,0.14); }
+    .cal-chip.task.is-done { background: rgba(17,17,17,0.04); color: rgba(17,17,17,0.4); box-shadow: inset 3px 0 0 rgba(17,17,17,0.2); }
+    .cal-chip.sess { background: rgba(62,107,140,0.1); color: #2b4f69; box-shadow: inset 3px 0 0 #3E6B8C; }
+    .cal-chip.sess.is-oh { background: rgba(201,168,76,0.14); color: #6b551b; box-shadow: inset 3px 0 0 #C9A84C; }
+    /* The week view's cards, in the same language. */
+    .cal-session { background: rgba(62,107,140,0.1); box-shadow: inset 3px 0 0 #3E6B8C; border-radius: 8px; padding-left: 0.7rem; }
+    .cal-session.is-oh { background: rgba(201,168,76,0.14); box-shadow: inset 3px 0 0 #C9A84C; }
+    .cal-task { box-shadow: inset 3px 0 0 var(--red); border-radius: 8px; padding-left: 0.7rem; }
+    .cal-task:hover { box-shadow: inset 3px 0 0 var(--red), 0 4px 12px rgba(17,17,17,0.10); }
+    .cal-task.is-done { box-shadow: inset 3px 0 0 rgba(17,17,17,0.2); }
+    .cal-task.is-overdue { background: rgba(176,39,28,0.08); }
+  }
+
   /* ═══ RUSH ══════════════════════════════════════════════════════════ */
   .rush-decks { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 1rem; margin-top: 1.6rem; }
   @media (max-width: 720px) { .rush-decks { grid-template-columns: 1fr; } }
@@ -4486,8 +4508,8 @@ window.Portal = {
     </div>
 
     <div class="cal-legend">
-      <span><i style="background:rgba(176,39,28,0.35)"></i>Assigned work</span>
-      <span><i style="background:rgba(62,107,140,0.45)"></i>Tutoring session</span>
+      <span><i style="background:rgba(176,39,28,0.12);box-shadow:inset 3px 0 0 #B0271C"></i>Assigned work</span>
+      <span><i style="background:rgba(62,107,140,0.14);box-shadow:inset 3px 0 0 #3E6B8C"></i>Tutoring session</span>
       <span class="cal-legend-hint" style="color:var(--faint);">Tick something off as you finish it.</span>
     </div>
     <div class="cal-note" id="cal-note" style="display:none;"></div>
