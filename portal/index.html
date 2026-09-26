@@ -1420,6 +1420,8 @@
   .done-wrap { width: 100%; max-width: 760px; display: flex; flex-direction: column; align-items: center; gap: 2.5rem; }
   .done-panel { position: relative; overflow: hidden; }
   #done-view-results { margin-top: 1.5rem; }
+  /* Links styled as .key-btn: an <a> does not center its text the way a <button> does. */
+  .done-panel a.key-btn { text-align: center; text-decoration: none; }
   .done-secondary-btn { display: block; text-align: center; text-decoration: none; margin-top: 0.75rem; background: none; border: 1px solid var(--border); color: var(--mid); }
   .done-secondary-btn:hover { border-color: var(--gold); color: var(--text); }
 
@@ -5630,6 +5632,7 @@ window.Portal = {
 <script src="challenge-questions.js?v=20260926a"></script>
 <script src="grid-in.js?v=20260910a"></script>
 <script src="question-flag.js?v=20260922c"></script>
+<script src="report-tour.js?v=20260926a"></script>
 <script>
   /* practice-tests.js is ~2.6MB, so a blocking <script> delayed every later
      script (including the key-submit wiring). It loads here via an async
@@ -25053,6 +25056,8 @@ window.renderNativeReport = function (data) {
       buckets.method.forEach(function (e) { n[e.r.sk] = (n[e.r.sk] || 0) + 1; });
       return Object.keys(n).sort(function (a, b) { return n[b] - n[a]; }).slice(0, 2);
     })();
+    // The rows themselves, for the walkthrough (report-tour.js): its clock chart and per-section counts.
+    planInputs.buckets = buckets;
     var CAUSES = [
       { key: 'content', barLabel: 'wrong after real work',  name: 'Content', section: 'What to relearn',
         color: 'var(--red)', short: 'questions worked through and still missed' },
@@ -26237,6 +26242,17 @@ window.renderNativeReport = function (data) {
       box.style.display = '';
     } catch (e) { if (window.console) console.warn('plain layer:', e); }
   })();
+
+  /* THE WALKTHROUGH (report-tour.js, Luca 2026-09-26), the same call as
+     report.html's: the story of this report from the values above. Opens by
+     itself the first time an attempt is opened on this device. */
+  if (window.MTReportTour) try {
+    window.MTReportTour.mount({ data: data, dateStr: dateStr, sections: sections, displaySections: displaySections, skills: skills,
+      domains: domains, totalC: totalC, totalQ: totalQ, composite: composite, rwScaled: rwScaled, mathScaled: mathScaled,
+      currentComposite: currentComposite, shownItems: shownItems, reachable: reachable, targetScore: targetScore,
+      behaviorFlags: behaviorFlags, planInputs: planInputs, reportBand: reportBand, domainBucketsDx: domainBucketsDx,
+      skipped: skipped }, { anchor: document.querySelector('#pt-native-report #plain-summary') || document.getElementById('plain-summary') });
+  } catch (e) { if (window.console) console.warn('walkthrough:', e); }   // never at the report's expense
 
   document.getElementById('page1').style.display = 'block';
   // After the container is visible: a tween started while the report is

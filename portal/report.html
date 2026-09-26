@@ -1126,6 +1126,7 @@
 <script src="signals.js?v=20260926c"></script>
 <script src="desmos-tags.js?v=20260916c"></script>
 <script src="question-flag.js?v=20260925a"></script>
+<script src="report-tour.js?v=20260926a"></script>
 <script>
 /* FLAGS FROM THE ADMIN PAGE (Luca, 2026-09-25). admin.html shows this report
    in a sandboxed frame with no access to its sign-in, so it says hello by
@@ -6480,6 +6481,8 @@
       buckets.method.forEach(function (e) { n[e.r.sk] = (n[e.r.sk] || 0) + 1; });
       return Object.keys(n).sort(function (a, b) { return n[b] - n[a]; }).slice(0, 2);
     })();
+    // The rows themselves, for the walkthrough (report-tour.js): its clock chart and per-section counts.
+    planInputs.buckets = buckets;
     var CAUSES = [
       { key: 'content', barLabel: 'wrong after real work',  name: 'Content', section: 'What to relearn',
         color: 'var(--red)', short: 'questions worked through and still missed' },
@@ -7663,6 +7666,19 @@
       box.style.display = '';
     } catch (e) { if (window.console) console.warn('plain layer:', e); }
   })();
+
+  /* THE WALKTHROUGH (report-tour.js, Luca 2026-09-26): the story of this
+     report, one idea per screen, built from the values above so its numbers
+     are the report's numbers. Opens by itself the first time an attempt is
+     opened on a device; never on the site's public sample. */
+  if (window.MTReportTour) try {
+    var isPublicSample = document.body.classList.contains('public-embed');
+    window.MTReportTour.mount({ data: data, dateStr: dateStr, sections: sections, displaySections: displaySections, skills: skills,
+      domains: domains, totalC: totalC, totalQ: totalQ, composite: composite, rwScaled: rwScaled, mathScaled: mathScaled,
+      currentComposite: currentComposite, shownItems: shownItems, reachable: reachable, targetScore: targetScore,
+      behaviorFlags: behaviorFlags, planInputs: planInputs, reportBand: reportBand, domainBucketsDx: domainBucketsDx,
+      skipped: skipped }, { autoOpen: !isPublicSample && !DEMO_MODE, noButton: isPublicSample });
+  } catch (e) { if (window.console) console.warn('walkthrough:', e); }   // never at the report's expense
 
   document.getElementById('page1').style.display = 'block';
   // After the page is visible: a tween started under display:none runs
