@@ -1361,7 +1361,7 @@
      so the signed admin session is in sessionStorage when the auto-continue
      boot code below reads it. -->
 <script src="time-budgets.js?v=20260912a"></script>
-<script src="signals.js?v=20260926a"></script>
+<script src="signals.js?v=20260926c"></script>
   <script src="backend-url.js?v=20260905"></script>
   <script>
     /* Browser errors on this page reach the ClientErrors tab too (prep.gs's
@@ -1629,7 +1629,12 @@
   // 27 (2026-09-26): the stats rebuild. Below it, retries, explanation reads
   // and confidence taps are held on students' devices, and the evidence card
   // and form offsets are missing, so the page says so.
-  var REQUIRED_BACKEND_VERSION = 27;
+  // 28 (audit 4, 2026-09-26): history by attempt, per-file capabilities,
+  // locked Question Bank sync, raw away time, the original miss time.
+  var REQUIRED_BACKEND_VERSION = 28;
+  // prep.gs has its own version since 28; below this its features are missing
+  // even when Code.gs is current (the version action reports each file).
+  var REQUIRED_PREP_VERSION = 28;
   var CAPABILITY_LABELS = {
     calendar: 'the calendar and student pages',
     dueDates: 'due dates',
@@ -1661,6 +1666,12 @@
     qbCompact: 'the Question Bank history syncing compactly (about 1,000 questions per student instead of 360)',
     formOffsets: 'per-test difficulty offsets for the skill evidence (prep.gs; computed daily)',
     evidenceFast: 'the evidence card loading from its cache for busy students',
+    historyWindow: 'test history counted by test, so no device deletes a long-standing student\u2019s older tests',
+    awayMs: 'exact time away from a test, so every screen applies the ten-minute rule the same way',
+    syncLock: 'two devices syncing the Question Bank at once without overwriting each other',
+    firstMissedAt: 'Saved & Mistakes retries tied to the original miss',
+    backendFiles: 'this page checking each Apps Script file (Code, prep, emails, signals) separately',
+    offsetsAtomic: 'the per-test difficulty offsets saved in one piece',
     unsubscribe: 'the Unsubscribe link in every automatic email, and pausing a family from its Account tab',
     portalLock: 'the portal lock for each student on their Account tab',
     questionFlags: 'the Flag button on every question (flags go to the Flagged tab)',
@@ -1681,9 +1692,27 @@
       // hiccup, so leave the banner alone.
       if (!data || (data.ok && data.version === undefined)) return;
       var version = (data && data.ok && data.version) || 0;
-      if (version >= REQUIRED_BACKEND_VERSION) {
+      /* Each file is pasted separately, so a current Code.gs says nothing
+         about the others (audit 4): name any that is missing or old. */
+      var files = data && data.files;
+      var fileProblems = [];
+      if (files) {
+        if (files.prep === null || files.prep === undefined) fileProblems.push('<code>prep.gs</code> is missing (practice log, session prep, evidence, offsets)');
+        else if (files.prep < REQUIRED_PREP_VERSION) fileProblems.push('<code>prep.gs</code> is an older copy (v' + (files.prep || 'before 28') + ')');
+        if (files.emails === null || files.emails === undefined) fileProblems.push('<code>emails.gs</code> is missing (family emails)');
+        if (!files.signals) fileProblems.push('<code>signals</code> (portal/signals.js) is missing, so no email says a score went up or down');
+        else if (!files.signalsFocus) fileProblems.push('<code>signals</code> is an older copy, so the weekly email has no focus line');
+      }
+      if (version >= REQUIRED_BACKEND_VERSION && !fileProblems.length) {
         backendStoresNotes = true;
         banner.style.display = 'none';
+        return;
+      }
+      if (version >= REQUIRED_BACKEND_VERSION) {
+        backendStoresNotes = true;
+        banner.innerHTML = '<b>Part of the Apps Script backend is out of date.</b><br>' + fileProblems.join('; ') + '. ' +
+          'Fix: paste the current copies from <code>portal/</code> as script files of those names, then <b>Deploy \u2192 Manage deployments \u2192 edit \u2192 Version: New version \u2192 Deploy</b>.';
+        banner.style.display = 'block';
         return;
       }
       // A deployment too old to know this action can't report its
@@ -3921,9 +3950,32 @@
      ranges only, never advice: what to do with them is Luca's call. */
   function evPct(x) { return Math.round(100 * x) + '%'; }
   function evRange(lo, hi, fmt) { return fmt(lo) + ' to ' + fmt(hi); }
+  /* Why a reading is not ready, in words (signals.js `why`, audit 4): the
+     count alone read "Collecting: 40 of 25 needed" when a different
+     requirement was the one missing. */
+  var EV_WHY = {
+    'need-more-sure': 'more first tries tapped "Sure"',
+    'need-more-not-sure': 'more first tries tapped Unsure or Guessing',
+    'too-uniform': 'taps that vary: almost everything is tapped "Sure", which says nothing yet',
+    'need-more-ticked-retries': 'more retries of questions ticked "I understand this"',
+    'need-more-wrong-answers': 'more wrong answers on questions other students also missed',
+    'no-roster-abilities': 'the updated backend (roster abilities for each wrong answer)',
+    'no-student-ability': 'a test with a per-question record, to place this student',
+    'ability-at-roster-edge': 'more students near this one\u2019s level to compare with',
+    'need-more-timed-answers': 'more timed answers',
+    'fit-failed': 'a steadier set of timed answers (the model did not settle)',
+    'need-more-pairs': 'more tests with practice on the same skills before them',
+    'practice-does-not-vary': 'practice that varies between tests (it has been about the same each time)',
+    'interval-too-wide': 'more pairs: the range is still too wide to read',
+    'need-more-intervals': 'more gaps between tests',
+    'no-fit': 'scores to compare each test with',
+    'need-more-explained': 'more misses retried after reading the explanation',
+    'need-more-not-explained': 'more misses retried without reading it'
+  };
   function evRow(title, r, reading, detail) {
+    var whyTxt = r && !r.ready && r.why ? (EV_WHY[r.why] || String(r.why).replace(/-/g, ' ')) : '';
     var body = !r ? '<span class="ev-wait">Not available yet.</span>'
-      : (!r.ready ? '<span class="ev-wait">Collecting: ' + (r.have || 0) + ' of ' + r.need + ' needed.</span>' +
+      : (!r.ready ? '<span class="ev-wait">' + (whyTxt ? 'Needs ' + whyTxt + ' (' + (r.have || 0) + ' so far).' : 'Collecting: ' + (r.have || 0) + ' of ' + r.need + ' needed.') + '</span>' +
           (detail ? '<span class="ev-detail">' + detail + '</span>' : '')
         : '<span class="ev-read">' + reading + '</span>' + (detail ? '<span class="ev-detail">' + detail + '</span>' : ''));
     return '<div class="ev-row"><div class="ev-title">' + title + '</div><div class="ev-body">' + body + '</div></div>';
@@ -3963,12 +4015,15 @@
       rh.ticked.n || rh.unticked.n ? 'Retries after a tick: ' + rh.ticked.right + ' of ' + rh.ticked.n + ' right. Without one: ' + rh.unticked.right + ' of ' + rh.unticked.n + '.' : ''));
 
     // 2. Are their wrong answers the popular trap?
-    var tp = MS.trapPull(ev.studentWrongs || [], ev.wrongCounts || {});
+    // Matched by ability (v28 prep.gs sends each wrong answer's answerer and
+    // their ability on that test): strong students no longer read "avoids".
+    var tp = MS.trapPull(ev.studentWrongs || [], ev.wrongCounts || {}, { ability: ev.ability, studentId: ev.studentId });
+    var tpm = tp.abilityMatched || tp;
     var tpRead = tp.ready ? (tp.verdict === 'drawn-to-traps'
-        ? 'Drawn to the trap: ' + evPct(tp.share) + ' of their wrong answers are the choice most students fall for, against ' + evPct(tp.expectedShare) + ' expected (excess ' + evRange(tp.lo, tp.hi, evPct) + ').'
+        ? 'Drawn to the trap: ' + evPct(tpm.share) + ' of their wrong answers are the choice most students fall for, against ' + evPct(tpm.expectedShare) + ' for students at their level (excess ' + evRange(tpm.lo, tpm.hi, evPct) + ').'
         : tp.verdict === 'avoids-traps'
-          ? 'Their misses avoid the popular trap: ' + evPct(tp.share) + ' against ' + evPct(tp.expectedShare) + ' expected. Their mistakes are their own, not the common misreading.'
-          : 'No clear pull: ' + evPct(tp.share) + ' of their wrong answers are the popular trap, about what anyone would pick (' + evPct(tp.expectedShare) + ').') : '';
+          ? 'Their misses avoid the popular trap more than students at their level do: ' + evPct(tpm.share) + ' against ' + evPct(tpm.expectedShare) + '.'
+          : 'No clear pull: ' + evPct(tpm.share) + ' of their wrong answers are the popular trap, about what students at their level pick (' + evPct(tpm.expectedShare) + ').') : '';
     rows.push(evRow('Are their wrong answers the common trap?', tp, tpRead,
       tp.have ? tp.have + ' wrong answers on questions at least five other students also missed.' : 'Counts wrong answers on questions at least five other students also missed.'));
 
@@ -4071,8 +4126,13 @@
     var units = Object.keys(ev.units).map(function (k) { return ev.units[k]; })
       .filter(function (u) { return u.n >= 3; })
       .sort(function (x, y) { return y.S - x.S; });
+    // Whether the roster's per-test difficulty offsets exist yet (prep.gs
+    // runFormOffsets): without them the bars are looser (audit 4).
+    var foAt = data.formOffsetsAt || (data.formOffsets && data.formOffsets.computedAt) || null;
+    var foTxt = foAt ? ' Test difficulty adjusted from the roster (computed ' + new Date(foAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ').'
+      : ' Test difficulty not adjusted yet: run setUpSessionsSnapshot once in Apps Script.';
     $('stu-skills-sub').textContent = 'Across ' + ev.attempts + (ev.attempts === 1 ? ' test' : ' tests') +
-      ', ranked by questions missed beyond what their level predicts for those questions. Only "clear" and "lead" rows are past chance.';
+      ', ranked by questions missed beyond what their level predicts for those questions. Only "clear" and "lead" rows are past chance.' + foTxt;
     host.innerHTML = units.slice(0, 12).map(function (u) {
       var pct = u.n ? Math.round(100 * u.obs / u.n) : 0;
       var tag = u.clear ? '<span class="sk-tag clear" title="z ' + u.z.toFixed(1) + '">clear</span>'

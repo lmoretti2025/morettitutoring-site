@@ -5624,7 +5624,7 @@ window.Portal = {
      header in fluid-ui.js. -->
 <script src="fluid-ui.js?v=20260905y"></script>
 <script src="banks.js?v=20260926a"></script>
-<script src="signals.js?v=20260926a"></script>
+<script src="signals.js?v=20260926c"></script>
 <script src="desmos-tags.js?v=20260916c"></script>
 <script src="time-budgets.js?v=20260912a"></script>
 <script src="challenge-questions.js?v=20260926a"></script>
@@ -6412,9 +6412,17 @@ window.Portal = {
       }).catch(function () { /* best-effort — this device's own localStorage copy is already saved */ });
     }, 1500);
   };
-  window.syncQbAttempts = function (attempts) {
+  /* v28 replies carry the backend version and capabilities. One WITHOUT
+     them, while the cached record says v28+, means an older deployment is
+     live again (a rollback): the cache is forgotten, so the next sync asks
+     afresh and sends the object shape unless qbCompact is advertised again.
+     A busy server (it merges under a lock) answers retryable: the same
+     view goes again in 20 seconds, unless a newer sync replaces it. */
+  var QB_SYNC_RETRY_MS = 20000, QB_SYNC_RETRY_MAX = 3;
+  window.syncQbAttempts = function (attempts, tries) {
     var key = currentStudent && currentStudent.key;
     if (!key || !attempts) return;
+    tries = tries || 0;
     clearTimeout(qbAttemptsSyncTimer);
     qbAttemptsSyncTimer = setTimeout(function () {
       // Compact only to a backend that stores it (qbCompact, v27); an older
@@ -6422,7 +6430,13 @@ window.Portal = {
       ensureBackendCaps().then(function () {
         var body = backendHas('qbCompact') ? qbEncodeAttempts_(attempts) : attempts;
         return postToBackend({ action: 'syncQbAttempts', key: key, attempts: body });
-      }).then(function () {
+      }).then(function (data) {
+        if (data && typeof data.version === 'number') learnBackendCaps(data);
+        else if (data) { var known = backendCapsNow(); if (known && known.v >= 28) forgetBackendCaps(); }
+        if (data && !data.ok && data.retryable && tries < QB_SYNC_RETRY_MAX && currentStudent && currentStudent.key === key) {
+          qbAttemptsSyncTimer = setTimeout(function () { window.syncQbAttempts(attempts, tries + 1); }, QB_SYNC_RETRY_MS);
+          return;
+        }
         if (window.invalidatePortalProgressCache) window.invalidatePortalProgressCache();
       }).catch(function () { /* best-effort */ });
     }, 1500);
@@ -7964,7 +7978,7 @@ window.Portal = {
       // { 'testId|domain': logits } } (prep.gs runFormOffsets), or null.
       window.portalFormOffsets = (data.formOffsets && data.formOffsets.offsets) ? data.formOffsets : null;
       saveCachedServerHistory(key, data.entries);
-      reconcileLocalScoreHistory();
+      reconcileLocalScoreHistory(data);
       repairMissingQStats();
       setPortalData('scores', 'ready');
       rerenderScoreViews();
@@ -7988,9 +8002,31 @@ window.Portal = {
     if (!hit) return;
     try { localStorage.setItem('moretti_score_history_' + key, JSON.stringify({ entries: local })); } catch (e) {}
   }
-  function reconcileLocalScoreHistory() {
+  /* ONLY WHAT THE SERVER'S LIST COVERS (audit 4, 2026-09-26). The server
+     sends a window of the newest attempts, not all of them, and anything
+     older used to be deleted here as "gone from the server". A v28 backend
+     says where its list starts: truncated false means the list is
+     complete; truncated true means only local tests dated from
+     oldestReturned on (plus a day, for clock skew) can be judged. An older
+     backend says neither, and its list is only known complete when it is
+     shorter than its cap (60 rows; 20 before audit 3; exactly 20 could be
+     either), so otherwise nothing is deleted. Returns the earliest date
+     (ms) a missing local test may be deleted from, -Infinity for any, or
+     null for none. */
+  var RECONCILE_WINDOW_MARGIN_MS = 24 * 60 * 60 * 1000;
+  function scoreHistoryReconcileFrom(reply, n) {
+    if (reply && typeof reply.truncated === 'boolean') {
+      if (!reply.truncated) return -Infinity;
+      var t = reply.oldestReturned ? Date.parse(reply.oldestReturned) : NaN;
+      return isNaN(t) ? null : t + RECONCILE_WINDOW_MARGIN_MS;
+    }
+    return (n < 20 || (n > 20 && n < 60)) ? -Infinity : null;
+  }
+  function reconcileLocalScoreHistory(reply) {
     var key = currentStudent && currentStudent.key;
     if (!key || !serverScoreHistoryFetched) return;
+    var from = scoreHistoryReconcileFrom(reply, serverScoreHistoryEntries.length);
+    if (from === null) return;   // the list may not cover them: delete nothing
     var serverIds = {};
     serverScoreHistoryEntries.forEach(function (e) { if (e && e.attemptId) serverIds[e.attemptId] = true; });
     var local = loadScoreHistory();
@@ -8000,6 +8036,8 @@ window.Portal = {
       // outbox are not stale: the server has not had the chance to know them.
       if (e.localOnly || isUnsentAttempt(key, e.attemptId)) return true;
       var ts = e.date ? Date.parse(e.date) : NaN;
+      // Older than the server's window (or undated, with a window): not judged.
+      if (from !== -Infinity && (isNaN(ts) || ts < from)) return true;
       return !isNaN(ts) && (Date.now() - ts) < RECONCILE_GRACE_MS;
     });
     if (kept.length === local.length) return; // nothing stale — don't touch storage for no reason
@@ -8609,7 +8647,16 @@ window.Portal = {
     xtAttempts.forEach(function (att) { att.items.forEach(function (it) { if (!it.blank) pooledQ++; }); });
     var foX = window.portalFormOffsets && window.portalFormOffsets.offsets;
     var ev = MSx.skillEvidence(xtAttempts, { grain: 'skill', formOffsets: foX });
+    /* Two reads (skillTrend's default since audit 4), and only claims the
+       shared verdict backs (trendWithinFocus): a skill "keeps coming back"
+       only inside what focusOf names for that section, so this card never
+       contradicts the Home card beside it. Simulated over ten weekly looks,
+       a student with no change sees "keeps coming back" 2.4-4.5% of the
+       time and "fixed" 0.0-0.1% (single read before: 20% and 12-14%). */
     var tr = MSx.skillTrend(xtAttempts, { grain: 'skill', formOffsets: foX });
+    if (typeof MSx.trendWithinFocus === 'function' && typeof MSx.focusOf === 'function') {
+      tr = MSx.trendWithinFocus(tr, MSx.focusOf(xtAttempts, { formOffsets: foX, skillLead: HOME_SKILL_LEAD }));
+    }
     var rowOf = function (k) {
       var u = ev.units[k] || { n: 0, obs: 0, perAttempt: [], sec: '' };
       var last = u.perAttempt.length ? u.perAttempt[u.perAttempt.length - 1] : null;
@@ -13429,6 +13476,21 @@ window.Portal = {
      are slim ({key, correct, given, attemptedAt}); full question content
      is resolved from `key` at render time via
      window.resolveQuestionByKey(). */
+  /* WHEN A MISS WAS FIRST MADE (audit 4, 2026-09-26). A wrong retry in
+     Saved & Mistakes re-records the miss with a new attemptedAt, so the
+     next retry's lm (the miss it is a retry of) was the previous retry and
+     every retry read as fixing a brand-new miss. The record now keeps
+     firstMissedAt: the earliest of the stored record's firstMissedAt (its
+     attemptedAt for a record from before this) and the new record's own.
+     attemptedAt stays the latest miss. ISO, or '' when none is known. */
+  function firstMissedAtOf(prev, rec) {
+    var best = NaN;
+    [prev && prev.firstMissedAt, prev && prev.attemptedAt, rec && rec.firstMissedAt, rec && rec.attemptedAt].forEach(function (v) {
+      var t = v ? Date.parse(String(v)) : NaN;
+      if (!isNaN(t) && (isNaN(best) || t < best)) best = t;
+    });
+    return isNaN(best) ? '' : new Date(best).toISOString();
+  }
   function recordIncorrectQuestions(records) {
     try {
       var studentKey = currentStudent && currentStudent.key;
@@ -13447,7 +13509,9 @@ window.Portal = {
           // attempts"). Mirrors Code.gs' handleSyncProgress/
           // handleAddIncorrectQuestion; keep the two in sync.
           var prevAttempts = (existing.byKey[r.key] && existing.byKey[r.key].wrongAttempts) || 0;
-          existing.byKey[r.key] = Object.assign({}, r, { wrongAttempts: prevAttempts + 1 });
+          // firstMissedAt: the earliest miss, kept when a wrong retry
+          // re-records it (Code.gs firstMissedAt_, the same rule).
+          existing.byKey[r.key] = Object.assign({}, r, { wrongAttempts: prevAttempts + 1, firstMissedAt: firstMissedAtOf(existing.byKey[r.key], r) });
         }
       });
       existing.updatedAt = new Date().toISOString();
@@ -16418,6 +16482,7 @@ window.Portal = {
           resolved.key = k; // stable id for the Test filter and quizState above
           resolved.given = stored.given;
           resolved.attemptedAt = stored.attemptedAt;
+          resolved.firstMissedAt = stored.firstMissedAt || stored.attemptedAt;   // the retry's lm (see firstMissedAtOf)
           resolved.wrongAttempts = stored.wrongAttempts || 1;
           resolved.testLabel = testLabelFor(resolved.testTitle);
           resolved.isSaved = !!savedByKey[k];
@@ -17205,7 +17270,9 @@ window.Portal = {
       window.queuePracticeEvent({ b: 'retry', s: r.sectionKey === 'math' ? 'math' : 'rw', q: pq || r.key, k: r.key,
         sk: String(r.skill || ''), d: String(r.difficulty || ''), c: st.correct ? 1 : 0, ms: Math.round(ms), g: g,
         ua: (ua && !isNaN(ua.getTime())) ? ua.toISOString() : '',
-        lm: (!r.savedCorrect && r.attemptedAt) ? String(r.attemptedAt) : '' });
+        // The ORIGINAL miss (audit 4): a wrong retry re-records the miss with
+        // a new attemptedAt, and lm must not move with it.
+        lm: (!r.savedCorrect && (r.firstMissedAt || r.attemptedAt)) ? String(r.firstMissedAt || r.attemptedAt) : '' });
     } catch (e) { /* logging must never break the round */ }
   }
   // What window.portalExplain needs to log the explanation of r.
@@ -17234,7 +17301,12 @@ window.Portal = {
       // Keeps the real mistake record in sync: a miss is recorded and a right
       // answer clears it, via the same bridge Question Bank uses.
       if (window.recordQuestionBankMistake && r.key) {
-        window.recordQuestionBankMistake({ key: r.key, given: given, correct: st.correct, attemptedAt: new Date().toISOString() });
+        var missAt = new Date().toISOString();
+        // A wrong retry keeps the original miss time (firstMissedAt), here, on
+        // the device's record and on the server's; attemptedAt is this miss.
+        var firstMiss = st.correct ? '' : ((!r.savedCorrect && (r.firstMissedAt || r.attemptedAt)) || missAt);
+        window.recordQuestionBankMistake(st.correct ? { key: r.key, given: given, correct: true, attemptedAt: missAt }
+          : { key: r.key, given: given, correct: false, attemptedAt: missAt, firstMissedAt: firstMiss });
       }
     } else {
       runnerIndex++;
