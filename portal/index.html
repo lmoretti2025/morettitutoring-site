@@ -5632,7 +5632,7 @@ window.Portal = {
 <script src="challenge-questions.js?v=20260926a"></script>
 <script src="grid-in.js?v=20260910a"></script>
 <script src="question-flag.js?v=20260922c"></script>
-<script src="report-tour.js?v=20260926a"></script>
+<script src="report-tour.js?v=20260926b"></script>
 <script>
   /* practice-tests.js is ~2.6MB, so a blocking <script> delayed every later
      script (including the key-submit wiring). It loads here via an async
@@ -13711,8 +13711,25 @@ window.Portal = {
       signals: entry.signals || null,   // SignalsJSON column (Code.gs)
       // Test integrity, so the roster can show it without opening the
       // report (see the Interrupted column in Code.gs).
-      interrupted: entry.interrupted, awayMs: entry.awayMs
+      interrupted: interruptedForWire(entry), awayMs: entry.awayMs
     };
+  }
+  /* WHAT AN OLDER BACKEND IS TOLD (audit 6, 2026-09-26). A backend before
+     v27 stores any truthy value as 'YES', and its emails read YES as "the
+     test was interrupted partway through, so I'm not comparing this score".
+     Since tab switches are recorded, that would reach families after a
+     90-second glance at another tab. So the kind goes as-is only to a
+     backend that advertises interruptKinds; any other backend (or an unknown
+     one) hears true only when the shared rule sets the test aside (ran out,
+     reopened, or more than ten minutes away), else false. Raw awayMs still
+     travels either way. */
+  function interruptedForWire(e) {
+    if (!e || !e.interrupted) return e ? e.interrupted : false;
+    if (backendHas('interruptKinds')) return e.interrupted;
+    var MS = window.MorettiSignals;
+    var setAside = (MS && typeof MS.isInterruptedForTrend === 'function') ? MS.isInterruptedForTrend(e)
+      : (e.interrupted === 'ranout' || e.interrupted === 'reopened' || e.interrupted === true || (Number(e.awayMs) || 0) > 600000);
+    return setAside ? e.interrupted : false;
   }
   function recordScoreHistory(entry) {
     try {
@@ -13907,7 +13924,8 @@ window.Portal = {
     var payload = {
       n: currentStudent.name, k: currentStudent.key, t: testChoice,
       pt: ptDoneEarly ? ptDoneEarly.id : undefined, ptTitle: ptDoneEarly ? ptDoneEarly.title : undefined,
-      dt: new Date().toISOString().slice(0, 10),
+      // Local date (audit 6): the UTC date put evening tests on the next day.
+      dt: (function (d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); })(new Date()),
       // Full submission timestamp (dt is date-only), so report.html can read
       // time of day (e.g. a late-night finish). UTC ISO string; report.html
       // converts it with toLocaleTimeString().
@@ -21150,7 +21168,12 @@ window.renderNativeReport = function (data) {
     if (ptNow && ptNow.title) data.ptTitle = ptNow.title;
   }
   var first = (data.n || 'Student').split(' ')[0];
-  var dateStr = data.dt || new Date().toISOString().slice(0, 10);
+  /* The day the student took it, in local time (audit 6, 2026-09-26): dt
+     was the UTC date, so a test finished after 8 pm Eastern read as the next
+     day. ts (the exact moment) wins when present; dt only for old payloads. */
+  var localDay = function (d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); };
+  var tsDate = data.ts ? new Date(data.ts) : null;
+  var dateStr = (tsDate && !isNaN(tsDate.getTime())) ? localDay(tsDate) : (data.dt || localDay(new Date()));
   // data.ts (see finishDiagnostic's payload in index.html) is a real
   // instant, absent on older reports, so every use is guarded. Shown in the
   // viewer's local time.
@@ -21171,7 +21194,8 @@ window.renderNativeReport = function (data) {
       : dateStr;
     document.getElementById('pt-report-hed-date').textContent = 'Completed on ' + longDate;
   }
-  document.getElementById('r-sub2').textContent = data.n + ' · ' + data.t + ' Diagnostic · ' + dateStr;
+  // A practice test is not a diagnostic (audit 6): name what it was.
+  document.getElementById('r-sub2').textContent = data.n + ' · ' + (data.ptTitle || (data.t + ' Diagnostic')) + ' · ' + dateStr;
   var ftrDate = document.getElementById('ftr-date');
   if (ftrDate) ftrDate.textContent = dateStr;
 

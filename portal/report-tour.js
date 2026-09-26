@@ -7,10 +7,13 @@
    evidence behind it. Loaded by report.html and by the portal's native
    report (index.html renderNativeReport); both call
        MTReportTour.mount({ ...the report's own computed values... })
-   at the end of their render, with the SAME variable names, so every
-   number here is the report's number, never a second calculation of it:
-   the causes are the diagnosis card's buckets, the path is the score
-   bridge's bars, the focus areas are the plan's areas.
+   at the end of their render, with the SAME variable names, so the numbers
+   here are the report's numbers: the causes are the diagnosis card's
+   buckets, the path is the score bridge's bars, the focus areas are the
+   plan's areas, the clock screen is the report's own clock buckets. Two
+   small calculations of its own, both stated where they happen: whether the
+   two section scores differ by more than one test can tell (sectionSem), and
+   the path's "if these were all fixed" sum.
 
    A screen with nothing to say is left out (no clock screen when the clock
    cost nothing, no path when there is no composite). The walkthrough opens
@@ -168,6 +171,14 @@
   function storage() { try { return window.localStorage; } catch (e) { return null; } }
 
   /* ---------- the model: every screen from the report's own values ---------- */
+  // How the clock took its questions, in words, from the report's own counts.
+  function clockWhy(pace) {
+    var bits = [];
+    if (pace.ranOut) bits.push('rushed as time ran out');
+    if (pace.blank) bits.push('never reached');
+    if (pace.tooFast) bits.push('answered too fast to have read');
+    return bits.length ? bits.join(', ') : 'rushed, or never reached';
+  }
   function build(R) {
     var data = R.data || {};
     var M = { first: String(data.n || '').trim().split(/\s+/)[0] || 'there', isDiag: !data.pt, screens: [] };
@@ -224,6 +235,10 @@
       // The range, in the report's own words (report.html plain layer): a number beside the probability.
       var band = R.reportBand && R.reportBand.lo != null && R.reportBand.hi != null && R.reportBand.hi > R.reportBand.lo ? R.reportBand : null;
       var bandLine = band ? '<p class="t-say r" style="margin-top:12px">Your real level is most likely between <strong>' + band.lo + '</strong> and <strong>' + band.hi + '</strong> (about 4 chances in 5).</p>' : '';
+      /* The all-hard test (audit 6): the report says the same student scores
+         about 87 points lower on it; the walkthrough says so too. */
+      var hardestId = (window.MorettiSignals && window.MorettiSignals.HARDEST_TEST_ID) || 'sat-practice-11';
+      if (data.pt === hardestId) bandLine += '<p class="t-say r">Every question on this test is hard, so the same student scores about <strong>87 points lower</strong> on it than on the others. Compare it only with itself.</p>';
       M.screens.push({ name: 'score', count: headline, html:
         '<p class="t-eye r">Your score</p><div class="t-hero r" data-count="' + headline + '" data-from="' + (single ? 200 : 400) + '">' + (single ? 200 : 400) + '</div>' + bandLine + halves +
         '<p class="t-say r">' + say + '</p><div class="r"><button type="button" class="t-more" data-sheet="score">See the numbers</button></div>',
@@ -261,7 +276,7 @@
         '<p class="t-eye r">Where the points went</p><h2 class="r">You missed ' + pl(missed, 'question') + '.' + (nK && nC ? ' They weren\u2019t all the same kind of miss.' : '') + '</h2>' +
         '<div class="r"><div class="t-dots" role="img" aria-label="' + nC + ' missed after real work, ' + nK + ' lost to the clock">' + dots + '</div><div class="t-key">' +
         (nC ? '<div><span class="t-sw content"></span><b>' + nC + '</b>missed after real work: content to review.</div>' : '') +
-        (nK ? '<div><span class="t-sw clock"></span><b>' + nK + '</b>' + (nK === 1 ? 'was' : 'were') + ' lost to the clock: rushed, or never reached.</div>' : '') +
+        (nK ? '<div><span class="t-sw clock"></span><b>' + nK + '</b>' + (nK === 1 ? 'was' : 'were') + ' lost to the clock: ' + clockWhy(P.pace || {}) + '.</div>' : '') +
         (nM ? '<div><span class="t-sw slow"></span><b>' + nM + '</b>more you got right, but so slowly it cost you later.</div>' : '') +
         '</div></div><p class="t-say r">' + sayMiss + '</p><div class="r"><button type="button" class="t-more" data-sheet="misses">See the numbers</button></div>',
         sheet: { eye: 'Where the points went', title: 'Every miss, sorted', html:
@@ -272,7 +287,7 @@
           (nK ? '<p><b>Lost to the clock.</b> ' + [pace.ranOut ? pl(pace.ranOut, 'rushed as time ran out', 'rushed as time ran out') : '', pace.blank ? pace.blank + ' never reached' : '',
             pace.tooFast ? pace.tooFast + ' answered too fast to have read' : ''].filter(String).join(', ') + '. Better pacing gets these back without learning anything new.</p>' : '') +
           (nM ? '<p><b>Slow but right.</b> Right answers that took well over their time while the clock was short. They count, but they cost time the later questions needed' +
-            (P.methodSkills && P.methodSkills.length ? ', mostly in <b>' + esc(P.methodSkills.join('</b> and <b>')) + '</b>' : '') + '.</p>' : '') }
+            (P.methodSkills && P.methodSkills.length ? ', mostly in <b>' + P.methodSkills.map(esc).join('</b> and <b>') + '</b>' : '') + '.</p>' : '') }
       });
     }
 
@@ -324,7 +339,7 @@
        null); a lead under that is the strongest lead, not a verdict. */
     var CLEAR_Z = 2.8;
     var clearArea = function (a) { return a.z == null || a.z >= CLEAR_Z; };
-    var areas = (P.areas || []).filter(function (a) { return a && a.name && a.severity === 3; });
+    var areas = (P.areas || []).filter(function (a) { return a && a.name && a.severity === 3 && !(a.lead === 0); });
     var seen = {};
     areas = areas.filter(function (a) { if (seen[a.name]) return false; seen[a.name] = 1; return true; }).slice(0, 3);
     var domains = R.domains || {};
@@ -345,12 +360,14 @@
          most points. */
       var gapRows = areas.map(function (a, i) {
         var s = acc(a.name), d = diffOfMisses(a.name);
-        var miss = s ? s.t - s.c : 0;
+        // The misses after real work (the plan's lead count), the same count
+        // the difficulty table sums; clock misses belong to the clock screen.
+        var miss = typeof a.lead === 'number' ? a.lead : (s ? s.t - s.c : 0);
         var most = ['hard', 'medium', 'easy'].sort(function (x, y) { return d[y] - d[x]; })[0];
         var note = d[most] ? 'Most of the misses here were ' + most + ' questions.' : '';
         var tops = (a.topSkills || []).map(function (t) { return typeof t === 'string' ? t : (t && (t.name || t.skill)) || ''; }).filter(function (n) { return n && n !== a.name; }).slice(0, 2);
         if (tops.length) note = 'Mostly ' + tops.join(' and ') + '. ' + note;
-        return '<div class="t-row" style="--i:' + i + '"><div class="t-rt"><span>' + esc(a.name) + '</span><em>' + (s ? miss + ' missed of ' + s.t : '') + '</em></div>' +
+        return '<div class="t-row" style="--i:' + i + '"><div class="t-rt"><span>' + esc(a.name) + '</span><em>' + (s ? miss + ' missed after real work, of ' + s.t : '') + '</em></div>' +
           '<div class="t-track"><div class="t-fill gap" data-w="' + (s ? pct(miss, s.t) : 30) + '"></div></div>' + (note ? '<p class="t-note">' + esc(note) + '</p>' : '') + '</div>';
       }).join('');
       var diffTot = { easy: { c: 0, t: 0 }, medium: { c: 0, t: 0 }, hard: { c: 0, t: 0 } };
@@ -383,31 +400,32 @@
       B.clock.forEach(function (e) { var k = e.sec.key + '|' + (e.r.moduleIndex || 0); byMod[k] = (byMod[k] || 0) + 1; });
       B.method.forEach(function (e) { var k = e.sec.key + '|' + (e.r.moduleIndex || 0); byMod[k] = (byMod[k] || 0) + 0.5; });
       var modKey = Object.keys(byMod).sort(function (a, b) { return byMod[b] - byMod[a]; })[0];
-      if (modKey && (clockN || methodN)) {
+      // Shown only when the report's own counts say the clock cost something:
+      // anything rushed or unreached, right answers over time while it was
+      // short, or two or more answers too fast to have been read (audit 6).
+      var clockMatters = ((pace2.blank || 0) + (pace2.ranOut || 0)) > 0 || methodN > 0 || (pace2.tooFast || 0) >= 2;
+      if (modKey && clockMatters) {
         var mk = modKey.split('|'), sec = sections.filter(function (s) { return s.key === mk[0]; })[0], mi = Number(mk[1]);
         var rows = sec ? sec.rows.filter(function (r) { return (r.moduleIndex || 0) === mi; }) : [];
         var inB = function (k) { var s = {}; B[k].forEach(function (e) { if (e.sec.key === mk[0]) s[e.r.n] = e.why; }); return s; };
         var clockSet = inB('clock'), methodSet = inB('method');
         var times = rows.map(function (r) { return r.timeMs || 0; });
         var maxT = Math.max.apply(null, times.concat([60000]));
-        var med = median(times);
-        var longest = rows.slice().sort(function (a, b) { return (b.timeMs || 0) - (a.timeMs || 0); })[0];
         var bars = rows.map(function (r, j) {
-          var why = clockSet[r.n], kind = why === 'never reached' ? 'blank' : why ? 'rushed' : (methodSet[r.n] || (med && r.timeMs >= 3 * med && r.timeMs >= 150000)) ? 'long' : '';
+          // The report's own buckets only (audit 6): a "stuck" rule of its own
+          // here disagreed with the report's clock verdict on the same page.
+          var why = clockSet[r.n], kind = why === 'never reached' ? 'blank' : why ? 'rushed' : methodSet[r.n] ? 'long' : '';
           var h = kind === 'blank' ? 40 : Math.max(3, Math.round(100 * (r.timeMs || 0) / maxT));
           return '<div class="t-cb ' + kind + '" data-h="' + h + '" data-tip="Q' + (j + 1) + ': ' + (kind === 'blank' ? 'never reached' : secs(r.timeMs)) + '"></div>';
         }).join('');
         var modName = secName(sec && sec.key, sec && sec.label) + (sec && sec.hasModules ? (mi ? ', second module' : ', first module') : '');
-        var rushedHere = rows.filter(function (r) { return clockSet[r.n]; }).length;
-        var ranLate = (pace2.blank || 0) + (pace2.ranOut || 0), stuck = longest && longest.timeMs >= 150000;
+        var ranLate = (pace2.blank || 0) + (pace2.ranOut || 0);
         var head = ranLate ? modName + ': the clock caught up with you.'
-          : stuck ? 'A few questions ate the clock.'
-          : pace2.tooFast ? 'A few answers came too fast to have read the question.'
-          : 'You finished, but a few questions ate the clock.';
-        var sayClock = (stuck ? 'Your longest question took <strong>' + secs(longest.timeMs) + '</strong>. ' : '') +
-          (ranLate ? 'By the end, ' + pl(ranLate, 'question was', 'questions were') + ' rushed or left blank. The fix is a skill, not speed: <strong>know when to move on</strong>.'
-           : pace2.tooFast ? cap(pl(pace2.tooFast, 'answer', 'answers')) + ' took only seconds, <strong>less than it takes to read the question</strong>. Reading those through is the fix.'
-           : 'The fix is a skill, not speed: <strong>know when to move on</strong>.');
+          : methodN ? 'A few right answers took so long they cost time.'
+          : 'A few answers came too fast to have read the question.';
+        var sayClock = ranLate ? 'By the end, ' + pl(ranLate, 'question was', 'questions were') + ' rushed or left blank. The fix is a skill, not speed: <strong>know when to move on</strong>.'
+           : methodN ? cap(pl(methodN, 'right answer', 'right answers')) + ' ran far over time while the clock was short. The fix is a skill, not speed: <strong>know when to move on</strong>.'
+           : cap(pl(pace2.tooFast, 'answer', 'answers')) + ' took only seconds, <strong>less than it takes to read the question</strong>. Reading those through is the fix.';
         var modTbl = (R.displaySections || []).map(function (d) {
           var rr = d.rows || [], blank = rr.filter(function (r) { return r.skipped; }).length;
           var used = d.timeTotal || 0, allot = (d.timeAllottedMin || 0) * 60000;
@@ -417,7 +435,7 @@
           '<p class="t-eye r">How you used the clock</p><h2 class="r">' + esc(head) + '</h2>' +
           '<div class="t-clock r"><div class="t-cbars" role="img" aria-label="Time per question in ' + esc(modName) + '">' + bars + '</div>' +
           '<div class="t-axis"><span>Question 1</span><span>Question ' + rows.length + '</span></div>' +
-          '<div class="t-legend"><span><i style="background:var(--slow)"></i>Stuck too long</span><span><i style="background:var(--clock)"></i>Rushed or too fast</span><span><i style="border:1.5px dashed var(--clock)"></i>Never reached</span></div></div>' +
+          '<div class="t-legend"><span><i style="background:var(--slow)"></i>Right, but far over time</span><span><i style="background:var(--clock)"></i>Rushed or too fast</span><span><i style="border:1.5px dashed var(--clock)"></i>Never reached</span></div></div>' +
           '<p class="t-say r">' + sayClock + '</p><div class="r"><button type="button" class="t-more" data-sheet="clock">See every module</button></div>',
           sheet: { eye: 'How you used the clock', title: 'Every module', html:
             (modTbl ? '<table class="t-tbl"><tr><th>Module</th><th class="num">Time used</th><th class="num">Per question</th><th class="num">Blank</th></tr>' + modTbl + '</table>' : '') +
@@ -465,7 +483,9 @@
       var top = items.slice().sort(function (a, b) { return b.points - a.points; }).slice(0, 4);
       var gain = top.reduce(function (a, it) { return a + it.points; }, 0);
       var end = Math.min(1600, Math.round((start + gain) / 10) * 10);
-      var target = Number(R.targetScore) || 0;
+      // Only a target the student set (audit 6): the report's own default
+      // (score + 150) is a chart line, not the student's goal.
+      var target = Number(R.data && R.data.targetScore) || 0;
       var lo = Math.max(400, Math.floor((start - 60) / 50) * 50), hi = Math.min(1600, Math.ceil((Math.max(end, target) + 40) / 50) * 50);
       var at = function (v) { return (100 * (v - lo) / (hi - lo)).toFixed(1); };
       var ceiling = R.reachable;
@@ -482,7 +502,13 @@
         sheet: { eye: 'Your path', title: 'Every point on the table', html:
           '<p>If every miss on this test were fixed, the score would be about <b>' + (ceiling || end) + '</b>. Here\u2019s where those points sit, biggest first:</p>' +
           '<table class="t-tbl"><tr><th>Fix</th><th class="num">Points</th></tr>' +
-          items.slice().sort(function (a, b) { return b.points - a.points; }).map(function (it) { return '<tr><td>' + esc(cleanLabel(it.label, true)) + '</td><td class="num">+' + Math.round(it.points) + '</td></tr>'; }).join('') + '</table>' +
+          items.slice().sort(function (a, b) { return b.points - a.points; }).map(function (it) { return '<tr><td>' + esc(cleanLabel(it.label, true)) + '</td><td class="num">+' + Math.round(it.points) + '</td></tr>'; }).join('') +
+          (function () {
+            // What the chart folds into one line, so the rows add up to the total (audit 6).
+            var shown = items.reduce(function (a, it) { return a + it.points; }, 0);
+            var rest = ceiling != null ? Math.round(ceiling - start - shown) : 0;
+            return rest >= 5 ? '<tr><td>Everything else, spread thin</td><td class="num">+' + rest + '</td></tr>' : '';
+          })() + '</table>' +
           (target ? '<p>Your target is <b>' + target + '</b>. ' + (end >= target ? 'If those were all fixed, that would reach it.' : 'If those were all fixed, that would be about ' + end + ', and the rest of the list closes the gap.') + '</p>' : '') +
           '<p>These are estimates from one test that assume each miss is fixed; points for a single question aren\u2019t fixed on the SAT, and the scoring curve makes the first few fixes at a low score worth less than they look here.</p>' }
       });
@@ -497,6 +523,14 @@
                                                 : 'The strongest lead on this test. Worth checking first, before planning around it.' });
       }
     });
+    /* No single content area separated, but many content misses spread across
+       the test: the report's own advice (its empty "What to relearn" card and
+       plain layer) is the foundation domains of each section. Without this a
+       weak, spread-out student's only task read "Read before answering". */
+    var attempted = Math.max(1, totalQ - (R.skipped || 0));
+    if (!areas.length && P.causes && P.causes.content / attempted >= 0.15) {
+      tasks.push({ h: 'Core material across the board', p: 'The misses are spread over most areas, so start with the foundations: Standard English Conventions in Reading & Writing, and Algebra in Math.' });
+    }
     var paceLost = (P.pace && (P.pace.blank + P.pace.ranOut)) || 0;
     if (paceLost >= 2) tasks.splice(Math.min(1, tasks.length), 0, { h: 'Know when to move on', p: 'If a question passes about twice its target time, mark it and move on. Come back if there\u2019s time.' });
     else if (P.pace && P.pace.tooFast >= 2) tasks.splice(Math.min(1, tasks.length), 0, { h: 'Read before answering', p: 'Read every question before answering. Some answers came faster than the question can be read.' });
@@ -555,6 +589,11 @@
     timers.forEach(clearTimeout); timers = [];
     if (cur >= 0) { scr[cur].classList.remove('on'); leave(scr[cur]); }
     cur = n; scr[n].classList.add('on'); scr[n].scrollTop = 0; enter(scr[n]);
+    // Only the screen on show is reachable by Tab or a screen reader (audit 6).
+    Array.prototype.forEach.call(scr, function (x, i) {
+      if (i === n) { x.removeAttribute('inert'); x.removeAttribute('aria-hidden'); }
+      else { x.setAttribute('inert', ''); x.setAttribute('aria-hidden', 'true'); }
+    });
     Array.prototype.forEach.call(root.querySelectorAll('.t-prog i'), function (p, i) { p.classList.toggle('done', i <= n); });
     root.querySelector('.t-prev').disabled = n === 0;
     root.querySelector('.t-next').disabled = n === scr.length - 1;
@@ -565,16 +604,39 @@
     if (!s) return;
     root.querySelector('.t-sh h3').innerHTML = '<small>' + esc(s.sheet.eye) + '</small>' + esc(s.sheet.title);
     var body = root.querySelector('.t-sb'); body.innerHTML = s.sheet.html; body.scrollTop = 0;
+    sheetReturn = document.activeElement;
     root.querySelector('.t-sheet').classList.add('open');
     root.querySelector('.t-x').focus();
   }
-  function closeSheet() { if (root) root.querySelector('.t-sheet').classList.remove('open'); }
+  var sheetReturn = null;
+  function closeSheet() {
+    if (!root) return;
+    root.querySelector('.t-sheet').classList.remove('open');
+    // Focus goes back to the button that opened it (audit 6).
+    if (sheetReturn && sheetReturn.focus && root.contains(sheetReturn)) try { sheetReturn.focus(); } catch (e) {}
+    sheetReturn = null;
+  }
   function sheetOpen() { return root && root.querySelector('.t-sheet').classList.contains('open'); }
   function onKey(e) {
     if (!root) return;
-    if (sheetOpen()) { if (e.key === 'Escape') closeSheet(); return; }
+    if (sheetOpen() && e.key === 'Escape') { closeSheet(); return; }
+    if (sheetOpen() && e.key !== 'Tab') return;
     if (e.key === 'Escape') return close();
-    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); go(cur + 1); }
+    // Space pages forward only when no button has focus, so it can still press
+    // a focused "See the numbers" (audit 6).
+    var onButton = document.activeElement && /^(BUTTON|A)$/.test(document.activeElement.tagName) && root.contains(document.activeElement);
+    if (e.key === 'ArrowRight' || (e.key === ' ' && !onButton)) { e.preventDefault(); go(cur + 1); }
+    if (e.key === 'Tab') {
+      // Keep Tab inside the walkthrough (or its open sheet): nothing behind it is reachable.
+      var box = sheetOpen() ? root.querySelector('.t-card') : root;
+      var f = Array.prototype.filter.call(box.querySelectorAll('button, a[href]'), function (x) { return !x.disabled && !x.closest('[inert]') && x.offsetParent !== null; });
+      if (f.length) {
+        var first = f[0], last = f[f.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+        else if (!box.contains(document.activeElement)) { e.preventDefault(); first.focus(); }
+      }
+    }
     if (e.key === 'ArrowLeft') go(cur - 1);
   }
   function close() {
@@ -623,7 +685,13 @@
     head.addEventListener('touchstart', function (e) { hy = e.touches[0].clientY; }, { passive: true });
     head.addEventListener('touchend', function (e) { if (hy !== null && e.changedTouches[0].clientY - hy > 60) closeSheet(); hy = null; });
     document.addEventListener('keydown', onKey);
-    requestAnimationFrame(function () { if (root) { root.classList.add('on'); go(0); } });
+    requestAnimationFrame(function () {
+      if (!root) return;
+      root.classList.add('on'); go(0);
+      // Focus moves into the walkthrough on open (audit 6: Tab reached the page behind it).
+      var nxt = root.querySelector('.t-scr.on button') || root.querySelector('.t-next');
+      if (nxt) try { nxt.focus(); } catch (e) {}
+    });
   }
 
   /* ---------- mounting on a report ---------- */
@@ -647,7 +715,10 @@
         anchor.parentNode.insertBefore(b, anchor);
       }
       // By itself once per attempt per device; never when printing or embedded for show.
-      if (opts.autoOpen !== false) {
+      // Not by itself inside Luca's admin viewer (audit 6: it greeted him as the student).
+      var inAdmin = false;
+      try { inAdmin = window.parent !== window && /admin/i.test(window.parent.location.pathname); } catch (e) { inAdmin = false; }
+      if (opts.autoOpen !== false && !inAdmin) {
         var st = storage(), key = 'mtt_seen:' + M.attemptId, seen = false;
         try { seen = !!(st && st.getItem(key)); } catch (e) {}
         if (!seen) {
