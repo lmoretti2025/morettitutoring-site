@@ -746,6 +746,9 @@
      markup) so the strip reads as four segments, not five. */
   .mini-skill-pair { display: flex; flex-direction: column; gap: 0.85rem; justify-content: center; }
   .mini-skill-pair .mini-skill-name { font-size: 1.05rem; }
+  /* Nothing past the evidence bar: a statement, not a link to a skill. */
+  .mini-skill-card.is-even .mini-skill-name, .mini-skill-card.is-even .mini-skill-name:hover { cursor: default; color: var(--mid); text-decoration: none; }
+  .mini-skill-card.is-even .mini-skill-bar-track { visibility: hidden; }
 
   /* ═══ JUMP BACK IN — real shortcuts into the weak-spot practice flows ═══
      flush with the page at rest, becoming a bordered, shadowed tile on
@@ -4362,13 +4365,13 @@ window.Portal = {
                    Session. -->
               <div class="mini-skill-pair">
                 <div class="mini-skill-card" id="mini-math-card" style="display:none;">
-                  <div class="mini-skill-label">Math &mdash; Top Weak Skill</div>
+                  <div class="mini-skill-label">Math &mdash; Weak Skill</div>
                   <div class="mini-skill-name" id="mini-math-name">&mdash;</div>
                   <div class="mini-skill-sub" id="mini-math-sub"></div>
                   <div class="mini-skill-bar-track"><div class="mini-skill-bar-fill" id="mini-math-bar"></div></div>
                 </div>
                 <div class="mini-skill-card" id="mini-rw-card" style="display:none;">
-                  <div class="mini-skill-label">R&amp;W &mdash; Top Weak Skill</div>
+                  <div class="mini-skill-label">R&amp;W &mdash; Weak Skill</div>
                   <div class="mini-skill-name" id="mini-rw-name">&mdash;</div>
                   <div class="mini-skill-sub" id="mini-rw-sub"></div>
                   <div class="mini-skill-bar-track"><div class="mini-skill-bar-fill" id="mini-rw-bar"></div></div>
@@ -4678,8 +4681,8 @@ window.Portal = {
     </div>
 
     <!-- Runs each subject's weakest skill back to back in one session, using
-         the same weakestSkillIn()/HOME_*_DOMAINS rule as Home's mini skill
-         cards (via window.getWeakestSkillsForQb). See
+         the same evidence as Home's mini skill cards (homeEvidence(), via
+         window.getWeakestSkillsForQb). See
          startWeaknessPractice(). -->
     <div class="vp-tenmin-card qb-weak-card" id="qb-weak-card">
       <div class="vp-tenmin-icon">&#127919;</div>
@@ -4763,7 +4766,7 @@ window.Portal = {
       <div class="qb-raw-stat">
         <span class="qb-raw-stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5L16 9"/></svg></span>
         <div class="qb-raw-stat-text">
-          <div class="qb-raw-stat-lab">Current Accuracy</div>
+          <div class="qb-raw-stat-lab">First-Try Accuracy</div>
           <div class="qb-raw-stat-num" id="qb-stat-accuracy">0%</div>
         </div>
       </div>
@@ -5054,7 +5057,10 @@ window.Portal = {
       <div class="vp-prog-card">
         <div class="vp-prog-top">
           <span class="vp-prog-num" id="vp-prog-num">0</span>
-          <span class="vp-prog-num-label">words mastered</span>
+          <!-- "known", not "mastered" (stats audit, 2026-09-25): a word joins
+               this count on one "Got it" or one right four-choice answer, and a
+               guess gets that right one time in four. -->
+          <span class="vp-prog-num-label">words known</span>
           <span class="vp-prog-of" id="vp-prog-of"></span>
         </div>
         <div class="vp-bar" id="vp-bar" role="img" aria-label="Vocabulary progress">
@@ -5062,7 +5068,7 @@ window.Portal = {
           <span class="vp-bar-learning" id="vp-bar-learning"></span>
         </div>
         <div class="vp-legend">
-          <span class="vp-legend-item"><span class="vp-dot vp-dot-mastered"></span><span class="vp-legend-num" id="vp-leg-mastered">0</span> mastered</span>
+          <span class="vp-legend-item"><span class="vp-dot vp-dot-mastered"></span><span class="vp-legend-num" id="vp-leg-mastered">0</span> known</span>
           <span class="vp-legend-item"><span class="vp-dot vp-dot-learning"></span><span class="vp-legend-num" id="vp-leg-learning">0</span> still learning</span>
           <span class="vp-legend-item"><span class="vp-dot vp-dot-new"></span><span class="vp-legend-num" id="vp-leg-new">0</span> not started</span>
         </div>
@@ -5608,11 +5614,11 @@ window.Portal = {
      count-up. Pure decoration, self-wiring, safe to remove — see the
      header in fluid-ui.js. -->
 <script src="fluid-ui.js?v=20260905y"></script>
-<script src="banks.js?v=20260910a"></script>
-<script src="signals.js?v=20260916b"></script>
+<script src="banks.js?v=20260926a"></script>
+<script src="signals.js?v=20260926a"></script>
 <script src="desmos-tags.js?v=20260916c"></script>
 <script src="time-budgets.js?v=20260912a"></script>
-<script src="challenge-questions.js?v=20260911a"></script>
+<script src="challenge-questions.js?v=20260926a"></script>
 <script src="grid-in.js?v=20260910a"></script>
 <script src="question-flag.js?v=20260922c"></script>
 <script>
@@ -5626,7 +5632,7 @@ window.Portal = {
      await this promise. */
   window.__practiceTestsReady = new Promise(function (resolve) {
     var s = document.createElement('script');
-    s.src = 'practice-tests.js?v=20260912a';
+    s.src = 'practice-tests.js?v=20260926a';
     // Settled, not loaded: an error resolves too, and a screen
     // needs to stop saying "loading" either way.
     function settle() { window.__practiceTestsSettled = true; resolve(); }
@@ -5798,7 +5804,9 @@ window.Portal = {
   window.addEventListener('online', function () { flushSubmitOutbox(); if (window.flushPracticeOutbox) window.flushPracticeOutbox(); });
 
   /* ═══ PRACTICE LOG ═══ every Question Bank, Challenge Questions and Rush
-     answer, queued here and sent in batches to the PracticeLog tab
+     answer (and, from 2026-09-26, every Saved & Mistakes retry, b 'retry',
+     and every explanation read, b 'explain'; see prep.gs for the columns),
+     queued here and sent in batches to the PracticeLog tab
      (logPracticeAttempts in prep.gs). The bank's own store keeps only each
      question's LATEST attempt, so without this the history of what a
      student practised, and how it went over time, was overwritten as they
@@ -5831,6 +5839,13 @@ window.Portal = {
     if (!key || practiceFlushBusy) return;
     var batch = loadPracticeOutbox(key).slice(0, PRACTICE_BATCH);
     if (!batch.length) return;
+    /* sa (2026-09-26): this device's clock as the batch leaves it. `at` is
+       its clock when the event was queued, and LoggedAt the server's on
+       arrival, so at -> sa is time in the outbox and sa -> LoggedAt is clock
+       skew (plus network), which one stamp alone could not tell apart.
+       Stamped on the copies sent, not stored. */
+    var sentAt = new Date().toISOString();
+    batch.forEach(function (e) { e.sa = sentAt; });
     practiceFlushBusy = true;
     postToBackend({ action: 'logPracticeAttempts', key: key, events: batch }, { timeoutMs: 20000, attempts: 2 })
       .then(function (data) {
@@ -5998,12 +6013,24 @@ window.Portal = {
     var seen = Object.assign({}, local.seen, server.seen);
     return { stillLearning: sl.map, seen: seen, termUpdatedAt: sl.times };
   };
+  /* Last write wins for the latest try, but the FIRST try (f, fa) is the
+     earliest either copy knows of, and n the larger count: two devices each
+     hold part of a question's history (see recordAttempt). */
   window.mergeQbAttempts_ = function (local, server) {
     var out = {};
     Object.keys(local || {}).forEach(function (qid) { out[qid] = local[qid]; });
     Object.keys(server || {}).forEach(function (qid) {
-      var s = server[qid];
-      if (!out[qid] || String((s && s.attemptedAt) || '') > String((out[qid] && out[qid].attemptedAt) || '')) out[qid] = s;
+      var s = server[qid], l = out[qid];
+      if (!l) { out[qid] = s; return; }
+      if (!s) return;
+      var later = String(s.attemptedAt || '') > String(l.attemptedAt || '') ? s : l;
+      var m = {};
+      for (var k in later) if (Object.prototype.hasOwnProperty.call(later, k)) m[k] = later[k];
+      var firstOf = [l, s].filter(function (x) { return x.fa && (x.f === 0 || x.f === 1); })
+        .sort(function (a, b) { return String(a.fa).localeCompare(String(b.fa)); })[0];
+      if (firstOf) { m.f = firstOf.f; m.fa = firstOf.fa; }
+      if (l.n || s.n) m.n = Math.max(l.n || 1, s.n || 1);
+      out[qid] = m;
     });
     return out;
   };
@@ -6315,6 +6342,7 @@ window.Portal = {
       // the reopen it is recording.
       savedAt: Date.now(),
       awayEvents: awayEvents,
+      hiddenSpells: hiddenSpells,
       moduleStage: moduleStage,
       module2Variant: module2Variant,
       module1Buffer: module1Buffer,
@@ -6798,6 +6826,9 @@ window.Portal = {
   function show(id) {
     if (isSatOnlyScreen(id) && satHidden() && !MID_DIAGNOSTIC_SCREENS[activeScreenId]) id = 'screen-menu';
     activeScreenId = id;
+    // Leaving the practice screen by any route (sidebar included) ends an
+    // open explanation's clock (see window.portalExplain).
+    if (id !== 'dx-screen' && window.portalExplain) { try { window.portalExplain.leave(null); } catch (e) {} }
     // Tells the presence heartbeat where they are, so the admin panel and
     // the auth log read "on Practice tests" rather than just "online".
     // A label only -- see setActivity in auth-client.js.
@@ -7909,7 +7940,9 @@ window.Portal = {
     var heldBack = null;
     if (!(currentStudent && currentStudent.reportsOpen)) {
       merged.forEach(function (e) {
-        if (e && e.source === 'diagnostic' && (!heldBack || String(e.date || '') < String(heldBack.date || ''))) heldBack = e;
+        // A retake is never the held-back one, even if its first
+        // diagnostic's row is missing from this list (2026-09-26).
+        if (e && e.source === 'diagnostic' && !e.retake && (!heldBack || String(e.date || '') < String(heldBack.date || ''))) heldBack = e;
       });
     }
     // Nothing downstream may treat a marker as a link, or open a held-back report.
@@ -8325,7 +8358,6 @@ window.Portal = {
 
      Never-reached questions are excluded: running out of time says nothing
      about knowing the topic. */
-  var XT_MIN_QUESTIONS = 4;   // below this a skill is one bad day, not a pattern
   var XT_MIN_TESTS = 2;       // "keeps coming back" needs at least two tests to come back IN
   var XT_MAX_ROWS = 3;
 
@@ -8376,59 +8408,47 @@ window.Portal = {
       return;
     }
 
-    var bySkill = {}, pooledQ = 0;
-    withStats.forEach(function (att, idx) {
-      var qs = att.qStats;
-      qs.q.forEach(function (row) {
-        var sectionKey = qs.s[row[0]] || '';
-        var skillKey = qs.k[row[1]] || '';
-        var result = row[3];
-        if (result === 2) return;                 // never reached -- not evidence about the topic
-        if (!skillKey) return;
-        var parts = skillKey.split(' → ');
-        var skill = parts.length > 1 ? parts[1] : skillKey;
-        pooledQ++;
-        var b = bySkill[skillKey] || (bySkill[skillKey] = {
-          skill: skill, section: sectionKey, total: 0, wrong: 0, perTest: {}
-        });
-        b.total++;
-        var p = b.perTest[idx] || (b.perTest[idx] = { t: 0, w: 0 });
-        p.t++;
-        if (result === 0) { b.wrong++; p.w++; }
-      });
+    /* ═══ WHAT KEEPS COMING BACK, WHAT GOT FIXED (stats audit, 2026-09-26) ═══
+       The old rules were "wrong in 2+ tests" and "earlier miss, none missed
+       on the latest": for a skill whose level never changed they fired 76%
+       and 28% of the time at three tests, and 93% of students were told
+       they had fixed something that had not moved. Now both come from
+       MorettiSignals.skillTrend at skill grain: the difficulty-aware content
+       test the report uses, per test and pooled. "Keeps coming back": the
+       pooled shortfall clears the lead bar and showed on 2+ tests. "Fixed":
+       an earlier shortfall that cleared it, and the latest test better by
+       more than 1.645 standard errors with 4+ questions. Simulated, a
+       student with no change sees any "keeps coming back" 4.1% and any
+       "fixed" 3.1% of the time at three tests. Rare by design: one test is a
+       small sample of a skill. Never-reached and too-fast answers are out. */
+    var MSx = window.MorettiSignals, TBx = window.TIME_BUDGETS;
+    if (!MSx || typeof MSx.skillTrend !== 'function' || typeof MSx.itemsFromQStats !== 'function') { host.style.display = 'none'; return; }
+    var budgetX = TBx ? function (sec, dom, skill, diff) { var bq = TBx.budgetSecondsFor(sec, dom, skill, diff, 1); return (bq && bq.seconds) || 0; } : null;
+    var pooledQ = 0;
+    var xtAttempts = withStats.map(function (att) {
+      var items = MSx.itemsFromQStats(att.qStats, budgetX) || [];
+      items.forEach(function (it) { if (!it.blank) pooledQ++; });
+      return { id: att.attemptId || '', testId: att.testId || '', at: att.date, items: items };
     });
-
-    var skills = Object.keys(bySkill).map(function (k) {
-      var b = bySkill[k];
-      var idxs = Object.keys(b.perTest).map(Number).sort(function (x, y) { return x - y; });
-      b.testCount = idxs.length;
-      b.missedTests = idxs.filter(function (i) { return b.perTest[i].w > 0; }).length;
-      var lastI = idxs[idxs.length - 1];
-      b.last = b.perTest[lastI];
-      // "Fixed" has to be earned on real evidence in the latest sitting, not
-      // on a single lucky question: at least two questions seen there, none
-      // missed, and a real miss in an earlier test to have improved FROM.
-      b.earlierWrong = idxs.slice(0, -1).some(function (i) { return b.perTest[i].w > 0; });
-      return b;
-    });
-
-    // KEEPS COMING BACK: wrong in two or more tests, ranked by questions
-    // missed rather than rate, so a tiny sample with an ugly rate doesn't
-    // outrank a bigger real cost.
-    var back = skills.filter(function (b) {
-      return b.missedTests >= XT_MIN_TESTS && b.total >= XT_MIN_QUESTIONS && b.wrong > 0;
-    }).sort(function (a, c) { return c.wrong - a.wrong || (c.wrong / c.total) - (a.wrong / a.total); })
-      .slice(0, XT_MAX_ROWS);
-
-    var fixed = skills.filter(function (b) {
-      return b.total >= XT_MIN_QUESTIONS && b.earlierWrong && b.last.w === 0 && b.last.t >= 2;
-    }).sort(function (a, c) { return c.total - a.total; }).slice(0, 2);
+    var ev = MSx.skillEvidence(xtAttempts, { grain: 'skill' });
+    var tr = MSx.skillTrend(xtAttempts, { grain: 'skill' });
+    var rowOf = function (k) {
+      var u = ev.units[k] || { n: 0, obs: 0, perAttempt: [], sec: '' };
+      var last = u.perAttempt.length ? u.perAttempt[u.perAttempt.length - 1] : null;
+      var t = tr.units[k] || {};
+      return { skill: k, section: u.sec, total: u.n, wrong: Math.round(u.n - u.obs), z: u.z || 0,
+               missedTests: t.deficitAttempts || 0, testCount: t.attempts || u.perAttempt.length,
+               last: last ? { t: last.n, right: Math.round(last.obs) } : { t: 0, right: 0 } };
+    };
+    var back = (tr.keepsComingBack || []).map(rowOf)
+      .sort(function (a, c) { return c.z - a.z; }).slice(0, XT_MAX_ROWS);
+    var fixed = (tr.fixed || []).map(rowOf).slice(0, 2);
 
     if (!back.length && !fixed.length) {
       host.innerHTML =
         xtHeadHtml(withStats.length + ' tests &middot; ' + pooledQ + ' questions') +
         '<p class="xt-lede" style="margin-bottom:0;">Nothing is repeating. Across all ' + withStats.length +
-        ' of your tests, no topic has come up wrong more than once &mdash; your mistakes are landing in different places each time rather than piling into the same few. That is a good sign: it points at focus and pacing on the day rather than at a topic you have not learned.</p>';
+        ' of your tests, no topic keeps coming up wrong more often than your level explains, once you allow for how hard its questions were. Your misses are landing in different places each time rather than piling into the same few.</p>';
       host.style.display = '';
       return;
     }
@@ -8454,8 +8474,8 @@ window.Portal = {
       }
       return '<div class="xt-row">' +
         '<div class="xt-name">' + esc(b.skill) + (sec ? '<span class="xt-sec">' + esc(sec) + '</span>' : '') + '</div>' +
-        '<div class="xt-count good">' + b.last.t + ' of ' + b.last.t + ' right</div>' +
-        '<div class="xt-when">You were missing these earlier. On your most recent test you got every one of them.</div>' +
+        '<div class="xt-count good">' + b.last.right + ' of ' + b.last.t + ' right</div>' +
+        '<div class="xt-when">You were missing these more than your level explained. On your most recent test you did clearly better, by more than a lucky day would.</div>' +
         '</div>';
     }
 
@@ -8467,7 +8487,7 @@ window.Portal = {
       html += '<div class="xt-group">' +
         '<div class="xt-group-hed"><span class="xt-dot back"></span>Keeps coming back</div>' +
         '<p class="xt-group-sub">You have missed ' + (back.length === 1 ? 'this' : 'these') +
-        ' on more than one test, so ' + (back.length === 1 ? 'it is' : 'they are') +
+        ' more than your level explains, on more than one test, so ' + (back.length === 1 ? 'it is' : 'they are') +
         ' worth actual review time rather than another practice set.</p>' +
         back.map(function (b) { return rowHtml(b, 'back'); }).join('') + '</div>';
     }
@@ -8475,10 +8495,10 @@ window.Portal = {
       html += '<div class="xt-group">' +
         '<div class="xt-group-hed"><span class="xt-dot fixed"></span>You have fixed ' + (fixed.length === 1 ? 'this one' : 'these') + '</div>' +
         '<p class="xt-group-sub">' + (fixed.length === 1 ? 'This used' : 'These used') +
-        ' to cost you points and no longer ' + (fixed.length === 1 ? 'does' : 'do') + '. Worth knowing what work actually moved.</p>' +
+        ' to cost you more points than your level explained, and on your latest test ' + (fixed.length === 1 ? 'it' : 'they') + ' clearly did not. Worth knowing what work actually moved.</p>' +
         fixed.map(function (b) { return rowHtml(b, 'fixed'); }).join('') + '</div>';
     }
-    html += '<p class="xt-foot">Based on every full test you have taken in the portal. Questions you never reached are left out &mdash; running out of time is a pacing problem, and this card is only about the topics themselves.</p>';
+    html += '<p class="xt-foot">Based on every full test you have taken in the portal. Questions you never reached, or answered too fast to have read, are left out &mdash; those are pacing, and this card is only about the topics themselves.</p>';
 
     host.innerHTML = html;
     host.style.display = '';
@@ -8644,21 +8664,11 @@ window.Portal = {
     cardEl.style.display = '';
   }
 
-  /* ═══ HOME: TOP WEAK SKILL MINI CARDS ═══ one skill per section (Math,
-     Reading & Writing): the worst accuracy across every attempt (from
-     window.fetchPortalProgress' skillStats), not the raw miss count.
-     Clicking a name opens My Incorrect Questions with that skill preselected
-     (see `preset` on window.iqModuleInit). */
-  // Keyed by the domain name with "&" written as "and", which is how every
-  // question bank spells it. These used "&", so the Craft and Structure,
-  // Information and Ideas, Geometry and Trigonometry and Problem-Solving
-  // and Data Analysis skills could never be picked as the weakest;
-  // homeDomainKey() folds either spelling to one key.
-  var HOME_MATH_DOMAINS = { 'advanced math': 1, 'algebra': 1, 'geometry and trigonometry': 1, 'problem-solving and data analysis': 1 };
-  var HOME_RW_DOMAINS = { 'craft and structure': 1, 'information and ideas': 1, 'standard english conventions': 1, 'expression of ideas': 1 };
-  function homeDomainKey(d) { return String(d || '').replace(/&/g, ' and ').replace(/\s+/g, ' ').trim().toLowerCase(); }
+  /* ═══ HOME: WEAK SKILL MINI CARDS ═══ one per section (Math, Reading &
+     Writing), from every full test's per-question record (see
+     homeEvidence below). Clicking a named skill opens My Incorrect
+     Questions with it preselected (see `preset` on window.iqModuleInit). */
   var MATH_SECTION_KEYS = { 'math': 1 };
-  var HOME_WEAK_SKILL_MIN_ATTEMPTS = 3; // fewer than this and one miss/hit swings the % too wildly to call it "the" weak spot
 
   function goToIncorrectQuestionsForSkill(skill) {
     if (window.iqModuleInit) window.iqModuleInit({ skill: skill });
@@ -8672,56 +8682,92 @@ window.Portal = {
     show('screen-incorrect-questions');
   }
 
-  // Lowest-accuracy skill within one domain set, out of the skillStats
-  // object synced by syncProgress (see handleSyncProgress in Code.gs) —
-  // mirrors weakestDomain()'s tie-breaking (more questions behind it wins
-  // a tie) at the skill level instead of the domain level.
-  function weakestSkillIn(skillStats, domainSet) {
-    var best = null;
-    Object.keys(skillStats || {}).forEach(function (key) {
-      var s = skillStats[key];
-      if (!s || !domainSet[homeDomainKey(s.domain)] || !s.total || s.total < HOME_WEAK_SKILL_MIN_ATTEMPTS) return;
-      var pct = s.correct / s.total;
-      if (!best || pct < best.pct || (pct === best.pct && s.total > best.total)) {
-        // domain lets outside callers (window.getWeakestSkillsForQb) place the
-        // skill when its name isn't in their taxonomy.
-        best = { skill: s.skill, domain: s.domain, correct: s.correct, total: s.total, pct: pct };
-      }
+  /* ═══ THE WEAK SKILL ON HOME (stats audit, 2026-09-26) ═══
+     It used to be the lowest raw percent among skills with 3+ questions on
+     the LATEST test alone. For a student at about 65% everywhere that card
+     showed a median of 25% on some skill, named a different skill 92% of
+     the time on the next test, and found a genuinely weak skill (1.5
+     logits down) only 35% of the time. Now it is the report's own
+     difficulty-aware content test (MorettiSignals.skillEvidence), at skill
+     grain, pooled over every full SAT the student has taken: a skill is
+     named only when it is a lead there (missed more than this student's
+     level predicts, given how hard its questions were, past z 2.95).
+     Simulated on the real forms, a student with no weak skill sees one
+     named 7.8 / 10.7 / 10.4% of the time after 1 / 3 / 6 tests. Otherwise
+     the card says no single skill stands out, which is the finding. */
+  function homeEvidence() {
+    var MS = window.MorettiSignals, TB = window.TIME_BUDGETS;
+    if (!MS || typeof MS.skillEvidence !== 'function' || typeof MS.itemsFromQStats !== 'function') return null;
+    var budget = TB ? function (sec, dom, skill, diff) {
+      var b = TB.budgetSecondsFor(sec, dom, skill, diff, 1);
+      return (b && b.seconds) || 0;
+    } : null;
+    var attempts = [], domOf = {};
+    var hist;
+    try { hist = mergedScoreHistory(); } catch (e) { hist = []; }
+    hist.forEach(function (e) {
+      if (!e || !e.qStats || e.mode === 'section' || (e.testType && e.testType !== 'SAT')) return;
+      var items = MS.itemsFromQStats(e.qStats, budget);
+      if (!items) return;
+      items.forEach(function (it) { domOf[it.skill] = it.dom; });
+      attempts.push({ id: e.attemptId || '', testId: e.testId || '', at: e.date, items: items });
     });
-    return best;
+    if (!attempts.length) return null;
+    var ev = MS.skillEvidence(attempts, { grain: 'skill' });
+    ev.domOf = domOf;
+    return ev;
+  }
+  // { lead, top } for one section: lead = the strongest skill past the bar
+  // (or null); top = the skill most below expectation even if it did not
+  // clear it, which only picks practice questions and is never shown as a claim.
+  function homeWeakSkill(ev, sectionKey) {
+    if (!ev) return null;
+    var lead = null, top = null;
+    Object.keys(ev.units).forEach(function (k) {
+      var u = ev.units[k];
+      if (u.sec !== sectionKey || !(u.n >= 3)) return;
+      var row = { skill: k, domain: ev.domOf[k] || '', correct: Math.round(u.obs), total: u.n, pct: u.n ? u.obs / u.n : 0, z: u.z };
+      if (!top || u.z > top.z) top = row;
+      if (u.lead && (!lead || u.z > lead.z)) lead = row;
+    });
+    return { lead: lead, top: top, tests: ev.attempts };
   }
 
-  function fillMiniSkillCard(cardId, nameId, subId, barId, best) {
+  function fillMiniSkillCard(cardId, nameId, subId, barId, res) {
     var cardEl = document.getElementById(cardId);
     if (!cardEl) return;
     cardEl.classList.remove('is-loading');   // see skeletonMiniSkillCard
-    if (!best) { cardEl.style.display = 'none'; return; }
+    if (!res) { cardEl.style.display = 'none'; return; }
     var nameEl = document.getElementById(nameId), subEl = document.getElementById(subId), barEl = document.getElementById(barId);
+    var testsTxt = res.tests === 1 ? 'your test' : 'your ' + res.tests + ' tests';
+    var best = res.lead;
+    if (!best) {
+      if (nameEl) { nameEl.textContent = 'No single skill stands out'; nameEl.onclick = null; }
+      if (subEl) subEl.textContent = 'Across ' + testsTxt + ', misses are spread out';
+      if (barEl) barEl.style.width = '0%';
+      cardEl.classList.add('is-even');
+      cardEl.style.display = '';
+      return;
+    }
+    cardEl.classList.remove('is-even');
     var pctInt = Math.round(best.pct * 100);
     if (nameEl) { nameEl.textContent = best.skill; nameEl.onclick = function () { goToIncorrectQuestionsForSkill(best.skill); }; }
-    if (subEl) subEl.textContent = pctInt + '% correct over last ' + best.total;
+    if (subEl) subEl.textContent = best.correct + ' of ' + best.total + ' right across ' + testsTxt + ', below your level';
     if (barEl) barEl.style.width = Math.max(2, pctInt) + '%';
     cardEl.style.display = '';
   }
 
   // Bridge for Question Bank's "Practice Your Weaknesses" (an isolated
-  // closure, like window.getPortalStudentKey). Reuses Home's weakest-skill
-  // signal so both places agree on "your weakest skill".
+  // closure, like window.getPortalStudentKey). Reuses Home's evidence so
+  // both places agree; when nothing clears the bar it still picks the skill
+  // furthest below expectation, since a practice round needs a skill.
   window.getWeakestSkillsForQb = function (callback) {
-    if (!window.fetchPortalProgress) { callback({ rw: null, math: null }); return; }
-    window.fetchPortalProgress(function (progress) {
-      var skillStats = (progress.skillStats && typeof progress.skillStats === 'object') ? progress.skillStats : {};
-      var rw = weakestSkillIn(skillStats, HOME_RW_DOMAINS);
-      var math = weakestSkillIn(skillStats, HOME_MATH_DOMAINS);
-      // domain travels with the skill because the diagnostic's taxonomy is
-      // finer than QB's and names differ slightly ("&" vs "and", casing), so
-      // QB needs a same-domain fallback (see weaknessPoolFor() in the QB
-      // module).
-      callback({
-        rw: rw ? { skill: rw.skill, domain: rw.domain } : null,
-        math: math ? { skill: math.skill, domain: math.domain } : null
-      }, !!progress.isStale);
-    });
+    var ev = homeEvidence();
+    var pick = function (sec) {
+      var r = homeWeakSkill(ev, sec), b = r && (r.lead || r.top);
+      return b ? { skill: b.skill, domain: b.domain } : null;
+    };
+    callback({ rw: pick('reading-writing'), math: pick('math') }, false);
   };
 
   function renderHomePies() {
@@ -8748,9 +8794,9 @@ window.Portal = {
         skeletonMiniSkillCard('mini-rw-card');
         return;
       }
-      var skillStats = (progress.skillStats && typeof progress.skillStats === 'object') ? progress.skillStats : {};
-      fillMiniSkillCard('mini-math-card', 'mini-math-name', 'mini-math-sub', 'mini-math-bar', weakestSkillIn(skillStats, HOME_MATH_DOMAINS));
-      fillMiniSkillCard('mini-rw-card', 'mini-rw-name', 'mini-rw-sub', 'mini-rw-bar', weakestSkillIn(skillStats, HOME_RW_DOMAINS));
+      var ev = homeEvidence();
+      fillMiniSkillCard('mini-math-card', 'mini-math-name', 'mini-math-sub', 'mini-math-bar', homeWeakSkill(ev, 'math'));
+      fillMiniSkillCard('mini-rw-card', 'mini-rw-name', 'mini-rw-sub', 'mini-rw-bar', homeWeakSkill(ev, 'reading-writing'));
     });
   }
   function skeletonMiniSkillCard(cardId) {
@@ -11070,6 +11116,31 @@ window.Portal = {
       explanation: q.explanation || null
     };
   }
+  /* The permanent question id (the item's qid: College Board's for the
+     Question Bank, "mt" + a content hash elsewhere, see
+     tests/assign-qids.js) behind a Mistakes/Saved key, or null. Keys are
+     positional (test|section|module|index), so the practice log carries
+     this as well to keep a retry tied to the question itself (2026-09-26). */
+  window.permanentQidForKey = function (key) {
+    try {
+      var parts = String(key || '').split('|'), q = null;
+      if (parts[0] === 'qb') return parts.length === 3 ? parts[2] : null;
+      if (parts[0] === 'chal' && parts.length === 3) {
+        var pool = parts[1] === 'math' ? (window.CHALLENGE_MATH || []) : (window.CHALLENGE_RW || []);
+        q = pool.filter(function (item) { return item.key === parts[2]; })[0];
+      } else if (parts.length === 4) {
+        var bank = null, mod = parts[2], idx = parseInt(parts[3], 10);
+        if (parts[0].indexOf('diag-') === 0) bank = SECTION_BANKS[parts[1]];
+        else {
+          var pt = (window.SAT_PRACTICE_TESTS || []).filter(function (t) { return t.id === parts[0]; })[0];
+          bank = (pt && pt.sections) ? pt.sections[parts[1] === 'reading-writing' ? 'readingWriting' : parts[1]] : null;
+        }
+        var list = (bank && (mod === 'module1' || mod === 'module2Easier' || mod === 'module2Harder')) ? bank[mod] : null;
+        q = (list && !isNaN(idx)) ? list[idx] : null;
+      }
+      return (q && q.qid) ? String(q.qid) : null;
+    } catch (e) { return null; }
+  };
   window.resolveQuestionByKey = function (key) {
     if (/^(qb|chal)\|/.test(String(key || ''))) return resolveQuestionBankKey_(key);
     var parts = String(key || '').split('|');
@@ -11341,6 +11412,14 @@ window.Portal = {
     sigCalcOpenAt = null; sigCalcFocusAt = null; sigRefAt = null;
   });
   var sigCheckpoint = sigSafe(function (now) { sigAccrue(now); });
+  // Drops the unseen part of the running segments: a visit whose clock
+  // started while the tab was hidden (see tabHiddenEnd) begins at `now`.
+  var sigSkipTo = sigSafe(function (now) {
+    if (sigSegAt !== null) sigSegAt = Math.max(sigSegAt, now);
+    if (sigCalcOpenAt !== null) sigCalcOpenAt = Math.max(sigCalcOpenAt, now);
+    if (sigCalcFocusAt !== null) sigCalcFocusAt = Math.max(sigCalcFocusAt, now);
+    if (sigRefAt !== null) sigRefAt = Math.max(sigRefAt, now);
+  });
   /* Within-visit switches: the student picked an answer during this look,
      then picked a different one (or crossed out the one just picked)
      before leaving. Replacing an answer committed on an EARLIER visit is
@@ -12117,13 +12196,127 @@ window.Portal = {
   function recordInterruption(kind, awayMs) {
     if (!(awayMs > AWAY_GRACE_MS)) return;
     awayEvents.push({
-      kind: kind,                                   // 'gap' | 'reopened' | 'ranout'
+      kind: kind,                                   // 'gap' | 'reopened' | 'ranout' | 'hidden'
       sec: activeSectionKeys[sectionIndex] || null,
       at: new Date().toISOString(),
       ms: Math.round(awayMs)
     });
     saveState();
   }
+
+  /* HIDDEN-TAB TIME (2026-09-26). A backgrounded tab still ticks about once
+     a second, so the gap detector in tickSectionTimer never fired for a
+     student reading another tab, and the whole spell was billed to the open
+     question. The question clock now stops when the page is hidden and
+     restarts when it comes back, exactly as the gap path does. A single
+     spell longer than the grace is an absence and goes in the interruption
+     log like a gap of that length (kind 'hidden'); shorter spells only stop
+     the question clock and are kept in hiddenSpells (on the attempt as
+     `hs`), so a pattern of quick tab switches is visible without tagging a
+     clean attempt as interrupted. The section clock is untouched: it never
+     gives time back. */
+  var hiddenSpells = [];      // [{s: section key, at: ISO start, ms}], every hidden spell in the test engine
+  var hiddenAt = null;        // when the current hidden spell began, or null
+  var hiddenQWasOpen = false; // a question (not the review page) was on screen when it began
+  var hiddenTimed = false;    // the section clock was running when it began
+  var hiddenSec = null;
+  function tabHiddenStart(now) {
+    if (hiddenAt !== null || activeScreenId !== 'dx-screen' || iqPracticeActive || !testChoice) return;
+    hiddenAt = now;
+    hiddenSec = activeSectionKeys[sectionIndex] || null;
+    hiddenTimed = !!sectionTimerInterval;
+    hiddenQWasOpen = questionEnterTime !== null && !dxMain.classList.contains('dx-checking');
+    pauseQuestionTimeAt(now);
+  }
+  // `resume` false when the spell is closed by the section ending under it
+  // (tickSectionTimer): there is then no question to restart.
+  function tabHiddenEnd(now, resume) {
+    if (hiddenAt === null) return;
+    var dur = Math.max(0, now - hiddenAt);
+    // Capped so a student flicking between tabs can't bloat the attempt.
+    if (hiddenSpells.length < 200) hiddenSpells.push({ s: hiddenSec, at: new Date(hiddenAt).toISOString(), ms: Math.round(dur) });
+    hiddenAt = null;
+    // The gap detector must not count this same absence a second time.
+    if (lastLiveTickAt !== null) lastLiveTickAt = Math.max(lastLiveTickAt, now);
+    if (hiddenTimed) recordInterruption('hidden', dur);
+    if (!resume) return;
+    if (questionEnterTime !== null) {
+      // A question clock started while hidden (the section ended under the
+      // spell and a new one opened): none of it was seen, so start it now.
+      questionEnterTime = Math.max(questionEnterTime, now);
+      sigSkipTo(now);
+    } else if (hiddenQWasOpen && activeScreenId === 'dx-screen' && !dxMain.classList.contains('dx-checking')) {
+      beginQuestionTime(current);
+    } else if (sigReviewPageAt !== null) {
+      // Time hidden on the review page isn't time on the review page.
+      sigReviewPageAt = Math.min(now, sigReviewPageAt + dur);
+    }
+    saveState();
+  }
+  document.addEventListener('visibilitychange', function () {
+    try {
+      if (document.visibilityState === 'hidden') tabHiddenStart(Date.now());
+      else tabHiddenEnd(Date.now(), true);
+    } catch (e) { if (window.console) console.warn('hidden-tab:', e); }
+  });
+  /* Total ms this page has spent hidden, the current spell included. The
+     practice runners (Question Bank, Challenge, Rush, Saved & Mistakes) and
+     the explanation timers subtract its growth across a question, so time
+     in another tab is never billed to it (2026-09-26). A plain running
+     total rather than per-runner listeners, because those runners live in
+     separate closures. */
+  (function () {
+    var total = 0, since = document.visibilityState === 'hidden' ? Date.now() : null;
+    document.addEventListener('visibilitychange', function () {
+      var now = Date.now();
+      if (document.visibilityState === 'hidden') { if (since === null) since = now; }
+      else if (since !== null) { total += Math.max(0, now - since); since = null; }
+    });
+    window.portalHiddenMs = function () { return total + (since !== null ? Math.max(0, Date.now() - since) : 0); };
+  })();
+  /* EXPLANATION ENGAGEMENT (2026-09-26). Whether a student reads the
+     explanation after a question, and for how long, was invisible. Each
+     practice runner's collapsible "Full Explanation" (buildCollapsibleExplain)
+     reports here: shown(ctx) when it is drawn for a question, toggle(open)
+     when the student expands or collapses it, and leave(key) whenever a
+     runner draws a question (or its end screen), which closes out any
+     OTHER question. One practice-log event per question left with its
+     explanation opened at least once: { b: 'explain', q, k, s, sk, d,
+     c: their result on it, ms: time open with the tab visible }. A re-render
+     rebuilds the block collapsed, so it counts as a close, not a leave. */
+  window.portalExplain = (function () {
+    var cur = null;   // { ctx, ms, openAt, hid0, opened } for the question on screen
+    function hid() { return window.portalHiddenMs ? window.portalHiddenMs() : 0; }
+    function stop() {
+      if (!cur || cur.openAt === null) return;
+      cur.ms += Math.max(0, Date.now() - cur.openAt - (hid() - cur.hid0));
+      cur.openAt = null;
+    }
+    function flush() {
+      if (!cur) return;
+      stop();
+      var done = cur, c = done.ctx;
+      cur = null;
+      if (!done.opened || !window.queuePracticeEvent) return;
+      window.queuePracticeEvent({ b: 'explain', s: c.s === 'math' ? 'math' : 'rw', q: String(c.q || c.key || ''), k: String(c.key || ''),
+        sk: String(c.sk || ''), d: String(c.d || ''), c: c.c ? 1 : 0, ms: Math.round(done.ms) });
+    }
+    window.addEventListener('pagehide', function () { try { flush(); } catch (e) {} });
+    return {
+      shown: function (ctx) {
+        if (!ctx || !ctx.key) return;
+        if (cur && cur.ctx.key !== ctx.key) flush();
+        if (!cur) cur = { ctx: ctx, ms: 0, openAt: null, hid0: 0, opened: false };
+        else { stop(); cur.ctx = ctx; }
+      },
+      toggle: function (open) {
+        if (!cur) return;
+        if (open) { if (cur.openAt === null) { cur.openAt = Date.now(); cur.hid0 = hid(); cur.opened = true; } }
+        else stop();
+      },
+      leave: function (key) { if (cur && cur.ctx.key !== key) flush(); }
+    };
+  })();
 
   function tickSectionTimer() {
     if (sectionTimerEndsAt === null) return;
@@ -12136,6 +12329,10 @@ window.Portal = {
     }
     if (remaining <= 0) {
       stopSectionTimer();
+      // A hidden spell the section ended under stops at the zero instant, so
+      // it and a 'ranout' overrun never cover the same minutes.
+      var endedHidden = hiddenAt !== null;
+      if (endedHidden) tabHiddenEnd(Math.max(hiddenAt, sectionTimerEndsAt), false);
       if (-remaining > AWAY_THRESHOLD_MS) {
         // The clock ran out unattended. The guard only prevents a silent submit
         // (an unattended computer must never cascade through the test and
@@ -12146,11 +12343,17 @@ window.Portal = {
       } else {
         autoSubmitSection();
       }
+      // Still hidden: whatever opened next starts a fresh spell, so its
+      // question clock is stopped too.
+      if (endedHidden && document.visibilityState === 'hidden') tabHiddenStart(Date.now());
     } else {
+      // The tick can run before the visibilitychange event on waking.
+      if (hiddenAt !== null && document.visibilityState === 'visible') tabHiddenEnd(Date.now(), true);
       // A gap between ticks longer than the grace means the tab slept or was
       // backgrounded: record it even though the section survived, so several
-      // short absences are as visible as one long one.
-      if (lastLiveTickAt !== null) {
+      // short absences are as visible as one long one. A gap inside a hidden
+      // spell is that spell, which tabHiddenEnd records once when it ends.
+      if (lastLiveTickAt !== null && hiddenAt === null) {
         var gap = Date.now() - lastLiveTickAt;
         if (gap > AWAY_GRACE_MS) {
           // Restart only a question that was actually open. On the review
@@ -12219,6 +12422,9 @@ window.Portal = {
       return bankFor(key).module1.length > 0;
     });
     completedSections = [];
+    // A second test in the same page session must not inherit the first
+    // one's interruptions (2026-09-26: awayEvents was never reset here).
+    awayEvents = []; hiddenSpells = []; hiddenAt = null;
     if (!activeSectionKeys.length) { show('screen-menu'); return; } // shouldn't happen — Math always has content
     showTestOverview();
   }
@@ -13327,13 +13533,25 @@ window.Portal = {
            difficulty, matching how the banks treat an unlabelled one)
            result 1 = correct, 0 = answered wrong, 2 = never answered --
            kept apart from wrong because "ran out of clock" and "got it
-           wrong" are different problems and the analytics separate them. */
+           wrong" are different problems and the analytics separate them.
+           Appended 2026-09-26 (readers index by position, so older
+           five-long tuples still read):
+           [5] qid: the item's permanent id (tests/assign-qids.js), or null
+           [6] the answer given: MC choice index 0-3, a grid-in as typed
+               (trimmed), null when blank -- so the popular wrong answer
+               on a question can be counted across students. */
+        var qsGiven = null;
+        if (typeof given === 'number') qsGiven = (given >= 0 && given <= 3) ? given : null;
+        else if (given && given.raw != null && String(given.raw).trim()) qsGiven = String(given.raw).trim().slice(0, 40);
+        else if (typeof given === 'string' && given.trim()) qsGiven = given.trim().slice(0, 40);
         qStats.q.push([
           qsSecIdx,
           qsIdx(qStats.k, skillKey),
           QS_DIFF[q.difficulty] === undefined ? 1 : QS_DIFF[q.difficulty],
           correct ? 1 : ((given === null || given === undefined || given === '') ? 2 : 0),
-          Math.round(((sec.questionTimeMs && sec.questionTimeMs[i]) || 0) / 1000)
+          Math.round(((sec.questionTimeMs && sec.questionTimeMs[i]) || 0) / 1000),
+          q.qid ? String(q.qid) : null,
+          qsGiven
         ]);
 
         var wasMarked = !!((sec.everMarked && sec.everMarked[i]) || (sec.marked && sec.marked[i]));
@@ -13419,6 +13637,10 @@ window.Portal = {
       iv: awayEvents.map(function (e) {
         return { k: e.kind, s: e.sec, ms: e.ms, at: e.at };
       }),
+      // hs = every spell with the tab hidden (2026-09-26), short ones
+      // included: the question clocks stopped for them, and the long ones
+      // are also in iv as kind 'hidden'. Absent on older attempts.
+      hs: hiddenSpells.slice(),
       s: completedSections.map(function (sec) {
         return Object.assign({
           // m = "ever flagged for review," not the final state (see everMarked),
@@ -13530,6 +13752,9 @@ window.Portal = {
         attemptId: 'a' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8),
         testType: testChoice,
         source: ptDoneEarly ? 'practice-test' : 'diagnostic',
+        // A diagnostic sat again once one is on file (2026-09-26): still a
+        // diagnostic attempt here, but never the one held back for Luca.
+        retake: (!ptDoneEarly && alreadyTakenThisTestType()) ? true : undefined,
         testId: ptDoneEarly ? ptDoneEarly.id : null,
         testTitle: ptDoneEarly ? ptDoneEarly.title : (testChoice + ' Diagnostic'),
         composite: composite, scaleMin: scaleMin, scaleMax: scaleMax,
@@ -13695,17 +13920,38 @@ window.Portal = {
 
     var isRetake = alreadyTakenThisTestType();
     if (isRetake) {
-      // Never sent, by design, so the server will never list it: marked so
-      // reconcileLocalScoreHistory() keeps it instead of purging it.
+      // Still marked local-only, so reconcileLocalScoreHistory() never purges
+      // it while the server lacks it (an older backend refuses it, below).
       markScoreEntryLocalOnly(scoreEntryForSubmit && scoreEntryForSubmit.attemptId);
       // Already has a real (Luca-notified) attempt at this test type: this one
       // is practice only. No email, no re-stamping, and the student sees the
       // link.
       setViewResultsLink(reportLinkRelative);
       document.getElementById('done-message').textContent =
-        'Nice work practicing! This attempt wasn\'t sent to Luca — you already have a real ' + testChoice + ' diagnostic on file.';
+        'Nice work practicing! This counts as practice: you already have a real ' + testChoice + ' diagnostic on file.';
       statusEl.textContent = '';
       show('screen-done');
+      /* RETAKES REACH THE SERVER (2026-09-26). They used to stay on this
+         device, so Luca never saw them and another device never listed
+         them. Sent like any attempt and stored with Source
+         'diagnostic-retake'; nothing is emailed (handleDiagnosticRetake_ in
+         Code.gs). test 'SAT-RETAKE' is what an older backend refuses
+         (bad_test), so it can never be taken for a first diagnostic; that
+         refusal is not queued, since a retry would only sit at the head of
+         the outbox in front of real tests. Anything else (offline, a
+         timeout) goes to the outbox like any attempt. Quiet either way: the
+         student was never promised a delivery. */
+      var retakeBody = Object.assign({
+        action: 'submitDiagnostic',
+        key: currentStudent.key,
+        test: testChoice + '-RETAKE',
+        score: totalCorrect + '/' + totalQuestions,
+        reportLink: reportLink,
+        report: report
+      }, scoreEntryFields(scoreEntryForSubmit));
+      postToBackend(retakeBody, { timeoutMs: 60000, attempts: 2 })
+        .then(function (data) { if (!(data && data.ok)) throw new Error((data && data.error) || 'send_failed'); })
+        .catch(function (err) { if (!(err && err.message === 'bad_test')) queueUnsentSubmit(retakeBody); });
       return;
     }
 
@@ -13781,6 +14027,8 @@ window.Portal = {
       completedSections = Array.isArray(state.completedSections) ? state.completedSections : [];
       // The interruption log has to survive the very reopen it records.
       awayEvents = Array.isArray(state.awayEvents) ? state.awayEvents : [];
+      hiddenSpells = Array.isArray(state.hiddenSpells) ? state.hiddenSpells : [];
+      hiddenAt = null;
       sectionIndex = typeof state.sectionIndex === 'number' ? state.sectionIndex : 0;
       moduleStage = state.moduleStage === 'module2' ? 'module2' : 'module1';
       module2Variant = state.module2Variant || null;
@@ -13856,6 +14104,8 @@ window.Portal = {
       completedSections = Array.isArray(state.completedSections) ? state.completedSections : [];
       // The interruption log has to survive the very reopen it records.
       awayEvents = Array.isArray(state.awayEvents) ? state.awayEvents : [];
+      hiddenSpells = Array.isArray(state.hiddenSpells) ? state.hiddenSpells : [];
+      hiddenAt = null;
       sectionIndex = typeof state.sectionIndex === 'number' ? state.sectionIndex : 0;
       // Only needed for a resumed module break (advanceFromBreak() ->
       // goToModuleIntro() reads these); harmless to restore otherwise.
@@ -15133,7 +15383,7 @@ window.Portal = {
     if (barLearningEl) barLearningEl.style.width = (c.total ? (c.learning / c.total * 100) : 0) + '%';
     var bar = document.getElementById('vp-bar');
     if (bar) bar.setAttribute('aria-label',
-      c.mastered + ' mastered, ' + c.learning + ' still learning, ' + c.notStarted + ' not started, of ' + c.total + ' words');
+      c.mastered + ' known, ' + c.learning + ' still learning, ' + c.notStarted + ' not started, of ' + c.total + ' words');
   }
   function stillLearningCards() {
     var all = allCardsByTerm();
@@ -16615,6 +16865,7 @@ window.Portal = {
     runnerState = {};
     runnerScore = 0;
     runnerReached = null;
+    runnerShownKey = null;
     window.dxPracticeNextHandler = runnerAdvance;
     window.dxPracticeBackHandler = runnerBack;
     window.dxPracticeBackHandler = runnerBack;
@@ -16673,6 +16924,36 @@ window.Portal = {
     runnerIndex++;
     renderRunnerQuestion();
   }
+  /* RETRIES TO THE PRACTICE LOG (2026-09-26). A retry here only updated the
+     mistake record, and a right answer deletes that record on the server,
+     so whether a student ever came back and fixed a miss was lost. Each
+     one is now a practice-log event b: 'retry': q the permanent qid (else
+     the mistake key), k the mistake key, g the answer given, ua when they
+     ticked "I understand this" (or ''), lm the recorded miss (or '' for a
+     saved question they had answered right). */
+  var runnerShownKey = null;   // the question last put on screen, for its clock
+  function logRetryEvent(r, st, given) {
+    try {
+      if (!window.queuePracticeEvent || !r || !r.key) return;
+      var g = given;
+      if (g && typeof g === 'object') g = g.raw;
+      if (typeof g === 'number') g = (g >= 0 && g <= 3) ? g : null;
+      else g = (g == null || !String(g).trim()) ? null : String(g).trim().slice(0, 40);
+      var hid = window.portalHiddenMs ? window.portalHiddenMs() - (st.shownHid || 0) : 0;
+      var ms = st.shownAt ? Math.max(0, Date.now() - st.shownAt - hid) : 0;
+      var ua = organizer.understood[r.key] ? new Date(organizer.understood[r.key]) : null;
+      var pq = window.permanentQidForKey ? window.permanentQidForKey(r.key) : null;
+      window.queuePracticeEvent({ b: 'retry', s: r.sectionKey === 'math' ? 'math' : 'rw', q: pq || r.key, k: r.key,
+        sk: String(r.skill || ''), d: String(r.difficulty || ''), c: st.correct ? 1 : 0, ms: Math.round(ms), g: g,
+        ua: (ua && !isNaN(ua.getTime())) ? ua.toISOString() : '',
+        lm: (!r.savedCorrect && r.attemptedAt) ? String(r.attemptedAt) : '' });
+    } catch (e) { /* logging must never break the round */ }
+  }
+  // What window.portalExplain needs to log the explanation of r.
+  function iqExplainCtx(r, st) {
+    var pq = window.permanentQidForKey ? window.permanentQidForKey(r.key) : null;
+    return { key: r.key, q: pq || r.key, s: r.sectionKey === 'math' ? 'math' : 'rw', sk: r.skill, d: r.difficulty, c: !!(st && st.correct) };
+  }
   function runnerAdvance() {
     if (runnerIndex >= runnerQueue.length) return; // already on the Done screen — nothing left to grade/advance
     var r = runnerQueue[runnerIndex];
@@ -16690,6 +16971,7 @@ window.Portal = {
       }
       st.submitted = true;
       if (st.correct) runnerScore++;
+      logRetryEvent(r, st, given);
       // Keeps the real mistake record in sync: a miss is recorded and a right
       // answer clears it, via the same bridge Question Bank uses.
       if (window.recordQuestionBankMistake && r.key) {
@@ -16808,6 +17090,10 @@ window.Portal = {
       el.parentNode.removeChild(el);
     });
     backBtnEl.disabled = true; // re-enabled below once a question is on screen (see runnerBack)
+    // Drawing another question (or the end card) closes out the previous
+    // one's explanation time (see window.portalExplain).
+    if (window.portalExplain) window.portalExplain.leave(runnerIndex < runnerQueue.length ? runnerQueue[runnerIndex].key : null);
+    if (runnerIndex >= runnerQueue.length) runnerShownKey = null;
 
     if (runnerIndex >= runnerQueue.length) {
       /* Scored over what was ANSWERED, not the queue: skipped questions and,
@@ -16861,6 +17147,13 @@ window.Portal = {
     var qnumTileEl = document.getElementById('dx-qnum-tile');
     if (qnumTileEl) { qnumTileEl.textContent = runnerIndex + 1; qnumTileEl.style.display = ''; }
     var st = runnerState[r.key] || (runnerState[r.key] = {});
+    // The retry's clock, as in the Question Bank runner: stamped when the
+    // question comes on screen unanswered, not on re-renders.
+    if (!st.submitted && runnerShownKey !== r.key) {
+      st.shownAt = Date.now();
+      st.shownHid = window.portalHiddenMs ? window.portalHiddenMs() : 0;
+    }
+    runnerShownKey = r.key;
     backBtnEl.disabled = runnerIndex === 0;
     renderRunnerSaveBtn(r);
     renderRunnerUnderstoodBtn(r);
@@ -16942,7 +17235,7 @@ window.Portal = {
       return n ? '<p><strong>Choice ' + LETTERS[i] + '.</strong> ' + n + '</p>' : '';
     }).join('')) : '';
     if (explainHtml && window.dxBuildCollapsibleExplain) {
-      navRowEl.parentNode.insertBefore(window.dxBuildCollapsibleExplain(explainHtml), navRowEl);
+      navRowEl.parentNode.insertBefore(window.dxBuildCollapsibleExplain(explainHtml, iqExplainCtx(r, st)), navRowEl);
     }
 
     nextBtnEl.textContent = st.submitted ? (runnerIndex + 1 < runnerQueue.length ? 'Next' : 'See Results') : 'Submit';
@@ -17104,10 +17397,26 @@ window.Portal = {
   }
   function withMode(m, fn) { var was = bankMode; bankMode = m; try { return fn(); } finally { bankMode = was; } }
   // One answer to the practice log (see PRACTICE LOG in the main script).
-  function logPracticeEvent(r, correct, ms, bank) {
+  // g (2026-09-26) is the answer given: an MC choice index 0-3, a grid-in
+  // as typed (trimmed), or null when blank, so a common wrong answer can be
+  // seen across students. The subject follows r._qbSubject, which a mixed
+  // weakness queue sets per question, so its math items are logged as math.
+  function practiceGiven(g) {
+    if (typeof g === 'number') return (g >= 0 && g <= 3) ? g : null;
+    if (g == null) return null;
+    var t = String(g).trim();
+    return t ? t.slice(0, 40) : null;
+  }
+  function logPracticeEvent(r, correct, ms, bank, given) {
     if (!window.queuePracticeEvent || !r) return;
-    window.queuePracticeEvent({ b: bank, s: currentSubject === 'math' ? 'math' : 'rw', q: String(r.qid || ''),
-      sk: String(r.skill || ''), d: String(r.difficulty || ''), c: correct ? 1 : 0, ms: ms > 0 ? Math.round(ms) : 0 });
+    window.queuePracticeEvent({ b: bank, s: (r._qbSubject || currentSubject) === 'math' ? 'math' : 'rw', q: String(r.qid || ''),
+      sk: String(r.skill || ''), d: String(r.difficulty || ''), c: correct ? 1 : 0, ms: ms > 0 ? Math.round(ms) : 0,
+      g: practiceGiven(given) });
+  }
+  // What window.portalExplain needs to log the explanation of r.
+  function explainCtx(r, st) {
+    var subj = r._qbSubject || currentSubject;
+    return { key: bankKeyFor(subj, r.qid), q: String(r.qid || ''), s: subj, sk: r.skill, d: r.difficulty, c: !!(st && st.correct) };
   }
   function bankScreenId() { return bankMode === 'challenge' ? 'screen-challenge-questions' : 'screen-question-bank'; }
   function bankKeyFor(subject, qid) { return (bankMode === 'challenge' ? 'chal|' : 'qb|') + subject + '|' + qid; }
@@ -17179,10 +17488,10 @@ window.Portal = {
       var raw = localStorage.getItem(progressStorageKey());
       if (raw) {
         var parsed = JSON.parse(raw);
-        if (parsed && typeof parsed === 'object') return { attempts: parsed.attempts || {}, saved: parsed.saved || {} };
+        if (parsed && typeof parsed === 'object') return { attempts: parsed.attempts || {}, saved: parsed.saved || {}, days: parsed.days || {} };
       }
     } catch (e) { /* ignore */ }
-    return { attempts: {}, saved: {} };
+    return { attempts: {}, saved: {}, days: {} };
   }
   function saveProgress(p) {
     try { localStorage.setItem(progressStorageKey(), JSON.stringify(p)); } catch (e) { /* private browsing / storage disabled — fail silently */ }
@@ -17196,11 +17505,36 @@ window.Portal = {
   // attemptedAt and ignores other fields, so it syncs with no schema
   // change. Older attempts have no ms, so time panels filter on `ms > 0`
   // and report their own sample size.
+  /* ═══ THE FIRST TRY IS THE EVIDENCE ═══ attempts[qid] used to be
+     overwritten on every answer, so accuracy, the topic bars and the labels
+     read each question's LATEST try: a student at 60% who went back over
+     their misses read 94% after one pass, and redoing yesterday's questions
+     today moved them to today and broke a 7-day streak to 1 (stats audit,
+     2026-09-25). Each record now also keeps its first result (f, 1/0), when
+     that was (fa) and how many tries (n); the record still syncs whole. A
+     record from before 2026-09-26 has no f: its first try is unknown and it
+     is read as it always was. `days` counts every answer by local day
+     (right, wrong), last 60 days, for the streak and the 14-day bars. */
+  var QB_DAYS_KEPT = 60;
   function recordAttempt(qid, wasCorrect, ms) {
     var p = loadProgress();
-    var rec = { correct: wasCorrect, attemptedAt: new Date().toISOString() };
+    var nowIso = new Date().toISOString();
+    var prev = p.attempts[qid];
+    var rec = { correct: wasCorrect, attemptedAt: nowIso };
     if (ms > 0) rec.ms = ms;
+    if (!prev) { rec.f = wasCorrect ? 1 : 0; rec.fa = nowIso; rec.n = 1; }
+    else {
+      if (prev.f === 0 || prev.f === 1) rec.f = prev.f;
+      if (prev.fa) rec.fa = prev.fa;
+      rec.n = (prev.n || 1) + 1;
+    }
     p.attempts[qid] = rec;
+    var day = qbDayKey(new Date());
+    var d = p.days[day] || (p.days[day] = [0, 0]);
+    d[wasCorrect ? 0 : 1]++;
+    var cutoff = new Date(); cutoff.setDate(cutoff.getDate() - QB_DAYS_KEPT);
+    var cutKey = qbDayKey(cutoff);
+    Object.keys(p.days).forEach(function (k) { if (k < cutKey) delete p.days[k]; });
     saveProgress(p);
   }
   // Merges in whatever this student's OTHER devices have synced for
@@ -17319,25 +17653,66 @@ window.Portal = {
       if (!meta) return;
       var a = p.attempts[qid];
       var when = new Date(a.attemptedAt);
+      var first = a.fa ? new Date(a.fa) : null;
+      var firstKnown = a.f === 0 || a.f === 1;
       out.push({
         qid: qid,
         subject: meta.subject,
         skill: meta.q.skill || '—',
         domain: meta.q.domain || '',
         difficulty: String(meta.q.difficulty || '').toLowerCase(),
-        correct: !!a.correct,
+        // The first try where it is known (see recordAttempt), else the only
+        // try on record. `latest` is the most recent result, for "solved".
+        correct: firstKnown ? a.f === 1 : !!a.correct,
+        latest: !!a.correct,
+        tries: a.n || 1,
         ms: a.ms > 0 ? a.ms : 0,
-        when: isNaN(when.getTime()) ? null : when
+        when: isNaN(when.getTime()) ? null : when,
+        firstWhen: first && !isNaN(first.getTime()) ? first : null
       });
     });
     return out;
+  }
+
+  /* ═══ WEAK / STRONG, ON EVIDENCE (stats audit, 2026-09-26) ═══ a skill
+     used to read Weak under 60% and Strong at 85% after 5 answers (the bars
+     turned red under 60% after 3), on each question's LATEST try, and the
+     cut moved with the difficulty filter. A skill at a true 70% read Weak
+     16.5% of the time, and 84% of students with ten such skills saw a Weak
+     and a Strong somewhere by chance. Now MorettiSignals.practiceEvidence on
+     FIRST tries: the student chooses the difficulty, so a skill is judged
+     against what their level predicts for the questions they actually
+     picked, and labelled only past its bar (Weak z > 2.8, Strong z < -2.4,
+     8+ first tries). Simulated, a student with no real differences across
+     ten skills sees any label 4-10% of the time. Unfiltered, so a tag does
+     not change with the difficulty buttons. { skill: { label, acc, n } } */
+  function qbFirstTry(a) { return (a.f === 0 || a.f === 1) ? a.f === 1 : !!a.correct; }
+  function qbPracticeLabels() {
+    var MS = window.MorettiSignals;
+    if (!MS || typeof MS.practiceEvidence !== 'function') return {};
+    var bank = bankMode === 'challenge' ? 'chal' : 'qb';
+    var ev;
+    try {
+      ev = MS.practiceEvidence(qbAttemptRecords().map(function (r) {
+        var when = r.firstWhen || r.when;
+        return { b: bank, s: r.subject, q: r.qid, sk: r.skill, dom: r.domain, d: r.difficulty, c: r.correct ? 1 : 0,
+                 at: when ? when.toISOString() : '' };
+      }));
+    } catch (e) { return {}; }
+    return (ev && ev.skills) || {};
   }
 
   // Longest run of consecutive days ending today, or yesterday (a streak
   // only breaks once a full day passes unused).
   function qbStudyStreak(records) {
     var days = {};
-    records.forEach(function (r) { if (r.when) days[qbDayKey(r.when)] = true; });
+    // Every day this device saw an answer (loadProgress().days), plus each
+    // question's first and latest try, so another device's work counts too.
+    Object.keys(loadProgress().days || {}).forEach(function (k) { days[k] = true; });
+    records.forEach(function (r) {
+      if (r.when) days[qbDayKey(r.when)] = true;
+      if (r.firstWhen) days[qbDayKey(r.firstWhen)] = true;
+    });
     var cursor = new Date();
     if (!days[qbDayKey(cursor)]) cursor.setDate(cursor.getDate() - 1);
     var streak = 0;
@@ -17348,15 +17723,10 @@ window.Portal = {
   /* ── Activity trend ── one stacked bar per day for the last 14 days
      (correct in green below, wrong in red above), with a dashed line at
      the daily average. */
-  function qbDailyAverage(records) {
-    var recent = records.filter(function (r) {
-      if (!r.when) return false;
-      var cutoff = new Date();
-      cutoff.setHours(0, 0, 0, 0);
-      cutoff.setDate(cutoff.getDate() - (QB_TREND_DAYS - 1));
-      return r.when >= cutoff;
-    });
-    return Math.round((recent.length / QB_TREND_DAYS) * 10) / 10;
+  // Every answer in the 14-day window (the bars), over 14 days.
+  function qbDailyAverage(buckets) {
+    var n = buckets.reduce(function (a, b) { return a + b.correct + b.wrong; }, 0);
+    return Math.round((n / QB_TREND_DAYS) * 10) / 10;
   }
 
   function qbRenderTrend(records) {
@@ -17375,19 +17745,29 @@ window.Portal = {
     var byKey = {};
     buckets.forEach(function (b) { byKey[b.key] = b; });
 
+    /* The bars count EVERY answer on the day it was given (redos
+       included: they are work done that day), from this device's day log
+       (see recordAttempt). A day the log does not have (before 2026-09-26,
+       or practised on another device) falls back to the questions whose
+       latest try was that day, as before. The legend totals are first
+       tries, the same quantity as the accuracy tile. */
+    var dayLog = loadProgress().days || {};
+    Object.keys(byKey).forEach(function (k) {
+      if (dayLog[k]) { byKey[k].correct = dayLog[k][0] || 0; byKey[k].wrong = dayLog[k][1] || 0; byKey[k].logged = true; }
+    });
     var totalCorrect = 0, totalWrong = 0;
     records.forEach(function (r) {
       if (r.correct) totalCorrect++; else totalWrong++;
       var b = r.when && byKey[qbDayKey(r.when)];
-      if (!b) return;
-      if (r.correct) b.correct++; else b.wrong++;
+      if (!b || b.logged) return;
+      if (r.latest) b.correct++; else b.wrong++;
     });
 
     if (legendEl) {
       legendEl.innerHTML =
         '<span class="qb-trend-key"><i class="qb-trend-dot ok"></i><b>' + totalCorrect + '</b> Correct</span>' +
         '<span class="qb-trend-key"><i class="qb-trend-dot bad"></i><b>' + totalWrong + '</b> Wrong</span>' +
-        '<span class="qb-trend-key"><i class="qb-trend-dash"></i><b>' + qbDailyAverage(records) + '</b>/day avg</span>';
+        '<span class="qb-trend-key"><i class="qb-trend-dash"></i><b>' + qbDailyAverage(buckets) + '</b>/day avg</span>';
     }
 
     var inWindow = buckets.reduce(function (n, b) { return n + b.correct + b.wrong; }, 0);
@@ -17464,9 +17844,8 @@ window.Portal = {
      fewer than QB_MIN_TOPIC_SAMPLE attempts are held back: one question is
      not a 100% or a 0%. */
   var QB_MIN_TOPIC_SAMPLE = 3;
-  // Cut points for the red / amber / green bands on a topic bar (see the
-  // --qb-acc-* tokens for the colours and why those three).
-  var QB_ACC_MID = 60, QB_ACC_STRONG = 80;
+  // A topic bar's red / amber / green (the --qb-acc-* tokens) follows the
+  // evidence label from qbPracticeLabels(), not a percent cut.
 
   function qbTopicSection(subjectKey, subjectLabel, subjectRecords) {
     var head = '<div class="qb-topic-hed"><h3>' + escHtmlQb(subjectLabel) + '</h3>';
@@ -17483,6 +17862,7 @@ window.Portal = {
     head += '<span class="qb-topic-overall"><b>' + overallPct + '%</b>' +
       '<span>' + overallCorrect + ' of ' + subjectRecords.length + '</span></span></div>';
 
+    var practiceLabels = qbPracticeLabels();
     var bySkill = {};
     subjectRecords.forEach(function (r) {
       var b = bySkill[r.skill] || (bySkill[r.skill] = { skill: r.skill, total: 0, correct: 0 });
@@ -17501,7 +17881,10 @@ window.Portal = {
     var html = ['<div class="qb-topic-list">'];
     rows.forEach(function (b) {
       var pct = Math.round((b.correct / b.total) * 100);
-      var tone = pct >= QB_ACC_STRONG ? 'strong' : (pct >= QB_ACC_MID ? 'mid' : '');
+      // Colour only on evidence (see qbPracticeLabels): red = weak, green =
+      // strong, everything else the neutral middle band.
+      var lab = practiceLabels[b.skill] && practiceLabels[b.skill].label;
+      var tone = lab === 'strong' ? 'strong' : (lab === 'weak' ? '' : 'mid');
       html.push('<div class="qb-topic-row">' +
         '<div class="qb-topic-lab">' +
           '<button type="button" class="qb-topic-link" data-qb-subject="' + subjectKey + '" data-qb-skill="' + escHtmlQb(b.skill) + '">' +
@@ -17700,9 +18083,8 @@ window.Portal = {
     return { passage: passage, question: question };
   }
 
-  // "Weak": 5+ attempts and under 60% accuracy (roughly the report's skill
-  // breakdown bar). "Strong": same sample size, 85%+.
-  var WEAK_MIN_ATTEMPTS = 5, WEAK_ACC_THRESHOLD = 60, STRONG_ACC_THRESHOLD = 85;
+  // "Weak" / "Strong" tags come from qbPracticeLabels() (evidence on first
+  // tries), not from a percent cut.
 
   // ═══ FILTER / SELECTION STATE ═══ reset every time the skills view is
   // entered (see showSkills()); this is a session builder, so nothing is
@@ -17834,11 +18216,12 @@ window.Portal = {
     }
 
     var html = '';
+    var practiceLabels = qbPracticeLabels();
     order.forEach(function (domain) {
       var rows = groups[domain].map(function (s) {
         var qs = s.questions.filter(passesFilters);
         var attempted = qs.filter(function (q) { return p.attempts[q.qid]; });
-        var correct = attempted.filter(function (q) { return p.attempts[q.qid].correct; });
+        var correct = attempted.filter(function (q) { return qbFirstTry(p.attempts[q.qid]); });
         var acc = attempted.length ? Math.round((correct.length / attempted.length) * 100) : 0;
         var pct = qs.length ? Math.round((attempted.length / qs.length) * 100) : 0;
         // isDone = started (at least one answered); isComplete = every question answered.
@@ -17854,9 +18237,9 @@ window.Portal = {
       var cards = rows.map(function (row) {
         visibleSkillNames.push(row.s.skill);
         qbSkillQuestionCounts[row.s.skill] = row.n;
-        var enough = row.attempted >= WEAK_MIN_ATTEMPTS;
-        var isWeak = enough && row.acc < WEAK_ACC_THRESHOLD;
-        var isStrong = enough && row.acc >= STRONG_ACC_THRESHOLD;
+        var lab = practiceLabels[row.s.skill] && practiceLabels[row.s.skill].label;
+        var isWeak = lab === 'weak';
+        var isStrong = lab === 'strong';
         var strengthCls = isWeak ? 'weak' : isStrong ? 'strong' : 'mid';
         var tag = isWeak ? ' <span class="qb-weak-tag">&#9889; Weak</span>'
           : isStrong ? ' <span class="qb-weak-tag qb-strong-tag">&#10003; Strong</span>' : '';
@@ -17984,6 +18367,15 @@ window.Portal = {
   var runnerScore = 0;
   var runnerSkillLabel = '';
   var questionShownAt = 0;
+  var questionShownHidden = 0; // window.portalHiddenMs() when it was stamped
+  // Ms the current question has been on screen with the tab visible
+  // (2026-09-26): time in another tab counts toward neither its attempt
+  // nor Rush's per-question budget.
+  function questionShownMs() {
+    if (!questionShownAt) return 0;
+    var hid = window.portalHiddenMs ? window.portalHiddenMs() - questionShownHidden : 0;
+    return Math.max(0, Date.now() - questionShownAt - hid);
+  }
   var runnerShownQid = null;   // the question last put on screen (see runnerBack)
   /* How many questions the student actually GOT TO. Null until they leave
      early, then frozen at the question they left on (see endRunner()). Lets
@@ -18085,7 +18477,7 @@ window.Portal = {
   }
 
   // "Practice Your Weaknesses": takes the weakest skill in EACH subject
-  // (window.getWeakestSkillsForQb, bridging Home's weakestSkillIn()) and
+  // (window.getWeakestSkillsForQb, bridging Home's homeEvidence()) and
   // runs them back to back in one session. Each question is tagged with
   // _qbSubject so renderRunnerQuestion() switches calculator/passage split
   // per question. Skips the selectedDifficulties/selectedSources filters:
@@ -18175,7 +18567,7 @@ window.Portal = {
     if (t) { t.style.transition = ''; t.classList.remove('expired'); t.style.opacity = '0'; }
   }
   function rushPaint() {
-    var left = rushBudgetMs - (Date.now() - questionShownAt);
+    var left = rushBudgetMs - questionShownMs();
     var frac = Math.max(0, left / rushBudgetMs);
     var fill = document.getElementById('rush-bar-fill'), over = document.getElementById('rush-over');
     if (left > 0) {
@@ -18445,19 +18837,19 @@ window.Portal = {
       st.submitted = true;
       if (st.correct) runnerScore++;
       if (rushCfg) {
-        var rushMs = questionShownAt ? (Date.now() - questionShownAt) : 0;
+        var rushMs = questionShownMs();
         // Paint first, THEN bank this question's overage: painting after
         // would count it twice (banked total + live overage).
         rushPaint();
         rushCfg.overMs += Math.max(0, rushMs - rushBudgetMs);
         rushCfg.results.push({ skill: r.skill, correct: st.correct, ms: rushMs, budgetMs: rushBudgetMs, over: rushMs > rushBudgetMs });
-        logPracticeEvent(r, st.correct, rushMs, 'rush');
+        logPracticeEvent(r, st.correct, rushMs, 'rush', given);
         rushStop();
         renderRunnerQuestion();
         return;
       }
-      recordAttempt(r.qid, st.correct, questionShownAt ? (Date.now() - questionShownAt) : 0);
-      logPracticeEvent(r, st.correct, questionShownAt ? (Date.now() - questionShownAt) : 0, bankMode === 'challenge' ? 'chal' : 'qb');
+      recordAttempt(r.qid, st.correct, questionShownMs());
+      logPracticeEvent(r, st.correct, questionShownMs(), bankMode === 'challenge' ? 'chal' : 'qb', given);
       // Feeds the Mistakes Log (see window.recordQuestionBankMistake); the same
       // call clears a question once it's answered correctly.
       if (bankMode === 'qb' && window.recordQuestionBankMistake) {
@@ -18493,7 +18885,11 @@ window.Portal = {
   }
   // Starts collapsed so a long explanation never pushes Next off-screen.
   // Shared by all three question types (mc, fr, mc-image).
-  function buildCollapsibleExplain(bodyHtml) {
+  // ctx (optional, 2026-09-26): { key, q, s, sk, d, c } for the question it
+  // explains, so time spent reading it reaches window.portalExplain.
+  function buildCollapsibleExplain(bodyHtml, ctx) {
+    var track = ctx && window.portalExplain ? window.portalExplain : null;
+    if (track) track.shown(ctx);
     var wrap = document.createElement('div');
     wrap.className = 'pb-explain pb-explain-collapsed';
     var hed = document.createElement('div');
@@ -18506,6 +18902,7 @@ window.Portal = {
     body.innerHTML = bodyHtml;
     function toggle() {
       wrap.classList.toggle('pb-explain-collapsed');
+      if (track) track.toggle(!wrap.classList.contains('pb-explain-collapsed'));
       var hintEl = hed.querySelector('.pb-explain-hint');
       if (hintEl) hintEl.textContent = wrap.classList.contains('pb-explain-collapsed') ? '(tap to expand)' : '(tap to collapse)';
     }
@@ -18574,6 +18971,12 @@ window.Portal = {
     backBtnEl.disabled = true;
     frRowEl.style.display = 'none';
     calcBtnEl.style.display = 'none';
+    // Drawing another question (or the end card) closes out the explanation
+    // time of the one before it; a re-render of the same one does not.
+    if (window.portalExplain) {
+      var shownR = runnerIndex < runnerQueue.length ? runnerQueue[runnerIndex] : null;
+      window.portalExplain.leave(shownR ? explainCtx(shownR).key : null);
+    }
 
     if (runnerIndex >= runnerQueue.length) {
       stopQbTimer();
@@ -18626,7 +19029,10 @@ window.Portal = {
     // to a skipped one with Back), not on re-renders (choice click,
     // eliminate, save), so those don't restart the clock. Feeds each
     // attempt's `ms` for the "Time by difficulty" panel.
-    if (isNewQuestion || (runnerShownQid !== r.qid && !st.submitted)) questionShownAt = Date.now();
+    if (isNewQuestion || (runnerShownQid !== r.qid && !st.submitted)) {
+      questionShownAt = Date.now();
+      questionShownHidden = window.portalHiddenMs ? window.portalHiddenMs() : 0;
+    }
     runnerShownQid = r.qid;
     backBtnEl.disabled = runnerIndex === 0 || !!rushCfg;
     if (rushCfg) { if (st.submitted) rushStop(); else if (rushQid !== r.qid) rushStartQuestion(r); }
@@ -18691,7 +19097,7 @@ window.Portal = {
       choicesEl.appendChild(ansWrap);
       nextBtnEl.disabled = !st.submitted && st.chosenIndex == null;
       if (st.submitted && r.explImg) {
-        var explainImg = buildCollapsibleExplain('<img src="' + r.explImg + '" alt="Explanation figure" style="max-width:100%;">');
+        var explainImg = buildCollapsibleExplain('<img src="' + r.explImg + '" alt="Explanation figure" style="max-width:100%;">', explainCtx(r, st));
         navRowEl.parentNode.insertBefore(explainImg, navRowEl);
       }
     } else if (r.type === 'fr') {
@@ -18721,7 +19127,7 @@ window.Portal = {
           frRowEl.parentNode.insertBefore(frCorrect, frNote.nextSibling);
         }
         if (r.explanation) {
-          var frExplain = buildCollapsibleExplain(r.explanation);
+          var frExplain = buildCollapsibleExplain(r.explanation, explainCtx(r, st));
           navRowEl.parentNode.insertBefore(frExplain, navRowEl);
         }
       }
@@ -18762,7 +19168,7 @@ window.Portal = {
       });
       nextBtnEl.disabled = !st.submitted && st.chosenIndex == null;
       if (st.submitted && r.explanation) {
-        var explain = buildCollapsibleExplain(r.explanation);
+        var explain = buildCollapsibleExplain(r.explanation, explainCtx(r, st));
         navRowEl.parentNode.insertBefore(explain, navRowEl);
       }
     }
@@ -20120,6 +20526,27 @@ window.renderNativeReport = function (data) {
       // as 35s total but 5s here.
       var qFirstVisitMs = (sec.fp && typeof sec.fp[i] === 'number') ? sec.fp[i] : null;
       if (timingUnusable) qFirstVisitMs = null;
+      /* ═══ A PLACEHOLDER IS NOT THE ANSWER ═══ a student who drops in a
+         quick answer, flags it and comes back to work it has a first look of
+         a few seconds, but the answer being graded came from the later
+         visit. Timed by the first look, a right answer read as "skimmed" and
+         a wrong one as "answered too fast to have read it" (stats audit,
+         2026-09-25). So when the visit log shows the final answer differs
+         from the first one committed, the question is paced on its total
+         time, which is the work that produced the graded answer. */
+      var answerRevised = false;
+      if (qFirstVisitMs != null && Array.isArray(sec.vl)) {
+        var blankEnd = function (a) { return a === null || a === undefined || a === '' || a === -1; };
+        var firstEnd = null, lastEnd = null;
+        sec.vl.filter(function (v) { return v[0] === i; })
+          .sort(function (a, b) { return a[1] - b[1]; })
+          .forEach(function (v) {
+            if (blankEnd(v[3])) return;
+            if (firstEnd === null) firstEnd = v[3];
+            lastEnd = v[3];
+          });
+        answerRevised = firstEnd !== null && String(lastEnd) !== String(firstEnd);
+      }
       var moduleIndex = i < moduleSplit ? 0 : 1;
       var modStartAt = moduleStartAt[moduleIndex];
       secTimeTotal += qTimeMs;
@@ -20178,7 +20605,7 @@ window.renderNativeReport = function (data) {
         skipped: (given === null || given === undefined),
         q: q, givenIdx: (q.type === 'mc' && given !== null && given !== undefined) ? given : null,
         givenText: (given && typeof given === 'object') ? esc(given.raw || String(given.value)) : null,
-        timeMs: qTimeMs, firstVisitMs: qFirstVisitMs, moduleIndex: moduleIndex,
+        timeMs: qTimeMs, firstVisitMs: qFirstVisitMs, answerRevised: answerRevised, moduleIndex: moduleIndex,
         firstVisitedAt: (sec.fv && typeof sec.fv[i] === 'number' && modStartAt !== null) ? (sec.fv[i] - modStartAt) : null,
         lastViewedAt: (sec.lv && typeof sec.lv[i] === 'number' && modStartAt !== null) ? (sec.lv[i] - modStartAt) : null,
         key: rowTestTag + '|' + sec.k + '|' + rowModuleName + '|' + rowModuleIdx,
@@ -21908,7 +22335,8 @@ window.renderNativeReport = function (data) {
   // cumulative total, which can hide a fast first look behind a later
   // revisit. Falls back to the cumulative total when there is no
   // first-pass data (older reports, never-visited questions).
-  function pacingTimeMs(r) { return (r.firstVisitMs != null) ? r.firstVisitMs : r.timeMs; }
+  // A revised answer (see answerRevised) is paced on its total time.
+  function pacingTimeMs(r) { return (r.firstVisitMs != null && !r.answerRevised) ? r.firstVisitMs : r.timeMs; }
   // Was this section short of time? Identical to report.html.
   /* ═══ WAS THE CLOCK SHORT? ═══
      Read from when the FIRST PASS ended, i.e. when every question in a
@@ -22115,7 +22543,7 @@ window.renderNativeReport = function (data) {
          section 1's question with a different, self-relative statistic that
          can disagree with it. The section-level count is kept as a separate,
          well-evidenced read; naming skills is section 1's job. */
-      behaviorFlags.push('<strong>Worked hard, still missed (' + s7.label + '):</strong> ' + stuckWrong.length + ' of the ' + missedForFlags + ' multiple-choice questions you answered and missed here took well over your usual time for a right answer. That is real effort that still came back wrong, not a rushed guess, so the fix is knowledge, not speed. <strong>Next:</strong> relearn before timed practice; “What to relearn” above says where to start.');
+      behaviorFlags.push('<strong>Worked hard, still missed (' + s7.label + '):</strong> ' + stuckWrong.length + ' of the ' + missedForFlags + ' multiple-choice questions you answered and missed here took at least one and a half times the target time for that question. That is real effort that still came back wrong, not a rushed guess, so the fix is knowledge, not speed. <strong>Next:</strong> relearn before timed practice; “What to relearn” above says where to start.');
     }
     if (missedForFlags >= 4 && rushedWrong.length / missedForFlags >= 0.5) {
       var wSkills = topSkillNames(rushedWrong, 3).join(', ');
@@ -24189,21 +24617,11 @@ window.renderNativeReport = function (data) {
           bucket('method', sec, r, 'right, but well over budget while time was short');
         });
       }
-      // Questions that came after the module's clock was already spent —
-      // answered, but not really attempted.
-      /* Per module (each has its own clock), wrong answers only (a right
-         answer lost no points), and never a question already in a bucket. It
-         used to run both modules against the whole section clock, so it
-         almost never fired, and when it did it could bill right answers. */
-      if (roll && sec.timeAllottedMin > 0) {
-        var modBudget = sec.timeAllottedMin * 60000 / (sec.hasModules ? 2 : 1), runBy = {};
-        var inAny = function (r) { return ['content', 'method', 'clock'].some(function (k) { return buckets[k].some(function (x) { return x.r === r; }); }); };
-        sec.rows.forEach(function (r) {
-          var m = r.moduleIndex || 0;
-          runBy[m] = (runBy[m] || 0) + (r.timeMs || 0);
-          if (runBy[m] > modBudget && !r.ok && !inAny(r)) bucket('clock', sec, r, 'clock already spent');
-        });
-      }
+      /* No "clock already spent" sweep. It ran after the loop above, which
+         already buckets every wrong or blank question, so it could never
+         fire, and the engine auto-submits a module when its clock runs out,
+         so no answer is given after it (stats audit, 2026-09-25: removed as
+         dead code). */
     });
     /* ═══ ONE SOURCE FOR BOTH NUMBERS ═══
        The bar and the list below are both drawn from buckets[], not from the

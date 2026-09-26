@@ -208,6 +208,9 @@
   .delta { font-weight: 700; }
   .delta.up { color: var(--green); }
   .delta.down { color: var(--red); }
+  /* A change inside the usual test-to-test swing: shown, but quiet, so an
+     arrow in colour always means the change cleared the noise. */
+  .delta.flat { color: var(--faint); font-weight: 500; }
   .no-score { color: var(--faint); font-style: italic; }
   .next-cell b { font-weight: 700; }
   .next-cell .next-day { display: block; color: var(--faint); font-size: 0.72rem; }
@@ -228,6 +231,21 @@
   .live-where { display: block; color: var(--faint); font-size: 0.72rem; font-weight: 400; }
   .summary-tile.live .num { color: var(--green); }
   .weakest-label { font-size: 0.78rem; }
+  /* What the evidence says */
+  .ev-row { display: grid; grid-template-columns: minmax(9rem, 13rem) 1fr; gap: 0.3rem 1rem; padding: 0.6rem 0; border-top: 1px solid var(--border); }
+  .ev-row:first-child { border-top: 0; }
+  .ev-title { font-weight: 600; font-size: 0.82rem; }
+  .ev-body { font-size: 0.82rem; }
+  .ev-read { display: block; }
+  .ev-wait { display: block; color: var(--mid); }
+  .ev-detail { display: block; color: var(--faint); font-size: 0.74rem; margin-top: 0.15rem; }
+  @media (max-width: 640px) { .ev-row { grid-template-columns: 1fr; } }
+  /* Weakest skills (evidence): the bar and its within-chance rows. */
+  .sk-tag { display: inline-block; margin-left: 0.4rem; padding: 0 0.35rem; border-radius: 3px; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; vertical-align: middle; }
+  .sk-tag.clear { background: var(--red); color: #fff; }
+  .sk-tag.lead { border: 1px solid var(--red); color: var(--red); }
+  .skill-row.sk-quiet .sk-name, .skill-row.sk-quiet .sk-frac { color: var(--mid); }
+  .skill-row.sk-quiet .sk-bar i { background: var(--faint); }
   .weakest-frac { color: var(--faint); font-size: 0.72rem; }
   .row-actions { display: flex; gap: 0.35rem; justify-content: flex-end; }
 
@@ -418,6 +436,8 @@
   .spc-score-top { flex: 1 1 0; min-width: 0; border-right: 1px solid var(--border); padding-right: 1.1rem; align-self: center; }
   .spc-composite-num { font-family: var(--display); font-weight: 700; font-size: 2.1rem; color: var(--text); line-height: 1; }
   .spc-composite-delta { font-family: var(--hel); font-size: 0.8rem; font-weight: 700; color: var(--green); margin-top: 0.3rem; }
+  .spc-composite-delta.down { color: var(--red); }
+  .spc-composite-delta.flat { color: var(--mid); font-weight: 500; }
   .spc-bars-col { flex: 1 1 0; min-width: 0; }
   .spc-bar-chart-wrap { position: relative; margin-top: 18px; }   /* room for the target label when the target is near the top */
   .spc-bars { height: 52px; display: flex; align-items: flex-end; gap: 6px; cursor: pointer; }
@@ -1030,19 +1050,24 @@
         <h2>Test reports</h2>
         <p class="card-sub">Every diagnostic and practice test this student has submitted. Opening one shows the exact report they see.</p>
         <div class="roster-table-scroll"><table id="stu-attempts-table"><thead><tr>
-          <th>Date</th><th>Test</th><th>Score</th><th>Weakest area</th><th></th>
+          <th>Date</th><th>Test</th><th>Score</th><th title="The lowest raw percent on that one test. Not a finding: see Across all their tests for what the evidence singles out.">Lowest this test</th><th></th>
         </tr></thead><tbody id="stu-attempts"></tbody></table></div>
       </div>
       <div class="scores-grid">
         <div class="card">
           <h2>Weakest skills</h2>
-          <p class="card-sub" id="stu-skills-sub">From their most recent completed test — the same breakdown "Practice My Weak Spots" uses.</p>
+          <p class="card-sub" id="stu-skills-sub">Across every test with a per-question record.</p>
           <div id="stu-skills"></div>
         </div>
         <div class="card" id="stu-analysis-card">
           <h2>Across all their tests</h2>
           <p class="card-sub" id="stu-analysis-sub">Pooled from every attempt &mdash; more evidence per skill than any single report can have.</p>
           <div id="stu-analysis"></div>
+        </div>
+        <div class="card" id="stu-evidence-card">
+          <h2>What the evidence says</h2>
+          <p class="card-sub">For you only. Each reading waits until there is enough evidence for its range to mean something, and none of them can tell cause from coincidence.</p>
+          <div id="stu-evidence"><div class="empty">Loading&hellip;</div></div>
         </div>
       </div>
     </section>
@@ -1336,6 +1361,7 @@
      so the signed admin session is in sessionStorage when the auto-continue
      boot code below reads it. -->
 <script src="time-budgets.js?v=20260912a"></script>
+<script src="signals.js?v=20260926a"></script>
   <script src="backend-url.js?v=20260905"></script>
   <script>
     /* Browser errors on this page reach the ClientErrors tab too (prep.gs's
@@ -1844,14 +1870,37 @@
       return;
     }
 
+    /* ═══ THE ROSTER ARROW ═══ first test to latest used to be a raw
+       difference, including the all-hard Test 12 and interrupted sittings:
+       68% of students whose level had not moved showed an arrow of 50+
+       (stats audit, 2026-09-25). The backend now sends compositeChange from
+       the shared score-change rule (MorettiSignals.scoreChange over
+       comparable tests only); a colour arrow means the change cleared the
+       noise, a grey one that it did not. An older backend still sends only
+       compositeDelta, which is shown grey: nothing checked it. */
+    function rosterDeltaHtml(s) {
+      var ch = s.compositeChange;
+      if (ch && typeof ch.delta === 'number') {
+        if (!ch.delta) return '';
+        var dir = ch.delta > 0 ? 'up' : 'down';
+        var arrow = ch.delta > 0 ? '&#9650;' : '&#9660;';
+        var tip = ch.real
+          ? 'Over ' + ch.tests + ' comparable tests: a real change (beyond the ' + ch.threshold + '-point swing a test has on its own).'
+          : 'Over ' + ch.tests + ' comparable tests: within the ' + ch.threshold + '-point swing a test has on its own, so not a change yet.';
+        return ' <span class="delta ' + (ch.real ? dir : 'flat') + '" title="' + escHtml(tip) + '">' + arrow + ' ' + Math.abs(ch.delta) + '</span>';
+      }
+      if (s.compositeDelta != null && s.compositeDelta !== 0) {
+        return ' <span class="delta flat" title="First test to latest, not checked against test-to-test noise.">' +
+          (s.compositeDelta > 0 ? '&#9650;' : '&#9660;') + ' ' + Math.abs(s.compositeDelta) + '</span>';
+      }
+      return '';
+    }
     bodyEl.innerHTML = rows.map(function (s) {
       var prog = programOf(s);
       var scoreCell = prog !== 'sat' ? '<span class="no-score">&mdash;</span>' : s.composite == null
         ? '<span class="no-score">No score yet</span>'
         : String(s.composite) + (s.testType ? ' <span style="color:var(--faint); font-size:0.72rem;">(' + escHtml(s.testType) + ')</span>' : '') +
-          (s.compositeDelta != null && s.compositeDelta !== 0
-            ? ' <span class="delta ' + (s.compositeDelta > 0 ? 'up' : 'down') + '">' + (s.compositeDelta > 0 ? '&#9650;' : '&#9660;') + ' ' + Math.abs(s.compositeDelta) + '</span>'
-            : '');
+          rosterDeltaHtml(s);
 
       var nextCell = nextSessionCell(s.key);
 
@@ -2858,10 +2907,22 @@
         var x = pr.byBank && pr.byBank[b[0]];
         if (x && x.n) parts.push(b[1] + ' ' + x.n);
       });
-      practiceSub = pr.n ? pct(pr.right, pr.n) + ' right' + (parts.length > 1 ? ' · ' + parts.join(' · ') : '') : 'none this week';
+      /* The percent is the Question Bank's alone: Challenge is harder on
+         purpose and Rush is timed, so pooling them read as a different
+         student depending on the mix (stats audit, 2026-09-25). */
+      var qbx = pr.byBank && pr.byBank.qb;
+      practiceSub = pr.n
+        ? (qbx && qbx.n && typeof qbx.right === 'number' ? pct(qbx.right, qbx.n) + ' right in the Question Bank' : (qbx && qbx.n ? 'Question Bank' : 'no Question Bank answers')) +
+          (parts.length > 1 || (parts.length === 1 && !(qbx && qbx.n)) ? ' · ' + parts.join(' · ') : '')
+        : 'none since the last session';
+      // Saved & Mistakes retries and explanation reads (backend v25).
+      var extraBits = [];
+      if (pr.retry && pr.retry.n) extraBits.push(pr.retry.n + ' mistake' + (pr.retry.n === 1 ? '' : 's') + ' retried, ' + pr.retry.right + ' right');
+      if (pr.explain && pr.explain.n) extraBits.push(pr.explain.n + ' explanation' + (pr.explain.n === 1 ? '' : 's') + ' read');
+      if (extraBits.length) practiceSub += '<br>' + extraBits.join(' · ');
     } else {
       practiceN = snap.qbCount || 0; practiceRight = snap.qbCorrect || 0;
-      practiceSub = practiceN ? pct(practiceRight, practiceN) + ' right (Question Bank)' : 'none this week';
+      practiceSub = practiceN ? pct(practiceRight, practiceN) + ' right (Question Bank)' : 'none since the last session';
     }
 
     var stats = [];
@@ -2908,7 +2969,12 @@
     if (pr.skills && pr.skills.length) {
       topics = '<div class="prep-sec">Practice by topic</div><table class="prep-topics"><thead><tr><th>Topic</th><th class="n">Answered</th><th class="n">Right</th><th class="n">Avg time</th></tr></thead><tbody>' +
         pr.skills.map(function (k) {
-          var low = k.n >= 3 && k.right / k.n < 0.6;
+          /* Red only when the evidence says below 60%: the top of the 80%
+             interval (Jeffreys, MorettiSignals.betaInterval) is under it. The
+             old rule (3+ answers under 60%) turned a 70% topic red 21% of
+             the time (stats audit, 2026-09-25). */
+          var MSi = window.MorettiSignals;
+          var low = MSi && MSi.betaInterval ? MSi.betaInterval(k.right, k.n, 0.8).hi < 0.6 : (k.n >= 3 && k.right / k.n < 0.6);
           return '<tr><td>' + escHtml(k.skill) + (k.bank !== 'qb' ? '<span class="prep-bank">' + (k.bank === 'chal' ? 'Challenge' : 'Rush') + '</span>' : '') + '</td>' +
             '<td class="n">' + k.n + '</td><td class="n' + (low ? ' low' : '') + '">' + pct(k.right, k.n) + '</td>' +
             '<td class="n">' + (k.timed ? Math.round(k.secs / k.timed) + 's' : '—') + '</td></tr>';
@@ -3009,6 +3075,7 @@
         renderAttempts(data);
         renderSkills(data);
         renderCrossTest(data);
+        loadStudentEvidence(data);
       } catch (err) {
         if (window.console && console.error) console.error('[admin] student render failed:', err);
         $('stu-meta').innerHTML = '<span style="color:var(--red);">Loaded this student, but could not draw the page. Details are in the browser console.</span>';
@@ -3207,18 +3274,42 @@
     var first = scored.length ? scored[scored.length - 1] : null;
     var delta = (latest && first && scored.length > 1) ? latest.composite - first.composite : null;
     var target = data.student.targetScore;
+    /* The same rules as the portal chart and the roster (stats audit,
+       2026-09-26): change over COMPARABLE tests only (no Test 12, section-
+       only or interrupted sittings), called real only past the noise; and
+       the target against the current-level estimate, not one test. */
+    var MS = window.MorettiSignals;
+    var comparable = MS ? scored.slice().reverse().map(function (a) { return Object.assign({ date: a.at }, a); }).filter(MS.isTrendComparable) : [];
+    var change = MS && comparable.length >= 2 ? MS.scoreChange(comparable) : null;
+    var level = MS && comparable.length ? MS.currentLevel(comparable) : null;
+    var reached = MS && target && comparable.length >= 2 ? MS.targetReached(comparable, Number(target)) : null;
 
     var tiles = [];
     tiles.push('<div class="summary-tile"><div class="num">' + (latest ? latest.composite : '—') + '</div>' +
       '<div class="lbl">Latest composite</div>' +
       '<div class="sub">' + (latest ? formatDay(latest.at) : 'No scored attempt yet') + '</div></div>');
-    tiles.push('<div class="summary-tile"><div class="num">' +
-      (delta == null ? '—' : (delta > 0 ? '+' : '') + delta) + '</div>' +
-      '<div class="lbl">Since first test</div>' +
-      '<div class="sub">' + (scored.length ? scored.length + ' scored attempt' + (scored.length === 1 ? '' : 's') : '&nbsp;') + '</div></div>');
+    if (change) {
+      tiles.push('<div class="summary-tile"><div class="num"' + (change.real ? '' : ' style="color:var(--mid)"') + '>' +
+        (change.delta > 0 ? '+' : '') + change.delta + '</div>' +
+        '<div class="lbl">Change across tests</div>' +
+        '<div class="sub">' + (change.real ? 'a real change' : 'within the ' + change.threshold + '-point swing') +
+        ' &middot; ' + change.n + ' comparable</div></div>');
+    } else {
+      tiles.push('<div class="summary-tile"><div class="num">' +
+        (delta == null ? '—' : (delta > 0 ? '+' : '') + delta) + '</div>' +
+        '<div class="lbl">Since first test</div>' +
+        '<div class="sub">' + (scored.length ? scored.length + ' scored attempt' + (scored.length === 1 ? '' : 's') + (delta != null ? ', not checked for noise' : '') : '&nbsp;') + '</div></div>');
+    }
+    var targetSub = '&nbsp;';
+    if (target && level && level.now) {
+      targetSub = reached && reached.reached ? 'reached: level ' + level.now.lo + '&ndash;' + level.now.hi
+        : 'likely level ' + level.now.lo + '&ndash;' + level.now.hi;
+    } else if (target && latest) {
+      targetSub = (target - latest.composite > 0 ? (target - latest.composite) + ' above the latest test' : 'latest test at or above it');
+    }
     tiles.push('<div class="summary-tile"><div class="num">' + (target || '—') + '</div>' +
       '<div class="lbl">Target</div>' +
-      '<div class="sub">' + (target && latest ? (target - latest.composite > 0 ? (target - latest.composite) + ' to go' : 'Target met') : '&nbsp;') + '</div></div>');
+      '<div class="sub">' + targetSub + '</div></div>');
     // Defaulted rather than printed raw: an older deployment, or any
     // response missing these, otherwise renders the word "undefined" in
     // 2rem type where a number should be.
@@ -3260,7 +3351,7 @@
 
   function trendEntryTitle(a) {
     var t = String(a.testTitle || '').replace(/^SAT\s+/i, '').replace(/\s+[\u2014\u2013-]\s+.*$/, '');
-    return t || (a.source === 'practice-test' ? 'Practice test' : 'Diagnostic');
+    return t || (a.source === 'practice-test' ? 'Practice test' : (a.source === 'diagnostic-retake' ? 'Diagnostic retake' : 'Diagnostic'));
   }
 
   var trendEntries = [];   // chart index -> attempt, for the tooltip and click
@@ -3334,13 +3425,19 @@
     var last = entries[entries.length - 1];
     var labels = trendLabels(entries);
 
+    // Coloured only when the change clears the noise over comparable tests
+    // (MorettiSignals.scoreChange); otherwise stated plainly, in grey.
     var deltaHtml = '';
-    if (entries.length > 1) {
+    var MSt = window.MorettiSignals;
+    var comp = MSt ? entries.map(function (a) { return Object.assign({ date: a.at }, a); }).filter(MSt.isTrendComparable) : [];
+    var ch = MSt && comp.length >= 2 ? MSt.scoreChange(comp) : null;
+    if (ch && ch.delta !== 0) {
+      deltaHtml = '<div class="spc-composite-delta' + (ch.real ? (ch.delta < 0 ? ' down' : '') : ' flat') + '">' + (ch.delta > 0 ? '\u2191 ' : '\u2193 ') +
+        Math.abs(ch.delta) + ' across ' + ch.n + ' comparable tests' + (ch.real ? '' : ', within the ' + ch.threshold + '-point swing') + '</div>';
+    } else if (!ch && entries.length > 1) {
       var delta = last.composite - entries[0].composite;
-      if (delta !== 0) {
-        deltaHtml = '<div class="spc-composite-delta">' + (delta > 0 ? '\u2191 ' : '\u2193 ') +
-          Math.abs(delta) + ' pts since ' + escHtml(labels[0]) + '</div>';
-      }
+      if (delta !== 0) deltaHtml = '<div class="spc-composite-delta flat">' + (delta > 0 ? '\u2191 ' : '\u2193 ') +
+        Math.abs(delta) + ' pts since ' + escHtml(labels[0]) + '</div>';
     }
 
     var barsHtml = '', labelsHtml = '';
@@ -3460,7 +3557,7 @@
       }
       return '<tr>' +
         '<td>' + formatDay(a.at) + '</td>' +
-        '<td>' + escHtml(attemptLabel(a)) + '<span class="src-badge' + (isDiag ? ' diag' : '') + '">' + (isDiag ? 'Diagnostic' : 'Practice') + '</span></td>' +
+        '<td>' + escHtml(attemptLabel(a)) + '<span class="src-badge' + (isDiag ? ' diag' : '') + '">' + (isDiag ? (a.source === 'diagnostic-retake' ? 'Retake' : 'Diagnostic') : 'Practice') + '</span></td>' +
         '<td>' + score + '</td>' +
         '<td>' + weakest + '</td>' +
         '<td><div class="row-actions">' + actions + '</div></td>' +
@@ -3482,8 +3579,19 @@
      whether something is improving or recurs every time.
 
      Attempts with no record are skipped, not counted as zeroes. */
-  var CT_BAND = 0.25;          // same +/-25% on-pace band time-budgets.js uses
-  var CT_RUSHED = 0.5;         // wrong in under half the budget = not really attempted
+  /* The SAME timing rules as the report (report.html RUSHED_REL,
+     STUCK_BUDGET_REL), so this panel and the student's report never
+     disagree about one question (stats audit, 2026-09-25). The old rules
+     here were budget-relative (under 0.5x the target = rushed, over 1.25x =
+     slow); real students run at about 0.66x the target by default, so that
+     called a quarter of every student's misses "missed in a hurry".
+       Rushed: under half this student's OWN typical pace on right answers
+               in that section of that test (target-relative only when
+               fewer than five right answers were timed).
+       Slow / worked at it: 1.5x the question's target time or more. */
+  var CT_RUSHED_REL = 0.5;     // x the student's median time/target on right answers
+  var CT_SLOW = 1.5;           // x the question's target time
+  var CT_MIN_TYPICAL = 5;      // right answers needed before "own pace" means anything
   var CT_DIFF_NAME = ['easy', 'medium', 'hard'];
 
   /* Skeletons shaped like the thing that is loading -- a table gets rows,
@@ -3513,6 +3621,21 @@
   function ctEsc(v) { return String(v == null ? '' : v).replace(/[&<>"]/g, function (c) {
     return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
 
+  /* Every attempt with a per-question record, as items for the shared
+     estimator (MorettiSignals.skillEvidence / skillTrend), oldest first;
+     answers under the report's reading floor are marked tooFast. */
+  function ctEvidenceAttempts(data) {
+    var MS = window.MorettiSignals;
+    if (!MS || typeof MS.itemsFromQStats !== 'function') return [];
+    var budget = window.TIME_BUDGETS ? function (sec, dom, skill, diff) {
+      var bd = window.TIME_BUDGETS.budgetSecondsFor(sec, dom, skill, diff, 1);
+      return (bd && bd.seconds) || 0;
+    } : null;
+    return (data.attempts || []).filter(function (a) { return a.qStats && a.qStats.q && a.qStats.q.length && a.mode !== 'section'; })
+      .slice().sort(function (a, c) { return String(a.at || '').localeCompare(String(c.at || '')); })
+      .map(function (a) { return { id: a.attemptId || '', testId: a.testId || '', at: a.at, items: MS.itemsFromQStats(a.qStats, budget) || [] }; });
+  }
+
   function renderCrossTest(data) {
     var host = $('stu-analysis');
     var withStats = (data.attempts || []).filter(function (a) {
@@ -3528,8 +3651,32 @@
     var bySkill = {};   // skillKey -> pooled totals
     var totalQ = 0;
 
+    function ctBudgetFor(sectionKey, domain, skill, diff) {
+      var budget = 70;
+      if (window.TIME_BUDGETS) {
+        var bd = window.TIME_BUDGETS.budgetSecondsFor(sectionKey, domain, skill, diff, 1);
+        if (bd && bd.seconds) budget = bd.seconds;
+      }
+      return budget;
+    }
+    function ctMedian(v) {
+      if (!v.length) return 0;
+      var a = v.slice().sort(function (x, y) { return x - y; }), m = Math.floor(a.length / 2);
+      return a.length % 2 ? a[m] : (a[m - 1] + a[m]) / 2;
+    }
     withStats.forEach(function (att, attIdx) {
       var qs = att.qStats;
+      // This test's own pace per section: median time/target on right answers.
+      var ratios = {};
+      qs.q.forEach(function (row) {
+        if (row[3] !== 1 || !(row[4] > 0)) return;
+        var sk = qs.k[row[1]] || '', pp = sk.split(' → ');
+        var sec = qs.s[row[0]] || '';
+        var bud = ctBudgetFor(sec, pp.length > 1 ? pp[0] : '', pp.length > 1 ? pp[1] : sk, CT_DIFF_NAME[row[2]] || 'medium');
+        (ratios[sec] = ratios[sec] || []).push(row[4] / bud);
+      });
+      var typical = {};
+      Object.keys(ratios).forEach(function (sec) { typical[sec] = ratios[sec].length >= CT_MIN_TYPICAL ? ctMedian(ratios[sec]) : 0; });
       qs.q.forEach(function (row) {
         var sectionKey = qs.s[row[0]] || '';
         var skillKey = qs.k[row[1]] || '';
@@ -3550,24 +3697,22 @@
 
         // Budget for THIS question. timeMult 1: this is Luca's read of the
         // work, not a compliance score against an accommodation.
-        var budget = 70;
-        if (window.TIME_BUDGETS) {
-          var bd = window.TIME_BUDGETS.budgetSecondsFor(sectionKey, domain, skill, diff, 1);
-          if (bd && bd.seconds) budget = bd.seconds;
-        }
+        var budget = ctBudgetFor(sectionKey, domain, skill, diff);
         b.budget += budget;
         if (secs > 0) { b.secs += secs; b.timed++; }
 
         if (result === 2) { bucket.unreached++; return; }
         if (result === 1) {
-          if (secs > budget * (1 + CT_BAND)) bucket.inefficient++;
+          if (secs >= budget * CT_SLOW) bucket.inefficient++;
           else bucket.mastered++;
           return;
         }
         b.wrong++;
         b.missedIn[attIdx] = 1;
-        if (secs > 0 && secs < budget * CT_RUSHED) bucket.rushed++;
-        else if (secs > budget * (1 + CT_BAND)) bucket.stuck++;
+        var own = typical[sectionKey] || 0;
+        var hurried = secs > 0 && (own ? secs / budget < CT_RUSHED_REL * own : secs < budget * CT_RUSHED_REL);
+        if (hurried) bucket.rushed++;
+        else if (secs >= budget * CT_SLOW) bucket.stuck++;
         else bucket.missed++;
       });
     });
@@ -3618,68 +3763,279 @@
       : '<div class="empty">Nothing consistently over budget.</div>';
     html += '</div>';
 
-    /* ── 3. missed more than once ───────────────────────────────────── */
-    /* Ranked by miss RATE, not by how many tests missed it: after a few tests
-       almost every skill has been missed in all of them. The test count
-       (2+) guards against a one-off bad section, and the four-question
-       minimum keeps a single miss in a rare skill off the top. */
-    var recurring = skills.filter(function (b) { return b.missedTestCount >= 2 && b.total >= 4 && b.wrong; })
-      .sort(function (a, c) { return (c.wrong / c.total) - (a.wrong / a.total); }).slice(0, 6);
-    html += '<div class="ct-block"><div class="ct-hed">Missed in more than one test</div>';
-    html += recurring.length
-      ? '<table class="ct-table"><tbody>' + recurring.map(function (b) {
-          return '<tr><td class="ct-skill">' + ctEsc(b.skill) + '<span class="ct-sub">' + ctEsc(b.section === 'math' ? 'Math' : 'Reading & Writing') + '</span></td>' +
-            '<td class="ct-num">' + Math.round(b.wrong / b.total * 100) + '% wrong</td>' +
-            '<td class="ct-vs">' + b.wrong + ' of ' + b.total + '</td>' +
-            '<td class="ct-n">in ' + b.missedTestCount + ' of ' + b.testCount + ' tests</td></tr>';
-        }).join('') + '</tbody></table>'
-      : '<div class="empty">' + (withStats.length < 2
-          ? 'Needs a second test before anything can repeat.'
-          : 'No skill missed in more than one test.') + '</div>';
-    html += '</div>';
+    /* ── 3. what keeps coming back, what got fixed ─────────────────── */
+    /* Was "missed in 2+ tests, 4+ questions, ranked by rate": for a skill
+       whose level never moved that fired 76% of the time at three tests.
+       Now MorettiSignals.skillTrend at DOMAIN grain (the report's content
+       test, per test and pooled; domain because a skill has too few
+       questions per test for "fixed" to be seen at all): keeps coming back
+       = the pooled shortfall clears the lead bar and showed on 2+ tests;
+       fixed = an earlier shortfall that cleared it and a latest test better
+       by 1.645 SE with 4+ questions. Simulated, a student with no change
+       sees any "keeps coming back" 9.5% and any "fixed" 4.5% of the time at
+       three tests; a real 1.6-logit gap is caught 70% at three tests. The
+       skills inside a named domain are listed by questions missed beyond
+       expectation, as detail. */
+    var MSct = window.MorettiSignals;
+    var evAtt = ctEvidenceAttempts(data);
+    html += '<div class="ct-block"><div class="ct-hed">Keeps coming back, and fixed</div>';
+    if (!MSct || typeof MSct.skillTrend !== 'function' || evAtt.length < 2) {
+      html += '<div class="empty">' + (evAtt.length < 2 ? 'Needs a second test before anything can repeat.' : 'Needs signals.js.') + '</div></div>';
+    } else {
+      var trD = MSct.skillTrend(evAtt, { grain: 'domain' });
+      var evD = MSct.skillEvidence(evAtt, { grain: 'domain' });
+      var evS = MSct.skillEvidence(evAtt, { grain: 'skill' });
+      var skillsIn = function (dom) {
+        var list = [];
+        evAtt.forEach(function (a) { a.items.forEach(function (it) { if (it.dom === dom && list.indexOf(it.skill) === -1) list.push(it.skill); }); });
+        return list.map(function (k) { return evS.units[k]; }).filter(function (u) { return u && u.S > 0.5; })
+          .sort(function (x, y) { return y.S - x.S; }).slice(0, 3)
+          .map(function (u) { return ctEsc(u.unit) + ' ' + Math.round(u.n - u.obs) + ' of ' + u.n + ' missed'; }).join(' · ');
+      };
+      var rowsCT = [];
+      (trD.keepsComingBack || []).forEach(function (k) {
+        var u = evD.units[k], t = trD.units[k];
+        rowsCT.push('<tr><td class="ct-skill">' + ctEsc(k) + '<span class="ct-sub">' +
+          Math.round(u.n - u.obs) + ' of ' + u.n + ' missed, about ' + Math.round(u.S) + ' more than their level predicts; short on ' +
+          t.deficitAttempts + ' of ' + t.attempts + ' tests' + (skillsIn(k) ? '<br>' + skillsIn(k) : '') + '</span></td>' +
+          '<td class="ct-over">keeps coming back</td></tr>');
+      });
+      (trD.fixed || []).forEach(function (k) {
+        var t = trD.units[k];
+        rowsCT.push('<tr><td class="ct-skill">' + ctEsc(k) + '<span class="ct-sub">short before; on the latest test (' +
+          (t.latest ? t.latest.n + ' questions' : '') + ') better by more than chance</span></td>' +
+          '<td class="ct-num" style="color:var(--green)">fixed</td></tr>');
+      });
+      html += rowsCT.length ? '<table class="ct-table"><tbody>' + rowsCT.join('') + '</tbody></table></div>'
+        : '<div class="empty">No area comes back beyond what their level explains, and nothing has clearly turned around yet.</div></div>';
+    }
 
     /* ── 4. consistency ─────────────────────────────────────────────── */
-    // Full sittings only: a section-only attempt has no composite and its
-    // one section would drag a range it was never comparable to.
-    var full = (data.attempts || []).filter(function (a) { return a.mode !== 'section' && a.composite != null; });
+    /* Is this student more erratic than a test is on its own? The old line
+       highlighted any spread of 80+ points: 78% of students whose level had
+       not moved were flagged after three tests, and the spread only grows
+       with more tests (stats audit, 2026-09-25). Now: comparable tests only
+       (MorettiSignals.isTrendComparable: no Test 12, no section-only or
+       interrupted sittings), a straight line through them in date order so
+       steady improvement is not mistaken for scatter, and the scatter around
+       that line is compared with each test's own measurement noise
+       (compositeSem at that score). Flagged when the sum of squared,
+       noise-scaled residuals passes the 95th percentile of chi-square on
+       n-2 degrees of freedom: about 1 steady student in 20 is flagged by
+       chance. Simulated (n=20,000 per cell, scratchpad wire/consistency-sim.js):
+       flat 4.9 / 4.9 / 4.3% at 3 / 5 / 10 tests, +10 a week 4.7-4.8%,
+       +30 a week 5.0-5.1% (7.0% at 10 tests, where the ceiling bends the
+       line); one sitting 240 points low is caught 24% at 3 tests, 58% at 5.
+       Needs 3 tests; with 2, the line fits exactly and there is nothing to
+       test. */
+    var MS = window.MorettiSignals;
+    var full = (data.attempts || []).slice().sort(function (a, c) { return String(a.at || '').localeCompare(String(c.at || '')); })
+      .filter(function (a) { return MS ? MS.isTrendComparable(a) : (a.mode !== 'section' && a.composite != null); });
     if (full.length >= 2) {
-      var spread = function (vals) {
-        var v = vals.filter(function (x) { return typeof x === 'number' && x; });
-        if (v.length < 2) return null;
-        return { lo: Math.min.apply(null, v), hi: Math.max.apply(null, v) };
-      };
-      var rows = [
-        { lab: 'Composite', s: spread(full.map(function (a) { return a.composite; })) },
-        { lab: 'Reading & Writing', s: spread(full.map(function (a) { return a.rw; })) },
-        { lab: 'Math', s: spread(full.map(function (a) { return a.math; })) }
-      ].filter(function (r) { return r.s; });
-      if (rows.length) {
-        html += '<div class="ct-block"><div class="ct-hed">Consistency across ' + full.length + ' full tests</div>' +
-          '<table class="ct-table"><tbody>' + rows.map(function (r) {
-            var range = r.s.hi - r.s.lo;
-            return '<tr><td class="ct-skill">' + r.lab + '</td>' +
-              '<td class="ct-num">' + r.s.lo + '&ndash;' + r.s.hi + '</td>' +
-              '<td class="ct-over' + (range >= 80 ? '' : ' ct-quiet') + '">' + range + ' point spread</td></tr>';
-          }).join('') + '</tbody></table></div>';
+      var CHI2_95 = [0, 3.84, 5.99, 7.81, 9.49, 11.07, 12.59, 14.07, 15.51, 16.92, 18.31, 19.68, 21.03, 22.36, 23.68];
+      var lo = Math.min.apply(null, full.map(function (a) { return a.composite; }));
+      var hi = Math.max.apply(null, full.map(function (a) { return a.composite; }));
+      var verdict = '', flagged = false;
+      if (full.length >= 3 && MS && MS.compositeSem) {
+        var xs = full.map(function (a, i) { var t = Date.parse(a.at); return isNaN(t) ? i : t / 864e5; });
+        var ys = full.map(function (a) { return a.composite; });
+        var fitLine = function (ws) {
+          var sw = 0, sx = 0, sy = 0, sxx = 0, sxy = 0, j;
+          for (j = 0; j < ys.length; j++) { sw += ws[j]; sx += ws[j] * xs[j]; sy += ws[j] * ys[j]; }
+          var mx = sx / sw, my = sy / sw;
+          for (j = 0; j < ys.length; j++) { sxx += ws[j] * (xs[j] - mx) * (xs[j] - mx); sxy += ws[j] * (xs[j] - mx) * (ys[j] - my); }
+          var b = sxx > 0 ? sxy / sxx : 0;
+          return function (x) { return my + b * (x - mx); };
+        };
+        /* Each test's noise is read at the LINE's value, not at the score it
+           gave: read at the observed score, a test that came out high got a
+           smaller error (the noise shrinks toward 800) and a bigger residual,
+           and chance flags ran 6.6-11.5%. Three reweighting passes. */
+        var ws = ys.map(function () { return 1; }), line;
+        for (var pass = 0; pass < 3; pass++) {
+          line = fitLine(ws);
+          ws = xs.map(function (x) { var e = MS.compositeSem({ composite: line(x) }); return 1 / (e * e); });
+        }
+        line = fitLine(ws);
+        var chi = 0;
+        for (var i = 0; i < ys.length; i++) { var r = ys[i] - line(xs[i]); chi += ws[i] * r * r; }
+        var df = ys.length - 2, crit = CHI2_95[Math.min(df, CHI2_95.length - 1)];
+        flagged = chi > crit;
+        verdict = flagged
+          ? 'More up and down than a test is on its own: something other than the test (a bad day, an interruption, effort) moved at least one score.'
+          : 'Within what a test varies by on its own.';
+      } else {
+        verdict = 'Two tests: one more is needed to tell scatter from a trend.';
       }
+      html += '<div class="ct-block"><div class="ct-hed">Consistency across ' + full.length + ' comparable tests</div>' +
+        '<table class="ct-table"><tbody><tr><td class="ct-skill">Composite</td>' +
+        '<td class="ct-num">' + lo + '&ndash;' + hi + '</td>' +
+        '<td class="ct-over' + (flagged ? '' : ' ct-quiet') + '">' + ctEsc(verdict) + '</td></tr></tbody></table></div>';
     }
 
     host.innerHTML = html;
   }
 
+  /* ═══ WEAKEST SKILLS (stats audit, 2026-09-26) ═══ was the latest
+     test's raw percent per skill, sorted, no minimum: the top row rested on
+     2 or fewer questions 84% of the time for a student with no weak skill.
+     Now every test with a per-question record, pooled, through the
+     report's difficulty-aware content test at skill grain
+     (MorettiSignals.skillEvidence): ranked by questions missed BEYOND what
+     this student's level predicts for those questions. "Clear" and "lead"
+     are the report's bars (skill grain z 3.35 / 2.95; a student with no
+     weak skill shows any lead 8-11% of the time); every other row is
+     within chance and is shown quiet, for context. */
+  /* ═══ WHAT THE EVIDENCE SAYS (2026-09-26) ═══ the tutor-only analyses in
+     signals.js (section G), on this student: does "I understand this" hold
+     up, are their wrong answers the popular trap, does slowing down help,
+     does practice on a skill show up on the next test, do hours move the
+     score, do explanations stick. The raw material comes from prep.gs
+     (adminStudentEvidence) and the per-question record already on this
+     page. Every reading waits for the evidence its interval needs (G_NEED,
+     set by simulation) and shows "collecting" until then. Figures and
+     ranges only, never advice: what to do with them is Luca's call. */
+  function evPct(x) { return Math.round(100 * x) + '%'; }
+  function evRange(lo, hi, fmt) { return fmt(lo) + ' to ' + fmt(hi); }
+  function evRow(title, r, reading, detail) {
+    var body = !r ? '<span class="ev-wait">Not available yet.</span>'
+      : (!r.ready ? '<span class="ev-wait">Collecting: ' + (r.have || 0) + ' of ' + r.need + ' needed.</span>' +
+          (detail ? '<span class="ev-detail">' + detail + '</span>' : '')
+        : '<span class="ev-read">' + reading + '</span>' + (detail ? '<span class="ev-detail">' + detail + '</span>' : ''));
+    return '<div class="ev-row"><div class="ev-title">' + title + '</div><div class="ev-body">' + body + '</div></div>';
+  }
+  function loadStudentEvidence(data) {
+    var host = $('stu-evidence');
+    var MS = window.MorettiSignals;
+    if (!host) return;
+    if (!MS || typeof MS.retryHolds !== 'function' || !isSat(currentStudent)) { $('stu-evidence-card').style.display = isSat(currentStudent) ? '' : 'none'; host.innerHTML = '<div class="empty">Needs signals.js.</div>'; return; }
+    $('stu-evidence-card').style.display = '';
+    var key = currentStudent && currentStudent.key;
+    host.innerHTML = '<div class="empty">Loading&hellip;</div>';
+    postToBackend({ action: 'adminStudentEvidence', adminKey: adminKey(), key: key }).then(function (ev) {
+      if (!currentStudent || currentStudent.key !== key) return;
+      if (!ev || !ev.ok) {
+        host.innerHTML = '<div class="empty">' + (ev && ev.error === 'unauthorized'
+          ? 'The backend does not know this request yet: paste the new Code.gs, auth.gs and prep.gs and deploy.'
+          : 'Could not load the evidence (' + escHtml((ev && ev.error) || 'network') + ').') + '</div>';
+        return;
+      }
+      renderStudentEvidence(data, ev);
+    }, function () { host.innerHTML = '<div class="empty">Could not load the evidence (network).</div>'; });
+  }
+  function renderStudentEvidence(data, ev) {
+    var MS = window.MorettiSignals, host = $('stu-evidence'), rows = [];
+    var events = ev.events || [];
+    var evAtt = ctEvidenceAttempts(data);
+
+    // 1. Does "I understand this" hold up?
+    var rh = MS.retryHolds(events);
+    var rhRead = rh.ready ? (rh.trust === 'holds'
+        ? 'Yes: questions they ticked come back right ' + evRange(rh.ticked.lo, rh.ticked.hi, evPct) + ' of the time on a retry.'
+        : rh.trust === 'does-not-hold'
+          ? 'No: questions they ticked come back right only ' + evRange(rh.ticked.lo, rh.ticked.hi, evPct) + ' of the time on a retry.'
+          : 'Unclear: ticked questions come back right ' + evRange(rh.ticked.lo, rh.ticked.hi, evPct) + ' of the time.') : '';
+    rows.push(evRow('Does &ldquo;I understand this&rdquo; hold up?', rh, rhRead,
+      rh.ticked.n || rh.unticked.n ? 'Retries after a tick: ' + rh.ticked.right + ' of ' + rh.ticked.n + ' right. Without one: ' + rh.unticked.right + ' of ' + rh.unticked.n + '.' : ''));
+
+    // 2. Are their wrong answers the popular trap?
+    var tp = MS.trapPull(ev.studentWrongs || [], ev.wrongCounts || {});
+    var tpRead = tp.ready ? (tp.verdict === 'drawn-to-traps'
+        ? 'Drawn to the trap: ' + evPct(tp.share) + ' of their wrong answers are the choice most students fall for, against ' + evPct(tp.expectedShare) + ' expected (excess ' + evRange(tp.lo, tp.hi, evPct) + ').'
+        : tp.verdict === 'avoids-traps'
+          ? 'Their misses avoid the popular trap: ' + evPct(tp.share) + ' against ' + evPct(tp.expectedShare) + ' expected. Their mistakes are their own, not the common misreading.'
+          : 'No clear pull: ' + evPct(tp.share) + ' of their wrong answers are the popular trap, about what anyone would pick (' + evPct(tp.expectedShare) + ').') : '';
+    rows.push(evRow('Are their wrong answers the common trap?', tp, tpRead,
+      tp.have ? tp.have + ' wrong answers on questions at least five other students also missed.' : 'Counts wrong answers on questions at least five other students also missed.'));
+
+    // 3. Does slowing down help? (per section, from the tests' timing)
+    var items = [];
+    var TB = window.TIME_BUDGETS;
+    evAtt.forEach(function (a, ai) {
+      a.items.forEach(function (it) {
+        if (it.blank || it.tooFast || !(it.seconds > 0) || !TB) return;
+        var bd = TB.budgetSecondsFor(it.sec, it.dom, it.skill, it.diff, 1);
+        if (bd && bd.seconds) items.push({ sec: it.sec, dom: it.dom, diff: it.diff, ok: it.ok, seconds: it.seconds, budget: bd.seconds, attempt: ai });
+      });
+    });
+    var sa = MS.speedAccuracy(items);
+    ['reading-writing', 'math'].forEach(function (sec) {
+      var x = sa.sections[sec];
+      var label = sec === 'math' ? 'Math' : 'Reading &amp; Writing';
+      var read = x && x.ready ? (x.verdict === 'slower-more-accurate'
+          ? 'Slower is more accurate for them here, beyond what harder questions explain.'
+          : x.verdict === 'slower-less-accurate'
+            ? 'Their slow answers are LESS accurate: time spent past a point is not buying points.'
+            : 'No clear link between time spent and accuracy.') : '';
+      var bins = x && x.bins ? x.bins.filter(function (b) { return b.n >= 5; }).map(function (b) { return b.label + ': ' + b.right + '/' + b.n; }).join(' · ') : '';
+      rows.push(evRow('Does slowing down help? (' + label + ')', x || { ready: false, have: 0, need: MS.G_NEED ? MS.G_NEED.speedAccuracy : 160 }, read, bins));
+    });
+
+    // 4. Practice before a test vs that test
+    var pt = MS.practiceTransfer(events, evAtt);
+    var ptRead = pt.ready ? (pt.hi < 0
+        ? 'Skills they practised more before a test ran closer to their level on it (' + evRange(pt.lo, pt.hi, function (v) { return v.toFixed(2); }) + ' logits per 10 questions). An association, not proof.'
+        : pt.lo > 0 ? 'More practice on a skill went with a BIGGER shortfall on it; most likely they practise what they already know is weak.'
+          : 'No clear link yet between practice on a skill and the next test.') : '';
+    rows.push(evRow('Does practice show up on the next test?', pt, ptRead, pt.have ? pt.have + ' skill-and-test pairs.' : ''));
+
+    // 5. Hours and sessions vs score change
+    var dr = MS.doseResponse(ev.intervals || []);
+    var fmtPts = function (v) { return (v > 0 ? '+' : '') + Math.round(v); };
+    var drRead = dr.ready ? [
+        dr.perHour ? 'Per hour on the portal between tests: ' + evRange(dr.perHour.lo, dr.perHour.hi, fmtPts) + ' points.' : '',
+        dr.perSession ? 'Per session: ' + evRange(dr.perSession.lo, dr.perSession.hi, fmtPts) + ' points.' : ''
+      ].filter(String).join(' ') : '';
+    rows.push(evRow('Do hours move the score?', dr, drRead, dr.have ? dr.have + ' test-to-test intervals.' : ''));
+
+    // 6. Do explanations stick?
+    var ee = MS.explanationEffect(events);
+    var eeRead = ee.ready && ee.diff ? 'After reading the explanation: ' + evPct(ee.explained.acc) + ' right on the next try; without: ' + evPct(ee.notExplained.acc) +
+      ' (difference ' + evRange(ee.diff.lo, ee.diff.hi, evPct) + ').' : '';
+    rows.push(evRow('Do explanations stick?', ee, eeRead,
+      (ee.explained && ee.notExplained && (ee.explained.n || ee.notExplained.n)) ? 'Missed, then tried again: ' + ee.explained.n + ' after reading, ' + ee.notExplained.n + ' without.' : ''));
+
+    host.innerHTML = rows.join('');
+  }
+
   function renderSkills(data) {
     var host = $('stu-skills');
-    if (!data.skills.length) {
-      host.innerHTML = '<div class="empty">No skill breakdown synced yet — it appears once they finish a diagnostic or practice test.</div>';
+    var MS = window.MorettiSignals;
+    var evAtt = ctEvidenceAttempts(data);
+    if (!MS || typeof MS.skillEvidence !== 'function' || !evAtt.length) {
+      $('stu-skills-sub').textContent = 'From their most recent completed test (no per-question record to pool).';
+      if (!data.skills.length) {
+        host.innerHTML = '<div class="empty">No skill breakdown synced yet — it appears once they finish a diagnostic or practice test.</div>';
+        return;
+      }
+      host.innerHTML = data.skills.slice(0, 12).map(function (sk) {
+        return '<div class="skill-row">' +
+          '<div class="sk-name">' + escHtml(sk.label) + (sk.domain && sk.domain !== sk.label ? '<small>' + escHtml(sk.domain) + '</small>' : '') + '</div>' +
+          '<div class="sk-bar"><i style="width:' + sk.pct + '%"></i></div>' +
+          '<div class="sk-frac">' + sk.correct + '/' + sk.total + ' &middot; ' + sk.pct + '%</div>' +
+          '<button type="button" class="mini skill-assign-btn" data-skill="' + escHtml(sk.label) + '">Assign</button>' +
+          '</div>';
+      }).join('');
       return;
     }
-    host.innerHTML = data.skills.slice(0, 12).map(function (sk) {
-      var cls = sk.pct < 50 ? 'weak' : (sk.pct >= 80 ? 'strong' : '');
-      return '<div class="skill-row">' +
-        '<div class="sk-name">' + escHtml(sk.label) + (sk.domain && sk.domain !== sk.label ? '<small>' + escHtml(sk.domain) + '</small>' : '') + '</div>' +
-        '<div class="sk-bar"><i class="' + cls + '" style="width:' + sk.pct + '%"></i></div>' +
-        '<div class="sk-frac">' + sk.correct + '/' + sk.total + ' &middot; ' + sk.pct + '%</div>' +
-        '<button type="button" class="mini skill-assign-btn" data-skill="' + escHtml(sk.label) + '">Assign</button>' +
+    var ev = MS.skillEvidence(evAtt, { grain: 'skill' });
+    var domOf = {};
+    evAtt.forEach(function (a) { a.items.forEach(function (it) { domOf[it.skill] = it.dom; }); });
+    var units = Object.keys(ev.units).map(function (k) { return ev.units[k]; })
+      .filter(function (u) { return u.n >= 3; })
+      .sort(function (x, y) { return y.S - x.S; });
+    $('stu-skills-sub').textContent = 'Across ' + ev.attempts + (ev.attempts === 1 ? ' test' : ' tests') +
+      ', ranked by questions missed beyond what their level predicts for those questions. Only "clear" and "lead" rows are past chance.';
+    host.innerHTML = units.slice(0, 12).map(function (u) {
+      var pct = u.n ? Math.round(100 * u.obs / u.n) : 0;
+      var tag = u.clear ? '<span class="sk-tag clear" title="z ' + u.z.toFixed(1) + '">clear</span>'
+        : (u.lead ? '<span class="sk-tag lead" title="z ' + u.z.toFixed(1) + '">lead</span>' : '');
+      var cls = u.clear || u.lead ? 'weak' : '';
+      return '<div class="skill-row' + (u.lead ? '' : ' sk-quiet') + '">' +
+        '<div class="sk-name">' + escHtml(u.unit) + tag + (domOf[u.unit] ? '<small>' + escHtml(domOf[u.unit]) + '</small>' : '') + '</div>' +
+        '<div class="sk-bar"><i class="' + cls + '" style="width:' + pct + '%"></i></div>' +
+        '<div class="sk-frac">' + Math.round(u.obs) + '/' + u.n + ' &middot; ' + (u.S > 0 ? Math.round(u.S * 10) / 10 + ' below' : 'as expected') + '</div>' +
+        '<button type="button" class="mini skill-assign-btn" data-skill="' + escHtml(u.unit) + '">Assign</button>' +
         '</div>';
     }).join('');
   }

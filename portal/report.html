@@ -1092,7 +1092,7 @@
   <div class="ftr"><span>Moretti Test Prep &amp; Tutoring · Cranford, NJ · (201) 275-2791</span><span>Page 2 of 2</span></div>
 </div>
 
-<script src="banks.js?v=20260910a"></script>
+<script src="banks.js?v=20260926a"></script>
 <script>
   /* ═══ WHO ACTUALLY NEEDS practice-tests.js ═══ only a PRACTICE TEST report
      reads it (getBank and the test-title lookup below, both behind
@@ -1116,12 +1116,12 @@
         needed = !!(d && d.pt);
       }
     } catch (e) { /* unreadable link: load it and let the report say so */ }
-    if (needed) document.write('<script src="practice-tests.js?v=20260912a"><\/script>');
+    if (needed) document.write('<script src="practice-tests.js?v=20260926a"><\/script>');
   })();
 </script>
 <script src="time-budgets.js?v=20260912a"></script>
 <script src="grid-in.js?v=20260910a"></script>
-<script src="signals.js?v=20260916b"></script>
+<script src="signals.js?v=20260926a"></script>
 <script src="desmos-tags.js?v=20260916c"></script>
 <script src="question-flag.js?v=20260925a"></script>
 <script>
@@ -2164,6 +2164,27 @@
       // plus 30s on return reads 35s total but still shows the rushed 5s.
       var qFirstVisitMs = (sec.fp && typeof sec.fp[i] === 'number') ? sec.fp[i] : null;
       if (timingUnusable) qFirstVisitMs = null;
+      /* ═══ A PLACEHOLDER IS NOT THE ANSWER ═══ a student who drops in a
+         quick answer, flags it and comes back to work it has a first look of
+         a few seconds, but the answer being graded came from the later
+         visit. Timed by the first look, a right answer read as "skimmed" and
+         a wrong one as "answered too fast to have read it" (stats audit,
+         2026-09-25). So when the visit log shows the final answer differs
+         from the first one committed, the question is paced on its total
+         time, which is the work that produced the graded answer. */
+      var answerRevised = false;
+      if (qFirstVisitMs != null && Array.isArray(sec.vl)) {
+        var blankEnd = function (a) { return a === null || a === undefined || a === '' || a === -1; };
+        var firstEnd = null, lastEnd = null;
+        sec.vl.filter(function (v) { return v[0] === i; })
+          .sort(function (a, b) { return a[1] - b[1]; })
+          .forEach(function (v) {
+            if (blankEnd(v[3])) return;
+            if (firstEnd === null) firstEnd = v[3];
+            lastEnd = v[3];
+          });
+        answerRevised = firstEnd !== null && String(lastEnd) !== String(firstEnd);
+      }
       var moduleIndex = i < moduleSplit ? 0 : 1;
       var modStartAt = moduleStartAt[moduleIndex];
       secTimeTotal += qTimeMs;
@@ -2216,7 +2237,7 @@
         skipped: (given === null || given === undefined),
         q: q, givenIdx: (q.type === 'mc' && given !== null && given !== undefined) ? given : null,
         givenText: (given && typeof given === 'object') ? esc(given.raw || String(given.value)) : null,
-        timeMs: qTimeMs, firstVisitMs: qFirstVisitMs, moduleIndex: moduleIndex,
+        timeMs: qTimeMs, firstVisitMs: qFirstVisitMs, answerRevised: answerRevised, moduleIndex: moduleIndex,
         firstVisitedAt: (sec.fv && typeof sec.fv[i] === 'number' && modStartAt !== null) ? (sec.fv[i] - modStartAt) : null,
         lastViewedAt: (sec.lv && typeof sec.lv[i] === 'number' && modStartAt !== null) ? (sec.lv[i] - modStartAt) : null,
         // Which section this question came from, so the question preview
@@ -4057,7 +4078,8 @@
   // its cumulative total, since a revisit can hide a fast first look. Falls
   // back to the cumulative total for rows with no first-pass data (older
   // saved reports, or a question never visited).
-  function pacingTimeMs(r) { return (r.firstVisitMs != null) ? r.firstVisitMs : r.timeMs; }
+  // A revised answer (see answerRevised) is paced on its total time.
+  function pacingTimeMs(r) { return (r.firstVisitMs != null && !r.answerRevised) ? r.firstVisitMs : r.timeMs; }
   /* ═══ HURRIED, RELATIVE TO THE QUESTION AND THE STUDENT ═══
      A wrong answer is hurried when its time, as a share of that question's
      own budget, is under RUSHED_REL of the student's typical share on the
@@ -4281,7 +4303,7 @@
          different, self-relative statistic from section 1's, so the two
          could disagree. The section-level count is kept because it is
          separately well evidenced; naming skills is section 1's job. */
-      behaviorFlags.push('<strong>Worked hard, still missed (' + s7.label + '):</strong> ' + stuckWrong.length + ' of the ' + missedForFlags + ' multiple-choice questions you answered and missed here took well over your usual time for a right answer. That is real effort that still came back wrong, not a rushed guess, so the fix is knowledge, not speed. <strong>Next:</strong> relearn before timed practice; “What to relearn” above says where to start.');
+      behaviorFlags.push('<strong>Worked hard, still missed (' + s7.label + '):</strong> ' + stuckWrong.length + ' of the ' + missedForFlags + ' multiple-choice questions you answered and missed here took at least one and a half times the target time for that question. That is real effort that still came back wrong, not a rushed guess, so the fix is knowledge, not speed. <strong>Next:</strong> relearn before timed practice; “What to relearn” above says where to start.');
     }
     if (missedForFlags >= 4 && rushedWrong.length / missedForFlags >= 0.5) {
       var wSkills = topSkillNames(rushedWrong, 3).join(', ');
@@ -6402,21 +6424,11 @@
           bucket('method', sec, r, 'right, but well over budget while time was short');
         });
       }
-      // Questions that came after the module's clock was already spent —
-      // answered, but not really attempted.
-      /* Per module (each has its own clock), wrong answers only (a right
-         answer lost no points), and never a question already in a bucket. It
-         used to run both modules against the whole section clock, so it
-         almost never fired, and when it did it could bill right answers. */
-      if (roll && sec.timeAllottedMin > 0) {
-        var modBudget = sec.timeAllottedMin * 60000 / (sec.hasModules ? 2 : 1), runBy = {};
-        var inAny = function (r) { return ['content', 'method', 'clock'].some(function (k) { return buckets[k].some(function (x) { return x.r === r; }); }); };
-        sec.rows.forEach(function (r) {
-          var m = r.moduleIndex || 0;
-          runBy[m] = (runBy[m] || 0) + (r.timeMs || 0);
-          if (runBy[m] > modBudget && !r.ok && !inAny(r)) bucket('clock', sec, r, 'clock already spent');
-        });
-      }
+      /* No "clock already spent" sweep. It ran after the loop above, which
+         already buckets every wrong or blank question, so it could never
+         fire, and the engine auto-submits a module when its clock runs out,
+         so no answer is given after it (stats audit, 2026-09-25: removed as
+         dead code). */
     });
     /* ═══ ONE SOURCE FOR BOTH NUMBERS ═══
        The bar and the list below are both drawn from buckets[], not the
