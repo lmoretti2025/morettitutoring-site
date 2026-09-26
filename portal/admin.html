@@ -2919,6 +2919,11 @@
       var extraBits = [];
       if (pr.retry && pr.retry.n) extraBits.push(pr.retry.n + ' mistake' + (pr.retry.n === 1 ? '' : 's') + ' retried, ' + pr.retry.right + ' right');
       if (pr.explain && pr.explain.n) extraBits.push(pr.explain.n + ' explanation' + (pr.explain.n === 1 ? '' : 's') + ' read');
+      if (pr.conf) {
+        var cfp = function (b, lab) { return b.n ? lab + ' ' + b.n + ' (' + b.right + ' right)' : ''; };
+        var cfBits = [cfp(pr.conf.sure, 'sure'), cfp(pr.conf.unsure, 'unsure'), cfp(pr.conf.guess, 'guessing')].filter(String);
+        if (cfBits.length) extraBits.push('tapped ' + cfBits.join(', '));
+      }
       if (extraBits.length) practiceSub += '<br>' + extraBits.join(' · ');
     } else {
       practiceN = snap.qbCount || 0; practiceRight = snap.qbCorrect || 0;
@@ -3994,6 +3999,19 @@
       ' (difference ' + evRange(ee.diff.lo, ee.diff.hi, evPct) + ').' : '';
     rows.push(evRow('Do explanations stick?', ee, eeRead,
       (ee.explained && ee.notExplained && (ee.explained.n || ee.notExplained.n)) ? 'Missed, then tried again: ' + ee.explained.n + ' after reading, ' + ee.notExplained.n + ' without.' : ''));
+
+    // 7. Does "sure" mean right? (the confidence tap, 2026-09-26)
+    var cc = MS.confidenceCalibration ? MS.confidenceCalibration(events) : null;
+    var ccRead = cc && cc.ready ? (cc.verdict === 'overconfident'
+        ? 'Overconfident: answers they tap "Sure" on are right only ' + evRange(cc.sure.lo, cc.sure.hi, evPct) + ' of the time, so some of what they are sure of is a wrong rule.'
+        : cc.verdict === 'calibrated'
+          ? 'Their "Sure" means right: ' + evRange(cc.sure.lo, cc.sure.hi, evPct) + ' of sure answers are correct, well above their unsure ones.'
+          : '"Sure" answers are right ' + evRange(cc.sure.lo, cc.sure.hi, evPct) + ' of the time: not clearly off, not clearly reliable.') : '';
+    var ccDetail = cc && (cc.sure.n || cc.unsure.n || cc.guessing.n)
+      ? 'Sure ' + cc.sure.right + '/' + cc.sure.n + ' · unsure ' + cc.unsure.right + '/' + cc.unsure.n + ' · guessing ' + cc.guessing.right + '/' + cc.guessing.n +
+        (cc.sureWrong.length ? '. Sure but wrong most in: ' + cc.sureWrong.map(function (x) { return escHtml(x.skill) + ' (' + x.wrong + ' of ' + x.n + ')'; }).join(', ') : '')
+      : 'From the Sure / Unsure / Guessing tap in Question Bank and Challenge practice (first tries).';
+    rows.push(evRow('Does &ldquo;sure&rdquo; mean right?', cc, ccRead, ccDetail));
 
     host.innerHTML = rows.join('');
   }

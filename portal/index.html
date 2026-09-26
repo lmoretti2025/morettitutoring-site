@@ -2252,6 +2252,13 @@
   .dx-choice.pb-right { border-color: #3f7d54; background: #eaf3ec; cursor: default; }
   .dx-choice.pb-right .dx-choice-letter { background: #3f7d54; border-color: #3f7d54; color: #fff; }
 
+  /* The confidence tap (QB / Challenge practice): three quiet buttons, each a Submit. */
+  .qb-conf-row { display: flex; align-items: center; flex-wrap: wrap; gap: 0.4rem; margin: 0.6rem 0 0.5rem; }
+  .qb-conf-lab { font-family: var(--hel); font-size: 0.78rem; color: var(--mid); margin-right: 0.2rem; }
+  .qb-conf-btn { font-family: var(--hel); font-size: 0.8rem; font-weight: 600; padding: 0.35rem 0.8rem; border-radius: 999px;
+    border: 1px solid var(--border); background: var(--white); color: var(--text); cursor: pointer; }
+  .qb-conf-btn:hover:not(:disabled) { border-color: var(--text); }
+  .qb-conf-btn:disabled { opacity: 0.4; cursor: default; }
   .pb-note { font-size: 0.85rem; line-height: 1.55; margin-top: 0.5rem; padding: 0.7rem 0.85rem; border-radius: 8px; background: var(--bg); color: var(--mid); }
   .pb-note.pb-note-correct { background: #eaf3ec; color: #2d5b3c; }
   .pb-note.pb-note-wrong { background: #f8ecea; color: var(--red); }
@@ -12928,6 +12935,9 @@ window.Portal = {
   }
 
   function renderQuestion() {
+    // The practice runners' confidence row never belongs on a timed test.
+    var strayConf = document.getElementById('qb-conf-row');
+    if (strayConf) strayConf.parentNode.removeChild(strayConf);
     var qs = activeQuestions();
     var q = qs[current];
     var splitParts = splitRwPassage(q);
@@ -17086,7 +17096,7 @@ window.Portal = {
     // every re-render (even an mc choice click) would leave the previous
     // question's note/explanation behind.
     var dxCardEl = document.getElementById('dx-card');
-    Array.prototype.forEach.call(dxCardEl.querySelectorAll('.pb-note, .pb-explain'), function (el) {
+    Array.prototype.forEach.call(dxCardEl.querySelectorAll('.pb-note, .pb-explain, #qb-conf-row'), function (el) {
       el.parentNode.removeChild(el);
     });
     backBtnEl.disabled = true; // re-enabled below once a question is on screen (see runnerBack)
@@ -17407,11 +17417,16 @@ window.Portal = {
     var t = String(g).trim();
     return t ? t.slice(0, 40) : null;
   }
-  function logPracticeEvent(r, correct, ms, bank, given) {
+  // cf (2026-09-26): the confidence tapped before the answer was checked,
+  // 2 sure / 1 unsure / 0 guessing; absent when the student just pressed
+  // Submit (see THE CONFIDENCE TAP in renderRunnerQuestion).
+  function logPracticeEvent(r, correct, ms, bank, given, conf) {
     if (!window.queuePracticeEvent || !r) return;
-    window.queuePracticeEvent({ b: bank, s: (r._qbSubject || currentSubject) === 'math' ? 'math' : 'rw', q: String(r.qid || ''),
+    var ev = { b: bank, s: (r._qbSubject || currentSubject) === 'math' ? 'math' : 'rw', q: String(r.qid || ''),
       sk: String(r.skill || ''), d: String(r.difficulty || ''), c: correct ? 1 : 0, ms: ms > 0 ? Math.round(ms) : 0,
-      g: practiceGiven(given) });
+      g: practiceGiven(given) };
+    if (conf === 0 || conf === 1 || conf === 2) ev.cf = conf;
+    window.queuePracticeEvent(ev);
   }
   // What window.portalExplain needs to log the explanation of r.
   function explainCtx(r, st) {
@@ -17471,7 +17486,10 @@ window.Portal = {
       if (da !== db) return da - db;
       return a.skill.localeCompare(b.skill);
     });
-    skillsCache[cacheKey] = list;
+    // An empty list is never cached: asked before the bank has downloaded,
+    // it stuck, and the topic list read "No topics to show yet" for good
+    // (found 2026-09-26 in the local preview).
+    if (list.length) skillsCache[cacheKey] = list;
     return list;
   }
 
@@ -18849,7 +18867,7 @@ window.Portal = {
         return;
       }
       recordAttempt(r.qid, st.correct, questionShownMs());
-      logPracticeEvent(r, st.correct, questionShownMs(), bankMode === 'challenge' ? 'chal' : 'qb', given);
+      logPracticeEvent(r, st.correct, questionShownMs(), bankMode === 'challenge' ? 'chal' : 'qb', given, st.conf);
       // Feeds the Mistakes Log (see window.recordQuestionBankMistake); the same
       // call clears a question once it's answered correctly.
       if (bankMode === 'qb' && window.recordQuestionBankMistake) {
@@ -18965,7 +18983,7 @@ window.Portal = {
     // #qb-runner-summary (see the same cleanup in My Incorrect Questions).
     document.querySelectorAll('#dx-card .iq-runner-summary').forEach(function (el) { el.parentNode.removeChild(el); });
     var dxCardEl = document.getElementById('dx-card');
-    Array.prototype.forEach.call(dxCardEl.querySelectorAll('.pb-note, .pb-explain'), function (el) {
+    Array.prototype.forEach.call(dxCardEl.querySelectorAll('.pb-note, .pb-explain, #qb-conf-row'), function (el) {
       el.parentNode.removeChild(el);
     });
     backBtnEl.disabled = true;
@@ -19187,6 +19205,39 @@ window.Portal = {
       skipBtnEl.textContent = 'Skip';
       skipBtnEl.addEventListener('click', skipRunnerQuestion);
       navRowEl.insertBefore(skipBtnEl, nextBtnEl);
+    }
+    /* ═══ THE CONFIDENCE TAP (Luca, 2026-09-26) ═══ untimed Question Bank
+       and Challenge practice only: never Rush, a test or the diagnostic.
+       Three buttons that each submit, so saying how sure you are costs no
+       extra step, and it is asked BEFORE the answer is checked (asked after,
+       it would only echo the result). Submit still works without it. The
+       tap reaches the practice log as cf, where signals.js
+       confidenceCalibration reads it for Luca: sure-and-wrong points at a
+       misconception (a wrong rule held firmly), unsure-and-right at fragile
+       knowledge (right today, not yet reliable). */
+    var oldConf = document.getElementById('qb-conf-row');
+    if (oldConf) oldConf.parentNode.removeChild(oldConf);
+    if (!st.submitted && !rushCfg) {
+      var confRow = document.createElement('div');
+      confRow.id = 'qb-conf-row';
+      confRow.className = 'qb-conf-row';
+      confRow.setAttribute('role', 'group');
+      confRow.setAttribute('aria-label', 'How sure are you? Choosing one submits your answer.');
+      confRow.innerHTML = '<span class="qb-conf-lab">How sure are you?</span>';
+      [[2, 'Sure'], [1, 'Unsure'], [0, 'Guessing']].forEach(function (c) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'qb-conf-btn';
+        b.textContent = c[1];
+        b.disabled = nextBtnEl.disabled;
+        b.addEventListener('click', function () {
+          if (nextBtnEl.disabled || st.submitted) return;
+          st.conf = c[0];
+          runnerAdvance();
+        });
+        confRow.appendChild(b);
+      });
+      navRowEl.parentNode.insertBefore(confRow, navRowEl);
     }
   }
 

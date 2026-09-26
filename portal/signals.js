@@ -1649,7 +1649,10 @@ var MorettiSignals = (function () {
     doseResponse: 15,
     // later attempts in EACH group: 80% interval on the difference under
     // 0.30 wide for every student at 36 (63% at 34)
-    explanationEffect: 36
+    explanationEffect: 36,
+    // first tries tapped "sure": the 80% interval on their accuracy is under
+    // 0.26 wide at every true rate from 25 on (0.21 at 80% right)
+    confidenceCalibration: 25
   };
   var PRACTICE_TRANSFER_WIDTH = 1.0;   // logits of gap per 10 practice questions
   function betaDiff(a1, b1, a2, b2) {
@@ -1978,6 +1981,55 @@ var MorettiSignals = (function () {
              note: 'Descriptive: explanations are opened on the questions a student cares about most.' };
   }
 
+  /* -- G7. Does "sure" mean right? confidenceCalibration (2026-09-26) ---
+     The confidence tap in untimed Question Bank and Challenge practice:
+     events carry cf (2 sure, 1 unsure, 0 guessing), tapped BEFORE the
+     answer was checked. FIRST tries only: a redo is tapped after seeing the
+     answer, and would read as confidence it did not earn. Returns { ready,
+     have, need, sure, unsure, guessing (each a rate: n, right, acc, lo, hi,
+     Jeffreys 80%), diff: sure minus not-sure { diff, lo, hi } | null,
+     verdict, sureWrong: [{ skill, n, wrong }], note }.
+     verdict (only when ready, 25+ sure first tries):
+       'overconfident'   the 80% interval on sure accuracy sits below 0.80:
+                         answers they are sure of are wrong often enough
+                         that some of what they "know" is a wrong rule;
+       'calibrated'      it sits above 0.80 and sure beats not-sure;
+       'unclear'         otherwise.
+     Simulated (conf-sim.js, 20,000 per cell, 15 not-sure answers): sure
+     answers truly 90% right are called overconfident 0.0-0.1% of the time
+     at 25-80 sure answers, 85% right 0.7-2.2%; truly 70% right 48 / 56 /
+     78% at 25 / 40 / 80, 65% right 69 / 80 / 96%.
+     sureWrong: the skills where sure answers went wrong most (2+ of them),
+     descriptive, biggest first: where to look for a misconception. */
+  var CONF_SURE_BAR = 0.80;
+  function confidenceCalibration(events, opts) {
+    var need = (opts && opts.need) || G_NEED.confidenceCalibration;
+    var seen = {}, lv = [{ n: 0, k: 0 }, { n: 0, k: 0 }, { n: 0, k: 0 }], bySkill = {};
+    byTime((events || []).filter(function (e) { return e && (e.b === 'qb' || e.b === 'chal' || e.b === 'challenge'); })).forEach(function (e) {
+      var key = (e.s || '') + '|' + e.q;
+      if (seen[key]) return;
+      seen[key] = true;
+      var cf = Number(e.cf), y = okOf(e.c);
+      if (!(cf === 0 || cf === 1 || cf === 2) || e.cf === null || e.cf === '' || y === null) return;
+      lv[cf].n++; lv[cf].k += y;
+      if (cf === 2 && !y) { var sk = String(e.sk || '(no topic)'); bySkill[sk] = (bySkill[sk] || 0) + 1; }
+      if (cf === 2) { var sk2 = String(e.sk || '(no topic)'); bySkill['n|' + sk2] = (bySkill['n|' + sk2] || 0) + 1; }
+    });
+    var sure = rate(lv[2].k, lv[2].n), unsure = rate(lv[1].k, lv[1].n), guessing = rate(lv[0].k, lv[0].n);
+    var nsN = lv[1].n + lv[0].n, nsK = lv[1].k + lv[0].k;
+    var diff = (lv[2].n && nsN) ? betaDiff(lv[2].k + 0.5, lv[2].n - lv[2].k + 0.5, nsK + 0.5, nsN - nsK + 0.5) : null;
+    var sureWrong = Object.keys(bySkill).filter(function (k) { return k.indexOf('n|') !== 0 && bySkill[k] >= 2; })
+      .map(function (k) { return { skill: k, n: bySkill['n|' + k] || 0, wrong: bySkill[k] }; })
+      .sort(function (a, b) { return b.wrong - a.wrong || b.n - a.n; }).slice(0, 3);
+    var ready = lv[2].n >= need;
+    var verdict = null;
+    if (ready) verdict = sure.hi < CONF_SURE_BAR ? 'overconfident'
+      : ((sure.lo > CONF_SURE_BAR && diff && diff.diff > 0) ? 'calibrated' : 'unclear');
+    return { ready: ready, have: lv[2].n, need: need, sure: sure, unsure: unsure, guessing: guessing, diff: diff,
+             verdict: verdict, sureWrong: sureWrong,
+             note: 'First tries in untimed practice, tapped before the answer was checked; descriptive.' };
+  }
+
   return {
     DEFAULTS: DEFAULTS,
     itemKey: itemKey,
@@ -2024,7 +2076,8 @@ var MorettiSignals = (function () {
     speedAccuracy: speedAccuracy,
     practiceTransfer: practiceTransfer,
     doseResponse: doseResponse,
-    explanationEffect: explanationEffect
+    explanationEffect: explanationEffect,
+    confidenceCalibration: confidenceCalibration
   };
 })();
 if (typeof module !== 'undefined' && module.exports) module.exports = MorettiSignals;
