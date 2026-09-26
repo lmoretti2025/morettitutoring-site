@@ -477,6 +477,9 @@
     }
 
     // ---- the path: the score bridge's own bars
+    // To the nearest 10, as the report's own bridge labels them: +131 here
+    // beside +130 there read as two different estimates (review 2026-09-26).
+    var pts10 = function (p) { return Math.round(p / 10) * 10; };
     var items = (R.shownItems || []).filter(function (it) { return it && it.points > 0; });
     var start = R.currentComposite;
     if (!single && start != null && items.length) {
@@ -493,7 +496,7 @@
         '<p class="t-eye r">Your path</p><h2 class="r">The points on the table.</h2><div class="t-path">' +
         top.map(function (it, i) {
           var lbl = it.filterType === 'clock' ? 'Reach the questions you ran out of time for' : 'Fix ' + cleanLabel(it.label);
-          return '<div class="t-step" style="--i:' + i + '"><span>' + esc(lbl) + (it.filterType === 'clock' ? '<small>' + esc(it.label) + '</small>' : '') + '</span><b>+' + Math.round(it.points) + '</b></div>';
+          return '<div class="t-step" style="--i:' + i + '"><span>' + esc(lbl) + (it.filterType === 'clock' ? '<small>' + esc(it.label) + '</small>' : '') + '</span><b>+' + pts10(it.points) + '</b></div>';
         }).join('') + '</div>' +
         '<div class="t-meter r"><div class="t-mt"><span>If these were all fixed: about</span><b data-count="' + end + '" data-from="' + start + '" data-delay="' + (900 + top.length * 450) + '">' + start + '</b></div>' +
         '<div class="t-track"><div class="t-fill" data-w="' + at(end) + '"></div>' + (target && target >= lo && target <= hi ? '<div class="t-target" style="left:' + at(target) + '%"><span>Target ' + target + '</span></div>' : '') + '</div></div>' +
@@ -502,7 +505,7 @@
         sheet: { eye: 'Your path', title: 'Every point on the table', html:
           '<p>If every miss on this test were fixed, the score would be about <b>' + (ceiling || end) + '</b>. Here\u2019s where those points sit, biggest first:</p>' +
           '<table class="t-tbl"><tr><th>Fix</th><th class="num">Points</th></tr>' +
-          items.slice().sort(function (a, b) { return b.points - a.points; }).map(function (it) { return '<tr><td>' + esc(cleanLabel(it.label, true)) + '</td><td class="num">+' + Math.round(it.points) + '</td></tr>'; }).join('') +
+          items.slice().sort(function (a, b) { return b.points - a.points; }).map(function (it) { return '<tr><td>' + esc(cleanLabel(it.label, true)) + '</td><td class="num">+' + pts10(it.points) + '</td></tr>'; }).join('') +
           (function () {
             // What the chart folds into one line, so the rows add up to the total (audit 6).
             var shown = items.reduce(function (a, it) { return a + it.points; }, 0);

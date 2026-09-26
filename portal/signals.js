@@ -1394,6 +1394,39 @@ var MorettiSignals = (function () {
      Returns items for skillEvidence, or null when qs has no record. */
   var TOO_FAST_REL = 0.15;
   var QS_DIFF = ['easy', 'medium', 'hard'];
+  /* trailingRush(rows): the end-of-module rush (audit 5, 2026-09-26). A
+     student who races the last questions of a module answers them in 4-12
+     seconds, often just over the 0.15 too-fast line, and those misses land
+     on whatever the module ends with (Expression of Ideas in R&W), which
+     was then named as a content gap: the simulated rusher had it named in
+     5 of 7 runs. Direct evidence only: counting back from the end of each
+     module, the unbroken run of answers each under RUSH_REL (0.35) of its
+     budget, blanks passed over; the run counts when it holds 3+ answers,
+     and then every answer in it is pace (right ones too, so the rule does
+     not lean either way). An answer at a normal pace ends the run.
+     rows: [{ mod, blank, ms, budgetMs }] in test order. Returns an array of
+     booleans, one per row. */
+  var RUSH_REL = 0.35, RUSH_MIN_RUN = 3;
+  function trailingRush(rows) {
+    var out = [], i, byMod = {};
+    rows = rows || [];
+    for (i = 0; i < rows.length; i++) {
+      out.push(false);
+      var m = rows[i] ? String(rows[i].mod) : '';
+      (byMod[m] = byMod[m] || []).push(i);
+    }
+    Object.keys(byMod).forEach(function (m) {
+      var idx = byMod[m], run = [];
+      for (var k = idx.length - 1; k >= 0; k--) {
+        var r = rows[idx[k]];
+        if (!r || r.blank) continue;
+        if (r.ms > 0 && r.budgetMs > 0 && r.ms < RUSH_REL * r.budgetMs) run.push(idx[k]);
+        else break;
+      }
+      if (run.length >= RUSH_MIN_RUN) run.forEach(function (j) { out[j] = true; });
+    });
+    return out;
+  }
   function itemsFromQStats(qs, budgetSeconds) {
     if (!qs || !qs.q || !qs.q.length || !qs.s || !qs.k) return null;
     var out = [];
@@ -3168,6 +3201,7 @@ var MorettiSignals = (function () {
     TARGET_GUARD_Z: TARGET_GUARD_Z,
     skillEvidence: skillEvidence,
     itemsFromQStats: itemsFromQStats,
+    trailingRush: trailingRush, RUSH_REL: RUSH_REL, RUSH_MIN_RUN: RUSH_MIN_RUN,
     skillTrend: skillTrend,
     evidenceAttempts: evidenceAttempts,
     formDomainOffsets: formDomainOffsets,
@@ -3176,7 +3210,7 @@ var MorettiSignals = (function () {
     // Bumped with every change to what this file computes (audit 5): the
     // admin deploy check compares it, since an older copy can still have
     // every function name and compute the old way.
-    VERSION: 29,
+    VERSION: 30,
     attemptAbility: attemptAbility,
     FOCUS_GATES: { domainClear: FOCUS_DOMAIN_CLEAR, skillLead: FOCUS_SKILL_LEAD, noOffsetsPenalty: FOCUS_NO_OFFSETS_PENALTY },
     practiceEvidence: practiceEvidence,

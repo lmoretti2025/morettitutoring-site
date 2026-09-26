@@ -1123,10 +1123,10 @@
 </script>
 <script src="time-budgets.js?v=20260912a"></script>
 <script src="grid-in.js?v=20260910a"></script>
-<script src="signals.js?v=20260926c"></script>
+<script src="signals.js?v=20260926d"></script>
 <script src="desmos-tags.js?v=20260916c"></script>
 <script src="question-flag.js?v=20260925a"></script>
-<script src="report-tour.js?v=20260926b"></script>
+<script src="report-tour.js?v=20260926c"></script>
 <script>
 /* FLAGS FROM THE ADMIN PAGE (Luca, 2026-09-25). admin.html shows this report
    in a sandboxed frame with no access to its sign-in, so it says hello by
@@ -3306,6 +3306,11 @@
     try { var sv = localStorage.getItem(storeKey); if (sv) savedTarget = parseInt(sv, 10); } catch (e) {}
     var targetScore = (savedTarget !== null && !isNaN(savedTarget)) ? savedTarget : defaultTarget;
     targetScore = Math.max(currentComposite, Math.min(scoreMax, targetScore));
+    /* "Your target" only when it is one: set on the roster, or typed or
+       dragged here. Otherwise the line is the report's suggestion (score +
+       150) and is labelled as one (review 2026-09-26; the walkthrough
+       already leaves it out, audit 6). */
+    var targetIsOwn = studentTarget !== null || (savedTarget !== null && !isNaN(savedTarget));
     // A saved value could be off-grid, so snap it to the nearest 10 for SAT.
     if (isSAT) targetScore = roundToTen(targetScore);
 
@@ -3317,6 +3322,7 @@
       // reportable score.
       if (isSAT) v = roundToTen(v);
       targetScore = v;
+      targetIsOwn = true;
       try { localStorage.setItem(storeKey, String(v)); } catch (e) {}
       renderBridge();
     }
@@ -3381,7 +3387,7 @@
       var row = document.createElement('div');
       row.className = 'bridge-target-row';
       row.innerHTML = '<span><span class="bt-lab">Current: </span>' + currentComposite + '</span>' +
-        '<span><span class="bt-lab">Your target: </span><input type="number" id="bt-input" value="' + targetScore + '" min="' + currentComposite + '" max="' + scoreMax + '" step="' + (isSAT ? 10 : 1) + '"> <span class="bt-static">' + targetScore + '</span> <button type="button" class="bt-reset" id="bt-reset">reset</button> <span class="bt-drag-hint">or drag the dashed line below</span></span>';
+        '<span><span class="bt-lab">' + (targetIsOwn ? 'Your target: ' : 'Try a target: ') + '</span><input type="number" id="bt-input" value="' + targetScore + '" min="' + currentComposite + '" max="' + scoreMax + '" step="' + (isSAT ? 10 : 1) + '"> <span class="bt-static">' + targetScore + '</span> <button type="button" class="bt-reset" id="bt-reset">reset</button> <span class="bt-drag-hint">or drag the dashed line below</span></span>';
       outer.appendChild(row);
 
       var canvasWrap = document.createElement('div');
@@ -3470,6 +3476,7 @@
       });
       document.getElementById('bt-reset').addEventListener('click', function () {
         targetScore = defaultTarget;
+        targetIsOwn = studentTarget !== null;
         try { localStorage.removeItem(storeKey); } catch (e) {}
         renderBridge();
       });
@@ -4089,6 +4096,21 @@
   // saved reports, or a question never visited).
   // A revised answer (see answerRevised) is paced on its total time.
   function pacingTimeMs(r) { return (r.firstVisitMs != null && !r.answerRevised) ? r.firstVisitMs : r.timeMs; }
+  /* The end-of-module rush (MorettiSignals.trailingRush, audit 5,
+     2026-09-26): counting back from the end of each module, an unbroken run
+     of 3+ answers each under 0.35x budget is pace, not content, the same
+     rule the saved per-question record uses, so this report, Home and the
+     family email agree. Returns the flagged rows. */
+  var END_RUSH_WHY = 'rushed through at the end of the module';
+  function endRushRows(sec, mult) {
+    var MSr = window.MorettiSignals;
+    if (!MSr || typeof MSr.trailingRush !== 'function' || !window.TIME_BUDGETS || !sec || !sec.rows) return [];
+    var flags = MSr.trailingRush(sec.rows.map(function (r) {
+      var bq = window.TIME_BUDGETS.budgetSecondsFor(sec.key, r.q.domain, r.sk || r.dom, r.q.difficulty, mult || 1);
+      return { mod: r.moduleIndex || 0, blank: !!r.skipped, ms: pacingTimeMs(r) || 0, budgetMs: (bq && bq.ms) || 0 };
+    }));
+    return sec.rows.filter(function (r, i) { return flags[i]; });
+  }
   /* ═══ HURRIED, RELATIVE TO THE QUESTION AND THE STUDENT ═══
      A wrong answer is hurried when its time, as a share of that question's
      own budget, is under RUSHED_REL of the student's typical share on the
@@ -4184,6 +4206,7 @@
     // No own-pace baseline (no right answers to time), no "stuck" judgement.
     var stuckCutoff = typical ? typical * STUCK_REL : Infinity;
     var hurry = hurriedJudge(s7, sectionMult, typical);
+    var endRush7 = endRushRows(s7, sectionMult);
     /* ═══ A GATE THAT WAS TRIED AND REMOVED -- DO NOT PUT IT BACK ═══
        Do not make the below-floor discount conditional on this student's
        fast answers being measurably worse than their slow ones. That test is:
@@ -4271,7 +4294,7 @@
            verdicts: a right answer stops counting as mastery, and a wrong
            answer stops counting as a content gap and becomes what it
            actually is, a pacing failure. */
-        var tooFast = qBudgetMs ? (pacingTimeMs(r) < qBudgetMs * TOO_FAST_BUDGET_REL) : false;
+        var tooFast = qBudgetMs ? (pacingTimeMs(r) < qBudgetMs * TOO_FAST_BUDGET_REL || endRush7.indexOf(r) >= 0) : false;
         var b = bucketFor(r.sk);
         b.total++;
         if (r.ok) { if (tooFast) b.skimmed++; else if (slow) b.inefficient++; else b.mastered++; }
@@ -6395,6 +6418,7 @@
       var typical = median(correctTimes);
       var secMult = (roll && roll.mult) || 1;
       var hurry = hurriedJudge(sec, secMult, typical);
+      var endRush = endRushRows(sec, secMult);
       sec.rows.forEach(function (r) {
         if (r.skipped) { bucket('clock', sec, r, 'never reached'); return; }
         if (r.ok) return;
@@ -6422,6 +6446,10 @@
            miss to the clock. Missing data is not speed. */
         if (qBudgetMs && tMs > 0 && tMs < qBudgetMs * TOO_FAST_BUDGET_REL) {
           bucket('clock', sec, r, 'answered too fast to have read it');
+          return;
+        }
+        if (qBudgetMs && tMs > 0 && endRush.indexOf(r) >= 0) {
+          bucket('clock', sec, r, END_RUSH_WHY);
           return;
         }
         /* A quick miss ABOVE the reading floor is a content miss. Speed
@@ -6470,11 +6498,13 @@
        the matching advice. A below-floor answer in a section whose first
        pass ended late was a guess as time ran out; with time to spare it was
        answered faster than it could be read. */
-    planInputs.pace = { blank: 0, ranOut: 0, tooFast: 0 };
+    // rushedEnd is counted inside ranOut as well (the advice is the same:
+    // time across the module), and named on its own in the summary.
+    planInputs.pace = { blank: 0, ranOut: 0, tooFast: 0, rushedEnd: 0 };
     buckets.clock.forEach(function (e) {
       if (e.why === 'never reached') planInputs.pace.blank++;
       else if (e.why === 'answered too fast to have read it' && !sectionClockPressed(e.sec)) planInputs.pace.tooFast++;
-      else planInputs.pace.ranOut++;
+      else { planInputs.pace.ranOut++; if (e.why === END_RUSH_WHY) planInputs.pace.rushedEnd++; }
     });
     // For the summary: the content misses one by one (a strong student's
     // three misses are the whole story), and the skills the slow right
@@ -6546,8 +6576,11 @@
           '. See “' + esc(lead.c.section) + '” below.';
       }
       if (decisive) {
-        return where + '<span class="dx-lead">' + (where ? 'most' : 'Most') + ' of it</span> is ' + lead.c.short +
-          ' (' + lead.n + ' of ' + live.reduce(function (a, r) { return a + r.n; }, 0) + '). Start with “' + esc(lead.c.section) + '” below.';
+        // "Most" only past half: 34 of 71 read as most (review 2026-09-26).
+        var liveTotal = live.reduce(function (a, r) { return a + r.n; }, 0);
+        var share = lead.n * 2 > liveTotal ? (where ? 'most' : 'Most') + ' of it' : (where ? 'the biggest share' : 'The biggest share');
+        return where + '<span class="dx-lead">' + share + '</span> is ' + lead.c.short +
+          ' (' + lead.n + ' of ' + liveTotal + '). Start with “' + esc(lead.c.section) + '” below.';
       }
       /* No section list here: the three kinds are named on the bar right
          under this sentence, and each needs its own fix. */
@@ -6813,14 +6846,14 @@
           '<span class="budget-row-name">' + esc(x.skill) +
             ' <span class="budget-row-dom">' + esc(x.domain || '') + '</span></span>' +
           '<span class="budget-gap dxk-hit" data-tip="' + esc(x.skill) + ' &nbsp;<b>' + fmtSec(x.actualMs / x.n) +
-            "</b> each <span class='dim'>&middot; target " + fmtSec(x.budgetMs / x.n) + ' &middot; +' + fmtMin(x.debtMs) + ' lost</span>">' +
+            "</b> each <span class='dim'>&middot; target " + fmtSec(x.budgetMs / x.n) + ' &middot; +' + (x.debtMs < 60000 ? fmtSec(x.debtMs) : fmtMin(x.debtMs)) + ' lost</span>">' +
             '<span class="budget-gap-rule" style="left:' + tPct.toFixed(1) + '%; width:' + Math.max(0, aPct - tPct).toFixed(1) + '%"></span>' +
             '<span class="budget-gap-target" style="left:' + tPct.toFixed(1) + '%"></span>' +
             '<span class="budget-gap-actual" style="left:calc(' + aPct.toFixed(1) + '% - 4px)"></span>' +
           '</span>' +
           '<span class="budget-row-nums' + (x.n < MIN_JUDGEABLE_N ? ' thin' : '') + '">' +
             fmtSec(x.actualMs / x.n) + ' each &middot; ' + x.n + ' questions</span>' +
-          '<span class="budget-lost">+' + fmtMin(x.debtMs) + '</span>' +
+          '<span class="budget-lost">+' + (x.debtMs < 60000 ? fmtSec(x.debtMs) : fmtMin(x.debtMs)) + '</span>' +
           '<span class="budget-cum">' + Math.round(x.cumShare * 100) + '%</span>' +
         '</div>';
       }).join('') +
@@ -7109,11 +7142,23 @@
           '<em>' + causes.method + ' right answer' + (causes.method === 1 ? '' : 's') + ' here cost more time than they should have, and the questions later in the section paid for it.</em>'
       });
     }
+    /* What the pace losses actually were (the review of 2026-09-26: the
+       fixed "left blank, rushed, or reached after time ran out" was read
+       as a description of a student who had done none of those). */
+    function paceWhy() {
+      var pc = planInputs.pace || {}, re = pc.rushedEnd || 0, bits = [];
+      if (pc.blank) bits.push(pc.blank + ' left blank');
+      if ((pc.ranOut || 0) - re > 0) bits.push((pc.ranOut - re) + ' reached with no time left');
+      if (re) bits.push(re + ' rushed through at the end of a module');
+      if (pc.tooFast) bits.push(pc.tooFast + ' answered faster than ' + (pc.tooFast === 1 ? 'it' : 'they') + ' could be read');
+      if (!bits.length) return 'left blank, rushed, or reached after time ran out';
+      return bits.length < 2 ? bits[0] : bits.slice(0, -1).join(', ') + ' and ' + bits[bits.length - 1];
+    }
     if (hours.clock > 0) {
       rows.push({
         h: hours.clock, unit: unitFor(hours.clock), color: '#4E6070',
         what: '<b>Pacing.</b> One full timed module a week, in one sitting, under real conditions &mdash; phone away, clock visible, no restarts. Review it the next day, not the same night. ' +
-          '<em>' + causes.clock + ' question' + (causes.clock === 1 ? '' : 's') + ' on this test ' + (causes.clock === 1 ? 'was' : 'were') + ' lost to pace: left blank, rushed, or reached after time ran out.</em>'
+          '<em>' + causes.clock + ' question' + (causes.clock === 1 ? '' : 's') + ' on this test ' + (causes.clock === 1 ? 'was' : 'were') + ' lost to pace: ' + paceWhy() + '.</em>'
       });
     }
     if (strong) {
@@ -7345,7 +7390,9 @@
       var joinAnd = function (a) { return a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1]; };
       var paceParts = [];
       if (pace.blank) paceParts.push(pace.blank + ' left blank');
-      if (pace.ranOut) paceParts.push(pace.ranOut + ' reached with no time left');
+      var rushedEnd = pace.rushedEnd || 0;
+      if (pace.ranOut - rushedEnd > 0) paceParts.push((pace.ranOut - rushedEnd) + ' reached with no time left');
+      if (rushedEnd) paceParts.push(rushedEnd + ' rushed through at the end of a module');
       if (pace.tooFast) paceParts.push(pace.tooFast + ' answered faster than ' + (pace.tooFast === 1 ? 'it' : 'they') + ' could be read');
       var tooFastMost = pace.tooFast >= 3 && pace.tooFast > pace.blank + pace.ranOut;
       var lede = !lostN

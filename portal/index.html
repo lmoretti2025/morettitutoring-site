@@ -5626,13 +5626,13 @@ window.Portal = {
      header in fluid-ui.js. -->
 <script src="fluid-ui.js?v=20260905y"></script>
 <script src="banks.js?v=20260926a"></script>
-<script src="signals.js?v=20260926c"></script>
+<script src="signals.js?v=20260926d"></script>
 <script src="desmos-tags.js?v=20260916c"></script>
 <script src="time-budgets.js?v=20260912a"></script>
 <script src="challenge-questions.js?v=20260926a"></script>
 <script src="grid-in.js?v=20260910a"></script>
 <script src="question-flag.js?v=20260922c"></script>
-<script src="report-tour.js?v=20260926b"></script>
+<script src="report-tour.js?v=20260926c"></script>
 <script>
   /* practice-tests.js is ~2.6MB, so a blocking <script> delayed every later
      script (including the key-submit wiring). It loads here via an async
@@ -8307,9 +8307,25 @@ window.Portal = {
        errors of that difference. The old rule (last minus first, +/-60)
        assumed half the real noise and showed a "gain" for about a quarter
        of students who had not changed at all. */
+    /* AUDIT 5 (2026-09-26): that one read at 1.645, re-read after every
+       test, showed a false arrow to 25% of students whose level never moved
+       (18 of 98 a drop, 7 a gain; e2e harness, 7 seeds x 12 weeks). The
+       arrow now needs a change that holds on two reads and does not rest on
+       one outlying test (gainVerdict), at z 1.96 rather than the parents'
+       2.6: flat students 1 of 98 ever saw an arrow; real gains still shown
+       to 6 of 42 steady, 5 of 14 levelling-off and 4 of 7 fast improvers
+       (the parents' bar: 3, 3 and 3). The old rule showed 20, 10 and 7, at
+       that false-arrow cost. A drop clears the same bar as a gain. */
+    var CHART_Z = 1.96;
     var deltaHtml = '';
     var chg = scoreChange(entries);
+    var gv = (chg && typeof MS_.gainVerdict === 'function') ? MS_.gainVerdict(entries, { z: CHART_Z }) : null;
     if (chg) {
+      if (gv && gv.full && typeof gv.full.delta === 'number') {
+        chg = { delta: gv.full.delta, threshold: gv.full.threshold, k: gv.full.k || chg.k, real: !!gv.verdict };
+      } else {
+        chg = { delta: chg.delta, threshold: chg.threshold, k: chg.k, real: false };
+      }
       var mag = Math.abs(chg.delta);
       var span = chg.k > 1 ? ('the average of the first ' + chg.k + ' and last ' + chg.k + ' tests') : 'the first and latest tests';
       if (chg.real) {
@@ -8319,8 +8335,12 @@ window.Portal = {
       } else {
         deltaHtml = '<div class="spc-composite-delta flat">No clear change yet' +
           '<span class="spc-delta-note">' + (chg.delta === 0 ? '' : (chg.delta > 0 ? '+' : '−') + mag + ' points between ') + span +
-          '; separate tests can differ by up to &plusmn;' + chg.threshold + ' on their own' +
-          (chg.k < 3 ? ', so more tests will make this clearer' : '') + '</span></div>';
+          (mag >= chg.threshold
+            // Past the bar on this read but not yet on the one before, or
+            // resting on one test: a change has to hold before it counts.
+            ? '; a change this size counts once it holds on the next test as well, not just this one'
+            : '; separate tests can differ by up to &plusmn;' + chg.threshold + ' on their own' +
+              (chg.k < 3 ? ', so more tests will make this clearer' : '')) + '</span></div>';
       }
     }
     var barsHtml = '', labelsHtml = '';
@@ -8661,9 +8681,8 @@ window.Portal = {
        a student with no change sees "keeps coming back" 2.4-4.5% of the
        time and "fixed" 0.0-0.1% (single read before: 20% and 12-14%). */
     var tr = MSx.skillTrend(xtAttempts, { grain: 'skill', formOffsets: foX });
-    if (typeof MSx.trendWithinFocus === 'function' && typeof MSx.focusOf === 'function') {
-      tr = MSx.trendWithinFocus(tr, MSx.focusOf(xtAttempts, { formOffsets: foX, skillLead: HOME_SKILL_LEAD }));
-    }
+    var xtFocus = typeof MSx.focusOf === 'function' ? MSx.focusOf(xtAttempts, { formOffsets: foX, skillLead: HOME_SKILL_LEAD }) : null;
+    if (typeof MSx.trendWithinFocus === 'function' && xtFocus) tr = MSx.trendWithinFocus(tr, xtFocus);
     var rowOf = function (k) {
       var u = ev.units[k] || { n: 0, obs: 0, perAttempt: [], sec: '' };
       var last = u.perAttempt.length ? u.perAttempt[u.perAttempt.length - 1] : null;
@@ -8674,9 +8693,26 @@ window.Portal = {
     };
     var back = (tr.keepsComingBack || []).map(rowOf)
       .sort(function (a, c) { return c.z - a.z; }).slice(0, XT_MAX_ROWS);
-    var fixed = (tr.fixed || []).map(rowOf).slice(0, 2);
+    /* "You have fixed this" is not shown (audit 5, 2026-09-26): over 25
+       simulated students x 12 weeks it was never once true, and the one
+       planted gap that really faded was never told. Until it can be shown
+       to find real fixes it says nothing. */
+    var fixed = [];
 
-    if (!back.length && !fixed.length) {
+    /* The email's focus line and this card read the same focusOf. When it
+       names an area but no single skill inside it repeats, say that, not
+       "nothing is repeating" beside an email that names the area (audit 5:
+       59% of students with a real area gap saw both). */
+    var focusTop = xtFocus && xtFocus.top;
+    if (!back.length && focusTop && focusTop.domain) {
+      host.innerHTML =
+        xtHeadHtml(withStats.length + ' tests &middot; ' + pooledQ + ' questions') +
+        '<p class="xt-lede" style="margin-bottom:0;"><strong>' + esc(focusTop.domain) + '</strong> is where your misses gather, across ' +
+        withStats.length + ' tests and allowing for how hard the questions were. No single skill inside it stands out yet: the misses are spread across its question types, so the work covers the whole area.</p>';
+      host.style.display = '';
+      return;
+    }
+    if (!back.length) {
       host.innerHTML =
         xtHeadHtml(withStats.length + ' tests &middot; ' + pooledQ + ' questions') +
         '<p class="xt-lede" style="margin-bottom:0;">Nothing is repeating. Across all ' + withStats.length +
@@ -8967,9 +9003,15 @@ window.Portal = {
       if (u.sec !== sectionKey || !(u.n >= 3)) return;
       if (!top || u.z > top.z) top = row(k);
     });
-    var lead = S.skill ? row(S.skill) : null;
-    if (lead && S.domain) lead.domain = S.domain;
-    return { lead: lead, top: top, tests: h.tests };
+    /* A skill is named only inside a named area (audit 5, 2026-09-26): a
+       skill named on its own lead was false for 56% of the students who saw
+       one. With the area named and no skill inside it, the card names the
+       area, the same one the email names. */
+    var lead = (S.skill && S.domain && row(S.skill) && row(S.skill).domain === S.domain) ? row(S.skill) : null;
+    if (lead) lead.domain = S.domain;
+    var area = (!lead && S.domain && S.detail && S.detail.n)
+      ? { domain: S.domain, correct: Math.round(S.detail.obs), total: S.detail.n, pct: S.detail.obs / S.detail.n } : null;
+    return { lead: lead, area: area, top: top, tests: h.tests };
   }
 
   function fillMiniSkillCard(cardId, nameId, subId, barId, res) {
@@ -8980,6 +9022,14 @@ window.Portal = {
     var nameEl = document.getElementById(nameId), subEl = document.getElementById(subId), barEl = document.getElementById(barId);
     var testsTxt = res.tests === 1 ? 'your test' : 'your ' + res.tests + ' tests';
     var best = res.lead;
+    if (!best && res.area) {
+      cardEl.classList.remove('is-even');
+      if (nameEl) { nameEl.textContent = res.area.domain; nameEl.onclick = null; }
+      if (subEl) subEl.textContent = res.area.correct + ' of ' + res.area.total + ' right across ' + testsTxt + ', below your level; no single skill inside it stands out yet';
+      if (barEl) barEl.style.width = Math.max(2, Math.round(res.area.pct * 100)) + '%';
+      cardEl.style.display = '';
+      return;
+    }
     if (!best) {
       if (nameEl) { nameEl.textContent = 'No single skill stands out'; nameEl.onclick = null; }
       if (subEl) subEl.textContent = 'Across ' + testsTxt + ', misses are spread out';
@@ -13976,31 +14026,40 @@ window.Portal = {
        the signal summary below uses), else 0; blanks and untimed 0. The
        rows were pushed in completedSections x question order, which is
        payload.s order, so a running index lines them up. */
+    /* Plus the end-of-module rush (MorettiSignals.trailingRush, audit 5):
+       an unbroken run of 3+ answers under 0.35x budget counting back from
+       the end of a module is pace too, flagged the same way, so the report,
+       Home and the family email all leave it out of the content evidence. */
     try {
       var qsRow = 0;
       payload.s.forEach(function (s) {
         var bank = bankFor(s.k), qs7 = sectionQuestions(bank, s.v);
         var mult7 = (window.TIME_BUDGETS && s.tl) ? window.TIME_BUDGETS.timeMultFromAllotted(s.k, !!bank.module2Easier, s.tl) : 1;
+        var m1Len7 = (bank.module1 || []).length;
+        var timing7 = qs7.map(function (q, i) {
+          var row = qStats.q[qsRow + i];
+          if (!row || row[3] === 2 || !window.TIME_BUDGETS) return { mod: i < m1Len7 ? 0 : 1, blank: !row || row[3] === 2, ms: 0, budgetMs: 0 };
+          var fp = (s.fp && typeof s.fp[i] === 'number') ? s.fp[i] : null;
+          var tm = (s.tm && typeof s.tm[i] === 'number') ? s.tm[i] : 0;
+          var revised = false;
+          if (fp != null && Array.isArray(s.vl)) {
+            var blank7 = function (a) { return a === null || a === undefined || a === '' || a === -1; };
+            var first7 = null, last7 = null;
+            s.vl.filter(function (v) { return v[0] === i; }).sort(function (a, b) { return a[1] - b[1]; })
+              .forEach(function (v) { if (blank7(v[3])) return; if (first7 === null) first7 = v[3]; last7 = v[3]; });
+            revised = first7 !== null && String(last7) !== String(first7);
+          }
+          var tMs = (fp != null && !revised) ? fp : tm;
+          var bq7 = window.TIME_BUDGETS.budgetSecondsFor(s.k, q.domain, q.skill || q.domain, q.difficulty, mult7 || 1);
+          return { mod: i < m1Len7 ? 0 : 1, blank: false, ms: tMs, budgetMs: (bq7 && bq7.ms) || 0 };
+        });
+        var rush7 = (window.MorettiSignals && typeof window.MorettiSignals.trailingRush === 'function')
+          ? window.MorettiSignals.trailingRush(timing7) : [];
         qs7.forEach(function (q, i) {
           var row = qStats.q[qsRow++];
           if (!row) return;
-          var flag = 0;
-          if (row[3] !== 2 && window.TIME_BUDGETS) {
-            var fp = (s.fp && typeof s.fp[i] === 'number') ? s.fp[i] : null;
-            var tm = (s.tm && typeof s.tm[i] === 'number') ? s.tm[i] : 0;
-            var revised = false;
-            if (fp != null && Array.isArray(s.vl)) {
-              var blank7 = function (a) { return a === null || a === undefined || a === '' || a === -1; };
-              var first7 = null, last7 = null;
-              s.vl.filter(function (v) { return v[0] === i; }).sort(function (a, b) { return a[1] - b[1]; })
-                .forEach(function (v) { if (blank7(v[3])) return; if (first7 === null) first7 = v[3]; last7 = v[3]; });
-              revised = first7 !== null && String(last7) !== String(first7);
-            }
-            var tMs = (fp != null && !revised) ? fp : tm;
-            var bq7 = window.TIME_BUDGETS.budgetSecondsFor(s.k, q.domain, q.skill || q.domain, q.difficulty, mult7 || 1);
-            var budMs = (bq7 && bq7.ms) || 0;
-            if (budMs && tMs > 0 && tMs < budMs * 0.15) flag = 1;
-          }
+          var t7 = timing7[i], flag = 0;
+          if (!t7.blank && t7.budgetMs && t7.ms > 0 && (t7.ms < t7.budgetMs * 0.15 || rush7[i])) flag = 1;
           row[5] = row[5] === undefined ? null : row[5];
           row[6] = row[6] === undefined ? null : row[6];
           row[7] = flag;
@@ -21977,6 +22036,11 @@ window.renderNativeReport = function (data) {
     try { var sv = localStorage.getItem(storeKey); if (sv) savedTarget = parseInt(sv, 10); } catch (e) {}
     var targetScore = (savedTarget !== null && !isNaN(savedTarget)) ? savedTarget : defaultTarget;
     targetScore = Math.max(currentComposite, Math.min(scoreMax, targetScore));
+    /* "Your target" only when it is one: set on the roster, or typed or
+       dragged here. Otherwise the line is the report's suggestion (score +
+       150) and is labelled as one (review 2026-09-26; the walkthrough
+       already leaves it out, audit 6). */
+    var targetIsOwn = studentTarget !== null || (savedTarget !== null && !isNaN(savedTarget));
     // A saved value may be off-grid (older data or tampering): snap it to
     // the nearest 10 for SAT so the target is a real, reportable score.
     if (isSAT) targetScore = roundToTen(targetScore);
@@ -21989,6 +22053,7 @@ window.renderNativeReport = function (data) {
       // the real SAT can issue.
       if (isSAT) v = roundToTen(v);
       targetScore = v;
+      targetIsOwn = true;
       try { localStorage.setItem(storeKey, String(v)); } catch (e) {}
       renderBridge();
     }
@@ -22053,7 +22118,7 @@ window.renderNativeReport = function (data) {
       var row = document.createElement('div');
       row.className = 'bridge-target-row';
       row.innerHTML = '<span><span class="bt-lab">Current: </span>' + currentComposite + '</span>' +
-        '<span><span class="bt-lab">Your target: </span><input type="number" id="bt-input" value="' + targetScore + '" min="' + currentComposite + '" max="' + scoreMax + '" step="' + (isSAT ? 10 : 1) + '"> <span class="bt-static">' + targetScore + '</span> <button type="button" class="bt-reset" id="bt-reset">reset</button> <span class="bt-drag-hint">or drag the dashed line below</span></span>';
+        '<span><span class="bt-lab">' + (targetIsOwn ? 'Your target: ' : 'Try a target: ') + '</span><input type="number" id="bt-input" value="' + targetScore + '" min="' + currentComposite + '" max="' + scoreMax + '" step="' + (isSAT ? 10 : 1) + '"> <span class="bt-static">' + targetScore + '</span> <button type="button" class="bt-reset" id="bt-reset">reset</button> <span class="bt-drag-hint">or drag the dashed line below</span></span>';
       outer.appendChild(row);
 
       var canvasWrap = document.createElement('div');
@@ -22143,6 +22208,7 @@ window.renderNativeReport = function (data) {
       });
       document.getElementById('bt-reset').addEventListener('click', function () {
         targetScore = defaultTarget;
+        targetIsOwn = studentTarget !== null;
         try { localStorage.removeItem(storeKey); } catch (e) {}
         renderBridge();
       });
@@ -22750,6 +22816,21 @@ window.renderNativeReport = function (data) {
   // first-pass data (older reports, never-visited questions).
   // A revised answer (see answerRevised) is paced on its total time.
   function pacingTimeMs(r) { return (r.firstVisitMs != null && !r.answerRevised) ? r.firstVisitMs : r.timeMs; }
+  /* The end-of-module rush (MorettiSignals.trailingRush, audit 5,
+     2026-09-26): counting back from the end of each module, an unbroken run
+     of 3+ answers each under 0.35x budget is pace, not content, the same
+     rule the saved per-question record uses, so this report, Home and the
+     family email agree. Returns the flagged rows. */
+  var END_RUSH_WHY = 'rushed through at the end of the module';
+  function endRushRows(sec, mult) {
+    var MSr = window.MorettiSignals;
+    if (!MSr || typeof MSr.trailingRush !== 'function' || !window.TIME_BUDGETS || !sec || !sec.rows) return [];
+    var flags = MSr.trailingRush(sec.rows.map(function (r) {
+      var bq = window.TIME_BUDGETS.budgetSecondsFor(sec.key, r.q.domain, r.sk || r.dom, r.q.difficulty, mult || 1);
+      return { mod: r.moduleIndex || 0, blank: !!r.skipped, ms: pacingTimeMs(r) || 0, budgetMs: (bq && bq.ms) || 0 };
+    }));
+    return sec.rows.filter(function (r, i) { return flags[i]; });
+  }
   // Was this section short of time? Identical to report.html.
   /* ═══ WAS THE CLOCK SHORT? ═══
      Read from when the FIRST PASS ended, i.e. when every question in a
@@ -22829,6 +22910,7 @@ window.renderNativeReport = function (data) {
     // No own-pace baseline (no right answers to time), no "stuck" judgement.
     var stuckCutoff = typical ? typical * STUCK_REL : Infinity;
     var hurry = hurriedJudge(s7, sectionMult, typical);
+    var endRush7 = endRushRows(s7, sectionMult);
     /* ═══ A GATE THAT WAS TRIED AND REMOVED -- DO NOT PUT IT BACK ═══
        Do not make the below-floor discount conditional on this student's
        fast answers being measurably worse than their slow ones.
@@ -22913,7 +22995,7 @@ window.renderNativeReport = function (data) {
            verdicts: a right answer stops counting as mastery, and a wrong
            answer stops counting as a content gap and becomes what it
            actually is, a pacing failure. */
-        var tooFast = qBudgetMs ? (pacingTimeMs(r) < qBudgetMs * TOO_FAST_BUDGET_REL) : false;
+        var tooFast = qBudgetMs ? (pacingTimeMs(r) < qBudgetMs * TOO_FAST_BUDGET_REL || endRush7.indexOf(r) >= 0) : false;
         var b = bucketFor(r.sk);
         b.total++;
         if (r.ok) { if (tooFast) b.skimmed++; else if (slow) b.inefficient++; else b.mastered++; }
@@ -25000,6 +25082,7 @@ window.renderNativeReport = function (data) {
       var typical = median(correctTimes);
       var secMult = (roll && roll.mult) || 1;
       var hurry = hurriedJudge(sec, secMult, typical);
+      var endRush = endRushRows(sec, secMult);
       sec.rows.forEach(function (r) {
         if (r.skipped) { bucket('clock', sec, r, 'never reached'); return; }
         if (r.ok) return;
@@ -25026,6 +25109,10 @@ window.renderNativeReport = function (data) {
            miss would be billed to the clock. Missing data is not speed. */
         if (qBudgetMs && tMs > 0 && tMs < qBudgetMs * TOO_FAST_BUDGET_REL) {
           bucket('clock', sec, r, 'answered too fast to have read it');
+          return;
+        }
+        if (qBudgetMs && tMs > 0 && endRush.indexOf(r) >= 0) {
+          bucket('clock', sec, r, END_RUSH_WHY);
           return;
         }
         /* A quick miss ABOVE the reading floor is a content miss. Speed
@@ -25067,11 +25154,13 @@ window.renderNativeReport = function (data) {
        the matching advice. A below-floor answer in a section whose first
        pass ended late was a guess as time ran out; with time to spare it was
        answered faster than it could be read. */
-    planInputs.pace = { blank: 0, ranOut: 0, tooFast: 0 };
+    // rushedEnd is counted inside ranOut as well (the advice is the same:
+    // time across the module), and named on its own in the summary.
+    planInputs.pace = { blank: 0, ranOut: 0, tooFast: 0, rushedEnd: 0 };
     buckets.clock.forEach(function (e) {
       if (e.why === 'never reached') planInputs.pace.blank++;
       else if (e.why === 'answered too fast to have read it' && !sectionClockPressed(e.sec)) planInputs.pace.tooFast++;
-      else planInputs.pace.ranOut++;
+      else { planInputs.pace.ranOut++; if (e.why === END_RUSH_WHY) planInputs.pace.rushedEnd++; }
     });
     // For the summary: the content misses one by one (a strong student's
     // three misses are the whole story), and the skills the slow right
@@ -25146,8 +25235,11 @@ window.renderNativeReport = function (data) {
           '. See “' + esc(lead.c.section) + '” below.';
       }
       if (decisive) {
-        return where + '<span class="dx-lead">' + (where ? 'most' : 'Most') + ' of it</span> is ' + lead.c.short +
-          ' (' + lead.n + ' of ' + live.reduce(function (a, r) { return a + r.n; }, 0) + '). Start with “' + esc(lead.c.section) + '” below.';
+        // "Most" only past half: 34 of 71 read as most (review 2026-09-26).
+        var liveTotal = live.reduce(function (a, r) { return a + r.n; }, 0);
+        var share = lead.n * 2 > liveTotal ? (where ? 'most' : 'Most') + ' of it' : (where ? 'the biggest share' : 'The biggest share');
+        return where + '<span class="dx-lead">' + share + '</span> is ' + lead.c.short +
+          ' (' + lead.n + ' of ' + liveTotal + '). Start with “' + esc(lead.c.section) + '” below.';
       }
       /* No section list here: the three kinds are named on the bar right
          under this sentence, and each needs its own fix. */
@@ -25412,14 +25504,14 @@ window.renderNativeReport = function (data) {
           '<span class="budget-row-name">' + esc(x.skill) +
             ' <span class="budget-row-dom">' + esc(x.domain || '') + '</span></span>' +
           '<span class="budget-gap dxk-hit" data-tip="' + esc(x.skill) + ' &nbsp;<b>' + fmtSec(x.actualMs / x.n) +
-            "</b> each <span class='dim'>&middot; target " + fmtSec(x.budgetMs / x.n) + ' &middot; +' + fmtMin(x.debtMs) + ' lost</span>">' +
+            "</b> each <span class='dim'>&middot; target " + fmtSec(x.budgetMs / x.n) + ' &middot; +' + (x.debtMs < 60000 ? fmtSec(x.debtMs) : fmtMin(x.debtMs)) + ' lost</span>">' +
             '<span class="budget-gap-rule" style="left:' + tPct.toFixed(1) + '%; width:' + Math.max(0, aPct - tPct).toFixed(1) + '%"></span>' +
             '<span class="budget-gap-target" style="left:' + tPct.toFixed(1) + '%"></span>' +
             '<span class="budget-gap-actual" style="left:calc(' + aPct.toFixed(1) + '% - 4px)"></span>' +
           '</span>' +
           '<span class="budget-row-nums' + (x.n < MIN_JUDGEABLE_N ? ' thin' : '') + '">' +
             fmtSec(x.actualMs / x.n) + ' each &middot; ' + x.n + ' questions</span>' +
-          '<span class="budget-lost">+' + fmtMin(x.debtMs) + '</span>' +
+          '<span class="budget-lost">+' + (x.debtMs < 60000 ? fmtSec(x.debtMs) : fmtMin(x.debtMs)) + '</span>' +
           '<span class="budget-cum">' + Math.round(x.cumShare * 100) + '%</span>' +
         '</div>';
       }).join('') +
@@ -25707,11 +25799,23 @@ window.renderNativeReport = function (data) {
           '<em>' + causes.method + ' right answer' + (causes.method === 1 ? '' : 's') + ' here cost more time than they should have, and the questions later in the section paid for it.</em>'
       });
     }
+    /* What the pace losses actually were (the review of 2026-09-26: the
+       fixed "left blank, rushed, or reached after time ran out" was read
+       as a description of a student who had done none of those). */
+    function paceWhy() {
+      var pc = planInputs.pace || {}, re = pc.rushedEnd || 0, bits = [];
+      if (pc.blank) bits.push(pc.blank + ' left blank');
+      if ((pc.ranOut || 0) - re > 0) bits.push((pc.ranOut - re) + ' reached with no time left');
+      if (re) bits.push(re + ' rushed through at the end of a module');
+      if (pc.tooFast) bits.push(pc.tooFast + ' answered faster than ' + (pc.tooFast === 1 ? 'it' : 'they') + ' could be read');
+      if (!bits.length) return 'left blank, rushed, or reached after time ran out';
+      return bits.length < 2 ? bits[0] : bits.slice(0, -1).join(', ') + ' and ' + bits[bits.length - 1];
+    }
     if (hours.clock > 0) {
       rows.push({
         h: hours.clock, unit: unitFor(hours.clock), color: '#4E6070',
         what: '<b>Pacing.</b> One full timed module a week, in one sitting, under real conditions &mdash; phone away, clock visible, no restarts. Review it the next day, not the same night. ' +
-          '<em>' + causes.clock + ' question' + (causes.clock === 1 ? '' : 's') + ' on this test ' + (causes.clock === 1 ? 'was' : 'were') + ' lost to pace: left blank, rushed, or reached after time ran out.</em>'
+          '<em>' + causes.clock + ' question' + (causes.clock === 1 ? '' : 's') + ' on this test ' + (causes.clock === 1 ? 'was' : 'were') + ' lost to pace: ' + paceWhy() + '.</em>'
       });
     }
     if (strong) {
@@ -25943,7 +26047,9 @@ window.renderNativeReport = function (data) {
       var joinAnd = function (a) { return a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1]; };
       var paceParts = [];
       if (pace.blank) paceParts.push(pace.blank + ' left blank');
-      if (pace.ranOut) paceParts.push(pace.ranOut + ' reached with no time left');
+      var rushedEnd = pace.rushedEnd || 0;
+      if (pace.ranOut - rushedEnd > 0) paceParts.push((pace.ranOut - rushedEnd) + ' reached with no time left');
+      if (rushedEnd) paceParts.push(rushedEnd + ' rushed through at the end of a module');
       if (pace.tooFast) paceParts.push(pace.tooFast + ' answered faster than ' + (pace.tooFast === 1 ? 'it' : 'they') + ' could be read');
       var tooFastMost = pace.tooFast >= 3 && pace.tooFast > pace.blank + pace.ranOut;
       var lede = !lostN
