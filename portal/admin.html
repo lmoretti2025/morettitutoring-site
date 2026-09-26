@@ -1635,6 +1635,11 @@
   // prep.gs has its own version since 28; below this its features are missing
   // even when Code.gs is current (the version action reports each file).
   var REQUIRED_PREP_VERSION = 28;
+  // signals.gs and emails.gs carry their own numbers since audit 5: an older
+  // copy can have every function name and still compute the old way.
+  var REQUIRED_SIGNALS_VERSION = 29, REQUIRED_EMAILS_VERSION = 29;
+  // booking.gs (the parent booking page) declares BOOKING_VERSION since 2026-09-26.
+  var REQUIRED_BOOKING_VERSION = 1;
   var CAPABILITY_LABELS = {
     calendar: 'the calendar and student pages',
     dueDates: 'due dates',
@@ -1698,10 +1703,16 @@
       var fileProblems = [];
       if (files) {
         if (files.prep === null || files.prep === undefined) fileProblems.push('<code>prep.gs</code> is missing (practice log, session prep, evidence, offsets)');
-        else if (files.prep < REQUIRED_PREP_VERSION) fileProblems.push('<code>prep.gs</code> is an older copy (v' + (files.prep || 'before 28') + ')');
+        else if (files.prep < REQUIRED_PREP_VERSION) fileProblems.push('<code>prep.gs</code> is an older copy (' + (files.prep ? 'v' + files.prep : 'from before v28') + ')');
         if (files.emails === null || files.emails === undefined) fileProblems.push('<code>emails.gs</code> is missing (family emails)');
+        else if (files.emails < REQUIRED_EMAILS_VERSION) fileProblems.push('<code>emails.gs</code> is an older copy, so the weekly email still uses the old rules');
+        if (files.booking !== undefined) {
+          if (files.booking === null) fileProblems.push('<code>booking.gs</code> is missing (parents cannot book sessions)');
+          else if (files.booking < REQUIRED_BOOKING_VERSION) fileProblems.push('<code>booking.gs</code> is an older copy');
+        }
         if (!files.signals) fileProblems.push('<code>signals</code> (portal/signals.js) is missing, so no email says a score went up or down');
-        else if (!files.signalsFocus) fileProblems.push('<code>signals</code> is an older copy, so the weekly email has no focus line');
+        else if (files.signalsVersion !== undefined ? files.signalsVersion < REQUIRED_SIGNALS_VERSION : !files.signalsFocus)
+          fileProblems.push('<code>signals</code> is an older copy, so the emails, the difficulty offsets and the evidence card compute the old way');
       }
       if (version >= REQUIRED_BACKEND_VERSION && !fileProblems.length) {
         backendStoresNotes = true;
@@ -3836,6 +3847,11 @@
     } else {
       var foCT = ctFormOffsets(data);
       var trD = MSct.skillTrend(evAtt, { grain: 'domain', formOffsets: foCT });
+      // The same filter the student's Your Statistics card applies (audit 5):
+      // "keeps coming back" only inside what focusOf names, "fixed" only outside.
+      if (typeof MSct.trendWithinFocus === 'function' && typeof MSct.focusOf === 'function') {
+        trD = MSct.trendWithinFocus(trD, MSct.focusOf(evAtt, { formOffsets: foCT, skillLead: 3.35 }));
+      }
       var evD = MSct.skillEvidence(evAtt, { grain: 'domain', formOffsets: foCT });
       var evS = MSct.skillEvidence(evAtt, { grain: 'skill', formOffsets: foCT });
       var skillsIn = function (dom) {
@@ -3975,7 +3991,7 @@
   function evRow(title, r, reading, detail) {
     var whyTxt = r && !r.ready && r.why ? (EV_WHY[r.why] || String(r.why).replace(/-/g, ' ')) : '';
     var body = !r ? '<span class="ev-wait">Not available yet.</span>'
-      : (!r.ready ? '<span class="ev-wait">' + (whyTxt ? 'Needs ' + whyTxt + ' (' + (r.have || 0) + ' so far).' : 'Collecting: ' + (r.have || 0) + ' of ' + r.need + ' needed.') + '</span>' +
+      : (!r.ready ? '<span class="ev-wait">' + (whyTxt ? 'Needs ' + whyTxt + (/^need-more/.test(r.why) ? ' (' + (r.have || 0) + ' so far).' : '.') : 'Collecting: ' + (r.have || 0) + ' of ' + r.need + ' needed.') + '</span>' +
           (detail ? '<span class="ev-detail">' + detail + '</span>' : '')
         : '<span class="ev-read">' + reading + '</span>' + (detail ? '<span class="ev-detail">' + detail + '</span>' : ''));
     return '<div class="ev-row"><div class="ev-title">' + title + '</div><div class="ev-body">' + body + '</div></div>';
@@ -4129,8 +4145,14 @@
     // Whether the roster's per-test difficulty offsets exist yet (prep.gs
     // runFormOffsets): without them the bars are looser (audit 4).
     var foAt = data.formOffsetsAt || (data.formOffsets && data.formOffsets.computedAt) || null;
-    var foTxt = foAt ? ' Test difficulty adjusted from the roster (computed ' + new Date(foAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ').'
-      : ' Test difficulty not adjusted yet: run setUpSessionsSnapshot once in Apps Script.';
+    // What focusOf actually used (audit 5): 'roster' (current two-level
+    // offsets), 'form-only' (an older one-level set: the stricter bar still
+    // applies), or 'none'.
+    var foMode = (MS.focusOf ? MS.focusOf(evAtt, { formOffsets: ctFormOffsets(data), skillLead: 3.35 }).offsets : null);
+    var foDay = foAt ? new Date(foAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+    var foTxt = foMode === 'roster' ? ' Test difficulty adjusted from the roster (computed ' + foDay + ').'
+      : foMode === 'form-only' ? ' Test difficulty offsets are from an older version (' + foDay + '), so a stricter bar applies: paste the current signals and run runFormOffsets once.'
+      : ' Test difficulty not adjusted yet, so a stricter bar applies: run setUpSessionsSnapshot once in Apps Script.';
     $('stu-skills-sub').textContent = 'Across ' + ev.attempts + (ev.attempts === 1 ? ' test' : ' tests') +
       ', ranked by questions missed beyond what their level predicts for those questions. Only "clear" and "lead" rows are past chance.' + foTxt;
     host.innerHTML = units.slice(0, 12).map(function (u) {

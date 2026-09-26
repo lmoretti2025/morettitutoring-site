@@ -1816,15 +1816,22 @@ var MorettiSignals = (function () {
     if (!trend) return trend;
     var out = {}, drop = { keepsComingBack: [], fixed: [] };
     Object.keys(trend).forEach(function (k) { out[k] = trend[k]; });
-    var ok = function (name) {
+    // Is this unit what focusOf names in its section (the named domain, the
+    // named skill, or a skill inside the named domain)?
+    var inFocus = function (name) {
       var u = trend.units && trend.units[name];
       var f = u && focus && focus.bySection ? focus.bySection[u.sec] : null;
       if (!f || !(f.domain || f.skill)) return false;
       return name === f.domain || name === f.skill || (!!f.domain && u.dom === f.domain);
     };
-    ['keepsComingBack', 'fixed'].forEach(function (list) {
-      out[list] = (trend[list] || []).filter(function (n) { if (ok(n)) return true; drop[list].push(n); return false; });
-    });
+    /* "Keeps coming back" only INSIDE the named focus; "fixed" only OUTSIDE
+       it. Audit 5 (2026-09-26): with both kept inside, a skill weak on five
+       tests and strong on the last three was named "below your level" on
+       Home and "you have fixed this" beside it in 64 of 200 runs. "Fixed"
+       already needs two reads (0.2-1.1% of no-change students over ten
+       looks), so it needs no focus to back it, only no focus against it. */
+    out.keepsComingBack = (trend.keepsComingBack || []).filter(function (n) { if (inFocus(n)) return true; drop.keepsComingBack.push(n); return false; });
+    out.fixed = (trend.fixed || []).filter(function (n) { if (!inFocus(n)) return true; drop.fixed.push(n); return false; });
     out.suppressed = drop;
     return out;
   }
@@ -3166,6 +3173,10 @@ var MorettiSignals = (function () {
     formDomainOffsets: formDomainOffsets,
     focusOf: focusOf,
     trendWithinFocus: trendWithinFocus,
+    // Bumped with every change to what this file computes (audit 5): the
+    // admin deploy check compares it, since an older copy can still have
+    // every function name and compute the old way.
+    VERSION: 29,
     attemptAbility: attemptAbility,
     FOCUS_GATES: { domainClear: FOCUS_DOMAIN_CLEAR, skillLead: FOCUS_SKILL_LEAD, noOffsetsPenalty: FOCUS_NO_OFFSETS_PENALTY },
     practiceEvidence: practiceEvidence,

@@ -7931,12 +7931,16 @@ window.Portal = {
       var raw = localStorage.getItem(SERVER_HISTORY_KEY_ + key);
       if (!raw) return [];
       var data = JSON.parse(raw);
+      // The roster's difficulty offsets travel with the cached history, so the
+      // first paint reads the same offsets the emails do (audit 5); without
+      // them every visit first drew on the stricter no-offsets bar.
+      if (data && data.formOffsets && data.formOffsets.offsets && !window.portalFormOffsets) window.portalFormOffsets = data.formOffsets;
       return (data && Array.isArray(data.entries)) ? data.entries : [];
     } catch (e) { return []; }
   }
-  function saveCachedServerHistory(key, entries) {
+  function saveCachedServerHistory(key, entries, formOffsets) {
     try {
-      localStorage.setItem(SERVER_HISTORY_KEY_ + key, JSON.stringify({ entries: entries || [] }));
+      localStorage.setItem(SERVER_HISTORY_KEY_ + key, JSON.stringify({ entries: entries || [], formOffsets: formOffsets || null }));
     } catch (e) { /* quota or private browsing -- the fetch still paints it this visit */ }
   }
 
@@ -7980,7 +7984,7 @@ window.Portal = {
       // v27: per-form difficulty offsets { computedAt, attempts, offsets:
       // { 'testId|domain': logits } } (prep.gs runFormOffsets), or null.
       window.portalFormOffsets = (data.formOffsets && data.formOffsets.offsets) ? data.formOffsets : null;
-      saveCachedServerHistory(key, data.entries);
+      saveCachedServerHistory(key, data.entries, window.portalFormOffsets);
       reconcileLocalScoreHistory(data);
       repairMissingQStats();
       setPortalData('scores', 'ready');
