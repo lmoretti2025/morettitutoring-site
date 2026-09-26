@@ -2638,6 +2638,8 @@
    number below should be read. */
 #pt-native-report .integrity { background: rgba(201,168,76,0.12); border: 1px solid rgba(201,168,76,0.5); border-left: 4px solid var(--gold); border-radius: 8px; padding: 12px 16px; margin: 0 0 18px; }
 #pt-native-report .integrity-hed { font-size: 10px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: #8a6d1f; margin-bottom: 5px; }
+/* Short absences (the score still counts): one quiet line, not a warning. */
+#pt-native-report .integrity.integrity-quiet { background: transparent; border: 0; border-left: 3px solid rgba(201,168,76,0.5); border-radius: 0; padding: 4px 12px; }
 #pt-native-report .integrity-body { font-size: 11px; line-height: 1.65; color: var(--ink); }
 #pt-native-report .integrity-body b { font-weight: 700; }
 /* Borderless — a plain ghost icon button (fill on hover only), not another
@@ -3766,7 +3768,7 @@ window.Portal = {
      MorettiAuth.refresh() and the onRefresh hook, and a cached copy would
      silently lack both (the guards degrade quietly). Only this tag moves;
      the question banks below keep theirs. -->
-<script src="auth-client.js?v=20260923a"></script>
+<script src="auth-client.js?v=20260926a"></script>
 
 <!-- Pre-login top bar (key entry, onboarding, marketing-style screens).
      Hidden once a student is in the app shell (see
@@ -5829,7 +5831,61 @@ window.Portal = {
   function savePracticeOutbox(key, list) {
     try { localStorage.setItem(PRACTICE_OUTBOX_PREFIX + key, JSON.stringify(list)); } catch (e) {}
   }
+  /* ═══ WHAT THE BACKEND CAN STORE (2026-09-26) ═══ Apps Script answers
+     every request, whatever version is deployed, and an older deployment
+     answered ok to retry/explain rows and the confidence field while
+     dropping them, so the device deleted them too. The portal now asks
+     ('version', public and cheap, cached an hour) or learns it from a
+     v27+ reply, and sends those only to a backend that advertises them
+     (practiceRetry, confidence); the Question Bank's compact sync needs
+     qbCompact. Unknown (offline, first load) counts as "not advertised". */
+  var BACKEND_CAPS_KEY = 'moretti_backend_caps';
+  var BACKEND_CAPS_TTL_MS = 60 * 60 * 1000;
+  var backendCapsMem = null, backendCapsPromise = null;
+  function backendCapsNow() {
+    if (!backendCapsMem) {
+      try { backendCapsMem = JSON.parse(localStorage.getItem(BACKEND_CAPS_KEY) || 'null'); } catch (e) { backendCapsMem = null; }
+    }
+    var c = backendCapsMem;
+    if (!c || !Array.isArray(c.capabilities) || !(Date.now() - (c.at || 0) < BACKEND_CAPS_TTL_MS)) return null;
+    return c;
+  }
+  function learnBackendCaps(data) {
+    if (!data || typeof data.version !== 'number' && typeof data.v !== 'number') return;
+    if (!Array.isArray(data.capabilities)) return;
+    backendCapsMem = { v: typeof data.version === 'number' ? data.version : data.v, capabilities: data.capabilities.slice(), at: Date.now() };
+    try { localStorage.setItem(BACKEND_CAPS_KEY, JSON.stringify(backendCapsMem)); } catch (e) {}
+  }
+  function forgetBackendCaps() {
+    backendCapsMem = null;
+    try { localStorage.removeItem(BACKEND_CAPS_KEY); } catch (e) {}
+  }
+  function backendHas(cap) { var c = backendCapsNow(); return !!(c && c.capabilities.indexOf(cap) !== -1); }
+  // Resolves with the capabilities record, or null; never rejects.
+  function ensureBackendCaps() {
+    var c = backendCapsNow();
+    if (c) return Promise.resolve(c);
+    if (backendCapsPromise) return backendCapsPromise;
+    backendCapsPromise = postToBackend({ action: 'version' }, { timeoutMs: 15000, attempts: 2 })
+      .then(function (data) { learnBackendCaps(data); return backendCapsNow(); })
+      .catch(function () { return null; })
+      .then(function (r) { backendCapsPromise = null; return r; });
+    return backendCapsPromise;
+  }
+  window.portalBackendHas = backendHas;
+  window.portalEnsureBackendCaps = ensureBackendCaps;
+
   var practiceFlushTimer = null, practiceFlushBusy = false;
+  // Held on the device, waiting for a backend that stores them, at most this
+  // many: past it the oldest confidence taps go without the tap (the answer
+  // matters more) and the oldest retry/explain rows are let go.
+  var PRACTICE_HOLD_MAX = 1500;
+  function practiceNeeds(e) {
+    var need = [];
+    if (e && (e.b === 'retry' || e.b === 'explain')) need.push('practiceRetry');
+    if (e && e.cf != null) need.push('confidence');
+    return need;
+  }
   window.queuePracticeEvent = function (ev) {
     var key = currentStudent && currentStudent.key;
     if (!key || !ev) return;
@@ -5844,7 +5900,34 @@ window.Portal = {
   window.flushPracticeOutbox = function () {
     var key = currentStudent && currentStudent.key;
     if (!key || practiceFlushBusy) return;
-    var batch = loadPracticeOutbox(key).slice(0, PRACTICE_BATCH);
+    if (!loadPracticeOutbox(key).length) return;
+    practiceFlushBusy = true;
+    ensureBackendCaps().then(function () {
+      practiceFlushBusy = false;
+      flushPracticeOutboxNow(key);
+    });
+  };
+  function flushPracticeOutboxNow(key) {
+    if (!key || practiceFlushBusy || !(currentStudent && currentStudent.key === key)) return;
+    var all = loadPracticeOutbox(key);
+    // Which events this backend can take; the rest wait (bounded, see PRACTICE_HOLD_MAX).
+    var held = all.filter(function (e) { return practiceNeeds(e).some(function (c) { return !backendHas(c); }); });
+    var strip = {}, drop = {};
+    if (held.length > PRACTICE_HOLD_MAX) {
+      held.slice(0, held.length - PRACTICE_HOLD_MAX).forEach(function (e) {
+        if (e.b === 'retry' || e.b === 'explain') drop[e.id] = true; else strip[e.id] = true;
+      });
+      all = all.filter(function (e) { return !drop[e.id]; });
+      savePracticeOutbox(key, all);
+    }
+    var heldIds = {};
+    held.forEach(function (e) { if (!strip[e.id]) heldIds[e.id] = true; });
+    var batch = all.filter(function (e) { return !heldIds[e.id]; }).slice(0, PRACTICE_BATCH).map(function (e) {
+      if (!strip[e.id]) return e;
+      var copy = {};
+      for (var f in e) if (Object.prototype.hasOwnProperty.call(e, f) && f !== 'cf') copy[f] = e[f];
+      return copy;
+    });
     if (!batch.length) return;
     /* sa (2026-09-26): this device's clock as the batch leaves it. `at` is
        its clock when the event was queued, and LoggedAt the server's on
@@ -5858,14 +5941,26 @@ window.Portal = {
       .then(function (data) {
         practiceFlushBusy = false;
         if (!(data && data.ok)) return;   // an older backend ('unknown_action') keeps them for later
-        var sent = {};
-        batch.forEach(function (e) { sent[e.id] = true; });
-        var rest = loadPracticeOutbox(key).filter(function (e) { return !sent[e.id]; });
+        /* v27 replies name each event: accepted (written, or written
+           before) and rejected (invalid for good). Only those leave the
+           device; anything in neither is sent again. An older reply has
+           neither list and meant "all of it", as before. It also carries
+           the capabilities; a reply without them from a backend thought
+           to be v27+ means an older one is live again, so ask afresh. */
+        if (typeof data.v === 'number') learnBackendCaps(data);
+        else { var known = backendCapsNow(); if (known && known.v >= 27) forgetBackendCaps(); }
+        var sent = {}, n = 0;
+        if (Array.isArray(data.accepted) || Array.isArray(data.rejected)) {
+          (data.accepted || []).concat(data.rejected || []).forEach(function (id) { sent[id] = true; });
+        } else {
+          batch.forEach(function (e) { sent[e.id] = true; });
+        }
+        var rest = loadPracticeOutbox(key).filter(function (e) { if (sent[e.id]) { n++; return false; } return true; });
         savePracticeOutbox(key, rest);
-        if (rest.length) window.flushPracticeOutbox();
+        if (rest.length && n) window.flushPracticeOutbox();
       })
       .catch(function () { practiceFlushBusy = false; });
-  };
+  }
 
   // Days a new key's SAT Resources, Your Overview and (after the
   // diagnostic) Practice Tests stay locked after first login
@@ -6023,7 +6118,13 @@ window.Portal = {
   /* Last write wins for the latest try, but the FIRST try (f, fa) is the
      earliest either copy knows of, and n the larger count: two devices each
      hold part of a question's history (see recordAttempt). */
+  /* f/fa come from the earliest record that HAS a first result: one
+     without fa still counts (it used to be skipped, losing f), and between
+     two with fa the earlier wins (a missing fa counts as later). n: the
+     larger, since a sum would double-count shared history (2026-09-26).
+     Either argument may be the compact sync shape (qbDecodeAttempts_). */
   window.mergeQbAttempts_ = function (local, server) {
+    local = qbDecodeAttempts_(local); server = qbDecodeAttempts_(server);
     var out = {};
     Object.keys(local || {}).forEach(function (qid) { out[qid] = local[qid]; });
     Object.keys(server || {}).forEach(function (qid) {
@@ -6033,14 +6134,53 @@ window.Portal = {
       var later = String(s.attemptedAt || '') > String(l.attemptedAt || '') ? s : l;
       var m = {};
       for (var k in later) if (Object.prototype.hasOwnProperty.call(later, k)) m[k] = later[k];
-      var firstOf = [l, s].filter(function (x) { return x.fa && (x.f === 0 || x.f === 1); })
-        .sort(function (a, b) { return String(a.fa).localeCompare(String(b.fa)); })[0];
-      if (firstOf) { m.f = firstOf.f; m.fa = firstOf.fa; }
+      var firstOf = null;
+      [l, s].forEach(function (x) {
+        if (!(x.f === 0 || x.f === 1)) return;
+        if (!firstOf || (x.fa && (!firstOf.fa || String(x.fa) < String(firstOf.fa)))) firstOf = x;
+      });
+      delete m.f; delete m.fa;
+      if (firstOf) { m.f = firstOf.f; if (firstOf.fa) m.fa = firstOf.fa; }
       if (l.n || s.n) m.n = Math.max(l.n || 1, s.n || 1);
       out[qid] = m;
     });
     return out;
   };
+  /* ═══ QUESTION BANK SYNC, COMPACT (2026-09-26) ═══ records stay objects
+     here and on the device; on the wire and in the server cell they are
+     { v: 2, r: { qid: [lastOk 0|1, lastEpochSec, f 0|1|-1, faEpochSec|0,
+     n, msDeci|0] } } (Code.gs qbV2FromAny_), about a third of the size, so
+     a heavy user's cell keeps ~3x the questions. Sent that way only to a
+     backend advertising qbCompact. */
+  function qbSec_(iso) { var t = iso ? Date.parse(iso) : NaN; return isNaN(t) ? 0 : Math.round(t / 1000); }
+  function qbIso_(sec) { return sec > 0 ? new Date(sec * 1000).toISOString() : ''; }
+  function qbEncodeAttempts_(attempts) {
+    var r = {};
+    Object.keys(attempts || {}).forEach(function (q) {
+      var x = attempts[q];
+      if (!x || typeof x !== 'object') return;
+      r[q] = [x.correct ? 1 : 0, qbSec_(x.attemptedAt), (x.f === 0 || x.f === 1) ? x.f : -1, qbSec_(x.fa),
+              x.n > 0 ? x.n : 0, x.ms > 0 ? Math.round(x.ms / 100) : 0];
+    });
+    return { v: 2, r: r };
+  }
+  function qbDecodeAttempts_(obj) {
+    if (!obj || typeof obj !== 'object' || obj.v !== 2 || !obj.r || typeof obj.r !== 'object') return obj;
+    var out = {};
+    Object.keys(obj.r).forEach(function (q) {
+      var a = obj.r[q];
+      if (!Array.isArray(a)) return;
+      var rec = { correct: a[0] === 1, attemptedAt: qbIso_(a[1]) };
+      if (a[5] > 0) rec.ms = a[5] * 100;
+      if (a[2] === 0 || a[2] === 1) rec.f = a[2];
+      if (a[3] > 0) rec.fa = qbIso_(a[3]);
+      if (a[4] > 0) rec.n = a[4];
+      out[q] = rec;
+    });
+    return out;
+  }
+  window.qbEncodeAttempts_ = qbEncodeAttempts_;
+  window.qbDecodeAttempts_ = qbDecodeAttempts_;
 
   // Fetches this student's synced Saved & Mistakes / Practice My Weak Spots
   // data from the backend (Code.gs Progress sheet) for those isolated
@@ -6205,7 +6345,9 @@ window.Portal = {
     if (portalData.progress !== 'ready') setPortalData('progress', serverCopy ? 'cached' : 'loading');
     // postToBackend has the per-attempt timeout and retries (bare fetch()
     // has no timeout); backendRead uses the early answer when there is one.
-    progressFetchPromise = trackSync(backendRead({ action: 'getProgress', key: key }), { quiet: !!serverCopy })
+    // qbFormat 2: a v27 backend sends the Question Bank records compact
+    // (mergeQbAttempts_ decodes either shape; an older one ignores it).
+    progressFetchPromise = trackSync(backendRead({ action: 'getProgress', key: key, qbFormat: 2 }), { quiet: !!serverCopy })
       .then(function (data) {
         var result;
         if (data && data.ok) {
@@ -6275,7 +6417,12 @@ window.Portal = {
     if (!key || !attempts) return;
     clearTimeout(qbAttemptsSyncTimer);
     qbAttemptsSyncTimer = setTimeout(function () {
-      postToBackend({ action: 'syncQbAttempts', key: key, attempts: attempts }).then(function () {
+      // Compact only to a backend that stores it (qbCompact, v27); an older
+      // one would keep {v, r} as if they were two questions.
+      ensureBackendCaps().then(function () {
+        var body = backendHas('qbCompact') ? qbEncodeAttempts_(attempts) : attempts;
+        return postToBackend({ action: 'syncQbAttempts', key: key, attempts: body });
+      }).then(function () {
         if (window.invalidatePortalProgressCache) window.invalidatePortalProgressCache();
       }).catch(function () { /* best-effort */ });
     }, 1500);
@@ -7782,7 +7929,7 @@ window.Portal = {
     try { return localStorage.getItem(SERVER_HISTORY_KEY_ + key) !== null; } catch (e) { return false; }
   }
   function rerenderScoreViews() {
-    if (activeScreenId === 'screen-menu') { renderScoreProgress(); renderCrossTestHome(); renderRecentTestCard(); renderHomeShortcutTeasers(); }
+    if (activeScreenId === 'screen-menu') { renderScoreProgress(); renderCrossTestHome(); renderRecentTestCard(); renderHomeShortcutTeasers(); renderHomeWeakCards(); }
     else if (activeScreenId === 'screen-practice-tests' && !anyPtMenuOpen()) renderPracticeTestList();
   }
   function loadServerScoreHistory() {
@@ -7813,6 +7960,9 @@ window.Portal = {
       if (!data || !data.ok || !Array.isArray(data.entries)) throw new Error('no_history');
       serverScoreHistoryEntries = data.entries;
       serverScoreHistoryFetched = true;
+      // v27: per-form difficulty offsets { computedAt, attempts, offsets:
+      // { 'testId|domain': logits } } (prep.gs runFormOffsets), or null.
+      window.portalFormOffsets = (data.formOffsets && data.formOffsets.offsets) ? data.formOffsets : null;
       saveCachedServerHistory(key, data.entries);
       reconcileLocalScoreHistory();
       repairMissingQStats();
@@ -7923,9 +8073,26 @@ window.Portal = {
       copy.reportLinkRelative = serverLink[e.attemptId];
       return copy;
     });
+    /* The server lists one attempt twice (its 'score' and 'log' rows, each
+       carrying part of it): counted twice, that test weighed double in every
+       trend and pool. The rows are merged, each field from whichever row
+       has it, into one entry per attempt. */
+    var serverById = {};
     serverScoreHistoryEntries.forEach(function (e) {
       if (e && e.attemptId && seen[e.attemptId]) return;
-      merged.push(e);
+      if (!e || !e.attemptId) { merged.push(e); return; }
+      var m = serverById[e.attemptId];
+      if (!m) {
+        m = serverById[e.attemptId] = {};
+        for (var k0 in e) if (Object.prototype.hasOwnProperty.call(e, k0)) m[k0] = e[k0];
+        merged.push(m);
+        return;
+      }
+      for (var k in e) {
+        if (!Object.prototype.hasOwnProperty.call(e, k)) continue;
+        var cur = m[k];
+        if (cur === undefined || cur === null || cur === '' || cur === false) m[k] = e[k];
+      }
     });
     /* OLDEST FIRST, BY DATE. The server-only tests were appended after this
        device's, so on a second device the list was out of order, and
@@ -7953,11 +8120,17 @@ window.Portal = {
       });
     }
     // Nothing downstream may treat a marker as a link, or open a held-back report.
+    // The held-back diagnostic is also flagged heldBack, so no statistic reads
+    // its answers before Luca has gone over it (MorettiSignals.evidenceAttempts
+    // leaves it out; audit 3, 2026-09-26).
     merged = merged.map(function (e) {
-      if (!e || !(e.reportLinkRelative || e.reportLink) || (e !== heldBack && usableReportLink(e))) return e;
+      if (!e) return e;
+      var hold = e === heldBack;
+      if (!hold && (!(e.reportLinkRelative || e.reportLink) || usableReportLink(e))) return e;
       var copy = {};
       for (var k in e) if (Object.prototype.hasOwnProperty.call(e, k)) copy[k] = e[k];
       copy.reportLinkRelative = ''; copy.reportLink = '';
+      if (hold) copy.heldBack = true;
       return copy;
     });
     /* A practice test's title is saved with each attempt, but tests can be
@@ -8396,11 +8569,14 @@ window.Portal = {
     if (satHidden()) { host.style.display = 'none'; return; }
     var entries;
     try { entries = mergedScoreHistory(); } catch (e) { entries = []; }
-    var withStats = (entries || []).filter(function (e) {
-      return e && e.qStats && e.qStats.q && e.qStats.q.length && e.mode !== 'section';
-    });
-    // Oldest first, so "the most recent test" below means what it says.
-    withStats.sort(function (a, b) { return String(a.date || '').localeCompare(String(b.date || '')); });
+    /* The shared inputs (MorettiSignals.evidenceAttempts, audit 3,
+       2026-09-26), oldest first: the all-hard Test 12, retakes and the
+       held-back diagnostic are out, so "N tests" and "your most recent
+       test" count only the tests the verdicts read. */
+    var MSx = window.MorettiSignals, TBx = window.TIME_BUDGETS;
+    if (!MSx || typeof MSx.skillTrend !== 'function' || typeof MSx.evidenceAttempts !== 'function') { host.style.display = 'none'; return; }
+    var budgetX = TBx ? function (sec, dom, skill, diff) { var bq = TBx.budgetSecondsFor(sec, dom, skill, diff, 1); return (bq && bq.seconds) || 0; } : null;
+    var withStats = MSx.evidenceAttempts(entries || [], { budgetSeconds: budgetX });
 
     if (!withStats.length) { host.style.display = 'none'; return; }
 
@@ -8428,17 +8604,12 @@ window.Portal = {
        student with no change sees any "keeps coming back" 4.1% and any
        "fixed" 3.1% of the time at three tests. Rare by design: one test is a
        small sample of a skill. Never-reached and too-fast answers are out. */
-    var MSx = window.MorettiSignals, TBx = window.TIME_BUDGETS;
-    if (!MSx || typeof MSx.skillTrend !== 'function' || typeof MSx.itemsFromQStats !== 'function') { host.style.display = 'none'; return; }
-    var budgetX = TBx ? function (sec, dom, skill, diff) { var bq = TBx.budgetSecondsFor(sec, dom, skill, diff, 1); return (bq && bq.seconds) || 0; } : null;
     var pooledQ = 0;
-    var xtAttempts = withStats.map(function (att) {
-      var items = MSx.itemsFromQStats(att.qStats, budgetX) || [];
-      items.forEach(function (it) { if (!it.blank) pooledQ++; });
-      return { id: att.attemptId || '', testId: att.testId || '', at: att.date, items: items };
-    });
-    var ev = MSx.skillEvidence(xtAttempts, { grain: 'skill' });
-    var tr = MSx.skillTrend(xtAttempts, { grain: 'skill' });
+    var xtAttempts = withStats;
+    xtAttempts.forEach(function (att) { att.items.forEach(function (it) { if (!it.blank) pooledQ++; }); });
+    var foX = window.portalFormOffsets && window.portalFormOffsets.offsets;
+    var ev = MSx.skillEvidence(xtAttempts, { grain: 'skill', formOffsets: foX });
+    var tr = MSx.skillTrend(xtAttempts, { grain: 'skill', formOffsets: foX });
     var rowOf = function (k) {
       var u = ev.units[k] || { n: 0, obs: 0, perAttempt: [], sec: '' };
       var last = u.perAttempt.length ? u.perAttempt[u.perAttempt.length - 1] : null;
@@ -8689,55 +8860,62 @@ window.Portal = {
     show('screen-incorrect-questions');
   }
 
-  /* ═══ THE WEAK SKILL ON HOME (stats audit, 2026-09-26) ═══
-     It used to be the lowest raw percent among skills with 3+ questions on
-     the LATEST test alone. For a student at about 65% everywhere that card
-     showed a median of 25% on some skill, named a different skill 92% of
-     the time on the next test, and found a genuinely weak skill (1.5
-     logits down) only 35% of the time. Now it is the report's own
-     difficulty-aware content test (MorettiSignals.skillEvidence), at skill
-     grain, pooled over every full SAT the student has taken: a skill is
-     named only when it is a lead there (missed more than this student's
-     level predicts, given how hard its questions were, past z 2.95).
-     Simulated on the real forms, a student with no weak skill sees one
-     named 7.8 / 10.7 / 10.4% of the time after 1 / 3 / 6 tests. Otherwise
+  /* ═══ THE WEAK SKILL ON HOME (stats audits, 2026-09-26) ═══ it used to be
+     the lowest raw percent among skills with 3+ questions on the LATEST test
+     alone: for a student at about 65% everywhere it showed a median of 25%
+     on some skill and named a different one 92% of the time on the next
+     test. Now it is MorettiSignals.focusOf over every full test (see
+     homeEvidence): a domain named when it clears the plan bar on two reads,
+     and the skill shown is the one inside it that carried the misses; with
+     no domain named, a skill only past a stricter skill bar (3.35) on two
+     reads. Simulated over ten weekly looks, a student with no weak area sees
+     a domain named about 4% of the time and some skill about 10%. Otherwise
      the card says no single skill stands out, which is the finding. */
   function homeEvidence() {
     var MS = window.MorettiSignals, TB = window.TIME_BUDGETS;
-    if (!MS || typeof MS.skillEvidence !== 'function' || typeof MS.itemsFromQStats !== 'function') return null;
+    if (!MS || typeof MS.focusOf !== 'function' || typeof MS.evidenceAttempts !== 'function') return null;
     var budget = TB ? function (sec, dom, skill, diff) {
       var b = TB.budgetSecondsFor(sec, dom, skill, diff, 1);
       return (b && b.seconds) || 0;
     } : null;
-    var attempts = [], domOf = {};
     var hist;
     try { hist = mergedScoreHistory(); } catch (e) { hist = []; }
-    hist.forEach(function (e) {
-      if (!e || !e.qStats || e.mode === 'section' || (e.testType && e.testType !== 'SAT')) return;
-      var items = MS.itemsFromQStats(e.qStats, budget);
-      if (!items) return;
-      items.forEach(function (it) { domOf[it.skill] = it.dom; });
-      attempts.push({ id: e.attemptId || '', testId: e.testId || '', at: e.date, items: items });
-    });
+    /* The same inputs and verdict as the weekly email, Your Statistics and
+       the admin panel (audit 3, 2026-09-26: they used to build their own and
+       disagreed about the same student 29-65% of the time): diagnostics in,
+       retakes, the held-back diagnostic and the all-hard test out, too-fast
+       answers out, per-test offsets from the roster, two reads. */
+    var attempts = MS.evidenceAttempts(hist, { budgetSeconds: budget });
     if (!attempts.length) return null;
-    var ev = MS.skillEvidence(attempts, { grain: 'skill' });
-    ev.domOf = domOf;
-    return ev;
+    var fo = window.portalFormOffsets && window.portalFormOffsets.offsets;
+    var focus = MS.focusOf(attempts, { formOffsets: fo, skillLead: HOME_SKILL_LEAD });
+    var ev = MS.skillEvidence(attempts, { grain: 'skill', formOffsets: fo });
+    return { focus: focus, ev: ev, tests: focus.tests };
   }
-  // { lead, top } for one section: lead = the strongest skill past the bar
-  // (or null); top = the skill most below expectation even if it did not
-  // clear it, which only picks practice questions and is never shown as a claim.
-  function homeWeakSkill(ev, sectionKey) {
-    if (!ev) return null;
-    var lead = null, top = null;
-    Object.keys(ev.units).forEach(function (k) {
-      var u = ev.units[k];
+  /* The skill bar every consumer passes to focusOf (emails.gs FOCUS_SKILL_LEAD_):
+     at the skill lead gate alone, about 20% of students with no weak skill saw
+     one named at some point over ten weeks; at 3.35, about 10% (audit 3). */
+  var HOME_SKILL_LEAD = 3.35;
+  // { lead, top, tests } for one section: lead = what focusOf names (a skill,
+  // inside its named domain when there is one), or null; top = the skill most
+  // below expectation even if nothing is named, which only picks practice
+  // questions and is never shown as a claim.
+  function homeWeakSkill(h, sectionKey) {
+    if (!h) return null;
+    var S = h.focus.bySection[sectionKey] || {};
+    var row = function (k) {
+      var u = h.ev.units[k];
+      return u ? { skill: k, domain: u.dom || '', correct: Math.round(u.obs), total: u.n, pct: u.n ? u.obs / u.n : 0, z: u.z } : null;
+    };
+    var top = null;
+    Object.keys(h.ev.units).forEach(function (k) {
+      var u = h.ev.units[k];
       if (u.sec !== sectionKey || !(u.n >= 3)) return;
-      var row = { skill: k, domain: ev.domOf[k] || '', correct: Math.round(u.obs), total: u.n, pct: u.n ? u.obs / u.n : 0, z: u.z };
-      if (!top || u.z > top.z) top = row;
-      if (u.lead && (!lead || u.z > lead.z)) lead = row;
+      if (!top || u.z > top.z) top = row(k);
     });
-    return { lead: lead, top: top, tests: ev.attempts };
+    var lead = S.skill ? row(S.skill) : null;
+    if (lead && S.domain) lead.domain = S.domain;
+    return { lead: lead, top: top, tests: h.tests };
   }
 
   function fillMiniSkillCard(cardId, nameId, subId, barId, res) {
@@ -8801,10 +8979,18 @@ window.Portal = {
         skeletonMiniSkillCard('mini-rw-card');
         return;
       }
-      var ev = homeEvidence();
-      fillMiniSkillCard('mini-math-card', 'mini-math-name', 'mini-math-sub', 'mini-math-bar', homeWeakSkill(ev, 'math'));
-      fillMiniSkillCard('mini-rw-card', 'mini-rw-name', 'mini-rw-sub', 'mini-rw-bar', homeWeakSkill(ev, 'reading-writing'));
+      renderHomeWeakCards();
     });
+  }
+  /* The weak-skill cards read the test history (homeEvidence), so they are
+     redrawn whenever it lands too (rerenderScoreViews), not only when the
+     progress fetch answers: drawn from an empty history on a fresh device,
+     they stayed hidden until the next visit. */
+  function renderHomeWeakCards() {
+    if (satHidden() || isGrantedLocked()) return;
+    var ev = homeEvidence();
+    fillMiniSkillCard('mini-math-card', 'mini-math-name', 'mini-math-sub', 'mini-math-bar', homeWeakSkill(ev, 'math'));
+    fillMiniSkillCard('mini-rw-card', 'mini-rw-name', 'mini-rw-sub', 'mini-rw-bar', homeWeakSkill(ev, 'reading-writing'));
   }
   function skeletonMiniSkillCard(cardId) {
     var card = document.getElementById(cardId);
@@ -10890,6 +11076,17 @@ window.Portal = {
     // Scale by the extended-time accommodation (1 / 1.5 / 2).
     if (minutes) minutes = minutes * accommodations.timeMult;
     if (minutes) { startSectionTimer(minutes); } else { dxTimerWrapEl.style.display = 'none'; stopSectionTimer(); sectionTimerEndsAt = null; }
+    /* A module can open with the tab already hidden (the break ran out in
+       another tab). tabHiddenStart ignores every screen but this one, so no
+       spell was running and the hidden minutes were billed to question 1
+       (2026-09-26). Start one now: the question clock waits for the
+       student, and the real first look is stamped when they come back. */
+    if (document.visibilityState === 'hidden') {
+      try {
+        tabHiddenStart(Date.now());
+        if (hiddenAt !== null && current >= 0 && current < questionFirstVisitedAt.length && !((questionTimeMs[current] || 0) > 1000)) questionFirstVisitedAt[current] = null;
+      } catch (e) { if (window.console) console.warn('hidden-tab:', e); }
+    }
   }
   document.getElementById('done-return-link').addEventListener('click', function (e) { e.preventDefault(); show('screen-menu'); });
 
@@ -12200,6 +12397,14 @@ window.Portal = {
      a deliberate break, a judgement no threshold can make. */
   var AWAY_GRACE_MS = 90 * 1000;   // shorter than this is a hiccup, not a break
   var awayEvents = [];
+  // The attempt's `interrupted` value: the worst kind seen, or false.
+  function interruptionKind(events) {
+    var has = {};
+    (events || []).forEach(function (e) { if (e && e.kind) has[e.kind] = true; });
+    if (has.ranout) return 'ranout';
+    if (has.reopened) return 'reopened';
+    return (events && events.length) ? 'away' : false;
+  }
   function recordInterruption(kind, awayMs) {
     if (!(awayMs > AWAY_GRACE_MS)) return;
     awayEvents.push({
@@ -13675,6 +13880,44 @@ window.Portal = {
         }, sigPayloadFields(sec.signals));
       })
     };
+    /* qStats [7] tooFast (2026-09-26, contract B): 1 when the answer's
+       pacing time (the report's pacingTimeMs: the first look, or the total
+       when the visit log shows the answer was revised later) was under
+       0.15x the question's budget scaled for extended time (the same mult
+       the signal summary below uses), else 0; blanks and untimed 0. The
+       rows were pushed in completedSections x question order, which is
+       payload.s order, so a running index lines them up. */
+    try {
+      var qsRow = 0;
+      payload.s.forEach(function (s) {
+        var bank = bankFor(s.k), qs7 = sectionQuestions(bank, s.v);
+        var mult7 = (window.TIME_BUDGETS && s.tl) ? window.TIME_BUDGETS.timeMultFromAllotted(s.k, !!bank.module2Easier, s.tl) : 1;
+        qs7.forEach(function (q, i) {
+          var row = qStats.q[qsRow++];
+          if (!row) return;
+          var flag = 0;
+          if (row[3] !== 2 && window.TIME_BUDGETS) {
+            var fp = (s.fp && typeof s.fp[i] === 'number') ? s.fp[i] : null;
+            var tm = (s.tm && typeof s.tm[i] === 'number') ? s.tm[i] : 0;
+            var revised = false;
+            if (fp != null && Array.isArray(s.vl)) {
+              var blank7 = function (a) { return a === null || a === undefined || a === '' || a === -1; };
+              var first7 = null, last7 = null;
+              s.vl.filter(function (v) { return v[0] === i; }).sort(function (a, b) { return a[1] - b[1]; })
+                .forEach(function (v) { if (blank7(v[3])) return; if (first7 === null) first7 = v[3]; last7 = v[3]; });
+              revised = first7 !== null && String(last7) !== String(first7);
+            }
+            var tMs = (fp != null && !revised) ? fp : tm;
+            var bq7 = window.TIME_BUDGETS.budgetSecondsFor(s.k, q.domain, q.skill || q.domain, q.difficulty, mult7 || 1);
+            var budMs = (bq7 && bq7.ms) || 0;
+            if (budMs && tMs > 0 && tMs < budMs * 0.15) flag = 1;
+          }
+          row[5] = row[5] === undefined ? null : row[5];
+          row[6] = row[6] === undefined ? null : row[6];
+          row[7] = flag;
+        });
+      });
+    } catch (e) { if (window.console) console.warn('qStats tooFast:', e); }
     var reportPayloadB64 = '';
     try { reportPayloadB64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload)))); } catch (e) { reportPayloadB64 = ''; }
     // Absolute link for email/external use; relative link for the in-portal
@@ -13785,9 +14028,15 @@ window.Portal = {
         // Tag the attempt itself, so a score taken under non-standard
         // conditions can never be read as a clean one from the roster or
         // the score history without opening the report.
-        interrupted: awayEvents.length > 0,
+        /* Which kind of interruption (2026-09-26, contract A): 'ranout'
+           (a section clock ran out while away) > 'reopened' (closed and
+           reopened) > 'away' (tab hidden or a tick gap past the grace),
+           or false. Readers treat only ranout / reopened / legacy true /
+           awayMin > 10 as not comparable. */
+        interrupted: interruptionKind(awayEvents),
         interruptions: awayEvents.length,
         awayMs: awayEvents.reduce(function (a, e) { return a + (e.ms || 0); }, 0),
+        awayMin: Math.round(awayEvents.reduce(function (a, e) { return a + (e.ms || 0); }, 0) / 60000),
         // Stored so "View Results" on a completed practice-test card or the
         // diagnostic tile can reopen this report later. Local to this browser
         // only, like the rest of this entry.
@@ -17683,6 +17932,7 @@ window.Portal = {
         // try on record. `latest` is the most recent result, for "solved".
         correct: firstKnown ? a.f === 1 : !!a.correct,
         latest: !!a.correct,
+        firstKnown: firstKnown,
         tries: a.n || 1,
         ms: a.ms > 0 ? a.ms : 0,
         when: isNaN(when.getTime()) ? null : when,
@@ -17711,7 +17961,10 @@ window.Portal = {
     var bank = bankMode === 'challenge' ? 'chal' : 'qb';
     var ev;
     try {
-      ev = MS.practiceEvidence(qbAttemptRecords().map(function (r) {
+      /* Only records whose first try is known: a record from before
+         2026-09-26 holds its LATEST try, which after a redo is a right answer
+         the student was shown, and would read as strength (audit 3). */
+      ev = MS.practiceEvidence(qbAttemptRecords().filter(function (r) { return r.firstKnown; }).map(function (r) {
         var when = r.firstWhen || r.when;
         return { b: bank, s: r.subject, q: r.qid, sk: r.skill, dom: r.domain, d: r.difficulty, c: r.correct ? 1 : 0,
                  at: when ? when.toISOString() : '' };
@@ -18387,12 +18640,18 @@ window.Portal = {
   var questionShownAt = 0;
   var questionShownHidden = 0; // window.portalHiddenMs() when it was stamped
   // Ms the current question has been on screen with the tab visible
-  // (2026-09-26): time in another tab counts toward neither its attempt
-  // nor Rush's per-question budget.
+  // (2026-09-26): time in another tab does not count toward its untimed
+  // attempt (Question Bank / Challenge).
   function questionShownMs() {
     if (!questionShownAt) return 0;
     var hid = window.portalHiddenMs ? window.portalHiddenMs() - questionShownHidden : 0;
     return Math.max(0, Date.now() - questionShownAt - hid);
+  }
+  // Rush is a timed drill: its per-question budget runs on the wall clock,
+  // hidden time included, so thinking in another tab is not free
+  // (2026-09-26; it used questionShownMs and paused while hidden).
+  function rushElapsedMs() {
+    return questionShownAt ? Math.max(0, Date.now() - questionShownAt) : 0;
   }
   var runnerShownQid = null;   // the question last put on screen (see runnerBack)
   /* How many questions the student actually GOT TO. Null until they leave
@@ -18585,7 +18844,7 @@ window.Portal = {
     if (t) { t.style.transition = ''; t.classList.remove('expired'); t.style.opacity = '0'; }
   }
   function rushPaint() {
-    var left = rushBudgetMs - questionShownMs();
+    var left = rushBudgetMs - rushElapsedMs();
     var frac = Math.max(0, left / rushBudgetMs);
     var fill = document.getElementById('rush-bar-fill'), over = document.getElementById('rush-over');
     if (left > 0) {
@@ -18855,7 +19114,7 @@ window.Portal = {
       st.submitted = true;
       if (st.correct) runnerScore++;
       if (rushCfg) {
-        var rushMs = questionShownMs();
+        var rushMs = rushElapsedMs();   // wall clock: hidden time counts in a timed drill
         // Paint first, THEN bank this question's overage: painting after
         // would count it twice (banked total + live overage).
         rushPaint();
@@ -24581,10 +24840,27 @@ window.renderNativeReport = function (data) {
     if (ranOut) what.push('left unattended until a section\u2019s clock ran out');
     var others = iv.length - reopened - ranOut;
     if (others) what.push(others + ' other break' + (others === 1 ? '' : 's') + ' of a minute or more');
+    /* THE SAME RULE AS THE TRENDS (audit 3, 2026-09-26). Since tab
+       switches are recorded, a single glance at another tab for a minute
+       and a half counted as an interruption and this banner told the family
+       to treat the score as practice, while the trend and the emails dropped
+       it. A score is set aside only when the clock ran out while away, the
+       test was closed and reopened, or the time away adds up to more than
+       ten minutes (MorettiSignals.isTrendComparable). Shorter absences are
+       stated in one quiet line and the score counts. */
+    var setAside = reopened > 0 || ranOut > 0 || totalMs > 10 * 60000;
+    if (!setAside) {
+      el.innerHTML = '<div class="integrity-body">You stepped away from the test ' + iv.length + ' time' + (iv.length === 1 ? '' : 's') +
+        ', about <b>' + mins + ' minute' + (mins === 1 ? '' : 's') + '</b> in total. The section clock kept running, and the score counts as usual.</div>';
+      el.classList.add('integrity-quiet');
+      el.style.display = '';
+      return;
+    }
+    el.classList.remove('integrity-quiet');
     el.innerHTML =
       '<div class="integrity-hed">Not taken under standard conditions</div>' +
-      '<div class="integrity-body">This attempt was interrupted &mdash; ' +
-      (what.length ? what.join(', ') + ' &mdash; ' : '') +
+      '<div class="integrity-body">This attempt was interrupted: ' +
+      (what.length ? what.join(', ') + '; ' : '') +
       '<b>' + mins + ' minute' + (mins === 1 ? '' : 's') + '</b> away from the screen in total. ' +
       'The section clocks kept running throughout, so no time was given back, but a score produced this way is not comparable to one taken straight through. ' +
       'Treat it as practice rather than as a measurement.</div>';

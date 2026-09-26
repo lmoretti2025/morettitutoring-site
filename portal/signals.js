@@ -946,17 +946,52 @@ var MorettiSignals = (function () {
      scores roughly 87 points lower on it, so it stays out of every trend,
      drop, improvement or target comparison. */
   var HARDEST_TEST_ID = 'sat-practice-11';
+  /* -- interrupted sittings (2026-09-26) ------------------------------
+     An entry's `interrupted` is one of:
+       false / absent   not interrupted
+       true             LEGACY: the sheet's 'YES' from before 2026-09-26,
+                        which did not say what happened: treated as a real
+                        interruption
+       'ranout'         the clock ran out while the student was away
+       'reopened'       the test was closed and reopened part-way
+       'away'           the tab was hidden or the clock's ticks had a gap;
+                        awayMin says for how many minutes
+     A test is left out of every trend (and the report / emails show their
+     "interrupted" banner) when it is 'ranout', 'reopened', legacy true, or
+     more than INTERRUPT_AWAY_MIN minutes away. A short 'away' (a glance at
+     another tab) stays comparable. interruptionKind(e) says which kind,
+     isInterruptedForTrend(e) applies the rule, so every page shows the
+     banner under the SAME rule the trend uses. */
+  var INTERRUPT_AWAY_MIN = 10;
+  function interruptionKind(e) {
+    if (!e) return null;
+    var v = e.interrupted;
+    if (v === 'ranout' || v === 'reopened' || v === 'away') return v;
+    if (v === true || v === 'YES' || v === 'yes' || v === 'TRUE') return 'legacy';
+    if (awayMinOf(e) > 0) return 'away';
+    return null;
+  }
+  // Minutes away as a number (a sheet may hand it over as text); 0 if none.
+  function awayMinOf(e) {
+    if (!e || e.awayMin === null || e.awayMin === undefined || e.awayMin === '') return 0;
+    var m = Number(e.awayMin);
+    return isFinite(m) && m > 0 ? m : 0;
+  }
+  function isInterruptedForTrend(e) {
+    var k = interruptionKind(e);
+    if (k === 'ranout' || k === 'reopened' || k === 'legacy') return true;
+    return awayMinOf(e) > INTERRUPT_AWAY_MIN;
+  }
   // entries: { composite, rw?, math?, testId?, mode? }. Section-only sittings
   // and the hardest test are not comparable to full tests.
   function isTrendComparable(e) {
     if (!e) return false;
     // The self-reported baseline (PSAT or an outside SAT, typed in) is a
     // starting point to show, not a test to average in.
-    // A sitting the clock ran out on while the student was away, or with more
-    // than 10 minutes away, measures the interruption, not the student.
-    var interrupted = e.interrupted === true || e.interrupted === 'ranout' || (typeof e.awayMin === 'number' && e.awayMin > 10);
+    // An interrupted sitting (isInterruptedForTrend) measures the
+    // interruption, not the student.
     return typeof e.composite === 'number' && isFinite(e.composite) && e.testId !== HARDEST_TEST_ID &&
-      e.mode !== 'section' && e.source !== 'baseline' && !interrupted;
+      e.mode !== 'section' && e.source !== 'baseline' && !isInterruptedForTrend(e);
   }
   function levelOf(list) {
     var avg = function (f) { return list.reduce(function (s, e) { return s + f(e); }, 0) / list.length; };
@@ -1081,13 +1116,21 @@ var MorettiSignals = (function () {
   var Z80 = 1.2816;
   function sigm(x) { return 1 / (1 + Math.exp(-x)); }
   function irtOff(d) { return IRT_OFFSETS[d] || 0; }
-  // MAP ability for items [{ o: offset, y: 0|1 }] under a N(mu, 1/tau) prior.
+  /* MAP ability for items [{ o: offset, y: 0|1 }] under a N(mu, 1/tau) prior.
+     STEP CONTROL (2026-09-26): the log-posterior is concave, but a plain
+     Newton step from the prior mean overshoots when the answers sit far from
+     it (60 easy practice first tries at 20% right went 1.2 -> -4.3 -> +1.9
+     ... and ended at theta 19, labelling every skill weak). Each step is now
+     capped at 1 logit, which cannot overshoot a concave maximum by more than
+     the cap and converges in a few more iterations. */
+  var MAP_MAX_STEP = 1;
   function mapTheta(its, mu, tau) {
     var th = mu;
-    for (var iter = 0; iter < 50; iter++) {
+    for (var iter = 0; iter < 100; iter++) {
       var gr = -(th - mu) * tau, h = -tau;
       for (var i = 0; i < its.length; i++) { var p = sigm(th + its[i].o); gr += its[i].y - p; h -= p * (1 - p); }
       var step = gr / h;
+      if (step > MAP_MAX_STEP) step = MAP_MAX_STEP; else if (step < -MAP_MAX_STEP) step = -MAP_MAX_STEP;
       th -= step;
       if (Math.abs(step) < 1e-7) break;
     }
@@ -1119,11 +1162,15 @@ var MorettiSignals = (function () {
      answers, V = W - W^2 / (W_section + tau). Blanks and answers too fast
      to have been read are left out. null with fewer than minItems usable
      answers (the report's 20). */
-  function attemptResiduals(items, grain, minItems) {
+  function attemptResiduals(items, grain, minItems, formOffsets, testId) {
+    var offs = (formOffsets && testId) ? formOffsets : null;
     var inf = (items || []).filter(function (it) {
       return it && !it.blank && !it.tooFast && secKeyOf(it.sec) && (it.ok === true || it.ok === false || it.ok === 1 || it.ok === 0);
     }).map(function (it) {
-      return { sec: secKeyOf(it.sec), unit: grain === 'skill' ? (it.skill || it.dom) : (it.dom || it.skill), o: irtOff(it.diff), y: it.ok ? 1 : 0 };
+      // A form x domain offset (formDomainOffsets) is extra difficulty in
+      // logits: it lowers every item's offset in that domain on that form.
+      var fo = offs ? num(offs[testId + '|' + (it.dom || '')]) : 0;
+      return { sec: secKeyOf(it.sec), unit: grain === 'skill' ? (it.skill || it.dom) : (it.dom || it.skill), dom: it.dom || it.skill, o: irtOff(it.diff) - fo, y: it.ok ? 1 : 0 };
     }).filter(function (it) { return !!it.unit; });
     if (inf.length < (minItems || 20)) return null;
     var popTau = 1 / (IRT_POP_SD * IRT_POP_SD), secTau = 1 / (IRT_SECTION_SD * IRT_SECTION_SD);
@@ -1139,7 +1186,7 @@ var MorettiSignals = (function () {
     var units = {};
     inf.forEach(function (it) {
       var p = sigm(theta[it.sec] + it.o);
-      var u = units[it.unit] || (units[it.unit] = { sec: it.sec, n: 0, obs: 0, exp: 0, S: 0, W: 0 });
+      var u = units[it.unit] || (units[it.unit] = { sec: it.sec, dom: it.dom, n: 0, obs: 0, exp: 0, S: 0, W: 0 });
       u.n++; u.obs += it.y; u.exp += p; u.S += p - it.y; u.W += p * (1 - p);
     });
     Object.keys(units).forEach(function (k) {
@@ -1158,9 +1205,11 @@ var MorettiSignals = (function () {
      each unit's S and V are summed across attempts. The hardest test
      (testId or id sat-practice-11) is left out unless opts.includeHardest.
      opts: grain 'domain' (default) | 'skill'; zLead, zClear, minExcess,
-       minItems override the calibrated gates.
+       minItems override the calibrated gates; formOffsets (from
+       formDomainOffsets, keyed testId + '|' + domain) adds each form's
+       domain difficulty to its items (2026-09-26).
      Returns { grain, attempts, zLead, zClear, units: { name: { unit, sec,
-       n, obs, exp, S, V, W, z, lo, hi, gap, gapSE, lead, clear,
+       dom (the unit's domain), n, obs, exp, S, V, W, z, lo, hi, gap, gapSE, lead, clear,
        perAttempt: [{ k, id, at, n, obs, exp, S, V, W }] } }, leads: [names,
        strongest first], top: name|null }.
        S    questions missed beyond what the student's ability predicts
@@ -1194,9 +1243,39 @@ var MorettiSignals = (function () {
      (domain, gap 0.8-1.6) and 39-91% (skill); on the next test ALONE it
      is a lead only 2-36%, so one new test never confirms or clears a unit
      by itself. For a no-gap student a named top unit survives the next
-     pooled test 31-65% of the time: survival is not proof. */
+     pooled test 31-65% of the time: survival is not proof.
+
+     RECALIBRATED WITH FORM x DOMAIN OFFSETS (2026-09-26, after the audit;
+     fix3-stats/roster.js + sweep.js). Rosters of 10 / 20 / 40 students, each
+     a diagnostic then a practice test a week for 10 weeks, 30% of them
+     with a planted domain gap (1.0 or 1.6 logits); offsets re-estimated
+     every week from the whole roster (formDomainOffsets, the student
+     included) and passed as opts.formOffsets. Models: the author's (item
+     SD 0.35, guess 0.15), and the auditor's harsher truth (item SD 0.7,
+     discrimination SD 0.3, guess 0.25, slips 3%) with a fixed form x
+     domain effect SD 0 / 0.3 / 0.5 and with end-of-module rushing. 3,000-
+     4,000 students per model x roster (2,100-2,800 without a gap).
+     Domain lead 2.24 -> 2.35, clear 2.8 kept: with offsets the worst any-
+     lead over every model, roster size and 1 / 3 / 6 / 10 tests is 9.3%
+     (was 11.9% at 2.24) and the worst any-clear 3.1%.
+       roster 20, offsets on (off):     any lead, worst of 1/3/6/10 tests   any clear
+         author                          8.6% (9.8%)                        2.9% (3.1%)
+         harsh, no form effect           7.7% (9.6%)                        1.9% (3.0%)
+         harsh, form effect SD 0.3       8.0% (12.4%)                       2.4% (5.0%)
+         harsh, form effect SD 0.5       7.8% (15.4%)                       2.4% (6.4%)
+       (rosters 10 and 40 within 1.5 points of these). So the offsets bring
+       a form effect of SD 0.5 back to the no-effect rates, and with no form
+       effect they do no harm (author model power unchanged: 76.5 vs 76.6%).
+       Power at 10 tests (planted domain a lead / clear): author gap 1.0
+       76 / 64%, 1.6 94 / 93%; harsh 57 / 46%, 86 / 82%.
+     The offsets must come from the WHOLE roster (student included): with
+     each student left out of their own offsets these gates give a worst
+     lead 11.2% and clear 3.8% (harsh, form SD 0.5); about 2.5 / 3.0 would
+     be needed there. Without offsets at all the harsh form-effect rates
+     above apply. The skill gates were already inside 10 / 5% with offsets
+     (lead 7.4-10.0%, clear 2.9-4.6% over the same grid) and are kept. */
   var SKILL_EVIDENCE_GATES = {
-    domain: { lead: 2.24, clear: 2.8 },
+    domain: { lead: 2.35, clear: 2.8 },   // lead was 2.24 (the report's single-test flag); recalibrated 2026-09-26, see below
     skill: { lead: 2.95, clear: 3.35 }
   };
   function skillEvidence(attempts, opts) {
@@ -1211,12 +1290,12 @@ var MorettiSignals = (function () {
     }));
     var units = {}, used = 0;
     list.forEach(function (a) {
-      var r = attemptResiduals(a.items, grain, opts.minItems);
+      var r = attemptResiduals(a.items, grain, opts.minItems, opts.formOffsets, a.testId || a.id);
       if (!r) return;
       used++;
       Object.keys(r.units).forEach(function (k) {
         var x = r.units[k];
-        var u = units[k] || (units[k] = { unit: k, sec: x.sec, n: 0, obs: 0, exp: 0, S: 0, V: 0, W: 0, perAttempt: [] });
+        var u = units[k] || (units[k] = { unit: k, sec: x.sec, dom: x.dom, n: 0, obs: 0, exp: 0, S: 0, V: 0, W: 0, perAttempt: [] });
         u.n += x.n; u.obs += x.obs; u.exp += x.exp; u.S += x.S; u.V += x.V; u.W += x.W;
         u.perAttempt.push({ k: used - 1, id: a.testId || a.id || null, at: a.at, n: x.n, obs: x.obs, exp: x.exp, S: x.S, V: x.V, W: x.W });
       });
@@ -1247,6 +1326,10 @@ var MorettiSignals = (function () {
      report's reading floor, report.html TOO_FAST_BUDGET_REL) and is left
      out of the content test as the report leaves it out. Without it (Apps
      Script has no time budgets) nothing is tooFast.
+     Tuple index 7 (2026-09-26), when present: the tooFast flag (1/0)
+     written at scoring time with the student's accommodation multiplier.
+     It wins over budgetSeconds, so Apps Script and the browser agree and
+     extended-time students are judged against their own clock.
      Returns items for skillEvidence, or null when qs has no record. */
   var TOO_FAST_REL = 0.15;
   var QS_DIFF = ['easy', 'medium', 'hard'];
@@ -1261,7 +1344,10 @@ var MorettiSignals = (function () {
       var dom = cut >= 0 ? sk.slice(0, cut) : sk, skill = cut >= 0 ? sk.slice(cut + 3) : sk;
       var diff = QS_DIFF[r[2]] || 'medium', secs = Number(r[4]) || 0;
       var tooFast = false;
-      if (budgetSeconds && secs > 0 && r[3] !== 2) {
+      if (r.length > 7 && (r[7] === 1 || r[7] === 0 || r[7] === true || r[7] === false)) {
+        // Stored at scoring time with the student's time multiplier (2026-09-26).
+        tooFast = r[3] !== 2 && (r[7] === 1 || r[7] === true);
+      } else if (budgetSeconds && secs > 0 && r[3] !== 2) {
         var b = budgetSeconds(sec, dom, skill, diff);
         if (b > 0 && secs < TOO_FAST_REL * b) tooFast = true;
       }
@@ -1293,6 +1379,12 @@ var MorettiSignals = (function () {
          been a lead); skill grain 5 / 7 / 9%. One test is a small sample of
          a unit, so "fixed" is rare by design; the pooled lead fading over
          later tests is the slower, surer sign.
+     (Those figures are at the old domain lead gate 2.24. At 2.35, 2026-09-
+     26, with no form offsets, the audit's a1-null.js, 2,100 no-gap
+     students a cell: author model "keeps coming back" 6.8 / 8.3 / 9.4% at
+     3 / 6 / 10 tests, "fixed" 3.6 / 2.0 / 1.6%; harsh model 9.3 / 11.8 /
+     11.4% and 4.5 / 3.3 / 2.4%. Pass opts.formOffsets as for
+     skillEvidence.)
      A deficit attempt is one with S >= 1 (TREND_DEFICIT_S): with S > 0 the
      second condition removed almost nothing (10.5% at 3 tests).
      Returns { attempts, units: { name: { lead, keepsComingBack, fixed,
@@ -1334,6 +1426,182 @@ var MorettiSignals = (function () {
       if (fixed) out.fixed.push(k);
     });
     return out;
+  }
+
+  /* -- WHICH TESTS COUNT AS CONTENT EVIDENCE: evidenceAttempts -----------
+     (2026-09-26, audit: the email, Home, the report and admin each built
+     their own list and named different things for the same student 29-65%
+     of the time.) ONE list for every consumer.
+     entries: score-history-like objects { attemptId|id, testId, source
+       ('diagnostic'|'practice-test'|'diagnostic-retake'|...), mode,
+       testType, date|at, qStats, interrupted?, awayMin?, heldBack?,
+       retake? }.
+     Kept: full SAT sittings with a per-question record (qStats), the
+       diagnostic included. Left out: section-only sittings (mode
+       'section'), non-SAT tests (testType set and not 'SAT'), diagnostic
+       retakes (source 'diagnostic-retake' or retake: true: the same
+       questions again), entries with heldBack: true (not yet the
+       student's), and the hardest test unless opts.includeHardest. The
+       same attemptId twice (local and server copies) counts once.
+     opts.budgetSeconds: passed to itemsFromQStats for records without the
+       stored tooFast flag.
+     Returns [{ id, attemptId, testId, source, at, items, interrupted }],
+     oldest first, ready for skillEvidence / skillTrend / focusOf. testId
+     is the entry's, or 'diagnostic' for a diagnostic without one (the
+     form-offset key). */
+  function evidenceAttempts(entries, opts) {
+    opts = opts || {};
+    var seen = {}, out = [];
+    (entries || []).forEach(function (e) {
+      if (!e || !e.qStats || e.mode === 'section') return;
+      if (e.testType && String(e.testType).toUpperCase() !== 'SAT') return;
+      if (e.source === 'diagnostic-retake' || e.retake === true || e.heldBack === true || e.source === 'baseline') return;
+      var tid = e.testId || (e.source === 'diagnostic' ? 'diagnostic' : '');
+      if (tid === HARDEST_TEST_ID && !opts.includeHardest) return;
+      var aid = e.attemptId || e.id || '';
+      if (aid) { if (seen[aid]) return; seen[aid] = true; }
+      var items = itemsFromQStats(e.qStats, opts.budgetSeconds);
+      if (!items) return;
+      out.push({ id: aid || tid, attemptId: aid, testId: tid, source: e.source || null, at: e.date !== undefined ? e.date : e.at,
+                 items: items, interrupted: interruptionKind(e) });
+    });
+    return byTime(out);
+  }
+
+  /* -- FORM x DOMAIN OFFSETS: formDomainOffsets -------------------------
+     (2026-09-26, audit: a domain that runs harder on one form than its
+     tags say reads as a gap for everyone who sits that form, pushing the
+     domain lead to 12-19% and piling false flags onto particular forms.)
+     rosterAttempts: attempts of the WHOLE roster in skillEvidence's shape
+       ({ testId, items, studentId? }; evidenceAttempts output works).
+     Per attempt, the domain residuals of the content test (ability
+     estimated per attempt, so residuals within a section are relative);
+     per key testId + '|' + domain, the raw offset is sum S / sum W (logits
+     of extra difficulty; S = misses beyond expectation) with sampling
+     variance sum V / (sum W)^2. Empirical-Bayes shrinkage toward 0: the
+     spread of true offsets tau^2 is estimated across keys by the method
+     of moments (mean of raw^2 minus sampling variance, floored at
+     FORM_OFFSET_TAU2_MIN), and each key's offset is raw x tau^2 / (tau^2 +
+     its variance): with few takers it is close to 0.
+     opts.exclude(attempt) -> true leaves an attempt out (use it to leave
+       the student being judged out of their own offsets).
+     opts.minTakers (default 2): keys with fewer attempts get no offset.
+     Returns { key: offset } (positive = that domain ran harder on that
+     form). Pass as opts.formOffsets to skillEvidence / skillTrend /
+     focusOf. The hardest test is kept (it has its own key). */
+  var FORM_OFFSET_TAU2_MIN = 0.0025;   // a floor of SD 0.05 logits, so one quiet roster never switches the offsets off
+  function formDomainOffsets(rosterAttempts, opts) {
+    opts = opts || {};
+    var minT = typeof opts.minTakers === 'number' ? opts.minTakers : 2;
+    var acc = {};
+    (rosterAttempts || []).forEach(function (a) {
+      if (!a || !Array.isArray(a.items) || !(a.testId || a.id)) return;
+      if (typeof opts.exclude === 'function' && opts.exclude(a)) return;
+      var r = attemptResiduals(a.items, 'domain');
+      if (!r) return;
+      var tid = a.testId || a.id;
+      Object.keys(r.units).forEach(function (d) {
+        var u = r.units[d], k = tid + '|' + d;
+        var x = acc[k] || (acc[k] = { S: 0, W: 0, V: 0, n: 0 });
+        x.S += u.S; x.W += u.W; x.V += u.V; x.n++;
+      });
+    });
+    var keys = Object.keys(acc).filter(function (k) { return acc[k].n >= minT && acc[k].W > 0; });
+    var out = {};
+    if (!keys.length) return out;
+    var m = 0;
+    keys.forEach(function (k) {
+      var x = acc[k];
+      x.raw = x.S / x.W; x.se2 = x.V / (x.W * x.W);
+      m += x.raw * x.raw - x.se2;
+    });
+    var tau2 = Math.max(FORM_OFFSET_TAU2_MIN, m / keys.length);
+    keys.forEach(function (k) { var x = acc[k]; out[k] = x.raw * tau2 / (tau2 + x.se2); });
+    return out;
+  }
+
+  /* -- ONE VERDICT FOR EVERY CONSUMER: focusOf ---------------------------
+     (2026-09-26.) The email's "current focus", Home's weak skill per
+     section, the report's cross-test line and admin all read THIS.
+     attempts: evidenceAttempts output (oldest first). opts.formOffsets
+       (formDomainOffsets), opts.includeHardest, opts.twoReads (default
+       true; false only for simulation).
+     Per section:
+       domain  named when it CLEARS at domain grain (z >= the domain clear
+               gate, S >= 1.5) on the full history AND on the history
+               without its latest test (two reads); the highest z of those.
+       skill   with a domain named: the skill inside it with the largest
+               excess S (> 0), even if that skill alone clears nothing.
+               With no domain named: a skill only if it passes the SKILL
+               LEAD gate on both reads (the highest z of those).
+     Returns { tests, bySection: { 'reading-writing': S, math: S }, top }
+       S = { domain: name|null, domainZ, skill: name|null, skillZ,
+             detail: { n, obs, S } | null }  (detail of the skill if named,
+             else of the domain; obs = questions right, S = missed beyond
+             expectation)
+       top = { section, domain, z, skill } for the named domain with the
+             largest z across sections (the parent email's line), or null.
+     One test can never name anything (there is no second read).
+     Measured 2026-09-26, family-wise over 10 weekly looks (a diagnostic,
+     then a practice test a week), whole-roster offsets re-estimated each
+     week, roster 20 (fix3-stats/focus-direct.js, the real function, 834
+     no-gap students per model; roster.js + analyze.js, 2,765 per model,
+     agree within 1 point):
+                            any named domain     any named skill
+       author model          4.1% (no offsets 5.2%)   17.6% (19.1%)
+       harsh                 4.2% (8.8%)              19.7% (26.6%)
+       harsh, form SD 0.5    4.4% (11.0%)             19.5% (28.4%)
+       harsh + rushing       3.9% (8.2%)              20.9% (25.9%)
+     A planted 1.6-logit domain gap is named (and is `top`) by the tenth
+     look 88% (author) / 75-78% (harsh) of the time; a 1.0 gap 61 / 37-42%.
+     The skill line (a skill with no domain named, lead gate on two reads)
+     is the loose one: about 1 no-gap student in 5 sees some skill named at
+     least once in ten weeks. Passing { skillLead: 3.35 } (the skill clear
+     gate) halves that to 10.5-10.8% (analyze.js) - Luca's call. Every
+     consumer that reads focusOf with the same attempts and offsets names
+     the same thing, so the 29-65% disagreement the audit found is gone by
+     construction. */
+  function focusOf(attempts, opts) {
+    opts = opts || {};
+    var list = byTime((attempts || []).filter(function (a) { return a && Array.isArray(a.items); }));
+    var base = { formOffsets: opts.formOffsets, includeHardest: opts.includeHardest };
+    var dGate = typeof opts.domainClear === 'number' ? opts.domainClear : SKILL_EVIDENCE_GATES.domain.clear;
+    var sGate = typeof opts.skillLead === 'number' ? opts.skillLead : SKILL_EVIDENCE_GATES.skill.lead;
+    var read = function (atts) {
+      var d = skillEvidence(atts, { grain: 'domain', formOffsets: base.formOffsets, includeHardest: base.includeHardest, zLead: Math.min(dGate, SKILL_EVIDENCE_GATES.domain.lead), zClear: dGate });
+      var sk = skillEvidence(atts, { grain: 'skill', formOffsets: base.formOffsets, includeHardest: base.includeHardest, zLead: sGate });
+      return { d: d, s: sk };
+    };
+    var full = read(list);
+    var twoReads = opts.twoReads !== false;
+    var prev = (twoReads && list.length) ? read(list.slice(0, list.length - 1)) : null;
+    var res = { tests: full.d.attempts, bySection: {}, top: null };
+    ['reading-writing', 'math'].forEach(function (sec) {
+      var S = { domain: null, domainZ: null, skill: null, skillZ: null, detail: null };
+      var clearIn = function (r, k) { var u = r && r.d.units[k]; return !!(u && u.sec === sec && u.clear); };
+      var doms = Object.keys(full.d.units).filter(function (k) { return clearIn(full, k) && (!twoReads || clearIn(prev, k)); })
+        .sort(function (a, b) { return full.d.units[b].z - full.d.units[a].z; });
+      if (doms.length) {
+        var du = full.d.units[doms[0]];
+        S.domain = doms[0]; S.domainZ = du.z;
+        var best = null;
+        Object.keys(full.s.units).forEach(function (k) {
+          var u = full.s.units[k];
+          if (u.sec !== sec || u.dom !== S.domain || !(u.S > 0)) return;
+          if (!best || u.S > best.S) best = u;
+        });
+        if (best) { S.skill = best.unit; S.skillZ = best.z; S.detail = { n: best.n, obs: best.obs, S: best.S }; }
+        else S.detail = { n: du.n, obs: du.obs, S: du.S };
+      } else {
+        var leadIn = function (r, k) { var u = r && r.s.units[k]; return !!(u && u.sec === sec && u.lead); };
+        var sks = Object.keys(full.s.units).filter(function (k) { return leadIn(full, k) && (!twoReads || leadIn(prev, k)); })
+          .sort(function (a, b) { return full.s.units[b].z - full.s.units[a].z; });
+        if (sks.length) { var su = full.s.units[sks[0]]; S.skill = sks[0]; S.skillZ = su.z; S.detail = { n: su.n, obs: su.obs, S: su.S }; }
+      }
+      res.bySection[sec] = S;
+      if (S.domain && (!res.top || S.domainZ > res.top.z)) res.top = { section: sec, domain: S.domain, z: S.domainZ, skill: S.skill };
+    });
+    return res;
   }
 
   /* -- betaInterval: the Jeffreys interval ------------------------------
@@ -1471,8 +1739,10 @@ var MorettiSignals = (function () {
      when it holds on two consecutive reads (heldOnTwoReads over the
      comparable tests). tests: score-history entries, oldest first.
      Returns { verdict: 'gain'|'drop'|null, delta, threshold, k, n, full,
-     prev } (delta/threshold/k/n from the full read; null fields with
-     fewer than two comparable tests).
+     prev, outlierGuard, restsOnOneTest } (delta/threshold/k/n from the
+     full read; null fields with fewer than two comparable tests).
+     opts: z (default PARENT_Z), outlierGuard (default true), guardZ
+     (default GAIN_GUARD_Z).
      Measured (stats build 2026-09-26, sim-D-gain.js, 20,000 students per
      row, a test every week, levels U(900,1450), test noise from
      compositeSem; "any" = at least once in ten weekly looks):
@@ -1484,8 +1754,35 @@ var MorettiSignals = (function () {
      and a flat student hears "drop" 1.9%. scoreChange (1.645, one read)
      stays as the chart's and the tutor's reading; this is the bar for a
      parent. z = 2.0 on two reads would give 4.8% flat and 24 / 67 / 94%
-     at +10 / +20 / +30: pass { z: 2.0 } if Luca wants that trade. */
+     at +10 / +20 / +30: pass { z: 2.0 } if Luca wants that trade.
+     OUTLIER GUARD (2026-09-26, audit: one lucky +150 / +200 test made a
+     flat student "up" 6-10% and "target reached" 8-12%). Each read's
+     verdict must also survive losing any ONE comparable test (so the one
+     most in its favour): without it the same comparison must still clear
+     GAIN_GUARD_Z (1.645) the same way. Tried 0 / 1.0 / 1.28 / 1.645 and a
+     full PARENT_Z (which cut +20/wk power to 23%); 1.645 is the least that
+     keeps a single +200 test under 3.5% in both models. restsOnOneTest:
+     the full read cleared PARENT_Z but not without one of its tests.
+     opts.outlierGuard = false turns it off (tutor views may).
+     Measured 2026-09-26 (fix3-stats/claims.js, 5,000 students per row, a
+     test a week, 10 looks; author = compositeSem normal noise, harsh =
+     1.15 x compositeSem, t(5) tails, a fixed per-form offset SD 25):
+                           author: guard (no guard)   harsh: guard (no guard)
+       flat "gain"               0.5% (2.0%)             1.2% (5.8%)
+       flat "drop"               0.5% (1.7%)             1.4% (5.7%)
+       flat, one +150 test       1.8% (6.7%)             2.6% (10.9%)
+       flat, one +200 test       2.5% (9.9%)             3.5% (14.4%)
+       +10 a week                7.2% (13.4%)            9.1% (19.3%)
+       +20 a week               41.9% (54.2%)           40.7% (55.8%)
+       +30 a week               81.1% (87.9%)           77.0% (87.1%) */
   var PARENT_Z = 2.33;
+  var GAIN_GUARD_Z = 1.645;   // the verdict without any one test (2026-09-26; table above)
+  /* targetReached's guard (2026-09-26): without any one test, the filter's
+     level less 0.84 SD (a one-sided 80% bound) must still be at the
+     target. Tried 0 / 0.5 / 0.84 / 1.28 (fix3-stats/target-gz.js, 1,500
+     per row): 0.84 keeps one +200 test under 3% (author) / 4.1% (harsh)
+     and the median lag after a true crossing unchanged (4 weeks). */
+  var TARGET_GUARD_Z = 0.84;
   function scoreChangeAt(entries, z) {
     var usable = (entries || []).filter(isTrendComparable);
     if (usable.length < 2) return null;
@@ -1498,13 +1795,64 @@ var MorettiSignals = (function () {
     return { delta: delta, threshold: threshold, k: k, n: usable.length, real: Math.abs(delta) >= threshold,
              verdict: Math.abs(delta) >= threshold ? (delta > 0 ? 'gain' : 'drop') : null };
   }
+  // Without each test in turn: does the verdict survive losing any single
+  // test (so the one most in its favour)? h: comparable tests.
+  function withoutEach(h, fn, v) {
+    for (var i = 0; i < h.length; i++) {
+      if (fn(h.slice(0, i).concat(h.slice(i + 1))) !== v) return false;
+    }
+    return true;
+  }
   function gainVerdict(tests, opts) {
     var z = (opts && typeof opts.z === 'number') ? opts.z : PARENT_Z;
+    var guard = !(opts && opts.outlierGuard === false);
     var usable = (tests || []).filter(isTrendComparable);
-    var r = heldOnTwoReads(function (h) { return scoreChangeAt(h, z); }, usable);
+    var gz = (opts && typeof opts.guardZ === 'number') ? opts.guardZ : GAIN_GUARD_Z;
+    var plain = function (h) { var c = scoreChangeAt(h, gz); return c ? c.verdict : null; };
+    var guardedFails = false;
+    var r = heldOnTwoReads(function (h) {
+      var c = scoreChangeAt(h, z);
+      if (!c || !c.verdict || !guard) return c;
+      if (withoutEach(h, plain, c.verdict)) return c;
+      if (h.length === usable.length) guardedFails = true;
+      var o = {}; Object.keys(c).forEach(function (k2) { o[k2] = c[k2]; });
+      o.verdict = null; o.heldWithoutEach = false;
+      return o;
+    }, usable);
     var f = r.full || {};
     return { verdict: r.verdict, delta: f.delta === undefined ? null : f.delta, threshold: f.threshold === undefined ? null : f.threshold,
-             k: f.k || null, n: usable.length, full: r.full, prev: r.prev };
+             k: f.k || null, n: usable.length, full: r.full, prev: r.prev, outlierGuard: guard, restsOnOneTest: guardedFails };
+  }
+  /* pairVerdict(prev, latest, history): the single-test line ("that's X
+     higher than your last test"). tutor: pairChange's own reading (1.645,
+     for Luca). verdict (what a parent may be told it MEANS): 'gain' only
+     when the pair clears PARENT_Z one-sided (the error read at the two
+     tests' average level) AND the trend rule agrees, i.e. gainVerdict over
+     the history up to and including latest says 'gain'; 'drop' likewise.
+     So the pair line can never claim a change the trend rule would not.
+     history: score-history entries oldest first (latest is appended if it
+     is not the last one); omitted = [prev, latest], which can never pass
+     the two-read trend rule, so a bare pair is never a parent claim.
+     Returns null when either test is not comparable, else { verdict,
+     delta, threshold (parent bar), tutorThreshold, tutorReal, trend }.
+     Measured 2026-09-26 (fix3-stats/claims.js, 5,000 per row, 10 weekly
+     looks): a flat student is told a real gain 0.0% (author) / 0.0%
+     (harsh), 0.0 / 0.2% with one +150 or +200 test, where the old pair
+     line (pairChange past PARENT_Z) said so 10.7 / 27.0% (flat) and up to
+     45.7 / 55.1% (one +200 test). Gaining +20 / +30 a week: 0.7 / 2.3%
+     (harsh 1.6 / 4.6%): the line is rare by design; the trend sentence
+     carries the news. */
+  function pairVerdict(prev, latest, history, opts) {
+    var pc = pairChange(prev, latest);
+    if (!pc) return null;
+    var z = (opts && typeof opts.z === 'number') ? opts.z : PARENT_Z;
+    var bar = Math.ceil(z * Math.SQRT2 * compositeSem(levelOf([prev, latest])) / 10) * 10;
+    var h = (history || [prev]).slice();
+    if (h[h.length - 1] !== latest) h.push(latest);
+    var trend = gainVerdict(h, opts);
+    var side = pc.delta >= bar ? 'gain' : (-pc.delta >= bar ? 'drop' : null);
+    return { verdict: side && trend.verdict === side ? side : null, delta: pc.delta, threshold: bar,
+             tutorThreshold: pc.threshold, tutorReal: pc.real, trend: trend.verdict };
   }
 
   /* -- F. TARGETS AND "NOW" -------------------------------------------- */
@@ -1598,7 +1946,17 @@ var MorettiSignals = (function () {
        improving to a target 100 above the start at +10 / +20 / +30 a
          week: median lag after the true crossing 5.0 / 4.0 / 3.7 weeks
          (90th percentile 9 / 6 / 4.7), early 7.1 / 2.2 / 2.0%; twoReads
-         lag 7.0 / 5.0 / 4.7 weeks, early 1.6 / 0.2 / 0.2%. */
+         lag 7.0 / 5.0 / 4.7 weeks, early 1.6 / 0.2 / 0.2%.
+     OUTLIER GUARD (2026-09-26; opts.outlierGuard = false turns it off,
+     opts.guardZ overrides TARGET_GUARD_Z): "reached" must also hold
+     without any one comparable test (see TARGET_GUARD_Z); loWithoutBest is
+     that bound, rounded. Measured with twoReads (fix3-stats/claims.js,
+     5,000 per row, a test a week, 10 looks; harsh as gainVerdict's):
+       flat, target 40 above:   author 0.8% (no guard 2.5%), harsh 1.4% (6.2%)
+       ... one +150 test:       2.3% (8.3%), harsh 3.4% (12.6%)
+       ... one +200 test:       2.7% (12.0%), harsh 4.6% (17.0%)
+       target 100 above, reached within the 10 looks at +20 / +30 a week:
+         author 52 / 98% (66 / 99.5%), harsh 49 / 95% (64 / 98%). */
   function targetReached(tests, target, opts) {
     if (!(typeof target === 'number' && isFinite(target))) return null;
     if (opts && opts.twoReads) {
@@ -1609,11 +1967,35 @@ var MorettiSignals = (function () {
       if (cur) cur.reached = hr.held;
       return cur;
     }
-    var now = null;
-    if (opts && opts.date !== undefined) now = currentLevelAt(tests, opts.date, opts);
-    else { var c = currentLevel(tests, opts); now = c && c.now; }
+    var loOf = function (list) {
+      if (opts && opts.date !== undefined) return currentLevelAt(list, opts.date, opts);
+      var c = currentLevel(list, opts); return c && c.now;
+    };
+    var now = loOf(tests);
     if (!now) return null;
-    return { reached: now.lo >= target, lo: now.lo, level: now.level, hi: now.hi };
+    var reached = now.lo >= target, guardLo = null;
+    if (reached && !(opts && opts.outlierGuard === false)) {
+      // Must still hold without any one test, so without the luckiest one:
+      // the level without it, less TARGET_GUARD_Z of its SD, at the target.
+      var gz = (opts && typeof opts.guardZ === 'number') ? opts.guardZ : TARGET_GUARD_Z;
+      var comp = (tests || []).filter(function (e) { return isTrendComparable(e) && isFinite(msOf(e.date)); });
+      for (var i = 0; i < comp.length; i++) {
+        var sub = comp.slice(0, i).concat(comp.slice(i + 1)), lo = -Infinity;
+        var st = levelState(sub, opts);
+        if (st) {
+          var x0 = st.x0, p00 = st.p00;
+          if (opts && opts.date !== undefined) {
+            var t = msOf(opts.date), dt = isFinite(t) ? Math.max(0, (t - st.lastMs) / (7 * 86400000)) : 0;
+            x0 += dt * st.x1; p00 += 2 * dt * st.p01 + dt * dt * st.p11 + st.P.drift * st.P.drift * dt;
+          }
+          lo = x0 - gz * Math.sqrt(Math.max(0, p00));
+        }
+        if (guardLo === null || lo < guardLo) guardLo = lo;
+      }
+      if (guardLo === null || guardLo < target) reached = false;
+      guardLo = (guardLo === null || !isFinite(guardLo)) ? null : Math.round(guardLo);
+    }
+    return { reached: reached, lo: now.lo, level: now.level, hi: now.hi, loWithoutBest: guardLo };
   }
 
   /* === G. TUTOR-ONLY ANALYSES ===========================================
@@ -1682,11 +2064,19 @@ var MorettiSignals = (function () {
   /* -- G1. Does "I understand this" hold up? retryHolds -----------------
      events: PracticeLog rows; the 'retry' rows count, each with c (0|1),
      at, lm (when the miss was recorded) and ua (when the student ticked
-     "I understand this"; absent if never ticked). A tick counts only if it
-     came before the retry (a ua later than at is treated as not ticked).
+     "I understand this"; absent or '' if never ticked).
+     Re-checked 2026-09-26 (audit): ONE retry per recorded miss (s, k or
+     q, lm), the earliest - a second go at the same miss comes after the
+     first showed the answer, and counting it made a quick re-tap look
+     like knowledge that held; a retry whose tick is stamped AFTER it
+     (clock skew; the tick cannot have come first) is left out of both
+     groups instead of counting as unticked; a saved question first
+     answered right (lm '') is not a miss and is left out. leftOut counts
+     each.
      Returns { ready, have, need, ticked: rate, unticked: rate, diff: { diff,
        lo, hi } | null, byDays: [{ label, from, to, ...rate }], bar, trust,
-       note }. rate = { n, right, acc, lo, hi } (Jeffreys 80%).
+       leftOut: { repeats, tickAfter, notMiss }, note }. rate = { n, right,
+       acc, lo, hi } (Jeffreys 80%).
      trust (only when ready): 'holds' when the ticked retries' 80%
      interval sits above opts.bar (default 0.7), 'does-not-hold' when it
      sits below, else 'unclear'. */
@@ -1695,12 +2085,24 @@ var MorettiSignals = (function () {
     var bar = (opts && typeof opts.bar === 'number') ? opts.bar : 0.7;
     var need = (opts && opts.need) || G_NEED.retryHolds;
     var t = { n: 0, k: 0 }, u = { n: 0, k: 0 }, bins = RETRY_DAY_BINS.map(function () { return { n: 0, k: 0 }; });
-    (events || []).forEach(function (e) {
-      if (!e || e.b !== 'retry') return;
+    var seen = {}, repeats = 0, late = 0, notMiss = 0;
+    byTime((events || []).filter(function (e) { return e && e.b === 'retry' && okOf(e.c) !== null; })).forEach(function (e) {
       var y = okOf(e.c);
-      if (y === null) return;
+      // A saved question first answered right (lm '') is not a miss to recover from.
+      if (e.lm === '') { notMiss++; return; }
+      // One retry per recorded miss: a second go at the same miss comes
+      // after the first one showed the answer.
+      var qk = (e.k !== undefined && e.k !== null && e.k !== '') ? e.k : e.q;
+      if (qk !== undefined && qk !== null && qk !== '') {
+        var key = (e.s || '') + '|' + qk + '|' + (e.lm === undefined ? '' : e.lm);
+        if (seen[key]) { repeats++; return; }
+        seen[key] = true;
+      }
       var at = msOf(e.at), ua = e.ua === true ? -Infinity : msOf(e.ua);
-      var ticked = !!e.ua && (isNaN(ua) ? e.ua !== false : !(isFinite(at) && ua > at));
+      // A tick stamped after the retry cannot have come before it: which
+      // group the retry belongs to is unknown, so it is left out of both.
+      if (e.ua && isFinite(ua) && isFinite(at) && ua > at) { late++; return; }
+      var ticked = !!e.ua && (isNaN(ua) ? e.ua !== false : true);
       var g = ticked ? t : u;
       g.n++; g.k += y;
       var lm = msOf(e.lm);
@@ -1713,6 +2115,7 @@ var MorettiSignals = (function () {
     var out = {
       ready: ready, have: t.n, need: need, bar: bar,
       ticked: rate(t.k, t.n), unticked: rate(u.k, u.n),
+      leftOut: { repeats: repeats, tickAfter: late, notMiss: notMiss },
       diff: (t.n && u.n) ? betaDiff(t.k + 0.5, t.n - t.k + 0.5, u.k + 0.5, u.n - u.k + 0.5) : null,
       byDays: RETRY_DAY_BINS.map(function (b, i) { var r = rate(bins[i].k, bins[i].n); r.label = b[2]; r.from = b[0]; r.to = b[1] === Infinity ? null : b[1]; return r; }),
       trust: null,
@@ -1724,61 +2127,122 @@ var MorettiSignals = (function () {
 
   /* -- G2. Are this student's wrong answers the popular trap? trapPull ---
      studentWrongs: [{ q, g }] this student's wrong answers and the choice
-     picked. itemWrongCounts: { q: { choice: count } } wrong answers across
-     the whole roster. Leave-one-out: the student's own answer is taken
-     off the roster counts before anything is read from them. Only items
-     with at least 5 other roster wrong answers count. For each, the modal
-     wrong choice(s) and p = their share of the roster's wrong answers;
-     under "wrong like everyone else" the student lands on them with
-     probability p. hits vs expected = sum p, z = (hits - expected) /
-     sqrt(sum p(1 - p)).
+     picked, ALL of the student's wrong rows that itemWrongCounts counts
+     (repeats included). itemWrongCounts: { q: { choice: count } } wrong
+     answers across the whole roster, this student's rows included.
+     REBUILT (2026-09-26, audit): the old rule compared "the student picked
+     the roster's modal wrong choice" with the modal choice's share, but the
+     modal choice is picked BECAUSE its roster count ran high, so its share
+     overstates how often a random wrong answer lands on it: a student
+     wrong exactly like everyone else was told "avoids-traps" 64 / 54 / 44%
+     of the time at roster 10 / 20 / 30, and repeat misses (retries,
+     retakes) counted one question several times.
+     Now:
+       ONE wrong answer per question: the student's first row for q (input
+         order); every one of the student's rows for q is taken off the
+         roster counts (leave-self-out), so repeats never count twice.
+       popularity of the student's choice  a = c_g / n  (n other students'
+         wrong answers, c_g of them on the student's choice)
+       chance  e = what a is on average when the student is just one more
+         answer drawn like the roster's: given the n + 1 answers on the
+         question (the student's added back, C_k per choice) the student is
+         any one of them with equal chance, so e = sum_k C_k (C_k - 1) /
+         ((n + 1) n) and the variance of a around e is exact (a
+         permutation null), no model of the choice shares assumed.
+       excess = mean(a - e) over questions with n >= minRoster (5) other
+         wrong answers, 80% interval from the summed permutation variances
+         (questions are independent).
+     Measured 2026-09-26 (fix3-stats/trap-null.js, 4,000 simulated
+     students per cell, 200 questions, choice shares Dirichlet(1,1,1),
+     each student wrong on 30%): wrong exactly like the roster,
+     "drawn-to-traps" / "avoids-traps" 9.1 / 10.2% at roster 15 (ready
+     85%), 10.1 / 9.7% at 20, 8.6 / 10.1% at 40 (nominal 10 / 10); with
+     retry/retake repeats in the input 9.6 / 10.6, 9.0 / 10.7, 10.3 /
+     10.6%. At roster 10 only 3% of students reach 40 usable questions.
+     Picking the roster's most popular wrong choice on an extra 20% of
+     misses: "drawn" 24 / 25 / 30% at roster 15 / 20 / 40, "avoids" 2-3%.
      Returns { ready, have, need, hits, expected, share, expectedShare,
-       excess, lo, hi, z, verdict, note }: excess = share - expectedShare,
-       lo/hi its 80% interval; verdict (only when ready) 'drawn-to-traps'
-       (lo > 0), 'avoids-traps' (hi < 0), else 'no-clear-pull'. */
+       excess, lo, hi, z, verdict, note }: hits = sum a, expected = sum e,
+       share / expectedShare their means; verdict (only when ready)
+       'drawn-to-traps' (lo > 0), 'avoids-traps' (hi < 0), else
+       'no-clear-pull'. */
   function trapPull(studentWrongs, itemWrongCounts, opts) {
     var need = (opts && opts.need) || G_NEED.trapPull, minRoster = (opts && opts.minRoster) || 5;
-    var n = 0, hits = 0, exp = 0, v = 0;
+    var mine = {}, order = [];
     (studentWrongs || []).forEach(function (w) {
-      if (!w || w.q === undefined || w.g === undefined || w.g === null) return;
-      var counts = itemWrongCounts && itemWrongCounts[w.q];
-      if (!counts) return;
-      var g = String(w.g), tot = 0, max = 0, c = {};
-      Object.keys(counts).forEach(function (k) { var x = Math.max(0, num(counts[k]) - (k === g ? 1 : 0)); c[k] = x; tot += x; });
-      if (tot < minRoster) return;
-      Object.keys(c).forEach(function (k) { if (c[k] > max) max = c[k]; });
-      var modal = Object.keys(c).filter(function (k) { return c[k] === max; });
-      var p = modal.length * max / tot;
-      n++; exp += p; v += p * (1 - p);
-      if (modal.indexOf(g) >= 0) hits++;
+      if (!w || w.q === undefined || w.q === null || w.g === undefined || w.g === null) return;
+      var q = String(w.q);
+      if (!mine[q]) { mine[q] = { first: String(w.g), all: {} }; order.push(q); }
+      mine[q].all[String(w.g)] = (mine[q].all[String(w.g)] || 0) + 1;
     });
-    var out = { ready: n >= need, have: n, need: need, hits: hits, expected: exp,
-                share: n ? hits / n : null, expectedShare: n ? exp / n : null, excess: null, lo: null, hi: null, z: null, verdict: null,
-                note: 'Share of wrong answers on the most popular wrong choice, against what the roster predicts.' };
+    var n = 0, sumA = 0, sumE = 0, vNull = 0;
+    order.forEach(function (q) {
+      var counts = itemWrongCounts && itemWrongCounts[q];
+      if (!counts) return;
+      var own = mine[q].all, g = mine[q].first, tot = 0, c = {};
+      Object.keys(counts).forEach(function (k) { var x = Math.max(0, num(Number(counts[k])) - (own[k] || 0)); c[k] = x; tot += x; });
+      if (tot < minRoster) return;
+      // Exchangeable with the roster under the null: given the n + 1
+      // answers (the student's first one added back), the student is any
+      // one of them with equal chance, so e and the variance are exact.
+      var C = {};
+      Object.keys(c).forEach(function (k) { C[k] = c[k]; });
+      C[g] = (C[g] || 0) + 1;
+      var e = 0, m2 = 0;
+      Object.keys(C).forEach(function (k) { var w = C[k] / (tot + 1), x = (C[k] - 1) / tot; e += w * x; m2 += w * x * x; });
+      var a = (c[g] || 0) / tot;
+      n++; sumA += a; sumE += e; vNull += Math.max(0, m2 - e * e);
+    });
+    var out = { ready: n >= need, have: n, need: need, hits: sumA, expected: sumE,
+                share: n ? sumA / n : null, expectedShare: n ? sumE / n : null, excess: null, lo: null, hi: null, z: null, verdict: null,
+                note: 'How popular the student\'s wrong choices are among the roster\'s wrong answers, against chance agreement; one wrong answer per question.' };
     if (n) {
-      var sd = Math.sqrt(v) / n;
-      out.excess = (hits - exp) / n; out.lo = out.excess - Z80 * sd; out.hi = out.excess + Z80 * sd;
-      out.z = v > 0 ? (hits - exp) / Math.sqrt(v) : null;
+      var m = (sumA - sumE) / n;
+      var se = vNull > 0 ? Math.sqrt(vNull) / n : Infinity, t = Z80;
+      out.excess = m; out.lo = m - t * se; out.hi = m + t * se;
+      out.z = se > 0 && isFinite(se) ? m / se : null;
     }
     if (out.ready) out.verdict = out.lo > 0 ? 'drawn-to-traps' : (out.hi < 0 ? 'avoids-traps' : 'no-clear-pull');
     return out;
   }
 
   /* -- G3. Is slower more accurate for this student? speedAccuracy ------
-     items: [{ sec, diff, ok, seconds, budget, attempt? }] (attempt: any id
-     grouping one sitting). r = ln(seconds / budget). Per section:
+     items: [{ sec, diff, ok, seconds, budget, attempt?, key? | qid? }]
+     (attempt: any id grouping one sitting; key/qid: the question, for the
+     roster time map). r = ln(seconds / budget). Per section:
        bins     accuracy by time ratio, Jeffreys 80% intervals
        slope    logistic regression of correctness on r, with the tagged
                 difficulty offset and an ability per attempt (prior N(1.20,
                 1.22^2)) as controls; prior N(0, 3^2) on the slope. In
                 logits per e-fold of time (r + 1 = 2.7 times as long).
+     NO VERDICT FROM THE BUDGET (audit 2026-09-26): within a difficulty tier
+     the questions that take longer are also the harder ones, so the slope
+     against the budget is negative for a student whose accuracy does not
+     depend on pace at all: "slower-less-accurate" 60% of the time when
+     harder questions take 0.4 log-time longer per logit. slope/lo/hi stay
+     as a description; verdict is null.
+     opts.itemMeanSeconds { key: seconds } (optional): the roster's typical
+     (geometric mean) time on each question. When it covers at least 90% of
+     a section's timed answers (and `need` of them), the slope is refitted
+     on ln(seconds / roster time) over the covered answers - how much longer
+     than everyone else THIS student took on the same question - and only
+     then is there a verdict: 'slower-more-accurate' (controlledLo > 0),
+     'slower-less-accurate' (controlledHi < 0), else 'no-clear-link'.
+     Measured 2026-09-26 (fix3-stats/speed.js, 1,000 students per row, 200
+     timed math answers over 4 sittings from a 400-question pool, roster of
+     15 others answering 150 each, map entries with 3+ roster times; guess
+     0.25, item SD 0.7): accuracy independent of pace, harder questions
+     slower or not: "less" 8.9%, "more" 9.9% of students given a verdict
+     (83%) - nominal 10 / 10 - where the uncontrolled slope was negative
+     55-62%; guess 0.15 (the author's model) 9.2 / 9.2%. A true effect of
+     +0.5 logit per e-fold of the student's own extra time: "more" 23%.
+     A student who gives up fast on hopeless questions is "more" 28% of the
+     time: the association is real (quick answers are the wrong ones), the
+     cause is not pace, which is why the note says descriptive.
      Returns { sections: { 'reading-writing'|'math': { ready, have, need,
-       bins: [{ label, n, right, acc, lo, hi }], slope, lo, hi, verdict } },
-       note }; verdict (only when ready): 'slower-more-accurate' (lo > 0),
-       'slower-less-accurate' (hi < 0), else 'no-clear-link'. The slope
-       mixes the student's pacing with the questions: within a difficulty
-       tier the questions that take longer are also the harder ones, so a
-       negative slope is the default, not a finding about the student. */
+       bins: [{ label, n, right, acc, lo, hi }], slope, lo, hi, verdict,
+       covered, controlledSlope, controlledLo, controlledHi } }, controlled,
+       note }. */
   var SPEED_BINS = [[-Infinity, Math.log(0.5), 'under half the target'], [Math.log(0.5), Math.log(0.8), '0.5-0.8x'],
                     [Math.log(0.8), Math.log(1.25), 'on target'], [Math.log(1.25), Math.log(2), '1.25-2x'], [Math.log(2), Infinity, 'over twice the target']];
   function solveLinear(A, b) { // Gaussian elimination with partial pivoting; A is small and positive definite
@@ -1806,7 +2270,7 @@ var MorettiSignals = (function () {
     var tauA = 1 / (IRT_POP_SD * IRT_POP_SD), tauB = 1 / 9, P = nG + 1;
     var th = []; for (var i = 0; i < nG; i++) th.push(IRT_POP_MU); th.push(0);
     var Hm = null;
-    for (var it = 0; it < 60; it++) {
+    for (var it = 0; it < 100; it++) {
       var g = th.map(function (t2, j) { return j < nG ? -(t2 - IRT_POP_MU) * tauA : -t2 * tauB; });
       Hm = []; for (var a = 0; a < P; a++) { Hm.push([]); for (var b = 0; b < P; b++) Hm[a].push(a === b ? (a < nG ? tauA : tauB) : 0); }
       rows.forEach(function (r) {
@@ -1817,7 +2281,9 @@ var MorettiSignals = (function () {
       var step = solveLinear(Hm, g);
       if (!step) return null;
       var mx = 0;
-      for (var q = 0; q < P; q++) { th[q] += step[q]; mx = Math.max(mx, Math.abs(step[q])); }
+      for (var q0 = 0; q0 < P; q0++) mx = Math.max(mx, Math.abs(step[q0]));
+      var sc = mx > MAP_MAX_STEP ? MAP_MAX_STEP / mx : 1;   // the same step control as mapTheta
+      for (var q = 0; q < P; q++) th[q] += sc * step[q];
       if (mx < 1e-8) break;
     }
     // The slope's variance: the last element of H^-1.
@@ -1825,11 +2291,15 @@ var MorettiSignals = (function () {
     var col = solveLinear(Hm, e2);
     return col ? { beta: th[nG], se: Math.sqrt(Math.max(0, col[nG])) } : null;
   }
+  var SPEED_MAP_COVER = 0.9;   // share of timed answers the itemMeanSeconds map must cover
   function speedAccuracy(items, opts) {
     var need = (opts && opts.need) || G_NEED.speedAccuracy;
-    var out = { sections: {}, note: 'Accuracy by time spent; within a difficulty tier slower questions are also harder ones, so this is descriptive.' };
+    var map = (opts && opts.itemMeanSeconds && typeof opts.itemMeanSeconds === 'object') ? opts.itemMeanSeconds : null;
+    var out = { sections: {}, controlled: !!map,
+                note: map ? 'Time measured against the roster\'s own time on each question, so a question that is slow for everyone does not count as slowing down; descriptive.'
+                          : 'Accuracy by time spent; no verdict: without the roster\'s time on each question, slower questions are also harder ones.' };
     ['reading-writing', 'math'].forEach(function (sec) {
-      var rows = [], groups = {}, nG = 0;
+      var rows = [], ctl = [], groups = {}, nG = 0;
       (items || []).forEach(function (it) {
         if (!it || secKeyOf(it.sec) !== sec || !(it.seconds > 0) || !(it.budget > 0)) return;
         var y = okOf(it.ok);
@@ -1837,6 +2307,9 @@ var MorettiSignals = (function () {
         var gk = String(it.attempt === undefined ? '' : it.attempt);
         if (groups[gk] === undefined) groups[gk] = nG++;
         rows.push({ g: groups[gk], o: irtOff(it.diff), y: y, x: Math.log(it.seconds / it.budget) });
+        var key = it.key !== undefined && it.key !== null ? it.key : it.qid;
+        var mt = (map && key !== undefined && key !== null) ? Number(map[key]) : NaN;
+        if (mt > 0) ctl.push({ g: groups[gk], o: irtOff(it.diff), y: y, x: Math.log(it.seconds / mt) });
       });
       if (!rows.length) return;
       var bins = SPEED_BINS.map(function (b) {
@@ -1846,8 +2319,15 @@ var MorettiSignals = (function () {
       });
       var fit = fitSlope(rows, nG);
       var s = { ready: rows.length >= need && !!fit, have: rows.length, need: need, bins: bins,
-                slope: fit ? fit.beta : null, lo: fit ? fit.beta - Z80 * fit.se : null, hi: fit ? fit.beta + Z80 * fit.se : null, verdict: null };
-      if (s.ready) s.verdict = s.lo > 0 ? 'slower-more-accurate' : (s.hi < 0 ? 'slower-less-accurate' : 'no-clear-link');
+                slope: fit ? fit.beta : null, lo: fit ? fit.beta - Z80 * fit.se : null, hi: fit ? fit.beta + Z80 * fit.se : null, verdict: null,
+                covered: map ? ctl.length : null, controlledSlope: null, controlledLo: null, controlledHi: null };
+      if (map && ctl.length >= need && ctl.length >= SPEED_MAP_COVER * rows.length) {
+        var cf = fitSlope(ctl, nG);
+        if (cf) {
+          s.controlledSlope = cf.beta; s.controlledLo = cf.beta - Z80 * cf.se; s.controlledHi = cf.beta + Z80 * cf.se;
+          s.verdict = s.controlledLo > 0 ? 'slower-more-accurate' : (s.controlledHi < 0 ? 'slower-less-accurate' : 'no-clear-link');
+        }
+      }
       out.sections[sec] = s;
     });
     return out;
@@ -1914,39 +2394,87 @@ var MorettiSignals = (function () {
   }
 
   /* -- G5. Portal time and sessions vs score change: doseResponse ------
-     intervals: [{ from, to, scoreChange, portalMinutes, sessions }], one
-     per pair of consecutive comparable tests. Two separate least-squares
-     slopes (the two inputs move together, so one model with both would
-     split them arbitrarily): points per hour of portal time and points
-     per session, each with a t-based 80% interval.
+     intervals: [{ from, to, scoreChange, portalMinutes, sessions,
+     prevScore? }], one per pair of consecutive comparable tests, oldest
+     first. REBUILT AS ANCOVA (audit 2026-09-26): the old slope of score
+     change on portal time read regression to the mean as a dose effect -
+     a student who studies more after a disappointing test gains more next
+     time whether or not the study did anything, and the slope's 80%
+     interval sat above 0 for 48-94% of such students (10% expected). Now
+     each input gets its own least-squares fit
+       scoreChange = a + b * prevScore + c * input + d * week
+     so the previous score (how the last test went) and the student's
+     steady trend (week of the interval's end) are held fixed; c is points
+     per hour of portal time (perHour) or per session (perSession), with a
+     t-based 80% interval on n - 4 df. prevScore is the earlier test's
+     composite; without it the chain of changes stands in for it (the
+     score before interval j is the first score plus the changes before j,
+     and the unknown first score only moves the intercept), which needs the
+     intervals consecutive (each `from` the previous `to`). Without either,
+     or with an unreadable week, that fit is null.
+     Measured 2026-09-26 (fix3-stats/dose.js, 4,000 students per row,
+     levels U(900,1450), test noise from compositeSem; hours U-ish around
+     2.5 +/- 1.2 per interval): a student whose score does not respond but
+     who studies 0 / 0.5 / 1 SD more per SD the last test fell short:
+     80% interval all above 0 10.6 / 10.5 / 10.6% and all below 8.8-9.0%
+     at 16 tests, 9.9-10.2 / 9.3-9.5% at 25 (nominal 10 / 10; the old
+     slope 48-94% above); growing 15 points a week meanwhile 10.8 / 8.9%;
+     noise 1.15 x compositeSem 10.6 / 9.4%. A true dose of +10 / +20 points
+     per portal hour (lasting): above 0 for 20 / 45% at 16 tests, 31 / 75%
+     at 25.
      Returns { ready, have, need, perHour: { slope, lo, hi } | null,
-       perSession: { slope, lo, hi } | null, note }. Descriptive: weeks
-     with more practice differ from other weeks in more than practice. */
-  function olsSlope(xs, ys) {
-    var n = xs.length;
-    if (n < 3) return null;
-    var mx = 0, my = 0;
-    for (var i = 0; i < n; i++) { mx += xs[i]; my += ys[i]; }
-    mx /= n; my /= n;
-    var sxx = 0, sxy = 0;
-    for (var j = 0; j < n; j++) { sxx += (xs[j] - mx) * (xs[j] - mx); sxy += (xs[j] - mx) * (ys[j] - my); }
-    if (!(sxx > 0)) return null;
-    var b = sxy / sxx, a = my - b * mx, rss = 0;
-    for (var k = 0; k < n; k++) { var e = ys[k] - a - b * xs[k]; rss += e * e; }
-    var se = Math.sqrt(rss / (n - 2) / sxx), t = t80(n - 2);
-    return { slope: b, lo: b - t * se, hi: b + t * se };
+       perSession: { slope, lo, hi } | null, adjustedFor: ['previous
+       score', 'week'], note }. Descriptive: weeks with more practice differ
+       from other weeks in more than practice. */
+  // Least squares of y on [1, X...]; the coefficient of column `col` of X
+  // with its t-based 80% interval, or null when the design is singular.
+  function olsCoef(X, ys, col) {
+    var n = ys.length, P = X[0] ? X[0].length + 1 : 1;
+    if (n <= P) return null;
+    var row = function (i) { return [1].concat(X[i]); };
+    var A = [], b = [];
+    for (var r = 0; r < P; r++) { A.push([]); for (var c = 0; c < P; c++) A[r].push(0); b.push(0); }
+    for (var i = 0; i < n; i++) {
+      var xi = row(i);
+      for (var r2 = 0; r2 < P; r2++) { b[r2] += xi[r2] * ys[i]; for (var c2 = 0; c2 < P; c2++) A[r2][c2] += xi[r2] * xi[c2]; }
+    }
+    var beta = solveLinear(A, b);
+    if (!beta) return null;
+    var rss = 0;
+    for (var k = 0; k < n; k++) { var xk = row(k), f = 0; for (var q = 0; q < P; q++) f += xk[q] * beta[q]; rss += (ys[k] - f) * (ys[k] - f); }
+    var e = []; for (var z = 0; z < P; z++) e.push(z === col + 1 ? 1 : 0);
+    var inv = solveLinear(A, e);
+    if (!inv || !(inv[col + 1] > 0)) return null;
+    var se = Math.sqrt(rss / (n - P) * inv[col + 1]), t = t80(n - P);
+    if (!isFinite(se)) return null;
+    return { slope: beta[col + 1], lo: beta[col + 1] - t * se, hi: beta[col + 1] + t * se };
   }
   function doseResponse(intervals, opts) {
     var need = (opts && opts.need) || G_NEED.doseResponse;
     var rows = (intervals || []).filter(function (r) { return r && typeof r.scoreChange === 'number' && isFinite(r.scoreChange); });
-    var hx = [], hy = [], sx = [], sy = [];
+    // The score before each interval: prevScore when given, else the chain.
+    var chain = rows.every(function (r, i) { return i === 0 || (r.from !== undefined && r.from !== null && String(r.from) === String(rows[i - 1].to)); });
+    var haveAll = rows.length > 0 && rows.every(function (r) { return typeof r.prevScore === 'number' && isFinite(r.prevScore); });
+    var t0 = rows.length ? msOf(rows[0].to) : NaN, cum = 0, base = [];
     rows.forEach(function (r) {
-      if (typeof r.portalMinutes === 'number' && isFinite(r.portalMinutes)) { hx.push(r.portalMinutes / 60); hy.push(r.scoreChange); }
-      if (typeof r.sessions === 'number' && isFinite(r.sessions)) { sx.push(r.sessions); sy.push(r.scoreChange); }
+      var w = (msOf(r.to) - t0) / (7 * 86400000);
+      base.push({ prev: haveAll ? r.prevScore : ((chain || haveAll) ? cum : NaN), week: w, y: r.scoreChange, r: r });
+      cum += r.scoreChange;
     });
-    var ph = olsSlope(hx, hy), ps = olsSlope(sx, sy);
+    var fit = function (get) {
+      var X = [], y = [];
+      base.forEach(function (b) {
+        var v = get(b.r);
+        if (!(typeof v === 'number' && isFinite(v)) || !isFinite(b.prev) || !isFinite(b.week)) return;
+        X.push([b.prev, v, b.week]); y.push(b.y);
+      });
+      return X.length >= 6 ? olsCoef(X, y, 1) : null;
+    };
+    var ph = fit(function (r) { return typeof r.portalMinutes === 'number' ? r.portalMinutes / 60 : NaN; });
+    var ps = fit(function (r) { return r.sessions; });
     return { ready: rows.length >= need && !!(ph || ps), have: rows.length, need: need, perHour: ph, perSession: ps,
-             note: 'Descriptive: busier weeks differ from quieter ones in more than portal time.' };
+             adjustedFor: ['previous score', 'week'],
+             note: 'Adjusted for how the previous test went and the steady trend; still descriptive: busier weeks differ from quieter ones in more than portal time.' };
   }
 
   /* -- G6. Do explanations stick? explanationEffect --------------------
@@ -1955,6 +2483,12 @@ var MorettiSignals = (function () {
      its original with `twin` or `of`) is the outcome. Explained: an
      'explain' row on that question between the miss and the later attempt
      with at least opts.minMs (default 5000) milliseconds in `ms`.
+     Re-checked 2026-09-26 (audit): an explanation opened AFTER the later
+     attempt already did not count; exact duplicate rows (an outbox
+     resend) are now one event, and a "later" attempt stamped the same
+     moment as the miss is not counted, so a resent miss is never read as
+     a second wrong try. Only the first miss and the attempt after it count
+     per question, so repeats cannot enter twice.
      Returns { ready, have, need, explained: rate, notExplained: rate,
        diff: { diff, lo, hi } | null, note }; ready needs `need` later
      attempts in EACH group. Descriptive: students open explanations on
@@ -1962,8 +2496,12 @@ var MorettiSignals = (function () {
   function explanationEffect(events, opts) {
     var need = (opts && opts.need) || G_NEED.explanationEffect, minMs = (opts && typeof opts.minMs === 'number') ? opts.minMs : 5000;
     var keyOf = function (e) { return (e.s || '') + '|' + (e.twin !== undefined ? e.twin : (e.of !== undefined ? e.of : e.q)); };
-    var byQ = {};
+    var byQ = {}, dup = {};
     byTime((events || []).filter(function (e) { return e && e.q !== undefined && isFinite(msOf(e.at)); })).forEach(function (e) {
+      // The same row twice (an outbox resend) is one event, not a later attempt.
+      var d = keyOf(e) + '|' + e.b + '|' + msOf(e.at) + '|' + e.c;
+      if (dup[d]) return;
+      dup[d] = true;
       (byQ[keyOf(e)] = byQ[keyOf(e)] || []).push(e);
     });
     var ex = { n: 0, k: 0 }, no = { n: 0, k: 0 };
@@ -1971,6 +2509,8 @@ var MorettiSignals = (function () {
       var list = byQ[k], answers = list.filter(function (e) { return e.b !== 'explain' && okOf(e.c) !== null; });
       if (answers.length < 2 || okOf(answers[0].c) !== 0) return;
       var t0 = msOf(answers[0].at), t1 = msOf(answers[1].at);
+      // A later attempt stamped the same moment as the miss is not later.
+      if (!(t1 > t0)) return;
       var explained = list.some(function (e) { var t = msOf(e.at); return e.b === 'explain' && t >= t0 && t <= t1 && num(e.ms) >= minMs; });
       var g = explained ? ex : no;
       g.n++; g.k += okOf(answers[1].c);
@@ -1988,20 +2528,39 @@ var MorettiSignals = (function () {
      answer, and would read as confidence it did not earn. Returns { ready,
      have, need, sure, unsure, guessing (each a rate: n, right, acc, lo, hi,
      Jeffreys 80%), diff: sure minus not-sure { diff, lo, hi } | null,
-     verdict, sureWrong: [{ skill, n, wrong }], note }.
-     verdict (only when ready, 25+ sure first tries):
+     verdict, sureWrong: [{ skill, n, wrong }], notSure, varied,
+     informative, note }.
+     verdict (only when ready: 25+ sure first tries, see below):
        'overconfident'   the 80% interval on sure accuracy sits below 0.80:
                          answers they are sure of are wrong often enough
                          that some of what they "know" is a wrong rule;
-       'calibrated'      it sits above 0.80 and sure beats not-sure;
+       'calibrated'      it sits above 0.80;
        'unclear'         otherwise.
-     Simulated (conf-sim.js, 20,000 per cell, 15 not-sure answers): sure
-     answers truly 90% right are called overconfident 0.0-0.1% of the time
+     Simulated before the 2026-09-26 tap-habit rule (conf-sim.js, 20,000
+     per cell, 15 not-sure answers): sure answers truly 90% right are called overconfident 0.0-0.1% of the time
      at 25-80 sure answers, 85% right 0.7-2.2%; truly 70% right 48 / 56 /
      78% at 25 / 40 / 80, 65% right 69 / 80 / 96%.
+     A TAP HABIT IS NOT A FINDING (audit 2026-09-26): a student who taps
+     "Sure" as the submit button 80% of the time was called overconfident
+     31-53% of the time. Now ready also needs CONF_MIN_NOT_SURE (8)
+     not-sure first tries and "sure" on at most CONF_MAX_SURE_SHARE (95%)
+     of the tapped first tries, and either verdict needs the tap to carry
+     information: sure answers more accurate than not-sure ones (the 80%
+     interval on the difference above 0, `informative`); otherwise
+     'unclear'. Measured 2026-09-26 (fix3-stats/conf.js = the audit's
+     g3-conf.js plus rows, 3,000 students per row, 150 first tries, guess
+     0.25, item SD 0.7): Sure as the submit button 80% / 60% of the time,
+     "overconfident" 2.6 / 1.9% at the student's own level and 4.5 / 4.1%
+     on hard questions only (was 31 / 53%); honest (Sure iff own p > 0.75)
+     0.4-0.6%, "calibrated" 29-39%, ready 50-66% (was 69-89%; the rest tap
+     sure on nearly everything or have under 8 not-sure). Truly
+     overconfident (Sure iff p > 0.45): "overconfident" 66-68% of ready
+     students (ready 12-29%); sure on p plus noise SD 0.3 above 0.5: 6-13%.
      sureWrong: the skills where sure answers went wrong most (2+ of them),
      descriptive, biggest first: where to look for a misconception. */
   var CONF_SURE_BAR = 0.80;
+  var CONF_MIN_NOT_SURE = 8;       // not-sure first tries needed before any verdict (2026-09-26)
+  var CONF_MAX_SURE_SHARE = 0.95;  // ...and "sure" on at most this share of the tapped first tries
   function confidenceCalibration(events, opts) {
     var need = (opts && opts.need) || G_NEED.confidenceCalibration;
     var seen = {}, lv = [{ n: 0, k: 0 }, { n: 0, k: 0 }, { n: 0, k: 0 }], bySkill = {};
@@ -2021,11 +2580,15 @@ var MorettiSignals = (function () {
     var sureWrong = Object.keys(bySkill).filter(function (k) { return k.indexOf('n|') !== 0 && bySkill[k] >= 2; })
       .map(function (k) { return { skill: k, n: bySkill['n|' + k] || 0, wrong: bySkill[k] }; })
       .sort(function (a, b) { return b.wrong - a.wrong || b.n - a.n; }).slice(0, 3);
-    var ready = lv[2].n >= need;
+    var tapped = lv[2].n + nsN;
+    var varied = nsN >= CONF_MIN_NOT_SURE && tapped > 0 && lv[2].n <= CONF_MAX_SURE_SHARE * tapped;
+    var informative = !!(diff && diff.lo > 0);
+    var ready = lv[2].n >= need && varied;
     var verdict = null;
-    if (ready) verdict = sure.hi < CONF_SURE_BAR ? 'overconfident'
-      : ((sure.lo > CONF_SURE_BAR && diff && diff.diff > 0) ? 'calibrated' : 'unclear');
-    return { ready: ready, have: lv[2].n, need: need, sure: sure, unsure: unsure, guessing: guessing, diff: diff,
+    if (ready) verdict = !informative ? 'unclear'
+      : (sure.hi < CONF_SURE_BAR ? 'overconfident' : (sure.lo > CONF_SURE_BAR ? 'calibrated' : 'unclear'));
+    return { ready: ready, have: lv[2].n, need: need, notSure: nsN, varied: varied, informative: informative,
+             sure: sure, unsure: unsure, guessing: guessing, diff: diff,
              verdict: verdict, sureWrong: sureWrong,
              note: 'First tries in untimed practice, tapped before the answer was checked; descriptive.' };
   }
@@ -2053,17 +2616,26 @@ var MorettiSignals = (function () {
     compositeSem: compositeSem,
     HARDEST_TEST_ID: HARDEST_TEST_ID,
     isTrendComparable: isTrendComparable,
+    interruptionKind: interruptionKind,
+    isInterruptedForTrend: isInterruptedForTrend,
+    INTERRUPT_AWAY_MIN: INTERRUPT_AWAY_MIN,
     scoreChange: scoreChange,
     pairChange: pairChange,
+    pairVerdict: pairVerdict,
     currentLevel: currentLevel,
     // Shared statistics (stats build, 2026-09-26)
     IRT_OFFSETS: IRT_OFFSETS,
     SKILL_EVIDENCE_GATES: SKILL_EVIDENCE_GATES,
     PRACTICE_GATES: PRACTICE_GATES,
     PARENT_Z: PARENT_Z,
+    GAIN_GUARD_Z: GAIN_GUARD_Z,
+    TARGET_GUARD_Z: TARGET_GUARD_Z,
     skillEvidence: skillEvidence,
     itemsFromQStats: itemsFromQStats,
     skillTrend: skillTrend,
+    evidenceAttempts: evidenceAttempts,
+    formDomainOffsets: formDomainOffsets,
+    focusOf: focusOf,
     practiceEvidence: practiceEvidence,
     betaInterval: betaInterval,
     heldOnTwoReads: heldOnTwoReads,

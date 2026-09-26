@@ -620,7 +620,11 @@ window.MorettiAuth = (function () {
       preflightDataKey = preKey;
       preflightDataAt = Date.now();
       PREFLIGHT_DATA_ACTIONS.forEach(function (action) {
-        preflightData[action] = post({ action: action, session: preflightToken });
+        // qbFormat 2 (v27): the Question Bank records compact, as index.html's
+        // own getProgress asks; an older backend ignores it.
+        preflightData[action] = post(action === 'getProgress'
+          ? { action: action, session: preflightToken, qbFormat: 2 }
+          : { action: action, session: preflightToken });
       });
     }
   } catch (e) { preflightData = {}; preflightDataKey = null; }

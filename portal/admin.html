@@ -1626,7 +1626,10 @@
 
   // What this build of admin.html needs the deployment to understand. Kept
   // beside the version constant in Code.gs — bump both together.
-  var REQUIRED_BACKEND_VERSION = 24;
+  // 27 (2026-09-26): the stats rebuild. Below it, retries, explanation reads
+  // and confidence taps are held on students' devices, and the evidence card
+  // and form offsets are missing, so the page says so.
+  var REQUIRED_BACKEND_VERSION = 27;
   var CAPABILITY_LABELS = {
     calendar: 'the calendar and student pages',
     dueDates: 'due dates',
@@ -1648,6 +1651,16 @@
     studentEdit: 'editing a student\u2019s details (second parent, second SAT date)',
     fridayPreview: 'the Upcoming weekly updates card on Emails',
     weeklyTiming: 'weekly updates going the morning after each session (until then they still go on Fridays)',
+    practiceRetry: 'Saved & Mistakes retries and explanation reads reaching the practice log (prep.gs)',
+    confidence: 'the Sure / Unsure / Guessing tap reaching the practice log (prep.gs)',
+    studentEvidence: 'the What the evidence says card on each student (prep.gs)',
+    diagRetake: 'diagnostic retakes being kept on the server',
+    sessionsTab: 'the Sessions tab (prep.gs; run setUpSessionsSnapshot once)',
+    interruptKinds: 'telling a glance at another tab apart from a real interruption, so short absences no longer drop a test from the trend',
+    practiceAck: 'practice answers the server turns away staying on the student\u2019s device instead of being lost',
+    qbCompact: 'the Question Bank history syncing compactly (about 1,000 questions per student instead of 360)',
+    formOffsets: 'per-test difficulty offsets for the skill evidence (prep.gs; computed daily)',
+    evidenceFast: 'the evidence card loading from its cache for busy students',
     unsubscribe: 'the Unsubscribe link in every automatic email, and pausing a family from its Account tab',
     portalLock: 'the portal lock for each student on their Account tab',
     questionFlags: 'the Flag button on every question (flags go to the Flagged tab)',
@@ -3630,16 +3643,21 @@
      estimator (MorettiSignals.skillEvidence / skillTrend), oldest first;
      answers under the report's reading floor are marked tooFast. */
   function ctEvidenceAttempts(data) {
+    /* The SAME inputs every consumer uses (MorettiSignals.evidenceAttempts,
+       audit 3, 2026-09-26): full SAT sittings with a per-question record,
+       diagnostics in, retakes and the all-hard test out, too-fast answers
+       out (stored flag, or the time budgets for older records). */
     var MS = window.MorettiSignals;
-    if (!MS || typeof MS.itemsFromQStats !== 'function') return [];
+    if (!MS || typeof MS.evidenceAttempts !== 'function') return [];
     var budget = window.TIME_BUDGETS ? function (sec, dom, skill, diff) {
       var bd = window.TIME_BUDGETS.budgetSecondsFor(sec, dom, skill, diff, 1);
       return (bd && bd.seconds) || 0;
     } : null;
-    return (data.attempts || []).filter(function (a) { return a.qStats && a.qStats.q && a.qStats.q.length && a.mode !== 'section'; })
-      .slice().sort(function (a, c) { return String(a.at || '').localeCompare(String(c.at || '')); })
-      .map(function (a) { return { id: a.attemptId || '', testId: a.testId || '', at: a.at, items: MS.itemsFromQStats(a.qStats, budget) || [] }; });
+    return MS.evidenceAttempts(data.attempts || [], { budgetSeconds: budget });
   }
+  // The roster's per-test difficulty offsets (prep.gs runFormOffsets), or undefined.
+  function ctFormOffsets(data) { return data && data.formOffsets && data.formOffsets.offsets ? data.formOffsets.offsets : undefined; }
+
 
   function renderCrossTest(data) {
     var host = $('stu-analysis');
@@ -3787,9 +3805,10 @@
     if (!MSct || typeof MSct.skillTrend !== 'function' || evAtt.length < 2) {
       html += '<div class="empty">' + (evAtt.length < 2 ? 'Needs a second test before anything can repeat.' : 'Needs signals.js.') + '</div></div>';
     } else {
-      var trD = MSct.skillTrend(evAtt, { grain: 'domain' });
-      var evD = MSct.skillEvidence(evAtt, { grain: 'domain' });
-      var evS = MSct.skillEvidence(evAtt, { grain: 'skill' });
+      var foCT = ctFormOffsets(data);
+      var trD = MSct.skillTrend(evAtt, { grain: 'domain', formOffsets: foCT });
+      var evD = MSct.skillEvidence(evAtt, { grain: 'domain', formOffsets: foCT });
+      var evS = MSct.skillEvidence(evAtt, { grain: 'skill', formOffsets: foCT });
       var skillsIn = function (dom) {
         var list = [];
         evAtt.forEach(function (a) { a.items.forEach(function (it) { if (it.dom === dom && list.indexOf(it.skill) === -1) list.push(it.skill); }); });
@@ -3967,11 +3986,18 @@
     ['reading-writing', 'math'].forEach(function (sec) {
       var x = sa.sections[sec];
       var label = sec === 'math' ? 'Math' : 'Reading &amp; Writing';
+      /* Descriptive only (audit 3, 2026-09-26): harder questions take longer AND
+         are missed more, so a slope of accuracy on time mostly measures the
+         questions, not the student (a false "slower is less accurate" for 60%
+         of students with no such habit). The verdict is read only if
+         signals.js gives one, which it does only with per-question roster
+         times to control for. */
       var read = x && x.ready ? (x.verdict === 'slower-more-accurate'
-          ? 'Slower is more accurate for them here, beyond what harder questions explain.'
+          ? 'Slower is more accurate for them here, compared with how long each question takes other students.'
           : x.verdict === 'slower-less-accurate'
-            ? 'Their slow answers are LESS accurate: time spent past a point is not buying points.'
-            : 'No clear link between time spent and accuracy.') : '';
+            ? 'Their slow answers are less accurate than other students\u2019 on the same questions.'
+            : x.verdict === 'no-clear-link' ? 'No clear link between time spent and accuracy.'
+            : 'Accuracy by time spent, below. No verdict: slow questions are also the hard ones.') : '';
       var bins = x && x.bins ? x.bins.filter(function (b) { return b.n >= 5; }).map(function (b) { return b.label + ': ' + b.right + '/' + b.n; }).join(' · ') : '';
       rows.push(evRow('Does slowing down help? (' + label + ')', x || { ready: false, have: 0, need: MS.G_NEED ? MS.G_NEED.speedAccuracy : 160 }, read, bins));
     });
@@ -3987,6 +4013,9 @@
     // 5. Hours and sessions vs score change
     var dr = MS.doseResponse(ev.intervals || []);
     var fmtPts = function (v) { return (v > 0 ? '+' : '') + Math.round(v); };
+    // doseResponse compares each test with the level before it (not the raw
+    // change, which a bad test followed by extra work inflates); a verdict-free
+    // reading when signals.js gives no interval.
     var drRead = dr.ready ? [
         dr.perHour ? 'Per hour on the portal between tests: ' + evRange(dr.perHour.lo, dr.perHour.hi, fmtPts) + ' points.' : '',
         dr.perSession ? 'Per session: ' + evRange(dr.perSession.lo, dr.perSession.hi, fmtPts) + ' points.' : ''
@@ -4003,7 +4032,7 @@
     // 7. Does "sure" mean right? (the confidence tap, 2026-09-26)
     var cc = MS.confidenceCalibration ? MS.confidenceCalibration(events) : null;
     var ccRead = cc && cc.ready ? (cc.verdict === 'overconfident'
-        ? 'Overconfident: answers they tap "Sure" on are right only ' + evRange(cc.sure.lo, cc.sure.hi, evPct) + ' of the time, so some of what they are sure of is a wrong rule.'
+        ? 'Overconfident: answers they tap "Sure" on are right only ' + evRange(cc.sure.lo, cc.sure.hi, evPct) + ' of the time. Worth asking about the skills below: sure and wrong can be a rule learned wrong, or a habit of tapping Sure.'
         : cc.verdict === 'calibrated'
           ? 'Their "Sure" means right: ' + evRange(cc.sure.lo, cc.sure.hi, evPct) + ' of sure answers are correct, well above their unsure ones.'
           : '"Sure" answers are right ' + evRange(cc.sure.lo, cc.sure.hi, evPct) + ' of the time: not clearly off, not clearly reliable.') : '';
@@ -4036,7 +4065,7 @@
       }).join('');
       return;
     }
-    var ev = MS.skillEvidence(evAtt, { grain: 'skill' });
+    var ev = MS.skillEvidence(evAtt, { grain: 'skill', formOffsets: ctFormOffsets(data) });
     var domOf = {};
     evAtt.forEach(function (a) { a.items.forEach(function (it) { domOf[it.skill] = it.dom; }); });
     var units = Object.keys(ev.units).map(function (k) { return ev.units[k]; })

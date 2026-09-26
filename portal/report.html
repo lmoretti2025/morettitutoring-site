@@ -348,6 +348,8 @@
    every number below should be read. */
 .integrity { background: rgba(201,168,76,0.12); border: 1px solid rgba(201,168,76,0.5); border-left: 4px solid var(--gold); border-radius: 8px; padding: 12px 16px; margin: 0 0 18px; }
 .integrity-hed { font-size: 10px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: #8a6d1f; margin-bottom: 5px; }
+/* Short absences (the score still counts): one quiet line, not a warning. */
+.integrity.integrity-quiet { background: transparent; border: 0; border-left: 3px solid rgba(201,168,76,0.5); border-radius: 0; padding: 4px 12px; }
 .integrity-body { font-size: 11px; line-height: 1.65; color: var(--ink); }
 .integrity-body b { font-weight: 700; }
   .timing-chart-card { overflow: visible; }
@@ -6330,10 +6332,27 @@
     if (ranOut) what.push('left unattended until a section\u2019s clock ran out');
     var others = iv.length - reopened - ranOut;
     if (others) what.push(others + ' other break' + (others === 1 ? '' : 's') + ' of a minute or more');
+    /* THE SAME RULE AS THE TRENDS (audit 3, 2026-09-26). Since tab
+       switches are recorded, a single glance at another tab for a minute
+       and a half counted as an interruption and this banner told the family
+       to treat the score as practice, while the trend and the emails dropped
+       it. A score is set aside only when the clock ran out while away, the
+       test was closed and reopened, or the time away adds up to more than
+       ten minutes (MorettiSignals.isTrendComparable). Shorter absences are
+       stated in one quiet line and the score counts. */
+    var setAside = reopened > 0 || ranOut > 0 || totalMs > 10 * 60000;
+    if (!setAside) {
+      el.innerHTML = '<div class="integrity-body">You stepped away from the test ' + iv.length + ' time' + (iv.length === 1 ? '' : 's') +
+        ', about <b>' + mins + ' minute' + (mins === 1 ? '' : 's') + '</b> in total. The section clock kept running, and the score counts as usual.</div>';
+      el.classList.add('integrity-quiet');
+      el.style.display = '';
+      return;
+    }
+    el.classList.remove('integrity-quiet');
     el.innerHTML =
       '<div class="integrity-hed">Not taken under standard conditions</div>' +
-      '<div class="integrity-body">This attempt was interrupted &mdash; ' +
-      (what.length ? what.join(', ') + ' &mdash; ' : '') +
+      '<div class="integrity-body">This attempt was interrupted: ' +
+      (what.length ? what.join(', ') + '; ' : '') +
       '<b>' + mins + ' minute' + (mins === 1 ? '' : 's') + '</b> away from the screen in total. ' +
       'The section clocks kept running throughout, so no time was given back, but a score produced this way is not comparable to one taken straight through. ' +
       'Treat it as practice rather than as a measurement.</div>';
