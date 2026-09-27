@@ -3191,7 +3191,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Boundaries",
           "difficulty": "medium",
           "type": "mc",
-          "text": "The oldest surviving pair of spectacles in Europe, found beneath the floorboards of a German ______ two riveted lenses of quartz set in bone frames, and no arms to hook over the ears.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "text": "Spectacles reached Europe late in the thirteenth century, and the earliest examples were made for reading at a fixed distance. The oldest surviving pair of spectacles in Europe, found beneath the floorboards of a German ______ two riveted lenses of quartz in bone frames, with nothing to hook behind the ears.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
           "choices": [
             "convent has",
             "convent, has",
@@ -3233,7 +3233,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Boundaries",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Three of the instruments were recovered from the wreck in 1982, and one of ______ a brass astrolabe engraved with the arms of a Lisbon house, is now the earliest dated example of its kind.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "text": "Divers worked the wreck at intervals for a decade. Three instruments came up in 1982, and one of ______ a brass astrolabe engraved with the arms of a Lisbon house, is the earliest such instrument yet dated.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
           "choices": [
             "them:",
             "them,",
@@ -3254,7 +3254,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Transitions",
           "difficulty": "easy",
           "type": "mc",
-          "text": "Sea ice reflects most of the sunlight that strikes the surface, while open water absorbs nearly all of that light. ______ each summer of heavy melting leaves a darker ocean that warms faster the following year.<br><br>Which choice completes the text with the most logical transition?",
+          "text": "Sea ice and open water differ sharply in an important respect, their response to sunlight. Sea ice throws back the greater part of the light striking it, whereas open water takes in almost everything reaching the surface. ______ a summer of heavy melting leaves a darker ocean, warming faster in the year to follow.<br><br>Which choice completes the text with the most logical transition?",
           "choices": [
             "Thus,",
             "For example,",
@@ -3275,7 +3275,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Transitions",
           "difficulty": "easy",
           "type": "mc",
-          "text": "A stringed instrument sounds partly through the air inside its body, and the size of that cavity sets the pitch it reinforces most strongly. The thickness of the wood matters as well, since a stiffer plate moves less freely. ______ the varnish, long thought to be decoration only, adds mass that alters how the plate responds.<br><br>Which choice completes the text with the most logical transition?",
+          "text": "A stringed instrument sounds partly by means of the air in its body, a cavity whose size sets the pitch it reinforces. Plate thickness matters as well, because a stiffer plate moves little. ______ the varnish, long thought to be decoration only, adds mass and alters the response of the plate.<br><br>Which choice completes the text with the most logical transition?",
           "choices": [
             "However,",
             "Moreover,",
@@ -3296,7 +3296,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Transitions",
           "difficulty": "hard",
           "type": "mc",
-          "text": "A dictionary that records how people actually write must wait for usage to settle, and a word may circulate for decades before it earns an entry. Editors describe their task as following rather than leading. ______ the dictionary is a lagging record of the language, not a current one.<br><br>Which choice completes the text with the most logical transition?",
+          "text": "Dictionaries record the usage that has settled, and words often circulate for decades before earning an entry. Editors describe the task as following the language, never leading it. ______ dictionaries are a lagging record of English, always a little behind the speech they describe.<br><br>Which choice completes the text with the most logical transition?",
           "choices": [
             "Nevertheless,",
             "For instance,",
@@ -3317,7 +3317,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Rhetorical Synthesis",
           "difficulty": "easy",
           "type": "mc",
-          "text": "While researching a topic, a student has taken the following notes:<br><br>• Kintsugi is the Japanese practice of repairing broken pottery with lacquer mixed with gold.<br>• The repair is made conspicuous rather than hidden.<br>• A mended bowl may be valued more highly than it was before the break.<br>• The practice dates to at least the fifteenth century.<br>• The seams trace the exact line along which the piece failed.<br><br>The student wants to explain what distinguishes kintsugi from ordinary repair. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
+          "text": "While researching a topic, a student has taken the following notes:<br><br>• Kintsugi is the Japanese practice of mending broken pottery in lacquer that carries powdered gold.<br>• The mend is left conspicuous instead of hidden.<br>• A mended bowl often carries greater value in the eyes of a collector.<br>• The practice goes back to the fifteenth century.<br>• The gold seams are the exact line along which the piece failed.<br><br>The student wants to explain what distinguishes kintsugi from ordinary repair. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
           "choices": [
             "Kintsugi dates to at least the fifteenth century and is practiced in Japan on broken pottery.",
             "A bowl mended by kintsugi may be valued more highly after the repair than it was before the break.",
@@ -3338,7 +3338,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Rhetorical Synthesis",
           "difficulty": "easy",
           "type": "mc",
-          "text": "While researching a topic, a student has taken the following notes:<br><br>• Wangari Maathai founded the Green Belt Movement in Kenya in 1977.<br>• The movement paid rural women a small sum for each seedling that survived.<br>• More than fifty million trees were planted in its first three decades.<br>• Maathai was awarded the Nobel Peace Prize in 2004.<br>• Payment depended on survival, not on the number of seedlings put in the ground.<br><br>The student wants to explain how the movement’s payment scheme encouraged results. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
+          "text": "While researching a topic, a student has taken the following notes:<br><br>• Wangari Maathai founded the Green Belt Movement in Kenya in 1977.<br>• The movement paid rural women a small sum for every seedling that lived.<br>• The movement planted over fifty million trees in three decades.<br>• Maathai won the Nobel Peace Prize in 2004.<br>• Seedlings that failed brought the planter nothing.<br><br>The student wants to explain how the movement’s payment scheme encouraged results. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
           "choices": [
             "Wangari Maathai founded the Green Belt Movement in Kenya in 1977 and received the Nobel Peace Prize in 2004.",
             "The Green Belt Movement planted more than fifty million trees during its first three decades in Kenya.",
@@ -3359,7 +3359,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Rhetorical Synthesis",
           "difficulty": "hard",
           "type": "mc",
-          "text": "While researching a topic, a student has taken the following notes:<br><br>• The Antikythera mechanism is a geared bronze device recovered from a Roman-era wreck in 1901.<br>• It modeled the positions of the sun and moon and predicted eclipses.<br>• It contains at least thirty interlocking gears.<br>• No comparable geared device is known from the next thousand years.<br>• Its complexity was recognized only after X-ray imaging in the 1970s.<br><br>The student wants to convey why the mechanism is considered remarkable. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
+          "text": "While researching a topic, a student has taken the following notes:<br><br>• The Antikythera mechanism, a geared bronze device, came out of a Roman-era wreck in 1901.<br>• The gearing modeled the positions of the sun and of the moon, and predicted eclipses.<br>• Thirty interlocking gears survive, and the original count was higher.<br>• Nothing of comparable complexity is known from the following thousand years.<br>• X-ray imaging of the 1970s first revealed the complexity of the mechanism.<br><br>The student wants to convey why the mechanism is considered remarkable. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
           "choices": [
             "With at least thirty gears modeling the sun and moon, the mechanism has no known counterpart for a thousand years.",
             "Recovered from a Roman-era wreck in 1901, the Antikythera mechanism is a geared bronze device.",
