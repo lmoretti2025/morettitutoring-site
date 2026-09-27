@@ -364,6 +364,34 @@
 .cond-card.cond-fair .cond-list li::before { background: var(--gold, #C9A84C); }
 .cond-list b { font-weight: 700; }
 .cond-foot { font-size: 11px; line-height: 1.6; color: var(--mid, rgba(17,17,17,0.62)); border-top: 1px solid rgba(17,17,17,0.08); padding-top: 9px; }
+/* WHERE YOUR POINTS ARE: ranked bars (2026-09-27) */
+.rank-list { display: grid; gap: 6px; }
+.rank-row { display: grid; grid-template-columns: minmax(0, 38%) 1fr 4.6em; align-items: center; gap: 12px; width: 100%; text-align: left; background: #fff; border: 1px solid rgba(17,17,17,0.08); border-radius: 10px; padding: 9px 12px; font: inherit; color: var(--ink); cursor: pointer; }
+.rank-row:hover { border-color: rgba(176,39,28,0.35); }
+.rank-row:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.rank-name { font-size: 12px; font-weight: 600; line-height: 1.35; }
+.rank-name small { display: block; font-size: 10px; font-weight: 400; color: var(--mid); }
+.rank-bar { height: 10px; background: rgba(17,17,17,0.06); border-radius: 999px; overflow: hidden; }
+.rank-bar i { display: block; height: 100%; background: #B0271C; border-radius: 999px; }
+.rank-clock .rank-bar i { background: #4E6070; }
+.rank-pts { font-size: 14px; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
+.rank-note { font-size: 12px; line-height: 1.65; color: var(--ink); margin: 12px 2px 0; }
+.rank-note b { font-weight: 700; }
+/* PAGE 2, HEADLINE FIRST (2026-09-27) */
+.ev-line { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin: -4px 0 12px; }
+.ev-line p { margin: 0; font-size: 13px; line-height: 1.6; color: var(--ink); max-width: 62ch; }
+.ev-open { flex-shrink: 0; font-family: var(--hel); font-size: 11px; font-weight: 600; color: var(--ink); background: #fff; border: 1px solid rgba(17,17,17,0.18); border-radius: 999px; padding: 5px 12px; cursor: pointer; }
+.ev-open:hover { border-color: #B0271C; color: #B0271C; }
+.ev-open:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.ev-collapsed { display: none !important; }
+.print-only-range { display: none !important; }
+@media print { .ev-collapsed { display: block !important; } .ev-open { display: none !important; } .print-only-range { display: block !important; } }
+@media (max-width: 520px) { .ev-line { flex-direction: column; gap: 8px; } }
+/* Phone (2026-09-27): stacked, the R&W / Math row kept its 320px basis as a HEIGHT, leaving a blank gap. */
+@media (max-width: 620px) { .score-tiles-small { flex: 0 0 auto; } }
+.tile-scale { white-space: nowrap; }
+@media (max-width: 620px) { .tile-scale { display: block; } }
+@media (max-width: 520px) { .rank-row { grid-template-columns: 1fr 4em; } .rank-bar { grid-column: 1 / -1; grid-row: 2; } }
 
   .timing-chart-card { overflow: visible; }
   /* align-items:center (not baseline) keeps the module pills vertically
@@ -1015,7 +1043,7 @@
   </div>
   <div class="plain-summary" id="plain-summary" style="display:none;"></div>
   <div id="section-breakdown"></div>
-  <div class="sec-hed" id="bridge-hed">Path to target score</div>
+  <div class="sec-hed" id="bridge-hed">Where your points are</div>
   <div class="bridge-card" id="bridge-card">
     <div id="score-bridge"></div>
     <div id="bridge-note-outer"></div>
@@ -2456,7 +2484,10 @@
     // tiles, so hierarchy comes from type size/weight alone.
     var lb = document.createElement('div');
     lb.className = 'tile-lab' + (big ? ' big' : '');
-    lb.textContent = label;
+    // The scale on its own line on a phone, not broken mid-range (2026-09-27).
+    var scaleM = /^(.*?)\s*(\([^)]*\))$/.exec(label);
+    if (scaleM) { lb.textContent = scaleM[1] + ' '; var sc = document.createElement('span'); sc.className = 'tile-scale'; sc.textContent = scaleM[2]; lb.appendChild(sc); }
+    else lb.textContent = label;
     tile.appendChild(lb);
     var num = document.createElement('div');
     num.className = 'tile-score ' + (big ? 'big' : 'small');
@@ -2832,6 +2863,9 @@
         var lo = Math.max(headlineMin, Math.floor(loRaw / 10) * 10);
         var hi = Math.min(headlineMax, Math.ceil(hiRaw / 10) * 10);
         rangeEl.textContent = 'range ' + lo + '\u2013' + hi;
+        /* Said once (2026-09-27): the summary right below states the range and
+           draws it; the tile's small repeat is kept only for print. */
+        rangeEl.className += ' print-only-range';
         reportBand = { val: headlineVal, lo: lo, hi: hi, sd: SCORE_SEM / 1.2816, min: headlineMin, max: headlineMax };
         rangeEl.title = 'Measurement error on this test: the true score should fall in this range about 4 times in 5.';
         bigTile.appendChild(rangeEl);
@@ -3399,109 +3433,75 @@
       }
     })();
 
+    /* ═══ WHERE YOUR POINTS ARE: ranked bars (2026-09-27) ═══
+       Replaces the draggable waterfall: tiny wrapped labels, colours that
+       meant nothing, and a target line that often sat on the score. A
+       student or parent now reads one ranked list, biggest first, each row
+       a skill and the composite points behind its misses (to the nearest 10,
+       as the walkthrough shows them), tap a row for the questions. Then two
+       plain sentences: what fixing the top few would do, and what every
+       miss corrected comes to. The same shownItems / reachable the
+       walkthrough reads, so the two never disagree. */
     function renderBridge() {
       bridgeWrap.innerHTML = '';
       var noteOuter = document.getElementById('bridge-note-outer');
       if (noteOuter) noteOuter.innerHTML = '';
       var outer = document.createElement('div');
-      outer.className = 'bridge-wrap';
-
-      var row = document.createElement('div');
-      row.className = 'bridge-target-row';
-      row.innerHTML = '<span><span class="bt-lab">Current: </span>' + currentComposite + '</span>' +
-        '<span><span class="bt-lab">' + (targetIsOwn ? 'Your target: ' : 'Try a target: ') + '</span><input type="number" id="bt-input" value="' + targetScore + '" min="' + currentComposite + '" max="' + scoreMax + '" step="' + (isSAT ? 10 : 1) + '"> <span class="bt-static">' + targetScore + '</span> <button type="button" class="bt-reset" id="bt-reset">reset</button> <span class="bt-drag-hint">or drag the dashed line below</span></span>';
-      outer.appendChild(row);
-
-      var canvasWrap = document.createElement('div');
-      canvasWrap.className = 'bridge-canvas-wrap';
-      outer.appendChild(canvasWrap);
-
+      outer.className = 'rank-wrap';
       if (!shownItems.length) {
-        var msg2 = document.createElement('div');
-        msg2.className = 'bridge-empty';
-        msg2.textContent = 'Not enough missed questions on this test to attribute recoverable points to specific skills yet.';
-        canvasWrap.appendChild(msg2);
-      } else {
-        canvasWrap.appendChild(drawBridge(shownItems, currentComposite, reachable, targetScore, applyTargetChange, onBarClick));
-        if (!bridgeAnimated) { bridgeAnimated = true; animateOnReveal(canvasWrap, armCanvasWipe); }
-
-        if (!noteOuter) { bridgeWrap.appendChild(outer); return; }
-
-        // Leftover points without their own bar are stated as a sentence, not a
-        // bar: they sum several small skills, a different kind of fact from one
-        // fixable gap. Placed below the card (#bridge-note-outer) as commentary
-        // on the whole section.
-        if (genericOtherPts >= 0.5) {
-          var otherNote = document.createElement('div');
-          otherNote.className = 'bridge-note-block bridge-other-note';
-          var otherPtsLabel = isSAT ? Math.max(10, roundToTen(genericOtherPts)) : Math.round(genericOtherPts);
-          otherNote.textContent = 'Plus roughly ' + otherPtsLabel + ' more points spread across ' + genericOtherN + ' other ' + (genericOtherN === 1 ? 'skill' : 'skills') + ', each too small on its own to call out by name.';
-          noteOuter.appendChild(otherNote);
-        }
-
-        var note = document.createElement('div');
-        note.className = 'bridge-note-block';
-        /* Says what the right-hand bar is before anyone reads it as a forecast:
-           the arithmetic total of every miss, usually near the top of the
-           scale because "every question right" IS a perfect score. The bars
-           say where the points sit. */
-        /* Says what the bars are, and names the clock bar separately when there
-           is one, since it's the bar most likely misread as "another topic
-           to study". */
-        /* ═══ WHERE THE POINTS ARE, NOT WHAT TO DO FIRST ═══
-           The bars rank by SIZE of opportunity; "What went wrong" ranks by
-           CAUSE; section 1 by what the evidence separates from the student's
-           baseline. A big bar with no section 1 finding means real points
-           this form couldn't prove are a weakness; the copy says so.
-
-           Deliberately NOT solved by hiding those bars: a uniformly weak
-           student has almost no separated areas, so the chart would empty
-           for the reader who most needs it. */
-        var baseText = clockShown
-          ? 'Each colored bar is the composite points sitting behind one skill on this test. The slate bar at the right is different: those are points on questions the clock never allowed, and no amount of re-teaching moves them — the fix there is pacing, not content. Hover any bar for detail, or click it to see those questions.'
-          : 'Each bar is the composite points sitting behind one skill on this test. Hover a bar for that skill\'s accuracy, or click it to see those questions.';
-        baseText += ' This chart is sized by where the points are, not by what to work on first. The sections below rank that, and a large bar here without a matching finding there means the points are real but this one test could not separate that area from your own average.';
-        baseText += ' The dashed bar on the right, ' + reachable + ', is what you would score with every single miss corrected' +
-          (hitCeiling ? ' — the top of the scale' : '') +
-          '. It is a ceiling, not a projection: no test can tell you how much of it is actually reachable, and real gains are a fraction of it.';
-        var HIGH_BAND = isSAT ? 1500 : 34;
-        if (currentComposite >= HIGH_BAND || targetScore >= HIGH_BAND) {
-          baseText += ' Scores at this level are disproportionately hard to move: the remaining questions skew toward the hardest on the test, so each additional point typically takes more practice than earlier gains did.';
-        }
-        /* Don't claim the target is "within reach" (true by construction below
-           the ceiling). State how much of the identified gap the target
-           needs instead, which the data does support. */
-        var targetText;
-        var needed = targetScore - currentComposite;
-        var pool = reachable - currentComposite;
-        var shareOfPool = pool > 0 ? needed / pool : 1;
-        if (targetScore >= reachable) {
-          targetText = 'The dashed line marks the target of ' + targetScore + ', above even that ceiling — it will take growth beyond what this test can pinpoint.';
-        } else if (shareOfPool >= 0.6) {
-          targetText = 'The dashed line marks the target of ' + targetScore + '. That is ' + Math.round(shareOfPool * 100) +
-            '% of everything missed here, so it needs sustained work across most of the list above, not a few fixes.';
-        } else {
-          targetText = 'The dashed line marks the target of ' + targetScore + '. That is ' + Math.round(shareOfPool * 100) +
-            '% of everything missed here, reachable by closing the largest gaps above rather than all of them.';
-        }
-        note.textContent = baseText + ' ' + targetText;
-        noteOuter.appendChild(note);
+        outer.innerHTML = '<div class="bridge-empty">Not enough missed questions on this test to say where the points are yet.</div>';
+        bridgeWrap.appendChild(outer);
+        return;
       }
-
+      var r10 = function (p) { return isSAT ? Math.round(p / 10) * 10 : Math.round(p); };
+      var ptsTxt = function (p) { var v = r10(p); return (p > 0 && v === 0) ? 'under +10' : '+' + v; };
+      var nameOf = function (it) {
+        if (it.filterType === 'clock') return 'Questions the clock never allowed';
+        var l = String(it.label || '');
+        var m = /^Other\s*[—–-]+\s*(.+?)\s*\((\d+) skills?\)\s*$/.exec(l);
+        // A grouped bar: the area's smaller skills together ("the rest of" read wrong when none of its skills is listed apart).
+        return m ? m[1] + ' (' + m[2] + ' skills together)' : l;
+      };
+      var items = shownItems.slice().sort(function (a, b) { return b.points - a.points; });
+      var max = items[0].points || 1;
+      var list = document.createElement('div');
+      list.className = 'rank-list';
+      items.forEach(function (it) {
+        var row = document.createElement('button');
+        row.type = 'button';
+        row.className = 'rank-row' + (it.filterType === 'clock' ? ' rank-clock' : '');
+        row.innerHTML = '<span class="rank-name">' + esc(nameOf(it)) +
+            (it.filterType === 'clock' ? '<small>a pacing fix, not a topic to study</small>' : '') + '</span>' +
+          '<span class="rank-bar"><i style="width:' + Math.max(4, Math.round(100 * it.points / max)) + '%"></i></span>' +
+          '<span class="rank-pts">' + ptsTxt(it.points) + '</span>';
+        row.setAttribute('aria-label', nameOf(it) + ': about ' + ptsTxt(it.points) + ' points. Show these questions.');
+        row.addEventListener('click', function () { onBarClick(it); });
+        list.appendChild(row);
+      });
+      outer.appendChild(list);
+      // What the top of the list would do, and the ceiling, in two sentences.
+      var topN = Math.min(3, items.length), topPts = items.slice(0, topN).reduce(function (a, it) { return a + it.points; }, 0);
+      var lines = [];
+      lines.push('Fixing the top ' + (topN === 1 ? 'one' : topN === 2 ? 'two' : 'three') + ' would be worth about <b>' + ptsTxt(topPts) + '</b>, to about <b>' +
+        Math.min(scoreMax, r10(currentComposite + topPts)) + '</b>.');
+      if (targetIsOwn && targetScore > currentComposite) {
+        var acc = currentComposite, k = 0;
+        while (k < items.length && acc < targetScore) { acc += items[k].points; k++; }
+        lines.push(acc >= targetScore
+          ? 'The target of <b>' + targetScore + '</b> is inside the first ' + (k === 1 ? 'one' : k) + ' on the list.'
+          : 'The target of <b>' + targetScore + '</b> is above what this list adds up to, so it needs growth beyond this one test.');
+      }
+      lines.push('Every miss on this test corrected would be about <b>' + reachable + '</b>' + (hitCeiling ? ', the top of the scale' : '') +
+        '. That is a ceiling, not a forecast: real gains come a few questions at a time.');
+      if (genericOtherPts >= 0.5) {
+        lines.push('Another ' + (isSAT ? Math.max(10, roundToTen(genericOtherPts)) : Math.round(genericOtherPts)) + ' or so points are spread across ' +
+          genericOtherN + ' other ' + (genericOtherN === 1 ? 'skill, too small to list on its own.' : 'skills, each too small to list on its own.'));
+      }
+      var note = document.createElement('p');
+      note.className = 'rank-note';
+      note.innerHTML = lines.join(' ');
+      outer.appendChild(note);
       bridgeWrap.appendChild(outer);
-
-      var input = document.getElementById('bt-input');
-      input.addEventListener('change', function () {
-        var v = parseInt(input.value, 10);
-        if (isNaN(v)) return;
-        applyTargetChange(v);
-      });
-      document.getElementById('bt-reset').addEventListener('click', function () {
-        targetScore = defaultTarget;
-        targetIsOwn = studentTarget !== null;
-        try { localStorage.removeItem(storeKey); } catch (e) {}
-        renderBridge();
-      });
     }
 
     function roundTopRect(ctx, x, y, wid, hgt, r) {
@@ -6430,6 +6430,8 @@
      questions rushed and no review. A score taken like that is not a
      test-day score, and the report says so before its numbers, with the
      evidence. Nothing is shown when the conditions were good. */
+  // What the conditions card showed, so later sections do not say it again.
+  var conditionsShown = null;
   (function renderConditions() {
     var MSc = window.MorettiSignals, el = document.getElementById('cond-card');
     if (!el || !MSc || typeof MSc.sittingConditions !== 'function' || !Array.isArray(data.s)) return;
@@ -6454,8 +6456,15 @@
        away" line is dropped so the same minutes are not told twice. */
     var ib = document.getElementById('integrity-banner'), interrupted = '';
     if (ib && ib.style.display !== 'none' && ib.innerHTML) {
-      var ibBody = ib.querySelector('.integrity-body');
-      if (!ib.classList.contains('integrity-quiet') && ibBody) interrupted = '<li><span><b>Interrupted:</b> ' + ibBody.innerHTML + '</span></li>';
+      // One short line from the interruption log (the banner's paragraph ran to eight lines on a phone).
+      if (!ib.classList.contains('integrity-quiet') && Array.isArray(data.iv)) {
+        var ivMs = data.iv.reduce(function (a, e) { return a + (e.ms || 0); }, 0);
+        var what = [];
+        if (data.iv.some(function (e) { return e.k === 'ranout'; })) what.push('the section clock ran out while away');
+        if (data.iv.some(function (e) { return e.k === 'reopened'; })) what.push('the test was closed and reopened');
+        interrupted = '<li><span><b>Interrupted:</b> ' + (what.length ? what.join(', and ') + ', ' : '') +
+          Math.max(1, Math.round(ivMs / 60000)) + ' minutes away from the test in all.</span></li>';
+      }
       ib.style.display = 'none';
     }
     var shown = c.signals.filter(function (x) { return !(interrupted && x.id === 'away'); });
@@ -6469,6 +6478,18 @@
       }).join('') + '</ul>' +
       '<div class="cond-foot">Test day is one sitting in the morning: about 10 minutes between the two sections, every minute used, and a check of each module before it is submitted. The closer practice gets to that, the more its score means.</div>';
     el.style.display = '';
+    conditionsShown = c;
+    /* Said once (2026-09-27): the habits list at the bottom repeated "taken
+       late at night" and "time left on the clock"; the card now carries them. */
+    var ids = c.signals.map(function (x) { return x.id; });
+    var bw = document.getElementById('behavior-section');
+    if (bw) {
+      Array.prototype.forEach.call(bw.querySelectorAll('.takeaways li'), function (li) {
+        var tx = li.textContent || '';
+        if ((ids.indexOf('late') >= 0 && /^Taken late at night/.test(tx)) || (ids.indexOf('left-time') >= 0 && /^Time left on the clock/.test(tx))) li.parentNode.removeChild(li);
+      });
+      Array.prototype.forEach.call(bw.querySelectorAll('.takeaways'), function (ul) { if (!ul.children.length) ul.parentNode.removeChild(ul); });
+    }
   })();
 
   /* ═══ THE DIAGNOSIS ═══
@@ -7716,7 +7737,8 @@
       var parentHtml = '<p class="plain-parent"><b>For parents:</b> ' + problem + planLine +
         (planLine ? ' The best help at home is protecting those hours, and making' : ' The best help at home is making') + ' the next practice test one quiet, timed sitting' +
         (late ? ' earlier in the day' : '') + ', with the phone in another room.</p>';
-      var lateHtml = late
+      // The conditions card above already says it, with the evidence (2026-09-27).
+      var lateHtml = late && !(conditionsShown && conditionsShown.signals.some(function (x) { return x.id === 'late'; }))
         ? '<p class="plain-well"><b>Worth knowing:</b> this test was handed in late at night, so the score may not reflect test day. Take the next one earlier in the day.</p>'
         : '';
 
@@ -7800,6 +7822,76 @@
       syncAll();
       box.style.display = '';
     } catch (e) { if (window.console) console.warn('plain layer:', e); }
+  })();
+
+  /* ═══ PAGE 2, HEADLINE FIRST (2026-09-27) ═══
+     The evidence page was six open sections of charts and fine print. Each
+     now shows its heading and one plain sentence read from its own numbers,
+     with the chart behind "Show details", so a student or parent can read
+     page 2 top to bottom in a minute and open only what they want. Print
+     shows everything. "Where the points went" is said on page 1 (the
+     summary), so its section here is left out. */
+  (function evidenceHeadlines() {
+    var q = function (id) { return document.getElementById(id); };
+    var txt = function (el) { return el ? (el.textContent || '').replace(/\s+/g, ' ').trim() : ''; };
+    var first = function (s) { var m = /^(.+?[.!?])(\s|$)/.exec(s); return m ? m[1] : s; };
+    var andJoin = function (a) { return a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1]; };
+    ['dx-hed', 'dx-card'].forEach(function (id) { var e = q(id); if (e) e.style.display = 'none'; });
+    var sections = [
+      { hed: 'bridge-hed', body: ['bridge-card', 'bridge-note-outer'], line: function () {
+        var rows = document.querySelectorAll('#bridge-card .rank-row'), parts = [];
+        for (var i = 0; i < Math.min(3, rows.length); i++) {
+          var nm = rows[i].querySelector('.rank-name'), small = nm && nm.querySelector('small');
+          var nmT = (small ? txt(nm).replace(txt(small), '').trim() : txt(nm)).replace(/\s*\(\d+ skills?( together)?\)$/, '');
+          parts.push(nmT + ' (' + txt(rows[i].querySelector('.rank-pts')) + ')');
+        }
+        return parts.length ? 'The most points sit in ' + andJoin(parts) + '.' : ''; } },
+      { hed: 'skilldx-hed', body: ['skilldx-card'], line: function () {
+        // The lead and its reason: two sentences when they are short enough to read at a glance.
+        var all = txt(q('skilldx-headline')), one = first(all), two = first(all.slice(one.length).trim());
+        return (two && (one + ' ' + two).length <= 230) ? one + ' ' + two : one; } },
+      { hed: 'budget-hed', body: ['budget-sub', 'budget-card'], line: function () {
+        var parts = [];
+        Array.prototype.forEach.call(document.querySelectorAll('#budget-card .budget-sec'), function (sc) {
+          var v = txt(sc.querySelector('.budget-verdict')), n = txt(sc.querySelector('.budget-sec-name'));
+          v = v.replace(/^first looks:\s*/i, '');
+          if (n && v) parts.push(n + ': ' + v.charAt(0).toLowerCase() + v.slice(1));
+        });
+        return parts.length ? parts.join('. ') + '.' : ''; } },
+      { hed: 'timing-hed', body: ['timing-card'], line: function () {
+        var v = txt(q('route-verdict'));
+        return v ? 'Every question in the order it was answered, one module at a time. ' + first(v) : ''; } },
+      { hed: 'behavior-hed', body: ['behavior-section'], line: function () {
+        var parts = [];
+        Array.prototype.forEach.call(document.querySelectorAll('#behavior-section .bp-tile'), function (t) {
+          var fig = t.querySelector('.bp-fig'), of = fig && fig.querySelector('small');
+          var n = fig ? txt(fig).replace(of ? txt(of) : '', '').trim() : '', cap = txt(t.querySelector('.bp-cap'));
+          if (n && cap) parts.push(n + (of ? ' of ' + txt(of).replace('/', '') : '') + ' ' + cap);
+        });
+        return parts.length ? andJoin(parts.slice(0, 4)) + '.' : ''; } }
+    ];
+    sections.forEach(function (sec) {
+      var hed = q(sec.hed);
+      if (!hed || hed.style.display === 'none') return;
+      var line = '';
+      try { line = sec.line(); } catch (e) { line = ''; }
+      if (!line) return;
+      var bodies = sec.body.map(q).filter(function (e) { return e && e.style.display !== 'none'; });
+      if (!bodies.length) return;
+      var p = document.createElement('div');
+      p.className = 'ev-line';
+      p.innerHTML = '<p>' + esc(line) + '</p><button type="button" class="ev-open" aria-expanded="false">Show details</button>';
+      hed.parentNode.insertBefore(p, hed.nextSibling);
+      bodies.forEach(function (b) { b.classList.add('ev-collapsed'); });
+      p.querySelector('.ev-open').addEventListener('click', function () {
+        var open = this.getAttribute('aria-expanded') !== 'true';
+        this.setAttribute('aria-expanded', open ? 'true' : 'false');
+        this.textContent = open ? 'Hide details' : 'Show details';
+        bodies.forEach(function (b) { b.classList.toggle('ev-collapsed', !open); });
+        // Charts that size themselves to their box re-fit once they can be measured.
+        if (open) { try { window.dispatchEvent(new Event('resize')); } catch (e) {} }
+      });
+    });
   })();
 
   /* THE WALKTHROUGH (report-tour.js, Luca 2026-09-26): the story of this
