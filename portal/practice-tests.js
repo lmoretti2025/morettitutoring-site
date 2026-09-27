@@ -3592,7 +3592,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Command of Evidence (Quantitative)",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Parchment was costly, and a scribe could fit more text on a page either by ruling more lines or by abbreviating more heavily. A scriptorium short of parchment might be expected to lean on whichever of the two techniques the scriptorium had already mastered, so that any one scriptorium should show much of one and little of the other. Measurements from four manuscripts bear that out, since ______<table class=\"dx-table\"><tr><th>Manuscript</th><th>Lines per page</th><th>Abbreviations per 100 words</th></tr><tr><td>Corbie</td><td>34</td><td>9</td></tr><tr><td>Tours</td><td>26</td><td>21</td></tr><tr><td>Reims</td><td>33</td><td>11</td></tr><tr><td>Fulda</td><td>25</td><td>23</td></tr></table><br><br>Which choice most effectively uses data from the table to complete the statement?",
+          "text": "Parchment was costly. A scribe could fit extra text on the page by ruling additional lines, or by abbreviating heavily (writing shortened forms of the commonest words), and a scriptorium short of parchment would be expected to lean on whichever of the two techniques it had already mastered. In that case a single scriptorium should show much of the one and little of the other. The table shows that ______<table class=\"dx-table\"><tr><th>Manuscript</th><th>Lines per page</th><th>Abbreviations per 100 words</th></tr><tr><td>Corbie</td><td>34</td><td>9</td></tr><tr><td>Tours</td><td>26</td><td>21</td></tr><tr><td>Reims</td><td>33</td><td>11</td></tr><tr><td>Fulda</td><td>25</td><td>23</td></tr></table><br><br>Which choice most effectively uses data from the table to complete the statement?",
           "choices": [
             "the two manuscripts with the most lines per page are also the two that abbreviate least.",
             "the Tours and Fulda manuscripts abbreviate more than twice as heavily as the Corbie manuscript does.",
@@ -3613,7 +3613,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Command of Evidence (Textual)",
           "difficulty": "medium",
           "type": "mc",
-          "text": "Wuthering Heights is an 1847 novel by Emily Brontë. The narrator, Nelly Dean, often states what another character was thinking as though she had watched it happen:<br><br>Which quotation from Wuthering Heights most effectively illustrates the claim?",
+          "text": "Wuthering Heights is an 1847 novel by Emily Brontë. Its narrator, Nelly Dean, has been a servant in both houses for most of her life, and she reports the thoughts of other characters as confidently as she reports their words and their movements:<br><br>Which quotation from Wuthering Heights most effectively illustrates the claim?",
           "choices": [
             "“I ran to the children’s room: their door was ajar, I saw they had never lain down, though it was past midnight.”",
             "“The other, I felt certain, recalled it often in the course of the evening.”",
@@ -3634,7 +3634,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Command of Evidence (Textual)",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Genetic data published since 2011 have been read against the view that the earliest domesticated rice spread outward from a single river valley. The alternative account holds that cultivation began independently at several sites, and that the shared traits of early domesticated grains reflect the same selective pressures acting separately rather than descent from one stock.<br><br>Which finding, if true, would most directly support this position?",
+          "text": "Genetic data published since 2011 have been read against the view that domesticated rice spread outward in one direction, out of a single river valley. An alternative account holds that cultivation of rice began independently at several sites, and that the traits early cultivated grains have in common point to selective pressures acting on each population separately. On that account the grains owe their likeness to the conditions they were grown in, not to a shared ancestor.<br><br>Which finding, if true, would most directly support this position?",
           "choices": [
             "Grains recovered from the river valley are several centuries older than grains from any other site.",
             "Grains from three distant sites carry different genetic markers for the same non-shattering trait.",
@@ -3655,7 +3655,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Inferences",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Cleaner shrimp remove parasites from fish that visit them, and a fish will hold still to be worked on. In a 2010 experiment testing whether the shrimp distinguish visitors that have somewhere else to go, each shrimp was offered two fish in turn: one taken from a reef with several cleaning stations, and one from an isolated outcrop—a lone rock head—with only that station. Shrimp gave the visitor from the multi-station reef longer sessions and took fewer bites of the mucus. Where both fish came from the isolated outcrop, sessions were the same length. The results therefore suggest that ______<br><br>Which choice most logically completes the text?",
+          "text": "Cleaner shrimp remove parasites from the skin of a visiting fish, and the fish holds still for the work. A 2010 experiment tested whether the shrimp respond to a visitor’s opportunities elsewhere, or are indifferent to them. Every shrimp received two fish in turn, one raised beside a reef of several cleaning stations, the second beside a lone outcrop—a single rock head—that held only one station. Shrimp gave the reef fish noticeably longer sessions and took fewer bites of its mucus, while two fish drawn off the lone outcrop received sessions of equal length. The results therefore suggest that ______<br><br>Which choice most logically completes the text?",
           "choices": [
             "shrimp prefer the mucus of fish that come from reefs with several cleaning stations.",
             "shrimp adjust their treatment of a client according to whether it has an alternative.",
@@ -3676,7 +3676,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Inferences",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Wheat sown in autumn yields more than wheat sown in spring, which agronomists have long attributed to the longer growing season. To separate season length from cold exposure, a team sowed one plot in autumn, a second in spring, and a third in spring after the seed had been held at four degrees Celsius for eight weeks. The third plot yielded almost as much as the autumn plot, and far more than the untreated spring plot, although both spring plots had the same number of growing days. It can therefore be inferred that ______<br><br>Which choice most logically completes the text?",
+          "text": "Wheat sown in autumn outyields wheat sown in spring, an advantage agronomists long ascribed to the length of the growing season. A team separated season length from cold exposure by sowing three plots, one in autumn, one in spring, and one in spring with seed previously chilled to four degrees Celsius for eight weeks. The chilled plot came close to the yield of the autumn plot and far exceeded the yield of the untreated spring plot, though the two spring plots enjoyed identical numbers of growing days. The team therefore concluded that ______<br><br>Which choice most logically completes the text?",
           "choices": [
             "autumn-sown wheat would yield still more if the seed were chilled before it was sown.",
             "wheat held at four degrees for eight weeks will germinate sooner in the field than wheat that has not been.",
