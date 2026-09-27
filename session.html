@@ -146,6 +146,17 @@
   textarea { min-height: 76px; resize: vertical; }
   .two { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
   .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .mg-list { list-style: none; margin: 0 0 6px; padding: 0; }
+  .mg-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 12px 0; border-top: 1px solid var(--line); }
+  .mg-row:first-child { border-top: 0; }
+  .mg-when { font-size: .95rem; color: var(--ink); }
+  .mg-when small { display: block; font-size: .78rem; color: var(--muted); }
+  .mg-row.is-gone .mg-when { color: var(--faint); text-decoration: line-through; }
+  .mg-acts { display: flex; gap: 8px; }
+  .mg-acts .btn { padding: .6rem 1rem; }
+  .mg-note { font-size: .8rem; color: var(--muted); }
+  #manage h2 { font-family: var(--display); font-weight: 400; font-size: 1.5rem; margin: 0 0 4px; color: var(--ink); }
+  #manage { margin-bottom: 18px; }
   #status { min-height: 1.4em; margin: 12px 0 0; font-size: .86rem; color: var(--muted); }
   #status.err { color: var(--red); }
 
@@ -180,12 +191,13 @@
     </div>
     <div class="lbl" style="margin-top:40px">Tutoring session &middot; 60 minutes to 2 hours</div>
     <h1>Book your <em>next session.</em></h1>
-    <p class="sub">Choose how long, then a day and a time. The calendar invite comes straight to your inbox.</p>
-    <div class="facts"><span>Online or in person</span><span>Google Meet link included for online</span></div>
+    <p class="sub">Choose how long, then a day and a time. Your confirmation comes straight to your inbox.</p>
+    <div class="facts"><span>Online or in person</span><span>One Google Meet link for every online session</span></div>
   </div>
 </header>
 
 <main class="shell">
+  <section class="card" id="manage" aria-label="Your sessions" hidden></section>
   <section class="card" aria-label="Choose a day">
     <div class="len-row">
       <div class="lengths" role="group" aria-label="Session length">
@@ -226,6 +238,14 @@
       <div class="two">
         <div><label for="b-student">Student&rsquo;s name</label><input id="b-student" required maxlength="80"></div>
         <div><label for="b-phone">Phone <span class="opt">(optional)</span></label><input id="b-phone" type="tel" autocomplete="tel" maxlength="30"></div>
+      </div>
+      <div id="repeat-wrap">
+        <label for="b-repeat">How often</label>
+        <select id="b-repeat">
+          <option value="1">Just this once</option>
+          <option value="4">Every week, for 4 weeks</option>
+          <option value="8">Every week, for 8 weeks</option>
+        </select>
       </div>
       <label for="b-notes">Anything to focus on? <span class="opt">(optional)</span></label>
       <textarea id="b-notes" maxlength="500"></textarea>
@@ -467,6 +487,8 @@
     $('sheet-lbl').textContent = 'Almost booked';
     $('sheet-title').textContent = 'Your details';
     say('');
+    $('repeat-wrap').hidden = !!moving;
+    $('go').textContent = moving ? 'Move the session' : 'Book the session';
     showStep('form');
     setTimeout(function () { (!$('b-name').value ? $('b-name') : $('go')).focus(); }, 60);
   }
@@ -485,12 +507,15 @@
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { say('Please check your email address.', true); $('b-email').focus(); return; }
     if (student.length < 2) { say('Please add the student’s name.', true); $('b-student').focus(); return; }
     var details = { name: name, email: email, phone: $('b-phone').value.trim(), student: student, where: WHERE };
-    $('go').disabled = true; $('go').textContent = 'Booking…';
+    $('go').disabled = true; $('go').textContent = moving ? 'Moving…' : 'Booking…';
     say('This takes about 15 seconds, so please keep this page open.');
-    post({ action: 'bookSession', start: chosen, minutes: LEN, requestId: requestId, name: name, email: email,
-           phone: details.phone, student: student, where: details.where, notes: $('b-notes').value.trim(), website: $('b-website').value }, BOOK_TIMEOUT_MS)
+    var req = { action: 'bookSession', start: chosen, minutes: LEN, requestId: requestId, name: name, email: email,
+           phone: details.phone, student: student, where: details.where, notes: $('b-notes').value.trim(), website: $('b-website').value,
+           repeat: moving ? 1 : Number($('b-repeat').value) };
+    if (moving) { req.replace = MANAGE; req.replaceStart = moving.start; }
+    post(req, BOOK_TIMEOUT_MS)
       .then(function (d) {
-        $('go').disabled = false; $('go').textContent = 'Book the session';
+        $('go').disabled = false; $('go').textContent = moving ? 'Move the session' : 'Book the session';
         if (d && d.ok) {
           try { localStorage.setItem(SAVED, JSON.stringify(details)); } catch (e) {}
           return done(d, email, details);
@@ -498,6 +523,8 @@
         var err = d && d.error;
         if (err === 'slot_taken') { closeSheet(); return load('That time was just taken. Here is what is open now.'); }
         if (err === 'inperson_hours') { closeSheet(); setWhere('inperson'); return load('That time runs past the library\u2019s hours. Here are the in-person times that fit.'); }
+        if (err === 'too_late') return say('That session is less than 24 hours away, so it can\u2019t be moved here. Text me at ' + PHONE + '.', true);
+        if (err === 'bad_token' || err === 'not_found') return say('That session could not be found. Text me at ' + PHONE + ' and I\u2019ll sort it out.', true);
         if (err === 'too_many') return say('You already have ' + (d.count || 4) + ' upcoming sessions booked. To add more, text me at ' + PHONE + '.', true);
         if (err === 'bad_email') return say('Please check your email address.', true);
         if (err === 'bad_phone') return say('Please check the phone number, or leave it blank.', true);
@@ -508,28 +535,93 @@
   });
 
   function done(d, email, details) {
-    try { if (window.MTrack) window.MTrack.event('schedule_session', { page: location.pathname, minutes: LEN }); } catch (e) {}
-    var start = d.start || chosen;
-    var eastern = sameZoneAsLuca() ? '' : ' (' + fmt(start, TIME, LUCA_TZ) + ' Eastern)';
+    try { if (window.MTrack) window.MTrack.event('schedule_session', { page: location.pathname, minutes: LEN, repeat: (d.booked || []).length }); } catch (e) {}
+    var booked = d.booked && d.booked.length ? d.booked : [{ start: d.start || chosen }];
+    var skipped = d.skipped || [];
+    var start = booked[0].start;
+    var eastern = function (iso) { return sameZoneAsLuca() ? '' : ' (' + fmt(iso, TIME, LUCA_TZ) + ' Eastern)'; };
     var online = details.where === 'online';
+    var wasMoving = !!moving;
     $('scrim').classList.remove('open'); $('scrim').setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
     notice('');
+    var times = booked.length > 1
+      ? '<ul class="mg-list" style="text-align:left;max-width:360px;margin:0 auto 12px">' + booked.map(function (x) {
+          return '<li class="mg-row"><span class="mg-when">' + esc(fmt(x.start, DAY)) + ' at ' + esc(fmt(x.start, TIME)) + esc(eastern(x.start)) + '</span></li>'; }).join('') + '</ul>'
+      : '<p class="when">' + esc(details.student) + ', ' + esc(fmt(start, DAY)) + ' at ' + esc(fmt(start, TIME)) + esc(eastern(start)) + ', ' + lenText() + (online ? ', online' : ', in person') + '</p>';
+    var skippedHtml = skipped.length
+      ? '<p>' + esc(skipped.map(function (x) { return fmt(x.start, { month: 'short', day: 'numeric' }); }).join(', ')) +
+        (skipped.length === 1 ? ' wasn&rsquo;t' : ' weren&rsquo;t') + ' open at that time, so ' + (skipped.length === 1 ? 'it isn&rsquo;t' : 'those aren&rsquo;t') + ' booked. Use <b>Pick another time</b> to choose a different time for ' + (skipped.length === 1 ? 'that week' : 'those weeks') + '.</p>'
+      : '';
     $('cal').innerHTML =
       '<div class="done"><div class="tick" aria-hidden="true">&#10003;</div>' +
-      '<div class="lbl" style="color:var(--gold-deep);margin-bottom:8px">Booked</div>' +
-      '<h2>See you then!</h2>' +
-      '<p class="when">' + esc(details.student) + ', ' + esc(fmt(start, DAY)) + ' at ' + esc(fmt(start, TIME)) + esc(eastern) + ', ' + lenText() + (online ? ', online' : ', in person') + '</p>' +
-      '<p>A calendar invite' + (online ? ' with the Google Meet link' : '') + ' is on its way to <b>' + esc(email) + '</b>. ' +
+      '<div class="lbl" style="color:var(--gold-deep);margin-bottom:8px">' + (wasMoving ? 'Moved' : 'Booked') + '</div>' +
+      '<h2>' + (booked.length > 1 ? esc(details.student) + '&rsquo;s weekly sessions' : 'See you then!') + '</h2>' + times + skippedHtml +
+      '<p>A confirmation' + (online ? ' with the Google Meet link' : '') + ' is on its way to <b>' + esc(email) + '</b>, with a calendar file and a link to move or cancel up to 24 hours before. ' +
       'If it doesn&rsquo;t show up in a few minutes, check your spam folder.</p>' +
-      '<p>Need a different time? Reply to the invite or text me at <a href="sms:+12012752791">' + PHONE + '</a>.</p>' +
-      '<p style="margin-top:18px"><button type="button" class="btn ghost" id="another">Book another session</button></p>' +
+      '<p style="margin-top:18px"><button type="button" class="btn ghost" id="another">' + (skipped.length ? 'Pick another time' : 'Book another session') + '</button></p>' +
       '<p style="margin-top:14px"><b style="color:var(--ink);font-weight:600">Luca Moretti</b></p></div>';
     $('another').onclick = function () { load(); };
+    if (wasMoving) { moving = null; loadManage(); }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
+  /* ═══ MOVE OR CANCEL (the link in the confirmation email, #m=...) ═══ */
+  var MANAGE = (/[#&]m=([^&]+)/.exec(location.hash) || [])[1] || '';
+  var moving = null;   // { start, minutes, where } while picking a new time for one session
+  function loadManage() {
+    if (!MANAGE) return;
+    var box = $('manage');
+    box.hidden = false;
+    box.innerHTML = '<div class="state"><div class="spin"></div>Finding your sessions&hellip;</div>';
+    post({ action: 'mySessions', token: decodeURIComponent(MANAGE) }).then(function (d) {
+      if (!d || !d.ok) {
+        box.innerHTML = '<p><b>This link doesn&rsquo;t match a booking.</b> Text me at <a href="sms:+12012752791">' + PHONE + '</a> and I&rsquo;ll sort it out.</p>';
+        return;
+      }
+      [['b-name', d.name], ['b-email', d.email], ['b-phone', d.phone], ['b-student', d.student]].forEach(function (f) { if (f[1]) $(f[0]).value = f[1]; });
+      var rows = d.sessions.map(function (x) {
+        var gone = x.state === 'cancelled' || x.state === 'moved';
+        var tag = x.state === 'cancelled' ? 'Cancelled' : x.state === 'moved' ? 'Moved' : x.state === 'past' ? 'Done' : '';
+        var acts = x.canChange
+          ? '<span class="mg-acts"><button type="button" class="btn ghost" data-move="' + esc(x.start) + '" data-min="' + x.minutes + '" data-where="' + esc(x.where) + '">Move</button>' +
+            '<button type="button" class="btn ghost" data-cancel="' + esc(x.start) + '">Cancel</button></span>'
+          : (x.state === 'booked' ? '<span class="mg-note">Within 24 hours: text me</span>' : '<span class="mg-note">' + tag + '</span>');
+        return '<li class="mg-row' + (gone ? ' is-gone' : '') + '"><span class="mg-when">' + esc(fmt(x.start, DAY)) + ' at ' + esc(fmt(x.start, TIME)) +
+          '<small>' + (x.minutes === 120 ? '2 hours' : x.minutes + ' minutes') + ', ' + (x.where === 'inperson' ? 'in person' : 'online') + '</small></span>' + acts + '</li>';
+      }).join('');
+      box.innerHTML = '<div class="lbl" style="color:var(--gold-deep)">Your booking</div><h2>' + esc(d.student) + '&rsquo;s sessions</h2>' +
+        '<ul class="mg-list">' + rows + '</ul>' +
+        '<p class="mg-note">You can move or cancel a session up to 24 hours before it. Closer to the time, text me at <a href="sms:+12012752791">' + PHONE + '</a>.</p>';
+      Array.prototype.forEach.call(box.querySelectorAll('[data-cancel]'), function (b) {
+        b.onclick = function () {
+          var at = b.getAttribute('data-cancel');
+          if (!window.confirm('Cancel the session on ' + fmt(at, DAY) + ' at ' + fmt(at, TIME) + '?')) return;
+          b.disabled = true; b.textContent = 'Cancelling…';
+          post({ action: 'cancelSession', token: decodeURIComponent(MANAGE), start: at }, BOOK_TIMEOUT_MS).then(function (r) {
+            if (r && r.ok) { loadManage(); load(); return; }
+            b.disabled = false; b.textContent = 'Cancel';
+            window.alert(r && r.error === 'too_late' ? 'That session is less than 24 hours away. Please text me at ' + PHONE + '.'
+              : 'That didn’t go through. Please try again, or text me at ' + PHONE + '.');
+          });
+        };
+      });
+      Array.prototype.forEach.call(box.querySelectorAll('[data-move]'), function (b) {
+        b.onclick = function () {
+          moving = { start: b.getAttribute('data-move'), minutes: Number(b.getAttribute('data-min')), where: b.getAttribute('data-where') };
+          var lenBtn = document.querySelector('[data-len="' + moving.minutes + '"]');
+          if (lenBtn && !lenBtn.hidden) lenBtn.click();
+          setWhere(moving.where);
+          if (all) show();
+          notice('Pick a new time for the session on ' + fmt(moving.start, DAY) + ' at ' + fmt(moving.start, TIME) + '. It stays booked until the new time is.');
+          document.querySelector('.len-row').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        };
+      });
+    });
+  }
+
   load();
+  loadManage();
 })();
 </script>
 </body>
