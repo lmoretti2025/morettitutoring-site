@@ -137,6 +137,26 @@
     '#mtt .t-grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}',
     '#mtt .t-stat{background:var(--bg);border-radius:14px;padding:14px}',
     '#mtt .t-stat b{display:block;font-family:var(--serif);font-size:26px;font-weight:700;font-variant-numeric:tabular-nums}#mtt .t-stat span{font-size:12.5px;color:var(--mid)}',
+    '#mtt .t-range{margin-top:22px}',
+    '#mtt .t-range .t-rtrack{position:relative;height:10px;border-radius:10px;background:var(--track)}',
+    '#mtt .t-range .t-band{position:absolute;top:0;bottom:0;border-radius:10px;background:rgba(176,39,28,.22);transform:scaleX(0);transform-origin:center;transition:transform 1.1s var(--ease) .9s}',
+    '#mtt .t-scr.on .t-range .t-band{transform:scaleX(1)}',
+    '#mtt .t-range .t-dotm{position:absolute;top:50%;width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;background:var(--ink);box-shadow:0 0 0 3px var(--bg)}',
+    '#mtt .t-range .t-rlab{position:relative;height:18px;font-size:12px;color:var(--mid);margin-top:6px;font-variant-numeric:tabular-nums}',
+    '#mtt .t-range .t-rlab span{position:absolute;transform:translateX(-50%);white-space:nowrap}',
+    '#mtt .t-range .t-rlab span.end{color:var(--faint)}',
+    '#mtt .t-mods{display:grid;gap:10px;margin-top:26px}',
+    '#mtt .t-mod{background:var(--card);border-radius:16px;padding:16px 18px;opacity:0;transform:translateY(12px);transition:opacity .6s var(--ease),transform .6s var(--ease)}',
+    '#mtt .t-scr.on .t-mod{opacity:1;transform:none;transition-delay:calc(.5s + var(--i) * .22s)}',
+    '#mtt .t-mod-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px}',
+    '#mtt .t-mod-h b{font-size:15px;font-weight:500}',
+    '#mtt .t-chip{font-size:10.5px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:20px;white-space:nowrap;background:rgba(17,17,17,.06);color:var(--mid)}',
+    '#mtt .t-chip.bad{background:rgba(200,55,43,.1);color:var(--content)}#mtt .t-chip.ok{background:rgba(46,138,94,.12);color:var(--good)}',
+    '#mtt .t-mod p{font-size:14px;color:var(--mid);margin-top:6px;line-height:1.5}',
+    '#mtt .t-use{display:flex;height:10px;border-radius:10px;overflow:hidden;gap:2px;margin-top:12px;background:var(--card)}',
+    '#mtt .t-use i{display:block;height:100%}',
+    '#mtt .t-use i.first{background:var(--ink)}#mtt .t-use i.back{background:var(--slow)}#mtt .t-use i.left{background:repeating-linear-gradient(45deg,rgba(17,17,17,.12) 0 4px,rgba(17,17,17,.04) 4px 8px)}',
+    '#mtt .t-cond{display:grid;gap:10px;margin-top:26px}',
     '@media (max-width:420px){#mtt .t-tbl td.bar{width:22%}}',
     '@media (prefers-reduced-motion:reduce){#mtt *,#mtt *:before,#mtt *:after{transition-duration:.01ms!important;transition-delay:0s!important}}',
     '@media print{#mtt,.mtt-launch{display:none!important}}',
@@ -170,6 +190,8 @@
     if (o) l = o[1] + (n ? ' (' + n[1] + ' skills together)' : '');
     return l;
   }
+  // Module labels arrive as "Math \u2013 Module 2 (Harder)"; said without the dash.
+  function undash(t) { return String(t || '').replace(/\s*[\u2014\u2013]\s*/g, ', ').replace(/\s+-\s+/g, ', '); }
   function storage() { try { return window.localStorage; } catch (e) { return null; } }
 
   /* ---------- the model: every screen from the report's own values ---------- */
@@ -188,7 +210,13 @@
     M.when = R.dateStr || data.dt || '';
     var dm = /^(\d{4})-(\d{2})-(\d{2})$/.exec(M.when);
     if (dm) M.when = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][+dm[2] - 1] + ' ' + (+dm[3]);
-    M.attemptId = String(data.ts || data.dt || '') + '|' + String(data.pt || 'diag') + '|' + String(data.n || '');
+    /* Seen once per attempt per device. The answers themselves go into the
+       key, so two same-day sittings with no ts never share one. */
+    var ans = '';
+    try { ans = JSON.stringify((data.s || []).map(function (x) { return [x.k, x.a]; })); } catch (e) { ans = ''; }
+    var hsh = 5381;
+    for (var hi = 0; hi < ans.length; hi++) hsh = ((hsh << 5) + hsh + ans.charCodeAt(hi)) | 0;
+    M.attemptId = String(data.ts || data.dt || '') + '|' + String(data.pt || 'diag') + '|' + String(data.n || '') + '|' + (hsh >>> 0).toString(36);
     var sections = R.sections || [];
     var single = R.composite == null;
     var totalQ = R.totalQ || 0, totalC = R.totalC || 0;
@@ -202,6 +230,17 @@
       '<h1 class="r">Hi ' + esc(M.first) + '.<br>Here\u2019s what your test is telling us.</h1>' +
       '<p class="t-say r">A few short screens: what happened, and what to do about it. Tap <strong>See the numbers</strong> on any screen for the full detail behind it.</p>' +
       '<div class="r"><button type="button" class="t-btn" data-go="next">Show me &rarr;</button></div>' });
+
+    // ---- how the test was taken (the report's conditions card): only when poor
+    var cond = R.conditions && R.conditions.signals && R.conditions.signals.length ? R.conditions : null;
+    if (cond && cond.level === 'poor') {
+      M.screens.push({ name: 'conditions', html:
+        '<p class="t-eye r">How this test was taken</p><h2 class="r">Read this score with some care.</h2>' +
+        '<p class="t-say r">A few things about the sitting can pull a score away from your real level, in either direction.</p><div class="t-cond">' +
+        cond.signals.map(function (g, i) {
+          return '<div class="t-habit" style="--i:' + i + '"><div class="n">!</div><div><h3>' + esc(undash(g.label)) + '</h3><p>' + esc(cap(undash(g.detail))) + '</p></div></div>';
+        }).join('') + '</div>' });
+    }
 
     // ---- score
     var rw = R.rwScaled, ma = R.mathScaled;
@@ -236,7 +275,19 @@
       });
       // The range, in the report's own words (report.html plain layer): a number beside the probability.
       var band = R.reportBand && R.reportBand.lo != null && R.reportBand.hi != null && R.reportBand.hi > R.reportBand.lo ? R.reportBand : null;
-      var bandLine = band ? '<p class="t-say r" style="margin-top:12px">Your real level is most likely between <strong>' + band.lo + '</strong> and <strong>' + band.hi + '</strong> (about 4 chances in 5).</p>' : '';
+      var bandLine = '';
+      if (band) {
+        // The report's likely-range bar (its score card): scale, shaded band, the score as a dot.
+        var smin = single ? 200 : 400, smax = single ? 800 : 1600;
+        var at2 = function (v) { return Math.max(0, Math.min(100, 100 * (v - smin) / (smax - smin))).toFixed(2); };
+        bandLine = '<div class="t-range r" role="img" aria-label="Likely range ' + band.lo + ' to ' + band.hi + ', score ' + headline + '">' +
+          '<div class="t-rtrack"><div class="t-band" style="left:' + at2(band.lo) + '%;width:' + (at2(band.hi) - at2(band.lo)).toFixed(2) + '%"></div>' +
+          '<div class="t-dotm" style="left:' + at2(headline) + '%"></div></div>' +
+          '<div class="t-rlab"><span class="end" style="left:0;transform:none">' + smin + '</span><span style="left:' + at2(band.lo) + '%">' + band.lo + '</span>' +
+          '<span style="left:' + at2(band.hi) + '%">' + band.hi + '</span><span class="end" style="left:auto;right:0;transform:none">' + smax + '</span></div></div>' +
+          '<p class="t-say r" style="margin-top:10px">Your real level is most likely between <strong>' + band.lo + '</strong> and <strong>' + band.hi + '</strong> (about 4 chances in 5).</p>';
+      }
+      if (cond && cond.level === 'fair') bandLine += '<p class="t-small r">About how this test was taken: ' + esc(cond.signals.map(function (g) { return undash(g.label); }).join('; ')) + '. The full report has the detail.</p>';
       /* The all-hard test (audit 6): the report says the same student scores
          about 87 points lower on it; the walkthrough says so too. */
       var hardestId = (window.MorettiSignals && window.MorettiSignals.HARDEST_TEST_ID) || 'sat-practice-11';
@@ -449,6 +500,64 @@
             '<p>Hover or tap a bar on the chart to see how long each question took.</p>' }
         });
       }
+    }
+
+    // ---- how each module went (the report's route chart summaries)
+    var routes = (R.routeSummaries || []).filter(function (x) { return x && x.questions; });
+    if (routes.length) {
+      var ORDER = ['slow-start', 'ran-short', 'late-drop', 'left-time', 'went-back', 'steady'];
+      var CHIP = { 'slow-start': 'Slow start', 'ran-short': 'Ran short', 'late-drop': 'Late drop', 'left-time': 'Time left over', 'went-back': 'Went back', 'steady': 'Steady' };
+      var pc = function (v) { return Math.round(100 * (Number(v) || 0)); };
+      var mins = function (sec) { var m = Math.round((Number(sec) || 0) / 60); return pl(m, 'minute'); };
+      var sentence = function (x) {
+        var got = x.right + ' of ' + x.questions + ' right';
+        switch (x.reading) {
+          case 'slow-start': return 'The first half ran slow, so the second half was rushed, and accuracy went from ' + pc(x.accFirstHalf) + '% to ' + pc(x.accSecondHalf) + '%.';
+          case 'ran-short': return 'Time ran short: ' + pl(x.rushedEnd, 'answer was', 'answers were') + ' rushed at the end' + (x.blanks ? ', and ' + x.blanks + ' left blank' : '') + '.';
+          case 'late-drop': return 'Accuracy dropped from ' + pc(x.accFirstHalf) + '% in the first half to ' + pc(x.accSecondHalf) + '% in the second.';
+          case 'left-time': return 'You finished with ' + mins(x.unusedSec) + ' to spare and got ' + got + '. That time could have gone to checking.';
+          case 'went-back': return 'You spent ' + mins(x.backSec) + ' going back over ' + pl(x.backQuestions, 'question') + '.';
+          default: return 'Steady from start to finish: ' + got + '.';
+        }
+      };
+      var sorted = routes.slice().sort(function (a, b) { return ORDER.indexOf(a.reading) - ORDER.indexOf(b.reading); });
+      var worst = sorted[0], troubled = sorted.filter(function (x) { return x.reading && x.reading !== 'steady'; });
+      var slowest = routes.filter(function (x) { return x.longest && x.longest.sec && x.longest.targetSec; })
+        .sort(function (a, b) { return b.longest.sec / b.longest.targetSec - a.longest.sec / a.longest.targetSec; })[0];
+      var useBar = function (x) {
+        var total = (Number(x.clockMin) || 0) * 60; if (!total) return '';
+        var first = Math.min(total, Number(x.firstPassEndSec) || 0), back = Math.min(total - first, Number(x.backSec) || 0), left = Math.max(0, Math.min(total - first - back, Number(x.unusedSec) || 0));
+        var w = function (v) { return (100 * v / total).toFixed(1); };
+        return '<div class="t-use" role="img" aria-label="First pass ' + mmss(first * 1000) + ', going back ' + mmss(back * 1000) + ', unused ' + mmss(left * 1000) + ' of ' + x.clockMin + ' minutes">' +
+          '<i class="first" style="width:' + w(first) + '%"></i>' + (back ? '<i class="back" style="width:' + w(back) + '%"></i>' : '') + (left ? '<i class="left" style="width:' + w(left) + '%"></i>' : '') + '</div>';
+      };
+      var wl = undash(worst.label);
+      var HEAD = { 'slow-start': wl + ' started slow.', 'ran-short': 'Time ran short in ' + wl + '.', 'late-drop': wl + ' faded in the second half.',
+                   'left-time': wl + ' finished with time to spare.', 'went-back': wl + ': a lot of going back.' };
+      var head2 = troubled.length ? (HEAD[worst.reading] || wl + '.') : 'Every module ran steady.';
+      M.screens.push({ name: 'route', html:
+        '<p class="t-eye r">How each module went</p><h2 class="r">' + esc(head2) + '</h2><div class="t-mods">' +
+        sorted.map(function (x, i) {
+          var bad = x.reading && x.reading !== 'steady';
+          return '<div class="t-mod" style="--i:' + i + '"><div class="t-mod-h"><b>' + esc(undash(x.label)) + '</b><span class="t-chip ' + (bad ? 'bad' : 'ok') + '">' + esc(CHIP[x.reading] || 'Steady') + '</span></div>' +
+            '<p>' + esc(sentence(x)) + '</p>' + useBar(x) + '</div>';
+        }).join('') + '</div>' +
+        '<div class="t-legend r"><span><i style="background:var(--ink)"></i>First pass</span><span><i style="background:var(--slow)"></i>Going back</span><span><i style="background:repeating-linear-gradient(45deg,rgba(17,17,17,.12) 0 4px,rgba(17,17,17,.04) 4px 8px)"></i>Unused</span></div>' +
+        (slowest ? '<p class="t-say r">The question that took the longest: <strong>question ' + slowest.longest.q + '</strong> in ' + esc(undash(slowest.label)) + ', ' + secs(slowest.longest.sec * 1000) + ' against a ' + secs(slowest.longest.targetSec * 1000) + ' target.</p>' : '') +
+        '<div class="r"><button type="button" class="t-more" data-sheet="route">See every module</button></div>',
+        sheet: { eye: 'How each module went', title: 'The route, module by module', html:
+          '<table class="t-tbl"><tr><th>Module</th><th class="num">Right</th><th class="num">First pass</th><th class="num">Back</th><th class="num">Unused</th></tr>' +
+          routes.map(function (x) {
+            return '<tr><td>' + esc(undash(x.label)) + '</td><td class="num">' + x.right + ' / ' + x.questions + '</td><td class="num">' + mmss((x.firstPassEndSec || 0) * 1000) +
+              '</td><td class="num">' + mmss((x.backSec || 0) * 1000) + '</td><td class="num">' + mmss((x.unusedSec || 0) * 1000) + '</td></tr>';
+          }).join('') + '</table>' +
+          '<h4>First half against second half</h4><table class="t-tbl"><tr><th>Module</th><th class="num">Pace</th><th class="num">Right</th></tr>' +
+          routes.map(function (x) {
+            var f = function (v) { return v == null ? '' : (Math.round(v * 100) / 100) + 'x'; };
+            return '<tr><td>' + esc(undash(x.label)) + '</td><td class="num">' + f(x.paceFirstHalf) + ' then ' + f(x.paceSecondHalf) + '</td><td class="num">' + pc(x.accFirstHalf) + '% then ' + pc(x.accSecondHalf) + '%</td></tr>';
+          }).join('') + '</table>' +
+          '<p>Pace is the typical first look at a question against its target time: 1x is on target, above 1x is slower. The full report\u2019s route chart shows every question in order.</p>' }
+      });
     }
 
     // ---- habits: the report's own behavior flags, plus the integrity read
