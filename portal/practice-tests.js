@@ -2939,7 +2939,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Cross-Text Connections",
           "difficulty": "medium",
           "type": "mc",
-          "text": "Text 1<br><br>Handwriting instruction has largely left the primary curriculum, and the case for restoring handwriting rests on studies by psychologist Karin James and others, in which preliterate children who formed letters by hand recognized them more readily afterward than children who typed them. The motor act of drawing a shape, on this account, lays down a trace of a kind that typing lacks.<br><br>Text 2<br><br>The studies usually cited compare handwriting with typing among children who are learning letters for the first time. But the comparison says nothing about older children, who already recognize the letters fluently, and the studies measure recognition rather than any later benefit to composition or to spelling.<br><br>Based on the texts, how would the author of Text 2 most likely respond to the case described in Text 1?",
+          "text": "Text 1<br><br>Handwriting instruction largely disappeared from the primary curriculum. The case for a return rests on work by the psychologist Karin James and others, who found that preliterate children recognized letters more readily when they had formed those letters by hand than when they typed them. The motor act of drawing a shape, in this account, leaves a trace that typing cannot leave.<br><br>Text 2<br><br>The studies cited as support for a return compare handwriting with typing among children just learning their letters. They say nothing about older children, already fluent in recognition, and what they measure is recognition alone, not the later gains in composition and spelling that the case for a return assumes.<br><br>Based on the texts, how would the author of Text 2 most likely respond to the case described in Text 1?",
           "choices": [
             "By noting that the evidence supports a narrower claim than restoring instruction would require.",
             "By denying that children who form letters by hand recognize them more readily afterward.",
@@ -2960,7 +2960,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Central Ideas and Details",
           "difficulty": "easy",
           "type": "mc",
-          "text": "The Lascaux cave paintings were closed to visitors in 1963, twenty years after their discovery, because the breath and body heat of the crowds had encouraged algae and calcite—a mineral crust— to spread across the walls. A full-size replica opened nearby in 1983, and two further replicas have been built since. Visitors now see the paintings copied to within a millimeter, while the originals are entered only by conservators.<br><br>Which choice best states the main idea of the text?",
+          "text": "Lascaux closed to visitors in 1963. Two decades of tourism allowed the breath and body heat of crowds to spread algae and calcite, a mineral crust, across painted walls that conservators could not safely clean. A full-size replica opened nearby during 1983, and two more copies now stand in for the cave, reproducing the paintings to within one millimeter. Only conservators can still enter the original.<br><br>Which choice best states the main idea of the text?",
           "choices": [
             "Lascaux was closed to protect the paintings, and replicas now stand in for the original cave.",
             "The replicas built near Lascaux since 1983 reproduce the paintings to within a millimeter.",
@@ -2981,7 +2981,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Central Ideas and Details",
           "difficulty": "medium",
           "type": "mc",
-          "text": "A 2021 study compared the account books of a sixteenth-century Seville hospital with the burial register. The books record payments to women hired by the day to nurse patients, work that the hospital’s own charter omitted and that fell outside every salaried post. The same names recur across years, which suggests a settled workforce.<br><br>Based on the text, what can be concluded about the women recorded in the account books?",
+          "text": "In 2021 researchers set the account books of a sixteenth-century Seville hospital beside the burial register. The books record daily payments to women hired for the nursing of patients. That work fell outside every salaried post, and the hospital charter passed over it in silence. The names recur from one year to the next, which points to a workforce employed steadily rather than casually.<br><br>Based on the text, what can be concluded about the women recorded in the account books?",
           "choices": [
             "They were paid more than the hospital’s salaried staff were paid for similar work.",
             "They appear in the burial register more often than other residents of the city do.",
@@ -3002,7 +3002,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Command of Evidence (Quantitative)",
           "difficulty": "easy",
           "type": "mc",
-          "text": "Small birds line their nests with whatever insulating material is to hand, and the lining matters most when the weather is against them. An ornithologist recorded hatching success for nests of four lining types across a cool spring and a warm one. The data support the claim that lining matters more in cold conditions, since ______<table class=\"dx-table\"><tr><th>Nest lining</th><th>Eggs hatched, cool spring</th><th>Eggs hatched, warm spring</th></tr><tr><td>Feather</td><td>86%</td><td>84%</td></tr><tr><td>Moss</td><td>71%</td><td>83%</td></tr><tr><td>Grass</td><td>64%</td><td>82%</td></tr><tr><td>Unlined</td><td>52%</td><td>80%</td></tr></table><br><br>Which choice most effectively uses data from the table to complete the claim?",
+          "text": "Small birds line their nests with whatever insulating material lies to hand, and the value of that lining rises as the weather turns against them. An ornithologist recorded the hatching success of nests of four lining types across two springs, one cool and one warm. The data support a claim that the lining of a nest tells chiefly in cold conditions. The table shows that ______<table class=\"dx-table\"><tr><th>Nest lining</th><th>Eggs hatched, cool spring</th><th>Eggs hatched, warm spring</th></tr><tr><td>Feather</td><td>86%</td><td>84%</td></tr><tr><td>Moss</td><td>71%</td><td>83%</td></tr><tr><td>Grass</td><td>64%</td><td>82%</td></tr><tr><td>Unlined</td><td>52%</td><td>80%</td></tr></table><br><br>Which choice most effectively uses data from the table to complete the claim?",
           "choices": [
             "feather-lined nests hatched 86 percent of their eggs in the cool spring, the highest figure in the table.",
             "unlined nests hatched 80 percent of their eggs in the warm spring, close to the figure for feather-lined nests.",
@@ -3023,7 +3023,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Command of Evidence (Quantitative)",
           "difficulty": "medium",
           "type": "mc",
-          "text": "Cooking alters food in more than one way at once, and a method that improves one measure may worsen another. A nutrition researcher prepared identical portions of spinach by four methods and measured both the iron the body could absorb and the vitamin C that survived. She concluded that no single method is best on both counts. The clearest example is boiling, which ______<table class=\"dx-table\"><tr><th>Cooking method</th><th>Iron absorbed (mg)</th><th>Vitamin C retained (%)</th></tr><tr><td>Raw</td><td>0.9</td><td>100</td></tr><tr><td>Steamed</td><td>1.4</td><td>71</td></tr><tr><td>Boiled</td><td>1.6</td><td>38</td></tr><tr><td>Fried</td><td>1.5</td><td>55</td></tr></table><br><br>Which choice most effectively uses data from the table to complete the example?",
+          "text": "Cooking changes food in several ways at the same time, and a method that improves one measure of nutrition can damage a second. A nutrition researcher prepared identical portions of spinach by four methods, then measured the amount of iron the body is able to absorb and the share of vitamin C left in the leaves. None of the four methods proved best on both counts. The clearest case is boiling, which ______<table class=\"dx-table\"><tr><th>Cooking method</th><th>Iron absorbed (mg)</th><th>Vitamin C retained (%)</th></tr><tr><td>Raw</td><td>0.9</td><td>100</td></tr><tr><td>Steamed</td><td>1.4</td><td>71</td></tr><tr><td>Boiled</td><td>1.6</td><td>38</td></tr><tr><td>Fried</td><td>1.5</td><td>55</td></tr></table><br><br>Which choice most effectively uses data from the table to complete the example?",
           "choices": [
             "retained all of the vitamin C in the leaves while yielding the least absorbable iron.",
             "yielded more absorbable iron than steaming did but less than frying did.",
