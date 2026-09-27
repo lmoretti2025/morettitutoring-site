@@ -189,7 +189,11 @@
         <button type="button" data-len="60" aria-pressed="true">60 minutes</button>
         <button type="button" data-len="90" aria-pressed="false">90 minutes</button>
       </div>
-      <p>Times shown are when I can fit this length.</p>
+      <div class="lengths" role="group" aria-label="Where">
+        <button type="button" data-where="online" aria-pressed="true">Online</button>
+        <button type="button" data-where="inperson" aria-pressed="false">In person</button>
+      </div>
+      <p id="len-note">Times shown are when I can fit this length.</p>
     </div>
     <div id="notice"></div>
     <div id="cal"><div class="state"><div class="spin"></div>Finding open times&hellip;</div></div>
@@ -219,11 +223,6 @@
         <div><label for="b-student">Student&rsquo;s name</label><input id="b-student" required maxlength="80"></div>
         <div><label for="b-phone">Phone <span class="opt">(optional)</span></label><input id="b-phone" type="tel" autocomplete="tel" maxlength="30"></div>
       </div>
-      <label for="b-where">Where</label>
-      <select id="b-where">
-        <option value="online">Online (Google Meet)</option>
-        <option value="inperson">In person</option>
-      </select>
       <label for="b-notes">Anything to focus on? <span class="opt">(optional)</span></label>
       <textarea id="b-notes" maxlength="500"></textarea>
       <div class="hp" aria-hidden="true"><label for="b-website">Leave this field blank</label><input id="b-website" tabindex="-1" autocomplete="off"></div>
@@ -288,11 +287,12 @@
   function dayKey(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
 
   // The details from last time on this device, so a family booking again types nothing.
+  var WHERE = 'online';   // from the Online / In person toggle
   var SAVED = 'mt_session_details';
   try {
     var pre = JSON.parse(localStorage.getItem(SAVED) || 'null');
     if (pre) [['b-name', pre.name], ['b-email', pre.email], ['b-phone', pre.phone], ['b-student', pre.student]].forEach(function (f) { if (f[1]) $(f[0]).value = f[1]; });
-    if (pre && pre.where && $('b-where').querySelector('option[value="' + pre.where + '"]')) $('b-where').value = pre.where;
+    if (pre && (pre.where === 'online' || pre.where === 'inperson')) setWhere(pre.where);
   } catch (e) { /* nothing saved */ }
   function newRequestId() {
     try { if (window.crypto && crypto.randomUUID) return crypto.randomUUID(); } catch (e) {}
@@ -330,7 +330,8 @@
 
   // The chosen length's times, as a month. Keeps the month in view when the length changes.
   function show() {
-    var slots = (all && all[LEN]) || [];
+    // In person happens at the Cranford library, so those times end by its closing.
+    var slots = ((all && all[LEN]) || []).filter(function (s) { return WHERE !== 'inperson' || s.inPerson; });
     var was = months[shown];
     if (!slots.length) { months = []; return noTimes('none'); }
     byDay = {}; months = [];
@@ -343,12 +344,22 @@
     shown = was ? Math.max(0, months.findIndex(function (x) { return x.y === was.y && x.m === was.m; })) : 0;
     render();
   }
-  Array.prototype.forEach.call(document.querySelectorAll('.lengths button'), function (b) {
+  Array.prototype.forEach.call(document.querySelectorAll('[data-len]'), function (b) {
     b.onclick = function () {
       LEN = Number(b.getAttribute('data-len'));
-      Array.prototype.forEach.call(document.querySelectorAll('.lengths button'), function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+      Array.prototype.forEach.call(document.querySelectorAll('[data-len]'), function (x) { x.setAttribute('aria-pressed', String(x === b)); });
       if (all) show();
     };
+  });
+  function setWhere(w) {
+    WHERE = w;
+    Array.prototype.forEach.call(document.querySelectorAll('[data-where]'), function (x) { x.setAttribute('aria-pressed', String(x.getAttribute('data-where') === w)); });
+    $('len-note').textContent = w === 'inperson'
+      ? 'In person meets at the Cranford Public Library, so it follows the library\u2019s hours: Mon\u2013Thu until 9 PM, Fri and Sat until 5 PM, Sun 12 to 4 PM.'
+      : 'Times shown are when I can fit this length.';
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('[data-where]'), function (b) {
+    b.onclick = function () { setWhere(b.getAttribute('data-where')); if (all) show(); };
   });
 
   function render() {
@@ -414,7 +425,7 @@
   }
   function pick(start) {
     chosen = start;
-    $('chosen').textContent = fmt(start, DAY) + ' at ' + fmt(start, TIME) + ', ' + LEN + ' min';
+    $('chosen').textContent = fmt(start, DAY) + ' at ' + fmt(start, TIME) + ', ' + LEN + ' min, ' + (WHERE === 'inperson' ? 'in person' : 'online');
     requestId = newRequestId();       // one id per chosen time: a retry of this booking, not a new one
     $('sheet-lbl').textContent = 'Almost booked';
     $('sheet-title').textContent = 'Your details';
@@ -436,7 +447,7 @@
     if (name.length < 2) { say('Please add your name.', true); $('b-name').focus(); return; }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { say('Please check your email address.', true); $('b-email').focus(); return; }
     if (student.length < 2) { say('Please add the student’s name.', true); $('b-student').focus(); return; }
-    var details = { name: name, email: email, phone: $('b-phone').value.trim(), student: student, where: $('b-where').value };
+    var details = { name: name, email: email, phone: $('b-phone').value.trim(), student: student, where: WHERE };
     $('go').disabled = true; $('go').textContent = 'Booking…';
     say('This takes about 15 seconds, so please keep this page open.');
     post({ action: 'bookSession', start: chosen, minutes: LEN, requestId: requestId, name: name, email: email,
@@ -449,6 +460,7 @@
         }
         var err = d && d.error;
         if (err === 'slot_taken') { closeSheet(); return load('That time was just taken. Here is what is open now.'); }
+        if (err === 'inperson_hours') { closeSheet(); setWhere('inperson'); return load('That time runs past the library\u2019s hours. Here are the in-person times that fit.'); }
         if (err === 'too_many') return say('You already have ' + (d.count || 4) + ' upcoming sessions booked. To add more, text me at ' + PHONE + '.', true);
         if (err === 'bad_email') return say('Please check your email address.', true);
         if (err === 'bad_phone') return say('Please check the phone number, or leave it blank.', true);
