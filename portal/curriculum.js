@@ -66,24 +66,17 @@
     '#cu-root .cu-body{transition:opacity .16s ease}#cu-root .cu-body.cu-fading{opacity:0}',
     '#cu-root .cu-in{animation:cuIn .5s var(--ease,ease) both;animation-delay:calc(var(--d,0) * 60ms)}',
     '@keyframes cuIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}',
-    '#cu-root .cu-hero{display:grid;grid-template-columns:1.2fr 1fr;gap:1rem;align-items:center;border-radius:20px;padding:1.6rem 1.8rem;margin-bottom:1.2rem;overflow:hidden;position:relative;box-shadow:var(--shadow)}',
+    '#cu-root .cu-hero{display:grid;grid-template-columns:1fr;gap:1rem;align-items:center;border-radius:20px;padding:1.6rem 1.8rem;margin-bottom:1.2rem;overflow:hidden;position:relative;box-shadow:var(--shadow)}',
     '#cu-root .cu-hero-math{background:linear-gradient(135deg,#fff 0%,#fbf1ef 60%,#f6e4e1 100%)}',
     '#cu-root .cu-hero-english{background:linear-gradient(135deg,#fff 0%,#eff2fb 60%,#e3e8f7 100%)}',
     '#cu-root .cu-hero h1{margin:0 0 .3rem;font-size:clamp(1.8rem,3.4vw,2.5rem)}',
     '#cu-root .cu-hero .cu-sub{max-width:32em}',
-    '#cu-root .cu-hero-art svg{width:100%;max-height:220px;display:block}',
-    '#cu-root .cu-draw{stroke-dasharray:420;stroke-dashoffset:420;animation:cuDraw 1.6s var(--ease,ease) .3s forwards}#cu-root .cu-draw.d2{animation-delay:.7s}',
-    '@keyframes cuDraw{to{stroke-dashoffset:0}}',
-    '#cu-root .cu-hl{transform-origin:174px 96px;animation:cuHl .9s var(--ease,ease) .5s both}@keyframes cuHl{from{transform:scaleX(0)}to{transform:scaleX(1)}}',
     '#cu-root .cu-stats{display:flex;align-items:center;gap:1.4rem;margin-top:1.1rem;flex-wrap:wrap}',
     '#cu-root .cu-bigring{position:relative;width:84px;height:84px}#cu-root .cu-bigring b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--display,Georgia,serif);font-size:1.25rem}',
     '#cu-root .cu-ringfill{transition:stroke-dasharray .8s var(--ease,ease)}',
     '#cu-root .cu-stat b{display:block;font-family:var(--display,Georgia,serif);font-size:1.5rem;line-height:1}#cu-root .cu-stat span{font-size:.75rem;color:var(--mid);text-transform:uppercase;letter-spacing:.08em}',
     '#cu-root .cu-resume-ic{width:40px;height:40px;border-radius:50%;background:var(--red,#B0271C);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex:none}',
     '#cu-root .cu-resume>div{flex:1}',
-    '#cu-root .cu-uic{width:40px;height:40px;border-radius:12px;background:#fbf1ef;color:var(--red,#B0271C);display:flex;align-items:center;justify-content:center;flex:none}',
-    '#cu-root .cu-uic svg{width:22px;height:22px}',
-    '#cu-root .cu-hero-english~.cu-units .cu-uic{background:#eef1fb;color:#3457d5}',
     '#cu-root .cu-unit-t{flex:1}#cu-root .cu-unum{font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--mid);font-weight:600}',
     '#cu-root .cu-unit-p{display:flex;align-items:center;gap:8px;font-size:.8rem;color:var(--mid);white-space:nowrap}',
     '#cu-root .cu-mbar{width:70px;height:6px;border-radius:6px;background:#e6e3de;overflow:hidden}#cu-root .cu-mbar i{display:block;height:100%;background:var(--cu-good);border-radius:6px}',
@@ -92,8 +85,8 @@
     '#cu-root .cu-lesson:hover .cu-go,#cu-root .cu-lesson:focus-visible .cu-go{opacity:1;transform:none}',
     '@media(hover:none){#cu-root .cu-go{opacity:1;transform:none}}',
     '@media(max-width:520px){#cu-root .cu-stats{gap:.9rem}#cu-root .cu-bigring{transform:scale(.82);margin:-7px}#cu-root .cu-stat b{font-size:1.25rem}}',
-    '@media(max-width:760px){#cu-root .cu-hero{grid-template-columns:1fr;padding:1.3rem}#cu-root .cu-hero-art{order:-1;max-width:260px}#cu-root .cu-hero-art svg{max-height:150px}}',
-    '@media(prefers-reduced-motion:reduce){#cu-root .cu-notes-fold{transition:none}#cu-root .cu-in,#cu-root .cu-draw,#cu-root .cu-hl{animation:none;stroke-dashoffset:0}#cu-root .cu-body{transition:none}}',
+    '@media(max-width:760px){#cu-root .cu-hero{padding:1.3rem}}',
+    '@media(prefers-reduced-motion:reduce){#cu-root .cu-notes-fold{transition:none}#cu-root .cu-in{animation:none}#cu-root .cu-body{transition:none}}',
     '#cu-root .cu-unit{background:#fff;border-radius:16px;box-shadow:var(--shadow);overflow:hidden}',
     '#cu-root .cu-unit-h{display:flex;align-items:center;gap:.9rem;padding:1rem 1.2rem .9rem;border-bottom:1px solid var(--cu-line)}',
     '#cu-root .cu-unit-h h2{font-size:1.15rem;margin:.1rem 0 0}',
@@ -302,44 +295,6 @@
   }
 
   /* ---------- home: the course, unit by unit ---------- */
-  /* ---------- artwork: inline, so nothing extra loads ---------- */
-  var ART = {
-    // A worked equation on notebook paper, the answer highlighted and checked
-    // (Luca, 2026-09-27: the graph version went).
-    math: '<svg viewBox="0 0 320 220" aria-hidden="true">' +
-      '<g transform="rotate(-3 160 114)"><rect x="58" y="20" width="204" height="186" rx="10" fill="#fff" stroke="rgba(17,17,17,.2)" stroke-width="2"/>' +
-      '<g stroke="rgba(52,87,213,.14)" stroke-width="1.5"><line x1="58" y1="62" x2="262" y2="62"/><line x1="58" y1="94" x2="262" y2="94"/><line x1="58" y1="126" x2="262" y2="126"/><line x1="58" y1="158" x2="262" y2="158"/><line x1="58" y1="190" x2="262" y2="190"/></g>' +
-      '<line x1="86" y1="20" x2="86" y2="206" stroke="rgba(176,39,28,.35)" stroke-width="1.5"/>' +
-      '<rect class="cu-hl" style="transform-origin:96px 142px" x="96" y="130" width="76" height="26" rx="5" fill="rgba(201,168,76,.45)"/>' +
-      '<g font-family="Georgia,serif" font-style="italic" font-size="22" fill="#111"><text x="100" y="88">3x + 5 = 20</text><text x="100" y="120">3x = 15</text><text x="104" y="151">x = 5</text></g>' +
-      '<text x="196" y="119" font-family="Georgia,serif" font-style="italic" font-size="17" fill="#3457d5">\u00f73</text>' +
-      '<path class="cu-draw" d="M186 140 l9 10 l21 -24" fill="none" stroke="#B0271C" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></g>' +
-      '<g transform="translate(262 176) rotate(-38)"><path d="M-48 -7 L-64 0 L-48 7 Z" fill="#f1dcb0"/><path d="M-59 -2.2 L-64 0 L-59 2.2 Z" fill="#111"/>' +
-      '<rect x="-48" y="-7" width="84" height="14" fill="#C9A84C"/><rect x="36" y="-7" width="6" height="14" fill="#bdbdbd"/><rect x="42" y="-7" width="13" height="14" rx="3" fill="#B0271C"/></g></svg>',
-    english: '<svg viewBox="0 0 320 220" aria-hidden="true">' +
-      '<path d="M40 44 Q100 30 160 50 L160 196 Q100 176 40 190 Z" fill="#fff" stroke="rgba(17,17,17,.2)" stroke-width="2" stroke-linejoin="round"/>' +
-      '<path d="M280 44 Q220 30 160 50 L160 196 Q220 176 280 190 Z" fill="#fff" stroke="rgba(17,17,17,.2)" stroke-width="2" stroke-linejoin="round"/>' +
-      '<g stroke="rgba(17,17,17,.18)" stroke-width="3" stroke-linecap="round"><line x1="58" y1="72" x2="142" y2="78"/><line x1="58" y1="92" x2="130" y2="97"/><line x1="58" y1="112" x2="142" y2="117"/><line x1="58" y1="132" x2="120" y2="136"/><line x1="58" y1="152" x2="138" y2="157"/>' +
-      '<line x1="178" y1="78" x2="262" y2="72"/><line x1="178" y1="117" x2="250" y2="112"/><line x1="178" y1="136" x2="262" y2="131"/><line x1="178" y1="157" x2="240" y2="152"/></g>' +
-      '<rect class="cu-hl" x="174" y="88" width="80" height="16" rx="4" fill="rgba(201,168,76,.45)"/><line x1="178" y1="97" x2="250" y2="92" stroke="#111" stroke-width="3" stroke-linecap="round"/>' +
-      '<text x="84" y="40" font-family="Georgia,serif" font-size="46" fill="#B0271C">\u201c</text><text x="238" y="214" font-family="Georgia,serif" font-size="46" fill="#B0271C">\u201d</text>' +
-      '<path class="cu-draw" d="M196 206 q10 -14 22 -2 t22 -2" fill="none" stroke="#3457d5" stroke-width="3" stroke-linecap="round"/></svg>'
-  };
-  // A small icon for each unit, by what the unit is about.
-  function unitIcon(name) {
-    var n = String(name).toLowerCase(), p;
-    if (/intro/.test(n)) p = '<path d="M6 4h9l3 3v13H6z"/><path d="M9 11h6M9 15h4"/>';
-    else if (/advanced/.test(n)) p = '<path d="M4 19c3-14 13-14 16 0"/><path d="M3 20h18"/>';
-    else if (/algebra/.test(n)) p = '<path d="M4 18L20 6"/><path d="M4 20h16M4 4v16"/>';
-    else if (/geometry/.test(n)) p = '<path d="M4 19L12 5l8 14z"/><path d="M9 19a3 3 0 0 0-2-3"/>';
-    else if (/data|problem/.test(n)) p = '<path d="M5 20V12M10 20V7M15 20v-5M20 20V4"/>';
-    else if (/convention/.test(n)) p = '<circle cx="8" cy="16" r="2"/><path d="M8 18c0 2-1 3-2 3"/><circle cx="16" cy="9" r="2"/><circle cx="16" cy="16" r="2"/>';
-    else if (/expression/.test(n)) p = '<path d="M4 8h13l-3-3M20 16H7l3 3"/>';
-    else if (/information/.test(n)) p = '<circle cx="10" cy="10" r="6"/><path d="M15 15l5 5"/>';
-    else if (/craft/.test(n)) p = '<path d="M20 4c-8 1-13 6-15 15"/><path d="M5 19l4-1M14 9l-5 5"/>';
-    else p = '<circle cx="12" cy="12" r="8"/>';
-    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + p + '</svg>';
-  }
   // A small progress ring: filled share of a lesson's parts, a tick when all are done.
   function ring(done, total, size) {
     size = size || 30;
@@ -381,11 +336,11 @@
         '<div class="cu-stats"><div class="cu-bigring"><svg width="84" height="84" viewBox="0 0 84 84" aria-hidden="true"><circle cx="42" cy="42" r="' + R + '" fill="none" stroke="rgba(17,17,17,.08)" stroke-width="7"/>' +
           (done ? '<circle class="cu-ringfill" cx="42" cy="42" r="' + R + '" fill="none" stroke="var(--red,#B0271C)" stroke-width="7" stroke-linecap="round" stroke-dasharray="' + Math.max(1, CIRC * pct / 100).toFixed(1) + ' ' + CIRC.toFixed(1) + '" transform="rotate(-90 42 42)"/>' : '') + '</svg><b>' + pct + '%</b></div>' +
           '<div class="cu-stat"><b>' + lessons.length + '</b><span>lessons</span></div><div class="cu-stat"><b>' + total + '</b><span>parts</span></div><div class="cu-stat"><b>' + done + '</b><span>done</span></div></div></div>' +
-        '<div class="cu-hero-art">' + ART[c.id] + '</div></section>' +
+        '</section>' +
       resume +
       '<div class="cu-units">' + c.domains.map(function (d, di) {
         var dDone = d.lessons.filter(function (l) { return lessonDoneCount(l) === l.parts.length; }).length;
-        return '<section class="cu-unit cu-in" style="--d:' + (di + 2) + '"><div class="cu-unit-h"><span class="cu-uic">' + unitIcon(d.name) + '</span>' +
+        return '<section class="cu-unit cu-in" style="--d:' + (di + 2) + '"><div class="cu-unit-h">' +
           '<div class="cu-unit-t"><span class="cu-unum">Unit ' + (di + 1) + '</span><h2>' + esc(d.name) + '</h2></div>' +
           '<span class="cu-unit-p"><span class="cu-mbar"><i style="width:' + Math.round(100 * dDone / d.lessons.length) + '%"></i></span>' + dDone + '/' + d.lessons.length + '</span></div>' +
           d.lessons.map(function (l) {
