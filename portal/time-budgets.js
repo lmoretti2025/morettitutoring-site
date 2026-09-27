@@ -89,7 +89,12 @@
      targets now add up to about 25 of its 35 minutes, leaving about 10 for
      going back and the hardest questions, and only 4 of the 39 math modules
      still need the MAX_BUDGET_SHARE squeeze below (13 did before). */
-  var MATH_BY_DIFFICULTY = { easy: 41, medium: 64, hard: 98 };
+    /* Cut 3% again on 2026-09-27 (Luca: hold students to a faster target so more of
+     the clock is left at the end; 41/64/98 -> 39.8/62.1/95.1). This follows the
+     15% cut of 2026-09-12 (48/75/115 -> 41/64/98). Note the cut reaches only the
+     modules that sit UNDER MAX_BUDGET_SHARE: a hard module 2 is already pinned at
+     the cap, so its reserve is set by the cap, not by these numbers. */
+  var MATH_BY_DIFFICULTY = { easy: 39.8, medium: 62.1, hard: 95.1 };
   var MATH_DOMAIN_MULT = {
     // Procedural. If these aren't fast, it's fluency, not reasoning.
     'Algebra': 0.9,
