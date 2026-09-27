@@ -4136,20 +4136,20 @@ window.SAT_PRACTICE_TESTS = [
           "explanation": "Choice B is correct. Slope is the change in y over the change in x, so (3 - 11)/(a - (-6)) = -2, which is -8/(a + 6) = -2. Multiplying both sides by (a + 6) gives -8 = -2(a + 6), and dividing both sides by -2 gives 4 = a + 6, so a = 4 - 6 = -2. Check it: from (-6, 11) to (-2, 3) the run is 4 and the rise is -8, and -8/4 = -2. Choice A, -10, comes from a sign slip that turns the equation into a + 6 = -4. Choice C, 4, stops one step early and reports the value of a + 6 as if it were a. Choice D, 10, uses a - 6 in the denominator instead of a - (-6), which is a + 6."
         },
         {
-          "qid": "mt3888b4",
-          "domain": "Problem-Solving and Data Analysis",
-          "skill": "Ratios, Rates, Proportional Relationships, and Units",
+          "qid": "mt6a1f03",
+          "domain": "Advanced Math",
+          "skill": "66 Rational Functions",
           "difficulty": "medium",
           "type": "mc",
-          "text": "The International Space Station orbits Earth at an average speed of 4.76 miles per second. What is the space station’s average speed in miles per hour?",
+          "text": "The function <i>f</i> is defined by <i>f</i>(<i>x</i>) = <span style=\"display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;\">2<i>x</i> + 6</span><span style=\"padding:0 0.25em;\"><i>x</i> − 1</span></span>, where <i>x</i> ≠ 1. For what value of <i>x</i> does <i>f</i>(<i>x</i>) = 3?",
           "choices": [
-            "285.6",
-            "571.2",
-            "856.8",
-            "17,136.0"
+            "3",
+            "4",
+            "9",
+            "15"
           ],
-          "correct": 3,
-          "explanation": "Choice D is correct. Since 1 minute = 60 seconds and 1 hour = 60 minutes, it follows that 1 hour = (60)(60), or 3,600 seconds. Using this conversion factor, the space station's average speed of 4.76 miles per second is equal to an average speed of <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">4.76 miles</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">second</span></span> &times; <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">3,600 seconds</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">hour</span></span> = <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">17,136 miles</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">hour</span></span>, or 17,136 miles per hour.<br><br>Choice A is incorrect. This is the space station's average speed in miles per minute. Choice B is incorrect. This is double the space station's average speed in miles per minute, or the number of miles the space station travels on average in 2 minutes. Choice C is incorrect. This is triple the space station's average speed in miles per minute, or the number of miles the space station travels on average in 3 minutes."
+          "correct": 2,
+          "explanation": "The correct answer is 9. Set the function equal to 3 and clear the denominator: 2<i>x</i> + 6 = 3(<i>x</i> − 1). Distributing on the right gives 2<i>x</i> + 6 = 3<i>x</i> − 3, so 9 = <i>x</i>. Checking, <i>f</i>(9) = 24/8 = 3. Choice B comes from setting the denominator itself equal to 3. Choice A comes from distributing 3(<i>x</i> + 1) instead of 3(<i>x</i> − 1), which flips the sign of the constant. The restriction <i>x</i> ≠ 1 matters only for ruling out a value that never arises here."
         },
         {
           "qid": "mt1d93aa",
@@ -4270,20 +4270,20 @@ window.SAT_PRACTICE_TESTS = [
           "explanation": "Choice B is correct. It's given that a team plans to sell at least 140 tickets before an event and at least 220 tickets during the event to raise a total of at least $5,820 from all tickets sold. It's also given that the price of a ticket during the event is $3 less than the price of a ticket before the event and that <i>x</i> represents the price, in dollars, of a ticket sold during the event. It follows that <i>x</i> + 3 represents the price, in dollars, of a ticket sold before the event. The expression 140(<i>x</i> + 3) represents the planned revenue, in dollars, from the tickets sold before the event, and the expression 220<i>x</i> represents the planned revenue, in dollars, from the tickets sold during the event. Thus, the expression 140(<i>x</i> + 3) + 220<i>x</i> represents the planned revenue, in dollars, from all tickets sold. Since the team plans to raise a total of at least $5,820 from all tickets sold, the total revenue must be at least $5,820. Therefore, the inequality 140(<i>x</i> + 3) + 220<i>x</i> ≥ 5,820 represents this situation.<br><br>Choice A is incorrect. This inequality represents a situation in which the team raises a total of at most $5,820 from all tickets sold.<br><br>Choice C is incorrect. This inequality represents a situation in which the price of a ticket before the event is $3 less, rather than $3 more, than the price of a ticket during the event and the team raises a total of at most $5,820 from all tickets sold.<br><br>Choice D is incorrect. This inequality represents a situation in which the price of a ticket before the event is $3 less, rather than $3 more, than the price of a ticket during the event."
         },
         {
-          "qid": "mtc8d603",
-          "domain": "Problem-Solving and Data Analysis",
-          "skill": "One-Variable Data: Distributions and Measures of Center and Spread",
+          "qid": "mt9c47e1",
+          "domain": "Advanced Math",
+          "skill": "65 Polynomial Functions",
           "difficulty": "hard",
           "type": "mc",
-          "text": "A data set of 27 different numbers has a mean of 33 and a median of 33. A new data set is created by adding 7 to each number in the original data set that is greater than the median and subtracting 7 from each number in the original data set that is less than the median. Which of the following measures does NOT have the same value in both the original and new data sets?",
+          "text": "The polynomial <i>p</i> is defined by <i>p</i>(<i>x</i>) = <i>x</i>³ − 4<i>x</i>² + <i>ax</i> − 12, where <i>a</i> is a constant. If <i>x</i> − 3 is a factor of <i>p</i>, what is the value of <i>a</i>?",
           "choices": [
-            "Median",
-            "Mean",
-            "Sum of the numbers",
-            "Standard deviation"
+            "−7",
+            "3",
+            "7",
+            "21"
           ],
-          "correct": 3,
-          "explanation": "Choice D is correct. When a data set has an odd number of elements, the median can be found by ordering the values from least to greatest and determining the middle value. Out of the 27 different numbers in this data set, 13 numbers are below the median, one number is exactly 33, and 13 numbers are above the median. When 7 is subtracted from each number below the median and added to each number above the median, the data spread out from the median. Since the median of this data set, 33, is equivalent to the mean of the data set, the data also spread out from the mean. Since standard deviation is a measure of how spread out the data are from the mean, a greater spread from the mean indicates an increased standard deviation.<br><br>Choice A is incorrect. All the numbers less than the median decrease and all the numbers greater than the median increase, but the median itself doesn't change. Choices B and C are incorrect. The mean of a data set is found by dividing the sum of the values by the number of values. The net change from subtracting 7 from 13 numbers and adding 7 to 13 numbers is zero. Therefore, neither the mean nor the sum of the numbers changes."
+          "correct": 2,
+          "explanation": "The correct answer is 7. If <i>x</i> − 3 is a factor, then <i>p</i>(3) = 0. Substituting gives 27 − 36 + 3<i>a</i> − 12 = 0, so 3<i>a</i> − 21 = 0 and <i>a</i> = 7. Choice D is 3<i>a</i> rather than <i>a</i>. Choice B is the root of the factor, not the constant. With <i>a</i> = 7 the polynomial factors as (<i>x</i> − 3)(<i>x</i>² − <i>x</i> + 4), and the quadratic has a negative discriminant, so 3 is the only real zero."
         },
         {
           "qid": "mt171241",
