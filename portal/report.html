@@ -1185,7 +1185,7 @@
 <script src="signals.js?v=20260927c"></script>
 <script src="desmos-tags.js?v=20260916c"></script>
 <script src="question-flag.js?v=20260925a"></script>
-<script src="report-tour.js?v=20260927e"></script>
+<script src="report-tour.js?v=20260927f"></script>
 <script>
 /* FLAGS FROM THE ADMIN PAGE (Luca, 2026-09-25). admin.html shows this report
    in a sandboxed frame with no access to its sign-in, so it says hello by
@@ -7996,6 +7996,10 @@
       /* ?tour=1 on the public sample (diagnostic.html, Luca 2026-09-27): the
          walkthrough IS the sample, opened at once, ending on the sign-up. */
       /[?&]tour=1\b/.test(location.search) && isPublicSample ? { sample: true, noButton: true }
+        /* ?tour=open (the diagnostic page's "Open the full sample report"): the
+           same sequence a family gets, the walkthrough first and the full
+           report behind it, every time it is opened. */
+        : /[?&]tour=open\b/.test(location.search) ? { autoOpen: true, always: true }
         : { autoOpen: !isPublicSample && !DEMO_MODE, noButton: isPublicSample });
   } catch (e) { if (window.console) console.warn('walkthrough:', e); }   // never at the report's expense
 

@@ -904,6 +904,7 @@
       if (opts.autoOpen !== false && !inAdmin) {
         var st = storage(), key = 'mtt_seen:' + M.attemptId, seen = false;
         try { seen = !!(st && st.getItem(key)); } catch (e) {}
+        if (opts.always) seen = false;   // a showcase link: the walkthrough every time
         if (!seen) {
           setTimeout(function () {
             if (!document.body.contains(anchor || document.body)) return;   // the report was closed or replaced first
