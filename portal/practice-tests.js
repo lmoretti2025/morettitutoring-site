@@ -2391,7 +2391,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Central Ideas and Details",
           "difficulty": "medium",
           "type": "mc",
-          "text": "Although pottery and permanent structures at Andean sites are generally taken to mark the beginning of settled life, pollen preserved in lake sediment—the silt of a lake bed, which records the plants growing nearby—tells a different story. Interestingly, a 2007 survey of one lake in the Peruvian Andes recovered maize pollen dated to roughly 4,000 years ago, well below the layers in which pottery first appears. That sequence places cultivation at the site several centuries before settlement.<br><br>Which choice best states the main idea of the text?",
+          "text": "Pottery and permanent structures at Andean sites are generally taken to mark the beginning of settled life, but pollen preserved in lake sediment—the silt of a lake bed, which records the plants growing nearby—tells a different story. A 2007 survey of one lake in the Peruvian Andes recovered maize pollen dated to roughly 4,000 years ago, well below the layers in which pottery first appears. Cultivation there may therefore have preceded settlement by several centuries.<br><br>Which choice best states the main idea of the text?",
           "choices": [
             "Pollen is a more reliable dating method than pottery is for sites in the Peruvian Andes.",
             "The inhabitants of the site abandoned cultivation once permanent structures had been built.",
@@ -2727,7 +2727,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Transitions",
           "difficulty": "hard",
           "type": "mc",
-          "text": "The hand in this manuscript matches nothing else in the whole of the abbey’s library, and the parchment, prepared by a method unrecorded anywhere in the region, came from somewhere far off. ______ the charter it preserves belonged to that abbey and that abbey only.<br><br>Which choice completes the text with the most logical transition?",
+          "text": "The hand in this manuscript matches nothing else in the abbey's library, and the parchment was prepared by a method unrecorded in the region. ______ the charter it preserves belonged to that abbey and to no other house.<br><br>Which choice completes the text with the most logical transition?",
           "choices": [
             "For example,",
             "As a result,",
@@ -3445,7 +3445,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Words in Context",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Conservators cleaning a seventeenth-century panel found yellowed varnish and a blue sleeve now reading as green. Removing this varnish restored the blue. Yet every surrounding tone in the picture was chosen to sit against blue already warmed by fresh varnish, and the cleaned picture is therefore ______ the one on the painter’s easel, exact in pigment and wrong in relation.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
+          "text": "A seventeenth-century panel was found to have yellowed unevenly, with a blue sleeve reading as green. Removing the varnish restored the blue, yet every surrounding tone had been chosen to sit against blue already warmed by fresh varnish, so the cleaned picture is ______ the one on the painter’s easel: exact in pigment and wrong in relation.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
           "choices": [
             "indistinguishable from",
             "at once truer and further from",
@@ -3466,7 +3466,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Cross-Text Connections",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Text 1<br><br>Medieval guilds are often presented as a brake on innovation. Guild statutes fixed materials, tools, and the number of apprentices in a workshop. A craft governed that closely, the argument runs, would have altered its methods slowly, whatever individual masters wanted.<br><br>Text 2<br><br>A 2016 study traced the statutes of a Cologne goldsmiths’ guild across two centuries. The statutes were revised, on average, every eleven years. Each revision followed the adoption of a new technique instead of preventing it. A method spread among masters in the city, and the statute was then rewritten to admit the method and to name who could use it.<br><br>Based on the texts, how would the author of Text 2 most likely respond to the argument in Text 1?",
+          "text": "Text 1<br><br>The medieval guild's reputation as a brake on innovation rests largely on its statutes. Guild statutes fixed the materials of the workshop, the tools, and the number of apprentices allowed to one master. With rules of that kind in force, the argument runs, crafts would have altered their methods slowly, whatever individual masters wanted.<br><br>Text 2<br><br>Regulation runs through the Cologne goldsmiths' records, but it is most visible in what the statutes were written to do. A 2016 study traced these statutes across two centuries and found them revised, on average, every eleven years. When a new technique spread among the masters, the guild rarely forbade it. Instead, the statute was rewritten to admit the technique and to name who could use it.<br><br>Based on the texts, how would the author of Text 2 most likely respond to the argument in Text 1?",
           "choices": [
             "By observing that the statutes followed changes in practice instead of constraining them.",
             "By agreeing that guild statutes were restrictive but noting that they were rarely enforced.",
