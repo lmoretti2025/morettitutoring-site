@@ -4002,6 +4002,16 @@ window.SAT_PRACTICE_TESTS = [
           "explanation": "Choice B is correct. The quantity x + 5 is already grouped on the left, so you can get it in one step. Dividing both sides of 3(x + 5) = 39 by 3 gives x + 5 = 13. There is no need to find x on its own. Choice A, 8, is the value of x, found by taking 5 away from 13, which answers a question the problem did not ask. Choice C, 34, comes from subtracting 5 from 39 rather than dividing by 3. Choice D, 117, multiplies 39 by 3 instead of dividing. If you prefer to expand, 3x + 15 = 39 gives 3x = 24 and x = 8, and then x + 5 = 8 + 5 = 13."
         },
         {
+          "qid": "mtde18df",
+          "domain": "Algebra",
+          "skill": "12 English to Math",
+          "difficulty": "easy",
+          "type": "fr",
+          "text": "A charter boat company charges $12 for each passenger plus a flat fee of $50 for the trip. The total charge for one trip was $362. How many passengers were on that trip?",
+          "answer": "26",
+          "explanation": "The correct answer is 26. Let p be the number of passengers. Each passenger is charged $12, so the passenger charge is 12p, and the flat $50 fee is charged once for the trip. That gives 12p + 50 = 362. Subtracting 50 from both sides gives 12p = 312, and dividing both sides by 12 gives p = 26. Check it: 26 passengers cost 12(26) = 312 dollars, and 312 + 50 = 362 dollars. A common slip is to divide the whole $362 by 12 before removing the flat fee, which gives about 30.2 - the flat fee has to come out first because it does not depend on how many passengers there are."
+        },
+        {
           "qid": "mt190185",
           "domain": "Problem-Solving and Data Analysis",
           "skill": "114 Scatterplots",
@@ -4024,26 +4034,6 @@ window.SAT_PRACTICE_TESTS = [
           "explanation": "Choice B is correct. The question asks what the line of best fit predicts, so read the line, not the nearby data point. The horizontal axis is minutes and the vertical axis is grams, with a minor tick every 50 grams. Above 20 minutes, the line sits at 300 grams. You can check this from the line itself: it starts at 400 grams at 0 minutes and falls to 100 grams at 60 minutes, a rate of -5 grams per minute, so the predicted mass at 20 minutes is 400 - 5(20) = 300 grams. Choice A, 100 grams, is the prediction at 60 minutes, the far end of the line. Choice C, 350 grams, comes from reading up to the next gridline above the line or from using the plotted point instead of the line. Choice D, 400 grams, is the value at 0 minutes."
         },
         {
-          "qid": "mtde18df",
-          "domain": "Algebra",
-          "skill": "12 English to Math",
-          "difficulty": "easy",
-          "type": "fr",
-          "text": "A charter boat company charges $12 for each passenger plus a flat fee of $50 for the trip. The total charge for one trip was $362. How many passengers were on that trip?",
-          "answer": "26",
-          "explanation": "The correct answer is 26. Let p be the number of passengers. Each passenger is charged $12, so the passenger charge is 12p, and the flat $50 fee is charged once for the trip. That gives 12p + 50 = 362. Subtracting 50 from both sides gives 12p = 312, and dividing both sides by 12 gives p = 26. Check it: 26 passengers cost 12(26) = 312 dollars, and 312 + 50 = 362 dollars. A common slip is to divide the whole $362 by 12 before removing the flat fee, which gives about 30.2 - the flat fee has to come out first because it does not depend on how many passengers there are."
-        },
-        {
-          "qid": "mt799420",
-          "domain": "Advanced Math",
-          "skill": "57 Sum of Quadratic Solutions",
-          "difficulty": "medium",
-          "type": "fr",
-          "text": "<div style=\"text-align:center;font-size:1.1em;\">3<i>x</i><sup>2</sup> + 5<i>x</i> &minus; 12 = <i>x</i><sup>2</sup> + 21<i>x</i> + 4</div>What is the sum of the solutions to the given equation?",
-          "answer": "8",
-          "explanation": "The correct answer is 8. Move everything to one side: 3x<sup>2</sup> + 5x - 12 - (x<sup>2</sup> + 21x + 4) = 0. Distributing the minus sign gives 3x<sup>2</sup> - x<sup>2</sup> = 2x<sup>2</sup>, 5x - 21x = -16x, and -12 - 4 = -16, so 2x<sup>2</sup> - 16x - 16 = 0. Dividing every term by 2 gives x<sup>2</sup> - 8x - 8 = 0. For a quadratic in the form x<sup>2</sup> + bx + c = 0, the two solutions add to -b, so the sum here is -(-8) = 8. You never need the solutions themselves. If you want them, the quadratic formula gives x = (8 ± &radic;(64 + 32))/2 = 4 ± 2&radic;6, and (4 + 2&radic;6) + (4 - 2&radic;6) = 8. Watch the constant term when you subtract: -12 - 4 is -16, not -8."
-        },
-        {
           "qid": "mt6c48d3",
           "domain": "Algebra",
           "skill": "5 Function Transformations",
@@ -4064,6 +4054,26 @@ window.SAT_PRACTICE_TESTS = [
             "D: read the vertical shift as a horizontal one, using g(x) = f(x - 15) = 3x - 36."
           ],
           "explanation": "Choice C is correct. First write g out. Since g(x) = f(x) - 15 and f(x) = 3x + 9, g(x) = 3x + 9 - 15 = 3x - 6. The x-intercept is the point where y = 0, so set 3x - 6 = 0, which gives 3x = 6 and x = 2. Choice A, -8, comes from adding 15 instead of subtracting it: 3x + 24 = 0 gives x = -8. Choice B, -3, is the x-intercept of f itself, from 3x + 9 = 0, so it ignores the shift entirely. Choice D, 12, treats the -15 as a shift to the right, solving 3(x - 15) + 9 = 0. Subtracting 15 from the output moves the graph down by 15, not sideways."
+        },
+        {
+          "qid": "mt799420",
+          "domain": "Advanced Math",
+          "skill": "57 Sum of Quadratic Solutions",
+          "difficulty": "medium",
+          "type": "fr",
+          "text": "<div style=\"text-align:center;font-size:1.1em;\">3<i>x</i><sup>2</sup> + 5<i>x</i> &minus; 12 = <i>x</i><sup>2</sup> + 21<i>x</i> + 4</div>What is the sum of the solutions to the given equation?",
+          "answer": "8",
+          "explanation": "The correct answer is 8. Move everything to one side: 3x<sup>2</sup> + 5x - 12 - (x<sup>2</sup> + 21x + 4) = 0. Distributing the minus sign gives 3x<sup>2</sup> - x<sup>2</sup> = 2x<sup>2</sup>, 5x - 21x = -16x, and -12 - 4 = -16, so 2x<sup>2</sup> - 16x - 16 = 0. Dividing every term by 2 gives x<sup>2</sup> - 8x - 8 = 0. For a quadratic in the form x<sup>2</sup> + bx + c = 0, the two solutions add to -b, so the sum here is -(-8) = 8. You never need the solutions themselves. If you want them, the quadratic formula gives x = (8 ± &radic;(64 + 32))/2 = 4 ± 2&radic;6, and (4 + 2&radic;6) + (4 - 2&radic;6) = 8. Watch the constant term when you subtract: -12 - 4 is -16, not -8."
+        },
+        {
+          "qid": "mt53bb7b",
+          "domain": "Geometry and Trigonometry",
+          "skill": "67 Angle Properties",
+          "difficulty": "medium",
+          "type": "fr",
+          "text": "In triangle <i>PQR</i>, the measure of angle <i>P</i> is 24&deg;. The measure of angle <i>Q</i> is 3 times the measure of angle <i>R</i>. What is the measure, in degrees, of angle <i>Q</i>?",
+          "answer": "117",
+          "explanation": "The correct answer is 117. The three angles of a triangle add to 180 degrees, so P + Q + R = 180. Since P is 24 degrees, angles Q and R together measure 180 - 24 = 156 degrees. The measure of Q is 3 times the measure of R, so write Q = 3R. Substituting gives 3R + R = 156, so 4R = 156 and R = 39. Then Q = 3(39) = 117 degrees. Check the total: 24 + 117 + 39 = 180. The main trap is stopping at R = 39 - the question asks for angle Q, which is the larger of the two."
         },
         {
           "qid": "mta1e7e9",
@@ -4126,16 +4136,6 @@ window.SAT_PRACTICE_TESTS = [
           "explanation": "Choice B is correct. Slope is the change in y over the change in x, so (3 - 11)/(a - (-6)) = -2, which is -8/(a + 6) = -2. Multiplying both sides by (a + 6) gives -8 = -2(a + 6), and dividing both sides by -2 gives 4 = a + 6, so a = 4 - 6 = -2. Check it: from (-6, 11) to (-2, 3) the run is 4 and the rise is -8, and -8/4 = -2. Choice A, -10, comes from a sign slip that turns the equation into a + 6 = -4. Choice C, 4, stops one step early and reports the value of a + 6 as if it were a. Choice D, 10, uses a - 6 in the denominator instead of a - (-6), which is a + 6."
         },
         {
-          "qid": "mt53bb7b",
-          "domain": "Geometry and Trigonometry",
-          "skill": "67 Angle Properties",
-          "difficulty": "medium",
-          "type": "fr",
-          "text": "In triangle <i>PQR</i>, the measure of angle <i>P</i> is 24&deg;. The measure of angle <i>Q</i> is 3 times the measure of angle <i>R</i>. What is the measure, in degrees, of angle <i>Q</i>?",
-          "answer": "117",
-          "explanation": "The correct answer is 117. The three angles of a triangle add to 180 degrees, so P + Q + R = 180. Since P is 24 degrees, angles Q and R together measure 180 - 24 = 156 degrees. The measure of Q is 3 times the measure of R, so write Q = 3R. Substituting gives 3R + R = 156, so 4R = 156 and R = 39. Then Q = 3(39) = 117 degrees. Check the total: 24 + 117 + 39 = 180. The main trap is stopping at R = 39 - the question asks for angle Q, which is the larger of the two."
-        },
-        {
           "qid": "mt3888b4",
           "domain": "Problem-Solving and Data Analysis",
           "skill": "Ratios, Rates, Proportional Relationships, and Units",
@@ -4196,22 +4196,6 @@ window.SAT_PRACTICE_TESTS = [
           "explanation": "Choice D is correct. The graph of g has its minimum where f takes its minimum value, and f reaches its minimum at its vertex. For f(x) = x<sup>2</sup> - 8x + 3, the vertex is at x = -b/(2a) = 8/2 = 4. Since g(x) = f(2x + 6), the input to f is 2x + 6, so g is at its minimum when 2x + 6 = 4. Subtracting 6 gives 2x = -2, so x = -1 and a = -1. Check: g(-1) = f(4) = 16 - 32 + 3 = -13, the smallest value f can take. Choice A, -5, uses x = -4 for the vertex of f, a sign error in -b/(2a), and then solves 2x + 6 = -4. Choice B, -4, reports that wrong vertex itself. Choice C, -2, drops the factor of 2 and solves x + 6 = 4."
         },
         {
-          "qid": "mt3a27d2",
-          "domain": "Algebra",
-          "skill": "Linear Functions",
-          "difficulty": "hard",
-          "type": "mc",
-          "text": "For the function <i>f</i>, if <i>f</i>(3<i>x</i>) = <i>x</i> − 6 for all values of <i>x</i>, what is the value of <i>f</i>(6)?",
-          "choices": [
-            "−6",
-            "−4",
-            "0",
-            "2"
-          ],
-          "correct": 1,
-          "explanation": "It's given that <i>f</i>(3<i>x</i>) = <i>x</i> − 6 for all values of <i>x</i>. If 3<i>x</i> = 6, then <i>f</i>(3<i>x</i>) will equal <i>f</i>(6). Dividing both sides of 3<i>x</i> = 6 by 3 gives <i>x</i> = 2. Therefore, substituting 2 for <i>x</i> in the given equation yields <i>f</i>(3 × 2) = 2 − 6, which can be rewritten as <i>f</i>(6) = −4.<br><br>Choice A is incorrect. This is the value of the constant in the given equation for <i>f</i>. Choice C is incorrect and may result from substituting <i>x</i> = 6, rather than <i>x</i> = 2, into the given equation. Choice D is incorrect. This is the value of <i>x</i> that yields <i>f</i>(6) for the left-hand side of the given equation; it's not the value of <i>f</i>(6)."
-        },
-        {
           "qid": "mtfefb83",
           "domain": "Advanced Math",
           "skill": "55 One Real Quadratic Solution",
@@ -4230,6 +4214,22 @@ window.SAT_PRACTICE_TESTS = [
           "text": "In a circle, a sector is bounded by two radii and the arc between their endpoints. The length of that arc is 4&pi; units and the area of that sector is 24&pi; square units. What is the measure, in degrees, of the central angle of the sector?",
           "answer": "60",
           "explanation": "The correct answer is 60. The area of a sector equals half its radius times its arc length, so 24&pi; = (1/2)(r)(4&pi;), which is 24&pi; = 2&pi; times r, giving r = 12. The whole circle then has circumference 2&pi;(12) = 24&pi;. The arc is 4&pi; long, so the sector takes up 4&pi;/24&pi; = 1/6 of the circle, and its central angle is (1/6)(360) = 60 degrees. You can reach the same place with the standard formulas: arc = (angle/360)(2&pi; r) and area = (angle/360)(&pi; r<sup>2</sup>). Dividing the area by the arc gives r/2, so r/2 = 24&pi;/4&pi; = 6 and r = 12, and then 4&pi; = (angle/360)(24&pi;) gives angle = 60 degrees."
+        },
+        {
+          "qid": "mt3a27d2",
+          "domain": "Algebra",
+          "skill": "Linear Functions",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "For the function <i>f</i>, if <i>f</i>(3<i>x</i>) = <i>x</i> − 6 for all values of <i>x</i>, what is the value of <i>f</i>(6)?",
+          "choices": [
+            "−6",
+            "−4",
+            "0",
+            "2"
+          ],
+          "correct": 1,
+          "explanation": "It's given that <i>f</i>(3<i>x</i>) = <i>x</i> − 6 for all values of <i>x</i>. If 3<i>x</i> = 6, then <i>f</i>(3<i>x</i>) will equal <i>f</i>(6). Dividing both sides of 3<i>x</i> = 6 by 3 gives <i>x</i> = 2. Therefore, substituting 2 for <i>x</i> in the given equation yields <i>f</i>(3 × 2) = 2 − 6, which can be rewritten as <i>f</i>(6) = −4.<br><br>Choice A is incorrect. This is the value of the constant in the given equation for <i>f</i>. Choice C is incorrect and may result from substituting <i>x</i> = 6, rather than <i>x</i> = 2, into the given equation. Choice D is incorrect. This is the value of <i>x</i> that yields <i>f</i>(6) for the left-hand side of the given equation; it's not the value of <i>f</i>(6)."
         },
         {
           "qid": "mt351fda",
@@ -4286,6 +4286,16 @@ window.SAT_PRACTICE_TESTS = [
           "explanation": "Choice D is correct. When a data set has an odd number of elements, the median can be found by ordering the values from least to greatest and determining the middle value. Out of the 27 different numbers in this data set, 13 numbers are below the median, one number is exactly 33, and 13 numbers are above the median. When 7 is subtracted from each number below the median and added to each number above the median, the data spread out from the median. Since the median of this data set, 33, is equivalent to the mean of the data set, the data also spread out from the mean. Since standard deviation is a measure of how spread out the data are from the mean, a greater spread from the mean indicates an increased standard deviation.<br><br>Choice A is incorrect. All the numbers less than the median decrease and all the numbers greater than the median increase, but the median itself doesn't change. Choices B and C are incorrect. The mean of a data set is found by dividing the sum of the values by the number of values. The net change from subtracting 7 from 13 numbers and adding 7 to 13 numbers is zero. Therefore, neither the mean nor the sum of the numbers changes."
         },
         {
+          "qid": "mt171241",
+          "domain": "Advanced Math",
+          "skill": "38 Exponent Rules",
+          "difficulty": "hard",
+          "type": "fr",
+          "text": "<div style=\"text-align:center;font-size:1.1em;\">2<sup><i>a</i></sup> = 8<sup><i>b</i>&thinsp;+&thinsp;1</sup></div><div style=\"text-align:center;font-size:1.1em;\">4<sup><i>a</i>&thinsp;&minus;&thinsp;<i>b</i></sup> = 2<sup>10</sup></div>In the given equations, <i>a</i> and <i>b</i> are constants. What is the value of <i>a</i>?",
+          "answer": "6",
+          "explanation": "The correct answer is 6. Write every base as a power of 2. Since 8 = 2<sup>3</sup>, the first equation becomes 2<sup>a</sup> = (2<sup>3</sup>)<sup>(b + 1)</sup> = 2<sup>(3b + 3)</sup>, and equal powers of the same base have equal exponents, so a = 3b + 3. Since 4 = 2<sup>2</sup>, the second equation becomes 2<sup>(2(a - b))</sup> = 2<sup>10</sup>, so 2a - 2b = 10 and a - b = 5, which rearranges to b = a - 5. Substituting that into the first equation gives a = 3(a - 5) + 3 = 3a - 15 + 3 = 3a - 12. Subtracting 3a from both sides gives -2a = -12, so a = 6. Then b = 1, and both equations check out: 2<sup>6</sup> = 64 and 8<sup>(1 + 1)</sup> = 64, and 4<sup>(6 - 1)</sup> = 4<sup>5</sup> = 1024 = 2<sup>10</sup>."
+        },
+        {
           "qid": "mt0e5f7b",
           "domain": "Problem-Solving and Data Analysis",
           "skill": "One-Variable Data: Distributions and Measures of Center and Spread",
@@ -4300,16 +4310,6 @@ window.SAT_PRACTICE_TESTS = [
           ],
           "correct": 1,
           "explanation": "Choice B is correct. The mean of a data set is calculated by dividing the sum of the values in the data set by the number of values in the data set. It's given that the mean length of the 240 gray seals from Muskeget Island was 88 inches. This can be represented by the equation <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>x</i></span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">240</span></span> = 88, where <i>x</i> represents the sum of the lengths, in inches, of the 240 gray seals from Muskeget Island. Multiplying both sides of this equation by 240 yields <i>x</i> = (240)(88), or <i>x</i> = 21,120 inches. It's also given that the mean length of the 120 gray seals from Sable Island was 94 inches. This can be represented by the equation <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>y</i></span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">120</span></span> = 94, where <i>y</i> represents the sum of the lengths, in inches, of the 120 gray seals from Sable Island. Multiplying both sides of this equation by 120 yields <i>y</i> = (120)(94), or <i>y</i> = 11,280 inches. Therefore, the sum of the lengths, in inches, of all 360 gray seals is 21,120 + 11,280, or 32,400. Dividing this sum by 360 yields <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">32,400</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">360</span></span>, or 90 inches. Therefore, the mean length of all 360 gray seals the scientist measured for this study is 90 inches.<br><br>Choice A is incorrect and may result from conceptual or calculation errors.<br><br>Choice C is incorrect. This is the mean length of 88 inches and 94 inches, not the mean length of all 360 gray seals the scientist measured for this study.<br><br>Choice D is incorrect and may result from conceptual or calculation errors."
-        },
-        {
-          "qid": "mt171241",
-          "domain": "Advanced Math",
-          "skill": "38 Exponent Rules",
-          "difficulty": "hard",
-          "type": "fr",
-          "text": "<div style=\"text-align:center;font-size:1.1em;\">2<sup><i>a</i></sup> = 8<sup><i>b</i>&thinsp;+&thinsp;1</sup></div><div style=\"text-align:center;font-size:1.1em;\">4<sup><i>a</i>&thinsp;&minus;&thinsp;<i>b</i></sup> = 2<sup>10</sup></div>In the given equations, <i>a</i> and <i>b</i> are constants. What is the value of <i>a</i>?",
-          "answer": "6",
-          "explanation": "The correct answer is 6. Write every base as a power of 2. Since 8 = 2<sup>3</sup>, the first equation becomes 2<sup>a</sup> = (2<sup>3</sup>)<sup>(b + 1)</sup> = 2<sup>(3b + 3)</sup>, and equal powers of the same base have equal exponents, so a = 3b + 3. Since 4 = 2<sup>2</sup>, the second equation becomes 2<sup>(2(a - b))</sup> = 2<sup>10</sup>, so 2a - 2b = 10 and a - b = 5, which rearranges to b = a - 5. Substituting that into the first equation gives a = 3(a - 5) + 3 = 3a - 15 + 3 = 3a - 12. Subtracting 3a from both sides gives -2a = -12, so a = 6. Then b = 1, and both equations check out: 2<sup>6</sup> = 64 and 8<sup>(1 + 1)</sup> = 64, and 4<sup>(6 - 1)</sup> = 4<sup>5</sup> = 1024 = 2<sup>10</sup>."
         }
       ],
       "module2Easier": [
@@ -4328,6 +4328,16 @@ window.SAT_PRACTICE_TESTS = [
           ],
           "correct": 1,
           "explanation": "Choice B is correct. In a box plot, the vertical line inside the box marks the median. That line sits at 26 on the height scale, so the median height is 26 centimeters. The fact that there are 23 plants does not change anything - the box plot already summarizes the data, so there is no list of 23 values to order. Choice A, 18, is the left edge of the box, which is the first quartile. Choice C, 34, is the right edge of the box, the third quartile. Choice D, 42, is the end of the right whisker, the greatest height in the data set."
+        },
+        {
+          "qid": "mte69d84",
+          "domain": "Algebra",
+          "skill": "30 Standard Form Equation",
+          "difficulty": "easy",
+          "type": "fr",
+          "text": "<div style=\"text-align:center;font-size:1.1em;margin:0.6em 0;\">5<i>x</i> + 4<i>y</i> = 60</div>The given equation represents a line in the <i>xy</i>-plane. What is the <i>x</i>-coordinate of the <i>x</i>-intercept of this line?",
+          "answer": "12",
+          "explanation": "The correct answer is 12. The x-intercept is where the line crosses the x-axis, and every point on the x-axis has y = 0. Substituting y = 0 into 5x + 4y = 60 gives 5x + 4(0) = 60, so 5x = 60 and x = 12. The x-intercept is the point (12, 0), and its x-coordinate is 12. The usual slip here is setting the wrong variable to 0. Putting x = 0 instead gives 4y = 60 and y = 15, which is the y-coordinate of the y-intercept, not what the question asked for."
         },
         {
           "qid": "mtb00757",
@@ -4378,16 +4388,6 @@ window.SAT_PRACTICE_TESTS = [
           "explanation": "Choice C is correct. The mean of a data set is found by dividing the sum of the values in the data set by the number of values in the data set. Therefore, the mean of data set A is <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">72+73+73+76+76</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">5</span></span>, which simplifies to 74. The mean of data set B is represented by the equation <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">61+64+74+85+<i>x</i></span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">5</span></span>, or <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">284+<i>x</i></span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">5</span></span>. It's given that the mean of data set A is equal to the mean of data set B. Therefore, the equation 74 = <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">284+<i>x</i></span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">5</span></span> can be used to solve for <i>x</i>. Multiplying both sides of this equation by 5 yields 370 = 284 + <i>x</i>. Subtracting 284 from both sides of this equation yields 86 = <i>x</i>.<br><br>Choices A, B, and D are incorrect and may result from calculation errors."
         },
         {
-          "qid": "mte69d84",
-          "domain": "Algebra",
-          "skill": "30 Standard Form Equation",
-          "difficulty": "easy",
-          "type": "fr",
-          "text": "<div style=\"text-align:center;font-size:1.1em;margin:0.6em 0;\">5<i>x</i> + 4<i>y</i> = 60</div>The given equation represents a line in the <i>xy</i>-plane. What is the <i>x</i>-coordinate of the <i>x</i>-intercept of this line?",
-          "answer": "12",
-          "explanation": "The correct answer is 12. The x-intercept is where the line crosses the x-axis, and every point on the x-axis has y = 0. Substituting y = 0 into 5x + 4y = 60 gives 5x + 4(0) = 60, so 5x = 60 and x = 12. The x-intercept is the point (12, 0), and its x-coordinate is 12. The usual slip here is setting the wrong variable to 0. Putting x = 0 instead gives 4y = 60 and y = 15, which is the y-coordinate of the y-intercept, not what the question asked for."
-        },
-        {
           "qid": "mt4bbbe5",
           "domain": "Advanced Math",
           "skill": "1 Plugging into a function",
@@ -4436,6 +4436,16 @@ window.SAT_PRACTICE_TESTS = [
           "explanation": "Choice D is correct. Distribute the 5 on the left side: 5(2x - 3) = 10x - 15. That is exactly the expression on the right side, so the equation says 10x - 15 = 10x - 15, which is true no matter what x is. The equation therefore has infinitely many solutions. Another way to see it is to subtract 10x from both sides, which leaves -15 = -15, a true statement with no x left in it. Compare this with choice A, zero solutions, which happens when the x terms match but the constants do not, as in 10x - 15 = 10x + 4, and with choice B, exactly one solution, which needs different coefficients of x on the two sides. Choice C cannot happen for an equation like this one, since a linear equation never has exactly two solutions."
         },
         {
+          "qid": "mt853ca8",
+          "domain": "Geometry and Trigonometry",
+          "skill": "96 Volume",
+          "difficulty": "easy",
+          "type": "fr",
+          "text": "A rectangular shipping box has a volume of 504 cubic inches. The base of the box is a rectangle with a length of 12 inches and a width of 7 inches. What is the height, in inches, of the box?",
+          "answer": "6",
+          "explanation": "The correct answer is 6. The volume of a rectangular box is the area of its base times its height. The base is 12 inches long and 7 inches wide, so its area is 12(7) = 84 square inches. With a volume of 504 cubic inches, 84h = 504, so h = 504/84 = 6 inches. Check it: 12(7)(6) = 84(6) = 504 cubic inches. If you multiply all three given numbers together instead of dividing, you get a number far larger than the volume, which is the sign that division is what is needed."
+        },
+        {
           "qid": "mt7e019a",
           "domain": "Advanced Math",
           "skill": "21 Simple Equivalent Expressions",
@@ -4468,16 +4478,6 @@ window.SAT_PRACTICE_TESTS = [
           "explanation": "Choice B is correct. Undo the operations in reverse order. Subtracting 9 from both sides of x/4 + 9 = 21 gives x/4 = 12, and multiplying both sides by 4 gives x = 48. Check it: 48/4 + 9 = 12 + 9 = 21. Choice A, 3, divides by 4 instead of multiplying, working out 12/4. Choice C, 75, multiplies by 4 first and then subtracts, using 4(21) - 9 = 84 - 9. Choice D, 120, multiplies by 4 but adds the 9 instead of subtracting it, using 4(21 + 9)."
         },
         {
-          "qid": "mt853ca8",
-          "domain": "Geometry and Trigonometry",
-          "skill": "96 Volume",
-          "difficulty": "easy",
-          "type": "fr",
-          "text": "A rectangular shipping box has a volume of 504 cubic inches. The base of the box is a rectangle with a length of 12 inches and a width of 7 inches. What is the height, in inches, of the box?",
-          "answer": "6",
-          "explanation": "The correct answer is 6. The volume of a rectangular box is the area of its base times its height. The base is 12 inches long and 7 inches wide, so its area is 12(7) = 84 square inches. With a volume of 504 cubic inches, 84h = 504, so h = 504/84 = 6 inches. Check it: 12(7)(6) = 84(6) = 504 cubic inches. If you multiply all three given numbers together instead of dividing, you get a number far larger than the volume, which is the sign that division is what is needed."
-        },
-        {
           "qid": "mt36ebf4",
           "domain": "Problem-Solving and Data Analysis",
           "skill": "Two-Variable Data: Models and Scatterplots",
@@ -4492,6 +4492,26 @@ window.SAT_PRACTICE_TESTS = [
           ],
           "correct": 2,
           "explanation": "Choice C is correct. Because the value of the investment increases each year, the function that best models how the value of the investment changes over time is an increasing function. It&rsquo;s given that each year, the value of the investment increases by 0.49% of its value the previous year. Since the value of the investment changes by a fixed percentage each year, the function that best models how the value of the investment changes over time is an exponential function. Therefore, the function that best models how the value of the investment changes over time is an increasing exponential function.<br><br>Choice A is incorrect and may result from conceptual errors.<br><br>Choice B is incorrect and may result from conceptual errors.<br><br>Choice D is incorrect and may result from conceptual errors."
+        },
+        {
+          "qid": "mt0058d4",
+          "domain": "Advanced Math",
+          "skill": "66 Rational Functions",
+          "difficulty": "medium",
+          "type": "fr",
+          "text": "<div style=\"text-align:center;font-size:1.1em;margin:0.6em 0;\">4/(<i>x</i> &minus; 5) = 10/(<i>x</i> + 1)</div>What is the solution to the given equation?",
+          "answer": "9",
+          "explanation": "The correct answer is 9. Since neither denominator may be zero, x is not 5 and not -1, and you can cross multiply: 4(x + 1) = 10(x - 5). Distributing gives 4x + 4 = 10x - 50. Subtracting 4x from both sides gives 4 = 6x - 50, and adding 50 gives 54 = 6x, so x = 54/6 = 9. Check it in the original equation: 4/(9 - 5) = 4/4 = 1 and 10/(9 + 1) = 10/10 = 1, so both sides equal 1. Two common slips are worth naming. Distributing the 10 as 10x - 5 instead of 10x - 50 leads to 4x + 4 = 10x - 5 and x = 1.5. Pairing each numerator with its own denominator, 4(x - 5) = 10(x + 1), leads to 4x - 20 = 10x + 10 and x = -5."
+        },
+        {
+          "qid": "mta291bf",
+          "domain": "Geometry and Trigonometry",
+          "skill": "71 Triangle Sides",
+          "difficulty": "medium",
+          "type": "fr",
+          "text": "The lengths of two sides of a triangle are 7 units and 12 units. The length of the third side is an integer number of units. What is the greatest possible length, in units, of the third side?",
+          "answer": "18",
+          "explanation": "The correct answer is 18. The triangle inequality says each side of a triangle must be shorter than the sum of the other two. With sides of 7 and 12, the third side x must satisfy x &lt; 7 + 12 = 19, and it must also be longer than the difference, x &gt; 12 - 7 = 5, so 5 &lt; x &lt; 19. The question asks for the greatest possible length, so the upper bound is what matters. Since x must be less than 19 and is an integer, the largest value available is 18. Note that 19 itself fails: with a third side of exactly 19 the sides of 7 and 12 would lie flat along it and enclose no area, so no triangle would exist. Answering 19 is the most common error here, and it comes from reading the inequality as x less than or equal to 19."
         },
         {
           "qid": "mt67b170",
@@ -4554,26 +4574,6 @@ window.SAT_PRACTICE_TESTS = [
           "explanation": "It's given that a neighborhood consists of a 2-hectare park and a 35-hectare residential area and that the total number of trees in the neighborhood is 3,934. It's also given that the equation 2<i>x</i> + 35<i>y</i> = 3,934 represents this situation. Since the total number of trees for a given area can be determined by taking the number of hectares times the average number of trees per hectare, this must mean that the terms 2<i>x</i> and 35<i>y</i> correspond to the number of trees in the park and in the residential area, respectively. Since 2<i>x</i> corresponds to the number of trees in the park, and 2 is the size of the park, in hectares, <i>x</i> must represent the average number of trees per hectare in the park.<br><br>Choice B is incorrect and may result from conceptual errors. Choice C is incorrect and may result from conceptual errors. Choice D is incorrect and may result from conceptual errors."
         },
         {
-          "qid": "mt0058d4",
-          "domain": "Advanced Math",
-          "skill": "66 Rational Functions",
-          "difficulty": "medium",
-          "type": "fr",
-          "text": "<div style=\"text-align:center;font-size:1.1em;margin:0.6em 0;\">4/(<i>x</i> &minus; 5) = 10/(<i>x</i> + 1)</div>What is the solution to the given equation?",
-          "answer": "9",
-          "explanation": "The correct answer is 9. Since neither denominator may be zero, x is not 5 and not -1, and you can cross multiply: 4(x + 1) = 10(x - 5). Distributing gives 4x + 4 = 10x - 50. Subtracting 4x from both sides gives 4 = 6x - 50, and adding 50 gives 54 = 6x, so x = 54/6 = 9. Check it in the original equation: 4/(9 - 5) = 4/4 = 1 and 10/(9 + 1) = 10/10 = 1, so both sides equal 1. Two common slips are worth naming. Distributing the 10 as 10x - 5 instead of 10x - 50 leads to 4x + 4 = 10x - 5 and x = 1.5. Pairing each numerator with its own denominator, 4(x - 5) = 10(x + 1), leads to 4x - 20 = 10x + 10 and x = -5."
-        },
-        {
-          "qid": "mta291bf",
-          "domain": "Geometry and Trigonometry",
-          "skill": "71 Triangle Sides",
-          "difficulty": "medium",
-          "type": "fr",
-          "text": "The lengths of two sides of a triangle are 7 units and 12 units. The length of the third side is an integer number of units. What is the greatest possible length, in units, of the third side?",
-          "answer": "18",
-          "explanation": "The correct answer is 18. The triangle inequality says each side of a triangle must be shorter than the sum of the other two. With sides of 7 and 12, the third side x must satisfy x &lt; 7 + 12 = 19, and it must also be longer than the difference, x &gt; 12 - 7 = 5, so 5 &lt; x &lt; 19. The question asks for the greatest possible length, so the upper bound is what matters. Since x must be less than 19 and is an integer, the largest value available is 18. Note that 19 itself fails: with a third side of exactly 19 the sides of 7 and 12 would lie flat along it and enclose no area, so no triangle would exist. Answering 19 is the most common error here, and it comes from reading the inequality as x less than or equal to 19."
-        },
-        {
           "qid": "mt8421d3",
           "domain": "Geometry and Trigonometry",
           "skill": "87 Standard Form of a Circle",
@@ -4628,6 +4628,16 @@ window.SAT_PRACTICE_TESTS = [
           "explanation": "Choice D is correct. It's given that from the initial survey, the margin of error associated with the estimate was 2.13%. A larger sample size generally leads to a smaller margin of error. Therefore, assuming the margins of error were calculated in the same way, the margin of error associated with the estimate from the larger sample is less than 2.13%.<br><br>Choice A is incorrect and may result from conceptual errors.<br><br>Choice B is incorrect and may result from conceptual errors.<br><br>Choice C is incorrect and may result from conceptual errors."
         },
         {
+          "qid": "mtae0243",
+          "domain": "Advanced Math",
+          "skill": "48 Integer Factors",
+          "difficulty": "hard",
+          "type": "fr",
+          "text": "<div style=\"text-align:center;font-size:1.1em;margin:0.6em 0;\"><i>x</i><sup>2</sup> + <i>b</i><i>x</i> + 45 = 0</div>In the given equation, <i>b</i> is a constant. The equation has two distinct solutions, and each solution is an integer. What is the greatest possible value of <i>b</i>?",
+          "answer": "46",
+          "explanation": "The correct answer is 46. If the two solutions are r and s, then x<sup>2</sup> + bx + 45 factors as (x - r)(x - s) = x<sup>2</sup> - (r + s)x + rs, so rs = 45 and r + s = -b. Because both solutions are integers, r and s form a factor pair of 45: (1, 45), (3, 15), (5, 9), or the negatives (-1, -45), (-3, -15), (-5, -9). Since b = -(r + s), b is greatest when r + s is least, and the least available sum is -1 + (-45) = -46, giving b = 46. The pairs of positive factors all give negative values of b, and the requirement of two distinct solutions rules out a repeated root, though 45 is not a perfect square so no such pair arises. Check: x<sup>2</sup> + 46x + 45 = (x + 1)(x + 45), with solutions -1 and -45, integers and distinct."
+        },
+        {
           "qid": "mt45d89d",
           "domain": "Problem-Solving and Data Analysis",
           "skill": "37 Hard Percentages",
@@ -4642,125 +4652,9 @@ window.SAT_PRACTICE_TESTS = [
           ],
           "correct": 2,
           "explanation": "Choice C is correct. A 30% increase multiplies the price by 1.30, and the later 10% decrease multiplies that result by 0.90, so a starting price p becomes 0.90(1.30p) = 1.17p. Setting 1.17p = 702 gives p = 702/1.17 = 600, so the price before the increase was $600. Check it forward: $600 increased by 30% is $780, and $780 decreased by 10% is $780 - $78 = $702. Choice D, $780, is the price after the increase but before the decrease, the answer one step before the one asked. Choice A, $540, is 702/1.3, undoing only the increase and treating $702 as the raised price. Choice B, $585, is 702/1.2, from treating a 30% rise and a 10% fall as a single net 20% rise, which ignores that the 10% is taken off the larger, already increased price."
-        },
-        {
-          "qid": "mtae0243",
-          "domain": "Advanced Math",
-          "skill": "48 Integer Factors",
-          "difficulty": "hard",
-          "type": "fr",
-          "text": "<div style=\"text-align:center;font-size:1.1em;margin:0.6em 0;\"><i>x</i><sup>2</sup> + <i>b</i><i>x</i> + 45 = 0</div>In the given equation, <i>b</i> is a constant. The equation has two distinct solutions, and each solution is an integer. What is the greatest possible value of <i>b</i>?",
-          "answer": "46",
-          "explanation": "The correct answer is 46. If the two solutions are r and s, then x<sup>2</sup> + bx + 45 factors as (x - r)(x - s) = x<sup>2</sup> - (r + s)x + rs, so rs = 45 and r + s = -b. Because both solutions are integers, r and s form a factor pair of 45: (1, 45), (3, 15), (5, 9), or the negatives (-1, -45), (-3, -15), (-5, -9). Since b = -(r + s), b is greatest when r + s is least, and the least available sum is -1 + (-45) = -46, giving b = 46. The pairs of positive factors all give negative values of b, and the requirement of two distinct solutions rules out a repeated root, though 45 is not a perfect square so no such pair arises. Check: x<sup>2</sup> + 46x + 45 = (x + 1)(x + 45), with solutions -1 and -45, integers and distinct."
         }
       ],
       "module2Harder": [
-        {
-          "qid": "mte24431",
-          "domain": "Problem-Solving and Data Analysis",
-          "skill": "118 Mean, Median, Range",
-          "difficulty": "easy",
-          "type": "mc",
-          "text": "<svg viewBox=\"0 0 300 200\" class=\"dx-fig\" style=\"color:var(--text);\"><title>A dot plot of the number of hours volunteered, with dots above the values 2 through 7</title><line x1=\"34\" y1=\"150\" x2=\"276\" y2=\"150\" stroke=\"currentColor\" stroke-width=\"1.4\"/><line x1=\"48\" y1=\"150\" x2=\"48\" y2=\"155\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"48\" y=\"168\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">2</text><circle cx=\"48\" cy=\"142\" r=\"4\" fill=\"currentColor\"/><circle cx=\"48\" cy=\"129\" r=\"4\" fill=\"currentColor\"/><line x1=\"88\" y1=\"150\" x2=\"88\" y2=\"155\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"88\" y=\"168\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">3</text><circle cx=\"88\" cy=\"142\" r=\"4\" fill=\"currentColor\"/><line x1=\"128\" y1=\"150\" x2=\"128\" y2=\"155\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"128\" y=\"168\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">4</text><circle cx=\"128\" cy=\"142\" r=\"4\" fill=\"currentColor\"/><circle cx=\"128\" cy=\"129\" r=\"4\" fill=\"currentColor\"/><circle cx=\"128\" cy=\"116\" r=\"4\" fill=\"currentColor\"/><circle cx=\"128\" cy=\"103\" r=\"4\" fill=\"currentColor\"/><line x1=\"168\" y1=\"150\" x2=\"168\" y2=\"155\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"168\" y=\"168\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">5</text><circle cx=\"168\" cy=\"142\" r=\"4\" fill=\"currentColor\"/><circle cx=\"168\" cy=\"129\" r=\"4\" fill=\"currentColor\"/><circle cx=\"168\" cy=\"116\" r=\"4\" fill=\"currentColor\"/><line x1=\"208\" y1=\"150\" x2=\"208\" y2=\"155\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"208\" y=\"168\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">6</text><circle cx=\"208\" cy=\"142\" r=\"4\" fill=\"currentColor\"/><circle cx=\"208\" cy=\"129\" r=\"4\" fill=\"currentColor\"/><line x1=\"248\" y1=\"150\" x2=\"248\" y2=\"155\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"248\" y=\"168\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">7</text><circle cx=\"248\" cy=\"142\" r=\"4\" fill=\"currentColor\"/><circle cx=\"248\" cy=\"129\" r=\"4\" fill=\"currentColor\"/><circle cx=\"248\" cy=\"116\" r=\"4\" fill=\"currentColor\"/><text x=\"150\" y=\"188\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">Number of hours volunteered</text></svg>The dot plot shows the number of hours each of 15 students volunteered last month. What is the median number of hours volunteered by these students?",
-          "choices": [
-            "4",
-            "5",
-            "5.5",
-            "7"
-          ],
-          "correct": 1,
-          "choiceNotes": [
-            "A: reported the value with the most dots (4 appears four times) instead of the middle value.",
-            "B: KEY. There are 15 values, so the median is the 8th; the counts 2, 1, 4 reach only 7 through 4 hours, so the 8th value lies in the column at 5.",
-            "C: located the 8th value at 5 but then applied the even-count rule anyway, averaging it with the next value up the axis: (5 + 6)/2.",
-            "D: reported the greatest value shown on the plot instead of the middle value."
-          ],
-          "explanation": "Choice B is correct. Count the dots above each value in the plot: 2 dots above 2, 1 above 3, 4 above 4, 3 above 5, 2 above 6, and 3 above 7. That is 2 + 1 + 4 + 3 + 2 + 3 = 15 values, matching the 15 students. The median of 15 values in order is the 8th value, since 7 values fall below it and 7 above. Counting up from the left, values 1 and 2 are 2s, value 3 is a 3, values 4 through 7 are 4s, and values 8, 9, and 10 are 5s. The 8th value is 5, so the median is 5 hours. Choice A, 4, is the value with the most dots, which is the mode rather than the median. Choice C, 5.5, averages two middle values, which applies only when the count is even. Choice D, 7, is the greatest value in the data set."
-        },
-        {
-          "qid": "mt310014",
-          "domain": "Algebra",
-          "skill": "104 Rate of change",
-          "difficulty": "easy",
-          "type": "mc",
-          "text": "<svg viewBox=\"0 0 300 200\" class=\"dx-fig\" style=\"color:var(--text);\"><title>A line in the xy-plane falling from left to right, with the points (0, 18) and (6, 6) drawn and labeled</title><line x1=\"45\" y1=\"20\" x2=\"45\" y2=\"155\" stroke=\"currentColor\" stroke-width=\"1.4\"/><line x1=\"45\" y1=\"155\" x2=\"278\" y2=\"155\" stroke=\"currentColor\" stroke-width=\"1.4\"/><line x1=\"41\" y1=\"131.0\" x2=\"45\" y2=\"131.0\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"37\" y=\"134.0\" font-size=\"9\" text-anchor=\"end\" fill=\"currentColor\">4</text><line x1=\"41\" y1=\"107.0\" x2=\"45\" y2=\"107.0\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"37\" y=\"110.0\" font-size=\"9\" text-anchor=\"end\" fill=\"currentColor\">8</text><line x1=\"41\" y1=\"83.0\" x2=\"45\" y2=\"83.0\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"37\" y=\"86.0\" font-size=\"9\" text-anchor=\"end\" fill=\"currentColor\">12</text><line x1=\"41\" y1=\"59.0\" x2=\"45\" y2=\"59.0\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"37\" y=\"62.0\" font-size=\"9\" text-anchor=\"end\" fill=\"currentColor\">16</text><line x1=\"41\" y1=\"35.0\" x2=\"45\" y2=\"35.0\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"37\" y=\"38.0\" font-size=\"9\" text-anchor=\"end\" fill=\"currentColor\">20</text><line x1=\"45.0\" y1=\"155\" x2=\"45.0\" y2=\"159\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"45.0\" y=\"171\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">0</text><line x1=\"101.0\" y1=\"155\" x2=\"101.0\" y2=\"159\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"101.0\" y=\"171\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">2</text><line x1=\"157.0\" y1=\"155\" x2=\"157.0\" y2=\"159\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"157.0\" y=\"171\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">4</text><line x1=\"213.0\" y1=\"155\" x2=\"213.0\" y2=\"159\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"213.0\" y=\"171\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">6</text><line x1=\"269.0\" y1=\"155\" x2=\"269.0\" y2=\"159\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"269.0\" y=\"171\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">8</text><line x1=\"45.0\" y1=\"47.0\" x2=\"269.0\" y2=\"143.0\" stroke=\"currentColor\" stroke-width=\"1.6\"/><circle cx=\"45.0\" cy=\"47.0\" r=\"3.2\" fill=\"currentColor\"/><circle cx=\"213.0\" cy=\"119.0\" r=\"3.2\" fill=\"currentColor\"/><text x=\"53.0\" y=\"41.0\" font-size=\"9\" text-anchor=\"start\" fill=\"currentColor\">(0, 18)</text><text x=\"221.0\" y=\"113.0\" font-size=\"9\" text-anchor=\"start\" fill=\"currentColor\">(6, 6)</text><text x=\"150\" y=\"186\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">Time (hours)</text><text x=\"14\" y=\"92\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\" transform=\"rotate(-90 14 92)\">Fuel (gallons)</text></svg>The graph shows the amount of fuel, in gallons, remaining in a generator’s tank <i>t</i> hours after the tank was filled. What is the average rate of change, in gallons per hour, of the amount of fuel remaining?",
-          "choices": [
-            "&minus;3",
-            "&minus;2",
-            "&minus;<sup>1</sup>&frasl;<sub>2</sub>",
-            "2"
-          ],
-          "correct": 1,
-          "explanation": "Choice B is correct. The average rate of change between two points is the change in the vertical value divided by the change in the horizontal value. The graph marks (0, 18) and (6, 6): the tank held 18 gallons when it was filled, and 6 hours later it held 6 gallons. So the rate of change is (6 - 18)/(6 - 0) = -12/6 = -2 gallons per hour. The value is negative because fuel is being consumed, and the units confirm it: gallons on top, hours on the bottom. Choice A, -3, comes from dividing the 18 gallons by the 6 hours instead of using the change of 12 gallons. Choice C, -1/2, is the reciprocal, from dividing the change in time by the change in fuel. Choice D, 2, has the right size but the wrong sign and would describe fuel being added."
-        },
-        {
-          "qid": "mt523875",
-          "domain": "Algebra",
-          "skill": "14 Consecutive odd/even integers",
-          "difficulty": "medium",
-          "type": "mc",
-          "text": "The sum of four consecutive odd integers is 232. What is the sum of the two least of these integers?",
-          "choices": [
-            "110",
-            "112",
-            "116",
-            "120"
-          ],
-          "correct": 1,
-          "explanation": "Choice B is correct. Consecutive odd integers differ by 2, so if the least is n the four integers are n, n + 2, n + 4, and n + 6. Their sum is 4n + 12 = 232, so 4n = 220 and n = 55. The four integers are 55, 57, 59, and 61, and as a check 55 + 57 + 59 + 61 = 232. The two least are 55 and 57, so the answer is 55 + 57 = 112. Choice D, 120, is 59 + 61, the sum of the two greatest, the opposite end of the list from the one asked for. Choice C, 116, is 232/2, which is also 57 + 59, the sum of the two middle integers. Choice A, 110, is 2(55), doubling the least integer instead of adding the next odd integer to it."
-        },
-        {
-          "qid": "mt82708d",
-          "domain": "Problem-Solving and Data Analysis",
-          "skill": "One-Variable Data: Distributions and Measures of Center and Spread",
-          "difficulty": "medium",
-          "type": "mc",
-          "text": "For which of the following data sets is the mean greater than the median?",
-          "choices": [
-            "5, 5, 5, 5, 5, 5, 5, 5, 5",
-            "0, 10, 20, 30, 40, 50, 60, 70, 80",
-            "2, 4, 8, 16, 32, 64, 128, 256, 512",
-            "7, 107, 107, 207, 207, 207, 307, 307, 307"
-          ],
-          "correct": 2,
-          "explanation": "Choice C is correct. If the values in a data set are ordered from least to greatest, the median of the data set will be the middle value. Since each data set in the choices is ordered and contains exactly 9 data values, the 5th value in each is the median. It follows that the median of the data set in choice C is 32. The sum of the positive differences between 32 and each of the values that are less than 32 is significantly smaller than the sum of the positive differences between 32 and each of the values that are greater than 32. If 32 were the mean, these sums would have been equal to each other. Therefore, the mean of this data set must be greater than 32. This can also be confirmed by calculating the mean as the sum of the values divided by the number of values in the data set: <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">2 + 4 + 8 + 16 + 32 + 64 + 128 + 256 + 512</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">9</span></span> = 113<span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">5</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">9</span></span>.<br><br>Choices A and B are incorrect. Each of the data sets in these choices is symmetric with respect to its median, so the mean and the median for each of these choices are equivalent. Choice D is incorrect. The median of this data set is 207. Since the sum of the positive differences between 207 and each of the values less than 207 is greater than the sum of the positive differences between 207 and each value greater than 207 in this data set, the mean must be less than the median."
-        },
-        {
-          "qid": "mtdbcd5f",
-          "domain": "Algebra",
-          "skill": "19 Single Variable Equations with a Constant",
-          "difficulty": "medium",
-          "type": "fr",
-          "text": "<div style=\"text-align:center;font-size:1.1em;margin:0.6em 0;\">4(<i>x</i> &minus; 3) + 7 = 3(2<i>x</i> &minus; <i>c</i>)</div>In the given equation, <i>c</i> is a constant and the solution to the equation is <i>x</i> = 11. What is the value of <i>c</i>?",
-          "answer": "9",
-          "explanation": "The correct answer is 9. Since x = 11 is the solution, substituting 11 for x makes the equation true: 4(11 - 3) + 7 = 3(2(11) - c). The left side is 4(8) + 7 = 32 + 7 = 39. The right side is 3(22 - c) = 66 - 3c. So 39 = 66 - 3c. Subtracting 66 from both sides gives -27 = -3c, and dividing both sides by -3 gives c = 9. Check by solving the finished equation: 4(x - 3) + 7 = 3(2x - 9) becomes 4x - 5 = 6x - 27, so 22 = 2x and x = 11, as given. The common error is distributing the 3 onto only the 2x and not onto the c, which turns the right side into 66 - c and gives c = 27."
-        },
-        {
-          "qid": "mtd4f5cc",
-          "domain": "Advanced Math",
-          "skill": "25 Equivalent for all x",
-          "difficulty": "medium",
-          "type": "fr",
-          "text": "<div style=\"text-align:center;font-size:1.1em;margin:0.6em 0;\">(2<i>x</i> + 7)(<i>kx</i> &minus; 3) = 8<i>x</i><sup>2</sup> + <i>cx</i> &minus; 21</div>In the given equation, <i>k</i> and <i>c</i> are constants and the equation is true for all values of <i>x</i>. What is the value of <i>c</i>?",
-          "answer": "22",
-          "explanation": "The correct answer is 22. An equation that is true for all values of x means the two sides are the same polynomial, so their corresponding coefficients must be equal. Expand the left side: (2x + 7)(kx - 3) = 2kx<sup>2</sup> - 6x + 7kx - 21 = 2kx<sup>2</sup> + (7k - 6)x - 21. Compare with 8x<sup>2</sup> + cx - 21. The x<sup>2</sup> coefficients give 2k = 8, so k = 4. The constant terms already agree at -21. The x coefficients then give c = 7k - 6 = 7(4) - 6 = 28 - 6 = 22. Check by expanding with k = 4: (2x + 7)(4x - 3) = 8x<sup>2</sup> - 6x + 28x - 21 = 8x<sup>2</sup> + 22x - 21. A common slip is losing the -6x from the outer-inner product and answering 28, which is 7k on its own."
-        },
-        {
-          "qid": "mt445ada",
-          "domain": "Algebra",
-          "skill": "33 Parallel Lines",
-          "difficulty": "medium",
-          "type": "mc",
-          "text": "In the <i>xy</i>-plane, line <i>&#8467;</i> is parallel to the line with equation 6<i>x</i> &minus; 2<i>y</i> = 9 and passes through the point (&minus;3, 4). What is the <i>y</i>-coordinate of the <i>y</i>-intercept of line <i>&#8467;</i>?",
-          "choices": [
-            "&minus;15",
-            "&minus;5",
-            "4",
-            "13"
-          ],
-          "correct": 3,
-          "explanation": "Choice D is correct. Parallel lines have equal slopes, so start by finding the slope of 6x - 2y = 9. Solving for y gives -2y = -6x + 9, so y = 3x - 4.5 and the slope is 3. Line l therefore has equation y = 3x + b. Substituting the point (-3, 4) gives 4 = 3(-3) + b, so 4 = -9 + b and b = 13. The y-intercept is (0, 13), whose y-coordinate is 13. Choice C, 4, is the y-coordinate of the given point rather than of the y-intercept. Choice B, -5, is 3(-3) + 4, from evaluating the right side instead of solving for b, which moves the -9 the wrong way. Choice A, -15, matches neither the slope nor the point and results from a calculation error."
-        },
         {
           "qid": "mtca36f8",
           "domain": "Algebra",
@@ -4842,6 +4736,16 @@ window.SAT_PRACTICE_TESTS = [
           "explanation": "Choice D is correct. It's given that a is 2,241% of the sum of <i>b</i> and <i>c</i>. This can be represented by the equation a = (2,241/100)(<i>b</i> + <i>c</i>), or a = 22.41(<i>b</i> + <i>c</i>). It's also given that <i>b</i> is 83% of <i>c</i>. This can be represented by the equation <i>b</i> = (83/100)<i>c</i>, or <i>b</i> = 0.83<i>c</i>. Dividing both sides of this equation by 0.83 yields <i>b</i>/0.83 = <i>c</i>. Substituting <i>b</i>/0.83 for <i>c</i> in the equation a = 22.41(<i>b</i> + <i>c</i>) yields a = 22.41(<i>b</i> + <i>b</i>/0.83), or a = 22.41(1.83<i>b</i>/0.83), which is equivalent to a = 41.0103<i>b</i>/0.83, or a = 49.41<i>b</i>. This equation is equivalent to a = (4,941/100)<i>b</i>; therefore, a is 4,941% of <i>b</i>.<br><br>Choice A is incorrect and may result from conceptual or calculation errors.<br><br>Choice B is incorrect and may result from conceptual or calculation errors.<br><br>Choice C is incorrect and may result from conceptual or calculation errors."
         },
         {
+          "qid": "mt15dc54",
+          "domain": "Advanced Math",
+          "skill": "45 Fractional Exponents",
+          "difficulty": "hard",
+          "type": "fr",
+          "text": "<div style=\"text-align:center;font-size:1.1em;margin:0.6em 0;\">(&#8731;(<i>x</i><sup>4</sup>) &middot; &radic;(<i>x</i>))<sup>6</sup> / <i>x</i><sup>3</sup></div>The given expression, where <i>x</i> &gt; 0, is equivalent to <i>x</i><sup><i>k</i></sup>, where <i>k</i> is a constant. What is the value of <i>k</i>?",
+          "answer": "8",
+          "explanation": "The correct answer is 8. Rewrite both radicals as powers: the cube root of x<sup>4</sup> is x<sup>(4/3)</sup>, and the square root of x is x<sup>(1/2)</sup>. Multiplying powers with the same base adds the exponents, so x<sup>(4/3)</sup> times x<sup>(1/2)</sup> = x<sup>(4/3 + 1/2)</sup> = x<sup>(8/6 + 3/6)</sup> = x<sup>(11/6)</sup>. Raising a power to a power multiplies the exponents, so (x<sup>(11/6)</sup>)<sup>6</sup> = x<sup>((11/6)(6))</sup> = x<sup>11</sup>. Dividing powers with the same base subtracts the exponents, so x<sup>11</sup> divided by x<sup>3</sup> is x<sup>(11 - 3)</sup> = x<sup>8</sup>, and k = 8. A faster route is to distribute the 6 first: the cube root of x<sup>4</sup> raised to the 6th is x<sup>8</sup>, and the square root of x raised to the 6th is x<sup>3</sup>, giving x<sup>11</sup> before the division. A common error is multiplying 4/3 and 1/2 instead of adding, which gives x<sup>(2/3)</sup> and eventually k = 1."
+        },
+        {
           "qid": "mt3dde2a",
           "domain": "Advanced Math",
           "skill": "60 Quadratic Applications",
@@ -4862,6 +4766,112 @@ window.SAT_PRACTICE_TESTS = [
             "D: subtracted a single 16 from the maximum height, as if the drop over the 3 seconds were 16 feet."
           ],
           "explanation": "Choice A is correct. The graph of h(t) = -16t<sup>2</sup> + bt + c is a downward-opening parabola, so its maximum is at the vertex. The ball reaches its maximum height of 180 feet at t = 3, so the vertex is (3, 180) and h can be written in vertex form as h(t) = -16(t - 3)<sup>2</sup> + 180. The launch height is the height at t = 0: h(0) = -16(0 - 3)<sup>2</sup> + 180 = -16(9) + 180 = -144 + 180 = 36 feet. Choice D, 164, comes from computing -16 + 180, squaring nothing. Choice C, 132, is 180 - 48, using 3(16) rather than 9(16). Choice B, 96, is the value of the constant b, not of c: since the vertex is at t = b/32 = 3, b = 96, and then 180 = -16(9) + 96(3) + c gives 180 = 144 + c and c = 36, confirming the answer."
+        },
+        {
+          "qid": "mte24431",
+          "domain": "Problem-Solving and Data Analysis",
+          "skill": "118 Mean, Median, Range",
+          "difficulty": "easy",
+          "type": "mc",
+          "text": "<svg viewBox=\"0 0 300 200\" class=\"dx-fig\" style=\"color:var(--text);\"><title>A dot plot of the number of hours volunteered, with dots above the values 2 through 7</title><line x1=\"34\" y1=\"150\" x2=\"276\" y2=\"150\" stroke=\"currentColor\" stroke-width=\"1.4\"/><line x1=\"48\" y1=\"150\" x2=\"48\" y2=\"155\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"48\" y=\"168\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">2</text><circle cx=\"48\" cy=\"142\" r=\"4\" fill=\"currentColor\"/><circle cx=\"48\" cy=\"129\" r=\"4\" fill=\"currentColor\"/><line x1=\"88\" y1=\"150\" x2=\"88\" y2=\"155\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"88\" y=\"168\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">3</text><circle cx=\"88\" cy=\"142\" r=\"4\" fill=\"currentColor\"/><line x1=\"128\" y1=\"150\" x2=\"128\" y2=\"155\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"128\" y=\"168\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">4</text><circle cx=\"128\" cy=\"142\" r=\"4\" fill=\"currentColor\"/><circle cx=\"128\" cy=\"129\" r=\"4\" fill=\"currentColor\"/><circle cx=\"128\" cy=\"116\" r=\"4\" fill=\"currentColor\"/><circle cx=\"128\" cy=\"103\" r=\"4\" fill=\"currentColor\"/><line x1=\"168\" y1=\"150\" x2=\"168\" y2=\"155\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"168\" y=\"168\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">5</text><circle cx=\"168\" cy=\"142\" r=\"4\" fill=\"currentColor\"/><circle cx=\"168\" cy=\"129\" r=\"4\" fill=\"currentColor\"/><circle cx=\"168\" cy=\"116\" r=\"4\" fill=\"currentColor\"/><line x1=\"208\" y1=\"150\" x2=\"208\" y2=\"155\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"208\" y=\"168\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">6</text><circle cx=\"208\" cy=\"142\" r=\"4\" fill=\"currentColor\"/><circle cx=\"208\" cy=\"129\" r=\"4\" fill=\"currentColor\"/><line x1=\"248\" y1=\"150\" x2=\"248\" y2=\"155\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"248\" y=\"168\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">7</text><circle cx=\"248\" cy=\"142\" r=\"4\" fill=\"currentColor\"/><circle cx=\"248\" cy=\"129\" r=\"4\" fill=\"currentColor\"/><circle cx=\"248\" cy=\"116\" r=\"4\" fill=\"currentColor\"/><text x=\"150\" y=\"188\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">Number of hours volunteered</text></svg>The dot plot shows the number of hours each of 15 students volunteered last month. What is the median number of hours volunteered by these students?",
+          "choices": [
+            "4",
+            "5",
+            "5.5",
+            "7"
+          ],
+          "correct": 1,
+          "choiceNotes": [
+            "A: reported the value with the most dots (4 appears four times) instead of the middle value.",
+            "B: KEY. There are 15 values, so the median is the 8th; the counts 2, 1, 4 reach only 7 through 4 hours, so the 8th value lies in the column at 5.",
+            "C: located the 8th value at 5 but then applied the even-count rule anyway, averaging it with the next value up the axis: (5 + 6)/2.",
+            "D: reported the greatest value shown on the plot instead of the middle value."
+          ],
+          "explanation": "Choice B is correct. Count the dots above each value in the plot: 2 dots above 2, 1 above 3, 4 above 4, 3 above 5, 2 above 6, and 3 above 7. That is 2 + 1 + 4 + 3 + 2 + 3 = 15 values, matching the 15 students. The median of 15 values in order is the 8th value, since 7 values fall below it and 7 above. Counting up from the left, values 1 and 2 are 2s, value 3 is a 3, values 4 through 7 are 4s, and values 8, 9, and 10 are 5s. The 8th value is 5, so the median is 5 hours. Choice A, 4, is the value with the most dots, which is the mode rather than the median. Choice C, 5.5, averages two middle values, which applies only when the count is even. Choice D, 7, is the greatest value in the data set."
+        },
+        {
+          "qid": "mt310014",
+          "domain": "Algebra",
+          "skill": "104 Rate of change",
+          "difficulty": "easy",
+          "type": "mc",
+          "text": "<svg viewBox=\"0 0 300 200\" class=\"dx-fig\" style=\"color:var(--text);\"><title>A line in the xy-plane falling from left to right, with the points (0, 18) and (6, 6) drawn and labeled</title><line x1=\"45\" y1=\"20\" x2=\"45\" y2=\"155\" stroke=\"currentColor\" stroke-width=\"1.4\"/><line x1=\"45\" y1=\"155\" x2=\"278\" y2=\"155\" stroke=\"currentColor\" stroke-width=\"1.4\"/><line x1=\"41\" y1=\"131.0\" x2=\"45\" y2=\"131.0\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"37\" y=\"134.0\" font-size=\"9\" text-anchor=\"end\" fill=\"currentColor\">4</text><line x1=\"41\" y1=\"107.0\" x2=\"45\" y2=\"107.0\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"37\" y=\"110.0\" font-size=\"9\" text-anchor=\"end\" fill=\"currentColor\">8</text><line x1=\"41\" y1=\"83.0\" x2=\"45\" y2=\"83.0\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"37\" y=\"86.0\" font-size=\"9\" text-anchor=\"end\" fill=\"currentColor\">12</text><line x1=\"41\" y1=\"59.0\" x2=\"45\" y2=\"59.0\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"37\" y=\"62.0\" font-size=\"9\" text-anchor=\"end\" fill=\"currentColor\">16</text><line x1=\"41\" y1=\"35.0\" x2=\"45\" y2=\"35.0\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"37\" y=\"38.0\" font-size=\"9\" text-anchor=\"end\" fill=\"currentColor\">20</text><line x1=\"45.0\" y1=\"155\" x2=\"45.0\" y2=\"159\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"45.0\" y=\"171\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">0</text><line x1=\"101.0\" y1=\"155\" x2=\"101.0\" y2=\"159\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"101.0\" y=\"171\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">2</text><line x1=\"157.0\" y1=\"155\" x2=\"157.0\" y2=\"159\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"157.0\" y=\"171\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">4</text><line x1=\"213.0\" y1=\"155\" x2=\"213.0\" y2=\"159\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"213.0\" y=\"171\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">6</text><line x1=\"269.0\" y1=\"155\" x2=\"269.0\" y2=\"159\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"269.0\" y=\"171\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">8</text><line x1=\"45.0\" y1=\"47.0\" x2=\"269.0\" y2=\"143.0\" stroke=\"currentColor\" stroke-width=\"1.6\"/><circle cx=\"45.0\" cy=\"47.0\" r=\"3.2\" fill=\"currentColor\"/><circle cx=\"213.0\" cy=\"119.0\" r=\"3.2\" fill=\"currentColor\"/><text x=\"53.0\" y=\"41.0\" font-size=\"9\" text-anchor=\"start\" fill=\"currentColor\">(0, 18)</text><text x=\"221.0\" y=\"113.0\" font-size=\"9\" text-anchor=\"start\" fill=\"currentColor\">(6, 6)</text><text x=\"150\" y=\"186\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">Time (hours)</text><text x=\"14\" y=\"92\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\" transform=\"rotate(-90 14 92)\">Fuel (gallons)</text></svg>The graph shows the amount of fuel, in gallons, remaining in a generator’s tank <i>t</i> hours after the tank was filled. What is the average rate of change, in gallons per hour, of the amount of fuel remaining?",
+          "choices": [
+            "&minus;3",
+            "&minus;2",
+            "&minus;<sup>1</sup>&frasl;<sub>2</sub>",
+            "2"
+          ],
+          "correct": 1,
+          "explanation": "Choice B is correct. The average rate of change between two points is the change in the vertical value divided by the change in the horizontal value. The graph marks (0, 18) and (6, 6): the tank held 18 gallons when it was filled, and 6 hours later it held 6 gallons. So the rate of change is (6 - 18)/(6 - 0) = -12/6 = -2 gallons per hour. The value is negative because fuel is being consumed, and the units confirm it: gallons on top, hours on the bottom. Choice A, -3, comes from dividing the 18 gallons by the 6 hours instead of using the change of 12 gallons. Choice C, -1/2, is the reciprocal, from dividing the change in time by the change in fuel. Choice D, 2, has the right size but the wrong sign and would describe fuel being added."
+        },
+        {
+          "qid": "mt523875",
+          "domain": "Algebra",
+          "skill": "14 Consecutive odd/even integers",
+          "difficulty": "medium",
+          "type": "mc",
+          "text": "The sum of four consecutive odd integers is 232. What is the sum of the two least of these integers?",
+          "choices": [
+            "110",
+            "112",
+            "116",
+            "120"
+          ],
+          "correct": 1,
+          "explanation": "Choice B is correct. Consecutive odd integers differ by 2, so if the least is n the four integers are n, n + 2, n + 4, and n + 6. Their sum is 4n + 12 = 232, so 4n = 220 and n = 55. The four integers are 55, 57, 59, and 61, and as a check 55 + 57 + 59 + 61 = 232. The two least are 55 and 57, so the answer is 55 + 57 = 112. Choice D, 120, is 59 + 61, the sum of the two greatest, the opposite end of the list from the one asked for. Choice C, 116, is 232/2, which is also 57 + 59, the sum of the two middle integers. Choice A, 110, is 2(55), doubling the least integer instead of adding the next odd integer to it."
+        },
+        {
+          "qid": "mtdbcd5f",
+          "domain": "Algebra",
+          "skill": "19 Single Variable Equations with a Constant",
+          "difficulty": "medium",
+          "type": "fr",
+          "text": "<div style=\"text-align:center;font-size:1.1em;margin:0.6em 0;\">4(<i>x</i> &minus; 3) + 7 = 3(2<i>x</i> &minus; <i>c</i>)</div>In the given equation, <i>c</i> is a constant and the solution to the equation is <i>x</i> = 11. What is the value of <i>c</i>?",
+          "answer": "9",
+          "explanation": "The correct answer is 9. Since x = 11 is the solution, substituting 11 for x makes the equation true: 4(11 - 3) + 7 = 3(2(11) - c). The left side is 4(8) + 7 = 32 + 7 = 39. The right side is 3(22 - c) = 66 - 3c. So 39 = 66 - 3c. Subtracting 66 from both sides gives -27 = -3c, and dividing both sides by -3 gives c = 9. Check by solving the finished equation: 4(x - 3) + 7 = 3(2x - 9) becomes 4x - 5 = 6x - 27, so 22 = 2x and x = 11, as given. The common error is distributing the 3 onto only the 2x and not onto the c, which turns the right side into 66 - c and gives c = 27."
+        },
+        {
+          "qid": "mt82708d",
+          "domain": "Problem-Solving and Data Analysis",
+          "skill": "One-Variable Data: Distributions and Measures of Center and Spread",
+          "difficulty": "medium",
+          "type": "mc",
+          "text": "For which of the following data sets is the mean greater than the median?",
+          "choices": [
+            "5, 5, 5, 5, 5, 5, 5, 5, 5",
+            "0, 10, 20, 30, 40, 50, 60, 70, 80",
+            "2, 4, 8, 16, 32, 64, 128, 256, 512",
+            "7, 107, 107, 207, 207, 207, 307, 307, 307"
+          ],
+          "correct": 2,
+          "explanation": "Choice C is correct. If the values in a data set are ordered from least to greatest, the median of the data set will be the middle value. Since each data set in the choices is ordered and contains exactly 9 data values, the 5th value in each is the median. It follows that the median of the data set in choice C is 32. The sum of the positive differences between 32 and each of the values that are less than 32 is significantly smaller than the sum of the positive differences between 32 and each of the values that are greater than 32. If 32 were the mean, these sums would have been equal to each other. Therefore, the mean of this data set must be greater than 32. This can also be confirmed by calculating the mean as the sum of the values divided by the number of values in the data set: <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">2 + 4 + 8 + 16 + 32 + 64 + 128 + 256 + 512</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">9</span></span> = 113<span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">5</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">9</span></span>.<br><br>Choices A and B are incorrect. Each of the data sets in these choices is symmetric with respect to its median, so the mean and the median for each of these choices are equivalent. Choice D is incorrect. The median of this data set is 207. Since the sum of the positive differences between 207 and each of the values less than 207 is greater than the sum of the positive differences between 207 and each value greater than 207 in this data set, the mean must be less than the median."
+        },
+        {
+          "qid": "mtd4f5cc",
+          "domain": "Advanced Math",
+          "skill": "25 Equivalent for all x",
+          "difficulty": "medium",
+          "type": "fr",
+          "text": "<div style=\"text-align:center;font-size:1.1em;margin:0.6em 0;\">(2<i>x</i> + 7)(<i>kx</i> &minus; 3) = 8<i>x</i><sup>2</sup> + <i>cx</i> &minus; 21</div>In the given equation, <i>k</i> and <i>c</i> are constants and the equation is true for all values of <i>x</i>. What is the value of <i>c</i>?",
+          "answer": "22",
+          "explanation": "The correct answer is 22. An equation that is true for all values of x means the two sides are the same polynomial, so their corresponding coefficients must be equal. Expand the left side: (2x + 7)(kx - 3) = 2kx<sup>2</sup> - 6x + 7kx - 21 = 2kx<sup>2</sup> + (7k - 6)x - 21. Compare with 8x<sup>2</sup> + cx - 21. The x<sup>2</sup> coefficients give 2k = 8, so k = 4. The constant terms already agree at -21. The x coefficients then give c = 7k - 6 = 7(4) - 6 = 28 - 6 = 22. Check by expanding with k = 4: (2x + 7)(4x - 3) = 8x<sup>2</sup> - 6x + 28x - 21 = 8x<sup>2</sup> + 22x - 21. A common slip is losing the -6x from the outer-inner product and answering 28, which is 7k on its own."
+        },
+        {
+          "qid": "mt445ada",
+          "domain": "Algebra",
+          "skill": "33 Parallel Lines",
+          "difficulty": "medium",
+          "type": "mc",
+          "text": "In the <i>xy</i>-plane, line <i>&#8467;</i> is parallel to the line with equation 6<i>x</i> &minus; 2<i>y</i> = 9 and passes through the point (&minus;3, 4). What is the <i>y</i>-coordinate of the <i>y</i>-intercept of line <i>&#8467;</i>?",
+          "choices": [
+            "&minus;15",
+            "&minus;5",
+            "4",
+            "13"
+          ],
+          "correct": 3,
+          "explanation": "Choice D is correct. Parallel lines have equal slopes, so start by finding the slope of 6x - 2y = 9. Solving for y gives -2y = -6x + 9, so y = 3x - 4.5 and the slope is 3. Line l therefore has equation y = 3x + b. Substituting the point (-3, 4) gives 4 = 3(-3) + b, so 4 = -9 + b and b = 13. The y-intercept is (0, 13), whose y-coordinate is 13. Choice C, 4, is the y-coordinate of the given point rather than of the y-intercept. Choice B, -5, is 3(-3) + 4, from evaluating the right side instead of solving for b, which moves the -9 the wrong way. Choice A, -15, matches neither the slope nor the point and results from a calculation error."
         },
         {
           "qid": "mt177b88",
@@ -4900,16 +4910,6 @@ window.SAT_PRACTICE_TESTS = [
           ],
           "correct": 0,
           "explanation": "A tour group with <i>n</i> people, where <i>n</i> ≥ 25, can be split into two subgroups: the first 25 people and the additional <i>n</i> − 25 people. Since the museum charges $21 per person for the first 25 people and $14 for each additional person, the charge for the first 25 people is $21(25) and the charge for the additional <i>n</i> − 25 people is $14(<i>n</i> − 25). Therefore, the total charge, in dollars, is given by the function <i>f</i>(<i>n</i>) = 21(25) + 14(<i>n</i> − 25), or <i>f</i>(<i>n</i>) = 14<i>n</i> + 175.<br><br>Choice B is incorrect and may result from conceptual or calculation errors. Choice C is incorrect and may result from conceptual or calculation errors. Choice D is incorrect and may result from conceptual or calculation errors."
-        },
-        {
-          "qid": "mt15dc54",
-          "domain": "Advanced Math",
-          "skill": "45 Fractional Exponents",
-          "difficulty": "hard",
-          "type": "fr",
-          "text": "<div style=\"text-align:center;font-size:1.1em;margin:0.6em 0;\">(&#8731;(<i>x</i><sup>4</sup>) &middot; &radic;(<i>x</i>))<sup>6</sup> / <i>x</i><sup>3</sup></div>The given expression, where <i>x</i> &gt; 0, is equivalent to <i>x</i><sup><i>k</i></sup>, where <i>k</i> is a constant. What is the value of <i>k</i>?",
-          "answer": "8",
-          "explanation": "The correct answer is 8. Rewrite both radicals as powers: the cube root of x<sup>4</sup> is x<sup>(4/3)</sup>, and the square root of x is x<sup>(1/2)</sup>. Multiplying powers with the same base adds the exponents, so x<sup>(4/3)</sup> times x<sup>(1/2)</sup> = x<sup>(4/3 + 1/2)</sup> = x<sup>(8/6 + 3/6)</sup> = x<sup>(11/6)</sup>. Raising a power to a power multiplies the exponents, so (x<sup>(11/6)</sup>)<sup>6</sup> = x<sup>((11/6)(6))</sup> = x<sup>11</sup>. Dividing powers with the same base subtracts the exponents, so x<sup>11</sup> divided by x<sup>3</sup> is x<sup>(11 - 3)</sup> = x<sup>8</sup>, and k = 8. A faster route is to distribute the 6 first: the cube root of x<sup>4</sup> raised to the 6th is x<sup>8</sup>, and the square root of x raised to the 6th is x<sup>3</sup>, giving x<sup>11</sup> before the division. A common error is multiplying 4/3 and 1/2 instead of adding, which gives x<sup>(2/3)</sup> and eventually k = 1."
         },
         {
           "qid": "mte0f366",
