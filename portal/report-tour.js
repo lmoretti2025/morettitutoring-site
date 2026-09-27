@@ -160,12 +160,14 @@
   function secName(key, label) { return key === 'math' ? 'Math' : key === 'reading-writing' ? 'Reading & Writing' : (label || 'This section'); }
   function bar(p, cls) { return '<div class="t-mini"><i class="' + (cls || '') + '" style="width:' + Math.max(0, Math.min(100, p)) + '%"></i></div>'; }
   // The bridge's rollup bars read "Other \u2014 Algebra (3 skills)"; said without the dash.
-  function cleanLabel(l, keepCount) {
+  // Said the report's way (report.html, 2026-09-27): "Algebra (3 skills together)",
+  // since "the rest of" read wrong when none of the area's skills is listed apart.
+  function cleanLabel(l) {
     l = String(l || '');
     var n = /\((\d+) skills?\)\s*$/.exec(l);
     l = l.replace(/\s*\(\d+ skills?\)\s*$/, '');
     var o = /^Other\s*[\u2014\u2013-]+\s*(.+)$/.exec(l);
-    if (o) l = 'the rest of ' + o[1] + (keepCount && n ? ' (' + n[1] + ' skills)' : '');
+    if (o) l = o[1] + (n ? ' (' + n[1] + ' skills together)' : '');
     return l;
   }
   function storage() { try { return window.localStorage; } catch (e) { return null; } }
@@ -507,7 +509,7 @@
         sheet: { eye: 'Your path', title: 'Every point on the table', html:
           '<p>If every miss on this test were fixed, the score would be about <b>' + (ceiling || end) + '</b>. Here\u2019s where those points sit, biggest first:</p>' +
           '<table class="t-tbl"><tr><th>Fix</th><th class="num">Points</th></tr>' +
-          items.slice().sort(function (a, b) { return b.points - a.points; }).map(function (it) { return '<tr><td>' + esc(cleanLabel(it.label, true)) + '</td><td class="num">' + ptsTxt(it.points) + '</td></tr>'; }).join('') +
+          items.slice().sort(function (a, b) { return b.points - a.points; }).map(function (it) { return '<tr><td>' + esc(cleanLabel(it.label)) + '</td><td class="num">' + ptsTxt(it.points) + '</td></tr>'; }).join('') +
           (function () {
             // What the chart folds into one line, so the rows add up to the total (audit 6).
             var shown = items.reduce(function (a, it) { return a + it.points; }, 0);
