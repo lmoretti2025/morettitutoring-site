@@ -1185,7 +1185,7 @@
 <script src="signals.js?v=20260927c"></script>
 <script src="desmos-tags.js?v=20260916c"></script>
 <script src="question-flag.js?v=20260925a"></script>
-<script src="report-tour.js?v=20260927d"></script>
+<script src="report-tour.js?v=20260927e"></script>
 <script>
 /* FLAGS FROM THE ADMIN PAGE (Luca, 2026-09-25). admin.html shows this report
    in a sandboxed frame with no access to its sign-in, so it says hello by
@@ -7992,7 +7992,11 @@
       domains: domains, totalC: totalC, totalQ: totalQ, composite: composite, rwScaled: rwScaled, mathScaled: mathScaled,
       currentComposite: currentComposite, shownItems: shownItems, reachable: reachable, targetScore: targetScore,
       behaviorFlags: behaviorFlags, planInputs: planInputs, reportBand: reportBand, domainBucketsDx: domainBucketsDx,
-      skipped: skipped, routeSummaries: routeSummaries, conditions: conditionsShown }, { autoOpen: !isPublicSample && !DEMO_MODE, noButton: isPublicSample });
+      skipped: skipped, routeSummaries: routeSummaries, conditions: conditionsShown },
+      /* ?tour=1 on the public sample (diagnostic.html, Luca 2026-09-27): the
+         walkthrough IS the sample, opened at once, ending on the sign-up. */
+      /[?&]tour=1\b/.test(location.search) && isPublicSample ? { sample: true, noButton: true }
+        : { autoOpen: !isPublicSample && !DEMO_MODE, noButton: isPublicSample });
   } catch (e) { if (window.console) console.warn('walkthrough:', e); }   // never at the report's expense
 
   document.getElementById('page1').style.display = 'block';

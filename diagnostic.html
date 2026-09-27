@@ -284,6 +284,13 @@ nav.is-red .navmenu{background:var(--red);border-top-color:rgba(255,255,255,.2)}
 /* White, matching the report's own ground, so there is no card edge between
    the page and the document — it reads as one surface. */
 .rptwrap{background:#fff;border:none;padding:0 0 clamp(2rem,5vh,3.5rem)}
+/* The sample walkthrough in a phone-sized frame: the deck fills whatever box it is given. */
+.deck-stage{max-width:430px;margin:.6rem auto 0;padding:0 1rem}
+.deck-stage iframe{display:block;width:100%;height:min(780px,82vh);border:0;border-radius:28px;background:#F2F2F2;
+  box-shadow:0 30px 70px rgba(12,10,9,.18),0 0 0 1px rgba(17,17,17,.08)}
+.deck-more{text-align:center;font-size:.85rem;color:#7A736B;margin:1.2rem 1rem 0}
+.deck-more a{color:#B0271C;font-weight:600}
+@media(max-width:480px){.deck-stage{padding:0 .5rem}.deck-stage iframe{border-radius:20px;height:78vh}}
 .rptbar{max-width:1560px;margin:0 auto;padding:clamp(1.1rem,2.6vh,1.8rem) clamp(1rem,3vw,2rem) clamp(.6rem,1.4vh,1rem)}
 .rptbar p{font-size:.8rem;color:#7A736B;line-height:1.55;max-width:66ch}
 .rptbar p b{color:var(--ink);font-weight:600}
@@ -410,7 +417,7 @@ nav.is-red .navmenu{background:var(--red);border-top-color:rgba(255,255,255,.2)}
   <div class="eyeb">The free diagnostic</div>
   <h1>A score says where your student is. This says <em>why.</em></h1>
   <p>A free, full-length digital SAT diagnostic, taken online at home in about two hours. Your
-  student gets the written report below, exactly as it appears in their portal. Nothing is held
+  student gets the report previewed below, walkthrough and all, exactly as it appears in their portal. Nothing is held
   back for a sales call.</p>
   <div class="acts">
     <a class="btn btn-a shimmer" href="#start"><span>Book the free diagnostic</span></a>
@@ -476,209 +483,40 @@ nav.is-red .navmenu{background:var(--red);border-top-color:rgba(255,255,255,.2)}
 </div></section>
 
 <section class="rptwrap">
+  <!-- THE SAMPLE IS THE WALKTHROUGH (Luca, 2026-09-27): parents see the
+       slide deck every family gets with the report, on the demo student,
+       instead of the whole report. report.html?embed=public&tour=1 opens it
+       at once (report-tour.js sample mode); its last button asks this page
+       to scroll to the form. The full sample report stays one link away. -->
   <div class="rptbar">
-    <p><b>This is the live report.</b> Tap a bar in the path-to-target chart for that skill&rsquo;s
-    accuracy and the questions behind it. On a computer you can also drag the dashed target line.
+    <p><b>This is what your student sees first.</b> Every diagnostic report opens with a short walkthrough:
+    the score, where the points went, and what to do next. Tap through it below, or swipe on a phone.
     Synthetic data for a student called Demo. No real student&rsquo;s results are published here.</p>
   </div>
 
-  <div class="stage" id="stage">
-    <iframe id="rptframe" loading="lazy" src="portal/report.html?demo=1&amp;score=1250&amp;weak=math&amp;embed=public&amp;v=20260916b" scrolling="no"
-            title="Sample SAT diagnostic report for a fictional student"></iframe>
-    <svg class="arrows" id="arrows" aria-hidden="true"></svg>
-    <div class="notes" id="notes"></div>
+  <div class="deck-stage">
+    <iframe id="deckframe" loading="lazy"
+            src="portal/report.html?demo=1&amp;score=1250&amp;weak=math&amp;embed=public&amp;tour=1&amp;v=20260927a"
+            title="Sample report walkthrough for a fictional student"></iframe>
   </div>
 
-  <button type="button" class="rptmore" id="rptmore">See the full report</button>
-
-  <div class="notelist">
-    <h2>Notes in the margin</h2>
-    <ul id="notelist"></ul>
-  </div>
+  <p class="deck-more">Want every detail behind it? <a href="portal/report.html?demo=1&amp;score=1250&amp;weak=math&amp;embed=public&amp;v=20260927a" target="_blank" rel="noopener">Open the full sample report</a></p>
 
   <p class="rptcta"><a class="btn btn-a shimmer" href="#start"><span>Take the free diagnostic</span></a></p>
 </section>
 
-
-
 <script>
-(function () {
-  var NOTES = [
-    { sel: '#score-card',        side: 'l', text: 'Shown as a range, because one sitting can\u2019t pin a score down: here, most likely 1170\u20131330.' },
-    { sel: '#plain-summary',     side: 'r', text: 'The one-minute version comes first, in words a student can act on: where the points went and what to do next. Everything under it is the evidence.' },
-    { sel: '#section-breakdown', side: 'l', text: 'Every question, module by module. Green right, red wrong, and the ones flagged for review marked.' },
-    { sel: '#bridge-card',       side: 'r', text: 'Sized by where the points are, not by what looks worst. Algebra is twice the size of geometry, so the same five mistakes are worth twice as much.' },
-    { sel: '#dx-card',           side: 'l', text: 'On a score report these three problems look identical. This says which one is actually driving the score.' },
-    { sel: '#skilldx-card',      side: 'r', text: 'Named only when the area was missed more than the rest of the test predicts, given how hard its questions were.' },
-    { sel: '#budget-card',       side: 'l', text: 'Right answers can still cost too much. Measured against a fixed budget rather than the student\u2019s own average, so being evenly slow still shows up.' },
-    { sel: '#timing-card',       side: 'r', text: 'The gap under the module clock is the reserve. Finishing far early means it was never used.' },
-    { sel: '#behavior-section',  side: 'l', text: 'What the clock says about this sitting: time left unused, and misses that took real effort rather than a rushed guess. Each note ends with what to do on the next test.' },
-    { sel: '#plan-section',      side: 'r', text: 'And then the part almost nobody writes down: the diagnosis turned into hours a week.' }
-  ];
-
-  var frame = document.getElementById('rptframe'),
-      stage = document.getElementById('stage'),
-      layer = document.getElementById('notes'),
-      list  = document.getElementById('notelist');
-
-  NOTES.forEach(function (n) {
-    var li = document.createElement('li'); li.textContent = n.text; list.appendChild(li);
-  });
-
-  /* The report measures itself and posts the numbers out (see the embed
-     channel at the bottom of portal/report.html). Reading its DOM directly
-     only works same-origin, so it is not relied on. */
-  var latest = null;
-
-  window.addEventListener('message', function (e) {
-    var m = e.data;
-    if (!m || m.type !== 'moretti-report') return;
-    if (e.source !== frame.contentWindow) return;
-    latest = m;
-    if (m.height && Math.abs(m.height - frame.clientHeight) > 2) {
-      frame.style.height = m.height + 'px';
-    }
-    place();
-  });
-
-  function place() {
-    if (!latest) return;
-    layer.innerHTML = '';
-
-    var GAP = 34;
-    var colLeft  = latest.colLeft;
-    var colRight = latest.colLeft + latest.colWidth;
-    var margin = Math.min(colLeft, stage.clientWidth - colRight);
-    var width = Math.floor(margin - GAP - 8);
-    if (width < 130) return;                 // the list below covers it
-    width = Math.min(width, 250);
-
-    NOTES.forEach(function (n) {
-      var top = latest.anchors[n.sel];
-      if (top === undefined) return;
-      var note = document.createElement('div');
-      note.className = 'note ' + n.side;
-      note.textContent = n.text;
-      note.style.width = width + 'px';
-      if (n.side === 'l') note.style.right = Math.round(stage.clientWidth - colLeft + GAP) + 'px';
-      else                note.style.left  = Math.round(colRight + GAP) + 'px';
-      note.dataset.sel = n.sel;
-      note.style.top = '0px';
-      layer.appendChild(note);
-
-      /* Sit the note ABOVE its target so the arrow can leave from underneath
-         and descend into it; level with the target, the arrow would climb
-         back through the handwriting. */
-      var h = note.getBoundingClientRect().height;
-      var above = top - h - 14;
-      if (above >= 4) {
-        note.style.top = Math.round(above) + 'px';
-        note.dataset.above = '1';
-      } else {
-        /* Not enough room above: sit it below and mirror the whole thing, so the
-           arrow leaves from over the note, climbs into the target, and still
-           gets the note's width to run. */
-        note.style.top = Math.round(top + 30) + 'px';
-        note.dataset.above = '0';
-      }
-    });
-    drawArrows(colLeft, colRight);
-    reveal();
+/* The walkthrough's last button ("Take the free diagnostic") comes here. */
+window.addEventListener('message', function (e) {
+  var f = document.getElementById('deckframe');
+  if (!f || e.source !== f.contentWindow || !e.data || e.data.type !== 'moretti-tour') return;
+  if (e.data.action === 'cta') {
+    var start = document.getElementById('start');
+    if (start) start.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    var name = document.getElementById('rf-name');
+    if (name) setTimeout(function () { try { name.focus({ preventScroll: true }); } catch (err) {} }, 700);
   }
-
-  /* A drawn arc from each note to the thing it points at. Curved and slightly
-     uneven on purpose — a straight rule reads as a diagram callout, and these
-     are meant to read as someone's margin notes. */
-  function drawArrows(colLeft, colRight) {
-    var svg = document.getElementById('arrows');
-    svg.innerHTML = '';
-    var sr = stage.getBoundingClientRect();
-    svg.setAttribute('viewBox', '0 0 ' + Math.round(sr.width) + ' ' + Math.round(stage.clientHeight));
-    svg.setAttribute('width', Math.round(sr.width));
-    svg.setAttribute('height', Math.round(stage.clientHeight));
-
-    Array.prototype.forEach.call(layer.querySelectorAll('.note'), function (note, i) {
-      var top = latest.anchors[note.dataset.sel];
-      if (top === undefined) return;
-      var nr = note.getBoundingClientRect();
-      var left = note.classList.contains('l');
-
-      /* Start underneath the note, set back toward its outer edge, not on the
-         inner edge (which is hard against the column and leaves no room).
-         From below, the arrow can run the note's width before turning in. */
-      var isAbove = note.dataset.above === '1';
-      // vary where each one sets off, so nine identical spans don't give
-      // the game away
-      var inset = 0.12 + (i % 4) * 0.055;
-      var x1, y1;
-      if (isAbove) {
-        // out from under the note, back toward its outer edge, so the line
-        // gets the note's full width to run before it turns in
-        x1 = left ? nr.left - sr.left + nr.width * inset
-                  : nr.right - sr.left - nr.width * inset;
-        y1 = nr.bottom - sr.top + 6;
-      } else {
-        // mirrored: out from over the note, climbing into the target
-        x1 = left ? nr.left - sr.left + nr.width * inset
-                  : nr.right - sr.left - nr.width * inset;
-        y1 = nr.top - sr.top - 6;
-      }
-      // land on the visible card edge, not the padding box around it
-      var edge = left ? (latest.contentLeft !== undefined ? latest.contentLeft : colLeft)
-                      : (latest.contentRight !== undefined ? latest.contentRight : colRight);
-      var x2 = edge + (left ? -9 : 9);
-      var y2 = top + 16;
-
-      // a single control point, bowed to the outside of the turn so the
-      // curve never doubles back over the note
-      var dx = x2 - x1, dy = y2 - y1;
-      var bow = (14 + (i % 3) * 7) * (isAbove ? 1 : -1);
-      var cx = x1 + dx * 0.62;
-      var cy = y1 + dy * 0.18 + bow;
-
-      var g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-      var p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      p.setAttribute('d', 'M ' + x1.toFixed(1) + ' ' + y1.toFixed(1) +
-                          ' Q ' + cx.toFixed(1) + ' ' + cy.toFixed(1) +
-                          ' ' + x2.toFixed(1) + ' ' + y2.toFixed(1));
-      g.appendChild(p);
-
-      // arrowhead, angled along the curve's final direction
-      var ang = Math.atan2(y2 - cy, x2 - cx);
-      var L = 8;
-      var h = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
-      h.setAttribute('class', 'head');
-      h.setAttribute('points',
-        (x2 - L * Math.cos(ang - 0.42)).toFixed(1) + ',' + (y2 - L * Math.sin(ang - 0.42)).toFixed(1) + ' ' +
-        x2.toFixed(1) + ',' + y2.toFixed(1) + ' ' +
-        (x2 - L * Math.cos(ang + 0.42)).toFixed(1) + ',' + (y2 - L * Math.sin(ang + 0.42)).toFixed(1));
-      g.appendChild(h);
-
-      g.dataset.for = note.dataset.sel;
-      svg.appendChild(g);
-    });
-  }
-
-  function reveal() {
-    var notes = layer.querySelectorAll('.note');
-    if (!('IntersectionObserver' in window)) {
-      Array.prototype.forEach.call(notes, function (n) { n.classList.add('in'); });
-      return;
-    }
-    var io = new IntersectionObserver(function (es) {
-      es.forEach(function (e) {
-        if (!e.isIntersecting) return;
-        e.target.classList.add('in');
-        var g = document.querySelector('#arrows g[data-for="' + e.target.dataset.sel + '"]');
-        if (g) g.classList.add('in');
-        io.unobserve(e.target);
-      });
-    }, { threshold: 0, rootMargin: '-6% 0px -10% 0px' });
-    Array.prototype.forEach.call(notes, function (n) { io.observe(n); });
-  }
-
-  window.addEventListener('resize', place);
-})();
+});
 </script>
 
 <footer><div class="shell">

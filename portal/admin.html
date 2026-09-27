@@ -3462,6 +3462,12 @@
         ? '<b>Paused</b> <span class="dim">(no weekly updates or other automatic emails)</span> <button type="button" class="mini" data-email-set="on">Turn back on</button>'
         : 'On <button type="button" class="mini" data-email-set="pause">Pause</button>');
     }
+    // When the weekly update goes (emails.gs weeklyTiming_). Older deployments send nothing: say nothing.
+    if (typeof s.weeklyAfter === 'string') {
+      row('Weekly update', s.weeklyAfter === 'second'
+        ? 'The morning after the <b>second session</b> of each week <button type="button" class="mini" data-weekly-after="">Back to automatic</button>'
+        : 'Automatic <span class="dim">(after the week\u2019s last session)</span> <button type="button" class="mini" data-weekly-after="second">After the 2nd session instead</button>');
+    }
     (s.emailOptOut || []).forEach(function (addr) {
       row('Unsubscribed', escHtml(addr) + ' <span class="dim">(used the link in an email)</span> ' +
         '<button type="button" class="mini" data-email-resub="' + escHtml(addr) + '">Resubscribe</button>');
@@ -3577,6 +3583,12 @@
       btn.addEventListener('click', function () {
         var pause = btn.getAttribute('data-email-set') === 'pause';
         save(btn, { emailsPaused: pause }, pause ? 'pausing emails' : 'turning emails back on');
+      });
+    });
+    Array.prototype.forEach.call($('stu-details').querySelectorAll('[data-weekly-after]'), function (btn) {
+      btn.addEventListener('click', function () {
+        var v = btn.getAttribute('data-weekly-after');
+        save(btn, { weeklyAfter: v }, v ? 'setting the weekly update to follow the second session' : 'setting the weekly update back to automatic');
       });
     });
     Array.prototype.forEach.call($('stu-details').querySelectorAll('[data-portal-set]'), function (btn) {
@@ -5818,7 +5830,9 @@
       $('fp-view').innerHTML = '<p class="fp-reason">' + escHtml(i.reason || '') + '</p>' +
         '<div class="bc-meta"><b>To</b> ' + (i.to && i.to.length ? escHtml(i.to.join(', ')) : '(no address on file)') +
         '<br><b>Subject</b> ' + escHtml(i.subject) + '</div><div class="bc-mail"><iframe title="Email preview" sandbox="allow-same-origin"></iframe></div>' +
-        '<div style="margin-top:0.8rem;">' + open + '</div>';
+        '<div style="margin-top:0.8rem;">' + (i.status !== 'done' && i.to && i.to.length
+          ? '<button type="button" class="mini" data-send-now="' + escHtml(key) + '" style="background:var(--red);color:#fff;border-color:var(--red);margin-right:6px;">Send now</button>' : '') +
+        open + '</div>';
       var f = $('fp-view').querySelector('.bc-mail iframe');
       f.onload = function () { try { f.style.height = (f.contentDocument.documentElement.scrollHeight + 4) + 'px'; } catch (e) {} };
       f.srcdoc = i.html;
@@ -5829,6 +5843,22 @@
   $('fp-list').addEventListener('click', function (e) {
     var r = e.target.closest('.fp-row');
     if (r) showFridayItem(r.getAttribute('data-key'));
+  });
+  /* SEND NOW: this family's update goes out at once, built today and covering
+     everything since their last one (emails.gs handleWeeklySendNow). */
+  $('fp-view').addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-send-now]');
+    if (!b) return;
+    var key = b.getAttribute('data-send-now');
+    var i = fp.items.filter(function (x) { return x.key === key; })[0] || {};
+    if (!confirm('Send ' + firstName(i.name || 'this family') + '\u2019s weekly update now, to ' + (i.to || []).join(', ') +
+                 '?\n\nIt is built as of today and covers everything since their last update. The next one is timed from today.')) return;
+    b.disabled = true; b.textContent = 'Sending\u2026';
+    postToBackend({ action: 'weeklySendNow', adminKey: adminKey(), key: key }).then(function (d) {
+      if (d && d.ok) { showNotice('Sent ' + firstName(i.name || '') + '\u2019s weekly update to ' + (d.to || []).join(', ') + '.'); loadFridayPreview(key); return; }
+      b.disabled = false; b.textContent = 'Send now';
+      showNotice('Not sent: ' + ((d && d.message) || (d && d.error === 'unknown_action' ? 'the live backend needs a new deploy first.' : (d && d.error) || 'unknown error')));
+    }).catch(function () { b.disabled = false; b.textContent = 'Send now'; showNotice('Not sent: could not reach the backend.'); });
   });
   $('fp-view').addEventListener('click', function (e) {
     var b = e.target.closest('button[data-open]');

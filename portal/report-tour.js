@@ -780,7 +780,7 @@
     if (!root) return;
     if (sheetOpen() && e.key === 'Escape') { closeSheet(); return; }
     if (sheetOpen() && e.key !== 'Tab') return;
-    if (e.key === 'Escape') return close();
+    if (e.key === 'Escape') return model && model.sample ? undefined : close();
     // Space pages forward only when no button has focus, so it can still press
     // a focused "See the numbers" (audit 6).
     var onButton = document.activeElement && /^(BUTTON|A)$/.test(document.activeElement.tagName) && root.contains(document.activeElement);
@@ -821,9 +821,31 @@
       '<div class="t-sheet"><div class="t-card" role="dialog" aria-modal="true" aria-labelledby="mtt-sh-title"><div class="t-sh"><h3 id="mtt-sh-title"></h3><button type="button" class="t-x" aria-label="Close">&times;</button></div><div class="t-sb"></div></div></div>';
     document.body.appendChild(root);
     document.documentElement.style.overflow = 'hidden';
+    /* The site's sample (diagnostic.html): nothing to skip to, and every way
+       out of the story leads to the sign-up form on the page around it. */
+    if (M.sample) {
+      var sk = root.querySelector('.t-skip');
+      sk.textContent = 'Sample: a made-up student'; sk.removeAttribute('data-go'); sk.disabled = true; sk.style.cursor = 'default';
+      Array.prototype.forEach.call(root.querySelectorAll('.t-scr [data-go="close"]'), function (b) {
+        b.setAttribute('data-go', 'cta'); b.className = 't-btn'; b.innerHTML = 'Take the free diagnostic &rarr;';
+        var again = document.createElement('button');
+        again.type = 'button'; again.className = 't-btn ghost'; again.setAttribute('data-go', 'restart'); again.textContent = 'Watch again';
+        again.style.marginLeft = '10px';
+        b.parentNode.appendChild(again);
+      });
+    }
     root.addEventListener('click', function (e) {
       var t = e.target;
-      var g = t.closest('[data-go]'); if (g) { var v = g.getAttribute('data-go'); if (v === 'close') close(); else go(cur + 1); return; }
+      var g = t.closest('[data-go]');
+      if (g) {
+        var v = g.getAttribute('data-go');
+        if (v === 'close') close();
+        else if (v === 'restart') go(0);
+        // The page around the sample scrolls to its form (diagnostic.html listens).
+        else if (v === 'cta') { try { window.parent.postMessage({ type: 'moretti-tour', action: 'cta' }, '*'); } catch (e) {} }
+        else go(cur + 1);
+        return;
+      }
       var sh = t.closest('[data-sheet]'); if (sh) return openSheet(sh.getAttribute('data-sheet'));
       if (t.closest('.t-x')) return closeSheet();
       if (t.classList.contains('t-sheet')) return closeSheet();
@@ -873,6 +895,8 @@
         b.addEventListener('click', function () { open(build(R)); });
         anchor.parentNode.insertBefore(b, anchor);
       }
+      // The public sample: the walkthrough is the whole show, so it opens every time.
+      if (opts.sample) { M.sample = true; setTimeout(function () { open(M); }, 300); return; }
       // By itself once per attempt per device; never when printing or embedded for show.
       // Not by itself inside Luca's admin viewer (audit 6: it greeted him as the student).
       var inAdmin = false;
