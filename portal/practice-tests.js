@@ -2391,7 +2391,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Central Ideas and Details",
           "difficulty": "medium",
           "type": "mc",
-          "text": "Pollen preserved within lake sediment, the silt of a lake bed, records which plants grew nearby, and grain depth can be read as an approximate date. Working on one lake among the Peruvian Andes, a 2007 survey of preserved pollen found maize grains dated to roughly 4,000 years ago, well below layers where pottery and permanent structures first appear. That sequence indicates cultivation preceded settlement by several centuries.<br><br>Which choice best states the main idea of the text?",
+          "text": "Although pottery and permanent structures at Andean sites are generally taken to mark the beginning of settled life, pollen preserved in lake sediment—the silt of a lake bed, which records the plants growing nearby—tells a different story. Interestingly, a 2007 survey of one lake in the Peruvian Andes recovered maize pollen dated to roughly 4,000 years ago, well below the layers in which pottery first appears. That sequence places cultivation at the site several centuries before settlement.<br><br>Which choice best states the main idea of the text?",
           "choices": [
             "Pollen is a more reliable dating method than pottery is for sites in the Peruvian Andes.",
             "The inhabitants of the site abandoned cultivation once permanent structures had been built.",
@@ -2433,7 +2433,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Command of Evidence (Textual)",
           "difficulty": "medium",
           "type": "mc",
-          "text": "The Country of the Pointed Firs is an 1896 novel by Sarah Orne Jewett. Its narrator, a writer lodging one summer in a Maine fishing village, goes out with her landlady (an herbalist known to everyone on that shore) to gather pennyroyal and to call on families in the outlying farms, and she is shown paths and landings that can be found on no map of that coast. After a season in their company she has come to admire a kind of knowledge she cannot acquire for herself:<br><br>Which quotation from The Country of the Pointed Firs most effectively illustrates the claim?",
+          "text": "The Country of the Pointed Firs is an 1896 novel by Sarah Orne Jewett. Its narrator, a summer visitor to a Maine fishing village, has been taken about the shore by her landlady for a season, and she has come to admire a kind of knowledge she cannot acquire for herself:<br><br>Which quotation from The Country of the Pointed Firs most effectively illustrates the claim?",
           "choices": [
             "“The wind blew off the shore, and the little boat went out past the point with the tide behind her.”",
             "“She knew the weather of that coast as I should never know it, though I stayed there all my life.”",
@@ -2454,7 +2454,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Command of Evidence (Textual)",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Soil carbon in cropland is conventionally sampled to a depth of thirty centimeters. Researchers settled on that limit because roots and organic matter concentrate near the surface (deeper cores cost a great deal more to collect and process), and because change in the plow layer shows up soonest. Some agronomists contend that the claims made for no-till farming rest on the convention rather than on the soil: in their view the practice rearranges carbon toward the surface without adding to the amount the profile holds altogether.<br><br>Which finding, if true, would most directly support this contention?",
+          "text": "Although soil organic carbon (SOC) in cropland is generally sampled to thirty centimeters, deep-core work—sampling the whole profile to one meter—is reported by a minority of studies. Fields under no-till management hold more carbon near the surface than tilled fields do, despite receiving similar inputs of residue. Some agronomists contend that this difference may be redistribution of carbon within the profile and not a gain across it.<br><br>Which finding, if true, would most directly support this contention?",
           "choices": [
             "Fields managed without tilling hold more carbon in the top thirty centimeters than comparably managed tilled fields do.",
             "Organic matter decomposes more slowly in the upper layers of an untilled field than in a tilled one.",
@@ -2559,7 +2559,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Form, Structure, and Sense",
           "difficulty": "easy",
           "type": "mc",
-          "text": "The Liverpool and Manchester Railway opened for passengers in 1830. Stephenson ______ locomotives for a dozen years by then, so the engine supplied to the new line, unlike most of its rivals, drew on a long succession of earlier designs.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "text": "By the time the Liverpool and Manchester Railway opened to passengers in 1830, George Stephenson ______ locomotives for well over a decade—the Blücher of 1814 was among the first—and the engine supplied to the new line drew on all of them.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
           "choices": [
             "has been building",
             "had been building",
@@ -2601,7 +2601,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Form, Structure, and Sense",
           "difficulty": "medium",
           "type": "mc",
-          "text": "Mills kept records for their own purposes, and what survives of them is rarely what a historian would have chosen. One archival box, holding wage books, an overseer’s daybook, and letters from three operatives, ______ what the published company reports leave out about the working week.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "text": "Mills kept records for their own purposes, and what survives of them is rarely what would now be most useful. One archival box, holding wage books, an overseer’s daybook, and letters from three operatives, ______ what the published company reports leave out about the working week.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
           "choices": [
             "reveal",
             "have revealed",
@@ -3023,7 +3023,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Command of Evidence (Quantitative)",
           "difficulty": "medium",
           "type": "mc",
-          "text": "Cooking changes food in several ways at the same time, and a method that improves one measure of nutrition can damage a second. A nutrition researcher prepared identical portions of spinach by four methods, then measured the iron a body is able to absorb, or bioavailable iron, and the share of vitamin C left in the leaves. None of the four methods proved best on both counts. The clearest case is boiling, which ______<table class=\"dx-table\"><tr><th>Cooking method</th><th>Iron absorbed (mg)</th><th>Vitamin C retained (%)</th></tr><tr><td>Raw</td><td>0.9</td><td>100</td></tr><tr><td>Steamed</td><td>1.4</td><td>71</td></tr><tr><td>Boiled</td><td>1.6</td><td>38</td></tr><tr><td>Fried</td><td>1.5</td><td>55</td></tr></table><br><br>Which choice most effectively uses data from the table to complete the example?",
+          "text": "Portions of spinach were prepared by four methods of cooking, and two quantities were measured for each: iron absorbed and vitamin C retained. According to the table, none of these methods gives the best result on both measures, and boiling ______<table class=\"dx-table\"><tr><th>Cooking method</th><th>Iron absorbed (mg)</th><th>Vitamin C retained (%)</th></tr><tr><td>Raw</td><td>0.9</td><td>100</td></tr><tr><td>Steamed</td><td>1.4</td><td>71</td></tr><tr><td>Boiled</td><td>1.6</td><td>38</td></tr><tr><td>Fried</td><td>1.5</td><td>55</td></tr></table><br><br>Which choice most effectively uses data from the table to complete the example?",
           "choices": [
             "retained all of the vitamin C in the leaves while yielding the least absorbable iron.",
             "yielded more absorbable iron than steaming did but less than frying did.",
@@ -3634,7 +3634,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Command of Evidence (Textual)",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Genetic data published since 2011 have been read against the view that domesticated rice spread outward in one direction, out of a single river valley. An alternative account holds that cultivation of rice began independently at several sites, and that the traits early cultivated grains have in common point to selective pressures acting on each population separately. On that account the grains owe their likeness to the conditions they were grown in, not to a shared ancestor.<br><br>Which finding, if true, would most directly support this position?",
+          "text": "Although most accounts trace domesticated rice outward from a single river valley, some archaeobotanists argue that cultivation began independently at sites far apart. Many researchers have assumed that traits shared by early cultivated grains would indicate common descent and thus would place all cultivated rice in one lineage. To evaluate this assumption, a research team analyzed genomes from over 3,000 accessions of cultivated and wild rice.<br><br>Which finding, if true, would most directly support this position?",
           "choices": [
             "Grains recovered from the river valley are several centuries older than grains from any other site.",
             "Grains from three distant sites carry different genetic markers for the same non-shattering trait.",
