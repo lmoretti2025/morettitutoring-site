@@ -279,7 +279,13 @@
      The factor is mult-invariant (budget and clock both scale with the
      multiplier), so it is computed once against the un-accommodated
      baseline. Callers see whether it fired via `.scale` on the rollup. */
-  var MAX_BUDGET_SHARE = 0.92;
+    /* 0.92 -> 0.88 on 2026-09-27. Published pacing guidance for digital SAT math is
+     to finish a module in 30-32 minutes and hold 3-5 minutes for the review pass;
+     at 0.92 the hard modules left only 2.8, under that floor. The cap binds only
+     where the raw budget approaches the clock, so modules 1 and 2-easier, which
+     already leave 9-10 minutes, are unaffected. Across the 39 math modules the
+     minimum reserve goes 2.8 -> 4.2 minutes and the median stays at 9.9. */
+  var MAX_BUDGET_SHARE = 0.88;
 
   /* baselineMinutes is the UN-accommodated whole-section clock — pass the
      standard-time figure even for an extended-time attempt, since the
