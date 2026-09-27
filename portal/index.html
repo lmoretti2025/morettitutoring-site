@@ -2644,6 +2644,18 @@
 #pt-native-report .integrity.integrity-quiet { background: transparent; border: 0; border-left: 3px solid rgba(201,168,76,0.5); border-radius: 0; padding: 4px 12px; }
 #pt-native-report .integrity-body { font-size: 11px; line-height: 1.65; color: var(--ink); }
 #pt-native-report .integrity-body b { font-weight: 700; }
+/* HOW THIS TEST WAS TAKEN (sittingConditions, 2026-09-26) */
+#pt-native-report .cond-card { background: #fff; border: 1px solid var(--border, #e6e2dc); border-radius: 12px; padding: 16px 18px 14px; margin: 0 0 20px; box-shadow: 0 1px 2px rgba(17,17,17,0.04); }
+#pt-native-report .cond-card.cond-poor { border-color: rgba(176,39,28,0.28); background: linear-gradient(0deg, rgba(176,39,28,0.035), rgba(176,39,28,0.035)), #fff; }
+#pt-native-report .cond-eye { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--red, #B0271C); margin-bottom: 4px; }
+#pt-native-report .cond-card.cond-fair .cond-eye { color: #8a6d1f; }
+#pt-native-report .cond-hed { font-size: 15px; font-weight: 700; color: var(--ink, #111); margin: 0 0 10px; line-height: 1.35; }
+#pt-native-report .cond-list { list-style: none; margin: 0 0 10px; padding: 0; display: grid; gap: 8px; }
+#pt-native-report .cond-list li { display: grid; grid-template-columns: 18px 1fr; gap: 8px; font-size: 11.5px; line-height: 1.55; color: var(--ink, #111); }
+#pt-native-report .cond-list li::before { content: ''; width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; background: var(--red, #B0271C); justify-self: center; }
+#pt-native-report .cond-card.cond-fair .cond-list li::before { background: var(--gold, #C9A84C); }
+#pt-native-report .cond-list b { font-weight: 700; }
+#pt-native-report .cond-foot { font-size: 11px; line-height: 1.6; color: var(--mid, rgba(17,17,17,0.62)); border-top: 1px solid rgba(17,17,17,0.08); padding-top: 9px; }
 /* Borderless — a plain ghost icon button (fill on hover only), not another
    bordered circle sitting next to the chart's own border. */
 /* Static, no scrolling: the chart's fixed CHART_W/CHART_H (set inline
@@ -3036,7 +3048,13 @@
   #pt-native-report .hdr { display: none; }
   /* More breathing room between sections and inside cards than the
      print-oriented original (built to fit two 8.5x11 pages) needed. */
-  #pt-native-report .sec-hed { margin: 2.25rem 0 1rem; font-size: 0.72rem; border-bottom: none; padding-bottom: 0; }
+  /* Page 2 polish (2026-09-26): as report.html. */
+  #pt-native-report .sec-hed { font-family: var(--display); font-size: 19px; font-weight: 700; letter-spacing: 0; text-transform: none; color: var(--ink); border-bottom: 0; padding: 14px 0 0; margin: 38px 0 14px; position: relative; line-height: 1.25; }
+  #pt-native-report .sec-hed::before { content: ''; position: absolute; top: 0; left: 0; width: 28px; height: 3px; border-radius: 2px; background: #B0271C; }
+  #pt-native-report .sec-hed .how-btn { margin-top: 2px; }
+  #pt-native-report .bridge-card, #pt-native-report .skilldx-card, #pt-native-report .budget-card, #pt-native-report #dx-card, #pt-native-report .timing-card { background: #FBFAF8; border: 1px solid rgba(17,17,17,0.07); border-radius: 12px; padding: 16px 18px; }
+  #pt-native-report #section-breakdown { margin-top: 26px; }
+  @media print { #pt-native-report .bridge-card, #pt-native-report .skilldx-card, #pt-native-report .budget-card, #pt-native-report #dx-card, #pt-native-report .timing-card { background: #fff; } }
   #pt-native-report .score-summary { padding: 0; background: transparent; border: none; }
   /* Score header: one connected card, the score row fused to the
      Correct/Wrong/Accuracy/Unattempted row below with a single divider.
@@ -4884,6 +4902,7 @@ window.Portal = {
     </div>
   </div>
   <div class="integrity" id="integrity-banner" style="display:none;"></div>
+  <div class="cond-card" id="cond-card" style="display:none;"></div>
   <div class="top-row">
     <div class="score-summary">
       <div class="score-card" id="score-card">
@@ -4927,7 +4946,7 @@ window.Portal = {
 
   <div class="sec-hed" id="timing-hed" style="display:none;">How you used the clock</div>
   <div class="timing-card" id="timing-card" style="display:none;">
-    <p class="chart-sub" id="timing-allocation-sub" style="display:none;"><b>Route</b> draws every visit to every question in the order it happened: a black bar is a question's first look, a gold bar is going back to it, and a visit under 1.5 seconds is paging past. Answer changes are marked where they happened. <b>Pace</b> shows, one module at a time, the running total of time spent against the target pace for these questions. The target deliberately adds up to <em>less</em> than the module clock: that gap is the reserve, there to be spent on the questions that run long and on the review pass at the end. So tracking the target and finishing a few minutes early is the plan working. Finishing <em>far</em> early means the reserve was never used.</p>
+    <p class="chart-sub" id="timing-allocation-sub" style="display:none;">The route draws every visit to every question in the order it happened: a black bar is a question's first look, a gold bar is going back to it, and a visit under 1.5 seconds is paging past. Answer changes are marked where they happened. The dashed line is the target pace, which deliberately adds up to <em>less</em> than the module clock: that gap is the reserve, there to be spent on the questions that run long and on the review pass at the end. Finishing a few minutes early is the plan working; finishing <em>far</em> early means the reserve was never used.</p>
     <div id="timing-allocation" style="display:none;"></div>
   </div>
 
@@ -5626,7 +5645,7 @@ window.Portal = {
      header in fluid-ui.js. -->
 <script src="fluid-ui.js?v=20260905y"></script>
 <script src="banks.js?v=20260926a"></script>
-<script src="signals.js?v=20260926g"></script>
+<script src="signals.js?v=20260926i"></script>
 <script src="desmos-tags.js?v=20260916c"></script>
 <script src="time-budgets.js?v=20260912a"></script>
 <script src="challenge-questions.js?v=20260926a"></script>
@@ -14054,6 +14073,7 @@ window.Portal = {
          the pooled "leaves time on the table" habit can read each module's
          clock (signals.js pacingHabits, 2026-09-26). */
       qStats.tl = payload.s.map(function (s) { return s.tl > 0 ? s.tl : null; });
+      var budget7 = [], m1s7 = [], base7 = [];
       payload.s.forEach(function (s) {
         var bank = bankFor(s.k), qs7 = sectionQuestions(bank, s.v);
         var mult7 = (window.TIME_BUDGETS && s.tl) ? window.TIME_BUDGETS.timeMultFromAllotted(s.k, !!bank.module2Easier, s.tl) : 1;
@@ -14094,6 +14114,7 @@ window.Portal = {
         });
         var rush7 = (window.MorettiSignals && typeof window.MorettiSignals.trailingRush === 'function')
           ? window.MorettiSignals.trailingRush(timing7) : [];
+        budget7.push(timing7.map(function (t) { return t.budgetMs || 0; })); m1s7.push(m1Len7); base7.push(qsRow);
         qs7.forEach(function (q, i) {
           var row = qStats.q[qsRow++];
           if (!row) return;
@@ -14115,6 +14136,18 @@ window.Portal = {
             : (rush7[i] ? 2 : (t7.ms < t7.floorMs ? 1 : (t7.totalMs >= t7.budgetMs * 1.5 ? 3 : 0)));
         });
       });
+      /* The conditions the test was taken under (signals.js
+         sittingConditions, 2026-09-26): late, long breaks, time away, time
+         left unused, a rushed finish, no review. Kept in the record (qs.cn)
+         so session prep and the admin page read it without the report. */
+      if (window.MorettiSignals && typeof window.MorettiSignals.sittingConditions === 'function') {
+        var cn7 = window.MorettiSignals.sittingConditions(payload, {
+          budgetMs: function (si, i) { return (budget7[si] && budget7[si][i]) || 0; },
+          correct: function (si, i) { var r = qStats.q[(base7[si] || 0) + i]; return !!r && r[3] === 1; },
+          module1Length: function (si) { return m1s7[si]; }
+        });
+        qStats.cn = window.MorettiSignals.conditionsCompact(cn7);
+      }
     } catch (e) { if (window.console) console.warn('qStats tooFast:', e); }
     var reportPayloadB64 = '';
     try { reportPayloadB64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload)))); } catch (e) { reportPayloadB64 = ''; }
@@ -22842,7 +22875,7 @@ window.renderNativeReport = function (data) {
   if (attemptDate) {
     var attemptHour = attemptDate.getHours();
     if (attemptHour >= 22 || attemptHour < 5) {
-      behaviorFlags.push('<strong>Taken late at night:</strong> this test was handed in at ' + timeStr + '. Tiredness at that hour can lower a score without saying anything about what you know, so this one may understate you. <strong>Next test:</strong> take it earlier in the day.');
+      behaviorFlags.push('<strong>Taken late at night:</strong> this test was handed in at ' + timeStr + '. A late sitting changes a score in ways that say nothing about what you know, in either direction, so this one may not reflect test day. <strong>Next test:</strong> take it earlier in the day.');
     }
   }
   // Unused time is flagged only when BOTH >=5 minutes AND >=15% of the
@@ -24989,6 +25022,12 @@ window.renderNativeReport = function (data) {
     }
 
     var anyRoute = moduleViews.some(function (mv) { return !!routeDataFor(mv); });
+    /* The line-graph Pace view is retired (Luca, 2026-09-26): the Route says
+       the same thing more directly and the running-total line was the hardest
+       chart in the report to read. Without a visit log (reports saved before
+       2026-09-12) there is no Route, and the card is left out rather than
+       falling back to the line. */
+    if (!anyRoute) return;
     // Redrawn when the plot's width changes (a phone rotated, a window
     // resized), on the next frame so the redraw never runs inside the
     // observer (see the bridge chart's refit).
@@ -25001,16 +25040,21 @@ window.renderNativeReport = function (data) {
         });
       }).observe(routePlot);
     }
-    var timingView = anyRoute ? 'route' : 'pace';
+    var timingView = 'route';
     function showingRoute() { return timingView === 'route' && !!routeDataFor(moduleViews[moduleIdx]); }
     function paintModule() {
       var mv = moduleViews[moduleIdx];
       hideTimingTooltip();
       hideRouteTooltip();
-      var rd = timingView === 'route' ? routeDataFor(mv) : null;
-      routeSwap.style.display = rd ? '' : 'none';
-      swapEl.style.display = rd ? 'none' : '';
-      if (rd) renderRoute(mv, rd); else renderPaceTrace(mv);
+      var rd = routeDataFor(mv);
+      routeSwap.style.display = '';
+      swapEl.style.display = 'none';
+      if (rd) renderRoute(mv, rd);
+      else {
+        // A module with no visit record in a report that has others.
+        routeVerdictEl.textContent = 'This module\u2019s visit record wasn\u2019t saved, so its route can\u2019t be drawn.';
+        routeSvg.innerHTML = ''; document.getElementById('route-legend').innerHTML = '';
+      }
       labelEl.textContent = mv.label;
     }
 
@@ -25051,17 +25095,6 @@ window.renderNativeReport = function (data) {
             moduleIdx = next;
             renderModule(dir);
           }, 'Choose module'));
-    }
-    // Route first, Pace one tap away; only where a visit log exists.
-    if (anyRoute) {
-      document.getElementById('timing-view-toggle').appendChild(
-        dxkToggle([{ key: 'route', label: 'Route' }, { key: 'pace', label: 'Pace' }], function (key) {
-          if (key === timingView) return;
-          timingView = key;
-          paintModule();
-          if (!showingRoute() && paceRevealed) animatePaceWipe(SWITCH_WIPE_MS);
-        }, 'Choose a view'));
-      document.getElementById('timing-view-row').style.display = '';
     }
     renderModule(0);
 
@@ -25122,6 +25155,53 @@ window.renderNativeReport = function (data) {
       '<b>' + mins + ' minute' + (mins === 1 ? '' : 's') + '</b> away from the screen in total. ' +
       'The section clocks kept running throughout, so no time was given back, but a score produced this way is not comparable to one taken straight through. ' +
       'Treat it as practice rather than as a measurement.</div>';
+    el.style.display = '';
+  })();
+
+  /* ═══ HOW THIS TEST WAS TAKEN ═══ (MorettiSignals.sittingConditions,
+     2026-09-26). Nikolas' home tests ran 1110-1350 against a real SAT of
+     1010: taken late, with long breaks, Math time left unused, the last
+     questions rushed and no review. A score taken like that is not a
+     test-day score, and the report says so before its numbers, with the
+     evidence. Nothing is shown when the conditions were good. */
+  (function renderConditions() {
+    var MSc = window.MorettiSignals, el = document.getElementById('cond-card');
+    if (!el || !MSc || typeof MSc.sittingConditions !== 'function' || !Array.isArray(data.s)) return;
+    var byKey = {};
+    sections.forEach(function (sec) { byKey[sec.key] = sec; });
+    var secOf = function (si) { var s = data.s[si]; return s ? byKey[s.k] : null; };
+    var c = MSc.sittingConditions(data, {
+      budgetMs: function (si, i) {
+        var sec = secOf(si), r = sec && sec.rows[i];
+        if (!r || !window.TIME_BUDGETS) return 0;
+        var mult = window.TIME_BUDGETS.timeMultFromAllotted(sec.key, sec.hasModules, sec.timeAllottedMin) || 1;
+        var b = window.TIME_BUDGETS.budgetSecondsFor(sec.key, r.q.domain, r.sk || r.dom, r.q.difficulty, mult);
+        return (b && b.ms) || 0;
+      },
+      correct: function (si, i) { var sec = secOf(si); return !!(sec && sec.rows[i] && sec.rows[i].ok); },
+      module1Length: function (si) { var sec = secOf(si); return sec && sec.hasModules ? sec.moduleSplit : null; }
+    });
+    if (c.level === 'good') return;
+    var poor = c.level === 'poor';
+    /* One banner, not two: the interruption banner above (renderIntegrity)
+       folds into this card as its first line, and the card's own "time
+       away" line is dropped so the same minutes are not told twice. */
+    var ib = document.getElementById('integrity-banner'), interrupted = '';
+    if (ib && ib.style.display !== 'none' && ib.innerHTML) {
+      var ibBody = ib.querySelector('.integrity-body');
+      if (!ib.classList.contains('integrity-quiet') && ibBody) interrupted = '<li><span><b>Interrupted:</b> ' + ibBody.innerHTML + '</span></li>';
+      ib.style.display = 'none';
+    }
+    var shown = c.signals.filter(function (x) { return !(interrupted && x.id === 'away'); });
+    el.className = 'cond-card ' + (poor ? 'cond-poor' : 'cond-fair');
+    el.innerHTML =
+      '<div class="cond-eye">How this test was taken</div>' +
+      '<div class="cond-hed">' + (poor ? 'Not under test conditions, so read this score as a rough guide, not a test-day score.'
+                                       : 'One thing to change before the next test.') + '</div>' +
+      '<ul class="cond-list">' + interrupted + shown.map(function (x) {
+        return '<li><span><b>' + esc(x.label) + ':</b> ' + esc(x.detail) + '.</span></li>';
+      }).join('') + '</ul>' +
+      '<div class="cond-foot">Test day is one sitting in the morning: about 10 minutes between the two sections, every minute used, and a check of each module before it is submitted. The closer practice gets to that, the more its score means.</div>';
     el.style.display = '';
   })();
 
@@ -26365,7 +26445,7 @@ window.renderNativeReport = function (data) {
         (planLine ? ' The best help at home is protecting those hours, and making' : ' The best help at home is making') + ' the next practice test one quiet, timed sitting' +
         (late ? ' earlier in the day' : '') + ', with the phone in another room.</p>';
       var lateHtml = late
-        ? '<p class="plain-well"><b>Worth knowing:</b> this test was handed in late at night. Tiredness can cost points, so this score may understate you. Take the next one earlier in the day.</p>'
+        ? '<p class="plain-well"><b>Worth knowing:</b> this test was handed in late at night, so the score may not reflect test day. Take the next one earlier in the day.</p>'
         : '';
 
       /* Every method note at once. On the cover it lives at the top of the
