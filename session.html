@@ -329,6 +329,13 @@
       }
       if (d.unavailable) { all = null; return noTimes('down'); }
       all = d.slots || {};
+      // Only the lengths this backend offers get a button (a new one appears once it is deployed).
+      if (Array.isArray(d.lengths)) {
+        Array.prototype.forEach.call(document.querySelectorAll('[data-len]'), function (b) {
+          b.hidden = d.lengths.indexOf(Number(b.getAttribute('data-len'))) === -1;
+        });
+        if (d.lengths.indexOf(LEN) === -1) { var first = document.querySelector('[data-len]:not([hidden])'); if (first) first.click(); }
+      }
       show();
     });
   }
