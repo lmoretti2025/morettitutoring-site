@@ -2146,7 +2146,7 @@ window.SAT_PRACTICE_TESTS = [
           {"qid":"mt2cc4a8","domain":"Craft and Structure","skill":"Words in Context","difficulty":"easy","type":"mc","text":"In northern Scandinavia, Sámi reindeer herders have long practiced selective thinning of young birch saplings in grazing areas. While removing young trees might seem like it would harm forest growth, the practice actually ____ it: thinning out densely packed saplings reduces competition for light and nutrients, allowing the remaining trees to grow stronger and healthier.<br><br>Which choice completes the text with the most logical and precise word or phrase?","choices":["restricts","complicates","encourages","monitors"],"correct":2,"choiceNotes":["Incorrect. \"Restricts\" is the opposite of the beneficial effect the passage describes.","Incorrect. \"Complicates\" doesn't match the straightforward positive effect described.","Correct. The passage explains that thinning reduces competition for light and nutrients, allowing trees to grow stronger and healthier, which is what it means to encourage growth.","Incorrect. \"Monitors\" implies mere observation, but the practice actively helps growth rather than just tracking it."]},
           {"qid":"mt9114fa","domain":"Craft and Structure","skill":"Words in Context","difficulty":"medium","type":"mc","text":"The practice of restoring historic wooden beams is often considered ____ because traditional repair techniques can cause structural weakness and require frequent maintenance. But engineer Lila Navarro has developed a new consolidation method that strengthens aging timber using plant-based resins, allowing original beams to remain intact far longer than before.<br><br>Which choice completes the text with the most logical and precise word or phrase?","choices":["resilient","inadequate","dynamic","satisfactory"],"correct":1,"choiceNotes":["Incorrect. \"Resilient\" means strong and durable, which contradicts the fact that traditional techniques cause weakness.","Correct. The traditional techniques cause structural weakness and require frequent upkeep, meaning the restoration practice falls short, or is inadequate; \"But\" then signals that Navarro's new method fixes this shortcoming.","Incorrect. \"Dynamic\" doesn't relate to the weakness and maintenance problems the text describes.","Incorrect. \"Satisfactory\" contradicts the description of a practice that causes weakness and requires frequent maintenance."]},
           {"qid":"mtb62ded","domain":"Craft and Structure","skill":"Words in Context","difficulty":"medium","type":"mc","text":"Neuroscientists studying migratory songbirds have found that these birds dramatically improve their long-distance navigation by adjusting their internal compass to match subtle shifts in Earth’s magnetic field. In 2021, Dr. Lina Moretti and her team discovered that the birds achieve this ____ with the planet’s magnetic patterns by detecting and interpreting quantum-level changes in specialized retinal proteins.<br><br>Which choice completes the text with the most logical and precise word or phrase?","choices":["synchronization","hibernation","prediction","moderation"],"correct":0,"choiceNotes":["Correct. The birds adjust their internal compass \"to match\" the magnetic field, which describes a synchronization between the bird's compass and the planet's magnetic patterns.","Incorrect. Hibernation is unrelated to navigation or magnetic fields.","Incorrect. The birds are described as detecting and interpreting existing changes, not predicting future ones.","Incorrect. \"Moderation\" (moderating or limiting) doesn't describe matching one's internal compass to an external pattern."]},
-          {"qid":"mtc3254d","domain":"Craft and Structure","skill":"Text Structure and Purpose","difficulty":"easy","type":"mc","text":"In the isolated coastal town where Mira lives, the abandoned lighthouse on Blackwater Cliff has long been the subject of local legends. For years, Mira had begged her older brother Tomas to take her up the cliff path to see the old lighthouse for herself. She wanted to touch its rusted railings, to peer through its broken glass, to finally prove she wasn’t afraid of the stories the fishermen told. Tomas always laughed — he didn’t believe in the ghostly lantern-keepers at all — but that didn’t matter. Maybe this year he’d finally take her. She was nearly thirteen.<br><br>Which choice best describes the overall purpose of the text?","choices":["To reveal how distrustful Tomas is of the town’s legends","To explain why Mira feels pressured to seem older than she is","To describe Mira’s determination to visit the abandoned lighthouse","To contrast Mira’s adventurous nature with Tomas’s hesitation"],"correct":2,"choiceNotes":["Incorrect. The text does not focus on Tomas being distrustful; he simply doesn't believe the legends, which is different from distrust.","Incorrect. Nothing in the text suggests Mira feels pressured to seem older; her wish to visit the lighthouse stems from wanting to prove she isn't afraid.","Correct. The passage centers on Mira's years-long wish and resolve to visit the lighthouse, touch its railings, and prove her courage, which conveys her determination.","Incorrect. Tomas's laughter reflects disbelief in the legends, not hesitation, so this isn't really a contrast of hesitation versus adventurousness."]},
+          {"qid":"mtc3254d","domain":"Craft and Structure","skill":"Text Structure and Purpose","difficulty":"easy","type":"mc","text":"In the isolated coastal town where Mira lives, the abandoned lighthouse on Blackwater Cliff has long been the subject of local legends. For years, Mira had begged her older brother Tomas to take her up the cliff path to see the old lighthouse for herself. She wanted to touch its rusted railings, to peer through its broken glass, to finally prove she wasn’t afraid of the stories the fishermen told. Tomas always laughed — he didn’t believe in the ghostly lantern-keepers at all — but that didn’t matter. Maybe this year he’d finally take her. She was nearly thirteen.<br><br>Which choice best describes the overall purpose of the text?","choices":["To reveal how distrustful Tomas is of the town’s legends","To explain why Mira feels pressured by Tomas to seem older than she is","To describe Mira’s determination to visit the abandoned lighthouse","To contrast Mira’s adventurous nature with Tomas’s hesitation"],"correct":2,"choiceNotes":["Incorrect. The text does not focus on Tomas being distrustful; he simply doesn't believe the legends, which is different from distrust.","Incorrect. Nothing in the text suggests Mira feels pressured to seem older; her wish to visit the lighthouse stems from wanting to prove she isn't afraid.","Correct. The passage centers on Mira's years-long wish and resolve to visit the lighthouse, touch its railings, and prove her courage, which conveys her determination.","Incorrect. Tomas's laughter reflects disbelief in the legends, not hesitation, so this isn't really a contrast of hesitation versus adventurousness."]},
           {"qid":"mt1394a8","domain":"Craft and Structure","skill":"Text Structure and Purpose","difficulty":"medium","type":"mc","text":"The following text is adapted from the fictional poem “Tides at Dusk.” The poem explores how the transition from daylight to night can reshape a familiar landscape.<br>Evening gathers her scattered colors and folds them into the sea.<br>She threads a silver path along the water,<br>a ribbon the moon will later claim.<br>Beneath her quiet hand, the shoreline softens,<br>learning once more the curve of darkness.<br>And as her calm deepens,<br>the first stars slip into their places<br>like thoughts settling gently into a dreaming mind.<br><br>Which choice best describes the overall structure of the text?","choices":["It contrasts the movements of the sea at dusk with the movements of the sea at dawn.","It presents dawn and dusk as competing forces shaping the shoreline.","It depicts how the night sky changes in step-by-step stages as stars appear.","It develops an extended metaphor by describing evening as a figure performing deliberate, humanlike actions."],"correct":3,"choiceNotes":["Incorrect. The poem never describes the sea at dawn, so no such contrast exists.","Incorrect. Dawn is never mentioned as a competing force; the poem only concerns evening and dusk.","Incorrect. The poem isn't organized around step-by-step stages of the night sky; it centers on evening personified as performing continuous actions.","Correct. Throughout the poem, evening is personified as a figure who \"gathers,\" \"threads,\" and calms the shoreline with a \"quiet hand,\" an extended metaphor built from deliberate, humanlike actions."]},
           {"qid":"mt11408e","domain":"Information and Ideas","skill":"Central Ideas and Details","difficulty":"easy","type":"mc","text":"The following text is adapted from Lina Cho’s 2019 memoir Across the Granite Highway. The narrator is traveling with her older cousin on a long bus ride through the mountains.<br>To pass the time, Jae and I tried to guess the destinations of the hikers who boarded at each stop, studying the oversized backpacks they balanced in the aisle. When the bus wound around sharp curves, Jae whispered silly stories about imaginary creatures that lived under the cliffs, and we tried not to laugh too loudly. We had taken shorter trips to the foothills with our aunt before, but I wondered how different this long, winding journey into the higher peaks would feel.<br><br>According to the text, what did the narrator and Jae do while riding on the bus?","choices":["They sketched the scenery passing by the windows.","They played guessing games and told stories.","They listened to music through shared headphones.","They slept through most of the mountain ride."],"correct":1,"choiceNotes":["Incorrect. The text mentions studying backpacks and guessing destinations, not sketching scenery.","Correct. The text states they \"tried to guess the destinations of the hikers\" (a guessing game) and that Jae \"whispered silly stories,\" together describing games and storytelling.","Incorrect. There is no mention of music or headphones anywhere in the passage.","Incorrect. The narrator describes staying awake and engaged in activities, not sleeping."]},
           {"qid":"mtbae111","domain":"Information and Ideas","skill":"Command of Evidence (Textual)","difficulty":"medium","type":"mc","text":"Marine archaeologist Torben Rick and his team studied the spread of early aquaculture along the Pacific coast during the first millennium CE. By examining trace isotopes in the shells of clams, mussels, and oysters collected from archaeological sites, they found that oysters showed high concentrations of nutrients associated with seaweed cultivated in shallow, human-managed pools. In contrast, clams and mussels displayed isotopic signatures linked to deeper, wild-feeding environments. Rick's team concluded that oysters were likely raised in controlled shoreline enclosures, whereas clams and mussels were gathered from uncultivated areas farther offshore.<br><br>Which finding, if true, would most strongly support the team’s conclusion?","choices":["Chemical analysis revealed that mussels occasionally contained low levels of the same seaweed-derived nutrients found in oysters.","Shell fragments from multiple sites showed that oysters grew larger on average than clams and mussels.","Excavations uncovered wooden stakes and channel systems near ancient shoreline settlements that appeared designed to hold and manage shallow-water oyster pools.","Modern oysters can survive in both cultivated and wild habitats as long as water temperatures remain stable."],"correct":2,"choiceNotes":["Incorrect. Finding that mussels occasionally contained the same nutrients as oysters would blur the distinction between cultivated and wild sources, weakening rather than supporting the conclusion.","Incorrect. A difference in oyster size doesn't relate to whether oysters were cultivated in enclosures versus gathered from the wild.","Correct. Physical evidence of wooden stakes and channel systems designed to hold shallow-water oyster pools would directly corroborate the claim that oysters were raised in controlled shoreline enclosures.","Incorrect. Modern oysters' habitat flexibility says nothing about how ancient oysters were actually raised."]},
@@ -2177,16 +2177,16 @@ window.SAT_PRACTICE_TESTS = [
           {"qid":"mt7397d4","domain":"Craft and Structure","skill":"Words in Context","difficulty":"easy","type":"mc","text":"Recent research on coastal erosion has revealed that rising sea levels do not impact all shorelines equally. Low-lying deltas and barrier islands, which are composed of loosely compacted sediment, can ______ experience faster land loss than rocky coasts, even when both regions are exposed to similar wave activity. As a result, scientists urge local governments in these vulnerable zones to implement protective measures well before erosion becomes irreversible.<br><br>Which choice completes the text with the most logical and precise word or phrase?","choices":["disproportionately","exclusively","uniformly","intermittently"],"correct":0,"choiceNotes":["Correct. \"Disproportionately\" matches the passage's opening claim that rising sea levels \"do not impact all shorelines equally,\" showing these areas are affected at an unequal, greater rate.","Incorrect. \"Exclusively\" would mean only these areas experience land loss, which is too absolute and unsupported by the text.","Incorrect. \"Uniformly\" contradicts the passage's central point that impacts are unequal across shoreline types.","Incorrect. \"Intermittently\" refers to occurring at irregular intervals, not to the comparative rate of land loss described."]},
           {"qid":"mt3a7891","domain":"Craft and Structure","skill":"Words in Context","difficulty":"medium","type":"mc","text":"For centuries, scholars have debated whether the bizarre celestial event recorded by a medieval monastery—described as “a second sun trembling in the heavens”—was an embellished chronicle of an atmospheric halo or evidence of an early supernova. Modern astrophysicists, however, armed with high-resolution sky surveys and radiometric dating, generally ______ the account as an imaginative misinterpretation rather than a faithful observation of an astronomical anomaly.<br><br>Which choice completes the text with the most logical or precise word or phrase?","choices":["trivialize","illustrate","dismiss","promote"],"correct":2,"choiceNotes":["Incorrect. \"Trivialize\" means to belittle something's importance, not to classify an account as one thing rather than another.","Incorrect. \"Illustrate\" would mean using the account as an example, which does not match astrophysicists rejecting its accuracy.","Correct. \"Dismiss\" fits the \"as X rather than Y\" construction, conveying that astrophysicists reject the account as a faithful observation.","Incorrect. \"Promote\" is essentially the opposite of what modern astrophysicists are described as doing—they doubt, rather than endorse, the account."]},
           {"qid":"mt90d9dd","domain":"Craft and Structure","skill":"Words in Context","difficulty":"easy","type":"mc","text":"In a lecture on Renaissance painting, the art historian explained how subtle adjustments in lighting could dramatically alter a viewer’s perception of a work. By deepening the shadows around the central figure and softening the highlights along the drapery, the painter was able to bring out the emotional tension underlying the scene, guiding the audience’s gaze toward the character’s conflicted expression.<br><br>As used in the text, what does the phrase “bring out” most nearly mean?","choices":["Equalize","Transport","Introduce","Reveal"],"correct":3,"choiceNotes":["Incorrect. \"Equalize\" means to make equal or balanced, which doesn't capture emphasizing something already present.","Incorrect. \"Transport\" suggests physically moving something elsewhere, unrelated to emphasizing an existing emotional quality.","Incorrect. \"Introduce\" would mean bringing something new into the scene, but the emotional tension already existed and was simply being emphasized.","Correct. \"Reveal\" captures how the lighting techniques made the already-present emotional tension more visible and apparent to viewers."]},
-          {"qid":"mtd35985","domain":"Craft and Structure","skill":"Text Structure and Purpose","difficulty":"easy","type":"mc","text":"During a seminar on cognitive bias, Professor Larkin described moments when she had misjudged colleagues based on first impressions. She recalled how certain people had seemed exceptionally capable simply because they spoke confidently or were well regarded by others. Only after working with them for several months did she realize her initial assessments had been inaccurate. This tendency to judge quickly, she explained, wasn't unique to her workplace—it was a common human habit, one that lets us feel certain about people before we have enough information to truly understand them.<br><br>Which choice best describes the overall structure of the text?","choices":["The speaker recounts personal experiences of misjudging others and then broadens those reflections into a general claim about human cognition.","The speaker criticizes professional hierarchies that reward confidence and then proposes reforms for evaluating colleagues more fairly.","The speaker contrasts two opposing theories of social perception, ultimately aligning with the one that prioritizes empirical reasoning.","The speaker traces the historical development of research on bias before applying it to her own experiences in the workplace."],"correct":0,"choiceNotes":["Correct. The speaker first describes her personal experiences misjudging colleagues, then generalizes this into a broader claim that quick judgment is \"a common human habit.\"","Incorrect. The text does not criticize professional hierarchies or propose reforms; it is a personal reflection generalized into a claim about cognition.","Incorrect. The text does not present two contrasting theories or align with an empirical one; it is a single narrative reflection.","Incorrect. The text does not trace the historical development of research; it opens with personal anecdote, not history."]},
-          {"qid":"mtfc6e29","domain":"Craft and Structure","skill":"Text Structure and Purpose","difficulty":"medium","type":"mc","text":"In an effort to understand why certain technologies fail to gain public acceptance despite clear practical benefits, researchers often begin by mapping the cultural landscape in which the technology appears. First, they identify the prevailing values, anxieties, and historical narratives that shape public perception. After gathering this information, they examine how these forces interact with the technology’s design, purpose, and methods of implementation. Only once this relationship has been clarified do the researchers develop communication strategies or redesign proposals intended to better align the technology with the concerns of its intended users.<br><br>Which choice best describes the overall structure of the text?","choices":["It outlines a controversy, then evaluates several competing viewpoints and concludes with a preferred position.","It describes a multi-stage analytical approach, then explains how the findings from that approach guide subsequent action.","It introduces a theoretical model, then critiques the assumptions that underlie the model’s structure.","It presents a recurring societal problem, then offers a historical example that illustrates the roots of that problem."],"correct":1,"choiceNotes":["Incorrect. The text does not present competing viewpoints or argue for a preferred position; it describes a sequential research process.","Correct. The text describes a multi-stage process—mapping cultural context, then examining interactions with technology design—and explains how researchers use these findings to develop strategies.","Incorrect. The text does not critique a model's assumptions; it neutrally describes a research methodology.","Incorrect. The text does not offer a historical example; it describes a general, ongoing research approach."]},
+          {"qid":"mtd35985","domain":"Craft and Structure","skill":"Text Structure and Purpose","difficulty":"easy","type":"mc","text":"During a seminar on cognitive bias, Professor Larkin described moments when she had misjudged colleagues based on first impressions. She recalled how certain people had seemed exceptionally capable simply because they spoke confidently or were well regarded by others. Only after working with them for several months did she realize her initial assessments had been inaccurate. This tendency to judge quickly, she explained, wasn't unique to her workplace—it was a common human habit, one that lets us feel certain about people before we have enough information to truly understand them.<br><br>Which choice best describes the overall structure of the text?","choices":["The speaker recounts personal experiences of misjudging others and then broadens those reflections into a general claim about human cognition.","The speaker criticizes professional hierarchies that reward confidence and then proposes reforms for evaluating colleagues more fairly in annual performance reviews.","The speaker contrasts two opposing theories of social perception, ultimately aligning with the one that prioritizes empirical reasoning.","The speaker traces the historical development of research on bias before applying it to her own experiences in the workplace."],"correct":0,"choiceNotes":["Correct. The speaker first describes her personal experiences misjudging colleagues, then generalizes this into a broader claim that quick judgment is \"a common human habit.\"","Incorrect. The text does not criticize professional hierarchies or propose reforms; it is a personal reflection generalized into a claim about cognition.","Incorrect. The text does not present two contrasting theories or align with an empirical one; it is a single narrative reflection.","Incorrect. The text does not trace the historical development of research; it opens with personal anecdote, not history."]},
+          {"qid":"mtfc6e29","domain":"Craft and Structure","skill":"Text Structure and Purpose","difficulty":"medium","type":"mc","text":"In an effort to understand why certain technologies fail to gain public acceptance despite clear practical benefits, researchers often begin by mapping the cultural landscape in which the technology appears. First, they identify the prevailing values, anxieties, and historical narratives that shape public perception. After gathering this information, they examine how these forces interact with the technology’s design, purpose, and methods of implementation. Only once this relationship has been clarified do the researchers develop communication strategies or redesign proposals intended to better align the technology with the concerns of its intended users.<br><br>Which choice best describes the overall structure of the text?","choices":["It outlines a controversy, then evaluates several competing viewpoints and concludes with a preferred position.","It describes a multi-stage analytical approach, then explains how the findings from that approach guide subsequent action.","It introduces a theoretical model, then critiques the assumptions that underlie the model’s structure.","It presents a recurring societal problem, then offers a historical example that illustrates how and where that problem first arose."],"correct":1,"choiceNotes":["Incorrect. The text does not present competing viewpoints or argue for a preferred position; it describes a sequential research process.","Correct. The text describes a multi-stage process—mapping cultural context, then examining interactions with technology design—and explains how researchers use these findings to develop strategies.","Incorrect. The text does not critique a model's assumptions; it neutrally describes a research methodology.","Incorrect. The text does not offer a historical example; it describes a general, ongoing research approach."]},
           {"qid":"mtf09ab9","domain":"Information and Ideas","skill":"Cross-Text Connections","difficulty":"medium","type":"mc","text":"<b>Text 1</b><br>In a recent wave of sociolinguistic research, scholars examined how linguistic code-switching—the practice of alternating between dialects or languages within a single conversation—affects social belonging. Their cross-regional studies revealed that code-switching often enhances individuals’ sense of inclusion, because it signals adaptability and social awareness. Participants who engaged in code-switching reported feeling more attuned to their conversational partners and more accepted within diverse groups.<br><br><b>Text 2</b><br>Other researchers, however, caution that the psychological effects of code-switching vary dramatically depending on context and motivation. A study led by Dr. Liyun Chen and Dr. Marcus Hovel found that while deliberate, identity-affirming code-switching can strengthen relationships, code-switching driven by anxiety, perceived social pressure, or fear of judgment may erode well-being. Participants in the latter category described heightened self-monitoring, emotional fatigue, and a diminished sense of authenticity. Chen and Hovel argue that broad claims about the benefits of code-switching are incomplete without distinguishing between voluntary and compelled forms.<br><br>Based on the texts, what would Chen and Hovel (<b>Text 2</b>) say about the conclusions of the studies discussed in <b>Text 1</b>?","choices":["They would consider the findings fully compatible with their own, since both sets of studies emphasize the universally positive social effects of code-switching.","They would view the conclusions of <b>Text 1</b> as speculative and unsupported by rigorous research methodology, requiring replication before they can be meaningfully evaluated.","They would claim that the studies in <b>Text 1</b> contradict extensive empirical evidence demonstrating that code-switching generally undermines social connectedness.","They would argue that the studies in <b>Text 1</b> overlook critical distinctions among types of code-switching and therefore provide only a partial and potentially misleading account of its psychological consequences."],"correct":3,"choiceNotes":["Incorrect. Chen and Hovel's research emphasizes that code-switching's effects vary by context and motivation, so they would not view the findings as \"fully compatible\" without qualification.","Incorrect. Chen and Hovel's critique concerns incomplete distinctions in the research, not the methodological rigor of the studies or a need for replication.","Incorrect. Chen and Hovel do not claim code-switching universally undermines connectedness; they acknowledge it can strengthen relationships under some conditions.","Correct. Chen and Hovel explicitly argue that broad claims about code-switching are incomplete without distinguishing between voluntary and compelled forms—exactly the critique this choice describes."]},
-          {"qid":"mtfaf29b","domain":"Information and Ideas","skill":"Command of Evidence (Quantitative)","difficulty":"medium","type":"mc","text":"<img src=\"assets/practice-test-figures/test12/menu-design-graph.png\" alt=\"Bar graph titled 'Impact of Menu Design on Selection of High-Calorie Meals' showing the percentage of participants who selected a high-calorie entrée under seven menu conditions: Standard (about 32.5%), Chef's recommendations (about 30%), Without photos (about 29%), Without descriptive text (about 25%, the lowest of all seven), Without photos and descriptive text (about 31.5%), With calorie disclosure (about 27.5%), and With calorie disclosure and health-impact statement (about 27.5%).\" style=\"display:block;margin:0.5em auto;max-width:420px;width:100%;\"><br><br>The rise of digital menus has allowed restaurants to experiment with different design features to influence ordering behavior. In a recent study, researchers tested seven menu conditions that varied only in presentation: a standard layout, a chef’s-recommendation tag, removal of photos, removal of descriptive text, removal of both photos and description, calorie disclosure, and calorie disclosure paired with a brief health-impact message. At the end of the study, the researchers concluded that the strongest reduction in high-calorie selections occurred when descriptive text was removed, while adding calorie information produced a more modest decrease.<br><br>Which choice most effectively uses data from the graph to support the researchers’ conclusion?","choices":["Under the chef’s-recommendation condition, the percentage of participants who chose a high-calorie entrée was nearly identical to the percentage under the standard menu.","When descriptive text was removed, the percentage of participants selecting a high-calorie entrée dropped to the lowest level among all seven conditions.","Removing photos produced roughly the same percentage of high-calorie selections as removing both photos and descriptive text.","Adding calorie disclosure and a health-impact statement resulted in a smaller decrease in high-calorie selections than the decrease produced by removing descriptive text."],"correct":3,"choiceNotes":["Incorrect. This comparison between the chef's-recommendation and standard conditions is accurate but irrelevant—it says nothing about the two conditions the researchers' conclusion specifically compares.","Incorrect. This is true (removing descriptive text does yield the lowest bar) and supports half of the conclusion, but it doesn't address the second half—the comparatively \"more modest decrease\" from adding calorie information—so it is a weaker choice than one addressing both parts.","Incorrect. The graph shows removing photos alone (about 29%) and removing both photos and descriptive text (about 31.5%) are not roughly the same; the combined-removal condition is actually noticeably higher.","Correct. This choice directly compares the size of the decrease from adding calorie disclosure and a health-impact statement (about 5 percentage points, from roughly 32.5% to 27.5%) to the larger decrease from removing descriptive text (about 7.5 percentage points, from roughly 32.5% to 25%), precisely matching both parts of the researchers' conclusion in a single comparison."]},
+          {"qid":"mtfaf29b","domain":"Information and Ideas","skill":"Command of Evidence (Quantitative)","difficulty":"medium","type":"mc","text":"<img src=\"assets/practice-test-figures/test12/menu-design-graph.png\" alt=\"Bar graph titled 'Impact of Menu Design on Selection of High-Calorie Meals' showing the percentage of participants who selected a high-calorie entrée under seven menu conditions: Standard (about 32.5%), Chef's recommendations (about 30%), Without photos (about 29%), Without descriptive text (about 25%, the lowest of all seven), Without photos and descriptive text (about 31.5%), With calorie disclosure (about 27.5%), and With calorie disclosure and health-impact statement (about 27.5%).\" style=\"display:block;margin:0.5em auto;max-width:420px;width:100%;\"><br><br>The rise of digital menus has allowed restaurants to experiment with different design features to influence ordering behavior. In a recent study, researchers tested seven menu conditions that varied only in presentation: a standard layout, a chef’s-recommendation tag, removal of photos, removal of descriptive text, removal of both photos and description, calorie disclosure, and calorie disclosure paired with a brief health-impact message. At the end of the study, the researchers concluded that the strongest reduction in high-calorie selections occurred when descriptive text was removed, while adding calorie information produced a more modest decrease.<br><br>Which choice most effectively uses data from the graph to support the researchers’ conclusion?","choices":["Under the chef’s-recommendation condition, the percentage of participants who chose a high-calorie entrée was nearly identical to the percentage under the standard menu.","When descriptive text was removed, the percentage of participants selecting a high-calorie entrée dropped to the lowest level among all seven conditions.","Removing photos produced roughly the same percentage of high-calorie selections as removing both photos and descriptive text, indicating that photographs alone accounted for the entire effect.","Adding calorie disclosure and a health-impact statement resulted in a smaller decrease in high-calorie selections than the decrease produced by removing descriptive text."],"correct":3,"choiceNotes":["Incorrect. This comparison between the chef's-recommendation and standard conditions is accurate but irrelevant—it says nothing about the two conditions the researchers' conclusion specifically compares.","Incorrect. This is true (removing descriptive text does yield the lowest bar) and supports half of the conclusion, but it doesn't address the second half—the comparatively \"more modest decrease\" from adding calorie information—so it is a weaker choice than one addressing both parts.","Incorrect. The graph shows removing photos alone (about 29%) and removing both photos and descriptive text (about 31.5%) are not roughly the same; the combined-removal condition is actually noticeably higher.","Correct. This choice directly compares the size of the decrease from adding calorie disclosure and a health-impact statement (about 5 percentage points, from roughly 32.5% to 27.5%) to the larger decrease from removing descriptive text (about 7.5 percentage points, from roughly 32.5% to 25%), precisely matching both parts of the researchers' conclusion in a single comparison."]},
           {"qid":"mta428f3","domain":"Information and Ideas","skill":"Command of Evidence (Textual)","difficulty":"easy","type":"mc","text":"“The Glass Violin” is a 1904 short story by Hungarian writer Ilona Farkas. In the story, the protagonist, Marek, becomes obsessed with a rumored instrument said to produce music only the doomed can hear. His friend, Tomas, grows alarmed by Marek’s fixation and repeatedly urges him to abandon his search for the violin. Tomas’s concern is clear when he says, ______<br><br>Which quotation from a translation of “The Glass Violin” most effectively illustrates the claim?","choices":["“You waste your nights chasing a melody no living musician has ever proven to exist.”","“I ran across the frozen courtyard to catch him, but he vanished into the fog before I could call his name.”","“In the hills above the village, shepherds say the wind itself can be coaxed into song by the patient listener.”","“I beg you, Marek, turn back before that cursed violin draws you into the darkness from which no one returns.”"],"correct":3,"choiceNotes":["Incorrect. This quotation is skeptical and somewhat critical in tone, but it does not express alarm or urge Marek to abandon his search.","Incorrect. This quotation describes an unrelated action scene (chasing someone across a courtyard) and does not express concern about Marek's obsession.","Incorrect. This quotation is a piece of folklore about shepherds and wind, unrelated to Tomas's concern for Marek.","Correct. This quotation directly begs Marek to \"turn back\" and warns of \"darkness from which no one returns,\" clearly expressing Tomas's alarm and his urging Marek to abandon the search."]},
           {"qid":"mt8dee1c","domain":"Information and Ideas","skill":"Command of Evidence (Textual)","difficulty":"medium","type":"mc","text":"Novelist Kazuo Ishiguro often uses child narrators who misunderstand the events they describe. In a recent essay, a literature student argues that Ishiguro uses this technique to show how limited perspective—not just dishonesty—can distort our understanding of truth.<br><br>Which quotation from a literary critic best supports the student’s claim?","choices":["\"Ishiguro's prose is marked by its architectural precision; each chapter invites the reader to wander until a final revelation illuminates the path.\"","\"Ishiguro frequently uses intergenerational conflicts to demonstrate how trauma reverberates across time.\"","\"By giving children narrative authority, Ishiguro shows that what these young narrators don't understand becomes as important as what they report.\"","\"Ishiguro's experiments with nonlinear chronology allow multiple realities to coexist within a single moment.\""],"correct":2,"choiceNotes":["Incorrect. This quotation addresses prose style and structural revelation, not child narrators' limited understanding.","Incorrect. This quotation is about intergenerational conflict and trauma, unrelated to the student's claim about narrators' limited perspective.","Correct. This quotation directly supports the claim by stating that what child narrators \"don't understand\" is as significant as what they report—matching the idea that limited perspective, not dishonesty, distorts truth.","Incorrect. This quotation addresses nonlinear chronology, a structural technique unrelated to child narrators' limited understanding."]},
           {"qid":"mt8029cb","domain":"Information and Ideas","skill":"Command of Evidence (Quantitative)","difficulty":"hard","type":"mc","text":"<i>Ratings of Cognitive Strain and Task Engagement under Varied Feedback Conditions</i><br><table class=\"dx-table\"><tr><th>Measure</th><th>No feedback</th><th>Positive feedback</th><th>Critical feedback</th><th>Randomized feedback</th></tr><tr><td>Cognitive strain, immediate</td><td>4.12</td><td>3.09</td><td>5.87</td><td>4.98</td></tr><tr><td>Task engagement, immediate</td><td>5.43</td><td>6.21</td><td>4.02</td><td>5.11</td></tr><tr><td>Cognitive strain, delayed</td><td>4.33</td><td>3.41</td><td>5.12</td><td>4.76</td></tr><tr><td>Task engagement, delayed</td><td>5.11</td><td>5.94</td><td>4.31</td><td>5.03</td></tr></table><br><br>Cognitive psychologists Renata Silva, Marcus Yong, and Anika Feldman proposed the hypothesis that the <i>type</i> of feedback individuals receive while completing a cognitively demanding task influences their mental load and motivation in <i>similar patterns</i> both immediately and after a delay. To test this, participants completed a complex pattern-recognition problem under one of four feedback conditions: no feedback, positive feedback, critical feedback, or randomized feedback. Shortly after finishing the task, researchers measured cognitive strain (mental effort) and task engagement (willingness to persist). Participants returned the next day to complete a follow-up assessment using the same metrics (delayed stage).<br><br>Which choice most effectively uses data from the table to support the researchers’ hypothesis?","choices":["In both the immediate and delayed stages, participants who received positive feedback exhibited the lowest cognitive strain and the highest engagement relative to all other feedback conditions.","Participants showed a larger drop in cognitive strain from the immediate to the delayed stage under randomized feedback than they did under positive feedback.","Across both stages, the difference between cognitive strain and engagement was largest for participants who received no feedback, suggesting that feedback is unnecessary for regulating motivation.","At the immediate stage, participants under critical feedback reported the highest cognitive strain, while at the delayed stage the highest strain was reported under randomized feedback, contradicting the predicted parallel patterns."],"correct":0,"choiceNotes":["Correct. The table confirms this consistently: positive feedback has the lowest strain (3.09 immediate, 3.41 delayed) and highest engagement (6.21 immediate, 5.94 delayed) in both stages, directly demonstrating the \"similar patterns\" both immediately and after a delay that the hypothesis predicts.","Incorrect. Under randomized feedback, strain drops only slightly (4.98 to 4.76), while under positive feedback strain actually increases slightly (3.09 to 3.41); this comparison doesn't meaningfully support the hypothesis of parallel patterns across conditions.","Incorrect. The largest strain-engagement gap is actually under positive feedback (about 3.12 immediate, 2.53 delayed), not no feedback (about 1.31 immediate, 0.78 delayed), so this claim misreads the table and undermines rather than supports the hypothesis.","Incorrect. At the delayed stage the highest cognitive strain is actually reported under critical feedback (5.12), not randomized feedback (4.76), so this choice misstates the data rather than supporting the hypothesis."]},
           {"qid":"mt4314fc","domain":"Information and Ideas","skill":"Inferences","difficulty":"medium","type":"mc","text":"Most astronomers believe that a massive stellar flare caused the sudden brightening of the star V-72 recorded 600 years ago. A disk of ionized gas orbiting V-72 appears to have formed around the same time, which many researchers attribute to that flare. However, astrophysicist Dr. Mara Jansen recently identified a second gas structure orbiting farther from the star. Chemical analysis suggests both structures formed simultaneously. Jansen proposes that a single catastrophic event—not multiple flares over time—expelled a large mass of stellar material that later split into the two structures we observe today.<br><br>Which finding, if true, would most directly support Jansen’s claim?","choices":["Measurements show that the outer gas structure rotates in the opposite direction from the inner disk, suggesting they formed from separate events.","Historical records describe additional brightening events occurring centuries before either gas structure formed.","Both gas structures contain identical rare elemental isotopes not found anywhere else in the V-72 system.","Computer models indicate that stars like V-72 typically undergo multiple independent ejections over thousands of years."],"correct":2,"choiceNotes":["Incorrect. Opposite rotation directions would suggest the two structures formed from separate events, which contradicts rather than supports Jansen's single-event claim.","Incorrect. Additional brightening events centuries before either structure formed does not support a single catastrophic origin for these two structures; if anything, it suggests a history of multiple events.","Correct. Identical rare isotopes found nowhere else in the system strongly suggest both structures originated from the same expelled material in a single catastrophic event, directly supporting Jansen's claim.","Incorrect. Evidence that stars like V-72 typically undergo multiple independent ejections would support the standard multiple-flare view, directly contradicting Jansen's single-event claim."]},
           {"qid":"mt73ab16","domain":"Information and Ideas","skill":"Inferences","difficulty":"medium","type":"mc","text":"In a study investigating the early stages of volcanic eruption cycles, geophysicists monitored deep-crust seismic vibrations and subterranean magma movement using a combination of laser interferometry and microgravity sensors. The researchers hypothesized that a consistent relationship between changes in seismic frequency and shifts in magma pressure could reveal which subterranean layers destabilize first before an eruption. Drawing on earlier findings, the team focused on the magma reservoir beneath the mid-crustal transition zone, a region long suspected to influence eruption timing. During the initial hours of pre-eruptive activity, the researchers detected sharp decreases in microgravity readings—indicating reduced local density—occurring simultaneously with the first appearance of low-frequency tremors. This suggests that ______<br><br>Which choice most logically completes the text?","choices":["the mid-crustal reservoir is one of the earliest structural regions to undergo destabilization prior to an eruption.","decreases in microgravity occurring alongside low-frequency tremors demonstrate that magma chambers remain stable in the earliest stages of an eruption cycle.","the mid-crustal reservoir is the final region of the crust to undergo measurable destabilization before magma reaches the surface.","volcanic systems typically experience symmetrical destabilization across all crustal layers during the initial phases of an eruption."],"correct":0,"choiceNotes":["Correct. Since the density decrease and tremors were detected \"during the initial hours of pre-eruptive activity\" in the mid-crustal reservoir specifically, this shows the reservoir is among the earliest regions to destabilize.","Incorrect. Sharp decreases in microgravity indicate reduced density, i.e., magma movement and destabilization—not stability—so this choice contradicts the data described.","Incorrect. The data show destabilization occurring during the initial hours, not the final stage, of pre-eruptive activity, contradicting this choice.","Incorrect. The passage focuses on one specific region (the mid-crustal reservoir) destabilizing early, not on symmetrical destabilization occurring across all crustal layers."]},
-          {"qid":"mt470589","domain":"Information and Ideas","skill":"Inferences","difficulty":"easy","type":"mc","text":"To prevent structural damage, civil engineers use a formula to calculate the maximum allowable load on an elevated platform. The safety formula takes into account not only the total weight placed on the platform but also the number of supporting columns and the distance between them, because a heavy load resting on only a few supports concentrates more force on each column than the same load spread across many supports. This means that a platform whose weight is distributed over more columns can safely bear a larger total load than one whose weight is carried by fewer columns, which means that ______<br><br>Which choice most logically completes the text?","choices":["the four-column platform likely has a lower maximum load limit than the two-column platform, since each column carries less weight.","both platforms likely have the same maximum load limit, because total weight matters more than how that weight is distributed.","the two-column platform is unlikely to require safety calculations, since its smaller number of supports makes the distribution of weight straightforward.","the four-column platform can typically be designed to carry a greater maximum load than the two-column platform, even if the platforms are otherwise similar."],"correct":3,"choiceNotes":["Incorrect. This reverses the passage's logic: a platform with more columns (four) can safely bear a larger, not smaller, total load than one with fewer columns.","Incorrect. The passage explicitly states that distribution over more columns allows a larger safe total load, meaning weight distribution—not just total weight—matters, contradicting this choice.","Incorrect. Nothing in the passage suggests fewer columns eliminates the need for safety calculations; in fact, fewer supports concentrate more force per column, making calculations more important.","Correct. This directly follows the passage's logic: distributing weight over more columns (four) allows a platform to safely carry a greater maximum load than one with fewer columns (two)."]},
+          {"qid":"mt470589","domain":"Information and Ideas","skill":"Inferences","difficulty":"easy","type":"mc","text":"To prevent structural damage, civil engineers use a formula to calculate the maximum allowable load on an elevated platform. The safety formula takes into account not only the total weight placed on the platform but also the number of supporting columns and the distance between them, because a heavy load resting on only a few supports concentrates more force on each column than the same load spread across many supports. This means that a platform whose weight is distributed over more columns can safely bear a larger total load than one whose weight is carried by fewer columns. Consider two platforms of identical size and material, one carried by two columns and one by four. It follows that ______<br><br>Which choice most logically completes the text?","choices":["the four-column platform likely has a lower maximum load limit than the two-column platform, since each column carries less weight.","both platforms likely have the same maximum load limit, because the total weight a platform carries matters more than how that weight is distributed among its supporting columns.","the two-column platform is unlikely to require safety calculations, since its smaller number of supports makes the distribution of weight straightforward.","the four-column platform can typically be designed to carry a greater maximum load than the two-column platform, even if the platforms are otherwise similar."],"correct":3,"choiceNotes":["Incorrect. This reverses the passage's logic: a platform with more columns (four) can safely bear a larger, not smaller, total load than one with fewer columns.","Incorrect. The passage explicitly states that distribution over more columns allows a larger safe total load, meaning weight distribution—not just total weight—matters, contradicting this choice.","Incorrect. Nothing in the passage suggests fewer columns eliminates the need for safety calculations; in fact, fewer supports concentrate more force per column, making calculations more important.","Correct. This directly follows the passage's logic: distributing weight over more columns (four) allows a platform to safely carry a greater maximum load than one with fewer columns (two)."]},
           {"qid":"mt24b31c","domain":"Standard English Conventions","skill":"Form, Structure, and Sense","difficulty":"easy","type":"mc","text":"A recent experiment tested whether volunteers who labeled containers accurately during a sorting task were more likely to remember the items they handled. When participants labeled each container themselves, they were better able to recall the objects inside compared to containers _____ they did not label.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?","choices":["that","those","them","who"],"correct":0,"choiceNotes":["Correct. \"That\" functions as the relative pronoun introducing the restrictive clause \"that they did not label,\" correctly modifying \"containers.\"","Incorrect. \"Those\" cannot function as a relative pronoun introducing a clause here; using it directly after \"containers\" creates an ungrammatical, redundant construction.","Incorrect. \"Them\" is an object pronoun and cannot introduce a relative clause modifying \"containers.\"","Incorrect. \"Who\" is used for people, not inanimate objects like containers."]},
           {"qid":"mtfbe37d","domain":"Standard English Conventions","skill":"Form, Structure, and Sense","difficulty":"medium","type":"mc","text":"A group of ecologists had recently observed that certain forest habitats recover more slowly after wildfires than expected, even when rainfall levels are normal. To determine what might be causing the delay, the researchers decided to explore a new guiding question: ______.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?","choices":["do variations in soil microbes influence how quickly vegetation returns after a fire","whether variations in soil microbes influence how quickly vegetation returns after a fire","what do variations in soil microbes influence about how quickly vegetation returns after a fire","variations in soil microbes influencing how quickly vegetation returns after a fire"],"correct":1,"choiceNotes":["Incorrect. This uses direct question word order (\"do variations... influence\"), which is grammatically incorrect for a noun clause completing \"a new guiding question:\".","Correct. \"Whether\" correctly introduces an indirect, embedded question functioning as a noun clause that completes \"a new guiding question:\".","Incorrect. This uses direct question word order with \"do,\" which is grammatically incorrect and semantically awkward as a noun clause here.","Incorrect. This gerund phrase is not a question and does not logically complete \"a new guiding question:\", which requires an actual question, not a description of an action."]},
           {"qid":"mt593e04","domain":"Standard English Conventions","skill":"Boundaries","difficulty":"medium","type":"mc","text":"Urban wind corridors—narrow pathways formed between tall buildings—can significantly influence airflow within a city. Strategically designed ventilation corridors help channel cooler air from surrounding rural regions into dense urban centers, reducing heat buildup. Plant-lined boulevards, which cool the air through transpiration, further enhance this effect by lowering temperatures of surrounding zones, whereas high-albedo pavements, which reflect a greater portion of solar radiation, mitigate heat differently. These distinctions mean that ventilation corridors influence the movement of air _____ high-albedo pavements primarily affect the absorption of heat.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?","choices":["through convection while","through convection; while","through convection. While","through convection, while"],"correct":3,"choiceNotes":["Incorrect. Without a comma, the transition into the contrasting clause introduced by \"while\" is unclear and does not match the standard punctuation for this kind of contrastive subordinate clause.","Incorrect. A semicolon must join two independent clauses, but \"while high-albedo pavements primarily affect the absorption of heat\" is a dependent clause and cannot follow a semicolon.","Incorrect. Ending the sentence with a period and beginning a new one with \"While\" creates a sentence fragment, since \"While X\" is a dependent clause, not a complete sentence.","Correct. The comma correctly sets off the contrastive dependent clause introduced by \"while,\" properly joining it to the independent clause that precedes it."]},
@@ -2207,11 +2207,11 @@ window.SAT_PRACTICE_TESTS = [
           {"qid":"mtf5ad74","domain":"Craft and Structure","skill":"Text Structure and Purpose","difficulty":"medium","type":"mc","text":"The following text is adapted from the memoir A Lantern in the Orchard by fictional author Mara Ellison. Mara, now an acclaimed botanist, recalls the rural valley where she spent her childhood.<br><br>Mara followed her grandmother through the terraced fields each morning, watching her gently inspect the leaves for signs of blight. <u>Although Mara often lingered by the creek with cousins her age, skipping stones and weaving cattails into bracelets, she found herself most absorbed during these quiet walks, listening to her grandmother explain the logic and rhythms of the land.</u><br><br>Which choice best describes the function of the underlined sentence in the text as a whole?","choices":["It summarizes the technical plant-care methods that shaped Mara’s later academic career.","It reinforces the memoir’s thematic emphasis on the value of intergenerational storytelling.","It introduces a moment of conflict that later motivates Mara’s departure from the rural valley.","It establishes a contrast that highlights how Mara’s early scientific curiosity outweighed the typical diversions of childhood."],"correct":3,"choiceNotes":["Incorrect. The sentence contrasts creek play with the grandmother’s walks; it doesn’t summarize any technical plant-care methods.","Incorrect. The sentence emphasizes Mara’s own absorption in observing the land, not storytelling passed between generations.","Incorrect. Nothing in the sentence introduces conflict or foreshadows a departure from the valley.","Correct. The sentence contrasts the typical childhood pastime of playing by the creek with Mara’s unusual absorption in her grandmother’s explanations, highlighting her early scientific curiosity."]},
           {"qid":"mt7fbd35","domain":"Craft and Structure","skill":"Text Structure and Purpose","difficulty":"medium","type":"mc","text":"The following text is adapted from the fictional memoir Winter Lines by Elias Hart. The narrator, a reclusive poet in his late thirties, reflects on a habit he developed during long periods of solitude.<br><br>I often spent entire weeks tucked away in my rented attic room, writing until the daylight thinned and the streetlamps glowed through the frost. Yet, without fail, some inner pull would send me downstairs to the bakery on the corner, where I would trade a few polite words with the owner. The moment I stepped inside, however, a strange stillness overtook me; I felt both rooted to the threshold and quietly relieved, as though the world’s noise had dimmed just enough to let me breathe. When I returned upstairs afterward, the brief interruption lingered in my thoughts, softening the edges of my isolation.<br><br>Which choice best states the main purpose of the text?","choices":["To illustrate how the narrator’s brief excursions into public spaces create a paradoxical blend of tension and solace","To reveal the narrator’s frustration with the monotony of his writing routine and his longing for constant social attention","To suggest that the narrator’s encounters at the bakery sparked a dramatic shift in his creative ambitions","To emphasize the narrator’s dependence on the bakery owner for emotional guidance and personal affirmation"],"correct":0,"choiceNotes":["Correct. The narrator describes feeling simultaneously “rooted” (a kind of tension) and “relieved” at the bakery, and the visit’s effect lingers, softening his isolation — a paradoxical blend of tension and solace.","Incorrect. The text doesn’t describe frustration with monotony or a longing for constant social attention; the narrator remains largely solitary and values his quiet routine.","Incorrect. There is no mention of the bakery visits changing the narrator’s creative ambitions.","Incorrect. The text shows the visits softening his isolation, not the narrator depending on the owner for guidance or affirmation; their exchange is described as only “a few polite words.”"]},
           {"qid":"mt12873f","domain":"Craft and Structure","skill":"Text Structure and Purpose","difficulty":"hard","type":"mc","text":"The following text is from the memoir Paper Houses. A woman named Liora is telling a friend about her great-uncle, Avi, who managed a small printing workshop in Tel Aviv during the 1950s.<br><br>“Each evening, my great-uncle Avi would walk through the shop after the apprentices left, checking every plate and roller twice over. He trusted no one with the final adjustments, not even my aunt, who handled the accounts. <u>From the stories I’ve heard, as far back as my mother can remember, Avi treated the workshop like a living thing—feeding it his time and guarding it with a devotion that bordered on obsession.</u> When a shipment went missing or a client delayed payment, he paced the floorboards until sunrise, muttering calculations and refusing to close the shutters.”<br><br>Which choice best states the function of the underlined sentence in the text as a whole?","choices":["It clarifies the origins of Avi’s meticulous habits by highlighting his early life experiences outside the workshop.","It offers essential background that contextualizes Avi’s intensity, helping explain why he reacted so strongly to setbacks.","It shows why Avi distrusted his employees, indicating that the workshop had suffered major financial losses in the past.","It contrasts Avi’s sentimental attachment to the workshop with his indifference toward his family’s involvement in the business."],"correct":1,"choiceNotes":["Incorrect. The sentence describes Avi’s devotion to the workshop itself, not any early-life experiences outside of it.","Correct. By establishing that Avi’s all-consuming devotion to the workshop was long-standing and nearly obsessive, the sentence provides background that explains his extreme reaction—pacing until sunrise—when problems like a missing shipment arose.","Incorrect. The sentence doesn’t mention financial losses; distrust of employees is addressed in the previous sentence, not this one.","Incorrect. The sentence doesn’t address Avi’s feelings toward his family’s involvement in the business at all."]},
-          {"qid":"mt1fe945","domain":"Craft and Structure","skill":"Text Structure and Purpose","difficulty":"hard","type":"mc","text":"Marine biologists studying the rapid decline of cold-water kelp forests have long noted that rising ocean temperatures and nutrient scarcity are key contributors. Recently, a consortium of researchers from universities across Norway and Iceland developed a remote-operated sensor array capable of tracking micro-scale turbulence around kelp blades. Early trials in controlled tanks suggest that the device detects subtle fluctuations in water flow that were previously impossible to measure, offering a promising tool for predicting when stressed kelp is on the verge of collapse. However, the team acknowledges that the sensor array has not yet been deployed across full coastal transects, and its accuracy outside controlled conditions remains uncertain. Preliminary modeling also indicates that, even if fully implemented, the tool may improve monitoring but is unlikely to reverse the underlying ecological decline.<br><br>Which choice best describes the overall structure of the text?","choices":["It critiques existing monitoring practices, then proposes an alternative solution expected to fully resolve the issue.","It presents conflicting theories about ecosystem decline, then dismisses them in favor of a more widely accepted explanation.","It describes a new research method, then argues that this innovation renders previous ecological studies unreliable.","It outlines a longstanding ecological problem, introduces a sophisticated technological response, and then qualifies the scope of that response."],"correct":3,"choiceNotes":["Incorrect. The text never claims the new sensor array will fully resolve kelp decline; it explicitly says the tool is unlikely to reverse the underlying decline.","Incorrect. The text doesn’t present competing theories about the cause of kelp decline or dismiss any theory; it presents one accepted set of causes and a new monitoring tool.","Incorrect. The text doesn’t suggest that the new sensor array discredits earlier ecological research.","Correct. The text opens with the established causes of kelp decline, introduces the new sensor array as a technological response, and then qualifies its limitations and likely impact."]},
-          {"qid":"mtc9139a","domain":"Information and Ideas","skill":"Cross-Text Connections","difficulty":"hard","type":"mc","text":"<b>Text 1</b><br>Historians have long debated why several coastal trading cities of the ancient Phoenicians abruptly declined. One prominent explanation focuses on mounting conflicts among merchant guilds that coincided with a period of reduced Mediterranean trade winds. According to this view, intensified competition during these windless seasons strained political alliances and weakened the institutions that had previously stabilized commercial life.<br><br><b>Text 2</b><br>Scholars studying the same Phoenician decline agree that shifting wind patterns played a role but argue that the core issue was not reduced wind strength alone. Instead, they emphasize that the winds had become erratic and difficult to anticipate, disrupting maritime schedules and making it nearly impossible for city officials to forecast safe departure windows. This unpredictability, they argue, destabilized the political and economic structures more than the mere decrease in average wind intensity.<br><br>Based on the texts, how would the author of <b>Text 2</b> most likely respond to the claims of the author of <b>Text 1</b>?","choices":["By rejecting the idea that weakened trade winds contributed to political instability in Phoenician cities","By arguing that if officials were increasingly unable to foresee wind conditions, merchant guilds would naturally lose confidence in governing institutions","By conceding that wind patterns affected Phoenician commerce but maintaining that the decisive factor was the unpredictability of those patterns rather than their overall decline","By asserting that had wind strength remained consistent, economic tensions among merchant guilds would not have intensified"],"correct":2,"choiceNotes":["Incorrect. The author of Text 2 explicitly agrees that shifting wind patterns played a role; they do not reject the connection between winds and instability altogether.","Incorrect. This choice is a plausible-sounding but unsupported inference — Text 2 focuses on unpredictability disrupting maritime schedules, not officials’ inability to “foresee” conditions causing guilds to lose confidence in institutions.","Correct. Text 2 agrees that wind patterns mattered but argues the decisive factor was the winds becoming erratic and unpredictable, not the average decrease in wind strength emphasized in Text 1.","Incorrect. This choice restates Text 1’s emphasis on overall wind strength, which is precisely what Text 2 argues against; Text 2 would not frame the issue in terms of consistent wind strength alone."]},
+          {"qid":"mt1fe945","domain":"Craft and Structure","skill":"Text Structure and Purpose","difficulty":"hard","type":"mc","text":"Marine biologists studying the rapid decline of cold-water kelp forests have long noted that rising ocean temperatures and nutrient scarcity are key contributors. Recently, a consortium of researchers from universities across Norway and Iceland developed a remote-operated sensor array capable of tracking micro-scale turbulence around kelp blades. Early trials in controlled tanks suggest that the device detects subtle fluctuations in water flow that were previously impossible to measure, offering a promising tool for predicting when stressed kelp is on the verge of collapse. However, the team acknowledges that the sensor array has not yet been deployed across full coastal transects, and its accuracy outside controlled conditions remains uncertain. Preliminary modeling also indicates that, even if fully implemented, the tool may improve monitoring but is unlikely to reverse the underlying ecological decline.<br><br>Which choice best describes the overall structure of the text?","choices":["It critiques existing monitoring practices, then proposes an alternative solution expected to fully resolve the issue.","It presents conflicting theories about ecosystem decline, then dismisses them in favor of a single more widely accepted explanation drawn from earlier surveys.","It describes a new research method, then argues that this innovation renders previous ecological studies unreliable.","It outlines a longstanding ecological problem, introduces a sophisticated technological response, and then qualifies the scope of that response."],"correct":3,"choiceNotes":["Incorrect. The text never claims the new sensor array will fully resolve kelp decline; it explicitly says the tool is unlikely to reverse the underlying decline.","Incorrect. The text doesn’t present competing theories about the cause of kelp decline or dismiss any theory; it presents one accepted set of causes and a new monitoring tool.","Incorrect. The text doesn’t suggest that the new sensor array discredits earlier ecological research.","Correct. The text opens with the established causes of kelp decline, introduces the new sensor array as a technological response, and then qualifies its limitations and likely impact."]},
+          {"qid":"mtc9139a","domain":"Information and Ideas","skill":"Cross-Text Connections","difficulty":"hard","type":"mc","text":"<b>Text 1</b><br>Historians have long debated why several coastal trading cities of the ancient Phoenicians abruptly declined. One prominent explanation focuses on mounting conflicts among merchant guilds that coincided with a period of reduced Mediterranean trade winds. According to this view, intensified competition during these windless seasons strained political alliances and weakened the institutions that had previously stabilized commercial life.<br><br><b>Text 2</b><br>Scholars studying the same Phoenician decline agree that shifting wind patterns played a role but argue that the core issue was not reduced wind strength alone. Instead, they emphasize that the winds had become erratic and difficult to anticipate, disrupting maritime schedules and making it nearly impossible for city officials to forecast safe departure windows. This unpredictability, they argue, destabilized the political and economic structures more than the mere decrease in average wind intensity.<br><br>Based on the texts, how would the author of <b>Text 2</b> most likely respond to the claims of the author of <b>Text 1</b>?","choices":["By rejecting the idea that weakened trade winds contributed to political instability in Phoenician cities","By arguing that if officials were increasingly unable to foresee wind conditions, merchant guilds would naturally lose confidence in the governing institutions","By conceding that wind patterns affected Phoenician commerce but maintaining that the decisive factor was the unpredictability of those patterns rather than their overall decline","By asserting that had the average strength of the winds remained unchanged, economic tensions among merchant guilds would not have intensified"],"correct":2,"choiceNotes":["Incorrect. The author of Text 2 explicitly agrees that shifting wind patterns played a role; they do not reject the connection between winds and instability altogether.","Incorrect. This choice is a plausible-sounding but unsupported inference — Text 2 focuses on unpredictability disrupting maritime schedules, not officials’ inability to “foresee” conditions causing guilds to lose confidence in institutions.","Correct. Text 2 agrees that wind patterns mattered but argues the decisive factor was the winds becoming erratic and unpredictable, not the average decrease in wind strength emphasized in Text 1.","Incorrect. This choice restates Text 1’s emphasis on overall wind strength, which is precisely what Text 2 argues against; Text 2 would not frame the issue in terms of consistent wind strength alone."]},
           {"qid":"mt43917f","domain":"Information and Ideas","skill":"Command of Evidence (Quantitative)","difficulty":"medium","type":"mc","text":"<i>Characteristics of Motion-Activated Wildlife Cameras</i><br><table class=\"dx-table\"><tr><th>Camera model</th><th>Trigger speed (s)</th><th>Battery life (days)</th><th>Operating temperature range (°C)</th></tr><tr><td>TrailCam A</td><td>0.2</td><td>45</td><td>−10 to 40</td></tr><tr><td>TrailCam B</td><td>0.6</td><td>55</td><td>−25 to 35</td></tr><tr><td>TrailCam C</td><td>0.4</td><td>60</td><td>−15 to 45</td></tr><tr><td>TrailCam D</td><td>0.3</td><td>75</td><td>−5 to 30</td></tr><tr><td>TrailCam E</td><td>0.5</td><td>50</td><td>−30 to 40</td></tr></table><br><br>A wildlife biologist is setting up cameras for a two-month winter study in a remote forest. She needs a camera that can operate in temperatures as low as −15°C, has a battery life of at least 60 days, and has a trigger speed of no slower than 0.5 seconds when an animal passes. Based on the characteristics of motion-activated wildlife cameras, she selected ______.<br><br>Which choice most effectively uses data from the table to complete the text?","choices":["TrailCam A.","TrailCam B.","TrailCam C.","TrailCam E."],"correct":2,"choiceNotes":["Incorrect. TrailCam A has a battery life of only 45 days, which does not meet the required minimum of 60 days.","Incorrect. TrailCam B has a trigger speed of 0.6 seconds, slower than the required maximum of 0.5 seconds, and a battery life of only 55 days.","Correct. TrailCam C operates down to −15°C, has a 60-day battery life, and has a 0.4-second trigger speed, meeting all three of the biologist’s requirements.","Incorrect. TrailCam E has a battery life of only 50 days, which does not meet the required minimum of 60 days."]},
           {"qid":"mtc45e49","domain":"Information and Ideas","skill":"Command of Evidence (Textual)","difficulty":"medium","type":"mc","text":"The short story Winter Orchard follows a narrator who returns to the rural farmhouse where she grew up. In one passage, she describes a moment of intense longing for a past she can no longer reclaim: ______<br><br>Which quotation from Winter Orchard most effectively illustrates the claim?","choices":["“The apples hung low that year, their skins freckled gold beneath the early frost.”","“Every step on the old porch boards felt like an echo of footsteps I could no longer follow.”","“My grandmother’s shawl still smelled faintly of cedar, though no one had opened that chest in years.”","“Across the fields, the crows traced their black signatures against the pale morning sky.”"],"correct":1,"choiceNotes":["Incorrect. This quotation offers a visual description of the orchard but does not convey longing for an unreclaimable past.","Correct. This quotation directly conveys the narrator’s longing and her explicit sense that the past (“footsteps”) can no longer be followed or reclaimed.","Incorrect. This quotation evokes memory through a sensory detail but does not express longing for a past that cannot be reclaimed.","Incorrect. This quotation is a visual description of the landscape and does not convey a sense of personal longing or loss."]},
-          {"qid":"mtb8e2b3","domain":"Information and Ideas","skill":"Command of Evidence (Quantitative)","difficulty":"hard","type":"mc","text":"<table class=\"dx-table\"><tr><th>Training condition</th><th>Before training (ms)</th><th>After training (ms)</th></tr><tr><td>Group A</td><td>7</td><td>5</td></tr><tr><td>Group B</td><td>6</td><td>4.8</td></tr></table><br><br>A team of cognitive scientists investigated whether a brief, high-intensity cognitive-load protocol could enhance participants’ efficiency in visual-pattern recognition. Two independent groups completed identical recognition trials both before and after the training. Mean reaction times (in milliseconds) for each condition are shown in the table above (Group A: Mean Reaction Times in Visual-Pattern Recognition Before and After Cognitive-Load Training). Although the groups began with slightly different baseline speeds, the researchers concluded that the relative magnitude of improvement was consistent across both, indicating that the protocol’s effects were not dependent on initial performance levels.<br><br>Which choice best describes data from the graph that undermines the researchers’ conclusion?","choices":["Both groups showed roughly equivalent percentage decreases in mean reaction time following training, despite beginning with different baseline speeds.","Group A’s mean reaction time decreased by about two milliseconds after training, while Group B’s decreased by only one, suggesting a stronger training effect for Group A.","The smaller post-training difference between Group A and Group B indicates that participants in the slower group simply caught up to the faster group over time.","Because Group B started with a lower baseline reaction time, its improvement after training cannot be meaningfully compared to that of Group A."],"correct":1,"choiceNotes":["Incorrect. This choice inaccurately describes the data — Group A’s percentage decrease (about 29%) is noticeably larger than Group B’s (20%), so the decreases were not roughly equivalent.","Correct. Group A’s reaction time fell from 7 to 5 ms (a decrease of about 2 ms), while Group B’s fell from 6 to 4.8 ms (a decrease of only about 1.2, or roughly one, ms) — a clear numerical difference in improvement that undermines the claim that the magnitude of improvement was consistent across groups.","Incorrect. Nothing in the graph supports the interpretation that the slower group “caught up” to the faster group; this misinterprets the data rather than citing it accurately.","Incorrect. This choice makes an unsupported claim that the groups’ results “cannot be meaningfully compared” rather than citing specific data that undermines the conclusion."]},
+          {"qid":"mtb8e2b3","domain":"Information and Ideas","skill":"Command of Evidence (Quantitative)","difficulty":"hard","type":"mc","text":"<table class=\"dx-table\"><tr><th>Training condition</th><th>Before training (ms)</th><th>After training (ms)</th></tr><tr><td>Group A</td><td>7</td><td>5</td></tr><tr><td>Group B</td><td>6</td><td>4.8</td></tr></table><br><br>A team of cognitive scientists investigated whether a brief, high-intensity cognitive-load protocol could enhance participants’ efficiency in visual-pattern recognition. Two independent groups completed identical recognition trials both before and after the training. Mean reaction times (in milliseconds) for each condition are shown in the table above (Mean Reaction Times in Visual-Pattern Recognition Before and After Cognitive-Load Training). Although the groups began with slightly different baseline speeds, the researchers concluded that the relative magnitude of improvement was consistent across both, indicating that the protocol’s effects were not dependent on initial performance levels.<br><br>Which choice best describes data from the table that undermines the researchers’ conclusion?","choices":["Both groups showed roughly equivalent percentage decreases in mean reaction time following training, despite beginning with different baseline speeds.","Group A’s mean reaction time fell by about 29 percent after training, while Group B’s fell by about 20 percent, so the relative improvement was not consistent across the groups.","The smaller post-training difference between Group A and Group B indicates that participants in the slower group simply caught up to the faster group over the course of the training period.","Because Group B started with a lower baseline reaction time, its improvement after training cannot be meaningfully compared to that of Group A."],"correct":1,"choiceNotes":["Incorrect. This choice inaccurately describes the data — Group A’s percentage decrease (about 29%) is noticeably larger than Group B’s (20%), so the decreases were not roughly equivalent.","Correct. Group A’s reaction time fell from 7 to 5 ms, a drop of about 29 percent, while Group B’s fell from 6 to 4.8 ms, a drop of about 20 percent — a clear numerical difference in improvement that undermines the claim that the magnitude of improvement was consistent across groups.","Incorrect. Nothing in the table supports the interpretation that the slower group “caught up” to the faster group; this misinterprets the data rather than citing it accurately.","Incorrect. This choice makes an unsupported claim that the groups’ results “cannot be meaningfully compared” rather than citing specific data that undermines the conclusion."]},
           {"qid":"mt488b61","domain":"Information and Ideas","skill":"Command of Evidence (Textual)","difficulty":"medium","type":"mc","text":"The Wanderer’s Vigil is a 1890 verse-drama by Alistair Rowan. The play centers on Eamon, a scholar who is imprisoned after refusing to endorse the king’s authoritarian decrees. Throughout the drama, Eamon repeatedly condemns the king’s rule as unjust and tyrannical. The claim is that Eamon openly denounces the king as a cruel oppressor, as when he says, ______<br><br>Which quotation from The Wanderer’s Vigil most effectively illustrates the claim?","choices":["“O ancient walls, you keep the secrets of all men who walked before me; let memory be my refuge now.”","“Such silence binds my limbs like iron, forged by a monarch who fears the sound of honest speech.”","“Justice, like a withered oak, still casts its shadow long across this land, though storms have stripped its crown.”","“The kindness I once offered my sovereign returned to me as fetters, each link hammered from spite.”"],"correct":1,"choiceNotes":["Incorrect. This quotation reflects on memory and the walls of the prison; it does not directly denounce the king as a cruel oppressor.","Correct. This quotation directly names the “monarch” and accuses him of fearing honest speech, explicitly framing him as an oppressive, cruel ruler.","Incorrect. This quotation uses a metaphor about justice generally, without directly denouncing the king himself.","Incorrect. This quotation describes personal betrayal but does not explicitly denounce the king as a tyrant or cruel oppressor."]},
           {"qid":"mt97b005","domain":"Information and Ideas","skill":"Inferences","difficulty":"hard","type":"mc","text":"Researchers in Utrecht wanted to determine whether brief exposure to prosocial storytelling could measurably shift people’s willingness to engage in cooperative behavior. To investigate this, they assigned volunteers to one of two groups. The experimental group read two short narratives in which characters resolved conflicts through generosity and perspective-taking; the control group read two neutral informational passages about local geography. Afterward, all participants watched a short clip in which an unfamiliar person described facing a difficult housing situation. Participants then completed assessments measuring both their empathic concern for the individual and their readiness to offer concrete assistance through a volunteer program. Although the experimental group scored noticeably higher in empathic concern than the control group, both groups reported nearly identical levels of willingness to volunteer, indicating that ______<br><br>Which choice most logically completes the text?","choices":["participants in both groups were motivated primarily by the desire to be perceived positively by the researchers.","reading prosocial stories caused participants to underestimate the severity of the housing situation.","increases in empathic concern do not automatically lead to changes in cooperative behavior.","brief exposure to neutral informational passages is as effective as prosocial narratives for improving empathy."],"correct":2,"choiceNotes":["Incorrect. Nothing in the passage suggests participants’ behavior was driven by a desire to be perceived positively; this introduces an unsupported motive.","Incorrect. There is no evidence that participants underestimated the severity of the situation; empathic concern was actually higher in the experimental group.","Correct. Since the experimental group showed higher empathic concern but the two groups reported nearly identical willingness to volunteer, the data support the conclusion that increased empathy did not translate into increased cooperative behavior.","Incorrect. This contradicts the passage, which states the experimental (prosocial-story) group scored noticeably higher in empathic concern than the control group, showing the two conditions were not equally effective for empathy."]},
           {"qid":"mt304b4a","domain":"Information and Ideas","skill":"Inferences","difficulty":"hard","type":"mc","text":"For decades, a granite pillar standing on a windswept ridge in western Scotland was thought to be the surviving remnant of a large Iron Age ceremonial enclosure. Antiquarians in the nineteenth century speculated that the enclosure once consisted of concentric timber rings surrounding the pillar and that it had served as a gathering place for seasonal rites. This theory fit with known Iron Age construction traditions, which often incorporated standing stones into ritual complexes. In 2018, however, a team of landscape archaeologists conducted ground-penetrating radar and soil-core sampling around the pillar. They found no subsurface evidence of postholes, ditches, or any other features consistent with an Iron Age enclosure. Further analysis of lichen patterns and weathering on the pillar suggested that it had been relocated to the ridge during the late seventeenth century, likely as part of a landowner’s effort to mark a property boundary. Therefore, the archaeologists concluded that ______<br><br>Which choice most logically completes the text?","choices":["Iron Age communities in the region did not construct ceremonial enclosures using concentric timber rings.","the pillar is not evidence of any ancient ritual enclosure at the ridge site.","the pillar must originally have served as a ritual monument before being moved to the ridge.","the ceremonial enclosure that once stood on the ridge was dismantled by landowners in the seventeenth century."],"correct":1,"choiceNotes":["Incorrect. The passage does not support a broad claim about whether Iron Age communities elsewhere used concentric timber rings; it addresses only this specific ridge site.","Correct. The absence of subsurface enclosure features combined with evidence that the pillar was relocated in the seventeenth century supports the conclusion that the pillar is not evidence of any ancient ritual enclosure at this site.","Incorrect. This contradicts the findings — there is no evidence the pillar served a ritual purpose; the lichen and weathering evidence instead points to a later, non-ritual purpose (marking a property boundary).","Incorrect. The findings indicate no enclosure existed at the site at all (no subsurface evidence), not that an enclosure existed and was later dismantled."]},
@@ -2224,17 +2224,2797 @@ window.SAT_PRACTICE_TESTS = [
           {"qid":"mtfc5a43","domain":"Standard English Conventions","skill":"Boundaries","difficulty":"medium","type":"mc","text":"Quantum physicist Jacqui Romero is working to develop a new quantum alphabet, in which a single photon can encode far more information than the two binary states used in classical computing. Romero balances her intensive laboratory ______ she frequently speaks at conferences about the importance of supporting parents in academic science.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?","choices":["work; moreover,","work moreover,","work, moreover,","work, moreover;"],"correct":0,"choiceNotes":["Correct. A semicolon before the conjunctive adverb “moreover,” followed by a comma, correctly joins the two independent clauses.","Incorrect. With no punctuation before “moreover,” this creates a run-on (fused) sentence.","Incorrect. A comma alone before “moreover” creates a comma splice between two independent clauses.","Incorrect. The semicolon is misplaced after “moreover” rather than before it, and the comma before “moreover” still creates a comma splice."]},
           {"qid":"mt98af77","domain":"Expression of Ideas","skill":"Transitions","difficulty":"medium","type":"mc","text":"Arctic foxes conserve heat in subzero environments by lowering their metabolic rate and reducing nocturnal activity. Their relative, the desert fennec fox, exhibits the opposite pattern: it increases nocturnal movement to avoid daytime temperatures that can exceed 45°C. ______ these divergent strategies arise from a shared need for temperature regulation, each adaptation reflects pressures specific to the animal’s habitat.<br><br>Which choice completes the text with the most logical transition?","choices":["Although","If","However","When"],"correct":0,"choiceNotes":["Correct. “Although” correctly introduces a concessive clause, acknowledging the shared underlying cause (temperature regulation) while contrasting it with the fact that each strategy is shaped by habitat-specific pressures.","Incorrect. “If” introduces a hypothetical condition, but the shared origin of the strategies is stated as fact, not a hypothetical.","Incorrect. “However” typically begins a new independent clause with a comma following it; used here, it doesn’t fit the grammatical structure of the sentence as a subordinating concession.","Incorrect. “When” suggests a time-based relationship, which doesn’t fit the logical (concessive) relationship between the shared cause and the habitat-specific outcomes."]},
           {"qid":"mt8e7929","domain":"Expression of Ideas","skill":"Transitions","difficulty":"medium","type":"mc","text":"During early exoplanet surveys, astronomers struggled to distinguish genuine planetary signals from the noise produced by stellar activity, such as starspots and magnetic flares. These distortions frequently mimicked the periodic dimming caused by an orbiting planet and led to numerous false detections. ______ the development of high-precision spectrographs and machine-learning–based noise-reduction techniques drastically improved the reliability of exoplanet validation, allowing researchers to confirm discoveries that would previously have been dismissed as ambiguous.<br><br>Which choice completes the text with the most logical transition?","choices":["In other words,","Eventually,","For this reason,","In addition,"],"correct":1,"choiceNotes":["Incorrect. “In other words” signals a restatement of the same idea, but the second sentence describes a new development (improved technology), not a rephrasing of the earlier problem.","Correct. “Eventually” signals the chronological progression from an early period of struggle with false detections to a later resolution through improved technology.","Incorrect. “For this reason” implies the false detections directly caused the development of the new techniques, a causal link the text doesn’t establish; the relationship described is chronological, not causal.","Incorrect. “In addition” signals an additive relationship, but the second sentence describes a resolution to the previously described problem, not an additional related point."]},
-          {"qid":"mt8b64a2","domain":"Expression of Ideas","skill":"Rhetorical Synthesis","difficulty":"hard","type":"mc","text":"While researching a topic, a student has taken the following notes:<br><ul><li>Passive radiative cooling materials release heat into outer space without consuming energy.</li><li>Some advanced prototypes can lower the temperature of an object by up to 10°C below ambient conditions.</li><li>These materials work even during the daytime when exposed to direct sunlight.</li><li>Traditional air-conditioning systems require electricity and contribute significantly to urban energy consumption.</li><li>Researchers believe large-scale deployment could reduce peak electricity demand in major cities.</li></ul><br><br>The student wants to persuade city planners that passive radiative cooling technologies could meaningfully alleviate long-term stress on a city’s energy infrastructure. Which choice most effectively uses relevant information from the notes to accomplish this goal?","choices":["Because some prototypes cool surfaces far below the surrounding air even in direct sunlight, they could reduce the need for mechanical cooling in outdoor public areas.","Although passive radiative cooling is still under active development, its ability to operate without electricity distinguishes it from traditional systems that heighten urban energy demand.","Since passive radiative cooling releases heat into space without using energy, widespread adoption could limit reliance on electricity-intensive air-conditioning during periods when demand on city grids is highest.","Passive radiative cooling materials have shown effective performance in both controlled trials and daytime field tests, suggesting they could be integrated into a variety of building designs."],"correct":2,"choiceNotes":["Incorrect. This choice focuses narrowly on outdoor public areas rather than addressing the city’s broader energy infrastructure, and it introduces a use case (outdoor public areas) not mentioned in the notes.","Incorrect. The notes never state that passive radiative cooling is “still under active development”; this framing is unsupported and undercuts the persuasive goal.","Correct. This choice connects the no-energy-use property of the materials with traditional air-conditioning’s contribution to urban energy consumption and researchers’ belief that large-scale deployment could reduce peak electricity demand — directly supporting the goal of alleviating stress on energy infrastructure.","Incorrect. This choice focuses on integration into building designs rather than directly addressing long-term stress on a city’s energy infrastructure."]},
-          {"qid":"mtbd7919","domain":"Expression of Ideas","skill":"Rhetorical Synthesis","difficulty":"hard","type":"mc","text":"While researching a topic, a student has taken the following notes:<br><ul><li>Microbial fuel cells (MFCs) generate electricity by using bacteria to break down organic waste.</li><li>Some experimental MFCs have powered small sensors for months with no external energy input.</li><li>Scaling MFCs for large infrastructure remains challenging because their power output is relatively low.</li><li>Wastewater treatment plants already process large volumes of organic material.</li><li>Several engineers propose integrating MFC modules into wastewater facilities to supplement on-site power needs.</li></ul><br><br>The student wants to argue that installing microbial fuel cells in wastewater facilities could support more sustainable on-site energy production. Which choice most effectively uses relevant information from the notes to accomplish this goal?","choices":["Although current MFCs cannot generate enough electricity to power entire wastewater facilities, the continuous supply of organic waste they process could support arrays of small modules that provide steady supplemental energy on site.","Because experimental MFCs have powered low-energy sensors for extended periods without outside electricity, integrating similar cells into wastewater systems could eliminate the need for traditional power sources.","Since wastewater plants handle large volumes of organic material, engineers expect MFC modules to eventually scale to the point where they could operate major parts of treatment infrastructure independently.","Given that MFCs’ low output limits their usefulness for large-scale systems, incorporating them into wastewater plants would mainly support isolated monitoring tasks rather than contribute to overall energy sustainability."],"correct":0,"choiceNotes":["Correct. This choice acknowledges the real limitation (low power output, per the notes) while connecting the steady organic-waste supply at wastewater plants to the proposal for supplemental power modules, directly supporting the goal of more sustainable on-site energy production.","Incorrect. The notes do not support the claim that MFCs could “eliminate the need for traditional power sources”; this overstates what the notes establish, especially given that scaling MFCs remains challenging.","Incorrect. The notes state that scaling MFCs for large infrastructure remains challenging; nothing suggests engineers expect MFCs to eventually operate major parts of the infrastructure independently.","Incorrect. This choice argues against the persuasive goal by suggesting MFCs would not meaningfully contribute to overall energy sustainability, contradicting the student’s intended argument."]},
+          {"qid":"mt8b64a2","domain":"Expression of Ideas","skill":"Rhetorical Synthesis","difficulty":"hard","type":"mc","text":"While researching a topic, a student has taken the following notes:<br><ul><li>Passive radiative cooling materials release heat into outer space without consuming energy.</li><li>Some advanced prototypes can lower the temperature of an object by up to 10°C below ambient conditions.</li><li>These materials work even during the daytime when exposed to direct sunlight.</li><li>Traditional air-conditioning systems require electricity and contribute significantly to urban energy consumption.</li><li>Researchers believe large-scale deployment could reduce peak electricity demand in major cities.</li></ul><br><br>The student wants to persuade city planners that passive radiative cooling technologies could meaningfully alleviate long-term stress on a city’s energy infrastructure. Which choice most effectively uses relevant information from the notes to accomplish this goal?","choices":["Because some prototypes cool surfaces far below the surrounding air even in direct sunlight, they could reduce the need for mechanical cooling in outdoor public areas.","Although passive radiative cooling is still under active development, its ability to operate without electricity distinguishes it from the traditional cooling systems that heighten urban energy demand.","Since passive radiative cooling releases heat into space without using energy, widespread adoption could limit reliance on electricity-intensive air-conditioning during periods when demand on city grids is highest.","Passive radiative cooling materials have shown effective performance in both controlled trials and daytime field tests, suggesting they could be integrated into a variety of building designs."],"correct":2,"choiceNotes":["Incorrect. This choice focuses narrowly on outdoor public areas rather than addressing the city’s broader energy infrastructure, and it introduces a use case (outdoor public areas) not mentioned in the notes.","Incorrect. The notes never state that passive radiative cooling is “still under active development”; this framing is unsupported and undercuts the persuasive goal.","Correct. This choice connects the no-energy-use property of the materials with traditional air-conditioning’s contribution to urban energy consumption and researchers’ belief that large-scale deployment could reduce peak electricity demand — directly supporting the goal of alleviating stress on energy infrastructure.","Incorrect. This choice focuses on integration into building designs rather than directly addressing long-term stress on a city’s energy infrastructure."]},
+          {"qid":"mtbd7919","domain":"Expression of Ideas","skill":"Rhetorical Synthesis","difficulty":"hard","type":"mc","text":"While researching a topic, a student has taken the following notes:<br><ul><li>Microbial fuel cells (MFCs) generate electricity by using bacteria to break down organic waste.</li><li>Some experimental MFCs have powered small sensors for months with no external energy input.</li><li>Scaling MFCs for large infrastructure remains challenging because their power output is relatively low.</li><li>Wastewater treatment plants already process large volumes of organic material.</li><li>Several engineers propose integrating MFC modules into wastewater facilities to supplement on-site power needs.</li></ul><br><br>The student wants to argue that installing microbial fuel cells in wastewater facilities could support more sustainable on-site energy production. Which choice most effectively uses relevant information from the notes to accomplish this goal?","choices":["Although current MFCs cannot generate enough electricity to power entire wastewater facilities, the continuous supply of organic waste they process could support arrays of small modules that provide steady supplemental energy on site.","Because experimental MFCs have powered low-energy sensors for extended periods without outside electricity, integrating similar cells into wastewater systems could eliminate the need for traditional power sources.","Since wastewater plants handle large volumes of organic material, engineers expect MFC modules to eventually scale to the point where they could operate major parts of treatment infrastructure independently.","Given that MFCs’ low output limits their usefulness for large-scale systems, incorporating them into wastewater plants would mainly support isolated monitoring tasks rather than contribute in any measurable way to overall energy sustainability."],"correct":0,"choiceNotes":["Correct. This choice acknowledges the real limitation (low power output, per the notes) while connecting the steady organic-waste supply at wastewater plants to the proposal for supplemental power modules, directly supporting the goal of more sustainable on-site energy production.","Incorrect. The notes do not support the claim that MFCs could “eliminate the need for traditional power sources”; this overstates what the notes establish, especially given that scaling MFCs remains challenging.","Incorrect. The notes state that scaling MFCs for large infrastructure remains challenging; nothing suggests engineers expect MFCs to eventually operate major parts of the infrastructure independently.","Incorrect. This choice argues against the persuasive goal by suggesting MFCs would not meaningfully contribute to overall energy sustainability, contradicting the student’s intended argument."]},
           {"qid":"mt7fdfaf","domain":"Expression of Ideas","skill":"Rhetorical Synthesis","difficulty":"hard","type":"mc","text":"While researching a topic, a student has taken the following notes:<br><ul><li>Several rapidly growing metropolitan regions have seen a sharp rise in the number of “super-aged” neighborhoods, where more than 30% of residents are over 65.</li><li>Municipal planners note that these neighborhoods often experience declining school enrollments and reduced demand for public transit during peak commuting hours.</li><li>Economic analysts report that local shops in such districts tend to shift toward services catering to older adults, which can make it harder for younger families to find housing and retail options that fit their needs.</li><li>A recent survey of young adults moving out of these regions cites “lack of intergenerational amenities” as a top reason for relocating.</li><li>Pilot initiatives that combined mixed-use zoning with multigenerational housing complexes slowed out-migration in a few test areas.</li></ul><br><br>The student wants to explain a concern that has emerged about demographic change in these metropolitan regions. Which choice most effectively uses relevant information from the notes to accomplish this goal?","choices":["Because super-aged neighborhoods often show reduced demand for commuter transit and lower school enrollments, planners caution that current infrastructure patterns may no longer align with daily usage trends in these districts.","As retail and housing options increasingly reflect the preferences of older residents, younger families are pushed to nearby regions, raising concerns that these districts may lose the generational balance needed to sustain long-term economic vitality.","Survey results indicating that young adults cite a lack of intergenerational amenities as a reason for leaving suggest that out-migration reflects shifting lifestyle priorities rather than demographic imbalance.","Although pilot programs with mixed-use zoning have slowed departures in limited areas, planners note that the success of these initiatives cannot yet be generalized without further data."],"correct":1,"choiceNotes":["Incorrect. This choice focuses on infrastructure and transit usage mismatches rather than directly explaining the demographic concern the student wants to highlight.","Correct. This choice synthesizes the notes on shifting retail/housing preferences and the survey on young adults leaving due to a lack of intergenerational amenities to directly explain the emerging concern: an imbalance between generations that threatens long-term economic vitality.","Incorrect. This choice explicitly downplays the demographic concern, framing out-migration as a matter of “shifting lifestyle priorities rather than demographic imbalance,” which works against the student’s goal.","Incorrect. This choice focuses on evaluating the pilot programs’ generalizability rather than explaining the underlying demographic concern."]}
       ]
     }
   }
 },
 {
-  "id": "sat-practice-11",
+  "id": "sat-practice-13",
   "number": 12,
-  "title": "SAT Practice Test 12 — Hardest Full-Length Test (No Scaling)",
+  "title": "SAT Practice Test 12",
+  "sections": {
+    "readingWriting": {
+      "module1": [
+        {
+          "qid": "g8cb9f81",
+          "domain": "Craft and Structure",
+          "skill": "Words in Context",
+          "difficulty": "easy",
+          "type": "mc",
+          "text": "The following text is from Jane Austen’s 1813 novel Pride and Prejudice. Mr. Wickham, newly arrived in the neighborhood, is introduced to the Bennet sisters in the street.<br><br>Mr. Denny addressed them directly, and entreated permission to introduce his friend, Mr. Wickham, who had returned with him the day before from town, and, he was happy to say, had accepted a commission in their corps. This was exactly as it should be; for the young man wanted only regimentals to make him completely charming.<br><br>As used in the text, what does the word “wanted” most nearly mean?",
+          "choices": [
+            "Lacked",
+            "Desired",
+            "Requested",
+            "Deserved"
+          ],
+          "correct": 0,
+          "choiceNotes": [
+            "Correct. Wickham is already charming in every other respect; the one thing still missing is the uniform, which the commission will supply.",
+            "Incorrect. This is the ordinary modern sense, but the sentence is about what Wickham does not yet have rather than about what he wishes for.",
+            "Incorrect. Wickham asks for nothing in the passage; Mr. Denny makes the request, and it is for an introduction.",
+            "Incorrect. The passage weighs what Wickham is missing, not whether he has earned anything."
+          ]
+        },
+        {
+          "qid": "ge77903d",
+          "domain": "Craft and Structure",
+          "skill": "Words in Context",
+          "difficulty": "medium",
+          "type": "mc",
+          "text": "Concrete gains most of its strength in the first month, but the reaction that hardens the cement—hydration—continues for years, and unreacted cement deep inside a wall remains available if a crack later admits water. Some cracks in old seawalls therefore ______ without intervention: water carries dissolved calcium into the gap, where it precipitates and seals the opening.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
+          "choices": [
+            "migrate",
+            "propagate",
+            "close",
+            "darken"
+          ],
+          "correct": 2,
+          "choiceNotes": [
+            "Incorrect. Nothing in the passage describes a crack moving through the wall.",
+            "Incorrect. To propagate is to spread or multiply, and the passage describes the gap being filled rather than extended.",
+            "Correct. Water carries dissolved calcium into the gap, where it precipitates and seals the opening, and the passage says this happens without intervention. A crack that seals itself closes.",
+            "Incorrect. Color is never at issue; what changes is whether the gap is open."
+          ]
+        },
+        {
+          "qid": "ge80935c",
+          "domain": "Craft and Structure",
+          "skill": "Words in Context",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "Economists measuring the effect of a minimum wage usually compare employment in a state that raised its wage with employment in a neighboring state that held its wage steady. That comparison is ______: states that raise wages tend to do so when their labor markets are already tightening, so the neighboring state only appears to supply a counterfactual.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
+          "choices": [
+            "tenuous",
+            "fallacious",
+            "customary",
+            "exhaustive"
+          ],
+          "correct": 1,
+          "choiceNotes": [
+            "Incorrect. “Tenuous” would mean the comparison is weakly supported, and the objection is that it is built on something untrue rather than something slight.",
+            "Correct. The objection is that the neighboring state only looks like a counterfactual: wage rises follow tightening labor markets, so the comparison rests on a false premise.",
+            "Incorrect. The passage does say the comparison is usual, but the point is that it does not work, not that it is common.",
+            "Incorrect. “Exhaustive” would praise the comparison for completeness, and the passage identifies a fault in it."
+          ]
+        },
+        {
+          "qid": "gc958a5c",
+          "domain": "Craft and Structure",
+          "skill": "Words in Context",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "In 1911 the physicist Heike Kamerlingh Onnes cooled mercury to within four degrees of absolute zero and found that its electrical resistance vanished altogether. For two decades the result was treated as a ______ of ordinary conduction, an extreme instance of familiar behavior, until later experiments established that a superconductor also expels a magnetic field, a property peculiar to superconductors.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
+          "choices": [
+            "continuation",
+            "anomaly",
+            "refinement",
+            "measurement"
+          ],
+          "correct": 0,
+          "choiceNotes": [
+            "Correct. The appositive that follows defines the sense wanted, “an extreme instance of familiar behavior”: the result was read as ordinary conduction carried further.",
+            "Incorrect. An anomaly departs from familiar behavior, and the passage says the result was taken as an instance of it.",
+            "Incorrect. A refinement would improve on ordinary conduction, and physicists took the mercury to be behaving exactly as it always had.",
+            "Incorrect. “Measurement” names what Onnes performed, not how the result was interpreted afterward."
+          ]
+        },
+        {
+          "qid": "g366c985",
+          "domain": "Craft and Structure",
+          "skill": "Text Structure and Purpose",
+          "difficulty": "easy",
+          "type": "mc",
+          "text": "Sourdough rises on wild yeast and bacteria that live in the flour and on the baker’s hands. <u>A culture kept in one kitchen will diverge within weeks from the same culture kept in another.</u> Bakers who trade starters therefore find that the gift does not stay identical to the original. A starter carried to a new kitchen therefore changes in composition within a few weeks.<br><br>Which choice best describes the function of the underlined sentence in the text as a whole?",
+          "choices": [
+            "It offers an example of the wild yeast and bacteria described in the previous sentence.",
+            "It explains why most bakers prefer to keep a single culture in one kitchen for years.",
+            "It qualifies the claim that sourdough depends on wild yeast and bacteria to rise at all.",
+            "It states the fact about cultures whose consequences the rest of the text sets out."
+          ],
+          "correct": 3,
+          "choiceNotes": [
+            "Incorrect. It names no yeast or bacterium; it reports what happens to a culture over time.",
+            "Incorrect. The passage says nothing about what bakers prefer, only what happens when starters are traded.",
+            "Incorrect. The claim is not narrowed anywhere; the underlined sentence builds on it.",
+            "Correct. Divergence between kitchens is stated first, and the two sentences after it draw out what that means for a traded starter."
+          ]
+        },
+        {
+          "qid": "g69599e1",
+          "domain": "Craft and Structure",
+          "skill": "Text Structure and Purpose",
+          "difficulty": "medium",
+          "type": "mc",
+          "text": "The double bass in a jazz rhythm section is seldom loud enough to be followed note by note, yet a recording made without it sounds thin in a way listeners register immediately. Acousticians attribute the effect to the instrument’s overtones, which fall in the range where the ear judges warmth and which persist after the fundamental (the lowest tone of the note) has died away. The bass is heard, in other words, less as a line than as a condition of the room.<br><br>Which choice best states the main purpose of the text?",
+          "choices": [
+            "To explain why an instrument that is hard to hear on its own is missed when it is absent.",
+            "To describe the particular range of overtones that the human ear associates with warmth.",
+            "To argue that jazz recordings ought to amplify the double bass more than they currently do.",
+            "To compare the double bass with the other instruments that make up a jazz rhythm section."
+          ],
+          "correct": 0,
+          "choiceNotes": [
+            "Correct. The passage opens with the puzzle that the bass is barely audible yet conspicuously missed, and the rest supplies the acoustic reason.",
+            "Incorrect. The overtone range is given as part of the explanation, not as the point of the passage.",
+            "Incorrect. The passage makes no recommendation about how recordings should be made.",
+            "Incorrect. No other instrument in the section is described or compared."
+          ]
+        },
+        {
+          "qid": "gf0ed195",
+          "domain": "Craft and Structure",
+          "skill": "Text Structure and Purpose",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "For most of the twentieth century the giant squid was known only from carcasses and from the beaks—the only hard parts of the animal— recovered in sperm whale stomachs. Estimates of its speed and hunting behavior were extrapolated from the anatomy of far smaller squid. In 2012 a Japanese team filmed a live animal at depth, and the footage showed it moving in slow, deliberate pulses rather than the darting characteristic of its relatives. The anatomy had been read correctly; the error lay in assuming that a larger animal would use it the same way.<br><br>Which choice best describes the overall structure of the text?",
+          "choices": [
+            "It describes a filming technique developed for deep water and then evaluates the evidence that the technique produced.",
+            "It gives the basis of an earlier estimate, reports an observation, and locates the error.",
+            "It contrasts two species of squid and explains why one of them is considerably harder to observe than the other.",
+            "It presents a long-standing question about the giant squid and concludes that the question remains unresolved."
+          ],
+          "correct": 1,
+          "choiceNotes": [
+            "Incorrect. The filming is mentioned in one clause and the technique is never described or evaluated.",
+            "Correct. The passage moves from what the estimate rested on, to what the footage showed, to a precise statement of which step had been wrong.",
+            "Incorrect. Smaller squid appear only as the source of the old estimate, not as a species under comparison.",
+            "Incorrect. The passage reports that the matter was settled by the footage rather than left open."
+          ]
+        },
+        {
+          "qid": "g08a37c5",
+          "domain": "Information and Ideas",
+          "skill": "Central Ideas and Details",
+          "difficulty": "medium",
+          "type": "mc",
+          "text": "Pollen preserved in lake sediment (the silt of the lake bed) records which plants grew nearby, and the depth at which a grain is found, its stratum, gives its approximate date. Working on a lake in the Peruvian Andes, a 2007 survey of preserved pollen found maize grains in layers dated to roughly 4,000 years ago, well below the depth at which pottery and permanent structures first appear. The sequence indicates that cultivation preceded settlement at the site by several centuries.<br><br>Which choice best states the main idea of the text?",
+          "choices": [
+            "Pollen is a more reliable dating method than pottery is for sites in the Peruvian Andes.",
+            "The inhabitants of the site abandoned cultivation once permanent structures had been built.",
+            "Maize was cultivated at the site before its inhabitants built permanent structures there.",
+            "Lake sediment preserves the pollen of cultivated plants better than it preserves wild pollen."
+          ],
+          "correct": 2,
+          "choiceNotes": [
+            "Incorrect. The passage uses depth to date both, and never compares the reliability of the two.",
+            "Incorrect. The passage says nothing about what happened after the structures were built.",
+            "Correct. Maize pollen lies below the layers containing pottery and permanent structures, and the passage draws the conclusion directly: cultivation preceded settlement by several centuries.",
+            "Incorrect. No comparison between cultivated and wild pollen appears anywhere in the passage."
+          ]
+        },
+        {
+          "qid": "g9b87864",
+          "domain": "Information and Ideas",
+          "skill": "Central Ideas and Details",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "Archaeologists have excavated three Viking-age boat burials in which the vessel was holed below the waterline before interment. In each case the damage is confined to a single plank and was made with a blade whose edge matches the shipwright’s adze (a shaping axe) recovered alongside. The holing therefore appears to have been a formal decommissioning that marked the vessel as withdrawn from use.<br><br>According to the text, what is true of the damage to the three vessels?",
+          "choices": [
+            "It was made deliberately, with a tool of the kind used to build the vessel.",
+            "It extended across several planks in each of the three burials.",
+            "It was repaired by the shipwright before the vessels were placed in the ground.",
+            "It was caused by the vessels running aground shortly before they were buried."
+          ],
+          "correct": 0,
+          "choiceNotes": [
+            "Correct. The damage was made before burial with a blade matching the adze found alongside, which is what marks the damage as deliberate.",
+            "Incorrect. The passage states that in each case the damage is confined to a single plank.",
+            "Incorrect. Nothing in the passage describes any repair; the holing is presented as the final act.",
+            "Incorrect. The passage attributes the damage to a blade matching the shipwright’s adze, not to grounding."
+          ]
+        },
+        {
+          "qid": "gba21d9a",
+          "domain": "Information and Ideas",
+          "skill": "Command of Evidence (Textual)",
+          "difficulty": "medium",
+          "type": "mc",
+          "text": "The Country of the Pointed Firs is an 1896 novel by Sarah Orne Jewett. In the novel, Jewett presents the narrator as someone who comes to value a kind of knowledge she cannot acquire for herself:<br><br>Which quotation from The Country of the Pointed Firs most effectively illustrates the claim?",
+          "choices": [
+            "“The wind blew off the shore, and the little boat went out past the point with the tide behind her.”",
+            "“She knew the weather of that coast as I should never know it, though I stayed there all my life.”",
+            "“I could see the harbor from my window, and I watched the boats until the light was wholly gone.”",
+            "“She had lived in that house since her marriage, and had not been a mile from it in thirty years.”"
+          ],
+          "correct": 1,
+          "choiceNotes": [
+            "Incorrect. This describes a boat leaving the harbor and says nothing about knowledge of any kind.",
+            "Correct. The narrator names a knowledge that belongs to someone else and states that her own length of residence would never supply it.",
+            "Incorrect. The narrator is watching, but nothing here marks her watching as inferior to another person’s knowledge.",
+            "Incorrect. It reports how long the woman has lived in one place, not what she knows or what the narrator cannot learn."
+          ]
+        },
+        {
+          "qid": "g76aed0b",
+          "domain": "Information and Ideas",
+          "skill": "Command of Evidence (Textual)",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "Soil carbon is conventionally measured in the top thirty centimeters (the plow layer) because roots and organic matter concentrate there and a change is easiest to detect. Some agronomists contend that the convention has produced overstated claims for no-till farming: the practice concentrates carbon near the surface, he argues, while leaving the total held in the full soil profile unchanged.<br><br>Which finding, if true, would most directly support this contention?",
+          "choices": [
+            "Fields managed without tilling hold more carbon in the top thirty centimeters than comparably managed tilled fields do.",
+            "Organic matter decomposes more slowly in the upper layers of an untilled field than in a tilled one.",
+            "Cores taken to a depth of one meter show no difference in total carbon between tilled and untilled fields.",
+            "Farmers who adopt no-till practices report higher yields during their first three seasons of use."
+          ],
+          "correct": 2,
+          "choiceNotes": [
+            "Incorrect. This is the very result the contention says is being over-read; it is consistent with the opposing view as much as with it.",
+            "Incorrect. A decomposition rate in the upper layers says nothing about the total held in the whole profile.",
+            "Correct. The claim is that no-till redistributes carbon rather than adding it. A full-profile measurement showing no difference in the total is exactly that.",
+            "Incorrect. Yield is a separate question from how much carbon the soil holds."
+          ]
+        },
+        {
+          "qid": "g7660622",
+          "domain": "Information and Ideas",
+          "skill": "Command of Evidence (Quantitative)",
+          "difficulty": "medium",
+          "type": "mc",
+          "text": "Many temperate seeds will not germinate until they have passed through a cold period, a requirement generally understood to prevent a seedling from emerging in autumn. In one experiment, seeds of two shrubs were held at four degrees Celsius for varying lengths of time and then sown under identical conditions. A student reviewing the data concludes that only one of the two species carries the requirement, since ______<table class=\"dx-table\"><tr><th>Weeks in cold storage</th><th>Germinated, spring vetch</th><th>Germinated, hoary rockrose</th></tr><tr><td>0</td><td>8%</td><td>41%</td></tr><tr><td>4</td><td>22%</td><td>40%</td></tr><tr><td>8</td><td>51%</td><td>39%</td></tr><tr><td>12</td><td>78%</td><td>38%</td></tr></table><br><br>Which choice most effectively uses data from the table to complete the statement?",
+          "choices": [
+            "germination in the spring vetch after four weeks of storage remained below the rate the hoary rockrose reached with none.",
+            "the hoary rockrose germinated at 41 percent without any cold storage, the highest single figure recorded for that species.",
+            "both species germinated at rates above 38 percent once they had been held in cold storage for twelve weeks.",
+            "germination in the spring vetch climbed from 8 percent to 78 percent as storage lengthened, while the hoary rockrose stayed near 40 percent throughout."
+          ],
+          "correct": 3,
+          "choiceNotes": [
+            "Incorrect. This compares a single pair of figures and says nothing about the trend across the four durations.",
+            "Incorrect. One figure for one species cannot show that the other carries a requirement the first lacks.",
+            "Incorrect. True of the table but it obscures the point, since the rockrose reached that level with no storage at all.",
+            "Correct. A requirement for cold predicts that germination rises with time in storage, which is what the spring vetch does and the hoary rockrose does not. The contrast is what licenses “only one of the two.”"
+          ]
+        },
+        {
+          "qid": "g47c6fb0",
+          "domain": "Information and Ideas",
+          "skill": "Command of Evidence (Quantitative)",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "Pteropods build shells of aragonite, a form of calcium carbonate that dissolves more readily as seawater grows less alkaline; oceanographer Nina Bednaršek has measured that dissolution in living animals. Mean shell thickness across a basin might therefore be expected to track mean pH from site to site. Data gathered at four sites suggest the relationship is not that simple, since ______<table class=\"dx-table\"><tr><th>Site</th><th>Mean water pH</th><th>Mean shell thickness (µm)</th></tr><tr><td>North</td><td>8.10</td><td>42</td></tr><tr><td>Central</td><td>8.05</td><td>40</td></tr><tr><td>South</td><td>7.95</td><td>43</td></tr><tr><td>Deep</td><td>7.85</td><td>39</td></tr></table><br><br>Which choice most effectively uses data from the table to complete the text?",
+          "choices": [
+            "shells at the Deep site, where pH was lowest, were thinner than shells at the North site, where pH was highest.",
+            "mean pH varied by only a quarter of a unit across the four sites in the study.",
+            "shell thickness at the North site exceeded shell thickness at the Central site by two micrometers.",
+            "the South site recorded a lower pH than the Central site and yet the thicker shells of the two."
+          ],
+          "correct": 3,
+          "choiceNotes": [
+            "Incorrect. This is the pattern that expectation predicted; it supports the proposal rather than complicating it.",
+            "Incorrect. The narrowness of the pH range says nothing about whether thickness tracks it.",
+            "Incorrect. North has both the higher pH and the thicker shells, so this pair also fits the prediction.",
+            "Correct. South has a lower pH than Central but thicker shells, which is the reverse of the predicted relationship and is what makes it “not that simple.”"
+          ]
+        },
+        {
+          "qid": "ga726063",
+          "domain": "Information and Ideas",
+          "skill": "Inferences",
+          "difficulty": "medium",
+          "type": "mc",
+          "text": "Honeybee colonies choose a nest site by sending scouts, each of which returns and dances to advertise what the scout has found. A scout that has since seen a better site does not contest its rival’s claim but simply stops dancing for its own. Because dancing decays after a fixed number of circuits unless the scout revisits the site, a mediocre site loses its advertisers faster than a good one does. The mechanism therefore ensures that ______<br><br>Which choice most logically completes the text?",
+          "choices": [
+            "a colony settles on whichever site the first returning scout happens to have discovered.",
+            "scouts that have visited the best available site dance for longer than the colony requires.",
+            "the number of scouts advertising each site stays constant until the decision is reached.",
+            "the colony converges on one site although no scout ever compares two sites directly."
+          ],
+          "correct": 3,
+          "choiceNotes": [
+            "Incorrect. The passage describes advertisers falling away from weaker sites over time, which is the opposite of settling on the first one found.",
+            "Incorrect. The passage says dancing decays unless the scout revisits the site; it never describes dancing that outlasts the decision.",
+            "Incorrect. The mechanism described is precisely a change in those numbers over time.",
+            "Correct. Each scout responds only to its own site, and the differing rates at which dances decay do the comparing, so a colony-level choice emerges with no scout weighing one site against another."
+          ]
+        },
+        {
+          "qid": "g03d3b1a",
+          "domain": "Information and Ideas",
+          "skill": "Inferences",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "A songbird raised in isolation produces an abnormal song, which has long been taken to show that the species learns its song from adults. In one experiment, one group of chaffinches (a common European songbird) was raised in isolation and a second group was raised in isolation but with a speaker playing recorded chaffinch song. Birds in the second group sang normally. A third group, raised in isolation with a speaker playing the song of a different species, again sang abnormally. Taken together, the three results suggest that ______<br><br>Which choice most logically completes the text?",
+          "choices": [
+            "chaffinches can acquire the song of another species if they are exposed to it early enough.",
+            "the isolated birds in the first group were prevented from singing normally by the absence of an adult chaffinch.",
+            "what the young bird needs is exposure to the song itself rather than the presence of an adult.",
+            "song learning in chaffinches is complete before the bird leaves the nest for the first time."
+          ],
+          "correct": 2,
+          "choiceNotes": [
+            "Incorrect. The third group heard another species and sang abnormally, which is the opposite of acquiring that song.",
+            "Incorrect. The first group did sing; the passage says their song was abnormal, not absent.",
+            "Correct. Birds with no adult present sang normally provided they heard recorded chaffinch song, and birds hearing the wrong song did not. The variable that matters is the song, not the adult.",
+            "Incorrect. The passage gives no timeline for when learning finishes, only what the bird must hear."
+          ]
+        },
+        {
+          "qid": "g073e150",
+          "domain": "Standard English Conventions",
+          "skill": "Form, Structure, and Sense",
+          "difficulty": "easy",
+          "type": "mc",
+          "text": "By the time the first passenger service opened in 1830, Stephenson ______ locomotives for more than a decade, and the design he brought to the line drew on every one of them.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "choices": [
+            "has been building",
+            "had been building",
+            "is building",
+            "will have built"
+          ],
+          "correct": 1,
+          "choiceNotes": [
+            "Incorrect. The present perfect progressive relates the action to now, and the sentence is set entirely in 1830.",
+            "Correct. The building preceded a past moment, 1830, so the past perfect progressive is required.",
+            "Incorrect. The present tense conflicts with “By the time... opened in 1830.”",
+            "Incorrect. The future perfect places the action ahead of a future point, and nothing here is future."
+          ]
+        },
+        {
+          "qid": "gfccef5a",
+          "domain": "Standard English Conventions",
+          "skill": "Boundaries",
+          "difficulty": "easy",
+          "type": "mc",
+          "text": "The first collections of Emily Dickinson’s poems replaced most of her dashes with commas and regularized her capitals, producing the 1890 ______ scholarly editions working from her manuscripts have largely undone.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "choices": [
+            "text which",
+            "text, and which",
+            "text; which",
+            "text, which"
+          ],
+          "correct": 3,
+          "choiceNotes": [
+            "Incorrect. Without a comma the clause reads as restrictive, but the 1890 text is already a single identified thing, so there is nothing left to narrow down.",
+            "Incorrect. “and” would join the relative clause to a second element that the sentence never supplies.",
+            "Incorrect. A semicolon requires an independent clause after it, and “which scholarly editions ... have largely undone” is subordinate.",
+            "Correct. The clause adds information about the 1890 text already identified, so it is supplementary and takes a comma."
+          ]
+        },
+        {
+          "qid": "g9492c78",
+          "domain": "Standard English Conventions",
+          "skill": "Form, Structure, and Sense",
+          "difficulty": "medium",
+          "type": "mc",
+          "text": "A single archival box from the mill, holding the wage books, the overseer’s daybook, and the letters of three operatives, ______ more about the working week than the company’s published reports do.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "choices": [
+            "reveal",
+            "have revealed",
+            "reveals",
+            "are revealing"
+          ],
+          "correct": 2,
+          "choiceNotes": [
+            "Incorrect. “Reveal” is plural; the subject is the singular “box.”",
+            "Incorrect. “Have revealed” is plural, and the plural nouns inside the participial phrase cannot supply the subject.",
+            "Correct. The subject is “A single archival box,” which is singular, so the singular “reveals” is required.",
+            "Incorrect. “Are revealing” is plural as well as progressive, and the sentence states a standing fact."
+          ]
+        },
+        {
+          "qid": "g57fa954",
+          "domain": "Standard English Conventions",
+          "skill": "Boundaries",
+          "difficulty": "medium",
+          "type": "mc",
+          "text": "The astronomer Vera Rubin measured how fast stars orbit at the edges of spiral galaxies and found them moving as quickly as stars near the ______ result that makes sense only if a great deal of unseen mass surrounds each galaxy.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "choices": [
+            "center; a",
+            "center a",
+            "center, a",
+            "center, and a"
+          ],
+          "correct": 2,
+          "choiceNotes": [
+            "Incorrect. A semicolon must join two independent clauses, and “a result that makes sense...” cannot stand alone.",
+            "Incorrect. With no punctuation the noun phrase runs into the clause and “center a result” cannot be read.",
+            "Correct. “a result that makes sense only if...” renames what precedes it, and a comma is the conventional mark before a supplementary element of this kind.",
+            "Incorrect. “and” would coordinate the appositive with a second element that the sentence never supplies."
+          ]
+        },
+        {
+          "qid": "g93bf71b",
+          "domain": "Standard English Conventions",
+          "skill": "Form, Structure, and Sense",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "Cut in the second century and reused in a medieval wall, ______<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "choices": [
+            "masons set the Roman inscription upside down above a doorway.",
+            "the Roman inscription sits upside down above a doorway in the medieval wall.",
+            "the doorway above which the Roman inscription sits was built by medieval masons.",
+            "medieval masons had no interest in what the Roman inscription said."
+          ],
+          "correct": 1,
+          "choiceNotes": [
+            "Incorrect. The opening phrase would then describe the masons, who were not cut in the second century.",
+            "Correct. An opening participial phrase attaches to the subject that follows, and the inscription is what was cut in the second century and reused in the wall.",
+            "Incorrect. It makes the doorway the thing cut in the second century and reused.",
+            "Incorrect. It makes the masons the thing cut and reused."
+          ]
+        },
+        {
+          "qid": "g40eff83",
+          "domain": "Standard English Conventions",
+          "skill": "Boundaries",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "A glassblower cannot pause once the gather leaves the furnace; the piece must be turned continuously or it will sag out of ______ is why the bench, the tools, and the annealing oven are arranged within one turn of the chair.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "choices": [
+            "shape that",
+            "shape. That",
+            "shape, that",
+            "shape: that"
+          ],
+          "correct": 1,
+          "choiceNotes": [
+            "Incorrect. Without punctuation two independent clauses fuse, and “sag out of shape that is why” cannot be parsed.",
+            "Correct. “That is why the bench, the tools, and the annealing oven are arranged within one turn of the chair” is an independent clause, so a period and a capital are conventional.",
+            "Incorrect. A comma between two independent clauses is a comma splice.",
+            "Incorrect. A colon would present what follows as an explanation of “shape” alone, and the clause explains the whole preceding statement."
+          ]
+        },
+        {
+          "qid": "gc0301ca",
+          "domain": "Expression of Ideas",
+          "skill": "Transitions",
+          "difficulty": "easy",
+          "type": "mc",
+          "text": "Gwendolyn Brooks often broke a line in the middle of a phrase so that the voice carries across the break. ______ in her poem “We Real Cool,” first published in 1959, every line but the last ends on the word “We,” which Brooks asked readers to speak softly.<br><br>Which choice completes the text with the most logical transition?",
+          "choices": [
+            "However,",
+            "Instead,",
+            "For example,",
+            "Meanwhile,"
+          ],
+          "correct": 2,
+          "choiceNotes": [
+            "Incorrect. The poem illustrates the preceding claim rather than cutting against it.",
+            "Incorrect. “Instead” would replace the preceding statement, and the poem confirms it.",
+            "Correct. The sentence before the blank describes what Brooks often did, and the poem named after it is an instance of exactly that.",
+            "Incorrect. “Meanwhile” marks something happening elsewhere at the same time, and no second situation is described."
+          ]
+        },
+        {
+          "qid": "g66f4110",
+          "domain": "Expression of Ideas",
+          "skill": "Transitions",
+          "difficulty": "medium",
+          "type": "mc",
+          "text": "A lock on a canal raises a boat by trapping the vessel between two gates and admitting water from the higher reach. Every lockful spent in lifting a boat is water drawn off the summit level, which is fed only by rainfall on the hills around it. ______ a dry summer can close a canal as effectively as a breach in its bank.<br><br>Which choice completes the text with the most logical transition?",
+          "choices": [
+            "Consequently,",
+            "For instance,",
+            "Nevertheless,",
+            "Similarly,"
+          ],
+          "correct": 0,
+          "choiceNotes": [
+            "Correct. The summit level depends on rainfall, so a dry summer starves the locks. The last sentence states the result of what precedes it.",
+            "Incorrect. A dry summer is not an example of water being drawn off the summit level; it is what happens when the supply fails.",
+            "Incorrect. “Nevertheless” would set the closure against the water supply, and the closure follows from it.",
+            "Incorrect. “Similarly” claims a likeness between two cases, and only one situation is described."
+          ]
+        },
+        {
+          "qid": "g604a6d7",
+          "domain": "Expression of Ideas",
+          "skill": "Transitions",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "The manuscript is written in a hand that appears nowhere else in the abbey’s books, and its parchment was prepared in a way unknown in the region. ______ the text it carries is a copy of a charter held by that abbey and by no other house.<br><br>Which choice completes the text with the most logical transition?",
+          "choices": [
+            "For example,",
+            "As a result,",
+            "In addition,",
+            "Even so,"
+          ],
+          "correct": 3,
+          "choiceNotes": [
+            "Incorrect. The charter is not an instance of an unfamiliar hand or an unfamiliar parchment.",
+            "Incorrect. The contents of the text are not a consequence of the hand or the parchment.",
+            "Incorrect. “In addition” would present the text as further evidence pointing the same way, and it points the other way.",
+            "Correct. The hand and the parchment point away from the abbey while the text points firmly to it, and “Even so” marks that the second fact holds in spite of the first."
+          ]
+        },
+        {
+          "qid": "g32af2ab",
+          "domain": "Expression of Ideas",
+          "skill": "Rhetorical Synthesis",
+          "difficulty": "easy",
+          "type": "mc",
+          "text": "While researching a topic, a student has taken the following notes:<br><br>• A qanat is a gently sloping tunnel that carries groundwater to the surface by gravity.<br>• Vertical shafts along its length gave access for digging and for maintenance.<br>• Some qanats in Iran have run continuously for more than two thousand years.<br>• No pump is used at any point.<br>• A single qanat may run for tens of kilometers underground.<br><br>The student wants to introduce the qanat to an audience unfamiliar with it. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
+          "choices": [
+            "A qanat is a gently sloping tunnel that brings groundwater to the surface by gravity alone, sometimes over tens of kilometers.",
+            "Some qanats in Iran have carried water continuously for more than two thousand years without a pump at any point.",
+            "Vertical shafts placed along the length of a qanat gave diggers access to the tunnel and allowed it to be maintained.",
+            "Qanats were dug by hand, and the vertical shafts along them may still be seen from the air in parts of Iran today."
+          ],
+          "correct": 0,
+          "choiceNotes": [
+            "Correct. It says what a qanat is, what it does and how, which is what an unfamiliar audience needs first.",
+            "Incorrect. It is striking but assumes the reader already knows what a qanat does.",
+            "Incorrect. The shafts are a detail of construction and mean little to a reader who does not yet know what a qanat is.",
+            "Incorrect. It adds a claim about visibility from the air that the notes do not contain."
+          ]
+        },
+        {
+          "qid": "g8f6c010",
+          "domain": "Expression of Ideas",
+          "skill": "Rhetorical Synthesis",
+          "difficulty": "medium",
+          "type": "mc",
+          "text": "While researching a topic, a student has taken the following notes:<br><br>• The Wardian case is a sealed glazed box for carrying live plants.<br>• Nathaniel Bagshaw Ward designed it in the 1830s.<br>• Before it, most plants shipped by sea died of salt spray or of drought on deck.<br>• Sealed, a case recycles its own moisture and needs no watering for months.<br>• Tea, rubber, and cinchona were all moved between continents in Wardian cases.<br><br>The student wants to explain how the Wardian case solved a practical problem. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
+          "choices": [
+            "Nathaniel Bagshaw Ward designed the Wardian case in the 1830s, and tea, rubber, and cinchona were all later moved between continents inside one.",
+            "Because a sealed glazed case recycles its own moisture, plants that would once have died of salt spray or drought on deck survived months at sea unwatered.",
+            "The Wardian case, a sealed glazed box for carrying live plants, was designed by Nathaniel Bagshaw Ward and is named after him.",
+            "Tea, rubber, and cinchona were three of the crops that traveled between continents during the nineteenth century in sealed glazed boxes."
+          ],
+          "correct": 1,
+          "choiceNotes": [
+            "Incorrect. It gives the designer and the cargoes but never says what problem the case solved or how.",
+            "Correct. It names the problem, salt spray and drought on deck, and the mechanism that answered it, a sealed case recycling its own moisture.",
+            "Incorrect. It defines the object and its designer, which is description rather than explanation.",
+            "Incorrect. It lists what traveled without explaining what made the traveling possible."
+          ]
+        },
+        {
+          "qid": "gc98e59b",
+          "domain": "Expression of Ideas",
+          "skill": "Rhetorical Synthesis",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "While researching a topic, a student has taken the following notes:<br><br>• Ada Blackjack was the sole survivor of a 1921 expedition to Wrangel Island.<br>• She was hired as a seamstress and had no training in hunting or trapping.<br>• The four men on the expedition died; three left the island and were never found.<br>• Left alone with one sick man, she taught herself to shoot and to trap foxes.<br>• She was rescued in 1923 after two years on the island.<br><br>The student wants to emphasize what Blackjack had to acquire in order to survive. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
+          "choices": [
+            "Ada Blackjack spent two years on Wrangel Island, where she was left alone with one sick man after the other members of the expedition had left the island.",
+            "Ada Blackjack was the only member of the 1921 Wrangel Island expedition to survive, and she was rescued in 1923 after two years there.",
+            "Of the five people who went to Wrangel Island in 1921, three left the island and were never found and a fourth died there.",
+            "Ada Blackjack, hired as a seamstress with no training in hunting or trapping, taught herself to shoot and to trap foxes once she was left alone."
+          ],
+          "correct": 3,
+          "choiceNotes": [
+            "Incorrect. It gives her circumstances but not the skills she gained.",
+            "Incorrect. It reports that she survived and was rescued without saying what she had to learn.",
+            "Incorrect. It accounts for the others and leaves Blackjack out altogether.",
+            "Correct. It sets what she lacked, training in hunting or trapping, against what she taught herself, which is precisely what she had to acquire."
+          ]
+        }
+      ],
+      "module2Easier": [
+        {
+          "qid": "gab841bb",
+          "domain": "Craft and Structure",
+          "skill": "Words in Context",
+          "difficulty": "easy",
+          "type": "mc",
+          "text": "The axolotl, a Mexican salamander, keeps the feathery external gills and the finned tail throughout adult life, features that other salamanders lose when they leave the water. Because the axolotl breeds in this form, the animal is called ______: it reaches maturity without ever completing the change its relatives undergo.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
+          "choices": [
+            "unfinished",
+            "freshwater",
+            "migratory",
+            "long-lived"
+          ],
+          "correct": 0,
+          "choiceNotes": [
+            "Correct. The colon explains the sense wanted: the axolotl matures without completing the transformation its relatives go through, so it stays in a form others pass out of.",
+            "Incorrect. That the axolotl lives in fresh water is true but is not what the colon defines; the point is the change it never completes.",
+            "Incorrect. No movement between habitats is described anywhere in the passage.",
+            "Incorrect. How long the animal lives is never mentioned in the passage."
+          ]
+        },
+        {
+          "qid": "gbb84b2e",
+          "domain": "Craft and Structure",
+          "skill": "Words in Context",
+          "difficulty": "easy",
+          "type": "mc",
+          "text": "The following text is from Charles Dickens’s 1861 novel Great Expectations. Pip is waiting in a room in Miss Havisham’s house.<br><br>I remained quiet. Estella returned, and she too remained quiet. It seemed to me that we continued thus for a long time. In the heavy air of the room, and the heavy darkness that brooded in its remoter corners, I even had an alarming fancy that Estella and I might presently begin to decay.<br><br>As used in the text, what does the word “presently” most nearly mean?",
+          "choices": [
+            "Currently",
+            "Soon",
+            "Slowly",
+            "Quietly"
+          ],
+          "correct": 1,
+          "choiceNotes": [
+            "Incorrect. This is the ordinary modern sense, but Pip imagines a decay that has not started; the fancy looks ahead rather than describing what is already the case.",
+            "Correct. Pip fears that he and Estella will before long begin to rot in the heavy air and darkness around them, so the word fixes how soon the decay would set in.",
+            "Incorrect. Decay is slow, and the room is heavy and still, but the word says when the decay would begin, not the pace at which it would go on.",
+            "Incorrect. The room is twice called quiet, but the word fixes when the decay would begin, not how silently it would proceed."
+          ]
+        },
+        {
+          "qid": "g8637f5d",
+          "domain": "Craft and Structure",
+          "skill": "Words in Context",
+          "difficulty": "medium",
+          "type": "mc",
+          "text": "A pearl forms when an irritant lodges inside an oyster and the animal coats the irritant, layer by layer, with the same material the oyster uses for the shell. The result is ______ rather than intentional: what looks like craft is a response the oyster would make to any intruder lodged too deep to expel.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
+          "choices": [
+            "microscopic",
+            "decorative",
+            "gradual",
+            "fortuitous"
+          ],
+          "correct": 3,
+          "choiceNotes": [
+            "Incorrect. Size is not at issue; the passage describes a visible pearl.",
+            "Incorrect. How the pearl looks is mentioned only to be set aside; the contrast drawn is with intention.",
+            "Incorrect. The layering is gradual, but “gradual” does not oppose “intentional,” which is what the sentence requires.",
+            "Correct. The sentence sets the result against “intentional” and explains that the pearl is the by-product of an ordinary defensive response, so it comes about by chance."
+          ]
+        },
+        {
+          "qid": "gee2e685",
+          "domain": "Craft and Structure",
+          "skill": "Words in Context",
+          "difficulty": "medium",
+          "type": "mc",
+          "text": "A 2003 survey traced the threads, or hyphae, of a single honey fungus through nine square kilometers of Oregon forest, all of it one organism by genetic test. The measurement is ______: the threads are continuous underground, but what grows above the soil appears as separate clumps of mushrooms scattered over the hillside.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
+          "choices": [
+            "preliminary",
+            "disputed",
+            "counterintuitive",
+            "approximate"
+          ],
+          "correct": 2,
+          "choiceNotes": [
+            "Incorrect. Nothing suggests the work is unfinished or awaiting confirmation.",
+            "Incorrect. No disagreement is reported; the genetic test settles that the threads belong to one organism.",
+            "Correct. The colon sets what the measurement means against what a walker on the hillside would see, so the finding runs against ordinary expectation.",
+            "Incorrect. “Approximate” would question the precision of the figure, and what the passage questions is how the figure appears to a reader."
+          ]
+        },
+        {
+          "qid": "ge4389c5",
+          "domain": "Craft and Structure",
+          "skill": "Text Structure and Purpose",
+          "difficulty": "easy",
+          "type": "mc",
+          "text": "A hurricane is named from a list, drawn up by a committee, prepared years in advance, and the lists rotate on a six-year cycle. <u>A name is retired only when the storm that carried it caused damage severe enough that reusing it would be insensitive.</u> Katrina, Maria, and Sandy were all withdrawn in this way. The list for any given year is therefore mostly old names with a few recent replacements.<br><br>Which choice best describes the function of the underlined sentence in the text as a whole?",
+          "choices": [
+            "It compares the damage done by Katrina with the damage done by Maria and Sandy.",
+            "It explains the exception to the rotation that the rest of the text illustrates.",
+            "It introduces a disagreement about which storms deserve to have names retired.",
+            "It gives the reason that the lists of hurricane names are prepared several years in advance."
+          ],
+          "correct": 1,
+          "choiceNotes": [
+            "Incorrect. The three storms are listed together without any comparison between them.",
+            "Correct. The lists rotate; the underlined sentence gives the one circumstance in which a name leaves the cycle, and the two sentences after it supply examples and the consequence.",
+            "Incorrect. No disagreement appears; retirement is presented as settled practice.",
+            "Incorrect. Why the lists are prepared in advance is never explained anywhere in the passage."
+          ]
+        },
+        {
+          "qid": "g4acee76",
+          "domain": "Craft and Structure",
+          "skill": "Text Structure and Purpose",
+          "difficulty": "medium",
+          "type": "mc",
+          "text": "Cochineal—the deep red used in European painting and dyeing from the sixteenth century—is made from an insect that feeds on prickly pear. Spain controlled the supply for two hundred years and exported the dried insects without disclosing what they were, and European naturalists argued over whether the grains were seeds, berries, or animals. The question was settled only when a microscope showed legs.<br><br>Which choice best states the main purpose of the text?",
+          "choices": [
+            "To argue that cochineal produced a better red than the dyes available in Europe.",
+            "To explain the optical principles that allowed early microscopes to resolve legs.",
+            "To trace the spread of prickly pear cultivation through sixteenth-century Spain.",
+            "To describe how a commercial secret kept the origin of a common dye obscure."
+          ],
+          "correct": 3,
+          "choiceNotes": [
+            "Incorrect. No other red is mentioned, and the passage makes no claim about quality.",
+            "Incorrect. The microscope appears in the final clause as what settled the question, not as a subject of explanation.",
+            "Incorrect. Prickly pear appears only as what the insect feeds on; cultivation is never discussed.",
+            "Correct. The passage turns on Spain exporting the insects without disclosing what they were, the confusion that followed, and how it ended."
+          ]
+        },
+        {
+          "qid": "gb2471fb",
+          "domain": "Craft and Structure",
+          "skill": "Cross-Text Connections",
+          "difficulty": "medium",
+          "type": "mc",
+          "text": "Text 1<br><br>Handwriting instruction has largely left the primary curriculum, and the case for restoring it rests on studies by psychologist Karin James and others, in which preliterate children who formed letters by hand recognized them more readily afterward than children who typed them. The motor act of drawing a shape, on this account, lays down a trace of a kind that typing lacks.<br><br>Text 2<br><br>The studies usually cited compare handwriting with typing among children who are learning letters for the first time. But the comparison says nothing about older children, who already recognize the letters fluently, and the studies measure recognition rather than any later benefit to composition or to spelling.<br><br>Based on the texts, how would the author of Text 2 most likely respond to the case described in Text 1?",
+          "choices": [
+            "By noting that the evidence supports a narrower claim than restoring instruction would require.",
+            "By denying that children who form letters by hand recognize them more readily afterward.",
+            "By arguing that typing lays down a motor trace of the same kind that handwriting does.",
+            "By pointing out that handwriting instruction was removed from the curriculum too recently to judge."
+          ],
+          "correct": 0,
+          "choiceNotes": [
+            "Correct. She confines the evidence to beginners and to recognition, so it cannot carry a general case for restoring instruction across the curriculum.",
+            "Incorrect. Text 2 does not dispute the finding; it questions how far the finding reaches.",
+            "Incorrect. Text 2 makes no claim about what typing does; it questions the scope of the comparison.",
+            "Incorrect. Timing is not the objection in Text 2, which says nothing about when instruction was removed."
+          ]
+        },
+        {
+          "qid": "g7a3af0a",
+          "domain": "Information and Ideas",
+          "skill": "Central Ideas and Details",
+          "difficulty": "easy",
+          "type": "mc",
+          "text": "The Lascaux cave paintings were closed to visitors in 1963, twenty years after their discovery, because the breath and body heat of the crowds had encouraged algae and calcite—a mineral crust— to spread across the walls. A full-size replica opened nearby in 1983, and two further replicas have been built since. Visitors now see the paintings copied to within a millimeter, while the originals are entered only by conservators.<br><br>Which choice best states the main idea of the text?",
+          "choices": [
+            "Lascaux was closed to protect the paintings, and replicas now stand in for the original cave.",
+            "The replicas built near Lascaux since 1983 reproduce the paintings to within a millimeter.",
+            "The algae that spread across the walls of Lascaux were removed by conservators after the cave closed in 1963.",
+            "Lascaux was discovered in 1943 and remained open to visitors for twenty years afterward."
+          ],
+          "correct": 0,
+          "choiceNotes": [
+            "Correct. The passage gives the reason for the closure and then what replaced the visit, which together are its point.",
+            "Incorrect. True, but it reports one detail of the replicas rather than why they exist.",
+            "Incorrect. The passage says the algae spread; it never says they were removed.",
+            "Incorrect. True, but it covers only the opening clause and leaves out both the closure and the replicas."
+          ]
+        },
+        {
+          "qid": "g05abd78",
+          "domain": "Information and Ideas",
+          "skill": "Central Ideas and Details",
+          "difficulty": "medium",
+          "type": "mc",
+          "text": "A 2021 study compared the account books of a sixteenth-century Seville hospital with its burial register. The books record payments to women hired by the day to nurse patients, work that the hospital’s own charter omitted and that fell outside every salaried post. The same names recur across years, which suggests a settled workforce.<br><br>Based on the text, what can be concluded about the women recorded in the account books?",
+          "choices": [
+            "They were paid more than the hospital’s salaried staff were paid for similar work.",
+            "They appear in the burial register more often than other residents of the city do.",
+            "They worked at the hospital regularly although its charter made no provision for them.",
+            "They were hired only during the years in which the hospital admitted the most patients to its wards."
+          ],
+          "correct": 2,
+          "choiceNotes": [
+            "Incorrect. No comparison of pay appears; the passage says only that no salaried post covered the work.",
+            "Incorrect. The burial register is named as a source read alongside the account books, not as a record of these women.",
+            "Correct. The recurrence of the same names across years indicates regular work, and the charter is said not to mention the role at all.",
+            "Incorrect. Admissions are never discussed, and recurring names across years point the other way."
+          ]
+        },
+        {
+          "qid": "g30220b1",
+          "domain": "Information and Ideas",
+          "skill": "Command of Evidence (Quantitative)",
+          "difficulty": "easy",
+          "type": "mc",
+          "text": "Small birds line their nests with whatever insulating material is to hand, and the lining matters most when the weather is against them. An ornithologist recorded hatching success for nests of four lining types across a cool spring and a warm one. The data support the claim that lining matters more in cold conditions, since ______<table class=\"dx-table\"><tr><th>Nest lining</th><th>Eggs hatched, cool spring</th><th>Eggs hatched, warm spring</th></tr><tr><td>Feather</td><td>86%</td><td>84%</td></tr><tr><td>Moss</td><td>71%</td><td>83%</td></tr><tr><td>Grass</td><td>64%</td><td>82%</td></tr><tr><td>Unlined</td><td>52%</td><td>80%</td></tr></table><br><br>Which choice most effectively uses data from the table to complete the claim?",
+          "choices": [
+            "feather-lined nests hatched 86 percent of their eggs in the cool spring, the highest figure in the table.",
+            "unlined nests hatched 80 percent of their eggs in the warm spring, close to the figure for feather-lined nests.",
+            "hatching success spanned 34 percentage points in the cool spring but only 4 in the warm one.",
+            "moss-lined and grass-lined nests both hatched more eggs in the warm spring than in the cool one."
+          ],
+          "correct": 2,
+          "choiceNotes": [
+            "Incorrect. A single highest value does not show that the lining matters more in one condition than the other.",
+            "Incorrect. This shows lining mattering little in the warm spring but says nothing about the cool one, so the comparison is left incomplete.",
+            "Correct. A wide spread across linings in the cool spring and almost none in the warm one is exactly the claim that lining matters more when it is cold.",
+            "Incorrect. True of the table, but it compares each lining with itself across seasons rather than the linings with one another."
+          ]
+        },
+        {
+          "qid": "g4019222",
+          "domain": "Information and Ideas",
+          "skill": "Command of Evidence (Quantitative)",
+          "difficulty": "medium",
+          "type": "mc",
+          "text": "Cooking alters food in more than one way at once, and a method that improves one measure may worsen another. A nutrition researcher prepared identical portions of spinach by four methods and measured both the iron the body could absorb and the vitamin C that survived. She concluded that no single method is best on both counts. The clearest example is boiling, which ______<table class=\"dx-table\"><tr><th>Cooking method</th><th>Iron absorbed (mg)</th><th>Vitamin C retained (%)</th></tr><tr><td>Raw</td><td>0.9</td><td>100</td></tr><tr><td>Steamed</td><td>1.4</td><td>71</td></tr><tr><td>Boiled</td><td>1.6</td><td>38</td></tr><tr><td>Fried</td><td>1.5</td><td>55</td></tr></table><br><br>Which choice most effectively uses data from the table to complete the example?",
+          "choices": [
+            "retained all of the vitamin C in the leaves while yielding the least absorbable iron.",
+            "yielded more absorbable iron than steaming did but less than frying did.",
+            "yielded the most absorbable iron of the four and retained the least vitamin C.",
+            "retained more vitamin C than frying did while yielding less absorbable iron."
+          ],
+          "correct": 2,
+          "choiceNotes": [
+            "Incorrect. Those are the figures for raw spinach; boiling retained 38 percent of the vitamin C, not all of it.",
+            "Incorrect. Boiling yielded 1.6 milligrams against frying’s 1.5, so the second half of the comparison is reversed.",
+            "Correct. Boiling is highest in the iron column at 1.6 milligrams and lowest in the vitamin C column at 38 percent, so the method best on one measure is worst on the other.",
+            "Incorrect. Boiling retained 38 percent against frying’s 55, so it held less vitamin C rather than more."
+          ]
+        },
+        {
+          "qid": "g6d7f549",
+          "domain": "Information and Ideas",
+          "skill": "Command of Evidence (Textual)",
+          "difficulty": "easy",
+          "type": "mc",
+          "text": "Ethologist Gavin Hunt (a student of animal behavior) first documented tool manufacture among New Caledonian crows, which strip and notch twigs to extract grubs from dead wood. One proposal holds that a crow selects a twig for a particular hole rather than reshaping whichever twig it happens to hold.<br><br>Which finding, if true, would most directly support this proposal?",
+          "choices": [
+            "Crows that are given no twigs will use stiff grass stems to extract grubs instead.",
+            "Crows presented with holes of varying width pick a twig matched to the hole before approaching it.",
+            "Young crows take several months to produce a notched twig as quickly as an adult does.",
+            "Crows carry a finished twig from one dead branch to another rather than discarding it after a single use."
+          ],
+          "correct": 1,
+          "choiceNotes": [
+            "Incorrect. Substituting grass shows flexibility about material, not that a tool is chosen to fit a particular hole.",
+            "Correct. Choosing a twig matched to the hole before approaching it is exactly selection for a particular hole rather than reshaping whatever is to hand.",
+            "Incorrect. How long the skill takes to learn says nothing about whether the twig is matched to the hole.",
+            "Incorrect. Reusing a tool shows it is valued, not that it was selected for the hole it is used on."
+          ]
+        },
+        {
+          "qid": "g52768b7",
+          "domain": "Information and Ideas",
+          "skill": "Command of Evidence (Textual)",
+          "difficulty": "medium",
+          "type": "mc",
+          "text": "Jane Eyre is an 1847 novel by Charlotte Brontë. In the novel, Brontë shows the young Jane insisting on a distinction between being disliked and being at fault:<br><br>Which quotation from Jane Eyre most effectively illustrates the claim?",
+          "choices": [
+            "“The room was chill, for it seldom had a fire; it was silent, because remote from the nursery.”",
+            "“Speak I must: I had been trodden on severely, and must turn: but how?”",
+            "“I am not deceitful: if I were, I should say I loved you; but I declare I do not love you.”",
+            "“I resisted all the way: a new thing for me, and a circumstance which greatly strengthened the bad opinion.”"
+          ],
+          "correct": 2,
+          "choiceNotes": [
+            "Incorrect. This describes a room and contains no claim about Jane’s conduct or how she is regarded.",
+            "Incorrect. It conveys the pressure to speak, not any distinction between fault and disfavour.",
+            "Correct. Jane concedes the dislike and refuses the charge in the same breath, separating what she is accused of being from what she has actually done.",
+            "Incorrect. It reports that resisting worsened the opinion of her, which is the reverse of drawing a distinction."
+          ]
+        },
+        {
+          "qid": "g9ed31bb",
+          "domain": "Information and Ideas",
+          "skill": "Inferences",
+          "difficulty": "easy",
+          "type": "mc",
+          "text": "Emperor penguins huddle through the Antarctic winter in colonies of thousands, and a bird on the windward edge loses heat far faster than one at the center. Time-lapse data from a colony filmed over several weeks in 2011 show the huddle advancing in small waves, each bird shuffling a few centimeters and the whole mass moving downwind over hours. A bird that began at the edge was near the center within a day. The pattern therefore suggests that ______<br><br>Which choice most logically completes the text?",
+          "choices": [
+            "the birds at the center of a huddle are the heaviest members of the colony.",
+            "penguins choose their position in the huddle according to age.",
+            "a huddle breaks apart once the wind rises above a certain speed.",
+            "no individual bird is left on the cold edge of the huddle for very long."
+          ],
+          "correct": 3,
+          "choiceNotes": [
+            "Incorrect. Weight is never mentioned, and the passage explains position by the movement of the huddle rather than by any property of a bird.",
+            "Incorrect. No bird is described as choosing where to stand; the shuffling carries each one along.",
+            "Incorrect. The passage describes the huddle moving downwind, not breaking apart.",
+            "Correct. A bird that starts at the edge reaches the center within a day, so the exposed position keeps passing from one bird to the next."
+          ]
+        },
+        {
+          "qid": "g9df6bf0",
+          "domain": "Information and Ideas",
+          "skill": "Inferences",
+          "difficulty": "medium",
+          "type": "mc",
+          "text": "A lighthouse lens concentrates a lamp into a narrow beam, and the beam sweeps as the lens turns. Each station was given a distinct rhythm of flashes, the light’s character, so that a navigator could tell one light from another, and the rhythm was produced by the shape of the lens and the speed of the clockwork that drove the lens. Two neighboring stations were never given the same rhythm. It can therefore be inferred that a navigator who saw a light and timed it ______<br><br>Which choice most logically completes the text?",
+          "choices": [
+            "could tell which station it was without consulting any chart.",
+            "could identify the station provided the rhythms of that coast were known.",
+            "could establish which of two stations had the more powerful lamp.",
+            "could determine how far away the station lay from the vessel."
+          ],
+          "correct": 1,
+          "choiceNotes": [
+            "Incorrect. The rhythm distinguishes stations only for someone who knows which rhythm belongs to which, which is what a chart supplies.",
+            "Correct. Each station has a distinct rhythm and no two neighbors share one, so timing the flashes identifies the station to a navigator who knows the local rhythms.",
+            "Incorrect. Lamp power is never compared; the rhythm comes from the lens and the clockwork.",
+            "Incorrect. Nothing in the passage connects the rhythm of flashes to distance."
+          ]
+        },
+        {
+          "qid": "g5026a11",
+          "domain": "Standard English Conventions",
+          "skill": "Form, Structure, and Sense",
+          "difficulty": "easy",
+          "type": "mc",
+          "text": "The pilots who worked the shifting channel of the estuary ______ willing to take a loaded vessel over the bar on an ebbing tide.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "choices": [
+            "has been",
+            "was",
+            "were",
+            "is"
+          ],
+          "correct": 2,
+          "choiceNotes": [
+            "Incorrect. “Has been” is singular, and the present perfect also conflicts with the past setting.",
+            "Incorrect. With “neither... nor,” the verb agrees with the nearer subject, which is the plural “pilots.”",
+            "Correct. The nearer of the two subjects is “the pilots,” so the plural “were” is required.",
+            "Incorrect. “Is” is singular and present, and the sentence is plural and past."
+          ]
+        },
+        {
+          "qid": "g5ff3890",
+          "domain": "Standard English Conventions",
+          "skill": "Boundaries",
+          "difficulty": "easy",
+          "type": "mc",
+          "text": "The expedition carried instruments from three countries: a barometer made in Paris, France; a chronometer from London, ______ a theodolite built in Munich.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "choices": [
+            "England; and",
+            "England and",
+            "England, and",
+            "England: and"
+          ],
+          "correct": 0,
+          "choiceNotes": [
+            "Correct. When the items of a series contain commas of their own, semicolons separate the items, and the semicolon belongs before the final “and.”",
+            "Incorrect. With no mark at all the third item runs into the second.",
+            "Incorrect. The items already contain internal commas, so a comma cannot also separate them without confusion.",
+            "Incorrect. A colon introduces a series; it does not separate items within one."
+          ]
+        },
+        {
+          "qid": "g5b8978d",
+          "domain": "Standard English Conventions",
+          "skill": "Form, Structure, and Sense",
+          "difficulty": "easy",
+          "type": "mc",
+          "text": "The survey team mapped the reef in March and returned in September, when ______ found that a third of the coral recorded in the spring had bleached.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "choices": [
+            "which",
+            "it",
+            "one",
+            "they"
+          ],
+          "correct": 3,
+          "choiceNotes": [
+            "Incorrect. “Which” is a relative pronoun and cannot serve as the subject of “found” after “when.”",
+            "Incorrect. “It” would treat the team as a single body, which conflicts with the sentence’s account of people doing the work.",
+            "Incorrect. “One” introduces an indefinite person who has no antecedent in the sentence.",
+            "Correct. The antecedent is “the survey team,” treated here as the people who mapped and returned, and “they” agrees with that reading and with the plural verbs around it."
+          ]
+        },
+        {
+          "qid": "g283480c",
+          "domain": "Standard English Conventions",
+          "skill": "Boundaries",
+          "difficulty": "medium",
+          "type": "mc",
+          "text": "The oldest surviving pair of spectacles in Europe, found beneath the floorboards of a German ______ two riveted lenses of quartz set in bone frames, and no arms to hook over the ears.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "choices": [
+            "convent has",
+            "convent, has",
+            "convent—has",
+            "convent; has"
+          ],
+          "correct": 0,
+          "choiceNotes": [
+            "Correct. “found beneath the floorboards of a German convent” is a supplementary phrase already closed by the comma after “Europe,” and no mark separates a subject from its verb.",
+            "Incorrect. A comma here would cut the subject from the verb “has.”",
+            "Incorrect. A dash would do the same, and it has no partner to open the interruption.",
+            "Incorrect. A semicolon must stand between two independent clauses, and “has two riveted lenses...” cannot stand alone."
+          ]
+        },
+        {
+          "qid": "ga599f3e",
+          "domain": "Standard English Conventions",
+          "skill": "Form, Structure, and Sense",
+          "difficulty": "medium",
+          "type": "mc",
+          "text": "A good field notebook records what the observer saw, what the weather was doing, and ______ the specimen was collected.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "choices": [
+            "the exact place where",
+            "exactly where",
+            "in the exact place that",
+            "what the exact place was where"
+          ],
+          "correct": 1,
+          "choiceNotes": [
+            "Incorrect. The series runs “what... what... ,” and this item breaks the pattern with a noun phrase.",
+            "Correct. The third item matches the form of the first two, each a clause introduced by a question word: what, what, where.",
+            "Incorrect. It introduces a prepositional phrase and so does not parallel the two clauses before it.",
+            "Incorrect. It is parallel in form but ungrammatical, doubling the question word in “what the exact place was where.”"
+          ]
+        },
+        {
+          "qid": "g8fd2285",
+          "domain": "Standard English Conventions",
+          "skill": "Boundaries",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "Three of the instruments were recovered from the wreck in 1982, and one of ______ a brass astrolabe engraved with the arms of a Lisbon house, is now the earliest dated example of its kind.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "choices": [
+            "them:",
+            "them,",
+            "them;",
+            "them"
+          ],
+          "correct": 1,
+          "choiceNotes": [
+            "Incorrect. A colon would present what follows as an elaboration and cannot pair with the closing comma.",
+            "Correct. “a brass astrolabe engraved with the arms of a Lisbon house” is a supplementary element, and it is closed by a comma before “is,” so it must be opened by one.",
+            "Incorrect. A semicolon cannot open a supplementary element inside a clause whose verb is still to come.",
+            "Incorrect. Without an opening comma the closing one is left unpaired."
+          ]
+        },
+        {
+          "qid": "g5ee1eeb",
+          "domain": "Expression of Ideas",
+          "skill": "Transitions",
+          "difficulty": "easy",
+          "type": "mc",
+          "text": "Sea ice reflects most of the sunlight that strikes the surface, while open water absorbs nearly all of that light. ______ each summer of heavy melting leaves a darker ocean that warms faster the following year.<br><br>Which choice completes the text with the most logical transition?",
+          "choices": [
+            "Thus,",
+            "For example,",
+            "Even so,",
+            "By contrast,"
+          ],
+          "correct": 0,
+          "choiceNotes": [
+            "Correct. Losing a reflective surface and exposing an absorbing one has the warming as its consequence.",
+            "Incorrect. The warming is the outcome of the contrast described, not an instance of it.",
+            "Incorrect. “Even so” concedes, and nothing in the second sentence resists the first.",
+            "Incorrect. The two sentences do not stand opposed; the second follows from the first."
+          ]
+        },
+        {
+          "qid": "g52cfb90",
+          "domain": "Expression of Ideas",
+          "skill": "Transitions",
+          "difficulty": "easy",
+          "type": "mc",
+          "text": "A stringed instrument sounds partly through the air inside its body, and the size of that cavity sets the pitch it reinforces most strongly. The thickness of the wood matters as well, since a stiffer plate moves less freely. ______ the varnish, long thought to be decoration only, adds mass that alters how the plate responds.<br><br>Which choice completes the text with the most logical transition?",
+          "choices": [
+            "However,",
+            "Moreover,",
+            "Instead,",
+            "In short,"
+          ],
+          "correct": 1,
+          "choiceNotes": [
+            "Incorrect. The varnish is a further contributor, not a contradiction of the two already named.",
+            "Correct. Cavity and plate thickness have each been given, and the varnish is a third factor added to them.",
+            "Incorrect. “Instead” would replace the earlier factors, and they are not withdrawn.",
+            "Incorrect. “In short” introduces a summary, and the sentence adds new information."
+          ]
+        },
+        {
+          "qid": "g7390a7f",
+          "domain": "Expression of Ideas",
+          "skill": "Transitions",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "A dictionary that records how people actually write must wait for usage to settle, and a word may circulate for decades before it earns an entry. Editors describe their task as following rather than leading. ______ the dictionary is a lagging record of the language, not a current one.<br><br>Which choice completes the text with the most logical transition?",
+          "choices": [
+            "Nevertheless,",
+            "For instance,",
+            "Meanwhile,",
+            "In other words,"
+          ],
+          "correct": 3,
+          "choiceNotes": [
+            "Incorrect. The final sentence agrees with what precedes rather than pushing against it.",
+            "Incorrect. It is not an instance of editors following usage; it is what following amounts to.",
+            "Incorrect. “Meanwhile” marks a separate concurrent situation, and none is described.",
+            "Correct. The sentence restates the preceding two in different terms, which is what “In other words” marks."
+          ]
+        },
+        {
+          "qid": "g8bc885a",
+          "domain": "Expression of Ideas",
+          "skill": "Rhetorical Synthesis",
+          "difficulty": "easy",
+          "type": "mc",
+          "text": "While researching a topic, a student has taken the following notes:<br><br>• Kintsugi is the Japanese practice of repairing broken pottery with lacquer mixed with gold.<br>• The repair is made conspicuous rather than hidden.<br>• A mended bowl may be valued more highly than it was before the break.<br>• The practice dates to at least the fifteenth century.<br>• The seams trace the exact line along which the piece failed.<br><br>The student wants to explain what distinguishes kintsugi from ordinary repair. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
+          "choices": [
+            "Kintsugi dates to at least the fifteenth century and is practiced in Japan on broken pottery.",
+            "A bowl mended by kintsugi may be valued more highly after the repair than it was before the break.",
+            "Kintsugi mends pottery with gold-laced lacquer that makes the break conspicuous instead of hiding it.",
+            "The gold seams of a kintsugi repair trace the exact line along which the original piece failed."
+          ],
+          "correct": 2,
+          "choiceNotes": [
+            "Incorrect. It dates and locates the practice without saying what sets it apart from any other repair.",
+            "Incorrect. The rise in value is a consequence of the difference rather than the difference itself.",
+            "Correct. Ordinary repair conceals a break; the note that kintsugi makes it conspicuous is exactly the distinguishing feature.",
+            "Incorrect. That the seams follow the break is true of any repair, so it distinguishes nothing."
+          ]
+        },
+        {
+          "qid": "g77d01ba",
+          "domain": "Expression of Ideas",
+          "skill": "Rhetorical Synthesis",
+          "difficulty": "easy",
+          "type": "mc",
+          "text": "While researching a topic, a student has taken the following notes:<br><br>• Wangari Maathai founded the Green Belt Movement in Kenya in 1977.<br>• The movement paid rural women a small sum for each seedling that survived.<br>• More than fifty million trees were planted in its first three decades.<br>• Maathai was awarded the Nobel Peace Prize in 2004.<br>• Payment depended on survival, not on the number of seedlings put in the ground.<br><br>The student wants to explain how the movement’s payment scheme encouraged results. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
+          "choices": [
+            "Wangari Maathai founded the Green Belt Movement in Kenya in 1977 and received the Nobel Peace Prize in 2004.",
+            "The Green Belt Movement planted more than fifty million trees during its first three decades in Kenya.",
+            "Rural women were paid a small sum by the Green Belt Movement for the seedlings they planted.",
+            "Because the movement paid rural women only for seedlings that survived, planting alone earned nothing."
+          ],
+          "correct": 3,
+          "choiceNotes": [
+            "Incorrect. It gives the founder and the prize and says nothing about the payment scheme.",
+            "Incorrect. It reports the outcome without explaining what produced it.",
+            "Incorrect. It describes payment for planting, which is the opposite of the condition recorded in the notes.",
+            "Correct. It names the condition attached to payment, survival rather than planting, which is the mechanism the goal asks about."
+          ]
+        },
+        {
+          "qid": "g71b66e9",
+          "domain": "Expression of Ideas",
+          "skill": "Rhetorical Synthesis",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "While researching a topic, a student has taken the following notes:<br><br>• The Antikythera mechanism is a geared bronze device recovered from a Roman-era wreck in 1901.<br>• It modeled the positions of the sun and moon and predicted eclipses.<br>• It contains at least thirty interlocking gears.<br>• No comparable geared device is known from the next thousand years.<br>• Its complexity was recognized only after X-ray imaging in the 1970s.<br><br>The student wants to convey why the mechanism is considered remarkable. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
+          "choices": [
+            "With at least thirty gears modeling the sun and moon, the mechanism has no known counterpart for a thousand years.",
+            "Recovered from a Roman-era wreck in 1901, the Antikythera mechanism is a geared bronze device.",
+            "The Antikythera mechanism modeled the sun and moon with thirty or more interlocking gears.",
+            "X-ray imaging carried out in the 1970s revealed the complexity of the Antikythera mechanism."
+          ],
+          "correct": 0,
+          "choiceNotes": [
+            "Correct. The gearing is set against the absence of anything comparable for a thousand years, which is what makes it remarkable rather than merely ingenious.",
+            "Incorrect. It says what the object is and where it came from, neither of which makes it remarkable.",
+            "Incorrect. It describes the mechanism accurately but leaves out what makes that description striking.",
+            "Incorrect. It reports how the complexity was discovered rather than why the object is extraordinary."
+          ]
+        }
+      ],
+      "module2Harder": [
+        {
+          "qid": "ge90c47d",
+          "domain": "Craft and Structure",
+          "skill": "Words in Context",
+          "difficulty": "medium",
+          "type": "mc",
+          "text": "A translator working from a language that leaves time unmarked on the verb must decide, sentence by sentence, whether a speaker is making a prediction, stating an intention, or merely entertaining a possibility. The original sentence remains ______, and the grammar of English insists on a choice.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
+          "choices": [
+            "contested",
+            "implausible",
+            "concealed",
+            "equivocal"
+          ],
+          "correct": 3,
+          "choiceNotes": [
+            "Incorrect. No dispute is described; the difficulty lies in the language, not among its speakers.",
+            "Incorrect. Nothing about the original is presented as unlikely, only as undetermined.",
+            "Incorrect. Nothing is hidden: the sentence sits in front of the translator, and what it fails to do is settle between the three readings.",
+            "Correct. The original does not settle among prediction, intention and supposition, and English forces a choice; what the source leaves open in that way is undecided."
+          ]
+        },
+        {
+          "qid": "g41a7b21",
+          "domain": "Craft and Structure",
+          "skill": "Words in Context",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "The early modern pardon was ______ rather than merciful in effect: a monarch who pardoned a condemned man was understood to have first established the guilt he was setting aside, so each act of clemency confirmed the court that had convicted him.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
+          "choices": [
+            "arbitrary",
+            "ratifying",
+            "provisional",
+            "ceremonial"
+          ],
+          "correct": 1,
+          "choiceNotes": [
+            "Incorrect. The passage presents the pardon as following a settled finding of guilt, which is the opposite of arbitrary.",
+            "Correct. The colon explains that each pardon confirmed the conviction it set aside, so the act endorsed the court rather than softening its work.",
+            "Incorrect. Nothing suggests the pardon was temporary or conditional on anything later.",
+            "Incorrect. “Ceremonial” would empty the act of consequence, and the passage gives it a definite legal effect."
+          ]
+        },
+        {
+          "qid": "g05949d0",
+          "domain": "Craft and Structure",
+          "skill": "Words in Context",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "Early radio astronomers took the hiss picked up by their aerials to be interference from the receiver itself, and spent years ______ it. Karl Jansky’s contribution was to notice that the hiss rose and fell on a cycle of twenty-three hours and fifty-six minutes, the period of the stars, and so came from the sky.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
+          "choices": [
+            "propagating",
+            "amplifying",
+            "suppressing",
+            "cataloging"
+          ],
+          "correct": 2,
+          "choiceNotes": [
+            "Incorrect. To propagate is to spread something, and nobody was trying to spread a supposed fault in their own equipment.",
+            "Incorrect. Treating the hiss as a fault would mean removing it, not strengthening it.",
+            "Correct. The astronomers believed the hiss came from their own receivers, so what they spent years doing was trying to get rid of it.",
+            "Incorrect. Cataloging would mean recording the hiss as a phenomenon, which is precisely what nobody did until Jansky."
+          ]
+        },
+        {
+          "qid": "g44038aa",
+          "domain": "Craft and Structure",
+          "skill": "Words in Context",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "Conservators cleaning a seventeenth-century panel found that the varnish had yellowed unevenly, and that the sitter’s blue sleeve now read as green. Removing the varnish restored the blue, but the painter had chosen the surrounding tones to sit against a blue already slightly warmed by fresh varnish. The cleaned picture is thus ______ the one the painter composed: accurate in its pigments and wrong in its relations.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
+          "choices": [
+            "indistinguishable from",
+            "at once truer and further from",
+            "less faithful than",
+            "a restoration of"
+          ],
+          "correct": 1,
+          "choiceNotes": [
+            "Incorrect. The passage insists on a difference between the cleaned picture and the painter’s, so they cannot be indistinguishable.",
+            "Correct. The colon supplies both halves at once: accurate in its pigments, wrong in its relations, so the picture is more faithful in one respect and less in another.",
+            "Incorrect. This takes only the second half and ignores the pigments, which the cleaning made accurate.",
+            "Incorrect. “A restoration of” takes only the first half of the colon and ignores the wrong relations."
+          ]
+        },
+        {
+          "qid": "g1d7ae45",
+          "domain": "Craft and Structure",
+          "skill": "Cross-Text Connections",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "Text 1<br><br>The medieval guild is often presented as a brake on innovation, since guild statutes fixed the materials, the tools, and the number of apprentices a master might keep. A craft governed that closely, the argument runs, would have altered its methods only slowly, whatever its masters wished.<br><br>Text 2<br><br>A 2016 study traced the statutes of a Cologne goldsmiths’ guild across two centuries and found them revised, on average, every eleven years. The revisions follow the adoption of a new technique rather than preventing it: a method spreads among masters, and the statute is rewritten to admit it and to say who may use it.<br><br>Based on the texts, how would the author of Text 2 most likely respond to the argument in Text 1?",
+          "choices": [
+            "By observing that the statutes followed changes in practice instead of constraining them.",
+            "By agreeing that guild statutes were restrictive but noting that they were rarely enforced.",
+            "By arguing that the Cologne goldsmiths were unusual among guilds of the period.",
+            "By pointing out that fixing the number of apprentices had little effect on technique."
+          ],
+          "correct": 0,
+          "choiceNotes": [
+            "Correct. Text 1 treats the statutes as a brake; Text 2 finds them rewritten after a technique has spread, which reverses the direction of the relation.",
+            "Incorrect. Text 2 says nothing about enforcement; its point concerns what the statutes were responding to.",
+            "Incorrect. She offers Cologne as evidence about guilds, not as an exception to them.",
+            "Incorrect. Apprentice numbers are one clause of Text 1 and are not what her evidence addresses."
+          ]
+        },
+        {
+          "qid": "g23cd1fe",
+          "domain": "Craft and Structure",
+          "skill": "Text Structure and Purpose",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "The standard account of the Great Fire of London credits the rebuilding acts with the city’s recovery, and the acts did impose brick where timber had stood. But the parish rate books, the local tax records, show that three quarters of the burnt houses were back in occupation before the first commissioner was appointed, and that the rebuilders were the same trades who had built the city before. <u>What the acts regulated was a recovery already under way.</u> The statute shaped the result; it did not produce it.<br><br>Which choice best describes the function of the underlined sentence in the text as a whole?",
+          "choices": [
+            "It offers an example of the kind of regulation the rebuilding acts imposed after the fire.",
+            "It introduces the rebuilding acts whose provisions the rest of the text goes on to describe.",
+            "It concedes a weakness in the rate books that the final sentence of the text then answers.",
+            "It states the relation between statute and recovery that the evidence before it establishes."
+          ],
+          "correct": 3,
+          "choiceNotes": [
+            "Incorrect. It gives no instance of a regulation; it characterizes what the regulation acted upon.",
+            "Incorrect. The acts are introduced in the first sentence, and their provisions are never described in detail.",
+            "Incorrect. No weakness in the rate books is granted anywhere; they are the passage’s evidence.",
+            "Correct. The rate-book evidence shows occupation preceding the commissioners, and the underlined sentence names what follows from that, which the last sentence then sharpens."
+          ]
+        },
+        {
+          "qid": "g2f23bb7",
+          "domain": "Craft and Structure",
+          "skill": "Text Structure and Purpose",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "Any account of why a language loses speakers must explain not only the pressure from outside but the decision inside a household to stop passing the language on. Sociolinguists have interviewed families at three stages of that shift, and report that parents rarely describe a decision at all. They describe a series of occasions on which the other language was easier, and a later recognition that the sequence had amounted to a choice.<br><br>Which choice best states the main purpose of the text?",
+          "choices": [
+            "To compare the external pressures on a language with the internal ones acting on a household.",
+            "To argue that parents who stop transmitting a language later come to regret having done so.",
+            "To describe the three stages of language shift identified in those interviews.",
+            "To present research indicating that language shift proceeds without a decision being made."
+          ],
+          "correct": 3,
+          "choiceNotes": [
+            "Incorrect. The opening names both kinds of pressure, but the passage develops only what happens inside the household.",
+            "Incorrect. Parents recognizes the sequence afterward; the passage reports no regret.",
+            "Incorrect. The three stages are mentioned once as a feature of her sample and are never described.",
+            "Correct. The passage sets up the puzzle of the household decision and then reports the finding that no decision is made, only a sequence recognized later."
+          ]
+        },
+        {
+          "qid": "gd50ed42",
+          "domain": "Information and Ideas",
+          "skill": "Central Ideas and Details",
+          "difficulty": "easy",
+          "type": "mc",
+          "text": "A fogbow (a rainbow formed in fog) has the same geometry as a rainbow proper but in droplets small enough that the light bends around them instead of passing cleanly through. The colors wash into one another, and what remains is a pale arc that observers often describe as white. The physics is not different in kind; the droplets are.<br><br>Which choice best states the main idea of the text?",
+          "choices": [
+            "Observers rarely distinguish a fogbow from the pale arcs produced by other conditions.",
+            "A fogbow and a rainbow are formed by two unrelated optical processes in the atmosphere.",
+            "A fogbow appears white because its droplets are too small to separate the colors.",
+            "The geometry of a rainbow depends on the size of the droplets through which light passes."
+          ],
+          "correct": 2,
+          "choiceNotes": [
+            "Incorrect. What observers say is mentioned once, and no other pale arcs are discussed.",
+            "Incorrect. The passage says the opposite: the physics is not different in kind.",
+            "Correct. The passage attributes the washed-out color to droplet size and states plainly that the physics is the same while the droplets differ.",
+            "Incorrect. The passage says the geometry is the same in both and locates the difference in the droplets."
+          ]
+        },
+        {
+          "qid": "g24627bf",
+          "domain": "Information and Ideas",
+          "skill": "Central Ideas and Details",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "Musicologists have compared the surviving parts for a Venetian opera of 1642 with the printed libretto—the sung text—sold at its first performances. Several arias named in the libretto are missing from the parts, and two numbers in the parts appear nowhere in the printed text. They argue that the libretto records what the poet supplied rather than what the audience heard, and that a score assembled from it would reconstruct a performance that never took place.<br><br>Which choice best describes the conclusion drawn from the two sources?",
+          "choices": [
+            "The two numbers absent from the libretto were added by a composer other than the one named on it.",
+            "The Venetian opera of 1642 was performed with more arias than its libretto lists for the audience.",
+            "The printed libretto is a less reliable guide to the poet’s own intentions than the surviving parts are.",
+            "Each source is partial, so a score built from the libretto would misrepresent the performance."
+          ],
+          "correct": 3,
+          "choiceNotes": [
+            "Incorrect. No second composer is mentioned, and the passage offers no account of who wrote the two numbers.",
+            "Incorrect. Material runs both ways between the sources, so the performance was not simply larger.",
+            "Incorrect. The argument treats the libretto as a good record of the poet; what it fails to record is the performance.",
+            "Correct. Each source contains material the other lacks, which is why a score assembled from the libretto would reconstruct a performance that never happened."
+          ]
+        },
+        {
+          "qid": "g9032455",
+          "domain": "Information and Ideas",
+          "skill": "Command of Evidence (Quantitative)",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "Carbon dioxide seeping from volcanic vents on the seafloor makes the water around them more acidic, and biologists use such vents as natural experiments in ocean acidification. A team measured limpets at four distances from one vent. They concluded that the water near the vent limits shell growth rather than merely damaging shells already formed.<table class=\"dx-table\"><tr><th>Distance from vent (m)</th><th>Shell length (mm)</th><th>Shells with dissolved margins (%)</th></tr><tr><td>5</td><td>18.2</td><td>61</td></tr><tr><td>20</td><td>22.6</td><td>34</td></tr><tr><td>60</td><td>23.1</td><td>12</td></tr><tr><td>150</td><td>23.4</td><td>9</td></tr></table><br><br>Which choice best describes data from the table that support the team's conclusion?",
+          "choices": [
+            "Sixty-one percent of shells collected five meters from the vent showed dissolved margins, the highest proportion recorded.",
+            "The proportion of shells with dissolved margins fell as distance from the vent increased.",
+            "Shell length at 60 meters and at 150 meters differed by only three tenths of a millimeter.",
+            "Limpets five meters from the vent were shorter than those at every other distance."
+          ],
+          "correct": 3,
+          "choiceNotes": [
+            "Incorrect. Dissolved margins are damage to shells already formed, which is the alternative the team is ruling out.",
+            "Incorrect. This describes erosion again, and so bears on damage rather than on growth.",
+            "Incorrect. The near-identical lengths at the two far distances say nothing about the vent’s effect.",
+            "Correct. Shorter shells, not merely more eroded ones, are what distinguish limited growth from damage after the fact, and only the five-meter limpets are shorter."
+          ]
+        },
+        {
+          "qid": "gdba3da9",
+          "domain": "Information and Ideas",
+          "skill": "Command of Evidence (Quantitative)",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "Parchment was costly, and a scribe could fit more text on a page either by ruling more lines or by abbreviating more heavily. A scriptorium short of parchment might be expected to lean on whichever of the two techniques it had already mastered, so that any one scriptorium should show much of one and little of the other. Measurements from four manuscripts bear that out, since ______<table class=\"dx-table\"><tr><th>Manuscript</th><th>Lines per page</th><th>Abbreviations per 100 words</th></tr><tr><td>Corbie</td><td>34</td><td>9</td></tr><tr><td>Tours</td><td>26</td><td>21</td></tr><tr><td>Reims</td><td>33</td><td>11</td></tr><tr><td>Fulda</td><td>25</td><td>23</td></tr></table><br><br>Which choice most effectively uses data from the table to complete the statement?",
+          "choices": [
+            "the two manuscripts with the most lines per page are also the two that abbreviate least.",
+            "the Tours and Fulda manuscripts abbreviate more than twice as heavily as the Corbie manuscript does.",
+            "the Corbie manuscript carries 34 lines per page, more than any of the other three manuscripts.",
+            "abbreviation rates across the four manuscripts range from 9 to 23 occurrences per 100 words."
+          ],
+          "correct": 0,
+          "choiceNotes": [
+            "Correct. Corbie and Reims rule the most lines and abbreviate least, while Tours and Fulda do the reverse, which is the inverse relation expected.",
+            "Incorrect. It compares abbreviation alone and never brings in lines per page, so no trade-off is shown.",
+            "Incorrect. A single highest value on one measure cannot establish a relation between two measures.",
+            "Incorrect. The spread of abbreviation rates says nothing about how they vary with lines per page."
+          ]
+        },
+        {
+          "qid": "gd4a9bf0",
+          "domain": "Information and Ideas",
+          "skill": "Command of Evidence (Textual)",
+          "difficulty": "medium",
+          "type": "mc",
+          "text": "Wuthering Heights is an 1847 novel by Emily Brontë. Its narrator, Nelly Dean, often states what another character was thinking as though she had watched it happen:<br><br>Which quotation from Wuthering Heights most effectively illustrates the claim?",
+          "choices": [
+            "“I ran to the children’s room: their door was ajar, I saw they had never lain down, though it was past midnight.”",
+            "“The other, I felt certain, recalled it often in the course of the evening.”",
+            "“I heard Joseph read on a while afterwards; then I distinguished his slow step on the ladder, and then I dropped asleep.”",
+            "“Coming down somewhat later than usual, I saw, by the sunbeams piercing the chinks of the shutters, Miss Catherine still seated near the fireplace.”"
+          ],
+          "correct": 1,
+          "choiceNotes": [
+            "Incorrect. Nelly reports what she saw herself, so it shows nothing about events she did not witness.",
+            "Correct. She asserts what a man would have done on a night she was not present for, and marks the assertion as certain rather than as inference.",
+            "Incorrect. It shows her memory of an event she was present for, not confidence about an absent one.",
+            "Incorrect. She explicitly attributes the account to another speaker, which is the opposite of the claimed confidence."
+          ]
+        },
+        {
+          "qid": "gc12fe2d",
+          "domain": "Information and Ideas",
+          "skill": "Command of Evidence (Textual)",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "Genetic data published since 2011 have been read against the view that the earliest domesticated rice spread outward from a single river valley. The alternative account holds that cultivation began independently at several sites, and that the shared traits of early domesticated grains reflect the same selective pressures acting separately rather than descent from one stock.<br><br>Which finding, if true, would most directly support this position?",
+          "choices": [
+            "Grains recovered from the river valley are several centuries older than grains from any other site.",
+            "Grains from three distant sites carry different genetic markers for the same non-shattering trait.",
+            "Early domesticated grains from widely separated sites are similar in size and in husk thickness.",
+            "Wild rice grows across the whole region in which the early cultivated sites are distributed."
+          ],
+          "correct": 1,
+          "choiceNotes": [
+            "Incorrect. An older valley is what the single-origin account predicts, so this supports his opponents.",
+            "Correct. Different genetic routes to the same trait mean the trait arose more than once, which is independent selection rather than descent from one stock.",
+            "Incorrect. Shared traits are the very thing this position explains away; their presence settles nothing between the two accounts.",
+            "Incorrect. Available wild rice makes independent domestication possible but does not show that it happened."
+          ]
+        },
+        {
+          "qid": "gab24582",
+          "domain": "Information and Ideas",
+          "skill": "Inferences",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "Cleaner shrimp remove parasites from fish that visit them, and a fish will hold still to be worked on. In a 2010 experiment testing whether the shrimp distinguish visitors that have somewhere else to go, each shrimp was offered two fish in turn: one taken from a reef with several cleaning stations, and one from an isolated outcrop—a lone rock head—with only that station. Shrimp gave the visitor from the multi-station reef longer sessions and took fewer bites of its mucus. Where both fish came from the isolated outcrop, sessions were the same length. The results therefore suggest that ______<br><br>Which choice most logically completes the text?",
+          "choices": [
+            "shrimp prefer the mucus of fish that come from reefs with several cleaning stations.",
+            "shrimp adjust their treatment of a client according to whether it has an alternative.",
+            "fish from isolated outcrops carry fewer parasites than fish from multi-station reefs.",
+            "a shrimp will work longer on any client that has held still for a previous session."
+          ],
+          "correct": 1,
+          "choiceNotes": [
+            "Incorrect. The shrimp took fewer bites of that fish’s mucus, which is the opposite of a preference for it.",
+            "Correct. Treatment improved only for the fish that could go elsewhere, and vanished as a difference when both clients lacked an alternative, which isolates the client’s options as the variable.",
+            "Incorrect. Parasite load is never measured, and the control condition rules it out as the explanation.",
+            "Incorrect. Holding still is described as what every client does, so it cannot account for the difference between them."
+          ]
+        },
+        {
+          "qid": "ge750ade",
+          "domain": "Information and Ideas",
+          "skill": "Inferences",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "Wheat sown in autumn yields more than wheat sown in spring, which agronomists have long attributed to the longer growing season. To separate season length from cold exposure, a team sowed one plot in autumn, a second in spring, and a third in spring after the seed had been held at four degrees for eight weeks. The third plot yielded almost as much as the autumn plot, and far more than the untreated spring plot, although both spring plots had the same number of growing days. It can therefore be inferred that ______<br><br>Which choice most logically completes the text?",
+          "choices": [
+            "autumn-sown wheat would yield still more if the seed were chilled before it was sown.",
+            "wheat held at four degrees for eight weeks will germinate sooner in the field than wheat that has not been.",
+            "the length of the growing season has no bearing on the yield of a wheat crop.",
+            "the advantage of autumn sowing comes largely from cold exposure rather than from season length."
+          ],
+          "correct": 3,
+          "choiceNotes": [
+            "Incorrect. No plot combined autumn sowing with chilled seed, so the passage gives no basis for the claim.",
+            "Incorrect. Germination timing is never measured; what is measured is yield.",
+            "Incorrect. The experiment shows cold matters, not that season length is irrelevant; the autumn plot still had the longest season.",
+            "Correct. The two spring plots shared a season length and differed only in chilling, and the chilled one performed like the autumn plot, which assigns the advantage to the cold."
+          ]
+        },
+        {
+          "qid": "g8fc698f",
+          "domain": "Standard English Conventions",
+          "skill": "Form, Structure, and Sense",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "The fuller of the two surviving accounts of the siege, written within a decade of it by a man who had questioned the sailors himself, ______ the number of ships in the harbor.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "choices": [
+            "give",
+            "have given",
+            "gives",
+            "are giving"
+          ],
+          "correct": 2,
+          "choiceNotes": [
+            "Incorrect. “Give” is plural; “neither” is singular however many nouns follow it.",
+            "Incorrect. “Have given” is plural, and the present perfect also conflicts with the standing description.",
+            "Correct. The subject is “Neither,” which takes a singular verb, and the two participial phrases between it and the verb cannot supply a new subject.",
+            "Incorrect. “Are giving” is plural and progressive, and the sentence states a fact about the documents."
+          ]
+        },
+        {
+          "qid": "g02b583e",
+          "domain": "Standard English Conventions",
+          "skill": "Boundaries",
+          "difficulty": "easy",
+          "type": "mc",
+          "text": "The ______ that ends both lines of a ghazal’s opening couplet and the second line of every couplet after it, is what holds the poem together.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "choices": [
+            "radif; a word or phrase",
+            "radif a word or phrase",
+            "radif, a word or phrase",
+            "radif: a word or phrase"
+          ],
+          "correct": 2,
+          "choiceNotes": [
+            "Incorrect. A semicolon requires an independent clause after it, and the appositive is not one.",
+            "Incorrect. Without punctuation the appositive runs into the noun it renames.",
+            "Correct. The appositive renames the radif and is set off by a pair of commas, the second of which already stands before “is what holds”.",
+            "Incorrect. A colon must follow a complete statement, and “The radif” is only a noun phrase."
+          ]
+        },
+        {
+          "qid": "gf47ca2c",
+          "domain": "Standard English Conventions",
+          "skill": "Form, Structure, and Sense",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "Had the ledger survived intact, historians ______ how much of the abbey’s income came from the wool clip rather than from its rents.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "choices": [
+            "would have known",
+            "will know",
+            "would know",
+            "had known"
+          ],
+          "correct": 2,
+          "choiceNotes": [
+            "Incorrect. “Would have known” places the consequence in the past, but the knowing would be ours now.",
+            "Incorrect. The future does not follow an inverted conditional describing a state contrary to fact.",
+            "Correct. “Had the ledger survived” states a condition contrary to present fact, and the main clause takes “would” plus the base form for the present consequence.",
+            "Incorrect. “Had known” repeats the conditional form in the main clause, leaving the sentence without a result."
+          ]
+        },
+        {
+          "qid": "gbda39b6",
+          "domain": "Standard English Conventions",
+          "skill": "Boundaries",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "The cartographer worked from three sources of unequal worth: a naval survey of the coast, accurate to within a cable, or 185 meters; a merchant’s sketch of the interior, drawn from ______ and a missionary’s account that gave distances in days of travel.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "choices": [
+            "memory;",
+            "memory,",
+            "memory",
+            "memory:"
+          ],
+          "correct": 0,
+          "choiceNotes": [
+            "Correct. The items of the series carry internal commas, so semicolons separate them, including before the final “and.”",
+            "Incorrect. A comma cannot separate items that already contain commas without making the series unreadable.",
+            "Incorrect. With no mark the third item runs into the second.",
+            "Incorrect. A colon has already introduced the series and cannot also divide it."
+          ]
+        },
+        {
+          "qid": "g9d17ffa",
+          "domain": "Standard English Conventions",
+          "skill": "Form, Structure, and Sense",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "The commission asked the engineers to report on the state of the embankment, to estimate the cost of raising it, and ______<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "choices": [
+            "whether the work could be finished before the winter floods.",
+            "could the work be finished before the winter floods.",
+            "to say whether the work could be finished before the winter floods.",
+            "the question of the work being finished before the winter floods."
+          ],
+          "correct": 2,
+          "choiceNotes": [
+            "Incorrect. The series runs “to report... to estimate...,” and a subordinate clause breaks the pattern.",
+            "Incorrect. An interrogative clause cannot serve as the third element of the series.",
+            "Correct. The third item matches the infinitives before it, giving “to report, to estimate, and to say.”",
+            "Incorrect. A noun phrase does not parallel two infinitives."
+          ]
+        },
+        {
+          "qid": "g27aabdf",
+          "domain": "Standard English Conventions",
+          "skill": "Boundaries",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "The tune survives in two forms, one collected in Donegal in 1912 and one printed in Boston forty years ______ second is a fourth higher and carries a second part that the Donegal singer did not know.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "choices": [
+            "earlier. The",
+            "earlier, the",
+            "earlier the",
+            "earlier; and the"
+          ],
+          "correct": 0,
+          "choiceNotes": [
+            "Correct. “The second is a fourth higher...” is independent, so a period and a capital are conventional.",
+            "Incorrect. A comma between two independent clauses is a comma splice.",
+            "Incorrect. With no punctuation two independent clauses fuse and “forty years earlier the second is” cannot be parsed.",
+            "Incorrect. A semicolon already joins independent clauses; adding “and” after it is redundant and non-standard."
+          ]
+        },
+        {
+          "qid": "g8b25985",
+          "domain": "Expression of Ideas",
+          "skill": "Transitions",
+          "difficulty": "medium",
+          "type": "mc",
+          "text": "A cuckoo laid in a reed warbler’s nest hatches first and ejects the other eggs, so the warblers rear one chick where they would have reared five. Warblers on rivers where cuckoos are common reject strange eggs at high rates. ______ warblers on rivers the cuckoo has never reached accept almost anything placed in the nest.<br><br>Which choice completes the text with the most logical transition?",
+          "choices": [
+            "By contrast,",
+            "Admittedly,",
+            "In addition,",
+            "Consequently,"
+          ],
+          "correct": 0,
+          "choiceNotes": [
+            "Correct. The two populations behave oppositely, and the sentence sets the second against the first.",
+            "Incorrect. “Admittedly” concedes a point against the writer’s own case, and no case is being argued.",
+            "Incorrect. “In addition” would present the second fact as more of the same, and it points the other way.",
+            "Incorrect. Acceptance on cuckoo-free rivers is not a consequence of rejection on cuckoo-rich ones."
+          ]
+        },
+        {
+          "qid": "gccec062",
+          "domain": "Expression of Ideas",
+          "skill": "Transitions",
+          "difficulty": "medium",
+          "type": "mc",
+          "text": "Sourcing an obsidian blade is unusually exact: each volcanic flow carries its own ratios of trace elements, and a fragment can be matched to its outcrop with near certainty. ______ a blade found eight hundred kilometers from any flow is evidence of a route, not of a guess.<br><br>Which choice completes the text with the most logical transition?",
+          "choices": [
+            "Therefore,",
+            "However,",
+            "Meanwhile,",
+            "Granted,"
+          ],
+          "correct": 0,
+          "choiceNotes": [
+            "Correct. Exact sourcing is what allows a distant blade to establish a route, so the sentence states what follows from it.",
+            "Incorrect. The conclusion rests on the precision just described rather than qualifying it.",
+            "Incorrect. “Meanwhile” marks a concurrent situation elsewhere, and none is described.",
+            "Incorrect. “Granted” concedes a point, and nothing here is conceded."
+          ]
+        },
+        {
+          "qid": "g219668e",
+          "domain": "Expression of Ideas",
+          "skill": "Transitions",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "A pigment’s lightfastness is tested by exposing a drawdown (a thin swatch of the paint) to a lamp for several hundred hours and comparing it with a portion kept in the dark. The test compresses years into hours, and the lamp only stands in for daylight. ______ a pigment that fails it will fail on a wall. One that passes may still shift under a window over thirty years.<br><br>Which choice completes the text with the most logical transition?",
+          "choices": [
+            "Even so,",
+            "Similarly,",
+            "For this reason,",
+            "To that end,"
+          ],
+          "correct": 0,
+          "choiceNotes": [
+            "Correct. The two limits are granted, and the sentence that follows asserts what the test nevertheless establishes.",
+            "Incorrect. “Similarly” claims a likeness between two cases, and one test is under discussion.",
+            "Incorrect. The limitations of the test are not the reason its results carry the weight described; they push the other way.",
+            "Incorrect. “To that end” introduces a means to a stated purpose, and no purpose has been given."
+          ]
+        },
+        {
+          "qid": "g509c314",
+          "domain": "Expression of Ideas",
+          "skill": "Rhetorical Synthesis",
+          "difficulty": "medium",
+          "type": "mc",
+          "text": "While researching a topic, a student has taken the following notes:<br><br>• The Iron Pillar of Delhi was raised in about the fourth century CE.<br>• The pillar is seven meters high and has stood outdoors throughout.<br>• It shows almost no rust.<br>• Its iron carries an unusually high proportion of phosphorus.<br>• Phosphorus forms a thin protective film in the humid air of the site.<br><br>The student wants to explain why the pillar has not rusted. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
+          "choices": [
+            "The Iron Pillar of Delhi, raised in about the fourth century CE, is seven meters high and stands outdoors.",
+            "Although it has stood outdoors since the fourth century CE, the Iron Pillar of Delhi shows almost no rust.",
+            "Phosphorus in the pillar’s iron forms a protective film in the humid air, so it has stood outdoors unrusted.",
+            "The iron of the Delhi pillar carries an unusually high proportion of phosphorus compared with other iron."
+          ],
+          "correct": 2,
+          "choiceNotes": [
+            "Incorrect. It describes the object and says nothing about rust or its absence.",
+            "Incorrect. It states the puzzle the goal asks the student to solve rather than solving it.",
+            "Correct. It gives the mechanism, phosphorus forming a protective film in humid air, and ties it to the outcome.",
+            "Incorrect. It reports the composition without saying what the phosphorus does."
+          ]
+        },
+        {
+          "qid": "ge2cf3cd",
+          "domain": "Expression of Ideas",
+          "skill": "Rhetorical Synthesis",
+          "difficulty": "medium",
+          "type": "mc",
+          "text": "While researching a topic, a student has taken the following notes:<br><br>• A palimpsest is a manuscript whose original text was scraped off so the parchment could be reused.<br>• The scraping was rarely complete.<br>• Ultraviolet and multispectral imaging can recover the lower text.<br>• The Archimedes Palimpsest was overwritten in the thirteenth century with a prayer book.<br>• Two treatises by Archimedes survive nowhere else.<br><br>The student wants to explain why palimpsests matter to scholars. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
+          "choices": [
+            "The Archimedes Palimpsest was overwritten in the thirteenth century with the text of a prayer book.",
+            "Because scraping was rarely complete, imaging can recover lower texts that survive nowhere else.",
+            "A palimpsest is a manuscript whose first text was scraped away so that the parchment could be used again.",
+            "Ultraviolet and multispectral imaging are now used by scholars to read the lower texts of manuscripts."
+          ],
+          "correct": 1,
+          "choiceNotes": [
+            "Incorrect. It gives one instance without explaining what makes such manuscripts valuable.",
+            "Correct. It joins the incomplete scraping to the recovery of texts that exist nowhere else, which is the reason scholars care.",
+            "Incorrect. It defines the term without saying why it matters.",
+            "Incorrect. It names the technique without saying what the technique yields."
+          ]
+        },
+        {
+          "qid": "g24866f8",
+          "domain": "Expression of Ideas",
+          "skill": "Rhetorical Synthesis",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "While researching a topic, a student has taken the following notes:<br><br>• Hedy Lamarr and George Antheil patented a frequency-hopping system in 1942.<br>• The system was intended to keep torpedo guidance signals from being jammed.<br>• The navy did not adopt it during the war.<br>• The patent expired before the principle came into commercial use.<br>• Frequency hopping underlies several later wireless technologies.<br><br>The student wants to emphasize the gap between the invention and its use. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
+          "choices": [
+            "Hedy Lamarr and George Antheil patented a frequency-hopping system in 1942 to protect torpedo guidance signals.",
+            "Frequency hopping, patented in 1942 and unused by the navy, came into commercial use only after the patent had expired.",
+            "Several of the later wireless technologies in everyday use rest on the principle of frequency hopping that Lamarr and Antheil described.",
+            "The navy declined to adopt the frequency-hopping system that Lamarr and Antheil patented during the war."
+          ],
+          "correct": 1,
+          "choiceNotes": [
+            "Incorrect. It reports the invention and its purpose and stops before any gap appears.",
+            "Correct. It sets the 1942 patent and the navy’s refusal against a commercial use that arrived only after the patent lapsed, which is the gap itself.",
+            "Incorrect. It gives the eventual influence without the delay that makes it notable.",
+            "Incorrect. It reports the refusal alone, leaving out the later use entirely."
+          ]
+        }
+      ]
+    },
+    "math": {
+      "module1": [
+        {
+          "qid": "mt989c20",
+          "domain": "Problem-Solving and Data Analysis",
+          "skill": "112 Reading a Chart",
+          "difficulty": "easy",
+          "type": "mc",
+          "text": "<svg viewBox=\"0 0 300 200\" class=\"dx-fig\" style=\"color:var(--text);\"><title>Bar graph of the number of guitars repaired in each of five months</title><line x1=\"40\" y1=\"168\" x2=\"288\" y2=\"168\" stroke=\"currentColor\" stroke-width=\"1.2\"/><line x1=\"40\" y1=\"168\" x2=\"40\" y2=\"18\" stroke=\"currentColor\" stroke-width=\"1.2\"/><line x1=\"37\" y1=\"168.0\" x2=\"40\" y2=\"168.0\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"34\" y=\"171.0\" font-size=\"9\" text-anchor=\"end\" fill=\"currentColor\">0</text><line x1=\"37\" y1=\"138.8\" x2=\"40\" y2=\"138.8\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"34\" y=\"141.8\" font-size=\"9\" text-anchor=\"end\" fill=\"currentColor\">10</text><line x1=\"37\" y1=\"109.6\" x2=\"40\" y2=\"109.6\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"34\" y=\"112.6\" font-size=\"9\" text-anchor=\"end\" fill=\"currentColor\">20</text><line x1=\"37\" y1=\"80.4\" x2=\"40\" y2=\"80.4\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"34\" y=\"83.4\" font-size=\"9\" text-anchor=\"end\" fill=\"currentColor\">30</text><line x1=\"37\" y1=\"51.2\" x2=\"40\" y2=\"51.2\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"34\" y=\"54.2\" font-size=\"9\" text-anchor=\"end\" fill=\"currentColor\">40</text><line x1=\"37\" y1=\"22.0\" x2=\"40\" y2=\"22.0\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"34\" y=\"25.0\" font-size=\"9\" text-anchor=\"end\" fill=\"currentColor\">50</text><line x1=\"38\" y1=\"153.4\" x2=\"40\" y2=\"153.4\" stroke=\"currentColor\" stroke-width=\"1\"/><line x1=\"38\" y1=\"124.2\" x2=\"40\" y2=\"124.2\" stroke=\"currentColor\" stroke-width=\"1\"/><line x1=\"38\" y1=\"95.0\" x2=\"40\" y2=\"95.0\" stroke=\"currentColor\" stroke-width=\"1\"/><line x1=\"38\" y1=\"65.8\" x2=\"40\" y2=\"65.8\" stroke=\"currentColor\" stroke-width=\"1\"/><line x1=\"38\" y1=\"36.599999999999994\" x2=\"40\" y2=\"36.599999999999994\" stroke=\"currentColor\" stroke-width=\"1\"/><rect x=\"52\" y=\"109.6\" width=\"30\" height=\"58.400000000000006\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.4\"/><text x=\"67\" y=\"181\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">Jan</text><rect x=\"98\" y=\"65.8\" width=\"30\" height=\"102.2\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.4\"/><text x=\"113\" y=\"181\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">Feb</text><rect x=\"144\" y=\"36.599999999999994\" width=\"30\" height=\"131.4\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.4\"/><text x=\"159\" y=\"181\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">Mar</text><rect x=\"190\" y=\"80.4\" width=\"30\" height=\"87.6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.4\"/><text x=\"205\" y=\"181\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">Apr</text><rect x=\"236\" y=\"124.2\" width=\"30\" height=\"43.8\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.4\"/><text x=\"251\" y=\"181\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">May</text><text x=\"10\" y=\"16\" font-size=\"9\" fill=\"currentColor\">Guitars repaired</text></svg>The bar graph shows the number of guitars repaired at a music shop in each of five months. How many more guitars were repaired in March than in January?",
+          "choices": [
+            "20",
+            "25",
+            "30",
+            "65"
+          ],
+          "correct": 1,
+          "choiceNotes": [
+            "A: reads the March bar as 40, the nearest labelled gridline, instead of 45, the halfway gridline it actually reaches, giving 40 &minus; 20 = 20.",
+            "B (key): March is 45 and January is 20, so 45 &minus; 20 = 25.",
+            "C: reads the March bar as the next labelled gridline up, 50, giving 50 &minus; 20 = 30.",
+            "D: adds the two bars, 45 + 20, instead of subtracting."
+          ],
+          "explanation": "Choice B is correct. The vertical axis is labeled every 10 guitars, with a minor tick halfway between each pair of labels, so each small step is 5 guitars. The March bar, the tallest one, reaches 45, and the January bar reaches 20. The number repaired in March minus the number repaired in January is 45 - 20 = 25. Choice A, 20, is the January total itself rather than the difference. Choice C, 30, is the April total, the bar just to the right of the tallest. Choice D, 65, adds the two months, 45 + 20, instead of subtracting. Since the question asks how many more, you need a difference between two bars, not a single bar's height."
+        },
+        {
+          "qid": "mtbeb065",
+          "domain": "Algebra",
+          "skill": "27 Linear Functions",
+          "difficulty": "easy",
+          "type": "mc",
+          "text": "<svg viewBox=\"0 0 300 200\" class=\"dx-fig\" style=\"color:var(--text);\"><title>The graph of a line rising from left to right, crossing the y-axis below the origin</title><line x1=\"34\" y1=\"129.7\" x2=\"290\" y2=\"129.7\" stroke=\"currentColor\" stroke-width=\"1.2\"/><line x1=\"66.0\" y1=\"14\" x2=\"66.0\" y2=\"176\" stroke=\"currentColor\" stroke-width=\"1.2\"/><line x1=\"34.0\" y1=\"126.69999999999999\" x2=\"34.0\" y2=\"132.7\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"34.0\" y=\"142.7\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">-1</text><line x1=\"98.0\" y1=\"126.69999999999999\" x2=\"98.0\" y2=\"132.7\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"98.0\" y=\"142.7\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">1</text><line x1=\"130.0\" y1=\"126.69999999999999\" x2=\"130.0\" y2=\"132.7\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"130.0\" y=\"142.7\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">2</text><line x1=\"162.0\" y1=\"126.69999999999999\" x2=\"162.0\" y2=\"132.7\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"162.0\" y=\"142.7\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">3</text><line x1=\"194.0\" y1=\"126.69999999999999\" x2=\"194.0\" y2=\"132.7\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"194.0\" y=\"142.7\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">4</text><line x1=\"226.0\" y1=\"126.69999999999999\" x2=\"226.0\" y2=\"132.7\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"226.0\" y=\"142.7\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">5</text><line x1=\"258.0\" y1=\"126.69999999999999\" x2=\"258.0\" y2=\"132.7\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"258.0\" y=\"142.7\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">6</text><line x1=\"290.0\" y1=\"126.69999999999999\" x2=\"290.0\" y2=\"132.7\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"290.0\" y=\"142.7\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">7</text><line x1=\"63.0\" y1=\"176.0\" x2=\"69.0\" y2=\"176.0\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"60.0\" y=\"179.0\" font-size=\"9\" text-anchor=\"end\" fill=\"currentColor\">-4</text><line x1=\"63.0\" y1=\"164.4\" x2=\"69.0\" y2=\"164.4\" stroke=\"currentColor\" stroke-width=\"1\"/><line x1=\"63.0\" y1=\"152.9\" x2=\"69.0\" y2=\"152.9\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"60.0\" y=\"155.9\" font-size=\"9\" text-anchor=\"end\" fill=\"currentColor\">-2</text><line x1=\"63.0\" y1=\"141.3\" x2=\"69.0\" y2=\"141.3\" stroke=\"currentColor\" stroke-width=\"1\"/><line x1=\"63.0\" y1=\"118.1\" x2=\"69.0\" y2=\"118.1\" stroke=\"currentColor\" stroke-width=\"1\"/><line x1=\"63.0\" y1=\"106.6\" x2=\"69.0\" y2=\"106.6\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"60.0\" y=\"109.6\" font-size=\"9\" text-anchor=\"end\" fill=\"currentColor\">2</text><line x1=\"63.0\" y1=\"95.0\" x2=\"69.0\" y2=\"95.0\" stroke=\"currentColor\" stroke-width=\"1\"/><line x1=\"63.0\" y1=\"83.4\" x2=\"69.0\" y2=\"83.4\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"60.0\" y=\"86.4\" font-size=\"9\" text-anchor=\"end\" fill=\"currentColor\">4</text><line x1=\"63.0\" y1=\"71.9\" x2=\"69.0\" y2=\"71.9\" stroke=\"currentColor\" stroke-width=\"1\"/><line x1=\"63.0\" y1=\"60.3\" x2=\"69.0\" y2=\"60.3\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"60.0\" y=\"63.3\" font-size=\"9\" text-anchor=\"end\" fill=\"currentColor\">6</text><line x1=\"63.0\" y1=\"48.7\" x2=\"69.0\" y2=\"48.7\" stroke=\"currentColor\" stroke-width=\"1\"/><line x1=\"63.0\" y1=\"37.1\" x2=\"69.0\" y2=\"37.1\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"60.0\" y=\"40.1\" font-size=\"9\" text-anchor=\"end\" fill=\"currentColor\">8</text><line x1=\"63.0\" y1=\"25.6\" x2=\"69.0\" y2=\"25.6\" stroke=\"currentColor\" stroke-width=\"1\"/><line x1=\"63.0\" y1=\"14.0\" x2=\"69.0\" y2=\"14.0\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"60.0\" y=\"17.0\" font-size=\"9\" text-anchor=\"end\" fill=\"currentColor\">10</text><text x=\"288\" y=\"124.69999999999999\" font-size=\"10\" font-style=\"italic\" text-anchor=\"end\" fill=\"currentColor\">x</text><text x=\"71.0\" y=\"22\" font-size=\"10\" font-style=\"italic\" fill=\"currentColor\">y</text><polyline points=\"34.0,158.6 34.6,158.3 35.3,157.9 35.9,157.6 36.6,157.3 37.2,156.9 37.8,156.6 38.5,156.2 39.1,155.9 39.8,155.5 40.4,155.2 41.0,154.8 41.7,154.5 42.3,154.1 43.0,153.8 43.6,153.4 44.2,153.1 44.9,152.7 45.5,152.4 46.2,152.0 46.8,151.7 47.4,151.4 48.1,151.0 48.7,150.7 49.4,150.3 50.0,150.0 50.6,149.6 51.3,149.3 51.9,148.9 52.6,148.6 53.2,148.2 53.8,147.9 54.5,147.5 55.1,147.2 55.8,146.8 56.4,146.5 57.0,146.1 57.7,145.8 58.3,145.5 59.0,145.1 59.6,144.8 60.2,144.4 60.9,144.1 61.5,143.7 62.2,143.4 62.8,143.0 63.4,142.7 64.1,142.3 64.7,142.0 65.4,141.6 66.0,141.3 66.6,140.9 67.3,140.6 67.9,140.2 68.6,139.9 69.2,139.6 69.8,139.2 70.5,138.9 71.1,138.5 71.8,138.2 72.4,137.8 73.0,137.5 73.7,137.1 74.3,136.8 75.0,136.4 75.6,136.1 76.2,135.7 76.9,135.4 77.5,135.0 78.2,134.7 78.8,134.3 79.4,134.0 80.1,133.6 80.7,133.3 81.4,133.0 82.0,132.6 82.6,132.3 83.3,131.9 83.9,131.6 84.6,131.2 85.2,130.9 85.8,130.5 86.5,130.2 87.1,129.8 87.8,129.5 88.4,129.1 89.0,128.8 89.7,128.4 90.3,128.1 91.0,127.7 91.6,127.4 92.2,127.1 92.9,126.7 93.5,126.4 94.2,126.0 94.8,125.7 95.4,125.3 96.1,125.0 96.7,124.6 97.4,124.3 98.0,123.9 98.6,123.6 99.3,123.2 99.9,122.9 100.6,122.5 101.2,122.2 101.8,121.8 102.5,121.5 103.1,121.2 103.8,120.8 104.4,120.5 105.0,120.1 105.7,119.8 106.3,119.4 107.0,119.1 107.6,118.7 108.2,118.4 108.9,118.0 109.5,117.7 110.2,117.3 110.8,117.0 111.4,116.6 112.1,116.3 112.7,115.9 113.4,115.6 114.0,115.2 114.6,114.9 115.3,114.6 115.9,114.2 116.6,113.9 117.2,113.5 117.8,113.2 118.5,112.8 119.1,112.5 119.8,112.1 120.4,111.8 121.0,111.4 121.7,111.1 122.3,110.7 123.0,110.4 123.6,110.0 124.2,109.7 124.9,109.3 125.5,109.0 126.2,108.7 126.8,108.3 127.4,108.0 128.1,107.6 128.7,107.3 129.4,106.9 130.0,106.6 130.6,106.2 131.3,105.9 131.9,105.5 132.6,105.2 133.2,104.8 133.8,104.5 134.5,104.1 135.1,103.8 135.8,103.4 136.4,103.1 137.0,102.8 137.7,102.4 138.3,102.1 139.0,101.7 139.6,101.4 140.2,101.0 140.9,100.7 141.5,100.3 142.2,100.0 142.8,99.6 143.4,99.3 144.1,98.9 144.7,98.6 145.4,98.2 146.0,97.9 146.6,97.5 147.3,97.2 147.9,96.9 148.6,96.5 149.2,96.2 149.8,95.8 150.5,95.5 151.1,95.1 151.8,94.8 152.4,94.4 153.0,94.1 153.7,93.7 154.3,93.4 155.0,93.0 155.6,92.7 156.2,92.3 156.9,92.0 157.5,91.6 158.2,91.3 158.8,91.0 159.4,90.6 160.1,90.3 160.7,89.9 161.4,89.6 162.0,89.2 162.6,88.9 163.3,88.5 163.9,88.2 164.6,87.8 165.2,87.5 165.8,87.1 166.5,86.8 167.1,86.4 167.8,86.1 168.4,85.7 169.0,85.4 169.7,85.0 170.3,84.7 171.0,84.4 171.6,84.0 172.2,83.7 172.9,83.3 173.5,83.0 174.2,82.6 174.8,82.3 175.4,81.9 176.1,81.6 176.7,81.2 177.4,80.9 178.0,80.5 178.6,80.2 179.3,79.8 179.9,79.5 180.6,79.1 181.2,78.8 181.8,78.5 182.5,78.1 183.1,77.8 183.8,77.4 184.4,77.1 185.0,76.7 185.7,76.4 186.3,76.0 187.0,75.7 187.6,75.3 188.2,75.0 188.9,74.6 189.5,74.3 190.2,73.9 190.8,73.6 191.4,73.2 192.1,72.9 192.7,72.6 193.4,72.2 194.0,71.9 194.6,71.5 195.3,71.2 195.9,70.8 196.6,70.5 197.2,70.1 197.8,69.8 198.5,69.4 199.1,69.1 199.8,68.7 200.4,68.4 201.0,68.0 201.7,67.7 202.3,67.3 203.0,67.0 203.6,66.7 204.2,66.3 204.9,66.0 205.5,65.6 206.2,65.3 206.8,64.9 207.4,64.6 208.1,64.2 208.7,63.9 209.4,63.5 210.0,63.2 210.6,62.8 211.3,62.5 211.9,62.1 212.6,61.8 213.2,61.4 213.8,61.1 214.5,60.7 215.1,60.4 215.8,60.1 216.4,59.7 217.0,59.4 217.7,59.0 218.3,58.7 219.0,58.3 219.6,58.0 220.2,57.6 220.9,57.3 221.5,56.9 222.2,56.6 222.8,56.2 223.4,55.9 224.1,55.5 224.7,55.2 225.4,54.8 226.0,54.5 226.6,54.2 227.3,53.8 227.9,53.5 228.6,53.1 229.2,52.8 229.8,52.4 230.5,52.1 231.1,51.7 231.8,51.4 232.4,51.0 233.0,50.7 233.7,50.3 234.3,50.0 235.0,49.6 235.6,49.3 236.2,48.9 236.9,48.6 237.5,48.3 238.2,47.9 238.8,47.6 239.4,47.2 240.1,46.9 240.7,46.5 241.4,46.2 242.0,45.8 242.6,45.5 243.3,45.1 243.9,44.8 244.6,44.4 245.2,44.1 245.8,43.7 246.5,43.4 247.1,43.0 247.8,42.7 248.4,42.3 249.0,42.0 249.7,41.7 250.3,41.3 251.0,41.0 251.6,40.6 252.2,40.3 252.9,39.9 253.5,39.6 254.2,39.2 254.8,38.9 255.4,38.5 256.1,38.2 256.7,37.8 257.4,37.5 258.0,37.1 258.6,36.8 259.3,36.4 259.9,36.1 260.6,35.8 261.2,35.4 261.8,35.1 262.5,34.7 263.1,34.4 263.8,34.0 264.4,33.7 265.0,33.3 265.7,33.0 266.3,32.6 267.0,32.3 267.6,31.9 268.2,31.6 268.9,31.2 269.5,30.9 270.2,30.5 270.8,30.2 271.4,29.9 272.1,29.5 272.7,29.2 273.4,28.8 274.0,28.5 274.6,28.1 275.3,27.8 275.9,27.4 276.6,27.1 277.2,26.7 277.8,26.4 278.5,26.0 279.1,25.7 279.8,25.3 280.4,25.0 281.0,24.6 281.7,24.3 282.3,24.0 283.0,23.6 283.6,23.3 284.2,22.9 284.9,22.6 285.5,22.2 286.2,21.9 286.8,21.5 287.4,21.2 288.1,20.8 288.7,20.5 289.4,20.1 290.0,19.8\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"/></svg>The graph of the linear function <i>f</i> is shown, where <i>y</i> = <i>f</i>(<i>x</i>). What is the value of <i>f</i>(4)?",
+          "choices": [
+            "−1",
+            "4",
+            "5",
+            "7"
+          ],
+          "correct": 2,
+          "explanation": "Choice C is correct. To find f(4), go right to x = 4 on the horizontal axis, then straight up to the line and read the y-value there, which is 5. So f(4) = 5. You can confirm this with the equation of the line. It crosses the y-axis at -1 and passes through (2, 2), so its slope is (2 - (-1))/(2 - 0) = 1.5 and f(x) = 1.5x - 1, giving f(4) = 1.5(4) - 1 = 5. Choice A, -1, is the y-intercept, which is f(0) rather than f(4). Choice B, 4, repeats the input instead of giving the output. Choice D, 7, comes from reading the slope as 2 - the labeled gridlines on the y-axis are 2 units apart, not 1 - and then computing 2(4) - 1 = 7."
+        },
+        {
+          "qid": "mt4d1c12",
+          "domain": "Algebra",
+          "skill": "18 Single Variable Equations",
+          "difficulty": "easy",
+          "type": "mc",
+          "text": "<div style=\"text-align:center;font-size:1.1em;\">3(<i>x</i> + 5) = 39</div>What is the value of <i>x</i> + 5 in the given equation?",
+          "choices": [
+            "8",
+            "13",
+            "34",
+            "117"
+          ],
+          "correct": 1,
+          "explanation": "Choice B is correct. The quantity x + 5 is already grouped on the left, so you can get it in one step. Dividing both sides of 3(x + 5) = 39 by 3 gives x + 5 = 13. There is no need to find x on its own. Choice A, 8, is the value of x, found by taking 5 away from 13, which answers a question the problem did not ask. Choice C, 34, comes from subtracting 5 from 39 rather than dividing by 3. Choice D, 117, multiplies 39 by 3 instead of dividing. If you prefer to expand, 3x + 15 = 39 gives 3x = 24 and x = 8, and then x + 5 = 8 + 5 = 13."
+        },
+        {
+          "qid": "mt190185",
+          "domain": "Problem-Solving and Data Analysis",
+          "skill": "114 Scatterplots",
+          "difficulty": "easy",
+          "type": "mc",
+          "text": "<svg viewBox=\"0 0 300 210\" class=\"dx-fig\" style=\"color:var(--text);\"><title>A scatterplot of seven points falling from left to right with a line of best fit</title><line x1=\"34\" y1=\"176.0\" x2=\"290\" y2=\"176.0\" stroke=\"currentColor\" stroke-width=\"1.2\"/><line x1=\"34.0\" y1=\"14\" x2=\"34.0\" y2=\"176\" stroke=\"currentColor\" stroke-width=\"1.2\"/><line x1=\"72.8\" y1=\"173.0\" x2=\"72.8\" y2=\"179.0\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"72.8\" y=\"189.0\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">10</text><line x1=\"111.6\" y1=\"173.0\" x2=\"111.6\" y2=\"179.0\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"111.6\" y=\"189.0\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">20</text><line x1=\"150.4\" y1=\"173.0\" x2=\"150.4\" y2=\"179.0\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"150.4\" y=\"189.0\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">30</text><line x1=\"189.2\" y1=\"173.0\" x2=\"189.2\" y2=\"179.0\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"189.2\" y=\"189.0\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">40</text><line x1=\"227.9\" y1=\"173.0\" x2=\"227.9\" y2=\"179.0\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"227.9\" y=\"189.0\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">50</text><line x1=\"266.7\" y1=\"173.0\" x2=\"266.7\" y2=\"179.0\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"266.7\" y=\"189.0\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">60</text><line x1=\"31.0\" y1=\"160.4\" x2=\"37.0\" y2=\"160.4\" stroke=\"currentColor\" stroke-width=\"1\"/><line x1=\"31.0\" y1=\"144.8\" x2=\"37.0\" y2=\"144.8\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"28.0\" y=\"147.8\" font-size=\"9\" text-anchor=\"end\" fill=\"currentColor\">100</text><line x1=\"31.0\" y1=\"129.3\" x2=\"37.0\" y2=\"129.3\" stroke=\"currentColor\" stroke-width=\"1\"/><line x1=\"31.0\" y1=\"113.7\" x2=\"37.0\" y2=\"113.7\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"28.0\" y=\"116.7\" font-size=\"9\" text-anchor=\"end\" fill=\"currentColor\">200</text><line x1=\"31.0\" y1=\"98.1\" x2=\"37.0\" y2=\"98.1\" stroke=\"currentColor\" stroke-width=\"1\"/><line x1=\"31.0\" y1=\"82.5\" x2=\"37.0\" y2=\"82.5\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"28.0\" y=\"85.5\" font-size=\"9\" text-anchor=\"end\" fill=\"currentColor\">300</text><line x1=\"31.0\" y1=\"67.0\" x2=\"37.0\" y2=\"67.0\" stroke=\"currentColor\" stroke-width=\"1\"/><line x1=\"31.0\" y1=\"51.4\" x2=\"37.0\" y2=\"51.4\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"28.0\" y=\"54.4\" font-size=\"9\" text-anchor=\"end\" fill=\"currentColor\">400</text><line x1=\"31.0\" y1=\"35.8\" x2=\"37.0\" y2=\"35.8\" stroke=\"currentColor\" stroke-width=\"1\"/><line x1=\"31.0\" y1=\"20.2\" x2=\"37.0\" y2=\"20.2\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"28.0\" y=\"23.2\" font-size=\"9\" text-anchor=\"end\" fill=\"currentColor\">500</text><line x1=\"34.0\" y1=\"51.4\" x2=\"266.7\" y2=\"144.8\" stroke=\"currentColor\" stroke-width=\"1.4\"/><circle cx=\"34.0\" cy=\"48.3\" r=\"2.6\" fill=\"currentColor\"/><circle cx=\"72.8\" cy=\"70.1\" r=\"2.6\" fill=\"currentColor\"/><circle cx=\"111.6\" cy=\"79.4\" r=\"2.6\" fill=\"currentColor\"/><circle cx=\"150.4\" cy=\"104.3\" r=\"2.6\" fill=\"currentColor\"/><circle cx=\"189.2\" cy=\"110.6\" r=\"2.6\" fill=\"currentColor\"/><circle cx=\"227.9\" cy=\"132.4\" r=\"2.6\" fill=\"currentColor\"/><circle cx=\"266.7\" cy=\"141.7\" r=\"2.6\" fill=\"currentColor\"/><text x=\"44\" y=\"12\" font-size=\"9\" fill=\"currentColor\">Mass (grams)</text><text x=\"150.35\" y=\"200.0\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">Minutes</text></svg>The scatterplot shows the mass, in grams, of a block of ice at several times after it was taken out of a freezer. A line of best fit is also shown. According to the line of best fit, what is the predicted mass of the block 20 minutes after it was taken out?",
+          "choices": [
+            "100 grams",
+            "300 grams",
+            "350 grams",
+            "400 grams"
+          ],
+          "correct": 1,
+          "choiceNotes": [
+            "A: gives the predicted decrease in mass over the 20 minutes, 400 &minus; 300, rather than the predicted mass itself.",
+            "B (key): at 20 minutes the line of best fit is at the 300-gram gridline.",
+            "C: reads the line at 10 minutes, one labelled tick too soon.",
+            "D: reads the line at 0 minutes, its vertical intercept, instead of at 20 minutes."
+          ],
+          "explanation": "Choice B is correct. The question asks what the line of best fit predicts, so read the line, not the nearby data point. The horizontal axis is minutes and the vertical axis is grams, with a minor tick every 50 grams. Above 20 minutes, the line sits at 300 grams. You can check this from the line itself: it starts at 400 grams at 0 minutes and falls to 100 grams at 60 minutes, a rate of -5 grams per minute, so the predicted mass at 20 minutes is 400 - 5(20) = 300 grams. Choice A, 100 grams, is the prediction at 60 minutes, the far end of the line. Choice C, 350 grams, comes from reading up to the next gridline above the line or from using the plotted point instead of the line. Choice D, 400 grams, is the value at 0 minutes."
+        },
+        {
+          "qid": "mtde18df",
+          "domain": "Algebra",
+          "skill": "12 English to Math",
+          "difficulty": "easy",
+          "type": "fr",
+          "text": "A charter boat company charges $12 for each passenger plus a flat fee of $50 for the trip. The total charge for one trip was $362. How many passengers were on that trip?",
+          "answer": "26",
+          "explanation": "The correct answer is 26. Let p be the number of passengers. Each passenger is charged $12, so the passenger charge is 12p, and the flat $50 fee is charged once for the trip. That gives 12p + 50 = 362. Subtracting 50 from both sides gives 12p = 312, and dividing both sides by 12 gives p = 26. Check it: 26 passengers cost 12(26) = 312 dollars, and 312 + 50 = 362 dollars. A common slip is to divide the whole $362 by 12 before removing the flat fee, which gives about 30.2 - the flat fee has to come out first because it does not depend on how many passengers there are."
+        },
+        {
+          "qid": "mt799420",
+          "domain": "Advanced Math",
+          "skill": "57 Sum of Quadratic Solutions",
+          "difficulty": "medium",
+          "type": "fr",
+          "text": "<div style=\"text-align:center;font-size:1.1em;\">3<i>x</i><sup>2</sup> + 5<i>x</i> &minus; 12 = <i>x</i><sup>2</sup> + 21<i>x</i> + 4</div>What is the sum of the solutions to the given equation?",
+          "answer": "8",
+          "explanation": "The correct answer is 8. Move everything to one side: 3x<sup>2</sup> + 5x - 12 - (x<sup>2</sup> + 21x + 4) = 0. Distributing the minus sign gives 3x<sup>2</sup> - x<sup>2</sup> = 2x<sup>2</sup>, 5x - 21x = -16x, and -12 - 4 = -16, so 2x<sup>2</sup> - 16x - 16 = 0. Dividing every term by 2 gives x<sup>2</sup> - 8x - 8 = 0. For a quadratic in the form x<sup>2</sup> + bx + c = 0, the two solutions add to -b, so the sum here is -(-8) = 8. You never need the solutions themselves. If you want them, the quadratic formula gives x = (8 ± &radic;(64 + 32))/2 = 4 ± 2&radic;6, and (4 + 2&radic;6) + (4 - 2&radic;6) = 8. Watch the constant term when you subtract: -12 - 4 is -16, not -8."
+        },
+        {
+          "qid": "mt6c48d3",
+          "domain": "Algebra",
+          "skill": "5 Function Transformations",
+          "difficulty": "medium",
+          "type": "mc",
+          "text": "The function <i>f</i> is defined by <i>f</i>(<i>x</i>) = 3<i>x</i> + 9. The function <i>g</i> is defined by <i>g</i>(<i>x</i>) = <i>f</i>(<i>x</i>) &minus; 15. In the <i>xy</i>-plane, what is the <i>x</i>-coordinate of the <i>x</i>-intercept of the graph of <i>y</i> = <i>g</i>(<i>x</i>)?",
+          "choices": [
+            "−8",
+            "−3",
+            "2",
+            "12"
+          ],
+          "correct": 2,
+          "choiceNotes": [
+            "A: added 15 instead of subtracting, solving 3x + 24 = 0.",
+            "B: found the x-intercept of f itself and ignored the shift, solving 3x + 9 = 0.",
+            "C: KEY. g(x) = 3x + 9 - 15 = 3x - 6, so 3x - 6 = 0 and x = 2.",
+            "D: read the vertical shift as a horizontal one, using g(x) = f(x - 15) = 3x - 36."
+          ],
+          "explanation": "Choice C is correct. First write g out. Since g(x) = f(x) - 15 and f(x) = 3x + 9, g(x) = 3x + 9 - 15 = 3x - 6. The x-intercept is the point where y = 0, so set 3x - 6 = 0, which gives 3x = 6 and x = 2. Choice A, -8, comes from adding 15 instead of subtracting it: 3x + 24 = 0 gives x = -8. Choice B, -3, is the x-intercept of f itself, from 3x + 9 = 0, so it ignores the shift entirely. Choice D, 12, treats the -15 as a shift to the right, solving 3(x - 15) + 9 = 0. Subtracting 15 from the output moves the graph down by 15, not sideways."
+        },
+        {
+          "qid": "mta1e7e9",
+          "domain": "Algebra",
+          "skill": "13 Inequalities",
+          "difficulty": "medium",
+          "type": "mc",
+          "text": "A chess club has $250 to spend on a tournament. The club must pay a $46 entry fee for the club and $18 for each player it registers. What is the greatest number of players the club can register?",
+          "choices": [
+            "11",
+            "12",
+            "13",
+            "14"
+          ],
+          "correct": 0,
+          "explanation": "Choice A is correct. The club pays the $46 entry fee once and $18 for each player, so registering p players costs 46 + 18p dollars, and that must be no more than the $250 available. Subtracting 46 from both sides of 46 + 18p = 250 shows that 18p can be at most 204, and dividing by 18 shows that p can be at most 11.33. Players come in whole numbers, so the greatest number the club can register is 11, at a cost of 46 + 18(11) = 244 dollars. Choice B, 12, rounds 11.33 up, but 46 + 18(12) = 262 dollars is more than the club has. Choices C and D leave the entry fee out and work from 250/18 = 13.9, rounding it down for 13 or up for 14."
+        },
+        {
+          "qid": "mt613ac6",
+          "domain": "Advanced Math",
+          "skill": "5 Function Transformations",
+          "difficulty": "medium",
+          "type": "mc",
+          "text": "The function <i>f</i> is defined by <i>f</i>(<i>x</i>) = <i>x</i><sup>2</sup> &minus; 6<i>x</i> + 1. The function <i>g</i> is defined by <i>g</i>(<i>x</i>) = <i>f</i>(&minus;<i>x</i>). Which of the following is equivalent to <i>g</i>(<i>x</i>)?",
+          "choices": [
+            "&minus;<i>x</i><sup>2</sup> + 6<i>x</i> &minus; 1",
+            "&minus;<i>x</i><sup>2</sup> + 6<i>x</i> + 1",
+            "<i>x</i><sup>2</sup> + 6<i>x</i> &minus; 1",
+            "<i>x</i><sup>2</sup> + 6<i>x</i> + 1"
+          ],
+          "correct": 3,
+          "choiceNotes": [
+            "A: computed &minus;<i>f</i>(<i>x</i>) instead of <i>f</i>(&minus;<i>x</i>), i.e. reflected across the <i>x</i>-axis rather than the <i>y</i>-axis.",
+            "B: substituted &minus;<i>x</i> correctly in the linear and constant terms but treated (&minus;<i>x</i>)<sup>2</sup> as &minus;<i>x</i><sup>2</sup>.",
+            "C: changed the sign of the constant term as well, treating the reflection as flipping the sign of every term except the leading one.",
+            "D (key): <i>f</i>(&minus;<i>x</i>) = (&minus;<i>x</i>)<sup>2</sup> &minus; 6(&minus;<i>x</i>) + 1 = <i>x</i><sup>2</sup> + 6<i>x</i> + 1. Spot check: <i>f</i>(&minus;2) = 4 + 12 + 1 = 17 and <i>g</i>(2) = 4 + 12 + 1 = 17."
+          ],
+          "explanation": "Choice D is correct. Writing g(x) = f(-x) means replacing every x in f with -x, so g(x) = (-x)<sup>2</sup> - 6(-x) + 1. Since (-x)<sup>2</sup> = x<sup>2</sup> and -6(-x) = +6x, this is g(x) = x<sup>2</sup> + 6x + 1. The constant 1 contains no x, so it is unchanged. Choice A is -f(x), which reflects the graph across the x-axis instead of the y-axis. Choice B negates the x<sup>2</sup> and x terms but leaves the constant alone, mixing the two reflections. Choice C gets x<sup>2</sup> and 6x right but also flips the sign of the constant, which only happens if you negate the whole function. As a check, f has its vertex at (3, -8), and reflecting across the y-axis puts g's vertex at (-3, -8) - substituting x = -3 into x<sup>2</sup> + 6x + 1 gives 9 - 18 + 1 = -8."
+        },
+        {
+          "qid": "mt4c2b77",
+          "domain": "Algebra",
+          "skill": "26 Slope",
+          "difficulty": "medium",
+          "type": "mc",
+          "text": "In the <i>xy</i>-plane, line <i>m</i> has a slope of &minus;2 and passes through the points (&minus;6, 11) and (<i>a</i>, 3), where <i>a</i> is a constant. What is the value of <i>a</i>?",
+          "choices": [
+            "&minus;10",
+            "&minus;2",
+            "4",
+            "10"
+          ],
+          "correct": 1,
+          "choiceNotes": [
+            "A: used the slope with the wrong sign, solving 3 &minus; 11 = 2(<i>a</i> + 6), which gives <i>a</i> = &minus;10.",
+            "B (key): (3 &minus; 11)&frasl;(<i>a</i> &minus; (&minus;6)) = &minus;2, so &minus;8 = &minus;2(<i>a</i> + 6), <i>a</i> + 6 = 4, <i>a</i> = &minus;2. Check: the points (&minus;6, 11) and (&minus;2, 3) give slope &minus;8&frasl;4 = &minus;2.",
+            "C: found the horizontal change, 4, and reported it as <i>a</i>, forgetting to add it to the <i>x</i>-coordinate &minus;6.",
+            "D: inverted the slope, multiplying the vertical change by &minus;2 instead of dividing, giving <i>a</i> = &minus;6 + 16 = 10."
+          ],
+          "explanation": "Choice B is correct. Slope is the change in y over the change in x, so (3 - 11)/(a - (-6)) = -2, which is -8/(a + 6) = -2. Multiplying both sides by (a + 6) gives -8 = -2(a + 6), and dividing both sides by -2 gives 4 = a + 6, so a = 4 - 6 = -2. Check it: from (-6, 11) to (-2, 3) the run is 4 and the rise is -8, and -8/4 = -2. Choice A, -10, comes from a sign slip that turns the equation into a + 6 = -4. Choice C, 4, stops one step early and reports the value of a + 6 as if it were a. Choice D, 10, uses a - 6 in the denominator instead of a - (-6), which is a + 6."
+        },
+        {
+          "qid": "mt53bb7b",
+          "domain": "Geometry and Trigonometry",
+          "skill": "67 Angle Properties",
+          "difficulty": "medium",
+          "type": "fr",
+          "text": "In triangle <i>PQR</i>, the measure of angle <i>P</i> is 24&deg;. The measure of angle <i>Q</i> is 3 times the measure of angle <i>R</i>. What is the measure, in degrees, of angle <i>Q</i>?",
+          "answer": "117",
+          "explanation": "The correct answer is 117. The three angles of a triangle add to 180 degrees, so P + Q + R = 180. Since P is 24 degrees, angles Q and R together measure 180 - 24 = 156 degrees. The measure of Q is 3 times the measure of R, so write Q = 3R. Substituting gives 3R + R = 156, so 4R = 156 and R = 39. Then Q = 3(39) = 117 degrees. Check the total: 24 + 117 + 39 = 180. The main trap is stopping at R = 39 - the question asks for angle Q, which is the larger of the two."
+        },
+        {
+          "qid": "mt3888b4",
+          "domain": "Problem-Solving and Data Analysis",
+          "skill": "Ratios, Rates, Proportional Relationships, and Units",
+          "difficulty": "medium",
+          "type": "mc",
+          "text": "The International Space Station orbits Earth at an average speed of 4.76 miles per second. What is the space station’s average speed in miles per hour?",
+          "choices": [
+            "285.6",
+            "571.2",
+            "856.8",
+            "17,136.0"
+          ],
+          "correct": 3,
+          "explanation": "Choice D is correct. Since 1 minute = 60 seconds and 1 hour = 60 minutes, it follows that 1 hour = (60)(60), or 3,600 seconds. Using this conversion factor, the space station's average speed of 4.76 miles per second is equal to an average speed of <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">4.76 miles</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">second</span></span> &times; <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">3,600 seconds</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">hour</span></span> = <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">17,136 miles</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">hour</span></span>, or 17,136 miles per hour.<br><br>Choice A is incorrect. This is the space station's average speed in miles per minute. Choice B is incorrect. This is double the space station's average speed in miles per minute, or the number of miles the space station travels on average in 2 minutes. Choice C is incorrect. This is triple the space station's average speed in miles per minute, or the number of miles the space station travels on average in 3 minutes."
+        },
+        {
+          "qid": "mt1d93aa",
+          "domain": "Advanced Math",
+          "skill": "62 Vertex Form",
+          "difficulty": "medium",
+          "type": "mc",
+          "text": "The function <i>f</i> is defined by <i>f</i>(<i>x</i>) = <i>a</i>(<i>x</i> &minus; <i>h</i>)<sup>2</sup> + <i>k</i>, where <i>a</i>, <i>h</i>, and <i>k</i> are constants. In the <i>xy</i>-plane, the graph of <i>y</i> = <i>f</i>(<i>x</i>) has its vertex at (3, &minus;8) and passes through the point (5, 0). What is the value of <i>a</i>?",
+          "choices": [
+            "−2",
+            "<sup>1</sup>&frasl;<sub>2</sub>",
+            "2",
+            "4"
+          ],
+          "correct": 2,
+          "choiceNotes": [
+            "A: moved k to the wrong side, solving 4a = -8.",
+            "B: inverted the ratio, computing 4/8 instead of 8/4.",
+            "C: KEY. 0 = a(5 - 3)^2 - 8 gives 4a = 8, so a = 2.",
+            "D: did not square the horizontal distance, computing a = 8/2."
+          ],
+          "explanation": "Choice C is correct. In the form f(x) = a(x - h)<sup>2</sup> + k, the vertex is (h, k). The vertex here is (3, -8), so h = 3 and k = -8 and f(x) = a(x - 3)<sup>2</sup> - 8. The graph passes through (5, 0), so substituting x = 5 and f(x) = 0 gives 0 = a(5 - 3)<sup>2</sup> - 8, which is 0 = a(4) - 8. Adding 8 gives 4a = 8, so a = 2 and f(x) = 2(x - 3)<sup>2</sup> - 8. Choice A, -2, has the wrong sign - with a negative a the parabola opens downward from (3, -8) and could never reach y = 0. Choice B, 1/2, inverts the division, using 4/8 in place of 8/4. Choice D, 4, divides 8 by (5 - 3) = 2 instead of by (5 - 3)<sup>2</sup> = 4."
+        },
+        {
+          "qid": "mtea01b0",
+          "domain": "Advanced Math",
+          "skill": "5 Function Transformations",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "The function <i>f</i> is defined by <i>f</i>(<i>x</i>) = <i>x</i><sup>2</sup> &minus; 8<i>x</i> + 3. The function <i>g</i> is defined by <i>g</i>(<i>x</i>) = <i>f</i>(2<i>x</i> + 6). In the <i>xy</i>-plane, the graph of <i>y</i> = <i>g</i>(<i>x</i>) has its minimum at the point (<i>a</i>, <i>b</i>). What is the value of <i>a</i>?",
+          "choices": [
+            "−5",
+            "−4",
+            "−2",
+            "−1"
+          ],
+          "correct": 3,
+          "choiceNotes": [
+            "A: sign error on the vertex of f, taking it at x = -4, then solving 2x + 6 = -4.",
+            "B: undid the transformations in the wrong order, computing 4/2 - 6.",
+            "C: ignored the factor of 2 and solved x + 6 = 4.",
+            "D: KEY. f has its minimum at x = 4, so g is least when 2x + 6 = 4, giving x = -1. (Check: g(x) = 4x^2 + 8x - 9, vertex at x = -8/8 = -1.)"
+          ],
+          "explanation": "Choice D is correct. The graph of g has its minimum where f takes its minimum value, and f reaches its minimum at its vertex. For f(x) = x<sup>2</sup> - 8x + 3, the vertex is at x = -b/(2a) = 8/2 = 4. Since g(x) = f(2x + 6), the input to f is 2x + 6, so g is at its minimum when 2x + 6 = 4. Subtracting 6 gives 2x = -2, so x = -1 and a = -1. Check: g(-1) = f(4) = 16 - 32 + 3 = -13, the smallest value f can take. Choice A, -5, uses x = -4 for the vertex of f, a sign error in -b/(2a), and then solves 2x + 6 = -4. Choice B, -4, reports that wrong vertex itself. Choice C, -2, drops the factor of 2 and solves x + 6 = 4."
+        },
+        {
+          "qid": "mt3a27d2",
+          "domain": "Algebra",
+          "skill": "Linear Functions",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "For the function <i>f</i>, if <i>f</i>(3<i>x</i>) = <i>x</i> − 6 for all values of <i>x</i>, what is the value of <i>f</i>(6)?",
+          "choices": [
+            "−6",
+            "−4",
+            "0",
+            "2"
+          ],
+          "correct": 1,
+          "explanation": "It's given that <i>f</i>(3<i>x</i>) = <i>x</i> − 6 for all values of <i>x</i>. If 3<i>x</i> = 6, then <i>f</i>(3<i>x</i>) will equal <i>f</i>(6). Dividing both sides of 3<i>x</i> = 6 by 3 gives <i>x</i> = 2. Therefore, substituting 2 for <i>x</i> in the given equation yields <i>f</i>(3 × 2) = 2 − 6, which can be rewritten as <i>f</i>(6) = −4.<br><br>Choice A is incorrect. This is the value of the constant in the given equation for <i>f</i>. Choice C is incorrect and may result from substituting <i>x</i> = 6, rather than <i>x</i> = 2, into the given equation. Choice D is incorrect. This is the value of <i>x</i> that yields <i>f</i>(6) for the left-hand side of the given equation; it's not the value of <i>f</i>(6)."
+        },
+        {
+          "qid": "mtfefb83",
+          "domain": "Advanced Math",
+          "skill": "55 One Real Quadratic Solution",
+          "difficulty": "hard",
+          "type": "fr",
+          "text": "<div style=\"text-align:center;font-size:1.1em;\"><i>kx</i><sup>2</sup> &minus; 20<i>x</i> + 25 = 0</div>In the given equation, <i>k</i> is a positive constant. The equation has exactly one real solution. What is that solution?",
+          "answer": "2.5",
+          "explanation": "The correct answer is 2.5. A quadratic ax<sup>2</sup> + bx + c = 0 has exactly one real solution when its discriminant b<sup>2</sup> - 4ac equals 0. Here a = k, b = -20, and c = 25, so (-20)<sup>2</sup> - 4(k)(25) = 0, which is 400 - 100k = 0, giving k = 4. That is positive, as the question requires. The equation is then 4x<sup>2</sup> - 20x + 25 = 0, which factors as (2x - 5)<sup>2</sup> = 0, so 2x = 5 and x = 2.5. A faster route: when a quadratic has one repeated solution, that solution is the vertex, x = -b/(2a) = 20/(2 times 4) = 2.5. Take care to answer the question asked - stopping at k = 4 gives the step before the one wanted."
+        },
+        {
+          "qid": "mted04fe",
+          "domain": "Geometry and Trigonometry",
+          "skill": "83 Arc Length",
+          "difficulty": "hard",
+          "type": "fr",
+          "text": "In a circle, a sector is bounded by two radii and the arc between their endpoints. The length of that arc is 4&pi; units and the area of that sector is 24&pi; square units. What is the measure, in degrees, of the central angle of the sector?",
+          "answer": "60",
+          "explanation": "The correct answer is 60. The area of a sector equals half its radius times its arc length, so 24&pi; = (1/2)(r)(4&pi;), which is 24&pi; = 2&pi; times r, giving r = 12. The whole circle then has circumference 2&pi;(12) = 24&pi;. The arc is 4&pi; long, so the sector takes up 4&pi;/24&pi; = 1/6 of the circle, and its central angle is (1/6)(360) = 60 degrees. You can reach the same place with the standard formulas: arc = (angle/360)(2&pi; r) and area = (angle/360)(&pi; r<sup>2</sup>). Dividing the area by the arc gives r/2, so r/2 = 24&pi;/4&pi; = 6 and r = 12, and then 4&pi; = (angle/360)(24&pi;) gives angle = 60 degrees."
+        },
+        {
+          "qid": "mt351fda",
+          "domain": "Geometry and Trigonometry",
+          "skill": "89 General Form of a Circle",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "<div style=\"text-align:center;font-size:1.1em;\"><i>x</i><sup>2</sup> + <i>y</i><sup>2</sup> &minus; 12<i>x</i> + 8<i>y</i> + 27 = 0</div>The given equation defines a circle in the <i>xy</i>-plane. What is the least possible distance between the point (14, 2) and a point on this circle?",
+          "choices": [
+            "5",
+            "9",
+            "10",
+            "15"
+          ],
+          "correct": 0,
+          "choiceNotes": [
+            "A (key): completing the square gives (<i>x</i> &minus; 6)<sup>2</sup> + (<i>y</i> + 4)<sup>2</sup> = 25, so the centre is (6, &minus;4) and the radius is 5. The distance from (14, 2) to the centre is &radic;(8<sup>2</sup> + 6<sup>2</sup>) = 10, and the nearest point of the circle lies on that segment, 5 units from the centre, so the least distance is 10 &minus; 5 = 5.",
+            "B: added the horizontal and vertical changes instead of using the Pythagorean theorem, getting 8 + 6 = 14 to the centre and answering 14 &minus; 5 = 9.",
+            "C: found the distance to the centre and stopped, never subtracting the radius.",
+            "D: added the radius instead of subtracting it, which gives the greatest distance to the circle, not the least."
+          ],
+          "explanation": "Choice A is correct. Complete the square to find the circle's center and radius. Group the terms as (x<sup>2</sup> - 12x) + (y<sup>2</sup> + 8y) = -27. Half of -12 is -6 and half of 8 is 4, so add 36 and 16 to both sides: (x - 6)<sup>2</sup> + (y + 4)<sup>2</sup> = -27 + 36 + 16 = 25. The center is (6, -4) and the radius is 5. The distance from (14, 2) to the center is &radic;((14 - 6)<sup>2</sup> + (2 - (-4))<sup>2</sup>) = &radic;(64 + 36) = 10, so the point lies outside the circle, and the nearest point of the circle is 10 - 5 = 5 units away. Choice C, 10, is the distance to the center, stopping before the radius is subtracted. Choice D, 15, is 10 + 5, the greatest distance rather than the least. Choice B, 9, comes from adding the horizontal and vertical gaps, 8 + 6 = 14, instead of using the Pythagorean distance."
+        },
+        {
+          "qid": "mtacb023",
+          "domain": "Algebra",
+          "skill": "Linear Inequalities in One or Two Variables",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "A team hosting an event to raise money for new uniforms plans to sell at least 140 tickets before this event and at least 220 tickets during this event to raise a total of at least $5,820 from all tickets sold. The price of a ticket during this event is $3 less than the price of a ticket before this event. Which inequality represents this situation, where <i>x</i> is the price, in dollars, of a ticket sold during this event?",
+          "choices": [
+            "140(<i>x</i> + 3) + 220<i>x</i> ≤ 5,820",
+            "140(<i>x</i> + 3) + 220<i>x</i> ≥ 5,820",
+            "140(<i>x</i> − 3) + 220<i>x</i> ≤ 5,820",
+            "140(<i>x</i> − 3) + 220<i>x</i> ≥ 5,820"
+          ],
+          "correct": 1,
+          "explanation": "Choice B is correct. It's given that a team plans to sell at least 140 tickets before an event and at least 220 tickets during the event to raise a total of at least $5,820 from all tickets sold. It's also given that the price of a ticket during the event is $3 less than the price of a ticket before the event and that <i>x</i> represents the price, in dollars, of a ticket sold during the event. It follows that <i>x</i> + 3 represents the price, in dollars, of a ticket sold before the event. The expression 140(<i>x</i> + 3) represents the planned revenue, in dollars, from the tickets sold before the event, and the expression 220<i>x</i> represents the planned revenue, in dollars, from the tickets sold during the event. Thus, the expression 140(<i>x</i> + 3) + 220<i>x</i> represents the planned revenue, in dollars, from all tickets sold. Since the team plans to raise a total of at least $5,820 from all tickets sold, the total revenue must be at least $5,820. Therefore, the inequality 140(<i>x</i> + 3) + 220<i>x</i> ≥ 5,820 represents this situation.<br><br>Choice A is incorrect. This inequality represents a situation in which the team raises a total of at most $5,820 from all tickets sold.<br><br>Choice C is incorrect. This inequality represents a situation in which the price of a ticket before the event is $3 less, rather than $3 more, than the price of a ticket during the event and the team raises a total of at most $5,820 from all tickets sold.<br><br>Choice D is incorrect. This inequality represents a situation in which the price of a ticket before the event is $3 less, rather than $3 more, than the price of a ticket during the event."
+        },
+        {
+          "qid": "mtc8d603",
+          "domain": "Problem-Solving and Data Analysis",
+          "skill": "One-Variable Data: Distributions and Measures of Center and Spread",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "A data set of 27 different numbers has a mean of 33 and a median of 33. A new data set is created by adding 7 to each number in the original data set that is greater than the median and subtracting 7 from each number in the original data set that is less than the median. Which of the following measures does NOT have the same value in both the original and new data sets?",
+          "choices": [
+            "Median",
+            "Mean",
+            "Sum of the numbers",
+            "Standard deviation"
+          ],
+          "correct": 3,
+          "explanation": "Choice D is correct. When a data set has an odd number of elements, the median can be found by ordering the values from least to greatest and determining the middle value. Out of the 27 different numbers in this data set, 13 numbers are below the median, one number is exactly 33, and 13 numbers are above the median. When 7 is subtracted from each number below the median and added to each number above the median, the data spread out from the median. Since the median of this data set, 33, is equivalent to the mean of the data set, the data also spread out from the mean. Since standard deviation is a measure of how spread out the data are from the mean, a greater spread from the mean indicates an increased standard deviation.<br><br>Choice A is incorrect. All the numbers less than the median decrease and all the numbers greater than the median increase, but the median itself doesn't change. Choices B and C are incorrect. The mean of a data set is found by dividing the sum of the values by the number of values. The net change from subtracting 7 from 13 numbers and adding 7 to 13 numbers is zero. Therefore, neither the mean nor the sum of the numbers changes."
+        },
+        {
+          "qid": "mt0e5f7b",
+          "domain": "Problem-Solving and Data Analysis",
+          "skill": "One-Variable Data: Distributions and Measures of Center and Spread",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "A scientist measured the lengths of 240 gray seals from Muskeget Island and 120 gray seals from Sable Island. The scientist determined that the mean length of the 240 gray seals from Muskeget Island was 88 inches and the mean length of the 120 gray seals from Sable Island was 94 inches. What was the mean length of all 360 gray seals the scientist measured for this study?",
+          "choices": [
+            "89",
+            "90",
+            "91",
+            "92"
+          ],
+          "correct": 1,
+          "explanation": "Choice B is correct. The mean of a data set is calculated by dividing the sum of the values in the data set by the number of values in the data set. It's given that the mean length of the 240 gray seals from Muskeget Island was 88 inches. This can be represented by the equation <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>x</i></span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">240</span></span> = 88, where <i>x</i> represents the sum of the lengths, in inches, of the 240 gray seals from Muskeget Island. Multiplying both sides of this equation by 240 yields <i>x</i> = (240)(88), or <i>x</i> = 21,120 inches. It's also given that the mean length of the 120 gray seals from Sable Island was 94 inches. This can be represented by the equation <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\"><i>y</i></span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">120</span></span> = 94, where <i>y</i> represents the sum of the lengths, in inches, of the 120 gray seals from Sable Island. Multiplying both sides of this equation by 120 yields <i>y</i> = (120)(94), or <i>y</i> = 11,280 inches. Therefore, the sum of the lengths, in inches, of all 360 gray seals is 21,120 + 11,280, or 32,400. Dividing this sum by 360 yields <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">32,400</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">360</span></span>, or 90 inches. Therefore, the mean length of all 360 gray seals the scientist measured for this study is 90 inches.<br><br>Choice A is incorrect and may result from conceptual or calculation errors.<br><br>Choice C is incorrect. This is the mean length of 88 inches and 94 inches, not the mean length of all 360 gray seals the scientist measured for this study.<br><br>Choice D is incorrect and may result from conceptual or calculation errors."
+        },
+        {
+          "qid": "mt171241",
+          "domain": "Advanced Math",
+          "skill": "38 Exponent Rules",
+          "difficulty": "hard",
+          "type": "fr",
+          "text": "<div style=\"text-align:center;font-size:1.1em;\">2<sup><i>a</i></sup> = 8<sup><i>b</i>&thinsp;+&thinsp;1</sup></div><div style=\"text-align:center;font-size:1.1em;\">4<sup><i>a</i>&thinsp;&minus;&thinsp;<i>b</i></sup> = 2<sup>10</sup></div>In the given equations, <i>a</i> and <i>b</i> are constants. What is the value of <i>a</i>?",
+          "answer": "6",
+          "explanation": "The correct answer is 6. Write every base as a power of 2. Since 8 = 2<sup>3</sup>, the first equation becomes 2<sup>a</sup> = (2<sup>3</sup>)<sup>(b + 1)</sup> = 2<sup>(3b + 3)</sup>, and equal powers of the same base have equal exponents, so a = 3b + 3. Since 4 = 2<sup>2</sup>, the second equation becomes 2<sup>(2(a - b))</sup> = 2<sup>10</sup>, so 2a - 2b = 10 and a - b = 5, which rearranges to b = a - 5. Substituting that into the first equation gives a = 3(a - 5) + 3 = 3a - 15 + 3 = 3a - 12. Subtracting 3a from both sides gives -2a = -12, so a = 6. Then b = 1, and both equations check out: 2<sup>6</sup> = 64 and 8<sup>(1 + 1)</sup> = 64, and 4<sup>(6 - 1)</sup> = 4<sup>5</sup> = 1024 = 2<sup>10</sup>."
+        }
+      ],
+      "module2Easier": [
+        {
+          "qid": "mtd5d858",
+          "domain": "Problem-Solving and Data Analysis",
+          "skill": "123 Box Plots",
+          "difficulty": "easy",
+          "type": "mc",
+          "text": "<svg viewBox=\"0 0 300 200\" class=\"dx-fig\" style=\"color:var(--text);\"><title>Box plot summarizing the heights of 23 tomato plants</title><line x1=\"25\" y1=\"145\" x2=\"290\" y2=\"145\" stroke=\"currentColor\" stroke-width=\"1.2\"/><line x1=\"30.0\" y1=\"145\" x2=\"30.0\" y2=\"150\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"30.0\" y=\"162\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">10</text><line x1=\"65.7\" y1=\"145\" x2=\"65.7\" y2=\"150\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"65.7\" y=\"162\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">15</text><line x1=\"101.4\" y1=\"145\" x2=\"101.4\" y2=\"150\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"101.4\" y=\"162\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">20</text><line x1=\"137.1\" y1=\"145\" x2=\"137.1\" y2=\"150\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"137.1\" y=\"162\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">25</text><line x1=\"172.9\" y1=\"145\" x2=\"172.9\" y2=\"150\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"172.9\" y=\"162\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">30</text><line x1=\"208.6\" y1=\"145\" x2=\"208.6\" y2=\"150\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"208.6\" y=\"162\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">35</text><line x1=\"244.3\" y1=\"145\" x2=\"244.3\" y2=\"150\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"244.3\" y=\"162\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">40</text><line x1=\"280.0\" y1=\"145\" x2=\"280.0\" y2=\"150\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"280.0\" y=\"162\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">45</text><line x1=\"44.3\" y1=\"100\" x2=\"87.1\" y2=\"100\" stroke=\"currentColor\" stroke-width=\"1.5\"/><line x1=\"201.4\" y1=\"100\" x2=\"258.6\" y2=\"100\" stroke=\"currentColor\" stroke-width=\"1.5\"/><line x1=\"44.3\" y1=\"88\" x2=\"44.3\" y2=\"112\" stroke=\"currentColor\" stroke-width=\"1.5\"/><line x1=\"258.6\" y1=\"88\" x2=\"258.6\" y2=\"112\" stroke=\"currentColor\" stroke-width=\"1.5\"/><rect x=\"87.1\" y=\"80\" width=\"114.3\" height=\"40\" stroke=\"currentColor\" fill=\"none\" stroke-width=\"1.5\"/><line x1=\"144.3\" y1=\"80\" x2=\"144.3\" y2=\"120\" stroke=\"currentColor\" stroke-width=\"1.5\"/><text x=\"160\" y=\"182\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">Height (centimeters)</text></svg>The box plot summarizes the heights, in centimeters, of 23 tomato plants grown in a greenhouse. What is the median height, in centimeters, of these plants?",
+          "choices": [
+            "18",
+            "26",
+            "34",
+            "42"
+          ],
+          "correct": 1,
+          "explanation": "Choice B is correct. In a box plot, the vertical line inside the box marks the median. That line sits at 26 on the height scale, so the median height is 26 centimeters. The fact that there are 23 plants does not change anything - the box plot already summarizes the data, so there is no list of 23 values to order. Choice A, 18, is the left edge of the box, which is the first quartile. Choice C, 34, is the right edge of the box, the third quartile. Choice D, 42, is the end of the right whisker, the greatest height in the data set."
+        },
+        {
+          "qid": "mtb00757",
+          "domain": "Algebra",
+          "skill": "Linear Equations in One Variable",
+          "difficulty": "easy",
+          "type": "mc",
+          "text": "If 4<i>x</i> − 28 = −24, what is the value of <i>x</i> − 7?",
+          "choices": [
+            "−24",
+            "−22",
+            "−6",
+            "−1"
+          ],
+          "correct": 2,
+          "explanation": "Choice C is correct. Dividing all terms in the given equation by 4 yields <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">4<i>x</i></span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">4</span></span> − <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">28</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">4</span></span> = <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">−24</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">4</span></span>, or <i>x</i> − 7 = −6. Therefore, the value of <i>x</i> − 7 is −6.<br><br>Choice A is incorrect. This is the value of 4<i>x</i> − 28, not <i>x</i> − 7.<br><br>Choice B is incorrect and may result from conceptual or calculation errors.<br><br>Choice D is incorrect and may result from conceptual or calculation errors."
+        },
+        {
+          "qid": "mt3f75a5",
+          "domain": "Algebra",
+          "skill": "12 English to Math",
+          "difficulty": "easy",
+          "type": "mc",
+          "text": "A technician charges a $45 service fee for each visit plus $35 for each hour of work. Which equation gives the total charge <i>C</i>, in dollars, for a visit that includes <i>h</i> hours of work?",
+          "choices": [
+            "<i>C</i> = 45 + 35<i>h</i>",
+            "<i>C</i> = 35 + 45<i>h</i>",
+            "<i>C</i> = 80<i>h</i>",
+            "<i>C</i> = 80 + <i>h</i>"
+          ],
+          "correct": 0,
+          "explanation": "Choice A is correct. The $45 service fee is charged once per visit, no matter how long the work takes, so it is a constant term in the equation. The $35 is charged for each hour of work, so it multiplies the number of hours, giving the term 35h. The total charge is therefore C = 45 + 35h. As a check, a 2-hour visit costs 45 + 35(2) = 45 + 70 = 115 dollars. Choice B swaps the two amounts, charging $35 once and $45 for each hour. Choice C combines the two into 80h, which charges the one-time service fee every hour. Choice D combines them into a constant 80 and then charges only $1 an hour."
+        },
+        {
+          "qid": "mt90d567",
+          "domain": "Problem-Solving and Data Analysis",
+          "skill": "One-Variable Data: Distributions and Measures of Center and Spread",
+          "difficulty": "easy",
+          "type": "mc",
+          "text": "Data set A: 72, 73, 73, 76, 76<br>Data set B: 61, 64, 74, 85, <i>x</i><br><br>Data set A and data set B each contain 5 numbers. If the mean of data set A is equal to the mean of data set B, what is the value of <i>x</i>?",
+          "choices": [
+            "77",
+            "85",
+            "86",
+            "95"
+          ],
+          "correct": 2,
+          "explanation": "Choice C is correct. The mean of a data set is found by dividing the sum of the values in the data set by the number of values in the data set. Therefore, the mean of data set A is <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">72+73+73+76+76</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">5</span></span>, which simplifies to 74. The mean of data set B is represented by the equation <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">61+64+74+85+<i>x</i></span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">5</span></span>, or <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">284+<i>x</i></span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">5</span></span>. It's given that the mean of data set A is equal to the mean of data set B. Therefore, the equation 74 = <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">284+<i>x</i></span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">5</span></span> can be used to solve for <i>x</i>. Multiplying both sides of this equation by 5 yields 370 = 284 + <i>x</i>. Subtracting 284 from both sides of this equation yields 86 = <i>x</i>.<br><br>Choices A, B, and D are incorrect and may result from calculation errors."
+        },
+        {
+          "qid": "mte69d84",
+          "domain": "Algebra",
+          "skill": "30 Standard Form Equation",
+          "difficulty": "easy",
+          "type": "fr",
+          "text": "<div style=\"text-align:center;font-size:1.1em;margin:0.6em 0;\">5<i>x</i> + 4<i>y</i> = 60</div>The given equation represents a line in the <i>xy</i>-plane. What is the <i>x</i>-coordinate of the <i>x</i>-intercept of this line?",
+          "answer": "12",
+          "explanation": "The correct answer is 12. The x-intercept is where the line crosses the x-axis, and every point on the x-axis has y = 0. Substituting y = 0 into 5x + 4y = 60 gives 5x + 4(0) = 60, so 5x = 60 and x = 12. The x-intercept is the point (12, 0), and its x-coordinate is 12. The usual slip here is setting the wrong variable to 0. Putting x = 0 instead gives 4y = 60 and y = 15, which is the y-coordinate of the y-intercept, not what the question asked for."
+        },
+        {
+          "qid": "mt4bbbe5",
+          "domain": "Advanced Math",
+          "skill": "1 Plugging into a function",
+          "difficulty": "easy",
+          "type": "fr",
+          "text": "The function <i>f</i> is defined by <i>f</i>(<i>x</i>) = 3<i>x</i><sup>2</sup> &minus; 5. What is the value of <i>f</i>(4)?",
+          "answer": "43",
+          "explanation": "The correct answer is 43. Substitute 4 for x everywhere in f(x) = 3x<sup>2</sup> - 5, which gives f(4) = 3(4)<sup>2</sup> - 5. Work in the right order: square first, so 4<sup>2</sup> = 16, then multiply, so 3(16) = 48, then subtract, so 48 - 5 = 43. Only the x is squared, not the 3 in front of it. Multiplying before squaring would give (3 times 4)<sup>2</sup> - 5 = 144 - 5 = 139, which is the value of (3x)<sup>2</sup> - 5 and not of 3x<sup>2</sup> - 5."
+        },
+        {
+          "qid": "mt8d12e0",
+          "domain": "Algebra",
+          "skill": "28 Linear Word Problems",
+          "difficulty": "easy",
+          "type": "mc",
+          "text": "A truck already holds 24 crates. A worker loads 6 more crates onto the truck each minute at a constant rate. After how many minutes will the truck hold 96 crates?",
+          "choices": [
+            "12",
+            "16",
+            "20",
+            "72"
+          ],
+          "correct": 0,
+          "explanation": "Choice A is correct. The truck already holds 24 crates and gains 6 more each minute, so after m minutes it holds 24 + 6m crates. Setting that equal to 96 gives 24 + 6m = 96, so 6m = 96 - 24 = 72 and m = 72/6 = 12 minutes. Check it: 24 + 6(12) = 24 + 72 = 96 crates. Choice B, 16, divides 96 by 6 and ignores the 24 crates that were already on the truck. Choice C, 20, adds the 24 instead of subtracting it, working from 120/6. Choice D, 72, is the number of crates still to be loaded, not the number of minutes it takes to load them."
+        },
+        {
+          "qid": "mtba3db6",
+          "domain": "Algebra",
+          "skill": "24 Number of Solutions",
+          "difficulty": "easy",
+          "type": "mc",
+          "text": "<div style=\"text-align:center;font-size:1.1em;margin:0.6em 0;\">5(2<i>x</i> &minus; 3) = 10<i>x</i> &minus; 15</div>How many solutions does the given equation have?",
+          "choices": [
+            "Zero",
+            "Exactly one",
+            "Exactly two",
+            "Infinitely many"
+          ],
+          "correct": 3,
+          "choiceNotes": [
+            "A: distributed only onto the first term, getting 10x - 3 = 10x - 15, then read the false statement -3 = -15 as no solutions.",
+            "B: distributed only onto the second term, getting 2x - 15 = 10x - 15, which gives 8x = 0 and the single solution x = 0.",
+            "C: tested convenient values instead of simplifying, found that x = 0 and x = 3 both satisfy the equation, and reported the number of values that happened to be tried.",
+            "D: KEY. Distributing gives 10x - 15 = 10x - 15, the same expression on both sides, so every value of x is a solution."
+          ],
+          "explanation": "Choice D is correct. Distribute the 5 on the left side: 5(2x - 3) = 10x - 15. That is exactly the expression on the right side, so the equation says 10x - 15 = 10x - 15, which is true no matter what x is. The equation therefore has infinitely many solutions. Another way to see it is to subtract 10x from both sides, which leaves -15 = -15, a true statement with no x left in it. Compare this with choice A, zero solutions, which happens when the x terms match but the constants do not, as in 10x - 15 = 10x + 4, and with choice B, exactly one solution, which needs different coefficients of x on the two sides. Choice C cannot happen for an equation like this one, since a linear equation never has exactly two solutions."
+        },
+        {
+          "qid": "mt7e019a",
+          "domain": "Advanced Math",
+          "skill": "21 Simple Equivalent Expressions",
+          "difficulty": "easy",
+          "type": "mc",
+          "text": "Which expression is equivalent to (5<i>x</i><sup>2</sup> + 7<i>x</i> &minus; 4) &minus; (<i>x</i><sup>2</sup> &minus; 2<i>x</i> + 9)?",
+          "choices": [
+            "4<i>x</i><sup>2</sup> + 5<i>x</i> + 5",
+            "4<i>x</i><sup>2</sup> + 5<i>x</i> &minus; 13",
+            "4<i>x</i><sup>2</sup> + 9<i>x</i> + 5",
+            "4<i>x</i><sup>2</sup> + 9<i>x</i> &minus; 13"
+          ],
+          "correct": 3,
+          "explanation": "Choice D is correct. The minus sign in front of the second set of parentheses applies to every term inside it, so (5x<sup>2</sup> + 7x - 4) - (x<sup>2</sup> - 2x + 9) becomes 5x<sup>2</sup> + 7x - 4 - x<sup>2</sup> + 2x - 9. Combining like terms gives 5x<sup>2</sup> - x<sup>2</sup> = 4x<sup>2</sup>, 7x + 2x = 9x, and -4 - 9 = -13, so the expression is equivalent to 4x<sup>2</sup> + 9x - 13. Choice A applies the minus sign to the x<sup>2</sup> term only, leaving 7x - 2x = 5x and -4 + 9 = 5. Choice B makes the same error on the middle term but handles the constant correctly. Choice C gets 9x right but leaves the constant as -4 + 9 = 5."
+        },
+        {
+          "qid": "mtd06c6b",
+          "domain": "Algebra",
+          "skill": "18 Single Variable Equations",
+          "difficulty": "easy",
+          "type": "mc",
+          "text": "<div style=\"text-align:center;font-size:1.1em;margin:0.6em 0;\"><span style=\"display:inline-block;vertical-align:middle;\"><i>x</i>/4</span> + 9 = 21</div>What is the value of <i>x</i> in the given equation?",
+          "choices": [
+            "3",
+            "48",
+            "75",
+            "120"
+          ],
+          "correct": 1,
+          "explanation": "Choice B is correct. Undo the operations in reverse order. Subtracting 9 from both sides of x/4 + 9 = 21 gives x/4 = 12, and multiplying both sides by 4 gives x = 48. Check it: 48/4 + 9 = 12 + 9 = 21. Choice A, 3, divides by 4 instead of multiplying, working out 12/4. Choice C, 75, multiplies by 4 first and then subtracts, using 4(21) - 9 = 84 - 9. Choice D, 120, multiplies by 4 but adds the 9 instead of subtracting it, using 4(21 + 9)."
+        },
+        {
+          "qid": "mt853ca8",
+          "domain": "Geometry and Trigonometry",
+          "skill": "96 Volume",
+          "difficulty": "easy",
+          "type": "fr",
+          "text": "A rectangular shipping box has a volume of 504 cubic inches. The base of the box is a rectangle with a length of 12 inches and a width of 7 inches. What is the height, in inches, of the box?",
+          "answer": "6",
+          "explanation": "The correct answer is 6. The volume of a rectangular box is the area of its base times its height. The base is 12 inches long and 7 inches wide, so its area is 12(7) = 84 square inches. With a volume of 504 cubic inches, 84h = 504, so h = 504/84 = 6 inches. Check it: 12(7)(6) = 84(6) = 504 cubic inches. If you multiply all three given numbers together instead of dividing, you get a number far larger than the volume, which is the sign that division is what is needed."
+        },
+        {
+          "qid": "mt36ebf4",
+          "domain": "Problem-Solving and Data Analysis",
+          "skill": "Two-Variable Data: Models and Scatterplots",
+          "difficulty": "medium",
+          "type": "mc",
+          "text": "Each year, the value of an investment increases by 0.49% of its value the previous year. Which of the following functions best models how the value of the investment changes over time?",
+          "choices": [
+            "Decreasing exponential",
+            "Decreasing linear",
+            "Increasing exponential",
+            "Increasing linear"
+          ],
+          "correct": 2,
+          "explanation": "Choice C is correct. Because the value of the investment increases each year, the function that best models how the value of the investment changes over time is an increasing function. It&rsquo;s given that each year, the value of the investment increases by 0.49% of its value the previous year. Since the value of the investment changes by a fixed percentage each year, the function that best models how the value of the investment changes over time is an exponential function. Therefore, the function that best models how the value of the investment changes over time is an increasing exponential function.<br><br>Choice A is incorrect and may result from conceptual errors.<br><br>Choice B is incorrect and may result from conceptual errors.<br><br>Choice D is incorrect and may result from conceptual errors."
+        },
+        {
+          "qid": "mt67b170",
+          "domain": "Advanced Math",
+          "skill": "41 Exponential Function Structure",
+          "difficulty": "medium",
+          "type": "mc",
+          "text": "<table class=\"dx-table\"><tr><th><i>t</i></th><th><i>v</i>(<i>t</i>)</th></tr><tr><td>0</td><td>24,000</td></tr><tr><td>3</td><td>12,000</td></tr><tr><td>6</td><td>6,000</td></tr><tr><td>9</td><td>3,000</td></tr></table>The table gives the value <i>v</i>(<i>t</i>), in dollars, of a commercial printing press for four values of <i>t</i>, where <i>t</i> is the number of years after the press was purchased. The value of the press decreases by the same percent each year. Which of the following could define <i>v</i>?",
+          "choices": [
+            "<i>v</i>(<i>t</i>) = 24,000 &minus; 4,000<i>t</i>",
+            "<i>v</i>(<i>t</i>) = 24,000(0.5)<sup>3<i>t</i></sup>",
+            "<i>v</i>(<i>t</i>) = 24,000(0.5)<sup><i>t</i></sup>",
+            "<i>v</i>(<i>t</i>) = 24,000(0.5)<sup><i>t</i>&frasl;3</sup>"
+          ],
+          "correct": 3,
+          "choiceNotes": [
+            "Linear: treated the 12,000 drop across the first three years as a constant 4,000 per year, so it gives 12,000 at t = 3 but 0 at t = 6.",
+            "Inverted the exponent, using 3t where t&frasl;3 is needed; this halves the value three times per year.",
+            "Halved once per unit of t, ignoring that consecutive rows are 3 years apart; it gives 3,000 at t = 3.",
+            "Key: the value halves over every 3-year step, so the annual factor is applied t&frasl;3 times: v(9) = 24,000(0.5)<sup>3</sup> = 3,000, and every row checks."
+          ],
+          "explanation": "Choice D is correct. Read the table across: from t = 0 to t = 3 the value falls from 24,000 to 12,000, from t = 3 to t = 6 from 12,000 to 6,000, and from t = 6 to t = 9 from 6,000 to 3,000. The value is multiplied by 0.5 every 3 years, not every year, so the exponent on 0.5 must be t/3. That way t = 3 gives an exponent of 1, t = 6 gives 2, and t = 9 gives 3. Checking choice D at t = 6 gives 24,000(0.5)<sup>2</sup> = 6,000, which matches the table. Choice C halves every year, so at t = 3 it gives 24,000(0.5)<sup>3</sup> = 3,000, far too small. Choice B falls faster still, halving three times a year. Choice A is linear, subtracting the same 4,000 each year rather than losing the same percent."
+        },
+        {
+          "qid": "mta15994",
+          "domain": "Advanced Math",
+          "skill": "47 Factoring",
+          "difficulty": "medium",
+          "type": "mc",
+          "text": "If <i>x</i><sup>2</sup> &minus; <i>y</i><sup>2</sup> = 64 and <i>x</i> + <i>y</i> = 16, what is the value of <i>x</i> &minus; <i>y</i>?",
+          "choices": [
+            "4",
+            "8",
+            "10",
+            "48"
+          ],
+          "correct": 0,
+          "choiceNotes": [
+            "A: KEY. x^2 - y^2 factors as (x + y)(x - y), so 16(x - y) = 64 and x - y = 4. (Check: x = 10, y = 6 gives 100 - 36 = 64 and 10 + 6 = 16.)",
+            "B: took the square root of 64, treating the square root of x^2 - y^2 as x - y.",
+            "C: went on to solve for x itself, getting x = 10 and y = 6, and reported x instead of x - y.",
+            "D: subtracted the second equation's value from the first, computing 64 - 16, instead of dividing 64 by 16."
+          ],
+          "explanation": "Choice A is correct. The left side of the first equation is a difference of squares, which factors as x<sup>2</sup> - y<sup>2</sup> = (x + y)(x - y). Substituting the given value x + y = 16 gives 16(x - y) = 64, so x - y = 64/16 = 4. Choice B, 8, is &radic;64, which is what you get by reading x<sup>2</sup> - y<sup>2</sup> = 64 as (x - y)<sup>2</sup> = 64. Choice D, 48, is 64 - 16, from subtracting the second equation from the first instead of dividing. Choice C, 10, is the value of x, not of x - y. As a check, x + y = 16 and x - y = 4 give x = 10 and y = 6, and 10<sup>2</sup> - 6<sup>2</sup> = 100 - 36 = 64, as required."
+        },
+        {
+          "qid": "mt833c9d",
+          "domain": "Algebra",
+          "skill": "Linear Equations in Two Variables",
+          "difficulty": "medium",
+          "type": "mc",
+          "text": "A neighborhood consists of a 2-hectare park and a 35-hectare residential area. The total number of trees in the neighborhood is 3,934. The equation 2<i>x</i> + 35<i>y</i> = 3,934 represents this situation. Which of the following is the best interpretation of <i>x</i> in this context?",
+          "choices": [
+            "The average number of trees per hectare in the park",
+            "The average number of trees per hectare in the residential area",
+            "The total number of trees in the park",
+            "The total number of trees in the residential area"
+          ],
+          "correct": 0,
+          "explanation": "It's given that a neighborhood consists of a 2-hectare park and a 35-hectare residential area and that the total number of trees in the neighborhood is 3,934. It's also given that the equation 2<i>x</i> + 35<i>y</i> = 3,934 represents this situation. Since the total number of trees for a given area can be determined by taking the number of hectares times the average number of trees per hectare, this must mean that the terms 2<i>x</i> and 35<i>y</i> correspond to the number of trees in the park and in the residential area, respectively. Since 2<i>x</i> corresponds to the number of trees in the park, and 2 is the size of the park, in hectares, <i>x</i> must represent the average number of trees per hectare in the park.<br><br>Choice B is incorrect and may result from conceptual errors. Choice C is incorrect and may result from conceptual errors. Choice D is incorrect and may result from conceptual errors."
+        },
+        {
+          "qid": "mt0058d4",
+          "domain": "Advanced Math",
+          "skill": "66 Rational Functions",
+          "difficulty": "medium",
+          "type": "fr",
+          "text": "<div style=\"text-align:center;font-size:1.1em;margin:0.6em 0;\">4/(<i>x</i> &minus; 5) = 10/(<i>x</i> + 1)</div>What is the solution to the given equation?",
+          "answer": "9",
+          "explanation": "The correct answer is 9. Since neither denominator may be zero, x is not 5 and not -1, and you can cross multiply: 4(x + 1) = 10(x - 5). Distributing gives 4x + 4 = 10x - 50. Subtracting 4x from both sides gives 4 = 6x - 50, and adding 50 gives 54 = 6x, so x = 54/6 = 9. Check it in the original equation: 4/(9 - 5) = 4/4 = 1 and 10/(9 + 1) = 10/10 = 1, so both sides equal 1. Two common slips are worth naming. Distributing the 10 as 10x - 5 instead of 10x - 50 leads to 4x + 4 = 10x - 5 and x = 1.5. Pairing each numerator with its own denominator, 4(x - 5) = 10(x + 1), leads to 4x - 20 = 10x + 10 and x = -5."
+        },
+        {
+          "qid": "mta291bf",
+          "domain": "Geometry and Trigonometry",
+          "skill": "71 Triangle Sides",
+          "difficulty": "medium",
+          "type": "fr",
+          "text": "The lengths of two sides of a triangle are 7 units and 12 units. The length of the third side is an integer number of units. What is the greatest possible length, in units, of the third side?",
+          "answer": "18",
+          "explanation": "The correct answer is 18. The triangle inequality says each side of a triangle must be shorter than the sum of the other two. With sides of 7 and 12, the third side x must satisfy x &lt; 7 + 12 = 19, and it must also be longer than the difference, x &gt; 12 - 7 = 5, so 5 &lt; x &lt; 19. The question asks for the greatest possible length, so the upper bound is what matters. Since x must be less than 19 and is an integer, the largest value available is 18. Note that 19 itself fails: with a third side of exactly 19 the sides of 7 and 12 would lie flat along it and enclose no area, so no triangle would exist. Answering 19 is the most common error here, and it comes from reading the inequality as x less than or equal to 19."
+        },
+        {
+          "qid": "mt8421d3",
+          "domain": "Geometry and Trigonometry",
+          "skill": "87 Standard Form of a Circle",
+          "difficulty": "medium",
+          "type": "mc",
+          "text": "In the <i>xy</i>-plane, a circle has its center at (&minus;3, 5) and passes through the point (9, 14). Which of the following equations represents this circle?",
+          "choices": [
+            "(<i>x</i> &minus; 3)<sup>2</sup> + (<i>y</i> + 5)<sup>2</sup> = 15",
+            "(<i>x</i> &minus; 3)<sup>2</sup> + (<i>y</i> + 5)<sup>2</sup> = 225",
+            "(<i>x</i> + 3)<sup>2</sup> + (<i>y</i> &minus; 5)<sup>2</sup> = 15",
+            "(<i>x</i> + 3)<sup>2</sup> + (<i>y</i> &minus; 5)<sup>2</sup> = 225"
+          ],
+          "correct": 3,
+          "explanation": "Choice D is correct. A circle with center (h, k) and radius r has equation (x - h)<sup>2</sup> + (y - k)<sup>2</sup> = r<sup>2</sup>. With center (-3, 5), h = -3 and k = 5, so the left side is (x - (-3))<sup>2</sup> + (y - 5)<sup>2</sup> = (x + 3)<sup>2</sup> + (y - 5)<sup>2</sup>. That eliminates choices A and B, which reverse both signs and so describe a circle centered at (3, -5). For the radius, use the distance from the center to the point (9, 14) on the circle: the horizontal change is 9 - (-3) = 12 and the vertical change is 14 - 5 = 9, so r = &radic;(12<sup>2</sup> + 9<sup>2</sup>) = &radic;(144 + 81) = &radic;225 = 15. The equation calls for r<sup>2</sup>, which is 225, not 15, so choice C stops one step short."
+        },
+        {
+          "qid": "mt59bf28",
+          "domain": "Algebra",
+          "skill": "10 Algebraic Systems",
+          "difficulty": "medium",
+          "type": "mc",
+          "text": "<div style=\"text-align:center;font-size:1.1em;margin:0.6em 0;\">3<i>x</i> + 2<i>y</i> = 19<br>5<i>x</i> &minus; 2<i>y</i> = 21</div>The given system of equations has the solution (<i>x</i>, <i>y</i>). What is the value of <i>x</i> + <i>y</i>?",
+          "choices": [
+            "3",
+            "7",
+            "9",
+            "10"
+          ],
+          "correct": 1,
+          "choiceNotes": [
+            "A: solved correctly but computed x - y = 5 - 2 instead of x + y.",
+            "B: KEY. Adding the equations gives 8x = 40, so x = 5; then 3(5) + 2y = 19 gives y = 2, and x + y = 7.",
+            "C: found 2y = 4 and used 4 as y without dividing by 2, giving 5 + 4.",
+            "D: found x = 5 and y = 2 correctly but multiplied them instead of adding."
+          ],
+          "explanation": "Choice B is correct. The y terms in the two equations are already opposites, so add the equations: (3x + 2y) + (5x - 2y) = 19 + 21 gives 8x = 40, so x = 5. Substituting into the first equation gives 3(5) + 2y = 19, so 2y = 19 - 15 = 4 and y = 2. The solution is (5, 2), and the question asks for x + y = 5 + 2 = 7. Check both equations: 3(5) + 2(2) = 19 and 5(5) - 2(2) = 21. Choice A, 3, is x - y, from subtracting the two values instead of adding them. Choice D, 10, is 2x, from doubling the value of x rather than adding y to it. Choice C, 9, matches neither the sum nor either coordinate."
+        },
+        {
+          "qid": "mt6ae294",
+          "domain": "Problem-Solving and Data Analysis",
+          "skill": "Inference from Sample Statistics and Margin of Error",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "A researcher surveyed a random sample of 1,020 people from a certain city to estimate the percentage of people who support a recently announced proposal. From the survey, the researcher estimated that 86% of people from the city support this proposal, with an associated margin of error of 2.13%. The researcher repeated the survey with a random sample of people from the city that was double the original sample size. Assuming the margins of error were calculated in the same way, which of the following is true about the margin of error associated with the estimate from the larger sample?",
+          "choices": [
+            "The margin of error is between 2.13% and 3.13%.",
+            "The margin of error is between 4.13% and 5.13%.",
+            "The margin of error is greater than 5.13%.",
+            "The margin of error is less than 2.13%."
+          ],
+          "correct": 3,
+          "explanation": "Choice D is correct. It's given that from the initial survey, the margin of error associated with the estimate was 2.13%. A larger sample size generally leads to a smaller margin of error. Therefore, assuming the margins of error were calculated in the same way, the margin of error associated with the estimate from the larger sample is less than 2.13%.<br><br>Choice A is incorrect and may result from conceptual errors.<br><br>Choice B is incorrect and may result from conceptual errors.<br><br>Choice C is incorrect and may result from conceptual errors."
+        },
+        {
+          "qid": "mt45d89d",
+          "domain": "Problem-Solving and Data Analysis",
+          "skill": "37 Hard Percentages",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "The price of a bicycle at a shop was increased by 30%. Several months later, the shop decreased that new price by 10%. If the price of the bicycle after both changes is $702, what was its price before the increase?",
+          "choices": [
+            "$540",
+            "$585",
+            "$600",
+            "$780"
+          ],
+          "correct": 2,
+          "explanation": "Choice C is correct. A 30% increase multiplies the price by 1.30, and the later 10% decrease multiplies that result by 0.90, so a starting price p becomes 0.90(1.30p) = 1.17p. Setting 1.17p = 702 gives p = 702/1.17 = 600, so the price before the increase was $600. Check it forward: $600 increased by 30% is $780, and $780 decreased by 10% is $780 - $78 = $702. Choice D, $780, is the price after the increase but before the decrease, the answer one step before the one asked. Choice A, $540, is 702/1.3, undoing only the increase and treating $702 as the raised price. Choice B, $585, is 702/1.2, from treating a 30% rise and a 10% fall as a single net 20% rise, which ignores that the 10% is taken off the larger, already increased price."
+        },
+        {
+          "qid": "mtae0243",
+          "domain": "Advanced Math",
+          "skill": "48 Integer Factors",
+          "difficulty": "hard",
+          "type": "fr",
+          "text": "<div style=\"text-align:center;font-size:1.1em;margin:0.6em 0;\"><i>x</i><sup>2</sup> + <i>b</i><i>x</i> + 45 = 0</div>In the given equation, <i>b</i> is a constant. The equation has two distinct solutions, and each solution is an integer. What is the greatest possible value of <i>b</i>?",
+          "answer": "46",
+          "explanation": "The correct answer is 46. If the two solutions are r and s, then x<sup>2</sup> + bx + 45 factors as (x - r)(x - s) = x<sup>2</sup> - (r + s)x + rs, so rs = 45 and r + s = -b. Because both solutions are integers, r and s form a factor pair of 45: (1, 45), (3, 15), (5, 9), or the negatives (-1, -45), (-3, -15), (-5, -9). Since b = -(r + s), b is greatest when r + s is least, and the least available sum is -1 + (-45) = -46, giving b = 46. The pairs of positive factors all give negative values of b, and the requirement of two distinct solutions rules out a repeated root, though 45 is not a perfect square so no such pair arises. Check: x<sup>2</sup> + 46x + 45 = (x + 1)(x + 45), with solutions -1 and -45, integers and distinct."
+        }
+      ],
+      "module2Harder": [
+        {
+          "qid": "mte24431",
+          "domain": "Problem-Solving and Data Analysis",
+          "skill": "118 Mean, Median, Range",
+          "difficulty": "easy",
+          "type": "mc",
+          "text": "<svg viewBox=\"0 0 300 200\" class=\"dx-fig\" style=\"color:var(--text);\"><title>A dot plot of the number of hours volunteered, with dots above the values 2 through 7</title><line x1=\"34\" y1=\"150\" x2=\"276\" y2=\"150\" stroke=\"currentColor\" stroke-width=\"1.4\"/><line x1=\"48\" y1=\"150\" x2=\"48\" y2=\"155\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"48\" y=\"168\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">2</text><circle cx=\"48\" cy=\"142\" r=\"4\" fill=\"currentColor\"/><circle cx=\"48\" cy=\"129\" r=\"4\" fill=\"currentColor\"/><line x1=\"88\" y1=\"150\" x2=\"88\" y2=\"155\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"88\" y=\"168\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">3</text><circle cx=\"88\" cy=\"142\" r=\"4\" fill=\"currentColor\"/><line x1=\"128\" y1=\"150\" x2=\"128\" y2=\"155\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"128\" y=\"168\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">4</text><circle cx=\"128\" cy=\"142\" r=\"4\" fill=\"currentColor\"/><circle cx=\"128\" cy=\"129\" r=\"4\" fill=\"currentColor\"/><circle cx=\"128\" cy=\"116\" r=\"4\" fill=\"currentColor\"/><circle cx=\"128\" cy=\"103\" r=\"4\" fill=\"currentColor\"/><line x1=\"168\" y1=\"150\" x2=\"168\" y2=\"155\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"168\" y=\"168\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">5</text><circle cx=\"168\" cy=\"142\" r=\"4\" fill=\"currentColor\"/><circle cx=\"168\" cy=\"129\" r=\"4\" fill=\"currentColor\"/><circle cx=\"168\" cy=\"116\" r=\"4\" fill=\"currentColor\"/><line x1=\"208\" y1=\"150\" x2=\"208\" y2=\"155\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"208\" y=\"168\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">6</text><circle cx=\"208\" cy=\"142\" r=\"4\" fill=\"currentColor\"/><circle cx=\"208\" cy=\"129\" r=\"4\" fill=\"currentColor\"/><line x1=\"248\" y1=\"150\" x2=\"248\" y2=\"155\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"248\" y=\"168\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">7</text><circle cx=\"248\" cy=\"142\" r=\"4\" fill=\"currentColor\"/><circle cx=\"248\" cy=\"129\" r=\"4\" fill=\"currentColor\"/><circle cx=\"248\" cy=\"116\" r=\"4\" fill=\"currentColor\"/><text x=\"150\" y=\"188\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">Number of hours volunteered</text></svg>The dot plot shows the number of hours each of 15 students volunteered last month. What is the median number of hours volunteered by these students?",
+          "choices": [
+            "4",
+            "5",
+            "5.5",
+            "7"
+          ],
+          "correct": 1,
+          "choiceNotes": [
+            "A: reported the value with the most dots (4 appears four times) instead of the middle value.",
+            "B: KEY. There are 15 values, so the median is the 8th; the counts 2, 1, 4 reach only 7 through 4 hours, so the 8th value lies in the column at 5.",
+            "C: located the 8th value at 5 but then applied the even-count rule anyway, averaging it with the next value up the axis: (5 + 6)/2.",
+            "D: reported the greatest value shown on the plot instead of the middle value."
+          ],
+          "explanation": "Choice B is correct. Count the dots above each value in the plot: 2 dots above 2, 1 above 3, 4 above 4, 3 above 5, 2 above 6, and 3 above 7. That is 2 + 1 + 4 + 3 + 2 + 3 = 15 values, matching the 15 students. The median of 15 values in order is the 8th value, since 7 values fall below it and 7 above. Counting up from the left, values 1 and 2 are 2s, value 3 is a 3, values 4 through 7 are 4s, and values 8, 9, and 10 are 5s. The 8th value is 5, so the median is 5 hours. Choice A, 4, is the value with the most dots, which is the mode rather than the median. Choice C, 5.5, averages two middle values, which applies only when the count is even. Choice D, 7, is the greatest value in the data set."
+        },
+        {
+          "qid": "mt310014",
+          "domain": "Algebra",
+          "skill": "104 Rate of change",
+          "difficulty": "easy",
+          "type": "mc",
+          "text": "<svg viewBox=\"0 0 300 200\" class=\"dx-fig\" style=\"color:var(--text);\"><title>A line in the xy-plane falling from left to right, with the points (0, 18) and (6, 6) drawn and labeled</title><line x1=\"45\" y1=\"20\" x2=\"45\" y2=\"155\" stroke=\"currentColor\" stroke-width=\"1.4\"/><line x1=\"45\" y1=\"155\" x2=\"278\" y2=\"155\" stroke=\"currentColor\" stroke-width=\"1.4\"/><line x1=\"41\" y1=\"131.0\" x2=\"45\" y2=\"131.0\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"37\" y=\"134.0\" font-size=\"9\" text-anchor=\"end\" fill=\"currentColor\">4</text><line x1=\"41\" y1=\"107.0\" x2=\"45\" y2=\"107.0\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"37\" y=\"110.0\" font-size=\"9\" text-anchor=\"end\" fill=\"currentColor\">8</text><line x1=\"41\" y1=\"83.0\" x2=\"45\" y2=\"83.0\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"37\" y=\"86.0\" font-size=\"9\" text-anchor=\"end\" fill=\"currentColor\">12</text><line x1=\"41\" y1=\"59.0\" x2=\"45\" y2=\"59.0\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"37\" y=\"62.0\" font-size=\"9\" text-anchor=\"end\" fill=\"currentColor\">16</text><line x1=\"41\" y1=\"35.0\" x2=\"45\" y2=\"35.0\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"37\" y=\"38.0\" font-size=\"9\" text-anchor=\"end\" fill=\"currentColor\">20</text><line x1=\"45.0\" y1=\"155\" x2=\"45.0\" y2=\"159\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"45.0\" y=\"171\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">0</text><line x1=\"101.0\" y1=\"155\" x2=\"101.0\" y2=\"159\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"101.0\" y=\"171\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">2</text><line x1=\"157.0\" y1=\"155\" x2=\"157.0\" y2=\"159\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"157.0\" y=\"171\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">4</text><line x1=\"213.0\" y1=\"155\" x2=\"213.0\" y2=\"159\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"213.0\" y=\"171\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">6</text><line x1=\"269.0\" y1=\"155\" x2=\"269.0\" y2=\"159\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"269.0\" y=\"171\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">8</text><line x1=\"45.0\" y1=\"47.0\" x2=\"269.0\" y2=\"143.0\" stroke=\"currentColor\" stroke-width=\"1.6\"/><circle cx=\"45.0\" cy=\"47.0\" r=\"3.2\" fill=\"currentColor\"/><circle cx=\"213.0\" cy=\"119.0\" r=\"3.2\" fill=\"currentColor\"/><text x=\"53.0\" y=\"41.0\" font-size=\"9\" text-anchor=\"start\" fill=\"currentColor\">(0, 18)</text><text x=\"221.0\" y=\"113.0\" font-size=\"9\" text-anchor=\"start\" fill=\"currentColor\">(6, 6)</text><text x=\"150\" y=\"186\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">Time (hours)</text><text x=\"14\" y=\"92\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\" transform=\"rotate(-90 14 92)\">Fuel (gallons)</text></svg>The graph shows the amount of fuel, in gallons, remaining in a generator’s tank <i>t</i> hours after the tank was filled. What is the average rate of change, in gallons per hour, of the amount of fuel remaining?",
+          "choices": [
+            "&minus;3",
+            "&minus;2",
+            "&minus;<sup>1</sup>&frasl;<sub>2</sub>",
+            "2"
+          ],
+          "correct": 1,
+          "explanation": "Choice B is correct. The average rate of change between two points is the change in the vertical value divided by the change in the horizontal value. The graph marks (0, 18) and (6, 6): the tank held 18 gallons when it was filled, and 6 hours later it held 6 gallons. So the rate of change is (6 - 18)/(6 - 0) = -12/6 = -2 gallons per hour. The value is negative because fuel is being consumed, and the units confirm it: gallons on top, hours on the bottom. Choice A, -3, comes from dividing the 18 gallons by the 6 hours instead of using the change of 12 gallons. Choice C, -1/2, is the reciprocal, from dividing the change in time by the change in fuel. Choice D, 2, has the right size but the wrong sign and would describe fuel being added."
+        },
+        {
+          "qid": "mt523875",
+          "domain": "Algebra",
+          "skill": "14 Consecutive odd/even integers",
+          "difficulty": "medium",
+          "type": "mc",
+          "text": "The sum of four consecutive odd integers is 232. What is the sum of the two least of these integers?",
+          "choices": [
+            "110",
+            "112",
+            "116",
+            "120"
+          ],
+          "correct": 1,
+          "explanation": "Choice B is correct. Consecutive odd integers differ by 2, so if the least is n the four integers are n, n + 2, n + 4, and n + 6. Their sum is 4n + 12 = 232, so 4n = 220 and n = 55. The four integers are 55, 57, 59, and 61, and as a check 55 + 57 + 59 + 61 = 232. The two least are 55 and 57, so the answer is 55 + 57 = 112. Choice D, 120, is 59 + 61, the sum of the two greatest, the opposite end of the list from the one asked for. Choice C, 116, is 232/2, which is also 57 + 59, the sum of the two middle integers. Choice A, 110, is 2(55), doubling the least integer instead of adding the next odd integer to it."
+        },
+        {
+          "qid": "mt82708d",
+          "domain": "Problem-Solving and Data Analysis",
+          "skill": "One-Variable Data: Distributions and Measures of Center and Spread",
+          "difficulty": "medium",
+          "type": "mc",
+          "text": "For which of the following data sets is the mean greater than the median?",
+          "choices": [
+            "5, 5, 5, 5, 5, 5, 5, 5, 5",
+            "0, 10, 20, 30, 40, 50, 60, 70, 80",
+            "2, 4, 8, 16, 32, 64, 128, 256, 512",
+            "7, 107, 107, 207, 207, 207, 307, 307, 307"
+          ],
+          "correct": 2,
+          "explanation": "Choice C is correct. If the values in a data set are ordered from least to greatest, the median of the data set will be the middle value. Since each data set in the choices is ordered and contains exactly 9 data values, the 5th value in each is the median. It follows that the median of the data set in choice C is 32. The sum of the positive differences between 32 and each of the values that are less than 32 is significantly smaller than the sum of the positive differences between 32 and each of the values that are greater than 32. If 32 were the mean, these sums would have been equal to each other. Therefore, the mean of this data set must be greater than 32. This can also be confirmed by calculating the mean as the sum of the values divided by the number of values in the data set: <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">2 + 4 + 8 + 16 + 32 + 64 + 128 + 256 + 512</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">9</span></span> = 113<span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">5</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">9</span></span>.<br><br>Choices A and B are incorrect. Each of the data sets in these choices is symmetric with respect to its median, so the mean and the median for each of these choices are equivalent. Choice D is incorrect. The median of this data set is 207. Since the sum of the positive differences between 207 and each of the values less than 207 is greater than the sum of the positive differences between 207 and each value greater than 207 in this data set, the mean must be less than the median."
+        },
+        {
+          "qid": "mtdbcd5f",
+          "domain": "Algebra",
+          "skill": "19 Single Variable Equations with a Constant",
+          "difficulty": "medium",
+          "type": "fr",
+          "text": "<div style=\"text-align:center;font-size:1.1em;margin:0.6em 0;\">4(<i>x</i> &minus; 3) + 7 = 3(2<i>x</i> &minus; <i>c</i>)</div>In the given equation, <i>c</i> is a constant and the solution to the equation is <i>x</i> = 11. What is the value of <i>c</i>?",
+          "answer": "9",
+          "explanation": "The correct answer is 9. Since x = 11 is the solution, substituting 11 for x makes the equation true: 4(11 - 3) + 7 = 3(2(11) - c). The left side is 4(8) + 7 = 32 + 7 = 39. The right side is 3(22 - c) = 66 - 3c. So 39 = 66 - 3c. Subtracting 66 from both sides gives -27 = -3c, and dividing both sides by -3 gives c = 9. Check by solving the finished equation: 4(x - 3) + 7 = 3(2x - 9) becomes 4x - 5 = 6x - 27, so 22 = 2x and x = 11, as given. The common error is distributing the 3 onto only the 2x and not onto the c, which turns the right side into 66 - c and gives c = 27."
+        },
+        {
+          "qid": "mtd4f5cc",
+          "domain": "Advanced Math",
+          "skill": "25 Equivalent for all x",
+          "difficulty": "medium",
+          "type": "fr",
+          "text": "<div style=\"text-align:center;font-size:1.1em;margin:0.6em 0;\">(2<i>x</i> + 7)(<i>kx</i> &minus; 3) = 8<i>x</i><sup>2</sup> + <i>cx</i> &minus; 21</div>In the given equation, <i>k</i> and <i>c</i> are constants and the equation is true for all values of <i>x</i>. What is the value of <i>c</i>?",
+          "answer": "22",
+          "explanation": "The correct answer is 22. An equation that is true for all values of x means the two sides are the same polynomial, so their corresponding coefficients must be equal. Expand the left side: (2x + 7)(kx - 3) = 2kx<sup>2</sup> - 6x + 7kx - 21 = 2kx<sup>2</sup> + (7k - 6)x - 21. Compare with 8x<sup>2</sup> + cx - 21. The x<sup>2</sup> coefficients give 2k = 8, so k = 4. The constant terms already agree at -21. The x coefficients then give c = 7k - 6 = 7(4) - 6 = 28 - 6 = 22. Check by expanding with k = 4: (2x + 7)(4x - 3) = 8x<sup>2</sup> - 6x + 28x - 21 = 8x<sup>2</sup> + 22x - 21. A common slip is losing the -6x from the outer-inner product and answering 28, which is 7k on its own."
+        },
+        {
+          "qid": "mt445ada",
+          "domain": "Algebra",
+          "skill": "33 Parallel Lines",
+          "difficulty": "medium",
+          "type": "mc",
+          "text": "In the <i>xy</i>-plane, line <i>&#8467;</i> is parallel to the line with equation 6<i>x</i> &minus; 2<i>y</i> = 9 and passes through the point (&minus;3, 4). What is the <i>y</i>-coordinate of the <i>y</i>-intercept of line <i>&#8467;</i>?",
+          "choices": [
+            "&minus;15",
+            "&minus;5",
+            "4",
+            "13"
+          ],
+          "correct": 3,
+          "explanation": "Choice D is correct. Parallel lines have equal slopes, so start by finding the slope of 6x - 2y = 9. Solving for y gives -2y = -6x + 9, so y = 3x - 4.5 and the slope is 3. Line l therefore has equation y = 3x + b. Substituting the point (-3, 4) gives 4 = 3(-3) + b, so 4 = -9 + b and b = 13. The y-intercept is (0, 13), whose y-coordinate is 13. Choice C, 4, is the y-coordinate of the given point rather than of the y-intercept. Choice B, -5, is 3(-3) + 4, from evaluating the right side instead of solving for b, which moves the -9 the wrong way. Choice A, -15, matches neither the slope nor the point and results from a calculation error."
+        },
+        {
+          "qid": "mtca36f8",
+          "domain": "Algebra",
+          "skill": "17 System of 1 Equation & 1 Inequality",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "A caterer is buying serving trays. Small trays cost $14 each and large trays cost $22 each. The caterer will buy at least 30 trays in total and will spend no more than $560 on the trays. What is the greatest number of large trays the caterer can buy?",
+          "choices": [
+            "15",
+            "17",
+            "18",
+            "25"
+          ],
+          "correct": 1,
+          "explanation": "Choice B is correct. Let l be the number of large trays and s the number of small trays. The caterer buys at least 30 trays, so s + l is at least 30, and spends at most $560, so 14s + 22l is at most 560. To make l as large as possible, buy as few small trays as the first condition allows, which is s = 30 - l. The cost is then 14(30 - l) + 22l = 420 - 14l + 22l = 420 + 8l. Requiring 420 + 8l to be at most 560 gives 8l at most 140, so l is at most 17.5, and since l is a whole number the greatest value is 17. Check: 17 large and 13 small cost 374 + 182 = 556, while 18 large and 12 small cost 396 + 168 = 564, over budget. Choice C, 18, rounds 17.5 up instead of down. Choice D, 25, is 560/22 rounded down, ignoring the 30-tray requirement."
+        },
+        {
+          "qid": "mt1ed816",
+          "domain": "Advanced Math",
+          "skill": "46 Exponential Growth Rate",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "A quantity increases by the same percent each year and is modeled by the function <i>P</i>, where <i>P</i>(<i>t</i>) is the quantity <i>t</i> years after the model began. If <i>P</i>(4) = 5,000 and <i>P</i>(10) = 20,000, what is the value of <i>P</i>(7)?",
+          "choices": [
+            "10,000",
+            "12,500",
+            "15,000",
+            "20,000"
+          ],
+          "correct": 0,
+          "choiceNotes": [
+            "A: KEY. From t = 4 to t = 10 the quantity multiplies by 20,000/5,000 = 4 over 6 years, so it doubles every 3 years; P(7) = 2(5,000) = 10,000.",
+            "B: treated the growth as linear, adding (20,000 - 5,000)/6 = 2,500 per year: 5,000 + 3(2,500).",
+            "C: reported the increase 20,000 - 5,000 rather than the value of P(7).",
+            "D: applied the whole factor of 4 to the 3-year gap from t = 4 to t = 7, computing 4(5,000), which is really the value at t = 10."
+          ],
+          "explanation": "Choice A is correct. A quantity that increases by the same percent each year is multiplied by the same factor r each year, so P(t) = P(0)r<sup>t</sup>. From t = 4 to t = 10 is 6 years, over which the quantity goes from 5,000 to 20,000, so r<sup>6</sup> = 20,000/5,000 = 4. The year 7 sits exactly halfway, 3 years from each, and r<sup>3</sup> = &radic;(r<sup>6</sup>) = &radic;4 = 2. Therefore P(7) = P(4)r<sup>3</sup> = 5,000(2) = 10,000. Equivalently, for an exponential model the middle value is the geometric mean of the outer two: &radic;(5,000 times 20,000) = &radic;(100,000,000) = 10,000. Choice B, 12,500, is the arithmetic mean of 5,000 and 20,000, which would be right for a linear model but not an exponential one. Choice C, 15,000, is the difference 20,000 - 5,000. Choice D, 20,000, is P(10), not P(7)."
+        },
+        {
+          "qid": "mt28fbec",
+          "domain": "Algebra",
+          "skill": "20 Rearranging Terms",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "<div style=\"text-align:center;font-size:1.1em;margin:0.6em 0;\"><i>P</i> = <sup>(2<i>A</i> + 3<i>B</i>)</sup>&frasl;<sub>(<i>A</i> &minus; <i>B</i>)</sub></div>The given equation relates the positive numbers <i>A</i>, <i>B</i>, and <i>P</i>, where <i>A</i> &gt; <i>B</i>. Which of the following correctly expresses <i>A</i> in terms of <i>B</i> and <i>P</i>?",
+          "choices": [
+            "<i>B</i>(<i>P</i> + 3) &frasl; (<i>P</i> &minus; 2)",
+            "<i>B</i>(<i>P</i> &minus; 3) &frasl; (<i>P</i> &minus; 2)",
+            "<i>B</i>(<i>P</i> + 3) &frasl; (<i>P</i> + 2)",
+            "<i>B</i>(<i>P</i> &minus; 3) &frasl; (<i>P</i> + 2)"
+          ],
+          "correct": 0,
+          "explanation": "Choice A is correct. Clear the fraction first: multiplying both sides of P = (2A + 3B)/(A - B) by A - B gives P(A - B) = 2A + 3B, or PA - PB = 2A + 3B. To express A in terms of B and P, gather every term containing A on one side and everything else on the other. Subtracting 2A from both sides and adding PB to both sides gives PA - 2A = 3B + PB. Factoring A from the left and B from the right gives A(P - 2) = B(P + 3). Dividing both sides by P - 2  gives A = B(P + 3)/(P - 2). Choice C has P + 2 in the denominator, a sign error when the 2A was moved across. Choice B has P - 3 in the numerator, a sign error on the 3B. Choice D makes both errors."
+        },
+        {
+          "qid": "mt8628a8",
+          "domain": "Geometry and Trigonometry",
+          "skill": "68 Total Interior Angles",
+          "difficulty": "hard",
+          "type": "fr",
+          "text": "In a certain regular polygon, the measure of each interior angle is 8 times the measure of each exterior angle. What is the sum, in degrees, of the measures of the interior angles of this polygon?",
+          "answer": "2880",
+          "explanation": "The correct answer is 2,880. At each vertex an interior angle and its exterior angle together form a straight line, so they add to 180 degrees. If the exterior angle measures e, the interior angle measures 8e, so 8e + e = 180. That gives 9e = 180 and e = 20 degrees. The exterior angles of any polygon add to 360 degrees, and in a regular polygon they are all equal, so the number of sides is 360/20 = 18. The interior angles of a polygon with n sides add to (n - 2)(180) degrees, so here the sum is (18 - 2)(180) = 16(180) = 2,880 degrees. Check it another way: each interior angle measures 8(20) = 160 degrees, and 18 vertices give 18(160) = 2,880 degrees, the same total."
+        },
+        {
+          "qid": "mtf63ec9",
+          "domain": "Problem-Solving and Data Analysis",
+          "skill": "Percentages",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "The positive number a is 2,241% of the sum of the positive numbers <i>b</i> and <i>c</i>, and <i>b</i> is 83% of <i>c</i>. What percent of <i>b</i> is a?",
+          "choices": [
+            "23.24%",
+            "49.41%",
+            "2,324%",
+            "4,941%"
+          ],
+          "correct": 3,
+          "explanation": "Choice D is correct. It's given that a is 2,241% of the sum of <i>b</i> and <i>c</i>. This can be represented by the equation a = (2,241/100)(<i>b</i> + <i>c</i>), or a = 22.41(<i>b</i> + <i>c</i>). It's also given that <i>b</i> is 83% of <i>c</i>. This can be represented by the equation <i>b</i> = (83/100)<i>c</i>, or <i>b</i> = 0.83<i>c</i>. Dividing both sides of this equation by 0.83 yields <i>b</i>/0.83 = <i>c</i>. Substituting <i>b</i>/0.83 for <i>c</i> in the equation a = 22.41(<i>b</i> + <i>c</i>) yields a = 22.41(<i>b</i> + <i>b</i>/0.83), or a = 22.41(1.83<i>b</i>/0.83), which is equivalent to a = 41.0103<i>b</i>/0.83, or a = 49.41<i>b</i>. This equation is equivalent to a = (4,941/100)<i>b</i>; therefore, a is 4,941% of <i>b</i>.<br><br>Choice A is incorrect and may result from conceptual or calculation errors.<br><br>Choice B is incorrect and may result from conceptual or calculation errors.<br><br>Choice C is incorrect and may result from conceptual or calculation errors."
+        },
+        {
+          "qid": "mt3dde2a",
+          "domain": "Advanced Math",
+          "skill": "60 Quadratic Applications",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "A ball is launched upward from a platform. Its height above the ground, in feet, <i>t</i> seconds after it is launched is given by <i>h</i>(<i>t</i>) = &minus;16<i>t</i><sup>2</sup> + <i>bt</i> + <i>c</i>, where <i>b</i> and <i>c</i> are constants. The ball reaches its maximum height of 180 feet 3 seconds after it is launched. What was the height of the ball, in feet, at the moment it was launched?",
+          "choices": [
+            "36",
+            "96",
+            "132",
+            "164"
+          ],
+          "correct": 0,
+          "choiceNotes": [
+            "A: KEY. The vertex is at t = b/32 = 3, so b = 96; then h(3) = -16(9) + 96(3) + c = 180 gives c = 36, and the launch height is h(0) = c.",
+            "B: found b = 96 from the vertex and reported that constant instead of c, the height at t = 0.",
+            "C: used -16t rather than -16t^2, subtracting 16(3) = 48 from 180.",
+            "D: subtracted a single 16 from the maximum height, as if the drop over the 3 seconds were 16 feet."
+          ],
+          "explanation": "Choice A is correct. The graph of h(t) = -16t<sup>2</sup> + bt + c is a downward-opening parabola, so its maximum is at the vertex. The ball reaches its maximum height of 180 feet at t = 3, so the vertex is (3, 180) and h can be written in vertex form as h(t) = -16(t - 3)<sup>2</sup> + 180. The launch height is the height at t = 0: h(0) = -16(0 - 3)<sup>2</sup> + 180 = -16(9) + 180 = -144 + 180 = 36 feet. Choice D, 164, comes from computing -16 + 180, squaring nothing. Choice C, 132, is 180 - 48, using 3(16) rather than 9(16). Choice B, 96, is the value of the constant b, not of c: since the vertex is at t = b/32 = 3, b = 96, and then 180 = -16(9) + 96(3) + c gives 180 = 144 + c and c = 36, confirming the answer."
+        },
+        {
+          "qid": "mt177b88",
+          "domain": "Advanced Math",
+          "skill": "8 Radical Models",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "<div style=\"text-align:center;font-size:1.1em;margin:0.6em 0;\">&radic;(3<i>x</i> + 4) = <i>x</i> &minus; 2</div>In the given equation, <i>x</i> is a real number. The equation has exactly one solution. What is that solution?",
+          "choices": [
+            "&minus;7",
+            "0",
+            "3",
+            "7"
+          ],
+          "correct": 3,
+          "choiceNotes": [
+            "A: sign error moving the radicand across: from 3x + 4 = x^2 - 4x + 4 wrote x^2 + 7x = 0 instead of x^2 - 7x = 0, giving x = -7.",
+            "B: the extraneous root: squaring gives x(x - 7) = 0, and x = 0 was kept without checking, but the square root of 4 is 2, not -2.",
+            "C: expanded (x - 2)^2 as x^2 + 4, losing the cross term, which gives x^2 - 3x = 0 and the nonzero root x = 3.",
+            "D: KEY. Squaring gives 3x + 4 = x^2 - 4x + 4, so x^2 - 7x = 0 and x = 0 or 7; only x = 7 works, since the square root of 25 is 5 = 7 - 2."
+          ],
+          "explanation": "Choice D is correct. Square both sides of &radic;(3x + 4) = x - 2 to remove the radical: 3x + 4 = (x - 2)<sup>2</sup> = x<sup>2</sup> - 4x + 4. Subtracting 3x + 4 from both sides gives 0 = x<sup>2</sup> - 7x, which factors as x(x - 7) = 0, so x = 0 or x = 7. Squaring can introduce solutions that fail the original equation, so test both. At x = 0 the left side is &radic;4 = 2 while the right side is 0 - 2 = -2, and a square root is never negative, so 0 is extraneous. At x = 7 the left side is &radic;(3(7) + 4) = &radic;25 = 5 and the right side is 7 - 2 = 5, so 7 works. Choice B, 0, is exactly that extraneous root. Choices A and C fail even the squared equation, since (-7)<sup>2</sup> - 7(-7) = 98 and 3<sup>2</sup> - 7(3) = -12, neither 0."
+        },
+        {
+          "qid": "mt3071e5",
+          "domain": "Algebra",
+          "skill": "Linear Functions",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "For groups of 25 or more people, a museum charges $21 per person for the first 25 people and $14 for each additional person. Which function <i>f</i> gives the total charge, in dollars, for a tour group with <i>n</i> people, where <i>n</i> ≥ 25?",
+          "choices": [
+            "<i>f</i>(<i>n</i>) = 14<i>n</i> + 175",
+            "<i>f</i>(<i>n</i>) = 14<i>n</i> + 525",
+            "<i>f</i>(<i>n</i>) = 35<i>n</i> − 350",
+            "<i>f</i>(<i>n</i>) = 14<i>n</i> + 21"
+          ],
+          "correct": 0,
+          "explanation": "A tour group with <i>n</i> people, where <i>n</i> ≥ 25, can be split into two subgroups: the first 25 people and the additional <i>n</i> − 25 people. Since the museum charges $21 per person for the first 25 people and $14 for each additional person, the charge for the first 25 people is $21(25) and the charge for the additional <i>n</i> − 25 people is $14(<i>n</i> − 25). Therefore, the total charge, in dollars, is given by the function <i>f</i>(<i>n</i>) = 21(25) + 14(<i>n</i> − 25), or <i>f</i>(<i>n</i>) = 14<i>n</i> + 175.<br><br>Choice B is incorrect and may result from conceptual or calculation errors. Choice C is incorrect and may result from conceptual or calculation errors. Choice D is incorrect and may result from conceptual or calculation errors."
+        },
+        {
+          "qid": "mt15dc54",
+          "domain": "Advanced Math",
+          "skill": "45 Fractional Exponents",
+          "difficulty": "hard",
+          "type": "fr",
+          "text": "<div style=\"text-align:center;font-size:1.1em;margin:0.6em 0;\">(&#8731;(<i>x</i><sup>4</sup>) &middot; &radic;(<i>x</i>))<sup>6</sup> / <i>x</i><sup>3</sup></div>The given expression, where <i>x</i> &gt; 0, is equivalent to <i>x</i><sup><i>k</i></sup>, where <i>k</i> is a constant. What is the value of <i>k</i>?",
+          "answer": "8",
+          "explanation": "The correct answer is 8. Rewrite both radicals as powers: the cube root of x<sup>4</sup> is x<sup>(4/3)</sup>, and the square root of x is x<sup>(1/2)</sup>. Multiplying powers with the same base adds the exponents, so x<sup>(4/3)</sup> times x<sup>(1/2)</sup> = x<sup>(4/3 + 1/2)</sup> = x<sup>(8/6 + 3/6)</sup> = x<sup>(11/6)</sup>. Raising a power to a power multiplies the exponents, so (x<sup>(11/6)</sup>)<sup>6</sup> = x<sup>((11/6)(6))</sup> = x<sup>11</sup>. Dividing powers with the same base subtracts the exponents, so x<sup>11</sup> divided by x<sup>3</sup> is x<sup>(11 - 3)</sup> = x<sup>8</sup>, and k = 8. A faster route is to distribute the 6 first: the cube root of x<sup>4</sup> raised to the 6th is x<sup>8</sup>, and the square root of x raised to the 6th is x<sup>3</sup>, giving x<sup>11</sup> before the division. A common error is multiplying 4/3 and 1/2 instead of adding, which gives x<sup>(2/3)</sup> and eventually k = 1."
+        },
+        {
+          "qid": "mte0f366",
+          "domain": "Geometry and Trigonometry",
+          "skill": "100 Similar 3D Figures",
+          "difficulty": "hard",
+          "type": "fr",
+          "text": "Rectangular prism <i>A</i> and rectangular prism <i>B</i> are similar. The volume of prism <i>A</i> is 81 cubic centimeters and the volume of prism <i>B</i> is 192 cubic centimeters. The length of one edge of prism <i>A</i> is 9 centimeters. What is the length, in centimeters, of the corresponding edge of prism <i>B</i>?",
+          "answer": "12",
+          "explanation": "The correct answer is 12. In similar solids, corresponding lengths are in some ratio k, corresponding areas are in the ratio k<sup>2</sup>, and volumes are in the ratio k<sup>3</sup>. Here the volumes are 81 and 192 cubic centimeters, so k<sup>3</sup> = 192/81. Dividing numerator and denominator by 3 gives 64/27, so k<sup>3</sup> = 64/27 and k is the cube root of 64/27, which is 4/3 since 4<sup>3</sup> = 64 and 3<sup>3</sup> = 27. Lengths in prism B are therefore 4/3 times the corresponding lengths in prism A, so the edge corresponding to the 9-centimeter edge measures 9(4/3) = 12 centimeters. Check: (12/9)<sup>3</sup> = (4/3)<sup>3</sup> = 64/27, and 81(64/27) = 3(64) = 192, the volume of prism B. Applying the volume ratio straight to the edge, 9(192/81), gives about 21.3 and is the usual error here."
+        },
+        {
+          "qid": "mt672f64",
+          "domain": "Geometry and Trigonometry",
+          "skill": "74 Cofunction Identity Geometrically",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "In right triangle <i>ABC</i>, the measure of angle <i>B</i> is 90&deg; and cos <i>A</i> = <sup>7</sup>&frasl;<sub>25</sub>. Triangle <i>PQR</i> is similar to triangle <i>ABC</i>, where angle <i>P</i> corresponds to angle <i>A</i> and angle <i>R</i> corresponds to angle <i>C</i>. What is the value of sin <i>R</i>?",
+          "choices": [
+            "<sup>7</sup>&frasl;<sub>25</sub>",
+            "<sup>24</sup>&frasl;<sub>25</sub>",
+            "<sup>24</sup>&frasl;<sub>7</sub>",
+            "<sup>25</sup>&frasl;<sub>7</sub>"
+          ],
+          "correct": 0,
+          "explanation": "Choice A is correct. In right triangle ABC angle B measures 90 degrees, so angles A and C add to 90 degrees and are complementary. For complementary angles the sine of one equals the cosine of the other, so sin C = cos A = 7/25. Triangle PQR is similar to triangle ABC with angle R corresponding to angle C, and similar triangles have equal corresponding angle measures, so angle R has the same measure as angle C and sin R = sin C = 7/25. Note that the similarity changes the side lengths but not the ratios, so no scaling is needed. Choice B, 24/25, is cos R, which equals sin A: since 7<sup>2</sup> + 24<sup>2</sup> = 49 + 576 = 625 = 25<sup>2</sup>, this is a 7-24-25 right triangle. Choice C, 24/7, is tan A. Choice D, 25/7, is the reciprocal of 7/25 rather than its complement."
+        },
+        {
+          "qid": "mtdfdb0d",
+          "domain": "Algebra",
+          "skill": "39 Mixtures",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "A chemist has 30 liters of a solution that is 15% acid by volume. She will add some amount of a second solution that is 40% acid by volume to produce a solution that is 25% acid by volume. How many liters of the 40% solution must she add?",
+          "choices": [
+            "7.5",
+            "12",
+            "20",
+            "50"
+          ],
+          "correct": 2,
+          "choiceNotes": [
+            "A: computed 25% of the 30 liters already in the tank, the acid the first solution would need, rather than the amount to add.",
+            "B: computed 40% of 30, applying the second solution's concentration to the volume already present.",
+            "C: KEY. 0.15(30) + 0.40y = 0.25(30 + y) gives 4.5 + 0.40y = 7.5 + 0.25y, so 0.15y = 3 and y = 20.",
+            "D: solved correctly but reported the total volume of the final mixture, 30 + 20, instead of the amount added."
+          ],
+          "explanation": "Choice C is correct. Track the acid rather than the solution. The 30 liters at 15% acid contain 0.15(30) = 4.5 liters of acid. Let x be the number of liters of 40% solution added, contributing 0.40x liters of acid. The final mixture has 30 + x liters in total and is 25% acid, so 4.5 + 0.40x = 0.25(30 + x). Expanding the right side gives 4.5 + 0.40x = 7.5 + 0.25x. Subtracting 0.25x and 4.5 from both sides gives 0.15x = 3, so x = 20 liters. Check: 20 liters at 40% adds 8 liters of acid, for 12.5 liters of acid in 50 liters of solution, and 12.5/50 = 0.25. Choice A, 7.5, solves 4.5 + 0.40x = 0.25(30), forgetting that adding solution also raises the total volume. Choice D, 50, is the final total volume, not the amount added. Choice B, 12, is 0.40(30), which answers nothing the question asks."
+        },
+        {
+          "qid": "mt2a19dc",
+          "domain": "Geometry and Trigonometry",
+          "skill": "103 Cones",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "<svg viewBox=\"0 0 300 200\" class=\"dx-fig\" style=\"color:var(--text);\"><title>A right circular cone with the diameter of its base marked 12 and its slant height marked 10</title><ellipse cx=\"150\" cy=\"140\" rx=\"62\" ry=\"15\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"/><line x1=\"150\" y1=\"40\" x2=\"88\" y2=\"140\" stroke=\"currentColor\" stroke-width=\"1.5\"/><line x1=\"150\" y1=\"40\" x2=\"212\" y2=\"140\" stroke=\"currentColor\" stroke-width=\"1.5\"/><line x1=\"88\" y1=\"140\" x2=\"138\" y2=\"140\" stroke=\"currentColor\" stroke-width=\"1.1\" stroke-dasharray=\"4 3\"/><line x1=\"162\" y1=\"140\" x2=\"212\" y2=\"140\" stroke=\"currentColor\" stroke-width=\"1.1\" stroke-dasharray=\"4 3\"/><text x=\"150\" y=\"144\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">12</text><text x=\"190\" y=\"86\" font-size=\"10\" text-anchor=\"start\" fill=\"currentColor\">10</text><text x=\"150\" y=\"190\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">Note: Figure not drawn to scale.</text></svg>The figure shows a right circular cone. The diameter of the base of the cone and the slant height of the cone are marked, in centimeters. What is the volume, in cubic centimeters, of the cone?",
+          "choices": [
+            "96&pi;",
+            "120&pi;",
+            "384&pi;",
+            "480&pi;"
+          ],
+          "correct": 0,
+          "explanation": "Choice A is correct. The figure marks the base diameter as 12, so the radius is 12/2 = 6, and marks the slant height as 10. The radius, the vertical height, and the slant height form a right triangle with the slant height as the hypotenuse, so 6<sup>2</sup> + h<sup>2</sup> = 10<sup>2</sup>, giving h<sup>2</sup> = 100 - 36 = 64 and h = 8. The volume of a cone is (1/3)&pi; r<sup>2</sup> h, so here it is (1/3)&pi;(6)<sup>2</sup>(8) = (1/3)&pi;(36)(8) = 96&pi; cubic centimeters. Choice B, 120&pi;, uses the slant height 10 as the vertical height: (1/3)&pi;(36)(10). Choice C, 384&pi;, uses the marked 12 as the radius with the correct height: (1/3)&pi;(144)(8). Choice D, 480&pi;, makes both errors at once, taking 12 as the radius and 10 as the height."
+        },
+        {
+          "qid": "mtd2a3da",
+          "domain": "Problem-Solving and Data Analysis",
+          "skill": "117 Probability with Percentages",
+          "difficulty": "hard",
+          "type": "mc",
+          "text": "<table class=\"dx-table\"><tr><th>Grade</th><th>Number of students surveyed</th><th>Percent who travel to school by bus</th></tr><tr><td>Grade 10</td><td>150</td><td>60%</td></tr><tr><td>Grade 11</td><td>200</td><td>55%</td></tr><tr><td>Grade 12</td><td>150</td><td>40%</td></tr></table>The table summarizes the results of a survey of 500 students at a high school. If one of the surveyed students who does not travel to school by bus is selected at random, what is the probability that the student selected is in Grade 11?",
+          "choices": [
+            "<sup>9</sup>&frasl;<sub>50</sub>",
+            "<sup>3</sup>&frasl;<sub>8</sub>",
+            "<sup>2</sup>&frasl;<sub>5</sub>",
+            "<sup>9</sup>&frasl;<sub>20</sub>"
+          ],
+          "correct": 1,
+          "choiceNotes": [
+            "9&frasl;50 = 90&frasl;500: found the 90 Grade 11 students who do not take the bus but divided by all 500 surveyed, ignoring the condition.",
+            "Key: the students who do not take the bus number 60 + 90 + 90 = 240, of whom 90 are in Grade 11, so the probability is 90&frasl;240 = 3&frasl;8.",
+            "2&frasl;5 = 200&frasl;500: the chance a surveyed student is in Grade 11, computed without using the bus column at all.",
+            "9&frasl;20 = 90&frasl;200: reversed the condition and found the probability that a Grade 11 student does not travel by bus."
+          ],
+          "explanation": "Choice B is correct. The student is chosen from those who do not travel by bus, so count the non-bus students in each grade from the table. In Grade 10, 60% of 150 take the bus, so 40% do not: 0.40(150) = 60. In Grade 11, 55% of 200 take the bus, so 45% do not: 0.45(200) = 90. In Grade 12, 40% of 150 take the bus, so 60% do not: 0.60(150) = 90. The total number of non-bus students is 60 + 90 + 90 = 240, of whom 90 are in Grade 11, so the probability is 90/240 = 3/8. Choice D, 9/20, is 0.45, the share of Grade 11 students who avoid the bus, which answers a different question. Choice A, 9/50, is 90/500, using all 500 surveyed students as the denominator instead of only the 240 non-bus students. Choice C, 2/5, is 200/500, the share of all surveyed students in Grade 11."
+        },
+        {
+          "qid": "mt6f23e6",
+          "domain": "Advanced Math",
+          "skill": "65 Polynomial Functions",
+          "difficulty": "hard",
+          "type": "fr",
+          "text": "The function <i>f</i> is defined by <i>f</i>(<i>x</i>) = <i>x</i><sup>3</sup> + <i>ax</i><sup>2</sup> + <i>bx</i> + 18, where <i>a</i> and <i>b</i> are constants. In the <i>xy</i>-plane, the graph of <i>y</i> = <i>f</i>(<i>x</i>) is tangent to the <i>x</i>-axis at the point (3, 0) and crosses the <i>x</i>-axis at exactly one other point. What is the <i>x</i>-coordinate of that other point?",
+          "answer": "-2",
+          "explanation": "The correct answer is -2. A graph tangent to the x-axis at (3, 0) touches there without crossing, which for a polynomial means x - 3 appears as a repeated factor. Since f has degree 3 and crosses the x-axis at exactly one other point, f(x) = (x - 3)<sup>2</sup>(x - c), where c is the x-coordinate of that other point. Look at the constant term: setting x = 0 gives f(0) = (-3)<sup>2</sup>(-c) = 9(-c), and the given function has constant term 18, so 9(-c) = 18, meaning -c = 2 and c = -2. The other point is (-2, 0). Check by expanding: (x - 3)<sup>2</sup>(x + 2) = (x<sup>2</sup> - 6x + 9)(x + 2) = x<sup>3</sup> - 4x<sup>2</sup> - 3x + 18, which has the required form x<sup>3</sup> + ax<sup>2</sup> + bx + 18 with a = -4 and b = -3."
+        }
+      ]
+    }
+  }
+},
+{
+  "id": "sat-practice-11",
+  "number": 13,
+  "title": "SAT Practice Test 13 — Hardest Full-Length Test (No Scaling)",
   "sections": {
     "math": {
       "module1": [
@@ -2400,5 +5180,5 @@ window.SAT_PRACTICE_TESTS = [
       ]
     }
   }
-}
+},
 ];
