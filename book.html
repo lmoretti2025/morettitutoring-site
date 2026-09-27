@@ -96,6 +96,8 @@
   .day.is-off .day-num { color: var(--faint); }
   .day.is-past { opacity: .5; }
   .day.is-blank { background: transparent; }
+  .day.is-other.is-off { background: transparent; box-shadow: inset 0 0 0 1px var(--line); }
+  .day.is-other .day-num { width: auto; min-width: 1.9rem; padding: 0 .25rem; }
   .cal-foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 20px; margin-top: 16px; font-size: .78rem; color: var(--muted); }
   .key { display: inline-flex; align-items: center; gap: 7px; margin-right: 16px; }
   .key i { width: 12px; height: 12px; border-radius: 4px; display: inline-block; }
@@ -338,12 +340,19 @@
     var mo = months[shown], first = new Date(mo.y, mo.m, 1), today = dayKey(new Date());
     var title = first.toLocaleString('en-US', { month: 'long', year: 'numeric' });
     var cells = [];
-    for (var b = 0; b < first.getDay(); b++) cells.push('<div class="day is-blank" aria-hidden="true"></div>');
-    var days = new Date(mo.y, mo.m + 1, 0).getDate();
-    for (var n = 1; n <= days; n++) {
-      var dt = new Date(mo.y, mo.m, n), k = dayKey(dt), list = byDay[k] || [];
+    /* Whole weeks (Luca, 2026-09-27, as on session.html): the first row
+       starts on the Sunday before the 1st and the last ends on the Saturday
+       after the month's last day, so a week that crosses into the next
+       month shows, and books, in full. */
+    var lastDay = new Date(mo.y, mo.m + 1, 0);
+    var span = first.getDay() + lastDay.getDate() + (6 - lastDay.getDay());
+    for (var c = 0; c < span; c++) {
+      var dt = new Date(mo.y, mo.m, 1 - first.getDay() + c), n = dt.getDate(), k = dayKey(dt), list = byDay[k] || [];
       var label = dt.toLocaleString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-      var cls = 'day' + (list.length ? ' is-open' : ' is-off') + (k === today ? ' is-today' : '') + (k < today ? ' is-past' : '');
+      var other = dt.getMonth() !== mo.m;
+      // The 1st of a neighboring month carries its name, so the switch reads at a glance.
+      if (other && n === 1) n = dt.toLocaleString('en-US', { month: 'short' }) + ' 1';
+      var cls = 'day' + (list.length ? ' is-open' : ' is-off') + (other ? ' is-other' : '') + (k === today ? ' is-today' : '') + (k < today ? ' is-past' : '');
       cells.push(list.length
         ? '<button type="button" class="' + cls + '" data-day="' + k + '" aria-label="' + esc(label) + ', ' + list.length + ' open times">' +
             '<span class="day-num">' + n + '</span><span class="day-tag">' + list.length + (list.length === 1 ? ' time' : ' times') + '</span></button>'
