@@ -2328,7 +2328,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Text Structure and Purpose",
           "difficulty": "easy",
           "type": "mc",
-          "text": "Sourdough rises on wild yeast and bacteria that live in the flour and on the baker’s hands. <u>A culture kept in one kitchen will diverge within weeks from the same culture kept in another.</u> Bakers who trade starters therefore find that the gift does not stay identical to the original. A starter carried to a new kitchen therefore changes in composition within a few weeks.<br><br>Which choice best describes the function of the underlined sentence in the text as a whole?",
+          "text": "Sourdough rises on wild yeast and bacteria living in flour and on a baker’s hands. <u>Cultures kept in two kitchens will diverge within weeks.</u> Bakers who trade starters therefore find the gift no longer identical to what they gave. A starter carried into a new kitchen shifts in composition within weeks.<br><br>Which choice best describes the function of the underlined sentence in the text as a whole?",
           "choices": [
             "It offers an example of the wild yeast and bacteria described in the previous sentence.",
             "It explains why most bakers prefer to keep a single culture in one kitchen for years.",
@@ -2349,7 +2349,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Text Structure and Purpose",
           "difficulty": "medium",
           "type": "mc",
-          "text": "The double bass in a jazz rhythm section is seldom loud enough to be followed note by note, yet a recording made without it sounds thin in a way listeners register immediately. Acousticians attribute the effect to the instrument’s overtones, which fall in the range where the ear judges warmth and which persist after the fundamental (the lowest tone of the note) has died away. The bass is heard, in other words, less as a line than as a condition of the room.<br><br>Which choice best states the main purpose of the text?",
+          "text": "The double bass in a jazz rhythm section is seldom loud enough to follow note by note, yet a recording made without bass sounds thin, and listeners register that thinness immediately. Acousticians attribute this effect to overtones falling in a range where ears judge warmth, overtones persisting once the fundamental (the lowest tone of a note) has died away. Bass is heard, in other words, less as a line and more as a condition of the room.<br><br>Which choice best states the main purpose of the text?",
           "choices": [
             "To explain why an instrument that is hard to hear on its own is missed when it is absent.",
             "To describe the particular range of overtones that the human ear associates with warmth.",
@@ -2370,7 +2370,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Text Structure and Purpose",
           "difficulty": "hard",
           "type": "mc",
-          "text": "For most of the twentieth century the giant squid was known only from carcasses and from the beaks—the only hard parts of the animal— recovered in sperm whale stomachs. Estimates of its speed and hunting behavior were extrapolated from the anatomy of far smaller squid. In 2012 a Japanese team filmed a live animal at depth, and the footage showed it moving in slow, deliberate pulses rather than the darting characteristic of its relatives. The anatomy had been read correctly; the error lay in assuming that a larger animal would use it the same way.<br><br>Which choice best describes the overall structure of the text?",
+          "text": "For most of the twentieth century the giant squid was known only through carcasses and through beaks—the only hard parts of the animal—recovered in sperm whale stomachs. To estimate speed and hunting behavior, researchers extrapolated from anatomy of far smaller squid. In 2012 a Japanese team managed to film a live animal at depth, and footage showed it moving in slow, deliberate pulses, not the darting characteristic of relatives. Anatomy had been read correctly, but the error lay in expecting a larger animal to move as smaller ones move.<br><br>Which choice best describes the overall structure of the text?",
           "choices": [
             "It describes a filming technique developed for deep water and then evaluates the evidence that the technique produced.",
             "It gives the basis of an earlier estimate, reports an observation, and locates the error.",
@@ -2391,7 +2391,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Central Ideas and Details",
           "difficulty": "medium",
           "type": "mc",
-          "text": "Pollen preserved in lake sediment (the silt of the lake bed) records which plants grew nearby, and the depth at which a grain is found, the stratum, gives the approximate date. Working on a lake in the Peruvian Andes, a 2007 survey of preserved pollen found maize grains in layers dated to roughly 4,000 years ago, well below the depth at which pottery and permanent structures first appear. The sequence indicates that cultivation preceded settlement at the site by several centuries.<br><br>Which choice best states the main idea of the text?",
+          "text": "Pollen preserved within lake sediment, the silt of a lake bed, records which plants grew nearby, and grain depth can be read as an approximate date. Working on one lake among the Peruvian Andes, a 2007 survey of preserved pollen found maize grains dated to roughly 4,000 years ago, well below layers where pottery and permanent structures first appear. That sequence indicates cultivation preceded settlement by several centuries.<br><br>Which choice best states the main idea of the text?",
           "choices": [
             "Pollen is a more reliable dating method than pottery is for sites in the Peruvian Andes.",
             "The inhabitants of the site abandoned cultivation once permanent structures had been built.",
@@ -2412,7 +2412,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Central Ideas and Details",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Archaeologists have excavated three Viking-age boat burials in which the vessel was holed below the waterline before interment. In each case the damage is confined to a single plank and was made with a blade whose edge matches the shipwright’s adze (a shaping axe) recovered alongside. The holing therefore appears to have been a formal decommissioning that marked the vessel as withdrawn from use.<br><br>According to the text, what is true of the damage to the three vessels?",
+          "text": "Archaeologists have excavated three Viking-age boat burials whose vessels show a hole below the waterline, cut before interment. Damage across all three runs to one plank only, and matches the edge of a shipwright’s adze, a shaping axe, recovered alongside. Holing therefore appears to be formal decommissioning, marking each vessel as withdrawn from use.<br><br>According to the text, what is true of the damage to the three vessels?",
           "choices": [
             "It was made deliberately, with a tool of the kind used to build the vessel.",
             "It extended across several planks in each of the three burials.",
@@ -2454,7 +2454,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Command of Evidence (Textual)",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Soil carbon is conventionally measured in the top thirty centimeters (the plow layer) because roots and organic matter concentrate there and a change is easiest to detect. Some agronomists contend that the convention has produced overstated claims for no-till farming: the practice concentrates carbon near the surface, he argues, while leaving the total held in the full soil profile unchanged.<br><br>Which finding, if true, would most directly support this contention?",
+          "text": "Soil carbon in cropland is conventionally sampled to a depth of thirty centimeters. Researchers settled on that limit because roots and organic matter concentrate near the surface (deeper cores cost a great deal more to collect and process), and because change in the plow layer shows up soonest. Some agronomists contend that the claims made for no-till farming rest on the convention rather than on the soil: in their view the practice rearranges carbon toward the surface without adding to the amount the profile holds altogether.<br><br>Which finding, if true, would most directly support this contention?",
           "choices": [
             "Fields managed without tilling hold more carbon in the top thirty centimeters than comparably managed tilled fields do.",
             "Organic matter decomposes more slowly in the upper layers of an untilled field than in a tilled one.",
@@ -2475,7 +2475,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Command of Evidence (Quantitative)",
           "difficulty": "medium",
           "type": "mc",
-          "text": "Many temperate seeds will not germinate until they have passed through a cold period, a requirement generally understood to prevent a seedling from emerging in autumn. In one experiment, seeds of two shrubs were held at four degrees Celsius for varying lengths of time and then sown under identical conditions. A student reviewing the data concludes that only one of the two species carries the requirement, since ______<table class=\"dx-table\"><tr><th>Weeks in cold storage</th><th>Germinated, spring vetch</th><th>Germinated, hoary rockrose</th></tr><tr><td>0</td><td>8%</td><td>41%</td></tr><tr><td>4</td><td>22%</td><td>40%</td></tr><tr><td>8</td><td>51%</td><td>39%</td></tr><tr><td>12</td><td>78%</td><td>38%</td></tr></table><br><br>Which choice most effectively uses data from the table to complete the statement?",
+          "text": "The seeds of many temperate shrubs do not germinate before a stretch of time in the cold has passed, a requirement generally understood to keep the seedlings from emerging in the autumn, when the first frosts would kill them. In one experiment the seeds of two shrubs were kept at four degrees Celsius for differing lengths of time and then sown in the same greenhouse. A student reviewing the results concludes that only one of the two shrubs carries the cold requirement. The table shows that ______<table class=\"dx-table\"><tr><th>Weeks in cold storage</th><th>Germinated, spring vetch</th><th>Germinated, hoary rockrose</th></tr><tr><td>0</td><td>8%</td><td>41%</td></tr><tr><td>4</td><td>22%</td><td>40%</td></tr><tr><td>8</td><td>51%</td><td>39%</td></tr><tr><td>12</td><td>78%</td><td>38%</td></tr></table><br><br>Which choice most effectively uses data from the table to complete the statement?",
           "choices": [
             "germination in the spring vetch after four weeks of storage remained below the rate the hoary rockrose reached with none.",
             "the hoary rockrose germinated at 41 percent without any cold storage, the highest single figure recorded for that species.",
@@ -2496,7 +2496,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Command of Evidence (Quantitative)",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Pteropods build shells of aragonite, a form of calcium carbonate that dissolves more readily as seawater grows less alkaline; oceanographer Nina Bednaršek has measured that dissolution in living animals. Mean shell thickness across a basin might therefore be expected to track mean pH from site to site. Data gathered at four sites suggest the relationship is not that simple, since ______<table class=\"dx-table\"><tr><th>Site</th><th>Mean water pH</th><th>Mean shell thickness (µm)</th></tr><tr><td>North</td><td>8.10</td><td>42</td></tr><tr><td>Central</td><td>8.05</td><td>40</td></tr><tr><td>South</td><td>7.95</td><td>43</td></tr><tr><td>Deep</td><td>7.85</td><td>39</td></tr></table><br><br>Which choice most effectively uses data from the table to complete the text?",
+          "text": "Pteropods build shells of aragonite, a form of calcium carbonate that dissolves more readily as the seawater grows less alkaline; the oceanographer Nina Bednaršek has measured the dissolution in living animals. The mean shell thickness across a basin might therefore be expected to track the mean pH from site to site. The data gathered at the four sites suggest the relationship is more complex. The table shows that ______<table class=\"dx-table\"><tr><th>Site</th><th>Mean water pH</th><th>Mean shell thickness (µm)</th></tr><tr><td>North</td><td>8.10</td><td>42</td></tr><tr><td>Central</td><td>8.05</td><td>40</td></tr><tr><td>South</td><td>7.95</td><td>43</td></tr><tr><td>Deep</td><td>7.85</td><td>39</td></tr></table><br><br>Which choice most effectively uses data from the table to complete the text?",
           "choices": [
             "shells at the Deep site, where pH was lowest, were thinner than shells at the North site, where pH was highest.",
             "mean pH varied by only a quarter of a unit across the four sites in the study.",
@@ -2517,7 +2517,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Inferences",
           "difficulty": "medium",
           "type": "mc",
-          "text": "Honeybee colonies choose a nest site by sending scouts, each of which returns and dances to advertise what the scout has found. A scout that has since seen a better site does not contest the rival’s claim but simply stops dancing for the first site. Because dancing decays after a fixed number of circuits unless the scout revisits the site, a mediocre site loses advertisers faster than a good one does. The mechanism therefore ensures that ______<br><br>Which choice most logically completes the text?",
+          "text": "Honeybee colonies choose nest sites by sending out scouts, and the scout that returns dances to advertise the site it visited. No bee inspects a second site; the dance reports only what that one scout saw. Dancing decays after a fixed number of circuits, and the better the site, the more circuits the scout performs before falling silent. This mechanism therefore ensures that ______<br><br>Which choice most logically completes the text?",
           "choices": [
             "a colony settles on whichever site the first returning scout happens to have discovered.",
             "scouts that have visited the best available site dance for longer than the colony requires.",
@@ -2538,7 +2538,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Inferences",
           "difficulty": "hard",
           "type": "mc",
-          "text": "A songbird raised in isolation produces an abnormal song, which has long been taken to show that the species learns the song from adults. In one experiment, one group of chaffinches (a common European songbird) was raised in isolation and a second group was raised in isolation but with a speaker playing recorded chaffinch song. Birds in the second group sang normally. A third group, raised in isolation with a speaker playing the song of a different species, again sang abnormally. Taken together, the three results suggest that ______<br><br>Which choice most logically completes the text?",
+          "text": "Songbirds raised in isolation produce ragged versions of the song of their species, a result long taken to show that the young bird learns to sing from adults around it. In one experiment, chaffinches grew up alone with loudspeakers playing recorded song of their own kind, and those birds came to sing normally. Others, isolated in the same fashion, heard only the song of other species, and their singing stayed ragged, no better than the singing of birds that heard nothing. The three outcomes taken together suggest that ______<br><br>Which choice most logically completes the text?",
           "choices": [
             "chaffinches can acquire the song of another species if they are exposed to it early enough.",
             "the isolated birds in the first group were prevented from singing normally by the absence of an adult chaffinch.",
@@ -2559,7 +2559,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Form, Structure, and Sense",
           "difficulty": "easy",
           "type": "mc",
-          "text": "By the time the first passenger service opened in 1830, Stephenson ______ locomotives for more than a decade, and the design he brought to the line drew on every one of them.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "text": "The Liverpool and Manchester Railway opened for passengers in 1830. Stephenson ______ locomotives for a dozen years by then, so the engine supplied to the new line, unlike most of its rivals, drew on a long succession of earlier designs.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
           "choices": [
             "has been building",
             "had been building",
