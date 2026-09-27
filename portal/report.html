@@ -1182,7 +1182,7 @@
 <script src="signals.js?v=20260927c"></script>
 <script src="desmos-tags.js?v=20260916c"></script>
 <script src="question-flag.js?v=20260925a"></script>
-<script src="report-tour.js?v=20260927b"></script>
+<script src="report-tour.js?v=20260927d"></script>
 <script>
 /* FLAGS FROM THE ADMIN PAGE (Luca, 2026-09-25). admin.html shows this report
    in a sandboxed frame with no access to its sign-in, so it says hello by
@@ -4595,11 +4595,12 @@
         ? ', came back to answer ' + skipAns.length + ', and got ' + skipRight.length + ' right.'
         : (skipsFirst.length === 1 ? ' and never came back to answer it.' : ' and never came back to answer them.')));
     }
+    // Checked = 30+ seconds spent checking; having time left is not checking (rushed, 2026-09-27).
     var reached = 0, mods = 0;
-    parts.forEach(function (p) { p.d.modules.forEach(function (m) { mods++; if (m.reviewStartSec !== null) reached++; }); });
+    parts.forEach(function (p) { p.d.modules.forEach(function (m) { mods++; if (m.reviewStartSec !== null && m.reviewSec >= 30) reached++; }); });
     tiles.push({
       k: 'Review pass', fig: reached, of: mods,
-      cap: mods === 1 ? 'module finished with time to review' : 'modules finished with time to review',
+      cap: mods === 1 ? 'module checked before it was handed in' : 'modules checked before they were handed in',
       bar: [{ w: pct(reached, mods), c: 'bp-s-ink' }],
       facts: revFacts
     });
@@ -7560,12 +7561,15 @@
       if (rushedEnd) paceParts.push(rushedEnd + ' rushed through at the end of a module');
       if (pace.tooFast) paceParts.push(pace.tooFast + ' answered faster than ' + (pace.tooFast === 1 ? 'it' : 'they') + ' could be read');
       var tooFastMost = pace.tooFast >= 3 && pace.tooFast > pace.blank + pace.ranOut;
+      // Rushed modules (the conditions card's one rule, signals rushedLevel): the plain layer says it the same way.
+      var rushedMods = (conditionsShown && conditionsShown.modules || []).filter(function (m) { return m.rushed > 0; });
       var lede = !lostN
         ? (c.method ? 'Every question you answered, you got right. What cost you was time.' : 'Nothing on this test cost you points.')
         : !fullyTimed
         ? 'This test’s timing wasn’t fully saved, so the report can count what you missed but can’t say which questions ran into the clock.'
         : c.content >= 1.5 * c.clock
-        ? 'Most of what you lost was on questions you worked through and still got wrong, not on the clock.'
+        ? (rushedMods.length ? 'Most of what you lost was on questions you worked through and still got wrong, with time still left to check them.'
+          : 'Most of what you lost was on questions you worked through and still got wrong, not on the clock.')
         : c.clock >= 1.5 * c.content
         ? (tooFastMost ? 'Most of what you lost was to answering faster than the questions could be read, not to what you know.'
           : !pace.ranOut && !pace.tooFast ? 'What you lost was questions left blank, not what you know.'
@@ -7590,7 +7594,7 @@
       if (best) lostHtml += '<p class="plain-well"><b>Going well:</b> ' + escP(best.name) + ', ' + best.right + ' of ' + best.n + ' right.</p>';
       // No strong area is not no strength: answering everything inside the
       // clock is real, and it tells a struggling student where the work isn't.
-      else if (nAll && !nBlank) lostHtml += '<p class="plain-well"><b>Going well:</b> you answered all ' + nAll + ' questions' +
+      else if (nAll && !nBlank && !rushedMods.length) lostHtml += '<p class="plain-well"><b>Going well:</b> you answered all ' + nAll + ' questions' +
         (!c.clock && !c.method && fullyTimed ? ', and the clock was not a problem, so the work is the material, not speed.' : '.') + '</p>';
 
       // The area the knowledge section starts with, and what it was named for.
@@ -7728,8 +7732,17 @@
       });
       var reopened = (behaviorFlags || []).some(function (f) { return f.indexOf('<strong>Went back to answers already chosen') === 0; });
       var outOfTime = pace.ranOut + pace.blank;
+      var mins = rushedMods.map(function (m) { return Math.round(m.unusedMs / 60000); });
+      var lo = Math.min.apply(null, mins), hi = Math.max.apply(null, mins);
+      var allMods = conditionsShown && rushedMods.length === conditionsShown.modules.length;
+      var quick = rushedMods.every(function (m) { return m.reviewSec !== null && m.reviewSec < 20; });
       if (blanks >= 3) {
         // already covered by the first step
+      } else if (rushedMods.length) {
+        steps.push('Use the whole clock. You handed in ' + (allMods ? (rushedMods.length === 2 ? 'both modules' : rushedMods.length === 1 ? 'the module' : 'every module') : rushedMods.length + ' of ' + conditionsShown.modules.length + ' modules') +
+          ' with ' + (lo === hi ? lo : lo + ' to ' + hi) + ' minutes left' + (quick ? ', seconds after the last answer' : '') +
+          (pace.tooFast ? ', and ' + count(pace.tooFast, 'wrong answer') + ' came faster than a question can be read' : '') + '. ' +
+          'Read each question to the end, then before you submit, go back to the questions you are least sure of and spend the time left on those.');
       } else if (tooFastMost) {
         steps.push('Slow down. ' + count(pace.tooFast, 'wrong answer') + ' came faster than a question can be read' +
           (spare ? ', while you still had time left' : '') + '. Read each question to the end before you choose.');
