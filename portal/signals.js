@@ -2461,6 +2461,37 @@ var MorettiSignals = (function () {
     return out;
   }
 
+  /* -- L. REAL SAT AGAINST PRACTICE: realVsPractice (2026-09-27) ----------
+     Each official result set beside the level the practice tests BEFORE it
+     pointed to (currentLevel: comparable first takes), and how many of
+     those tests were taken under poor conditions where that is known. One
+     function for the admin Scores tab and session prep, so they cannot
+     disagree. Nikolas: practice level about 1250 (1180-1330) before his
+     September SAT, which came back 1010.
+     official: [{ date: 'yyyy-MM-dd', rw, math }]; entries: scored tests
+     ({ composite, rw, math, date or at, testId, mode, ... }); conds:
+     conditionsSummary(...).list or [{ at, level }] (optional).
+     Returns [{ date, rw, math, composite, before, level, gap, where:
+     'below' | 'above' | 'inside' | null, poor, known }], oldest first. */
+  function realVsPractice(official, entries, conds) {
+    var day = function (v) { var t = msOf(v); return isFinite(t) ? new Date(t).toISOString().slice(0, 10) : ''; };
+    return (official || []).filter(function (o) { return o && o.date && o.rw && o.math; })
+      .slice().sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; })
+      .map(function (o) {
+        var composite = Number(o.rw) + Number(o.math);
+        var before = (entries || []).filter(function (e) { var d = day(e && (e.date || e.at)); return d && d < o.date; });
+        var lv = before.length ? currentLevel(before.map(function (e) { var c = {}; for (var k in e) c[k] = e[k]; c.date = e.date || e.at; return c; })) : null;
+        var n = lv && lv.now ? lv.now : null;
+        var poor = 0, known = 0;
+        (conds || []).forEach(function (c) { var d = day(c && (c.at || c.date)); if (d && d < o.date && c.level) { known++; if (c.level === 'poor') poor++; } });
+        return { date: o.date, rw: Number(o.rw), math: Number(o.math), composite: composite, before: before.length,
+                 level: n ? { level: n.level, lo: n.lo, hi: n.hi } : null,
+                 gap: n ? Math.round((composite - n.level) / 10) * 10 : null,
+                 where: n ? (composite < n.lo ? 'below' : composite > n.hi ? 'above' : 'inside') : null,
+                 poor: poor, known: known };
+      });
+  }
+
   /* -- I. HOW THE MISSES HAPPEN, AREA BY AREA: missProfile (2026-09-26) ---
      Counts, not verdicts: for every missed question on the last `last`
      (default 8, as pacingHabits) sittings that count as content evidence
@@ -3902,6 +3933,7 @@ var MorettiSignals = (function () {
     pacingHabits: pacingHabits, missProfile: missProfile, consistencyOf: consistencyOf, gammaQ: gammaQ,
     firstTakes: firstTakes, abandonedSitting: abandonedSitting,
     sittingConditions: sittingConditions, conditionsCompact: conditionsCompact, conditionsSummary: conditionsSummary,
+    realVsPractice: realVsPractice,
     skillTrend: skillTrend,
     evidenceAttempts: evidenceAttempts,
     formDomainOffsets: formDomainOffsets,
@@ -3910,7 +3942,7 @@ var MorettiSignals = (function () {
     // Bumped with every change to what this file computes (audit 5): the
     // admin deploy check compares it, since an older copy can still have
     // every function name and compute the old way.
-    VERSION: 34,
+    VERSION: 35,
     attemptAbility: attemptAbility,
     FOCUS_GATES: { domainClear: FOCUS_DOMAIN_CLEAR, skillLead: FOCUS_SKILL_LEAD, noOffsetsPenalty: FOCUS_NO_OFFSETS_PENALTY },
     practiceEvidence: practiceEvidence,

@@ -1408,7 +1408,7 @@
      so the signed admin session is in sessionStorage when the auto-continue
      boot code below reads it. -->
 <script src="time-budgets.js?v=20260912a"></script>
-<script src="signals.js?v=20260926i"></script>
+<script src="signals.js?v=20260927a"></script>
   <script src="backend-url.js?v=20260905"></script>
   <script>
     /* Browser errors on this page reach the ClientErrors tab too (prep.gs's
@@ -1684,7 +1684,7 @@
   var REQUIRED_PREP_VERSION = 29;
   // signals.gs and emails.gs carry their own numbers since audit 5: an older
   // copy can have every function name and still compute the old way.
-  var REQUIRED_SIGNALS_VERSION = 34, REQUIRED_EMAILS_VERSION = 32;
+  var REQUIRED_SIGNALS_VERSION = 35, REQUIRED_EMAILS_VERSION = 32;
   // booking.gs (the parent booking page) declares BOOKING_VERSION since 2026-09-26.
   var REQUIRED_BOOKING_VERSION = 1;
   var CAPABILITY_LABELS = {
@@ -3081,7 +3081,7 @@
         '<p class="prep-note">Areas are ordered by misses beyond this student\u2019s own miss rate. "Down to two" and "key crossed out" are part of the misses, not extra; they start with tests saved from September 26 on.' +
         (unknownN ? ' ' + unknownN + ' misses on older tests have no timing to sort them and are in "Missed" only.' : '') + '</p>'
       : '';
-    return renderConditionsPrep(P.conditions) + '<div class="prep-bp">' + hed + '<ul>' + items.join('') + '</ul>' + table + renderConsistency(P.consistency, P.conditions) + '</div>';
+    return renderRealPrep(P.real) + renderConditionsPrep(P.conditions) + '<div class="prep-bp">' + hed + '<ul>' + items.join('') + '</ul>' + table + renderConsistency(P.consistency, P.conditions) + '</div>';
   }
   /* ═══ TEST CONDITIONS (signals.js sittingConditions, 2026-09-26) ═══
      Each scored sitting's conditions: late, long breaks, time away, time
@@ -3089,9 +3089,25 @@
      poor, 1110-1350 against a real 1010. Tutor view; the report shows the
      student the same evidence on the test itself. */
   var COND_LABEL = { late: 'late', 'long-break': 'long break', away: 'time away', 'left-time': 'time left unused', 'rushed-finish': 'rushed finish', 'no-review': 'no review' };
+  /* ═══ REAL SAT AGAINST PRACTICE, in session prep (2026-09-27) ═══ the
+     latest official result first, from the same function as the Scores tab. */
+  function renderRealPrep(R) {
+    if (!R || !R.length) return '';
+    var fmt = function (d) { var p = String(d).split('-'); return p.length === 3 ? Number(p[1]) + '/' + Number(p[2]) : d; };
+    var items = R.slice().reverse().map(function (r) {
+      return '<li><span class="tag ' + (r.where === 'below' ? 'parent' : 'tutor') + '">' + (r.where === 'below' ? 'Below practice' : r.where === 'above' ? 'Above practice' : r.where ? 'In line' : 'Real SAT') + '</span>' +
+        '<b>' + escHtml(fmt(r.date)) + ' real SAT ' + r.composite + '</b> (R&amp;W ' + r.rw + ', Math ' + r.math + ') &middot; ' + realVsLine(r) + '</li>';
+    }).join('');
+    return '<div class="prep-bp"><div class="prep-hw-hed">Real SAT against practice<span>' + R.length + ' official result' + (R.length === 1 ? '' : 's') + '</span></div><ul>' + items + '</ul></div>';
+  }
   function renderConditionsPrep(C) {
     if (!C || !C.tests) return '';
-    var dt = function (at) { var d = new Date(at); return isNaN(d) ? '' : (d.getMonth() + 1) + '/' + d.getDate(); };
+    // A bare yyyy-MM-dd is that day as written (new Date() would read it as UTC midnight, the evening before here).
+    var dt = function (at) {
+      var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(at || ''));
+      if (m) return Number(m[2]) + '/' + Number(m[3]);
+      var d = new Date(at); return isNaN(d) ? '' : (d.getMonth() + 1) + '/' + d.getDate();
+    };
     var li = C.list.slice().reverse().slice(0, 8).map(function (x) {
       var tag = x.level === 'poor' ? '<span class="tag parent">Poor</span>' : x.level === 'fair' ? '<span class="tag tutor">Fair</span>' : '<span class="tag tutor" style="background:rgba(46,125,85,0.12);color:#2E7D55;">Good</span>';
       var what = (x.sig || []).map(function (sg) { return escHtml(sg[1]); }).join('; ');
@@ -3640,6 +3656,15 @@
      practice tests taken BEFORE it, and how many of those were under poor
      conditions where that is known (qs.cn). Saved whole through
      updateStudentInfo { officialScores }. */
+  // One line for a real result against the practice level before it (realVsPractice row).
+  function realVsLine(r) {
+    if (!r || !r.level) return 'No comparable practice tests before it to set it beside.';
+    var n = r.level, where = r.where === 'below' ? '<span class="real-gap-below">' + Math.abs(r.gap) + ' points below</span> what they pointed to'
+      : r.where === 'above' ? '<b>' + r.gap + ' points above</b> what they pointed to' : 'inside the range they pointed to';
+    return 'Practice tests before it put the level at about <b>' + n.level + '</b> (' + n.lo + '&ndash;' + n.hi + '); the real score was ' + where + '.' +
+      (r.known ? ' ' + r.poor + ' of the ' + r.known + ' with a conditions record were taken under poor conditions.' : '') +
+      (r.where === 'below' ? ' Home tests are running above test day.' : '');
+  }
   function renderRealScores(data) {
     var host = $('stu-real'), card = $('stu-real-card');
     var st = data.student || {};
@@ -3656,25 +3681,15 @@
                interrupted: a.interrupted, awayMin: a.awayMin, awayMs: a.awayMs, qStats: a.qStats };
     }).filter(function (a) { return a.date; }).sort(function (a, b) { return String(a.date).localeCompare(String(b.date)); });
     var fmtDay = function (d) { var p = String(d).split('-'); return p.length === 3 ? Number(p[1]) + '/' + Number(p[2]) + '/' + p[0] : d; };
+    // The shared reading (signals.js realVsPractice), the same one session prep shows.
+    var conds = attempts.map(function (a) {
+      var qs = a.qStats; if (typeof qs === 'string') { try { qs = JSON.parse(qs); } catch (e) { qs = null; } }
+      return qs && qs.cn ? { at: a.at, level: qs.cn.level } : null;
+    }).filter(Boolean);
+    var cmp = MS && typeof MS.realVsPractice === 'function' ? MS.realVsPractice(list, attempts, conds) : [];
     var rows = list.map(function (o, i) {
-      var before = attempts.filter(function (a) { return String(a.date).slice(0, 10) < o.date; });
-      var lvl = MS && typeof MS.currentLevel === 'function' ? MS.currentLevel(before) : null;
-      var vs = '';
-      if (lvl && lvl.now) {
-        var n = lvl.now, gap = o.composite - n.level;
-        var where = o.composite < n.lo ? '<span class="real-gap-below">' + Math.abs(Math.round(gap / 10) * 10) + ' points below</span> what they pointed to'
-          : o.composite > n.hi ? '<b>' + Math.round(gap / 10) * 10 + ' points above</b> what they pointed to' : 'inside the range they pointed to';
-        var poor = 0, known = 0;
-        before.forEach(function (a) {
-          var qs = a.qStats; if (typeof qs === 'string') { try { qs = JSON.parse(qs); } catch (e) { qs = null; } }
-          if (qs && qs.cn) { known++; if (qs.cn.level === 'poor') poor++; }
-        });
-        vs = 'Practice tests before it put the level at about <b>' + n.level + '</b> (' + n.lo + '&ndash;' + n.hi + '); the real score was ' + where + '.' +
-          (known ? ' ' + poor + ' of the ' + known + ' with a conditions record were taken under poor conditions.' : '') +
-          (o.composite < n.lo ? ' Home tests are running above test day.' : '');
-      } else {
-        vs = 'No comparable practice tests before it to set it beside.';
-      }
+      var r = cmp.filter(function (x) { return x.date === o.date && x.composite === o.composite; })[0];
+      var vs = realVsLine(r);
       return '<div class="real-row"><div class="real-date">' + escHtml(fmtDay(o.date)) + '</div>' +
         '<div><div class="real-score">' + o.composite + '<span>R&amp;W ' + o.rw + ' &middot; Math ' + o.math + '</span></div><div class="real-vs">' + vs + '</div></div>' +
         '<button type="button" class="mini" data-real-del="' + i + '" aria-label="Remove this score">Remove</button></div>';
