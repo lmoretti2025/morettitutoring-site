@@ -3487,7 +3487,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Text Structure and Purpose",
           "difficulty": "hard",
           "type": "mc",
-          "text": "The standard account of the Great Fire of London credits the rebuilding acts with the city’s recovery, and the acts did impose brick where timber had stood. But the parish rate books, the local tax records, show that three quarters of the burnt houses were back in occupation before the first commissioner was appointed, and that the rebuilders were the same trades who had built the city before. <u>What the acts regulated was a recovery already under way.</u> The statute shaped the result; it did not produce it.<br><br>Which choice best describes the function of the underlined sentence in the text as a whole?",
+          "text": "A standard account of London's Great Fire credits rebuilding acts with recovery in the city, and those acts imposed brick where timber once stood. Parish rate books, kept for local taxation, show that three quarters of burnt houses stood occupied again before officials were appointed to the work. They show too that men already in those trades rebuilt the houses. <u>The acts regulated a recovery already in motion.</u> Statute shaped the result without producing it.<br><br>Which choice best describes the function of the underlined sentence in the text as a whole?",
           "choices": [
             "It offers an example of the kind of regulation the rebuilding acts imposed after the fire.",
             "It introduces the rebuilding acts whose provisions the rest of the text goes on to describe.",
@@ -3499,7 +3499,7 @@ window.SAT_PRACTICE_TESTS = [
             "Incorrect. It gives no instance of a regulation; it characterizes what the regulation acted upon.",
             "Incorrect. The acts are introduced in the first sentence, and their provisions are never described in detail.",
             "Incorrect. No weakness in the rate books is granted anywhere; they are the passage’s evidence.",
-            "Correct. The rate-book evidence shows occupation preceding the commissioners, and the underlined sentence names what follows from that, which the last sentence then sharpens."
+            "Correct. The rate-book evidence shows occupation preceding any official appointment, and the underlined sentence names what follows from that, which the last sentence then sharpens."
           ]
         },
         {
@@ -3508,7 +3508,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Text Structure and Purpose",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Any account of why a language loses speakers must explain not only the pressure from outside but the decision inside a household to stop passing the language on. Sociolinguists have interviewed families at three stages of that shift, and report that parents rarely describe a decision at all. They describe a series of occasions on which the other language was easier, and a later recognition that the sequence had amounted to a choice.<br><br>Which choice best states the main purpose of the text?",
+          "text": "Languages lose speakers partly to outside pressure, partly to decisions inside households about ceasing to pass them on. Sociolinguists who interviewed families in three stages of such shift report that parents rarely describe one decision. They describe instead a run of occasions in which the second language came more easily, and a later recognition that the run amounted to a choice.<br><br>Which choice best states the main purpose of the text?",
           "choices": [
             "To compare the external pressures on a language with the internal ones acting on a household.",
             "To argue that parents who stop transmitting a language later come to regret having done so.",
@@ -3529,7 +3529,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Central Ideas and Details",
           "difficulty": "easy",
           "type": "mc",
-          "text": "A fogbow (a rainbow formed in fog) has the same geometry as a rainbow proper but in droplets small enough that the light bends around them instead of passing cleanly through. The colors wash into one another, and what remains is a pale arc that observers often describe as white. The physics is not different in kind; the droplets are.<br><br>Which choice best states the main idea of the text?",
+          "text": "A fogbow shares the geometry of an ordinary rainbow, but it forms in droplets so small that light bends around them rather than passing cleanly through. Colors wash together, and the arc that remains looks pale enough to be called white. The physics has not changed. The droplets have.<br><br>Which choice best states the main idea of the text?",
           "choices": [
             "Observers rarely distinguish a fogbow from the pale arcs produced by other conditions.",
             "A fogbow and a rainbow are formed by two unrelated optical processes in the atmosphere.",
@@ -3550,7 +3550,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Central Ideas and Details",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Musicologists have compared the surviving parts for a Venetian opera of 1642 with the printed libretto—the sung text—sold at the first performances. Several arias named in the libretto are missing from the parts, and two numbers in the parts appear nowhere in the printed text. They argue that the libretto records what the poet supplied rather than what the audience heard, and that a score assembled from the libretto would reconstruct a performance that never took place.<br><br>Which choice best describes the conclusion drawn from the two sources?",
+          "text": "Musicologists have compared the surviving performing parts of a Venetian opera of 1642 with the printed libretto—the sung text—sold at the first performances. Several arias named in that libretto are missing from the parts. Two numbers in the parts appear nowhere in the printed text. They conclude that the libretto preserves a poet's supply rather than an audience's experience, and that a score built from it would reconstruct a performance which never actually took place.<br><br>Which choice best describes the conclusion drawn from the two sources?",
           "choices": [
             "The two numbers absent from the libretto were added by a composer other than the one named on it.",
             "The Venetian opera of 1642 was performed with more arias than its libretto lists for the audience.",
@@ -3571,7 +3571,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Command of Evidence (Quantitative)",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Carbon dioxide seeping from volcanic vents on the seafloor makes the water around them more acidic, and biologists use such vents as natural experiments in ocean acidification. A team measured limpets at four distances from one vent. They concluded that the water near the vent limits shell growth rather than merely damaging shells already formed.<table class=\"dx-table\"><tr><th>Distance from vent (m)</th><th>Shell length (mm)</th><th>Shells with dissolved margins (%)</th></tr><tr><td>5</td><td>18.2</td><td>61</td></tr><tr><td>20</td><td>22.6</td><td>34</td></tr><tr><td>60</td><td>23.1</td><td>12</td></tr><tr><td>150</td><td>23.4</td><td>9</td></tr></table><br><br>Which choice best describes data from the table that support the team's conclusion?",
+          "text": "Carbon dioxide seeping out of volcanic vents on the seafloor acidifies the water around them, and biologists treat such vents as natural experiments in the chemistry of ocean acidification. A team measured the shells of limpets at four distances along a transect away from one vent, recording both the length of each shell and the state of its margins. The team concluded that water near the vent limits the growth of a shell rather than merely damaging shells already formed.<table class=\"dx-table\"><tr><th>Distance from vent (m)</th><th>Shell length (mm)</th><th>Shells with dissolved margins (%)</th></tr><tr><td>5</td><td>18.2</td><td>61</td></tr><tr><td>20</td><td>22.6</td><td>34</td></tr><tr><td>60</td><td>23.1</td><td>12</td></tr><tr><td>150</td><td>23.4</td><td>9</td></tr></table><br><br>Which choice best describes data from the table that support the team's conclusion?",
           "choices": [
             "Sixty-one percent of shells collected five meters from the vent showed dissolved margins, the highest proportion recorded.",
             "The proportion of shells with dissolved margins fell as distance from the vent increased.",
