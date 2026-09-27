@@ -5851,14 +5851,26 @@
     if (!b) return;
     var key = b.getAttribute('data-send-now');
     var i = fp.items.filter(function (x) { return x.key === key; })[0] || {};
-    if (!confirm('Send ' + firstName(i.name || 'this family') + '\u2019s weekly update now, to ' + (i.to || []).join(', ') +
-                 '?\n\nIt is built as of today and covers everything since their last update. The next one is timed from today.')) return;
-    b.disabled = true; b.textContent = 'Sending\u2026';
-    postToBackend({ action: 'weeklySendNow', adminKey: adminKey(), key: key }).then(function (d) {
-      if (d && d.ok) { showNotice('Sent ' + firstName(i.name || '') + '\u2019s weekly update to ' + (d.to || []).join(', ') + '.'); loadFridayPreview(key); return; }
-      b.disabled = false; b.textContent = 'Send now';
-      showNotice('Not sent: ' + ((d && d.message) || (d && d.error === 'unknown_action' ? 'the live backend needs a new deploy first.' : (d && d.error) || 'unknown error')));
-    }).catch(function () { b.disabled = false; b.textContent = 'Send now'; showNotice('Not sent: could not reach the backend.'); });
+    /* Show the version that actually goes: written for today and this hour,
+       not the scheduled morning the preview shows. */
+    if (i.nowHtml) {
+      var fr = $('fp-view').querySelector('.bc-mail iframe'), rs = $('fp-view').querySelector('.fp-reason');
+      if (fr) fr.srcdoc = i.nowHtml;
+      if (rs) rs.textContent = 'This is the version Send now sends: written for today, ' + new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }) + '.';
+      var meta = $('fp-view').querySelector('.bc-meta');
+      if (meta && i.nowSubject) meta.innerHTML = '<b>To</b> ' + escHtml((i.to || []).join(', ')) + '<br><b>Subject</b> ' + escHtml(i.nowSubject);
+    }
+    // A moment for the swapped preview to paint before the confirm box freezes the page.
+    setTimeout(function () {
+      if (!confirm('Send ' + firstName(i.name || 'this family') + '\u2019s weekly update now, to ' + (i.to || []).join(', ') +
+                   '?\n\nIt is built as of today and covers everything since their last update. The next one is timed from today.')) return;
+      b.disabled = true; b.textContent = 'Sending\u2026';
+      postToBackend({ action: 'weeklySendNow', adminKey: adminKey(), key: key }).then(function (d) {
+        if (d && d.ok) { showNotice('Sent ' + firstName(i.name || '') + '\u2019s weekly update to ' + (d.to || []).join(', ') + '.'); loadFridayPreview(key); return; }
+        b.disabled = false; b.textContent = 'Send now';
+        showNotice('Not sent: ' + ((d && d.message) || (d && d.error === 'unknown_action' ? 'the live backend needs a new deploy first.' : (d && d.error) || 'unknown error')));
+      }).catch(function () { b.disabled = false; b.textContent = 'Send now'; showNotice('Not sent: could not reach the backend.'); });
+    }, i.nowHtml ? 450 : 0);
   });
   $('fp-view').addEventListener('click', function (e) {
     var b = e.target.closest('button[data-open]');
