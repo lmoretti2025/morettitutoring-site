@@ -94,7 +94,7 @@
   .day.is-past { opacity: .5; }
   .day.is-blank { background: transparent; }
   .day.is-other.is-off { background: transparent; box-shadow: inset 0 0 0 1px var(--line); }
-  .day.is-other .day-num { width: auto; min-width: 1.9rem; padding: 0 .25rem; }
+  .day-num.has-month { width: max-content; padding: 0 .3rem; border-radius: 999px; }   /* "Oct 1" only; every other date keeps its circle */
   .cal-foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 20px; margin-top: 16px; font-size: .78rem; color: var(--muted); }
   .key { display: inline-flex; align-items: center; gap: 7px; margin-right: 16px; }
   .key i { width: 12px; height: 12px; border-radius: 4px; display: inline-block; }
@@ -404,9 +404,9 @@
       var cls = 'day' + (list.length ? ' is-open' : ' is-off') + (other ? ' is-other' : '') + (k === today ? ' is-today' : '') + (k < today ? ' is-past' : '');
       cells.push(list.length
         ? '<button type="button" class="' + cls + '" data-day="' + k + '" aria-label="' + esc(label) + ', ' + list.length + ' open times">' +
-            '<span class="day-num">' + n + '</span><span class="day-tag">' + list.length + (list.length === 1 ? ' time' : ' times') + '</span></button>'
+            '<span class="day-num' + (typeof n === 'string' ? ' has-month' : '') + '">' + n + '</span><span class="day-tag">' + list.length + (list.length === 1 ? ' time' : ' times') + '</span></button>'
         // Grey says unavailable (the key below explains it); the word on every tile was noise.
-        : '<div class="' + cls + '" role="img" aria-label="' + esc(label) + ', unavailable"><span class="day-num">' + n + '</span></div>');
+        : '<div class="' + cls + '" role="img" aria-label="' + esc(label) + ', unavailable"><span class="day-num' + (typeof n === 'string' ? ' has-month' : '') + '">' + n + '</span></div>');
     }
     $('cal').innerHTML =
       '<div class="cal-toolbar"><div class="cal-title">' + esc(title) + '</div><div class="cal-nav">' +
