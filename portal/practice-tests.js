@@ -3697,7 +3697,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Form, Structure, and Sense",
           "difficulty": "hard",
           "type": "mc",
-          "text": "The fuller of the two surviving accounts of the siege, written within a decade of the siege by a man who had questioned the sailors himself, ______ the number of ships in the harbor.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "text": "Historians have never settled how large that fleet was. Two eyewitnesses left records, and one is far fuller. The fuller of two surviving accounts of the siege, written within a decade by a man who questioned sailors, ______ a figure for ships in harbor.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
           "choices": [
             "give",
             "have given",
@@ -3706,10 +3706,10 @@ window.SAT_PRACTICE_TESTS = [
           ],
           "correct": 2,
           "choiceNotes": [
-            "Incorrect. “Give” is plural; “neither” is singular however many nouns follow it.",
-            "Incorrect. “Have given” is plural, and the present perfect also conflicts with the standing description.",
-            "Correct. The subject is “Neither,” which takes a singular verb, and the two participial phrases between it and the verb cannot supply a new subject.",
-            "Incorrect. “Are giving” is plural and progressive, and the sentence states a fact about the documents."
+            "Incorrect. “Give” is plural, and the subject “The fuller” is singular however many nouns follow it.",
+            "Incorrect. “Have given” is plural, and the present perfect conflicts with a standing description of what the document says.",
+            "Correct. The subject is “The fuller,” which takes a singular verb. “Accounts” and “sailors” stand between the subject and the verb but cannot supply a new one.",
+            "Incorrect. “Are giving” is plural and progressive, and the sentence states a standing fact about the document."
           ]
         },
         {
@@ -3760,7 +3760,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Boundaries",
           "difficulty": "hard",
           "type": "mc",
-          "text": "The cartographer worked from three sources of unequal worth: a naval survey of the coast, accurate to within a cable, or 185 meters; a merchant’s sketch of the interior, drawn from ______ and a missionary’s account that gave distances in days of travel.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "text": "Compiled at Lisbon in 1846, the map drew on very unequal material, and the cartographer noted his misgivings in the margin. He had three sources: one naval survey accurate to within a cable, or 185 meters; a merchant’s sketch showing the interior, drawn from ______ and a missionary’s account giving distances in days walked.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
           "choices": [
             "memory;",
             "memory,",
@@ -3802,7 +3802,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Boundaries",
           "difficulty": "hard",
           "type": "mc",
-          "text": "The tune survives in two forms, one collected in Donegal in 1912 and one printed in Boston forty years ______ second is a fourth higher and carries a second part that the Donegal singer did not know.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "text": "Collectors found the tune in two forms. One was taken down by a fieldworker at Donegal during 1912, one printed at Boston forty years ______ Boston version stands a fourth higher and carries a part unknown to the Donegal singer.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
           "choices": [
             "earlier. The",
             "earlier, the",
@@ -3811,9 +3811,9 @@ window.SAT_PRACTICE_TESTS = [
           ],
           "correct": 0,
           "choiceNotes": [
-            "Correct. “The second is a fourth higher...” is independent, so a period and a capital are conventional.",
+            "Correct. “The Boston version stands a fourth higher...” is independent, so a period and a capital are conventional.",
             "Incorrect. A comma between two independent clauses is a comma splice.",
-            "Incorrect. With no punctuation two independent clauses fuse and “forty years earlier the second is” cannot be parsed.",
+            "Incorrect. With no punctuation two independent clauses fuse, and “forty years earlier Boston version stands” cannot be parsed.",
             "Incorrect. A semicolon already joins independent clauses; adding “and” after it is redundant and non-standard."
           ]
         },
@@ -3823,7 +3823,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Transitions",
           "difficulty": "medium",
           "type": "mc",
-          "text": "A cuckoo laid in a reed warbler’s nest hatches first and ejects the other eggs, so the warblers rear one chick where they would have reared five. Warblers on rivers where cuckoos are common reject strange eggs at high rates. ______ warblers on rivers the cuckoo has never reached accept almost anything placed in the nest.<br><br>Which choice completes the text with the most logical transition?",
+          "text": "A cuckoo hatching in a reed warbler’s nest ejects the eggs around it, and the warblers then rear one chick instead of five. Along rivers with many cuckoos, warblers reject a strange egg at high rates. ______ warblers along rivers the cuckoo never reached accept almost anything placed in the nest.<br><br>Which choice completes the text with the most logical transition?",
           "choices": [
             "By contrast,",
             "Admittedly,",
