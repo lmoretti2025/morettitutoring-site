@@ -5685,7 +5685,7 @@ window.Portal = {
 <script src="challenge-questions.js?v=20260926a"></script>
 <script src="grid-in.js?v=20260910a"></script>
 <script src="question-flag.js?v=20260922c"></script>
-<script src="report-tour.js?v=20260927a"></script>
+<script src="report-tour.js?v=20260927b"></script>
 <script>
   /* practice-tests.js is ~2.6MB, so a blocking <script> delayed every later
      script (including the key-submit wiring). It loads here via an async
@@ -25274,14 +25274,14 @@ window.renderNativeReport = function (data) {
     if (bw) {
       Array.prototype.forEach.call(bw.querySelectorAll('.takeaways li'), function (li) {
         var tx = li.textContent || '';
-        if ((ids.indexOf('late') >= 0 && /^Taken late at night/.test(tx)) || (ids.indexOf('left-time') >= 0 && /^Time left on the clock/.test(tx))) li.parentNode.removeChild(li);
+        if ((ids.indexOf('late') >= 0 && /^Taken late at night/.test(tx)) || ((ids.indexOf('left-time') >= 0 || ids.indexOf('fast-throughout') >= 0) && /^Time left on the clock/.test(tx))) li.parentNode.removeChild(li);
       });
       Array.prototype.forEach.call(bw.querySelectorAll('.takeaways'), function (ul) { if (!ul.children.length) ul.parentNode.removeChild(ul); });
     }
     // The walkthrough reads the same list (R.behaviorFlags): take them out there too.
     for (var bf = behaviorFlags.length - 1; bf >= 0; bf--) {
       var bt = String(behaviorFlags[bf]).replace(/<[^>]+>/g, '');
-      if ((ids.indexOf('late') >= 0 && /^Taken late at night/.test(bt)) || (ids.indexOf('left-time') >= 0 && /^Time left on the clock/.test(bt))) behaviorFlags.splice(bf, 1);
+      if ((ids.indexOf('late') >= 0 && /^Taken late at night/.test(bt)) || ((ids.indexOf('left-time') >= 0 || ids.indexOf('fast-throughout') >= 0) && /^Time left on the clock/.test(bt))) behaviorFlags.splice(bf, 1);
     }
   })();
 
