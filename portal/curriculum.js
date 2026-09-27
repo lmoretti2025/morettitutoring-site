@@ -136,6 +136,9 @@
     /* the bottom bar, as on Khan's pages */
     '#cu-root .cu-bottom{position:sticky;bottom:0;margin-top:1.2rem;background:rgba(255,255,255,.96);backdrop-filter:blur(6px);border-radius:14px;box-shadow:0 -2px 16px rgba(17,17,17,.07);padding:.75rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;z-index:3}',
     '#cu-root .cu-qdots{display:flex;gap:6px;flex-wrap:wrap}',
+    '#cu-root .cu-streak-wrap{display:flex;align-items:center;gap:12px;flex-wrap:wrap}',
+    '#cu-root .cu-streak{display:flex;gap:4px}#cu-root .cu-streak i{width:20px;height:9px;border-radius:5px;background:#e2dfda;transition:background .3s}',
+    '#cu-root .cu-streak i.on{background:var(--cu-good)}#cu-root .cu-streak-wrap .lbl b{color:var(--text,#111)}',
     '#cu-root .cu-qdots i{width:12px;height:12px;border-radius:50%;border:1.5px solid rgba(17,17,17,.3)}',
     '#cu-root .cu-qdots i.ok{background:var(--cu-good);border-color:var(--cu-good)}#cu-root .cu-qdots i.cur{border-color:#3457d5;box-shadow:0 0 0 2px rgba(52,87,213,.2)}',
     '#cu-root .cu-bottom .lbl{font-size:.82rem;color:var(--mid)}',
@@ -275,7 +278,7 @@
     }
     root.innerHTML = '<div class="cu-wrap">' +
       '<div class="cu-kicker">Curriculum</div><h1>' + esc(c.title === 'Math' ? 'SAT Math' : 'SAT Reading & Writing') + '</h1>' +
-      '<div class="cu-sub">Every lesson is a short video, then a quick check. Get each check right to unlock the next part.</div>' +
+      '<div class="cu-sub">Every lesson is a short video, then a check: get ' + STREAK_TO_PASS + ' right in a row to unlock the next part.</div>' +
       '<div class="cu-tabs" role="group" aria-label="Course">' + courses().map(function (x) {
         return '<button type="button" data-course="' + x.id + '" aria-pressed="' + (x.id === c.id) + '">' + esc(x.title) + '</button>';
       }).join('') + '</div>' +
@@ -344,7 +347,7 @@
         '<span class="ic">' + (done ? '&#10003;' : '&#9654;') + '</span><span>' + esc(partTitle(l, i)) + '</span><span class="st">' + (open ? '' : '&#128274;') + '</span></button>';
       if (p.qids.length) {
         out += '<button type="button" class="cu-step' + (view.part === i && view.step === 'check' ? ' on' : '') + (open ? '' : ' locked') + (done ? ' done' : '') + '" data-step="check" data-part="' + i + '"' + lock + '>' +
-          '<span class="ic">' + (done ? '&#10003;' : '&#9998;') + '</span><span>Check: ' + pl(p.qids.length, 'question') + '</span><span class="st">' + (open ? '' : '&#128274;') + '</span></button>';
+          '<span class="ic">' + (done ? '&#10003;' : '&#9998;') + '</span><span>Check: ' + STREAK_TO_PASS + ' in a row</span><span class="st">' + (open ? '' : '&#128274;') + '</span></button>';
       }
     });
     return out;
@@ -373,7 +376,7 @@
     var hasCheck = p.qids.length > 0, done = isDone(l.id, i);
     var nextOpen = i + 1 < l.parts.length;
     var bar;
-    if (hasCheck) bar = '<span class="lbl">Up next: a ' + p.qids.length + '-question check</span><button type="button" class="cu-btn" data-go-check>Start the check &rarr;</button>';
+    if (hasCheck) bar = '<span class="lbl">Up next: get ' + STREAK_TO_PASS + ' right in a row</span><button type="button" class="cu-btn" data-go-check>Start the check &rarr;</button>';
     else bar = '<span class="lbl">' + (done ? 'Watched' : 'No questions for this part') + '</span><button type="button" class="cu-btn" data-watched>' + (nextOpen ? 'Next part &rarr;' : 'Finish the lesson &rarr;') + '</button>';
     $('#cu-main', root).innerHTML =
       '<div class="cu-mhead"><div class="cu-kicker">' + esc(l.num + ' ' + l.title) + '</div><h1>' + esc(partTitle(l, i)) + '</h1></div>' +
@@ -383,11 +386,41 @@
       '<div class="cu-bottom">' + bar + '</div>';
   }
 
-  /* ---------- the check: every question right before moving on ---------- */
+  /* ---------- the check: 8 right in a row (Luca, 2026-09-27) ----------
+     A part is passed with STREAK_TO_PASS correct answers in a row. Any miss
+     resets the streak to 0, shows the answer and why, and the check carries
+     on with questions the student has not seen yet: each part's pool (~30
+     questions, growing) is worked through least recently seen first, never
+     the same question twice in a row, so a reset means new questions rather
+     than memorised ones. What was seen, and when, is kept per part on the
+     device, so the rotation continues across visits. */
+  var STREAK_TO_PASS = 8;
   function startCheck(c, l) {
     var p = l.parts[view.part];
-    var qids = p.qids.filter(function (q) { return !!question(q); });
-    check = { lessonId: l.id, part: view.part, all: qids.slice(), queue: qids.slice(), right: {}, tries: {}, current: qids[0], answered: false, pick: null, missing: p.qids.length - qids.length };
+    var pool = p.qids.filter(function (q) { return !!question(q); });
+    check = { lessonId: l.id, part: view.part, pool: pool, streak: 0, asked: {}, n: 0, current: null, answered: false, pick: null };
+    nextQuestion(l);
+  }
+  function seenMap(l) {
+    prog.seen = prog.seen || {};
+    var k = pkey(l.id, check.part);
+    return (prog.seen[k] = prog.seen[k] || {});
+  }
+  function nextQuestion(l) {
+    var seen = seenMap(l), last = check.current;
+    var fresh = check.pool.filter(function (id) { return !check.asked[id] && id !== last; });
+    if (!fresh.length) {                              // the whole pool has come round: start a new cycle
+      check.asked = {};
+      fresh = check.pool.filter(function (id) { return id !== last; });
+      if (!fresh.length) fresh = check.pool.slice();  // a pool of one
+    }
+    // Least recently seen first (never seen = oldest), ties broken at random.
+    fresh.sort(function (a, b) { return ((seen[a] || 0) - (seen[b] || 0)) || (Math.random() - 0.5); });
+    check.current = fresh[0];
+    check.asked[check.current] = true;
+    check.n++;
+    seen[check.current] = Date.now();
+    try { localStorage.setItem('moretti_curriculum_' + progKey, JSON.stringify(prog)); } catch (e) {}
   }
   function renderCheck(c, l) {
     var main = $('#cu-main', root);
@@ -398,31 +431,35 @@
       drawQuestion(c, l);
     });
   }
+  function streakHtml() {
+    var segs = '';
+    for (var i = 0; i < STREAK_TO_PASS; i++) segs += '<i class="' + (i < check.streak ? 'on' : '') + '"></i>';
+    return '<div class="cu-streak" role="img" aria-label="' + check.streak + ' in a row of ' + STREAK_TO_PASS + ' needed">' + segs + '</div>' +
+      '<span class="lbl"><b>' + check.streak + '</b> in a row &middot; ' + STREAK_TO_PASS + ' to pass</span>';
+  }
   function drawQuestion(c, l) {
     var main = $('#cu-main', root);
-    if (!check.all.length) {
+    if (!check.pool.length || !check.current) {
       main.innerHTML = '<div class="cu-card cu-state">These questions could not be loaded. Check your connection and try again.</div>';
       return;
     }
-    if (!check.queue.length) return drawComplete(c, l);
     var q = question(check.current);
-    var n = check.all.indexOf(check.current);
-    var dots = check.all.map(function (id) { return '<i class="' + (check.right[id] ? 'ok' : id === check.current ? 'cur' : '') + '"></i>'; }).join('');
     var body;
     if (q.type === 'fr') {
-      body = '<div class="cu-fr"><input type="text" inputmode="decimal" autocomplete="off" aria-label="Your answer" id="cu-fr" placeholder="Your answer"' + (check.answered ? ' disabled' : '') + '></div>';
+      body = '<div class="cu-fr"><input type="text" inputmode="decimal" autocomplete="off" aria-label="Your answer" id="cu-fr" placeholder="Your answer"></div>';
     } else {
       body = '<div class="cu-choices">' + (q.choices || []).map(function (ch, k) {
-        return '<button type="button" class="cu-choice" data-choice="' + k + '"' + (check.answered ? ' disabled' : '') + '><span class="lt">' + LETTERS[k] + '</span><span>' + ch + '</span></button>';
+        return '<button type="button" class="cu-choice" data-choice="' + k + '"><span class="lt">' + LETTERS[k] + '</span><span>' + ch + '</span></button>';
       }).join('') + '</div>';
     }
     var isMath = c.bank === 'math';
     main.innerHTML =
-      '<div class="cu-mhead"><div class="cu-kicker">' + esc(l.num + ' ' + l.title) + '</div><h1>Check your understanding</h1></div>' +
-      '<div class="cu-card"><div class="cu-qhead"><span>Question ' + (n + 1) + ' of ' + check.all.length + (check.tries[check.current] ? ' &middot; try again' : '') + '</span>' +
+      '<div class="cu-mhead"><div class="cu-kicker">' + esc(l.num + ' ' + l.title) + '</div><h1>Check your understanding</h1>' +
+        '<div class="cu-sub">Get ' + STREAK_TO_PASS + ' right in a row to unlock the next part. A miss starts the count over, with new questions.</div></div>' +
+      '<div class="cu-card"><div class="cu-qhead"><span>Question ' + check.n + '</span>' +
         (isMath ? '<button type="button" class="cu-mini" data-calc>Calculator</button>' : '') + '</div>' +
         '<div class="cu-qtext">' + q.text + '</div>' + body + '<div id="cu-fb"></div><div class="cu-calc" id="cu-calc" hidden></div></div>' +
-      '<div class="cu-bottom"><div class="cu-qdots" aria-label="' + Object.keys(check.right).length + ' of ' + check.all.length + ' right">' + dots + '</div>' +
+      '<div class="cu-bottom"><div class="cu-streak-wrap">' + streakHtml() + '</div>' +
         '<button type="button" class="cu-btn" id="cu-go" data-check-go disabled>Check</button></div>';
     var fr = $('#cu-fr', main);
     if (fr) {
@@ -441,40 +478,31 @@
   }
   function submitAnswer(c, l) {
     var main = $('#cu-main', root), q = question(check.current), fb = $('#cu-fb', main), go = $('#cu-go', main);
-    if (check.answered) {           // Continue
+    if (check.answered) {           // Next
       check.answered = false; check.pick = null;
-      if (!check.queue.length) return drawComplete(c, l);
-      check.current = check.queue[0];
+      if (check.streak >= STREAK_TO_PASS) return drawComplete(c, l);
+      nextQuestion(l);
       return drawQuestion(c, l);
     }
     var g = grade(q);
-    var id = check.current;
-    if (g.ok) {
-      check.right[id] = true;
-      check.queue = check.queue.filter(function (x) { return x !== id; });
-      check.answered = true;
-      markChoices(q, true);
-      fb.innerHTML = '<div class="cu-fb ok"><b>Correct!</b>' + (q.explanation && check.tries[id] ? '<div class="ex">' + q.explanation + '</div>' : '') + '</div>';
-      go.textContent = check.queue.length ? 'Next question' : 'Finish'; go.disabled = false;
-      return;
-    }
-    check.tries[id] = (check.tries[id] || 0) + 1;
-    if (check.tries[id] === 1) {
-      // First miss: another go, with a pointer back to the teaching.
-      if (q.type !== 'fr') { var b = $('[data-choice="' + check.pick + '"]', main); if (b) { b.classList.remove('sel'); b.classList.add('wrong'); b.disabled = true; } check.pick = null; }
-      fb.innerHTML = '<div class="cu-fb no"><b>Not quite.</b> Give it another try. Stuck? <a href="#" data-rewatch>Rewatch the video</a> or check the notes.</div>';
-      go.disabled = true;
-      return;
-    }
-    // Second miss: the answer and why, and the question comes back at the end
-    // of the check, so it still has to be answered right before moving on.
     check.answered = true;
-    check.queue = check.queue.filter(function (x) { return x !== id; }).concat([id]);
-    markChoices(q, false);
-    var answer = q.type === 'fr' ? '<p>The answer is <b>' + esc(q.answerValue != null ? q.answerValue : q.answer) + '</b>.</p>' : '';
-    fb.innerHTML = '<div class="cu-fb no"><b>Here\u2019s how it works.</b> This one comes back at the end of the check, so make sure it clicks.' +
-      '<div class="ex">' + answer + (q.explanation || '') + '</div></div>';
-    go.textContent = 'Continue'; go.disabled = false;
+    if (g.ok) {
+      check.streak++;
+      markChoices(q, true);
+      var passed = check.streak >= STREAK_TO_PASS;
+      fb.innerHTML = '<div class="cu-fb ok"><b>Correct!</b> ' + (passed ? STREAK_TO_PASS + ' in a row. That\u2019s the part.' : check.streak + ' in a row.') + '</div>';
+      go.textContent = passed ? 'Finish' : 'Next question'; go.disabled = false;
+    } else {
+      var had = check.streak;
+      check.streak = 0;
+      markChoices(q, false);
+      var answer = q.type === 'fr' ? '<p>The answer is <b>' + esc(q.answerValue != null ? q.answerValue : q.answer) + '</b>.</p>' : '';
+      fb.innerHTML = '<div class="cu-fb no"><b>Not quite.</b> ' + (had ? 'Your streak of ' + had + ' starts over' : 'The count starts over') +
+        ', with new questions. Stuck? <a href="#" data-rewatch>Rewatch the video</a> or check the notes.' +
+        '<div class="ex">' + answer + (q.explanation || '') + '</div></div>';
+      go.textContent = 'Next question'; go.disabled = false;
+    }
+    var w = $('.cu-streak-wrap', main); if (w) w.innerHTML = streakHtml();
   }
   function markChoices(q, ok) {
     if (q.type === 'fr') { var fr = $('#cu-fr', root); if (fr) fr.disabled = true; return; }
@@ -495,7 +523,7 @@
     var nextLesson = list[at + 1];
     $('#cu-main', root).innerHTML =
       '<div class="cu-card cu-complete"><div class="tick">&#10003;</div><h2 style="margin:0 0 .4rem">' + (nextPart ? 'Part ' + (i + 1) + ' complete' : 'Lesson complete') + '</h2>' +
-      '<p class="cu-sub">' + (nextPart ? 'Every question right. The next part is unlocked.' : 'You finished ' + esc(l.num + ' ' + l.title) + '.') + '</p>' +
+      '<p class="cu-sub">' + (nextPart ? STREAK_TO_PASS + ' right in a row. The next part is unlocked.' : STREAK_TO_PASS + ' right in a row. You finished ' + esc(l.num + ' ' + l.title) + '.') + '</p>' +
       '<div style="margin-top:1.3rem;display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap">' +
       (nextPart ? '<button type="button" class="cu-btn" data-open-part="' + (i + 1) + '">Up next: part ' + (i + 2) + ' &rarr;</button>'
         : nextLesson ? '<button type="button" class="cu-btn" data-lesson-go="' + esc(nextLesson.l.id) + '">Up next: ' + esc(nextLesson.l.num + ' ' + nextLesson.l.title) + ' &rarr;</button>' : '') +
