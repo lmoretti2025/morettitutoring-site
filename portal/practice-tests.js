@@ -4223,13 +4223,13 @@ window.SAT_PRACTICE_TESTS = [
           "type": "mc",
           "text": "For the function <i>f</i>, if <i>f</i>(3<i>x</i>) = <i>x</i> − 6 for all values of <i>x</i>, what is the value of <i>f</i>(6)?",
           "choices": [
-            "−6",
             "−4",
             "0",
-            "2"
+            "2",
+            "12"
           ],
-          "correct": 1,
-          "explanation": "It's given that <i>f</i>(3<i>x</i>) = <i>x</i> − 6 for all values of <i>x</i>. If 3<i>x</i> = 6, then <i>f</i>(3<i>x</i>) will equal <i>f</i>(6). Dividing both sides of 3<i>x</i> = 6 by 3 gives <i>x</i> = 2. Therefore, substituting 2 for <i>x</i> in the given equation yields <i>f</i>(3 × 2) = 2 − 6, which can be rewritten as <i>f</i>(6) = −4.<br><br>Choice A is incorrect. This is the value of the constant in the given equation for <i>f</i>. Choice C is incorrect and may result from substituting <i>x</i> = 6, rather than <i>x</i> = 2, into the given equation. Choice D is incorrect. This is the value of <i>x</i> that yields <i>f</i>(6) for the left-hand side of the given equation; it's not the value of <i>f</i>(6)."
+          "correct": 0,
+          "explanation": "Choice A is correct. It is given that <i>f</i>(3<i>x</i>) = <i>x</i> − 6 for all values of <i>x</i>. If 3<i>x</i> = 6, then <i>f</i>(3<i>x</i>) is <i>f</i>(6). Dividing both sides of 3<i>x</i> = 6 by 3 gives <i>x</i> = 2, and substituting 2 for <i>x</i> yields <i>f</i>(6) = 2 − 6 = −4. Choice B, 0, comes from substituting 6 for <i>x</i> in <i>x</i> − 6 instead of solving 3<i>x</i> = 6 first. Choice C, 2, is the value of <i>x</i>, not of <i>f</i>(6). Choice D, 12, comes from reading the rule as <i>f</i>(<i>x</i>) = 3<i>x</i> − 6 and evaluating it at 6."
         },
         {
           "qid": "mt351fda",
@@ -4347,13 +4347,13 @@ window.SAT_PRACTICE_TESTS = [
           "type": "mc",
           "text": "If 4<i>x</i> − 28 = −24, what is the value of <i>x</i> − 7?",
           "choices": [
+            "−96",
+            "−28",
             "−24",
-            "−22",
-            "−6",
-            "−1"
+            "−6"
           ],
-          "correct": 2,
-          "explanation": "Choice C is correct. Dividing all terms in the given equation by 4 yields <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">4<i>x</i></span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">4</span></span> − <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">28</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">4</span></span> = <span style=\"display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;text-align:center;white-space:nowrap;\">−24</span><span style=\"padding:0 0.25em;text-align:center;white-space:nowrap;\">4</span></span>, or <i>x</i> − 7 = −6. Therefore, the value of <i>x</i> − 7 is −6.<br><br>Choice A is incorrect. This is the value of 4<i>x</i> − 28, not <i>x</i> − 7.<br><br>Choice B is incorrect and may result from conceptual or calculation errors.<br><br>Choice D is incorrect and may result from conceptual or calculation errors."
+          "correct": 3,
+          "explanation": "Choice D is correct. The left side is already four times the quantity asked for, since 4<i>x</i> − 28 = 4(<i>x</i> − 7). Dividing both sides of 4(<i>x</i> − 7) = −24 by 4 gives <i>x</i> − 7 = −6. Choice A, −96, multiplies by 4 instead of dividing. Choice B, −28, is the constant term in the equation, not the value asked for. Choice C, −24, is the value of 4<i>x</i> − 28 itself, which is four times too large."
         },
         {
           "qid": "mt3f75a5",
@@ -4470,12 +4470,12 @@ window.SAT_PRACTICE_TESTS = [
           "text": "<div style=\"text-align:center;font-size:1.1em;margin:0.6em 0;\"><span style=\"display:inline-block;vertical-align:middle;\"><i>x</i>/4</span> + 9 = 21</div>What is the value of <i>x</i> in the given equation?",
           "choices": [
             "3",
-            "48",
-            "75",
-            "120"
+            "12",
+            "30",
+            "48"
           ],
-          "correct": 1,
-          "explanation": "Choice B is correct. Undo the operations in reverse order. Subtracting 9 from both sides of x/4 + 9 = 21 gives x/4 = 12, and multiplying both sides by 4 gives x = 48. Check it: 48/4 + 9 = 12 + 9 = 21. Choice A, 3, divides by 4 instead of multiplying, working out 12/4. Choice C, 75, multiplies by 4 first and then subtracts, using 4(21) - 9 = 84 - 9. Choice D, 120, multiplies by 4 but adds the 9 instead of subtracting it, using 4(21 + 9)."
+          "correct": 3,
+          "explanation": "Choice D is correct. Undo the operations in reverse order. Subtracting 9 from both sides of <i>x</i>/4 + 9 = 21 gives <i>x</i>/4 = 12, and multiplying both sides by 4 gives <i>x</i> = 48. Check it: 48/4 + 9 = 12 + 9 = 21. Choice A, 3, divides 12 by 4 instead of multiplying. Choice B, 12, is the value of <i>x</i>/4 and stops one step early. Choice C, 30, adds 9 to 21 instead of subtracting it."
         },
         {
           "qid": "mt36ebf4",
@@ -4813,13 +4813,13 @@ window.SAT_PRACTICE_TESTS = [
           "type": "mc",
           "text": "The sum of four consecutive odd integers is 232. What is the sum of the two least of these integers?",
           "choices": [
-            "110",
             "112",
             "116",
-            "120"
+            "120",
+            "232"
           ],
-          "correct": 1,
-          "explanation": "Choice B is correct. Consecutive odd integers differ by 2, so if the least is n the four integers are n, n + 2, n + 4, and n + 6. Their sum is 4n + 12 = 232, so 4n = 220 and n = 55. The four integers are 55, 57, 59, and 61, and as a check 55 + 57 + 59 + 61 = 232. The two least are 55 and 57, so the answer is 55 + 57 = 112. Choice D, 120, is 59 + 61, the sum of the two greatest, the opposite end of the list from the one asked for. Choice C, 116, is 232/2, which is also 57 + 59, the sum of the two middle integers. Choice A, 110, is 2(55), doubling the least integer instead of adding the next odd integer to it."
+          "correct": 0,
+          "explanation": "Choice A is correct. Let the four consecutive odd integers be <i>n</i>, <i>n</i> + 2, <i>n</i> + 4 and <i>n</i> + 6. Their sum is 4<i>n</i> + 12 = 232, so <i>n</i> = 55 and the integers are 55, 57, 59 and 61. The two least are 55 and 57, which sum to 112. Choice B, 116, is half of 232, the average of the four. Choice C, 120, is the sum of the two greatest. Choice D, 232, is the sum of all four."
         },
         {
           "qid": "mtdbcd5f",
