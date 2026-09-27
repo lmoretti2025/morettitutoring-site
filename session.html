@@ -6,10 +6,10 @@
 <meta name="robots" content="noindex">
 <meta name="referrer" content="no-referrer">
 <title>Book a session | Moretti Test Prep</title>
-<meta name="description" content="Book a 60 or 90 minute tutoring session with Luca Moretti.">
+<meta name="description" content="Book a 60 minute, 90 minute or 2 hour tutoring session with Luca Moretti.">
 <link rel="canonical" href="https://morettitutoring.com/session.html">
 <meta property="og:title" content="Book a tutoring session with Luca Moretti">
-<meta property="og:description" content="Pick a 60 or 90 minute session at a time that works for you.">
+<meta property="og:description" content="Pick a 60 minute, 90 minute or 2 hour session at a time that works for you.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://morettitutoring.com/session.html">
 <meta property="og:image" content="https://morettitutoring.com/og-image.png">
@@ -101,6 +101,7 @@
   .lengths { display: inline-flex; background: var(--sunk); border-radius: 999px; padding: 4px; margin: 0 0 18px; }
   .lengths button { border: 0; background: transparent; font-family: var(--sans); font-size: .85rem; font-weight: 500; color: var(--muted);
                     padding: 8px 18px; border-radius: 999px; cursor: pointer; transition: background .18s var(--ease), color .18s, box-shadow .18s; }
+  .lengths button { white-space: nowrap; }
   .lengths button[aria-pressed="true"] { background: var(--paper); color: var(--ink); box-shadow: 0 1px 4px rgba(17,17,17,.12); }
   .len-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 16px; }
   .len-row p { font-size: .8rem; color: var(--muted); margin-bottom: 18px; }
@@ -177,7 +178,7 @@
       <a href="/"><img src="logo-caladea-white-400.png" alt="Moretti Test Prep &amp; Tutoring"></a>
       <a class="back" href="/">&larr; morettitutoring.com</a>
     </div>
-    <div class="lbl" style="margin-top:40px">Tutoring session &middot; 60 or 90 minutes</div>
+    <div class="lbl" style="margin-top:40px">Tutoring session &middot; 60 minutes to 2 hours</div>
     <h1>Book your <em>next session.</em></h1>
     <p class="sub">Choose how long, then a day and a time. The calendar invite comes straight to your inbox.</p>
     <div class="facts"><span>Online or in person</span><span>Google Meet link included for online</span></div>
@@ -188,8 +189,9 @@
   <section class="card" aria-label="Choose a day">
     <div class="len-row">
       <div class="lengths" role="group" aria-label="Session length">
-        <button type="button" data-len="60" aria-pressed="true">60 minutes</button>
-        <button type="button" data-len="90" aria-pressed="false">90 minutes</button>
+        <button type="button" data-len="60" aria-pressed="true">60 min</button>
+        <button type="button" data-len="90" aria-pressed="false">90 min</button>
+        <button type="button" data-len="120" aria-pressed="false">2 hours</button>
       </div>
       <div class="lengths" role="group" aria-label="Where">
         <button type="button" data-where="online" aria-pressed="true">Online</button>
@@ -302,6 +304,7 @@
   }
 
   var LEN = 60;            // minutes, from the toggle
+  function lenText() { return LEN === 120 ? '2 hours' : LEN + ' minutes'; }
   var all = null;          // { '60': [slot], '90': [slot] } from the backend
   var byDay = {};          // 'yyyy-mm-dd' -> [slot]
   var months = [];         // [{ y, m }] with at least one open day, first to last
@@ -310,7 +313,7 @@
 
   function state(html) { $('cal').innerHTML = '<div class="state">' + html + '</div>'; }
   function noTimes(why) {
-    state('<p><b>' + (why === 'down' ? 'I can&rsquo;t show open times right now.' : 'No open ' + LEN + '-minute times in the next six weeks.') + '</b></p>' +
+    state('<p><b>' + (why === 'down' ? 'I can&rsquo;t show open times right now.' : 'No open ' + (LEN === 120 ? '2-hour' : LEN + '-minute') + ' times in the next six weeks.') + '</b></p>' +
           '<p style="margin-top:8px">Text me at <a href="sms:+12012752791">' + PHONE + '</a> or reply to my email, and I&rsquo;ll find a time that works.</p>');
   }
   function notice(text) { $('notice').innerHTML = text ? '<p class="notice">' + esc(text) + '</p>' : ''; }
@@ -432,7 +435,7 @@
     $('times').innerHTML = list.map(function (s) {
       return '<button type="button" class="time" data-start="' + esc(s.start) + '">' + esc(fmt(s.start, TIME)) + '</button>';
     }).join('');
-    $('zone').textContent = (sameZoneAsLuca() ? 'Eastern Time.' : 'Your time zone (' + zoneName(HERE) + ').') + ' Each session is ' + LEN + ' minutes.';
+    $('zone').textContent = (sameZoneAsLuca() ? 'Eastern Time.' : 'Your time zone (' + zoneName(HERE) + ').') + ' Each session is ' + lenText() + '.';
     Array.prototype.forEach.call($('times').querySelectorAll('.time'), function (b) { b.onclick = function () { pick(b.getAttribute('data-start')); }; });
     showStep('times');
     lastFocus = document.activeElement;
@@ -452,7 +455,7 @@
   }
   function pick(start) {
     chosen = start;
-    $('chosen').textContent = fmt(start, DAY) + ' at ' + fmt(start, TIME) + ', ' + LEN + ' min, ' + (WHERE === 'inperson' ? 'in person' : 'online');
+    $('chosen').textContent = fmt(start, DAY) + ' at ' + fmt(start, TIME) + ', ' + (LEN === 120 ? '2 hours' : LEN + ' min') + ', ' + (WHERE === 'inperson' ? 'in person' : 'online');
     requestId = newRequestId();       // one id per chosen time: a retry of this booking, not a new one
     $('sheet-lbl').textContent = 'Almost booked';
     $('sheet-title').textContent = 'Your details';
@@ -509,7 +512,7 @@
       '<div class="done"><div class="tick" aria-hidden="true">&#10003;</div>' +
       '<div class="lbl" style="color:var(--gold-deep);margin-bottom:8px">Booked</div>' +
       '<h2>See you then!</h2>' +
-      '<p class="when">' + esc(details.student) + ', ' + esc(fmt(start, DAY)) + ' at ' + esc(fmt(start, TIME)) + esc(eastern) + ', ' + LEN + ' minutes' + (online ? ', online' : ', in person') + '</p>' +
+      '<p class="when">' + esc(details.student) + ', ' + esc(fmt(start, DAY)) + ' at ' + esc(fmt(start, TIME)) + esc(eastern) + ', ' + lenText() + (online ? ', online' : ', in person') + '</p>' +
       '<p>A calendar invite' + (online ? ' with the Google Meet link' : '') + ' is on its way to <b>' + esc(email) + '</b>. ' +
       'If it doesn&rsquo;t show up in a few minutes, check your spam folder.</p>' +
       '<p>Need a different time? Reply to the invite or text me at <a href="sms:+12012752791">' + PHONE + '</a>.</p>' +
