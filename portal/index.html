@@ -3884,6 +3884,11 @@ window.Portal = {
       <span class="sidebar-label">Files</span>
     </a>
     <div class="sb-divider" id="sidebar-learn-divider"><span>Learn</span></div>
+    <!-- The full courses, video lessons with checks (curriculum.js, Luca 2026-09-27). -->
+    <a href="#" class="sidebar-item" data-nav="curriculum" id="sidebar-curriculum">
+      <span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="12.5" rx="1.8"/><path d="M10.2 8.2v5.2l4.4-2.6-4.4-2.6Z"/><path d="M8 20h8"/></svg></span>
+      <span class="sidebar-label">Curriculum</span>
+    </a>
     <a href="#" class="sidebar-item" data-nav="practice-tests" id="sidebar-practice-tests">
       <span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2"/><path d="M9 2h6"/></svg></span>
       <span class="sidebar-label">Practice Tests</span>
@@ -5107,6 +5112,9 @@ window.Portal = {
   <div class="rush-tint" id="rush-tint" aria-hidden="true"></div>
 </div>
 
+<!-- CURRICULUM: drawn entirely by curriculum.js into #cu-root. -->
+<div class="screen has-sidebar" id="screen-curriculum"><div id="cu-root"></div></div>
+
 <div class="screen has-sidebar" id="screen-vocab">
   <div class="panel-wide">
     <div class="vp-head">
@@ -5693,6 +5701,7 @@ window.Portal = {
 <script src="grid-in.js?v=20260910a"></script>
 <script src="question-flag.js?v=20260922c"></script>
 <script src="report-tour.js?v=20260927e"></script>
+<script src="curriculum.js?v=20260927a"></script>
 <script>
   /* practice-tests.js is ~2.6MB, so a blocking <script> delayed every later
      script (including the key-submit wiring). It loads here via an async
@@ -6929,6 +6938,7 @@ window.Portal = {
     // renderPracticeTestList().
     setNav('sidebar-practice-tests', !isTestPrep || (hasCompletedADiagnostic && isNewKeyHold()));
     setNav('sidebar-vocab', resourcesHidden || !showSat);
+    setNav('sidebar-curriculum', resourcesHidden || !showSat);   // the same access as the Question Bank
     setNav('sidebar-incorrect-questions', resourcesHidden);
     setNav('sidebar-challenge-questions', resourcesHidden || !showSat);
     setNav('sidebar-question-bank', resourcesHidden || !showSat);
@@ -6936,7 +6946,7 @@ window.Portal = {
     // The "Learn" heading shows only when at least one item is under it
     // (a subject-only student has none); a label over nothing looks like a
     // failed load.
-    var anyLearn = ['sidebar-practice-tests', 'sidebar-question-bank', 'sidebar-rush', 'sidebar-challenge-questions', 'sidebar-vocab', 'sidebar-incorrect-questions'].some(function (id) {
+    var anyLearn = ['sidebar-curriculum', 'sidebar-practice-tests', 'sidebar-question-bank', 'sidebar-rush', 'sidebar-challenge-questions', 'sidebar-vocab', 'sidebar-incorrect-questions'].some(function (id) {
       var el = document.getElementById(id);
       return el && el.style.display !== 'none';
     });
@@ -7014,8 +7024,8 @@ window.Portal = {
     }
   }
 
-  var SIDEBAR_SCREENS = { 'screen-menu': 1, 'screen-calendar': 1, 'screen-practice-tests': 1, 'screen-resources': 1, 'screen-vocab': 1, 'screen-incorrect-questions': 1, 'screen-sat-resources': 1, 'screen-challenge-questions': 1, 'screen-question-bank': 1, 'screen-rush': 1 };
-  var SIDEBAR_NAV_FOR_SCREEN = { 'screen-menu': 'home', 'screen-calendar': 'calendar', 'screen-practice-tests': 'practice-tests', 'screen-resources': 'files', 'screen-vocab': 'vocab', 'screen-incorrect-questions': 'incorrect-questions', 'screen-challenge-questions': 'challenge-questions', 'screen-question-bank': 'question-bank', 'screen-rush': 'rush' };
+  var SIDEBAR_SCREENS = { 'screen-curriculum': 1, 'screen-menu': 1, 'screen-calendar': 1, 'screen-practice-tests': 1, 'screen-resources': 1, 'screen-vocab': 1, 'screen-incorrect-questions': 1, 'screen-sat-resources': 1, 'screen-challenge-questions': 1, 'screen-question-bank': 1, 'screen-rush': 1 };
+  var SIDEBAR_NAV_FOR_SCREEN = { 'screen-curriculum': 'curriculum', 'screen-menu': 'home', 'screen-calendar': 'calendar', 'screen-practice-tests': 'practice-tests', 'screen-resources': 'files', 'screen-vocab': 'vocab', 'screen-incorrect-questions': 'incorrect-questions', 'screen-challenge-questions': 'challenge-questions', 'screen-question-bank': 'question-bank', 'screen-rush': 'rush' };
   var sidebarEl = document.getElementById('portal-sidebar');
   var mainNavEl = document.getElementById('main-nav');
   var examWatermarkEl = document.getElementById('exam-watermark');
@@ -7049,7 +7059,7 @@ window.Portal = {
   // A function, not a var: show() can run before this line is reached.
   function isSatOnlyScreen(id) {
     return !!({ 'screen-sat-resources': 1, 'screen-practice-tests': 1, 'screen-question-bank': 1, 'screen-rush': 1,
-      'screen-challenge-questions': 1, 'screen-vocab': 1, 'screen-incorrect-questions': 1, 'screen-test-overview': 1,
+      'screen-challenge-questions': 1, 'screen-vocab': 1, 'screen-incorrect-questions': 1, 'screen-test-overview': 1, 'screen-curriculum': 1,
       'screen-intro': 1, 'dx-screen': 1, 'dx-break-screen': 1, 'dx-module-over-screen': 1, 'screen-done': 1 })[id];
   }
   function satHidden() { return !!(currentStudent && !currentStudent.showSat); }
@@ -10297,6 +10307,7 @@ window.Portal = {
     else if (nav === 'calendar') { show('screen-calendar'); if (window.calendarModuleInit) window.calendarModuleInit(); }
     else if (nav === 'files') { renderResources(); show('screen-resources'); }
     else if (nav === 'vocab') { show('screen-vocab'); if (window.vocabModuleInit) window.vocabModuleInit(); }
+    else if (nav === 'curriculum') { show('screen-curriculum'); if (window.curriculumModuleInit) window.curriculumModuleInit(); }
     else if (nav === 'practice-tests') { ptListReturnScreen = 'screen-menu'; renderPracticeTestList(); show('screen-practice-tests'); }
     else if (nav === 'incorrect-questions') { show('screen-incorrect-questions'); if (window.iqModuleInit) window.iqModuleInit(); }
     else if (nav === 'challenge-questions') { show('screen-challenge-questions'); if (window.cqModuleInit) window.cqModuleInit(); }
@@ -14729,6 +14740,8 @@ window.Portal = {
     } else if (state.screen === 'screen-practice-tests') {
       ptListReturnScreen = state.ptListReturnScreen === 'screen-sat-resources' ? 'screen-sat-resources' : 'screen-menu';
       renderPracticeTestList(); show('screen-practice-tests');
+    } else if (state.screen === 'screen-curriculum') {
+      show('screen-curriculum'); if (window.curriculumModuleInit) window.curriculumModuleInit();
     } else if (state.screen === 'screen-vocab') {
       show('screen-vocab'); if (window.vocabModuleInit) window.vocabModuleInit();
     } else if (state.screen === 'screen-incorrect-questions') {
