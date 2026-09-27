@@ -238,6 +238,11 @@
 
     // ---- how the test was taken (the report's conditions card): only when poor
     var cond = R.conditions && R.conditions.signals && R.conditions.signals.length ? R.conditions : null;
+    // Luca's rule (2026-09-27): a module handed in with more than 5 minutes left.
+    var rushedSitting = !!(cond && cond.signals.some(function (g) { return g.id === 'rushed'; }));
+    /* On a rushed sitting the clock never ran short, so its fast misses are
+       lost to speed, not to "the clock" (Sakeena, 15 to 29 minutes left). */
+    var clk = rushedSitting ? 'speed' : 'the clock';
     if (cond && cond.level === 'poor') {
       M.screens.push({ name: 'conditions', html:
         '<p class="t-eye r">How this test was taken</p><h2 class="r">Read this score with some care.</h2>' +
@@ -320,9 +325,10 @@
       var dots = '';
       for (var i = 0; i < nC + nK && i < 98; i++) dots += '<span class="t-dot ' + (i < nC ? 'content' : 'clock') + '"></span>';
       var share = nK / (nC + nK || 1);
-      var sayMiss = nK === 0 ? 'Every miss was a real attempt, so the points are in <strong>what to review next</strong>, not in the clock.'
-        : share >= 0.25 ? 'So ' + (share >= 0.5 ? 'most' : 'a good share') + ' of your misses <strong>aren\u2019t about what you know</strong>. They\u2019re about time, which better pacing can win back without learning anything new.'
-        : 'Most misses are <strong>content to review</strong>, with ' + (nK === 1 ? 'one' : 'a few') + ' lost to the clock.';
+      var sayMiss = nK === 0 ? 'Every miss was a real attempt, so the points are in <strong>what to review next</strong>, not in ' + clk + '.'
+        : share >= 0.25 ? 'So ' + (share >= 0.5 ? 'most' : 'a good share') + ' of your misses <strong>aren\u2019t about what you know</strong>. ' +
+            (rushedSitting ? 'They\u2019re about speed, and slowing down wins them back without learning anything new.' : 'They\u2019re about time, which better pacing can win back without learning anything new.')
+        : 'Most misses are <strong>content to review</strong>, with ' + (nK === 1 ? 'one' : 'a few') + ' lost to ' + clk + '.';
       var bySec = '';
       if (B) {
         bySec = sections.map(function (s) {
@@ -333,17 +339,17 @@
       var pace = P.pace || {};
       M.screens.push({ name: 'misses', dots: true, html:
         '<p class="t-eye r">Where the points went</p><h2 class="r">You missed ' + pl(missed, 'question') + '.' + (nK && nC ? ' They weren\u2019t all the same kind of miss.' : '') + '</h2>' +
-        '<div class="r"><div class="t-dots" role="img" aria-label="' + nC + ' missed after real work, ' + nK + ' lost to the clock">' + dots + '</div><div class="t-key">' +
+        '<div class="r"><div class="t-dots" role="img" aria-label="' + nC + ' missed after real work, ' + nK + ' lost to ' + clk + '">' + dots + '</div><div class="t-key">' +
         (nC ? '<div><span class="t-sw content"></span><b>' + nC + '</b>missed after real work: content to review.</div>' : '') +
-        (nK ? '<div><span class="t-sw clock"></span><b>' + nK + '</b>' + (nK === 1 ? 'was' : 'were') + ' lost to the clock: ' + clockWhy(P.pace || {}) + '.</div>' : '') +
+        (nK ? '<div><span class="t-sw clock"></span><b>' + nK + '</b>' + (nK === 1 ? 'was' : 'were') + ' lost to ' + clk + ': ' + clockWhy(P.pace || {}) + '.</div>' : '') +
         (nM ? '<div><span class="t-sw slow"></span><b>' + nM + '</b>more you got right, but so slowly it cost you later.</div>' : '') +
         '</div></div><p class="t-say r">' + sayMiss + '</p><div class="r"><button type="button" class="t-more" data-sheet="misses">See the numbers</button></div>',
         sheet: { eye: 'Where the points went', title: 'Every miss, sorted', html:
-          (bySec ? '<h4>By section</h4><table class="t-tbl"><tr><th>Section</th><th class="num">After real work</th><th class="num">Clock</th><th class="num">Slow but right</th></tr>' + bySec +
+          (bySec ? '<h4>By section</h4><table class="t-tbl"><tr><th>Section</th><th class="num">After real work</th><th class="num">' + (rushedSitting ? 'Speed' : 'Clock') + '</th><th class="num">Slow but right</th></tr>' + bySec +
             '<tr><td><b>Total</b></td><td class="num"><b>' + nC + '</b></td><td class="num"><b>' + nK + '</b></td><td class="num"><b>' + nM + '</b></td></tr></table>' : '') +
           '<h4>What each kind means</h4>' +
           '<p><b>Missed after real work.</b> You read it and still missed it. Some are gaps to relearn and some may be slips; either way it\u2019s content to review, and the next screens say where.</p>' +
-          (nK ? '<p><b>Lost to the clock.</b> ' + [pace.ranOut ? pace.ranOut + ' hurried as time ran out' : '', pace.blank ? pace.blank + ' never reached' : '',
+          (nK ? '<p><b>Lost to ' + clk + '.</b> ' + [pace.ranOut ? pace.ranOut + ' hurried as time ran out' : '', pace.blank ? pace.blank + ' never reached' : '',
             pace.tooFast ? pace.tooFast + ' answered too fast to have read' : ''].filter(String).join(', ') + '. Better pacing gets these back without learning anything new.</p>' : '') +
           (nM ? '<p><b>Slow but right.</b> Right answers that took well over their time while the clock was short. They count, but they cost time the later questions needed' +
             (P.methodSkills && P.methodSkills.length ? ', mostly in <b>' + P.methodSkills.map(esc).join('</b> and <b>') + '</b>' : '') + '.</p>' : '') }
@@ -382,7 +388,6 @@
     /* "Answered every question" is no strength on a rushed sitting (Luca's rule,
        2026-09-27: handed in with more than 5 minutes left): it was answered
        fast, not well. The conditions screen says so instead. */
-    var rushedSitting = !!(cond && cond.signals.some(function (g) { return g.id === 'rushed'; }));
     var allAnswered = totalQ && !R.skipped && !rushedSitting;
     if (best || allAnswered) {
       M.screens.push({ name: 'strengths', html:
@@ -675,7 +680,14 @@
       tasks.push({ h: 'Core material across the board', p: 'The misses are spread over most areas, so start with the foundations: ' + found + '.' });
     }
     var paceLost = (P.pace && (P.pace.blank + P.pace.ranOut)) || 0;
-    if (paceLost >= 2) tasks.splice(Math.min(1, tasks.length), 0, { h: 'Know when to move on', p: 'If a question passes about twice its target time, mark it and move on. Come back if there\u2019s time.' });
+    if (rushedSitting) {
+      // The report's own "Do these next" step on a rushed sitting (2026-09-27), minutes from the route.
+      var leftMins = (R.routeSummaries || []).filter(function (x) { return x && x.reading === 'left-time' && x.unusedSec; })
+        .map(function (x) { return Math.round(x.unusedSec / 60); }).sort(function (a, b) { return a - b; });
+      var range = !leftMins.length ? 'time left on the clock'
+        : leftMins[0] === leftMins[leftMins.length - 1] ? pl(leftMins[0], 'minute') + ' left' : leftMins[0] + ' to ' + leftMins[leftMins.length - 1] + ' minutes left';
+      tasks.splice(Math.min(1, tasks.length), 0, { h: 'Use the whole clock', p: 'You handed in with ' + range + '. Spend it: read every question to the end before answering, then check your answers before handing in.' });
+    } else if (paceLost >= 2) tasks.splice(Math.min(1, tasks.length), 0, { h: 'Know when to move on', p: 'If a question passes about twice its target time, mark it and move on. Come back if there\u2019s time.' });
     else if (P.pace && P.pace.tooFast >= 2) tasks.splice(Math.min(1, tasks.length), 0, { h: 'Read before answering', p: 'Read every question before answering. Some answers came faster than the question can be read.' });
     tasks = tasks.slice(0, 3);
     if (tasks.length) {
