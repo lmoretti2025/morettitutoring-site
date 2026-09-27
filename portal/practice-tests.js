@@ -2412,7 +2412,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Central Ideas and Details",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Archaeologists have excavated three Viking-age boat burials whose vessels show a hole below the waterline, cut before interment. Damage across all three runs to one plank only, and matches the edge of a shipwright’s adze, a shaping axe, recovered alongside. Holing therefore appears to be formal decommissioning, marking each vessel as withdrawn from use.<br><br>According to the text, what is true of the damage to the three vessels?",
+          "text": "Three Viking-age boat burials have been excavated, and the vessels of all three are holed below the waterline, the holes cut at the time of burial. The hole in every case is confined to one plank, and the edges of the hole match those of a shipwright's adze, or shaping axe, recovered from the same grave. Holing is therefore taken to be formal decommissioning, a mark of withdrawal from use.<br><br>According to the text, what is true of the damage to the three vessels?",
           "choices": [
             "It was made deliberately, with a tool of the kind used to build the vessel.",
             "It extended across several planks in each of the three burials.",
@@ -2813,7 +2813,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Words in Context",
           "difficulty": "easy",
           "type": "mc",
-          "text": "The axolotl, a Mexican salamander, keeps its feathery external gills (the organs a larva breathes with) and its finned tail into adult life, features that related salamanders shed when they leave the water. Since it breeds in exactly this form, biologists describe the animal as ______. It reaches sexual maturity without ever undergoing the transformation its relatives complete.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
+          "text": "Axolotls are Mexican salamanders that keep their feathery external gills (the organs with which a larva breathes) and their finned tails into adult life, features which related salamanders shed on leaving the water. Because axolotls breed in exactly this form, they are described by biologists as ______, since sexual maturity is reached without the transformation that their relatives complete.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
           "choices": [
             "unfinished",
             "freshwater",
@@ -3044,7 +3044,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Command of Evidence (Textual)",
           "difficulty": "easy",
           "type": "mc",
-          "text": "The ethologist Gavin Hunt first documented tool manufacture (the shaping of an object for a task) in New Caledonian crows, birds that strip and notch twigs in order to extract grubs from dead wood. How the birds arrive at their tools remains in dispute. One proposal holds that a crow chooses its twig with a particular hole in mind, and not by reshaping whatever twig it happens to be carrying.<br><br>Which finding, if true, would most directly support this proposal?",
+          "text": "Tool manufacture, the shaping of an object for a task, was first documented in New Caledonian crows by the ethologist Gavin Hunt, whose birds stripped and notched twigs to extract grubs from dead wood. The way these birds arrive at their tools is disputed. One proposal is that the crow selects each twig with one particular hole in mind, while the reshaping of twigs already carried is thought to play little part.<br><br>Which finding, if true, would most directly support this proposal?",
           "choices": [
             "Crows that are given no twigs will use stiff grass stems to extract grubs instead.",
             "Crows presented with holes of varying width pick a twig matched to the hole before approaching it.",
@@ -3382,7 +3382,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Words in Context",
           "difficulty": "medium",
           "type": "mc",
-          "text": "A translator working from a language that leaves time unmarked on the verb has to decide sentence by sentence whether a speaker predicts an event, declares an intention, or merely entertains a possibility. The original stays ______ in a way that English grammar cannot reproduce, for English insists on one reading of the three.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
+          "text": "Translators working from languages lacking tense marking are obliged to decide, sentence by sentence, whether the speaker predicts an event, declares an intention, or merely entertains a possibility. The original is ______ in a way English grammar cannot reproduce, because English insists on one reading of the three.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
           "choices": [
             "contested",
             "implausible",
@@ -3403,7 +3403,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Words in Context",
           "difficulty": "hard",
           "type": "mc",
-          "text": "The early modern pardon was ______ rather than merciful in effect. A monarch who pardoned a condemned man was understood to have established the guilt first, and to be setting aside a verdict the crown itself had reached. Every act of clemency therefore confirmed the authority of the court.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
+          "text": "The early modern pardon was ______ in effect, and was never simply merciful. Monarchs pardoning condemned men were understood to have established guilt first, and to be setting aside verdicts reached by the crown itself, so that every act of clemency was taken as confirmation of the court's authority.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
           "choices": [
             "arbitrary",
             "ratifying",
@@ -3529,7 +3529,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Central Ideas and Details",
           "difficulty": "easy",
           "type": "mc",
-          "text": "A fogbow shares the geometry of an ordinary rainbow, but it forms in droplets so small that light bends around them rather than passing cleanly through. Colors wash together, and the arc that remains looks pale enough to be called white. The physics has not changed. The droplets have.<br><br>Which choice best states the main idea of the text?",
+          "text": "A fogbow (a rainbow formed in fog) has the geometry of an ordinary rainbow, but it is formed in droplets so small that light is bent around them instead of passing cleanly through. The colors are washed together, and what is left is a pale arc that observers are inclined to call white. The physics is unchanged. Only the droplets are smaller.<br><br>Which choice best states the main idea of the text?",
           "choices": [
             "Observers rarely distinguish a fogbow from the pale arcs produced by other conditions.",
             "A fogbow and a rainbow are formed by two unrelated optical processes in the atmosphere.",
