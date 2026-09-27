@@ -3044,7 +3044,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Command of Evidence (Textual)",
           "difficulty": "easy",
           "type": "mc",
-          "text": "Ethologist Gavin Hunt (a student of animal behavior) first documented tool manufacture among New Caledonian crows, which strip and notch twigs to extract grubs from dead wood. One proposal holds that a crow selects a twig for a particular hole rather than reshaping whichever twig it happens to hold.<br><br>Which finding, if true, would most directly support this proposal?",
+          "text": "Ethologist Gavin Hunt first documented tool manufacture among New Caledonian crows, which strip and notch twigs to extract grubs from dead wood. One proposal holds that a crow selects a twig for a particular hole rather than reshaping whichever twig it happens to hold.<br><br>Which finding, if true, would most directly support this proposal?",
           "choices": [
             "Crows that are given no twigs will use stiff grass stems to extract grubs instead.",
             "Crows presented with holes of varying width pick a twig matched to the hole before approaching it.",
@@ -3198,10 +3198,10 @@ window.SAT_PRACTICE_TESTS = [
             "convent—has",
             "convent; has"
           ],
-          "correct": 0,
+          "correct": 1,
           "choiceNotes": [
-            "Correct. “found beneath the floorboards of a German convent” is a supplementary phrase already closed by the comma after “Europe,” and no mark separates a subject from its verb.",
-            "Incorrect. A comma here would cut the subject from the verb “has.”",
+            "Incorrect. The comma after “Europe” opens the supplementary phrase, so leaving it unclosed runs the modifier straight into the verb.",
+            "Correct. The phrase is supplementary and was opened by a comma after “Europe,” so it takes a closing comma before the verb.",
             "Incorrect. A dash would do the same, and it has no partner to open the interruption.",
             "Incorrect. A semicolon must stand between two independent clauses, and “has two riveted lenses...” cannot stand alone."
           ]
@@ -3676,7 +3676,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Inferences",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Wheat sown in autumn yields more than wheat sown in spring, which agronomists have long attributed to the longer growing season. To separate season length from cold exposure, a team sowed one plot in autumn, a second in spring, and a third in spring after the seed had been held at four degrees for eight weeks. The third plot yielded almost as much as the autumn plot, and far more than the untreated spring plot, although both spring plots had the same number of growing days. It can therefore be inferred that ______<br><br>Which choice most logically completes the text?",
+          "text": "Wheat sown in autumn yields more than wheat sown in spring, which agronomists have long attributed to the longer growing season. To separate season length from cold exposure, a team sowed one plot in autumn, a second in spring, and a third in spring after the seed had been held at four degrees Celsius for eight weeks. The third plot yielded almost as much as the autumn plot, and far more than the untreated spring plot, although both spring plots had the same number of growing days. It can therefore be inferred that ______<br><br>Which choice most logically completes the text?",
           "choices": [
             "autumn-sown wheat would yield still more if the seed were chilled before it was sown.",
             "wheat held at four degrees for eight weeks will germinate sooner in the field than wheat that has not been.",
