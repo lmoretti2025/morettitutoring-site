@@ -1388,7 +1388,7 @@
      so the signed admin session is in sessionStorage when the auto-continue
      boot code below reads it. -->
 <script src="time-budgets.js?v=20260912a"></script>
-<script src="signals.js?v=20260926e"></script>
+<script src="signals.js?v=20260926f"></script>
   <script src="backend-url.js?v=20260905"></script>
   <script>
     /* Browser errors on this page reach the ClientErrors tab too (prep.gs's
@@ -1664,7 +1664,7 @@
   var REQUIRED_PREP_VERSION = 29;
   // signals.gs and emails.gs carry their own numbers since audit 5: an older
   // copy can have every function name and still compute the old way.
-  var REQUIRED_SIGNALS_VERSION = 31, REQUIRED_EMAILS_VERSION = 30;
+  var REQUIRED_SIGNALS_VERSION = 32, REQUIRED_EMAILS_VERSION = 31;
   // booking.gs (the parent booking page) declares BOOKING_VERSION since 2026-09-26.
   var REQUIRED_BOOKING_VERSION = 1;
   var CAPABILITY_LABELS = {
@@ -2988,16 +2988,21 @@
         h.hit + ' of ' + h.of + ' tests (' + escHtml(bits.join(', ')) + ')' + escHtml(sinks) + '</li>';
     }
     if (h.id === 'too-fast') {
+      var pctF = h.answers ? Math.round(100 * h.fastRight / h.answers) : 0, pctO = h.other ? Math.round(100 * h.otherRight / h.other) : 0;
       return '<li>' + tag + '<b>Answers faster than a question can be read</b> &middot; ' + h.hit + ' of ' + h.of + ' tests, ' +
-        h.answers + ' answers under a sixth of their time, outside any end-of-module rush</li>';
+        h.answers + ' such answers, ' + pctF + '% right against ' + pctO + '% on the rest</li>';
     }
     return '';
   }
-  function missReading(d) {
+  /* Audit 7: "content to teach" showed for about 90% of students with no
+     gap, because most misses anywhere are worked misses. It is said only for
+     the named focus area, where focusOf has already shown the misses run
+     past the student's level; elsewhere the split is described plainly. */
+  function missReading(d, isFocus) {
     var m = d.misses || 0;
     if (m < 6) return '';
     var worked = d.worked + d.sink, paceN = d.fast + d.rush, out = [];
-    if (worked >= 0.6 * m) out.push('Most were worked and still missed: content to teach.');
+    if (worked >= 0.6 * m) out.push(isFocus ? 'Most were worked and still missed: content to teach.' : worked + ' of ' + m + ' were worked and still missed.');
     else if (paceN >= 0.4 * m) out.push('A large share went by too fast or in an end rush: part of this is pace, not content.');
     if (d.near >= 0.4 * m) out.push(d.near + ' came down to two choices: close, so work on the final distinction.');
     if (d.keyOut >= Math.max(2, 0.25 * m)) out.push('The right answer was crossed out on ' + d.keyOut + ': look for a misconception.');
@@ -3019,7 +3024,11 @@
         : 'No pacing habit holds across tests.') + '</li>');
     }
     var byD = (P.misses && P.misses.byDomain) || {};
-    var doms = Object.keys(byD).sort(function (a, b) { return byD[b].misses - byD[a].misses; });
+    /* Ranked by misses beyond the student's own miss rate on that area's
+       questions, not by raw count (audit 7: raw counts ranked by area size). */
+    var all = (P.misses && P.misses.overall) || {}, rate = all.questions ? all.misses / all.questions : 0;
+    var excess = function (d) { return byD[d].misses - rate * (byD[d].questions || 0); };
+    var doms = Object.keys(byD).sort(function (a, b) { return excess(b) - excess(a); });
     if (P.focus && byD[P.focus]) doms = [P.focus].concat(doms.filter(function (d) { return d !== P.focus; }));
     doms = doms.filter(function (d) { return byD[d].misses > 0; }).slice(0, 4);
     var n = function (v) { return '<td class="n">' + (v || 0) + '</td>'; };
@@ -3029,13 +3038,22 @@
         n(x.misses) + n(x.worked) + n(x.sink) + n(x.fast + x.rush) + n(x.blank) + n(x.near) + n(x.keyOut) +
         '<td class="n">' + (qb.sure ? qb.sureWrong + ' / ' + qb.sure : '&ndash;') + '</td></tr>';
     }).join('');
-    var reading = P.focus && byD[P.focus] ? missReading(byD[P.focus]) : (doms[0] ? missReading(byD[doms[0]]) : '');
+    var reading = P.focus && byD[P.focus] ? missReading(byD[P.focus], true) : (doms[0] ? missReading(byD[doms[0]], false) : '');
+    /* Coverage (audit 7): an area where over a third of the answers were too
+       fast or rushed cannot be judged from these tests, and says so rather
+       than staying silent (a rusher's real Expression of Ideas gap was found
+       6.6% of the time). */
+    var blind = Object.keys(byD).filter(function (d) { return byD[d].answered >= 6 && byD[d].excluded * 3 > byD[d].answered; })
+      .map(function (d) { return 'can\u2019t judge ' + (AREA_SHORT[d] || d) + ' yet: ' + byD[d].excluded + ' of its ' + byD[d].answered + ' answers were too fast or rushed'; });
+    var unknownN = (P.misses && P.misses.overall && P.misses.overall.unknown) || 0;
     var table = rows
       ? '<div class="pool-tbl-wrap"><table class="pool-tbl"><thead><tr><th>Area</th><th class="n">Missed</th><th class="n">Worked, wrong</th>' +
         '<th class="n">1.5x time, wrong</th><th class="n">Too fast or rushed</th><th class="n">Blank</th><th class="n">Down to two</th>' +
         '<th class="n">Key crossed out</th><th class="n">QB: Sure but wrong</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
         (reading ? '<p class="pool-read"><b>' + escHtml(AREA_SHORT[P.focus || doms[0]] || (P.focus || doms[0])) + ':</b> ' + escHtml(reading) + '</p>' : '') +
-        '<p class="prep-note">"Down to two" and "key crossed out" are part of the misses, not extra. They start with tests saved from September 26 on.</p>'
+        (blind.length ? '<p class="pool-read"><b>Coverage:</b> ' + escHtml(blind.join('; ')) + '.</p>' : '') +
+        '<p class="prep-note">Areas are ordered by misses beyond this student\u2019s own miss rate. "Down to two" and "key crossed out" are part of the misses, not extra; they start with tests saved from September 26 on.' +
+        (unknownN ? ' ' + unknownN + ' misses on older tests have no timing to sort them and are in "Missed" only.' : '') + '</p>'
       : '';
     return '<div class="prep-bp">' + hed + '<ul>' + items.join('') + '</ul>' + table + '</div>';
   }
@@ -3051,13 +3069,15 @@
     };
     var md = (d.missesByDomain || []).slice(0, 8);
     var n = function (v) { return '<td class="n">' + (v || 0) + '</td>'; };
-    var pct = function (a, b) { return b ? Math.round(100 * a / b) + '%' : '&ndash;'; };
-    var table = md.length ? '<div class="pool-tbl-wrap"><table class="pool-tbl"><thead><tr><th>Area</th><th class="n">Students</th><th class="n">Missed</th>' +
+    // Shares are each student's own, averaged: every student counts once (audit 7).
+    var sh = function (v) { return typeof v === 'number' ? Math.round(100 * v) + '%' : '&ndash;'; };
+    var table = md.length ? '<div class="pool-tbl-wrap"><table class="pool-tbl"><thead><tr><th>Area</th><th class="n">Students</th><th class="n">Misses a test</th>' +
       '<th class="n">Worked, wrong</th><th class="n">Too fast or rushed</th><th class="n">Blank</th><th class="n">Down to two</th></tr></thead><tbody>' +
       md.map(function (x) {
-        return '<tr><td><b>' + escHtml(AREA_SHORT[x.domain] || x.domain) + '</b></td>' + n(x.students) + n(x.misses) +
-          '<td class="n">' + pct(x.worked + x.sink, x.misses) + '</td><td class="n">' + pct(x.fast + x.rush, x.misses) + '</td>' +
-          '<td class="n">' + pct(x.blank, x.misses) + '</td><td class="n">' + pct(x.near, x.misses) + '</td></tr>';
+        var S = x.share || {};
+        return '<tr><td><b>' + escHtml(AREA_SHORT[x.domain] || x.domain) + '</b></td>' + n(x.students) + '<td class="n">' + x.perTest + '</td>' +
+          '<td class="n">' + sh(S.worked) + '</td><td class="n">' + sh(S.pace) + '</td>' +
+          '<td class="n">' + sh(S.blank) + '</td><td class="n">' + sh(S.near) + '</td></tr>';
       }).join('') + '</tbody></table></div>' : '';
     body.innerHTML = '<div class="rp-cols">' +
       group('Named focus areas', d.areas || [], 'No student has a named focus area yet.') +
@@ -3067,13 +3087,14 @@
       '<p class="prep-note">' + d.withTests + ' of ' + d.students + ' SAT students have tests on record' +
       ((d.noArea || []).length ? '; ' + d.noArea.length + ' with no single area standing out' : '') +
       ((d.thin || []).length ? '; ' + d.thin.length + ' with fewer than 3 timed tests, too few for pacing habits' : '') +
-      '. Each student is counted by the same rules as their session prep. ' + (d.cached ? 'Up to ten minutes old.' : '') + '</p>';
+      '. Each student is counted by the same rules as their session prep, and weighs the same in the table. ' + (d.cached ? 'Up to ten minutes old.' : '') + '</p>';
   }
   function loadRosterPatterns() {
     var body = document.getElementById('rp-body'), btn = document.getElementById('rp-load');
     body.innerHTML = '<p class="prep-note">Reading every student\u2019s tests&hellip;</p>';
     if (btn) btn.disabled = true;
-    postToBackend({ action: 'adminRosterPatterns', adminKey: adminKey() }).then(function (d) {
+    var fresh = !!(btn && btn.textContent === 'Refresh');
+    postToBackend({ action: 'adminRosterPatterns', adminKey: adminKey(), fresh: fresh }).then(function (d) {
       if (btn) { btn.disabled = false; btn.textContent = 'Refresh'; }
       if (!d || !d.ok) {
         var e = d && d.error;

@@ -5626,13 +5626,13 @@ window.Portal = {
      header in fluid-ui.js. -->
 <script src="fluid-ui.js?v=20260905y"></script>
 <script src="banks.js?v=20260926a"></script>
-<script src="signals.js?v=20260926e"></script>
+<script src="signals.js?v=20260926f"></script>
 <script src="desmos-tags.js?v=20260916c"></script>
 <script src="time-budgets.js?v=20260912a"></script>
 <script src="challenge-questions.js?v=20260926a"></script>
 <script src="grid-in.js?v=20260910a"></script>
 <script src="question-flag.js?v=20260922c"></script>
-<script src="report-tour.js?v=20260926c"></script>
+<script src="report-tour.js?v=20260926d"></script>
 <script>
   /* practice-tests.js is ~2.6MB, so a blocking <script> delayed every later
      script (including the key-submit wiring). It loads here via an async
@@ -8315,7 +8315,16 @@ window.Portal = {
        2.6: flat students 1 of 98 ever saw an arrow; real gains still shown
        to 6 of 42 steady, 5 of 14 levelling-off and 4 of 7 fast improvers
        (the parents' bar: 3, 3 and 3). The old rule showed 20, 10 and 7, at
-       that false-arrow cost. A drop clears the same bar as a gain. */
+       that false-arrow cost. A drop clears the same bar as a gain.
+       AUDIT 7 (audit7-stats/gain.js, 4,000 per cell, 12 weekly looks): the
+       "1 of 98" above was optimistic. Under heavier noise a flat student
+       saw an arrow 5.0-10.8%, mostly from a low first test that the
+       one-sided outlier guard never flagged (14.1% "gain"). With the guard
+       two-sided (signals.js outlierIn, Luca's option A, 2026-09-26), the
+       shipped code re-run (2,000 per cell): flat 2.5 / 4.0 / 3.4 / 5.3%
+       (normal / harsh / heavy-tailed / bad days), 5.8% with a bad first
+       test; +20 a week shown 64 / 58% (was 71 / 66%), a +150 level-off
+       34 / 32% (was 46 / 47%). */
     var CHART_Z = 1.96;
     var deltaHtml = '';
     var chg = scoreChange(entries);
@@ -8651,7 +8660,7 @@ window.Portal = {
       host.innerHTML =
         xtHeadHtml('1 test so far') +
         '<p class="xt-lede">Your report breaks down the test you have taken. What it cannot tell you yet is which mistakes were a bad morning and which ones keep happening &mdash; that needs a second test to compare against.</p>' +
-        '<p class="xt-lede" style="margin-bottom:0;">After your next full test, this card will show the topics that came up wrong <strong>more than once</strong>, and the ones you have already fixed.</p>';
+        '<p class="xt-lede" style="margin-bottom:0;">After your next full test, this card will show the topics that came up wrong <strong>more than once</strong>.</p>';
       host.style.display = '';
       return;
     }
@@ -8705,10 +8714,18 @@ window.Portal = {
        59% of students with a real area gap saw both). */
     var focusTop = xtFocus && xtFocus.top;
     if (!back.length && focusTop && focusTop.domain) {
+      /* The skill Home names inside this area, by Home's own rule (focusOf's
+         skill, when it belongs to the named area): audit 7 found Home naming
+         a skill beside "no single skill stands out" here in 176 of 234 runs. */
+      var fSec = xtFocus.bySection && xtFocus.bySection[focusTop.section], fSkill = null;
+      if (fSec && fSec.skill && fSec.domain === focusTop.domain && ev.units[fSec.skill] && ev.units[fSec.skill].dom === focusTop.domain) fSkill = rowOf(fSec.skill);
       host.innerHTML =
         xtHeadHtml(withStats.length + ' tests &middot; ' + pooledQ + ' questions') +
         '<p class="xt-lede" style="margin-bottom:0;"><strong>' + esc(focusTop.domain) + '</strong> is where your misses gather, across ' +
-        withStats.length + ' tests and allowing for how hard the questions were. No single skill inside it stands out yet: the misses are spread across its question types, so the work covers the whole area.</p>';
+        withStats.length + ' tests and allowing for how hard the questions were. ' +
+        (fSkill
+          ? 'Inside it, <strong>' + esc(fSkill.skill) + '</strong> stands out the most (' + fSkill.wrong + ' of ' + fSkill.total + ' wrong), so start there; it has not yet come back often enough to call it a repeat.</p>'
+          : 'No single skill inside it stands out yet: the misses are spread across its question types, so the work covers the whole area.</p>');
       host.style.display = '';
       return;
     }
@@ -14036,9 +14053,18 @@ window.Portal = {
         var bank = bankFor(s.k), qs7 = sectionQuestions(bank, s.v);
         var mult7 = (window.TIME_BUDGETS && s.tl) ? window.TIME_BUDGETS.timeMultFromAllotted(s.k, !!bank.module2Easier, s.tl) : 1;
         var m1Len7 = (bank.module1 || []).length;
+        // The module's clock and each question's first-look start, for the
+        // end-rush clock gate (signals.js trailingRush, audit 7): the visit
+        // log's start times are seconds from the module's start.
+        var modMs7 = (s.tl > 0) ? s.tl * 60000 / (bank.module2Easier ? 2 : 1) : 0;
+        var start7 = {};
+        if (Array.isArray(s.vl)) s.vl.forEach(function (v) {
+          if (!Array.isArray(v) || typeof v[0] !== 'number' || typeof v[1] !== 'number') return;
+          if (start7[v[0]] === undefined || v[1] < start7[v[0]]) start7[v[0]] = v[1];
+        });
         var timing7 = qs7.map(function (q, i) {
           var row = qStats.q[qsRow + i];
-          if (!row || row[3] === 2 || !window.TIME_BUDGETS) return { mod: i < m1Len7 ? 0 : 1, blank: !row || row[3] === 2, ms: 0, budgetMs: 0 };
+          if (!row || row[3] === 2 || !window.TIME_BUDGETS) return { mod: i < m1Len7 ? 0 : 1, blank: !row || row[3] === 2, ms: 0, budgetMs: 0, moduleMs: modMs7 };
           var fp = (s.fp && typeof s.fp[i] === 'number') ? s.fp[i] : null;
           var tm = (s.tm && typeof s.tm[i] === 'number') ? s.tm[i] : 0;
           var revised = false;
@@ -14051,7 +14077,15 @@ window.Portal = {
           }
           var tMs = (fp != null && !revised) ? fp : tm;
           var bq7 = window.TIME_BUDGETS.budgetSecondsFor(s.k, q.domain, q.skill || q.domain, q.difficulty, mult7 || 1);
-          return { mod: i < m1Len7 ? 0 : 1, blank: false, ms: tMs, budgetMs: (bq7 && bq7.ms) || 0 };
+          /* The reading floor is on the STANDARD-time budget (audit 7): how
+             long it takes to read a question does not grow with the time
+             allowed, and scaling it flagged extended-time students who
+             simply use standard time. The rush and the sink stay on their
+             own clock's budget. */
+          var bq1 = window.TIME_BUDGETS.budgetSecondsFor(s.k, q.domain, q.skill || q.domain, q.difficulty, 1);
+          return { mod: i < m1Len7 ? 0 : 1, blank: false, ms: tMs, totalMs: tm > 0 ? tm : tMs, budgetMs: (bq7 && bq7.ms) || 0,
+                   floorMs: 0.15 * ((bq1 && bq1.ms) || 0), moduleMs: modMs7,
+                   startMs: typeof start7[i] === 'number' ? start7[i] * 1000 : undefined };
         });
         var rush7 = (window.MorettiSignals && typeof window.MorettiSignals.trailingRush === 'function')
           ? window.MorettiSignals.trailingRush(timing7) : [];
@@ -14059,18 +14093,21 @@ window.Portal = {
           var row = qStats.q[qsRow++];
           if (!row) return;
           var t7 = timing7[i], flag = 0;
-          if (!t7.blank && t7.budgetMs && t7.ms > 0 && (t7.ms < t7.budgetMs * 0.15 || rush7[i])) flag = 1;
+          if (!t7.blank && t7.budgetMs && t7.ms > 0 && (t7.ms < t7.floorMs || rush7[i])) flag = 1;
           row[5] = row[5] === undefined ? null : row[5];
           row[6] = row[6] === undefined ? null : row[6];
           row[7] = flag;
           /* [8] the module (0/1) and [9] the pace code (2026-09-26), for the
              pooled pacing habits and miss profile (signals.js pacingHabits,
              missProfile): 2 in an end-of-module rush (first, however fast:
-             a rush is its own habit), 1 too fast to have read it elsewhere, 3 a time sink (1.5x budget or more), 0 an ordinary pace;
-             null when the question was left blank or has no timing/budget. */
+             a rush is its own habit), 1 too fast to have read it elsewhere
+             (under the standard-time reading floor), 3 a time sink (1.5x
+             budget or more of TOTAL time, so a long return visit counts:
+             audit 7), 0 an ordinary pace; null when the question was left
+             blank or has no timing/budget. */
           row[8] = t7.mod;
           row[9] = (t7.blank || !(t7.budgetMs > 0) || !(t7.ms > 0)) ? null
-            : (rush7[i] ? 2 : (t7.ms < t7.budgetMs * 0.15 ? 1 : (t7.ms >= t7.budgetMs * 1.5 ? 3 : 0)));
+            : (rush7[i] ? 2 : (t7.ms < t7.floorMs ? 1 : (t7.totalMs >= t7.budgetMs * 1.5 ? 3 : 0)));
         });
       });
     } catch (e) { if (window.console) console.warn('qStats tooFast:', e); }
@@ -22833,11 +22870,24 @@ window.renderNativeReport = function (data) {
   function endRushRows(sec, mult) {
     var MSr = window.MorettiSignals;
     if (!MSr || typeof MSr.trailingRush !== 'function' || !window.TIME_BUDGETS || !sec || !sec.rows) return [];
+    // The module's clock and each question's first-look start, for the
+    // clock gate (audit 7: a run counts only once 85% of the clock is gone).
+    var modMs = sec.timeAllottedMin > 0 ? sec.timeAllottedMin * 60000 / (sec.hasModules ? 2 : 1) : 0;
     var flags = MSr.trailingRush(sec.rows.map(function (r) {
       var bq = window.TIME_BUDGETS.budgetSecondsFor(sec.key, r.q.domain, r.sk || r.dom, r.q.difficulty, mult || 1);
-      return { mod: r.moduleIndex || 0, blank: !!r.skipped, ms: pacingTimeMs(r) || 0, budgetMs: (bq && bq.ms) || 0 };
+      return { mod: r.moduleIndex || 0, blank: !!r.skipped, ms: pacingTimeMs(r) || 0, budgetMs: (bq && bq.ms) || 0,
+               moduleMs: modMs, startMs: typeof r.firstVisitedAt === 'number' ? r.firstVisitedAt : undefined };
     }));
     return sec.rows.filter(function (r, i) { return flags[i]; });
+  }
+  /* The reading floor on the STANDARD-time budget (audit 7): reading a
+     question takes no longer because more time is allowed, and scaling the
+     floor called extended-time students who use standard time "too fast to
+     have read it". Budgets elsewhere keep the student's own clock. */
+  function readFloorMs(secKey, r) {
+    if (!window.TIME_BUDGETS) return 0;
+    var b = window.TIME_BUDGETS.budgetSecondsFor(secKey, r.q.domain, r.sk || r.dom, r.q.difficulty, 1);
+    return ((b && b.ms) || 0) * TOO_FAST_BUDGET_REL;
   }
   // Was this section short of time? Identical to report.html.
   /* ═══ WAS THE CLOCK SHORT? ═══
@@ -23003,7 +23053,7 @@ window.renderNativeReport = function (data) {
            verdicts: a right answer stops counting as mastery, and a wrong
            answer stops counting as a content gap and becomes what it
            actually is, a pacing failure. */
-        var tooFast = qBudgetMs ? (pacingTimeMs(r) < qBudgetMs * TOO_FAST_BUDGET_REL || endRush7.indexOf(r) >= 0) : false;
+        var tooFast = qBudgetMs ? (pacingTimeMs(r) < readFloorMs(s7.key, r) || endRush7.indexOf(r) >= 0) : false;
         var b = bucketFor(r.sk);
         b.total++;
         if (r.ok) { if (tooFast) b.skimmed++; else if (slow) b.inefficient++; else b.mastered++; }
@@ -25115,7 +25165,7 @@ window.renderNativeReport = function (data) {
         /* tMs > 0 IS LOAD-BEARING. An attempt with no timing reads as zero ms on
            every question, which is below every floor; without this guard every
            miss would be billed to the clock. Missing data is not speed. */
-        if (qBudgetMs && tMs > 0 && tMs < qBudgetMs * TOO_FAST_BUDGET_REL) {
+        if (qBudgetMs && tMs > 0 && tMs < readFloorMs(sec.key, r)) {
           bucket('clock', sec, r, 'answered too fast to have read it');
           return;
         }

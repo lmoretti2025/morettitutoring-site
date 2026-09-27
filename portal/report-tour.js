@@ -480,6 +480,8 @@
     // To the nearest 10, as the report's own bridge labels them: +131 here
     // beside +130 there read as two different estimates (review 2026-09-26).
     var pts10 = function (p) { return Math.round(p / 10) * 10; };
+    // Under 5 points rounds to +0, which reads as nothing (audit 7).
+    var ptsTxt = function (p) { return (p > 0 && pts10(p) === 0) ? 'under +10' : '+' + pts10(p); };
     var items = (R.shownItems || []).filter(function (it) { return it && it.points > 0; });
     var start = R.currentComposite;
     if (!single && start != null && items.length) {
@@ -496,7 +498,7 @@
         '<p class="t-eye r">Your path</p><h2 class="r">The points on the table.</h2><div class="t-path">' +
         top.map(function (it, i) {
           var lbl = it.filterType === 'clock' ? 'Reach the questions you ran out of time for' : 'Fix ' + cleanLabel(it.label);
-          return '<div class="t-step" style="--i:' + i + '"><span>' + esc(lbl) + (it.filterType === 'clock' ? '<small>' + esc(it.label) + '</small>' : '') + '</span><b>+' + pts10(it.points) + '</b></div>';
+          return '<div class="t-step" style="--i:' + i + '"><span>' + esc(lbl) + (it.filterType === 'clock' ? '<small>' + esc(it.label) + '</small>' : '') + '</span><b>' + ptsTxt(it.points) + '</b></div>';
         }).join('') + '</div>' +
         '<div class="t-meter r"><div class="t-mt"><span>If these were all fixed: about</span><b data-count="' + end + '" data-from="' + start + '" data-delay="' + (900 + top.length * 450) + '">' + start + '</b></div>' +
         '<div class="t-track"><div class="t-fill" data-w="' + at(end) + '"></div>' + (target && target >= lo && target <= hi ? '<div class="t-target" style="left:' + at(target) + '%"><span>Target ' + target + '</span></div>' : '') + '</div></div>' +
@@ -505,13 +507,14 @@
         sheet: { eye: 'Your path', title: 'Every point on the table', html:
           '<p>If every miss on this test were fixed, the score would be about <b>' + (ceiling || end) + '</b>. Here\u2019s where those points sit, biggest first:</p>' +
           '<table class="t-tbl"><tr><th>Fix</th><th class="num">Points</th></tr>' +
-          items.slice().sort(function (a, b) { return b.points - a.points; }).map(function (it) { return '<tr><td>' + esc(cleanLabel(it.label, true)) + '</td><td class="num">+' + pts10(it.points) + '</td></tr>'; }).join('') +
+          items.slice().sort(function (a, b) { return b.points - a.points; }).map(function (it) { return '<tr><td>' + esc(cleanLabel(it.label, true)) + '</td><td class="num">' + ptsTxt(it.points) + '</td></tr>'; }).join('') +
           (function () {
             // What the chart folds into one line, so the rows add up to the total (audit 6).
             var shown = items.reduce(function (a, it) { return a + it.points; }, 0);
-            var rest = ceiling != null ? Math.round(ceiling - start - shown) : 0;
-            return rest >= 5 ? '<tr><td>Everything else, spread thin</td><td class="num">+' + rest + '</td></tr>' : '';
-          })() + '</table>' +
+            // Rounded like the rows (audit 7), so every figure is on the same scale.
+            var rest = ceiling != null ? ceiling - start - shown : 0;
+            return rest >= 5 ? '<tr><td>Everything else, spread thin</td><td class="num">' + ptsTxt(rest) + '</td></tr>' : '';
+          })() + '</table><p class="t-small">Each figure is rounded to the nearest 10, so they add up to the total only roughly.</p>' +
           (target ? '<p>Your target is <b>' + target + '</b>. ' + (end >= target ? 'If those were all fixed, that would reach it.' : 'If those were all fixed, that would be about ' + end + ', and the rest of the list closes the gap.') + '</p>' : '') +
           '<p>These are estimates from one test that assume each miss is fixed; points for a single question aren\u2019t fixed on the SAT, and the scoring curve makes the first few fixes at a low score worth less than they look here.</p>' }
       });
