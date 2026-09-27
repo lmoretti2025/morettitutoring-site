@@ -352,11 +352,17 @@
     });
     return out;
   }
+  /* A part is named after its last page: the one right before its check,
+     which is what the questions test (Luca, 2026-09-27: Part 1 of Linear
+     Equations is Definition, What do we need to create a line?, and
+     Slope-Intercept Form; it was showing only "Definition"). */
+  function partPages(l, i) { return (l.parts[i].notes || []).map(function (n) { return n.title; }).filter(Boolean); }
   function partTitle(l, i) {
-    var p = l.parts[i], first = p.notes && p.notes[0];
-    var t = first && first.title ? first.title : '';
-    return l.parts.length > 1 ? 'Part ' + (i + 1) + (t ? ': ' + t : '') : (t || 'Video');
+    var t = partPages(l, i);
+    var name = t.length ? t[t.length - 1] : '';
+    return l.parts.length > 1 ? 'Part ' + (i + 1) + (name ? ': ' + name : '') : l.title;   // one part: the lesson itself
   }
+
 
   function notesHtml(p) {
     return (p.notes || []).map(function (n) {
@@ -379,7 +385,8 @@
     if (hasCheck) bar = '<span class="lbl">Up next: get ' + STREAK_TO_PASS + ' right in a row</span><button type="button" class="cu-btn" data-go-check>Start the check &rarr;</button>';
     else bar = '<span class="lbl">' + (done ? 'Watched' : 'No questions for this part') + '</span><button type="button" class="cu-btn" data-watched>' + (nextOpen ? 'Next part &rarr;' : 'Finish the lesson &rarr;') + '</button>';
     $('#cu-main', root).innerHTML =
-      '<div class="cu-mhead"><div class="cu-kicker">' + esc(l.num + ' ' + l.title) + '</div><h1>' + esc(partTitle(l, i)) + '</h1></div>' +
+      '<div class="cu-mhead"><div class="cu-kicker">' + esc(l.num + ' ' + l.title) + '</div><h1>' + esc(partTitle(l, i)) + '</h1>' +
+        (partPages(l, i).length > 1 ? '<div class="cu-sub">Covers: ' + partPages(l, i).map(esc).join(' &middot; ') + '</div>' : '') + '</div>' +
       '<div class="cu-video">' + (vid || '<div class="cu-soon"><div class="play">&#9654;</div><b>Video coming soon</b><span>This lesson\u2019s video is being recorded. The notes below cover the same material for now.</span></div>') + '</div>' +
       '<section class="cu-notes"><button type="button" class="cu-notes-h" data-notes aria-expanded="' + (!vid) + '">Notes <span>' + (vid ? 'Show' : 'Hide') + '</span></button>' +
       '<div class="cu-notes-b"' + (vid ? ' hidden' : '') + '>' + (notesHtml(p) || '<p>No notes for this part.</p>') + '</div></section>' +
