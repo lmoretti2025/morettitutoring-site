@@ -4192,7 +4192,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mt3a27d2",
           "domain": "Algebra",
-          "skill": "Linear Functions",
+          "skill": "27 Linear Functions",
           "difficulty": "hard",
           "type": "mc",
           "text": "For the function <i>f</i>, if <i>f</i>(3<i>x</i>) = <i>x</i> − 6 for all values of <i>x</i>, what is the value of <i>f</i>(6)?",
@@ -4298,7 +4298,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mtacb023",
           "domain": "Algebra",
-          "skill": "Linear Inequalities in One or Two Variables",
+          "skill": "13 Inequalities",
           "difficulty": "hard",
           "type": "mc",
           "text": "A team hosting an event to raise money for new uniforms plans to sell at least 140 tickets before this event and at least 220 tickets during this event to raise a total of at least $5,820 from all tickets sold. The price of a ticket during this event is $3 less than the price of a ticket before this event. Which inequality represents this situation, where <i>x</i> is the price, in dollars, of a ticket sold during this event?",
@@ -4316,7 +4316,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mtb00757",
           "domain": "Algebra",
-          "skill": "Linear Equations in One Variable",
+          "skill": "18 Single Variable Equations",
           "difficulty": "easy",
           "type": "mc",
           "text": "If 4<i>x</i> − 28 = −24, what is the value of <i>x</i> − 7?",
@@ -4432,7 +4432,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mt833c9d",
           "domain": "Algebra",
-          "skill": "Linear Equations in Two Variables",
+          "skill": "30 Standard Form Equation",
           "difficulty": "medium",
           "type": "mc",
           "text": "A neighborhood consists of a 2-hectare park and a 35-hectare residential area. The total number of trees in the neighborhood is 3,934. The equation 2<i>x</i> + 35<i>y</i> = 3,934 represents this situation. Which of the following is the best interpretation of <i>x</i> in this context?",
@@ -4550,7 +4550,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "1971f9b1",
           "domain": "Advanced Math",
-          "skill": "Nonlinear Functions",
+          "skill": "45 Fractional Exponents",
           "difficulty": "hard",
           "type": "mc",
           "text": "For the exponential function <i>f</i>, the value of <i>f</i>(3) is <i>k</i>, where <i>k</i> is a constant. Which of the following equivalent forms of the function <i>f</i> shows the value of <i>k</i> as the coefficient or the base?",
@@ -4566,7 +4566,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "98d3393a",
           "domain": "Algebra",
-          "skill": "Linear Equations in Two Variables",
+          "skill": "26 Slope",
           "difficulty": "hard",
           "type": "mc",
           "text": "Line ℓ in the <i>xy</i>-plane is perpendicular to the line with equation <i>x</i> = 2. What is the slope of line ℓ?",
@@ -4582,7 +4582,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "f87ece91",
           "domain": "Geometry and Trigonometry",
-          "skill": "Area and Volume",
+          "skill": "100 Similar 3D Figures",
           "difficulty": "hard",
           "type": "mc",
           "text": "Two similar right circular cones have volumes of 27 cubic units and 125 cubic units. The surface area of the smaller cone is 63 square units. What is the surface area, in square units, of the larger cone?",
@@ -4640,7 +4640,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mt0e5f7b",
           "domain": "Problem-Solving and Data Analysis",
-          "skill": "One-Variable Data: Distributions and Measures of Center and Spread",
+          "skill": "118 Mean, Median, Range",
           "difficulty": "hard",
           "type": "mc",
           "text": "A scientist measured the lengths of 240 gray seals from Muskeget Island and 120 gray seals from Sable Island. The scientist determined that the mean length of the 240 gray seals from Muskeget Island was 88 inches and the mean length of the 120 gray seals from Sable Island was 94 inches. What was the mean length of all 360 gray seals the scientist measured for this study?",
@@ -4700,7 +4700,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mt3071e5",
           "domain": "Algebra",
-          "skill": "Linear Functions",
+          "skill": "28 Linear Word Problems",
           "difficulty": "hard",
           "type": "mc",
           "text": "For groups of 25 or more people, a museum charges $21 per person for the first 25 people and $14 for each additional person. Which function <i>f</i> gives the total charge, in dollars, for a tour group with <i>n</i> people, where <i>n</i> ≥ 25?",
@@ -4844,7 +4844,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mt82708d",
           "domain": "Problem-Solving and Data Analysis",
-          "skill": "One-Variable Data: Distributions and Measures of Center and Spread",
+          "skill": "118 Mean, Median, Range",
           "difficulty": "medium",
           "type": "mc",
           "text": "For which of the following data sets is the mean greater than the median?",
@@ -4876,7 +4876,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mtf63ec9",
           "domain": "Problem-Solving and Data Analysis",
-          "skill": "Percentages",
+          "skill": "37 Hard Percentages",
           "difficulty": "hard",
           "type": "mc",
           "text": "The positive number a is 2,241% of the sum of the positive numbers <i>b</i> and <i>c</i>, and <i>b</i> is 83% of <i>c</i>. What percent of <i>b</i> is a?",
