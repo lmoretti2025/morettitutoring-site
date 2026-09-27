@@ -2328,7 +2328,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Text Structure and Purpose",
           "difficulty": "easy",
           "type": "mc",
-          "text": "Sourdough rises on wild yeast and bacteria living in flour and on a baker’s hands. <u>Cultures kept in two kitchens will diverge within weeks.</u> Bakers who trade starters therefore find the gift no longer identical to what they gave. A starter carried into a new kitchen shifts in composition within weeks.<br><br>Which choice best describes the function of the underlined sentence in the text as a whole?",
+          "text": "Sourdough rises on wild yeasts and bacteria, organisms of the flour and of the baker's hands, not of any packet. <u>Cultures kept in two kitchens will diverge within weeks.</u> Bakers trading starters therefore find the gift altered: crumb opens differently, sourness arrives at different hours, even when both halves began in one jar.<br><br>Which choice best describes the function of the underlined sentence in the text as a whole?",
           "choices": [
             "It offers an example of the wild yeast and bacteria described in the previous sentence.",
             "It explains why most bakers prefer to keep a single culture in one kitchen for years.",
@@ -2349,7 +2349,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Text Structure and Purpose",
           "difficulty": "medium",
           "type": "mc",
-          "text": "The double bass in a jazz rhythm section is seldom loud enough to follow note by note, yet a recording made without bass sounds thin, and listeners register that thinness immediately. Acousticians attribute this effect to overtones falling in a range where ears judge warmth, overtones persisting once the fundamental (the lowest tone of a note) has died away. Bass is heard, in other words, less as a line and more as a condition of the room.<br><br>Which choice best states the main purpose of the text?",
+          "text": "Double basses in jazz rhythm sections are seldom loud enough to be followed note by note, yet recordings made without them sound thin, and listeners register the thinness immediately (even listeners unable to say what is missing). Because the overtones of the instrument fall in ranges the ear reads as warmth, for example the low partials persisting after each fundamental has died away, bass can be said to color the whole ensemble rather than to carry lines of its own. Acousticians describe the effect in concert halls, and it appears as clearly in small studios.<br><br>Which choice best states the main purpose of the text?",
           "choices": [
             "To explain why an instrument that is hard to hear on its own is missed when it is absent.",
             "To describe the particular range of overtones that the human ear associates with warmth.",
@@ -2517,7 +2517,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Inferences",
           "difficulty": "medium",
           "type": "mc",
-          "text": "Honeybee colonies choose nest sites by sending out scouts, and the scout that returns dances to advertise the site it visited. No bee inspects a second site; the dance reports only what that one scout saw. Dancing decays after a fixed number of circuits, and the better the site, the more circuits the scout performs before falling silent. This mechanism therefore ensures that ______<br><br>Which choice most logically completes the text?",
+          "text": "Studies of nest choice in honeybee colonies have demonstrated links between cavity quality and the persistence of dances that advertise it: circuits performed, bouts repeated, minutes spent in advertisement. To investigate how colonies settle on one cavity, researchers marked every scout in one hive and recorded which site each had inspected. Every scout was found to have inspected one cavity only, and dances for poorer cavities were the first to fall silent, suggesting that ______<br><br>Which choice most logically completes the text?",
           "choices": [
             "a colony settles on whichever site the first returning scout happens to have discovered.",
             "scouts that have visited the best available site dance for longer than the colony requires.",
@@ -2706,7 +2706,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Transitions",
           "difficulty": "medium",
           "type": "mc",
-          "text": "Canal locks lift boats by closing two gates around the hull, then letting in water from the reach above. Every lockful spent in the lift, once the gates open below, runs away downhill, and the loss falls on the summit level, fed by rainfall on the surrounding hills and by nothing else. ______ dry summers close the canal as thoroughly as breaches in its bank.<br><br>Which choice completes the text with the most logical transition?",
+          "text": "The summit level, highest pound of the canal and fed by nothing but rainfall on the hills around it, loses one lockful of water at every passage. ______ long dry spells, such as the rainless Augusts of bad years, can close canals as completely as breaches in the bank.<br><br>Which choice completes the text with the most logical transition?",
           "choices": [
             "Consequently,",
             "For instance,",
@@ -3424,7 +3424,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Words in Context",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Early radio astronomers treated the hiss in their aerials as interference from the receiver, and spent years ______ it. Karl Jansky noticed instead that the hiss rose and fell on a cycle of twenty-three hours and fifty-six minutes, the period of the stars, which placed its source in the sky.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
+          "text": "Early radio astronomers were convinced that the hiss in their aerials was interference from equipment, that is from faulty valves or poor earthing, and they spent years ______ it. Karl Jansky established instead that the hiss rose and fell on cycles of twenty-three hours, fifty-six minutes, which is the sidereal day (the period of the stars) and is therefore evidence that the source lay beyond Earth.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
           "choices": [
             "propagating",
             "amplifying",
@@ -3487,7 +3487,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Text Structure and Purpose",
           "difficulty": "hard",
           "type": "mc",
-          "text": "A standard account of London's Great Fire credits rebuilding acts with recovery in the city, and those acts imposed brick where timber once stood. Parish rate books, kept for local taxation, show that three quarters of burnt houses stood occupied again before officials were appointed to the work. They show too that men already in those trades rebuilt the houses. <u>The acts regulated a recovery already in motion.</u> Statute shaped the result without producing it.<br><br>Which choice best describes the function of the underlined sentence in the text as a whole?",
+          "text": "Standard accounts of London's Great Fire credit the rebuilding acts of 1667 with recovery in the city, and it is true that those acts imposed brick where timber had burned. Parish rate books, which were kept to assess taxation, record occupancy year by year, and they show that three quarters of burnt houses were reoccupied while commissioners remained unappointed. <u>The acts regulated a recovery already in motion.</u> Statute shaped the result without producing it.<br><br>Which choice best describes the function of the underlined sentence in the text as a whole?",
           "choices": [
             "It offers an example of the kind of regulation the rebuilding acts imposed after the fire.",
             "It introduces the rebuilding acts whose provisions the rest of the text goes on to describe.",
@@ -3676,7 +3676,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Inferences",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Wheat sown in autumn outyields wheat sown in spring, an advantage agronomists long ascribed to the length of the growing season. A team separated season length from cold exposure by sowing three plots, one in autumn, one in spring, and one in spring with seed previously chilled to four degrees Celsius for eight weeks. The chilled plot came close to the yield of the autumn plot and far exceeded the yield of the untreated spring plot, though the two spring plots enjoyed identical numbers of growing days. The team therefore concluded that ______<br><br>Which choice most logically completes the text?",
+          "text": "Wheat sown in autumn outyields wheat sown in spring, an advantage agronomists long ascribed to the length of the growing season. A team separated season length from cold exposure, or vernalization, by sowing three plots, one in autumn, one in spring, and one in spring with seed previously chilled to four degrees Celsius for eight weeks. The chilled plot came close to the yield of the autumn plot and far exceeded the yield of the untreated spring plot, though the two spring plots enjoyed identical numbers of growing days. The team therefore concluded that ______<br><br>Which choice most logically completes the text?",
           "choices": [
             "autumn-sown wheat would yield still more if the seed were chilled before it was sown.",
             "wheat held at four degrees for eight weeks will germinate sooner in the field than wheat that has not been.",
