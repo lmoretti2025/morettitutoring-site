@@ -918,6 +918,9 @@
   .plain-range { margin: -2px 0 12px; max-width: 380px; }
   .plain-range svg { display: block; width: 100%; height: auto; }
   .plain-range-cap { font-size: 11px; line-height: 1.45; color: var(--mid); margin: 2px 0 0; }
+  /* The walkthrough tells the one-minute story on screen (Luca, 2026-09-27); the printed report keeps it. */
+  @media screen { .plain-screen-off { display: none !important; }
+    .plain-screen-off + .plain-parent { margin: 0; padding-top: 0; border-top: 0; color: var(--ink); font-size: 12px; } }
   .plain-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding-top: 12px; border-top: 1px solid var(--border); }
   @media (max-width: 640px) { .plain-cols { grid-template-columns: 1fr; gap: 14px; } }
   .plain-label { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--mid); margin-bottom: 6px; }
@@ -7822,15 +7825,17 @@
          and where, since most of it is below the fold. */
       var allBtnHtml = '<button type="button" class="how-btn how-all-btn"></button>';
       box.innerHTML =
-        '<div class="plain-head"><h2>Your report in one minute</h2>' + (coverLayout ? '' : allBtnHtml) + '</div>' +
-        '<div class="plain-cols">' +
+        '<div class="plain-head plain-screen-off"><h2>Your report in one minute</h2>' + (coverLayout ? '' : allBtnHtml) + '</div>' +
+        '<div class="plain-cols plain-screen-off">' +
           '<div><div class="plain-label">Where your points went</div>' + lostHtml + '</div>' +
           '<div><div class="plain-label">Do these next</div><ol class="plain-steps">' +
             steps.slice(0, 3).map(function (s) { return '<li>' + s + '</li>'; }).join('') + '</ol>' + hoursHtml + lateHtml + '</div>' +
         '</div>' +
         (coverLayout ? '' : parentHtml +
-          '<p class="plain-foot">The rest of the report is the evidence for this. Each section has a <b>How this works</b> button if you want the method.</p>' +
+          '<p class="plain-foot plain-screen-off">The rest of the report is the evidence for this. Each section has a <b>How this works</b> button if you want the method.</p>' +
           '<p class="plain-status" aria-live="polite"></p>');
+      // On the cover the box holds only the summary, so on screen the whole box goes.
+      box.classList.toggle('plain-screen-off', !!coverLayout);
       /* The range where the score is revealed (Luca, 2026-09-27): the
          sentence and the bar sit in the score card, under the numbers, not
          a screen further down in the summary. */
@@ -7920,7 +7925,7 @@
     var andJoin = function (a) { return a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1]; };
     ['dx-hed', 'dx-card'].forEach(function (id) { var e = q(id); if (e) e.style.display = 'none'; });
     var sections = [
-      { hed: 'bridge-hed', body: ['bridge-card', 'bridge-note-outer'], line: function () {
+      { hed: 'bridge-hed', open: true, body: ['bridge-card', 'bridge-note-outer'], line: function () {
         var rows = document.querySelectorAll('#bridge-card .rank-row'), parts = [];
         for (var i = 0; i < Math.min(3, rows.length); i++) {
           var nm = rows[i].querySelector('.rank-name'), small = nm && nm.querySelector('small');
@@ -7940,7 +7945,7 @@
           if (n && v) parts.push(n + ': ' + v.charAt(0).toLowerCase() + v.slice(1));
         });
         return parts.length ? parts.join('. ') + '.' : ''; } },
-      { hed: 'timing-hed', body: ['timing-card'], line: function () {
+      { hed: 'timing-hed', open: true, body: ['timing-card'], line: function () {
         var v = txt(q('route-verdict'));
         return v ? 'Every question in the order it was answered, one module at a time. ' + first(v) : ''; } },
       { hed: 'behavior-hed', body: ['behavior-section'], line: function () {
@@ -7962,9 +7967,10 @@
       if (!bodies.length) return;
       var p = document.createElement('div');
       p.className = 'ev-line';
-      p.innerHTML = '<p>' + esc(line) + '</p><button type="button" class="ev-open" aria-expanded="false">Show details</button>';
+      // The points graph and the route graph stay open (Luca, 2026-09-27); the rest open on tap.
+      p.innerHTML = '<p>' + esc(line) + '</p><button type="button" class="ev-open" aria-expanded="' + (sec.open ? 'true' : 'false') + '">' + (sec.open ? 'Hide details' : 'Show details') + '</button>';
       hed.parentNode.insertBefore(p, hed.nextSibling);
-      bodies.forEach(function (b) { b.classList.add('ev-collapsed'); });
+      if (!sec.open) bodies.forEach(function (b) { b.classList.add('ev-collapsed'); });
       p.querySelector('.ev-open').addEventListener('click', function () {
         var open = this.getAttribute('aria-expanded') !== 'true';
         this.setAttribute('aria-expanded', open ? 'true' : 'false');
