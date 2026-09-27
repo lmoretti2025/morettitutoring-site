@@ -304,14 +304,18 @@
   /* ---------- home: the course, unit by unit ---------- */
   /* ---------- artwork: inline, so nothing extra loads ---------- */
   var ART = {
-    math: '<svg viewBox="0 0 320 220" aria-hidden="true"><defs><linearGradient id="cuG1" x1="0" x2="1"><stop offset="0" stop-color="#B0271C"/><stop offset="1" stop-color="#D24234"/></linearGradient></defs>' +
-      '<g stroke="rgba(17,17,17,.08)" stroke-width="1">' + (function () { var g = ''; for (var x = 20; x <= 300; x += 28) g += '<line x1="' + x + '" y1="14" x2="' + x + '" y2="206"/>'; for (var y = 14; y <= 206; y += 24) g += '<line x1="20" y1="' + y + '" x2="300" y2="' + y + '"/>'; return g; })() + '</g>' +
-      '<line x1="20" y1="134" x2="300" y2="134" stroke="rgba(17,17,17,.35)" stroke-width="1.5"/><line x1="132" y1="14" x2="132" y2="206" stroke="rgba(17,17,17,.35)" stroke-width="1.5"/>' +
-      '<path class="cu-draw" d="M40 196 Q132 -30 224 196" fill="none" stroke="#3457d5" stroke-width="3" stroke-linecap="round"/>' +
-      '<path class="cu-draw d2" d="M28 176 L292 40" fill="none" stroke="url(#cuG1)" stroke-width="3" stroke-linecap="round"/>' +
-      '<path d="M226 190 L292 190 L292 150 Z" fill="rgba(201,168,76,.22)" stroke="#C9A84C" stroke-width="2" stroke-linejoin="round"/>' +
-      '<circle cx="132" cy="83" r="5" fill="#3457d5"/><circle cx="188" cy="107" r="5" fill="#B0271C"/>' +
-      '<text x="200" y="60" font-family="Georgia,serif" font-style="italic" font-size="20" fill="#111">y = mx + b</text></svg>',
+    // A worked equation on notebook paper, the answer highlighted and checked
+    // (Luca, 2026-09-27: the graph version went).
+    math: '<svg viewBox="0 0 320 220" aria-hidden="true">' +
+      '<g transform="rotate(-3 160 114)"><rect x="58" y="20" width="204" height="186" rx="10" fill="#fff" stroke="rgba(17,17,17,.2)" stroke-width="2"/>' +
+      '<g stroke="rgba(52,87,213,.14)" stroke-width="1.5"><line x1="58" y1="62" x2="262" y2="62"/><line x1="58" y1="94" x2="262" y2="94"/><line x1="58" y1="126" x2="262" y2="126"/><line x1="58" y1="158" x2="262" y2="158"/><line x1="58" y1="190" x2="262" y2="190"/></g>' +
+      '<line x1="86" y1="20" x2="86" y2="206" stroke="rgba(176,39,28,.35)" stroke-width="1.5"/>' +
+      '<rect class="cu-hl" style="transform-origin:96px 142px" x="96" y="130" width="76" height="26" rx="5" fill="rgba(201,168,76,.45)"/>' +
+      '<g font-family="Georgia,serif" font-style="italic" font-size="22" fill="#111"><text x="100" y="88">3x + 5 = 20</text><text x="100" y="120">3x = 15</text><text x="104" y="151">x = 5</text></g>' +
+      '<text x="196" y="119" font-family="Georgia,serif" font-style="italic" font-size="17" fill="#3457d5">\u00f73</text>' +
+      '<path class="cu-draw" d="M186 140 l9 10 l21 -24" fill="none" stroke="#B0271C" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></g>' +
+      '<g transform="translate(262 176) rotate(-38)"><path d="M-48 -7 L-64 0 L-48 7 Z" fill="#f1dcb0"/><path d="M-59 -2.2 L-64 0 L-59 2.2 Z" fill="#111"/>' +
+      '<rect x="-48" y="-7" width="84" height="14" fill="#C9A84C"/><rect x="36" y="-7" width="6" height="14" fill="#bdbdbd"/><rect x="42" y="-7" width="13" height="14" rx="3" fill="#B0271C"/></g></svg>',
     english: '<svg viewBox="0 0 320 220" aria-hidden="true">' +
       '<path d="M40 44 Q100 30 160 50 L160 196 Q100 176 40 190 Z" fill="#fff" stroke="rgba(17,17,17,.2)" stroke-width="2" stroke-linejoin="round"/>' +
       '<path d="M280 44 Q220 30 160 50 L160 196 Q220 176 280 190 Z" fill="#fff" stroke="rgba(17,17,17,.2)" stroke-width="2" stroke-linejoin="round"/>' +
@@ -374,7 +378,6 @@
     var R = 34, CIRC = 2 * Math.PI * R;
     return '<section class="cu-hero cu-hero-' + c.id + ' cu-in" style="--d:0">' +
         '<div class="cu-hero-text"><h1>' + esc(c.id === 'math' ? 'SAT Math' : 'SAT Reading & Writing') + '</h1>' +
-        '<p class="cu-sub">Every lesson is a short video, then a check: get ' + STREAK_TO_PASS + ' right in a row to unlock the next part.</p>' +
         '<div class="cu-stats"><div class="cu-bigring"><svg width="84" height="84" viewBox="0 0 84 84" aria-hidden="true"><circle cx="42" cy="42" r="' + R + '" fill="none" stroke="rgba(17,17,17,.08)" stroke-width="7"/>' +
           (done ? '<circle class="cu-ringfill" cx="42" cy="42" r="' + R + '" fill="none" stroke="var(--red,#B0271C)" stroke-width="7" stroke-linecap="round" stroke-dasharray="' + Math.max(1, CIRC * pct / 100).toFixed(1) + ' ' + CIRC.toFixed(1) + '" transform="rotate(-90 42 42)"/>' : '') + '</svg><b>' + pct + '%</b></div>' +
           '<div class="cu-stat"><b>' + lessons.length + '</b><span>lessons</span></div><div class="cu-stat"><b>' + total + '</b><span>parts</span></div><div class="cu-stat"><b>' + done + '</b><span>done</span></div></div></div>' +
