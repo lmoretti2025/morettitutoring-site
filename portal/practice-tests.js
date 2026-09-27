@@ -3962,9 +3962,9 @@ window.SAT_PRACTICE_TESTS = [
           ],
           "correct": 1,
           "choiceNotes": [
-            "A: reads the March bar as 40, the nearest labelled gridline, instead of 45, the halfway gridline it actually reaches, giving 40 &minus; 20 = 20.",
-            "B (key): March is 45 and January is 20, so 45 &minus; 20 = 25.",
-            "C: reads the March bar as the next labelled gridline up, 50, giving 50 &minus; 20 = 30.",
+            "A: reads the March bar as 40, the nearest labelled gridline, instead of 45, the halfway gridline it actually reaches, giving 40 − 20 = 20.",
+            "B (key): March is 45 and January is 20, so 45 − 20 = 25.",
+            "C: reads the March bar as the next labelled gridline up, 50, giving 50 − 20 = 30.",
             "D: adds the two bars, 45 + 20, instead of subtracting."
           ],
           "explanation": "Choice B is correct. The vertical axis is labeled every 10 guitars, with a minor tick halfway between each pair of labels, so each small step is 5 guitars. The March bar, the tallest one, reaches 45, and the January bar reaches 20. The number repaired in March minus the number repaired in January is 45 - 20 = 25. Choice A, 20, is the January total itself rather than the difference. Choice C, 30, is the April total, the bar just to the right of the tallest. Choice D, 65, adds the two months, 45 + 20, instead of subtracting. Since the question asks how many more, you need a difference between two bars, not a single bar's height."
@@ -4026,7 +4026,7 @@ window.SAT_PRACTICE_TESTS = [
           ],
           "correct": 1,
           "choiceNotes": [
-            "A: gives the predicted decrease in mass over the 20 minutes, 400 &minus; 300, rather than the predicted mass itself.",
+            "A: gives the predicted decrease in mass over the 20 minutes, 400 − 300, rather than the predicted mass itself.",
             "B (key): at 20 minutes the line of best fit is at the 300-gram gridline.",
             "C: reads the line at 10 minutes, one labelled tick too soon.",
             "D: reads the line at 0 minutes, its vertical intercept, instead of at 20 minutes."
@@ -4061,9 +4061,9 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "57 Sum of Quadratic Solutions",
           "difficulty": "medium",
           "type": "fr",
-          "text": "<div style=\"text-align:center;font-size:1.1em;\">3<i>x</i><sup>2</sup> + 5<i>x</i> &minus; 12 = <i>x</i><sup>2</sup> + 21<i>x</i> + 4</div>What is the sum of the solutions to the given equation?",
+          "text": "<div style=\"text-align:center;font-size:1.1em;\">3<i>x</i><sup>2</sup> + 5<i>x</i> − 12 = <i>x</i><sup>2</sup> + 21<i>x</i> + 4</div>What is the sum of the solutions to the given equation?",
           "answer": "8",
-          "explanation": "The correct answer is 8. Move everything to one side: 3x<sup>2</sup> + 5x - 12 - (x<sup>2</sup> + 21x + 4) = 0. Distributing the minus sign gives 3x<sup>2</sup> - x<sup>2</sup> = 2x<sup>2</sup>, 5x - 21x = -16x, and -12 - 4 = -16, so 2x<sup>2</sup> - 16x - 16 = 0. Dividing every term by 2 gives x<sup>2</sup> - 8x - 8 = 0. For a quadratic in the form x<sup>2</sup> + bx + c = 0, the two solutions add to -b, so the sum here is -(-8) = 8. You never need the solutions themselves. If you want them, the quadratic formula gives x = (8 ± &radic;(64 + 32))/2 = 4 ± 2&radic;6, and (4 + 2&radic;6) + (4 - 2&radic;6) = 8. Watch the constant term when you subtract: -12 - 4 is -16, not -8."
+          "explanation": "The correct answer is 8. Move everything to one side: 3x<sup>2</sup> + 5x - 12 - (x<sup>2</sup> + 21x + 4) = 0. Distributing the minus sign gives 3x<sup>2</sup> - x<sup>2</sup> = 2x<sup>2</sup>, 5x - 21x = -16x, and -12 - 4 = -16, so 2x<sup>2</sup> - 16x - 16 = 0. Dividing every term by 2 gives x<sup>2</sup> - 8x - 8 = 0. For a quadratic in the form x<sup>2</sup> + bx + c = 0, the two solutions add to -b, so the sum here is -(-8) = 8. You never need the solutions themselves. If you want them, the quadratic formula gives x = (8 ± √(64 + 32))/2 = 4 ± 2√6, and (4 + 2√6) + (4 - 2√6) = 8. Watch the constant term when you subtract: -12 - 4 is -16, not -8."
         },
         {
           "qid": "mt53bb7b",
@@ -4097,19 +4097,19 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "5 Function Transformations",
           "difficulty": "medium",
           "type": "mc",
-          "text": "The function <i>f</i> is defined by <i>f</i>(<i>x</i>) = <i>x</i><sup>2</sup> &minus; 6<i>x</i> + 1. The function <i>g</i> is defined by <i>g</i>(<i>x</i>) = <i>f</i>(&minus;<i>x</i>). Which of the following is equivalent to <i>g</i>(<i>x</i>)?",
+          "text": "The function <i>f</i> is defined by <i>f</i>(<i>x</i>) = <i>x</i><sup>2</sup> − 6<i>x</i> + 1. The function <i>g</i> is defined by <i>g</i>(<i>x</i>) = <i>f</i>(−<i>x</i>). Which of the following is equivalent to <i>g</i>(<i>x</i>)?",
           "choices": [
-            "&minus;<i>x</i><sup>2</sup> + 6<i>x</i> &minus; 1",
-            "&minus;<i>x</i><sup>2</sup> + 6<i>x</i> + 1",
-            "<i>x</i><sup>2</sup> + 6<i>x</i> &minus; 1",
+            "−<i>x</i><sup>2</sup> + 6<i>x</i> − 1",
+            "−<i>x</i><sup>2</sup> + 6<i>x</i> + 1",
+            "<i>x</i><sup>2</sup> + 6<i>x</i> − 1",
             "<i>x</i><sup>2</sup> + 6<i>x</i> + 1"
           ],
           "correct": 3,
           "choiceNotes": [
-            "A: computed &minus;<i>f</i>(<i>x</i>) instead of <i>f</i>(&minus;<i>x</i>), i.e. reflected across the <i>x</i>-axis rather than the <i>y</i>-axis.",
-            "B: substituted &minus;<i>x</i> correctly in the linear and constant terms but treated (&minus;<i>x</i>)<sup>2</sup> as &minus;<i>x</i><sup>2</sup>.",
+            "A: computed −<i>f</i>(<i>x</i>) instead of <i>f</i>(−<i>x</i>), i.e. reflected across the <i>x</i>-axis rather than the <i>y</i>-axis.",
+            "B: substituted −<i>x</i> correctly in the linear and constant terms but treated (−<i>x</i>)<sup>2</sup> as −<i>x</i><sup>2</sup>.",
             "C: changed the sign of the constant term as well, treating the reflection as flipping the sign of every term except the leading one.",
-            "D (key): <i>f</i>(&minus;<i>x</i>) = (&minus;<i>x</i>)<sup>2</sup> &minus; 6(&minus;<i>x</i>) + 1 = <i>x</i><sup>2</sup> + 6<i>x</i> + 1. Spot check: <i>f</i>(&minus;2) = 4 + 12 + 1 = 17 and <i>g</i>(2) = 4 + 12 + 1 = 17."
+            "D (key): <i>f</i>(−<i>x</i>) = (−<i>x</i>)<sup>2</sup> − 6(−<i>x</i>) + 1 = <i>x</i><sup>2</sup> + 6<i>x</i> + 1. Spot check: <i>f</i>(−2) = 4 + 12 + 1 = 17 and <i>g</i>(2) = 4 + 12 + 1 = 17."
           ],
           "explanation": "Choice D is correct. Writing g(x) = f(-x) means replacing every x in f with -x, so g(x) = (-x)<sup>2</sup> - 6(-x) + 1. Since (-x)<sup>2</sup> = x<sup>2</sup> and -6(-x) = +6x, this is g(x) = x<sup>2</sup> + 6x + 1. The constant 1 contains no x, so it is unchanged. Choice A is -f(x), which reflects the graph across the x-axis instead of the y-axis. Choice B negates the x<sup>2</sup> and x terms but leaves the constant alone, mixing the two reflections. Choice C gets x<sup>2</sup> and 6x right but also flips the sign of the constant, which only happens if you negate the whole function. As a check, f has its vertex at (3, -8), and reflecting across the y-axis puts g's vertex at (-3, -8) - substituting x = -3 into x<sup>2</sup> + 6x + 1 gives 9 - 18 + 1 = -8."
         },
@@ -4119,19 +4119,19 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "26 Slope",
           "difficulty": "medium",
           "type": "mc",
-          "text": "In the <i>xy</i>-plane, line <i>m</i> has a slope of &minus;2 and passes through the points (&minus;6, 11) and (<i>a</i>, 3), where <i>a</i> is a constant. What is the value of <i>a</i>?",
+          "text": "In the <i>xy</i>-plane, line <i>m</i> has a slope of −2 and passes through the points (−6, 11) and (<i>a</i>, 3), where <i>a</i> is a constant. What is the value of <i>a</i>?",
           "choices": [
-            "&minus;10",
-            "&minus;2",
+            "−10",
+            "−2",
             "4",
             "10"
           ],
           "correct": 1,
           "choiceNotes": [
-            "A: used the slope with the wrong sign, solving 3 &minus; 11 = 2(<i>a</i> + 6), which gives <i>a</i> = &minus;10.",
-            "B (key): (3 &minus; 11)&frasl;(<i>a</i> &minus; (&minus;6)) = &minus;2, so &minus;8 = &minus;2(<i>a</i> + 6), <i>a</i> + 6 = 4, <i>a</i> = &minus;2. Check: the points (&minus;6, 11) and (&minus;2, 3) give slope &minus;8&frasl;4 = &minus;2.",
-            "C: found the horizontal change, 4, and reported it as <i>a</i>, forgetting to add it to the <i>x</i>-coordinate &minus;6.",
-            "D: inverted the slope, multiplying the vertical change by &minus;2 instead of dividing, giving <i>a</i> = &minus;6 + 16 = 10."
+            "A: used the slope with the wrong sign, solving 3 − 11 = 2(<i>a</i> + 6), which gives <i>a</i> = −10.",
+            "B (key): (3 − 11)/(<i>a</i> − (−6)) = −2, so −8 = −2(<i>a</i> + 6), <i>a</i> + 6 = 4, <i>a</i> = −2. Check: the points (−6, 11) and (−2, 3) give slope −8/4 = −2.",
+            "C: found the horizontal change, 4, and reported it as <i>a</i>, forgetting to add it to the <i>x</i>-coordinate −6.",
+            "D: inverted the slope, multiplying the vertical change by −2 instead of dividing, giving <i>a</i> = −6 + 16 = 10."
           ],
           "explanation": "Choice B is correct. Slope is the change in y over the change in x, so (3 - 11)/(a - (-6)) = -2, which is -8/(a + 6) = -2. Multiplying both sides by (a + 6) gives -8 = -2(a + 6), and dividing both sides by -2 gives 4 = a + 6, so a = 4 - 6 = -2. Check it: from (-6, 11) to (-2, 3) the run is 4 and the rise is -8, and -8/4 = -2. Choice A, -10, comes from a sign slip that turns the equation into a + 6 = -4. Choice C, 4, stops one step early and reports the value of a + 6 as if it were a. Choice D, 10, uses a - 6 in the denominator instead of a - (-6), which is a + 6."
         },
@@ -4157,10 +4157,10 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "62 Vertex Form",
           "difficulty": "medium",
           "type": "mc",
-          "text": "The function <i>f</i> is defined by <i>f</i>(<i>x</i>) = <i>a</i>(<i>x</i> &minus; <i>h</i>)<sup>2</sup> + <i>k</i>, where <i>a</i>, <i>h</i>, and <i>k</i> are constants. In the <i>xy</i>-plane, the graph of <i>y</i> = <i>f</i>(<i>x</i>) has its vertex at (3, &minus;8) and passes through the point (5, 0). What is the value of <i>a</i>?",
+          "text": "The function <i>f</i> is defined by <i>f</i>(<i>x</i>) = <i>a</i>(<i>x</i> − <i>h</i>)<sup>2</sup> + <i>k</i>, where <i>a</i>, <i>h</i>, and <i>k</i> are constants. In the <i>xy</i>-plane, the graph of <i>y</i> = <i>f</i>(<i>x</i>) has its vertex at (3, −8) and passes through the point (5, 0). What is the value of <i>a</i>?",
           "choices": [
             "−2",
-            "<sup>1</sup>&frasl;<sub>2</sub>",
+            "<span style=\"display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;\">1</span><span style=\"padding:0 0.25em;\">2</span></span>",
             "2",
             "4"
           ],
@@ -4179,7 +4179,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "5 Function Transformations",
           "difficulty": "hard",
           "type": "mc",
-          "text": "The function <i>f</i> is defined by <i>f</i>(<i>x</i>) = <i>x</i><sup>2</sup> &minus; 8<i>x</i> + 3. The function <i>g</i> is defined by <i>g</i>(<i>x</i>) = <i>f</i>(2<i>x</i> + 6). In the <i>xy</i>-plane, the graph of <i>y</i> = <i>g</i>(<i>x</i>) has its minimum at the point (<i>a</i>, <i>b</i>). What is the value of <i>a</i>?",
+          "text": "The function <i>f</i> is defined by <i>f</i>(<i>x</i>) = <i>x</i><sup>2</sup> − 8<i>x</i> + 3. The function <i>g</i> is defined by <i>g</i>(<i>x</i>) = <i>f</i>(2<i>x</i> + 6). In the <i>xy</i>-plane, the graph of <i>y</i> = <i>g</i>(<i>x</i>) has its minimum at the point (<i>a</i>, <i>b</i>). What is the value of <i>a</i>?",
           "choices": [
             "−5",
             "−4",
@@ -4201,7 +4201,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "55 One Real Quadratic Solution",
           "difficulty": "hard",
           "type": "fr",
-          "text": "<div style=\"text-align:center;font-size:1.1em;\"><i>kx</i><sup>2</sup> &minus; 20<i>x</i> + 25 = 0</div>In the given equation, <i>k</i> is a positive constant. The equation has exactly one real solution. What is that solution?",
+          "text": "<div style=\"text-align:center;font-size:1.1em;\"><i>kx</i><sup>2</sup> − 20<i>x</i> + 25 = 0</div>In the given equation, <i>k</i> is a positive constant. The equation has exactly one real solution. What is that solution?",
           "answer": "2.5",
           "explanation": "The correct answer is 2.5. A quadratic ax<sup>2</sup> + bx + c = 0 has exactly one real solution when its discriminant b<sup>2</sup> - 4ac equals 0. Here a = k, b = -20, and c = 25, so (-20)<sup>2</sup> - 4(k)(25) = 0, which is 400 - 100k = 0, giving k = 4. That is positive, as the question requires. The equation is then 4x<sup>2</sup> - 20x + 25 = 0, which factors as (2x - 5)<sup>2</sup> = 0, so 2x = 5 and x = 2.5. A faster route: when a quadratic has one repeated solution, that solution is the vertex, x = -b/(2a) = 20/(2 times 4) = 2.5. Take care to answer the question asked - stopping at k = 4 gives the step before the one wanted."
         },
@@ -4211,9 +4211,9 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "83 Arc Length",
           "difficulty": "hard",
           "type": "fr",
-          "text": "In a circle, a sector is bounded by two radii and the arc between their endpoints. The length of that arc is 4&pi; units and the area of that sector is 24&pi; square units. What is the measure, in degrees, of the central angle of the sector?",
+          "text": "In a circle, a sector is bounded by two radii and the arc between their endpoints. The length of that arc is 4π units and the area of that sector is 24π square units. What is the measure, in degrees, of the central angle of the sector?",
           "answer": "60",
-          "explanation": "The correct answer is 60. The area of a sector equals half its radius times its arc length, so 24&pi; = (1/2)(r)(4&pi;), which is 24&pi; = 2&pi; times r, giving r = 12. The whole circle then has circumference 2&pi;(12) = 24&pi;. The arc is 4&pi; long, so the sector takes up 4&pi;/24&pi; = 1/6 of the circle, and its central angle is (1/6)(360) = 60 degrees. You can reach the same place with the standard formulas: arc = (angle/360)(2&pi; r) and area = (angle/360)(&pi; r<sup>2</sup>). Dividing the area by the arc gives r/2, so r/2 = 24&pi;/4&pi; = 6 and r = 12, and then 4&pi; = (angle/360)(24&pi;) gives angle = 60 degrees."
+          "explanation": "The correct answer is 60. The area of a sector equals half its radius times its arc length, so 24π = (1/2)(r)(4π), which is 24π = 2π times r, giving r = 12. The whole circle then has circumference 2π(12) = 24π. The arc is 4π long, so the sector takes up 4π/24π = 1/6 of the circle, and its central angle is (1/6)(360) = 60 degrees. You can reach the same place with the standard formulas: arc = (angle/360)(2π r) and area = (angle/360)(π r<sup>2</sup>). Dividing the area by the arc gives r/2, so r/2 = 24π/4π = 6 and r = 12, and then 4π = (angle/360)(24π) gives angle = 60 degrees."
         },
         {
           "qid": "mt3a27d2",
@@ -4237,7 +4237,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "89 General Form of a Circle",
           "difficulty": "hard",
           "type": "mc",
-          "text": "<div style=\"text-align:center;font-size:1.1em;\"><i>x</i><sup>2</sup> + <i>y</i><sup>2</sup> &minus; 12<i>x</i> + 8<i>y</i> + 27 = 0</div>The given equation defines a circle in the <i>xy</i>-plane. What is the least possible distance between the point (14, 2) and a point on this circle?",
+          "text": "<div style=\"text-align:center;font-size:1.1em;\"><i>x</i><sup>2</sup> + <i>y</i><sup>2</sup> − 12<i>x</i> + 8<i>y</i> + 27 = 0</div>The given equation defines a circle in the <i>xy</i>-plane. What is the least possible distance between the point (14, 2) and a point on this circle?",
           "choices": [
             "5",
             "9",
@@ -4246,12 +4246,12 @@ window.SAT_PRACTICE_TESTS = [
           ],
           "correct": 0,
           "choiceNotes": [
-            "A (key): completing the square gives (<i>x</i> &minus; 6)<sup>2</sup> + (<i>y</i> + 4)<sup>2</sup> = 25, so the centre is (6, &minus;4) and the radius is 5. The distance from (14, 2) to the centre is &radic;(8<sup>2</sup> + 6<sup>2</sup>) = 10, and the nearest point of the circle lies on that segment, 5 units from the centre, so the least distance is 10 &minus; 5 = 5.",
-            "B: added the horizontal and vertical changes instead of using the Pythagorean theorem, getting 8 + 6 = 14 to the centre and answering 14 &minus; 5 = 9.",
+            "A (key): completing the square gives (<i>x</i> − 6)<sup>2</sup> + (<i>y</i> + 4)<sup>2</sup> = 25, so the centre is (6, −4) and the radius is 5. The distance from (14, 2) to the centre is √(8<sup>2</sup> + 6<sup>2</sup>) = 10, and the nearest point of the circle lies on that segment, 5 units from the centre, so the least distance is 10 − 5 = 5.",
+            "B: added the horizontal and vertical changes instead of using the Pythagorean theorem, getting 8 + 6 = 14 to the centre and answering 14 − 5 = 9.",
             "C: found the distance to the centre and stopped, never subtracting the radius.",
             "D: added the radius instead of subtracting it, which gives the greatest distance to the circle, not the least."
           ],
-          "explanation": "Choice A is correct. Complete the square to find the circle's center and radius. Group the terms as (x<sup>2</sup> - 12x) + (y<sup>2</sup> + 8y) = -27. Half of -12 is -6 and half of 8 is 4, so add 36 and 16 to both sides: (x - 6)<sup>2</sup> + (y + 4)<sup>2</sup> = -27 + 36 + 16 = 25. The center is (6, -4) and the radius is 5. The distance from (14, 2) to the center is &radic;((14 - 6)<sup>2</sup> + (2 - (-4))<sup>2</sup>) = &radic;(64 + 36) = 10, so the point lies outside the circle, and the nearest point of the circle is 10 - 5 = 5 units away. Choice C, 10, is the distance to the center, stopping before the radius is subtracted. Choice D, 15, is 10 + 5, the greatest distance rather than the least. Choice B, 9, comes from adding the horizontal and vertical gaps, 8 + 6 = 14, instead of using the Pythagorean distance."
+          "explanation": "Choice A is correct. Complete the square to find the circle's center and radius. Group the terms as (x<sup>2</sup> - 12x) + (y<sup>2</sup> + 8y) = -27. Half of -12 is -6 and half of 8 is 4, so add 36 and 16 to both sides: (x - 6)<sup>2</sup> + (y + 4)<sup>2</sup> = -27 + 36 + 16 = 25. The center is (6, -4) and the radius is 5. The distance from (14, 2) to the center is √((14 - 6)<sup>2</sup> + (2 - (-4))<sup>2</sup>) = √(64 + 36) = 10, so the point lies outside the circle, and the nearest point of the circle is 10 - 5 = 5 units away. Choice C, 10, is the distance to the center, stopping before the radius is subtracted. Choice D, 15, is 10 + 5, the greatest distance rather than the least. Choice B, 9, comes from adding the horizontal and vertical gaps, 8 + 6 = 14, instead of using the Pythagorean distance."
         },
         {
           "qid": "mtacb023",
@@ -4291,7 +4291,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "38 Exponent Rules",
           "difficulty": "hard",
           "type": "fr",
-          "text": "<div style=\"text-align:center;font-size:1.1em;\">2<sup><i>a</i></sup> = 8<sup><i>b</i>&thinsp;+&thinsp;1</sup></div><div style=\"text-align:center;font-size:1.1em;\">4<sup><i>a</i>&thinsp;&minus;&thinsp;<i>b</i></sup> = 2<sup>10</sup></div>In the given equations, <i>a</i> and <i>b</i> are constants. What is the value of <i>a</i>?",
+          "text": "<div style=\"text-align:center;font-size:1.1em;\">2<sup><i>a</i></sup> = 8<sup><i>b</i> + 1</sup></div><div style=\"text-align:center;font-size:1.1em;\">4<sup><i>a</i> − <i>b</i></sup> = 2<sup>10</sup></div>In the given equations, <i>a</i> and <i>b</i> are constants. What is the value of <i>a</i>?",
           "answer": "6",
           "explanation": "The correct answer is 6. Write every base as a power of 2. Since 8 = 2<sup>3</sup>, the first equation becomes 2<sup>a</sup> = (2<sup>3</sup>)<sup>(b + 1)</sup> = 2<sup>(3b + 3)</sup>, and equal powers of the same base have equal exponents, so a = 3b + 3. Since 4 = 2<sup>2</sup>, the second equation becomes 2<sup>(2(a - b))</sup> = 2<sup>10</sup>, so 2a - 2b = 10 and a - b = 5, which rearranges to b = a - 5. Substituting that into the first equation gives a = 3(a - 5) + 3 = 3a - 15 + 3 = 3a - 12. Subtracting 3a from both sides gives -2a = -12, so a = 6. Then b = 1, and both equations check out: 2<sup>6</sup> = 64 and 8<sup>(1 + 1)</sup> = 64, and 4<sup>(6 - 1)</sup> = 4<sup>5</sup> = 1024 = 2<sup>10</sup>."
         },
@@ -4393,7 +4393,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "1 Plugging into a function",
           "difficulty": "easy",
           "type": "fr",
-          "text": "The function <i>f</i> is defined by <i>f</i>(<i>x</i>) = 3<i>x</i><sup>2</sup> &minus; 5. What is the value of <i>f</i>(4)?",
+          "text": "The function <i>f</i> is defined by <i>f</i>(<i>x</i>) = 3<i>x</i><sup>2</sup> − 5. What is the value of <i>f</i>(4)?",
           "answer": "43",
           "explanation": "The correct answer is 43. Substitute 4 for x everywhere in f(x) = 3x<sup>2</sup> - 5, which gives f(4) = 3(4)<sup>2</sup> - 5. Work in the right order: square first, so 4<sup>2</sup> = 16, then multiply, so 3(16) = 48, then subtract, so 48 - 5 = 43. Only the x is squared, not the 3 in front of it. Multiplying before squaring would give (3 times 4)<sup>2</sup> - 5 = 144 - 5 = 139, which is the value of (3x)<sup>2</sup> - 5 and not of 3x<sup>2</sup> - 5."
         },
@@ -4451,12 +4451,12 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "21 Simple Equivalent Expressions",
           "difficulty": "easy",
           "type": "mc",
-          "text": "Which expression is equivalent to (5<i>x</i><sup>2</sup> + 7<i>x</i> &minus; 4) &minus; (<i>x</i><sup>2</sup> &minus; 2<i>x</i> + 9)?",
+          "text": "Which expression is equivalent to (5<i>x</i><sup>2</sup> + 7<i>x</i> − 4) − (<i>x</i><sup>2</sup> − 2<i>x</i> + 9)?",
           "choices": [
             "4<i>x</i><sup>2</sup> + 5<i>x</i> + 5",
-            "4<i>x</i><sup>2</sup> + 5<i>x</i> &minus; 13",
+            "4<i>x</i><sup>2</sup> + 5<i>x</i> − 13",
             "4<i>x</i><sup>2</sup> + 9<i>x</i> + 5",
-            "4<i>x</i><sup>2</sup> + 9<i>x</i> &minus; 13"
+            "4<i>x</i><sup>2</sup> + 9<i>x</i> − 13"
           ],
           "correct": 3,
           "explanation": "Choice D is correct. The minus sign in front of the second set of parentheses applies to every term inside it, so (5x<sup>2</sup> + 7x - 4) - (x<sup>2</sup> - 2x + 9) becomes 5x<sup>2</sup> + 7x - 4 - x<sup>2</sup> + 2x - 9. Combining like terms gives 5x<sup>2</sup> - x<sup>2</sup> = 4x<sup>2</sup>, 7x + 2x = 9x, and -4 - 9 = -13, so the expression is equivalent to 4x<sup>2</sup> + 9x - 13. Choice A applies the minus sign to the x<sup>2</sup> term only, leaving 7x - 2x = 5x and -4 + 9 = 5. Choice B makes the same error on the middle term but handles the constant correctly. Choice C gets 9x right but leaves the constant as -4 + 9 = 5."
@@ -4499,7 +4499,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "66 Rational Functions",
           "difficulty": "medium",
           "type": "fr",
-          "text": "<div style=\"text-align:center;font-size:1.1em;margin:0.6em 0;\">4/(<i>x</i> &minus; 5) = 10/(<i>x</i> + 1)</div>What is the solution to the given equation?",
+          "text": "<div style=\"text-align:center;font-size:1.1em;margin:0.6em 0;\">4/(<i>x</i> − 5) = 10/(<i>x</i> + 1)</div>What is the solution to the given equation?",
           "answer": "9",
           "explanation": "The correct answer is 9. Since neither denominator may be zero, x is not 5 and not -1, and you can cross multiply: 4(x + 1) = 10(x - 5). Distributing gives 4x + 4 = 10x - 50. Subtracting 4x from both sides gives 4 = 6x - 50, and adding 50 gives 54 = 6x, so x = 54/6 = 9. Check it in the original equation: 4/(9 - 5) = 4/4 = 1 and 10/(9 + 1) = 10/10 = 1, so both sides equal 1. Two common slips are worth naming. Distributing the 10 as 10x - 5 instead of 10x - 50 leads to 4x + 4 = 10x - 5 and x = 1.5. Pairing each numerator with its own denominator, 4(x - 5) = 10(x + 1), leads to 4x - 20 = 10x + 10 and x = -5."
         },
@@ -4521,17 +4521,17 @@ window.SAT_PRACTICE_TESTS = [
           "type": "mc",
           "text": "<table class=\"dx-table\"><tr><th><i>t</i></th><th><i>v</i>(<i>t</i>)</th></tr><tr><td>0</td><td>24,000</td></tr><tr><td>3</td><td>12,000</td></tr><tr><td>6</td><td>6,000</td></tr><tr><td>9</td><td>3,000</td></tr></table>The table gives the value <i>v</i>(<i>t</i>), in dollars, of a commercial printing press for four values of <i>t</i>, where <i>t</i> is the number of years after the press was purchased. The value of the press decreases by the same percent each year. Which of the following could define <i>v</i>?",
           "choices": [
-            "<i>v</i>(<i>t</i>) = 24,000 &minus; 4,000<i>t</i>",
+            "<i>v</i>(<i>t</i>) = 24,000 − 4,000<i>t</i>",
             "<i>v</i>(<i>t</i>) = 24,000(0.5)<sup>3<i>t</i></sup>",
             "<i>v</i>(<i>t</i>) = 24,000(0.5)<sup><i>t</i></sup>",
-            "<i>v</i>(<i>t</i>) = 24,000(0.5)<sup><i>t</i>&frasl;3</sup>"
+            "<i>v</i>(<i>t</i>) = 24,000(0.5)<sup><i>t</i>/3</sup>"
           ],
           "correct": 3,
           "choiceNotes": [
             "Linear: treated the 12,000 drop across the first three years as a constant 4,000 per year, so it gives 12,000 at t = 3 but 0 at t = 6.",
-            "Inverted the exponent, using 3t where t&frasl;3 is needed; this halves the value three times per year.",
+            "Inverted the exponent, using 3t where t/3 is needed; this halves the value three times per year.",
             "Halved once per unit of t, ignoring that consecutive rows are 3 years apart; it gives 3,000 at t = 3.",
-            "Key: the value halves over every 3-year step, so the annual factor is applied t&frasl;3 times: v(9) = 24,000(0.5)<sup>3</sup> = 3,000, and every row checks."
+            "Key: the value halves over every 3-year step, so the annual factor is applied t/3 times: v(9) = 24,000(0.5)<sup>3</sup> = 3,000, and every row checks."
           ],
           "explanation": "Choice D is correct. Read the table across: from t = 0 to t = 3 the value falls from 24,000 to 12,000, from t = 3 to t = 6 from 12,000 to 6,000, and from t = 6 to t = 9 from 6,000 to 3,000. The value is multiplied by 0.5 every 3 years, not every year, so the exponent on 0.5 must be t/3. That way t = 3 gives an exponent of 1, t = 6 gives 2, and t = 9 gives 3. Checking choice D at t = 6 gives 24,000(0.5)<sup>2</sup> = 6,000, which matches the table. Choice C halves every year, so at t = 3 it gives 24,000(0.5)<sup>3</sup> = 3,000, far too small. Choice B falls faster still, halving three times a year. Choice A is linear, subtracting the same 4,000 each year rather than losing the same percent."
         },
@@ -4541,7 +4541,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "47 Factoring",
           "difficulty": "medium",
           "type": "mc",
-          "text": "If <i>x</i><sup>2</sup> &minus; <i>y</i><sup>2</sup> = 64 and <i>x</i> + <i>y</i> = 16, what is the value of <i>x</i> &minus; <i>y</i>?",
+          "text": "If <i>x</i><sup>2</sup> − <i>y</i><sup>2</sup> = 64 and <i>x</i> + <i>y</i> = 16, what is the value of <i>x</i> − <i>y</i>?",
           "choices": [
             "4",
             "8",
@@ -4555,7 +4555,7 @@ window.SAT_PRACTICE_TESTS = [
             "C: went on to solve for x itself, getting x = 10 and y = 6, and reported x instead of x - y.",
             "D: subtracted the second equation's value from the first, computing 64 - 16, instead of dividing 64 by 16."
           ],
-          "explanation": "Choice A is correct. The left side of the first equation is a difference of squares, which factors as x<sup>2</sup> - y<sup>2</sup> = (x + y)(x - y). Substituting the given value x + y = 16 gives 16(x - y) = 64, so x - y = 64/16 = 4. Choice B, 8, is &radic;64, which is what you get by reading x<sup>2</sup> - y<sup>2</sup> = 64 as (x - y)<sup>2</sup> = 64. Choice D, 48, is 64 - 16, from subtracting the second equation from the first instead of dividing. Choice C, 10, is the value of x, not of x - y. As a check, x + y = 16 and x - y = 4 give x = 10 and y = 6, and 10<sup>2</sup> - 6<sup>2</sup> = 100 - 36 = 64, as required."
+          "explanation": "Choice A is correct. The left side of the first equation is a difference of squares, which factors as x<sup>2</sup> - y<sup>2</sup> = (x + y)(x - y). Substituting the given value x + y = 16 gives 16(x - y) = 64, so x - y = 64/16 = 4. Choice B, 8, is √64, which is what you get by reading x<sup>2</sup> - y<sup>2</sup> = 64 as (x - y)<sup>2</sup> = 64. Choice D, 48, is 64 - 16, from subtracting the second equation from the first instead of dividing. Choice C, 10, is the value of x, not of x - y. As a check, x + y = 16 and x - y = 4 give x = 10 and y = 6, and 10<sup>2</sup> - 6<sup>2</sup> = 100 - 36 = 64, as required."
         },
         {
           "qid": "mt833c9d",
@@ -4579,15 +4579,15 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "87 Standard Form of a Circle",
           "difficulty": "medium",
           "type": "mc",
-          "text": "In the <i>xy</i>-plane, a circle has its center at (&minus;3, 5) and passes through the point (9, 14). Which of the following equations represents this circle?",
+          "text": "In the <i>xy</i>-plane, a circle has its center at (−3, 5) and passes through the point (9, 14). Which of the following equations represents this circle?",
           "choices": [
-            "(<i>x</i> &minus; 3)<sup>2</sup> + (<i>y</i> + 5)<sup>2</sup> = 15",
-            "(<i>x</i> &minus; 3)<sup>2</sup> + (<i>y</i> + 5)<sup>2</sup> = 225",
-            "(<i>x</i> + 3)<sup>2</sup> + (<i>y</i> &minus; 5)<sup>2</sup> = 15",
-            "(<i>x</i> + 3)<sup>2</sup> + (<i>y</i> &minus; 5)<sup>2</sup> = 225"
+            "(<i>x</i> − 3)<sup>2</sup> + (<i>y</i> + 5)<sup>2</sup> = 15",
+            "(<i>x</i> − 3)<sup>2</sup> + (<i>y</i> + 5)<sup>2</sup> = 225",
+            "(<i>x</i> + 3)<sup>2</sup> + (<i>y</i> − 5)<sup>2</sup> = 15",
+            "(<i>x</i> + 3)<sup>2</sup> + (<i>y</i> − 5)<sup>2</sup> = 225"
           ],
           "correct": 3,
-          "explanation": "Choice D is correct. A circle with center (h, k) and radius r has equation (x - h)<sup>2</sup> + (y - k)<sup>2</sup> = r<sup>2</sup>. With center (-3, 5), h = -3 and k = 5, so the left side is (x - (-3))<sup>2</sup> + (y - 5)<sup>2</sup> = (x + 3)<sup>2</sup> + (y - 5)<sup>2</sup>. That eliminates choices A and B, which reverse both signs and so describe a circle centered at (3, -5). For the radius, use the distance from the center to the point (9, 14) on the circle: the horizontal change is 9 - (-3) = 12 and the vertical change is 14 - 5 = 9, so r = &radic;(12<sup>2</sup> + 9<sup>2</sup>) = &radic;(144 + 81) = &radic;225 = 15. The equation calls for r<sup>2</sup>, which is 225, not 15, so choice C stops one step short."
+          "explanation": "Choice D is correct. A circle with center (h, k) and radius r has equation (x - h)<sup>2</sup> + (y - k)<sup>2</sup> = r<sup>2</sup>. With center (-3, 5), h = -3 and k = 5, so the left side is (x - (-3))<sup>2</sup> + (y - 5)<sup>2</sup> = (x + 3)<sup>2</sup> + (y - 5)<sup>2</sup>. That eliminates choices A and B, which reverse both signs and so describe a circle centered at (3, -5). For the radius, use the distance from the center to the point (9, 14) on the circle: the horizontal change is 9 - (-3) = 12 and the vertical change is 14 - 5 = 9, so r = √(12<sup>2</sup> + 9<sup>2</sup>) = √(144 + 81) = √225 = 15. The equation calls for r<sup>2</sup>, which is 225, not 15, so choice C stops one step short."
         },
         {
           "qid": "mt59bf28",
@@ -4595,7 +4595,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "10 Algebraic Systems",
           "difficulty": "medium",
           "type": "mc",
-          "text": "<div style=\"text-align:center;font-size:1.1em;margin:0.6em 0;\">3<i>x</i> + 2<i>y</i> = 19<br>5<i>x</i> &minus; 2<i>y</i> = 21</div>The given system of equations has the solution (<i>x</i>, <i>y</i>). What is the value of <i>x</i> + <i>y</i>?",
+          "text": "<div style=\"text-align:center;font-size:1.1em;margin:0.6em 0;\">3<i>x</i> + 2<i>y</i> = 19<br>5<i>x</i> − 2<i>y</i> = 21</div>The given system of equations has the solution (<i>x</i>, <i>y</i>). What is the value of <i>x</i> + <i>y</i>?",
           "choices": [
             "3",
             "7",
@@ -4691,7 +4691,7 @@ window.SAT_PRACTICE_TESTS = [
             "C: reported the increase 20,000 - 5,000 rather than the value of P(7).",
             "D: applied the whole factor of 4 to the 3-year gap from t = 4 to t = 7, computing 4(5,000), which is really the value at t = 10."
           ],
-          "explanation": "Choice A is correct. A quantity that increases by the same percent each year is multiplied by the same factor r each year, so P(t) = P(0)r<sup>t</sup>. From t = 4 to t = 10 is 6 years, over which the quantity goes from 5,000 to 20,000, so r<sup>6</sup> = 20,000/5,000 = 4. The year 7 sits exactly halfway, 3 years from each, and r<sup>3</sup> = &radic;(r<sup>6</sup>) = &radic;4 = 2. Therefore P(7) = P(4)r<sup>3</sup> = 5,000(2) = 10,000. Equivalently, for an exponential model the middle value is the geometric mean of the outer two: &radic;(5,000 times 20,000) = &radic;(100,000,000) = 10,000. Choice B, 12,500, is the arithmetic mean of 5,000 and 20,000, which would be right for a linear model but not an exponential one. Choice C, 15,000, is the difference 20,000 - 5,000. Choice D, 20,000, is P(10), not P(7)."
+          "explanation": "Choice A is correct. A quantity that increases by the same percent each year is multiplied by the same factor r each year, so P(t) = P(0)r<sup>t</sup>. From t = 4 to t = 10 is 6 years, over which the quantity goes from 5,000 to 20,000, so r<sup>6</sup> = 20,000/5,000 = 4. The year 7 sits exactly halfway, 3 years from each, and r<sup>3</sup> = √(r<sup>6</sup>) = √4 = 2. Therefore P(7) = P(4)r<sup>3</sup> = 5,000(2) = 10,000. Equivalently, for an exponential model the middle value is the geometric mean of the outer two: √(5,000 times 20,000) = √(100,000,000) = 10,000. Choice B, 12,500, is the arithmetic mean of 5,000 and 20,000, which would be right for a linear model but not an exponential one. Choice C, 15,000, is the difference 20,000 - 5,000. Choice D, 20,000, is P(10), not P(7)."
         },
         {
           "qid": "mt28fbec",
@@ -4699,12 +4699,12 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "20 Rearranging Terms",
           "difficulty": "hard",
           "type": "mc",
-          "text": "<div style=\"text-align:center;font-size:1.1em;margin:0.6em 0;\"><i>P</i> = <sup>(2<i>A</i> + 3<i>B</i>)</sup>&frasl;<sub>(<i>A</i> &minus; <i>B</i>)</sub></div>The given equation relates the positive numbers <i>A</i>, <i>B</i>, and <i>P</i>, where <i>A</i> &gt; <i>B</i>. Which of the following correctly expresses <i>A</i> in terms of <i>B</i> and <i>P</i>?",
+          "text": "<div style=\"text-align:center;font-size:1.1em;margin:0.6em 0;\"><i>P</i> = <span style=\"display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;\">2<i>A</i> + 3<i>B</i></span><span style=\"padding:0 0.25em;\"><i>A</i> − <i>B</i></span></span></div>The given equation relates the positive numbers <i>A</i>, <i>B</i>, and <i>P</i>, where <i>A</i> &gt; <i>B</i>. Which of the following correctly expresses <i>A</i> in terms of <i>B</i> and <i>P</i>?",
           "choices": [
-            "<i>B</i>(<i>P</i> + 3) &frasl; (<i>P</i> &minus; 2)",
-            "<i>B</i>(<i>P</i> &minus; 3) &frasl; (<i>P</i> &minus; 2)",
-            "<i>B</i>(<i>P</i> + 3) &frasl; (<i>P</i> + 2)",
-            "<i>B</i>(<i>P</i> &minus; 3) &frasl; (<i>P</i> + 2)"
+            "<span style=\"display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;\"><i>B</i>(<i>P</i> + 3)</span><span style=\"padding:0 0.25em;\"><i>P</i> − 2</span></span>",
+            "<span style=\"display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;\"><i>B</i>(<i>P</i> − 3)</span><span style=\"padding:0 0.25em;\"><i>P</i> − 2</span></span>",
+            "<span style=\"display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;\"><i>B</i>(<i>P</i> + 3)</span><span style=\"padding:0 0.25em;\"><i>P</i> + 2</span></span>",
+            "<span style=\"display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;\"><i>B</i>(<i>P</i> − 3)</span><span style=\"padding:0 0.25em;\"><i>P</i> + 2</span></span>"
           ],
           "correct": 0,
           "explanation": "Choice A is correct. Clear the fraction first: multiplying both sides of P = (2A + 3B)/(A - B) by A - B gives P(A - B) = 2A + 3B, or PA - PB = 2A + 3B. To express A in terms of B and P, gather every term containing A on one side and everything else on the other. Subtracting 2A from both sides and adding PB to both sides gives PA - 2A = 3B + PB. Factoring A from the left and B from the right gives A(P - 2) = B(P + 3). Dividing both sides by P - 2  gives A = B(P + 3)/(P - 2). Choice C has P + 2 in the denominator, a sign error when the 2A was moved across. Choice B has P - 3 in the numerator, a sign error on the 3B. Choice D makes both errors."
@@ -4741,7 +4741,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "45 Fractional Exponents",
           "difficulty": "hard",
           "type": "fr",
-          "text": "<div style=\"text-align:center;font-size:1.1em;margin:0.6em 0;\">(&#8731;(<i>x</i><sup>4</sup>) &middot; &radic;(<i>x</i>))<sup>6</sup> / <i>x</i><sup>3</sup></div>The given expression, where <i>x</i> &gt; 0, is equivalent to <i>x</i><sup><i>k</i></sup>, where <i>k</i> is a constant. What is the value of <i>k</i>?",
+          "text": "<div style=\"text-align:center;font-size:1.1em;margin:0.6em 0;\">(&#8731;(<i>x</i><sup>4</sup>) &middot; √(<i>x</i>))<sup>6</sup> / <i>x</i><sup>3</sup></div>The given expression, where <i>x</i> &gt; 0, is equivalent to <i>x</i><sup><i>k</i></sup>, where <i>k</i> is a constant. What is the value of <i>k</i>?",
           "answer": "8",
           "explanation": "The correct answer is 8. Rewrite both radicals as powers: the cube root of x<sup>4</sup> is x<sup>(4/3)</sup>, and the square root of x is x<sup>(1/2)</sup>. Multiplying powers with the same base adds the exponents, so x<sup>(4/3)</sup> times x<sup>(1/2)</sup> = x<sup>(4/3 + 1/2)</sup> = x<sup>(8/6 + 3/6)</sup> = x<sup>(11/6)</sup>. Raising a power to a power multiplies the exponents, so (x<sup>(11/6)</sup>)<sup>6</sup> = x<sup>((11/6)(6))</sup> = x<sup>11</sup>. Dividing powers with the same base subtracts the exponents, so x<sup>11</sup> divided by x<sup>3</sup> is x<sup>(11 - 3)</sup> = x<sup>8</sup>, and k = 8. A faster route is to distribute the 6 first: the cube root of x<sup>4</sup> raised to the 6th is x<sup>8</sup>, and the square root of x raised to the 6th is x<sup>3</sup>, giving x<sup>11</sup> before the division. A common error is multiplying 4/3 and 1/2 instead of adding, which gives x<sup>(2/3)</sup> and eventually k = 1."
         },
@@ -4751,7 +4751,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "60 Quadratic Applications",
           "difficulty": "hard",
           "type": "mc",
-          "text": "A ball is launched upward from a platform. Its height above the ground, in feet, <i>t</i> seconds after it is launched is given by <i>h</i>(<i>t</i>) = &minus;16<i>t</i><sup>2</sup> + <i>bt</i> + <i>c</i>, where <i>b</i> and <i>c</i> are constants. The ball reaches its maximum height of 180 feet 3 seconds after it is launched. What was the height of the ball, in feet, at the moment it was launched?",
+          "text": "A ball is launched upward from a platform. Its height above the ground, in feet, <i>t</i> seconds after it is launched is given by <i>h</i>(<i>t</i>) = −16<i>t</i><sup>2</sup> + <i>bt</i> + <i>c</i>, where <i>b</i> and <i>c</i> are constants. The ball reaches its maximum height of 180 feet 3 seconds after it is launched. What was the height of the ball, in feet, at the moment it was launched?",
           "choices": [
             "36",
             "96",
@@ -4797,9 +4797,9 @@ window.SAT_PRACTICE_TESTS = [
           "type": "mc",
           "text": "<svg viewBox=\"0 0 300 200\" class=\"dx-fig\" style=\"color:var(--text);\"><title>A line in the xy-plane falling from left to right, with the points (0, 18) and (6, 6) drawn and labeled</title><line x1=\"45\" y1=\"20\" x2=\"45\" y2=\"155\" stroke=\"currentColor\" stroke-width=\"1.4\"/><line x1=\"45\" y1=\"155\" x2=\"278\" y2=\"155\" stroke=\"currentColor\" stroke-width=\"1.4\"/><line x1=\"41\" y1=\"131.0\" x2=\"45\" y2=\"131.0\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"37\" y=\"134.0\" font-size=\"9\" text-anchor=\"end\" fill=\"currentColor\">4</text><line x1=\"41\" y1=\"107.0\" x2=\"45\" y2=\"107.0\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"37\" y=\"110.0\" font-size=\"9\" text-anchor=\"end\" fill=\"currentColor\">8</text><line x1=\"41\" y1=\"83.0\" x2=\"45\" y2=\"83.0\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"37\" y=\"86.0\" font-size=\"9\" text-anchor=\"end\" fill=\"currentColor\">12</text><line x1=\"41\" y1=\"59.0\" x2=\"45\" y2=\"59.0\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"37\" y=\"62.0\" font-size=\"9\" text-anchor=\"end\" fill=\"currentColor\">16</text><line x1=\"41\" y1=\"35.0\" x2=\"45\" y2=\"35.0\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"37\" y=\"38.0\" font-size=\"9\" text-anchor=\"end\" fill=\"currentColor\">20</text><line x1=\"45.0\" y1=\"155\" x2=\"45.0\" y2=\"159\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"45.0\" y=\"171\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">0</text><line x1=\"101.0\" y1=\"155\" x2=\"101.0\" y2=\"159\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"101.0\" y=\"171\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">2</text><line x1=\"157.0\" y1=\"155\" x2=\"157.0\" y2=\"159\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"157.0\" y=\"171\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">4</text><line x1=\"213.0\" y1=\"155\" x2=\"213.0\" y2=\"159\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"213.0\" y=\"171\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">6</text><line x1=\"269.0\" y1=\"155\" x2=\"269.0\" y2=\"159\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"269.0\" y=\"171\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">8</text><line x1=\"45.0\" y1=\"47.0\" x2=\"269.0\" y2=\"143.0\" stroke=\"currentColor\" stroke-width=\"1.6\"/><circle cx=\"45.0\" cy=\"47.0\" r=\"3.2\" fill=\"currentColor\"/><circle cx=\"213.0\" cy=\"119.0\" r=\"3.2\" fill=\"currentColor\"/><text x=\"53.0\" y=\"41.0\" font-size=\"9\" text-anchor=\"start\" fill=\"currentColor\">(0, 18)</text><text x=\"221.0\" y=\"113.0\" font-size=\"9\" text-anchor=\"start\" fill=\"currentColor\">(6, 6)</text><text x=\"150\" y=\"186\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">Time (hours)</text><text x=\"14\" y=\"92\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\" transform=\"rotate(-90 14 92)\">Fuel (gallons)</text></svg>The graph shows the amount of fuel, in gallons, remaining in a generator’s tank <i>t</i> hours after the tank was filled. What is the average rate of change, in gallons per hour, of the amount of fuel remaining?",
           "choices": [
-            "&minus;3",
-            "&minus;2",
-            "&minus;<sup>1</sup>&frasl;<sub>2</sub>",
+            "−3",
+            "−2",
+            "−<span style=\"display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;\">1</span><span style=\"padding:0 0.25em;\">2</span></span>",
             "2"
           ],
           "correct": 1,
@@ -4827,7 +4827,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "19 Single Variable Equations with a Constant",
           "difficulty": "medium",
           "type": "fr",
-          "text": "<div style=\"text-align:center;font-size:1.1em;margin:0.6em 0;\">4(<i>x</i> &minus; 3) + 7 = 3(2<i>x</i> &minus; <i>c</i>)</div>In the given equation, <i>c</i> is a constant and the solution to the equation is <i>x</i> = 11. What is the value of <i>c</i>?",
+          "text": "<div style=\"text-align:center;font-size:1.1em;margin:0.6em 0;\">4(<i>x</i> − 3) + 7 = 3(2<i>x</i> − <i>c</i>)</div>In the given equation, <i>c</i> is a constant and the solution to the equation is <i>x</i> = 11. What is the value of <i>c</i>?",
           "answer": "9",
           "explanation": "The correct answer is 9. Since x = 11 is the solution, substituting 11 for x makes the equation true: 4(11 - 3) + 7 = 3(2(11) - c). The left side is 4(8) + 7 = 32 + 7 = 39. The right side is 3(22 - c) = 66 - 3c. So 39 = 66 - 3c. Subtracting 66 from both sides gives -27 = -3c, and dividing both sides by -3 gives c = 9. Check by solving the finished equation: 4(x - 3) + 7 = 3(2x - 9) becomes 4x - 5 = 6x - 27, so 22 = 2x and x = 11, as given. The common error is distributing the 3 onto only the 2x and not onto the c, which turns the right side into 66 - c and gives c = 27."
         },
@@ -4853,7 +4853,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "25 Equivalent for all x",
           "difficulty": "medium",
           "type": "fr",
-          "text": "<div style=\"text-align:center;font-size:1.1em;margin:0.6em 0;\">(2<i>x</i> + 7)(<i>kx</i> &minus; 3) = 8<i>x</i><sup>2</sup> + <i>cx</i> &minus; 21</div>In the given equation, <i>k</i> and <i>c</i> are constants and the equation is true for all values of <i>x</i>. What is the value of <i>c</i>?",
+          "text": "<div style=\"text-align:center;font-size:1.1em;margin:0.6em 0;\">(2<i>x</i> + 7)(<i>kx</i> − 3) = 8<i>x</i><sup>2</sup> + <i>cx</i> − 21</div>In the given equation, <i>k</i> and <i>c</i> are constants and the equation is true for all values of <i>x</i>. What is the value of <i>c</i>?",
           "answer": "22",
           "explanation": "The correct answer is 22. An equation that is true for all values of x means the two sides are the same polynomial, so their corresponding coefficients must be equal. Expand the left side: (2x + 7)(kx - 3) = 2kx<sup>2</sup> - 6x + 7kx - 21 = 2kx<sup>2</sup> + (7k - 6)x - 21. Compare with 8x<sup>2</sup> + cx - 21. The x<sup>2</sup> coefficients give 2k = 8, so k = 4. The constant terms already agree at -21. The x coefficients then give c = 7k - 6 = 7(4) - 6 = 28 - 6 = 22. Check by expanding with k = 4: (2x + 7)(4x - 3) = 8x<sup>2</sup> - 6x + 28x - 21 = 8x<sup>2</sup> + 22x - 21. A common slip is losing the -6x from the outer-inner product and answering 28, which is 7k on its own."
         },
@@ -4863,10 +4863,10 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "33 Parallel Lines",
           "difficulty": "medium",
           "type": "mc",
-          "text": "In the <i>xy</i>-plane, line <i>&#8467;</i> is parallel to the line with equation 6<i>x</i> &minus; 2<i>y</i> = 9 and passes through the point (&minus;3, 4). What is the <i>y</i>-coordinate of the <i>y</i>-intercept of line <i>&#8467;</i>?",
+          "text": "In the <i>xy</i>-plane, line <i>&#8467;</i> is parallel to the line with equation 6<i>x</i> − 2<i>y</i> = 9 and passes through the point (−3, 4). What is the <i>y</i>-coordinate of the <i>y</i>-intercept of line <i>&#8467;</i>?",
           "choices": [
-            "&minus;15",
-            "&minus;5",
+            "−15",
+            "−5",
             "4",
             "13"
           ],
@@ -4879,9 +4879,9 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "8 Radical Models",
           "difficulty": "hard",
           "type": "mc",
-          "text": "<div style=\"text-align:center;font-size:1.1em;margin:0.6em 0;\">&radic;(3<i>x</i> + 4) = <i>x</i> &minus; 2</div>In the given equation, <i>x</i> is a real number. The equation has exactly one solution. What is that solution?",
+          "text": "<div style=\"text-align:center;font-size:1.1em;margin:0.6em 0;\">√(3<i>x</i> + 4) = <i>x</i> &minus; 2</div>In the given equation, <i>x</i> is a real number. The equation has exactly one solution. What is that solution?",
           "choices": [
-            "&minus;7",
+            "−7",
             "0",
             "3",
             "7"
@@ -4893,7 +4893,7 @@ window.SAT_PRACTICE_TESTS = [
             "C: expanded (x - 2)^2 as x^2 + 4, losing the cross term, which gives x^2 - 3x = 0 and the nonzero root x = 3.",
             "D: KEY. Squaring gives 3x + 4 = x^2 - 4x + 4, so x^2 - 7x = 0 and x = 0 or 7; only x = 7 works, since the square root of 25 is 5 = 7 - 2."
           ],
-          "explanation": "Choice D is correct. Square both sides of &radic;(3x + 4) = x - 2 to remove the radical: 3x + 4 = (x - 2)<sup>2</sup> = x<sup>2</sup> - 4x + 4. Subtracting 3x + 4 from both sides gives 0 = x<sup>2</sup> - 7x, which factors as x(x - 7) = 0, so x = 0 or x = 7. Squaring can introduce solutions that fail the original equation, so test both. At x = 0 the left side is &radic;4 = 2 while the right side is 0 - 2 = -2, and a square root is never negative, so 0 is extraneous. At x = 7 the left side is &radic;(3(7) + 4) = &radic;25 = 5 and the right side is 7 - 2 = 5, so 7 works. Choice B, 0, is exactly that extraneous root. Choices A and C fail even the squared equation, since (-7)<sup>2</sup> - 7(-7) = 98 and 3<sup>2</sup> - 7(3) = -12, neither 0."
+          "explanation": "Choice D is correct. Square both sides of √(3x + 4) = x - 2 to remove the radical: 3x + 4 = (x - 2)<sup>2</sup> = x<sup>2</sup> - 4x + 4. Subtracting 3x + 4 from both sides gives 0 = x<sup>2</sup> - 7x, which factors as x(x - 7) = 0, so x = 0 or x = 7. Squaring can introduce solutions that fail the original equation, so test both. At x = 0 the left side is √4 = 2 while the right side is 0 - 2 = -2, and a square root is never negative, so 0 is extraneous. At x = 7 the left side is √(3(7) + 4) = √25 = 5 and the right side is 7 - 2 = 5, so 7 works. Choice B, 0, is exactly that extraneous root. Choices A and C fail even the squared equation, since (-7)<sup>2</sup> - 7(-7) = 98 and 3<sup>2</sup> - 7(3) = -12, neither 0."
         },
         {
           "qid": "mt3071e5",
@@ -4927,12 +4927,12 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "74 Cofunction Identity Geometrically",
           "difficulty": "hard",
           "type": "mc",
-          "text": "In right triangle <i>ABC</i>, the measure of angle <i>B</i> is 90&deg; and cos <i>A</i> = <sup>7</sup>&frasl;<sub>25</sub>. Triangle <i>PQR</i> is similar to triangle <i>ABC</i>, where angle <i>P</i> corresponds to angle <i>A</i> and angle <i>R</i> corresponds to angle <i>C</i>. What is the value of sin <i>R</i>?",
+          "text": "In right triangle <i>ABC</i>, the measure of angle <i>B</i> is 90&deg; and cos <i>A</i> = <span style=\"display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;\">7</span><span style=\"padding:0 0.25em;\">25</span></span>. Triangle <i>PQR</i> is similar to triangle <i>ABC</i>, where angle <i>P</i> corresponds to angle <i>A</i> and angle <i>R</i> corresponds to angle <i>C</i>. What is the value of sin <i>R</i>?",
           "choices": [
-            "<sup>7</sup>&frasl;<sub>25</sub>",
-            "<sup>24</sup>&frasl;<sub>25</sub>",
-            "<sup>24</sup>&frasl;<sub>7</sub>",
-            "<sup>25</sup>&frasl;<sub>7</sub>"
+            "<span style=\"display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;\">7</span><span style=\"padding:0 0.25em;\">25</span></span>",
+            "<span style=\"display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;\">24</span><span style=\"padding:0 0.25em;\">25</span></span>",
+            "<span style=\"display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;\">24</span><span style=\"padding:0 0.25em;\">7</span></span>",
+            "<span style=\"display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;\">25</span><span style=\"padding:0 0.25em;\">7</span></span>"
           ],
           "correct": 0,
           "explanation": "Choice A is correct. In right triangle ABC angle B measures 90 degrees, so angles A and C add to 90 degrees and are complementary. For complementary angles the sine of one equals the cosine of the other, so sin C = cos A = 7/25. Triangle PQR is similar to triangle ABC with angle R corresponding to angle C, and similar triangles have equal corresponding angle measures, so angle R has the same measure as angle C and sin R = sin C = 7/25. Note that the similarity changes the side lengths but not the ratios, so no scaling is needed. Choice B, 24/25, is cos R, which equals sin A: since 7<sup>2</sup> + 24<sup>2</sup> = 49 + 576 = 625 = 25<sup>2</sup>, this is a 7-24-25 right triangle. Choice C, 24/7, is tan A. Choice D, 25/7, is the reciprocal of 7/25 rather than its complement."
@@ -4967,13 +4967,13 @@ window.SAT_PRACTICE_TESTS = [
           "type": "mc",
           "text": "<svg viewBox=\"0 0 300 200\" class=\"dx-fig\" style=\"color:var(--text);\"><title>A right circular cone with the diameter of its base marked 12 and its slant height marked 10</title><ellipse cx=\"150\" cy=\"140\" rx=\"62\" ry=\"15\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"/><line x1=\"150\" y1=\"40\" x2=\"88\" y2=\"140\" stroke=\"currentColor\" stroke-width=\"1.5\"/><line x1=\"150\" y1=\"40\" x2=\"212\" y2=\"140\" stroke=\"currentColor\" stroke-width=\"1.5\"/><line x1=\"88\" y1=\"140\" x2=\"138\" y2=\"140\" stroke=\"currentColor\" stroke-width=\"1.1\" stroke-dasharray=\"4 3\"/><line x1=\"162\" y1=\"140\" x2=\"212\" y2=\"140\" stroke=\"currentColor\" stroke-width=\"1.1\" stroke-dasharray=\"4 3\"/><text x=\"150\" y=\"144\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">12</text><text x=\"190\" y=\"86\" font-size=\"10\" text-anchor=\"start\" fill=\"currentColor\">10</text><text x=\"150\" y=\"190\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">Note: Figure not drawn to scale.</text></svg>The figure shows a right circular cone. The diameter of the base of the cone and the slant height of the cone are marked, in centimeters. What is the volume, in cubic centimeters, of the cone?",
           "choices": [
-            "96&pi;",
-            "120&pi;",
-            "384&pi;",
-            "480&pi;"
+            "96π",
+            "120π",
+            "384π",
+            "480π"
           ],
           "correct": 0,
-          "explanation": "Choice A is correct. The figure marks the base diameter as 12, so the radius is 12/2 = 6, and marks the slant height as 10. The radius, the vertical height, and the slant height form a right triangle with the slant height as the hypotenuse, so 6<sup>2</sup> + h<sup>2</sup> = 10<sup>2</sup>, giving h<sup>2</sup> = 100 - 36 = 64 and h = 8. The volume of a cone is (1/3)&pi; r<sup>2</sup> h, so here it is (1/3)&pi;(6)<sup>2</sup>(8) = (1/3)&pi;(36)(8) = 96&pi; cubic centimeters. Choice B, 120&pi;, uses the slant height 10 as the vertical height: (1/3)&pi;(36)(10). Choice C, 384&pi;, uses the marked 12 as the radius with the correct height: (1/3)&pi;(144)(8). Choice D, 480&pi;, makes both errors at once, taking 12 as the radius and 10 as the height."
+          "explanation": "Choice A is correct. The figure marks the base diameter as 12, so the radius is 12/2 = 6, and marks the slant height as 10. The radius, the vertical height, and the slant height form a right triangle with the slant height as the hypotenuse, so 6<sup>2</sup> + h<sup>2</sup> = 10<sup>2</sup>, giving h<sup>2</sup> = 100 - 36 = 64 and h = 8. The volume of a cone is (1/3)π r<sup>2</sup> h, so here it is (1/3)π(6)<sup>2</sup>(8) = (1/3)π(36)(8) = 96π cubic centimeters. Choice B, 120π, uses the slant height 10 as the vertical height: (1/3)π(36)(10). Choice C, 384π, uses the marked 12 as the radius with the correct height: (1/3)π(144)(8). Choice D, 480π, makes both errors at once, taking 12 as the radius and 10 as the height."
         },
         {
           "qid": "mtd2a3da",
@@ -4983,17 +4983,17 @@ window.SAT_PRACTICE_TESTS = [
           "type": "mc",
           "text": "<table class=\"dx-table\"><tr><th>Grade</th><th>Number of students surveyed</th><th>Percent who travel to school by bus</th></tr><tr><td>Grade 10</td><td>150</td><td>60%</td></tr><tr><td>Grade 11</td><td>200</td><td>55%</td></tr><tr><td>Grade 12</td><td>150</td><td>40%</td></tr></table>The table summarizes the results of a survey of 500 students at a high school. If one of the surveyed students who does not travel to school by bus is selected at random, what is the probability that the student selected is in Grade 11?",
           "choices": [
-            "<sup>9</sup>&frasl;<sub>50</sub>",
-            "<sup>3</sup>&frasl;<sub>8</sub>",
-            "<sup>2</sup>&frasl;<sub>5</sub>",
-            "<sup>9</sup>&frasl;<sub>20</sub>"
+            "<span style=\"display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;\">9</span><span style=\"padding:0 0.25em;\">50</span></span>",
+            "<span style=\"display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;\">3</span><span style=\"padding:0 0.25em;\">8</span></span>",
+            "<span style=\"display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;\">2</span><span style=\"padding:0 0.25em;\">5</span></span>",
+            "<span style=\"display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;\">9</span><span style=\"padding:0 0.25em;\">20</span></span>"
           ],
           "correct": 1,
           "choiceNotes": [
-            "9&frasl;50 = 90&frasl;500: found the 90 Grade 11 students who do not take the bus but divided by all 500 surveyed, ignoring the condition.",
-            "Key: the students who do not take the bus number 60 + 90 + 90 = 240, of whom 90 are in Grade 11, so the probability is 90&frasl;240 = 3&frasl;8.",
-            "2&frasl;5 = 200&frasl;500: the chance a surveyed student is in Grade 11, computed without using the bus column at all.",
-            "9&frasl;20 = 90&frasl;200: reversed the condition and found the probability that a Grade 11 student does not travel by bus."
+            "9/50 = 90/500: found the 90 Grade 11 students who do not take the bus but divided by all 500 surveyed, ignoring the condition.",
+            "Key: the students who do not take the bus number 60 + 90 + 90 = 240, of whom 90 are in Grade 11, so the probability is 90/240 = 3/8.",
+            "2/5 = 200/500: the chance a surveyed student is in Grade 11, computed without using the bus column at all.",
+            "9/20 = 90/200: reversed the condition and found the probability that a Grade 11 student does not travel by bus."
           ],
           "explanation": "Choice B is correct. The student is chosen from those who do not travel by bus, so count the non-bus students in each grade from the table. In Grade 10, 60% of 150 take the bus, so 40% do not: 0.40(150) = 60. In Grade 11, 55% of 200 take the bus, so 45% do not: 0.45(200) = 90. In Grade 12, 40% of 150 take the bus, so 60% do not: 0.60(150) = 90. The total number of non-bus students is 60 + 90 + 90 = 240, of whom 90 are in Grade 11, so the probability is 90/240 = 3/8. Choice D, 9/20, is 0.45, the share of Grade 11 students who avoid the bus, which answers a different question. Choice A, 9/50, is 90/500, using all 500 surveyed students as the denominator instead of only the 240 non-bus students. Choice C, 2/5, is 200/500, the share of all surveyed students in Grade 11."
         },
