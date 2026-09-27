@@ -5614,7 +5614,7 @@ window.Portal = {
      is the single choke point for module 1 to module 2, section to break,
      and section to next section. -->
 <div class="screen" id="dx-module-over-screen">
-  <div class="dx-module-over-wrap">
+  <div class="dx-module-over-wrap" id="dx-module-over-wrap">
     <h1>This Module Is Over</h1>
     <p>All your work has been saved.</p>
     <p>You'll move on automatically in just a moment.</p>
@@ -13149,7 +13149,7 @@ window.Portal = {
       // between a section's two modules; standard-time students go straight to
       // Module 2. The 10-minute between-section break is separate.
       if (accommodations.timeMult > 1) startModuleBreak();
-      else goToModuleIntro();
+      else startModuleTransition();
       return;
     }
 
@@ -13552,6 +13552,42 @@ window.Portal = {
   // prefers-reduced-motion, since it makes the transition read as automatic;
   // only the spinner is suppressed (in CSS).
   var MODULE_OVER_DELAY_MS = 2400;
+
+  /* BETWEEN MODULE 1 AND MODULE 2, STANDARD TIME (Luca, 2026-09-27: "a
+     loading/transition page between modules 1 & 2 ... instead of just
+     shooting straight to module 2"). The module-over screen says Module 1
+     is done and counts down to Module 2, then opens it. Both ways out of
+     Module 1 come here: Submit (after the 2.4s interstitial) and the clock
+     running out, which used to jump straight in. No test clock runs during
+     it: Module 1's stopped in finishCurrentModule(), Module 2's starts in
+     enterModule(). Saved as its own screen, so a refresh mid-countdown
+     starts it again rather than dropping the test (see the restore). */
+  var MODULE_TRANSITION_SECONDS = 8;
+  var moduleOverDefaultHtml = null, moduleTransitionTimer = null;
+  function startModuleTransition() {
+    var wrap = document.getElementById('dx-module-over-wrap');
+    if (moduleOverDefaultHtml === null) moduleOverDefaultHtml = wrap.innerHTML;
+    var sec = bankFor(activeSectionKeys[sectionIndex]).label;
+    var left = MODULE_TRANSITION_SECONDS;
+    wrap.innerHTML =
+      '<h1>Module 1 Complete</h1>' +
+      '<p>All your work has been saved.</p>' +
+      '<p>Module 2 of ' + sec + ' starts in <strong id="dx-module-countdown">' + left + '</strong> seconds. The timer starts fresh when it opens.</p>' +
+      '<p>Do not refresh this page or close this tab.</p>' +
+      '<div class="dx-module-over-spinner" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>';
+    show('dx-module-over-screen');
+    saveState();
+    if (moduleTransitionTimer) clearInterval(moduleTransitionTimer);
+    moduleTransitionTimer = setInterval(function () {
+      left -= 1;
+      var el = document.getElementById('dx-module-countdown');
+      if (el) el.textContent = Math.max(0, left);
+      if (left > 0) return;
+      clearInterval(moduleTransitionTimer); moduleTransitionTimer = null;
+      wrap.innerHTML = moduleOverDefaultHtml;   // the plain interstitial for every other destination
+      goToModuleIntro();
+    }, 1000);
+  }
   function showModuleOverThenAdvance() {
     show('dx-module-over-screen');
     setTimeout(finishCurrentModule, MODULE_OVER_DELAY_MS);
@@ -14647,6 +14683,23 @@ window.Portal = {
       } else {
         show('screen-menu');
       }
+    } else if (state.screen === 'dx-module-over-screen' && state.moduleStage === 'module2' && state.module1Buffer && state.testChoice &&
+               Array.isArray(state.activeSectionKeys) && state.activeSectionKeys.length) {
+      // A refresh during the Module 1 to Module 2 countdown: Module 1 is
+      // already banked in module1Buffer, so the countdown simply runs again.
+      testChoice = state.testChoice;
+      practiceTestId = state.practiceTestId || null;
+      activeSectionKeys = state.activeSectionKeys;
+      sectionOnly = state.sectionOnly || null;
+      completedSections = Array.isArray(state.completedSections) ? state.completedSections : [];
+      awayEvents = Array.isArray(state.awayEvents) ? state.awayEvents : [];
+      hiddenSpells = Array.isArray(state.hiddenSpells) ? state.hiddenSpells : [];
+      hiddenAt = null;
+      sectionIndex = typeof state.sectionIndex === 'number' ? state.sectionIndex : 0;
+      moduleStage = 'module2';
+      module2Variant = state.module2Variant || null;
+      module1Buffer = state.module1Buffer;
+      startModuleTransition();
     } else if (state.screen === 'dx-break-screen' && state.testChoice && Array.isArray(state.activeSectionKeys) && state.activeSectionKeys.length) {
       testChoice = state.testChoice;
       practiceTestId = state.practiceTestId || null;
