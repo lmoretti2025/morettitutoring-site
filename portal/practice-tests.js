@@ -2370,7 +2370,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Text Structure and Purpose",
           "difficulty": "hard",
           "type": "mc",
-          "text": "For most of the twentieth century the giant squid was known only through carcasses and through beaks—the only hard parts of the animal—recovered in sperm whale stomachs. To estimate speed and hunting behavior, researchers extrapolated from anatomy of far smaller squid. In 2012 a Japanese team managed to film a live animal at depth, and footage showed it moving in slow, deliberate pulses, not the darting characteristic of relatives. Anatomy had been read correctly, but the error lay in expecting a larger animal to move as smaller ones move.<br><br>Which choice best describes the overall structure of the text?",
+          "text": "For most of the twentieth century the giant squid was known only through carcasses and through beaks—the only hard parts of the animal—recovered in sperm whale stomachs. To estimate speed and hunting behavior, researchers extrapolated from anatomy of far smaller squid. In 2012 the zoologist Tsunemi Kubodera and his colleagues filmed a live animal at depth off the Bonin Islands, and footage showed it moving in slow, deliberate pulses, not the darting characteristic of relatives. Anatomy had been read correctly, but the error lay in expecting a larger animal to move as smaller ones move.<br><br>Which choice best describes the overall structure of the text?",
           "choices": [
             "It describes a filming technique developed for deep water and then evaluates the evidence that the technique produced.",
             "It gives the basis of an earlier estimate, reports an observation, and locates the error.",
@@ -2517,7 +2517,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Inferences",
           "difficulty": "medium",
           "type": "mc",
-          "text": "Studies of nest choice in honeybee colonies have demonstrated links between cavity quality and the persistence of dances that advertise it: circuits performed, bouts repeated, minutes spent in advertisement. To investigate how colonies settle on one cavity, researchers marked every scout in one hive and recorded which site each had inspected. Every scout was found to have inspected one cavity only, and dances for poorer cavities were the first to fall silent, suggesting that ______<br><br>Which choice most logically completes the text?",
+          "text": "Studies of nest choice in honeybee colonies, most of them by the biologist Thomas Seeley, have demonstrated links between cavity quality and the persistence of the dances that advertise it: circuits performed, bouts repeated, minutes spent in advertisement. To investigate how colonies settle on one cavity, researchers marked every scout in one hive and recorded which site each had inspected. Every scout was found to have inspected one cavity only, and dances for poorer cavities were the first to fall silent, suggesting that ______<br><br>Which choice most logically completes the text?",
           "choices": [
             "a colony settles on whichever site the first returning scout happens to have discovered.",
             "scouts that have visited the best available site dance for longer than the colony requires.",
@@ -2538,7 +2538,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Inferences",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Songbirds raised in isolation produce ragged versions of the song of their species, a result long taken to show that the young bird learns to sing from adults around it. In one experiment, chaffinches grew up alone with loudspeakers playing recorded song of their own kind, and those birds came to sing normally. Others, isolated in the same fashion, heard only the song of other species, and their singing stayed ragged, no better than the singing of birds that heard nothing. The three outcomes taken together suggest that ______<br><br>Which choice most logically completes the text?",
+          "text": "Songbirds raised in isolation produce ragged versions of the song of their species, a result long taken to show that the young bird learns to sing from adults around it. In an experiment by the zoologist W. H. Thorpe, chaffinches grew up alone with loudspeakers playing recorded song of their own kind, and those birds came to sing normally. Others, isolated in the same fashion, heard only the song of other species, and their singing stayed ragged, no better than the singing of birds that heard nothing. The three outcomes taken together suggest that ______<br><br>Which choice most logically completes the text?",
           "choices": [
             "chaffinches can acquire the song of another species if they are exposed to it early enough.",
             "the isolated birds in the first group were prevented from singing normally by the absence of an adult chaffinch.",
@@ -2918,7 +2918,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Text Structure and Purpose",
           "difficulty": "medium",
           "type": "mc",
-          "text": "Cochineal—the deep red of European painting and dyeing after the sixteenth century—comes from an insect that feeds on prickly pear. Spain controlled the supply for two hundred years, shipping the dried insects to Europe without any account of their origin, and naturalists there argued about whether the grains belonged to plants or to animals. A microscope settled the question by showing legs.<br><br>Which choice best states the main purpose of the text?",
+          "text": "Cochineal—the deep red of European painting and dyeing after the sixteenth century—comes from an insect that feeds on prickly pear. Spain controlled the supply for two hundred years, shipping the dried insects to Europe without any account of their origin, and naturalists there argued about whether the grains belonged to plants or to animals. The dispute ended when a microscope revealed that each grain was the dried body of an insect.<br><br>Which choice best states the main purpose of the text?",
           "choices": [
             "To argue that cochineal produced a better red than the dyes available in Europe.",
             "To explain the optical principles that allowed early microscopes to resolve legs.",
@@ -2960,7 +2960,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Central Ideas and Details",
           "difficulty": "easy",
           "type": "mc",
-          "text": "Lascaux closed to visitors in 1963. Two decades of tourism allowed the breath and body heat of crowds to spread algae and calcite—a mineral crust—across painted walls that conservators could not safely clean. A full-size replica opened nearby during 1983, and two more copies now stand in for the cave, reproducing the paintings to within one millimeter. Only conservators can still enter the original.<br><br>Which choice best states the main idea of the text?",
+          "text": "Lascaux closed to visitors in 1963. Two decades of tourism allowed the breath and body heat of crowds to spread algae and calcite—a mineral crust—across painted walls that conservators could not safely clean. A full-size replica opened nearby during 1983, and two more copies now stand in for the cave, reproducing the paintings to within one millimeter. Entry to the original cave is now restricted to conservators, who monitor the painted walls on a fixed schedule.<br><br>Which choice best states the main idea of the text?",
           "choices": [
             "Lascaux was closed to protect the paintings, and replicas now stand in for the original cave.",
             "The replicas built near Lascaux since 1983 reproduce the paintings to within a millimeter.",
@@ -3487,7 +3487,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Text Structure and Purpose",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Standard accounts of London's Great Fire credit the rebuilding acts of 1667 with recovery in the city, and it is true that those acts imposed brick where timber had burned. Parish rate books, which were kept to assess taxation, record occupancy year by year, and they show that three quarters of burnt houses were reoccupied while commissioners remained unappointed. <u>The acts regulated a recovery already in motion.</u> Statute shaped the result without producing it.<br><br>Which choice best describes the function of the underlined sentence in the text as a whole?",
+          "text": "Standard accounts of London's Great Fire credit the rebuilding acts of 1667 with recovery in the city, and it is true that those acts imposed brick where timber had burned. Parish rate books, which were kept to assess taxation, record occupancy year by year, and they show that three quarters of burnt houses were reoccupied while commissioners remained unappointed. <u>The acts regulated a recovery already in motion.</u> The acts therefore governed the materials and the frontages of a rebuilding that was already in progress.<br><br>Which choice best describes the function of the underlined sentence in the text as a whole?",
           "choices": [
             "It offers an example of the kind of regulation the rebuilding acts imposed after the fire.",
             "It introduces the rebuilding acts whose provisions the rest of the text goes on to describe.",
@@ -3529,7 +3529,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Central Ideas and Details",
           "difficulty": "easy",
           "type": "mc",
-          "text": "A fogbow (a rainbow formed in fog) has the geometry of an ordinary rainbow, but it is formed in droplets so small that light is bent around them instead of passing cleanly through. The colors are washed together, and what is left is a pale arc that observers are inclined to call white. The physics is unchanged. Only the droplets are smaller.<br><br>Which choice best states the main idea of the text?",
+          "text": "A fogbow (a rainbow formed in fog) has the geometry of an ordinary rainbow, but it is formed in droplets so small that light is bent around them instead of passing cleanly through. The colors are washed together, and what is left is a pale arc that observers are inclined to call white. The physics of the two is the same, and the difference lies entirely in the size of the droplets.<br><br>Which choice best states the main idea of the text?",
           "choices": [
             "Observers rarely distinguish a fogbow from the pale arcs produced by other conditions.",
             "A fogbow and a rainbow are formed by two unrelated optical processes in the atmosphere.",
