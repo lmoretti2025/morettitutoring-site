@@ -2365,7 +2365,9 @@ var MorettiSignals = (function () {
       var n = (S.a && S.a.length) || (S.tm && S.tm.length) || 0;
       if (!n) return;
       var m1 = typeof opts.module1Length === 'function' ? opts.module1Length(si) : null;
-      if (!(m1 > 0 && m1 < n)) m1 = Math.floor(n / 2);
+      // One module sat on its own (S.mo, 2026-09-27) is one module, not two halves.
+      if (S.mo) m1 = n;
+      else if (!(m1 > 0 && m1 < n)) m1 = Math.floor(n / 2);
       var nMods = m1 < n ? 2 : 1;
       var clockMs = (S.tl > 0 ? S.tl : (S.k === 'math' ? 70 : 64)) * 60000 / nMods;
       for (var m = 0; m < nMods; m++) {
@@ -2383,7 +2385,7 @@ var MorettiSignals = (function () {
         // The module clock at submit (sb, seconds) runs through time away; the
         // per-question times do not. Unused = what was really left on the clock.
         var usedMs = (S.sb && typeof S.sb[m] === 'number') ? Math.max(onQ, S.sb[m] * 1000) : onQ;
-        mods.push({ sec: S.k, module: m + 1, n: hi - lo, answered: answered, right: typeof opts.correct === 'function' ? right : null,
+        mods.push({ sec: S.k, module: (S.mo && S.mo !== 'module1') ? 2 : m + 1, n: hi - lo, answered: answered, right: typeof opts.correct === 'function' ? right : null,
                     clockMs: clockMs, unusedMs: Math.max(0, clockMs - usedMs), usedMs: usedMs, start: fvs.length ? Math.min.apply(null, fvs) : null,
                     end: (fvs.length || lvs.length) ? Math.max.apply(null, fvs.concat(lvs)) : null,
                     // Checking = the time between the end of the first pass (rv) and

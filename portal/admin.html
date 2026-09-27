@@ -1408,7 +1408,7 @@
      so the signed admin session is in sessionStorage when the auto-continue
      boot code below reads it. -->
 <script src="time-budgets.js?v=20260912a"></script>
-<script src="signals.js?v=20260927c"></script>
+<script src="signals.js?v=20260927m"></script>
   <script src="backend-url.js?v=20260905"></script>
   <script>
     /* Browser errors on this page reach the ClientErrors tab too (prep.gs's
@@ -3949,6 +3949,11 @@
   })();
 
   function attemptLabel(a) {
+    // One module sat on its own (2026-09-27): say which, beside the test.
+    if (a.module && /^(module1|Easier|Harder)$/.test(a.module)) {
+      return (a.testTitle || a.testId || 'Practice test') + ' \u00b7 ' + (a.sectionKey === 'math' ? 'Math' : 'Reading & Writing') + ', ' +
+        (a.module === 'module1' ? 'Module 1' : 'Module 2 (' + (a.module === 'Harder' ? 'harder' : 'easier') + ')');
+    }
     if (a.testTitle) return a.testTitle;
     if (a.source === 'practice-test') return a.testId || 'Practice test';
     return (a.testType || 'SAT') + ' diagnostic';

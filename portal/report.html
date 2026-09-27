@@ -1182,7 +1182,7 @@
 </script>
 <script src="time-budgets.js?v=20260912a"></script>
 <script src="grid-in.js?v=20260910a"></script>
-<script src="signals.js?v=20260927c"></script>
+<script src="signals.js?v=20260927m"></script>
 <script src="desmos-tags.js?v=20260916c"></script>
 <script src="question-flag.js?v=20260925a"></script>
 <script src="report-tour.js?v=20260927f"></script>
@@ -2085,12 +2085,26 @@
   // unchanged; only the question bank source differs. practice-tests.js
   // keys R&W as 'readingWriting', banks.js as 'reading-writing'; this
   // translates so callers can use sec.k as-is.
+  function moduleOnlyOf(sectionKey) {
+    var sec = ((typeof data !== 'undefined' && data && data.s) || []).filter(function (x) { return x && x.k === sectionKey && x.mo; })[0];
+    return sec && /^(module1|Easier|Harder)$/.test(sec.mo) ? sec.mo : null;
+  }
+  function moduleOnlyLabel(sectionKey) {
+    var mo = moduleOnlyOf(sectionKey);
+    return mo ? (sectionKey === 'math' ? 'Math' : 'Reading & Writing') + ', ' + (mo === 'module1' ? 'Module 1' : 'Module 2 (' + (mo === 'Harder' ? 'harder' : 'easier') + ')') : '';
+  }
   function getBank(sectionKey) {
     if (data.pt) {
       var pt = (window.SAT_PRACTICE_TESTS || []).filter(function (t) { return t.id === data.pt; })[0];
       if (pt && pt.sections) {
         var ptKey = sectionKey === 'reading-writing' ? 'readingWriting' : sectionKey;
-        if (pt.sections[ptKey]) return pt.sections[ptKey];
+        if (pt.sections[ptKey]) {
+          /* One module sat on its own (sec.mo, 2026-09-27): that module alone,
+             as a one-module section, which is how its answers were saved. */
+          var mo = moduleOnlyOf(sectionKey);
+          if (mo) return { module1: pt.sections[ptKey][mo === 'module1' ? 'module1' : 'module2' + mo] || [] };
+          return pt.sections[ptKey];
+        }
       }
     }
     return window.SECTION_BANKS[sectionKey];
@@ -2312,7 +2326,7 @@
              (i < moduleSplit ? 'module1' : ('module2' + (sec.v || 'Easier'))) + '|' + (i < moduleSplit ? i : (i - moduleSplit)) });
     });
     sections.push({
-      key: sec.k, label: sectionLabel(sec.k, bank), c: c, t: qs.length, rows: rows, domains: secDomains,
+      key: sec.k, moduleOnly: moduleOnlyOf(sec.k), label: moduleOnlyLabel(sec.k) || sectionLabel(sec.k, bank), c: c, t: qs.length, rows: rows, domains: secDomains,
       distractors: secDistractors, missedMc: secMissedMc, missedMcAll: secMissedMcAll, diff: diff, c1: c1, t1: t1, c2: c2, t2: t2, variant: sec.v,
       timeTotal: secTimeTotal, timeCorrect: secTimeCorrect, timeIncorrect: secTimeIncorrect,
       // Total minutes allotted for this section (both modules, accommodation-
@@ -2770,6 +2784,7 @@
   // module-weight curve is inferred from which curve was passed.
   function satSectionScore(sec, curve) {
     if (!sec || !sec.t) return null;
+    if (sec.moduleOnly) return null;   // one module sat on its own: raw score only
     var pct = sec.c / sec.t * 100;
     var base = scaleFromPct(pct, curve);
     // Module-1 vs Module-2 success rates. A non-adaptive section (no
@@ -2816,9 +2831,11 @@
     // On a single-section attempt the surviving section IS the headline, so
     // it takes the big tile rather than sitting in the small row next to an
     // empty space where the composite would have been.
-    if (rw) tilesEl.appendChild(scoreTile('Reading & Writing (200–800)', rw.c, rw.t, rwScaled,
+    var moduleSec = [rw, mathSec].filter(function (x) { return x && moduleOnlyOf(x.key); })[0];
+    if (moduleSec) tilesEl.appendChild(scoreTile(moduleOnlyLabel(moduleSec.key) + ' (raw score)', moduleSec.c, moduleSec.t, moduleSec.c + '/' + moduleSec.t, true));
+    else if (rw) tilesEl.appendChild(scoreTile('Reading & Writing (200–800)', rw.c, rw.t, rwScaled,
       singleSection && rwScaled !== null && rwScaled !== undefined));
-    if (mathSec) tilesEl.appendChild(scoreTile('Math (200–800)', mathSec.c, mathSec.t, mathScaled,
+    if (mathSec && !moduleSec) tilesEl.appendChild(scoreTile('Math (200–800)', mathSec.c, mathSec.t, mathScaled,
       singleSection && mathScaled !== null && mathScaled !== undefined));
 
     /* ═══ SCORE BAND ═══ the composite needs to carry its own imprecision,

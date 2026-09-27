@@ -1061,6 +1061,8 @@
   .pt-choice-text { min-width: 0; }
   .pt-choice-title { display: block; font-weight: 700; font-size: 0.92rem; margin-bottom: 0.15rem; }
   .pt-choice-note { display: block; font-size: 0.79rem; color: var(--mid); line-height: 1.5; }
+  .pt-choice-back { align-self: flex-start; background: none; border: 0; padding: 0.1rem 0; font: inherit; font-family: var(--hel); font-size: 0.82rem; font-weight: 600; color: var(--red); cursor: pointer; }
+  .pt-choice-back:hover { text-decoration: underline; }
   .pt-modal-actions { display: flex; gap: 0.7rem; justify-content: flex-end; margin-top: 1.5rem; flex-wrap: wrap; }
   .pt-modal-btn { font: inherit; font-family: var(--hel); font-size: 0.92rem; font-weight: 600; padding: 0.7rem 1.4rem; border-radius: 10px; cursor: pointer; transition: background 0.15s var(--ease); }
   .pt-modal-cancel { background: var(--white); border: 1px solid var(--border); color: var(--text); }
@@ -5694,7 +5696,7 @@ window.Portal = {
      header in fluid-ui.js. -->
 <script src="fluid-ui.js?v=20260905y"></script>
 <script src="banks.js?v=20260926a"></script>
-<script src="signals.js?v=20260927c"></script>
+<script src="signals.js?v=20260927m"></script>
 <script src="desmos-tags.js?v=20260916c"></script>
 <script src="time-budgets.js?v=20260912a"></script>
 <script src="challenge-questions.js?v=20260926a"></script>
@@ -6558,6 +6560,7 @@ window.Portal = {
       practiceTestId: practiceTestId,
       activeSectionKeys: activeSectionKeys,
       sectionOnly: sectionOnly,
+      moduleOnly: moduleOnly,
       sectionIndex: sectionIndex,
       completedSections: completedSections,
       current: current,
@@ -10176,7 +10179,8 @@ window.Portal = {
       var msLeft = (typeof snap.sectionTimerEndsAt === 'number') ? snap.sectionTimerEndsAt - Date.now() : null;
       var mLeft = msLeft !== null && msLeft > 0 ? Math.ceil(msLeft / 60000) : 0;
       rows += ptChoiceRow('resume', 'Resume where you left off',
-        'You have an unfinished sitting of this test' + (wasSectionOnly ? ' (' + secName + ' only)' : ', part-way through ' + secName) +
+        'You have an unfinished sitting of this test' + (snap.moduleOnly && wasSectionOnly ? ' (' + moduleOnlyName(secKey, snap.moduleOnly) + ')'
+          : wasSectionOnly ? ' (' + secName + ' only)' : ', part-way through ' + secName) +
         '. Your answers are saved. ' + (msLeft === null ? ''
           : msLeft > 0 ? 'The clock kept running while you were away, so ' + mLeft + ' minute' + (mLeft === 1 ? '' : 's') + ' of this module ' + (mLeft === 1 ? 'is' : 'are') + ' left.'
           : 'The clock ran out on this module while you were away, so it will be submitted as it stands.'));
@@ -10184,9 +10188,9 @@ window.Portal = {
     rows += ptChoiceRow('full', 'Full test',
       'Reading &amp; Writing and Math, timed like the real thing. This is the only way to get a 400&ndash;1600 score.');
     rows += ptChoiceRow('reading-writing', 'Reading &amp; Writing only',
-      'Just the two R&amp;W modules. You get a section score out of 800 and a full breakdown, but no 400&ndash;1600 score.');
+      'Both R&amp;W modules, or just one of them. Pick which on the next step.');
     rows += ptChoiceRow('math', 'Math only',
-      'Just the two Math modules. You get a section score out of 800 and a full breakdown, but no 400&ndash;1600 score.');
+      'Both Math modules, or just one of them. Pick which on the next step.');
 
     document.getElementById('pt-choice-sub').textContent = snap
       ? 'Pick up where you left off, or start this test fresh.'
@@ -10197,6 +10201,40 @@ window.Portal = {
     // there is one, otherwise the full test.
     selectPtChoice(listEl.querySelector('.pt-choice'));
     ptChoiceOverlay.classList.add('active');
+  }
+
+  /* Step two for a section on its own (Luca, 2026-09-27): both modules, or a
+     single one (Module 1, or either version of Module 2) scored raw. */
+  var ptChoiceRows = '', ptChoiceSub = '';
+  function openPtModuleChoice(secKey) {
+    var test = ptChoiceTest;
+    if (!test) return;
+    var listEl = document.getElementById('pt-choice-list');
+    ptChoiceRows = listEl.innerHTML;
+    ptChoiceSub = document.getElementById('pt-choice-sub').textContent;
+    var s = (test.sections || {})[secKey === 'reading-writing' ? 'readingWriting' : secKey] || {};
+    var lim = window.PRACTICE_MODULE_TIME_LIMITS || {};
+    var mins = lim[secKey === 'reading-writing' ? 'readingWriting' : secKey] || lim[secKey] || 0;
+    if (mins) mins = Math.round(mins * accommodations.timeMult);
+    var size = function (list) {
+      var n = (list || []).length;
+      return n + ' questions' + (mins ? ', ' + mins + ' minutes' : '') + '. You get your raw score and a full breakdown.';
+    };
+    var secName = secKey === 'math' ? 'Math' : 'Reading &amp; Writing';
+    var rows = '<button type="button" class="pt-choice-back" id="pt-choice-back">&larr; All options</button>';
+    rows += ptChoiceRow('sec:' + secKey + ':both', 'Both modules',
+      'Module 1, then the Module 2 your score sends you to. You get a section score out of 800, but no 400&ndash;1600 score.');
+    rows += ptChoiceRow('sec:' + secKey + ':module1', 'Module 1', size(s.module1));
+    if (s.module2Easier) rows += ptChoiceRow('sec:' + secKey + ':Easier', 'Module 2, easier version', size(s.module2Easier));
+    if (s.module2Harder) rows += ptChoiceRow('sec:' + secKey + ':Harder', 'Module 2, harder version', size(s.module2Harder));
+    listEl.innerHTML = rows;
+    document.getElementById('pt-choice-sub').textContent = secName.replace('&amp;', '&') + ' only: which part?';
+    selectPtChoice(listEl.querySelector('.pt-choice'));
+    document.getElementById('pt-choice-back').onclick = function () {
+      listEl.innerHTML = ptChoiceRows;
+      document.getElementById('pt-choice-sub').textContent = ptChoiceSub;
+      selectPtChoice(listEl.querySelector('[data-pt-choice="' + secKey + '"]'));
+    };
   }
 
   function closePtChoice() {
@@ -10215,7 +10253,10 @@ window.Portal = {
 
   document.getElementById('pt-choice-list').addEventListener('click', function (e) {
     var btn = e.target.closest('[data-pt-choice]');
-    if (btn) selectPtChoice(btn);
+    if (!btn) return;
+    var k = btn.getAttribute('data-pt-choice');
+    if (k === 'reading-writing' || k === 'math') { openPtModuleChoice(k); return; }
+    selectPtChoice(btn);
   });
 
   document.getElementById('pt-choice-go').addEventListener('click', function () {
@@ -10244,7 +10285,9 @@ window.Portal = {
     if (existing && !window.confirm('Start this test again from the beginning?\n\nYour unfinished sitting of it will be discarded.')) return;
     if (existing) clearResumeSnapshot(currentStudent && currentStudent.key);
 
-    startPracticeTest(test.id, kind === 'full' ? null : kind);
+    var picked = /^sec:([a-z-]+):(both|module1|Easier|Harder)$/.exec(kind);
+    if (picked) startPracticeTest(test.id, picked[1], picked[2] === 'both' ? null : picked[2]);
+    else startPracticeTest(test.id, kind === 'full' ? null : kind);
   });
 
   // Click handler for the Diagnostic tile in the Practice Tests picker (see
@@ -10799,7 +10842,11 @@ window.Portal = {
       var isSection = e.mode === 'section' && e.sectionKey;
       var sectionName = e.sectionKey === 'math' ? 'Math' : 'Reading & Writing';
       var label;
-      if (isSection) {
+      if (isSection && e.module) {
+        // Short, to fit the card's results button: "Math M2 (harder) — Sep 27 (15/22)".
+        label = (e.sectionKey === 'math' ? 'Math' : 'R&W') + (e.module === 'module1' ? ' M1' : ' M2 (' + (e.module === 'Harder' ? 'harder' : 'easier') + ')') + (d ? ' — ' + d : '') +
+          (e.raw && e.raw.t ? ' (' + e.raw.c + '/' + e.raw.t + ')' : '');
+      } else if (isSection) {
         label = sectionName + ' only' + (d ? ' — ' + d : '') +
           (typeof e.sectionScore === 'number' ? ' (' + e.sectionScore + ')' : '');
       } else {
@@ -11607,6 +11654,12 @@ window.Portal = {
      and "one section because the other bank is empty" must be told apart
      at scoring: the first never gets a 400-1600 composite. */
   var sectionOnly = null;
+  /* ONE MODULE ON ITS OWN (Luca, 2026-09-27): with sectionOnly set, which
+     single module was chosen: 'module1', 'Easier' or 'Harder' (Module 2's
+     two versions), else null. bankFor() then hands the engine that module
+     alone, as a one-module section, so the clock, the review page and the
+     report all run unchanged. Raw score only: no 200-800 estimate. */
+  var moduleOnly = null;
   var sectionIndex = 0;
   // Test-center accommodations. timeMult scales every module's time limit
   // (1, 1.5, or 2); breakMult scales the between-section break (breaks are
@@ -12033,6 +12086,9 @@ window.Portal = {
       var ptKey = key === 'reading-writing' ? 'readingWriting' : key;
       var s = pt.sections[ptKey];
       if (s) {
+        if (moduleOnly && key === sectionOnly) {
+          return { label: key === 'math' ? 'Math' : 'Reading and Writing', module1: s[moduleBankName(moduleOnly)] || [] };
+        }
         return {
           label: key === 'math' ? 'Math' : 'Reading and Writing',
           module1: s.module1, module2Easier: s.module2Easier, module2Harder: s.module2Harder
@@ -12048,6 +12104,11 @@ window.Portal = {
     return SECTION_BANKS[key];
   }
   function currentSectionKey() { return activeSectionKeys[sectionIndex]; }
+  // 'module1' / 'Easier' / 'Harder' -> the practice-test bank's field, and a name for people.
+  function moduleBankName(m) { return m === 'module1' ? 'module1' : 'module2' + m; }
+  function moduleOnlyName(sec, m) {
+    return (sec === 'math' ? 'Math' : 'Reading & Writing') + ', ' + (m === 'module1' ? 'Module 1' : 'Module 2 (' + (m === 'Harder' ? 'harder' : 'easier') + ')');
+  }
   function sectionHasModules(key) { return !!bankFor(key).module2Easier; }
   function moduleQuestions(bank, stage, variant) {
     if (!bank.module2Easier) return bank.module1; // non-adaptive section: single fixed module
@@ -12818,9 +12879,10 @@ window.Portal = {
     finishCurrentModule();
   }
 
-  function startTest(choice, onlySectionKey) {
+  function startTest(choice, onlySectionKey, onlyModule) {
     testChoice = choice;
     sectionOnly = onlySectionKey || null;
+    moduleOnly = (sectionOnly && onlyModule) || null;
     activeSectionKeys = TEST_FORMATS[choice].order.filter(function (key) {
       if (sectionOnly && key !== sectionOnly) return false;
       return bankFor(key).module1.length > 0;
@@ -12836,9 +12898,9 @@ window.Portal = {
   // Practice tests reuse the diagnostic's adaptive-module engine
   // (testChoice stays 'SAT'); practiceTestId is the only extra state, and
   // only bankFor() reads it.
-  function startPracticeTest(testId, onlySectionKey) {
+  function startPracticeTest(testId, onlySectionKey, onlyModule) {
     practiceTestId = testId;
-    startTest('SAT', onlySectionKey);
+    startTest('SAT', onlySectionKey, onlyModule);
   }
 
   // Has this key already completed a real (Luca-notified) attempt? Read
@@ -12856,7 +12918,11 @@ window.Portal = {
     /* Section-only sittings get their own sentence: calling 44 minutes of
        Math "a full practice test" is wrong on the screen where they commit. */
     var secName = sectionOnly === 'math' ? 'Math' : 'Reading & Writing';
-    document.getElementById('overview-sub').textContent = sectionOnly
+    document.getElementById('overview-sub').textContent = moduleOnly
+      ? (pt ? practiceTestNameParts(pt).name + ' — ' : '') + moduleOnlyName(sectionOnly, moduleOnly) + ' on its own, ' +
+        'timed exactly as on the real test. You will get your raw score (how many you got right) and a full breakdown, ' +
+        'but no scaled score, since one module is not enough for one.'
+      : sectionOnly
       ? (pt ? practiceTestNameParts(pt).name + ' — ' : '') + secName + ' only: both modules of that section, ' +
         'timed exactly as on the real test. You will get a section score out of 800 and a full breakdown, ' +
         'but not a 400–1600 score — that needs both halves.'
@@ -12894,7 +12960,9 @@ window.Portal = {
 
     // The button names what is about to start, so a half-sitting never
     // reads as committing to the whole test.
-    document.getElementById('overview-start').textContent = sectionOnly
+    document.getElementById('overview-start').textContent = moduleOnly
+      ? ('Begin ' + (moduleOnly === 'module1' ? 'Module 1' : 'Module 2'))
+      : sectionOnly
       ? ('Begin ' + secName)
       : (pt ? ('Begin ' + practiceTestNameParts(pt).name)
             : ('Begin ' + testChoice + ' Diagnostic'));
@@ -12929,7 +12997,7 @@ window.Portal = {
       var perModuleMinutes = timeLimits[key === 'reading-writing' ? 'readingWriting' : key] || timeLimits[key] || 0;
       var totalMinutes = (hasTwoModules ? perModuleMinutes * 2 : perModuleMinutes) * mult;
       var totalQuestions = hasTwoModules ? bank.module1.length + bank.module2Easier.length : bank.module1.length;
-      var label = bank.label;
+      var label = moduleOnly ? moduleOnlyName(key, moduleOnly) : bank.label;
       var moduleNote = hasTwoModules ? ' (2 modules)' : '';
       rowsHtml += '<div class="overview-section-row">' +
         '<span class="overview-section-name">' + (i + 1) + '. ' + label + moduleNote + '</span>' +
@@ -13100,7 +13168,8 @@ window.Portal = {
     diagnosticSubmitted = false;
 
     var sectionLabel = bank.label;
-    var moduleLabelSuffix = hasTwoModules ? (' — ' + (moduleStage === 'module1' ? 'Module 1' : 'Module 2')) : '';
+    var moduleLabelSuffix = hasTwoModules ? (' — ' + (moduleStage === 'module1' ? 'Module 1' : 'Module 2'))
+      : (moduleOnly ? ' — ' + (moduleOnly === 'module1' ? 'Module 1' : 'Module 2') : '');
     var hasReference = !!SECTIONS_WITH_REFERENCE[secKey];
     var pt = activePracticeTest();
     var testLabel = pt ? pt.title : (testChoice + ' Diagnostic');
@@ -13538,6 +13607,7 @@ window.Portal = {
     var secKey = activeSectionKeys[sectionIndex];
     if (sectionHasModules(secKey) && moduleStage === 'module1') return 'Submit Module';
     if (!isLastSection()) return 'Next Section';
+    if (moduleOnly) return 'Submit ' + (moduleOnly === 'module1' ? 'Module 1' : 'Module 2');
     // A numbered practice test must never show "Submit Diagnostic" (see
     // updateBreakTitle() for the same rule on the break screen).
     var pt = activePracticeTest();
@@ -13881,6 +13951,7 @@ window.Portal = {
          composite OR a section score, so omitting them discards a
          section-only attempt. */
       mode: entry.mode, sectionKey: entry.sectionKey, sectionScore: entry.sectionScore,
+      module: entry.module, raw: entry.raw,
       qStats: entry.qStats,
       signals: entry.signals || null,   // SignalsJSON column (Code.gs)
       // Test integrity, so the roster can show it without opening the
@@ -14042,7 +14113,7 @@ window.Portal = {
           : ((given && given.raw != null) ? given.raw : '(unrecognized)'));
         lines.push('  ' + (i + 1) + '. [' + q.domain + ' → ' + skillName + '] answered ' + givenText + ' — ' + (correct ? 'correct' : 'incorrect') + (wasMarked ? ' (marked for review)' : ''));
 
-        var moduleName = i < mod1Len ? 'module1' : ('module2' + (sec.module2Variant || 'Easier'));
+        var moduleName = moduleOnly ? moduleBankName(moduleOnly) : (i < mod1Len ? 'module1' : ('module2' + (sec.module2Variant || 'Easier')));
         var moduleIndex = i < mod1Len ? i : (i - mod1Len);
         var testTag = ptDoneEarly ? ptDoneEarly.id : ('diag-' + testChoice);
         // Deliberately slim: text, choices, domain/skill/difficulty and test are
@@ -14125,6 +14196,8 @@ window.Portal = {
           // so the report's flag column and "never used flag" check reflect
           // what actually happened.
           k: sec.key, a: sec.answers, m: (sec.everMarked || sec.marked || []).map(function (x) { return x ? 1 : 0; }), v: sec.module2Variant || null,
+          // mo: one module sat on its own ('module1' / 'Easier' / 'Harder'); a holds only its answers.
+          mo: moduleOnly || undefined,
           // Per-question timing: tm = total ms on the question, fv/lv = Date.now()
           // of first visit/last view, indexed like `a`/`m`. tm is capped as a
           // backstop against away-gaps that bypass pauseQuestionTimeAt (a
@@ -14265,7 +14338,9 @@ window.Portal = {
          entry is still kept (section score and report link) with
          `composite` null, which every consumer already skips. */
       var onlyScaled = null;
-      if (composite === null && sectionOnly) {
+      if (composite === null && moduleOnly) {
+        onlyScaled = null;   // one module: raw score only (Luca, 2026-09-27)
+      } else if (composite === null && sectionOnly) {
         onlyScaled = sectionOnly === 'math' ? mathScaled : rwScaled;
         if (onlyScaled === null) return;
       } else if (composite === null) {
@@ -14339,6 +14414,9 @@ window.Portal = {
         mode: sectionOnly ? 'section' : 'full',
         sectionKey: sectionOnly || undefined,
         sectionScore: (onlyScaled !== null && onlyScaled !== undefined) ? onlyScaled : undefined,
+        // One module on its own: which one, and its raw score (see moduleOnly).
+        module: moduleOnly || undefined,
+        raw: moduleOnly ? { c: totalCorrect, t: totalQuestions } : undefined,
         // SAT-only section split (rw/math already computed above) — feeds
         // the Home screen's Most Recent Test card sub-score line.
         rw: (testChoice === 'SAT' && typeof rwScaled === 'number') ? rwScaled : undefined,
@@ -14437,9 +14515,11 @@ window.Portal = {
     if (ptDone && sectionOnly) {
       setViewResultsLink(reportLinkRelative);
       var secName = sectionOnly === 'math' ? 'Math' : 'Reading & Writing';
-      document.getElementById('done-message').textContent =
-        'Nice work — that was the ' + secName + ' section on its own, so there is no 400–1600 score for it. ' +
-        'Your section score and full breakdown are below.';
+      document.getElementById('done-message').textContent = moduleOnly
+        ? 'Nice work. You got ' + totalCorrect + ' of ' + totalQuestions + ' right on ' + moduleOnlyName(sectionOnly, moduleOnly) + '. ' +
+          'Your full breakdown is below.'
+        : 'Nice work — that was the ' + secName + ' section on its own, so there is no 400–1600 score for it. ' +
+          'Your section score and full breakdown are below.';
       statusEl.textContent = 'Saving your results…';
       show('screen-done');
       var sectionBody = Object.assign({
@@ -14461,7 +14541,7 @@ window.Portal = {
           // submit is queued (see UNSENT TESTS), so this is about when Luca
           // gets it -- worded so they do not think their work vanished.
           queueUnsentSubmit(sectionBody);
-          statusEl.textContent = 'Your section score is saved on this device. It has not reached Luca yet; the portal will send it ' +
+          statusEl.textContent = 'Your ' + (moduleOnly ? 'score' : 'section score') + ' is saved on this device. It has not reached Luca yet; the portal will send it ' +
             'automatically next time you open it. If it still has not arrived tomorrow, text him at (201) 275-2791.';
           statusEl.classList.add('err');
         });
@@ -14622,6 +14702,7 @@ window.Portal = {
       practiceTestId = state.practiceTestId || null;
       activeSectionKeys = state.activeSectionKeys;
       sectionOnly = state.sectionOnly || null;
+      moduleOnly = state.moduleOnly || null;
       completedSections = Array.isArray(state.completedSections) ? state.completedSections : [];
       // The interruption log has to survive the very reopen it records.
       awayEvents = Array.isArray(state.awayEvents) ? state.awayEvents : [];
@@ -14663,7 +14744,8 @@ window.Portal = {
         sigRestore(state.signals, qs.length);
         current = Math.min(Math.max(state.current || 0, 0), qs.length - 1);
         document.getElementById('dx-student-label').textContent = currentStudent.name;
-        var moduleLabelSuffix = sectionHasModules(secKey) ? (' — ' + (moduleStage === 'module1' ? 'Module 1' : 'Module 2')) : '';
+        var moduleLabelSuffix = sectionHasModules(secKey) ? (' — ' + (moduleStage === 'module1' ? 'Module 1' : 'Module 2'))
+          : (moduleOnly ? ' — ' + (moduleOnly === 'module1' ? 'Module 1' : 'Module 2') : '');
         var ptResumed = activePracticeTest();
         document.getElementById('dx-brand-label').textContent = (ptResumed ? ptResumed.title : (testChoice + ' Diagnostic')) + ' — ' + bank.label + moduleLabelSuffix;
         document.getElementById('dx-notice-text').textContent = ptResumed
@@ -14702,6 +14784,7 @@ window.Portal = {
       practiceTestId = state.practiceTestId || null;
       activeSectionKeys = state.activeSectionKeys;
       sectionOnly = state.sectionOnly || null;
+      moduleOnly = state.moduleOnly || null;
       completedSections = Array.isArray(state.completedSections) ? state.completedSections : [];
       awayEvents = Array.isArray(state.awayEvents) ? state.awayEvents : [];
       hiddenSpells = Array.isArray(state.hiddenSpells) ? state.hiddenSpells : [];
@@ -14716,6 +14799,7 @@ window.Portal = {
       practiceTestId = state.practiceTestId || null;
       activeSectionKeys = state.activeSectionKeys;
       sectionOnly = state.sectionOnly || null;
+      moduleOnly = state.moduleOnly || null;
       completedSections = Array.isArray(state.completedSections) ? state.completedSections : [];
       // The interruption log has to survive the very reopen it records.
       awayEvents = Array.isArray(state.awayEvents) ? state.awayEvents : [];
@@ -21057,12 +21141,26 @@ window.renderNativeReport = function (data) {
   // below runs unchanged; only the question bank differs. practice-tests.js
   // keys R&W as 'readingWriting' where SECTION_BANKS uses 'reading-writing',
   // so translate here and callers keep using sec.k.
+  function moduleOnlyOf(sectionKey) {
+    var sec = ((typeof data !== 'undefined' && data && data.s) || []).filter(function (x) { return x && x.k === sectionKey && x.mo; })[0];
+    return sec && /^(module1|Easier|Harder)$/.test(sec.mo) ? sec.mo : null;
+  }
+  function moduleOnlyLabel(sectionKey) {
+    var mo = moduleOnlyOf(sectionKey);
+    return mo ? (sectionKey === 'math' ? 'Math' : 'Reading & Writing') + ', ' + (mo === 'module1' ? 'Module 1' : 'Module 2 (' + (mo === 'Harder' ? 'harder' : 'easier') + ')') : '';
+  }
   function getBank(sectionKey) {
     if (data.pt) {
       var pt = (window.SAT_PRACTICE_TESTS || []).filter(function (t) { return t.id === data.pt; })[0];
       if (pt && pt.sections) {
         var ptKey = sectionKey === 'reading-writing' ? 'readingWriting' : sectionKey;
-        if (pt.sections[ptKey]) return pt.sections[ptKey];
+        if (pt.sections[ptKey]) {
+          /* One module sat on its own (sec.mo, 2026-09-27): that module alone,
+             as a one-module section, which is how its answers were saved. */
+          var mo = moduleOnlyOf(sectionKey);
+          if (mo) return { module1: pt.sections[ptKey][mo === 'module1' ? 'module1' : 'module2' + mo] || [] };
+          return pt.sections[ptKey];
+        }
       }
     }
     return window.SECTION_BANKS[sectionKey];
@@ -21288,7 +21386,7 @@ window.renderNativeReport = function (data) {
         testTitle: data.ptTitle || (data.t + ' Diagnostic') });
     });
     sections.push({
-      key: sec.k, label: sectionLabel(sec.k, bank), c: c, t: qs.length, rows: rows, domains: secDomains,
+      key: sec.k, moduleOnly: moduleOnlyOf(sec.k), label: moduleOnlyLabel(sec.k) || sectionLabel(sec.k, bank), c: c, t: qs.length, rows: rows, domains: secDomains,
       distractors: secDistractors, missedMc: secMissedMc, missedMcAll: secMissedMcAll, diff: diff, c1: c1, t1: t1, c2: c2, t2: t2, variant: sec.v,
       timeTotal: secTimeTotal, timeCorrect: secTimeCorrect, timeIncorrect: secTimeIncorrect,
       // Total minutes allotted for this section (both modules, accommodation-
@@ -21596,6 +21694,7 @@ window.renderNativeReport = function (data) {
   // from which curve was passed.
   function satSectionScore(sec, curve) {
     if (!sec || !sec.t) return null;
+    if (sec.moduleOnly) return null;   // one module sat on its own: raw score only
     var pct = sec.c / sec.t * 100;
     var base = scaleFromPct(pct, curve);
     // Module-1 vs Module-2 success rates. A non-adaptive section (no
@@ -21642,9 +21741,11 @@ window.renderNativeReport = function (data) {
     // On a single-section attempt the surviving section IS the headline, so
     // it takes the big tile rather than sitting in the small row next to an
     // empty space where the composite would have been.
-    if (rw) tilesEl.appendChild(scoreTile('Reading & Writing (200–800)', rw.c, rw.t, rwScaled,
+    var moduleSec = [rw, mathSec].filter(function (x) { return x && moduleOnlyOf(x.key); })[0];
+    if (moduleSec) tilesEl.appendChild(scoreTile(moduleOnlyLabel(moduleSec.key) + ' (raw score)', moduleSec.c, moduleSec.t, moduleSec.c + '/' + moduleSec.t, true));
+    else if (rw) tilesEl.appendChild(scoreTile('Reading & Writing (200–800)', rw.c, rw.t, rwScaled,
       singleSection && rwScaled !== null && rwScaled !== undefined));
-    if (mathSec) tilesEl.appendChild(scoreTile('Math (200–800)', mathSec.c, mathSec.t, mathScaled,
+    if (mathSec && !moduleSec) tilesEl.appendChild(scoreTile('Math (200–800)', mathSec.c, mathSec.t, mathScaled,
       singleSection && mathScaled !== null && mathScaled !== undefined));
 
     /* ═══ SCORE BAND ═══ the composite carries its imprecision as part of the
