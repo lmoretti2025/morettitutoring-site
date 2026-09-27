@@ -1419,7 +1419,7 @@
   .done-status.err { color: var(--red); }
   .done-wrap { width: 100%; max-width: 760px; display: flex; flex-direction: column; align-items: center; gap: 2.5rem; }
   .done-panel { position: relative; overflow: hidden; }
-  #done-view-results { margin-top: 1.5rem; }
+  #done-view-results, #done-book-call { margin-top: 1.5rem; }
   /* Links styled as .key-btn: an <a> does not center its text the way a <button> does. */
   .done-panel a.key-btn { text-align: center; text-decoration: none; }
   .done-secondary-btn { display: block; text-align: center; text-decoration: none; margin-top: 0.75rem; background: none; border: 1px solid var(--border); color: var(--mid); }
@@ -5671,6 +5671,10 @@ window.Portal = {
            first-ever diagnostic, which only notifies Luca (see
            finishDiagnostic()). -->
       <a href="#" class="key-btn" id="done-view-results" style="display:none;">View Results</a>
+      <!-- A new student's first diagnostic: results wait for Luca's call, so the
+           primary action books it (Luca, 2026-09-27). The signed link from the
+           submit reply fills in the parent; until it arrives, book.html. -->
+      <a href="/book.html" class="key-btn" id="done-book-call" target="_blank" rel="noopener" style="display:none;">Book your results meeting</a>
       <a href="#" class="key-btn done-secondary-btn" id="done-return-link">Return to Portal</a>
     </div>
 
@@ -14353,6 +14357,9 @@ window.Portal = {
     // only the "sent to Luca" message. Later practice attempts (not emailed
     // to Luca) show the student their report link.
     var viewResultsBtn = document.getElementById('done-view-results');
+    // Only a new student's first diagnostic shows the booking button (set below).
+    var doneBookBtn = document.getElementById('done-book-call');
+    if (doneBookBtn) doneBookBtn.style.display = 'none';
     var statusEl = document.getElementById('done-status');
     statusEl.classList.remove('err');
     // Shared by the branches below: shows/hides View Results and stores the
@@ -14488,9 +14495,24 @@ window.Portal = {
     var openNow = !!(currentStudent && currentStudent.reportsOpen);
     setViewResultsLink(openNow ? reportLinkRelative : null);
 
+    /* A NEW STUDENT BOOKS THE RESULTS MEETING (Luca, 2026-09-27). The results
+       are gone over together, so instead of View Results the screen asks for
+       a time that works for the student and a parent or guardian. The button
+       opens book.html; once the submit replies, its signed link (bookUrl)
+       replaces it so the parent's name and email are already filled in. */
+    var bookBtn = document.getElementById('done-book-call');
+    var bookNew = !openNow;
+    if (bookBtn) {
+      bookBtn.style.display = bookNew ? 'block' : 'none';
+      bookBtn.setAttribute('href', '/book.html');
+      if (bookNew) {
+        try { sessionStorage.setItem('mt_book_prefill', JSON.stringify({ student: currentStudent.name || '', about: 'sat' })); } catch (e) {}
+      }
+    }
+    document.getElementById('done-hed').textContent = 'Congratulations!';
     document.getElementById('done-message').textContent = openNow
       ? 'Your results just went to Luca, so there is nothing to send. You can open them below.'
-      : 'Your results just went to Luca \u2014 no need to send anything yourself.';
+      : 'Your diagnostic is done. We\u2019ll go over the results together on a call, so please book a time that works for both you and your parent or guardian.';
     statusEl.textContent = 'Sending your results…';
     show('screen-done');
 
@@ -14521,6 +14543,8 @@ window.Portal = {
       .then(function (data) {
         if (data && data.ok) {
           statusEl.textContent = 'Results delivered.';
+          // The signed booking link: book.html opens with the parent and student filled in.
+          if (bookNew && bookBtn && data.bookUrl && /^https:\/\/morettitutoring\.com\/book\.html/.test(data.bookUrl)) bookBtn.setAttribute('href', data.bookUrl);
         } else {
           throw new Error((data && data.error) || 'send_failed');
         }
