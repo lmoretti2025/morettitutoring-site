@@ -59,12 +59,47 @@
     '#cu-root .cu-btn[disabled]{opacity:.45;cursor:default;transform:none;box-shadow:none}',
     '#cu-root .cu-btn.ghost{background:#fff;color:var(--text,#111);box-shadow:inset 0 0 0 1px var(--cu-line)}',
     '#cu-root .cu-units{display:grid;gap:1.1rem}',
+    'html:has(#screen-curriculum.active){scrollbar-gutter:stable}',
+    '#cu-root .cu-top{display:flex;justify-content:space-between;align-items:flex-end;gap:1rem;flex-wrap:wrap;margin-bottom:1.1rem;min-height:3.6rem}',
+    '#cu-root .cu-toph{font-family:var(--display,Georgia,serif);font-size:1.25rem;font-weight:700;margin-top:.2rem}',
+    '#cu-root .cu-top .cu-tabs{margin:0}',
+    '#cu-root .cu-body{transition:opacity .16s ease}#cu-root .cu-body.cu-fading{opacity:0}',
+    '#cu-root .cu-in{animation:cuIn .5s var(--ease,ease) both;animation-delay:calc(var(--d,0) * 60ms)}',
+    '@keyframes cuIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}',
+    '#cu-root .cu-hero{display:grid;grid-template-columns:1.2fr 1fr;gap:1rem;align-items:center;border-radius:20px;padding:1.6rem 1.8rem;margin-bottom:1.2rem;overflow:hidden;position:relative;box-shadow:var(--shadow)}',
+    '#cu-root .cu-hero-math{background:linear-gradient(135deg,#fff 0%,#fbf1ef 60%,#f6e4e1 100%)}',
+    '#cu-root .cu-hero-english{background:linear-gradient(135deg,#fff 0%,#eff2fb 60%,#e3e8f7 100%)}',
+    '#cu-root .cu-hero h1{margin:0 0 .3rem;font-size:clamp(1.8rem,3.4vw,2.5rem)}',
+    '#cu-root .cu-hero .cu-sub{max-width:32em}',
+    '#cu-root .cu-hero-art svg{width:100%;max-height:220px;display:block}',
+    '#cu-root .cu-draw{stroke-dasharray:420;stroke-dashoffset:420;animation:cuDraw 1.6s var(--ease,ease) .3s forwards}#cu-root .cu-draw.d2{animation-delay:.7s}',
+    '@keyframes cuDraw{to{stroke-dashoffset:0}}',
+    '#cu-root .cu-hl{transform-origin:174px 96px;animation:cuHl .9s var(--ease,ease) .5s both}@keyframes cuHl{from{transform:scaleX(0)}to{transform:scaleX(1)}}',
+    '#cu-root .cu-stats{display:flex;align-items:center;gap:1.4rem;margin-top:1.1rem;flex-wrap:wrap}',
+    '#cu-root .cu-bigring{position:relative;width:84px;height:84px}#cu-root .cu-bigring b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--display,Georgia,serif);font-size:1.25rem}',
+    '#cu-root .cu-ringfill{transition:stroke-dasharray .8s var(--ease,ease)}',
+    '#cu-root .cu-stat b{display:block;font-family:var(--display,Georgia,serif);font-size:1.5rem;line-height:1}#cu-root .cu-stat span{font-size:.75rem;color:var(--mid);text-transform:uppercase;letter-spacing:.08em}',
+    '#cu-root .cu-resume-ic{width:40px;height:40px;border-radius:50%;background:var(--red,#B0271C);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex:none}',
+    '#cu-root .cu-resume>div{flex:1}',
+    '#cu-root .cu-uic{width:40px;height:40px;border-radius:12px;background:#fbf1ef;color:var(--red,#B0271C);display:flex;align-items:center;justify-content:center;flex:none}',
+    '#cu-root .cu-uic svg{width:22px;height:22px}',
+    '#cu-root .cu-hero-english~.cu-units .cu-uic{background:#eef1fb;color:#3457d5}',
+    '#cu-root .cu-unit-t{flex:1}#cu-root .cu-unum{font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--mid);font-weight:600}',
+    '#cu-root .cu-unit-p{display:flex;align-items:center;gap:8px;font-size:.8rem;color:var(--mid);white-space:nowrap}',
+    '#cu-root .cu-mbar{width:70px;height:6px;border-radius:6px;background:#e6e3de;overflow:hidden}#cu-root .cu-mbar i{display:block;height:100%;background:var(--cu-good);border-radius:6px}',
+    '#cu-root .cu-ring{flex:none}#cu-root .cu-ring.done{border-radius:50%;background:var(--cu-good);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700}',
+    '#cu-root .cu-go{font-size:.8rem;font-weight:600;color:var(--red,#B0271C);opacity:.0;transform:translateX(-4px);transition:opacity .2s,transform .2s;white-space:nowrap}',
+    '#cu-root .cu-lesson:hover .cu-go,#cu-root .cu-lesson:focus-visible .cu-go{opacity:1;transform:none}',
+    '@media(hover:none){#cu-root .cu-go{opacity:1;transform:none}}',
+    '@media(max-width:520px){#cu-root .cu-stats{gap:.9rem}#cu-root .cu-bigring{transform:scale(.82);margin:-7px}#cu-root .cu-stat b{font-size:1.25rem}}',
+    '@media(max-width:760px){#cu-root .cu-hero{grid-template-columns:1fr;padding:1.3rem}#cu-root .cu-hero-art{order:-1;max-width:260px}#cu-root .cu-hero-art svg{max-height:150px}}',
+    '@media(prefers-reduced-motion:reduce){#cu-root .cu-notes-fold{transition:none}#cu-root .cu-in,#cu-root .cu-draw,#cu-root .cu-hl{animation:none;stroke-dashoffset:0}#cu-root .cu-body{transition:none}}',
     '#cu-root .cu-unit{background:#fff;border-radius:16px;box-shadow:var(--shadow);overflow:hidden}',
-    '#cu-root .cu-unit-h{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;padding:1rem 1.2rem .7rem;border-bottom:1px solid var(--cu-line)}',
-    '#cu-root .cu-unit-h h2{font-size:1.2rem;margin:0}#cu-root .cu-unit-h span{font-size:.8rem;color:var(--mid)}',
-    '#cu-root .cu-lesson{display:grid;grid-template-columns:3rem 1fr auto;align-items:center;gap:.8rem;width:100%;text-align:left;border:0;background:#fff;padding:.8rem 1.2rem;cursor:pointer;border-bottom:1px solid var(--cu-line);font-family:inherit;color:inherit}',
+    '#cu-root .cu-unit-h{display:flex;align-items:center;gap:.9rem;padding:1rem 1.2rem .9rem;border-bottom:1px solid var(--cu-line)}',
+    '#cu-root .cu-unit-h h2{font-size:1.15rem;margin:.1rem 0 0}',
+    '#cu-root .cu-lesson{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:.8rem;width:100%;text-align:left;border:0;background:#fff;padding:.8rem 1.2rem;cursor:pointer;border-bottom:1px solid var(--cu-line);font-family:inherit;color:inherit}',
     '#cu-root .cu-lesson:last-child{border-bottom:0}#cu-root .cu-lesson:hover{background:var(--cu-soft)}',
-    '#cu-root .cu-num{font-family:var(--display,Georgia,serif);font-weight:700;color:var(--mid);font-size:1rem}',
+    '#cu-root .cu-num{font-family:var(--display,Georgia,serif);font-weight:700;color:var(--mid);font-size:.95rem;margin-right:.2rem}',
     '#cu-root .cu-lt{font-size:.95rem;font-weight:500}#cu-root .cu-lt small{display:block;font-size:.78rem;color:var(--mid);font-weight:300;margin-top:2px}',
     '#cu-root .cu-dots{display:flex;gap:4px;align-items:center}',
     '#cu-root .cu-dots i{width:9px;height:9px;border-radius:50%;background:#e2dfda}#cu-root .cu-dots i.on{background:var(--cu-good)}',
@@ -98,6 +133,9 @@
     '#cu-root .cu-notes{background:#fff;border-radius:14px;box-shadow:var(--shadow);margin-top:1.2rem}',
     '#cu-root .cu-notes-h{display:flex;justify-content:space-between;align-items:center;width:100%;border:0;background:none;padding:1rem 1.2rem;font:600 .95rem var(--hel,Poppins,sans-serif);cursor:pointer;color:inherit}',
     '#cu-root .cu-notes-h span{font-size:.8rem;color:var(--mid);font-weight:400}',
+    '#cu-root .cu-notes-fold{display:grid;grid-template-rows:1fr;transition:grid-template-rows .35s var(--ease,ease)}',
+    '#cu-root .cu-notes-fold.closed{grid-template-rows:0fr}#cu-root .cu-notes-in{overflow:hidden;min-height:0}',
+    '#cu-root .cu-notes-fold.closed .cu-notes-b{visibility:hidden;transition:visibility 0s .35s}',
     '#cu-root .cu-notes-b{padding:0 1.4rem 1.2rem;font-size:.95rem;line-height:1.65;color:#2b2724}',
     '#cu-root .cu-notes-b h3{font-family:var(--display,Georgia,serif);font-size:1.12rem;margin:1.2rem 0 .4rem;color:var(--text,#111)}',
     '#cu-root .cu-notes-b ul,#cu-root .cu-notes-b ol{padding-left:1.3rem;margin:.4rem 0 .8rem}#cu-root .cu-notes-b li{margin:.3rem 0}',
@@ -144,7 +182,7 @@
     '#cu-root .cu-bottom .lbl{font-size:.82rem;color:var(--mid)}',
     '#cu-root .cu-state{padding:3rem 1rem;text-align:center;color:var(--mid)}',
     '@media(max-width:900px){#cu-root .cu-lesson-wrap{grid-template-columns:1fr}#cu-root .cu-panel{position:static;max-height:none}#cu-root .cu-steps{max-height:260px}}',
-    '@media(max-width:520px){#cu-root .cu-lesson{grid-template-columns:2.2rem 1fr;}#cu-root .cu-lesson .cu-dots,#cu-root .cu-lesson .cu-done-tag{grid-column:2}#cu-root .cu-card{padding:1.1rem}#cu-root .cu-resume{flex-direction:column;align-items:flex-start}}'
+    '@media(max-width:520px){#cu-root .cu-go{display:none}#cu-root .cu-unit-p .cu-mbar{display:none}#cu-root .cu-card{padding:1.1rem}#cu-root .cu-resume{flex-direction:column;align-items:flex-start}}'
   ].join('');
   function injectCss() {
     if (document.getElementById('cu-css')) return;
@@ -264,37 +302,110 @@
   }
 
   /* ---------- home: the course, unit by unit ---------- */
+  /* ---------- artwork: inline, so nothing extra loads ---------- */
+  var ART = {
+    math: '<svg viewBox="0 0 320 220" aria-hidden="true"><defs><linearGradient id="cuG1" x1="0" x2="1"><stop offset="0" stop-color="#B0271C"/><stop offset="1" stop-color="#D24234"/></linearGradient></defs>' +
+      '<g stroke="rgba(17,17,17,.08)" stroke-width="1">' + (function () { var g = ''; for (var x = 20; x <= 300; x += 28) g += '<line x1="' + x + '" y1="14" x2="' + x + '" y2="206"/>'; for (var y = 14; y <= 206; y += 24) g += '<line x1="20" y1="' + y + '" x2="300" y2="' + y + '"/>'; return g; })() + '</g>' +
+      '<line x1="20" y1="134" x2="300" y2="134" stroke="rgba(17,17,17,.35)" stroke-width="1.5"/><line x1="132" y1="14" x2="132" y2="206" stroke="rgba(17,17,17,.35)" stroke-width="1.5"/>' +
+      '<path class="cu-draw" d="M40 196 Q132 -30 224 196" fill="none" stroke="#3457d5" stroke-width="3" stroke-linecap="round"/>' +
+      '<path class="cu-draw d2" d="M28 176 L292 40" fill="none" stroke="url(#cuG1)" stroke-width="3" stroke-linecap="round"/>' +
+      '<path d="M226 190 L292 190 L292 150 Z" fill="rgba(201,168,76,.22)" stroke="#C9A84C" stroke-width="2" stroke-linejoin="round"/>' +
+      '<circle cx="132" cy="83" r="5" fill="#3457d5"/><circle cx="188" cy="107" r="5" fill="#B0271C"/>' +
+      '<text x="200" y="60" font-family="Georgia,serif" font-style="italic" font-size="20" fill="#111">y = mx + b</text></svg>',
+    english: '<svg viewBox="0 0 320 220" aria-hidden="true">' +
+      '<path d="M40 44 Q100 30 160 50 L160 196 Q100 176 40 190 Z" fill="#fff" stroke="rgba(17,17,17,.2)" stroke-width="2" stroke-linejoin="round"/>' +
+      '<path d="M280 44 Q220 30 160 50 L160 196 Q220 176 280 190 Z" fill="#fff" stroke="rgba(17,17,17,.2)" stroke-width="2" stroke-linejoin="round"/>' +
+      '<g stroke="rgba(17,17,17,.18)" stroke-width="3" stroke-linecap="round"><line x1="58" y1="72" x2="142" y2="78"/><line x1="58" y1="92" x2="130" y2="97"/><line x1="58" y1="112" x2="142" y2="117"/><line x1="58" y1="132" x2="120" y2="136"/><line x1="58" y1="152" x2="138" y2="157"/>' +
+      '<line x1="178" y1="78" x2="262" y2="72"/><line x1="178" y1="117" x2="250" y2="112"/><line x1="178" y1="136" x2="262" y2="131"/><line x1="178" y1="157" x2="240" y2="152"/></g>' +
+      '<rect class="cu-hl" x="174" y="88" width="80" height="16" rx="4" fill="rgba(201,168,76,.45)"/><line x1="178" y1="97" x2="250" y2="92" stroke="#111" stroke-width="3" stroke-linecap="round"/>' +
+      '<text x="84" y="40" font-family="Georgia,serif" font-size="46" fill="#B0271C">\u201c</text><text x="238" y="214" font-family="Georgia,serif" font-size="46" fill="#B0271C">\u201d</text>' +
+      '<path class="cu-draw" d="M196 206 q10 -14 22 -2 t22 -2" fill="none" stroke="#3457d5" stroke-width="3" stroke-linecap="round"/></svg>'
+  };
+  // A small icon for each unit, by what the unit is about.
+  function unitIcon(name) {
+    var n = String(name).toLowerCase(), p;
+    if (/intro/.test(n)) p = '<path d="M6 4h9l3 3v13H6z"/><path d="M9 11h6M9 15h4"/>';
+    else if (/advanced/.test(n)) p = '<path d="M4 19c3-14 13-14 16 0"/><path d="M3 20h18"/>';
+    else if (/algebra/.test(n)) p = '<path d="M4 18L20 6"/><path d="M4 20h16M4 4v16"/>';
+    else if (/geometry/.test(n)) p = '<path d="M4 19L12 5l8 14z"/><path d="M9 19a3 3 0 0 0-2-3"/>';
+    else if (/data|problem/.test(n)) p = '<path d="M5 20V12M10 20V7M15 20v-5M20 20V4"/>';
+    else if (/convention/.test(n)) p = '<circle cx="8" cy="16" r="2"/><path d="M8 18c0 2-1 3-2 3"/><circle cx="16" cy="9" r="2"/><circle cx="16" cy="16" r="2"/>';
+    else if (/expression/.test(n)) p = '<path d="M4 8h13l-3-3M20 16H7l3 3"/>';
+    else if (/information/.test(n)) p = '<circle cx="10" cy="10" r="6"/><path d="M15 15l5 5"/>';
+    else if (/craft/.test(n)) p = '<path d="M20 4c-8 1-13 6-15 15"/><path d="M5 19l4-1M14 9l-5 5"/>';
+    else p = '<circle cx="12" cy="12" r="8"/>';
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + p + '</svg>';
+  }
+  // A small progress ring: filled share of a lesson's parts, a tick when all are done.
+  function ring(done, total, size) {
+    size = size || 30;
+    var r = size / 2 - 3, C = 2 * Math.PI * r, f = total ? done / total : 0;
+    if (total && done === total) return '<span class="cu-ring done" style="width:' + size + 'px;height:' + size + 'px">&#10003;</span>';
+    return '<svg class="cu-ring" width="' + size + '" height="' + size + '" viewBox="0 0 ' + size + ' ' + size + '" aria-hidden="true">' +
+      '<circle cx="' + size / 2 + '" cy="' + size / 2 + '" r="' + r + '" fill="none" stroke="#e6e3de" stroke-width="3"/>' +
+      (done ? '<circle cx="' + size / 2 + '" cy="' + size / 2 + '" r="' + r + '" fill="none" stroke="var(--cu-good)" stroke-width="3" stroke-linecap="round" stroke-dasharray="' + (C * f).toFixed(1) + ' ' + C.toFixed(1) + '" transform="rotate(-90 ' + size / 2 + ' ' + size / 2 + ')"/>' : '') + '</svg>';
+  }
+
+  /* ---------- home: the course, unit by unit ----------
+     The header and the course tabs are drawn once and never move; switching
+     course crossfades only what is below them, keeping its height while it
+     swaps, so nothing on the page jumps (Luca, 2026-09-27). */
   function renderHome() {
     var c = course(view.course);
     view.course = c.id;
+    root.innerHTML = '<div class="cu-wrap">' +
+      '<div class="cu-top"><div><div class="cu-kicker">Curriculum</div><div class="cu-toph">Learn it, then prove it</div></div>' +
+      '<div class="cu-tabs" role="group" aria-label="Course">' + courses().map(function (x) {
+        return '<button type="button" data-course="' + x.id + '" aria-pressed="' + (x.id === c.id) + '">' + esc(x.title) + '</button>';
+      }).join('') + '</div></div>' +
+      '<div class="cu-body" id="cu-body">' + homeBody(c) + '</div></div>';
+  }
+  function homeBody(c) {
     var lessons = allLessons(c);
     var total = 0, done = 0;
     lessons.forEach(function (x) { total += x.l.parts.length; done += lessonDoneCount(x.l); });
+    var pct = total ? Math.round(100 * done / total) : 0;
     var last = prog.last && findLesson(prog.last.lessonId);
     var resume = '';
     if (last && last.c.id === c.id) {
-      resume = '<div class="cu-resume"><div><b>Pick up where you left off</b><span>' + esc(last.l.num + ' ' + last.l.title) + ', part ' + (prog.last.part + 1) + ' of ' + last.l.parts.length + '</span></div>' +
+      resume = '<div class="cu-resume cu-in" style="--d:1"><span class="cu-resume-ic">&#9654;</span><div><b>Pick up where you left off</b><span>' + esc(last.l.num + ' ' + last.l.title) + ', part ' + (prog.last.part + 1) + ' of ' + last.l.parts.length + '</span></div>' +
         '<button type="button" class="cu-btn" data-resume>Continue &rarr;</button></div>';
     }
-    root.innerHTML = '<div class="cu-wrap">' +
-      '<div class="cu-kicker">Curriculum</div><h1>' + esc(c.title === 'Math' ? 'SAT Math' : 'SAT Reading & Writing') + '</h1>' +
-      '<div class="cu-sub">Every lesson is a short video, then a check: get ' + STREAK_TO_PASS + ' right in a row to unlock the next part.</div>' +
-      '<div class="cu-tabs" role="group" aria-label="Course">' + courses().map(function (x) {
-        return '<button type="button" data-course="' + x.id + '" aria-pressed="' + (x.id === c.id) + '">' + esc(x.title) + '</button>';
-      }).join('') + '</div>' +
-      '<div class="cu-overall"><div class="cu-bar"><i style="width:' + (total ? Math.round(100 * done / total) : 0) + '%"></i></div><span>' + done + ' of ' + pl(total, 'part') + ' done</span></div>' +
+    var R = 34, CIRC = 2 * Math.PI * R;
+    return '<section class="cu-hero cu-hero-' + c.id + ' cu-in" style="--d:0">' +
+        '<div class="cu-hero-text"><h1>' + esc(c.id === 'math' ? 'SAT Math' : 'SAT Reading & Writing') + '</h1>' +
+        '<p class="cu-sub">Every lesson is a short video, then a check: get ' + STREAK_TO_PASS + ' right in a row to unlock the next part.</p>' +
+        '<div class="cu-stats"><div class="cu-bigring"><svg width="84" height="84" viewBox="0 0 84 84" aria-hidden="true"><circle cx="42" cy="42" r="' + R + '" fill="none" stroke="rgba(17,17,17,.08)" stroke-width="7"/>' +
+          (done ? '<circle class="cu-ringfill" cx="42" cy="42" r="' + R + '" fill="none" stroke="var(--red,#B0271C)" stroke-width="7" stroke-linecap="round" stroke-dasharray="' + Math.max(1, CIRC * pct / 100).toFixed(1) + ' ' + CIRC.toFixed(1) + '" transform="rotate(-90 42 42)"/>' : '') + '</svg><b>' + pct + '%</b></div>' +
+          '<div class="cu-stat"><b>' + lessons.length + '</b><span>lessons</span></div><div class="cu-stat"><b>' + total + '</b><span>parts</span></div><div class="cu-stat"><b>' + done + '</b><span>done</span></div></div></div>' +
+        '<div class="cu-hero-art">' + ART[c.id] + '</div></section>' +
       resume +
       '<div class="cu-units">' + c.domains.map(function (d, di) {
         var dDone = d.lessons.filter(function (l) { return lessonDoneCount(l) === l.parts.length; }).length;
-        return '<section class="cu-unit"><div class="cu-unit-h"><h2>' + esc('Unit ' + (di + 1) + ': ' + d.name) + '</h2><span>' + dDone + ' of ' + pl(d.lessons.length, 'lesson') + ' complete</span></div>' +
+        return '<section class="cu-unit cu-in" style="--d:' + (di + 2) + '"><div class="cu-unit-h"><span class="cu-uic">' + unitIcon(d.name) + '</span>' +
+          '<div class="cu-unit-t"><span class="cu-unum">Unit ' + (di + 1) + '</span><h2>' + esc(d.name) + '</h2></div>' +
+          '<span class="cu-unit-p"><span class="cu-mbar"><i style="width:' + Math.round(100 * dDone / d.lessons.length) + '%"></i></span>' + dDone + '/' + d.lessons.length + '</span></div>' +
           d.lessons.map(function (l) {
-            var n = lessonDoneCount(l), all = n === l.parts.length;
-            return '<button type="button" class="cu-lesson" data-lesson="' + esc(l.id) + '"><span class="cu-num">' + esc(l.num) + '</span>' +
-              '<span class="cu-lt">' + esc(l.title) + '<small>' + pl(l.parts.length, 'part') + ' &middot; ' + pl(l.parts.reduce(function (a, p) { return a + p.qids.length; }, 0), 'question') + '</small></span>' +
-              (all ? '<span class="cu-done-tag">&#10003; Done</span>' : '<span class="cu-dots" aria-label="' + n + ' of ' + l.parts.length + ' parts done">' +
-                l.parts.map(function (p, i) { return '<i class="' + (isDone(l.id, i) ? 'on' : '') + '"></i>'; }).join('') + '</span>') + '</button>';
+            var n = lessonDoneCount(l);
+            return '<button type="button" class="cu-lesson" data-lesson="' + esc(l.id) + '">' + ring(n, l.parts.length) +
+              '<span class="cu-lt"><span class="cu-num">' + esc(l.num) + '</span> ' + esc(l.title) + '<small>' + pl(l.parts.length, 'part') + (n && n < l.parts.length ? ' &middot; ' + n + ' done' : '') + '</small></span>' +
+              '<span class="cu-go">' + (n === l.parts.length ? 'Review' : n ? 'Continue' : 'Start') + ' &rsaquo;</span></button>';
           }).join('') + '</section>';
-      }).join('') + '</div></div>';
+      }).join('') + '</div>';
+  }
+  function switchCourse(id) {
+    if (id === view.course) return;
+    view.course = id;
+    $$('.cu-tabs button', root).forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-course') === id)); });
+    var body = $('#cu-body', root);
+    if (!body) return renderHome();
+    body.style.minHeight = body.offsetHeight + 'px';          // hold the space while it swaps
+    body.classList.add('cu-fading');
+    setTimeout(function () {
+      body.innerHTML = homeBody(course(id));
+      body.classList.remove('cu-fading');
+      requestAnimationFrame(function () { body.style.minHeight = ''; });
+    }, 160);
   }
 
   /* ---------- a lesson ---------- */
@@ -389,7 +500,7 @@
         (partPages(l, i).length > 1 ? '<div class="cu-sub">Covers: ' + partPages(l, i).map(esc).join(' &middot; ') + '</div>' : '') + '</div>' +
       '<div class="cu-video">' + (vid || '<div class="cu-soon"><div class="play">&#9654;</div><b>Video coming soon</b><span>This lesson\u2019s video is being recorded. The notes below cover the same material for now.</span></div>') + '</div>' +
       '<section class="cu-notes"><button type="button" class="cu-notes-h" data-notes aria-expanded="' + (!vid) + '">Notes <span>' + (vid ? 'Show' : 'Hide') + '</span></button>' +
-      '<div class="cu-notes-b"' + (vid ? ' hidden' : '') + '>' + (notesHtml(p) || '<p>No notes for this part.</p>') + '</div></section>' +
+      '<div class="cu-notes-fold' + (vid ? ' closed' : '') + '"><div class="cu-notes-in"><div class="cu-notes-b">' + (notesHtml(p) || '<p>No notes for this part.</p>') + '</div></div></div></section>' +
       '<div class="cu-bottom">' + bar + '</div>';
   }
 
@@ -545,7 +656,7 @@
   function onClick(e) {
     var t = e.target;
     var b;
-    if ((b = t.closest('[data-course]'))) { view.course = b.getAttribute('data-course'); return renderHome(); }
+    if ((b = t.closest('[data-course]'))) return switchCourse(b.getAttribute('data-course'));
     if ((b = t.closest('[data-resume]'))) { var L = prog.last; return openLesson(L.lessonId, L.part, L.step); }
     if ((b = t.closest('[data-lesson]'))) return openLesson(b.getAttribute('data-lesson'));
     if ((b = t.closest('[data-lesson-go]'))) { var id = b.getAttribute('data-lesson-go'); if (id) openLesson(id); return; }
@@ -569,9 +680,23 @@
       return list[at + 1] ? openLesson(list[at + 1].l.id) : (view.name = 'home', renderHome());
     }
     if ((b = t.closest('[data-notes]'))) {
-      var body = b.nextElementSibling, open = body.hasAttribute('hidden');
-      if (open) body.removeAttribute('hidden'); else body.setAttribute('hidden', '');
+      /* Folds open and shut (a height animation), with the Notes header held
+         where it is on screen, so the page never jumps under the student
+         (Luca, 2026-09-27). */
+      var fold = b.nextElementSibling, open = fold.classList.contains('closed');
+      var before = b.getBoundingClientRect().top;
+      // The page keeps its height while on this part, or a page scrolled near
+      // its end would have to scroll up when the notes shut.
+      var main = $('#cu-main', root);
+      if (!open && main) main.style.minHeight = main.offsetHeight + 'px';
+      fold.classList.toggle('closed', !open);
       b.setAttribute('aria-expanded', String(open)); b.querySelector('span').textContent = open ? 'Hide' : 'Show';
+      var start = performance.now();
+      (function hold(now) {
+        var drift = b.getBoundingClientRect().top - before;
+        if (Math.abs(drift) > 0.5) window.scrollBy(0, drift);
+        if (now - start < 420) requestAnimationFrame(hold);
+      })(start);
       return;
     }
     if (t.closest('[data-rewatch]')) { e.preventDefault(); view.step = 'video'; return renderLesson(); }
