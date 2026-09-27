@@ -2265,7 +2265,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Words in Context",
           "difficulty": "medium",
           "type": "mc",
-          "text": "Concrete gains most of its strength in the first month, but the reaction that hardens the cement—hydration—continues for years, and unreacted cement deep inside a wall remains available if a crack later admits water. Some cracks in old seawalls therefore ______ without intervention: water carries dissolved calcium into the gap, where it precipitates and seals the opening.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
+          "text": "Concrete keeps gaining strength for years after the first month. The hardening reaction—hydration—continues, and unreacted cement remains deep inside a wall. Water that later reaches such cement carries dissolved calcium into the gap, where the calcium slowly precipitates and seals the opening. Some cracks in old seawalls therefore ______ without intervention.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
           "choices": [
             "migrate",
             "propagate",
@@ -2286,7 +2286,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Words in Context",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Economists measuring the effect of a minimum wage usually compare employment in a state that raised its wage with employment in a neighboring state that held its wage steady. That comparison is ______: states that raise wages tend to do so when their labor markets are already tightening, so the neighboring state only appears to supply a counterfactual.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
+          "text": "Economists measuring the effect of minimum wages usually compare employment in states that raised wages with employment in neighboring states holding wages steady. The comparison is ______. States raise wages precisely when local labor markets are already tightening, and the neighboring state therefore only appears to supply a counterfactual.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
           "choices": [
             "tenuous",
             "fallacious",
@@ -2307,7 +2307,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Words in Context",
           "difficulty": "hard",
           "type": "mc",
-          "text": "In 1911 the physicist Heike Kamerlingh Onnes cooled mercury to within four degrees of absolute zero and found that its electrical resistance vanished altogether. For two decades the result was treated as a ______ of ordinary conduction, an extreme instance of familiar behavior, until later experiments established that a superconductor also expels a magnetic field, a property peculiar to superconductors.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
+          "text": "In 1911 the physicist Heike Kamerlingh Onnes cooled mercury to within four degrees of absolute zero, and electrical resistance vanished altogether. For two decades physicists treated the result as ______ of ordinary conduction, an extreme instance of familiar behavior. Later experiments established that superconductors also expel magnetic fields, which no ordinary conductor does.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
           "choices": [
             "continuation",
             "anomaly",
@@ -2391,7 +2391,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Central Ideas and Details",
           "difficulty": "medium",
           "type": "mc",
-          "text": "Pollen preserved in lake sediment (the silt of the lake bed) records which plants grew nearby, and the depth at which a grain is found, its stratum, gives its approximate date. Working on a lake in the Peruvian Andes, a 2007 survey of preserved pollen found maize grains in layers dated to roughly 4,000 years ago, well below the depth at which pottery and permanent structures first appear. The sequence indicates that cultivation preceded settlement at the site by several centuries.<br><br>Which choice best states the main idea of the text?",
+          "text": "Pollen preserved in lake sediment (the silt of the lake bed) records which plants grew nearby, and the depth at which a grain is found, the stratum, gives the approximate date. Working on a lake in the Peruvian Andes, a 2007 survey of preserved pollen found maize grains in layers dated to roughly 4,000 years ago, well below the depth at which pottery and permanent structures first appear. The sequence indicates that cultivation preceded settlement at the site by several centuries.<br><br>Which choice best states the main idea of the text?",
           "choices": [
             "Pollen is a more reliable dating method than pottery is for sites in the Peruvian Andes.",
             "The inhabitants of the site abandoned cultivation once permanent structures had been built.",
@@ -2517,7 +2517,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Inferences",
           "difficulty": "medium",
           "type": "mc",
-          "text": "Honeybee colonies choose a nest site by sending scouts, each of which returns and dances to advertise what the scout has found. A scout that has since seen a better site does not contest its rival’s claim but simply stops dancing for its own. Because dancing decays after a fixed number of circuits unless the scout revisits the site, a mediocre site loses its advertisers faster than a good one does. The mechanism therefore ensures that ______<br><br>Which choice most logically completes the text?",
+          "text": "Honeybee colonies choose a nest site by sending scouts, each of which returns and dances to advertise what the scout has found. A scout that has since seen a better site does not contest the rival’s claim but simply stops dancing for the first site. Because dancing decays after a fixed number of circuits unless the scout revisits the site, a mediocre site loses advertisers faster than a good one does. The mechanism therefore ensures that ______<br><br>Which choice most logically completes the text?",
           "choices": [
             "a colony settles on whichever site the first returning scout happens to have discovered.",
             "scouts that have visited the best available site dance for longer than the colony requires.",
@@ -2538,7 +2538,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Inferences",
           "difficulty": "hard",
           "type": "mc",
-          "text": "A songbird raised in isolation produces an abnormal song, which has long been taken to show that the species learns its song from adults. In one experiment, one group of chaffinches (a common European songbird) was raised in isolation and a second group was raised in isolation but with a speaker playing recorded chaffinch song. Birds in the second group sang normally. A third group, raised in isolation with a speaker playing the song of a different species, again sang abnormally. Taken together, the three results suggest that ______<br><br>Which choice most logically completes the text?",
+          "text": "A songbird raised in isolation produces an abnormal song, which has long been taken to show that the species learns the song from adults. In one experiment, one group of chaffinches (a common European songbird) was raised in isolation and a second group was raised in isolation but with a speaker playing recorded chaffinch song. Birds in the second group sang normally. A third group, raised in isolation with a speaker playing the song of a different species, again sang abnormally. Taken together, the three results suggest that ______<br><br>Which choice most logically completes the text?",
           "choices": [
             "chaffinches can acquire the song of another species if they are exposed to it early enough.",
             "the isolated birds in the first group were prevented from singing normally by the absence of an adult chaffinch.",
@@ -2939,7 +2939,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Cross-Text Connections",
           "difficulty": "medium",
           "type": "mc",
-          "text": "Text 1<br><br>Handwriting instruction has largely left the primary curriculum, and the case for restoring it rests on studies by psychologist Karin James and others, in which preliterate children who formed letters by hand recognized them more readily afterward than children who typed them. The motor act of drawing a shape, on this account, lays down a trace of a kind that typing lacks.<br><br>Text 2<br><br>The studies usually cited compare handwriting with typing among children who are learning letters for the first time. But the comparison says nothing about older children, who already recognize the letters fluently, and the studies measure recognition rather than any later benefit to composition or to spelling.<br><br>Based on the texts, how would the author of Text 2 most likely respond to the case described in Text 1?",
+          "text": "Text 1<br><br>Handwriting instruction has largely left the primary curriculum, and the case for restoring handwriting rests on studies by psychologist Karin James and others, in which preliterate children who formed letters by hand recognized them more readily afterward than children who typed them. The motor act of drawing a shape, on this account, lays down a trace of a kind that typing lacks.<br><br>Text 2<br><br>The studies usually cited compare handwriting with typing among children who are learning letters for the first time. But the comparison says nothing about older children, who already recognize the letters fluently, and the studies measure recognition rather than any later benefit to composition or to spelling.<br><br>Based on the texts, how would the author of Text 2 most likely respond to the case described in Text 1?",
           "choices": [
             "By noting that the evidence supports a narrower claim than restoring instruction would require.",
             "By denying that children who form letters by hand recognize them more readily afterward.",
@@ -2981,7 +2981,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Central Ideas and Details",
           "difficulty": "medium",
           "type": "mc",
-          "text": "A 2021 study compared the account books of a sixteenth-century Seville hospital with its burial register. The books record payments to women hired by the day to nurse patients, work that the hospital’s own charter omitted and that fell outside every salaried post. The same names recur across years, which suggests a settled workforce.<br><br>Based on the text, what can be concluded about the women recorded in the account books?",
+          "text": "A 2021 study compared the account books of a sixteenth-century Seville hospital with the burial register. The books record payments to women hired by the day to nurse patients, work that the hospital’s own charter omitted and that fell outside every salaried post. The same names recur across years, which suggests a settled workforce.<br><br>Based on the text, what can be concluded about the women recorded in the account books?",
           "choices": [
             "They were paid more than the hospital’s salaried staff were paid for similar work.",
             "They appear in the burial register more often than other residents of the city do.",
@@ -3044,7 +3044,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Command of Evidence (Textual)",
           "difficulty": "easy",
           "type": "mc",
-          "text": "Ethologist Gavin Hunt first documented tool manufacture among New Caledonian crows, which strip and notch twigs to extract grubs from dead wood. One proposal holds that a crow selects a twig for a particular hole rather than reshaping whichever twig it happens to hold.<br><br>Which finding, if true, would most directly support this proposal?",
+          "text": "Ethologist Gavin Hunt first documented tool manufacture among New Caledonian crows, which strip and notch twigs to extract grubs from dead wood. One proposal holds that a crow selects a twig for a particular hole rather than reshaping whichever twig the crow happens to hold.<br><br>Which finding, if true, would most directly support this proposal?",
           "choices": [
             "Crows that are given no twigs will use stiff grass stems to extract grubs instead.",
             "Crows presented with holes of varying width pick a twig matched to the hole before approaching it.",
@@ -3466,7 +3466,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Cross-Text Connections",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Text 1<br><br>The medieval guild is often presented as a brake on innovation, since guild statutes fixed the materials, the tools, and the number of apprentices a master might keep. A craft governed that closely, the argument runs, would have altered its methods only slowly, whatever its masters wished.<br><br>Text 2<br><br>A 2016 study traced the statutes of a Cologne goldsmiths’ guild across two centuries and found them revised, on average, every eleven years. The revisions follow the adoption of a new technique rather than preventing it: a method spreads among masters, and the statute is rewritten to admit it and to say who may use it.<br><br>Based on the texts, how would the author of Text 2 most likely respond to the argument in Text 1?",
+          "text": "Text 1<br><br>The medieval guild is often presented as a brake on innovation, since guild statutes fixed the materials, the tools, and the number of apprentices a master might keep. A craft governed that closely, the argument runs, would have altered methods only slowly, whatever the masters wished.<br><br>Text 2<br><br>A 2016 study traced the statutes of a Cologne goldsmiths’ guild across two centuries and found them revised, on average, every eleven years. The revisions follow the adoption of a new technique rather than preventing the technique: a method spreads among masters, and the statute is rewritten to admit the method and to say who may use the method.<br><br>Based on the texts, how would the author of Text 2 most likely respond to the argument in Text 1?",
           "choices": [
             "By observing that the statutes followed changes in practice instead of constraining them.",
             "By agreeing that guild statutes were restrictive but noting that they were rarely enforced.",
@@ -3550,7 +3550,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Central Ideas and Details",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Musicologists have compared the surviving parts for a Venetian opera of 1642 with the printed libretto—the sung text—sold at its first performances. Several arias named in the libretto are missing from the parts, and two numbers in the parts appear nowhere in the printed text. They argue that the libretto records what the poet supplied rather than what the audience heard, and that a score assembled from it would reconstruct a performance that never took place.<br><br>Which choice best describes the conclusion drawn from the two sources?",
+          "text": "Musicologists have compared the surviving parts for a Venetian opera of 1642 with the printed libretto—the sung text—sold at the first performances. Several arias named in the libretto are missing from the parts, and two numbers in the parts appear nowhere in the printed text. They argue that the libretto records what the poet supplied rather than what the audience heard, and that a score assembled from the libretto would reconstruct a performance that never took place.<br><br>Which choice best describes the conclusion drawn from the two sources?",
           "choices": [
             "The two numbers absent from the libretto were added by a composer other than the one named on it.",
             "The Venetian opera of 1642 was performed with more arias than its libretto lists for the audience.",
@@ -3592,7 +3592,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Command of Evidence (Quantitative)",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Parchment was costly, and a scribe could fit more text on a page either by ruling more lines or by abbreviating more heavily. A scriptorium short of parchment might be expected to lean on whichever of the two techniques it had already mastered, so that any one scriptorium should show much of one and little of the other. Measurements from four manuscripts bear that out, since ______<table class=\"dx-table\"><tr><th>Manuscript</th><th>Lines per page</th><th>Abbreviations per 100 words</th></tr><tr><td>Corbie</td><td>34</td><td>9</td></tr><tr><td>Tours</td><td>26</td><td>21</td></tr><tr><td>Reims</td><td>33</td><td>11</td></tr><tr><td>Fulda</td><td>25</td><td>23</td></tr></table><br><br>Which choice most effectively uses data from the table to complete the statement?",
+          "text": "Parchment was costly, and a scribe could fit more text on a page either by ruling more lines or by abbreviating more heavily. A scriptorium short of parchment might be expected to lean on whichever of the two techniques the scriptorium had already mastered, so that any one scriptorium should show much of one and little of the other. Measurements from four manuscripts bear that out, since ______<table class=\"dx-table\"><tr><th>Manuscript</th><th>Lines per page</th><th>Abbreviations per 100 words</th></tr><tr><td>Corbie</td><td>34</td><td>9</td></tr><tr><td>Tours</td><td>26</td><td>21</td></tr><tr><td>Reims</td><td>33</td><td>11</td></tr><tr><td>Fulda</td><td>25</td><td>23</td></tr></table><br><br>Which choice most effectively uses data from the table to complete the statement?",
           "choices": [
             "the two manuscripts with the most lines per page are also the two that abbreviate least.",
             "the Tours and Fulda manuscripts abbreviate more than twice as heavily as the Corbie manuscript does.",
@@ -3613,7 +3613,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Command of Evidence (Textual)",
           "difficulty": "medium",
           "type": "mc",
-          "text": "Wuthering Heights is an 1847 novel by Emily Brontë. Its narrator, Nelly Dean, often states what another character was thinking as though she had watched it happen:<br><br>Which quotation from Wuthering Heights most effectively illustrates the claim?",
+          "text": "Wuthering Heights is an 1847 novel by Emily Brontë. The narrator, Nelly Dean, often states what another character was thinking as though she had watched it happen:<br><br>Which quotation from Wuthering Heights most effectively illustrates the claim?",
           "choices": [
             "“I ran to the children’s room: their door was ajar, I saw they had never lain down, though it was past midnight.”",
             "“The other, I felt certain, recalled it often in the course of the evening.”",
@@ -3655,7 +3655,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Inferences",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Cleaner shrimp remove parasites from fish that visit them, and a fish will hold still to be worked on. In a 2010 experiment testing whether the shrimp distinguish visitors that have somewhere else to go, each shrimp was offered two fish in turn: one taken from a reef with several cleaning stations, and one from an isolated outcrop—a lone rock head—with only that station. Shrimp gave the visitor from the multi-station reef longer sessions and took fewer bites of its mucus. Where both fish came from the isolated outcrop, sessions were the same length. The results therefore suggest that ______<br><br>Which choice most logically completes the text?",
+          "text": "Cleaner shrimp remove parasites from fish that visit them, and a fish will hold still to be worked on. In a 2010 experiment testing whether the shrimp distinguish visitors that have somewhere else to go, each shrimp was offered two fish in turn: one taken from a reef with several cleaning stations, and one from an isolated outcrop—a lone rock head—with only that station. Shrimp gave the visitor from the multi-station reef longer sessions and took fewer bites of the mucus. Where both fish came from the isolated outcrop, sessions were the same length. The results therefore suggest that ______<br><br>Which choice most logically completes the text?",
           "choices": [
             "shrimp prefer the mucus of fish that come from reefs with several cleaning stations.",
             "shrimp adjust their treatment of a client according to whether it has an alternative.",
@@ -3697,7 +3697,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Form, Structure, and Sense",
           "difficulty": "hard",
           "type": "mc",
-          "text": "The fuller of the two surviving accounts of the siege, written within a decade of it by a man who had questioned the sailors himself, ______ the number of ships in the harbor.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "text": "The fuller of the two surviving accounts of the siege, written within a decade of the siege by a man who had questioned the sailors himself, ______ the number of ships in the harbor.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
           "choices": [
             "give",
             "have given",
