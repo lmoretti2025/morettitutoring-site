@@ -3382,7 +3382,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Words in Context",
           "difficulty": "medium",
           "type": "mc",
-          "text": "A translator working from a language that leaves time unmarked on the verb must decide, sentence by sentence, whether a speaker is making a prediction, stating an intention, or merely entertaining a possibility. The original sentence remains ______, and the grammar of English insists on a choice.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
+          "text": "A translator working from a language that leaves time unmarked on the verb has to decide sentence by sentence whether a speaker predicts an event, declares an intention, or merely entertains a possibility. The original stays ______ in a way that English grammar cannot reproduce, for English insists on one reading of the three.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
           "choices": [
             "contested",
             "implausible",
@@ -3403,7 +3403,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Words in Context",
           "difficulty": "hard",
           "type": "mc",
-          "text": "The early modern pardon was ______ rather than merciful in effect: a monarch who pardoned a condemned man was understood to have first established the guilt he was setting aside, so each act of clemency confirmed the court that had convicted him.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
+          "text": "The early modern pardon was ______ rather than merciful in effect. A monarch who pardoned a condemned man was understood to have established the guilt first, and to be setting aside a verdict the crown itself had reached. Every act of clemency therefore confirmed the authority of the court.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
           "choices": [
             "arbitrary",
             "ratifying",
@@ -3424,7 +3424,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Words in Context",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Early radio astronomers took the hiss picked up by their aerials to be interference from the receiver itself, and spent years ______ it. Karl Jansky’s contribution was to notice that the hiss rose and fell on a cycle of twenty-three hours and fifty-six minutes, the period of the stars, and so came from the sky.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
+          "text": "Early radio astronomers treated the hiss in their aerials as interference from the receiver, and spent years ______ it. Karl Jansky noticed instead that the hiss rose and fell on a cycle of twenty-three hours and fifty-six minutes, the period of the stars, which placed its source in the sky.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
           "choices": [
             "propagating",
             "amplifying",
@@ -3445,7 +3445,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Words in Context",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Conservators cleaning a seventeenth-century panel found that the varnish had yellowed unevenly, and that the sitter’s blue sleeve now read as green. Removing the varnish restored the blue, but the painter had chosen the surrounding tones to sit against a blue already slightly warmed by fresh varnish. The cleaned picture is thus ______ the one the painter composed: accurate in its pigments and wrong in its relations.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
+          "text": "Conservators cleaning a seventeenth-century panel found yellowed varnish and a blue sleeve now reading as green. Removing this varnish restored the blue. Yet every surrounding tone in the picture was chosen to sit against blue already warmed by fresh varnish, and the cleaned picture is therefore ______ the one on the painter’s easel, exact in pigment and wrong in relation.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
           "choices": [
             "indistinguishable from",
             "at once truer and further from",
@@ -3466,7 +3466,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Cross-Text Connections",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Text 1<br><br>The medieval guild is often presented as a brake on innovation, since guild statutes fixed the materials, the tools, and the number of apprentices a master might keep. A craft governed that closely, the argument runs, would have altered methods only slowly, whatever the masters wished.<br><br>Text 2<br><br>A 2016 study traced the statutes of a Cologne goldsmiths’ guild across two centuries and found them revised, on average, every eleven years. The revisions follow the adoption of a new technique rather than preventing the technique: a method spreads among masters, and the statute is rewritten to admit the method and to say who may use the method.<br><br>Based on the texts, how would the author of Text 2 most likely respond to the argument in Text 1?",
+          "text": "Text 1<br><br>Medieval guilds are often presented as a brake on innovation. Guild statutes fixed materials, tools, and the number of apprentices in a workshop. A craft governed that closely, the argument runs, would have altered its methods slowly, whatever individual masters wanted.<br><br>Text 2<br><br>A 2016 study traced the statutes of a Cologne goldsmiths’ guild across two centuries. The statutes were revised, on average, every eleven years. Each revision followed the adoption of a new technique instead of preventing it. A method spread among masters in the city, and the statute was then rewritten to admit the method and to name who could use it.<br><br>Based on the texts, how would the author of Text 2 most likely respond to the argument in Text 1?",
           "choices": [
             "By observing that the statutes followed changes in practice instead of constraining them.",
             "By agreeing that guild statutes were restrictive but noting that they were rarely enforced.",
