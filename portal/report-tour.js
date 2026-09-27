@@ -534,7 +534,15 @@
       var wl = undash(worst.label);
       var HEAD = { 'slow-start': wl + ' started slow.', 'ran-short': 'Time ran short in ' + wl + '.', 'late-drop': wl + ' faded in the second half.',
                    'left-time': wl + ' finished with time to spare.', 'went-back': wl + ': a lot of going back.' };
-      var head2 = troubled.length ? (HEAD[worst.reading] || wl + '.') : 'Every module ran steady.';
+      /* Several modules with the same reading are said together (Sakeena,
+         2026-09-26: four 'left-time' modules headed by the first one alone). */
+      var HEADN = { 'slow-start': 'started slow.', 'ran-short': 'ran short on time.', 'late-drop': 'faded in the second half.',
+                    'left-time': 'finished with time to spare.', 'went-back': 'had a lot of going back.' };
+      var same = routes.filter(function (x) { return x.reading === worst.reading; }).length;
+      var head2 = !troubled.length ? 'Every module ran steady.'
+        : same === routes.length && same > 1 ? (same === 2 ? 'Both modules ' : 'All ' + numWord(same) + ' modules ') + HEADN[worst.reading]
+        : same > 1 ? cap(numWord(same)) + ' of ' + numWord(routes.length) + ' modules ' + HEADN[worst.reading]
+        : (HEAD[worst.reading] || wl + '.');
       M.screens.push({ name: 'route', html:
         '<p class="t-eye r">How each module went</p><h2 class="r">' + esc(head2) + '</h2><div class="t-mods">' +
         sorted.map(function (x, i) {
@@ -575,6 +583,10 @@
       iv.forEach(function (x) { if (x.k === 'reopened') reopened++; else if (x.k === 'ranout') ranOut++; else awayMs += Number(x.ms) || 0; });
       setAside = reopened > 0 || ranOut > 0 || awayMs > 10 * 60000;
     }
+    /* The conditions screen (or note) already covers breaks and time away:
+       no second card saying so, and no "clean" card beside it. */
+    var condSaysBreak = !!(cond && cond.signals.some(function (g) { return /break|away|interrupt|reopen/i.test(String(g.id || '') + ' ' + String(g.label || '')); }));
+    if (condSaysBreak) { clean = false; setAside = false; }
     if (flags.length || clean || setAside) {
       var cards = flags.slice(0, 4).map(function (f, i) {
         return '<div class="t-habit" style="--i:' + i + '"><div class="n">' + (f.neutral ? 'i' : '!') + '</div><div><h3>' + esc(f.title) + (f.neutral ? '' : ' <span class="t-tag watch">Watch</span>') + '</h3><p>' + esc(f.short) + '</p></div></div>';
