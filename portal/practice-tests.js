@@ -2433,7 +2433,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Command of Evidence (Textual)",
           "difficulty": "medium",
           "type": "mc",
-          "text": "The Country of the Pointed Firs is an 1896 novel by Sarah Orne Jewett. In the novel, Jewett presents the narrator as someone who comes to value a kind of knowledge she cannot acquire for herself:<br><br>Which quotation from The Country of the Pointed Firs most effectively illustrates the claim?",
+          "text": "The Country of the Pointed Firs is an 1896 novel by Sarah Orne Jewett. Its narrator, a writer lodging one summer in a Maine fishing village, goes out with her landlady (an herbalist known to everyone on that shore) to gather pennyroyal and to call on families in the outlying farms, and she is shown paths and landings that can be found on no map of that coast. After a season in their company she has come to admire a kind of knowledge she cannot acquire for herself:<br><br>Which quotation from The Country of the Pointed Firs most effectively illustrates the claim?",
           "choices": [
             "“The wind blew off the shore, and the little boat went out past the point with the tide behind her.”",
             "“She knew the weather of that coast as I should never know it, though I stayed there all my life.”",
@@ -2580,7 +2580,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Boundaries",
           "difficulty": "easy",
           "type": "mc",
-          "text": "The first collections of Emily Dickinson’s poems replaced most of her dashes with commas and regularized her capitals, producing the 1890 ______ scholarly editions working from her manuscripts have largely undone.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "text": "Emily Dickinson left her poems in manuscript, dashed and capitalized in ways no printer of the period was prepared to set. Her first editors put commas where she had put dashes and lowered the capitals to match ordinary usage, producing the 1890 ______ scholarly editions have since worked to undo.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
           "choices": [
             "text which",
             "text, and which",
@@ -2601,7 +2601,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Form, Structure, and Sense",
           "difficulty": "medium",
           "type": "mc",
-          "text": "A single archival box from the mill, holding the wage books, the overseer’s daybook, and the letters of three operatives, ______ more about the working week than the company’s published reports do.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "text": "Mills kept records for their own purposes, and what survives of them is rarely what a historian would have chosen. One archival box, holding wage books, an overseer’s daybook, and letters from three operatives, ______ what the published company reports leave out about the working week.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
           "choices": [
             "reveal",
             "have revealed",
@@ -2622,7 +2622,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Boundaries",
           "difficulty": "medium",
           "type": "mc",
-          "text": "The astronomer Vera Rubin measured how fast stars orbit at the edges of spiral galaxies and found them moving as quickly as stars near the ______ result that makes sense only if a great deal of unseen mass surrounds each galaxy.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "text": "Stars at the outer edge of a spiral galaxy ought to travel more slowly than stars near its middle, in the way that the outer planets travel more slowly than the inner ones. The astronomer Vera Rubin, measuring the orbits of stars in dozens of galaxies, found the outer ones moving as quickly as those near the ______ result that points to a great deal of unseen mass, invisible to telescopes, surrounding the galaxies.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
           "choices": [
             "center; a",
             "center a",
@@ -2664,7 +2664,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Boundaries",
           "difficulty": "hard",
           "type": "mc",
-          "text": "A glassblower cannot pause once the gather leaves the furnace; the piece must be turned continuously or it will sag out of ______ is why the bench, the tools, and the annealing oven are arranged within one turn of the chair.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "text": "At the bench a glassblower works against the clock. The gather has to turn from the instant it leaves the furnace, since two seconds of rest leave the piece sagging out of ______ is why the bench, the tools, and the annealing oven all sit within one turn of the chair.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
           "choices": [
             "shape that",
             "shape. That",
