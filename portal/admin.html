@@ -82,6 +82,19 @@
   .card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow); padding: 1.25rem 1.4rem; margin-bottom: 1.25rem; }
   .card > h2 { font-family: var(--display); font-size: 1.05rem; margin: 0 0 0.15rem; }
   .card > .card-sub { font-size: 0.76rem; color: var(--faint); margin: 0 0 1rem; }
+  /* Real SAT scores (2026-09-26) */
+  .real-row { display: grid; grid-template-columns: 7.5rem 1fr auto; gap: 0.4rem 1rem; align-items: start; padding: 0.7rem 0; border-top: 1px solid var(--border); }
+  .real-row:first-child { border-top: 0; }
+  .real-date { font-size: 0.8rem; font-weight: 600; }
+  .real-score { font-size: 1.5rem; font-weight: 700; line-height: 1.1; }
+  .real-score span { font-size: 0.74rem; font-weight: 500; color: var(--mid); margin-left: 0.4rem; }
+  .real-vs { font-size: 0.78rem; line-height: 1.5; color: var(--mid); margin-top: 0.25rem; }
+  .real-vs b { color: var(--text); }
+  .real-gap-below { color: var(--red); font-weight: 600; }
+  .real-add { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: end; margin-top: 0.8rem; padding-top: 0.8rem; border-top: 1px solid var(--border); }
+  .real-add label { display: flex; flex-direction: column; gap: 0.2rem; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--mid); }
+  .real-add input { font: inherit; font-size: 0.85rem; padding: 0.35rem 0.5rem; border: 1px solid var(--border); border-radius: 8px; width: 7.5rem; }
+  .real-add input[type=number] { width: 5.5rem; }
   .empty { color: var(--faint); font-style: italic; font-size: 0.84rem; padding: 0.6rem 0; }
 
   /* ═══ SESSION PREP ═══ the student's last seven days, read before a
@@ -1068,6 +1081,13 @@
     <section id="tab-scores" style="display:none;">
       <div class="scores-past" id="stu-scores-past" style="display:none;">SAT history from before the switch. It stays on file; the student no longer sees it.</div>
       <div class="summary-row" id="stu-tiles"></div>
+      <!-- REAL SAT SCORES (backend v30, 2026-09-26): official results typed in
+           here, each set beside the practice level before it. -->
+      <div class="card" id="stu-real-card">
+        <h2>Real SAT scores</h2>
+        <p class="card-sub">Official results, typed in from College Board. Each one is set beside the level the practice tests before it pointed to, so it shows whether home tests run above or below test day.</p>
+        <div id="stu-real"></div>
+      </div>
       <div class="card" id="stu-trend-card">
         <h2>Score progress</h2>
         <p class="card-sub" id="stu-trend-sub">Every scored attempt, oldest first.</p>
@@ -1658,7 +1678,7 @@
   // and form offsets are missing, so the page says so.
   // 28 (audit 4, 2026-09-26): history by attempt, per-file capabilities,
   // locked Question Bank sync, raw away time, the original miss time.
-  var REQUIRED_BACKEND_VERSION = 29;
+  var REQUIRED_BACKEND_VERSION = 30;
   // prep.gs has its own version since 28; below this its features are missing
   // even when Code.gs is current (the version action reports each file).
   var REQUIRED_PREP_VERSION = 29;
@@ -1697,6 +1717,7 @@
     practiceAck: 'practice answers the server turns away staying on the student\u2019s device instead of being lost',
     qbCompact: 'the Question Bank history syncing compactly (about 1,000 questions per student instead of 360)',
     formOffsets: 'per-test difficulty offsets for the skill evidence (prep.gs; computed daily)',
+    officialScores: 'saving real SAT scores on the Scores tab',
     pooledPrep: 'pacing habits and how misses happen, in Session prep (prep.gs)',
     rosterPatterns: 'Across your students under the roster (prep.gs)',
     evidenceFast: 'the evidence card loading from its cache for busy students',
@@ -3361,6 +3382,7 @@
       try {
         renderStudentMeta(data);
         renderStudentTiles(data);
+        renderRealScores(data);
         renderTrend(data);
         renderAttempts(data);
         renderSkills(data);
@@ -3609,6 +3631,85 @@
       '<div class="lbl">Outstanding misses</div>' +
       '<div class="sub">' + saved + ' saved question' + (saved === 1 ? '' : 's') + '</div></div>');
     $('stu-tiles').innerHTML = tiles.join('');
+  }
+
+  /* ═══ REAL SAT SCORES (backend v30, 2026-09-26) ═══
+     Nikolas: home tests 1110-1350, real SAT 1010, and nowhere to put the
+     1010. Each official result is set beside the current level
+     (MorettiSignals.currentLevel, first takes, comparable tests) from the
+     practice tests taken BEFORE it, and how many of those were under poor
+     conditions where that is known (qs.cn). Saved whole through
+     updateStudentInfo { officialScores }. */
+  function renderRealScores(data) {
+    var host = $('stu-real'), card = $('stu-real-card');
+    var st = data.student || {};
+    var sat = !st.program || st.program === 'sat';
+    card.style.display = sat ? '' : 'none';
+    if (!sat) return;
+    if (!Array.isArray(st.officialScores)) {
+      host.innerHTML = '<div class="empty">Needs the backend update (Code.gs version 30) before real scores can be saved.</div>';
+      return;
+    }
+    var MS = window.MorettiSignals, list = st.officialScores.slice();
+    var attempts = (data.attempts || []).map(function (a) {
+      return { composite: a.composite, rw: a.rw, math: a.math, date: a.at, at: a.at, testId: a.testId, mode: a.mode, source: a.source,
+               interrupted: a.interrupted, awayMin: a.awayMin, awayMs: a.awayMs, qStats: a.qStats };
+    }).filter(function (a) { return a.date; }).sort(function (a, b) { return String(a.date).localeCompare(String(b.date)); });
+    var fmtDay = function (d) { var p = String(d).split('-'); return p.length === 3 ? Number(p[1]) + '/' + Number(p[2]) + '/' + p[0] : d; };
+    var rows = list.map(function (o, i) {
+      var before = attempts.filter(function (a) { return String(a.date).slice(0, 10) < o.date; });
+      var lvl = MS && typeof MS.currentLevel === 'function' ? MS.currentLevel(before) : null;
+      var vs = '';
+      if (lvl && lvl.now) {
+        var n = lvl.now, gap = o.composite - n.level;
+        var where = o.composite < n.lo ? '<span class="real-gap-below">' + Math.abs(Math.round(gap / 10) * 10) + ' points below</span> what they pointed to'
+          : o.composite > n.hi ? '<b>' + Math.round(gap / 10) * 10 + ' points above</b> what they pointed to' : 'inside the range they pointed to';
+        var poor = 0, known = 0;
+        before.forEach(function (a) {
+          var qs = a.qStats; if (typeof qs === 'string') { try { qs = JSON.parse(qs); } catch (e) { qs = null; } }
+          if (qs && qs.cn) { known++; if (qs.cn.level === 'poor') poor++; }
+        });
+        vs = 'Practice tests before it put the level at about <b>' + n.level + '</b> (' + n.lo + '&ndash;' + n.hi + '); the real score was ' + where + '.' +
+          (known ? ' ' + poor + ' of the ' + known + ' with a conditions record were taken under poor conditions.' : '') +
+          (o.composite < n.lo ? ' Home tests are running above test day.' : '');
+      } else {
+        vs = 'No comparable practice tests before it to set it beside.';
+      }
+      return '<div class="real-row"><div class="real-date">' + escHtml(fmtDay(o.date)) + '</div>' +
+        '<div><div class="real-score">' + o.composite + '<span>R&amp;W ' + o.rw + ' &middot; Math ' + o.math + '</span></div><div class="real-vs">' + vs + '</div></div>' +
+        '<button type="button" class="mini" data-real-del="' + i + '" aria-label="Remove this score">Remove</button></div>';
+    }).join('');
+    host.innerHTML = (rows || '<div class="empty">No real SAT scores yet.</div>') +
+      '<form class="real-add" id="real-add-form">' +
+        '<label>SAT date<input type="date" id="real-add-date" required></label>' +
+        '<label>R&amp;W<input type="number" id="real-add-rw" min="200" max="800" step="10" required></label>' +
+        '<label>Math<input type="number" id="real-add-math" min="200" max="800" step="10" required></label>' +
+        '<button type="submit" class="mini solid" id="real-add-btn">Add score</button>' +
+      '</form>';
+    var key = currentStudent && currentStudent.key;
+    var save = function (next, btn, what) {
+      if (!key) return;
+      if (btn) { btn.disabled = true; btn.textContent = 'Saving\u2026'; }
+      postToBackend({ action: 'updateStudentInfo', adminKey: adminKey(), key: key, fields: { officialScores: next.map(function (o) { return { date: o.date, rw: o.rw, math: o.math }; }) } })
+        .then(function (d) {
+          if (!d || !d.ok) showNotice((currentStudent.name || key) + ': ' + what + ' NOT saved. ' + ((d && d.message) || (d && d.error) || 'Try again.'));
+          else if ((d.changed || []).indexOf('OfficialScoresJSON') === -1) showNotice((currentStudent.name || key) + ': ' + what + ' NOT saved. The backend is out of date: paste Code.gs and redeploy.');
+          if (currentStudent && currentStudent.key === key) loadStudentDetail(key);
+        }, function () { showNotice((currentStudent.name || key) + ': ' + what + ' NOT saved. Could not reach the backend.'); if (btn) { btn.disabled = false; btn.textContent = 'Add score'; } });
+    };
+    $('real-add-form').addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var date = $('real-add-date').value, rw = Number($('real-add-rw').value), math = Number($('real-add-math').value);
+      var okSec = function (n) { return n >= 200 && n <= 800 && n % 10 === 0; };
+      if (!date || !okSec(rw) || !okSec(math)) { showNotice('Each section is 200 to 800, in tens, with the SAT date.'); return; }
+      save(list.concat([{ date: date, rw: rw, math: math }]), $('real-add-btn'), 'the real SAT score');
+    });
+    Array.prototype.forEach.call(host.querySelectorAll('[data-real-del]'), function (b) {
+      b.addEventListener('click', function () {
+        var i = Number(b.getAttribute('data-real-del'));
+        save(list.filter(function (_, j) { return j !== i; }), b, 'removing the score');
+      });
+    });
   }
 
   /* ═══ SCORE PROGRESS ═══ the student's Home-screen bar chart, ported so
