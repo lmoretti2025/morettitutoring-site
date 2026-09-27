@@ -261,17 +261,15 @@
         halves = '<div class="t-halves r">' +
           '<div><div class="t-ht"><span>Reading &amp; Writing</span><b>' + rw + '</b></div><div class="t-track"><div class="t-fill" data-w="' + (100 * rw / 800).toFixed(1) + '"></div></div></div>' +
           '<div><div class="t-ht"><span>Math</span><b>' + ma + '</b></div><div class="t-track"><div class="t-fill" data-w="' + (100 * ma / 800).toFixed(1) + '"></div></div></div></div>';
-        /* A gap between the sections is only called a difference when it beats
-           one test's noise: each section's error is about 45 to 60 points
-           (MorettiSignals.sectionSem), so the gap's is near 80, and 1.645 of it
-           (about 130 mid-scale) is the bar. Which section holds the cheaper
-           points is the "Where the points are" screen's job, not this one's. */
-        var gap = Math.abs(rw - ma), MS = window.MorettiSignals;
-        var semOf = function (v) { try { return MS && MS.sectionSem ? Number(MS.sectionSem(v)) || 55 : 55; } catch (e) { return 55; } };
-        var se = Math.sqrt(Math.pow(semOf(rw), 2) + Math.pow(semOf(ma), 2));
-        say = gap >= 1.645 * se
-          ? (rw > ma ? 'Reading &amp; Writing' : 'Math') + ' is <strong>ahead by ' + gap + '</strong>, more than one test\u2019s ordinary noise.'
-          : 'Your two sections are <strong>close</strong>: within what one test can tell apart.';
+        /* Close means within 50 points (Luca, 2026-09-27: Nikolas' 710 and 600
+           were being called close under the old noise-based bar of about 130).
+           Which section holds the cheaper points is the "Where the points are"
+           screen's job, not this one's. */
+        var gap = Math.abs(rw - ma);
+        say = gap > 50
+          ? (rw > ma ? 'Reading &amp; Writing' : 'Math') + ' is <strong>ahead by ' + gap + '</strong>.'
+          : gap === 0 ? 'Your two sections are <strong>even</strong>.'
+          : 'Your two sections are <strong>close</strong>, within ' + gap + ' points of each other.';
       } else {
         var sKey = sections[0] && sections[0].key;
         halves = '<p class="t-say r" style="margin-top:14px">' + esc(secName(sKey)) + ' only, on the 200 to 800 scale.</p>';
@@ -807,7 +805,7 @@
     setTimeout(function () { if (r.parentNode) r.parentNode.removeChild(r); }, 450);
     if (lastFocus && lastFocus.focus) try { lastFocus.focus(); } catch (e) {}
   }
-  function open(M) {
+  function open(M, instant) {
     if (root || !M || !M.screens.length) return;
     model = M; injectCss(); lastFocus = document.activeElement;
     root = document.createElement('div'); root.id = 'mtt';
@@ -819,6 +817,9 @@
       '<div class="t-nav"><div class="t-nav-in"><button type="button" class="t-arrow t-prev" aria-label="Back">&larr;</button><span class="t-hint">Tap, swipe or use arrow keys</span>' +
       '<button type="button" class="t-arrow next t-next" aria-label="Next">&rarr;</button></div></div>' +
       '<div class="t-sheet"><div class="t-card" role="dialog" aria-modal="true" aria-labelledby="mtt-sh-title"><div class="t-sh"><h3 id="mtt-sh-title"></h3><button type="button" class="t-x" aria-label="Close">&times;</button></div><div class="t-sb"></div></div></div>';
+    /* Opening by itself (instant): covered from the first frame, no fade, so
+       the report never shows for a moment underneath (Luca, 2026-09-27). */
+    if (instant) { root.style.transition = 'none'; root.classList.add('on'); }
     document.body.appendChild(root);
     document.documentElement.style.overflow = 'hidden';
     /* The site's sample (diagnostic.html): nothing to skip to, and every way
@@ -868,7 +869,7 @@
     document.addEventListener('keydown', onKey);
     requestAnimationFrame(function () {
       if (!root) return;
-      root.classList.add('on'); go(0);
+      root.classList.add('on'); root.style.transition = ''; go(0);
       // Focus moves into the walkthrough on open (audit 6: Tab reached the page behind it).
       var nxt = root.querySelector('.t-scr.on button') || root.querySelector('.t-next');
       if (nxt) try { nxt.focus(); } catch (e) {}
@@ -899,18 +900,17 @@
       if (opts.sample) { M.sample = true; setTimeout(function () { open(M); }, 300); return; }
       // By itself once per attempt per device; never when printing or embedded for show.
       // Not by itself inside Luca's admin viewer (audit 6: it greeted him as the student).
-      var inAdmin = false;
-      try { inAdmin = window.parent !== window && /admin/i.test(window.parent.location.pathname); } catch (e) { inAdmin = false; }
+      /* The admin viewer's frame is sandboxed, so the parent's address can't be
+         read from here; it marks the link ?admin=1 instead (2026-09-27). */
+      var inAdmin = /[?&]admin=1\b/.test(location.search);
+      try { inAdmin = inAdmin || (window.parent !== window && /admin/i.test(window.parent.location.pathname)); } catch (e) { /* sandboxed: the marker decides */ }
       if (opts.autoOpen !== false && !inAdmin) {
         var st = storage(), key = 'mtt_seen:' + M.attemptId, seen = false;
         try { seen = !!(st && st.getItem(key)); } catch (e) {}
         if (opts.always) seen = false;   // a showcase link: the walkthrough every time
         if (!seen) {
-          setTimeout(function () {
-            if (!document.body.contains(anchor || document.body)) return;   // the report was closed or replaced first
-            open(M);
-            try { if (st && root) st.setItem(key, String(Date.now())); } catch (e) {}
-          }, opts.delay || 500);
+          open(M, true);
+          try { if (st && root) st.setItem(key, String(Date.now())); } catch (e) {}
         }
       }
     } catch (e) { if (window.console) console.warn('report walkthrough:', e); }
