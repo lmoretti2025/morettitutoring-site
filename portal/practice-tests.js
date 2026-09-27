@@ -2769,7 +2769,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Rhetorical Synthesis",
           "difficulty": "medium",
           "type": "mc",
-          "text": "While researching a topic, a student has taken the following notes:<br><br>• The Wardian case is a sealed glazed box built to carry live plants.<br>• Nathaniel Bagshaw Ward designed the case in the 1830s.<br>• Earlier, most plants shipped by sea died of salt spray, and many died of drought on deck.<br>• A sealed case recycles the moisture inside and stands months at sea unwatered.<br>• Tea, rubber, and cinchona travelled by Wardian case from one continent to another.<br><br>The student wants to explain how the Wardian case solved a practical problem. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
+          "text": "While researching a topic, a student has taken the following notes:<br><br>• The Wardian case is a sealed glazed box built to carry live plants.<br>• Nathaniel Bagshaw Ward designed the case in the 1830s.<br>• Earlier, most plants shipped by sea died of salt spray, and many died of drought on deck.<br>• A sealed case recycles the moisture inside and stands months at sea unwatered.<br>• Tea, rubber, and cinchona traveled by Wardian case from one continent to another.<br><br>The student wants to explain how the Wardian case solved a practical problem. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
           "choices": [
             "Nathaniel Bagshaw Ward designed the Wardian case in the 1830s, and tea, rubber, and cinchona were all later moved between continents inside one.",
             "Because a sealed glazed case recycles its own moisture, plants that would once have died of salt spray or drought on deck survived months at sea unwatered.",
@@ -2813,7 +2813,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Words in Context",
           "difficulty": "easy",
           "type": "mc",
-          "text": "The axolotl, a Mexican salamander, keeps its feathery external gills and finned tail into adult life, features that related salamanders shed when they leave the water. Since it breeds in exactly this form, biologists describe the animal as ______. It reaches sexual maturity without ever undergoing the transformation its relatives complete.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
+          "text": "The axolotl, a Mexican salamander, keeps its feathery external gills (the organs a larva breathes with) and its finned tail into adult life, features that related salamanders shed when they leave the water. Since it breeds in exactly this form, biologists describe the animal as ______. It reaches sexual maturity without ever undergoing the transformation its relatives complete.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
           "choices": [
             "unfinished",
             "freshwater",
@@ -2918,7 +2918,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Text Structure and Purpose",
           "difficulty": "medium",
           "type": "mc",
-          "text": "Cochineal (the deep red of European painting and dyeing after the sixteenth century) comes from an insect that feeds on prickly pear. Spain controlled the supply for two hundred years, shipping the dried insects to Europe without any account of their origin, and naturalists there argued about whether the grains belonged to plants or to animals. A microscope settled the question by showing legs.<br><br>Which choice best states the main purpose of the text?",
+          "text": "Cochineal—the deep red of European painting and dyeing after the sixteenth century—comes from an insect that feeds on prickly pear. Spain controlled the supply for two hundred years, shipping the dried insects to Europe without any account of their origin, and naturalists there argued about whether the grains belonged to plants or to animals. A microscope settled the question by showing legs.<br><br>Which choice best states the main purpose of the text?",
           "choices": [
             "To argue that cochineal produced a better red than the dyes available in Europe.",
             "To explain the optical principles that allowed early microscopes to resolve legs.",
@@ -2960,7 +2960,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Central Ideas and Details",
           "difficulty": "easy",
           "type": "mc",
-          "text": "Lascaux closed to visitors in 1963. Two decades of tourism allowed the breath and body heat of crowds to spread algae and calcite, a mineral crust, across painted walls that conservators could not safely clean. A full-size replica opened nearby during 1983, and two more copies now stand in for the cave, reproducing the paintings to within one millimeter. Only conservators can still enter the original.<br><br>Which choice best states the main idea of the text?",
+          "text": "Lascaux closed to visitors in 1963. Two decades of tourism allowed the breath and body heat of crowds to spread algae and calcite—a mineral crust—across painted walls that conservators could not safely clean. A full-size replica opened nearby during 1983, and two more copies now stand in for the cave, reproducing the paintings to within one millimeter. Only conservators can still enter the original.<br><br>Which choice best states the main idea of the text?",
           "choices": [
             "Lascaux was closed to protect the paintings, and replicas now stand in for the original cave.",
             "The replicas built near Lascaux since 1983 reproduce the paintings to within a millimeter.",
@@ -3023,7 +3023,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Command of Evidence (Quantitative)",
           "difficulty": "medium",
           "type": "mc",
-          "text": "Cooking changes food in several ways at the same time, and a method that improves one measure of nutrition can damage a second. A nutrition researcher prepared identical portions of spinach by four methods, then measured the amount of iron the body is able to absorb and the share of vitamin C left in the leaves. None of the four methods proved best on both counts. The clearest case is boiling, which ______<table class=\"dx-table\"><tr><th>Cooking method</th><th>Iron absorbed (mg)</th><th>Vitamin C retained (%)</th></tr><tr><td>Raw</td><td>0.9</td><td>100</td></tr><tr><td>Steamed</td><td>1.4</td><td>71</td></tr><tr><td>Boiled</td><td>1.6</td><td>38</td></tr><tr><td>Fried</td><td>1.5</td><td>55</td></tr></table><br><br>Which choice most effectively uses data from the table to complete the example?",
+          "text": "Cooking changes food in several ways at the same time, and a method that improves one measure of nutrition can damage a second. A nutrition researcher prepared identical portions of spinach by four methods, then measured the iron a body is able to absorb, or bioavailable iron, and the share of vitamin C left in the leaves. None of the four methods proved best on both counts. The clearest case is boiling, which ______<table class=\"dx-table\"><tr><th>Cooking method</th><th>Iron absorbed (mg)</th><th>Vitamin C retained (%)</th></tr><tr><td>Raw</td><td>0.9</td><td>100</td></tr><tr><td>Steamed</td><td>1.4</td><td>71</td></tr><tr><td>Boiled</td><td>1.6</td><td>38</td></tr><tr><td>Fried</td><td>1.5</td><td>55</td></tr></table><br><br>Which choice most effectively uses data from the table to complete the example?",
           "choices": [
             "retained all of the vitamin C in the leaves while yielding the least absorbable iron.",
             "yielded more absorbable iron than steaming did but less than frying did.",
@@ -3044,7 +3044,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Command of Evidence (Textual)",
           "difficulty": "easy",
           "type": "mc",
-          "text": "Ethologist Gavin Hunt first documented tool manufacture among New Caledonian crows, which strip and notch twigs to extract grubs from dead wood. One proposal holds that a crow selects a twig for a particular hole rather than reshaping whichever twig the crow happens to hold.<br><br>Which finding, if true, would most directly support this proposal?",
+          "text": "The ethologist Gavin Hunt first documented tool manufacture (the shaping of an object for a task) in New Caledonian crows, birds that strip and notch twigs in order to extract grubs from dead wood. How the birds arrive at their tools remains in dispute. One proposal holds that a crow chooses its twig with a particular hole in mind, and not by reshaping whatever twig it happens to be carrying.<br><br>Which finding, if true, would most directly support this proposal?",
           "choices": [
             "Crows that are given no twigs will use stiff grass stems to extract grubs instead.",
             "Crows presented with holes of varying width pick a twig matched to the hole before approaching it.",
@@ -3065,7 +3065,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Command of Evidence (Textual)",
           "difficulty": "medium",
           "type": "mc",
-          "text": "Jane Eyre is an 1847 novel by Charlotte Brontë. In the novel, Brontë shows the young Jane insisting on a distinction between being disliked and being at fault:<br><br>Which quotation from Jane Eyre most effectively illustrates the claim?",
+          "text": "Jane Eyre is an 1847 novel by Charlotte Brontë. In this scene the young Jane, long treated as a burden in her aunt's house and lately accused of deceit, insists that to be disliked is not the same thing as to be in the wrong:<br><br>Which quotation from Jane Eyre most effectively illustrates the claim?",
           "choices": [
             "“The room was chill, for it seldom had a fire; it was silent, because remote from the nursery.”",
             "“Speak I must: I had been trodden on severely, and must turn: but how?”",
@@ -3075,7 +3075,7 @@ window.SAT_PRACTICE_TESTS = [
           "correct": 2,
           "choiceNotes": [
             "Incorrect. This describes a room and contains no claim about Jane’s conduct or how she is regarded.",
-            "Incorrect. It conveys the pressure to speak, not any distinction between fault and disfavour.",
+            "Incorrect. It conveys the pressure to speak, not any distinction between fault and disfavor.",
             "Correct. Jane concedes the dislike and refuses the charge in the same breath, separating what she is accused of being from what she has actually done.",
             "Incorrect. It reports that resisting worsened the opinion of her, which is the reverse of drawing a distinction."
           ]
@@ -3086,7 +3086,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Inferences",
           "difficulty": "easy",
           "type": "mc",
-          "text": "Emperor penguins huddle through the Antarctic winter in colonies of thousands, and a bird on the windward edge loses heat far faster than one at the center. Time-lapse data from a colony filmed over several weeks in 2011 show the huddle advancing in small waves, each bird shuffling a few centimeters and the whole mass moving downwind over hours. A bird that began at the edge was near the center within a day. The pattern therefore suggests that ______<br><br>Which choice most logically completes the text?",
+          "text": "Emperor penguins spend the Antarctic winter in colonies of thousands, pressed together in huddles, and birds along the windward face of a huddle lose heat far faster than those nearer the middle. Time-lapse film of one colony, shot across several weeks of 2011, shows the huddle advancing in small movements known as traveling waves. Birds shuffle forward a few centimeters and the mass of them travels slowly downwind through the hours. Birds that begin along the windward face stand near the middle within a day. The pattern therefore suggests that ______<br><br>Which choice most logically completes the text?",
           "choices": [
             "the birds at the center of a huddle are the heaviest members of the colony.",
             "penguins choose their position in the huddle according to age.",
@@ -3107,7 +3107,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Inferences",
           "difficulty": "medium",
           "type": "mc",
-          "text": "A lighthouse lens concentrates a lamp into a narrow beam, and the beam sweeps as the lens turns. Each station was given a distinct rhythm of flashes, the light’s character, so that a navigator could tell one light from another, and the rhythm was produced by the shape of the lens and the speed of the clockwork that drove the lens. Two neighboring stations were never given the same rhythm. It can therefore be inferred that a navigator who saw a light and timed it ______<br><br>Which choice most logically completes the text?",
+          "text": "The lens of a lighthouse concentrates lamplight in one narrow beam, and the beam sweeps the horizon as the lens turns. Every station received its own rhythm of flashes, known as the character of the light, fixed by the shape of the lens and by the speed of the clockwork driving it, so that navigators distinguished one light from the next along a stretch of coast. No station shared a rhythm with any other station nearby. Given the practice, a navigator timing the flashes of one unknown light ______<br><br>Which choice most logically completes the text?",
           "choices": [
             "could tell which station it was without consulting any chart.",
             "could identify the station provided the rhythms of that coast were known.",
@@ -3170,7 +3170,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Form, Structure, and Sense",
           "difficulty": "easy",
           "type": "mc",
-          "text": "The survey team mapped the reef in March and returned in September, when ______ found that a third of the coral recorded in the spring had bleached.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "text": "Bleaching is the loss of the algae that give coral its color, and a bleached reef is often a dying one. Marine biologists mapped one reef during March and returned six months later, when ______ found a third of the coral recorded earlier to be bleached.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
           "choices": [
             "which",
             "it",
@@ -3180,9 +3180,9 @@ window.SAT_PRACTICE_TESTS = [
           "correct": 3,
           "choiceNotes": [
             "Incorrect. “Which” is a relative pronoun and cannot serve as the subject of “found” after “when.”",
-            "Incorrect. “It” would treat the team as a single body, which conflicts with the sentence’s account of people doing the work.",
+            "Incorrect. “It” is singular and cannot refer to the plural “marine biologists.”",
             "Incorrect. “One” introduces an indefinite person who has no antecedent in the sentence.",
-            "Correct. The antecedent is “the survey team,” treated here as the people who mapped and returned, and “they” agrees with that reading and with the plural verbs around it."
+            "Correct. The antecedent is “marine biologists,” and “they” is the only choice that agrees with a plural antecedent."
           ]
         },
         {
