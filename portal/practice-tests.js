@@ -2508,7 +2508,7 @@ window.SAT_PRACTICE_TESTS = [
             "Incorrect. This is the pattern that expectation predicted; it supports the proposal rather than complicating it.",
             "Incorrect. The narrowness of the pH range says nothing about whether thickness tracks it.",
             "Incorrect. North has both the higher pH and the thicker shells, so this pair also fits the prediction.",
-            "Correct. South has a lower pH than Central but thicker shells, which is the reverse of the predicted relationship and is what makes it “not that simple.”"
+            "Correct. South has a lower pH than Central but thicker shells, which is the reverse of the predicted relationship and is what makes it “more complex.”"
           ]
         },
         {
@@ -2706,7 +2706,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Transitions",
           "difficulty": "medium",
           "type": "mc",
-          "text": "A lock on a canal raises a boat by trapping the vessel between two gates and admitting water from the higher reach. Every lockful spent in lifting a boat is water drawn off the summit level, which is fed only by rainfall on the hills around it. ______ a dry summer can close a canal as effectively as a breach in its bank.<br><br>Which choice completes the text with the most logical transition?",
+          "text": "Canal locks lift boats by closing two gates around the hull, then letting in water from the reach above. Every lockful spent in the lift, once the gates open below, runs away downhill, and the loss falls on the summit level, fed by rainfall on the surrounding hills and by nothing else. ______ dry summers close the canal as thoroughly as breaches in its bank.<br><br>Which choice completes the text with the most logical transition?",
           "choices": [
             "Consequently,",
             "For instance,",
@@ -2727,7 +2727,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Transitions",
           "difficulty": "hard",
           "type": "mc",
-          "text": "The manuscript is written in a hand that appears nowhere else in the abbey’s books, and its parchment was prepared in a way unknown in the region. ______ the text it carries is a copy of a charter held by that abbey and by no other house.<br><br>Which choice completes the text with the most logical transition?",
+          "text": "The hand in this manuscript matches nothing else in the whole of the abbey’s library, and the parchment, prepared by a method unrecorded anywhere in the region, came from somewhere far off. ______ the charter it preserves belonged to that abbey and that abbey only.<br><br>Which choice completes the text with the most logical transition?",
           "choices": [
             "For example,",
             "As a result,",
@@ -2748,19 +2748,19 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Rhetorical Synthesis",
           "difficulty": "easy",
           "type": "mc",
-          "text": "While researching a topic, a student has taken the following notes:<br><br>• A qanat is a gently sloping tunnel that carries groundwater to the surface by gravity.<br>• Vertical shafts along its length gave access for digging and for maintenance.<br>• Some qanats in Iran have run continuously for more than two thousand years.<br>• No pump is used at any point.<br>• A single qanat may run for tens of kilometers underground.<br><br>The student wants to introduce the qanat to an audience unfamiliar with it. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
+          "text": "While researching a topic, a student has taken the following notes:<br><br>• A qanat is a tunnel, sloping at a slight grade, that carries groundwater to the surface by gravity.<br>• Vertical shafts, sunk along the line of the tunnel, gave diggers access during the digging of the tunnel and during its upkeep.<br>• Some qanats of Iran have carried water for more than two thousand years without a break.<br>• The water of a qanat moves by gravity, never by pump.<br>• A single qanat, running underground, can reach tens of kilometers in length.<br><br>The student wants to introduce the qanat to an audience unfamiliar with it. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
           "choices": [
             "A qanat is a gently sloping tunnel that brings groundwater to the surface by gravity alone, sometimes over tens of kilometers.",
             "Some qanats in Iran have carried water continuously for more than two thousand years without a pump at any point.",
             "Vertical shafts placed along the length of a qanat gave diggers access to the tunnel and allowed it to be maintained.",
-            "Qanats were dug by hand, and the vertical shafts along them may still be seen from the air in parts of Iran today."
+            "Some qanats extend tens of kilometers underground, and a few in Iran have delivered water for more than two thousand years."
           ],
           "correct": 0,
           "choiceNotes": [
             "Correct. It says what a qanat is, what it does and how, which is what an unfamiliar audience needs first.",
             "Incorrect. It is striking but assumes the reader already knows what a qanat does.",
             "Incorrect. The shafts are a detail of construction and mean little to a reader who does not yet know what a qanat is.",
-            "Incorrect. It adds a claim about visibility from the air that the notes do not contain."
+            "Incorrect. The length and the age are both in the notes, but neither tells a reader who does not know the word what a qanat is."
           ]
         },
         {
@@ -2769,7 +2769,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Rhetorical Synthesis",
           "difficulty": "medium",
           "type": "mc",
-          "text": "While researching a topic, a student has taken the following notes:<br><br>• The Wardian case is a sealed glazed box for carrying live plants.<br>• Nathaniel Bagshaw Ward designed it in the 1830s.<br>• Before it, most plants shipped by sea died of salt spray or of drought on deck.<br>• Sealed, a case recycles its own moisture and needs no watering for months.<br>• Tea, rubber, and cinchona were all moved between continents in Wardian cases.<br><br>The student wants to explain how the Wardian case solved a practical problem. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
+          "text": "While researching a topic, a student has taken the following notes:<br><br>• The Wardian case is a sealed glazed box built to carry live plants.<br>• Nathaniel Bagshaw Ward designed the case in the 1830s.<br>• Earlier, most plants shipped by sea died of salt spray, and many died of drought on deck.<br>• A sealed case recycles the moisture inside and stands months at sea unwatered.<br>• Tea, rubber, and cinchona travelled by Wardian case from one continent to another.<br><br>The student wants to explain how the Wardian case solved a practical problem. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
           "choices": [
             "Nathaniel Bagshaw Ward designed the Wardian case in the 1830s, and tea, rubber, and cinchona were all later moved between continents inside one.",
             "Because a sealed glazed case recycles its own moisture, plants that would once have died of salt spray or drought on deck survived months at sea unwatered.",
@@ -2790,7 +2790,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Rhetorical Synthesis",
           "difficulty": "hard",
           "type": "mc",
-          "text": "While researching a topic, a student has taken the following notes:<br><br>• Ada Blackjack was the sole survivor of a 1921 expedition to Wrangel Island.<br>• She was hired as a seamstress and had no training in hunting or trapping.<br>• The four men on the expedition died; three left the island and were never found.<br>• Left alone with one sick man, she taught herself to shoot and to trap foxes.<br>• She was rescued in 1923 after two years on the island.<br><br>The student wants to emphasize what Blackjack had to acquire in order to survive. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
+          "text": "While researching a topic, a student has taken the following notes:<br><br>• Ada Blackjack was the sole survivor of a 1921 expedition to Wrangel Island.<br>• The expedition hired her as a seamstress, and she arrived without training in hunting or trapping.<br>• Four men went with her, and three of the four walked out across the ice and vanished.<br>• The fourth fell ill, and she nursed him alone on the island until he died.<br>• Alone, she taught herself to shoot and to trap foxes.<br>• A ship took her off in 1923, two years after the expedition landed.<br><br>The student wants to emphasize what Blackjack had to acquire in order to survive. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
           "choices": [
             "Ada Blackjack spent two years on Wrangel Island, where she was left alone with one sick man after the other members of the expedition had left the island.",
             "Ada Blackjack was the only member of the 1921 Wrangel Island expedition to survive, and she was rescued in 1923 after two years there.",
