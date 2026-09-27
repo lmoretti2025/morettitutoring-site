@@ -111,6 +111,25 @@
   .prep-note { font-size: 0.72rem; color: var(--faint); margin: 0.75rem 0 0; }
   /* Behaviour patterns, pooled across tests (prep.gs behavior) */
   .prep-bp { margin: 0 0 1.1rem; }
+  /* Pooled pacing and how misses happen (v29), and Across your students. */
+  .pool-tbl-wrap { overflow-x: auto; margin: 0.4rem 0 0.2rem; }
+  .pool-tbl { border-collapse: collapse; width: 100%; font-size: 0.76rem; min-width: 560px; }
+  .pool-tbl th, .pool-tbl td { padding: 0.35rem 0.45rem; border-top: 1px solid var(--border); text-align: left; vertical-align: top; }
+  .pool-tbl th { font-size: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mid); font-weight: 700; }
+  .pool-tbl .n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .pool-tbl tr.focus td { background: rgba(176,39,28,0.05); }
+  .pool-tbl td .sub { color: var(--mid); font-size: 0.7rem; }
+  .pool-read { font-size: 0.8rem; line-height: 1.5; margin: 0.35rem 0 0; }
+  .roster-pat { margin: 1.4rem 0 0; background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.1rem; }
+  .roster-pat h2 { font-size: 1rem; margin: 0 0 0.2rem; }
+  .roster-pat .rp-sub { font-size: 0.78rem; color: var(--mid); margin: 0 0 0.7rem; }
+  .roster-pat .rp-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 0.9rem 1.4rem; }
+  .roster-pat h3 { font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--mid); margin: 0 0 0.35rem; }
+  .roster-pat ul { list-style: none; margin: 0; padding: 0; }
+  .roster-pat li { padding: 0.4rem 0; border-top: 1px solid var(--border); font-size: 0.8rem; line-height: 1.45; }
+  .roster-pat li b { font-weight: 600; }
+  .roster-pat li .who { color: var(--mid); display: block; font-size: 0.74rem; }
+  .roster-pat .rp-count { float: right; font-variant-numeric: tabular-nums; font-weight: 600; }
   .prep-bp-sub { font-weight: 600; letter-spacing: 0.04em; text-transform: none; margin-left: 0.4rem; }
   .prep-bp ul { list-style: none; margin: 0; padding: 0; }
   .prep-bp li { padding: 0.5rem 0; border-top: 1px solid var(--border); font-size: 0.82rem; line-height: 1.5; }
@@ -987,6 +1006,14 @@
         </table>
       </div>
     </div>
+    <!-- ACROSS YOUR STUDENTS (prep.gs adminRosterPatterns, v29): what is
+         common across the SAT roster. Loaded on demand: it reads every
+         student's tests. -->
+    <div class="roster-pat" id="roster-pat">
+      <h2>Across your students</h2>
+      <p class="rp-sub" id="rp-sub">Focus areas, pacing habits and test-taking habits that hold for each student, grouped so you can see what is common. <button type="button" class="mini" id="rp-load">Show</button></p>
+      <div id="rp-body"></div>
+    </div>
   </div>
 
   <!-- ═══ ONE STUDENT ═══ a header that says who, which program and when
@@ -1361,7 +1388,7 @@
      so the signed admin session is in sessionStorage when the auto-continue
      boot code below reads it. -->
 <script src="time-budgets.js?v=20260912a"></script>
-<script src="signals.js?v=20260926d"></script>
+<script src="signals.js?v=20260926e"></script>
   <script src="backend-url.js?v=20260905"></script>
   <script>
     /* Browser errors on this page reach the ClientErrors tab too (prep.gs's
@@ -1631,13 +1658,13 @@
   // and form offsets are missing, so the page says so.
   // 28 (audit 4, 2026-09-26): history by attempt, per-file capabilities,
   // locked Question Bank sync, raw away time, the original miss time.
-  var REQUIRED_BACKEND_VERSION = 28;
+  var REQUIRED_BACKEND_VERSION = 29;
   // prep.gs has its own version since 28; below this its features are missing
   // even when Code.gs is current (the version action reports each file).
-  var REQUIRED_PREP_VERSION = 28;
+  var REQUIRED_PREP_VERSION = 29;
   // signals.gs and emails.gs carry their own numbers since audit 5: an older
   // copy can have every function name and still compute the old way.
-  var REQUIRED_SIGNALS_VERSION = 30, REQUIRED_EMAILS_VERSION = 30;
+  var REQUIRED_SIGNALS_VERSION = 31, REQUIRED_EMAILS_VERSION = 30;
   // booking.gs (the parent booking page) declares BOOKING_VERSION since 2026-09-26.
   var REQUIRED_BOOKING_VERSION = 1;
   var CAPABILITY_LABELS = {
@@ -1670,6 +1697,8 @@
     practiceAck: 'practice answers the server turns away staying on the student\u2019s device instead of being lost',
     qbCompact: 'the Question Bank history syncing compactly (about 1,000 questions per student instead of 360)',
     formOffsets: 'per-test difficulty offsets for the skill evidence (prep.gs; computed daily)',
+    pooledPrep: 'pacing habits and how misses happen, in Session prep (prep.gs)',
+    rosterPatterns: 'Across your students under the roster (prep.gs)',
     evidenceFast: 'the evidence card loading from its cache for busy students',
     historyWindow: 'test history counted by test, so no device deletes a long-standing student\u2019s older tests',
     awayMs: 'exact time away from a test, so every screen applies the ten-minute rule the same way',
@@ -2936,6 +2965,135 @@
       '<p class="prep-note">Pooled: ' + escHtml(bits.join(' · ')) + '. ' + emailNote + '</p></div>';
   }
 
+  /* ═══ PACING AND HOW MISSES HAPPEN (prep.gs pooled, v29) ═══
+     Pooled across every test that counts: the pacing habits that hold on
+     two reads (signals.js pacingHabits), and each area's misses split by
+     how they happened (missProfile), with the Question Bank's "Sure but
+     wrong" beside them. Counts for Luca's judgment; nothing here decides. */
+  var AREA_SHORT = {
+    'Standard English Conventions': 'Conventions', 'Expression of Ideas': 'Expression of Ideas',
+    'Information and Ideas': 'Information and Ideas', 'Craft and Structure': 'Craft and Structure',
+    'Algebra': 'Algebra', 'Advanced Math': 'Advanced Math',
+    'Problem-Solving and Data Analysis': 'Problem-Solving and Data', 'Geometry and Trigonometry': 'Geometry and Trig'
+  };
+  function paceHabitLine(h, pending) {
+    var tag = '<span class="tag tutor">' + (pending ? 'Not yet held twice' : 'Tutor only') + '</span>';
+    if (h.id === 'runs-short') {
+      var bits = [];
+      if (h.blanks) bits.push(h.blanks + ' never answered');
+      if (h.rushed) bits.push(h.rushed + ' rushed at the end');
+      var sinks = h.sinks ? '; before that, ' + h.sinks + ' question' + (h.sinks === 1 ? '' : 's') + ' took 1.5x their time' +
+        (h.sinksWhere ? ' (' + h.sinksWhereN + ' in ' + h.sinksWhere + ')' : '') : '';
+      return '<li>' + tag + '<b>' + (h.sec === 'math' ? 'Math' : 'Reading and Writing') + ', Module ' + h.module + ' runs short</b> &middot; ' +
+        h.hit + ' of ' + h.of + ' tests (' + escHtml(bits.join(', ')) + ')' + escHtml(sinks) + '</li>';
+    }
+    if (h.id === 'too-fast') {
+      return '<li>' + tag + '<b>Answers faster than a question can be read</b> &middot; ' + h.hit + ' of ' + h.of + ' tests, ' +
+        h.answers + ' answers under a sixth of their time, outside any end-of-module rush</li>';
+    }
+    return '';
+  }
+  function missReading(d) {
+    var m = d.misses || 0;
+    if (m < 6) return '';
+    var worked = d.worked + d.sink, paceN = d.fast + d.rush, out = [];
+    if (worked >= 0.6 * m) out.push('Most were worked and still missed: content to teach.');
+    else if (paceN >= 0.4 * m) out.push('A large share went by too fast or in an end rush: part of this is pace, not content.');
+    if (d.near >= 0.4 * m) out.push(d.near + ' came down to two choices: close, so work on the final distinction.');
+    if (d.keyOut >= Math.max(2, 0.25 * m)) out.push('The right answer was crossed out on ' + d.keyOut + ': look for a misconception.');
+    if (d.blank >= 0.4 * m) out.push('Many were never answered: they sit where the clock ran out.');
+    if (d.qb && d.qb.sureWrong >= 3 && d.qb.sureWrong >= 0.3 * d.qb.sure) out.push('In practice, "Sure" was wrong ' + d.qb.sureWrong + ' of ' + d.qb.sure + ' times.');
+    return out.join(' ');
+  }
+  function renderPooledPrep(P, err) {
+    var hed = '<div class="prep-hw-hed">Pacing and how misses happen';
+    if (!P) return err ? '<div class="prep-bp">' + hed + '</div><p class="prep-note">Not available: ' + escHtml(err) + '</p></div>' : '';
+    var pc = P.pacing || {};
+    hed += '<span>' + (P.misses && P.misses.tests || 0) + ' test' + ((P.misses && P.misses.tests) === 1 ? '' : 's') + ' pooled</span></div>';
+    var items = [];
+    (pc.habits || []).forEach(function (h) { items.push(paceHabitLine(h, false)); });
+    (pc.pending || []).forEach(function (h) { items.push(paceHabitLine(h, true)); });
+    if (!items.length) {
+      items.push('<li>' + (pc.tests < pc.need ? 'Pacing habits start after ' + pc.need + ' timed tests.'
+        : pc.withModules < pc.need ? 'Pacing habits need tests saved from September 26 on (older records carry no module or pace code).'
+        : 'No pacing habit holds across tests.') + '</li>');
+    }
+    var byD = (P.misses && P.misses.byDomain) || {};
+    var doms = Object.keys(byD).sort(function (a, b) { return byD[b].misses - byD[a].misses; });
+    if (P.focus && byD[P.focus]) doms = [P.focus].concat(doms.filter(function (d) { return d !== P.focus; }));
+    doms = doms.filter(function (d) { return byD[d].misses > 0; }).slice(0, 4);
+    var n = function (v) { return '<td class="n">' + (v || 0) + '</td>'; };
+    var rows = doms.map(function (d) {
+      var x = byD[d], qb = x.qb || {};
+      return '<tr' + (d === P.focus ? ' class="focus"' : '') + '><td><b>' + escHtml(AREA_SHORT[d] || d) + '</b>' + (d === P.focus ? ' <span class="sub">focus</span>' : '') + '</td>' +
+        n(x.misses) + n(x.worked) + n(x.sink) + n(x.fast + x.rush) + n(x.blank) + n(x.near) + n(x.keyOut) +
+        '<td class="n">' + (qb.sure ? qb.sureWrong + ' / ' + qb.sure : '&ndash;') + '</td></tr>';
+    }).join('');
+    var reading = P.focus && byD[P.focus] ? missReading(byD[P.focus]) : (doms[0] ? missReading(byD[doms[0]]) : '');
+    var table = rows
+      ? '<div class="pool-tbl-wrap"><table class="pool-tbl"><thead><tr><th>Area</th><th class="n">Missed</th><th class="n">Worked, wrong</th>' +
+        '<th class="n">1.5x time, wrong</th><th class="n">Too fast or rushed</th><th class="n">Blank</th><th class="n">Down to two</th>' +
+        '<th class="n">Key crossed out</th><th class="n">QB: Sure but wrong</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+        (reading ? '<p class="pool-read"><b>' + escHtml(AREA_SHORT[P.focus || doms[0]] || (P.focus || doms[0])) + ':</b> ' + escHtml(reading) + '</p>' : '') +
+        '<p class="prep-note">"Down to two" and "key crossed out" are part of the misses, not extra. They start with tests saved from September 26 on.</p>'
+      : '';
+    return '<div class="prep-bp">' + hed + '<ul>' + items.join('') + '</ul>' + table + '</div>';
+  }
+
+  /* ═══ ACROSS YOUR STUDENTS (prep.gs adminRosterPatterns, v29) ═══ */
+  function renderRosterPatterns(d) {
+    var body = document.getElementById('rp-body');
+    var who = function (list) { return list.map(function (x) { return escHtml(String(x.name).split(' ')[0]); }).join(', '); };
+    var group = function (title, list, empty) {
+      return '<div><h3>' + title + '</h3><ul>' + (list.length ? list.map(function (g) {
+        return '<li><span class="rp-count">' + g.students.length + '</span><b>' + escHtml(AREA_SHORT[g.label] || g.label) + '</b><span class="who">' + who(g.students) + '</span></li>';
+      }).join('') : '<li>' + empty + '</li>') + '</ul></div>';
+    };
+    var md = (d.missesByDomain || []).slice(0, 8);
+    var n = function (v) { return '<td class="n">' + (v || 0) + '</td>'; };
+    var pct = function (a, b) { return b ? Math.round(100 * a / b) + '%' : '&ndash;'; };
+    var table = md.length ? '<div class="pool-tbl-wrap"><table class="pool-tbl"><thead><tr><th>Area</th><th class="n">Students</th><th class="n">Missed</th>' +
+      '<th class="n">Worked, wrong</th><th class="n">Too fast or rushed</th><th class="n">Blank</th><th class="n">Down to two</th></tr></thead><tbody>' +
+      md.map(function (x) {
+        return '<tr><td><b>' + escHtml(AREA_SHORT[x.domain] || x.domain) + '</b></td>' + n(x.students) + n(x.misses) +
+          '<td class="n">' + pct(x.worked + x.sink, x.misses) + '</td><td class="n">' + pct(x.fast + x.rush, x.misses) + '</td>' +
+          '<td class="n">' + pct(x.blank, x.misses) + '</td><td class="n">' + pct(x.near, x.misses) + '</td></tr>';
+      }).join('') + '</tbody></table></div>' : '';
+    body.innerHTML = '<div class="rp-cols">' +
+      group('Named focus areas', d.areas || [], 'No student has a named focus area yet.') +
+      group('Habits that hold', d.habits || [], 'No pacing or test-taking habit holds for any student yet.') +
+      '</div>' +
+      '<h3 style="margin-top:1rem;">Where the roster\u2019s misses are, and how they happen</h3>' + table +
+      '<p class="prep-note">' + d.withTests + ' of ' + d.students + ' SAT students have tests on record' +
+      ((d.noArea || []).length ? '; ' + d.noArea.length + ' with no single area standing out' : '') +
+      ((d.thin || []).length ? '; ' + d.thin.length + ' with fewer than 3 timed tests, too few for pacing habits' : '') +
+      '. Each student is counted by the same rules as their session prep. ' + (d.cached ? 'Up to ten minutes old.' : '') + '</p>';
+  }
+  function loadRosterPatterns() {
+    var body = document.getElementById('rp-body'), btn = document.getElementById('rp-load');
+    body.innerHTML = '<p class="prep-note">Reading every student\u2019s tests&hellip;</p>';
+    if (btn) btn.disabled = true;
+    postToBackend({ action: 'adminRosterPatterns', adminKey: adminKey() }).then(function (d) {
+      if (btn) { btn.disabled = false; btn.textContent = 'Refresh'; }
+      if (!d || !d.ok) {
+        var e = d && d.error;
+        body.innerHTML = '<p class="prep-note">' + (e === 'unauthorized' || e === 'unknown_action' || !e
+          ? 'The backend does not have this view yet: paste prep.gs, Code.gs, auth.gs and signals.gs (version 31), then deploy a new version.'
+          : e === 'needs_signals_31' ? 'signals.gs in Apps Script is older than version 31: paste portal/signals.js again as signals.gs.'
+          : 'Not available: ' + escHtml(e)) + '</p>';
+        return;
+      }
+      renderRosterPatterns(d);
+    }).catch(function (err) {
+      if (btn) btn.disabled = false;
+      body.innerHTML = '<p class="prep-note">Could not load: ' + escHtml(String(err && err.message || err)) + '</p>';
+    });
+  }
+  (function () {
+    var btn = document.getElementById('rp-load');
+    if (btn) btn.addEventListener('click', loadRosterPatterns);
+  })();
+
   function renderStudentPrep(p) {
     var snap = p.snapshot || null, pr = p.practice || { n: 0, right: 0, byBank: {}, skills: [] };
     var dayLabel = function (d) {
@@ -3053,7 +3211,7 @@
     }
     $('stu-prep').innerHTML = '<div class="prep-stats">' + stats.join('') + '</div>' +
       renderTimeBreakdown(snap, mins) +
-      nextHtml + hwHtml + renderBehaviorPatterns(p.behavior, p.behaviorError) + topics + (note ? '<p class="prep-note">' + note + '</p>' : '');
+      nextHtml + hwHtml + renderBehaviorPatterns(p.behavior, p.behaviorError) + renderPooledPrep(p.pooled, p.pooledError) + topics + (note ? '<p class="prep-note">' + note + '</p>' : '');
   }
 
   /* WHERE THE TIME WENT (Luca, 2026-09-25): the week's active minutes by

@@ -425,7 +425,7 @@ var MorettiSignals = (function () {
     var lift = { old: 0, elim: 0 };
     var out = {
       v: 1, chg: chg, lift: lift,
-      keyOut: 0, keyOutBySkill: {}, near: 0, blindMedHard: 0,
+      keyOut: 0, keyOutBySkill: {}, near: 0, nearBySkill: {}, blindMedHard: 0,
       elim: { mc: 0, used: 0 },
       rev: [], calc: { mathQ: 0, active: 0, openOnly: 0, fav: null, favActive: null, favMissNoUse: null, untagged: null,
                        favSlowNoUse: null, candidates: null, overUse: null },
@@ -463,7 +463,10 @@ var MorettiSignals = (function () {
             if (r.skill) out.keyOutBySkill[r.skill] = (out.keyOutBySkill[r.skill] || 0) + 1;
           }
           if (r.final !== null && !r.finalOk) {
-            if (r.k === 2 && !r.keyOutFinal) out.near++;
+            if (r.k === 2 && !r.keyOutFinal) {
+              out.near++;
+              if (r.skill) out.nearBySkill[r.skill] = (out.nearBySkill[r.skill] || 0) + 1;
+            }
             if (r.k === 4 && (r.difficulty === 'medium' || r.difficulty === 'hard')) out.blindMedHard++;
           }
         }
@@ -1869,6 +1872,199 @@ var MorettiSignals = (function () {
     return out;
   }
 
+  /* -- H. POOLED PACING HABITS: pacingHabits (2026-09-26) ----------------
+     The report judges pace one test at a time; this asks whether the same
+     pacing problem comes back test after test. Read from the per-question
+     record: [8] the module (0/1) and [9] a pace code written at scoring time
+     with the student's own time budgets (2 in an end-of-module rush,
+     trailingRush, however fast; 1 too fast to have read it elsewhere, under
+     0.15x budget; 3 a time sink,
+     1.5x budget or more; 0 an ordinary pace; null untimed). Records saved
+     before these fields fall back to [7] for "too fast" and add nothing to
+     the per-module habits.
+     Which sittings: any timed sitting with a record (full tests, the
+     diagnostic, a section on its own), never the hardest test (it runs
+     every student short by design), a diagnostic retake, or a sitting set
+     aside as interrupted (running out while away is the absence, not the
+     habit). The last `last` (default 8) of them.
+     Habits, each needing PACE_MIN_TESTS sittings that can show it and a
+     share of at least PACE_SHARE of them, on two reads (with and without
+     the newest sitting):
+       runs-short  one module (say Math, Module 2) ends with 2+ questions
+                   never answered, or in an end-of-module rush; with the
+                   time sinks (1.5x budget or more) earlier in those same
+                   modules, where the time went, and their area
+       too-fast    8+ answers under 0.15x budget in a sitting, outside an
+                   end-of-module rush (real answers fall under the line about
+                   3% of the time, 45 of 1,503: about 3 a test is ordinary)
+     Time sinks are not a habit of their own: with real students at a
+     median 0.66x budget and a wide spread, about 8% of anyone's answers
+     pass 1.5x, so a count bar would name nearly everyone. They matter when
+     the module then runs short, which is how they are reported.
+     Returns { tests, withModules, withCodes, need, habits, pending }:
+     pending are habits that hold now but not yet without the newest
+     sitting (for Luca, not yet a pattern). Simulated (pace-sim.js,
+     scratchpad audit5-e2e, 2026-09-26): see the table in the commit. */
+  var PACE_MIN_TESTS = 3, PACE_SHARE = 2 / 3, PACE_END_BLANKS = 2, PACE_FAST_PER_TEST = 8;
+  function qsOf(x) {
+    if (!x) return null;
+    if (typeof x === 'string') { try { x = JSON.parse(x); } catch (e) { return null; } }
+    return (x && x.q && x.q.length && x.s && x.k) ? x : null;
+  }
+  function splitKey(sk) {
+    sk = String(sk || '');
+    var cut = sk.indexOf(' \u2192 ');
+    return cut >= 0 ? { dom: sk.slice(0, cut), skill: sk.slice(cut + 3) } : { dom: sk, skill: sk };
+  }
+  function paceEligible(e) {
+    if (!e || e.testId === HARDEST_TEST_ID || e.source === 'diagnostic-retake') return false;
+    if (isInterruptedForTrend(e)) return false;
+    return !!qsOf(e.qStats);
+  }
+  function paceSitting(e) {
+    var qs = qsOf(e.qStats), mods = {}, hasMod = false, hasCode = false;
+    var fast = 0, sinks = 0, answered = 0, sinkDom = {};
+    qs.q.forEach(function (r) {
+      if (!r || r.length < 4) return;
+      var mod = (r.length > 8 && (r[8] === 0 || r[8] === 1)) ? r[8] : null;
+      var code = (r.length > 9 && typeof r[9] === 'number') ? r[9] : null;
+      var blank = r[3] === 2;
+      if (mod !== null) hasMod = true;
+      if (code !== null) hasCode = true;
+      if (!blank) {
+        answered++;
+        if (code === 1 || (code === null && r.length > 7 && r[7] === 1)) fast++;
+        if (code === 3) { sinks++; var d = splitKey(qs.k[r[1]]).dom; sinkDom[d] = (sinkDom[d] || 0) + 1; }
+      }
+      if (mod === null) return;
+      var mk = (secKeyOf(String(qs.s[r[0]] || '')) || 'other') + '|' + mod;
+      (mods[mk] = mods[mk] || []).push({ blank: blank, rush: code === 2, sink: !blank && code === 3, dom: splitKey(qs.k[r[1]]).dom });
+    });
+    var ends = {};
+    Object.keys(mods).forEach(function (mk) {
+      var rows = mods[mk], blanks = 0, rush = 0, sinkN = 0, sinkDomM = {}, k = rows.length - 1;
+      while (k >= 0 && rows[k].blank) { blanks++; k--; }
+      rows.forEach(function (x) {
+        if (x.rush) rush++;
+        if (x.sink) { sinkN++; sinkDomM[x.dom] = (sinkDomM[x.dom] || 0) + 1; }
+      });
+      ends[mk] = { blanks: blanks, rush: rush, sinks: sinkN, sinkDom: sinkDomM, short: blanks >= PACE_END_BLANKS || rush >= 3 };
+    });
+    return { at: msOf(e.at || e.date), hasMod: hasMod, hasCode: hasCode, fast: fast, sinks: sinks, sinkDom: sinkDom, answered: answered, ends: ends };
+  }
+  function paceRead(S) {
+    var out = [], mks = {};
+    var held = function (have, hit) { return have.length >= PACE_MIN_TESTS && hit.length >= PACE_SHARE * have.length; };
+    S.forEach(function (x) { Object.keys(x.ends).forEach(function (mk) { mks[mk] = true; }); });
+    Object.keys(mks).sort().forEach(function (mk) {
+      var have = S.filter(function (x) { return x.ends[mk]; });
+      var hit = have.filter(function (x) { return x.ends[mk].short; });
+      if (!held(have, hit)) return;
+      var p = mk.split('|'), dom = {};
+      hit.forEach(function (x) { Object.keys(x.ends[mk].sinkDom).forEach(function (d) { dom[d] = (dom[d] || 0) + x.ends[mk].sinkDom[d]; }); });
+      var top = Object.keys(dom).sort(function (a, b) { return dom[b] - dom[a] || (a < b ? -1 : 1); })[0] || null;
+      out.push({ id: 'runs-short', key: 'runs-short|' + mk, sec: p[0], module: Number(p[1]) + 1, hit: hit.length, of: have.length,
+                 blanks: hit.reduce(function (a, x) { return a + x.ends[mk].blanks; }, 0),
+                 rushed: hit.reduce(function (a, x) { return a + x.ends[mk].rush; }, 0),
+                 sinks: hit.reduce(function (a, x) { return a + x.ends[mk].sinks; }, 0), sinksWhere: top, sinksWhereN: top ? dom[top] : 0 });
+    });
+    var timed = S.filter(function (x) { return x.answered > 0; });
+    var fastHit = timed.filter(function (x) { return x.fast >= PACE_FAST_PER_TEST; });
+    if (held(timed, fastHit)) {
+      out.push({ id: 'too-fast', key: 'too-fast', hit: fastHit.length, of: timed.length,
+                 answers: timed.reduce(function (a, x) { return a + x.fast; }, 0) });
+    }
+    return out;
+  }
+  function pacingHabits(entries, cfg) {
+    var last = (cfg && cfg.last > 0) ? cfg.last : 8;
+    var all = byTime((entries || []).filter(paceEligible).map(paceSitting).filter(function (x) { return isFinite(x.at); }));
+    var S = all.slice(-last), before = all.slice(-last - 1, -1);
+    var now = paceRead(S);
+    var twoReads = !(cfg && cfg.twoReads === false);
+    var prevKeys = {};
+    if (twoReads) paceRead(before).forEach(function (h) { prevKeys[h.key] = true; });
+    var habits = [], pending = [];
+    now.forEach(function (h) { (!twoReads || prevKeys[h.key] ? habits : pending).push(h); });
+    return { tests: S.length, withModules: S.filter(function (x) { return x.hasMod; }).length,
+             withCodes: S.filter(function (x) { return x.hasCode; }).length, need: PACE_MIN_TESTS,
+             habits: habits, pending: pending };
+  }
+
+  /* -- I. HOW THE MISSES HAPPEN, AREA BY AREA: missProfile (2026-09-26) ---
+     Counts, not verdicts: for every missed question on the sittings that
+     count as content evidence (the same exclusions as pacingHabits, and no
+     section-only sittings), how it was missed, per area and per skill:
+       blank     never answered
+       fast      answered too fast to have read it (pace code 1, or [7])
+       rush      in an end-of-module rush (pace code 2)
+       sink      worked 1.5x budget or more and still wrong (pace code 3)
+       worked    an ordinary pace and wrong
+     and from the attempt's behaviour summary (SignalsJSON), per skill:
+       near      wrong with the choice down to two (nearBySkill, summaries
+                 from 2026-09-26 on)
+       keyOut    wrong with the right answer crossed out at some point
+     near and keyOut overlap the pace kinds; they are "of which".
+     qb: Question Bank events [{ q, sk, c, cf, at }] (PracticeLog): first
+     tries only, per skill: first, wrong, and the confidence taps
+     (cf 2 sure / 1 unsure / 0 guessing): sure, sureWrong. Mapped to areas
+     through the skills the tests carry.
+     Returns { tests, overall, byDomain: { dom: { ..., bySkill } }, qbUnmapped }. */
+  function missCounts() { return { misses: 0, blank: 0, fast: 0, rush: 0, sink: 0, worked: 0, near: 0, keyOut: 0,
+                                   qb: { first: 0, wrong: 0, sure: 0, sureWrong: 0 } }; }
+  function missProfile(entries, qbEvents, cfg) {
+    var overall = missCounts(), byDomain = {}, skillDom = {}, tests = 0;
+    var cell = function (dom, skill) {
+      var d = byDomain[dom] || (byDomain[dom] = missCounts());
+      if (!d.bySkill) d.bySkill = {};
+      var k = d.bySkill[skill] || (d.bySkill[skill] = missCounts());
+      return [overall, d, k];
+    };
+    var bump = function (cells, f, n) { cells.forEach(function (c) { c[f] += (n === undefined ? 1 : n); }); };
+    (entries || []).filter(function (e) { return paceEligible(e) && e.mode !== 'section'; }).forEach(function (e) {
+      var qs = qsOf(e.qStats);
+      tests++;
+      qs.q.forEach(function (r) {
+        if (!r || r.length < 4) return;
+        var sk = splitKey(qs.k[r[1]]);
+        skillDom[sk.skill] = sk.dom;
+        if (r[3] === 1) return;
+        var cells = cell(sk.dom, sk.skill), code = (r.length > 9 && typeof r[9] === 'number') ? r[9] : null;
+        bump(cells, 'misses');
+        if (r[3] === 2) bump(cells, 'blank');
+        else if (code === 1 || (code === null && r.length > 7 && r[7] === 1)) bump(cells, 'fast');
+        else if (code === 2) bump(cells, 'rush');
+        else if (code === 3) bump(cells, 'sink');
+        else bump(cells, 'worked');
+      });
+      var sig = e.signals;
+      if (typeof sig === 'string') { try { sig = JSON.parse(sig); } catch (err) { sig = null; } }
+      if (sig && sig.v === 1) {
+        [['near', sig.nearBySkill], ['keyOut', sig.keyOutBySkill]].forEach(function (pair) {
+          var m = pair[1] || {};
+          Object.keys(m).forEach(function (skill) {
+            var n = Number(m[skill]) || 0;
+            if (n > 0 && skillDom[skill] !== undefined) bump(cell(skillDom[skill], skill), pair[0], n);
+          });
+        });
+      }
+    });
+    // Question Bank: the first try at each question only.
+    var seen = {}, unmapped = 0;
+    byTime((qbEvents || []).filter(function (x) { return x && x.q && x.sk; })).forEach(function (x) {
+      if (x.b === 'explain' || seen[x.q]) return;
+      seen[x.q] = true;
+      var dom = skillDom[x.sk];
+      if (dom === undefined) { unmapped++; return; }
+      cell(dom, x.sk).forEach(function (c) {
+        c.qb.first++;
+        if (!(x.c === 1 || x.c === true)) c.qb.wrong++;
+        if (Number(x.cf) === 2) { c.qb.sure++; if (!(x.c === 1 || x.c === true)) c.qb.sureWrong++; }
+      });
+    });
+    return { tests: tests, overall: overall, byDomain: byDomain, qbUnmapped: unmapped };
+  }
+
   /* -- betaInterval: the Jeffreys interval ------------------------------
      k successes in n; central `level` (default 0.80) interval of the
      Beta(k + 1/2, n - k + 1/2) posterior. Jeffreys because it is the
@@ -3202,6 +3398,7 @@ var MorettiSignals = (function () {
     skillEvidence: skillEvidence,
     itemsFromQStats: itemsFromQStats,
     trailingRush: trailingRush, RUSH_REL: RUSH_REL, RUSH_MIN_RUN: RUSH_MIN_RUN,
+    pacingHabits: pacingHabits, missProfile: missProfile,
     skillTrend: skillTrend,
     evidenceAttempts: evidenceAttempts,
     formDomainOffsets: formDomainOffsets,
@@ -3210,7 +3407,7 @@ var MorettiSignals = (function () {
     // Bumped with every change to what this file computes (audit 5): the
     // admin deploy check compares it, since an older copy can still have
     // every function name and compute the old way.
-    VERSION: 30,
+    VERSION: 31,
     attemptAbility: attemptAbility,
     FOCUS_GATES: { domainClear: FOCUS_DOMAIN_CLEAR, skillLead: FOCUS_SKILL_LEAD, noOffsetsPenalty: FOCUS_NO_OFFSETS_PENALTY },
     practiceEvidence: practiceEvidence,

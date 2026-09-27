@@ -5626,7 +5626,7 @@ window.Portal = {
      header in fluid-ui.js. -->
 <script src="fluid-ui.js?v=20260905y"></script>
 <script src="banks.js?v=20260926a"></script>
-<script src="signals.js?v=20260926d"></script>
+<script src="signals.js?v=20260926e"></script>
 <script src="desmos-tags.js?v=20260916c"></script>
 <script src="time-budgets.js?v=20260912a"></script>
 <script src="challenge-questions.js?v=20260926a"></script>
@@ -14063,6 +14063,14 @@ window.Portal = {
           row[5] = row[5] === undefined ? null : row[5];
           row[6] = row[6] === undefined ? null : row[6];
           row[7] = flag;
+          /* [8] the module (0/1) and [9] the pace code (2026-09-26), for the
+             pooled pacing habits and miss profile (signals.js pacingHabits,
+             missProfile): 2 in an end-of-module rush (first, however fast:
+             a rush is its own habit), 1 too fast to have read it elsewhere, 3 a time sink (1.5x budget or more), 0 an ordinary pace;
+             null when the question was left blank or has no timing/budget. */
+          row[8] = t7.mod;
+          row[9] = (t7.blank || !(t7.budgetMs > 0) || !(t7.ms > 0)) ? null
+            : (rush7[i] ? 2 : (t7.ms < t7.budgetMs * 0.15 ? 1 : (t7.ms >= t7.budgetMs * 1.5 ? 3 : 0)));
         });
       });
     } catch (e) { if (window.console) console.warn('qStats tooFast:', e); }
