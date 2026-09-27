@@ -5679,13 +5679,13 @@ window.Portal = {
      header in fluid-ui.js. -->
 <script src="fluid-ui.js?v=20260905y"></script>
 <script src="banks.js?v=20260926a"></script>
-<script src="signals.js?v=20260927a"></script>
+<script src="signals.js?v=20260927b"></script>
 <script src="desmos-tags.js?v=20260916c"></script>
 <script src="time-budgets.js?v=20260912a"></script>
 <script src="challenge-questions.js?v=20260926a"></script>
 <script src="grid-in.js?v=20260910a"></script>
 <script src="question-flag.js?v=20260922c"></script>
-<script src="report-tour.js?v=20260926d"></script>
+<script src="report-tour.js?v=20260927a"></script>
 <script>
   /* practice-tests.js is ~2.6MB, so a blocking <script> delayed every later
      script (including the key-submit wiring). It loads here via an async
@@ -25066,7 +25066,8 @@ window.renderNativeReport = function (data) {
         var reading;
         if (p1 !== null && p2 !== null && p1 >= 1.25 && p2 <= 0.85 && a2 !== null && a1 !== null && a2 < a1 - 0.1) reading = 'slow-start';
         else if (rushed >= 3 && unused < 180) reading = 'ran-short';
-        else if (unused >= 0.25 * clockSec && right < 0.85 * n) reading = 'left-time';
+        // Worked fast from the first question and left 40%+ of the clock: time left over, however many were right.
+        else if ((unused >= 0.25 * clockSec && right < 0.85 * n) || (unused >= 0.4 * clockSec && p1 !== null && p1 < 0.5)) reading = 'left-time';
         // The second half went clearly worse (the hardest questions sit there): where to look.
         else if (a1 !== null && a2 !== null && a2 <= a1 - 0.15) reading = 'late-drop';
         else if (back >= 120 && Object.keys(backQ).length >= 2) reading = 'went-back';
@@ -25276,6 +25277,11 @@ window.renderNativeReport = function (data) {
         if ((ids.indexOf('late') >= 0 && /^Taken late at night/.test(tx)) || (ids.indexOf('left-time') >= 0 && /^Time left on the clock/.test(tx))) li.parentNode.removeChild(li);
       });
       Array.prototype.forEach.call(bw.querySelectorAll('.takeaways'), function (ul) { if (!ul.children.length) ul.parentNode.removeChild(ul); });
+    }
+    // The walkthrough reads the same list (R.behaviorFlags): take them out there too.
+    for (var bf = behaviorFlags.length - 1; bf >= 0; bf--) {
+      var bt = String(behaviorFlags[bf]).replace(/<[^>]+>/g, '');
+      if ((ids.indexOf('late') >= 0 && /^Taken late at night/.test(bt)) || (ids.indexOf('left-time') >= 0 && /^Time left on the clock/.test(bt))) behaviorFlags.splice(bf, 1);
     }
   })();
 

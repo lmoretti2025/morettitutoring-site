@@ -2350,12 +2350,22 @@ var MorettiSignals = (function () {
        left-time     a module finished with a quarter of its clock unused
                      while it went under 85% right (a third or more unused
                      when right answers are not known)
+       fast-throughout  a module worked at under 0.5x budget from the start
+                     (median of the first two-thirds), 80%+ answered, with
+                     40%+ of the clock left: fast all the way, not a rush
+                     at the end (Sakeena, 2026-09-27: math at 10-12 s a
+                     question, the last third SLOWER than the first)
        rushed-finish the last third of a module at under half the normal
-                     pace, 3+ answers under 0.35x budget, with 3+ minutes
-                     still on the clock (hurrying to be done, not the clock)
+                     pace and under 0.6x the module's own earlier pace, 3+
+                     answers under 0.35x budget, with 3+ minutes still on
+                     the clock (hurrying to be done, not the clock)
+     Unused time is the clock left at submit (sb), so time away, which
+     runs on the clock, is not counted as unused.
        no-review     submitted under 20 seconds after the first pass ended
                      (going back to questions counts as checking), with 5+
                      minutes left (sittings with a visit log)
+     A module that is fast-throughout is left out of left-time and
+     no-review (its line already says both); it counts as two signals.
      level: 'good' (none), 'fair' (one), 'poor' (two or more).
      Also, as information: start and end, the longest break, minutes away,
      minutes unused, and crossed-out answers on how many questions. */
@@ -2371,7 +2381,7 @@ var MorettiSignals = (function () {
       var nMods = m1 < n ? 2 : 1;
       var clockMs = (S.tl > 0 ? S.tl : (S.k === 'math' ? 70 : 64)) * 60000 / nMods;
       for (var m = 0; m < nMods; m++) {
-        var lo = m ? m1 : 0, hi = m ? n : m1, onQ = 0, fvs = [], lvs = [], right = 0, answered = 0, hurried = 0, paces = [];
+        var lo = m ? m1 : 0, hi = m ? n : m1, onQ = 0, fvs = [], lvs = [], right = 0, answered = 0, hurried = 0, paces = [], earlyPaces = [];
         for (var i = lo; i < hi; i++) {
           var tm = (S.tm && S.tm[i]) || 0;
           onQ += tm;
@@ -2380,21 +2390,28 @@ var MorettiSignals = (function () {
           var ans = S.a ? S.a[i] : null, blank = ans === null || ans === undefined || ans === -1 || ans === '';
           if (!blank) answered++;
           if (typeof opts.correct === 'function' && opts.correct(si, i)) right++;
-          if (i >= hi - Math.ceil((hi - lo) / 3) && !blank && typeof opts.budgetMs === 'function') {
+          if (!blank && typeof opts.budgetMs === 'function') {
             var b = opts.budgetMs(si, i), t = (S.fp && typeof S.fp[i] === 'number') ? S.fp[i] : tm;
-            if (b > 0 && t > 0) { paces.push(t / b); if (t < 0.35 * b) hurried++; }
+            if (b > 0 && t > 0) {
+              if (i >= hi - Math.ceil((hi - lo) / 3)) { paces.push(t / b); if (t < 0.35 * b) hurried++; }
+              else earlyPaces.push(t / b);
+            }
           }
         }
         var el = typeof S.el === 'string' ? S.el.slice(lo, hi) : null;
+        // The module clock at submit (sb, seconds) runs through time away; the
+        // per-question times do not. Unused = what was really left on the clock.
+        var usedMs = (S.sb && typeof S.sb[m] === 'number') ? Math.max(onQ, S.sb[m] * 1000) : onQ;
+        var med = function (a) { return a.length ? a.slice().sort(function (x, y) { return x - y; })[Math.floor(a.length / 2)] : null; };
         mods.push({ sec: S.k, module: m + 1, n: hi - lo, answered: answered, right: typeof opts.correct === 'function' ? right : null,
-                    clockMs: clockMs, unusedMs: Math.max(0, clockMs - onQ), start: fvs.length ? Math.min.apply(null, fvs) : null,
+                    clockMs: clockMs, unusedMs: Math.max(0, clockMs - usedMs), usedMs: usedMs, earlyPace: med(earlyPaces), start: fvs.length ? Math.min.apply(null, fvs) : null,
                     end: (fvs.length || lvs.length) ? Math.max.apply(null, fvs.concat(lvs)) : null,
                     // Checking = the time between the end of the first pass (rv) and
                     // submitting (sb), going back to questions included; the review
                     // page alone (rp) is not checking.
                     reviewSec: (S.sb && S.rv && typeof S.sb[m] === 'number' && typeof S.rv[m] === 'number') ? Math.max(0, S.sb[m] - S.rv[m]) : null,
                     crossed: el ? el.replace(/0/g, '').length : null,
-                    latePace: paces.length ? paces.slice().sort(function (a, b) { return a - b; })[Math.floor(paces.length / 2)] : null, hurried: hurried });
+                    latePace: med(paces), hurried: hurried });
       }
     });
     // A module never started (a single module taken on purpose) says nothing about conditions.
@@ -2427,16 +2444,22 @@ var MorettiSignals = (function () {
     var awayMs = ((d && d.iv) || []).reduce(function (a, v) { return a + ((v && v.ms) || 0); }, 0);
     if (d && Array.isArray(d.iv)) out.awayMin = Math.round(awayMs / 6000) / 10;
     if (awayMs >= 180000) out.signals.push({ id: 'away', label: 'Time away from the test', detail: (Math.round(awayMs / 6000) / 10) + ' minutes away from the test window' });
+    // Fast from the first question to the last is not a rush at the end: it has its own line, and it
+    // already says the time left and the missing check, so those lines skip its modules.
+    var fastAll = mods.filter(function (m) { return m.earlyPace !== null && m.latePace !== null && m.earlyPace < 0.5 && m.answered >= 0.8 * m.n && m.unusedMs >= 0.4 * m.clockMs; });
+    if (fastAll.length) out.signals.push({ id: 'fast-throughout', label: 'Fast from start to finish', detail: fastAll.map(function (m) { return modName(m) + ': ' + m.answered + ' questions in ' + Math.max(1, Math.round(m.usedMs / 60000)) + ' of ' + Math.round(m.clockMs / 60000) + ' minutes' + (m.reviewSec !== null && m.reviewSec < 20 ? ', handed in without checking' : ''); }).join('; ') });
     // Without right answers to check (an old record), only a larger share unused counts.
-    var left = mods.filter(function (m) { return m.answered > 0 && (m.right === null ? m.unusedMs >= 0.35 * m.clockMs : (m.unusedMs >= 0.25 * m.clockMs && m.right < 0.85 * m.n)); });
+    var left = mods.filter(function (m) { return fastAll.indexOf(m) < 0 && m.answered > 0 && (m.right === null ? m.unusedMs >= 0.35 * m.clockMs : (m.unusedMs >= 0.25 * m.clockMs && m.right < 0.85 * m.n)); });
     if (left.length) out.signals.push({ id: 'left-time', label: 'Time left unused', detail: left.map(function (m) { return Math.round(m.unusedMs / 60000) + ' of ' + Math.round(m.clockMs / 60000) + ' minutes unused in ' + modName(m); }).join('; ') });
-    var rushed = mods.filter(function (m) { return m.latePace !== null && m.latePace < 0.5 && m.hurried >= 3 && m.unusedMs >= 180000; });
+    var rushed = mods.filter(function (m) { return fastAll.indexOf(m) < 0 && m.latePace !== null && m.latePace < 0.5 && m.hurried >= 3 && m.unusedMs >= 180000 && (m.earlyPace === null || m.latePace < 0.6 * m.earlyPace); });
     if (rushed.length) out.signals.push({ id: 'rushed-finish', label: 'Rushed to finish', detail: rushed.map(function (m) { return 'the last questions of ' + modName(m) + ' at ' + Math.round(m.latePace * 100) + '% of normal pace, with ' + Math.round(m.unusedMs / 60000) + ' minutes still on the clock'; }).join('; ') });
-    var noRev = mods.filter(function (m) { return m.reviewSec !== null && m.reviewSec < 20 && m.unusedMs >= 300000; });
+    var noRev = mods.filter(function (m) { return fastAll.indexOf(m) < 0 && m.reviewSec !== null && m.reviewSec < 20 && m.unusedMs >= 300000; });
     if (noRev.length) out.signals.push({ id: 'no-review', label: 'Submitted without checking', detail: noRev.map(function (m) { return modName(m) + ' submitted ' + Math.round(m.reviewSec) + ' seconds after the last question, ' + Math.round(m.unusedMs / 60000) + ' minutes early'; }).join('; ') });
     var withEl = mods.filter(function (m) { return m.crossed !== null; });
     out.crossed = withEl.length ? { on: withEl.reduce(function (a, m) { return a + m.crossed; }, 0), of: withEl.reduce(function (a, m) { return a + m.n; }, 0) } : null;
-    out.level = out.signals.length >= 2 ? 'poor' : out.signals.length === 1 ? 'fair' : 'good';
+    // Fast from start to finish counts twice: it stands for the time left and the missing check.
+    var weight = out.signals.reduce(function (a, x) { return a + (x.id === 'fast-throughout' ? 2 : 1); }, 0);
+    out.level = weight >= 2 ? 'poor' : weight === 1 ? 'fair' : 'good';
     return out;
   }
   // The compact form kept in the per-question record (qs.cn) and read by
@@ -3942,7 +3965,7 @@ var MorettiSignals = (function () {
     // Bumped with every change to what this file computes (audit 5): the
     // admin deploy check compares it, since an older copy can still have
     // every function name and compute the old way.
-    VERSION: 35,
+    VERSION: 36,
     attemptAbility: attemptAbility,
     FOCUS_GATES: { domainClear: FOCUS_DOMAIN_CLEAR, skillLead: FOCUS_SKILL_LEAD, noOffsetsPenalty: FOCUS_NO_OFFSETS_PENALTY },
     practiceEvidence: practiceEvidence,
