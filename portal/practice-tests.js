@@ -2813,7 +2813,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Words in Context",
           "difficulty": "easy",
           "type": "mc",
-          "text": "The axolotl, a Mexican salamander, keeps the feathery external gills and the finned tail throughout adult life, features that other salamanders lose when they leave the water. Because the axolotl breeds in this form, the animal is called ______: it reaches maturity without ever completing the change its relatives undergo.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
+          "text": "The axolotl, a Mexican salamander, keeps its feathery external gills and finned tail into adult life, features that related salamanders shed when they leave the water. Since it breeds in exactly this form, biologists describe the animal as ______. It reaches sexual maturity without ever undergoing the transformation its relatives complete.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
           "choices": [
             "unfinished",
             "freshwater",
@@ -2855,7 +2855,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Words in Context",
           "difficulty": "medium",
           "type": "mc",
-          "text": "A pearl forms when an irritant lodges inside an oyster and the animal coats the irritant, layer by layer, with the same material the oyster uses for the shell. The result is ______ rather than intentional: what looks like craft is a response the oyster would make to any intruder lodged too deep to expel.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
+          "text": "An irritant works inside an oyster, and the animal begins to coat the grain, layer upon layer, in nacre (the material of a shell) drawn from cells along the mantle. Such a pearl is ______ rather than intentional, since nacre collects on every intruder too deeply lodged for expulsion.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
           "choices": [
             "microscopic",
             "decorative",
@@ -2876,7 +2876,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Words in Context",
           "difficulty": "medium",
           "type": "mc",
-          "text": "A 2003 survey traced the threads, or hyphae, of a single honey fungus through nine square kilometers of Oregon forest, all of it one organism by genetic test. The measurement is ______: the threads are continuous underground, but what grows above the soil appears as separate clumps of mushrooms scattered over the hillside.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
+          "text": "The hyphae (the threads that make up a fungus) of a single honey fungus were traced in 2003 across nine square kilometers of forest in Oregon, and genetic tests identified all of that tissue as one organism. The measurement sounds ______, for the threads run continuously underground while growth above the soil appears in separate clumps of mushrooms scattered across a hillside.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
           "choices": [
             "preliminary",
             "disputed",
@@ -2897,7 +2897,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Text Structure and Purpose",
           "difficulty": "easy",
           "type": "mc",
-          "text": "A hurricane is named from a list, drawn up by a committee, prepared years in advance, and the lists rotate on a six-year cycle. <u>A name is retired only when the storm that carried it caused damage severe enough that reusing it would be insensitive.</u> Katrina, Maria, and Sandy were all withdrawn in this way. The list for any given year is therefore mostly old names with a few recent replacements.<br><br>Which choice best describes the function of the underlined sentence in the text as a whole?",
+          "text": "Hurricane names come from lists prepared years in advance by a committee of the World Meteorological Organization, and each list rotates on a six-year cycle, so names given to one season's storms return to service six seasons later. <u>A name leaves the rotation for good if the storm carrying that name did damage severe enough to make reuse offensive.</u> Katrina, Maria, and Sandy all left the rotation in this way, and a substitute name filled each vacant place. Most of a list is therefore long-serving names, joined here and there by recent substitutions.<br><br>Which choice best describes the function of the underlined sentence in the text as a whole?",
           "choices": [
             "It compares the damage done by Katrina with the damage done by Maria and Sandy.",
             "It explains the exception to the rotation that the rest of the text illustrates.",
@@ -2918,7 +2918,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Text Structure and Purpose",
           "difficulty": "medium",
           "type": "mc",
-          "text": "Cochineal—the deep red used in European painting and dyeing from the sixteenth century—is made from an insect that feeds on prickly pear. Spain controlled the supply for two hundred years and exported the dried insects without disclosing what they were, and European naturalists argued over whether the grains were seeds, berries, or animals. The question was settled only when a microscope showed legs.<br><br>Which choice best states the main purpose of the text?",
+          "text": "Cochineal (the deep red of European painting and dyeing after the sixteenth century) comes from an insect that feeds on prickly pear. Spain controlled the supply for two hundred years, shipping the dried insects to Europe without any account of their origin, and naturalists there argued about whether the grains belonged to plants or to animals. A microscope settled the question by showing legs.<br><br>Which choice best states the main purpose of the text?",
           "choices": [
             "To argue that cochineal produced a better red than the dyes available in Europe.",
             "To explain the optical principles that allowed early microscopes to resolve legs.",
