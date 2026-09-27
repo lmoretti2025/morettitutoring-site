@@ -3844,7 +3844,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Transitions",
           "difficulty": "medium",
           "type": "mc",
-          "text": "Sourcing an obsidian blade is unusually exact: each volcanic flow carries its own ratios of trace elements, and a fragment can be matched to its outcrop with near certainty. ______ a blade found eight hundred kilometers from any flow is evidence of a route, not of a guess.<br><br>Which choice completes the text with the most logical transition?",
+          "text": "Obsidian sourcing reaches unusual exactness. Every volcanic flow carries distinct ratios of trace elements, and a fragment matches one outcrop alone. ______ blades lying eight hundred kilometers from the nearest flow record a route, never a guess.<br><br>Which choice completes the text with the most logical transition?",
           "choices": [
             "Therefore,",
             "However,",
@@ -3865,7 +3865,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Transitions",
           "difficulty": "hard",
           "type": "mc",
-          "text": "A pigment’s lightfastness is tested by exposing a drawdown (a thin swatch of the paint) to a lamp for several hundred hours and comparing it with a portion kept in the dark. The test compresses years into hours, and the lamp only stands in for daylight. ______ a pigment that fails it will fail on a wall. One that passes may still shift under a window over thirty years.<br><br>Which choice completes the text with the most logical transition?",
+          "text": "Lightfastness in pigments is tested by exposing a drawdown (a thin swatch of paint) to lamplight for several hundred hours, then comparing that swatch with one kept in darkness. The test compresses years into hours, and lamps are only a stand-in for daylight. ______ pigments that fail are certain to fail on walls. Pigments that pass may still shift beside windows across thirty years.<br><br>Which choice completes the text with the most logical transition?",
           "choices": [
             "Even so,",
             "Similarly,",
@@ -3886,7 +3886,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Rhetorical Synthesis",
           "difficulty": "medium",
           "type": "mc",
-          "text": "While researching a topic, a student has taken the following notes:<br><br>• The Iron Pillar of Delhi was raised in about the fourth century CE.<br>• The pillar is seven meters high and has stood outdoors throughout.<br>• It shows almost no rust.<br>• Its iron carries an unusually high proportion of phosphorus.<br>• Phosphorus forms a thin protective film in the humid air of the site.<br><br>The student wants to explain why the pillar has not rusted. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
+          "text": "While researching a topic, a student has taken the following notes:<br><br>• Craftsmen raised the Iron Pillar of Delhi in the fourth century CE.<br>• The pillar, seven meters high, has stood outdoors ever since.<br>• Rust has barely marked the surface.<br>• The iron carries an unusually high proportion of phosphorus.<br>• Phosphorus forms a thin protective film in the humid air of the site.<br><br>The student wants to explain why the pillar has not rusted. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
           "choices": [
             "The Iron Pillar of Delhi, raised in about the fourth century CE, is seven meters high and stands outdoors.",
             "Although it has stood outdoors since the fourth century CE, the Iron Pillar of Delhi shows almost no rust.",
@@ -3907,7 +3907,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Rhetorical Synthesis",
           "difficulty": "medium",
           "type": "mc",
-          "text": "While researching a topic, a student has taken the following notes:<br><br>• A palimpsest is a manuscript whose original text was scraped off so the parchment could be reused.<br>• The scraping was rarely complete.<br>• Ultraviolet and multispectral imaging can recover the lower text.<br>• The Archimedes Palimpsest was overwritten in the thirteenth century with a prayer book.<br>• Two treatises by Archimedes survive nowhere else.<br><br>The student wants to explain why palimpsests matter to scholars. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
+          "text": "While researching a topic, a student has taken the following notes:<br><br>• Palimpsests are manuscripts whose first text a scribe scraped away in order to reuse the parchment.<br>• Scrapers rarely removed every trace of the earlier ink, which is why the first text often persists.<br>• Ultraviolet and multispectral imaging recover much of that lower text for scholars to read.<br>• In the thirteenth century, a prayer book was written over the Archimedes Palimpsest.<br>• Two treatises of Archimedes survive in that undertext and nowhere else.<br><br>The student wants to explain why palimpsests matter to scholars. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
           "choices": [
             "The Archimedes Palimpsest was overwritten in the thirteenth century with the text of a prayer book.",
             "Because scraping was rarely complete, imaging can recover lower texts that survive nowhere else.",
@@ -3928,7 +3928,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Rhetorical Synthesis",
           "difficulty": "hard",
           "type": "mc",
-          "text": "While researching a topic, a student has taken the following notes:<br><br>• Hedy Lamarr and George Antheil patented a frequency-hopping system in 1942.<br>• The system was intended to keep torpedo guidance signals from being jammed.<br>• The navy did not adopt it during the war.<br>• The patent expired before the principle came into commercial use.<br>• Frequency hopping underlies several later wireless technologies.<br><br>The student wants to emphasize the gap between the invention and its use. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
+          "text": "While researching a topic, a student has taken the following notes:<br><br>• Hedy Lamarr and George Antheil patented a frequency-hopping system in 1942.<br>• The system aimed to keep enemies from jamming torpedo guidance signals.<br>• The navy passed over the invention during the war.<br>• Commercial use of the principle began after expiry of the patent.<br>• Several later wireless technologies rest on frequency hopping.<br><br>The student wants to emphasize the gap between the invention and its use. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
           "choices": [
             "Hedy Lamarr and George Antheil patented a frequency-hopping system in 1942 to protect torpedo guidance signals.",
             "Frequency hopping, patented in 1942 and unused by the navy, came into commercial use only after the patent had expired.",
