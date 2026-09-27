@@ -1388,7 +1388,7 @@
      so the signed admin session is in sessionStorage when the auto-continue
      boot code below reads it. -->
 <script src="time-budgets.js?v=20260912a"></script>
-<script src="signals.js?v=20260926f"></script>
+<script src="signals.js?v=20260926g"></script>
   <script src="backend-url.js?v=20260905"></script>
   <script>
     /* Browser errors on this page reach the ClientErrors tab too (prep.gs's
@@ -1664,7 +1664,7 @@
   var REQUIRED_PREP_VERSION = 29;
   // signals.gs and emails.gs carry their own numbers since audit 5: an older
   // copy can have every function name and still compute the old way.
-  var REQUIRED_SIGNALS_VERSION = 32, REQUIRED_EMAILS_VERSION = 31;
+  var REQUIRED_SIGNALS_VERSION = 33, REQUIRED_EMAILS_VERSION = 32;
   // booking.gs (the parent booking page) declares BOOKING_VERSION since 2026-09-26.
   var REQUIRED_BOOKING_VERSION = 1;
   var CAPABILITY_LABELS = {
@@ -2987,6 +2987,11 @@
       return '<li>' + tag + '<b>' + (h.sec === 'math' ? 'Math' : 'Reading and Writing') + ', Module ' + h.module + ' runs short</b> &middot; ' +
         h.hit + ' of ' + h.of + ' tests (' + escHtml(bits.join(', ')) + ')' + escHtml(sinks) + '</li>';
     }
+    if (h.id === 'leaves-time') {
+      var pE = h.earlyN ? Math.round(100 * h.earlyRight / h.earlyN) : 0, pO = h.otherN ? Math.round(100 * h.otherRight / h.otherN) : 0;
+      return '<li>' + tag + '<b>' + (h.sec === 'math' ? 'Math' : 'Reading and Writing') + ', Module ' + h.module + ': finishes early, and it costs questions</b> &middot; ' +
+        h.early + ' of ' + h.of + ' tests ended with about ' + h.unusedMin + ' minutes unused; ' + pE + '% right on those against ' + pO + '% on the others</li>';
+    }
     if (h.id === 'too-fast') {
       var pctF = h.answers ? Math.round(100 * h.fastRight / h.answers) : 0, pctO = h.other ? Math.round(100 * h.otherRight / h.other) : 0;
       return '<li>' + tag + '<b>Answers faster than a question can be read</b> &middot; ' + h.hit + ' of ' + h.of + ' tests, ' +
@@ -3055,7 +3060,31 @@
         '<p class="prep-note">Areas are ordered by misses beyond this student\u2019s own miss rate. "Down to two" and "key crossed out" are part of the misses, not extra; they start with tests saved from September 26 on.' +
         (unknownN ? ' ' + unknownN + ' misses on older tests have no timing to sort them and are in "Missed" only.' : '') + '</p>'
       : '';
-    return '<div class="prep-bp">' + hed + '<ul>' + items.join('') + '</ul>' + table + '</div>';
+    return '<div class="prep-bp">' + hed + '<ul>' + items.join('') + '</ul>' + table + renderConsistency(P.consistency) + '</div>';
+  }
+  /* ═══ HOW CONSISTENT (signals.js consistencyOf, 2026-09-26) ═══
+     The composite's scatter around a straight line (steady progress is not
+     scatter), and each module's swing against what chance gives at the
+     student's accuracy for those questions. Four modules are read at once,
+     so a module is "clear" at p < .0125 and "possible" at p < .05. */
+  function consistencyLine(c) {
+    if (!c) return '';
+    var trend = c.perWeek ? (c.perWeek > 0 ? ', moving about +' : ', moving about ') + c.perWeek + ' a week' : '';
+    return 'Composite ' + c.lo + '&ndash;' + c.hi + ' across ' + c.n + ' first-time tests' + escHtml(trend) + ': ' +
+      (c.flagged ? '<b>more up and down than a test varies on its own</b> (p ' + c.p + ')' : 'the scatter is within what a test varies on its own') + '.';
+  }
+  function renderConsistency(C) {
+    if (!C || (!C.composite && !(C.modules || []).length)) return '';
+    var rows = (C.modules || []).map(function (m) {
+      var tier = m.direction ? (m.direction === 'up' ? 'rising each test' : 'falling each test')
+        : m.p < 0.0125 ? '<b>swings clearly more than chance</b>' : m.p < 0.05 ? 'possibly swings more than chance; one more test will tell'
+        : m.ratio >= 1.3 ? 'some swing, too few tests to tell it from chance' : 'steady';
+      return '<tr><td><b>' + (m.sec === 'math' ? 'Math' : 'R&amp;W') + ' M' + m.module + '</b></td><td>' +
+        m.sittings.map(function (x) { return x.right + '/' + x.n; }).join(', ') + '</td><td class="n">' + m.ratio + '</td><td>' + tier + '</td></tr>';
+    }).join('');
+    return '<p class="pool-read" style="margin-top:0.7rem;"><b>Consistency:</b> ' + consistencyLine(C.composite) + '</p>' +
+      (rows ? '<div class="pool-tbl-wrap"><table class="pool-tbl"><thead><tr><th>Module</th><th>Right, test by test</th><th class="n">Swing vs chance</th><th>Reading</th></tr></thead><tbody>' +
+        rows + '</tbody></table></div><p class="prep-note">Swing vs chance is about 1 for a steady student. Modules need 3 tests saved from September 26 on; first-time tests only, no sitting left partway.</p>' : '');
   }
 
   /* ═══ ACROSS YOUR STUDENTS (prep.gs adminRosterPatterns, v29) ═══ */
@@ -4077,6 +4106,15 @@
        Needs 3 tests; with 2, the line fits exactly and there is nothing to
        test. */
     var MS = window.MorettiSignals;
+    // One test for every surface (signals.js consistencyOf since 2026-09-26: the same line fit, first takes only).
+    if (MS && typeof MS.consistencyOf === 'function') {
+      var CS = MS.consistencyOf(data.attempts || []);
+      if (CS.composite || (CS.modules || []).length) {
+        html += '<div class="ct-block"><div class="ct-hed">Consistency</div>' + renderConsistency(CS) + '</div>';
+      }
+      host.innerHTML = html;
+      return;
+    }
     var full = (data.attempts || []).slice().sort(function (a, c) { return String(a.at || '').localeCompare(String(c.at || '')); })
       .filter(function (a) { return MS ? MS.isTrendComparable(a) : (a.mode !== 'section' && a.composite != null); });
     if (full.length >= 2) {

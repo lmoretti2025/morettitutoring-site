@@ -1023,7 +1023,55 @@ var MorettiSignals = (function () {
     // An interrupted sitting (isInterruptedForTrend) measures the
     // interruption, not the student.
     return typeof e.composite === 'number' && isFinite(e.composite) && e.testId !== HARDEST_TEST_ID &&
-      e.mode !== 'section' && e.source !== 'baseline' && !isInterruptedForTrend(e);
+      e.mode !== 'section' && e.source !== 'baseline' && !isInterruptedForTrend(e) &&
+      e.retake !== true && !abandonedSitting(e.qStats);
+  }
+  /* A practice test taken again (2026-09-26, Nikolas): the same questions a
+     second time measure memory as much as the student, like a diagnostic
+     retake. firstTakes(list) keeps each practice test's first full sitting
+     and drops later ones; list in time order. Section-only sittings are not
+     a take (their other section was never seen), and are never dropped
+     here (they are out of every trend anyway). Diagnostics keep their own
+     retake rule (source 'diagnostic-retake'). */
+  function firstTakes(list) {
+    var seen = {};
+    return (list || []).filter(function (e) {
+      if (!e) return false;
+      var id = e.testId;
+      if (!id || !/^sat-practice-/.test(String(id)) || e.mode === 'section') return true;
+      if (seen[id]) return false;
+      seen[id] = true;
+      return true;
+    });
+  }
+  /* A sitting walked away from partway (2026-09-26, Nikolas: Module 1 of
+     Reading and Writing answered, all of Module 2 blank, nothing logged as
+     an interruption; it scored 390). Abandoned when any module has every
+     question blank; with no module field ([8], records before 2026-09-26),
+     when a section's last half or more is blank. Its score measures leaving,
+     not the student: out of every trend, and never quoted to a family.
+     qs: the per-question record (object or JSON text). */
+  function abandonedSitting(qsIn) {
+    var qs = qsIn;
+    if (typeof qs === 'string') { try { qs = JSON.parse(qs); } catch (e) { return false; } }
+    if (!qs || !qs.q || !qs.q.length) return false;
+    var groups = {}, order = [];
+    qs.q.forEach(function (r) {
+      if (!r || r.length < 4) return;
+      var hasMod = r.length > 8 && (r[8] === 0 || r[8] === 1);
+      var g = String(r[0]) + '|' + (hasMod ? r[8] : 'x');
+      if (!groups[g]) { groups[g] = []; order.push(g); }
+      groups[g].push(r[3] === 2);
+    });
+    return order.some(function (g) {
+      var b = groups[g];
+      if (/\|x$/.test(g)) {
+        var tail = 0;
+        for (var i = b.length - 1; i >= 0 && b[i]; i--) tail++;
+        return b.length >= 8 && tail * 2 >= b.length;
+      }
+      return b.length >= 5 && b.every(function (x) { return x; });
+    });
   }
   function levelOf(list) {
     var avg = function (f) { return list.reduce(function (s, e) { return s + f(e); }, 0) / list.length; };
@@ -1043,7 +1091,7 @@ var MorettiSignals = (function () {
      13-14% false changes against 10% nominal) and rounded up to the next 10.
      Returns null with fewer than two comparable tests. */
   function scoreChange(entries) {
-    var usable = (entries || []).filter(isTrendComparable);
+    var usable = firstTakes(entries || []).filter(isTrendComparable);
     if (usable.length < 2) return null;
     var k = Math.max(1, Math.min(3, Math.floor(usable.length / 2)));
     var first = usable.slice(0, k), latest = usable.slice(usable.length - k);
@@ -1062,6 +1110,8 @@ var MorettiSignals = (function () {
      comparable. */
   function pairChange(prev, latest) {
     if (!isTrendComparable(prev) || !isTrendComparable(latest)) return null;
+    // The same practice test twice is memory, not a change (firstTakes).
+    if (prev.testId && prev.testId === latest.testId && /^sat-practice-/.test(String(prev.testId))) return null;
     var delta = Math.round(latest.composite - prev.composite);
     var threshold = Math.ceil(1.645 * Math.SQRT2 * compositeSem(levelOf([prev, latest])) / 10) * 10;
     return { delta: delta, threshold: threshold, real: Math.abs(delta) >= threshold };
@@ -1623,12 +1673,19 @@ var MorettiSignals = (function () {
   function evidenceAttempts(entries, opts) {
     opts = opts || {};
     var seen = {}, out = [];
-    (entries || []).forEach(function (e) {
+    // Oldest first, so "the first sitting of a practice test" is the earliest.
+    var ordered = (entries || []).map(function (e, i) { return { e: e, i: i, t: e ? msOf(e.at || e.date) : NaN }; })
+      .sort(function (x, y) { return ((isFinite(x.t) ? x.t : Infinity) - (isFinite(y.t) ? y.t : Infinity)) || (x.i - y.i); })
+      .map(function (w) { return w.e; });
+    ordered.forEach(function (e) {
       if (!e || !e.qStats || e.mode === 'section') return;
       if (e.testType && String(e.testType).toUpperCase() !== 'SAT') return;
       if (e.source === 'diagnostic-retake' || e.retake === true || e.heldBack === true || e.source === 'baseline') return;
       var tid = e.testId || (e.source === 'diagnostic' ? 'diagnostic' : '');
       if (tid === HARDEST_TEST_ID && !opts.includeHardest) return;
+      // A practice test taken again (firstTakes): only its first sitting is read.
+      if (/^sat-practice-/.test(String(tid))) { if (seen['t:' + tid]) return; seen['t:' + tid] = true; }
+      if (abandonedSitting(e.qStats)) return;
       var aid = e.attemptId || e.id || '';
       if (aid) { if (seen[aid]) return; seen[aid] = true; }
       var items = itemsFromQStats(e.qStats, opts.budgetSeconds);
@@ -1943,7 +2000,7 @@ var MorettiSignals = (function () {
      name nearly everyone. They matter when the module then runs short.
      Returns { tests, withModules, withCodes, need, habits, pending }. */
   var PACE_MIN_TESTS = 3, PACE_SHARE = 2 / 3, PACE_END_BLANKS = 2, PACE_FAST_PER_TEST = 6, PACE_FULL_TEST_Q = 98;
-  var PACE_BASE_SHORT = 0.25, PACE_ALPHA = 0.05, PACE_FAST_Z = 1.645;
+  var PACE_BASE_SHORT = 0.25, PACE_ALPHA = 0.05, PACE_FAST_Z = 1.645, PACE_EARLY_SHARE = 0.25, PACE_LEAVE_Z = 2.24, PACE_LEAVE_MIN_DIFF = 0.1;
   function qsOf(x) {
     if (!x) return null;
     if (typeof x === 'string') { try { x = JSON.parse(x); } catch (e) { return null; } }
@@ -1970,10 +2027,20 @@ var MorettiSignals = (function () {
     return 0;
   }
   function paceEligible(e) {
-    if (!e || e.testId === HARDEST_TEST_ID || e.source === 'diagnostic-retake') return false;
+    if (!e || e.testId === HARDEST_TEST_ID || e.source === 'diagnostic-retake' || e.retake === true) return false;
     if (isInterruptedForTrend(e)) return false;
-    return !!qsOf(e.qStats);
+    // A sitting walked away from reads as a module "run short"; it is leaving, not pace.
+    return !!qsOf(e.qStats) && !abandonedSitting(e.qStats);
   }
+  // Oldest first, a practice test's first sitting only (firstTakes).
+  function paceEntries(entries) {
+    var w = (entries || []).filter(paceEligible).map(function (e, i) { return { e: e, i: i, t: msOf(e.at || e.date) }; })
+      .filter(function (x) { return isFinite(x.t); })
+      .sort(function (a, b) { return (a.t - b.t) || (a.i - b.i); });
+    return firstTakes(w.map(function (x) { return x.e; }));
+  }
+  // Standard minutes per module when a record carries no clock (qs.tl).
+  var PACE_STD_MODULE_MIN = { 'reading-writing': 32, math: 35 };
   function paceSitting(e) {
     var qs = qsOf(e.qStats), mods = {}, hasMod = false, hasCode = false;
     var fast = 0, fastOk = 0, otherN = 0, otherOk = 0, answered = 0;
@@ -1991,7 +2058,8 @@ var MorettiSignals = (function () {
       }
       if (mod === null) return;
       var mk = (secKeyOf(String(qs.s[r[0]] || '')) || 'other') + '|' + mod;
-      (mods[mk] = mods[mk] || []).push({ blank: blank, rush: code === 2, sink: !blank && code === 3, dom: splitKey(qs.k[r[1]]).dom });
+      (mods[mk] = mods[mk] || []).push({ blank: blank, rush: code === 2, sink: !blank && code === 3, dom: splitKey(qs.k[r[1]]).dom,
+                                         ok: r[3] === 1, sec: Number(r[4]) || 0, si: r[0] });
     });
     var ends = {};
     Object.keys(mods).forEach(function (mk) {
@@ -2001,12 +2069,24 @@ var MorettiSignals = (function () {
         if (x.rush) rush++;
         if (x.sink) { sinkN++; sinkDomM[x.dom] = (sinkDomM[x.dom] || 0) + 1; }
       });
-      ends[mk] = { blanks: blanks, rush: rush, sinks: sinkN, sinkDom: sinkDomM, short: blanks >= PACE_END_BLANKS || rush >= 3 };
+      /* Time left on the module's clock (leaves-time): the section's minutes
+         from the record (qs.tl, 2026-09-26 on) split over its modules, else
+         the standard clock (which can only understate an accommodated
+         student's unused time, never invent it). */
+      var secKey = mk.split('|')[0], si = rows.length ? rows[0].si : 0;
+      var nMods = Object.keys(mods).filter(function (k2) { return k2.split('|')[0] === secKey; }).length || 1;
+      var tl = qs.tl && typeof qs.tl[si] === 'number' && qs.tl[si] > 0 ? qs.tl[si] : null;
+      var clockMin = tl ? tl / nMods : (PACE_STD_MODULE_MIN[secKey] || 0);
+      var usedMin = rows.reduce(function (a, x) { return a + x.sec; }, 0) / 60;
+      ends[mk] = { blanks: blanks, rush: rush, sinks: sinkN, sinkDom: sinkDomM, short: blanks >= PACE_END_BLANKS || rush >= 3,
+                   n: rows.length, right: rows.filter(function (x) { return x.ok; }).length,
+                   clockMin: clockMin, unusedMin: clockMin ? Math.max(0, clockMin - usedMin) : 0,
+                   early: !!clockMin && blanks === 0 && (clockMin - usedMin) >= PACE_EARLY_SHARE * clockMin };
     });
     return { at: msOf(e.at || e.date), hasMod: hasMod, hasCode: hasCode, fast: fast, fastOk: fastOk, otherN: otherN, otherOk: otherOk,
              answered: answered, questions: qs.q.length, ends: ends };
   }
-  function paceRead(S) {
+  function paceRead(S, cfg) {
     var out = [], mks = {};
     S.forEach(function (x) { Object.keys(x.ends).forEach(function (mk) { mks[mk] = true; }); });
     Object.keys(mks).sort().forEach(function (mk) {
@@ -2020,6 +2100,41 @@ var MorettiSignals = (function () {
                  blanks: hit.reduce(function (a, x) { return a + x.ends[mk].blanks; }, 0),
                  rushed: hit.reduce(function (a, x) { return a + x.ends[mk].rush; }, 0),
                  sinks: hit.reduce(function (a, x) { return a + x.ends[mk].sinks; }, 0), sinksWhere: top, sinksWhereN: top ? dom[top] : 0 });
+    });
+    /* Leaves time on the table (2026-09-26, Nikolas): a module finished with
+       a quarter or more of its clock unused, and on those sittings the
+       module goes worse than on the others (pooled accuracy, one-sided z >=
+       1.645), so the early finish is costing questions rather than being a
+       strong student's spare time. Needs 3+ sittings of the module, 2+ of
+       them early and 1+ not. Simulated (leave-sim.js, 2,000 students, 8
+       sittings, two reads): see PACE_EARLY_SHARE's note. */
+    Object.keys(mks).sort().forEach(function (mk) {
+      var have = S.filter(function (x) { return x.ends[mk] && x.ends[mk].clockMin; });
+      var E = have.filter(function (x) { return x.ends[mk].early; }), O = have.filter(function (x) { return !x.ends[mk].early; });
+      if (have.length < PACE_MIN_TESTS || E.length < 2 || O.length < 1) return;
+      var sum = function (L, f) { return L.reduce(function (a, x) { return a + x.ends[mk][f]; }, 0); };
+      var eR = sum(E, 'right'), eN = sum(E, 'n'), oR = sum(O, 'right'), oN = sum(O, 'n');
+      var pE = eR / eN, pO = oR / oN, pAll = (eR + oR) / (eN + oN);
+      var se = Math.sqrt(pAll * (1 - pAll) * (1 / eN + 1 / oN));
+      /* Days differ (a student is sharper on some): the sittings' own
+         spread inside each group, against what question-to-question chance
+         gives, widens the error when it is bigger (design effect >= 1). */
+      var wv = 0, wdf = 0, bv = 0;
+      [E, O].forEach(function (L) {
+        if (L.length < 2) return;
+        var ps = L.map(function (x) { return x.ends[mk].right / x.ends[mk].n; });
+        var m = ps.reduce(function (a, b) { return a + b; }, 0) / ps.length;
+        wv += ps.reduce(function (a, b) { return a + (b - m) * (b - m); }, 0); wdf += ps.length - 1;
+      });
+      have.forEach(function (x) { bv += pAll * (1 - pAll) / x.ends[mk].n; });
+      bv /= have.length;
+      var deff = (cfg && cfg.leaveDeff === false) || !wdf || !(bv > 0) ? 1 : Math.max(1, (wv / wdf) / bv);
+      var zBar = (cfg && typeof cfg.leaveZ === 'number') ? cfg.leaveZ : PACE_LEAVE_Z;
+      if (!(se > 0) || (pO - pE) / (se * Math.sqrt(deff)) < zBar || pO - pE < PACE_LEAVE_MIN_DIFF) return;
+      var p = mk.split('|');
+      out.push({ id: 'leaves-time', key: 'leaves-time|' + mk, sec: p[0], module: Number(p[1]) + 1, early: E.length, of: have.length,
+                 earlyRight: eR, earlyN: eN, otherRight: oR, otherN: oN,
+                 unusedMin: Math.round(sum(E, 'unusedMin') / E.length * 10) / 10 });
     });
     // Too fast: only sittings that carry pace codes can show it.
     var coded = S.filter(function (x) { return x.hasCode && x.answered > 0; });
@@ -2041,17 +2156,170 @@ var MorettiSignals = (function () {
   }
   function pacingHabits(entries, cfg) {
     var last = (cfg && cfg.last > 0) ? cfg.last : 8;
-    var all = byTime((entries || []).filter(paceEligible).map(paceSitting).filter(function (x) { return isFinite(x.at); }));
+    var all = paceEntries(entries).map(paceSitting);
     var S = all.slice(-last), before = all.slice(-last - 1, -1);
-    var now = paceRead(S);
+    var now = paceRead(S, cfg);
     var twoReads = !(cfg && cfg.twoReads === false);
     var prevKeys = {};
-    if (twoReads) paceRead(before).forEach(function (h) { prevKeys[h.key] = true; });
+    if (twoReads) paceRead(before, cfg).forEach(function (h) { prevKeys[h.key] = true; });
     var habits = [], pending = [];
     now.forEach(function (h) { (!twoReads || prevKeys[h.key] ? habits : pending).push(h); });
     return { tests: S.length, withModules: S.filter(function (x) { return x.hasMod; }).length,
              withCodes: S.filter(function (x) { return x.hasCode; }).length, need: PACE_MIN_TESTS,
              habits: habits, pending: pending };
+  }
+
+  /* -- J. HOW CONSISTENT IS THE STUDENT? consistencyOf (2026-09-26) ------
+     Nikolas: scores 1110 / 1340 / 1210 / 1350 looked "inconsistent", and
+     nothing in the system measured it. Two readings, both against what
+     chance alone gives, for Luca (session prep), never a family:
+       composite  the comparable first takes (isTrendComparable, firstTakes),
+                  3+: scatter around a straight line, against each test's
+                  own measurement error (see the note in the code); flagged
+                  at p < .05. ratio = sqrt(chi / df): about 1 when steady.
+       modules    each section's Module 1 and Module 2 across the sittings
+                  that record the module ([8]), 3+, each against the same
+                  sitting's other modules (a whole good or bad day is the
+                  composite's swing, not a module's): right answers per sitting
+                  against what the student's own accuracy at each difficulty
+                  in that section predicts for that sitting's questions (so a
+                  harder Module 2 form is expected to go worse), measured
+                  around the student's own average offset in that module
+                  (and, with 4+ sittings, around a straight line). ratio =
+                  sqrt(chi / df).
+     A ratio well over 1 with p < .05 means more swing than a test's noise
+     explains. direction 'up' / 'down' when every sitting beat (or fell
+     below) the one before: that is a trend, not inconsistency, and reads so. With 3-4 tests even a real swing is rarely conclusive; the
+     p says so. Returns { composite, modules: [...] sorted by ratio }. */
+  function gammaQ(a, x) { // regularized upper incomplete gamma Q(a, x)
+    if (!(x > 0)) return 1;
+    var lg = lgamma(a), sum, del, ap, n;
+    if (x < a + 1) {
+      ap = a; sum = 1 / a; del = sum;
+      for (n = 0; n < 200; n++) { ap += 1; del *= x / ap; sum += del; if (Math.abs(del) < Math.abs(sum) * 1e-12) break; }
+      return Math.max(0, 1 - sum * Math.exp(-x + a * Math.log(x) - lg));
+    }
+    var b = x + 1 - a, c = 1e300, d = 1 / b, h = d, an, i;
+    for (i = 1; i < 200; i++) {
+      an = -i * (i - a); b += 2;
+      d = an * d + b; if (Math.abs(d) < 1e-300) d = 1e-300;
+      c = b + an / c; if (Math.abs(c) < 1e-300) c = 1e-300;
+      d = 1 / d; del = d * c; h *= del;
+      if (Math.abs(del - 1) < 1e-12) break;
+    }
+    return Math.min(1, Math.exp(-x + a * Math.log(x) - lg) * h);
+  }
+  function consistencyOf(entries) {
+    var out = { composite: null, modules: [] };
+    var ordered = (entries || []).map(function (e, i) { return { e: e, i: i, t: e ? msOf(e.at || e.date) : NaN }; })
+      .filter(function (w) { return isFinite(w.t); })
+      .sort(function (a, b) { return (a.t - b.t) || (a.i - b.i); }).map(function (w) { return w.e; });
+    var comp = firstTakes(ordered).filter(isTrendComparable);
+    if (comp.length >= 3) {
+      /* The admin page's test, moved here so every surface reads one
+         (stats audit 2026-09-25, wire/consistency-sim.js, n 20,000 a cell):
+         a straight line through the tests in date order, so steady
+         improvement is not scatter; each test's noise read at the LINE's
+         value (compositeSem), three reweighting passes; chi = sum of
+         squared noise-scaled residuals on n-2 df. About 1 steady student in
+         20 flagged by chance at p < .05 (flat 4.9 / 4.9 / 4.3% at 3 / 5 / 10
+         tests; +10 or +30 a week 4.7-5.1%); one sitting 240 points low is
+         caught 24% at 3 tests, 58% at 5. Now on first takes only. */
+      var xs = comp.map(function (e, i) { var t = msOf(e.at || e.date); return isFinite(t) ? t / 864e5 : i; });
+      var ys = comp.map(function (e) { return e.composite; });
+      var fit = function (ws) {
+        var sw = 0, sx = 0, sy = 0, sxx = 0, sxy = 0, j;
+        for (j = 0; j < ys.length; j++) { sw += ws[j]; sx += ws[j] * xs[j]; sy += ws[j] * ys[j]; }
+        var mx = sx / sw, my = sy / sw;
+        for (j = 0; j < ys.length; j++) { sxx += ws[j] * (xs[j] - mx) * (xs[j] - mx); sxy += ws[j] * (xs[j] - mx) * (ys[j] - my); }
+        var bb = sxx > 0 ? sxy / sxx : 0;
+        return { at: function (x) { return my + bb * (x - mx); }, perWeek: bb * 7 };
+      };
+      var ws = ys.map(function () { return 1; }), line;
+      for (var pass = 0; pass < 3; pass++) {
+        line = fit(ws);
+        ws = xs.map(function (x) { var e = compositeSem({ composite: line.at(x) }); return 1 / (e * e); });
+      }
+      line = fit(ws);
+      var chiC = 0;
+      for (var ic = 0; ic < ys.length; ic++) { var rr = ys[ic] - line.at(xs[ic]); chiC += ws[ic] * rr * rr; }
+      var dfC = ys.length - 2, mean = ys.reduce(function (x, y) { return x + y; }, 0) / ys.length;
+      var semC = compositeSem(levelOf(comp));
+      out.composite = { n: ys.length, scores: ys, mean: Math.round(mean), lo: Math.min.apply(null, ys), hi: Math.max.apply(null, ys),
+                        perWeek: Math.round(line.perWeek), sem: Math.round(semC),
+                        ratio: Math.round(Math.sqrt(chiC / dfC) * 100) / 100, chi: Math.round(chiC * 100) / 100, df: dfC,
+                        p: Math.round(gammaQ(dfC / 2, chiC / 2) * 1000) / 1000 };
+      out.composite.flagged = out.composite.p < 0.05;
+    }
+    // Modules: full sittings with a module field, first takes, not abandoned or set aside.
+    var sits = paceEntries(ordered).filter(function (e) { return e.mode !== 'section'; }).map(function (e) { return qsOf(e.qStats); });
+    var acc = {}, rows = [];
+    sits.forEach(function (qs, si) {
+      qs.q.forEach(function (r) {
+        if (!r || r.length < 9 || (r[8] !== 0 && r[8] !== 1)) return;
+        var sec = secKeyOf(String(qs.s[r[0]] || '')) || 'other', d = r[2];
+        var k = sec + '|' + d, a = acc[k] || (acc[k] = { r: 0, n: 0 });
+        a.n++; if (r[3] === 1) a.r++;
+        rows.push({ si: si, sec: sec, mod: r[8], d: d, ok: r[3] === 1 });
+      });
+    });
+    var byMod = {};
+    rows.forEach(function (x) {
+      var a = acc[x.sec + '|' + x.d], p = (a.r + 0.5) / (a.n + 1);
+      var mk = x.sec + '|' + x.mod, m = byMod[mk] || (byMod[mk] = {}), c = m[x.si] || (m[x.si] = { right: 0, n: 0, exp: 0, v: 0 });
+      c.n++; if (x.ok) c.right++; c.exp += p; c.v += p * (1 - p);
+    });
+    /* Relative to the same sitting's other modules (2026-09-26): a good or a
+       bad day moves every module together, and read alone each module then
+       "swung" (steady students with ordinary day-to-day variation got a
+       clear module 11-57% of the time in cons-sim.js). A module's residual
+       less its share of the other modules' residual that sitting isolates
+       what is particular to it; the whole-day swing is the composite's. */
+    var daySum = {};
+    Object.keys(byMod).forEach(function (mk) {
+      Object.keys(byMod[mk]).forEach(function (si) {
+        var c = byMod[mk][si], d = daySum[si] || (daySum[si] = { res: 0, n: 0, v: 0 });
+        d.res += c.right - c.exp; d.n += c.n; d.v += c.v;
+      });
+    });
+    Object.keys(byMod).forEach(function (mk) {
+      Object.keys(byMod[mk]).forEach(function (si) {
+        var c = byMod[mk][si], d = daySum[si], oN = d.n - c.n;
+        if (oN > 0) {
+          var oRes = d.res - (c.right - c.exp), oV = d.v - c.v;
+          c.adj = (c.right - c.exp) - c.n * oRes / oN;
+          c.vAdj = c.v + c.n * c.n * oV / (oN * oN);
+        }
+      });
+    });
+    Object.keys(byMod).sort().forEach(function (mk) {
+      var list = Object.keys(byMod[mk]).map(function (k) { return byMod[mk][k]; })
+        .filter(function (c) { return typeof c.adj === 'number'; });
+      if (list.length < 3) return;
+      /* Spread around the student's own level in this module: the
+         sitting's residual (right minus expected) less the mean residual,
+         so a module that is steadily above or below the difficulty-based
+         expectation (17, 18, 17 of 22) reads as steady, not as a swing. */
+      var res0 = list.map(function (c) { return c.adj; }), k = list.length;
+      var mr = res0.reduce(function (a, b) { return a + b; }, 0) / k, slope = 0;
+      // With 4+ sittings a straight line comes out first (steady progress is not a swing).
+      if (k >= 4) {
+        var mi = (k - 1) / 2, sxx = 0, sxy = 0;
+        for (var j2 = 0; j2 < k; j2++) { sxx += (j2 - mi) * (j2 - mi); sxy += (j2 - mi) * (res0[j2] - mr); }
+        slope = sxx > 0 ? sxy / sxx : 0;
+      }
+      var chi = list.reduce(function (a, c, j3) { var d = res0[j3] - mr - slope * (j3 - (k - 1) / 2); return a + (c.vAdj > 0 ? d * d / c.vAdj : 0); }, 0);
+      var df = k >= 4 ? k - 2 : k - 1;
+      var p = mk.split('|');
+      // Every sitting better (or worse) than the last is a direction, not a swing.
+      var res = list.map(function (c) { return c.right - c.exp; }), up = true, down = true;
+      for (var q = 1; q < res.length; q++) { if (!(res[q] > res[q - 1])) up = false; if (!(res[q] < res[q - 1])) down = false; }
+      out.modules.push({ sec: p[0], module: Number(p[1]) + 1, direction: up ? 'up' : down ? 'down' : null, detrended: k >= 4, sittings: list.map(function (c) { return { right: c.right, n: c.n, expected: Math.round(c.exp * 10) / 10 }; }),
+                         ratio: Math.round(Math.sqrt(chi / df) * 100) / 100, chi: Math.round(chi * 100) / 100, df: df,
+                         p: Math.round(gammaQ(df / 2, chi / 2) * 1000) / 1000 });
+    });
+    out.modules.sort(function (a, b) { return b.ratio - a.ratio; });
+    return out;
   }
 
   /* -- I. HOW THE MISSES HAPPEN, AREA BY AREA: missProfile (2026-09-26) ---
@@ -2096,8 +2364,7 @@ var MorettiSignals = (function () {
       return [overall, d, k];
     };
     var bump = function (cells, f, n) { cells.forEach(function (c) { c[f] += (n === undefined ? 1 : n); }); };
-    var used = byTime((entries || []).filter(function (e) { return paceEligible(e) && e.mode !== 'section'; })
-      .map(function (e) { return { at: e.at || e.date, e: e }; })).slice(-last).map(function (w) { return w.e; });
+    var used = paceEntries(entries).filter(function (e) { return e.mode !== 'section'; }).slice(-last);
     used.forEach(function (e) {
       var qs = qsOf(e.qStats);
       tests++;
@@ -2388,7 +2655,7 @@ var MorettiSignals = (function () {
      4.3%. The lag is the noise: about 100 points a test. */
   var TARGET_GUARD_Z = 0.84;
   function scoreChangeAt(entries, z) {
-    var usable = (entries || []).filter(isTrendComparable);
+    var usable = firstTakes(entries || []).filter(isTrendComparable);
     if (usable.length < 2) return null;
     var k = Math.max(1, Math.min(3, Math.floor(usable.length / 2)));
     var first = usable.slice(0, k), latest = usable.slice(usable.length - k);
@@ -2435,7 +2702,7 @@ var MorettiSignals = (function () {
   function gainVerdict(tests, opts) {
     var z = (opts && typeof opts.z === 'number') ? opts.z : PARENT_Z;
     var guard = !(opts && opts.outlierGuard === false);
-    var usable = (tests || []).filter(isTrendComparable);
+    var usable = firstTakes(tests || []).filter(isTrendComparable);
     var gz = (opts && typeof opts.guardZ === 'number') ? opts.guardZ : GAIN_GUARD_Z;
     // 'outlier' (default since audit 4): only a flagged test is removed;
     // 'each': every test in turn, the rule before audit 4.
@@ -2504,13 +2771,15 @@ var MorettiSignals = (function () {
     var DAY = 86400000, WEEK = 7 * DAY;
     var used = [];
     (entries || []).forEach(function (e, i) {
-      if (!isTrendComparable(e)) return;
-      var ms = msOf(e.date);
+      var ms = e ? msOf(e.date) : NaN;
       if (!isFinite(ms)) return;
       used.push({ e: e, i: i, ms: ms });
     });
-    if (!used.length) return null;
     used.sort(function (a, b) { return (a.ms - b.ms) || (a.i - b.i); });
+    // A repeat of a practice test is not a new reading (firstTakes).
+    var firsts = firstTakes(used.map(function (u) { return u.e; }));
+    used = used.filter(function (u) { return firsts.indexOf(u.e) >= 0 && isTrendComparable(u.e); });
+    if (!used.length) return null;
     var R = function (v) { var s = compositeSem({ composite: v }); return s * s; };
     var q1 = P.drift * P.drift, q2 = P.slopeDrift * P.slopeDrift;
     var x0 = 0, x1 = 0, p00 = 0, p01 = 0, p11 = 0, trace = [];
@@ -2597,7 +2866,7 @@ var MorettiSignals = (function () {
     if (!(typeof target === 'number' && isFinite(target))) return null;
     if (opts && opts.twoReads) {
       var o2 = {}; Object.keys(opts).forEach(function (k) { if (k !== 'twoReads') o2[k] = opts[k]; });
-      var usable = (tests || []).filter(isTrendComparable);
+      var usable = firstTakes(tests || []).filter(isTrendComparable);
       var hr = heldOnTwoReads(function (h) { var t = targetReached(h, target, o2); return t && t.reached ? 'reached' : null; }, usable);
       var cur = targetReached(tests, target, o2);
       if (cur) cur.reached = hr.held;
@@ -3491,7 +3760,8 @@ var MorettiSignals = (function () {
     skillEvidence: skillEvidence,
     itemsFromQStats: itemsFromQStats,
     trailingRush: trailingRush, RUSH_REL: RUSH_REL, RUSH_MIN_RUN: RUSH_MIN_RUN, RUSH_CLOCK_SHARE: RUSH_CLOCK_SHARE,
-    pacingHabits: pacingHabits, missProfile: missProfile,
+    pacingHabits: pacingHabits, missProfile: missProfile, consistencyOf: consistencyOf, gammaQ: gammaQ,
+    firstTakes: firstTakes, abandonedSitting: abandonedSitting,
     skillTrend: skillTrend,
     evidenceAttempts: evidenceAttempts,
     formDomainOffsets: formDomainOffsets,
@@ -3500,7 +3770,7 @@ var MorettiSignals = (function () {
     // Bumped with every change to what this file computes (audit 5): the
     // admin deploy check compares it, since an older copy can still have
     // every function name and compute the old way.
-    VERSION: 32,
+    VERSION: 33,
     attemptAbility: attemptAbility,
     FOCUS_GATES: { domainClear: FOCUS_DOMAIN_CLEAR, skillLead: FOCUS_SKILL_LEAD, noOffsetsPenalty: FOCUS_NO_OFFSETS_PENALTY },
     practiceEvidence: practiceEvidence,

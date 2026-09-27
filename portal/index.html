@@ -5626,7 +5626,7 @@ window.Portal = {
      header in fluid-ui.js. -->
 <script src="fluid-ui.js?v=20260905y"></script>
 <script src="banks.js?v=20260926a"></script>
-<script src="signals.js?v=20260926f"></script>
+<script src="signals.js?v=20260926g"></script>
 <script src="desmos-tags.js?v=20260916c"></script>
 <script src="time-budgets.js?v=20260912a"></script>
 <script src="challenge-questions.js?v=20260926a"></script>
@@ -14049,6 +14049,11 @@ window.Portal = {
        Home and the family email all leave it out of the content evidence. */
     try {
       var qsRow = 0;
+      /* The section's allotted minutes (accommodation-adjusted), aligned
+         with qStats.s (the same completedSections order as payload.s), so
+         the pooled "leaves time on the table" habit can read each module's
+         clock (signals.js pacingHabits, 2026-09-26). */
+      qStats.tl = payload.s.map(function (s) { return s.tl > 0 ? s.tl : null; });
       payload.s.forEach(function (s) {
         var bank = bankFor(s.k), qs7 = sectionQuestions(bank, s.v);
         var mult7 = (window.TIME_BUDGETS && s.tl) ? window.TIME_BUDGETS.timeMultFromAllotted(s.k, !!bank.module2Easier, s.tl) : 1;
@@ -21584,6 +21589,16 @@ window.renderNativeReport = function (data) {
     if (!MS || !MS.pairChange) return;
     var thisEntry = { composite: thisComposite, rw: rwScaled, math: mathScaled, testId: data.pt || null };
     if (!MS.isTrendComparable(thisEntry)) return;
+    /* A second sitting of the same practice test (2026-09-26): knowing the
+       questions lifts it, so it is not set against anything (firstTakes). */
+    var takenBefore = data.pt && /^sat-practice-/.test(data.pt) && entries.some(function (e) {
+      return e && e.testId === data.pt && e.mode !== 'section' && Date.parse(e.date) < thisTs;
+    });
+    if (takenBefore) {
+      wrap.innerHTML = 'A second try at this test: knowing the questions lifts the score, so it isn\u2019t compared with the first.';
+      wrap.style.display = '';
+      return;
+    }
     var prior = entries.filter(function (e) {
       return e && e.testType === data.t && MS.isTrendComparable(e) && Date.parse(e.date) < thisTs;
     }).sort(function (a, b) { return Date.parse(b.date) - Date.parse(a.date); })[0];
