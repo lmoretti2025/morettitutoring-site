@@ -169,7 +169,12 @@
 
   /* ---------- small helpers ---------- */
   function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
-  function plain(html) { var d = document.createElement('div'); d.innerHTML = String(html || ''); return (d.textContent || '').replace(/\s+/g, ' ').trim(); }
+  // Text of the report's flag HTML. A <template> is inert, so nothing in it loads or runs.
+  function plain(html) {
+    var t = document.createElement('template'), d;
+    if ('content' in t) { t.innerHTML = String(html || ''); d = t.content; } else { d = document.createElement('div'); d.innerHTML = String(html || '').replace(/<(img|script|iframe)[^>]*>/gi, ''); }
+    return (d.textContent || '').replace(/\s+/g, ' ').trim();
+  }
   function pl(n, w, ws) { return n + ' ' + (n === 1 ? w : (ws || w + 's')); }
   function pct(c, t) { return t ? Math.round(100 * c / t) : 0; }
   function numWord(n) { return ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'][n] || String(n); }
@@ -198,10 +203,10 @@
   // How the clock took its questions, in words, from the report's own counts.
   function clockWhy(pace) {
     var bits = [];
-    if (pace.ranOut) bits.push('rushed as time ran out');
+    if (pace.ranOut) bits.push('hurried as time ran out');
     if (pace.blank) bits.push('never reached');
     if (pace.tooFast) bits.push('answered too fast to have read');
-    return bits.length ? bits.join(', ') : 'rushed, or never reached';
+    return bits.length ? bits.join(', ') : 'hurried, or never reached';
   }
   function build(R) {
     var data = R.data || {};
@@ -265,7 +270,7 @@
       } else {
         var sKey = sections[0] && sections[0].key;
         halves = '<p class="t-say r" style="margin-top:14px">' + esc(secName(sKey)) + ' only, on the 200 to 800 scale.</p>';
-        say = 'This sitting was one section, so there\u2019s no 400 to 1600 total. It\u2019s a clean read of <strong>' + esc(secName(sKey)) + '</strong> on its own.';
+        say = 'This sitting was one section, so there\u2019s no 400 to 1600 total. It\u2019s a read of <strong>' + esc(secName(sKey)) + '</strong> on its own.';
       }
       var modRows = (R.displaySections || []).map(function (d) {
         return '<tr><td>' + esc(d.label) + '</td><td class="num">' + d.c + ' / ' + d.t + '</td><td class="bar">' + bar(pct(d.c, d.t)) + '</td></tr>';
@@ -283,8 +288,9 @@
         bandLine = '<div class="t-range r" role="img" aria-label="Likely range ' + band.lo + ' to ' + band.hi + ', score ' + headline + '">' +
           '<div class="t-rtrack"><div class="t-band" style="left:' + at2(band.lo) + '%;width:' + (at2(band.hi) - at2(band.lo)).toFixed(2) + '%"></div>' +
           '<div class="t-dotm" style="left:' + at2(headline) + '%"></div></div>' +
-          '<div class="t-rlab"><span class="end" style="left:0;transform:none">' + smin + '</span><span style="left:' + at2(band.lo) + '%">' + band.lo + '</span>' +
-          '<span style="left:' + at2(band.hi) + '%">' + band.hi + '</span><span class="end" style="left:auto;right:0;transform:none">' + smax + '</span></div></div>' +
+          '<div class="t-rlab">' + (at2(band.lo) > 9 ? '<span class="end" style="left:0;transform:none">' + smin + '</span>' : '') +
+          '<span style="left:' + Math.max(4, at2(band.lo)) + '%">' + band.lo + '</span>' +
+          '<span style="left:' + Math.min(96, at2(band.hi)) + '%">' + band.hi + '</span>' + (at2(band.hi) < 91 ? '<span class="end" style="left:auto;right:0;transform:none">' + smax + '</span>' : '') + '</div></div>' +
           '<p class="t-say r" style="margin-top:10px">Your real level is most likely between <strong>' + band.lo + '</strong> and <strong>' + band.hi + '</strong> (about 4 chances in 5).</p>';
       }
       if (cond && cond.level === 'fair') bandLine += '<p class="t-small r">About how this test was taken: ' + esc(cond.signals.map(function (g) { return undash(g.label); }).join('; ')) + '. The full report has the detail.</p>';
@@ -316,7 +322,7 @@
       var share = nK / (nC + nK || 1);
       var sayMiss = nK === 0 ? 'Every miss was a real attempt, so the points are in <strong>what to review next</strong>, not in the clock.'
         : share >= 0.25 ? 'So ' + (share >= 0.5 ? 'most' : 'a good share') + ' of your misses <strong>aren\u2019t about what you know</strong>. They\u2019re about time, which better pacing can win back without learning anything new.'
-        : 'Most misses are <strong>content to review</strong>, with a few lost to the clock.';
+        : 'Most misses are <strong>content to review</strong>, with ' + (nK === 1 ? 'one' : 'a few') + ' lost to the clock.';
       var bySec = '';
       if (B) {
         bySec = sections.map(function (s) {
@@ -337,7 +343,7 @@
             '<tr><td><b>Total</b></td><td class="num"><b>' + nC + '</b></td><td class="num"><b>' + nK + '</b></td><td class="num"><b>' + nM + '</b></td></tr></table>' : '') +
           '<h4>What each kind means</h4>' +
           '<p><b>Missed after real work.</b> You read it and still missed it. Some are gaps to relearn and some may be slips; either way it\u2019s content to review, and the next screens say where.</p>' +
-          (nK ? '<p><b>Lost to the clock.</b> ' + [pace.ranOut ? pl(pace.ranOut, 'rushed as time ran out', 'rushed as time ran out') : '', pace.blank ? pace.blank + ' never reached' : '',
+          (nK ? '<p><b>Lost to the clock.</b> ' + [pace.ranOut ? pace.ranOut + ' hurried as time ran out' : '', pace.blank ? pace.blank + ' never reached' : '',
             pace.tooFast ? pace.tooFast + ' answered too fast to have read' : ''].filter(String).join(', ') + '. Better pacing gets these back without learning anything new.</p>' : '') +
           (nM ? '<p><b>Slow but right.</b> Right answers that took well over their time while the clock was short. They count, but they cost time the later questions needed' +
             (P.methodSkills && P.methodSkills.length ? ', mostly in <b>' + P.methodSkills.map(esc).join('</b> and <b>') + '</b>' : '') + '.</p>' : '') }
@@ -373,7 +379,11 @@
       var b = DX[d], right = b.mastered + b.skimmed + b.inefficient, p = b.total ? right / b.total : 0;
       if (b.total >= 8 && p >= 0.85 && (!best || p > best.p || (p === best.p && b.total > best.n))) best = { name: d, right: right, n: b.total, p: p };
     });
-    var allAnswered = totalQ && !R.skipped;
+    /* "Answered every question" is no strength on a rushed sitting (Luca's rule,
+       2026-09-27: handed in with more than 5 minutes left): it was answered
+       fast, not well. The conditions screen says so instead. */
+    var rushedSitting = !!(cond && cond.signals.some(function (g) { return g.id === 'rushed'; }));
+    var allAnswered = totalQ && !R.skipped && !rushedSitting;
     if (best || allAnswered) {
       M.screens.push({ name: 'strengths', html:
         '<p class="t-eye r">Going well</p><h2 class="r">' + (best ? esc(best.name) + ' is already working.' : 'You answered every question.') + '</h2>' +
@@ -476,7 +486,7 @@
         var head = ranLate ? modName + ': the clock caught up with you.'
           : methodN ? 'A few right answers took so long they cost time.'
           : 'A few answers came too fast to have read the question.';
-        var sayClock = ranLate ? 'By the end, ' + pl(ranLate, 'question was', 'questions were') + ' rushed or left blank. The fix is a skill, not speed: <strong>know when to move on</strong>.'
+        var sayClock = ranLate ? 'By the end, ' + pl(ranLate, 'question was', 'questions were') + ' hurried or left blank. The fix is a skill, not speed: <strong>know when to move on</strong>.'
            : methodN ? cap(pl(methodN, 'right answer', 'right answers')) + ' ran far over time while the clock was short. The fix is a skill, not speed: <strong>know when to move on</strong>.'
            : cap(pl(pace2.tooFast, 'answer', 'answers')) + ' took only seconds, <strong>less than it takes to read the question</strong>. Reading those through is the fix.';
         var modTbl = (R.displaySections || []).map(function (d) {
@@ -488,12 +498,12 @@
           '<p class="t-eye r">How you used the clock</p><h2 class="r">' + esc(head) + '</h2>' +
           '<div class="t-clock r"><div class="t-cbars" role="img" aria-label="Time per question in ' + esc(modName) + '">' + bars + '</div>' +
           '<div class="t-axis"><span>Question 1</span><span>Question ' + rows.length + '</span></div>' +
-          '<div class="t-legend"><span><i style="background:var(--slow)"></i>Right, but far over time</span><span><i style="background:var(--clock)"></i>Rushed or too fast</span><span><i style="border:1.5px dashed var(--clock)"></i>Never reached</span></div></div>' +
+          '<div class="t-legend"><span><i style="background:var(--slow)"></i>Right, but far over time</span><span><i style="background:var(--clock)"></i>Hurried or too fast</span><span><i style="border:1.5px dashed var(--clock)"></i>Never reached</span></div></div>' +
           '<p class="t-say r">' + sayClock + '</p><div class="r"><button type="button" class="t-more" data-sheet="clock">See every module</button></div>',
           sheet: { eye: 'How you used the clock', title: 'Every module', html:
             (modTbl ? '<table class="t-tbl"><tr><th>Module</th><th class="num">Time used</th><th class="num">Per question</th><th class="num">Blank</th></tr>' + modTbl + '</table>' : '') +
             '<h4>What the clock cost</h4><table class="t-tbl">' +
-            '<tr><td>Rushed as time ran out</td><td class="num">' + (pace2.ranOut || 0) + '</td></tr>' +
+            '<tr><td>Hurried as time ran out</td><td class="num">' + (pace2.ranOut || 0) + '</td></tr>' +
             '<tr><td>Never reached</td><td class="num">' + (pace2.blank || 0) + '</td></tr>' +
             '<tr><td>Answered too fast to have read it</td><td class="num">' + (pace2.tooFast || 0) + '</td></tr>' +
             '<tr><td>Right, but far over time while it was short</td><td class="num">' + methodN + '</td></tr></table>' +
@@ -506,16 +516,18 @@
     var routes = (R.routeSummaries || []).filter(function (x) { return x && x.questions; });
     if (routes.length) {
       var ORDER = ['slow-start', 'ran-short', 'late-drop', 'left-time', 'went-back', 'steady'];
-      var CHIP = { 'slow-start': 'Slow start', 'ran-short': 'Ran short', 'late-drop': 'Late drop', 'left-time': 'Time left over', 'went-back': 'Went back', 'steady': 'Steady' };
+      /* 'left-time' is what Luca calls rushed (2026-09-27): handed in with more than
+         5 minutes on the clock (MorettiSignals.rushedLevel), so it is named that. */
+      var CHIP = { 'slow-start': 'Slow start', 'ran-short': 'Ran out of time', 'late-drop': 'Late drop', 'left-time': 'Rushed', 'went-back': 'Went back', 'steady': 'Steady' };
       var pc = function (v) { return Math.round(100 * (Number(v) || 0)); };
       var mins = function (sec) { var m = Math.round((Number(sec) || 0) / 60); return pl(m, 'minute'); };
       var sentence = function (x) {
         var got = x.right + ' of ' + x.questions + ' right';
         switch (x.reading) {
-          case 'slow-start': return 'The first half ran slow, so the second half was rushed, and accuracy went from ' + pc(x.accFirstHalf) + '% to ' + pc(x.accSecondHalf) + '%.';
-          case 'ran-short': return 'Time ran short: ' + pl(x.rushedEnd, 'answer was', 'answers were') + ' rushed at the end' + (x.blanks ? ', and ' + x.blanks + ' left blank' : '') + '.';
+          case 'slow-start': return 'The first half ran slow, so the second half was hurried, and accuracy went from ' + pc(x.accFirstHalf) + '% to ' + pc(x.accSecondHalf) + '%.';
+          case 'ran-short': return 'Time ran out: ' + pl(x.rushedEnd, 'answer', 'answers') + ' came in a hurry at the end' + (x.blanks ? ', and ' + x.blanks + ' ' + (x.blanks === 1 ? 'was' : 'were') + ' left blank' : '') + '.';
           case 'late-drop': return 'Accuracy dropped from ' + pc(x.accFirstHalf) + '% in the first half to ' + pc(x.accSecondHalf) + '% in the second.';
-          case 'left-time': return 'You finished with ' + mins(x.unusedSec) + ' to spare and got ' + got + '. That time could have gone to checking.';
+          case 'left-time': return 'You handed in with ' + mins(x.unusedSec) + ' left and got ' + got + '. That time could have gone to checking.';
           case 'went-back': return 'You spent ' + mins(x.backSec) + ' going back over ' + pl(x.backQuestions, 'question') + '.';
           default: return 'Steady from start to finish: ' + got + '.';
         }
@@ -532,12 +544,12 @@
           '<i class="first" style="width:' + w(first) + '%"></i>' + (back ? '<i class="back" style="width:' + w(back) + '%"></i>' : '') + (left ? '<i class="left" style="width:' + w(left) + '%"></i>' : '') + '</div>';
       };
       var wl = undash(worst.label);
-      var HEAD = { 'slow-start': wl + ' started slow.', 'ran-short': 'Time ran short in ' + wl + '.', 'late-drop': wl + ' faded in the second half.',
-                   'left-time': wl + ' finished with time to spare.', 'went-back': wl + ': a lot of going back.' };
+      var HEAD = { 'slow-start': wl + ' started slow.', 'ran-short': 'Time ran out in ' + wl + '.', 'late-drop': wl + ' faded in the second half.',
+                   'left-time': wl + ' was rushed.', 'went-back': wl + ': a lot of going back.' };
       /* Several modules with the same reading are said together (Sakeena,
          2026-09-26: four 'left-time' modules headed by the first one alone). */
-      var HEADN = { 'slow-start': 'started slow.', 'ran-short': 'ran short on time.', 'late-drop': 'faded in the second half.',
-                    'left-time': 'finished with time to spare.', 'went-back': 'had a lot of going back.' };
+      var HEADN = { 'slow-start': 'started slow.', 'ran-short': 'ran out of time.', 'late-drop': 'faded in the second half.',
+                    'left-time': 'were rushed: handed in with time left.', 'went-back': 'had a lot of going back.' };
       var same = routes.filter(function (x) { return x.reading === worst.reading; }).length;
       var head2 = !troubled.length ? 'Every module ran steady.'
         : same === routes.length && same > 1 ? (same === 2 ? 'Both modules ' : 'All ' + numWord(same) + ' modules ') + HEADN[worst.reading]
@@ -658,7 +670,9 @@
        weak, spread-out student's only task read "Read before answering". */
     var attempted = Math.max(1, totalQ - (R.skipped || 0));
     if (!areas.length && P.causes && P.causes.content / attempted >= 0.15) {
-      tasks.push({ h: 'Core material across the board', p: 'The misses are spread over most areas, so start with the foundations: Standard English Conventions in Reading & Writing, and Algebra in Math.' });
+      var hasRW = sections.some(function (x) { return x.key === 'reading-writing'; }), hasM = sections.some(function (x) { return x.key === 'math'; });
+      var found = [hasRW ? 'Standard English Conventions in Reading & Writing' : '', hasM ? 'Algebra in Math' : ''].filter(String).join(', and ');
+      tasks.push({ h: 'Core material across the board', p: 'The misses are spread over most areas, so start with the foundations: ' + found + '.' });
     }
     var paceLost = (P.pace && (P.pace.blank + P.pace.ranOut)) || 0;
     if (paceLost >= 2) tasks.splice(Math.min(1, tasks.length), 0, { h: 'Know when to move on', p: 'If a question passes about twice its target time, mark it and move on. Come back if there\u2019s time.' });
@@ -673,6 +687,10 @@
         (weekly ? '<div class="r"><button type="button" class="t-more" data-sheet="plan">How much practice</button></div>' : '') +
         '<div class="r"><button type="button" class="t-btn ghost" data-go="close">See the full report &rarr;</button></div>',
         sheet: weekly ? { eye: 'The plan', title: 'How much practice', html: weekly } : null });
+    } else if (missed === 0 && totalQ) {
+      M.screens.push({ name: 'plan', html: '<p class="t-eye r">What\u2019s next</p><h2 class="r">Nothing missed.</h2>' +
+        '<p class="t-say r">Every question right. The job now is <strong>keeping it</strong>: a full practice test now and then, under real timing.</p>' +
+        '<div class="r"><button type="button" class="t-btn" data-go="close">See the full report &rarr;</button></div>' });
     } else {
       M.screens.push({ name: 'plan', html: '<p class="t-eye r">That\u2019s the story</p><h2 class="r">The full report has every detail.</h2>' +
         '<div class="r"><button type="button" class="t-btn" data-go="close">See the full report &rarr;</button></div>' });
@@ -788,7 +806,7 @@
       '<div class="t-stage">' + M.screens.map(function (s) { return '<section class="t-scr" data-name="' + s.name + '"><div class="t-in">' + s.html + '</div></section>'; }).join('') + '</div>' +
       '<div class="t-nav"><div class="t-nav-in"><button type="button" class="t-arrow t-prev" aria-label="Back">&larr;</button><span class="t-hint">Tap, swipe or use arrow keys</span>' +
       '<button type="button" class="t-arrow next t-next" aria-label="Next">&rarr;</button></div></div>' +
-      '<div class="t-sheet"><div class="t-card" role="dialog" aria-modal="true"><div class="t-sh"><h3></h3><button type="button" class="t-x" aria-label="Close">&times;</button></div><div class="t-sb"></div></div></div>';
+      '<div class="t-sheet"><div class="t-card" role="dialog" aria-modal="true" aria-labelledby="mtt-sh-title"><div class="t-sh"><h3 id="mtt-sh-title"></h3><button type="button" class="t-x" aria-label="Close">&times;</button></div><div class="t-sb"></div></div></div>';
     document.body.appendChild(root);
     document.documentElement.style.overflow = 'hidden';
     root.addEventListener('click', function (e) {
@@ -851,8 +869,11 @@
         var st = storage(), key = 'mtt_seen:' + M.attemptId, seen = false;
         try { seen = !!(st && st.getItem(key)); } catch (e) {}
         if (!seen) {
-          try { if (st) st.setItem(key, String(Date.now())); } catch (e) {}
-          setTimeout(function () { open(M); }, opts.delay || 500);
+          setTimeout(function () {
+            if (!document.body.contains(anchor || document.body)) return;   // the report was closed or replaced first
+            open(M);
+            try { if (st && root) st.setItem(key, String(Date.now())); } catch (e) {}
+          }, opts.delay || 500);
         }
       }
     } catch (e) { if (window.console) console.warn('report walkthrough:', e); }
