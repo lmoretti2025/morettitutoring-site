@@ -2681,6 +2681,12 @@
 @media (max-width: 520px) { #pt-native-report .ev-line { flex-direction: column; gap: 8px; } }
 /* Phone (2026-09-27): stacked, the R&W / Math row kept its 320px basis as a HEIGHT, leaving a blank gap. */
 @media (max-width: 620px) { #pt-native-report .score-tiles-small { flex: 0 0 auto; } }
+/* The range with the score (2026-09-27) */
+#pt-native-report .score-range-row { display: grid; grid-template-columns: minmax(0, 360px) 1fr; gap: 6px 22px; align-items: center; padding: 12px 18px 14px; border-top: 1px solid rgba(17,17,17,0.08); }
+#pt-native-report .score-range-row .plain-range { margin: 0; max-width: none; }
+#pt-native-report .score-range-row .plain-score { margin: 0; font-size: 12px; line-height: 1.6; color: var(--ink); }
+@media (max-width: 620px) { #pt-native-report .score-range-row { grid-template-columns: 1fr; } }
+
 #pt-native-report .tile-scale { white-space: nowrap; }
 @media (max-width: 620px) { #pt-native-report .tile-scale { display: block; } }
 @media (max-width: 520px) { #pt-native-report .rank-row { grid-template-columns: 1fr 4em; } #pt-native-report .rank-bar { grid-column: 1 / -1; grid-row: 2; } }
@@ -24263,6 +24269,8 @@ window.renderNativeReport = function (data) {
 
 
 
+  // Filled by the clock section for the walkthrough (see "A plain summary of each module's route").
+  var routeSummaries = [];
   (function renderTimingAllocation() {
     var wrap = document.getElementById('timing-allocation');
     var TIMING_SEC_SHORT = { 'reading-writing': 'R&W', 'math': 'Math' };
@@ -25025,6 +25033,54 @@ window.renderNativeReport = function (data) {
        2026-09-12) there is no Route, and the card is left out rather than
        falling back to the line. */
     if (!anyRoute) return;
+    /* A plain summary of each module's route for the walkthrough's clock
+       slide (Luca, 2026-09-27): when the first pass ended, how long went to
+       going back, the slowest first look against its target, the first half
+       against the second (pace and accuracy), a rushed end, time left, and
+       one reading a student can act on. Read from the same visits the chart
+       draws. */
+    try {
+      routeSummaries = moduleViews.map(function (mv) {
+        var rd = routeDataFor(mv);
+        if (!rd) return null;
+        var rows = rd.rows, n = rows.length, first = {}, back = 0, backQ = {}, lastEnd = 0;
+        rd.visits.forEach(function (v) {
+          lastEnd = Math.max(lastEnd, v.t0 + v.dur);
+          if (v.dur < GLANCE_SEC) return;
+          if (first[v.q] === undefined) first[v.q] = v; else { back += v.dur; backQ[v.q] = true; }
+        });
+        var firstEnd = 0;
+        Object.keys(first).forEach(function (q) { firstEnd = Math.max(firstEnd, first[q].t0 + first[q].dur); });
+        var bud = function (i) { var r = rows[i]; if (!window.TIME_BUDGETS || !r) return 0;
+          var b = window.TIME_BUDGETS.budgetSecondsFor(mv.key, r.q.domain, r.q.skill || r.dom, r.q.difficulty, mv.mult); return (b && b.ms) ? b.ms / 1000 : 0; };
+        var half = Math.floor(n / 2), med = function (a) { a = a.slice().sort(function (x, y) { return x - y; }); return a.length ? a[Math.floor(a.length / 2)] : null; };
+        var paceOf = function (lo, hi) { var a = []; for (var i = lo; i < hi; i++) { var b = bud(i); if (first[i] && b > 0) a.push(first[i].dur / b); } return med(a); };
+        var accOf = function (lo, hi) { var c = 0, t = 0; for (var i = lo; i < hi; i++) { t++; if (rows[i].ok) c++; } return t ? c / t : null; };
+        var longest = null;
+        Object.keys(first).forEach(function (q) { var b = bud(+q), d = first[q].dur; if (b > 0 && (!longest || d / b > longest.ratio)) longest = { q: +q + 1, sec: Math.round(d), targetSec: Math.round(b), ratio: d / b }; });
+        var tail = Math.ceil(n / 3), rushed = 0;
+        for (var i = n - tail; i < n; i++) { var b2 = bud(i); if (first[i] && b2 > 0 && first[i].dur < 0.35 * b2 && !rows[i].skipped) rushed++; }
+        var clockSec = (mv.clockMin || 0) * 60, unused = Math.max(0, clockSec - lastEnd);
+        var p1 = paceOf(0, half), p2 = paceOf(half, n), a1 = accOf(0, half), a2 = accOf(half, n);
+        var blanks = rows.filter(function (r) { return r.skipped; }).length, right = rows.filter(function (r) { return r.ok; }).length;
+        var reading;
+        if (p1 !== null && p2 !== null && p1 >= 1.25 && p2 <= 0.85 && a2 !== null && a1 !== null && a2 < a1 - 0.1) reading = 'slow-start';
+        else if (rushed >= 3 && unused < 180) reading = 'ran-short';
+        else if (unused >= 0.25 * clockSec && right < 0.85 * n) reading = 'left-time';
+        // The second half went clearly worse (the hardest questions sit there): where to look.
+        else if (a1 !== null && a2 !== null && a2 <= a1 - 0.15) reading = 'late-drop';
+        else if (back >= 120 && Object.keys(backQ).length >= 2) reading = 'went-back';
+        else reading = 'steady';
+        return { label: mv.label, sec: mv.key, clockMin: mv.clockMin, questions: n, right: right, blanks: blanks,
+                 firstPassEndSec: Math.round(firstEnd), backSec: Math.round(back), backQuestions: Object.keys(backQ).length,
+                 unusedSec: Math.round(unused), longest: longest ? { q: longest.q, sec: longest.sec, targetSec: longest.targetSec } : null,
+                 paceFirstHalf: p1 === null ? null : Math.round(p1 * 100) / 100, paceSecondHalf: p2 === null ? null : Math.round(p2 * 100) / 100,
+                 accFirstHalf: a1 === null ? null : Math.round(a1 * 100) / 100, accSecondHalf: a2 === null ? null : Math.round(a2 * 100) / 100,
+                 rushedEnd: rushed, reading: reading, verdict: '' };
+      }).filter(Boolean);
+    } catch (e) { routeSummaries = []; }
+
+
     // Redrawn when the plot's width changes (a phone rotated, a window
     // resized), on the next frame so the redraw never runs inside the
     // observer (see the bridge chart's refit).
@@ -26473,7 +26529,6 @@ window.renderNativeReport = function (data) {
       var allBtnHtml = '<button type="button" class="how-btn how-all-btn"></button>';
       box.innerHTML =
         '<div class="plain-head"><h2>Your report in one minute</h2>' + (coverLayout ? '' : allBtnHtml) + '</div>' +
-        (coverLayout ? '<div class="plain-score-row">' + scoreHtml + rangeHtml + '</div>' : scoreHtml + rangeHtml) +
         '<div class="plain-cols">' +
           '<div><div class="plain-label">Where your points went</div>' + lostHtml + '</div>' +
           '<div><div class="plain-label">Do these next</div><ol class="plain-steps">' +
@@ -26482,9 +26537,17 @@ window.renderNativeReport = function (data) {
         (coverLayout ? '' : parentHtml +
           '<p class="plain-foot">The rest of the report is the evidence for this. Each section has a <b>How this works</b> button if you want the method.</p>' +
           '<p class="plain-status" aria-live="polite"></p>');
+      /* The range where the score is revealed (Luca, 2026-09-27): the
+         sentence and the bar sit in the score card, under the numbers, not
+         a screen further down in the summary. */
+      var scoreCardEl = document.getElementById('score-card');
+      if (scoreCardEl) {
+        Array.prototype.forEach.call(scoreCardEl.querySelectorAll('.score-range-row'), function (e) { e.parentNode.removeChild(e); });
+        if (scoreHtml || rangeHtml) scoreCardEl.insertAdjacentHTML('beforeend', '<div class="score-range-row">' + rangeHtml + scoreHtml + '</div>');
+      }
       if (coverLayout) {
         var titleTxt = (document.getElementById('r-title') || {}).textContent || '';
-        [root.querySelector('.hdr'), document.getElementById('integrity-banner'), root.querySelector('.top-row'), box,
+        [root.querySelector('.hdr'), document.getElementById('integrity-banner'), document.getElementById('cond-card'), root.querySelector('.top-row'), box,
           document.getElementById('plan-hed'), document.getElementById('plan-section')].forEach(function (el) {
           if (!el) return;
           var slot = document.createComment('cover slot');
@@ -26627,7 +26690,7 @@ window.renderNativeReport = function (data) {
       domains: domains, totalC: totalC, totalQ: totalQ, composite: composite, rwScaled: rwScaled, mathScaled: mathScaled,
       currentComposite: currentComposite, shownItems: shownItems, reachable: reachable, targetScore: targetScore,
       behaviorFlags: behaviorFlags, planInputs: planInputs, reportBand: reportBand, domainBucketsDx: domainBucketsDx,
-      skipped: skipped }, { anchor: document.querySelector('#pt-native-report #plain-summary') || document.getElementById('plain-summary') });
+      skipped: skipped, routeSummaries: routeSummaries, conditions: conditionsShown }, { anchor: document.querySelector('#pt-native-report #plain-summary') || document.getElementById('plain-summary') });
   } catch (e) { if (window.console) console.warn('walkthrough:', e); }   // never at the report's expense
 
   document.getElementById('page1').style.display = 'block';
