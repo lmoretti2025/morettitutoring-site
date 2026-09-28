@@ -3233,7 +3233,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Boundaries",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Teresa Boaventura and her divers worked the wreck at intervals for a decade. Three instruments came up in 1982, and one of ______ a brass astrolabe engraved with the arms of a Lisbon house, is the earliest such instrument yet dated.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "text": "Three meteorites were recovered from the crater field Teresa Boaventura has worked since 1974, and one of ______ an iron fragment with an unusually high nickel content, is the oldest meteorite yet dated.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
           "choices": [
             "them:",
             "them,",
@@ -3243,7 +3243,7 @@ window.SAT_PRACTICE_TESTS = [
           "correct": 1,
           "choiceNotes": [
             "Incorrect. A colon would present what follows as an elaboration and cannot pair with the closing comma.",
-            "Correct. “a brass astrolabe engraved with the arms of a Lisbon house” is a supplementary element, and it is closed by a comma before “is,” so it must be opened by one.",
+            "Correct. “an iron fragment with an unusually high nickel content” is a supplementary element, and it is closed by a comma before “is,” so it must be opened by one.",
             "Incorrect. A semicolon cannot open a supplementary element inside a clause whose verb is still to come.",
             "Incorrect. Without an opening comma the closing one is left unpaired."
           ]
@@ -3739,7 +3739,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Form, Structure, and Sense",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Had the ledger survived intact, historians ______ how much of the abbey’s income came from the wool clip rather than from its rents.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "text": "Had the tide gauge survived the storm, oceanographers ______, even now, how much of the surge came from wind rather than from falling pressure.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
           "choices": [
             "would have known",
             "will know",
@@ -3750,7 +3750,7 @@ window.SAT_PRACTICE_TESTS = [
           "choiceNotes": [
             "Incorrect. “Would have known” places the consequence in the past, but the knowing would be ours now.",
             "Incorrect. The future does not follow an inverted conditional describing a state contrary to fact.",
-            "Correct. “Had the ledger survived” states a condition contrary to present fact, and the main clause takes “would” plus the base form for the present consequence.",
+            "Correct. “Had the tide gauge survived” states a condition contrary to present fact, and the main clause takes “would” plus the base form for the present consequence.",
             "Incorrect. “Had known” repeats the conditional form in the main clause, leaving the sentence without a result."
           ]
         },
@@ -3760,7 +3760,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Boundaries",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Compiled at Lisbon in 1846, the map drew on very unequal material, and the cartographer noted his misgivings in the margin. He had three sources: one naval survey accurate to within a cable, or 185 meters; a merchant’s sketch showing the interior, drawn from ______ and a missionary’s account giving distances in days walked.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "text": "Assembling the range map, Hilde Brandt drew on material of very uneven quality. She had three sources: one radio-tracking survey run from Tsavo, Kenya; a ranger’s sketch of the northern boundary, drawn from ______ and a herder’s account giving distances in days walked.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
           "choices": [
             "memory;",
             "memory,",
