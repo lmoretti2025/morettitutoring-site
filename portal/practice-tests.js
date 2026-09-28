@@ -3233,7 +3233,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Boundaries",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Three meteorites were recovered from the crater field Teresa Boaventura has worked since 1974, and one of ______ an iron fragment with an unusually high nickel content, is the oldest meteorite yet dated.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "text": "Three meteorites were recovered from the crater field that Teresa Boaventura has worked since 1974, and one of ______ an iron fragment with an unusually high nickel content, is the oldest meteorite yet dated.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
           "choices": [
             "them:",
             "them,",
@@ -3739,7 +3739,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Form, Structure, and Sense",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Had the tide gauge survived the storm, oceanographers ______, even now, how much of the surge came from wind rather than from falling pressure.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "text": "Were the tide gauge still in place, oceanographers ______ how much of the surge came from wind rather than from falling pressure.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
           "choices": [
             "would have known",
             "will know",
@@ -3748,9 +3748,9 @@ window.SAT_PRACTICE_TESTS = [
           ],
           "correct": 2,
           "choiceNotes": [
-            "Incorrect. “Would have known” places the consequence in the past, but the knowing would be ours now.",
+            "Incorrect. The condition is contrary to PRESENT fact, so the consequence cannot sit in the past; a present condition cannot yield a knowing that is already over.",
             "Incorrect. The future does not follow an inverted conditional describing a state contrary to fact.",
-            "Correct. “Had the tide gauge survived” states a condition contrary to present fact, and the main clause takes “would” plus the base form for the present consequence.",
+            "Correct. “Were the tide gauge still in place” states a condition contrary to present fact, and the main clause takes “would” plus the base form.",
             "Incorrect. “Had known” repeats the conditional form in the main clause, leaving the sentence without a result."
           ]
         },
