@@ -2981,19 +2981,19 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Central Ideas and Details",
           "difficulty": "medium",
           "type": "mc",
-          "text": "In 2021 Alvaro Benitez set the account books of a sixteenth-century Seville hospital beside the burial register. The books record daily payments to women hired for the nursing of patients. That work fell outside every salaried post, and the hospital charter passed over it in silence. The names recur from one year to the next, which points to a workforce employed steadily rather than casually.<br><br>Based on the text, what can be concluded about the women recorded in the account books?",
+          "text": "In 2021 Alvaro Benitez set the day logs of a Costa Rican field station beside its payroll. The logs record daily payments to local guides hired to find nesting sites. No salaried post covered that work, and the station’s staffing plan does not mention it. The same names appear in the logs season after season.<br><br>Based on the text, what can be concluded about the guides recorded in the day logs?",
           "choices": [
-            "They were paid more than the hospital’s salaried staff were paid for similar work.",
-            "They appear in the burial register more often than other residents of the city do.",
-            "They worked at the hospital regularly although its charter made no provision for them.",
-            "They were hired only during the years in which the hospital admitted the most patients to its wards."
+            "The payroll was the source that first revealed their presence at the station.",
+            "They were a steady part of the station’s workforce despite having no place in its formal structure.",
+            "They were employed for a single season each and then replaced by others.",
+            "Their work was recorded in the staffing plan but omitted from the payroll."
           ],
-          "correct": 2,
+          "correct": 1,
           "choiceNotes": [
-            "Incorrect. No comparison of pay appears; the passage says only that no salaried post covered the work.",
-            "Incorrect. The burial register is named as a source read alongside the account books, not as a record of these women.",
-            "Correct. The recurrence of the same names across years indicates regular work, and the charter is said not to mention the role at all.",
-            "Incorrect. Admissions are never discussed, and recurring names across years point the other way."
+            "Incorrect. The guides appear in the day logs; the payroll is the separate document set beside them, and no salaried post covered the work.",
+            "Correct. The same names appear season after season, which indicates steady work, while no salaried post covered it and the staffing plan does not mention it.",
+            "Incorrect. The same names recur from season to season, which is the opposite of being replaced each year.",
+            "Incorrect. The staffing plan is said not to mention the work at all; it is the day logs that record it."
           ]
         },
         {
@@ -3550,19 +3550,19 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Central Ideas and Details",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Benedetta Fiore and colleagues have compared the surviving performing parts of a Venetian opera of 1642 with the printed libretto—the sung text—sold at the first performances. Several arias named in that libretto are missing from the parts. Two numbers in the parts appear nowhere in the printed text. They conclude that the libretto preserves a poet's supply rather than an audience's experience, and that a score built from it would reconstruct a performance which never actually took place.<br><br>Which choice best describes the conclusion drawn from the two sources?",
+          "text": "Benedetta Fiore and colleagues have compared the field notebooks of a 1962 bird survey, the only record of what its observers saw, with the published species list drawn from them. Several species named in the list are missing from the notebooks. Two species in the notebooks appear nowhere in the list. They conclude that the list reflects choices the editor made rather than what the observers recorded. A distribution map built from the list would place species where no one recorded them.<br><br>Which choice best states the main idea of the text?",
           "choices": [
-            "The two numbers absent from the libretto were added by a composer other than the one named on it.",
-            "The Venetian opera of 1642 was performed with more arias than its libretto lists for the audience.",
-            "The printed libretto is a less reliable guide to the poet’s own intentions than the surviving parts are.",
-            "Each source is partial, so a score built from the libretto would misrepresent the performance."
+            "A map built from either source alone would describe the same set of species.",
+            "A map built from the notebooks would show fewer species than the list names.",
+            "The published list is a less reliable guide to the editor’s own judgment than the notebooks are.",
+            "Each source is partial, so a map built from the list would misrepresent what was seen."
           ],
           "correct": 3,
           "choiceNotes": [
-            "Incorrect. No second composer is mentioned, and the passage offers no account of who wrote the two numbers.",
-            "Incorrect. Material runs both ways between the sources, so the performance was not simply larger.",
-            "Incorrect. The argument treats the libretto as a good record of the poet; what it fails to record is the performance.",
-            "Correct. Each source contains material the other lacks, which is why a score assembled from the libretto would reconstruct a performance that never happened."
+            "Incorrect. The two sources differ in both directions, so maps built from them separately would not agree.",
+            "Incorrect. This is true of one of the two mismatches, but it is a detail rather than the point the comparison establishes.",
+            "Incorrect. The argument treats the list as a good record of the editor’s choices; what it fails to record is what was seen.",
+            "Correct. Each source contains material the other lacks, which is why a map assembled from the list would place species where none were recorded."
           ]
         },
         {
@@ -3592,19 +3592,19 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Command of Evidence (Quantitative)",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Parchment was costly, as Hendrik Mauss has emphasized. A scribe could fit extra text on the page by ruling additional lines, or by abbreviating heavily (writing shortened forms of the commonest words), and a scriptorium short of parchment would be expected to lean on whichever of the two techniques it had already mastered. In that case a single scriptorium should show much of the one and little of the other. The table shows that ______<table class=\"dx-table\"><tr><th>Manuscript</th><th>Lines per page</th><th>Abbreviations per 100 words</th></tr><tr><td>Corbie</td><td>34</td><td>9</td></tr><tr><td>Tours</td><td>26</td><td>21</td></tr><tr><td>Reims</td><td>33</td><td>11</td></tr><tr><td>Fulda</td><td>25</td><td>23</td></tr></table><br><br>Which choice most effectively uses data from the table to complete the statement?",
+          "text": "Hendrik Mauss has shown how field time constrains survey design. A team can cover more of a reserve either by lengthening each transect or by spacing transects farther apart, and either method alone is enough. A team short of days therefore uses the one it has already mastered and has little need of the other. Each survey should run high on one measure and low on the other. The table shows that ______<table class=\"dx-table\"><tr><th>Survey</th><th>Transect length (km)</th><th>Spacing between transects (km)</th></tr><tr><td>Alder Creek</td><td>34</td><td>9</td></tr><tr><td>Birch Flats</td><td>26</td><td>21</td></tr><tr><td>Cedar Ridge</td><td>33</td><td>11</td></tr><tr><td>Dune Spit</td><td>25</td><td>23</td></tr></table><br><br>Which choice most effectively uses data from the table to complete the statement?",
           "choices": [
-            "the two manuscripts with the most lines per page are also the two that abbreviate least.",
-            "the Tours and Fulda manuscripts abbreviate more than twice as heavily as the Corbie manuscript does.",
-            "the Corbie manuscript carries 34 lines per page, more than any of the other three manuscripts.",
-            "abbreviation rates across the four manuscripts range from 9 to 23 occurrences per 100 words."
+            "the two surveys with the longest transects are also the two that space them most closely.",
+            "Birch Flats runs longer transects than Cedar Ridge does and spaces them more closely.",
+            "the survey with the longest transects also spaces them most widely.",
+            "transect spacing across the four surveys ranges from 9 to 23 kilometers."
           ],
           "correct": 0,
           "choiceNotes": [
-            "Correct. Corbie and Reims rule the most lines and abbreviate least, while Tours and Fulda do the reverse, which is the inverse relation expected.",
-            "Incorrect. It compares abbreviation alone and never brings in lines per page, so no trade-off is shown.",
-            "Incorrect. A single highest value on one measure cannot establish a relation between two measures.",
-            "Incorrect. The spread of abbreviation rates says nothing about how they vary with lines per page."
+            "Correct. Alder Creek and Cedar Ridge run the longest transects and space them most closely, while Birch Flats and Dune Spit do the reverse, which is the inverse relation expected.",
+            "Incorrect. It pairs the two measures in the expected direction but misreads the table: Birch Flats runs shorter transects than Cedar Ridge, at 26 kilometers against 33.",
+            "Incorrect. Alder Creek runs the longest transects and spaces them most closely, not most widely, so this reverses what the table shows.",
+            "Incorrect. The spread of spacings says nothing about how they vary with transect length."
           ]
         },
         {
@@ -3676,7 +3676,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Inferences",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Wheat sown in autumn outyields wheat sown in spring, an advantage agronomists long ascribed to the length of the growing season. A team separated season length from cold exposure, or vernalization, by sowing three plots, one in autumn, one in spring, and one in spring with seed previously chilled to four degrees Celsius for eight weeks. The chilled plot came close to the yield of the autumn plot and far exceeded the yield of the untreated spring plot, though the two spring plots enjoyed identical numbers of growing days. The team therefore concluded that ______<br><br>Which choice most logically completes the text?",
+          "text": "Wheat sown in autumn outyields wheat sown in spring, an advantage agronomists long ascribed to the length of the growing season. A team separated season length from cold exposure—vernalization—by sowing three plots, one in autumn, one in spring, and one in spring with seed previously chilled to four degrees Celsius for eight weeks. The chilled plot came close to the yield of the autumn plot and far exceeded the yield of the untreated spring plot, though the two spring plots enjoyed identical numbers of growing days. The team therefore concluded that ______<br><br>Which choice most logically completes the text?",
           "choices": [
             "autumn-sown wheat would yield still more if the seed were chilled before it was sown.",
             "wheat held at four degrees for eight weeks will germinate sooner in the field than wheat that has not been.",
