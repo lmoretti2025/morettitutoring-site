@@ -5697,7 +5697,7 @@ window.Portal = {
      header in fluid-ui.js. -->
 <script src="fluid-ui.js?v=20260905y"></script>
 <script src="banks.js?v=20260926a"></script>
-<script src="signals.js?v=20260927o"></script>
+<script src="signals.js?v=20260927p"></script>
 <script src="desmos-tags.js?v=20260916c"></script>
 <script src="time-budgets.js?v=20260912a"></script>
 <script src="challenge-questions.js?v=20260926a"></script>
@@ -25620,12 +25620,13 @@ window.renderNativeReport = function (data) {
     // Of the content misses, those read as the question type (a subset: counts and hours are unchanged).
     var apprRows = buckets.content.filter(function (e) { return e.approach; });
     planInputs.approach = (function () {
-      var bySk = {}, kinds = { long: 0, two: 0, desmos: 0, context: 0 };
+      var bySk = {}, kinds = { long: 0, two: 0, desmos: 0, context: 0, reading: 0 };
       apprRows.forEach(function (e) { kinds[e.approach]++; var k = e.r.sk || e.r.dom; bySk[k] = (bySk[k] || 0) + 1; });
       var bits = [];
       if (kinds.long) bits.push(kinds.long + ' took well past their time and ' + (kinds.long === 1 ? 'was' : 'were') + ' still missed');
       if (kinds.two) bits.push(kinds.two + ' came down to two choices and went the wrong way');
-      if (kinds.context) bits.push(kinds.context + ' in Words in Context, a reading skill');
+      if (kinds.context) bits.push(kinds.context + ' in Words in Context');
+      if (kinds.reading) bits.push(kinds.reading + ' other reading question' + (kinds.reading === 1 ? '' : 's'));
       if (kinds.desmos) bits.push(kinds.desmos + ' graphing-route math question' + (kinds.desmos === 1 ? '' : 's') + ' missed without the calculator');
       var skills = Object.keys(bySk).sort(function (a, b) { return bySk[b] - bySk[a]; });
       // Named on the page and in the plan only at 3+ (signals.js APPROACH_MIN_SHOWN); the rows keep their mark either way.
@@ -25641,9 +25642,9 @@ window.renderNativeReport = function (data) {
       if (!A || !A.n || !host) return;
       var p = document.createElement('p');
       p.className = 'skilldx-approach';
-      p.innerHTML = '<b>Strategy, not knowledge:</b> ' + A.n + ' of the ' + buckets.content.length + ' questions missed after real work look like the question type rather than the material (' +
+      p.innerHTML = '<b>Strategy, not knowledge:</b> ' + A.n + ' of the ' + buckets.content.length + ' questions missed after real work are strategy, not material to relearn (' +
         esc(A.why) + '), in ' + A.skills.slice(0, 3).map(function (k) { return '<b>' + esc(k) + '</b>'; }).join(', ') +
-        '. Those are won back by practising how that kind of question is answered, not by studying the topic again.';
+        '. Reading questions are won with a reading method, and Desmos-route math with the calculator: practise how the question is answered, not the topic.';
       host.insertBefore(p, host.firstChild);
     })();
     /* What "lost to pace" was made of, so the summary can say it and give
@@ -26280,9 +26281,9 @@ window.renderNativeReport = function (data) {
       strategyRow = ({
         h: strategyH, unit: unitFor(strategyH), color: '#8A5A9E',
         what: '<b>Strategy.</b> Question Bank sets on ' + A.skills.slice(0, 3).map(function (k) { return '<b>' + esc(k) + '</b>'; }).join(', ') +
-          ', worked for the method, not the answer: say what the question asks before reading the choices, then say why the right choice wins and why the last wrong one loses. ' +
+          ', worked for the method, not the answer: say what the question asks, find the line in the text that answers it, and put the answer in your own words before reading the choices; then say why the right choice wins and why the last wrong one loses. ' +
           (A.bySkill['Words in Context'] ? 'For Words in Context, cover the choices, read the whole text, and say in your own words what the blank has to mean before looking; this is a reading skill that builds over months, not a word list. ' : '') +
-          '<em>' + A.n + ' question' + (A.n === 1 ? '' : 's') + ' on this test looked like the question type rather than the material: ' + esc(A.why) + '.</em>'
+          '<em>' + A.n + ' question' + (A.n === 1 ? '' : 's') + ' on this test ' + (A.n === 1 ? 'was' : 'were') + ' strategy, not material to relearn: ' + esc(A.why) + '.</em>'
       });
     }
     if (hours.content > 0) {
@@ -26360,7 +26361,7 @@ window.renderNativeReport = function (data) {
             missSkills.length ? ', starting with this test’s: ' + missSkills.slice(0, 3).map(esc).join('; ') : '') +
           '. From your second test on, the “Your Statistics” card on Home lists the topics that came up wrong more than once; ' +
           'those come first, in the Question Bank and in Saved &amp; Mistakes.' +
-          (A.n ? ' <em>' + A.n + ' of this test’s misses looked like the question type rather than the material (' + esc(A.why) + '), so on ' +
+          (A.n ? ' <em>' + A.n + ' of this test’s misses were strategy, not material (' + esc(A.why) + '), so on ' +
             A.skills.slice(0, 2).map(esc).join(' and ') + ' practise how the question is answered, not the topic.</em>' : '')
       }];
     }
@@ -26591,7 +26592,7 @@ window.renderNativeReport = function (data) {
         : 'What you lost is split between questions you got wrong and questions lost to pace.';
       var lines = [
         { n: c.content, t: count(c.content, 'question') + (fullyTimed ? ' you worked on and still got wrong' : ' answered wrong') +
-            (c.approach ? ', ' + c.approach + ' of them on the question type more than the material' : '') },
+            (c.approach ? ', ' + c.approach + ' of them strategy more than material' : '') },
         { n: c.clock, t: count(c.clock, 'question') + ' lost to pace: ' + joinAnd(paceParts) }
       ].filter(function (x) { return x.n > 0; }).sort(function (a, b) { return b.n - a.n; });
       if (c.method > 0) lines.push({ n: c.method, t: count(c.method, 'right answer') + ' that took so long that later questions ran short on time' });
@@ -26951,7 +26952,7 @@ window.renderNativeReport = function (data) {
         var base = (two && (one + ' ' + two).length <= 230) ? one + ' ' + two : one;
         // Strategy, not knowledge: said in the line itself, since the card is folded (Luca, 2026-09-27).
         var A = planInputs.approach;
-        return base + (A && A.n ? ' ' + A.n + ' of the misses look like the question type rather than the material, in ' + andJoin(A.skills.slice(0, 2)) + ': practise the method there.' : ''); } },
+        return base + (A && A.n ? ' ' + A.n + ' of the misses are strategy, not material, mostly ' + andJoin(A.skills.slice(0, 2)) + ': practise the method there.' : ''); } },
       { hed: 'budget-hed', body: ['budget-sub', 'budget-card'], line: function () {
         var parts = [];
         Array.prototype.forEach.call(document.querySelectorAll('#budget-card .budget-sec'), function (sc) {

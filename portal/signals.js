@@ -2536,17 +2536,20 @@ var MorettiSignals = (function () {
                  picked the other
        'desmos'  a math question whose fastest route is graphing, missed
                  without the calculator (reviewed Desmos tags only)
-       'context' any Words in Context miss (Luca, 2026-09-27: a reading
-                 skill built over time, answered by understanding what the
-                 sentence needs, not by knowing the word), after the two
-                 above
+       'context' any other Words in Context miss (Luca, 2026-09-27: a
+                 reading skill built over time, answered by understanding
+                 what the sentence needs, not by knowing the word)
+       'reading' any other miss in a reading skill (Luca, 2026-09-27:
+                 reading questions are answered with a reading strategy,
+                 not learned as material). So on a competent sitting every
+                 reading-skill miss is strategy; long and two only say how.
      Reading and Writing: Information and Ideas, Craft and Structure and
      Expression of Ideas take 'long' and 'two'; Standard English
      Conventions is rules to learn, never approach. Math takes 'desmos'
      only: a long wrong math answer can as well be a method not known.
      x: { sec, domain, skill, ok, blank, clock (billed to pace), budgetRatio,
           choicesLeft, keyOutFinal, fastRoute, calcActive }.
-     Returns 'long' | 'two' | 'desmos' | 'context' | null. */
+     Returns 'long' | 'two' | 'desmos' | 'context' | 'reading' | null. */
   // A test names it at 3+ such misses: one or two is an anecdote (roster check 2026-09-27:
   // 1 of 22 and 1 of 17 read as a strategy week otherwise); session prep pools the rest.
   var APPROACH_MIN_COMPOSITE = 1200, APPROACH_MIN_SECTION = 600, APPROACH_LONG_REL = 1.5, APPROACH_MIN_SHOWN = 3;
@@ -2561,8 +2564,7 @@ var MorettiSignals = (function () {
     if (!APPROACH_RW_DOMAINS[x.domain]) return null;
     if (typeof x.budgetRatio === 'number' && x.budgetRatio >= APPROACH_LONG_REL) return 'long';
     if (x.choicesLeft === 2 && x.keyOutFinal === false) return 'two';
-    if (x.skill === 'Words in Context') return 'context';
-    return null;
+    return x.skill === 'Words in Context' ? 'context' : 'reading';
   }
   function missCounts() { return { misses: 0, blank: 0, fast: 0, rush: 0, sink: 0, worked: 0, unknown: 0, near: 0, keyOut: 0,
                                    questions: 0, answered: 0, excluded: 0, qb: { first: 0, wrong: 0, sure: 0, sureWrong: 0 } }; }
@@ -2585,8 +2587,8 @@ var MorettiSignals = (function () {
        they are shown apart, never added), per skill; and reading-skill
        accuracy against grammar rules on the same sittings, with a one-sided
        two-proportion z (a strong student's rules ahead of reading). */
-    var appr = { tests: 0, long: 0, two: 0, context: 0, bySkill: {}, reading: { right: 0, n: 0 }, rules: { right: 0, n: 0 }, z: null };
-    var apprSk = function (skill) { return appr.bySkill[skill] || (appr.bySkill[skill] = { long: 0, two: 0, context: 0 }); };
+    var appr = { tests: 0, long: 0, two: 0, context: 0, other: 0, bySkill: {}, reading: { right: 0, n: 0 }, rules: { right: 0, n: 0 }, z: null };
+    var apprSk = function (skill) { return appr.bySkill[skill] || (appr.bySkill[skill] = { long: 0, two: 0, context: 0, other: 0 }); };
     used.forEach(function (e) {
       var qs = qsOf(e.qStats);
       tests++;
@@ -2612,8 +2614,11 @@ var MorettiSignals = (function () {
           var pool = APPROACH_RW_DOMAINS[sk.dom] ? appr.reading : sk.dom === 'Standard English Conventions' ? appr.rules : null;
           if (pool) { pool.n++; if (r[3] === 1) pool.right++; }
           if (r[3] !== 1 && !blank && kind === 'sink' && APPROACH_RW_DOMAINS[sk.dom]) { appr.long++; apprSk(sk.skill).long++; }
-          // Words in Context: every miss not already long or billed to pace (the narrowed-to-two ones may overlap; shown apart).
-          else if (r[3] !== 1 && !blank && kind !== 'fast' && kind !== 'rush' && sk.skill === 'Words in Context') { appr.context++; apprSk(sk.skill).context++; }
+          // Every other reading-skill miss not billed to pace: Words in Context apart (the narrowed-to-two ones may overlap; shown apart).
+          else if (r[3] !== 1 && !blank && kind !== 'fast' && kind !== 'rush' && APPROACH_RW_DOMAINS[sk.dom]) {
+            var kk = sk.skill === 'Words in Context' ? 'context' : 'other';
+            appr[kk]++; apprSk(sk.skill)[kk]++;
+          }
         }
         if (kind === 'fast' || kind === 'rush') bump(cells, 'excluded');
         if (r[3] === 1) return;
@@ -4012,7 +4017,7 @@ var MorettiSignals = (function () {
     // every function name and compute the old way.
     rushedLevel: rushedLevel,
     approachEvidence: approachEvidence, approachCompetent: approachCompetent, APPROACH_RW_DOMAINS: APPROACH_RW_DOMAINS, APPROACH_MIN_SHOWN: APPROACH_MIN_SHOWN,
-    VERSION: 39,
+    VERSION: 40,
     attemptAbility: attemptAbility,
     FOCUS_GATES: { domainClear: FOCUS_DOMAIN_CLEAR, skillLead: FOCUS_SKILL_LEAD, noOffsetsPenalty: FOCUS_NO_OFFSETS_PENALTY },
     practiceEvidence: practiceEvidence,
