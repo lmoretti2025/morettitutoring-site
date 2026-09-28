@@ -2570,7 +2570,7 @@ window.SAT_PRACTICE_TESTS = [
           "choiceNotes": [
             "Incorrect. The present perfect progressive relates the action to now, and the sentence is set entirely in 1830.",
             "Correct. The building preceded a past moment, 1830, so the past perfect progressive is required.",
-            "Incorrect. The present tense conflicts with “By the time... opened in 1830.”",
+            "Incorrect. The present tense conflicts with “By the time... opened to passengers in 1830.”",
             "Incorrect. The future perfect places the action ahead of a future point, and nothing here is future."
           ]
         },
@@ -2631,9 +2631,9 @@ window.SAT_PRACTICE_TESTS = [
           ],
           "correct": 2,
           "choiceNotes": [
-            "Incorrect. A semicolon must join two independent clauses, and “a result that makes sense...” cannot stand alone.",
+            "Incorrect. A semicolon must join two independent clauses, and “a result that points to a great deal of unseen mass...” cannot stand alone.",
             "Incorrect. With no punctuation the noun phrase runs into the clause and “center a result” cannot be read.",
-            "Correct. “a result that makes sense only if...” renames what precedes it, and a comma is the conventional mark before a supplementary element of this kind.",
+            "Correct. “a result that points to a great deal of unseen mass...” renames what precedes it, and a comma is the conventional mark before a supplementary element of this kind.",
             "Incorrect. “and” would coordinate the appositive with a second element that the sentence never supplies."
           ]
         },
@@ -2673,8 +2673,8 @@ window.SAT_PRACTICE_TESTS = [
           ],
           "correct": 1,
           "choiceNotes": [
-            "Incorrect. Without punctuation two independent clauses fuse, and “sag out of shape that is why” cannot be parsed.",
-            "Correct. “That is why the bench, the tools, and the annealing oven are arranged within one turn of the chair” is an independent clause, so a period and a capital are conventional.",
+            "Incorrect. Without punctuation two independent clauses fuse, and “sagging out of shape that is why” cannot be parsed.",
+            "Correct. “That is why the bench, the tools, and the annealing oven all sit within one turn of the chair” is an independent clause, so a period and a capital are conventional.",
             "Incorrect. A comma between two independent clauses is a comma splice.",
             "Incorrect. A colon would present what follows as an explanation of “shape” alone, and the clause explains the whole preceding statement."
           ]
@@ -3149,19 +3149,19 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Boundaries",
           "difficulty": "easy",
           "type": "mc",
-          "text": "Cecilia Marchetti catalogued what the laboratory had inherited. The three microscopes came from three countries: one made in Jena, Germany; one bought secondhand from London, ______ one assembled in Rochester, New York.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "text": "Cecilia Marchetti catalogued what the laboratory had inherited. An instrument is entered on her list ______ its maker and its year of manufacture can both be established.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
           "choices": [
-            "England; and",
-            "England and",
-            "England, and",
-            "England: and"
+            "only when",
+            "only when,",
+            "; only when",
+            ". Only when"
           ],
           "correct": 0,
           "choiceNotes": [
-            "Correct. When the items of a series contain commas of their own, semicolons separate the items, and the semicolon belongs before the final “and.”",
-            "Incorrect. With no mark at all the third item runs into the second.",
-            "Incorrect. The items already contain internal commas, so a comma cannot also separate them without confusion.",
-            "Incorrect. A colon introduces a series; it does not separate items within one."
+            "Correct. The clause states the condition under which an instrument is entered, so it is restrictive and takes no punctuation.",
+            "Incorrect. The comma falls between “only when” and the clause it introduces, separating the conjunction from its own clause.",
+            "Incorrect. A semicolon must join two independent clauses, and “only when its maker and its year of manufacture can both be established” is subordinate.",
+            "Incorrect. “Only when its maker and its year of manufacture can both be established” is a fragment, not a sentence."
           ]
         },
         {
@@ -3191,18 +3191,18 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Boundaries",
           "difficulty": "medium",
           "type": "mc",
-          "text": "Spectacles reached Europe late in the thirteenth century, and the earliest examples were made for reading at a fixed distance. The oldest surviving pair of spectacles in Europe, found beneath the floorboards of a German ______ two riveted lenses of quartz in bone frames, with nothing to hook behind the ears.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "text": "Spectacles reached Europe late in the thirteenth century, and the earliest examples were made for reading at a fixed distance. The pair found beneath the floorboards of a German ______ two riveted lenses of quartz in bone frames, with nothing to hook behind the ears.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
           "choices": [
             "convent has",
             "convent, has",
             "convent—has",
             "convent; has"
           ],
-          "correct": 1,
+          "correct": 0,
           "choiceNotes": [
-            "Incorrect. The comma after “Europe” opens the supplementary phrase, so leaving it unclosed runs the modifier straight into the verb.",
-            "Correct. The phrase is supplementary and was opened by a comma after “Europe,” so it takes a closing comma before the verb.",
-            "Incorrect. A dash would do the same, and it has no partner to open the interruption.",
+            "Correct. “found beneath the floorboards of a German convent” identifies which pair is meant, so it is restrictive and is not set off at all.",
+            "Incorrect. A single comma would separate the subject from its verb, and a restrictive phrase takes no comma.",
+            "Incorrect. A dash would also separate the subject from its verb, and it has nothing to pair with.",
             "Incorrect. A semicolon must stand between two independent clauses, and “has two riveted lenses...” cannot stand alone."
           ]
         },
@@ -3760,19 +3760,19 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Boundaries",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Assembling the range map, Hilde Brandt drew on material of very uneven quality. She had three sources: one radio-tracking survey run from Tsavo, Kenya; a ranger’s sketch of the northern boundary, drawn from ______ and a herder’s account giving distances in days walked.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "text": "Assembling the range map, Hilde Brandt drew on material of very uneven quality. She had three ______ one radio-tracking survey run from Tsavo, Kenya; a ranger’s sketch of the northern boundary, drawn from memory; and a herder’s account giving distances in days walked.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
           "choices": [
-            "memory;",
-            "memory,",
-            "memory",
-            "memory:"
+            "sources. One",
+            "sources: one",
+            "sources; one",
+            "sources, one"
           ],
-          "correct": 0,
+          "correct": 1,
           "choiceNotes": [
-            "Correct. The items of the series carry internal commas, so semicolons separate them, including before the final “and.”",
-            "Incorrect. A comma cannot separate items that already contain commas without making the series unreadable.",
-            "Incorrect. With no mark the third item runs into the second.",
-            "Incorrect. A colon has already introduced the series and cannot also divide it."
+            "Incorrect. What follows is a list of noun phrases, not a sentence, so it cannot stand as one.",
+            "Correct. “She had three sources” is a complete statement, and a colon introduces the list that completes it.",
+            "Incorrect. A semicolon joins two independent clauses, and the list is not one. Semicolons do separate the items within this series, which is why the mark introducing it must be different.",
+            "Incorrect. A comma is too weak to introduce the series, and the items are already divided by semicolons."
           ]
         },
         {
@@ -3792,7 +3792,7 @@ window.SAT_PRACTICE_TESTS = [
           "choiceNotes": [
             "Incorrect. The series runs “to report... to estimate...,” and a subordinate clause breaks the pattern.",
             "Incorrect. An interrogative clause cannot serve as the third element of the series.",
-            "Correct. The third item matches the infinitives before it, giving “to report, to estimate, and to say.”",
+            "Correct. The third item matches the infinitives before it, so the series runs report, estimate, say.",
             "Incorrect. A noun phrase does not parallel two infinitives."
           ]
         },
@@ -3813,7 +3813,7 @@ window.SAT_PRACTICE_TESTS = [
           "choiceNotes": [
             "Correct. “The Boston version stands a fourth higher...” is independent, so a period and a capital are conventional.",
             "Incorrect. A comma between two independent clauses is a comma splice.",
-            "Incorrect. With no punctuation two independent clauses fuse, and “forty years earlier Boston version stands” cannot be parsed.",
+            "Incorrect. With no punctuation two independent clauses fuse, and “forty years earlier the Boston version stands” cannot be parsed.",
             "Incorrect. A semicolon already joins independent clauses; adding “and” after it is redundant and non-standard."
           ]
         },
