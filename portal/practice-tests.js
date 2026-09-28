@@ -2965,14 +2965,14 @@ window.SAT_PRACTICE_TESTS = [
             "Lascaux was closed to protect the paintings, and replicas now stand in for the original cave.",
             "The replicas built near Lascaux since 1983 reproduce the paintings to within a millimeter.",
             "The algae that spread across the walls of Lascaux were removed by conservators after the cave closed in 1963.",
-            "Lascaux was discovered in 1943 and remained open to visitors for twenty years afterward."
+            "Lascaux remained open to visitors for two decades before conservation concerns closed it."
           ],
           "correct": 0,
           "choiceNotes": [
             "Correct. The passage gives the reason for the closure and then what replaced the visit, which together are its point.",
             "Incorrect. True, but it reports one detail of the replicas rather than why they exist.",
             "Incorrect. The passage says the algae spread; it never says they were removed.",
-            "Incorrect. True, but it covers only the opening clause and leaves out both the closure and the replicas."
+            "Incorrect. True, but it reports only how long the cave stayed open and leaves out both the reason for the closure and the replicas."
           ]
         },
         {
