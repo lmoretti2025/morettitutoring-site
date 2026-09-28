@@ -3550,19 +3550,19 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Central Ideas and Details",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Benedetta Fiore and colleagues have compared the field notebooks of a 1962 bird survey, the only record of what its observers saw, with the published species list drawn from them. Several species named in the list are missing from the notebooks. Two species in the notebooks appear nowhere in the list. They conclude that the list reflects choices the editor made rather than what the observers recorded. A distribution map built from the list would place species where no one recorded them.<br><br>Which choice best states the main idea of the text?",
+          "text": "Benedetta Fiore and colleagues have compared one observer’s field notebooks from a 1962 bird survey with the species list he published a year later. Several species named in the list are missing from the notebooks. Two species in the notebooks appear nowhere in the list.<br><br>Which choice best states the main idea of the text?",
           "choices": [
-            "A map built from either source alone would describe the same set of species.",
-            "A map built from the notebooks would show fewer species than the list names.",
-            "The published list is a less reliable guide to the editor’s own judgment than the notebooks are.",
-            "Each source is partial, so a map built from the list would misrepresent what was seen."
+            "The published list names every species the observer recorded.",
+            "The notebooks and the list disagree over exactly two species.",
+            "The observer recorded more species than the published list names.",
+            "Each source omits material the other records, so neither alone gives a full account."
           ],
           "correct": 3,
           "choiceNotes": [
-            "Incorrect. The two sources differ in both directions, so maps built from them separately would not agree.",
-            "Incorrect. This is true of one of the two mismatches, but it is a detail rather than the point the comparison establishes.",
-            "Incorrect. The argument treats the list as a good record of the editor’s choices; what it fails to record is what was seen.",
-            "Correct. Each source contains material the other lacks, which is why a map assembled from the list would place species where none were recorded."
+            "Incorrect. Two species recorded in the notebooks appear nowhere in the list, so the list does not name them all.",
+            "Incorrect. Two species are missing from the list, but several more are named in the list and missing from the notebooks, so the disagreement runs both ways.",
+            "Incorrect. The list names several species the notebooks do not, so it cannot be inferred that the notebooks hold the larger record.",
+            "Correct. Each document contains species the other lacks, so neither on its own records everything the two together show."
           ]
         },
         {
@@ -3592,19 +3592,19 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Command of Evidence (Quantitative)",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Hendrik Mauss has shown how field time constrains survey design. A team can cover more of a reserve either by lengthening each transect or by spacing transects farther apart, and either method alone is enough. A team short of days therefore uses the one it has already mastered and has little need of the other. Each survey should run high on one measure and low on the other. The table shows that ______<table class=\"dx-table\"><tr><th>Survey</th><th>Transect length (km)</th><th>Spacing between transects (km)</th></tr><tr><td>Alder Creek</td><td>34</td><td>9</td></tr><tr><td>Birch Flats</td><td>26</td><td>21</td></tr><tr><td>Cedar Ridge</td><td>33</td><td>11</td></tr><tr><td>Dune Spit</td><td>25</td><td>23</td></tr></table><br><br>Which choice most effectively uses data from the table to complete the statement?",
+          "text": "Hendrik Mauss has studied how a fixed field season shapes survey design. A team can walk each transect several times or walk more transects once, and with limited days a team might be expected to favor one approach over the other. The table shows that ______<table class=\"dx-table\"><tr><th>Survey</th><th>Visits per transect</th><th>Transects walked</th></tr><tr><td>Alder Creek</td><td>6</td><td>9</td></tr><tr><td>Birch Flats</td><td>2</td><td>24</td></tr><tr><td>Cedar Ridge</td><td>5</td><td>11</td></tr><tr><td>Dune Spit</td><td>3</td><td>17</td></tr></table><br><br>Which choice most effectively uses data from the table to complete the statement?",
           "choices": [
-            "the two surveys with the longest transects are also the two that space them most closely.",
-            "Birch Flats runs longer transects than Cedar Ridge does and spaces them more closely.",
-            "the survey with the longest transects also spaces them most widely.",
-            "transect spacing across the four surveys ranges from 9 to 23 kilometers."
+            "the two surveys with the most visits per transect are also the two that walked the fewest transects.",
+            "Birch Flats made more visits per transect than Cedar Ridge did and walked fewer transects.",
+            "Dune Spit made more visits per transect than Alder Creek did and walked fewer transects.",
+            "the number of transects walked across the four surveys ranges from 9 to 24."
           ],
           "correct": 0,
           "choiceNotes": [
-            "Correct. Alder Creek and Cedar Ridge run the longest transects and space them most closely, while Birch Flats and Dune Spit do the reverse, which is the inverse relation expected.",
-            "Incorrect. It pairs the two measures in the expected direction but misreads the table: Birch Flats runs shorter transects than Cedar Ridge, at 26 kilometers against 33.",
-            "Incorrect. Alder Creek runs the longest transects and spaces them most closely, not most widely, so this reverses what the table shows.",
-            "Incorrect. The spread of spacings says nothing about how they vary with transect length."
+            "Correct. Alder Creek and Cedar Ridge made the most visits, at 6 and 5, and walked the fewest transects, at 9 and 11, while Birch Flats and Dune Spit did the reverse.",
+            "Incorrect. Birch Flats made 2 visits per transect against Cedar Ridge’s 5, and walked 24 transects against 11, so both halves reverse the table.",
+            "Incorrect. Dune Spit made 3 visits per transect against Alder Creek’s 6, and walked 17 transects against 9, so both halves reverse the table.",
+            "Incorrect. The spread of one column says nothing about how it varies with the other."
           ]
         },
         {
