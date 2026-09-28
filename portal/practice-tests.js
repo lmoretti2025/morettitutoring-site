@@ -2307,7 +2307,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Words in Context",
           "difficulty": "hard",
           "type": "mc",
-          "text": "In 1911 the physicist Heike Kamerlingh Onnes cooled mercury to within four degrees of absolute zero, and electrical resistance vanished altogether. For two decades physicists treated the result as ______ of ordinary conduction, an extreme instance of familiar behavior. Later experiments established that superconductors also expel magnetic fields, which no ordinary conductor does.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
+          "text": "In 1911 Heike Kamerlingh Onnes cooled mercury to within four degrees of absolute zero, and electrical resistance vanished altogether. For two decades physicists treated the result as ______ of ordinary conduction, an extreme instance of familiar behavior. Later experiments established that superconductors also expel magnetic fields, which no ordinary conductor does.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
           "choices": [
             "continuation",
             "anomaly",
@@ -2349,7 +2349,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Text Structure and Purpose",
           "difficulty": "medium",
           "type": "mc",
-          "text": "Double basses in jazz rhythm sections are seldom loud enough to be followed note by note, yet recordings made without them sound thin, and listeners register the thinness immediately (even listeners unable to say what is missing). Because the overtones of the instrument fall in ranges the ear reads as warmth, for example the low partials persisting after each fundamental has died away, bass can be said to color the whole ensemble rather than to carry lines of its own. Acousticians describe the effect in concert halls, and it appears as clearly in small studios.<br><br>Which choice best states the main purpose of the text?",
+          "text": "Double basses in jazz rhythm sections are seldom loud enough to be followed note by note, yet recordings made without them sound thin, and listeners register the thinness immediately (even listeners unable to say what is missing). Because the overtones of the instrument fall in ranges the ear reads as warmth, for example the low partials persisting after each fundamental has died away, bass can be said to color the whole ensemble rather than to carry lines of its own. Acoustician Yolanda Pereda describes the effect in concert halls, and it appears as clearly in small studios.<br><br>Which choice best states the main purpose of the text?",
           "choices": [
             "To explain why an instrument that is hard to hear on its own is missed when it is absent.",
             "To describe the particular range of overtones that the human ear associates with warmth.",
@@ -2391,7 +2391,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Central Ideas and Details",
           "difficulty": "medium",
           "type": "mc",
-          "text": "Pottery and permanent structures at Andean sites are generally taken to mark the beginning of settled life, but pollen preserved in lake sediment—the silt of a lake bed, which records the plants growing nearby—tells a different story. A 2007 survey of one lake in the Peruvian Andes recovered maize pollen dated to roughly 4,000 years ago, well below the layers in which pottery first appears. Cultivation there may therefore have preceded settlement by several centuries.<br><br>Which choice best states the main idea of the text?",
+          "text": "Pottery and permanent structures at Andean sites are generally taken to mark the beginning of settled life, but pollen preserved in lake sediment—the silt of a lake bed, which records the plants growing nearby—tells a different story. A 2007 survey of one lake in the Peruvian Andes, directed by Eugenia Villalba, recovered maize pollen dated to roughly 4,000 years ago, well below the layers in which pottery first appears. Cultivation there may therefore have preceded settlement by several centuries.<br><br>Which choice best states the main idea of the text?",
           "choices": [
             "Pollen is a more reliable dating method than pottery is for sites in the Peruvian Andes.",
             "The inhabitants of the site abandoned cultivation once permanent structures had been built.",
@@ -2475,7 +2475,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Command of Evidence (Quantitative)",
           "difficulty": "medium",
           "type": "mc",
-          "text": "The seeds of many temperate shrubs do not germinate before a stretch of time in the cold has passed, a requirement generally understood to keep the seedlings from emerging in the autumn, when the first frosts would kill them. In one experiment the seeds of two shrubs were kept at four degrees Celsius for differing lengths of time and then sown in the same greenhouse. A student reviewing the results concludes that only one of the two shrubs carries the cold requirement. The table shows that ______<table class=\"dx-table\"><tr><th>Weeks in cold storage</th><th>Germinated, spring vetch</th><th>Germinated, hoary rockrose</th></tr><tr><td>0</td><td>8%</td><td>41%</td></tr><tr><td>4</td><td>22%</td><td>40%</td></tr><tr><td>8</td><td>51%</td><td>39%</td></tr><tr><td>12</td><td>78%</td><td>38%</td></tr></table><br><br>Which choice most effectively uses data from the table to complete the statement?",
+          "text": "The seeds of many temperate shrubs do not germinate before a stretch of time in the cold has passed, a requirement generally understood to keep the seedlings from emerging in the autumn, when the first frosts would kill them. In an experiment by Noor Haddad and colleagues, the seeds of two shrubs were kept at four degrees Celsius for differing lengths of time and then sown in the same greenhouse. A student reviewing the results concludes that only one of the two shrubs carries the cold requirement. The table shows that ______<table class=\"dx-table\"><tr><th>Weeks in cold storage</th><th>Germinated, spring vetch</th><th>Germinated, hoary rockrose</th></tr><tr><td>0</td><td>8%</td><td>41%</td></tr><tr><td>4</td><td>22%</td><td>40%</td></tr><tr><td>8</td><td>51%</td><td>39%</td></tr><tr><td>12</td><td>78%</td><td>38%</td></tr></table><br><br>Which choice most effectively uses data from the table to complete the statement?",
           "choices": [
             "germination in the spring vetch after four weeks of storage remained below the rate the hoary rockrose reached with none.",
             "the hoary rockrose germinated at 41 percent without any cold storage, the highest single figure recorded for that species.",
@@ -2496,7 +2496,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Command of Evidence (Quantitative)",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Pteropods build shells of aragonite, a form of calcium carbonate that dissolves more readily as the seawater grows less alkaline; the oceanographer Nina Bednaršek has measured the dissolution in living animals. The mean shell thickness across a basin might therefore be expected to track the mean pH from site to site. The data gathered at the four sites suggest the relationship is more complex. The table shows that ______<table class=\"dx-table\"><tr><th>Site</th><th>Mean water pH</th><th>Mean shell thickness (µm)</th></tr><tr><td>North</td><td>8.10</td><td>42</td></tr><tr><td>Central</td><td>8.05</td><td>40</td></tr><tr><td>South</td><td>7.95</td><td>43</td></tr><tr><td>Deep</td><td>7.85</td><td>39</td></tr></table><br><br>Which choice most effectively uses data from the table to complete the text?",
+          "text": "Pteropods build shells of aragonite, a form of calcium carbonate that dissolves more readily as the seawater grows less alkaline; Nina Bednaršek has measured the dissolution in living animals. The mean shell thickness across a basin might therefore be expected to track the mean pH from site to site. The data gathered at the four sites suggest the relationship is more complex. The table shows that ______<table class=\"dx-table\"><tr><th>Site</th><th>Mean water pH</th><th>Mean shell thickness (µm)</th></tr><tr><td>North</td><td>8.10</td><td>42</td></tr><tr><td>Central</td><td>8.05</td><td>40</td></tr><tr><td>South</td><td>7.95</td><td>43</td></tr><tr><td>Deep</td><td>7.85</td><td>39</td></tr></table><br><br>Which choice most effectively uses data from the table to complete the text?",
           "choices": [
             "shells at the Deep site, where pH was lowest, were thinner than shells at the North site, where pH was highest.",
             "mean pH varied by only a quarter of a unit across the four sites in the study.",
@@ -2517,7 +2517,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Inferences",
           "difficulty": "medium",
           "type": "mc",
-          "text": "Studies of nest choice in honeybee colonies, most of them by the biologist Thomas Seeley, have demonstrated links between cavity quality and the persistence of the dances that advertise it: circuits performed, bouts repeated, minutes spent in advertisement. To investigate how colonies settle on one cavity, researchers marked every scout in one hive and recorded which site each had inspected. Every scout was found to have inspected one cavity only, and dances for poorer cavities were the first to fall silent, suggesting that ______<br><br>Which choice most logically completes the text?",
+          "text": "Studies of nest choice in honeybee colonies, most of them by Thomas Seeley, have demonstrated links between cavity quality and the persistence of the dances that advertise it: circuits performed, bouts repeated, minutes spent in advertisement. To investigate how colonies settle on one cavity, researchers marked every scout in one hive and recorded which site each had inspected. Every scout was found to have inspected one cavity only, and dances for poorer cavities were the first to fall silent, suggesting that ______<br><br>Which choice most logically completes the text?",
           "choices": [
             "a colony settles on whichever site the first returning scout happens to have discovered.",
             "scouts that have visited the best available site dance for longer than the colony requires.",
@@ -2664,7 +2664,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Boundaries",
           "difficulty": "hard",
           "type": "mc",
-          "text": "At the bench a glassblower works against the clock. The gather has to turn from the instant it leaves the furnace, since two seconds of rest leave the piece sagging out of ______ is why the bench, the tools, and the annealing oven all sit within one turn of the chair.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "text": "At the bench glassblower Elsa Vondrak works against the clock. The gather has to turn from the instant it leaves the furnace, since two seconds of rest leave the piece sagging out of ______ is why the bench, the tools, and the annealing oven all sit within one turn of the chair.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
           "choices": [
             "shape that",
             "shape. That",
@@ -2706,7 +2706,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Transitions",
           "difficulty": "medium",
           "type": "mc",
-          "text": "The summit level, highest pound of the canal and fed by nothing but rainfall on the hills around it, loses one lockful of water at every passage. ______ long dry spells, such as the rainless Augusts of bad years, can close canals as completely as breaches in the bank.<br><br>Which choice completes the text with the most logical transition?",
+          "text": "Surveying the line in 1834, Hester Gillingwater found that the summit level, highest pound of the canal and fed by nothing but rainfall on the hills around it, loses one lockful of water at every passage. ______ long dry spells, such as the rainless Augusts of bad years, can close canals as completely as breaches in the bank.<br><br>Which choice completes the text with the most logical transition?",
           "choices": [
             "Consequently,",
             "For instance,",
@@ -2727,7 +2727,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Transitions",
           "difficulty": "hard",
           "type": "mc",
-          "text": "The hand in this manuscript matches nothing else in the abbey's library, and the parchment was prepared by a method unrecorded in the region. ______ the charter it preserves belonged to that abbey and to no other house.<br><br>Which choice completes the text with the most logical transition?",
+          "text": "Examining the volume in 2016, Ruth Oyelaran found that the hand in this manuscript matches nothing else in the abbey's library, and that the parchment was prepared by a method unrecorded in the region. ______ the charter it preserves belonged to that abbey and to no other house.<br><br>Which choice completes the text with the most logical transition?",
           "choices": [
             "For example,",
             "As a result,",
@@ -2855,7 +2855,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Words in Context",
           "difficulty": "medium",
           "type": "mc",
-          "text": "An irritant works inside an oyster, and the animal begins to coat the grain, layer upon layer, in nacre (the material of a shell) drawn from cells along the mantle. Such a pearl is ______ rather than intentional, since nacre collects on every intruder too deeply lodged for expulsion.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
+          "text": "Sunil Pradhan and colleagues have sectioned hundreds of pearls to trace their growth. An irritant works inside an oyster, and the animal begins to coat the grain, layer upon layer, in nacre (the material of a shell) drawn from cells along the mantle. Such a pearl is ______ rather than intentional, since nacre collects on every intruder too deeply lodged for expulsion.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
           "choices": [
             "microscopic",
             "decorative",
@@ -2876,7 +2876,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Words in Context",
           "difficulty": "medium",
           "type": "mc",
-          "text": "The hyphae (the threads that make up a fungus) of a single honey fungus were traced in 2003 across nine square kilometers of forest in Oregon, and genetic tests identified all of that tissue as one organism. The measurement sounds ______, for the threads run continuously underground while growth above the soil appears in separate clumps of mushrooms scattered across a hillside.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
+          "text": "The hyphae (the threads that make up a fungus) of a single honey fungus were traced in 2003 by Ingrid Solheim and colleagues across nine square kilometers of forest in Oregon, and genetic tests identified all of that tissue as one organism. The measurement sounds ______, for the threads run continuously underground while growth above the soil appears in separate clumps of mushrooms scattered across a hillside.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
           "choices": [
             "preliminary",
             "disputed",
@@ -2918,7 +2918,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Text Structure and Purpose",
           "difficulty": "medium",
           "type": "mc",
-          "text": "Cochineal—the deep red of European painting and dyeing after the sixteenth century—comes from an insect that feeds on prickly pear. Spain controlled the supply for two hundred years, shipping the dried insects to Europe without any account of their origin, and naturalists there argued about whether the grains belonged to plants or to animals. The dispute ended when a microscope revealed that each grain was the dried body of an insect.<br><br>Which choice best states the main purpose of the text?",
+          "text": "Cochineal—the deep red of European painting and dyeing after the sixteenth century—comes from an insect that feeds on prickly pear. Spain controlled the supply for two hundred years, shipping the dried insects to Europe without any account of their origin, and naturalists there argued about whether the grains belonged to plants or to animals. The dispute ended when Melchior van Duyn turned a microscope on the grains and found each to be the dried body of an insect.<br><br>Which choice best states the main purpose of the text?",
           "choices": [
             "To argue that cochineal produced a better red than the dyes available in Europe.",
             "To explain the optical principles that allowed early microscopes to resolve legs.",
@@ -2939,7 +2939,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Cross-Text Connections",
           "difficulty": "medium",
           "type": "mc",
-          "text": "Text 1<br><br>Handwriting instruction largely disappeared from the primary curriculum. The case for a return rests on work by the psychologist Karin James and others, who found that preliterate children recognized letters more readily when they had formed those letters by hand than when they typed them. The motor act of drawing a shape, in this account, leaves a trace that typing cannot leave.<br><br>Text 2<br><br>The studies cited as support for a return compare handwriting with typing among children just learning their letters. They say nothing about older children, already fluent in recognition, and what they measure is recognition alone, not the later gains in composition and spelling that the case for a return assumes.<br><br>Based on the texts, how would the author of Text 2 most likely respond to the case described in Text 1?",
+          "text": "Text 1<br><br>Handwriting instruction largely disappeared from the primary curriculum. The case for a return rests on work by Karin James and others, who found that preliterate children recognized letters more readily when they had formed those letters by hand than when they typed them. The motor act of drawing a shape, in this account, leaves a trace that typing cannot leave.<br><br>Text 2<br><br>The studies cited as support for a return compare handwriting with typing among children just learning their letters. They say nothing about older children, already fluent in recognition, and what they measure is recognition alone, not the later gains in composition and spelling that the case for a return assumes.<br><br>Based on the texts, how would the author of Text 2 most likely respond to the case described in Text 1?",
           "choices": [
             "By noting that the evidence supports a narrower claim than restoring instruction would require.",
             "By denying that children who form letters by hand recognize them more readily afterward.",
@@ -2960,7 +2960,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Central Ideas and Details",
           "difficulty": "easy",
           "type": "mc",
-          "text": "Lascaux closed to visitors in 1963. Two decades of tourism allowed the breath and body heat of crowds to spread algae and calcite—a mineral crust—across painted walls that conservators could not safely clean. A full-size replica opened nearby during 1983, and two more copies now stand in for the cave, reproducing the paintings to within one millimeter. Entry to the original cave is now restricted to conservators, who monitor the painted walls on a fixed schedule.<br><br>Which choice best states the main idea of the text?",
+          "text": "Lascaux closed to visitors in 1963. Two decades of tourism allowed the breath and body heat of crowds to spread algae and calcite—a mineral crust—across painted walls that conservators could not safely clean. A full-size replica opened nearby during 1983, and two more copies now stand in for the cave, reproducing the paintings to within one millimeter. Entry to the original cave is now restricted to conservators, and the chief of them, Sandrine Aubert, monitors the painted walls on a fixed schedule.<br><br>Which choice best states the main idea of the text?",
           "choices": [
             "Lascaux was closed to protect the paintings, and replicas now stand in for the original cave.",
             "The replicas built near Lascaux since 1983 reproduce the paintings to within a millimeter.",
@@ -2981,7 +2981,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Central Ideas and Details",
           "difficulty": "medium",
           "type": "mc",
-          "text": "In 2021 researchers set the account books of a sixteenth-century Seville hospital beside the burial register. The books record daily payments to women hired for the nursing of patients. That work fell outside every salaried post, and the hospital charter passed over it in silence. The names recur from one year to the next, which points to a workforce employed steadily rather than casually.<br><br>Based on the text, what can be concluded about the women recorded in the account books?",
+          "text": "In 2021 Alvaro Benitez set the account books of a sixteenth-century Seville hospital beside the burial register. The books record daily payments to women hired for the nursing of patients. That work fell outside every salaried post, and the hospital charter passed over it in silence. The names recur from one year to the next, which points to a workforce employed steadily rather than casually.<br><br>Based on the text, what can be concluded about the women recorded in the account books?",
           "choices": [
             "They were paid more than the hospital’s salaried staff were paid for similar work.",
             "They appear in the burial register more often than other residents of the city do.",
@@ -3002,7 +3002,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Command of Evidence (Quantitative)",
           "difficulty": "easy",
           "type": "mc",
-          "text": "Small birds line their nests with whatever insulating material lies to hand, and the value of that lining rises as the weather turns against them. An ornithologist recorded the hatching success of nests of four lining types across two springs, one cool and one warm. The data support a claim that the lining of a nest tells chiefly in cold conditions. The table shows that ______<table class=\"dx-table\"><tr><th>Nest lining</th><th>Eggs hatched, cool spring</th><th>Eggs hatched, warm spring</th></tr><tr><td>Feather</td><td>86%</td><td>84%</td></tr><tr><td>Moss</td><td>71%</td><td>83%</td></tr><tr><td>Grass</td><td>64%</td><td>82%</td></tr><tr><td>Unlined</td><td>52%</td><td>80%</td></tr></table><br><br>Which choice most effectively uses data from the table to complete the claim?",
+          "text": "Small birds line their nests with whatever insulating material lies to hand, and the value of that lining rises as the weather turns against them. Ornithologist Kwame Adjei recorded the hatching success of nests of four lining types across two springs, one cool and one warm. The data support a claim that the lining of a nest tells chiefly in cold conditions. The table shows that ______<table class=\"dx-table\"><tr><th>Nest lining</th><th>Eggs hatched, cool spring</th><th>Eggs hatched, warm spring</th></tr><tr><td>Feather</td><td>86%</td><td>84%</td></tr><tr><td>Moss</td><td>71%</td><td>83%</td></tr><tr><td>Grass</td><td>64%</td><td>82%</td></tr><tr><td>Unlined</td><td>52%</td><td>80%</td></tr></table><br><br>Which choice most effectively uses data from the table to complete the claim?",
           "choices": [
             "feather-lined nests hatched 86 percent of their eggs in the cool spring, the highest figure in the table.",
             "unlined nests hatched 80 percent of their eggs in the warm spring, close to the figure for feather-lined nests.",
@@ -3023,7 +3023,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Command of Evidence (Quantitative)",
           "difficulty": "medium",
           "type": "mc",
-          "text": "Portions of spinach were prepared by four methods of cooking, and two quantities were measured for each: iron absorbed and vitamin C retained. According to the table, none of these methods gives the best result on both measures, and boiling ______<table class=\"dx-table\"><tr><th>Cooking method</th><th>Iron absorbed (mg)</th><th>Vitamin C retained (%)</th></tr><tr><td>Raw</td><td>0.9</td><td>100</td></tr><tr><td>Steamed</td><td>1.4</td><td>71</td></tr><tr><td>Boiled</td><td>1.6</td><td>38</td></tr><tr><td>Fried</td><td>1.5</td><td>55</td></tr></table><br><br>Which choice most effectively uses data from the table to complete the example?",
+          "text": "Lena Vasquez prepared portions of spinach by four methods of cooking and measured two quantities for each: iron absorbed and vitamin C retained. According to the table, none of these methods gives the best result on both measures, and boiling ______<table class=\"dx-table\"><tr><th>Cooking method</th><th>Iron absorbed (mg)</th><th>Vitamin C retained (%)</th></tr><tr><td>Raw</td><td>0.9</td><td>100</td></tr><tr><td>Steamed</td><td>1.4</td><td>71</td></tr><tr><td>Boiled</td><td>1.6</td><td>38</td></tr><tr><td>Fried</td><td>1.5</td><td>55</td></tr></table><br><br>Which choice most effectively uses data from the table to complete the example?",
           "choices": [
             "retained all of the vitamin C in the leaves while yielding the least absorbable iron.",
             "yielded more absorbable iron than steaming did but less than frying did.",
@@ -3044,7 +3044,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Command of Evidence (Textual)",
           "difficulty": "easy",
           "type": "mc",
-          "text": "Tool manufacture, the shaping of an object for a task, was first documented in New Caledonian crows by the ethologist Gavin Hunt, whose birds stripped and notched twigs to extract grubs from dead wood. The way these birds arrive at their tools is disputed. One proposal is that the crow selects each twig with one particular hole in mind, while the reshaping of twigs already carried is thought to play little part.<br><br>Which finding, if true, would most directly support this proposal?",
+          "text": "Tool manufacture, the shaping of an object for a task, was first documented in New Caledonian crows by Gavin Hunt, whose birds stripped and notched twigs to extract grubs from dead wood. The way these birds arrive at their tools is disputed. One proposal is that the crow selects each twig with one particular hole in mind, while the reshaping of twigs already carried is thought to play little part.<br><br>Which finding, if true, would most directly support this proposal?",
           "choices": [
             "Crows that are given no twigs will use stiff grass stems to extract grubs instead.",
             "Crows presented with holes of varying width pick a twig matched to the hole before approaching it.",
@@ -3086,7 +3086,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Inferences",
           "difficulty": "easy",
           "type": "mc",
-          "text": "Emperor penguins spend the Antarctic winter in colonies of thousands, pressed together in huddles, and birds along the windward face of a huddle lose heat far faster than those nearer the middle. Time-lapse film of one colony, shot across several weeks of 2011, shows the huddle advancing in small movements known as traveling waves. Birds shuffle forward a few centimeters and the mass of them travels slowly downwind through the hours. Birds that begin along the windward face stand near the middle within a day. The pattern therefore suggests that ______<br><br>Which choice most logically completes the text?",
+          "text": "Emperor penguins spend the Antarctic winter in colonies of thousands, pressed together in huddles, and birds along the windward face of a huddle lose heat far faster than those nearer the middle. Time-lapse film of one colony, shot across several weeks of 2011 by Mathilde Renard and colleagues, shows the huddle advancing in small movements known as traveling waves. Birds shuffle forward a few centimeters and the mass of them travels slowly downwind through the hours. Birds that begin along the windward face stand near the middle within a day. The pattern therefore suggests that ______<br><br>Which choice most logically completes the text?",
           "choices": [
             "the birds at the center of a huddle are the heaviest members of the colony.",
             "penguins choose their position in the huddle according to age.",
@@ -3107,7 +3107,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Inferences",
           "difficulty": "medium",
           "type": "mc",
-          "text": "The lens of a lighthouse concentrates lamplight in one narrow beam, and the beam sweeps the horizon as the lens turns. Every station received its own rhythm of flashes, known as the character of the light, fixed by the shape of the lens and by the speed of the clockwork driving it, so that navigators distinguished one light from the next along a stretch of coast. No station shared a rhythm with any other station nearby. Given the practice, a navigator timing the flashes of one unknown light ______<br><br>Which choice most logically completes the text?",
+          "text": "In a manual of 1864, engineer Marguerite Lehane set out the principle: the lens of a lighthouse concentrates lamplight in one narrow beam, and the beam sweeps the horizon as the lens turns. Every station received its own rhythm of flashes, known as the character of the light, fixed by the shape of the lens and by the speed of the clockwork driving it, so that navigators distinguished one light from the next along a stretch of coast. No station shared a rhythm with any other station nearby. Given the practice, a navigator timing the flashes of one unknown light ______<br><br>Which choice most logically completes the text?",
           "choices": [
             "could tell which station it was without consulting any chart.",
             "could identify the station provided the rhythms of that coast were known.",
@@ -3128,7 +3128,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Form, Structure, and Sense",
           "difficulty": "easy",
           "type": "mc",
-          "text": "The pilots who worked the shifting channel of the estuary ______ willing to take a loaded vessel over the bar on an ebbing tide.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "text": "Josiah Renwick kept a list of the men licensed for the crossing. The pilots who worked the shifting channel of the estuary ______ willing to take a loaded vessel over the bar on an ebbing tide.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
           "choices": [
             "has been",
             "was",
@@ -3149,7 +3149,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Boundaries",
           "difficulty": "easy",
           "type": "mc",
-          "text": "The expedition carried instruments from three countries: a barometer made in Paris, France; a chronometer from London, ______ a theodolite built in Munich.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "text": "Cecilia Marchetti drew up the equipment list. The expedition carried instruments from three countries: a barometer made in Paris, France; a chronometer from London, ______ a theodolite built in Munich.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
           "choices": [
             "England; and",
             "England and",
@@ -3233,7 +3233,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Boundaries",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Divers worked the wreck at intervals for a decade. Three instruments came up in 1982, and one of ______ a brass astrolabe engraved with the arms of a Lisbon house, is the earliest such instrument yet dated.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "text": "Teresa Boaventura and her divers worked the wreck at intervals for a decade. Three instruments came up in 1982, and one of ______ a brass astrolabe engraved with the arms of a Lisbon house, is the earliest such instrument yet dated.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
           "choices": [
             "them:",
             "them,",
@@ -3254,7 +3254,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Transitions",
           "difficulty": "easy",
           "type": "mc",
-          "text": "Sea ice and open water differ sharply in an important respect, their response to sunlight. Sea ice throws back the greater part of the light striking it, whereas open water takes in almost everything reaching the surface. ______ a summer of heavy melting leaves a darker ocean, warming faster in the year to follow.<br><br>Which choice completes the text with the most logical transition?",
+          "text": "Measuring the two each summer, glaciologist Aleksi Virtanen finds that sea ice and open water differ sharply in an important respect, their response to sunlight. Sea ice throws back the greater part of the light striking it, whereas open water takes in almost everything reaching the surface. ______ a summer of heavy melting leaves a darker ocean, warming faster in the year to follow.<br><br>Which choice completes the text with the most logical transition?",
           "choices": [
             "Thus,",
             "For example,",
@@ -3296,7 +3296,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Transitions",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Dictionaries record the usage that has settled, and words often circulate for decades before earning an entry. Editors describe the task as following the language, never leading it. ______ dictionaries are a lagging record of English, always a little behind the speech they describe.<br><br>Which choice completes the text with the most logical transition?",
+          "text": "Dictionaries record the usage that has settled, and words often circulate for decades before earning an entry. Lexicographer Ngozi Adeyemi describes the task as following the language, never leading it. ______ dictionaries are a lagging record of English, always a little behind the speech they describe.<br><br>Which choice completes the text with the most logical transition?",
           "choices": [
             "Nevertheless,",
             "For instance,",
@@ -3382,7 +3382,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Words in Context",
           "difficulty": "medium",
           "type": "mc",
-          "text": "Translators working from languages lacking tense marking are obliged to decide, sentence by sentence, whether the speaker predicts an event, declares an intention, or merely entertains a possibility. The original is ______ in a way English grammar cannot reproduce, because English insists on one reading of the three.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
+          "text": "Translator Hana Bergstrom has written at length about the problem facing translators who work from languages lacking tense marking, who must decide, sentence by sentence, whether the speaker predicts an event, declares an intention, or merely entertains a possibility. The original is ______ in a way English grammar cannot reproduce, because English insists on one reading of the three.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
           "choices": [
             "contested",
             "implausible",
@@ -3403,7 +3403,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Words in Context",
           "difficulty": "hard",
           "type": "mc",
-          "text": "The early modern pardon was ______ in effect, and was never simply merciful. Monarchs pardoning condemned men were understood to have established guilt first, and to be setting aside verdicts reached by the crown itself, so that every act of clemency was taken as confirmation of the court's authority.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
+          "text": "Emile Charpentier has studied thousands of early modern pardons. The early modern pardon was ______ in effect, and was never simply merciful. Monarchs pardoning condemned men were understood to have established guilt first, and to be setting aside verdicts reached by the crown itself, so that every act of clemency was taken as confirmation of the court's authority.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
           "choices": [
             "arbitrary",
             "ratifying",
@@ -3445,7 +3445,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Words in Context",
           "difficulty": "hard",
           "type": "mc",
-          "text": "A seventeenth-century panel was found to have yellowed unevenly, with a blue sleeve reading as green. Removing the varnish restored the blue, yet every surrounding tone had been chosen to sit against blue already warmed by fresh varnish, so the cleaned picture is ______ the one on the painter’s easel: exact in pigment and wrong in relation.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
+          "text": "A seventeenth-century panel examined by Ida Brekke was found to have yellowed unevenly, with a blue sleeve reading as green. Removing the varnish restored the blue, yet every surrounding tone had been chosen to sit against blue already warmed by fresh varnish, so the cleaned picture is ______ the one on the painter’s easel: exact in pigment and wrong in relation.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
           "choices": [
             "indistinguishable from",
             "at once truer and further from",
@@ -3466,7 +3466,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Cross-Text Connections",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Text 1<br><br>The medieval guild's reputation as a brake on innovation rests largely on its statutes. Guild statutes fixed the materials of the workshop, the tools, and the number of apprentices allowed to one master. With rules of that kind in force, the argument runs, crafts would have altered their methods slowly, whatever individual masters wanted.<br><br>Text 2<br><br>Regulation runs through the Cologne goldsmiths' records, but it is most visible in what the statutes were written to do. A 2016 study traced these statutes across two centuries and found them revised, on average, every eleven years. When a new technique spread among the masters, the guild rarely forbade it. Instead, the statute was rewritten to admit the technique and to name who could use it.<br><br>Based on the texts, how would the author of Text 2 most likely respond to the argument in Text 1?",
+          "text": "Text 1<br><br>The medieval guild's reputation as a brake on innovation rests largely on its statutes. Guild statutes fixed the materials of the workshop, the tools, and the number of apprentices allowed to one master. With rules of that kind in force, the argument runs, crafts would have altered their methods slowly, whatever individual masters wanted.<br><br>Text 2<br><br>Regulation runs through the Cologne goldsmiths' records, but it is most visible in what the statutes were written to do. A 2016 study by Klaus Reinhardt and colleagues traced these statutes across two centuries and found them revised, on average, every eleven years. When a new technique spread among the masters, the guild rarely forbade it. Instead, the statute was rewritten to admit the technique and to name who could use it.<br><br>Based on the texts, how would the author of Text 2 most likely respond to the argument in Text 1?",
           "choices": [
             "By observing that the statutes followed changes in practice instead of constraining them.",
             "By agreeing that guild statutes were restrictive but noting that they were rarely enforced.",
@@ -3487,7 +3487,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Text Structure and Purpose",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Standard accounts of London's Great Fire credit the rebuilding acts of 1667 with recovery in the city, and it is true that those acts imposed brick where timber had burned. Parish rate books, which were kept to assess taxation, record occupancy year by year, and they show that three quarters of burnt houses were reoccupied while commissioners remained unappointed. <u>The acts regulated a recovery already in motion.</u> The acts therefore governed the materials and the frontages of a rebuilding that was already in progress.<br><br>Which choice best describes the function of the underlined sentence in the text as a whole?",
+          "text": "Standard accounts of London's Great Fire credit the rebuilding acts of 1667 with recovery in the city, and it is true that those acts imposed brick where timber had burned. Parish rate books, which were kept to assess taxation, record occupancy year by year, and Verity Halloran shows that three quarters of burnt houses were reoccupied while commissioners remained unappointed. <u>The acts regulated a recovery already in motion.</u> The acts therefore governed the materials and the frontages of a rebuilding that was already in progress.<br><br>Which choice best describes the function of the underlined sentence in the text as a whole?",
           "choices": [
             "It offers an example of the kind of regulation the rebuilding acts imposed after the fire.",
             "It introduces the rebuilding acts whose provisions the rest of the text goes on to describe.",
@@ -3508,7 +3508,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Text Structure and Purpose",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Languages lose speakers partly to outside pressure, partly to decisions inside households about ceasing to pass them on. Sociolinguists who interviewed families in three stages of such shift report that parents rarely describe one decision. They describe instead a run of occasions in which the second language came more easily, and a later recognition that the run amounted to a choice.<br><br>Which choice best states the main purpose of the text?",
+          "text": "Languages lose speakers partly to outside pressure, partly to decisions inside households about ceasing to pass them on. Sociolinguists who interviewed families in three stages of such shift, among them Ayesha Karim, report that parents rarely describe one decision. They describe instead a run of occasions in which the second language came more easily, and a later recognition that the run amounted to a choice.<br><br>Which choice best states the main purpose of the text?",
           "choices": [
             "To compare the external pressures on a language with the internal ones acting on a household.",
             "To argue that parents who stop transmitting a language later come to regret having done so.",
@@ -3529,7 +3529,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Central Ideas and Details",
           "difficulty": "easy",
           "type": "mc",
-          "text": "A fogbow (a rainbow formed in fog) has the geometry of an ordinary rainbow, but it is formed in droplets so small that light is bent around them instead of passing cleanly through. The colors are washed together, and what is left is a pale arc that observers are inclined to call white. The physics of the two is the same, and the difference lies entirely in the size of the droplets.<br><br>Which choice best states the main idea of the text?",
+          "text": "Meteorologist Per Lindgren describes the fogbow as a rainbow with its colors taken out. A fogbow (a rainbow formed in fog) has the geometry of an ordinary rainbow, but it is formed in droplets so small that light is bent around them instead of passing cleanly through. The colors are washed together, and what is left is a pale arc that observers are inclined to call white. The physics of the two is the same, and the difference lies entirely in the size of the droplets.<br><br>Which choice best states the main idea of the text?",
           "choices": [
             "Observers rarely distinguish a fogbow from the pale arcs produced by other conditions.",
             "A fogbow and a rainbow are formed by two unrelated optical processes in the atmosphere.",
@@ -3550,7 +3550,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Central Ideas and Details",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Musicologists have compared the surviving performing parts of a Venetian opera of 1642 with the printed libretto—the sung text—sold at the first performances. Several arias named in that libretto are missing from the parts. Two numbers in the parts appear nowhere in the printed text. They conclude that the libretto preserves a poet's supply rather than an audience's experience, and that a score built from it would reconstruct a performance which never actually took place.<br><br>Which choice best describes the conclusion drawn from the two sources?",
+          "text": "Benedetta Fiore and colleagues have compared the surviving performing parts of a Venetian opera of 1642 with the printed libretto—the sung text—sold at the first performances. Several arias named in that libretto are missing from the parts. Two numbers in the parts appear nowhere in the printed text. They conclude that the libretto preserves a poet's supply rather than an audience's experience, and that a score built from it would reconstruct a performance which never actually took place.<br><br>Which choice best describes the conclusion drawn from the two sources?",
           "choices": [
             "The two numbers absent from the libretto were added by a composer other than the one named on it.",
             "The Venetian opera of 1642 was performed with more arias than its libretto lists for the audience.",
@@ -3571,7 +3571,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Command of Evidence (Quantitative)",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Carbon dioxide seeping out of volcanic vents on the seafloor acidifies the water around them, and biologists treat such vents as natural experiments in the chemistry of ocean acidification. A team measured the shells of limpets at four distances along a transect away from one vent, recording both the length of each shell and the state of its margins. The team concluded that water near the vent limits the growth of a shell rather than merely damaging shells already formed.<table class=\"dx-table\"><tr><th>Distance from vent (m)</th><th>Shell length (mm)</th><th>Shells with dissolved margins (%)</th></tr><tr><td>5</td><td>18.2</td><td>61</td></tr><tr><td>20</td><td>22.6</td><td>34</td></tr><tr><td>60</td><td>23.1</td><td>12</td></tr><tr><td>150</td><td>23.4</td><td>9</td></tr></table><br><br>Which choice best describes data from the table that support the team's conclusion?",
+          "text": "Carbon dioxide seeping out of volcanic vents on the seafloor acidifies the water around them, and biologists treat such vents as natural experiments in the chemistry of ocean acidification. A team led by Raul Ibanez measured the shells of limpets at four distances along a transect away from one vent, recording both the length of each shell and the state of its margins. The team concluded that water near the vent limits the growth of a shell rather than merely damaging shells already formed.<table class=\"dx-table\"><tr><th>Distance from vent (m)</th><th>Shell length (mm)</th><th>Shells with dissolved margins (%)</th></tr><tr><td>5</td><td>18.2</td><td>61</td></tr><tr><td>20</td><td>22.6</td><td>34</td></tr><tr><td>60</td><td>23.1</td><td>12</td></tr><tr><td>150</td><td>23.4</td><td>9</td></tr></table><br><br>Which choice best describes data from the table that support the team's conclusion?",
           "choices": [
             "Sixty-one percent of shells collected five meters from the vent showed dissolved margins, the highest proportion recorded.",
             "The proportion of shells with dissolved margins fell as distance from the vent increased.",
@@ -3592,7 +3592,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Command of Evidence (Quantitative)",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Parchment was costly. A scribe could fit extra text on the page by ruling additional lines, or by abbreviating heavily (writing shortened forms of the commonest words), and a scriptorium short of parchment would be expected to lean on whichever of the two techniques it had already mastered. In that case a single scriptorium should show much of the one and little of the other. The table shows that ______<table class=\"dx-table\"><tr><th>Manuscript</th><th>Lines per page</th><th>Abbreviations per 100 words</th></tr><tr><td>Corbie</td><td>34</td><td>9</td></tr><tr><td>Tours</td><td>26</td><td>21</td></tr><tr><td>Reims</td><td>33</td><td>11</td></tr><tr><td>Fulda</td><td>25</td><td>23</td></tr></table><br><br>Which choice most effectively uses data from the table to complete the statement?",
+          "text": "Parchment was costly, as Hendrik Mauss has emphasized. A scribe could fit extra text on the page by ruling additional lines, or by abbreviating heavily (writing shortened forms of the commonest words), and a scriptorium short of parchment would be expected to lean on whichever of the two techniques it had already mastered. In that case a single scriptorium should show much of the one and little of the other. The table shows that ______<table class=\"dx-table\"><tr><th>Manuscript</th><th>Lines per page</th><th>Abbreviations per 100 words</th></tr><tr><td>Corbie</td><td>34</td><td>9</td></tr><tr><td>Tours</td><td>26</td><td>21</td></tr><tr><td>Reims</td><td>33</td><td>11</td></tr><tr><td>Fulda</td><td>25</td><td>23</td></tr></table><br><br>Which choice most effectively uses data from the table to complete the statement?",
           "choices": [
             "the two manuscripts with the most lines per page are also the two that abbreviate least.",
             "the Tours and Fulda manuscripts abbreviate more than twice as heavily as the Corbie manuscript does.",
@@ -3634,7 +3634,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Command of Evidence (Textual)",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Although most accounts trace domesticated rice outward from a single river valley, some archaeobotanists argue that cultivation began independently at sites far apart. Many researchers have assumed that traits shared by early cultivated grains would indicate common descent and thus would place all cultivated rice in one lineage. To evaluate this assumption, a research team analyzed genomes from over 3,000 accessions of cultivated and wild rice.<br><br>Which finding, if true, would most directly support this position?",
+          "text": "Although most accounts trace domesticated rice outward from a single river valley, some archaeobotanists argue that cultivation began independently at sites far apart. Many researchers have assumed that traits shared by early cultivated grains would indicate common descent and thus would place all cultivated rice in one lineage. To evaluate this assumption, a research team led by Lian Zhou analyzed genomes from over 3,000 accessions of cultivated and wild rice.<br><br>Which finding, if true, would most directly support this position?",
           "choices": [
             "Grains recovered from the river valley are several centuries older than grains from any other site.",
             "Grains from three distant sites carry different genetic markers for the same non-shattering trait.",
@@ -3697,7 +3697,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Form, Structure, and Sense",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Historians have never settled how large that fleet was. Two eyewitnesses left records, and one is far fuller. The fuller of two surviving accounts of the siege, written within a decade by a man who questioned sailors, ______ a figure for ships in harbor.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "text": "Reopening the question in 2014, Cosimo Ferrante noted that historians have never settled how large that fleet was. Two eyewitnesses left records, and one is far fuller. The fuller of two surviving accounts of the siege, written within a decade by a man who questioned sailors, ______ a figure for ships in harbor.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
           "choices": [
             "give",
             "have given",
@@ -3718,7 +3718,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Boundaries",
           "difficulty": "easy",
           "type": "mc",
-          "text": "The ______ that ends both lines of a ghazal’s opening couplet and the second line of every couplet after it, is what holds the poem together.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "text": "Agha Shahid Ali set out the formal requirements of the ghazal for English-language writers in his 2000 anthology <em>Ravishing DisUnities</em>. The ______ that ends both lines of a ghazal’s opening couplet and the second line of every couplet after it, is what holds the poem together.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
           "choices": [
             "radif; a word or phrase",
             "radif a word or phrase",
@@ -3781,7 +3781,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Form, Structure, and Sense",
           "difficulty": "hard",
           "type": "mc",
-          "text": "The commission asked the engineers to report on the state of the embankment, to estimate the cost of raising it, and ______<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "text": "Engineer Frederick Ashgrove chaired the inquiry. The commission asked the engineers to report on the state of the embankment, to estimate the cost of raising it, and ______<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
           "choices": [
             "whether the work could be finished before the winter floods.",
             "could the work be finished before the winter floods.",
@@ -3886,7 +3886,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Rhetorical Synthesis",
           "difficulty": "medium",
           "type": "mc",
-          "text": "While researching a topic, a student has taken the following notes:<br><br>• The Iron Pillar of Delhi is a wrought-iron column seven meters tall, raised in about the fourth century CE.<br>• It has stood outdoors ever since and shows almost no rust.<br>• The iron contains an unusually high proportion of phosphorus, about four times that of modern iron.<br>• Phosphorus reacts with iron in humid air to form a thin protective film.<br>• That film is what has kept the column from rusting.<br><br>The student wants to explain why the pillar has not rusted. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
+          "text": "While researching a topic, a student has taken the following notes:<br><br>• The Iron Pillar of Delhi is a wrought-iron column seven meters tall, raised in about the fourth century CE.<br>• It has stood outdoors ever since and shows almost no rust.<br>• The iron contains an unusually high proportion of phosphorus, about four times that of modern iron.<br>• Phosphorus reacts with iron in humid air to form a thin protective film.<br>• Metallurgist R. Balasubramaniam identified the film in 2002.<br>• That film is what has kept the column from rusting.<br><br>The student wants to explain why the pillar has not rusted. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
           "choices": [
             "The Iron Pillar of Delhi, raised in about the fourth century CE, is seven meters high and stands outdoors.",
             "Although it has stood outdoors since the fourth century CE, the Iron Pillar of Delhi shows almost no rust.",
