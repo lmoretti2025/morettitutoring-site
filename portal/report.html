@@ -224,6 +224,7 @@
   /* ═══ SKILL DIAGNOSIS ═══ Mastered/Inefficient/Stuck/Rushed rollup — see
      index.html's identical CSS (this is the standalone report's own copy,
      kept in sync by hand). */
+  .skilldx-approach { margin: 0 0 12px; padding: 10px 12px; border-left: 3px solid #8A5A9E; background: #F6F0F8; border-radius: 0 8px 8px 0; font-size: 12.5px; line-height: 1.55; color: var(--ink); }
   .skilldx-card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow); padding: 20px 24px; }
   .skilldx-card > .behavior-focus { margin-bottom: 12px; }
   .skilldx-row { display: flex; align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--border); }
@@ -1182,7 +1183,7 @@
 </script>
 <script src="time-budgets.js?v=20260912a"></script>
 <script src="grid-in.js?v=20260910a"></script>
-<script src="signals.js?v=20260927m"></script>
+<script src="signals.js?v=20260927n"></script>
 <script src="desmos-tags.js?v=20260916c"></script>
 <script src="question-flag.js?v=20260925a"></script>
 <script src="report-tour.js?v=20260927g"></script>
@@ -6593,6 +6594,42 @@
        questions are in each bucket and narrow to one section. A question can
        be in two buckets (evidence for both) but never twice in one. */
     var buckets = { content: [], method: [], clock: [] };
+    /* ═══ APPROACH, NOT KNOWLEDGE (Luca, 2026-09-27) ═══
+       On a competent sitting (1200+, or 600+ on a section alone) a content
+       miss is marked e.approach when the miss itself shows the question type
+       was the problem: worked 1.5x budget and still wrong, narrowed to two
+       and picked the other, or a graphing-route math question missed
+       without the calculator (signals.js approachEvidence). It stays a
+       content miss for the counts and the week's hours; the plan and the
+       page say which kind of work it needs. */
+    var MSa = window.MorettiSignals;
+    var approachOn = !!(MSa && typeof MSa.approachEvidence === 'function' && data.t === 'SAT' &&
+      MSa.approachCompetent(typeof composite === 'number' ? composite : null,
+        typeof composite === 'number' ? null : (typeof rwScaled === 'number' ? rwScaled : typeof mathScaled === 'number' ? mathScaled : null)));
+    var decodedRows = {};
+    if (approachOn) {
+      try {
+        (data.s || []).forEach(function (raw) {
+          var bank = getBank(raw.k);
+          if (!bank) return;
+          var qs = sectionQuestions(bank, raw.v);
+          var d = MSa.decodeSection(raw, qs, { grade: isCorrect, module1Length: bank.module2Easier ? bank.module1.length : undefined });
+          if (d && d.recorded && d.rows.length === qs.length) decodedRows[raw.k] = { rows: d.rows, qs: qs };
+        });
+      } catch (e) { decodedRows = {}; }
+    }
+    var desmosTags = window.DESMOS_TAGS_REVIEWED === true ? window.DESMOS_TAGS : null;
+    function approachOf(sec, r, ri, tMs, qBudgetMs) {
+      if (!approachOn) return null;
+      var dr = decodedRows[sec.key], row = dr && dr.rows[ri], tag = null;
+      if (desmosTags && dr && MSa.itemKey) { var t = desmosTags[MSa.itemKey(dr.qs[ri])]; tag = typeof t === 'number' ? t : null; }
+      return MSa.approachEvidence({
+        sec: sec.key, domain: r.q && r.q.domain, ok: !!r.ok, blank: !!r.skipped, clock: false,
+        budgetRatio: qBudgetMs > 0 && tMs > 0 ? tMs / qBudgetMs : null,
+        choicesLeft: row && r.q && r.q.type === 'mc' ? row.k : null, keyOutFinal: row ? !!row.keyOutFinal : null,
+        fastRoute: tag === null ? null : tag === 2, calcActive: row ? !!row.calcActive : null
+      });
+    }
     function bucket(k, sec, r, why) {
       if (buckets[k].some(function (x) { return x.r === r; })) return;
       buckets[k].push({ sec: sec, r: r, why: why });
@@ -6605,7 +6642,7 @@
       var secMult = (roll && roll.mult) || 1;
       var hurry = hurriedJudge(sec, secMult, typical);
       var endRush = endRushRows(sec, secMult);
-      sec.rows.forEach(function (r) {
+      sec.rows.forEach(function (r, ri) {
         if (r.skipped) { bucket('clock', sec, r, 'never reached'); return; }
         if (r.ok) return;
         /* ═══ EVERY UNHURRIED MISS IS CONTENT ═══
@@ -6648,6 +6685,8 @@
         var slow = qBudgetMs ? (tMs >= qBudgetMs * STUCK_BUDGET_REL)
                              : (typical && tMs >= typical * STUCK_REL);
         bucket('content', sec, r, slow ? 'worked at it, still missed' : 'missed at a normal pace');
+        var ev = approachOf(sec, r, ri, tMs, qBudgetMs), last = buckets.content[buckets.content.length - 1];
+        if (ev && last && last.r === r) last.approach = ev;
       });
       // The rollup collects these itself (see correctOverBudgetRows in
       // time-budgets.js) so the list and the count cannot drift apart.
@@ -6680,6 +6719,34 @@
     // the question lists are drawn from -- not the tallies, which
     // double-count by design (see the note directly above).
     planInputs.causes = { content: buckets.content.length, method: buckets.method.length, clock: buckets.clock.length };
+    // Of the content misses, those read as the question type (a subset: counts and hours are unchanged).
+    var apprRows = buckets.content.filter(function (e) { return e.approach; });
+    planInputs.approach = (function () {
+      var bySk = {}, kinds = { long: 0, two: 0, desmos: 0 };
+      apprRows.forEach(function (e) { kinds[e.approach]++; var k = e.r.sk || e.r.dom; bySk[k] = (bySk[k] || 0) + 1; });
+      var bits = [];
+      if (kinds.long) bits.push(kinds.long + ' worked well past their time and still missed');
+      if (kinds.two) bits.push(kinds.two + ' narrowed to two choices, then the wrong one picked');
+      if (kinds.desmos) bits.push(kinds.desmos + ' graphing-route math question' + (kinds.desmos === 1 ? '' : 's') + ' missed without the calculator');
+      var skills = Object.keys(bySk).sort(function (a, b) { return bySk[b] - bySk[a]; });
+      // Named on the page and in the plan only at 3+ (signals.js APPROACH_MIN_SHOWN); the rows keep their mark either way.
+      var shown = apprRows.length >= ((MSa && MSa.APPROACH_MIN_SHOWN) || 3);
+      return { n: shown ? apprRows.length : 0, marked: apprRows.length, kinds: kinds, skills: skills, bySkill: bySk,
+               why: bits.length < 2 ? bits.join('') : bits.slice(0, -1).join(', ') + ' and ' + bits[bits.length - 1] };
+    })();
+    planInputs.causes.approach = planInputs.approach.n;
+    /* On the page: the line under "What to relearn" says which misses are
+       the question type, so the relearning list is not read as all of them. */
+    (function () {
+      var A = planInputs.approach, host = document.getElementById('skilldx-card');
+      if (!A || !A.n || !host) return;
+      var p = document.createElement('p');
+      p.className = 'skilldx-approach';
+      p.innerHTML = '<b>Strategy, not knowledge:</b> ' + A.n + ' of the ' + buckets.content.length + ' questions missed after real work look like the question type rather than the material (' +
+        esc(A.why) + '), in ' + A.skills.slice(0, 3).map(function (k) { return '<b>' + esc(k) + '</b>'; }).join(', ') +
+        '. Those are won back by practising how that kind of question is answered, not by studying the topic again.';
+      host.insertBefore(p, host.firstChild);
+    })();
     /* What "lost to pace" was made of, so the summary can say it and give
        the matching advice. A below-floor answer in a section whose first
        pass ended late was a guess as time ran out; with time to spare it was
@@ -7265,7 +7332,7 @@
     var clockOnly = (cmTotal === 0) && !strong;
 
     function hrs(h) { return h === Math.floor(h) ? String(h) : (h < 1 ? '' : String(Math.floor(h))) + '½'; }
-    function unitFor(h) { return h === 1 ? 'hr / week' : 'hrs / week'; }
+    function unitFor(h) { return h <= 1 ? 'hr / week' : 'hrs / week'; }
 
     // The areas this plan is allowed to name under content, most severe
     // first, capped at three: a week with four content topics in it is a
@@ -7295,6 +7362,26 @@
       : null;
 
     var rows = [];
+    /* Strategy practice (Luca, 2026-09-27): the approach misses' share of the
+       relearning hours, at least half an hour, and all of them when every
+       content miss was the question type. The week's total is unchanged. */
+    var A = planInputs.approach || { n: 0 };
+    var strategyH = 0;
+    if (!strong && A.n > 0 && hours.content > 0) {
+      strategyH = A.n >= causes.content ? hours.content : Math.max(0.5, half(hours.content * A.n / causes.content));
+      if (hours.content - strategyH < 0.5) strategyH = hours.content;
+      hours.content -= strategyH;
+    }
+    var contentOnly = causes.content - (A.n || 0);
+    var strategyRow = null;
+    if (strategyH > 0) {
+      strategyRow = ({
+        h: strategyH, unit: unitFor(strategyH), color: '#8A5A9E',
+        what: '<b>Strategy.</b> Question Bank sets on ' + A.skills.slice(0, 3).map(function (k) { return '<b>' + esc(k) + '</b>'; }).join(', ') +
+          ', worked for the method, not the answer: say what the question asks before reading the choices, then say why the right choice wins and why the last wrong one loses. ' +
+          '<em>' + A.n + ' question' + (A.n === 1 ? '' : 's') + ' on this test looked like the question type rather than the material: ' + esc(A.why) + '.</em>'
+      });
+    }
     if (hours.content > 0) {
       var pre = planInputs.prereq;
       rows.push({
@@ -7307,11 +7394,11 @@
               : 'it is a closed set of rules that moves in weeks, where ' + esc(pre.blocks) +
                 ' is comprehension and moves in months. ') +
             'Then ' + (areaTxt || 'the rest of what this test got wrong') + '. ' +
-            '<em>' + causes.content + ' question' + (causes.content === 1 ? '' : 's') +
+            '<em>' + (strategyH ? contentOnly : causes.content) + ' question' + ((strategyH ? contentOnly : causes.content) === 1 ? '' : 's') +
             ' on this test got real effort and still came back wrong.</em>'
           : areaTxt
           ? areaTxt + ' first, then practice on ' + (contentAreas.length === 1 ? 'it' : 'them') + ', in that order: practicing before the method is solid just rehearses the wrong method. ' +
-            '<em>' + causes.content + ' question' + (causes.content === 1 ? '' : 's') + ' on this test got real work and still came back wrong' +
+            '<em>' + (strategyH ? contentOnly : causes.content) + ' question' + ((strategyH ? contentOnly : causes.content) === 1 ? '' : 's') + ' on this test got real work and still came back wrong' +
             (areaMiss > 0 && areaMiss < causes.content ? ', ' + areaMiss + ' of them in ' + (contentAreas.length === 1 ? esc(contentAreas[0].name) : 'those areas') + '. Go through the rest one by one from the question grids.' : '.') + '</em>'
           : 'Work the questions this test got wrong. ' +
             '<em>' + (hedgedLead
@@ -7319,6 +7406,8 @@
               : 'No area stood out clearly enough to build the week around, so spread the time across the misses rather than picking one topic.') + '</em>')
       });
     }
+    // Strategy sits under the relearning it was split from.
+    if (strategyRow) rows.push(strategyRow);
     if (hours.method > 0) {
       rows.push({
         h: hours.method, unit: unitFor(hours.method), color: 'var(--tan)',
@@ -7367,7 +7456,9 @@
           (areaTxt ? ', starting with ' + areaTxt + ', where this test found a clear gap' :
             missSkills.length ? ', starting with this test’s: ' + missSkills.slice(0, 3).map(esc).join('; ') : '') +
           '. From your second test on, the “Your Statistics” card on Home lists the topics that came up wrong more than once; ' +
-          'those come first, in the Question Bank and in Saved &amp; Mistakes.'
+          'those come first, in the Question Bank and in Saved &amp; Mistakes.' +
+          (A.n ? ' <em>' + A.n + ' of this test’s misses looked like the question type rather than the material (' + esc(A.why) + '), so on ' +
+            A.skills.slice(0, 2).map(esc).join(' and ') + ' practise how the question is answered, not the topic.</em>' : '')
       }];
     }
     if (!rows.length) return;
@@ -7596,7 +7687,8 @@
           : 'Most of what you lost was to the clock, not to what you know.')
         : 'What you lost is split between questions you got wrong and questions lost to pace.';
       var lines = [
-        { n: c.content, t: count(c.content, 'question') + (fullyTimed ? ' you worked on and still got wrong' : ' answered wrong') },
+        { n: c.content, t: count(c.content, 'question') + (fullyTimed ? ' you worked on and still got wrong' : ' answered wrong') +
+            (c.approach ? ', ' + c.approach + ' of them on the question type more than the material' : '') },
         { n: c.clock, t: count(c.clock, 'question') + ' lost to pace: ' + joinAnd(paceParts) }
       ].filter(function (x) { return x.n > 0; }).sort(function (a, b) { return b.n - a.n; });
       if (c.method > 0) lines.push({ n: c.method, t: count(c.method, 'right answer') + ' that took so long that later questions ran short on time' });
@@ -7953,7 +8045,10 @@
       { hed: 'skilldx-hed', body: ['skilldx-card'], line: function () {
         // The lead and its reason: two sentences when they are short enough to read at a glance.
         var all = txt(q('skilldx-headline')), one = first(all), two = first(all.slice(one.length).trim());
-        return (two && (one + ' ' + two).length <= 230) ? one + ' ' + two : one; } },
+        var base = (two && (one + ' ' + two).length <= 230) ? one + ' ' + two : one;
+        // Strategy, not knowledge: said in the line itself, since the card is folded (Luca, 2026-09-27).
+        var A = planInputs.approach;
+        return base + (A && A.n ? ' ' + A.n + ' of the misses look like the question type rather than the material, in ' + andJoin(A.skills.slice(0, 2)) + ': practise the method there.' : ''); } },
       { hed: 'budget-hed', body: ['budget-sub', 'budget-card'], line: function () {
         var parts = [];
         Array.prototype.forEach.call(document.querySelectorAll('#budget-card .budget-sec'), function (sc) {
