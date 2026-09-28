@@ -2349,7 +2349,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Text Structure and Purpose",
           "difficulty": "medium",
           "type": "mc",
-          "text": "Double basses in jazz rhythm sections are seldom loud enough to be followed note by note, yet recordings made without them sound thin, and listeners register the thinness immediately (even listeners unable to say what is missing). Because the overtones of the instrument fall in ranges the ear reads as warmth, for example the low partials persisting after each fundamental has died away, bass can be said to color the whole ensemble rather than to carry lines of its own. Acoustician Yolanda Pereda describes the effect in concert halls, and it appears as clearly in small studios.<br><br>Which choice best states the main purpose of the text?",
+          "text": "Double basses in jazz rhythm sections are seldom loud enough to be followed note by note, yet recordings made without them sound thin, and listeners register the thinness immediately (even listeners unable to say what is missing). Because the overtones of the instrument fall in ranges the ear reads as warmth, for example the low partials persisting after each fundamental has died away, bass can be said to color the whole ensemble rather than to carry lines of its own. Acousticians describe the effect in concert halls, and it appears as clearly in small studios.<br><br>Which choice best states the main purpose of the text?",
           "choices": [
             "To explain why an instrument that is hard to hear on its own is missed when it is absent.",
             "To describe the particular range of overtones that the human ear associates with warmth.",
@@ -2664,7 +2664,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Boundaries",
           "difficulty": "hard",
           "type": "mc",
-          "text": "At the bench glassblower Elsa Vondrak works against the clock. The gather has to turn from the instant it leaves the furnace, since two seconds of rest leave the piece sagging out of ______ is why the bench, the tools, and the annealing oven all sit within one turn of the chair.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "text": "At the bench a glassblower works against the clock. The gather has to turn from the instant it leaves the furnace, since two seconds of rest leave the piece sagging out of ______ is why the bench, the tools, and the annealing oven all sit within one turn of the chair.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
           "choices": [
             "shape that",
             "shape. That",
@@ -2727,7 +2727,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Transitions",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Ruth Oyelaran reexamined the quilt in 2016. Its stitching matches nothing else attributed to the workshop, and its dyes were fixed by a method unrecorded in the region. ______ the initials it carries are those of the workshop’s founder and of no one else.<br><br>Which choice completes the text with the most logical transition?",
+          "text": "The quilt was reexamined in 2016. Its stitching matches nothing else attributed to the workshop, and its dyes were fixed by a method unrecorded in the region. ______ the initials it carries are those of the workshop’s founder and of no one else.<br><br>Which choice completes the text with the most logical transition?",
           "choices": [
             "For example,",
             "As a result,",
@@ -2855,7 +2855,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Words in Context",
           "difficulty": "medium",
           "type": "mc",
-          "text": "Sunil Pradhan and colleagues have sectioned hundreds of pearls to trace their growth. An irritant works inside an oyster, and the animal begins to coat the grain, layer upon layer, in nacre (the material of a shell) drawn from cells along the mantle. Such a pearl is ______ rather than intentional, since nacre collects on every intruder too deeply lodged for expulsion.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
+          "text": "An irritant works inside an oyster, and the animal begins to coat the grain, layer upon layer, in nacre (the material of a shell) drawn from cells along the mantle. Such a pearl is ______ rather than intentional, since nacre collects on every intruder too deeply lodged for expulsion.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
           "choices": [
             "microscopic",
             "decorative",
@@ -2876,7 +2876,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Words in Context",
           "difficulty": "medium",
           "type": "mc",
-          "text": "The hyphae (the threads that make up a fungus) of a single honey fungus were traced in 2003 by Ingrid Solheim and colleagues across nine square kilometers of forest in Oregon, and genetic tests identified all of that tissue as one organism. The measurement sounds ______, for the threads run continuously underground while growth above the soil appears in separate clumps of mushrooms scattered across a hillside.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
+          "text": "The hyphae (the threads that make up a fungus) of a single honey fungus were traced in 2003 across nine square kilometers of forest in Oregon, and genetic tests identified all of that tissue as one organism. The measurement sounds ______, for the threads run continuously underground while growth above the soil appears in separate clumps of mushrooms scattered across a hillside.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
           "choices": [
             "preliminary",
             "disputed",
@@ -2960,7 +2960,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Central Ideas and Details",
           "difficulty": "easy",
           "type": "mc",
-          "text": "Lascaux closed to visitors in 1963. Two decades of tourism allowed the breath and body heat of crowds to spread algae and calcite—a mineral crust—across painted walls that conservators could not safely clean. A full-size replica opened nearby during 1983, and two more copies now stand in for the cave, reproducing the paintings to within one millimeter. Entry to the original cave is now restricted to conservators, and the chief of them, Sandrine Aubert, monitors the painted walls on a fixed schedule.<br><br>Which choice best states the main idea of the text?",
+          "text": "Lascaux closed to visitors in 1963. Two decades of tourism allowed the breath and body heat of crowds to spread algae and calcite—a mineral crust—across painted walls that conservators could not safely clean. A full-size replica opened nearby during 1983, and two more copies now stand in for the cave, reproducing the paintings to within one millimeter. Entry to the original cave is now restricted to conservators, who monitor the painted walls on a fixed schedule.<br><br>Which choice best states the main idea of the text?",
           "choices": [
             "Lascaux was closed to protect the paintings, and replicas now stand in for the original cave.",
             "The replicas built near Lascaux since 1983 reproduce the paintings to within a millimeter.",
@@ -3002,7 +3002,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Command of Evidence (Quantitative)",
           "difficulty": "easy",
           "type": "mc",
-          "text": "Small birds line their nests with whatever insulating material lies to hand, and that lining matters more in cold weather. Ornithologist Kwame Adjei recorded the hatching success of nests of four lining types across two springs, one cool and one warm. The data support a claim that nest lining affects hatching success mainly in cold weather. The table shows that ______<table class=\"dx-table\"><tr><th>Nest lining</th><th>Eggs hatched, cool spring</th><th>Eggs hatched, warm spring</th></tr><tr><td>Feather</td><td>86%</td><td>84%</td></tr><tr><td>Moss</td><td>71%</td><td>83%</td></tr><tr><td>Grass</td><td>64%</td><td>82%</td></tr><tr><td>Unlined</td><td>52%</td><td>80%</td></tr></table><br><br>Which choice most effectively uses data from the table to complete the statement?",
+          "text": "Small birds line their nests with whatever insulating material lies to hand, and that lining matters more in cold weather. An ornithologist recorded the hatching success of nests of four lining types across two springs, one cool and one warm. The data support a claim that nest lining affects hatching success mainly in cold weather. The table shows that ______<table class=\"dx-table\"><tr><th>Nest lining</th><th>Eggs hatched, cool spring</th><th>Eggs hatched, warm spring</th></tr><tr><td>Feather</td><td>86%</td><td>84%</td></tr><tr><td>Moss</td><td>71%</td><td>83%</td></tr><tr><td>Grass</td><td>64%</td><td>82%</td></tr><tr><td>Unlined</td><td>52%</td><td>80%</td></tr></table><br><br>Which choice most effectively uses data from the table to complete the statement?",
           "choices": [
             "feather-lined nests hatched 86 percent of their eggs in the cool spring, the highest figure in the table.",
             "unlined nests hatched 80 percent of their eggs in the warm spring, close to the figure for feather-lined nests.",
@@ -3023,7 +3023,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Command of Evidence (Quantitative)",
           "difficulty": "medium",
           "type": "mc",
-          "text": "Lena Vasquez prepared portions of spinach by four methods of cooking and measured two quantities for each: iron absorbed and vitamin C retained. According to the table, none of these methods gives the best result on both measures, and boiling ______<table class=\"dx-table\"><tr><th>Cooking method</th><th>Iron absorbed (mg)</th><th>Vitamin C retained (%)</th></tr><tr><td>Raw</td><td>0.9</td><td>100</td></tr><tr><td>Steamed</td><td>1.4</td><td>71</td></tr><tr><td>Boiled</td><td>1.6</td><td>38</td></tr><tr><td>Fried</td><td>1.5</td><td>55</td></tr></table><br><br>Which choice most effectively uses data from the table to complete the example?",
+          "text": "Portions of spinach were prepared by four methods of cooking, and two quantities were measured for each: iron absorbed and vitamin C retained. According to the table, none of these methods gives the best result on both measures, and boiling ______<table class=\"dx-table\"><tr><th>Cooking method</th><th>Iron absorbed (mg)</th><th>Vitamin C retained (%)</th></tr><tr><td>Raw</td><td>0.9</td><td>100</td></tr><tr><td>Steamed</td><td>1.4</td><td>71</td></tr><tr><td>Boiled</td><td>1.6</td><td>38</td></tr><tr><td>Fried</td><td>1.5</td><td>55</td></tr></table><br><br>Which choice most effectively uses data from the table to complete the example?",
           "choices": [
             "retained all of the vitamin C in the leaves while yielding the least absorbable iron.",
             "yielded more absorbable iron than steaming did but less than frying did.",
@@ -3086,7 +3086,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Inferences",
           "difficulty": "easy",
           "type": "mc",
-          "text": "Emperor penguins spend the Antarctic winter in colonies of thousands, pressed together in huddles, and birds along the windward face of a huddle lose heat far faster than those nearer the middle. Time-lapse film of one colony, shot across several weeks of 2011 by Mathilde Renard and colleagues, shows the huddle advancing in small movements known as traveling waves. Birds shuffle forward a few centimeters and the mass of them travels slowly downwind through the hours. Birds that begin along the windward face stand near the middle within a day. The pattern therefore suggests that ______<br><br>Which choice most logically completes the text?",
+          "text": "Emperor penguins spend the Antarctic winter in colonies of thousands, pressed together in huddles, and birds along the windward face of a huddle lose heat far faster than those nearer the middle. Time-lapse film of one colony, shot across several weeks of 2011, shows the huddle advancing in small movements known as traveling waves. Birds shuffle forward a few centimeters and the mass of them travels slowly downwind through the hours. Birds that begin along the windward face stand near the middle within a day. The pattern therefore suggests that ______<br><br>Which choice most logically completes the text?",
           "choices": [
             "the birds at the center of a huddle are the heaviest members of the colony.",
             "penguins choose their position in the huddle according to age.",
@@ -3107,7 +3107,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Inferences",
           "difficulty": "medium",
           "type": "mc",
-          "text": "In a manual of 1864, engineer Marguerite Lehane set out the principle: the lens of a lighthouse concentrates lamplight in one narrow beam, and the beam sweeps the horizon as the lens turns. Every station received its own rhythm of flashes, known as the character of the light, fixed by the shape of the lens and by the speed of the clockwork driving it, so that navigators distinguished one light from the next along a stretch of coast. No station shared a rhythm with any other station nearby. Given the practice, a navigator timing the flashes of one unknown light ______<br><br>Which choice most logically completes the text?",
+          "text": "A manual of 1864 set out the principle: the lens of a lighthouse concentrates lamplight in one narrow beam, and the beam sweeps the horizon as the lens turns. Every station received its own rhythm of flashes, known as the character of the light, fixed by the shape of the lens and by the speed of the clockwork driving it, so that navigators distinguished one light from the next along a stretch of coast. No station shared a rhythm with any other station nearby. Given the practice, a navigator timing the flashes of one unknown light ______<br><br>Which choice most logically completes the text?",
           "choices": [
             "could tell which station it was without consulting any chart.",
             "could identify the station provided the rhythms of that coast were known.",
@@ -3128,7 +3128,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Form, Structure, and Sense",
           "difficulty": "easy",
           "type": "mc",
-          "text": "Ana Quintero kept a list of everyone cleared for night patrol. The rangers who worked the eastern boundary of the reserve ______ willing to approach a bull elephant on foot.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "text": "A list was kept of everyone cleared for night patrol. The rangers who worked the eastern boundary of the reserve ______ willing to approach a bull elephant on foot.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
           "choices": [
             "has been",
             "was",
@@ -3149,7 +3149,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Boundaries",
           "difficulty": "easy",
           "type": "mc",
-          "text": "Cecilia Marchetti maintains the laboratory’s list of instruments. An instrument is entered on her list ______ its maker and its year of manufacture can both be established.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "text": "The laboratory keeps a list of its instruments. An instrument is entered on her list ______ its maker and its year of manufacture can both be established.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
           "choices": [
             "only when",
             "only when,",
@@ -3254,7 +3254,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Transitions",
           "difficulty": "easy",
           "type": "mc",
-          "text": "Measuring the two each summer, glaciologist Aleksi Virtanen finds that sea ice and open water differ sharply in an important respect, their response to sunlight. Sea ice throws back the greater part of the light striking it, whereas open water takes in almost everything reaching the surface. ______ a summer of heavy melting leaves a darker ocean, warming faster in the year to follow.<br><br>Which choice completes the text with the most logical transition?",
+          "text": "Sea ice and open water differ sharply in an important respect, their response to sunlight. Sea ice throws back the greater part of the light striking it, whereas open water takes in almost everything reaching the surface. ______ a summer of heavy melting leaves a darker ocean, warming faster in the year to follow.<br><br>Which choice completes the text with the most logical transition?",
           "choices": [
             "Thus,",
             "For example,",
@@ -3296,7 +3296,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Transitions",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Dictionaries record the usage that has settled, and words often circulate for decades before earning an entry. Lexicographer Ngozi Adeyemi describes the task as following the language, never leading it. ______ dictionaries are a lagging record of English, always a little behind the speech they describe.<br><br>Which choice completes the text with the most logical transition?",
+          "text": "Dictionaries record the usage that has settled, and words often circulate for decades before earning an entry. Editors describe the task as following the language, never leading it. ______ dictionaries are a lagging record of English, always a little behind the speech they describe.<br><br>Which choice completes the text with the most logical transition?",
           "choices": [
             "Nevertheless,",
             "For instance,",
@@ -3382,7 +3382,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Words in Context",
           "difficulty": "medium",
           "type": "mc",
-          "text": "Translator Hana Bergstrom has written at length about the problem facing translators who work from languages lacking tense marking, who must decide, sentence by sentence, whether the speaker predicts an event, declares an intention, or merely entertains a possibility. The original is ______ in a way English grammar cannot reproduce, because English insists on one reading of the three.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
+          "text": "Translators working from languages lacking tense marking are obliged to decide, sentence by sentence, whether the speaker predicts an event, declares an intention, or merely entertains a possibility. The original is ______ in a way English grammar cannot reproduce, because English insists on one reading of the three.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
           "choices": [
             "contested",
             "implausible",
@@ -3403,7 +3403,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Words in Context",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Emile Charpentier has studied thousands of early modern pardons. The early modern pardon was ______ in effect. Monarchs pardoning condemned men were understood to have established guilt first, and to be setting aside verdicts reached by the crown itself, so that every act of clemency was taken as confirmation of the court’s authority.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
+          "text": "The early modern pardon was ______ in effect. Monarchs pardoning condemned men were understood to have established guilt first, and to be setting aside verdicts reached by the crown itself, so that every act of clemency was taken as confirmation of the court’s authority.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
           "choices": [
             "arbitrary",
             "ratifying",
@@ -3445,7 +3445,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Words in Context",
           "difficulty": "hard",
           "type": "mc",
-          "text": "A seventeenth-century panel examined by Ida Brekke was found to have yellowed unevenly, with a blue sleeve reading as green. Removing the varnish restored the blue, yet every surrounding tone had been chosen to sit against blue already warmed by fresh varnish, so the cleaned picture is ______ the one on the painter’s easel: exact in pigment and wrong in relation.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
+          "text": "A seventeenth-century panel was found to have yellowed unevenly, with a blue sleeve reading as green. Removing the varnish restored the blue, yet every surrounding tone had been chosen to sit against blue already warmed by fresh varnish, so the cleaned picture is ______ the one on the painter’s easel: exact in pigment and wrong in relation.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
           "choices": [
             "indistinguishable from",
             "at once truer and further from",
@@ -3529,7 +3529,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Central Ideas and Details",
           "difficulty": "easy",
           "type": "mc",
-          "text": "Meteorologist Per Lindgren describes the fogbow as a rainbow with its colors taken out. A fogbow (a rainbow formed in fog) has the geometry of an ordinary rainbow, but it is formed in droplets so small that light is bent around them instead of passing cleanly through. The colors are washed together, and what is left is a pale arc that observers are inclined to call white. The physics of the two is the same, and the difference appears to lie entirely in the size of the droplets.<br><br>Which choice best states the main idea of the text?",
+          "text": "A fogbow (a rainbow formed in fog) has the geometry of an ordinary rainbow, but it is formed in droplets so small that light is bent around them instead of passing cleanly through. The colors are washed together, and what is left is a pale arc that observers are inclined to call white. The physics of the two is the same, and the difference appears to lie entirely in the size of the droplets.<br><br>Which choice best states the main idea of the text?",
           "choices": [
             "Observers rarely distinguish a fogbow from the pale arcs produced by other conditions.",
             "A fogbow and a rainbow are formed by two unrelated optical processes in the atmosphere.",
@@ -3592,7 +3592,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Command of Evidence (Quantitative)",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Hendrik Mauss has studied how a fixed field season shapes survey design. A team can walk each transect (a fixed line surveyed on foot) several times or walk more transects once, and with limited days a team might be expected to favor one approach over the other. The table shows that ______<table class=\"dx-table\"><tr><th>Survey</th><th>Visits per transect</th><th>Transects walked</th></tr><tr><td>Alder Creek</td><td>6</td><td>9</td></tr><tr><td>Birch Flats</td><td>2</td><td>24</td></tr><tr><td>Cedar Ridge</td><td>5</td><td>11</td></tr><tr><td>Dune Spit</td><td>3</td><td>17</td></tr></table><br><br>Which choice most effectively uses data from the table to complete the statement?",
+          "text": "A fixed field season shapes survey design. A team can walk each transect (a fixed line surveyed on foot) several times or walk more transects once, and with limited days a team might be expected to favor one approach over the other. The table shows that ______<table class=\"dx-table\"><tr><th>Survey</th><th>Visits per transect</th><th>Transects walked</th></tr><tr><td>Alder Creek</td><td>6</td><td>9</td></tr><tr><td>Birch Flats</td><td>2</td><td>24</td></tr><tr><td>Cedar Ridge</td><td>5</td><td>11</td></tr><tr><td>Dune Spit</td><td>3</td><td>17</td></tr></table><br><br>Which choice most effectively uses data from the table to complete the statement?",
           "choices": [
             "the two surveys with the most visits per transect are also the two that walked the fewest transects.",
             "Birch Flats made more visits per transect than Cedar Ridge did and walked fewer transects.",
@@ -3760,7 +3760,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Boundaries",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Assembling the range map, Hilde Brandt drew on material of very uneven quality. She had three ______ one radio-tracking survey run from Tsavo, Kenya; a ranger’s sketch of the northern boundary, which he drew from memory; and a herder’s account that gave distances as numbers of days on foot.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "text": "Assembling the range map, the compiler drew on material of very uneven quality. She had three ______ one radio-tracking survey run from Tsavo, Kenya; a ranger’s sketch of the northern boundary, which he drew from memory; and a herder’s account that gave distances as numbers of days on foot.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
           "choices": [
             "sources. One",
             "sources: one",
