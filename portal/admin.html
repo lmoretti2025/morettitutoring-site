@@ -1408,7 +1408,7 @@
      so the signed admin session is in sessionStorage when the auto-continue
      boot code below reads it. -->
 <script src="time-budgets.js?v=20260912a"></script>
-<script src="signals.js?v=20260927p"></script>
+<script src="signals.js?v=20260927q"></script>
   <script src="backend-url.js?v=20260905"></script>
   <script>
     /* Browser errors on this page reach the ClientErrors tab too (prep.gs's
@@ -1684,7 +1684,7 @@
   var REQUIRED_PREP_VERSION = 30;
   // signals.gs and emails.gs carry their own numbers since audit 5: an older
   // copy can have every function name and still compute the old way.
-  var REQUIRED_SIGNALS_VERSION = 40, REQUIRED_EMAILS_VERSION = 32;
+  var REQUIRED_SIGNALS_VERSION = 41, REQUIRED_EMAILS_VERSION = 32;
   // booking.gs (the parent booking page) declares BOOKING_VERSION since 2026-09-26.
   var REQUIRED_BOOKING_VERSION = 5;
   var CAPABILITY_LABELS = {
@@ -1786,7 +1786,7 @@
         backendStoresNotes = have.indexOf('notes') !== -1;
         whatBreaks = missing.length
           ? joinList(missing.map(function (c) { return CAPABILITY_LABELS[c]; }))
-          : 'some of the newest behaviour (descriptions save, but this page can\'t read them back)';
+          : 'some of the newest behavior (descriptions save, but this page can\'t read them back)';
       } else {
         whatBreaks = 'anything added since it was last deployed — currently ' +
           joinList([CAPABILITY_LABELS.notes, CAPABILITY_LABELS.series]);
@@ -3038,7 +3038,7 @@
     return out.join(' ');
   }
   /* ═══ STRATEGY, NOT KNOWLEDGE (Luca, 2026-09-27) ═══ over the sittings at
-     1200+: reading misses worked long and still wrong, and narrowed to two
+     Reading and Writing 600+: every reading miss, and how (worked long and still wrong, narrowed to two)
      (shown apart: one miss can be both), by skill, and reading against
      grammar rules. Said when there are 3+ such misses; the contrast is
      called clear only at z >= 1.645 (one test rarely gets there). */
@@ -3046,7 +3046,10 @@
     var all = function (o) { return (o.long || 0) + (o.two || 0) + (o.context || 0) + (o.other || 0); };
     if (!A || !A.tests || all(A) < 3) return '';
     var sk = Object.keys(A.bySkill).map(function (k) { return { k: k, n: all(A.bySkill[k]) }; })
-      .sort(function (a, b) { return b.n - a.n; }).slice(0, 3).map(function (x) { return escHtml(x.k); });
+      .sort(function (a, b) { return b.n - a.n; }).slice(0, 3).map(function (x) {
+        var L = (MorettiSignals.APPROACH_LESSONS || {})[x.k];
+        return escHtml(x.k) + (L ? ' (lesson ' + L.lesson + ')' : '');
+      });
     var pct = function (o) { return o.n ? Math.round(100 * o.right / o.n) : null; };
     var pr = pct(A.reading), pg = pct(A.rules);
     var contrast = pr !== null && pg !== null && pg > pr
@@ -4475,8 +4478,8 @@
     // 4. Practice before a test vs that test
     var pt = MS.practiceTransfer(events, evAtt);
     var ptRead = pt.ready ? (pt.hi < 0
-        ? 'Skills they practised more before a test ran closer to their level on it (' + evRange(pt.lo, pt.hi, function (v) { return v.toFixed(2); }) + ' logits per 10 questions). An association, not proof.'
-        : pt.lo > 0 ? 'More practice on a skill went with a BIGGER shortfall on it; most likely they practise what they already know is weak.'
+        ? 'Skills they practiced more before a test ran closer to their level on it (' + evRange(pt.lo, pt.hi, function (v) { return v.toFixed(2); }) + ' logits per 10 questions). An association, not proof.'
+        : pt.lo > 0 ? 'More practice on a skill went with a BIGGER shortfall on it; most likely they practice what they already know is weak.'
           : 'No clear link yet between practice on a skill and the next test.') : '';
     rows.push(evRow('Does practice show up on the next test?', pt, ptRead, pt.have ? pt.have + ' skill-and-test pairs.' : ''));
 

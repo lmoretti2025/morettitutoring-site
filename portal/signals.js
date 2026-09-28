@@ -2528,9 +2528,9 @@ var MorettiSignals = (function () {
      Aryan (1330) had grammar rules 12/14 and Transitions 5/5 but reading
      skills 21/31, with Command of Evidence worked for 216 and 189 s against
      95 and still wrong, and 5 misses narrowed to two choices. One rule for
-     the report and session prep. Only on a competent sitting (composite
-     1200+, or 600+ on a section taken alone): below that, a miss is read as
-     content. Only with evidence on the miss itself, never by the skill alone:
+     the report and session prep. Only on a competent sitting: Reading and
+     Writing 600+ for the reading kinds, Math 600+ for the Desmos kind
+     (approachCompetent); below that, a miss is read as content. Only with evidence on the miss itself, never by the skill alone:
        'long'    worked 1.5x its budget or more and still wrong
        'two'     narrowed to two choices with the right one still in, and
                  picked the other
@@ -2554,10 +2554,28 @@ var MorettiSignals = (function () {
   // 1 of 22 and 1 of 17 read as a strategy week otherwise); session prep pools the rest.
   var APPROACH_MIN_COMPOSITE = 1200, APPROACH_MIN_SECTION = 600, APPROACH_LONG_REL = 1.5, APPROACH_MIN_SHOWN = 3;
   var APPROACH_RW_DOMAINS = { 'Information and Ideas': 1, 'Craft and Structure': 1, 'Expression of Ideas': 1 };
+  /* Competent is read per section (Luca, 2026-09-27): the reading kinds
+     need Reading and Writing at 600+, the Desmos kind Math at 600+, so a
+     1250 made of 520 and 730 does not have its reading misses called
+     strategy. A composite alone (no section score) falls back to 1200+. */
   function approachCompetent(composite, sectionScore) {
-    return typeof composite === 'number' ? composite >= APPROACH_MIN_COMPOSITE
-         : typeof sectionScore === 'number' ? sectionScore >= APPROACH_MIN_SECTION : false;
+    return typeof sectionScore === 'number' ? sectionScore >= APPROACH_MIN_SECTION
+         : typeof composite === 'number' ? composite >= APPROACH_MIN_COMPOSITE : false;
   }
+  /* The fix for each skill, from Luca's English course (Business/curriculum/
+     SAT_ENGLISH_CURRICULUM.md, also the portal's Curriculum tab), in its
+     own words, shortened. ASCII only: this file is pasted into Apps Script. */
+  var APPROACH_LESSONS = {
+    'Transitions': { lesson: '3.2', fix: 'read both sentences and say the relationship out loud before looking at the choices' },
+    'Rhetorical Synthesis': { lesson: '3.3', fix: 'read the goal first, skip the notes, and cross out every choice that misses a part of the goal' },
+    'Central Ideas and Details': { lesson: '4.2', fix: 'find the main claim, usually near the end, and point to the sentence that answers the question' },
+    'Command of Evidence (Textual)': { lesson: '4.3', fix: 'reduce the claim to its model (what changes, what is measured, how they are related); the right finding matches every part' },
+    'Command of Evidence (Quantitative)': { lesson: '4.4', fix: 'read the claim first, then the table title and headings, and use only the cells the claim needs' },
+    'Inferences': { lesson: '4.5', fix: 'build the model and predict the blank in your own words before reading the choices' },
+    'Words in Context': { lesson: '5.1', fix: 'come up with a synonym backed by evidence in the passage before reading the choices' },
+    'Text Structure and Purpose': { lesson: '5.2', fix: 'name what the text or sentence is doing, using the sentences before and after, before reading the choices' },
+    'Cross-Text Connections': { lesson: '5.3', fix: 'find each text\'s main claim, then name the relationship: agree, disagree, or qualify' }
+  };
   function approachEvidence(x) {
     if (!x || x.ok || x.blank || x.clock) return null;
     if (x.sec === 'math') return (x.fastRoute === true && x.calcActive === false) ? 'desmos' : null;
@@ -2583,7 +2601,7 @@ var MorettiSignals = (function () {
     /* Strategy, not knowledge (approachEvidence, Luca 2026-09-27), pooled
        over the competent sittings (composite 1200+): reading misses worked
        1.5x budget and still wrong (long), and reading misses narrowed to two
-       (two, from the behaviour summary; the same miss can be in both, so
+       (two, from the behavior summary; the same miss can be in both, so
        they are shown apart, never added), per skill; and reading-skill
        accuracy against grammar rules on the same sittings, with a one-sided
        two-proportion z (a strong student's rules ahead of reading). */
@@ -2592,7 +2610,8 @@ var MorettiSignals = (function () {
     used.forEach(function (e) {
       var qs = qsOf(e.qStats);
       tests++;
-      var competent = approachCompetent(typeof e.composite === 'number' ? e.composite : Number(e.composite) || null, null);
+      var rwNum = typeof e.rw === 'number' ? e.rw : Number(e.rw) || null;
+      var competent = approachCompetent(typeof e.composite === 'number' ? e.composite : Number(e.composite) || null, rwNum);
       if (competent) appr.tests++;
       qs.q.forEach(function (r) {
         if (!r || r.length < 4) return;
@@ -4017,7 +4036,8 @@ var MorettiSignals = (function () {
     // every function name and compute the old way.
     rushedLevel: rushedLevel,
     approachEvidence: approachEvidence, approachCompetent: approachCompetent, APPROACH_RW_DOMAINS: APPROACH_RW_DOMAINS, APPROACH_MIN_SHOWN: APPROACH_MIN_SHOWN,
-    VERSION: 40,
+    APPROACH_LESSONS: APPROACH_LESSONS,
+    VERSION: 41,
     attemptAbility: attemptAbility,
     FOCUS_GATES: { domainClear: FOCUS_DOMAIN_CLEAR, skillLead: FOCUS_SKILL_LEAD, noOffsetsPenalty: FOCUS_NO_OFFSETS_PENALTY },
     practiceEvidence: practiceEvidence,

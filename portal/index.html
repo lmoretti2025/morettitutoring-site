@@ -5697,7 +5697,7 @@ window.Portal = {
      header in fluid-ui.js. -->
 <script src="fluid-ui.js?v=20260905y"></script>
 <script src="banks.js?v=20260926a"></script>
-<script src="signals.js?v=20260927p"></script>
+<script src="signals.js?v=20260927q"></script>
 <script src="desmos-tags.js?v=20260916c"></script>
 <script src="time-budgets.js?v=20260912a"></script>
 <script src="challenge-questions.js?v=20260926a"></script>
@@ -25509,9 +25509,12 @@ window.renderNativeReport = function (data) {
        content miss for the counts and the week's hours; the plan and the
        page say which kind of work it needs. */
     var MSa = window.MorettiSignals;
-    var approachOn = !!(MSa && typeof MSa.approachEvidence === 'function' && data.t === 'SAT' &&
-      MSa.approachCompetent(typeof composite === 'number' ? composite : null,
-        typeof composite === 'number' ? null : (typeof rwScaled === 'number' ? rwScaled : typeof mathScaled === 'number' ? mathScaled : null)));
+    var approachOn = !!(MSa && typeof MSa.approachEvidence === 'function' && data.t === 'SAT');
+    // Per section: the reading kinds need Reading and Writing 600+, the Desmos kind Math 600+ (signals.js approachCompetent).
+    var secCompetent = function (k) {
+      var sc = k === 'math' ? (typeof mathScaled === 'number' ? mathScaled : null) : (typeof rwScaled === 'number' ? rwScaled : null);
+      return sc !== null && MSa.approachCompetent(null, sc);
+    };
     var decodedRows = {};
     if (approachOn) {
       try {
@@ -25526,7 +25529,7 @@ window.renderNativeReport = function (data) {
     }
     var desmosTags = window.DESMOS_TAGS_REVIEWED === true ? window.DESMOS_TAGS : null;
     function approachOf(sec, r, ri, tMs, qBudgetMs) {
-      if (!approachOn) return null;
+      if (!approachOn || !secCompetent(sec.key)) return null;
       var dr = decodedRows[sec.key], row = dr && dr.rows[ri], tag = null;
       if (desmosTags && dr && MSa.itemKey) { var t = desmosTags[MSa.itemKey(dr.qs[ri])]; tag = typeof t === 'number' ? t : null; }
       return MSa.approachEvidence({
@@ -25642,9 +25645,9 @@ window.renderNativeReport = function (data) {
       if (!A || !A.n || !host) return;
       var p = document.createElement('p');
       p.className = 'skilldx-approach';
-      p.innerHTML = '<b>Strategy, not knowledge:</b> ' + A.n + ' of the ' + buckets.content.length + ' questions missed after real work are strategy, not material to relearn (' +
-        esc(A.why) + '), in ' + A.skills.slice(0, 3).map(function (k) { return '<b>' + esc(k) + '</b>'; }).join(', ') +
-        '. Reading questions are won with a reading method, and Desmos-route math with the calculator: practise how the question is answered, not the topic.';
+      p.innerHTML = '<b>A skill to practice, not a topic to relearn:</b> ' + A.n + ' of the ' + buckets.content.length + ' questions missed after real work (' +
+        esc(A.why) + '), mostly ' + A.skills.slice(0, 3).map(function (k) { return '<b>' + esc(k) + '</b>'; }).join(', ') +
+        '. These improve with the right method, practiced over weeks, rather than by studying the material again. The Strategy line in the plan gives the method for each.';
       host.insertBefore(p, host.firstChild);
     })();
     /* What "lost to pace" was made of, so the summary can say it and give
@@ -26278,12 +26281,19 @@ window.renderNativeReport = function (data) {
     planInputs.contentWord = strategyH > 0 ? (strategyH > hours.content ? 'strategy practice' : strategyH === hours.content ? 'relearning and strategy practice' : 'relearning') : 'relearning';
     var strategyRow = null;
     if (strategyH > 0) {
+      var LES = (window.MorettiSignals && window.MorettiSignals.APPROACH_LESSONS) || {};
+      var fixes = A.skills.filter(function (k) { return LES[k]; }).slice(0, 3).map(function (k) {
+        return '<b>' + esc(k) + '</b> (Curriculum, lesson ' + LES[k].lesson + '): ' + esc(LES[k].fix) + '.';
+      });
+      var mathFix = A.kinds.desmos ? ' <b>Graphing-route math</b>: when a question asks for a value and both sides can be graphed, graph them in Desmos and read the answer off the graph.' : '';
+      var howFix = (A.kinds.long >= 2 ? ' Several took well past their time: read for the main claim first and go into the details only when the question needs them (lesson 4.1).' : '') +
+        (A.kinds.two >= 2 ? ' Several came down to two choices: go word by word through both, since the wrong one usually overreaches or swaps one detail.' : '');
       strategyRow = ({
         h: strategyH, unit: unitFor(strategyH), color: '#8A5A9E',
-        what: '<b>Strategy.</b> Question Bank sets on ' + A.skills.slice(0, 3).map(function (k) { return '<b>' + esc(k) + '</b>'; }).join(', ') +
-          ', worked for the method, not the answer: say what the question asks, find the line in the text that answers it, and put the answer in your own words before reading the choices; then say why the right choice wins and why the last wrong one loses. ' +
-          (A.bySkill['Words in Context'] ? 'For Words in Context, cover the choices, read the whole text, and say in your own words what the blank has to mean before looking; this is a reading skill that builds over months, not a word list. ' : '') +
-          '<em>' + A.n + ' question' + (A.n === 1 ? '' : 's') + ' on this test ' + (A.n === 1 ? 'was' : 'were') + ' strategy, not material to relearn: ' + esc(A.why) + '.</em>'
+        what: '<b>Strategy.</b> Question Bank sets on these question types, answered with the method, not just for the answer.' +
+          fixes.map(function (f) { return '<br>' + f; }).join('') + (mathFix ? '<br>' + mathFix.trim() : '') + (howFix ? '<br>' + howFix.trim() : '') +
+          (A.bySkill['Words in Context'] ? ' Words in Context builds over months, not from a word list.' : '') +
+          ' <em>' + A.n + ' question' + (A.n === 1 ? '' : 's') + ' on this test ' + (A.n === 1 ? 'was a skill' : 'were skills') + ' to practice rather than material to relearn: ' + esc(A.why) + '.</em>'
       });
     }
     if (hours.content > 0) {
@@ -26349,7 +26359,7 @@ window.renderNativeReport = function (data) {
         h: STRONG_TEST_HOURS, unit: unitFor(STRONG_TEST_HOURS), color: '#4E6070',
         what: '<b>Practice tests.</b> One full timed practice test every week, in one sitting, phone away, reviewed the next day. ' +
           (paceOnly
-            ? 'Practise the pace itself: answer every question, move on from one that stalls, and read each one to the end before choosing.'
+            ? 'Practice the pace itself: answer every question, move on from one that stalls, and read each one to the end before choosing.'
             : 'At this level each test has only a few questions left to win, and more tests are how you find the ones that keep costing you.' +
               (causes.clock > 0 ? ' <em>' + causes.clock + ' question' + (causes.clock === 1 ? '' : 's') + ' here ' + (causes.clock === 1 ? 'was' : 'were') + ' lost to pace, so pace each test as you go.</em>' : ''))
       }, {
@@ -26361,8 +26371,9 @@ window.renderNativeReport = function (data) {
             missSkills.length ? ', starting with this test’s: ' + missSkills.slice(0, 3).map(esc).join('; ') : '') +
           '. From your second test on, the “Your Statistics” card on Home lists the topics that came up wrong more than once; ' +
           'those come first, in the Question Bank and in Saved &amp; Mistakes.' +
-          (A.n ? ' <em>' + A.n + ' of this test’s misses were strategy, not material (' + esc(A.why) + '), so on ' +
-            A.skills.slice(0, 2).map(esc).join(' and ') + ' practise how the question is answered, not the topic.</em>' : '')
+          (A.n ? ' <em>' + A.n + ' of this test’s misses were skills to practice rather than material (' + esc(A.why) + '), so on ' +
+            A.skills.slice(0, 2).map(esc).join(' and ') + ' practice the method' +
+            (((window.MorettiSignals && window.MorettiSignals.APPROACH_LESSONS) || {})[A.skills[0]] ? ' (Curriculum, lesson ' + window.MorettiSignals.APPROACH_LESSONS[A.skills[0]].lesson + ')' : '') + ', not the topic.</em>' : '')
       }];
     }
     if (!rows.length) return;
@@ -26592,7 +26603,7 @@ window.renderNativeReport = function (data) {
         : 'What you lost is split between questions you got wrong and questions lost to pace.';
       var lines = [
         { n: c.content, t: count(c.content, 'question') + (fullyTimed ? ' you worked on and still got wrong' : ' answered wrong') +
-            (c.approach ? ', ' + c.approach + ' of them strategy more than material' : '') },
+            (c.approach ? ', ' + c.approach + ' of them a skill to practice rather than a topic to relearn' : '') },
         { n: c.clock, t: count(c.clock, 'question') + ' lost to pace: ' + joinAnd(paceParts) }
       ].filter(function (x) { return x.n > 0; }).sort(function (a, b) { return b.n - a.n; });
       if (c.method > 0) lines.push({ n: c.method, t: count(c.method, 'right answer') + ' that took so long that later questions ran short on time' });
@@ -26952,7 +26963,7 @@ window.renderNativeReport = function (data) {
         var base = (two && (one + ' ' + two).length <= 230) ? one + ' ' + two : one;
         // Strategy, not knowledge: said in the line itself, since the card is folded (Luca, 2026-09-27).
         var A = planInputs.approach;
-        return base + (A && A.n ? ' ' + A.n + ' of the misses are strategy, not material, mostly ' + andJoin(A.skills.slice(0, 2)) + ': practise the method there.' : ''); } },
+        return base + (A && A.n ? ' ' + A.n + ' of the misses are a skill to practice rather than a topic to relearn, mostly ' + andJoin(A.skills.slice(0, 2)) + ': the plan gives the method.' : ''); } },
       { hed: 'budget-hed', body: ['budget-sub', 'budget-card'], line: function () {
         var parts = [];
         Array.prototype.forEach.call(document.querySelectorAll('#budget-card .budget-sec'), function (sc) {
