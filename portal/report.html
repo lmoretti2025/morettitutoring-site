@@ -6749,7 +6749,16 @@
       p.className = 'skilldx-approach';
       p.innerHTML = '<b>A skill to practice, not a topic to relearn:</b> ' + A.n + ' of the ' + buckets.content.length + ' questions missed after real work (' +
         esc(A.why) + '), mostly ' + A.skills.slice(0, 3).map(function (k) { return '<b>' + esc(k) + '</b>'; }).join(', ') +
-        '. These improve with the right method, practiced over weeks, rather than by studying the material again. The Strategy line in the plan gives the method for each.';
+        '. These improve with the right method, practiced over weeks, rather than by studying the material again.' +
+        (function () {
+          // The method for each, on every report (practice tests have no weekly plan): Luca's course, lesson by lesson.
+          var LES = (window.MorettiSignals && window.MorettiSignals.APPROACH_LESSONS) || {};
+          var f = A.skills.filter(function (k) { return LES[k]; }).slice(0, 3).map(function (k) {
+            return '<br><b>' + esc(k) + '</b> (Curriculum, lesson ' + LES[k].lesson + '): ' + esc(LES[k].fix) + '.';
+          });
+          if (A.kinds.desmos) f.push('<br><b>Graphing-route math</b>: when a question asks for a value and both sides can be graphed, graph them in Desmos and read the answer off the graph.');
+          return f.join('');
+        })();
       host.insertBefore(p, host.firstChild);
     })();
     /* What "lost to pace" was made of, so the summary can say it and give
@@ -8064,7 +8073,7 @@
         var base = (two && (one + ' ' + two).length <= 230) ? one + ' ' + two : one;
         // Strategy, not knowledge: said in the line itself, since the card is folded (Luca, 2026-09-27).
         var A = planInputs.approach;
-        return base + (A && A.n ? ' ' + A.n + ' of the misses are a skill to practice rather than a topic to relearn, mostly ' + andJoin(A.skills.slice(0, 2)) + ': the plan gives the method.' : ''); } },
+        return base + (A && A.n ? ' ' + A.n + ' of the misses are a skill to practice rather than a topic to relearn, mostly ' + andJoin(A.skills.slice(0, 2)) + ': the method for each is under Show details.' : ''); } },
       { hed: 'budget-hed', body: ['budget-sub', 'budget-card'], line: function () {
         var parts = [];
         Array.prototype.forEach.call(document.querySelectorAll('#budget-card .budget-sec'), function (sc) {
