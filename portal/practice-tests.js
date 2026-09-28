@@ -2706,7 +2706,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Transitions",
           "difficulty": "medium",
           "type": "mc",
-          "text": "Surveying the line in 1834, Hester Gillingwater found that the summit level, highest pound of the canal and fed by nothing but rainfall on the hills around it, loses one lockful of water at every passage. ______ long dry spells, such as the rainless Augusts of bad years, can close canals as completely as breaches in the bank.<br><br>Which choice completes the text with the most logical transition?",
+          "text": "Aleksandra Nowak, who tracked the research station’s power use through one winter, notes that the rooftop solar array feeds a bank of batteries that have no other source of charge. ______ a stretch of overcast days can shut down the instruments as completely as a power cut.<br><br>Which choice completes the text with the most logical transition?",
           "choices": [
             "Consequently,",
             "For instance,",
@@ -2715,9 +2715,9 @@ window.SAT_PRACTICE_TESTS = [
           ],
           "correct": 0,
           "choiceNotes": [
-            "Correct. The summit level depends on rainfall, so a dry summer starves the locks. The last sentence states the result of what precedes it.",
-            "Incorrect. A dry summer is not an example of water being drawn off the summit level; it is what happens when the supply fails.",
-            "Incorrect. “Nevertheless” would set the closure against the water supply, and the closure follows from it.",
+            "Correct. The array depends on sunlight alone, so a run of dark days starves the batteries. The last sentence states the result of what precedes it.",
+            "Incorrect. A stretch of overcast days is not an example of the array charging the batteries; it is what happens when the supply fails.",
+            "Incorrect. “Nevertheless” would set the shutdown against the power supply, and the shutdown follows from it.",
             "Incorrect. “Similarly” claims a likeness between two cases, and only one situation is described."
           ]
         },
@@ -2727,7 +2727,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Transitions",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Examining the volume in 2016, Ruth Oyelaran found that the hand in this manuscript matches nothing else in the abbey's library, and that the parchment was prepared by a method unrecorded in the region. ______ the charter it preserves belonged to that abbey and to no other house.<br><br>Which choice completes the text with the most logical transition?",
+          "text": "Ruth Oyelaran reexamined the quilt in 2016. Its stitching matches nothing else attributed to the workshop, and its dyes were fixed by a method unrecorded in the region. ______ the initials it carries are those of the workshop’s founder and of no one else.<br><br>Which choice completes the text with the most logical transition?",
           "choices": [
             "For example,",
             "As a result,",
@@ -2736,10 +2736,10 @@ window.SAT_PRACTICE_TESTS = [
           ],
           "correct": 3,
           "choiceNotes": [
-            "Incorrect. The charter is not an instance of an unfamiliar hand or an unfamiliar parchment.",
-            "Incorrect. The contents of the text are not a consequence of the hand or the parchment.",
-            "Incorrect. “In addition” would present the text as further evidence pointing the same way, and it points the other way.",
-            "Correct. The hand and the parchment point away from the abbey while the text points firmly to it, and “Even so” marks that the second fact holds in spite of the first."
+            "Incorrect. The initials are not an instance of unfamiliar stitching or unfamiliar dyes.",
+            "Incorrect. The initials are not a consequence of the stitching or the dyes.",
+            "Incorrect. “In addition” would present the initials as further evidence pointing the same way, and they point the other way.",
+            "Correct. The stitching and the dyes point away from the workshop while the initials point firmly to it, and “Even so” marks that the second fact holds in spite of the first."
           ]
         },
         {
@@ -3781,7 +3781,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Form, Structure, and Sense",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Engineer Frederick Ashgrove chaired the inquiry. The commission asked the engineers to report on the state of the embankment, to estimate the cost of raising it, and ______<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "text": "The city council asked Frederick Ashgrove and his engineers to report on the condition of the levee, to estimate the cost of raising it, and ______<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
           "choices": [
             "whether the work could be finished before the winter floods.",
             "could the work be finished before the winter floods.",
