@@ -2328,7 +2328,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Text Structure and Purpose",
           "difficulty": "easy",
           "type": "mc",
-          "text": "Sourdough rises on wild yeasts and bacteria, organisms of the flour and of the baker's hands, not of any packet. <u>Cultures kept in two kitchens will diverge within weeks.</u> Bakers trading starters therefore find the gift altered: crumb opens differently, sourness arrives at different hours, even when both halves began in one jar.<br><br>Which choice best describes the function of the underlined sentence in the text as a whole?",
+          "text": "Sourdough rises on wild yeasts and bacteria, organisms of the flour and of the baker's hands, not of any packet. <u>Cultures kept in two kitchens will diverge within weeks.</u> Bakers trading starters therefore tend to find the gift altered: crumb opens differently, sourness arrives at different hours, even when both halves began in one jar.<br><br>Which choice best describes the function of the underlined sentence in the text as a whole?",
           "choices": [
             "It offers an example of the wild yeast and bacteria described in the previous sentence.",
             "It explains why most bakers prefer to keep a single culture in one kitchen for years.",
@@ -2412,7 +2412,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Central Ideas and Details",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Three Viking-age boat burials have been excavated, and the vessels of all three are holed below the waterline, the holes cut at the time of burial. The hole in every case is confined to one plank, and the edges of the hole match those of a shipwright's adze, or shaping axe, recovered from the same grave. Holing is therefore taken to be formal decommissioning, a mark of withdrawal from use.<br><br>According to the text, what is true of the damage to the three vessels?",
+          "text": "Three Viking-age boat burials have been excavated, and the vessels of all three are holed below the waterline, the holes cut at the time of burial. The hole in every case is confined to one plank, and the edges of the hole match those of a shipwright's adze, or shaping axe, recovered from the same grave. Holing is therefore thought to be formal decommissioning, a mark of withdrawal from use.<br><br>According to the text, what is true of the damage to the three vessels?",
           "choices": [
             "It was made deliberately, with a tool of the kind used to build the vessel.",
             "It extended across several planks in each of the three burials.",
@@ -3275,7 +3275,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Transitions",
           "difficulty": "easy",
           "type": "mc",
-          "text": "A stringed instrument sounds partly by means of the air in its body, a cavity whose size sets the pitch it reinforces. Plate thickness matters as well, because a stiffer plate moves little. ______ the varnish, long thought to be decoration only, adds mass and alters the response of the plate.<br><br>Which choice completes the text with the most logical transition?",
+          "text": "A stringed instrument sounds partly by means of the air in its body, a cavity whose size sets the pitch it reinforces. Plate thickness is thought to matter as well, because a stiffer plate moves little. ______ the varnish, long thought to be decoration only, adds mass and alters the response of the plate.<br><br>Which choice completes the text with the most logical transition?",
           "choices": [
             "However,",
             "Moreover,",
@@ -3424,7 +3424,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Words in Context",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Early radio astronomers were convinced that the hiss in their aerials was interference from equipment, that is from faulty valves or poor earthing, and they spent years ______ it. Karl Jansky established instead that the hiss rose and fell on cycles of twenty-three hours, fifty-six minutes, which is the sidereal day (the period of the stars) and is therefore evidence that the source lay beyond Earth.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
+          "text": "Early radio astronomers were convinced that the hiss in their aerials was interference from equipment, that is from faulty valves or poor earthing, and they spent years ______ it. Karl Jansky argued instead that the hiss rose and fell on cycles of twenty-three hours, fifty-six minutes, which is the sidereal day (the period of the stars) and is therefore evidence that the source lay beyond Earth.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
           "choices": [
             "propagating",
             "amplifying",
@@ -3487,7 +3487,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Text Structure and Purpose",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Standard accounts of London's Great Fire credit the rebuilding acts of 1667 with recovery in the city, and it is true that those acts imposed brick where timber had burned. Parish rate books, which were kept to assess taxation, record occupancy year by year, and Verity Halloran shows that three quarters of burnt houses were reoccupied while commissioners remained unappointed. <u>The acts regulated a recovery already in motion.</u> The acts therefore governed the materials and the frontages of a rebuilding that was already in progress.<br><br>Which choice best describes the function of the underlined sentence in the text as a whole?",
+          "text": "Standard accounts of London's Great Fire credit the rebuilding acts of 1667 with recovery in the city, and it is true that those acts imposed brick where timber had burned. Parish rate books, which were kept to assess taxation, record occupancy year by year, and Verity Halloran shows that three quarters of burnt houses were reoccupied while commissioners remained unappointed. <u>The acts regulated a recovery already in motion.</u> The acts therefore appear to have governed the materials and the frontages of a rebuilding that was already in progress.<br><br>Which choice best describes the function of the underlined sentence in the text as a whole?",
           "choices": [
             "It offers an example of the kind of regulation the rebuilding acts imposed after the fire.",
             "It introduces the rebuilding acts whose provisions the rest of the text goes on to describe.",
@@ -3529,7 +3529,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Central Ideas and Details",
           "difficulty": "easy",
           "type": "mc",
-          "text": "Meteorologist Per Lindgren describes the fogbow as a rainbow with its colors taken out. A fogbow (a rainbow formed in fog) has the geometry of an ordinary rainbow, but it is formed in droplets so small that light is bent around them instead of passing cleanly through. The colors are washed together, and what is left is a pale arc that observers are inclined to call white. The physics of the two is the same, and the difference lies entirely in the size of the droplets.<br><br>Which choice best states the main idea of the text?",
+          "text": "Meteorologist Per Lindgren describes the fogbow as a rainbow with its colors taken out. A fogbow (a rainbow formed in fog) has the geometry of an ordinary rainbow, but it is formed in droplets so small that light is bent around them instead of passing cleanly through. The colors are washed together, and what is left is a pale arc that observers are inclined to call white. The physics of the two is the same, and the difference appears to lie entirely in the size of the droplets.<br><br>Which choice best states the main idea of the text?",
           "choices": [
             "Observers rarely distinguish a fogbow from the pale arcs produced by other conditions.",
             "A fogbow and a rainbow are formed by two unrelated optical processes in the atmosphere.",
@@ -3571,7 +3571,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Command of Evidence (Quantitative)",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Carbon dioxide seeping out of volcanic vents on the seafloor acidifies the water around them, and biologists treat such vents as natural experiments in the chemistry of ocean acidification. A team led by Raul Ibanez measured the shells of limpets at four distances along a transect away from one vent, recording both the length of each shell and the state of its margins. The team concluded that water near the vent limits the growth of a shell rather than merely damaging shells already formed.<table class=\"dx-table\"><tr><th>Distance from vent (m)</th><th>Shell length (mm)</th><th>Shells with dissolved margins (%)</th></tr><tr><td>5</td><td>18.2</td><td>61</td></tr><tr><td>20</td><td>22.6</td><td>34</td></tr><tr><td>60</td><td>23.1</td><td>12</td></tr><tr><td>150</td><td>23.4</td><td>9</td></tr></table><br><br>Which choice best describes data from the table that support Ibanez and colleagues' conclusion?",
+          "text": "Carbon dioxide seeping out of volcanic vents on the seafloor acidifies the water around them, and biologists treat such vents as natural experiments in the chemistry of ocean acidification. A team led by Raul Ibanez measured the shells of limpets at four distances along a transect away from one vent, recording both the length of each shell and the state of its margins. The team concluded that water near the vent may limit the growth of a shell rather than merely damaging shells already formed.<table class=\"dx-table\"><tr><th>Distance from vent (m)</th><th>Shell length (mm)</th><th>Shells with dissolved margins (%)</th></tr><tr><td>5</td><td>18.2</td><td>61</td></tr><tr><td>20</td><td>22.6</td><td>34</td></tr><tr><td>60</td><td>23.1</td><td>12</td></tr><tr><td>150</td><td>23.4</td><td>9</td></tr></table><br><br>Which choice best describes data from the table that support Ibanez and colleagues' conclusion?",
           "choices": [
             "Sixty-one percent of shells collected five meters from the vent showed dissolved margins, the highest proportion recorded.",
             "The proportion of shells with dissolved margins fell as distance from the vent increased.",
@@ -3592,7 +3592,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Command of Evidence (Quantitative)",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Hendrik Mauss has studied how a fixed field season shapes survey design. A team can walk each transect several times or walk more transects once, and with limited days a team might be expected to favor one approach over the other. The table shows that ______<table class=\"dx-table\"><tr><th>Survey</th><th>Visits per transect</th><th>Transects walked</th></tr><tr><td>Alder Creek</td><td>6</td><td>9</td></tr><tr><td>Birch Flats</td><td>2</td><td>24</td></tr><tr><td>Cedar Ridge</td><td>5</td><td>11</td></tr><tr><td>Dune Spit</td><td>3</td><td>17</td></tr></table><br><br>Which choice most effectively uses data from the table to complete the statement?",
+          "text": "Hendrik Mauss has studied how a fixed field season shapes survey design. A team can walk each transect (a fixed line surveyed on foot) several times or walk more transects once, and with limited days a team might be expected to favor one approach over the other. The table shows that ______<table class=\"dx-table\"><tr><th>Survey</th><th>Visits per transect</th><th>Transects walked</th></tr><tr><td>Alder Creek</td><td>6</td><td>9</td></tr><tr><td>Birch Flats</td><td>2</td><td>24</td></tr><tr><td>Cedar Ridge</td><td>5</td><td>11</td></tr><tr><td>Dune Spit</td><td>3</td><td>17</td></tr></table><br><br>Which choice most effectively uses data from the table to complete the statement?",
           "choices": [
             "the two surveys with the most visits per transect are also the two that walked the fewest transects.",
             "Birch Flats made more visits per transect than Cedar Ridge did and walked fewer transects.",
@@ -3697,7 +3697,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Form, Structure, and Sense",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Reopening the question in 2014, Cosimo Ferrante noted that historians have never settled how large that fleet was. Two eyewitnesses left records, and one is far fuller. The fuller of two surviving accounts of the siege, written within a decade by a man who questioned sailors, ______ a figure for ships in harbor.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "text": "Reopening the question in 2014, Cosimo Ferrante noted that historians have never settled how large that fleet was. Two eyewitnesses left records, and one is probably far fuller. The fuller of two surviving accounts of the siege, written within a decade by a man who questioned sailors, ______ a figure for ships in harbor.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
           "choices": [
             "give",
             "have given",
@@ -3718,7 +3718,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Boundaries",
           "difficulty": "easy",
           "type": "mc",
-          "text": "Agha Shahid Ali set out the formal requirements of the ghazal for English-language writers in his 2000 anthology <em>Ravishing DisUnities</em>. The ______ that ends both lines of a ghazal’s opening couplet and the second line of every couplet after it, is what holds the poem together.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "text": "Agha Shahid Ali set out the formal requirements of the ghazal (a verse form built from couplets) for English-language writers in his 2000 anthology <em>Ravishing DisUnities</em>. The ______ that ends both lines of a ghazal’s opening couplet and the second line of every couplet after it, is what holds the poem together.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
           "choices": [
             "radif; a word or phrase",
             "radif a word or phrase",
@@ -3844,7 +3844,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Transitions",
           "difficulty": "medium",
           "type": "mc",
-          "text": "Obsidian sourcing reaches unusual exactness. Every volcanic flow carries distinct ratios of trace elements, and a fragment matches one outcrop alone. ______ blades lying eight hundred kilometers from the nearest flow record a route, never a guess.<br><br>Which choice completes the text with the most logical transition?",
+          "text": "Obsidian sourcing reaches unusual exactness. Every volcanic flow carries distinct ratios of trace elements (metals present in tiny amounts), and a fragment matches one outcrop alone. ______ blades lying eight hundred kilometers from the nearest flow record a route, never a guess.<br><br>Which choice completes the text with the most logical transition?",
           "choices": [
             "Therefore,",
             "However,",
