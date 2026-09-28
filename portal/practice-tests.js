@@ -2433,7 +2433,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Command of Evidence (Textual)",
           "difficulty": "medium",
           "type": "mc",
-          "text": "The Country of the Pointed Firs is an 1896 novel by Sarah Orne Jewett. Its narrator, a summer visitor to a Maine fishing village, has been taken about the shore by her landlady for a season, and she has come to admire a kind of knowledge she cannot acquire for herself:<br><br>Which quotation from The Country of the Pointed Firs most effectively illustrates the claim?",
+          "text": "The Country of the Pointed Firs is an 1896 novel by Sarah Orne Jewett. Its narrator, a summer visitor to a Maine fishing village, has been taken about the shore by her landlady for a season, and she has come to admire a kind of knowledge she cannot acquire for herself: ______<br><br>Which quotation from The Country of the Pointed Firs most effectively illustrates the claim?",
           "choices": [
             "“The wind blew off the shore, and the little boat went out past the point with the tide behind her.”",
             "“She knew the weather of that coast as I should never know it, though I stayed there all my life.”",
@@ -3065,7 +3065,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Command of Evidence (Textual)",
           "difficulty": "medium",
           "type": "mc",
-          "text": "Jane Eyre is an 1847 novel by Charlotte Brontë. In this scene the young Jane, long treated as a burden in her aunt's house and lately accused of deceit, insists that to be disliked is not the same thing as to be in the wrong:<br><br>Which quotation from Jane Eyre most effectively illustrates the claim?",
+          "text": "Jane Eyre is an 1847 novel by Charlotte Brontë. In this scene the young Jane, long treated as a burden in her aunt's house and lately accused of deceit, insists that to be disliked is not the same thing as to be in the wrong: ______<br><br>Which quotation from Jane Eyre most effectively illustrates the claim?",
           "choices": [
             "“The room was chill, for it seldom had a fire; it was silent, because remote from the nursery.”",
             "“Speak I must: I had been trodden on severely, and must turn: but how?”",
@@ -3552,10 +3552,10 @@ window.SAT_PRACTICE_TESTS = [
           "type": "mc",
           "text": "Benedetta Fiore and colleagues have compared one observer’s field notebooks from a 1962 bird survey with the species list he published a year later. Several species named in the list are missing from the notebooks. Two species in the notebooks appear nowhere in the list.<br><br>Which choice best states the main idea of the text?",
           "choices": [
-            "The published list names every species the observer recorded.",
-            "The notebooks and the list disagree over exactly two species.",
-            "The observer recorded more species than the published list names.",
-            "Each document names species the other leaves out, so the list alone does not show everything the observer found."
+            "The published list names every species that the observer had recorded in his notebooks.",
+            "The notebooks and the published list disagree over exactly two species and no others.",
+            "The observer recorded more species in his notebooks than the published list goes on to name.",
+            "Each document names species the other leaves out, so the list alone is an incomplete record."
           ],
           "correct": 3,
           "choiceNotes": [
@@ -3613,7 +3613,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Command of Evidence (Textual)",
           "difficulty": "medium",
           "type": "mc",
-          "text": "Wuthering Heights is an 1847 novel by Emily Brontë. Its narrator, Nelly Dean, has been a servant in both houses for most of her life, and she reports the thoughts of other characters as confidently as she reports their words and their movements:<br><br>Which quotation from Wuthering Heights most effectively illustrates the claim?",
+          "text": "Wuthering Heights is an 1847 novel by Emily Brontë. Its narrator, Nelly Dean, has been a servant in both houses for most of her life, and she reports the thoughts of other characters as confidently as she reports their words and their movements: ______<br><br>Which quotation from Wuthering Heights most effectively illustrates the claim?",
           "choices": [
             "“I ran to the children’s room: their door was ajar, I saw they had never lain down, though it was past midnight.”",
             "“The other, I felt certain, recalled it often in the course of the evening.”",
