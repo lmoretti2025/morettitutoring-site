@@ -2591,7 +2591,7 @@ window.SAT_PRACTICE_TESTS = [
           "choiceNotes": [
             "Incorrect. Without a comma the clause reads as restrictive, but the 1890 text is already a single identified thing, so there is nothing left to narrow down.",
             "Incorrect. “and” would join the relative clause to a second element that the sentence never supplies.",
-            "Incorrect. A semicolon requires an independent clause after it, and “which scholarly editions ... have largely undone” is subordinate.",
+            "Incorrect. A semicolon requires an independent clause after it, and “which scholarly editions have since worked to undo” is subordinate.",
             "Correct. The clause adds information about the 1890 text already identified, so it is supplementary and takes a comma."
           ]
         },
@@ -2601,7 +2601,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Form, Structure, and Sense",
           "difficulty": "medium",
           "type": "mc",
-          "text": "Mills kept records for their own purposes, and what survives of them is rarely what would now be most useful. One archival box, holding wage books, an overseer’s daybook, and letters from three operatives, ______ what the published company reports leave out about the working week.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "text": "Nest boxes are checked on a fixed schedule, and a checker writes down only what the schedule asks for. One box, holding two unhatched eggs and the leg rings of three pied flycatchers (Ficedula hypoleuca), ______ what those records miss: how often a nest site changes hands.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
           "choices": [
             "reveal",
             "have revealed",
@@ -2612,7 +2612,7 @@ window.SAT_PRACTICE_TESTS = [
           "choiceNotes": [
             "Incorrect. “Reveal” is plural; the subject is the singular “box.”",
             "Incorrect. “Have revealed” is plural, and the plural nouns inside the participial phrase cannot supply the subject.",
-            "Correct. The subject is “A single archival box,” which is singular, so the singular “reveals” is required.",
+            "Correct. The subject is “One box,” which is singular, so the singular “reveals” is required.",
             "Incorrect. “Are revealing” is plural as well as progressive, and the sentence states a standing fact."
           ]
         },
@@ -3128,7 +3128,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Form, Structure, and Sense",
           "difficulty": "easy",
           "type": "mc",
-          "text": "Josiah Renwick kept a list of the men licensed for the crossing. The pilots who worked the shifting channel of the estuary ______ willing to take a loaded vessel over the bar on an ebbing tide.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "text": "Ana Quintero kept a list of everyone cleared for night patrol. The rangers who worked the eastern boundary of the reserve ______ willing to approach a bull elephant on foot.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
           "choices": [
             "has been",
             "was",
@@ -3138,8 +3138,8 @@ window.SAT_PRACTICE_TESTS = [
           "correct": 2,
           "choiceNotes": [
             "Incorrect. “Has been” is singular, and the present perfect also conflicts with the past setting.",
-            "Incorrect. With “neither... nor,” the verb agrees with the nearer subject, which is the plural “pilots.”",
-            "Correct. The nearer of the two subjects is “the pilots,” so the plural “were” is required.",
+            "Incorrect. “Was” is singular; the subject is the plural “rangers,” which the relative clause “who worked the eastern boundary” separates from the verb.",
+            "Correct. The subject is the plural “rangers,” so the plural “were” is required even though a relative clause stands between subject and verb.",
             "Incorrect. “Is” is singular and present, and the sentence is plural and past."
           ]
         },
@@ -3149,7 +3149,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Boundaries",
           "difficulty": "easy",
           "type": "mc",
-          "text": "Cecilia Marchetti drew up the equipment list. The expedition carried instruments from three countries: a barometer made in Paris, France; a chronometer from London, ______ a theodolite built in Munich.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "text": "Cecilia Marchetti catalogued what the laboratory had inherited. The three microscopes came from three countries: one made in Jena, Germany; one bought secondhand from London, ______ one assembled in Rochester, New York.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
           "choices": [
             "England; and",
             "England and",
