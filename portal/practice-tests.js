@@ -2370,7 +2370,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Text Structure and Purpose",
           "difficulty": "hard",
           "type": "mc",
-          "text": "For most of the twentieth century the giant squid was known only through carcasses and through beaks—the only hard parts of the animal—recovered in sperm whale stomachs. To estimate speed and hunting behavior, researchers extrapolated from anatomy of far smaller squid. In 2012 the zoologist Tsunemi Kubodera and his colleagues filmed a live animal at depth off the Bonin Islands, and footage showed it moving in slow, deliberate pulses, not the darting characteristic of relatives. Anatomy had been read correctly, but the error lay in expecting a larger animal to move as smaller ones move.<br><br>Which choice best describes the overall structure of the text?",
+          "text": "For most of the twentieth century the giant squid was known only through carcasses and through beaks—the only hard parts of the animal—recovered in sperm whale stomachs. To estimate speed and hunting behavior, researchers extrapolated from anatomy of far smaller squid. In 2012 the zoologist Tsunemi Kubodera and his colleagues filmed a live animal at depth off the Bonin Islands, and footage showed it moving in slow, deliberate pulses, not the darting characteristic of relatives. The anatomy had been read correctly, but the assumption that a larger squid would swim like its smaller relatives was wrong.<br><br>Which choice best describes the overall structure of the text?",
           "choices": [
             "It describes a filming technique developed for deep water and then evaluates the evidence that the technique produced.",
             "It gives the basis of an earlier estimate, reports an observation, and locates the error.",
@@ -2517,7 +2517,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Inferences",
           "difficulty": "medium",
           "type": "mc",
-          "text": "Studies of nest choice in honeybee colonies, most of them by Thomas Seeley, have demonstrated links between cavity quality and the persistence of the dances that advertise it: circuits performed, bouts repeated, minutes spent in advertisement. To investigate how colonies settle on one cavity, researchers marked every scout in one hive and recorded which site each had inspected. Every scout was found to have inspected one cavity only, and dances for poorer cavities were the first to fall silent, suggesting that ______<br><br>Which choice most logically completes the text?",
+          "text": "Studies of nest choice in honeybee colonies, most of them by Thomas Seeley, have demonstrated links between cavity quality and how long the dances that advertise it persist, measured as the number of circuits, the number of bouts, and the minutes spent dancing. To investigate how colonies settle on one cavity, researchers marked every scout in one hive and recorded which site each had inspected. Every scout was found to have inspected one cavity only, and dances for poorer cavities were the first to fall silent, suggesting that ______<br><br>Which choice most logically completes the text?",
           "choices": [
             "a colony settles on whichever site the first returning scout happens to have discovered.",
             "scouts that have visited the best available site dance for longer than the colony requires.",
@@ -2748,7 +2748,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Rhetorical Synthesis",
           "difficulty": "easy",
           "type": "mc",
-          "text": "While researching a topic, a student has taken the following notes:<br><br>• A qanat is an underground channel that carries groundwater from an aquifer to the surface.<br>• The channel slopes gently downward along its whole length, so the water moves by gravity.<br>• Gravity alone is enough, and no pump is used at any point.<br>• Vertical shafts sunk at intervals let diggers reach the tunnel and clear it.<br>• Some qanats in Iran have run for more than two thousand years, over distances of tens of kilometers.<br><br>The student wants to introduce the qanat to an audience unfamiliar with it. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
+          "text": "While researching a topic, a student has taken the following notes:<br><br>• A qanat is an underground channel that carries groundwater from an aquifer to the surface.<br>• The channel slopes gently downward along its whole length, so the water moves by gravity.<br>• No pump is used at any point along the channel.<br>• Vertical shafts sunk at intervals let diggers reach the tunnel and clear it.<br>• Some qanats in Iran have run for more than two thousand years, over distances of tens of kilometers.<br><br>The student wants to introduce the qanat to an audience unfamiliar with it. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
           "choices": [
             "A qanat is a gently sloping tunnel that brings groundwater to the surface by gravity alone, sometimes over tens of kilometers.",
             "Some qanats in Iran have carried water continuously for more than two thousand years without a pump at any point.",
@@ -3002,7 +3002,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Command of Evidence (Quantitative)",
           "difficulty": "easy",
           "type": "mc",
-          "text": "Small birds line their nests with whatever insulating material lies to hand, and the value of that lining rises as the weather turns against them. Ornithologist Kwame Adjei recorded the hatching success of nests of four lining types across two springs, one cool and one warm. The data support a claim that the lining of a nest tells chiefly in cold conditions. The table shows that ______<table class=\"dx-table\"><tr><th>Nest lining</th><th>Eggs hatched, cool spring</th><th>Eggs hatched, warm spring</th></tr><tr><td>Feather</td><td>86%</td><td>84%</td></tr><tr><td>Moss</td><td>71%</td><td>83%</td></tr><tr><td>Grass</td><td>64%</td><td>82%</td></tr><tr><td>Unlined</td><td>52%</td><td>80%</td></tr></table><br><br>Which choice most effectively uses data from the table to complete the statement?",
+          "text": "Small birds line their nests with whatever insulating material lies to hand, and that lining matters more in cold weather. Ornithologist Kwame Adjei recorded the hatching success of nests of four lining types across two springs, one cool and one warm. The data support a claim that nest lining affects hatching success mainly in cold weather. The table shows that ______<table class=\"dx-table\"><tr><th>Nest lining</th><th>Eggs hatched, cool spring</th><th>Eggs hatched, warm spring</th></tr><tr><td>Feather</td><td>86%</td><td>84%</td></tr><tr><td>Moss</td><td>71%</td><td>83%</td></tr><tr><td>Grass</td><td>64%</td><td>82%</td></tr><tr><td>Unlined</td><td>52%</td><td>80%</td></tr></table><br><br>Which choice most effectively uses data from the table to complete the statement?",
           "choices": [
             "feather-lined nests hatched 86 percent of their eggs in the cool spring, the highest figure in the table.",
             "unlined nests hatched 80 percent of their eggs in the warm spring, close to the figure for feather-lined nests.",
@@ -3149,7 +3149,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Boundaries",
           "difficulty": "easy",
           "type": "mc",
-          "text": "Cecilia Marchetti catalogued what the laboratory had inherited. An instrument is entered on her list ______ its maker and its year of manufacture can both be established.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "text": "Cecilia Marchetti maintains the laboratory’s list of instruments. An instrument is entered on her list ______ its maker and its year of manufacture can both be established.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
           "choices": [
             "only when",
             "only when,",
@@ -3403,7 +3403,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Words in Context",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Emile Charpentier has studied thousands of early modern pardons. The early modern pardon was ______ in effect, and was never simply merciful. Monarchs pardoning condemned men were understood to have established guilt first, and to be setting aside verdicts reached by the crown itself, so that every act of clemency was taken as confirmation of the court's authority.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
+          "text": "Emile Charpentier has studied thousands of early modern pardons. The early modern pardon was ______ in effect. Monarchs pardoning condemned men were understood to have established guilt first, and to be setting aside verdicts reached by the crown itself, so that every act of clemency was taken as confirmation of the court’s authority.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
           "choices": [
             "arbitrary",
             "ratifying",
@@ -3413,7 +3413,7 @@ window.SAT_PRACTICE_TESTS = [
           "correct": 1,
           "choiceNotes": [
             "Incorrect. The passage presents the pardon as following a settled finding of guilt, which is the opposite of arbitrary.",
-            "Correct. The colon explains that each pardon confirmed the conviction it set aside, so the act endorsed the court rather than softening its work.",
+            "Correct. The sentence that follows explains that each pardon confirmed the conviction it set aside, so the act endorsed the court rather than softening its work.",
             "Incorrect. Nothing suggests the pardon was temporary or conditional on anything later.",
             "Incorrect. “Ceremonial” would empty the act of consequence, and the passage gives it a definite legal effect."
           ]
@@ -3555,14 +3555,14 @@ window.SAT_PRACTICE_TESTS = [
             "The published list names every species the observer recorded.",
             "The notebooks and the list disagree over exactly two species.",
             "The observer recorded more species than the published list names.",
-            "Each source omits material the other records, so neither alone gives a full account."
+            "Each document names species the other leaves out, so the list alone does not show everything the observer found."
           ],
           "correct": 3,
           "choiceNotes": [
             "Incorrect. Two species recorded in the notebooks appear nowhere in the list, so the list does not name them all.",
             "Incorrect. Two species are missing from the list, but several more are named in the list and missing from the notebooks, so the disagreement runs both ways.",
             "Incorrect. The list names several species the notebooks do not, so it cannot be inferred that the notebooks hold the larger record.",
-            "Correct. Each document contains species the other lacks, so neither on its own records everything the two together show."
+            "Correct. Each document contains species the other lacks, so the list on its own leaves out part of what the observer recorded."
           ]
         },
         {
@@ -3760,7 +3760,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Boundaries",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Assembling the range map, Hilde Brandt drew on material of very uneven quality. She had three ______ one radio-tracking survey run from Tsavo, Kenya; a ranger’s sketch of the northern boundary, drawn from memory; and a herder’s account giving distances in days walked.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "text": "Assembling the range map, Hilde Brandt drew on material of very uneven quality. She had three ______ one radio-tracking survey run from Tsavo, Kenya; a ranger’s sketch of the northern boundary, which he drew from memory; and a herder’s account that gave distances as numbers of days on foot.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
           "choices": [
             "sources. One",
             "sources: one",
@@ -3865,7 +3865,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Transitions",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Lightfastness in pigments is tested by exposing a drawdown (a thin swatch of paint) to lamplight for several hundred hours, then comparing that swatch with one kept in darkness. The test compresses years into hours, and lamps are only a stand-in for daylight. ______ pigments that fail are certain to fail on walls. Pigments that pass may still shift beside windows across thirty years.<br><br>Which choice completes the text with the most logical transition?",
+          "text": "Lightfastness in pigments is tested by exposing a drawdown (a thin swatch of paint) to lamplight for several hundred hours, then comparing that swatch with one kept in darkness. The test compresses years of exposure into a few hundred hours, and lamplight is not identical to daylight. ______ pigments that fail are certain to fail on walls. Pigments that pass may still shift beside windows across thirty years.<br><br>Which choice completes the text with the most logical transition?",
           "choices": [
             "Even so,",
             "Similarly,",
