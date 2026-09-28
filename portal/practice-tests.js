@@ -2288,14 +2288,14 @@ window.SAT_PRACTICE_TESTS = [
           "type": "mc",
           "text": "Economists measuring the effect of minimum wages usually compare employment in states that raised wages with employment in neighboring states holding wages steady. The comparison is ______. States raise wages precisely when local labor markets are already tightening, and the neighboring state therefore only appears to supply a counterfactual.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
           "choices": [
-            "tenuous",
+            "deliberate",
             "fallacious",
             "customary",
             "exhaustive"
           ],
           "correct": 1,
           "choiceNotes": [
-            "Incorrect. “Tenuous” would mean the comparison is weakly supported, and the objection is that it is built on something untrue rather than something slight.",
+            "Incorrect. Nothing in the passage bears on whether the comparison was chosen on purpose.",
             "Correct. The objection is that the neighboring state only looks like a counterfactual: wage rises follow tightening labor markets, so the comparison rests on a false premise.",
             "Incorrect. The passage does say the comparison is usual, but the point is that it does not work, not that it is common.",
             "Incorrect. “Exhaustive” would praise the comparison for completeness, and the passage identifies a fault in it."
@@ -2664,19 +2664,19 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Boundaries",
           "difficulty": "hard",
           "type": "mc",
-          "text": "At the bench a glassblower works against the clock. The gather has to turn from the instant it leaves the furnace, since two seconds of rest leave the piece sagging out of ______ is why the bench, the tools, and the annealing oven all sit within one turn of the chair.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "text": "At the bench a glassblower works against the clock. The gather has to turn from the instant it leaves the furnace, since two seconds of rest leave the piece sagging out of ______ the bench, the tools, and the annealing oven all sit within one turn of the chair.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
           "choices": [
-            "shape that",
-            "shape. That",
-            "shape, that",
-            "shape: that"
+            "shape, which is why",
+            "shape. Which is why",
+            "shape; which is why",
+            "shape which is why"
           ],
-          "correct": 1,
+          "correct": 0,
           "choiceNotes": [
-            "Incorrect. Without punctuation two independent clauses fuse, and “sagging out of shape that is why” cannot be parsed.",
-            "Correct. “That is why the bench, the tools, and the annealing oven all sit within one turn of the chair” is an independent clause, so a period and a capital are conventional.",
-            "Incorrect. A comma between two independent clauses is a comma splice.",
-            "Incorrect. A colon would present what follows as an explanation of “shape” alone, and the clause explains the whole preceding statement."
+            "Correct. “which is why...” is a relative clause attached to the statement before it, so a comma joins them.",
+            "Incorrect. “Which is why the bench, the tools, and the annealing oven all sit within one turn of the chair” is a relative clause, not a sentence.",
+            "Incorrect. A semicolon must join two independent clauses, and a relative clause is not one.",
+            "Incorrect. Without the comma the relative clause runs into the statement it modifies."
           ]
         },
         {
@@ -3513,14 +3513,14 @@ window.SAT_PRACTICE_TESTS = [
             "To compare the external pressures on a language with the internal ones acting on a household.",
             "To argue that parents who stop transmitting a language later come to regret having done so.",
             "To describe the three stages of language shift identified in those interviews.",
-            "To present research indicating that language shift proceeds without a decision being made."
+            "To present research indicating that language shift proceeds without any single deliberate decision."
           ],
           "correct": 3,
           "choiceNotes": [
             "Incorrect. The opening names both kinds of pressure, but the passage develops only what happens inside the household.",
-            "Incorrect. Parents recognizes the sequence afterward; the passage reports no regret.",
-            "Incorrect. The three stages are mentioned once as a feature of her sample and are never described.",
-            "Correct. The passage sets up the puzzle of the household decision and then reports the finding that no decision is made, only a sequence recognized later."
+            "Incorrect. Parents recognize the sequence afterward; the passage reports no regret.",
+            "Incorrect. The three stages are mentioned once as a feature of the sample and are never described.",
+            "Correct. The passage sets up the household decision and then reports that parents describe no single decision, only a run of occasions they later recognize as a choice."
           ]
         },
         {
@@ -3655,7 +3655,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Inferences",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Cleaner shrimp remove parasites from the skin of a visiting fish, and the fish holds still for the work. A 2010 experiment tested whether the shrimp respond to a visitor’s opportunities elsewhere, or are indifferent to them. Every shrimp received two fish in turn, one raised beside a reef of several cleaning stations, the second beside a lone outcrop—a single rock head—that held only one station. Shrimp gave the reef fish noticeably longer sessions and took fewer bites of its mucus, while two fish drawn off the lone outcrop received sessions of equal length. The results therefore suggest that ______<br><br>Which choice most logically completes the text?",
+          "text": "Cleaner shrimp remove parasites from the skin of a visiting fish, and the fish holds still for the work. A 2010 experiment tested whether the shrimp respond to a visitor’s opportunities elsewhere, or are indifferent to them. Every shrimp received two fish in turn. For some shrimp the first was raised beside a reef of several cleaning stations and the second beside a lone outcrop—a single rock head—that held only one station; for the rest both fish came from lone outcrops. Shrimp gave the reef fish noticeably longer sessions and took fewer bites of its mucus, while two fish drawn off the lone outcrop received sessions of equal length. The results therefore suggest that ______<br><br>Which choice most logically completes the text?",
           "choices": [
             "shrimp prefer the mucus of fish that come from reefs with several cleaning stations.",
             "shrimp adjust their treatment of a client according to whether it has an alternative.",
