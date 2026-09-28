@@ -3739,16 +3739,16 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Form, Structure, and Sense",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Were the tide gauge still in place, oceanographers ______ how much of the surge came from wind rather than from falling pressure.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "text": "Were the tide gauge still in place, oceanographers ______ how much of a storm surge comes from wind rather than from falling pressure.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
           "choices": [
-            "would have known",
+            "would be knowing",
             "will know",
             "would know",
             "had known"
           ],
           "correct": 2,
           "choiceNotes": [
-            "Incorrect. The condition is contrary to PRESENT fact, so the consequence cannot sit in the past; a present condition cannot yield a knowing that is already over.",
+            "Incorrect. “Know” is a stative verb and resists the progressive, so the modal is right but the aspect is not.",
             "Incorrect. The future does not follow an inverted conditional describing a state contrary to fact.",
             "Correct. “Were the tide gauge still in place” states a condition contrary to present fact, and the main clause takes “would” plus the base form.",
             "Incorrect. “Had known” repeats the conditional form in the main clause, leaving the sentence without a result."
