@@ -2454,7 +2454,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Command of Evidence (Textual)",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Although soil organic carbon (SOC) in cropland is generally sampled to thirty centimeters, deep-core work—sampling the whole profile to one meter—is reported by a minority of studies. Fields under no-till management hold more carbon near the surface than tilled fields do, despite receiving similar inputs of residue. Some agronomists contend that this difference may be redistribution of carbon within the profile and not a gain across it.<br><br>Which finding, if true, would most directly support this contention?",
+          "text": "Although soil organic carbon (SOC) in cropland is generally sampled to thirty centimeters, deep-core work—sampling the whole profile to one meter—is reported by a minority of studies. Fields under no-till management hold more carbon near the surface than tilled fields do, despite receiving similar inputs of residue. Tobias Lindqvist and colleagues hypothesize that this difference may be redistribution of carbon within the profile and not a gain across it.<br><br>Which finding, if true, would most directly support Lindqvist and colleagues' hypothesis?",
           "choices": [
             "Fields managed without tilling hold more carbon in the top thirty centimeters than comparably managed tilled fields do.",
             "Organic matter decomposes more slowly in the upper layers of an untilled field than in a tilled one.",
@@ -2463,7 +2463,7 @@ window.SAT_PRACTICE_TESTS = [
           ],
           "correct": 2,
           "choiceNotes": [
-            "Incorrect. This is the very result the contention says is being over-read; it is consistent with the opposing view as much as with it.",
+            "Incorrect. This is the very result the hypothesis says is being over-read; it is consistent with the opposing view as much as with it.",
             "Incorrect. A decomposition rate in the upper layers says nothing about the total held in the whole profile.",
             "Correct. The claim is that no-till redistributes carbon rather than adding it. A full-profile measurement showing no difference in the total is exactly that.",
             "Incorrect. Yield is a separate question from how much carbon the soil holds."
@@ -2496,7 +2496,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Command of Evidence (Quantitative)",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Pteropods build shells of aragonite, a form of calcium carbonate that dissolves more readily as the seawater grows less alkaline; Nina Bednaršek has measured the dissolution in living animals. The mean shell thickness across a basin might therefore be expected to track the mean pH from site to site. The data gathered at the four sites suggest the relationship is more complex. The table shows that ______<table class=\"dx-table\"><tr><th>Site</th><th>Mean water pH</th><th>Mean shell thickness (µm)</th></tr><tr><td>North</td><td>8.10</td><td>42</td></tr><tr><td>Central</td><td>8.05</td><td>40</td></tr><tr><td>South</td><td>7.95</td><td>43</td></tr><tr><td>Deep</td><td>7.85</td><td>39</td></tr></table><br><br>Which choice most effectively uses data from the table to complete the text?",
+          "text": "Pteropods build shells of aragonite, a form of calcium carbonate that dissolves more readily as the seawater grows less alkaline; Nina Bednaršek has measured the dissolution in living animals. The mean shell thickness across a basin might therefore be expected to track the mean pH from site to site. The data gathered at the four sites suggest the relationship is more complex. The table shows that ______<table class=\"dx-table\"><tr><th>Site</th><th>Mean water pH</th><th>Mean shell thickness (µm)</th></tr><tr><td>North</td><td>8.10</td><td>42</td></tr><tr><td>Central</td><td>8.05</td><td>40</td></tr><tr><td>South</td><td>7.95</td><td>43</td></tr><tr><td>Deep</td><td>7.85</td><td>39</td></tr></table><br><br>Which choice most effectively uses data from the table to complete the statement?",
           "choices": [
             "shells at the Deep site, where pH was lowest, were thinner than shells at the North site, where pH was highest.",
             "mean pH varied by only a quarter of a unit across the four sites in the study.",
@@ -3002,7 +3002,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Command of Evidence (Quantitative)",
           "difficulty": "easy",
           "type": "mc",
-          "text": "Small birds line their nests with whatever insulating material lies to hand, and the value of that lining rises as the weather turns against them. Ornithologist Kwame Adjei recorded the hatching success of nests of four lining types across two springs, one cool and one warm. The data support a claim that the lining of a nest tells chiefly in cold conditions. The table shows that ______<table class=\"dx-table\"><tr><th>Nest lining</th><th>Eggs hatched, cool spring</th><th>Eggs hatched, warm spring</th></tr><tr><td>Feather</td><td>86%</td><td>84%</td></tr><tr><td>Moss</td><td>71%</td><td>83%</td></tr><tr><td>Grass</td><td>64%</td><td>82%</td></tr><tr><td>Unlined</td><td>52%</td><td>80%</td></tr></table><br><br>Which choice most effectively uses data from the table to complete the claim?",
+          "text": "Small birds line their nests with whatever insulating material lies to hand, and the value of that lining rises as the weather turns against them. Ornithologist Kwame Adjei recorded the hatching success of nests of four lining types across two springs, one cool and one warm. The data support a claim that the lining of a nest tells chiefly in cold conditions. The table shows that ______<table class=\"dx-table\"><tr><th>Nest lining</th><th>Eggs hatched, cool spring</th><th>Eggs hatched, warm spring</th></tr><tr><td>Feather</td><td>86%</td><td>84%</td></tr><tr><td>Moss</td><td>71%</td><td>83%</td></tr><tr><td>Grass</td><td>64%</td><td>82%</td></tr><tr><td>Unlined</td><td>52%</td><td>80%</td></tr></table><br><br>Which choice most effectively uses data from the table to complete the statement?",
           "choices": [
             "feather-lined nests hatched 86 percent of their eggs in the cool spring, the highest figure in the table.",
             "unlined nests hatched 80 percent of their eggs in the warm spring, close to the figure for feather-lined nests.",
@@ -3044,7 +3044,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Command of Evidence (Textual)",
           "difficulty": "easy",
           "type": "mc",
-          "text": "Tool manufacture, the shaping of an object for a task, was first documented in New Caledonian crows by Gavin Hunt, whose birds stripped and notched twigs to extract grubs from dead wood. The way these birds arrive at their tools is disputed. One proposal is that the crow selects each twig with one particular hole in mind, while the reshaping of twigs already carried is thought to play little part.<br><br>Which finding, if true, would most directly support this proposal?",
+          "text": "Tool manufacture, the shaping of an object for a task, was first documented in New Caledonian crows by Gavin Hunt, whose birds stripped and notched twigs to extract grubs from dead wood. The way these birds arrive at their tools is disputed. One hypothesis, advanced by Ines Cardoso, is that the crow selects each twig with one particular hole in mind, while the reshaping of twigs already carried is thought to play little part.<br><br>Which finding, if true, would most directly support Cardoso's hypothesis?",
           "choices": [
             "Crows that are given no twigs will use stiff grass stems to extract grubs instead.",
             "Crows presented with holes of varying width pick a twig matched to the hole before approaching it.",
@@ -3466,7 +3466,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Cross-Text Connections",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Text 1<br><br>The medieval guild's reputation as a brake on innovation rests largely on its statutes. Guild statutes fixed the materials of the workshop, the tools, and the number of apprentices allowed to one master. With rules of that kind in force, the argument runs, crafts would have altered their methods slowly, whatever individual masters wanted.<br><br>Text 2<br><br>Regulation runs through the Cologne goldsmiths' records, but it is most visible in what the statutes were written to do. A 2016 study by Klaus Reinhardt and colleagues traced these statutes across two centuries and found them revised, on average, every eleven years. When a new technique spread among the masters, the guild rarely forbade it. Instead, the statute was rewritten to admit the technique and to name who could use it.<br><br>Based on the texts, how would the author of Text 2 most likely respond to the argument in Text 1?",
+          "text": "Text 1<br><br>The medieval guild's reputation as a brake on innovation rests largely on its statutes. Guild statutes fixed the materials of the workshop, the tools, and the number of apprentices allowed to one master. With rules of that kind in force, the argument runs, crafts would have altered their methods slowly, whatever individual masters wanted.<br><br>Text 2<br><br>Regulation runs through the Cologne goldsmiths' records, but it is most visible in what the statutes were written to do. A 2016 study by Klaus Reinhardt and colleagues traced these statutes across two centuries and found them revised, on average, every eleven years. When a new technique spread among the masters, the guild rarely forbade it. Instead, the statute was rewritten to admit the technique and to name who could use it.<br><br>Based on the texts, how would Reinhardt and colleagues (Text 2) most likely respond to the argument presented in Text 1?",
           "choices": [
             "By observing that the statutes followed changes in practice instead of constraining them.",
             "By agreeing that guild statutes were restrictive but noting that they were rarely enforced.",
@@ -3571,7 +3571,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Command of Evidence (Quantitative)",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Carbon dioxide seeping out of volcanic vents on the seafloor acidifies the water around them, and biologists treat such vents as natural experiments in the chemistry of ocean acidification. A team led by Raul Ibanez measured the shells of limpets at four distances along a transect away from one vent, recording both the length of each shell and the state of its margins. The team concluded that water near the vent limits the growth of a shell rather than merely damaging shells already formed.<table class=\"dx-table\"><tr><th>Distance from vent (m)</th><th>Shell length (mm)</th><th>Shells with dissolved margins (%)</th></tr><tr><td>5</td><td>18.2</td><td>61</td></tr><tr><td>20</td><td>22.6</td><td>34</td></tr><tr><td>60</td><td>23.1</td><td>12</td></tr><tr><td>150</td><td>23.4</td><td>9</td></tr></table><br><br>Which choice best describes data from the table that support the team's conclusion?",
+          "text": "Carbon dioxide seeping out of volcanic vents on the seafloor acidifies the water around them, and biologists treat such vents as natural experiments in the chemistry of ocean acidification. A team led by Raul Ibanez measured the shells of limpets at four distances along a transect away from one vent, recording both the length of each shell and the state of its margins. The team concluded that water near the vent limits the growth of a shell rather than merely damaging shells already formed.<table class=\"dx-table\"><tr><th>Distance from vent (m)</th><th>Shell length (mm)</th><th>Shells with dissolved margins (%)</th></tr><tr><td>5</td><td>18.2</td><td>61</td></tr><tr><td>20</td><td>22.6</td><td>34</td></tr><tr><td>60</td><td>23.1</td><td>12</td></tr><tr><td>150</td><td>23.4</td><td>9</td></tr></table><br><br>Which choice best describes data from the table that support Ibanez and colleagues' conclusion?",
           "choices": [
             "Sixty-one percent of shells collected five meters from the vent showed dissolved margins, the highest proportion recorded.",
             "The proportion of shells with dissolved margins fell as distance from the vent increased.",
@@ -3634,7 +3634,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Command of Evidence (Textual)",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Although most accounts trace domesticated rice outward from a single river valley, some archaeobotanists argue that cultivation began independently at sites far apart. Many researchers have assumed that traits shared by early cultivated grains would indicate common descent and thus would place all cultivated rice in one lineage. To evaluate this assumption, a research team led by Lian Zhou analyzed genomes from over 3,000 accessions of cultivated and wild rice.<br><br>Which finding, if true, would most directly support this position?",
+          "text": "Although most accounts trace domesticated rice outward from a single river valley, archaeobotanist Marit Aalto hypothesizes that cultivation began independently at sites far apart. Many researchers have assumed that traits shared by early cultivated grains would indicate common descent and thus would place all cultivated rice in one lineage. To evaluate this assumption, a research team led by Lian Zhou analyzed genomes from over 3,000 accessions of cultivated and wild rice.<br><br>Which finding, if true, would most directly support Aalto's hypothesis?",
           "choices": [
             "Grains recovered from the river valley are several centuries older than grains from any other site.",
             "Grains from three distant sites carry different genetic markers for the same non-shattering trait.",
@@ -3645,7 +3645,7 @@ window.SAT_PRACTICE_TESTS = [
           "choiceNotes": [
             "Incorrect. An older valley is what the single-origin account predicts, so this supports his opponents.",
             "Correct. Different genetic routes to the same trait mean the trait arose more than once, which is independent selection rather than descent from one stock.",
-            "Incorrect. Shared traits are the very thing this position explains away; their presence settles nothing between the two accounts.",
+            "Incorrect. Shared traits are the very thing this hypothesis explains away; their presence settles nothing between the two accounts.",
             "Incorrect. Available wild rice makes independent domestication possible but does not show that it happened."
           ]
         },
