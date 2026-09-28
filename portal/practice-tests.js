@@ -2395,14 +2395,14 @@ window.SAT_PRACTICE_TESTS = [
           "choices": [
             "Pollen is a more reliable dating method than pottery is for sites in the Peruvian Andes.",
             "The inhabitants of the site abandoned cultivation once permanent structures had been built.",
-            "Maize was cultivated at the site before its inhabitants built permanent structures there.",
+            "Maize may have been cultivated at the site before its inhabitants built permanent structures there.",
             "Lake sediment preserves the pollen of cultivated plants better than it preserves wild pollen."
           ],
           "correct": 2,
           "choiceNotes": [
             "Incorrect. The passage uses depth to date both, and never compares the reliability of the two.",
             "Incorrect. The passage says nothing about what happened after the structures were built.",
-            "Correct. Maize pollen lies below the layers containing pottery and permanent structures, and the passage draws the conclusion directly: cultivation preceded settlement by several centuries.",
+            "Correct. Maize pollen lies below the layers containing pottery and permanent structures, and the passage draws that conclusion, though it puts it as a possibility.",
             "Incorrect. No comparison between cultivated and wild pollen appears anywhere in the passage."
           ]
         },
@@ -2813,7 +2813,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Words in Context",
           "difficulty": "easy",
           "type": "mc",
-          "text": "Axolotls are Mexican salamanders that keep their feathery external gills (the organs with which a larva breathes) and their finned tails into adult life, features which related salamanders shed on leaving the water. Because axolotls breed in exactly this form, they are described by biologists as ______, since sexual maturity is reached without the transformation that their relatives complete.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
+          "text": "Axolotls are Mexican salamanders that keep their feathery external gills (the organs with which a larva breathes) and their finned tails into adult life, features which related salamanders shed on leaving the water. Because axolotls breed in exactly this form, biologists treat their development as ______, since sexual maturity is reached without the transformation that their relatives complete.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
           "choices": [
             "unfinished",
             "freshwater",
@@ -2822,8 +2822,8 @@ window.SAT_PRACTICE_TESTS = [
           ],
           "correct": 0,
           "choiceNotes": [
-            "Correct. The colon explains the sense wanted: the axolotl matures without completing the transformation its relatives go through, so it stays in a form others pass out of.",
-            "Incorrect. That the axolotl lives in fresh water is true but is not what the colon defines; the point is the change it never completes.",
+            "Correct. The clause that follows explains the sense wanted: the axolotl matures without completing the transformation its relatives go through, so it stays in a form others pass out of.",
+            "Incorrect. That the axolotl lives in fresh water is true but is not what the following clause defines; the point is the change it never completes.",
             "Incorrect. No movement between habitats is described anywhere in the passage.",
             "Incorrect. How long the animal lives is never mentioned in the passage."
           ]
@@ -2855,7 +2855,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Words in Context",
           "difficulty": "medium",
           "type": "mc",
-          "text": "An irritant works inside an oyster, and the animal begins to coat the grain, layer upon layer, in nacre (the material of a shell) drawn from cells along the mantle. Such a pearl is ______ rather than intentional, since nacre collects on every intruder too deeply lodged for expulsion.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
+          "text": "A grain of grit works its way inside an oyster, and the animal begins to coat it, layer upon layer, in nacre (the material of a shell) drawn from cells along the mantle. Such a pearl is ______ rather than intentional, since nacre collects on every intruder too deeply lodged for expulsion.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
           "choices": [
             "microscopic",
             "decorative",
@@ -2887,7 +2887,7 @@ window.SAT_PRACTICE_TESTS = [
           "choiceNotes": [
             "Incorrect. Nothing suggests the work is unfinished or awaiting confirmation.",
             "Incorrect. No disagreement is reported; the genetic test settles that the threads belong to one organism.",
-            "Correct. The colon sets what the measurement means against what a walker on the hillside would see, so the finding runs against ordinary expectation.",
+            "Correct. The clause beginning “for” sets what the measurement means against what a walker on the hillside would see, so the finding runs against ordinary expectation.",
             "Incorrect. “Approximate” would question the precision of the figure, and what the passage questions is how the figure appears to a reader."
           ]
         },
@@ -3214,17 +3214,17 @@ window.SAT_PRACTICE_TESTS = [
           "type": "mc",
           "text": "A good field notebook records what the observer saw, what the weather was doing, and ______ the specimen was collected.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
           "choices": [
-            "the exact place where",
+            "that the exact place",
             "exactly where",
             "in the exact place that",
             "what the exact place was where"
           ],
           "correct": 1,
           "choiceNotes": [
-            "Incorrect. The series runs “what... what... ,” and this item breaks the pattern with a noun phrase.",
+            "Incorrect. “that the exact place the specimen was collected” is not a grammatical clause; “that” introduces nothing.",
             "Correct. The third item matches the form of the first two, each a clause introduced by a question word: what, what, where.",
-            "Incorrect. It introduces a prepositional phrase and so does not parallel the two clauses before it.",
-            "Incorrect. It is parallel in form but ungrammatical, doubling the question word in “what the exact place was where.”"
+            "Incorrect. It introduces a prepositional phrase, which cannot serve as the third object of “records”.",
+            "Incorrect. It doubles the question word in “what the exact place was where”, which is not standard."
           ]
         },
         {
