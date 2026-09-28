@@ -5697,7 +5697,7 @@ window.Portal = {
      header in fluid-ui.js. -->
 <script src="fluid-ui.js?v=20260905y"></script>
 <script src="banks.js?v=20260926a"></script>
-<script src="signals.js?v=20260927n"></script>
+<script src="signals.js?v=20260927o"></script>
 <script src="desmos-tags.js?v=20260916c"></script>
 <script src="time-budgets.js?v=20260912a"></script>
 <script src="challenge-questions.js?v=20260926a"></script>
@@ -25530,7 +25530,7 @@ window.renderNativeReport = function (data) {
       var dr = decodedRows[sec.key], row = dr && dr.rows[ri], tag = null;
       if (desmosTags && dr && MSa.itemKey) { var t = desmosTags[MSa.itemKey(dr.qs[ri])]; tag = typeof t === 'number' ? t : null; }
       return MSa.approachEvidence({
-        sec: sec.key, domain: r.q && r.q.domain, ok: !!r.ok, blank: !!r.skipped, clock: false,
+        sec: sec.key, domain: r.q && r.q.domain, skill: r.sk || (r.q && r.q.skill), ok: !!r.ok, blank: !!r.skipped, clock: false,
         budgetRatio: qBudgetMs > 0 && tMs > 0 ? tMs / qBudgetMs : null,
         choicesLeft: row && r.q && r.q.type === 'mc' ? row.k : null, keyOutFinal: row ? !!row.keyOutFinal : null,
         fastRoute: tag === null ? null : tag === 2, calcActive: row ? !!row.calcActive : null
@@ -25620,11 +25620,12 @@ window.renderNativeReport = function (data) {
     // Of the content misses, those read as the question type (a subset: counts and hours are unchanged).
     var apprRows = buckets.content.filter(function (e) { return e.approach; });
     planInputs.approach = (function () {
-      var bySk = {}, kinds = { long: 0, two: 0, desmos: 0 };
+      var bySk = {}, kinds = { long: 0, two: 0, desmos: 0, context: 0 };
       apprRows.forEach(function (e) { kinds[e.approach]++; var k = e.r.sk || e.r.dom; bySk[k] = (bySk[k] || 0) + 1; });
       var bits = [];
-      if (kinds.long) bits.push(kinds.long + ' worked well past their time and still missed');
-      if (kinds.two) bits.push(kinds.two + ' narrowed to two choices, then the wrong one picked');
+      if (kinds.long) bits.push(kinds.long + ' took well past their time and ' + (kinds.long === 1 ? 'was' : 'were') + ' still missed');
+      if (kinds.two) bits.push(kinds.two + ' came down to two choices and went the wrong way');
+      if (kinds.context) bits.push(kinds.context + ' in Words in Context, a reading skill');
       if (kinds.desmos) bits.push(kinds.desmos + ' graphing-route math question' + (kinds.desmos === 1 ? '' : 's') + ' missed without the calculator');
       var skills = Object.keys(bySk).sort(function (a, b) { return bySk[b] - bySk[a]; });
       // Named on the page and in the plan only at 3+ (signals.js APPROACH_MIN_SHOWN); the rows keep their mark either way.
@@ -26272,12 +26273,15 @@ window.renderNativeReport = function (data) {
       hours.content -= strategyH;
     }
     var contentOnly = causes.content - (A.n || 0);
+    // What the relearning hours became: strategy, relearning, or an even split (for the lede and the parents' line).
+    planInputs.contentWord = strategyH > 0 ? (strategyH > hours.content ? 'strategy practice' : strategyH === hours.content ? 'relearning and strategy practice' : 'relearning') : 'relearning';
     var strategyRow = null;
     if (strategyH > 0) {
       strategyRow = ({
         h: strategyH, unit: unitFor(strategyH), color: '#8A5A9E',
         what: '<b>Strategy.</b> Question Bank sets on ' + A.skills.slice(0, 3).map(function (k) { return '<b>' + esc(k) + '</b>'; }).join(', ') +
           ', worked for the method, not the answer: say what the question asks before reading the choices, then say why the right choice wins and why the last wrong one loses. ' +
+          (A.bySkill['Words in Context'] ? 'For Words in Context, cover the choices, read the whole text, and say in your own words what the blank has to mean before looking; this is a reading skill that builds over months, not a word list. ' : '') +
           '<em>' + A.n + ' question' + (A.n === 1 ? '' : 's') + ' on this test looked like the question type rather than the material: ' + esc(A.why) + '.</em>'
       });
     }
@@ -26367,7 +26371,7 @@ window.renderNativeReport = function (data) {
     }).join('');
 
     var lead = ['content', 'method', 'clock'].reduce(function (a, k) { return causes[k] > causes[a] ? k : a; }, 'content');
-    var leadWord = { content: 'relearning', method: 'speed', clock: 'pacing' }[lead];
+    var leadWord = { content: planInputs.contentWord || 'relearning', method: 'speed', clock: 'pacing' }[lead];
 
     var lede = strong
       ? 'About <b>' + hrs(weekly) + ' hours a week</b>, mostly full practice tests. ' +
@@ -26818,7 +26822,7 @@ window.renderNativeReport = function (data) {
       var planLine = planInputs.weekly > 0
         ? ' The plan is about ' + planInputs.weeklyText + (planInputs.weekly === 1 ? ' hour' : ' hours') + ' a week, mostly ' +
           (planInputs.mode === 'tests' ? 'full practice tests' : planInputs.mode === 'pace' ? 'timed practice'
-            : { content: 'relearning', method: 'timed practice', clock: 'timed practice' }[leadWork]) + '.'
+            : { content: planInputs.contentWord || 'relearning', method: 'timed practice', clock: 'timed practice' }[leadWork]) + '.'
         : '';
       var parentHtml = '<p class="plain-parent"><b>For parents:</b> ' + problem + planLine +
         (planLine ? ' The best help at home is protecting those hours, and making' : ' The best help at home is making') + ' the next practice test one quiet, timed sitting' +
