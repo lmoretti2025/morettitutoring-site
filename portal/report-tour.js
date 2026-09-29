@@ -708,6 +708,49 @@
     return M;
   }
 
+  /* ---------- the site's sample (diagnostic.html) ----------
+     Luca, 2026-09-29: the diagnostic page IS this sequence, full screen. It
+     opens "Hi there, here's what your results will look like", and the + on
+     every screen explains to a parent what that screen is showing. The
+     sample's own numbers stay underneath, as an example. */
+  var SAMPLE_NOTES = {
+    conditions: ['How the test was taken', 'Before any number, the report checks how the test was taken: the time of day, breaks, whether time was left on the clock, and whether answers came in too fast to have been read. A score from a rushed or interrupted sitting is not a real read of where your student stands, so the report says so first.'],
+    score: ['The score', 'The same 400 to 1600 scale as the real SAT, split into Reading & Writing and Math, with the range one test can honestly claim. A single sitting can land a little high or low, and the range keeps anyone from overreacting to one test.'],
+    misses: ['Where the points went', 'Every missed question is sorted by why it was missed: not knowing the material, running short on time, or a slip on something your student actually knows. Each needs a different fix, and most students miss points in more than one way.'],
+    strengths: ['What is already working', 'The skills your student got right consistently. Knowing them matters as much as knowing the gaps: session time does not go to them, so the hours go where the points are.'],
+    gaps: ['What to relearn', 'The specific skills behind the content misses, named the way the College Board names what the SAT tests. They come up on every SAT, so each one fixed pays off on every test after it.'],
+    clock: ['The clock', 'How the time went in each module, against a steady pace. It shows whether your student ran out of time, rushed, or left minutes unused, which is often worth as many points as content.'],
+    route: ['The route', 'The order your student moved through each module: the first pass, the skips, and the returns. It shows habits no score can, like getting stuck early or never going back to check.'],
+    habits: ['How the test was worked', 'Patterns in how questions were answered: changing answers, crossing out choices, using the calculator, guessing. Small habits like these add up to real points, in both directions.'],
+    path: ['Where the points are', 'The points still on the table, and which are closest to being earned. It turns the report into a target: how far the score can realistically move, and what moves it.'],
+    plan: ['The plan', 'Two or three concrete things to do first, and about how much practice a week, built from every screen before this one. After the diagnostic, we go over it together on a free call.']
+  };
+  function sampleize(M) {
+    M.screens.forEach(function (s) {
+      if (s.name === 'hello') {
+        s.html = '<p class="t-eye r">The free diagnostic &middot; a sample report</p>' +
+          '<h1 class="r">Hi there.<br>Here\u2019s what your results will look like.</h1>' +
+          '<p class="t-say r">This is the walkthrough every student gets with their report, shown here for a made-up student. ' +
+          'Tap the <strong>+</strong> on any screen for what that screen is telling you.</p>' +
+          '<div class="r"><button type="button" class="t-btn" data-go="next">Show me &rarr;</button></div>';
+        return;
+      }
+      var note = SAMPLE_NOTES[s.name] || ['About this screen', 'One part of the report, from this sample student\u2019s test.'];
+      var numbers = s.sheet && s.sheet.html
+        ? '<p style="margin-top:18px"><b>' + esc(s.sheet.title) + ', for this sample student:</b></p>' + s.sheet.html : '';
+      s.sheet = { eye: 'What this screen shows', title: note[0], html: '<p>' + esc(note[1]) + '</p>' + numbers };
+      var btn = '<button type="button" class="t-more" data-sheet="' + s.name + '">What this shows</button>';
+      if (/<button type="button" class="t-more"[^>]*>[^<]*<\/button>/.test(s.html)) {
+        s.html = s.html.replace(/<button type="button" class="t-more"[^>]*>[^<]*<\/button>/, btn);
+      } else {
+        // Before the screen's last buttons (the plan's), or at the end.
+        var at = s.html.lastIndexOf('<div class="r"><button type="button" class="t-btn');
+        s.html = at === -1 ? s.html + '<div class="r">' + btn + '</div>' : s.html.slice(0, at) + '<div class="r">' + btn + '</div>' + s.html.slice(at);
+      }
+    });
+    // Two screens of one name (never today) would share one note: harmless.
+  }
+
   /* ---------- the player ---------- */
   var root = null, cur = -1, timers = [], model = null, lastFocus = null;
   function later(fn, ms) { timers.push(setTimeout(fn, reduced() ? 0 : ms)); }
@@ -825,6 +868,8 @@
     /* The site's sample (diagnostic.html): nothing to skip to, and every way
        out of the story leads to the sign-up form on the page around it. */
     if (M.sample) {
+      // The site's name, not "Demo's diagnostic", and the one way off the page.
+      root.querySelector('.t-top span').innerHTML = '<a href="/" target="_top" style="color:inherit;text-decoration:none"><b>Moretti Test Prep &amp; Tutoring</b></a>';
       var sk = root.querySelector('.t-skip');
       sk.textContent = 'Sample: a made-up student'; sk.removeAttribute('data-go'); sk.disabled = true; sk.style.cursor = 'default';
       Array.prototype.forEach.call(root.querySelectorAll('.t-scr [data-go="close"]'), function (b) {
@@ -897,7 +942,8 @@
         anchor.parentNode.insertBefore(b, anchor);
       }
       // The public sample: the walkthrough is the whole show, so it opens every time.
-      if (opts.sample) { M.sample = true; setTimeout(function () { open(M); }, 300); return; }
+      // Opened at once and opaque, so the report never shows underneath first.
+      if (opts.sample) { M.sample = true; sampleize(M); open(M, true); return; }
       // By itself once per attempt per device; never when printing or embedded for show.
       // Not by itself inside Luca's admin viewer (audit 6: it greeted him as the student).
       /* The admin viewer's frame is sandboxed, so the parent's address can't be
