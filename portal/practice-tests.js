@@ -2475,7 +2475,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Central Ideas and Details",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Three Viking-age boat burials have been excavated, and the vessels of all three are holed below the waterline, the holes cut at the time of burial. The hole in every case is confined to one plank, and the edges of the hole match those of a shipwright's adze, or shaping axe, recovered from the same grave. Holing is therefore thought to be formal decommissioning, a mark of withdrawal from use.<br><br>According to the text, what is true of the damage to the three vessels?",
+          "text": "Boat burials are graves in which a vessel was buried along with the dead. Three Viking-age examples have been excavated, and all three vessels are holed below the waterline. Archaeologists have found that the holes were cut at the time of burial and are confined to a single plank. In every grave the edges of the hole match a shipwright's adze, or shaping axe, buried alongside, so the holes are thought to mark a formal withdrawal from use.<br><br>According to the text, what is true of the damage to the three vessels?",
           "choices": [
             "It was made deliberately, with a tool of the kind used to build the vessel.",
             "It extended across several planks in each of the three burials.",
@@ -2484,7 +2484,7 @@ window.SAT_PRACTICE_TESTS = [
           ],
           "correct": 0,
           "choiceNotes": [
-            "Correct. The damage was made before burial with a blade matching the adze found alongside, which is what marks the damage as deliberate.",
+            "Correct. The holes were cut at the time of burial, and their edges match the adze buried alongside, which is what marks the damage as deliberate.",
             "Incorrect. The passage states that in each case the damage is confined to a single plank.",
             "Incorrect. Nothing in the passage describes any repair; the holing is presented as the final act.",
             "Incorrect. The passage attributes the damage to a blade matching the shipwright’s adze, not to grounding."
@@ -2622,7 +2622,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Form, Structure, and Sense",
           "difficulty": "medium",
           "type": "mc",
-          "text": "Nest boxes are checked on a fixed schedule, and a checker writes down only what the schedule asks for. One box, holding two unhatched eggs and the leg rings of three pied flycatchers (Ficedula hypoleuca), ______ what those records miss: how often a nest site changes hands.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "text": "Nest boxes are checked on a fixed schedule, and the checkers write down only what the schedule asks for. One box, which held two unhatched eggs and the leg rings of three pied flycatchers (Ficedula hypoleuca), ______ what those records miss: how often a nest site changes hands.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
           "choices": [
             "reveal",
             "have revealed",
@@ -2632,7 +2632,7 @@ window.SAT_PRACTICE_TESTS = [
           "correct": 2,
           "choiceNotes": [
             "Incorrect. “Reveal” is plural; the subject is the singular “box.”",
-            "Incorrect. “Have revealed” is plural, and the plural nouns inside the participial phrase cannot supply the subject.",
+            "Incorrect. “Have revealed” is plural, and the plural nouns inside the relative clause cannot supply the subject.",
             "Correct. The subject is “One box,” which is singular, so the singular “reveals” is required.",
             "Incorrect. “Are revealing” is plural as well as progressive, and the sentence states a standing fact."
           ]
@@ -2643,7 +2643,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Boundaries",
           "difficulty": "hard",
           "type": "mc",
-          "text": "At the bench a glassblower works against the clock. The gather has to turn from the instant it leaves the furnace, since two seconds of rest leave the piece sagging out of ______ the bench, the tools, and the annealing oven all sit within one turn of the chair.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "text": "Glassblowers work against the clock. The gather of molten glass has to turn from the instant it leaves the furnace, because two seconds of rest leave the piece sagging out of ______ the bench, the tools, and the annealing oven all sit within one turn of the chair.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
           "choices": [
             "shape, which is why",
             "shape. Which is why",
@@ -2769,7 +2769,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Transitions",
           "difficulty": "hard",
           "type": "mc",
-          "text": "The quilt was reexamined in 2016. Its stitching matches nothing else attributed to the workshop, and its dyes were fixed by a method unrecorded in the region. ______ the initials it carries are those of the workshop’s founder and of no one else.<br><br>Which choice completes the text with the most logical transition?",
+          "text": "When the quilt was reexamined in 2016, two of its features seemed to rule out the workshop it had long been assigned to: its stitching matched nothing else from that workshop, and its dyes were fixed by a method no one in the region had recorded. ______ the initials it carries are those of the workshop's founder and of no one else.<br><br>Which choice completes the text with the most logical transition?",
           "choices": [
             "For example,",
             "As a result,",
@@ -2918,7 +2918,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Text Structure and Purpose",
           "difficulty": "medium",
           "type": "mc",
-          "text": "Cochineal—the deep red of European painting and dyeing after the sixteenth century—comes from an insect that feeds on prickly pear. Spain controlled the supply for two hundred years, shipping the dried insects to Europe without any account of their origin, and naturalists there argued about whether the grains belonged to plants or to animals. The dispute ended when Melchior van Duyn turned a microscope on the grains and found each to be the dried body of an insect.<br><br>Which choice best states the main purpose of the text?",
+          "text": "The dye known as cochineal gave European painting its deep red for three centuries. Because the grains arrived already dried, and because Spain shipped them with no account of where they came from, they reached their buyers without an origin. Naturalists took the grains for plant matter, but Melchior van Duyn observed under a microscope that each one was the dried body of an insect that feeds on prickly pear.<br><br>Which choice best states the main purpose of the text?",
           "choices": [
             "To argue that cochineal produced a better red than the dyes available in Europe.",
             "To explain the optical principles that allowed early microscopes to resolve legs.",
@@ -2960,7 +2960,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Central Ideas and Details",
           "difficulty": "easy",
           "type": "mc",
-          "text": "Lascaux closed to visitors in 1963. Two decades of tourism allowed the breath and body heat of crowds to spread algae and calcite—a mineral crust—across painted walls that conservators could not safely clean. A full-size replica opened nearby during 1983, and two more copies now stand in for the cave, reproducing the paintings to within one millimeter. Entry to the original cave is now restricted to conservators, who monitor the painted walls on a fixed schedule.<br><br>Which choice best states the main idea of the text?",
+          "text": "Lascaux is a cave in France whose walls are covered with prehistoric paintings. These paintings were open to visitors until 1963. Two decades of tourism had allowed the breath and body heat of crowds to spread algae and calcite, a mineral crust, across the painted walls. Because conservators could not safely clean these deposits, the cave was closed. Full-size replicas opened nearby in 1983 and now stand in for the original, reproducing the paintings to within one millimeter.<br><br>Which choice best states the main idea of the text?",
           "choices": [
             "Lascaux was closed to protect the paintings, and replicas now stand in for the original cave.",
             "The replicas built near Lascaux since 1983 reproduce the paintings to within a millimeter.",
@@ -3065,7 +3065,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Central Ideas and Details",
           "difficulty": "medium",
           "type": "mc",
-          "text": "In 2021 Alvaro Benitez set the day logs of a Costa Rican field station beside its payroll. The logs record daily payments to local guides hired to find nesting sites. No salaried post covered that work, and the station’s staffing plan does not mention it. The same names appear in the logs season after season.<br><br>Based on the text, what can be concluded about the guides recorded in the day logs?",
+          "text": "At tropical field stations, local guides have traditionally been the finders of nesting sites and the keepers of knowledge about them. They have often been paid by the day, too. Formal staffing plans may not record these workers at all, but the day logs of one Costa Rican station name the same guides season after season.<br><br>Based on the text, what can be concluded about the guides recorded in the day logs?",
           "choices": [
             "The payroll was the source that first revealed their presence at the station.",
             "They were a steady part of the station’s workforce despite having no place in its formal structure.",
@@ -3074,10 +3074,10 @@ window.SAT_PRACTICE_TESTS = [
           ],
           "correct": 1,
           "choiceNotes": [
-            "Incorrect. The guides appear in the day logs; the payroll is the separate document set beside them, and no salaried post covered the work.",
-            "Correct. The same names appear season after season, which indicates steady work, while no salaried post covered it and the staffing plan does not mention it.",
+            "Incorrect. The guides are named in the day logs, and nothing in the text says a payroll revealed them.",
+            "Correct. The same guides are named season after season, which indicates steady work, while formal staffing plans may not record these workers at all.",
             "Incorrect. The same names recur from season to season, which is the opposite of being replaced each year.",
-            "Incorrect. The staffing plan is said not to mention the work at all; it is the day logs that record it."
+            "Incorrect. Formal staffing plans are said not to record these workers at all; it is the day logs that name them."
           ]
         },
         {
@@ -3086,7 +3086,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Inferences",
           "difficulty": "medium",
           "type": "mc",
-          "text": "A manual of 1864 set out the principle: the lens of a lighthouse concentrates lamplight in one narrow beam, and the beam sweeps the horizon as the lens turns. Every station received its own rhythm of flashes, known as the character of the light, fixed by the shape of the lens and by the speed of the clockwork driving it, so that navigators distinguished one light from the next along a stretch of coast. No station shared a rhythm with any other station nearby. Given the practice, a navigator timing the flashes of one unknown light ______<br><br>Which choice most logically completes the text?",
+          "text": "If two lighthouses stand on the same stretch of coast, how can a navigator at night tell one from the other? Nineteenth-century engineers came up with a practical answer. They gave the stations along each coast their own rhythms of flashes. These rhythms produce a signature, known as the character of the light, that no neighboring station repeats. Because the rhythms differ from station to station, a navigator who times the flashes of one unknown light ______<br><br>Which choice most logically completes the text?",
           "choices": [
             "could tell which station it was without consulting any chart.",
             "could identify the station provided the rhythms of that coast were known.",
@@ -3097,7 +3097,7 @@ window.SAT_PRACTICE_TESTS = [
           "choiceNotes": [
             "Incorrect. The rhythm distinguishes stations only for someone who knows which rhythm belongs to which, which is what a chart supplies.",
             "Correct. Each station has a distinct rhythm and no two neighbors share one, so timing the flashes identifies the station to a navigator who knows the local rhythms.",
-            "Incorrect. Lamp power is never compared; the rhythm comes from the lens and the clockwork.",
+            "Incorrect. Lamp power is never compared; what distinguishes the stations is the rhythm of the flashes.",
             "Incorrect. Nothing in the passage connects the rhythm of flashes to distance."
           ]
         },
@@ -3212,7 +3212,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Boundaries",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Three meteorites were recovered from the crater field that Teresa Boaventura has worked since 1974, and one of ______ an iron fragment with an unusually high nickel content, is the oldest meteorite yet dated.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "text": "Crater fields are scatters of fragments left by a single fall, and these fields often yield several meteorites at once. Three were recovered from the field that Teresa Boaventura has worked since 1974, and one of ______ an iron fragment with an unusually high nickel content, is the oldest meteorite yet dated.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
           "choices": [
             "them:",
             "them,",
@@ -3233,7 +3233,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Form, Structure, and Sense",
           "difficulty": "hard",
           "type": "mc",
-          "text": "Reopening the question in 2014, Cosimo Ferrante noted that historians have never settled how large that fleet was. Two eyewitnesses left records, and one is probably far fuller. The fuller of two surviving accounts of the siege, written within a decade by a man who questioned sailors, ______ a figure for ships in harbor.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+          "text": "Historians have never settled how large that fleet was. Two eyewitnesses left records of the siege, and these accounts differ greatly in length. The fuller of the two, which was written within a decade by a man who questioned sailors, ______ a figure for the ships in harbor.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
           "choices": [
             "give",
             "have given",
@@ -3244,7 +3244,7 @@ window.SAT_PRACTICE_TESTS = [
           "choiceNotes": [
             "Incorrect. “Give” is plural, and the subject “The fuller” is singular however many nouns follow it.",
             "Incorrect. “Have given” is plural, and the present perfect conflicts with a standing description of what the document says.",
-            "Correct. The subject is “The fuller,” which takes a singular verb. “Accounts” and “sailors” stand between the subject and the verb but cannot supply a new one.",
+            "Correct. The subject is “The fuller,” which takes a singular verb. “two” and “sailors” stand between the subject and the verb but cannot supply a new one.",
             "Incorrect. “Are giving” is plural and progressive, and the sentence states a standing fact about the document."
           ]
         },
@@ -3275,7 +3275,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Transitions",
           "difficulty": "easy",
           "type": "mc",
-          "text": "A stringed instrument sounds partly by means of the air in its body, a cavity whose size sets the pitch it reinforces. Plate thickness is thought to matter as well, because a stiffer plate moves little. ______ the varnish, long thought to be decoration only, adds mass and alters the response of the plate.<br><br>Which choice completes the text with the most logical transition?",
+          "text": "The body of a stringed instrument is a cavity, and the size of that cavity sets the pitch it reinforces. The thickness of the plates matters as well, because a stiffer plate moves very little. ______ the varnish, which was long thought to be decoration, adds mass and alters the way these plates respond.<br><br>Which choice completes the text with the most logical transition?",
           "choices": [
             "However,",
             "Moreover,",
@@ -3296,7 +3296,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Rhetorical Synthesis",
           "difficulty": "easy",
           "type": "mc",
-          "text": "While researching a topic, a student has taken the following notes:<br><br>• Kintsugi is a Japanese method of repairing broken pottery.<br>• The repairer joins the pieces with lacquer and dusts the seam with powdered gold.<br>• The gold makes the break the most visible feature of the object rather than hiding it.<br>• The seam follows the exact line along which the piece broke.<br>• Craftsmen have used the method since at least the fifteenth century.<br>• A mended bowl is often valued more highly than it was before it broke.<br><br>The student wants to explain what distinguishes kintsugi from ordinary repair. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
+          "text": "While researching a topic, a student has taken the following notes: • Kintsugi is a Japanese method of repairing broken pottery. • Repairers join the broken pieces with lacquer and dust the seam with powdered gold. • The gold makes the break the most visible feature of the object instead of hiding it. • The seam follows the exact line along which the piece broke. • Craftsmen have used the method since at least the fifteenth century. • A mended bowl is often valued more highly than it was before it broke.<br><br>The student wants to explain what distinguishes kintsugi from ordinary repair. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
           "choices": [
             "Kintsugi dates to at least the fifteenth century and is practiced in Japan on broken pottery.",
             "A bowl mended by kintsugi may be valued more highly after the repair than it was before the break.",
@@ -3317,7 +3317,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Rhetorical Synthesis",
           "difficulty": "easy",
           "type": "mc",
-          "text": "While researching a topic, a student has taken the following notes:<br><br>• The Green Belt Movement is a Kenyan tree-planting organization founded by Wangari Maathai in 1977.<br>• The movement paid rural women a small sum for the seedlings they planted.<br>• Payment came only after a seedling had survived its first years, and a seedling that died earned nothing.<br>• More than fifty million trees were planted in the movement's first three decades.<br>• Maathai received the Nobel Peace Prize in 2004.<br><br>The student wants to explain how the movement’s payment scheme encouraged results. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
+          "text": "While researching a topic, a student has taken the following notes: • The Green Belt Movement is a Kenyan tree-planting organization. • Wangari Maathai founded it in 1977. • The movement paid rural women a small sum for the seedlings they planted. • It paid them only after a seedling had survived its first years. • Seedlings that died earned nothing. • More than fifty million trees were planted in the movement's first three decades. • Maathai received the Nobel Peace Prize in 2004.<br><br>The student wants to explain how the movement’s payment scheme encouraged results. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
           "choices": [
             "Wangari Maathai founded the Green Belt Movement in Kenya in 1977 and received the Nobel Peace Prize in 2004.",
             "The Green Belt Movement planted more than fifty million trees during its first three decades in Kenya.",
@@ -3787,7 +3787,7 @@ window.SAT_PRACTICE_TESTS = [
           "skill": "Rhetorical Synthesis",
           "difficulty": "hard",
           "type": "mc",
-          "text": "While researching a topic, a student has taken the following notes:<br><br>• Sponge divers recovered the Antikythera mechanism from a Roman-era wreck in 1901.<br>• The device is built from bronze gearwheels, and at least thirty of them survive.<br>• Dials on its face showed the positions of the sun and the moon.<br>• Other dials predicted eclipses.<br>• No comparable geared device is known from the thousand years that followed.<br>• X-ray imaging in the 1970s first revealed how intricate the gearing was.<br><br>The student wants to convey why the mechanism is considered remarkable. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
+          "text": "While researching a topic, a student has taken the following notes: • The Antikythera mechanism is an ancient Greek device built from bronze gearwheels. • Sponge divers recovered it from a Roman-era wreck in 1901. • At least thirty of its gearwheels survive. • Its dials showed the positions of the sun and the moon. • Other dials on it predicted eclipses. • No comparable geared device is known from the thousand years that followed. • X-ray imaging in the 1970s first revealed how intricate its gearing was.<br><br>The student wants to convey why the mechanism is considered remarkable. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
           "choices": [
             "With at least thirty gears modeling the sun and moon, the mechanism has no known counterpart for a thousand years.",
             "Recovered from a Roman-era wreck in 1901, the Antikythera mechanism is a geared bronze device.",
