@@ -2041,6 +2041,7 @@ var MorettiSignals = (function () {
      had at most one wrong: checking had nothing left to win back (Mario).
      One rule for the sitting's conditions, the habit across sittings and
      the report's module reading. */
+  var LEFT_WINDOW_TIMES = 5, LEFT_WINDOW_MS = 180000;   // provisional (see sittingConditions)
   var RUSHED_LEFT_MIN = 5, RUSHED_POOR_SHARE = 1 / 3, RUSHED_NEAR_PERFECT_WRONG = 1;
   // 0 not rushed, 1 rushed, 2 rushed with a third or more of the clock left.
   function rushedLevel(secKey, leftMin, clockMin, n, right) {
@@ -2378,6 +2379,8 @@ var MorettiSignals = (function () {
        long-break    a gap between modules over 15 minutes (the SAT: 10
                      between sections, none between modules)
        away          3+ minutes away from the test (tab hidden, gaps)
+       left-window   the test page hidden 5+ times (2+ s each) or 3+
+                     minutes in all (d.hs, 2026-09-28 on; provisional)
        rushed        a module handed in with more than 5 minutes on its
                      clock, scaled for extended time, unless it had at most
                      one wrong (rushedLevel; Luca, 2026-09-27); the detail
@@ -2457,7 +2460,30 @@ var MorettiSignals = (function () {
     }
     var awayMs = ((d && d.iv) || []).reduce(function (a, v) { return a + ((v && v.ms) || 0); }, 0);
     if (d && Array.isArray(d.iv)) out.awayMin = Math.round(awayMs / 6000) / 10;
-    if (awayMs >= 180000) out.signals.push({ id: 'away', label: 'Time away from the test', detail: (Math.round(awayMs / 6000) / 10) + ' minutes away from the test window' });
+    /* Left the test window (Luca, 2026-09-29: switching away is poor
+       conditions). d.hs, saved from 2026-09-28 on, logs every time the test
+       page was hidden (another tab, app or the phone). Counted when 2+
+       seconds (shorter is focus noise); said at 5+ times or 3+ minutes in
+       all. PROVISIONAL: the first record with it (John-Carlos 9/28) left 51
+       times, about 10 minutes; re-set the line once the roster has more.
+       When it is said, it carries the time away too, so 'away' is not
+       said again. */
+    var hsList = (d && Array.isArray(d.hs)) ? d.hs.filter(function (h) { return h && h.ms >= 2000; }) : null;
+    var leftSaid = false;
+    if (hsList) {
+      var hsMs = hsList.reduce(function (a, h) { return a + h.ms; }, 0);
+      out.leftWindow = { times: hsList.length, min: Math.round(hsMs / 6000) / 10 };
+      if (hsList.length >= LEFT_WINDOW_TIMES || hsMs >= LEFT_WINDOW_MS) {
+        var bySec = {};
+        hsList.forEach(function (h) { var k = h.s === 'math' ? 'Math' : 'Reading and Writing'; bySec[k] = (bySec[k] || 0) + 1; });
+        var parts = Object.keys(bySec).map(function (k) { return bySec[k] + ' in ' + k; });
+        out.signals.push({ id: 'left-window', label: 'Left the test window',
+          detail: hsList.length + ' time' + (hsList.length === 1 ? '' : 's') + ', about ' + Math.max(1, Math.round(hsMs / 60000)) + ' minute' + (Math.round(hsMs / 60000) === 1 ? '' : 's') + ' in all' +
+                  (parts.length > 1 ? ' (' + parts.join(', ') + ')' : '') + ': another tab, app or phone during the test' });
+        leftSaid = true;
+      }
+    }
+    if (awayMs >= 180000 && !leftSaid) out.signals.push({ id: 'away', label: 'Time away from the test', detail: (Math.round(awayMs / 6000) / 10) + ' minutes away from the test window' });
     // Rushed (Luca, 2026-09-27): handed in with more than 5 minutes on the clock. Nothing else decides it.
     mods.forEach(function (m) { m.rushed = m.answered > 0 ? rushedLevel(m.sec, m.unusedMs / 60000, m.clockMs / 60000, m.n, m.right) : 0; });
     var rushed = mods.filter(function (m) { return m.rushed > 0; });
@@ -4069,7 +4095,7 @@ var MorettiSignals = (function () {
     rushedLevel: rushedLevel,
     approachEvidence: approachEvidence, approachCompetent: approachCompetent, APPROACH_RW_DOMAINS: APPROACH_RW_DOMAINS, APPROACH_MIN_SHOWN: APPROACH_MIN_SHOWN,
     APPROACH_LESSONS: APPROACH_LESSONS,
-    VERSION: 42,
+    VERSION: 43,
     attemptAbility: attemptAbility,
     FOCUS_GATES: { domainClear: FOCUS_DOMAIN_CLEAR, skillLead: FOCUS_SKILL_LEAD, noOffsetsPenalty: FOCUS_NO_OFFSETS_PENALTY },
     practiceEvidence: practiceEvidence,

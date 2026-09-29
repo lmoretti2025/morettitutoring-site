@@ -224,6 +224,7 @@
   /* ═══ SKILL DIAGNOSIS ═══ Mastered/Inefficient/Stuck/Rushed rollup — see
      index.html's identical CSS (this is the standalone report's own copy,
      kept in sync by hand). */
+  .unjudged-note { margin: 0 0 12px; padding: 10px 12px; border-left: 3px solid #9A8F80; background: #F5F2EE; border-radius: 0 8px 8px 0; font-size: 12.5px; line-height: 1.55; color: var(--ink); }
   .skilldx-approach { margin: 0 0 12px; padding: 10px 12px; border-left: 3px solid #8A5A9E; background: #F6F0F8; border-radius: 0 8px 8px 0; font-size: 12.5px; line-height: 1.55; color: var(--ink); }
   .skilldx-card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow); padding: 20px 24px; }
   .skilldx-card > .behavior-focus { margin-bottom: 12px; }
@@ -1183,7 +1184,7 @@
 </script>
 <script src="time-budgets.js?v=20260912a"></script>
 <script src="grid-in.js?v=20260910a"></script>
-<script src="signals.js?v=20260929b"></script>
+<script src="signals.js?v=20260929c"></script>
 <script src="desmos-tags.js?v=20260916c"></script>
 <script src="question-flag.js?v=20260925a"></script>
 <script src="report-tour.js?v=20260927g"></script>
@@ -4110,6 +4111,16 @@
      sessions get planned in. So domains carry the ranked claim and skills
      stay as descriptive detail underneath. */
   var domainBucketsDx = {};
+  /* ═══ CAN'T BE JUDGED (audit 2026-09-29) ═══ An area where a third or
+     more of 6+ answers went by too fast to have been read says nothing about
+     what the student knows: the same line session prep uses (signals.js
+     missProfile, audit 7). Such an area is not ranked, not named as a place
+     to start, and the page says so. John-Carlos 9/28: prep said Algebra
+     can't be judged while the report named it the place to start. */
+  function unjudgedDomain(dom) {
+    var b = domainBucketsDx[dom];
+    return !!b && b.total >= 6 && (b.skimmed + b.rushed) * 3 >= b.total;
+  }
   function domainBucketFor(domName) {
     return domainBucketsDx[domName] || (domainBucketsDx[domName] =
       { mastered: 0, skimmed: 0, inefficient: 0, stuck: 0, onpace: 0, rushed: 0, total: 0, skills: {} });
@@ -4806,7 +4817,7 @@
                notRead: b.rushed + b.skimmed,
                total: b.total };
     });
-    var rows = allRows.filter(function (r) { return r.total >= MIN_JUDGEABLE_N; });
+    var rows = allRows.filter(function (r) { return r.total >= MIN_JUDGEABLE_N && !unjudgedDomain(r.skill); });
     var thinRows = allRows.filter(function (r) { return r.total > 0 && r.total < MIN_JUDGEABLE_N; });
 
     /* The student's own baseline rate for each failure mode, used as the
@@ -6359,6 +6370,10 @@
         var tail = Math.ceil(n / 3), rushed = 0;
         for (var i = n - tail; i < n; i++) { var b2 = bud(i); if (first[i] && b2 > 0 && first[i].dur < 0.35 * b2 && !rows[i].skipped) rushed++; }
         var clockSec = (mv.clockMin || 0) * 60, unused = Math.max(0, clockSec - lastEnd);
+        // The clock at hand-in (sb), as the conditions card reads it, so the two never differ by a minute (audit 2026-09-29).
+        var rawS = (data.s || []).filter(function (x) { return x.k === mv.key; })[0];
+        var sbSec = rawS && Array.isArray(rawS.sb) ? rawS.sb[mv.lo ? 1 : 0] : null;
+        if (typeof sbSec === 'number' && sbSec > 0 && clockSec > 0) unused = Math.max(0, clockSec - Math.max(sbSec, lastEnd));
         var p1 = paceOf(0, half), p2 = paceOf(half, n), a1 = accOf(0, half), a2 = accOf(half, n);
         var blanks = rows.filter(function (r) { return r.skipped; }).length, right = rows.filter(function (r) { return r.ok; }).length;
         var reading;
@@ -6588,6 +6603,19 @@
       ib.style.display = 'none';
     }
     var shown = c.signals.filter(function (x) { return !(interrupted && x.id === 'away'); });
+    /* What rushing cost (audit 2026-09-29, John-Carlos): Module 1 decides
+       which Module 2 comes next. A rushed Module 1 followed by the easier
+       Module 2 is said plainly, since the easier module caps the score. */
+    var routed = '';
+    (data.s || []).forEach(function (S) {
+      if (S.v !== 'Easier' || S.mo) return;
+      var m1 = (c.modules || []).filter(function (m) { return m.sec === S.k && m.module === 1 && m.rushed > 0; })[0];
+      if (!m1) return;
+      var nm = S.k === 'math' ? 'Math' : 'Reading and Writing';
+      routed += '<li><span><b>What rushing cost:</b> ' + nm + ' Module 1 was rushed and ended at ' +
+        (typeof m1.right === 'number' ? m1.right + ' of ' + m1.n + ' right' : 'a lower score') +
+        ', which sent you to the easier Module 2. The easier Module 2 caps how high the ' + nm + ' score can go.</span></li>';
+    });
     el.className = 'cond-card ' + (poor ? 'cond-poor' : 'cond-fair');
     el.innerHTML =
       '<div class="cond-eye">How this test was taken</div>' +
@@ -6595,7 +6623,7 @@
                                        : 'One thing to change before the next test.') + '</div>' +
       '<ul class="cond-list">' + interrupted + shown.map(function (x) {
         return '<li><span><b>' + esc(x.label) + ':</b> ' + esc(x.detail) + '.</span></li>';
-      }).join('') + '</ul>' +
+      }).join('') + routed + '</ul>' +
       '<div class="cond-foot">Test day is one sitting in the morning: about 10 minutes between the two sections, every minute used, and a check of each module before it is submitted. The closer practice gets to that, the more its score means.</div>';
     el.style.display = '';
     conditionsShown = c;
@@ -6665,6 +6693,8 @@
     var desmosTags = window.DESMOS_TAGS_REVIEWED === true ? window.DESMOS_TAGS : null;
     function approachOf(sec, r, ri, tMs, qBudgetMs) {
       if (!approachOn || !secCompetent(sec.key)) return null;
+      // An area that can't be judged (too many answers too fast) can't have its misses called strategy either (audit 2026-09-29, Alexa 9/1).
+      if (r.q && unjudgedDomain(r.q.domain)) return null;
       var dr = decodedRows[sec.key], row = dr && dr.rows[ri], tag = null;
       if (desmosTags && dr && MSa.itemKey) { var t = desmosTags[MSa.itemKey(dr.qs[ri])]; tag = typeof t === 'number' ? t : null; }
       return MSa.approachEvidence({
@@ -7078,8 +7108,14 @@
       // the section total so the headline verdict and the counts below it
       // can never disagree with each other.
       var verdictCls = ratio >= 1.1 ? 'over' : (ratio <= 0.9 ? 'under' : 'on');
+      /* Fast because rushed is not good pace (audit 2026-09-29: "Math: 45m
+         under target pace" sat under a card saying the test was rushed, on
+         20 reports). With a rushed module in the section it says so. */
+      var rushedHere = !!(conditionsShown && (conditionsShown.modules || []).some(function (m) { return m.sec === sec.key && m.rushed > 0; }));
+      if (ratio <= 0.9 && rushedHere) verdictCls = 'over';
       var verdictTxt = (sec.rows.some(function (x) { return x.firstVisitMs != null; }) ? 'First looks: ' : '') + (ratio >= 1.1
         ? '+' + fmtMin(r.debtMs) + ' over target pace'
+        : ratio <= 0.9 && rushedHere ? fmtMin(-r.debtMs) + ' faster than target pace, because it was rushed'
         : (ratio <= 0.9 ? fmtMin(-r.debtMs) + ' under target pace' : 'on target pace'));
 
       // Shared pixel scale for the two stacked bars: whichever of budget,
@@ -7884,7 +7920,7 @@
         var starts = [];
         var shaky = function (dom) {
           var b = (domainBucketsDx || {})[dom];
-          if (!b || !b.total || (best && best.name === dom)) return false;
+          if (!b || !b.total || (best && best.name === dom) || unjudgedDomain(dom)) return false;
           return (b.mastered + b.skimmed + b.inefficient) / b.total < PREREQ_SHAKY_BELOW;
         };
         if (secKeys.indexOf('reading-writing') !== -1 && shaky('Standard English Conventions')) starts.push('Standard English Conventions (grammar and punctuation) in Reading and Writing');
@@ -8090,6 +8126,32 @@
     } catch (e) { if (window.console) console.warn('plain layer:', e); }
   })();
 
+  /* ═══ CAN'T BE JUDGED, SAID (audit 2026-09-29) ═══ The areas unjudgedDomain
+     leaves out, named under the points and in What to relearn, and handed to
+     the walkthrough (planInputs.unjudged) so it doesn't start there either. */
+  /* The older "Read this one with care: you worked N of M minutes" note under
+     the score says what the conditions card already said, and points at a
+     section below: when the card says the test was rushed, it goes. */
+  if (conditionsShown && (conditionsShown.signals || []).some(function (x) { return x.id === 'rushed'; })) {
+    Array.prototype.forEach.call(document.querySelectorAll('.tile-unworked'), function (e) { e.style.display = 'none'; });
+  }
+  (function unjudgedNote() {
+    var list = Object.keys(domainBucketsDx).filter(unjudgedDomain).map(function (d) {
+      var b = domainBucketsDx[d]; return { name: d, fast: b.skimmed + b.rushed, total: b.total };
+    });
+    planInputs.unjudged = list.map(function (x) { return x.name; });
+    if (!list.length) return;
+    var e = function (t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+    var line = list.map(function (x) { return '<b>' + e(x.name) + '</b> (' + x.fast + ' of ' + x.total + ' answers)'; });
+    var html = '<p class="unjudged-note"><b>Can\u2019t judge yet:</b> ' + (line.length < 2 ? line.join('') : line.slice(0, -1).join(', ') + ' and ' + line[line.length - 1]) +
+      '. Too many of these answers came faster than the questions can be read to say what you know there, so the next test, taken at a steady pace, will.</p>';
+    // On the cards themselves: renderBridge empties bridge-note-outer each time it redraws.
+    ['skilldx-card', 'bridge-card'].forEach(function (id) {
+      var host = document.getElementById(id);
+      if (host) host.insertAdjacentHTML('afterbegin', html);
+    });
+  })();
+
   /* ═══ PAGE 2, HEADLINE FIRST (2026-09-27) ═══
      The evidence page was six open sections of charts and fine print. Each
      now shows its heading and one plain sentence read from its own numbers,
@@ -8116,6 +8178,8 @@
         // The lead and its reason: two sentences when they are short enough to read at a glance.
         var all = txt(q('skilldx-headline')), one = first(all), two = first(all.slice(one.length).trim());
         var base = (two && (one + ' ' + two).length <= 230) ? one + ' ' + two : one;
+        var unj = planInputs.unjudged || [];
+        if (unj.length) base += ' ' + andJoin(unj) + ' can\u2019t be judged from this test: too many answers came too fast.';
         // Strategy, not knowledge: said in the line itself, since the card is folded (Luca, 2026-09-27).
         var A = planInputs.approach;
         return base + (A && A.n ? ' ' + A.n + ' of the misses are a skill to practice rather than a topic to relearn, mostly ' + andJoin(A.skills.slice(0, 2)) + ': the method for each is under Show details.' : ''); } },
