@@ -490,7 +490,8 @@
         var ranLate = (pace2.blank || 0) + (pace2.ranOut || 0);
         var head = ranLate ? modName + ': the clock caught up with you.'
           : methodN ? 'A few right answers took so long they cost time.'
-          : 'A few answers came too fast to have read the question.';
+          /* "A few" only for a few (stats audit, 2026-09-29: it was said of 8 to 12). */
+          : (pace2.tooFast > 4 ? cap(numWord(pace2.tooFast)) + ' answers came too fast to have read the question.' : 'A few answers came too fast to have read the question.');
         var sayClock = ranLate ? 'By the end, ' + pl(ranLate, 'question was', 'questions were') + ' hurried or left blank. The fix is a skill, not speed: <strong>know when to move on</strong>.'
            : methodN ? cap(pl(methodN, 'right answer', 'right answers')) + ' ran far over time while the clock was short. The fix is a skill, not speed: <strong>know when to move on</strong>.'
            : cap(pl(pace2.tooFast, 'answer', 'answers')) + ' took only seconds, <strong>less than it takes to read the question</strong>. Reading those through is the fix.';
@@ -661,10 +662,15 @@
     }
 
     // ---- the plan: three things, from the same areas and the clock
+    /* An area where a third or more of the answers came too fast can't be
+       judged (planInputs.unjudged, stats audit 2026-09-29): never start there. */
+    var unjudged = function (name) {
+      return (P.unjudged || []).some(function (u) { return u && (name === u || String(name).indexOf(u + ' ') === 0); });
+    };
     var tasks = [];
-    if (P.prereq && P.prereq.name) tasks.push({ h: P.prereq.name, p: P.prereq.kind === 'prereq' ? 'This one comes first: ' + P.prereq.blocks + ' builds on it.' : 'The cheapest points on the test. Start here.' });
+    if (P.prereq && P.prereq.name && !unjudged(P.prereq.name)) tasks.push({ h: P.prereq.name, p: P.prereq.kind === 'prereq' ? 'This one comes first: ' + P.prereq.blocks + ' builds on it.' : 'The cheapest points on the test. Start here.' });
     areas.forEach(function (a) {
-      if (tasks.length < 3 && !tasks.some(function (t) { return t.h === a.name; })) {
+      if (tasks.length < 3 && !unjudged(a.name) && !tasks.some(function (t) { return t.h === a.name; })) {
         tasks.push({ h: a.name, p: clearArea(a) ? 'Relearn it from the ground up, then practice until it holds under time.'
                                                 : 'The strongest lead on this test. Worth checking first, before planning around it.' });
       }
@@ -676,8 +682,9 @@
     var attempted = Math.max(1, totalQ - (R.skipped || 0));
     if (!areas.length && P.causes && P.causes.content / attempted >= 0.15) {
       var hasRW = sections.some(function (x) { return x.key === 'reading-writing'; }), hasM = sections.some(function (x) { return x.key === 'math'; });
-      var found = [hasRW ? 'Standard English Conventions in Reading & Writing' : '', hasM ? 'Algebra in Math' : ''].filter(String).join(', and ');
-      tasks.push({ h: 'Core material across the board', p: 'The misses are spread over most areas, so start with the foundations: ' + found + '.' });
+      var found = [hasRW && !unjudged('Standard English Conventions') ? 'Standard English Conventions in Reading & Writing' : '',
+                   hasM && !unjudged('Algebra') ? 'Algebra in Math' : ''].filter(String).join(', and ');
+      if (found) tasks.push({ h: 'Core material across the board', p: 'The misses are spread over most areas, so start with the foundations: ' + found + '.' });
     }
     var paceLost = (P.pace && (P.pace.blank + P.pace.ranOut)) || 0;
     if (rushedSitting) {
