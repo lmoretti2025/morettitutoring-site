@@ -19,7 +19,7 @@
 (function () {
   'use strict';
 
-  var DATA_SRC = 'curriculum-data.js?v=20260929b';
+  var DATA_SRC = 'curriculum-data.js?v=20260929c';
   var VIDEO_SRC = 'curriculum-videos.js?v=20260927a';
 
   /* ---------- small helpers ---------- */
@@ -52,6 +52,20 @@
     '#cu-root .cu-overall{display:flex;align-items:center;gap:14px;margin:0 0 1.4rem;font-size:.85rem;color:var(--mid)}',
     '#cu-root .cu-bar{flex:1;max-width:360px;height:8px;border-radius:8px;background:#e6e3de;overflow:hidden}',
     '#cu-root .cu-bar i{display:block;height:100%;background:var(--red,#B0271C);border-radius:8px;transition:width .6s var(--ease,ease)}',
+    '#cu-root .cu-guide{background:#fff;border-radius:14px;box-shadow:var(--shadow);margin:0 0 1.6rem;overflow:hidden}',
+    '#cu-root .cu-guide>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.95rem 1.2rem}',
+    '#cu-root .cu-guide>summary::-webkit-details-marker{display:none}',
+    '#cu-root .cu-guide>summary b{font-size:.95rem;font-weight:600}#cu-root .cu-guide>summary small{display:block;font-size:.78rem;color:var(--mid);font-weight:300;margin-top:2px}',
+    '#cu-root .cu-guide-tog{width:.55rem;height:.55rem;border-right:1.5px solid var(--mid);border-bottom:1.5px solid var(--mid);transform:rotate(45deg);transition:transform .2s;flex:none;margin-right:.2rem}',
+    '#cu-root .cu-guide[open] .cu-guide-tog{transform:rotate(-135deg)}',
+    '#cu-root .cu-guide-body{padding:0 1.2rem 1.1rem;border-top:1px solid rgba(17,17,17,.06)}',
+    '#cu-root .cu-guide-lead{font-size:.86rem;color:var(--mid);margin:.9rem 0 .6rem}',
+    '#cu-root .cu-guide ol{margin:0;padding:0 0 0 1.2rem}#cu-root .cu-guide li{padding:.55rem 0 .55rem .2rem;border-bottom:1px solid rgba(17,17,17,.05)}#cu-root .cu-guide li:last-child{border-bottom:0}',
+    '#cu-root .cu-guide li p{font-size:.84rem;margin:.35rem 0 0;line-height:1.5}',
+    '#cu-root .cu-gchips{display:flex;flex-wrap:wrap;gap:.3rem}',
+    '#cu-root .cu-gchip{font:inherit;font-size:.74rem;font-weight:600;padding:2px 9px;border-radius:999px;border:1px solid rgba(17,17,17,.14);background:#fff;color:inherit;cursor:pointer}',
+    '#cu-root .cu-gchip:hover{border-color:var(--red,#B0271C);color:var(--red,#B0271C)}',
+    '#cu-root .cu-gchip.done{background:rgba(46,125,80,.1);border-color:transparent;color:var(--cu-good)}',
     '#cu-root .cu-resume{display:flex;align-items:center;justify-content:space-between;gap:1rem;background:#fff;border-radius:14px;box-shadow:var(--shadow);padding:1rem 1.2rem;margin:0 0 1.6rem;border-left:4px solid var(--red,#B0271C)}',
     '#cu-root .cu-resume b{display:block;font-weight:600}#cu-root .cu-resume span{font-size:.85rem;color:var(--mid)}',
     '#cu-root .cu-btn{display:inline-flex;align-items:center;gap:.5rem;border:0;border-radius:999px;background:var(--red,#B0271C);color:#fff;font:600 .85rem var(--hel,Poppins,sans-serif);padding:.75rem 1.3rem;cursor:pointer;white-space:nowrap;transition:transform .15s,box-shadow .15s}',
@@ -339,7 +353,7 @@
           (done ? '<circle class="cu-ringfill" cx="42" cy="42" r="' + R + '" fill="none" stroke="var(--red,#B0271C)" stroke-width="7" stroke-linecap="round" stroke-dasharray="' + Math.max(1, CIRC * pct / 100).toFixed(1) + ' ' + CIRC.toFixed(1) + '" transform="rotate(-90 42 42)"/>' : '') + '</svg><b>' + pct + '%</b></div>' +
           '<div class="cu-stat"><b>' + lessons.length + '</b><span>lessons</span></div><div class="cu-stat"><b>' + total + '</b><span>parts</span></div><div class="cu-stat"><b>' + done + '</b><span>done</span></div></div></div>' +
         '</section>' +
-      resume +
+      resume + guideHtml(c) +
       '<div class="cu-units">' + c.domains.map(function (d, di) {
         var dDone = d.lessons.filter(function (l) { return lessonDoneCount(l) === l.parts.length; }).length;
         return '<section class="cu-unit cu-in" style="--d:' + (di + 2) + '"><div class="cu-unit-h">' +
@@ -354,6 +368,28 @@
       }).join('') + '</div>';
   }
   function calcBadge(l) { return l.calc ? '<span class="cu-calc">Calculator</span>' : ''; }
+  /* SUGGESTED ORDER (course guide in the course files, Luca 2026-09-29):
+     advice beside the course, folded by default. The units below stay in
+     course order and nothing is gated on it. Lessons inside each step are
+     in course order on purpose (prerequisites). */
+  function guideHtml(c) {
+    var g = c.guide;
+    if (!g || !g.steps || !g.steps.length) return '';
+    var open = false;
+    try { open = localStorage.getItem('moretti_cu_guide_open') === '1'; } catch (e) {}
+    return '<details class="cu-guide cu-in" style="--d:1"' + (open ? ' open' : '') + '><summary><span><b>' + esc(g.title || 'Suggested order') + '</b>' +
+        (g.audience ? '<small>' + esc(g.audience) + '</small>' : '') + '</span><span class="cu-guide-tog" aria-hidden="true"></span></summary>' +
+      '<div class="cu-guide-body">' + (g.lead ? '<p class="cu-guide-lead">' + esc(g.lead) + '</p>' : '') +
+      '<ol>' + g.steps.map(function (st) {
+        var chips = (st.lessons || []).map(function (id) {
+          var hit = findLesson(id);
+          if (!hit) return '';
+          var fin = lessonDoneCount(hit.l) === hit.l.parts.length;
+          return '<button type="button" class="cu-gchip' + (fin ? ' done' : '') + '" data-lesson="' + esc(id) + '" title="' + esc(hit.l.num + ' ' + hit.l.title) + '">' + esc(hit.l.num) + '</button>';
+        }).join('');
+        return '<li><div class="cu-gchips">' + chips + '</div><p>' + esc(st.text || '') + '</p></li>';
+      }).join('') + '</ol></div></details>';
+  }
   function switchCourse(id) {
     if (id === view.course) return;
     view.course = id;
@@ -681,7 +717,14 @@
     root = document.getElementById('cu-root');
     if (!root) return;
     injectCss();
-    if (!root.__wired) { root.addEventListener('click', onClick); root.__wired = true; }
+    if (!root.__wired) {
+      root.addEventListener('click', onClick);
+      // toggle does not bubble: caught on the way down.
+      root.addEventListener('toggle', function (e) {
+        if (e.target.classList && e.target.classList.contains('cu-guide')) { try { localStorage.setItem('moretti_cu_guide_open', e.target.open ? '1' : '0'); } catch (x) {} }
+      }, true);
+      root.__wired = true;
+    }
     if (!window.CURRICULUM) root.innerHTML = '<div class="cu-state">Loading the curriculum&hellip;</div>';
     ensureData().then(function () {
       if (!courses().length) { root.innerHTML = '<div class="cu-state">The curriculum could not be loaded. Check your connection and try again.</div>'; return; }
