@@ -19,7 +19,7 @@
 (function () {
   'use strict';
 
-  var DATA_SRC = 'curriculum-data.js?v=20260927a';
+  var DATA_SRC = 'curriculum-data.js?v=20260929a';
   var VIDEO_SRC = 'curriculum-videos.js?v=20260927a';
 
   /* ---------- small helpers ---------- */
@@ -93,6 +93,8 @@
     '#cu-root .cu-lesson{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:.8rem;width:100%;text-align:left;border:0;background:#fff;padding:.8rem 1.2rem;cursor:pointer;border-bottom:1px solid var(--cu-line);font-family:inherit;color:inherit}',
     '#cu-root .cu-lesson:last-child{border-bottom:0}#cu-root .cu-lesson:hover{background:var(--cu-soft)}',
     '#cu-root .cu-num{font-family:var(--display,Georgia,serif);font-weight:700;color:var(--mid);font-size:.95rem;margin-right:.2rem}',
+    // A calculator unit (calc in the course files, set by hand per lesson): the deck's Desmos green.
+    '#cu-root .cu-calc{display:inline-block;vertical-align:2px;margin-left:.45rem;padding:1px 7px;border-radius:999px;background:rgba(13,122,95,.1);color:#0d7a5f;font-size:.66rem;font-weight:600;letter-spacing:.02em;white-space:nowrap}',
     '#cu-root .cu-lt{font-size:.95rem;font-weight:500}#cu-root .cu-lt small{display:block;font-size:.78rem;color:var(--mid);font-weight:300;margin-top:2px}',
     '#cu-root .cu-dots{display:flex;gap:4px;align-items:center}',
     '#cu-root .cu-dots i{width:9px;height:9px;border-radius:50%;background:#e2dfda}#cu-root .cu-dots i.on{background:var(--cu-good)}',
@@ -346,11 +348,12 @@
           d.lessons.map(function (l) {
             var n = lessonDoneCount(l);
             return '<button type="button" class="cu-lesson" data-lesson="' + esc(l.id) + '">' + ring(n, l.parts.length) +
-              '<span class="cu-lt"><span class="cu-num">' + esc(l.num) + '</span> ' + esc(l.title) + '<small>' + pl(l.parts.length, 'part') + (n && n < l.parts.length ? ' &middot; ' + n + ' done' : '') + '</small></span>' +
+              '<span class="cu-lt"><span class="cu-num">' + esc(l.num) + '</span> ' + esc(l.title) + calcBadge(l) + '<small>' + pl(l.parts.length, 'part') + (n && n < l.parts.length ? ' &middot; ' + n + ' done' : '') + '</small></span>' +
               '<span class="cu-go">' + (n === l.parts.length ? 'Review' : n ? 'Continue' : 'Start') + ' &rsaquo;</span></button>';
           }).join('') + '</section>';
       }).join('') + '</div>';
   }
+  function calcBadge(l) { return l.calc ? '<span class="cu-calc">Calculator</span>' : ''; }
   function switchCourse(id) {
     if (id === view.course) return;
     view.course = id;
@@ -399,7 +402,7 @@
       '<aside class="cu-panel"><div class="cu-panel-h"><button type="button" class="cu-back" data-home>&larr; All ' + esc(c.title) + ' lessons</button>' +
         '<div class="cu-crumb">' + esc(c.title + ' \u203a ' + d.name) + '</div>' +
         '<div class="cu-ltitle"><button type="button" class="cu-arrow" data-lesson-go="' + (prev ? esc(prev.l.id) : '') + '"' + (prev ? '' : ' disabled') + ' aria-label="Previous lesson">&lsaquo;</button>' +
-        '<b>' + esc(l.num + ' ' + l.title) + '</b>' +
+        '<b>' + esc(l.num + ' ' + l.title) + calcBadge(l) + '</b>' +
         '<button type="button" class="cu-arrow" data-lesson-go="' + (next ? esc(next.l.id) : '') + '"' + (next ? '' : ' disabled') + ' aria-label="Next lesson">&rsaquo;</button></div></div>' +
         '<div class="cu-steps">' + steps + '</div></aside>' +
       '<main class="cu-main" id="cu-main"></main></div></div>';
