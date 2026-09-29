@@ -2555,6 +2555,67 @@ var MorettiSignals = (function () {
      cfg.budgetSeconds(sec, dom, skill, diff) -> seconds: classifies old
      records' misses (fast under 0.15x, sink at 1.5x, else worked).
      Returns { tests, overall, byDomain: { dom: { ..., bySkill } }, qbUnmapped }. */
+  /* -- APPROACH MISSES (Luca, 2026-09-27) ---------------------------------
+     A competent student's miss can be the question type, not the knowledge:
+     Aryan (1330) had grammar rules 12/14 and Transitions 5/5 but reading
+     skills 21/31, with Command of Evidence worked for 216 and 189 s against
+     95 and still wrong, and 5 misses narrowed to two choices. One rule for
+     the report and session prep. Only on a competent sitting: Reading and
+     Writing 600+ for the reading kinds, Math 600+ for the Desmos kind
+     (approachCompetent); below that, a miss is read as content. Only with evidence on the miss itself, never by the skill alone:
+       'long'    worked 1.5x its budget or more and still wrong
+       'two'     narrowed to two choices with the right one still in, and
+                 picked the other
+       'desmos'  a math question whose fastest route is graphing, missed
+                 without the calculator (reviewed Desmos tags only)
+       'context' any other Words in Context miss (Luca, 2026-09-27: a
+                 reading skill built over time, answered by understanding
+                 what the sentence needs, not by knowing the word)
+       'reading' any other miss in a reading skill (Luca, 2026-09-27:
+                 reading questions are answered with a reading strategy,
+                 not learned as material). So on a competent sitting every
+                 reading-skill miss is strategy; long and two only say how.
+     Reading and Writing: Information and Ideas, Craft and Structure and
+     Expression of Ideas take 'long' and 'two'; Standard English
+     Conventions is rules to learn, never approach. Math takes 'desmos'
+     only: a long wrong math answer can as well be a method not known.
+     x: { sec, domain, skill, ok, blank, clock (billed to pace), budgetRatio,
+          choicesLeft, keyOutFinal, fastRoute, calcActive }.
+     Returns 'long' | 'two' | 'desmos' | 'context' | 'reading' | null. */
+  // A test names it at 3+ such misses: one or two is an anecdote (roster check 2026-09-27:
+  // 1 of 22 and 1 of 17 read as a strategy week otherwise); session prep pools the rest.
+  var APPROACH_MIN_COMPOSITE = 1200, APPROACH_MIN_SECTION = 600, APPROACH_LONG_REL = 1.5, APPROACH_MIN_SHOWN = 3;
+  var APPROACH_RW_DOMAINS = { 'Information and Ideas': 1, 'Craft and Structure': 1, 'Expression of Ideas': 1 };
+  /* Competent is read per section (Luca, 2026-09-27): the reading kinds
+     need Reading and Writing at 600+, the Desmos kind Math at 600+, so a
+     1250 made of 520 and 730 does not have its reading misses called
+     strategy. A composite alone (no section score) falls back to 1200+. */
+  function approachCompetent(composite, sectionScore) {
+    return typeof sectionScore === 'number' ? sectionScore >= APPROACH_MIN_SECTION
+         : typeof composite === 'number' ? composite >= APPROACH_MIN_COMPOSITE : false;
+  }
+  /* The fix for each skill, from Luca's English course (Business/curriculum/
+     SAT_ENGLISH_CURRICULUM.md, also the portal's Curriculum tab), in its
+     own words, shortened. ASCII only: this file is pasted into Apps Script. */
+  var APPROACH_LESSONS = {
+    'Transitions': { lesson: '3.2', fix: 'read both sentences and say the relationship out loud before looking at the choices' },
+    'Rhetorical Synthesis': { lesson: '3.3', fix: 'read the goal first, skip the notes, and cross out every choice that misses a part of the goal' },
+    'Central Ideas and Details': { lesson: '4.2', fix: 'find the main claim, usually near the end, and point to the sentence that answers the question' },
+    'Command of Evidence (Textual)': { lesson: '4.3', fix: 'reduce the claim to its model (what changes, what is measured, how they are related); the right finding matches every part' },
+    'Command of Evidence (Quantitative)': { lesson: '4.4', fix: 'read the claim first, then the table title and headings, and use only the cells the claim needs' },
+    'Inferences': { lesson: '4.5', fix: 'build the model and predict the blank in your own words before reading the choices' },
+    'Words in Context': { lesson: '5.1', fix: 'come up with a synonym backed by evidence in the passage before reading the choices' },
+    'Text Structure and Purpose': { lesson: '5.2', fix: 'name what the text or sentence is doing, using the sentences before and after, before reading the choices' },
+    'Cross-Text Connections': { lesson: '5.3', fix: 'find each text\'s main claim, then name the relationship: agree, disagree, or qualify' }
+  };
+  function approachEvidence(x) {
+    if (!x || x.ok || x.blank || x.clock) return null;
+    if (x.sec === 'math') return (x.fastRoute === true && x.calcActive === false) ? 'desmos' : null;
+    if (!APPROACH_RW_DOMAINS[x.domain]) return null;
+    if (typeof x.budgetRatio === 'number' && x.budgetRatio >= APPROACH_LONG_REL) return 'long';
+    if (x.choicesLeft === 2 && x.keyOutFinal === false) return 'two';
+    return x.skill === 'Words in Context' ? 'context' : 'reading';
+  }
   function missCounts() { return { misses: 0, blank: 0, fast: 0, rush: 0, sink: 0, worked: 0, unknown: 0, near: 0, keyOut: 0,
                                    questions: 0, answered: 0, excluded: 0, qb: { first: 0, wrong: 0, sure: 0, sureWrong: 0 } }; }
   function missProfile(entries, qbEvents, cfg) {
@@ -2569,9 +2630,21 @@ var MorettiSignals = (function () {
     };
     var bump = function (cells, f, n) { cells.forEach(function (c) { c[f] += (n === undefined ? 1 : n); }); };
     var used = paceEntries(entries).filter(function (e) { return e.mode !== 'section'; }).slice(-last);
+    /* Strategy, not knowledge (approachEvidence, Luca 2026-09-27), pooled
+       over the competent sittings (composite 1200+): reading misses worked
+       1.5x budget and still wrong (long), and reading misses narrowed to two
+       (two, from the behavior summary; the same miss can be in both, so
+       they are shown apart, never added), per skill; and reading-skill
+       accuracy against grammar rules on the same sittings, with a one-sided
+       two-proportion z (a strong student's rules ahead of reading). */
+    var appr = { tests: 0, long: 0, two: 0, context: 0, other: 0, bySkill: {}, reading: { right: 0, n: 0 }, rules: { right: 0, n: 0 }, z: null };
+    var apprSk = function (skill) { return appr.bySkill[skill] || (appr.bySkill[skill] = { long: 0, two: 0, context: 0, other: 0 }); };
     used.forEach(function (e) {
       var qs = qsOf(e.qStats);
       tests++;
+      var rwNum = typeof e.rw === 'number' ? e.rw : Number(e.rw) || null;
+      var competent = approachCompetent(typeof e.composite === 'number' ? e.composite : Number(e.composite) || null, rwNum);
+      if (competent) appr.tests++;
       qs.q.forEach(function (r) {
         if (!r || r.length < 4) return;
         var sk = splitKey(qs.k[r[1]]), sec = String(qs.s[r[0]] || '');
@@ -2588,6 +2661,16 @@ var MorettiSignals = (function () {
         }
         bump(cells, 'questions');
         if (!blank) bump(cells, 'answered');
+        if (competent && /reading/.test(sec)) {
+          var pool = APPROACH_RW_DOMAINS[sk.dom] ? appr.reading : sk.dom === 'Standard English Conventions' ? appr.rules : null;
+          if (pool) { pool.n++; if (r[3] === 1) pool.right++; }
+          if (r[3] !== 1 && !blank && kind === 'sink' && APPROACH_RW_DOMAINS[sk.dom]) { appr.long++; apprSk(sk.skill).long++; }
+          // Every other reading-skill miss not billed to pace: Words in Context apart (the narrowed-to-two ones may overlap; shown apart).
+          else if (r[3] !== 1 && !blank && kind !== 'fast' && kind !== 'rush' && APPROACH_RW_DOMAINS[sk.dom]) {
+            var kk = sk.skill === 'Words in Context' ? 'context' : 'other';
+            appr[kk]++; apprSk(sk.skill)[kk]++;
+          }
+        }
         if (kind === 'fast' || kind === 'rush') bump(cells, 'excluded');
         if (r[3] === 1) return;
         bump(cells, 'misses');
@@ -2601,10 +2684,17 @@ var MorettiSignals = (function () {
           Object.keys(m).forEach(function (skill) {
             var n = Number(m[skill]) || 0;
             if (n > 0 && skillDom[skill] !== undefined) bump(cell(skillDom[skill], skill), pair[0], n);
+            if (n > 0 && pair[0] === 'near' && competent && APPROACH_RW_DOMAINS[skillDom[skill]]) { appr.two += n; apprSk(skill).two += n; }
           });
         });
       }
     });
+    if (appr.reading.n && appr.rules.n) {
+      var pR = appr.reading.right / appr.reading.n, pG = appr.rules.right / appr.rules.n,
+          pAll = (appr.reading.right + appr.rules.right) / (appr.reading.n + appr.rules.n),
+          seA = Math.sqrt(pAll * (1 - pAll) * (1 / appr.reading.n + 1 / appr.rules.n));
+      appr.z = seA > 0 ? Math.round((pG - pR) / seA * 100) / 100 : null;
+    }
     // Question Bank: the first try at each question only.
     var seen = {}, unmapped = 0;
     byTime((qbEvents || []).filter(function (x) { return x && x.q && x.sk; })).forEach(function (x) {
@@ -2618,7 +2708,7 @@ var MorettiSignals = (function () {
         if (Number(x.cf) === 2) { c.qb.sure++; if (!(x.c === 1 || x.c === true)) c.qb.sureWrong++; }
       });
     });
-    return { tests: tests, overall: overall, byDomain: byDomain, qbUnmapped: unmapped };
+    return { tests: tests, overall: overall, byDomain: byDomain, qbUnmapped: unmapped, approach: appr };
   }
 
   /* -- betaInterval: the Jeffreys interval ------------------------------
@@ -3977,7 +4067,9 @@ var MorettiSignals = (function () {
     // admin deploy check compares it, since an older copy can still have
     // every function name and compute the old way.
     rushedLevel: rushedLevel,
-    VERSION: 38,
+    approachEvidence: approachEvidence, approachCompetent: approachCompetent, APPROACH_RW_DOMAINS: APPROACH_RW_DOMAINS, APPROACH_MIN_SHOWN: APPROACH_MIN_SHOWN,
+    APPROACH_LESSONS: APPROACH_LESSONS,
+    VERSION: 42,
     attemptAbility: attemptAbility,
     FOCUS_GATES: { domainClear: FOCUS_DOMAIN_CLEAR, skillLead: FOCUS_SKILL_LEAD, noOffsetsPenalty: FOCUS_NO_OFFSETS_PENALTY },
     practiceEvidence: practiceEvidence,
