@@ -2041,7 +2041,7 @@ var MorettiSignals = (function () {
      had at most one wrong: checking had nothing left to win back (Mario).
      One rule for the sitting's conditions, the habit across sittings and
      the report's module reading. */
-  var LEFT_WINDOW_TIMES = 5, LEFT_WINDOW_MS = 180000;   // provisional (see sittingConditions)
+  var LEFT_WINDOW_TIMES = 15, LEFT_WINDOW_MS = 180000;   // provisional (see sittingConditions)
   var RUSHED_LEFT_MIN = 5, RUSHED_POOR_SHARE = 1 / 3, RUSHED_NEAR_PERFECT_WRONG = 1;
   // 0 not rushed, 1 rushed, 2 rushed with a third or more of the clock left.
   function rushedLevel(secKey, leftMin, clockMin, n, right) {
@@ -2379,7 +2379,7 @@ var MorettiSignals = (function () {
        long-break    a gap between modules over 15 minutes (the SAT: 10
                      between sections, none between modules)
        away          3+ minutes away from the test (tab hidden, gaps)
-       left-window   the test page hidden 5+ times (2+ s each) or 3+
+       left-window   the test page hidden 15+ times (2+ s each) or 3+
                      minutes in all (d.hs, 2026-09-28 on; provisional)
        rushed        a module handed in with more than 5 minutes on its
                      clock, scaled for extended time, unless it had at most
@@ -2463,9 +2463,12 @@ var MorettiSignals = (function () {
     /* Left the test window (Luca, 2026-09-29: switching away is poor
        conditions). d.hs, saved from 2026-09-28 on, logs every time the test
        page was hidden (another tab, app or the phone). Counted when 2+
-       seconds (shorter is focus noise); said at 5+ times or 3+ minutes in
-       all. PROVISIONAL: the first record with it (John-Carlos 9/28) left 51
-       times, about 10 minutes; re-set the line once the roster has more.
+       seconds (shorter is focus noise); said at 15+ times or 3+ minutes in
+       all. PROVISIONAL, from the first two records with it: John-Carlos 9/28
+       left 41 times, about 10 minutes (said); Nikolas 9/28, his cleanest
+       sitting (daytime, every minute used), 8 times, about 1 minute (not
+       said: a minute of glances can't move a score). Re-set the line once
+       the roster has more.
        When it is said, it carries the time away too, so 'away' is not
        said again. */
     var hsList = (d && Array.isArray(d.hs)) ? d.hs.filter(function (h) { return h && h.ms >= 2000; }) : null;
