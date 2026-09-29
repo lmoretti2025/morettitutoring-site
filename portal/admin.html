@@ -362,6 +362,19 @@
   .week-grid > .card { margin-bottom: 0; }
   .scores-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1.25rem; align-items: start; }
   .scores-grid > .card { margin-bottom: 0; }
+  /* Folded detail (Luca, 2026-09-29): the everyday view first, the rest one click away. */
+  .more-box { margin: 1.1rem 0 0; }
+  .more-box > summary { cursor: pointer; list-style: none; display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.78rem; font-weight: 600; color: var(--mid); padding: 0.35rem 0; user-select: none; }
+  .more-box > summary::-webkit-details-marker { display: none; }
+  .more-box > summary::before { content: ""; width: 0.4rem; height: 0.4rem; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(-45deg); transition: transform 0.15s var(--ease); }
+  .more-box[open] > summary::before { transform: rotate(45deg); }
+  .more-box > summary:hover { color: var(--text); }
+  .more-box[open] > summary { margin-bottom: 0.6rem; }
+  .deep-box { margin: 0 0 1.25rem; }
+  #stu-analysis, #stu-evidence { overflow-x: auto; }
+  #stu-skills .sk-extra { display: none; }
+  #stu-skills.show-all .sk-extra { display: flex; }
+  .sk-all { margin-top: 0.6rem; }
   .scores-past { font-size: 0.8rem; color: #8a6d1f; background: rgba(201,168,76,0.12); border: 1px solid rgba(201,168,76,0.35); border-radius: 10px; padding: 0.6rem 0.9rem; margin-bottom: 1.1rem; }
   @media (max-width: 900px) {
     .week-grid, .scores-grid { grid-template-columns: minmax(0, 1fr); }
@@ -1065,7 +1078,7 @@
         </div>
         <div class="card" id="stu-note-card">
           <h2>Note for the weekly update</h2>
-          <p class="card-sub">A line or two from this week&rsquo;s session. It goes into the family&rsquo;s next weekly update, the morning after the session, then clears.</p>
+          <p class="card-sub">Goes into the family&rsquo;s next weekly update, then clears.</p>
           <textarea id="stu-note" maxlength="2500" rows="10" placeholder="e.g. Cracked the quadratic word problems today: set up three in a row on their own."></textarea>
           <div class="fn-count" id="stu-note-count"></div>
           <div class="fn-row">
@@ -1081,42 +1094,42 @@
     <section id="tab-scores" style="display:none;">
       <div class="scores-past" id="stu-scores-past" style="display:none;">SAT history from before the switch. It stays on file; the student no longer sees it.</div>
       <div class="summary-row" id="stu-tiles"></div>
-      <!-- REAL SAT SCORES (backend v30, 2026-09-26): official results typed in
-           here, each set beside the practice level before it. -->
-      <div class="card" id="stu-real-card">
-        <h2>Real SAT scores</h2>
-        <p class="card-sub">Official results, typed in from College Board. Each one is set beside the level the practice tests before it pointed to, so it shows whether home tests run above or below test day.</p>
-        <div id="stu-real"></div>
-      </div>
       <div class="card" id="stu-trend-card">
         <h2>Score progress</h2>
-        <p class="card-sub" id="stu-trend-sub">Every scored attempt, oldest first.</p>
         <div class="trend-wrap" id="stu-trend"></div>
       </div>
       <div class="card">
         <h2>Test reports</h2>
-        <p class="card-sub">Every diagnostic and practice test this student has submitted. Opening one shows the exact report they see.</p>
+        <p class="card-sub">Each opens the report they see.</p>
         <div class="roster-table-scroll"><table id="stu-attempts-table"><thead><tr>
           <th>Date</th><th>Test</th><th>Score</th><th title="The lowest raw percent on that one test. Not a finding: see Across all their tests for what the evidence singles out.">Lowest this test</th><th></th>
         </tr></thead><tbody id="stu-attempts"></tbody></table></div>
       </div>
-      <div class="scores-grid">
-        <div class="card">
-          <h2>Weakest skills</h2>
-          <p class="card-sub" id="stu-skills-sub">Across every test with a per-question record.</p>
-          <div id="stu-skills"></div>
-        </div>
+      <div class="card">
+        <h2>Weakest skills</h2>
+        <p class="card-sub" id="stu-skills-sub">Across every test with a per-question record.</p>
+        <div id="stu-skills"></div>
+      </div>
+      <!-- REAL SAT SCORES (backend v30, 2026-09-26): official results typed in
+           here, each set beside the practice level before it. -->
+      <div class="card" id="stu-real-card">
+        <h2>Real SAT scores</h2>
+        <p class="card-sub">Official results, each beside what practice predicted.</p>
+        <div id="stu-real"></div>
+      </div>
+      <details class="more-box deep-box" id="stu-deep">
+        <summary>Deeper analysis</summary>
         <div class="card" id="stu-analysis-card">
           <h2>Across all their tests</h2>
-          <p class="card-sub" id="stu-analysis-sub">Pooled from every attempt &mdash; more evidence per skill than any single report can have.</p>
+          <p class="card-sub" id="stu-analysis-sub">Pooled from every attempt.</p>
           <div id="stu-analysis"></div>
         </div>
         <div class="card" id="stu-evidence-card">
           <h2>What the evidence says</h2>
-          <p class="card-sub">For you only. Each reading waits until there is enough evidence for its range to mean something, and none of them can tell cause from coincidence.</p>
+          <p class="card-sub">Each waits for enough evidence; none can tell cause from coincidence.</p>
           <div id="stu-evidence"><div class="empty">Loading&hellip;</div></div>
         </div>
-      </div>
+      </details>
     </section>
 
     <section id="tab-homework" style="display:none;">
@@ -1191,18 +1204,18 @@
       </div>
       <div class="card" id="stu-program-card">
         <h2>Program</h2>
-        <p class="card-sub">What this student is here for. It decides what their portal shows, which emails the family gets, and where they sort on the roster.</p>
+        <p class="card-sub">Sets what their portal shows and which emails go out.</p>
         <div class="prog-options" id="stu-program-options">
-          <label class="prog-opt"><input type="radio" name="stu-program" value="sat"><span><b>SAT prep</b><small>The diagnostic, practice tests, question bank and vocabulary in their portal. Friday updates with their practice and scores, and the SAT date reminders.</small></span></label>
-          <label class="prog-opt"><input type="radio" name="stu-program" value="tutoring"><span><b>Subject tutoring</b><small>No SAT material in their portal: homework, sessions and files. The Friday update is your note, when you write one.</small></span></label>
-          <label class="prog-opt"><input type="radio" name="stu-program" value="admissions"><span><b>College admissions</b><small>Essays and applications. The same portal and emails as subject tutoring, sorted on its own.</small></span></label>
+          <label class="prog-opt"><input type="radio" name="stu-program" value="sat"><span><b>SAT prep</b><small>Full SAT portal; updates with practice and scores.</small></span></label>
+          <label class="prog-opt"><input type="radio" name="stu-program" value="tutoring"><span><b>Subject tutoring</b><small>Homework, sessions and files; updates are your note.</small></span></label>
+          <label class="prog-opt"><input type="radio" name="stu-program" value="admissions"><span><b>College admissions</b><small>Like tutoring, sorted on its own.</small></span></label>
         </div>
         <div class="fn-row"><span class="fn-status" id="stu-program-status"></span></div>
         <div class="sat-history" id="stu-sat-history" style="display:none;"></div>
       </div>
       <div class="card danger-card" id="stu-delete-card">
         <h2 class="card-hed">Delete this account</h2>
-        <p class="card-sub">Removes the roster row, unlinks their Google sign-in, and revokes their access to the Drive folder. The folder itself and its files are left in Drive. If they have recorded tests you will be asked once more before those scores go too.</p>
+        <p class="card-sub">Removes them from the roster and their sign-in and Drive access. The Drive folder stays.</p>
         <div class="stu-actions">
           <button type="button" class="mini danger" id="stu-delete-btn">Delete account</button>
         </div>
@@ -1473,7 +1486,7 @@
   // The value is the field a real answer always carries. A stalling service
   // can answer a POST with its GET health reply ({ok:true}, no data), so a
   // reply missing that field is treated as lost.
-  var RETRY_READS = { getRoster: 'students', version: 'version', getStudentDetail: '', getAdminAssignments: '', getAdminCalendar: '', broadcastPrepare: 'families', fridayNoteGet: 'friday', fridayPreview: 'items' };
+  var RETRY_READS = { getRoster: 'students', version: 'version', getStudentDetail: '', getAdminAssignments: '', getAdminCalendar: '', broadcastPrepare: 'families', fridayNoteGet: 'note', fridayPreview: 'items' };
   function looksLost(action, data) {
     var field = RETRY_READS[action];
     return !!field && data && data.ok && !(field in data);
@@ -2716,14 +2729,23 @@
   // noteSeq counts student opens (and re-reads); a reply for an older one
   // is dropped. noteSaving is the noteSeq a save is in flight for, so a
   // save still going for one student never blocks the next student's.
-  var noteSeq = 0, noteSaved = '', noteKey = '', noteSaving = 0, noteLoading = false;
+  // noteBase: what the box held when a read started. The box stays open
+  // while the note loads; anything typed by then is kept when it lands.
+  var noteSeq = 0, noteSaved = '', noteKey = '', noteSaving = 0, noteLoading = false, noteBase = '';
   // The sheet stores the note cleaned (dashes become commas, trimmed), so
   // "is this what I typed" compares words, not punctuation.
   function noteLoose(t) { return String(t || '').replace(/[\s,\u2014\u2013-]+/g, ' ').trim().slice(0, 600); }
-  function noteDirty() { return !!noteKey && !noteLoading && $('stu-note').value !== noteSaved; }
+  function noteDirty() { return !!noteKey && $('stu-note').value !== (noteLoading ? noteBase : noteSaved); }
   function noteControls(on) {
-    $('stu-note').disabled = !on;
+    $('stu-note').disabled = false;
     $('stu-note-save').disabled = $('stu-note-clear').disabled = !on;
+  }
+  // Typed while the note was loading: kept, after the saved note if there is one.
+  function noteTypedSince(saved) {
+    var now = $('stu-note').value;
+    if (now === noteBase) return null;
+    var merge = !!saved && noteLoose(now).indexOf(noteLoose(saved)) === -1;
+    return { text: merge ? saved + '\n\n' + now : now, merged: merge };
   }
 
   function noteStatus(msg, cls) {
@@ -2759,6 +2781,7 @@
     noteSaved = '';
     noteLoading = true;
     if (typed == null) $('stu-note').value = ''; paintNoteCount();
+    noteBase = $('stu-note').value;
     noteControls(false);
     if (typed == null) noteStatus('Loading\u2026');
     /* The note as it was last seen, ready to read and edit at once. When the
@@ -2787,15 +2810,21 @@
         }
         return;
       }
+      var early = typed == null && d && d.ok ? noteTypedSince(d.note || '') : null;
       if (!d || !d.ok) {
-        if (typed != null) $('stu-note').value = typed; paintNoteCount();
+        if (typed != null && $('stu-note').value === noteBase) $('stu-note').value = typed; paintNoteCount();
         noteStatus(noteError(d), 'warn');
         return;
       }
       noteSaved = d.note || '';
       var w = noteWhere(d);
+      if (early != null) {
+        $('stu-note').value = early.text; paintNoteCount();
+        noteStatus('Not saved yet.' + (early.merged ? ' What you typed is under the note already saved.' : ''), 'warn');
+        return;
+      }
       if (typed != null && noteLoose(typed) !== noteLoose(noteSaved)) {
-        $('stu-note').value = typed; paintNoteCount();
+        if ($('stu-note').value === noteBase) $('stu-note').value = typed; paintNoteCount();
         noteStatus('Not saved. Your text is still here: press Save note again.', 'warn');
         return;
       }
@@ -2806,7 +2835,7 @@
       noteLoading = false;
       noteControls(true);
       if (typed != null) {
-        $('stu-note').value = typed; paintNoteCount();
+        if ($('stu-note').value === noteBase) $('stu-note').value = typed; paintNoteCount();
         noteStatus('Could not check whether it saved. Your text is still here: press Save note again.', 'warn');
         return;
       }
@@ -3237,6 +3266,8 @@
     if (btn) btn.addEventListener('click', loadRosterPatterns);
   })();
 
+  // Which More boxes Luca left open, so a refresh does not fold them away.
+  var moreOpen = {};
   function renderStudentPrep(p) {
     var snap = p.snapshot || null, pr = p.practice || { n: 0, right: 0, byBank: {}, skills: [] };
     var dayLabel = function (d) {
@@ -3247,14 +3278,14 @@
     var mins = function (m) { m = Math.round(m || 0); return m >= 60 ? Math.floor(m / 60) + 'h ' + (m % 60) + 'm' : m + ' min'; };
     // Since the last session ended (prep.gs), or the last seven days for a student with no session yet.
     $('stu-prep-sub').textContent = snap && snap.since
-      ? 'Since the last session ended, ' + new Date(snap.since).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) + '. Starts over after each session.'
+      ? 'Since the last session, ' + new Date(snap.since).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) + '.'
       : dayLabel(p.from) + ' – ' + dayLabel(p.to) + ' (the last seven days; no session on the calendar yet)';
     var sat = isSat(currentStudent);
 
     // Practice: the log when it has the week, else the bank's own count
     // (which only sees each question's latest attempt).
     var logWeek = pr.logStarted && String(pr.logStarted).slice(0, 10) <= p.from;
-    var practiceN = pr.n, practiceRight = pr.right, practiceSub;
+    var practiceN = pr.n, practiceRight = pr.right, practiceSub, practiceMore = [];
     if (pr.n || logWeek || !snap) {
       var parts = [];
       [['qb', 'Question Bank'], ['chal', 'Challenge'], ['rush', 'Rush']].forEach(function (b) {
@@ -3266,9 +3297,9 @@
          student depending on the mix (stats audit, 2026-09-25). */
       var qbx = pr.byBank && pr.byBank.qb;
       practiceSub = pr.n
-        ? (qbx && qbx.n && typeof qbx.right === 'number' ? pct(qbx.right, qbx.n) + ' right in the Question Bank' : (qbx && qbx.n ? 'Question Bank' : 'no Question Bank answers')) +
-          (parts.length > 1 || (parts.length === 1 && !(qbx && qbx.n)) ? ' · ' + parts.join(' · ') : '')
+        ? (qbx && qbx.n && typeof qbx.right === 'number' ? pct(qbx.right, qbx.n) + ' right in the Question Bank' : (qbx && qbx.n ? 'Question Bank' : 'no Question Bank answers'))
         : 'none since the last session';
+      if (pr.n && (parts.length > 1 || (parts.length === 1 && !(qbx && qbx.n)))) practiceMore.push(parts.join(' · '));
       // Saved & Mistakes retries and explanation reads (backend v25).
       var extraBits = [];
       if (pr.retry && pr.retry.n) extraBits.push(pr.retry.n + ' mistake' + (pr.retry.n === 1 ? '' : 's') + ' retried, ' + pr.retry.right + ' right');
@@ -3278,7 +3309,7 @@
         var cfBits = [cfp(pr.conf.sure, 'sure'), cfp(pr.conf.unsure, 'unsure'), cfp(pr.conf.guess, 'guessing')].filter(String);
         if (cfBits.length) extraBits.push('tapped ' + cfBits.join(', '));
       }
-      if (extraBits.length) practiceSub += '<br>' + extraBits.join(' · ');
+      practiceMore = practiceMore.concat(extraBits);
     } else {
       practiceN = snap.qbCount || 0; practiceRight = snap.qbCorrect || 0;
       practiceSub = practiceN ? pct(practiceRight, practiceN) + ' right (Question Bank)' : 'none since the last session';
@@ -3295,7 +3326,7 @@
       testSub = escHtml(t.title || 'Practice test');
       if (t.interrupted) testSub += ' · interrupted, not compared';
       else if (t.hardest) testSub += ' · the hardest test, not compared';
-      else if (t.change) testSub += ' · ' + (t.change.delta > 0 ? '+' : '') + t.change.delta + ' vs last' + (t.change.real ? ' (a real change)' : ' (within normal variation)');
+      else if (t.change) testSub += ' · ' + (t.change.delta > 0 ? '+' : '') + t.change.delta + ' vs last' + (t.change.real ? '' : ', within normal variation');
     }
     stats.push('<div class="prep-stat"><div class="num">' + (t ? t.composite : '—') + '</div><div class="lbl">Practice test</div><div class="sub">' + testSub + '</div></div>');
 
@@ -3352,9 +3383,17 @@
       $('stu-prep').innerHTML = nextHtml + (hwHtml || (nextHtml ? '' : '<div class="empty">Nothing assigned since the last session.</div>'));
       return;
     }
+    /* The week at a glance, then homework. The rest (time by area, topics,
+       behavior and pooled patterns) waits under More (Luca, 2026-09-29:
+       the page read as too much). */
+    var more = renderTimeBreakdown(snap, mins) +
+      (practiceMore.length ? '<p class="prep-note">Practice: ' + practiceMore.join(' · ') + '</p>' : '') +
+      topics + renderBehaviorPatterns(p.behavior, p.behaviorError) + renderPooledPrep(p.pooled, p.pooledError) +
+      (note ? '<p class="prep-note">' + note + '</p>' : '');
     $('stu-prep').innerHTML = '<div class="prep-stats">' + stats.join('') + '</div>' +
-      renderTimeBreakdown(snap, mins) +
-      nextHtml + hwHtml + renderBehaviorPatterns(p.behavior, p.behaviorError) + renderPooledPrep(p.pooled, p.pooledError) + topics + (note ? '<p class="prep-note">' + note + '</p>' : '');
+      nextHtml + hwHtml + (more ? '<details class="more-box" id="stu-prep-more"' + (moreOpen.prep ? ' open' : '') + '><summary>More from this week</summary>' + more + '</details>' : '');
+    var pm = $('stu-prep-more');
+    if (pm) pm.addEventListener('toggle', function () { moreOpen.prep = pm.open; });
   }
 
   /* WHERE THE TIME WENT (Luca, 2026-09-25): the week's active minutes by
@@ -3475,9 +3514,8 @@
 
     var rows = [];
     var row = function (k, v) { rows.push('<dt>' + k + '</dt><dd>' + v + '</dd>'); };
-    row('Key', '<code>' + escHtml(s.key || currentStudent.key) + '</code>');
     row('Student', s.grantedEmail
-      ? escHtml(s.grantedEmail) + (s.grantedAt ? ' <span class="dim">(signed in since ' + formatDay(s.grantedAt) + ')</span>' : '')
+      ? escHtml(s.grantedEmail) + (s.grantedAt ? ' <span class="dim">since ' + formatDay(s.grantedAt) + '</span>' : '')
       : (s.leadEmail ? 'Inquired as ' + escHtml(s.leadEmail) + ' <span class="dim">(not signed in yet)</span>' : '<span class="dim">Not signed in yet</span>'));
     row('Parent', s.guardianEmail
       ? (s.guardianName ? escHtml(s.guardianName) + ' ' : '') + '&lt;' + escHtml(s.guardianEmail) + '&gt;'
@@ -3490,17 +3528,17 @@
     // Older deployments send neither field: say nothing rather than guess.
     if (typeof s.emailsPaused === 'boolean') {
       row('Automatic emails', s.emailsPaused
-        ? '<b>Paused</b> <span class="dim">(no weekly updates or other automatic emails)</span> <button type="button" class="mini" data-email-set="on">Turn back on</button>'
+        ? '<b>Paused</b> <button type="button" class="mini" data-email-set="on">Turn back on</button>'
         : 'On <button type="button" class="mini" data-email-set="pause">Pause</button>');
     }
     // When the weekly update goes (emails.gs weeklyTiming_). Older deployments send nothing: say nothing.
     if (typeof s.weeklyAfter === 'string') {
       row('Weekly update', s.weeklyAfter === 'second'
-        ? 'The morning after the <b>second session</b> of each week <button type="button" class="mini" data-weekly-after="">Back to automatic</button>'
-        : 'Automatic <span class="dim">(after the week\u2019s last session)</span> <button type="button" class="mini" data-weekly-after="second">After the 2nd session instead</button>');
+        ? 'After the <b>second session</b> each week <button type="button" class="mini" data-weekly-after="">Back to automatic</button>'
+        : 'After the week\u2019s last session <button type="button" class="mini" data-weekly-after="second">After the 2nd instead</button>');
     }
     (s.emailOptOut || []).forEach(function (addr) {
-      row('Unsubscribed', escHtml(addr) + ' <span class="dim">(used the link in an email)</span> ' +
+      row('Unsubscribed', escHtml(addr) + ' ' +
         '<button type="button" class="mini" data-email-resub="' + escHtml(addr) + '">Resubscribe</button>');
     });
     // The portal lock, under the email switches. Older deployments send nothing: say nothing.
@@ -3515,7 +3553,7 @@
       }[pa.reason] || '';
       var state = pa.override === 'open' ? '<b>Always open</b> <span class="dim">(set by you)</span>'
         : pa.override === 'locked' ? '<b>Locked</b> <span class="dim">(set by you: only the free diagnostic)</span>'
-        : (pa.locked ? '<b>Locked</b>' : 'Open') + ' <span class="dim">(by calendar' + (why ? ': ' + why : '') + ')</span>';
+        : (pa.locked ? '<b>Locked</b>' : 'Open') + ' <span class="dim" title="' + escHtml(why) + '">(follows calendar)</span>';
       if (!pa.live) state += ' <span class="dim">Nobody is locked out until you go live.</span>';
       var opts = [['', 'Follow calendar'], ['open', 'Always open'], ['locked', 'Lock']].filter(function (o) { return o[0] !== pa.override; });
       row('Portal access', state + ' ' + opts.map(function (o) {
@@ -3523,21 +3561,22 @@
       }).join(' '));
     }
     if (sat) {
-      row('SAT date', satDay || '<span class="dim">Not set</span>');
-      if (satDay2) row('Second SAT date', satDay2);
-      row('Target', s.targetScore ? String(s.targetScore) : '<span class="dim">Not set</span>');
+      // One line: dates, target, baseline, timing.
+      var satBits = [satDay || '<span class="dim">No SAT date</span>'];
+      if (satDay2) satBits.push('then ' + satDay2);
+      satBits.push(s.targetScore ? 'target ' + s.targetScore : '<span class="dim">no target</span>');
       if (s.baselineRw || s.baselineMath) {
-        row('Baseline', ((Number(s.baselineRw) || 0) + (Number(s.baselineMath) || 0)) + ' <span class="dim">(' + (s.baselineRw || '—') + ' R&amp;W, ' +
-          (s.baselineMath || '—') + ' Math' + (s.baselineType ? ', ' + escHtml(String(s.baselineType).toUpperCase()) : '') + ')</span>');
+        satBits.push('baseline ' + ((Number(s.baselineRw) || 0) + (Number(s.baselineMath) || 0)) + (s.baselineType ? ' ' + escHtml(String(s.baselineType).toUpperCase()) : '') +
+          ' <span class="dim">(' + (s.baselineRw || '—') + ' / ' + (s.baselineMath || '—') + ')</span>');
       }
       var accom = [];
       if (isFinite(timeMult) && timeMult > 1) accom.push(timeMult + '&times; time');
       if (isFinite(breakMult) && breakMult > 1) accom.push('extended breaks');
-      row('Accommodations', accom.length ? accom.join(', ') : '<span class="dim">Standard timing</span>');
+      if (accom.length) satBits.push(accom.join(', '));
+      row('SAT', satBits.join(' &middot; '));
     }
-    row('Drive folder', s.driveFolderUrl
-      ? '<a target="_blank" rel="noopener" href="' + escHtml(s.driveFolderUrl) + '">Open in Drive</a>'
-      : '<span class="dim">Not created yet</span>');
+    if (!s.driveFolderUrl) row('Drive folder', '<span class="dim">Not created yet</span>');
+    row('Google review', '<button type="button" class="mini" id="stu-review-btn" title="After a family shares a good official score">Ask for a review</button>');
     $('stu-details').innerHTML = rows.join('');
     $('stu-edit-btn').disabled = false;
     wireEmailSettings(s);
@@ -3545,13 +3584,14 @@
 
     var actions = [];
     if (s.driveFolderUrl) actions.push('<a class="mini" target="_blank" rel="noopener" href="' + escHtml(s.driveFolderUrl) + '">Drive folder</a>');
-    actions.push('<button type="button" class="mini" id="stu-review-btn" title="After a family shares a good official score">Ask for a review</button>');
     actions.push('<button type="button" class="mini solid" id="stu-assign-btn">Assign homework</button>');
     $('stu-actions').innerHTML = actions.join('');
     var assignBtn = $('stu-assign-btn');
     if (assignBtn) assignBtn.addEventListener('click', function () {
       selectTab('homework');
-      openCreateModal([toDateStr(new Date())], currentStudent.key, currentStudent.name, '');
+      var ns = nextSessionFor[currentStudent.key];
+      if (ns) openCreateModal([isoToDateStr(ns)], currentStudent.key, currentStudent.name, '', 'Due the day of their next session');
+      else openCreateModal([toDateStr(new Date())], currentStudent.key, currentStudent.name, '');
     });
     var reviewBtn = $('stu-review-btn');
     if (reviewBtn) reviewBtn.addEventListener('click', function () { askForReview(reviewBtn); });
@@ -3738,8 +3778,9 @@
         '<div><div class="real-score">' + o.composite + '<span>R&amp;W ' + o.rw + ' &middot; Math ' + o.math + '</span></div><div class="real-vs">' + vs + '</div></div>' +
         '<button type="button" class="mini" data-real-del="' + i + '" aria-label="Remove this score">Remove</button></div>';
     }).join('');
-    host.innerHTML = (rows || '<div class="empty">No real SAT scores yet.</div>') +
-      '<form class="real-add" id="real-add-form">' +
+    host.innerHTML = (rows || '<div class="empty">None yet.</div>') +
+      '<button type="button" class="fp-jump" id="real-add-open">Add a real score &rarr;</button>' +
+      '<form class="real-add" id="real-add-form" style="display:none;">' +
         '<label>SAT date<input type="date" id="real-add-date" required></label>' +
         '<label>R&amp;W<input type="number" id="real-add-rw" min="200" max="800" step="10" required></label>' +
         '<label>Math<input type="number" id="real-add-math" min="200" max="800" step="10" required></label>' +
@@ -3756,6 +3797,11 @@
           if (currentStudent && currentStudent.key === key) loadStudentDetail(key);
         }, function () { showNotice((currentStudent.name || key) + ': ' + what + ' NOT saved. Could not reach the backend.'); if (btn) { btn.disabled = false; btn.textContent = 'Add score'; } });
     };
+    $('real-add-open').addEventListener('click', function () {
+      $('real-add-open').style.display = 'none';
+      $('real-add-form').style.display = '';
+      $('real-add-date').focus();
+    });
     $('real-add-form').addEventListener('submit', function (ev) {
       ev.preventDefault();
       var date = $('real-add-date').value, rw = Number($('real-add-rw').value), math = Number($('real-add-math').value);
@@ -4560,19 +4606,22 @@
       : foMode === 'form-only' ? ' Test difficulty offsets are from an older version (' + foDay + '), so a stricter bar applies: paste the current signals and run runFormOffsets once.'
       : ' Test difficulty not adjusted yet, so a stricter bar applies: run setUpSessionsSnapshot once in Apps Script.';
     $('stu-skills-sub').textContent = 'Across ' + ev.attempts + (ev.attempts === 1 ? ' test' : ' tests') +
-      ', ranked by questions missed beyond what their level predicts for those questions. Only "clear" and "lead" rows are past chance.' + foTxt;
-    host.innerHTML = units.slice(0, 12).map(function (u) {
+      ', by misses beyond what their level predicts. Only "clear" and "lead" are past chance.' + (foMode === 'roster' ? '' : foTxt);
+    host.innerHTML = units.slice(0, 12).map(function (u, i) {
       var pct = u.n ? Math.round(100 * u.obs / u.n) : 0;
       var tag = u.clear ? '<span class="sk-tag clear" title="z ' + u.z.toFixed(1) + '">clear</span>'
         : (u.lead ? '<span class="sk-tag lead" title="z ' + u.z.toFixed(1) + '">lead</span>' : '');
       var cls = u.clear || u.lead ? 'weak' : '';
-      return '<div class="skill-row' + (u.lead ? '' : ' sk-quiet') + '">' +
+      return '<div class="skill-row' + (u.lead ? '' : ' sk-quiet') + (i >= 5 ? ' sk-extra' : '') + '">' +
         '<div class="sk-name">' + escHtml(u.unit) + tag + (domOf[u.unit] ? '<small>' + escHtml(domOf[u.unit]) + '</small>' : '') + '</div>' +
         '<div class="sk-bar"><i class="' + cls + '" style="width:' + pct + '%"></i></div>' +
         '<div class="sk-frac">' + Math.round(u.obs) + '/' + u.n + ' &middot; ' + (u.S > 0 ? Math.round(u.S * 10) / 10 + ' below' : 'as expected') + '</div>' +
         '<button type="button" class="mini skill-assign-btn" data-skill="' + escHtml(u.unit) + '">Assign</button>' +
         '</div>';
-    }).join('');
+    }).join('') + (units.length > 5 ? '<button type="button" class="fp-jump sk-all" id="stu-skills-all">Show all ' + Math.min(12, units.length) + ' &rarr;</button>' : '');
+    var all = $('stu-skills-all');
+    if (all) all.addEventListener('click', function () { host.classList.add('show-all'); all.remove(); });
+    host.classList.remove('show-all');
   }
 
   // The whole point of having reports and the scheduler on one page:
@@ -5152,6 +5201,7 @@
 
   function loadNextSession(key) {
     var host = $('hw-next');
+    delete nextSessionFor[key];
     var now = new Date();
     var end = new Date(now.getTime() + 90 * 86400000);
     // The roster already knows the next session: say it now, then check.
@@ -5189,14 +5239,12 @@
         if (currentStudent && currentStudent.key === key && !known) host.innerHTML = '<span class="ns-none">Could not reach the calendar.</span>';
       });
   }
+  var nextSessionFor = {};
   function paintNextSession(key, next) {
     if (!currentStudent || currentStudent.key !== key) return;
-    $('hw-next').innerHTML = '<span>Next session: <b>' + escHtml(formatSessionWhen(next)) + '</b></span>' +
-      '<button type="button" class="mini solid" id="hw-assign-next">Assign for that day</button>';
-    $('hw-assign-next').addEventListener('click', function () {
-      selectTab('homework');
-      openCreateModal([isoToDateStr(next.startIso)], currentStudent.key, currentStudent.name, '', 'Due the day of their next session');
-    });
+    // Assign homework (header) dates the task for this day.
+    nextSessionFor[key] = next.startIso;
+    $('hw-next').innerHTML = '<span>Next session: <b>' + escHtml(formatSessionWhen(next)) + '</b></span>';
   }
 
   /* EVERYONE'S SESSION PREP IN ONE REQUEST (Luca, 2026-09-25). The backend
