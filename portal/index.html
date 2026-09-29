@@ -5702,7 +5702,7 @@ window.Portal = {
 <script src="challenge-questions.js?v=20260926a"></script>
 <script src="grid-in.js?v=20260910a"></script>
 <script src="question-flag.js?v=20260922c"></script>
-<script src="report-tour.js?v=20260929i"></script>
+<script src="report-tour.js?v=20260929j"></script>
 <script src="curriculum.js?v=20260927g"></script>
 <script>
   /* practice-tests.js is ~2.6MB, so a blocking <script> delayed every later
@@ -24476,6 +24476,10 @@ window.renderNativeReport = function (data) {
 
   // Filled by the clock section for the walkthrough (see "A plain summary of each module's route").
   var routeSummaries = [];
+  /* The walkthrough's route screen shows this chart for the module it talks
+     about (Luca, 2026-09-29: "there's no route graph!"). Set inside the
+     timing section below; returns the chart as markup, or ''. */
+  var routeGraphFor = null;
   (function renderTimingAllocation() {
     var wrap = document.getElementById('timing-allocation');
     var TIMING_SEC_SHORT = { 'reading-writing': 'R&W', 'math': 'Math' };
@@ -25300,6 +25304,19 @@ window.renderNativeReport = function (data) {
       }).observe(routePlot);
     }
     var timingView = 'route';
+    routeGraphFor = function (label) {
+      var norm = function (x) { return String(x || '').toLowerCase().replace(/[^a-z0-9]/g, ''); };
+      var mv = moduleViews.filter(function (m) { return norm(m.label) === norm(label); })[0];
+      var rd = mv && routeDataFor(mv);
+      if (!rd) return '';
+      var svg = '', leg = '';
+      try {
+        renderRoute(mv, rd);
+        svg = routeSvg.outerHTML; leg = routeLegend ? routeLegend.innerHTML : '';
+      } finally { try { paintModule(); } catch (e) { /* the report keeps whatever it had */ } }
+      // A copy, so no ids: they belong to the report's own chart.
+      return (svg + (leg ? '<div class="dxk-legend pace-legend">' + leg + '</div>' : '')).replace(/ id="[^"]*"/g, '');
+    };
     function showingRoute() { return timingView === 'route' && !!routeDataFor(moduleViews[moduleIdx]); }
     function paintModule() {
       var mv = moduleViews[moduleIdx];
@@ -26916,7 +26933,7 @@ window.renderNativeReport = function (data) {
       domains: domains, totalC: totalC, totalQ: totalQ, composite: composite, rwScaled: rwScaled, mathScaled: mathScaled,
       currentComposite: currentComposite, shownItems: shownItems, reachable: reachable, targetScore: targetScore,
       behaviorFlags: behaviorFlags, planInputs: planInputs, reportBand: reportBand, domainBucketsDx: domainBucketsDx,
-      skipped: skipped, routeSummaries: routeSummaries, conditions: conditionsShown }, { anchor: document.querySelector('#pt-native-report #plain-summary') || document.getElementById('plain-summary') });
+      skipped: skipped, routeSummaries: routeSummaries, conditions: conditionsShown, routeGraph: routeGraphFor }, { anchor: document.querySelector('#pt-native-report #plain-summary') || document.getElementById('plain-summary') });
   } catch (e) { if (window.console) console.warn('walkthrough:', e); }   // never at the report's expense
 
   document.getElementById('page1').style.display = 'block';

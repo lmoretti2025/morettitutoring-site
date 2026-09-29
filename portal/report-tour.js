@@ -30,6 +30,10 @@
     'position:fixed;inset:0;z-index:2147483000;background:var(--bg);color:var(--ink);font-family:var(--sans);font-weight:300;-webkit-font-smoothing:antialiased;',
     'opacity:0;transition:opacity .45s var(--ease);-webkit-tap-highlight-color:transparent;line-height:1.5;text-align:left}',
     '#mtt.on{opacity:1}#mtt *{box-sizing:border-box;margin:0;padding:0}',
+    '#mtt .t-routeg{margin:18px 0 8px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 12px 8px}',
+    '#mtt .t-routeg-h{font-size:12px;color:var(--mid);margin:0 0 6px}',
+    '#mtt .t-routeg svg{display:block;width:100%;height:auto}',
+    '#mtt .t-routeg .pace-legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:11px;color:var(--mid);margin-top:6px}',
     '#mtt .t-bar{position:absolute;top:0;left:0;right:0;z-index:5;padding:max(14px,env(safe-area-inset-top)) 16px 10px;background:linear-gradient(var(--bg) 70%,rgba(242,242,242,0))}',
     '#mtt .t-prog{display:flex;gap:5px;max-width:720px;margin:0 auto}',
     '#mtt .t-prog i{flex:1;height:3px;border-radius:3px;background:var(--track);overflow:hidden;position:relative}',
@@ -558,8 +562,13 @@
         : same === routes.length && same > 1 ? (same === 2 ? 'Both modules ' : 'All ' + numWord(same) + ' modules ') + HEADN[worst.reading]
         : same > 1 ? cap(numWord(same)) + ' of ' + numWord(routes.length) + ' modules ' + HEADN[worst.reading]
         : (HEAD[worst.reading] || wl + '.');
+      // The report's own route chart for the module the headline names.
+      var graph = '';
+      try { graph = typeof R.routeGraph === 'function' ? R.routeGraph(worst.label) || '' : ''; } catch (e) { graph = ''; }
       M.screens.push({ name: 'route', html:
-        '<p class="t-eye r">How each module went</p><h2 class="r">' + esc(head2) + '</h2><div class="t-mods">' +
+        '<p class="t-eye r">How each module went</p><h2 class="r">' + esc(head2) + '</h2>' +
+        (graph ? '<div class="t-routeg r"><p class="t-routeg-h">' + esc(undash(worst.label)) + ': every visit to every question, in order</p>' + graph + '</div>' : '') +
+        '<div class="t-mods">' +
         sorted.map(function (x, i) {
           var bad = x.reading && x.reading !== 'steady';
           return '<div class="t-mod" style="--i:' + i + '"><div class="t-mod-h"><b>' + esc(undash(x.label)) + '</b><span class="t-chip ' + (bad ? 'bad' : 'ok') + '">' + esc(CHIP[x.reading] || 'Steady') + '</span></div>' +
