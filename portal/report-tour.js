@@ -30,10 +30,6 @@
     'position:fixed;inset:0;z-index:2147483000;background:var(--bg);color:var(--ink);font-family:var(--sans);font-weight:300;-webkit-font-smoothing:antialiased;',
     'opacity:0;transition:opacity .45s var(--ease);-webkit-tap-highlight-color:transparent;line-height:1.5;text-align:left}',
     '#mtt.on{opacity:1}#mtt *{box-sizing:border-box;margin:0;padding:0}',
-    '#mtt .t-routeg{margin:18px 0 8px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 12px 8px}',
-    '#mtt .t-routeg-h{font-size:12px;color:var(--mid);margin:0 0 6px}',
-    '#mtt .t-routeg svg{display:block;width:100%;height:auto}',
-    '#mtt .t-routeg .pace-legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:11px;color:var(--mid);margin-top:6px}',
     '#mtt .t-bar{position:absolute;top:0;left:0;right:0;z-index:5;padding:max(14px,env(safe-area-inset-top)) 16px 10px;background:linear-gradient(var(--bg) 70%,rgba(242,242,242,0))}',
     '#mtt .t-prog{display:flex;gap:5px;max-width:720px;margin:0 auto}',
     '#mtt .t-prog i{flex:1;height:3px;border-radius:3px;background:var(--track);overflow:hidden;position:relative}',
@@ -68,7 +64,8 @@
     '#mtt .t-halves{display:grid;gap:18px;margin-top:28px}',
     '#mtt .t-ht{display:flex;justify-content:space-between;font-size:14px;color:var(--mid);margin-bottom:8px}#mtt .t-ht b{color:var(--ink);font-weight:500;font-variant-numeric:tabular-nums}',
     '#mtt .t-dots{display:grid;grid-template-columns:repeat(auto-fill,16px);gap:6px;margin-top:28px}',
-    '#mtt .t-dot{width:16px;height:16px;border-radius:50%;background:rgba(17,17,17,.18);transition:background .6s var(--ease),border-radius .6s var(--ease)}',
+    '#mtt .t-dot{width:16px;height:16px;border-radius:50%;background:rgba(17,17,17,.18);opacity:0;transform:scale(.2);transition:opacity .35s var(--ease),transform .45s var(--ease),background .6s var(--ease),border-radius .6s var(--ease)}',
+    '#mtt .t-dots.pop .t-dot{opacity:1;transform:scale(1)}',
     '#mtt .t-dots.split .t-dot.content{background:var(--content)}#mtt .t-dots.split .t-dot.clock{background:var(--clock);border-radius:4px}',
     '#mtt .t-key{display:grid;gap:12px;margin-top:24px}',
     '#mtt .t-key div{display:flex;align-items:baseline;gap:12px;font-size:15px;color:var(--mid);opacity:0;transition:opacity .6s var(--ease)}',
@@ -325,7 +322,8 @@
     if (causes && missed > 0) {
       var nC = causes.content, nK = causes.clock, nM = causes.method;
       var dots = '';
-      for (var i = 0; i < nC + nK && i < 98; i++) dots += '<span class="t-dot ' + (i < nC ? 'content' : 'clock') + '"></span>';
+      // Each dot comes in, then colors, a beat after the one before (Luca, 2026-09-29: it has to be seen).
+      for (var i = 0; i < nC + nK && i < 98; i++) dots += '<span class="t-dot ' + (i < nC ? 'content' : 'clock') + '" style="transition-delay:' + (i * 35) + 'ms"></span>';
       var share = nK / (nC + nK || 1);
       var sayMiss = nK === 0 ? 'Every miss was a real attempt, so the points are in <strong>what to review next</strong>, not in ' + clk + '.'
         : share >= 0.25 ? 'So ' + (share >= 0.5 ? 'most' : 'a good share') + ' of your misses <strong>aren\u2019t about what you know</strong>. ' +
@@ -562,13 +560,8 @@
         : same === routes.length && same > 1 ? (same === 2 ? 'Both modules ' : 'All ' + numWord(same) + ' modules ') + HEADN[worst.reading]
         : same > 1 ? cap(numWord(same)) + ' of ' + numWord(routes.length) + ' modules ' + HEADN[worst.reading]
         : (HEAD[worst.reading] || wl + '.');
-      // The report's own route chart for the module the headline names.
-      var graph = '';
-      try { graph = typeof R.routeGraph === 'function' ? R.routeGraph(worst.label) || '' : ''; } catch (e) { graph = ''; }
       M.screens.push({ name: 'route', html:
-        '<p class="t-eye r">How each module went</p><h2 class="r">' + esc(head2) + '</h2>' +
-        (graph ? '<div class="t-routeg r"><p class="t-routeg-h">' + esc(undash(worst.label)) + ': every visit to every question, in order</p>' + graph + '</div>' : '') +
-        '<div class="t-mods">' +
+        '<p class="t-eye r">How each module went</p><h2 class="r">' + esc(head2) + '</h2><div class="t-mods">' +
         sorted.map(function (x, i) {
           var bad = x.reading && x.reading !== 'steady';
           return '<div class="t-mod" style="--i:' + i + '"><div class="t-mod-h"><b>' + esc(undash(x.label)) + '</b><span class="t-chip ' + (bad ? 'bad' : 'ok') + '">' + esc(CHIP[x.reading] || 'Steady') + '</span></div>' +
@@ -784,12 +777,20 @@
   function enter(el) {
     Array.prototype.forEach.call(el.querySelectorAll('[data-count]'), countUp);
     Array.prototype.forEach.call(el.querySelectorAll('.t-fill[data-w]'), function (f) { f.style.width = f.getAttribute('data-w') + '%'; });
-    var d = el.querySelector('.t-dots'); if (d) later(function () { d.classList.add('split'); }, 1100);
+    /* The dots appear once the screen has faded in (the .r reveal takes
+       about .8s), one by one, then split into their colors: started any
+       sooner, the whole thing ran while the screen was still invisible. */
+    var d = el.querySelector('.t-dots');
+    if (d) {
+      var nd = d.children.length;
+      later(function () { d.classList.add('pop'); }, 900);
+      later(function () { d.classList.add('split'); }, 900 + nd * 35 + 500);
+    }
     Array.prototype.forEach.call(el.querySelectorAll('.t-cb'), function (b, i) { later(function () { b.style.height = b.getAttribute('data-h') + '%'; }, 500 + i * 40); });
   }
   function leave(el) {
     Array.prototype.forEach.call(el.querySelectorAll('.t-fill[data-w]'), function (f) { f.style.width = '0'; });
-    var d = el.querySelector('.t-dots'); if (d) d.classList.remove('split');
+    var d = el.querySelector('.t-dots'); if (d) d.classList.remove('split', 'pop');
     Array.prototype.forEach.call(el.querySelectorAll('.t-cb'), function (b) { b.style.height = '0'; });
   }
   function go(n) {
@@ -952,7 +953,12 @@
       }
       // The public sample: the walkthrough is the whole show, so it opens every time.
       // Opened at once and opaque, so the report never shows underneath first.
-      if (opts.sample) { M.sample = true; sampleize(M); open(M, true); return; }
+      if (opts.sample) {
+        M.sample = true; sampleize(M); open(M, true);
+        // The page around the sample shows its frame only now, so nothing flickers first.
+        try { window.parent.postMessage({ type: 'moretti-tour', action: 'ready' }, '*'); } catch (e) {}
+        return;
+      }
       // By itself once per attempt per device; never when printing or embedded for show.
       // Not by itself inside Luca's admin viewer (audit 6: it greeted him as the student).
       /* The admin viewer's frame is sandboxed, so the parent's address can't be

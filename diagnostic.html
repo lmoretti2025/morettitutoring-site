@@ -400,7 +400,8 @@ nav.is-red .navmenu{background:var(--red);border-top-color:rgba(255,255,255,.2)}
 </style>
 <style>
 html,body{margin:0;height:100%;background:#F2F2F2;overflow:hidden}
-#deckframe{position:fixed;inset:0;width:100%;height:100%;height:100dvh;border:0;display:block;background:#F2F2F2}
+#deckframe{position:fixed;inset:0;width:100%;height:100%;height:100dvh;border:0;display:block;background:#F2F2F2;opacity:0;transition:opacity .4s var(--ease)}
+#deckframe.ready{opacity:1}
 .dform{position:fixed;inset:0;z-index:5;background:var(--void);overflow-y:auto;-webkit-overflow-scrolling:touch;
   opacity:0;transition:opacity .35s var(--ease);padding:max(18px,env(safe-area-inset-top)) 16px 40px}
 .dform.on{opacity:1}
@@ -415,7 +416,7 @@ html,body{margin:0;height:100%;background:#F2F2F2;overflow:hidden}
 .dform .capphone a{color:var(--red-lift);font-weight:600;margin-left:.35rem}
 </style>
 
-<iframe id="deckframe" src="portal/report.html?demo=1&amp;score=1250&amp;weak=math&amp;embed=public&amp;tour=1&amp;v=20260929d"
+<iframe id="deckframe" src="portal/report.html?demo=1&amp;score=1250&amp;weak=math&amp;embed=public&amp;tour=1&amp;v=20260929f"
         title="Sample diagnostic report walkthrough, for a made-up student"></iframe>
 
 <section class="dform dcta" id="start" hidden aria-label="Take the free diagnostic"><div class="in">
@@ -465,8 +466,15 @@ html,body{margin:0;height:100%;background:#F2F2F2;overflow:hidden}
     form.classList.remove('on');
     setTimeout(function () { form.hidden = true; try { f.focus(); } catch (e) {} }, 350);
   }
+  /* The frame stays invisible until the walkthrough is up (it says 'ready'),
+     so the report loading underneath never shows. A late or missing signal
+     still reveals it once the frame has loaded. */
+  function reveal() { f.classList.add('ready'); }
+  f.addEventListener('load', function () { setTimeout(reveal, 1500); });
+  setTimeout(reveal, 6000);
   window.addEventListener('message', function (e) {
     if (!f || e.source !== f.contentWindow || !e.data || e.data.type !== 'moretti-tour') return;
+    if (e.data.action === 'ready') reveal();
     if (e.data.action === 'cta') show();
   });
   document.getElementById('dform-back').addEventListener('click', hide);
