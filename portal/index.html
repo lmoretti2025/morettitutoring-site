@@ -21548,7 +21548,10 @@ window.renderNativeReport = function (data) {
   if (attemptDate && isNaN(attemptDate.getTime())) attemptDate = null;
   var timeStr = attemptDate ? attemptDate.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : null;
 
-  document.getElementById('r-title').textContent = data.n + ' · ' + (data.ptTitle ? data.ptTitle + ' Report' : data.t + ' Diagnostic Report');
+  /* One module on its own names the module in the title (Luca, 2026-09-29). */
+  var moduleOnlyTitle = (data.s || []).map(function (x) { return x && moduleOnlyLabel(x.k); }).filter(Boolean)[0];
+  document.getElementById('r-title').textContent = data.n + ' · ' + (moduleOnlyTitle ? (data.ptTitle || 'Practice test') + ' · ' + moduleOnlyTitle
+    : data.ptTitle ? data.ptTitle + ' Report' : data.t + ' Diagnostic Report');
   document.getElementById('r-sub').textContent = 'Administered ' + dateStr + (timeStr ? ' at ' + timeStr : '') + ' · Moretti student portal';
   // Compact in-portal header (.pt-report-hed): just the test name plus a
   // spoken-style "completed on" date, not the yyyy-mm-dd used elsewhere.
@@ -21742,7 +21745,8 @@ window.renderNativeReport = function (data) {
     // it takes the big tile rather than sitting in the small row next to an
     // empty space where the composite would have been.
     var moduleSec = [rw, mathSec].filter(function (x) { return x && moduleOnlyOf(x.key); })[0];
-    if (moduleSec) tilesEl.appendChild(scoreTile(moduleOnlyLabel(moduleSec.key) + ' (raw score)', moduleSec.c, moduleSec.t, moduleSec.c + '/' + moduleSec.t, true));
+    // The title names the module; the tile is just the raw score.
+    if (moduleSec) tilesEl.appendChild(scoreTile('Raw score (one module, so no 200–800 score)', moduleSec.c, moduleSec.t, moduleSec.c + '/' + moduleSec.t, true));
     else if (rw) tilesEl.appendChild(scoreTile('Reading & Writing (200–800)', rw.c, rw.t, rwScaled,
       singleSection && rwScaled !== null && rwScaled !== undefined));
     if (mathSec && !moduleSec) tilesEl.appendChild(scoreTile('Math (200–800)', mathSec.c, mathSec.t, mathScaled,
@@ -21925,6 +21929,8 @@ window.renderNativeReport = function (data) {
       { lab: skipped ? 'Accuracy (answered)' : 'Accuracy', val: attempted ? accuracyPct + '%' : '—', cls: !attempted ? '' : accuracyPct >= 75 ? 'ok' : (accuracyPct < 50 ? 'bad' : ''), icon: ICONS.accuracy },
       { lab: 'Unattempted', val: String(skipped), cls: skipped > 0 ? 'bad' : '', icon: ICONS.unattempted }
     ];
+    // One module: the big number above already is correct out of total.
+    if ((data.s || []).some(function (x) { return x && moduleOnlyOf(x.k); })) stats = stats.filter(function (s) { return s.lab !== 'Correct'; });
     wrap.innerHTML = stats.map(function (s) {
       return '<div class="raw-stat ' + s.cls + '"><span class="raw-stat-icon">' + s.icon + '</span><div class="raw-stat-text"><div class="raw-stat-lab">' + s.lab + '</div><div class="raw-stat-num">' + s.val + '</div></div></div>';
     }).join('');
@@ -22897,6 +22903,10 @@ window.renderNativeReport = function (data) {
       ctx.scale(dpr, dpr);
       return { cv: cv, ctx: ctx };
     }
+  } else if (bridgeWrap && (data.s || []).some(function (x) { return x && moduleOnlyOf(x.k); })) {
+    // One module has no scale to climb: no section at all rather than "not available".
+    bridgeWrap.style.display = 'none';
+    var bh = document.getElementById('bridge-hed'); if (bh) bh.style.display = 'none';
   } else if (bridgeWrap) {
     bridgeWrap.innerHTML = '<div class="bridge-empty">Not available for this test type.</div>';
   }
