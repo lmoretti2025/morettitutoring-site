@@ -1024,7 +1024,7 @@ var MorettiSignals = (function () {
     // interruption, not the student.
     return typeof e.composite === 'number' && isFinite(e.composite) && e.testId !== HARDEST_TEST_ID &&
       e.mode !== 'section' && e.source !== 'baseline' && !isInterruptedForTrend(e) &&
-      e.retake !== true && !abandonedSitting(e.qStats);
+      e.retake !== true && !abandonedSitting(e.qStats) && !spamSitting(e.qStats);
   }
   /* A practice test taken again (2026-09-26, Nikolas): the same questions a
      second time measure memory as much as the student, like a diagnostic
@@ -1072,6 +1072,38 @@ var MorettiSignals = (function () {
       }
       return b.length >= 5 && b.every(function (x) { return x; });
     });
+  }
+  /* spamSitting (Luca, 2026-09-29: "I rushed through the entire thing,
+     literally spamming answers, and the report said I worked the test
+     well"): half or more of the timed answers came faster than a question
+     can be read (under 0.15x its budget, the report's reading floor), on 10
+     or more answers. Such a sitting measures nothing: no score, trend,
+     level, habit or email reads it. Roster (2026-09-29): real students at
+     most 17% (a racer), most 0-5%; the test account 94%, a spammed test
+     100%. Uses the tooFast flag the record carries (tuple [7], or pace code
+     1 at [9]); older records without it need budgetSeconds(sec, dom, skill,
+     diff) -> seconds, else they are never called spam. */
+  var SPAM_SHARE = 0.5, SPAM_MIN_ANSWERED = 10;
+  function spamSitting(qsIn, budgetSeconds) {
+    var qs = qsIn;
+    if (typeof qs === 'string') { try { qs = JSON.parse(qs); } catch (e) { return false; } }
+    if (!qs || !qs.q || !qs.q.length) return false;
+    var answered = 0, fast = 0;
+    qs.q.forEach(function (r) {
+      if (!r || r.length < 5 || r[3] === 2) return;
+      var flag = (r.length > 9 && typeof r[9] === 'number') ? (r[9] === 1 ? 1 : 0)
+               : (r.length > 7 && (r[7] === 0 || r[7] === 1)) ? r[7] : null;
+      if (flag === null && typeof budgetSeconds === 'function') {
+        var sk = String((qs.k && qs.k[r[1]]) || ''), cut = sk.indexOf(' \u2192 ');
+        var dom = cut >= 0 ? sk.slice(0, cut) : sk, skill = cut >= 0 ? sk.slice(cut + 3) : sk;
+        var sec = /math/.test(String((qs.s && qs.s[r[0]]) || '')) ? 'math' : 'reading-writing';
+        var b = Number(budgetSeconds(sec, dom, skill, ['easy', 'medium', 'hard'][r[2]] || 'medium')) || 0, secs = Number(r[4]) || 0;
+        if (b > 0 && secs > 0) flag = secs < TOO_FAST_REL * b ? 1 : 0;
+      }
+      if (flag === null) return;
+      answered++; if (flag === 1) fast++;
+    });
+    return answered >= SPAM_MIN_ANSWERED && fast >= SPAM_SHARE * answered;
   }
   function levelOf(list) {
     var avg = function (f) { return list.reduce(function (s, e) { return s + f(e); }, 0) / list.length; };
@@ -1685,7 +1717,7 @@ var MorettiSignals = (function () {
       if (tid === HARDEST_TEST_ID && !opts.includeHardest) return;
       // A practice test taken again (firstTakes): only its first sitting is read.
       if (/^sat-practice-/.test(String(tid))) { if (seen['t:' + tid]) return; seen['t:' + tid] = true; }
-      if (abandonedSitting(e.qStats)) return;
+      if (abandonedSitting(e.qStats) || spamSitting(e.qStats, opts.budgetSeconds)) return;
       var aid = e.attemptId || e.id || '';
       if (aid) { if (seen[aid]) return; seen[aid] = true; }
       var items = itemsFromQStats(e.qStats, opts.budgetSeconds);
@@ -2047,7 +2079,7 @@ var MorettiSignals = (function () {
     if (!e || e.testId === HARDEST_TEST_ID || e.source === 'diagnostic-retake' || e.retake === true) return false;
     if (isInterruptedForTrend(e)) return false;
     // A sitting walked away from reads as a module "run short"; it is leaving, not pace.
-    return !!qsOf(e.qStats) && !abandonedSitting(e.qStats);
+    return !!qsOf(e.qStats) && !abandonedSitting(e.qStats) && !spamSitting(e.qStats);
   }
   // Oldest first, a practice test's first sitting only (firstTakes).
   function paceEntries(entries) {
@@ -3933,7 +3965,7 @@ var MorettiSignals = (function () {
     itemsFromQStats: itemsFromQStats,
     trailingRush: trailingRush, RUSH_REL: RUSH_REL, RUSH_MIN_RUN: RUSH_MIN_RUN, RUSH_CLOCK_SHARE: RUSH_CLOCK_SHARE,
     pacingHabits: pacingHabits, missProfile: missProfile, consistencyOf: consistencyOf, gammaQ: gammaQ,
-    firstTakes: firstTakes, abandonedSitting: abandonedSitting,
+    firstTakes: firstTakes, abandonedSitting: abandonedSitting, spamSitting: spamSitting, SPAM_SHARE: SPAM_SHARE,
     sittingConditions: sittingConditions, conditionsCompact: conditionsCompact, conditionsSummary: conditionsSummary,
     realVsPractice: realVsPractice,
     skillTrend: skillTrend,
@@ -3945,7 +3977,7 @@ var MorettiSignals = (function () {
     // admin deploy check compares it, since an older copy can still have
     // every function name and compute the old way.
     rushedLevel: rushedLevel,
-    VERSION: 37,
+    VERSION: 38,
     attemptAbility: attemptAbility,
     FOCUS_GATES: { domainClear: FOCUS_DOMAIN_CLEAR, skillLead: FOCUS_SKILL_LEAD, noOffsetsPenalty: FOCUS_NO_OFFSETS_PENALTY },
     practiceEvidence: practiceEvidence,

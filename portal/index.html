@@ -5696,7 +5696,7 @@ window.Portal = {
      header in fluid-ui.js. -->
 <script src="fluid-ui.js?v=20260905y"></script>
 <script src="banks.js?v=20260926a"></script>
-<script src="signals.js?v=20260927m"></script>
+<script src="signals.js?v=20260929a"></script>
 <script src="desmos-tags.js?v=20260916c"></script>
 <script src="time-budgets.js?v=20260912a"></script>
 <script src="challenge-questions.js?v=20260926a"></script>
@@ -8892,7 +8892,10 @@ window.Portal = {
     var entries = mergedScoreHistory().filter(function (e) { return homeTestIncluded(homeTestLabel(e.testTitle)) && e.composite != null; });
     // Shows as soon as there's any score: a single point is still useful,
     // and buildScoreLineSvg() centers a lone point.
-    var allSat = entries.filter(function (e) { return e.testType === 'SAT' && e.testId !== HARDEST_TEST_ID; });
+    // A clicked-through test (answers faster than they can be read) measures nothing, so it isn't plotted (signals spamSitting, 2026-09-29).
+    var MSp = window.MorettiSignals;
+    var allSat = entries.filter(function (e) { return e.testType === 'SAT' && e.testId !== HARDEST_TEST_ID &&
+      !(MSp && typeof MSp.spamSitting === 'function' && e.qStats && MSp.spamSitting(e.qStats)); });
     // Said once under the chart, so a student who took it doesn't think it went missing.
     var hardestTaken = entries.some(function (e) { return e.testId === HARDEST_TEST_ID; });
     var baseline = baselineScoreEntry();
@@ -25425,6 +25428,26 @@ window.renderNativeReport = function (data) {
      evidence. Nothing is shown when the conditions were good. */
   // What the conditions card showed, so later sections do not say it again.
   var conditionsShown = null;
+  /* ═══ NOT A REAL ATTEMPT (Luca, 2026-09-29) ═══ Half or more of the timed
+     answers under the reading floor (0.15x the question's budget): the
+     test was clicked through, not taken, and its score measures nothing.
+     Same line as signals.js spamSitting (real students: at most 17%). The
+     top card says so, the score loses its range, and every section that
+     reads the answers as real (points, relearn, time, habits, plan, the
+     walkthrough) is held back; the grids and the route stay as evidence. */
+  var notReal = (function () {
+    var answered = 0, fast = 0;
+    (sections || []).forEach(function (sec) {
+      sec.rows.forEach(function (r) {
+        if (r.skipped || !r.q) return;
+        var t = pacingTimeMs(r), floor = readFloorMs(sec.key, r);
+        if (!(t > 0) || !(floor > 0)) return;
+        answered++; if (t < floor) fast++;
+      });
+    });
+    var share = (window.MorettiSignals && window.MorettiSignals.SPAM_SHARE) || 0.5;
+    return answered >= 10 && fast >= share * answered ? { answered: answered, fast: fast } : null;
+  })();
   (function renderConditions() {
     var MSc = window.MorettiSignals, el = document.getElementById('cond-card');
     if (!el || !MSc || typeof MSc.sittingConditions !== 'function' || !Array.isArray(data.s)) return;
@@ -25442,6 +25465,17 @@ window.renderNativeReport = function (data) {
       correct: function (si, i) { var sec = secOf(si); return !!(sec && sec.rows[i] && sec.rows[i].ok); },
       module1Length: function (si) { var sec = secOf(si); return sec && sec.hasModules ? sec.moduleSplit : null; }
     });
+    if (notReal) {
+      el.className = 'cond-card cond-poor';
+      el.innerHTML = '<div class="cond-eye">How this test was taken</div>' +
+        '<div class="cond-hed">Not a real attempt, so this score doesn\u2019t measure anything.</div>' +
+        '<ul class="cond-list"><li><span><b>Answered too fast to read:</b> ' + notReal.fast + ' of ' + notReal.answered +
+        ' answers came faster than the question can be read.</span></li></ul>' +
+        '<p class="cond-foot">Nothing on this report can say what you know or how you pace a test, so there is no plan here. Take a test again under real conditions: read every question to the end, and use the time.</p>';
+      el.style.display = '';
+      conditionsShown = { level: 'poor', modules: c.modules || [], signals: [{ id: 'not-real', label: 'Not a real attempt', detail: notReal.fast + ' of ' + notReal.answered + ' answers too fast to read' }] };
+      return;
+    }
     if (c.level === 'good') return;
     var poor = c.level === 'poor';
     /* One banner, not two: the interruption banner above (renderIntegrity)
@@ -26738,7 +26772,10 @@ window.renderNativeReport = function (data) {
           (planInputs.mode === 'tests' ? 'full practice tests' : planInputs.mode === 'pace' ? 'timed practice'
             : { content: 'relearning', method: 'timed practice', clock: 'timed practice' }[leadWork]) + '.'
         : '';
-      var parentHtml = '<p class="plain-parent"><b>For parents:</b> ' + problem + planLine +
+      var parentHtml = notReal
+        ? '<p class="plain-parent"><b>For parents:</b> this test was clicked through, with most answers given faster than the questions can be read, so it says nothing about what ' +
+          who + ' knows. The best help at home is making the next practice test one quiet, timed sitting, with the phone in another room.</p>'
+        : '<p class="plain-parent"><b>For parents:</b> ' + problem + planLine +
         (planLine ? ' The best help at home is protecting those hours, and making' : ' The best help at home is making') + ' the next practice test one quiet, timed sitting' +
         (late ? ' earlier in the day' : '') + ', with the phone in another room.</p>';
       // The conditions card above already says it, with the evidence (2026-09-27).
@@ -26768,7 +26805,8 @@ window.renderNativeReport = function (data) {
       var scoreCardEl = document.getElementById('score-card');
       if (scoreCardEl) {
         Array.prototype.forEach.call(scoreCardEl.querySelectorAll('.score-range-row'), function (e) { e.parentNode.removeChild(e); });
-        if (scoreHtml || rangeHtml) scoreCardEl.insertAdjacentHTML('beforeend', '<div class="score-range-row">' + rangeHtml + scoreHtml + '</div>');
+        if (notReal) scoreCardEl.insertAdjacentHTML('beforeend', '<div class="score-range-row"><p class="plain-score">This score is not a measure: the answers came faster than the questions can be read.</p></div>');
+        else if (scoreHtml || rangeHtml) scoreCardEl.insertAdjacentHTML('beforeend', '<div class="score-range-row">' + rangeHtml + scoreHtml + '</div>');
       }
       if (coverLayout) {
         var titleTxt = (document.getElementById('r-title') || {}).textContent || '';
@@ -26911,7 +26949,19 @@ window.renderNativeReport = function (data) {
   /* THE WALKTHROUGH (report-tour.js, Luca 2026-09-26), the same call as
      report.html's: the story of this report from the values above. Opens by
      itself the first time an attempt is opened on this device. */
-  if (window.MTReportTour) try {
+  if (notReal) {
+    ['plain-summary', 'bridge-hed', 'bridge-card', 'skilldx-hed', 'skilldx-card', 'budget-hed', 'budget-sub', 'budget-card',
+     'behavior-hed', 'behavior-section', 'plan-hed', 'plan-section', 'dx-hed', 'dx-card'].forEach(function (id) {
+      var e = document.getElementById(id);
+      if (!e) return;
+      e.style.display = 'none';
+      var n = e.nextElementSibling;   // the one-line headline the folded sections carry
+      if (n && n.classList && n.classList.contains('ev-line')) n.style.display = 'none';
+    });
+    // The older "Read this one with care" note under the score says less, and points at a section held back.
+    Array.prototype.forEach.call(document.querySelectorAll('.tile-unworked'), function (e) { e.style.display = 'none'; });
+  }
+  if (window.MTReportTour && !notReal) try {
     window.MTReportTour.mount({ data: data, dateStr: dateStr, sections: sections, displaySections: displaySections, skills: skills,
       domains: domains, totalC: totalC, totalQ: totalQ, composite: composite, rwScaled: rwScaled, mathScaled: mathScaled,
       currentComposite: currentComposite, shownItems: shownItems, reachable: reachable, targetScore: targetScore,
