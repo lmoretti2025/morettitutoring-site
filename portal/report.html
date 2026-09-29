@@ -1665,8 +1665,18 @@
     // MODULE2_ROUTING_RAW_THRESHOLD.
     var ROUTE_RAW_THRESHOLD = { 'reading-writing': 15, 'math': 12 };
 
-    function genAnswers(qs, wrongRate, weakSkill, key) {
+    /* &mix=1, the site's sample (Luca, 2026-09-29: "show the different
+       question type misses ... have the student unable to complete the
+       English section in the full time"). The second Reading & Writing
+       module runs slow: the student rushes three questions near the end in
+       a few seconds each and misses them, and the clock runs out with four
+       never reached. Everything else is the ordinary demo. */
+    var DEMO_MIX = /[?&]mix=1\b/.test(location.search);
+    var MIX_BLANK = 4, MIX_RUSHED = 3;
+    function genAnswers(qs, wrongRate, weakSkill, key, isM2) {
       var answers = [], marked = [], times = [], firsts = [], correct = 0;
+      var mixHere = DEMO_MIX && isM2 && key === 'reading-writing' && qs.length > MIX_BLANK + MIX_RUSHED + 5;
+      var rushedAt = {};
       var diff = { easy: { c: 0, t: 0 }, medium: { c: 0, t: 0 }, hard: { c: 0, t: 0 } };
       // The real engine force-submits a module when its clock hits zero
       // (autoSubmitSection in index.html), so every question after that is
@@ -1677,9 +1687,9 @@
       // crossing dot.
       var perModuleMs = ((window.SECTION_MODULE_TIME_LIMITS && window.SECTION_MODULE_TIME_LIMITS[key]) || 0) * 60000 * demoAccomMult;
       var cumMs = 0;
-      qs.forEach(function (q) {
+      qs.forEach(function (q, qi) {
         var dtag = diff[q.difficulty];
-        var outOfClock = perModuleMs > 0 && cumMs >= perModuleMs;
+        var outOfClock = (perModuleMs > 0 && cumMs >= perModuleMs) || (mixHere && qi >= qs.length - MIX_BLANK);
         if (outOfClock) {
           if (dtag) dtag.t++; // still counts toward the bank's total, same as the random-blank roll below
           answers.push(null);
@@ -1690,6 +1700,8 @@
         }
         var wrong = rand() < wrongRate;
         if (!hasTarget && weakSkill && q.skill === weakSkill) wrong = rand() < WEAK_WRONG;
+        var rushedQ = mixHere && qi >= qs.length - MIX_BLANK - MIX_RUSHED;
+        if (rushedQ) { wrong = true; rushedAt[qi] = true; }
         var given;
         if (q.type === 'mc') {
           var n = (q.choices || []).length || 4;
@@ -1704,7 +1716,7 @@
         // The random blank roll applies only to the default (no-target) demo.
         // With a target it would only ever pull scores down and make the true
         // ceiling (1600) unreachable.
-        if (!hasTarget && rand() < 0.05) {
+        if (!hasTarget && !rushedQ && rand() < 0.05) {
           given = null;
         } else if (!wrong) {
           correct++;
@@ -1730,6 +1742,8 @@
           budMs *= DEMO_MATH_TIME_BASE[q.difficulty] / nowMath[q.difficulty];
         var baseMs = budMs * demoPaceFor(q);
         var totalMs = Math.round(wrong ? baseMs * (1.15 + rand() * 0.5) : baseMs * (0.78 + rand() * 0.34));
+        // A rushed guess: a few seconds, far too fast to have read the question.
+        if (rushedQ) totalMs = 4000 + Math.round(rand() * 4000);
         // Truncate the question that crosses the clock to the time left, so a
         // module's total never exceeds its clock. It still gets a real answer
         // and a (shorter) time.
@@ -1741,9 +1755,30 @@
         // flag are built on. Flagged questions come back more often, which
         // is what actually happens.
         var isMarked = marked[marked.length - 1];
-        var comesBack = rand() < (isMarked ? 0.55 : 0.14);
+        var comesBack = !rushedQ && rand() < (isMarked ? 0.55 : 0.14);
         firsts.push(comesBack ? Math.round(totalMs * (0.45 + rand() * 0.25)) : totalMs);
       });
+      /* The mixed sample's slow module fills its whole clock: the answered,
+         unrushed questions stretch so the module ends exactly at time. */
+      if (mixHere && perModuleMs > 0) {
+        var rushedMs = 0, restMs = 0;
+        times.forEach(function (t, i) { if (rushedAt[i]) rushedMs += t; else restMs += t; });
+        var k = restMs > 0 ? Math.max(1, (perModuleMs - rushedMs) / restMs) : 1;
+        times = times.map(function (t, i) { return rushedAt[i] || !t ? t : Math.round(t * k); });
+        firsts = firsts.map(function (t, i) { return rushedAt[i] || !t ? t : Math.round(t * k); });
+      }
+      /* ...and its other modules end a minute or two early rather than with
+         many minutes to spare, so the sample tells one story (time ran short),
+         not a second, contradicting one (rushed, handed in early). */
+      else if (DEMO_MIX && perModuleMs > 0) {
+        var used = times.reduce(function (x, y) { return x + y; }, 0);
+        var goal = perModuleMs - 90000;   // a minute and a half early; no extra random draw, so the misses stay put
+        if (used > 0 && used < goal) {
+          var k2 = goal / used;
+          times = times.map(function (t) { return Math.round(t * k2); });
+          firsts = firsts.map(function (t) { return Math.round(t * k2); });
+        }
+      }
       return { answers: answers, marked: marked, times: times, firsts: firsts, correct: correct, diff: diff };
     }
     // Turns a flat array of per-question durations into fabricated
@@ -1809,7 +1844,7 @@
       if (bank.module2Easier) {
         var rawT = ROUTE_RAW_THRESHOLD[key];
         variant = (rawT != null ? m1.correct > rawT : (m1.correct / bank.module1.length) >= 0.6) ? 'Harder' : 'Easier';
-        m2 = genAnswers(bank['module2' + variant], wrongRate, weakSkill, key);
+        m2 = genAnswers(bank['module2' + variant], wrongRate, weakSkill, key, true);
         m2t = bank['module2' + variant].length;
       }
       var diff = { easy: { c: 0, t: 0 }, medium: { c: 0, t: 0 }, hard: { c: 0, t: 0 } };
