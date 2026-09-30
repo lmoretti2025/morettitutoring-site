@@ -89,12 +89,14 @@
     '#cu-root .cu-body{transition:opacity .16s ease}#cu-root .cu-body.cu-fading{opacity:0}',
     '#cu-root .cu-in{animation:cuIn .5s var(--ease,ease) both;animation-delay:calc(var(--d,0) * 60ms)}',
     '@keyframes cuIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}',
-    '#cu-root .cu-hero{display:grid;grid-template-columns:1fr;gap:1rem;align-items:center;border-radius:20px;padding:1.6rem 1.8rem;margin-bottom:1.2rem;overflow:hidden;position:relative;box-shadow:var(--shadow)}',
+    '#cu-root .cu-hero{border-radius:18px;padding:1.15rem 1.6rem;margin-bottom:1.2rem;overflow:hidden;position:relative;box-shadow:var(--shadow)}',
+    '#cu-root .cu-hero-text{display:flex;align-items:center;justify-content:space-between;gap:.8rem 2rem;flex-wrap:wrap}',
     '#cu-root .cu-hero-math{background:linear-gradient(135deg,#fff 0%,#fbf1ef 60%,#f6e4e1 100%)}',
     '#cu-root .cu-hero-english{background:linear-gradient(135deg,#fff 0%,#eff2fb 60%,#e3e8f7 100%)}',
-    '#cu-root .cu-hero h1{margin:0 0 .3rem;font-size:clamp(1.8rem,3.4vw,2.5rem)}',
+    '#cu-root .cu-hero h1{margin:0;font-size:clamp(1.6rem,3vw,2.1rem)}',
     '#cu-root .cu-hero .cu-sub{max-width:32em}',
-    '#cu-root .cu-stats{display:flex;align-items:center;gap:1.4rem;margin-top:1.1rem;flex-wrap:wrap}',
+    '#cu-root .cu-stats{display:flex;align-items:center;gap:1.4rem;flex-wrap:wrap}',
+    '#cu-root .cu-bigring{zoom:.76}',
     '#cu-root .cu-bigring{position:relative;width:84px;height:84px}#cu-root .cu-bigring b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--display,Georgia,serif);font-size:1.25rem}',
     '#cu-root .cu-ringfill{transition:stroke-dasharray .8s var(--ease,ease)}',
     '#cu-root .cu-stat b{display:block;font-family:var(--display,Georgia,serif);font-size:1.5rem;line-height:1}#cu-root .cu-stat span{font-size:.75rem;color:var(--mid);text-transform:uppercase;letter-spacing:.08em}',
@@ -142,7 +144,13 @@
     '#cu-root .cu-step.done .ic{background:var(--cu-good);border-color:var(--cu-good);color:#fff}',
     '#cu-root .cu-step .st{font-size:.72rem;color:var(--mid)}',
     '#cu-root .cu-main{min-width:0}',
-    '#cu-root .cu-mhead{text-align:center;margin-bottom:1rem}#cu-root .cu-mhead h1{font-size:clamp(1.4rem,2.6vw,1.9rem)}',
+    '#cu-root .cu-mhead{margin-bottom:1rem}#cu-root .cu-mhead h1{font-size:clamp(1.4rem,2.6vw,1.9rem);margin:.15rem 0 .3rem}',
+    '#cu-root .cu-nov{display:flex;align-items:center;gap:.9rem;background:#12284c;color:#fff;border-radius:14px;padding:.9rem 1.1rem;box-shadow:var(--shadow)}',
+    '#cu-root .cu-nov .play{flex:none;width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;font-size:.85rem}',
+    '#cu-root .cu-nov b{display:block;font-weight:600;font-size:.95rem}#cu-root .cu-nov span span,#cu-root .cu-nov div span{font-size:.84rem;opacity:.75;font-weight:300}',
+    '#cu-root .cu-step.sub{padding-top:.34rem;padding-bottom:.5rem;font-size:.8rem;color:var(--mid)}#cu-root .cu-step.sub small{font-size:.74rem;opacity:.8;margin-left:.2rem}',
+    '#cu-root .cu-step.sub .ic{width:14px;height:14px;border-radius:50%;margin-left:6px;font-size:.55rem}',
+    '#cu-root .cu-step .st svg{display:block;opacity:.55}',
     '#cu-root .cu-video{position:relative;width:100%;aspect-ratio:16/9;background:#12284c;border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}',
     '#cu-root .cu-video iframe,#cu-root .cu-video video{position:absolute;inset:0;width:100%;height:100%;border:0}',
     '#cu-root .cu-r2{position:absolute;inset:0}#cu-root .cu-soon a{color:#fff}',
@@ -286,9 +294,12 @@
       // not_configured: the signing key is not in Apps Script yet, so the video is not out yet.
       var msg = why === 'not_entitled'
         ? '<b>Videos open with your sessions</b><span>This lesson\u2019s notes are below in the meantime.</span>'
-        : why === 'not_configured'
-        ? '<b>Video coming soon</b><span>This lesson\u2019s video is being recorded. The notes below cover the same material for now.</span>'
         : '<b>The video didn\u2019t load</b><span><a href="#" data-r2-retry>Try again</a></span>';
+      if (why === 'not_configured') {                 // not out yet: the same line as a part with no video
+        var frame = box.closest('.cu-video');
+        if (frame) { frame.outerHTML = NO_VIDEO; var nb = $('[data-notes]', root); if (nb && nb.getAttribute('aria-expanded') === 'false') nb.click(); }
+        return;
+      }
       box.innerHTML = '<div class="cu-soon"><div class="play">&#9654;</div>' + msg + '</div>';
     };
     r2Link(key).then(function (d) {
@@ -544,7 +555,7 @@
             if (lessonLocked(c, l)) {
               return '<button type="button" class="cu-lesson cu-locked" data-locked title="Watch 1.1 to unlock the rest of Math"><span class="cu-ring cu-lockring" style="width:30px;height:30px">' + LOCK_SVG + '</span>' +
                 '<span class="cu-lt"><span class="cu-num">' + esc(l.num) + '</span> ' + esc(l.title) + calcBadge(l) + '<small>' + pl(l.parts.length, 'part') + '</small></span>' +
-                '<span class="cu-go">Locked</span></button>';
+                '</button>';
             }
             return '<button type="button" class="cu-lesson" data-lesson="' + esc(l.id) + '">' + ring(n, l.parts.length) +
               '<span class="cu-lt"><span class="cu-num">' + esc(l.num) + '</span> ' + esc(l.title) + calcBadge(l) + '<small>' + pl(l.parts.length, 'part') + (n && n < l.parts.length ? ' &middot; ' + n + ' done' : '') + '</small></span>' +
@@ -642,10 +653,10 @@
       var open = unlocked(l, i), done = isDone(l.id, i);
       var lock = open ? '' : ' aria-disabled="true"';
       out += '<button type="button" class="cu-step' + (view.part === i && view.step === 'video' ? ' on' : '') + (open ? '' : ' locked') + (done ? ' done' : '') + '" data-step="video" data-part="' + i + '"' + lock + '>' +
-        '<span class="ic">' + (done ? '&#10003;' : '&#9654;') + '</span><span>' + esc(partTitle(l, i)) + '</span><span class="st">' + (open ? '' : '&#128274;') + '</span></button>';
+        '<span class="ic">' + (done ? '&#10003;' : '&#9654;') + '</span><span>' + esc(partTitle(l, i)) + '</span><span class="st">' + (open ? '' : LOCK_SVG) + '</span></button>';
       if (p.qids.length) {
-        out += '<button type="button" class="cu-step' + (view.part === i && view.step === 'check' ? ' on' : '') + (open ? '' : ' locked') + (done ? ' done' : '') + '" data-step="check" data-part="' + i + '"' + lock + '>' +
-          '<span class="ic">' + (done ? '&#10003;' : '&#9998;') + '</span><span>Check: ' + STREAK_TO_PASS + ' in a row</span><span class="st">' + (open ? '' : '&#128274;') + '</span></button>';
+        out += '<button type="button" class="cu-step sub' + (view.part === i && view.step === 'check' ? ' on' : '') + (open ? '' : ' locked') + (done ? ' done' : '') + '" data-step="check" data-part="' + i + '"' + lock + '>' +
+          '<span class="ic">' + (done ? '&#10003;' : '') + '</span><span>Check <small>' + STREAK_TO_PASS + ' in a row</small></span><span class="st"></span></button>';
       }
     });
     return out;
@@ -674,6 +685,8 @@
     }).join('');
   }
 
+  // No video yet: a line saying so, not an empty player.
+  var NO_VIDEO = '<div class="cu-nov"><span class="play">&#9654;</span><div><b>Video coming soon</b><span>The notes below cover the same material for now.</span></div></div>';
   function renderVideo(c, l) {
     var p = l.parts[view.part], i = view.part;
     var vid = videoFor(l.id, i);
@@ -683,9 +696,9 @@
     if (hasCheck) bar = '<span class="lbl">Up next: get ' + STREAK_TO_PASS + ' right in a row</span><button type="button" class="cu-btn" data-go-check>Start the check &rarr;</button>';
     else bar = '<span class="lbl">' + (done ? 'Watched' : 'No questions for this part') + '</span><button type="button" class="cu-btn" data-watched>' + (nextOpen ? 'Next part &rarr;' : 'Finish the lesson &rarr;') + '</button>';
     $('#cu-main', root).innerHTML =
-      '<div class="cu-mhead"><div class="cu-kicker">' + esc(l.num + ' ' + l.title) + '</div><h1>' + esc(partTitle(l, i)) + '</h1>' +
-        (partPages(l, i).length > 1 ? '<div class="cu-sub">Covers: ' + partPages(l, i).map(esc).join(' &middot; ') + '</div>' : '') + '</div>' +
-      '<div class="cu-video">' + (vid || '<div class="cu-soon"><div class="play">&#9654;</div><b>Video coming soon</b><span>This lesson\u2019s video is being recorded. The notes below cover the same material for now.</span></div>') + '</div>' +
+      // One part: the heading is the lesson itself, so the line above it names the unit instead of repeating it.
+      '<div class="cu-mhead"><div class="cu-kicker">' + esc(l.parts.length > 1 ? l.num + ' ' + l.title : c.title + ' \u00b7 ' + ((findLesson(l.id) || {}).d || {}).name) + '</div><h1>' + esc(l.parts.length > 1 ? partTitle(l, i) : l.num + ' ' + l.title) + '</h1></div>' +
+      (vid ? '<div class="cu-video">' + vid + '</div>' : NO_VIDEO) +
       '<section class="cu-notes"><button type="button" class="cu-notes-h" data-notes aria-expanded="' + (!vid) + '">Notes <span>' + (vid ? 'Show' : 'Hide') + '</span></button>' +
       '<div class="cu-notes-fold' + (vid ? ' closed' : '') + '"><div class="cu-notes-in"><div class="cu-notes-b">' + (notesHtml(p) || '<p>No notes for this part.</p>') + '</div></div></div></section>' +
       '<div class="cu-bottom">' + bar + '</div>';
