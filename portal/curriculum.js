@@ -41,7 +41,9 @@
   var CSS = [
     '#cu-root{--cu-line:rgba(17,17,17,.10);--cu-soft:#f6f5f3;--cu-good:#2E8A5E;--cu-bad:#C8372B;font-family:var(--hel,Poppins,sans-serif);color:var(--text,#111)}',
     '#cu-root *{box-sizing:border-box}',
-    '#cu-root .cu-wrap{max-width:1180px;margin:0 auto;padding:1.6rem clamp(1rem,3vw,2rem) 6rem}',
+    // A fixed width (Luca, 2026-09-30): the screen sized itself to its content, so switching course or opening Suggested order moved everything.
+    '#cu-root{width:100%;align-self:stretch}',
+    '#cu-root .cu-wrap{width:100%;max-width:1100px;margin:0 auto;padding:1.6rem clamp(1rem,3vw,2rem) 6rem}',
     '#cu-root .cu-kicker{font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:var(--red,#B0271C);font-weight:600}',
     '#cu-root h1{font-family:var(--display,Georgia,serif);font-size:clamp(1.7rem,3.2vw,2.3rem);font-weight:700;margin:.35rem 0 .2rem;line-height:1.15}',
     '#cu-root h2{font-family:var(--display,Georgia,serif);font-weight:700}',
@@ -83,8 +85,8 @@
     '#cu-root .cu-btn.ghost{background:#fff;color:var(--text,#111);box-shadow:inset 0 0 0 1px var(--cu-line)}',
     '#cu-root .cu-units{display:grid;gap:1.1rem}',
     'html:has(#screen-curriculum.active){scrollbar-gutter:stable}',
-    '#cu-root .cu-top{display:flex;justify-content:space-between;align-items:flex-end;gap:1rem;flex-wrap:wrap;margin-bottom:1.1rem;min-height:3.6rem}',
-    '#cu-root .cu-toph{font-family:var(--display,Georgia,serif);font-size:1.25rem;font-weight:700;margin-top:.2rem}',
+    '#cu-root .cu-top{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:1.1rem;min-height:3rem}',
+    '#cu-root .cu-toph{font-family:var(--display,Georgia,serif);font-size:1.5rem;font-weight:700}',
     '#cu-root .cu-top .cu-tabs{margin:0}',
     '#cu-root .cu-body{transition:opacity .16s ease}#cu-root .cu-body.cu-fading{opacity:0}',
     '#cu-root .cu-in{animation:cuIn .5s var(--ease,ease) both;animation-delay:calc(var(--d,0) * 60ms)}',
@@ -568,7 +570,7 @@
     var c = course(view.course);
     view.course = c.id;
     root.innerHTML = '<div class="cu-wrap">' +
-      '<div class="cu-top"><div><div class="cu-kicker">Curriculum</div><div class="cu-toph">Learn it, then prove it</div></div>' +
+      '<div class="cu-top"><div class="cu-toph">Curriculum</div>' +
       '<div class="cu-tabs" role="group" aria-label="Course">' + courses().map(function (x) {
         return '<button type="button" data-course="' + x.id + '" aria-pressed="' + (x.id === c.id) + '">' + esc(x.title) + '</button>';
       }).join('') + '</div></div>' +
@@ -591,7 +593,7 @@
     var pct = total ? Math.round(100 * done / total) : 0;
     var R = 34, CIRC = 2 * Math.PI * R;
     if (courseSoon(c)) {
-      return '<section class="cu-hero cu-hero-' + c.id + ' cu-in" style="--d:0"><div class="cu-hero-text"><h1>SAT Reading &amp; Writing</h1></div></section>' +
+      return heroHtml(c) +
         '<div class="cu-gate cu-in" style="--d:1"><span class="cu-gate-ic">' + LOCK_SVG + '</span><div><b>Coming soon</b>' +
         '<span>The Reading &amp; Writing lessons are being recorded. Math is open now, and the Question Bank has every Reading &amp; Writing skill in the meantime.</span></div>' +
         '<button type="button" class="cu-btn" data-course="math">Go to Math &rarr;</button></div>';
@@ -610,12 +612,7 @@
       resume = '<div class="cu-resume cu-in" style="--d:1"><span class="cu-resume-ic">' + PLAY_SVG_SM + '</span><div><b>Pick up where you left off</b><span>' + esc(last.l.num + ' ' + last.l.title) + ', part ' + (prog.last.part + 1) + ' of ' + last.l.parts.length + '</span></div>' +
         '<button type="button" class="cu-btn" data-resume>Continue &rarr;</button></div>';
     }
-    return '<section class="cu-hero cu-hero-' + c.id + ' cu-in" style="--d:0">' +
-        '<div class="cu-hero-text"><h1>' + esc(c.id === 'math' ? 'SAT Math' : 'SAT Reading & Writing') + '</h1>' +
-        '<div class="cu-stats"><div class="cu-bigring"><svg width="84" height="84" viewBox="0 0 84 84" aria-hidden="true"><circle cx="42" cy="42" r="' + R + '" fill="none" stroke="rgba(17,17,17,.08)" stroke-width="7"/>' +
-          (done ? '<circle class="cu-ringfill" cx="42" cy="42" r="' + R + '" fill="none" stroke="var(--red,#B0271C)" stroke-width="7" stroke-linecap="round" stroke-dasharray="' + Math.max(1, CIRC * pct / 100).toFixed(1) + ' ' + CIRC.toFixed(1) + '" transform="rotate(-90 42 42)"/>' : '') + '</svg><b>' + pct + '%</b></div>' +
-          '<div class="cu-stat"><b>' + lessons.length + '</b><span>lessons</span></div><div class="cu-stat"><b>' + total + '</b><span>parts</span></div><div class="cu-stat"><b>' + done + '</b><span>done</span></div></div></div>' +
-        '</section>' +
+    return heroHtml(c) +
       gateCard + resume + guideHtml(c) +
       '<div class="cu-units">' + c.domains.map(function (d, di) {
         var dDone = d.lessons.filter(function (l) { return lessonDoneCount(l) === l.parts.length; }).length;
@@ -636,6 +633,19 @@
       }).join('') + '</div>';
   }
   var LOCK_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
+  // The course's header card: its name, and lessons, parts and done. The same on both courses, so switching does not change its size.
+  function heroHtml(c) {
+    var lessons = allLessons(c), total = 0, done = 0;
+    lessons.forEach(function (x) { total += x.l.parts.length; done += lessonDoneCount(x.l); });
+    var pct = total ? Math.round(100 * done / total) : 0;
+    var R = 34, CIRC = 2 * Math.PI * R;
+    return '<section class="cu-hero cu-hero-' + c.id + ' cu-in" style="--d:0">' +
+        '<div class="cu-hero-text"><h1>' + esc(c.id === 'math' ? 'SAT Math' : 'SAT Reading & Writing') + '</h1>' +
+        '<div class="cu-stats"><div class="cu-bigring"><svg width="84" height="84" viewBox="0 0 84 84" aria-hidden="true"><circle cx="42" cy="42" r="' + R + '" fill="none" stroke="rgba(17,17,17,.08)" stroke-width="7"/>' +
+          (done ? '<circle class="cu-ringfill" cx="42" cy="42" r="' + R + '" fill="none" stroke="var(--red,#B0271C)" stroke-width="7" stroke-linecap="round" stroke-dasharray="' + Math.max(1, CIRC * pct / 100).toFixed(1) + ' ' + CIRC.toFixed(1) + '" transform="rotate(-90 42 42)"/>' : '') + '</svg><b>' + pct + '%</b></div>' +
+          '<div class="cu-stat"><b>' + lessons.length + '</b><span>lessons</span></div><div class="cu-stat"><b>' + total + '</b><span>parts</span></div><div class="cu-stat"><b>' + done + '</b><span>done</span></div></div></div>' +
+        '</section>';
+  }
   function calcBadge(l) { return l.calc ? '<span class="cu-calcb">Calculator</span>' : ''; }
   /* SUGGESTED ORDER (course guide in the course files, Luca 2026-09-29):
      advice beside the course, folded by default. The units below stay in
