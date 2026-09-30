@@ -5068,15 +5068,15 @@ window.SAT_PRACTICE_TESTS = [
  "text": "“The Glass Violin” is a 1904 short story by Hungarian writer Ilona Farkas. In the story, the protagonist, Marek, becomes obsessed with a rumored instrument said to produce music only the doomed can hear. His friend, Tomas, grows alarmed by Marek’s fixation and repeatedly urges him to abandon his search for the violin. Tomas’s concern is clear when he says, ______<br><br>Which quotation from a translation of “The Glass Violin” most effectively illustrates the claim?",
  "choices": [
   "“The luthiers of the village have not shaped an instrument out of glass in forty years.”",
-  "“I ran across the frozen courtyard to catch him, but he vanished into the fog before I could call his name.”",
+  "“Marek kept a ledger of every rumor he gathered, each entry dated and initialled in a careful hand.”",
   "“In the hills above the village, shepherds say the wind itself can be coaxed into song by the patient listener.”",
   "“I beg you, Marek, turn back before that cursed violin draws you into the darkness from which no one returns.”"
  ],
  "correct": 3,
  "choiceNotes": [
   "Incorrect. This reports a fact about the village’s instrument makers; it neither expresses concern nor urges Marek to stop.",
-  "Incorrect. This quotation describes an unrelated action scene (chasing someone across a courtyard) and does not express concern about Marek's obsession.",
-  "Incorrect. This quotation is a piece of folklore about shepherds and wind, unrelated to Tomas's concern for Marek.",
+  "Incorrect. This records how methodically Marek pursued the violin. It is Marek’s diligence, not Tomas’s concern.",
+  "Incorrect. This repeats local folklore about music in nature. It says nothing of Tomas or of his view of Marek’s search.",
   "Correct. This quotation directly begs Marek to \"turn back\" and warns of \"darkness from which no one returns,\" clearly expressing Tomas's alarm and his urging Marek to abandon the search."
  ]
 },
@@ -7845,7 +7845,7 @@ window.SAT_PRACTICE_TESTS = [
  "skill": "Transitions",
  "difficulty": "hard",
  "type": "mc",
- "text": "Atacamite, a copper-bearing mineral notable for its striking emerald coloration, is found in Chile, especially in the country's arid northern regions. ______ in 2023, around 5 million metric tons of atacamite were produced.<br><br>Which choice completes the text with the most logical transition?",
+ "text": "Atacamite, a copper-bearing mineral notable for its striking emerald coloration, is found in Chile, especially in the country's arid northern regions. ______ in 2023, several thousand metric tons of atacamite were produced.<br><br>Which choice completes the text with the most logical transition?",
  "choices": [
   "Specifically,",
   "Accordingly,",
