@@ -1520,7 +1520,7 @@ window.SAT_PRACTICE_TESTS = [
   "Bears are found to have more success than humans in reducing their cardiac atrophy over extended periods of time.",
   "Some astronauts report that their sleep quality improves over the course of a long mission.",
   "Astronauts who performed no exercise while traveling in a spacecraft experienced greater cardiac atrophy than astronauts who did exercise.",
-  "Bears that are placed in orbit in a spacecraft had a similar level of cardiac atrophy as did humans in the same spacecraft."
+  "Bears placed in orbit in a spacecraft had a similar level of cardiac atrophy as did humans in the same spacecraft."
  ],
  "correct": 3,
  "choiceNotes": [
