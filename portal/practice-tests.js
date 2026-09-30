@@ -4088,7 +4088,7 @@ window.SAT_PRACTICE_TESTS = [
  "skill": "Command of Evidence (Textual)",
  "difficulty": "medium",
  "type": "mc",
- "text": "The Wanderer’s Vigil is a 1890 verse-drama by Alistair Rowan. The play centers on Eamon, a monastic clerk imprisoned after refusing to endorse the king’s authoritarian decrees. Throughout the drama, Eamon repeatedly condemns the king’s rule as unjust and tyrannical. The claim is that Eamon openly denounces the king as a cruel oppressor, as when he says, ______<br><br>Which quotation from The Wanderer’s Vigil most effectively illustrates the claim?",
+ "text": "The Wanderer’s Vigil is an 1890 verse-drama by Alistair Rowan. The play centers on Eamon, a monastic clerk imprisoned after refusing to endorse the king’s authoritarian decrees. Throughout the drama, Eamon repeatedly condemns the king’s rule as unjust and tyrannical. The claim is that Eamon openly denounces the king as a cruel oppressor, as when he says, ______<br><br>Which quotation from The Wanderer’s Vigil most effectively illustrates the claim?",
  "choices": [
   "“O ancient walls, you keep the secrets of all men who walked before me; let memory be my refuge now.”",
   "“Such silence binds my limbs like iron, forged by a monarch who fears the sound of honest speech.”",
