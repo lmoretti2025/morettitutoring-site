@@ -2634,6 +2634,7 @@ var MorettiSignals = (function () {
       if (!pm.length || !cm.length) return;
       var pl = pm.reduce(function (a, m) { return a + m.left; }, 0), cl = cm.reduce(function (a, m) { return a + m.left; }, 0);
       var pr = pm.filter(function (m) { return m.rushed; }).length, cr = cm.filter(function (m) { return m.rushed; }).length;
+      if (cl <= 1 && pl <= 1 && !cr && !pr) { put('same', 'time-' + k, secName(k) + ': used the whole clock both times.'); return; }
       var txt = secName(k) + ': handed in with ' + plural(cl, 'minute') + ' left in all, against ' + pl + ' last time';
       if (cr < pr) put('better', 'time-' + k, txt + '. You used the clock.');
       else if (cr > pr) put('worse', 'time-' + k, txt + '. That time could have gone to checking.');
