@@ -20,7 +20,7 @@
   'use strict';
 
   var DATA_SRC = 'curriculum-data.js?v=20260929c';
-  var VIDEO_SRC = 'curriculum-videos.js?v=20260927a';
+  var VIDEO_SRC = 'curriculum-videos.js?v=20260930a';
 
   /* ---------- small helpers ---------- */
   function $(sel, root) { return (root || document).querySelector(sel); }
@@ -136,6 +136,7 @@
     '#cu-root .cu-mhead{text-align:center;margin-bottom:1rem}#cu-root .cu-mhead h1{font-size:clamp(1.4rem,2.6vw,1.9rem)}',
     '#cu-root .cu-video{position:relative;width:100%;aspect-ratio:16/9;background:#12284c;border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}',
     '#cu-root .cu-video iframe,#cu-root .cu-video video{position:absolute;inset:0;width:100%;height:100%;border:0}',
+    '#cu-root .cu-r2{position:absolute;inset:0}#cu-root .cu-soon a{color:#fff}',
     '#cu-root .cu-soon{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff;padding:1.5rem}',
     '#cu-root .cu-soon .play{width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:1rem}',
     '#cu-root .cu-soon b{font-family:var(--display,Georgia,serif);font-size:1.3rem}#cu-root .cu-soon span{opacity:.75;font-size:.88rem;margin-top:.4rem;max-width:30em}',
@@ -231,20 +232,73 @@
     return qIndex[qid] || null;
   }
 
-  /* A part's video: CURRICULUM_VIDEOS[lessonId][partIndex], as "youtube:ID",
-     "vimeo:ID", a YouTube or Vimeo link, or a direct .mp4 link. */
+  /* A part's video: CURRICULUM_VIDEOS[lessonId][partIndex], as "r2:KEY"
+     (a private course video, see r2Mount), "youtube:ID", "vimeo:ID", a
+     YouTube or Vimeo link, or a direct .mp4 link. */
   function videoFor(lessonId, i) {
     var list = (window.CURRICULUM_VIDEOS || {})[lessonId];
     var v = list && list[i];
     if (!v) return null;
     v = String(v).trim();
     var m;
+    if ((m = /^r2:([me]\d{1,2}\.\d{1,2}-\d{1,2}\.mp4)$/.exec(v)))
+      return '<div class="cu-r2" data-r2="' + esc(m[1]) + '"><div class="cu-soon"><div class="play">&#9654;</div><b>Loading the video&hellip;</b></div></div>';
     if ((m = /^youtube:([\w-]{6,})$/.exec(v)) || (m = /(?:youtu\.be\/|[?&]v=|\/embed\/|\/shorts\/)([\w-]{6,})/.exec(v)))
       return '<iframe src="https://www.youtube-nocookie.com/embed/' + esc(m[1]) + '?rel=0&modestbranding=1" title="Lesson video" allow="accelerometer; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>';
     if ((m = /^vimeo:(\d+)$/.exec(v)) || (m = /vimeo\.com\/(?:video\/)?(\d+)/.exec(v)))
       return '<iframe src="https://player.vimeo.com/video/' + esc(m[1]) + '" title="Lesson video" allow="fullscreen; picture-in-picture" allowfullscreen></iframe>';
     if (/^https:\/\/\S+\.(mp4|webm|mov)(\?\S*)?$/i.test(v)) return '<video src="' + esc(v) + '" controls playsinline preload="metadata"></video>';
     return null;
+  }
+
+  /* PRIVATE COURSE VIDEOS (Luca, 2026-09-30). The files sit in a private
+     bucket behind videos.morettitutoring.com, which plays one only with a
+     signed link that runs out after two hours. The backend (Code.gs
+     videoToken) signs it for this signed-in student alone, so a link passed
+     on stops working that evening. A link is reused while it has 10 minutes
+     left; one that runs out mid-video is renewed and picks up at the same
+     second. */
+  var r2Links = {};
+  function r2Link(key, fresh) {
+    var hit = r2Links[key];
+    if (!fresh && hit && hit.e * 1000 - Date.now() > 10 * 60000) return Promise.resolve(hit);
+    return post({ action: 'videoToken', key: progKey, video: key }).then(function (d) {
+      if (!d || !d.ok || !d.url) throw new Error((d && d.error) || 'no_link');
+      return (r2Links[key] = d);
+    });
+  }
+  function r2Mount() {
+    var box = $('.cu-r2', root);
+    if (!box) return;
+    var key = box.getAttribute('data-r2');
+    var fail = function (err) {
+      if (!box.isConnected) return;
+      var msg = String(err && err.message) === 'not_entitled'
+        ? '<b>Videos open with your sessions</b><span>This lesson\u2019s notes are below in the meantime.</span>'
+        : '<b>The video didn\u2019t load</b><span><a href="#" data-r2-retry>Try again</a></span>';
+      box.innerHTML = '<div class="cu-soon"><div class="play">&#9654;</div>' + msg + '</div>';
+    };
+    r2Link(key).then(function (d) {
+      if (!box.isConnected) return;
+      var v = document.createElement('video');
+      v.controls = true; v.playsInline = true; v.preload = 'metadata';
+      v.setAttribute('controlsList', 'nodownload');
+      v.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+      var renewed = false;
+      v.addEventListener('error', function () {
+        // Most likely the link ran out mid-video: one fresh link, same second.
+        if (renewed) return fail(new Error('play'));
+        renewed = true;
+        var at = v.currentTime || 0, playing = !v.paused;
+        r2Link(key, true).then(function (n) {
+          v.src = n.url + (at > 1 ? '#t=' + at.toFixed(1) : '');   // a media fragment: starts at that second
+          if (playing) { var p = v.play(); if (p && p.catch) p.catch(function () {}); }
+        }, fail);
+      });
+      v.src = d.url;
+      box.innerHTML = '';
+      box.appendChild(v);
+    }, fail);
   }
 
   /* ---------- progress ---------- */
@@ -499,6 +553,7 @@
       '<section class="cu-notes"><button type="button" class="cu-notes-h" data-notes aria-expanded="' + (!vid) + '">Notes <span>' + (vid ? 'Show' : 'Hide') + '</span></button>' +
       '<div class="cu-notes-fold' + (vid ? ' closed' : '') + '"><div class="cu-notes-in"><div class="cu-notes-b">' + (notesHtml(p) || '<p>No notes for this part.</p>') + '</div></div></div></section>' +
       '<div class="cu-bottom">' + bar + '</div>';
+    r2Mount();
   }
 
   /* ---------- the check: 8 right in a row (Luca, 2026-09-27) ----------
@@ -676,6 +731,7 @@
       list.forEach(function (x, j) { if (x.l.id === hit.l.id) at = j; });
       return list[at + 1] ? openLesson(list[at + 1].l.id) : (view.name = 'home', renderHome());
     }
+    if ((b = t.closest('[data-r2-retry]'))) { e.preventDefault(); var box = b.closest('.cu-r2'); if (box) { delete r2Links[box.getAttribute('data-r2')]; box.innerHTML = '<div class="cu-soon"><div class="play">&#9654;</div><b>Loading the video&hellip;</b></div>'; r2Mount(); } return; }
     if ((b = t.closest('[data-notes]'))) {
       /* Folds open and shut (a height animation), with the Notes header held
          where it is on screen, so the page never jumps under the student
