@@ -995,6 +995,43 @@
     if (check && t.closest('[data-check-go]')) return submitAnswer(hit.c, hit.l);
   }
 
+  /* ---------- the home screen's Curriculum tile ----------
+     Where the student is, in a line: the course they last worked in (Math
+     while Reading & Writing is not out), what comes next there, and how
+     many parts are done. Called with what this device knows, then again
+     when the backend's copy has been merged in. */
+  function homeSummary() {
+    var last = prog.last && findLesson(prog.last.lessonId);
+    var c = last && !courseSoon(last.c) ? last.c : course('math');
+    if (courseSoon(c)) c = course('math');
+    var lessons = allLessons(c), total = 0, done = 0;
+    lessons.forEach(function (x) { total += x.l.parts.length; done += lessonDoneCount(x.l); });
+    var name = c.id === 'math' ? 'Math' : 'Reading & Writing';
+    var body;
+    if (c.id === 'math' && mathLocked()) {
+      var g = findLesson(GATE_LESSON);
+      body = name + ': start with ' + (g ? g.l.num + ' ' + g.l.title : '1.1') + '. Watching it opens the rest.';
+    } else {
+      var next = last && last.c.id === c.id && lessonDoneCount(last.l) < last.l.parts.length ? last.l
+        : (lessons.filter(function (x) { return lessonDoneCount(x.l) < x.l.parts.length; })[0] || {}).l;
+      if (!next) body = name + ': every lesson done. Open any of them to review.';
+      else {
+        var at = firstOpenPart(next);
+        body = name + (done ? ': up next, ' : ': start with ') + next.num + ' ' + next.title +
+          (next.parts.length > 1 ? ', part ' + (at + 1) + ' of ' + next.parts.length : '') + '.';
+      }
+    }
+    return { course: c.id, body: body, badge: done ? done + ' of ' + total + ' parts' : '' };
+  }
+  window.curriculumHomeSummary = function (cb) {
+    ensureData().then(function () {
+      if (!courses().length) return;
+      loadProgress();
+      cb(homeSummary());
+      return pullProgress().then(function () { cb(homeSummary()); });
+    }).catch(function () {});
+  };
+
   /* ---------- entry ---------- */
   window.curriculumModuleInit = function () {
     root = document.getElementById('cu-root');
