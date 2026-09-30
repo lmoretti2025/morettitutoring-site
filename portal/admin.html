@@ -1421,7 +1421,7 @@
      so the signed admin session is in sessionStorage when the auto-continue
      boot code below reads it. -->
 <script src="time-budgets.js?v=20260912a"></script>
-<script src="signals.js?v=20260930a"></script>
+<script src="signals.js?v=20260930b"></script>
   <script src="backend-url.js?v=20260905"></script>
   <script>
     /* Browser errors on this page reach the ClientErrors tab too (prep.gs's
@@ -4675,6 +4675,43 @@
     })(0);
   }
 
+  /* pp (2026-09-30): the student's previous test (newest before this one,
+     same test type, not a single module, not the all-hard test, not one
+     clicked through) is attached to the report as it opens, so "Since your
+     last test" works on reports saved before it existed, and against a
+     diagnostic, which has no per-question record for the portal to
+     summarise. Any failure opens the report as saved. */
+  function reportLinkFor(key, attempt) {
+    var name = reportKeepName(key, attempt), hit = kept(name);
+    if (hit && hit.ok && hit.reportLink) return Promise.resolve(hit.reportLink);
+    return postToBackend({ action: 'getAttemptReport', adminKey: adminKey(), key: key, row: attempt.reportRow })
+      .then(function (d) { if (d && d.ok && d.reportLink) { keep(name, { ok: true, reportLink: d.reportLink }); return d.reportLink; } return ''; });
+  }
+  function withPreviousTest(attempt, link) {
+    var decode = function (l) {
+      var m = /#d=([^&]+)/.exec(l || '');
+      return m ? JSON.parse(decodeURIComponent(escape(atob(m[1])))) : null;
+    };
+    var key = currentStudent && currentStudent.key, MSq = window.MorettiSignals;
+    var hardest = (MSq && MSq.HARDEST_TEST_ID) || 'sat-practice-11';
+    var prev = ((currentDetail && currentDetail.attempts) || []).filter(function (a) {
+      if (!a || a === attempt || !a.reportRow || String(a.at || '') >= String(attempt.at || '')) return false;
+      if (a.module && /^(module1|Easier|Harder)$/.test(a.module)) return false;
+      if (attempt.testType && a.testType && a.testType !== attempt.testType) return false;
+      if (a.testId === hardest) return false;
+      if (a.qStats && MSq && (MSq.abandonedSitting(a.qStats) || MSq.spamSitting(a.qStats))) return false;
+      return true;
+    }).sort(function (a, b) { return String(b.at || '').localeCompare(String(a.at || '')); })[0];
+    if (!prev || !key) return Promise.resolve(link);
+    return reportLinkFor(key, prev).then(function (pl) {
+      var cur = decode(link), pd = decode(pl);
+      if (!cur || cur.pv || !pd || !pd.s) return link;
+      delete pd.pv; delete pd.pp;
+      cur.pp = pd;
+      return link.replace(/#d=[^&]+/, '#d=' + btoa(unescape(encodeURIComponent(JSON.stringify(cur)))));
+    }).catch(function () { return link; });
+  }
+
   function openReport(attempt) {
     if (!attempt || !attempt.reportRow || !currentStudent) return;
     var wrap = $('report-frame-wrap');
@@ -4695,14 +4732,18 @@
       .then(function (data) {
         if (!data || !data.ok || !data.reportLink) {
           wrap.innerHTML = '<div id="report-loading">This attempt has no saved report payload.</div>';
-          return;
+          return null;
         }
         var link = safeReportLink(data.reportLink);
         if (!link) {
           wrap.innerHTML = '<div id="report-loading">This attempt\'s saved report link isn\'t a report URL — nothing to open.</div>';
-          return;
+          return null;
         }
         reportViewerLink = link;
+        return withPreviousTest(attempt, link);
+      })
+      .then(function (link) {
+        if (!link) return;
         // A fresh <iframe> per open, rather than reassigning src: the
         // report is addressed entirely by URL hash, and changing only the
         // hash on a live frame doesn't reload it — it would silently keep
@@ -4716,7 +4757,7 @@
         frame.setAttribute('sandbox', 'allow-scripts allow-modals allow-popups allow-downloads');
         // ?admin=1: the walkthrough never opens by itself here (the sandbox hides
         // this page's address from the report, so it is told instead).
-        frame.src = reportViewerLink.replace(/^([^?#]*)(\?[^#]*)?/, function (m, path, q) { return path + (q ? q + '&admin=1' : '?admin=1'); });
+        frame.src = link.replace(/^([^?#]*)(\?[^#]*)?/, function (m, path, q) { return path + (q ? q + '&admin=1' : '?admin=1'); });
         // Flags from inside the report (report.html asks this page to send them).
         frame.addEventListener('load', function () {
           try { frame.contentWindow.postMessage({ type: 'mt-admin-flag-mode' }, '*'); } catch (e) {}

@@ -1195,7 +1195,7 @@
 </script>
 <script src="time-budgets.js?v=20260912a"></script>
 <script src="grid-in.js?v=20260910a"></script>
-<script src="signals.js?v=20260930a"></script>
+<script src="signals.js?v=20260930b"></script>
 <script src="desmos-tags.js?v=20260916c"></script>
 <script src="question-flag.js?v=20260925a"></script>
 <script src="report-tour.js?v=20260929m"></script>
@@ -8180,8 +8180,41 @@
      a sitting that isn't a real attempt, or without a previous one. */
   (function sinceLastTest() {
     var MSs = window.MorettiSignals;
-    if (!data.pv || notReal || !MSs || typeof MSs.sittingSummary !== 'function') return;
+    if ((!data.pv && !data.pp) || notReal || !MSs || typeof MSs.sittingSummary !== 'function') return;
     try {
+      /* data.pp (2026-09-30): the previous sitting's own payload, attached
+         when a report is opened from the portal or admin, for reports saved
+         before pv was written at submit. Graded here with the same banks
+         and isCorrect the report uses for itself. */
+      var pv = data.pv;
+      if (!pv && data.pp && Array.isArray(data.pp.s)) {
+        var pp = data.pp, ppItems = [];
+        var bankFor = function (k) {
+          if (pp.pt) {
+            var T = (window.SAT_PRACTICE_TESTS || []).filter(function (t) { return t.id === pp.pt; })[0];
+            var tk = k === 'reading-writing' ? 'readingWriting' : k;
+            if (T && T.sections && T.sections[tk]) return T.sections[tk];
+          }
+          return (window.SECTION_BANKS || {})[k];
+        };
+        pp.s.forEach(function (S, si) {
+          var bank = bankFor(S.k);
+          if (!bank || S.mo) return;
+          var qs = sectionQuestions(bank, S.v);
+          (S.a || []).forEach(function (ans, i) {
+            var q = qs[i];
+            if (!q) return;
+            var blank = ans === null || ans === undefined || ans === -1 || ans === '';
+            var t = (S.tm && S.tm[i]) || 0, floor = readFloorMs(S.k, { q: q, sk: q.skill });
+            ppItems.push({ si: si, i: i, dom: q.domain, sk: q.skill, res: blank ? 2 : (isCorrect(q, ans) ? 1 : 0),
+                           secs: t / 1000, fast: (t > 0 && floor > 0) ? (t < floor ? 1 : 0) : null });
+          });
+        });
+        pv = ppItems.length ? MSs.sittingSummary(pp, ppItems, {}) : null;
+        // A previous sitting clicked through is no basis for comparing.
+        if (pv && pv.answered >= 10 && pv.fast * 2 >= pv.answered) pv = null;
+      }
+      if (!pv) return;
       var siOf = {};
       (data.s || []).forEach(function (S, si) { if (S && S.k) siOf[S.k] = si; });
       var items = [];
@@ -8196,7 +8229,7 @@
         });
       });
       var cur = MSs.sittingSummary(data, items, {});
-      var C = MSs.compareSittings(data.pv, cur);
+      var C = MSs.compareSittings(pv, cur);
       planInputs.compare = C;
       if (!C.better.length && !C.worse.length && !C.same.length) return;
       var e = function (t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };

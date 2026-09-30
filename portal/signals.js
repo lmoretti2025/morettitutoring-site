@@ -2577,7 +2577,11 @@ var MorettiSignals = (function () {
                 secs: d.s.map(function (S) { return S.k; }), mods: [], fast: 0, answered: 0,
                 left: c.leftWindow || null, late: c.signals.some(function (x) { return x.id === 'late'; }),
                 brk: c.longestBreakMin, flags: 0, back: 0, crossed: 0, changed: 0, changedRight: 0, dom: {}, sk: {} };
+    // A section saved without its clock length (records before 2026-09-26) can't say how much time was
+    // left: an accommodated student would be judged on the standard clock. Its modules are left out.
+    var clockKnown = {}; d.s.forEach(function (S) { if (S && S.tl > 0) clockKnown[S.k] = true; });
     (c.modules || []).forEach(function (m) {
+      if (!clockKnown[m.sec]) return;
       // Checked: 20+ s between the first pass ending and handing in. Not a lapse with under 5 minutes left (no time to check).
       var leftMin = m.unusedMs / 60000;
       out.mods.push({ sec: m.sec, module: m.module, left: Math.round(leftMin), rushed: m.rushed || 0,
@@ -2597,9 +2601,13 @@ var MorettiSignals = (function () {
         if (f === 1) out.fast++;
       }
     });
+    // Navigation that the record never logged is unknown (null), never 0.
+    var hasVl = d.s.some(function (S) { return Array.isArray(S.vl) && S.vl.length; }), hasEl = d.s.some(function (S) { return typeof S.el === 'string'; });
+    if (!hasVl) { out.back = null; out.changed = null; out.changedRight = null; }
+    if (!hasEl) out.crossed = null;
     d.s.forEach(function (S, si) {
       (S.m || []).forEach(function (m) { if (m === 1 || m === true) out.flags++; });
-      if (typeof S.el === 'string') out.crossed += S.el.replace(/0/g, '').length;
+      if (typeof S.el === 'string' && out.crossed !== null) out.crossed += S.el.replace(/0/g, '').length;
       var seen = {}, back = {}, firstAns = {}, lastAns = {};
       (S.vl || []).forEach(function (v) {
         if (!v || v.length < 4) return;
@@ -2609,6 +2617,7 @@ var MorettiSignals = (function () {
         var has = !(ans === -1 || ans === null || ans === undefined || ans === '');
         if (has) { if (firstAns[q] === undefined) firstAns[q] = JSON.stringify(ans); lastAns[q] = JSON.stringify(ans); }
       });
+      if (!hasVl) return;
       out.back += Object.keys(back).length;
       Object.keys(firstAns).forEach(function (q) {
         if (lastAns[q] !== firstAns[q]) {
@@ -2673,11 +2682,11 @@ var MorettiSignals = (function () {
       var fl = 'Flagged ' + plural(cur.flags, 'question') + ' for review, against ' + prev.flags + ' last time';
       put(prev.flags === 0 && cur.flags >= 2 ? 'better' : 'same', 'flags', fl + '.');
     }
-    if (prev.crossed || cur.crossed) {
+    if (prev.crossed !== null && cur.crossed !== null && (prev.crossed || cur.crossed)) {
       var cx = 'Crossed out choices on ' + plural(cur.crossed, 'question') + ', against ' + prev.crossed + ' last time';
       put(prev.crossed < 3 && cur.crossed >= 5 ? 'better' : 'same', 'crossed', cx + '.');
     }
-    if (prev.back || cur.back) put('same', 'back', 'Went back to ' + plural(cur.back, 'question') + ', against ' + prev.back + ' last time.');
+    if (prev.back !== null && cur.back !== null && (prev.back || cur.back)) put('same', 'back', 'Went back to ' + plural(cur.back, 'question') + ', against ' + prev.back + ' last time.');
     if (cur.changed) put('same', 'changed', 'Changed ' + plural(cur.changed, 'answer') + ' after first choosing; ' + cur.changedRight + ' of those ended right.');
     // Areas and skills, past chance only.
     var z = function (a, b) {

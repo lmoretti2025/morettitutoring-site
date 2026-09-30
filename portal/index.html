@@ -5719,7 +5719,7 @@ window.Portal = {
      header in fluid-ui.js. -->
 <script src="fluid-ui.js?v=20260905y"></script>
 <script src="banks.js?v=20260926a"></script>
-<script src="signals.js?v=20260930a"></script>
+<script src="signals.js?v=20260930b"></script>
 <script src="desmos-tags.js?v=20260916c"></script>
 <script src="time-budgets.js?v=20260912a"></script>
 <script src="challenge-questions.js?v=20260926a"></script>
@@ -11413,6 +11413,31 @@ window.Portal = {
     if (!m) return null;
     try { return JSON.parse(decodeURIComponent(escape(atob(m[1])))); } catch (e) { return null; }
   }
+  /* pp (2026-09-30): a report saved before "Since your last test" existed,
+     or whose previous test had no per-question record (a diagnostic), gets
+     that test's own payload attached here, so the report can grade it and
+     compare. The previous test is the newest one taken before this one, of
+     the same test type, not the all-hard test and not one clicked through. */
+  function previousPayloadFor(link, data) {
+    var MSq = window.MorettiSignals;
+    var when = function (e) { return new Date((e && (e.date || e.at)) || 0).getTime() || 0; };
+    var all = mergedScoreHistory().filter(function (e) { return usableReportLink(e); });
+    var cur = all.filter(function (e) { return usableReportLink(e) === link || link.indexOf(usableReportLink(e)) !== -1; })[0];
+    var curT = cur ? when(cur) : new Date(data.ts || data.dt || 0).getTime();
+    if (!curT) return null;
+    var prev = all.filter(function (e) {
+      if (e === cur || when(e) >= curT - 60000) return false;
+      if (cur && cur.testType && e.testType && e.testType !== cur.testType) return false;
+      if (e.testId === HARDEST_TEST_ID) return false;
+      if (e.module && /^(module1|Easier|Harder)$/.test(e.module)) return false;
+      if (e.qStats && MSq && (MSq.abandonedSitting(e.qStats) || MSq.spamSitting(e.qStats))) return false;
+      return true;
+    }).sort(function (a, b) { return when(b) - when(a); })[0];
+    var p = prev && decodeReportPayload(usableReportLink(prev));
+    if (!p || !p.s) return null;
+    delete p.pv; delete p.pp;
+    return p;
+  }
   var pendingReportLink = null;
   function openTestResults(link) {
     if (!link) return;
@@ -11446,6 +11471,9 @@ window.Portal = {
     ready.then(function () {
       if (pendingReportLink !== link) return; // student already navigated to a different one
       var data = decodeReportPayload(link);
+      if (data && !data.pv) {
+        try { var pp = previousPayloadFor(link, data); if (pp) data.pp = pp; } catch (e) {}
+      }
       if (data) window.renderNativeReport(data);
     });
   }
@@ -27103,8 +27131,41 @@ window.renderNativeReport = function (data) {
      a sitting that isn't a real attempt, or without a previous one. */
   (function sinceLastTest() {
     var MSs = window.MorettiSignals;
-    if (!data.pv || notReal || !MSs || typeof MSs.sittingSummary !== 'function') return;
+    if ((!data.pv && !data.pp) || notReal || !MSs || typeof MSs.sittingSummary !== 'function') return;
     try {
+      /* data.pp (2026-09-30): the previous sitting's own payload, attached
+         when a report is opened from the portal or admin, for reports saved
+         before pv was written at submit. Graded here with the same banks
+         and isCorrect the report uses for itself. */
+      var pv = data.pv;
+      if (!pv && data.pp && Array.isArray(data.pp.s)) {
+        var pp = data.pp, ppItems = [];
+        var bankFor = function (k) {
+          if (pp.pt) {
+            var T = (window.SAT_PRACTICE_TESTS || []).filter(function (t) { return t.id === pp.pt; })[0];
+            var tk = k === 'reading-writing' ? 'readingWriting' : k;
+            if (T && T.sections && T.sections[tk]) return T.sections[tk];
+          }
+          return (window.SECTION_BANKS || {})[k];
+        };
+        pp.s.forEach(function (S, si) {
+          var bank = bankFor(S.k);
+          if (!bank || S.mo) return;
+          var qs = sectionQuestions(bank, S.v);
+          (S.a || []).forEach(function (ans, i) {
+            var q = qs[i];
+            if (!q) return;
+            var blank = ans === null || ans === undefined || ans === -1 || ans === '';
+            var t = (S.tm && S.tm[i]) || 0, floor = readFloorMs(S.k, { q: q, sk: q.skill });
+            ppItems.push({ si: si, i: i, dom: q.domain, sk: q.skill, res: blank ? 2 : (isCorrect(q, ans) ? 1 : 0),
+                           secs: t / 1000, fast: (t > 0 && floor > 0) ? (t < floor ? 1 : 0) : null });
+          });
+        });
+        pv = ppItems.length ? MSs.sittingSummary(pp, ppItems, {}) : null;
+        // A previous sitting clicked through is no basis for comparing.
+        if (pv && pv.answered >= 10 && pv.fast * 2 >= pv.answered) pv = null;
+      }
+      if (!pv) return;
       var siOf = {};
       (data.s || []).forEach(function (S, si) { if (S && S.k) siOf[S.k] = si; });
       var items = [];
@@ -27119,7 +27180,7 @@ window.renderNativeReport = function (data) {
         });
       });
       var cur = MSs.sittingSummary(data, items, {});
-      var C = MSs.compareSittings(data.pv, cur);
+      var C = MSs.compareSittings(pv, cur);
       planInputs.compare = C;
       if (!C.better.length && !C.worse.length && !C.same.length) return;
       var e = function (t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
