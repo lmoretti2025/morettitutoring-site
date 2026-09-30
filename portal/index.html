@@ -2946,6 +2946,17 @@
 }
 /* ═══ SKILL DIAGNOSIS ═══ Mastered/Inefficient/Stuck/Rushed rollup, see
    skillBuckets/renderSkillDiagnosis(). Same card chrome as .timing-card. */
+#pt-native-report .since-card { background: var(--white, #fff); border: 1px solid var(--border, rgba(17,17,17,0.1)); border-radius: 12px; padding: 16px 18px; margin-bottom: 22px; }
+#pt-native-report .since-sub { margin: 0 0 12px; font-size: 12.5px; line-height: 1.55; color: var(--mid, rgba(17,17,17,0.62)); }
+#pt-native-report .since-cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+#pt-native-report .since-col { border-radius: 10px; padding: 10px 12px; font-size: 12.5px; line-height: 1.5; }
+#pt-native-report .since-col ul { margin: 0; padding-left: 16px; } #pt-native-report .since-col li { margin: 0 0 6px; }
+#pt-native-report .since-col-hed { font-weight: 700; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
+#pt-native-report .since-col.better { background: #EEF6F0; } #pt-native-report .since-col.better .since-col-hed { color: #1F7A3F; }
+#pt-native-report .since-col.same { background: #F4F2EF; } #pt-native-report .since-col.same .since-col-hed { color: #6B6358; }
+#pt-native-report .since-col.worse { background: #FBEFEE; } #pt-native-report .since-col.worse .since-col-hed { color: #B0271C; }
+#pt-native-report .since-empty { margin: 0; color: var(--mid, rgba(17,17,17,0.62)); }
+@media (max-width: 640px) { #pt-native-report .since-cols { grid-template-columns: 1fr; } }
 #pt-native-report .unjudged-note { margin: 0 0 12px; padding: 10px 12px; border-left: 3px solid #9A8F80; background: #F5F2EE; border-radius: 0 8px 8px 0; font-size: 12.5px; line-height: 1.55; color: var(--ink); }
 #pt-native-report .skilldx-approach { margin: 0 0 12px; padding: 10px 12px; border-left: 3px solid #8A5A9E; background: #F6F0F8; border-radius: 0 8px 8px 0; font-size: 12.5px; line-height: 1.55; color: var(--ink); }
 #pt-native-report .skilldx-card { background: var(--white); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); padding: 1.5rem 1.75rem; }
@@ -5708,7 +5719,7 @@ window.Portal = {
      header in fluid-ui.js. -->
 <script src="fluid-ui.js?v=20260905y"></script>
 <script src="banks.js?v=20260926a"></script>
-<script src="signals.js?v=20260929d"></script>
+<script src="signals.js?v=20260930a"></script>
 <script src="desmos-tags.js?v=20260916c"></script>
 <script src="time-budgets.js?v=20260912a"></script>
 <script src="challenge-questions.js?v=20260926a"></script>
@@ -14344,6 +14355,34 @@ window.Portal = {
       }
     } catch (e) { if (window.console) console.warn('qStats tooFast:', e); }
     var reportPayloadB64 = '';
+    /* pv (Luca, 2026-09-30): the previous comparable sitting, summarised
+       (signals.js sittingSummary) from its own report link and per-question
+       record, so this report can say what got better, stayed the same or got
+       worse. Not a sitting clicked through, walked away from, or the
+       all-hard test. Never blocks a submission. */
+    try {
+      var MSp = window.MorettiSignals;
+      if (MSp && typeof MSp.sittingSummary === 'function' && typeof mergedScoreHistory === 'function') {
+        var prevE = mergedScoreHistory().filter(function (e) {
+          var l = e && (e.reportLinkRelative || e.reportLink);
+          return l && /#d=/.test(l) && e.qStats && e.testType === testChoice && e.testId !== HARDEST_TEST_ID &&
+            !MSp.abandonedSitting(e.qStats) && !MSp.spamSitting(e.qStats);
+        }).sort(function (a, b) { return new Date(b.date || b.at || 0) - new Date(a.date || a.at || 0); })[0];
+        if (prevE) {
+          var pl = String(prevE.reportLinkRelative || prevE.reportLink);
+          var prevD = JSON.parse(decodeURIComponent(escape(atob(pl.slice(pl.indexOf('#d=') + 3)))));
+          var prevItems = MSp.qsItems(prevD, prevE.qStats);
+          var TBp = window.TIME_BUDGETS;
+          var pv = MSp.sittingSummary(prevD, prevItems, { budgetMs: function (si, i) {
+            var x = prevItems.filter(function (y) { return y.si === si && y.i === i; })[0], S = prevD.s[si];
+            if (!x || !S || !TBp) return 0;
+            var b = TBp.budgetSecondsFor(S.k, x.dom, x.sk, 'medium', 1); return (b && b.ms) || 0;
+          } });
+          if (pv && JSON.stringify(pv).length > 4000) delete pv.sk;
+          if (pv) payload.pv = pv;
+        }
+      }
+    } catch (e) { if (window.console) console.warn('pv:', e); }
     try { reportPayloadB64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload)))); } catch (e) { reportPayloadB64 = ''; }
     // Absolute link for email/external use; relative link for the in-portal
     // "View Results" iframe, so it loads from whatever origin is serving this
@@ -27054,6 +27093,48 @@ window.renderNativeReport = function (data) {
       syncAll();
       box.style.display = '';
     } catch (e) { if (window.console) console.warn('plain layer:', e); }
+  })();
+
+  /* ═══ SINCE YOUR LAST TEST (Luca, 2026-09-30) ═══ The previous comparable
+     sitting's summary rides in this link (data.pv, written at submit from the
+     portal's own record of it); this sitting's is read from the rows here.
+     signals.js compareSittings sorts them into better / about the same /
+     worse: habits, navigation and areas, never the score. Nothing is said on
+     a sitting that isn't a real attempt, or without a previous one. */
+  (function sinceLastTest() {
+    var MSs = window.MorettiSignals;
+    if (!data.pv || notReal || !MSs || typeof MSs.sittingSummary !== 'function') return;
+    try {
+      var siOf = {};
+      (data.s || []).forEach(function (S, si) { if (S && S.k) siOf[S.k] = si; });
+      var items = [];
+      (sections || []).forEach(function (sec) {
+        var si = siOf[sec.key];
+        if (si === undefined) return;
+        sec.rows.forEach(function (r, i) {
+          if (!r.q) return;
+          var t = pacingTimeMs(r), floor = readFloorMs(sec.key, r);
+          items.push({ si: si, i: i, dom: r.q.domain, sk: r.sk || r.q.skill, res: r.skipped ? 2 : (r.ok ? 1 : 0),
+                       secs: t > 0 ? t / 1000 : 0, fast: (t > 0 && floor > 0) ? (t < floor ? 1 : 0) : null });
+        });
+      });
+      var cur = MSs.sittingSummary(data, items, {});
+      var C = MSs.compareSittings(data.pv, cur);
+      planInputs.compare = C;
+      if (!C.better.length && !C.worse.length && !C.same.length) return;
+      var e = function (t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+      var col = function (cls, title, list, empty) {
+        return '<div class="since-col ' + cls + '"><div class="since-col-hed">' + title + '</div>' +
+          (list.length ? '<ul>' + list.map(function (x) { return '<li>' + e(x.text) + '</li>'; }).join('') + '</ul>' : '<p class="since-empty">' + empty + '</p>') + '</div>';
+      };
+      var hed = document.getElementById('bridge-hed');
+      if (!hed) return;
+      hed.insertAdjacentHTML('beforebegin',
+        '<div class="sec-hed" id="since-hed">Since your last test</div>' +
+        '<div class="since-card" id="since-card"><p class="since-sub">How this test compares with the one before it: the habits, the way you moved through it, and the areas with enough questions to tell. The score isn’t compared here; one test to the next swings too much to read.</p>' +
+        '<div class="since-cols">' + col('better', 'Better', C.better, 'Nothing clearly better this time.') +
+          col('same', 'About the same', C.same, 'Nothing to list.') + col('worse', 'Worse', C.worse, 'Nothing clearly worse.') + '</div></div>');
+    } catch (err) { if (window.console) console.warn('since last test:', err); }
   })();
 
   /* ═══ CAN'T BE JUDGED, SAID (audit 2026-09-29) ═══ The areas unjudgedDomain

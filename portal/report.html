@@ -224,6 +224,17 @@
   /* ═══ SKILL DIAGNOSIS ═══ Mastered/Inefficient/Stuck/Rushed rollup — see
      index.html's identical CSS (this is the standalone report's own copy,
      kept in sync by hand). */
+  .since-card { background: var(--white, #fff); border: 1px solid var(--border, rgba(17,17,17,0.1)); border-radius: 12px; padding: 16px 18px; margin-bottom: 22px; }
+  .since-sub { margin: 0 0 12px; font-size: 12.5px; line-height: 1.55; color: var(--mid, rgba(17,17,17,0.62)); }
+  .since-cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .since-col { border-radius: 10px; padding: 10px 12px; font-size: 12.5px; line-height: 1.5; }
+  .since-col ul { margin: 0; padding-left: 16px; } .since-col li { margin: 0 0 6px; }
+  .since-col-hed { font-weight: 700; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
+  .since-col.better { background: #EEF6F0; } .since-col.better .since-col-hed { color: #1F7A3F; }
+  .since-col.same { background: #F4F2EF; } .since-col.same .since-col-hed { color: #6B6358; }
+  .since-col.worse { background: #FBEFEE; } .since-col.worse .since-col-hed { color: #B0271C; }
+  .since-empty { margin: 0; color: var(--mid, rgba(17,17,17,0.62)); }
+  @media (max-width: 640px) { .since-cols { grid-template-columns: 1fr; } }
   .unjudged-note { margin: 0 0 12px; padding: 10px 12px; border-left: 3px solid #9A8F80; background: #F5F2EE; border-radius: 0 8px 8px 0; font-size: 12.5px; line-height: 1.55; color: var(--ink); }
   .skilldx-approach { margin: 0 0 12px; padding: 10px 12px; border-left: 3px solid #8A5A9E; background: #F6F0F8; border-radius: 0 8px 8px 0; font-size: 12.5px; line-height: 1.55; color: var(--ink); }
   .skilldx-card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow); padding: 20px 24px; }
@@ -1184,7 +1195,7 @@
 </script>
 <script src="time-budgets.js?v=20260912a"></script>
 <script src="grid-in.js?v=20260910a"></script>
-<script src="signals.js?v=20260929d"></script>
+<script src="signals.js?v=20260930a"></script>
 <script src="desmos-tags.js?v=20260916c"></script>
 <script src="question-flag.js?v=20260925a"></script>
 <script src="report-tour.js?v=20260929m"></script>
@@ -8159,6 +8170,48 @@
       syncAll();
       box.style.display = '';
     } catch (e) { if (window.console) console.warn('plain layer:', e); }
+  })();
+
+  /* ═══ SINCE YOUR LAST TEST (Luca, 2026-09-30) ═══ The previous comparable
+     sitting's summary rides in this link (data.pv, written at submit from the
+     portal's own record of it); this sitting's is read from the rows here.
+     signals.js compareSittings sorts them into better / about the same /
+     worse: habits, navigation and areas, never the score. Nothing is said on
+     a sitting that isn't a real attempt, or without a previous one. */
+  (function sinceLastTest() {
+    var MSs = window.MorettiSignals;
+    if (!data.pv || notReal || !MSs || typeof MSs.sittingSummary !== 'function') return;
+    try {
+      var siOf = {};
+      (data.s || []).forEach(function (S, si) { if (S && S.k) siOf[S.k] = si; });
+      var items = [];
+      (sections || []).forEach(function (sec) {
+        var si = siOf[sec.key];
+        if (si === undefined) return;
+        sec.rows.forEach(function (r, i) {
+          if (!r.q) return;
+          var t = pacingTimeMs(r), floor = readFloorMs(sec.key, r);
+          items.push({ si: si, i: i, dom: r.q.domain, sk: r.sk || r.q.skill, res: r.skipped ? 2 : (r.ok ? 1 : 0),
+                       secs: t > 0 ? t / 1000 : 0, fast: (t > 0 && floor > 0) ? (t < floor ? 1 : 0) : null });
+        });
+      });
+      var cur = MSs.sittingSummary(data, items, {});
+      var C = MSs.compareSittings(data.pv, cur);
+      planInputs.compare = C;
+      if (!C.better.length && !C.worse.length && !C.same.length) return;
+      var e = function (t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+      var col = function (cls, title, list, empty) {
+        return '<div class="since-col ' + cls + '"><div class="since-col-hed">' + title + '</div>' +
+          (list.length ? '<ul>' + list.map(function (x) { return '<li>' + e(x.text) + '</li>'; }).join('') + '</ul>' : '<p class="since-empty">' + empty + '</p>') + '</div>';
+      };
+      var hed = document.getElementById('bridge-hed');
+      if (!hed) return;
+      hed.insertAdjacentHTML('beforebegin',
+        '<div class="sec-hed" id="since-hed">Since your last test</div>' +
+        '<div class="since-card" id="since-card"><p class="since-sub">How this test compares with the one before it: the habits, the way you moved through it, and the areas with enough questions to tell. The score isn’t compared here; one test to the next swings too much to read.</p>' +
+        '<div class="since-cols">' + col('better', 'Better', C.better, 'Nothing clearly better this time.') +
+          col('same', 'About the same', C.same, 'Nothing to list.') + col('worse', 'Worse', C.worse, 'Nothing clearly worse.') + '</div></div>');
+    } catch (err) { if (window.console) console.warn('since last test:', err); }
   })();
 
   /* ═══ CAN'T BE JUDGED, SAID (audit 2026-09-29) ═══ The areas unjudgedDomain
