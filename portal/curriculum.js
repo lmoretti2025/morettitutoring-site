@@ -154,6 +154,8 @@
     '#cu-root .cu-video{position:relative;width:100%;aspect-ratio:16/9;background:#12284c;border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}',
     '#cu-root .cu-video iframe,#cu-root .cu-video video{position:absolute;inset:0;width:100%;height:100%;border:0}',
     '#cu-root .cu-r2{position:absolute;inset:0}#cu-root .cu-soon a{color:#fff}',
+    '#cu-root .cu-r2 .cu-soon .play{animation:cuLoad 1.3s ease-in-out infinite}@keyframes cuLoad{0%,100%{opacity:.55;transform:scale(.96)}50%{opacity:1;transform:none}}',
+    '@media(prefers-reduced-motion:reduce){#cu-root .cu-r2 .cu-soon .play{animation:none}}',
     '#cu-root .cu-soon{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff;padding:1.5rem}',
     '#cu-root .cu-soon .play{width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:1rem}',
     '#cu-root .cu-soon b{font-family:var(--display,Georgia,serif);font-size:1.3rem}#cu-root .cu-soon span{opacity:.75;font-size:.88rem;margin-top:.4rem;max-width:30em}',
@@ -226,7 +228,37 @@
     ]);
     return ready;
   }
-  function courses() { return (window.CURRICULUM && window.CURRICULUM.courses) || []; }
+  // The play triangle, drawn: the text character sits off-centre in its circle.
+  function playSvg(px) { return '<svg width="' + px + '" height="' + px + '" viewBox="0 0 24 24" aria-hidden="true" style="display:block"><path d="M8.5 5.2v13.6L19.5 12z" fill="currentColor"/></svg>'; }
+  var PLAY_SVG = playSvg(26), PLAY_SVG_SM = playSvg(18), PLAY_SVG_XS = playSvg(12);
+
+  /* Lesson titles read in title case (Luca, 2026-09-30) without touching his
+     text in the course files. Never lowercases a whole title: a word that
+     already has a capital inside it, or is all capitals (SAT, II), is left
+     alone; small words stay small unless they open the title or follow a
+     colon. Done once, when the course is first read. */
+  var TITLE_MINOR = { a: 1, an: 1, and: 1, as: 1, at: 1, but: 1, by: 1, 'for': 1, from: 1, 'in': 1, nor: 1, of: 1, on: 1, or: 1, the: 1, to: 1, vs: 1, 'with': 1 };
+  function titleCase(str) {
+    var toks = String(str || '').split(/(\s+)/);
+    return toks.map(function (tok, i) {
+      if (/^\s+$/.test(tok)) return tok;
+      var prev = toks[i - 2] || '';
+      var opens = i === 0 || /[:\u2014-]$/.test(prev);
+      if (/[A-Z]/.test(tok.slice(1)) || /^[A-Z]+[^a-z]*$/.test(tok)) return tok;
+      var bare = tok.replace(/[^A-Za-z-]/g, '').toLowerCase();
+      if (!opens && TITLE_MINOR[bare] === 1) return tok.toLowerCase();
+      return tok.replace(/[A-Za-z][a-z]*/g, function (w) { return w.charAt(0).toUpperCase() + w.slice(1); });
+    }).join('');
+  }
+  var titled = false;
+  function courses() {
+    var list = (window.CURRICULUM && window.CURRICULUM.courses) || [];
+    if (!titled && list.length) {
+      titled = true;
+      list.forEach(function (c) { c.domains.forEach(function (d) { d.lessons.forEach(function (l) { l.title = titleCase(l.title); }); }); });
+    }
+    return list;
+  }
   function course(id) { return courses().filter(function (c) { return c.id === id; })[0] || courses()[0]; }
   function allLessons(c) { return c.domains.reduce(function (a, d) { return a.concat(d.lessons.map(function (l) { return { l: l, d: d }; })); }, []); }
   function findLesson(id) {
@@ -259,7 +291,7 @@
     v = String(v).trim();
     var m;
     if ((m = /^r2:([me]\d{1,2}\.\d{1,2}-\d{1,2}\.mp4)$/.exec(v)))
-      return '<div class="cu-r2" data-r2="' + esc(m[1]) + '"><div class="cu-soon"><div class="play">&#9654;</div><b>Loading the video&hellip;</b></div></div>';
+      return '<div class="cu-r2" data-r2="' + esc(m[1]) + '"><div class="cu-soon"><div class="play">' + PLAY_SVG + '</div><b>Loading the video&hellip;</b></div></div>';
     if ((m = /^youtube:([\w-]{6,})$/.exec(v)) || (m = /(?:youtu\.be\/|[?&]v=|\/embed\/|\/shorts\/)([\w-]{6,})/.exec(v)))
       return '<iframe src="https://www.youtube-nocookie.com/embed/' + esc(m[1]) + '?rel=0&modestbranding=1" title="Lesson video" allow="accelerometer; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>';
     if ((m = /^vimeo:(\d+)$/.exec(v)) || (m = /vimeo\.com\/(?:video\/)?(\d+)/.exec(v)))
@@ -275,14 +307,44 @@
      on stops working that evening. A link is reused while it has 10 minutes
      left; one that runs out mid-video is renewed and picks up at the same
      second. */
-  var r2Links = {};
+  /* A FAST START (Luca, 2026-09-30). Asking the backend for a link is the
+     slow step, a few seconds through Apps Script, so it is done ahead: for
+     the lesson a student is most likely to open as soon as the course page
+     draws, and for any lesson the pointer goes down on. A link lasts two
+     hours, so it is kept for the tab (sessionStorage) and a second visit
+     starts at once. One request per video at a time. */
+  var r2Links = {}, r2Asking = {}, r2Loaded = '';
+  function r2Store() { try { sessionStorage.setItem('moretti_cu_r2_' + progKey, JSON.stringify(r2Links)); } catch (e) {} }
   function r2Link(key, fresh) {
+    if (r2Loaded !== progKey) {
+      r2Loaded = progKey; r2Links = {};
+      try { r2Links = JSON.parse(sessionStorage.getItem('moretti_cu_r2_' + progKey) || '{}') || {}; } catch (e) { r2Links = {}; }
+    }
     var hit = r2Links[key];
     if (!fresh && hit && hit.e * 1000 - Date.now() > 10 * 60000) return Promise.resolve(hit);
-    return post({ action: 'videoToken', key: progKey, video: key }).then(function (d) {
+    if (r2Asking[key]) return r2Asking[key];
+    var ask = post({ action: 'videoToken', key: progKey, video: key }).then(function (d) {
+      delete r2Asking[key];
       if (!d || !d.ok || !d.url) throw new Error((d && d.error) || 'no_link');
-      return (r2Links[key] = d);
-    });
+      r2Links[key] = d; r2Store();
+      return d;
+    }, function (err) { delete r2Asking[key]; throw err; });
+    return (r2Asking[key] = ask);
+  }
+  function r2KeyOf(lessonId, i) {
+    var v = ((window.CURRICULUM_VIDEOS || {})[lessonId] || [])[i];
+    var m = /^r2:([me]\d{1,2}\.\d{1,2}-\d{1,2}\.mp4)$/.exec(String(v || '').trim());
+    return m ? m[1] : '';
+  }
+  var r2Hinted = false;
+  function r2Warm(lessonId, i) {
+    var key = lessonId && r2KeyOf(lessonId, i || 0);
+    if (!key || !progKey) return;
+    if (!r2Hinted) {          // the connection to the video host, opened early too
+      r2Hinted = true;
+      try { var ln = document.createElement('link'); ln.rel = 'preconnect'; ln.href = 'https://videos.morettitutoring.com'; document.head.appendChild(ln); } catch (e) {}
+    }
+    r2Link(key).catch(function () {});
   }
   function r2Mount() {
     var box = $('.cu-r2', root);
@@ -300,12 +362,12 @@
         if (frame) { frame.outerHTML = NO_VIDEO; var nb = $('[data-notes]', root); if (nb && nb.getAttribute('aria-expanded') === 'false') nb.click(); }
         return;
       }
-      box.innerHTML = '<div class="cu-soon"><div class="play">&#9654;</div>' + msg + '</div>';
+      box.innerHTML = '<div class="cu-soon"><div class="play">' + PLAY_SVG + '</div>' + msg + '</div>';
     };
     r2Link(key).then(function (d) {
       if (!box.isConnected) return;
       var v = document.createElement('video');
-      v.controls = true; v.playsInline = true; v.preload = 'metadata';
+      v.controls = true; v.playsInline = true; v.preload = 'auto';   // starts filling its buffer at once
       v.setAttribute('controlsList', 'nodownload');
       v.addEventListener('contextmenu', function (e) { e.preventDefault(); });
       var renewed = false;
@@ -511,6 +573,16 @@
         return '<button type="button" data-course="' + x.id + '" aria-pressed="' + (x.id === c.id) + '">' + esc(x.title) + '</button>';
       }).join('') + '</div></div>' +
       '<div class="cu-body" id="cu-body">' + homeBody(c) + '</div></div>';
+    warmLikely(c);
+  }
+  // The video most likely to be opened next from this page: its link is asked for now.
+  function warmLikely(c) {
+    if (courseSoon(c)) return;
+    if (c.id === 'math' && mathLocked()) return r2Warm(GATE_LESSON, 0);
+    var last = prog.last && findLesson(prog.last.lessonId);
+    if (last && last.c.id === c.id) return r2Warm(last.l.id, prog.last.part || 0);
+    var next = allLessons(c).filter(function (x) { return lessonDoneCount(x.l) < x.l.parts.length; })[0];
+    if (next) r2Warm(next.l.id, firstOpenPart(next.l));
   }
   function homeBody(c) {
     var lessons = allLessons(c);
@@ -535,7 +607,7 @@
     var last = prog.last && findLesson(prog.last.lessonId);
     var resume = '';
     if (last && last.c.id === c.id && !lessonLocked(last.c, last.l) && !locked) {
-      resume = '<div class="cu-resume cu-in" style="--d:1"><span class="cu-resume-ic">&#9654;</span><div><b>Pick up where you left off</b><span>' + esc(last.l.num + ' ' + last.l.title) + ', part ' + (prog.last.part + 1) + ' of ' + last.l.parts.length + '</span></div>' +
+      resume = '<div class="cu-resume cu-in" style="--d:1"><span class="cu-resume-ic">' + PLAY_SVG_SM + '</span><div><b>Pick up where you left off</b><span>' + esc(last.l.num + ' ' + last.l.title) + ', part ' + (prog.last.part + 1) + ' of ' + last.l.parts.length + '</span></div>' +
         '<button type="button" class="cu-btn" data-resume>Continue &rarr;</button></div>';
     }
     return '<section class="cu-hero cu-hero-' + c.id + ' cu-in" style="--d:0">' +
@@ -653,7 +725,7 @@
       var open = unlocked(l, i), done = isDone(l.id, i);
       var lock = open ? '' : ' aria-disabled="true"';
       out += '<button type="button" class="cu-step' + (view.part === i && view.step === 'video' ? ' on' : '') + (open ? '' : ' locked') + (done ? ' done' : '') + '" data-step="video" data-part="' + i + '"' + lock + '>' +
-        '<span class="ic">' + (done ? '&#10003;' : '&#9654;') + '</span><span>' + esc(partTitle(l, i)) + '</span><span class="st">' + (open ? '' : LOCK_SVG) + '</span></button>';
+        '<span class="ic">' + (done ? '&#10003;' : PLAY_SVG_XS) + '</span><span>' + esc(partTitle(l, i)) + '</span><span class="st">' + (open ? '' : LOCK_SVG) + '</span></button>';
       if (p.qids.length) {
         out += '<button type="button" class="cu-step sub' + (view.part === i && view.step === 'check' ? ' on' : '') + (open ? '' : ' locked') + (done ? ' done' : '') + '" data-step="check" data-part="' + i + '"' + lock + '>' +
           '<span class="ic">' + (done ? '&#10003;' : '') + '</span><span>Check <small>' + STREAK_TO_PASS + ' in a row</small></span><span class="st"></span></button>';
@@ -687,7 +759,7 @@
   }
 
   // No video yet: a line saying so, not an empty player.
-  var NO_VIDEO = '<div class="cu-nov"><span class="play">&#9654;</span><div><b>Video coming soon</b><span>The notes below cover the same material for now.</span></div></div>';
+  var NO_VIDEO = '<div class="cu-nov"><span class="play">' + PLAY_SVG + '</span><div><b>Video coming soon</b><span>The notes below cover the same material for now.</span></div></div>';
   function renderVideo(c, l) {
     var p = l.parts[view.part], i = view.part;
     var vid = videoFor(l.id, i);
@@ -886,7 +958,7 @@
       list.forEach(function (x, j) { if (x.l.id === hit.l.id) at = j; });
       return list[at + 1] ? openLesson(list[at + 1].l.id) : (view.name = 'home', renderHome());
     }
-    if ((b = t.closest('[data-r2-retry]'))) { e.preventDefault(); var box = b.closest('.cu-r2'); if (box) { delete r2Links[box.getAttribute('data-r2')]; box.innerHTML = '<div class="cu-soon"><div class="play">&#9654;</div><b>Loading the video&hellip;</b></div>'; r2Mount(); } return; }
+    if ((b = t.closest('[data-r2-retry]'))) { e.preventDefault(); var box = b.closest('.cu-r2'); if (box) { delete r2Links[box.getAttribute('data-r2')]; r2Store(); box.innerHTML = '<div class="cu-soon"><div class="play">' + PLAY_SVG + '</div><b>Loading the video&hellip;</b></div>'; r2Mount(); } return; }
     if ((b = t.closest('[data-notes]'))) {
       /* Folds open and shut (a height animation), with the Notes header held
          where it is on screen, so the page never jumps under the student
@@ -930,6 +1002,16 @@
     injectCss();
     if (!root.__wired) {
       root.addEventListener('click', onClick);
+      // The pointer going down on a lesson is a second or so ahead of its video being asked for.
+      var warmFrom = function (e) {
+        var b = e.target.closest && e.target.closest('[data-lesson],[data-lesson-go],[data-resume]');
+        if (!b) return;
+        var id = b.getAttribute('data-lesson') || b.getAttribute('data-lesson-go') || (prog.last && prog.last.lessonId);
+        var hit = id && findLesson(id);
+        if (hit && !lessonLocked(hit.c, hit.l)) r2Warm(hit.l.id, b.hasAttribute('data-resume') ? (prog.last.part || 0) : firstOpenPart(hit.l));
+      };
+      root.addEventListener('pointerdown', warmFrom);
+      root.addEventListener('mouseover', warmFrom);
       // toggle does not bubble: caught on the way down.
       root.addEventListener('toggle', function (e) {
         if (e.target.classList && e.target.classList.contains('cu-guide')) { try { localStorage.setItem('moretti_cu_guide_open', e.target.open ? '1' : '0'); } catch (x) {} }
