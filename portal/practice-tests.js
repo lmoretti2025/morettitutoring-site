@@ -3050,7 +3050,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mtbeb065",
           "domain": "Algebra",
-          "skill": "27 Linear Functions",
+          "skill": "Linear Functions", "topic": "27 Linear Functions",
           "difficulty": "easy",
           "type": "mc",
           "text": "<svg viewBox=\"22 0 278 190\" class=\"dx-fig\" style=\"color:var(--text);\"><title>The graph of a line rising from left to right, crossing the y-axis below the origin</title><line x1=\"66\" y1=\"14\" x2=\"290\" y2=\"14\" stroke=\"currentColor\" stroke-width=\"0.4\" opacity=\"0.25\"/><line x1=\"66\" y1=\"37.1\" x2=\"290\" y2=\"37.1\" stroke=\"currentColor\" stroke-width=\"0.4\" opacity=\"0.25\"/><line x1=\"66\" y1=\"60.3\" x2=\"290\" y2=\"60.3\" stroke=\"currentColor\" stroke-width=\"0.4\" opacity=\"0.25\"/><line x1=\"66\" y1=\"83.4\" x2=\"290\" y2=\"83.4\" stroke=\"currentColor\" stroke-width=\"0.4\" opacity=\"0.25\"/><line x1=\"66\" y1=\"106.6\" x2=\"290\" y2=\"106.6\" stroke=\"currentColor\" stroke-width=\"0.4\" opacity=\"0.25\"/><line x1=\"66\" y1=\"152.9\" x2=\"290\" y2=\"152.9\" stroke=\"currentColor\" stroke-width=\"0.4\" opacity=\"0.25\"/><line x1=\"66\" y1=\"176\" x2=\"290\" y2=\"176\" stroke=\"currentColor\" stroke-width=\"0.4\" opacity=\"0.25\"/><line x1=\"34\" y1=\"129.7\" x2=\"290\" y2=\"129.7\" stroke=\"currentColor\" stroke-width=\"1.5\"/><line x1=\"66.0\" y1=\"14\" x2=\"66.0\" y2=\"176\" stroke=\"currentColor\" stroke-width=\"1.5\"/><line x1=\"34.0\" y1=\"126.7\" x2=\"34.0\" y2=\"132.7\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"34.0\" y=\"142.7\" font-size=\"8\" text-anchor=\"middle\" fill=\"currentColor\">-1</text><line x1=\"98.0\" y1=\"126.7\" x2=\"98.0\" y2=\"132.7\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"98.0\" y=\"142.7\" font-size=\"8\" text-anchor=\"middle\" fill=\"currentColor\">1</text><line x1=\"130.0\" y1=\"126.7\" x2=\"130.0\" y2=\"132.7\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"130.0\" y=\"142.7\" font-size=\"8\" text-anchor=\"middle\" fill=\"currentColor\">2</text><line x1=\"162.0\" y1=\"126.7\" x2=\"162.0\" y2=\"132.7\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"162.0\" y=\"142.7\" font-size=\"8\" text-anchor=\"middle\" fill=\"currentColor\">3</text><line x1=\"194.0\" y1=\"126.7\" x2=\"194.0\" y2=\"132.7\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"194.0\" y=\"142.7\" font-size=\"8\" text-anchor=\"middle\" fill=\"currentColor\">4</text><line x1=\"226.0\" y1=\"126.7\" x2=\"226.0\" y2=\"132.7\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"226.0\" y=\"142.7\" font-size=\"8\" text-anchor=\"middle\" fill=\"currentColor\">5</text><line x1=\"258.0\" y1=\"126.7\" x2=\"258.0\" y2=\"132.7\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"258.0\" y=\"142.7\" font-size=\"8\" text-anchor=\"middle\" fill=\"currentColor\">6</text><line x1=\"290.0\" y1=\"126.7\" x2=\"290.0\" y2=\"132.7\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"290.0\" y=\"142.7\" font-size=\"8\" text-anchor=\"middle\" fill=\"currentColor\">7</text><line x1=\"63.0\" y1=\"176.0\" x2=\"69.0\" y2=\"176.0\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"60.0\" y=\"179.0\" font-size=\"8\" text-anchor=\"end\" fill=\"currentColor\">-4</text><line x1=\"63.0\" y1=\"164.4\" x2=\"69.0\" y2=\"164.4\" stroke=\"currentColor\" stroke-width=\"1\"/><line x1=\"63.0\" y1=\"152.9\" x2=\"69.0\" y2=\"152.9\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"60.0\" y=\"155.9\" font-size=\"8\" text-anchor=\"end\" fill=\"currentColor\">-2</text><line x1=\"63.0\" y1=\"141.3\" x2=\"69.0\" y2=\"141.3\" stroke=\"currentColor\" stroke-width=\"1\"/><line x1=\"63.0\" y1=\"118.1\" x2=\"69.0\" y2=\"118.1\" stroke=\"currentColor\" stroke-width=\"1\"/><line x1=\"63.0\" y1=\"106.6\" x2=\"69.0\" y2=\"106.6\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"60.0\" y=\"109.6\" font-size=\"8\" text-anchor=\"end\" fill=\"currentColor\">2</text><line x1=\"63.0\" y1=\"95.0\" x2=\"69.0\" y2=\"95.0\" stroke=\"currentColor\" stroke-width=\"1\"/><line x1=\"63.0\" y1=\"83.4\" x2=\"69.0\" y2=\"83.4\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"60.0\" y=\"86.4\" font-size=\"8\" text-anchor=\"end\" fill=\"currentColor\">4</text><line x1=\"63.0\" y1=\"71.9\" x2=\"69.0\" y2=\"71.9\" stroke=\"currentColor\" stroke-width=\"1\"/><line x1=\"63.0\" y1=\"60.3\" x2=\"69.0\" y2=\"60.3\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"60.0\" y=\"63.3\" font-size=\"8\" text-anchor=\"end\" fill=\"currentColor\">6</text><line x1=\"63.0\" y1=\"48.7\" x2=\"69.0\" y2=\"48.7\" stroke=\"currentColor\" stroke-width=\"1\"/><line x1=\"63.0\" y1=\"37.1\" x2=\"69.0\" y2=\"37.1\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"60.0\" y=\"40.1\" font-size=\"8\" text-anchor=\"end\" fill=\"currentColor\">8</text><line x1=\"63.0\" y1=\"25.6\" x2=\"69.0\" y2=\"25.6\" stroke=\"currentColor\" stroke-width=\"1\"/><line x1=\"63.0\" y1=\"14.0\" x2=\"69.0\" y2=\"14.0\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"60.0\" y=\"17.0\" font-size=\"8\" text-anchor=\"end\" fill=\"currentColor\">10</text><text x=\"288\" y=\"124.7\" font-size=\"10\" font-style=\"italic\" text-anchor=\"end\" fill=\"currentColor\">x</text><text x=\"71.0\" y=\"22\" font-size=\"10\" font-style=\"italic\" fill=\"currentColor\">y</text><polyline points=\"34.0,158.6 34.6,158.3 35.3,157.9 35.9,157.6 36.6,157.3 37.2,156.9 37.8,156.6 38.5,156.2 39.1,155.9 39.8,155.5 40.4,155.2 41.0,154.8 41.7,154.5 42.3,154.1 43.0,153.8 43.6,153.4 44.2,153.1 44.9,152.7 45.5,152.4 46.2,152.0 46.8,151.7 47.4,151.4 48.1,151.0 48.7,150.7 49.4,150.3 50.0,150.0 50.6,149.6 51.3,149.3 51.9,148.9 52.6,148.6 53.2,148.2 53.8,147.9 54.5,147.5 55.1,147.2 55.8,146.8 56.4,146.5 57.0,146.1 57.7,145.8 58.3,145.5 59.0,145.1 59.6,144.8 60.2,144.4 60.9,144.1 61.5,143.7 62.2,143.4 62.8,143.0 63.4,142.7 64.1,142.3 64.7,142.0 65.4,141.6 66.0,141.3 66.6,140.9 67.3,140.6 67.9,140.2 68.6,139.9 69.2,139.6 69.8,139.2 70.5,138.9 71.1,138.5 71.8,138.2 72.4,137.8 73.0,137.5 73.7,137.1 74.3,136.8 75.0,136.4 75.6,136.1 76.2,135.7 76.9,135.4 77.5,135.0 78.2,134.7 78.8,134.3 79.4,134.0 80.1,133.6 80.7,133.3 81.4,133.0 82.0,132.6 82.6,132.3 83.3,131.9 83.9,131.6 84.6,131.2 85.2,130.9 85.8,130.5 86.5,130.2 87.1,129.8 87.8,129.5 88.4,129.1 89.0,128.8 89.7,128.4 90.3,128.1 91.0,127.7 91.6,127.4 92.2,127.1 92.9,126.7 93.5,126.4 94.2,126.0 94.8,125.7 95.4,125.3 96.1,125.0 96.7,124.6 97.4,124.3 98.0,123.9 98.6,123.6 99.3,123.2 99.9,122.9 100.6,122.5 101.2,122.2 101.8,121.8 102.5,121.5 103.1,121.2 103.8,120.8 104.4,120.5 105.0,120.1 105.7,119.8 106.3,119.4 107.0,119.1 107.6,118.7 108.2,118.4 108.9,118.0 109.5,117.7 110.2,117.3 110.8,117.0 111.4,116.6 112.1,116.3 112.7,115.9 113.4,115.6 114.0,115.2 114.6,114.9 115.3,114.6 115.9,114.2 116.6,113.9 117.2,113.5 117.8,113.2 118.5,112.8 119.1,112.5 119.8,112.1 120.4,111.8 121.0,111.4 121.7,111.1 122.3,110.7 123.0,110.4 123.6,110.0 124.2,109.7 124.9,109.3 125.5,109.0 126.2,108.7 126.8,108.3 127.4,108.0 128.1,107.6 128.7,107.3 129.4,106.9 130.0,106.6 130.6,106.2 131.3,105.9 131.9,105.5 132.6,105.2 133.2,104.8 133.8,104.5 134.5,104.1 135.1,103.8 135.8,103.4 136.4,103.1 137.0,102.8 137.7,102.4 138.3,102.1 139.0,101.7 139.6,101.4 140.2,101.0 140.9,100.7 141.5,100.3 142.2,100.0 142.8,99.6 143.4,99.3 144.1,98.9 144.7,98.6 145.4,98.2 146.0,97.9 146.6,97.5 147.3,97.2 147.9,96.9 148.6,96.5 149.2,96.2 149.8,95.8 150.5,95.5 151.1,95.1 151.8,94.8 152.4,94.4 153.0,94.1 153.7,93.7 154.3,93.4 155.0,93.0 155.6,92.7 156.2,92.3 156.9,92.0 157.5,91.6 158.2,91.3 158.8,91.0 159.4,90.6 160.1,90.3 160.7,89.9 161.4,89.6 162.0,89.2 162.6,88.9 163.3,88.5 163.9,88.2 164.6,87.8 165.2,87.5 165.8,87.1 166.5,86.8 167.1,86.4 167.8,86.1 168.4,85.7 169.0,85.4 169.7,85.0 170.3,84.7 171.0,84.4 171.6,84.0 172.2,83.7 172.9,83.3 173.5,83.0 174.2,82.6 174.8,82.3 175.4,81.9 176.1,81.6 176.7,81.2 177.4,80.9 178.0,80.5 178.6,80.2 179.3,79.8 179.9,79.5 180.6,79.1 181.2,78.8 181.8,78.5 182.5,78.1 183.1,77.8 183.8,77.4 184.4,77.1 185.0,76.7 185.7,76.4 186.3,76.0 187.0,75.7 187.6,75.3 188.2,75.0 188.9,74.6 189.5,74.3 190.2,73.9 190.8,73.6 191.4,73.2 192.1,72.9 192.7,72.6 193.4,72.2 194.0,71.9 194.6,71.5 195.3,71.2 195.9,70.8 196.6,70.5 197.2,70.1 197.8,69.8 198.5,69.4 199.1,69.1 199.8,68.7 200.4,68.4 201.0,68.0 201.7,67.7 202.3,67.3 203.0,67.0 203.6,66.7 204.2,66.3 204.9,66.0 205.5,65.6 206.2,65.3 206.8,64.9 207.4,64.6 208.1,64.2 208.7,63.9 209.4,63.5 210.0,63.2 210.6,62.8 211.3,62.5 211.9,62.1 212.6,61.8 213.2,61.4 213.8,61.1 214.5,60.7 215.1,60.4 215.8,60.1 216.4,59.7 217.0,59.4 217.7,59.0 218.3,58.7 219.0,58.3 219.6,58.0 220.2,57.6 220.9,57.3 221.5,56.9 222.2,56.6 222.8,56.2 223.4,55.9 224.1,55.5 224.7,55.2 225.4,54.8 226.0,54.5 226.6,54.2 227.3,53.8 227.9,53.5 228.6,53.1 229.2,52.8 229.8,52.4 230.5,52.1 231.1,51.7 231.8,51.4 232.4,51.0 233.0,50.7 233.7,50.3 234.3,50.0 235.0,49.6 235.6,49.3 236.2,48.9 236.9,48.6 237.5,48.3 238.2,47.9 238.8,47.6 239.4,47.2 240.1,46.9 240.7,46.5 241.4,46.2 242.0,45.8 242.6,45.5 243.3,45.1 243.9,44.8 244.6,44.4 245.2,44.1 245.8,43.7 246.5,43.4 247.1,43.0 247.8,42.7 248.4,42.3 249.0,42.0 249.7,41.7 250.3,41.3 251.0,41.0 251.6,40.6 252.2,40.3 252.9,39.9 253.5,39.6 254.2,39.2 254.8,38.9 255.4,38.5 256.1,38.2 256.7,37.8 257.4,37.5 258.0,37.1 258.6,36.8 259.3,36.4 259.9,36.1 260.6,35.8 261.2,35.4 261.8,35.1 262.5,34.7 263.1,34.4 263.8,34.0 264.4,33.7 265.0,33.3 265.7,33.0 266.3,32.6 267.0,32.3 267.6,31.9 268.2,31.6 268.9,31.2 269.5,30.9 270.2,30.5 270.8,30.2 271.4,29.9 272.1,29.5 272.7,29.2 273.4,28.8 274.0,28.5 274.6,28.1 275.3,27.8 275.9,27.4 276.6,27.1 277.2,26.7 277.8,26.4 278.5,26.0 279.1,25.7 279.8,25.3 280.4,25.0 281.0,24.6 281.7,24.3 282.3,24.0 283.0,23.6 283.6,23.3 284.2,22.9 284.9,22.6 285.5,22.2 286.2,21.9 286.8,21.5 287.4,21.2 288.1,20.8 288.7,20.5 289.4,20.1 290.0,19.8\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"/></svg>The graph of the linear function <i>f</i> is shown, where <i>y</i> = <i>f</i>(<i>x</i>). What is the value of <i>f</i>(4)?",
@@ -3066,7 +3066,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mt310014",
           "domain": "Algebra",
-          "skill": "104 Rate of change",
+          "skill": "Linear Functions", "topic": "104 Rate of change",
           "difficulty": "easy",
           "type": "mc",
           "text": "<svg viewBox=\"-2 12 288 185\" class=\"dx-fig\" style=\"color:var(--text);\"><title>A line in the xy-plane falling from left to right, with the points (0, 18) and (6, 6) drawn and labeled</title><line x1=\"45\" y1=\"35\" x2=\"278\" y2=\"35\" stroke=\"currentColor\" stroke-width=\"0.4\" opacity=\"0.25\"/><line x1=\"45\" y1=\"59\" x2=\"278\" y2=\"59\" stroke=\"currentColor\" stroke-width=\"0.4\" opacity=\"0.25\"/><line x1=\"45\" y1=\"83\" x2=\"278\" y2=\"83\" stroke=\"currentColor\" stroke-width=\"0.4\" opacity=\"0.25\"/><line x1=\"45\" y1=\"107\" x2=\"278\" y2=\"107\" stroke=\"currentColor\" stroke-width=\"0.4\" opacity=\"0.25\"/><line x1=\"45\" y1=\"131\" x2=\"278\" y2=\"131\" stroke=\"currentColor\" stroke-width=\"0.4\" opacity=\"0.25\"/><line x1=\"45\" y1=\"20\" x2=\"45\" y2=\"155\" stroke=\"currentColor\" stroke-width=\"1.5\"/><line x1=\"45\" y1=\"155\" x2=\"278\" y2=\"155\" stroke=\"currentColor\" stroke-width=\"1.5\"/><line x1=\"41\" y1=\"131.0\" x2=\"45\" y2=\"131.0\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"37\" y=\"134.0\" font-size=\"8\" text-anchor=\"end\" fill=\"currentColor\">4</text><line x1=\"41\" y1=\"107.0\" x2=\"45\" y2=\"107.0\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"37\" y=\"110.0\" font-size=\"8\" text-anchor=\"end\" fill=\"currentColor\">8</text><line x1=\"41\" y1=\"83.0\" x2=\"45\" y2=\"83.0\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"37\" y=\"86.0\" font-size=\"8\" text-anchor=\"end\" fill=\"currentColor\">12</text><line x1=\"41\" y1=\"59.0\" x2=\"45\" y2=\"59.0\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"37\" y=\"62.0\" font-size=\"8\" text-anchor=\"end\" fill=\"currentColor\">16</text><line x1=\"41\" y1=\"35.0\" x2=\"45\" y2=\"35.0\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"37\" y=\"38.0\" font-size=\"8\" text-anchor=\"end\" fill=\"currentColor\">20</text><line x1=\"45.0\" y1=\"155\" x2=\"45.0\" y2=\"159\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"45.0\" y=\"171\" font-size=\"8\" text-anchor=\"middle\" fill=\"currentColor\">0</text><line x1=\"101.0\" y1=\"155\" x2=\"101.0\" y2=\"159\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"101.0\" y=\"171\" font-size=\"8\" text-anchor=\"middle\" fill=\"currentColor\">2</text><line x1=\"157.0\" y1=\"155\" x2=\"157.0\" y2=\"159\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"157.0\" y=\"171\" font-size=\"8\" text-anchor=\"middle\" fill=\"currentColor\">4</text><line x1=\"213.0\" y1=\"155\" x2=\"213.0\" y2=\"159\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"213.0\" y=\"171\" font-size=\"8\" text-anchor=\"middle\" fill=\"currentColor\">6</text><line x1=\"269.0\" y1=\"155\" x2=\"269.0\" y2=\"159\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"269.0\" y=\"171\" font-size=\"8\" text-anchor=\"middle\" fill=\"currentColor\">8</text><line x1=\"45.0\" y1=\"47.0\" x2=\"269.0\" y2=\"143.0\" stroke=\"currentColor\" stroke-width=\"1.6\"/><circle cx=\"45.0\" cy=\"47.0\" r=\"3.2\" fill=\"currentColor\"/><circle cx=\"213.0\" cy=\"119.0\" r=\"3.2\" fill=\"currentColor\"/><text x=\"53.0\" y=\"41.0\" font-size=\"8\" text-anchor=\"start\" fill=\"currentColor\">(0, 18)</text><text x=\"221.0\" y=\"113.0\" font-size=\"8\" text-anchor=\"start\" fill=\"currentColor\">(6, 6)</text><text x=\"150\" y=\"186\" font-size=\"8\" text-anchor=\"middle\" fill=\"currentColor\">Time (hours)</text><text x=\"14\" y=\"92\" font-size=\"8\" text-anchor=\"middle\" fill=\"currentColor\" transform=\"rotate(-90 14 92)\">Fuel (gallons)</text></svg>The graph shows the amount of fuel, in gallons, remaining in a generator’s tank <i>t</i> hours after the tank was filled. What is the average rate of change, in gallons per hour, of the amount of fuel remaining?",
@@ -3082,7 +3082,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "5a74f696",
           "domain": "Advanced Math",
-          "skill": "41 Exponential Function Structure",
+          "skill": "Nonlinear Functions", "topic": "41 Exponential Function Structure",
           "difficulty": "easy",
           "type": "mc",
           "text": "An investment account was opened with an initial value of $890. The value of the account doubled every 10 years. Which equation represents the value of the account <i>M</i>(<i>t</i>), in dollars, <i>t</i> years after the account was opened?",
@@ -3098,7 +3098,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mt989c20",
           "domain": "Problem-Solving and Data Analysis",
-          "skill": "112 Reading a Chart",
+          "skill": "One-Variable Data: Distributions and Measures of Center and Spread", "topic": "112 Reading a Chart",
           "difficulty": "easy",
           "type": "mc",
           "text": "<svg viewBox=\"2 0 294 192\" class=\"dx-fig\" style=\"color:var(--text);\"><title>Bar graph of the number of guitars repaired in each of five months</title><line x1=\"40\" y1=\"22\" x2=\"288\" y2=\"22\" stroke=\"currentColor\" stroke-width=\"0.4\" opacity=\"0.25\"/><line x1=\"40\" y1=\"51.2\" x2=\"288\" y2=\"51.2\" stroke=\"currentColor\" stroke-width=\"0.4\" opacity=\"0.25\"/><line x1=\"40\" y1=\"80.4\" x2=\"288\" y2=\"80.4\" stroke=\"currentColor\" stroke-width=\"0.4\" opacity=\"0.25\"/><line x1=\"40\" y1=\"109.6\" x2=\"288\" y2=\"109.6\" stroke=\"currentColor\" stroke-width=\"0.4\" opacity=\"0.25\"/><line x1=\"40\" y1=\"138.8\" x2=\"288\" y2=\"138.8\" stroke=\"currentColor\" stroke-width=\"0.4\" opacity=\"0.25\"/><line x1=\"40\" y1=\"168\" x2=\"288\" y2=\"168\" stroke=\"currentColor\" stroke-width=\"0.4\" opacity=\"0.25\"/><line x1=\"40\" y1=\"168\" x2=\"288\" y2=\"168\" stroke=\"currentColor\" stroke-width=\"1.5\"/><line x1=\"40\" y1=\"168\" x2=\"40\" y2=\"18\" stroke=\"currentColor\" stroke-width=\"1.5\"/><line x1=\"37\" y1=\"168.0\" x2=\"40\" y2=\"168.0\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"34\" y=\"171.0\" font-size=\"8\" text-anchor=\"end\" fill=\"currentColor\">0</text><line x1=\"37\" y1=\"138.8\" x2=\"40\" y2=\"138.8\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"34\" y=\"141.8\" font-size=\"8\" text-anchor=\"end\" fill=\"currentColor\">10</text><line x1=\"37\" y1=\"109.6\" x2=\"40\" y2=\"109.6\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"34\" y=\"112.6\" font-size=\"8\" text-anchor=\"end\" fill=\"currentColor\">20</text><line x1=\"37\" y1=\"80.4\" x2=\"40\" y2=\"80.4\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"34\" y=\"83.4\" font-size=\"8\" text-anchor=\"end\" fill=\"currentColor\">30</text><line x1=\"37\" y1=\"51.2\" x2=\"40\" y2=\"51.2\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"34\" y=\"54.2\" font-size=\"8\" text-anchor=\"end\" fill=\"currentColor\">40</text><line x1=\"37\" y1=\"22.0\" x2=\"40\" y2=\"22.0\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"34\" y=\"25.0\" font-size=\"8\" text-anchor=\"end\" fill=\"currentColor\">50</text><line x1=\"38\" y1=\"153.4\" x2=\"40\" y2=\"153.4\" stroke=\"currentColor\" stroke-width=\"1\"/><line x1=\"38\" y1=\"124.2\" x2=\"40\" y2=\"124.2\" stroke=\"currentColor\" stroke-width=\"1\"/><line x1=\"38\" y1=\"95.0\" x2=\"40\" y2=\"95.0\" stroke=\"currentColor\" stroke-width=\"1\"/><line x1=\"38\" y1=\"65.8\" x2=\"40\" y2=\"65.8\" stroke=\"currentColor\" stroke-width=\"1\"/><line x1=\"38\" y1=\"36.6\" x2=\"40\" y2=\"36.6\" stroke=\"currentColor\" stroke-width=\"1\"/><rect x=\"52\" y=\"109.6\" width=\"30\" height=\"58.4\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.4\"/><text x=\"67\" y=\"181\" font-size=\"8\" text-anchor=\"middle\" fill=\"currentColor\">Jan</text><rect x=\"98\" y=\"65.8\" width=\"30\" height=\"102.2\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.4\"/><text x=\"113\" y=\"181\" font-size=\"8\" text-anchor=\"middle\" fill=\"currentColor\">Feb</text><rect x=\"144\" y=\"36.6\" width=\"30\" height=\"131.4\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.4\"/><text x=\"159\" y=\"181\" font-size=\"8\" text-anchor=\"middle\" fill=\"currentColor\">Mar</text><rect x=\"190\" y=\"80.4\" width=\"30\" height=\"87.6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.4\"/><text x=\"205\" y=\"181\" font-size=\"8\" text-anchor=\"middle\" fill=\"currentColor\">Apr</text><rect x=\"236\" y=\"124.2\" width=\"30\" height=\"43.8\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.4\"/><text x=\"251\" y=\"181\" font-size=\"8\" text-anchor=\"middle\" fill=\"currentColor\">May</text><text x=\"10\" y=\"16\" font-size=\"8\" fill=\"currentColor\">Guitars repaired</text></svg>The bar graph shows the number of guitars repaired at a music shop in each of five months. How many more guitars were repaired in March than in January?",
@@ -3120,7 +3120,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mt190185",
           "domain": "Problem-Solving and Data Analysis",
-          "skill": "114 Scatterplots",
+          "skill": "Two-Variable Data: Models and Scatterplots", "topic": "114 Scatterplots",
           "difficulty": "easy",
           "type": "mc",
           "text": "<svg viewBox=\"5 -4 293 216\" class=\"dx-fig\" style=\"color:var(--text);\"><title>A scatterplot of seven points falling from left to right with a line of best fit</title><line x1=\"34\" y1=\"20.2\" x2=\"290\" y2=\"20.2\" stroke=\"currentColor\" stroke-width=\"0.4\" opacity=\"0.25\"/><line x1=\"34\" y1=\"51.4\" x2=\"290\" y2=\"51.4\" stroke=\"currentColor\" stroke-width=\"0.4\" opacity=\"0.25\"/><line x1=\"34\" y1=\"82.5\" x2=\"290\" y2=\"82.5\" stroke=\"currentColor\" stroke-width=\"0.4\" opacity=\"0.25\"/><line x1=\"34\" y1=\"113.7\" x2=\"290\" y2=\"113.7\" stroke=\"currentColor\" stroke-width=\"0.4\" opacity=\"0.25\"/><line x1=\"34\" y1=\"144.8\" x2=\"290\" y2=\"144.8\" stroke=\"currentColor\" stroke-width=\"0.4\" opacity=\"0.25\"/><line x1=\"34\" y1=\"176.0\" x2=\"290\" y2=\"176.0\" stroke=\"currentColor\" stroke-width=\"1.5\"/><line x1=\"34.0\" y1=\"14\" x2=\"34.0\" y2=\"176\" stroke=\"currentColor\" stroke-width=\"1.5\"/><line x1=\"72.8\" y1=\"173.0\" x2=\"72.8\" y2=\"179.0\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"72.8\" y=\"189.0\" font-size=\"8\" text-anchor=\"middle\" fill=\"currentColor\">10</text><line x1=\"111.6\" y1=\"173.0\" x2=\"111.6\" y2=\"179.0\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"111.6\" y=\"189.0\" font-size=\"8\" text-anchor=\"middle\" fill=\"currentColor\">20</text><line x1=\"150.4\" y1=\"173.0\" x2=\"150.4\" y2=\"179.0\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"150.4\" y=\"189.0\" font-size=\"8\" text-anchor=\"middle\" fill=\"currentColor\">30</text><line x1=\"189.2\" y1=\"173.0\" x2=\"189.2\" y2=\"179.0\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"189.2\" y=\"189.0\" font-size=\"8\" text-anchor=\"middle\" fill=\"currentColor\">40</text><line x1=\"227.9\" y1=\"173.0\" x2=\"227.9\" y2=\"179.0\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"227.9\" y=\"189.0\" font-size=\"8\" text-anchor=\"middle\" fill=\"currentColor\">50</text><line x1=\"266.7\" y1=\"173.0\" x2=\"266.7\" y2=\"179.0\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"266.7\" y=\"189.0\" font-size=\"8\" text-anchor=\"middle\" fill=\"currentColor\">60</text><line x1=\"31.0\" y1=\"160.4\" x2=\"37.0\" y2=\"160.4\" stroke=\"currentColor\" stroke-width=\"1\"/><line x1=\"31.0\" y1=\"144.8\" x2=\"37.0\" y2=\"144.8\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"28.0\" y=\"147.8\" font-size=\"8\" text-anchor=\"end\" fill=\"currentColor\">100</text><line x1=\"31.0\" y1=\"129.3\" x2=\"37.0\" y2=\"129.3\" stroke=\"currentColor\" stroke-width=\"1\"/><line x1=\"31.0\" y1=\"113.7\" x2=\"37.0\" y2=\"113.7\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"28.0\" y=\"116.7\" font-size=\"8\" text-anchor=\"end\" fill=\"currentColor\">200</text><line x1=\"31.0\" y1=\"98.1\" x2=\"37.0\" y2=\"98.1\" stroke=\"currentColor\" stroke-width=\"1\"/><line x1=\"31.0\" y1=\"82.5\" x2=\"37.0\" y2=\"82.5\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"28.0\" y=\"85.5\" font-size=\"8\" text-anchor=\"end\" fill=\"currentColor\">300</text><line x1=\"31.0\" y1=\"67.0\" x2=\"37.0\" y2=\"67.0\" stroke=\"currentColor\" stroke-width=\"1\"/><line x1=\"31.0\" y1=\"51.4\" x2=\"37.0\" y2=\"51.4\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"28.0\" y=\"54.4\" font-size=\"8\" text-anchor=\"end\" fill=\"currentColor\">400</text><line x1=\"31.0\" y1=\"35.8\" x2=\"37.0\" y2=\"35.8\" stroke=\"currentColor\" stroke-width=\"1\"/><line x1=\"31.0\" y1=\"20.2\" x2=\"37.0\" y2=\"20.2\" stroke=\"currentColor\" stroke-width=\"1\"/><text x=\"28.0\" y=\"23.2\" font-size=\"8\" text-anchor=\"end\" fill=\"currentColor\">500</text><line x1=\"34.0\" y1=\"51.4\" x2=\"266.7\" y2=\"144.8\" stroke=\"currentColor\" stroke-width=\"1.4\"/><circle cx=\"34.0\" cy=\"48.3\" r=\"2.6\" fill=\"currentColor\"/><circle cx=\"72.8\" cy=\"70.1\" r=\"2.6\" fill=\"currentColor\"/><circle cx=\"111.6\" cy=\"79.4\" r=\"2.6\" fill=\"currentColor\"/><circle cx=\"150.4\" cy=\"104.3\" r=\"2.6\" fill=\"currentColor\"/><circle cx=\"189.2\" cy=\"110.6\" r=\"2.6\" fill=\"currentColor\"/><circle cx=\"227.9\" cy=\"132.4\" r=\"2.6\" fill=\"currentColor\"/><circle cx=\"266.7\" cy=\"141.7\" r=\"2.6\" fill=\"currentColor\"/><text x=\"44\" y=\"12\" font-size=\"8\" fill=\"currentColor\">Mass (grams)</text><text x=\"150.3\" y=\"200.0\" font-size=\"8\" text-anchor=\"middle\" fill=\"currentColor\">Minutes</text></svg>The scatterplot shows the mass, in grams, of a block of ice at several times after it was taken out of a freezer. A line of best fit is also shown. According to the line of best fit, what is the predicted mass of the block 20 minutes after it was taken out?",
@@ -3142,7 +3142,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mtde18df",
           "domain": "Algebra",
-          "skill": "12 English to Math",
+          "skill": "Linear Functions", "topic": "12 English to Math",
           "difficulty": "easy",
           "type": "fr",
           "text": "A charter boat company charges $12 for each passenger plus a flat fee of $50 for the trip. The total charge for one trip was $362. How many passengers were on that trip?",
@@ -3152,7 +3152,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mtdbcd5f",
           "domain": "Algebra",
-          "skill": "19 Single Variable Equations with a Constant",
+          "skill": "Linear Equations in One Variable", "topic": "19 Single Variable Equations with a Constant",
           "difficulty": "medium",
           "type": "fr",
           "text": "<div style=\"text-align:center;font-size:1.1em;margin:0.6em 0;\">4(<i>x</i> − 3) + 7 = 3(2<i>x</i> − <i>c</i>)</div>In the given equation, <i>c</i> is a constant and the solution to the equation is <i>x</i> = 11. What is the value of <i>c</i>?",
@@ -3162,7 +3162,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mte24431",
           "domain": "Problem-Solving and Data Analysis",
-          "skill": "118 Mean, Median, Range",
+          "skill": "One-Variable Data: Distributions and Measures of Center and Spread", "topic": "118 Mean, Median, Range",
           "difficulty": "easy",
           "type": "mc",
           "text": "<svg viewBox=\"26 91 258 108\" class=\"dx-fig\" style=\"color:var(--text);\"><title>A dot plot of the number of hours volunteered, with dots above the values 2 through 7</title><line x1=\"34\" y1=\"150\" x2=\"276\" y2=\"150\" stroke=\"currentColor\" stroke-width=\"1.5\"/><line x1=\"48\" y1=\"150\" x2=\"48\" y2=\"155\" stroke=\"currentColor\" stroke-width=\"1.5\"/><text x=\"48\" y=\"168\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">2</text><circle cx=\"48\" cy=\"142\" r=\"4\" fill=\"currentColor\"/><circle cx=\"48\" cy=\"129\" r=\"4\" fill=\"currentColor\"/><line x1=\"88\" y1=\"150\" x2=\"88\" y2=\"155\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"88\" y=\"168\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">3</text><circle cx=\"88\" cy=\"142\" r=\"4\" fill=\"currentColor\"/><line x1=\"128\" y1=\"150\" x2=\"128\" y2=\"155\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"128\" y=\"168\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">4</text><circle cx=\"128\" cy=\"142\" r=\"4\" fill=\"currentColor\"/><circle cx=\"128\" cy=\"129\" r=\"4\" fill=\"currentColor\"/><circle cx=\"128\" cy=\"116\" r=\"4\" fill=\"currentColor\"/><circle cx=\"128\" cy=\"103\" r=\"4\" fill=\"currentColor\"/><line x1=\"168\" y1=\"150\" x2=\"168\" y2=\"155\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"168\" y=\"168\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">5</text><circle cx=\"168\" cy=\"142\" r=\"4\" fill=\"currentColor\"/><circle cx=\"168\" cy=\"129\" r=\"4\" fill=\"currentColor\"/><circle cx=\"168\" cy=\"116\" r=\"4\" fill=\"currentColor\"/><line x1=\"208\" y1=\"150\" x2=\"208\" y2=\"155\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"208\" y=\"168\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">6</text><circle cx=\"208\" cy=\"142\" r=\"4\" fill=\"currentColor\"/><circle cx=\"208\" cy=\"129\" r=\"4\" fill=\"currentColor\"/><circle cx=\"208\" cy=\"116\" r=\"4\" fill=\"currentColor\"/><line x1=\"248\" y1=\"150\" x2=\"248\" y2=\"155\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"248\" y=\"168\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">7</text><circle cx=\"248\" cy=\"142\" r=\"4\" fill=\"currentColor\"/><circle cx=\"248\" cy=\"129\" r=\"4\" fill=\"currentColor\"/><circle cx=\"248\" cy=\"116\" r=\"4\" fill=\"currentColor\"/><text x=\"150\" y=\"188\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">Number of hours volunteered</text></svg>The dot plot shows the number of hours each of 16 students volunteered last month. What is the median number of hours volunteered by these students?",
@@ -3184,7 +3184,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mt6c48d3",
           "domain": "Algebra",
-          "skill": "5 Function Transformations",
+          "skill": "Nonlinear Functions", "topic": "5 Function Transformations",
           "difficulty": "medium",
           "type": "mc",
           "text": "The function <i>f</i> is defined by <i>f</i>(<i>x</i>) = 3<i>x</i> + 9. The function <i>g</i> is defined by <i>g</i>(<i>x</i>) = <i>f</i>(<i>x</i>) &minus; 15. In the <i>xy</i>-plane, what is the <i>x</i>-coordinate of the <i>x</i>-intercept of the graph of <i>y</i> = <i>g</i>(<i>x</i>)?",
@@ -3206,7 +3206,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mta1e7e9",
           "domain": "Algebra",
-          "skill": "13 Inequalities",
+          "skill": "Linear Inequalities in One or Two Variables", "topic": "13 Inequalities",
           "difficulty": "medium",
           "type": "mc",
           "text": "A chess club has $250 to spend on a tournament. The club must pay a $46 entry fee for the club and $18 for each player it registers. What is the greatest number of players the club can register?",
@@ -3222,7 +3222,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mt613ac6",
           "domain": "Advanced Math",
-          "skill": "5 Function Transformations",
+          "skill": "Nonlinear Functions", "topic": "5 Function Transformations",
           "difficulty": "medium",
           "type": "mc",
           "text": "The function <i>f</i> is defined by <i>f</i>(<i>x</i>) = <i>x</i><sup>2</sup> − 6<i>x</i> + 1. The function <i>g</i> is defined by <i>g</i>(<i>x</i>) = <i>f</i>(−<i>x</i>). Which of the following is equivalent to <i>g</i>(<i>x</i>)?",
@@ -3244,7 +3244,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mt6a1f03",
           "domain": "Advanced Math",
-          "skill": "66 Rational Functions",
+          "skill": "Nonlinear Functions", "topic": "66 Rational Functions",
           "difficulty": "medium",
           "type": "mc",
           "text": "The function <i>f</i> is defined by <i>f</i>(<i>x</i>) = <span style=\"display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;\">2<i>x</i> + 6</span><span style=\"padding:0 0.25em;\"><i>x</i> − 1</span></span>, where <i>x</i> ≠ 1. For what value of <i>x</i> does <i>f</i>(<i>x</i>) = 3?",
@@ -3260,7 +3260,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mt799420",
           "domain": "Advanced Math",
-          "skill": "57 Sum of Quadratic Solutions",
+          "skill": "Nonlinear Equations in One Variable and Systems of Equations in Two Variables", "topic": "57 Sum of Quadratic Solutions",
           "difficulty": "medium",
           "type": "fr",
           "text": "<div style=\"text-align:center;font-size:1.1em;\">3<i>x</i><sup>2</sup> + 5<i>x</i> − 12 = <i>x</i><sup>2</sup> + 21<i>x</i> + 4</div>What is the sum of the solutions to the given equation?",
@@ -3271,7 +3271,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mt1d93aa",
           "domain": "Advanced Math",
-          "skill": "62 Vertex Form",
+          "skill": "Nonlinear Functions", "topic": "62 Vertex Form",
           "difficulty": "medium",
           "type": "mc",
           "text": "The function <i>f</i> is defined by <i>f</i>(<i>x</i>) = <i>a</i>(<i>x</i> − <i>h</i>)<sup>2</sup> + <i>k</i>, where <i>a</i>, <i>h</i>, and <i>k</i> are constants. In the <i>xy</i>-plane, the graph of <i>y</i> = <i>f</i>(<i>x</i>) has its vertex at (3, −8) and passes through the point (5, 0). What is the value of <i>a</i>?",
@@ -3293,7 +3293,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mt8421d3",
           "domain": "Geometry and Trigonometry",
-          "skill": "87 Standard Form of a Circle",
+          "skill": "Circles", "topic": "87 Standard Form of a Circle",
           "difficulty": "medium",
           "type": "mc",
           "text": "In the <i>xy</i>-plane, a circle has its center at (−3, 5) and passes through the point (9, 14). Which of the following equations represents this circle?",
@@ -3309,7 +3309,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mt3a27d2",
           "domain": "Algebra",
-          "skill": "27 Linear Functions",
+          "skill": "Linear Functions", "topic": "27 Linear Functions",
           "difficulty": "hard",
           "type": "mc",
           "text": "For the function <i>f</i>, if <i>f</i>(3<i>x</i>) = <i>x</i> − 6 for all values of <i>x</i>, what is the value of <i>f</i>(6)?",
@@ -3325,7 +3325,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mtea01b0",
           "domain": "Advanced Math",
-          "skill": "5 Function Transformations",
+          "skill": "Nonlinear Functions", "topic": "5 Function Transformations",
           "difficulty": "hard",
           "type": "mc",
           "text": "The function <i>f</i> is defined by <i>f</i>(<i>x</i>) = <i>x</i><sup>2</sup> − 8<i>x</i> + 3. The function <i>g</i> is defined by <i>g</i>(<i>x</i>) = <i>f</i>(2<i>x</i> + 6). In the <i>xy</i>-plane, the graph of <i>y</i> = <i>g</i>(<i>x</i>) has its minimum at the point (<i>a</i>, <i>b</i>). What is the value of <i>a</i>?",
@@ -3347,7 +3347,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mt351fda",
           "domain": "Geometry and Trigonometry",
-          "skill": "89 General Form of a Circle",
+          "skill": "Circles", "topic": "89 General Form of a Circle",
           "difficulty": "hard",
           "type": "mc",
           "text": "<div style=\"text-align:center;font-size:1.1em;\"><i>x</i><sup>2</sup> + <i>y</i><sup>2</sup> − 12<i>x</i> + 8<i>y</i> + 27 = 0</div>The given equation defines a circle in the <i>xy</i>-plane. What is the least possible distance between the point (14, 2) and a point on this circle?",
@@ -3369,7 +3369,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mt53bb7b",
           "domain": "Geometry and Trigonometry",
-          "skill": "67 Angle Properties",
+          "skill": "Lines, Angles, and Triangles", "topic": "67 Angle Properties",
           "difficulty": "medium",
           "type": "fr",
           "text": "In triangle <i>PQR</i>, the measure of angle <i>P</i> is 24&deg;. The measure of angle <i>Q</i> is 3 times the measure of angle <i>R</i>. What is the measure, in degrees, of angle <i>Q</i>?",
@@ -3379,7 +3379,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mtfefb83",
           "domain": "Advanced Math",
-          "skill": "55 One Real Quadratic Solution",
+          "skill": "Nonlinear Equations in One Variable and Systems of Equations in Two Variables", "topic": "55 One Real Quadratic Solution",
           "difficulty": "hard",
           "type": "fr",
           "text": "<div style=\"text-align:center;font-size:1.1em;\"><i>kx</i><sup>2</sup> − 20<i>x</i> + 25 = 0</div>In the given equation, <i>k</i> is a positive constant. The equation has exactly one real solution. What is that solution?",
@@ -3389,7 +3389,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "f87ece91",
           "domain": "Geometry and Trigonometry",
-          "skill": "100 Similar 3D Figures",
+          "skill": "Area and Volume", "topic": "100 Similar 3D Figures",
           "difficulty": "hard",
           "type": "mc",
           "text": "Two similar right circular cones have volumes of 27 cubic units and 125 cubic units. The surface area of the smaller cone is 63 square units. What is the surface area, in square units, of the larger cone?",
@@ -3407,7 +3407,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mtb00757",
           "domain": "Algebra",
-          "skill": "18 Single Variable Equations",
+          "skill": "Linear Equations in One Variable", "topic": "18 Single Variable Equations",
           "difficulty": "easy",
           "type": "mc",
           "text": "If 4<i>x</i> − 28 = −24, what is the value of <i>x</i> − 7?",
@@ -3423,7 +3423,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mtba3db6",
           "domain": "Algebra",
-          "skill": "24 Number of Solutions",
+          "skill": "Linear Equations in One Variable", "topic": "24 Number of Solutions",
           "difficulty": "easy",
           "type": "mc",
           "text": "<div style=\"text-align:center;font-size:1.1em;margin:0.6em 0;\">5(2<i>x</i> &minus; 3) = 10<i>x</i> &minus; 15</div>How many solutions does the given equation have?",
@@ -3445,7 +3445,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mtd06c6b",
           "domain": "Algebra",
-          "skill": "18 Single Variable Equations",
+          "skill": "Linear Equations in One Variable", "topic": "18 Single Variable Equations",
           "difficulty": "easy",
           "type": "mc",
           "text": "<div style=\"text-align:center;font-size:1.1em;margin:0.6em 0;\"><span style=\"display:inline-block;vertical-align:middle;\"><i>x</i>/4</span> + 9 = 21</div>What is the value of <i>x</i> in the given equation?",
@@ -3461,7 +3461,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mt7e019a",
           "domain": "Advanced Math",
-          "skill": "21 Simple Equivalent Expressions",
+          "skill": "Equivalent Expressions", "topic": "21 Simple Equivalent Expressions",
           "difficulty": "easy",
           "type": "mc",
           "text": "Which expression is equivalent to (5<i>x</i><sup>2</sup> + 7<i>x</i> − 4) − (<i>x</i><sup>2</sup> − 2<i>x</i> + 9)?",
@@ -3477,7 +3477,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mtd5d858",
           "domain": "Problem-Solving and Data Analysis",
-          "skill": "123 Box Plots",
+          "skill": "One-Variable Data: Distributions and Measures of Center and Spread", "topic": "123 Box Plots",
           "difficulty": "easy",
           "type": "mc",
           "text": "<svg viewBox=\"17 72 281 121\" class=\"dx-fig\" style=\"color:var(--text);\"><title>Box plot summarizing the heights of 23 tomato plants</title><line x1=\"25\" y1=\"145\" x2=\"290\" y2=\"145\" stroke=\"currentColor\" stroke-width=\"1.5\"/><line x1=\"30.0\" y1=\"145\" x2=\"30.0\" y2=\"150\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"30.0\" y=\"162\" font-size=\"8\" text-anchor=\"middle\" fill=\"currentColor\">10</text><line x1=\"65.7\" y1=\"145\" x2=\"65.7\" y2=\"150\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"65.7\" y=\"162\" font-size=\"8\" text-anchor=\"middle\" fill=\"currentColor\">15</text><line x1=\"101.4\" y1=\"145\" x2=\"101.4\" y2=\"150\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"101.4\" y=\"162\" font-size=\"8\" text-anchor=\"middle\" fill=\"currentColor\">20</text><line x1=\"137.1\" y1=\"145\" x2=\"137.1\" y2=\"150\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"137.1\" y=\"162\" font-size=\"8\" text-anchor=\"middle\" fill=\"currentColor\">25</text><line x1=\"172.9\" y1=\"145\" x2=\"172.9\" y2=\"150\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"172.9\" y=\"162\" font-size=\"8\" text-anchor=\"middle\" fill=\"currentColor\">30</text><line x1=\"208.6\" y1=\"145\" x2=\"208.6\" y2=\"150\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"208.6\" y=\"162\" font-size=\"8\" text-anchor=\"middle\" fill=\"currentColor\">35</text><line x1=\"244.3\" y1=\"145\" x2=\"244.3\" y2=\"150\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"244.3\" y=\"162\" font-size=\"8\" text-anchor=\"middle\" fill=\"currentColor\">40</text><line x1=\"280.0\" y1=\"145\" x2=\"280.0\" y2=\"150\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"280.0\" y=\"162\" font-size=\"8\" text-anchor=\"middle\" fill=\"currentColor\">45</text><line x1=\"44.3\" y1=\"100\" x2=\"87.1\" y2=\"100\" stroke=\"currentColor\" stroke-width=\"1.5\"/><line x1=\"201.4\" y1=\"100\" x2=\"258.6\" y2=\"100\" stroke=\"currentColor\" stroke-width=\"1.5\"/><line x1=\"44.3\" y1=\"88\" x2=\"44.3\" y2=\"112\" stroke=\"currentColor\" stroke-width=\"1.5\"/><line x1=\"258.6\" y1=\"88\" x2=\"258.6\" y2=\"112\" stroke=\"currentColor\" stroke-width=\"1.5\"/><rect x=\"87.1\" y=\"80\" width=\"114.3\" height=\"40\" stroke=\"currentColor\" fill=\"none\" stroke-width=\"1.5\"/><line x1=\"144.3\" y1=\"80\" x2=\"144.3\" y2=\"120\" stroke=\"currentColor\" stroke-width=\"1.5\"/><text x=\"160\" y=\"182\" font-size=\"8\" text-anchor=\"middle\" fill=\"currentColor\">Height (centimeters)</text></svg>The box plot summarizes the heights, in centimeters, of 23 tomato plants grown in a greenhouse. What is the median height, in centimeters, of these plants?",
@@ -3493,7 +3493,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mte69d84",
           "domain": "Algebra",
-          "skill": "30 Standard Form Equation",
+          "skill": "Linear Equations in Two Variables", "topic": "30 Standard Form Equation",
           "difficulty": "easy",
           "type": "fr",
           "text": "<div style=\"text-align:center;font-size:1.1em;margin:0.6em 0;\">5<i>x</i> + 4<i>y</i> = 60</div>The given equation represents a line in the <i>xy</i>-plane. What is the <i>x</i>-coordinate of the <i>x</i>-intercept of this line?",
@@ -3505,7 +3505,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mt833c9d",
           "domain": "Algebra",
-          "skill": "30 Standard Form Equation",
+          "skill": "Linear Equations in Two Variables", "topic": "30 Standard Form Equation",
           "difficulty": "medium",
           "type": "mc",
           "text": "A neighborhood consists of a 2-hectare park and a 35-hectare residential area. The total number of trees in the neighborhood is 3,934. The equation 2<i>x</i> + 35<i>y</i> = 3,934 represents this situation. Which of the following is the best interpretation of <i>x</i> in this context?",
@@ -3521,7 +3521,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mt59bf28",
           "domain": "Algebra",
-          "skill": "10 Algebraic Systems",
+          "skill": "Systems of Two Linear Equations in Two Variables", "topic": "10 Algebraic Systems",
           "difficulty": "medium",
           "type": "mc",
           "text": "<div style=\"text-align:center;font-size:1.1em;margin:0.6em 0;\">3<i>x</i> + 2<i>y</i> = 19<br>5<i>x</i> − 2<i>y</i> = 21</div>The given system of equations has the solution (<i>x</i>, <i>y</i>). What is the value of <i>x</i> + <i>y</i>?",
@@ -3543,7 +3543,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mt67b170",
           "domain": "Advanced Math",
-          "skill": "41 Exponential Function Structure",
+          "skill": "Nonlinear Functions", "topic": "41 Exponential Function Structure",
           "difficulty": "medium",
           "type": "mc",
           "text": "<table class=\"dx-table\"><tr><th><i>t</i></th><th><i>v</i>(<i>t</i>)</th></tr><tr><td>0</td><td>24,000</td></tr><tr><td>3</td><td>12,000</td></tr><tr><td>6</td><td>6,000</td></tr><tr><td>9</td><td>3,000</td></tr></table>The table gives the value <i>v</i>(<i>t</i>), in dollars, of a commercial printing press for four values of <i>t</i>, where <i>t</i> is the number of years after the press was purchased. The value of the press decreases by the same percent each year. Which of the following could define <i>v</i>?",
@@ -3565,7 +3565,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mta15994",
           "domain": "Advanced Math",
-          "skill": "47 Factoring",
+          "skill": "Nonlinear Equations in One Variable and Systems of Equations in Two Variables", "topic": "47 Factoring",
           "difficulty": "medium",
           "type": "mc",
           "text": "If <i>x</i><sup>2</sup> − <i>y</i><sup>2</sup> = 64 and <i>x</i> + <i>y</i> = 16, what is the value of <i>x</i> − <i>y</i>?",
@@ -3587,7 +3587,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mt4bbbe5",
           "domain": "Advanced Math",
-          "skill": "1 Plugging into a function",
+          "skill": "Nonlinear Functions", "topic": "1 Plugging into a function",
           "difficulty": "easy",
           "type": "fr",
           "text": "The function <i>f</i> is defined by <i>f</i>(<i>x</i>) = 3<i>x</i><sup>2</sup> − 5. What is the value of <i>f</i>(4)?",
@@ -3598,7 +3598,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "1971f9b1",
           "domain": "Advanced Math",
-          "skill": "45 Fractional Exponents",
+          "skill": "Nonlinear Functions", "topic": "45 Fractional Exponents",
           "difficulty": "hard",
           "type": "mc",
           "text": "For the exponential function <i>f</i>, the value of <i>f</i>(3) is <i>k</i>, where <i>k</i> is a constant. Which of the following equivalent forms of the function <i>f</i> shows the value of <i>k</i> as the coefficient or the base?",
@@ -3614,7 +3614,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mt9c47e1",
           "domain": "Advanced Math",
-          "skill": "65 Polynomial Functions",
+          "skill": "Nonlinear Functions", "topic": "65 Polynomial Functions",
           "difficulty": "hard",
           "type": "mc",
           "text": "The polynomial <i>p</i> is defined by <i>p</i>(<i>x</i>) = <i>x</i>³ − 4<i>x</i>² + <i>ax</i> − 12, where <i>a</i> is a constant. If <i>x</i> − 3 is a factor of <i>p</i>, what is the value of <i>a</i>?",
@@ -3646,7 +3646,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mt45d89d",
           "domain": "Problem-Solving and Data Analysis",
-          "skill": "37 Hard Percentages",
+          "skill": "Percentages", "topic": "37 Hard Percentages",
           "difficulty": "hard",
           "type": "mc",
           "text": "The price of a bicycle at a shop was increased by 30%. Several months later, the shop decreased that new price by 10%. If the price of the bicycle after both changes is $702, what was its price before the increase?",
@@ -3662,7 +3662,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mt672f64",
           "domain": "Geometry and Trigonometry",
-          "skill": "74 Cofunction Identity Geometrically",
+          "skill": "Right Triangles and Trigonometry", "topic": "74 Cofunction Identity Geometrically",
           "difficulty": "hard",
           "type": "mc",
           "text": "In right triangle <i>ABC</i>, the measure of angle <i>B</i> is 90&deg; and cos <i>A</i> = <span style=\"display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;\">7</span><span style=\"padding:0 0.25em;\">25</span></span>. Triangle <i>PQR</i> is similar to triangle <i>ABC</i>, where angle <i>P</i> corresponds to angle <i>A</i> and angle <i>R</i> corresponds to angle <i>C</i>. What is the value of sin <i>R</i>?",
@@ -3678,7 +3678,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mt853ca8",
           "domain": "Geometry and Trigonometry",
-          "skill": "96 Volume",
+          "skill": "Area and Volume", "topic": "96 Volume",
           "difficulty": "easy",
           "type": "fr",
           "text": "A rectangular shipping box has a volume of 504 cubic inches. The base of the box is a rectangle with a length of 12 inches and a width of 7 inches. What is the height, in inches, of the box?",
@@ -3688,7 +3688,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mt0058d4",
           "domain": "Advanced Math",
-          "skill": "66 Rational Functions",
+          "skill": "Nonlinear Functions", "topic": "66 Rational Functions",
           "difficulty": "medium",
           "type": "fr",
           "text": "<div style=\"text-align:center;font-size:1.1em;margin:0.6em 0;\">4/(<i>x</i> − 5) = 10/(<i>x</i> + 1)</div>What is the solution to the given equation?",
@@ -3698,7 +3698,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mt2a19dc",
           "domain": "Geometry and Trigonometry",
-          "skill": "103 Cones",
+          "skill": "Area and Volume", "topic": "103 Cones",
           "difficulty": "hard",
           "type": "mc",
           "text": "<svg viewBox=\"71 32 158 169\" class=\"dx-fig\" style=\"color:var(--text);max-width:218px;\"><title>A right circular cone with the diameter of its base marked 12 and its slant height marked 10</title><ellipse cx=\"150\" cy=\"140\" rx=\"62\" ry=\"15\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"/><line x1=\"150\" y1=\"40\" x2=\"88\" y2=\"140\" stroke=\"currentColor\" stroke-width=\"1.5\"/><line x1=\"150\" y1=\"40\" x2=\"212\" y2=\"140\" stroke=\"currentColor\" stroke-width=\"1.5\"/><line x1=\"88\" y1=\"140\" x2=\"138\" y2=\"140\" stroke=\"currentColor\" stroke-width=\"1.1\" stroke-dasharray=\"4 3\"/><line x1=\"162\" y1=\"140\" x2=\"212\" y2=\"140\" stroke=\"currentColor\" stroke-width=\"1.1\" stroke-dasharray=\"4 3\"/><text x=\"150\" y=\"144\" font-size=\"10\" text-anchor=\"middle\" fill=\"currentColor\">12</text><text x=\"190\" y=\"86\" font-size=\"10\" text-anchor=\"start\" fill=\"currentColor\">10</text><text x=\"150\" y=\"190\" font-size=\"9\" text-anchor=\"middle\" fill=\"currentColor\">Note: Figure not drawn to scale.</text></svg>The figure shows a right circular cone. The diameter of the base of the cone and the slant height of the cone are marked, in centimeters. What is the volume, in cubic centimeters, of the cone?",
@@ -3716,7 +3716,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mt3071e5",
           "domain": "Algebra",
-          "skill": "28 Linear Word Problems",
+          "skill": "Linear Functions", "topic": "28 Linear Word Problems",
           "difficulty": "hard",
           "type": "mc",
           "text": "For groups of 25 or more people, a museum charges $21 per person for the first 25 people and $14 for each additional person. Which function <i>f</i> gives the total charge, in dollars, for a tour group with <i>n</i> people, where <i>n</i> ≥ 25?",
@@ -3732,7 +3732,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mtdfdb0d",
           "domain": "Algebra",
-          "skill": "39 Mixtures",
+          "skill": "Linear Equations in One Variable", "topic": "39 Mixtures",
           "difficulty": "hard",
           "type": "mc",
           "text": "A chemist has 30 liters of a solution that is 15% acid by volume. She will add some amount of a second solution that is 40% acid by volume to produce a solution that is 25% acid by volume. How many liters of the 40% solution must she add?",
@@ -3754,7 +3754,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mt1ed816",
           "domain": "Advanced Math",
-          "skill": "46 Exponential Growth Rate",
+          "skill": "Nonlinear Functions", "topic": "46 Exponential Growth Rate",
           "difficulty": "hard",
           "type": "mc",
           "text": "A quantity increases by the same percent each year and is modeled by the function <i>P</i>, where <i>P</i>(<i>t</i>) is the quantity <i>t</i> years after the model began. If <i>P</i>(4) = 5,000 and <i>P</i>(10) = 20,000, what is the value of <i>P</i>(7)?",
@@ -3776,7 +3776,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mt3dde2a",
           "domain": "Advanced Math",
-          "skill": "60 Quadratic Applications",
+          "skill": "Nonlinear Functions", "topic": "60 Quadratic Applications",
           "difficulty": "hard",
           "type": "mc",
           "text": "A ball is launched upward from a platform. Its height above the ground, in feet, <i>t</i> seconds after it is launched is given by <i>h</i>(<i>t</i>) = −16<i>t</i><sup>2</sup> + <i>bt</i> + <i>c</i>, where <i>b</i> and <i>c</i> are constants. The ball reaches its maximum height of 180 feet 3 seconds after it is launched. What was the height of the ball, in feet, at the moment it was launched?",
@@ -3798,7 +3798,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mt177b88",
           "domain": "Advanced Math",
-          "skill": "8 Radical Models",
+          "skill": "Nonlinear Equations in One Variable and Systems of Equations in Two Variables", "topic": "8 Radical Models",
           "difficulty": "hard",
           "type": "mc",
           "text": "<div style=\"text-align:center;font-size:1.1em;margin:0.6em 0;\">√(3<i>x</i> + 4) = <i>x</i> &minus; 2</div>In the given equation, <i>x</i> is a real number. The equation has exactly one solution. What is that solution?",
@@ -3820,7 +3820,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mt6f23e6",
           "domain": "Advanced Math",
-          "skill": "65 Polynomial Functions",
+          "skill": "Nonlinear Functions", "topic": "65 Polynomial Functions",
           "difficulty": "hard",
           "type": "fr",
           "text": "The function <i>f</i> is defined by <i>f</i>(<i>x</i>) = <i>x</i><sup>3</sup> + <i>ax</i><sup>2</sup> + <i>bx</i> + 18, where <i>a</i> and <i>b</i> are constants. In the <i>xy</i>-plane, the graph of <i>y</i> = <i>f</i>(<i>x</i>) is tangent to the <i>x</i>-axis at the point (3, 0) and crosses the <i>x</i>-axis at exactly one other point. What is the <i>x</i>-coordinate of that other point?",
@@ -3831,7 +3831,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mt523875",
           "domain": "Algebra",
-          "skill": "14 Consecutive odd/even integers",
+          "skill": "Linear Equations in One Variable", "topic": "14 Consecutive odd/even integers",
           "difficulty": "medium",
           "type": "mc",
           "text": "The sum of four consecutive odd integers is 232. What is the sum of the two least of these integers?",
@@ -3847,7 +3847,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mt445ada",
           "domain": "Algebra",
-          "skill": "33 Parallel Lines",
+          "skill": "Linear Equations in Two Variables", "topic": "33 Parallel Lines",
           "difficulty": "medium",
           "type": "mc",
           "text": "In the <i>xy</i>-plane, line <i>&#8467;</i> is parallel to the line with equation 6<i>x</i> − 2<i>y</i> = 9 and passes through the point (−3, 4). What is the <i>y</i>-coordinate of the <i>y</i>-intercept of line <i>&#8467;</i>?",
@@ -3863,7 +3863,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mt82708d",
           "domain": "Problem-Solving and Data Analysis",
-          "skill": "118 Mean, Median, Range",
+          "skill": "One-Variable Data: Distributions and Measures of Center and Spread", "topic": "118 Mean, Median, Range",
           "difficulty": "medium",
           "type": "mc",
           "text": "For which of the following data sets is the mean greater than the median?",
@@ -3879,7 +3879,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mtca36f8",
           "domain": "Algebra",
-          "skill": "17 System of 1 Equation & 1 Inequality",
+          "skill": "Linear Inequalities in One or Two Variables", "topic": "17 System of 1 Equation & 1 Inequality",
           "difficulty": "hard",
           "type": "mc",
           "text": "A caterer is buying serving trays. Small trays cost $14 each and large trays cost $22 each. The caterer will buy at least 30 trays in total and will spend no more than $560 on the trays. What is the greatest number of large trays the caterer can buy?",
@@ -3895,7 +3895,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mt28fbec",
           "domain": "Algebra",
-          "skill": "20 Rearranging Terms",
+          "skill": "Equivalent Expressions", "topic": "20 Rearranging Terms",
           "difficulty": "hard",
           "type": "mc",
           "text": "<div style=\"text-align:center;font-size:1.1em;margin:0.6em 0;\"><i>P</i> = <span style=\"display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.15;margin:0 0.12em;font-size:0.95em;\"><span style=\"border-bottom:1px solid currentColor;padding:0 0.25em;\">2<i>A</i> + 3<i>B</i></span><span style=\"padding:0 0.25em;\"><i>A</i> − <i>B</i></span></span></div>The given equation relates the positive numbers <i>A</i>, <i>B</i>, and <i>P</i>, where <i>A</i> &gt; <i>B</i>. Which of the following correctly expresses <i>A</i> in terms of <i>B</i> and <i>P</i>?",
@@ -3912,7 +3912,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mt15dc54",
           "domain": "Advanced Math",
-          "skill": "45 Fractional Exponents",
+          "skill": "Nonlinear Functions", "topic": "45 Fractional Exponents",
           "difficulty": "hard",
           "type": "fr",
           "text": "<div style=\"text-align:center;font-size:1.1em;margin:0.6em 0;\">(&#8731;(<i>x</i><sup>4</sup>) &middot; √(<i>x</i>))<sup>6</sup> / <i>x</i><sup>3</sup></div>The given expression, where <i>x</i> &gt; 0, is equivalent to <i>x</i><sup><i>k</i></sup>, where <i>k</i> is a constant. What is the value of <i>k</i>?",
@@ -3923,7 +3923,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mtf63ec9",
           "domain": "Problem-Solving and Data Analysis",
-          "skill": "37 Hard Percentages",
+          "skill": "Percentages", "topic": "37 Hard Percentages",
           "difficulty": "hard",
           "type": "mc",
           "text": "The positive number a is 2,241% of the sum of the positive numbers <i>b</i> and <i>c</i>, and <i>b</i> is 83% of <i>c</i>. What percent of <i>b</i> is a?",
@@ -3939,7 +3939,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mtd2a3da",
           "domain": "Problem-Solving and Data Analysis",
-          "skill": "117 Probability with Percentages",
+          "skill": "Probability and Conditional Probability", "topic": "117 Probability with Percentages",
           "difficulty": "hard",
           "type": "mc",
           "text": "<table class=\"dx-table\"><tr><th>Grade</th><th>Number of students surveyed</th><th>Percent who travel to school by bus</th></tr><tr><td>Grade 10</td><td>150</td><td>60%</td></tr><tr><td>Grade 11</td><td>200</td><td>55%</td></tr><tr><td>Grade 12</td><td>150</td><td>40%</td></tr></table>The table summarizes the results of a survey of 500 students at a high school. If one of the surveyed students who does not travel to school by bus is selected at random, what is the probability that the student selected is in Grade 11?",
@@ -3964,7 +3964,7 @@ window.SAT_PRACTICE_TESTS = [
         {
           "qid": "mt8628a8",
           "domain": "Geometry and Trigonometry",
-          "skill": "68 Total Interior Angles",
+          "skill": "Lines, Angles, and Triangles", "topic": "68 Total Interior Angles",
           "difficulty": "hard",
           "type": "fr",
           "text": "In a certain regular polygon, the measure of each interior angle is 8 times the measure of each exterior angle. What is the sum, in degrees, of the measures of the interior angles of this polygon?",
