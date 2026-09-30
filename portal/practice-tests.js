@@ -3060,17 +3060,17 @@ window.SAT_PRACTICE_TESTS = [
  "skill": "Boundaries",
  "difficulty": "hard",
  "type": "mc",
- "text": "Developed along with the swing style of jazz music in the 1920s, swing dance is a group of social dances that once comprised hundreds of styles. Not all of the styles survived beyond that time ______ the dances that are still popular today include Lindy Hop, Balboa, Collegiate Shag, and Charleston.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+ "text": "Developed along with the swing style of jazz music in the 1920s and 1930s, swing dance is a group of social dances that once comprised hundreds of styles. Not all of the styles survived beyond that time ______ the dances that are still popular today include Lindy Hop, Balboa, Collegiate Shag, and Charleston.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
  "choices": [
   "period; however,",
-  "period, however:",
+  "period however;",
   "period, however,",
   "period, however"
  ],
  "correct": 0,
  "choiceNotes": [
   "Correct. A semicolon joins the two independent clauses and “however,” opens the second.",
-  "Incorrect. A colon cannot stand between two independent clauses in this way.",
+  "Incorrect. “However” is parenthetical here and has to be set off on both sides, so it needs a comma before it as well as the semicolon after.",
   "Incorrect. A comma alone can't join two independent clauses — this creates a comma splice between 'time period, however' and 'the dances that are still popular today include...'",
   "Incorrect. With no punctuation at all between the clauses, this creates a run-on sentence."
  ]
@@ -3514,14 +3514,14 @@ window.SAT_PRACTICE_TESTS = [
  "choices": [
   "Actually,",
   "Nevertheless,",
-  "For this reason,",
+  "Meanwhile,",
   "For instance,"
  ],
  "correct": 1,
  "choiceNotes": [
   "Incorrect. 'Actually' signals a correction to a prior misconception, but the sentence about voluntary versus involuntary choices doesn't contradict or correct anything just stated about Perez v. Brownell.",
   "Correct. Perez had just been described as overruled, and this sentence says it nonetheless prompted a lasting discussion, which is a concession.",
-  "Incorrect. Being overruled is not the reason Perez prompted the discussion, so a causal link does not hold.",
+  "Incorrect. Nothing here happens at the same time as anything else; the two cases are decades apart and one overrules the other.",
   "Incorrect. 'For instance' signals a specific example, but the sentence about voluntary versus involuntary choices is additional information about the case's implications, not a concrete example of something previously stated."
  ]
 },
@@ -7323,19 +7323,19 @@ window.SAT_PRACTICE_TESTS = [
  "skill": "Boundaries",
  "difficulty": "hard",
  "type": "mc",
- "text": "To many historians of science, Johannes Kepler's description of planetary motion, uniting mathematical precision with physical intuition, lends unusual coherence to early modern astronomy. This formulation of celestial order did not originate with ______ in 1609, the concept had been foreshadowed in earlier work by the Polish astronomer Nicolaus Copernicus.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+ "text": "To many historians of science, Johannes Kepler's description of planetary motion, uniting mathematical precision with physical intuition, lends unusual coherence to early modern astronomy. This formulation of celestial order did not originate with ______ well before 1609, the concept had been foreshadowed in earlier work by the Polish astronomer Nicolaus Copernicus.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
  "choices": [
-  "Kepler; though,",
-  "Kepler though",
-  "Kepler, though;",
-  "Kepler, though,"
+  "Kepler,",
+  "Kepler",
+  "Kepler;",
+  "Kepler, which"
  ],
  "correct": 2,
  "choiceNotes": [
-  "Incorrect. A semicolon before \"though,\" followed by a comma, misplaces the required break; \"though\" functions here as a sentence-ending adverb attached to the first clause, not as the start of a new independent clause requiring this punctuation pattern.",
-  "Incorrect. Without the comma, “Kepler though in 1609” reads as a single run of words and leaves the two independent clauses unseparated.",
-  "Correct. \"This formulation...did not originate with Kepler, though\" functions as a complete concessive statement, and the semicolon correctly separates it from the following independent clause, \"in 1609, the concept had been foreshadowed in earlier work by...Copernicus.\"",
-  "Incorrect. A comma after \"though\" is insufficient to separate two independent clauses, creating a comma splice."
+  "Incorrect. A comma alone between two independent clauses is a comma splice.",
+  "Incorrect. With no punctuation at all the two independent clauses run together.",
+  "Correct. A semicolon is the conventional way to join two independent clauses without a conjunction, and both halves here can stand alone.",
+  "Incorrect. “Which” introduces a relative clause, and what follows is a complete sentence with its own subject and verb, so the two cannot be joined this way."
  ]
 },
           {"qid":"mt18a89e","domain":"Standard English Conventions","skill":"Boundaries","difficulty":"hard","type":"mc","text":"Game designers often refine puzzle sequences not by overhauling their mechanics but by making imperceptible adjustments to how information is conveyed. In a recent usability report, ______ contends that players solved a spatial-logic puzzle more efficiently after a discreet tutorial hint was embedded into the opening level, suggesting that even minimal guidance can materially affect performance.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?","choices":["lead designer, Maren Ilyanova,","lead designer Maren Ilyanova,","lead designer, Maren Ilyanova","lead designer Maren Ilyanova"],"correct":3,"choiceNotes":["Incorrect. Setting off \"Maren Ilyanova\" with commas on both sides treats the title-plus-name as a nonessential appositive, but here the title functions attributively before the name (as in \"President Biden\"), requiring no commas.","Incorrect. A comma after \"Ilyanova\" alone, without a matching comma before \"lead designer,\" creates an unbalanced, unnecessary break.","Incorrect. A comma after \"designer\" alone, without one after \"Ilyanova,\" creates an unbalanced, unnecessary break in the title-plus-name phrase.","Correct. \"Lead designer Maren Ilyanova\" functions as a title directly preceding a proper name, similar to \"Author Jane Doe,\" which requires no surrounding commas."]},
