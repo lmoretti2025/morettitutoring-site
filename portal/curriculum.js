@@ -19,7 +19,7 @@
 (function () {
   'use strict';
 
-  var DATA_SRC = 'curriculum-data.js?v=20260930a';
+  var DATA_SRC = 'curriculum-data.js?v=20260930b';
   var VIDEO_SRC = 'curriculum-videos.js?v=20260930b';
 
   /* ---------- small helpers ---------- */
@@ -667,8 +667,9 @@
      Slope-Intercept Form; it was showing only "Definition"). */
   function partPages(l, i) { return (l.parts[i].notes || []).map(function (n) { return n.title; }).filter(Boolean); }
   function partTitle(l, i) {
+    // The part's own title from the course files; before those carried one, its last note's heading.
     var t = partPages(l, i);
-    var name = t.length ? t[t.length - 1] : '';
+    var name = l.parts[i].title || (t.length ? t[t.length - 1] : '');
     return l.parts.length > 1 ? 'Part ' + (i + 1) + (name ? ': ' + name : '') : l.title;   // one part: the lesson itself
   }
 
