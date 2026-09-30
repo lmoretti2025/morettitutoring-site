@@ -19,7 +19,7 @@
 (function () {
   'use strict';
 
-  var DATA_SRC = 'curriculum-data.js?v=20260929c';
+  var DATA_SRC = 'curriculum-data.js?v=20260930a';
   var VIDEO_SRC = 'curriculum-videos.js?v=20260930b';
 
   /* ---------- small helpers ---------- */
@@ -52,6 +52,15 @@
     '#cu-root .cu-overall{display:flex;align-items:center;gap:14px;margin:0 0 1.4rem;font-size:.85rem;color:var(--mid)}',
     '#cu-root .cu-bar{flex:1;max-width:360px;height:8px;border-radius:8px;background:#e6e3de;overflow:hidden}',
     '#cu-root .cu-bar i{display:block;height:100%;background:var(--red,#B0271C);border-radius:8px;transition:width .6s var(--ease,ease)}',
+    '#cu-root .cu-gate{display:flex;align-items:center;gap:1rem;background:#fff;border-radius:14px;box-shadow:var(--shadow);padding:1rem 1.2rem;margin:0 0 1.6rem;border-left:4px solid var(--red,#B0271C)}',
+    '#cu-root .cu-gate>div{flex:1;min-width:0}#cu-root .cu-gate b{display:block;font-size:.98rem;font-weight:600}#cu-root .cu-gate span{font-size:.84rem;color:var(--mid);font-weight:300}',
+    '#cu-root .cu-gate-ic{flex:none;width:36px;height:36px;border-radius:50%;background:rgba(176,39,28,.1);color:var(--red,#B0271C);display:flex;align-items:center;justify-content:center}',
+    '#cu-root .cu-gate.nudge{animation:cuNudge .5s}@keyframes cuNudge{0%,100%{transform:none}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}',
+    '#cu-root .cu-lesson.cu-locked{cursor:default}#cu-root .cu-lesson.cu-locked .cu-lt,#cu-root .cu-lesson.cu-locked .cu-go{opacity:.45}',
+    '#cu-root .cu-lockring{display:inline-flex;align-items:center;justify-content:center;color:var(--mid);background:rgba(17,17,17,.05);border-radius:50%;flex:none}',
+    '#cu-root .cu-gchip.locked{opacity:.45;cursor:default}#cu-root .cu-gchip.locked:hover{border-color:rgba(17,17,17,.14);color:inherit}',
+    '#cu-root .cu-watch{font-size:.82rem;color:var(--mid);margin:.6rem 0 0}#cu-root .cu-watch b{color:var(--text,#111);font-weight:600}#cu-root .cu-watch.ok b{color:var(--cu-good)}',
+    '@media(max-width:520px){#cu-root .cu-gate{flex-direction:column;align-items:flex-start}}',
     '#cu-root .cu-guide{background:#fff;border-radius:14px;box-shadow:var(--shadow);margin:0 0 1.6rem;overflow:hidden}',
     '#cu-root .cu-guide>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.95rem 1.2rem}',
     '#cu-root .cu-guide>summary::-webkit-details-marker{display:none}',
@@ -108,7 +117,7 @@
     '#cu-root .cu-lesson:last-child{border-bottom:0}#cu-root .cu-lesson:hover{background:var(--cu-soft)}',
     '#cu-root .cu-num{font-family:var(--display,Georgia,serif);font-weight:700;color:var(--mid);font-size:.95rem;margin-right:.2rem}',
     // A calculator unit (calc in the course files, set by hand per lesson): the deck's Desmos green.
-    '#cu-root .cu-calc{display:inline-block;vertical-align:2px;margin-left:.45rem;padding:1px 7px;border-radius:999px;background:rgba(13,122,95,.1);color:#0d7a5f;font-size:.66rem;font-weight:600;letter-spacing:.02em;white-space:nowrap}',
+    '#cu-root .cu-calcb{display:inline-block;vertical-align:2px;margin-left:.45rem;padding:1px 7px;border-radius:999px;background:rgba(13,122,95,.1);color:#0d7a5f;font-size:.66rem;font-weight:600;letter-spacing:.02em;white-space:nowrap}',
     '#cu-root .cu-lt{font-size:.95rem;font-weight:500}#cu-root .cu-lt small{display:block;font-size:.78rem;color:var(--mid);font-weight:300;margin-top:2px}',
     '#cu-root .cu-dots{display:flex;gap:4px;align-items:center}',
     '#cu-root .cu-dots i{width:9px;height:9px;border-radius:50%;background:#e2dfda}#cu-root .cu-dots i.on{background:var(--cu-good)}',
@@ -302,7 +311,66 @@
       v.src = d.url;
       box.innerHTML = '';
       box.appendChild(v);
+      watchTrack(v, key, box);
     }, fail);
+  }
+  /* SECONDS ACTUALLY WATCHED. Each second of the video counts once, and only
+     when playback ran into it: a step of up to 2 seconds between two ticks
+     while playing. A drag along the bar is a jump, so it marks nothing, and
+     so does replaying a minute already seen. The marks stay on the device
+     (one character a second); the count and the length go to the backend
+     with the rest of the progress, which decides when 90% is reached. */
+  function watchTrack(v, key, box) {
+    var store = 'moretti_cu_watch_' + progKey + '_' + key;
+    var marks = [], n = 0, last = null, savedAt = 0, syncedAt = 0;
+    try { marks = (localStorage.getItem(store) || '').split('').map(function (c) { return c === '1' ? 1 : 0; }); } catch (e) { marks = []; }
+    marks.forEach(function (m) { n += m; });
+    var gating = !!(gate && gate.on && !gate.bypass && key === gate.video);
+    var note = null;
+    if (gating) {
+      var frame = box.closest('.cu-video');
+      note = document.createElement('p');
+      note.className = 'cu-watch';
+      if (frame && frame.parentNode) frame.parentNode.insertBefore(note, frame.nextSibling);
+    }
+    var share = (gate && gate.share) || 0.9;
+    function length() { return isFinite(v.duration) && v.duration > 0 ? Math.floor(v.duration) : 0; }
+    function paint() {
+      if (!note) return;
+      var d = length(), rec = videoRec(key);
+      if (rec && rec.done) { note.className = 'cu-watch ok'; note.innerHTML = '<b>Watched.</b> The rest of Math is unlocked.'; return; }
+      note.innerHTML = '<b>' + (d ? Math.min(99, Math.round(100 * n / d)) : 0) + '% watched.</b> The rest of Math unlocks at ' + Math.round(share * 100) + '%.';
+    }
+    function record(now) {
+      var d = length();
+      if (!d) return;
+      var had = videoRec(key) || {};
+      var rec = { w: Math.max(Math.min(n, d), had.w || 0), d: d };
+      if (had.done) rec.done = had.done;
+      else if (rec.w >= share * d) { rec.done = new Date().toISOString(); now = true; }
+      prog.videos = prog.videos || {};
+      prog.videos[key] = rec;
+      try {
+        localStorage.setItem(store, marks.map(function (m) { return m ? '1' : '0'; }).join(''));
+        localStorage.setItem('moretti_curriculum_' + progKey, JSON.stringify(prog));
+      } catch (e) {}
+      if (now || n - syncedAt >= 20) { syncedAt = n; queueSync(); }
+      paint();
+    }
+    v.addEventListener('timeupdate', function () {
+      var t = v.currentTime;
+      if (v.seeking || v.paused || last == null) { last = t; return; }
+      var step = t - last;
+      last = t;
+      if (!(step > 0 && step <= 2)) return;       // a jump, or a rewind: nothing watched
+      var sec = Math.floor(t);
+      if (!marks[sec]) { for (var i = marks.length; i <= sec; i++) if (marks[i] == null) marks[i] = 0; marks[sec] = 1; n++; }
+      if (n - savedAt >= 5) { savedAt = n; record(false); }
+    });
+    ['seeking', 'seeked', 'play'].forEach(function (ev) { v.addEventListener(ev, function () { last = null; }); });
+    ['pause', 'ended'].forEach(function (ev) { v.addEventListener(ev, function () { last = null; savedAt = n; record(true); }); });
+    v.addEventListener('loadedmetadata', paint);
+    paint();
   }
 
   /* ---------- progress ---------- */
@@ -314,6 +382,7 @@
     progKey = k;
     prog = { v: 1, parts: {}, last: null };
     try { var raw = JSON.parse(localStorage.getItem('moretti_curriculum_' + k) || 'null'); if (raw && raw.parts) prog = raw; } catch (e) {}
+    loadGate();
     return prog;
   }
   function saveProgress() {
@@ -329,6 +398,28 @@
   function unlocked(l, i) { return i === 0 || isDone(l.id, i - 1); }
   function lessonDoneCount(l) { var n = 0; l.parts.forEach(function (p, i) { if (isDone(l.id, i)) n++; }); return n; }
 
+  /* THE MATH GATE, AND READING & WRITING NOT OUT YET (Luca, 2026-09-30).
+     The rest of Math opens once lesson 1.1's video has been watched: 90% of
+     it, counted in seconds actually played (watchTrack), so dragging the bar
+     to the end opens nothing. The backend says which video gates the course,
+     whether the gate is on (only while that video can be played at all) and
+     whether this is one of Luca's own accounts, which pass everything. Until
+     it has answered on this device, nothing is locked. Reading & Writing is
+     closed to everyone but Luca until its videos exist. */
+  var GATE_LESSON = 'm1.1';
+  var gate = null;
+  function loadGate() {
+    gate = null;
+    try { gate = JSON.parse(localStorage.getItem('moretti_cu_gate_' + progKey) || 'null'); } catch (e) {}
+  }
+  function bypass() { return !!(gate && gate.bypass); }
+  function videoRec(key) { return (prog.videos && prog.videos[key]) || null; }
+  function gateWatched() { var r = gate && videoRec(gate.video); return !!(r && r.done); }
+  function gateShare() { var r = gate && videoRec(gate.video); return r && r.d ? Math.min(1, r.w / r.d) : 0; }
+  function mathLocked() { return !!(gate && gate.on && !gate.bypass && !gateWatched()); }
+  function courseSoon(c) { return c.id === 'english' && !bypass(); }
+  function lessonLocked(c, l) { return courseSoon(c) || (c.id === 'math' && l.id !== GATE_LESSON && mathLocked()); }
+
   /* The backend copy: merged part by part (a part done anywhere is done), so
      nothing is ever lost between devices. Optional: without the actions the
      device copy simply stands. */
@@ -340,12 +431,29 @@
     pulled = true;
     return post({ action: 'curriculumGet', key: progKey }).then(function (d) {
       if (!d || !d.ok || !d.progress || !d.progress.parts) return;
-      var changed = false;
+      var changed = false, partsChanged = false;
+      if (d.gate && JSON.stringify(d.gate) !== JSON.stringify(gate)) {
+        gate = d.gate; changed = true;
+        try { localStorage.setItem('moretti_cu_gate_' + progKey, JSON.stringify(gate)); } catch (e) {}
+      }
+      Object.keys(d.progress.videos || {}).forEach(function (k) {
+        var theirs = d.progress.videos[k], mine = videoRec(k) || {};
+        if (!theirs || ((theirs.w || 0) <= (mine.w || 0) && (!theirs.done || mine.done))) return;
+        prog.videos = prog.videos || {};
+        prog.videos[k] = { w: Math.max(theirs.w || 0, mine.w || 0), d: theirs.d || mine.d, done: mine.done || theirs.done };
+        if (!prog.videos[k].done) delete prog.videos[k].done;
+        changed = true;
+      });
       Object.keys(d.progress.parts).forEach(function (k) {
-        if (!prog.parts[k] && d.progress.parts[k] && d.progress.parts[k].done) { prog.parts[k] = d.progress.parts[k]; changed = true; }
+        if (!prog.parts[k] && d.progress.parts[k] && d.progress.parts[k].done) { prog.parts[k] = d.progress.parts[k]; changed = true; partsChanged = true; }
       });
       if (!prog.last && d.progress.last) { prog.last = d.progress.last; changed = true; }
-      if (changed) { try { localStorage.setItem('moretti_curriculum_' + progKey, JSON.stringify(prog)); } catch (e) {} rerender(); }
+      if (!changed) return;
+      try { localStorage.setItem('moretti_curriculum_' + progKey, JSON.stringify(prog)); } catch (e) {}
+      // An open lesson is redrawn only when it must be: a redraw restarts its video.
+      var open = view.name === 'lesson' && findLesson(view.lessonId);
+      if (open && lessonLocked(open.c, open.l)) { view.name = 'home'; renderHome(); }
+      else if (!open || partsChanged) rerender();
     }).catch(function () {});
   }
   function queueSync() {
@@ -398,20 +506,34 @@
     var total = 0, done = 0;
     lessons.forEach(function (x) { total += x.l.parts.length; done += lessonDoneCount(x.l); });
     var pct = total ? Math.round(100 * done / total) : 0;
+    var R = 34, CIRC = 2 * Math.PI * R;
+    if (courseSoon(c)) {
+      return '<section class="cu-hero cu-hero-' + c.id + ' cu-in" style="--d:0"><div class="cu-hero-text"><h1>SAT Reading &amp; Writing</h1></div></section>' +
+        '<div class="cu-gate cu-in" style="--d:1"><span class="cu-gate-ic">' + LOCK_SVG + '</span><div><b>Coming soon</b>' +
+        '<span>The Reading &amp; Writing lessons are being recorded. Math is open now, and the Question Bank has every Reading &amp; Writing skill in the meantime.</span></div>' +
+        '<button type="button" class="cu-btn" data-course="math">Go to Math &rarr;</button></div>';
+    }
+    var locked = c.id === 'math' && mathLocked();
+    var gateCard = '';
+    if (locked) {
+      var gl = findLesson(GATE_LESSON), share = Math.round(100 * gateShare());
+      gateCard = '<div class="cu-gate cu-in" style="--d:1"><span class="cu-gate-ic">' + LOCK_SVG + '</span><div><b>Watch ' + esc(gl ? gl.l.num : '1.1') + ' to unlock the rest of Math</b>' +
+        '<span>It covers the approach and strategy the rest of the course builds on.' + (share ? ' You have watched ' + share + '% so far.' : '') + '</span></div>' +
+        '<button type="button" class="cu-btn" data-lesson="' + GATE_LESSON + '">' + (share ? 'Keep watching' : 'Watch ' + esc(gl ? gl.l.num : '1.1')) + ' &rarr;</button></div>';
+    }
     var last = prog.last && findLesson(prog.last.lessonId);
     var resume = '';
-    if (last && last.c.id === c.id) {
+    if (last && last.c.id === c.id && !lessonLocked(last.c, last.l) && !locked) {
       resume = '<div class="cu-resume cu-in" style="--d:1"><span class="cu-resume-ic">&#9654;</span><div><b>Pick up where you left off</b><span>' + esc(last.l.num + ' ' + last.l.title) + ', part ' + (prog.last.part + 1) + ' of ' + last.l.parts.length + '</span></div>' +
         '<button type="button" class="cu-btn" data-resume>Continue &rarr;</button></div>';
     }
-    var R = 34, CIRC = 2 * Math.PI * R;
     return '<section class="cu-hero cu-hero-' + c.id + ' cu-in" style="--d:0">' +
         '<div class="cu-hero-text"><h1>' + esc(c.id === 'math' ? 'SAT Math' : 'SAT Reading & Writing') + '</h1>' +
         '<div class="cu-stats"><div class="cu-bigring"><svg width="84" height="84" viewBox="0 0 84 84" aria-hidden="true"><circle cx="42" cy="42" r="' + R + '" fill="none" stroke="rgba(17,17,17,.08)" stroke-width="7"/>' +
           (done ? '<circle class="cu-ringfill" cx="42" cy="42" r="' + R + '" fill="none" stroke="var(--red,#B0271C)" stroke-width="7" stroke-linecap="round" stroke-dasharray="' + Math.max(1, CIRC * pct / 100).toFixed(1) + ' ' + CIRC.toFixed(1) + '" transform="rotate(-90 42 42)"/>' : '') + '</svg><b>' + pct + '%</b></div>' +
           '<div class="cu-stat"><b>' + lessons.length + '</b><span>lessons</span></div><div class="cu-stat"><b>' + total + '</b><span>parts</span></div><div class="cu-stat"><b>' + done + '</b><span>done</span></div></div></div>' +
         '</section>' +
-      resume + guideHtml(c) +
+      gateCard + resume + guideHtml(c) +
       '<div class="cu-units">' + c.domains.map(function (d, di) {
         var dDone = d.lessons.filter(function (l) { return lessonDoneCount(l) === l.parts.length; }).length;
         return '<section class="cu-unit cu-in" style="--d:' + (di + 2) + '"><div class="cu-unit-h">' +
@@ -419,13 +541,19 @@
           '<span class="cu-unit-p"><span class="cu-mbar"><i style="width:' + Math.round(100 * dDone / d.lessons.length) + '%"></i></span>' + dDone + '/' + d.lessons.length + '</span></div>' +
           d.lessons.map(function (l) {
             var n = lessonDoneCount(l);
+            if (lessonLocked(c, l)) {
+              return '<button type="button" class="cu-lesson cu-locked" data-locked title="Watch 1.1 to unlock the rest of Math"><span class="cu-ring cu-lockring" style="width:30px;height:30px">' + LOCK_SVG + '</span>' +
+                '<span class="cu-lt"><span class="cu-num">' + esc(l.num) + '</span> ' + esc(l.title) + calcBadge(l) + '<small>' + pl(l.parts.length, 'part') + '</small></span>' +
+                '<span class="cu-go">Locked</span></button>';
+            }
             return '<button type="button" class="cu-lesson" data-lesson="' + esc(l.id) + '">' + ring(n, l.parts.length) +
               '<span class="cu-lt"><span class="cu-num">' + esc(l.num) + '</span> ' + esc(l.title) + calcBadge(l) + '<small>' + pl(l.parts.length, 'part') + (n && n < l.parts.length ? ' &middot; ' + n + ' done' : '') + '</small></span>' +
               '<span class="cu-go">' + (n === l.parts.length ? 'Review' : n ? 'Continue' : 'Start') + ' &rsaquo;</span></button>';
           }).join('') + '</section>';
       }).join('') + '</div>';
   }
-  function calcBadge(l) { return l.calc ? '<span class="cu-calc">Calculator</span>' : ''; }
+  var LOCK_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
+  function calcBadge(l) { return l.calc ? '<span class="cu-calcb">Calculator</span>' : ''; }
   /* SUGGESTED ORDER (course guide in the course files, Luca 2026-09-29):
      advice beside the course, folded by default. The units below stay in
      course order and nothing is gated on it. Lessons inside each step are
@@ -443,6 +571,7 @@
           var hit = findLesson(id);
           if (!hit) return '';
           var fin = lessonDoneCount(hit.l) === hit.l.parts.length;
+          if (lessonLocked(hit.c, hit.l)) return '<button type="button" class="cu-gchip locked" data-locked title="' + esc(hit.l.num + ' ' + hit.l.title) + ' (watch 1.1 to unlock)">' + esc(hit.l.num) + '</button>';
           return '<button type="button" class="cu-gchip' + (fin ? ' done' : '') + '" data-lesson="' + esc(id) + '" title="' + esc(hit.l.num + ' ' + hit.l.title) + '">' + esc(hit.l.num) + '</button>';
         }).join('');
         return '<li><div class="cu-gchips">' + chips + '</div><p>' + esc(st.text || '') + '</p></li>';
@@ -467,6 +596,9 @@
   function openLesson(id, part, step) {
     var hit = findLesson(id);
     if (!hit) return;
+    // A locked lesson leads to the one that opens it; a course not out yet, back to its page.
+    if (courseSoon(hit.c)) { view.name = 'home'; view.course = hit.c.id; return renderHome(); }
+    if (lessonLocked(hit.c, hit.l)) { if (id === GATE_LESSON) return; return openLesson(GATE_LESSON); }
     view.name = 'lesson'; view.course = hit.c.id; view.lessonId = id;
     // Never past what is unlocked.
     var p = typeof part === 'number' ? part : firstOpenPart(hit.l);
@@ -486,7 +618,7 @@
 
   function renderLesson() {
     var hit = findLesson(view.lessonId);
-    if (!hit) { view.name = 'home'; return renderHome(); }
+    if (!hit || lessonLocked(hit.c, hit.l)) { view.name = 'home'; return renderHome(); }
     var c = hit.c, d = hit.d, l = hit.l;
     var list = allLessons(c), at = -1;
     list.forEach(function (x, i) { if (x.l.id === l.id) at = i; });
@@ -712,6 +844,11 @@
   function onClick(e) {
     var t = e.target;
     var b;
+    if ((b = t.closest('[data-locked]'))) {
+      var gc = $('.cu-gate', root);
+      if (gc) { try { gc.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (x) {} gc.classList.remove('nudge'); void gc.offsetWidth; gc.classList.add('nudge'); }
+      return;
+    }
     if ((b = t.closest('[data-course]'))) return switchCourse(b.getAttribute('data-course'));
     if ((b = t.closest('[data-resume]'))) { var L = prog.last; return openLesson(L.lessonId, L.part, L.step); }
     if ((b = t.closest('[data-lesson]'))) return openLesson(b.getAttribute('data-lesson'));
