@@ -20,7 +20,7 @@
   'use strict';
 
   var DATA_SRC = 'curriculum-data.js?v=20260929c';
-  var VIDEO_SRC = 'curriculum-videos.js?v=20260930a';
+  var VIDEO_SRC = 'curriculum-videos.js?v=20260930b';
 
   /* ---------- small helpers ---------- */
   function $(sel, root) { return (root || document).querySelector(sel); }
@@ -273,8 +273,12 @@
     var key = box.getAttribute('data-r2');
     var fail = function (err) {
       if (!box.isConnected) return;
-      var msg = String(err && err.message) === 'not_entitled'
+      var why = String(err && err.message);
+      // not_configured: the signing key is not in Apps Script yet, so the video is not out yet.
+      var msg = why === 'not_entitled'
         ? '<b>Videos open with your sessions</b><span>This lesson\u2019s notes are below in the meantime.</span>'
+        : why === 'not_configured'
+        ? '<b>Video coming soon</b><span>This lesson\u2019s video is being recorded. The notes below cover the same material for now.</span>'
         : '<b>The video didn\u2019t load</b><span><a href="#" data-r2-retry>Try again</a></span>';
       box.innerHTML = '<div class="cu-soon"><div class="play">&#9654;</div>' + msg + '</div>';
     };
