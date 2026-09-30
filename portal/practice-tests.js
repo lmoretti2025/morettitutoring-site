@@ -2505,14 +2505,14 @@ window.SAT_PRACTICE_TESTS = [
  "type": "mc",
  "text": "In the 1990s, amidst concern for its effect on wildlife, DDT was largely banned; bedbugs slowly began their comeback. By 2010 entomologists monitoring infestations recorded numbers that were spiking. Because of a huge increase in personal travel since the last time the bugs were an issue, they spread faster than ever. Laundromats, hotels, and libraries became ______ for transmission. Bug eggs can get tucked into suitcases when traveling, or into books borrowed from a library. In communal living areas (like apartment buildings), they can crawl from one apartment to another as they look for human hosts on which to feed.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
  "choices": [
-  "agents",
+  "vectors",
   "excursions",
   "hygienics",
   "meanderings"
  ],
  "correct": 0,
  "choiceNotes": [
-  "Correct. \"Agents\" (means or vehicles) fits the sentence's point that laundromats, hotels, and libraries became vehicles by which bedbugs spread.",
+  "Correct. A vector is a means by which something is carried, which is what laundromats, hotels and libraries become when suitcases and borrowed books move the eggs between them.",
   "Incorrect. \"Excursions\" means trips or outings, which doesn't describe a place's role in transmission.",
   "Incorrect. \"Hygienics\" refers to cleanliness practices, the opposite of what's being described (places that spread infestation).",
   "Incorrect. \"Meanderings\" means wandering paths, which doesn't fit describing a location's function in transmission."
@@ -3158,19 +3158,19 @@ window.SAT_PRACTICE_TESTS = [
  "skill": "Words in Context",
  "difficulty": "easy",
  "type": "mc",
- "text": "In studying the ability to discern differences in pitch in music, psychologist Diana Deutsch found that native speakers of tonal languages, or languages in which pitch changes a word’s meaning, such as Mandarin or Cantonese, are more apt to recognize pitch differences than native speakers of non-tonal languages, such as English or French, as tonal languages ______ words and phrases using pitch changes, giving speakers of these languages heightened sensitivity.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
+ "text": "In studying the ability to discern differences in pitch in music, psychologist Diana Deutsch found that native speakers of tonal languages, such as Mandarin or Cantonese, are more apt to recognize pitch differences than native speakers of non-tonal languages, such as English or French, as tonal languages ______ words and phrases using pitch changes, giving speakers of these languages heightened sensitivity.<br><br>Which choice completes the text with the most logical and precise word or phrase?",
  "choices": [
   "suggest",
-  "enunciate",
+  "translate",
   "distinguish",
   "camouflage"
  ],
- "correct": 1,
+ "correct": 2,
  "choiceNotes": [
-  "Incorrect. \"Suggest\" doesn't capture the direct, defining role pitch changes play in how tonal languages are pronounced.",
-  "Correct. \"Enunciate\" matches the passage's implication that tonal languages pronounce or articulate words and phrases through pitch changes, which explains speakers' heightened pitch sensitivity.",
-  "Incorrect. Though pitch changes could help distinguish one word from another, the passage never discusses that function — only how words are pronounced using pitch.",
-  "Incorrect. \"Camouflage\" (disguise) contradicts the passage's point that pitch changes are an integral, noticeable part of how tonal languages are spoken."
+  "Incorrect. A language does not suggest its own words; the sentence needs a verb for what a change of pitch does to them.",
+  "Incorrect. Translating carries meaning between languages rather than marking one word off from another within a language.",
+  "Correct. In a tonal language a change of pitch separates one word from another, which is what gives its speakers practice in hearing pitch.",
+  "Incorrect. Camouflage would mean pitch hides the words, the opposite of the heightened sensitivity the sentence goes on to describe."
  ]
 },
           {
@@ -3204,7 +3204,7 @@ window.SAT_PRACTICE_TESTS = [
  "skill": "Text Structure and Purpose",
  "difficulty": "easy",
  "type": "mc",
- "text": "Research conducted by neuroscientist Dr. Lisa Feldman Barrett suggests that emotions are based on the way that the brain interprets sensory inputs. <u>Over a period of sixty days in 2004, Barrett and her team asked study participants to self-report their emotional experiences by ranking to what extent they felt base emotions such as anger, anxiety, and happiness.</u> Ida Brekke and her team found that individuals who reported emotional states that accurately correlated with existing data concerning emotional state and heartbeat rhythm typically had lower levels of depression and anxiety compared to those who are less able to report specific emotional states.<br><br>Which choice best states the function of the underlined sentence in the overall structure of the text?",
+ "text": "Research conducted by neuroscientist Dr. Lisa Feldman Barrett suggests that emotions are based on the way that the brain interprets sensory inputs. <u>Over a period of sixty days in 2004, Barrett and her team asked study participants to self-report their emotional experiences by ranking to what extent they felt base emotions such as anger, anxiety, and happiness.</u> Barrett's team found that individuals who reported emotional states that accurately correlated with existing data concerning emotional state and heartbeat rhythm typically had lower levels of depression and anxiety compared to those who are less able to report specific emotional states.<br><br>Which choice best states the function of the underlined sentence in the overall structure of the text?",
  "choices": [
   "To highlight an obstacle the researchers had to overcome to conduct its study",
   "To summarize the findings of a research study",
@@ -3273,14 +3273,14 @@ window.SAT_PRACTICE_TESTS = [
  "type": "mc",
  "text": "Transcribed in the sixteenth century in Classical Quiché by an unknown Mayan scribe, Popol Vuh is one of the most significant surviving sources of ancient Mayan culture. The text reflects pre-colonial Mayan beliefs about cosmology, religion, and morality. Nonetheless, some of the passages in Popol Vuh included Catholic and European influence, which suggests that the Mayans may have had interactions with those religious and regional groups. Consequently, scholars contend that ______<br><br>Which choice most logically completes the text?",
  "choices": [
-  "any references to beliefs that influenced cultural aspects of the Mayan civilization found in the text should be considered distinct from the original Mayan belief.",
+  "every passage in the text should be read as a product of European influence rather than of Mayan belief.",
   "while most of ancient Mayan culture and traditions predates colonialization, some elements of culture were shaped after contact with European and Catholic ideals.",
   "although the scribe who transcribed Popol Vuh was fluent in Classical Quiché, they also had a functional knowledge of European languages.",
   "before colonization, Mayan beliefs about cosmology, religion, and morality were unique to the civilization."
  ],
  "correct": 1,
  "choiceNotes": [
-  "Incorrect. This is the opposite of what the passage supports — since Popol Vuh reflects genuine early Mayan beliefs, it shouldn't be considered entirely distinct from them.",
+  "Incorrect. The text says the passages mostly reflect pre-colonial Mayan belief and that only SOME show European influence, so reading every passage that way overstates it.",
   "Correct. This matches the passage's contrast between the text's mostly pre-colonial Mayan content and its passages showing later Catholic and European influence.",
   "Incorrect. This misapplies details from the passage — the scribe's transcription skill in Classical Quiché doesn't address the Popol Vuh's mixed cultural content.",
   "Incorrect. This uses extreme language the passage doesn't support — it never states whether the pre-colonial beliefs were unique to the Mayans or shared with other civilizations."
@@ -4093,14 +4093,14 @@ window.SAT_PRACTICE_TESTS = [
   "“O ancient walls, you keep the secrets of all men who walked before me; let memory be my refuge now.”",
   "“Such silence binds my limbs like iron, forged by a monarch who fears the sound of honest speech.”",
   "“Justice, like a withered oak, still casts its shadow long across this land, though storms have stripped its crown.”",
-  "“The kindness I once offered my sovereign returned to me as fetters, each link hammered from spite.”"
+  "“The kindness I once offered returned to me as fetters, and I have learned at last what my trust was worth.”"
  ],
  "correct": 1,
  "choiceNotes": [
   "Incorrect. This quotation reflects on memory and the walls of the prison; it does not directly denounce the king as a cruel oppressor.",
   "Correct. This quotation directly names the “monarch” and accuses him of fearing honest speech, explicitly framing him as an oppressive, cruel ruler.",
   "Incorrect. This quotation uses a metaphor about justice generally, without directly denouncing the king himself.",
-  "Incorrect. This quotation describes personal betrayal but does not explicitly denounce the king as a tyrant or cruel oppressor."
+  "Incorrect. This laments the speaker’s own misplaced trust and names no one; it does not denounce the king as a cruel oppressor."
  ]
 },
           {"qid":"mt470589","domain":"Information and Ideas","skill":"Inferences","difficulty":"easy","type":"mc","text":"To prevent structural damage, civil engineers use a formula to calculate the maximum allowable load on an elevated platform. The safety formula takes into account not only the total weight placed on the platform but also the number of supporting columns and the distance between them, because a heavy load resting on only a few supports concentrates more force on each column than the same load spread across many supports. This means that a platform whose weight is distributed over more columns can safely bear a larger total load than one whose weight is carried by fewer columns. Consider two platforms of identical size and material, one carried by two columns and one by four. It follows that ______<br><br>Which choice most logically completes the text?","choices":["the four-column platform likely has a lower maximum load limit than the two-column platform, since each column carries less weight.","both platforms likely have the same maximum load limit, because the total weight a platform carries matters more than how that weight is distributed among its supporting columns.","the two-column platform is unlikely to require safety calculations, since its smaller number of supports makes the distribution of weight straightforward.","the four-column platform can typically be designed to carry a greater maximum load than the two-column platform, even if the platforms are otherwise similar."],"correct":3,"choiceNotes":["Incorrect. This reverses the passage's logic: a platform with more columns (four) can safely bear a larger, not smaller, total load than one with fewer columns.","Incorrect. The passage explicitly states that distribution over more columns allows a larger safe total load, meaning weight distribution—not just total weight—matters, contradicting this choice.","Incorrect. Nothing in the passage suggests fewer columns eliminates the need for safety calculations; in fact, fewer supports concentrate more force per column, making calculations more important.","Correct. This directly follows the passage's logic: distributing weight over more columns (four) allows a platform to safely carry a greater maximum load than one with fewer columns (two)."]},
