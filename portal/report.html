@@ -1274,7 +1274,8 @@ window.mathFor = function (q, html) {
       var raw = location.hash.replace(/^#d=/, '');
       if (raw) {
         var d = JSON.parse(decodeURIComponent(escape(atob(raw))));
-        needed = !!(d && d.pt);
+        // Or a previous practice test attached for "Since your last test" (d.pp).
+        needed = !!(d && (d.pt || (d.pp && d.pp.pt)));
       }
     } catch (e) { /* unreadable link: load it and let the report say so */ }
     /* WHICH VERSION of the questions this attempt was answered against.
@@ -1316,10 +1317,10 @@ window.mathFor = function (q, html) {
 </script>
 <script src="time-budgets.js?v=20260912a"></script>
 <script src="grid-in.js?v=20261013a"></script>
-<script src="signals.js?v=20261018a"></script>
+<script src="signals.js?v=20261019a"></script>
 <script src="desmos-tags.js?v=20260916c"></script>
 <script src="question-flag.js?v=20260925a"></script>
-<script src="report-tour.js?v=20261014b"></script>
+<script src="report-tour.js?v=20261019a"></script>
 <script>
 /* FLAGS FROM THE ADMIN PAGE (Luca, 2026-09-25). admin.html shows this report
    in a sandboxed frame with no access to its sign-in, so it says hello by
@@ -3638,7 +3639,8 @@ window.mathFor = function (q, html) {
       } else { undomainedPts += item.points; undomainedN += 1; }
     });
     var domainItems = Object.keys(domainBuckets)
-      .map(function (d) { return { label: 'Other: ' + d, dom: d, points: domainBuckets[d].points, n: domainBuckets[d].n }; })
+      // Named as the area itself: "Other: Algebra" leaked into the summary and walkthrough (audit 2026-09-30).
+      .map(function (d) { return { label: d, dom: d, points: domainBuckets[d].points, n: domainBuckets[d].n }; })
       .sort(function (a, b) { return b.points - a.points; });
 
     // No bar is reserved for a generic catch-all: that leftover is a sentence
@@ -3657,9 +3659,9 @@ window.mathFor = function (q, html) {
     // exact name; 'domain' rollups against `domains` (whole-domain accuracy,
     // matching "Skill Breakdown").
     var shownItems = namedItems.map(function (it) {
-      return { label: it.label, points: it.points, filterType: 'skill', filterName: it.label };
+      return { label: it.label, points: it.points, filterType: 'skill', filterName: it.label, dom: it.dom };
     }).concat(shownDomainItems.map(function (it) {
-      return { label: it.label + (it.n > 1 ? ' (' + it.n + ' skills)' : ''), points: it.points, filterType: 'domain', filterName: it.dom };
+      return { label: it.label + (it.n > 1 ? ' (' + it.n + ' skills together)' : ''), points: it.points, filterType: 'domain', filterName: it.dom, dom: it.dom };
     }));
     /* The clock bar goes LAST (content, then clock, as in the diagnosis card)
        and outside the TOTAL_MAX_BARS cap: it's the one bar re-teaching can't
@@ -3813,8 +3815,9 @@ window.mathFor = function (q, html) {
         Math.min(scoreMax, r10(currentComposite + topPts)) + '</b>.');
       if (targetIsOwn && targetScore > currentComposite) {
         var acc = currentComposite, k = 0;
-        while (k < items.length && acc < targetScore) { acc += items[k].points; k++; }
-        lines.push(acc >= targetScore
+        // Rounded as the sentence before it is, or "to about 1100" sat beside "above what this list adds up to" (audit 2026-09-30).
+        while (k < items.length && r10(acc) < targetScore) { acc += items[k].points; k++; }
+        lines.push(r10(acc) >= targetScore
           ? 'The target of <b>' + targetScore + '</b> is inside the first ' + (k === 1 ? 'one' : k) + ' on the list.'
           : 'The target of <b>' + targetScore + '</b> is above what this list adds up to, so it needs growth beyond this one test.');
       }
@@ -3830,6 +3833,8 @@ window.mathFor = function (q, html) {
       outer.appendChild(note);
       bridgeWrap.appendChild(outer);
     }
+    // For the can't-judge step below, which runs once the areas are judged (audit 2026-09-30).
+    bridgeRerender = renderBridge;
 
     function roundTopRect(ctx, x, y, wid, hgt, r) {
       if (hgt <= 0) return;
@@ -4404,6 +4409,7 @@ window.mathFor = function (q, html) {
      sessions get planned in. So domains carry the ranked claim and skills
      stay as descriptive detail underneath. */
   var domainBucketsDx = {};
+  var bridgeRerender;   // set by the bridge block above; no initializer, which would reset it here
   /* ═══ CAN'T BE JUDGED (audit 2026-09-29) ═══ An area where a third or
      more of 6+ answers went by too fast to have been read says nothing about
      what the student knows: the same line session prep uses (signals.js
@@ -4776,7 +4782,8 @@ window.mathFor = function (q, html) {
   });
 
   if (markedT === 0 && totalQ >= 40) {
-    behaviorFlags.push('You never used "flag for review" on any of the ' + totalQ + ' questions' + (skipped < totalQ - totalC ? ', with ' + (totalQ - totalC) + ' missed' : '') + '. Pushing through an unsure question without marking it leaves nothing to come back to. <strong>Next test:</strong> flag every question that feels unsure.');
+    // Titled like every other habit, or the walkthrough used the whole paragraph as its heading (2026-09-30).
+    behaviorFlags.push('<strong>Never flagged a question:</strong> you never used "flag for review" on any of the ' + totalQ + ' questions' + (skipped < totalQ - totalC ? ', with ' + (totalQ - totalC) + ' missed' : '') + '. Pushing through an unsure question without marking it leaves nothing to come back to. <strong>Next test:</strong> flag every question that feels unsure.');
   }
   /* ═══ CHANCE-CORRECTED COUNT ═══ grouped with the other "how to read
      this attempt" notes, next to the guess-landed flag.
@@ -4889,6 +4896,18 @@ window.mathFor = function (q, html) {
     var fixedQ = changed.filter(function (x) { return !x.r.initialOk && x.r.finalOk; });
     var brokeQ = changed.filter(function (x) { return x.r.initialOk && !x.r.finalOk; });
     var swapQ = changed.filter(function (x) { return !x.r.initialOk && !x.r.finalOk; });
+    /* Two habits for the habits list and the walkthrough (Luca, 2026-09-30),
+       each at more than 2 misses on one test: a right answer changed to a
+       wrong one on a later look, and a miss with the right answer crossed out. */
+    if (brokeQ.length > 2) {
+      behaviorFlags.push('<strong>Second-guessing:</strong> on ' + brokeQ.length + ' questions the first answer was right and was changed to a wrong one on a later look' +
+        (fixedQ.length ? ' (' + fixedQ.length + ' went the other way, wrong to right)' : '') +
+        '. Rechecking helps only when it finds a real reason the answer is wrong. <strong>Next test:</strong> change an answer only when you can say what is wrong with it, not because it feels off.');
+    }
+    if (keyOut && keyOut.length > 2) {
+      behaviorFlags.push('<strong>Crossing out the right answer:</strong> on ' + keyOut.length + ' missed questions the right answer was crossed out. ' +
+        'Crossing out helps only when each choice is ruled out for a reason. <strong>Next test:</strong> cross a choice out only when you can point to the words that make it wrong.');
+    }
     var flaggedOf = function (list) { var n = list.filter(function (x) { return x.r.flagged; }).length; return n ? ' (' + n + ' flagged)' : ''; };
     var chFacts = [];
     if (changed.length) {
@@ -6737,10 +6756,18 @@ window.mathFor = function (q, html) {
         var rd = routeDataFor(mv);
         if (!rd) return null;
         var rows = rd.rows, n = rows.length, first = {}, back = 0, backQ = {}, lastEnd = 0;
+        /* The first look is the first visit that left an answer: a peek that
+           left the question blank, followed by a real visit later, is not how
+           the question was paced (Om, 2026-10-19: two 4-second peeks read as
+           rushed answers). A question never answered keeps its first visit. */
+        var blankEnd = function (a) { return a === null || a === undefined || a === '' || a === -1; };
         rd.visits.forEach(function (v) {
           lastEnd = Math.max(lastEnd, v.t0 + v.dur);
           if (v.dur < GLANCE_SEC) return;
-          if (first[v.q] === undefined) first[v.q] = v; else { back += v.dur; backQ[v.q] = true; }
+          var f = first[v.q];
+          if (f === undefined || (blankEnd(f.end) && !blankEnd(v.end) && !f.real)) { if (f) v.afterPeek = true; first[v.q] = v; }
+          else { back += v.dur; backQ[v.q] = true; }
+          if (!blankEnd(v.end)) first[v.q].real = true;
         });
         var firstEnd = 0;
         Object.keys(first).forEach(function (q) { firstEnd = Math.max(firstEnd, first[q].t0 + first[q].dur); });
@@ -6762,7 +6789,9 @@ window.mathFor = function (q, html) {
         var blanks = rows.filter(function (r) { return r.skipped; }).length, right = rows.filter(function (r) { return r.ok; }).length;
         var reading;
         if (p1 !== null && p2 !== null && p1 >= 1.25 && p2 <= 0.85 && a2 !== null && a1 !== null && a2 < a1 - 0.1) reading = 'slow-start';
-        else if (rushed >= 3 && unused < 180) reading = 'ran-short';
+        // Ran short only when the first pass itself reached the end of the clock: a pass that
+        // ended with minutes to spare and then went into checking did not run out (Om, 2026-10-19).
+        else if (rushed >= 3 && unused < 180 && (!clockSec || firstEnd >= clockSec - 180)) reading = 'ran-short';
         // Rushed: the one rule in signals.js (more than 5 minutes left, scaled for extended time, unless at most one wrong).
         else if (window.MorettiSignals && window.MorettiSignals.rushedLevel && window.MorettiSignals.rushedLevel(mv.key, unused / 60, mv.clockMin || 0, n, right) > 0) reading = 'left-time';
         // The second half went clearly worse (the hardest questions sit there): where to look.
@@ -6996,9 +7025,13 @@ window.mathFor = function (q, html) {
       var m1 = (c.modules || []).filter(function (m) { return m.sec === S.k && m.module === 1 && m.rushed > 0; })[0];
       if (!m1) return;
       var nm = S.k === 'math' ? 'Math' : 'Reading and Writing';
-      routed += '<li><span><b>What rushing cost:</b> ' + nm + ' Module 1 was rushed and ended at ' +
+      // The walkthrough says it too (audit 2026-09-30: it was left out there).
+      (planInputs.routedRush = planInputs.routedRush || []).push({ name: nm, right: typeof m1.right === 'number' ? m1.right : null, n: m1.n });
+      // The route is a fact; that rushing caused the score is not known, so it isn't said (audit 2026-09-30).
+      routed += '<li><span><b>Where the rushed module led:</b> ' + nm + ' Module 1 was rushed and ended at ' +
         (typeof m1.right === 'number' ? m1.right + ' of ' + m1.n + ' right' : 'a lower score') +
-        ', which sent you to the easier Module 2. The easier Module 2 caps how high the ' + nm + ' score can go.</span></li>';
+        '. That score sent you to the easier Module 2, which caps how high the ' + nm + ' score can go. ' +
+        'Module 1 worked at a steady pace is the way to the harder one.</span></li>';
     });
     el.className = 'cond-card ' + (poor ? 'cond-poor' : 'cond-fair');
     el.innerHTML =
@@ -7181,7 +7214,8 @@ window.mathFor = function (q, html) {
     var apprRows = buckets.content.filter(function (e) { return e.approach; });
     planInputs.approach = (function () {
       var bySk = {}, kinds = { long: 0, two: 0, desmos: 0, context: 0, reading: 0 };
-      apprRows.forEach(function (e) { kinds[e.approach]++; var k = e.r.sk || e.r.dom; bySk[k] = (bySk[k] || 0) + 1; });
+      var byDom = {};
+      apprRows.forEach(function (e) { kinds[e.approach]++; var k = e.r.sk || e.r.dom; bySk[k] = (bySk[k] || 0) + 1; byDom[e.r.dom] = (byDom[e.r.dom] || 0) + 1; });
       var bits = [];
       if (kinds.long) bits.push(kinds.long + ' took well past their time and ' + (kinds.long === 1 ? 'was' : 'were') + ' still missed');
       if (kinds.two) bits.push(kinds.two + ' came down to two choices and went the wrong way');
@@ -7191,7 +7225,7 @@ window.mathFor = function (q, html) {
       var skills = Object.keys(bySk).sort(function (a, b) { return bySk[b] - bySk[a]; });
       // Named on the page and in the plan only at 3+ (signals.js APPROACH_MIN_SHOWN); the rows keep their mark either way.
       var shown = apprRows.length >= ((MSa && MSa.APPROACH_MIN_SHOWN) || 3);
-      return { n: shown ? apprRows.length : 0, marked: apprRows.length, kinds: kinds, skills: skills, bySkill: bySk,
+      return { n: shown ? apprRows.length : 0, marked: apprRows.length, kinds: kinds, skills: skills, bySkill: bySk, byDom: byDom,
                why: bits.length < 2 ? bits.join('') : bits.slice(0, -1).join(', ') + ' and ' + bits[bits.length - 1] };
     })();
     planInputs.causes.approach = planInputs.approach.n;
@@ -7871,6 +7905,17 @@ window.mathFor = function (q, html) {
       hours.content -= strategyH;
     }
     var contentOnly = causes.content - (A.n || 0);
+    /* With strategy split off, an area's misses that were the question type
+       are counted there, not here: the line below said "4 questions got real
+       work, 5 of them in Information and Ideas" (audit 2026-09-30). An area
+       whose misses were all strategy leaves the relearning list. */
+    if (strategyH > 0) {
+      var aDom = A.byDom || {};
+      var leftIn = function (a) { return Math.max(0, (a.lead || 0) - (aDom[a.name] || 0)); };
+      contentAreas = contentAreas.filter(function (a) { return leftIn(a) > 0; });
+      areaMiss = contentAreas.reduce(function (t, a) { return t + leftIn(a); }, 0);
+      areaTxt = contentAreas.length ? contentAreas.map(function (a) { return '<b>' + esc(a.name) + '</b>'; }).join(', ') : null;
+    }
     // What the relearning hours became: strategy, relearning, or an even split (for the lede and the parents' line).
     planInputs.contentWord = strategyH > 0 ? (strategyH > hours.content ? 'strategy practice' : strategyH === hours.content ? 'relearning and strategy practice' : 'relearning') : 'relearning';
     var strategyRow = null;
@@ -7916,7 +7961,7 @@ window.mathFor = function (q, html) {
           : areaTxt
           ? areaTxt + ' first, then practice on ' + (contentAreas.length === 1 ? 'it' : 'them') + ', in that order: practicing before the method is solid just rehearses the wrong method. ' +
             '<em>' + (strategyH ? contentOnly : causes.content) + ' question' + ((strategyH ? contentOnly : causes.content) === 1 ? '' : 's') + ' on this test got real work and still came back wrong' +
-            (areaMiss > 0 && areaMiss < causes.content ? ', ' + areaMiss + ' of them in ' + (contentAreas.length === 1 ? esc(contentAreas[0].name) : 'those areas') + '. Go through the rest one by one from the question grids.' : '.') + '</em>'
+            (areaMiss > 0 && areaMiss < (strategyH ? contentOnly : causes.content) ? ', ' + areaMiss + ' of them in ' + (contentAreas.length === 1 ? esc(contentAreas[0].name) : 'those areas') + '. Go through the rest one by one from the question grids.' : '.') + '</em>'
           : 'Work the questions this test got wrong. ' +
             '<em>' + (hedgedLead
               ? '<b>' + esc(hedgedLead) + '</b> came out weakest, but not clearly enough to build the week around yet, so spread the time across the misses and let the next test show whether it holds.'
@@ -7956,8 +8001,18 @@ window.mathFor = function (q, html) {
     if (strong) {
       // The skills this test's misses landed in, as the first place to look
       // until a second test shows which ones pool.
-      var missSkills = [];
-      (planInputs.contentRows || []).forEach(function (x) { if (x.sk && missSkills.indexOf(x.sk) === -1) missSkills.push(x.sk); });
+      var missSkills = [], missN = {};
+      (planInputs.contentRows || []).forEach(function (x) { if (!x.sk) return; missN[x.sk] = (missN[x.sk] || 0) + 1; if (missSkills.indexOf(x.sk) === -1) missSkills.push(x.sk); });
+      /* Ordered by the points the bridge puts on each skill, then by misses: in
+         question order, Reading and Writing always came first, so a student with
+         3 R&W misses and 7 hard Math misses was told to drill grammar (Om,
+         2026-10-19). Now the list and "Your path" rank the same way. */
+      var skillPts = {};
+      if (typeof bridgeItems !== 'undefined' && bridgeItems) bridgeItems.forEach(function (b) { if (b && b.label) skillPts[b.label] = (skillPts[b.label] || 0) + (b.points || 0); });
+      var firstAt = missSkills.slice();
+      missSkills.sort(function (a, b) {
+        return ((skillPts[b] || 0) - (skillPts[a] || 0)) || ((missN[b] || 0) - (missN[a] || 0)) || (firstAt.indexOf(a) - firstAt.indexOf(b));
+      });
       rows = [{
         h: STRONG_TEST_HOURS, unit: unitFor(STRONG_TEST_HOURS), color: '#4E6070', label: 'Practice tests',
         what: '<b>Practice tests.</b> One full timed practice test every week, in one sitting, phone away, reviewed the next day. ' +
@@ -8567,6 +8622,8 @@ window.mathFor = function (q, html) {
   (function sinceLastTest() {
     var MSs = window.MorettiSignals;
     if ((!data.pv && !data.pp) || notReal || !MSs || typeof MSs.sittingSummary !== 'function') return;
+    // A single module is not compared against a whole test (audit 2026-09-30).
+    if ((data.s || []).some(function (S) { return S && S.mo; })) return;
     try {
       /* data.pp (2026-09-30): the previous sitting's own payload, attached
          when a report is opened from the portal or admin, for reports saved
@@ -8593,7 +8650,17 @@ window.mathFor = function (q, html) {
             var q = qs[i];
             if (!q) return;
             var blank = ans === null || ans === undefined || ans === -1 || ans === '';
-            var t = (S.tm && S.tm[i]) || 0, floor = readFloorMs(S.k, { q: q, sk: q.skill });
+            /* Timed as this report times its own rows (pacingTimeMs): the first
+               look, unless the answer was changed on a later visit. Total time
+               made a quick first look read as not fast, so the same sitting
+               counted 17 too fast as current and 0 as previous (audit 2026-09-30). */
+            var t = (S.tm && S.tm[i]) || 0;
+            if (S.fp && typeof S.fp[i] === 'number') {
+              var ends = (Array.isArray(S.vl) ? S.vl : []).filter(function (v) { return v && v[0] === i && !(v[3] === null || v[3] === undefined || v[3] === '' || v[3] === -1); })
+                .sort(function (a, b) { return a[1] - b[1]; });
+              if (!ends.length || String(ends[0][3]) === String(ends[ends.length - 1][3])) t = S.fp[i];
+            }
+            var floor = readFloorMs(S.k, { q: q, sk: q.skill });
             ppItems.push({ si: si, i: i, dom: q.domain, sk: q.skill, res: blank ? 2 : (isCorrect(q, ans) ? 1 : 0),
                            secs: t / 1000, fast: (t > 0 && floor > 0) ? (t < floor ? 1 : 0) : null });
           });
@@ -8629,7 +8696,7 @@ window.mathFor = function (q, html) {
       if (!hed) return;
       hed.insertAdjacentHTML('beforebegin',
         '<div class="sec-hed" id="since-hed">Since your last test</div>' +
-        '<div class="since-card" id="since-card"><p class="since-sub">How this test compares with the one before it: the habits, the way you moved through it, and the areas with enough questions to tell. The score isn’t compared here; one test to the next swings too much to read.</p>' +
+        '<div class="since-card" id="since-card"><p class="since-sub">How this test compares with the one before it: the habits and the way you moved through it. Areas aren’t compared: about a dozen questions per area can’t show a change from one test to the next, so those are read across several tests. The score isn’t compared here; one test to the next swings too much to read.</p>' +
         '<div class="since-cols">' + col('better', 'Better', C.better, 'Nothing clearly better this time.') +
           col('same', 'About the same', C.same, 'Nothing to list.') + col('worse', 'Worse', C.worse, 'Nothing clearly worse.') + '</div></div>');
     } catch (err) { if (window.console) console.warn('since last test:', err); }
@@ -8650,10 +8717,22 @@ window.mathFor = function (q, html) {
     });
     planInputs.unjudged = list.map(function (x) { return x.name; });
     if (!list.length) return;
+    /* Their points leave the list and the path (audit 2026-09-30): a value
+       on an area the page says it can't judge contradicted the line above
+       it. The every-miss ceiling still counts them. */
+    var held = 0;
+    if (typeof shownItems !== 'undefined' && shownItems) {
+      for (var hi = shownItems.length - 1; hi >= 0; hi--) {
+        var it = shownItems[hi];
+        if (it.filterType !== 'clock' && it.dom && planInputs.unjudged.indexOf(it.dom) >= 0) { held += it.points; shownItems.splice(hi, 1); }
+      }
+      if (held > 0 && bridgeRerender) bridgeRerender();
+    }
     var e = function (t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
     var line = list.map(function (x) { return '<b>' + e(x.name) + '</b> (' + x.fast + ' of ' + x.total + ' answers)'; });
     var html = '<p class="unjudged-note"><b>Can\u2019t judge yet:</b> ' + (line.length < 2 ? line.join('') : line.slice(0, -1).join(', ') + ' and ' + line[line.length - 1]) +
-      '. Too many of these answers came faster than the questions can be read to say what you know there, so the next test, taken at a steady pace, will.</p>';
+      '. Too many of these answers came faster than the questions can be read to say what you know there, so the next test, taken at a steady pace, will.' +
+      (held > 0 ? ' Until then their points are left off the list.' : '') + '</p>';
     // On the cards themselves: renderBridge empties bridge-note-outer each time it redraws.
     ['skilldx-card', 'bridge-card'].forEach(function (id) {
       var host = document.getElementById(id);
