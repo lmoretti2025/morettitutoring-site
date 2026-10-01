@@ -2703,9 +2703,6 @@ var MorettiSignals = (function () {
       put(prev.crossed < 3 && cur.crossed >= 5 ? 'better' : 'same', 'crossed', cx + '.');
     }
     if (prev.back !== null && cur.back !== null && (prev.back || cur.back)) put('same', 'back', 'Went back to ' + plural(cur.back, 'question') + ', against ' + prev.back + ' last time.');
-    if (prev.highlighted != null && cur.highlighted != null && (prev.highlighted || cur.highlighted)) {
-      put('same', 'highlighted', 'Highlighted on ' + plural(cur.highlighted, 'Reading and Writing question') + ', against ' + prev.highlighted + ' last time.');
-    }
     if (cur.changed) put('same', 'changed', 'Changed ' + plural(cur.changed, 'answer') + ' after first choosing; ' + cur.changedRight + ' of those ended right.');
     // Areas and skills, past chance only.
     var z = function (a, b) {
