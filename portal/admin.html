@@ -313,6 +313,9 @@
   .stu-meta { font-size: 0.78rem; color: var(--mid); display: flex; flex-wrap: wrap; gap: 0.35rem 1rem; margin-bottom: 1rem; }
   .stu-meta span b { font-weight: 700; color: var(--text); }
   .stu-actions { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+  .stu-sync { font-size: 0.74rem; color: var(--faint); }
+  .stu-sync.warn { color: var(--red); }
+  .stu-sync .mini { margin-left: 0.4rem; }
 
   .tabbar { display: flex; gap: 0.4rem; border-bottom: 1px solid var(--border); margin-bottom: 1.3rem; }
   /* NOTE FOR FRIDAY: one line from Luca, into the family's next Friday update
@@ -1054,6 +1057,7 @@
         <div class="stu-sub">
           <button type="button" class="prog-badge" id="stu-program-badge" title="Change it on the Account tab">SAT prep</button>
           <span class="stu-meta" id="stu-meta"></span>
+          <span class="stu-sync" id="stu-sync"></span>
         </div>
       </div>
       <div class="stu-actions" id="stu-actions"></div>
@@ -3426,16 +3430,36 @@
       (gap >= 5 ? '<div class="tb-note">' + mins(gap) + ' from earlier visits, before the breakdown was recorded.</div>' : '') + '</div>';
   }
 
+  /* What is on screen may be the copy kept from the last visit while the
+     fresh one loads. It says so, and if the fresh one does not come, it says
+     why instead of quietly leaving the old copy up (Luca, 2026-09-30: a test
+     taken that afternoon was missing with no sign anything was wrong). */
+  function stuSync(key, msg, cls, retry) {
+    if (!currentStudent || currentStudent.key !== key) return;
+    var el = $('stu-sync');
+    el.className = 'stu-sync' + (cls ? ' ' + cls : '');
+    el.innerHTML = msg ? escHtml(msg) + (retry ? ' <button type="button" class="mini" id="stu-sync-retry">Try again</button>' : '') : '';
+    var b = $('stu-sync-retry');
+    if (b) b.addEventListener('click', function () { loadStudentDetail(key); });
+  }
+  function keptAt(name) {
+    try { var o = JSON.parse(localStorage.getItem(KEEP_PREFIX + name) || 'null'); return o && o.at ? o.at : 0; } catch (e) { return 0; }
+  }
   function loadStudentDetail(key) {
     var hit = kept('s_detail_' + key);
+    var at = keptAt('s_detail_' + key);
     if (hit && hit.ok) paintStudentDetail(key, hit);
+    stuSync(key, hit && hit.ok ? 'Showing the copy from ' + new Date(at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) + ', checking for anything newer\u2026' : '', 'dim');
     return postToBackend({ action: 'getStudentDetail', adminKey: adminKey(), key: key }).then(function (data) {
       if (!currentStudent || currentStudent.key !== key) return; // navigated away mid-flight
-      if (data && data.ok) keep('s_detail_' + key, data);
+      if (data && data.ok) { keep('s_detail_' + key, data); stuSync(key, ''); }
+      else stuSync(key, 'Could not load the latest for this student (' + ((data && (data.message || data.error)) || 'no answer') + ').' +
+        (hit && hit.ok ? ' What you see may be out of date.' : ''), 'warn', true);
       if ((!data || !data.ok) && hit && hit.ok) return;   // keep what is on screen
       paintStudentDetail(key, data);
       if (data && data.ok) setTimeout(function () { prefetchReports(key, data.attempts); }, 1500);
-    }).catch(function () {
+    }).catch(function (err) {
+      stuSync(key, 'Could not reach the backend for the latest (' + ((err && err.message) || 'network') + ').' + (hit && hit.ok ? ' What you see may be out of date.' : ''), 'warn', true);
       if (!currentStudent || currentStudent.key !== key || (hit && hit.ok)) return;
       $('stu-meta').innerHTML = '<span style="color:var(--red);">Network error loading this student.</span>';
       $('stu-details').innerHTML = '<dd class="dim">Network error loading this student&rsquo;s details.</dd>';
@@ -3477,7 +3501,7 @@
         loadStudentEvidence(data);
       } catch (err) {
         if (window.console && console.error) console.error('[admin] student render failed:', err);
-        $('stu-meta').innerHTML = '<span style="color:var(--red);">Loaded this student, but could not draw the page. Details are in the browser console.</span>';
+        $('stu-meta').innerHTML = '<span style="color:var(--red);">Loaded this student, but could not draw the page: ' + escHtml(String((err && err.message) || err).slice(0, 160)) + '</span>';
       }
     }
   }
