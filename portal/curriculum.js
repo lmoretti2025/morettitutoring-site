@@ -59,12 +59,40 @@
     '#cu-root .cu-btn[disabled]{opacity:.45;cursor:default;transform:none;box-shadow:none}',
     '#cu-root .cu-btn.ghost{background:#fff;color:var(--text,#111);box-shadow:inset 0 0 0 1px var(--cu-line)}',
     '#cu-root .cu-units{display:grid;gap:1.1rem}',
+    'html:has(#screen-curriculum.active){scrollbar-gutter:stable}',
+    '#cu-root .cu-top{display:flex;justify-content:space-between;align-items:flex-end;gap:1rem;flex-wrap:wrap;margin-bottom:1.1rem;min-height:3.6rem}',
+    '#cu-root .cu-toph{font-family:var(--display,Georgia,serif);font-size:1.25rem;font-weight:700;margin-top:.2rem}',
+    '#cu-root .cu-top .cu-tabs{margin:0}',
+    '#cu-root .cu-body{transition:opacity .16s ease}#cu-root .cu-body.cu-fading{opacity:0}',
+    '#cu-root .cu-in{animation:cuIn .5s var(--ease,ease) both;animation-delay:calc(var(--d,0) * 60ms)}',
+    '@keyframes cuIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}',
+    '#cu-root .cu-hero{display:grid;grid-template-columns:1fr;gap:1rem;align-items:center;border-radius:20px;padding:1.6rem 1.8rem;margin-bottom:1.2rem;overflow:hidden;position:relative;box-shadow:var(--shadow)}',
+    '#cu-root .cu-hero-math{background:linear-gradient(135deg,#fff 0%,#fbf1ef 60%,#f6e4e1 100%)}',
+    '#cu-root .cu-hero-english{background:linear-gradient(135deg,#fff 0%,#eff2fb 60%,#e3e8f7 100%)}',
+    '#cu-root .cu-hero h1{margin:0 0 .3rem;font-size:clamp(1.8rem,3.4vw,2.5rem)}',
+    '#cu-root .cu-hero .cu-sub{max-width:32em}',
+    '#cu-root .cu-stats{display:flex;align-items:center;gap:1.4rem;margin-top:1.1rem;flex-wrap:wrap}',
+    '#cu-root .cu-bigring{position:relative;width:84px;height:84px}#cu-root .cu-bigring b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--display,Georgia,serif);font-size:1.25rem}',
+    '#cu-root .cu-ringfill{transition:stroke-dasharray .8s var(--ease,ease)}',
+    '#cu-root .cu-stat b{display:block;font-family:var(--display,Georgia,serif);font-size:1.5rem;line-height:1}#cu-root .cu-stat span{font-size:.75rem;color:var(--mid);text-transform:uppercase;letter-spacing:.08em}',
+    '#cu-root .cu-resume-ic{width:40px;height:40px;border-radius:50%;background:var(--red,#B0271C);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex:none}',
+    '#cu-root .cu-resume>div{flex:1}',
+    '#cu-root .cu-unit-t{flex:1}#cu-root .cu-unum{font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--mid);font-weight:600}',
+    '#cu-root .cu-unit-p{display:flex;align-items:center;gap:8px;font-size:.8rem;color:var(--mid);white-space:nowrap}',
+    '#cu-root .cu-mbar{width:70px;height:6px;border-radius:6px;background:#e6e3de;overflow:hidden}#cu-root .cu-mbar i{display:block;height:100%;background:var(--cu-good);border-radius:6px}',
+    '#cu-root .cu-ring{flex:none}#cu-root .cu-ring.done{border-radius:50%;background:var(--cu-good);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700}',
+    '#cu-root .cu-go{font-size:.8rem;font-weight:600;color:var(--red,#B0271C);opacity:.0;transform:translateX(-4px);transition:opacity .2s,transform .2s;white-space:nowrap}',
+    '#cu-root .cu-lesson:hover .cu-go,#cu-root .cu-lesson:focus-visible .cu-go{opacity:1;transform:none}',
+    '@media(hover:none){#cu-root .cu-go{opacity:1;transform:none}}',
+    '@media(max-width:520px){#cu-root .cu-stats{gap:.9rem}#cu-root .cu-bigring{transform:scale(.82);margin:-7px}#cu-root .cu-stat b{font-size:1.25rem}}',
+    '@media(max-width:760px){#cu-root .cu-hero{padding:1.3rem}}',
+    '@media(prefers-reduced-motion:reduce){#cu-root .cu-notes-fold{transition:none}#cu-root .cu-in{animation:none}#cu-root .cu-body{transition:none}}',
     '#cu-root .cu-unit{background:#fff;border-radius:16px;box-shadow:var(--shadow);overflow:hidden}',
-    '#cu-root .cu-unit-h{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;padding:1rem 1.2rem .7rem;border-bottom:1px solid var(--cu-line)}',
-    '#cu-root .cu-unit-h h2{font-size:1.2rem;margin:0}#cu-root .cu-unit-h span{font-size:.8rem;color:var(--mid)}',
-    '#cu-root .cu-lesson{display:grid;grid-template-columns:3rem 1fr auto;align-items:center;gap:.8rem;width:100%;text-align:left;border:0;background:#fff;padding:.8rem 1.2rem;cursor:pointer;border-bottom:1px solid var(--cu-line);font-family:inherit;color:inherit}',
+    '#cu-root .cu-unit-h{display:flex;align-items:center;gap:.9rem;padding:1rem 1.2rem .9rem;border-bottom:1px solid var(--cu-line)}',
+    '#cu-root .cu-unit-h h2{font-size:1.15rem;margin:.1rem 0 0}',
+    '#cu-root .cu-lesson{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:.8rem;width:100%;text-align:left;border:0;background:#fff;padding:.8rem 1.2rem;cursor:pointer;border-bottom:1px solid var(--cu-line);font-family:inherit;color:inherit}',
     '#cu-root .cu-lesson:last-child{border-bottom:0}#cu-root .cu-lesson:hover{background:var(--cu-soft)}',
-    '#cu-root .cu-num{font-family:var(--display,Georgia,serif);font-weight:700;color:var(--mid);font-size:1rem}',
+    '#cu-root .cu-num{font-family:var(--display,Georgia,serif);font-weight:700;color:var(--mid);font-size:.95rem;margin-right:.2rem}',
     '#cu-root .cu-lt{font-size:.95rem;font-weight:500}#cu-root .cu-lt small{display:block;font-size:.78rem;color:var(--mid);font-weight:300;margin-top:2px}',
     '#cu-root .cu-dots{display:flex;gap:4px;align-items:center}',
     '#cu-root .cu-dots i{width:9px;height:9px;border-radius:50%;background:#e2dfda}#cu-root .cu-dots i.on{background:var(--cu-good)}',
@@ -98,6 +126,9 @@
     '#cu-root .cu-notes{background:#fff;border-radius:14px;box-shadow:var(--shadow);margin-top:1.2rem}',
     '#cu-root .cu-notes-h{display:flex;justify-content:space-between;align-items:center;width:100%;border:0;background:none;padding:1rem 1.2rem;font:600 .95rem var(--hel,Poppins,sans-serif);cursor:pointer;color:inherit}',
     '#cu-root .cu-notes-h span{font-size:.8rem;color:var(--mid);font-weight:400}',
+    '#cu-root .cu-notes-fold{display:grid;grid-template-rows:1fr;transition:grid-template-rows .35s var(--ease,ease)}',
+    '#cu-root .cu-notes-fold.closed{grid-template-rows:0fr}#cu-root .cu-notes-in{overflow:hidden;min-height:0}',
+    '#cu-root .cu-notes-fold.closed .cu-notes-b{visibility:hidden;transition:visibility 0s .35s}',
     '#cu-root .cu-notes-b{padding:0 1.4rem 1.2rem;font-size:.95rem;line-height:1.65;color:#2b2724}',
     '#cu-root .cu-notes-b h3{font-family:var(--display,Georgia,serif);font-size:1.12rem;margin:1.2rem 0 .4rem;color:var(--text,#111)}',
     '#cu-root .cu-notes-b ul,#cu-root .cu-notes-b ol{padding-left:1.3rem;margin:.4rem 0 .8rem}#cu-root .cu-notes-b li{margin:.3rem 0}',
@@ -136,12 +167,15 @@
     /* the bottom bar, as on Khan's pages */
     '#cu-root .cu-bottom{position:sticky;bottom:0;margin-top:1.2rem;background:rgba(255,255,255,.96);backdrop-filter:blur(6px);border-radius:14px;box-shadow:0 -2px 16px rgba(17,17,17,.07);padding:.75rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;z-index:3}',
     '#cu-root .cu-qdots{display:flex;gap:6px;flex-wrap:wrap}',
+    '#cu-root .cu-streak-wrap{display:flex;align-items:center;gap:12px;flex-wrap:wrap}',
+    '#cu-root .cu-streak{display:flex;gap:4px}#cu-root .cu-streak i{width:20px;height:9px;border-radius:5px;background:#e2dfda;transition:background .3s}',
+    '#cu-root .cu-streak i.on{background:var(--cu-good)}#cu-root .cu-streak-wrap .lbl b{color:var(--text,#111)}',
     '#cu-root .cu-qdots i{width:12px;height:12px;border-radius:50%;border:1.5px solid rgba(17,17,17,.3)}',
     '#cu-root .cu-qdots i.ok{background:var(--cu-good);border-color:var(--cu-good)}#cu-root .cu-qdots i.cur{border-color:#3457d5;box-shadow:0 0 0 2px rgba(52,87,213,.2)}',
     '#cu-root .cu-bottom .lbl{font-size:.82rem;color:var(--mid)}',
     '#cu-root .cu-state{padding:3rem 1rem;text-align:center;color:var(--mid)}',
     '@media(max-width:900px){#cu-root .cu-lesson-wrap{grid-template-columns:1fr}#cu-root .cu-panel{position:static;max-height:none}#cu-root .cu-steps{max-height:260px}}',
-    '@media(max-width:520px){#cu-root .cu-lesson{grid-template-columns:2.2rem 1fr;}#cu-root .cu-lesson .cu-dots,#cu-root .cu-lesson .cu-done-tag{grid-column:2}#cu-root .cu-card{padding:1.1rem}#cu-root .cu-resume{flex-direction:column;align-items:flex-start}}'
+    '@media(max-width:520px){#cu-root .cu-go{display:none}#cu-root .cu-unit-p .cu-mbar{display:none}#cu-root .cu-card{padding:1.1rem}#cu-root .cu-resume{flex-direction:column;align-items:flex-start}}'
   ].join('');
   function injectCss() {
     if (document.getElementById('cu-css')) return;
@@ -261,37 +295,75 @@
   }
 
   /* ---------- home: the course, unit by unit ---------- */
+  // A small progress ring: filled share of a lesson's parts, a tick when all are done.
+  function ring(done, total, size) {
+    size = size || 30;
+    var r = size / 2 - 3, C = 2 * Math.PI * r, f = total ? done / total : 0;
+    if (total && done === total) return '<span class="cu-ring done" style="width:' + size + 'px;height:' + size + 'px">&#10003;</span>';
+    return '<svg class="cu-ring" width="' + size + '" height="' + size + '" viewBox="0 0 ' + size + ' ' + size + '" aria-hidden="true">' +
+      '<circle cx="' + size / 2 + '" cy="' + size / 2 + '" r="' + r + '" fill="none" stroke="#e6e3de" stroke-width="3"/>' +
+      (done ? '<circle cx="' + size / 2 + '" cy="' + size / 2 + '" r="' + r + '" fill="none" stroke="var(--cu-good)" stroke-width="3" stroke-linecap="round" stroke-dasharray="' + (C * f).toFixed(1) + ' ' + C.toFixed(1) + '" transform="rotate(-90 ' + size / 2 + ' ' + size / 2 + ')"/>' : '') + '</svg>';
+  }
+
+  /* ---------- home: the course, unit by unit ----------
+     The header and the course tabs are drawn once and never move; switching
+     course crossfades only what is below them, keeping its height while it
+     swaps, so nothing on the page jumps (Luca, 2026-09-27). */
   function renderHome() {
     var c = course(view.course);
     view.course = c.id;
+    root.innerHTML = '<div class="cu-wrap">' +
+      '<div class="cu-top"><div><div class="cu-kicker">Curriculum</div><div class="cu-toph">Learn it, then prove it</div></div>' +
+      '<div class="cu-tabs" role="group" aria-label="Course">' + courses().map(function (x) {
+        return '<button type="button" data-course="' + x.id + '" aria-pressed="' + (x.id === c.id) + '">' + esc(x.title) + '</button>';
+      }).join('') + '</div></div>' +
+      '<div class="cu-body" id="cu-body">' + homeBody(c) + '</div></div>';
+  }
+  function homeBody(c) {
     var lessons = allLessons(c);
     var total = 0, done = 0;
     lessons.forEach(function (x) { total += x.l.parts.length; done += lessonDoneCount(x.l); });
+    var pct = total ? Math.round(100 * done / total) : 0;
     var last = prog.last && findLesson(prog.last.lessonId);
     var resume = '';
     if (last && last.c.id === c.id) {
-      resume = '<div class="cu-resume"><div><b>Pick up where you left off</b><span>' + esc(last.l.num + ' ' + last.l.title) + ', part ' + (prog.last.part + 1) + ' of ' + last.l.parts.length + '</span></div>' +
+      resume = '<div class="cu-resume cu-in" style="--d:1"><span class="cu-resume-ic">&#9654;</span><div><b>Pick up where you left off</b><span>' + esc(last.l.num + ' ' + last.l.title) + ', part ' + (prog.last.part + 1) + ' of ' + last.l.parts.length + '</span></div>' +
         '<button type="button" class="cu-btn" data-resume>Continue &rarr;</button></div>';
     }
-    root.innerHTML = '<div class="cu-wrap">' +
-      '<div class="cu-kicker">Curriculum</div><h1>' + esc(c.title === 'Math' ? 'SAT Math' : 'SAT Reading & Writing') + '</h1>' +
-      '<div class="cu-sub">Every lesson is a short video, then a quick check. Get each check right to unlock the next part.</div>' +
-      '<div class="cu-tabs" role="group" aria-label="Course">' + courses().map(function (x) {
-        return '<button type="button" data-course="' + x.id + '" aria-pressed="' + (x.id === c.id) + '">' + esc(x.title) + '</button>';
-      }).join('') + '</div>' +
-      '<div class="cu-overall"><div class="cu-bar"><i style="width:' + (total ? Math.round(100 * done / total) : 0) + '%"></i></div><span>' + done + ' of ' + pl(total, 'part') + ' done</span></div>' +
+    var R = 34, CIRC = 2 * Math.PI * R;
+    return '<section class="cu-hero cu-hero-' + c.id + ' cu-in" style="--d:0">' +
+        '<div class="cu-hero-text"><h1>' + esc(c.id === 'math' ? 'SAT Math' : 'SAT Reading & Writing') + '</h1>' +
+        '<div class="cu-stats"><div class="cu-bigring"><svg width="84" height="84" viewBox="0 0 84 84" aria-hidden="true"><circle cx="42" cy="42" r="' + R + '" fill="none" stroke="rgba(17,17,17,.08)" stroke-width="7"/>' +
+          (done ? '<circle class="cu-ringfill" cx="42" cy="42" r="' + R + '" fill="none" stroke="var(--red,#B0271C)" stroke-width="7" stroke-linecap="round" stroke-dasharray="' + Math.max(1, CIRC * pct / 100).toFixed(1) + ' ' + CIRC.toFixed(1) + '" transform="rotate(-90 42 42)"/>' : '') + '</svg><b>' + pct + '%</b></div>' +
+          '<div class="cu-stat"><b>' + lessons.length + '</b><span>lessons</span></div><div class="cu-stat"><b>' + total + '</b><span>parts</span></div><div class="cu-stat"><b>' + done + '</b><span>done</span></div></div></div>' +
+        '</section>' +
       resume +
       '<div class="cu-units">' + c.domains.map(function (d, di) {
         var dDone = d.lessons.filter(function (l) { return lessonDoneCount(l) === l.parts.length; }).length;
-        return '<section class="cu-unit"><div class="cu-unit-h"><h2>' + esc('Unit ' + (di + 1) + ': ' + d.name) + '</h2><span>' + dDone + ' of ' + pl(d.lessons.length, 'lesson') + ' complete</span></div>' +
+        return '<section class="cu-unit cu-in" style="--d:' + (di + 2) + '"><div class="cu-unit-h">' +
+          '<div class="cu-unit-t"><span class="cu-unum">Unit ' + (di + 1) + '</span><h2>' + esc(d.name) + '</h2></div>' +
+          '<span class="cu-unit-p"><span class="cu-mbar"><i style="width:' + Math.round(100 * dDone / d.lessons.length) + '%"></i></span>' + dDone + '/' + d.lessons.length + '</span></div>' +
           d.lessons.map(function (l) {
-            var n = lessonDoneCount(l), all = n === l.parts.length;
-            return '<button type="button" class="cu-lesson" data-lesson="' + esc(l.id) + '"><span class="cu-num">' + esc(l.num) + '</span>' +
-              '<span class="cu-lt">' + esc(l.title) + '<small>' + pl(l.parts.length, 'part') + ' &middot; ' + pl(l.parts.reduce(function (a, p) { return a + p.qids.length; }, 0), 'question') + '</small></span>' +
-              (all ? '<span class="cu-done-tag">&#10003; Done</span>' : '<span class="cu-dots" aria-label="' + n + ' of ' + l.parts.length + ' parts done">' +
-                l.parts.map(function (p, i) { return '<i class="' + (isDone(l.id, i) ? 'on' : '') + '"></i>'; }).join('') + '</span>') + '</button>';
+            var n = lessonDoneCount(l);
+            return '<button type="button" class="cu-lesson" data-lesson="' + esc(l.id) + '">' + ring(n, l.parts.length) +
+              '<span class="cu-lt"><span class="cu-num">' + esc(l.num) + '</span> ' + esc(l.title) + '<small>' + pl(l.parts.length, 'part') + (n && n < l.parts.length ? ' &middot; ' + n + ' done' : '') + '</small></span>' +
+              '<span class="cu-go">' + (n === l.parts.length ? 'Review' : n ? 'Continue' : 'Start') + ' &rsaquo;</span></button>';
           }).join('') + '</section>';
-      }).join('') + '</div></div>';
+      }).join('') + '</div>';
+  }
+  function switchCourse(id) {
+    if (id === view.course) return;
+    view.course = id;
+    $$('.cu-tabs button', root).forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-course') === id)); });
+    var body = $('#cu-body', root);
+    if (!body) return renderHome();
+    body.style.minHeight = body.offsetHeight + 'px';          // hold the space while it swaps
+    body.classList.add('cu-fading');
+    setTimeout(function () {
+      body.innerHTML = homeBody(course(id));
+      body.classList.remove('cu-fading');
+      requestAnimationFrame(function () { body.style.minHeight = ''; });
+    }, 160);
   }
 
   /* ---------- a lesson ---------- */
@@ -344,16 +416,22 @@
         '<span class="ic">' + (done ? '&#10003;' : '&#9654;') + '</span><span>' + esc(partTitle(l, i)) + '</span><span class="st">' + (open ? '' : '&#128274;') + '</span></button>';
       if (p.qids.length) {
         out += '<button type="button" class="cu-step' + (view.part === i && view.step === 'check' ? ' on' : '') + (open ? '' : ' locked') + (done ? ' done' : '') + '" data-step="check" data-part="' + i + '"' + lock + '>' +
-          '<span class="ic">' + (done ? '&#10003;' : '&#9998;') + '</span><span>Check: ' + pl(p.qids.length, 'question') + '</span><span class="st">' + (open ? '' : '&#128274;') + '</span></button>';
+          '<span class="ic">' + (done ? '&#10003;' : '&#9998;') + '</span><span>Check: ' + STREAK_TO_PASS + ' in a row</span><span class="st">' + (open ? '' : '&#128274;') + '</span></button>';
       }
     });
     return out;
   }
+  /* A part is named after its last page: the one right before its check,
+     which is what the questions test (Luca, 2026-09-27: Part 1 of Linear
+     Equations is Definition, What do we need to create a line?, and
+     Slope-Intercept Form; it was showing only "Definition"). */
+  function partPages(l, i) { return (l.parts[i].notes || []).map(function (n) { return n.title; }).filter(Boolean); }
   function partTitle(l, i) {
-    var p = l.parts[i], first = p.notes && p.notes[0];
-    var t = first && first.title ? first.title : '';
-    return l.parts.length > 1 ? 'Part ' + (i + 1) + (t ? ': ' + t : '') : (t || 'Video');
+    var t = partPages(l, i);
+    var name = t.length ? t[t.length - 1] : '';
+    return l.parts.length > 1 ? 'Part ' + (i + 1) + (name ? ': ' + name : '') : l.title;   // one part: the lesson itself
   }
+
 
   function notesHtml(p) {
     return (p.notes || []).map(function (n) {
@@ -373,21 +451,52 @@
     var hasCheck = p.qids.length > 0, done = isDone(l.id, i);
     var nextOpen = i + 1 < l.parts.length;
     var bar;
-    if (hasCheck) bar = '<span class="lbl">Up next: a ' + p.qids.length + '-question check</span><button type="button" class="cu-btn" data-go-check>Start the check &rarr;</button>';
+    if (hasCheck) bar = '<span class="lbl">Up next: get ' + STREAK_TO_PASS + ' right in a row</span><button type="button" class="cu-btn" data-go-check>Start the check &rarr;</button>';
     else bar = '<span class="lbl">' + (done ? 'Watched' : 'No questions for this part') + '</span><button type="button" class="cu-btn" data-watched>' + (nextOpen ? 'Next part &rarr;' : 'Finish the lesson &rarr;') + '</button>';
     $('#cu-main', root).innerHTML =
-      '<div class="cu-mhead"><div class="cu-kicker">' + esc(l.num + ' ' + l.title) + '</div><h1>' + esc(partTitle(l, i)) + '</h1></div>' +
+      '<div class="cu-mhead"><div class="cu-kicker">' + esc(l.num + ' ' + l.title) + '</div><h1>' + esc(partTitle(l, i)) + '</h1>' +
+        (partPages(l, i).length > 1 ? '<div class="cu-sub">Covers: ' + partPages(l, i).map(esc).join(' &middot; ') + '</div>' : '') + '</div>' +
       '<div class="cu-video">' + (vid || '<div class="cu-soon"><div class="play">&#9654;</div><b>Video coming soon</b><span>This lesson\u2019s video is being recorded. The notes below cover the same material for now.</span></div>') + '</div>' +
       '<section class="cu-notes"><button type="button" class="cu-notes-h" data-notes aria-expanded="' + (!vid) + '">Notes <span>' + (vid ? 'Show' : 'Hide') + '</span></button>' +
-      '<div class="cu-notes-b"' + (vid ? ' hidden' : '') + '>' + (notesHtml(p) || '<p>No notes for this part.</p>') + '</div></section>' +
+      '<div class="cu-notes-fold' + (vid ? ' closed' : '') + '"><div class="cu-notes-in"><div class="cu-notes-b">' + (notesHtml(p) || '<p>No notes for this part.</p>') + '</div></div></div></section>' +
       '<div class="cu-bottom">' + bar + '</div>';
   }
 
-  /* ---------- the check: every question right before moving on ---------- */
+  /* ---------- the check: 8 right in a row (Luca, 2026-09-27) ----------
+     A part is passed with STREAK_TO_PASS correct answers in a row. Any miss
+     resets the streak to 0, shows the answer and why, and the check carries
+     on with questions the student has not seen yet: each part's pool (~30
+     questions, growing) is worked through least recently seen first, never
+     the same question twice in a row, so a reset means new questions rather
+     than memorised ones. What was seen, and when, is kept per part on the
+     device, so the rotation continues across visits. */
+  var STREAK_TO_PASS = 8;
   function startCheck(c, l) {
     var p = l.parts[view.part];
-    var qids = p.qids.filter(function (q) { return !!question(q); });
-    check = { lessonId: l.id, part: view.part, all: qids.slice(), queue: qids.slice(), right: {}, tries: {}, current: qids[0], answered: false, pick: null, missing: p.qids.length - qids.length };
+    var pool = p.qids.filter(function (q) { return !!question(q); });
+    check = { lessonId: l.id, part: view.part, pool: pool, streak: 0, asked: {}, n: 0, current: null, answered: false, pick: null };
+    nextQuestion(l);
+  }
+  function seenMap(l) {
+    prog.seen = prog.seen || {};
+    var k = pkey(l.id, check.part);
+    return (prog.seen[k] = prog.seen[k] || {});
+  }
+  function nextQuestion(l) {
+    var seen = seenMap(l), last = check.current;
+    var fresh = check.pool.filter(function (id) { return !check.asked[id] && id !== last; });
+    if (!fresh.length) {                              // the whole pool has come round: start a new cycle
+      check.asked = {};
+      fresh = check.pool.filter(function (id) { return id !== last; });
+      if (!fresh.length) fresh = check.pool.slice();  // a pool of one
+    }
+    // Least recently seen first (never seen = oldest), ties broken at random.
+    fresh.sort(function (a, b) { return ((seen[a] || 0) - (seen[b] || 0)) || (Math.random() - 0.5); });
+    check.current = fresh[0];
+    check.asked[check.current] = true;
+    check.n++;
+    seen[check.current] = Date.now();
+    try { localStorage.setItem('moretti_curriculum_' + progKey, JSON.stringify(prog)); } catch (e) {}
   }
   function renderCheck(c, l) {
     var main = $('#cu-main', root);
@@ -398,31 +507,35 @@
       drawQuestion(c, l);
     });
   }
+  function streakHtml() {
+    var segs = '';
+    for (var i = 0; i < STREAK_TO_PASS; i++) segs += '<i class="' + (i < check.streak ? 'on' : '') + '"></i>';
+    return '<div class="cu-streak" role="img" aria-label="' + check.streak + ' in a row of ' + STREAK_TO_PASS + ' needed">' + segs + '</div>' +
+      '<span class="lbl"><b>' + check.streak + '</b> in a row &middot; ' + STREAK_TO_PASS + ' to pass</span>';
+  }
   function drawQuestion(c, l) {
     var main = $('#cu-main', root);
-    if (!check.all.length) {
+    if (!check.pool.length || !check.current) {
       main.innerHTML = '<div class="cu-card cu-state">These questions could not be loaded. Check your connection and try again.</div>';
       return;
     }
-    if (!check.queue.length) return drawComplete(c, l);
     var q = question(check.current);
-    var n = check.all.indexOf(check.current);
-    var dots = check.all.map(function (id) { return '<i class="' + (check.right[id] ? 'ok' : id === check.current ? 'cur' : '') + '"></i>'; }).join('');
     var body;
     if (q.type === 'fr') {
-      body = '<div class="cu-fr"><input type="text" inputmode="decimal" autocomplete="off" aria-label="Your answer" id="cu-fr" placeholder="Your answer"' + (check.answered ? ' disabled' : '') + '></div>';
+      body = '<div class="cu-fr"><input type="text" inputmode="decimal" autocomplete="off" aria-label="Your answer" id="cu-fr" placeholder="Your answer"></div>';
     } else {
       body = '<div class="cu-choices">' + (q.choices || []).map(function (ch, k) {
-        return '<button type="button" class="cu-choice" data-choice="' + k + '"' + (check.answered ? ' disabled' : '') + '><span class="lt">' + LETTERS[k] + '</span><span>' + ch + '</span></button>';
+        return '<button type="button" class="cu-choice" data-choice="' + k + '"><span class="lt">' + LETTERS[k] + '</span><span>' + ch + '</span></button>';
       }).join('') + '</div>';
     }
     var isMath = c.bank === 'math';
     main.innerHTML =
-      '<div class="cu-mhead"><div class="cu-kicker">' + esc(l.num + ' ' + l.title) + '</div><h1>Check your understanding</h1></div>' +
-      '<div class="cu-card"><div class="cu-qhead"><span>Question ' + (n + 1) + ' of ' + check.all.length + (check.tries[check.current] ? ' &middot; try again' : '') + '</span>' +
+      '<div class="cu-mhead"><div class="cu-kicker">' + esc(l.num + ' ' + l.title) + '</div><h1>Check your understanding</h1>' +
+        '<div class="cu-sub">Get ' + STREAK_TO_PASS + ' right in a row to unlock the next part. A miss starts the count over, with new questions.</div></div>' +
+      '<div class="cu-card"><div class="cu-qhead"><span>Question ' + check.n + '</span>' +
         (isMath ? '<button type="button" class="cu-mini" data-calc>Calculator</button>' : '') + '</div>' +
         '<div class="cu-qtext">' + q.text + '</div>' + body + '<div id="cu-fb"></div><div class="cu-calc" id="cu-calc" hidden></div></div>' +
-      '<div class="cu-bottom"><div class="cu-qdots" aria-label="' + Object.keys(check.right).length + ' of ' + check.all.length + ' right">' + dots + '</div>' +
+      '<div class="cu-bottom"><div class="cu-streak-wrap">' + streakHtml() + '</div>' +
         '<button type="button" class="cu-btn" id="cu-go" data-check-go disabled>Check</button></div>';
     var fr = $('#cu-fr', main);
     if (fr) {
@@ -441,40 +554,31 @@
   }
   function submitAnswer(c, l) {
     var main = $('#cu-main', root), q = question(check.current), fb = $('#cu-fb', main), go = $('#cu-go', main);
-    if (check.answered) {           // Continue
+    if (check.answered) {           // Next
       check.answered = false; check.pick = null;
-      if (!check.queue.length) return drawComplete(c, l);
-      check.current = check.queue[0];
+      if (check.streak >= STREAK_TO_PASS) return drawComplete(c, l);
+      nextQuestion(l);
       return drawQuestion(c, l);
     }
     var g = grade(q);
-    var id = check.current;
-    if (g.ok) {
-      check.right[id] = true;
-      check.queue = check.queue.filter(function (x) { return x !== id; });
-      check.answered = true;
-      markChoices(q, true);
-      fb.innerHTML = '<div class="cu-fb ok"><b>Correct!</b>' + (q.explanation && check.tries[id] ? '<div class="ex">' + q.explanation + '</div>' : '') + '</div>';
-      go.textContent = check.queue.length ? 'Next question' : 'Finish'; go.disabled = false;
-      return;
-    }
-    check.tries[id] = (check.tries[id] || 0) + 1;
-    if (check.tries[id] === 1) {
-      // First miss: another go, with a pointer back to the teaching.
-      if (q.type !== 'fr') { var b = $('[data-choice="' + check.pick + '"]', main); if (b) { b.classList.remove('sel'); b.classList.add('wrong'); b.disabled = true; } check.pick = null; }
-      fb.innerHTML = '<div class="cu-fb no"><b>Not quite.</b> Give it another try. Stuck? <a href="#" data-rewatch>Rewatch the video</a> or check the notes.</div>';
-      go.disabled = true;
-      return;
-    }
-    // Second miss: the answer and why, and the question comes back at the end
-    // of the check, so it still has to be answered right before moving on.
     check.answered = true;
-    check.queue = check.queue.filter(function (x) { return x !== id; }).concat([id]);
-    markChoices(q, false);
-    var answer = q.type === 'fr' ? '<p>The answer is <b>' + esc(q.answerValue != null ? q.answerValue : q.answer) + '</b>.</p>' : '';
-    fb.innerHTML = '<div class="cu-fb no"><b>Here\u2019s how it works.</b> This one comes back at the end of the check, so make sure it clicks.' +
-      '<div class="ex">' + answer + (q.explanation || '') + '</div></div>';
-    go.textContent = 'Continue'; go.disabled = false;
+    if (g.ok) {
+      check.streak++;
+      markChoices(q, true);
+      var passed = check.streak >= STREAK_TO_PASS;
+      fb.innerHTML = '<div class="cu-fb ok"><b>Correct!</b> ' + (passed ? STREAK_TO_PASS + ' in a row. That\u2019s the part.' : check.streak + ' in a row.') + '</div>';
+      go.textContent = passed ? 'Finish' : 'Next question'; go.disabled = false;
+    } else {
+      var had = check.streak;
+      check.streak = 0;
+      markChoices(q, false);
+      var answer = q.type === 'fr' ? '<p>The answer is <b>' + esc(q.answerValue != null ? q.answerValue : q.answer) + '</b>.</p>' : '';
+      fb.innerHTML = '<div class="cu-fb no"><b>Not quite.</b> ' + (had ? 'Your streak of ' + had + ' starts over' : 'The count starts over') +
+        ', with new questions. Stuck? <a href="#" data-rewatch>Rewatch the video</a> or check the notes.' +
+        '<div class="ex">' + answer + (q.explanation || '') + '</div></div>';
+      go.textContent = 'Next question'; go.disabled = false;
+    }
+    var w = $('.cu-streak-wrap', main); if (w) w.innerHTML = streakHtml();
   }
   function markChoices(q, ok) {
     if (q.type === 'fr') { var fr = $('#cu-fr', root); if (fr) fr.disabled = true; return; }
@@ -495,7 +599,7 @@
     var nextLesson = list[at + 1];
     $('#cu-main', root).innerHTML =
       '<div class="cu-card cu-complete"><div class="tick">&#10003;</div><h2 style="margin:0 0 .4rem">' + (nextPart ? 'Part ' + (i + 1) + ' complete' : 'Lesson complete') + '</h2>' +
-      '<p class="cu-sub">' + (nextPart ? 'Every question right. The next part is unlocked.' : 'You finished ' + esc(l.num + ' ' + l.title) + '.') + '</p>' +
+      '<p class="cu-sub">' + (nextPart ? STREAK_TO_PASS + ' right in a row. The next part is unlocked.' : STREAK_TO_PASS + ' right in a row. You finished ' + esc(l.num + ' ' + l.title) + '.') + '</p>' +
       '<div style="margin-top:1.3rem;display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap">' +
       (nextPart ? '<button type="button" class="cu-btn" data-open-part="' + (i + 1) + '">Up next: part ' + (i + 2) + ' &rarr;</button>'
         : nextLesson ? '<button type="button" class="cu-btn" data-lesson-go="' + esc(nextLesson.l.id) + '">Up next: ' + esc(nextLesson.l.num + ' ' + nextLesson.l.title) + ' &rarr;</button>' : '') +
@@ -510,7 +614,7 @@
   function onClick(e) {
     var t = e.target;
     var b;
-    if ((b = t.closest('[data-course]'))) { view.course = b.getAttribute('data-course'); return renderHome(); }
+    if ((b = t.closest('[data-course]'))) return switchCourse(b.getAttribute('data-course'));
     if ((b = t.closest('[data-resume]'))) { var L = prog.last; return openLesson(L.lessonId, L.part, L.step); }
     if ((b = t.closest('[data-lesson]'))) return openLesson(b.getAttribute('data-lesson'));
     if ((b = t.closest('[data-lesson-go]'))) { var id = b.getAttribute('data-lesson-go'); if (id) openLesson(id); return; }
@@ -534,9 +638,23 @@
       return list[at + 1] ? openLesson(list[at + 1].l.id) : (view.name = 'home', renderHome());
     }
     if ((b = t.closest('[data-notes]'))) {
-      var body = b.nextElementSibling, open = body.hasAttribute('hidden');
-      if (open) body.removeAttribute('hidden'); else body.setAttribute('hidden', '');
+      /* Folds open and shut (a height animation), with the Notes header held
+         where it is on screen, so the page never jumps under the student
+         (Luca, 2026-09-27). */
+      var fold = b.nextElementSibling, open = fold.classList.contains('closed');
+      var before = b.getBoundingClientRect().top;
+      // The page keeps its height while on this part, or a page scrolled near
+      // its end would have to scroll up when the notes shut.
+      var main = $('#cu-main', root);
+      if (!open && main) main.style.minHeight = main.offsetHeight + 'px';
+      fold.classList.toggle('closed', !open);
       b.setAttribute('aria-expanded', String(open)); b.querySelector('span').textContent = open ? 'Hide' : 'Show';
+      var start = performance.now();
+      (function hold(now) {
+        var drift = b.getBoundingClientRect().top - before;
+        if (Math.abs(drift) > 0.5) window.scrollBy(0, drift);
+        if (now - start < 420) requestAnimationFrame(hold);
+      })(start);
       return;
     }
     if (t.closest('[data-rewatch]')) { e.preventDefault(); view.step = 'video'; return renderLesson(); }

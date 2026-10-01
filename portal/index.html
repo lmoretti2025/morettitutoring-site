@@ -11591,9 +11591,21 @@ window.Portal = {
   window.resolveQuestionByKey = function (key) {
     if (/^(qb|chal)\|/.test(String(key || ''))) return resolveQuestionBankKey_(key);
     var parts = String(key || '').split('|');
-    if (parts.length !== 4) return null;
+    /* Four parts is the original, POSITIONAL key: test|section|module|index. A fifth part,
+       added 2026-09-30, carries the qid, and it is what makes a saved miss survive the
+       question order changing underneath it.
+
+       Why it was needed: a miss resolved purely by position, into whatever
+       practice-tests.js said at render time. Comparing the deployed file with the pending
+       one, 1,076 of 1,764 slots (61%) had moved within their own module and 357 (20%) no
+       longer existed, so a push would have silently re-pointed most saved misses at a
+       DIFFERENT question, with the student's recorded answer still attached. Nothing would
+       have errored. Old four-part keys still resolve positionally, which is the best that
+       can be done for them; data/miss_key_remap.json carries the one-off translation. */
+    if (parts.length !== 4 && parts.length !== 5) return null;
     var testTag = parts[0], sectionKey = parts[1], moduleName = parts[2], moduleIndex = parseInt(parts[3], 10);
-    if (isNaN(moduleIndex)) return null;
+    var wantQid = parts.length === 5 ? parts[4] : null;
+    if (isNaN(moduleIndex) && !wantQid) return null;
 
     var bank, testTitle;
     if (testTag.indexOf('diag-') === 0) {
@@ -11614,7 +11626,35 @@ window.Portal = {
       : moduleName === 'module2Easier' ? bank.module2Easier
       : moduleName === 'module2Harder' ? bank.module2Harder
       : null;
-    var q = qs && qs[moduleIndex];
+    var q = null;
+    if (wantQid && qs) {
+      /* Prefer the qid: the question itself, wherever it now sits in the module. */
+      for (var qi = 0; qi < qs.length; qi++) {
+        if (qs[qi] && qs[qi].qid === wantQid) { q = qs[qi]; break; }
+      }
+      if (!q) {
+        /* Re-dealt into one of the other modules of the same test - still the right
+           question, and showing it beats showing a different one. */
+        var others = [bank.module1, bank.module2Easier, bank.module2Harder];
+        for (var oi = 0; oi < others.length && !q; oi++) {
+          var arr = others[oi] || [];
+          for (var aj = 0; aj < arr.length; aj++) {
+            if (arr[aj] && arr[aj].qid === wantQid) { q = arr[aj]; break; }
+          }
+        }
+      }
+    }
+    /* A five-part key whose qid is nowhere in this test means the question was RETIRED.
+       We know exactly which question was wanted and we know it is gone, so falling back to
+       whatever now sits at that index would show a different question with the student's
+       recorded answer still attached - the precise failure the qid was added to prevent.
+       Drop the record instead; the caller treats null as "not resolvable" and omits it.
+       (2026-10-01: 15 duplicated College Board passages were retired from the tests, which
+       is what made this path reachable.) */
+    if (!q && wantQid) return null;
+    /* No qid in the key at all (a record saved before 2026-09-30): position is the best
+       that can be done, which is what every key did then. */
+    if (!q) q = qs && qs[moduleIndex];
     if (!q) return null;
 
     return {
@@ -14124,7 +14164,10 @@ window.Portal = {
         // derived from `key` via window.resolveQuestionByKey() at render time.
         // Storing full snapshots per miss overflows the Sheets cell cap.
         incorrectRecords.push({
-          key: testTag + '|' + sec.key + '|' + moduleName + '|' + moduleIndex,
+          /* The qid is appended so this key survives the question order changing later;
+             resolveQuestionByKey() prefers it and falls back to the index. */
+          key: testTag + '|' + sec.key + '|' + moduleName + '|' + moduleIndex
+               + (q && q.qid ? '|' + q.qid : ''),
           correct: correct,
           given: (given === null || given === undefined) ? null : given,
           attemptedAt: attemptTimestamp

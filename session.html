@@ -6,10 +6,10 @@
 <meta name="robots" content="noindex">
 <meta name="referrer" content="no-referrer">
 <title>Book a session | Moretti Test Prep</title>
-<meta name="description" content="Book a 60 or 90 minute tutoring session with Luca Moretti.">
+<meta name="description" content="Book a 60 minute, 90 minute or 2 hour tutoring session with Luca Moretti.">
 <link rel="canonical" href="https://morettitutoring.com/session.html">
 <meta property="og:title" content="Book a tutoring session with Luca Moretti">
-<meta property="og:description" content="Pick a 60 or 90 minute session at a time that works for you.">
+<meta property="og:description" content="Pick a 60 minute, 90 minute or 2 hour session at a time that works for you.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://morettitutoring.com/session.html">
 <meta property="og:image" content="https://morettitutoring.com/og-image.png">
@@ -81,7 +81,7 @@
   .day { position: relative; border: none; border-radius: 16px; min-height: 86px; padding: 10px 10px 9px; text-align: left; font-family: var(--sans);
          background: var(--sunk); display: flex; flex-direction: column; justify-content: space-between; gap: 6px; }
   .day-num { font-family: var(--display); font-size: 1.05rem; color: var(--ink); width: 1.9rem; height: 1.9rem; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
-  .day.is-today .day-num { box-shadow: inset 0 0 0 1.5px var(--red); color: var(--red); font-weight: 700; }
+  #cal .day.is-today .day-num { background: var(--red); color: #fff; font-weight: 700; }   /* today: a filled circle, as in Apple Calendar */
   .day-tag { font-size: .68rem; font-weight: 600; letter-spacing: .02em; border-radius: 999px; padding: .18rem .55rem; align-self: flex-start; white-space: nowrap; }
   /* Open: a white tile that lifts, the way a portal day does. */
   .day.is-open { background: var(--paper); box-shadow: inset 0 0 0 1px var(--line); cursor: pointer;
@@ -93,12 +93,15 @@
   .day.is-off .day-num { color: var(--faint); }
   .day.is-past { opacity: .5; }
   .day.is-blank { background: transparent; }
+  .day.is-other.is-off { background: transparent; box-shadow: inset 0 0 0 1px var(--line); }
+  .day-num.has-month { width: max-content; padding: 0 .3rem; border-radius: 999px; }   /* "Oct 1" only; every other date keeps its circle */
   .cal-foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 20px; margin-top: 16px; font-size: .78rem; color: var(--muted); }
   .key { display: inline-flex; align-items: center; gap: 7px; margin-right: 16px; }
   .key i { width: 12px; height: 12px; border-radius: 4px; display: inline-block; }
   .lengths { display: inline-flex; background: var(--sunk); border-radius: 999px; padding: 4px; margin: 0 0 18px; }
   .lengths button { border: 0; background: transparent; font-family: var(--sans); font-size: .85rem; font-weight: 500; color: var(--muted);
                     padding: 8px 18px; border-radius: 999px; cursor: pointer; transition: background .18s var(--ease), color .18s, box-shadow .18s; }
+  .lengths button { white-space: nowrap; }
   .lengths button[aria-pressed="true"] { background: var(--paper); color: var(--ink); box-shadow: 0 1px 4px rgba(17,17,17,.12); }
   .len-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 16px; }
   .len-row p { font-size: .8rem; color: var(--muted); margin-bottom: 18px; }
@@ -143,6 +146,17 @@
   textarea { min-height: 76px; resize: vertical; }
   .two { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
   .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .mg-list { list-style: none; margin: 0 0 6px; padding: 0; }
+  .mg-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 12px 0; border-top: 1px solid var(--line); }
+  .mg-row:first-child { border-top: 0; }
+  .mg-when { font-size: .95rem; color: var(--ink); }
+  .mg-when small { display: block; font-size: .78rem; color: var(--muted); }
+  .mg-row.is-gone .mg-when { color: var(--faint); text-decoration: line-through; }
+  .mg-acts { display: flex; gap: 8px; }
+  .mg-acts .btn { padding: .6rem 1rem; }
+  .mg-note { font-size: .8rem; color: var(--muted); }
+  #manage h2 { font-family: var(--display); font-weight: 400; font-size: 1.5rem; margin: 0 0 4px; color: var(--ink); }
+  #manage { margin-bottom: 18px; }
   #status { min-height: 1.4em; margin: 12px 0 0; font-size: .86rem; color: var(--muted); }
   #status.err { color: var(--red); }
 
@@ -175,21 +189,27 @@
       <a href="/"><img src="logo-caladea-white-400.png" alt="Moretti Test Prep &amp; Tutoring"></a>
       <a class="back" href="/">&larr; morettitutoring.com</a>
     </div>
-    <div class="lbl" style="margin-top:40px">Tutoring session &middot; 60 or 90 minutes</div>
+    <div class="lbl" style="margin-top:40px">Tutoring session &middot; 60 minutes to 2 hours</div>
     <h1>Book your <em>next session.</em></h1>
-    <p class="sub">Choose how long, then a day and a time. The calendar invite comes straight to your inbox.</p>
-    <div class="facts"><span>Online or in person</span><span>Google Meet link included for online</span></div>
+    <p class="sub">Choose how long, then a day and a time. Your confirmation comes straight to your inbox.</p>
+    <div class="facts"><span>Online or in person</span><span>One Google Meet link for every online session</span></div>
   </div>
 </header>
 
 <main class="shell">
+  <section class="card" id="manage" aria-label="Your sessions" hidden></section>
   <section class="card" aria-label="Choose a day">
     <div class="len-row">
       <div class="lengths" role="group" aria-label="Session length">
-        <button type="button" data-len="60" aria-pressed="true">60 minutes</button>
-        <button type="button" data-len="90" aria-pressed="false">90 minutes</button>
+        <button type="button" data-len="60" aria-pressed="true">60 min</button>
+        <button type="button" data-len="90" aria-pressed="false">90 min</button>
+        <button type="button" data-len="120" aria-pressed="false">2 hours</button>
       </div>
-      <p>Times shown are when I can fit this length.</p>
+      <div class="lengths" role="group" aria-label="Where">
+        <button type="button" data-where="online" aria-pressed="true">Online</button>
+        <button type="button" data-where="inperson" aria-pressed="false">In person</button>
+      </div>
+      <p id="len-note">Times shown are when I can fit this length.</p>
     </div>
     <div id="notice"></div>
     <div id="cal"><div class="state"><div class="spin"></div>Finding open times&hellip;</div></div>
@@ -219,11 +239,14 @@
         <div><label for="b-student">Student&rsquo;s name</label><input id="b-student" required maxlength="80"></div>
         <div><label for="b-phone">Phone <span class="opt">(optional)</span></label><input id="b-phone" type="tel" autocomplete="tel" maxlength="30"></div>
       </div>
-      <label for="b-where">Where</label>
-      <select id="b-where">
-        <option value="online">Online (Google Meet)</option>
-        <option value="inperson">In person</option>
-      </select>
+      <div id="repeat-wrap">
+        <label for="b-repeat">How often</label>
+        <select id="b-repeat">
+          <option value="1">Just this once</option>
+          <option value="4">Every week, for 4 weeks</option>
+          <option value="8">Every week, for 8 weeks</option>
+        </select>
+      </div>
       <label for="b-notes">Anything to focus on? <span class="opt">(optional)</span></label>
       <textarea id="b-notes" maxlength="500"></textarea>
       <div class="hp" aria-hidden="true"><label for="b-website">Leave this field blank</label><input id="b-website" tabindex="-1" autocomplete="off"></div>
@@ -288,11 +311,12 @@
   function dayKey(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
 
   // The details from last time on this device, so a family booking again types nothing.
+  var WHERE = 'online';   // from the Online / In person toggle
   var SAVED = 'mt_session_details';
   try {
     var pre = JSON.parse(localStorage.getItem(SAVED) || 'null');
     if (pre) [['b-name', pre.name], ['b-email', pre.email], ['b-phone', pre.phone], ['b-student', pre.student]].forEach(function (f) { if (f[1]) $(f[0]).value = f[1]; });
-    if (pre && pre.where && $('b-where').querySelector('option[value="' + pre.where + '"]')) $('b-where').value = pre.where;
+    if (pre && (pre.where === 'online' || pre.where === 'inperson')) setWhere(pre.where);
   } catch (e) { /* nothing saved */ }
   function newRequestId() {
     try { if (window.crypto && crypto.randomUUID) return crypto.randomUUID(); } catch (e) {}
@@ -300,6 +324,7 @@
   }
 
   var LEN = 60;            // minutes, from the toggle
+  function lenText() { return LEN === 120 ? '2 hours' : LEN + ' minutes'; }
   var all = null;          // { '60': [slot], '90': [slot] } from the backend
   var byDay = {};          // 'yyyy-mm-dd' -> [slot]
   var months = [];         // [{ y, m }] with at least one open day, first to last
@@ -308,7 +333,7 @@
 
   function state(html) { $('cal').innerHTML = '<div class="state">' + html + '</div>'; }
   function noTimes(why) {
-    state('<p><b>' + (why === 'down' ? 'I can&rsquo;t show open times right now.' : 'No open ' + LEN + '-minute times in the next two weeks.') + '</b></p>' +
+    state('<p><b>' + (why === 'down' ? 'I can&rsquo;t show open times right now.' : 'No open ' + (LEN === 120 ? '2-hour' : LEN + '-minute') + ' times in the next six weeks.') + '</b></p>' +
           '<p style="margin-top:8px">Text me at <a href="sms:+12012752791">' + PHONE + '</a> or reply to my email, and I&rsquo;ll find a time that works.</p>');
   }
   function notice(text) { $('notice').innerHTML = text ? '<p class="notice">' + esc(text) + '</p>' : ''; }
@@ -324,13 +349,39 @@
       }
       if (d.unavailable) { all = null; return noTimes('down'); }
       all = d.slots || {};
+      // Only the lengths this backend offers get a button (a new one appears once it is deployed).
+      if (Array.isArray(d.lengths)) {
+        Array.prototype.forEach.call(document.querySelectorAll('[data-len]'), function (b) {
+          b.hidden = d.lengths.indexOf(Number(b.getAttribute('data-len'))) === -1;
+        });
+        if (d.lengths.indexOf(LEN) === -1) { var first = document.querySelector('[data-len]:not([hidden])'); if (first) first.click(); }
+      }
       show();
     });
   }
 
   // The chosen length's times, as a month. Keeps the month in view when the length changes.
+  /* The backend marks each slot inPerson (the Cranford library's hours).
+     A backend from before that, or a cached answer, leaves it out; then the
+     page works it out from the same hours, so In person never goes empty.
+     The backend still refuses a booking outside them. */
+  var LIBRARY_HOURS = { 0: ['12:00', '16:00'], 1: ['10:00', '21:00'], 2: ['10:00', '21:00'], 3: ['10:00', '21:00'],
+                        4: ['10:00', '21:00'], 5: ['10:00', '17:00'], 6: ['10:00', '17:00'] };
+  function nyParts(iso) {
+    var p = {};
+    new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', weekday: 'short', year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(new Date(iso)).forEach(function (x) { p[x.type] = x.value; });
+    return { dow: { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 }[p.weekday], day: p.year + p.month + p.day, hm: p.hour + ':' + p.minute };
+  }
+  function fitsLibrary(s) {
+    if (typeof s.inPerson === 'boolean') return s.inPerson;
+    var a = nyParts(s.start), b = nyParts(s.end), h = LIBRARY_HOURS[a.dow];
+    return !!h && a.day === b.day && a.hm >= h[0] && b.hm <= h[1];
+  }
+
   function show() {
-    var slots = (all && all[LEN]) || [];
+    // In person happens at the Cranford library, so those times end by its closing.
+    var slots = ((all && all[LEN]) || []).filter(function (s) { return WHERE !== 'inperson' || fitsLibrary(s); });
     var was = months[shown];
     if (!slots.length) { months = []; return noTimes('none'); }
     byDay = {}; months = [];
@@ -343,29 +394,46 @@
     shown = was ? Math.max(0, months.findIndex(function (x) { return x.y === was.y && x.m === was.m; })) : 0;
     render();
   }
-  Array.prototype.forEach.call(document.querySelectorAll('.lengths button'), function (b) {
+  Array.prototype.forEach.call(document.querySelectorAll('[data-len]'), function (b) {
     b.onclick = function () {
       LEN = Number(b.getAttribute('data-len'));
-      Array.prototype.forEach.call(document.querySelectorAll('.lengths button'), function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+      Array.prototype.forEach.call(document.querySelectorAll('[data-len]'), function (x) { x.setAttribute('aria-pressed', String(x === b)); });
       if (all) show();
     };
+  });
+  function setWhere(w) {
+    WHERE = w;
+    Array.prototype.forEach.call(document.querySelectorAll('[data-where]'), function (x) { x.setAttribute('aria-pressed', String(x.getAttribute('data-where') === w)); });
+    $('len-note').textContent = w === 'inperson'
+      ? 'In person meets at the Cranford Public Library, so it follows the library\u2019s hours: Mon\u2013Thu until 9 PM, Fri and Sat until 5 PM, Sun 12 to 4 PM.'
+      : 'Times shown are when I can fit this length.';
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('[data-where]'), function (b) {
+    b.onclick = function () { setWhere(b.getAttribute('data-where')); if (all) show(); };
   });
 
   function render() {
     var mo = months[shown], first = new Date(mo.y, mo.m, 1), today = dayKey(new Date());
     var title = first.toLocaleString('en-US', { month: 'long', year: 'numeric' });
     var cells = [];
-    for (var b = 0; b < first.getDay(); b++) cells.push('<div class="day is-blank" aria-hidden="true"></div>');
-    var days = new Date(mo.y, mo.m + 1, 0).getDate();
-    for (var n = 1; n <= days; n++) {
-      var dt = new Date(mo.y, mo.m, n), k = dayKey(dt), list = byDay[k] || [];
+    /* Whole weeks (Luca, 2026-09-27): the first row starts on the Sunday
+       before the 1st and the last ends on the Saturday after the month's
+       last day, so a week that crosses into the next month shows, and
+       books, in full. */
+    var lastDay = new Date(mo.y, mo.m + 1, 0);
+    var span = first.getDay() + lastDay.getDate() + (6 - lastDay.getDay());
+    for (var c = 0; c < span; c++) {
+      var dt = new Date(mo.y, mo.m, 1 - first.getDay() + c), n = dt.getDate(), k = dayKey(dt), list = byDay[k] || [];
       var label = dt.toLocaleString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-      var cls = 'day' + (list.length ? ' is-open' : ' is-off') + (k === today ? ' is-today' : '') + (k < today ? ' is-past' : '');
+      var other = dt.getMonth() !== mo.m;
+      // The 1st of a neighboring month carries its name, so the switch reads at a glance.
+      if (other && n === 1) n = dt.toLocaleString('en-US', { month: 'short' }) + ' 1';
+      var cls = 'day' + (list.length ? ' is-open' : ' is-off') + (other ? ' is-other' : '') + (k === today ? ' is-today' : '') + (k < today ? ' is-past' : '');
       cells.push(list.length
         ? '<button type="button" class="' + cls + '" data-day="' + k + '" aria-label="' + esc(label) + ', ' + list.length + ' open times">' +
-            '<span class="day-num">' + n + '</span><span class="day-tag">' + list.length + (list.length === 1 ? ' time' : ' times') + '</span></button>'
+            '<span class="day-num' + (typeof n === 'string' ? ' has-month' : '') + '">' + n + '</span><span class="day-tag">' + list.length + (list.length === 1 ? ' time' : ' times') + '</span></button>'
         // Grey says unavailable (the key below explains it); the word on every tile was noise.
-        : '<div class="' + cls + '" role="img" aria-label="' + esc(label) + ', unavailable"><span class="day-num">' + n + '</span></div>');
+        : '<div class="' + cls + '" role="img" aria-label="' + esc(label) + ', unavailable"><span class="day-num' + (typeof n === 'string' ? ' has-month' : '') + '">' + n + '</span></div>');
     }
     $('cal').innerHTML =
       '<div class="cal-toolbar"><div class="cal-title">' + esc(title) + '</div><div class="cal-nav">' +
@@ -394,7 +462,7 @@
     $('times').innerHTML = list.map(function (s) {
       return '<button type="button" class="time" data-start="' + esc(s.start) + '">' + esc(fmt(s.start, TIME)) + '</button>';
     }).join('');
-    $('zone').textContent = (sameZoneAsLuca() ? 'Eastern Time.' : 'Your time zone (' + zoneName(HERE) + ').') + ' Each session is ' + LEN + ' minutes.';
+    $('zone').textContent = (sameZoneAsLuca() ? 'Eastern Time.' : 'Your time zone (' + zoneName(HERE) + ').') + ' Each session is ' + lenText() + '.';
     Array.prototype.forEach.call($('times').querySelectorAll('.time'), function (b) { b.onclick = function () { pick(b.getAttribute('data-start')); }; });
     showStep('times');
     lastFocus = document.activeElement;
@@ -414,11 +482,13 @@
   }
   function pick(start) {
     chosen = start;
-    $('chosen').textContent = fmt(start, DAY) + ' at ' + fmt(start, TIME) + ', ' + LEN + ' min';
+    $('chosen').textContent = fmt(start, DAY) + ' at ' + fmt(start, TIME) + ', ' + (LEN === 120 ? '2 hours' : LEN + ' min') + ', ' + (WHERE === 'inperson' ? 'in person' : 'online');
     requestId = newRequestId();       // one id per chosen time: a retry of this booking, not a new one
     $('sheet-lbl').textContent = 'Almost booked';
     $('sheet-title').textContent = 'Your details';
     say('');
+    $('repeat-wrap').hidden = !!moving;
+    $('go').textContent = moving ? 'Move the session' : 'Book the session';
     showStep('form');
     setTimeout(function () { (!$('b-name').value ? $('b-name') : $('go')).focus(); }, 60);
   }
@@ -436,19 +506,25 @@
     if (name.length < 2) { say('Please add your name.', true); $('b-name').focus(); return; }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { say('Please check your email address.', true); $('b-email').focus(); return; }
     if (student.length < 2) { say('Please add the student’s name.', true); $('b-student').focus(); return; }
-    var details = { name: name, email: email, phone: $('b-phone').value.trim(), student: student, where: $('b-where').value };
-    $('go').disabled = true; $('go').textContent = 'Booking…';
+    var details = { name: name, email: email, phone: $('b-phone').value.trim(), student: student, where: WHERE };
+    $('go').disabled = true; $('go').textContent = moving ? 'Moving…' : 'Booking…';
     say('This takes about 15 seconds, so please keep this page open.');
-    post({ action: 'bookSession', start: chosen, minutes: LEN, requestId: requestId, name: name, email: email,
-           phone: details.phone, student: student, where: details.where, notes: $('b-notes').value.trim(), website: $('b-website').value }, BOOK_TIMEOUT_MS)
+    var req = { action: 'bookSession', start: chosen, minutes: LEN, requestId: requestId, name: name, email: email,
+           phone: details.phone, student: student, where: details.where, notes: $('b-notes').value.trim(), website: $('b-website').value,
+           repeat: moving ? 1 : Number($('b-repeat').value) };
+    if (moving) { req.replace = MANAGE; req.replaceStart = moving.start; }
+    post(req, BOOK_TIMEOUT_MS)
       .then(function (d) {
-        $('go').disabled = false; $('go').textContent = 'Book the session';
+        $('go').disabled = false; $('go').textContent = moving ? 'Move the session' : 'Book the session';
         if (d && d.ok) {
           try { localStorage.setItem(SAVED, JSON.stringify(details)); } catch (e) {}
           return done(d, email, details);
         }
         var err = d && d.error;
         if (err === 'slot_taken') { closeSheet(); return load('That time was just taken. Here is what is open now.'); }
+        if (err === 'inperson_hours') { closeSheet(); setWhere('inperson'); return load('That time runs past the library\u2019s hours. Here are the in-person times that fit.'); }
+        if (err === 'too_late') return say('That session is less than 24 hours away, so it can\u2019t be moved here. Text me at ' + PHONE + '.', true);
+        if (err === 'bad_token' || err === 'not_found') return say('That session could not be found. Text me at ' + PHONE + ' and I\u2019ll sort it out.', true);
         if (err === 'too_many') return say('You already have ' + (d.count || 4) + ' upcoming sessions booked. To add more, text me at ' + PHONE + '.', true);
         if (err === 'bad_email') return say('Please check your email address.', true);
         if (err === 'bad_phone') return say('Please check the phone number, or leave it blank.', true);
@@ -459,28 +535,93 @@
   });
 
   function done(d, email, details) {
-    try { if (window.MTrack) window.MTrack.event('schedule_session', { page: location.pathname, minutes: LEN }); } catch (e) {}
-    var start = d.start || chosen;
-    var eastern = sameZoneAsLuca() ? '' : ' (' + fmt(start, TIME, LUCA_TZ) + ' Eastern)';
+    try { if (window.MTrack) window.MTrack.event('schedule_session', { page: location.pathname, minutes: LEN, repeat: (d.booked || []).length }); } catch (e) {}
+    var booked = d.booked && d.booked.length ? d.booked : [{ start: d.start || chosen }];
+    var skipped = d.skipped || [];
+    var start = booked[0].start;
+    var eastern = function (iso) { return sameZoneAsLuca() ? '' : ' (' + fmt(iso, TIME, LUCA_TZ) + ' Eastern)'; };
     var online = details.where === 'online';
+    var wasMoving = !!moving;
     $('scrim').classList.remove('open'); $('scrim').setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
     notice('');
+    var times = booked.length > 1
+      ? '<ul class="mg-list" style="text-align:left;max-width:360px;margin:0 auto 12px">' + booked.map(function (x) {
+          return '<li class="mg-row"><span class="mg-when">' + esc(fmt(x.start, DAY)) + ' at ' + esc(fmt(x.start, TIME)) + esc(eastern(x.start)) + '</span></li>'; }).join('') + '</ul>'
+      : '<p class="when">' + esc(details.student) + ', ' + esc(fmt(start, DAY)) + ' at ' + esc(fmt(start, TIME)) + esc(eastern(start)) + ', ' + lenText() + (online ? ', online' : ', in person') + '</p>';
+    var skippedHtml = skipped.length
+      ? '<p>' + esc(skipped.map(function (x) { return fmt(x.start, { month: 'short', day: 'numeric' }); }).join(', ')) +
+        (skipped.length === 1 ? ' wasn&rsquo;t' : ' weren&rsquo;t') + ' open at that time, so ' + (skipped.length === 1 ? 'it isn&rsquo;t' : 'those aren&rsquo;t') + ' booked. Use <b>Pick another time</b> to choose a different time for ' + (skipped.length === 1 ? 'that week' : 'those weeks') + '.</p>'
+      : '';
     $('cal').innerHTML =
       '<div class="done"><div class="tick" aria-hidden="true">&#10003;</div>' +
-      '<div class="lbl" style="color:var(--gold-deep);margin-bottom:8px">Booked</div>' +
-      '<h2>See you then!</h2>' +
-      '<p class="when">' + esc(details.student) + ', ' + esc(fmt(start, DAY)) + ' at ' + esc(fmt(start, TIME)) + esc(eastern) + ', ' + LEN + ' minutes' + (online ? ', online' : ', in person') + '</p>' +
-      '<p>A calendar invite' + (online ? ' with the Google Meet link' : '') + ' is on its way to <b>' + esc(email) + '</b>. ' +
+      '<div class="lbl" style="color:var(--gold-deep);margin-bottom:8px">' + (wasMoving ? 'Moved' : 'Booked') + '</div>' +
+      '<h2>' + (booked.length > 1 ? esc(details.student) + '&rsquo;s weekly sessions' : 'See you then!') + '</h2>' + times + skippedHtml +
+      '<p>A confirmation' + (online ? ' with the Google Meet link' : '') + ' is on its way to <b>' + esc(email) + '</b>, with a calendar file and a link to move or cancel up to 24 hours before. ' +
       'If it doesn&rsquo;t show up in a few minutes, check your spam folder.</p>' +
-      '<p>Need a different time? Reply to the invite or text me at <a href="sms:+12012752791">' + PHONE + '</a>.</p>' +
-      '<p style="margin-top:18px"><button type="button" class="btn ghost" id="another">Book another session</button></p>' +
+      '<p style="margin-top:18px"><button type="button" class="btn ghost" id="another">' + (skipped.length ? 'Pick another time' : 'Book another session') + '</button></p>' +
       '<p style="margin-top:14px"><b style="color:var(--ink);font-weight:600">Luca Moretti</b></p></div>';
     $('another').onclick = function () { load(); };
+    if (wasMoving) { moving = null; loadManage(); }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
+  /* ═══ MOVE OR CANCEL (the link in the confirmation email, #m=...) ═══ */
+  var MANAGE = (/[#&]m=([^&]+)/.exec(location.hash) || [])[1] || '';
+  var moving = null;   // { start, minutes, where } while picking a new time for one session
+  function loadManage() {
+    if (!MANAGE) return;
+    var box = $('manage');
+    box.hidden = false;
+    box.innerHTML = '<div class="state"><div class="spin"></div>Finding your sessions&hellip;</div>';
+    post({ action: 'mySessions', token: decodeURIComponent(MANAGE) }).then(function (d) {
+      if (!d || !d.ok) {
+        box.innerHTML = '<p><b>This link doesn&rsquo;t match a booking.</b> Text me at <a href="sms:+12012752791">' + PHONE + '</a> and I&rsquo;ll sort it out.</p>';
+        return;
+      }
+      [['b-name', d.name], ['b-email', d.email], ['b-phone', d.phone], ['b-student', d.student]].forEach(function (f) { if (f[1]) $(f[0]).value = f[1]; });
+      var rows = d.sessions.map(function (x) {
+        var gone = x.state === 'cancelled' || x.state === 'moved';
+        var tag = x.state === 'cancelled' ? 'Cancelled' : x.state === 'moved' ? 'Moved' : x.state === 'past' ? 'Done' : '';
+        var acts = x.canChange
+          ? '<span class="mg-acts"><button type="button" class="btn ghost" data-move="' + esc(x.start) + '" data-min="' + x.minutes + '" data-where="' + esc(x.where) + '">Move</button>' +
+            '<button type="button" class="btn ghost" data-cancel="' + esc(x.start) + '">Cancel</button></span>'
+          : (x.state === 'booked' ? '<span class="mg-note">Within 24 hours: text me</span>' : '<span class="mg-note">' + tag + '</span>');
+        return '<li class="mg-row' + (gone ? ' is-gone' : '') + '"><span class="mg-when">' + esc(fmt(x.start, DAY)) + ' at ' + esc(fmt(x.start, TIME)) +
+          '<small>' + (x.minutes === 120 ? '2 hours' : x.minutes + ' minutes') + ', ' + (x.where === 'inperson' ? 'in person' : 'online') + '</small></span>' + acts + '</li>';
+      }).join('');
+      box.innerHTML = '<div class="lbl" style="color:var(--gold-deep)">Your booking</div><h2>' + esc(d.student) + '&rsquo;s sessions</h2>' +
+        '<ul class="mg-list">' + rows + '</ul>' +
+        '<p class="mg-note">You can move or cancel a session up to 24 hours before it. Closer to the time, text me at <a href="sms:+12012752791">' + PHONE + '</a>.</p>';
+      Array.prototype.forEach.call(box.querySelectorAll('[data-cancel]'), function (b) {
+        b.onclick = function () {
+          var at = b.getAttribute('data-cancel');
+          if (!window.confirm('Cancel the session on ' + fmt(at, DAY) + ' at ' + fmt(at, TIME) + '?')) return;
+          b.disabled = true; b.textContent = 'Cancelling…';
+          post({ action: 'cancelSession', token: decodeURIComponent(MANAGE), start: at }, BOOK_TIMEOUT_MS).then(function (r) {
+            if (r && r.ok) { loadManage(); load(); return; }
+            b.disabled = false; b.textContent = 'Cancel';
+            window.alert(r && r.error === 'too_late' ? 'That session is less than 24 hours away. Please text me at ' + PHONE + '.'
+              : 'That didn’t go through. Please try again, or text me at ' + PHONE + '.');
+          });
+        };
+      });
+      Array.prototype.forEach.call(box.querySelectorAll('[data-move]'), function (b) {
+        b.onclick = function () {
+          moving = { start: b.getAttribute('data-move'), minutes: Number(b.getAttribute('data-min')), where: b.getAttribute('data-where') };
+          var lenBtn = document.querySelector('[data-len="' + moving.minutes + '"]');
+          if (lenBtn && !lenBtn.hidden) lenBtn.click();
+          setWhere(moving.where);
+          if (all) show();
+          notice('Pick a new time for the session on ' + fmt(moving.start, DAY) + ' at ' + fmt(moving.start, TIME) + '. It stays booked until the new time is.');
+          document.querySelector('.len-row').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        };
+      });
+    });
+  }
+
   load();
+  loadManage();
 })();
 </script>
 </body>

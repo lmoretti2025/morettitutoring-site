@@ -1182,10 +1182,10 @@
 </script>
 <script src="time-budgets.js?v=20260912a"></script>
 <script src="grid-in.js?v=20260910a"></script>
-<script src="signals.js?v=20260927c"></script>
+<script src="signals.js?v=20260927m"></script>
 <script src="desmos-tags.js?v=20260916c"></script>
 <script src="question-flag.js?v=20260925a"></script>
-<script src="report-tour.js?v=20260927f"></script>
+<script src="report-tour.js?v=20260929m"></script>
 <script>
 /* FLAGS FROM THE ADMIN PAGE (Luca, 2026-09-25). admin.html shows this report
    in a sandboxed frame with no access to its sign-in, so it says hello by
@@ -2085,12 +2085,26 @@
   // unchanged; only the question bank source differs. practice-tests.js
   // keys R&W as 'readingWriting', banks.js as 'reading-writing'; this
   // translates so callers can use sec.k as-is.
+  function moduleOnlyOf(sectionKey) {
+    var sec = ((typeof data !== 'undefined' && data && data.s) || []).filter(function (x) { return x && x.k === sectionKey && x.mo; })[0];
+    return sec && /^(module1|Easier|Harder)$/.test(sec.mo) ? sec.mo : null;
+  }
+  function moduleOnlyLabel(sectionKey) {
+    var mo = moduleOnlyOf(sectionKey);
+    return mo ? (sectionKey === 'math' ? 'Math' : 'Reading & Writing') + ', ' + (mo === 'module1' ? 'Module 1' : 'Module 2 (' + (mo === 'Harder' ? 'harder' : 'easier') + ')') : '';
+  }
   function getBank(sectionKey) {
     if (data.pt) {
       var pt = (window.SAT_PRACTICE_TESTS || []).filter(function (t) { return t.id === data.pt; })[0];
       if (pt && pt.sections) {
         var ptKey = sectionKey === 'reading-writing' ? 'readingWriting' : sectionKey;
-        if (pt.sections[ptKey]) return pt.sections[ptKey];
+        if (pt.sections[ptKey]) {
+          /* One module sat on its own (sec.mo, 2026-09-27): that module alone,
+             as a one-module section, which is how its answers were saved. */
+          var mo = moduleOnlyOf(sectionKey);
+          if (mo) return { module1: pt.sections[ptKey][mo === 'module1' ? 'module1' : 'module2' + mo] || [] };
+          return pt.sections[ptKey];
+        }
       }
     }
     return window.SECTION_BANKS[sectionKey];
@@ -2312,7 +2326,7 @@
              (i < moduleSplit ? 'module1' : ('module2' + (sec.v || 'Easier'))) + '|' + (i < moduleSplit ? i : (i - moduleSplit)) });
     });
     sections.push({
-      key: sec.k, label: sectionLabel(sec.k, bank), c: c, t: qs.length, rows: rows, domains: secDomains,
+      key: sec.k, moduleOnly: moduleOnlyOf(sec.k), label: moduleOnlyLabel(sec.k) || sectionLabel(sec.k, bank), c: c, t: qs.length, rows: rows, domains: secDomains,
       distractors: secDistractors, missedMc: secMissedMc, missedMcAll: secMissedMcAll, diff: diff, c1: c1, t1: t1, c2: c2, t2: t2, variant: sec.v,
       timeTotal: secTimeTotal, timeCorrect: secTimeCorrect, timeIncorrect: secTimeIncorrect,
       // Total minutes allotted for this section (both modules, accommodation-
@@ -2470,7 +2484,10 @@
   if (attemptDate && isNaN(attemptDate.getTime())) attemptDate = null;
   var timeStr = attemptDate ? attemptDate.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : null;
 
-  document.getElementById('r-title').textContent = data.n + ' · ' + (data.ptTitle ? data.ptTitle + ' Report' : data.t + ' Diagnostic Report');
+  /* One module on its own names the module in the title (Luca, 2026-09-29). */
+  var moduleOnlyTitle = (data.s || []).map(function (x) { return x && moduleOnlyLabel(x.k); }).filter(Boolean)[0];
+  document.getElementById('r-title').textContent = data.n + ' · ' + (moduleOnlyTitle ? (data.ptTitle || 'Practice test') + ' · ' + moduleOnlyTitle
+    : data.ptTitle ? data.ptTitle + ' Report' : data.t + ' Diagnostic Report');
   document.getElementById('r-sub').textContent = 'Administered ' + dateStr + (timeStr ? ' at ' + timeStr : '') + ' · Moretti student portal';
   // A practice test is not a diagnostic (audit 6): name what it was.
   document.getElementById('r-sub2').textContent = data.n + ' · ' + (data.ptTitle || (data.t + ' Diagnostic')) + ' · ' + dateStr;
@@ -2770,6 +2787,7 @@
   // module-weight curve is inferred from which curve was passed.
   function satSectionScore(sec, curve) {
     if (!sec || !sec.t) return null;
+    if (sec.moduleOnly) return null;   // one module sat on its own: raw score only
     var pct = sec.c / sec.t * 100;
     var base = scaleFromPct(pct, curve);
     // Module-1 vs Module-2 success rates. A non-adaptive section (no
@@ -2816,9 +2834,12 @@
     // On a single-section attempt the surviving section IS the headline, so
     // it takes the big tile rather than sitting in the small row next to an
     // empty space where the composite would have been.
-    if (rw) tilesEl.appendChild(scoreTile('Reading & Writing (200–800)', rw.c, rw.t, rwScaled,
+    var moduleSec = [rw, mathSec].filter(function (x) { return x && moduleOnlyOf(x.key); })[0];
+    // The title names the module; the tile is just the raw score.
+    if (moduleSec) tilesEl.appendChild(scoreTile('Raw score (one module, so no 200–800 score)', moduleSec.c, moduleSec.t, moduleSec.c + '/' + moduleSec.t, true));
+    else if (rw) tilesEl.appendChild(scoreTile('Reading & Writing (200–800)', rw.c, rw.t, rwScaled,
       singleSection && rwScaled !== null && rwScaled !== undefined));
-    if (mathSec) tilesEl.appendChild(scoreTile('Math (200–800)', mathSec.c, mathSec.t, mathScaled,
+    if (mathSec && !moduleSec) tilesEl.appendChild(scoreTile('Math (200–800)', mathSec.c, mathSec.t, mathScaled,
       singleSection && mathScaled !== null && mathScaled !== undefined));
 
     /* ═══ SCORE BAND ═══ the composite needs to carry its own imprecision,
@@ -2956,6 +2977,8 @@
       { lab: skipped ? 'Accuracy (answered)' : 'Accuracy', val: attempted ? accuracyPct + '%' : '—', cls: !attempted ? '' : accuracyPct >= 75 ? 'ok' : (accuracyPct < 50 ? 'bad' : ''), icon: ICONS.accuracy },
       { lab: 'Unattempted', val: String(skipped), cls: skipped > 0 ? 'bad' : '', icon: ICONS.unattempted }
     ];
+    // One module: the big number above already is correct out of total.
+    if ((data.s || []).some(function (x) { return x && moduleOnlyOf(x.k); })) stats = stats.filter(function (s) { return s.lab !== 'Correct'; });
     wrap.innerHTML = stats.map(function (s) {
       return '<div class="raw-stat ' + s.cls + '"><span class="raw-stat-icon">' + s.icon + '</span><div class="raw-stat-text"><div class="raw-stat-lab">' + s.lab + '</div><div class="raw-stat-num">' + s.val + '</div></div></div>';
     }).join('');
@@ -3920,6 +3943,10 @@
       ctx.scale(dpr, dpr);
       return { cv: cv, ctx: ctx };
     }
+  } else if (bridgeWrap && (data.s || []).some(function (x) { return x && moduleOnlyOf(x.k); })) {
+    // One module has no scale to climb: no section at all rather than "not available".
+    bridgeWrap.style.display = 'none';
+    var bh = document.getElementById('bridge-hed'); if (bh) bh.style.display = 'none';
   } else if (bridgeWrap) {
     bridgeWrap.innerHTML = '<div class="bridge-empty">Not available for this test type.</div>';
   }

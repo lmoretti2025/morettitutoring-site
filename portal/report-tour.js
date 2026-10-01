@@ -64,7 +64,8 @@
     '#mtt .t-halves{display:grid;gap:18px;margin-top:28px}',
     '#mtt .t-ht{display:flex;justify-content:space-between;font-size:14px;color:var(--mid);margin-bottom:8px}#mtt .t-ht b{color:var(--ink);font-weight:500;font-variant-numeric:tabular-nums}',
     '#mtt .t-dots{display:grid;grid-template-columns:repeat(auto-fill,16px);gap:6px;margin-top:28px}',
-    '#mtt .t-dot{width:16px;height:16px;border-radius:50%;background:rgba(17,17,17,.18);transition:background .6s var(--ease),border-radius .6s var(--ease)}',
+    '#mtt .t-dot{width:16px;height:16px;border-radius:50%;background:rgba(17,17,17,.18);opacity:0;transform:scale(.2);transition:opacity .35s var(--ease),transform .45s var(--ease),background .6s var(--ease),border-radius .6s var(--ease)}',
+    '#mtt .t-dots.pop .t-dot{opacity:1;transform:scale(1)}',
     '#mtt .t-dots.split .t-dot.content{background:var(--content)}#mtt .t-dots.split .t-dot.clock{background:var(--clock);border-radius:4px}',
     '#mtt .t-key{display:grid;gap:12px;margin-top:24px}',
     '#mtt .t-key div{display:flex;align-items:baseline;gap:12px;font-size:15px;color:var(--mid);opacity:0;transition:opacity .6s var(--ease)}',
@@ -261,17 +262,15 @@
         halves = '<div class="t-halves r">' +
           '<div><div class="t-ht"><span>Reading &amp; Writing</span><b>' + rw + '</b></div><div class="t-track"><div class="t-fill" data-w="' + (100 * rw / 800).toFixed(1) + '"></div></div></div>' +
           '<div><div class="t-ht"><span>Math</span><b>' + ma + '</b></div><div class="t-track"><div class="t-fill" data-w="' + (100 * ma / 800).toFixed(1) + '"></div></div></div></div>';
-        /* A gap between the sections is only called a difference when it beats
-           one test's noise: each section's error is about 45 to 60 points
-           (MorettiSignals.sectionSem), so the gap's is near 80, and 1.645 of it
-           (about 130 mid-scale) is the bar. Which section holds the cheaper
-           points is the "Where the points are" screen's job, not this one's. */
-        var gap = Math.abs(rw - ma), MS = window.MorettiSignals;
-        var semOf = function (v) { try { return MS && MS.sectionSem ? Number(MS.sectionSem(v)) || 55 : 55; } catch (e) { return 55; } };
-        var se = Math.sqrt(Math.pow(semOf(rw), 2) + Math.pow(semOf(ma), 2));
-        say = gap >= 1.645 * se
-          ? (rw > ma ? 'Reading &amp; Writing' : 'Math') + ' is <strong>ahead by ' + gap + '</strong>, more than one test\u2019s ordinary noise.'
-          : 'Your two sections are <strong>close</strong>: within what one test can tell apart.';
+        /* Close means within 50 points (Luca, 2026-09-27: Nikolas' 710 and 600
+           were being called close under the old noise-based bar of about 130).
+           Which section holds the cheaper points is the "Where the points are"
+           screen's job, not this one's. */
+        var gap = Math.abs(rw - ma);
+        say = gap > 50
+          ? (rw > ma ? 'Reading &amp; Writing' : 'Math') + ' is <strong>ahead by ' + gap + '</strong>.'
+          : gap === 0 ? 'Your two sections are <strong>even</strong>.'
+          : 'Your two sections are <strong>close</strong>, within ' + gap + ' points of each other.';
       } else {
         var sKey = sections[0] && sections[0].key;
         halves = '<p class="t-say r" style="margin-top:14px">' + esc(secName(sKey)) + ' only, on the 200 to 800 scale.</p>';
@@ -323,7 +322,8 @@
     if (causes && missed > 0) {
       var nC = causes.content, nK = causes.clock, nM = causes.method;
       var dots = '';
-      for (var i = 0; i < nC + nK && i < 98; i++) dots += '<span class="t-dot ' + (i < nC ? 'content' : 'clock') + '"></span>';
+      // Each dot comes in, then colors, a beat after the one before (Luca, 2026-09-29: it has to be seen).
+      for (var i = 0; i < nC + nK && i < 98; i++) dots += '<span class="t-dot ' + (i < nC ? 'content' : 'clock') + '" style="transition-delay:' + (i * 35) + 'ms"></span>';
       var share = nK / (nC + nK || 1);
       var sayMiss = nK === 0 ? 'Every miss was a real attempt, so the points are in <strong>what to review next</strong>, not in ' + clk + '.'
         : share >= 0.25 ? 'So ' + (share >= 0.5 ? 'most' : 'a good share') + ' of your misses <strong>aren\u2019t about what you know</strong>. ' +
@@ -490,7 +490,8 @@
         var ranLate = (pace2.blank || 0) + (pace2.ranOut || 0);
         var head = ranLate ? modName + ': the clock caught up with you.'
           : methodN ? 'A few right answers took so long they cost time.'
-          : 'A few answers came too fast to have read the question.';
+          /* "A few" only for a few (stats audit, 2026-09-29: it was said of 8 to 12). */
+          : (pace2.tooFast > 4 ? cap(numWord(pace2.tooFast)) + ' answers came too fast to have read the question.' : 'A few answers came too fast to have read the question.');
         var sayClock = ranLate ? 'By the end, ' + pl(ranLate, 'question was', 'questions were') + ' hurried or left blank. The fix is a skill, not speed: <strong>know when to move on</strong>.'
            : methodN ? cap(pl(methodN, 'right answer', 'right answers')) + ' ran far over time while the clock was short. The fix is a skill, not speed: <strong>know when to move on</strong>.'
            : cap(pl(pace2.tooFast, 'answer', 'answers')) + ' took only seconds, <strong>less than it takes to read the question</strong>. Reading those through is the fix.';
@@ -661,10 +662,15 @@
     }
 
     // ---- the plan: three things, from the same areas and the clock
+    /* An area where a third or more of the answers came too fast can't be
+       judged (planInputs.unjudged, stats audit 2026-09-29): never start there. */
+    var unjudged = function (name) {
+      return (P.unjudged || []).some(function (u) { return u && (name === u || String(name).indexOf(u + ' ') === 0); });
+    };
     var tasks = [];
-    if (P.prereq && P.prereq.name) tasks.push({ h: P.prereq.name, p: P.prereq.kind === 'prereq' ? 'This one comes first: ' + P.prereq.blocks + ' builds on it.' : 'The cheapest points on the test. Start here.' });
+    if (P.prereq && P.prereq.name && !unjudged(P.prereq.name)) tasks.push({ h: P.prereq.name, p: P.prereq.kind === 'prereq' ? 'This one comes first: ' + P.prereq.blocks + ' builds on it.' : 'The cheapest points on the test. Start here.' });
     areas.forEach(function (a) {
-      if (tasks.length < 3 && !tasks.some(function (t) { return t.h === a.name; })) {
+      if (tasks.length < 3 && !unjudged(a.name) && !tasks.some(function (t) { return t.h === a.name; })) {
         tasks.push({ h: a.name, p: clearArea(a) ? 'Relearn it from the ground up, then practice until it holds under time.'
                                                 : 'The strongest lead on this test. Worth checking first, before planning around it.' });
       }
@@ -676,8 +682,9 @@
     var attempted = Math.max(1, totalQ - (R.skipped || 0));
     if (!areas.length && P.causes && P.causes.content / attempted >= 0.15) {
       var hasRW = sections.some(function (x) { return x.key === 'reading-writing'; }), hasM = sections.some(function (x) { return x.key === 'math'; });
-      var found = [hasRW ? 'Standard English Conventions in Reading & Writing' : '', hasM ? 'Algebra in Math' : ''].filter(String).join(', and ');
-      tasks.push({ h: 'Core material across the board', p: 'The misses are spread over most areas, so start with the foundations: ' + found + '.' });
+      var found = [hasRW && !unjudged('Standard English Conventions') ? 'Standard English Conventions in Reading & Writing' : '',
+                   hasM && !unjudged('Algebra') ? 'Algebra in Math' : ''].filter(String).join(', and ');
+      if (found) tasks.push({ h: 'Core material across the board', p: 'The misses are spread over most areas, so start with the foundations: ' + found + '.' });
     }
     var paceLost = (P.pace && (P.pace.blank + P.pace.ranOut)) || 0;
     if (rushedSitting) {
@@ -710,6 +717,49 @@
     return M;
   }
 
+  /* ---------- the site's sample (diagnostic.html) ----------
+     Luca, 2026-09-29: the diagnostic page IS this sequence, full screen. It
+     opens "Hi there, here's what your results will look like", and the + on
+     every screen explains to a parent what that screen is showing. The
+     sample's own numbers stay underneath, as an example. */
+  var SAMPLE_NOTES = {
+    conditions: ['How the test was taken', 'Before any number, the report checks how the test was taken: the time of day, breaks, whether time was left on the clock, and whether answers came in too fast to have been read. A score from a rushed or interrupted sitting is not a real read of where your student stands, so the report says so first.'],
+    score: ['The score', 'The same 400 to 1600 scale as the real SAT, split into Reading & Writing and Math, with the range one test can honestly claim. A single sitting can land a little high or low, and the range keeps anyone from overreacting to one test.'],
+    misses: ['Where the points went', 'Every missed question is sorted by why it was missed: not knowing the material, running short on time, or a slip on something your student actually knows. Each needs a different fix, and most students miss points in more than one way.'],
+    strengths: ['What is already working', 'The skills your student got right consistently. Knowing them matters as much as knowing the gaps: session time does not go to them, so the hours go where the points are.'],
+    gaps: ['What to relearn', 'The specific skills behind the content misses, named the way the College Board names what the SAT tests. They come up on every SAT, so each one fixed pays off on every test after it.'],
+    clock: ['The clock', 'How the time went in each module, against a steady pace. It shows whether your student ran out of time, rushed, or left minutes unused, which is often worth as many points as content.'],
+    route: ['The route', 'The order your student moved through each module: the first pass, the skips, and the returns. It shows habits no score can, like getting stuck early or never going back to check.'],
+    habits: ['How the test was worked', 'Patterns in how questions were answered: changing answers, crossing out choices, using the calculator, guessing. Small habits like these add up to real points, in both directions.'],
+    path: ['Where the points are', 'The points still on the table, and which are closest to being earned. It turns the report into a target: how far the score can realistically move, and what moves it.'],
+    plan: ['The plan', 'Two or three concrete things to do first, and about how much practice a week, built from every screen before this one. After the diagnostic, we go over it together on a free call.']
+  };
+  function sampleize(M) {
+    M.screens.forEach(function (s) {
+      if (s.name === 'hello') {
+        s.html = '<p class="t-eye r">The free diagnostic &middot; a sample report</p>' +
+          '<h1 class="r">Hi there.<br>Here\u2019s what your results will look like.</h1>' +
+          '<p class="t-say r">This is the walkthrough every student gets with their report, shown here for a made-up student. ' +
+          'Tap the <strong>+</strong> on any screen for what that screen is telling you.</p>' +
+          '<div class="r"><button type="button" class="t-btn" data-go="next">Show me &rarr;</button></div>';
+        return;
+      }
+      var note = SAMPLE_NOTES[s.name] || ['About this screen', 'One part of the report, from this sample student\u2019s test.'];
+      var numbers = s.sheet && s.sheet.html
+        ? '<p style="margin-top:18px"><b>' + esc(s.sheet.title) + ', for this sample student:</b></p>' + s.sheet.html : '';
+      s.sheet = { eye: 'What this screen shows', title: note[0], html: '<p>' + esc(note[1]) + '</p>' + numbers };
+      var btn = '<button type="button" class="t-more" data-sheet="' + s.name + '">What this shows</button>';
+      if (/<button type="button" class="t-more"[^>]*>[^<]*<\/button>/.test(s.html)) {
+        s.html = s.html.replace(/<button type="button" class="t-more"[^>]*>[^<]*<\/button>/, btn);
+      } else {
+        // Before the screen's last buttons (the plan's), or at the end.
+        var at = s.html.lastIndexOf('<div class="r"><button type="button" class="t-btn');
+        s.html = at === -1 ? s.html + '<div class="r">' + btn + '</div>' : s.html.slice(0, at) + '<div class="r">' + btn + '</div>' + s.html.slice(at);
+      }
+    });
+    // Two screens of one name (never today) would share one note: harmless.
+  }
+
   /* ---------- the player ---------- */
   var root = null, cur = -1, timers = [], model = null, lastFocus = null;
   function later(fn, ms) { timers.push(setTimeout(fn, reduced() ? 0 : ms)); }
@@ -734,12 +784,20 @@
   function enter(el) {
     Array.prototype.forEach.call(el.querySelectorAll('[data-count]'), countUp);
     Array.prototype.forEach.call(el.querySelectorAll('.t-fill[data-w]'), function (f) { f.style.width = f.getAttribute('data-w') + '%'; });
-    var d = el.querySelector('.t-dots'); if (d) later(function () { d.classList.add('split'); }, 1100);
+    /* The dots appear once the screen has faded in (the .r reveal takes
+       about .8s), one by one, then split into their colors: started any
+       sooner, the whole thing ran while the screen was still invisible. */
+    var d = el.querySelector('.t-dots');
+    if (d) {
+      var nd = d.children.length;
+      later(function () { d.classList.add('pop'); }, 900);
+      later(function () { d.classList.add('split'); }, 900 + nd * 35 + 500);
+    }
     Array.prototype.forEach.call(el.querySelectorAll('.t-cb'), function (b, i) { later(function () { b.style.height = b.getAttribute('data-h') + '%'; }, 500 + i * 40); });
   }
   function leave(el) {
     Array.prototype.forEach.call(el.querySelectorAll('.t-fill[data-w]'), function (f) { f.style.width = '0'; });
-    var d = el.querySelector('.t-dots'); if (d) d.classList.remove('split');
+    var d = el.querySelector('.t-dots'); if (d) d.classList.remove('split', 'pop');
     Array.prototype.forEach.call(el.querySelectorAll('.t-cb'), function (b) { b.style.height = '0'; });
   }
   function go(n) {
@@ -807,7 +865,7 @@
     setTimeout(function () { if (r.parentNode) r.parentNode.removeChild(r); }, 450);
     if (lastFocus && lastFocus.focus) try { lastFocus.focus(); } catch (e) {}
   }
-  function open(M) {
+  function open(M, instant) {
     if (root || !M || !M.screens.length) return;
     model = M; injectCss(); lastFocus = document.activeElement;
     root = document.createElement('div'); root.id = 'mtt';
@@ -819,11 +877,16 @@
       '<div class="t-nav"><div class="t-nav-in"><button type="button" class="t-arrow t-prev" aria-label="Back">&larr;</button><span class="t-hint">Tap, swipe or use arrow keys</span>' +
       '<button type="button" class="t-arrow next t-next" aria-label="Next">&rarr;</button></div></div>' +
       '<div class="t-sheet"><div class="t-card" role="dialog" aria-modal="true" aria-labelledby="mtt-sh-title"><div class="t-sh"><h3 id="mtt-sh-title"></h3><button type="button" class="t-x" aria-label="Close">&times;</button></div><div class="t-sb"></div></div></div>';
+    /* Opening by itself (instant): covered from the first frame, no fade, so
+       the report never shows for a moment underneath (Luca, 2026-09-27). */
+    if (instant) { root.style.transition = 'none'; root.classList.add('on'); }
     document.body.appendChild(root);
     document.documentElement.style.overflow = 'hidden';
     /* The site's sample (diagnostic.html): nothing to skip to, and every way
        out of the story leads to the sign-up form on the page around it. */
     if (M.sample) {
+      // The site's name, not "Demo's diagnostic", and the one way off the page.
+      root.querySelector('.t-top span').innerHTML = '<a href="/" target="_top" style="color:inherit;text-decoration:none"><b>Moretti Test Prep &amp; Tutoring</b></a>';
       var sk = root.querySelector('.t-skip');
       sk.textContent = 'Sample: a made-up student'; sk.removeAttribute('data-go'); sk.disabled = true; sk.style.cursor = 'default';
       Array.prototype.forEach.call(root.querySelectorAll('.t-scr [data-go="close"]'), function (b) {
@@ -868,7 +931,7 @@
     document.addEventListener('keydown', onKey);
     requestAnimationFrame(function () {
       if (!root) return;
-      root.classList.add('on'); go(0);
+      root.classList.add('on'); root.style.transition = ''; go(0);
       // Focus moves into the walkthrough on open (audit 6: Tab reached the page behind it).
       var nxt = root.querySelector('.t-scr.on button') || root.querySelector('.t-next');
       if (nxt) try { nxt.focus(); } catch (e) {}
@@ -896,21 +959,26 @@
         anchor.parentNode.insertBefore(b, anchor);
       }
       // The public sample: the walkthrough is the whole show, so it opens every time.
-      if (opts.sample) { M.sample = true; setTimeout(function () { open(M); }, 300); return; }
+      // Opened at once and opaque, so the report never shows underneath first.
+      if (opts.sample) {
+        M.sample = true; sampleize(M); open(M, true);
+        // The page around the sample shows its frame only now, so nothing flickers first.
+        try { window.parent.postMessage({ type: 'moretti-tour', action: 'ready' }, '*'); } catch (e) {}
+        return;
+      }
       // By itself once per attempt per device; never when printing or embedded for show.
       // Not by itself inside Luca's admin viewer (audit 6: it greeted him as the student).
-      var inAdmin = false;
-      try { inAdmin = window.parent !== window && /admin/i.test(window.parent.location.pathname); } catch (e) { inAdmin = false; }
+      /* The admin viewer's frame is sandboxed, so the parent's address can't be
+         read from here; it marks the link ?admin=1 instead (2026-09-27). */
+      var inAdmin = /[?&]admin=1\b/.test(location.search);
+      try { inAdmin = inAdmin || (window.parent !== window && /admin/i.test(window.parent.location.pathname)); } catch (e) { /* sandboxed: the marker decides */ }
       if (opts.autoOpen !== false && !inAdmin) {
         var st = storage(), key = 'mtt_seen:' + M.attemptId, seen = false;
         try { seen = !!(st && st.getItem(key)); } catch (e) {}
         if (opts.always) seen = false;   // a showcase link: the walkthrough every time
         if (!seen) {
-          setTimeout(function () {
-            if (!document.body.contains(anchor || document.body)) return;   // the report was closed or replaced first
-            open(M);
-            try { if (st && root) st.setItem(key, String(Date.now())); } catch (e) {}
-          }, opts.delay || 500);
+          open(M, true);
+          try { if (st && root) st.setItem(key, String(Date.now())); } catch (e) {}
         }
       }
     } catch (e) { if (window.console) console.warn('report walkthrough:', e); }
