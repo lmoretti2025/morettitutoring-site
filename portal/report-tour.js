@@ -617,6 +617,38 @@
         sheet: flags.length ? { eye: 'How you worked the test', title: 'The habits, in detail', html: flags.map(function (f) { return '<h4>' + esc(f.title) + '</h4><p>' + esc(f.body) + '</p>'; }).join('') } : null });
     }
 
+    // ---- since your last test (Luca, 2026-09-30): habits, navigation and areas
+    /* planInputs.compare is signals.js compareSittings, the report's "Since
+       your last test" card: never the score. Sits after how this test went
+       and before what to do next. Better and Watch cards first; the full
+       three lists are under the button. */
+    var CMP = P.compare;
+    if (CMP && (CMP.better.length || CMP.worse.length || CMP.same.length)) {
+      var cmpCard = function (x, kind, i) {
+        var t = undash(x.text), cut = t.indexOf(': ');
+        var h = cut > 0 && cut < 60 ? t.slice(0, cut) : t, body = cut > 0 && cut < 60 ? cap(t.slice(cut + 2)) : '';
+        var tag = kind === 'better' ? ' <span class="t-tag fine">Better</span>' : kind === 'worse' ? ' <span class="t-tag watch">Watch</span>' : '';
+        return '<div class="t-habit' + (kind === 'better' ? ' ok' : '') + '" style="--i:' + i + '"><div class="n">' +
+          (kind === 'better' ? '&#10003;' : kind === 'worse' ? '!' : '=') + '</div><div><h3>' + esc(h) + tag + '</h3>' + (body ? '<p>' + esc(body) + '</p>' : '') + '</div></div>';
+      };
+      var nB = Math.min(CMP.better.length, CMP.worse.length ? 3 : 4), nW = Math.min(CMP.worse.length, 4 - nB);
+      var picks = CMP.better.slice(0, nB).map(function (x) { return [x, 'better']; }).concat(CMP.worse.slice(0, nW).map(function (x) { return [x, 'worse']; }));
+      if (!picks.length) picks = CMP.same.slice(0, 3).map(function (x) { return [x, 'same']; });
+      var cmpHead = CMP.better.length && CMP.worse.length ? numWord(CMP.better.length) + (CMP.better.length === 1 ? ' thing' : ' things') + ' better, ' + numWord(CMP.worse.length) + ' to watch.'
+        : CMP.better.length ? 'Better than last time in ' + pl(CMP.better.length, 'way') + '.'
+        : CMP.worse.length ? (CMP.worse.length === 1 ? 'One thing slipped since last time.' : 'A few things slipped since last time.')
+        : 'Much the same as last time.';
+      var cmpList = function (title, list) { return list.length ? '<h4>' + title + '</h4><ul>' + list.map(function (x) { return '<li>' + esc(undash(x.text)) + '</li>'; }).join('') + '</ul>' : ''; };
+      M.screens.push({ name: 'since', html:
+        '<p class="t-eye r">Since your last test</p><h2 class="r">' + esc(cap(cmpHead)) + '</h2><div class="t-habits">' +
+        picks.map(function (p, i) { return cmpCard(p[0], p[1], i); }).join('') + '</div>' +
+        '<p class="t-small r" style="margin-top:22px;transition-delay:1.6s">How you worked, moved through the test and did by area. Not the score: one test to the next swings too much to read.</p>' +
+        '<div class="r" style="transition-delay:1.8s"><button type="button" class="t-more" data-sheet="since">See the full comparison</button></div>',
+        sheet: { eye: 'Since your last test', title: 'Against your last test', html:
+          cmpList('Better', CMP.better) + cmpList('About the same', CMP.same) + cmpList('Worse', CMP.worse) +
+          '<p class="t-small">An area or skill is called better or worse only when the change is bigger than one test to the next can show by chance.</p>' } });
+    }
+
     // ---- the path: the score bridge's own bars
     // To the nearest 10, as the report's own bridge labels them: +131 here
     // beside +130 there read as two different estimates (review 2026-09-26).
@@ -727,6 +759,7 @@
     score: ['The score', 'The same 400 to 1600 scale as the real SAT, split into Reading & Writing and Math, with the range one test can honestly claim. A single sitting can land a little high or low, and the range keeps anyone from overreacting to one test.'],
     misses: ['Where the points went', 'Every missed question is sorted by why it was missed: not knowing the material, running short on time, or a slip on something your student actually knows. Each needs a different fix, and most students miss points in more than one way.'],
     strengths: ['What is already working', 'The skills your student got right consistently. Knowing them matters as much as knowing the gaps: session time does not go to them, so the hours go where the points are.'],
+    since: ['Since your last test', 'What got better, stayed the same or got worse against the test before: habits, how the test was worked and areas with enough questions to tell. Never the score, which swings too much from one test to the next.'],
     gaps: ['What to relearn', 'The specific skills behind the content misses, named the way the College Board names what the SAT tests. They come up on every SAT, so each one fixed pays off on every test after it.'],
     clock: ['The clock', 'How the time went in each module, against a steady pace. It shows whether your student ran out of time, rushed, or left minutes unused, which is often worth as many points as content.'],
     route: ['The route', 'The order your student moved through each module: the first pass, the skips, and the returns. It shows habits no score can, like getting stuck early or never going back to check.'],
