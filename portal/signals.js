@@ -2601,6 +2601,22 @@ var MorettiSignals = (function () {
         if (f === 1) out.fast++;
       }
     });
+    // Highlighting in Reading and Writing (recorded from 2026-09-30, hv): the
+    // questions with any highlight, and how many of those ended right. Null
+    // when the record predates it.
+    var rwHv = d.s.filter(function (S) { return S && S.k === 'reading-writing' && S.hv; });
+    out.highlighted = rwHv.length ? 0 : null;
+    out.highlightedRight = rwHv.length ? 0 : null;
+    d.s.forEach(function (S, si) {
+      if (!S || S.k !== 'reading-writing' || !S.hv || !S.hl) return;
+      Object.keys(S.hl).forEach(function (q) {
+        var h = S.hl[q];
+        if (!h || !((h[0] || 0) + (h[1] || 0))) return;
+        out.highlighted++;
+        var x = at[si + '|' + q];
+        if (x && x.res === 1) out.highlightedRight++;
+      });
+    });
     // Navigation that the record never logged is unknown (null), never 0.
     var hasVl = d.s.some(function (S) { return Array.isArray(S.vl) && S.vl.length; }), hasEl = d.s.some(function (S) { return typeof S.el === 'string'; });
     if (!hasVl) { out.back = null; out.changed = null; out.changedRight = null; }
@@ -2687,6 +2703,9 @@ var MorettiSignals = (function () {
       put(prev.crossed < 3 && cur.crossed >= 5 ? 'better' : 'same', 'crossed', cx + '.');
     }
     if (prev.back !== null && cur.back !== null && (prev.back || cur.back)) put('same', 'back', 'Went back to ' + plural(cur.back, 'question') + ', against ' + prev.back + ' last time.');
+    if (prev.highlighted != null && cur.highlighted != null && (prev.highlighted || cur.highlighted)) {
+      put('same', 'highlighted', 'Highlighted on ' + plural(cur.highlighted, 'Reading and Writing question') + ', against ' + prev.highlighted + ' last time.');
+    }
     if (cur.changed) put('same', 'changed', 'Changed ' + plural(cur.changed, 'answer') + ' after first choosing; ' + cur.changedRight + ' of those ended right.');
     // Areas and skills, past chance only.
     var z = function (a, b) {
@@ -4291,7 +4310,7 @@ var MorettiSignals = (function () {
     rushedLevel: rushedLevel,
     approachEvidence: approachEvidence, approachCompetent: approachCompetent, APPROACH_RW_DOMAINS: APPROACH_RW_DOMAINS, APPROACH_MIN_SHOWN: APPROACH_MIN_SHOWN,
     APPROACH_LESSONS: APPROACH_LESSONS,
-    VERSION: 44,
+    VERSION: 45,
     attemptAbility: attemptAbility,
     FOCUS_GATES: { domainClear: FOCUS_DOMAIN_CLEAR, skillLead: FOCUS_SKILL_LEAD, noOffsetsPenalty: FOCUS_NO_OFFSETS_PENALTY },
     practiceEvidence: practiceEvidence,

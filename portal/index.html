@@ -5719,7 +5719,7 @@ window.Portal = {
      header in fluid-ui.js. -->
 <script src="fluid-ui.js?v=20260905y"></script>
 <script src="banks.js?v=20260926a"></script>
-<script src="signals.js?v=20260930b"></script>
+<script src="signals.js?v=20260930c"></script>
 <script src="desmos-tags.js?v=20260916c"></script>
 <script src="time-budgets.js?v=20260912a"></script>
 <script src="challenge-questions.js?v=20260926a"></script>
@@ -11846,6 +11846,8 @@ window.Portal = {
   var sigCalcFocusN = [];   // [q] = separate entries into the Desmos frame
   var sigRefOpens = [];     // [q] = reference-sheet opens while q was on screen
   var sigRefMs = [];        // [q] = ms the reference sheet was open while q was on screen
+  var sigHlPass = [];       // [q] = highlights made in the passage while q was on screen
+  var sigHlStem = [];       // [q] = highlights made in the question while q was on screen
   var sigReviewAtMs = null; // ms into the module of the first review-page arrival after every question was seen
   var sigReviewPageAt = null; // when the current stay on the review page began, or null
   var sigReviewPageMs = 0;  // total ms on the review page this module
@@ -11870,6 +11872,8 @@ window.Portal = {
     sigCalcFocusN = new Array(n).fill(0);
     sigRefOpens = new Array(n).fill(0);
     sigRefMs = new Array(n).fill(0);
+    sigHlPass = new Array(n).fill(0);
+    sigHlStem = new Array(n).fill(0);
     sigReviewAtMs = null; sigReviewPageAt = null; sigReviewPageMs = 0; sigSubmitAtMs = null;
     sigModuleStartAt = Date.now();
     sigOpen = -1; sigSegAt = null; sigNavBreak = true;
@@ -12036,7 +12040,8 @@ window.Portal = {
         vl: sigVisitLog.map(function (v) { return [toBank(v[0]), v[1], v[2], v[3], v[4]]; }),
         rv: sigReviewAtMs, rp: sigReviewPageMs, sb: sigSubmitAtMs,
         co: canonical(sigCalcOpenMs), cf: canonical(sigCalcFocusMs), cn: canonical(sigCalcFocusN),
-        ro: canonical(sigRefOpens), rm: canonical(sigRefMs)
+        ro: canonical(sigRefOpens), rm: canonical(sigRefMs),
+        hp: canonical(sigHlPass), hq: canonical(sigHlStem)
       };
     } catch (e) { return null; }
   }
@@ -12050,13 +12055,15 @@ window.Portal = {
     try {
       if (!m2 || (twoModules && !m1)) return null;
       var parts = twoModules ? [m1, m2] : [m2];
-      var out = { el: '', eu: '', vl: [], rv: [], rp: [], sb: [], co: [], cf: [], cn: [], ro: [], rm: [] };
+      var out = { el: '', eu: '', vl: [], rv: [], rp: [], sb: [], co: [], cf: [], cn: [], ro: [], rm: [], hp: [], hq: [] };
       var offset = 0;
       parts.forEach(function (m) {
         out.el += m.el; out.eu += m.eu;
         m.vl.forEach(function (v) { out.vl.push([v[0] + offset, v[1], v[2], v[3], v[4]]); });
         out.rv.push(m.rv); out.rp.push(m.rp == null ? null : m.rp); out.sb.push(m.sb == null ? null : m.sb);
         ['co', 'cf', 'cn', 'ro', 'rm'].forEach(function (k) { out[k] = out[k].concat(m[k]); });
+        // Modules saved before highlights were recorded fill with zeros.
+        ['hp', 'hq'].forEach(function (k) { out[k] = out[k].concat(Array.isArray(m[k]) ? m[k] : new Array(m.n).fill(0)); });
         offset += m.n;
       });
       return out;
@@ -12087,13 +12094,18 @@ window.Portal = {
         sb: (sig.sb || []).map(function (x) { return x == null ? null : tenth(x); }),
         co: sparse(sig.co, function (ms) { return ms > 0 ? tenth(ms) : null; }),
         cf: sparse(sig.cf, function (ms, i) { return (ms > 0 || sig.cn[i] > 0) ? [tenth(ms), sig.cn[i] || 0] : null; }),
-        rf: sparse(sig.ro, function (n, i) { return (n > 0 || sig.rm[i] > 0) ? [n, tenth(sig.rm[i])] : null; })
+        rf: sparse(sig.ro, function (n, i) { return (n > 0 || sig.rm[i] > 0) ? [n, tenth(sig.rm[i])] : null; }),
+        // Highlights made while the question was on screen: [in the passage,
+        // in the question]. hv marks that they were recorded, so a sitting
+        // with none reads as "none", not "not recorded".
+        hv: 1,
+        hl: sparse(sig.hp || [], function (n, i) { var q = (sig.hq || [])[i] || 0; return (n > 0 || q > 0) ? [n || 0, q] : null; })
       };
     } catch (e) { return {}; }
   }
   function sigStateForSave() {
     return { vl: sigVisitLog, eu: sigElimEver, co: sigCalcOpenMs, cf: sigCalcFocusMs, cn: sigCalcFocusN,
-             ro: sigRefOpens, rm: sigRefMs, rv: sigReviewAtMs, t0: sigModuleStartAt,
+             ro: sigRefOpens, rm: sigRefMs, hp: sigHlPass, hq: sigHlStem, rv: sigReviewAtMs, t0: sigModuleStartAt,
              nb: sigNavBreak, pk: sigPicked,
              // A review-page stay still in progress is closed at the save, so
              // a refresh on the review page doesn't lose it.
@@ -12109,6 +12121,7 @@ window.Portal = {
     sigElimEver = arr(st.eu);
     sigCalcOpenMs = arr(st.co); sigCalcFocusMs = arr(st.cf); sigCalcFocusN = arr(st.cn);
     sigRefOpens = arr(st.ro); sigRefMs = arr(st.rm);
+    sigHlPass = arr(st.hp); sigHlStem = arr(st.hq);
     sigReviewAtMs = (typeof st.rv === 'number') ? st.rv : null;
     if (typeof st.t0 === 'number') sigModuleStartAt = st.t0;
     if (typeof st.rpMs === 'number') sigReviewPageMs = st.rpMs;
@@ -12506,6 +12519,15 @@ window.Portal = {
       return;
     }
     if (!hlPendingRange) return;
+    // Recorded for the statistics: a new highlight made during a timed
+    // module, counted against the question on screen (recolors are not new).
+    try {
+      if (activeScreenId === 'dx-screen' && sigOpen >= 0) {
+        var hlRoot = hlRootOf(hlPendingRange.commonAncestorContainer), hlQ = sigVisitLog[sigOpen][0];
+        if (hlRoot && hlRoot.id === 'dx-passage-body') sigHlPass[hlQ]++;
+        else if (hlRoot && hlRoot.id === 'dx-qtext') sigHlStem[hlQ]++;
+      }
+    } catch (e) {}
     var mark = document.createElement('mark');
     mark.className = 'dx-user-highlight ' + className;
     try {
