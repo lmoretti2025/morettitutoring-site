@@ -1038,6 +1038,13 @@
         sk: (l.num + ' ' + l.title + (l.parts.length > 1 ? ' - ' + partTitle(l, check.part) : '')).slice(0, 90), d: String(q.difficulty || '').toLowerCase(),
         c: g.ok ? 1 : 0, ms: check.shownAt ? Math.max(0, Date.now() - check.shownAt) : 0, g: given, k: l.id + '|' + check.part });
     } catch (e) {}
+    /* And into Saved & Mistakes, as the Question Bank question it is (these
+       are bank questions): a miss lands in the Mistakes Log, a right answer
+       clears an old miss of the same question (2026-10-02). */
+    try {
+      if (window.recordQuestionBankMistake) window.recordQuestionBankMistake({
+        key: 'qb|' + (c.bank === 'math' ? 'math' : 'rw') + '|' + q.qid, given: given, correct: !!g.ok, attemptedAt: new Date().toISOString() });
+    } catch (e) {}
   }
   function markChoices(q, ok) {
     if (q.type === 'fr') { var fr = $('#cu-fr', root); if (fr) fr.disabled = true; return; }

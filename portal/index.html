@@ -918,6 +918,22 @@
      empty Saved & Mistakes tab) floats to the middle and its sticky
      header has nothing to stick to. */
   .screen.has-sidebar { align-items: flex-start; }
+  /* THE CURRICULUM GETS THE WHOLE SCREEN (Luca, 2026-10-02: the red bar is
+     obtrusive while studying). The sidebar hides there, and the menu button
+     in the corner slides it back in over the page; any navigation closes it. */
+  .cu-menu-btn, .cu-menu-scrim { display: none; }
+  body.cu-focus .portal-sidebar.sidebar-shown { display: none; }
+  body.cu-focus #screen-curriculum.screen.has-sidebar { padding-left: 0; padding-top: 0.5rem; }
+  @media (max-width: 899px) { body.cu-focus #screen-curriculum.screen.has-sidebar { padding-top: 3.6rem; } }
+  body.cu-focus .cu-menu-btn { display: flex; position: fixed; top: 14px; left: 14px; z-index: 320; width: 40px; height: 40px; align-items: center; justify-content: center; border-radius: 10px; border: 1px solid rgba(17,17,17,0.12); background: #fff; color: var(--red); cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+  body.cu-focus .cu-menu-btn:hover { border-color: var(--red); }
+  body.cu-focus .cu-menu-btn svg { width: 18px; height: 18px; }
+  body.cu-focus.cu-menu-open .portal-sidebar.sidebar-shown { display: flex; box-shadow: 8px 0 30px rgba(0,0,0,0.18); animation: cuMenuIn .22s cubic-bezier(.2,.8,.2,1); }
+  body.cu-focus.cu-menu-open .cu-menu-scrim { display: block; position: fixed; inset: 0; z-index: 290; background: rgba(17,17,17,0.28); }
+  body.cu-focus.cu-menu-open .cu-menu-btn { display: none; }
+  @keyframes cuMenuIn { from { transform: translateX(-16px); opacity: 0; } to { transform: none; opacity: 1; } }
+  @media (max-width: 899px) { @keyframes cuMenuIn { from { transform: translateY(-12px); opacity: 0; } to { transform: none; opacity: 1; } } }
+  @media (prefers-reduced-motion: reduce) { body.cu-focus.cu-menu-open .portal-sidebar.sidebar-shown { animation: none; } }
   @media (max-width: 899px) {
     .portal-sidebar.sidebar-shown { flex-direction: column; position: fixed; top: 0; left: 0; right: 0; bottom: auto; z-index: 250; background: var(--red); border-bottom: 1px solid rgba(255,255,255,0.15); }
     .sb-brand { flex-direction: row; align-items: center; justify-content: flex-start; gap: 0.85rem; padding: 0.65rem 4.6rem 0.65rem 1.1rem; }
@@ -3876,6 +3892,8 @@ window.Portal = {
      always show; Practice Tests/Vocabulary/My Incorrect Questions hide for
      non-test-prep students during the diagnostic-only window. Clicking an
      item drives the same show()/route logic. -->
+<button type="button" class="cu-menu-btn" id="cu-menu-btn" aria-label="Show the menu" title="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg></button>
+<div class="cu-menu-scrim" id="cu-menu-scrim"></div>
 <nav class="portal-sidebar" id="portal-sidebar">
   <div class="sb-brand">
     <a href="../index.html" class="nav-logo-link" id="sidebar-logo-exit"><img src="../logo-caladea-white.png" alt="Moretti Test Prep &amp; Tutoring" class="nav-logo-img"></a>
@@ -5726,7 +5744,7 @@ window.Portal = {
 <script src="grid-in.js?v=20261002a"></script>
 <script src="question-flag.js?v=20260922c"></script>
 <script src="report-tour.js?v=20260930a"></script>
-<script src="curriculum.js?v=20261002q"></script>
+<script src="curriculum.js?v=20261002r"></script>
 <script>
   /* practice-tests.js is ~2.6MB, so a blocking <script> delayed every later
      script (including the key-submit wiring). It loads here via an async
@@ -7060,10 +7078,22 @@ window.Portal = {
   var sidebarEl = document.getElementById('portal-sidebar');
   var mainNavEl = document.getElementById('main-nav');
   var examWatermarkEl = document.getElementById('exam-watermark');
+  (function () {
+    var btn = document.getElementById('cu-menu-btn'), scrim = document.getElementById('cu-menu-scrim');
+    var close = function () { document.body.classList.remove('cu-menu-open'); };
+    if (btn) btn.addEventListener('click', function () { document.body.classList.add('cu-menu-open'); });
+    if (scrim) scrim.addEventListener('click', close);
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && document.body.classList.contains('cu-menu-open')) close(); });
+    // Choosing anything in the menu closes it, even Curriculum itself.
+    if (sidebarEl) sidebarEl.addEventListener('click', function (e) { if (e.target.closest && e.target.closest('.sidebar-item')) close(); });
+  })();
   function updateSidebarForScreen(id) {
     if (!sidebarEl) return;
     var showIt = !!SIDEBAR_SCREENS[id];
     sidebarEl.classList.toggle('sidebar-shown', showIt);
+    // The curriculum hides the sidebar behind a menu button (see .cu-focus).
+    document.body.classList.toggle('cu-focus', id === 'screen-curriculum');
+    document.body.classList.remove('cu-menu-open');
     // Top-bar search/countdown/profile only make sense alongside the
     // sidebar — same screens, same gate (see .nav-app-shell in the CSS).
     if (mainNavEl) mainNavEl.classList.toggle('nav-app-shell', showIt);
@@ -16976,6 +17006,7 @@ window.Portal = {
          calls back a second time (the server's answer, or this device's copy
          marked failed), so skipping this one just keeps the placeholder up. */
       if (progress.isStale && !progress.fromServerCache) return;
+      var finalLoad = !progress.isStale;
       loadFailed = !!progress.failed;
       orgAdopt(progress.organizer);
       var byKey = (progress.incorrectQuestions && typeof progress.incorrectQuestions === 'object') ? progress.incorrectQuestions : {};
@@ -17035,7 +17066,7 @@ window.Portal = {
           });
         });
         records.sort(function (a, b) { return (b.attemptedAt || '').localeCompare(a.attemptedAt || ''); }); // most recently missed/saved first
-        callback();
+        callback(finalLoad);
       });
     });
   }
@@ -17242,7 +17273,7 @@ window.Portal = {
   function toModalRow(r) {
     var givenIsObj = r.given && typeof r.given === 'object';
     return {
-      q: { type: r.type, choices: r.choices, correct: r.correctIndex, text: r.text, answer: r.answerValue, explanation: r.explanation, domain: r.domain, skill: r.skill, difficulty: r.difficulty },
+      q: { type: r.type, choices: r.choices, correct: r.correctIndex, text: r.text, answer: r.answerValue, explanation: r.explanation, choiceNotes: r.choiceNotes || null, domain: r.domain, skill: r.skill, difficulty: r.difficulty },
       givenIdx: r.type === 'mc' && typeof r.given === 'number' ? r.given : null,
       givenText: r.type === 'fr' ? (givenIsObj ? (r.given.raw != null ? String(r.given.raw) : null) : (r.given != null ? String(r.given) : null)) : null,
       ok: !!r.savedCorrect,
@@ -18164,11 +18195,14 @@ window.Portal = {
     setPracticeCount(0);
     tabMistakesCountEl.textContent = '';
     tabMistakesCountEl.classList.add('is-loading');
-    loadRecords(function () {
+    loadRecords(function (finalLoad) {
       tabMistakesCountEl.classList.remove('is-loading');
       paintMistakesCount();
-      // A focus that matches nothing (a stale link) falls back to the whole log.
-      if (focus && !currentFiltered().length) focus = null;
+      // A focus that matches nothing (a stale link) falls back to the whole log,
+      // but only once the server's answer is in: the first draw is last
+      // visit's copy, which lacks the mistakes from a test just taken, and
+      // judging the link by it dropped every fresh skill link (2026-10-02).
+      if (focus && finalLoad && !currentFiltered().length) focus = null;
       renderList();
     });
   };
@@ -19708,9 +19742,10 @@ window.Portal = {
       logPracticeEvent(r, st.correct, questionShownMs(), bankMode === 'challenge' ? 'chal' : 'qb', given, st.conf);
       // Feeds the Mistakes Log (see window.recordQuestionBankMistake); the same
       // call clears a question once it's answered correctly.
-      if (bankMode === 'qb' && window.recordQuestionBankMistake) {
+      // Challenge misses too (2026-10-02), under their own 'chal|' key.
+      if ((bankMode === 'qb' || bankMode === 'challenge') && window.recordQuestionBankMistake) {
         window.recordQuestionBankMistake({
-          key: 'qb|' + currentSubject + '|' + r.qid,
+          key: bankKeyFor(currentSubject, r.qid),
           given: given,
           correct: st.correct,
           attemptedAt: new Date().toISOString()
@@ -20574,11 +20609,17 @@ window.Portal = {
     var isQbRow = /^Question Bank/.test(r.testTitle || '');
 
     modalExplainOpen = false;
-    if (isQbRow && q.explanation) {
+    /* Every source that carries an explanation shows it (2026-10-02): the
+       Question Bank's full explanation, or a practice test's notes on each
+       choice. Practice-test mistakes used to open with no explanation at all. */
+    var explainHtmlM = q.explanation || (Array.isArray(q.choiceNotes) ? q.choiceNotes.map(function (n, i) {
+      return n ? '<p><strong>Choice ' + 'ABCDE'.charAt(i) + '.</strong> ' + n + '</p>' : '';
+    }).join('') : '');
+    if (explainHtmlM) {
       var explainBlock = document.createElement('div');
       explainBlock.className = 'q-modal-explain-block';
       explainBlock.id = 'q-modal-explain-block';
-      explainBlock.innerHTML = '<div class="pb-explain-hed">Full Explanation</div>' + q.explanation;
+      explainBlock.innerHTML = '<div class="pb-explain-hed">Full Explanation</div>' + explainHtmlM;
       qModalQuestionPane.appendChild(explainBlock);
       qModalExplainBtn.style.display = '';
       qModalExplainBtn.textContent = 'Explanation';
