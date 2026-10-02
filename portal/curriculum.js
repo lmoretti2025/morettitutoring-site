@@ -19,7 +19,7 @@
 (function () {
   'use strict';
 
-  var DATA_SRC = 'curriculum-data.js?v=20261002d';
+  var DATA_SRC = 'curriculum-data.js?v=20261002e';
   var VIDEO_SRC = 'curriculum-videos.js?v=20261002b';
 
   /* ---------- small helpers ---------- */
@@ -835,7 +835,13 @@
      (qids), so the two can be sized apart. Least recently seen first, kept
      per part on the device, so a second go brings different questions. */
   var CHECK_LEN = 8;
-  function checkIds(p) { return (p.checkQids && p.checkQids.length) ? p.checkQids : (p.qids || []); }
+  /* The check draws from the part's own pool. A pool shorter than a full check
+     is topped up from the part's deck questions so it still asks CHECK_LEN. */
+  function checkIds(p) {
+    var ids = (p.checkQids || []).slice();
+    (p.qids || []).forEach(function (q) { if (ids.length < CHECK_LEN && ids.indexOf(q) < 0) ids.push(q); });
+    return ids;
+  }
   function checkCount(p) { return Math.min(CHECK_LEN, checkIds(p).length); }
   function startCheck(c, l) {
     var p = l.parts[view.part];
