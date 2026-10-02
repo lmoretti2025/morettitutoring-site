@@ -138,6 +138,13 @@
     '#cu-root .cu-arrow{width:28px;height:28px;border-radius:50%;border:1px solid var(--cu-line);background:#fff;cursor:pointer;color:var(--text,#111);flex:none}',
     '#cu-root .cu-arrow[disabled]{opacity:.3;cursor:default}',
     '#cu-root .cu-steps{overflow-y:auto;padding:.3rem 0}',
+    '#cu-root .cu-ptabs{display:flex;gap:4px;padding:.5rem .8rem;border-bottom:1px solid var(--cu-line)}',
+    '#cu-root .cu-ptabs button{flex:1;border:0;background:transparent;font:500 .8rem var(--hel,Poppins,sans-serif);color:var(--mid);padding:.4rem;border-radius:999px;cursor:pointer}',
+    '#cu-root .cu-ptabs button[aria-pressed="true"]{background:var(--cu-soft);color:var(--text,#111)}',
+    '#cu-root .cu-pnotes{display:none;flex:1 1 auto;min-height:0;overflow-y:auto;padding:.4rem 1.1rem 1.2rem;font-size:.85rem;line-height:1.6}',
+    '#cu-root .cu-pnotes h3{font-size:1rem;margin:.9rem 0 .3rem}',
+    '#cu-root .cu-panel.show-notes .cu-steps{display:none}#cu-root .cu-panel.show-notes .cu-pnotes{display:block}',
+    '@media(max-width:900px){#cu-root .cu-pnotes{max-height:320px}}',
     '#cu-root .cu-step{display:grid;grid-template-columns:28px 1fr auto;align-items:center;gap:.6rem;width:100%;border:0;background:none;text-align:left;padding:.62rem 1rem;font:400 .86rem var(--hel,Poppins,sans-serif);color:var(--text,#111);cursor:pointer;border-left:3px solid transparent}',
     '#cu-root .cu-step:hover{background:var(--cu-soft)}',
     '#cu-root .cu-step.on{background:#fbf3f2;border-left-color:var(--red,#B0271C);font-weight:500}',
@@ -796,6 +803,7 @@
   var NO_VIDEO = '<div class="cu-nov"><span class="play">' + PLAY_SVG + '</span><div><b>Video coming soon</b><span>The notes below cover the same material for now.</span></div></div>';
   function renderVideo(c, l) {
     calcPop(false);
+    marginNotes(null);
     var p = l.parts[view.part], i = view.part;
     var vid = videoFor(l.id, i), inPart = null;
     if (vid && vid.indexOf('PART:') === 0) { inPart = Number(vid.slice(5)); vid = null; }
@@ -861,6 +869,37 @@
       drawQuestion(c, l);
     });
   }
+  /* NOTES IN THE MARGIN (Luca, 2026-10-02): during a check, the side panel
+     shows the part's notes beside the question, with a tab back to the list
+     of parts. On the video the notes are under it, so the panel is the list. */
+  function marginNotes(l, i) {
+    var panel = $('.cu-panel', root);
+    if (!panel) return;
+    var tabs = $('.cu-ptabs', panel), box = $('.cu-pnotes', panel);
+    if (!l) { if (tabs) tabs.remove(); if (box) box.remove(); panel.classList.remove('show-notes'); return; }
+    if (!tabs) {
+      tabs = document.createElement('div');
+      tabs.className = 'cu-ptabs';
+      tabs.innerHTML = '<button type="button" data-ptab="notes" aria-pressed="true">Notes</button><button type="button" data-ptab="steps" aria-pressed="false">Parts</button>';
+      $('.cu-panel-h', panel).after(tabs);
+      tabs.addEventListener('click', function (e) {
+        var b = e.target.closest('[data-ptab]'); if (!b) return;
+        var notes = b.getAttribute('data-ptab') === 'notes';
+        panel.classList.toggle('show-notes', notes);
+        $$('[data-ptab]', tabs).forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+      });
+    }
+    if (!box || box.getAttribute('data-for') !== l.id + '#' + i) {
+      if (box) box.remove();
+      box = document.createElement('div');
+      box.className = 'cu-pnotes cu-notes-b';
+      box.setAttribute('data-for', l.id + '#' + i);
+      box.innerHTML = notesHtml(l.parts[i]) || '<p>No notes for this part.</p>';
+      $('.cu-steps', panel).after(box);
+      panel.classList.add('show-notes');
+      $$('[data-ptab]', tabs).forEach(function (x) { x.setAttribute('aria-pressed', String(x.getAttribute('data-ptab') === 'notes')); });
+    }
+  }
   // One mark per question: green right, red missed, grey still to come.
   function streakHtml() {
     var segs = '', right = 0;
@@ -896,6 +935,7 @@
         '<div class="cu-qtext">' + q.text + '</div>' + body + '<div id="cu-fb"></div></div>' +
       '<div class="cu-bottom"><div class="cu-streak-wrap">' + streakHtml() + '</div>' +
         '<button type="button" class="cu-btn" id="cu-go" data-check-go disabled>Check</button></div>';
+    marginNotes(l, check.part);
     var fr = $('#cu-fr', main);
     if (fr) {
       fr.addEventListener('input', function () { $('#cu-go', main).disabled = !fr.value.trim(); });
