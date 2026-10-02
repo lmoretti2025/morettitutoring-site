@@ -19,7 +19,7 @@
 (function () {
   'use strict';
 
-  var DATA_SRC = 'curriculum-data.js?v=20261002e';
+  var DATA_SRC = 'curriculum-data.js?v=20261002f';
   var VIDEO_SRC = 'curriculum-videos.js?v=20261002b';
 
   /* ---------- small helpers ---------- */
@@ -835,13 +835,9 @@
      (qids), so the two can be sized apart. Least recently seen first, kept
      per part on the device, so a second go brings different questions. */
   var CHECK_LEN = 8;
-  /* The check draws from the part's own pool. A pool shorter than a full check
-     is topped up from the part's deck questions so it still asks CHECK_LEN. */
-  function checkIds(p) {
-    var ids = (p.checkQids || []).slice();
-    (p.qids || []).forEach(function (q) { if (ids.length < CHECK_LEN && ids.indexOf(q) < 0) ids.push(q); });
-    return ids;
-  }
+  /* The check draws from the part's own pool, never from the questions
+     worked in the slides. A part with no pool yet falls back to its own. */
+  function checkIds(p) { return (p.checkQids && p.checkQids.length) ? p.checkQids : (p.qids || []); }
   function checkCount(p) { return Math.min(CHECK_LEN, checkIds(p).length); }
   function startCheck(c, l) {
     var p = l.parts[view.part];
@@ -926,7 +922,7 @@
     var q = question(check.current);
     var body;
     if (q.type === 'fr') {
-      body = '<div class="cu-fr"><input type="text" inputmode="decimal" autocomplete="off" aria-label="Your answer" id="cu-fr" placeholder="Your answer"></div>';
+      body = '<div class="cu-fr"><input type="text" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-label="Your answer" id="cu-fr" placeholder="Your answer"></div>';
     } else {
       body = '<div class="cu-choices">' + (q.choices || []).map(function (ch, k) {
         return '<button type="button" class="cu-choice" data-choice="' + k + '"><span class="lt">' + LETTERS[k] + '</span><span>' + ch + '</span></button>';
@@ -944,6 +940,7 @@
     marginNotes(l, check.part);
     var fr = $('#cu-fr', main);
     if (fr) {
+      if (window.gridInGuard) window.gridInGuard(fr);
       fr.addEventListener('input', function () { $('#cu-go', main).disabled = !fr.value.trim(); });
       fr.addEventListener('keydown', function (e) { if (e.key === 'Enter' && fr.value.trim()) submitAnswer(c, l); });
       setTimeout(function () { try { fr.focus(); } catch (e) {} }, 50);

@@ -5526,7 +5526,7 @@ window.Portal = {
           <h1 class="dx-qtext" id="dx-qtext"></h1>
           <div class="dx-choices" id="dx-choices" style="display:none;"></div>
           <div class="dx-fr-row" id="dx-fr-row" style="display:none;">
-            <input type="text" inputmode="decimal" class="dx-fr-input" id="dx-fr-input" placeholder="Type your answer">
+            <input type="text" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" class="dx-fr-input" id="dx-fr-input" placeholder="Type your answer">
           </div>
           <div class="dx-nav-row">
             <button class="dx-btn dx-btn-back" id="dx-back">Back</button>
@@ -5723,10 +5723,10 @@ window.Portal = {
 <script src="desmos-tags.js?v=20260916c"></script>
 <script src="time-budgets.js?v=20260912a"></script>
 <script src="challenge-questions.js?v=20260926a"></script>
-<script src="grid-in.js?v=20260910a"></script>
+<script src="grid-in.js?v=20261002a"></script>
 <script src="question-flag.js?v=20260922c"></script>
 <script src="report-tour.js?v=20260930a"></script>
-<script src="curriculum.js?v=20261002i"></script>
+<script src="curriculum.js?v=20261002j"></script>
 <script>
   /* practice-tests.js is ~2.6MB, so a blocking <script> delayed every later
      script (including the key-submit wiring). It loads here via an async
@@ -13625,21 +13625,9 @@ window.Portal = {
   // navigation hooks above, bank the value then too rather than trusting
   // that every future caller remembers to.
   frInput.addEventListener('blur', function () { if (!iqPracticeActive) commitPendingFrAnswer(); });
-  frInput.addEventListener('input', function () {
-    if (iqPracticeActive) { if (window.dxPracticeFrInputHandler) window.dxPracticeFrInputHandler(); return; }
-    // Grid-in answers are numeric only (digits, decimal point, minus sign,
-    // a/b fraction). Strip anything else as the student types so units or
-    // words can't silently fail to grade.
-    var sel = frInput.selectionStart;
-    var before = frInput.value;
-    var cleaned = before.replace(/[^0-9.\-\/]/g, '');
-    if (cleaned !== before) {
-      frInput.value = cleaned;
-      var removedBeforeCursor = before.slice(0, sel).length - before.slice(0, sel).replace(/[^0-9.\-\/]/g, '').length;
-      var newPos = Math.max(0, sel - removedBeforeCursor);
-      frInput.setSelectionRange(newPos, newPos);
-    }
-  });
+  // Numbers only, at most 4 decimal places, no autofill suggestions: the
+  // rule lives in grid-in.js. It runs in every mode, practice included.
+  if (window.gridInGuard) window.gridInGuard(frInput);
 
   function goTo(index) {
     var qs = activeQuestions();

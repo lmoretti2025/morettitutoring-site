@@ -107,6 +107,44 @@
     return false;
   }
 
+  /* What a student may type in an answer box: numbers only. Digits, one
+     leading minus, one decimal point per number, one fraction slash, and
+     at most 4 digits after a decimal point. Anything else is dropped as it
+     is typed, so the box never holds something that cannot be graded. */
+  function gridInSanitize(s) {
+    s = String(s == null ? '' : s).replace(/−/g, '-').replace(/[^0-9.\-\/]/g, '');
+    var halves = s.split('/');
+    if (halves.length > 2) halves = [halves[0], halves.slice(1).join('')];
+    return halves.map(function (h, i) {
+      var neg = i === 0 && h.charAt(0) === '-';
+      h = h.replace(/-/g, '');
+      var dot = h.indexOf('.');
+      if (dot >= 0) h = h.slice(0, dot + 1) + h.slice(dot + 1).replace(/\./g, '').slice(0, 4);
+      return (neg ? '-' : '') + h;
+    }).join('/');
+  }
+
+  /* Wires an answer box: no browser autofill suggestions, and the filter
+     above on every keystroke with the caret kept where the student left it. */
+  function gridInGuard(input) {
+    if (!input || input.__gridGuard) return;
+    input.__gridGuard = true;
+    input.setAttribute('autocomplete', 'off');
+    input.setAttribute('autocorrect', 'off');
+    input.setAttribute('autocapitalize', 'off');
+    input.setAttribute('spellcheck', 'false');
+    input.addEventListener('input', function () {
+      var before = input.value, cleaned = gridInSanitize(before);
+      if (cleaned === before) return;
+      var sel = input.selectionStart == null ? before.length : input.selectionStart;
+      var keep = gridInSanitize(before.slice(0, sel)).length;
+      input.value = cleaned;
+      try { input.setSelectionRange(Math.min(keep, cleaned.length), Math.min(keep, cleaned.length)); } catch (e) {}
+    });
+  }
+
   root.gridInCorrect = gridInCorrect;
-  if (typeof module !== 'undefined' && module.exports) module.exports = { gridInCorrect: gridInCorrect };
+  root.gridInSanitize = gridInSanitize;
+  root.gridInGuard = gridInGuard;
+  if (typeof module !== 'undefined' && module.exports) module.exports = { gridInCorrect: gridInCorrect, gridInSanitize: gridInSanitize };
 })(typeof window !== 'undefined' ? window : this);
