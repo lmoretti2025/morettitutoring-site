@@ -30,9 +30,10 @@
    ========================================================================= */
 window.CURRICULUM_VIDEOS = {
   'm1.1': ['r2:m1.1-1.mp4'],
-  // One video per lesson for now: Part 1 plays it, the other parts point to it
-  // until their start times are added as 'r2:m2.1-1.mp4@2:05-4:40'.
-  'm2.1': ['r2:m2.1-1.mp4', 'part:1', 'part:1'],
-  'm2.2': ['r2:m2.2-1.mp4', 'part:1', 'part:1'],
-  'm2.3': ['r2:m2.3-1.mp4', 'part:1', 'part:1', 'part:1']
+  // One video per lesson, each part playing its stretch of it. The times are
+  // where each part's title slide first appears, read off the videos
+  // (2026-10-02), one second early.
+  'm2.1': ['r2:m2.1-1.mp4@0:00-10:31', 'r2:m2.1-1.mp4@10:31-14:23', 'r2:m2.1-1.mp4@14:23'],
+  'm2.2': ['r2:m2.2-1.mp4@0:00-9:59', 'r2:m2.2-1.mp4@9:59-14:53', 'r2:m2.2-1.mp4@14:53'],
+  'm2.3': ['r2:m2.3-1.mp4@0:00-12:29', 'r2:m2.3-1.mp4@12:29-16:53', 'r2:m2.3-1.mp4@16:53-24:39', 'r2:m2.3-1.mp4@24:39']
 };

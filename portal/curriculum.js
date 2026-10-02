@@ -20,7 +20,7 @@
   'use strict';
 
   var DATA_SRC = 'curriculum-data.js?v=20261002a';
-  var VIDEO_SRC = 'curriculum-videos.js?v=20261002a';
+  var VIDEO_SRC = 'curriculum-videos.js?v=20261002b';
 
   /* ---------- small helpers ---------- */
   function $(sel, root) { return (root || document).querySelector(sel); }
@@ -769,7 +769,7 @@
   function partTitle(l, i) {
     // The part's own title from the course files; before those carried one, its last note's heading.
     var t = partPages(l, i);
-    var name = l.parts[i].title || (t.length ? t[t.length - 1] : '');
+    var name = String(l.parts[i].title || (t.length ? t[t.length - 1] : '')).replace(/\*\*/g, '');   // the deck's bold marks are not text
     return l.parts.length > 1 ? 'Part ' + (i + 1) + (name ? ': ' + name : '') : l.title;   // one part: the lesson itself
   }
 
