@@ -20,7 +20,7 @@
   'use strict';
 
   var DATA_SRC = 'curriculum-data.js?v=20261002a';
-  var VIDEO_SRC = 'curriculum-videos.js?v=20260930b';
+  var VIDEO_SRC = 'curriculum-videos.js?v=20261002a';
 
   /* ---------- small helpers ---------- */
   function $(sel, root) { return (root || document).querySelector(sel); }
@@ -286,14 +286,26 @@
   /* A part's video: CURRICULUM_VIDEOS[lessonId][partIndex], as "r2:KEY"
      (a private course video, see r2Mount), "youtube:ID", "vimeo:ID", a
      YouTube or Vimeo link, or a direct .mp4 link. */
+  // '2:05' or '125' as seconds; '' when not given.
+  function secsOf(t) {
+    if (!t) return '';
+    var n = String(t).split(':').reduce(function (a, x) { return a * 60 + Number(x || 0); }, 0);
+    return isFinite(n) && n >= 0 ? String(Math.round(n * 10) / 10) : '';
+  }
   function videoFor(lessonId, i) {
     var list = (window.CURRICULUM_VIDEOS || {})[lessonId];
     var v = list && list[i];
     if (!v) return null;
     v = String(v).trim();
     var m;
-    if ((m = /^r2:([me]\d{1,2}\.\d{1,2}-\d{1,2}\.mp4)$/.exec(v)))
-      return '<div class="cu-r2" data-r2="' + esc(m[1]) + '"><div class="cu-soon"><div class="play">' + PLAY_SVG + '</div><b>Loading the video&hellip;</b></div></div>';
+    /* One video can carry a whole lesson (Luca records a lesson in one take):
+       'r2:m2.1-1.mp4@2:05-4:40' plays that part's stretch of it, from 2:05,
+       stopping at 4:40 (either end may be left off). 'part:1' means the part
+       is covered in Part 1's video, until its times are known. */
+    if ((m = /^part:(\d{1,2})$/.exec(v)))
+      return 'PART:' + (Number(m[1]) - 1);
+    if ((m = /^r2:([me]\d{1,2}\.\d{1,2}-\d{1,2}\.mp4)(?:@([\d:.]*)(?:-([\d:.]*))?)?$/.exec(v)))
+      return '<div class="cu-r2" data-r2="' + esc(m[1]) + '" data-from="' + secsOf(m[2]) + '" data-to="' + secsOf(m[3]) + '"><div class="cu-soon"><div class="play">' + PLAY_SVG + '</div><b>Loading the video&hellip;</b></div></div>';
     if ((m = /^youtube:([\w-]{6,})$/.exec(v)) || (m = /(?:youtu\.be\/|[?&]v=|\/embed\/|\/shorts\/)([\w-]{6,})/.exec(v)))
       return '<iframe src="https://www.youtube-nocookie.com/embed/' + esc(m[1]) + '?rel=0&modestbranding=1" title="Lesson video" allow="accelerometer; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>';
     if ((m = /^vimeo:(\d+)$/.exec(v)) || (m = /vimeo\.com\/(?:video\/)?(\d+)/.exec(v)))
@@ -335,7 +347,7 @@
   }
   function r2KeyOf(lessonId, i) {
     var v = ((window.CURRICULUM_VIDEOS || {})[lessonId] || [])[i];
-    var m = /^r2:([me]\d{1,2}\.\d{1,2}-\d{1,2}\.mp4)$/.exec(String(v || '').trim());
+    var m = /^r2:([me]\d{1,2}\.\d{1,2}-\d{1,2}\.mp4)(?:@[\d:.\-]*)?$/.exec(String(v || '').trim());
     return m ? m[1] : '';
   }
   var r2Hinted = false;
@@ -383,7 +395,13 @@
           if (playing) { var p = v.play(); if (p && p.catch) p.catch(function () {}); }
         }, fail);
       });
-      v.src = d.url;
+      // A part's stretch of a lesson video: a media fragment starts it there and pauses it at the end.
+      var from = box.getAttribute('data-from'), to = box.getAttribute('data-to');
+      v.src = d.url + ((from || to) ? '#t=' + (from || '0') + (to ? ',' + to : '') : '');
+      // Also held in code: starts at the part's first second, pauses at its last.
+      var fromS = Number(from) || 0, toS = Number(to) || 0;
+      if (fromS) v.addEventListener('loadedmetadata', function () { if (v.currentTime < fromS - 1) { try { v.currentTime = fromS; } catch (e) {} } }, { once: true });
+      if (toS) v.addEventListener('timeupdate', function () { if (!v.paused && v.currentTime >= toS && v.currentTime < toS + 2) v.pause(); });
       box.innerHTML = '';
       box.appendChild(v);
       watchTrack(v, key, box);
@@ -772,7 +790,8 @@
   var NO_VIDEO = '<div class="cu-nov"><span class="play">' + PLAY_SVG + '</span><div><b>Video coming soon</b><span>The notes below cover the same material for now.</span></div></div>';
   function renderVideo(c, l) {
     var p = l.parts[view.part], i = view.part;
-    var vid = videoFor(l.id, i);
+    var vid = videoFor(l.id, i), inPart = null;
+    if (vid && vid.indexOf('PART:') === 0) { inPart = Number(vid.slice(5)); vid = null; }
     var hasCheck = checkIds(p).length > 0, done = isDone(l.id, i);
     var nextOpen = i + 1 < l.parts.length;
     var bar;
@@ -781,7 +800,10 @@
     $('#cu-main', root).innerHTML =
       // One part: the heading is the lesson itself, so the line above it names the unit instead of repeating it.
       '<div class="cu-mhead"><div class="cu-kicker">' + esc(l.parts.length > 1 ? l.num + ' ' + l.title : c.title + ' \u00b7 ' + ((findLesson(l.id) || {}).d || {}).name) + '</div><h1>' + esc(l.parts.length > 1 ? partTitle(l, i) : l.num + ' ' + l.title) + '</h1></div>' +
-      (vid ? '<div class="cu-video">' + vid + '</div>' : NO_VIDEO) +
+      (vid ? '<div class="cu-video">' + vid + '</div>'
+        : inPart !== null && inPart !== i ? '<div class="cu-nov"><span class="play">' + PLAY_SVG + '</span><div><b>This part is in the lesson video</b><span>It is all one video, in Part ' + (inPart + 1) + '. The notes below cover this part.</span></div>' +
+            '<button type="button" class="cu-btn ghost" data-open-part="' + inPart + '" style="margin-left:auto">Watch it &rarr;</button></div>'
+        : NO_VIDEO) +
       '<section class="cu-notes"><button type="button" class="cu-notes-h" data-notes aria-expanded="' + (!vid) + '">Notes <span>' + (vid ? 'Show' : 'Hide') + '</span></button>' +
       '<div class="cu-notes-fold' + (vid ? ' closed' : '') + '"><div class="cu-notes-in"><div class="cu-notes-b">' + (notesHtml(p) || '<p>No notes for this part.</p>') + '</div></div></div></section>' +
       '<div class="cu-bottom">' + bar + '</div>';

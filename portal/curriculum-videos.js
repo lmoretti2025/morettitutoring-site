@@ -20,9 +20,19 @@
      'vimeo:123456789'   /  'https://vimeo.com/123456789'
      'https://.../lesson.mp4'
 
+   A lesson recorded as one video: give each part its stretch of it,
+     'r2:m2.1-1.mp4@0:00-3:10', 'r2:m2.1-1.mp4@3:10-7:45', ...
+   (minutes:seconds, either end may be left off), or 'part:1' for a part
+   whose material is in Part 1's video.
+
    Example (remove the // to use it):
    //   'm2.1': ['r2:m2.1-1.mp4', 'r2:m2.1-2.mp4', ''],
    ========================================================================= */
 window.CURRICULUM_VIDEOS = {
-  'm1.1': ['r2:m1.1-1.mp4']
+  'm1.1': ['r2:m1.1-1.mp4'],
+  // One video per lesson for now: Part 1 plays it, the other parts point to it
+  // until their start times are added as 'r2:m2.1-1.mp4@2:05-4:40'.
+  'm2.1': ['r2:m2.1-1.mp4', 'part:1', 'part:1'],
+  'm2.2': ['r2:m2.2-1.mp4', 'part:1', 'part:1'],
+  'm2.3': ['r2:m2.3-1.mp4', 'part:1', 'part:1', 'part:1']
 };
