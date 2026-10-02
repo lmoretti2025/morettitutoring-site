@@ -33,7 +33,9 @@ window.CURRICULUM_VIDEOS = {
   // One video per lesson, each part playing its stretch of it. The times are
   // where each part's title slide first appears, read off the videos
   // (2026-10-02), one second early.
-  'm2.1': ['r2:m2.1-1.mp4@0:00-10:31', 'r2:m2.1-1.mp4@10:31-14:23', 'r2:m2.1-1.mp4@14:23'],
+  // Re-recorded 2026-10-02 (19:45, was ~16:00). Part boundaries are the Standard Form and
+  // Point-Slope Form title slides at 13:00 and 17:19, one second early as before.
+  'm2.1': ['r2:m2.1-1.mp4@0:00-12:59', 'r2:m2.1-1.mp4@12:59-17:18', 'r2:m2.1-1.mp4@17:18'],
   'm2.2': ['r2:m2.2-1.mp4@0:00-9:59', 'r2:m2.2-1.mp4@9:59-14:53', 'r2:m2.2-1.mp4@14:53'],
   // 2.3 and 2.4 swapped places (Luca, 2026-10-02): this recording is Building
   // the Equation, now 2.4. The new 2.3, Interpretation, has no video yet.
