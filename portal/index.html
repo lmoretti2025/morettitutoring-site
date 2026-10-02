@@ -6595,6 +6595,9 @@ window.Portal = {
       module1Buffer: module1Buffer,
       breakEndsAt: breakEndsAt,
       breakKind: breakKind,
+      // Fingerprint of the questions this attempt was started against. See
+      // contentSignature(): a resume is refused if the test has been edited since.
+      contentSig: (typeof practiceTestId !== 'undefined' && practiceTestId) ? contentSignature(practiceTestId) : null,
       // Which tab wrote this. See the storage listener below: it is the only
       // way a tab can tell another tab's save from an echo of its own.
       tabId: TAB_ID
@@ -6608,6 +6611,63 @@ window.Portal = {
 
   // One resume slot per student key, so a saved spot never surfaces for a
   // different key entered later on the same shared device.
+  /* ═══ CONTENT SIGNATURE — guards a resumed attempt against the test having
+     changed underneath it ═══
+
+     A saved attempt stores answers, marks, eliminations and per-question timings
+     BY INDEX, plus qOrder. None of that means anything if the questions at those
+     indexes are no longer the same questions. On 2026-10-01 a difficulty-equating
+     pass replaced 248 items across all 14 tests in one go; a student who was
+     mid-test when that shipped would have resumed into a different paper with
+     their old answers still attached to the slots, and nothing would have errored.
+
+     So the snapshot carries a fingerprint of the qids it was taken against, and a
+     resume is refused when the fingerprint no longer matches. Both module 2
+     variants are included because routing has not happened yet at save time and
+     either could be the one the student lands on.
+
+     Deliberately NOT a version number anyone has to remember to bump: it is
+     derived from the content itself, so any edit to any item invalidates exactly
+     the attempts that item could have appeared in. */
+  function contentSignature(testId) {
+    var pt = (window.SAT_PRACTICE_TESTS || []).filter(function (t) { return t.id === testId; })[0];
+    if (!pt || !pt.sections) return null;
+    var ids = [];
+    Object.keys(pt.sections).sort().forEach(function (secKey) {
+      var sec = pt.sections[secKey] || {};
+      Object.keys(sec).sort().forEach(function (mod) {
+        (sec[mod] || []).forEach(function (q, i) { ids.push(secKey + mod + i + (q && q.qid || '')); });
+      });
+    });
+    // djb2 over the joined ids, as an unsigned base-36 string.
+    var h = 5381, str = ids.join('|');
+    for (var n = 0; n < str.length; n++) h = ((h * 33) ^ str.charCodeAt(n)) >>> 0;
+    return str.length + '.' + h.toString(36);
+  }
+  var contentChangedWarned = false;
+  function warnContentChanged() {
+    if (contentChangedWarned) return;
+    contentChangedWarned = true;
+    var bar = document.createElement('div');
+    bar.id = 'dx-tab-warning';
+    var msg = document.createElement('span');
+    msg.textContent = 'This practice test was updated since you started it, so your saved place could not be restored. Nothing you have finished before is affected \u2014 you will just need to start this one again.';
+    var close = document.createElement('button');
+    close.type = 'button';
+    close.textContent = 'Got it';
+    close.onclick = function () { if (bar.parentNode) bar.parentNode.removeChild(bar); };
+    bar.appendChild(msg);
+    bar.appendChild(close);
+    document.body.insertBefore(bar, document.body.firstChild);
+  }
+  // A snapshot predating the signature has none; treat that as a match rather
+  // than discarding work saved before this guard existed.
+  function contentStillMatches(state) {
+    if (!state || !state.practiceTestId || !state.contentSig) return true;
+    var now = contentSignature(state.practiceTestId);
+    return now === null || now === state.contentSig;
+  }
+
   function resumeStorageKey(key) { return 'moretti_portal_resume_' + key; }
   function syncResumeSnapshot(payload) {
     if (!currentStudent || !currentStudent.key) return;
@@ -6682,6 +6742,13 @@ window.Portal = {
       // nothing about a practice test.
       if (!state.practiceTestId && currentStudent.satTaken) {
         clearResumeSnapshot(currentStudent.key);
+        return null;
+      }
+      // The test may have been edited since this attempt was saved, in which case
+      // the stored answers no longer line up with the questions. See contentSignature().
+      if (!contentStillMatches(state)) {
+        clearResumeSnapshot(currentStudent.key);
+        warnContentChanged();
         return null;
       }
       return state;
@@ -14894,6 +14961,9 @@ window.Portal = {
       if (!raw) return;
       var state = JSON.parse(raw);
       if (!state || !state.student || !state.student.key) { clearState(); return; }
+      // Same guard as the cross-session snapshot: an in-tab refresh must not
+      // restore answers onto questions that have changed. See contentSignature().
+      if (!contentStillMatches(state)) { clearState(); warnContentChanged(); return; }
 
       currentStudent = state.student;
       // `accommodations` isn't in the saved snapshot; it's derived from
