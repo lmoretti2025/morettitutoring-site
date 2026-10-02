@@ -780,7 +780,7 @@
         '<span class="ic">' + (done ? '&#10003;' : PLAY_SVG_XS) + '</span><span>' + esc(partTitle(l, i)) + '</span><span class="st">' + (open ? '' : LOCK_SVG) + '</span></button>';
       if (checkIds(p).length) {
         out += '<button type="button" class="cu-step sub' + (view.part === i && view.step === 'check' ? ' on' : '') + (open ? '' : ' locked') + (done ? ' done' : '') + '" data-step="check" data-part="' + i + '"' + lock + '>' +
-          '<span class="ic">' + (done ? '&#10003;' : '') + '</span><span>Check <small>' + pl(checkCount(p), 'question') + '</small></span><span class="st"></span></button>';
+          '<span class="ic">' + (done ? '&#10003;' : '') + '</span><span>Check <small>' + pl(checkCount(p, l), 'question') + '</small></span><span class="st"></span></button>';
       }
     });
     return out;
@@ -821,7 +821,7 @@
     var hasCheck = checkIds(p).length > 0, done = isDone(l.id, i);
     var nextOpen = i + 1 < l.parts.length;
     var bar;
-    if (hasCheck) bar = '<span class="lbl">Up next: ' + pl(checkCount(p), 'question') + ' on this part</span><button type="button" class="cu-btn" data-go-check>Start the check &rarr;</button>';
+    if (hasCheck) bar = '<span class="lbl">Up next: ' + pl(checkCount(p, l), 'question') + ' on this part</span><button type="button" class="cu-btn" data-go-check>Start the check &rarr;</button>';
     else bar = '<span class="lbl">' + (done ? 'Watched' : 'No questions for this part') + '</span><button type="button" class="cu-btn" data-watched>' + (nextOpen ? 'Next part &rarr;' : 'Finish the lesson &rarr;') + '</button>';
     $('#cu-main', root).innerHTML =
       // One part: the heading is the lesson itself, so the line above it names the unit instead of repeating it.
@@ -846,14 +846,18 @@
      (qids), so the two can be sized apart. Least recently seen first, kept
      per part on the device, so a second go brings different questions. */
   var CHECK_LEN = 8;
+  /* Parts whose check asks every question in its pool, not CHECK_LEN of them
+     (Luca, 2026-10-02). Keyed by lesson id and part title. */
+  var ASK_ALL = { 'm2.1|Slope-Intercept Form': true };
+  function checkLen(l, p, n) { return ASK_ALL[l.id + '|' + p.title] ? n : Math.min(CHECK_LEN, n); }
   /* The check draws from the part's own pool, never from the questions
      worked in the slides. A part with no pool yet falls back to its own. */
   function checkIds(p) { return (p.checkQids && p.checkQids.length) ? p.checkQids : (p.qids || []); }
-  function checkCount(p) { return Math.min(CHECK_LEN, checkIds(p).length); }
+  function checkCount(p, l) { return l ? checkLen(l, p, checkIds(p).length) : Math.min(CHECK_LEN, checkIds(p).length); }
   function startCheck(c, l) {
     var p = l.parts[view.part];
     var pool = checkIds(p).filter(function (q) { return !!question(q); });
-    check = { lessonId: l.id, part: view.part, pool: pool, len: Math.min(CHECK_LEN, pool.length), results: [], asked: {}, n: 0, current: null, answered: false, pick: null };
+    check = { lessonId: l.id, part: view.part, pool: pool, len: checkLen(l, p, pool.length), results: [], asked: {}, n: 0, current: null, answered: false, pick: null };
     nextQuestion(l);
   }
   function seenMap(l) {
