@@ -291,6 +291,7 @@ window.MorettiAuth = (function () {
     'screen-practice-tests': 'Practice tests',
     'screen-vocab': 'Vocab',
     'screen-test-overview': 'Test overview',
+    'screen-curriculum': 'Curriculum',
     'screen-intro': 'Starting a test',
     'dx-screen': 'Taking a test',
     'dx-module-over-screen': 'Between modules',
@@ -329,6 +330,13 @@ window.MorettiAuth = (function () {
       var detail = testScreenDetail();
       var area = isPracticeRound() ? 'Practicing' : 'Taking a test';
       return detail ? area + ' - ' + detail : area;
+    }
+    /* The curriculum names the lesson, part and step (curriculum.js whereNow):
+       "Curriculum - 2.1 Linear Equations - Part 2 check". */
+    if (activity === 'screen-curriculum') {
+      var cw = '';
+      try { cw = typeof window.curriculumWhere === 'function' ? String(window.curriculumWhere() || '') : ''; } catch (e) { cw = ''; }
+      return cw ? 'Curriculum - ' + cw : 'Curriculum';
     }
     if (activity && SCREEN_LABELS[activity]) return SCREEN_LABELS[activity];
     if (activity) return activity;
@@ -1560,6 +1568,12 @@ window.MorettiAuth = (function () {
     /* "Is this student on the site right now" is answered by the heartbeat;
        exposed so a page that restores a student some other way can start
        it, and so it can be checked from the console. */
-    startPresence: startHeartbeat
+    startPresence: startHeartbeat,
+    /* For a screen whose own position changes without a screen change (the
+       curriculum moving between lessons): pings early, on the same five
+       second floor as setActivity. */
+    refreshWhere: function () {
+      if (heartbeatOn && (Date.now() - lastPingAt) > 5000) ping(true);
+    }
   };
 })();

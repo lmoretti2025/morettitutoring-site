@@ -261,6 +261,13 @@
   @media (prefers-reduced-motion: reduce) { .live-dot.on { animation: none; } }
   .live-now { color: var(--green); font-weight: 700; }
   .live-where { display: block; color: var(--faint); font-size: 0.72rem; font-weight: 400; }
+  .stu-live { font-size: 0.8rem; margin-top: 0.35rem; }
+  .stu-live:empty { display: none; }
+  .stu-live .live-now::before { content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--green); margin-right: 0.4rem; vertical-align: 1px; }
+  .stu-live .where { color: var(--mid); margin-left: 0.35rem; }
+  .cu-prep-head { font-size: 0.8rem; color: var(--mid); margin: 0 0 0.5rem; }
+  .cu-prep-head b { color: var(--text); font-weight: 600; }
+  .prep-topics td.cu-done { color: var(--green); white-space: nowrap; }
   .summary-tile.live .num { color: var(--green); }
   .weakest-label { font-size: 0.78rem; }
   /* What the evidence says */
@@ -1059,6 +1066,7 @@
           <span class="stu-meta" id="stu-meta"></span>
           <span class="stu-sync" id="stu-sync"></span>
         </div>
+        <div class="stu-live" id="stu-live"></div>
       </div>
       <div class="stu-actions" id="stu-actions"></div>
     </div>
@@ -2267,7 +2275,7 @@
   var PRESENCE_POLL_MS = 45000;
   function pollPresence() {
     var key = adminKey();
-    if (!key || currentView !== 'roster' || !allStudents.length) return;
+    if (!key || (currentView !== 'roster' && currentView !== 'student') || !allStudents.length) return;
     try { if (document.hidden) return; } catch (e) {}
     postToBackend({ action: 'authLog', adminKey: key, limit: 1 }).then(function (data) {
       if (!data || !data.ok) return;
@@ -2284,10 +2292,22 @@
       // Only when something actually moved: renderTable() rebuilds every
       // row, and doing that every 45 seconds for no reason would fight
       // anything Luca is in the middle of reading.
-      if (changed) { renderSummary(); renderTable(); }
+      if (changed && currentView === 'roster') { renderSummary(); renderTable(); }
+      if (currentView === 'student') paintStuLive();
     }).catch(function () { /* a missed poll is a stale dot, nothing more */ });
   }
   setInterval(pollPresence, PRESENCE_POLL_MS);
+  /* ON NOW, ON THE STUDENT PAGE (Luca, 2026-10-02): the same live dot as the
+     roster, with exactly where they are ("Curriculum - 2.1 Linear Equations
+     - Part 2 check"), kept fresh by the poll above while the page is open. */
+  function paintStuLive() {
+    var el = $('stu-live');
+    if (!el) return;
+    var s = currentStudent && allStudents.filter(function (x) { return x.key === currentStudent.key; })[0];
+    el.innerHTML = s && s.online
+      ? '<span class="live-now">On now</span>' + (s.presenceWhere ? '<span class="where">' + escHtml(s.presenceWhere) + '</span>' : '')
+      : '';
+  }
   try {
     document.addEventListener('visibilitychange', function () {
       if (!document.hidden) pollPresence();
@@ -2394,6 +2414,8 @@
     $('stu-details').innerHTML = skLines(4);
     $('stu-name').firstChild.textContent = student.name;
     $('stu-key').textContent = student.key;
+    paintStuLive();
+    setTimeout(pollPresence, 0);   // fresh "On now" for this student, not the roster's last poll
     $('stu-meta').innerHTML = '<span class="sk sk-line" style="display:inline-block;width:190px;vertical-align:middle;"></span>';
     $('stu-actions').innerHTML = '';
     $('stu-tiles').innerHTML = '';
@@ -3395,9 +3417,117 @@
       topics + renderBehaviorPatterns(p.behavior, p.behaviorError) + renderPooledPrep(p.pooled, p.pooledError) +
       (note ? '<p class="prep-note">' + note + '</p>' : '');
     $('stu-prep').innerHTML = '<div class="prep-stats">' + stats.join('') + '</div>' +
-      nextHtml + hwHtml + (more ? '<details class="more-box" id="stu-prep-more"' + (moreOpen.prep ? ' open' : '') + '><summary>More from this week</summary>' + more + '</details>' : '');
+      nextHtml + hwHtml + renderCurriculumPrep(p, snap, mins) + (more ? '<details class="more-box" id="stu-prep-more"' + (moreOpen.prep ? ' open' : '') + '><summary>More from this week</summary>' + more + '</details>' : '');
     var pm = $('stu-prep-more');
     if (pm) pm.addEventListener('toggle', function () { moreOpen.prep = pm.open; });
+  }
+
+  /* THE CURRICULUM THIS WEEK (Luca, 2026-10-02): every lesson part the
+     student touched since the last session, one row each: minutes on the
+     video and in the check (the visit log, "Curriculum - 2.1 ... - Part 2
+     video"), check questions answered and right (PracticeLog, bank 'cu'),
+     and the day the part was finished (CurriculumJSON). Above it, where
+     they are in the course. Names come from the portal's own course file,
+     fetched once; until it arrives the rows use the logged labels. */
+  var cuNamesState = '';
+  function cuCourseData() {
+    if (window.CURRICULUM && window.CURRICULUM.courses) return window.CURRICULUM;
+    if (cuNamesState) return null;
+    cuNamesState = 'loading';
+    var sc = document.createElement('script');
+    sc.src = 'curriculum-data.js?d=' + new Date().toISOString().slice(0, 10);
+    sc.onload = function () {
+      cuNamesState = 'done';
+      if (lastPrep && currentStudent && lastPrep.key === currentStudent.key) { try { renderStudentPrep(lastPrep.prep); } catch (e) {} }
+    };
+    sc.onerror = function () { cuNamesState = 'failed'; };
+    document.head.appendChild(sc);
+    return null;
+  }
+  function cuLessonByNum(data, num) {
+    var hit = null;
+    (data ? data.courses : []).forEach(function (c) {
+      (c.domains || c.units || []).forEach(function (d) { (d.lessons || []).forEach(function (l) { if (!hit && String(l.num) === String(num)) hit = l; }); });
+    });
+    return hit;
+  }
+  function cuLessonById(data, id) {
+    var hit = null;
+    (data ? data.courses : []).forEach(function (c) {
+      (c.domains || c.units || []).forEach(function (d) { (d.lessons || []).forEach(function (l) { if (!hit && l.id === id) hit = l; }); });
+    });
+    return hit;
+  }
+  function renderCurriculumPrep(p, snap, mins) {
+    var cu = p.curriculum || null, pr = (p.practice && p.practice.cu) || null, things = (snap && snap.portalThings) || {};
+    var data = cuCourseData();
+    var rows = {}, browseMin = 0;
+    var rowFor = function (lessonId, num, part) {
+      var k = lessonId + '|' + part;
+      return rows[k] || (rows[k] = { lessonId: lessonId, num: num, part: part, video: 0, check: 0, n: 0, right: 0, done: '', label: '' });
+    };
+    Object.keys(things).forEach(function (t) {
+      if (t.indexOf('Curriculum - ') !== 0 || !(things[t] > 0)) return;
+      var m = /^Curriculum - (\d+\.\d+)\b.* - Part (\d+) (video|check)$/.exec(t);
+      if (!m) { browseMin += things[t]; return; }
+      var l = cuLessonByNum(data, m[1]);
+      var r = rowFor(l ? l.id : 'm' + m[1], m[1], Number(m[2]) - 1);
+      r[m[3]] += things[t];
+    });
+    Object.keys((pr && pr.parts) || {}).forEach(function (k) {
+      var x = pr.parts[k], mm = /^([me])(\d+\.\d+)\|(\d+)$/.exec(x.k || '');
+      if (!mm) return;
+      var r = rowFor(mm[1] + mm[2], mm[2], Number(mm[3]));
+      r.n += x.n; r.right += x.right; r.label = r.label || x.name;
+    });
+    ((cu && cu.week) || []).forEach(function (w) {
+      var mm = /^([me])(\d+\.\d+)#(\d+)$/.exec(w.k || '');
+      if (mm) rowFor(mm[1] + mm[2], mm[2], Number(mm[3])).done = w.at;
+    });
+    var list = Object.keys(rows).map(function (k) { return rows[k]; });
+    var started = cu && cu.started;
+    if (!list.length && !browseMin && !started) return '';
+    var numKey = function (n) { var a = String(n).split('.'); return Number(a[0]) * 1000 + Number(a[1] || 0); };
+    list.sort(function (a, b) { return (a.lessonId.charAt(0) === b.lessonId.charAt(0) ? 0 : a.lessonId.charAt(0) === 'm' ? -1 : 1) || numKey(a.num) - numKey(b.num) || a.part - b.part; });
+    var nameOf = function (r) {
+      var l = cuLessonById(data, r.lessonId);
+      if (!l) return r.label || (r.num + ', part ' + (r.part + 1));
+      var pt = l.parts && l.parts[r.part], many = l.parts && l.parts.length > 1;
+      var ptName = pt && pt.title ? String(pt.title).replace(/\*\*/g, '') : '';
+      return l.num + ' ' + l.title + (many ? ' · Part ' + (r.part + 1) + (ptName ? ': ' + ptName : '') : '');
+    };
+    var day = function (iso) { return new Date(iso).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }); };
+    // Where they are, and how far through the course.
+    var head = [];
+    if (cu && cu.last && cu.last.lessonId) {
+      var ll = cuLessonById(data, cu.last.lessonId);
+      head.push('Last at <b>' + escHtml((ll ? ll.num + ' ' + ll.title : cu.last.lessonId.slice(1)) + ', part ' + ((cu.last.part || 0) + 1) + ' ' + (cu.last.step === 'check' ? 'check' : 'video')) + '</b>');
+    }
+    if (cu && cu.done && data) {
+      var tot = 0, got = {};
+      cu.done.forEach(function (k) { got[k] = 1; });
+      var doneMath = 0;
+      data.courses.forEach(function (c) {
+        if (c.id !== 'math') return;
+        (c.domains || c.units || []).forEach(function (d) { (d.lessons || []).forEach(function (l) { (l.parts || []).forEach(function (pp, i) { tot++; if (got[l.id + '#' + i]) doneMath++; }); }); });
+      });
+      if (tot) head.push('Math: <b>' + doneMath + ' of ' + tot + '</b> parts done');
+    }
+    var gv = cu && cu.videos && cu.videos['m1.1-1.mp4'];
+    if (gv && gv.d) head.push('1.1 video ' + (gv.done ? 'watched' : Math.round(100 * Math.min(gv.w, gv.d) / gv.d) + '% watched'));
+    var body = list.length
+      ? '<table class="prep-topics"><thead><tr><th>Lesson part</th><th class="n">Video</th><th class="n">Check</th><th class="n">Questions</th><th class="n">Finished</th></tr></thead><tbody>' +
+        list.map(function (r) {
+          return '<tr><td>' + escHtml(nameOf(r)) + '</td>' +
+            '<td class="n">' + (r.video ? mins(r.video) : '—') + '</td>' +
+            '<td class="n">' + (r.check ? mins(r.check) : '—') + '</td>' +
+            '<td class="n">' + (r.n ? r.right + ' of ' + r.n + ' right' : '—') + '</td>' +
+            '<td class="n' + (r.done ? ' cu-done' : '') + '">' + (r.done ? '&#10003; ' + day(r.done) : '—') + '</td></tr>';
+        }).join('') + '</tbody></table>'
+      : '<div class="empty">No curriculum work since the last session.</div>';
+    return '<div class="prep-sec">Curriculum since the last session</div>' +
+      (head.length ? '<p class="cu-prep-head">' + head.join(' &nbsp;·&nbsp; ') + '</p>' : '') + body +
+      (browseMin >= 1 ? '<p class="prep-note">Plus ' + mins(browseMin) + ' looking through the lessons.</p>' : '');
   }
 
   /* WHERE THE TIME WENT (Luca, 2026-09-25): the week's active minutes by

@@ -588,6 +588,29 @@
     if (!root) return;
     if (view.name === 'lesson') renderLesson(); else renderHome();
   }
+  /* WHERE THEY ARE, FOR THE ADMIN PAGE (Luca, 2026-10-02). The presence
+     heartbeat (auth-client.js) asks for this on the curriculum screen and
+     reports "Curriculum - <this>": the green dot shows it live, and the
+     visit log sums the minutes under it, so the week's time breaks down by
+     lesson, part, video and check. Kept short and stable (no question
+     number), because every distinct label is its own line in that log. */
+  function whereNow() {
+    var short = function (t, n) { t = String(t || '').replace(/&/g, 'and').replace(/[^\w .,'\/-]/g, ' ').replace(/\s+/g, ' ').trim(); if (t.length <= n) return t; t = t.slice(0, n + 1); t = t.slice(0, t.lastIndexOf(' ') > 0 ? t.lastIndexOf(' ') : n); return t.replace(/(\s+(and|or|of|the|a|to|in))+$/i, '').replace(/[ ,.-]+$/, ''); };
+    if (view.name === 'lesson') {
+      var hit = findLesson(view.lessonId);
+      if (hit) return short(hit.l.num + ' ' + hit.l.title, 30) + ' - Part ' + (view.part + 1) + ' ' + (view.step === 'check' ? 'check' : 'video');
+    }
+    var c = courses().filter(function (x) { return x.id === view.course; })[0];
+    return short((c ? c.title : 'Course') + ' lessons', 30);
+  }
+  window.curriculumWhere = function () { try { return root ? whereNow() : ''; } catch (e) { return ''; } };
+  var whereSent = '';
+  function whereChanged() {
+    var w = window.curriculumWhere();
+    if (w === whereSent) return;
+    whereSent = w;
+    try { if (window.MorettiAuth && MorettiAuth.refreshWhere) MorettiAuth.refreshWhere(); } catch (e) {}
+  }
   function remember() {
     prog.last = { course: view.course, lessonId: view.lessonId, part: view.part, step: view.step };
     try { localStorage.setItem('moretti_curriculum_' + progKey, JSON.stringify(prog)); } catch (e) {}
@@ -610,6 +633,7 @@
      swaps, so nothing on the page jumps (Luca, 2026-09-27). */
   function renderHome() {
     calcPop(false);
+    whereChanged();
     var c = course(view.course);
     view.course = c.id;
     root.innerHTML = '<div class="cu-wrap">' +
@@ -755,6 +779,7 @@
   function renderLesson() {
     var hit = findLesson(view.lessonId);
     if (!hit || lessonLocked(hit.c, hit.l)) { view.name = 'home'; return renderHome(); }
+    whereChanged();
     var c = hit.c, d = hit.d, l = hit.l;
     var list = allLessons(c), at = -1;
     list.forEach(function (x, i) { if (x.l.id === l.id) at = i; });
@@ -947,6 +972,7 @@
     }
     var isMath = c.bank === 'math', isMc = q.type !== 'fr';
     check.out = {};
+    check.shownAt = Date.now();
     main.innerHTML =
       '<div class="cu-mhead"><div class="cu-kicker">' + esc(l.num + ' ' + l.title) + '</div><h1>Check your understanding</h1>' +
         '<div class="cu-sub">' + pl(check.len, 'question') + ' on this part. Each one shows the answer and why, and the next part opens when you finish.</div></div>' +
@@ -985,6 +1011,7 @@
     var g = grade(q);
     check.answered = true;
     check.results.push(!!g.ok);
+    logAnswer(c, l, q, g);
     var last = check.results.length >= check.len;
     if (g.ok) {
       markChoices(q, true);
@@ -997,6 +1024,20 @@
     }
     go.textContent = last ? 'Finish' : 'Next question'; go.disabled = false;
     var w = $('.cu-streak-wrap', main); if (w) w.innerHTML = streakHtml();
+  }
+  /* EVERY CHECK ANSWER GOES TO THE PRACTICE LOG (Luca, 2026-10-02), bank
+     'cu', through the portal's outbox (index.html queuePracticeEvent), so
+     the admin page's session prep can show what was answered this week,
+     part by part. Skill is the part ("2.1 Linear Equations - Standard
+     Form") and ItemKey its id ("m2.1|1"), which is what groups them. */
+  function logAnswer(c, l, q, g) {
+    if (!window.queuePracticeEvent || !q || !q.qid) return;
+    var given = q.type === 'fr' ? String(g.given || '').slice(0, 40) : (typeof g.given === 'number' ? g.given : null);
+    try {
+      window.queuePracticeEvent({ b: 'cu', s: c.bank === 'math' ? 'math' : 'rw', q: String(q.qid),
+        sk: (l.num + ' ' + l.title + (l.parts.length > 1 ? ' - ' + partTitle(l, check.part) : '')).slice(0, 90), d: String(q.difficulty || '').toLowerCase(),
+        c: g.ok ? 1 : 0, ms: check.shownAt ? Math.max(0, Date.now() - check.shownAt) : 0, g: given, k: l.id + '|' + check.part });
+    } catch (e) {}
   }
   function markChoices(q, ok) {
     if (q.type === 'fr') { var fr = $('#cu-fr', root); if (fr) fr.disabled = true; return; }
