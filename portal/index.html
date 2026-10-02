@@ -13235,13 +13235,35 @@ window.Portal = {
   // Populates the intro screen for the current module (moduleStage/
   // module2Variant) and loads its questions. Used for a section's first
   // module and, via finishCurrentModule(), its second.
+  /* A TEST SECTION'S SCREEN, from whatever was on it before (Luca,
+     2026-10-02). The question screen is shared with the practice rounds
+     (Question Bank, Saved & Mistakes, Rush), and a round's end card hides
+     the Back/Next row, adds its own Done button and hides the calculator.
+     None of that was undone, so a test started after a round had no Next
+     (the student moved with the question list) and, resumed, no calculator.
+     Both a fresh module and a resumed one now set the screen here. */
+  function dxTestChrome(secKey) {
+    var card = document.getElementById('dx-card');
+    if (card) {
+      card.querySelectorAll('.iq-runner-summary, #qb-conf-row, .pb-note, .pb-explain').forEach(function (el) { el.parentNode.removeChild(el); });
+      var navRow = card.querySelector('.dx-nav-row'); if (navRow) navRow.style.display = '';
+      var hed = card.querySelector('.dx-card-hed'); if (hed) hed.style.display = '';
+    }
+    var choices = document.getElementById('dx-choices'); if (choices) choices.style.display = '';
+    var nextB = document.getElementById('dx-next'); if (nextB) nextB.disabled = false;
+    dxShellEl.classList.toggle('math-mode', !!MATH_SECTION_KEYS[secKey]);
+    document.getElementById('dx-reference-btn').style.display = SECTIONS_WITH_REFERENCE[secKey] ? '' : 'none';
+    // Calculator is allowed on BOTH real tests' math sections (unlike the
+    // reference sheet). MATH_SECTION_KEYS covers the SAT's 'math' section.
+    document.getElementById('dx-calculator-btn').style.display = MATH_SECTION_KEYS[secKey] ? '' : 'none';
+  }
   function goToModuleIntro() {
     dxMain.classList.remove('dx-checking');
     closeCalculator(); // a fresh module might not even be math — never carry the panel open into it
     var secKey = activeSectionKeys[sectionIndex];
     // Math questions use a tighter layout than R&W (see .dx-shell.math-mode),
     // matching denser Bluebook math, especially with the calculator open.
-    dxShellEl.classList.toggle('math-mode', !!MATH_SECTION_KEYS[secKey]);
+    dxTestChrome(secKey);
     var bank = bankFor(secKey);
     var hasTwoModules = sectionHasModules(secKey);
     var qsBank = moduleQuestions(bank, moduleStage, module2Variant);
@@ -13268,11 +13290,6 @@ window.Portal = {
     var pt = activePracticeTest();
     var testLabel = pt ? pt.title : (testChoice + ' Diagnostic');
 
-    document.getElementById('dx-reference-btn').style.display = hasReference ? '' : 'none';
-    // Calculator is allowed on BOTH real tests' math sections (unlike the
-    // reference sheet) — MATH_SECTION_KEYS
-    // covers the SAT's 'math' section.
-    document.getElementById('dx-calculator-btn').style.display = MATH_SECTION_KEYS[secKey] ? '' : 'none';
     document.getElementById('dx-brand-label').textContent = testLabel + ' — ' + sectionLabel + moduleLabelSuffix;
     // Naming the exact test in the banner lets a student confirm mid-test
     // that they're in the one they were told to take.
@@ -14870,6 +14887,7 @@ window.Portal = {
           : (moduleOnly ? ' — ' + (moduleOnly === 'module1' ? 'Module 1' : 'Module 2') : '');
         var ptResumed = activePracticeTest();
         document.getElementById('dx-brand-label').textContent = (ptResumed ? ptResumed.title : (testChoice + ' Diagnostic')) + ' — ' + bank.label + moduleLabelSuffix;
+        dxTestChrome(secKey);   // calculator, reference, and no practice-round leftovers, as on a fresh start
         document.getElementById('dx-notice-text').textContent = ptResumed
           ? ('THIS IS ' + practiceTestNameParts(ptResumed).name.toUpperCase() + ': TIMED AND SCORED')
           : ('THIS IS YOUR ' + testChoice + ' DIAGNOSTIC: NOT A PRACTICE TEST');
