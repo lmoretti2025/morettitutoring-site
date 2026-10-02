@@ -5744,7 +5744,7 @@ window.Portal = {
 <script src="grid-in.js?v=20261002a"></script>
 <script src="question-flag.js?v=20260922c"></script>
 <script src="report-tour.js?v=20260930a"></script>
-<script src="curriculum.js?v=20261002s"></script>
+<script src="curriculum.js?v=20261002t"></script>
 <script>
   /* practice-tests.js is ~2.6MB, so a blocking <script> delayed every later
      script (including the key-submit wiring). It loads here via an async
@@ -7093,6 +7093,8 @@ window.Portal = {
     sidebarEl.classList.toggle('sidebar-shown', showIt);
     // The curriculum hides the sidebar behind a menu button (see .cu-focus).
     document.body.classList.toggle('cu-focus', id === 'screen-curriculum');
+    // The curriculum's calculator pop-out floats over the page: it leaves with the curriculum.
+    if (id !== 'screen-curriculum' && window.curriculumCalcClose) window.curriculumCalcClose();
     document.body.classList.remove('cu-menu-open');
     // Top-bar search/countdown/profile only make sense alongside the
     // sidebar — same screens, same gate (see .nav-app-shell in the CSS).
@@ -16123,7 +16125,8 @@ window.Portal = {
     var out = []; selectedSets.forEach(function (s) { (VOCAB[s] || []).forEach(function (c) { out.push(c); }); }); return out;
   }
   function esc(s) { return window.Portal.escHtml(s); }
-  function norm(s) { return String(s).toLowerCase().trim().replace(/[^a-z0-9]/g, ''); }
+  // Accents fold to plain letters, so "facade" matches "façade".
+  function norm(s) { s = String(s).toLowerCase().trim(); try { s = s.normalize('NFD').replace(/[\u0300-\u036f]/g, ''); } catch (e) {} return s.replace(/[^a-z0-9]/g, ''); }
   function allCardsByTerm() {
     var all = {};
     setNames.forEach(function (s) { (VOCAB[s] || []).forEach(function (c) { all[c.term] = c; }); });
@@ -16441,8 +16444,9 @@ window.Portal = {
       '<div class="vp-nav"><button id="vp-prev" type="button"' + (fc.idx === 0 ? ' disabled' : '') + '>&larr; Back</button><button id="vp-shuffle" type="button">Shuffle</button><button id="vp-skip" type="button">Skip &rarr;</button></div>' +
       '</div>';
     document.getElementById('vp-card').addEventListener('click', flipCurrentCard);
-    document.getElementById('vp-still').addEventListener('click', function () { fc.still.push(fc.order[fc.idx]); setStillLearning(c.term, true); advanceFlash(1); });
-    document.getElementById('vp-got').addEventListener('click', function () { setStillLearning(c.term, false); advanceFlash(1); });
+    // One entry per card, and "Got it" takes it back out: the list follows the latest mark (2026-10-02).
+    document.getElementById('vp-still').addEventListener('click', function () { var cur = fc.order[fc.idx]; if (fc.still.indexOf(cur) === -1) fc.still.push(cur); setStillLearning(c.term, true); advanceFlash(1); });
+    document.getElementById('vp-got').addEventListener('click', function () { var at = fc.still.indexOf(fc.order[fc.idx]); if (at !== -1) fc.still.splice(at, 1); setStillLearning(c.term, false); advanceFlash(1); });
     document.getElementById('vp-prev').addEventListener('click', function () { advanceFlash(-1); });
     document.getElementById('vp-skip').addEventListener('click', function () { advanceFlash(1); });
     document.getElementById('vp-shuffle').addEventListener('click', renderFlash);
@@ -16512,7 +16516,9 @@ window.Portal = {
       var input = document.getElementById('vp-input');
       input.focus();
       function check() {
-        if (qz.answered) return; qz.answered = true;
+        if (qz.answered) return;
+        if (!norm(input.value)) { input.focus(); return; }   // a blank Enter is not an answer (2026-10-02)
+        qz.answered = true;
         var fb = document.getElementById('vp-fb');
         var right = answerAccepted(c, input.value);
         if (right) { qz.score++; fb.className = 'vp-fb ok'; fb.textContent = 'Correct: ' + c.term; }
@@ -17952,6 +17958,7 @@ window.Portal = {
   }
 
   function renderRunnerQuestion() {
+    var abcT = document.getElementById('dx-abc-toggle'); if (abcT) abcT.style.display = '';   // hidden again for a grid-in
     var qtextEl = document.getElementById('dx-qtext');
     var choicesEl = document.getElementById('dx-choices');
     var frRowEl = document.getElementById('dx-fr-row');
@@ -18097,7 +18104,9 @@ window.Portal = {
       choicesEl.style.display = 'none';
       frRowEl.style.display = st.submitted ? 'none' : 'flex';
       frInputEl.value = st.rawAnswer || '';
-      nextBtnEl.disabled = false;
+      // A blank (or digit-less) grid-in can't be submitted: Skip is the way past it (2026-10-02).
+      nextBtnEl.disabled = !st.submitted && !/\d/.test(st.rawAnswer || '');
+      if (abcT) abcT.style.display = 'none';   // the eliminator has nothing to cross out on a grid-in
       if (st.submitted) {
         var frNote = document.createElement('div');
         frNote.className = 'pb-note ' + (st.correct ? 'pb-note-correct' : 'pb-note-wrong');
@@ -18123,7 +18132,11 @@ window.Portal = {
     }
 
     nextBtnEl.textContent = st.submitted ? (runnerIndex + 1 < runnerQueue.length ? 'Next' : 'See Results') : 'Submit';
-    if (!st.submitted) frInputEl.oninput = function () { st.rawAnswer = frInputEl.value; };
+    if (!st.submitted) frInputEl.oninput = function () {
+      st.rawAnswer = frInputEl.value;
+      nextBtnEl.disabled = !/\d/.test(st.rawAnswer);
+      document.querySelectorAll('.qb-conf-btn').forEach(function (b) { b.disabled = nextBtnEl.disabled; });
+    };
     // The shared nav row may still hold another runner's Skip: replace it
     // with one bound to this runner (see the Question Bank runner).
     var oldSkipBtn = document.getElementById('dx-skip-btn');
@@ -18339,7 +18352,7 @@ window.Portal = {
     var back = document.getElementById('qb-skills-back');
     if (back) back.innerHTML = copy.back;
   }
-  function setBankMode(m) { bankMode = m; mountBankViews(); }
+  function setBankMode(m) { bankMode = m; if (typeof QB_SIZE_KEY !== 'undefined') qbSessionSize = loadQbSessionSize(); mountBankViews(); }
   // Same grid-in rule as every other 'fr' runner in this file (Practice
   // Tests, Saved & Mistakes): gridInCorrect() in grid-in.js.
   function checkFrAnswer(raw, expected, qid) {
@@ -19029,13 +19042,17 @@ window.Portal = {
      per device, like the weakness card's own size. */
   var QB_SIZE_KEY = 'qb_session_size';
   var QB_SIZE_MIN = 10, QB_SIZE_MAX = 100, QB_SIZE_STEP = 5;
-  var qbSessionSize = (function () {
+  // Each bank keeps its own round length (qb_session_size / _chal), read again
+  // whenever the bank changes (setBankMode), so Challenge's choice never leaks
+  // into the Question Bank or is lost on reload (2026-10-02).
+  function loadQbSessionSize() {
     try {
-      var n = parseInt(localStorage.getItem(QB_SIZE_KEY), 10);
+      var n = parseInt(localStorage.getItem(prefKeyFor(QB_SIZE_KEY)), 10);
       if (isFinite(n) && (n === 0 || (n >= QB_SIZE_MIN && n <= QB_SIZE_MAX))) return n;
     } catch (e) {}
     return 0;                       // All
-  })();
+  }
+  var qbSessionSize = loadQbSessionSize();
 
   var qbBarTimer = null;
   function qbReduceMotion() {
@@ -19672,7 +19689,9 @@ window.Portal = {
       runnerScore = 0;
       runnerSkillLabel = 'Your Weakest Skills';
       runnerReached = null;
+      runnerFromHome = true;
       window.dxPracticeNextHandler = runnerAdvance;
+      window.dxPracticeBackHandler = runnerBack;
       window.dxPracticeExitHandler = endRunner;
       window.dxPracticeLetterHandler = selectRunnerChoice;
       if (window.dxStartIncorrectPractice) window.dxStartIncorrectPractice('Question Bank: Your Weakest Skills');
@@ -19705,7 +19724,9 @@ window.Portal = {
       if (answered) {
         // Questions SEEN, not the current index: Back can leave the student
         // behind the furthest one they reached.
-        runnerReached = runnerQueue.filter(function (q) { return !!runnerState[q.qid]; }).length;
+        // The question on screen when they exit was not skipped, only left (2026-10-02).
+        var onScreen = runnerQueue[runnerIndex];
+        runnerReached = runnerQueue.filter(function (q) { var st = runnerState[q.qid]; return !!st && (st.submitted || q !== onScreen); }).length;
         runnerIndex = runnerQueue.length;
         renderRunnerQuestion();
         return;
@@ -19722,8 +19743,11 @@ window.Portal = {
     }
     if (window.dxEndIncorrectPractice) window.dxEndIncorrectPractice();
     if (window.showScreen) window.showScreen(bankScreenId());
+    // A weakness round started on the bank's home, not a topic list: back there.
+    if (runnerFromHome) { runnerFromHome = false; showHome(); return; }
     showSkills(currentSubject);
   }
+  var runnerFromHome = false;
   function runnerAdvance() {
     if (runnerIndex >= runnerQueue.length) return;
     var r = runnerQueue[runnerIndex];
@@ -19760,7 +19784,8 @@ window.Portal = {
       // Challenge misses too (2026-10-02), under their own 'chal|' key.
       if ((bankMode === 'qb' || bankMode === 'challenge') && window.recordQuestionBankMistake) {
         window.recordQuestionBankMistake({
-          key: bankKeyFor(currentSubject, r.qid),
+          // r._qbSubject: a Practice Your Weaknesses round mixes subjects and never sets currentSubject.
+          key: bankKeyFor(r._qbSubject || currentSubject, r.qid),
           given: given,
           correct: st.correct,
           attemptedAt: new Date().toISOString()
@@ -19834,7 +19859,7 @@ window.Portal = {
       btn.className = 'dx-mark-btn dx-save-btn';
       hedEl.appendChild(btn);
     }
-    var qbKey = bankKeyFor(currentSubject, r.qid);
+    var qbKey = bankKeyFor(r._qbSubject || currentSubject, r.qid);
     function paint() {
       var on = qbIsSaved(qbKey);
       btn.innerHTML = on ? '&#9733; Saved' : '&#9734; Save';
@@ -19860,6 +19885,7 @@ window.Portal = {
     };
   }
   function renderRunnerQuestion() {
+    var abcT = document.getElementById('dx-abc-toggle'); if (abcT) abcT.style.display = '';   // hidden again for a grid-in
     var qtextEl = document.getElementById('dx-qtext');
     var choicesEl = document.getElementById('dx-choices');
     var frRowEl = document.getElementById('dx-fr-row');
@@ -20019,8 +20045,14 @@ window.Portal = {
       choicesEl.style.display = 'none';
       frRowEl.style.display = st.submitted ? 'none' : 'flex';
       frInputEl.value = st.rawAnswer || '';
-      nextBtnEl.disabled = false;
-      if (!st.submitted) frInputEl.oninput = function () { st.rawAnswer = frInputEl.value; };
+      // A blank (or digit-less) grid-in can't be submitted: Skip is the way past it (2026-10-02).
+      nextBtnEl.disabled = !st.submitted && !/\d/.test(st.rawAnswer || '');
+      if (abcT) abcT.style.display = 'none';   // the eliminator has nothing to cross out on a grid-in
+      if (!st.submitted) frInputEl.oninput = function () {
+      st.rawAnswer = frInputEl.value;
+      nextBtnEl.disabled = !/\d/.test(st.rawAnswer);
+      document.querySelectorAll('.qb-conf-btn').forEach(function (b) { b.disabled = nextBtnEl.disabled; });
+    };
       if (st.submitted) {
         var frNote = document.createElement('div');
         frNote.className = 'pb-note ' + (st.correct ? 'pb-note-correct' : 'pb-note-wrong');

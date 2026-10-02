@@ -909,6 +909,14 @@
     bankReady(c).then(function () {
       if (view.name !== 'lesson' || view.lessonId !== l.id || view.step !== 'check') return;
       if (!check || check.lessonId !== l.id || check.part !== view.part) startCheck(c, l);
+      /* Back from the video (Rewatch, the Parts tab) with the last question
+         already answered: that one is counted, so carry on to the next rather
+         than redraw it looking unanswered (2026-10-02). */
+      if (check.answered) {
+        check.answered = false; check.pick = null;
+        if (check.results.length >= check.len) return drawComplete(c, l);
+        nextQuestion(l);
+      }
       drawQuestion(c, l);
     });
   }
@@ -1172,6 +1180,7 @@
   var calcEl = null;
   /* The answer eliminator stays on or off across questions, like Bluebook's. */
   var elimOn = false;
+  window.curriculumCalcClose = function () { if (calcEl) calcEl.hidden = true; };
   function calcPop(toggle) {
     if (!calcEl) {
       if (!toggle) return;
