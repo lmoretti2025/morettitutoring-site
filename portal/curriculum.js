@@ -19,7 +19,7 @@
 (function () {
   'use strict';
 
-  var DATA_SRC = 'curriculum-data.js?v=20260930b';
+  var DATA_SRC = 'curriculum-data.js?v=20261002a';
   var VIDEO_SRC = 'curriculum-videos.js?v=20260930b';
 
   /* ---------- small helpers ---------- */
@@ -207,7 +207,7 @@
     '#cu-root .cu-qdots{display:flex;gap:6px;flex-wrap:wrap}',
     '#cu-root .cu-streak-wrap{display:flex;align-items:center;gap:12px;flex-wrap:wrap}',
     '#cu-root .cu-streak{display:flex;gap:4px}#cu-root .cu-streak i{width:20px;height:9px;border-radius:5px;background:#e2dfda;transition:background .3s}',
-    '#cu-root .cu-streak i.on{background:var(--cu-good)}#cu-root .cu-streak-wrap .lbl b{color:var(--text,#111)}',
+    '#cu-root .cu-streak i.miss{background:var(--cu-bad)}#cu-root .cu-streak i.on{background:var(--cu-good)}#cu-root .cu-streak-wrap .lbl b{color:var(--text,#111)}',
     '#cu-root .cu-qdots i{width:12px;height:12px;border-radius:50%;border:1.5px solid rgba(17,17,17,.3)}',
     '#cu-root .cu-qdots i.ok{background:var(--cu-good);border-color:var(--cu-good)}#cu-root .cu-qdots i.cur{border-color:#3457d5;box-shadow:0 0 0 2px rgba(52,87,213,.2)}',
     '#cu-root .cu-bottom .lbl{font-size:.82rem;color:var(--mid)}',
@@ -725,7 +725,7 @@
         '<button type="button" class="cu-arrow" data-lesson-go="' + (next ? esc(next.l.id) : '') + '"' + (next ? '' : ' disabled') + ' aria-label="Next lesson">&rsaquo;</button></div></div>' +
         '<div class="cu-steps">' + steps + '</div></aside>' +
       '<main class="cu-main" id="cu-main"></main></div></div>';
-    if (view.step === 'check' && l.parts[view.part].qids.length) renderCheck(c, l); else renderVideo(c, l);
+    if (view.step === 'check' && checkIds(l.parts[view.part]).length) renderCheck(c, l); else renderVideo(c, l);
   }
 
   // The lesson's steps for the panel: each part's video, then its check. Locked until the part before is done.
@@ -736,9 +736,9 @@
       var lock = open ? '' : ' aria-disabled="true"';
       out += '<button type="button" class="cu-step' + (view.part === i && view.step === 'video' ? ' on' : '') + (open ? '' : ' locked') + (done ? ' done' : '') + '" data-step="video" data-part="' + i + '"' + lock + '>' +
         '<span class="ic">' + (done ? '&#10003;' : PLAY_SVG_XS) + '</span><span>' + esc(partTitle(l, i)) + '</span><span class="st">' + (open ? '' : LOCK_SVG) + '</span></button>';
-      if (p.qids.length) {
+      if (checkIds(p).length) {
         out += '<button type="button" class="cu-step sub' + (view.part === i && view.step === 'check' ? ' on' : '') + (open ? '' : ' locked') + (done ? ' done' : '') + '" data-step="check" data-part="' + i + '"' + lock + '>' +
-          '<span class="ic">' + (done ? '&#10003;' : '') + '</span><span>Check <small>' + STREAK_TO_PASS + ' in a row</small></span><span class="st"></span></button>';
+          '<span class="ic">' + (done ? '&#10003;' : '') + '</span><span>Check <small>' + pl(checkCount(p), 'question') + '</small></span><span class="st"></span></button>';
       }
     });
     return out;
@@ -773,10 +773,10 @@
   function renderVideo(c, l) {
     var p = l.parts[view.part], i = view.part;
     var vid = videoFor(l.id, i);
-    var hasCheck = p.qids.length > 0, done = isDone(l.id, i);
+    var hasCheck = checkIds(p).length > 0, done = isDone(l.id, i);
     var nextOpen = i + 1 < l.parts.length;
     var bar;
-    if (hasCheck) bar = '<span class="lbl">Up next: get ' + STREAK_TO_PASS + ' right in a row</span><button type="button" class="cu-btn" data-go-check>Start the check &rarr;</button>';
+    if (hasCheck) bar = '<span class="lbl">Up next: ' + pl(checkCount(p), 'question') + ' on this part</span><button type="button" class="cu-btn" data-go-check>Start the check &rarr;</button>';
     else bar = '<span class="lbl">' + (done ? 'Watched' : 'No questions for this part') + '</span><button type="button" class="cu-btn" data-watched>' + (nextOpen ? 'Next part &rarr;' : 'Finish the lesson &rarr;') + '</button>';
     $('#cu-main', root).innerHTML =
       // One part: the heading is the lesson itself, so the line above it names the unit instead of repeating it.
@@ -788,19 +788,22 @@
     r2Mount();
   }
 
-  /* ---------- the check: 8 right in a row (Luca, 2026-09-27) ----------
-     A part is passed with STREAK_TO_PASS correct answers in a row. Any miss
-     resets the streak to 0, shows the answer and why, and the check carries
-     on with questions the student has not seen yet: each part's pool (~30
-     questions, growing) is worked through least recently seen first, never
-     the same question twice in a row, so a reset means new questions rather
-     than memorised ones. What was seen, and when, is kept per part on the
-     device, so the rotation continues across visits. */
-  var STREAK_TO_PASS = 8;
+  /* ---------- the check: 8 questions (Luca, 2026-10-02) ----------
+     Each part ends with CHECK_LEN questions (fewer when the part has fewer,
+     never one twice), each answered with the right answer and why. The part
+     is done once they are all answered; the score is shown, not required
+     (it was 8 right in a row until 2026-10-02, which the short Algebra lists
+     made impossible to pass). The questions come from the part's own check
+     list (checkQids) when it has one, else the list the deck practises
+     (qids), so the two can be sized apart. Least recently seen first, kept
+     per part on the device, so a second go brings different questions. */
+  var CHECK_LEN = 8;
+  function checkIds(p) { return (p.checkQids && p.checkQids.length) ? p.checkQids : (p.qids || []); }
+  function checkCount(p) { return Math.min(CHECK_LEN, checkIds(p).length); }
   function startCheck(c, l) {
     var p = l.parts[view.part];
-    var pool = p.qids.filter(function (q) { return !!question(q); });
-    check = { lessonId: l.id, part: view.part, pool: pool, streak: 0, asked: {}, n: 0, current: null, answered: false, pick: null };
+    var pool = checkIds(p).filter(function (q) { return !!question(q); });
+    check = { lessonId: l.id, part: view.part, pool: pool, len: Math.min(CHECK_LEN, pool.length), results: [], asked: {}, n: 0, current: null, answered: false, pick: null };
     nextQuestion(l);
   }
   function seenMap(l) {
@@ -810,12 +813,8 @@
   }
   function nextQuestion(l) {
     var seen = seenMap(l), last = check.current;
-    var fresh = check.pool.filter(function (id) { return !check.asked[id] && id !== last; });
-    if (!fresh.length) {                              // the whole pool has come round: start a new cycle
-      check.asked = {};
-      fresh = check.pool.filter(function (id) { return id !== last; });
-      if (!fresh.length) fresh = check.pool.slice();  // a pool of one
-    }
+    var fresh = check.pool.filter(function (id) { return !check.asked[id]; });   // never one twice in a check
+    if (!fresh.length) return;
     // Least recently seen first (never seen = oldest), ties broken at random.
     fresh.sort(function (a, b) { return ((seen[a] || 0) - (seen[b] || 0)) || (Math.random() - 0.5); });
     check.current = fresh[0];
@@ -833,11 +832,16 @@
       drawQuestion(c, l);
     });
   }
+  // One mark per question: green right, red missed, grey still to come.
   function streakHtml() {
-    var segs = '';
-    for (var i = 0; i < STREAK_TO_PASS; i++) segs += '<i class="' + (i < check.streak ? 'on' : '') + '"></i>';
-    return '<div class="cu-streak" role="img" aria-label="' + check.streak + ' in a row of ' + STREAK_TO_PASS + ' needed">' + segs + '</div>' +
-      '<span class="lbl"><b>' + check.streak + '</b> in a row &middot; ' + STREAK_TO_PASS + ' to pass</span>';
+    var segs = '', right = 0;
+    for (var i = 0; i < check.len; i++) {
+      var r = check.results[i];
+      if (r) right++;
+      segs += '<i class="' + (r === true ? 'on' : r === false ? 'miss' : '') + '"></i>';
+    }
+    return '<div class="cu-streak" role="img" aria-label="' + check.results.length + ' of ' + check.len + ' answered, ' + right + ' right">' + segs + '</div>' +
+      '<span class="lbl">Question <b>' + Math.min(check.n, check.len) + '</b> of ' + check.len + '</span>';
   }
   function drawQuestion(c, l) {
     var main = $('#cu-main', root);
@@ -857,7 +861,7 @@
     var isMath = c.bank === 'math';
     main.innerHTML =
       '<div class="cu-mhead"><div class="cu-kicker">' + esc(l.num + ' ' + l.title) + '</div><h1>Check your understanding</h1>' +
-        '<div class="cu-sub">Get ' + STREAK_TO_PASS + ' right in a row to unlock the next part. A miss starts the count over, with new questions.</div></div>' +
+        '<div class="cu-sub">' + pl(check.len, 'question') + ' on this part. Each one shows the answer and why, and the next part opens when you finish.</div></div>' +
       '<div class="cu-card"><div class="cu-qhead"><span>Question ' + check.n + '</span>' +
         (isMath ? '<button type="button" class="cu-mini" data-calc>Calculator</button>' : '') + '</div>' +
         '<div class="cu-qtext">' + q.text + '</div>' + body + '<div id="cu-fb"></div><div class="cu-calc" id="cu-calc" hidden></div></div>' +
@@ -882,28 +886,24 @@
     var main = $('#cu-main', root), q = question(check.current), fb = $('#cu-fb', main), go = $('#cu-go', main);
     if (check.answered) {           // Next
       check.answered = false; check.pick = null;
-      if (check.streak >= STREAK_TO_PASS) return drawComplete(c, l);
+      if (check.results.length >= check.len) return drawComplete(c, l);
       nextQuestion(l);
       return drawQuestion(c, l);
     }
     var g = grade(q);
     check.answered = true;
+    check.results.push(!!g.ok);
+    var last = check.results.length >= check.len;
     if (g.ok) {
-      check.streak++;
       markChoices(q, true);
-      var passed = check.streak >= STREAK_TO_PASS;
-      fb.innerHTML = '<div class="cu-fb ok"><b>Correct!</b> ' + (passed ? STREAK_TO_PASS + ' in a row. That\u2019s the part.' : check.streak + ' in a row.') + '</div>';
-      go.textContent = passed ? 'Finish' : 'Next question'; go.disabled = false;
+      fb.innerHTML = '<div class="cu-fb ok"><b>Correct!</b></div>';
     } else {
-      var had = check.streak;
-      check.streak = 0;
       markChoices(q, false);
       var answer = q.type === 'fr' ? '<p>The answer is <b>' + esc(q.answerValue != null ? q.answerValue : q.answer) + '</b>.</p>' : '';
-      fb.innerHTML = '<div class="cu-fb no"><b>Not quite.</b> ' + (had ? 'Your streak of ' + had + ' starts over' : 'The count starts over') +
-        ', with new questions. Stuck? <a href="#" data-rewatch>Rewatch the video</a> or check the notes.' +
+      fb.innerHTML = '<div class="cu-fb no"><b>Not quite.</b> Stuck? <a href="#" data-rewatch>Rewatch the video</a> or check the notes.' +
         '<div class="ex">' + answer + (q.explanation || '') + '</div></div>';
-      go.textContent = 'Next question'; go.disabled = false;
     }
+    go.textContent = last ? 'Finish' : 'Next question'; go.disabled = false;
     var w = $('.cu-streak-wrap', main); if (w) w.innerHTML = streakHtml();
   }
   function markChoices(q, ok) {
@@ -918,6 +918,8 @@
   }
   function drawComplete(c, l) {
     var i = check.part;
+    var right = check.results.filter(Boolean).length, missed = check.results.length - right;
+    var score = right + ' of ' + check.results.length;
     markDone(l.id, i);
     var nextPart = i + 1 < l.parts.length;
     var list = allLessons(c), at = -1;
@@ -925,7 +927,8 @@
     var nextLesson = list[at + 1];
     $('#cu-main', root).innerHTML =
       '<div class="cu-card cu-complete"><div class="tick">&#10003;</div><h2 style="margin:0 0 .4rem">' + (nextPart ? 'Part ' + (i + 1) + ' complete' : 'Lesson complete') + '</h2>' +
-      '<p class="cu-sub">' + (nextPart ? STREAK_TO_PASS + ' right in a row. The next part is unlocked.' : STREAK_TO_PASS + ' right in a row. You finished ' + esc(l.num + ' ' + l.title) + '.') + '</p>' +
+      '<p class="cu-sub">' + score + ' right. ' + (nextPart ? 'The next part is unlocked.' : 'You finished ' + esc(l.num + ' ' + l.title) + '.') +
+        (missed ? ' The notes and the video are there for the ones you missed.' : '') + '</p>' +
       '<div style="margin-top:1.3rem;display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap">' +
       (nextPart ? '<button type="button" class="cu-btn" data-open-part="' + (i + 1) + '">Up next: part ' + (i + 2) + ' &rarr;</button>'
         : nextLesson ? '<button type="button" class="cu-btn" data-lesson-go="' + esc(nextLesson.l.id) + '">Up next: ' + esc(nextLesson.l.num + ' ' + nextLesson.l.title) + ' &rarr;</button>' : '') +
