@@ -198,7 +198,12 @@
     '#cu-root .cu-fb.ok{background:#eef7f2;color:#1f5e40}#cu-root .cu-fb.no{background:#fcefee;color:#8a2a22}',
     '#cu-root .cu-fb .ex{margin-top:.6rem;color:#2b2724;background:#fff;border-radius:8px;padding:.7rem .85rem;font-family:var(--display,Georgia,serif);font-size:.93rem}',
     '#cu-root .cu-fb a{color:inherit;font-weight:600}',
-    '#cu-root .cu-calc{margin-top:1rem}#cu-root .cu-calc .dx-calc-frame,#cu-root .cu-calc iframe{width:100%;height:420px;border:1px solid var(--cu-line);border-radius:12px}',
+    '#cu-calc-pop{position:fixed;right:24px;bottom:24px;width:440px;height:540px;min-width:300px;min-height:320px;max-width:calc(100vw - 16px);max-height:calc(100vh - 16px);z-index:9000;background:#fff;border-radius:14px;box-shadow:0 18px 50px rgba(17,17,17,.28),0 0 0 1px rgba(17,17,17,.08);display:flex;flex-direction:column;overflow:hidden;resize:both}',
+    '#cu-calc-pop[hidden]{display:none}',
+    '#cu-calc-pop .cu-pop-bar{flex:none;display:flex;align-items:center;justify-content:space-between;padding:.5rem .7rem .5rem 1rem;background:#12284c;color:#fff;cursor:move;user-select:none;touch-action:none;font:600 .85rem var(--hel,Poppins,sans-serif)}',
+    '#cu-calc-pop .cu-pop-x{border:0;background:rgba(255,255,255,.14);color:#fff;width:28px;height:28px;border-radius:50%;font-size:1.1rem;line-height:1;cursor:pointer}',
+    '#cu-calc-pop .cu-pop-body{flex:1;min-height:0;position:relative}#cu-calc-pop .cu-pop-body iframe,#cu-calc-pop .cu-pop-body .dx-calc-frame{position:absolute;inset:0;width:100%;height:100%;border:0}',
+    '@media(max-width:600px){#cu-calc-pop{left:8px!important;right:8px!important;top:auto!important;bottom:8px!important;width:auto;height:60vh;resize:none}}',
     '#cu-root .cu-mini{border:0;background:none;color:#3457d5;font:500 .82rem var(--hel,Poppins,sans-serif);cursor:pointer;padding:0}',
     '#cu-root .cu-complete{text-align:center;padding:2.2rem 1.5rem}',
     '#cu-root .cu-complete .tick{width:64px;height:64px;border-radius:50%;background:#eef7f2;color:var(--cu-good);font-size:1.8rem;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem}',
@@ -585,6 +590,7 @@
      course crossfades only what is below them, keeping its height while it
      swaps, so nothing on the page jumps (Luca, 2026-09-27). */
   function renderHome() {
+    calcPop(false);
     var c = course(view.course);
     view.course = c.id;
     root.innerHTML = '<div class="cu-wrap">' +
@@ -789,6 +795,7 @@
   // No video yet: a line saying so, not an empty player.
   var NO_VIDEO = '<div class="cu-nov"><span class="play">' + PLAY_SVG + '</span><div><b>Video coming soon</b><span>The notes below cover the same material for now.</span></div></div>';
   function renderVideo(c, l) {
+    calcPop(false);
     var p = l.parts[view.part], i = view.part;
     var vid = videoFor(l.id, i), inPart = null;
     if (vid && vid.indexOf('PART:') === 0) { inPart = Number(vid.slice(5)); vid = null; }
@@ -886,7 +893,7 @@
         '<div class="cu-sub">' + pl(check.len, 'question') + ' on this part. Each one shows the answer and why, and the next part opens when you finish.</div></div>' +
       '<div class="cu-card"><div class="cu-qhead"><span>Question ' + check.n + '</span>' +
         (isMath ? '<button type="button" class="cu-mini" data-calc>Calculator</button>' : '') + '</div>' +
-        '<div class="cu-qtext">' + q.text + '</div>' + body + '<div id="cu-fb"></div><div class="cu-calc" id="cu-calc" hidden></div></div>' +
+        '<div class="cu-qtext">' + q.text + '</div>' + body + '<div id="cu-fb"></div></div>' +
       '<div class="cu-bottom"><div class="cu-streak-wrap">' + streakHtml() + '</div>' +
         '<button type="button" class="cu-btn" id="cu-go" data-check-go disabled>Check</button></div>';
     var fr = $('#cu-fr', main);
@@ -939,6 +946,7 @@
     });
   }
   function drawComplete(c, l) {
+    calcPop(false);
     var i = check.part;
     var right = check.results.filter(Boolean).length, missed = check.results.length - right;
     var score = right + ' of ' + check.results.length;
@@ -1015,12 +1023,7 @@
       return;
     }
     if (t.closest('[data-rewatch]')) { e.preventDefault(); view.step = 'video'; return renderLesson(); }
-    if (t.closest('[data-calc]')) {
-      var box = $('#cu-calc', root);
-      if (box.hasAttribute('hidden')) { box.removeAttribute('hidden'); if (window.ensureDesmosCalculator) window.ensureDesmosCalculator(box); }
-      else box.setAttribute('hidden', '');
-      return;
-    }
+    if (t.closest('[data-calc]')) { calcPop(true); return; }
     if (check && (b = t.closest('.cu-choice')) && !b.disabled) {
       check.pick = Number(b.getAttribute('data-choice'));
       $$('.cu-choice', root).forEach(function (x) { x.classList.toggle('sel', x === b); });
@@ -1028,6 +1031,41 @@
       return;
     }
     if (check && t.closest('[data-check-go]')) return submitAnswer(hit.c, hit.l);
+  }
+
+  /* THE CALCULATOR, A POP-OUT (Luca, 2026-10-02): a window over the page,
+     not a panel under the question. Dragged by its bar, resized from its
+     corner, closed with x. One for the whole check, so the graphs stay put
+     from question to question; it closes when the check is left. */
+  var calcEl = null;
+  function calcPop(toggle) {
+    if (!calcEl) {
+      if (!toggle) return;
+      calcEl = document.createElement('div');
+      calcEl.id = 'cu-calc-pop';
+      calcEl.setAttribute('role', 'dialog');
+      calcEl.setAttribute('aria-label', 'Calculator');
+      calcEl.innerHTML = '<div class="cu-pop-bar"><b>Calculator</b><button type="button" class="cu-pop-x" aria-label="Close the calculator">&times;</button></div><div class="cu-pop-body"></div>';
+      document.body.appendChild(calcEl);
+      calcEl.querySelector('.cu-pop-x').addEventListener('click', function () { calcEl.hidden = true; });
+      var bar = calcEl.querySelector('.cu-pop-bar'), drag = null;
+      bar.addEventListener('pointerdown', function (e) {
+        if (e.target.closest('.cu-pop-x')) return;
+        var r = calcEl.getBoundingClientRect();
+        drag = { dx: e.clientX - r.left, dy: e.clientY - r.top };
+        bar.setPointerCapture(e.pointerId);
+      });
+      bar.addEventListener('pointermove', function (e) {
+        if (!drag) return;
+        var x = Math.max(0, Math.min(window.innerWidth - 120, e.clientX - drag.dx));
+        var y = Math.max(0, Math.min(window.innerHeight - 40, e.clientY - drag.dy));
+        calcEl.style.left = x + 'px'; calcEl.style.top = y + 'px'; calcEl.style.right = 'auto'; calcEl.style.bottom = 'auto';
+      });
+      bar.addEventListener('pointerup', function () { drag = null; });
+      if (window.ensureDesmosCalculator) window.ensureDesmosCalculator(calcEl.querySelector('.cu-pop-body'));
+      return;
+    }
+    calcEl.hidden = toggle ? !calcEl.hidden : true;
   }
 
   /* ---------- the home screen's Curriculum tile ----------
