@@ -1169,7 +1169,7 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}
   <div class="capintro">
     <h2 class="rv d1">Start with the <span class="uline">free<svg class="uline-svg" viewBox="0 0 120 22" preserveAspectRatio="none" aria-hidden="true"><path class="u1" d="M3 9.5C22 5.6 47 4.4 70 5.2c17 .6 33 2 46 3.4"/><path class="u2" d="M6 16.4C26 12.8 52 11.6 76 12.2c15 .4 29 1.5 39 2.7"/></svg></span> diagnostic.</h2>
     <p class="lead rv d2">I reply personally, the same day. SAT plans start with a full-length timed test at no charge, and a report on the data behind the score. Math and essay coaching start with a free call instead.</p>
-    <p class="capdate rv d2"><span class="cdk">Next open SAT</span> <b id="cd-fit">October 3</b>, <span id="cd-reglbl">register by</span> <b id="cd-reg">September 18</b>. <a href="test-dates.html">All dates &rarr;</a></p>
+    <p class="capdate rv d2"><span class="cdk">Next open SAT</span> <b id="cd-fit">November 7</b>, <span id="cd-reglbl">register by</span> <b id="cd-reg">October 23</b>. <a href="test-dates.html">All dates &rarr;</a></p>
   </div>
 
   <div class="bookcard rv d2">
@@ -1259,7 +1259,9 @@ footer a{color:rgba(237,231,229,.7);transition:color .2s}
     open();
   }
   window.addEventListener('hashchange', openFromHash);
-  openFromHash();
+  // auth-client.js is deferred, so it has not run yet at this point: wait for it.
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', openFromHash);
+  else openFromHash();
 })();
 </script>
 <script>
@@ -1711,11 +1713,11 @@ mtaSafe(function(){
           if (window.MTrack) window.MTrack.lead({ source: 'site_form', page: location.pathname, start: start || 'unset', has_message: message ? 1 : 0 });
         } catch (err) {}
         form.reset();
-        btn.disabled=false; btn.textContent='Take the free diagnostic';
+        btn.disabled=false; btn.innerHTML='<span>Take the free diagnostic</span>';
       })
       .catch(function(){
         bad.style.display='block'; ok.style.display='none';
-        btn.disabled=false; btn.textContent='Take the free diagnostic';
+        btn.disabled=false; btn.innerHTML='<span>Take the free diagnostic</span>';
       });
   });
 });
