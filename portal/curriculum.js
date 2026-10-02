@@ -19,7 +19,7 @@
 (function () {
   'use strict';
 
-  var DATA_SRC = 'curriculum-data.js?v=20261002j';
+  var DATA_SRC = 'curriculum-data.js?v=20261002k';
   var VIDEO_SRC = 'curriculum-videos.js?v=20261002b';
 
   /* ---------- small helpers ---------- */
@@ -178,6 +178,7 @@
     '#cu-root .cu-notes-b h3{font-family:var(--display,Georgia,serif);font-size:1.12rem;margin:1.2rem 0 .4rem;color:var(--text,#111)}',
     '#cu-root .cu-notes-b ul,#cu-root .cu-notes-b ol{padding-left:1.3rem;margin:.4rem 0 .8rem}#cu-root .cu-notes-b li{margin:.3rem 0}',
     '#cu-root .cu-notes-b li.sub{margin-left:1.2rem;list-style:circle}',
+    '#cu-root .cu-notes-b li.sub.deep{margin-left:2.4rem;list-style:square}',
     '#cu-root .cu-notes-b blockquote{margin:.6rem 0;padding:.6rem .9rem;background:var(--cu-soft);border-left:3px solid var(--gold,#C9A84C);border-radius:6px;font-family:var(--display,Georgia,serif)}',
     '#cu-root .cu-notes-b table{border-collapse:collapse;margin:.6rem 0;font-size:.88rem;width:100%}',
     '#cu-root .cu-notes-b th,#cu-root .cu-notes-b td{border:1px solid var(--cu-line);padding:.4rem .55rem;text-align:left;vertical-align:top}',
@@ -804,7 +805,7 @@
         return (n.title ? '<h3>' + esc(n.title) + '</h3>' : '') +
           (n.lead ? '<p>' + n.lead + '</p>' : '') + (n.formula ? '<div class="cu-formula">' + n.formula + '</div>' : '') +
           (n.listhead ? '<p><b>' + n.listhead + '</b></p>' : '') +
-          (n.rows.length ? '<ul>' + n.rows.map(function (r) { return '<li' + (r.sub ? ' class="sub"' : '') + '>' + r.html + '</li>'; }).join('') + '</ul>' : '');
+          (n.rows.length ? '<ul>' + n.rows.map(function (r) { return '<li' + (r.sub ? ' class="sub' + (r.deep ? ' deep' : '') + '"' : '') + '>' + r.html + '</li>'; }).join('') + '</ul>' : '');
       }
       return (n.title ? '<h3>' + esc(n.title) + '</h3>' : '') + (n.html || '');
     }).join('');
