@@ -19,7 +19,7 @@
 (function () {
   'use strict';
 
-  var DATA_SRC = 'curriculum-data.js?v=20261002g';
+  var DATA_SRC = 'curriculum-data.js?v=20261002h';
   var VIDEO_SRC = 'curriculum-videos.js?v=20261002b';
 
   /* ---------- small helpers ---------- */
@@ -198,6 +198,17 @@
     '#cu-root .cu-choice.right{border-color:var(--cu-good);background:#eef7f2}#cu-root .cu-choice.right .lt{background:var(--cu-good);border-color:var(--cu-good);color:#fff}',
     '#cu-root .cu-choice.wrong{border-color:var(--cu-bad);background:#fcefee}#cu-root .cu-choice.wrong .lt{background:var(--cu-bad);border-color:var(--cu-bad);color:#fff}',
     '#cu-root .cu-choice[disabled]{cursor:default}',
+    '#cu-root .cu-crow{display:grid;grid-template-columns:1fr;gap:.5rem;align-items:center}',
+    '#cu-root .cu-choices.elim .cu-crow{grid-template-columns:1fr 54px}',
+    '#cu-root .cu-x{display:none;width:34px;height:34px;border-radius:50%;border:1.5px solid rgba(17,17,17,.3);background:#fff;color:inherit;font:600 .78rem var(--hel,Poppins,sans-serif);cursor:pointer;align-items:center;justify-content:center;position:relative;padding:0}',
+    '#cu-root .cu-x::after{content:"";position:absolute;left:4px;right:4px;top:50%;border-top:1.5px solid currentColor}',
+    '#cu-root .cu-x:hover{border-color:rgba(17,17,17,.6)}',
+    '#cu-root .cu-choices.elim .cu-x{display:flex}',
+    '#cu-root .cu-crow.out .cu-choice{opacity:.45}#cu-root .cu-crow.out .cu-choice>span:last-child{text-decoration:line-through}',
+    '#cu-root .cu-x{justify-self:center}#cu-root .cu-crow.out .cu-x{width:54px;border-radius:999px;font-size:.72rem;font-weight:500}#cu-root .cu-crow.out .cu-x::after{display:none}',
+    '#cu-root .cu-qtools{display:flex;gap:1.1rem;align-items:center}',
+    '#cu-root .cu-abc{border:1.5px solid var(--cu-line);background:#fff;border-radius:6px;padding:.15rem .45rem;font:600 .74rem var(--hel,Poppins,sans-serif);color:inherit;cursor:pointer;text-decoration:line-through}',
+    '#cu-root .cu-abc[aria-pressed="true"]{background:#3457d5;border-color:#3457d5;color:#fff}',
     '#cu-root .cu-fr{margin-top:1.1rem;display:flex;gap:.6rem;align-items:center}',
     '#cu-root .cu-fr input{font:500 1.05rem var(--hel,Poppins,sans-serif);padding:.65rem .8rem;border:1.5px solid var(--cu-line);border-radius:10px;width:12rem}',
     '#cu-root .cu-fr input:focus{outline:none;border-color:#3457d5}',
@@ -925,19 +936,23 @@
       body = '<div class="cu-fr"><input type="text" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-label="Your answer" id="cu-fr" placeholder="Your answer"></div>';
     } else {
       body = '<div class="cu-choices">' + (q.choices || []).map(function (ch, k) {
-        return '<button type="button" class="cu-choice" data-choice="' + k + '"><span class="lt">' + LETTERS[k] + '</span><span>' + ch + '</span></button>';
+        return '<div class="cu-crow"><button type="button" class="cu-choice" data-choice="' + k + '"><span class="lt">' + LETTERS[k] + '</span><span>' + ch + '</span></button>' +
+          '<button type="button" class="cu-x" data-elim="' + k + '" aria-label="Rule out ' + LETTERS[k] + '" title="Rule out ' + LETTERS[k] + '">' + LETTERS[k] + '</button></div>';
       }).join('') + '</div>';
     }
-    var isMath = c.bank === 'math';
+    var isMath = c.bank === 'math', isMc = q.type !== 'fr';
+    check.out = {};
     main.innerHTML =
       '<div class="cu-mhead"><div class="cu-kicker">' + esc(l.num + ' ' + l.title) + '</div><h1>Check your understanding</h1>' +
         '<div class="cu-sub">' + pl(check.len, 'question') + ' on this part. Each one shows the answer and why, and the next part opens when you finish.</div></div>' +
-      '<div class="cu-card"><div class="cu-qhead"><span>Question ' + check.n + '</span>' +
-        (isMath ? '<button type="button" class="cu-mini" data-calc>Calculator</button>' : '') + '</div>' +
+      '<div class="cu-card"><div class="cu-qhead"><span>Question ' + check.n + '</span><span class="cu-qtools">' +
+        (isMc ? '<button type="button" class="cu-abc" data-abc aria-pressed="' + elimOn + '" title="Answer eliminator">ABC</button>' : '') +
+        (isMath ? '<button type="button" class="cu-mini" data-calc>Calculator</button>' : '') + '</span></div>' +
         '<div class="cu-qtext">' + q.text + '</div>' + body + '<div id="cu-fb"></div></div>' +
       '<div class="cu-bottom"><div class="cu-streak-wrap">' + streakHtml() + '</div>' +
         '<button type="button" class="cu-btn" id="cu-go" data-check-go disabled>Check</button></div>';
     marginNotes(l, check.part);
+    if (isMc && elimOn) $('.cu-choices', main).classList.add('elim');
     var fr = $('#cu-fr', main);
     if (fr) {
       if (window.gridInGuard) window.gridInGuard(fr);
@@ -980,10 +995,12 @@
   }
   function markChoices(q, ok) {
     if (q.type === 'fr') { var fr = $('#cu-fr', root); if (fr) fr.disabled = true; return; }
+    var ch = $('.cu-choices', root); if (ch) ch.classList.remove('elim');
     $$('.cu-choice', root).forEach(function (b) {
       var k = Number(b.getAttribute('data-choice'));
       b.disabled = true;
       b.classList.remove('sel');
+      b.parentNode.classList.remove('out');
       if (k === q.correct) b.classList.add('right');
       else if (k === check.pick && !ok) b.classList.add('wrong');
     });
@@ -1067,7 +1084,26 @@
     }
     if (t.closest('[data-rewatch]')) { e.preventDefault(); view.step = 'video'; return renderLesson(); }
     if (t.closest('[data-calc]')) { calcPop(true); return; }
+    if (check && t.closest('[data-abc]')) {
+      elimOn = !elimOn;
+      t.closest('[data-abc]').setAttribute('aria-pressed', String(elimOn));
+      var cs = $('.cu-choices', root); if (cs && !check.answered) cs.classList.toggle('elim', elimOn);
+      return;
+    }
+    if (check && (b = t.closest('[data-elim]')) && !check.answered) {
+      var k = Number(b.getAttribute('data-elim')), row = b.parentNode;
+      check.out[k] = !check.out[k];
+      row.classList.toggle('out', check.out[k]);
+      b.setAttribute('aria-label', (check.out[k] ? 'Bring back ' : 'Rule out ') + LETTERS[k]);
+      b.textContent = check.out[k] ? 'Undo' : LETTERS[k];
+      if (check.out[k] && check.pick === k) {
+        check.pick = null; row.querySelector('.cu-choice').classList.remove('sel'); $('#cu-go', root).disabled = true;
+      }
+      return;
+    }
     if (check && (b = t.closest('.cu-choice')) && !b.disabled) {
+      var kk = Number(b.getAttribute('data-choice'));
+      if (check.out[kk]) { check.out[kk] = false; var r = b.parentNode, xb = r.querySelector('.cu-x'); r.classList.remove('out'); xb.textContent = LETTERS[kk]; xb.setAttribute('aria-label', 'Rule out ' + LETTERS[kk]); }
       check.pick = Number(b.getAttribute('data-choice'));
       $$('.cu-choice', root).forEach(function (x) { x.classList.toggle('sel', x === b); });
       $('#cu-go', root).disabled = false;
@@ -1081,6 +1117,8 @@
      corner, closed with x. One for the whole check, so the graphs stay put
      from question to question; it closes when the check is left. */
   var calcEl = null;
+  /* The answer eliminator stays on or off across questions, like Bluebook's. */
+  var elimOn = false;
   function calcPop(toggle) {
     if (!calcEl) {
       if (!toggle) return;
