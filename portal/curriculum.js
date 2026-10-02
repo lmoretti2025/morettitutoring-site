@@ -963,7 +963,7 @@
     var q = question(check.current);
     var body;
     if (q.type === 'fr') {
-      body = '<div class="cu-fr"><input type="text" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-label="Your answer" id="cu-fr" placeholder="Your answer"></div>';
+      body = '<div class="cu-fr"><input type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-label="Your answer" id="cu-fr" placeholder="Your answer"></div>';
     } else {
       body = '<div class="cu-choices">' + (q.choices || []).map(function (ch, k) {
         return '<div class="cu-crow"><button type="button" class="cu-choice" data-choice="' + k + '"><span class="lt">' + LETTERS[k] + '</span><span>' + ch + '</span></button>' +
@@ -987,8 +987,8 @@
     var fr = $('#cu-fr', main);
     if (fr) {
       if (window.gridInGuard) window.gridInGuard(fr);
-      fr.addEventListener('input', function () { $('#cu-go', main).disabled = !fr.value.trim(); });
-      fr.addEventListener('keydown', function (e) { if (e.key === 'Enter' && fr.value.trim()) submitAnswer(c, l); });
+      fr.addEventListener('input', function () { $('#cu-go', main).disabled = !/\d/.test(fr.value); });
+      fr.addEventListener('keydown', function (e) { if (e.key === 'Enter' && /\d/.test(fr.value)) submitAnswer(c, l); });
       setTimeout(function () { try { fr.focus(); } catch (e) {} }, 50);
     }
   }

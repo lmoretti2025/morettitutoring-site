@@ -5544,7 +5544,7 @@ window.Portal = {
           <h1 class="dx-qtext" id="dx-qtext"></h1>
           <div class="dx-choices" id="dx-choices" style="display:none;"></div>
           <div class="dx-fr-row" id="dx-fr-row" style="display:none;">
-            <input type="text" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" class="dx-fr-input" id="dx-fr-input" placeholder="Type your answer">
+            <input type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" class="dx-fr-input" id="dx-fr-input" placeholder="Type your answer">
           </div>
           <div class="dx-nav-row">
             <button class="dx-btn dx-btn-back" id="dx-back">Back</button>
@@ -5744,7 +5744,7 @@ window.Portal = {
 <script src="grid-in.js?v=20261002a"></script>
 <script src="question-flag.js?v=20260922c"></script>
 <script src="report-tour.js?v=20260930a"></script>
-<script src="curriculum.js?v=20261002r"></script>
+<script src="curriculum.js?v=20261002s"></script>
 <script>
   /* practice-tests.js is ~2.6MB, so a blocking <script> delayed every later
      script (including the key-submit wiring). It loads here via an async
@@ -11023,7 +11023,7 @@ window.Portal = {
         cls: ' pt-card-live',
         score: '',
         meta: '<span class="pt-live-dot"></span>' +
-          (snap.moduleStage === 'module2' ? 'Module 2' : 'Module 1') +
+          ((snap.moduleOnly ? snap.moduleOnly !== 'module1' : snap.moduleStage === 'module2') ? 'Module 2' : 'Module 1') +
           (msLeft === null ? ' &middot; in progress'
             : msLeft > 0 ? ' &middot; ' + Math.ceil(msLeft / 60000) + ' min left' : ' &middot; time ran out'),
         resume: true
@@ -13478,7 +13478,7 @@ window.Portal = {
   function openNavModal() {
     var secKey = activeSectionKeys[sectionIndex];
     var bank = bankFor(secKey);
-    var moduleLabel = sectionHasModules(secKey) ? (moduleStage === 'module1' ? 'Module 1' : 'Module 2') : 'Module 1';
+    var moduleLabel = moduleOnly ? (moduleOnly === 'module1' ? 'Module 1' : 'Module 2') : sectionHasModules(secKey) ? (moduleStage === 'module1' ? 'Module 1' : 'Module 2') : 'Module 1';
     navModalTitle.textContent = 'Section ' + (sectionIndex + 1) + ', ' + moduleLabel + ': ' + bank.label + ' Questions';
     refreshSidebar();
     navOverlay.classList.add('active');
@@ -13530,11 +13530,12 @@ window.Portal = {
     var hed = document.querySelector('#dx-card .dx-card-hed');
     var pt = activePracticeTest();
     var secKey = currentSectionKey();
-    var moduleName = moduleStage === 'module2' ? 'module2' + (module2Variant || 'Easier') : 'module1';
+    // A module sat on its own runs as stage 'module1' whichever module it is (moduleOnly says which).
+    var moduleName = moduleOnly ? moduleBankName(moduleOnly) : moduleStage === 'module2' ? 'module2' + (module2Variant || 'Easier') : 'module1';
     var testTag = pt ? pt.id : ('diag-' + testChoice);
     var title = pt ? pt.title : ((testChoice || 'SAT') + ' Diagnostic');
     var where = title + ' - ' + (secKey === 'math' ? 'Math' : 'Reading & Writing') +
-      (sectionHasModules(secKey) ? ' Module ' + (moduleStage === 'module2' ? '2' : '1') : '') + ' - Q' + (current + 1);
+      (moduleOnly ? ' Module ' + (moduleOnly === 'module1' ? '1' : '2') : sectionHasModules(secKey) ? ' Module ' + (moduleStage === 'module2' ? '2' : '1') : '') + ' - Q' + (current + 1);
     window.portalFlag.attach(hed, {
       qkey: testTag + '|' + secKey + '|' + moduleName + '|' + (qOrder[current] != null ? qOrder[current] : current),
       where: where,
@@ -13621,7 +13622,8 @@ window.Portal = {
 
   function recordFrAnswer() {
     var raw = frInput.value.trim();
-    if (!raw) { answers[current] = null; return false; } // student cleared the box — clear the recorded answer too, don't leave a stale one behind
+    // A lone "-", "." or "/" is not an answer yet: it must not mark the question answered.
+    if (!raw || !/\d/.test(raw)) { answers[current] = null; return false; } // student cleared the box — clear the recorded answer too, don't leave a stale one behind
     answers[current] = { raw: raw, value: parseNumeric(raw) };
     return true;
   }
@@ -13656,6 +13658,19 @@ window.Portal = {
   // navigation hooks above, bank the value then too rather than trusting
   // that every future caller remembers to.
   frInput.addEventListener('blur', function () { if (!iqPracticeActive) commitPendingFrAnswer(); });
+  /* A typed answer used to reach the saved state only once the student left
+     the question, so a reload (or a closed laptop) mid-answer lost it
+     (2026-10-02). It is banked and saved a moment after typing stops, and
+     again as the page goes away. */
+  var frSaveTimer = null;
+  frInput.addEventListener('input', function () {
+    if (iqPracticeActive) return;
+    if (frSaveTimer) clearTimeout(frSaveTimer);
+    frSaveTimer = setTimeout(function () { frSaveTimer = null; if (activeScreenId === 'dx-screen') { commitPendingFrAnswer(); saveState(); } }, 600);
+  });
+  window.addEventListener('pagehide', function () {
+    if (activeScreenId === 'dx-screen' && !iqPracticeActive) { try { commitPendingFrAnswer(); saveState(); } catch (e) {} }
+  });
   // Numbers only, at most 4 decimal places, no autofill suggestions: the
   // rule lives in grid-in.js. It runs in every mode, practice included.
   if (window.gridInGuard) window.gridInGuard(frInput);
@@ -13690,10 +13705,10 @@ window.Portal = {
       if (practiceLetterIdx !== -1 && window.dxPracticeLetterHandler) { e.preventDefault(); window.dxPracticeLetterHandler(practiceLetterIdx); }
       return;
     }
-    if (dxMain.classList.contains('dx-checking')) {
-      if (e.key === 'Enter') { e.preventDefault(); checkSubmitBtn.click(); }
-      return;
-    }
+    /* The review page takes no Enter (2026-10-02): a second press of the
+       Enter that opened it submitted the module on the spot, with no way
+       back. Bluebook has no keyboard submit either; the button is the way. */
+    if (dxMain.classList.contains('dx-checking')) return;
     if (e.key === 'ArrowLeft') { e.preventDefault(); goTo(current - 1); }
     else if (e.key === 'ArrowRight') { e.preventDefault(); goTo(current + 1); }
     else if (e.key === 'Enter') { e.preventDefault(); if (!nextBtn.disabled) nextBtn.click(); }
@@ -13749,7 +13764,7 @@ window.Portal = {
     sigReviewReached();
     var secKey = activeSectionKeys[sectionIndex];
     var bank = bankFor(secKey);
-    var moduleLabel = sectionHasModules(secKey) ? (moduleStage === 'module1' ? 'Module 1' : 'Module 2') : 'Module 1';
+    var moduleLabel = moduleOnly ? (moduleOnly === 'module1' ? 'Module 1' : 'Module 2') : sectionHasModules(secKey) ? (moduleStage === 'module1' ? 'Module 1' : 'Module 2') : 'Module 1';
     checkTitle.textContent = 'Section ' + (sectionIndex + 1) + ', ' + moduleLabel + ': ' + bank.label + ' Questions';
     checkSubmitBtn.textContent = computeSubmitLabel();
     buildCheckGrid();
