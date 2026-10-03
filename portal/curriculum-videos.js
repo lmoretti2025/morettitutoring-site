@@ -36,7 +36,9 @@ window.CURRICULUM_VIDEOS = {
   // Re-recorded 2026-10-02 (19:45, was ~16:00). Part boundaries are the Standard Form and
   // Point-Slope Form title slides at 13:00 and 17:19, one second early as before.
   'm2.1': ['r2:m2.1-1.mp4@0:00-12:59', 'r2:m2.1-1.mp4@12:59-17:18', 'r2:m2.1-1.mp4@17:18'],
-  'm2.2': ['r2:m2.2-1.mp4@0:00-9:59', 'r2:m2.2-1.mp4@9:59-14:53', 'r2:m2.2-1.mp4@14:53'],
+  // Re-recorded 2026-10-03 (14:30). Boundaries are the Equation-to-table and When given
+  // two points title slides at 7:44 and 12:10, one second early as the others are.
+  'm2.2': ['r2:m2.2-1.mp4@0:00-7:43', 'r2:m2.2-1.mp4@7:43-12:09', 'r2:m2.2-1.mp4@12:09'],
   // 2.3 and 2.4 swapped places (Luca, 2026-10-02): this recording is Building
   // the Equation, now 2.4. The new 2.3, Interpretation, has no video yet.
   'm2.4': ['r2:m2.3-1.mp4@0:00-12:29', 'r2:m2.3-1.mp4@12:29-16:53', 'r2:m2.3-1.mp4@16:53-24:39', 'r2:m2.3-1.mp4@24:39']
