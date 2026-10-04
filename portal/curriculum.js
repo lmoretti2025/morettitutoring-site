@@ -26,6 +26,10 @@
   function $(sel, root) { return (root || document).querySelector(sel); }
   function $$(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
   function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+  /* A note heading keeps the deck's **bold** marks. esc() alone printed them as
+     literal asterisks in the margin notes (Luca, 2026-10-04). partTitle strips
+     them instead, because a Part button is plain text. */
+  function escB(s) { return esc(s).replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>'); }
   function loadScript(src) {
     return new Promise(function (resolve) {
       var s = document.createElement('script');
@@ -827,12 +831,12 @@
   function notesHtml(p) {
     return (p.notes || []).map(function (n) {
       if (n.rows) {   // a math deck page
-        return (n.title ? '<h3>' + esc(n.title) + '</h3>' : '') +
+        return (n.title ? '<h3>' + escB(n.title) + '</h3>' : '') +
           (n.lead ? '<p>' + n.lead + '</p>' : '') + (n.formula ? '<div class="cu-formula">' + n.formula + '</div>' : '') +
           (n.listhead ? '<p><b>' + n.listhead + '</b></p>' : '') +
           (n.rows.length ? '<ul>' + n.rows.map(function (r) { return '<li' + (r.sub ? ' class="sub' + (r.deep ? ' deep' : '') + '"' : '') + '>' + r.html + '</li>'; }).join('') + '</ul>' : '');
       }
-      return (n.title ? '<h3>' + esc(n.title) + '</h3>' : '') + (n.html || '');
+      return (n.title ? '<h3>' + escB(n.title) + '</h3>' : '') + (n.html || '');
     }).join('');
   }
 
