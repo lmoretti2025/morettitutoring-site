@@ -19,8 +19,8 @@
 (function () {
   'use strict';
 
-  var DATA_SRC = 'curriculum-data.js?v=20261003b';
-  var VIDEO_SRC = 'curriculum-videos.js?v=20261003a';
+  var DATA_SRC = 'curriculum-data.js?v=20261004a';
+  var VIDEO_SRC = 'curriculum-videos.js?v=20261004a';
 
   /* ---------- small helpers ---------- */
   function $(sel, root) { return (root || document).querySelector(sel); }

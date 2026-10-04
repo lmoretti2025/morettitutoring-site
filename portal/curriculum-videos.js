@@ -30,16 +30,15 @@
    ========================================================================= */
 window.CURRICULUM_VIDEOS = {
   'm1.1': ['r2:m1.1-1.mp4'],
-  // One video per lesson, each part playing its stretch of it. The times are
-  // where each part's title slide first appears, read off the videos
-  // (2026-10-02), one second early.
-  // Re-recorded 2026-10-02 (19:45, was ~16:00). Part boundaries are the Standard Form and
-  // Point-Slope Form title slides at 13:00 and 17:19, one second early as before.
   'm2.1': ['r2:m2.1-1.mp4@0:00-12:59', 'r2:m2.1-1.mp4@12:59-17:18', 'r2:m2.1-1.mp4@17:18'],
-  // Re-recorded 2026-10-03 (14:30). Boundaries are the Equation-to-table and When given
-  // two points title slides at 7:44 and 12:10, one second early as the others are.
   'm2.2': ['r2:m2.2-1.mp4@0:00-7:43', 'r2:m2.2-1.mp4@7:43-12:09', 'r2:m2.2-1.mp4@12:09'],
-  // 2.3 and 2.4 swapped places (Luca, 2026-10-02): this recording is Building
-  // the Equation, now 2.4. The new 2.3, Interpretation, has no video yet.
-  'm2.4': ['r2:m2.3-1.mp4@0:00-12:29', 'r2:m2.3-1.mp4@12:29-16:53', 'r2:m2.3-1.mp4@16:53-24:39', 'r2:m2.3-1.mp4@24:39']
+  // 2.3 to 2.8, recorded 2026-10-04. Each boundary is where that part's title
+  // slide first appears, read off the video, one second early. 2.8 is two parts:
+  // the "Solving an inequality" slide was cut and its questions moved up.
+  'm2.3': ['r2:m2.3-1.mp4@0:00-11:03', 'r2:m2.3-1.mp4@11:03-20:30', 'r2:m2.3-1.mp4@20:30'],
+  'm2.4': ['r2:m2.4-1.mp4@0:00-6:21', 'r2:m2.4-1.mp4@6:21-9:01', 'r2:m2.4-1.mp4@9:01-14:19', 'r2:m2.4-1.mp4@14:19'],
+  'm2.5': ['r2:m2.5-1.mp4@0:00-4:55', 'r2:m2.5-1.mp4@4:55-5:53', 'r2:m2.5-1.mp4@5:53-8:55', 'r2:m2.5-1.mp4@8:55'],
+  'm2.6': ['r2:m2.6-1.mp4@0:00-4:16', 'r2:m2.6-1.mp4@4:16'],
+  'm2.7': ['r2:m2.7-1.mp4@0:00-9:33', 'r2:m2.7-1.mp4@9:33'],
+  'm2.8': ['r2:m2.8-1.mp4@0:00-8:18', 'r2:m2.8-1.mp4@8:18']
 };
