@@ -116,6 +116,18 @@
   .prep-next { font-size: 0.82rem; color: var(--mid); margin: 0 0 1rem; line-height: 1.6; }
   .prep-next b { color: var(--text); font-weight: 600; }
   .prep-topics { width: 100%; border-collapse: collapse; font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+  .prep-topics tr.cu-row { cursor: pointer; }
+  .prep-topics tr.cu-row:hover > td { background: var(--soft, #faf8f5); }
+  .prep-topics .cu-tw { display: inline-block; width: 1em; color: var(--faint); font-size: 0.8em; }
+  .prep-topics tr.cu-ans > td { padding: 0 0 0.6rem 1.6rem; background: var(--soft, #faf8f5); }
+  .cu-atab { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+  .cu-atab th { text-align: left; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); padding: 0.3rem 0.5rem; }
+  .cu-atab th.n, .cu-atab td.n { text-align: center; white-space: nowrap; }
+  .cu-atab td { padding: 0.3rem 0.5rem; border-top: 1px solid var(--line, #eee); vertical-align: top; line-height: 1.45; }
+  .cu-atab tr.cu-a-no td { color: var(--text); }
+  .cu-atab tr.cu-a-no td.n:last-child { color: #b0271c; font-weight: 700; }
+  .cu-atab tr.cu-a-ok td.n:last-child { color: #1d6b3a; }
+  .cu-atab .cu-a-wait { color: var(--faint); font-style: italic; }
   .prep-topics th { text-align: left; font-size: 0.64rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); padding: 0 0.5rem 0.4rem 0; }
   .prep-topics td { padding: 0.35rem 0.5rem 0.35rem 0; border-top: 1px solid var(--border); }
   .prep-topics td.n, .prep-topics th.n { text-align: right; }
@@ -3418,6 +3430,14 @@
       (note ? '<p class="prep-note">' + note + '</p>' : '');
     $('stu-prep').innerHTML = '<div class="prep-stats">' + stats.join('') + '</div>' +
       nextHtml + hwHtml + renderCurriculumPrep(p, snap, mins) + (more ? '<details class="more-box" id="stu-prep-more"' + (moreOpen.prep ? ' open' : '') + '><summary>More from this week</summary>' + more + '</details>' : '');
+    /* Opening a part shows the answers in it; the bank loads on the first open. */
+    Array.prototype.forEach.call(document.querySelectorAll('tr.cu-row'), function (tr) {
+      tr.addEventListener('click', function () {
+        var k = tr.getAttribute('data-cu-part');
+        if (cuOpenParts[k]) delete cuOpenParts[k]; else cuOpenParts[k] = 1;
+        if (lastPrep && lastPrep.prep) { try { renderStudentPrep(lastPrep.prep); } catch (e) {} }
+      });
+    });
     var pm = $('stu-prep-more');
     if (pm) pm.addEventListener('toggle', function () { moreOpen.prep = pm.open; });
   }
@@ -3444,6 +3464,52 @@
     document.head.appendChild(sc);
     return null;
   }
+  /* THE ANSWERS THEMSELVES (Luca, 2026-10-04). The rows above are a tally;
+     going through a part together needs the questions. A bank is big, so one
+     is fetched only when a part is actually opened, and only once. */
+  var cuOpenParts = {}, cuBankState = {};
+  function cuBank(which) {
+    var g = which === 'math' ? 'QUESTION_BANK_MATH' : 'QUESTION_BANK';
+    if (window[g]) return window[g];
+    if (cuBankState[which]) return null;
+    cuBankState[which] = 'loading';
+    var sc = document.createElement('script');
+    sc.src = (which === 'math' ? 'question-bank-math.js' : 'question-bank.js') + '?d=' + new Date().toISOString().slice(0, 10);
+    sc.onload = function () {
+      cuBankState[which] = 'done';
+      if (lastPrep && currentStudent && lastPrep.key === currentStudent.key) { try { renderStudentPrep(lastPrep.prep); } catch (e) {} }
+    };
+    sc.onerror = function () { cuBankState[which] = 'failed'; };
+    document.head.appendChild(sc);
+    return null;
+  }
+  function cuQuestion(which, qid) {
+    var bank = cuBank(which);
+    if (!bank) return null;
+    var ix = cuBankState[which + ':ix'];
+    if (!ix) { ix = cuBankState[which + ':ix'] = {}; bank.forEach(function (q) { ix[q.qid] = q; }); }
+    return ix[qid] || null;
+  }
+  // What the student put: a letter for multiple choice, the text for a grid-in.
+  function cuGiven(q, g) {
+    if (g === '' || g == null) return '\u2014';
+    if (q && q.type !== 'fr' && /^\d+$/.test(String(g))) return 'ABCDE'.charAt(Number(g)) || String(g);
+    return String(g);
+  }
+  function cuAnswerRows(which, items) {
+    var loading = !cuBank(which);
+    return items.slice().sort(function (a, b) { return a.at < b.at ? -1 : a.at > b.at ? 1 : 0; }).map(function (it) {
+      var q = cuQuestion(which, it.q);
+      var stem = q ? String(q.text || '').replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim() : '';
+      var key = q ? (q.type === 'fr' ? String(q.answerValue == null ? '' : q.answerValue) : ('ABCDE'.charAt(q.correct) || '')) : '';
+      return '<tr class="' + (it.c ? 'cu-a-ok' : 'cu-a-no') + '">' +
+        '<td>' + (stem ? escHtml(stem.slice(0, 150)) + (stem.length > 150 ? '\u2026' : '')
+                       : (loading ? '<span class="cu-a-wait">loading the question\u2026</span> ' : '') + '<code>' + escHtml(it.q) + '</code>') + '</td>' +
+        '<td class="n">' + escHtml(cuGiven(q, it.g)) + '</td>' +
+        '<td class="n">' + (key ? escHtml(key) : '\u2014') + '</td>' +
+        '<td class="n">' + (it.c ? '\u2713' : '\u2717') + '</td></tr>';
+    }).join('');
+  }
   function cuLessonByNum(data, num) {
     var hit = null;
     (data ? data.courses : []).forEach(function (c) {
@@ -3464,7 +3530,7 @@
     var rows = {}, browseMin = 0;
     var rowFor = function (lessonId, num, part) {
       var k = lessonId + '|' + part;
-      return rows[k] || (rows[k] = { lessonId: lessonId, num: num, part: part, video: 0, check: 0, n: 0, right: 0, done: '', label: '' });
+      return rows[k] || (rows[k] = { lessonId: lessonId, num: num, part: part, video: 0, check: 0, n: 0, right: 0, done: '', label: '', items: null });
     };
     Object.keys(things).forEach(function (t) {
       if (t.indexOf('Curriculum - ') !== 0 || !(things[t] > 0)) return;
@@ -3479,6 +3545,7 @@
       if (!mm) return;
       var r = rowFor(mm[1] + mm[2], mm[2], Number(mm[3]));
       r.n += x.n; r.right += x.right; r.label = r.label || x.name;
+      if (x.items && x.items.length) r.items = (r.items || []).concat(x.items);
     });
     ((cu && cu.week) || []).forEach(function (w) {
       var mm = /^([me])(\d+\.\d+)#(\d+)$/.exec(w.k || '');
@@ -3518,11 +3585,17 @@
     var body = list.length
       ? '<table class="prep-topics"><thead><tr><th>Lesson part</th><th class="n">Video</th><th class="n">Check</th><th class="n">Questions</th><th class="n">Finished</th></tr></thead><tbody>' +
         list.map(function (r) {
-          return '<tr><td>' + escHtml(nameOf(r)) + '</td>' +
+          var which = r.lessonId.charAt(0) === 'm' ? 'math' : 'rw';
+          var has = !!(r.items && r.items.length), pk = r.lessonId + '|' + r.part, open = has && cuOpenParts[pk];
+          return '<tr' + (has ? ' class="cu-row" data-cu-part="' + escHtml(pk) + '"' : '') + '><td>' +
+            (has ? '<span class="cu-tw">' + (open ? '\u25be' : '\u25b8') + '</span>' : '') + escHtml(nameOf(r)) + '</td>' +
             '<td class="n">' + (r.video ? mins(r.video) : '—') + '</td>' +
             '<td class="n">' + (r.check ? mins(r.check) : '—') + '</td>' +
             '<td class="n">' + (r.n ? r.right + ' of ' + r.n + ' right' : '—') + '</td>' +
-            '<td class="n' + (r.done ? ' cu-done' : '') + '">' + (r.done ? '&#10003; ' + day(r.done) : '—') + '</td></tr>';
+            '<td class="n' + (r.done ? ' cu-done' : '') + '">' + (r.done ? '&#10003; ' + day(r.done) : '—') + '</td></tr>' +
+            (open ? '<tr class="cu-ans"><td colspan="5"><table class="cu-atab"><thead><tr><th>Question</th>' +
+              '<th class="n">Put</th><th class="n">Answer</th><th class="n"></th></tr></thead><tbody>' +
+              cuAnswerRows(which, r.items) + '</tbody></table></td></tr>' : '');
         }).join('') + '</tbody></table>'
       : '<div class="empty">No curriculum work since the last session.</div>';
     return '<div class="prep-sec">Curriculum since the last session</div>' +
