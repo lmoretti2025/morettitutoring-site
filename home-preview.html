@@ -855,6 +855,35 @@ section.sec{padding:clamp(4.6rem,11vh,8.4rem) 0}
 .leaks li::before{content:"";position:absolute;left:0;top:.62em;width:.85rem;height:2px;background:var(--red-lift)}
 .leaks b{color:#fff;font-weight:600}
 .leaks.light li{color:var(--body)}.leaks.light b{color:var(--ink)}.leaks.light li::before{background:var(--red)}
+.rshow{background:#171312;border:1px solid rgba(255,255,255,.09);border-radius:10px;overflow:hidden;box-shadow:0 30px 70px -36px rgba(0,0,0,.7)}
+.rs-stage{position:relative;aspect-ratio:4/3.1;background:#F3F1EE}
+.rs-slide{position:absolute;inset:0;opacity:0;transition:opacity .6s var(--ease);display:flex;align-items:center;justify-content:center;padding:4%}
+.rs-slide.on{opacity:1}
+.rs-img{max-width:100%;max-height:100%;display:flex}
+.rs-slide img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;border-radius:6px;box-shadow:0 12px 34px -16px rgba(17,17,17,.35);background:#fff}
+.rs-slide.tall img{max-height:100%}
+.rs-bar{padding:1rem 1.2rem 1.1rem}
+.rs-caps{position:relative;min-height:3.2em}
+.rs-cap{position:absolute;inset:0;opacity:0;transition:opacity .4s;font-size:.86rem;line-height:1.55;color:rgba(237,231,229,.72)}
+.rs-cap.on{opacity:1;position:relative}
+.rs-cap b{color:#fff;font-weight:600}
+.rs-nav{display:flex;align-items:center;gap:.8rem;margin-top:.7rem}
+.rs-dots{display:flex;gap:.45rem;flex:1;justify-content:center}
+.rs-dot{width:8px;height:8px;border-radius:50%;border:none;padding:0;background:rgba(255,255,255,.25);cursor:pointer}
+.rs-dot.on{background:var(--red-lift);width:22px;border-radius:4px}
+.rs-arrow{width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.2);background:transparent;color:#fff;cursor:pointer;font-size:.95rem}
+.rs-arrow:hover{border-color:#fff}
+.feats .feat .im{aspect-ratio:2.6/1}
+.feat .im.fit{background:#fff}
+.feat .im.fit img{width:100%;height:100%;object-fit:contain}
+.wt-open{background:none;border:none;border-bottom:1px solid rgba(255,255,255,.35);padding:0 0 1px;font:inherit;font-size:.86rem;font-weight:500;color:#fff;cursor:pointer}
+.wt{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center}
+.wt[hidden]{display:none}
+.wt-scrim{position:absolute;inset:0;background:rgba(12,10,9,.78);backdrop-filter:blur(4px)}
+.wt-box{position:relative;width:min(400px,92vw);height:min(820px,90vh);border-radius:28px;overflow:hidden;background:#fff;box-shadow:0 40px 100px -30px rgba(0,0,0,.8),0 0 0 8px #111}
+.wt-box iframe{width:100%;height:100%;border:0;display:block}
+.wt-x{position:absolute;top:0;right:-58px;width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.4);background:transparent;color:#fff;font-size:1.4rem;cursor:pointer}
+@media(max-width:600px){.wt-box{width:100vw;height:100vh;border-radius:0;box-shadow:none}.wt-x{top:10px;right:10px;background:rgba(0,0,0,.55);z-index:2}}
 </style>
 </head>
 <body>
@@ -954,13 +983,15 @@ section.sec{padding:clamp(4.6rem,11vh,8.4rem) 0}
           <li><b>The clock.</b> One stubborn question, and the next three get rushed.</li>
           <li><b>Second guesses.</b> Right answers changed to wrong ones at review.</li>
           <li><b>Guesses.</b> Answers given faster than the question can be read.</li>
+          <li><b>The hardest questions.</b> Topics that require specific, focused, and repeatable approaches.</li>
         </ul>
-        <p class="rv d3" style="margin-top:1.8rem"><a class="xlink" href="portal/report.html?demo=1&amp;score=1250&amp;weak=math">See a full sample report &rarr;</a></p>
+        <p class="rv d3" style="margin-top:1.8rem"><button type="button" class="xlink wt-open" data-walk>Walk through a sample report &rarr;</button></p>
       </div>
-      <figure class="routefig rv d2">
-        <img src="img/sat/route.jpg" alt="The route graph from a sample report: every visit to every question in one module, in order, with the target pace" loading="lazy">
-        <figcaption><b>The route graph.</b> Every visit to every question, in order. Black is the first look, gold is going back at review, the dashed line is target pace.</figcaption>
-      </figure>
+      <div class="rshow rv d2" id="rshow" aria-roledescription="carousel" aria-label="Inside the report">
+        <div class="rs-stage"><div class="rs-slide on wide" data-i="0"><div class="rs-img"><img src="img/sat/route.jpg" alt="How the clock was used" loading="lazy"></div></div><div class="rs-slide wide" data-i="1"><div class="rs-img"><img src="img/report/grid.jpg" alt="Every question, at a glance" loading="lazy"></div></div><div class="rs-slide tall" data-i="2"><div class="rs-img"><img src="img/report/tour-clock.jpg" alt="From the walkthrough" loading="lazy"></div></div><div class="rs-slide wide" data-i="3"><div class="rs-img"><img src="img/report/points.jpg" alt="Where the points are" loading="lazy"></div></div><div class="rs-slide tall" data-i="4"><div class="rs-img"><img src="img/report/tour-modules.jpg" alt="How each module went" loading="lazy"></div></div><div class="rs-slide wide" data-i="5"><div class="rs-img"><img src="img/report/plan.jpg" alt="The next four weeks" loading="lazy"></div></div></div>
+        <div class="rs-bar"><div class="rs-caps"><div class="rs-cap on" data-i="0"><b>How the clock was used.</b> Every visit to every question, in order. Gold is going back at review; the dashed line is target pace.</div><div class="rs-cap" data-i="1"><b>Every question, at a glance.</b> Right, wrong and flagged, module by module.</div><div class="rs-cap" data-i="2"><b>From the walkthrough.</b> Where the clock caught up, and the questions it cost.</div><div class="rs-cap" data-i="3"><b>Where the points are.</b> The skills worth the most points for this student, in order.</div><div class="rs-cap" data-i="4"><b>How each module went.</b> Ran out of time, went back, or held steady.</div><div class="rs-cap" data-i="5"><b>The next four weeks.</b> A weekly plan, split the way the test went.</div></div>
+          <div class="rs-nav"><button type="button" class="rs-arrow" data-d="-1" aria-label="Previous">&larr;</button><div class="rs-dots"><button type="button" class="rs-dot on" data-i="0" aria-label="Show How the clock was used"></button><button type="button" class="rs-dot" data-i="1" aria-label="Show Every question, at a glance"></button><button type="button" class="rs-dot" data-i="2" aria-label="Show From the walkthrough"></button><button type="button" class="rs-dot" data-i="3" aria-label="Show Where the points are"></button><button type="button" class="rs-dot" data-i="4" aria-label="Show How each module went"></button><button type="button" class="rs-dot" data-i="5" aria-label="Show The next four weeks"></button></div><button type="button" class="rs-arrow" data-d="1" aria-label="Next">&rarr;</button></div></div>
+      </div>
     </div>
   </div>
 </section>
@@ -1006,7 +1037,7 @@ section.sec{padding:clamp(4.6rem,11vh,8.4rem) 0}
     <div class="feats">
       <div class="feat rv"><div class="im"><img src="img/sat/test.png" alt="" loading="lazy"></div><div class="tx"><span class="k">Practice tests</span><h3>A dozen full-length tests.</h3><p>Adaptive, with the same layout, tools and timing as Bluebook. Taken whole, one section at a time, or one module on its own.</p></div></div>
       <div class="feat rv"><div class="im"><img src="img/sat/qbank-real.jpg" alt="" loading="lazy"></div><div class="tx"><span class="k">Question bank</span><h3>Thousands of questions, and the hardest ones.</h3><p>Practice by skill and difficulty, a round drawn from what your student misses most, hand-picked challenge sets of the toughest second-module questions, and every mistake saved to retry.</p></div></div>
-      <div class="feat rv"><div class="im"><img src="img/sat/home.png" alt="" loading="lazy"></div><div class="tx"><span class="k">Progress</span><h3>Progress you can trust.</h3><p>Every score on one chart, with the likely level pooled across tests, so a gain is only called a gain once it holds.</p></div></div>
+      <div class="feat rv"><div class="im fit"><img src="img/report/progress.jpg" alt="Score progress: 1400, up 210 points, bars climbing toward the target" loading="lazy"></div><div class="tx"><span class="k">Progress</span><h3>Progress you can trust.</h3><p>Every score on one chart, with the likely level pooled across tests, so a gain is only called a gain once it holds.</p></div></div>
       <div class="feat rv"><div class="im"><img src="img/sat/weekly.png" alt="" loading="lazy"></div><div class="tx"><span class="k">Every week</span><h3>You always know how it&rsquo;s going.</h3><p>After every session, an update from me: what we worked on, how the practice went, any new score, and what comes next.</p></div></div>
     </div>
     <div class="access rv"><b>And me, between sessions.</b> Text me a question any time, and bring anything to weekly office hours. You never wait a week for an answer.</div>
@@ -1336,6 +1367,36 @@ document.documentElement.classList.add('js');
   var t; window.addEventListener('resize', function(){ clearTimeout(t); t = setTimeout(pace, 180); });
 })();
 
+</script>
+<script>
+/* The report slideshow: advances on its own, pauses on hover or after a click. */
+(function(){
+  var root=document.getElementById('rshow'); if(!root) return;
+  var sl=root.querySelectorAll('.rs-slide'), cp=root.querySelectorAll('.rs-cap'), dt=root.querySelectorAll('.rs-dot'), n=sl.length, i=0, t=null, held=false;
+  function go(k){ i=(k+n)%n; [sl,cp,dt].forEach(function(L){ [].forEach.call(L,function(e){ e.classList.toggle('on', +e.getAttribute('data-i')===i); }); }); }
+  function tick(){ clearInterval(t); if(!held && !matchMedia('(prefers-reduced-motion: reduce)').matches) t=setInterval(function(){ go(i+1); },5200); }
+  root.addEventListener('click',function(e){ var d=e.target.closest('[data-d]'), o=e.target.closest('.rs-dot'); if(d){ go(i+(+d.getAttribute('data-d'))); held=true; tick(); } else if(o){ go(+o.getAttribute('data-i')); held=true; tick(); } });
+  root.addEventListener('mouseenter',function(){ clearInterval(t); }); root.addEventListener('mouseleave',tick);
+  tick();
+})();
+</script>
+<div class="wt" id="walk" hidden>
+  <div class="wt-scrim" data-walk-close></div>
+  <div class="wt-box" role="dialog" aria-modal="true" aria-label="A sample report walkthrough">
+    <button type="button" class="wt-x" data-walk-close aria-label="Close">&times;</button>
+    <iframe title="A sample report walkthrough, for a made-up student" data-src="portal/report.html?demo=1&amp;score=1250&amp;weak=math&amp;embed=public&amp;tour=1&amp;mix=1&amp;v=20260929h"></iframe>
+  </div>
+</div>
+<script>
+(function(){
+  var w=document.getElementById('walk'), fr=w.querySelector('iframe');
+  function open(){ if(!fr.src) fr.src=fr.getAttribute('data-src'); w.hidden=false; document.body.style.overflow='hidden'; }
+  function close(){ w.hidden=true; document.body.style.overflow=''; }
+  document.addEventListener('click',function(e){ if(e.target.closest('[data-walk]')) open(); else if(e.target.closest('[data-walk-close]')) close(); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&!w.hidden) close(); });
+  // The walkthrough's last button brings the form into view.
+  addEventListener('message',function(e){ if(e.data&&e.data.type==='moretti-tour'&&e.data.action==='cta'){ close(); document.getElementById('start').scrollIntoView({behavior:'smooth'}); } });
+})();
 </script>
 <script src="site.js"></script>
 <script src="lead-form.js?v=20261002a"></script>
