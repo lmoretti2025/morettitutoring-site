@@ -1061,6 +1061,77 @@ section.sec{padding:clamp(4.6rem,11vh,8.4rem) 0}
 .ws-screen iframe{display:block;width:100%;height:clamp(560px,72vh,700px);border:0}
 @media(max-width:860px){.ws-head{grid-template-columns:1fr}}
 @media(max-width:600px){.ws-screen{margin:0 -6px;border-radius:12px}.ws-screen iframe{height:620px}}
+/* Try it: the four things the report reads */
+.ws-leaks{list-style:none;margin:0 0 2rem;padding:0;display:grid;grid-template-columns:repeat(4,1fr);gap:0 1.6rem}
+.ws-leaks li{border-top:1px solid rgba(255,255,255,.28);padding-top:.8rem}
+.ws-leaks b{display:block;color:#fff;font-weight:600;font-size:.92rem;margin-bottom:.25rem}
+.ws-leaks span{font-size:.82rem;line-height:1.5;color:rgba(255,255,255,.75)}
+@media(max-width:860px){.ws-leaks{grid-template-columns:1fr 1fr;gap:1rem 1.4rem}}
+/* The portal panel: tabs that advance on their own, every view usable */
+.ptl-split{align-items:start}.ptl-split>*{min-width:0}
+.ptl{color:var(--ink)}
+.ptl-top{display:flex;justify-content:space-between;align-items:baseline}
+.ptl-k{font-size:.62rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--red)}
+.ptl-who{font-size:.74rem;color:var(--muted)}
+.ptl-tabs{display:flex;gap:0;margin-top:.6rem;border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
+.ptl-tab{position:relative;background:none;border:0;padding:.55rem 1.1rem .7rem 0;font:500 .8rem var(--sans);color:var(--muted);cursor:pointer;white-space:nowrap}
+.ptl-tab.on{color:var(--ink)}
+.ptl-tab.on::after{content:"";position:absolute;left:0;right:1.1rem;bottom:-1px;height:2px;background:var(--line)}
+.ptl-tab .bar{position:absolute;left:0;bottom:-1px;height:2px;width:calc(100% - 1.1rem);background:var(--red);transform-origin:left;transform:scaleX(var(--p,1))}
+.ptl-stage{display:grid;padding:1.4rem 0 1rem;min-height:22rem}
+.ptl-pane{grid-area:1/1;opacity:0;visibility:hidden;transition:opacity .45s var(--ease),visibility 0s .45s}
+.ptl-pane.on{opacity:1;visibility:visible;transition:opacity .45s var(--ease)}
+.ptl-caps{display:grid;border-top:1px solid var(--line);padding-top:.9rem}
+.ptl-cap{grid-area:1/1;margin:0;opacity:0;transition:opacity .35s;font-size:.86rem;line-height:1.55;color:var(--body)}
+.ptl-cap.on{opacity:1}.ptl-cap b{color:var(--ink)}
+.pt-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.pt-t{border:0;border-bottom:2px solid #2B4C9B;border-radius:6px;background:color-mix(in srgb,#2B4C9B 9%,transparent);padding:.55rem .2rem .5rem;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:1px;font-family:var(--sans);color:var(--ink);transition:transform .2s var(--ease)}
+.pt-t:hover,.pt-t.sel{transform:translateY(-2px)}
+.pt-t small{font-size:.56rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.pt-t b{font-family:var(--display);font-size:1.25rem;line-height:1}
+.pt-t span{font-size:.64rem;color:var(--muted)}
+.pt-t.done{background:#2B4C9B;color:#fff}.pt-t.done small,.pt-t.done span{color:rgba(255,255,255,.8)}
+.pt-t.hard{border-bottom-color:var(--red);background:color-mix(in srgb,var(--red) 9%,transparent)}
+.pt-t.sel{box-shadow:0 0 0 2px var(--ink)}
+.ptl-pane.on .pt-t{animation:rqpop .45s var(--ease) both}
+.pt-info{margin-top:1rem;padding-left:.9rem;border-left:3px solid #2B4C9B;min-height:3.1rem}
+.pt-info b{display:block;font-family:var(--display);font-size:1.1rem}
+.pt-info small{font-size:.78rem;color:var(--muted)}
+.pt-modes{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:1rem;font-size:.74rem;color:var(--muted)}
+.pt-modes span{margin-right:.3rem}
+.pt-modes button,.qb-sw button,.qb-d button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:.32rem .75rem;font:500 .74rem var(--sans);color:var(--body);cursor:pointer}
+.pt-modes button.on,.qb-sw button.on,.qb-d button.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.qb-top{display:flex;justify-content:space-between;flex-wrap:wrap;gap:.6rem;margin-bottom:1rem}
+.qb-sw,.qb-d{display:flex;gap:5px}
+.qb-rows{display:grid}
+.qb-r{display:grid;grid-template-columns:minmax(0,1fr) 1.1fr 3.4rem;gap:.9rem;align-items:center;padding:.62rem 0;border-bottom:1px solid var(--line)}
+.qb-r span{font-size:.82rem;font-weight:500;line-height:1.3}
+.qb-r b{text-align:right;font-family:var(--display);font-size:1.1rem}
+.qb-bar{display:flex;height:9px;border-radius:5px;overflow:hidden;background:#ECEAE7}
+.qb-bar i{height:100%;transition:width .5s var(--ease),opacity .3s}
+.qb-bar i.e{background:#4C9A6A}.qb-bar i.m{background:#D9A23B}.qb-bar i.h{background:var(--red)}
+.qb-bar i.dim{opacity:.18}
+.qb-foot{display:flex;flex-wrap:wrap;gap:.5rem 1.4rem;margin-top:1rem;font-size:.78rem;color:var(--muted)}.qb-foot b{color:var(--ink)}
+.pg-head{display:flex;justify-content:space-between;align-items:flex-end;gap:1rem;margin-bottom:1.2rem}
+.pg-head b{font-family:var(--display);font-size:2.6rem;line-height:1}
+.pg-head .up{display:block;color:#2E8A5E;font-weight:600;font-size:.86rem;margin-top:.3rem}
+.pg-head p{margin:0;font-size:.8rem;color:var(--muted);text-align:right;line-height:1.5}.pg-head p b{font-family:var(--sans);font-size:.86rem;color:var(--ink)}
+.pg-chart{position:relative;height:12rem;display:grid;grid-template-columns:repeat(7,1fr);grid-template-rows:100%;gap:8px;align-items:stretch}
+.pg-target{position:absolute;left:0;right:0;bottom:calc(1.6rem + var(--h) * 9.4rem / 100);border-top:1.5px dashed #C9A84C}
+.pg-target span{position:absolute;right:0;top:-1.3rem;font-size:.72rem;font-weight:600;color:#9A7C22}
+.pg-b{position:relative;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center}
+.pg-b i{display:block;width:100%;height:calc(var(--h) * 9.4rem / 100);border-radius:5px 5px 2px 2px;background:linear-gradient(#D9A23B,#B0271C);transform-origin:bottom}
+.ptl-pane.on .pg-b i{animation:pggrow .7s var(--ease) both;animation-delay:calc(var(--k)*80ms)}
+@keyframes pggrow{from{transform:scaleY(0)}}
+.pg-b span{font-size:.68rem;font-weight:600;margin-bottom:.25rem;opacity:0;transition:opacity .2s}
+.pg-b:hover span,.pg-b:last-of-type span{opacity:1}
+.pg-b small{font-size:.66rem;color:var(--muted);margin-top:.4rem;height:1.2rem}
+.wk{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff;max-width:30rem}
+.wk-h{background:#0C0A09;color:#fff;font-family:var(--display);font-weight:700;letter-spacing:.12em;padding:.7rem 1rem;border-bottom:2px solid var(--red);font-size:.95rem}
+.wk-h small{font-family:var(--sans);font-weight:400;letter-spacing:.04em;font-size:.68rem;color:rgba(255,255,255,.6);margin-left:.5rem}
+.wk-b{padding:.9rem 1.1rem;font-size:.8rem;line-height:1.6;color:#2b2724}.wk-b p{margin:0 0 .6rem}.wk-b ul{margin:0 0 .6rem;padding-left:1.1rem}
+@media(max-width:600px){.pt-grid{grid-template-columns:repeat(4,1fr)}.qb-r{grid-template-columns:1fr 3rem;row-gap:.4rem}.qb-bar{grid-column:1/-1;grid-row:2}.pg-head{flex-direction:column;align-items:flex-start}.pg-head p{text-align:left}}
+@media(prefers-reduced-motion:reduce){.ptl-pane.on *{animation:none!important}}
 </style>
 </head>
 <body>
@@ -1068,9 +1139,9 @@ section.sec{padding:clamp(4.6rem,11vh,8.4rem) 0}
 <nav><div class="shell">
   <a class="nav-logo" href="index.html"><img src="logo-caladea-white-400.png" alt="Moretti Test Prep &amp; Tutoring"></a>
   <div class="navlinks">
-    <a href="#diagnostic">The diagnostic</a>
-    <a href="#course">The course</a>
+    <a href="#walkthrough">Try it</a>
     <a href="#portal">The portal</a>
+    <a href="#course">The course</a>
     <a href="#proof">Results</a>
   </div>
   <a class="navlogin" href="portal/index.html">Student Login</a>
@@ -1112,10 +1183,16 @@ section.sec{padding:clamp(4.6rem,11vh,8.4rem) 0}
     <div class="ws-head">
       <div>
         <p class="ws-k rv">Try it &middot; a real report, for a made-up student</p>
-        <h2 class="ws-h rv d1">Walk through the report your student gets.</h2>
+        <h2 class="ws-h rv d1">Plenty of tutors say they adapt like an algorithm. I built one.</h2>
       </div>
-      <p class="ws-sub rv d2">Every diagnostic and practice test opens with this walkthrough: what happened, where the points went, and what to do about it. Use the arrows, or tap the <b>+</b> on any screen for what it is telling you.</p>
+      <p class="ws-sub rv d2">Every diagnostic and practice test records <b>how</b> each question was answered, not just whether it was right: how long it took, whether the answer changed at review, whether it came faster than the question can be read. The report turns that into where the points went and what to do next. Use the arrows, or tap the <b>+</b> on any screen.</p>
     </div>
+    <ul class="ws-leaks rv d2">
+      <li><b>The clock</b><span>One stubborn question, and the next three get rushed.</span></li>
+      <li><b>Second guesses</b><span>Right answers changed to wrong ones at review.</span></li>
+      <li><b>Guesses</b><span>Answers given faster than the question can be read.</span></li>
+      <li><b>The hardest questions</b><span>Topics that need a specific, focused, repeatable approach.</span></li>
+    </ul>
     <div class="ws-screen rv d2">
       <div class="ws-bar"><i></i><i></i><i></i><span>Sample report &middot; score 1250</span></div>
       <iframe src="portal/report.html?demo=1&amp;score=1250&amp;weak=math&amp;embed=public&amp;tour=1&amp;mix=1&amp;v=20260929h" title="A sample report walkthrough, for a made-up student"></iframe>
@@ -1123,56 +1200,48 @@ section.sec{padding:clamp(4.6rem,11vh,8.4rem) 0}
   </div>
 </section>
 
-<!-- Results this fall -->
-<section class="sec soft" id="proof">
-  <div class="shell center">
-    <p class="lbl rv">Results this fall</p>
-    <h2 class="h-sec rv d1">Scores, as families sent them.</h2>
-    <p class="lede rv d2">Hear from parents who worked with Luca on their SAT preparation, from the scores they achieved to what helped them along the way.</p>
-    <div class="proofgrid">
-      <figure class="pf rv"><div class="shotwrap"><img src="img/results/1550-text.webp" alt="A parent&rsquo;s text: he got a 1550, 780 in Math, up 20 points" loading="lazy"></div><figcaption><b>1550</b><span>Up 20 points from the high 1500s, with a 780 in Math.</span></figcaption></figure>
-      <figure class="pf rv"><div class="shotwrap"><img src="img/results/1500-text.webp" alt="A parent&rsquo;s text: 730 on Reading and Writing, exactly 1500" loading="lazy"></div><figcaption><b>1500</b><span>Exactly 1500, with a 730 in Reading and Writing.</span></figcaption></figure>
-      <figure class="pf rv"><div class="shotwrap"><img src="img/results/1460-score-report.webp" alt="A College Board score report: 1460, 690 Reading and Writing, 770 Math, improved 170 points" loading="lazy"></div><figcaption><b>1460</b><span>Up 170 points since the last SAT, with a 770 in Math.</span></figcaption></figure>
-      <figure class="pf rv"><div class="shotwrap"><img src="img/results/1350-text.webp" alt="A parent&rsquo;s text: 1220 in December, 1230 in the spring, 1350 this time" loading="lazy"></div><figcaption><b>1350</b><span>Up from 1220 and 1230 after only two weeks of prep.</span></figcaption></figure>
-    </div>
-  </div>
-</section>
-
-<!-- 2. What the diagnostic shows: behavior, not just answers -->
-<section class="sec dark" id="diagnostic">
+<!-- The portal, interactive: four views, each one you can use -->
+<section class="sec soft" id="portal">
   <div class="shell">
-    <div class="split diag-split">
+    <div class="split ptl-split">
       <div>
-        <p class="lbl rv">The diagnostic, and every test after it</p>
-        <h2 class="h-sec rv d1">Plenty of tutors say they adapt like an algorithm. I built one.</h2>
-        <p class="lede rv d2">Every practice test records <b>how</b> each question was answered, not just whether it was right. Strong students rarely lose points to what they don&rsquo;t know. They lose them here:</p>
-        <ul class="leaks rv d3">
-          <li><b>The clock.</b> One stubborn question, and the next three get rushed.</li>
-          <li><b>Second guesses.</b> Right answers changed to wrong ones at review.</li>
-          <li><b>Guesses.</b> Answers given faster than the question can be read.</li>
-          <li><b>The hardest questions.</b> Topics that require specific, focused, and repeatable approaches.</li>
+        <p class="lbl rv">The portal</p>
+        <h2 class="h-sec rv d1">Everything between sessions, in one place.</h2>
+        <p class="lede rv d2">The tests, the question bank, the course and every report live in one login, and every answer your student gives in it feeds the next report. Try it: each view on the right works.</p>
+        <ul class="leaks light rv d3">
+          <li><b>Practice that feels like test day.</b> The same layout, tools and timing as Bluebook: adaptive modules, the eliminator, the highlighter, the graphing calculator.</li>
+          <li><b>Nothing answered is lost.</b> Every mistake is saved to retry, and the misses decide what comes up next.</li>
+          <li><b>You see it too.</b> After every session, an update from me with the week&rsquo;s work and any new score.</li>
         </ul>
-        <p class="rv d3" style="margin-top:1.8rem"><a class="xlink" href="#walkthrough">Try the full walkthrough &uarr;</a></p>
       </div>
-      <div class="rpt rv d2" id="rshow" aria-label="Inside a sample report">
-        <div class="rpt-top"><span class="rpt-k">Sample report</span><span class="rpt-sc">Total score <b>1250</b></span></div>
-        <div class="rpt-tabs" role="tablist"><button type="button" class="rpt-tab on" data-i="0" role="tab">Every question</button><button type="button" class="rpt-tab" data-i="1" role="tab">The clock</button><button type="button" class="rpt-tab" data-i="2" role="tab">The points</button><button type="button" class="rpt-tab" data-i="3" role="tab">The plan</button><span class="rpt-run"></span></div>
-        <div class="rpt-stage">
-          <div class="rpt-pane on" data-i="0"><div class="rq" id="rq"></div><div class="rq-key"><span><i class="g"></i>Right</span><span><i class="r"></i>Wrong</span><span><i class="g f">!</i>Flagged</span></div></div>
-          <div class="rpt-pane" data-i="1"><div class="rc-h"><b>Reading and Writing, Module 1</b><span>minutes into the module</span></div><svg id="rclock" viewBox="0 0 640 412" role="img" aria-label="Time spent on each of 27 questions, against target pace"></svg></div>
-          <div class="rpt-pane" data-i="2"><div class="rp-h">Where the points are</div><div class="rp">
-            <div class="rp-r"><span>Algebra</span><i style="--w:100%"></i><b>+110</b></div>
-            <div class="rp-r"><span>Problem-Solving and Data Analysis</span><i style="--w:45%"></i><b>+50</b></div>
-            <div class="rp-r"><span>Nonlinear Functions</span><i style="--w:36%"></i><b>+40</b></div>
-            <div class="rp-r"><span>Inferences</span><i style="--w:18%"></i><b>+20</b></div>
-            <div class="rp-r"><span>Form, Structure, and Sense</span><i style="--w:18%"></i><b>+20</b></div>
-          </div><div class="rp-sum"><span>1250</span><em>top three fixed</em><span class="to">about 1450</span></div></div>
-          <div class="rpt-pane" data-i="3"><div class="rp-h">The next four weeks</div><div class="rl-bar"><i style="--w:89%"></i><i class="s" style="--w:11%"></i></div>
-            <div class="rl"><div class="rl-r"><b>4<small>hrs / week</small></b><p><strong>Relearning.</strong> Work every question this test got wrong. It cost the most points, so it gets the most time.</p></div>
-            <div class="rl-r s"><b>&frac12;<small>hr / week</small></b><p><strong>Strategy.</strong> Question Bank sets answered with the method, not just for the answer:</p></div>
-            <ul class="rl-l"><li><span>4.2</span>Central Ideas and Details</li><li><span>4.5</span>Inferences</li><li><span>3.3</span>Rhetorical Synthesis</li></ul></div></div>
+      <div class="ptl rv d2" id="ptl">
+        <div class="ptl-top"><span class="ptl-k">Inside the portal</span><span class="ptl-who">Sample student</span></div>
+        <div class="ptl-tabs" role="tablist"><button type="button" class="ptl-tab on" data-i="0">Practice tests</button><button type="button" class="ptl-tab" data-i="1">Question bank</button><button type="button" class="ptl-tab" data-i="2">Progress</button><button type="button" class="ptl-tab" data-i="3">Every week</button></div>
+        <div class="ptl-stage">
+          <div class="ptl-pane on" data-i="0">
+            <div class="pt-grid"><button type="button" class="pt-t done" data-n="1" data-s="1230"><small>Test</small><b>1</b><span>1230</span></button><button type="button" class="pt-t done" data-n="2" data-s="1240"><small>Test</small><b>2</b><span>1240</span></button><button type="button" class="pt-t done" data-n="3" data-s="1290"><small>Test</small><b>3</b><span>1290</span></button><button type="button" class="pt-t done" data-n="4" data-s="1330"><small>Test</small><b>4</b><span>1330</span></button><button type="button" class="pt-t" data-n="5" data-s=""><small>Test</small><b>5</b><span>Not yet</span></button><button type="button" class="pt-t done" data-n="6" data-s="1350"><small>Test</small><b>6</b><span>1350</span></button><button type="button" class="pt-t done" data-n="7" data-s="1400"><small>Test</small><b>7</b><span>1400</span></button><button type="button" class="pt-t" data-n="8" data-s=""><small>Test</small><b>8</b><span>Not yet</span></button><button type="button" class="pt-t" data-n="9" data-s=""><small>Test</small><b>9</b><span>Not yet</span></button><button type="button" class="pt-t" data-n="10" data-s=""><small>Test</small><b>10</b><span>Not yet</span></button><button type="button" class="pt-t" data-n="11" data-s=""><small>Test</small><b>11</b><span>Not yet</span></button><button type="button" class="pt-t hard" data-n="12" data-s=""><small>Test</small><b>12</b><span>Hardest</span></button></div>
+            <div class="pt-info" aria-live="polite"></div>
+            <div class="pt-modes"><span>Take it as</span><button type="button" class="on">The whole test</button><button type="button">One section</button><button type="button">One module</button></div>
+          </div>
+          <div class="ptl-pane" data-i="1">
+            <div class="qb-top"><div class="qb-sw"><button type="button" class="on" data-s="math">Math</button><button type="button" data-s="rw">Reading &amp; Writing</button></div><div class="qb-d"><button type="button" class="on" data-d="a">All</button><button type="button" data-d="e">Easy</button><button type="button" data-d="m">Medium</button><button type="button" data-d="h">Hard</button></div></div>
+            <div class="qb-rows"></div>
+            <div class="qb-foot"><span><b>127</b> hand-picked challenge questions</span><span><b>From your misses</b>, a round of what goes wrong most</span></div>
+          </div>
+          <div class="ptl-pane" data-i="2">
+            <div class="pg-head"><div><b>1400</b><span class="up">&uarr; 210 since the diagnostic</span></div><p>Likely level now: <b>1320&ndash;1440</b><br>(4 chances in 5)</p></div>
+            <div class="pg-chart"><div class="pg-target" style="--h:90"><span>Target 1450</span></div><div class="pg-b" style="--h:38.0;--k:0"><span>1190</span><i></i><small>Diag</small></div><div class="pg-b" style="--h:46.0;--k:1"><span>1230</span><i></i><small>PT 1</small></div><div class="pg-b" style="--h:48.0;--k:2"><span>1240</span><i></i><small>PT 2</small></div><div class="pg-b" style="--h:58.0;--k:3"><span>1290</span><i></i><small>PT 3</small></div><div class="pg-b" style="--h:66.0;--k:4"><span>1330</span><i></i><small>PT 4</small></div><div class="pg-b" style="--h:70.0;--k:5"><span>1350</span><i></i><small>PT 6</small></div><div class="pg-b" style="--h:80.0;--k:6"><span>1400</span><i></i><small>PT 7</small></div></div>
+          </div>
+          <div class="ptl-pane" data-i="3">
+            <div class="wk"><div class="wk-h">MORETTI <small>weekly update</small></div><div class="wk-b">
+              <p>Good morning Dana,</p>
+              <p>Here&rsquo;s a quick update on Maya&rsquo;s week. Maya took <b>SAT Practice Test 3</b> on Wednesday and scored a <b>1290</b>. The last practice test was a 1240. A single test can swing on its own, so I look at the trend over several tests rather than any one jump or dip.</p>
+              <ul><li><b>about 3 hours 20 minutes</b> on the portal, across 2 sittings</li><li><b>2 questions</b> in the question bank</li><li><b>1 vocabulary word</b> reviewed</li></ul>
+              <p>Our next session is <b>Tuesday at 4:00 PM</b>. The SAT is <b>about 11 weeks</b> away.</p>
+            </div></div>
+          </div>
         </div>
-        <div class="rpt-caps"><p class="rpt-cap on" data-i="0"><b>Every question, at a glance.</b> All four modules, right, wrong and flagged. Math held 29 of 44; Reading and Writing, 50 of 54.</p><p class="rpt-cap" data-i="1"><b>How the clock was used.</b> Every question in order, against target pace (dashed). The two longest, 7 and 14, were both missed. Gold is going back at review.</p><p class="rpt-cap" data-i="2"><b>Where the points are.</b> The skills worth the most points for this student, in order. The top three alone are worth about 200.</p><p class="rpt-cap" data-i="3"><b>The next four weeks.</b> About 4&frac12; hours a week, split the way the test went, with each lesson to watch named.</p></div>
+        <div class="ptl-caps"><p class="ptl-cap on" data-i="0"><b>A dozen full-length tests.</b> Every one scored, with the full report. Tap a test.</p><p class="ptl-cap" data-i="1"><b>4,523 questions</b> by skill and difficulty, every one with a written explanation. Switch subjects and difficulty.</p><p class="ptl-cap" data-i="2"><b>Every score on one chart.</b> The likely level pools every test, so one good or bad morning never moves the picture on its own.</p><p class="ptl-cap" data-i="3"><b>An update after every session.</b> What your student worked on, how the practice went, any new score, and what comes next. A sample, with made-up names.</p></div>
       </div>
     </div>
   </div>
@@ -1226,52 +1295,8 @@ section.sec{padding:clamp(4.6rem,11vh,8.4rem) 0}
   </div>
 </section>
 
-<!-- 4. The portal, a sticky screen -->
-<section class="sec soft" id="portal">
-  <div class="shell center">
-    <p class="lbl rv">The portal</p>
-    <h2 class="h-sec rv d1">Everything between sessions, in one place.</h2>
-    <p class="lede rv d2">Your student signs in to one place for the course, practice and progress. Here it is, exactly as they see it.</p>
-  </div>
-  <div class="shell" style="margin-top:40px">
-    <div class="tour">
-      <div class="tour-stage"><div class="scrf">
-        <img data-shot="0" src="img/sat/test.png" alt="" style="opacity:1">
-        <img data-shot="1" src="img/sat/practice.png" alt="" style="opacity:0">
-        <img data-shot="2" src="img/sat/qbank-real.jpg" alt="" style="opacity:0">
-        <img data-shot="3" class="fit" src="img/report/progress.jpg" alt="" style="opacity:0">
-      </div></div>
-      <div class="tour-steps">
-        <div class="tour-step on" data-step="0"><h3>Practice that feels like test day.</h3><p>The same layout, tools and timing as Bluebook: adaptive modules, the answer eliminator, the highlighter, the graphing calculator and the reference sheet.</p><img class="mob shot" src="img/sat/test.png" alt="A practice question" loading="lazy"></div>
-        <div class="tour-step" data-step="1"><h3>A dozen full-length practice tests.</h3><p>Taken whole, one section at a time, or one module on its own. Every one scored, with the full report.</p><img class="mob shot" src="img/sat/practice.png" alt="The practice tests" loading="lazy"></div>
-        <div class="tour-step" data-step="2"><h3>Thousands of questions, and the hardest ones.</h3><p>Practice by skill and difficulty, a round drawn from what your student misses most, hand-picked challenge sets of the toughest second-module questions, and every mistake saved to retry.</p><img class="mob shot" src="img/sat/qbank-real.jpg" alt="The question bank" loading="lazy"></div>
-        <div class="tour-step" data-step="3"><h3>Every score, on one chart.</h3><p>Every practice test and official score in one place, with the likely level pooled across tests, so one good or bad morning never moves the picture on its own.</p><img class="mob shot fit" src="img/report/progress.jpg" alt="Score progress, bars climbing toward the target" loading="lazy"></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- 5. Every week -->
-<section class="sec" id="weekly">
-  <div class="shell">
-    <div class="split flip">
-      <div>
-        <p class="lbl rv">Every week</p>
-        <h2 class="h-sec rv d1">You always know how it&rsquo;s going.</h2>
-        <p class="lede rv d2">After every session, a short update from me: what your student worked on, how the practice went, any new score, and what comes next.</p>
-        <ul class="points rv d3">
-          <li><b>Sessions that fit your week</b><span>Book, move or cancel online, including a weekly time, up to 24 hours ahead.</span></li>
-          <li><b>Online or in person</b><span>One Meet link for every online session, or at the Cranford Public Library.</span></li>
-          <li><b>No surprises</b><span>If a week goes by without practice, you hear that too.</span></li>
-        </ul>
-      </div>
-      <div class="rv d2"><img class="shot" src="img/sat/weekly.png" alt="A weekly update email to a parent" loading="lazy" style="max-width:460px;margin:0 auto"></div>
-    </div>
-  </div>
-</section>
-
 <!-- 6. Support, as a bento -->
-<section class="sec soft">
+<section class="sec">
   <div class="shell center">
     <p class="lbl rv">Support</p>
     <h2 class="h-sec rv d1">Help between sessions, too.</h2>
@@ -1287,22 +1312,6 @@ section.sec{padding:clamp(4.6rem,11vh,8.4rem) 0}
   </div>
 </section>
 
-<!-- 7. Results -->
-<section class="sec" id="results">
-  <div class="shell center">
-    <p class="lbl rv">Testimonials</p>
-    <h2 class="h-sec rv d1">From families who&rsquo;ve done it.</h2>
-  </div>
-  <div class="shell">
-    <div class="quotes">
-      <figure class="quote rv"><span class="res">Scored 1520</span><blockquote>&ldquo;They went into test day feeling confident and scored a 1520! Luca&rsquo;s tutoring completely transformed how my child approached studying.&rdquo;</blockquote><cite>Jessie C., parent</cite></figure>
-      <figure class="quote rv d1"><span class="res">About +200 in SAT Math</span><blockquote>&ldquo;She improved her SAT Math score by approximately 200 points, exceeding our expectations.&rdquo;</blockquote><cite>Michele C., parent</cite></figure>
-      <figure class="quote rv d2"><span class="res">+140 in SAT Math</span><blockquote>&ldquo;As a direct result of his tutoring, my daughter&rsquo;s math score improved by 140 points.&rdquo;</blockquote><cite>Pam S., parent</cite></figure>
-    </div>
-    <p class="center rv" style="margin-top:34px"><a class="xlink" href="testimonials.html">Read every review &rarr;</a></p>
-  </div>
-</section>
-
 <!-- 8. Who teaches it -->
 <section class="sec soft" id="instructor">
   <div class="shell">
@@ -1314,6 +1323,21 @@ section.sec{padding:clamp(4.6rem,11vh,8.4rem) 0}
         <p class="lede rv d2">I studied statistics at Northwestern, graduating top of my class in three years, and I&rsquo;ve tutored one-on-one since 2018. The reports, the plans and the portal come from years of analyzing how the SAT is built: which questions carry the most points, and where students lose them.</p>
         <div class="creds rv d3"><span>Northwestern University, B.A. Statistics, top of class in three years</span><span>Scored over 1500 on the SAT</span><span>5 on AP Calculus AB &amp; BC</span><span>IB Diploma</span><span>Teaching one-on-one since 2018</span></div>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- Results this fall -->
+<section class="sec" id="proof">
+  <div class="shell center">
+    <p class="lbl rv">Results this fall</p>
+    <h2 class="h-sec rv d1">Scores, as families sent them.</h2>
+    <p class="lede rv d2">Hear from parents who worked with Luca on their SAT preparation, from the scores they achieved to what helped them along the way.</p>
+    <div class="proofgrid">
+      <figure class="pf rv"><div class="shotwrap"><img src="img/results/1550-text.webp" alt="A parent&rsquo;s text: he got a 1550, 780 in Math, up 20 points" loading="lazy"></div><figcaption><b>1550</b><span>Up 20 points from the high 1500s, with a 780 in Math.</span></figcaption></figure>
+      <figure class="pf rv"><div class="shotwrap"><img src="img/results/1500-text.webp" alt="A parent&rsquo;s text: 730 on Reading and Writing, exactly 1500" loading="lazy"></div><figcaption><b>1500</b><span>Exactly 1500, with a 730 in Reading and Writing.</span></figcaption></figure>
+      <figure class="pf rv"><div class="shotwrap"><img src="img/results/1460-score-report.webp" alt="A College Board score report: 1460, 690 Reading and Writing, 770 Math, improved 170 points" loading="lazy"></div><figcaption><b>1460</b><span>Up 170 points since the last SAT, with a 770 in Math.</span></figcaption></figure>
+      <figure class="pf rv"><div class="shotwrap"><img src="img/results/1350-text.webp" alt="A parent&rsquo;s text: 1220 in December, 1230 in the spring, 1350 this time" loading="lazy"></div><figcaption><b>1350</b><span>Up from 1220 and 1230 after only two weeks of prep.</span></figcaption></figure>
     </div>
   </div>
 </section>
@@ -1558,6 +1582,38 @@ document.documentElement.classList.add('js');
   chk.addEventListener('click',function(){ var s=q.querySelector('.qc-ch.sel'); if(!s) return; q.classList.add('done'); chk.hidden=true; again.hidden=false;
     note.textContent=s.getAttribute('data-ok')==='1'?'Right. Now look at where the other three come from.':'Not quite. Each wrong answer is a mistake with a name:'; });
   again.addEventListener('click',function(){ q.classList.remove('done'); [].forEach.call(q.querySelectorAll('.qc-ch'),function(c){c.classList.remove('sel','out');}); chk.hidden=false; chk.disabled=true; again.hidden=true; note.textContent='Pick an answer. The \u00d7 crosses a choice out.'; });
+})();
+</script>
+<script>
+/* The portal panel: four views that advance on their own until touched; every view responds. */
+(function(){
+  var root=document.getElementById('ptl'); if(!root) return;
+  var tabs=root.querySelectorAll('.ptl-tab'), panes=root.querySelectorAll('.ptl-pane'), caps=root.querySelectorAll('.ptl-cap'), n=tabs.length, i=0, held=false, hover=false, t0=0, DUR=7000, seen=false;
+  var still=matchMedia('(prefers-reduced-motion: reduce)').matches, bar=document.createElement('span'); bar.className='bar';
+  function go(k){ i=(k+n)%n; [tabs,panes,caps].forEach(function(L){[].forEach.call(L,function(e){e.classList.toggle('on',+e.getAttribute('data-i')===i);});}); tabs[i].appendChild(bar); t0=performance.now(); bar.style.setProperty('--p',held||still?1:0); }
+  function frame(now){ if(!held&&!hover&&!still&&seen){ var p=(now-t0)/DUR; if(p>=1){go(i+1);p=0;} bar.style.setProperty('--p',p);} else if(hover) t0=now-(parseFloat(bar.style.getPropertyValue('--p'))||0)*DUR; requestAnimationFrame(frame); }
+  new IntersectionObserver(function(es){es.forEach(function(e){ if(e.isIntersecting&&!seen){seen=true;if(!held)go(0);} });},{threshold:.3}).observe(root);
+  root.addEventListener('click',function(e){ var b=e.target.closest('.ptl-tab'); if(b){held=true;go(+b.getAttribute('data-i'));} else if(e.target.closest('.ptl-stage')){ held=true; bar.style.setProperty('--p',1);} });
+  root.addEventListener('mouseenter',function(){hover=true;}); root.addEventListener('mouseleave',function(){hover=false;});
+  go(0); requestAnimationFrame(frame);
+
+  // Practice tests: tap a test to read it.
+  var tiles=[].slice.call(root.querySelectorAll('.pt-t')), info=root.querySelector('.pt-info');
+  function showTest(t){ tiles.forEach(function(x){x.classList.toggle('sel',x===t);}); var n=t.getAttribute('data-n'), sc=t.getAttribute('data-s');
+    info.innerHTML='<b>SAT Practice Test '+n+(n==='12'?', the hardest one':'')+'</b><small>'+(sc?'Scored '+sc+' &middot; the full report is ready, with the walkthrough':n==='12'?'Every question from the hardest end of the test, with no scaling':'Not taken yet &middot; full length, adaptive, timed like the real one')+'</small>'; }
+  showTest(tiles[2]);
+  root.querySelector('.pt-grid').addEventListener('click',function(e){var t=e.target.closest('.pt-t'); if(t) showTest(t);});
+  root.querySelector('.pt-grid').addEventListener('mouseover',function(e){var t=e.target.closest('.pt-t'); if(t) showTest(t);});
+  root.querySelector('.pt-modes').addEventListener('click',function(e){var b=e.target.closest('button'); if(!b) return; [].forEach.call(b.parentNode.querySelectorAll('button'),function(x){x.classList.toggle('on',x===b);});});
+
+  // Question bank: real counts by domain and difficulty.
+  var QB={"math": [["Algebra", 336, 278, 191], ["Advanced Math", 181, 255, 273], ["Problem-Solving and Data Analysis", 215, 177, 134], ["Geometry and Trigonometry", 109, 145, 225]], "rw": [["Standard English Conventions", 196, 150, 293], ["Information and Ideas", 123, 190, 241], ["Expression of Ideas", 116, 199, 85], ["Craft and Structure", 193, 115, 103]]}, subj='math', diff='a', rows=root.querySelector('.qb-rows');
+  function paint(){ var max=Math.max.apply(null,QB[subj].map(function(r){return r[1]+r[2]+r[3];}));
+    rows.innerHTML=QB[subj].map(function(r){ var tot=r[1]+r[2]+r[3], show=diff==='a'?tot:diff==='e'?r[1]:diff==='m'?r[2]:r[3];
+      return '<div class="qb-r"><span>'+r[0]+'</span><div class="qb-bar" style="width:'+Math.round(100*tot/max)+'%">'+['e','m','h'].map(function(d,k){return '<i class="'+d+(diff!=='a'&&diff!==d?' dim':'')+'" style="width:'+(100*r[k+1]/tot).toFixed(1)+'%"></i>';}).join('')+'</div><b>'+show.toLocaleString()+'</b></div>'; }).join(''); }
+  paint();
+  root.querySelector('.qb-sw').addEventListener('click',function(e){var b=e.target.closest('button'); if(!b) return; subj=b.getAttribute('data-s'); [].forEach.call(b.parentNode.children,function(x){x.classList.toggle('on',x===b);}); paint();});
+  root.querySelector('.qb-d').addEventListener('click',function(e){var b=e.target.closest('button'); if(!b) return; diff=b.getAttribute('data-d'); [].forEach.call(b.parentNode.children,function(x){x.classList.toggle('on',x===b);}); paint();});
 })();
 </script>
 <script src="site.js"></script>
