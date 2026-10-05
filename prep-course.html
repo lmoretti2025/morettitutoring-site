@@ -1360,10 +1360,7 @@ nav.is-red .navlinks a{color:rgba(255,255,255,.85)}nav.is-red .navlinks a.on{col
       <div class="tour-steps" id="ptl">
         <div class="tour-step on" data-step="0"><h3>Practice that feels like test day.</h3><p>The same layout, tools and timing as Bluebook: adaptive modules, the answer eliminator, the highlighter, the graphing calculator and the reference sheet.</p><img class="mob shot" src="img/sat/test.png" alt="A practice question" loading="lazy"></div>
         <div class="tour-step" data-step="1"><h3>A dozen full-length practice tests.</h3><p>Taken whole, one section at a time, or one module on its own. Every one scored, with the full report.</p><img class="mob shot" src="img/sat/practice.png" alt="The practice tests" loading="lazy"></div>
-        <div class="tour-step" data-step="2"><h3>Thousands of questions, and the hardest ones.</h3><p>4,523 questions by skill and difficulty, every one with a written explanation, plus hand-picked challenge sets and a round drawn from what your student misses most. Switch the subject and difficulty.</p><img class="mob shot" src="img/sat/qbank-real.jpg" alt="The question bank" loading="lazy">
-          <div class="tw"><div class="qb-top"><div class="qb-top"><div class="qb-sw"><button type="button" class="on" data-s="math">Math</button><button type="button" data-s="rw">Reading &amp; Writing</button></div><div class="qb-d"><button type="button" class="on" data-d="a">All</button><button type="button" data-d="e">Easy</button><button type="button" data-d="m">Medium</button><button type="button" data-d="h">Hard</button></div></div>
-            <div class="qb-rows"></div>
-            <div class="qb-foot"><span><b>127</b> hand-picked challenge questions</span><span><b>From your misses</b>, a round of what goes wrong most</span></div></div>
+        <div class="tour-step" data-step="2"><h3>Thousands of questions, and the hardest ones.</h3><p>4,523 questions by skill and difficulty, every one with a written explanation, plus hand-picked challenge sets and a round drawn from what your student misses most.</p><img class="mob shot" src="img/sat/qbank-real.jpg" alt="The question bank" loading="lazy"></div>
         <div class="tour-step" data-step="3"><h3>Every score, on one chart.</h3><p>Every practice test and official score in one place, with the likely level pooled across tests, so one good or bad morning never moves the picture on its own.</p><img class="mob shot" src="img/sat/home.png" alt="The portal home, with score progress" loading="lazy"></div>
         <div class="tour-step" data-step="4"><h3>You always know how it&rsquo;s going.</h3><p>After every session, a short update from me: what your student worked on, how the practice went, any new score, and what comes next. If a week goes by without practice, you hear that too.</p><img class="mob shot fit" src="img/sat/weekly.png" alt="A weekly update email to a parent" loading="lazy"></div>
       </div>
@@ -1718,20 +1715,6 @@ document.documentElement.classList.add('js');
   chk.addEventListener('click',function(){ var s=q.querySelector('.qc-ch.sel'); if(!s) return; q.classList.add('done'); chk.hidden=true; again.hidden=false;
     note.textContent=s.getAttribute('data-ok')==='1'?'Right. Now look at where the other three come from.':'Not quite. Each wrong answer is a mistake with a name:'; });
   again.addEventListener('click',function(){ q.classList.remove('done'); [].forEach.call(q.querySelectorAll('.qc-ch'),function(c){c.classList.remove('sel','out');}); chk.hidden=false; chk.disabled=true; again.hidden=true; note.textContent='Pick an answer. The \u00d7 crosses a choice out.'; });
-})();
-</script>
-<script>
-/* The portal tour's working pieces: tap a test, switch the question bank. */
-(function(){
-  var root=document.getElementById('ptl'); if(!root) return;
-  // Question bank: real counts by domain and difficulty.
-  var QB={"math": [["Algebra", 336, 278, 191], ["Advanced Math", 181, 255, 273], ["Problem-Solving and Data Analysis", 215, 177, 134], ["Geometry and Trigonometry", 109, 145, 225]], "rw": [["Standard English Conventions", 196, 150, 293], ["Information and Ideas", 123, 190, 241], ["Expression of Ideas", 116, 199, 85], ["Craft and Structure", 193, 115, 103]]}, subj='math', diff='a', rows=root.querySelector('.qb-rows');
-  function paint(){ var max=Math.max.apply(null,QB[subj].map(function(r){return r[1]+r[2]+r[3];}));
-    rows.innerHTML=QB[subj].map(function(r){ var tot=r[1]+r[2]+r[3], show=diff==='a'?tot:diff==='e'?r[1]:diff==='m'?r[2]:r[3];
-      return '<div class="qb-r"><span>'+r[0]+'</span><div class="qb-bar" style="width:'+Math.round(100*tot/max)+'%">'+['e','m','h'].map(function(d,k){return '<i class="'+d+(diff!=='a'&&diff!==d?' dim':'')+'" style="width:'+(100*r[k+1]/tot).toFixed(1)+'%"></i>';}).join('')+'</div><b>'+show.toLocaleString()+'</b></div>'; }).join(''); }
-  paint();
-  root.querySelector('.qb-sw').addEventListener('click',function(e){var b=e.target.closest('button'); if(!b) return; subj=b.getAttribute('data-s'); [].forEach.call(b.parentNode.children,function(x){x.classList.toggle('on',x===b);}); paint();});
-  root.querySelector('.qb-d').addEventListener('click',function(e){var b=e.target.closest('button'); if(!b) return; diff=b.getAttribute('data-d'); [].forEach.call(b.parentNode.children,function(x){x.classList.toggle('on',x===b);}); paint();});
 })();
 </script>
 <script>
