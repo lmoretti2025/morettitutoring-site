@@ -737,25 +737,10 @@
       resume = '<div class="cu-resume cu-in" style="--d:1"><span class="cu-resume-ic">' + PLAY_SVG_SM + '</span><div><b>Pick up where you left off</b><span>' + esc(last.l.num + ' ' + last.l.title) + ', part ' + (prog.last.part + 1) + ' of ' + last.l.parts.length + '</span></div>' +
         '<button type="button" class="cu-btn" data-resume>Continue &rarr;</button></div>';
     }
-    return heroHtml(c) +
-      gateCard + resume + mapHtml(c) + guideHtml(c) +
-      '<div class="cu-units">' + c.domains.map(function (d, di) {
-        var dDone = d.lessons.filter(function (l) { return lessonDoneCount(l) === l.parts.length; }).length;
-        return '<section class="cu-unit cu-in" style="--d:' + (di + 2) + ';--c:' + dcolor(d) + '"><div class="cu-unit-h">' +
-          '<div class="cu-unit-t"><span class="cu-unum">Unit ' + (di + 1) + '</span><h2>' + esc(d.name) + '</h2></div>' +
-          '<span class="cu-unit-p"><span class="cu-mbar"><i style="width:' + Math.round(100 * dDone / d.lessons.length) + '%"></i></span>' + dDone + '/' + d.lessons.length + '</span></div>' +
-          d.lessons.map(function (l) {
-            var n = lessonDoneCount(l);
-            if (lessonLocked(c, l)) {
-              return '<button type="button" class="cu-lesson cu-locked" data-locked title="Watch 1.1 to unlock the rest of Math"><span class="cu-ring cu-lockring" style="width:30px;height:30px">' + LOCK_SVG + '</span>' +
-                '<span class="cu-lt"><span class="cu-num">' + esc(l.num) + '</span> ' + esc(l.title) + calcBadge(l) + '<small>' + pl(l.parts.length, 'part') + '</small></span>' +
-                '</button>';
-            }
-            return '<button type="button" class="cu-lesson" data-lesson="' + esc(l.id) + '">' + ring(n, l.parts.length) +
-              '<span class="cu-lt"><span class="cu-num">' + esc(l.num) + '</span> ' + esc(l.title) + calcBadge(l) + '<small>' + pl(l.parts.length, 'part') + (n && n < l.parts.length ? ' &middot; ' + n + ' done' : '') + '</small></span>' +
-              '<span class="cu-go">' + (n === l.parts.length ? 'Review' : n ? 'Continue' : 'Start') + ' &rsaquo;</span></button>';
-          }).join('') + '</section>';
-      }).join('') + '</div>';
+    /* The tiles ARE the categorisation (Luca, 2026-10-05): the course map
+       groups every lesson by unit and opens it, so the long unit lists that
+       used to sit under the suggested order said the same thing twice. */
+    return heroHtml(c) + gateCard + resume + mapHtml(c) + guideHtml(c);
   }
   // One color per domain, as on the homepage's course map.
   var DOMAIN_COLOR = { 'Introduction': '#6E655C', 'Algebra': '#B0271C', 'Advanced Math': '#2B4C9B', 'Geometry & Trigonometry': '#1F7A6E', 'Problem-Solving & Data Analysis': '#B7791F',
