@@ -1046,6 +1046,21 @@ section.sec{padding:clamp(4.6rem,11vh,8.4rem) 0}
 .scrf img.fit{object-fit:contain;object-position:center;padding:6%}
 .tour-step .mob.fit{background:#fff;padding:4%}
 .walk-split{align-items:center}
+/* The walkthrough stage: red, so it reads as the thing to try */
+.wstage{position:relative;background:radial-gradient(120% 90% at 50% 0%,#C4372A 0%,var(--red) 45%,#7E1A12 100%);color:#fff;padding:clamp(3.6rem,7vw,5.6rem) 0 clamp(3.4rem,6vw,5rem);overflow:hidden}
+.wstage::before{content:"";position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.09) 1px,transparent 1px);background-size:22px 22px;pointer-events:none}
+.wstage .shell{position:relative}
+.ws-head{display:grid;grid-template-columns:1.1fr .9fr;gap:1.2rem 3rem;align-items:end;margin-bottom:2.2rem}
+.ws-k{font-size:.66rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.75);margin:0 0 .8rem}
+.ws-h{font-family:var(--display);font-weight:700;font-size:clamp(2rem,4.2vw,3.2rem);line-height:1.05;margin:0;color:#fff}
+.ws-sub{margin:0;font-size:1rem;line-height:1.65;color:rgba(255,255,255,.82)}.ws-sub b{color:#fff}
+.ws-screen{max-width:1060px;margin:0 auto;border-radius:14px;overflow:hidden;background:#F2F2F2;box-shadow:0 40px 90px -30px rgba(40,6,3,.75),0 0 0 1px rgba(255,255,255,.18)}
+.ws-bar{display:flex;align-items:center;gap:6px;padding:.6rem .9rem;background:#fff;border-bottom:1px solid rgba(17,17,17,.08)}
+.ws-bar i{width:10px;height:10px;border-radius:50%;background:#E3DED9}
+.ws-bar span{margin-left:auto;font-size:.7rem;color:#8a837c;font-weight:500}
+.ws-screen iframe{display:block;width:100%;height:clamp(560px,72vh,700px);border:0}
+@media(max-width:860px){.ws-head{grid-template-columns:1fr}}
+@media(max-width:600px){.ws-screen{margin:0 -6px;border-radius:12px}.ws-screen iframe{height:620px}}
 </style>
 </head>
 <body>
@@ -1091,6 +1106,23 @@ section.sec{padding:clamp(4.6rem,11vh,8.4rem) 0}
   </div>
 </section>
 
+<!-- The walkthrough, live and full width, straight after the hero -->
+<section class="wstage" id="walkthrough">
+  <div class="shell">
+    <div class="ws-head">
+      <div>
+        <p class="ws-k rv">Try it &middot; a real report, for a made-up student</p>
+        <h2 class="ws-h rv d1">Walk through the report your student gets.</h2>
+      </div>
+      <p class="ws-sub rv d2">Every diagnostic and practice test opens with this walkthrough: what happened, where the points went, and what to do about it. Use the arrows, or tap the <b>+</b> on any screen for what it is telling you.</p>
+    </div>
+    <div class="ws-screen rv d2">
+      <div class="ws-bar"><i></i><i></i><i></i><span>Sample report &middot; score 1250</span></div>
+      <iframe src="portal/report.html?demo=1&amp;score=1250&amp;weak=math&amp;embed=public&amp;tour=1&amp;mix=1&amp;v=20260929h" title="A sample report walkthrough, for a made-up student"></iframe>
+    </div>
+  </div>
+</section>
+
 <!-- Results this fall -->
 <section class="sec soft" id="proof">
   <div class="shell center">
@@ -1120,7 +1152,7 @@ section.sec{padding:clamp(4.6rem,11vh,8.4rem) 0}
           <li><b>Guesses.</b> Answers given faster than the question can be read.</li>
           <li><b>The hardest questions.</b> Topics that require specific, focused, and repeatable approaches.</li>
         </ul>
-        <p class="rv d3" style="margin-top:1.8rem"><a class="xlink" href="#walkthrough">Walk through a sample report &rarr;</a></p>
+        <p class="rv d3" style="margin-top:1.8rem"><a class="xlink" href="#walkthrough">Try the full walkthrough &uarr;</a></p>
       </div>
       <div class="rpt rv d2" id="rshow" aria-label="Inside a sample report">
         <div class="rpt-top"><span class="rpt-k">Sample report</span><span class="rpt-sc">Total score <b>1250</b></span></div>
@@ -1141,25 +1173,6 @@ section.sec{padding:clamp(4.6rem,11vh,8.4rem) 0}
             <ul class="rl-l"><li><span>4.2</span>Central Ideas and Details</li><li><span>4.5</span>Inferences</li><li><span>3.3</span>Rhetorical Synthesis</li></ul></div></div>
         </div>
         <div class="rpt-caps"><p class="rpt-cap on" data-i="0"><b>Every question, at a glance.</b> All four modules, right, wrong and flagged. Math held 29 of 44; Reading and Writing, 50 of 54.</p><p class="rpt-cap" data-i="1"><b>How the clock was used.</b> Every question in order, against target pace (dashed). The two longest, 7 and 14, were both missed. Gold is going back at review.</p><p class="rpt-cap" data-i="2"><b>Where the points are.</b> The skills worth the most points for this student, in order. The top three alone are worth about 200.</p><p class="rpt-cap" data-i="3"><b>The next four weeks.</b> About 4&frac12; hours a week, split the way the test went, with each lesson to watch named.</p></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- The walkthrough, live -->
-<section class="sec" id="walkthrough">
-  <div class="shell">
-    <div class="split walk-split">
-      <div>
-        <p class="lbl rv">Every report opens with a walkthrough</p>
-        <h2 class="h-sec rv d1">What happened, and what to do about it.</h2>
-        <p class="lede rv d2">Before any of the detail, the report walks your student through the test in a few screens. Try it: this is a real one, for a made-up student.</p>
-        <p class="rv d3" style="margin-top:1.6rem">Every diagnostic and every practice test gets the same report, and it stays in your student&rsquo;s portal as the work happens.</p>
-      </div>
-      <div class="rv d2">
-        <div class="phone"><div class="isl"></div><div class="scr">
-          <iframe src="portal/report.html?demo=1&amp;score=1250&amp;weak=math&amp;embed=public&amp;tour=1&amp;mix=1&amp;v=20260929h" title="A sample report walkthrough, for a made-up student" loading="lazy"></iframe>
-        </div></div>
       </div>
     </div>
   </div>
