@@ -1202,6 +1202,10 @@ nav.is-red .navlinks a{color:rgba(255,255,255,.85)}nav.is-red .navlinks a.on{col
 @keyframes impact{0%{opacity:.85;transform:scale(.12)}100%{opacity:0;transform:scale(1.05)}}
 @media(prefers-reduced-motion:reduce){.shero .mark.go #ringOuter,.shero .mark.go #ringInner,.shero .mark.go #arrow,.shero .mark.go #shadows{animation:none;opacity:1;transform:none}.shero .mark.go #impact{animation:none}}
 @media(max-width:980px){.shero .mark{right:-40%;top:62%;width:120vw;opacity:.14}}
+/* The form's intro: one wide line of headline, one short paragraph, not a narrow column */
+.capintro{max-width:680px}
+.capture h2{font-size:clamp(1.9rem,3.4vw,2.7rem)}
+.capintro .lead{max-width:36em;margin-left:auto;margin-right:auto}
 </style>
 </head>
 <body>
@@ -1737,6 +1741,7 @@ document.documentElement.classList.add('js');
   var map={}; links.forEach(function(a){ var el=document.querySelector(a.getAttribute('href')); if(el) map[el.id]=a; });
   var io=new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ links.forEach(function(a){a.classList.remove('on');}); map[e.target.id].classList.add('on'); } }); },{rootMargin:'-45% 0px -50% 0px'});
   Object.keys(map).forEach(function(id){ io.observe(document.getElementById(id)); });
+  var st=document.getElementById('start'); if(st) new IntersectionObserver(function(es){ if(es[0].isIntersecting) links.forEach(function(a){a.classList.remove('on');}); },{rootMargin:'-45% 0px -50% 0px'}).observe(st);
 })();
 </script>
 <script src="site.js"></script>

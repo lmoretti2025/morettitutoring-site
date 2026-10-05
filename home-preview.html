@@ -1065,6 +1065,7 @@ nav.is-red .navlinks a{color:rgba(255,255,255,.85)}nav.is-red .navlinks a.on{col
 .navlinks a.navsat::after{display:none}
 .navlinks a.navsat:hover{background:#fff;color:var(--red)}
 /* The platform section: the report and the course, side by side in one claim */
+#platform .split>*{min-width:0}
 .pf2{display:grid;gap:1.1rem;margin-top:1.6rem}
 .pf2>div{border-left:2px solid var(--red-lift);padding-left:1rem}
 .pf2 b{display:block;color:#fff;font-weight:600;font-size:1rem;margin-bottom:.25rem}
@@ -1075,6 +1076,31 @@ nav.is-red .navlinks a{color:rgba(255,255,255,.85)}nav.is-red .navlinks a.on{col
 .pstats b{display:block;font-family:var(--display);font-weight:700;font-size:clamp(2.2rem,4vw,3.2rem);line-height:1;color:#fff}
 .pstats span{display:block;margin-top:.7rem;font-size:.84rem;line-height:1.5;color:rgba(237,231,229,.6)}
 @media(max-width:700px){.pstats{grid-template-columns:1fr 1fr;row-gap:1.6rem}.pstats>div:nth-child(3){border-left:none}}
+/* The course map and the question, inside the dark platform panel */
+.rpt .cmap{background:none;border:0;padding:0;box-shadow:none}
+.rpt .cmap-top .k{color:rgba(237,231,229,.6)}
+.rpt .cmap-sw{background:rgba(255,255,255,.08)}.rpt .cmap-sw button{color:rgba(237,231,229,.7)}.rpt .cmap-sw button.on{background:#fff;color:#111}
+.rpt .cd-h{color:#fff}.rpt .cd-h span{color:rgba(237,231,229,.5)}
+.rpt .ct{color:#fff;background:color-mix(in srgb,var(--c) 26%,transparent)}
+.rpt .ct.on{background:var(--c)}
+.rpt .cmap-info{border-top-color:rgba(255,255,255,.12)}.rpt .cmap-info b{color:#fff}.rpt .cmap-info small{color:rgba(237,231,229,.6)}
+.rpt .cmap-body{gap:.6rem}
+.rpt .qcard{background:none;border:0;padding:0 0 0 1rem;box-shadow:none;border-left:2px solid var(--red-lift)}
+.rpt .qc-q{color:#fff}.rpt .qc-tool{color:rgba(237,231,229,.55)}
+.rpt .qc-pick{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.22);color:#fff}
+.rpt .qc-pick:hover{border-color:#fff}
+.rpt .qc-x{background:transparent;border-color:rgba(255,255,255,.3);color:rgba(237,231,229,.7)}
+.rpt .qc-ch.out .qc-x{background:#fff;color:#111;border-color:#fff}
+.rpt .qc-ch.sel .qc-pick{background:rgba(52,87,213,.25);border-color:#7FA2E8;box-shadow:inset 0 0 0 1px #7FA2E8}
+.rpt .qcard.done .qc-ch[data-ok="1"] .qc-pick{background:rgba(22,163,74,.2)}
+.rpt .qcard.done .qc-ch.sel[data-ok="0"] .qc-pick{background:rgba(224,74,63,.2)}
+.rpt .qc-why{color:rgba(237,231,229,.75)}.rpt .qc-why b{color:#F07A70}.rpt .qc-ch[data-ok="1"] .qc-why b{color:#4ADE80}
+.rpt .qc-note{color:rgba(237,231,229,.6)}
+.rpt .qc-again{background:#fff;color:#111}
+/* The form's intro: one wide line of headline, one short paragraph, not a narrow column */
+.capintro{max-width:680px}
+.capture h2{font-size:clamp(1.9rem,3.4vw,2.7rem)}
+.capintro .lead{max-width:36em;margin-left:auto;margin-right:auto}
 </style>
 </head>
 <body>
@@ -1184,31 +1210,34 @@ nav.is-red .navlinks a{color:rgba(255,255,255,.85)}nav.is-red .navlinks a.on{col
         <p class="satgo rv light" style="text-align:left;margin-top:1.2rem"><a href="prep-course.html#walkthrough">See the whole platform on the SAT page &rarr;</a></p>
       </div>
       <div class="rpt rv d2" id="rshow" aria-label="Inside a sample report">
-        <div class="rpt-top"><span class="rpt-k">Sample report</span><span class="rpt-sc">Total score <b>1250</b></span></div>
-        <div class="rpt-tabs" role="tablist"><button type="button" class="rpt-tab on" data-i="0" role="tab">Every question</button><button type="button" class="rpt-tab" data-i="1" role="tab">The clock</button><button type="button" class="rpt-tab" data-i="2" role="tab">The points</button><button type="button" class="rpt-tab" data-i="3" role="tab">The plan</button><span class="rpt-run"></span></div>
+        <div class="rpt-top"><span class="rpt-k">Inside the platform</span><span class="rpt-sc">a sample student</span></div>
+        <div class="rpt-tabs" role="tablist"><button type="button" class="rpt-tab on" data-i="0" role="tab">Every question</button><button type="button" class="rpt-tab" data-i="1" role="tab">The clock</button><button type="button" class="rpt-tab" data-i="2" role="tab">The plan</button><button type="button" class="rpt-tab" data-i="3" role="tab">The course</button><button type="button" class="rpt-tab" data-i="4" role="tab">A question</button><span class="rpt-run"></span></div>
         <div class="rpt-stage">
           <div class="rpt-pane on" data-i="0"><div class="rq" id="rq"></div><div class="rq-key"><span><i class="g"></i>Right</span><span><i class="r"></i>Wrong</span><span><i class="g f">!</i>Flagged</span></div></div>
           <div class="rpt-pane" data-i="1"><div class="rc-h"><b>Reading and Writing, Module 1</b><span>minutes into the module</span></div><svg id="rclock" viewBox="0 0 640 412" role="img" aria-label="Time spent on each of 27 questions, against target pace"></svg></div>
-          <div class="rpt-pane" data-i="2"><div class="rp-h">Where the points are</div><div class="rp">
-            <div class="rp-r"><span>Algebra</span><i style="--w:100%"></i><b>+110</b></div>
-            <div class="rp-r"><span>Problem-Solving and Data Analysis</span><i style="--w:45%"></i><b>+50</b></div>
-            <div class="rp-r"><span>Nonlinear Functions</span><i style="--w:36%"></i><b>+40</b></div>
-            <div class="rp-r"><span>Inferences</span><i style="--w:18%"></i><b>+20</b></div>
-            <div class="rp-r"><span>Form, Structure, and Sense</span><i style="--w:18%"></i><b>+20</b></div>
-          </div><div class="rp-sum"><span>1250</span><em>top three fixed</em><span class="to">about 1450</span></div></div>
-          <div class="rpt-pane" data-i="3"><div class="rp-h">The next four weeks</div><div class="rl-bar"><i style="--w:89%"></i><i class="s" style="--w:11%"></i></div>
+          <div class="rpt-pane" data-i="2"><div class="rp-h">The next four weeks</div><div class="rl-bar"><i style="--w:89%"></i><i class="s" style="--w:11%"></i></div>
             <div class="rl"><div class="rl-r"><b>4<small>hrs / week</small></b><p><strong>Relearning.</strong> Work every question this test got wrong. It cost the most points, so it gets the most time.</p></div>
             <div class="rl-r s"><b>&frac12;<small>hr / week</small></b><p><strong>Strategy.</strong> Question Bank sets answered with the method, not just for the answer:</p></div>
             <ul class="rl-l"><li><span>4.2</span>Central Ideas and Details</li><li><span>4.5</span>Inferences</li><li><span>3.3</span>Rhetorical Synthesis</li></ul></div></div>
+          <div class="rpt-pane" data-i="3"><div class="cmap" id="cmap">
+        <div class="cmap-top"><span class="k">59 lessons, by unit</span><div class="cmap-sw" role="tablist"><button type="button" class="on" data-c="0">Math</button><button type="button" data-c="1">Reading &amp; Writing</button></div></div>
+        <div class="cmap-body"></div>
+        <div class="cmap-info" aria-live="polite"></div>
+      </div></div>
+          <div class="rpt-pane" data-i="4"><div class="qcard" id="qcard">
+        <div class="qc-head"><span class="qc-tag">Lesson 2.1 &middot; check</span><span class="qc-tool">Sample question</span></div>
+        <p class="qc-q">A line in the <i>xy</i>-plane has a slope of 3 and passes through the point (2, 7). What is the <i>y</i>-coordinate of the line&rsquo;s <i>y</i>-intercept?</p>
+        <div class="qc-chs">
+          <div class="qc-ch" data-ok="0"><button type="button" class="qc-pick"><span class="L">A</span><span class="v">&minus;1</span></button><button type="button" class="qc-x" aria-label="Cross out A">&times;</button><p class="qc-why"><b>Subtracted in the wrong order.</b> 3(2) &minus; 7 = &minus;1. The intercept is 7&nbsp;&minus;&nbsp;3(2).</p></div>
+          <div class="qc-ch" data-ok="1"><button type="button" class="qc-pick"><span class="L">B</span><span class="v">1</span></button><button type="button" class="qc-x" aria-label="Cross out B">&times;</button><p class="qc-why"><b>Correct.</b> Put the point into <i>y</i> = 3<i>x</i> + <i>b</i>: 7 = 3(2) + <i>b</i>, so <i>b</i> = 1.</p></div>
+          <div class="qc-ch" data-ok="0"><button type="button" class="qc-pick"><span class="L">C</span><span class="v">7</span></button><button type="button" class="qc-x" aria-label="Cross out C">&times;</button><p class="qc-why"><b>Used the point&rsquo;s <i>y</i>-value.</b> 7 is the line&rsquo;s height at <i>x</i> = 2. The <i>y</i>-intercept is its height at <i>x</i> = 0.</p></div>
+          <div class="qc-ch" data-ok="0"><button type="button" class="qc-pick"><span class="L">D</span><span class="v">13</span></button><button type="button" class="qc-x" aria-label="Cross out D">&times;</button><p class="qc-why"><b>Went the wrong way.</b> Moving from <i>x</i> = 2 back to <i>x</i> = 0 lowers <i>y</i> by 3 &times; 2 = 6, so 7 &minus; 6, not 7 + 6.</p></div>
         </div>
-        <div class="rpt-caps"><p class="rpt-cap on" data-i="0"><b>Every question, at a glance.</b> All four modules, right, wrong and flagged. Math held 29 of 44; Reading and Writing, 50 of 54.</p><p class="rpt-cap" data-i="1"><b>How the clock was used.</b> Every question in order, against target pace (dashed). The two longest, 7 and 14, were both missed. Gold is going back at review.</p><p class="rpt-cap" data-i="2"><b>Where the points are.</b> The skills worth the most points for this student, in order. The top three alone are worth about 200.</p><p class="rpt-cap" data-i="3"><b>The next four weeks.</b> About 4&frac12; hours a week, split the way the test went, with each lesson to watch named.</p></div>
+        <div class="qc-foot"><button type="button" class="qc-check" disabled>Check answer</button><button type="button" class="qc-again" hidden>Try again</button><span class="qc-note">Pick an answer. The &times; crosses a choice out.</span></div>
+      </div></div>
+        </div>
+        <div class="rpt-caps"><p class="rpt-cap on" data-i="0"><b>Every question, at a glance.</b> All four modules, right, wrong and flagged, from one sample diagnostic.</p><p class="rpt-cap" data-i="1"><b>How the clock was used.</b> Every question in order, against target pace (dashed). The two longest, 7 and 14, were both missed.</p><p class="rpt-cap" data-i="2"><b>The plan.</b> About 4&frac12; hours a week, split the way the test went, with each lesson to watch named.</p><p class="rpt-cap" data-i="3"><b>The course.</b> Every lesson is a video, notes and a check. Hover or tap a lesson.</p><p class="rpt-cap" data-i="4"><b>Inside a lesson.</b> Pick an answer and check it: every choice shows where it comes from.</p></div>
       </div>
-    </div>
-    <div class="pstats rv">
-      <div><b>12</b><span>full-length<br>practice tests</span></div>
-      <div><b>4,523</b><span>questions, every one<br>with an explanation</span></div>
-      <div><b>59</b><span>video lessons,<br>20+ hours</span></div>
-      <div><b>190</b><span>parts, each ending<br>in a check</span></div>
     </div>
   </div>
 </section>
@@ -1357,7 +1386,7 @@ nav.is-red .navlinks a{color:rgba(255,255,255,.85)}nav.is-red .navlinks a.on{col
 <section id="start" class="capture"><div class="shell">
   <div class="capintro">
     <h2 class="rv d1">Start with the <span class="uline">free<svg class="uline-svg" viewBox="0 0 120 22" preserveAspectRatio="none" aria-hidden="true"><path class="u1" d="M3 9.5C22 5.6 47 4.4 70 5.2c17 .6 33 2 46 3.4"/><path class="u2" d="M6 16.4C26 12.8 52 11.6 76 12.2c15 .4 29 1.5 39 2.7"/></svg></span> diagnostic.</h2>
-    <p class="lead rv d2">I reply personally, the same day. SAT plans start with a full-length timed test at no charge, and a report on the data behind the score. Math and essay coaching start with a free call instead.</p>
+    <p class="lead rv d2">I reply personally, the same day. The diagnostic is a full-length timed SAT, free, with a report on the data behind the score. Math and essays start with a free call.</p>
     <p class="capdate rv d2"><span class="cdk">Next open SAT</span> <b id="cd-fit">November 7</b>, <span id="cd-reglbl">register by</span> <b id="cd-reg">October 23</b>. <a href="test-dates.html">All dates &rarr;</a></p>
   </div>
 
@@ -1585,6 +1614,7 @@ document.documentElement.classList.add('js');
   function frame(now){ if(!held&&!hover&&!still&&seen){ var p=(now-t0)/DUR; if(p>=1){go(i+1);p=0;} bar.style.setProperty('--p',p);} else if(hover) t0=now-(parseFloat(bar.style.getPropertyValue('--p'))||0)*DUR; raf=requestAnimationFrame(frame); }
   var seen=false; new IntersectionObserver(function(es){es.forEach(function(e){ if(e.isIntersecting&&!seen){seen=true;if(!held)go(0);} });},{threshold:.35}).observe(root);
   root.querySelector('.rpt-tabs').addEventListener('click',function(e){var b=e.target.closest('.rpt-tab'); if(b){held=true;go(+b.getAttribute('data-i'));}});
+  root.querySelector('.rpt-stage').addEventListener('click',function(){ if(!held){ held=true; bar.style.setProperty('--p',1); } });
   root.addEventListener('mouseenter',function(){hover=true;}); root.addEventListener('mouseleave',function(){hover=false;});
   go(0); raf=requestAnimationFrame(frame);
 })();
@@ -1650,6 +1680,7 @@ document.documentElement.classList.add('js');
   var map={}; links.forEach(function(a){ var el=document.querySelector(a.getAttribute('href')); if(el) map[el.id]=a; });
   var io=new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ links.forEach(function(a){a.classList.remove('on');}); map[e.target.id].classList.add('on'); } }); },{rootMargin:'-45% 0px -50% 0px'});
   Object.keys(map).forEach(function(id){ io.observe(document.getElementById(id)); });
+  var st=document.getElementById('start'); if(st) new IntersectionObserver(function(es){ if(es[0].isIntersecting) links.forEach(function(a){a.classList.remove('on');}); },{rootMargin:'-45% 0px -50% 0px'}).observe(st);
 })();
 </script>
 <script src="site.js"></script>
