@@ -884,6 +884,133 @@ section.sec{padding:clamp(4.6rem,11vh,8.4rem) 0}
 .wt-box iframe{width:100%;height:100%;border:0;display:block}
 .wt-x{position:fixed;top:20px;right:20px;z-index:3;width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.4);background:transparent;color:#fff;font-size:1.4rem;cursor:pointer}
 @media(max-width:600px){.wt-box{width:100vw;height:100vh;border-radius:0;box-shadow:none}.wt-x{top:10px;right:10px;background:rgba(0,0,0,.55);z-index:2}}
+/* Native report panel (diagnostic) */
+.rpt{background:#FBFAF8;color:var(--ink);border-radius:12px;overflow:hidden;box-shadow:0 30px 70px -30px rgba(0,0,0,.75);border:1px solid rgba(255,255,255,.1)}
+.rpt-top{display:flex;justify-content:space-between;align-items:baseline;padding:1rem 1.3rem .2rem}
+.rpt-k{font-size:.62rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--red)}
+.rpt-sc{font-size:.78rem;color:var(--muted)}.rpt-sc b{font-family:var(--display);font-size:1.5rem;color:var(--ink);margin-left:.3rem}
+.rpt-tabs{position:relative;display:flex;gap:.25rem;padding:.6rem 1rem 0;border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
+.rpt-tabs::-webkit-scrollbar{display:none}
+.rpt-tab{position:relative;background:none;border:0;padding:.55rem .6rem .7rem;font:500 .8rem var(--sans);color:var(--muted);cursor:pointer;white-space:nowrap}
+.rpt-tab.on{color:var(--ink)}
+.rpt-tab.on::after{content:"";position:absolute;left:.6rem;right:.6rem;bottom:-1px;height:2px;background:var(--line)}
+.rpt-tab.on .bar{position:absolute;left:.6rem;bottom:-1px;height:2px;background:var(--red);width:calc(100% - 1.2rem);transform-origin:left;transform:scaleX(var(--p,1))}
+.rpt-stage{display:grid;padding:1.3rem 1.3rem 1rem;min-height:21rem}
+.rpt-pane{grid-area:1/1;opacity:0;visibility:hidden;transition:opacity .5s var(--ease),visibility 0s .5s}
+.rpt-pane.on{opacity:1;visibility:visible;transition:opacity .5s var(--ease)}
+.rpt-caps{display:grid;background:#171312;padding:1rem 1.3rem 1.15rem}
+.rpt-cap{grid-area:1/1;margin:0;opacity:0;transition:opacity .4s;font-size:.86rem;line-height:1.55;color:rgba(237,231,229,.74)}
+.rpt-cap.on{opacity:1}.rpt-cap b{color:#fff;font-weight:600}
+/* every question */
+.rq{display:grid;grid-template-columns:repeat(2,1fr);gap:1.3rem 1.6rem}
+.rq-m b{display:block;font-size:.8rem;font-weight:600}
+.rq-m small{display:block;font-size:.72rem;color:var(--muted);margin:.15rem 0 .55rem}
+.rq-m small em{font-style:normal;color:#C0392B;font-weight:600}.rq-m small strong{color:#15803D;font-weight:600}
+.rq-g{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;max-width:15rem}
+.rq-g i,.rq-key i{display:flex;align-items:center;justify-content:center;aspect-ratio:1;border-radius:5px;background:#16A34A;font:700 .62rem var(--sans);font-style:normal;color:#fff}
+.rq-g i.r,.rq-key i.r{background:#E04A3F}
+.rpt-pane.on .rq-g i{animation:rqpop .45s var(--ease) both;animation-delay:calc(var(--k)*18ms)}
+@keyframes rqpop{from{opacity:0;transform:scale(.4)}}
+.rq-key{display:flex;gap:1.1rem;margin-top:1.2rem;font-size:.72rem;color:var(--muted)}
+.rq-key span{display:flex;align-items:center;gap:.4rem}.rq-key i{width:13px;height:13px;font-size:.55rem}
+/* the clock */
+.rc-h{display:flex;justify-content:space-between;align-items:baseline;font-size:.78rem;margin-bottom:.4rem}.rc-h span{font-size:.7rem;color:var(--muted)}
+#rclock{width:100%;height:auto;display:block}
+#rclock .bar{fill:#1A1716;transform-box:fill-box;transform-origin:left}
+#rclock .rev{fill:#C9A84C;transform-box:fill-box;transform-origin:left}
+.rpt-pane.on #rclock .bar,.rpt-pane.on #rclock .rev{animation:rcgrow .5s var(--ease) both;animation-delay:calc(var(--k)*55ms)}
+@keyframes rcgrow{from{transform:scaleX(0)}}
+#rclock .pace{fill:none;stroke:#8A847E;stroke-width:1.6;stroke-dasharray:5 4}
+#rclock text{font:500 10px var(--sans);fill:#8A847E}
+#rclock .gl{stroke:rgba(17,17,17,.07)}
+#rclock .st{fill:#16A34A}#rclock .st.r{fill:#E04A3F}
+#rclock .done{stroke:#C9A84C;stroke-width:1.4;stroke-dasharray:4 3}
+#rclock .lbl2{fill:#9A7C22;font-weight:600}
+/* the points */
+.rp-h{font-family:var(--display);font-weight:700;font-size:1.3rem;margin-bottom:.9rem}
+.rp{display:grid;gap:.55rem}
+.rp-r{display:grid;grid-template-columns:minmax(0,1.1fr) 1fr 3rem;align-items:center;gap:.9rem;background:#fff;border:1px solid var(--hair);border-radius:8px;padding:.6rem .85rem}
+.rp-r span{font-size:.8rem;font-weight:600;line-height:1.3}
+.rp-r i{position:relative;height:7px;border-radius:4px;background:#EEECE9;overflow:hidden}
+.rp-r i::after{content:"";position:absolute;inset:0 auto 0 0;width:var(--w);border-radius:4px;background:var(--red);transform-origin:left}
+.rpt-pane.on .rp-r i::after{animation:rcgrow .9s var(--ease) both}
+.rpt-pane.on .rp-r:nth-child(2) i::after{animation-delay:.08s}.rpt-pane.on .rp-r:nth-child(3) i::after{animation-delay:.16s}.rpt-pane.on .rp-r:nth-child(4) i::after{animation-delay:.24s}.rpt-pane.on .rp-r:nth-child(5) i::after{animation-delay:.32s}
+.rp-r b{text-align:right;font-size:.9rem}
+.rp-sum{display:flex;align-items:center;gap:.8rem;margin-top:1rem;font-size:.78rem;color:var(--muted)}
+.rp-sum span{font-family:var(--display);font-weight:700;font-size:1.35rem;color:var(--ink)}
+.rp-sum em{flex:1;font-style:normal;text-align:center;border-bottom:1.5px dashed rgba(176,39,28,.45);padding-bottom:.2rem;white-space:nowrap}
+.rp-sum .to{color:var(--red)}
+/* the plan */
+.rl-bar{display:flex;gap:3px;height:8px;margin-bottom:1rem}
+.rl-bar i{width:var(--w);border-radius:4px;background:#E04A3F}.rl-bar i.s{background:#7E57A8}
+.rpt-pane.on .rl-bar i{animation:rcgrow .9s var(--ease) both;transform-origin:left}
+.rl-r{display:grid;grid-template-columns:4.4rem 1fr;gap:.9rem;padding:.55rem 0}
+.rl-r b{font-family:var(--display);font-size:1.6rem;line-height:1;color:#E04A3F}.rl-r.s b{color:#7E57A8}
+.rl-r b small{display:block;font:600 .58rem var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:.35rem}
+.rl-r p{margin:0;font-size:.84rem;line-height:1.55;color:var(--body)}.rl-r strong{color:var(--ink)}
+.rl-l{list-style:none;margin:.1rem 0 0 5.3rem;padding:0;display:grid;gap:.4rem}
+.rl-l li{display:flex;align-items:center;gap:.6rem;font-size:.82rem;font-weight:500;background:#fff;border:1px solid var(--hair);border-radius:7px;padding:.45rem .7rem}
+.rl-l span{font-size:.68rem;font-weight:600;color:#fff;background:#7E57A8;border-radius:4px;padding:.12rem .38rem}
+@media(max-width:560px){.rpt-stage{padding:1.1rem .95rem .9rem}.rq{gap:1rem}.rp-r{grid-template-columns:1fr 2.6rem;row-gap:.45rem}.rp-r i{grid-column:1/-1;grid-row:2}.rl-l{margin-left:0}}
+
+/* Course map */
+.cmap{background:#fff;border:1px solid var(--line);border-radius:12px;padding:clamp(1.1rem,2.2vw,1.5rem);box-shadow:0 26px 60px -40px rgba(17,17,17,.4)}
+.cmap-top{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
+.cmap-top .k{font-size:.62rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--red)}
+.cmap-sw{display:flex;background:var(--sunk);border-radius:999px;padding:3px}
+.cmap-sw button{border:0;background:none;border-radius:999px;padding:.4rem .85rem;font:500 .76rem var(--sans);color:var(--muted);cursor:pointer}
+.cmap-sw button.on{background:var(--ink);color:#fff}
+.cmap-body{margin-top:1.1rem;display:grid;gap:.85rem}
+.cd-h{display:flex;justify-content:space-between;font-size:.7rem;font-weight:600;color:var(--ink);margin-bottom:.4rem}
+.cd-h span{color:var(--muted);font-weight:500}
+.cd-t{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:5px}
+.ct{position:relative;aspect-ratio:1/1.02;border:1.5px solid var(--c);background:color-mix(in srgb,var(--c) 9%,#fff);border-radius:7px;padding:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--ink);font:600 clamp(.6rem,1.1vw,.74rem) var(--sans);transition:transform .2s var(--ease),background .2s}
+.ct:hover{transform:translateY(-2px)}
+.ct.on{background:var(--c);color:#fff}
+.ct i{display:flex;gap:2px}.ct i s{width:4px;height:4px;border-radius:50%;background:var(--c);opacity:.75}
+.ct.on i s{background:#fff}
+.cmap.go .ct{animation:rqpop .5s var(--ease) both;animation-delay:calc(var(--k)*22ms)}
+.cmap-info{margin-top:1.1rem;padding-top:1rem;border-top:1px solid var(--line);display:grid;grid-template-columns:auto 1fr;gap:.15rem .9rem;align-items:center;min-height:3.4rem}
+.cmap-info .n{grid-row:span 2;width:2.6rem;height:2.6rem;border-radius:8px;background:var(--c);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:.8rem}
+.cmap-info b{font-family:var(--display);font-size:1.12rem;line-height:1.2;color:var(--ink)}
+.cmap-info small{font-size:.74rem;color:var(--muted)}
+/* Sample question */
+.course-try{margin-top:clamp(3.4rem,7vw,5rem)}
+.h-sec.sm{font-size:clamp(1.6rem,3vw,2.3rem)}
+.qcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:clamp(1.2rem,2.4vw,1.7rem);box-shadow:0 26px 60px -40px rgba(17,17,17,.4)}
+.qc-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
+.qc-tag{font-size:.68rem;font-weight:600;letter-spacing:.06em;color:#fff;background:var(--red);border-radius:999px;padding:.25rem .7rem}
+.qc-tool{font-size:.7rem;color:var(--muted)}
+.qc-q{font-size:.98rem;line-height:1.6;color:var(--ink);margin:0 0 1.1rem}
+.qc-chs{display:grid;gap:.55rem}
+.qc-ch{display:grid;grid-template-columns:1fr auto;align-items:center;gap:.5rem}
+.qc-pick{display:flex;align-items:center;gap:.8rem;width:100%;text-align:left;background:#fff;border:1.5px solid rgba(17,17,17,.2);border-radius:9px;padding:.65rem .8rem;font:500 .95rem var(--sans);color:var(--ink);cursor:pointer;transition:border-color .15s,background .15s}
+.qc-pick:hover{border-color:var(--ink)}
+.qc-pick .L{width:1.6rem;height:1.6rem;border-radius:50%;border:1.5px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:600;flex:none}
+.qc-ch.sel .qc-pick{border-color:#2B4C9B;background:#F1F4FB;box-shadow:inset 0 0 0 1px #2B4C9B}
+.qc-ch.sel .L{background:#2B4C9B;border-color:#2B4C9B;color:#fff}
+.qc-x{width:1.7rem;height:1.7rem;border-radius:50%;border:1.5px solid rgba(17,17,17,.25);background:#fff;color:var(--muted);font-size:1rem;line-height:1;cursor:pointer}
+.qc-ch.out .qc-pick{opacity:.45}.qc-ch.out .qc-pick .v{text-decoration:line-through}.qc-ch.out .qc-x{background:var(--ink);color:#fff;border-color:var(--ink)}
+.qc-why{grid-column:1/-1;margin:0;max-height:0;overflow:hidden;font-size:.82rem;line-height:1.5;color:var(--body);padding-left:3.2rem;transition:max-height .45s var(--ease),margin .45s var(--ease)}
+.qc-why b{color:#B42318}
+.qc-ch[data-ok="1"] .qc-why b{color:#15803D}
+.qcard.done .qc-why{max-height:4rem;margin:.1rem 0 .35rem}
+.qcard.done .qc-ch[data-ok="1"] .qc-pick{border-color:#16A34A;background:#F0FAF3;box-shadow:inset 0 0 0 1px #16A34A}
+.qcard.done .qc-ch[data-ok="1"] .L{background:#16A34A;border-color:#16A34A;color:#fff}
+.qcard.done .qc-ch.sel[data-ok="0"] .qc-pick{border-color:#E04A3F;background:#FDF2F1;box-shadow:inset 0 0 0 1px #E04A3F}
+.qcard.done .qc-ch.sel[data-ok="0"] .L{background:#E04A3F;border-color:#E04A3F;color:#fff}
+.qcard.done .qc-ch.out .qc-pick{opacity:.7}
+.qcard.done .qc-pick,.qcard.done .qc-x{pointer-events:none}
+.qc-foot{display:flex;align-items:center;gap:1rem;margin-top:1.1rem;flex-wrap:wrap}
+.qc-check,.qc-again{border:0;border-radius:999px;background:var(--red);color:#fff;font:600 .82rem var(--sans);padding:.65rem 1.3rem;cursor:pointer}
+.qc-check:disabled{opacity:.35;cursor:default}
+.qc-again{background:var(--ink)}
+.qc-note{font-size:.76rem;color:var(--muted)}
+.cstats.four{grid-template-columns:repeat(4,1fr)}
+@media(max-width:900px){.cstats.four{grid-template-columns:repeat(2,1fr)}.cstats.four > div:nth-child(3){border-left:none}}
+@media(max-width:700px){.cstats.four{grid-template-columns:1fr}.cstats.four > div{border-left:none!important}}
+@media(max-width:560px){.rpt-tabs{padding:.5rem .55rem 0;gap:0}.rpt-tab{font-size:.72rem;padding:.5rem .45rem .65rem}.rc-h span{display:none}.ct i{display:none}.cd-t{gap:4px}.cd-h{font-size:.66rem}}
+@media(prefers-reduced-motion:reduce){.rpt-pane.on *,.cmap.go .ct{animation:none!important}}
 </style>
 </head>
 <body>
@@ -987,10 +1114,25 @@ section.sec{padding:clamp(4.6rem,11vh,8.4rem) 0}
         </ul>
         <p class="rv d3" style="margin-top:1.8rem"><button type="button" class="xlink wt-open" data-walk>Walk through a sample report &rarr;</button></p>
       </div>
-      <div class="rshow rv d2" id="rshow" aria-roledescription="carousel" aria-label="Inside the report">
-        <div class="rs-stage"><div class="rs-slide on wide" data-i="0"><div class="rs-img"><img src="img/sat/route.jpg" alt="How the clock was used" loading="lazy"></div></div><div class="rs-slide wide" data-i="1"><div class="rs-img"><img src="img/report/grid.jpg" alt="Every question, at a glance" loading="lazy"></div></div><div class="rs-slide tall" data-i="2"><div class="rs-img"><img src="img/report/tour-clock.jpg" alt="From the walkthrough" loading="lazy"></div></div><div class="rs-slide wide" data-i="3"><div class="rs-img"><img src="img/report/points.jpg" alt="Where the points are" loading="lazy"></div></div><div class="rs-slide tall" data-i="4"><div class="rs-img"><img src="img/report/tour-modules.jpg" alt="How each module went" loading="lazy"></div></div><div class="rs-slide wide" data-i="5"><div class="rs-img"><img src="img/report/plan.jpg" alt="The next four weeks" loading="lazy"></div></div></div>
-        <div class="rs-bar"><div class="rs-caps"><div class="rs-cap on" data-i="0"><b>How the clock was used.</b> Every visit to every question, in order. Gold is going back at review; the dashed line is target pace.</div><div class="rs-cap" data-i="1"><b>Every question, at a glance.</b> Right, wrong and flagged, module by module.</div><div class="rs-cap" data-i="2"><b>From the walkthrough.</b> Where the clock caught up, and the questions it cost.</div><div class="rs-cap" data-i="3"><b>Where the points are.</b> The skills worth the most points for this student, in order.</div><div class="rs-cap" data-i="4"><b>How each module went.</b> Ran out of time, went back, or held steady.</div><div class="rs-cap" data-i="5"><b>The next four weeks.</b> A weekly plan, split the way the test went.</div></div>
-          <div class="rs-nav"><button type="button" class="rs-arrow" data-d="-1" aria-label="Previous">&larr;</button><div class="rs-dots"><button type="button" class="rs-dot on" data-i="0" aria-label="Show How the clock was used"></button><button type="button" class="rs-dot" data-i="1" aria-label="Show Every question, at a glance"></button><button type="button" class="rs-dot" data-i="2" aria-label="Show From the walkthrough"></button><button type="button" class="rs-dot" data-i="3" aria-label="Show Where the points are"></button><button type="button" class="rs-dot" data-i="4" aria-label="Show How each module went"></button><button type="button" class="rs-dot" data-i="5" aria-label="Show The next four weeks"></button></div><button type="button" class="rs-arrow" data-d="1" aria-label="Next">&rarr;</button></div></div>
+      <div class="rpt rv d2" id="rshow" aria-label="Inside a sample report">
+        <div class="rpt-top"><span class="rpt-k">Sample report</span><span class="rpt-sc">Total score <b>1250</b></span></div>
+        <div class="rpt-tabs" role="tablist"><button type="button" class="rpt-tab on" data-i="0" role="tab">Every question</button><button type="button" class="rpt-tab" data-i="1" role="tab">The clock</button><button type="button" class="rpt-tab" data-i="2" role="tab">The points</button><button type="button" class="rpt-tab" data-i="3" role="tab">The plan</button><span class="rpt-run"></span></div>
+        <div class="rpt-stage">
+          <div class="rpt-pane on" data-i="0"><div class="rq" id="rq"></div><div class="rq-key"><span><i class="g"></i>Right</span><span><i class="r"></i>Wrong</span><span><i class="g f">!</i>Flagged</span></div></div>
+          <div class="rpt-pane" data-i="1"><div class="rc-h"><b>Reading and Writing, Module 1</b><span>minutes into the module</span></div><svg id="rclock" viewBox="0 0 640 412" role="img" aria-label="Time spent on each of 27 questions, against target pace"></svg></div>
+          <div class="rpt-pane" data-i="2"><div class="rp-h">Where the points are</div><div class="rp">
+            <div class="rp-r"><span>Algebra</span><i style="--w:100%"></i><b>+110</b></div>
+            <div class="rp-r"><span>Problem-Solving and Data Analysis</span><i style="--w:45%"></i><b>+50</b></div>
+            <div class="rp-r"><span>Nonlinear Functions</span><i style="--w:36%"></i><b>+40</b></div>
+            <div class="rp-r"><span>Inferences</span><i style="--w:18%"></i><b>+20</b></div>
+            <div class="rp-r"><span>Form, Structure, and Sense</span><i style="--w:18%"></i><b>+20</b></div>
+          </div><div class="rp-sum"><span>1250</span><em>top three fixed</em><span class="to">about 1450</span></div></div>
+          <div class="rpt-pane" data-i="3"><div class="rp-h">The next four weeks</div><div class="rl-bar"><i style="--w:89%"></i><i class="s" style="--w:11%"></i></div>
+            <div class="rl"><div class="rl-r"><b>4<small>hrs / week</small></b><p><strong>Relearning.</strong> Work every question this test got wrong. It cost the most points, so it gets the most time.</p></div>
+            <div class="rl-r s"><b>&frac12;<small>hr / week</small></b><p><strong>Strategy.</strong> Question Bank sets answered with the method, not just for the answer:</p></div>
+            <ul class="rl-l"><li><span>4.2</span>Central Ideas and Details</li><li><span>4.5</span>Inferences</li><li><span>3.3</span>Rhetorical Synthesis</li></ul></div></div>
+        </div>
+        <div class="rpt-caps"><p class="rpt-cap on" data-i="0"><b>Every question, at a glance.</b> All four modules, right, wrong and flagged. Math held 29 of 44; Reading and Writing, 50 of 54.</p><p class="rpt-cap" data-i="1"><b>How the clock was used.</b> Every question in order, against target pace (dashed). The two longest, 7 and 14, were both missed. Gold is going back at review.</p><p class="rpt-cap" data-i="2"><b>Where the points are.</b> The skills worth the most points for this student, in order. The top three alone are worth about 200.</p><p class="rpt-cap" data-i="3"><b>The next four weeks.</b> About 4&frac12; hours a week, split the way the test went, with each lesson to watch named.</p></div>
       </div>
     </div>
   </div>
@@ -1004,24 +1146,43 @@ section.sec{padding:clamp(4.6rem,11vh,8.4rem) 0}
         <p class="lbl rv">The course</p>
         <h2 class="h-sec rv d1">The SAT asks the same questions in a hundred disguises.</h2>
         <p class="lede rv d2">The test returns to the same core concepts again and again. So instead of skimming a long list of topics, the course takes each one the SAT tests most and develops it fully, until every version of it looks familiar. Linear equations alone gets four lessons.</p>
+        <p class="lede rv d3" style="margin-top:1rem">Every lesson is a video, a set of notes and a check at the end, built around real SAT questions.</p>
+      </div>
+      <div class="cmap rv d2" id="cmap">
+        <div class="cmap-top"><span class="k">The course map</span><div class="cmap-sw" role="tablist"><button type="button" class="on" data-c="0">Math</button><button type="button" data-c="1">Reading &amp; Writing</button></div></div>
+        <div class="cmap-body"></div>
+        <div class="cmap-info" aria-live="polite"></div>
+      </div>
+    </div>
+    <div class="split course-try">
+      <div class="qcard rv" id="qcard">
+        <div class="qc-head"><span class="qc-tag">Lesson 2.1 &middot; check</span><span class="qc-tool">Sample question</span></div>
+        <p class="qc-q">A line in the <i>xy</i>-plane has a slope of 3 and passes through the point (2, 7). What is the <i>y</i>-coordinate of the line&rsquo;s <i>y</i>-intercept?</p>
+        <div class="qc-chs">
+          <div class="qc-ch" data-ok="0"><button type="button" class="qc-pick"><span class="L">A</span><span class="v">&minus;1</span></button><button type="button" class="qc-x" aria-label="Cross out A">&times;</button><p class="qc-why"><b>The flipped subtraction.</b> 6 &minus; 7 instead of 7 &minus; 6.</p></div>
+          <div class="qc-ch" data-ok="1"><button type="button" class="qc-pick"><span class="L">B</span><span class="v">1</span></button><button type="button" class="qc-x" aria-label="Cross out B">&times;</button><p class="qc-why"><b>Correct.</b> 7 = 3(2) + <i>b</i>, so <i>b</i> = 1.</p></div>
+          <div class="qc-ch" data-ok="0"><button type="button" class="qc-pick"><span class="L">C</span><span class="v">7</span></button><button type="button" class="qc-x" aria-label="Cross out C">&times;</button><p class="qc-why"><b>The point trap.</b> 7 is where the line is at <i>x</i> = 2, not at <i>x</i> = 0.</p></div>
+          <div class="qc-ch" data-ok="0"><button type="button" class="qc-pick"><span class="L">D</span><span class="v">13</span></button><button type="button" class="qc-x" aria-label="Cross out D">&times;</button><p class="qc-why"><b>The wrong direction.</b> Added the 6 instead of walking back to <i>x</i> = 0.</p></div>
+        </div>
+        <div class="qc-foot"><button type="button" class="qc-check" disabled>Check answer</button><button type="button" class="qc-again" hidden>Try again</button><span class="qc-note">Pick an answer. The &times; crosses a choice out.</span></div>
+      </div>
+      <div>
+        <p class="lbl rv">Inside every lesson</p>
+        <h3 class="h-sec sm rv d1">Every wrong answer has a name.</h3>
+        <p class="lede rv d2">Try the question. Whatever you pick, you&rsquo;ll see where each wrong choice comes from. That is how the whole course is taught.</p>
         <ul class="leaks light rv d3">
           <li><b>Recognize the question type.</b> Every lesson starts from how the SAT actually words it, so your student knows it the moment it appears.</li>
           <li><b>Know the traps.</b> Each wrong answer is built from a predictable mistake. Students learn them by name and stop walking into them.</li>
-          <li><b>Own one approach.</b> A single reliable method for every version of the question, practiced on real SAT questions until it is automatic.</li>
+          <li><b>Own one approach.</b> A single reliable method for every version of the question, practiced until it is automatic.</li>
         </ul>
       </div>
-      <div class="rv d2">
-        <div class="ladder">
-          <div class="ladder-head"><span class="k">One concept, ten lessons</span><b>Lines and linear equations</b><span class="sub">The Algebra unit, as your student sees it</span></div>
-          <ol><li><span class="n">2.1</span><span class="t">Linear Equations</span><span class="p">3 parts</span></li><li><span class="n">2.2</span><span class="t">Tables</span><span class="p">3 parts</span></li><li><span class="n">2.3</span><span class="t">Word Problems: Interpretation</span><span class="p">3 parts</span></li><li><span class="n">2.4</span><span class="t">Word Problems: Building the Equation</span><span class="p">4 parts</span></li><li><span class="n">2.5</span><span class="t">Systems of Equations</span><span class="p">4 parts</span></li><li><span class="n">2.6</span><span class="t">Solving Single-Variable Equations</span><span class="p">2 parts</span></li><li><span class="n">2.7</span><span class="t">Parallel, Perpendicular &amp; Solution Types</span><span class="p">2 parts</span></li><li><span class="n">2.8</span><span class="t">Linear Inequalities I: Solving Them</span><span class="p">2 parts</span></li><li><span class="n">2.9</span><span class="t">Linear Inequalities II: Graphing Them</span><span class="p">3 parts</span></li><li><span class="n">2.10</span><span class="t">The Hardest Algebra Questions</span><span class="p">5 parts</span></li></ol>
-          <div class="ladder-foot">31 parts, each with a video lesson, notes and a check at the end.</div>
-        </div>
-      </div>
     </div>
-    <div class="cstats">
-      <div class="rv"><b>20+</b><span>hours of video lessons</span></div>
+    <div class="cstats four">
+      <div class="rv"><b>20+</b><span>hours of<br>video lessons</span></div>
       <div class="rv d1"><b>59</b><span>lessons: 37 in Math,<br>22 in Reading and Writing</span></div>
-      <div class="rv d2"><b>800+</b><span>real SAT questions<br>worked through in the lessons</span></div>
+      <div class="rv d2"><b>190</b><span>parts, each ending<br>in a check</span></div>
+      <div class="rv d3"><b>800+</b><span>real SAT questions<br>worked through in the lessons</span></div>
+    </div>
   </div>
 </section>
 
@@ -1369,17 +1530,74 @@ document.documentElement.classList.add('js');
 
 </script>
 <script>
-/* The report slideshow: advances on its own, pauses on hover or after a click. */
+/* Report panel: four native views of a sample report; advances on its own, pauses on hover or a click. */
 (function(){
   var root=document.getElementById('rshow'); if(!root) return;
-  var sl=root.querySelectorAll('.rs-slide'), cp=root.querySelectorAll('.rs-cap'), dt=root.querySelectorAll('.rs-dot'), n=sl.length, i=0, t=null, held=false;
-  function go(k){ i=(k+n)%n; [sl,cp,dt].forEach(function(L){ [].forEach.call(L,function(e){ e.classList.toggle('on', +e.getAttribute('data-i')===i); }); }); }
-  function tick(){ clearInterval(t); if(!held && !matchMedia('(prefers-reduced-motion: reduce)').matches) t=setInterval(function(){ go(i+1); },5200); }
-  root.addEventListener('click',function(e){ var d=e.target.closest('[data-d]'), o=e.target.closest('.rs-dot'); if(d){ go(i+(+d.getAttribute('data-d'))); held=true; tick(); } else if(o){ go(+o.getAttribute('data-i')); held=true; tick(); } });
-  root.addEventListener('mouseenter',function(){ clearInterval(t); }); root.addEventListener('mouseleave',tick);
-  tick();
+  // Every question, from the sample report: g right, r wrong, f flagged (right).
+  var M=[['Reading and Writing, Module 1','ggggggrggggggrgrggggggggggr'],['Reading and Writing, Module 2','gggggggggggggfgfggggfgggggg'],['Math, Module 1','gggrrgrggggggrgrggrgrg'],['Math, Module 2','grgrrffggggggrrrggrgrg']];
+  var h='';M.forEach(function(m){var s=m[1],c=0,w=0,f=0,g='';for(var j=0;j<s.length;j++){var x=s[j];if(x==='r')w++;else c++;if(x==='f')f++;g+='<i class="'+(x==='r'?'r':'g')+'" style="--k:'+j+'">'+(x==='f'?'!':'')+'</i>';}
+    h+='<div class="rq-m"><b>'+m[0]+'</b><small><strong>'+c+'</strong> right &middot; <em>'+w+'</em> wrong'+(f?' &middot; '+f+' flagged':'')+'</small><div class="rq-g">'+g+'</div></div>';});
+  document.getElementById('rq').innerHTML=h;
+  // The clock, Reading and Writing Module 1: [start, end] minutes for each question, then review visits.
+  var Q=[[0,.6],[.6,1.2],[1.2,1.8],[1.8,2.4],[2.4,3.6],[3.6,4.8],[4.8,6.8],[6.8,8.3],[8.3,9],[9,10.5],[10.5,11.8],[11.8,12.5],[12.5,14],[14,16],[16,17.6],[17.6,18.3],[18.3,18.9],[18.9,19.4],[19.4,20],[20,20.4],[20.4,21],[21,21.6],[21.6,22.1],[22.1,22.7],[22.7,23.3],[23.3,24],[24,25.5]];
+  var miss={7:1,14:1,16:1,27:1}, R=[[9,25.5,26],[12,26,26.7],[18,26.8,26.95],[20,27,27.12]];
+  var X=function(m){return 46+m*18.3}, Y=function(q){return 8+(q-1)*14}, s='';
+  [0,8,16,24,32].forEach(function(m){s+='<line class="gl" x1="'+X(m)+'" x2="'+X(m)+'" y1="4" y2="384"/><text x="'+X(m)+'" y="402" text-anchor="middle">'+m+'</text>';});
+  s+='<line class="done" x1="'+X(25.5)+'" x2="'+X(25.5)+'" y1="4" y2="384"/><text class="lbl2" x="'+(X(25.5)-6)+'" y="16" text-anchor="end">first pass done 25:29</text>';
+  s+='<polyline class="pace" points="'+X(0)+','+Y(1)+' '+X(19)+','+Y(15.5)+' '+X(28)+','+Y(28)+'"/>';
+  Q.forEach(function(b,i){var q=i+1,y=Y(q);s+='<rect class="st'+(miss[q]?' r':'')+'" x="30" y="'+(y-1)+'" width="9" height="9" rx="2"/>';
+    if(q===1||q%5===0||q===27)s+='<text x="24" y="'+(y+7)+'" text-anchor="end">'+q+'</text>';
+    s+='<rect class="bar" style="--k:'+i+'" x="'+X(b[0])+'" y="'+y+'" width="'+Math.max(4,X(b[1])-X(b[0])-1)+'" height="7" rx="2"/>';});
+  R.forEach(function(r,i){s+='<rect class="rev" style="--k:'+(28+i)+'" x="'+X(r[1])+'" y="'+Y(r[0])+'" width="'+Math.max(4,X(r[2])-X(r[1]))+'" height="7" rx="2"/>';});
+  document.getElementById('rclock').innerHTML=s;
+
+  var tabs=root.querySelectorAll('.rpt-tab'), panes=root.querySelectorAll('.rpt-pane'), caps=root.querySelectorAll('.rpt-cap'), n=tabs.length, i=0, held=false, hover=false, t0=0, raf=0, DUR=6500;
+  var still=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var bar=document.createElement('span'); bar.className='bar';
+  function go(k){ i=(k+n)%n; [tabs,panes,caps].forEach(function(L){[].forEach.call(L,function(e){e.classList.toggle('on',+e.getAttribute('data-i')===i);});}); tabs[i].appendChild(bar); t0=performance.now(); bar.style.setProperty('--p',held||still?1:0); }
+  function frame(now){ if(!held&&!hover&&!still&&seen){ var p=(now-t0)/DUR; if(p>=1){go(i+1);p=0;} bar.style.setProperty('--p',p);} else if(hover) t0=now-(parseFloat(bar.style.getPropertyValue('--p'))||0)*DUR; raf=requestAnimationFrame(frame); }
+  var seen=false; new IntersectionObserver(function(es){es.forEach(function(e){ if(e.isIntersecting&&!seen){seen=true;if(!held)go(0);} });},{threshold:.35}).observe(root);
+  root.querySelector('.rpt-tabs').addEventListener('click',function(e){var b=e.target.closest('.rpt-tab'); if(b){held=true;go(+b.getAttribute('data-i'));}});
+  root.addEventListener('mouseenter',function(){hover=true;}); root.addEventListener('mouseleave',function(){hover=false;});
+  go(0); raf=requestAnimationFrame(frame);
+})();
+/* Course map: every lesson as a tile, sized by its parts; walks itself until someone touches it. */
+(function(){
+  var root=document.getElementById('cmap'); if(!root) return;
+  var D=[{"id":"math","t":"Math","d":[{"n":"Introduction","l":[["1.1","SAT Math Section: Logistics, and General Approach",1]]},{"n":"Algebra","l":[["2.1","Linear Equations",3],["2.2","Tables",3],["2.3","Word Problems: Interpretation",3],["2.4","Word Problems: Building the Equation",4],["2.5","Systems of Equations",4],["2.6","Solving single-variable equations",2],["2.7","Parallel, Perpendicular & Solution Types",2],["2.8","Linear Inequalities I: Solving Them",2],["2.9","Linear Inequalities II: Graphing Them",3],["2.10","The Hardest Algebra Questions",5]]},{"n":"Advanced Math","l":[["3.1","Introduction to Regressions: Solving for X and Expressing One Variable in Terms of Another",3],["3.2","Equivalent Expressions",6],["3.3","Quadratics I: Standard & Factored Form, and Solutions",5],["3.4","Quadratics II: The Vertex, and Which Form to Use",3],["3.5","Other Nonlinear Equations and Systems",4],["3.6","Exponentials I: Reading the Equation",4],["3.7","Exponentials II: Writing the Equation",3],["3.8","Functions: Evaluating and Transforming",3],["3.9","Nonlinear Word Problems",2],["3.10","Advanced Regression Techniques",1]]},{"n":"Geometry & Trigonometry","l":[["4.1","Area and Perimeter",3],["4.2","Volume and Surface Area",2],["4.3","Scaling",3],["4.4","Lines, Angles, and Triangles",3],["4.5","Similar and Congruent Triangles",2],["4.6","Right Triangles",3],["4.7","Trigonometry",3],["4.8","Circles I: Arcs, Sectors, and Radians",5],["4.9","Circles II: Equations and Graphing",3]]},{"n":"Problem-Solving & Data Analysis","l":[["5.1","Ratios, Rates, and Proportions",3],["5.2","Unit Conversion",3],["5.3","Percentages",5],["5.4","One-Variable Data: Mean, Median, and Spread",4],["5.5","Two-Variable Data: Scatterplots and Models",4],["5.6","Probability and Conditional Probability",3],["5.7","Samples, Margin of Error, and Study Design",2]]}]},{"id":"english","t":"Reading & Writing","d":[{"n":"Introduction","l":[["1.1","SAT Reading and Writing: Logistics, and General Approach",1]]},{"n":"Standard English Conventions","l":[["2.1","The Foundation: Subjects, Main Verbs, and Independent vs. Dependent Clauses",3],["2.2","Punctuation I: Joining Two Independent Clauses",5],["2.3","Punctuation II: Additional Information: Commas, Dashes, and When to Use Nothing",4],["2.4","Punctuation III: Colons, Lists, and Question Marks",5],["2.5","Punctuation IV: Transition Placement and Multi-Blank Questions",2],["2.6","Verbs I: Does the Sentence Need a Main Verb?",4],["2.7","Verbs II: Subject–Verb Agreement",2],["2.8","Verbs III: Tense",3],["2.9","Pronouns and Possessives",2],["2.10","Modifiers",2]]},{"n":"Expression of Ideas","l":[["3.1","Transitions I: The Eight Relationships",8],["3.2","Transitions II: Harder Transitions and the Traps",3],["3.3","Rhetorical Synthesis",4]]},{"n":"Information and Ideas","l":[["4.1","How to Read an SAT Passage: The Main Claim",1],["4.2","Central Ideas and Details",3],["4.3","Command of Evidence: Textual",3],["4.4","Command of Evidence: Quantitative",2],["4.5","Inferences",5]]},{"n":"Craft and Structure","l":[["5.1","Words in Context",5],["5.2","Text Structure and Purpose",3],["5.3","Cross-Text Connections",3]]}]}];
+  var COL={'Introduction':'#6E655C','Algebra':'#B0271C','Advanced Math':'#2B4C9B','Geometry & Trigonometry':'#1F7A6E','Problem-Solving & Data Analysis':'#B7791F','Standard English Conventions':'#7E3F8F','Expression of Ideas':'#2B4C9B','Information and Ideas':'#1F7A6E','Craft and Structure':'#B7791F'};
+  var body=root.querySelector('.cmap-body'), info=root.querySelector('.cmap-info'), cur=0, tiles=[], at=0, held=false, timer=0;
+  function show(t){ tiles.forEach(function(x){x.classList.toggle('on',x===t);}); var c=t.style.getPropertyValue('--c'), p=+t.getAttribute('data-p');
+    info.style.setProperty('--c',c); info.innerHTML='<span class="n">'+t.getAttribute('data-n')+'</span><b>'+t.getAttribute('data-t')+'</b><small>'+t.getAttribute('data-d')+' &middot; '+p+(p===1?' part':' parts')+', each with a video, notes and a check</small>'; }
+  function paint(ci,first){ cur=ci; var h='',k=0; D[ci].d.forEach(function(d){ var c=COL[d.n]||'#6E655C', parts=d.l.reduce(function(a,l){return a+l[2];},0);
+      h+='<div class="cd"><div class="cd-h">'+d.n.replace(/&/g,'&amp;')+'<span>'+d.l.length+(d.l.length===1?' lesson':' lessons')+' &middot; '+parts+(parts===1?' part':' parts')+'</span></div><div class="cd-t">';
+      d.l.forEach(function(l){ var dots=''; for(var j=0;j<l[2];j++) dots+='<s></s>';
+        h+='<button type="button" class="ct" style="--c:'+c+';--k:'+(k++)+'" data-n="'+l[0]+'" data-p="'+l[2]+'" data-d="'+d.n.replace(/&/g,'&amp;')+'" data-t="'+l[1].replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'" aria-label="'+l[0]+' '+l[1].replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'"><span>'+l[0]+'</span><i>'+dots+'</i></button>'; });
+      h+='</div></div>'; });
+    body.innerHTML=h; tiles=[].slice.call(body.querySelectorAll('.ct'));
+    [].forEach.call(root.querySelectorAll('.cmap-sw button'),function(b){b.classList.toggle('on',+b.getAttribute('data-c')===ci);});
+    at=1; show(tiles[at]); root.classList.remove('go'); void root.offsetWidth; if(!first) root.classList.add('go'); }
+  paint(0,true);
+  function step(){ if(held) return; at=(at+1)%tiles.length; show(tiles[at]); }
+  body.addEventListener('click',function(e){var t=e.target.closest('.ct'); if(t){held=true; show(t);}});
+  body.addEventListener('mouseover',function(e){var t=e.target.closest('.ct'); if(t){held=true; show(t);}});
+  root.querySelector('.cmap-sw').addEventListener('click',function(e){var b=e.target.closest('button'); if(b) paint(+b.getAttribute('data-c'));});
+  if(!matchMedia('(prefers-reduced-motion: reduce)').matches) new IntersectionObserver(function(es){es.forEach(function(e){ clearInterval(timer); if(e.isIntersecting){ if(!root.classList.contains('go')) root.classList.add('go'); timer=setInterval(step,1800);} });},{threshold:.4}).observe(root);
+})();
+/* Sample question: pick, cross out, check; every choice then shows where it comes from. */
+(function(){
+  var q=document.getElementById('qcard'); if(!q) return;
+  var chk=q.querySelector('.qc-check'), again=q.querySelector('.qc-again'), note=q.querySelector('.qc-note');
+  q.addEventListener('click',function(e){ var ch=e.target.closest('.qc-ch');
+    if(e.target.closest('.qc-x')){ ch.classList.toggle('out'); if(ch.classList.contains('out')) ch.classList.remove('sel'); }
+    else if(e.target.closest('.qc-pick')){ [].forEach.call(q.querySelectorAll('.qc-ch'),function(c){c.classList.toggle('sel',c===ch);}); ch.classList.remove('out'); }
+    chk.disabled=!q.querySelector('.qc-ch.sel'); });
+  chk.addEventListener('click',function(){ var s=q.querySelector('.qc-ch.sel'); if(!s) return; q.classList.add('done'); chk.hidden=true; again.hidden=false;
+    note.textContent=s.getAttribute('data-ok')==='1'?'Right. Now look at where the other three come from.':'Not quite. Each wrong answer is a mistake with a name:'; });
+  again.addEventListener('click',function(){ q.classList.remove('done'); [].forEach.call(q.querySelectorAll('.qc-ch'),function(c){c.classList.remove('sel','out');}); chk.hidden=false; chk.disabled=true; again.hidden=true; note.textContent='Pick an answer. The \u00d7 crosses a choice out.'; });
 })();
 </script>
+
 <div class="wt" id="walk" hidden>
   <div class="wt-scrim" data-walk-close></div>
   <div class="wt-box" role="dialog" aria-modal="true" aria-label="A sample report walkthrough">
