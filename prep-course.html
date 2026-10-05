@@ -1164,6 +1164,21 @@ section.sec{padding:clamp(4.6rem,11vh,8.4rem) 0}
 .navlinks a:hover::after,.navlinks a.on::after{transform:scaleX(1)}
 nav.is-red .navlinks a{color:rgba(255,255,255,.85)}nav.is-red .navlinks a.on{color:#fff}
 @media(max-width:1060px){.navlinks{display:none}}
+/* Hero: this fall's scores beside the claim */
+.hfall{justify-self:end;width:100%;max-width:470px;border:1px solid rgba(255,255,255,.12);border-radius:12px;background:rgba(255,255,255,.035);padding:1.5rem 1.6rem 1.3rem;backdrop-filter:blur(4px)}
+.hf-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.4rem}
+.hf-k{font-size:.66rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--red-lift)}
+.hf-s{font-size:.74rem;color:rgba(237,231,229,.55)}
+.hfall ul{list-style:none;margin:0;padding:0}
+.hfall li{display:grid;grid-template-columns:5.6rem 1fr;gap:1rem;align-items:center;padding:1rem 0;border-bottom:1px solid rgba(255,255,255,.1)}
+.hfall li b{font-family:var(--display);font-weight:700;font-size:2.4rem;line-height:1;color:#fff}
+.hfall li span{font-size:.88rem;line-height:1.5;color:rgba(237,231,229,.78)}
+.hf-more{display:inline-block;margin-top:1rem;font-size:.84rem;color:#fff;border-bottom:1px solid rgba(255,255,255,.4)}
+@media(max-width:980px){.hfall{justify-self:stretch;max-width:none}}
+/* Top bar: section links stay on smaller laptops and tablets, tighter */
+@media(min-width:821px) and (max-width:1180px){nav .shell{gap:1.2rem}.navlinks{gap:1.1rem}.navlinks a{font-size:.8rem}.nav-logo img{height:42px}}
+#faq .faqs{align-items:start}
+@media(min-width:821px) and (max-width:1060px){.navlinks{display:flex!important}.navlogin{display:none}.navlinks a[href="#instructor"]{display:none}}
 </style>
 </head>
 <body>
@@ -1209,26 +1224,16 @@ nav.is-red .navlinks a{color:rgba(255,255,255,.85)}nav.is-red .navlinks a.on{col
           <div class="r"><b>100+</b><span>students taught<br>one-on-one</span></div>
         </div>
       </div>
-      <div class="rpt rv d2" id="rshow" aria-label="Inside a sample report">
-        <div class="rpt-top"><span class="rpt-k">Sample report</span><span class="rpt-sc">Total score <b>1250</b></span></div>
-        <div class="rpt-tabs" role="tablist"><button type="button" class="rpt-tab on" data-i="0" role="tab">Every question</button><button type="button" class="rpt-tab" data-i="1" role="tab">The clock</button><button type="button" class="rpt-tab" data-i="2" role="tab">The points</button><button type="button" class="rpt-tab" data-i="3" role="tab">The plan</button><span class="rpt-run"></span></div>
-        <div class="rpt-stage">
-          <div class="rpt-pane on" data-i="0"><div class="rq" id="rq"></div><div class="rq-key"><span><i class="g"></i>Right</span><span><i class="r"></i>Wrong</span><span><i class="g f">!</i>Flagged</span></div></div>
-          <div class="rpt-pane" data-i="1"><div class="rc-h"><b>Reading and Writing, Module 1</b><span>minutes into the module</span></div><svg id="rclock" viewBox="0 0 640 412" role="img" aria-label="Time spent on each of 27 questions, against target pace"></svg></div>
-          <div class="rpt-pane" data-i="2"><div class="rp-h">Where the points are</div><div class="rp">
-            <div class="rp-r"><span>Algebra</span><i style="--w:100%"></i><b>+110</b></div>
-            <div class="rp-r"><span>Problem-Solving and Data Analysis</span><i style="--w:45%"></i><b>+50</b></div>
-            <div class="rp-r"><span>Nonlinear Functions</span><i style="--w:36%"></i><b>+40</b></div>
-            <div class="rp-r"><span>Inferences</span><i style="--w:18%"></i><b>+20</b></div>
-            <div class="rp-r"><span>Form, Structure, and Sense</span><i style="--w:18%"></i><b>+20</b></div>
-          </div><div class="rp-sum"><span>1250</span><em>top three fixed</em><span class="to">about 1450</span></div></div>
-          <div class="rpt-pane" data-i="3"><div class="rp-h">The next four weeks</div><div class="rl-bar"><i style="--w:89%"></i><i class="s" style="--w:11%"></i></div>
-            <div class="rl"><div class="rl-r"><b>4<small>hrs / week</small></b><p><strong>Relearning.</strong> Work every question this test got wrong. It cost the most points, so it gets the most time.</p></div>
-            <div class="rl-r s"><b>&frac12;<small>hr / week</small></b><p><strong>Strategy.</strong> Question Bank sets answered with the method, not just for the answer:</p></div>
-            <ul class="rl-l"><li><span>4.2</span>Central Ideas and Details</li><li><span>4.5</span>Inferences</li><li><span>3.3</span>Rhetorical Synthesis</li></ul></div></div>
-        </div>
-        <div class="rpt-caps"><p class="rpt-cap on" data-i="0"><b>Every question, at a glance.</b> All four modules, right, wrong and flagged. Math held 29 of 44; Reading and Writing, 50 of 54.</p><p class="rpt-cap" data-i="1"><b>How the clock was used.</b> Every question in order, against target pace (dashed). The two longest, 7 and 14, were both missed. Gold is going back at review.</p><p class="rpt-cap" data-i="2"><b>Where the points are.</b> The skills worth the most points for this student, in order. The top three alone are worth about 200.</p><p class="rpt-cap" data-i="3"><b>The next four weeks.</b> About 4&frac12; hours a week, split the way the test went, with each lesson to watch named.</p></div>
-      </div>
+      <aside class="hfall rv d2" aria-label="This fall's scores">
+        <div class="hf-top"><span class="hf-k">This fall</span><span class="hf-s">as families sent them</span></div>
+        <ul>
+          <li><b>1550</b><span>Up 20 points from the high 1500s, with a 780 in Math.</span></li>
+          <li><b>1500</b><span>Exactly 1500, with a 730 in Reading and Writing.</span></li>
+          <li><b>1460</b><span>Up 170 points since the last SAT, with a 770 in Math.</span></li>
+          <li><b>1350</b><span>Up from 1220 and 1230 after only two weeks of prep.</span></li>
+        </ul>
+        <a class="hf-more" href="#proof">See the texts and score reports &darr;</a>
+      </aside>
     </div>
   </div>
 </section>
@@ -1312,11 +1317,6 @@ nav.is-red .navlinks a{color:rgba(255,255,255,.85)}nav.is-red .navlinks a.on{col
         <p class="lbl rv">Inside every lesson</p>
         <h3 class="h-sec sm rv d1">Every wrong answer has a name.</h3>
         <p class="lede rv d2">Try the question. Whatever you pick, you&rsquo;ll see where each wrong choice comes from. That is how the whole course is taught.</p>
-        <ul class="leaks light rv d3">
-          <li><b>Recognize the question type.</b> Every lesson starts from how the SAT actually words it, so your student knows it the moment it appears.</li>
-          <li><b>Know the traps.</b> Each wrong answer is built from a predictable mistake. Students learn them by name and stop walking into them.</li>
-          <li><b>Own one approach.</b> A single reliable method for every version of the question, practiced until it is automatic.</li>
-        </ul>
       </div>
     </div>
     <div class="cstats four">
@@ -1373,6 +1373,22 @@ nav.is-red .navlinks a{color:rgba(255,255,255,.85)}nav.is-red .navlinks a.on{col
       <figure class="pf rv"><div class="shotwrap"><img src="img/results/1350-text.webp" alt="A parent&rsquo;s text: 1220 in December, 1230 in the spring, 1350 this time" loading="lazy"></div><figcaption><b>1350</b><span>Up from 1220 and 1230 after only two weeks of prep.</span></figcaption></figure>
     </div>
     <p class="center rv" style="margin-top:34px"><a class="xlink" href="testimonials.html">Read parent and student testimonials &rarr;</a></p>
+  </div>
+</section>
+
+<!-- Questions -->
+<section class="sec soft" id="faq">
+  <div class="shell center">
+    <p class="lbl rv">Questions</p>
+    <h2 class="h-sec rv d1">What parents usually ask.</h2>
+    <div class="faqs">
+      <details class="rv"><summary>What does it cost?</summary><div class="a">Sessions are billed by the hour, individually or from a prepaid pack, and how many your student needs depends on where they start and where they are aiming. So you see the plan and the total in writing before anything is scheduled. The diagnostic is free, and the report is yours either way. The payment terms are in the <a href="terms.html">terms</a>.</div></details>
+      <details class="rv"><summary>What is the free diagnostic?</summary><div class="a">A full-length, timed digital SAT your student takes at home, in the same format as the real test. It is scored on the same scale, and the report shows where the points went and what to do about it. We go over it together on a free call.</div></details>
+      <details class="rv"><summary>When should we start?</summary><div class="a">Ideally three to four months before the test. Juniors usually start once PSAT scores come back, aiming for a March or May SAT. After the diagnostic I&rsquo;ll give you a realistic timeline for your student.</div></details>
+      <details class="rv"><summary>Online or in person?</summary><div class="a">Online, or in person at the Cranford Public Library. Same sessions, same materials, same portal, and many families mix the two.</div></details>
+      <details class="rv"><summary>Does the PSAT matter for National Merit?</summary><div class="a">For strong sophomores and juniors, yes. National Merit eligibility comes from the junior-year PSAT, and New Jersey&rsquo;s cutoff is one of the highest in the country, so a student near it should prepare for the October PSAT as seriously as for the SAT.</div></details>
+      <details class="rv"><summary>How will I know it&rsquo;s working?</summary><div class="a">You get an update after every session: what we worked on, how the practice went, and any new score. Every practice test lands in the portal with the same full report as the diagnostic.</div></details>
+    </div>
   </div>
 </section>
 
