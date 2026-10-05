@@ -1040,7 +1040,11 @@ section.sec{padding:clamp(4.6rem,11vh,8.4rem) 0}
 /* SAT page: the portal video stays behind the words */
 .xhero .reel::after{background:linear-gradient(180deg,rgba(12,10,9,.84) 0%,rgba(12,10,9,.88) 60%,var(--void) 100%)!important}
 .xhero .reel video{filter:blur(7px) saturate(.6);transform:scale(1.05)}
-/* SAT page: frameless portal tour */
+/* SAT page: frameless portal tour; each step carries a working piece */
+.tw{margin-top:1.4rem;padding-top:1.2rem;border-top:1px solid var(--line)}
+.tw .pt-grid{grid-template-columns:repeat(4,1fr)}
+
+.tour-step:has(.tw){min-height:78vh}
 .scrf{position:relative;aspect-ratio:16/10;border-radius:10px;overflow:hidden;background:#fff;box-shadow:0 0 0 1px var(--line),0 30px 70px -36px rgba(17,17,17,.45)}
 .scrf img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top;transition:opacity .6s var(--ease)}
 .scrf img.fit{object-fit:contain;object-position:center;padding:6%}
@@ -1093,7 +1097,7 @@ section.sec{padding:clamp(4.6rem,11vh,8.4rem) 0}
 .pt-t.done{background:#2B4C9B;color:#fff}.pt-t.done small,.pt-t.done span{color:rgba(255,255,255,.8)}
 .pt-t.hard{border-bottom-color:var(--red);background:color-mix(in srgb,var(--red) 9%,transparent)}
 .pt-t.sel{box-shadow:0 0 0 2px var(--ink)}
-.ptl-pane.on .pt-t{animation:rqpop .45s var(--ease) both}
+.tour-step.on .pt-t{animation:rqpop .45s var(--ease) both}
 .pt-info{margin-top:1rem;padding-left:.9rem;border-left:3px solid #2B4C9B;min-height:3.1rem}
 .pt-info b{display:block;font-family:var(--display);font-size:1.1rem}
 .pt-info small{font-size:.78rem;color:var(--muted)}
@@ -1121,7 +1125,7 @@ section.sec{padding:clamp(4.6rem,11vh,8.4rem) 0}
 .pg-target span{position:absolute;right:0;top:-1.3rem;font-size:.72rem;font-weight:600;color:#9A7C22}
 .pg-b{position:relative;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center}
 .pg-b i{display:block;width:100%;height:calc(var(--h) * 9.4rem / 100);border-radius:5px 5px 2px 2px;background:linear-gradient(#D9A23B,#B0271C);transform-origin:bottom}
-.ptl-pane.on .pg-b i{animation:pggrow .7s var(--ease) both;animation-delay:calc(var(--k)*80ms)}
+.tour-step.on .pg-b i{animation:pggrow .7s var(--ease) both;animation-delay:calc(var(--k)*80ms)}
 @keyframes pggrow{from{transform:scaleY(0)}}
 .pg-b span{font-size:.68rem;font-weight:600;margin-bottom:.25rem;opacity:0;transition:opacity .2s}
 .pg-b:hover span,.pg-b:last-of-type span{opacity:1}
@@ -1200,48 +1204,34 @@ section.sec{padding:clamp(4.6rem,11vh,8.4rem) 0}
   </div>
 </section>
 
-<!-- The portal, interactive: four views, each one you can use -->
+<!-- The portal: the scroll-down tour of the real screens, each step with a piece you can use -->
 <section class="sec soft" id="portal">
-  <div class="shell">
-    <div class="split ptl-split">
-      <div>
-        <p class="lbl rv">The portal</p>
-        <h2 class="h-sec rv d1">Everything between sessions, in one place.</h2>
-        <p class="lede rv d2">The tests, the question bank, the course and every report live in one login, and every answer your student gives in it feeds the next report. Try it: each view on the right works.</p>
-        <ul class="leaks light rv d3">
-          <li><b>Practice that feels like test day.</b> The same layout, tools and timing as Bluebook: adaptive modules, the eliminator, the highlighter, the graphing calculator.</li>
-          <li><b>Nothing answered is lost.</b> Every mistake is saved to retry, and the misses decide what comes up next.</li>
-          <li><b>You see it too.</b> After every session, an update from me with the week&rsquo;s work and any new score.</li>
-        </ul>
-      </div>
-      <div class="ptl rv d2" id="ptl">
-        <div class="ptl-top"><span class="ptl-k">Inside the portal</span><span class="ptl-who">Sample student</span></div>
-        <div class="ptl-tabs" role="tablist"><button type="button" class="ptl-tab on" data-i="0">Practice tests</button><button type="button" class="ptl-tab" data-i="1">Question bank</button><button type="button" class="ptl-tab" data-i="2">Progress</button><button type="button" class="ptl-tab" data-i="3">Every week</button></div>
-        <div class="ptl-stage">
-          <div class="ptl-pane on" data-i="0">
-            <div class="pt-grid"><button type="button" class="pt-t done" data-n="1" data-s="1230"><small>Test</small><b>1</b><span>1230</span></button><button type="button" class="pt-t done" data-n="2" data-s="1240"><small>Test</small><b>2</b><span>1240</span></button><button type="button" class="pt-t done" data-n="3" data-s="1290"><small>Test</small><b>3</b><span>1290</span></button><button type="button" class="pt-t done" data-n="4" data-s="1330"><small>Test</small><b>4</b><span>1330</span></button><button type="button" class="pt-t" data-n="5" data-s=""><small>Test</small><b>5</b><span>Not yet</span></button><button type="button" class="pt-t done" data-n="6" data-s="1350"><small>Test</small><b>6</b><span>1350</span></button><button type="button" class="pt-t done" data-n="7" data-s="1400"><small>Test</small><b>7</b><span>1400</span></button><button type="button" class="pt-t" data-n="8" data-s=""><small>Test</small><b>8</b><span>Not yet</span></button><button type="button" class="pt-t" data-n="9" data-s=""><small>Test</small><b>9</b><span>Not yet</span></button><button type="button" class="pt-t" data-n="10" data-s=""><small>Test</small><b>10</b><span>Not yet</span></button><button type="button" class="pt-t" data-n="11" data-s=""><small>Test</small><b>11</b><span>Not yet</span></button><button type="button" class="pt-t hard" data-n="12" data-s=""><small>Test</small><b>12</b><span>Hardest</span></button></div>
+  <div class="shell center">
+    <p class="lbl rv">The portal</p>
+    <h2 class="h-sec rv d1">Everything between sessions, in one place.</h2>
+    <p class="lede rv d2">Your student signs in to one place for the course, practice and progress. Here it is, exactly as they see it, and each part below works: tap it.</p>
+  </div>
+  <div class="shell" style="margin-top:40px">
+    <div class="tour">
+      <div class="tour-stage"><div class="scrf">
+        <img data-shot="0" src="img/sat/test.png" alt="" style="opacity:1">
+        <img data-shot="1" src="img/sat/practice.png" alt="" style="opacity:0">
+        <img data-shot="2" src="img/sat/qbank-real.jpg" alt="" style="opacity:0">
+        <img data-shot="3" class="fit" src="img/report/progress.jpg" alt="" style="opacity:0">
+        <img data-shot="4" class="fit" src="img/sat/weekly.png" alt="" style="opacity:0">
+      </div></div>
+      <div class="tour-steps" id="ptl">
+        <div class="tour-step on" data-step="0"><h3>Practice that feels like test day.</h3><p>The same layout, tools and timing as Bluebook: adaptive modules, the answer eliminator, the highlighter, the graphing calculator and the reference sheet.</p><img class="mob shot" src="img/sat/test.png" alt="A practice question" loading="lazy"></div>
+        <div class="tour-step" data-step="1"><h3>A dozen full-length practice tests.</h3><p>Taken whole, one section at a time, or one module on its own. Every one scored, with the full report. Tap a test.</p><img class="mob shot" src="img/sat/practice.png" alt="The practice tests" loading="lazy">
+          <div class="tw"><div class="pt-grid"><button type="button" class="pt-t done" data-n="1" data-s="1230"><small>Test</small><b>1</b><span>1230</span></button><button type="button" class="pt-t done" data-n="2" data-s="1260"><small>Test</small><b>2</b><span>1260</span></button><button type="button" class="pt-t done" data-n="3" data-s="1310"><small>Test</small><b>3</b><span>1310</span></button><button type="button" class="pt-t done" data-n="4" data-s="1340"><small>Test</small><b>4</b><span>1340</span></button><button type="button" class="pt-t" data-n="5" data-s=""><small>Test</small><b>5</b><span>Not yet</span></button><button type="button" class="pt-t done" data-n="6" data-s="1370"><small>Test</small><b>6</b><span>1370</span></button><button type="button" class="pt-t done" data-n="7" data-s="1400"><small>Test</small><b>7</b><span>1400</span></button><button type="button" class="pt-t" data-n="8" data-s=""><small>Test</small><b>8</b><span>Not yet</span></button><button type="button" class="pt-t" data-n="9" data-s=""><small>Test</small><b>9</b><span>Not yet</span></button><button type="button" class="pt-t" data-n="10" data-s=""><small>Test</small><b>10</b><span>Not yet</span></button><button type="button" class="pt-t" data-n="11" data-s=""><small>Test</small><b>11</b><span>Not yet</span></button><button type="button" class="pt-t hard" data-n="12" data-s=""><small>Test</small><b>12</b><span>Hardest</span></button></div>
             <div class="pt-info" aria-live="polite"></div>
-            <div class="pt-modes"><span>Take it as</span><button type="button" class="on">The whole test</button><button type="button">One section</button><button type="button">One module</button></div>
-          </div>
-          <div class="ptl-pane" data-i="1">
-            <div class="qb-top"><div class="qb-sw"><button type="button" class="on" data-s="math">Math</button><button type="button" data-s="rw">Reading &amp; Writing</button></div><div class="qb-d"><button type="button" class="on" data-d="a">All</button><button type="button" data-d="e">Easy</button><button type="button" data-d="m">Medium</button><button type="button" data-d="h">Hard</button></div></div>
+            <div class="pt-modes"><span>Take it as</span><button type="button" class="on">The whole test</button><button type="button">One section</button><button type="button">One module</button></div></div></div>
+        <div class="tour-step" data-step="2"><h3>Thousands of questions, and the hardest ones.</h3><p>4,523 questions by skill and difficulty, every one with a written explanation, plus hand-picked challenge sets and a round drawn from what your student misses most. Switch the subject and difficulty.</p><img class="mob shot" src="img/sat/qbank-real.jpg" alt="The question bank" loading="lazy">
+          <div class="tw"><div class="qb-top"><div class="qb-top"><div class="qb-sw"><button type="button" class="on" data-s="math">Math</button><button type="button" data-s="rw">Reading &amp; Writing</button></div><div class="qb-d"><button type="button" class="on" data-d="a">All</button><button type="button" data-d="e">Easy</button><button type="button" data-d="m">Medium</button><button type="button" data-d="h">Hard</button></div></div>
             <div class="qb-rows"></div>
-            <div class="qb-foot"><span><b>127</b> hand-picked challenge questions</span><span><b>From your misses</b>, a round of what goes wrong most</span></div>
-          </div>
-          <div class="ptl-pane" data-i="2">
-            <div class="pg-head"><div><b>1400</b><span class="up">&uarr; 210 since the diagnostic</span></div><p>Likely level now: <b>1320&ndash;1440</b><br>(4 chances in 5)</p></div>
-            <div class="pg-chart"><div class="pg-target" style="--h:90"><span>Target 1450</span></div><div class="pg-b" style="--h:38.0;--k:0"><span>1190</span><i></i><small>Diag</small></div><div class="pg-b" style="--h:46.0;--k:1"><span>1230</span><i></i><small>PT 1</small></div><div class="pg-b" style="--h:48.0;--k:2"><span>1240</span><i></i><small>PT 2</small></div><div class="pg-b" style="--h:58.0;--k:3"><span>1290</span><i></i><small>PT 3</small></div><div class="pg-b" style="--h:66.0;--k:4"><span>1330</span><i></i><small>PT 4</small></div><div class="pg-b" style="--h:70.0;--k:5"><span>1350</span><i></i><small>PT 6</small></div><div class="pg-b" style="--h:80.0;--k:6"><span>1400</span><i></i><small>PT 7</small></div></div>
-          </div>
-          <div class="ptl-pane" data-i="3">
-            <div class="wk"><div class="wk-h">MORETTI <small>weekly update</small></div><div class="wk-b">
-              <p>Good morning Dana,</p>
-              <p>Here&rsquo;s a quick update on Maya&rsquo;s week. Maya took <b>SAT Practice Test 3</b> on Wednesday and scored a <b>1290</b>. The last practice test was a 1240. A single test can swing on its own, so I look at the trend over several tests rather than any one jump or dip.</p>
-              <ul><li><b>about 3 hours 20 minutes</b> on the portal, across 2 sittings</li><li><b>2 questions</b> in the question bank</li><li><b>1 vocabulary word</b> reviewed</li></ul>
-              <p>Our next session is <b>Tuesday at 4:00 PM</b>. The SAT is <b>about 11 weeks</b> away.</p>
-            </div></div>
-          </div>
-        </div>
-        <div class="ptl-caps"><p class="ptl-cap on" data-i="0"><b>A dozen full-length tests.</b> Every one scored, with the full report. Tap a test.</p><p class="ptl-cap" data-i="1"><b>4,523 questions</b> by skill and difficulty, every one with a written explanation. Switch subjects and difficulty.</p><p class="ptl-cap" data-i="2"><b>Every score on one chart.</b> The likely level pools every test, so one good or bad morning never moves the picture on its own.</p><p class="ptl-cap" data-i="3"><b>An update after every session.</b> What your student worked on, how the practice went, any new score, and what comes next. A sample, with made-up names.</p></div>
+            <div class="qb-foot"><span><b>127</b> hand-picked challenge questions</span><span><b>From your misses</b>, a round of what goes wrong most</span></div></div>
+        <div class="tour-step" data-step="3"><h3>Every score, on one chart.</h3><p>Every practice test and official score in one place, with the likely level pooled across tests, so one good or bad morning never moves the picture on its own.</p><img class="mob shot fit" src="img/report/progress.jpg" alt="Score progress, bars climbing toward the target" loading="lazy"></div>
+        <div class="tour-step" data-step="4"><h3>You always know how it&rsquo;s going.</h3><p>After every session, a short update from me: what your student worked on, how the practice went, any new score, and what comes next. If a week goes by without practice, you hear that too.</p><img class="mob shot fit" src="img/sat/weekly.png" alt="A weekly update email to a parent" loading="lazy"></div>
       </div>
     </div>
   </div>
@@ -1585,18 +1575,9 @@ document.documentElement.classList.add('js');
 })();
 </script>
 <script>
-/* The portal panel: four views that advance on their own until touched; every view responds. */
+/* The portal tour's working pieces: tap a test, switch the question bank. */
 (function(){
   var root=document.getElementById('ptl'); if(!root) return;
-  var tabs=root.querySelectorAll('.ptl-tab'), panes=root.querySelectorAll('.ptl-pane'), caps=root.querySelectorAll('.ptl-cap'), n=tabs.length, i=0, held=false, hover=false, t0=0, DUR=7000, seen=false;
-  var still=matchMedia('(prefers-reduced-motion: reduce)').matches, bar=document.createElement('span'); bar.className='bar';
-  function go(k){ i=(k+n)%n; [tabs,panes,caps].forEach(function(L){[].forEach.call(L,function(e){e.classList.toggle('on',+e.getAttribute('data-i')===i);});}); tabs[i].appendChild(bar); t0=performance.now(); bar.style.setProperty('--p',held||still?1:0); }
-  function frame(now){ if(!held&&!hover&&!still&&seen){ var p=(now-t0)/DUR; if(p>=1){go(i+1);p=0;} bar.style.setProperty('--p',p);} else if(hover) t0=now-(parseFloat(bar.style.getPropertyValue('--p'))||0)*DUR; requestAnimationFrame(frame); }
-  new IntersectionObserver(function(es){es.forEach(function(e){ if(e.isIntersecting&&!seen){seen=true;if(!held)go(0);} });},{threshold:.3}).observe(root);
-  root.addEventListener('click',function(e){ var b=e.target.closest('.ptl-tab'); if(b){held=true;go(+b.getAttribute('data-i'));} else if(e.target.closest('.ptl-stage')){ held=true; bar.style.setProperty('--p',1);} });
-  root.addEventListener('mouseenter',function(){hover=true;}); root.addEventListener('mouseleave',function(){hover=false;});
-  go(0); requestAnimationFrame(frame);
-
   // Practice tests: tap a test to read it.
   var tiles=[].slice.call(root.querySelectorAll('.pt-t')), info=root.querySelector('.pt-info');
   function showTest(t){ tiles.forEach(function(x){x.classList.toggle('sel',x===t);}); var n=t.getAttribute('data-n'), sc=t.getAttribute('data-s');
