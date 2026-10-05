@@ -774,6 +774,44 @@ section.sec{padding:clamp(4.6rem,11vh,8.4rem) 0}
 @media(max-width:900px){.feats{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){.feats{grid-template-columns:1fr}}
 .who.short img{aspect-ratio:4/5;object-position:50% 40%}
+/* the behavior graphic in place of a laptop */
+.diag-split{align-items:start}
+.beh{background:#171312;border:1px solid rgba(255,255,255,.09);border-radius:8px;padding:clamp(1.2rem,2.4vw,1.8rem)}
+.beh-head{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;flex-wrap:wrap}
+.beh .k{font-size:.6rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:rgba(237,231,229,.5)}
+.beh-sum{font-size:.88rem;color:rgba(237,231,229,.8)}.beh-sum b{color:#fff;font-weight:600}
+.beh-chart{display:grid;grid-template-columns:repeat(22,1fr);gap:4px;align-items:end;height:200px;margin-top:2.2rem;padding-top:22px;border-bottom:1px solid rgba(255,255,255,.18)}
+.beh .q{position:relative;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center}
+.beh .q .b{display:block;width:100%;border-radius:3px 3px 0 0;background:rgba(237,231,229,.42)}
+.beh .q.miss .b{background:rgba(237,231,229,.18);outline:1px dashed rgba(237,231,229,.4);outline-offset:-1px}
+.beh .q.rush .b{background:#E0A43A}
+.beh .q.chg .b{background:var(--red-lift)}
+.beh .q.sink .b{background:rgba(237,231,229,.42);box-shadow:inset 0 -60% 0 rgba(224,164,58,.0)}
+.beh .q.blank .b{background:transparent;border:1px solid rgba(237,231,229,.5);border-bottom:none;height:6px!important}
+.beh .q em{position:absolute;bottom:-1.35rem;font-style:normal;font-size:.55rem;color:rgba(237,231,229,.4)}
+.beh .pin{position:absolute;top:-4px;left:50%;transform:translate(-50%,-100%);width:18px;height:18px;border-radius:50%;background:#fff;color:var(--void);font-style:normal;font-size:.62rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+.beh .q.rush .pin,.beh .q.chg .pin{background:#fff}
+.beh .flag{position:absolute;top:-4px;left:50%;transform:translate(-50%,-100%);font-style:normal;font-size:.75rem;color:rgba(237,231,229,.6)}
+.beh .q{}
+.beh-axis{display:flex;justify-content:space-between;margin-top:1.8rem;font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;color:rgba(237,231,229,.45)}
+.beh-key{display:flex;flex-wrap:wrap;gap:.5rem 1.1rem;margin-top:1rem;font-size:.74rem;color:rgba(237,231,229,.7)}
+.beh-key .sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:.4rem;vertical-align:-1px}
+.sw.ok{background:rgba(237,231,229,.42)}.sw.miss{background:rgba(237,231,229,.18);outline:1px dashed rgba(237,231,229,.4)}.sw.rush{background:#E0A43A}.sw.chg{background:var(--red-lift)}.sw.blank{border:1px solid rgba(237,231,229,.5)}
+.beh-notes{list-style:none;counter-reset:n;padding:0;margin:1.4rem 0 0;display:grid;gap:.7rem;border-top:1px solid rgba(255,255,255,.1);padding-top:1.2rem}
+.beh-notes li{counter-increment:n;position:relative;padding-left:2rem;font-size:.88rem;line-height:1.55;color:rgba(237,231,229,.75)}
+.beh-notes li::before{content:counter(n);position:absolute;left:0;top:.05rem;width:18px;height:18px;border-radius:50%;background:#fff;color:var(--void);font-size:.62rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+.beh-notes b{color:#fff;font-weight:600}
+.tracks{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.1);margin-top:clamp(3rem,6vw,4.4rem)}
+.trk{background:var(--void);padding:1.4rem 1.3rem}
+.trk b{display:block;font-size:.92rem;font-weight:600;color:#fff;margin-bottom:.45rem}
+.trk span{font-size:.85rem;line-height:1.6;color:rgba(237,231,229,.66)}
+@media(max-width:1000px){.tracks{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.tracks{grid-template-columns:1fr}.beh-chart{gap:2px;height:160px}.beh .q em{display:none}}
+.diag-foot{margin-top:2.2rem;max-width:760px;font-size:.98rem;line-height:1.7;color:rgba(237,231,229,.78)}
+.diag-foot .xlink{margin-left:.3rem}
+/* the portal video without a laptop frame */
+.screenvid{max-width:1020px;margin:0 auto;border-radius:12px;overflow:hidden;box-shadow:0 40px 90px -30px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.08)}
+.screenvid video{display:block;width:100%;height:auto;aspect-ratio:16/10;object-fit:cover;object-position:top left;background:#fff}
 </style>
 </head>
 <body>
@@ -850,23 +888,37 @@ section.sec{padding:clamp(4.6rem,11vh,8.4rem) 0}
   </div>
 </section>
 
-<!-- 2. What the diagnostic shows -->
+<!-- 2. What the diagnostic shows: behavior, not just answers -->
 <section class="sec dark" id="diagnostic">
   <div class="shell">
-    <div class="split">
+    <div class="split diag-split">
       <div>
         <p class="lbl rv">It starts with a full diagnostic</p>
-        <h2 class="h-sec rv d1">A score tells you where. The report tells you why.</h2>
-        <p class="lede rv d2">Your student takes a full-length, timed digital SAT at home, under real test conditions. I then read every answer, every second on the clock and every change of mind, and turn it into a report that explains <b>why</b> the score landed where it did, and what will move it.</p>
-        <ul class="points rv d3">
-          <li><b>The score, with its honest range</b><span>Any single test can run hot or cold by dozens of points. The report gives the range your student&rsquo;s true level most likely sits in, so no one over-reads a lucky or unlucky morning.</span></li>
-          <li><b>Every miss, sorted by cause</b><span>A concept not yet learned, a question rushed or abandoned, a careless slip, or a right answer second-guessed into a wrong one. Each has a different fix, and the plan treats them differently.</span></li>
-          <li><b>Where the points are hiding</b><span>Which skills carry the most points for this student, where the clock was lost, and how the sitting itself went, so every hour of prep goes where it counts.</span></li>
-        </ul>
-        <p class="rv d3" style="margin-top:1.6rem"><a class="xlink" href="portal/report.html?demo=1&amp;score=1250&amp;weak=math">See a full sample report &rarr;</a></p>
+        <h2 class="h-sec rv d1">Most lost points aren&rsquo;t about what a student doesn&rsquo;t know.</h2>
+        <p class="lede rv d2">The diagnostic is a full-length, timed digital SAT, taken at home on the same kind of screen as test day. While your student works, the platform records <b>how</b> every question was answered: how long it took, whether the answer changed, what was flagged, and whether they stepped away.</p>
+        <p class="lede rv d2">That is where strong students lose their points. A student who knows the material can still give away a handful of questions to the clock and to second-guessing, and a score alone will never show it. The report finds exactly where it happened, so we fix the habit instead of re-teaching what they already know.</p>
       </div>
-      <div class="rv d2"><div class="mac"><div class="lid"><img src="img/sat/report.png" alt="A sample diagnostic report: score, range, and misses by cause" loading="lazy"></div><div class="base"></div></div></div>
+      <div class="beh rv d2" aria-label="Sample: one Math module from a made-up student, question by question">
+      <div class="beh-head"><span class="k">Sample module, made-up student</span><span class="beh-sum">15 of 22 right. <b>Five of the seven misses had nothing to do with knowledge.</b></span></div>
+      <div class="beh-chart"><div class="q ok" title="Question 1: 70 seconds"><span class="b" style="height:29%"></span><em>1</em></div><div class="q ok" title="Question 2: 85 seconds"><span class="b" style="height:35%"></span><em>2</em></div><div class="q ok" title="Question 3: 60 seconds"><span class="b" style="height:25%"></span><em>3</em></div><div class="q ok" title="Question 4: 95 seconds"><span class="b" style="height:40%"></span><em>4</em></div><div class="q ok" title="Question 5: 80 seconds"><span class="b" style="height:33%"></span><em>5</em></div><div class="q ok" title="Question 6: 110 seconds"><span class="b" style="height:46%"></span><em>6</em></div><div class="q rush" title="Question 7: 9 seconds"><span class="b" style="height:4%"></span><i class="pin">1</i><em>7</em></div><div class="q ok" title="Question 8: 90 seconds"><span class="b" style="height:38%"></span><em>8</em></div><div class="q ok" title="Question 9: 75 seconds"><span class="b" style="height:31%"></span><em>9</em></div><div class="q miss" title="Question 10: 120 seconds"><span class="b" style="height:50%"></span><em>10</em></div><div class="q ok" title="Question 11: 100 seconds"><span class="b" style="height:42%"></span><em>11</em></div><div class="q ok" title="Question 12: 85 seconds"><span class="b" style="height:35%"></span><em>12</em></div><div class="q ok" title="Question 13: 95 seconds"><span class="b" style="height:40%"></span><em>13</em></div><div class="q chg" title="Question 14: 105 seconds"><span class="b" style="height:44%"></span><i class="pin">2</i><em>14</em></div><div class="q ok" title="Question 15: 80 seconds"><span class="b" style="height:33%"></span><em>15</em></div><div class="q ok" title="Question 16: 115 seconds"><span class="b" style="height:48%"></span><em>16</em></div><div class="q miss" title="Question 17: 130 seconds"><span class="b" style="height:54%"></span><em>17</em></div><div class="q ok" title="Question 18: 90 seconds"><span class="b" style="height:38%"></span><em>18</em></div><div class="q sink" title="Question 19: 240 seconds"><span class="b" style="height:100%"></span><i class="pin">3</i><em>19</em></div><div class="q rush" title="Question 20: 22 seconds"><span class="b" style="height:9%"></span><em>20</em></div><div class="q rush" title="Question 21: 16 seconds"><span class="b" style="height:7%"></span><em>21</em></div><div class="q blank" title="Question 22: blank"><span class="b" style="height:4%"></span><i class="pin">4</i><em>22</em></div></div>
+      <div class="beh-axis"><span>Time on each question</span><span>Module 2, Math</span></div>
+      <div class="beh-key"><span><i class="sw ok"></i>Right</span><span><i class="sw miss"></i>Missed</span><span><i class="sw rush"></i>Answered too fast to read</span><span><i class="sw chg"></i>Right answer changed to wrong</span><span><i class="sw blank"></i>Left blank</span></div>
+      <ol class="beh-notes">
+        <li><b>Question 7, 9 seconds.</b> A hard question answered faster than it can be read. A guess, not a gap.</li>
+        <li><b>Question 14.</b> Solved correctly, then changed at review. Second-guessing, not knowledge.</li>
+        <li><b>Question 19, 4 minutes.</b> One stubborn question, and the two after it were rushed to make up the time.</li>
+        <li><b>Question 22.</b> Left blank when time ran out.</li>
+      </ol>
     </div>
+    </div>
+    <div class="tracks">
+      <div class="trk rv"><b>Time on every question</b><span>A four-minute stall costs the questions after it. The report shows where the clock went, module by module.</span></div>
+      <div class="trk rv"><b>Every answer change</b><span>Whether changing answers helps or hurts this student, counted across every test: right to wrong, and wrong to right.</span></div>
+      <div class="trk rv"><b>Guesses and rushed answers</b><span>Answers given too fast to have been read are separated from real misses, so a guess is never mistaken for a gap.</span></div>
+      <div class="trk rv"><b>Flags and review</b><span>Whether flagged questions were actually revisited, and whether review time fixed anything or broke it.</span></div>
+      <div class="trk rv"><b>Test conditions</b><span>Time away from the screen and interrupted sittings are recorded, so a practice score means what it says.</span></div>
+    </div>
+    <p class="rv diag-foot">Then every miss is sorted by cause: not yet learned, out of time, a slip on something known, or second-guessed. Each has a different fix, and the plan treats them differently. <a class="xlink" href="portal/report.html?demo=1&amp;score=1250&amp;weak=math">See a full sample report &rarr;</a></p>
   </div>
 </section>
 
@@ -1010,7 +1062,7 @@ section.sec{padding:clamp(4.6rem,11vh,8.4rem) 0}
     <p class="lede rv d2">Every student gets the portal: the full curriculum, test-day practice and a record of every question they&rsquo;ve answered, all tied to the plan we work on together. Here it is, exactly as students see it.</p>
   </div>
   <div class="shell" style="margin-top:48px">
-    <div class="mac rv"><div class="lid"><video autoplay muted loop playsinline preload="metadata" poster="img/sat/home.png"><source src="img/sat/portal-tour.mp4" type="video/mp4"></video></div><div class="base"></div></div>
+    <div class="screenvid rv"><video autoplay muted loop playsinline preload="metadata" poster="img/sat/home.png"><source src="img/sat/portal-tour.mp4" type="video/mp4"></video></div>
     <div class="feats">
       <div class="feat rv"><div class="im"><img src="img/sat/lesson.png" alt="" loading="lazy"></div><div class="tx"><span class="k">Curriculum</span><h3>The full course, lesson by lesson.</h3><p>Every Math lesson taught on video by me, with notes for every part and a check at the end of each. Reading and Writing is being recorded now.</p></div></div>
       <div class="feat rv"><div class="im"><img src="img/sat/test.png" alt="" loading="lazy"></div><div class="tx"><span class="k">Practice tests</span><h3>A dozen full-length tests.</h3><p>Adaptive, with the same layout, tools and timing as Bluebook. Taken whole, one section at a time, or one module on its own.</p></div></div>
