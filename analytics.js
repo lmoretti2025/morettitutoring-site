@@ -70,9 +70,24 @@
   // Only the live site counts: local previews and dev servers were being
   // recorded as real visits.
   var liveHost = /(^|\.)morettitutoring\.com$/.test(w.location.hostname);
-  var useGa4   = configured(CONFIG.ga4)       && !onPortal && liveHost;
-  var useMeta  = configured(CONFIG.metaPixel) && !onPortal && liveHost;
-  var useAds   = configured(CONFIG.googleAds) && !onPortal && liveHost;
+
+  // Luca's own browsing was inflating the numbers. Opening any page once
+  // with ?notrack=1 marks this browser as his and nothing is sent from it
+  // again; ?notrack=0 undoes it. Each browser and device needs it once.
+  var mine = false;
+  try {
+    var nt = /[?&]notrack=([01])/.exec(w.location.search);
+    if (nt) {
+      if (nt[1] === '1') w.localStorage.setItem('mtNoTrack', '1');
+      else w.localStorage.removeItem('mtNoTrack');
+    }
+    mine = w.localStorage.getItem('mtNoTrack') === '1';
+  } catch (e) { /* storage blocked: count the visit as usual */ }
+
+  var track    = liveHost && !onPortal && !mine;
+  var useGa4   = configured(CONFIG.ga4)       && track;
+  var useMeta  = configured(CONFIG.metaPixel) && track;
+  var useAds   = configured(CONFIG.googleAds) && track;
 
   /* ── Google (GA4, and Google Ads through the same tag) ─────────────────── */
   w.dataLayer = w.dataLayer || [];
