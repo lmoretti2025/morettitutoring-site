@@ -110,6 +110,15 @@
     '#mtt .t-task{display:grid;grid-template-columns:auto 1fr;gap:16px;padding:20px;border-radius:16px;background:var(--card)}',
     '#mtt .t-task:before{counter-increment:n;content:counter(n);font-family:var(--serif);font-size:34px;font-weight:700;line-height:1;color:var(--brand)}',
     '#mtt .t-task h3{font-size:16px;font-weight:500}#mtt .t-task p{font-size:14px;color:var(--mid);margin-top:4px;line-height:1.55}',
+    /* The four weeks, as on the site's sample report (2026-10-05): a split bar, big hours in each row's color, the lessons named. */
+    '#mtt .t-wk{margin-top:24px}',
+    '#mtt .t-wkbar{display:flex;gap:4px;height:10px;margin-bottom:6px}#mtt .t-wkbar i{border-radius:999px}',
+    '#mtt .t-wkrow{display:grid;grid-template-columns:72px 1fr;gap:14px;padding:16px 0;border-bottom:1px solid var(--line)}',
+    '#mtt .t-wkh{font-family:var(--serif);font-size:36px;line-height:1}#mtt .t-wkh small{display:block;font-family:var(--sans);font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin-top:8px}',
+    '#mtt .t-wkrow h3{font-size:16px;font-weight:500;margin-top:2px}#mtt .t-wksaid{font-size:14px;color:var(--mid);margin-top:4px;line-height:1.55}',
+    '#mtt .t-wkles{list-style:none;margin:8px 0 0;padding:0}#mtt .t-wkles li{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);font-size:14px;font-weight:500}#mtt .t-wkles li:last-child{border-bottom:0}',
+    '#mtt .t-wkles b{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:24px;padding:0 6px;border-radius:6px;color:#fff;font-size:12px;font-weight:600}',
+    '#mtt .t-wkles small{margin-left:auto;font-size:11px;color:var(--faint);font-weight:400;white-space:nowrap}',
     '#mtt .t-nav{position:absolute;left:0;right:0;bottom:0;z-index:5;padding:14px 16px max(18px,env(safe-area-inset-bottom));background:linear-gradient(rgba(242,242,242,0),var(--bg) 40%)}',
     '#mtt .t-nav-in{max-width:720px;margin:0 auto;display:flex;justify-content:space-between;align-items:center}',
     '#mtt .t-arrow{width:52px;height:52px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:20px;cursor:pointer;transition:opacity .3s,transform .2s var(--ease)}',
@@ -732,9 +741,21 @@
     if (tasks.length) {
       var weekly = P.weeklyText ? '<p>About <b>' + esc(P.weeklyText) + ' hour' + (P.weekly === 1 ? '' : 's') + ' a week</b> of practice for now' +
         (P.mode === 'tests' ? ', mostly full practice tests' : P.mode === 'pace' ? ', mostly timed practice' : '') + '. The full report\u2019s <b>Your next four weeks</b> section splits it up week by week.</p>' : '';
+      /* With the report's week split (diagnostics), the plan is the four weeks
+         themselves, each kind of work with its lessons named; otherwise the
+         three things. */
+      var W = P.planRows && P.planRows.length ? P.planRows : null;
+      var body = W
+        ? '<div class="t-wk r"><div class="t-wkbar">' + W.map(function (r) { return '<i style="flex:' + r.share + ' 1 0;background:' + r.color + '"></i>'; }).join('') + '</div>' +
+          W.map(function (r) {
+            return '<div class="t-wkrow"><div class="t-wkh" style="color:' + r.color + '">' + esc(r.h) + '<small>' + esc(r.unit) + '</small></div><div><h3>' + esc(r.label) + '</h3>' + (!r.lessons.length && r.said ? '<p class="t-wksaid">' + esc(r.said) + '</p>' : '') +
+              (r.lessons.length ? '<ul class="t-wkles">' + r.lessons.map(function (x) { return '<li><b style="background:' + r.color + '">' + esc(x.num) + '</b>' + esc(x.title) + '<small>' + (x.s === 'm' ? 'Math' : 'R&amp;W') + '</small></li>'; }).join('') + '</ul>' : '') +
+              '</div></div>';
+          }).join('') + '</div>'
+        : '<div class="t-plan r">' + tasks.map(function (t) { return '<div class="t-task"><div><h3>' + esc(t.h) + '</h3><p>' + esc(t.p) + '</p></div></div>'; }).join('') + '</div>';
       M.screens.push({ name: 'plan', html:
-        '<p class="t-eye r">Your ' + numWord(tasks.length) + ' thing' + (tasks.length === 1 ? '' : 's') + '</p><h2 class="r">Start here.</h2><div class="t-plan r">' +
-        tasks.map(function (t) { return '<div class="t-task"><div><h3>' + esc(t.h) + '</h3><p>' + esc(t.p) + '</p></div></div>'; }).join('') + '</div>' +
+        (W ? '<p class="t-eye r">Your next four weeks</p><h2 class="r">About ' + esc(P.weeklyText) + ' hour' + (P.weekly === 1 ? '' : 's') + ' a week.</h2>'
+           : '<p class="t-eye r">Your ' + numWord(tasks.length) + ' thing' + (tasks.length === 1 ? '' : 's') + '</p><h2 class="r">Start here.</h2>') + body +
         (weekly ? '<div class="r"><button type="button" class="t-more" data-sheet="plan">How much practice</button></div>' : '') +
         '<div class="r"><button type="button" class="t-btn ghost" data-go="close">See the full report &rarr;</button></div>',
         sheet: weekly ? { eye: 'The plan', title: 'How much practice', html: weekly } : null });

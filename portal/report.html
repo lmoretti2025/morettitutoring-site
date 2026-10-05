@@ -83,6 +83,22 @@
   .tile-range { font-family: var(--hel); font-size: 11px; font-weight: 500; letter-spacing: 0.02em; color: var(--faint); margin-top: 5px; font-variant-numeric: tabular-nums; }
   /* ═══ STUDY PLAN ═══ */
   .plan-card { border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; background: var(--white); }
+  /* The plan's look (2026-10-05, from the site's sample report): big hours in the row's color, a
+     thick split bar, and the lessons named one per line with their number in a colored badge. */
+  .plan-card .plan-meter { height: 9px; gap: 4px; background: none; margin: 6px 0 16px; }
+  .plan-card .plan-meter i { border-radius: 999px; }
+  .plan-card .plan-rows { gap: 0; }
+  .plan-card .plan-row { grid-template-columns: 82px 1fr; padding: 12px 0; border-top: 1px solid var(--border); }
+  .plan-card .plan-row:first-child { border-top: 0; padding-top: 2px; }
+  .plan-card .plan-hours { font-family: var(--display); font-weight: 400; font-size: 30px; line-height: 1; }
+  .plan-card .plan-hours span { font-family: var(--hel); margin-top: 7px; }
+  .plan-card .plan-what { font-size: 11px; }
+  .plan-les { list-style: none; margin: 9px 0 0; padding: 0; }
+  .plan-les li { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; padding: 7px 0; border-bottom: 1px solid var(--border); }
+  .plan-les .n { display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 22px; padding: 0 6px; border-radius: 5px; color: #fff; font-family: var(--hel); font-weight: 700; font-size: 10.5px; }
+  .plan-les .t { font-size: 11.5px; font-weight: 600; color: var(--ink); line-height: 1.35; padding-top: 3px; }
+  .plan-les .t small { display: block; font-size: 9.5px; font-weight: 500; color: var(--faint); margin-top: 1px; }
+  .plan-les .t em { display: block; font-style: normal; font-weight: 400; font-size: 10.5px; color: var(--mid); margin-top: 3px; line-height: 1.5; }
   .plan-lede { font-size: 11px; line-height: 1.65; color: var(--ink); margin: 0 0 11px; }
   .plan-lede b { font-weight: 700; }
   .plan-rows { display: flex; flex-direction: column; gap: 9px; }
@@ -1198,7 +1214,7 @@
 <script src="signals.js?v=20260930c"></script>
 <script src="desmos-tags.js?v=20260916c"></script>
 <script src="question-flag.js?v=20260925a"></script>
-<script src="report-tour.js?v=20260930a"></script>
+<script src="report-tour.js?v=20261005a"></script>
 <script>
 /* FLAGS FROM THE ADMIN PAGE (Luca, 2026-09-25). admin.html shows this report
    in a sandboxed frame with no access to its sign-in, so it says hello by
@@ -7380,6 +7396,29 @@
        METHOD  -> timed sets on questions already understood. Cheap, fast.
        CLOCK   -> whole timed modules under real conditions, one long
          sitting a week. */
+  /* LESSONS BY SKILL (2026-10-05): the curriculum lessons that teach each
+     College Board skill, so the plan names the lessons to watch outright
+     ("2.4 Word Problems: Building the Equation") rather than a skill to go
+     and find. Derived from the curriculum itself: a lesson is listed for a
+     skill when at least a quarter of its slide and check questions are that
+     skill, strongest first, at most three. Regenerate when lessons change. */
+  var SKILL_LESSONS = {"Linear Equations in Two Variables":[["m","2.1","Linear Equations"],["m","2.2","Tables"],["m","2.7","Parallel, Perpendicular & Solution Types"]],"Linear Functions":[["m","2.4","Word Problems: Building the Equation"],["m","2.3","Word Problems: Interpretation"],["m","2.2","Tables"]],"Systems of Two Linear Equations in Two Variables":[["m","2.5","Systems of Equations"],["m","2.10","The Hardest Algebra Questions"],["m","2.7","Parallel, Perpendicular & Solution Types"]],"Linear Equations in One Variable":[["m","2.6","Solving single-variable equations"]],"Nonlinear Equations in One Variable and Systems of Equations in Two Variables":[["m","3.3","Quadratics I: Standard & Factored Form, and Solutions"],["m","3.1","Introduction to Regressions: Solving for X and Expressing One Variable in Terms of Another"],["m","2.6","Solving single-variable equations"]],"Linear Inequalities in One or Two Variables":[["m","2.8","Linear Inequalities I: Solving Them"],["m","2.9","Linear Inequalities II: Graphing Them"]],"Equivalent Expressions":[["m","3.2","Equivalent Expressions"]],"Nonlinear Functions":[["m","3.9","Nonlinear Word Problems"],["m","3.6","Exponentials I: Reading the Equation"],["m","3.7","Exponentials II: Writing the Equation"]],"Area and Volume":[["m","4.3","Scaling"],["m","4.2","Volume and Surface Area"],["m","4.1","Area and Perimeter"]],"Lines, Angles, and Triangles":[["m","4.4","Lines, Angles, and Triangles"],["m","4.5","Similar and Congruent Triangles"]],"Right Triangles and Trigonometry":[["m","4.6","Right Triangles"],["m","4.7","Trigonometry"]],"Circles":[["m","4.9","Circles II: Equations and Graphing"],["m","4.8","Circles I: Arcs, Sectors, and Radians"]],"Ratios, Rates, Proportional Relationships, and Units":[["m","5.1","Ratios, Rates, and Proportions"],["m","5.2","Unit Conversion"]],"Percentages":[["m","5.3","Percentages"]],"One-Variable Data: Distributions and Measures of Center and Spread":[["m","5.4","One-Variable Data: Mean, Median, and Spread"]],"Two-Variable Data: Models and Scatterplots":[["m","5.5","Two-Variable Data: Scatterplots and Models"]],"Probability and Conditional Probability":[["m","5.6","Probability and Conditional Probability"]],"Inference from Sample Statistics and Margin of Error":[["m","5.7","Samples, Margin of Error, and Study Design"]],"Evaluating Statistical Claims: Observational Studies and Experiments":[["m","5.7","Samples, Margin of Error, and Study Design"]],"Boundaries":[["rw","2.3","Punctuation II: Additional Information: Commas, Dashes, and When to Use Nothing"],["rw","2.1","The Foundation: Subjects, Main Verbs, and Independent vs. Dependent Clauses"],["rw","2.2","Punctuation I: Joining Two Independent Clauses"]],"Form, Structure, and Sense":[["rw","2.6","Verbs I: Does the Sentence Need a Main Verb?"],["rw","2.9","Pronouns and Possessives"],["rw","2.7","Verbs II: Subject–Verb Agreement"]],"Transitions":[["rw","3.1","Transitions I: The Eight Relationships"],["rw","3.2","Transitions II: Harder Transitions and the Traps"]],"Rhetorical Synthesis":[["rw","3.3","Rhetorical Synthesis"]],"Inferences":[["rw","4.5","Inferences"],["rw","4.1","How to Read an SAT Passage: The Main Claim"]],"Central Ideas and Details":[["rw","4.2","Central Ideas and Details"]],"Command of Evidence (Textual)":[["rw","4.3","Command of Evidence: Textual"]],"Command of Evidence (Quantitative)":[["rw","4.4","Command of Evidence: Quantitative"]],"Words in Context":[["rw","5.1","Words in Context"]],"Text Structure and Purpose":[["rw","5.2","Text Structure and Purpose"]],"Cross-Text Connections":[["rw","5.3","Cross-Text Connections"]]};
+  function lessonsFor(names, max) {
+    var out = [], seen = {};
+    (names || []).forEach(function (n) {
+      var key = String(n || '').replace(/^Other:\s*/, '');
+      (SKILL_LESSONS[key] || []).forEach(function (x) {
+        var id = x[0] + x[1];
+        if (!seen[id] && out.length < (max || 4)) { seen[id] = 1; out.push({ s: x[0], num: x[1], title: x[2] }); }
+      });
+    });
+    return out;
+  }
+  function lessonByNum(subj, num) {
+    var hit = null;
+    Object.keys(SKILL_LESSONS).forEach(function (k) { SKILL_LESSONS[k].forEach(function (x) { if (!hit && x[0] === subj && x[1] === num) hit = { s: x[0], num: x[1], title: x[2] }; }); });
+    return hit;
+  }
   (function renderStudyPlan() {
     var causes = planInputs.causes;
     if (!causes) return;
@@ -7517,16 +7556,17 @@
     var strategyRow = null;
     if (strategyH > 0) {
       var LES = (window.MorettiSignals && window.MorettiSignals.APPROACH_LESSONS) || {};
-      var fixes = A.skills.filter(function (k) { return LES[k]; }).slice(0, 3).map(function (k) {
-        return '<b>' + esc(k) + '</b> (Curriculum, lesson ' + LES[k].lesson + '): ' + esc(LES[k].fix) + '.';
+      var stratLessons = A.skills.filter(function (k) { return LES[k]; }).slice(0, 3).map(function (k) {
+        var hitL = lessonByNum('rw', LES[k].lesson);
+        return { s: 'rw', num: LES[k].lesson, title: hitL ? hitL.title : k, note: LES[k].fix.charAt(0).toUpperCase() + LES[k].fix.slice(1) + '.' };
       });
       var mathFix = A.kinds.desmos ? ' <b>Graphing-route math</b>: when a question asks for a value and both sides can be graphed, graph them in Desmos and read the answer off the graph.' : '';
       var howFix = (A.kinds.long >= 2 ? ' Several took well past their time: read for the main claim first and go into the details only when the question needs them (lesson 4.1).' : '') +
         (A.kinds.two >= 2 ? ' Several came down to two choices: go word by word through both, since the wrong one usually overreaches or swaps one detail.' : '');
       strategyRow = ({
-        h: strategyH, unit: unitFor(strategyH), color: '#8A5A9E',
-        what: '<b>Strategy.</b> Question Bank sets on these question types, answered with the method, not just for the answer.' +
-          fixes.map(function (f) { return '<br>' + f; }).join('') + (mathFix ? '<br>' + mathFix.trim() : '') + (howFix ? '<br>' + howFix.trim() : '') +
+        h: strategyH, unit: unitFor(strategyH), color: '#8A5A9E', label: 'Strategy', lessons: stratLessons,
+        what: '<b>Strategy.</b> Question Bank sets on these question types, answered with the method, not just for the answer' + (stratLessons.length ? '. Watch these lessons first:' : '.') +
+          (mathFix ? '<br>' + mathFix.trim() : '') + (howFix ? '<br>' + howFix.trim() : '') +
           (A.bySkill['Words in Context'] ? ' Words in Context builds over months, not from a word list.' : '') +
           ' <em>' + A.n + ' question' + (A.n === 1 ? '' : 's') + ' on this test ' + (A.n === 1 ? 'was a skill' : 'were skills') + ' to practice rather than material to relearn: ' + esc(A.why) + '.</em>'
       });
@@ -7534,7 +7574,15 @@
     if (hours.content > 0) {
       var pre = planInputs.prereq;
       rows.push({
-        h: hours.content, unit: unitFor(hours.content), color: 'var(--red)',
+        h: hours.content, unit: unitFor(hours.content), color: 'var(--red)', label: 'Relearning',
+        lessons: (function () {
+          var named = lessonsFor((pre ? [pre.name] : []).concat(contentAreas.map(function (a) { return a.name; })).concat(hedgedLead ? [hedgedLead] : []), 4);
+          if (named.length) return named;
+          // No area stood out: the lessons for the skills the misses landed in, most misses first.
+          var n = {};
+          (planInputs.contentRows || []).forEach(function (x) { if (x.sk) n[x.sk] = (n[x.sk] || 0) + 1; });
+          return lessonsFor(Object.keys(n).sort(function (p, q) { return n[q] - n[p]; }), 3);
+        })(),
         what: '<b>Relearning.</b> ' + (pre
           ? '<b>' + esc(pre.name) + ' first</b>. You are at ' +
             pre.phrase.replace('%', '% there', 1) + ', and ' +
@@ -7559,7 +7607,7 @@
     if (strategyRow) rows.push(strategyRow);
     if (hours.method > 0) {
       rows.push({
-        h: hours.method, unit: unitFor(hours.method), color: 'var(--tan)',
+        h: hours.method, unit: unitFor(hours.method), color: 'var(--tan)', label: 'Speed', lessons: lessonsFor(planInputs.methodSkills, 3),
         what: '<b>Speed.</b> Timed sets from the Question Bank on skills you already get right' +
           ((planInputs.methodSkills || []).length ? ', starting with ' + planInputs.methodSkills.map(esc).join(' and ') : '') +
           ', with a clock running on each question.' + ' The goal is not accuracy. It is the same accuracy, faster. ' +
@@ -7580,7 +7628,7 @@
     }
     if (hours.clock > 0) {
       rows.push({
-        h: hours.clock, unit: unitFor(hours.clock), color: '#4E6070',
+        h: hours.clock, unit: unitFor(hours.clock), color: '#4E6070', label: 'Pacing',
         what: '<b>Pacing.</b> One full timed module a week, in one sitting, under real conditions, phone away, clock visible, no restarts. Review it the next day, not the same night. ' +
           '<em>' + causes.clock + ' question' + (causes.clock === 1 ? '' : 's') + ' on this test ' + (causes.clock === 1 ? 'was' : 'were') + ' lost to pace: ' + paceWhy() + '.</em>'
       });
@@ -7591,14 +7639,15 @@
       var missSkills = [];
       (planInputs.contentRows || []).forEach(function (x) { if (x.sk && missSkills.indexOf(x.sk) === -1) missSkills.push(x.sk); });
       rows = [{
-        h: STRONG_TEST_HOURS, unit: unitFor(STRONG_TEST_HOURS), color: '#4E6070',
+        h: STRONG_TEST_HOURS, unit: unitFor(STRONG_TEST_HOURS), color: '#4E6070', label: 'Practice tests',
         what: '<b>Practice tests.</b> One full timed practice test every week, in one sitting, phone away, reviewed the next day. ' +
           (paceOnly
             ? 'Practice the pace itself: answer every question, move on from one that stalls, and read each one to the end before choosing.'
             : 'At this level each test has only a few questions left to win, and more tests are how you find the ones that keep costing you.' +
               (causes.clock > 0 ? ' <em>' + causes.clock + ' question' + (causes.clock === 1 ? '' : 's') + ' here ' + (causes.clock === 1 ? 'was' : 'were') + ' lost to pace, so pace each test as you go.</em>' : ''))
       }, {
-        h: STRONG_SHARPEN_HOURS, unit: unitFor(STRONG_SHARPEN_HOURS), color: 'var(--red)',
+        h: STRONG_SHARPEN_HOURS, unit: unitFor(STRONG_SHARPEN_HOURS), color: 'var(--red)', label: paceOnly ? 'Timed sets' : 'Sharpen',
+        lessons: paceOnly ? [] : lessonsFor(contentAreas.length ? contentAreas.map(function (a) { return a.name; }) : missSkills, 3),
         what: paceOnly
           ? '<b>Timed sets.</b> Short timed sets from the Question Bank at a steady pace, with a clock on each question, so the pace holds on the real test.'
           : '<b>Sharpen.</b> Drill the skills your misses pool in' +
@@ -7614,8 +7663,16 @@
     if (!rows.length) return;
 
     var meter = rows.map(function (r) {
-      return '<i style="width:' + (r.h / weekly * 100).toFixed(1) + '%;background:' + r.color + '"></i>';
+      return '<i style="flex:' + r.h + ' 1 0;background:' + r.color + '"></i>';
     }).join('');
+    // Each lesson named outright: its number in the row's color, then its title.
+    function lessonList(r) {
+      if (!r.lessons || !r.lessons.length) return '';
+      return '<ul class="plan-les">' + r.lessons.map(function (x) {
+        return '<li><span class="n" style="background:' + r.color + '">' + esc(x.num) + '</span><span class="t">' + esc(x.title) +
+          '<small>' + (x.s === 'm' ? 'Math' : 'Reading &amp; Writing') + ' lesson ' + esc(x.num) + '</small>' + (x.note ? '<em>' + esc(x.note) + '</em>' : '') + '</span></li>';
+      }).join('') + '</ul>';
+    }
 
     var lead = ['content', 'method', 'clock'].reduce(function (a, k) { return causes[k] > causes[a] ? k : a; }, 'content');
     var leadWord = { content: planInputs.contentWord || 'relearning', method: 'speed', clock: 'pacing' }[lead];
@@ -7644,8 +7701,8 @@
       '<div class="plan-meter">' + meter + '</div>' +
       '<div class="plan-rows">' +
         rows.map(function (r) {
-          return '<div class="plan-row"><div class="plan-hours">' + hrs(r.h) + '<span>' + r.unit + '</span></div>' +
-            '<div class="plan-what">' + r.what + '</div></div>';
+          return '<div class="plan-row"><div class="plan-hours" style="color:' + r.color + '">' + hrs(r.h) + '<span>' + r.unit + '</span></div>' +
+            '<div class="plan-what">' + r.what + lessonList(r) + '</div></div>';
         }).join('') +
       '</div>' +
       '<p class="plan-foot">This is a starting allocation off one test, not a syllabus. It should be re-cut after the next full-length test. The shares above are the shape of <em>this</em> attempt, and the fastest-moving of the three is usually method, so the split that is right in week one is rarely still right in week five.</p>' +
@@ -7656,6 +7713,10 @@
        re-cut it. data.ptTitle is set only for a numbered practice test. */
     if (!data.ptTitle) {
       planInputs.weekly = weekly; planInputs.weeklyText = hrs(weekly);
+      // The same rows for the walkthrough's plan screen (report-tour.js).
+      planInputs.planRows = rows.map(function (r) { var tmp = document.createElement('div'); tmp.innerHTML = r.what.replace(/<em>[\s\S]*$/, '');
+        var said = (tmp.textContent || '').replace(/^[^.]*\.\s*/, '').split(/(?<=\.)\s/)[0] || '';
+        return { h: hrs(r.h), unit: r.unit, color: r.color, label: r.label || '', lessons: r.lessons || [], share: r.h / weekly, said: said }; });
       var host = document.getElementById('plan-section');
       host.innerHTML = html;
       document.getElementById('plan-hed').style.display = '';
