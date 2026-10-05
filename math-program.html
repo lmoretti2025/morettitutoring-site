@@ -1083,6 +1083,19 @@ section.sec{padding:clamp(4.6rem,11vh,8.4rem) 0}
 .capintro{max-width:680px}
 .capture h2{font-size:clamp(1.9rem,3.4vw,2.7rem)}
 .capintro .lead{max-width:36em;margin-left:auto;margin-right:auto}
+/* Top bar links: brighter, larger, and the section on screen marked */
+.navlinks{display:flex;gap:1.6rem}
+.navlinks a{font-size:.86rem;font-weight:500;color:rgba(255,255,255,.8);letter-spacing:.01em}
+.navlinks a:hover,.navlinks a.on{color:#fff}
+.navlinks a::after{content:"";position:absolute;left:0;right:0;bottom:-6px;height:2px;background:var(--red-lift);transform:scaleX(0);transform-origin:left;transition:transform .3s var(--ease)}
+.navlinks a:hover::after,.navlinks a.on::after{transform:scaleX(1)}
+nav.is-red .navlinks a{color:rgba(255,255,255,.85)}nav.is-red .navlinks a.on{color:#fff}
+@media(max-width:1060px){.navlinks{display:none}}
+@media(min-width:821px) and (max-width:1180px){nav .shell{gap:1.2rem}.navlinks{gap:1.1rem}.navlinks a{font-size:.8rem}.nav-logo img{height:42px}}
+@media(min-width:821px) and (max-width:1060px){.navlinks{display:flex!important}.navlogin{display:none}}
+.navlinks a.navsat{color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:.32rem .85rem;margin-left:.3rem}
+.navlinks a.navsat::after{display:none}
+.navlinks a.navsat:hover{background:#fff;color:var(--red)}
 </style>
 </head>
 <body>
@@ -1094,6 +1107,7 @@ section.sec{padding:clamp(4.6rem,11vh,8.4rem) 0}
     <a href="#plan">The curriculum</a>
     <a href="#courses">Courses</a>
     <a href="#results">Testimonials</a>
+    <a class="navsat" href="prep-course.html">SAT program</a>
   </div>
   <a class="navlogin" href="portal/index.html">Student Login</a>
   <a class="navcta shimmer" href="#start"><span>Free call</span></a>
@@ -1384,6 +1398,16 @@ document.documentElement.classList.add('js');
   root.addEventListener('click',function(e){var b=e.target.closest('.mc'); if(b){held=true;show(b);}});
   root.addEventListener('mouseover',function(e){var b=e.target.closest('.mc'); if(b){held=true;show(b);}});
   if(!matchMedia('(prefers-reduced-motion: reduce)').matches) new IntersectionObserver(function(es){es.forEach(function(e){ clearInterval(timer); if(e.isIntersecting){ root.classList.add('go'); timer=setInterval(function(){ if(held) return; at=(at+1)%cs.length; show(cs[at]); },2200);} });},{threshold:.4}).observe(root);
+})();
+</script>
+<script>
+/* The top bar marks the section on screen. */
+(function(){
+  var links=[].slice.call(document.querySelectorAll('.navlinks a[href^="#"]')); if(!links.length||!('IntersectionObserver' in window)) return;
+  var map={}; links.forEach(function(a){ var el=document.querySelector(a.getAttribute('href')); if(el) map[el.id]=a; });
+  var io=new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ links.forEach(function(a){a.classList.remove('on');}); map[e.target.id].classList.add('on'); } }); },{rootMargin:'-45% 0px -50% 0px'});
+  Object.keys(map).forEach(function(id){ io.observe(document.getElementById(id)); });
+  var st=document.getElementById('start'); if(st) new IntersectionObserver(function(es){ if(es[0].isIntersecting) links.forEach(function(a){a.classList.remove('on');}); },{rootMargin:'-45% 0px -50% 0px'}).observe(st);
 })();
 </script>
 <script src="site.js"></script>
