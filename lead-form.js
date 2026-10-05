@@ -93,7 +93,16 @@ safe(function(){
   function pickDoor(want) {
     var pick = want && document.getElementById(want === 'call' ? 'rf-start-call' : want === 'diagnostic' ? 'rf-start-diag' : '');
     if (pick) pick.checked = true;
+    doorLabel();
   }
+  /* The button says what the picked door does: a family who chose to talk
+     first is not sent off with "Take the free diagnostic" (2026-10-05). */
+  var doorBtn = document.getElementById('rf-submit'), doorDefault = doorBtn ? doorBtn.innerHTML : '';
+  function doorLabel() {
+    var c = document.getElementById('rf-start-call');
+    if (doorBtn && c) doorBtn.innerHTML = c.checked ? '<span>Ask for a call</span>' : doorDefault;
+  }
+  [].forEach.call(form.querySelectorAll('input[name="start"]'), function (r) { r.addEventListener('change', doorLabel); });
   try { pickDoor(new URLSearchParams(location.search).get('start')); } catch (err) {}
   [].forEach.call(document.querySelectorAll('[data-start]'), function (a) {
     a.addEventListener('click', function () { pickDoor(a.getAttribute('data-start')); });
