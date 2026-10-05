@@ -241,6 +241,60 @@
     '#cu-root .cu-bottom .lbl{font-size:.82rem;color:var(--mid)}',
     '#cu-root .cu-state{padding:3rem 1rem;text-align:center;color:var(--mid)}',
     '@media(max-width:900px){#cu-root .cu-lesson-wrap{grid-template-columns:1fr}#cu-root .cu-panel{position:static;max-height:none}#cu-root .cu-steps{max-height:260px}}',
+    /* THE HOMEPAGE LOOK (Luca, 2026-10-05): flush with the page instead of
+       white cards; a course map of colored tiles on the home screen; the
+       check drawn like the homepage's sample question, with the eliminator's
+       x outside each choice and the reason under every choice once answered. */
+    '#cu-root .cu-hero,#cu-root .cu-hero-math,#cu-root .cu-hero-english{background:none;box-shadow:none;border-radius:0;padding:.2rem 0 1.1rem;border-bottom:1px solid var(--cu-line);margin-bottom:1.4rem}',
+    '#cu-root .cu-hero h1{font-size:clamp(1.9rem,3.4vw,2.5rem)}',
+    '#cu-root .cu-guide,#cu-root .cu-resume,#cu-root .cu-gate{background:none;box-shadow:none;border-radius:0;border-left:2px solid var(--red,#B0271C)}',
+    '#cu-root .cu-guide{border-left-color:var(--cu-line)}#cu-root .cu-guide summary{padding-left:1.1rem}#cu-root .cu-guide-body{border-top:0;padding-left:1.1rem}',
+    '#cu-root .cu-resume,#cu-root .cu-gate{padding:.6rem 0 .6rem 1.1rem}',
+    '#cu-root .cu-map{margin:0 0 2rem}',
+    '#cu-root .cu-map-h{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.9rem}',
+    '#cu-root .cu-map-h .k{font-size:.66rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--red,#B0271C)}',
+    '#cu-root .cu-map-h .key{display:flex;gap:1rem;font-size:.72rem;color:var(--mid)}#cu-root .cu-map-h .key i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:.35rem;vertical-align:-1px;background:rgba(17,17,17,.08);border-bottom:2px solid rgba(17,17,17,.35)}#cu-root .cu-map-h .key i.d{background:rgba(17,17,17,.6);border:0}',
+    '#cu-root .cu-map-rows{display:grid;gap:.8rem}',
+    '#cu-root .cu-md-h{display:flex;justify-content:space-between;font-size:.72rem;font-weight:600;margin-bottom:.35rem}#cu-root .cu-md-h span{color:var(--mid);font-weight:400}',
+    '#cu-root .cu-md-t{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:5px;max-width:640px}',
+    '#cu-root .cu-tile{position:relative;aspect-ratio:1/1;border:0;border-bottom:2px solid var(--c);border-radius:5px;background:linear-gradient(to top,color-mix(in srgb,var(--c) 30%,transparent) var(--f,0%),color-mix(in srgb,var(--c) 10%,transparent) var(--f,0%));display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font:600 clamp(.6rem,1.05vw,.74rem) var(--hel,Poppins,sans-serif);color:var(--text,#111);cursor:pointer;padding:0;transition:transform .2s var(--ease,ease)}',
+    '#cu-root .cu-tile:hover,#cu-root .cu-tile.hov{transform:translateY(-2px)}',
+    '#cu-root .cu-tile.done{background:var(--c);color:#fff}',
+    '#cu-root .cu-tile i{display:flex;gap:2px}#cu-root .cu-tile i s{width:4px;height:4px;border-radius:50%;background:var(--c);opacity:.75}#cu-root .cu-tile i s.on{opacity:1;box-shadow:0 0 0 1px #fff}#cu-root .cu-tile.done i s{background:#fff}',
+    '#cu-root .cu-tile.locked{opacity:.4;cursor:default}',
+    '#cu-root .cu-map.go .cu-tile{animation:cuPop .45s var(--ease,ease) both;animation-delay:calc(var(--k)*14ms)}@keyframes cuPop{from{opacity:0;transform:scale(.5)}}',
+    '#cu-root .cu-map-info{margin-top:1rem;padding-top:.9rem;border-top:1px solid var(--cu-line);display:grid;grid-template-columns:auto 1fr;gap:.1rem .85rem;align-items:center;min-height:3rem;max-width:640px}',
+    '#cu-root .cu-map-info .n{grid-row:span 2;width:2.5rem;height:2.5rem;border-radius:7px;background:var(--c);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:.78rem}',
+    '#cu-root .cu-map-info b{font-family:var(--display,Georgia,serif);font-size:1.08rem;line-height:1.2}#cu-root .cu-map-info small{font-size:.74rem;color:var(--mid)}',
+    '#cu-root .cu-units{gap:2.2rem}',
+    '#cu-root .cu-unit{background:none;box-shadow:none;border-radius:0;overflow:visible}',
+    '#cu-root .cu-unit-h{padding:0 0 .7rem;border-bottom:2px solid var(--c,var(--text,#111))}',
+    '#cu-root .cu-unum{color:var(--c,var(--mid))}',
+    '#cu-root .cu-lesson{background:none;padding:.75rem .2rem;border-bottom:1px solid var(--cu-line)}',
+    '#cu-root .cu-lesson:last-child{border-bottom:1px solid var(--cu-line)}#cu-root .cu-lesson:hover{background:color-mix(in srgb,var(--c,#111) 5%,transparent)}',
+    '#cu-root .cu-num{display:inline-flex;align-items:center;justify-content:center;min-width:2.3rem;height:1.6rem;border-radius:5px;background:color-mix(in srgb,var(--c,#111) 11%,transparent);color:var(--text,#111);font:600 .74rem var(--hel,Poppins,sans-serif);margin-right:.55rem;vertical-align:1px}',
+    '#cu-root .cu-mbar i{background:var(--c,var(--cu-good))}',
+    '#cu-root .cu-panel{background:none;box-shadow:none;border-radius:0;border-right:1px solid var(--cu-line)}',
+    '#cu-root .cu-panel-h{padding-left:0}#cu-root .cu-step{padding-left:.4rem}#cu-root .cu-step.on{background:color-mix(in srgb,var(--red,#B0271C) 6%,transparent)}',
+    '#cu-root .cu-ptabs{padding-left:0}#cu-root .cu-pnotes{padding-left:0}',
+    '#cu-root .cu-notes{background:none;box-shadow:none;border-radius:0;border-top:1px solid var(--cu-line);border-bottom:1px solid var(--cu-line)}',
+    '#cu-root .cu-notes-h{padding-left:0;padding-right:0}#cu-root .cu-notes-b{padding-left:0;padding-right:0}',
+    '#cu-root .cu-bottom{border-radius:0;box-shadow:none;border-top:1px solid var(--cu-line);background:rgba(255,255,255,.94);padding-left:0;padding-right:0}',
+    '#cu-root .cu-card{background:none;box-shadow:none;border-radius:0;padding:.2rem 0 .4rem clamp(1rem,2vw,1.5rem);border-left:2px solid var(--red,#B0271C)}',
+    '#cu-root .cu-complete{border-left:0;padding-left:0}',
+    '#cu-root .cu-pill{display:inline-block;font-size:.68rem;font-weight:600;letter-spacing:.04em;color:#fff;background:var(--red,#B0271C);border-radius:999px;padding:.22rem .7rem}',
+    '#cu-root .cu-choices.elim,#cu-root .cu-choices.pad{padding-right:2.6rem}',
+    '#cu-root .cu-choice{position:relative;border-width:1px;border-color:rgba(17,17,17,.2);border-radius:9px}',
+    '#cu-root .cu-choices.elim .cu-elim{position:absolute;right:-2.55rem;top:50%;transform:translateY(-50%);width:1.75rem;height:1.75rem;border:1.5px solid rgba(17,17,17,.25);background:#fff;color:var(--mid)}',
+    '#cu-root .cu-choice.out{opacity:1}#cu-root .cu-choice.out>span:not(.cu-elim){opacity:.45}#cu-root .cu-choice.out .cu-elim{background:var(--text,#111);border-color:var(--text,#111);color:#fff}',
+    '#cu-root .cu-choice.sel{box-shadow:inset 0 0 0 1px #3457d5}#cu-root .cu-choice.right{box-shadow:inset 0 0 0 1px var(--cu-good)}#cu-root .cu-choice.wrong{box-shadow:inset 0 0 0 1px var(--cu-bad)}',
+    '#cu-root .cu-why{margin:-.15rem 0 .35rem;padding-left:3.4rem;font-size:.86rem;line-height:1.55;color:#4a4139;animation:cuIn .4s var(--ease,ease) both}',
+    '#cu-root .cu-why b{color:var(--cu-bad);font-weight:600}#cu-root .cu-why.ok b{color:var(--cu-good)}',
+    '#cu-root .cu-fb{border-radius:0;background:none!important;padding:.2rem 0}',
+    '#cu-root .cu-fb .ex{background:none;padding:.5rem 0 0;font-family:inherit;font-size:.9rem}',
+    '@media(max-width:900px){#cu-root .cu-panel{border-right:0;border-bottom:1px solid var(--cu-line);padding-bottom:.6rem}}',
+    '@media(max-width:520px){#cu-root .cu-why{padding-left:.4rem}#cu-root .cu-md-t{gap:4px}#cu-root .cu-tile i{display:none}#cu-root .cu-card{padding-left:.85rem}}',
+    '@media(prefers-reduced-motion:reduce){#cu-root .cu-map.go .cu-tile,#cu-root .cu-why{animation:none}}',
     '@media(max-width:520px){#cu-root .cu-go{display:none}#cu-root .cu-unit-p .cu-mbar{display:none}#cu-root .cu-card{padding:1.1rem}#cu-root .cu-resume{flex-direction:column;align-items:flex-start}}'
   ].join('');
   function injectCss() {
@@ -684,10 +738,10 @@
         '<button type="button" class="cu-btn" data-resume>Continue &rarr;</button></div>';
     }
     return heroHtml(c) +
-      gateCard + resume + guideHtml(c) +
+      gateCard + resume + mapHtml(c) + guideHtml(c) +
       '<div class="cu-units">' + c.domains.map(function (d, di) {
         var dDone = d.lessons.filter(function (l) { return lessonDoneCount(l) === l.parts.length; }).length;
-        return '<section class="cu-unit cu-in" style="--d:' + (di + 2) + '"><div class="cu-unit-h">' +
+        return '<section class="cu-unit cu-in" style="--d:' + (di + 2) + ';--c:' + dcolor(d) + '"><div class="cu-unit-h">' +
           '<div class="cu-unit-t"><span class="cu-unum">Unit ' + (di + 1) + '</span><h2>' + esc(d.name) + '</h2></div>' +
           '<span class="cu-unit-p"><span class="cu-mbar"><i style="width:' + Math.round(100 * dDone / d.lessons.length) + '%"></i></span>' + dDone + '/' + d.lessons.length + '</span></div>' +
           d.lessons.map(function (l) {
@@ -702,6 +756,38 @@
               '<span class="cu-go">' + (n === l.parts.length ? 'Review' : n ? 'Continue' : 'Start') + ' &rsaquo;</span></button>';
           }).join('') + '</section>';
       }).join('') + '</div>';
+  }
+  // One color per domain, as on the homepage's course map.
+  var DOMAIN_COLOR = { 'Introduction': '#6E655C', 'Algebra': '#B0271C', 'Advanced Math': '#2B4C9B', 'Geometry & Trigonometry': '#1F7A6E', 'Problem-Solving & Data Analysis': '#B7791F',
+    'Standard English Conventions': '#7E3F8F', 'Expression of Ideas': '#2B4C9B', 'Information and Ideas': '#1F7A6E', 'Craft and Structure': '#B7791F' };
+  function dcolor(d) { return DOMAIN_COLOR[d.name] || '#6E655C'; }
+  /* THE COURSE MAP (2026-10-05): every lesson as a tile, filled as its parts
+     are done; hovering one names it underneath, a click opens it. */
+  function mapHtml(c) {
+    var k = 0;
+    return '<section class="cu-map cu-in go" style="--d:1"><div class="cu-map-h"><span class="k">The course map</span><span class="key"><span><i></i>Not started</span><span><i class="d"></i>Done</span></span></div><div class="cu-map-rows">' +
+      c.domains.map(function (d) {
+        var col = dcolor(d), parts = d.lessons.reduce(function (a, l) { return a + l.parts.length; }, 0);
+        return '<div><div class="cu-md-h">' + esc(d.name) + '<span>' + pl(d.lessons.length, 'lesson') + ' &middot; ' + pl(parts, 'part') + '</span></div><div class="cu-md-t">' +
+          d.lessons.map(function (l) {
+            var n = lessonDoneCount(l), all = l.parts.length, lock = lessonLocked(c, l), dots = '';
+            for (var j = 0; j < all; j++) dots += '<s' + (isDone(l.id, j) ? ' class="on"' : '') + '></s>';
+            return '<button type="button" class="cu-tile' + (n === all ? ' done' : '') + (lock ? ' locked' : '') + '" style="--c:' + col + ';--k:' + (k++) + ';--f:' + Math.round(100 * n / all) + '%"' +
+              (lock ? ' data-locked' : ' data-lesson="' + esc(l.id) + '"') + ' data-tip="' + esc(l.id) + '" aria-label="' + esc(l.num + ' ' + l.title) + '"><span>' + esc(l.num) + '</span><i>' + dots + '</i></button>';
+          }).join('') + '</div></div>';
+      }).join('') + '</div><div class="cu-map-info" aria-live="polite">' + mapInfo(c, null) + '</div></section>';
+  }
+  function mapInfo(c, id) {
+    var hit = id ? findLesson(id) : null;
+    if (!hit) {
+      var last = prog.last && findLesson(prog.last.lessonId);
+      hit = last && last.c.id === c.id ? last : null;
+      if (!hit) { var nx = allLessons(c).filter(function (x) { return lessonDoneCount(x.l) < x.l.parts.length && !lessonLocked(c, x.l); })[0]; hit = nx ? { c: c, d: nx.d, l: nx.l } : null; }
+    }
+    if (!hit) return '';
+    var l = hit.l, n = lessonDoneCount(l);
+    return '<span class="n" style="--c:' + dcolor(hit.d) + '">' + esc(l.num) + '</span><b>' + esc(l.title) + '</b><small>' + esc(hit.d.name) + ' &middot; ' +
+      (lessonLocked(hit.c, l) ? 'opens after 1.1' : n === l.parts.length ? 'done' : n ? n + ' of ' + pl(l.parts.length, 'part') + ' done' : (l.parts.length === 1 ? 'a video, notes and a check' : pl(l.parts.length, 'part') + ', each with a video, notes and a check')) + '</small>';
   }
   var LOCK_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
   // The course's header card: its name, and lessons, parts and done. The same on both courses, so switching does not change its size.
@@ -986,7 +1072,7 @@
     check.out = {};
     check.shownAt = Date.now();
     main.innerHTML =
-      '<div class="cu-mhead"><div class="cu-kicker">' + esc(l.num + ' ' + l.title) + '</div><h1>Check your understanding</h1>' +
+      '<div class="cu-mhead"><span class="cu-pill">' + esc(l.num + ' ' + l.title) + ' &middot; check</span><h1>Check your understanding</h1>' +
         '<div class="cu-sub">' + pl(check.len, 'question') + ' on this part. Each one shows the answer and why, and the next part opens when you finish.</div></div>' +
       '<div class="cu-card"><div class="cu-qhead"><span>Question ' + check.n + '</span><span class="cu-qtools">' +
         (isMc ? '<button type="button" class="cu-abc" data-abc aria-pressed="' + elimOn + '" title="Answer eliminator">ABC</button>' : '') +
@@ -995,6 +1081,7 @@
       '<div class="cu-bottom"><div class="cu-streak-wrap">' + streakHtml() + '</div>' +
         '<button type="button" class="cu-btn" id="cu-go" data-check-go disabled>Check</button></div>';
     marginNotes(l, check.part);
+    if (isMc) $('.cu-choices', main).classList.add('pad');   // room for the x, kept after answering so nothing shifts
     if (isMc && elimOn) $('.cu-choices', main).classList.add('elim');
     var fr = $('#cu-fr', main);
     if (fr) {
@@ -1027,12 +1114,14 @@
     var last = check.results.length >= check.len;
     if (g.ok) {
       markChoices(q, true);
-      fb.innerHTML = '<div class="cu-fb ok"><b>Correct!</b></div>';
+      var byOk = choiceReasons(q);
+      fb.innerHTML = '<div class="cu-fb ok"><b>Correct!</b>' + (byOk ? ' Here is where the other choices come from.' : '') + '</div>';
     } else {
       markChoices(q, false);
+      var by = choiceReasons(q);
       var answer = q.type === 'fr' ? '<p>The answer is <b>' + esc(q.answerValue != null ? q.answerValue : q.answer) + '</b>.</p>' : '';
       fb.innerHTML = '<div class="cu-fb no"><b>Not quite.</b> Stuck? <a href="#" data-rewatch>Rewatch the video</a> or check the notes.' +
-        '<div class="ex">' + answer + (q.explanation || '') + '</div></div>';
+        (by ? '' : '<div class="ex">' + answer + (q.explanation || '') + '</div>') + '</div>';
     }
     go.textContent = last ? 'Finish' : 'Next question'; go.disabled = false;
     var w = $('.cu-streak-wrap', main); if (w) w.innerHTML = streakHtml();
@@ -1057,6 +1146,33 @@
       if (window.recordQuestionBankMistake) window.recordQuestionBankMistake({
         key: 'qb|' + (c.bank === 'math' ? 'math' : 'rw') + '|' + q.qid, given: given, correct: !!g.ok, attemptedAt: new Date().toISOString() });
     } catch (e) {}
+  }
+  /* THE REASON UNDER EVERY CHOICE (2026-10-05), as on the homepage's sample
+     question: the explanation's "Choice B is incorrect ..." sentences go under
+     B, the working under the right answer. Drawn when the explanation splits
+     that way (most bank questions); otherwise it stays one block. */
+  function choiceReasons(q) {
+    if (!q || q.type === 'fr' || !q.explanation) return false;
+    var ex = String(q.explanation), re = /Choice ([A-E]) is (in)?correct/g, m, marks = [];
+    while ((m = re.exec(ex))) marks.push({ at: m.index, k: LETTERS.indexOf(m[1]), ok: !m[2] });
+    if (!marks.length) return false;
+    var notes = {}, lead = ex.slice(0, marks[0].at);
+    marks.forEach(function (mk, j) {
+      var seg = ex.slice(mk.at, j + 1 < marks.length ? marks[j + 1].at : ex.length).replace(/(<br\s*\/?>\s*)+$/i, '').trim();
+      if (mk.ok) { notes[mk.k] = (notes[mk.k] || '') + ' ' + seg.replace(/^Choice [A-E] is correct\.?\s*/, ''); return; }
+      seg = seg.replace(/^Choice [A-E] is incorrect(\.| and)?\s*/, '');
+      notes[mk.k] = seg ? seg.charAt(0).toUpperCase() + seg.slice(1) : '';
+    });
+    notes[q.correct] = (lead.replace(/(<br\s*\/?>\s*)+$/i, '') + (notes[q.correct] || '')).trim();
+    $$('.cu-choice', root).forEach(function (b) {
+      var k = Number(b.getAttribute('data-choice')), txt = notes[k];
+      if (!txt) return;
+      var p = document.createElement('p');
+      p.className = 'cu-why' + (k === q.correct ? ' ok' : '');
+      p.innerHTML = '<b>' + (k === q.correct ? 'Correct.' : 'Incorrect.') + '</b> ' + txt;
+      b.after(p);
+    });
+    return true;
   }
   function markChoices(q, ok) {
     if (q.type === 'fr') { var fr = $('#cu-fr', root); if (fr) fr.disabled = true; return; }
@@ -1258,6 +1374,10 @@
     injectCss();
     if (!root.__wired) {
       root.addEventListener('click', onClick);
+      root.addEventListener('mouseover', function (e) {
+        var t = e.target.closest && e.target.closest('.cu-tile'), box = t && $('.cu-map-info', root);
+        if (box && view.name === 'home') box.innerHTML = mapInfo(course(view.course), t.getAttribute('data-tip'));
+      });
       // The pointer going down on a lesson is a second or so ahead of its video being asked for.
       var warmFrom = function (e) {
         var b = e.target.closest && e.target.closest('[data-lesson],[data-lesson-go],[data-resume]');
