@@ -618,7 +618,7 @@ section.sec{padding:clamp(4.6rem,11vh,8.4rem) 0}
 <script src="portal/backend-url.js"></script>
 <style>
 /* ===== homepage (preview) additions, on top of the SAT page's styles ===== */
-.xhero .reel img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 35%;transform:scale(1.04)}
+
 .xhero .reel::after{background:linear-gradient(180deg,rgba(12,10,9,.62) 0%,rgba(12,10,9,.72) 55%,var(--void) 100%)!important}
 .hproof{margin:2.4rem auto 0;max-width:560px;font-family:var(--display);font-size:1.12rem;line-height:1.5;color:rgba(237,231,229,.92)}
 .hproof .stars{display:block;color:var(--gold);letter-spacing:.2em;font-size:.9rem;margin-bottom:.4rem}
@@ -686,6 +686,94 @@ section.sec{padding:clamp(4.6rem,11vh,8.4rem) 0}
 .pf b{display:block;font-family:var(--display);font-weight:700;font-size:1.9rem;line-height:1;color:var(--ink)}
 .pf span{display:block;margin-top:.45rem;font-size:.88rem;line-height:1.55;color:var(--body)}
 @media(max-width:960px){.proofgrid{grid-template-columns:repeat(2,1fr)}}
+/* hero: the three photos, crossfading */
+.xhero .reel .slide{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 35%;opacity:0;animation:heroFade 18s infinite;transform:scale(1.04)}
+.xhero .reel .slide:nth-child(1){animation-delay:0s}.xhero .reel .slide:nth-child(2){animation-delay:6s}.xhero .reel .slide:nth-child(3){animation-delay:12s}
+@keyframes heroFade{0%{opacity:0}5%{opacity:1}33%{opacity:1}38%{opacity:0}100%{opacity:0}}
+@media(prefers-reduced-motion:reduce){.xhero .reel .slide{animation:none}.xhero .reel .slide:nth-child(1){opacity:1}}
+/* testimonials carousel, as on the original homepage */
+.tmarq{--tmark:clamp(27px,2.5vw,36px);position:relative;overflow:hidden;
+  margin-top:clamp(1.4rem,2.6vw,2.2rem);
+  margin-left:calc(50% - 50vw);width:100vw;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 6%,#000 94%,transparent 100%);
+  mask-image:linear-gradient(90deg,transparent 0,#000 6%,#000 94%,transparent 100%)}
+.tlane{display:flex;width:max-content;will-change:transform}
+.tlane + .tlane{margin-top:clamp(.8rem,1.4vw,1.2rem)}
+.tset{display:flex;flex:none}
+/* --tdur is written per lane by JS from that lane's own width, so both
+   lanes travel at the same pixels per second however many cards each holds. */
+.tlane[data-lane="a"]{animation:tdriftL var(--tdur,64s) linear infinite}
+.tlane[data-lane="b"]{animation:tdriftR var(--tdur,72s) linear infinite}
+@keyframes tdriftL{from{transform:translate3d(0,0,0)}   to{transform:translate3d(-50%,0,0)}}
+@keyframes tdriftR{from{transform:translate3d(-50%,0,0)}to{transform:translate3d(0,0,0)}}
+/* Stop for anyone actually reading one. */
+.tmarq:hover .tlane,.tmarq:focus-within .tlane{animation-play-state:paused}
+
+.tqm{position:relative;overflow:hidden;
+  flex:0 0 clamp(262px,24vw,352px);margin:0 clamp(.8rem,1.4vw,1.2rem) 0 0;
+  display:flex;flex-direction:column;gap:.62rem;
+  background:var(--surface);border:1px solid var(--hair);
+  padding:clamp(1.15rem,1.9vw,1.6rem);
+  transition:border-color .45s var(--ease)}
+.tqm:hover{border-color:var(--line)}
+/* The mark in the corner, standing in for a quote glyph. Smaller than it
+   was on the old wide cards because these are a third of the width. */
+.tqm::before{content:'';position:absolute;pointer-events:none;
+  top:clamp(.95rem,1.6vw,1.35rem);right:clamp(.95rem,1.6vw,1.35rem);
+  width:var(--tmark);aspect-ratio:1;opacity:.14;
+  background:url('target-icon-white.png') no-repeat center/contain;
+  transition:opacity .45s var(--ease),transform .55s var(--ease)}
+.tqm:hover::before{opacity:.32;transform:scale(1.08)}
+/* The result line reserves the corner rather than running under the mark:
+   several of these labels are two lines and nearly fill the card. */
+.tqm .tres{margin:0;padding-right:calc(var(--tmark) + .55rem);
+  font-family:var(--display);font-weight:700;color:var(--red);
+  font-size:clamp(.97rem,1.14vw,1.1rem);line-height:1.18;letter-spacing:-.02em}
+.tqm blockquote{margin:0;font-family:var(--display);font-weight:400;
+  font-size:clamp(.89rem,1.02vw,.98rem);line-height:1.58;letter-spacing:-.004em;color:var(--body)}
+/* Red inside the quote would fight the line above, which already carries it. */
+.tqm .tgain{color:inherit;font-weight:600}
+.tqm figcaption{margin-top:auto;padding-top:.3rem;display:flex;align-items:center;gap:.5rem;
+  font-size:.6rem;font-weight:600;letter-spacing:.13em;text-transform:uppercase;color:var(--muted)}
+.tqm figcaption::before{content:'';flex:none;width:14px;height:1px;background:var(--red);opacity:.6}
+
+/* Motion is the whole device, so with it switched off the wall becomes an
+   ordinary horizontal scroller and the cloned half is dropped. */
+@media(prefers-reduced-motion:reduce){
+  .tlane{animation:none}
+  .tlane .tset[aria-hidden]{display:none}
+  .tmarq{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;
+    -webkit-mask-image:none;mask-image:none}
+}
+.tgain{color:var(--red);font-weight:600;white-space:nowrap}
+
+/* program cards with the original page's artwork on top */
+.prog{padding:0;overflow:hidden}
+.prog .art{position:relative;height:clamp(150px,16vw,200px);background:var(--void);display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
+.prog .art::before{content:'';position:absolute;left:50%;top:50%;width:90%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,rgba(176,39,28,.42) 0%,rgba(176,39,28,.12) 46%,transparent 70%);transition:transform .9s var(--ease)}
+.prog:hover .art::before{transform:translate(-50%,-50%) scale(1.12)}
+.prog .art b{position:relative;font-family:var(--display);font-weight:700;font-size:clamp(3rem,5vw,4.2rem);line-height:1;color:var(--red-lift);letter-spacing:-.02em}
+.prog .art b sup{font-size:.28em;vertical-align:super}
+.prog .art small{position:relative;margin-top:.7rem;font-size:.6rem;font-weight:600;letter-spacing:.19em;text-transform:uppercase;color:rgba(237,231,229,.5)}
+.prog .art svg{position:relative;width:min(62%,200px);height:auto;overflow:visible}
+.prog .art .ln{fill:none;stroke:var(--red-lift);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.prog .art .ln-2{fill:none;stroke:rgba(237,231,229,.34);stroke-width:1.6;stroke-linecap:round}
+.prog .art .grid{stroke:rgba(255,255,255,.13);stroke-width:1}
+.prog .art .fillrd{fill:rgba(210,66,52,.26)}
+.prog .art .sym{fill:var(--red-lift)}
+.prog .pbody{display:flex;flex-direction:column;flex:1;padding:clamp(1.5rem,2.6vw,2.2rem)}
+/* portal features */
+.feats{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin-top:3rem;text-align:left}
+.feat{background:#171312;border:1px solid rgba(255,255,255,.08);border-radius:6px;overflow:hidden;display:flex;flex-direction:column}
+.feat .im{aspect-ratio:16/10;background:#fff;overflow:hidden}
+.feat .im img{width:100%;height:100%;object-fit:cover;object-position:top left}
+.feat .tx{padding:1.3rem 1.4rem 1.5rem}
+.feat .k{font-size:.6rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--red-lift)}
+.feat h3{font-family:var(--display);font-weight:700;font-size:1.3rem;line-height:1.2;color:#fff;margin:.5rem 0 .45rem}
+.feat p{font-size:.9rem;line-height:1.62;color:rgba(237,231,229,.72)}
+@media(max-width:900px){.feats{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.feats{grid-template-columns:1fr}}
+.who.short img{aspect-ratio:4/5;object-position:50% 40%}
 </style>
 </head>
 <body>
@@ -695,7 +783,7 @@ section.sec{padding:clamp(4.6rem,11vh,8.4rem) 0}
   <div class="navlinks">
     <a href="#diagnostic">The diagnostic</a>
     <a href="#how">How it works</a>
-    <a href="#results">Results</a>
+    <a href="#results">Testimonials</a>
     <a href="#programs">Programs</a>
   </div>
   <a class="navlogin" href="portal/index.html">Student Login</a>
@@ -713,7 +801,7 @@ section.sec{padding:clamp(4.6rem,11vh,8.4rem) 0}
 
 <!-- 1. Opening -->
 <section class="xhero">
-  <div class="reel" aria-hidden="true"><img src="photo-2-web.jpg" alt="" fetchpriority="high"></div>
+  <div class="reel" aria-hidden="true"><img class="slide" src="photo-2-web.jpg" alt="" fetchpriority="high"><img class="slide" src="photo-1-web.jpg" alt="" loading="lazy"><img class="slide" src="photo-3-web.jpg" alt="" loading="lazy"></div>
   <div class="shell">
     <p class="lbl rv">One-on-one SAT tutoring &middot; Cranford, NJ and online</p>
     <h1 class="h-hero rv d1">SAT prep for students aiming at <em>1500 and above.</em></h1>
@@ -751,7 +839,7 @@ section.sec{padding:clamp(4.6rem,11vh,8.4rem) 0}
 <section class="sec" id="instructor">
   <div class="shell">
     <div class="who short">
-      <img class="rv" src="Portrait.jpg" alt="Luca Moretti" loading="lazy">
+      <img class="rv" src="img/portrait-centered.jpg" alt="Luca Moretti" loading="lazy">
       <div>
         <p class="lbl rv">Your tutor</p>
         <h2 class="h-sec rv d1">A statistician who teaches every session himself.</h2>
@@ -768,12 +856,12 @@ section.sec{padding:clamp(4.6rem,11vh,8.4rem) 0}
     <div class="split">
       <div>
         <p class="lbl rv">It starts with a full diagnostic</p>
-        <h2 class="h-sec rv d1">Find out exactly where the points are going.</h2>
-        <p class="lede rv d2">A full-length, timed digital SAT your student takes at home. Then a statistical report on <b>why</b> the score is where it is, not just the number.</p>
+        <h2 class="h-sec rv d1">A score tells you where. The report tells you why.</h2>
+        <p class="lede rv d2">Your student takes a full-length, timed digital SAT at home, under real test conditions. I then read every answer, every second on the clock and every change of mind, and turn it into a report that explains <b>why</b> the score landed where it did, and what will move it.</p>
         <ul class="points rv d3">
-          <li><b>The score, with its honest range</b><span>One test can land high or low, so every score comes with the range your student&rsquo;s real level most likely sits in.</span></li>
-          <li><b>Every miss, sorted by cause</b><span>Material not yet learned, time run out, a slip on something known, or a right answer second-guessed into a wrong one. Each needs a different fix.</span></li>
-          <li><b>Pacing and test conditions</b><span>Time on every question, where the clock was lost, and how the sitting itself went, so practice scores mean what they say.</span></li>
+          <li><b>The score, with its honest range</b><span>Any single test can run hot or cold by dozens of points. The report gives the range your student&rsquo;s true level most likely sits in, so no one over-reads a lucky or unlucky morning.</span></li>
+          <li><b>Every miss, sorted by cause</b><span>A concept not yet learned, a question rushed or abandoned, a careless slip, or a right answer second-guessed into a wrong one. Each has a different fix, and the plan treats them differently.</span></li>
+          <li><b>Where the points are hiding</b><span>Which skills carry the most points for this student, where the clock was lost, and how the sitting itself went, so every hour of prep goes where it counts.</span></li>
         </ul>
         <p class="rv d3" style="margin-top:1.6rem"><a class="xlink" href="portal/report.html?demo=1&amp;score=1250&amp;weak=math">See a full sample report &rarr;</a></p>
       </div>
@@ -811,19 +899,68 @@ section.sec{padding:clamp(4.6rem,11vh,8.4rem) 0}
 <!-- 4. Results -->
 <section class="sec" id="results">
   <div class="shell center">
-    <p class="lbl rv">Results</p>
+    <p class="lbl rv">Testimonials</p>
     <h2 class="h-sec rv d1">From families who&rsquo;ve done it.</h2>
     <p class="lede rv d2">Hear from parents who worked with Luca on their SAT preparation, from the scores they achieved to what helped them along the way.</p>
   </div>
   <div class="shell">
-    <div class="quotes six">
-      <figure class="quote rv"><span class="res">Scored 1520</span><blockquote>&ldquo;They went into test day feeling confident and scored a 1520! Luca&rsquo;s tutoring completely transformed how my child approached studying.&rdquo;</blockquote><cite>Jessie C., parent</cite></figure>
-      <figure class="quote rv"><span class="res">About +200 in SAT Math</span><blockquote>&ldquo;She improved her SAT Math score by approximately 200 points, exceeding our expectations. He was always professional, punctual, and prepared for every session.&rdquo;</blockquote><cite>Michele C., parent</cite></figure>
-      <figure class="quote rv"><span class="res">+140 in SAT Math</span><blockquote>&ldquo;As a direct result of his tutoring, my daughter&rsquo;s math score improved by 140 points.&rdquo;</blockquote><cite>Pam S., parent</cite></figure>
-      <figure class="quote rv"><span class="res">Calm, and deeply knowledgeable</span><blockquote>&ldquo;He has a very approachable and calm demeanor and a seriously deep grasp of the material. He makes a stressful experience much less so.&rdquo;</blockquote><cite>Ellen C., parent</cite></figure>
-      <figure class="quote rv"><span class="res">Hard concepts made clear</span><blockquote>&ldquo;He made challenging math concepts easy to understand, helped build her confidence, and made a real difference in her test prep.&rdquo;</blockquote><cite>Joh S., parent</cite></figure>
-      <figure class="quote rv"><span class="res">Patient, kind, and available</span><blockquote>&ldquo;I found Luca from the list of tutors from the Summit Public Schools. He is very patient, kind, and was even available to answer questions on text after a session.&rdquo;</blockquote><cite>Sharon A., parent</cite></figure>
+  <div class="tmarq rv" id="tmarq">
+    <div class="tlane" data-lane="a">
+      <div class="tset">
+        <figure class="tqm">
+          <p class="tres">Scored 1520</p>
+          <blockquote>&ldquo;They went into test day feeling confident and <span class="tgain">scored a 1520</span>! Luca&rsquo;s tutoring was incredibly engaging and completely transformed how my child approached studying.&rdquo;</blockquote>
+          <figcaption>Jessie C., parent</figcaption>
+        </figure>
+        <figure class="tqm">
+          <p class="tres">About +200 in SAT Math</p>
+          <blockquote>&ldquo;She improved her SAT Math score by approximately <span class="tgain">200 points</span>, exceeding our expectations. He was always professional, punctual, and prepared for every session.&rdquo;</blockquote>
+          <figcaption>Michele C., parent</figcaption>
+        </figure>
+        <figure class="tqm">
+          <p class="tres">+140 in SAT Math</p>
+          <blockquote>&ldquo;He was engaging and extremely knowledgeable about every aspect of the test. As a direct result of his tutoring, my daughter&rsquo;s math score improved by <span class="tgain">140 points</span>.&rdquo;</blockquote>
+          <figcaption>Pam S., parent</figcaption>
+        </figure>
+        <figure class="tqm">
+          <p class="tres">C to an A in math</p>
+          <blockquote>&ldquo;My daughter has gone from a <span class="tgain">C</span> to an <span class="tgain">A</span> grade student in math. She now feels confident in math and proud of her accomplishments.&rdquo;</blockquote>
+          <figcaption>Patti M., parent</figcaption>
+        </figure>
+      </div>
     </div>
+    <div class="tlane" data-lane="b">
+      <div class="tset">
+        <figure class="tqm">
+          <p class="tres">D to a B in college math</p>
+          <blockquote>&ldquo;I went from a student who was barely passing with a <span class="tgain">D</span> to someone who actually enjoys math, and finished my finals with a <span class="tgain">B</span>.&rdquo;</blockquote>
+          <figcaption>A student</figcaption>
+        </figure>
+        <figure class="tqm">
+          <p class="tres">Hard concepts made clear</p>
+          <blockquote>&ldquo;He made challenging math concepts easy to understand, helped build her confidence, and made a real difference in her test prep.&rdquo;</blockquote>
+          <figcaption>Joh S., parent</figcaption>
+        </figure>
+        <figure class="tqm">
+          <p class="tres">Got the score I wanted</p>
+          <blockquote>&ldquo;He made learning easy and enjoyable. Thanks to his help, I got the score I wanted and enjoyed studying.&rdquo;</blockquote>
+          <figcaption>A student</figcaption>
+        </figure>
+        <figure class="tqm">
+          <p class="tres">Calm, and deeply knowledgeable</p>
+          <blockquote>&ldquo;He has a very approachable and calm demeanor and a seriously deep grasp of the material. He makes a stressful experience much less so.&rdquo;</blockquote>
+          <figcaption>Ellen C., parent</figcaption>
+        </figure>
+        <figure class="tqm">
+          <p class="tres">Patient, kind, and available</p>
+          <blockquote>&ldquo;I found Luca from the list of tutors from the Summit Public Schools. He is very patient, kind, and was even available to answer questions on text after a session.&rdquo;</blockquote>
+          <figcaption>Sharon A., parent</figcaption>
+        </figure>
+      </div>
+    </div>
+  </div>
+
+  
     <p class="center rv" style="margin-top:34px"><a class="xlink" href="testimonials.html">Read every review &rarr;</a></p>
   </div>
 </section>
@@ -832,35 +969,57 @@ section.sec{padding:clamp(4.6rem,11vh,8.4rem) 0}
 <section class="sec" id="programs">
   <div class="shell center">
     <p class="lbl rv">What I teach</p>
-    <h2 class="h-sec rv d1">SAT prep, and advanced math.</h2>
+    <h2 class="h-sec rv d1">SAT prep, and advanced math, both taught by me.</h2>
+    <p class="lede rv d2">One-on-one sessions, online or in person at the Cranford Public Library.</p>
     <div class="progs lop">
       <a class="prog rv" href="prep-course.html">
+        <span class="art" aria-hidden="true"><b>SAT<sup>&reg;</sup></b><small>the digital test</small></span>
+        <span class="pbody">
         <span class="k">College entrance exams</span>
         <h3>Digital SAT tutoring</h3>
-        <p>A plan built from your student&rsquo;s own diagnostic, with the practice, lessons and progress tracking in the portal between sessions.</p>
-        <ul><li>A free full-length diagnostic and report</li><li>A dozen full practice tests, built like Bluebook</li><li>Every Math lesson on video, with notes</li><li>An update for parents after every session</li></ul>
+        <p>Weekly one-on-one sessions for as long as your student needs, planned from their own results, with full-length timed testing, weekly office hours, and an update to you after every session.</p>
+        <p class="cov">SAT&reg; &middot; PSAT/NMSQT&reg; &middot; National Merit &middot; test-day strategy</p>
         <span class="go">Explore SAT tutoring &rarr;</span>
+        </span>
       </a>
       <a class="prog rv d1" href="math-program.html">
+        <span class="art" aria-hidden="true"><svg viewBox="0 0 240 190" role="img" aria-hidden="true">
+            <g class="grid"><path d="M20 30h200M20 70h200M20 110h200M20 150h200"/><path d="M60 18v146M100 18v146M140 18v146M180 18v146"/></g>
+            <path class="fillrd" d="M52 150 C90 150 96 74 128 58 C158 43 178 74 196 100 L196 150 Z"/>
+            <path class="ln" d="M40 152 C86 152 94 70 128 54 C160 39 182 72 202 104"/>
+            <path class="ln-2" d="M20 164h204M28 18v150"/>
+            <path class="ln-2" d="M52 150v14M196 150v14" stroke-dasharray="3 5"/>
+            <text class="sym" x="120" y="50" font-family="Georgia, 'Times New Roman', serif" font-size="30" font-style="italic"><tspan font-size="52" dy="4">&#8747;</tspan><tspan dy="-4" dx="3">f(x)</tspan><tspan dx="2">dx</tspan></text>
+          </svg></span>
+        <span class="pbody">
         <span class="k">Advanced mathematics</span>
         <h3>Math tutoring</h3>
-        <p>For students in the most demanding courses, built around the class, its textbook and its exams.</p>
-        <ul><li>AP Calculus AB &amp; BC</li><li>AP Statistics</li><li>IB Mathematics, SL and HL</li><li>Multivariable calculus</li></ul>
+        <p>For students in the most demanding courses: a plan built around the class, its textbook and its exams, with help between sessions and a written progress report every eight weeks.</p>
+        <p class="cov">AP Calculus AB &amp; BC &middot; AP Statistics &middot; IB Mathematics SL &amp; HL &middot; Multivariable calculus</p>
         <span class="go">Explore math tutoring &rarr;</span>
+        </span>
       </a>
     </div>
   </div>
 </section>
 
-<!-- 7. Portal and weekly updates -->
+<!-- 7. The portal -->
 <section class="sec dark" id="portal">
   <div class="shell center">
-    <p class="lbl rv">Between sessions</p>
-    <h2 class="h-sec rv d1">You always know how it&rsquo;s going.</h2>
-    <p class="lede rv d2">Your student practices in a portal built like the real test, with every practice test scored and reported. You get an update from me after every session: what we worked on, how the practice went, and any new score.</p>
+    <p class="lbl rv">The portal</p>
+    <h2 class="h-sec rv d1">A complete SAT course online, between every session.</h2>
+    <p class="lede rv d2">Every student gets the portal: the full curriculum, test-day practice and a record of every question they&rsquo;ve answered, all tied to the plan we work on together. Here it is, exactly as students see it.</p>
   </div>
   <div class="shell" style="margin-top:48px">
     <div class="mac rv"><div class="lid"><video autoplay muted loop playsinline preload="metadata" poster="img/sat/home.png"><source src="img/sat/portal-tour.mp4" type="video/mp4"></video></div><div class="base"></div></div>
+    <div class="feats">
+      <div class="feat rv"><div class="im"><img src="img/sat/lesson.png" alt="" loading="lazy"></div><div class="tx"><span class="k">Curriculum</span><h3>The full course, lesson by lesson.</h3><p>Every Math lesson taught on video by me, with notes for every part and a check at the end of each. Reading and Writing is being recorded now.</p></div></div>
+      <div class="feat rv"><div class="im"><img src="img/sat/test.png" alt="" loading="lazy"></div><div class="tx"><span class="k">Practice tests</span><h3>A dozen full-length tests.</h3><p>Adaptive, with the same layout, tools and timing as Bluebook. Taken whole, one section at a time, or one module on its own.</p></div></div>
+      <div class="feat rv"><div class="im"><img src="img/sat/qbank-real.jpg" alt="" loading="lazy"></div><div class="tx"><span class="k">Question bank</span><h3>Thousands of questions, by skill.</h3><p>Practice by skill and difficulty, or a focused round drawn from what your student misses most, plus every mistake saved to retry.</p></div></div>
+      <div class="feat rv"><div class="im"><img src="img/sat/report.png" alt="" loading="lazy"></div><div class="tx"><span class="k">Reports</span><h3>Every test, fully analyzed.</h3><p>Each practice test gets the same statistical report as the diagnostic: pacing, causes of misses, and where the points are.</p></div></div>
+      <div class="feat rv"><div class="im"><img src="img/sat/home.png" alt="" loading="lazy"></div><div class="tx"><span class="k">Progress</span><h3>Progress you can trust.</h3><p>Every score on one chart, with the likely level pooled across tests, so a gain is only called a gain once it holds.</p></div></div>
+      <div class="feat rv"><div class="im"><img src="img/sat/weekly.png" alt="" loading="lazy"></div><div class="tx"><span class="k">Every week</span><h3>You always know how it&rsquo;s going.</h3><p>After every session, an update from me: what we worked on, how the practice went, any new score, and what comes next.</p></div></div>
+    </div>
     <p class="center rv" style="margin-top:34px"><a class="xlink" href="prep-course.html#portal">Take the full tour &rarr;</a></p>
   </div>
 </section>
@@ -870,10 +1029,11 @@ section.sec{padding:clamp(4.6rem,11vh,8.4rem) 0}
   <div class="shell center">
     <p class="lbl rv">Why this works</p>
     <h2 class="h-sec rv d1">Most programs are built for the middle of the scale.</h2>
+    <p class="lede rv d2">Above 1400, the points that remain are few, specific and different for every student. Finding them takes a closer read than a standard course can give.</p>
     <div class="vs">
-      <div class="rv"><span class="k">Free practice</span><h3>Great for practice.</h3><p>Official practice tests are the best free material there is, and your student will use them with me too. They won&rsquo;t tell you why the score is stuck.</p></div>
-      <div class="rv d1"><span class="k">Large companies and centers</span><h3>A curriculum and whoever is free.</h3><p>The same course for every student, taught by whichever tutor is available that week, paced for the average score.</p></div>
-      <div class="me rv d2"><span class="k">With me</span><h3>One tutor, one plan.</h3><p>A plan built from your student&rsquo;s own data, taught by the person who read it, with an update after every session.</p></div>
+      <div class="rv"><span class="k">Practice on your own</span><h3>Plenty of questions, no diagnosis.</h3><p>Official practice tests are excellent, and your student will take them with me. But a score report can&rsquo;t tell you whether a miss was a gap, a rushed minute or a second guess, and that is exactly what decides the next 50 points.</p></div>
+      <div class="rv d1"><span class="k">Large companies and centers</span><h3>One course, many tutors.</h3><p>A fixed syllabus paced for the average student, taught by whichever tutor has the slot. Strong students spend their hours reviewing what they already know.</p></div>
+      <div class="me rv d2"><span class="k">With me</span><h3>One tutor, one plan, every week.</h3><p>A plan built from your student&rsquo;s own data, taught by the statistician who read it, and adjusted after every practice test. You hear from me after every session.</p></div>
     </div>
   </div>
 </section>
@@ -1067,6 +1227,34 @@ document.documentElement.classList.add('js');
     if (e.data && e.data.type === 'moretti-tour' && e.data.action === 'cta') document.getElementById('start').scrollIntoView({ behavior: 'smooth' });
   });
 })();
+</script>
+<script>
+(function(){
+  var marq = document.getElementById('tmarq');
+  if (!marq) return;
+  var PX_PER_SEC = 26;
+  var lanes = [].slice.call(marq.querySelectorAll('.tlane'));
+
+  lanes.forEach(function (lane) {
+    var set = lane.querySelector('.tset');
+    if (!set) return;
+    var twin = set.cloneNode(true);
+    twin.setAttribute('aria-hidden', 'true');   // no duplicate reading
+    lane.appendChild(twin);
+  });
+
+  function pace(){
+    lanes.forEach(function (lane) {
+      var w = lane.querySelector('.tset').getBoundingClientRect().width;
+      if (w > 0) lane.style.setProperty('--tdur', Math.round(w / PX_PER_SEC) + 's');
+    });
+  }
+  pace();
+  // Caladea arrives after first paint and changes the card widths with it.
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(pace);
+  var t; window.addEventListener('resize', function(){ clearTimeout(t); t = setTimeout(pace, 180); });
+})();
+
 </script>
 <script src="site.js"></script>
 <script src="lead-form.js?v=20261002a"></script>
