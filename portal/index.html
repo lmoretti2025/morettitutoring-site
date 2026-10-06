@@ -5699,7 +5699,7 @@ window.Portal = {
      count-up. Pure decoration, self-wiring, safe to remove — see the
      header in fluid-ui.js. -->
 <script src="fluid-ui.js?v=20260905y"></script>
-<script src="banks.js?v=20260926a"></script>
+<script src="banks.js?v=20261006a"></script>
 <script src="signals.js?v=20260927m"></script>
 <script src="desmos-tags.js?v=20260916c"></script>
 <script src="time-budgets.js?v=20260912a"></script>
@@ -11644,7 +11644,11 @@ window.Portal = {
         q = pool.filter(function (item) { return item.key === parts[2]; })[0];
       } else if (parts.length === 4) {
         var bank = null, mod = parts[2], idx = parseInt(parts[3], 10);
-        if (parts[0].indexOf('diag-') === 0) bank = SECTION_BANKS[parts[1]];
+        /* A four-part DIAGNOSTIC key is unresolvable since the 2026-10-06 re-deal: no
+           position holds the item it held when the key was written, so reading a qid out
+           of one would stamp the wrong question onto a practice-log row. See the same
+           guard in resolveQuestionByKey. */
+        if (parts[0].indexOf('diag-') === 0) return null;
         else {
           var pt = (window.SAT_PRACTICE_TESTS || []).filter(function (t) { return t.id === parts[0]; })[0];
           bank = (pt && pt.sections) ? pt.sections[parts[1] === 'reading-writing' ? 'readingWriting' : parts[1]] : null;
@@ -11720,7 +11724,15 @@ window.Portal = {
        is what made this path reachable.) */
     if (!q && wantQid) return null;
     /* No qid in the key at all (a record saved before 2026-09-30): position is the best
-       that can be done, which is what every key did then. */
+       that can be done, which is what every key did then.
+
+       EXCEPT for the diagnostic. On 2026-10-06 all 147 of its items were re-dealt from
+       the gated banks, so not one position still holds the question it held when a
+       four-part key was written. Resolving by position would attach the student's
+       recorded answer to a question they never saw - the exact failure the fifth part
+       was added to prevent, and here we know for certain it would happen rather than
+       merely suspecting it. Drop the record; the caller omits an unresolvable one. */
+    if (!q && testTag.indexOf('diag-') === 0) return null;
     if (!q) q = qs && qs[moduleIndex];
     if (!q) return null;
 
