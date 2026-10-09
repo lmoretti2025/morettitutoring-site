@@ -5719,7 +5719,7 @@ window.Portal = {
      await this promise. */
   window.__practiceTestsReady = new Promise(function (resolve) {
     var s = document.createElement('script');
-    s.src = 'practice-tests.js?v=20261008b';
+    s.src = 'practice-tests.js?v=20261009a';
     // Settled, not loaded: an error resolves too, and a screen
     // needs to stop saying "loading" either way.
     function settle() { window.__practiceTestsSettled = true; resolve(); }
@@ -5762,7 +5762,7 @@ window.Portal = {
       }
     });
   }
-  lazyBank('__questionBankReady', 'question-bank.js?v=20261008d', '__questionBankSettled');
+  lazyBank('__questionBankReady', 'question-bank.js?v=20261009a', '__questionBankSettled');
   lazyBank('__questionBankMathReady', 'question-bank-math.js?v=20261008a', '__questionBankMathSettled');
 
   // Chart.js: only for Home's two donut charts. Loaded async like
@@ -18069,9 +18069,22 @@ window.Portal = {
     /* One collapsed "Full Explanation" after submitting, as in the Question
        Bank runner. Practice-test questions carry per-choice notes instead of
        an explanation, so those are listed there, one per choice. */
-    var explainHtml = st.submitted ? (r.explanation || (r.choiceNotes || []).map(function (n, i) {
-      return n ? '<p><strong>Choice ' + LETTERS[i] + '.</strong> ' + n + '</p>' : '';
-    }).join('')) : '';
+    /* Per-choice notes come FIRST when they cover every choice, and the single-block
+       explanation is the fallback. 1,661 of the 1,668 Reading and Writing bank questions
+       carry both, and because the block used to win, their per-choice notes never reached a
+       student. Measured before the switch: the notes cover every choice in all 1,661, retain
+       a median 93% of the block's length, and the only words the split dropped across a
+       400-item sample were "choice", "answer", "best" and "because" - the scaffolding of
+       "Choice A is the best answer" and "Choice B is incorrect because". One item, a8774aa8,
+       had lost a real sentence in the split and it has been restored. A student reviewing an
+       item can now find the note for the answer they actually picked. */
+    var notes = (r.choiceNotes || []).map(function (n) { return n ? String(n).trim() : ''; });
+    var notesCoverAll = notes.length > 0 && (r.choices || []).length > 0 &&
+      notes.length >= (r.choices || []).length &&
+      notes.slice(0, (r.choices || []).length).every(function (n) { return !!n; });
+    var explainHtml = st.submitted ? (notesCoverAll ? notes.map(function (n, i) {
+      return '<p><strong>Choice ' + LETTERS[i] + '.</strong> ' + n + '</p>';
+    }).join('') : (r.explanation || '')) : '';
     if (explainHtml && window.dxBuildCollapsibleExplain) {
       navRowEl.parentNode.insertBefore(window.dxBuildCollapsibleExplain(explainHtml, iqExplainCtx(r, st)), navRowEl);
     }
