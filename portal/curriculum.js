@@ -19,7 +19,7 @@
 (function () {
   'use strict';
 
-  var DATA_SRC = 'curriculum-data.js?v=20261009a';
+  var DATA_SRC = 'curriculum-data.js?v=20261009b';
   var VIDEO_SRC = 'curriculum-videos.js?v=20261004a';
 
   /* ---------- small helpers ---------- */
