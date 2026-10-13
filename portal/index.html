@@ -402,6 +402,9 @@
   /* Visible by default: revealGreeting() adds .pre-reveal and removes it a
      frame later, so a JS error means no animation, never no greeting. */
   .menu-greeting { font-family: var(--display); font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 700; color: var(--text); text-align: center; margin-bottom: 0.6rem; transition: opacity 0.5s var(--ease), transform 0.5s var(--ease), filter 0.5s var(--ease); }
+  /* Phones only: the top bar hides .nav-countdown under 480px. */
+  .menu-countdown-m { display: none; text-align: center; font-family: var(--hel); font-size: 0.8rem; font-weight: 600; color: var(--red); margin: -0.2rem 0 1rem; }
+  @media (max-width: 480px) { .menu-countdown-m.has-date { display: block; } }
   .menu-greeting.pre-reveal { opacity: 0; transform: translateY(6px); filter: blur(4px); }
   .next-session-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 1.3rem 1.4rem; margin: 0 auto 1.6rem; max-width: 460px; text-align: center; box-shadow: var(--shadow); position: relative; overflow: hidden; }
   /* Gold-to-red accent bar: this card is the one piece of information
@@ -797,6 +800,12 @@
     .home-stats-row > * { border-left: none; border-top: 1px solid var(--border); flex: 0 0 auto; }
     .home-stats-row > *:first-child { border-top: none; }
     .home-shortcuts { grid-template-columns: 1fr; }
+    /* The next session (and its Join button) leads on a phone, above the
+       score chart and weak skills (2026-10-13). */
+    .home-overview:not(.is-subject) .overview-card .home-stats-row { display: contents; }
+    .home-overview:not(.is-subject) .overview-card .next-session-card { order: -1; border-top: none; border-bottom: 1px solid var(--border); }
+    .home-overview:not(.is-subject) .overview-card .mini-skill-pair { border-top: 1px solid var(--border); }
+    .home-overview:not(.is-subject) .overview-card .score-progress-card { border-bottom: none; }
   }
   .mini-skill-label { font-family: var(--hel); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mid); margin-bottom: 0.65rem; }
   .mini-skill-name { font-family: var(--display); font-weight: 700; font-size: 1.3rem; color: var(--text); cursor: pointer; }
@@ -965,12 +974,17 @@
   .res-icon { font-size: 2rem; margin-bottom: 1.25rem; }
   .res-drive-btn { display: inline-block; background: var(--red); color: #fff; font-family: var(--hel); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; padding: 1rem 2.2rem; text-decoration: none; margin-top: 0.5rem; transition: opacity 0.2s; }
   .res-drive-btn:hover { opacity: 0.86; }
+  .pt-next-pill { display: inline-block; vertical-align: middle; margin-left: 0.45rem; font-family: var(--hel); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #fff; background: var(--red); padding: 0.2rem 0.55rem; border-radius: 999px; }
+  .menu-card.pt-up-next { border-color: rgba(176,39,28,0.45); }
   .res-drive-btn-outline { display: inline-block; background: transparent; color: var(--text); border: 1px solid var(--border); font-family: var(--hel); font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.7rem 1.4rem; text-decoration: none; margin-top: 0.85rem; transition: border-color 0.2s; }
   .res-drive-btn-outline:hover { border-color: var(--red); color: var(--red); }
   .res-pending { font-size: 0.85rem; color: var(--mid); line-height: 1.8; }
+  .res-embed-note { font-size: 0.75rem; color: var(--faint); margin: 0.4rem 0 0; }
   .res-embed { width: 100%; height: 420px; border: 1px solid var(--border); margin: 1.25rem 0 0.25rem; background: var(--bg); }
   .menu-back-link { display: block; text-align: center; margin-top: 1.75rem; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); text-decoration: none; }
   .menu-back-link:hover { color: var(--red); }
+  /* The sidebar (a top strip on phones) is always there on these screens. */
+  .screen.has-sidebar .menu-back-link { display: none; }
 
   /* ═══ DIAGNOSTIC INTRO ═══ */
   .intro-list { list-style: none; margin: 0 0 2.25rem; padding: 0; }
@@ -2370,6 +2384,7 @@
   .iq-note-cancel, .iq-note-del { background: var(--white); color: var(--mid); border: 1px solid var(--border); }
   .iq-note-del { margin-right: auto; }
   .iq-item-icon.col { background: #fbf4dd; color: #7a5f12; }
+  .iq-item-skill { font-weight: 700; color: var(--red); margin-right: 0.5rem; }
   .iq-item-preview { flex: 1 1 100%; font-size: 0.85rem; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .vp-summary { text-align: center; background: var(--white); border: 1px solid var(--border); border-radius: 14px; padding: 2rem 1.5rem; }
   .vp-summary .vp-score { font-family: var(--display); font-size: 2.5rem; color: var(--gold); line-height: 1; animation: vpPop 0.4s cubic-bezier(.2,.7,.3,1); }
@@ -4430,6 +4445,7 @@ window.Portal = {
 <div class="screen has-sidebar" id="screen-menu">
   <div class="panel-wide home-panel">
     <h1 class="menu-greeting" id="menu-greeting">Hey there.</h1>
+    <p class="menu-countdown-m" id="menu-countdown-m"></p>
 
     <!-- ═══ HOME EMPTY STATES ═══ replaces the whole dashboard for a student
          who hasn't taken the diagnostic yet, or has and is still inside the
@@ -4795,7 +4811,7 @@ window.Portal = {
     <div class="vp-head">
       <div class="kicker">SAT Resources</div>
       <h1 class="panel-hed">Question Bank</h1>
-      <p class="panel-sub">Every official College Board Reading &amp; Writing question, organized by skill. Pick a subject, then a skill, to start practicing.</p>
+      <p class="panel-sub">Every official College Board question, Reading &amp; Writing and Math, organized by skill. Pick a subject, then a skill, to start practicing.</p>
     </div>
 
     <!-- Runs each subject's weakest skill back to back in one session, using
@@ -4953,7 +4969,7 @@ window.Portal = {
   <div class="panel-wide" id="pt-picker-view">
     <div class="kicker">Practice Tests</div>
     <h1 class="panel-hed">Pick a test.</h1>
-    <p class="panel-sub">Your diagnostic, plus fully-timed, curated practice tests. Note that the majority test <strong>harder</strong> than normal. After you complete a practice test once, any subsequent attempt won't be reported to Luca.</p>
+    <p class="panel-sub">Your diagnostic, plus fully timed, curated practice tests. Most run <strong>harder</strong> than the real SAT. After you complete a practice test once, any subsequent attempt won't be reported to Luca.</p>
     <div class="menu-grid" id="pt-test-list"></div>
     <a href="#" class="menu-back-link" id="pt-list-back">&larr; Back</a>
   </div>
@@ -6956,9 +6972,9 @@ window.Portal = {
         : 'tel:' + LUCA_CONTACT.phone;
     }
     if (askBody) {
-      askBody.textContent = LUCA_CONTACT.email
-        ? 'Stuck on something before your next session? Email Luca at ' + LUCA_CONTACT.email + '.'
-        : 'Stuck on something before your next session? Call or text ' + LUCA_CONTACT.phoneDisplay + '.';
+      // Both ways in, matching the sign-in screen's "Text Luca at ...".
+      askBody.textContent = 'Stuck on something before your next session? Text ' + LUCA_CONTACT.phoneDisplay +
+        (LUCA_CONTACT.email ? ' or email ' + LUCA_CONTACT.email + '.' : '.');
     }
 
     renderAssignments();  // repaints the checklist under this layout's rules
@@ -8558,14 +8574,24 @@ window.Portal = {
           (chg.delta > 0 ? '↑ ' : '↓ ') + mag + ' pts' +
           '<span class="spc-delta-note">' + span + ', beyond the &plusmn;' + chg.threshold + ' that test-to-test variation could explain</span></div>';
       } else {
-        deltaHtml = '<div class="spc-composite-delta flat">No clear change yet' +
-          '<span class="spc-delta-note">' + (chg.delta === 0 ? '' : (chg.delta > 0 ? '+' : '−') + mag + ' points between ') + span +
-          (mag >= chg.threshold
-            // Past the bar on this read but not yet on the one before, or
-            // resting on one test: a change has to hold before it counts.
-            ? '; a change this size counts once it holds on the next test as well, not just this one'
-            : '; separate tests can differ by up to &plusmn;' + chg.threshold + ' on their own' +
-              (chg.k < 3 ? ', so more tests will make this clearer' : '')) + '</span></div>';
+        if (chg.delta > 0) {
+          // An unconfirmed gain still leads with the gain: a student who went
+          // up 130 reads "No clear change yet" as "nothing is working". The
+          // caution moves to the small print (Luca, 2026-10-13).
+          deltaHtml = '<div class="spc-composite-delta">&uarr; ' + mag + ' pts' +
+            '<span class="spc-delta-note">between ' + span + '. ' +
+            (mag >= chg.threshold
+              ? 'It counts once it holds on the next test too.'
+              : 'Tests can swing &plusmn;' + chg.threshold + ' on their own, so the next test will confirm it.') +
+            '</span></div>';
+        } else {
+          deltaHtml = '<div class="spc-composite-delta flat">No clear change yet' +
+            '<span class="spc-delta-note">' + (chg.delta === 0 ? '' : '&minus;' + mag + ' points between ') + span +
+            (mag >= chg.threshold
+              ? '; a change this size counts once it holds on the next test as well, not just this one'
+              : '; separate tests can differ by up to &plusmn;' + chg.threshold + ' on their own' +
+                (chg.k < 3 ? ', so more tests will make this clearer' : '')) + '</span></div>';
+        }
       }
     }
     var barsHtml = '', labelsHtml = '';
@@ -9619,6 +9645,8 @@ window.Portal = {
   }
 
   function renderTestCountdown() {
+    var tcMobile = document.getElementById('menu-countdown-m');
+    if (tcMobile) tcMobile.classList.remove('has-date');
     if (!currentStudent || satHidden()) { tcCard.classList.remove('has-date'); return; }
     var testMs = countdownTestMs();
     if (testMs == null) { tcCard.classList.remove('has-date'); return; }
@@ -9642,6 +9670,10 @@ window.Portal = {
     } else {
       tcDaysMain.textContent = 'Good luck!';
       tcDaysRest.textContent = '';
+    }
+    if (tcMobile) {
+      tcMobile.textContent = tcDaysMain.textContent + tcDaysRest.textContent;
+      tcMobile.classList.add('has-date');
     }
   }
 
@@ -11189,6 +11221,15 @@ window.Portal = {
       checking.innerHTML = '<span class="pt-sync-dot" aria-hidden="true"></span>Checking which tests you have taken\u2026';
       list.appendChild(checking);
     }
+    // "Up next": the first test not yet taken, unless one is mid-test
+    // (its Resume button already says what to do).
+    var hardestId = (typeof HARDEST_TEST_ID !== 'undefined') ? HARDEST_TEST_ID : null;
+    var nextTestId = null;
+    if (!snapshot) {
+      for (var ni = 0; ni < tests.length; ni++) {
+        if (!done[tests[ni].id] && tests[ni].id !== hardestId) { nextTestId = tests[ni].id; break; }
+      }
+    }
     tests.forEach(function (test) {
       var mathQ = ((test.sections || {}).math || {});
       var rwQ = ((test.sections || {}).readingWriting || {});
@@ -11215,13 +11256,14 @@ window.Portal = {
         result: result,
         idleMeta: sectionOnlyCount ? 'Section practiced &middot; full test available' : totalQ + ' questions &middot; timed'
       });
-      card.className = 'menu-card menu-card-wide' + st.cls;
+      card.className = 'menu-card menu-card-wide' + st.cls + (test.id === nextTestId ? ' pt-up-next' : '');
       // Not gated on `result`: a test sat only in halves has no `result`
       // (see practiceTestResultsById) but still has reports to open.
       var attempts = attemptMenuItems(practiceTestAttempts(test.id));
       card.innerHTML =
         '<span class="' + (num ? 'pt-num' : 'menu-card-icon') + '">' + (num || '&#9201;') + '</span>' +
-        '<div class="pt-card-text"><div class="menu-card-title">' + parts.name + '</div>' +
+        '<div class="pt-card-text"><div class="menu-card-title">' + parts.name +
+          (test.id === nextTestId ? ' <span class="pt-next-pill">Up next</span>' : '') + '</div>' +
         (parts.note ? '<div class="pt-note">' + parts.note + '</div>' : '') +
         st.score +
         '<div class="pt-meta">' + st.meta + '</div>' +
@@ -11436,9 +11478,12 @@ window.Portal = {
     var folderId = driveFolderId(url);
     if (folderId) {
       body.innerHTML =
-        '<p class="res-pending">Everything Luca has shared with you lives here. This folder is restricted to your Google account. If it doesn\'t load below, make sure you\'re signed into the Google account Luca shared it with, or use the button to open it directly in Drive and sign in there.</p>' +
+        // The button leads: Safari and iPhones often block the embedded
+        // folder (third-party cookies), leaving a blank box (2026-10-13).
+        '<p class="res-pending">Everything Luca has shared with you lives in your Google Drive folder.</p>' +
+        '<a href="' + url + '" target="_blank" rel="noopener" class="res-drive-btn">Open in Google Drive</a>' +
         '<iframe class="res-embed" src="https://drive.google.com/embeddedfolderview?id=' + folderId + '#list" loading="lazy"></iframe>' +
-        '<a href="' + url + '" target="_blank" rel="noopener" class="res-drive-btn-outline">Open in Google Drive &rarr;</a>';
+        '<p class="res-embed-note">Blank above? Use the button, signed into the Google account Luca shared the folder with.</p>';
     } else {
       body.innerHTML = '<p class="res-pending">Everything Luca has shared with you lives in your personal folder.</p>' +
         '<a href="' + url + '" target="_blank" rel="noopener" class="res-drive-btn">Open My Folder</a>';
@@ -17451,7 +17496,10 @@ window.Portal = {
       (r.isSaved ? '<span class="iq-pill iq-pill-category">&#11088; Saved</span>' : '') +
       (isUnderstood(r) ? '<span class="iq-pill iq-pill-understood">&#10003; Understood</span>' : '') +
       '<span class="iq-item-time">' + relativeTimeLabel(r.attemptedAt) + '</span>' +
-      '<div class="iq-item-preview">' + iqPreviewText((splitPassage(r) || {}).question || r.text) + '</div>' +
+      // Skill plus the start of the passage: most R&W stems are identical
+      // ("Which choice completes the text..."), so the stem alone can't tell rows apart.
+      '<div class="iq-item-preview">' + (r.skill ? '<span class="iq-item-skill">' + escHtml(r.skill) + '</span>' : '') +
+        iqPreviewText(String((splitPassage(r) || {}).passage || r.text || '').replace(/<(table|svg)[\s\S]*?<\/\1>/gi, ' ')) + '</div>' +
     '</div>';
     return '<div class="iq-item" data-key="' + escHtml(r.key) + '">' + summary + noteHtml(r) + actionsHtml(r) + '</div>';
   }
