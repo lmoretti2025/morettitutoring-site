@@ -1195,6 +1195,22 @@
      The report id is in the URL fragment, readable before any of this runs,
      so the question is answerable here. An unreadable or missing fragment
      loads the file anyway: the safe way to be wrong (Luca, 2026-09-16). */
+  /* The 12 tests as they stood before the cutover. Hardcoded because the archive is
+     frozen by definition, and because this has to be answerable before any test file has
+     loaded. sat-practice-13 and sat-practice-14 are absent from it, which is itself a
+     version signal: an attempt naming one can only be post-cutover. */
+  var V1_TEST_IDS = ['sat-practice-1','sat-practice-2','sat-practice-3','sat-practice-4',
+                     'sat-practice-5','sat-practice-6','sat-practice-7','sat-practice-8',
+                     'sat-practice-9','sat-practice-10','sat-practice-11','sat-practice-12'];
+  /* The instant the audited tests went live: the GitHub Pages release of 40ce30d,
+     2026-10-13T03:03:19Z. An attempt submitted before it was answered against the
+     archive. */
+  var CUTOVER_MS = Date.parse('2026-10-13T03:03:19Z');
+  /* An attempt STARTED before the release and submitted after it still had the old
+     questions in the browser, so its version cannot be read off the clock. Reports in
+     that window say so rather than guessing silently. */
+  var CUTOVER_GREY_MS = 6 * 60 * 60 * 1000;
+
   (function () {
     // The public sample report never reads a practice test.
     if (/[?&]demo=1\b/.test(location.search)) return;
@@ -1206,7 +1222,33 @@
         needed = !!(d && d.pt);
       }
     } catch (e) { /* unreadable link: load it and let the report say so */ }
-    if (needed) document.write('<script src="practice-tests.js?v=20261013a"><\/script>');
+    /* WHICH VERSION of the tests this attempt was answered against.
+       A saved attempt records answers BY POSITION and carries no qids, and the
+       audited tests that landed on 2026-10-13 re-pointed 85% of those positions.
+       So an attempt from before that must be regraded against the archive, not
+       against the live file, or the report scores a student on questions they
+       never saw. Decided here because the payload is in the URL fragment and is
+       readable before anything loads. */
+    if (needed) {
+      var v1 = false;
+      try {
+        if (d) {
+          if (d.tv) {
+            v1 = (d.tv === 1);                       // stamped at submit: authoritative
+          } else if (V1_TEST_IDS.indexOf(d.pt) < 0) {
+            v1 = false;                              // a test that exists only now
+          } else {
+            var t = d.ts ? Date.parse(d.ts) : NaN;
+            // No timestamp at all predates `ts` itself, so it predates the cutover.
+            v1 = !isFinite(t) || t < CUTOVER_MS;
+          }
+        }
+      } catch (e) { v1 = false; }
+      window.__MT_TEST_VERSION = v1 ? 1 : 2;
+      document.write(v1
+        ? '<script src="practice-tests-v1.js?v=20261013a"><\/script>'
+        : '<script src="practice-tests.js?v=20261013a"><\/script>');
+    }
   })();
 </script>
 <script src="time-budgets.js?v=20260912a"></script>
@@ -2159,9 +2201,77 @@
     var mo = moduleOnlyOf(sectionKey);
     return mo ? (sectionKey === 'math' ? 'Math' : 'Reading & Writing') + ', ' + (mo === 'module1' ? 'Module 1' : 'Module 2 (' + (mo === 'Harder' ? 'harder' : 'easier') + ')') : '';
   }
+  /* THE TESTS AS THIS ATTEMPT SAW THEM.
+
+     Only one of the two files is loaded (see the version decision in the head), so this
+     returns whichever arrived. It deliberately does NOT fall back from the archive to the
+     live file: if practice-tests-v1.js failed to load, the honest outcome is a report with
+     no question detail, not a report that regrades a student's answers against questions
+     they never saw. That silent regrade is the whole defect this exists to fix. */
+  function ptTests() {
+    if (window.__MT_TEST_VERSION === 1) return window.SAT_PRACTICE_TESTS_V1 || [];
+    return window.SAT_PRACTICE_TESTS || [];
+  }
+
+  /* The same question for SOME OTHER attempt (the previous-sitting comparison), which can
+     sit on the other side of the cutover from the one being viewed. */
+  function ptTestsFor(att) {
+    var v;
+    if (att && att.tv) v = att.tv;
+    else if (att && V1_TEST_IDS.indexOf(att.pt) < 0) v = 2;
+    else {
+      var t = att && att.ts ? Date.parse(att.ts) : NaN;
+      v = (!isFinite(t) || t < CUTOVER_MS) ? 1 : 2;
+    }
+    if (v === 1) return window.SAT_PRACTICE_TESTS_V1 || [];
+    return window.SAT_PRACTICE_TESTS || [];
+  }
+
+  /* ═══ RESOLVE A SECTION'S QUESTIONS BY QID WHEN THE ATTEMPT RECORDS THEM ═══
+     From 2026-10-13 an attempt carries `q`: the qid of every question, in the same order
+     as its answers. When it is there, use it - that is what makes an attempt readable
+     however the tests change afterwards, and it is the fix for the defect that made the
+     archive necessary in the first place. Older attempts have no `q` and fall back to
+     position, which is correct for them because they are resolved against the archive.
+
+     A qid that cannot be found (a question retired after the attempt) falls back to the
+     slot and is COUNTED, so the report can say the detail is approximate rather than
+     quietly show a different question. */
+  var _qidIndex = null;
+  var _qidMisses = 0;
+  function findByQid(qid) {
+    if (!_qidIndex) {
+      _qidIndex = {};
+      [window.SAT_PRACTICE_TESTS_V1, window.SAT_PRACTICE_TESTS].forEach(function (T) {
+        (T || []).forEach(function (t) {
+          Object.keys(t.sections || {}).forEach(function (sk) {
+            Object.keys(t.sections[sk] || {}).forEach(function (mk) {
+              var arr = t.sections[sk][mk];
+              if (Array.isArray(arr)) arr.forEach(function (it) {
+                if (it && it.qid && !_qidIndex[it.qid]) _qidIndex[it.qid] = it;
+              });
+            });
+          });
+        });
+      });
+    }
+    return _qidIndex[qid] || null;
+  }
+  function questionsFor(bank, sec) {
+    var byPos = sectionQuestions(bank, sec && sec.v);
+    if (!sec || !Array.isArray(sec.q) || !sec.q.length) return byPos;
+    var out = [];
+    for (var i = 0; i < sec.q.length; i++) {
+      var q = sec.q[i] ? findByQid(sec.q[i]) : null;
+      if (!q) { q = byPos[i]; _qidMisses++; }
+      out.push(q);
+    }
+    return out;
+  }
+
   function getBank(sectionKey) {
     if (data.pt) {
-      var pt = (window.SAT_PRACTICE_TESTS || []).filter(function (t) { return t.id === data.pt; })[0];
+      var pt = ptTests().filter(function (t) { return t.id === data.pt; })[0];
       if (pt && pt.sections) {
         var ptKey = sectionKey === 'reading-writing' ? 'readingWriting' : sectionKey;
         if (pt.sections[ptKey]) {
@@ -2243,7 +2353,7 @@
   data.s.forEach(function (sec) {
     var bank = getBank(sec.k);
     if (!bank) return;
-    var qs = sectionQuestions(bank, sec.v), c = 0, rows = [];
+    var qs = questionsFor(bank, sec), c = 0, rows = [];
     var secDomains = {}; // this section's own domain/skill breakdown — kept
                           // separate from the global domains{}/skills{} so
                           // the report can show what's weak within THIS
@@ -2518,7 +2628,7 @@
           var wrongHere = view.rows.filter(function (r) { return r.q && r.q.type === 'mc' && !r.skipped && !r.ok; }).length;
           var raw = (data.s || []).filter(function (x) { return x.k === view.key; })[0];
           var bank = raw && getBank(raw.k);
-          var d = bank ? MS.decodeSection(raw, sectionQuestions(bank, raw.v), { grade: isCorrect, module1Length: bank.module2Easier ? bank.module1.length : undefined }) : null;
+          var d = bank ? MS.decodeSection(raw, questionsFor(bank, raw), { grade: isCorrect, module1Length: bank.module2Easier ? bank.module1.length : undefined }) : null;
           if (d && d.recorded && d.rows.some(function (r) { return r.masks; })) { sum += MS.guessingLift(d.rows).elim; elimAware = true; }
           else sum += wrongHere / 3;
         });
@@ -2533,7 +2643,7 @@
   // 2026-09-12), so the report names the test as it is numbered now, found
   // by its id, which never changes. The saved title is the fallback.
   if (data.pt) {
-    var ptNow = (window.SAT_PRACTICE_TESTS || []).filter(function (t) { return t.id === data.pt; })[0];
+    var ptNow = ptTests().filter(function (t) { return t.id === data.pt; })[0];
     if (ptNow && ptNow.title) data.ptTitle = ptNow.title;
   }
   var first = (data.n || 'Student').split(' ')[0];
@@ -4600,7 +4710,7 @@
         var bank = getBank(sec.k);
         var view = sections.filter(function (x) { return x.key === sec.k; })[0];
         if (!bank || !view) return;
-        var qs = sectionQuestions(bank, sec.v);
+        var qs = questionsFor(bank, sec);
         var d = MS.decodeSection(sec, qs, { grade: isCorrect, module1Length: bank.module2Easier ? bank.module1.length : undefined });
         if (d && d.recorded && d.rows.length === qs.length) parts.push({ sec: sec, bank: bank, view: view, qs: qs, d: d });
       });
@@ -5425,6 +5535,36 @@
   /* page 2 — raw data */
   document.getElementById('raw-score').textContent = 'Raw score: ' + totalC + ' / ' + totalQ + ' (' + pct + '%)';
   document.getElementById('raw-sections').textContent = sections.map(function (s3) { return s3.label + ' ' + s3.c + '/' + s3.t; }).join(' · ') + (markedT ? ' · Marked for review: ' + markedT : '') + (skipped ? ' · Skipped: ' + skipped : '');
+  /* SAY WHICH VERSION OF THE TEST THIS IS SCORED AGAINST, when it is not the current one.
+     The detail below is only meaningful if it shows the questions the student actually
+     answered, and for an attempt from before 2026-10-13 those are the archived ones. An
+     attempt in the hours either side of the release cannot be placed by its timestamp -
+     it may have been started on the old questions and submitted after the new ones went
+     live - so that case says so instead of quietly picking one. */
+  (function () {
+    if (!data.pt) return;
+    var note = document.getElementById('raw-sections');
+    var ts = data.ts ? Date.parse(data.ts) : NaN;
+    var grey = !data.tv && isFinite(ts) && ts >= CUTOVER_MS && ts < CUTOVER_MS + CUTOVER_GREY_MS;
+    var msg = '';
+    if (window.__MT_TEST_VERSION === 1) {
+      msg = 'Scored against the test as it stood when this was taken, before the 13 October revision.';
+    } else if (grey) {
+      msg = 'This attempt was submitted just after the 13 October test revision, so the '
+          + 'question detail below may not be the exact wording it was sat on. The score is unaffected.';
+    }
+    if (!msg && _qidMisses > 0) {
+      msg = _qidMisses + ' question' + (_qidMisses === 1 ? '' : 's') + ' recorded in this '
+          + 'attempt no longer exist in the test, so the detail for '
+          + (_qidMisses === 1 ? 'it is' : 'those is') + ' approximate. The score is unaffected.';
+    }
+    if (!msg) return;
+    var p = document.createElement('p');
+    p.className = 'raw-sub';
+    p.style.fontStyle = 'italic';
+    p.textContent = msg;
+    note.parentNode.insertBefore(p, note.nextSibling);
+  })();
   // Builds the expanded detail for one question row: the prompt (trusted
   // HTML from the question bank, with its own formatting and equations), MC
   // choices with the correct one and the student's pick marked, or a
@@ -8254,7 +8394,9 @@
         var pp = data.pp, ppItems = [];
         var bankFor = function (k) {
           if (pp.pt) {
-            var T = (window.SAT_PRACTICE_TESTS || []).filter(function (t) { return t.id === pp.pt; })[0];
+            // pp is the PREVIOUS attempt, which may predate the cutover even when this
+            // one does not, so it gets its own version rather than this report's.
+            var T = ptTestsFor(pp).filter(function (t) { return t.id === pp.pt; })[0];
             var tk = k === 'reading-writing' ? 'readingWriting' : k;
             if (T && T.sections && T.sections[tk]) return T.sections[tk];
           }

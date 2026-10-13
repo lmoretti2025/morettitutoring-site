@@ -14452,6 +14452,14 @@ window.Portal = {
       // time of day (e.g. a late-night finish). UTC ISO string; report.html
       // converts it with toLocaleTimeString().
       ts: attemptTimestamp,
+      /* tv = which version of the practice tests this attempt was answered against.
+         Stamped from 2026-10-13 because an attempt records answers BY POSITION, and when
+         the audited tests landed that day 85% of positions came to hold a different
+         question - so every report written before it was being regraded against questions
+         its student never saw. report.html reads tv (and the per-section `q` below) to
+         score an attempt against what was actually on the screen. An attempt with no tv
+         predates the stamp and is therefore version 1. */
+      tv: 2,
       // Onboarding/Account Settings goal: report.html's score-bridge chart uses
       // it as the default target instead of "current + 150"; the chart's own
       // target field/drag-handle can still override it for that view.
@@ -14473,6 +14481,18 @@ window.Portal = {
           // so the report's flag column and "never used flag" check reflect
           // what actually happened.
           k: sec.key, a: sec.answers, m: (sec.everMarked || sec.marked || []).map(function (x) { return x ? 1 : 0; }), v: sec.module2Variant || null,
+          /* q = the qid of each question, in the same order as `a`, so this attempt stays
+             readable however the tests change later. ~1.4KB per attempt, which is the
+             price of never needing another frozen snapshot. Built with the same two
+             helpers the runner used to show the questions, so it cannot drift from `a`:
+             bankFor() honours moduleOnly, sectionQuestions() concatenates module 1 and
+             the routed module 2. */
+          q: (function () {
+            try {
+              return sectionQuestions(bankFor(sec.key), sec.module2Variant || null)
+                .map(function (x) { return (x && x.qid) || null; });
+            } catch (e) { return null; }
+          })(),
           // mo: one module sat on its own ('module1' / 'Easier' / 'Harder'); a holds only its answers.
           mo: moduleOnly || undefined,
           // Per-question timing: tm = total ms on the question, fv/lv = Date.now()
