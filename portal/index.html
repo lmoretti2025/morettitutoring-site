@@ -9100,7 +9100,11 @@ window.Portal = {
     }
     if (satShown.length >= 1) addChart('SAT Composite (400–1600)', satShown, 400, 1600, allSat.length, 'SAT', level);
     if (satShown.length >= 1 && hardestTaken) {
-      html += '<div class="spc-note">Practice Test 12 isn’t on this chart: every question on it is hard, so it would read as a drop.</div>';
+      /* The name comes from the test itself. Hardcoded, it said "Practice Test 12" while
+         HARDEST_TEST_ID pointed at sat-practice-11, whose title is "SAT Practice Test 13 -
+         Hardest Full-Length Test" - so the one student who had just sat it was told the
+         wrong test was missing from the chart. */
+      html += '<div class="spc-note">' + (function(){var T=(window.SAT_PRACTICE_TESTS||[]),i,t;for(i=0;i<T.length;i++){if(T[i].id===HARDEST_TEST_ID){t=String(T[i].title||'');t=t.split('—')[0].replace(/^SAT\s+/,'').trim();return t||'That test';}}return 'That test';})() + ' isn’t on this chart: every question on it is hard, so it would read as a drop.</div>';
     }
     scoreProgressChartsEl.innerHTML = html;
     scoreProgressCard.style.display = '';
