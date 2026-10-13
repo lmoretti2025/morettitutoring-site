@@ -13847,7 +13847,7 @@ window.Portal = {
     var qs = activeQuestions();
     var q = qs[current];
     var splitParts = splitRwPassage(q);
-    qtextEl.innerHTML = splitParts ? splitParts.question : window.mathFor(currentSectionKey() === 'math' ? { domain: 'Algebra' } : q, q.text);
+    window.dxSetStem(qtextEl, splitParts ? splitParts.question : window.mathFor(currentSectionKey() === 'math' ? { domain: 'Algebra' } : q, q.text), 'eng:' + currentSectionKey() + ':' + current + ':' + (q.qid || ''));
     renderPassagePane(q, splitParts);
     flagTestQuestion(q);
 
@@ -17658,6 +17658,19 @@ window.Portal = {
     return isMath ? window.mathDisplay(html) : html;
   };
 
+  /* THE QUESTION STEM, WRITTEN ONCE PER QUESTION (2026-10-13). Highlights live in the DOM, so
+     rewriting the stem wiped them, and every cross-out or answer pick redraws the question. A redraw of
+     the same question with the same text now leaves the stem (and its highlights) alone; a different
+     question, or a key of null (summary screens, figures), always writes. */
+  window.dxSetStem = function (el, html, key) {
+    if (!el) return;
+    html = String(html == null ? '' : html);
+    if (key != null && el._stemKey === key && el._stemSrc === html) return;
+    el.innerHTML = html;
+    el._stemKey = key == null ? null : key;
+    el._stemSrc = html;
+  };
+
   window.qbFormatPassage = function (passage) {
     passage = qbHealHyphenWraps(String(passage || '').trim());
     if (QB_VERSE_RE.test(passage)) return qbFormatVerse(passage);
@@ -18440,7 +18453,7 @@ window.Portal = {
       var leftCount = Math.max(0, runnerQueue.length - reachedCount);
       if (attemptedCount === 0) { runnerReached = null; endPracticeRunner(); return; }
       document.getElementById('dx-notice-text').textContent = 'PRACTICE MODE: DONE';
-      qtextEl.innerHTML = '';
+      window.dxSetStem(qtextEl, '', null);
       choicesEl.style.display = 'none';
       frRowEl.style.display = 'none';
       navRowEl.style.display = 'none';
@@ -18495,7 +18508,7 @@ window.Portal = {
     });
     var split = splitPassage(r);
     var questionText = split ? split.question : r.text;
-    qtextEl.innerHTML = questionText;
+    window.dxSetStem(qtextEl, questionText, 'iq:' + r.key);
     // Reading & Writing's stimulus is inline in r.text (see splitPassage
     // above), so the split is all the passage pane needs.
     if (window.dxRenderPassagePane) window.dxRenderPassagePane({}, split, r.key);
@@ -20412,7 +20425,7 @@ window.Portal = {
       var leftCount = Math.max(0, runnerQueue.length - reachedCount);
       if (attemptedCount === 0) { runnerReached = null; endRunner(); return; }
       document.getElementById('dx-notice-text').textContent = (rushCfg ? 'RUSH' : 'PRACTICE MODE') + ': DONE';
-      qtextEl.innerHTML = '';
+      window.dxSetStem(qtextEl, '', null);
       choicesEl.style.display = 'none';
       navRowEl.style.display = 'none';
       nextBtnEl.disabled = true;
@@ -20488,7 +20501,7 @@ window.Portal = {
       // images (see question-bank-math.js). No passage pane; the 4 choices
       // are plain lettered buttons below the choices image.
       if (window.dxRenderPassagePane) window.dxRenderPassagePane({}, null);
-      qtextEl.innerHTML = '<img src="' + r.qImg + '" alt="Question figure" style="max-width:100%;">';
+      window.dxSetStem(qtextEl, '<img src="' + r.qImg + '" alt="Question figure" style="max-width:100%;">', 'qbimg:' + r.qid);
       var ansWrap = document.createElement('div');
       ansWrap.style.width = '100%';
       var ansImgEl = document.createElement('img');
@@ -20529,7 +20542,7 @@ window.Portal = {
       // math setup sentence before its question would falsely split into
       // two panes.
       var split = (r._qbSubject || currentSubject) === 'math' ? null : splitPassageQb(r.text);
-      qtextEl.innerHTML = split ? split.question : ((r._qbSubject || currentSubject) === 'math' ? window.mathDisplay(r.text) : r.text);
+      window.dxSetStem(qtextEl, split ? split.question : ((r._qbSubject || currentSubject) === 'math' ? window.mathDisplay(r.text) : r.text), 'qb:' + r.qid);
       if (window.dxRenderPassagePane) window.dxRenderPassagePane({}, split, r.qid);
       choicesEl.style.display = 'none';
       frRowEl.style.display = st.submitted ? 'none' : 'flex';
@@ -20563,7 +20576,7 @@ window.Portal = {
       // math setup sentence before its question would falsely split into
       // two panes.
       var split = (r._qbSubject || currentSubject) === 'math' ? null : splitPassageQb(r.text);
-      qtextEl.innerHTML = split ? split.question : ((r._qbSubject || currentSubject) === 'math' ? window.mathDisplay(r.text) : r.text);
+      window.dxSetStem(qtextEl, split ? split.question : ((r._qbSubject || currentSubject) === 'math' ? window.mathDisplay(r.text) : r.text), 'qb:' + r.qid);
       if (window.dxRenderPassagePane) window.dxRenderPassagePane({}, split, r.qid);
       r.choices.forEach(function (c, i) {
         var isElim = !st.submitted && (st.elim || []).indexOf(i) !== -1;
