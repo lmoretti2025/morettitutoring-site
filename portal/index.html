@@ -19199,10 +19199,24 @@ window.Portal = {
   // (e.g. "Non-Bluebook", "August 2026 SAT") — computed fresh each time
   // showSkills() resets the filters, same as selectedDifficulties.
   var selectedSources = [];
+  /* One name per source, for filtering and for the chips students see.
+     Questions Luca wrote to fill a thin cell carry a working note as their
+     source ("Moretti generated 2026-10-10 to fill ... (CB supplies only 7)");
+     they are his questions like the rest, so they file under his name. */
+  window.qbSource = function (q) {
+    var s = q.source || 'Non-Bluebook';
+    return /^Moretti/i.test(s) ? 'Moretti Test Prep & Tutoring' : s;
+  };
+  // What a student reads on a source chip; the value underneath is unchanged.
+  window.qbSourceLabel = function (s) {
+    if (s === 'Non-Bluebook') return 'College Board';
+    var m = /^([A-Z][a-z]+) SAT (\d{4})$/.exec(s);
+    return m ? m[1] + ' ' + m[2] + ' SAT' : s;
+  };
   function availableSources(subject) {
     var seen = {}, list = [];
     poolFor(subject).forEach(function (q) {
-      var src = q.source || 'Non-Bluebook';
+      var src = qbSource(q);
       if (!seen[src]) { seen[src] = true; list.push(src); }
     });
     return list;
@@ -19318,7 +19332,7 @@ window.Portal = {
     // The same two tests startRunner() applies when it builds a queue.
     function passesFilters(q) {
       return selectedDifficulties.indexOf(q.difficulty) !== -1 &&
-        selectedSources.indexOf(q.source || 'Non-Bluebook') !== -1;
+        selectedSources.indexOf(qbSource(q)) !== -1;
     }
 
     var html = '';
@@ -19534,7 +19548,7 @@ window.Portal = {
     entries.forEach(function (s) {
       s.questions.forEach(function (q) {
         if (selectedDifficulties.indexOf(q.difficulty) === -1) return;
-        if (selectedSources.indexOf(q.source || 'Non-Bluebook') === -1) return;
+        if (selectedSources.indexOf(qbSource(q)) === -1) return;
         if (qbShow !== 'all' && (qbShow === 'not') === !!p.attempts[q.qid]) return;
         pool.push(q);
       });
@@ -19782,7 +19796,7 @@ window.Portal = {
       if (q.type === 'fr') { if (q.answerValue == null) return false; }
       else if (!(Array.isArray(q.choices) && q.choices.length >= 2 && typeof q.correct === 'number')) return false;
       if (f.difficulties && f.difficulties.indexOf(q.difficulty) === -1) return false;
-      if (f.sources && f.sources.indexOf(q.source || 'Non-Bluebook') === -1) return false;
+      if (f.sources && f.sources.indexOf(qbSource(q)) === -1) return false;
       if (f.domains && f.domains.indexOf(q.domain) === -1) return false;
       var tried = !!p.attempts[q.qid];
       if (f.show === 'not' && tried) return false;
@@ -19794,7 +19808,7 @@ window.Portal = {
   window.rushFacets = function (subject) {
     var src = {}, dom = {}, sources = [], domains = [];
     withMode('qb', function () { return poolFor(subject); }).forEach(function (q) {
-      var s0 = q.source || 'Non-Bluebook';
+      var s0 = qbSource(q);
       if (!src[s0]) { src[s0] = 1; sources.push(s0); }
       if (q.domain && !dom[q.domain]) { dom[q.domain] = 1; domains.push(q.domain); }
     });
@@ -20362,7 +20376,7 @@ window.Portal = {
     var qs = [];
     allSkills().forEach(function (s) { if (skills.indexOf(s.skill) !== -1) qs = qs.concat(s.questions); });
     var sources = [];
-    qs.forEach(function (q) { var src = q.source || 'Non-Bluebook'; if (sources.indexOf(src) === -1) sources.push(src); });
+    qs.forEach(function (q) { var src = qbSource(q); if (sources.indexOf(src) === -1) sources.push(src); });
     // Only difficulties these topics have (Challenge Questions are mostly hard).
     var DIFFS = ['easy', 'medium', 'hard'].filter(function (d) { return qs.some(function (q) { return q.difficulty === d; }); });
     if (!DIFFS.length) DIFFS = ['easy', 'medium', 'hard'];
@@ -20382,7 +20396,7 @@ window.Portal = {
     function pool(st) {
       return qs.filter(function (q) {
         if (st.difficulties.indexOf(q.difficulty) === -1) return false;
-        if (st.sources.indexOf(q.source || 'Non-Bluebook') === -1) return false;
+        if (st.sources.indexOf(qbSource(q)) === -1) return false;
         return st.show === 'all' || (st.show === 'not') !== !!p.attempts[q.qid];
       });
     }
@@ -20397,7 +20411,7 @@ window.Portal = {
         var rows = [{ key: 'difficulties', label: 'Difficulty', type: 'chips',
           items: DIFFS.map(function (d) { return { v: d, label: d.charAt(0).toUpperCase() + d.slice(1) }; }) }];
         if (sources.length > 1) rows.push({ key: 'sources', label: 'Source', type: 'chips',
-          items: sources.map(function (x) { return { v: x, label: x }; }) });
+          items: sources.map(function (x) { return { v: x, label: qbSourceLabel(x) }; }) });
         rows.push({ key: 'show', label: 'Show', type: 'seg',
           items: [{ v: 'all', label: 'All' }, { v: 'not', label: 'Not started' }, { v: 'done', label: 'Started' }] });
         rows.push({ key: 'len', label: 'Round length', type: 'slider', min: QB_SIZE_MIN, max: QB_SIZE_MAX, step: QB_SIZE_STEP,
@@ -27756,7 +27770,7 @@ window.renderNativeReport = function (data) {
     // Source, only when there is a choice to make (the bank does the same)
     if (facets.sources.length > 1) {
       var sr = row('Source'), sc = document.createElement('div'); sc.className = 'qb-chips';
-      chips(sc, facets.sources.map(function (x) { return { v: x, label: x }; }), f.sources);
+      chips(sc, facets.sources.map(function (x) { return { v: x, label: qbSourceLabel(x) }; }), f.sources);
       sr.appendChild(sc);
     }
 
