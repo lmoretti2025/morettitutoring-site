@@ -93,7 +93,16 @@ safe(function(){
   function pickDoor(want) {
     var pick = want && document.getElementById(want === 'call' ? 'rf-start-call' : want === 'diagnostic' ? 'rf-start-diag' : '');
     if (pick) pick.checked = true;
+    doorLabel();
   }
+  /* The button says what the picked door does: a family who chose to talk
+     first is not sent off with "Take the free diagnostic" (2026-10-05). */
+  var doorBtn = document.getElementById('rf-submit'), doorDefault = doorBtn ? doorBtn.innerHTML : '';
+  function doorLabel() {
+    var c = document.getElementById('rf-start-call');
+    if (doorBtn && c) doorBtn.innerHTML = c.checked ? '<span>Ask for a call</span>' : doorDefault;
+  }
+  [].forEach.call(form.querySelectorAll('input[name="start"]'), function (r) { r.addEventListener('change', doorLabel); });
   try { pickDoor(new URLSearchParams(location.search).get('start')); } catch (err) {}
   [].forEach.call(document.querySelectorAll('[data-start]'), function (a) {
     a.addEventListener('click', function () { pickDoor(a.getAttribute('data-start')); });
@@ -162,7 +171,8 @@ safe(function(){
     }
     /* The page's own label, so a form whose button says something else
        (the diagnostic page) comes back to its own words, not "Get started". */
-    var btnLabel = btn.textContent;
+    // innerHTML, not textContent: the label sits in a <span> that keeps it above the shimmer (site.css .shimmer>span).
+    var btnLabel = btn.innerHTML;
     btn.disabled = true; btn.textContent = 'Sending…';
     fetch(LEAD_BACKEND_URL, {
       method: 'POST',
@@ -181,11 +191,11 @@ safe(function(){
           if (window.MTrack) window.MTrack.lead({ source: 'site_form', page: location.pathname, start: start || 'unset', has_message: message ? 1 : 0 });
         } catch (err) {}
         form.reset();
-        btn.disabled=false; btn.textContent=btnLabel;
+        btn.disabled=false; btn.innerHTML=btnLabel;
       })
       .catch(function(){
         bad.style.display='block'; ok.style.display='none';
-        btn.disabled=false; btn.textContent=btnLabel;
+        btn.disabled=false; btn.innerHTML=btnLabel;
       });
   });
 });

@@ -116,6 +116,18 @@
   .prep-next { font-size: 0.82rem; color: var(--mid); margin: 0 0 1rem; line-height: 1.6; }
   .prep-next b { color: var(--text); font-weight: 600; }
   .prep-topics { width: 100%; border-collapse: collapse; font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+  .prep-topics tr.cu-row { cursor: pointer; }
+  .prep-topics tr.cu-row:hover > td { background: var(--soft, #faf8f5); }
+  .prep-topics .cu-tw { display: inline-block; width: 1em; color: var(--faint); font-size: 0.8em; }
+  .prep-topics tr.cu-ans > td { padding: 0 0 0.6rem 1.6rem; background: var(--soft, #faf8f5); }
+  .cu-atab { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+  .cu-atab th { text-align: left; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); padding: 0.3rem 0.5rem; }
+  .cu-atab th.n, .cu-atab td.n { text-align: center; white-space: nowrap; }
+  .cu-atab td { padding: 0.3rem 0.5rem; border-top: 1px solid var(--line, #eee); vertical-align: top; line-height: 1.45; }
+  .cu-atab tr.cu-a-no td { color: var(--text); }
+  .cu-atab tr.cu-a-no td.n:last-child { color: #b0271c; font-weight: 700; }
+  .cu-atab tr.cu-a-ok td.n:last-child { color: #1d6b3a; }
+  .cu-atab .cu-a-wait { color: var(--faint); font-style: italic; }
   .prep-topics th { text-align: left; font-size: 0.64rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); padding: 0 0.5rem 0.4rem 0; }
   .prep-topics td { padding: 0.35rem 0.5rem 0.35rem 0; border-top: 1px solid var(--border); }
   .prep-topics td.n, .prep-topics th.n { text-align: right; }
@@ -261,6 +273,13 @@
   @media (prefers-reduced-motion: reduce) { .live-dot.on { animation: none; } }
   .live-now { color: var(--green); font-weight: 700; }
   .live-where { display: block; color: var(--faint); font-size: 0.72rem; font-weight: 400; }
+  .stu-live { font-size: 0.8rem; margin-top: 0.35rem; }
+  .stu-live:empty { display: none; }
+  .stu-live .live-now::before { content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--green); margin-right: 0.4rem; vertical-align: 1px; }
+  .stu-live .where { color: var(--mid); margin-left: 0.35rem; }
+  .cu-prep-head { font-size: 0.8rem; color: var(--mid); margin: 0 0 0.5rem; }
+  .cu-prep-head b { color: var(--text); font-weight: 600; }
+  .prep-topics td.cu-done { color: var(--green); white-space: nowrap; }
   .summary-tile.live .num { color: var(--green); }
   .weakest-label { font-size: 0.78rem; }
   /* What the evidence says */
@@ -313,6 +332,9 @@
   .stu-meta { font-size: 0.78rem; color: var(--mid); display: flex; flex-wrap: wrap; gap: 0.35rem 1rem; margin-bottom: 1rem; }
   .stu-meta span b { font-weight: 700; color: var(--text); }
   .stu-actions { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+  .stu-sync { font-size: 0.74rem; color: var(--faint); }
+  .stu-sync.warn { color: var(--red); }
+  .stu-sync .mini { margin-left: 0.4rem; }
 
   .tabbar { display: flex; gap: 0.4rem; border-bottom: 1px solid var(--border); margin-bottom: 1.3rem; }
   /* NOTE FOR FRIDAY: one line from Luca, into the family's next Friday update
@@ -362,6 +384,19 @@
   .week-grid > .card { margin-bottom: 0; }
   .scores-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1.25rem; align-items: start; }
   .scores-grid > .card { margin-bottom: 0; }
+  /* Folded detail (Luca, 2026-09-29): the everyday view first, the rest one click away. */
+  .more-box { margin: 1.1rem 0 0; }
+  .more-box > summary { cursor: pointer; list-style: none; display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.78rem; font-weight: 600; color: var(--mid); padding: 0.35rem 0; user-select: none; }
+  .more-box > summary::-webkit-details-marker { display: none; }
+  .more-box > summary::before { content: ""; width: 0.4rem; height: 0.4rem; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(-45deg); transition: transform 0.15s var(--ease); }
+  .more-box[open] > summary::before { transform: rotate(45deg); }
+  .more-box > summary:hover { color: var(--text); }
+  .more-box[open] > summary { margin-bottom: 0.6rem; }
+  .deep-box { margin: 0 0 1.25rem; }
+  #stu-analysis, #stu-evidence { overflow-x: auto; }
+  #stu-skills .sk-extra { display: none; }
+  #stu-skills.show-all .sk-extra { display: flex; }
+  .sk-all { margin-top: 0.6rem; }
   .scores-past { font-size: 0.8rem; color: #8a6d1f; background: rgba(201,168,76,0.12); border: 1px solid rgba(201,168,76,0.35); border-radius: 10px; padding: 0.6rem 0.9rem; margin-bottom: 1.1rem; }
   @media (max-width: 900px) {
     .week-grid, .scores-grid { grid-template-columns: minmax(0, 1fr); }
@@ -1041,7 +1076,9 @@
         <div class="stu-sub">
           <button type="button" class="prog-badge" id="stu-program-badge" title="Change it on the Account tab">SAT prep</button>
           <span class="stu-meta" id="stu-meta"></span>
+          <span class="stu-sync" id="stu-sync"></span>
         </div>
+        <div class="stu-live" id="stu-live"></div>
       </div>
       <div class="stu-actions" id="stu-actions"></div>
     </div>
@@ -1065,7 +1102,7 @@
         </div>
         <div class="card" id="stu-note-card">
           <h2>Note for the weekly update</h2>
-          <p class="card-sub">A line or two from this week&rsquo;s session. It goes into the family&rsquo;s next weekly update, the morning after the session, then clears.</p>
+          <p class="card-sub">Goes into the family&rsquo;s next weekly update, then clears.</p>
           <textarea id="stu-note" maxlength="2500" rows="10" placeholder="e.g. Cracked the quadratic word problems today: set up three in a row on their own."></textarea>
           <div class="fn-count" id="stu-note-count"></div>
           <div class="fn-row">
@@ -1081,42 +1118,42 @@
     <section id="tab-scores" style="display:none;">
       <div class="scores-past" id="stu-scores-past" style="display:none;">SAT history from before the switch. It stays on file; the student no longer sees it.</div>
       <div class="summary-row" id="stu-tiles"></div>
-      <!-- REAL SAT SCORES (backend v30, 2026-09-26): official results typed in
-           here, each set beside the practice level before it. -->
-      <div class="card" id="stu-real-card">
-        <h2>Real SAT scores</h2>
-        <p class="card-sub">Official results, typed in from College Board. Each one is set beside the level the practice tests before it pointed to, so it shows whether home tests run above or below test day.</p>
-        <div id="stu-real"></div>
-      </div>
       <div class="card" id="stu-trend-card">
         <h2>Score progress</h2>
-        <p class="card-sub" id="stu-trend-sub">Every scored attempt, oldest first.</p>
         <div class="trend-wrap" id="stu-trend"></div>
       </div>
       <div class="card">
         <h2>Test reports</h2>
-        <p class="card-sub">Every diagnostic and practice test this student has submitted. Opening one shows the exact report they see.</p>
+        <p class="card-sub">Each opens the report they see.</p>
         <div class="roster-table-scroll"><table id="stu-attempts-table"><thead><tr>
           <th>Date</th><th>Test</th><th>Score</th><th title="The lowest raw percent on that one test. Not a finding: see Across all their tests for what the evidence singles out.">Lowest this test</th><th></th>
         </tr></thead><tbody id="stu-attempts"></tbody></table></div>
       </div>
-      <div class="scores-grid">
-        <div class="card">
-          <h2>Weakest skills</h2>
-          <p class="card-sub" id="stu-skills-sub">Across every test with a per-question record.</p>
-          <div id="stu-skills"></div>
-        </div>
+      <div class="card">
+        <h2>Weakest skills</h2>
+        <p class="card-sub" id="stu-skills-sub">Across every test with a per-question record.</p>
+        <div id="stu-skills"></div>
+      </div>
+      <!-- REAL SAT SCORES (backend v30, 2026-09-26): official results typed in
+           here, each set beside the practice level before it. -->
+      <div class="card" id="stu-real-card">
+        <h2>Real SAT scores</h2>
+        <p class="card-sub">Official results, each beside what practice predicted.</p>
+        <div id="stu-real"></div>
+      </div>
+      <details class="more-box deep-box" id="stu-deep">
+        <summary>Deeper analysis</summary>
         <div class="card" id="stu-analysis-card">
           <h2>Across all their tests</h2>
-          <p class="card-sub" id="stu-analysis-sub">Pooled from every attempt &mdash; more evidence per skill than any single report can have.</p>
+          <p class="card-sub" id="stu-analysis-sub">Pooled from every attempt.</p>
           <div id="stu-analysis"></div>
         </div>
         <div class="card" id="stu-evidence-card">
           <h2>What the evidence says</h2>
-          <p class="card-sub">For you only. Each reading waits until there is enough evidence for its range to mean something, and none of them can tell cause from coincidence.</p>
+          <p class="card-sub">Each waits for enough evidence; none can tell cause from coincidence.</p>
           <div id="stu-evidence"><div class="empty">Loading&hellip;</div></div>
         </div>
-      </div>
+      </details>
     </section>
 
     <section id="tab-homework" style="display:none;">
@@ -1191,18 +1228,18 @@
       </div>
       <div class="card" id="stu-program-card">
         <h2>Program</h2>
-        <p class="card-sub">What this student is here for. It decides what their portal shows, which emails the family gets, and where they sort on the roster.</p>
+        <p class="card-sub">Sets what their portal shows and which emails go out.</p>
         <div class="prog-options" id="stu-program-options">
-          <label class="prog-opt"><input type="radio" name="stu-program" value="sat"><span><b>SAT prep</b><small>The diagnostic, practice tests, question bank and vocabulary in their portal. Friday updates with their practice and scores, and the SAT date reminders.</small></span></label>
-          <label class="prog-opt"><input type="radio" name="stu-program" value="tutoring"><span><b>Subject tutoring</b><small>No SAT material in their portal: homework, sessions and files. The Friday update is your note, when you write one.</small></span></label>
-          <label class="prog-opt"><input type="radio" name="stu-program" value="admissions"><span><b>College admissions</b><small>Essays and applications. The same portal and emails as subject tutoring, sorted on its own.</small></span></label>
+          <label class="prog-opt"><input type="radio" name="stu-program" value="sat"><span><b>SAT prep</b><small>Full SAT portal; updates with practice and scores.</small></span></label>
+          <label class="prog-opt"><input type="radio" name="stu-program" value="tutoring"><span><b>Subject tutoring</b><small>Homework, sessions and files; updates are your note.</small></span></label>
+          <label class="prog-opt"><input type="radio" name="stu-program" value="admissions"><span><b>College admissions</b><small>Like tutoring, sorted on its own.</small></span></label>
         </div>
         <div class="fn-row"><span class="fn-status" id="stu-program-status"></span></div>
         <div class="sat-history" id="stu-sat-history" style="display:none;"></div>
       </div>
       <div class="card danger-card" id="stu-delete-card">
         <h2 class="card-hed">Delete this account</h2>
-        <p class="card-sub">Removes the roster row, unlinks their Google sign-in, and revokes their access to the Drive folder. The folder itself and its files are left in Drive. If they have recorded tests you will be asked once more before those scores go too.</p>
+        <p class="card-sub">Removes them from the roster and their sign-in and Drive access. The Drive folder stays.</p>
         <div class="stu-actions">
           <button type="button" class="mini danger" id="stu-delete-btn">Delete account</button>
         </div>
@@ -1408,7 +1445,7 @@
      so the signed admin session is in sessionStorage when the auto-continue
      boot code below reads it. -->
 <script src="time-budgets.js?v=20260912a"></script>
-<script src="signals.js?v=20260927m"></script>
+<script src="signals.js?v=20260930c"></script>
   <script src="backend-url.js?v=20260905"></script>
   <script>
     /* Browser errors on this page reach the ClientErrors tab too (prep.gs's
@@ -1473,7 +1510,7 @@
   // The value is the field a real answer always carries. A stalling service
   // can answer a POST with its GET health reply ({ok:true}, no data), so a
   // reply missing that field is treated as lost.
-  var RETRY_READS = { getRoster: 'students', version: 'version', getStudentDetail: '', getAdminAssignments: '', getAdminCalendar: '', broadcastPrepare: 'families', fridayNoteGet: 'friday', fridayPreview: 'items' };
+  var RETRY_READS = { getRoster: 'students', version: 'version', getStudentDetail: '', getAdminAssignments: '', getAdminCalendar: '', broadcastPrepare: 'families', fridayNoteGet: 'note', fridayPreview: 'items' };
   function looksLost(action, data) {
     var field = RETRY_READS[action];
     return !!field && data && data.ok && !(field in data);
@@ -1684,9 +1721,9 @@
   var REQUIRED_PREP_VERSION = 30;
   // signals.gs and emails.gs carry their own numbers since audit 5: an older
   // copy can have every function name and still compute the old way.
-  var REQUIRED_SIGNALS_VERSION = 37, REQUIRED_EMAILS_VERSION = 32;
+  var REQUIRED_SIGNALS_VERSION = 43, REQUIRED_EMAILS_VERSION = 33;
   // booking.gs (the parent booking page) declares BOOKING_VERSION since 2026-09-26.
-  var REQUIRED_BOOKING_VERSION = 2;
+  var REQUIRED_BOOKING_VERSION = 5;
   var CAPABILITY_LABELS = {
     calendar: 'the calendar and student pages',
     dueDates: 'due dates',
@@ -1786,7 +1823,7 @@
         backendStoresNotes = have.indexOf('notes') !== -1;
         whatBreaks = missing.length
           ? joinList(missing.map(function (c) { return CAPABILITY_LABELS[c]; }))
-          : 'some of the newest behaviour (descriptions save, but this page can\'t read them back)';
+          : 'some of the newest behavior (descriptions save, but this page can\'t read them back)';
       } else {
         whatBreaks = 'anything added since it was last deployed — currently ' +
           joinList([CAPABILITY_LABELS.notes, CAPABILITY_LABELS.series]);
@@ -2250,7 +2287,7 @@
   var PRESENCE_POLL_MS = 45000;
   function pollPresence() {
     var key = adminKey();
-    if (!key || currentView !== 'roster' || !allStudents.length) return;
+    if (!key || (currentView !== 'roster' && currentView !== 'student') || !allStudents.length) return;
     try { if (document.hidden) return; } catch (e) {}
     postToBackend({ action: 'authLog', adminKey: key, limit: 1 }).then(function (data) {
       if (!data || !data.ok) return;
@@ -2267,10 +2304,22 @@
       // Only when something actually moved: renderTable() rebuilds every
       // row, and doing that every 45 seconds for no reason would fight
       // anything Luca is in the middle of reading.
-      if (changed) { renderSummary(); renderTable(); }
+      if (changed && currentView === 'roster') { renderSummary(); renderTable(); }
+      if (currentView === 'student') paintStuLive();
     }).catch(function () { /* a missed poll is a stale dot, nothing more */ });
   }
   setInterval(pollPresence, PRESENCE_POLL_MS);
+  /* ON NOW, ON THE STUDENT PAGE (Luca, 2026-10-02): the same live dot as the
+     roster, with exactly where they are ("Curriculum - 2.1 Linear Equations
+     - Part 2 check"), kept fresh by the poll above while the page is open. */
+  function paintStuLive() {
+    var el = $('stu-live');
+    if (!el) return;
+    var s = currentStudent && allStudents.filter(function (x) { return x.key === currentStudent.key; })[0];
+    el.innerHTML = s && s.online
+      ? '<span class="live-now">On now</span>' + (s.presenceWhere ? '<span class="where">' + escHtml(s.presenceWhere) + '</span>' : '')
+      : '';
+  }
   try {
     document.addEventListener('visibilitychange', function () {
       if (!document.hidden) pollPresence();
@@ -2377,6 +2426,8 @@
     $('stu-details').innerHTML = skLines(4);
     $('stu-name').firstChild.textContent = student.name;
     $('stu-key').textContent = student.key;
+    paintStuLive();
+    setTimeout(pollPresence, 0);   // fresh "On now" for this student, not the roster's last poll
     $('stu-meta').innerHTML = '<span class="sk sk-line" style="display:inline-block;width:190px;vertical-align:middle;"></span>';
     $('stu-actions').innerHTML = '';
     $('stu-tiles').innerHTML = '';
@@ -2716,14 +2767,23 @@
   // noteSeq counts student opens (and re-reads); a reply for an older one
   // is dropped. noteSaving is the noteSeq a save is in flight for, so a
   // save still going for one student never blocks the next student's.
-  var noteSeq = 0, noteSaved = '', noteKey = '', noteSaving = 0, noteLoading = false;
+  // noteBase: what the box held when a read started. The box stays open
+  // while the note loads; anything typed by then is kept when it lands.
+  var noteSeq = 0, noteSaved = '', noteKey = '', noteSaving = 0, noteLoading = false, noteBase = '';
   // The sheet stores the note cleaned (dashes become commas, trimmed), so
   // "is this what I typed" compares words, not punctuation.
   function noteLoose(t) { return String(t || '').replace(/[\s,\u2014\u2013-]+/g, ' ').trim().slice(0, 600); }
-  function noteDirty() { return !!noteKey && !noteLoading && $('stu-note').value !== noteSaved; }
+  function noteDirty() { return !!noteKey && $('stu-note').value !== (noteLoading ? noteBase : noteSaved); }
   function noteControls(on) {
-    $('stu-note').disabled = !on;
+    $('stu-note').disabled = false;
     $('stu-note-save').disabled = $('stu-note-clear').disabled = !on;
+  }
+  // Typed while the note was loading: kept, after the saved note if there is one.
+  function noteTypedSince(saved) {
+    var now = $('stu-note').value;
+    if (now === noteBase) return null;
+    var merge = !!saved && noteLoose(now).indexOf(noteLoose(saved)) === -1;
+    return { text: merge ? saved + '\n\n' + now : now, merged: merge };
   }
 
   function noteStatus(msg, cls) {
@@ -2759,6 +2819,7 @@
     noteSaved = '';
     noteLoading = true;
     if (typed == null) $('stu-note').value = ''; paintNoteCount();
+    noteBase = $('stu-note').value;
     noteControls(false);
     if (typed == null) noteStatus('Loading\u2026');
     /* The note as it was last seen, ready to read and edit at once. When the
@@ -2787,15 +2848,21 @@
         }
         return;
       }
+      var early = typed == null && d && d.ok ? noteTypedSince(d.note || '') : null;
       if (!d || !d.ok) {
-        if (typed != null) $('stu-note').value = typed; paintNoteCount();
+        if (typed != null && $('stu-note').value === noteBase) $('stu-note').value = typed; paintNoteCount();
         noteStatus(noteError(d), 'warn');
         return;
       }
       noteSaved = d.note || '';
       var w = noteWhere(d);
+      if (early != null) {
+        $('stu-note').value = early.text; paintNoteCount();
+        noteStatus('Not saved yet.' + (early.merged ? ' What you typed is under the note already saved.' : ''), 'warn');
+        return;
+      }
       if (typed != null && noteLoose(typed) !== noteLoose(noteSaved)) {
-        $('stu-note').value = typed; paintNoteCount();
+        if ($('stu-note').value === noteBase) $('stu-note').value = typed; paintNoteCount();
         noteStatus('Not saved. Your text is still here: press Save note again.', 'warn');
         return;
       }
@@ -2806,7 +2873,7 @@
       noteLoading = false;
       noteControls(true);
       if (typed != null) {
-        $('stu-note').value = typed; paintNoteCount();
+        if ($('stu-note').value === noteBase) $('stu-note').value = typed; paintNoteCount();
         noteStatus('Could not check whether it saved. Your text is still here: press Save note again.', 'warn');
         return;
       }
@@ -3037,12 +3104,43 @@
     if (d.qb && d.qb.sureWrong >= 3 && d.qb.sureWrong >= 0.3 * d.qb.sure) out.push('In practice, "Sure" was wrong ' + d.qb.sureWrong + ' of ' + d.qb.sure + ' times.');
     return out.join(' ');
   }
+  /* ═══ STRATEGY, NOT KNOWLEDGE (Luca, 2026-09-27) ═══ over the sittings at
+     Reading and Writing 600+: every reading miss, and how (worked long and still wrong, narrowed to two)
+     (shown apart: one miss can be both), by skill, and reading against
+     grammar rules. Said when there are 3+ such misses; the contrast is
+     called clear only at z >= 1.645 (one test rarely gets there). */
+  function approachPrepLine(A, byD) {
+    var all = function (o) { return (o.long || 0) + (o.two || 0) + (o.context || 0) + (o.other || 0); };
+    /* A skill in an area the Coverage line can't judge (a third or more of its answers too fast or rushed) is left out, as the report does. */
+    var blindSkill = {};
+    Object.keys(byD || {}).forEach(function (d) { if (byD[d].answered >= 6 && byD[d].excluded * 3 > byD[d].answered) Object.keys(byD[d].bySkill || {}).forEach(function (k) { blindSkill[k] = true; }); });
+    if (A) { A = JSON.parse(JSON.stringify(A)); Object.keys(A.bySkill).forEach(function (k) { if (blindSkill[k]) { ['long', 'two', 'context', 'other'].forEach(function (f) { A[f] = (A[f] || 0) - (A.bySkill[k][f] || 0); }); delete A.bySkill[k]; } }); }
+    if (!A || !A.tests || all(A) < 3) return '';
+    var sk = Object.keys(A.bySkill).map(function (k) { return { k: k, n: all(A.bySkill[k]) }; })
+      .sort(function (a, b) { return b.n - a.n; }).slice(0, 3).map(function (x) {
+        var L = (MorettiSignals.APPROACH_LESSONS || {})[x.k];
+        return escHtml(x.k) + (L ? ' (lesson ' + L.lesson + ')' : '');
+      });
+    var pct = function (o) { return o.n ? Math.round(100 * o.right / o.n) : null; };
+    var pr = pct(A.reading), pg = pct(A.rules);
+    var contrast = pr !== null && pg !== null && pg > pr
+      ? ' Reading skills ' + pr + '% against grammar rules ' + pg + '%' + (A.z !== null && A.z >= 1.645 ? ', a clear gap.' : ', not yet clear of chance.')
+      : '';
+    var how = [];
+    if (A.long) how.push(A.long + ' worked long and still wrong');
+    if (A.two) how.push(A.two + ' narrowed to two and picked wrong');
+    return '<li><span class="tag tutor">Tutor only</span><b>Strategy, not knowledge</b> &middot; across ' + A.tests + ' test' + (A.tests === 1 ? '' : 's') + ' with Reading and Writing at 600+: ' +
+      (A.long + A.context + (A.other || 0)) + ' reading misses' + (sk.length ? ', mostly ' + sk.join(', ') : '') +
+      (how.length ? ' (' + how.join('; ') + ')' : '') + '.' + contrast + '</li>';
+  }
   function renderPooledPrep(P, err) {
     var hed = '<div class="prep-hw-hed">Pacing and how misses happen';
     if (!P) return err ? '<div class="prep-bp">' + hed + '</div><p class="prep-note">Not available: ' + escHtml(err) + '</p></div>' : '';
     var pc = P.pacing || {};
     hed += '<span>' + (P.misses && P.misses.tests || 0) + ' test' + ((P.misses && P.misses.tests) === 1 ? '' : 's') + ' pooled</span></div>';
     var items = [];
+    var ap = approachPrepLine(P.misses && P.misses.approach, P.misses && P.misses.byDomain);
+    if (ap) items.push(ap);
     (pc.habits || []).forEach(function (h) { items.push(paceHabitLine(h, false)); });
     (pc.pending || []).forEach(function (h) { items.push(paceHabitLine(h, true)); });
     if (!items.length) {
@@ -3089,7 +3187,7 @@
      left unused, a rushed finish, no review. Nikolas: 4 of 5 home tests
      poor, 1110-1350 against a real 1010. Tutor view; the report shows the
      student the same evidence on the test itself. */
-  var COND_LABEL = { late: 'late', 'long-break': 'long break', away: 'time away', rushed: 'rushed' };
+  var COND_LABEL = { late: 'late', 'long-break': 'long break', away: 'time away', 'left-window': 'left the test window', rushed: 'rushed' };
   /* ═══ REAL SAT AGAINST PRACTICE, in session prep (2026-09-27) ═══ the
      latest official result first, from the same function as the Scores tab. */
   function renderRealPrep(R) {
@@ -3206,6 +3304,8 @@
     if (btn) btn.addEventListener('click', loadRosterPatterns);
   })();
 
+  // Which More boxes Luca left open, so a refresh does not fold them away.
+  var moreOpen = {};
   function renderStudentPrep(p) {
     var snap = p.snapshot || null, pr = p.practice || { n: 0, right: 0, byBank: {}, skills: [] };
     var dayLabel = function (d) {
@@ -3216,14 +3316,14 @@
     var mins = function (m) { m = Math.round(m || 0); return m >= 60 ? Math.floor(m / 60) + 'h ' + (m % 60) + 'm' : m + ' min'; };
     // Since the last session ended (prep.gs), or the last seven days for a student with no session yet.
     $('stu-prep-sub').textContent = snap && snap.since
-      ? 'Since the last session ended, ' + new Date(snap.since).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) + '. Starts over after each session.'
+      ? 'Since the last session, ' + new Date(snap.since).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) + '.'
       : dayLabel(p.from) + ' – ' + dayLabel(p.to) + ' (the last seven days; no session on the calendar yet)';
     var sat = isSat(currentStudent);
 
     // Practice: the log when it has the week, else the bank's own count
     // (which only sees each question's latest attempt).
     var logWeek = pr.logStarted && String(pr.logStarted).slice(0, 10) <= p.from;
-    var practiceN = pr.n, practiceRight = pr.right, practiceSub;
+    var practiceN = pr.n, practiceRight = pr.right, practiceSub, practiceMore = [];
     if (pr.n || logWeek || !snap) {
       var parts = [];
       [['qb', 'Question Bank'], ['chal', 'Challenge'], ['rush', 'Rush']].forEach(function (b) {
@@ -3235,9 +3335,9 @@
          student depending on the mix (stats audit, 2026-09-25). */
       var qbx = pr.byBank && pr.byBank.qb;
       practiceSub = pr.n
-        ? (qbx && qbx.n && typeof qbx.right === 'number' ? pct(qbx.right, qbx.n) + ' right in the Question Bank' : (qbx && qbx.n ? 'Question Bank' : 'no Question Bank answers')) +
-          (parts.length > 1 || (parts.length === 1 && !(qbx && qbx.n)) ? ' · ' + parts.join(' · ') : '')
+        ? (qbx && qbx.n && typeof qbx.right === 'number' ? pct(qbx.right, qbx.n) + ' right in the Question Bank' : (qbx && qbx.n ? 'Question Bank' : 'no Question Bank answers'))
         : 'none since the last session';
+      if (pr.n && (parts.length > 1 || (parts.length === 1 && !(qbx && qbx.n)))) practiceMore.push(parts.join(' · '));
       // Saved & Mistakes retries and explanation reads (backend v25).
       var extraBits = [];
       if (pr.retry && pr.retry.n) extraBits.push(pr.retry.n + ' mistake' + (pr.retry.n === 1 ? '' : 's') + ' retried, ' + pr.retry.right + ' right');
@@ -3247,7 +3347,7 @@
         var cfBits = [cfp(pr.conf.sure, 'sure'), cfp(pr.conf.unsure, 'unsure'), cfp(pr.conf.guess, 'guessing')].filter(String);
         if (cfBits.length) extraBits.push('tapped ' + cfBits.join(', '));
       }
-      if (extraBits.length) practiceSub += '<br>' + extraBits.join(' · ');
+      practiceMore = practiceMore.concat(extraBits);
     } else {
       practiceN = snap.qbCount || 0; practiceRight = snap.qbCorrect || 0;
       practiceSub = practiceN ? pct(practiceRight, practiceN) + ' right (Question Bank)' : 'none since the last session';
@@ -3264,7 +3364,7 @@
       testSub = escHtml(t.title || 'Practice test');
       if (t.interrupted) testSub += ' · interrupted, not compared';
       else if (t.hardest) testSub += ' · the hardest test, not compared';
-      else if (t.change) testSub += ' · ' + (t.change.delta > 0 ? '+' : '') + t.change.delta + ' vs last' + (t.change.real ? ' (a real change)' : ' (within normal variation)');
+      else if (t.change) testSub += ' · ' + (t.change.delta > 0 ? '+' : '') + t.change.delta + ' vs last' + (t.change.real ? '' : ', within normal variation');
     }
     stats.push('<div class="prep-stat"><div class="num">' + (t ? t.composite : '—') + '</div><div class="lbl">Practice test</div><div class="sub">' + testSub + '</div></div>');
 
@@ -3321,9 +3421,186 @@
       $('stu-prep').innerHTML = nextHtml + (hwHtml || (nextHtml ? '' : '<div class="empty">Nothing assigned since the last session.</div>'));
       return;
     }
+    /* The week at a glance, then homework. The rest (time by area, topics,
+       behavior and pooled patterns) waits under More (Luca, 2026-09-29:
+       the page read as too much). */
+    var more = renderTimeBreakdown(snap, mins) +
+      (practiceMore.length ? '<p class="prep-note">Practice: ' + practiceMore.join(' · ') + '</p>' : '') +
+      topics + renderBehaviorPatterns(p.behavior, p.behaviorError) + renderPooledPrep(p.pooled, p.pooledError) +
+      (note ? '<p class="prep-note">' + note + '</p>' : '');
     $('stu-prep').innerHTML = '<div class="prep-stats">' + stats.join('') + '</div>' +
-      renderTimeBreakdown(snap, mins) +
-      nextHtml + hwHtml + renderBehaviorPatterns(p.behavior, p.behaviorError) + renderPooledPrep(p.pooled, p.pooledError) + topics + (note ? '<p class="prep-note">' + note + '</p>' : '');
+      nextHtml + hwHtml + renderCurriculumPrep(p, snap, mins) + (more ? '<details class="more-box" id="stu-prep-more"' + (moreOpen.prep ? ' open' : '') + '><summary>More from this week</summary>' + more + '</details>' : '');
+    /* Opening a part shows the answers in it; the bank loads on the first open. */
+    Array.prototype.forEach.call(document.querySelectorAll('tr.cu-row'), function (tr) {
+      tr.addEventListener('click', function () {
+        var k = tr.getAttribute('data-cu-part');
+        if (cuOpenParts[k]) delete cuOpenParts[k]; else cuOpenParts[k] = 1;
+        if (lastPrep && lastPrep.prep) { try { renderStudentPrep(lastPrep.prep); } catch (e) {} }
+      });
+    });
+    var pm = $('stu-prep-more');
+    if (pm) pm.addEventListener('toggle', function () { moreOpen.prep = pm.open; });
+  }
+
+  /* THE CURRICULUM THIS WEEK (Luca, 2026-10-02): every lesson part the
+     student touched since the last session, one row each: minutes on the
+     video and in the check (the visit log, "Curriculum - 2.1 ... - Part 2
+     video"), check questions answered and right (PracticeLog, bank 'cu'),
+     and the day the part was finished (CurriculumJSON). Above it, where
+     they are in the course. Names come from the portal's own course file,
+     fetched once; until it arrives the rows use the logged labels. */
+  var cuNamesState = '';
+  function cuCourseData() {
+    if (window.CURRICULUM && window.CURRICULUM.courses) return window.CURRICULUM;
+    if (cuNamesState) return null;
+    cuNamesState = 'loading';
+    var sc = document.createElement('script');
+    sc.src = 'curriculum-data.js?d=' + new Date().toISOString().slice(0, 10);
+    sc.onload = function () {
+      cuNamesState = 'done';
+      if (lastPrep && currentStudent && lastPrep.key === currentStudent.key) { try { renderStudentPrep(lastPrep.prep); } catch (e) {} }
+    };
+    sc.onerror = function () { cuNamesState = 'failed'; };
+    document.head.appendChild(sc);
+    return null;
+  }
+  /* THE ANSWERS THEMSELVES (Luca, 2026-10-04). The rows above are a tally;
+     going through a part together needs the questions. A bank is big, so one
+     is fetched only when a part is actually opened, and only once. */
+  var cuOpenParts = {}, cuBankState = {};
+  function cuBank(which) {
+    var g = which === 'math' ? 'QUESTION_BANK_MATH' : 'QUESTION_BANK';
+    if (window[g]) return window[g];
+    if (cuBankState[which]) return null;
+    cuBankState[which] = 'loading';
+    var sc = document.createElement('script');
+    sc.src = (which === 'math' ? 'question-bank-math.js' : 'question-bank.js') + '?d=' + new Date().toISOString().slice(0, 10);
+    sc.onload = function () {
+      cuBankState[which] = 'done';
+      if (lastPrep && currentStudent && lastPrep.key === currentStudent.key) { try { renderStudentPrep(lastPrep.prep); } catch (e) {} }
+    };
+    sc.onerror = function () { cuBankState[which] = 'failed'; };
+    document.head.appendChild(sc);
+    return null;
+  }
+  function cuQuestion(which, qid) {
+    var bank = cuBank(which);
+    if (!bank) return null;
+    var ix = cuBankState[which + ':ix'];
+    if (!ix) { ix = cuBankState[which + ':ix'] = {}; bank.forEach(function (q) { ix[q.qid] = q; }); }
+    return ix[qid] || null;
+  }
+  // What the student put: a letter for multiple choice, the text for a grid-in.
+  function cuGiven(q, g) {
+    if (g === '' || g == null) return '\u2014';
+    if (q && q.type !== 'fr' && /^\d+$/.test(String(g))) return 'ABCDE'.charAt(Number(g)) || String(g);
+    return String(g);
+  }
+  function cuAnswerRows(which, items) {
+    var loading = !cuBank(which);
+    return items.slice().sort(function (a, b) { return a.at < b.at ? -1 : a.at > b.at ? 1 : 0; }).map(function (it) {
+      var q = cuQuestion(which, it.q);
+      var stem = q ? String(q.text || '').replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim() : '';
+      var key = q ? (q.type === 'fr' ? String(q.answerValue == null ? '' : q.answerValue) : ('ABCDE'.charAt(q.correct) || '')) : '';
+      return '<tr class="' + (it.c ? 'cu-a-ok' : 'cu-a-no') + '">' +
+        '<td>' + (stem ? escHtml(stem.slice(0, 150)) + (stem.length > 150 ? '\u2026' : '')
+                       : (loading ? '<span class="cu-a-wait">loading the question\u2026</span> ' : '') + '<code>' + escHtml(it.q) + '</code>') + '</td>' +
+        '<td class="n">' + escHtml(cuGiven(q, it.g)) + '</td>' +
+        '<td class="n">' + (key ? escHtml(key) : '\u2014') + '</td>' +
+        '<td class="n">' + (it.c ? '\u2713' : '\u2717') + '</td></tr>';
+    }).join('');
+  }
+  function cuLessonByNum(data, num) {
+    var hit = null;
+    (data ? data.courses : []).forEach(function (c) {
+      (c.domains || c.units || []).forEach(function (d) { (d.lessons || []).forEach(function (l) { if (!hit && String(l.num) === String(num)) hit = l; }); });
+    });
+    return hit;
+  }
+  function cuLessonById(data, id) {
+    var hit = null;
+    (data ? data.courses : []).forEach(function (c) {
+      (c.domains || c.units || []).forEach(function (d) { (d.lessons || []).forEach(function (l) { if (!hit && l.id === id) hit = l; }); });
+    });
+    return hit;
+  }
+  function renderCurriculumPrep(p, snap, mins) {
+    var cu = p.curriculum || null, pr = (p.practice && p.practice.cu) || null, things = (snap && snap.portalThings) || {};
+    var data = cuCourseData();
+    var rows = {}, browseMin = 0;
+    var rowFor = function (lessonId, num, part) {
+      var k = lessonId + '|' + part;
+      return rows[k] || (rows[k] = { lessonId: lessonId, num: num, part: part, video: 0, check: 0, n: 0, right: 0, done: '', label: '', items: null });
+    };
+    Object.keys(things).forEach(function (t) {
+      if (t.indexOf('Curriculum - ') !== 0 || !(things[t] > 0)) return;
+      var m = /^Curriculum - (\d+\.\d+)\b.* - Part (\d+) (video|check)$/.exec(t);
+      if (!m) { browseMin += things[t]; return; }
+      var l = cuLessonByNum(data, m[1]);
+      var r = rowFor(l ? l.id : 'm' + m[1], m[1], Number(m[2]) - 1);
+      r[m[3]] += things[t];
+    });
+    Object.keys((pr && pr.parts) || {}).forEach(function (k) {
+      var x = pr.parts[k], mm = /^([me])(\d+\.\d+)\|(\d+)$/.exec(x.k || '');
+      if (!mm) return;
+      var r = rowFor(mm[1] + mm[2], mm[2], Number(mm[3]));
+      r.n += x.n; r.right += x.right; r.label = r.label || x.name;
+      if (x.items && x.items.length) r.items = (r.items || []).concat(x.items);
+    });
+    ((cu && cu.week) || []).forEach(function (w) {
+      var mm = /^([me])(\d+\.\d+)#(\d+)$/.exec(w.k || '');
+      if (mm) rowFor(mm[1] + mm[2], mm[2], Number(mm[3])).done = w.at;
+    });
+    var list = Object.keys(rows).map(function (k) { return rows[k]; });
+    var started = cu && cu.started;
+    if (!list.length && !browseMin && !started) return '';
+    var numKey = function (n) { var a = String(n).split('.'); return Number(a[0]) * 1000 + Number(a[1] || 0); };
+    list.sort(function (a, b) { return (a.lessonId.charAt(0) === b.lessonId.charAt(0) ? 0 : a.lessonId.charAt(0) === 'm' ? -1 : 1) || numKey(a.num) - numKey(b.num) || a.part - b.part; });
+    var nameOf = function (r) {
+      var l = cuLessonById(data, r.lessonId);
+      if (!l) return r.label || (r.num + ', part ' + (r.part + 1));
+      var pt = l.parts && l.parts[r.part], many = l.parts && l.parts.length > 1;
+      var ptName = pt && pt.title ? String(pt.title).replace(/\*\*/g, '') : '';
+      return l.num + ' ' + l.title + (many ? ' · Part ' + (r.part + 1) + (ptName ? ': ' + ptName : '') : '');
+    };
+    var day = function (iso) { return new Date(iso).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }); };
+    // Where they are, and how far through the course.
+    var head = [];
+    if (cu && cu.last && cu.last.lessonId) {
+      var ll = cuLessonById(data, cu.last.lessonId);
+      head.push('Last at <b>' + escHtml((ll ? ll.num + ' ' + ll.title : cu.last.lessonId.slice(1)) + ', part ' + ((cu.last.part || 0) + 1) + ' ' + (cu.last.step === 'check' ? 'check' : 'video')) + '</b>');
+    }
+    if (cu && cu.done && data) {
+      var tot = 0, got = {};
+      cu.done.forEach(function (k) { got[k] = 1; });
+      var doneMath = 0;
+      data.courses.forEach(function (c) {
+        if (c.id !== 'math') return;
+        (c.domains || c.units || []).forEach(function (d) { (d.lessons || []).forEach(function (l) { (l.parts || []).forEach(function (pp, i) { tot++; if (got[l.id + '#' + i]) doneMath++; }); }); });
+      });
+      if (tot) head.push('Math: <b>' + doneMath + ' of ' + tot + '</b> parts done');
+    }
+    var gv = cu && cu.videos && cu.videos['m1.1-1.mp4'];
+    if (gv && gv.d) head.push('1.1 video ' + (gv.done ? 'watched' : Math.round(100 * Math.min(gv.w, gv.d) / gv.d) + '% watched'));
+    var body = list.length
+      ? '<table class="prep-topics"><thead><tr><th>Lesson part</th><th class="n">Video</th><th class="n">Check</th><th class="n">Questions</th><th class="n">Finished</th></tr></thead><tbody>' +
+        list.map(function (r) {
+          var which = r.lessonId.charAt(0) === 'm' ? 'math' : 'rw';
+          var has = !!(r.items && r.items.length), pk = r.lessonId + '|' + r.part, open = has && cuOpenParts[pk];
+          return '<tr' + (has ? ' class="cu-row" data-cu-part="' + escHtml(pk) + '"' : '') + '><td>' +
+            (has ? '<span class="cu-tw">' + (open ? '\u25be' : '\u25b8') + '</span>' : '') + escHtml(nameOf(r)) + '</td>' +
+            '<td class="n">' + (r.video ? mins(r.video) : '—') + '</td>' +
+            '<td class="n">' + (r.check ? mins(r.check) : '—') + '</td>' +
+            '<td class="n">' + (r.n ? r.right + ' of ' + r.n + ' right' : '—') + '</td>' +
+            '<td class="n' + (r.done ? ' cu-done' : '') + '">' + (r.done ? '&#10003; ' + day(r.done) : '—') + '</td></tr>' +
+            (open ? '<tr class="cu-ans"><td colspan="5"><table class="cu-atab"><thead><tr><th>Question</th>' +
+              '<th class="n">Put</th><th class="n">Answer</th><th class="n"></th></tr></thead><tbody>' +
+              cuAnswerRows(which, r.items) + '</tbody></table></td></tr>' : '');
+        }).join('') + '</tbody></table>'
+      : '<div class="empty">No curriculum work since the last session.</div>';
+    return '<div class="prep-sec">Curriculum since the last session</div>' +
+      (head.length ? '<p class="cu-prep-head">' + head.join(' &nbsp;·&nbsp; ') + '</p>' : '') + body +
+      (browseMin >= 1 ? '<p class="prep-note">Plus ' + mins(browseMin) + ' looking through the lessons.</p>' : '');
   }
 
   /* WHERE THE TIME WENT (Luca, 2026-09-25): the week's active minutes by
@@ -3356,16 +3633,36 @@
       (gap >= 5 ? '<div class="tb-note">' + mins(gap) + ' from earlier visits, before the breakdown was recorded.</div>' : '') + '</div>';
   }
 
+  /* What is on screen may be the copy kept from the last visit while the
+     fresh one loads. It says so, and if the fresh one does not come, it says
+     why instead of quietly leaving the old copy up (Luca, 2026-09-30: a test
+     taken that afternoon was missing with no sign anything was wrong). */
+  function stuSync(key, msg, cls, retry) {
+    if (!currentStudent || currentStudent.key !== key) return;
+    var el = $('stu-sync');
+    el.className = 'stu-sync' + (cls ? ' ' + cls : '');
+    el.innerHTML = msg ? escHtml(msg) + (retry ? ' <button type="button" class="mini" id="stu-sync-retry">Try again</button>' : '') : '';
+    var b = $('stu-sync-retry');
+    if (b) b.addEventListener('click', function () { loadStudentDetail(key); });
+  }
+  function keptAt(name) {
+    try { var o = JSON.parse(localStorage.getItem(KEEP_PREFIX + name) || 'null'); return o && o.at ? o.at : 0; } catch (e) { return 0; }
+  }
   function loadStudentDetail(key) {
     var hit = kept('s_detail_' + key);
+    var at = keptAt('s_detail_' + key);
     if (hit && hit.ok) paintStudentDetail(key, hit);
+    stuSync(key, hit && hit.ok ? 'Showing the copy from ' + new Date(at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) + ', checking for anything newer\u2026' : '', 'dim');
     return postToBackend({ action: 'getStudentDetail', adminKey: adminKey(), key: key }).then(function (data) {
       if (!currentStudent || currentStudent.key !== key) return; // navigated away mid-flight
-      if (data && data.ok) keep('s_detail_' + key, data);
+      if (data && data.ok) { keep('s_detail_' + key, data); stuSync(key, ''); }
+      else stuSync(key, 'Could not load the latest for this student (' + ((data && (data.message || data.error)) || 'no answer') + ').' +
+        (hit && hit.ok ? ' What you see may be out of date.' : ''), 'warn', true);
       if ((!data || !data.ok) && hit && hit.ok) return;   // keep what is on screen
       paintStudentDetail(key, data);
       if (data && data.ok) setTimeout(function () { prefetchReports(key, data.attempts); }, 1500);
-    }).catch(function () {
+    }).catch(function (err) {
+      stuSync(key, 'Could not reach the backend for the latest (' + ((err && err.message) || 'network') + ').' + (hit && hit.ok ? ' What you see may be out of date.' : ''), 'warn', true);
       if (!currentStudent || currentStudent.key !== key || (hit && hit.ok)) return;
       $('stu-meta').innerHTML = '<span style="color:var(--red);">Network error loading this student.</span>';
       $('stu-details').innerHTML = '<dd class="dim">Network error loading this student&rsquo;s details.</dd>';
@@ -3407,7 +3704,7 @@
         loadStudentEvidence(data);
       } catch (err) {
         if (window.console && console.error) console.error('[admin] student render failed:', err);
-        $('stu-meta').innerHTML = '<span style="color:var(--red);">Loaded this student, but could not draw the page. Details are in the browser console.</span>';
+        $('stu-meta').innerHTML = '<span style="color:var(--red);">Loaded this student, but could not draw the page: ' + escHtml(String((err && err.message) || err).slice(0, 160)) + '</span>';
       }
     }
   }
@@ -3444,9 +3741,8 @@
 
     var rows = [];
     var row = function (k, v) { rows.push('<dt>' + k + '</dt><dd>' + v + '</dd>'); };
-    row('Key', '<code>' + escHtml(s.key || currentStudent.key) + '</code>');
     row('Student', s.grantedEmail
-      ? escHtml(s.grantedEmail) + (s.grantedAt ? ' <span class="dim">(signed in since ' + formatDay(s.grantedAt) + ')</span>' : '')
+      ? escHtml(s.grantedEmail) + (s.grantedAt ? ' <span class="dim">since ' + formatDay(s.grantedAt) + '</span>' : '')
       : (s.leadEmail ? 'Inquired as ' + escHtml(s.leadEmail) + ' <span class="dim">(not signed in yet)</span>' : '<span class="dim">Not signed in yet</span>'));
     row('Parent', s.guardianEmail
       ? (s.guardianName ? escHtml(s.guardianName) + ' ' : '') + '&lt;' + escHtml(s.guardianEmail) + '&gt;'
@@ -3459,17 +3755,17 @@
     // Older deployments send neither field: say nothing rather than guess.
     if (typeof s.emailsPaused === 'boolean') {
       row('Automatic emails', s.emailsPaused
-        ? '<b>Paused</b> <span class="dim">(no weekly updates or other automatic emails)</span> <button type="button" class="mini" data-email-set="on">Turn back on</button>'
+        ? '<b>Paused</b> <button type="button" class="mini" data-email-set="on">Turn back on</button>'
         : 'On <button type="button" class="mini" data-email-set="pause">Pause</button>');
     }
     // When the weekly update goes (emails.gs weeklyTiming_). Older deployments send nothing: say nothing.
     if (typeof s.weeklyAfter === 'string') {
       row('Weekly update', s.weeklyAfter === 'second'
-        ? 'The morning after the <b>second session</b> of each week <button type="button" class="mini" data-weekly-after="">Back to automatic</button>'
-        : 'Automatic <span class="dim">(after the week\u2019s last session)</span> <button type="button" class="mini" data-weekly-after="second">After the 2nd session instead</button>');
+        ? 'After the <b>second session</b> each week <button type="button" class="mini" data-weekly-after="">Back to automatic</button>'
+        : 'After the week\u2019s last session <button type="button" class="mini" data-weekly-after="second">After the 2nd instead</button>');
     }
     (s.emailOptOut || []).forEach(function (addr) {
-      row('Unsubscribed', escHtml(addr) + ' <span class="dim">(used the link in an email)</span> ' +
+      row('Unsubscribed', escHtml(addr) + ' ' +
         '<button type="button" class="mini" data-email-resub="' + escHtml(addr) + '">Resubscribe</button>');
     });
     // The portal lock, under the email switches. Older deployments send nothing: say nothing.
@@ -3484,7 +3780,7 @@
       }[pa.reason] || '';
       var state = pa.override === 'open' ? '<b>Always open</b> <span class="dim">(set by you)</span>'
         : pa.override === 'locked' ? '<b>Locked</b> <span class="dim">(set by you: only the free diagnostic)</span>'
-        : (pa.locked ? '<b>Locked</b>' : 'Open') + ' <span class="dim">(by calendar' + (why ? ': ' + why : '') + ')</span>';
+        : (pa.locked ? '<b>Locked</b>' : 'Open') + ' <span class="dim" title="' + escHtml(why) + '">(follows calendar)</span>';
       if (!pa.live) state += ' <span class="dim">Nobody is locked out until you go live.</span>';
       var opts = [['', 'Follow calendar'], ['open', 'Always open'], ['locked', 'Lock']].filter(function (o) { return o[0] !== pa.override; });
       row('Portal access', state + ' ' + opts.map(function (o) {
@@ -3492,21 +3788,22 @@
       }).join(' '));
     }
     if (sat) {
-      row('SAT date', satDay || '<span class="dim">Not set</span>');
-      if (satDay2) row('Second SAT date', satDay2);
-      row('Target', s.targetScore ? String(s.targetScore) : '<span class="dim">Not set</span>');
+      // One line: dates, target, baseline, timing.
+      var satBits = [satDay || '<span class="dim">No SAT date</span>'];
+      if (satDay2) satBits.push('then ' + satDay2);
+      satBits.push(s.targetScore ? 'target ' + s.targetScore : '<span class="dim">no target</span>');
       if (s.baselineRw || s.baselineMath) {
-        row('Baseline', ((Number(s.baselineRw) || 0) + (Number(s.baselineMath) || 0)) + ' <span class="dim">(' + (s.baselineRw || '—') + ' R&amp;W, ' +
-          (s.baselineMath || '—') + ' Math' + (s.baselineType ? ', ' + escHtml(String(s.baselineType).toUpperCase()) : '') + ')</span>');
+        satBits.push('baseline ' + ((Number(s.baselineRw) || 0) + (Number(s.baselineMath) || 0)) + (s.baselineType ? ' ' + escHtml(String(s.baselineType).toUpperCase()) : '') +
+          ' <span class="dim">(' + (s.baselineRw || '—') + ' / ' + (s.baselineMath || '—') + ')</span>');
       }
       var accom = [];
       if (isFinite(timeMult) && timeMult > 1) accom.push(timeMult + '&times; time');
       if (isFinite(breakMult) && breakMult > 1) accom.push('extended breaks');
-      row('Accommodations', accom.length ? accom.join(', ') : '<span class="dim">Standard timing</span>');
+      if (accom.length) satBits.push(accom.join(', '));
+      row('SAT', satBits.join(' &middot; '));
     }
-    row('Drive folder', s.driveFolderUrl
-      ? '<a target="_blank" rel="noopener" href="' + escHtml(s.driveFolderUrl) + '">Open in Drive</a>'
-      : '<span class="dim">Not created yet</span>');
+    if (!s.driveFolderUrl) row('Drive folder', '<span class="dim">Not created yet</span>');
+    row('Google review', '<button type="button" class="mini" id="stu-review-btn" title="After a family shares a good official score">Ask for a review</button>');
     $('stu-details').innerHTML = rows.join('');
     $('stu-edit-btn').disabled = false;
     wireEmailSettings(s);
@@ -3514,13 +3811,14 @@
 
     var actions = [];
     if (s.driveFolderUrl) actions.push('<a class="mini" target="_blank" rel="noopener" href="' + escHtml(s.driveFolderUrl) + '">Drive folder</a>');
-    actions.push('<button type="button" class="mini" id="stu-review-btn" title="After a family shares a good official score">Ask for a review</button>');
     actions.push('<button type="button" class="mini solid" id="stu-assign-btn">Assign homework</button>');
     $('stu-actions').innerHTML = actions.join('');
     var assignBtn = $('stu-assign-btn');
     if (assignBtn) assignBtn.addEventListener('click', function () {
       selectTab('homework');
-      openCreateModal([toDateStr(new Date())], currentStudent.key, currentStudent.name, '');
+      var ns = nextSessionFor[currentStudent.key];
+      if (ns) openCreateModal([isoToDateStr(ns)], currentStudent.key, currentStudent.name, '', 'Due the day of their next session');
+      else openCreateModal([toDateStr(new Date())], currentStudent.key, currentStudent.name, '');
     });
     var reviewBtn = $('stu-review-btn');
     if (reviewBtn) reviewBtn.addEventListener('click', function () { askForReview(reviewBtn); });
@@ -3707,8 +4005,9 @@
         '<div><div class="real-score">' + o.composite + '<span>R&amp;W ' + o.rw + ' &middot; Math ' + o.math + '</span></div><div class="real-vs">' + vs + '</div></div>' +
         '<button type="button" class="mini" data-real-del="' + i + '" aria-label="Remove this score">Remove</button></div>';
     }).join('');
-    host.innerHTML = (rows || '<div class="empty">No real SAT scores yet.</div>') +
-      '<form class="real-add" id="real-add-form">' +
+    host.innerHTML = (rows || '<div class="empty">None yet.</div>') +
+      '<button type="button" class="fp-jump" id="real-add-open">Add a real score &rarr;</button>' +
+      '<form class="real-add" id="real-add-form" style="display:none;">' +
         '<label>SAT date<input type="date" id="real-add-date" required></label>' +
         '<label>R&amp;W<input type="number" id="real-add-rw" min="200" max="800" step="10" required></label>' +
         '<label>Math<input type="number" id="real-add-math" min="200" max="800" step="10" required></label>' +
@@ -3725,6 +4024,11 @@
           if (currentStudent && currentStudent.key === key) loadStudentDetail(key);
         }, function () { showNotice((currentStudent.name || key) + ': ' + what + ' NOT saved. Could not reach the backend.'); if (btn) { btn.disabled = false; btn.textContent = 'Add score'; } });
     };
+    $('real-add-open').addEventListener('click', function () {
+      $('real-add-open').style.display = 'none';
+      $('real-add-form').style.display = '';
+      $('real-add-date').focus();
+    });
     $('real-add-form').addEventListener('submit', function (ev) {
       ev.preventDefault();
       var date = $('real-add-date').value, rw = Number($('real-add-rw').value), math = Number($('real-add-math').value);
@@ -4451,8 +4755,8 @@
     // 4. Practice before a test vs that test
     var pt = MS.practiceTransfer(events, evAtt);
     var ptRead = pt.ready ? (pt.hi < 0
-        ? 'Skills they practised more before a test ran closer to their level on it (' + evRange(pt.lo, pt.hi, function (v) { return v.toFixed(2); }) + ' logits per 10 questions). An association, not proof.'
-        : pt.lo > 0 ? 'More practice on a skill went with a BIGGER shortfall on it; most likely they practise what they already know is weak.'
+        ? 'Skills they practiced more before a test ran closer to their level on it (' + evRange(pt.lo, pt.hi, function (v) { return v.toFixed(2); }) + ' logits per 10 questions). An association, not proof.'
+        : pt.lo > 0 ? 'More practice on a skill went with a BIGGER shortfall on it; most likely they practice what they already know is weak.'
           : 'No clear link yet between practice on a skill and the next test.') : '';
     rows.push(evRow('Does practice show up on the next test?', pt, ptRead, pt.have ? pt.have + ' skill-and-test pairs.' : ''));
 
@@ -4529,19 +4833,22 @@
       : foMode === 'form-only' ? ' Test difficulty offsets are from an older version (' + foDay + '), so a stricter bar applies: paste the current signals and run runFormOffsets once.'
       : ' Test difficulty not adjusted yet, so a stricter bar applies: run setUpSessionsSnapshot once in Apps Script.';
     $('stu-skills-sub').textContent = 'Across ' + ev.attempts + (ev.attempts === 1 ? ' test' : ' tests') +
-      ', ranked by questions missed beyond what their level predicts for those questions. Only "clear" and "lead" rows are past chance.' + foTxt;
-    host.innerHTML = units.slice(0, 12).map(function (u) {
+      ', by misses beyond what their level predicts. Only "clear" and "lead" are past chance.' + (foMode === 'roster' ? '' : foTxt);
+    host.innerHTML = units.slice(0, 12).map(function (u, i) {
       var pct = u.n ? Math.round(100 * u.obs / u.n) : 0;
       var tag = u.clear ? '<span class="sk-tag clear" title="z ' + u.z.toFixed(1) + '">clear</span>'
         : (u.lead ? '<span class="sk-tag lead" title="z ' + u.z.toFixed(1) + '">lead</span>' : '');
       var cls = u.clear || u.lead ? 'weak' : '';
-      return '<div class="skill-row' + (u.lead ? '' : ' sk-quiet') + '">' +
+      return '<div class="skill-row' + (u.lead ? '' : ' sk-quiet') + (i >= 5 ? ' sk-extra' : '') + '">' +
         '<div class="sk-name">' + escHtml(u.unit) + tag + (domOf[u.unit] ? '<small>' + escHtml(domOf[u.unit]) + '</small>' : '') + '</div>' +
         '<div class="sk-bar"><i class="' + cls + '" style="width:' + pct + '%"></i></div>' +
         '<div class="sk-frac">' + Math.round(u.obs) + '/' + u.n + ' &middot; ' + (u.S > 0 ? Math.round(u.S * 10) / 10 + ' below' : 'as expected') + '</div>' +
         '<button type="button" class="mini skill-assign-btn" data-skill="' + escHtml(u.unit) + '">Assign</button>' +
         '</div>';
-    }).join('');
+    }).join('') + (units.length > 5 ? '<button type="button" class="fp-jump sk-all" id="stu-skills-all">Show all ' + Math.min(12, units.length) + ' &rarr;</button>' : '');
+    var all = $('stu-skills-all');
+    if (all) all.addEventListener('click', function () { host.classList.add('show-all'); all.remove(); });
+    host.classList.remove('show-all');
   }
 
   // The whole point of having reports and the scheduler on one page:
@@ -4595,6 +4902,43 @@
     })(0);
   }
 
+  /* pp (2026-09-30): the student's previous test (newest before this one,
+     same test type, not a single module, not the all-hard test, not one
+     clicked through) is attached to the report as it opens, so "Since your
+     last test" works on reports saved before it existed, and against a
+     diagnostic, which has no per-question record for the portal to
+     summarise. Any failure opens the report as saved. */
+  function reportLinkFor(key, attempt) {
+    var name = reportKeepName(key, attempt), hit = kept(name);
+    if (hit && hit.ok && hit.reportLink) return Promise.resolve(hit.reportLink);
+    return postToBackend({ action: 'getAttemptReport', adminKey: adminKey(), key: key, row: attempt.reportRow })
+      .then(function (d) { if (d && d.ok && d.reportLink) { keep(name, { ok: true, reportLink: d.reportLink }); return d.reportLink; } return ''; });
+  }
+  function withPreviousTest(attempt, link) {
+    var decode = function (l) {
+      var m = /#d=([^&]+)/.exec(l || '');
+      return m ? JSON.parse(decodeURIComponent(escape(atob(m[1])))) : null;
+    };
+    var key = currentStudent && currentStudent.key, MSq = window.MorettiSignals;
+    var hardest = (MSq && MSq.HARDEST_TEST_ID) || 'sat-practice-11';
+    var prev = ((currentDetail && currentDetail.attempts) || []).filter(function (a) {
+      if (!a || a === attempt || !a.reportRow || String(a.at || '') >= String(attempt.at || '')) return false;
+      if (a.module && /^(module1|Easier|Harder)$/.test(a.module)) return false;
+      if (attempt.testType && a.testType && a.testType !== attempt.testType) return false;
+      if (a.testId === hardest) return false;
+      if (a.qStats && MSq && (MSq.abandonedSitting(a.qStats) || MSq.spamSitting(a.qStats))) return false;
+      return true;
+    }).sort(function (a, b) { return String(b.at || '').localeCompare(String(a.at || '')); })[0];
+    if (!prev || !key) return Promise.resolve(link);
+    return reportLinkFor(key, prev).then(function (pl) {
+      var cur = decode(link), pd = decode(pl);
+      if (!cur || cur.pv || !pd || !pd.s) return link;
+      delete pd.pv; delete pd.pp;
+      cur.pp = pd;
+      return link.replace(/#d=[^&]+/, '#d=' + btoa(unescape(encodeURIComponent(JSON.stringify(cur)))));
+    }).catch(function () { return link; });
+  }
+
   function openReport(attempt) {
     if (!attempt || !attempt.reportRow || !currentStudent) return;
     var wrap = $('report-frame-wrap');
@@ -4615,14 +4959,18 @@
       .then(function (data) {
         if (!data || !data.ok || !data.reportLink) {
           wrap.innerHTML = '<div id="report-loading">This attempt has no saved report payload.</div>';
-          return;
+          return null;
         }
         var link = safeReportLink(data.reportLink);
         if (!link) {
           wrap.innerHTML = '<div id="report-loading">This attempt\'s saved report link isn\'t a report URL — nothing to open.</div>';
-          return;
+          return null;
         }
         reportViewerLink = link;
+        return withPreviousTest(attempt, link);
+      })
+      .then(function (link) {
+        if (!link) return;
         // A fresh <iframe> per open, rather than reassigning src: the
         // report is addressed entirely by URL hash, and changing only the
         // hash on a live frame doesn't reload it — it would silently keep
@@ -4636,7 +4984,7 @@
         frame.setAttribute('sandbox', 'allow-scripts allow-modals allow-popups allow-downloads');
         // ?admin=1: the walkthrough never opens by itself here (the sandbox hides
         // this page's address from the report, so it is told instead).
-        frame.src = reportViewerLink.replace(/^([^?#]*)(\?[^#]*)?/, function (m, path, q) { return path + (q ? q + '&admin=1' : '?admin=1'); });
+        frame.src = link.replace(/^([^?#]*)(\?[^#]*)?/, function (m, path, q) { return path + (q ? q + '&admin=1' : '?admin=1'); });
         // Flags from inside the report (report.html asks this page to send them).
         frame.addEventListener('load', function () {
           try { frame.contentWindow.postMessage({ type: 'mt-admin-flag-mode' }, '*'); } catch (e) {}
@@ -5121,6 +5469,7 @@
 
   function loadNextSession(key) {
     var host = $('hw-next');
+    delete nextSessionFor[key];
     var now = new Date();
     var end = new Date(now.getTime() + 90 * 86400000);
     // The roster already knows the next session: say it now, then check.
@@ -5158,14 +5507,12 @@
         if (currentStudent && currentStudent.key === key && !known) host.innerHTML = '<span class="ns-none">Could not reach the calendar.</span>';
       });
   }
+  var nextSessionFor = {};
   function paintNextSession(key, next) {
     if (!currentStudent || currentStudent.key !== key) return;
-    $('hw-next').innerHTML = '<span>Next session: <b>' + escHtml(formatSessionWhen(next)) + '</b></span>' +
-      '<button type="button" class="mini solid" id="hw-assign-next">Assign for that day</button>';
-    $('hw-assign-next').addEventListener('click', function () {
-      selectTab('homework');
-      openCreateModal([isoToDateStr(next.startIso)], currentStudent.key, currentStudent.name, '', 'Due the day of their next session');
-    });
+    // Assign homework (header) dates the task for this day.
+    nextSessionFor[key] = next.startIso;
+    $('hw-next').innerHTML = '<span>Next session: <b>' + escHtml(formatSessionWhen(next)) + '</b></span>';
   }
 
   /* EVERYONE'S SESSION PREP IN ONE REQUEST (Luca, 2026-09-25). The backend

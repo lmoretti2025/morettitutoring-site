@@ -20,7 +20,12 @@
      page_view       automatic, every page
      generate_lead   the inquiry form submitted successfully   (Meta: Lead)
      contact_phone   a click on the phone number               (Meta: Contact)
-     view_diagnostic scrolled to the diagnostic section on the homepage
+     view_diagnostic scrolled to the diagnostic (now "platform") section on the homepage
+     view_section    each main section reached, once per page view    (section)
+     open_walkthrough  the sample report walkthrough opened on the homepage
+     click_sat_program a link to the SAT page clicked                   (from)
+     click_cta       a button that picks the form's door clicked     (start, from)
+     choose_start    the form's door changed: diagnostic or call      (start)
 
    ── TO CHECK IT IS WORKING ─────────────────────────────────────────────────
    Add ?mtdebug=1 to any URL. Every event is then logged to the console and
@@ -70,9 +75,24 @@
   // Only the live site counts: local previews and dev servers were being
   // recorded as real visits.
   var liveHost = /(^|\.)morettitutoring\.com$/.test(w.location.hostname);
-  var useGa4   = configured(CONFIG.ga4)       && !onPortal && liveHost;
-  var useMeta  = configured(CONFIG.metaPixel) && !onPortal && liveHost;
-  var useAds   = configured(CONFIG.googleAds) && !onPortal && liveHost;
+
+  // Luca's own browsing was inflating the numbers. Opening any page once
+  // with ?notrack=1 marks this browser as his and nothing is sent from it
+  // again; ?notrack=0 undoes it. Each browser and device needs it once.
+  var mine = false;
+  try {
+    var nt = /[?&]notrack=([01])/.exec(w.location.search);
+    if (nt) {
+      if (nt[1] === '1') w.localStorage.setItem('mtNoTrack', '1');
+      else w.localStorage.removeItem('mtNoTrack');
+    }
+    mine = w.localStorage.getItem('mtNoTrack') === '1';
+  } catch (e) { /* storage blocked: count the visit as usual */ }
+
+  var track    = liveHost && !onPortal && !mine;
+  var useGa4   = configured(CONFIG.ga4)       && track;
+  var useMeta  = configured(CONFIG.metaPixel) && track;
+  var useAds   = configured(CONFIG.googleAds) && track;
 
   /* ── Google (GA4, and Google Ads through the same tag) ─────────────────── */
   w.dataLayer = w.dataLayer || [];
@@ -191,7 +211,7 @@
      reach it is what tells you whether the homepage or the ad is at fault. */
   function watchDiagnostic() {
     watchDiagnostic.ran = true;
-    var target = d.getElementById('diagnostic');
+    var target = d.getElementById('diagnostic') || d.getElementById('platform');
     if (!target || !('IntersectionObserver' in w)) return;
     var seen = false;
     var io = new IntersectionObserver(function (entries) {
@@ -210,6 +230,42 @@
     }, { threshold: 0, rootMargin: '-35% 0px -35% 0px' });
     io.observe(target);
   }
+
+  /* WHAT GETS CLICKED (2026-10-11): which parts of the new pages lead to a
+     sign-up. Each click names the section it came from, so the reports can
+     say "the SAT program link in the hero" rather than just "a click". */
+  function fromOf(el) {
+    if (el.closest('nav')) return 'nav';
+    var sec = el.closest('section[id], section');
+    return sec ? (sec.id || (sec.className || '').split(' ')[0] || 'section') : 'page';
+  }
+  d.addEventListener('click', function (e) {
+    var t = e.target && e.target.closest ? e.target : null;
+    if (!t) return;
+    var a = t.closest('a[href*="prep-course.html"]');
+    if (a && w.location.pathname.indexOf('prep-course') === -1) event('click_sat_program', { from: fromOf(a) });
+    if (t.closest('[data-walk]')) event('open_walkthrough', { from: fromOf(t.closest('[data-walk]')) });
+    var c = t.closest('[data-start]');
+    if (c) event('click_cta', { start: c.getAttribute('data-start'), from: fromOf(c) });
+  }, true);
+  d.addEventListener('change', function (e) {
+    var r = e.target;
+    if (r && r.name === 'start' && r.checked) event('choose_start', { start: r.value });
+  }, true);
+  /* How far down each page readers get: every main section, once. */
+  function watchSections() {
+    if (!('IntersectionObserver' in w)) return;
+    var seen = {};
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        var id = en.target.id;
+        if (en.isIntersecting && !seen[id]) { seen[id] = 1; event('view_section', { section: id }); io.unobserve(en.target); }
+      });
+    }, { threshold: 0, rootMargin: '-35% 0px -35% 0px' });
+    [].forEach.call(d.querySelectorAll('section[id]'), function (s) { io.observe(s); });
+  }
+  if (d.readyState === 'loading') d.addEventListener('DOMContentLoaded', watchSections);
+  else watchSections();
 
   /* A deferred script normally runs before DOMContentLoaded, but not if
      parsing has already finished, so check readyState instead of assuming. */
