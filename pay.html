@@ -17,7 +17,8 @@
   PAYMENT DETAILS (Luca, 2026-10-13: "build the stripe card-on-file setup
   with ACH first"). A family's own link, #t=<signed token>, from the Billing
   tab. They save a bank account (the default) or a card on Stripe's own
-  page; nothing is charged here. The backend is portal/billing.gs. No
+  page; nothing is charged here. Sessions are charged in the 24 hours
+  before they start (Luca's cancellation window). The backend is portal/billing.gs. No
   prices on this page, as on the rest of the site. Not linked from the site.
 -->
 <style>
@@ -79,7 +80,7 @@
     <div class="hero-top"><a href="/"><img src="logo-caladea-white-400.png" alt="Moretti Test Prep &amp; Tutoring"></a></div>
     <div class="lbl" style="margin-top:40px">Payment details</div>
     <h1 id="h1">Set up payment for your sessions.</h1>
-    <p class="sub">Save a bank account or a card once. Each session is charged after it happens, so there&rsquo;s nothing to remember.</p>
+    <p class="sub">Save a bank account or a card once. Each session is charged the day before it, so there&rsquo;s nothing to remember.</p>
   </div>
 </header>
 
@@ -128,7 +129,7 @@
         '<button type="button" class="opt" data-m="card"><b>Credit or debit card</b><span class="d">Visa, Mastercard, American Express or Discover.' + fee + '</span></button>' +
       '</div>' +
       '<p id="msg" role="status"></p>' +
-      '<div class="how"><p>Nothing is charged today.</p><p>After each session, that session is charged to what you save here.</p>' +
+      '<div class="how"><p>Nothing is charged today.</p><p>Each session is charged in the 24 hours before it, once it&rsquo;s past the free cancellation window.</p>' +
         '<p>Payments run through Stripe. Your bank and card details go to Stripe, never to me.</p></div>';
     Array.prototype.forEach.call(card.querySelectorAll('[data-m]'), function (b) {
       b.onclick = function () {
@@ -150,7 +151,7 @@
     card.innerHTML = '<div class="state"><div class="onfile" style="justify-content:center;text-align:left;margin:0 auto 14px;max-width:420px">' +
       '<div class="tick" aria-hidden="true">' + (pending ? '&#8987;' : '&#10003;') + '</div><p><b>' + (pending ? 'Almost done' : 'All set') + '</b><br>' +
       esc(d.detail || '') + (pending ? ' is saved. Your bank verifies it with two small deposits in a day or two; Stripe emails you a link to confirm them.'
-        : ' is on file. Nothing was charged today; each session is charged after it happens.') + '</p></div>' +
+        : ' is on file. Nothing was charged today; each session is charged in the 24 hours before it.') + '</p></div>' +
       '<p>Thank you! See you at the next session.</p><p style="margin-top:14px"><b>Luca Moretti</b></p></div>';
     try { history.replaceState(null, '', location.pathname + location.hash); } catch (e) {}
   }
