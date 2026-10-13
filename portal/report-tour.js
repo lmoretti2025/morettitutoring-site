@@ -944,7 +944,7 @@
       var sk = root.querySelector('.t-skip');
       sk.textContent = 'Sample: a made-up student'; sk.removeAttribute('data-go'); sk.disabled = true; sk.style.cursor = 'default';
       Array.prototype.forEach.call(root.querySelectorAll('.t-scr [data-go="close"]'), function (b) {
-        b.setAttribute('data-go', 'cta'); b.className = 't-btn'; b.innerHTML = 'Take the free diagnostic &rarr;';
+        b.setAttribute('data-go', 'cta'); b.className = 't-btn'; b.innerHTML = 'Book a free call &rarr;';
         var again = document.createElement('button');
         again.type = 'button'; again.className = 't-btn ghost'; again.setAttribute('data-go', 'restart'); again.textContent = 'Watch again';
         again.style.marginLeft = '10px';

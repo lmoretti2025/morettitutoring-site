@@ -65,7 +65,8 @@ safe(function(){
   function checkFields(name, phone, email) {
     var checks = [
       ['rf-name',  !name, 'your name'],
-      ['rf-phone', phone.replace(/\D/g, '').length < 7, phone ? 'a full phone number' : 'a phone number'],
+      // Optional since 2026-10-12 (two in three who started the form left it): only checked when given.
+      ['rf-phone', !!phone && phone.replace(/\D/g, '').length < 7, 'a full phone number'],
       ['rf-email', !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email), email ? 'a complete email address' : 'an email address']
     ];
     var wanted = [], first = null;
@@ -100,7 +101,8 @@ safe(function(){
   var doorBtn = document.getElementById('rf-submit'), doorDefault = doorBtn ? doorBtn.innerHTML : '';
   function doorLabel() {
     var c = document.getElementById('rf-start-call');
-    if (doorBtn && c) doorBtn.innerHTML = c.checked ? '<span>Ask for a call</span>' : doorDefault;
+    // Only where a form still offers both doors; a call-only form keeps its own label.
+    if (doorBtn && c && document.getElementById('rf-start-diag')) doorBtn.innerHTML = c.checked ? '<span>Ask for a call</span>' : doorDefault;
   }
   [].forEach.call(form.querySelectorAll('input[name="start"]'), function (r) { r.addEventListener('change', doorLabel); });
   try { pickDoor(new URLSearchParams(location.search).get('start')); } catch (err) {}
@@ -142,7 +144,7 @@ safe(function(){
     var start = startEl ? startEl.value : '';
     if (start) message = (start === 'call' ? 'Wants to talk first, then the diagnostic' : 'Wants to start with: the free diagnostic') + (message ? '\n\n' + message : '');
     if (interest) message = 'Interested in: ' + interest + (message ? '\n' + message : '');
-    /* Only name, phone and email are required: grade, subject and parent vs
+    /* Only name and email are required (phone is optional): grade, subject and parent vs
        student are answered in the first minute of the call, and asking here
        turns a free diagnostic into a quoting form. */
     if (!checkFields(name, phone, email)) return;

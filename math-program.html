@@ -1096,6 +1096,15 @@ nav.is-red .navlinks a{color:rgba(255,255,255,.85)}nav.is-red .navlinks a.on{col
 .navlinks a.navsat{color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:.32rem .85rem;margin-left:.3rem}
 .navlinks a.navsat::after{display:none}
 .navlinks a.navsat:hover{background:#fff;color:var(--red)}
+/* GET STARTED, ALWAYS IN REACH (2026-10-12): a bar that appears once the hero is
+   scrolled past and steps aside when the form itself is on screen. */
+.gsbar{position:fixed;left:50%;bottom:16px;z-index:55;transform:translate(-50%,140%);display:flex;align-items:center;gap:1rem;background:#0C0A09;color:#fff;border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:.45rem .45rem .45rem 1.2rem;box-shadow:0 18px 40px -14px rgba(0,0,0,.55);transition:transform .45s var(--ease);max-width:calc(100vw - 24px)}
+.gsbar.on{transform:translate(-50%,0)}
+.gsbar span{font-size:.8rem;color:rgba(237,231,229,.75);white-space:nowrap}
+.gsbar a{background:var(--red);color:#fff;border-radius:999px;padding:.7rem 1.2rem;font:600 .74rem var(--sans);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.gsbar a:hover{background:var(--red-lift)}
+@media(max-width:600px){.gsbar{left:12px;right:12px;bottom:12px;padding:.4rem;transform:translateY(140%);justify-content:space-between}.gsbar.on{transform:none}.gsbar span{display:none}.gsbar a{flex:1;text-align:center;padding:.85rem 1rem}}
+@media(prefers-reduced-motion:reduce){.gsbar{transition:none}}
 </style>
 </head>
 <body>
@@ -1251,20 +1260,22 @@ nav.is-red .navlinks a{color:rgba(255,255,255,.85)}nav.is-red .navlinks a.on{col
 
   <div class="bookcard rv d2">
     <form id="reserve-form" novalidate data-interest="Math tutoring">
+      <!-- One door since 2026-10-12: every form asks for a call; the diagnostic comes after it. -->
+      <input type="radio" id="rf-start-call" name="start" value="call" checked hidden>
       <div class="hp-field" aria-hidden="true">
         <label for="rf-hp">Leave this field blank</label>
         <input type="text" id="rf-hp" name="rf_x7q2" tabindex="-1" autocomplete="off" data-lpignore="true" data-1p-ignore data-form-type="other">
       </div>
       <div class="frow">
         <div class="ff"><label class="fl" for="rf-name">Your name</label><input class="fi" type="text" id="rf-name" name="parentName" autocomplete="name" required></div>
-        <div class="ff"><label class="fl" for="rf-phone">Phone</label><input class="fi" type="tel" id="rf-phone" name="phone" autocomplete="tel" placeholder="e.g. (201) 555-0100" required></div>
+        <div class="ff"><label class="fl" for="rf-phone">Phone <em>(optional)</em></label><input class="fi" type="tel" id="rf-phone" name="phone" autocomplete="tel" placeholder="for a quicker reply by text"></div>
       </div>
       <div class="ff"><label class="fl" for="rf-email">Email</label><input class="fi" type="email" id="rf-email" name="email" autocomplete="email" required></div>
       <div class="ff"><label class="fl" for="rf-message">What your student needs help with <em>(optional)</em></label>
         <textarea class="fi" id="rf-message" name="message" rows="2" placeholder="Course, grade so far, what feels hard&hellip;"></textarea></div>
       <button type="submit" class="fsub shimmer" id="rf-submit"><span>Book a free call</span></button>
       <p id="rf-invalid" class="fmsg err" role="alert"></p>
-      <p class="fnote" id="rf-note">The call costs nothing either way, and you have the plan and the cost in writing before anything starts. <a href="#faq">How pricing works &rarr;</a></p>
+      <p class="fnote" id="rf-note">The call costs nothing either way, and you have the plan and the cost in writing before anything starts. <a href="book.html">Or pick a time now &rarr;</a></p>
       <p id="rf-success" class="fmsg ok" role="status">Thanks, check your email for confirmation. I&rsquo;ll follow up personally, the same day.</p>
       <p id="rf-error" role="alert" class="fmsg err">Something went wrong. Please call (201) 275-2791 directly.</p>
     </form>
@@ -1273,6 +1284,7 @@ nav.is-red .navlinks a{color:rgba(255,255,255,.85)}nav.is-red .navlinks a.on{col
   <p class="capphone rv d3">Prefer to talk now?<a href="tel:2012752791">(201) 275-2791</a></p>
 </div></section>
 
+<div class="gsbar" id="gsbar" aria-hidden="true"><span>15 minutes, no obligation</span><a href="#start">Book a free call &rarr;</a></div>
 <footer><div class="shell">
   <div class="footer-id">
     <p>Moretti Test Prep &amp; Tutoring, located in Cranford NJ</p>
@@ -1410,7 +1422,18 @@ document.documentElement.classList.add('js');
   var st=document.getElementById('start'); if(st) new IntersectionObserver(function(es){ if(es[0].isIntersecting) links.forEach(function(a){a.classList.remove('on');}); },{rootMargin:'-45% 0px -50% 0px'}).observe(st);
 })();
 </script>
+<script>
+/* The get-started bar: shown once the hero is behind you, hidden while the form is on screen. */
+(function(){
+  var bar=document.getElementById('gsbar'), hero=document.querySelector('.xhero,.shero'), form=document.getElementById('start');
+  if(!bar||!hero||!form||!('IntersectionObserver' in window)) return;
+  var pastHero=false, atForm=false;
+  function paint(){ var on=pastHero&&!atForm; bar.classList.toggle('on',on); bar.setAttribute('aria-hidden',String(!on)); }
+  new IntersectionObserver(function(es){ pastHero=!es[0].isIntersecting; paint(); }).observe(hero);
+  new IntersectionObserver(function(es){ atForm=es[0].isIntersecting; paint(); },{rootMargin:'0px 0px -20% 0px'}).observe(form);
+})();
+</script>
 <script src="site.js"></script>
-<script src="lead-form.js?v=20261005a"></script>
+<script src="lead-form.js?v=20261012b"></script>
 </body>
 </html>
