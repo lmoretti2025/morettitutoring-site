@@ -101,7 +101,8 @@ safe(function(){
   var doorBtn = document.getElementById('rf-submit'), doorDefault = doorBtn ? doorBtn.innerHTML : '';
   function doorLabel() {
     var c = document.getElementById('rf-start-call');
-    if (doorBtn && c) doorBtn.innerHTML = c.checked ? '<span>Ask for a call</span>' : doorDefault;
+    // Only where a form still offers both doors; a call-only form keeps its own label.
+    if (doorBtn && c && document.getElementById('rf-start-diag')) doorBtn.innerHTML = c.checked ? '<span>Ask for a call</span>' : doorDefault;
   }
   [].forEach.call(form.querySelectorAll('input[name="start"]'), function (r) { r.addEventListener('change', doorLabel); });
   try { pickDoor(new URLSearchParams(location.search).get('start')); } catch (err) {}
