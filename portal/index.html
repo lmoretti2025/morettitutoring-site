@@ -17504,6 +17504,14 @@ window.Portal = {
     var m, last = -1;
     QUESTION_TRIGGER_RE_IQ.lastIndex = 0;
     while ((m = QUESTION_TRIGGER_RE_IQ.exec(text))) { last = m.index; }
+    /* Rhetorical Synthesis (2026-10-13): "The student wants to ... Which choice ...?" is ONE prompt.
+       The last trigger is "Which choice", which left the goal sentence on the passage side, under
+       the notes. When a "The student wants" sentence runs straight into the last trigger (no markup
+       between, so not part of the notes), the prompt starts there. */
+    if (last > 0) {
+      var sw = text.lastIndexOf('The student wants', last - 1);
+      if (sw !== -1 && last - sw < 400 && text.slice(sw, last).indexOf('<') === -1) last = sw;
+    }
     return last;
   }
   var ABBREVIATION_RE_IQ = /(?:^|[\s"'])(Dr|Mr|Mrs|Ms|Jr|Sr|St|vs|etc|U\.S|no|Vol|pp|al)$/i;
@@ -19358,6 +19366,14 @@ window.Portal = {
     var m, last = -1;
     QUESTION_TRIGGER_RE.lastIndex = 0;
     while ((m = QUESTION_TRIGGER_RE.exec(text))) { last = m.index; }
+    /* Rhetorical Synthesis (2026-10-13): "The student wants to ... Which choice ...?" is ONE prompt.
+       The last trigger is "Which choice", which left the goal sentence on the passage side, under
+       the notes. When a "The student wants" sentence runs straight into the last trigger (no markup
+       between, so not part of the notes), the prompt starts there. */
+    if (last > 0) {
+      var sw = text.lastIndexOf('The student wants', last - 1);
+      if (sw !== -1 && last - sw < 400 && text.slice(sw, last).indexOf('<') === -1) last = sw;
+    }
     return last;
   }
   var ABBREVIATION_RE = /(?:^|[\s"'])(Dr|Mr|Mrs|Ms|Jr|Sr|St|vs|etc|U\.S|no|Vol|pp|al)$/i;
@@ -19373,6 +19389,18 @@ window.Portal = {
   }
   function splitPassageQb(text) {
     text = String(text || '').trim();
+    /* The data's own break before the prompt wins when what follows it IS the prompt (2026-10-13),
+       as in the test engine, the Mistakes log and the question modal. */
+    var brIdx = text.lastIndexOf('<br><br>');
+    if (brIdx !== -1) {
+      var tail = text.slice(brIdx + 8).trim();
+      QUESTION_TRIGGER_RE.lastIndex = 0;
+      var first = QUESTION_TRIGGER_RE.exec(tail);
+      if (first && first.index === 0 && tail.indexOf('?') !== -1) {
+        var bp = window.qbFormatPassage(text.slice(0, brIdx));
+        if (bp) return { passage: bp, question: tail };
+      }
+    }
     var qMark = text.lastIndexOf('?');
     if (qMark === -1) return null;
     var triggerIdx = lastQuestionTriggerIndex(text.slice(0, qMark + 1));
@@ -20785,6 +20813,14 @@ window.Portal = {
     var m, last = -1;
     QUESTION_TRIGGER_RE.lastIndex = 0;
     while ((m = QUESTION_TRIGGER_RE.exec(text))) { last = m.index; }
+    /* Rhetorical Synthesis (2026-10-13): "The student wants to ... Which choice ...?" is ONE prompt.
+       The last trigger is "Which choice", which left the goal sentence on the passage side, under
+       the notes. When a "The student wants" sentence runs straight into the last trigger (no markup
+       between, so not part of the notes), the prompt starts there. */
+    if (last > 0) {
+      var sw = text.lastIndexOf('The student wants', last - 1);
+      if (sw !== -1 && last - sw < 400 && text.slice(sw, last).indexOf('<') === -1) last = sw;
+    }
     return last;
   }
   var ABBREVIATION_RE_MODAL = /(?:^|[\s"'])(Dr|Mr|Mrs|Ms|Jr|Sr|St|vs|etc|U\.S|no|Vol|pp|al)$/i;
