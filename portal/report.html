@@ -66,7 +66,9 @@
      single-section attempt has no such column (groupSmallScoreTiles returns
      early), and since that wrapper is appended after the big tile, the big
      tile is :last-child exactly when it stands alone. */
-  .score-tiles > .score-tile.big:last-child { border-right: none; }
+  /* Alone (one section, no column beside it) it fills the row and centers,
+     instead of sitting in the left corner of an empty row (2026-10-13). */
+  .score-tiles > .score-tile.big:last-child { border-right: none; flex: 1 1 100%; }
   .score-tile .tile-lab { font-family: var(--hel); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--mid); margin: 0 0 0.4rem; }
   .score-tile .tile-lab.big { font-size: 0.68rem; }
   .score-tile .tile-score { font-family: var(--hel); font-weight: 700; color: var(--text); line-height: 1; }
@@ -2054,6 +2056,11 @@
     if (/[?&]late=1\b/.test(location.search)) demoNow.setHours(23, 30, 0, 0);
     var pad2 = function (x) { return (x < 10 ? '0' : '') + x; };
     var demoDay = demoNow.getFullYear() + '-' + pad2(demoNow.getMonth() + 1) + '-' + pad2(demoNow.getDate());
+    // &only=math (or &only=rw) previews a single-section attempt.
+    var demoOnly = (location.search.match(/[?&]only=(math|rw)\b/) || [])[1];
+    if (demoOnly) {
+      s = s.filter(function (x) { return x.k === (demoOnly === 'rw' ? 'reading-writing' : 'math'); });
+    }
     return { n: 'Demo Student', k: 'DEMO', t: testChoice, dt: demoDay, ts: demoNow.toISOString(), s: s };
   }
   var DEMO_MODE = /[?&]demo=1\b/.test(location.search);
