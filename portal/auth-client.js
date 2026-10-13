@@ -773,22 +773,22 @@ window.MorettiAuth = (function () {
         '<div id="mta-continue" style="display:none;">' +
           '<h1 class="panel-hed">You&rsquo;re already set up</h1>' +
           '<p class="panel-sub">This device is signed in as <b id="mta-continue-who"></b>. ' +
-            'That invite link was one-time and has already been used &mdash; you don&rsquo;t need it again.</p>' +
+            'That invite link was one-time and has already been used. You don&rsquo;t need it again.</p>' +
           '<button class="key-btn" id="mta-continue-go">Continue to the portal</button>' +
           '<p class="key-help" style="margin-top:1rem;">From now on just open ' +
-            '<b>morettitutoring.com/portal</b> &mdash; worth bookmarking.</p>' +
-          '<p class="key-help"><a href="#" id="mta-continue-other">This isn&rsquo;t me &mdash; sign in as someone else</a></p>' +
+            '<b>morettitutoring.com/portal</b>. It&rsquo;s worth bookmarking.</p>' +
+          '<p class="key-help"><a href="#" id="mta-continue-other">Not you? Sign in as someone else</a></p>' +
         '</div>' +
 
         '<div id="mta-who" style="display:none;">' +
           '<h1 class="panel-hed">Before you sign in</h1>' +
           '<p class="panel-sub">This link sets up the <b>student&rsquo;s</b> portal account. ' +
-            'Whoever signs in here becomes the account &mdash; and it is the address their notes, ' +
+            'Whoever signs in here becomes the account, and it&rsquo;s the address their notes, ' +
             'slide decks and score reports get shared to.</p>' +
-          '<button class="key-btn" id="mta-who-student">I&rsquo;m the student &mdash; continue</button>' +
+          '<button class="key-btn" id="mta-who-student">I&rsquo;m the student, continue</button>' +
           '<p class="key-help"><a href="#" id="mta-who-parent">I&rsquo;m a parent</a></p>' +
           '<div id="mta-who-forward" style="display:none;">' +
-            '<p class="panel-sub" style="margin-top:1.2rem;">No problem &mdash; forward this email to your ' +
+            '<p class="panel-sub" style="margin-top:1.2rem;">No problem. Forward this email to your ' +
             'child and have them open the link on their own device, signed in to their own Google account. ' +
             'Nothing else is needed from you.</p>' +
             '<p class="key-help">Setting it up together on their device right now? ' +
@@ -798,11 +798,11 @@ window.MorettiAuth = (function () {
 
         '<div id="mta-signin">' +
           '<h1 class="panel-hed">Sign in</h1>' +
-          '<p class="panel-sub">This is the <b>student&rsquo;s</b> portal &mdash; sign in with the ' +
+          '<p class="panel-sub">This is the <b>student&rsquo;s</b> portal. Sign in with the ' +
             'student&rsquo;s own Google account, not a parent&rsquo;s.</p>' +
           '<div id="mta-gbtn" style="display:flex;justify-content:center;margin:1.5rem 0 0;"></div>' +
           '<p class="key-error" id="mta-signin-error"></p>' +
-          '<p class="key-help">No Google account on your email address? You can make one on the address you already use &mdash; ' +
+          '<p class="key-help">No Google account on your email address? You can make one on the address you already use: ' +
             'go to <a href="https://accounts.google.com/signup" target="_blank" rel="noopener">accounts.google.com/signup</a> ' +
             'and choose &ldquo;Use your existing email.&rdquo;</p>' +
         '</div>' +
@@ -830,7 +830,7 @@ window.MorettiAuth = (function () {
           '<h1 class="panel-hed">Waiting on Luca</h1>' +
           '<p class="panel-sub" id="mta-pending-sub"></p>' +
           '<div id="mta-pending-dots" style="margin:1.5rem 0;font-size:1.5rem;letter-spacing:.3em;opacity:.4;">&bull;&bull;&bull;</div>' +
-          '<p class="key-help">Leave this page open &mdash; it lets you in by itself the moment he approves. ' +
+          '<p class="key-help">Leave this page open. It lets you in by itself the moment he approves. ' +
             'In a hurry? ' + CONTACT.charAt(0).toUpperCase() + CONTACT.slice(1) + '. ' +
             '<a href="#" id="mta-pending-switch">Start over</a></p>' +
         '</div>' +
@@ -1065,7 +1065,7 @@ window.MorettiAuth = (function () {
       case 'bad_token':
         return 'Your sign-in expired while you were typing. Reload the page and sign in again.';
       case 'busy_try_again':
-        return 'The server is still finishing your last attempt — wait a moment and try again.';
+        return 'The server is still finishing your last attempt. Wait a moment and try again.';
       case 'network':
         return "Couldn't reach the server. Check your connection and try again, or " + CONTACT + '.';
       // Raised by the request guard when the pairing behind a token is gone
@@ -1073,7 +1073,7 @@ window.MorettiAuth = (function () {
       // hopeless; signing in again is not.
       case 'session_revoked':
       case 'unauthorized':
-        return 'Your sign-in is no longer valid \u2014 reload the page and sign in again, or ' + CONTACT + '.';
+        return 'Your sign-in is no longer valid. Reload the page and sign in again, or ' + CONTACT + '.';
       default:
         return "That key wasn't recognized. Double-check it, or " + CONTACT + '.';
     }
@@ -1091,8 +1091,8 @@ window.MorettiAuth = (function () {
     if (data.pending) {
       wasPending = true;
       host.querySelector('#mta-pending-sub').textContent =
-        'Your request is with Luca now. He gets it on his phone and usually approves within a few minutes — ' +
-        'nothing on your account is visible to anyone until he does.';
+        'Your request is with Luca now. He gets it on his phone and usually approves within a few minutes. ' +
+        'Nothing on your account is visible to anyone until he does.';
       pane('pending');
       startPoll();
       return;
@@ -1112,8 +1112,8 @@ window.MorettiAuth = (function () {
       host.querySelector('#mta-key-sub').innerHTML =
         'Signed in as <b>' + escapeText(data.email || 'your Google account') + '</b>. ' +
         'One time only: enter the access key to link <i>this</i> account to the student&rsquo;s file. ' +
-        '<b>Not the student?</b> <a href="#" id="mta-key-wrong">Switch account</a> first &mdash; ' +
-        'the portal belongs to whoever signs in here.';
+        '<b>Not the student?</b> <a href="#" id="mta-key-wrong">Switch account</a> first. ' +
+        'The portal belongs to whoever signs in here.';
       var wrong = host.querySelector('#mta-key-wrong');
       if (wrong) wrong.addEventListener('click', function (e) { e.preventDefault(); restart(); });
       pane('key');
@@ -1127,7 +1127,7 @@ window.MorettiAuth = (function () {
     if (!data.key || !data.session) {
       err('#mta-signin-error',
         'The portal reached the server but got an answer it did not understand. ' +
-        'This usually means the backend needs redeploying — ' + CONTACT + '.');
+        'This usually means the backend needs redeploying. ' + CONTACT.charAt(0).toUpperCase() + CONTACT.slice(1) + '.');
       pane('signin');
       return;
     }
@@ -1284,7 +1284,7 @@ window.MorettiAuth = (function () {
         'press and hold the link and choose "Open in Browser", or type ' +
         'morettitutoring.com/portal into your browser yourself.';
     }
-    return "Google's sign-in could not start \u2014 an ad blocker, a content blocker or a school network filter is " +
+    return "Google's sign-in could not start. An ad blocker, a content blocker or a school network filter is " +
       'the usual cause, and tapping a link from inside an app (Gmail, Instagram, WhatsApp) does it too. ' +
       'Try opening morettitutoring.com/portal in Safari or Chrome, or ' + CONTACT + '.';
   }
