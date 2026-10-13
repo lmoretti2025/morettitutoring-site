@@ -1224,33 +1224,41 @@
         needed = !!(d && d.pt);
       }
     } catch (e) { /* unreadable link: load it and let the report say so */ }
-    /* WHICH VERSION of the tests this attempt was answered against.
-       A saved attempt records answers BY POSITION and carries no qids, and the
-       audited tests that landed on 2026-10-13 re-pointed 85% of those positions.
-       So an attempt from before that must be regraded against the archive, not
-       against the live file, or the report scores a student on questions they
-       never saw. Decided here because the payload is in the URL fragment and is
-       readable before anything loads. */
-    if (needed) {
-      var v1 = false;
-      try {
-        if (d) {
-          if (d.tv) {
-            v1 = (d.tv === 1);                       // stamped at submit: authoritative
-          } else if (V1_TEST_IDS.indexOf(d.pt) < 0) {
-            v1 = false;                              // a test that exists only now
-          } else {
-            var t = d.ts ? Date.parse(d.ts) : NaN;
-            // No timestamp at all predates `ts` itself, so it predates the cutover.
-            v1 = !isFinite(t) || t < CUTOVER_MS;
-          }
+    /* WHICH VERSION of the questions this attempt was answered against.
+       An attempt records answers BY POSITION and carries no qids. The release of
+       2026-10-13T03:03:19Z re-pointed 85% of the practice-test positions AND re-dealt the
+       diagnostic outright - all 147 of its positions, with not one of the 108 old qids
+       surviving. So an attempt from before that must be regraded against the archive, or
+       the report scores a student on questions they never saw. Decided here because the
+       payload is in the URL fragment and is readable before anything loads.
+
+       BOTH kinds need this. The first version of this block only versioned practice
+       tests, and the first real report Luca checked was a diagnostic, which it did
+       nothing for - the worse of the two breaks, since the diagnostic has no surviving
+       questions at all. */
+    var v1 = false;
+    try {
+      if (d) {
+        if (d.tv) {
+          v1 = (d.tv === 1);                        // stamped at submit: authoritative
+        } else if (d.pt && V1_TEST_IDS.indexOf(d.pt) < 0) {
+          v1 = false;                               // a test that exists only now
+        } else {
+          var t = d.ts ? Date.parse(d.ts) : NaN;
+          // No timestamp at all predates `ts` itself, so it predates the cutover.
+          v1 = !isFinite(t) || t < CUTOVER_MS;
         }
-      } catch (e) { v1 = false; }
-      window.__MT_TEST_VERSION = v1 ? 1 : 2;
+      }
+    } catch (e) { v1 = false; }
+    window.__MT_TEST_VERSION = v1 ? 1 : 2;
+    if (needed) {
       document.write(v1
         ? '<script src="practice-tests-v1.js?v=20261013a"><\/script>'
         : '<script src="practice-tests.js?v=20261013a"><\/script>');
     }
+    /* The DIAGNOSTIC archive. banks.js is always loaded, so this is additional and small
+       (126KB against the practice tests' 3MB), and only for a pre-release attempt. */
+    if (v1) document.write('<script src="banks-v1.js?v=20261013a"><\/script>');
   })();
 </script>
 <script src="time-budgets.js?v=20260912a"></script>
@@ -1709,7 +1717,7 @@
   function buildDemoData() {
     var testChoice = 'SAT';
     var order = (window.TEST_FORMATS && window.TEST_FORMATS[testChoice] && window.TEST_FORMATS[testChoice].order) || [];
-    var sectionKeys = order.filter(function (k) { return window.SECTION_BANKS[k] && window.SECTION_BANKS[k].module1.length; });
+    var sectionKeys = order.filter(function (k) { return dxBanks()[k] && dxBanks()[k].module1.length; });
     var seed = 42;
     function rand() { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return (seed % 1000) / 1000; }
     // Skill names here must be exact official College Board strings — see
@@ -1908,7 +1916,7 @@
       return (hasTwoModules ? perModule * 2 : perModule) * demoAccomMult;
     }
     function genSection(key, wrongRate) {
-      var bank = window.SECTION_BANKS[key];
+      var bank = dxBanks()[key];
       var weakSkill = weakSkillBySection[key];
       var m1 = genAnswers(bank.module1, wrongRate, weakSkill, key);
       var variant = null, m2 = null, m2t = 0;
@@ -2166,7 +2174,7 @@
     d.pt = (typeof d.pt === 'string' && /^[\w-]{1,60}$/.test(d.pt)) ? d.pt : null;
     d.iv = Array.isArray(d.iv) ? d.iv.filter(function (e) { return e && typeof e === 'object'; })
       .map(function (e) { return { k: String(e.k), s: e.s, ms: Number(e.ms) || 0, at: e.at }; }) : undefined;
-    var banks = window.SECTION_BANKS || {};
+    var banks = dxBanks();
     d.s = d.s.filter(function (sec) {
       if (!sec || typeof sec !== 'object' || !Object.prototype.hasOwnProperty.call(banks, sec.k)) return false;
       if (sec.v != null && !/^[A-Za-z]{1,12}$/.test(sec.v)) sec.v = null;
@@ -2218,6 +2226,17 @@
   function ptTests() {
     if (window.__MT_TEST_VERSION === 1) return window.SAT_PRACTICE_TESTS_V1 || [];
     return window.SAT_PRACTICE_TESTS || [];
+  }
+
+  /* THE DIAGNOSTIC BANK AS THIS ATTEMPT SAW IT. Same reasoning as ptTests(), and more
+     necessary: the 2026-10-13 re-deal left NO question in common, so a pre-release
+     diagnostic scored against the live bank is scored entirely on questions the student
+     never saw. Falls back to the live bank only if the archive did not load, because a
+     diagnostic report with no bank at all cannot render anything, and banks.js is always
+     present - the version note on page 2 says which was used. */
+  function dxBanks() {
+    if (window.__MT_TEST_VERSION === 1 && window.SECTION_BANKS_V1) return window.SECTION_BANKS_V1;
+    return window.SECTION_BANKS || {};
   }
 
   /* The same question for SOME OTHER attempt (the previous-sitting comparison), which can
@@ -2290,14 +2309,14 @@
         }
       }
     }
-    return window.SECTION_BANKS[sectionKey];
+    return dxBanks()[sectionKey];
   }
 
   // Practice-test section objects (from getBank) have no `label`, so use
   // SECTION_BANKS' label for the section key, which names the same
   // category either way.
   function sectionLabel(sectionKey, bank) {
-    var label = (window.SECTION_BANKS[sectionKey] && window.SECTION_BANKS[sectionKey].label) || bank.label || sectionKey;
+    var label = (dxBanks()[sectionKey] && dxBanks()[sectionKey].label) || bank.label || sectionKey;
     return label;
   }
 
@@ -5549,13 +5568,13 @@
      it may have been started on the old questions and submitted after the new ones went
      live - so that case says so instead of quietly picking one. */
   (function () {
-    if (!data.pt) return;
     var note = document.getElementById('raw-sections');
     var ts = data.ts ? Date.parse(data.ts) : NaN;
     var grey = !data.tv && isFinite(ts) && ts >= CUTOVER_MS && ts < CUTOVER_MS + CUTOVER_GREY_MS;
     var msg = '';
     if (window.__MT_TEST_VERSION === 1) {
-      msg = 'Scored against the test as it stood when this was taken, before the 13 October revision.';
+      msg = 'Scored against the ' + (data.pt ? 'test' : 'diagnostic')
+          + ' as it stood when this was taken, before the 13 October revision.';
     } else if (grey) {
       msg = 'This attempt was submitted just after the 13 October test revision, so the '
           + 'question detail below may not be the exact wording it was sat on. The score is unaffected.';
@@ -8407,7 +8426,7 @@
             var tk = k === 'reading-writing' ? 'readingWriting' : k;
             if (T && T.sections && T.sections[tk]) return T.sections[tk];
           }
-          return (window.SECTION_BANKS || {})[k];
+          return dxBanks()[k];
         };
         pp.s.forEach(function (S, si) {
           var bank = bankFor(S.k);
