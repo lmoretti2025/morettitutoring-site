@@ -1291,6 +1291,34 @@
   /* ═══ QUESTION NAVIGATOR — a dismissible popup (opened from the
      progress button), matching Bluebook's own module question-picker,
      rather than a permanently-docked sidebar. ═══ */
+  /* The confidence tap (diagnostic only). Each button advances, so it stands in for Next
+     rather than adding a step; `chosen` only marks a value already recorded, which the
+     student sees if they come back to a question. */
+  .dx-conf { display: flex; align-items: center; gap: 0.4rem; margin-left: auto; }
+  /* `.dx-btn` picks up a `flex` shorthand inside a media query; make sure neither it nor
+     the row can out-specify the hidden attribute. */
+  .dx-conf[hidden], .dx-btn[hidden] { display: none !important; }
+  .dx-conf-lab { font-family: var(--hel); font-size: 0.78rem; color: var(--mid); margin-right: 0.15rem; white-space: nowrap; }
+  .dx-conf-btn { background: transparent; color: var(--text); border: 1px solid var(--border);
+                 padding: 0.62rem 1rem; }
+  .dx-conf-btn:hover { border-color: var(--text); }
+  /* `.dx-btn` sets `border: none`, so a border-colour alone marks nothing. An inset shadow
+     reads as a ring without changing the button's size. */
+  .dx-conf-btn.chosen { box-shadow: inset 0 0 0 2px var(--red); color: var(--red); }
+  @media (max-width: 560px) {
+    /* The three buttons share the bar with Back. The label goes: in context, after an
+       answer is selected, three words on a nav bar do not need a question in front of them,
+       and keeping it forces the buttons onto their own stacked lines.
+
+       `min-width: 0` on both the row and the buttons is what actually makes them fit. The
+       phone rule gives every .dx-btn `flex: 1 1 auto`, whose automatic basis is the text's
+       own width, so without it the four buttons measured 394px inside a 362px bar and
+       "Guessing" hung 72px past the edge. With a zero basis they divide the bar instead. */
+    .dx-conf-lab { display: none; }
+    .dx-conf { gap: 0.3rem; flex: 1 1 auto; min-width: 0; }
+    #dx-card .dx-nav-row .dx-conf-btn,
+    .dx-conf-btn { flex: 1 1 0; min-width: 0; padding: 0.8rem 0.25rem; font-size: 0.6rem; letter-spacing: 0.03em; }
+  }
   .dx-nav-overlay { display: none; position: fixed; inset: 0; background: rgba(17,17,17,0.55); z-index: 650; align-items: center; justify-content: center; padding: 1.5rem; }
   .dx-nav-overlay.active { display: flex; }
   .dx-nav-modal { background: #fff; width: 100%; max-width: 580px; max-height: 85vh; overflow-y: auto; padding: 1.8rem 2rem 2.2rem; box-shadow: 0 24px 64px rgba(0,0,0,0.3); }
@@ -5574,6 +5602,14 @@ window.Portal = {
           </div>
           <div class="dx-nav-row">
             <button class="dx-btn dx-btn-back" id="dx-back">Back</button>
+            <!-- The confidence tap REPLACES Next once an answer is recorded, so it costs no
+                 extra press. Never shown on a practice test. -->
+            <div class="dx-conf" id="dx-conf" hidden>
+              <span class="dx-conf-lab">How sure?</span>
+              <button class="dx-btn dx-conf-btn" type="button" data-conf="sure">Sure</button>
+              <button class="dx-btn dx-conf-btn" type="button" data-conf="think">Think so</button>
+              <button class="dx-btn dx-conf-btn" type="button" data-conf="guess">Guessing</button>
+            </div>
             <button class="dx-btn dx-btn-next" id="dx-next" disabled>Next</button>
           </div>
         </div>
@@ -6633,6 +6669,7 @@ window.Portal = {
       completedSections: completedSections,
       current: current,
       answers: answers,
+      confidence: confidence,
       marked: marked,
       everMarked: everMarked,
       elims: elims,
@@ -12021,6 +12058,11 @@ window.Portal = {
   var completedSections = [];  // [{ key, label, answers, marked, everMarked, module2Variant }] for sections already finished
   var current = 0;
   var answers = [];
+  /* How sure the student was, parallel to `answers`: 'sure' | 'think' | 'guess', or null
+     when they skipped, pressed Enter, or sat a PRACTICE TEST - the tap is diagnostic-only,
+     because a practice test exists to rehearse the real exam and the real exam does not
+     ask. See the confidence row in renderQuestion(). */
+  var confidence = [];
   var marked = [];
   // Like `marked`, but only ever set to true: `marked` is the live flag the
   // UI toggles, `everMarked` is what gets logged, so reports show a question
@@ -13552,6 +13594,7 @@ window.Portal = {
     currentQs = qOrder.map(function (i) { return qsBank[i]; });
     var qs = currentQs;
     answers = new Array(qs.length).fill(null);
+    confidence = new Array(qs.length).fill(null);
     marked = new Array(qs.length).fill(false);
     everMarked = new Array(qs.length).fill(false);
     elims = new Array(qs.length).fill(null).map(function () { return []; });
@@ -13607,7 +13650,8 @@ window.Portal = {
       var rawThreshold = MODULE2_ROUTING_RAW_THRESHOLD[secKey];
       module2Variant = (rawThreshold != null ? correct > rawThreshold : (qs.length && correct / qs.length >= 0.6)) ? 'Harder' : 'Easier';
       module1Buffer = {
-        answers: canonical(answers), marked: canonical(marked), everMarked: canonical(everMarked),
+        answers: canonical(answers), confidence: canonical(confidence),
+        marked: canonical(marked), everMarked: canonical(everMarked),
         questionTimeMs: canonical(questionTimeMs),
         questionFirstVisitedAt: canonical(questionFirstVisitedAt),
         questionLastViewedAt: canonical(questionLastViewedAt),
@@ -13624,11 +13668,12 @@ window.Portal = {
       return;
     }
 
-    var finalAnswers, finalMarked, finalEverMarked, finalQuestionTimeMs, finalQuestionFirstVisitedAt, finalQuestionLastViewedAt, finalQuestionFirstVisitDurationMs;
+    var finalAnswers, finalConfidence, finalMarked, finalEverMarked, finalQuestionTimeMs, finalQuestionFirstVisitedAt, finalQuestionLastViewedAt, finalQuestionFirstVisitDurationMs;
     var finalSignals = sigCombine(hasTwoModules ? module1Buffer.signals : null, sigModuleSnapshot(), hasTwoModules);
     sigModuleStartAt = null;
     if (hasTwoModules) {
       finalAnswers = module1Buffer.answers.concat(canonical(answers));
+      finalConfidence = (module1Buffer.confidence || []).concat(canonical(confidence));
       finalMarked = module1Buffer.marked.concat(canonical(marked));
       finalEverMarked = module1Buffer.everMarked.concat(canonical(everMarked));
       finalQuestionTimeMs = module1Buffer.questionTimeMs.concat(canonical(questionTimeMs));
@@ -13637,6 +13682,7 @@ window.Portal = {
       finalQuestionFirstVisitDurationMs = module1Buffer.questionFirstVisitDurationMs.concat(canonical(questionFirstVisitDurationMs));
     } else {
       finalAnswers = canonical(answers);
+      finalConfidence = canonical(confidence);
       finalMarked = canonical(marked);
       finalEverMarked = canonical(everMarked);
       finalQuestionTimeMs = canonical(questionTimeMs);
@@ -13645,7 +13691,7 @@ window.Portal = {
       finalQuestionFirstVisitDurationMs = canonical(questionFirstVisitDurationMs);
     }
     completedSections.push({
-      key: secKey, label: bankFor(secKey).label, answers: finalAnswers, marked: finalMarked, everMarked: finalEverMarked, module2Variant: module2Variant,
+      key: secKey, label: bankFor(secKey).label, answers: finalAnswers, confidence: finalConfidence, marked: finalMarked, everMarked: finalEverMarked, module2Variant: module2Variant,
       questionTimeMs: finalQuestionTimeMs, questionFirstVisitedAt: finalQuestionFirstVisitedAt, questionLastViewedAt: finalQuestionLastViewedAt,
       questionFirstVisitDurationMs: finalQuestionFirstVisitDurationMs,
       signals: finalSignals
@@ -13847,6 +13893,7 @@ window.Portal = {
     // Next is always available.
     nextBtn.disabled = false;
     nextBtn.textContent = !isLastQuestionInSection() ? 'Next' : 'Go to Review Page';
+    refreshConfRow();
     progLabel.textContent = 'Question ' + (current + 1) + ' of ' + qs.length;
     if (qnumTile) qnumTile.textContent = current + 1;
     jumpSelect.value = current;
@@ -13914,6 +13961,7 @@ window.Portal = {
   var frSaveTimer = null;
   frInput.addEventListener('input', function () {
     if (iqPracticeActive) return;
+    refreshConfRow();
     if (frSaveTimer) clearTimeout(frSaveTimer);
     frSaveTimer = setTimeout(function () { frSaveTimer = null; if (activeScreenId === 'dx-screen') { commitPendingFrAnswer(); saveState(); } }, 600);
   });
@@ -13966,12 +14014,60 @@ window.Portal = {
       if (letterIdx !== -1 && activeQuestions()[current].type === 'mc') { e.preventDefault(); selectMcAnswer(letterIdx); }
     }
   });
-  nextBtn.addEventListener('click', function () {
-    if (iqPracticeActive) { if (window.dxPracticeNextHandler) window.dxPracticeNextHandler(); return; }
+  /* Next and each confidence tap do THE SAME THING. Sharing one function is the point:
+     the tap replaces Next rather than sitting beside it, so a change to how a question is
+     left behind cannot apply to one path and not the other. */
+  function leaveQuestion() {
     if (activeQuestions()[current].type === 'fr') { recordFrAnswer(); }
     if (!isLastQuestionInSection()) { goTo(current + 1); }
     else { showCheckScreen(); }
+  }
+  nextBtn.addEventListener('click', function () {
+    if (iqPracticeActive) { if (window.dxPracticeNextHandler) window.dxPracticeNextHandler(); return; }
+    leaveQuestion();
   });
+
+  /* ═══ THE CONFIDENCE TAP ═══ diagnostic only.
+
+     A practice test is a rehearsal for the real exam, and the real exam never asks how sure
+     you are, so asking there would change the thing it is meant to simulate. On a practice
+     test the same reading is inferred instead, from what signals.js already records: time
+     against the question's budget, options crossed out, revisits and answer changes.
+
+     It costs no extra press because it stands in for Next, and it appears only once an
+     answer is recorded - a skipped question still shows Next, because moving on without
+     answering is itself a strategy worth measuring. */
+  var confRow = document.getElementById('dx-conf');
+  function confidenceAsked() { return !practiceTestId; }
+  /* A grid-in does not reach `answers` until it is committed on the way out, so asking
+     only about `answers` would never offer the tap on one. What the student has typed
+     counts, on the same test recordFrAnswer() uses. */
+  function hasAnswerNow() {
+    if (answers[current] != null) return true;
+    var q = activeQuestions()[current];
+    return !!(q && q.type === 'fr' && /\d/.test(frInput.value || ''));
+  }
+  function refreshConfRow() {
+    if (!confRow) return;
+    var answered = confidenceAsked() && hasAnswerNow();
+    confRow.hidden = !answered;
+    nextBtn.hidden = answered;
+    if (!answered) return;
+    var have = confidence[current];
+    confRow.querySelectorAll('.dx-conf-btn').forEach(function (b) {
+      b.classList.toggle('chosen', b.dataset.conf === have);
+    });
+  }
+  if (confRow) {
+    confRow.querySelectorAll('.dx-conf-btn').forEach(function (b) {
+      b.addEventListener('click', function () {
+        if (!hasAnswerNow()) return;
+        confidence[current] = b.dataset.conf;
+        saveState();
+        leaveQuestion();
+      });
+    });
+  }
 
   /* ═══ CHECK YOUR WORK — shown instead of submitting directly once the
      last question of a module is answered, so there's always a final
@@ -14601,6 +14697,10 @@ window.Portal = {
           // so the report's flag column and "never used flag" check reflect
           // what actually happened.
           k: sec.key, a: sec.answers, m: (sec.everMarked || sec.marked || []).map(function (x) { return x ? 1 : 0; }), v: sec.module2Variant || null,
+          /* cf = how sure the student was on each question, in the same order as `a`.
+             Diagnostic only; its ABSENCE on a practice test means the question was never
+             asked, not that the student declined to answer it. */
+          cf: sec.confidence || null,
           /* q = the qid of each question, in the same order as `a`, so this attempt stays
              readable however the tests change later. ~1.4KB per attempt, which is the
              price of never needing another frozen snapshot. Built with the same two
@@ -15176,6 +15276,7 @@ window.Portal = {
           if (expectType === 'fr') return (a && typeof a === 'object' && 'value' in a) ? a : null;
           return a;
         });
+        confidence = (Array.isArray(state.confidence) && state.confidence.length === qs.length) ? state.confidence : new Array(qs.length).fill(null);
         marked = (Array.isArray(state.marked) && state.marked.length === qs.length) ? state.marked : new Array(qs.length).fill(false);
         everMarked = (Array.isArray(state.everMarked) && state.everMarked.length === qs.length) ? state.everMarked : new Array(qs.length).fill(false);
         elims = (Array.isArray(state.elims) && state.elims.length === qs.length) ? state.elims : new Array(qs.length).fill(null).map(function () { return []; });
