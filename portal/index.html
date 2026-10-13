@@ -11759,7 +11759,12 @@ window.Portal = {
            guard in resolveQuestionByKey. */
         if (parts[0].indexOf('diag-') === 0) return null;
         else {
-          var pt = (window.SAT_PRACTICE_TESTS || []).filter(function (t) { return t.id === parts[0]; })[0];
+          // Four parts, so the position means the tests AS THEY WERE: read the qid out of
+          // the archive, or admit we cannot. Reading it from the live tests would stamp a
+          // different question's qid onto the row.
+          var poolQ = (window.SAT_PRACTICE_TESTS_V1 || null);
+          if (!poolQ) return null;
+          var pt = poolQ.filter(function (t) { return t.id === parts[0]; })[0];
           bank = (pt && pt.sections) ? pt.sections[parts[1] === 'reading-writing' ? 'readingWriting' : parts[1]] : null;
         }
         var list = (bank && (mod === 'module1' || mod === 'module2Easier' || mod === 'module2Harder')) ? bank[mod] : null;
@@ -11768,6 +11773,42 @@ window.Portal = {
       return (q && q.qid) ? String(q.qid) : null;
     } catch (e) { return null; }
   };
+  /* ═══ THE ARCHIVED TESTS, LOADED ONLY WHEN AN OLD RECORD NEEDS THEM ═══
+     A mistake saved before 2026-09-30 is keyed test|section|module|index with no qid, and
+     the audited tests that landed on 2026-10-13 re-pointed 85% of those positions. Of the
+     1,235 questions that survived that revision only 980 are byte-identical - 111 have
+     different choices - so resolving an old record against the LIVE tests shows the
+     student a different question, or the same question with its options reordered, and
+     marks their recorded answer against it either way.
+
+     The precedent in RETIRED_BEFORE below was to DROP such records; that was the best
+     available before practice-tests-v1.js existed. Now the question as answered can be
+     shown instead, so it is. 3MB, fetched once, and only for a student who actually has a
+     pre-2026-09-30 practice-test record - most will never load it. */
+  var _v1Promise = null;
+  function archivedTests() { return window.SAT_PRACTICE_TESTS_V1 || null; }
+  function needsArchive(key) {
+    var p = String(key || '').split('|');
+    return p.length === 4 && p[0].indexOf('sat-practice-') === 0;
+  }
+  function loadArchivedTests() {
+    if (window.SAT_PRACTICE_TESTS_V1) return Promise.resolve(true);
+    if (_v1Promise) return _v1Promise;
+    _v1Promise = new Promise(function (res) {
+      var sc = document.createElement('script');
+      sc.src = 'practice-tests-v1.js?v=20261013a';
+      // A failure resolves rather than rejects: the caller then drops those records,
+      // which is the old behaviour and strictly better than showing the wrong question.
+      sc.onload = function () { res(!!window.SAT_PRACTICE_TESTS_V1); };
+      sc.onerror = function () { res(false); };
+      document.head.appendChild(sc);
+    });
+    window.__practiceTestsV1Ready = _v1Promise;
+    return _v1Promise;
+  }
+  window.loadArchivedTests = loadArchivedTests;
+  window.needsArchive = needsArchive;
+
   window.resolveQuestionByKey = function (key) {
     if (/^(qb|chal)\|/.test(String(key || ''))) return resolveQuestionBankKey_(key);
     var parts = String(key || '').split('|');
@@ -11792,7 +11833,12 @@ window.Portal = {
       bank = SECTION_BANKS[sectionKey];
       testTitle = testTag.slice(5) + ' Diagnostic';
     } else {
-      var pt = (window.SAT_PRACTICE_TESTS || []).filter(function (t) { return t.id === testTag; })[0];
+      /* A FOUR-PART key names a position in the tests AS THEY WERE, so it is resolved
+         against the archive and never against the live tests. Without the archive the
+         record is dropped - see loadArchivedTests(). */
+      var pool = (parts.length === 4) ? archivedTests() : window.SAT_PRACTICE_TESTS;
+      if (parts.length === 4 && !pool) return null;
+      var pt = (pool || []).filter(function (t) { return t.id === testTag; })[0];
       if (!pt || !pt.sections) return null;
       var ptKey = sectionKey === 'reading-writing' ? 'readingWriting' : sectionKey;
       var s = pt.sections[ptKey];
@@ -11831,7 +11877,30 @@ window.Portal = {
        Drop the record instead; the caller treats null as "not resolvable" and omits it.
        (2026-10-01: 15 duplicated College Board passages were retired from the tests, which
        is what made this path reachable.) */
-    if (!q && wantQid) return null;
+    if (!q && wantQid) {
+      /* RETIRED, but still reviewable. 342 questions left the tests on 2026-10-13, and a
+         five-part key names one of them exactly. Dropping was right when the question was
+         simply gone; now it is in the archive, so show it rather than losing the record. */
+      var arch = archivedTests();
+      if (arch) {
+        for (var ai = 0; ai < arch.length && !q; ai++) {
+          var asec = arch[ai].sections || {};
+          var akeys = Object.keys(asec);
+          for (var ak = 0; ak < akeys.length && !q; ak++) {
+            var amods = asec[akeys[ak]] || {};
+            var amk = Object.keys(amods);
+            for (var am = 0; am < amk.length && !q; am++) {
+              var aarr = amods[amk[am]];
+              if (!Array.isArray(aarr)) continue;
+              for (var aj = 0; aj < aarr.length; aj++) {
+                if (aarr[aj] && aarr[aj].qid === wantQid) { q = aarr[aj]; break; }
+              }
+            }
+          }
+        }
+      }
+      if (!q) return null;
+    }
     /* No qid in the key at all (a record saved before 2026-09-30): position is the best
        that can be done, which is what every key did then.
 
@@ -17185,7 +17254,17 @@ window.Portal = {
       orgAdopt(progress.organizer);
       var byKey = (progress.incorrectQuestions && typeof progress.incorrectQuestions === 'object') ? progress.incorrectQuestions : {};
       var savedByKey = (progress.savedQuestions && typeof progress.savedQuestions === 'object') ? progress.savedQuestions : {};
+      /* THE ARCHIVE, only if this student actually has a pre-2026-09-30 practice-test
+         record. Checked here because the keys are not known until the progress call
+         returns, and awaited before resolving so no record is dropped merely for arriving
+         early. A student with none of those keys never fetches it. */
       readyPromise.then(function () {
+        var keys = Object.keys(byKey).concat(Object.keys(savedByKey));
+        for (var ki = 0; ki < keys.length; ki++) {
+          if (needsArchive(keys[ki])) return loadArchivedTests();
+        }
+        return null;
+      }).then(function () {
         records = Object.keys(byKey).map(function (k) {
           var stored = byKey[k];
           if (!stored || isRetiredRecord(k, stored.attemptedAt)) return null;
