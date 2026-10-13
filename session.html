@@ -242,9 +242,8 @@
       <div id="repeat-wrap">
         <label for="b-repeat">How often</label>
         <select id="b-repeat">
+          <option value="0" selected>Every week, same time (ongoing)</option>
           <option value="1">Just this once</option>
-          <option value="4">Every week, for 4 weeks</option>
-          <option value="8">Every week, for 8 weeks</option>
         </select>
       </div>
       <label for="b-notes">Anything to focus on? <span class="opt">(optional)</span></label>
@@ -556,8 +555,10 @@
     $('cal').innerHTML =
       '<div class="done"><div class="tick" aria-hidden="true">&#10003;</div>' +
       '<div class="lbl" style="color:var(--gold-deep);margin-bottom:8px">' + (wasMoving ? 'Moved' : 'Booked') + '</div>' +
-      '<h2>' + (booked.length > 1 ? esc(details.student) + '&rsquo;s weekly sessions' : 'See you then!') + '</h2>' + times + skippedHtml +
-      '<p>A confirmation' + (online ? ' with the Google Meet link' : '') + ' is on its way to <b>' + esc(email) + '</b>, with a calendar file and a link to move or cancel up to 24 hours before. ' +
+      '<h2>' + (booked.length > 1 || d.ongoing ? esc(details.student) + '&rsquo;s weekly sessions' : 'See you then!') + '</h2>' +
+      (d.ongoing ? '<p>Every ' + esc(fmt(start, { weekday: 'long' })) + ' at ' + esc(fmt(start, TIME)) + '. New weeks are added on their own, so there&rsquo;s nothing to rebook. Here are the next ' + booked.length + ':</p>' : '') +
+      times + skippedHtml +
+      '<p>A confirmation' + (online ? ' with the Google Meet link' : '') + ' is on its way to <b>' + esc(email) + '</b>, with a calendar file and a link to move or cancel' + (d.ongoing ? ' (or stop the weekly sessions)' : '') + ' up to 24 hours before. ' +
       'If it doesn&rsquo;t show up in a few minutes, check your spam folder.</p>' +
       '<p style="margin-top:18px"><button type="button" class="btn ghost" id="another">' + (skipped.length ? 'Pick another time' : 'Book another session') + '</button></p>' +
       '<p style="margin-top:14px"><b style="color:var(--ink);font-weight:600">Luca Moretti</b></p></div>';
@@ -591,8 +592,20 @@
           '<small>' + (x.minutes === 120 ? '2 hours' : x.minutes + ' minutes') + ', ' + (x.where === 'inperson' ? 'in person' : 'online') + '</small></span>' + acts + '</li>';
       }).join('');
       box.innerHTML = '<div class="lbl" style="color:var(--gold-deep)">Your booking</div><h2>' + esc(d.student) + '&rsquo;s sessions</h2>' +
+        (d.weekly === 'active' ? '<p class="mg-note">Weekly, ongoing: new weeks are added on their own.</p>' : '') +
         '<ul class="mg-list">' + rows + '</ul>' +
-        '<p class="mg-note">You can move or cancel a session up to 24 hours before it. Closer to the time, text me at <a href="sms:+12012752791">' + PHONE + '</a>.</p>';
+        '<p class="mg-note">You can move or cancel a session up to 24 hours before it. Closer to the time, text me at <a href="sms:+12012752791">' + PHONE + '</a>.</p>' +
+        (d.weekly === 'active' ? '<p style="margin-top:14px"><button type="button" class="btn ghost" id="stop-weekly">Stop weekly sessions</button></p>' : '');
+      var stop = $('stop-weekly');
+      if (stop) stop.onclick = function () {
+        if (!window.confirm('Stop ' + d.student + '\u2019s weekly sessions? Every session more than 24 hours away is cancelled.')) return;
+        stop.disabled = true; stop.textContent = 'Stopping\u2026';
+        post({ action: 'stopWeekly', token: decodeURIComponent(MANAGE) }, BOOK_TIMEOUT_MS).then(function (r) {
+          if (r && r.ok) { loadManage(); load(); return; }
+          stop.disabled = false; stop.textContent = 'Stop weekly sessions';
+          window.alert('That didn\u2019t go through. Please try again, or text me at ' + PHONE + '.');
+        });
+      };
       Array.prototype.forEach.call(box.querySelectorAll('[data-cancel]'), function (b) {
         b.onclick = function () {
           var at = b.getAttribute('data-cancel');
