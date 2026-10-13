@@ -44,11 +44,49 @@ h1,h2,h3,h4{margin:0;color:var(--ink);text-wrap:balance}
 p{margin:0}
 .shell{max-width:1220px;margin:0 auto;padding:0 var(--gut)}
 .lbl{font-size:.61rem;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}
-/* The page as a walkthrough of the process (2026-10-13): step 1 the diagnostic, 2 the platform, 3 the course. */
-.stepk{display:inline-flex;align-items:center;gap:.65rem;font-size:.62rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--red-lift);margin:0 0 1rem}
-.stepk .stepn{flex:none;width:26px;height:26px;border-radius:50%;background:var(--red);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:.74rem;letter-spacing:0}
-.wstage .stepk{color:rgba(255,255,255,.88)}
-.wstage .stepk .stepn{background:#fff;color:var(--red)}
+/* ═══ THE WALKTHROUGH (2026-10-13, Luca: "make it very apple-like") ═══
+   The middle of the page is a guided scroll in three chapters: the diagnostic,
+   the platform, the course. Each opens on a full screen of its own (a big
+   number, one line, one sentence), then shows the real thing, large. A frosted
+   bar under the nav says which step you are on and fills as you go. */
+.howi{background:#fff;text-align:center;padding:clamp(6rem,14vw,10rem) 0 clamp(4rem,9vw,6.5rem)}
+.howi .eyebrow{font-size:.72rem;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--red);margin:0 0 1.1rem}
+.howi h2{font-family:var(--display);font-weight:700;font-size:clamp(2.6rem,7vw,5.4rem);line-height:1.02;letter-spacing:-.02em;color:var(--ink);margin:0 auto;max-width:14ch}
+.howi .sub{font-size:clamp(1.05rem,1.8vw,1.35rem);color:var(--muted);max-width:34ch;margin:1.4rem auto 0;line-height:1.5}
+.howi-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;max-width:960px;margin:clamp(3rem,7vw,4.6rem) auto 0;padding:0 var(--gut);list-style:none}
+.howi-steps a{display:block;text-decoration:none;color:inherit;text-align:left;padding:1.6rem 1.5rem 1.7rem;border-radius:22px;background:#F5F5F7;transition:transform .5s var(--ease),background .3s}
+.howi-steps a:hover{transform:translateY(-4px);background:#EFEFF2}
+.howi-steps .n{font-family:var(--display);font-weight:700;font-size:2.6rem;line-height:1;color:var(--red)}
+.howi-steps b{display:block;margin-top:1.1rem;font-size:1.08rem;font-weight:600;color:var(--ink)}
+.howi-steps span{display:block;margin-top:.35rem;font-size:.92rem;color:var(--muted);line-height:1.5}
+.chap{background:#fff;text-align:center;min-height:78vh;min-height:78svh;display:flex;align-items:center;padding:clamp(5rem,12vw,8rem) 0 clamp(3rem,7vw,4.5rem);scroll-margin-top:60px}
+.chap .shell{width:100%}
+.chap-n{font-family:var(--display);font-weight:700;font-size:clamp(5.5rem,16vw,11rem);line-height:.9;letter-spacing:-.04em;color:transparent;-webkit-text-stroke:2px var(--red);margin:0 0 1.4rem}
+.chap-k{font-size:.74rem;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--red);margin:0 0 1rem}
+.chap-h{font-family:var(--display);font-weight:700;font-size:clamp(2.7rem,7.4vw,5.8rem);line-height:1.01;letter-spacing:-.025em;color:var(--ink);margin:0 auto;max-width:13ch}
+.chap-sub{font-size:clamp(1.08rem,1.9vw,1.4rem);line-height:1.5;color:var(--muted);max-width:36ch;margin:1.5rem auto 0}
+.chap-sub b{color:var(--ink);font-weight:600}
+.chap-cue{display:inline-block;margin-top:2.4rem;font-size:.82rem;color:var(--muted);text-decoration:none}
+.chap-cue::after{content:"";display:block;width:1px;height:42px;margin:.8rem auto 0;background:linear-gradient(var(--muted),transparent)}
+/* the frosted step bar */
+.stepbar{position:fixed;left:0;right:0;top:var(--navh,62px);z-index:55;background:rgba(255,255,255,.78);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);
+  border-bottom:1px solid rgba(0,0,0,.07);transform:translateY(-110%);opacity:0;transition:transform .5s var(--ease),opacity .4s}
+.stepbar.on{transform:none;opacity:1}
+.stepbar ol{list-style:none;margin:0 auto;padding:.7rem var(--gut);max-width:980px;display:flex;justify-content:center;gap:clamp(1rem,4vw,3.4rem)}
+.stepbar a{display:flex;align-items:center;gap:.55rem;text-decoration:none;font-size:.82rem;font-weight:500;color:rgba(17,17,17,.42);transition:color .3s}
+.stepbar a i{font-style:normal;width:22px;height:22px;border-radius:50%;border:1.5px solid currentColor;display:inline-flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:600;transition:all .3s}
+.stepbar a.done{color:rgba(17,17,17,.62)}
+.stepbar a.on{color:var(--ink)}
+.stepbar a.on i,.stepbar a.done i{background:var(--red);border-color:var(--red);color:#fff}
+.stepbar .fill{position:absolute;left:0;bottom:-1px;height:2px;background:var(--red);width:0;transition:width .15s linear}
+@media(max-width:600px){.stepbar a span{display:none}.stepbar a.on span{display:inline}.howi-steps{grid-template-columns:1fr}}
+/* the content under each chapter: quiet, light grey, the product large */
+.wstage.quiet{background:#F5F5F7;color:var(--ink);padding:clamp(2.6rem,5vw,4rem) 0 clamp(4rem,8vw,6rem)}
+.wstage.quiet::before{display:none}
+.ws-cap{text-align:center;font-size:.9rem;color:var(--muted);margin:0 0 1.6rem}
+.ws-cap b{color:var(--ink);font-weight:600}
+.wstage.quiet .ws-screen{box-shadow:0 50px 100px -40px rgba(0,0,0,.35),0 0 0 1px rgba(0,0,0,.06)}
+.sec.quiet{background:#F5F5F7}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:1.02rem 1.85rem;font-size:.76rem;font-weight:600;letter-spacing:.11em;text-transform:uppercase;transition:background .22s var(--ease),color .22s,border-color .22s,transform .22s var(--ease);cursor:pointer;border-radius:2px}
 
 /* ── reveal (safe: visible unless JS enables) ── */
@@ -1355,31 +1393,61 @@ nav.is-red .navlinks a{color:rgba(255,255,255,.85)}nav.is-red .navlinks a.on{col
   </div>
 </section>
 
-<!-- STEP 1 · The diagnostic: the full results, live, in the real report -->
-<section class="wstage" id="walkthrough">
+<!-- THE WALKTHROUGH: how it works, then three chapters -->
+<div class="stepbar" id="stepbar" role="navigation" aria-label="The three steps">
+  <ol>
+    <li><a href="#walkthrough" data-step="walkthrough"><i>1</i><span>The diagnostic</span></a></li>
+    <li><a href="#portal" data-step="portal"><i>2</i><span>The platform</span></a></li>
+    <li><a href="#course" data-step="course"><i>3</i><span>The course</span></a></li>
+  </ol>
+  <div class="fill" id="stepfill"></div>
+</div>
+
+<section class="howi" id="how">
   <div class="shell">
-    <div class="ws-head">
-      <div>
-        <p class="stepk rv"><span class="stepn">1</span>Step 1 of 3 &middot; The diagnostic</p>
-        <h2 class="ws-h rv d1">A full-length SAT, and a report on every answer.</h2>
-      </div>
-      <p class="ws-sub rv d2">After a free 15-minute call, your student takes a full-length SAT at home, also free. Every diagnostic and practice test records <b>how</b> each question was answered, not just whether it was right: how long it took, whether the answer changed at review, whether it came faster than the question can be read. The report turns that into where the points went and what to do next. Below is the real report, for a made-up student: use the arrows, or tap the <b>+</b> on any screen.</p>
-    </div>
-    <div class="ws-screen rv d2">
+    <p class="eyebrow rv">How it works</p>
+    <h2 class="rv d1">Three steps. All of them about your student.</h2>
+    <p class="sub rv d2">It starts with a free 15-minute call. Then:</p>
+  </div>
+  <ol class="howi-steps">
+    <li class="rv d1"><a href="#walkthrough"><span class="n">01</span><b>The diagnostic</b><span>A full-length SAT at home, free, and a report on every answer.</span></a></li>
+    <li class="rv d2"><a href="#portal"><span class="n">02</span><b>The platform</b><span>Practice, scores and my notes, all in one place.</span></a></li>
+    <li class="rv d3"><a href="#course"><span class="n">03</span><b>The course</b><span>Each concept the SAT tests most, taught until it&rsquo;s familiar.</span></a></li>
+  </ol>
+</section>
+
+<!-- CHAPTER 1 · The diagnostic -->
+<section class="chap" id="walkthrough" data-chap="walkthrough">
+  <div class="shell">
+    <p class="chap-n rv" aria-hidden="true">01</p>
+    <p class="chap-k rv d1">The diagnostic</p>
+    <h2 class="chap-h rv d1">It starts with one test.</h2>
+    <p class="chap-sub rv d2">A full-length SAT, taken at home, free. The report shows <b>how</b> every question was answered: how long it took, what changed at review, what went too fast to read.</p>
+    <a class="chap-cue rv d3" href="#report">See a real report</a>
+  </div>
+</section>
+<section class="wstage quiet" id="report" data-chap="walkthrough">
+  <div class="shell">
+    <p class="ws-cap rv"><b>Try it.</b> The real report, for a made-up student. Use the arrows, or tap <b>+</b> on any screen.</p>
+    <div class="ws-screen rv d1">
       <div class="ws-bar"><i></i><i></i><i></i><span>Sample report &middot; score 1250</span></div>
       <iframe src="portal/report.html?demo=1&amp;score=1250&amp;weak=math&amp;embed=public&amp;tour=1&amp;mix=1&amp;v=20261005a" title="A sample report walkthrough, for a made-up student"></iframe>
     </div>
   </div>
 </section>
 
-<!-- STEP 2 · The platform: the scroll-down tour of the real screens -->
-<section class="sec soft" id="portal">
-  <div class="shell center">
-    <p class="stepk rv"><span class="stepn">2</span>Step 2 of 3 &middot; The platform</p>
-    <h2 class="h-sec rv d1">Then the work happens in one place.</h2>
-    <p class="lede rv d2">From the first session, your student works in the portal: practice tests, thousands of questions, every score and my notes after each session. Here it is, exactly as they see it.</p>
+<!-- CHAPTER 2 · The platform -->
+<section class="chap" id="portal" data-chap="portal">
+  <div class="shell">
+    <p class="chap-n rv" aria-hidden="true">02</p>
+    <p class="chap-k rv d1">The platform</p>
+    <h2 class="chap-h rv d1">Then, everything in one place.</h2>
+    <p class="chap-sub rv d2">Practice tests, thousands of questions, every score and my notes after each session. Exactly as your student sees it.</p>
+    <a class="chap-cue rv d3" href="#tour">Take the tour</a>
   </div>
-  <div class="shell" style="margin-top:40px">
+</section>
+<section class="sec quiet" id="tour" data-chap="portal">
+  <div class="shell">
     <div class="tour">
       <div class="tour-stage"><div class="scrf">
         <img data-shot="0" src="img/sat/test.webp" alt="" style="opacity:1">
@@ -1399,15 +1467,24 @@ nav.is-red .navlinks a{color:rgba(255,255,255,.85)}nav.is-red .navlinks a.on{col
   </div>
 </section>
 
-<!-- STEP 3 · The course: what the report finds, taught -->
-<section class="sec" id="course">
+<!-- CHAPTER 3 · The course -->
+<section class="chap" id="course" data-chap="course">
+  <div class="shell">
+    <p class="chap-n rv" aria-hidden="true">03</p>
+    <p class="chap-k rv d1">The course</p>
+    <h2 class="chap-h rv d1">Taught until it&rsquo;s familiar.</h2>
+    <p class="chap-sub rv d2">The SAT asks the same questions in a hundred disguises. Each lesson takes one and develops it fully: a video, notes and a check. Your student&rsquo;s plan names the lessons their diagnostic points to.</p>
+    <a class="chap-cue rv d3" href="#cmap">Explore the course</a>
+  </div>
+</section>
+<section class="sec quiet" data-chap="course">
   <div class="shell">
     <div class="split course-split">
       <div>
-        <p class="stepk rv"><span class="stepn">3</span>Step 3 of 3 &middot; The course</p>
-        <h2 class="h-sec rv d1">The SAT asks the same questions in a hundred disguises.</h2>
-        <p class="lede rv d2">The test returns to the same core concepts again and again. So instead of skimming a long list of topics, the course takes each one the SAT tests most and develops it fully, until every version of it looks familiar. Linear equations alone gets four lessons.</p>
-        <p class="lede rv d3" style="margin-top:1rem">Every lesson is a video, a set of notes and a check at the end, built around real SAT questions. Your student&rsquo;s plan names the lessons their diagnostic points to.</p>
+        <p class="lbl rv">The course map</p>
+        <h2 class="h-sec rv d1">Every concept, in order.</h2>
+        <p class="lede rv d2">Instead of skimming a long list of topics, the course takes each concept the SAT tests most and develops it fully. Linear equations alone gets four lessons. Tap any lesson to see what it covers.</p>
+        <p class="lede rv d3" style="margin-top:1rem">Every lesson is a video, a set of notes and a check at the end, built around real SAT questions.</p>
       </div>
       <div class="cmap rv d2" id="cmap">
         <div class="cmap-top"><span class="k">The course map</span><div class="cmap-sw" role="tablist"><button type="button" class="on" data-c="0">Math</button><button type="button" data-c="1">Reading &amp; Writing</button></div></div>
@@ -1437,7 +1514,7 @@ nav.is-red .navlinks a{color:rgba(255,255,255,.85)}nav.is-red .navlinks a.on{col
 </section>
 
 <!-- Support: around the three steps -->
-<section class="sec soft">
+<section class="sec">
   <div class="shell center">
     <p class="lbl rv">Support</p>
     <h2 class="h-sec rv d1">Help between sessions, too.</h2>
@@ -1453,7 +1530,7 @@ nav.is-red .navlinks a{color:rgba(255,255,255,.85)}nav.is-red .navlinks a.on{col
 </section>
 
 <!-- How I tutor: the method and the tutor, together (as on the homepage, 2026-10-13) -->
-<section class="sec" id="instructor">
+<section class="sec soft" id="instructor">
   <div class="shell">
     <div class="who short">
       <img class="rv" src="img/portrait-centered.jpg" alt="Luca Moretti" loading="lazy">
@@ -1469,7 +1546,7 @@ nav.is-red .navlinks a{color:rgba(255,255,255,.85)}nav.is-red .navlinks a.on{col
 </section>
 
 <!-- Results this fall -->
-<section class="sec soft" id="proof">
+<section class="sec" id="proof">
   <div class="shell center">
     <p class="lbl rv">Results this fall</p>
     <h2 class="h-sec rv d1">Scores, as families sent them.</h2>
@@ -1485,7 +1562,7 @@ nav.is-red .navlinks a{color:rgba(255,255,255,.85)}nav.is-red .navlinks a.on{col
 </section>
 
 <!-- Questions -->
-<section class="sec" id="faq">
+<section class="sec soft" id="faq">
   <div class="shell center">
     <p class="lbl rv">Questions</p>
     <h2 class="h-sec rv d1">What parents usually ask.</h2>
@@ -1756,6 +1833,34 @@ document.documentElement.classList.add('js');
   function paint(){ var on=pastHero&&!atForm; bar.classList.toggle('on',on); bar.setAttribute('aria-hidden',String(!on)); }
   new IntersectionObserver(function(es){ pastHero=!es[0].isIntersecting; paint(); }).observe(hero);
   new IntersectionObserver(function(es){ atForm=es[0].isIntersecting; paint(); },{rootMargin:'0px 0px -20% 0px'}).observe(form);
+})();
+
+/* THE STEP BAR: shown while the walkthrough is on screen; the step you are in is lit, the ones
+   behind you are done, and the line fills across the whole walkthrough. */
+(function(){
+  var bar=document.getElementById('stepbar'), fill=document.getElementById('stepfill');
+  if(!bar) return;
+  var nav=document.querySelector('body > nav, nav');
+  var links=[].slice.call(bar.querySelectorAll('a[data-step]'));
+  var order=links.map(function(a){return a.getAttribute('data-step');});
+  var parts=[].slice.call(document.querySelectorAll('[data-chap]'));
+  var first=document.getElementById('walkthrough'), last=parts[parts.length-1];
+  function setNavH(){ if(nav) document.documentElement.style.setProperty('--navh', nav.getBoundingClientRect().height+'px'); }
+  setNavH(); window.addEventListener('resize',setNavH,{passive:true});
+  var ticking=false;
+  function update(){
+    ticking=false;
+    var top=first.getBoundingClientRect().top, bottom=last.getBoundingClientRect().bottom, vh=window.innerHeight;
+    bar.classList.toggle('on', top < vh*0.35 && bottom > vh*0.25);
+    var mid=vh*0.4, cur=null;
+    parts.forEach(function(p){ var r=p.getBoundingClientRect(); if(r.top<=mid && r.bottom>mid) cur=p.getAttribute('data-chap'); });
+    var ci=order.indexOf(cur);
+    links.forEach(function(a,i){ a.classList.toggle('on', i===ci); a.classList.toggle('done', ci>-1 && i<ci); });
+    var span=(bottom-top)-vh*0.6, done=Math.min(1,Math.max(0,(-top+vh*0.4)/Math.max(1,span)));
+    fill.style.width=(done*100).toFixed(2)+'%';
+  }
+  window.addEventListener('scroll',function(){ if(!ticking){ ticking=true; requestAnimationFrame(update); } },{passive:true});
+  update();
 })();
 </script>
 <script src="site.js"></script>
