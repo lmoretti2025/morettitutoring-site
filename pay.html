@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Payment details | Moretti Test Prep</title>
+<link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caladea:wght@400;700&family=Poppins:wght@300;400;500;600;700&display=swap"
+      media="print" onload="this.media='all';this.onload=null">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caladea:wght@400;700&family=Poppins:wght@300;400;500;600;700&display=swap"></noscript>
+<!--
+  PAYMENT DETAILS (Luca, 2026-10-13: "build the stripe card-on-file setup
+  with ACH first"). A family's own link, #t=<signed token>, from the Billing
+  tab. They save a bank account (the default) or a card on Stripe's own
+  page; nothing is charged here. The backend is portal/billing.gs. No
+  prices on this page, as on the rest of the site. Not linked from the site.
+-->
+<style>
+  :root {
+    --void: #0C0A09;
+    --paper: #FFFFFF; --sunk: #F6F4F1;
+    --ink: #111111; --body: #4A4139; --muted: #6E655C; --faint: #A39A90;
+    --line: rgba(17,17,17,.12);
+    --red: #B0271C; --red-lift: #D24234; --red-soft: rgba(176,39,28,.06);
+    --ok: #2F6B3A;
+    --display: 'Caladea', Georgia, 'Times New Roman', serif;
+    --sans: 'Poppins', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    --ease: cubic-bezier(.22,1,.36,1);
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--body); font-family: var(--sans); font-weight: 300; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+  a { color: var(--red); }
+  :focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
+  h1, h2 { margin: 0; color: var(--ink); text-wrap: balance; }
+  p { margin: 0; }
+  .shell { max-width: 640px; margin: 0 auto; padding: 0 16px; }
+  .lbl { font-size: .62rem; font-weight: 600; letter-spacing: .22em; text-transform: uppercase; color: var(--red-lift); }
+  .hero { background: radial-gradient(120% 90% at 85% 0%, #2a1512 0%, var(--void) 55%), var(--void); color: #EDE8E2; padding: 26px 0 64px; }
+  .hero-top img { width: 132px; height: auto; display: block; }
+  .hero h1 { color: #fff; font-family: var(--display); font-weight: 700; font-size: clamp(2rem, 5.2vw, 2.7rem); line-height: 1.1; margin: 40px 0 12px; }
+  .hero p.sub { color: rgba(237,232,226,.78); font-size: 1rem; max-width: 32rem; }
+  .card { background: var(--paper); border-radius: 22px; box-shadow: 0 24px 60px rgba(12,10,9,.16), 0 2px 6px rgba(12,10,9,.06);
+          margin-top: -36px; padding: 26px; position: relative; }
+  .opts { display: grid; gap: 12px; margin-top: 4px; }
+  .opt { display: block; width: 100%; text-align: left; font: inherit; color: inherit; background: var(--paper); border: 1px solid var(--line); border-radius: 14px;
+         padding: 18px 20px; cursor: pointer; transition: border-color .2s var(--ease), transform .2s var(--ease), background .2s var(--ease); }
+  .opt:hover:not(:disabled) { border-color: var(--red); transform: translateY(-1px); }
+  .opt:disabled { opacity: .55; cursor: default; }
+  .opt.main { border-color: var(--red); background: var(--red-soft); }
+  .opt b { display: block; color: var(--ink); font-weight: 600; font-size: 1rem; }
+  .opt .tag { display: inline-block; margin-left: 8px; font-size: .62rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: #fff; background: var(--red);
+              padding: 2px 8px; border-radius: 999px; vertical-align: 2px; }
+  .opt span.d { display: block; font-size: .86rem; color: var(--muted); margin-top: 2px; }
+  .onfile { display: flex; align-items: center; gap: 14px; padding: 16px 18px; border-radius: 14px; background: rgba(47,107,58,.07); margin-bottom: 18px; }
+  .onfile .tick { flex: none; width: 36px; height: 36px; border-radius: 50%; background: rgba(47,107,58,.14); color: var(--ok); display: flex; align-items: center; justify-content: center; }
+  .onfile b { color: var(--ink); font-weight: 600; }
+  .how { margin-top: 20px; display: grid; gap: 8px; font-size: .86rem; color: var(--muted); }
+  .how p { position: relative; padding-left: 16px; }
+  .how p::before { content: ''; position: absolute; left: 0; top: .62em; width: 6px; height: 6px; border-radius: 50%; background: var(--red-lift); }
+  .state { padding: 34px 8px; text-align: center; color: var(--muted); }
+  .state b { color: var(--ink); font-weight: 600; }
+  .spin { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--line); border-top-color: var(--red); animation: spin .8s linear infinite; margin: 0 auto 12px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  h2.t { font-family: var(--display); font-size: 1.6rem; line-height: 1.2; margin-bottom: 16px; }
+  #msg { margin-top: 12px; font-size: .86rem; min-height: 1.2em; }
+  #msg.bad { color: var(--red); }
+  .below { text-align: center; margin: 26px 0 60px; font-size: .86rem; color: var(--muted); }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="shell">
+    <div class="hero-top"><a href="/"><img src="logo-caladea-white-400.png" alt="Moretti Test Prep &amp; Tutoring"></a></div>
+    <div class="lbl" style="margin-top:40px">Payment details</div>
+    <h1 id="h1">Set up payment for your sessions.</h1>
+    <p class="sub">Save a bank account or a card once. Each session is charged after it happens, so there&rsquo;s nothing to remember.</p>
+  </div>
+</header>
+
+<main class="shell">
+  <section class="card" id="card" aria-live="polite"><div class="state"><div class="spin"></div>One moment&hellip;</div></section>
+  <p class="below">Questions? Text me at <a href="sms:+12012752791">(201) 275-2791</a></p>
+</main>
+
+<script src="portal/backend-url.js"></script>
+<script>
+(function () {
+  'use strict';
+  var URL_ = window.APPS_SCRIPT_URL;
+  var TOKEN = decodeURIComponent((/[#&]t=([^&]+)/.exec(location.hash) || [])[1] || '');
+  var DONE = (/[?&]done=([A-Za-z0-9_]+)/.exec(location.search) || [])[1] || '';
+  var card = document.getElementById('card');
+  var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return '&#' + c.charCodeAt(0) + ';'; }); };
+
+  function post(payload, ms) {
+    var ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, ms || 25000);
+    var opts = { method: 'POST', body: JSON.stringify(payload) };
+    if (ctrl) opts.signal = ctrl.signal;
+    return fetch(URL_, opts).then(function (r) { return r.json(); })
+      .catch(function () { return { ok: false, error: 'network' }; })
+      .then(function (d) { clearTimeout(timer); return d; });
+  }
+  function stop(html) { card.innerHTML = '<div class="state">' + html + '</div>'; }
+  var TEXT_ME = 'Text me at <a href="sms:+12012752791">(201) 275-2791</a> and I&rsquo;ll sort it out.';
+
+  function choose(d) {
+    var first = d.student ? esc(d.student) + '&rsquo;s' : 'your';
+    document.getElementById('h1').innerHTML = 'Set up payment for ' + first + ' sessions.';
+    var has = d.method && !/verifying/.test(d.method);
+    var verifying = /verifying/.test(d.method || '');
+    var fee = d.cardFeePct ? ' A ' + d.cardFeePct + '% processing fee is added to card payments.' : '';
+    card.innerHTML =
+      (has ? '<div class="onfile"><div class="tick" aria-hidden="true">&#10003;</div><p><b>On file: ' + esc(d.detail || (d.method === 'card' ? 'a card' : 'a bank account')) +
+        '</b><br>You&rsquo;re all set. To use a different one, choose below.</p></div>' : '') +
+      (verifying ? '<div class="onfile"><div class="tick" aria-hidden="true">&#8987;</div><p><b>Your bank is verifying ' + esc(d.detail || 'the account') +
+        '.</b><br>Watch for an email from Stripe about two small deposits; confirming them finishes it.</p></div>' : '') +
+      (has ? '' : '<h2 class="t">How would you like to pay?</h2>') +
+      '<div class="opts">' +
+        '<button type="button" class="opt main" data-m="bank"><b>Bank account<span class="tag">Recommended</span></b>' +
+          '<span class="d">Connect your bank securely through Stripe in about a minute. No fees.</span></button>' +
+        '<button type="button" class="opt" data-m="card"><b>Credit or debit card</b><span class="d">Visa, Mastercard, American Express or Discover.' + fee + '</span></button>' +
+      '</div>' +
+      '<p id="msg" role="status"></p>' +
+      '<div class="how"><p>Nothing is charged today.</p><p>After each session, that session is charged to what you save here.</p>' +
+        '<p>Payments run through Stripe. Your bank and card details go to Stripe, never to me.</p></div>';
+    Array.prototype.forEach.call(card.querySelectorAll('[data-m]'), function (b) {
+      b.onclick = function () {
+        Array.prototype.forEach.call(card.querySelectorAll('[data-m]'), function (x) { x.disabled = true; });
+        var msg = document.getElementById('msg'); msg.className = ''; msg.textContent = 'Opening Stripe…';
+        post({ action: 'billingSetupStart', token: TOKEN, method: b.getAttribute('data-m') }).then(function (r) {
+          if (r && r.ok && r.url) { location.href = r.url; return; }
+          Array.prototype.forEach.call(card.querySelectorAll('[data-m]'), function (x) { x.disabled = false; });
+          msg.className = 'bad';
+          msg.innerHTML = r && r.error === 'not_ready' ? 'Payments aren&rsquo;t switched on yet. ' + TEXT_ME : 'That didn&rsquo;t go through. Please try again, or ' + TEXT_ME.charAt(0).toLowerCase() + TEXT_ME.slice(1);
+        });
+      };
+    });
+  }
+
+  function finished(d) {
+    var pending = d.pending;
+    document.getElementById('h1').innerHTML = pending ? 'Almost done.' : 'You&rsquo;re all set.';
+    card.innerHTML = '<div class="state"><div class="onfile" style="justify-content:center;text-align:left;margin:0 auto 14px;max-width:420px">' +
+      '<div class="tick" aria-hidden="true">' + (pending ? '&#8987;' : '&#10003;') + '</div><p><b>' + (pending ? 'Almost done' : 'All set') + '</b><br>' +
+      esc(d.detail || '') + (pending ? ' is saved. Your bank verifies it with two small deposits in a day or two; Stripe emails you a link to confirm them.'
+        : ' is on file. Nothing was charged today; each session is charged after it happens.') + '</p></div>' +
+      '<p>Thank you! See you at the next session.</p><p style="margin-top:14px"><b>Luca Moretti</b></p></div>';
+    try { history.replaceState(null, '', location.pathname + location.hash); } catch (e) {}
+  }
+
+  if (!TOKEN) { stop('<b>This link is missing a piece.</b><br>' + TEXT_ME); return; }
+  if (DONE) {
+    card.innerHTML = '<div class="state"><div class="spin"></div>Saving your payment details&hellip;</div>';
+    post({ action: 'billingSetupDone', token: TOKEN, session: DONE }, 40000).then(function (d) {
+      if (d && d.ok) { finished(d); return; }
+      stop('<b>That didn&rsquo;t save.</b><br>Nothing was charged. Please try again from this link, or ' + TEXT_ME.charAt(0).toLowerCase() + TEXT_ME.slice(1));
+    });
+    return;
+  }
+  post({ action: 'billingInfo', token: TOKEN }).then(function (d) {
+    if (!d || !d.ok) { stop('<b>This link doesn&rsquo;t match a family.</b><br>' + TEXT_ME); return; }
+    if (!d.ready) { stop('<b>Payments aren&rsquo;t switched on yet.</b><br>' + TEXT_ME); return; }
+    choose(d);
+  });
+})();
+</script>
+</body>
+</html>
