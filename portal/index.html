@@ -12694,7 +12694,7 @@ window.Portal = {
   // own closures, so the letter index is handed to the active runner.
   window.dxPracticeLetterHandler = null;
   window.showScreen = show;
-  window.dxRenderPassagePane = function (q, splitParts, inlineId) { renderPassagePane(q, splitParts, inlineId); };
+  window.dxRenderPassagePane = function (q, splitParts, inlineId, scope) { renderPassagePane(q, splitParts, inlineId, scope); };
   window.dxIsPracticeActive = function () { return iqPracticeActive; };
   window.dxSetMathMode = function (on) { dxShellEl.classList.toggle('math-mode', !!on); };
   window.dxCloseCalculator = function () { closeCalculator(); };
@@ -12761,8 +12761,13 @@ window.Portal = {
     return { passage: text.slice(0, idx), question: text.slice(idx + 8) };
   }
 
-  function renderPassagePane(q, splitParts, inlineId) {
+  var passageScope = null, passageSrc = null;
+  function rememberPassage() {
+    if (lastRenderedPassageId != null) window.dxHlRemember(passageScope, lastRenderedPassageId, passageSrc, passageBodyEl.innerHTML);
+  }
+  function renderPassagePane(q, splitParts, inlineId, scope) {
     if (!splitParts) {
+      rememberPassage();
       dxShellEl.classList.remove('passage-mode');
       lastRenderedPassageId = null;
       return;
@@ -12774,9 +12779,13 @@ window.Portal = {
     // every practice question the same cache key and freeze the pane on
     // the first passage.
     var simpleId = 'inline:' + (inlineId != null ? inlineId : current);
-    if (lastRenderedPassageId !== simpleId) {
-      passageBodyEl.innerHTML = splitParts.passage;
+    var sc = scope || (inlineId != null ? null : activeQuestions());
+    if (lastRenderedPassageId !== simpleId || passageScope !== sc) {
+      rememberPassage();
+      var back = window.dxHlRecall(sc, simpleId, splitParts.passage);
+      passageBodyEl.innerHTML = back != null ? back : splitParts.passage;
       lastRenderedPassageId = simpleId;
+      passageScope = sc; passageSrc = splitParts.passage;
       passagePaneEl.scrollTop = 0;
     }
   }
@@ -13847,7 +13856,7 @@ window.Portal = {
     var qs = activeQuestions();
     var q = qs[current];
     var splitParts = splitRwPassage(q);
-    window.dxSetStem(qtextEl, splitParts ? splitParts.question : window.mathFor(currentSectionKey() === 'math' ? { domain: 'Algebra' } : q, q.text), 'eng:' + currentSectionKey() + ':' + current + ':' + (q.qid || ''));
+    window.dxSetStem(qtextEl, splitParts ? splitParts.question : window.mathFor(currentSectionKey() === 'math' ? { domain: 'Algebra' } : q, q.text), 'eng:' + currentSectionKey() + ':' + current + ':' + (q.qid || ''), activeQuestions());
     renderPassagePane(q, splitParts);
     flagTestQuestion(q);
 
@@ -17658,17 +17667,34 @@ window.Portal = {
     return isMath ? window.mathDisplay(html) : html;
   };
 
-  /* THE QUESTION STEM, WRITTEN ONCE PER QUESTION (2026-10-13). Highlights live in the DOM, so
-     rewriting the stem wiped them, and every cross-out or answer pick redraws the question. A redraw of
-     the same question with the same text now leaves the stem (and its highlights) alone; a different
-     question, or a key of null (summary screens, figures), always writes. */
-  window.dxSetStem = function (el, html, key) {
+  /* HIGHLIGHTS, AS IN BLUEBOOK (Luca, 2026-10-13). Highlights live in the DOM. The stem is written
+     once per question (a cross-out or an answer pick redraws the question and used to wipe them), and
+     what a student highlighted is remembered per question for as long as that module (or practice round)
+     lasts: leave a question and come back, and the highlights are still there. The memory is keyed to the
+     module's own question list, so a new module or a new round starts clean, as on test day. */
+  var dxHlMemory = (typeof WeakMap === 'function') ? new WeakMap() : null;
+  window.dxHlRemember = function (scope, key, src, html) {
+    if (!dxHlMemory || !scope || typeof scope !== 'object' || key == null) return;
+    var m = dxHlMemory.get(scope); if (!m) { m = {}; dxHlMemory.set(scope, m); }
+    if (html.indexOf('dx-user-highlight') !== -1) m[key] = { src: src, html: html };
+    else delete m[key];
+  };
+  window.dxHlRecall = function (scope, key, src) {
+    if (!dxHlMemory || !scope || typeof scope !== 'object' || key == null) return null;
+    var m = dxHlMemory.get(scope), e = m && m[key];
+    return e && e.src === src ? e.html : null;
+  };
+  window.dxSetStem = function (el, html, key, scope) {
     if (!el) return;
     html = String(html == null ? '' : html);
-    if (key != null && el._stemKey === key && el._stemSrc === html) return;
-    el.innerHTML = html;
+    if (key != null && el._stemKey === key && el._stemSrc === html && el._stemScope === scope) return;
+    // Leaving a question: keep what was highlighted on it.
+    if (el._stemKey != null) window.dxHlRemember(el._stemScope, el._stemKey, el._stemSrc, el.innerHTML);
+    var back = window.dxHlRecall(scope, key, html);
+    el.innerHTML = back != null ? back : html;
     el._stemKey = key == null ? null : key;
     el._stemSrc = html;
+    el._stemScope = scope || null;
   };
 
   window.qbFormatPassage = function (passage) {
@@ -18508,10 +18534,10 @@ window.Portal = {
     });
     var split = splitPassage(r);
     var questionText = split ? split.question : r.text;
-    window.dxSetStem(qtextEl, questionText, 'iq:' + r.key);
+    window.dxSetStem(qtextEl, questionText, 'iq:' + r.key, runnerQueue);
     // Reading & Writing's stimulus is inline in r.text (see splitPassage
     // above), so the split is all the passage pane needs.
-    if (window.dxRenderPassagePane) window.dxRenderPassagePane({}, split, r.key);
+    if (window.dxRenderPassagePane) window.dxRenderPassagePane({}, split, r.key, runnerQueue);
 
     var isMath = r.sectionKey === 'math';
     calcBtnEl.style.display = isMath ? '' : 'none';
@@ -20501,7 +20527,7 @@ window.Portal = {
       // images (see question-bank-math.js). No passage pane; the 4 choices
       // are plain lettered buttons below the choices image.
       if (window.dxRenderPassagePane) window.dxRenderPassagePane({}, null);
-      window.dxSetStem(qtextEl, '<img src="' + r.qImg + '" alt="Question figure" style="max-width:100%;">', 'qbimg:' + r.qid);
+      window.dxSetStem(qtextEl, '<img src="' + r.qImg + '" alt="Question figure" style="max-width:100%;">', 'qbimg:' + r.qid, runnerQueue);
       var ansWrap = document.createElement('div');
       ansWrap.style.width = '100%';
       var ansImgEl = document.createElement('img');
@@ -20542,8 +20568,8 @@ window.Portal = {
       // math setup sentence before its question would falsely split into
       // two panes.
       var split = (r._qbSubject || currentSubject) === 'math' ? null : splitPassageQb(r.text);
-      window.dxSetStem(qtextEl, split ? split.question : ((r._qbSubject || currentSubject) === 'math' ? window.mathDisplay(r.text) : r.text), 'qb:' + r.qid);
-      if (window.dxRenderPassagePane) window.dxRenderPassagePane({}, split, r.qid);
+      window.dxSetStem(qtextEl, split ? split.question : ((r._qbSubject || currentSubject) === 'math' ? window.mathDisplay(r.text) : r.text), 'qb:' + r.qid, runnerQueue);
+      if (window.dxRenderPassagePane) window.dxRenderPassagePane({}, split, r.qid, runnerQueue);
       choicesEl.style.display = 'none';
       frRowEl.style.display = st.submitted ? 'none' : 'flex';
       frInputEl.value = st.rawAnswer || '';
@@ -20576,8 +20602,8 @@ window.Portal = {
       // math setup sentence before its question would falsely split into
       // two panes.
       var split = (r._qbSubject || currentSubject) === 'math' ? null : splitPassageQb(r.text);
-      window.dxSetStem(qtextEl, split ? split.question : ((r._qbSubject || currentSubject) === 'math' ? window.mathDisplay(r.text) : r.text), 'qb:' + r.qid);
-      if (window.dxRenderPassagePane) window.dxRenderPassagePane({}, split, r.qid);
+      window.dxSetStem(qtextEl, split ? split.question : ((r._qbSubject || currentSubject) === 'math' ? window.mathDisplay(r.text) : r.text), 'qb:' + r.qid, runnerQueue);
+      if (window.dxRenderPassagePane) window.dxRenderPassagePane({}, split, r.qid, runnerQueue);
       r.choices.forEach(function (c, i) {
         var isElim = !st.submitted && (st.elim || []).indexOf(i) !== -1;
         var cls = 'dx-choice' + (isElim ? ' eliminated' : '');
