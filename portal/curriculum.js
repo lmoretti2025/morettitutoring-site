@@ -19,8 +19,8 @@
 (function () {
   'use strict';
 
-  var DATA_SRC = 'curriculum-data.js?v=20261012a';
-  var VIDEO_SRC = 'curriculum-videos.js?v=20261012a';
+  var DATA_SRC = 'curriculum-data.js?v=20261013b';
+  var VIDEO_SRC = 'curriculum-videos.js?v=20261013b';
 
   /* ---------- small helpers ---------- */
   function $(sel, root) { return (root || document).querySelector(sel); }
@@ -190,6 +190,13 @@
     '#cu-root .cu-notes-b figure{margin:.8rem 0;text-align:center}#cu-root .cu-notes-b figure img{max-width:100%;border-radius:8px}',
     '#cu-root .cu-notes-b figcaption{font-size:.8rem;color:var(--mid);margin-top:.3rem}',
     '#cu-root .cu-formula{background:var(--cu-soft);border-radius:8px;padding:.55rem .8rem;font-family:var(--display,Georgia,serif);margin:.4rem 0}',
+    /* a stacked fraction: build.py turns \frac{a}{b} into two spans, so the
+       quadratic formula and the trig ratios read as fractions rather than as
+       a slash. The rule is currentColor so it follows the text. */
+    '#cu-root .frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;margin:0 .2em}',
+    '#cu-root .frac>span{display:block;padding:0 .35em;line-height:1.18}',
+    '#cu-root .frac>span:first-child{border-bottom:1px solid currentColor;padding-bottom:.08em}',
+    '#cu-root .frac>span:last-child{padding-top:.08em}',
     '#cu-root .cu-code,#cu-root .cu-notes-b code{background:var(--cu-soft);border-radius:4px;padding:0 .3em;font-size:.9em}',
     /* the check */
     '#cu-root .cu-card{background:#fff;border-radius:16px;box-shadow:var(--shadow);padding:1.4rem 1.5rem}',
