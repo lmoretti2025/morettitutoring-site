@@ -7929,7 +7929,10 @@ window.mathFor = function (q, html) {
       planInputs.weekly = weekly; planInputs.weeklyText = hrs(weekly);
       // The same rows for the walkthrough's plan screen (report-tour.js).
       planInputs.planRows = rows.map(function (r) { var tmp = document.createElement('div'); tmp.innerHTML = r.what.replace(/<em>[\s\S]*$/, '');
-        var said = (tmp.textContent || '').replace(/^[^.]*\.\s*/, '').split(/(?<=\.)\s/)[0] || '';
+        // First sentence: up to the first period that a space follows. Not split(/(?<=\.)\s/): iOS
+        // before 16.4 cannot parse a lookbehind, and one bad regex stops the whole report script.
+        var rest = (tmp.textContent || '').replace(/^[^.]*\.\s*/, ''), firstS = rest.match(/^[\s\S]*?\.(?=\s)/);
+        var said = (firstS ? firstS[0] : rest) || '';
         return { h: hrs(r.h), unit: r.unit, color: r.color, label: r.label || '', lessons: r.lessons || [], share: r.h / weekly, said: said }; });
       var host = document.getElementById('plan-section');
       host.innerHTML = html;
