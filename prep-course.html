@@ -1206,6 +1206,15 @@ nav.is-red .navlinks a{color:rgba(255,255,255,.85)}nav.is-red .navlinks a.on{col
 .capintro{max-width:680px}
 .capture h2{font-size:clamp(1.9rem,3.4vw,2.7rem)}
 .capintro .lead{max-width:36em;margin-left:auto;margin-right:auto}
+/* GET STARTED, ALWAYS IN REACH (2026-10-12): a bar that appears once the hero is
+   scrolled past and steps aside when the form itself is on screen. */
+.gsbar{position:fixed;left:50%;bottom:16px;z-index:55;transform:translate(-50%,140%);display:flex;align-items:center;gap:1rem;background:#0C0A09;color:#fff;border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:.45rem .45rem .45rem 1.2rem;box-shadow:0 18px 40px -14px rgba(0,0,0,.55);transition:transform .45s var(--ease);max-width:calc(100vw - 24px)}
+.gsbar.on{transform:translate(-50%,0)}
+.gsbar span{font-size:.8rem;color:rgba(237,231,229,.75);white-space:nowrap}
+.gsbar a{background:var(--red);color:#fff;border-radius:999px;padding:.7rem 1.2rem;font:600 .74rem var(--sans);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.gsbar a:hover{background:var(--red-lift)}
+@media(max-width:600px){.gsbar{left:12px;right:12px;bottom:12px;padding:.4rem;transform:translateY(140%);justify-content:space-between}.gsbar.on{transform:none}.gsbar span{display:none}.gsbar a{flex:1;text-align:center;padding:.85rem 1rem}}
+@media(prefers-reduced-motion:reduce){.gsbar{transition:none}}
 </style>
 </head>
 <body>
@@ -1497,7 +1506,7 @@ nav.is-red .navlinks a{color:rgba(255,255,255,.85)}nav.is-red .navlinks a.on{col
       </fieldset>
       <div class="frow">
         <div class="ff"><label class="fl" for="rf-name">Your name</label><input class="fi" type="text" id="rf-name" name="parentName" autocomplete="name" required></div>
-        <div class="ff"><label class="fl" for="rf-phone">Phone</label><input class="fi" type="tel" id="rf-phone" name="phone" autocomplete="tel" placeholder="e.g. (201) 555-0100" required></div>
+        <div class="ff"><label class="fl" for="rf-phone">Phone <em>(optional)</em></label><input class="fi" type="tel" id="rf-phone" name="phone" autocomplete="tel" placeholder="for a quicker reply by text"></div>
       </div>
       <div class="ff"><label class="fl" for="rf-email">Email</label><input class="fi" type="email" id="rf-email" name="email" autocomplete="email" required></div>
       <div class="ff"><label class="fl" for="rf-message">What your student needs help with <em>(optional)</em></label>
@@ -1513,6 +1522,7 @@ nav.is-red .navlinks a{color:rgba(255,255,255,.85)}nav.is-red .navlinks a.on{col
   <p class="capphone rv d3">Prefer to talk now?<a href="tel:2012752791">(201) 275-2791</a></p>
 </div></section>
 
+<div class="gsbar" id="gsbar" aria-hidden="true"><span>Full-length, timed, and free</span><a href="#start" data-start="diagnostic">Take the free diagnostic &rarr;</a></div>
 <footer><div class="shell">
   <div class="footer-id">
     <p>Moretti Test Prep &amp; Tutoring, located in Cranford NJ</p>
@@ -1727,7 +1737,18 @@ document.documentElement.classList.add('js');
   var st=document.getElementById('start'); if(st) new IntersectionObserver(function(es){ if(es[0].isIntersecting) links.forEach(function(a){a.classList.remove('on');}); },{rootMargin:'-45% 0px -50% 0px'}).observe(st);
 })();
 </script>
+<script>
+/* The get-started bar: shown once the hero is behind you, hidden while the form is on screen. */
+(function(){
+  var bar=document.getElementById('gsbar'), hero=document.querySelector('.xhero,.shero'), form=document.getElementById('start');
+  if(!bar||!hero||!form||!('IntersectionObserver' in window)) return;
+  var pastHero=false, atForm=false;
+  function paint(){ var on=pastHero&&!atForm; bar.classList.toggle('on',on); bar.setAttribute('aria-hidden',String(!on)); }
+  new IntersectionObserver(function(es){ pastHero=!es[0].isIntersecting; paint(); }).observe(hero);
+  new IntersectionObserver(function(es){ atForm=es[0].isIntersecting; paint(); },{rootMargin:'0px 0px -20% 0px'}).observe(form);
+})();
+</script>
 <script src="site.js"></script>
-<script src="lead-form.js?v=20261005a"></script>
+<script src="lead-form.js?v=20261012a"></script>
 </body>
 </html>
