@@ -985,7 +985,9 @@
     document.addEventListener('keydown', onKey);
     requestAnimationFrame(function () {
       if (!root) return;
-      root.classList.add('on'); root.style.transition = ''; go(0);
+      // ?start=N opens on screen N (the SAT page's sample starts on the score, 2026-10-14).
+      var sm = /[?&]start=(\d+)/.exec(location.search), first = sm ? Math.min(+sm[1], root.querySelectorAll('.t-scr').length - 1) : 0;
+      root.classList.add('on'); root.style.transition = ''; go(first);
       // Focus moves into the walkthrough on open (audit 6: Tab reached the page behind it).
       var nxt = root.querySelector('.t-scr.on button') || root.querySelector('.t-next');
       if (nxt) try { nxt.focus(); } catch (e) {}
