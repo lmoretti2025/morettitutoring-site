@@ -1396,6 +1396,18 @@
   .dx-fr-row { display: flex; gap: 0.75rem; margin-bottom: 2rem; }
   .dx-fr-input { flex: 1; font-family: var(--hel); font-size: 0.92rem; padding: 0.85rem 1.1rem; border: 1px solid var(--border); background: var(--white); color: var(--text); }
   .dx-fr-input:focus { outline: none; border-color: var(--dx-blue); }
+  /* Bluebook's grid-in: the answer as it will be read, under the box, and the directions on the left (2026-10-13). */
+  .dx-fr-preview { margin: -1.2rem 0 2rem; font-family: var(--hel); font-size: 0.9rem; color: var(--text); display: flex; align-items: center; gap: 0.5rem; min-height: 2.6rem; }
+  .dx-fr-preview .fr-frac { display: inline-flex; flex-direction: column; align-items: center; line-height: 1.15; font-size: 1.05em; vertical-align: middle; }
+  .dx-fr-preview .fr-frac > span:first-child { border-bottom: 1px solid currentColor; padding: 0 0.3em; }
+  .dx-fr-preview .fr-frac > span:last-child { padding: 0 0.3em; }
+  .dx-fr-preview b { font-size: 1.15em; }
+  #dx-fr-row[style*="display:none"] + .dx-fr-preview, #dx-fr-row[style*="display: none"] + .dx-fr-preview { display: none; }
+  #dx-passage-body .spr-h { margin: 0 0 0.6rem; }
+  #dx-passage-body ul.spr { margin: 0 0 1.2rem; padding-left: 1.2rem; font-size: 0.92em; line-height: 1.55; }
+  #dx-passage-body ul.spr li { margin-bottom: 0.45rem; }
+  #dx-passage-body table.spr-ex { border-collapse: collapse; font-size: 0.85em; width: 100%; }
+  #dx-passage-body table.spr-ex th, #dx-passage-body table.spr-ex td { border: 1px solid var(--border); padding: 0.4rem 0.5rem; text-align: center; vertical-align: top; }
 
   /* ═══ QUESTION CARD HEADER — numbered tile + Mark for Review + ABC
      eliminator toggle, matching Bluebook's own question-card header. ═══ */
@@ -1412,7 +1424,9 @@
   .dx-mark-btn.dx-save-btn[aria-pressed="true"] { background: #fbf4dd; border-color: var(--gold); color: #7a5f12; }
   .dx-abc-btn { margin-left: auto; flex-shrink: 0; background: var(--dx-blue); color: #fff; border: none; font-family: var(--hel); font-weight: 800; font-size: 0.62rem; letter-spacing: 0.03em; padding: 0.38rem 0.6rem; cursor: pointer; transition: opacity 0.2s; }
   .dx-abc-btn:hover { opacity: 0.85; }
-  .dx-abc-btn.on { background: var(--gold); color: #111; }
+  /* Off is an outline with the letters struck through, on is filled, as in Bluebook (2026-10-13). */
+  .dx-abc-btn:not(.on) { background: var(--white); color: var(--dx-blue); box-shadow: inset 0 0 0 1.5px var(--dx-blue); text-decoration: line-through; }
+  .dx-abc-btn.on { background: var(--dx-blue); color: #fff; }
   .dx-choice { position: relative; }
   .dx-choice.eliminated { opacity: 0.45; }
   .dx-choice.eliminated .dx-choice-text { text-decoration: line-through; }
@@ -5602,6 +5616,7 @@ window.Portal = {
           <div class="dx-fr-row" id="dx-fr-row" style="display:none;">
             <input type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" class="dx-fr-input" id="dx-fr-input" placeholder="Type your answer">
           </div>
+          <div class="dx-fr-preview" id="dx-fr-preview">Answer Preview: <span id="dx-fr-preview-v"></span></div>
           <div class="dx-nav-row">
             <button class="dx-btn dx-btn-back" id="dx-back">Back</button>
             <!-- The confidence tap REPLACES Next once an answer is recorded, so it costs no
@@ -12023,9 +12038,10 @@ window.Portal = {
   /* ═══ OFFICIAL-STYLE SECTION DIRECTIONS ═══
      Keyed by SECTION_BANKS key; read by openDirections(). Sections without
      an entry show no directions text. */
+  var SPR_DIRECTIONS_HTML = '<p class="spr-h"><b>Student-produced response directions</b></p><ul class="spr"><li>If you find more than one correct answer, enter only one answer.</li><li>You can enter up to 5 characters for a positive answer and up to 6 characters (including the negative sign) for a negative answer.</li><li>If your answer is a fraction that doesn&rsquo;t fit in the provided space, enter the decimal equivalent.</li><li>If your answer is a decimal that doesn&rsquo;t fit in the provided space, enter it by truncating or rounding at the fourth digit.</li><li>If your answer is a mixed number (such as 3&#8239;&frac12;), enter it as an improper fraction (7/2) or its decimal equivalent (3.5).</li><li>Don&rsquo;t enter symbols such as a percent sign, comma, or dollar sign.</li></ul><table class="spr-ex"><tr><th>Answer</th><th>Acceptable ways to enter</th><th>Unacceptable</th></tr><tr><td>3.5</td><td>3.5<br>3.50<br>7/2</td><td>31/2<br>3 1/2</td></tr><tr><td>2/3</td><td>2/3<br>.6666<br>.6667<br>0.666<br>0.667</td><td>0.66<br>.66<br>0.67<br>.67</td></tr><tr><td>&minus;1/3</td><td>&minus;1/3<br>&minus;.3333<br>&minus;0.333</td><td>&minus;.33<br>&minus;0.33</td></tr></table>';
   var SECTION_DIRECTIONS = {
     'reading-writing':
-      '<p>The questions in this section address a number of important reading and writing skills. Each question includes one or more passages, which may include a table or graph. Read each passage and question carefully, and then choose the best answer to the question based on the passage(s). All questions in this section are multiple-choice with four answer choices. Each question has a single best answer. You can jump between questions using the panel on the right, and come back to anything.</p>',
+      '<p>The questions in this section address a number of important reading and writing skills. Each question includes one or more passages, which may include a table or graph. Read each passage and question carefully, and then choose the best answer to the question based on the passage(s). All questions in this section are multiple-choice with four answer choices. Each question has a single best answer. You can move between questions and come back to any of them before the module ends.</p>',
     'math':
       '<p>The questions in this section address a number of important math skills. Use of a calculator is permitted for all questions.</p>' +
       '<p>Unless otherwise indicated: all variables and expressions represent real numbers; figures provided are drawn to scale; all figures lie in a plane; the domain of a given function f is the set of all real numbers x for which f(x) is a real number.</p>'
@@ -12999,7 +13015,7 @@ window.Portal = {
     var hidden = dxTimerEl.classList.toggle('dx-timer-hidden');
     dxTimerToggleEl.textContent = hidden ? 'Show' : 'Hide';
   });
-  var eliminatorOn = true; // "ABC" toggle — shows/hides the per-choice cross-out control; matches the real digital SAT, which starts with Answer Eliminator on
+  var eliminatorOn = false; // "ABC" toggle: shows/hides the per-choice cross-out control. Off at the start, as in Bluebook, where the student turns it on once and it stays on (2026-10-13; it used to start on)
 
   function activeQuestions() { return currentQs; }
   function isLastQuestionInSection() { return current === activeQuestions().length - 1; }
@@ -13013,6 +13029,11 @@ window.Portal = {
     return m + ':' + (s < 10 ? '0' : '') + s;
   }
 
+  // Bluebook shows a hidden timer again at five minutes left (2026-10-13). It can be hidden again after.
+  function forceTimerVisible() {
+    dxTimerEl.classList.remove('dx-timer-hidden');
+    dxTimerToggleEl.textContent = 'Hide';
+  }
   function showTimerToast() {
     dxTimerToastEl.style.display = 'block';
     dxTimerToastEl.style.animation = 'none';
@@ -13217,6 +13238,7 @@ window.Portal = {
     if (remaining <= 5 * 60 * 1000 && !sectionTimerWarned) {
       sectionTimerWarned = true;
       dxTimerEl.classList.add('dx-timer-warn');
+      forceTimerVisible();
       showTimerToast();
     }
     if (remaining <= 0) {
@@ -13287,6 +13309,7 @@ window.Portal = {
     lastLiveTickAt = Date.now();
     sectionTimerWarned = (endsAt - Date.now()) <= 5 * 60 * 1000;
     dxTimerEl.classList.toggle('dx-timer-warn', sectionTimerWarned);
+    if (sectionTimerWarned) forceTimerVisible();
     dxTimerWrapEl.style.display = 'flex';
     tickSectionTimer();
     if (sectionTimerEndsAt - Date.now() > 0) {
@@ -13760,10 +13783,10 @@ window.Portal = {
   });
 
   var abcToggle = document.getElementById('dx-abc-toggle');
-  abcToggle.classList.toggle('on', eliminatorOn); // matches the real digital SAT — Answer Eliminator starts ON
+  abcToggle.classList.toggle('on', eliminatorOn); // off at the start, as in Bluebook
   // Set on #dx-choices now, not only in renderQuestion(), so practice runs
   // (separate closures sharing this element, see window.dxIsEliminatorOn)
-  // also start with Answer Eliminator ON, its true default.
+  // start the same way.
   choicesEl.classList.toggle('eliminator-on', eliminatorOn);
   abcToggle.addEventListener('click', function () {
     eliminatorOn = !eliminatorOn;
@@ -13856,6 +13879,8 @@ window.Portal = {
     var qs = activeQuestions();
     var q = qs[current];
     var splitParts = splitRwPassage(q);
+    // A math grid-in shows Bluebook's student-produced response directions on the left (2026-10-13).
+    if (!splitParts && q.type === 'fr' && currentSectionKey() === 'math') splitParts = { passage: SPR_DIRECTIONS_HTML, question: window.mathFor({ domain: 'Algebra' }, q.text) };
     window.dxSetStem(qtextEl, splitParts ? splitParts.question : window.mathFor(currentSectionKey() === 'math' ? { domain: 'Algebra' } : q, q.text), 'eng:' + currentSectionKey() + ':' + current + ':' + (q.qid || ''), activeQuestions());
     renderPassagePane(q, splitParts);
     flagTestQuestion(q);
@@ -13896,6 +13921,7 @@ window.Portal = {
       // session with a differently shaped saved state can't throw or put the
       // literal text "undefined" in the box.
       frInput.value = (answers[current] != null && answers[current].raw != null) ? answers[current].raw : '';
+      refreshFrPreview();
     }
 
     backBtn.disabled = current === 0;
@@ -13970,6 +13996,19 @@ window.Portal = {
      (2026-10-02). It is banked and saved a moment after typing stops, and
      again as the page goes away. */
   var frSaveTimer = null;
+  // The Answer Preview: what was typed, as it will be read, a fraction stacked (Bluebook, 2026-10-13).
+  var frPreviewEl = document.getElementById('dx-fr-preview'), frPreviewV = document.getElementById('dx-fr-preview-v');
+  function refreshFrPreview() {
+    if (!frPreviewEl) return;
+    var v = String(frInput.value || '').trim();
+    var neg = v.charAt(0) === '-', body = neg ? v.slice(1) : v, parts = body.split('/');
+    var esc = function (t) { return String(t).replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); };
+    frPreviewV.innerHTML = !v ? '' : (neg ? '<b>&minus;</b>' : '') + (parts.length === 2
+      ? '<span class="fr-frac"><span>' + esc(parts[0]) + '</span><span>' + esc(parts[1]) + '</span></span>'
+      : '<b>' + esc(body) + '</b>');
+  }
+  frInput.addEventListener('input', refreshFrPreview);
+  window.dxFrPreview = refreshFrPreview;   // the practice runners fill the same box
   frInput.addEventListener('input', function () {
     if (iqPracticeActive) return;
     refreshConfRow();
@@ -18584,7 +18623,7 @@ window.Portal = {
     } else if (r.type === 'fr') {
       choicesEl.style.display = 'none';
       frRowEl.style.display = st.submitted ? 'none' : 'flex';
-      frInputEl.value = st.rawAnswer || '';
+      frInputEl.value = st.rawAnswer || ''; if (window.dxFrPreview) window.dxFrPreview();
       // A blank (or digit-less) grid-in can't be submitted: Skip is the way past it (2026-10-02).
       nextBtnEl.disabled = !st.submitted && !/\d/.test(st.rawAnswer || '');
       if (abcT) abcT.style.display = 'none';   // the eliminator has nothing to cross out on a grid-in
@@ -20572,7 +20611,7 @@ window.Portal = {
       if (window.dxRenderPassagePane) window.dxRenderPassagePane({}, split, r.qid, runnerQueue);
       choicesEl.style.display = 'none';
       frRowEl.style.display = st.submitted ? 'none' : 'flex';
-      frInputEl.value = st.rawAnswer || '';
+      frInputEl.value = st.rawAnswer || ''; if (window.dxFrPreview) window.dxFrPreview();
       // A blank (or digit-less) grid-in can't be submitted: Skip is the way past it (2026-10-02).
       nextBtnEl.disabled = !st.submitted && !/\d/.test(st.rawAnswer || '');
       if (abcT) abcT.style.display = 'none';   // the eliminator has nothing to cross out on a grid-in
