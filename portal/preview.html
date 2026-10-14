@@ -126,7 +126,10 @@
     // A non-SAT student sees a different home screen (applySubjectHome() in
     // index.html). It shows no scores, so only a next session and assigned
     // work need faking.
-    var subject = params.get('subject') === '1';
+    // &mathshow=1 (2026-10-14) — a math (subject) student with a real-looking
+    // week, for the recordings on the math page.
+    var mathshow = params.get('mathshow') === '1';
+    var subject = params.get('subject') === '1' || mathshow;
     // &nosession=1 — the hero card with nothing to lead with, which is
     // what a subject student sees before Luca has put anything on the
     // calendar. Worth being able to look at on purpose.
@@ -166,6 +169,18 @@
         { row: 4, task: 'Bring your lab notebook', done: false, notes: 'The one with the graphs in it.', dueDate: null },
         { row: 5, task: 'Vocabulary from Tuesday', done: true, notes: '', dueDate: null }
       ] : [];
+      if (mathshow) {
+        soon = new Date(); soon.setHours(16, 30, 0, 0);
+        while ((soon.getDay() !== 2 && soon.getDay() !== 4) || soon <= new Date()) soon.setDate(soon.getDate() + 1);
+        var dd = function (n) { var d = new Date(); d.setDate(d.getDate() + n); d.setHours(12, 0, 0, 0); return d.toISOString(); };
+        fakeAssignments = [
+          { row: 2, task: 'Test corrections: Unit 6', done: false, notes: 'Redo every miss and write one line on what went wrong.', dueDate: dd(-1) },
+          { row: 3, task: 'Problem set 7.3: solving quadratics by factoring', done: false, notes: 'Skip #14, we will do it together.', dueDate: dd(2) },
+          { row: 4, task: 'Exponent rules review sheet', done: false, notes: '', dueDate: dd(4) },
+          { row: 5, task: 'Read section 7.4 before Thursday', done: false, notes: '', dueDate: null },
+          { row: 6, task: 'Fractions warm-up, 10 minutes', done: true, notes: '', dueDate: null }
+        ];
+      }
       var student = {
         ok:true, session:'preview', key:'PREVIEW1', name:'Avery Preview', email:'preview@example.com',
         needsOnboarding:onboarding, needsName:false,
@@ -226,6 +241,14 @@
           'Transitions': { domain: 'Expression of Ideas', skill: 'Transitions', correct: 7, total: 8 }
         } : {},
         vocabProgress: vocab, qbAttempts: {} };
+      var calSessions = [{ startIso: soon.toISOString(), allDay: false, title: 'Avery - tutoring' }];
+      if (mathshow) {
+        calSessions = [];
+        for (var w = -2; w <= 3; w++) [2, 4].forEach(function (dow) {
+          var d = new Date(); d.setDate(d.getDate() - d.getDay() + dow + w * 7); d.setHours(16, 30, 0, 0);
+          calSessions.push({ startIso: d.toISOString(), allDay: false, title: 'Avery - tutoring' });
+        });
+      }
       var boot = '<scr' + 'ipt>(function(){' +
         'var S=' + JSON.stringify(student) + ',W=' + JSON.stringify(wantScreen) + ',H=' + JSON.stringify(history) + ',P=' + JSON.stringify(progress) + ',D=' + delayMs + ';' +
         // A session token shaped like the real thing (base64url JSON, a dot,
@@ -243,7 +266,7 @@
         'else if(b.action==="getProgress")o=P;' +
         'else if(b.action==="getAssignments")o={ok:true,assignments:S.assignments};' +
         'else if(b.action==="nextSession")o=' + (noSession ? '{ok:true,next:null}' : '{ok:true,next:{startIso:' + JSON.stringify(soon.toISOString()) + ',allDay:false,title:"Avery - tutoring"}}') + ';' +
-        'else if(b.action==="getAssignmentsCalendar")o={ok:true,assignments:S.assignments,sessions:[{startIso:' + JSON.stringify(soon.toISOString()) + ',allDay:false,title:"Avery - tutoring"}]};' +
+        'else if(b.action==="getAssignmentsCalendar")o={ok:true,assignments:S.assignments,sessions:' + JSON.stringify(calSessions) + '};' +
         'var res={ok:true,status:200,clone:function(){return this;},' +
         'json:function(){return Promise.resolve(JSON.parse(JSON.stringify(o)));},text:function(){return Promise.resolve(JSON.stringify(o));}};' +
         // Writes answer at once; reads are what a slow backend holds up.
@@ -258,7 +281,7 @@
         '})();</scr' + 'ipt>';
       // The beta notice opens on every sign-in and would cover the very
       // loading states the rich preview exists to show.
-      if (rich) boot = '<style>#beta-modal-overlay{display:none!important}</style>' + boot;
+      if (rich || mathshow) boot = '<style>#beta-modal-overlay{display:none!important}</style>' + boot;
       document.open(); document.write(boot + html); document.close();
     }).catch(function (e) {
       intro.innerHTML = '<span class="bad">Could not load index.html:</span> ' + e.message +
