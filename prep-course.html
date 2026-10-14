@@ -105,6 +105,21 @@ p{margin:0}
 .inc.wide b{margin:0;color:#fff;font-size:1.15rem}
 .inc.wide span{margin:.2rem 0 0;color:rgba(255,255,255,.7)}
 /* Take a closer look */
+/* platform rows (2026-10-14) */
+.plat{background:#fff;padding:clamp(1rem,3vw,2rem) 0 clamp(4.5rem,9vw,7rem)}
+.prow{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.45fr);gap:clamp(2rem,5vw,4.5rem);align-items:center;margin:0 auto clamp(4rem,8vw,6.5rem);max-width:1180px}
+.prow.flip{grid-template-columns:minmax(0,1.45fr) minmax(0,.8fr)}.prow.flip .ptx{order:2}
+.pk{font-size:.74rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--red);margin:0 0 .8rem}
+.ptx h3{font-family:var(--display);font-weight:700;font-size:clamp(1.9rem,3.4vw,2.8rem);line-height:1.06;letter-spacing:-.02em;color:var(--ink);margin:0}
+.ptx h3 em{font-style:normal;color:var(--red)}
+.ptx p:not(.pk){font-size:clamp(1rem,1.4vw,1.1rem);line-height:1.6;color:var(--muted);margin:1rem 0 0;max-width:40ch}
+.pmedia{margin:0;border-radius:16px;overflow:hidden;background:#fff;box-shadow:0 30px 70px -32px rgba(12,10,9,.4),0 0 0 1px rgba(0,0,0,.07)}
+.pmedia img{display:block;width:100%;height:auto}
+.pmore{text-align:center;max-width:860px;margin:0 auto}
+.pmore p{font-family:var(--display);font-weight:700;font-size:clamp(1.4rem,2.6vw,1.9rem);color:var(--ink);margin:0 0 1.2rem}
+.pmore div{display:flex;flex-wrap:wrap;justify-content:center;gap:.6rem}
+.pmore span{background:#F5F5F7;border-radius:999px;padding:.55rem 1.05rem;font-size:.9rem;color:var(--ink)}
+@media(max-width:860px){.prow,.prow.flip{grid-template-columns:1fr;gap:1.4rem}.prow.flip .ptx{order:0}.ptx p:not(.pk){max-width:none}}
 /* walkthrough steps (2026-10-14) */
 .wstep{background:#fff;padding:0 0 clamp(4.5rem,9vw,7rem)}
 .wshot{margin:0 auto;max-width:1180px;border-radius:14px;overflow:hidden;background:#fff;box-shadow:0 40px 90px -40px rgba(12,10,9,.45),0 0 0 1px rgba(0,0,0,.08)}
@@ -1391,9 +1406,8 @@ nav.is-red .navlinks a{color:rgba(255,255,255,.85)}nav.is-red .navlinks a.on{col
   <a class="nav-logo" href="index.html"><img src="logo-caladea-white-400.png" alt="Moretti Test Prep &amp; Tutoring"></a>
   <div class="navlinks">
     <a href="#walkthrough">The diagnostic</a>
-    <a href="#practice">Practice</a>
-    <a href="#course">The course</a>
-    <a href="#instructor">How I tutor</a>
+    <a href="#platform">The platform</a>
+        <a href="#instructor">How I tutor</a>
     <a href="#proof">Results</a>
   </div>
   <a class="navlogin" href="portal/index.html">Student Login</a>
@@ -1402,9 +1416,8 @@ nav.is-red .navlinks a{color:rgba(255,255,255,.85)}nav.is-red .navlinks a.on{col
 </div>
 <div class="navmenu" id="navmenu">
   <a href="#walkthrough">The diagnostic</a>
-  <a href="#practice">Practice</a>
-  <a href="#course">The course</a>
-  <a href="#instructor">How I tutor</a>
+  <a href="#platform">The platform</a>
+    <a href="#instructor">How I tutor</a>
   <a href="#proof">Results</a>
   <a href="test-dates.html">Test dates</a>
   <a href="portal/index.html">Student login</a>
@@ -1421,131 +1434,20 @@ nav.is-red .navlinks a{color:rgba(255,255,255,.85)}nav.is-red .navlinks a.on{col
       <a class="xlink light" href="#walkthrough">See how it works &darr;</a>
     </div>
     <p class="free rv d3">The first call and the diagnostic are both free.</p>
-    <div class="shot" id="pshot"><picture><source media="(max-width:640px)" srcset="img/sat/v2-home-m.webp"><img src="img/sat/v2-home.webp" width="2560" height="1600" alt="The student portal home: score progress, the weakest skills, the next session and the week's work"></picture></div>
+    <div class="shot" id="pshot"><picture><source media="(max-width:640px)" srcset="img/sat/v3-home-m.webp"><img src="img/sat/v3-home.webp" width="2560" height="1600" alt="The student portal home: seven tests of score progress, the weakest skill in each section, the next session and the week's work"></picture></div>
   </div>
 </section>
 
 <div class="pnav" id="pnav" role="navigation" aria-label="SAT Prep">
   <div class="in">
     <a class="t" href="#overview">SAT Prep</a>
-    <a class="l" href="#walkthrough" data-sec="walkthrough">Diagnostic</a>
-    <a class="l" href="#practice" data-sec="practice">Practice</a>
-    <a class="l" href="#course" data-sec="course">Course</a>
-    <a class="l" href="#updates" data-sec="updates">Updates</a>
     <a class="l" href="#proof" data-sec="proof">Results</a>
+    <a class="l" href="#walkthrough" data-sec="walkthrough">Diagnostic</a>
+    <a class="l" href="#platform" data-sec="platform">Platform</a>
+    <a class="l" href="#instructor" data-sec="instructor">How I tutor</a>
     <a class="b" href="book.html" data-start="call">Book a free call</a>
   </div>
 </div>
-
-<!-- THE WALKTHROUGH (2026-10-14): one step per section, one headline, one sentence, one large picture -->
-<span id="highlights" aria-hidden="true"></span><span id="portal" aria-hidden="true"></span>
-<section class="chap" id="walkthrough" data-chap="walkthrough">
-  <div class="shell">
-    <p class="chap-k sc">Step 1 &middot; The diagnostic</p>
-    <h2 class="chap-h">It starts with one full SAT.</h2>
-    <p class="chap-sub sc">Free, at home, timed like the real test. The report shows how every question was answered, not just whether it was right. Try one, for a made-up student.</p>
-  </div>
-</section>
-<section class="diaglive" id="report" data-chap="walkthrough" aria-label="A real report, for a made-up student: use the arrows, or tap + on any screen">
-  <iframe src="portal/report.html?demo=1&amp;score=1250&amp;weak=math&amp;embed=public&amp;tour=1&amp;mix=1&amp;v=20261005a" title="A real report, for a made-up student" loading="lazy"></iframe>
-</section>
-
-<!-- STEP 2 · Practice -->
-<section class="chap" id="practice" data-chap="practice">
-  <div class="shell">
-    <p class="chap-k sc">Step 2 &middot; Practice</p>
-    <h2 class="chap-h">Practice that feels like test day.</h2>
-    <p class="chap-sub sc">The same layout, timer and tools as the digital SAT. Every practice test comes back with the same full report.</p>
-  </div>
-</section>
-<section class="wstep" data-chap="practice">
-  <div class="shell">
-    <figure class="wshot rv"><div class="wbar" aria-hidden="true"><i></i><i></i><i></i></div><picture><source media="(max-width:640px)" srcset="img/sat/v2-test-m.webp"><img src="img/sat/v2-test.webp" width="2880" height="1400" alt="A practice test question in the portal: the passage on the left, the answer choices on the right, one choice crossed out, the timer at the top" loading="lazy"></picture></figure>
-    <div class="wstats">
-      <div class="rv"><b>14</b><span>full-length adaptive tests</span></div>
-      <div class="rv d1"><b>4,000+</b><span>questions, sorted by skill</span></div>
-      <div class="rv d2"><b>Explained</b><span>every answer, right or wrong</span></div>
-    </div>
-  </div>
-</section>
-
-<!-- STEP 3 · The course -->
-<section class="chap" id="course" data-chap="course">
-  <div class="shell">
-    <p class="chap-k sc">Step 3 &middot; The course</p>
-    <h2 class="chap-h">Taught until it&rsquo;s familiar.</h2>
-    <p class="chap-sub sc">The SAT asks the same questions in a hundred disguises. The course takes each one and develops it until every version looks familiar.</p>
-  </div>
-</section>
-<section class="sec quiet" data-chap="course">
-  <div class="shell">
-    <div class="split course-split">
-      <div>
-        <p class="lbl rv">The course map</p>
-        <h2 class="h-sec rv d1">Every concept, in order.</h2>
-        <p class="lede rv d2">Linear equations alone gets four lessons. Tap any lesson to see what it covers.</p>
-      </div>
-      <div class="cmap rv d2" id="cmap">
-        <div class="cmap-top"><span class="k">The course map</span><div class="cmap-sw" role="tablist"><button type="button" class="on" data-c="0">Math</button><button type="button" data-c="1">Reading &amp; Writing</button></div></div>
-        <div class="cmap-body"></div>
-        <div class="cmap-info" aria-live="polite"></div>
-      </div>
-    </div>
-    <div class="split course-try">
-      <div class="qcard rv" id="qcard">
-        <div class="qc-head"><span class="qc-tag">Lesson 2.1 &middot; check</span><span class="qc-tool">Sample question</span></div>
-        <p class="qc-q">A line in the <i>xy</i>-plane has a slope of 3 and passes through the point (2, 7). What is the <i>y</i>-coordinate of the line&rsquo;s <i>y</i>-intercept?</p>
-        <div class="qc-chs">
-          <div class="qc-ch" data-ok="0"><button type="button" class="qc-pick"><span class="L">A</span><span class="v">&minus;1</span></button><button type="button" class="qc-x" aria-label="Cross out A">&times;</button><p class="qc-why"><b>Subtracted in the wrong order.</b> 3(2) &minus; 7 = &minus;1. The intercept is 7&nbsp;&minus;&nbsp;3(2).</p></div>
-          <div class="qc-ch" data-ok="1"><button type="button" class="qc-pick"><span class="L">B</span><span class="v">1</span></button><button type="button" class="qc-x" aria-label="Cross out B">&times;</button><p class="qc-why"><b>Correct.</b> Put the point into <i>y</i> = 3<i>x</i> + <i>b</i>: 7 = 3(2) + <i>b</i>, so <i>b</i> = 1.</p></div>
-          <div class="qc-ch" data-ok="0"><button type="button" class="qc-pick"><span class="L">C</span><span class="v">7</span></button><button type="button" class="qc-x" aria-label="Cross out C">&times;</button><p class="qc-why"><b>Used the point&rsquo;s <i>y</i>-value.</b> 7 is the line&rsquo;s height at <i>x</i> = 2. The <i>y</i>-intercept is its height at <i>x</i> = 0.</p></div>
-          <div class="qc-ch" data-ok="0"><button type="button" class="qc-pick"><span class="L">D</span><span class="v">13</span></button><button type="button" class="qc-x" aria-label="Cross out D">&times;</button><p class="qc-why"><b>Went the wrong way.</b> Moving from <i>x</i> = 2 back to <i>x</i> = 0 lowers <i>y</i> by 3 &times; 2 = 6, so 7 &minus; 6, not 7 + 6.</p></div>
-        </div>
-        <div class="qc-foot"><button type="button" class="qc-check" disabled>Check answer</button><button type="button" class="qc-again" hidden>Try again</button><span class="qc-note">Pick an answer. The &times; crosses a choice out.</span></div>
-      </div>
-      <div>
-        <p class="lbl rv">Inside every lesson</p>
-        <h3 class="h-sec sm rv d1">Every wrong answer has a name.</h3>
-        <p class="lede rv d2">Try the question. Whatever you pick, you&rsquo;ll see where each wrong choice comes from. That is how the whole course is taught.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- STEP 4 · Every week -->
-<section class="chap" id="updates" data-chap="updates">
-  <div class="shell">
-    <p class="chap-k sc">Step 4 &middot; Every week</p>
-    <h2 class="chap-h">You always know how it&rsquo;s going.</h2>
-    <p class="chap-sub sc">After every session, an email: what we worked on, how practice went, any new score, and what comes next.</p>
-  </div>
-</section>
-<section class="wstep" data-chap="updates">
-  <div class="shell">
-    <figure class="wmail rv"><img src="img/sat/v2-weekly.webp" width="1200" height="1339" alt="A weekly update email to a parent: the latest practice test score, what the student worked on, the next session and how far away the SAT is" loading="lazy"></figure>
-    <div class="wstats">
-      <div class="rv"><b>Office hours</b><span>every week, between sessions</span></div>
-      <div class="rv d1"><b>Texts</b><span>answered the same day</span></div>
-      <div class="rv d2"><b>Booking</b><span>a session takes two taps</span></div>
-    </div>
-  </div>
-</section>
-
-<!-- How I tutor: the method and the tutor, together (as on the homepage, 2026-10-13) -->
-<section class="sec" id="instructor">
-  <div class="shell">
-    <div class="who short">
-      <img class="rv" src="img/portrait-centered.jpg" alt="Luca Moretti" loading="lazy">
-      <div>
-        <p class="lbl rv">How I tutor</p>
-        <h2 class="h-sec rv d1">Most SAT tutors work through a fixed plan. I don&rsquo;t.</h2>
-        <p class="lede rv d2">The usual way is to meet each week, cover the next topic and move down the list. For a student already scoring well, most of those hours go to material they already know.</p>
-        <p class="lede rv d2">My sessions follow your student. Every wrong answer tells me how they were thinking, and the next question I give them is chosen to close exactly that gap. I studied statistics at <a href="https://www.northwestern.edu/" target="_blank" rel="noopener" class="nu-link">Northwestern University</a>, and I&rsquo;ve taught every session myself, one-on-one, since 2018.</p>
-        <div class="creds rv d3"><span>Northwestern University, B.A. Statistics, top of class in three years</span><span>Scored over 1500 on the SAT</span><span>5 on AP Calculus AB &amp; BC</span><span>IB Diploma</span></div>
-      </div>
-    </div>
-  </div>
-</section>
 
 <!-- Results this fall -->
 <section class="sec soft" id="proof" data-sec="proof">
@@ -1560,6 +1462,92 @@ nav.is-red .navlinks a{color:rgba(255,255,255,.85)}nav.is-red .navlinks a.on{col
       <figure class="pf rv"><div class="shotwrap"><img src="img/results/1350-text.webp" alt="A parent&rsquo;s text: 1220 in December, 1230 in the spring, 1350 this time" loading="lazy"></div><figcaption><b>1350</b><span>Up from 1220 and 1230 after only two weeks of prep.</span></figcaption></figure>
     </div>
     <p class="center rv" style="margin-top:34px"><a class="xlink" href="testimonials.html">Read parent and student testimonials &rarr;</a></p>
+  </div>
+</section>
+
+<!-- THE WALKTHROUGH (2026-10-14): one step per section, one headline, one sentence, one large picture -->
+<span id="highlights" aria-hidden="true"></span><span id="portal" aria-hidden="true"></span>
+<section class="chap" id="walkthrough" data-chap="walkthrough">
+  <div class="shell">
+    <p class="chap-k sc">It starts with the diagnostic</p>
+    <h2 class="chap-h">It starts with one full SAT.</h2>
+    <p class="chap-sub sc">Free, at home, timed like the real test. The report shows how every question was answered, not just whether it was right. Try one, for a made-up student.</p>
+  </div>
+</section>
+<section class="diaglive" id="report" data-chap="walkthrough" aria-label="A real report, for a made-up student: use the arrows, or tap + on any screen">
+  <iframe src="portal/report.html?demo=1&amp;score=1250&amp;weak=math&amp;embed=public&amp;tour=1&amp;mix=1&amp;v=20261005a" title="A real report, for a made-up student" loading="lazy"></iframe>
+</section>
+
+<!-- THE PLATFORM (2026-10-14): one row per feature, each a short recording of the real portal -->
+<section class="chap" id="platform" data-chap="platform">
+  <div class="shell">
+    <p class="chap-k sc">The platform</p>
+    <h2 class="chap-h">Everything between sessions, in one place.</h2>
+    <p class="chap-sub sc">Recorded in the real portal, with a made-up student.</p>
+  </div>
+</section>
+<section class="plat" data-chap="platform">
+  <div class="shell">
+    <article class="prow">
+      <div class="ptx rv"><p class="pk">Practice tests</p><h3>Full-length tests that feel like <em>test day.</em></h3><p>14 adaptive practice tests built like the real digital SAT, with the same timer, highlighter, answer cross-out and question map. Each one comes back with a full report.</p></div>
+      <figure class="pmedia rv d1"><img src="img/sat/rec-test.webp" width="1300" height="815" alt="A practice test in the portal: highlighting a phrase in the passage, crossing out two choices, picking an answer and jumping to the next question" loading="lazy" decoding="async"></figure>
+    </article>
+    <article class="prow flip">
+      <div class="ptx rv"><p class="pk">Question bank</p><h3>4,000+ questions, <em>every one explained.</em></h3><p>Pick any skill and set up a round. Students say how sure they were, see the right answer at once, and read why each choice is right or wrong.</p></div>
+      <figure class="pmedia rv d1"><img src="img/sat/rec-qb.webp" width="1300" height="945" alt="The question bank: choosing Words in Context, setting up a round, answering, and opening the full explanation" loading="lazy" decoding="async"></figure>
+    </article>
+    <article class="prow">
+      <div class="ptx rv"><p class="pk">The course</p><h3>A full video course, <em>taught by me.</em></h3><p>Video lessons I recorded, with notes beside them. A short check follows each part, every wrong choice is explained, and the next part opens once the check is done.</p></div>
+      <figure class="pmedia rv d1"><img src="img/sat/rec-cu.webp" width="1300" height="898" alt="The course: the course map, a lesson video with worked handwriting, and the check question that follows it" loading="lazy" decoding="async"></figure>
+    </article>
+    <article class="prow flip">
+      <div class="ptx rv"><p class="pk">Mistakes log</p><h3>Every miss, <em>saved for later.</em></h3><p>Each wrong answer lands in the log with its skill, its difficulty and how many tries it took. Review with the answer hidden until it is earned.</p></div>
+      <figure class="pmedia rv d1"><img src="img/sat/rec-mis.webp" width="1300" height="851" alt="The mistakes log: opening a missed question, revealing the answer and reading the explanation" loading="lazy" decoding="async"></figure>
+    </article>
+    <article class="prow">
+      <div class="ptx rv"><p class="pk">Rush</p><h3>Timed sets that <em>build speed.</em></h3><p>Each question gets its own clock, set by its skill and difficulty, so students learn what test-day pace feels like.</p></div>
+      <figure class="pmedia rv d1"><img src="img/sat/rec-rush.webp" width="1300" height="898" alt="Rush mode: timed questions with a countdown bar under the header" loading="lazy" decoding="async"></figure>
+    </article>
+    <article class="prow flip">
+      <div class="ptx rv"><p class="pk">Vocabulary</p><h3>Ten minutes of <em>vocabulary</em> a day.</h3><p>A focused round that starts with the words a student is still learning, timed to ten minutes so it becomes a habit.</p></div>
+      <figure class="pmedia rv d1"><img src="img/sat/rec-vocab.webp" width="1216" height="896" alt="Vocabulary practice: a ten-minute round answered word by word" loading="lazy" decoding="async"></figure>
+    </article>
+    <div class="pmore rv"><p>And everything else</p><div><span>Challenge questions</span><span>Desmos calculator</span><span>Saved questions and collections</span><span>Calendar of sessions and work</span><span>Shared files</span><span>Score predictions</span></div></div>
+  </div>
+</section>
+
+<!-- How I tutor: the method and the tutor, together (as on the homepage, 2026-10-13) -->
+<section class="sec" id="instructor" data-sec="instructor">
+  <div class="shell">
+    <div class="who short">
+      <img class="rv" src="img/portrait-centered.jpg" alt="Luca Moretti" loading="lazy">
+      <div>
+        <p class="lbl rv">How I tutor</p>
+        <h2 class="h-sec rv d1">Most SAT tutors work through a fixed plan. I don&rsquo;t.</h2>
+        <p class="lede rv d2">The usual way is to meet each week, cover the next topic and move down the list. For a student already scoring well, most of those hours go to material they already know.</p>
+        <p class="lede rv d2">My sessions follow your student. Every wrong answer tells me how they were thinking, and the next question I give them is chosen to close exactly that gap. I studied statistics at <a href="https://www.northwestern.edu/" target="_blank" rel="noopener" class="nu-link">Northwestern University</a>, and I&rsquo;ve taught every session myself, one-on-one, since 2018.</p>
+        <div class="creds rv d3"><span>Northwestern University, B.A. Statistics, top of class in three years</span><span>Scored over 1500 on the SAT</span><span>5 on AP Calculus AB &amp; BC</span><span>IB Diploma</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STEP 4 · Every week -->
+<section class="chap" id="updates" data-chap="updates">
+  <div class="shell">
+    <p class="chap-k sc">Every week</p>
+    <h2 class="chap-h">You always know how it&rsquo;s going.</h2>
+    <p class="chap-sub sc">After every session, an email: what we worked on, how practice went, any new score, and what comes next.</p>
+  </div>
+</section>
+<section class="wstep" data-chap="updates">
+  <div class="shell">
+    <figure class="wmail rv"><img src="img/sat/v2-weekly.webp" width="1200" height="1339" alt="A weekly update email to a parent: the latest practice test score, what the student worked on, the next session and how far away the SAT is" loading="lazy"></figure>
+    <div class="wstats">
+      <div class="rv"><b>Office hours</b><span>every week, between sessions</span></div>
+      <div class="rv d1"><b>Texts</b><span>answered the same day</span></div>
+      <div class="rv d2"><b>Booking</b><span>a session takes two taps</span></div>
+    </div>
   </div>
 </section>
 

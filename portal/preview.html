@@ -141,7 +141,10 @@
     var delayMs = Math.max(0, Math.min(20000, Number(params.get('delay')) || 0));
     // &rich=1 — a student with something on every screen: three tests,
     // mistakes, weak skills, vocabulary. What a refresh is supposed to show.
-    var rich = !subject && params.get('rich') === '1';
+    // &showcase=1 (2026-10-14) — rich, plus seven tests with a clear rise and
+    // two weak skills, for the screenshots and screen recordings on the SAT page.
+    var showcase = !subject && params.get('showcase') === '1';
+    var rich = !subject && (params.get('rich') === '1' || showcase);
     // &fresh=1 — this browser has none of the student's data cached, as on a
     // new device or after clearing the browser. The student is still signed
     // in; only the data is missing. The worst case for a refresh.
@@ -181,6 +184,25 @@
         { date: '2026-08-23T15:00:00Z', testType: 'SAT', source: 'practice-test', testId: 'sat-practice-1', testTitle: 'SAT Practice Test 1', composite: 1250, rw: 630, math: 620, qStats: qs, attemptId: 'pv-a2' },
         { date: '2026-09-13T15:00:00Z', testType: 'SAT', source: 'practice-test', testId: 'sat-practice-2', testTitle: 'SAT Practice Test 2', composite: 1310, rw: 650, math: 660, qStats: qs, attemptId: 'pv-a3' }
       ] : [];
+      if (showcase) {
+        var SK = ['Inferences', 'Words in Context', 'Transitions', 'Boundaries', 'Nonlinear functions', 'Linear equations in two variables', 'Circles', 'Percentages'];
+        var weakAt = { 0: 0.45, 4: 0.22 };
+        var mkQ = function (lift) { return { v: 1, s: ['rw', 'math'], k: SK, q: Array.from({ length: 98 }, function (_, i) {
+          var sec = i < 54 ? 0 : 1, sk = sec ? 4 + (i % 4) : i % 4, p = (weakAt[sk] || 0.82) + lift;
+          return [sec, sk, 1, ((i * 37) % 100) / 100 < p ? 1 : 0, 60]; }) }; };
+        history = [[1180, 600, 580, '2026-07-12'], [1250, 630, 620, '2026-07-26'], [1290, 640, 650, '2026-08-09'], [1310, 650, 660, '2026-08-23'],
+          [1340, 660, 680, '2026-09-06'], [1380, 680, 700, '2026-09-20'], [1410, 690, 720, '2026-10-04']].map(function (t, i) {
+          return { date: t[3] + 'T15:00:00Z', testType: 'SAT', source: i ? 'practice-test' : 'diagnostic', testId: i ? 'sat-practice-' + i : undefined,
+            testTitle: i ? 'SAT Practice Test ' + i : '', composite: t[0], rw: t[1], math: t[2], qStats: mkQ(i * 0.02), attemptId: 'pv-s' + i };
+        });
+        student.targetScore = 1450;
+        var due = new Date(); due.setDate(due.getDate() + 3);
+        student.assignments = [
+          { row: 2, task: 'Practice Test 7, full and timed', done: false, notes: 'Saturday morning, like test day.', dueDate: due.toISOString() },
+          { row: 3, task: 'Question Bank: Inferences, 20 questions', done: false, notes: '', dueDate: due.toISOString() },
+          { row: 4, task: 'Lesson 3.4 and its check', done: true, notes: '', dueDate: null }
+        ];
+      }
       // Real question ids, so the Mistakes log resolves them the way it does
       // for a real student.
       var missed = rich ? ['rw|de55ec71', 'rw|e38b3e4f', 'rw|87aa7bab', 'rw|2903668a', 'rw|75e07a4d',
