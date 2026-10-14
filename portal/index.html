@@ -254,11 +254,11 @@
      lockstep with #main-nav.nav-hidden (see show() in the JS). The site's
      red mark at very low opacity with pointer-events:none, meant to be
      barely there, like a paper watermark. */
-  /* A corner mark, not a centered one: centered it sat between the passage and the question (2026-10-13). */
-  .exam-watermark { display: none; position: fixed; left: 1.5rem; bottom: 1.5rem; z-index: 1; pointer-events: none; opacity: 0.08; }
+  /* Centered, as it was (Luca, 2026-10-14: "it should be in the center"; a corner placement was tried on 10-13). */
+  .exam-watermark { display: none; position: fixed; inset: 0; z-index: 1; align-items: center; justify-content: center; pointer-events: none; opacity: 0.1; }
   .exam-watermark.visible { display: flex; }
-  .exam-watermark img { width: 110px; height: 110px; display: block; }
-  @media (max-width: 640px) { .exam-watermark { display: none !important; } }
+  .exam-watermark img { width: 380px; height: 380px; display: block; }
+  @media (max-width: 640px) { .exam-watermark img { width: 240px; height: 240px; } }
 
   /* ═══ FIRST-LOGIN ONBOARDING SEQUENCE ═══
      #screen-onboard hosts every beat as a sibling .onb-pane, one visible
@@ -3655,7 +3655,7 @@
   .rush-sum-stats div { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: .8rem .9rem; }
   .rush-sum-stats b { display: block; font-family: var(--display); font-size: 1.5rem; letter-spacing: -.02em; }
   .rush-sum-stats span { display: block; font-size: .68rem; color: var(--mid); margin-top: .2rem; line-height: 1.4; }
-  .rush-sum-list { background: var(--white); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .rush-sum-list { background: var(--white); border: 1px solid var(--border); border-radius: 12px; overflow: hidden auto; max-height: 320px; overscroll-behavior: contain; }
   .rush-sum-row { display: grid; grid-template-columns: 1.6rem 1fr auto auto; gap: .7rem; align-items: center; padding: .55rem .9rem; border-top: 1px solid var(--border); font-size: .76rem; }
   .rush-sum-row:first-child { border-top: 0; }
   .rush-sum-row .rs-n { font-weight: 700; color: var(--faint); }
@@ -14047,6 +14047,7 @@ window.Portal = {
     var tag = (document.activeElement && document.activeElement.tagName) || '';
     if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
     if (iqPracticeActive) {
+      if (e.key === 'Enter' && e.repeat) { e.preventDefault(); return; }   // a held Enter is one press
       if (e.key === 'Enter' && !nextBtn.disabled) { e.preventDefault(); nextBtn.click(); return; }
       var practiceLetterIdx = ['a', 'b', 'c', 'd'].indexOf(e.key.toLowerCase());
       if (practiceLetterIdx !== -1 && window.dxPracticeLetterHandler) { e.preventDefault(); window.dxPracticeLetterHandler(practiceLetterIdx); }
@@ -20319,6 +20320,10 @@ window.Portal = {
     if (runnerIndex >= runnerQueue.length) return;
     var r = runnerQueue[runnerIndex];
     var st = runnerState[r.qid];
+    /* A second press right after a submit (a double-click, a held Enter) used to carry straight on:
+       on the last Rush question that skipped its result and landed on the summary (2026-10-14). The
+       result now always shows; the press after it moves on. */
+    if (st.submitted && st._submittedAt && Date.now() - st._submittedAt < 650) return;
     if (!st.submitted) {
       var given;
       if (r.type === 'fr') {
@@ -20331,6 +20336,7 @@ window.Portal = {
         given = st.chosenIndex;
       }
       st.submitted = true;
+      st._submittedAt = Date.now();
       if (st.correct) runnerScore++;
       if (rushCfg) {
         var rushMs = rushElapsedMs();   // wall clock: hidden time counts in a timed drill
