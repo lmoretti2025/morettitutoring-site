@@ -634,6 +634,8 @@
   .xt-hed { margin-bottom: 0; }
   .xt-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.55rem; }
   .xt-evidence { font-family: var(--hel); font-size: 0.72rem; font-weight: 600; color: var(--mid); background: rgba(17,17,17,0.05); border-radius: 999px; padding: 0.2rem 0.6rem; white-space: nowrap; }
+  .xt-more { font-size: 0.76rem; font-weight: 600; color: var(--red); text-decoration: none; margin-left: auto; white-space: nowrap; }
+  .xt-more:hover { text-decoration: underline; }
   .xt-lede { font-size: 0.85rem; line-height: 1.6; color: var(--text); margin: 0 0 1.1rem; }
   .xt-group + .xt-group { margin-top: 1.3rem; }
   .xt-group-hed { font-family: var(--hel); font-size: 0.78rem; font-weight: 700; color: var(--text); margin: 0 0 0.15rem; display: flex; align-items: center; gap: 0.4rem; }
@@ -1013,6 +1015,31 @@
   .home-overview:not(.is-subject) .overview-card .ns-join { background: var(--red); color: #fff; padding: .45rem .95rem; box-shadow: 0 6px 16px -8px rgba(176,39,28,.7); }
   .home-overview:not(.is-subject) .overview-card .ns-oh-join { background: rgba(176,39,28,.08); }
   @media (max-width: 640px) { .home-overview:not(.is-subject) .overview-card .spc-composite-num { font-size: 2.6rem; } }
+
+  /* ═══ PHONE PASS (Luca, 2026-10-15) ═══ */
+  @media (max-width: 640px) {
+    .scr-band { padding-top: 1.1rem; }
+    /* Home's score bars: every label would collide ("DiagPT PT PT"), so only the first and the last. */
+    .home-overview .spc-bar-labels span { visibility: hidden; }
+    .home-overview .spc-bar-labels span:first-child, .home-overview .spc-bar-labels span:last-child { visibility: visible; }
+    /* Home shortcuts: two compact columns, icon and title only. */
+    .home-overview:not(.is-subject) .home-shortcuts { grid-template-columns: 1fr 1fr; gap: .6rem; }
+    .home-overview:not(.is-subject) .home-shortcut-card { padding: .9rem .9rem; border: 1px solid var(--border); background: var(--white); }
+    .home-overview:not(.is-subject) .home-shortcut-body { display: none; }
+    .home-overview:not(.is-subject) .home-shortcut-icon { width: 34px; height: 34px; margin-bottom: .55rem; }
+    .home-overview:not(.is-subject) .home-shortcut-title { font-size: .84rem; margin-bottom: 0; }
+    .home-overview:not(.is-subject) .home-shortcut-card { padding-top: 1.5rem; }
+    .home-overview:not(.is-subject) .home-shortcut-badge { top: .45rem; right: .5rem; font-size: .52rem; }
+    .home-overview .spc-bar-labels span { white-space: nowrap; }
+    /* Analytics: the skill table keeps skill, tests, bar and practice; time and trend are on wider screens. */
+    #screen-analytics .an-table th:nth-child(5), #screen-analytics .an-table td:nth-child(5),
+    #screen-analytics .an-table th:nth-child(6), #screen-analytics .an-table td:nth-child(6) { display: none; }
+    #screen-analytics .an-bar { min-width: 50px; }
+    #screen-analytics .an-kpis { gap: 1.4rem 1rem; }
+    #screen-analytics .an-kpis .an-tile .v { font-size: 1.45rem; }
+    #screen-analytics .an-hero { padding: 1.3rem 1.2rem; }
+    #screen-analytics .an-tiles3 { grid-template-columns: 1fr 1fr 1fr; gap: .8rem; }
+  }
 
   /* ═══ SUBJECT-TUTORING HOME ═══ see applySubjectHome(). A student who
      isn't doing SAT prep has no scores, practice tests or question bank.
@@ -7219,6 +7246,11 @@ window.Portal = {
   }
   document.getElementById('home-empty-cta').addEventListener('click', startDiagnosticFlow);
   document.getElementById('home-shortcut-weak').addEventListener('click', goToWeaknessPractice);
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('[data-xt-analytics]');
+    if (!a) return;
+    e.preventDefault(); goToGatedNav('sidebar-analytics', 'analytics');
+  });
   document.getElementById('home-shortcut-vocab').addEventListener('click', goToTenMinVocab);
   // Same guard as the .sidebar-item listener: ignore a Home shortcut to a
   // screen the sidebar is currently hiding.
@@ -9279,6 +9311,7 @@ window.Portal = {
       '<path d="M4 4v16h16"/><path d="M7 15l4-5 3 3 5-7"/></svg>' +
       'Your Statistics</h2>' +
       (evidence ? '<div class="xt-evidence">' + evidence + '</div>' : '') +
+      '<a href="#" class="xt-more" data-xt-analytics>All your numbers &rarr;</a>' +
       '</div>';
   }
 
@@ -9409,7 +9442,7 @@ window.Portal = {
         var v = byDay[anDayKey(d.getTime())] || 0; maxB = Math.max(maxB, v);
         bars.push({ d: d, v: v, wk: d.getTime() >= wk0 });
       }
-      var W = 640, H = 130, B = 22, bw = (W - 20) / 14;
+      var W = innerWidth < 640 ? 380 : 640, H = innerWidth < 640 ? 150 : 130, B = 22, bw = (W - 20) / 14;   // narrower on a phone so the labels stay readable
       var svg = bars.map(function (b, i) {
         var h = maxB ? Math.max(b.v ? 3 : 0, (H - B - 16) * b.v / maxB) : 0, x = 10 + i * bw + 3, y = H - B - h;
         return '<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + (bw - 6).toFixed(1) + '" height="' + h.toFixed(1) + '" rx="4" fill="' + (b.wk ? 'url(#anBarHot)' : 'url(#anBarOld)') + '"><title>' + e(b.d.toDateString().slice(0, 10)) + ': ' + anHm(b.v) + '</title></rect>' +
@@ -9556,7 +9589,7 @@ window.Portal = {
     var chart = '';
     if (vals.length) {
       var mn = Math.max(lo, Math.floor((Math.min.apply(null, vals) - 60) / 50) * 50), mx = Math.min(hi, Math.ceil((Math.max.apply(null, vals) + 60) / 50) * 50);
-      var W2 = 640, H2 = 190, L = 34, R = 12, T2 = 18, B2 = 26, n = scored.length;
+      var W2 = innerWidth < 640 ? 380 : 640, H2 = innerWidth < 640 ? 230 : 190, L = 34, R = 12, T2 = 18, B2 = 26, n = scored.length;
       var PADX = 26, xAt = function (i) { return n === 1 ? (L + W2 - R) / 2 : L + PADX + i * (W2 - L - R - 2 * PADX) / (n - 1); };
       var yAt = function (v) { return T2 + (1 - (v - mn) / (mx - mn || 1)) * (H2 - T2 - B2); };
       var grid = '', step = (mx - mn) > 300 ? 100 : 50;
@@ -9674,8 +9707,7 @@ window.Portal = {
     if (withStats.length < XT_MIN_TESTS) {
       host.innerHTML =
         xtHeadHtml('1 test so far') +
-        '<p class="xt-lede">Your report breaks down the test you have taken. What it cannot tell you yet is which mistakes were a bad morning and which ones keep happening. That needs a second test to compare against.</p>' +
-        '<p class="xt-lede" style="margin-bottom:0;">After your next full test, this card will show the topics that came up wrong <strong>more than once</strong>.</p>';
+        '<p class="xt-lede" style="margin-bottom:0;">After your next full test, this shows the topics that come up wrong <strong>more than once</strong>.</p>';
       host.style.display = '';
       return;
     }
@@ -9736,19 +9768,17 @@ window.Portal = {
       if (fSec && fSec.skill && fSec.domain === focusTop.domain && ev.units[fSec.skill] && ev.units[fSec.skill].dom === focusTop.domain) fSkill = rowOf(fSec.skill);
       host.innerHTML =
         xtHeadHtml(withStats.length + ' tests &middot; ' + pooledQ + ' questions') +
-        '<p class="xt-lede" style="margin-bottom:0;"><strong>' + esc(focusTop.domain) + '</strong> is where your misses gather, across ' +
-        withStats.length + ' tests and allowing for how hard the questions were. ' +
+        '<p class="xt-lede" style="margin-bottom:0;"><strong>' + esc(focusTop.domain) + '</strong> is where your misses gather across ' + withStats.length + ' tests. ' +
         (fSkill
-          ? 'Inside it, <strong>' + esc(fSkill.skill) + '</strong> stands out the most (' + fSkill.wrong + ' of ' + fSkill.total + ' wrong), so start there; it has not yet come back often enough to call it a repeat.</p>'
-          : 'No single skill inside it stands out yet: the misses are spread across its question types, so the work covers the whole area.</p>');
+          ? 'Start with <strong>' + esc(fSkill.skill) + '</strong> (' + fSkill.wrong + ' of ' + fSkill.total + ' wrong).</p>'
+          : 'The misses are spread across it, so the work covers the whole area.</p>');
       host.style.display = '';
       return;
     }
     if (!back.length) {
       host.innerHTML =
         xtHeadHtml(withStats.length + ' tests &middot; ' + pooledQ + ' questions') +
-        '<p class="xt-lede" style="margin-bottom:0;">Nothing is repeating. Across all ' + withStats.length +
-        ' of your tests, no topic keeps coming up wrong more often than your level explains, once you allow for how hard its questions were. Your misses are landing in different places each time rather than piling into the same few.</p>';
+        '<p class="xt-lede" style="margin-bottom:0;">Nothing keeps coming back across your ' + withStats.length + ' tests: your misses land in different places each time.</p>';
       host.style.display = '';
       return;
     }
@@ -9766,7 +9796,7 @@ window.Portal = {
           '<div class="xt-count">' + b.wrong + ' of ' + b.total + ' wrong</div>' +
           '<div class="xt-bar"><i style="width:' + pct + '%"></i></div>' +
           '<div class="xt-rowfoot">' +
-            '<span class="xt-when">Came up wrong in ' + b.missedTests + ' of the ' + b.testCount + ' tests that included it.</span>' +
+            '<span class="xt-when">Wrong on ' + b.missedTests + ' of ' + b.testCount + ' tests</span>' +
             '<button type="button" class="xt-practice" data-qb-subject="' + subject + '" data-qb-skill="' + esc(b.skill) + '">' +
               'Practice this <span aria-hidden="true">&rarr;</span></button>' +
           '</div>' +
@@ -9780,15 +9810,11 @@ window.Portal = {
     }
 
     var html =
-      xtHeadHtml(withStats.length + ' tests &middot; ' + pooledQ + ' questions') +
-      '<p class="xt-lede">Each test report looks at that test on its own. This looks at all of them together, which is the only way to tell a bad morning apart from a topic you actually need to go back to.</p>';
+      xtHeadHtml(withStats.length + ' tests &middot; ' + pooledQ + ' questions');
 
     if (back.length) {
       html += '<div class="xt-group">' +
         '<div class="xt-group-hed"><span class="xt-dot back"></span>Keeps coming back</div>' +
-        '<p class="xt-group-sub">You have missed ' + (back.length === 1 ? 'this' : 'these') +
-        ' more than your level explains, on more than one test, so ' + (back.length === 1 ? 'it is' : 'they are') +
-        ' worth actual review time rather than another practice set.</p>' +
         back.map(function (b) { return rowHtml(b, 'back'); }).join('') + '</div>';
     }
     if (fixed.length) {
@@ -9798,7 +9824,6 @@ window.Portal = {
         ' to cost you more points than your level explained, and on your latest test ' + (fixed.length === 1 ? 'it' : 'they') + ' clearly did not. Worth knowing what work actually moved.</p>' +
         fixed.map(function (b) { return rowHtml(b, 'fixed'); }).join('') + '</div>';
     }
-    html += '<p class="xt-foot">Based on every full test you have taken in the portal. Questions you never reached, or answered too fast to have read, are left out. Those are pacing, and this card is only about the topics themselves.</p>';
 
     host.innerHTML = html;
     host.style.display = '';
