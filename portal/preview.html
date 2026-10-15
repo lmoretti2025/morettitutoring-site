@@ -204,7 +204,7 @@
         var weakAt = { 0: 0.45, 4: 0.22 };
         var mkQ = function (lift) { return { v: 1, s: ['rw', 'math'], k: SK, q: Array.from({ length: 98 }, function (_, i) {
           var sec = i < 54 ? 0 : 1, sk = sec ? 4 + (i % 4) : i % 4, p = (weakAt[sk] || 0.82) + lift;
-          return [sec, sk, 1, ((i * 37) % 100) / 100 < p ? 1 : 0, 60]; }) }; };
+          var dl = (i * 7) % 3; return [sec, sk, dl, ((i * 37) % 100) / 100 < p + (1 - dl) * 0.08 ? 1 : 0, (sec ? 55 : 48) + ((i * 13) % 45)]; }) }; };
         history = [[1180, 600, 580, '2026-07-12'], [1250, 630, 620, '2026-07-26'], [1290, 640, 650, '2026-08-09'], [1310, 650, 660, '2026-08-23'],
           [1340, 660, 680, '2026-09-06'], [1380, 680, 700, '2026-09-20'], [1410, 690, 720, '2026-10-04']].map(function (t, i) {
           return { date: t[3] + 'T15:00:00Z', testType: 'SAT', source: i ? 'practice-test' : 'diagnostic', testId: i ? 'sat-practice-' + i : undefined,
