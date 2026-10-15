@@ -1956,6 +1956,23 @@
      portal's styles. */
   #screen-vocab .panel-wide { max-width: 640px; }
   .vp-head { text-align: center; margin-bottom: 1.25rem; }
+  /* ═══ SCREEN BANDS ═══ see scrBands(). Gradients from the portal's own palette, white type, one key number. */
+  .scr-band { position: relative; overflow: hidden; color: #fff; border-radius: 22px; padding: 2rem 2rem 1.7rem; margin-bottom: 2rem; text-align: center;
+    background: linear-gradient(135deg, var(--red) 0%, #c9a84c 130%); box-shadow: 0 18px 36px -24px rgba(176,39,28,.65); }
+  .scr-band::after { content: ''; position: absolute; right: -70px; top: -90px; width: 240px; height: 240px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,.22), transparent 70%); pointer-events: none; }
+  .scr-band[data-band="qb"] { background: linear-gradient(135deg, var(--dx-navy) 0%, var(--dx-blue) 135%); box-shadow: 0 18px 36px -24px rgba(18,40,76,.7); }
+  .scr-band[data-band="cq"] { background: linear-gradient(135deg, #262220 0%, var(--red) 140%); box-shadow: 0 18px 36px -24px rgba(38,34,32,.7); }
+  .scr-band[data-band="rush"] { background: linear-gradient(135deg, #7A140D 0%, var(--red) 70%, #E0574A 130%); }
+  .scr-band[data-band="vocab"] { background: linear-gradient(135deg, #B08A2E 0%, #C9A84C 60%, #A97C50 130%); box-shadow: 0 18px 36px -24px rgba(150,110,30,.6); }
+  .scr-band[data-band="iq"] { background: linear-gradient(135deg, #2F6F4A 0%, #3F8F5F 70%, #6BB386 135%); box-shadow: 0 18px 36px -24px rgba(47,111,74,.6); }
+  .scr-band .kicker { color: rgba(255,255,255,.78); margin-bottom: .8rem; }
+  .scr-band .panel-hed { color: #fff; margin-bottom: .5rem; }
+  .scr-band .panel-sub { color: rgba(255,255,255,.86); margin: 0 auto; max-width: 60ch; }
+  .scr-band .panel-sub strong, .scr-band .panel-sub b { color: #fff; }
+  .scr-stat { display: flex; justify-content: center; flex-wrap: wrap; gap: .6rem; margin-top: 1.1rem; }
+  .scr-stat span { font-size: .78rem; background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.22); border-radius: 999px; padding: .3rem .8rem; }
+  .scr-stat b { font-weight: 700; }
+  @media (max-width: 640px) { .scr-band { padding: 1.5rem 1.2rem 1.3rem; border-radius: 18px; } }
   .vp-panel-label { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); margin: 1rem 0 0.55rem; }
   /* ═══ SET TILES ═══ two tiles: "All sets" and "Choose sets", which opens
      a dropdown of individual sets (checkboxes, one or many). Each dropdown
@@ -7244,8 +7261,9 @@ window.Portal = {
        tests are one tap away in the sidebar, and the tile now says where
        the student is in the course. */
     var SUBJECT_TILES = ['home-shortcut-thisweek', 'home-shortcut-files', 'home-shortcut-ask'];
-    // Cut to three (Luca, 2026-10-15): the overview card's tiles now open practice, and the rest are in the sidebar.
-    var SAT_TILES = ['home-shortcut-thisweek', 'home-shortcut-pt', 'home-shortcut-ask'];
+    // Luca tried three (2026-10-15) and wanted the full set back.
+    var SAT_TILES = ['home-shortcut-thisweek', 'home-shortcut-weak', 'home-shortcut-vocab',
+                     'home-shortcut-cu', 'home-shortcut-mistakes', 'home-shortcut-ask'];
     var shown = on ? SUBJECT_TILES : SAT_TILES;
     document.querySelectorAll('.home-shortcut-card').forEach(function (el) {
       el.style.display = shown.indexOf(el.id) === -1 ? 'none' : '';
@@ -7516,6 +7534,41 @@ window.Portal = {
   }
   function satHidden() { return !!(currentStudent && !currentStudent.showSat); }
 
+  /* ═══ SCREEN BANDS (Luca, 2026-10-15) ═══ each Learn screen's title block becomes a colored band in its own
+     color, with one key number where there is one. Built once from the existing kicker, heading and sub. */
+  var SCR_BANDS = { 'screen-practice-tests': 'pt', 'screen-question-bank': 'qb', 'screen-challenge-questions': 'cq',
+    'screen-rush': 'rush', 'screen-vocab': 'vocab', 'screen-incorrect-questions': 'iq' };
+  function scrBands(id) {
+    var v = SCR_BANDS[id]; if (!v) return;
+    var scr = document.getElementById(id); if (!scr) return;
+    var head = scr.querySelector('.vp-head');
+    if (!head) {   // Practice Tests: kicker, heading and sub are loose in the panel
+      var k = scr.querySelector('.panel-wide > .kicker');
+      if (k && !k.closest('.scr-band')) {
+        head = document.createElement('div');
+        k.parentNode.insertBefore(head, k);
+        [k, k.nextElementSibling, k.nextElementSibling && k.nextElementSibling.nextElementSibling].forEach(function (el, i) {
+          if (el && (i === 0 || el.classList.contains('panel-hed') || el.classList.contains('panel-sub'))) head.appendChild(el);
+        });
+      } else head = scr.querySelector('.scr-band');
+    }
+    if (!head) return;
+    head.classList.add('scr-band');
+    head.setAttribute('data-band', v);   // the bank view moves between the two bank screens, so it is set on every show
+    var st = head.querySelector('.scr-stat');
+    if (!st) { st = document.createElement('div'); st.className = 'scr-stat'; head.appendChild(st); }
+    var html = '';
+    if (v === 'pt' && typeof practiceTestResultsById === 'function' && portalData.scores !== 'loading') {
+      var res = practiceTestResultsById(), done = Object.keys(res).length, total = (window.SAT_PRACTICE_TESTS || []).length;
+      var best = 0; Object.keys(res).forEach(function (k2) { best = Math.max(best, Number(res[k2].composite) || 0); });
+      if (total) html = '<span><b>' + done + '</b> of ' + total + ' done</span>' + (best ? '<span>Best <b>' + best + '</b></span>' : '');
+    } else if ((v === 'qb' || v === 'cq') && window.qbBandStat) {
+      var q = window.qbBandStat();
+      if (q && q.n) html = '<span><b>' + q.n.toLocaleString() + '</b> answered</span><span><b>' + q.pct + '%</b> right</span>';
+    }
+    st.innerHTML = html; st.style.display = html ? '' : 'none';
+  }
+
   function show(id) {
     if (id !== 'dx-screen' && window.dxLineReaderOff) window.dxLineReaderOff();
     if (isSatOnlyScreen(id) && satHidden() && !MID_DIAGNOSTIC_SCREENS[activeScreenId]) id = 'screen-menu';
@@ -7535,6 +7588,7 @@ window.Portal = {
     if (id === 'screen-menu') { renderHomeState(); applyTestPrepGating(); applyTestCardStates(); renderScoreProgress(); renderCrossTestHome(); renderHomePies(); renderRecentTestCard(); renderHomeShortcutTeasers(); }
     if (id === 'screen-sat-resources') applyResourcesGating();
     if (id === 'screen-done') fireConfetti();
+    try { scrBands(id); setTimeout(function () { if (activeScreenId === id) scrBands(id); }, 0); } catch (e) {}
     // Exam screens hide the red header entirely (see examChromeHidden for why
     // this checks that flag). A faint watermark (.exam-watermark) stands in
     // for the branding, and the exit control moves into
@@ -20209,6 +20263,9 @@ window.Portal = {
   /* Exposed so Home's "Your Statistics" (a different script block) can
      open a weak skill via qbPracticeSkill(), keeping that behavior in one
      place. */
+  // For the colored screen band (scrBands): answers so far and share right, in the bank on screen.
+  window.qbBandStat = function () { try { var r = qbAttemptRecords().filter(function (x) { return bankMode !== 'challenge' || String(x.qid).indexOf('chal|') === 0; }); var ok = r.filter(function (x) { return x.correct; }).length; return { n: r.length, pct: r.length ? Math.round(100 * ok / r.length) : 0 }; } catch (e) { return null; } };
+  window.qbBankMode = function () { return bankMode; };
   window.qbPractice = {
     open: function (subject, skill) { setBankMode('qb'); qbPracticeSkill(subject, skill); },
     // Every topic in a subject, one difficulty only (Home's weak-skill tile when nothing stands out, 2026-10-15).
