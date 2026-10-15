@@ -887,6 +887,14 @@ section.sec{padding:clamp(4.6rem,11vh,8.4rem) 0}
 .hh-cred{font-size:.82rem;color:var(--muted);margin:.8rem 0 0}
 @media(max-width:900px){.hh-grid{grid-template-columns:1fr}.hh-pic{margin:1rem 10px 30px}.hpsc-row{grid-template-columns:1fr 1fr;gap:1.8rem 1rem}.hpsc-row div+div{border-left:0}.hh-steps{grid-template-columns:1fr;gap:1.6rem}}
 @media(max-width:560px){.hh-me{grid-template-columns:1fr;text-align:center}.hh-me img{margin:0 auto}.hh-chip.c1{left:-8px}.hh-chip.c2{right:-8px}.hh-chip b{font-size:1.35rem}}
+
+/* the original homepage hero: three session photos crossfading */
+.xhero .reel .slide{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 35%;opacity:0;animation:heroFade 18s infinite;transform:scale(1.04)}
+.xhero .reel .slide:nth-child(1){animation-delay:0s}.xhero .reel .slide:nth-child(2){animation-delay:6s}.xhero .reel .slide:nth-child(3){animation-delay:12s}
+@keyframes heroFade{0%{opacity:0}5%{opacity:1}33%{opacity:1}38%{opacity:0}100%{opacity:0}}
+@media (prefers-reduced-motion:reduce){.xhero .reel .slide{animation:none}.xhero .reel .slide:nth-child(1){opacity:1}}
+.hproof-m{display:none}
+@media(max-width:700px){.hproof-m{display:inline-block;margin-top:1.1rem;font-size:.82rem;color:rgba(237,231,229,.75);border-bottom:1px solid rgba(255,255,255,.3);padding-bottom:2px}.hproof-m b{color:#fff;font-weight:600}}
 </style>
 <link rel="stylesheet" href="site.css?v=20260918">
 <link rel="stylesheet" href="lead-form.css?v=20260916b">
@@ -1582,25 +1590,25 @@ nav.is-red .navlinks a{color:rgba(255,255,255,.85)}nav.is-red .navlinks a.on{col
   <a href="portal/index.html">Student login</a>
 </div></nav>
 
-<!-- HERO (Luca, 2026-10-15: the homepage should not look like the program pages): brand red, the person and a
-     real session first, the results on the photo. The program pages keep the dark video heroes. -->
-<section class="hhero" id="overview">
-  <div class="shell hh-grid">
-    <div class="hh-tx">
-      <p class="hh-k rv">Luca Moretti &middot; Cranford, NJ and online</p>
-      <h1 class="rv d1">One tutor.<br>Every session.<br><em>Every point.</em></h1>
-      <p class="hh-sub rv d2">One-on-one SAT prep for students aiming at 1500 and above, and math tutoring from Algebra 1 to college math. I teach every session myself.</p>
-      <div class="hh-ctas rv d3">
-        <a class="btn hh-btn" href="book.html" data-start="call"><span>Book a free call</span></a>
-        <a class="hh-link" href="#paths">See the programs &darr;</a>
-      </div>
+<!-- HERO: the homepage's own, the session photos crossfading (Luca preferred it to the red one, 2026-10-15) -->
+<section class="xhero" id="overview">
+  <div class="reel" aria-hidden="true"><img class="slide" src="photo-2-web.jpg" alt="" fetchpriority="high"><img class="slide" src="photo-1-web.jpg" alt="" loading="lazy"><img class="slide" src="photo-3-web.jpg" alt="" loading="lazy"></div>
+  <div class="shell">
+    <p class="lbl rv">Luca Moretti &middot; one-on-one SAT tutoring &middot; Cranford, NJ and online</p>
+    <h1 class="h-hero rv d1">SAT prep for students aiming at <em>1500 and above.</em></h1>
+    <p class="lede rv d2">One-on-one SAT prep with strategies proven to raise scores, built on your student&rsquo;s own data. Trusted by students aiming for the Ivy League and the most selective universities in the country.</p>
+    <div class="ctas rv d3">
+      <a class="btn btn-red shimmer" href="book.html" data-start="call"><span>Book a free call</span></a>
+      <a class="xlink light" href="#start">or ask a question &darr;</a>
     </div>
-    <div class="hh-pic rv d2">
-      <img src="photo-3-web.jpg" alt="Luca working through a problem with a student at a table" fetchpriority="high">
-      <div class="hh-chip c1"><b>1550</b><span>780 in Math</span></div>
-      <div class="hh-chip c2"><b>1460</b><span>up 170 points</span></div>
-      <div class="hh-chip c3"><b>1350</b><span>from 1230 in two weeks</span></div>
+    <a class="hproof-m" href="#proof">This fall: <b>1550 &middot; 1500 &middot; 1460 &middot; 1350</b> &darr;</a>
+    <div class="resstrip rv d3">
+      <div class="r"><b>1500+</b><span>SAT scores reached by<br>students I have taught</span></div>
+      <div class="r"><b>1 on 1</b><span>every session,<br>taught by me</span></div>
+      <div class="r"><b>100+</b><span>students taught<br>one-on-one</span></div>
+      <div class="r"><b>C&rarr;A</b><span>letter-grade jumps<br>in school math</span></div>
     </div>
+    <p class="resnote rv d3"><a href="prep-course.html" style="color:#fff;border-bottom:1px solid rgba(255,255,255,.4)">Explore the SAT program &rarr;</a></p>
   </div>
 </section>
 
@@ -2125,6 +2133,34 @@ document.documentElement.classList.add('js');
 })();
 </script>
 <script src="tiles.js?v=20261014a"></script>
+<script>
+(function(){
+  var marq = document.getElementById('tmarq');
+  if (!marq) return;
+  var PX_PER_SEC = 26;
+  var lanes = [].slice.call(marq.querySelectorAll('.tlane'));
+
+  lanes.forEach(function (lane) {
+    var set = lane.querySelector('.tset');
+    if (!set) return;
+    var twin = set.cloneNode(true);
+    twin.setAttribute('aria-hidden', 'true');   // no duplicate reading
+    lane.appendChild(twin);
+  });
+
+  function pace(){
+    lanes.forEach(function (lane) {
+      var w = lane.querySelector('.tset').getBoundingClientRect().width;
+      if (w > 0) lane.style.setProperty('--tdur', Math.round(w / PX_PER_SEC) + 's');
+    });
+  }
+  pace();
+  // Caladea arrives after first paint and changes the card widths with it.
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(pace);
+  var t; window.addEventListener('resize', function(){ clearTimeout(t); t = setTimeout(pace, 180); });
+})();
+
+</script>
 <script src="site.js"></script>
 <script src="lead-form.js?v=20261012b"></script>
 </body>
