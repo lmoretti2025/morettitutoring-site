@@ -1982,18 +1982,22 @@ document.documentElement.classList.add('js');
     if(pts.length<2) return;
     var d='M'+pts[0][0].toFixed(1)+' '+pts[0][1].toFixed(1);
     for(var i=1;i<pts.length;i++){ var a=pts[i-1], c=pts[i], dy=c[1]-a[1];
-      d+=' C'+a[0].toFixed(1)+' '+(a[1]+dy*.55).toFixed(1)+' '+c[0].toFixed(1)+' '+(c[1]-dy*.55).toFixed(1)+' '+c[0].toFixed(1)+' '+c[1].toFixed(1); }
+      d+=' C'+a[0].toFixed(1)+' '+(a[1]+dy*.42).toFixed(1)+' '+c[0].toFixed(1)+' '+(c[1]-dy*.42).toFixed(1)+' '+c[0].toFixed(1)+' '+c[1].toFixed(1); }
     dash.setAttribute('d',d); rev.setAttribute('d',d); len=rev.getTotalLength(); rev.style.strokeDasharray=len+' '+len;
     // sample the path once: for each bit of length, how far down the page it has reached
-    ys=[]; for(var L=0;L<=len;L+=6){ var q=rev.getPointAtLength(L); ys.push([L,q.y]); }
+    ys=[]; for(var L=0;L<=len;L+=4){ var q=rev.getPointAtLength(L); ys.push([L,q.y]); }
     paint();
   }
   function paint(){
     if(reduce){ rev.style.strokeDashoffset=0; return; }
     // the line's tip sits at 60% down the screen: scrolling moves the tip, nothing else does
     var target=innerHeight*.6-wrap.getBoundingClientRect().top, shown=0;
-    for(var i=0;i<ys.length;i++){ if(ys[i][1]<=target) shown=ys[i][0]; else break; }
-    if(ys.length && target>=ys[ys.length-1][1]) shown=len;
+    // y only ever grows along the path (control points at .42), so find the sample pair around the target and blend
+    var lo=0, hi=ys.length-1;
+    if(!ys.length||target<=ys[0][1]) shown=0;
+    else if(target>=ys[hi][1]) shown=len;
+    else { while(hi-lo>1){ var mid=(lo+hi)>>1; if(ys[mid][1]<=target) lo=mid; else hi=mid; }
+      var f=(target-ys[lo][1])/((ys[hi][1]-ys[lo][1])||1); shown=ys[lo][0]+(ys[hi][0]-ys[lo][0])*f; }
     rev.style.strokeDashoffset=(len-shown).toFixed(1);
   }
   var t=false; addEventListener('scroll',function(){ if(!t){ t=true; requestAnimationFrame(function(){ t=false; paint(); }); } },{passive:true});
