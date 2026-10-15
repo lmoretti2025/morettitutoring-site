@@ -895,6 +895,53 @@ section.sec{padding:clamp(4.6rem,11vh,8.4rem) 0}
 @media (prefers-reduced-motion:reduce){.xhero .reel .slide{animation:none}.xhero .reel .slide:nth-child(1){opacity:1}}
 .hproof-m{display:none}
 @media(max-width:700px){.hproof-m{display:inline-block;margin-top:1.1rem;font-size:.82rem;color:rgba(237,231,229,.75);border-bottom:1px solid rgba(255,255,255,.3);padding-bottom:2px}.hproof-m b{color:#fff;font-weight:600}}
+
+/* ═══ HOMEPAGE LIFE (Luca, 2026-10-15: "feels empty... a similar life, not the same thing") ═══ */
+/* the photos drift slowly while they crossfade */
+.xhero .reel .slide{animation:heroFade 18s infinite,heroDrift 18s infinite linear}
+@keyframes heroDrift{0%{transform:scale(1.04) translate(0,0)}33%{transform:scale(1.12) translate(-1.5%,-1%)}100%{transform:scale(1.12) translate(-1.5%,-1%)}}
+/* the results card, cycling */
+.hres{position:absolute;right:clamp(1.2rem,4vw,3.4rem);bottom:clamp(1.4rem,4vw,3rem);z-index:2;display:block;width:260px;padding:1rem 1.2rem 1.1rem;border-radius:18px;
+  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);-webkit-backdrop-filter:blur(14px) saturate(140%);backdrop-filter:blur(14px) saturate(140%);
+  color:#fff;text-decoration:none;box-shadow:0 20px 40px -20px rgba(0,0,0,.6);opacity:0;transform:translateY(16px);animation:hresIn .9s 1.1s cubic-bezier(.16,1,.3,1) forwards}
+@keyframes hresIn{to{opacity:1;transform:none}}
+.hres-k{display:flex;align-items:center;gap:.45rem;font-size:.66rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.7)}
+.hres-k i{width:7px;height:7px;border-radius:50%;background:#7EE2A8;box-shadow:0 0 0 0 rgba(126,226,168,.6);animation:hresPulse 2s infinite}
+@keyframes hresPulse{70%{box-shadow:0 0 0 8px rgba(126,226,168,0)}100%{box-shadow:0 0 0 0 rgba(126,226,168,0)}}
+.hres-slot{position:relative;display:block;height:4.4rem;margin-top:.4rem}
+.hres-i{position:absolute;inset:0;opacity:0;transform:translateY(10px);transition:opacity .6s,transform .7s cubic-bezier(.16,1,.3,1)}
+.hres-i.on{opacity:1;transform:none}
+.hres-i.out{opacity:0;transform:translateY(-10px)}
+.hres-i b{display:block;font-family:var(--display);font-weight:700;font-size:2.4rem;line-height:1;color:#fff}
+.hres-i em{display:block;font-style:normal;font-size:.8rem;color:rgba(255,255,255,.75);margin-top:.35rem}
+@media(max-width:1100px){.hres{display:none}}
+/* the score screenshots arrive as a fan and settle into a row */
+.js #proof .pf{transition:transform 1.1s cubic-bezier(.16,1,.3,1),opacity .8s}
+.js #proof:not(.fanned) .pf:nth-child(1){transform:translate(40%,40px) rotate(-8deg);opacity:.0}
+.js #proof:not(.fanned) .pf:nth-child(2){transform:translate(14%,60px) rotate(-3deg);opacity:0}
+.js #proof:not(.fanned) .pf:nth-child(3){transform:translate(-14%,60px) rotate(3deg);opacity:0}
+.js #proof:not(.fanned) .pf:nth-child(4){transform:translate(-40%,40px) rotate(8deg);opacity:0}
+#proof.fanned .pf:nth-child(2){transition-delay:.08s}#proof.fanned .pf:nth-child(3){transition-delay:.16s}#proof.fanned .pf:nth-child(4){transition-delay:.24s}
+#proof .pf .shotwrap{transition:transform .5s cubic-bezier(.16,1,.3,1),box-shadow .5s}
+#proof .pf:hover .shotwrap{transform:translateY(-6px) rotate(-1deg);box-shadow:0 26px 40px -22px rgba(0,0,0,.45)}
+/* program doors: a gentle lift, the recording grows a touch */
+.door:hover{transform:translateY(-6px)}
+.door-im img{transition:transform 1.2s cubic-bezier(.16,1,.3,1)}
+.door:hover .door-im img{transform:scale(1.03)}
+/* how it works: a red line draws from step 1 to step 3 as the section comes up; each step lights as it is reached */
+.hh-steps{position:relative}
+.hh-line{position:absolute;left:19px;right:calc(33.333% - 19px);top:18px;height:2px;background:rgba(176,39,28,.15);list-style:none;pointer-events:none}
+.hh-line i{display:block;height:100%;width:0;background:var(--red);transition:width 1.6s cubic-bezier(.65,0,.35,1)}
+.hh-steps.drawn .hh-line i{width:100%}
+.hh-steps li:not(.hh-line){position:relative;z-index:1}
+.hh-steps li span{transition:transform .5s cubic-bezier(.34,1.56,.64,1),box-shadow .5s;box-shadow:0 0 0 6px #FBF7F1}
+.js .hh-steps li span{transform:scale(.6);background:#E9C9C4}
+.js .hh-steps li.lit span{transform:scale(1);background:var(--red)}
+@media(max-width:900px){.hh-line{display:none}.js .hh-steps li span{transform:none;background:var(--red)}}
+/* section titles rise in word by word */
+.wr .w{display:inline-block;opacity:0;transform:translateY(.45em);transition:opacity .6s,transform .8s cubic-bezier(.16,1,.3,1);transition-delay:calc(var(--i) * 55ms)}
+.wr.in .w{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){.xhero .reel .slide{animation:none}.hres,.hres-i,.wr .w,.js #proof .pf,.hh-line i{animation:none!important;transition:none!important;opacity:1!important;transform:none!important}.hh-line i{width:100%}.js .hh-steps li span{transform:none;background:var(--red)}}
 </style>
 <link rel="stylesheet" href="site.css?v=20260918">
 <link rel="stylesheet" href="lead-form.css?v=20260916b">
@@ -1603,13 +1650,23 @@ nav.is-red .navlinks a{color:rgba(255,255,255,.85)}nav.is-red .navlinks a.on{col
     </div>
     <a class="hproof-m" href="#proof">This fall: <b>1550 &middot; 1500 &middot; 1460 &middot; 1350</b> &darr;</a>
     <div class="resstrip rv d3">
-      <div class="r"><b>1500+</b><span>SAT scores reached by<br>students I have taught</span></div>
+      <div class="r"><b data-count="1500" data-suffix="+">1500+</b><span>SAT scores reached by<br>students I have taught</span></div>
       <div class="r"><b>1 on 1</b><span>every session,<br>taught by me</span></div>
-      <div class="r"><b>100+</b><span>students taught<br>one-on-one</span></div>
+      <div class="r"><b data-count="100" data-suffix="+">100+</b><span>students taught<br>one-on-one</span></div>
       <div class="r"><b>C&rarr;A</b><span>letter-grade jumps<br>in school math</span></div>
     </div>
     <p class="resnote rv d3"><a href="prep-course.html" style="color:#fff;border-bottom:1px solid rgba(255,255,255,.4)">Explore the SAT program &rarr;</a></p>
   </div>
+  <!-- RESULTS, ONE AT A TIME (2026-10-15): the verified scores, cycling, so the hero shows proof as it loads -->
+  <a class="hres" href="#proof" aria-label="This fall's scores">
+    <span class="hres-k"><i></i>This fall</span>
+    <span class="hres-slot">
+      <span class="hres-i on"><b>1550</b><em>up 20, with a 780 in Math</em></span>
+      <span class="hres-i"><b>1500</b><em>exactly, 730 in Reading and Writing</em></span>
+      <span class="hres-i"><b>1460</b><em>up 170 since the last SAT</em></span>
+      <span class="hres-i"><b>1350</b><em>from 1230, in two weeks of prep</em></span>
+    </span>
+  </a>
 </section>
 
 <div class="pnav" id="pnav" role="navigation" aria-label="Moretti Tutoring">
@@ -1645,7 +1702,7 @@ nav.is-red .navlinks a{color:rgba(255,255,255,.85)}nav.is-red .navlinks a.on{col
     <div class="doors-grid">
       <a class="door door-sat rv" href="prep-course.html">
         <div class="door-tx"><span class="k">SAT and PSAT</span><h3>SAT prep</h3><p>A free full-length diagnostic, a report on every answer, weekly sessions with me and the whole platform in between.</p><span class="go">Explore SAT prep &rarr;</span></div>
-        <div class="door-im"><img src="img/sat/v3-home.webp" alt="" loading="lazy"></div>
+        <div class="door-im"><img src="img/sat/rec-test.webp" alt="" loading="lazy"></div>
       </a>
       <a class="door door-math rv d1" href="math-program.html">
         <div class="door-tx"><span class="k">Algebra 1 to college math</span><h3>Math tutoring</h3><p>The gap is usually a year or two back. The first sessions find it, and a plan built on your student&rsquo;s own course fixes it first.</p><span class="go">Explore math tutoring &rarr;</span></div>
@@ -1659,7 +1716,8 @@ nav.is-red .navlinks a{color:rgba(255,255,255,.85)}nav.is-red .navlinks a.on{col
 <section class="hhow" id="how" data-sec="how">
   <div class="shell">
     <h2 class="hh-h2 rv">How it works</h2>
-    <ol class="hh-steps">
+    <ol class="hh-steps" id="hhsteps">
+      <li class="hh-line" aria-hidden="true"><i></i></li>
       <li class="rv"><span>1</span><b>A free 15-minute call</b><p>Your student, the course or the test date, and the goal.</p></li>
       <li class="rv d1"><span>2</span><b>Find where the points are</b><p>For SAT, a free full-length diagnostic and a report on every answer. For math, the first sessions find the gap underneath.</p></li>
       <li class="rv d2"><span>3</span><b>Weekly sessions with me</b><p>One-on-one, online or at the Cranford Public Library, with my portal and course in between.</p></li>
@@ -2160,6 +2218,72 @@ document.documentElement.classList.add('js');
   var t; window.addEventListener('resize', function(){ clearTimeout(t); t = setTimeout(pace, 180); });
 })();
 
+</script>
+<script>
+/* HOMEPAGE LIFE (2026-10-15): the results card cycles, the hero numbers count up, the screenshots fan in, the
+   steps' line draws, the section titles rise word by word. All once, on view; nothing with reduced motion. */
+(function(){
+  var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // results card
+  var items = [].slice.call(document.querySelectorAll('.hres-i')), k = 0;
+  if (items.length > 1 && !reduce) setInterval(function () {
+    if (document.hidden) return;
+    var cur = items[k]; k = (k + 1) % items.length; var nx = items[k];
+    cur.classList.remove('on'); cur.classList.add('out');
+    setTimeout(function () { cur.classList.remove('out'); }, 700);
+    nx.classList.add('on');
+  }, 3200);
+  // hero numbers count up
+  [].forEach.call(document.querySelectorAll('[data-count]'), function (el) {
+    if (reduce) return;
+    var to = +el.getAttribute('data-count'), suf = el.getAttribute('data-suffix') || '', t0 = null;
+    el.textContent = '0' + suf;
+    setTimeout(function () {
+      requestAnimationFrame(function step(t) {
+        if (t0 === null) t0 = t;
+        var p = Math.min(1, (t - t0) / 1400), e = 1 - Math.pow(1 - p, 3);
+        el.textContent = Math.round(to * e) + suf;
+        if (p < 1) requestAnimationFrame(step);
+      });
+    }, 900);
+  });
+  // titles word by word
+  var heads = [].slice.call(document.querySelectorAll('.doors-head h2, .hh-h2, #proof .h-sec, #results .h-sec, #faq .h-sec'));
+  heads.forEach(function (h) {
+    var i = 0;
+    (function wrap(node) {
+      [].slice.call(node.childNodes).forEach(function (c) {
+        if (c.nodeType === 3) {
+          var frag = document.createDocumentFragment();
+          c.textContent.split(/(\s+)/).forEach(function (part) {
+            if (!part) return;
+            if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); return; }
+            var sp = document.createElement('span'); sp.className = 'w'; sp.style.setProperty('--i', i++); sp.textContent = part; frag.appendChild(sp);
+          });
+          node.replaceChild(frag, c);
+        } else if (c.nodeType === 1 && !/svg/i.test(c.tagName)) wrap(c);
+      });
+    })(h);
+    h.classList.add('wr');
+  });
+  var proof = document.getElementById('proof'), steps = document.getElementById('hhsteps');
+  function lightSteps() {
+    steps.classList.add('drawn');
+    [].slice.call(steps.querySelectorAll('li:not(.hh-line)')).forEach(function (li, j) { setTimeout(function () { li.classList.add('lit'); }, reduce ? 0 : j * 700); });
+  }
+  if (!('IntersectionObserver' in window) || reduce) {
+    heads.forEach(function (h) { h.classList.add('in'); }); if (proof) proof.classList.add('fanned'); if (steps) lightSteps(); return;
+  }
+  var io = new IntersectionObserver(function (es) {
+    es.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      var t = e.target;
+      if (t === proof) t.classList.add('fanned'); else if (t === steps) lightSteps(); else t.classList.add('in');
+      io.unobserve(t);
+    });
+  }, { threshold: .3 });
+  heads.forEach(function (h) { io.observe(h); }); if (proof) io.observe(proof); if (steps) io.observe(steps);
+})();
 </script>
 <script src="site.js"></script>
 <script src="lead-form.js?v=20261012b"></script>
