@@ -103,6 +103,18 @@
   .prep-stat .num { font-family: var(--display); font-size: 1.45rem; line-height: 1.1; color: var(--text); font-variant-numeric: tabular-nums; }
   .prep-stat .lbl { font-size: 0.64rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); margin-top: 0.2rem; }
   .prep-stat .sub { font-size: 0.74rem; color: var(--mid); margin-top: 0.15rem; }
+  .ptm { border: 1px solid var(--border); border-radius: 14px; padding: 1rem 1.1rem 0.4rem; margin: 0 0 1.1rem; background: linear-gradient(180deg, #fff, #FBF6F4); }
+  .ptm-top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 1rem 2rem; margin-bottom: 0.9rem; }
+  .ptm-hed { font-size: 0.64rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); display: flex; align-items: center; gap: 0.5rem; }
+  .ptm-num { font-family: var(--display); font-size: 2.4rem; line-height: 1; color: var(--text); margin-top: 0.3rem; font-variant-numeric: tabular-nums; }
+  .ptm-win { font-size: 0.8rem; color: var(--mid); margin-top: 0.3rem; }
+  .ptm-flag { font-size: 0.6rem; letter-spacing: 0.06em; padding: 0.15rem 0.5rem; border-radius: 99px; }
+  .ptm-flag.light { background: #FBF0D9; color: #8A6412; }
+  .ptm-flag.none { background: #FBE9E7; color: var(--red); }
+  .ptm-facts { display: flex; gap: 1.6rem; }
+  .ptm-facts b { display: block; font-family: var(--display); font-size: 1.25rem; color: var(--text); font-variant-numeric: tabular-nums; }
+  .ptm-facts span { font-size: 0.72rem; color: var(--mid); }
+  .ptm .time-breakdown { border-top: 1px solid var(--border); padding-top: 0.7rem; }
   .time-breakdown { margin: 0 0 1.1rem; }
   .tb-hed { font-size: 0.64rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); margin-bottom: 0.45rem; }
   .tb-row { display: grid; grid-template-columns: minmax(96px, 150px) 1fr 58px; align-items: center; gap: 0.7rem; padding: 0.22rem 0; font-size: 0.8rem; }
@@ -3354,8 +3366,6 @@
     }
 
     var stats = [];
-    stats.push('<div class="prep-stat"><div class="num">' + (snap ? mins(snap.portalMin) : '—') + '</div><div class="lbl">Portal time</div>' +
-      '<div class="sub">' + (snap ? snap.sittings + ' sitting' + (snap.sittings === 1 ? '' : 's') + ' of 5+ min' : escHtml(p.snapError || 'not available')) + '</div></div>');
     stats.push('<div class="prep-stat"><div class="num">' + practiceN + '</div><div class="lbl">Practice questions</div><div class="sub">' + practiceSub + '</div></div>');
     stats.push('<div class="prep-stat"><div class="num">' + (snap ? (snap.vocabCount || 0) : '—') + '</div><div class="lbl">Vocabulary</div><div class="sub">words reviewed</div></div>');
     var t = snap && snap.test;
@@ -3417,18 +3427,17 @@
     if (!sat) {
       // Everything the portal measures is SAT practice; for this student
       // only the homework means anything.
-      $('stu-prep-sub').textContent = 'Homework since the last session.';
-      $('stu-prep').innerHTML = nextHtml + (hwHtml || (nextHtml ? '' : '<div class="empty">Nothing assigned since the last session.</div>'));
+      $('stu-prep-sub').textContent = 'Portal time and homework since the last session.';
+      $('stu-prep').innerHTML = renderPortalTime(snap, mins, p.snapError) + nextHtml + (hwHtml || (nextHtml ? '' : '<div class="empty">Nothing assigned since the last session.</div>'));
       return;
     }
     /* The week at a glance, then homework. The rest (time by area, topics,
        behavior and pooled patterns) waits under More (Luca, 2026-09-29:
        the page read as too much). */
-    var more = renderTimeBreakdown(snap, mins) +
-      (practiceMore.length ? '<p class="prep-note">Practice: ' + practiceMore.join(' · ') + '</p>' : '') +
+    var more = (practiceMore.length ? '<p class="prep-note">Practice: ' + practiceMore.join(' · ') + '</p>' : '') +
       topics + renderBehaviorPatterns(p.behavior, p.behaviorError) + renderPooledPrep(p.pooled, p.pooledError) +
       (note ? '<p class="prep-note">' + note + '</p>' : '');
-    $('stu-prep').innerHTML = '<div class="prep-stats">' + stats.join('') + '</div>' +
+    $('stu-prep').innerHTML = renderPortalTime(snap, mins, p.snapError) + '<div class="prep-stats">' + stats.join('') + '</div>' +
       nextHtml + hwHtml + renderCurriculumPrep(p, snap, mins) + (more ? '<details class="more-box" id="stu-prep-more"' + (moreOpen.prep ? ' open' : '') + '><summary>More from this week</summary>' + more + '</details>' : '');
     /* Opening a part shows the answers in it; the bank loads on the first open. */
     Array.prototype.forEach.call(document.querySelectorAll('tr.cu-row'), function (tr) {
@@ -3601,6 +3610,29 @@
     return '<div class="prep-sec">Curriculum since the last session</div>' +
       (head.length ? '<p class="cu-prep-head">' + head.join(' &nbsp;·&nbsp; ') + '</p>' : '') + body +
       (browseMin >= 1 ? '<p class="prep-note">Plus ' + mins(browseMin) + ' looking through the lessons.</p>' : '');
+  }
+
+  /* TIME ON THE PORTAL (Luca, 2026-10-15: "make the weekly time spent more clear"): its own block at the
+     top of This week. The total with its window spelled out, days so far, per day, sittings, and where the
+     time went right under it (it used to sit under More). Under an hour is flagged, the same line as the
+     weekly email's light week (emails.gs LIGHT_WEEK_MIN_). */
+  function renderPortalTime(snap, mins, err) {
+    if (!snap) return '<div class="ptm"><div class="ptm-hed">Time on the portal</div><div class="empty">' + escHtml(err || 'Not available') + '</div></div>';
+    var since = snap.since ? new Date(snap.since) : null;
+    var days = since && isFinite(since.getTime()) ? Math.max(1, Math.ceil((Date.now() - since.getTime()) / 86400000)) : 7;
+    var m = Math.round(snap.portalMin || 0), sit = snap.sittings || 0;
+    var win = since
+      ? 'since the session on ' + since.toLocaleString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })
+      : 'in the last 7 days';
+    var flag = m === 0 ? '<span class="ptm-flag none">Nothing yet</span>' : (m < 60 ? '<span class="ptm-flag light">Under an hour</span>' : '');
+    return '<div class="ptm"><div class="ptm-top">' +
+      '<div class="ptm-main"><div class="ptm-hed">Time on the portal' + flag + '</div>' +
+        '<div class="ptm-num">' + (m ? mins(m) : '0 min') + '</div><div class="ptm-win">' + escHtml(win) + '</div></div>' +
+      '<div class="ptm-facts">' +
+        '<div><b>' + days + '</b><span>day' + (days === 1 ? '' : 's') + ' so far</span></div>' +
+        '<div><b>' + (m ? mins(Math.round(m / days)) : '0 min') + '</b><span>per day</span></div>' +
+        '<div><b>' + sit + '</b><span>sitting' + (sit === 1 ? '' : 's') + ' of 5+ min</span></div>' +
+      '</div></div>' + renderTimeBreakdown(snap, mins) + '</div>';
   }
 
   /* WHERE THE TIME WENT (Luca, 2026-09-25): the week's active minutes by
