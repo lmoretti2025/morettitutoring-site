@@ -1041,6 +1041,38 @@
     #screen-analytics .an-tiles3 { grid-template-columns: 1fr 1fr 1fr; gap: .8rem; }
   }
 
+  /* ═══ SESSION RECAPS & SEND YOUR WORK (2026-10-15) ═══ */
+  .home-recap { margin: 1.3rem 0 0; padding: 1.15rem 1.3rem; background: #fff; border: 1px solid var(--border); border-left: 3px solid var(--gold); border-radius: 12px; }
+  .hr-top { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: .45rem; }
+  .hr-k { font-size: .66rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #9A7A2A; }
+  .hr-date { font-size: .74rem; color: var(--mid); }
+  .hr-text p, .ri-text p { font-size: .9rem; line-height: 1.6; color: var(--text); margin: 0 0 .5rem; }
+  .hr-text p:last-child, .ri-text p:last-child { margin-bottom: 0; }
+  .hr-more { display: inline-block; margin-top: .6rem; font-size: .76rem; font-weight: 600; color: var(--red); text-decoration: none; }
+  #screen-recaps .panel-wide { max-width: 760px; }
+  .recap-item { padding: 1.2rem 0; border-top: 1px solid var(--border); }
+  .recap-item:first-child { border-top: 0; }
+  .ri-date { font-family: var(--display); font-weight: 700; font-size: 1.05rem; color: var(--text); margin-bottom: .45rem; }
+  .recap-empty { text-align: center; color: var(--mid); font-size: .9rem; line-height: 1.7; padding: 2rem 1rem; }
+  .sw { margin: 1.8rem 0 0; padding: 1.3rem 1.4rem; border: 1px solid var(--border); border-radius: 14px; background: linear-gradient(180deg, #fff, #F3F8F4); text-align: left; }
+  .sw-h { font-family: var(--display); font-size: 1.15rem; font-weight: 700; margin: 0 0 .3rem; color: var(--text); }
+  .sw-p { font-size: .84rem; line-height: 1.55; color: var(--mid); margin: 0 0 .9rem; }
+  .sw-note { width: 100%; font-family: var(--hel); font-size: .86rem; padding: .6rem .75rem; border: 1px solid var(--border); border-radius: 9px; margin-bottom: .7rem; background: #fff; }
+  .sw-btn { display: inline-flex; align-items: center; justify-content: center; width: 100%; font-weight: 700; font-size: .82rem; color: #fff; background: linear-gradient(135deg, #4FA06E, #2F7A4F); border-radius: 10px; padding: .8rem 1rem; cursor: pointer; }
+  .sw-btn:hover { filter: brightness(.95); }
+  .sw-status { font-size: .8rem; margin-top: .7rem; color: var(--mid); min-height: 1.1em; }
+  .sw-status .ok { color: #2F7A4F; font-weight: 600; }
+  .sw-status .err { color: var(--red); }
+  .home-overview.is-subject .home-shortcuts { grid-template-columns: repeat(4, 1fr); }
+  @media (max-width: 900px) { .home-overview.is-subject .home-shortcuts { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 640px) {
+    .home-overview.is-subject .home-shortcuts { gap: .6rem; }
+    .home-overview.is-subject .home-shortcut-card { padding: 1.5rem .9rem .9rem; border: 1px solid var(--border); background: var(--white); }
+    .home-overview.is-subject .home-shortcut-body { display: none; }
+    .home-overview.is-subject .home-shortcut-title { font-size: .84rem; margin-bottom: 0; }
+    .home-overview.is-subject .home-shortcut-badge { top: .45rem; right: .5rem; font-size: .52rem; }
+  }
+
   /* ═══ SUBJECT-TUTORING HOME ═══ see applySubjectHome(). A student who
      isn't doing SAT prep has no scores, practice tests or question bank.
      Only the SAT-only children of Your Overview are hidden (hiding the
@@ -4260,6 +4292,11 @@ window.Portal = {
       <span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a1 1 0 0 1 1-1h5l2 2h9a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7z"/></svg></span>
       <span class="sidebar-label">Files</span>
     </a>
+    <!-- Session recaps (Luca 2026-10-15): what each session covered, written by Luca, for every student. -->
+    <a href="#" class="sidebar-item" data-nav="recaps" id="sidebar-recaps">
+      <span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5h9l3 3V20a.5.5 0 0 1-.5.5H6a.5.5 0 0 1-.5-.5V4a.5.5 0 0 1 .5-.5z"/><path d="M9 10h6M9 13.5h6M9 17h3.5"/></svg></span>
+      <span class="sidebar-label">Session recaps</span>
+    </a>
     <!-- Analytics (Luca 2026-10-14): every test pooled, by skill, difficulty and pace. -->
     <a href="#" class="sidebar-item" data-nav="analytics" id="sidebar-analytics">
       <span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 4v15.5H20"/><path d="M7 15.5l3.8-4.3 3.2 2.8 5-6"/><path d="M15.5 8h3.5v3.5"/></svg></span>
@@ -4870,6 +4907,9 @@ window.Portal = {
                hovered (see .home-shortcut-card). This Week and Question Bank
                carry live counts (see renderHomeShortcutTeasers()); the rest
                are navigateTo() destinations also in the sidebar. -->
+          <!-- LAST SESSION: Luca's latest recap (see renderRecaps()); hidden until there is one. -->
+          <div class="home-recap" id="home-recap" hidden></div>
+
           <div class="home-shortcuts">
             <button type="button" class="home-shortcut-card" id="home-shortcut-thisweek">
               <span class="home-shortcut-badge" id="home-shortcut-thisweek-badge" style="display:none;"></span>
@@ -4888,6 +4928,13 @@ window.Portal = {
               </span>
               <span class="home-shortcut-title">My Files</span>
               <span class="home-shortcut-body" id="home-shortcut-files-body">Everything Luca has shared with you: notes, worksheets, and past work.</span>
+            </button>
+            <button type="button" class="home-shortcut-card" id="home-shortcut-sendwork" style="display:none;">
+              <span class="home-shortcut-icon green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2l1.5-2h6l1.5 2h2A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z"/><circle cx="12" cy="13" r="3.4"/></svg>
+              </span>
+              <span class="home-shortcut-title">Send your work</span>
+              <span class="home-shortcut-body">Snap your homework or a test you got back. It goes straight to Luca before your session.</span>
             </button>
             <a class="home-shortcut-card" id="home-shortcut-ask" href="#" style="display:none;">
               <span class="home-shortcut-icon gold">
@@ -5025,6 +5072,16 @@ window.Portal = {
       </label>
       <a href="#" class="cal-detail-go" id="cal-detail-go" style="display:none;"></a>
     </div>
+  </div>
+</div>
+
+<!-- ═══ SESSION RECAPS (Luca, 2026-10-15) ═══ every recap Luca has written, newest first. Filled by renderRecaps(). -->
+<div class="screen has-sidebar" id="screen-recaps">
+  <div class="panel-wide">
+    <div class="kicker">Your sessions</div>
+    <h1 class="panel-hed">Session recaps</h1>
+    <p class="panel-sub">What we covered in each session, and what to practice before the next one.</p>
+    <div id="recap-list"></div>
   </div>
 </div>
 
@@ -7268,6 +7325,10 @@ window.Portal = {
   document.getElementById('home-shortcut-mistakes').addEventListener('click', function () { goToGatedNav('sidebar-incorrect-questions', 'incorrect-questions'); });
   document.getElementById('home-shortcut-qb').addEventListener('click', function () { goToGatedNav('sidebar-question-bank', 'question-bank'); });
   document.getElementById('home-shortcut-files').addEventListener('click', function () { goToGatedNav('sidebar-files', 'files'); });
+  document.getElementById('home-shortcut-sendwork').addEventListener('click', function () {
+    goToGatedNav('sidebar-files', 'files');
+    var inp = document.getElementById('sw-input'); if (inp) inp.click();   // same tap, so the picker is allowed to open
+  });
 
   /* ═══ HOW LUCA IS REACHED ═══ the only contact channel this site
      publishes is the phone number in the marketing page's hero/footer, so
@@ -7322,7 +7383,7 @@ window.Portal = {
        gave its place to Curriculum the same way (Luca, 2026-09-30): the
        tests are one tap away in the sidebar, and the tile now says where
        the student is in the course. */
-    var SUBJECT_TILES = ['home-shortcut-thisweek', 'home-shortcut-files', 'home-shortcut-ask'];
+    var SUBJECT_TILES = ['home-shortcut-thisweek', 'home-shortcut-files', 'home-shortcut-sendwork', 'home-shortcut-ask'];
     // Luca tried three (2026-10-15) and wanted the full set back.
     var SAT_TILES = ['home-shortcut-thisweek', 'home-shortcut-weak', 'home-shortcut-vocab',
                      'home-shortcut-cu', 'home-shortcut-mistakes', 'home-shortcut-ask'];
@@ -7542,8 +7603,8 @@ window.Portal = {
     }
   }
 
-  var SIDEBAR_SCREENS = { 'screen-curriculum': 1, 'screen-menu': 1, 'screen-calendar': 1, 'screen-practice-tests': 1, 'screen-analytics': 1, 'screen-resources': 1, 'screen-vocab': 1, 'screen-incorrect-questions': 1, 'screen-sat-resources': 1, 'screen-challenge-questions': 1, 'screen-question-bank': 1, 'screen-rush': 1 };
-  var SIDEBAR_NAV_FOR_SCREEN = { 'screen-curriculum': 'curriculum', 'screen-menu': 'home', 'screen-calendar': 'calendar', 'screen-practice-tests': 'practice-tests', 'screen-analytics': 'analytics', 'screen-resources': 'files', 'screen-vocab': 'vocab', 'screen-incorrect-questions': 'incorrect-questions', 'screen-challenge-questions': 'challenge-questions', 'screen-question-bank': 'question-bank', 'screen-rush': 'rush' };
+  var SIDEBAR_SCREENS = { 'screen-curriculum': 1, 'screen-menu': 1, 'screen-calendar': 1, 'screen-practice-tests': 1, 'screen-analytics': 1, 'screen-resources': 1, 'screen-recaps': 1, 'screen-vocab': 1, 'screen-incorrect-questions': 1, 'screen-sat-resources': 1, 'screen-challenge-questions': 1, 'screen-question-bank': 1, 'screen-rush': 1 };
+  var SIDEBAR_NAV_FOR_SCREEN = { 'screen-curriculum': 'curriculum', 'screen-menu': 'home', 'screen-calendar': 'calendar', 'screen-practice-tests': 'practice-tests', 'screen-analytics': 'analytics', 'screen-resources': 'files', 'screen-recaps': 'recaps', 'screen-vocab': 'vocab', 'screen-incorrect-questions': 'incorrect-questions', 'screen-challenge-questions': 'challenge-questions', 'screen-question-bank': 'question-bank', 'screen-rush': 'rush' };
   var sidebarEl = document.getElementById('portal-sidebar');
   var mainNavEl = document.getElementById('main-nav');
   var examWatermarkEl = document.getElementById('exam-watermark');
@@ -7647,7 +7708,7 @@ window.Portal = {
       screens[k].classList.toggle('active', isActive);
       if (!isActive) screens[k].classList.remove('screen-visible');
     });
-    if (id === 'screen-menu') { renderHomeState(); applyTestPrepGating(); applyTestCardStates(); renderScoreProgress(); renderCrossTestHome(); renderHomePies(); renderRecentTestCard(); renderHomeShortcutTeasers(); }
+    if (id === 'screen-menu') { try { loadRecaps(); } catch (e) {} renderHomeState(); applyTestPrepGating(); applyTestCardStates(); renderScoreProgress(); renderCrossTestHome(); renderHomePies(); renderRecentTestCard(); renderHomeShortcutTeasers(); }
     if (id === 'screen-sat-resources') applyResourcesGating();
     if (id === 'screen-done') fireConfetti();
     try { scrBands(id); setTimeout(function () { if (activeScreenId === id) scrBands(id); }, 0); } catch (e) {}
@@ -8008,6 +8069,7 @@ window.Portal = {
   // already be correct from an earlier snapshot.
   function loadAssignments() {
     if (!currentStudent || !currentStudent.key) return;
+    loadRecaps();
     fetch(APPS_SCRIPT_URL, {
       method: 'POST',
       body: JSON.stringify({ action: 'getAssignments', key: currentStudent.key })
@@ -11382,6 +11444,7 @@ window.Portal = {
     if (nav === 'home') { show('screen-menu'); }
     else if (nav === 'calendar') { show('screen-calendar'); if (window.calendarModuleInit) window.calendarModuleInit(); }
     else if (nav === 'files') { renderResources(); show('screen-resources'); }
+    else if (nav === 'recaps') { renderRecaps(); show('screen-recaps'); loadRecaps(true); }
     else if (nav === 'vocab') { show('screen-vocab'); if (window.vocabModuleInit) window.vocabModuleInit(); }
     else if (nav === 'curriculum') { show('screen-curriculum'); if (window.curriculumModuleInit) window.curriculumModuleInit(); }
     else if (nav === 'practice-tests') { ptListReturnScreen = 'screen-menu'; renderPracticeTestList(); show('screen-practice-tests'); }
@@ -11431,6 +11494,7 @@ window.Portal = {
     { label: 'Practice Tests', nav: 'practice-tests' },
     { label: 'Diagnostic', nav: 'diagnostic' },
     { label: 'Files', nav: 'files' },
+    { label: 'Session recaps', nav: 'recaps' },
     { label: 'Vocabulary', nav: 'vocab' },
     { label: 'Saved & Mistakes', nav: 'incorrect-questions' },
     { label: 'Analytics', nav: 'analytics' },
@@ -12356,12 +12420,129 @@ window.Portal = {
         '<p class="res-pending">Everything Luca has shared with you lives in your Google Drive folder.</p>' +
         '<a href="' + url + '" target="_blank" rel="noopener" class="res-drive-btn">Open in Google Drive</a>' +
         '<iframe class="res-embed" src="https://drive.google.com/embeddedfolderview?id=' + folderId + '#list" loading="lazy"></iframe>' +
-        '<p class="res-embed-note">Blank above? Use the button, signed into the Google account Luca shared the folder with.</p>';
+        '<p class="res-embed-note">Blank above? Use the button, signed into the Google account Luca shared the folder with.</p>' + sendWorkHtml();
+      wireSendWork();
     } else {
       body.innerHTML = '<p class="res-pending">Everything Luca has shared with you lives in your personal folder.</p>' +
         '<a href="' + url + '" target="_blank" rel="noopener" class="res-drive-btn">Open My Folder</a>';
     }
   }
+  /* ═══ SESSION RECAPS (Luca, 2026-10-15) ═══ Luca writes them on the admin page (work.gs). Home shows the latest,
+     the Session recaps screen all of them. Cached per student so Home paints at once. */
+  var recapState = { key: null, list: null, at: 0, loading: false };
+  function recapsCacheKey() { return 'moretti_recaps_' + (currentStudent && currentStudent.key); }
+  function loadRecaps(force) {
+    if (!currentStudent || !currentStudent.key) return;
+    var key = currentStudent.key;
+    if (recapState.key !== key) {
+      recapState = { key: key, list: null, at: 0, loading: false };
+      try { var c = JSON.parse(localStorage.getItem(recapsCacheKey()) || 'null'); if (Array.isArray(c)) recapState.list = c; } catch (e) {}
+      renderRecaps();
+    }
+    if (recapState.loading || (!force && Date.now() - recapState.at < 5 * 60000)) return;
+    recapState.loading = true;
+    postToBackend({ action: 'getRecaps', key: key }, { attempts: 2 }).then(function (d) {
+      recapState.loading = false; recapState.at = Date.now();
+      if (!d || !d.ok || !Array.isArray(d.recaps) || recapState.key !== key) return;
+      recapState.list = d.recaps;
+      try { localStorage.setItem(recapsCacheKey(), JSON.stringify(d.recaps)); } catch (e) {}
+      renderRecaps();
+    }, function () { recapState.loading = false; });
+  }
+  function recapDayLabel(day) {
+    var d = new Date(String(day) + 'T12:00:00');
+    return isNaN(d.getTime()) ? '' : d.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
+  }
+  function recapTextHtml(t) {
+    return String(t || '').split(/\n{2,}/).map(function (p) { return '<p>' + window.Portal.escHtml(p).replace(/\n/g, '<br>') + '</p>'; }).join('');
+  }
+  function renderRecaps() {
+    var list = recapState.list || [];
+    var home = document.getElementById('home-recap');
+    if (home) {
+      if (list.length) {
+        var r = list[0];
+        home.innerHTML = '<div class="hr-top"><span class="hr-k">Last session</span><span class="hr-date">' + window.Portal.escHtml(recapDayLabel(r.date)) + '</span></div>' +
+          '<div class="hr-text">' + recapTextHtml(r.recap) + '</div>' +
+          (list.length > 1 ? '<a href="#" class="hr-more" data-recaps-all>All session recaps &rarr;</a>' : '');
+        home.hidden = false;
+      } else home.hidden = true;
+    }
+    var el = document.getElementById('recap-list');
+    if (!el) return;
+    el.innerHTML = list.length ? list.map(function (r) {
+      return '<article class="recap-item"><div class="ri-date">' + window.Portal.escHtml(recapDayLabel(r.date)) + '</div><div class="ri-text">' + recapTextHtml(r.recap) + '</div></article>';
+    }).join('') : '<p class="recap-empty">' + (recapState.list ? 'No recaps yet. After your next session, Luca&rsquo;s notes on what you covered will show up here.' : 'Loading your recaps&hellip;') + '</p>';
+  }
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('[data-recaps-all]');
+    if (!a) return;
+    e.preventDefault(); goToGatedNav('sidebar-recaps', 'recaps');
+  });
+
+  /* ═══ SEND YOUR WORK (Luca, 2026-10-15) ═══ photos or a PDF into the student's own Drive folder (work.gs
+     uploadWork). Photos are shrunk on the device first (longest side 2000px, JPEG), so a phone picture is a few
+     hundred KB, not 5 MB. One file at a time, so a failure says which one. */
+  function sendWorkHtml() {
+    return '<div class="sw" id="sw">' +
+      '<h2 class="sw-h">Send Luca your work</h2>' +
+      '<p class="sw-p">Snap your homework or a test you got back. It goes straight into this folder, so Luca sees it before your session.</p>' +
+      '<input type="text" class="sw-note" id="sw-note" maxlength="200" placeholder="Anything to add? (optional)">' +
+      '<label class="sw-btn"><input type="file" id="sw-input" accept="image/*,application/pdf" multiple hidden>Choose photos or a PDF</label>' +
+      '<div class="sw-status" id="sw-status" aria-live="polite"></div></div>';
+  }
+  function shrinkImage(file) {
+    return new Promise(function (resolve, reject) {
+      var url = URL.createObjectURL(file), img = new Image();
+      img.onload = function () {
+        var MAX = 2000, w = img.naturalWidth, h = img.naturalHeight, k = Math.min(1, MAX / Math.max(w, h));
+        var c = document.createElement('canvas'); c.width = Math.round(w * k); c.height = Math.round(h * k);
+        var g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); g.drawImage(img, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(url);
+        resolve({ mimeType: 'image/jpeg', data: c.toDataURL('image/jpeg', 0.82) });
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('unreadable')); };
+      img.src = url;
+    });
+  }
+  function readAsDataUrl(file) {
+    return new Promise(function (resolve, reject) {
+      var r = new FileReader(); r.onload = function () { resolve(r.result); }; r.onerror = function () { reject(new Error('unreadable')); }; r.readAsDataURL(file);
+    });
+  }
+  var SW_ERRORS = { bad_type: 'only photos and PDFs can be sent', too_big: 'that file is too large (8 MB at most)', no_folder: 'your folder is not set up yet, so ask Luca',
+    too_many: 'that is the limit for today', drive_failed: 'Google Drive did not take it, so try again in a minute', bad_file: 'that file could not be read' };
+  function wireSendWork() {
+    var input = document.getElementById('sw-input'); if (!input || input.__wired) return; input.__wired = true;
+    input.addEventListener('change', function () {
+      var files = [].slice.call(input.files || []); input.value = '';
+      if (!files.length || !currentStudent) return;
+      var st = document.getElementById('sw-status'), note = (document.getElementById('sw-note') || {}).value || '';
+      var sent = 0, failed = [];
+      var line = function (t, cls) { st.innerHTML = '<span class="' + (cls || '') + '">' + t + '</span>'; };
+      var next = function (i) {
+        if (i >= files.length) {
+          if (sent) line('&#10003; Sent ' + sent + ' file' + (sent === 1 ? '' : 's') + ' to Luca.' + (failed.length ? ' ' + failed.join(' ') : ''), 'ok');
+          else line(failed.join(' '), 'err');
+          if (sent) { var n = document.getElementById('sw-note'); if (n) n.value = ''; }
+          return;
+        }
+        var f = files[i];
+        line('Sending ' + (i + 1) + ' of ' + files.length + '&hellip;');
+        var isPdf = /pdf$/i.test(f.type) || /\.pdf$/i.test(f.name);
+        var prep = isPdf ? readAsDataUrl(f).then(function (d) { return { mimeType: 'application/pdf', data: d }; }) : shrinkImage(f);
+        prep.then(function (p) {
+          return postToBackend({ action: 'uploadWork', key: currentStudent.key, mimeType: p.mimeType, data: p.data, note: note, part: files.length > 1 ? i + 1 : 0 }, { attempts: 2, timeoutMs: 60000 });
+        }).then(function (d) {
+          if (d && d.ok) sent++;
+          else failed.push(window.Portal.escHtml(f.name) + ': ' + (SW_ERRORS[d && d.error] || 'it did not go through') + '.');
+          next(i + 1);
+        }, function () { failed.push(window.Portal.escHtml(f.name) + ': it did not go through, so check your connection and try again.'); next(i + 1); });
+      };
+      next(0);
+    });
+  }
+
   document.getElementById('res-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-menu'); });
 
 

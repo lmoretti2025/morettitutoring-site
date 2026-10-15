@@ -414,8 +414,25 @@
     .week-grid, .scores-grid { grid-template-columns: minmax(0, 1fr); }
     /* On a phone the note comes first: right after a session is when it is
        opened there. */
-    #stu-note-card { order: -1; }
+    .wk-side { order: -1; }
   }
+  .wk-side { display: grid; gap: 1.25rem; align-content: start; }
+  .wk-side > .card { margin-bottom: 0; }
+  #stu-recap { display: block; width: 100%; font-family: var(--hel); font-size: 0.9rem; line-height: 1.5; color: var(--text); padding: 0.6rem 0.75rem; border: 1.5px solid var(--border); border-radius: 10px; resize: vertical; min-height: 64px; background: var(--white); }
+  #stu-recap:focus { outline: none; border-color: var(--red); }
+  .rc-row { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.6rem; font-size: 0.78rem; color: var(--mid); }
+  .rc-row input { font-family: var(--hel); font-size: 0.82rem; padding: 0.35rem 0.5rem; border: 1px solid var(--border); border-radius: 8px; }
+  #stu-recap-card .fn-status { flex: 1 1 auto; }
+  .rc-list { margin-top: 1rem; border-top: 1px solid var(--border); }
+  .rc-item { padding: 0.7rem 0; border-bottom: 1px solid var(--border); font-size: 0.82rem; }
+  .rc-item .rc-h { display: flex; align-items: center; gap: 0.5rem; font-weight: 600; color: var(--text); }
+  .rc-item .rc-h span { margin-left: auto; display: flex; gap: 0.6rem; }
+  .rc-item .rc-h button { border: 0; background: none; color: var(--red); font-size: 0.74rem; font-weight: 600; cursor: pointer; padding: 0; }
+  .rc-item .rc-t { color: var(--mid); margin-top: 0.25rem; white-space: pre-wrap; line-height: 1.5; }
+  .rc-sec { font-size: 0.64rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); margin: 1.1rem 0 0.3rem; }
+  .wk-item { display: flex; gap: 0.6rem; align-items: baseline; padding: 0.35rem 0; font-size: 0.8rem; }
+  .wk-item a { color: var(--red); font-weight: 600; text-decoration: none; }
+  .wk-item small { color: var(--mid); }
   /* Four figures: two by two in the half-width column, one row when wide. */
   .week-grid .prep-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   @media (min-width: 1060px) { .week-grid .prep-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
@@ -1112,6 +1129,7 @@
           <p class="card-sub" id="stu-prep-sub">The last seven days.</p>
           <div id="stu-prep"></div>
         </div>
+        <div class="wk-side">
         <div class="card" id="stu-note-card">
           <h2>Note for the weekly update</h2>
           <p class="card-sub">Goes into the family&rsquo;s next weekly update, then clears.</p>
@@ -1123,6 +1141,22 @@
             <button type="button" class="mini solid" id="stu-note-save">Save note</button>
           </div>
           <button type="button" class="fp-jump" id="stu-note-preview">See their weekly email &rarr;</button>
+        </div>
+        <!-- SESSION RECAP (2026-10-15, work.gs): what this session covered and what to practice. The student sees
+             it in the portal (Home's Last session card and Session recaps); nothing is emailed. -->
+        <div class="card" id="stu-recap-card">
+          <h2>Session recap</h2>
+          <p class="card-sub">Shows in their portal right away. Not emailed.</p>
+          <div class="rc-row"><label for="stu-recap-date">Session</label><input type="date" id="stu-recap-date"></div>
+          <textarea id="stu-recap" maxlength="3000" rows="5" placeholder="e.g. Factoring by grouping: did 7.3 together.&#10;&#10;Before Thursday: 7.3 #1 to 15 (odds)."></textarea>
+          <div class="fn-row">
+            <span class="fn-status" id="stu-recap-status"></span>
+            <button type="button" class="mini" id="stu-recap-cancel" style="display:none;">Cancel edit</button>
+            <button type="button" class="mini solid" id="stu-recap-save">Save recap</button>
+          </div>
+          <div id="stu-recap-list"></div>
+          <div id="stu-work-list"></div>
+        </div>
         </div>
       </div>
     </section>
@@ -2464,6 +2498,7 @@
     loadNextSession(student.key);
     loadStudentPrep(student.key);
     loadFridayNote(student.key);
+    loadRecapAdmin(student.key);
   }
 
   document.querySelectorAll('#student .tabbar .tab').forEach(function (btn) {
@@ -2825,6 +2860,61 @@
   // typed: after a save that got no answer, the text Luca had typed. If
   // the sheet does not hold exactly that, it goes back in the box unsaved
   // rather than being replaced by the older copy.
+  /* ═══ SESSION RECAP (2026-10-15, work.gs) ═══ write, edit or delete what a session covered; also lists the work
+     the student has sent from the portal. Shown to the student in their portal; never emailed. */
+  var recapAdmin = { key: null, editId: '', list: [] };
+  function recapToday() { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  function recapLabel(day) { var d = new Date(String(day) + 'T12:00:00'); return isNaN(d.getTime()) ? day : d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }); }
+  function recapStatus(t, cls) { var el = $('stu-recap-status'); el.textContent = t || ''; el.className = 'fn-status' + (cls ? ' ' + cls : ''); }
+  function recapResetForm() { recapAdmin.editId = ''; $('stu-recap').value = ''; $('stu-recap-date').value = recapToday(); $('stu-recap-cancel').style.display = 'none'; $('stu-recap-save').textContent = 'Save recap'; }
+  function paintRecapAdmin(d) {
+    recapAdmin.list = (d && d.recaps) || [];
+    $('stu-recap-list').innerHTML = recapAdmin.list.length ? '<div class="rc-sec">Recaps they can see</div><div class="rc-list">' + recapAdmin.list.slice(0, 12).map(function (r) {
+      return '<div class="rc-item"><div class="rc-h">' + escHtml(recapLabel(r.date)) + '<span><button type="button" data-rc-edit="' + escHtml(r.id) + '">Edit</button><button type="button" data-rc-del="' + escHtml(r.id) + '">Delete</button></span></div><div class="rc-t">' + escHtml(r.recap) + '</div></div>';
+    }).join('') + '</div>' : '';
+    var work = (d && d.work) || [];
+    $('stu-work-list').innerHTML = work.length ? '<div class="rc-sec">Work they sent</div>' + work.slice(0, 10).map(function (w) {
+      var when = w.at ? new Date(w.at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '';
+      return '<div class="wk-item"><a href="' + escHtml(w.url) + '" target="_blank" rel="noopener">' + escHtml(when || w.name) + '</a>' + (w.note ? '<small>' + escHtml(w.note) + '</small>' : '') + '</div>';
+    }).join('') : '';
+  }
+  function loadRecapAdmin(key) {
+    recapAdmin.key = key; recapResetForm(); recapStatus(''); paintRecapAdmin(kept('s_recap_' + key));
+    postToBackend({ action: 'recapList', adminKey: adminKey(), key: key }).then(function (d) {
+      if (recapAdmin.key !== key) return;
+      if (d && d.ok) { keep('s_recap_' + key, d); paintRecapAdmin(d); }
+      else if (d && d.error === 'unknown_action') recapStatus('Needs the backend update before recaps can be saved.', 'warn');
+    }).catch(function () {});
+  }
+  function saveRecapAdmin(body, okMsg) {
+    var key = recapAdmin.key; if (!key) return;
+    $('stu-recap-save').disabled = true; recapStatus('Saving…');
+    body.action = 'recapSave'; body.adminKey = adminKey(); body.key = key;
+    postToBackend(body).then(function (d) {
+      $('stu-recap-save').disabled = false;
+      if (recapAdmin.key !== key) return;
+      if (d && d.ok) { var prev = kept('s_recap_' + key) || {}; var nd = { ok: true, recaps: d.recaps, work: prev.work || [] }; keep('s_recap_' + key, nd); paintRecapAdmin(nd); recapResetForm(); recapStatus(okMsg, 'ok'); }
+      else recapStatus(d && d.error === 'unknown_action' ? 'Needs the backend update first.' : 'Could not save (' + ((d && (d.error || d.message)) || 'no answer') + ').', 'warn');
+    }).catch(function () { $('stu-recap-save').disabled = false; recapStatus('Could not reach the backend. Try again.', 'warn'); });
+  }
+  $('stu-recap-save').addEventListener('click', function () {
+    var text = $('stu-recap').value.trim();
+    if (!text) { recapStatus('Write the recap first.', 'warn'); return; }
+    saveRecapAdmin({ id: recapAdmin.editId, date: $('stu-recap-date').value, recap: text }, recapAdmin.editId ? 'Updated. They see the new version.' : 'Saved. It is in their portal now.');
+  });
+  $('stu-recap-cancel').addEventListener('click', function () { recapResetForm(); recapStatus(''); });
+  $('stu-recap-list').addEventListener('click', function (e) {
+    var ed = e.target.closest('[data-rc-edit]'), del = e.target.closest('[data-rc-del]');
+    if (ed) {
+      var r = recapAdmin.list.filter(function (x) { return x.id === ed.getAttribute('data-rc-edit'); })[0]; if (!r) return;
+      recapAdmin.editId = r.id; $('stu-recap').value = r.recap; $('stu-recap-date').value = r.date;
+      $('stu-recap-cancel').style.display = ''; $('stu-recap-save').textContent = 'Save changes'; $('stu-recap').focus();
+    } else if (del) {
+      if (!confirm('Delete this recap? The student will no longer see it.')) return;
+      saveRecapAdmin({ id: del.getAttribute('data-rc-del'), recap: '' }, 'Deleted.');
+    }
+  });
+
   function loadFridayNote(key, typed) {
     var seq = ++noteSeq;
     noteKey = key;

@@ -269,6 +269,14 @@
           calSessions.push({ startIso: d.toISOString(), allDay: false, title: 'Avery - tutoring' });
         });
       }
+      var dayAgo = function (n) { var d = new Date(); d.setDate(d.getDate() - n); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+      var sampleRecaps = subject ? [
+        { id: 'r2', date: dayAgo(2), recap: 'Factoring by grouping: we went through 7.3 together and you did the last four on your own.\n\nBefore Thursday: 7.3 #1 to 15 (odds), and redo #12 from the quiz.' },
+        { id: 'r1', date: dayAgo(9), recap: 'Back to exponent rules underneath the quadratics. Negative exponents finally clicked.\n\nPractice: the exponent rules sheet in your folder.' }
+      ] : [
+        { id: 'r2', date: dayAgo(2), recap: 'Went through Practice Test 6 together. Inferences: we used the "what must be true" check on every miss.\n\nBefore next session: 20 Inferences in the Question Bank, and Lesson 3.4 with its check.' },
+        { id: 'r1', date: dayAgo(9), recap: 'Nonlinear functions: reading a graph for the vertex and intercepts, then Desmos to check.\n\nPractice: 15 nonlinear functions questions, medium and hard.' }
+      ];
       var boot = '<scr' + 'ipt>(function(){' +
         'var S=' + JSON.stringify(student) + ',ST=' + JSON.stringify(studyStats) + ',W=' + JSON.stringify(wantScreen) + ',H=' + JSON.stringify(history) + ',P=' + JSON.stringify(progress) + ',D=' + delayMs + ';' +
         // A session token shaped like the real thing (base64url JSON, a dot,
@@ -285,6 +293,9 @@
         'else if(b.action==="getScoreHistory")o={ok:true,entries:H};' +
         'else if(b.action==="getProgress")o=P;' +
         'else if(b.action==="getAssignments")o={ok:true,assignments:S.assignments};' +
+        // Sample session recaps (work.gs getRecaps) and a pretend upload (uploadWork), 2026-10-15.
+        'else if(b.action==="getRecaps")o={ok:true,recaps:' + JSON.stringify(sampleRecaps) + '};' +
+        'else if(b.action==="uploadWork")o={ok:true,name:"Work from Avery.jpg",url:"https://drive.google.com/file/d/PREVIEW"};' +
         'else if(b.action==="nextSession")o=' + (noSession ? '{ok:true,next:null}' : '{ok:true,next:{startIso:' + JSON.stringify(soon.toISOString()) + ',allDay:false,title:"Avery - tutoring"}}') + ';' +
         'else if(b.action==="getStudyStats"&&ST)o=ST;' +
         'else if(b.action==="getAssignmentsCalendar")o={ok:true,assignments:S.assignments,sessions:' + JSON.stringify(calSessions) + '};' +
