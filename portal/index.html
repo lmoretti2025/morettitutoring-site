@@ -10499,12 +10499,13 @@ window.Portal = {
     var cachedNs = nsCacheRead();
     if (cachedNs) { try { paintNextSession(cachedNs); } catch (e) {} }
 
-    fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'nextSession', key: currentStudent.key, debug: DEBUG_MODE }) })
-      .then(function (r) { return r.json(); })
+    /* Retried like every other read (Google stalls about one call in four), and a failure never replaces a good
+       copy already on screen (Luca, 2026-10-15: an error line mixed with the cached "no sessions" text). */
+    postToBackend({ action: 'nextSession', key: currentStudent.key, debug: DEBUG_MODE }, { attempts: 3, timeoutMs: 15000 })
       .catch(function (err) { return { ok: false, error: 'network', message: String(err) }; })
       .then(function (data) {
-        if (data && data.ok) nsCacheWrite(data);
-        paintNextSession(data);
+        if (data && data.ok) { nsCacheWrite(data); paintNextSession(data); }
+        else if (!cachedNs) paintNextSession(data);
       });
   }
 
@@ -10551,9 +10552,14 @@ window.Portal = {
           // whatever. The link itself (set above, before this fetch even
           // ran) stays put regardless; only this text falls back.
           nsLabel.textContent = '';
-          nsDate.textContent = DEBUG_MODE ? 'Request failed. See debug output below.' : "Couldn't load your session time, but you can still join here:";
+          nsNoSession = false;
+          var hasJoin = !!(window.GOOGLE_MEET_URL && window.GOOGLE_MEET_URL.indexOf('PLACEHOLDER') === -1);
+          nsDate.textContent = DEBUG_MODE ? 'Request failed. See debug output below.'
+            : (hasJoin ? "Couldn't load your session time, but you can still join here:" : "Couldn't load your next session.");
+          if (nsTime) nsTime.textContent = hasJoin ? '' : 'Refresh the page in a minute, or book a time.';
           setNsRel('');
           setNsDayChip(null);
+          nsBookLink(!hasJoin);
         }
     // Always re-affirm the join link after the lookup resolves too --
     // belt and suspenders, in case anything above ever changes.
