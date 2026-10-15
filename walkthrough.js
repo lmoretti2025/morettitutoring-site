@@ -41,3 +41,40 @@
   var io=new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('show'); io.unobserve(e.target); } }); },{threshold:.35});
   chaps.forEach(function(c){ io.observe(c); });
 })();
+
+/* THE TRAIL: the line through every [data-trail] element in #trail, drawn in as the page scrolls. Layout positions
+   (offsetLeft/Top), not getBoundingClientRect, because the rows slide and scale in as they appear. */
+(function(){
+  var wrap=document.getElementById('trail'); if(!wrap) return;
+  var NS='http://www.w3.org/2000/svg', svg=document.createElementNS(NS,'svg'), id='trailmask'+Math.round(Math.random()*1e6);
+  svg.setAttribute('class','trail-svg'); svg.setAttribute('aria-hidden','true');
+  svg.innerHTML='<defs><mask id="'+id+'" maskUnits="userSpaceOnUse"><path fill="none" stroke="#fff" stroke-width="14" stroke-linecap="round"/></mask></defs><path class="trail-dash" mask="url(#'+id+')"/>';
+  wrap.insertBefore(svg,wrap.firstChild);
+  var rev=svg.querySelector('mask path'), dash=svg.querySelector('.trail-dash'), len=0, ys=[];
+  var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function at(e){ var x=0,y=0,w=e.offsetWidth,h=e.offsetHeight; while(e&&e!==wrap){ x+=e.offsetLeft; y+=e.offsetTop; e=e.offsetParent; } return [x+w/2,y+h/2]; }
+  function build(){
+    var W=wrap.offsetWidth, H=wrap.offsetHeight; svg.setAttribute('width',W); svg.setAttribute('height',H); svg.setAttribute('viewBox','0 0 '+W+' '+H);
+    var pts=[].slice.call(wrap.querySelectorAll('[data-trail]')).map(at); if(pts.length<2) return;
+    var d='M'+pts[0][0].toFixed(1)+' '+pts[0][1].toFixed(1);
+    for(var i=1;i<pts.length;i++){ var a=pts[i-1],c=pts[i],dy=c[1]-a[1];
+      d+=' C'+a[0].toFixed(1)+' '+(a[1]+dy*.55).toFixed(1)+' '+c[0].toFixed(1)+' '+(c[1]-dy*.55).toFixed(1)+' '+c[0].toFixed(1)+' '+c[1].toFixed(1); }
+    dash.setAttribute('d',d); rev.setAttribute('d',d); len=rev.getTotalLength(); rev.style.strokeDasharray=len+' '+len;
+    // sample the path once: for each bit of length, how far down the page it has reached
+    ys=[]; for(var L=0;L<=len;L+=6){ var q=rev.getPointAtLength(L); ys.push([L,q.y]); }
+    paint();
+  }
+  function paint(){
+    if(reduce){ rev.style.strokeDashoffset=0; return; }
+    // the line's tip sits at 60% down the screen: scrolling moves the tip, nothing else does
+    var target=innerHeight*.6-wrap.getBoundingClientRect().top, shown=0;
+    for(var i=0;i<ys.length;i++){ if(ys[i][1]<=target) shown=ys[i][0]; else break; }
+    if(ys.length && target>=ys[ys.length-1][1]) shown=len;
+    rev.style.strokeDashoffset=(len-shown).toFixed(1);
+  }
+  var t=false; addEventListener('scroll',function(){ if(!t){ t=true; requestAnimationFrame(function(){ t=false; paint(); }); } },{passive:true});
+  addEventListener('resize',build); addEventListener('load',build);
+  if('ResizeObserver' in window) new ResizeObserver(build).observe(wrap);
+  [].forEach.call(wrap.querySelectorAll('img'),function(im){ im.addEventListener('load',build); });
+  build();
+})();

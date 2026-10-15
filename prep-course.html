@@ -1971,7 +1971,7 @@ document.documentElement.classList.add('js');
 /* ROUTE: points are the report window's center, then each portal image's center; the reveal follows the scroll. */
 (function(){
   var wrap=document.getElementById('trail'); if(!wrap) return;
-  var svg=document.getElementById('routesvg'), dash=document.getElementById('routedash'), rev=document.getElementById('routereveal'), len=0;
+  var svg=document.getElementById('routesvg'), dash=document.getElementById('routedash'), rev=document.getElementById('routereveal'), len=0, ys=[];
   var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
   function build(){
     var b=wrap.getBoundingClientRect(), W=b.width, H=b.height;
@@ -1983,12 +1983,18 @@ document.documentElement.classList.add('js');
     var d='M'+pts[0][0].toFixed(1)+' '+pts[0][1].toFixed(1);
     for(var i=1;i<pts.length;i++){ var a=pts[i-1], c=pts[i], dy=c[1]-a[1];
       d+=' C'+a[0].toFixed(1)+' '+(a[1]+dy*.55).toFixed(1)+' '+c[0].toFixed(1)+' '+(c[1]-dy*.55).toFixed(1)+' '+c[0].toFixed(1)+' '+c[1].toFixed(1); }
-    dash.setAttribute('d',d); rev.setAttribute('d',d); len=rev.getTotalLength(); rev.style.strokeDasharray=len+' '+len; paint();
+    dash.setAttribute('d',d); rev.setAttribute('d',d); len=rev.getTotalLength(); rev.style.strokeDasharray=len+' '+len;
+    // sample the path once: for each bit of length, how far down the page it has reached
+    ys=[]; for(var L=0;L<=len;L+=6){ var q=rev.getPointAtLength(L); ys.push([L,q.y]); }
+    paint();
   }
   function paint(){
     if(reduce){ rev.style.strokeDashoffset=0; return; }
-    var b=wrap.getBoundingClientRect(), p=Math.min(1,Math.max(0,(innerHeight*.72-b.top)/b.height));
-    rev.style.strokeDashoffset=(len*(1-p)).toFixed(1);
+    // the line's tip sits at 60% down the screen: scrolling moves the tip, nothing else does
+    var target=innerHeight*.6-wrap.getBoundingClientRect().top, shown=0;
+    for(var i=0;i<ys.length;i++){ if(ys[i][1]<=target) shown=ys[i][0]; else break; }
+    if(ys.length && target>=ys[ys.length-1][1]) shown=len;
+    rev.style.strokeDashoffset=(len-shown).toFixed(1);
   }
   var t=false; addEventListener('scroll',function(){ if(!t){ t=true; requestAnimationFrame(function(){ t=false; paint(); }); } },{passive:true});
   addEventListener('resize',build); addEventListener('load',build);
