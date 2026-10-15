@@ -940,6 +940,11 @@
   .mini-skill-name { font-family: var(--display); font-weight: 700; font-size: 1.3rem; color: var(--text); cursor: pointer; }
   .mini-skill-name:hover { color: var(--red); }
   .mini-skill-sub { font-family: var(--hel); font-size: 0.76rem; color: var(--mid); margin: 0.15rem 0 0.75rem; }
+  .mini-skill-pct { font-family: var(--hel); font-size: 0.8em; font-weight: 700; color: var(--red); margin-left: 0.3rem; }
+  .mini-skill-sub b { color: var(--text); font-weight: 700; }
+  .mini-skill-card.is-lever { cursor: pointer; }
+  .mini-skill-card.is-lever:hover .mini-skill-go { text-decoration: underline; }
+  .mini-skill-go { display: inline-block; margin-top: 0.2rem; font-weight: 700; color: var(--red); cursor: pointer; white-space: nowrap; }
   .mini-skill-bar-track { height: 6px; background: var(--bg); border-radius: 3px; overflow: hidden; }
   .mini-skill-bar-fill { height: 100%; width: 0; background: var(--red); border-radius: 3px; transition: width 0.9s cubic-bezier(0.22,1,0.3,1); }
 
@@ -9913,7 +9918,7 @@ window.Portal = {
     var fo = window.portalFormOffsets && window.portalFormOffsets.offsets;
     var focus = MS.focusOf(attempts, { formOffsets: fo, skillLead: HOME_SKILL_LEAD });
     var ev = MS.skillEvidence(attempts, { grain: 'skill', formOffsets: fo });
-    return { focus: focus, ev: ev, tests: focus.tests };
+    return { focus: focus, ev: ev, tests: focus.tests, attempts: attempts, hist: hist };
   }
   /* The skill bar every consumer passes to focusOf (emails.gs FOCUS_SKILL_LEAD_):
      at the skill lead gate alone, about 20% of students with no weak skill saw
@@ -9944,13 +9949,37 @@ window.Portal = {
     if (lead) lead.domain = S.domain;
     var area = (!lead && S.domain && S.detail && S.detail.n)
       ? { domain: S.domain, correct: Math.round(S.detail.obs), total: S.detail.n, pct: S.detail.obs / S.detail.n } : null;
-    return { lead: lead, area: area, top: top, tests: h.tests };
+    return { lead: lead, area: area, top: top, tests: h.tests, lever: homeSectionLever(h, sectionKey) };
+  }
+
+  /* The section's latest score, its change since the diagnostic, and accuracy on hard questions pooled over the
+     same tests the evidence uses (blank and too-fast answers out). For the weak-skill tile when nothing stands out. */
+  function homeSectionLever(h, sectionKey) {
+    if (!h || !h.attempts) return null;
+    var n = 0, ok = 0;
+    h.attempts.forEach(function (a) {
+      (a.items || []).forEach(function (it) {
+        var sec = it.sec === 'rw' ? 'reading-writing' : it.sec;
+        if (sec !== sectionKey || it.diff !== 'hard' || it.blank || it.tooFast) return;
+        n++; if (it.ok) ok++;
+      });
+    });
+    var fld = sectionKey === 'math' ? 'math' : 'rw';
+    var seq = (h.hist || []).filter(function (e) { return e && e.testType === 'SAT' && e.mode !== 'section' && e.testId !== HARDEST_TEST_ID && Number(e[fld]) > 0; })
+      .slice().sort(function (a, b) { return String(a.date || '') < String(b.date || '') ? -1 : 1; });
+    var diag = seq.filter(function (e) { return e.source === 'diagnostic'; })[0];
+    var last = seq[seq.length - 1];
+    return { hardN: n, hardPct: n ? Math.round(100 * ok / n) : 0, score: last ? Number(last[fld]) : 0,
+      change: (diag && last && last !== diag) ? Number(last[fld]) - Number(diag[fld]) : 0, qbSubject: sectionKey === 'math' ? 'math' : 'rw' };
   }
 
   function fillMiniSkillCard(cardId, nameId, subId, barId, res) {
     var cardEl = document.getElementById(cardId);
     if (!cardEl) return;
     cardEl.classList.remove('is-loading');   // see skeletonMiniSkillCard
+    cardEl.onclick = null; cardEl.classList.remove('is-lever'); cardEl.removeAttribute('title');
+    var lbl = cardEl.querySelector('.mini-skill-label');
+    if (lbl) { if (!lbl.getAttribute('data-orig')) { lbl.setAttribute('data-orig', lbl.textContent); lbl.setAttribute('data-sec', lbl.textContent.split(':')[0]); } lbl.textContent = lbl.getAttribute('data-orig'); }
     if (!res) { cardEl.style.display = 'none'; return; }
     var nameEl = document.getElementById(nameId), subEl = document.getElementById(subId), barEl = document.getElementById(barId);
     var testsTxt = res.tests === 1 ? 'your test' : 'your ' + res.tests + ' tests';
@@ -9964,10 +9993,28 @@ window.Portal = {
       return;
     }
     if (!best) {
-      if (nameEl) { nameEl.textContent = 'No single skill stands out'; nameEl.onclick = null; }
-      if (subEl) subEl.textContent = 'Across ' + testsTxt + ', misses are spread out';
-      if (barEl) barEl.style.width = '0%';
-      cardEl.classList.add('is-even');
+      /* Nothing clears the bar (Luca, 2026-10-15: "is there better info"): where the section is heading, and
+         hard questions, the points left when misses are spread out. Tapping opens a hard round in that section. */
+      var lv = res.lever;
+      cardEl.classList.remove('is-even');
+      if (lv && lv.hardN) {
+        if (nameEl) {
+          nameEl.innerHTML = 'Hard questions <span class="mini-skill-pct">' + lv.hardPct + '%</span>';
+          nameEl.onclick = null;
+        }
+        cardEl.classList.add('is-lever');
+        cardEl.onclick = function () { goToHardPractice(lv.qbSubject); };
+        if (subEl) subEl.innerHTML = (lv.score ? '<b>' + lv.score + '</b>' + (lv.change ? ' &middot; ' + (lv.change > 0 ? '+' : '&minus;') + Math.abs(lv.change) + ' since your diagnostic' : '') + '<br>' : '') +
+          '<span class="mini-skill-go">Practice hard questions &rarr;</span>';
+        cardEl.title = 'No single skill stands out across ' + testsTxt + ', so the points left are mostly in the hard questions.';
+        if (lbl) lbl.textContent = lbl.getAttribute('data-sec') + ': Where the points are';
+        if (barEl) barEl.style.width = Math.max(2, lv.hardPct) + '%';
+      } else {
+        if (nameEl) { nameEl.textContent = 'No single skill stands out'; nameEl.onclick = null; }
+        if (subEl) subEl.textContent = 'Across ' + testsTxt + ', misses are spread out';
+        if (barEl) barEl.style.width = '0%';
+        cardEl.classList.add('is-even');
+      }
       cardEl.style.display = '';
       return;
     }
@@ -11216,6 +11263,12 @@ window.Portal = {
     if (sb && sb.style.display === 'none') return;
     navigateTo('question-bank');
     if (window.startWeaknessPractice) window.startWeaknessPractice();
+  }
+  function goToHardPractice(subject) {
+    var sb = document.getElementById('sidebar-question-bank');
+    if (sb && sb.style.display === 'none') return;
+    navigateTo('question-bank');
+    if (window.qbPractice && window.qbPractice.hard) window.qbPractice.hard(subject);
   }
   function goToTenMinVocab() {
     var sb = document.getElementById('sidebar-vocab');
@@ -20129,7 +20182,19 @@ window.Portal = {
      open a weak skill via qbPracticeSkill(), keeping that behavior in one
      place. */
   window.qbPractice = {
-    open: function (subject, skill) { setBankMode('qb'); qbPracticeSkill(subject, skill); }
+    open: function (subject, skill) { setBankMode('qb'); qbPracticeSkill(subject, skill); },
+    // Every topic in a subject, hard questions only (Home's weak-skill tile when nothing stands out, 2026-10-15).
+    hard: function (subject) {
+      // The banks load in the background: wait for them, or the topic list is empty.
+      Promise.all([window.__questionBankReady || Promise.resolve(), window.__questionBankMathReady || Promise.resolve()]).then(function () {
+        if (subject === 'math' && (QB_MATH_TEMP_DISABLED || !(window.QUESTION_BANK_MATH || []).length)) return;
+        setBankMode('qb'); showSkills(subject);
+        selectedDifficulties = ['hard'];
+        selectedSkills = [].slice.call(document.querySelectorAll('#qb-skills-list .qb-topic')).map(function (c) { return c.getAttribute('data-skill'); }).filter(Boolean);
+        qbFiltersBuilt = null;
+        renderSkillsList(); renderSelectionBar();
+      });
+    }
   };
 
   function renderAnalytics() {
