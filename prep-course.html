@@ -860,6 +860,16 @@ section.sec{padding:clamp(4.6rem,11vh,8.4rem) 0}
 .dwin{box-shadow:0 0 0 1px rgba(0,0,0,.09)!important;border-radius:20px!important}
 .js .chap.show .chap-h .w{transition-delay:.1s!important}
 .js .chap.show .chap-sub{transition-delay:.25s!important}
+/* the route (2026-10-14, Luca): a dashed line from the middle of the report, curving left and right
+   under each portal image in turn; it sits behind everything and draws itself as the page scrolls */
+.trail{position:relative;background:#fff}
+.trail>section{position:relative;z-index:1;background:transparent!important}
+.route-svg{position:absolute;left:0;top:0;z-index:0;pointer-events:none;overflow:visible}
+#routedash{fill:none;stroke:var(--red);stroke-opacity:.55;stroke-width:2.5;stroke-dasharray:9 11;stroke-linecap:round}
+.pcred{font-size:.88rem!important;color:var(--ink)!important;opacity:.7;margin-top:1.1rem!important}
+.pface{max-width:430px;justify-self:center;width:100%}
+.pface img{aspect-ratio:4/5;object-fit:cover;object-position:50% 25%}
+@media(prefers-reduced-motion:reduce){#routereveal{stroke-dasharray:none!important;stroke-dashoffset:0!important}}
 </style>
 <link rel="stylesheet" href="site.css?v=20260918">
 <link rel="stylesheet" href="lead-form.css?v=20260916b">
@@ -1508,7 +1518,6 @@ nav.is-red .navlinks a{color:rgba(255,255,255,.85)}nav.is-red .navlinks a.on{col
   <div class="navlinks">
     <a href="#walkthrough">The diagnostic</a>
     <a href="#platform">The platform</a>
-        <a href="#instructor">How I tutor</a>
     <a href="#proof">Results</a>
   </div>
   <a class="navlogin" href="portal/index.html">Student Login</a>
@@ -1518,7 +1527,6 @@ nav.is-red .navlinks a{color:rgba(255,255,255,.85)}nav.is-red .navlinks a.on{col
 <div class="navmenu" id="navmenu">
   <a href="#walkthrough">The diagnostic</a>
   <a href="#platform">The platform</a>
-    <a href="#instructor">How I tutor</a>
   <a href="#proof">Results</a>
   <a href="test-dates.html">Test dates</a>
   <a href="portal/index.html">Student login</a>
@@ -1544,12 +1552,13 @@ nav.is-red .navlinks a{color:rgba(255,255,255,.85)}nav.is-red .navlinks a.on{col
     <a class="t" href="#overview">SAT Prep</a>
     <a class="l" href="#walkthrough" data-sec="walkthrough">Diagnostic</a>
     <a class="l" href="#platform" data-sec="platform">Platform</a>
-    <a class="l" href="#instructor" data-sec="instructor">How I tutor</a>
     <a class="l" href="#proof" data-sec="proof">Results</a>
     <a class="b" href="book.html" data-start="call">Book a free call</a>
   </div>
 </div>
 
+<div class="trail" id="trail">
+<svg class="route-svg" id="routesvg" aria-hidden="true"><defs><mask id="routemask" maskUnits="userSpaceOnUse"><path id="routereveal" fill="none" stroke="#fff" stroke-width="14" stroke-linecap="round"/></mask></defs><path id="routedash" mask="url(#routemask)"/></svg>
 <!-- THE WALKTHROUGH (2026-10-14): one step per section, one headline, one sentence, one large picture -->
 <span id="highlights" aria-hidden="true"></span><span id="portal" aria-hidden="true"></span>
 <section class="chap" id="walkthrough" data-chap="walkthrough">
@@ -1574,39 +1583,45 @@ nav.is-red .navlinks a{color:rgba(255,255,255,.85)}nav.is-red .navlinks a.on{col
 <section class="plat" data-chap="platform">
   <div class="shell">
     <article class="prow">
+      <div class="ptx"><p class="pk">Sessions</p><h3>Every session, with me</h3><p>One-on-one every week, online or at the Cranford Public Library. Every wrong answer tells me how your student was thinking, and the next question I give them closes exactly that gap.</p><p class="pcred">Northwestern University, B.A. Statistics &middot; over 1500 on the SAT &middot; teaching one-on-one since 2018</p></div>
+      <figure class="pmedia pface"><img src="img/portrait-centered.jpg" alt="Luca Moretti" loading="lazy" decoding="async"></figure>
+    </article>
+    <article class="prow flip">
       <div class="ptx"><p class="pk">Home</p><h3>One place for all of it</h3><p>Every score so far and where it is likely to land, the weakest skill in each section, this week&rsquo;s work and the next session, the moment a student signs in.</p></div>
       <figure class="pmedia"><img src="img/sat/v3-home.webp" width="2560" height="1600" alt="The student portal home: seven tests of score progress, the weakest skill in each section, the next session and the week's work" loading="lazy" decoding="async"></figure>
     </article>
-    <article class="prow flip">
+    <article class="prow">
       <div class="ptx"><p class="pk">Practice tests</p><h3>Full-length tests that feel like test day</h3><p>14 adaptive practice tests built like the real digital SAT, with the same timer, highlighter, answer cross-out and question map. Each one comes back with a full report.</p></div>
       <figure class="pmedia"><img src="img/sat/rec-test.webp" width="1300" height="815" alt="A practice test in the portal: highlighting a phrase in the passage, crossing out two choices, picking an answer and jumping to the next question" loading="lazy" decoding="async"></figure>
     </article>
-    <article class="prow">
+    <article class="prow flip">
       <div class="ptx"><p class="pk">Question bank</p><h3>4,000+ questions, every one explained</h3><p>Pick any skill and set up a round. Students say how sure they were, see the right answer at once, and read why each choice is right or wrong.</p></div>
       <figure class="pmedia"><img src="img/sat/rec-qb.webp" width="1300" height="945" alt="The question bank: choosing Words in Context, setting up a round, answering, and opening the full explanation" loading="lazy" decoding="async"></figure>
     </article>
-    <article class="prow flip">
+    <article class="prow">
       <div class="ptx"><p class="pk">The course</p><h3>A full video course, taught by me</h3><p>59 video lessons across Math and Reading &amp; Writing, about 15 hours, all recorded by me critically inspecting question types and how to master the SAT. A short check follows each part, every wrong choice is explained, and the next part opens once the check is done.</p></div>
       <figure class="pmedia"><img src="img/sat/rec-cu.webp" width="1300" height="898" alt="The course: the course map, a lesson video with worked handwriting, and the check question that follows it" loading="lazy" decoding="async"></figure>
     </article>
-    <article class="prow">
+    <article class="prow flip">
       <div class="ptx"><p class="pk">Mistakes log</p><h3>Every miss, saved for later</h3><p>Each wrong answer lands in the log with its skill, its difficulty and how many tries it took.</p></div>
       <figure class="pmedia"><img src="img/sat/rec-mis.webp" width="1300" height="851" alt="The mistakes log: opening a missed question, revealing the answer and reading the explanation" loading="lazy" decoding="async"></figure>
     </article>
-    <article class="prow flip">
+    <article class="prow">
       <div class="ptx"><p class="pk">Rush</p><h3>Timed sets that build speed</h3><p>Each question gets its own clock, set by its skill and difficulty, so students learn what test-day pace feels like and how to manage the pressure.</p></div>
       <figure class="pmedia"><img src="img/sat/rec-rush.webp" width="1182" height="829" alt="Rush mode: the last seconds of a question, the screen turning red as time runs out, then an answer picked" loading="lazy" decoding="async"></figure>
     </article>
-    <article class="prow">
+    <article class="prow flip">
       <div class="ptx"><p class="pk">Vocabulary</p><h3>Ten minutes of vocabulary a day</h3><p>A focused round that starts with the words a student is still learning, timed to ten minutes so it becomes a habit.</p></div>
       <figure class="pmedia"><img src="img/sat/rec-vocab.webp" width="1216" height="896" alt="Vocabulary practice: a ten-minute round answered word by word" loading="lazy" decoding="async"></figure>
     </article>
-    <article class="prow flip">
+    <article class="prow">
       <div class="ptx"><p class="pk">Weekly updates</p><h3>You always know how it&rsquo;s going</h3><p>After every session, an email from me: what we worked on, how practice went, any new score, and what comes next.</p></div>
       <figure class="pmedia pmail"><img src="img/sat/weekly-card.webp" width="1200" height="1339" alt="A weekly update email to a parent: the latest practice test score, what the student worked on, the next session and how far away the SAT is" loading="lazy" decoding="async"></figure>
     </article>
   </div>
 </section>
+
+</div>
 
 <!-- AND EVERYTHING ELSE (2026-10-14): the highlight tiles, with Support folded in -->
 <section class="hx" id="support">
@@ -1614,22 +1629,6 @@ nav.is-red .navlinks a{color:rgba(255,255,255,.85)}nav.is-red .navlinks a.on{col
     <div class="hx-head"><h2 class="rv">And everything else</h2><div class="hx-arrows"><button type="button" data-hx="-1" aria-label="Previous">&lsaquo;</button><button type="button" data-hx="1" aria-label="Next">&rsaquo;</button></div></div>
   </div>
   <div class="hx-track" id="hxtrack"><article class="hx-card"><div class="hx-bg" aria-hidden="true"><img src="img/tiles/online.webp" alt="" loading="lazy"></div><div class="tx"><span class="k">Office hours</span><h3>Weekly office hours</h3><p>Stuck on a question between sessions? Bring it, and we work through it together.</p></div><div class="hx-vis"><span class="hx-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg></span></div></article><article class="hx-card"><div class="hx-bg" aria-hidden="true"><img src="img/tiles/challenge.webp" alt="" loading="lazy"></div><div class="tx"><span class="k">Challenge questions</span><h3>The hardest questions</h3><p>Module 2 at its toughest: the ones that separate a 1400 from a 1500+.</p></div><div class="hx-vis"><span class="hx-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg></span></div></article><article class="hx-card"><div class="hx-bg" aria-hidden="true"><img src="img/tiles/booking.webp" alt="" loading="lazy"></div><div class="tx"><span class="k">Scheduling</span><h3><a class="tlink" href="session.html">Book sessions in two taps &rarr;</a></h3><p>Pick any open time, or keep the same time every week. Move or cancel from your confirmation.</p></div><div class="hx-vis"><span class="hx-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4M12 13v4M10 15h4"/></svg></span></div></article><article class="hx-card"><div class="hx-bg" aria-hidden="true"><img src="img/tiles/textbook.webp" alt="" loading="lazy"></div><div class="tx"><span class="k">Direct line</span><h3>Text me</h3><p>Questions don&rsquo;t wait for the next session. I answer the same day: (201)&nbsp;275&#8209;2791.</p></div><div class="hx-vis"><span class="hx-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 3.5h3l1.5 4-2 1.3a11 11 0 0 0 6.2 6.2l1.3-2 4 1.5v3a2 2 0 0 1-2 2A16.5 16.5 0 0 1 4.5 5.5a2 2 0 0 1 2-2z"/></svg></span></div></article><article class="hx-card"><div class="hx-bg" aria-hidden="true"><img src="img/tiles/predictions.webp" alt="" loading="lazy"></div><div class="tx"><span class="k">Score predictions</span><h3>A range, not a guess</h3><p>A likely range after every test, not just one number.</p></div><div class="hx-vis"><span class="hx-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19h16M6 15l4-4 3 3 5-6"/><path d="M15 8h3v3"/></svg></span></div></article><article class="hx-card"><div class="hx-bg" aria-hidden="true"><img src="img/tiles/calendar.webp" alt="" loading="lazy"></div><div class="tx"><span class="k">One calendar</span><h3>Homework and sessions, together</h3><p>Each week&rsquo;s work as a checklist, right beside every session.</p></div><div class="hx-vis"><span class="hx-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4M8.5 14.5l2 2 4-4"/></svg></span></div></article><article class="hx-card"><div class="hx-bg" aria-hidden="true"><img src="img/tiles/saved.webp" alt="" loading="lazy"></div><div class="tx"><span class="k">Saved questions</span><h3>Come back to anything</h3><p>Star any question and gather them into collections.</p></div><div class="hx-vis"><span class="hx-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h10a1 1 0 0 1 1 1v17l-6-4-6 4V4a1 1 0 0 1 1-1z"/></svg></span></div></article><article class="hx-card"><div class="hx-bg" aria-hidden="true"><img src="img/tiles/files.webp" alt="" loading="lazy"></div><div class="tx"><span class="k">Shared files</span><h3>Everything in one folder</h3><p>Notes, worksheets and past work I share, in one Google Drive folder.</p></div><div class="hx-vis"><span class="hx-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 7.5a2 2 0 0 1 2-2h4l2 2.5h7a2 2 0 0 1 2 2v7.5a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/></svg></span></div></article></div>
-</section>
-
-<!-- How I tutor: the method and the tutor, together (as on the homepage, 2026-10-13) -->
-<section class="sec" id="instructor" data-sec="instructor">
-  <div class="shell">
-    <div class="who short">
-      <img class="rv" src="img/portrait-centered.jpg" alt="Luca Moretti" loading="lazy">
-      <div>
-        <p class="lbl rv">How I tutor</p>
-        <h2 class="h-sec rv d1">Most SAT tutors work through a fixed plan. I don&rsquo;t.</h2>
-        <p class="lede rv d2">The usual way is to meet each week, cover the next topic and move down the list. For a student already scoring well, most of those hours go to material they already know.</p>
-        <p class="lede rv d2">My sessions follow your student. Every wrong answer tells me how they were thinking, and the next question I give them is chosen to close exactly that gap. I studied statistics at <a href="https://www.northwestern.edu/" target="_blank" rel="noopener" class="nu-link">Northwestern University</a>, and I&rsquo;ve taught every session myself, one-on-one, since 2018.</p>
-        <div class="creds rv d3"><span>Northwestern University, B.A. Statistics, top of class in three years</span><span>Scored over 1500 on the SAT</span><span>5 on AP Calculus AB &amp; BC</span><span>IB Diploma</span></div>
-      </div>
-    </div>
-  </div>
 </section>
 
 <!-- Questions -->
@@ -1967,6 +1966,35 @@ document.documentElement.classList.add('js');
   [].slice.call(document.querySelectorAll('[data-hx]')).forEach(function(b){ b.addEventListener('click',function(){ tr.scrollBy({left:Number(b.getAttribute('data-hx'))*350,behavior:'smooth'}); }); });
   if(!('IntersectionObserver' in window)){ sec.classList.add('show'); return; }
   var io=new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ sec.classList.add('show'); io.disconnect(); } }); },{threshold:.2}); io.observe(sec);
+})();
+
+/* ROUTE: points are the report window's center, then each portal image's center; the reveal follows the scroll. */
+(function(){
+  var wrap=document.getElementById('trail'); if(!wrap) return;
+  var svg=document.getElementById('routesvg'), dash=document.getElementById('routedash'), rev=document.getElementById('routereveal'), len=0;
+  var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function build(){
+    var b=wrap.getBoundingClientRect(), W=b.width, H=b.height;
+    svg.setAttribute('width',W); svg.setAttribute('height',H); svg.setAttribute('viewBox','0 0 '+W+' '+H);
+    var els=[wrap.querySelector('.dwin')].concat([].slice.call(wrap.querySelectorAll('.pmedia')));
+    // layout positions, not getBoundingClientRect: the rows slide and scale in, and the line must not follow that
+    var pts=els.filter(Boolean).map(function(e){ var x=0,y=0,w=e.offsetWidth,h=e.offsetHeight; while(e&&e!==wrap){ x+=e.offsetLeft; y+=e.offsetTop; e=e.offsetParent; } return [x+w/2, y+h/2]; });
+    if(pts.length<2) return;
+    var d='M'+pts[0][0].toFixed(1)+' '+pts[0][1].toFixed(1);
+    for(var i=1;i<pts.length;i++){ var a=pts[i-1], c=pts[i], dy=c[1]-a[1];
+      d+=' C'+a[0].toFixed(1)+' '+(a[1]+dy*.55).toFixed(1)+' '+c[0].toFixed(1)+' '+(c[1]-dy*.55).toFixed(1)+' '+c[0].toFixed(1)+' '+c[1].toFixed(1); }
+    dash.setAttribute('d',d); rev.setAttribute('d',d); len=rev.getTotalLength(); rev.style.strokeDasharray=len+' '+len; paint();
+  }
+  function paint(){
+    if(reduce){ rev.style.strokeDashoffset=0; return; }
+    var b=wrap.getBoundingClientRect(), p=Math.min(1,Math.max(0,(innerHeight*.72-b.top)/b.height));
+    rev.style.strokeDashoffset=(len*(1-p)).toFixed(1);
+  }
+  var t=false; addEventListener('scroll',function(){ if(!t){ t=true; requestAnimationFrame(function(){ t=false; paint(); }); } },{passive:true});
+  addEventListener('resize',build); addEventListener('load',build);
+  if('ResizeObserver' in window) new ResizeObserver(build).observe(wrap);
+  [].forEach.call(wrap.querySelectorAll('img'),function(im){ im.addEventListener('load',build); });
+  build();
 })();
 
 /* CHAPTER REVEAL: each chapter's label, headline (word by word) and sentence rise in once, when it comes into view. */
