@@ -202,7 +202,7 @@
       if (showcase) {
         var SK = ['Inferences', 'Words in Context', 'Transitions', 'Boundaries', 'Nonlinear functions', 'Linear equations in two variables', 'Circles', 'Percentages'];
         var weakAt = { 0: 0.45, 4: 0.22 };
-        var mkQ = function (lift) { return { v: 1, s: ['rw', 'math'], k: SK, q: Array.from({ length: 98 }, function (_, i) {
+        var mkQ = function (lift) { return { v: 1, s: ['reading-writing', 'math'], k: SK, q: Array.from({ length: 98 }, function (_, i) {
           var sec = i < 54 ? 0 : 1, sk = sec ? 4 + (i % 4) : i % 4, p = (weakAt[sk] || 0.82) + lift;
           var dl = (i * 7) % 3; return [sec, sk, dl, ((i * 37) % 100) / 100 < p + (1 - dl) * 0.08 ? 1 : 0, (sec ? 55 : 48) + ((i * 13) % 45)]; }) }; };
         history = [[1180, 600, 580, '2026-07-12'], [1250, 630, 620, '2026-07-26'], [1290, 640, 650, '2026-08-09'], [1310, 650, 660, '2026-08-23'],
@@ -215,7 +215,7 @@
         student.assignments = [
           { row: 2, task: 'Practice Test 7, full and timed', done: false, notes: 'Saturday morning, like test day.', dueDate: due.toISOString() },
           { row: 3, task: 'Question Bank: Inferences, 20 questions', done: false, notes: '', dueDate: due.toISOString() },
-          { row: 4, task: 'Lesson 3.4 and its check', done: true, notes: '', dueDate: null }
+          { row: 4, task: 'Lesson 3.4 and its check', done: true, doneAt: new Date(Date.now() - 864e5).toISOString(), notes: '', dueDate: new Date(Date.now() - 864e5).toISOString() }
         ];
       }
       // Real question ids, so the Mistakes log resolves them the way it does
@@ -241,6 +241,26 @@
           'Transitions': { domain: 'Expression of Ideas', skill: 'Transitions', correct: 7, total: 8 }
         } : {},
         vocabProgress: vocab, qbAttempts: {} };
+      // &showcase: a believable study record for the Analytics screen (2026-10-15).
+      var studyStats = null;
+      if (showcase || mathshow) {
+        var AREAS = ['Practicing', 'Taking a test', 'Lessons', 'Vocab', 'Reviewing mistakes', 'Rush'];
+        var visits = [], prow = [], skl = showcase ? ['Inferences', 'Words in Context', 'Transitions', 'Boundaries', 'Nonlinear functions', 'Linear equations in two variables', 'Circles', 'Percentages', 'Central Ideas and Details', 'Systems of two linear equations in two variables'] : [];
+        for (var dd2 = 40; dd2 >= 0; dd2--) {
+          if ((dd2 * 7) % 5 === 1) continue;
+          var vd = new Date(); vd.setDate(vd.getDate() - dd2); vd.setHours(16 + (dd2 % 4), 10, 0, 0);
+          if (vd > new Date()) vd = new Date(Date.now() - 3600e3);
+          var mins = 20 + ((dd2 * 37) % 55), ar = {};
+          ar[AREAS[dd2 % AREAS.length]] = Math.round(mins * 0.6); ar[AREAS[(dd2 + 2) % AREAS.length]] = mins - Math.round(mins * 0.6);
+          visits.push([vd.getTime(), mins, ar]);
+          for (var qn = 0; qn < 6 + (dd2 % 9) && skl.length; qn++) {
+            var si2 = (dd2 * 3 + qn) % skl.length;
+            prow.push([vd.getTime() + qn * 60000, qn % 5 === 0 ? 'rush' : 'qb', si2 >= 4 && si2 <= 7 || si2 === 9 ? 1 : 0, si2, qn % 3,
+              (Math.abs(Math.sin(dd2 * 12.9898 + qn * 78.233 + si2 * 3.7)) * 43758.5453 % 1) < (si2 === 4 ? 0.5 : si2 === 0 ? 0.58 : 0.82) ? 1 : 0, 40 + ((qn * 13) % 50)]);
+          }
+        }
+        studyStats = { ok: true, v: 1, now: Date.now(), visits: visits, practice: { skills: skl, rows: prow } };
+      }
       var calSessions = [{ startIso: soon.toISOString(), allDay: false, title: 'Avery - tutoring' }];
       if (mathshow) {
         calSessions = [];
@@ -250,7 +270,7 @@
         });
       }
       var boot = '<scr' + 'ipt>(function(){' +
-        'var S=' + JSON.stringify(student) + ',W=' + JSON.stringify(wantScreen) + ',H=' + JSON.stringify(history) + ',P=' + JSON.stringify(progress) + ',D=' + delayMs + ';' +
+        'var S=' + JSON.stringify(student) + ',ST=' + JSON.stringify(studyStats) + ',W=' + JSON.stringify(wantScreen) + ',H=' + JSON.stringify(history) + ',P=' + JSON.stringify(progress) + ',D=' + delayMs + ';' +
         // A session token shaped like the real thing (base64url JSON, a dot,
         // a signature), so the portal can read which student it is for.
         'var TOK=btoa(JSON.stringify({t:"session",k:S.key})).replace(/=+$/,"").replace(/\\+/g,"-").replace(/\\//g,"_")+".preview";' +
@@ -266,6 +286,7 @@
         'else if(b.action==="getProgress")o=P;' +
         'else if(b.action==="getAssignments")o={ok:true,assignments:S.assignments};' +
         'else if(b.action==="nextSession")o=' + (noSession ? '{ok:true,next:null}' : '{ok:true,next:{startIso:' + JSON.stringify(soon.toISOString()) + ',allDay:false,title:"Avery - tutoring"}}') + ';' +
+        'else if(b.action==="getStudyStats"&&ST)o=ST;' +
         'else if(b.action==="getAssignmentsCalendar")o={ok:true,assignments:S.assignments,sessions:' + JSON.stringify(calSessions) + '};' +
         'var res={ok:true,status:200,clone:function(){return this;},' +
         'json:function(){return Promise.resolve(JSON.parse(JSON.stringify(o)));},text:function(){return Promise.resolve(JSON.stringify(o));}};' +

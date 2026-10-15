@@ -259,6 +259,40 @@
   .an-pill.good { background: #E7F3EC; color: #2F7A4F; }
   .an-pace.slow { color: var(--red); font-weight: 600; }
   .an-empty { text-align: center; color: var(--mid); font-size: 0.88rem; line-height: 1.7; padding: 2rem 1rem; }
+  .an-band { font-family: var(--display); font-size: 1.25rem; font-weight: 700; color: var(--text); margin: 0.6rem 0 0.8rem; }
+  .an-tiles3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .an-tile.hot { border-color: rgba(176,39,28,0.35); background: linear-gradient(180deg, #fff, #fdf3f1); }
+  .an-tile.hot .v { color: var(--red); }
+  .an-subh { font-size: 0.72rem; font-weight: 600; color: var(--text); margin: 0.4rem 0 0.2rem; }
+  .an-subh span { font-weight: 400; color: var(--mid); margin-left: 0.4rem; }
+  .an-areas { margin-top: 1rem; border-top: 1px solid var(--border); padding-top: 0.8rem; }
+  .an-areas-h, .an-area { display: grid; grid-template-columns: minmax(0, 1.2fr) 70px minmax(0, 2fr); gap: 0.8rem; align-items: center; }
+  .an-areas-h { font-size: 0.6rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mid); margin-bottom: 0.4rem; }
+  .an-area { font-size: 0.8rem; padding: 0.3rem 0; }
+  .an-area .wk { font-variant-numeric: tabular-nums; color: var(--red); font-weight: 600; }
+  .an-area .al { display: flex; align-items: center; gap: 0.5rem; }
+  .an-area .al i { display: block; height: 6px; border-radius: 999px; background: linear-gradient(90deg, var(--gold), var(--red)); }
+  .an-area .al b { font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .an-wklist { display: grid; gap: 0.1rem; }
+  .an-wk { display: grid; grid-template-columns: 26px minmax(0, 1fr) 70px minmax(0, 1.4fr); gap: 0.6rem; align-items: center; padding: 0.55rem 0; border-top: 1px solid var(--border); font-size: 0.84rem; }
+  .an-wk:first-child { border-top: 0; }
+  .an-wk .mk { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: #fff; }
+  .an-wk.ok .mk { background: #3F8F5F; border-color: #3F8F5F; }
+  .an-wk .lb { font-weight: 600; }
+  .an-wk .vl { font-family: var(--display); font-size: 1.25rem; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .an-wk .dt { color: var(--mid); font-size: 0.76rem; }
+  .an-mute { color: var(--mid); font-weight: 400; }
+  .an-small { font-size: 0.72rem; }
+  .an-delta { font-size: 0.7rem; font-weight: 700; margin-left: 0.25rem; color: var(--mid); }
+  .an-delta.up { color: #2F7A4F; }
+  .an-delta.down { color: var(--red); }
+  .an-diff small + small { margin-top: 0.15rem; }
+  .an-habits { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+  .an-habits div { background: var(--bg); border-radius: 12px; padding: 0.8rem 0.9rem; }
+  .an-habits b { display: block; font-family: var(--display); font-size: 1.4rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .an-habits span { display: block; font-size: 0.78rem; font-weight: 600; margin-top: 0.15rem; }
+  .an-habits small { display: block; font-size: 0.7rem; color: var(--mid); margin-top: 0.1rem; }
+  @media (max-width: 760px) { .an-tiles3 { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; } .an-tiles3 .an-tile { padding: 0.7rem 0.6rem; } .an-tiles3 .v { font-size: 1.15rem; } .an-tiles3 .s { font-size: 0.66rem; } .an-habits { grid-template-columns: 1fr 1fr; } .an-wk { grid-template-columns: 26px minmax(0, 1fr) auto; } .an-wk .dt { grid-column: 2 / -1; } .an-areas-h, .an-area { grid-template-columns: minmax(0, 1fr) 54px minmax(0, 1.2fr); } }
   @media (max-width: 760px) { .an-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } .an-diff { grid-template-columns: 1fr; } }
 
   /* ═══ KEY SCREEN ═══ */
@@ -9044,59 +9078,235 @@ window.Portal = {
       '</div>';
   }
 
-  /* ═══ ANALYTICS SCREEN (Luca 2026-10-14) ═══
-     Everything pooled from the per-question record each full test writes
-     (qStats), through the same inputs as Your Statistics and the report
-     (MorettiSignals.evidenceAttempts: retakes, the held-back diagnostic,
-     the all-hard Test 12 and abandoned sittings out). Raw counts are shown
-     as counts; the only labels ("Below your level", "Keeps coming back",
-     "Improved") come from the shared verdicts, so this screen can never
-     call a skill weak that the report and the weekly email would not. */
+  /* ═══ ANALYTICS SCREEN (Luca 2026-10-14, rebuilt 2026-10-15) ═══
+     One page for everything the portal knows about how a student is doing.
+       Study time   from the presence log (getStudyStats): study screens
+                    only, the same minutes as the weekly parent email.
+       This week    Monday to today: study time, assignments done, practice
+                    answers, tests, lesson parts and vocabulary.
+       Pooled       every full test (MorettiSignals.evidenceAttempts: retakes,
+                    the held-back diagnostic, the all-hard Test 12 and
+                    abandoned sittings out) beside every practice answer
+                    (PracticeLog), by section, difficulty and skill, with
+                    earlier vs recent tests and pace against each question's
+                    time budget.
+     Labels ("Below your level", "Keeps coming back", "Improved") come only
+     from the shared verdicts, so this screen never calls a skill weak that
+     the report and the weekly email would not. A backend without
+     getStudyStats still gets a full page: time falls back to the time spent
+     answering questions, and practice to the synced Question Bank records. */
   var anState = { sec: 'all', range: 'all' };
+  var anStudy = { key: null, data: null, loading: false, failed: false };
   function anPct(k, n) { return n ? Math.round(100 * k / n) : 0; }
   function anSecLabel(k) { return k === 'math' ? 'Math' : 'Reading & Writing'; }
+  function anHm(min) {
+    min = Math.round(min || 0);
+    if (min < 60) return min + 'm';
+    var h = Math.floor(min / 60), m = min % 60;
+    return h + 'h' + (m ? ' ' + m + 'm' : '');
+  }
+  function anDayKey(ms) { var d = new Date(ms); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
+  function anWeekStart(now) { var d = new Date(now); d.setHours(0, 0, 0, 0); var dow = (d.getDay() + 6) % 7; d.setDate(d.getDate() - dow); return d.getTime(); }
+  function anMs(v) { if (v == null || v === '') return NaN; if (typeof v === 'number') return v < 1e11 ? v * 1000 : v; var t = Date.parse(v); return t; }
+  function anFetchStudy() {
+    var key = currentStudent && currentStudent.key;
+    if (!key) return;
+    if (anStudy.key !== key) {
+      anStudy = { key: key, data: null, loading: false, failed: false };
+      try { var c = JSON.parse(localStorage.getItem('moretti_study_' + key) || 'null'); if (c && c.ok) anStudy.data = c; } catch (e) {}
+    }
+    // One ask per five minutes, answered or not: a backend without getStudyStats must not be asked on every paint.
+    if (anStudy.loading || (anStudy.askedAt && Date.now() - anStudy.askedAt < 5 * 60000)) return;
+    anStudy.loading = true; anStudy.askedAt = Date.now();
+    postToBackend({ action: 'getStudyStats', key: key }, { attempts: 2 }).then(function (d) {
+      anStudy.loading = false;
+      if (d && d.ok && d.v === 1) {
+        d._fresh = Date.now(); anStudy.data = d; anStudy.failed = false;
+        try { localStorage.setItem('moretti_study_' + key, JSON.stringify(d)); } catch (e) {}
+      } else if (!anStudy.data) anStudy.failed = true;
+      if (activeScreenId === 'screen-analytics') renderAnalytics();
+    }, function () { anStudy.loading = false; if (!anStudy.data) anStudy.failed = true; if (activeScreenId === 'screen-analytics') renderAnalytics(); });
+  }
   function renderAnalytics() {
     var body = document.getElementById('an-body'), sub = document.getElementById('an-sub');
     if (!body) return;
+    anFetchStudy();
     var MSa = window.MorettiSignals, TBa = window.TIME_BUDGETS, e = function (s) { return window.Portal.escHtml(s); };
+    var key = currentStudent && currentStudent.key;
     var accom = (window.getPortalAccomMult && window.getPortalAccomMult()) || 1;
     var budgetOf = TBa ? function (sec, dom, skill, diff) { var b = TBa.budgetSecondsFor(sec, dom, skill, diff, accom); return (b && b.seconds) || 0; } : null;
+    var now = Date.now(), wk0 = anWeekStart(now), lastWk0 = wk0 - 7 * 86400000;
+    var inWeek = function (ms) { return isFinite(ms) && ms >= wk0 && ms <= now + 60000; };
+    document.querySelectorAll('[data-an-sec]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-an-sec') === anState.sec)); });
+    document.querySelectorAll('[data-an-range]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-an-range') === anState.range)); });
+
     var entries;
     try { entries = mergedScoreHistory() || []; } catch (err) { entries = []; }
     var attempts = (MSa && MSa.evidenceAttempts) ? MSa.evidenceAttempts(entries, { budgetSeconds: budgetOf }) : [];
-    document.querySelectorAll('[data-an-sec]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-an-sec') === anState.sec)); });
-    document.querySelectorAll('[data-an-range]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-an-range') === anState.range)); });
+    var prog = (key && loadServerProgressCache(key)) || {};
+    var study = anStudy.data;
+    var secOk = function (k) { return anState.sec === 'all' || anState.sec === k; };
+
+    // ── practice answers: PracticeLog when the backend has it, else the synced Question Bank records ──
+    var practice = [];   // { at, bank, sec, skill, diff, ok, secs, first }
+    if (study && study.practice && Array.isArray(study.practice.rows)) {
+      var sk = study.practice.skills || [], seenQ = {};
+      study.practice.rows.forEach(function (r) {
+        if (r[1] === 'cu') return;   // lesson checks are counted with the lessons
+        practice.push({ at: r[0], bank: r[1], sec: r[2] === 1 ? 'math' : (r[2] === 0 ? 'reading-writing' : ''), skill: r[3] >= 0 ? sk[r[3]] : '',
+          diff: ['easy', 'medium', 'hard'][r[4]] || '', ok: r[5] === 1, secs: r[6] || 0 });
+      });
+    } else if (prog.qbAttempts) {
+      Object.keys(prog.qbAttempts).forEach(function (q) {
+        var a = prog.qbAttempts[q]; if (!a) return;
+        practice.push({ at: anMs(a.attemptedAt), bank: 'qb', sec: '', skill: '', diff: '', ok: !!a.correct, secs: a.ms ? a.ms / 1000 : 0 });
+      });
+    }
+
+    // ── study time ──
+    var timeHtml = '';
+    (function () {
+      var visits = (study && Array.isArray(study.visits)) ? study.visits : null;
+      var total = 0, week = 0, lastWeek = 0, byDay = {}, areasAll = {}, areasWk = {}, sittingsWk = 0, label, note;
+      if (visits) {
+        label = 'Time studying';
+        note = 'Active time on study screens: practice, tests, lessons, vocabulary. Time on Home, the calendar or settings is not counted.';
+        visits.forEach(function (v) {
+          var at = v[0], m = v[1] || 0;
+          total += m;
+          if (inWeek(at)) { week += m; if (m >= 5) sittingsWk++; }
+          else if (at >= lastWk0 && at < wk0) lastWeek += m;
+          var dk = anDayKey(at); byDay[dk] = (byDay[dk] || 0) + m;
+          if (v[2]) Object.keys(v[2]).forEach(function (a) { areasAll[a] = (areasAll[a] || 0) + v[2][a]; if (inWeek(at)) areasWk[a] = (areasWk[a] || 0) + v[2][a]; });
+        });
+      } else {
+        // No presence record from this backend: the time spent answering questions instead.
+        label = 'Time answering questions';
+        note = anStudy.loading ? 'Loading your full study time.' : 'Time on practice tests and practice questions. Your full study time appears here once the portal updates.';
+        attempts.forEach(function (a) {
+          var at = anMs(a.at), m = a.items.reduce(function (s, it) { return s + (it.seconds || 0); }, 0) / 60;
+          total += m; if (inWeek(at)) week += m; else if (at >= lastWk0 && at < wk0) lastWeek += m;
+          var dk = anDayKey(at); if (isFinite(at)) byDay[dk] = (byDay[dk] || 0) + m;
+          areasAll['Practice tests'] = (areasAll['Practice tests'] || 0) + m; if (inWeek(at)) areasWk['Practice tests'] = (areasWk['Practice tests'] || 0) + m;
+        });
+        practice.forEach(function (p) {
+          var m = (p.secs || 0) / 60; total += m;
+          if (inWeek(p.at)) week += m; else if (p.at >= lastWk0 && p.at < wk0) lastWeek += m;
+          if (isFinite(p.at)) { var dk = anDayKey(p.at); byDay[dk] = (byDay[dk] || 0) + m; }
+          areasAll['Practice questions'] = (areasAll['Practice questions'] || 0) + m; if (inWeek(p.at)) areasWk['Practice questions'] = (areasWk['Practice questions'] || 0) + m;
+        });
+      }
+      var daysIn = Math.max(1, Math.floor((now - wk0) / 86400000) + 1);
+      var delta = week - lastWeek;
+      // The last 14 days, oldest first.
+      var bars = [], maxB = 0;
+      for (var i = 13; i >= 0; i--) {
+        var d = new Date(now); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() - i);
+        var v = byDay[anDayKey(d.getTime())] || 0; maxB = Math.max(maxB, v);
+        bars.push({ d: d, v: v, wk: d.getTime() >= wk0 });
+      }
+      var W = 640, H = 130, B = 22, bw = (W - 20) / 14;
+      var svg = bars.map(function (b, i) {
+        var h = maxB ? Math.max(b.v ? 3 : 0, (H - B - 16) * b.v / maxB) : 0, x = 10 + i * bw + 3, y = H - B - h;
+        return '<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + (bw - 6).toFixed(1) + '" height="' + h.toFixed(1) + '" rx="3" fill="' + (b.wk ? '#B0271C' : 'rgba(176,39,28,0.28)') + '"><title>' + e(b.d.toDateString().slice(0, 10)) + ': ' + anHm(b.v) + '</title></rect>' +
+          (b.v ? '<text class="val" x="' + (x + (bw - 6) / 2).toFixed(1) + '" y="' + (y - 4).toFixed(1) + '" text-anchor="middle">' + anHm(b.v) + '</text>' : '') +
+          '<text x="' + (x + (bw - 6) / 2).toFixed(1) + '" y="' + (H - 6) + '" text-anchor="middle">' + 'SMTWTFS'.charAt(b.d.getDay()) + '</text>';
+      }).join('');
+      var areaRows = Object.keys(areasAll).sort(function (a, b) { return areasAll[b] - areasAll[a]; });
+      var areaMax = areaRows.length ? areasAll[areaRows[0]] : 0;
+      var areaHtml = areaRows.length ? '<div class="an-areas"><div class="an-areas-h"><span>Where the time went</span><span>This week</span><span>All time</span></div>' + areaRows.slice(0, 8).map(function (a) {
+        return '<div class="an-area"><span class="nm">' + e(a) + '</span><span class="wk">' + (areasWk[a] ? anHm(areasWk[a]) : '&ndash;') + '</span><span class="al"><i style="width:' + Math.max(2, Math.round(100 * areasAll[a] / (areaMax || 1))) + '%"></i><b>' + anHm(areasAll[a]) + '</b></span></div>';
+      }).join('') + '</div>' : '';
+      timeHtml = '<div class="an-card an-time"><h2>' + label + '</h2><p class="an-note">' + e(note) + '</p>' +
+        '<div class="an-tiles an-tiles3">' +
+          '<div class="an-tile"><div class="k">All time</div><div class="v">' + anHm(total) + '</div><div class="s">' + (visits ? visits.length + ' visits' : 'since your first test') + '</div></div>' +
+          '<div class="an-tile hot"><div class="k">This week</div><div class="v">' + anHm(week) + '</div><div class="s">' + (lastWeek || week ? (delta >= 0 ? '+' : '&minus;') + anHm(Math.abs(delta)) + ' vs last week' : 'Monday to today') + '</div></div>' +
+          '<div class="an-tile"><div class="k">Per day this week</div><div class="v">' + anHm(week / daysIn) + '</div><div class="s">' + (visits ? sittingsWk + ' sitting' + (sittingsWk === 1 ? '' : 's') + ' of 5+ minutes' : 'average over ' + daysIn + ' day' + (daysIn === 1 ? '' : 's')) + '</div></div>' +
+        '</div>' +
+        '<div class="an-subh">The last 14 days <span>this week in red</span></div>' +
+        '<svg class="an-chart" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Study time on each of the last 14 days">' + svg + '</svg>' +
+        areaHtml + '</div>';
+    })();
+
+    // ── this week's work ──
+    var weekHtml = (function () {
+      var asg = (currentStudent && currentStudent.assignments) || [];
+      var dueWk = asg.filter(function (a) { var t = anMs(a.dueDate); return isFinite(t) && t >= wk0 && t < wk0 + 7 * 86400000; });
+      var doneWk = asg.filter(function (a) { return a.done && inWeek(anMs(a.doneAt)); });
+      var dueDone = dueWk.filter(function (a) { return a.done; }).length;
+      var pw = practice.filter(function (p) { return inWeek(p.at); });
+      var pwOk = pw.filter(function (p) { return p.ok; }).length;
+      var testsWk = entries.filter(function (x) { return x && x.testType === 'SAT' && inWeek(anMs(x.date)) && (Number(x.composite) > 0 || x.mode === 'section'); });
+      var parts = 0, partsAll = 0, cp = null;
+      try { cp = JSON.parse(localStorage.getItem('moretti_curriculum_' + key) || 'null'); } catch (err) { cp = null; }
+      if (cp && cp.parts) Object.keys(cp.parts).forEach(function (k) { var d = cp.parts[k] && cp.parts[k].done; if (d) { partsAll++; if (inWeek(anMs(d))) parts++; } });
+      var vocab = 0, vp = prog.vocabProgress;
+      if (vp && vp.termUpdatedAt) Object.keys(vp.termUpdatedAt).forEach(function (t) { if (inWeek(anMs(vp.termUpdatedAt[t]))) vocab++; });
+      var row = function (ok, label, val, detail) {
+        return '<div class="an-wk' + (ok ? ' ok' : '') + '"><span class="mk" aria-hidden="true">' + (ok ? '&#10003;' : '') + '</span><span class="lb">' + label + '</span><span class="vl">' + val + '</span><span class="dt">' + detail + '</span></div>';
+      };
+      var rows =
+        row(dueWk.length && dueDone === dueWk.length, 'Assignments', dueWk.length ? dueDone + ' of ' + dueWk.length : doneWk.length, dueWk.length ? 'due this week, done' + (doneWk.length > dueDone ? ' (' + doneWk.length + ' finished in all)' : '') : 'finished this week') +
+        row(pw.length > 0, 'Practice questions', pw.length, pw.length ? anPct(pwOk, pw.length) + '% right' : 'none yet this week') +
+        row(testsWk.length > 0, 'Practice tests', testsWk.length, testsWk.length ? testsWk.map(function (x) { return x.composite ? x.composite : 'section'; }).join(', ') : 'none this week') +
+        row(parts > 0, 'Lesson parts', parts, partsAll ? partsAll + ' finished all time' : 'in the course') +
+        row(vocab > 0, 'Vocabulary words', vocab, 'reviewed this week');
+      var d0 = new Date(wk0);
+      return '<div class="an-card"><h2>This week</h2><p class="an-note">Since Monday, ' + e(d0.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })) + '.</p><div class="an-wklist">' + rows + '</div></div>';
+    })();
+
     if (!attempts.length) {
-      sub.textContent = 'Every full test you take, pooled.';
-      body.innerHTML = '<div class="an-empty">Your numbers start with your first full practice test.<br>Take one in Practice Tests, and this page fills in by skill, difficulty and pace.</div>';
+      sub.textContent = 'Your study time and work so far. Test numbers start with your first full practice test.';
+      body.innerHTML = timeHtml + weekHtml + '<div class="an-empty">Your numbers by skill, difficulty and pace start with your first full practice test.<br>Take one in Practice Tests, and this page fills in.</div>';
       return;
     }
     var used = anState.range === '3' ? attempts.slice(-3) : attempts;
-    var secOk = function (k) { return anState.sec === 'all' || anState.sec === k; };
     sub.textContent = (anState.range === '3' && attempts.length > 3 ? 'Your last 3 tests' : (used.length === 1 ? 'Your 1 full test' : 'All ' + used.length + ' of your full tests')) +
-      ', pooled. Updated after every test.';
+      (practice.length ? ' and ' + practice.length + ' practice answers' : '') + ', pooled. Updated after every test.';
 
-    // Pool every question.
-    var tot = { n: 0, ok: 0, blank: 0, fast: 0, secs: 0, bud: 0, over: 0, timed: 0 };
-    var byDiff = { easy: { n: 0, ok: 0 }, medium: { n: 0, ok: 0 }, hard: { n: 0, ok: 0 } };
-    var doms = {}, order = [];
+    // ── pool every test question ──
+    var half = Math.max(1, Math.floor(used.length / 2)), early = used.length >= 2 ? used.slice(0, half) : [], late = used.length >= 2 ? used.slice(half) : [];
+    var earlyIds = {}; early.forEach(function (a) { earlyIds[a.id] = 1; });
+    var tot = { n: 0, ok: 0, blank: 0, fast: 0, secs: 0, bud: 0, over: 0, timed: 0, overOk: 0, overN: 0, underOk: 0, underN: 0 };
+    var secs = {}, doms = {}, order = [];
+    var secT = function (k) { return (secs[k] = secs[k] || { n: 0, ok: 0, en: 0, eok: 0, ln: 0, lok: 0, secs: 0, bud: 0, timed: 0, d: { easy: [0, 0], medium: [0, 0], hard: [0, 0] }, pn: 0, pok: 0 }); };
     used.forEach(function (a) {
+      var isEarly = !!earlyIds[a.id];
       a.items.forEach(function (it) {
+        if (it.sec === 'rw') it.sec = 'reading-writing';
         if (!secOk(it.sec)) return;
         var dk = it.sec + '|' + it.dom;
         if (!doms[dk]) { doms[dk] = { sec: it.sec, dom: it.dom, n: 0, ok: 0, skills: {}, so: [] }; order.push(dk); }
         var D = doms[dk];
-        if (!D.skills[it.skill]) { D.skills[it.skill] = { n: 0, ok: 0, blank: 0, secs: 0, bud: 0, timed: 0, d: { easy: [0, 0], medium: [0, 0], hard: [0, 0] } }; D.so.push(it.skill); }
-        var S = D.skills[it.skill];
+        if (!D.skills[it.skill]) { D.skills[it.skill] = { n: 0, ok: 0, blank: 0, secs: 0, bud: 0, timed: 0, en: 0, eok: 0, ln: 0, lok: 0, pn: 0, pok: 0 }; D.so.push(it.skill); }
+        var S = D.skills[it.skill], T = secT(it.sec);
         if (it.blank) { tot.blank++; S.blank++; return; }
-        tot.n++; D.n++; S.n++;
-        if (it.ok) { tot.ok++; D.ok++; S.ok++; }
+        tot.n++; D.n++; S.n++; T.n++;
+        if (it.ok) { tot.ok++; D.ok++; S.ok++; T.ok++; }
         if (it.tooFast) tot.fast++;
-        var bd = byDiff[it.diff] || byDiff.medium; bd.n++; if (it.ok) bd.ok++;
-        var sd = S.d[it.diff] || S.d.medium; sd[1]++; if (it.ok) sd[0]++;
+        if (used.length >= 2) { if (isEarly) { S.en++; T.en++; if (it.ok) { S.eok++; T.eok++; } } else { S.ln++; T.ln++; if (it.ok) { S.lok++; T.lok++; } } }
+        var dd = T.d[it.diff] || T.d.medium; dd[1]++; if (it.ok) dd[0]++;
         var b = budgetOf ? budgetOf(it.sec, it.dom, it.skill, it.diff) : 0;
-        if (it.seconds > 0 && b > 0) { tot.secs += it.seconds; tot.bud += b; tot.timed++; S.secs += it.seconds; S.bud += b; S.timed++; if (it.seconds > b) tot.over++; }
+        if (it.seconds > 0 && b > 0) {
+          tot.secs += it.seconds; tot.bud += b; tot.timed++; S.secs += it.seconds; S.bud += b; S.timed++; T.secs += it.seconds; T.bud += b; T.timed++;
+          if (it.seconds > b) { tot.over++; tot.overN++; if (it.ok) tot.overOk++; } else { tot.underN++; if (it.ok) tot.underOk++; }
+        }
       });
+    });
+    // Practice answers joined by skill name (both use the College Board skill names).
+    var skIndex = {};
+    Object.keys(doms).forEach(function (dk) { doms[dk].so.forEach(function (s) { skIndex[s] = doms[dk].skills[s]; }); });
+    var pTot = { n: 0, ok: 0 }, orphan = {};
+    practice.forEach(function (p) {
+      if (p.bank === 'retry') return;   // a retry of a missed question is review, not a new read of the skill
+      if (p.sec && !secOk(p.sec)) return;
+      if (!p.sec && anState.sec !== 'all') return;
+      pTot.n++; if (p.ok) pTot.ok++;
+      if (p.sec) { var T = secT(p.sec); T.pn++; if (p.ok) T.pok++; }
+      if (!p.skill) return;
+      var S = skIndex[p.skill];
+      if (S) { S.pn++; if (p.ok) S.pok++; }
+      else { var o = (orphan[p.skill] = orphan[p.skill] || { n: 0, ok: 0, sec: p.sec }); o.n++; if (p.ok) o.ok++; }
     });
 
     // The shared verdicts, on the same attempts.
@@ -9109,13 +9319,13 @@ window.Portal = {
         (tr.fixed || []).forEach(function (k) { if (!flags[k]) flags[k] = { t: 'Improved', c: 'good' }; });
       }
       var focus = MSa.focusOf(used, { formOffsets: fo, skillLead: 3.35 });
-      ['reading-writing', 'math'].forEach(function (sk) {
-        var F = focus && focus.bySection && focus.bySection[sk];
+      ['reading-writing', 'math'].forEach(function (sk2) {
+        var F = focus && focus.bySection && focus.bySection[sk2];
         if (F && F.skill && !flags[F.skill]) flags[F.skill] = { t: 'Below your level', c: 'bad' };
       });
     } catch (err) { /* no labels rather than wrong ones */ }
 
-    // Tiles.
+    // ── tiles ──
     var lvl = null;
     try {
       var satEntries = entries.filter(function (x) { return x && x.testType === 'SAT' && x.testId !== HARDEST_TEST_ID && x.mode !== 'section'; });
@@ -9124,66 +9334,102 @@ window.Portal = {
     var pace = tot.bud ? tot.secs / tot.bud : 0;
     var paceTxt = !tot.timed ? '–' : (pace <= 1 ? Math.round((1 - pace) * 100) + '% under' : Math.round((pace - 1) * 100) + '% over');
     var tiles =
+      '<h2 class="an-band">Across your tests</h2>' +
       '<div class="an-tiles">' +
         '<div class="an-tile"><div class="k">Likely level now</div><div class="v">' + (lvl && lvl.now ? e(Math.round(lvl.now.lo)) + '&ndash;' + e(Math.round(lvl.now.hi)) : '&ndash;') + '</div><div class="s">' + (lvl && lvl.now ? 'About 4 chances in 5, from every test' : 'After your first scored test') + '</div></div>' +
-        '<div class="an-tile"><div class="k">Answered right</div><div class="v">' + anPct(tot.ok, tot.n) + '%</div><div class="s">' + tot.ok + ' of ' + tot.n + ' questions answered</div></div>' +
+        '<div class="an-tile"><div class="k">Answered right</div><div class="v">' + anPct(tot.ok, tot.n) + '%</div><div class="s">' + tot.ok + ' of ' + tot.n + ' on tests' + (pTot.n ? '; ' + anPct(pTot.ok, pTot.n) + '% of ' + pTot.n + ' in practice' : '') + '</div></div>' +
         '<div class="an-tile"><div class="k">Pace</div><div class="v">' + paceTxt + '</div><div class="s">' + (tot.timed ? 'Against the time each question allows. ' + tot.over + ' ran over.' : 'Not recorded on these tests') + '</div></div>' +
         '<div class="an-tile"><div class="k">Never reached</div><div class="v">' + tot.blank + '</div><div class="s">' + (tot.fast ? tot.fast + ' more answered too fast to count as a read' : 'Questions the clock took') + '</div></div>' +
       '</div>';
 
-    // Score history (all scored tests; the section filter picks the line).
+    // ── score history ──
     var scored = entries.filter(function (x) { return x && x.testType === 'SAT' && x.mode !== 'section' && x.testId !== HARDEST_TEST_ID && Number(x.composite) > 0; })
       .slice().sort(function (a, b) { return new Date(a.date || 0) - new Date(b.date || 0); });
     if (anState.range === '3') scored = scored.slice(-3);
-    var key = anState.sec === 'all' ? 'composite' : (anState.sec === 'math' ? 'math' : 'rw');
+    var key2 = anState.sec === 'all' ? 'composite' : (anState.sec === 'math' ? 'math' : 'rw');
     var lo = anState.sec === 'all' ? 400 : 200, hi = anState.sec === 'all' ? 1600 : 800;
-    var vals = scored.map(function (x) { return Number(x[key]) || 0; }).filter(function (v) { return v > 0; });
+    var vals = scored.map(function (x) { return Number(x[key2]) || 0; }).filter(function (v) { return v > 0; });
     var chart = '';
     if (vals.length) {
       var mn = Math.max(lo, Math.floor((Math.min.apply(null, vals) - 60) / 50) * 50), mx = Math.min(hi, Math.ceil((Math.max.apply(null, vals) + 60) / 50) * 50);
-      var W = 640, H = 190, L = 34, R = 12, T = 18, B = 26, n = scored.length;
-      var PADX = 26, xAt = function (i) { return n === 1 ? (L + W - R) / 2 : L + PADX + i * (W - L - R - 2 * PADX) / (n - 1); };
-      var yAt = function (v) { return T + (1 - (v - mn) / (mx - mn || 1)) * (H - T - B); };
+      var W2 = 640, H2 = 190, L = 34, R = 12, T2 = 18, B2 = 26, n = scored.length;
+      var PADX = 26, xAt = function (i) { return n === 1 ? (L + W2 - R) / 2 : L + PADX + i * (W2 - L - R - 2 * PADX) / (n - 1); };
+      var yAt = function (v) { return T2 + (1 - (v - mn) / (mx - mn || 1)) * (H2 - T2 - B2); };
       var grid = '', step = (mx - mn) > 300 ? 100 : 50;
-      for (var g = Math.ceil(mn / step) * step; g <= mx; g += step) grid += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + yAt(g).toFixed(1) + '" y2="' + yAt(g).toFixed(1) + '" stroke="rgba(17,17,17,.08)"/><text x="' + (L - 6) + '" y="' + (yAt(g) + 3).toFixed(1) + '" text-anchor="end">' + g + '</text>';
-      var pts = scored.map(function (x, i) { return [xAt(i), yAt(Number(x[key]) || mn), Number(x[key]) || 0, x]; });
+      for (var g = Math.ceil(mn / step) * step; g <= mx; g += step) grid += '<line x1="' + L + '" x2="' + (W2 - R) + '" y1="' + yAt(g).toFixed(1) + '" y2="' + yAt(g).toFixed(1) + '" stroke="rgba(17,17,17,.08)"/><text x="' + (L - 6) + '" y="' + (yAt(g) + 3).toFixed(1) + '" text-anchor="end">' + g + '</text>';
+      var pts = scored.map(function (x, i) { return [xAt(i), yAt(Number(x[key2]) || mn), Number(x[key2]) || 0, x]; });
       var path = pts.map(function (p, i) { return (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1); }).join(' ');
       var dots = pts.map(function (p, i) {
-        var lab = p[3].source === 'diagnostic' ? 'Diag' : (/practice-(\d+)/.exec(String(p[3].testId || '')) ? 'PT ' + /practice-(\d+)/.exec(String(p[3].testId))[1] : 'Test ' + (i + 1));
+        var mt = /practice-(\d+)/.exec(String(p[3].testId || ''));
+        var lab = p[3].source === 'diagnostic' ? 'Diag' : (mt ? 'PT ' + mt[1] : 'Test ' + (i + 1));
         return '<circle cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="4" fill="#B0271C" stroke="#fff" stroke-width="2"/>' +
           '<text class="val" x="' + p[0].toFixed(1) + '" y="' + (p[1] - 9).toFixed(1) + '" text-anchor="middle">' + p[2] + '</text>' +
-          '<text x="' + p[0].toFixed(1) + '" y="' + (H - 8) + '" text-anchor="middle">' + e(lab) + '</text>';
+          '<text x="' + p[0].toFixed(1) + '" y="' + (H2 - 8) + '" text-anchor="middle">' + e(lab) + '</text>';
       }).join('');
-      chart = '<div class="an-card"><h2>Score history</h2><p class="an-note">' + (anState.sec === 'all' ? 'Total score' : anSecLabel(anState.sec) + ' score') + ' on each full test, oldest first.</p>' +
-        '<svg class="an-chart" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Score on each test">' + grid + '<path d="' + path + '" fill="none" stroke="#B0271C" stroke-width="2"/>' + dots + '</svg></div>';
+      var first = vals[0], lastV = vals[vals.length - 1];
+      chart = '<div class="an-card"><h2>Score history</h2><p class="an-note">' + (anState.sec === 'all' ? 'Total score' : anSecLabel(anState.sec) + ' score') + ' on each full test, oldest first.' + (vals.length > 1 ? ' <b>' + (lastV - first >= 0 ? '+' : '&minus;') + Math.abs(lastV - first) + '</b> from the first to the latest.' : '') + '</p>' +
+        '<svg class="an-chart" viewBox="0 0 ' + W2 + ' ' + H2 + '" role="img" aria-label="Score on each test">' + grid + '<path d="' + path + '" fill="none" stroke="#B0271C" stroke-width="2"/>' + dots + '</svg></div>';
     }
 
-    // Difficulty.
-    var diffHtml = '<div class="an-card"><h2>By difficulty</h2><p class="an-note">How often you got each level right. On the real test, the second module is harder when the first goes well.</p><div class="an-diff">' +
-      ['easy', 'medium', 'hard'].map(function (d) { var x = byDiff[d]; return '<div><b>' + d + '</b><span>' + (x.n ? anPct(x.ok, x.n) + '%' : '&ndash;') + '</span><small>' + x.ok + ' of ' + x.n + '</small></div>'; }).join('') + '</div></div>';
+    // ── by section ──
+    var secKeys = ['reading-writing', 'math'].filter(function (k) { return secs[k] && (secs[k].n || secs[k].pn); });
+    var trendCell = function (en, eok, ln, lok) {
+      if (!en || !ln) return '<span class="an-mute">&ndash;</span>';
+      var d = anPct(lok, ln) - anPct(eok, en);
+      return anPct(eok, en) + '% &rarr; ' + anPct(lok, ln) + '% <span class="an-delta ' + (d > 2 ? 'up' : d < -2 ? 'down' : '') + '">' + (d > 0 ? '+' : d < 0 ? '&minus;' : '') + Math.abs(d) + '</span>';
+    };
+    var secHtml = secKeys.length ? '<div class="an-card"><h2>By section</h2><p class="an-note">Tests and practice side by side. Earlier &rarr; recent splits your tests into an older half and a newer half.</p>' +
+      '<div class="an-tablewrap"><table class="an-table"><thead><tr><th>Section</th><th>On tests</th><th>Earlier &rarr; recent</th><th>In practice</th><th>Time / allowed</th></tr></thead><tbody>' +
+      secKeys.map(function (k) { var T = secs[k];
+        return '<tr><td><b>' + e(anSecLabel(k)) + '</b></td><td class="num">' + (T.n ? anPct(T.ok, T.n) + '% <span class="an-mute">(' + T.ok + '/' + T.n + ')</span>' : '&ndash;') + '</td><td class="num">' + trendCell(T.en, T.eok, T.ln, T.lok) + '</td>' +
+          '<td class="num">' + (T.pn ? anPct(T.pok, T.pn) + '% <span class="an-mute">(' + T.pok + '/' + T.pn + ')</span>' : '&ndash;') + '</td>' +
+          '<td class="num">' + (T.timed ? '<span class="an-pace' + (T.secs / T.bud > 1.1 ? ' slow' : '') + '">' + Math.round(T.secs / T.timed) + 's</span> / ' + Math.round(T.bud / T.timed) + 's' : '&ndash;') + '</td></tr>';
+      }).join('') + '</tbody></table></div></div>' : '';
 
-    // By skill.
+    // ── by difficulty, per section ──
+    var diffHtml = '<div class="an-card"><h2>By difficulty</h2><p class="an-note">How often you got each level right on tests. On the real test, the second module is harder when the first goes well.</p><div class="an-diff">' +
+      ['easy', 'medium', 'hard'].map(function (d) {
+        var tn = 0, tk = 0, per = secKeys.map(function (k) { var x = secs[k].d[d]; tn += x[1]; tk += x[0]; return x[1] ? '<small>' + e(k === 'math' ? 'Math' : 'R&W') + ' ' + anPct(x[0], x[1]) + '% (' + x[0] + '/' + x[1] + ')</small>' : ''; }).join('');
+        return '<div><b>' + d + '</b><span>' + (tn ? anPct(tk, tn) + '%' : '&ndash;') + '</span><small>' + tk + ' of ' + tn + '</small>' + (secKeys.length > 1 ? per : '') + '</div>';
+      }).join('') + '</div></div>';
+
+    // ── habits, pooled ──
+    var habitHtml = tot.timed ? '<div class="an-card"><h2>How you use the clock</h2><p class="an-note">Every timed question across your tests, against the time each one allows.</p><div class="an-habits">' +
+      '<div><b>' + anPct(tot.underOk, tot.underN) + '%</b><span>right when on time</span><small>' + tot.underN + ' questions</small></div>' +
+      '<div><b>' + anPct(tot.overOk, tot.overN) + '%</b><span>right when over time</span><small>' + tot.overN + ' questions</small></div>' +
+      '<div><b>' + tot.fast + '</b><span>answered too fast to read</span><small>left out of every skill count</small></div>' +
+      '<div><b>' + tot.blank + '</b><span>never reached</span><small>the clock ran out first</small></div>' +
+      '</div></div>' : '';
+
+    // ── by skill ──
     order.sort(function (a, b) { return (doms[a].sec === doms[b].sec ? 0 : (doms[a].sec === 'reading-writing' ? -1 : 1)); });
     var rows = '', lastSec = '';
     order.forEach(function (dk) {
       var D = doms[dk];
       if (!D.n) return;
-      if (anState.sec === 'all' && D.sec !== lastSec) { rows += '<tr class="dom"><td colspan="5" style="background:transparent;padding-top:1rem;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:var(--mid)">' + e(anSecLabel(D.sec)) + '</td></tr>'; lastSec = D.sec; }
-      rows += '<tr class="dom"><td>' + e(D.dom) + '</td><td class="num">' + D.ok + ' / ' + D.n + '</td><td><div class="an-bar"><i style="width:' + anPct(D.ok, D.n) + '%"></i></div></td><td></td><td></td></tr>';
-      D.so.slice().sort(function (a, b) { var A = D.skills[a], B2 = D.skills[b]; return (A.n ? A.ok / A.n : 1) - (B2.n ? B2.ok / B2.n : 1); }).forEach(function (sk) {
-        var S = D.skills[sk];
+      if (anState.sec === 'all' && D.sec !== lastSec) { rows += '<tr class="dom"><td colspan="6" style="background:transparent;padding-top:1rem;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:var(--mid)">' + e(anSecLabel(D.sec)) + '</td></tr>'; lastSec = D.sec; }
+      var single = D.so.length === 1 && D.so[0] === D.dom;
+      if (!single) rows += '<tr class="dom"><td>' + e(D.dom) + '</td><td class="num">' + D.ok + ' / ' + D.n + '</td><td><div class="an-bar"><i style="width:' + anPct(D.ok, D.n) + '%"></i></div></td><td></td><td></td><td></td></tr>';
+      D.so.slice().sort(function (a, b) { var A = D.skills[a], B3 = D.skills[b]; return (A.n ? A.ok / A.n : 1) - (B3.n ? B3.ok / B3.n : 1); }).forEach(function (s) {
+        var S = D.skills[s];
         if (!S.n && !S.blank) return;
-        if (sk === D.dom && D.so.length === 1) { var f0 = flags[sk]; if (f0) rows = rows.replace(/<td><\/td><\/tr>$/, '<td><span class="an-pill ' + f0.c + '">' + e(f0.t) + '</span></td></tr>'); return; }
-        var pr = S.bud ? S.secs / S.bud : 0, f = flags[sk];
-        var paceCell = S.timed ? '<span class="an-pace' + (pr > 1.15 ? ' slow' : '') + '">' + Math.round(S.secs / S.timed) + 's <span style="color:var(--mid);font-weight:400">/ ' + Math.round(S.bud / S.timed) + 's</span></span>' : '&ndash;';
-        rows += '<tr><td style="padding-left:1.2rem">' + e(sk) + '</td><td class="num">' + S.ok + ' / ' + S.n + (S.blank ? ' <span style="color:var(--mid)">(+' + S.blank + ' not reached)</span>' : '') + '</td>' +
-          '<td><div class="an-bar"><i style="width:' + anPct(S.ok, S.n) + '%"></i></div></td><td class="num">' + paceCell + '</td><td>' + (f ? '<span class="an-pill ' + f.c + '">' + e(f.t) + '</span>' : '') + '</td></tr>';
+        var f = flags[s];
+        var paceCell = S.timed ? '<span class="an-pace' + (S.secs / S.bud > 1.15 ? ' slow' : '') + '">' + Math.round(S.secs / S.timed) + 's <span style="color:var(--mid);font-weight:400">/ ' + Math.round(S.bud / S.timed) + 's</span></span>' : '&ndash;';
+        rows += '<tr' + (single ? ' class="dom"' : '') + '><td' + (single ? '' : ' style="padding-left:1.2rem"') + '>' + e(s) + '</td><td class="num">' + S.ok + ' / ' + S.n + (S.blank ? ' <span style="color:var(--mid)">(+' + S.blank + ' not reached)</span>' : '') + '</td>' +
+          '<td><div class="an-bar"><i style="width:' + anPct(S.ok, S.n) + '%"></i></div></td>' +
+          '<td class="num">' + (S.pn ? anPct(S.pok, S.pn) + '% <span class="an-mute">(' + S.pn + ')</span>' : '<span class="an-mute">&ndash;</span>') + '</td>' +
+          '<td class="num">' + paceCell + '</td><td>' + (f ? '<span class="an-pill ' + f.c + '">' + e(f.t) + '</span>' : (S.en >= 4 && S.ln >= 4 ? '<span class="an-mute an-small">' + trendCell(S.en, S.eok, S.ln, S.lok) + '</span>' : '')) + '</td></tr>';
       });
     });
-    var skillHtml = '<div class="an-card"><h2>By skill</h2><p class="an-note">Right out of answered, weakest first in each area. Time is your average per question against what the question allows. Labels appear only when the pattern is too consistent to be a bad day.</p>' +
-      '<div class="an-tablewrap"><table class="an-table"><thead><tr><th>Skill</th><th>Right</th><th></th><th>Time / allowed</th><th></th></tr></thead><tbody>' + rows + '</tbody></table></div></div>';
+    var orphanKeys = Object.keys(orphan).filter(function (k) { return orphan[k].n >= 3; }).sort(function (a, b) { return orphan[b].n - orphan[a].n; });
+    if (orphanKeys.length) {
+      rows += '<tr class="dom"><td colspan="6" style="background:transparent;padding-top:1rem;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:var(--mid)">Practiced, not yet on a test</td></tr>' +
+        orphanKeys.slice(0, 12).map(function (k) { var o = orphan[k]; return '<tr><td style="padding-left:1.2rem">' + e(k) + '</td><td class="num an-mute">&ndash;</td><td></td><td class="num">' + anPct(o.ok, o.n) + '% <span class="an-mute">(' + o.n + ')</span></td><td></td><td></td></tr>'; }).join('');
+    }
+    var skillHtml = '<div class="an-card"><h2>By skill</h2><p class="an-note">Tests: right out of answered, weakest first in each area. Practice: your Question Bank, Rush and Challenge answers on the same skill. Time is your average per question against what it allows. Labels appear only when the pattern is too consistent to be a bad day; otherwise the last column shows earlier &rarr; recent tests where there is enough to compare.</p>' +
+      '<div class="an-tablewrap"><table class="an-table"><thead><tr><th>Skill</th><th>Tests</th><th></th><th>Practice</th><th>Time / allowed</th><th></th></tr></thead><tbody>' + rows + '</tbody></table></div></div>';
 
-    body.innerHTML = tiles + chart + diffHtml + skillHtml;
+    body.innerHTML = timeHtml + weekHtml + tiles + chart + secHtml + diffHtml + habitHtml + skillHtml;
   }
   document.addEventListener('click', function (ev) {
     var b = ev.target.closest && ev.target.closest('[data-an-sec],[data-an-range]');
