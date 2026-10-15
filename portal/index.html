@@ -9339,9 +9339,10 @@ window.Portal = {
         if (!D.skills[it.skill]) { D.skills[it.skill] = { n: 0, ok: 0, blank: 0, secs: 0, bud: 0, timed: 0, en: 0, eok: 0, ln: 0, lok: 0, pn: 0, pok: 0 }; D.so.push(it.skill); }
         var S = D.skills[it.skill], T = secT(it.sec);
         if (it.blank) { tot.blank++; S.blank++; return; }
+        // Too fast to have been read: counted, but kept out of every percentage, as in the shared skill check (signals.js).
+        if (it.tooFast) { tot.fast++; return; }
         tot.n++; D.n++; S.n++; T.n++;
         if (it.ok) { tot.ok++; D.ok++; S.ok++; T.ok++; }
-        if (it.tooFast) tot.fast++;
         if (used.length >= 2) { if (isEarly) { S.en++; T.en++; if (it.ok) { S.eok++; T.eok++; } } else { S.ln++; T.ln++; if (it.ok) { S.lok++; T.lok++; } } }
         var dd = T.d[it.diff] || T.d.medium; dd[1]++; if (it.ok) dd[0]++;
         var b = budgetOf ? budgetOf(it.sec, it.dom, it.skill, it.diff) : 0;
