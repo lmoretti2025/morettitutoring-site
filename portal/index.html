@@ -1073,6 +1073,25 @@
     .home-overview.is-subject .home-shortcut-badge { top: .45rem; right: .5rem; font-size: .52rem; }
   }
 
+  /* ═══ MATH HOME, WARMER (Luca, 2026-10-15: "bland, empty") ═══ the SAT Home's warm card, office hours as a gold
+     panel, real cards for the shortcuts, today's date under the greeting, booking when nothing is scheduled. */
+  .menu-today { display: none; text-align: center; font-size: .86rem; color: var(--mid); margin: -.4rem 0 1.6rem; }
+  body:has(.home-overview.is-subject) .menu-today { display: block; }
+  .home-overview.is-subject .overview-card { background: radial-gradient(90% 160% at 0% 0%, #FBEFE6 0%, #fff 55%), #fff; border: 1px solid rgba(201,168,76,.38); border-radius: 18px; box-shadow: 0 14px 34px -22px rgba(120,60,30,.45); }
+  .home-overview.is-subject .ns-main { flex: 1 1 auto; }
+  .home-overview.is-subject .mini-session-eyebrow { color: #9A7A2A; }
+  .home-overview.is-subject .ns-join { background: var(--red); color: #fff; box-shadow: 0 6px 16px -8px rgba(176,39,28,.7); }
+  .ns-book { display: inline-block; margin-top: 1rem; font-size: .8rem; font-weight: 700; color: #fff; background: var(--red); border-radius: 999px; padding: .55rem 1.1rem; text-decoration: none; box-shadow: 0 6px 16px -8px rgba(176,39,28,.7); }
+  .ns-book:hover { filter: brightness(.95); }
+  .home-overview.is-subject .ns-oh { max-width: 420px; margin-top: 1.3rem; padding: .9rem 1.1rem; border-top: 0; background: rgba(201,168,76,.12); border-radius: 12px; }
+  .home-overview.is-subject .ns-oh-join { background: #fff; }
+  @media (min-width: 641px) {
+    .home-overview.is-subject .home-shortcuts { gap: 1rem; }
+    .home-overview.is-subject .home-shortcut-card { background: #fff; border: 1px solid var(--border); box-shadow: 0 6px 18px -14px rgba(17,17,17,.3); }
+    .home-overview.is-subject .home-shortcut-card:hover { transform: translateY(-2px); }
+  }
+  .home-top-row.is-subject .assign-card { border-left: 3px solid var(--gold); background: linear-gradient(180deg, #fff, #FDFAF4); }
+
   /* ═══ SUBJECT-TUTORING HOME ═══ see applySubjectHome(). A student who
      isn't doing SAT prep has no scores, practice tests or question bank.
      Only the SAT-only children of Your Overview are hidden (hiding the
@@ -4811,6 +4830,7 @@ window.Portal = {
   <div class="panel-wide home-panel">
     <h1 class="menu-greeting" id="menu-greeting">Hey there.</h1>
     <p class="menu-countdown-m" id="menu-countdown-m"></p>
+    <p class="menu-today" id="menu-today"></p>
 
     <!-- ═══ HOME EMPTY STATES ═══ replaces the whole dashboard for a student
          who hasn't taken the diagnostic yet, or has and is still inside the
@@ -7395,6 +7415,8 @@ window.Portal = {
     // "This Week" as a tile duplicates the checklist sitting right below
     // it on this layout, so it becomes the way through to the calendar
     // proper and says so.
+    var todayEl = document.getElementById('menu-today');   // the math Home has no countdown, so it shows the date
+    if (todayEl) { try { todayEl.textContent = on ? new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' }) : ''; } catch (e) {} }
     var twTitle = document.querySelector('#home-shortcut-thisweek .home-shortcut-title');
     if (twTitle) twTitle.textContent = on ? 'My Calendar' : 'This Week';
     // renderHomeShortcutTeasers() fills this tile with the next task's name.
@@ -10498,15 +10520,17 @@ window.Portal = {
             setNsRel(sessionRelativeText(data.next.startIso));
             setNsDayChip(data.next.startIso);
           }
+          nsBookLink(false);
         } else if (data && data.ok && !data.next) {
           nsLabel.textContent = '';
           nsDate.textContent = 'No sessions scheduled yet.';
           // The hero card is the whole point of this layout, so this state
           // says what happens next instead of stopping at a dead end.
-          if (nsTime) nsTime.textContent = 'Luca will put your next one on the calendar.';
+          if (nsTime) nsTime.textContent = 'Pick a time that works for you, or Luca will put the next one on the calendar.';
           setNsRel('');
           setNsDayChip(null);
           nsNoSession = true;
+          nsBookLink(true);
         } else {
           // Lookup failed — server error, calendar unreachable, offline,
           // whatever. The link itself (set above, before this fetch even
@@ -10557,6 +10581,18 @@ window.Portal = {
     if (!days.length) return null;
     var ahead = days.filter(function (ms) { return ms >= startOfToday.getTime(); });
     return ahead.length ? ahead[0] : days[days.length - 1];
+  }
+
+  /* With no session on the calendar, the hero offers booking one (session.html) rather than ending there (2026-10-15). */
+  function nsBookLink(on) {
+    var main = document.querySelector('#next-session-card .ns-main'); if (!main) return;
+    var a = document.getElementById('ns-book');
+    if (!a && on) {
+      a = document.createElement('a'); a.id = 'ns-book'; a.className = 'ns-book'; a.href = '../session.html'; a.target = '_blank'; a.rel = 'noopener';
+      a.textContent = 'Book a session \u2192';
+      var oh = document.getElementById('ns-oh'); main.insertBefore(a, oh || null);
+    }
+    if (a) a.style.display = on ? '' : 'none';
   }
 
   function renderTestCountdown() {
@@ -16544,6 +16580,7 @@ window.Portal = {
       // timer from it.
       if (typeof applyStoredAccommodations === 'function') applyStoredAccommodations();
       document.getElementById('menu-greeting').textContent = 'Hey ' + currentStudent.name.split(' ')[0] + '.';
+      try { document.getElementById('menu-today').textContent = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' }); } catch (e) {}
       loadNextSession();
       renderTestCountdown();
       renderNavProfile();
