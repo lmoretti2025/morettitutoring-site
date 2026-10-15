@@ -1058,8 +1058,26 @@
   .sw-h { font-family: var(--display); font-size: 1.15rem; font-weight: 700; margin: 0 0 .3rem; color: var(--text); }
   .sw-p { font-size: .84rem; line-height: 1.55; color: var(--mid); margin: 0 0 .9rem; }
   .sw-note { width: 100%; font-family: var(--hel); font-size: .86rem; padding: .6rem .75rem; border: 1px solid var(--border); border-radius: 9px; margin-bottom: .7rem; background: #fff; }
-  .sw-btn { display: inline-flex; align-items: center; justify-content: center; width: 100%; font-weight: 700; font-size: .82rem; color: #fff; background: linear-gradient(135deg, #4FA06E, #2F7A4F); border-radius: 10px; padding: .8rem 1rem; cursor: pointer; }
+  .sw-btn { border: 0; display: inline-flex; align-items: center; justify-content: center; width: 100%; font-weight: 700; font-size: .82rem; color: #fff; background: linear-gradient(135deg, #4FA06E, #2F7A4F); border-radius: 10px; padding: .8rem 1rem; cursor: pointer; }
   .sw-btn:hover { filter: brightness(.95); }
+  .sw-modal { position: fixed; inset: 0; z-index: 9000; background: rgba(17,17,17,.45); display: flex; align-items: center; justify-content: center; padding: 1rem; }
+  .sw-modal[hidden] { display: none; }
+  body.sw-open { overflow: hidden; }
+  .sw-card { position: relative; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; background: #fff; border-radius: 18px; padding: 1.5rem 1.5rem 1.3rem; box-shadow: 0 30px 60px -20px rgba(0,0,0,.45); text-align: left; }
+  .sw-x { position: absolute; top: .7rem; right: .8rem; border: 0; background: none; font-size: 1.5rem; line-height: 1; color: var(--mid); cursor: pointer; }
+  .sw-add { display: flex; align-items: center; justify-content: center; border: 1.5px dashed rgba(63,143,95,.55); background: #F3F8F4; color: #2F7A4F; font-weight: 700; font-size: .86rem; border-radius: 12px; padding: 1rem; cursor: pointer; }
+  .sw-add:hover { background: #EAF4EE; }
+  .sw-list { display: grid; gap: .45rem; margin: .8rem 0; }
+  .sw-f { display: flex; align-items: center; gap: .65rem; padding: .4rem .5rem; border: 1px solid var(--border); border-radius: 10px; }
+  .sw-f img { width: 42px; height: 42px; object-fit: cover; border-radius: 7px; }
+  .sw-pdf { width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; border-radius: 7px; background: rgba(176,39,28,.1); color: var(--red); font-size: .7rem; font-weight: 700; }
+  .sw-fn { flex: 1; min-width: 0; font-size: .8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sw-f button { border: 0; background: none; font-size: 1.2rem; color: var(--mid); cursor: pointer; }
+  .sw-card .sw-note { resize: vertical; min-height: 70px; font-family: var(--hel); }
+  .sw-foot { display: flex; align-items: center; gap: .8rem; margin-top: .2rem; }
+  .sw-foot .sw-status { flex: 1; margin: 0; }
+  .sw-send { border: 0; border-radius: 999px; background: linear-gradient(135deg, #4FA06E, #2F7A4F); color: #fff; font-weight: 700; font-size: .84rem; padding: .7rem 1.4rem; cursor: pointer; }
+  .sw-send:disabled { opacity: .45; cursor: default; }
   .sw-status { font-size: .8rem; margin-top: .7rem; color: var(--mid); min-height: 1.1em; }
   .sw-status .ok { color: #2F7A4F; font-weight: 600; }
   .sw-status .err { color: var(--red); }
@@ -7345,10 +7363,7 @@ window.Portal = {
   document.getElementById('home-shortcut-mistakes').addEventListener('click', function () { goToGatedNav('sidebar-incorrect-questions', 'incorrect-questions'); });
   document.getElementById('home-shortcut-qb').addEventListener('click', function () { goToGatedNav('sidebar-question-bank', 'question-bank'); });
   document.getElementById('home-shortcut-files').addEventListener('click', function () { goToGatedNav('sidebar-files', 'files'); });
-  document.getElementById('home-shortcut-sendwork').addEventListener('click', function () {
-    goToGatedNav('sidebar-files', 'files');
-    var inp = document.getElementById('sw-input'); if (inp) inp.click();   // same tap, so the picker is allowed to open
-  });
+  document.getElementById('home-shortcut-sendwork').setAttribute('data-sw-open', '');   // opens the Send your work pop-up
 
   /* ═══ HOW LUCA IS REACHED ═══ the only contact channel this site
      publishes is the phone number in the marketing page's hero/footer, so
@@ -12522,10 +12537,8 @@ window.Portal = {
   function sendWorkHtml() {
     return '<div class="sw" id="sw">' +
       '<h2 class="sw-h">Send Luca your work</h2>' +
-      '<p class="sw-p">Snap your homework or a test you got back. It goes straight into this folder, so Luca sees it before your session.</p>' +
-      '<input type="text" class="sw-note" id="sw-note" maxlength="200" placeholder="Anything to add? (optional)">' +
-      '<label class="sw-btn"><input type="file" id="sw-input" accept="image/*,application/pdf" multiple hidden>Choose photos or a PDF</label>' +
-      '<div class="sw-status" id="sw-status" aria-live="polite"></div></div>';
+      '<p class="sw-p">Snap your homework or a test you got back. It goes straight into this folder, and Luca gets it before your session.</p>' +
+      '<button type="button" class="sw-btn" data-sw-open>Send your work</button></div>';
   }
   function shrinkImage(file) {
     return new Promise(function (resolve, reject) {
@@ -12548,37 +12561,85 @@ window.Portal = {
   }
   var SW_ERRORS = { bad_type: 'only photos and PDFs can be sent', too_big: 'that file is too large (8 MB at most)', no_folder: 'your folder is not set up yet, so ask Luca',
     too_many: 'that is the limit for today', drive_failed: 'Google Drive did not take it, so try again in a minute', bad_file: 'that file could not be read' };
-  function wireSendWork() {
-    var input = document.getElementById('sw-input'); if (!input || input.__wired) return; input.__wired = true;
-    input.addEventListener('change', function () {
-      var files = [].slice.call(input.files || []); input.value = '';
-      if (!files.length || !currentStudent) return;
-      var st = document.getElementById('sw-status'), note = (document.getElementById('sw-note') || {}).value || '';
-      var sent = 0, failed = [];
-      var line = function (t, cls) { st.innerHTML = '<span class="' + (cls || '') + '">' + t + '</span>'; };
-      var next = function (i) {
-        if (i >= files.length) {
-          if (sent) line('&#10003; Sent ' + sent + ' file' + (sent === 1 ? '' : 's') + ' to Luca.' + (failed.length ? ' ' + failed.join(' ') : ''), 'ok');
-          else line(failed.join(' '), 'err');
-          if (sent) { var n = document.getElementById('sw-note'); if (n) n.value = ''; }
-          return;
-        }
-        var f = files[i];
-        line('Sending ' + (i + 1) + ' of ' + files.length + '&hellip;');
-        var isPdf = /pdf$/i.test(f.type) || /\.pdf$/i.test(f.name);
-        var prep = isPdf ? readAsDataUrl(f).then(function (d) { return { mimeType: 'application/pdf', data: d }; }) : shrinkImage(f);
-        prep.then(function (p) {
-          return postToBackend({ action: 'uploadWork', key: currentStudent.key, mimeType: p.mimeType, data: p.data, note: note, part: files.length > 1 ? i + 1 : 0 }, { attempts: 2, timeoutMs: 60000 });
-        }).then(function (d) {
-          if (d && d.ok) sent++;
-          else failed.push(window.Portal.escHtml(f.name) + ': ' + (SW_ERRORS[d && d.error] || 'it did not go through') + '.');
-          next(i + 1);
-        }, function () { failed.push(window.Portal.escHtml(f.name) + ': it did not go through, so check your connection and try again.'); next(i + 1); });
-      };
-      next(0);
+  /* The pop-up (Luca, 2026-10-15): pick files, remove any, add a note, and nothing goes until Send. One batch, so
+     Luca gets one email with the note and every file. */
+  var swFiles = [];
+  function wireSendWork() {}
+  function swEl() {
+    var m = document.getElementById('sw-modal');
+    if (m) return m;
+    m = document.createElement('div'); m.id = 'sw-modal'; m.className = 'sw-modal'; m.hidden = true;
+    m.innerHTML = '<div class="sw-card" role="dialog" aria-modal="true" aria-labelledby="sw-title">' +
+      '<button type="button" class="sw-x" data-sw-close aria-label="Close">&times;</button>' +
+      '<h2 class="sw-h" id="sw-title">Send Luca your work</h2>' +
+      '<p class="sw-p">Photos of homework or a test you got back, or a PDF. Luca gets them with your note before your session.</p>' +
+      '<label class="sw-add"><input type="file" id="sw-input" accept="image/*,application/pdf" multiple hidden><span>+ Add photos or a PDF</span></label>' +
+      '<div class="sw-list" id="sw-list"></div>' +
+      '<textarea class="sw-note" id="sw-note" maxlength="200" rows="3" placeholder="Add a note for Luca (optional): which problems, what you got stuck on"></textarea>' +
+      '<div class="sw-foot"><span class="sw-status" id="sw-status" aria-live="polite"></span><button type="button" class="sw-send" id="sw-send" disabled>Send</button></div></div>';
+    document.body.appendChild(m);
+    m.addEventListener('click', function (e) {
+      if (e.target === m || e.target.closest('[data-sw-close]')) { swClose(); return; }
+      var rm = e.target.closest('[data-sw-rm]');
+      if (rm) { swFiles.splice(+rm.getAttribute('data-sw-rm'), 1); swPaint(); }
     });
+    m.querySelector('#sw-input').addEventListener('change', function () {
+      [].slice.call(this.files || []).forEach(function (f) { if (swFiles.length < 10) swFiles.push(f); });
+      this.value = ''; swPaint();
+    });
+    m.querySelector('#sw-send').addEventListener('click', swSend);
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !m.hidden) swClose(); });
+    return m;
   }
-
+  function swPaint() {
+    var list = document.getElementById('sw-list');
+    list.innerHTML = swFiles.map(function (f, i) {
+      var isImg = /^image\//.test(f.type), url = isImg ? URL.createObjectURL(f) : '';
+      return '<div class="sw-f">' + (isImg ? '<img src="' + url + '" alt="">' : '<span class="sw-pdf">PDF</span>') +
+        '<span class="sw-fn">' + window.Portal.escHtml(f.name) + '</span><button type="button" data-sw-rm="' + i + '" aria-label="Remove">&times;</button></div>';
+    }).join('');
+    document.getElementById('sw-send').disabled = !swFiles.length;
+    document.getElementById('sw-send').textContent = swFiles.length > 1 ? 'Send ' + swFiles.length + ' files' : 'Send';
+  }
+  function swOpen() {
+    var m = swEl(); swFiles = []; swPaint();
+    document.getElementById('sw-note').value = ''; document.getElementById('sw-status').innerHTML = '';
+    m.hidden = false; document.body.classList.add('sw-open');
+  }
+  function swClose() { var m = document.getElementById('sw-modal'); if (m) m.hidden = true; document.body.classList.remove('sw-open'); }
+  function swSend() {
+    if (!swFiles.length || !currentStudent) return;
+    var files = swFiles.slice(), note = document.getElementById('sw-note').value || '', st = document.getElementById('sw-status');
+    var btn = document.getElementById('sw-send'); btn.disabled = true;
+    var batch = 'b' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), sent = 0, failed = [];
+    var line = function (t, cls) { st.innerHTML = '<span class="' + (cls || '') + '">' + t + '</span>'; };
+    var next = function (i) {
+      if (i >= files.length) {
+        if (sent && !failed.length) { line('&#10003; Sent to Luca.', 'ok'); setTimeout(swClose, 1400); }
+        else if (sent) { line('Sent ' + sent + '. ' + failed.join(' '), 'err'); btn.disabled = false; }
+        else { line(failed.join(' '), 'err'); btn.disabled = false; }
+        return;
+      }
+      var f = files[i];
+      line('Sending ' + (files.length > 1 ? (i + 1) + ' of ' + files.length : '') + '&hellip;');
+      var isPdf = /pdf$/i.test(f.type) || /\.pdf$/i.test(f.name);
+      var prep = isPdf ? readAsDataUrl(f).then(function (d) { return { mimeType: 'application/pdf', data: d }; }) : shrinkImage(f);
+      prep.then(function (p) {
+        return postToBackend({ action: 'uploadWork', key: currentStudent.key, mimeType: p.mimeType, data: p.data, note: note,
+          batch: batch, part: files.length > 1 ? i + 1 : 0, last: i === files.length - 1 }, { attempts: 2, timeoutMs: 60000 });
+      }).then(function (d) {
+        if (d && d.ok) { sent++; swFiles.splice(swFiles.indexOf(f), 1); }
+        else failed.push(window.Portal.escHtml(f.name) + ': ' + (SW_ERRORS[d && d.error] || 'it did not go through') + '.');
+        next(i + 1);
+      }, function () { failed.push(window.Portal.escHtml(f.name) + ': it did not go through, so check your connection and try again.'); next(i + 1); });
+    };
+    next(0);
+  }
+  document.addEventListener('click', function (e) {
+    var o = e.target.closest && e.target.closest('[data-sw-open]');
+    if (!o) return;
+    e.preventDefault(); swOpen();
+  });
   document.getElementById('res-back').addEventListener('click', function (e) { e.preventDefault(); show('screen-menu'); });
 
 
