@@ -269,6 +269,12 @@
           calSessions.push({ startIso: d.toISOString(), allDay: false, title: 'Avery - tutoring' });
         });
       }
+      /* Office hours (2026-10-15): the weekly drop-in, on Home and the calendar, for the showcase
+         recordings on the SAT and math pages. Wednesdays at 7 PM. */
+      var ohAt = function (w) { var d = new Date(); d.setDate(d.getDate() - d.getDay() + 3 + w * 7); d.setHours(19, 0, 0, 0); return d; };
+      var ohNext = ohAt(0) > new Date() ? ohAt(0) : ohAt(1);
+      var ohJson = (showcase || mathshow) ? ',officeHours:{startIso:' + JSON.stringify(ohNext.toISOString()) + ',allDay:false,title:"Office hours"}' : '';
+      if (showcase || mathshow) for (var ow = -2; ow <= 3; ow++) calSessions.push({ startIso: ohAt(ow).toISOString(), allDay: false, title: 'Office hours', officeHours: true });
       var dayAgo = function (n) { var d = new Date(); d.setDate(d.getDate() - n); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
       var sampleRecaps = subject ? [
         { id: 'r2', date: dayAgo(2), recap: 'Factoring by grouping: we went through 7.3 together and you did the last four on your own.\n\nBefore Thursday: 7.3 #1 to 15 (odds), and redo #12 from the quiz.' },
@@ -296,7 +302,7 @@
         // Sample session recaps (work.gs getRecaps) and a pretend upload (uploadWork), 2026-10-15.
         'else if(b.action==="getRecaps")o={ok:true,recaps:' + JSON.stringify(sampleRecaps) + '};' +
         'else if(b.action==="uploadWork")o={ok:true,name:"Work from Avery.jpg",url:"https://drive.google.com/file/d/PREVIEW"};' +
-        'else if(b.action==="nextSession")o=' + (noSession ? '{ok:true,next:null}' : '{ok:true,next:{startIso:' + JSON.stringify(soon.toISOString()) + ',allDay:false,title:"Avery - tutoring"}}') + ';' +
+        'else if(b.action==="nextSession")o=' + (noSession ? '{ok:true,next:null}' : '{ok:true,next:{startIso:' + JSON.stringify(soon.toISOString()) + ',allDay:false,title:"Avery - tutoring"}' + ohJson + '}') + ';' +
         'else if(b.action==="getStudyStats"&&ST)o=ST;' +
         'else if(b.action==="getAssignmentsCalendar")o={ok:true,assignments:S.assignments,sessions:' + JSON.stringify(calSessions) + '};' +
         'var res={ok:true,status:200,clone:function(){return this;},' +
