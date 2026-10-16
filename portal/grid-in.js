@@ -121,7 +121,7 @@
       var dot = h.indexOf('.');
       if (dot >= 0) h = h.slice(0, dot + 1) + h.slice(dot + 1).replace(/\./g, '').slice(0, 4);
       return (neg ? '-' : '') + h;
-    }).join('/');
+    }).join('/').slice(0, s.charAt(0) === '-' ? 6 : 5);   // Bluebook: 5 characters, 6 with a negative sign (2026-10-13)
   }
 
   /* Wires an answer box: no browser autofill suggestions, and the filter

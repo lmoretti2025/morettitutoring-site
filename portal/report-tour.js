@@ -828,11 +828,14 @@
     if (reduced()) { el.textContent = to; return; }
     later(function () {
       var t0 = performance.now();
-      (function tick(t) {
-        var p = Math.min(1, (t - t0) / 1500), e = 1 - Math.pow(1 - p, 3);
+      // performance.now(), not the frame's timestamp: in an embedded or
+      // offscreen frame that can predate t0, and a negative p blew the eased
+      // value up to -111413676 on the SAT page (2026-10-14).
+      (function tick() {
+        var p = Math.max(0, Math.min(1, (performance.now() - t0) / 1500)), e = 1 - Math.pow(1 - p, 3);
         el.textContent = Math.round(from + (to - from) * e);
         if (p < 1 && root) requestAnimationFrame(tick);
-      })(t0);
+      })();
     }, delay);
   }
   function enter(el) {
@@ -985,7 +988,9 @@
     document.addEventListener('keydown', onKey);
     requestAnimationFrame(function () {
       if (!root) return;
-      root.classList.add('on'); root.style.transition = ''; go(0);
+      // ?start=N opens on screen N (the SAT page's sample starts on the score, 2026-10-14).
+      var sm = /[?&]start=(\d+)/.exec(location.search), first = sm ? Math.min(+sm[1], root.querySelectorAll('.t-scr').length - 1) : 0;
+      root.classList.add('on'); root.style.transition = ''; go(first);
       // Focus moves into the walkthrough on open (audit 6: Tab reached the page behind it).
       var nxt = root.querySelector('.t-scr.on button') || root.querySelector('.t-next');
       if (nxt) try { nxt.focus(); } catch (e) {}

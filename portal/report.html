@@ -10,6 +10,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caladea:wght@400;700&family=Poppins:wght@300;400;500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
 <style>
+  /* A stated equation on its own centered line (window.mathDisplay, 2026-10-13). */
+  .eqline { display: block; text-align: center; margin: 0.75em 0; }
+
   /* --red/--green here are the saturated report palette (#EF4444/#16A34A),
      not the muted sitewide brick-red/sage (#B0271C/#5E8B6F). This file IS
      the report, so the swap happens at :root (the portal's #pt-native-report
@@ -1050,6 +1053,51 @@
 </head>
 <body>
 <script>
+/* MATH EQUATIONS ON THEIR OWN LINE (Luca, 2026-10-13): a stated equation or function definition
+   moves out of the sentence onto a centered line, as on the SAT. Only when the sentence introduces it
+   ("defined by", "the equation", "given by", ...), never in the sentence that asks the question. */
+window.mathDisplay = function (html) {
+  html = String(html || '');
+  if (html.indexOf('=') === -1 && !/[<>≤≥]\s/.test(html.replace(/<[^>]+>/g, ''))) return html;
+  // Keep existing display blocks (figures, centered equations, tables) out of reach.
+  var keep = [];
+  var work = html.replace(/<(div|table|svg|figure)\b[\s\S]*?<\/\1>/gi, function (m) { keep.push(m); return '\u0000' + (keep.length - 1) + '\u0000'; });
+  var plain = function (s) { return s.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').trim(); };
+  var okEq = function (s) {
+    var p = plain(s);
+    if (!p || p.length > 70 || !/[=<>≤≥]/.test(p)) return false;
+    if (/[\u0000]/.test(s)) return false;
+    // Math only: no prose words (more than two letters in a row), bar the usual function names.
+    var words = p.replace(/\b(sin|cos|tan|log|ln|sqrt)\b/g, '').match(/[A-Za-z]{3,}/g);
+    return !words;
+  };
+  var TRIG = '(defined by|given by|modeled by|represented by|written as|expressed as|(?:the|an|this) (?:equation|function|formula|inequality)(?: shown)?|(?:equation|function|formula|inequality))';
+  var TERM = '(?=,\\s|\\.(?:\\s|$)|;|\\s(?:where|represents|gives|models|for|and|if|when|in which|describes|shows|is used|can be|has|defines)\\b|$)';
+  var re = new RegExp('\\b' + TRIG + '\\s+((?:(?!\\s(?:where|represents|gives|models|for|and|if|when|describes|shows)\\b)[^.;?\\u0000]|\\.(?=\\d)|,(?=\\d))+?)' + TERM, 'gi');
+  // One sentence at a time; the one that asks the question keeps its equation inline.
+  var parts = work.replace(/([.?!])\s+(?=[A-Z<\u0000])/g, '$1\u0001').split('\u0001');   // no lookbehind: older iPhones can't parse it
+  parts = parts.map(function (sent) {
+    if (sent.indexOf('?') !== -1) return sent;
+    return sent.replace(re, function (all, trig, eq) {
+      // A small word between the trigger and the equation stays in the sentence ("the function of f(x) = ...").
+      var lead = (eq.match(/^\s*(?:of|is|by|in|as|to|at)\s+/) || [''])[0];
+      eq = eq.slice(lead.length);
+      if (!okEq(eq)) return all;
+      return trig + (lead ? ' ' + lead.trim() : '') + '<span class="eqline">' + eq.trim() + '</span>';
+    }).replace(/(<\/span>)\s*(and|or)\s+((?:[^.;?,\u0000]|\.(?=\d)|,(?=\d))+?)(?=,\s|\.(?:\s|$)|;|$)/g, function (all, close, conj, eq) {
+      // "defined by f(x) = ... and g(x) = ...": the second one goes on its own line too.
+      return okEq(eq) ? close + '<span class="eqline">' + eq.trim() + '</span>' : all;
+    }).replace(/(<span class="eqline">[\s\S]*?<\/span>)[.,]\s*/g, '$1');
+  });
+  work = parts.join(' ');
+  return work.replace(/\u0000(\d+)\u0000/g, function (m, i) { return keep[+i]; });
+};
+// Only math questions get it, and only on the question side (math has no passage pane).
+window.mathFor = function (q, html) {
+  var isMath = q && (/Algebra|Advanced Math|Problem-Solving|Geometry/.test(String(q.domain || '')) || q._qbSubject === 'math');
+  return isMath ? window.mathDisplay(html) : html;
+};
+
   // Viewed inside the portal's in-place results viewer (see openTestResults()
   // in index.html) vs. opened directly. Standalone visits (emailed link,
   // print) keep the fixed-width "printed page" look; embedded, that reads
@@ -1262,11 +1310,11 @@
   })();
 </script>
 <script src="time-budgets.js?v=20260912a"></script>
-<script src="grid-in.js?v=20261002a"></script>
+<script src="grid-in.js?v=20261013a"></script>
 <script src="signals.js?v=20260930c"></script>
 <script src="desmos-tags.js?v=20260916c"></script>
 <script src="question-flag.js?v=20260925a"></script>
-<script src="report-tour.js?v=20261012a"></script>
+<script src="report-tour.js?v=20261014b"></script>
 <script>
 /* FLAGS FROM THE ADMIN PAGE (Luca, 2026-09-25). admin.html shows this report
    in a sandboxed frame with no access to its sign-in, so it says hello by
@@ -1528,7 +1576,7 @@
     qModalQuestionPane.innerHTML = '';
     var qtext = document.createElement('div');
     qtext.className = 'q-text';
-    qtext.innerHTML = split ? split.question : (q.text || '(question text unavailable)');
+    qtext.innerHTML = split ? split.question : window.mathFor(q, q.text || '(question text unavailable)');
     qModalQuestionPane.appendChild(qtext);
     qModalQuestionPane.appendChild(renderModalAnswerArea(r, q, modalHideAnswer, modalHideChoices));
 
@@ -5628,7 +5676,7 @@
 
     var txt = document.createElement('div');
     txt.className = 'q-text';
-    txt.innerHTML = q.text || '(question text unavailable)';
+    txt.innerHTML = window.mathFor(q, q.text || '(question text unavailable)');
     box.appendChild(txt);
     box.appendChild(answerWrap);
 
@@ -7881,7 +7929,10 @@
       planInputs.weekly = weekly; planInputs.weeklyText = hrs(weekly);
       // The same rows for the walkthrough's plan screen (report-tour.js).
       planInputs.planRows = rows.map(function (r) { var tmp = document.createElement('div'); tmp.innerHTML = r.what.replace(/<em>[\s\S]*$/, '');
-        var said = (tmp.textContent || '').replace(/^[^.]*\.\s*/, '').split(/(?<=\.)\s/)[0] || '';
+        // First sentence: up to the first period that a space follows. Not split(/(?<=\.)\s/): iOS
+        // before 16.4 cannot parse a lookbehind, and one bad regex stops the whole report script.
+        var rest = (tmp.textContent || '').replace(/^[^.]*\.\s*/, ''), firstS = rest.match(/^[\s\S]*?\.(?=\s)/);
+        var said = (firstS ? firstS[0] : rest) || '';
         return { h: hrs(r.h), unit: r.unit, color: r.color, label: r.label || '', lessons: r.lessons || [], share: r.h / weekly, said: said }; });
       var host = document.getElementById('plan-section');
       host.innerHTML = html;
