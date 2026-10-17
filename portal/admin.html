@@ -166,6 +166,8 @@
   .ls-work .k { display: block; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #9A7A2A; margin-bottom: 0.15rem; }
   .ls-before { background: rgba(176,39,28,.07); }
   /* Watched vs skipped (2026-10-16) */
+  .vid-tally { display: block; font-size: 0.7rem; color: #2F7A4F; margin-top: 0.15rem; white-space: nowrap; }
+  .vid-tally.bad { color: var(--red); font-weight: 600; }
   .cu-w { font-size: 0.72rem; font-weight: 600; white-space: nowrap; }
   .cu-w.ok { color: #2F7A4F; } .cu-w.part { color: #9A7A2A; } .cu-w.no { color: var(--red); }
   .cu-vids { margin: 0.4rem 0 0.9rem; }
@@ -2154,6 +2156,7 @@
           (lvWhere ? '<span class="live-where"' + (lvTitle ? ' title="' + escHtml(lvTitle) + '"' : '') + '>' + escHtml(lvWhere) +
             (lv.min ? ' &middot; ' + lv.min + ' min active' : '') + '</span>' : '');
 
+      activityCell += rosterVideoHtml(s.key);
       var k = escHtml(s.key);
       return '<tr' + (s.archived ? ' class="is-archived"' : '') + '>' +
         '<td class="name-cell"><span class="live-dot' + (s.online ? ' on' : '') + '" title="' +
@@ -3610,6 +3613,7 @@
     sc.src = 'curriculum-data.js?d=' + new Date().toISOString().slice(0, 10);
     sc.onload = function () {
       cuNamesState = 'done';
+      try { renderTable(); } catch (e) {}
       if (lastPrep && currentStudent && lastPrep.key === currentStudent.key) { try { renderStudentPrep(lastPrep.prep); } catch (e) {} }
     };
     sc.onerror = function () { cuNamesState = 'failed'; };
@@ -3690,6 +3694,7 @@
     sc.src = 'curriculum-videos.js?d=' + new Date().toISOString().slice(0, 10);
     sc.onload = function () {
       cuVidState = 'done';
+      try { renderTable(); } catch (e) {}
       if (lastPrep && currentStudent && lastPrep.key === currentStudent.key) { try { renderStudentPrep(lastPrep.prep); } catch (e) {} }
     };
     sc.onerror = function () { cuVidState = 'failed'; };
@@ -3720,6 +3725,32 @@
     if (share >= 0.9) return '<span class="cu-w ok">&#10003; watched</span>';
     if (share >= 0.2) return '<span class="cu-w part">' + Math.round(share * 100) + '%</span>';
     return '<span class="cu-w no">skipped</span>';
+  }
+  // Watched / partly / skipped over every finished part with a tracked video; null until the course files are in.
+  function cuVideoTally(cu) {
+    if (!cu || !cu.done || !cu.done.length) return null;
+    var data = cuCourseData(), vids = cuVideos();
+    if (!data || !vids) return null;
+    var got = {}, t = { ok: 0, part: 0, no: 0, n: 0 };
+    cu.done.forEach(function (k) { got[k] = 1; });
+    data.courses.forEach(function (c) {
+      (c.domains || c.units || []).forEach(function (d) { (d.lessons || []).forEach(function (l) { (l.parts || []).forEach(function (pp, i) {
+        if (!got[l.id + '#' + i]) return;
+        var sh = cuWatchShare(cu, l.id, i);
+        if (sh == null) return;
+        t.n++; t[sh >= 0.9 ? 'ok' : sh >= 0.2 ? 'part' : 'no']++;
+      }); }); });
+    });
+    return t.n ? t : null;
+  }
+  /* ON THE ROSTER (Luca, 2026-10-16: "show this on the roster too"): one line under
+     Last activity, from the session prep kept for each student (prepAllStudents). */
+  function rosterVideoHtml(key) {
+    var one = kept('s_prep_' + key), cu = one && one.prep && one.prep.curriculum;
+    var t = cuVideoTally(cu);
+    if (!t) return '';
+    return '<span class="vid-tally' + (t.no ? ' bad' : '') + '" title="Videos for the course parts they finished: ' + t.ok + ' watched, ' + t.part + ' partly, ' + t.no + ' skipped">' +
+      '&#9654; ' + t.ok + ' of ' + t.n + ' videos watched' + (t.no ? ' &middot; ' + t.no + ' skipped' : '') + '</span>';
   }
   function renderCurriculumPrep(p, snap, mins) {
     var cu = p.curriculum || null, pr = (p.practice && p.practice.cu) || null, things = (snap && snap.portalThings) || {};
@@ -5836,6 +5867,7 @@
         // The student on screen, if their card was still loading, gets it now.
         if (currentStudent && currentStudent.key === k && currentView === 'student' && !lastPrep) paintStudentPrep(k, one);
       });
+      try { renderTable(); } catch (e) {}
     }, function () { prepBatchAt = 0; });
   }
 
