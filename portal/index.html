@@ -13915,6 +13915,52 @@ window.Portal = {
     parent.normalize();
   }
 
+  // One highlight can need several <mark>s, so they carry a group id and
+  // recolor and delete act on the whole group.
+  var hlGroupSeq = 0;
+  function hlGroup(mark) {
+    var g = mark.getAttribute('data-hl-group');
+    if (!g) return [mark];
+    var root = hlRootOf(mark) || document;
+    return [].slice.call(root.querySelectorAll('mark[data-hl-group="' + g + '"]'));
+  }
+  function hlFirstText(el) {
+    return document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null).nextNode();
+  }
+  function hlLastText(el) {
+    var w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null), n, last = null;
+    while ((n = w.nextNode())) last = n;
+    return last;
+  }
+  // Every text node the range touches, with the two end nodes split at the
+  // selection's edges so each one can be wrapped whole.
+  function hlRangeTextNodes(range, root) {
+    var sc = range.startContainer, so = range.startOffset,
+        ec = range.endContainer,   eo = range.endOffset;
+    if (ec.nodeType === 3 && eo > 0 && eo < ec.nodeValue.length) ec.splitText(eo);
+    if (sc.nodeType === 3 && so > 0 && so < sc.nodeValue.length) {
+      var tail = sc.splitText(so);
+      if (ec === sc) ec = tail;
+      sc = tail;
+    }
+    var first = sc.nodeType === 3 ? sc : hlFirstText(sc),
+        last  = ec.nodeType === 3 ? ec : hlLastText(ec);
+    if (!first || !last) return [];
+    var out = [], w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null), n, on = false;
+    while ((n = w.nextNode())) {
+      if (n === first) on = true;
+      if (on && n.nodeValue.length) out.push(n);
+      if (n === last) break;
+    }
+    // A space on its own at either end would become a mark of pure
+    // whitespace, which under the underline style draws a short dash sitting
+    // in the middle of an expression. Interior spaces stay, so the highlight
+    // is still continuous.
+    while (out.length && !out[0].nodeValue.trim()) out.shift();
+    while (out.length && !out[out.length - 1].nodeValue.trim()) out.pop();
+    return out;
+  }
+
   var hlToolbar = document.getElementById('dx-hl-toolbar');
   var hlDeleteBtn = document.getElementById('dx-hl-delete');
   var hlUnderlineBtn = document.getElementById('dx-hl-underline');
@@ -13958,7 +14004,7 @@ window.Portal = {
   // with a color; a deliberate scope trim.
   function applyHlClass(className) {
     if (hlTargetMark) {
-      hlTargetMark.className = 'dx-user-highlight ' + className;
+      hlGroup(hlTargetMark).forEach(function (m) { m.className = 'dx-user-highlight ' + className; });
       closeHlToolbar();
       return;
     }
@@ -13972,18 +14018,27 @@ window.Portal = {
         else if (hlRoot && hlRoot.id === 'dx-qtext') sigHlStem[hlQ]++;
       }
     } catch (e) {}
-    var mark = document.createElement('mark');
-    mark.className = 'dx-user-highlight ' + className;
-    try {
-      hlPendingRange.surroundContents(mark);
-    } catch (e) {
-      // Selection crosses element boundaries (spans multiple <p> tags, a
-      // ref-mark, etc.) — surroundContents can't wrap that directly, so
-      // extract the fragment and wrap it instead.
-      try {
-        mark.appendChild(hlPendingRange.extractContents());
-        hlPendingRange.insertNode(mark);
-      } catch (e2) { /* give up quietly rather than breaking the passage */ }
+    // Wrap each text node where it already sits. The old code asked the Range
+    // to do it, and when the selection crossed an element boundary the
+    // fallback (extractContents + insertNode) CLONED the ancestors to hold
+    // the pieces. In a math stem that is drawn with CSS — a fraction is an
+    // inline-flex column whose numerator carries border-bottom as the
+    // fraction bar — the clone kept the border but held no text, so a stray
+    // dash appeared in the middle of the equation and read as a minus sign,
+    // and the <mark>, promoted to a flex item, tore the fraction onto
+    // separate lines. Wrapping text nodes in place never clones an ancestor,
+    // so the structure and every border on it survive (2026-10-17).
+    var hlRootEl = hlRootOf(hlPendingRange.commonAncestorContainer);
+    if (hlRootEl) {
+      var gid = 'hl' + (++hlGroupSeq);
+      hlRangeTextNodes(hlPendingRange, hlRootEl).forEach(function (t) {
+        if (!t.parentNode) return;
+        var m = document.createElement('mark');
+        m.className = 'dx-user-highlight ' + className;
+        m.setAttribute('data-hl-group', gid);
+        t.parentNode.insertBefore(m, t);
+        m.appendChild(t);
+      });
     }
     // The native selection is left alone until now because
     // positionHlToolbar() needs a live range. Clear it once the mark exists,
@@ -13997,7 +14052,7 @@ window.Portal = {
   });
   hlUnderlineBtn.addEventListener('click', function () { applyHlClass('dx-hl-underline'); });
   hlDeleteBtn.addEventListener('click', function () {
-    if (hlTargetMark) unwrapHighlight(hlTargetMark);
+    if (hlTargetMark) hlGroup(hlTargetMark).forEach(unwrapHighlight);
     closeHlToolbar();
   });
 
