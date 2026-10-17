@@ -164,6 +164,8 @@
   .dt-key i.ss { background: repeating-linear-gradient(135deg, rgba(17,17,17,.3) 0 2px, rgba(17,17,17,.06) 2px 4px); }
   .ls-work { margin-top: 0.8rem; padding: 0.6rem 0.8rem; border-radius: 10px; background: rgba(201,168,76,.12); font-size: 0.82rem; color: var(--text); }
   .ls-work .k { display: block; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #9A7A2A; margin-bottom: 0.15rem; }
+  .ls-before { background: rgba(176,39,28,.07); }
+  .ls-before .k { color: var(--red); }
   .ls-work small { display: block; color: var(--mid); font-size: 0.7rem; margin-top: 0.15rem; }
   .dt-day.today .dt-bar { box-shadow: inset 0 0 0 1.5px var(--text); }
   .dt-d { font-size: 0.62rem; font-weight: 600; color: var(--mid); text-align: center; line-height: 1.15; }
@@ -3796,14 +3798,28 @@
      so practice done during a session used to vanish. It is shown here instead. */
   function renderLastSessionWork(snap, mins) {
     var L = snap && snap.lastSession;
-    if (!L || !(L.min || L.qb || L.other)) return '';
+    if (!L) return '';
     var st = new Date(L.start), en = new Date(L.end);
     var t = function (d) { return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }).replace(':00', ''); };
+    var day = function (d) { return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }); };
+    /* The homework done FOR the last session (Luca, 2026-10-16: Sakeena's 58 Words
+       in Context questions "didn't appear once"): the reset at the session's end
+       used to wipe it from this page right when it mattered. */
+    var B = L.before, pre = '';
+    if (B) {
+      var bq = (B.qb || 0) + (B.other || 0), bb = [];
+      if (bq) bb.push('<b>' + bq + '</b> practice question' + (bq === 1 ? '' : 's') + (B.qb ? ' (' + B.qbRight + ' of ' + B.qb + ' right in the Question Bank)' : ''));
+      if (B.min) bb.push('<b>' + mins(B.min) + '</b> active');
+      if (B.skills && B.skills.length) bb.push(B.skills.map(function (k) { return escHtml(k[0]) + ' ' + k[1]; }).join(', '));
+      pre = '<div class="ls-work ls-before"><span class="k">Before the last session</span>' +
+        escHtml(day(new Date(B.from)) + ' to ' + day(st)) + ': ' + (bb.length ? bb.join(' &middot; ') : 'nothing on the portal') + '</div>';
+    }
+    if (!(L.min || L.qb || L.other)) return pre;
     var bits = [];
     if (L.min) bits.push('<b>' + mins(L.min) + '</b> active');
     var q = (L.qb || 0) + (L.other || 0);
     if (q) bits.push('<b>' + q + '</b> practice question' + (q === 1 ? '' : 's') + (L.qb ? ' (' + L.qbRight + ' of ' + L.qb + ' right in the Question Bank)' : ''));
-    return '<div class="ls-work"><span class="k">In the last session</span>' +
+    return pre + '<div class="ls-work"><span class="k">In the last session</span>' +
       escHtml(st.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) + ', ' + t(st) + ' to ' + t(en)) + ': ' + bits.join(' &middot; ') +
       '<small>Not in the numbers above, which count work on their own.</small></div>';
   }
