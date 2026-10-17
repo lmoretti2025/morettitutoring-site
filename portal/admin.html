@@ -158,6 +158,13 @@
   .dt-bar { width: 100%; height: 74px; display: flex; align-items: flex-end; background: rgba(17,17,17,0.035); border-radius: 5px; overflow: hidden; }
   .dt-bar i { display: block; width: 100%; background: rgba(17,17,17,0.22); border-radius: 5px 5px 0 0; }
   .dt-day.cur .dt-bar i { background: var(--red); }
+  .dt-bar { flex-direction: column; justify-content: flex-end; }
+  .dt-bar i.ss, .dt-day.cur .dt-bar i.ss { background: repeating-linear-gradient(135deg, rgba(17,17,17,.16) 0 3px, rgba(17,17,17,.05) 3px 6px); border-radius: 5px 5px 0 0; }
+  .dt-bar i.ss + i { border-radius: 0; }
+  .dt-key i.ss { background: repeating-linear-gradient(135deg, rgba(17,17,17,.3) 0 2px, rgba(17,17,17,.06) 2px 4px); }
+  .ls-work { margin-top: 0.8rem; padding: 0.6rem 0.8rem; border-radius: 10px; background: rgba(201,168,76,.12); font-size: 0.82rem; color: var(--text); }
+  .ls-work .k { display: block; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #9A7A2A; margin-bottom: 0.15rem; }
+  .ls-work small { display: block; color: var(--mid); font-size: 0.7rem; margin-top: 0.15rem; }
   .dt-day.today .dt-bar { box-shadow: inset 0 0 0 1.5px var(--text); }
   .dt-d { font-size: 0.62rem; font-weight: 600; color: var(--mid); text-align: center; line-height: 1.15; }
   .dt-d small { display: block; font-weight: 400; font-size: 0.56rem; }
@@ -3754,7 +3761,7 @@
         '<div><b>' + days + '</b><span>day' + (days === 1 ? '' : 's') + ' so far</span></div>' +
         '<div><b>' + (m ? mins(Math.round(m / days)) : '0 min') + '</b><span>per day</span></div>' +
         '<div><b>' + sit + '</b><span>sitting' + (sit === 1 ? '' : 's') + ' of 5+ min</span></div>' +
-      '</div></div>' + renderDailyTime(snap, mins) + renderTimeBreakdown(snap, mins) + '</div>';
+      '</div></div>' + renderLastSessionWork(snap, mins) + renderDailyTime(snap, mins) + renderTimeBreakdown(snap, mins) + '</div>';
   }
 
   /* DAY BY DAY (Luca, 2026-10-15: "I want to see how much time a student puts in every day"): the
@@ -3766,20 +3773,39 @@
     var since = snap.since ? new Date(snap.since) : null;
     var sinceDay = since && isFinite(since.getTime()) ? since.toLocaleDateString('en-CA') : '';
     var today = new Date().toLocaleDateString('en-CA');
-    var max = Math.max.apply(null, D.map(function (d) { return d.min || 0; })) || 1;
+    var max = Math.max.apply(null, D.map(function (d) { return (d.min || 0) + (d.sess || 0); })) || 1;
     var last7 = D.slice(-7), active7 = last7.filter(function (d) { return d.min >= 5; }).length;
     var sum7 = last7.reduce(function (t, d) { return t + (d.min || 0); }, 0);
     var bars = D.map(function (d) {
-      var dt = new Date(d.day + 'T12:00:00'), m = Math.round(d.min || 0);
+      var dt = new Date(d.day + 'T12:00:00'), m = Math.round(d.min || 0), ss = Math.round(d.sess || 0);
       var cls = (sinceDay ? d.day >= sinceDay : D.indexOf(d) >= D.length - 7) ? 'cur' : 'old';
-      return '<div class="dt-day ' + cls + (d.day === today ? ' today' : '') + '" title="' + escHtml(dt.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })) + ': ' + mins(m) + '">' +
+      return '<div class="dt-day ' + cls + (d.day === today ? ' today' : '') + '" title="' + escHtml(dt.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })) + ': ' + mins(m) + ' on their own' + (ss ? ', plus ' + mins(ss) + ' in a session' : '') + '">' +
         '<span class="dt-v">' + (m ? (m >= 60 ? Math.floor(m / 60) + 'h' + (m % 60 ? ' ' + (m % 60) + 'm' : '') : m + 'm') : '') + '</span>' +
-        '<span class="dt-bar"><i style="height:' + (m ? Math.max(6, Math.round(100 * m / max)) : 0) + '%"></i></span>' +
+        '<span class="dt-bar">' + (ss ? '<i class="ss" style="height:' + Math.max(4, Math.round(100 * ss / max)) + '%"></i>' : '') +
+          '<i style="height:' + (m ? Math.max(6, Math.round(100 * m / max)) : 0) + '%"></i></span>' +
         '<span class="dt-d">' + 'SMTWTFS'.charAt(dt.getDay()) + '<small>' + (dt.getMonth() + 1) + '/' + dt.getDate() + '</small></span></div>';
     }).join('');
     return '<div class="dt"><div class="dt-hed">Every day<span>last 14 days &middot; ' + active7 + ' of the last 7 days active &middot; ' + mins(sum7) + ' in the last 7</span></div>' +
       '<div class="dt-row">' + bars + '</div>' +
-      '<div class="dt-key"><i class="cur"></i>since the last session <i class="old"></i>before it</div></div>';
+      '<div class="dt-key"><i class="cur"></i>since the last session <i class="old"></i>before it' +
+      (D.some(function (d) { return d.sess; }) ? ' <i class="ss"></i>in a session' : '') + '</div></div>';
+  }
+
+  /* THE LAST SESSION'S WORK (Luca, 2026-10-16: a student did 60 Rush questions
+     and "it didn't register at all"). Everything above counts work on their own,
+     so practice done during a session used to vanish. It is shown here instead. */
+  function renderLastSessionWork(snap, mins) {
+    var L = snap && snap.lastSession;
+    if (!L || !(L.min || L.qb || L.other)) return '';
+    var st = new Date(L.start), en = new Date(L.end);
+    var t = function (d) { return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }).replace(':00', ''); };
+    var bits = [];
+    if (L.min) bits.push('<b>' + mins(L.min) + '</b> active');
+    var q = (L.qb || 0) + (L.other || 0);
+    if (q) bits.push('<b>' + q + '</b> practice question' + (q === 1 ? '' : 's') + (L.qb ? ' (' + L.qbRight + ' of ' + L.qb + ' right in the Question Bank)' : ''));
+    return '<div class="ls-work"><span class="k">In the last session</span>' +
+      escHtml(st.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) + ', ' + t(st) + ' to ' + t(en)) + ': ' + bits.join(' &middot; ') +
+      '<small>Not in the numbers above, which count work on their own.</small></div>';
   }
 
   /* WHERE THE TIME WENT (Luca, 2026-09-25): the week's active minutes by
