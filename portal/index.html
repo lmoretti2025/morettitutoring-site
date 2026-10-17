@@ -15994,10 +15994,16 @@ window.Portal = {
           // so the report's flag column and "never used flag" check reflect
           // what actually happened.
           k: sec.key, a: sec.answers, m: (sec.everMarked || sec.marked || []).map(function (x) { return x ? 1 : 0; }), v: sec.module2Variant || null,
-          /* cf = how sure the student was on each question, in the same order as `a`.
+          /* cq = how sure the student was on each question, in the same order as `a`.
              Diagnostic only; its ABSENCE on a practice test means the question was never
-             asked, not that the student declined to answer it. */
-          cf: sec.confidence || null,
+             asked, not that the student declined to answer it.
+
+             NOT `cf`. That key is already Desmos calculator focus, emitted by
+             sigPayloadFields() below, and Object.assign's later source wins - so a `cf`
+             here was overwritten on every sitting that captured signals, which is every
+             real one. An absent calculator makes it worse, not better: sparse() returns
+             undefined, and assigning cf: undefined still clobbers the key. */
+          cq: sec.confidence || null,
           /* q = the qid of each question, in the same order as `a`, so this attempt stays
              readable however the tests change later. ~1.4KB per attempt, which is the
              price of never needing another frozen snapshot. Built with the same two

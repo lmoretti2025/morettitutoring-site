@@ -2230,6 +2230,14 @@ window.mathFor = function (q, html) {
       // page (a TypeError before any message could show); no answers is
       // every question unanswered.
       if (!Array.isArray(sec.a)) sec.a = [];
+      /* cq = the confidence tapped per question (diagnostic only), in the same order as
+         `a`. Validated HERE and not in cleanSignals(), because it does not come from
+         signals.js and must not be thrown away with them when `sv` is missing. An unknown
+         value blanks that one entry rather than the whole array, for the same reason the
+         visit log does: one bad value used to make a section read "not recorded". */
+      if (Array.isArray(sec.cq) && sec.cq.length <= 200) {
+        sec.cq = sec.cq.map(function (v) { return /^(sure|think|guess)$/.test(v) ? v : null; });
+      } else { delete sec.cq; }
       cleanSignals(sec);
       return true;
     });
