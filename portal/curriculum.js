@@ -85,7 +85,7 @@
     '#cu-root .cu-resume b{display:block;font-weight:600}#cu-root .cu-resume span{font-size:.85rem;color:var(--mid)}',
     '#cu-root .cu-btn{display:inline-flex;align-items:center;gap:.5rem;border:0;border-radius:999px;background:var(--red,#B0271C);color:#fff;font:600 .85rem var(--hel,Poppins,sans-serif);padding:.75rem 1.3rem;cursor:pointer;white-space:nowrap;transition:transform .15s,box-shadow .15s}',
     '#cu-root .cu-btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(176,39,28,.22)}',
-    '#cu-root .cu-btn[disabled]{opacity:.45;cursor:default;transform:none;box-shadow:none}',
+    '#cu-root .cu-btn[disabled],#cu-root .cu-btn[disabled]:hover{opacity:.45;cursor:default;transform:none;box-shadow:none}',
     '#cu-root .cu-btn.ghost{background:#fff;color:var(--text,#111);box-shadow:inset 0 0 0 1px var(--cu-line)}',
     '#cu-root .cu-units{display:grid;gap:1.1rem}',
     'html:has(#screen-curriculum.active){scrollbar-gutter:stable}',
@@ -153,6 +153,7 @@
     '#cu-root .cu-step:hover{background:var(--cu-soft)}',
     '#cu-root .cu-step.on{background:#fbf3f2;border-left-color:var(--red,#B0271C);font-weight:500}',
     '#cu-root .cu-step.locked{color:#a8a39c;cursor:not-allowed}#cu-root .cu-step.locked:hover{background:none}',
+    '#cu-root .cu-step.wlock{color:#a8a39c}#cu-root .cu-bottom .lbl svg{vertical-align:-2px;margin-right:.2rem}',
     '#cu-root .cu-step .ic{width:26px;height:26px;border-radius:7px;border:1px solid var(--cu-line);display:flex;align-items:center;justify-content:center;font-size:.72rem;color:var(--mid)}',
     '#cu-root .cu-step.done .ic{background:var(--cu-good);border-color:var(--cu-good);color:#fff}',
     '#cu-root .cu-step .st{font-size:.72rem;color:var(--mid)}',
@@ -538,6 +539,7 @@
       } catch (e) {}
       if (now || n - syncedAt >= 20) { syncedAt = n; queueSync(); }
       paint();
+      refreshCheckBar();
     }
     v.addEventListener('timeupdate', function () {
       var t = v.currentTime;
@@ -598,6 +600,62 @@
   function videoRec(key) { return (prog.videos && prog.videos[key]) || null; }
   function gateWatched() { var r = gate && videoRec(gate.video); return !!(r && r.done); }
   function gateShare() { var r = gate && videoRec(gate.video); return r && r.d ? Math.min(1, r.w / r.d) : 0; }
+
+  /* CHECKS WAIT FOR THE VIDEO (Luca, 2026-10-16: "lock the checks until the
+     video is watched", after a student was found doing ten parts' checks
+     without playing their videos). A part's check opens once 90% of that
+     part's stretch of video has been played, counted the same way as the
+     1.1 gate (seconds actually played, so dragging to the end opens nothing).
+     A part already done stays open, a part with no tracked video (none yet,
+     or a YouTube one) is not held, and Luca's own accounts pass. */
+  var CHECK_WATCH_SHARE = 0.9;
+  function partVideo(l, i, depth) {
+    var list = (window.CURRICULUM_VIDEOS || {})[l.id], v = list && list[i], m;
+    if (!v) return null;
+    v = String(v).trim();
+    if ((m = /^part:(\d{1,2})$/.exec(v))) { var j = Number(m[1]) - 1; return j !== i && j >= 0 && !depth ? partVideo(l, j, 1) : null; }
+    if (!(m = /^r2:([me]\d{1,2}\.\d{1,2}-\d{1,2}\.mp4)(?:@([\d:.]*)(?:-([\d:.]*))?)?$/.exec(v))) return null;
+    return { key: m[1], from: Number(secsOf(m[2])) || 0, to: Number(secsOf(m[3])) || 0 };
+  }
+  function partWatchShare(l, i) {
+    var pv = partVideo(l, i);
+    if (!pv) return 1;
+    var rec = videoRec(pv.key) || {};
+    if (rec.done && !pv.from && !pv.to) return 1;
+    var marks = [];
+    try { marks = (localStorage.getItem('moretti_cu_watch_' + progKey + '_' + pv.key) || '').split(''); } catch (e) { marks = []; }
+    var a = pv.from, z = pv.to || rec.d || 0;
+    if (!(z > a)) return 0;
+    var n = 0;
+    for (var t = Math.floor(a); t < z; t++) if (marks[t] === '1') n++;
+    var share = n / (z - a);
+    // Watched on another device: only the total comes back, taken as played from the start.
+    if (rec.w) share = Math.max(share, Math.min(1, (rec.w - a) / (z - a)));
+    return Math.max(0, Math.min(1, share));
+  }
+  function checkOpen(l, i) {
+    if (bypass() || isDone(l.id, i)) return true;
+    if (gate && gate.on === false) return true;   // the videos cannot be played right now: nothing to wait for
+    return partWatchShare(l, i) >= CHECK_WATCH_SHARE;
+  }
+  // The bar under the video, kept current as the video plays.
+  function checkBarHtml(l, i) {
+    var p = l.parts[i];
+    if (checkOpen(l, i)) return '<span class="lbl">Up next: ' + pl(checkCount(p, l), 'question') + ' on this part</span><button type="button" class="cu-btn" data-go-check>Start the check &rarr;</button>';
+    var pct = Math.round(100 * partWatchShare(l, i));
+    return '<span class="lbl">' + LOCK_SVG + ' The check opens once the video is watched <b>(' + pct + '% so far)</b></span><button type="button" class="cu-btn" disabled aria-disabled="true">Start the check &rarr;</button>';
+  }
+  function refreshCheckBar() {
+    if (view.name !== 'lesson' || view.step !== 'video') return;
+    var hit = view.lessonId && findLesson(view.lessonId);
+    if (!hit) return;
+    var l = hit.l, i = view.part, p = l.parts[i];
+    if (!p || !checkIds(p).length) return;
+    var bar = root && $('.cu-bottom', root);
+    if (bar) bar.innerHTML = checkBarHtml(l, i);
+    var step = root && root.querySelector('.cu-step[data-step="check"][data-part="' + i + '"]');
+    if (step && checkOpen(l, i)) { step.classList.remove('wlock'); step.removeAttribute('title'); }
+  }
   function mathLocked() { return !!(gate && gate.on && !gate.bypass && !gateWatched()); }
   function courseSoon(c) { return c.id === 'english' && !bypass(); }
   function lessonLocked(c, l) { return courseSoon(c) || (c.id === 'math' && l.id !== GATE_LESSON && mathLocked()); }
@@ -875,6 +933,7 @@
         '<button type="button" class="cu-arrow" data-lesson-go="' + (next ? esc(next.l.id) : '') + '"' + (next ? '' : ' disabled') + ' aria-label="Next lesson">&rsaquo;</button></div></div>' +
         '<div class="cu-steps">' + steps + '</div></aside>' +
       '<main class="cu-main" id="cu-main"></main></div></div>';
+    if (view.step === 'check' && !checkOpen(l, view.part)) view.step = 'video';
     if (view.step === 'check' && checkIds(l.parts[view.part]).length) renderCheck(c, l); else renderVideo(c, l);
   }
 
@@ -887,8 +946,9 @@
       out += '<button type="button" class="cu-step' + (view.part === i && view.step === 'video' ? ' on' : '') + (open ? '' : ' locked') + (done ? ' done' : '') + '" data-step="video" data-part="' + i + '"' + lock + '>' +
         '<span class="ic">' + (done ? '&#10003;' : PLAY_SVG_XS) + '</span><span>' + esc(partTitle(l, i)) + '</span><span class="st">' + (open ? '' : LOCK_SVG) + '</span></button>';
       if (checkIds(p).length) {
-        out += '<button type="button" class="cu-step sub' + (view.part === i && view.step === 'check' ? ' on' : '') + (open ? '' : ' locked') + (done ? ' done' : '') + '" data-step="check" data-part="' + i + '"' + lock + '>' +
-          '<span class="ic">' + (done ? '&#10003;' : '') + '</span><span>Check <small>' + pl(checkCount(p, l), 'question') + '</small></span><span class="st"></span></button>';
+        var wl = open && !checkOpen(l, i);
+        out += '<button type="button" class="cu-step sub' + (view.part === i && view.step === 'check' ? ' on' : '') + (open ? '' : ' locked') + (wl ? ' wlock' : '') + (done ? ' done' : '') + '" data-step="check" data-part="' + i + '"' + lock + (wl ? ' title="Opens once the video is watched"' : '') + '>' +
+          '<span class="ic">' + (done ? '&#10003;' : '') + '</span><span>Check <small>' + pl(checkCount(p, l), 'question') + '</small></span><span class="st">' + (wl ? LOCK_SVG : '') + '</span></button>';
       }
     });
     return out;
@@ -929,7 +989,7 @@
     var hasCheck = checkIds(p).length > 0, done = isDone(l.id, i);
     var nextOpen = i + 1 < l.parts.length;
     var bar;
-    if (hasCheck) bar = '<span class="lbl">Up next: ' + pl(checkCount(p, l), 'question') + ' on this part</span><button type="button" class="cu-btn" data-go-check>Start the check &rarr;</button>';
+    if (hasCheck) bar = checkBarHtml(l, i);
     else bar = '<span class="lbl">' + (done ? 'Watched' : 'No questions for this part') + '</span><button type="button" class="cu-btn" data-watched>' + (nextOpen ? 'Next part &rarr;' : 'Finish the lesson &rarr;') + '</button>';
     $('#cu-main', root).innerHTML =
       // One part: the heading is the lesson itself, so the line above it names the unit instead of repeating it.
@@ -1221,12 +1281,13 @@
     if ((b = t.closest('.cu-step'))) {
       var part = Number(b.getAttribute('data-part'));
       if (!unlocked(hit.l, part)) return;
+      if (b.getAttribute('data-step') === 'check' && !checkOpen(hit.l, part)) { view.part = part; view.step = 'video'; remember(); return renderLesson(); }
       view.part = part; view.step = b.getAttribute('data-step');
       if (!(check && check.part === part && check.lessonId === hit.l.id)) check = null;
       remember(); return renderLesson();
     }
     if ((b = t.closest('[data-open-part]'))) { view.part = Number(b.getAttribute('data-open-part')); view.step = 'video'; remember(); return renderLesson(); }
-    if (t.closest('[data-go-check]')) { view.step = 'check'; remember(); return renderLesson(); }
+    if (t.closest('[data-go-check]')) { if (!checkOpen(hit.l, view.part)) return; view.step = 'check'; remember(); return renderLesson(); }
     if (t.closest('[data-watched]')) {
       markDone(hit.l.id, view.part);
       if (view.part + 1 < hit.l.parts.length) { view.part++; view.step = 'video'; remember(); return renderLesson(); }
