@@ -158,6 +158,29 @@
   .dt-bar { width: 100%; height: 74px; display: flex; align-items: flex-end; background: rgba(17,17,17,0.035); border-radius: 5px; overflow: hidden; }
   .dt-bar i { display: block; width: 100%; background: rgba(17,17,17,0.22); border-radius: 5px 5px 0 0; }
   .dt-day.cur .dt-bar i { background: var(--red); }
+  .dt-bar { flex-direction: column; justify-content: flex-end; }
+  .dt-bar i.ss, .dt-day.cur .dt-bar i.ss { background: repeating-linear-gradient(135deg, rgba(17,17,17,.16) 0 3px, rgba(17,17,17,.05) 3px 6px); border-radius: 5px 5px 0 0; }
+  .dt-bar i.ss + i { border-radius: 0; }
+  .dt-key i.ss { background: repeating-linear-gradient(135deg, rgba(17,17,17,.3) 0 2px, rgba(17,17,17,.06) 2px 4px); }
+  .ls-work { margin-top: 0.8rem; padding: 0.6rem 0.8rem; border-radius: 10px; background: rgba(201,168,76,.12); font-size: 0.82rem; color: var(--text); }
+  .ls-work .k { display: block; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #9A7A2A; margin-bottom: 0.15rem; }
+  .ls-before { background: rgba(176,39,28,.07); }
+  /* Watched vs skipped (2026-10-16) */
+  .vid-tally { display: block; font-size: 0.7rem; color: #2F7A4F; margin-top: 0.15rem; white-space: nowrap; }
+  .vid-tally.bad { color: var(--red); font-weight: 600; }
+  .cu-w { font-size: 0.72rem; font-weight: 600; white-space: nowrap; }
+  .cu-w.ok { color: #2F7A4F; } .cu-w.part { color: #9A7A2A; } .cu-w.no { color: var(--red); }
+  .cu-vids { margin: 0.4rem 0 0.9rem; }
+  .cu-vids-h { font-size: 0.78rem; font-weight: 600; color: var(--text); display: flex; justify-content: space-between; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 0.4rem; }
+  .cu-vids-h span { font-weight: 400; color: var(--mid); }
+  .cu-vids-h b.ok { color: #2F7A4F; } .cu-vids-h b.part { color: #9A7A2A; } .cu-vids-h b.no { color: var(--red); }
+  .cu-vc-row { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+  .cu-vc { font-size: 0.7rem; font-weight: 600; padding: 0.15rem 0.5rem; border-radius: 999px; font-variant-numeric: tabular-nums; cursor: default; }
+  .cu-vc.ok { background: rgba(63,143,95,.13); color: #2F7A4F; }
+  .cu-vc.part { background: rgba(201,168,76,.18); color: #7A5F1C; }
+  .cu-vc.no { background: rgba(176,39,28,.1); color: var(--red); }
+  .ls-before .k { color: var(--red); }
+  .ls-work small { display: block; color: var(--mid); font-size: 0.7rem; margin-top: 0.15rem; }
   .dt-day.today .dt-bar { box-shadow: inset 0 0 0 1.5px var(--text); }
   .dt-d { font-size: 0.62rem; font-weight: 600; color: var(--mid); text-align: center; line-height: 1.15; }
   .dt-d small { display: block; font-weight: 400; font-size: 0.56rem; }
@@ -2133,6 +2156,7 @@
           (lvWhere ? '<span class="live-where"' + (lvTitle ? ' title="' + escHtml(lvTitle) + '"' : '') + '>' + escHtml(lvWhere) +
             (lv.min ? ' &middot; ' + lv.min + ' min active' : '') + '</span>' : '');
 
+      activityCell += rosterVideoHtml(s.key);
       var k = escHtml(s.key);
       return '<tr' + (s.archived ? ' class="is-archived"' : '') + '>' +
         '<td class="name-cell"><span class="live-dot' + (s.online ? ' on' : '') + '" title="' +
@@ -3589,6 +3613,7 @@
     sc.src = 'curriculum-data.js?d=' + new Date().toISOString().slice(0, 10);
     sc.onload = function () {
       cuNamesState = 'done';
+      try { renderTable(); } catch (e) {}
       if (lastPrep && currentStudent && lastPrep.key === currentStudent.key) { try { renderStudentPrep(lastPrep.prep); } catch (e) {} }
     };
     sc.onerror = function () { cuNamesState = 'failed'; };
@@ -3655,6 +3680,78 @@
     });
     return hit;
   }
+  /* WATCHED OR SKIPPED (Luca, 2026-10-16: "show watched vs skipped videos in the
+     admin too"). Which video plays for each part comes from the portal's own
+     curriculum-videos.js, fetched once; how much of it was played comes from the
+     student's synced progress (videos: { file: { w: seconds played, d: length } }).
+     A part's stretch of a shared video is judged on the seconds played up to its end. */
+  var cuVidState = '';
+  function cuVideos() {
+    if (window.CURRICULUM_VIDEOS) return window.CURRICULUM_VIDEOS;
+    if (cuVidState) return null;
+    cuVidState = 'loading';
+    var sc = document.createElement('script');
+    sc.src = 'curriculum-videos.js?d=' + new Date().toISOString().slice(0, 10);
+    sc.onload = function () {
+      cuVidState = 'done';
+      try { renderTable(); } catch (e) {}
+      if (lastPrep && currentStudent && lastPrep.key === currentStudent.key) { try { renderStudentPrep(lastPrep.prep); } catch (e) {} }
+    };
+    sc.onerror = function () { cuVidState = 'failed'; };
+    document.head.appendChild(sc);
+    return null;
+  }
+  function cuSecs(t) { if (!t) return 0; var n = String(t).split(':').reduce(function (a, x) { return a * 60 + Number(x || 0); }, 0); return isFinite(n) ? n : 0; }
+  function cuPartVideo(lessonId, i, depth) {
+    var V = cuVideos(), list = V && V[lessonId], v = list && list[i], m;
+    if (!v) return null;
+    v = String(v).trim();
+    if ((m = /^part:(\d{1,2})$/.exec(v))) { var j = Number(m[1]) - 1; return j !== i && j >= 0 && !depth ? cuPartVideo(lessonId, j, 1) : null; }
+    if (!(m = /^r2:([me]\d{1,2}\.\d{1,2}-\d{1,2}\.mp4)(?:@([\d:.]*)(?:-([\d:.]*))?)?$/.exec(v))) return null;
+    return { key: m[1], from: cuSecs(m[2]), to: cuSecs(m[3]) };
+  }
+  // 0..1 of the part's video played, or null when the part has no tracked video.
+  function cuWatchShare(cu, lessonId, i) {
+    var pv = cuPartVideo(lessonId, i);
+    if (!pv) return null;
+    var rec = (cu && cu.videos && cu.videos[pv.key]) || {};
+    if (rec.done && !pv.from && !pv.to) return 1;
+    var z = pv.to || rec.d || 0;
+    if (!rec.w || !(z > pv.from)) return 0;
+    return Math.max(0, Math.min(1, (rec.w - pv.from) / (z - pv.from)));
+  }
+  function cuWatchCell(share) {
+    if (share == null) return '\u2014';
+    if (share >= 0.9) return '<span class="cu-w ok">&#10003; watched</span>';
+    if (share >= 0.2) return '<span class="cu-w part">' + Math.round(share * 100) + '%</span>';
+    return '<span class="cu-w no">skipped</span>';
+  }
+  // Watched / partly / skipped over every finished part with a tracked video; null until the course files are in.
+  function cuVideoTally(cu) {
+    if (!cu || !cu.done || !cu.done.length) return null;
+    var data = cuCourseData(), vids = cuVideos();
+    if (!data || !vids) return null;
+    var got = {}, t = { ok: 0, part: 0, no: 0, n: 0 };
+    cu.done.forEach(function (k) { got[k] = 1; });
+    data.courses.forEach(function (c) {
+      (c.domains || c.units || []).forEach(function (d) { (d.lessons || []).forEach(function (l) { (l.parts || []).forEach(function (pp, i) {
+        if (!got[l.id + '#' + i]) return;
+        var sh = cuWatchShare(cu, l.id, i);
+        if (sh == null) return;
+        t.n++; t[sh >= 0.9 ? 'ok' : sh >= 0.2 ? 'part' : 'no']++;
+      }); }); });
+    });
+    return t.n ? t : null;
+  }
+  /* ON THE ROSTER (Luca, 2026-10-16: "show this on the roster too"): one line under
+     Last activity, from the session prep kept for each student (prepAllStudents). */
+  function rosterVideoHtml(key) {
+    var one = kept('s_prep_' + key), cu = one && one.prep && one.prep.curriculum;
+    var t = cuVideoTally(cu);
+    if (!t) return '';
+    return '<span class="vid-tally' + (t.no ? ' bad' : '') + '" title="Videos for the course parts they finished: ' + t.ok + ' watched, ' + t.part + ' partly, ' + t.no + ' skipped">' +
+      '&#9654; ' + t.ok + ' of ' + t.n + ' videos watched' + (t.no ? ' &middot; ' + t.no + ' skipped' : '') + '</span>';
+  }
   function renderCurriculumPrep(p, snap, mins) {
     var cu = p.curriculum || null, pr = (p.practice && p.practice.cu) || null, things = (snap && snap.portalThings) || {};
     var data = cuCourseData();
@@ -3713,24 +3810,46 @@
     }
     var gv = cu && cu.videos && cu.videos['m1.1-1.mp4'];
     if (gv && gv.d) head.push('1.1 video ' + (gv.done ? 'watched' : Math.round(100 * Math.min(gv.w, gv.d) / gv.d) + '% watched'));
+    var vids = '';
+    if (cu && cu.done && cu.done.length && data && cuVideos()) {
+      var got2 = {}, chips = [], nW = 0, nP = 0, nS = 0;
+      cu.done.forEach(function (k) { got2[k] = 1; });
+      data.courses.forEach(function (c) {
+        (c.domains || c.units || []).forEach(function (d) { (d.lessons || []).forEach(function (l) { (l.parts || []).forEach(function (pp, i) {
+          if (!got2[l.id + '#' + i]) return;
+          var sh = cuWatchShare(cu, l.id, i);
+          if (sh == null) return;
+          var cls = sh >= 0.9 ? 'ok' : sh >= 0.2 ? 'part' : 'no';
+          if (cls === 'ok') nW++; else if (cls === 'part') nP++; else nS++;
+          var many = l.parts.length > 1, ptName = pp && pp.title ? String(pp.title).replace(/\*\*/g, '') : '';
+          chips.push('<span class="cu-vc ' + cls + '" title="' + escHtml(l.num + ' ' + l.title + (many ? ', Part ' + (i + 1) + (ptName ? ': ' + ptName : '') : '') + ': ' + Math.round(sh * 100) + '% of the video played') + '">' +
+            escHtml(l.num + (many ? ' P' + (i + 1) : '')) + '</span>');
+        }); }); });
+      });
+      if (chips.length) vids = '<div class="cu-vids"><div class="cu-vids-h">Videos for the parts they finished<span>' +
+        '<b class="ok">' + nW + ' watched</b> &middot; <b class="part">' + nP + ' partly</b> &middot; <b class="no">' + nS + ' skipped</b></span></div>' +
+        '<div class="cu-vc-row">' + chips.join('') + '</div>' +
+        (nS ? '<p class="prep-note">Skipped means under a fifth of the video was played before the check was done. Checks lock until the video is watched from Oct 16 on.</p>' : '') + '</div>';
+    }
     var body = list.length
-      ? '<table class="prep-topics"><thead><tr><th>Lesson part</th><th class="n">Video</th><th class="n">Check</th><th class="n">Questions</th><th class="n">Finished</th></tr></thead><tbody>' +
+      ? '<table class="prep-topics"><thead><tr><th>Lesson part</th><th class="n">Video</th><th class="n">Watched</th><th class="n">Check</th><th class="n">Questions</th><th class="n">Finished</th></tr></thead><tbody>' +
         list.map(function (r) {
           var which = r.lessonId.charAt(0) === 'm' ? 'math' : 'rw';
           var has = !!(r.items && r.items.length), pk = r.lessonId + '|' + r.part, open = has && cuOpenParts[pk];
           return '<tr' + (has ? ' class="cu-row" data-cu-part="' + escHtml(pk) + '"' : '') + '><td>' +
             (has ? '<span class="cu-tw">' + (open ? '\u25be' : '\u25b8') + '</span>' : '') + escHtml(nameOf(r)) + '</td>' +
             '<td class="n">' + (r.video ? mins(r.video) : '—') + '</td>' +
+            '<td class="n">' + cuWatchCell(cuWatchShare(cu, r.lessonId, r.part)) + '</td>' +
             '<td class="n">' + (r.check ? mins(r.check) : '—') + '</td>' +
             '<td class="n">' + (r.n ? r.right + ' of ' + r.n + ' right' : '—') + '</td>' +
             '<td class="n' + (r.done ? ' cu-done' : '') + '">' + (r.done ? '&#10003; ' + day(r.done) : '—') + '</td></tr>' +
-            (open ? '<tr class="cu-ans"><td colspan="5"><table class="cu-atab"><thead><tr><th>Question</th>' +
+            (open ? '<tr class="cu-ans"><td colspan="6"><table class="cu-atab"><thead><tr><th>Question</th>' +
               '<th class="n">Put</th><th class="n">Answer</th><th class="n"></th></tr></thead><tbody>' +
               cuAnswerRows(which, r.items) + '</tbody></table></td></tr>' : '');
         }).join('') + '</tbody></table>'
       : '<div class="empty">No curriculum work since the last session.</div>';
     return '<div class="prep-sec">Curriculum since the last session</div>' +
-      (head.length ? '<p class="cu-prep-head">' + head.join(' &nbsp;·&nbsp; ') + '</p>' : '') + body +
+      (head.length ? '<p class="cu-prep-head">' + head.join(' &nbsp;·&nbsp; ') + '</p>' : '') + vids + body +
       (browseMin >= 1 ? '<p class="prep-note">Plus ' + mins(browseMin) + ' looking through the lessons.</p>' : '');
   }
 
@@ -3754,7 +3873,7 @@
         '<div><b>' + days + '</b><span>day' + (days === 1 ? '' : 's') + ' so far</span></div>' +
         '<div><b>' + (m ? mins(Math.round(m / days)) : '0 min') + '</b><span>per day</span></div>' +
         '<div><b>' + sit + '</b><span>sitting' + (sit === 1 ? '' : 's') + ' of 5+ min</span></div>' +
-      '</div></div>' + renderDailyTime(snap, mins) + renderTimeBreakdown(snap, mins) + '</div>';
+      '</div></div>' + renderLastSessionWork(snap, mins) + renderDailyTime(snap, mins) + renderTimeBreakdown(snap, mins) + '</div>';
   }
 
   /* DAY BY DAY (Luca, 2026-10-15: "I want to see how much time a student puts in every day"): the
@@ -3766,20 +3885,53 @@
     var since = snap.since ? new Date(snap.since) : null;
     var sinceDay = since && isFinite(since.getTime()) ? since.toLocaleDateString('en-CA') : '';
     var today = new Date().toLocaleDateString('en-CA');
-    var max = Math.max.apply(null, D.map(function (d) { return d.min || 0; })) || 1;
+    var max = Math.max.apply(null, D.map(function (d) { return (d.min || 0) + (d.sess || 0); })) || 1;
     var last7 = D.slice(-7), active7 = last7.filter(function (d) { return d.min >= 5; }).length;
     var sum7 = last7.reduce(function (t, d) { return t + (d.min || 0); }, 0);
     var bars = D.map(function (d) {
-      var dt = new Date(d.day + 'T12:00:00'), m = Math.round(d.min || 0);
+      var dt = new Date(d.day + 'T12:00:00'), m = Math.round(d.min || 0), ss = Math.round(d.sess || 0);
       var cls = (sinceDay ? d.day >= sinceDay : D.indexOf(d) >= D.length - 7) ? 'cur' : 'old';
-      return '<div class="dt-day ' + cls + (d.day === today ? ' today' : '') + '" title="' + escHtml(dt.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })) + ': ' + mins(m) + '">' +
+      return '<div class="dt-day ' + cls + (d.day === today ? ' today' : '') + '" title="' + escHtml(dt.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })) + ': ' + mins(m) + ' on their own' + (ss ? ', plus ' + mins(ss) + ' in a session' : '') + '">' +
         '<span class="dt-v">' + (m ? (m >= 60 ? Math.floor(m / 60) + 'h' + (m % 60 ? ' ' + (m % 60) + 'm' : '') : m + 'm') : '') + '</span>' +
-        '<span class="dt-bar"><i style="height:' + (m ? Math.max(6, Math.round(100 * m / max)) : 0) + '%"></i></span>' +
+        '<span class="dt-bar">' + (ss ? '<i class="ss" style="height:' + Math.max(4, Math.round(100 * ss / max)) + '%"></i>' : '') +
+          '<i style="height:' + (m ? Math.max(6, Math.round(100 * m / max)) : 0) + '%"></i></span>' +
         '<span class="dt-d">' + 'SMTWTFS'.charAt(dt.getDay()) + '<small>' + (dt.getMonth() + 1) + '/' + dt.getDate() + '</small></span></div>';
     }).join('');
     return '<div class="dt"><div class="dt-hed">Every day<span>last 14 days &middot; ' + active7 + ' of the last 7 days active &middot; ' + mins(sum7) + ' in the last 7</span></div>' +
       '<div class="dt-row">' + bars + '</div>' +
-      '<div class="dt-key"><i class="cur"></i>since the last session <i class="old"></i>before it</div></div>';
+      '<div class="dt-key"><i class="cur"></i>since the last session <i class="old"></i>before it' +
+      (D.some(function (d) { return d.sess; }) ? ' <i class="ss"></i>in a session' : '') + '</div></div>';
+  }
+
+  /* THE LAST SESSION'S WORK (Luca, 2026-10-16: a student did 60 Rush questions
+     and "it didn't register at all"). Everything above counts work on their own,
+     so practice done during a session used to vanish. It is shown here instead. */
+  function renderLastSessionWork(snap, mins) {
+    var L = snap && snap.lastSession;
+    if (!L) return '';
+    var st = new Date(L.start), en = new Date(L.end);
+    var t = function (d) { return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }).replace(':00', ''); };
+    var day = function (d) { return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }); };
+    /* The homework done FOR the last session (Luca, 2026-10-16: Sakeena's 58 Words
+       in Context questions "didn't appear once"): the reset at the session's end
+       used to wipe it from this page right when it mattered. */
+    var B = L.before, pre = '';
+    if (B) {
+      var bq = (B.qb || 0) + (B.other || 0), bb = [];
+      if (bq) bb.push('<b>' + bq + '</b> practice question' + (bq === 1 ? '' : 's') + (B.qb ? ' (' + B.qbRight + ' of ' + B.qb + ' right in the Question Bank)' : ''));
+      if (B.min) bb.push('<b>' + mins(B.min) + '</b> active');
+      if (B.skills && B.skills.length) bb.push(B.skills.map(function (k) { return escHtml(k[0]) + ' ' + k[1]; }).join(', '));
+      pre = '<div class="ls-work ls-before"><span class="k">Before the last session</span>' +
+        escHtml(day(new Date(B.from)) + ' to ' + day(st)) + ': ' + (bb.length ? bb.join(' &middot; ') : 'nothing on the portal') + '</div>';
+    }
+    if (!(L.min || L.qb || L.other)) return pre;
+    var bits = [];
+    if (L.min) bits.push('<b>' + mins(L.min) + '</b> active');
+    var q = (L.qb || 0) + (L.other || 0);
+    if (q) bits.push('<b>' + q + '</b> practice question' + (q === 1 ? '' : 's') + (L.qb ? ' (' + L.qbRight + ' of ' + L.qb + ' right in the Question Bank)' : ''));
+    return pre + '<div class="ls-work"><span class="k">In the last session</span>' +
+      escHtml(st.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) + ', ' + t(st) + ' to ' + t(en)) + ': ' + bits.join(' &middot; ') +
+      '<small>Not in the numbers above, which count work on their own.</small></div>';
   }
 
   /* WHERE THE TIME WENT (Luca, 2026-09-25): the week's active minutes by
@@ -5715,6 +5867,7 @@
         // The student on screen, if their card was still loading, gets it now.
         if (currentStudent && currentStudent.key === k && currentView === 'student' && !lastPrep) paintStudentPrep(k, one);
       });
+      try { renderTable(); } catch (e) {}
     }, function () { prepBatchAt = 0; });
   }
 
