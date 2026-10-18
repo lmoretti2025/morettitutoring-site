@@ -8710,7 +8710,12 @@ window.mathFor = function (q, html) {
           var n = fig ? txt(fig).replace(of ? txt(of) : '', '').trim() : '', cap = txt(t.querySelector('.bp-cap'));
           if (n && cap) parts.push(n + (of ? ' of ' + txt(of).replace('/', '') : '') + ' ' + cap);
         });
-        return parts.length ? andJoin(parts.slice(0, 4)) + '.' : ''; } }
+        /* Five, not four. The cap was written when there were four tiles, so adding the
+           confidence tile silently dropped it from the only line most people ever read -
+           the panel is collapsed by default, and I verified the tile with it open. A cap
+           tied to the number of tiles that existed when it was written will do this again:
+           if a sixth is ever added, raise it here too. */
+        return parts.length ? andJoin(parts.slice(0, 5)) + '.' : ''; } }
     ];
     sections.forEach(function (sec) {
       var hed = q(sec.hed);
