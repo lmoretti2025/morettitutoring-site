@@ -22,6 +22,13 @@
  * question anyway (it tracks the label mix at r=-0.993). These 22 are the items that
  * were briefly live, kept because the file's whole purpose is that a student who sat an
  * item can still have it resolved, however short its life was.
+ *
+ * 2026-10-18: math module2Harder re-dealt again, on Luca's explicit call after seeing the
+ * measurement - 1/5/16, and every hard item carrying a twist or mechanism. It added
+ * NOTHING here, which is the file working as intended: the module it replaced was the
+ * original one, already retired on 10-17 and then restored by the revert, so its 22 items
+ * were in this list before this deal ran. The dedupe is on qid; append blindly and the
+ * same item would land twice.
  */
 window.RETIRED_ITEMS = [
  {
