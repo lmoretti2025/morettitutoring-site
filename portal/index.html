@@ -6225,7 +6225,7 @@ window.Portal = {
      header in fluid-ui.js. -->
 <script src="fluid-ui.js?v=20260905y"></script>
 <script src="banks.js?v=20261018a"></script>
-<script src="signals.js?v=20260930c"></script>
+<script src="signals.js?v=20261018a"></script>
 <script src="desmos-tags.js?v=20260916c"></script>
 <script src="time-budgets.js?v=20260912a"></script>
 <script src="challenge-questions.js?v=20260926a"></script>
@@ -25701,6 +25701,47 @@ window.renderNativeReport = function (data) {
         });
       }
     }
+
+    /* 6. HOW SURE THEY FELT. Diagnostic only - a practice test never asks, because the
+       real exam never asks (index.html confidenceAsked). Facts, with the questions they
+       happened on; the reading of what a run of sure misses MEANS needs several sittings
+       and belongs in session prep, like every other habit here (Luca, 2026-09-16).
+
+       The tile leads on SURE AND WRONG because that is the cell no score can show. A
+       student who is wrong and knows it checks their work; a student who is wrong and
+       certain has no reason to look again. On the mark sheet they are the same student.
+
+       Silent when `cq` is absent or empty, which is every practice test and every
+       diagnostic sat before 2026-10-13 - and, because of the key collision fixed in
+       c2d783a, every diagnostic sat before 2026-10-17 as well. */
+    (function () {
+      if (!MS || typeof MS.confidenceQuadrant !== 'function') return;
+      var answered = 0;
+      var idx = { sure: { right: [], wrong: [] }, think: { right: [], wrong: [] }, guess: { right: [], wrong: [] } };
+      parts.forEach(function (p) {
+        var q = MS.confidenceQuadrant(p.d.rows, p.sec.cq);
+        answered += q.answered;
+        ['sure', 'think', 'guess'].forEach(function (k) {
+          ['right', 'wrong'].forEach(function (w) {
+            q.cells[k][w].forEach(function (i) { idx[k][w].push({ p: p, i: i }); });
+          });
+        });
+      });
+      if (!answered) return;
+      var n = function (k, w) { return idx[k][w].length; };
+      var sureN = n('sure', 'right') + n('sure', 'wrong');
+      var facts = [];
+      if (n('sure', 'wrong')) facts.push('<b>Sure, and wrong:</b> ' + plural(n('sure', 'wrong'), 'question') + '.' + qlist(idx.sure.wrong));
+      if (n('guess', 'right')) facts.push('<b>Guessing, and right:</b> ' + plural(n('guess', 'right'), 'question') + '.' + qlist(idx.guess.right));
+      if (sureN) facts.push('When you said you were sure, you were right on <b>' + n('sure', 'right') + ' of ' + sureN + '</b>.');
+      if (!facts.length) facts.push('Every answer you were sure about was right, and no guess landed.');
+      tiles.push({
+        k: 'How sure you felt', fig: sureN, of: answered,
+        cap: 'answers you marked "Sure"',
+        bar: [{ w: pct(sureN, answered), c: 'bp-s-ink' }],
+        facts: facts
+      });
+    })();
 
     return '<div class="bp-wrap"><p class="bp-intro">What the test recorded beyond the clock: every crossed-out choice, changed answer, return trip and calculator use. Facts about this attempt; patterns across tests build up as more are taken.</p>' +
       '<div class="bp-grid">' + tiles.map(function (t) {

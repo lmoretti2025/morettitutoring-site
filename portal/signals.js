@@ -853,6 +853,51 @@ var MorettiSignals = (function () {
      review-pass is now { id, gain, tests, fixed, broke, of, filled,
        filledOf, pHelp }: gain = fixed - broke, answers the review changed;
        blanks filled in are filled (right) of filledOf, never in gain. */
+  /* ═══ THE CONFIDENCE QUADRANT ═══ correctness crossed with how sure they felt.
+   *
+   * Diagnostic only, because only the diagnostic asks (index.html confidenceAsked; a
+   * practice test must stay a rehearsal of an exam that never asks). `cq` arrives in the
+   * same order as the answers, so it indexes the decoded rows directly. Its ABSENCE means
+   * the question was never put, not that the student declined to answer it, so an attempt
+   * without it returns asked:0 and every caller stays silent.
+   *
+   * The cell that earns this is WRONG AND SURE. A student who is wrong and knows it will
+   * check their work; a student who is wrong and certain has no reason to look again, and
+   * nothing in a score report can find them - they and a careless student produce the same
+   * mark. Right-and-guessing is the mirror: they know more than they trust.
+   *
+   * Counts and question lists only. Whether four of these is a habit or one bad morning
+   * takes several sittings, and that reading lives in session prep (behaviorHighlights),
+   * not here - Luca, 2026-09-16.
+   */
+  function confidenceQuadrant(rows, cq) {
+    var out = { asked: 0, answered: 0, cells: {}, rate: {} };
+    var KEYS = ['sure', 'think', 'guess'];
+    KEYS.forEach(function (k) { out.cells[k] = { right: [], wrong: [] }; });
+    if (!Array.isArray(rows) || !Array.isArray(cq)) return out;
+    for (var i = 0; i < rows.length; i++) {
+      var c = cq[i];
+      if (KEYS.indexOf(c) < 0) continue;      // null = never tapped, which is not a value
+      out.asked++;
+      var r = rows[i];
+      if (!r || r.final === null) continue;   // tapped, then cleared the answer
+      out.answered++;
+      out.cells[c][r.finalOk ? 'right' : 'wrong'].push(i);
+    }
+    KEYS.forEach(function (k) {
+      var n = out.cells[k].right.length + out.cells[k].wrong.length;
+      out.rate[k] = n ? out.cells[k].right.length / n : null;
+    });
+    out.sureWrong = out.cells.sure.wrong;
+    out.guessRight = out.cells.guess.right;
+    /* Calibration: how far "sure" outruns the truth. Positive means they were surer than
+       they were right. Null until there are enough sure answers for the number to mean
+       anything - a single sure miss is not a calibration problem. */
+    var sureN = out.cells.sure.right.length + out.cells.sure.wrong.length;
+    out.calibration = sureN >= 5 ? (1 - out.rate.sure) : null;
+    return out;
+  }
+
   function behaviorHighlights(entries, cfg) {
     var L = sumLedger(entries, cfg && cfg.nowMs, cfg && cfg.days);
     var rd = changeReading(L.chg, cfg);
@@ -4258,6 +4303,7 @@ var MorettiSignals = (function () {
     changeVerdict: changeVerdict,
     changeReading: changeReading,
     behaviorHighlights: behaviorHighlights,
+    confidenceQuadrant: confidenceQuadrant,
     changeImproved: changeImproved,
     probGreater: probGreater,
     parentFacts: parentFacts,
