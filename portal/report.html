@@ -1232,7 +1232,12 @@ window.mathFor = function (q, html) {
   <div class="ftr"><span>Moretti Test Prep &amp; Tutoring · Cranford, NJ · (201) 275-2791</span><span>Page 2 of 2</span></div>
 </div>
 
-<script src="banks.js?v=20261013a"></script>
+<script src="banks.js?v=20261017a"></script>
+<!-- Every diagnostic item any re-deal has ever retired, so an attempt that stamped one
+     still resolves to the question the student actually saw. 55KB, grows slowly, and
+     unconditional on purpose: which attempt needs it is not known until its payload is
+     parsed, and by then the scripts have loaded. -->
+<script src="retired-items.js?v=20261017a"></script>
 <script>
   /* ═══ WHO ACTUALLY NEEDS practice-tests.js ═══ only a PRACTICE TEST report
      reads it (getBank and the test-title lookup below, both behind
@@ -2324,18 +2329,35 @@ window.mathFor = function (q, html) {
   function findByQid(qid) {
     if (!_qidIndex) {
       _qidIndex = {};
+      var add = function (arr) {
+        if (Array.isArray(arr)) arr.forEach(function (it) {
+          if (it && it.qid && !_qidIndex[it.qid]) _qidIndex[it.qid] = it;
+        });
+      };
       [window.SAT_PRACTICE_TESTS_V1, window.SAT_PRACTICE_TESTS].forEach(function (T) {
         (T || []).forEach(function (t) {
           Object.keys(t.sections || {}).forEach(function (sk) {
-            Object.keys(t.sections[sk] || {}).forEach(function (mk) {
-              var arr = t.sections[sk][mk];
-              if (Array.isArray(arr)) arr.forEach(function (it) {
-                if (it && it.qid && !_qidIndex[it.qid]) _qidIndex[it.qid] = it;
-              });
-            });
+            Object.keys(t.sections[sk] || {}).forEach(function (mk) { add(t.sections[sk][mk]); });
           });
         });
       });
+      /* AND THE DIAGNOSTIC. Leaving it out meant 145 of the diagnostic's 147 items were
+         unreachable here, so every diagnostic report fell through to byPos[i] - position -
+         which is the exact defect the qid stamp exists to prevent, on the one record kind
+         that first broke. It was silent only because banks.js had not moved since the
+         stamp shipped. The bank is {section: {module: [items]}}, one level shallower than
+         a test's {sections: {...}}, which is why it needs its own walk and not the loop
+         above. Archive first, so a pre-cutover attempt resolves to the item the student
+         actually saw rather than its replacement. */
+      [window.SECTION_BANKS_V1, window.SECTION_BANKS].forEach(function (B) {
+        Object.keys(B || {}).forEach(function (sk) {
+          var mods = (B || {})[sk];
+          if (mods && typeof mods === 'object') Object.keys(mods).forEach(function (mk) { add(mods[mk]); });
+        });
+      });
+      // Last, so anything still installed wins: a retired item is the fallback, not the
+      // source of truth.
+      add(window.RETIRED_ITEMS);
     }
     return _qidIndex[qid] || null;
   }
