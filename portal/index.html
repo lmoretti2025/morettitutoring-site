@@ -25640,6 +25640,26 @@ window.renderNativeReport = function (data) {
         revFacts.push('<b>' + name + ':</b> ' + bits.join(', ') + '.');
       });
     });
+    /* What the review actually CHANGED, question by question. The module lines above give
+       the net, and the net hides the trade: "review gained +1" can be three questions
+       rescued and two thrown away. The one to see is a question standing RIGHT and handed
+       in WRONG - that is second-guessing with a cost attached, and `standingOk` has been
+       recorded on every question since the signals went in and read by nobody until now.
+
+       Predicates mirror signals.js exactly (reviewGain's up/down split): a blank filled in
+       is neither, because a filled blank is a guess as often as a correction, and the
+       skips line below already reports those. Only modules that reached a review count -
+       elsewhere `standing` is simply the final answer. */
+    var reviewed = {};
+    parts.forEach(function (p) {
+      p.d.modules.forEach(function (m) { if (m.reviewStartSec !== null) reviewed[p.sec.k + '|' + m.module] = true; });
+    });
+    var inReviewed = function (x) { return !!reviewed[x.p.sec.k + '|' + x.r.module]; };
+    var revDown = all.filter(function (x) { return inReviewed(x) && !x.r.standingBlank && x.r.standingOk && !x.r.finalOk; });
+    var revUp = all.filter(function (x) { return inReviewed(x) && !x.r.standingBlank && !x.r.standingOk && x.r.finalOk; });
+    if (revDown.length) revFacts.push('<b>Right before the review, wrong after:</b> ' + plural(revDown.length, 'question') + '.' + qlist(revDown));
+    if (revUp.length) revFacts.push('<b>Wrong before the review, right after:</b> ' + plural(revUp.length, 'question') + '.' + qlist(revUp));
+
     if (skipsFirst.length) {
       var skipAns = skipsFirst.filter(function (x) { return x.r.final !== null; });
       var skipRight = skipsFirst.filter(function (x) { return x.r.finalOk; });
