@@ -25,28 +25,6 @@ window.SECTION_BANKS = {
     "source": "Non-Bluebook"
    },
    {
-    "qid": "2c61e0b9",
-    "domain": "Expression of Ideas",
-    "skill": "Rhetorical Synthesis",
-    "difficulty": "hard",
-    "type": "mc",
-    "text": "While researching a topic, a student has taken the following notes:<ul><li>British musicians John Lennon and Paul McCartney shared writing credit for numerous Beatles songs.</li><li>Many Lennon-McCartney songs were actually written by either Lennon or McCartney, not by both.</li><li>The exact authorship of specific parts of many Beatles songs, such as the verse for \"In My Life,\" is disputed.</li><li>Mark Glickman, Jason Brown, and Ryan Song used statistical methods to analyze the musical content of Beatles songs.</li><li>They concluded that there is 18.9% probability that McCartney wrote the verse for \"In My Life,\" stating that the verse is \"consistent with Lennon's songwriting style.\"</li></ul><br><br>The student wants to make a generalization about the kind of study conducted by Glickman, Brown, and Song. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
-    "choices": [
-     "Based on statistical analysis, Glickman, Brown, and Song claim that John Lennon wrote the verse of \"In My Life.\"",
-     "There is only an 18.9% probability that Paul McCartney wrote the verse for \"In My Life\"; John Lennon is the more likely author.",
-     "It is likely that John Lennon, not Paul McCartney, wrote the verse for \"In My Life.\"",
-     "Researchers have used statistical methods to address questions of authorship within the field of music."
-    ],
-    "correct": 3,
-    "choiceNotes": [
-     "Incorrect. The sentence summarizes the methodology and findings of a particular analysis of a single song; it doesn't make a generalization about the kind of study conducted.",
-     "Incorrect. The sentence mentions the data and conclusion of a particular analysis of a single song; it doesn't make a generalization about the kind of study conducted.",
-     "Incorrect. The sentence focuses on a specific conclusion from a particular analysis of a single song; it doesn't make a generalization about the kind of study conducted.",
-     "Correct. The sentence uses information from the notes to make a generalization about the kind of study Glickman, Brown, and Song conducted. Specifically, the sentence indicates that the study was of a kind that used statistical methods to address questions of authorship within the field of music."
-    ],
-    "source": "Non-Bluebook"
-   },
-   {
     "qid": "cce2f8dc",
     "domain": "Craft and Structure",
     "skill": "Text Structure and Purpose",
@@ -91,46 +69,90 @@ window.SECTION_BANKS = {
     "source": "Non-Bluebook"
    },
    {
-    "qid": "0d3ebdce",
-    "domain": "Expression of Ideas",
-    "skill": "Transitions",
-    "difficulty": "easy",
+    "qid": "d168e7c5",
+    "domain": "Craft and Structure",
+    "skill": "Text Structure and Purpose",
+    "difficulty": "medium",
     "type": "mc",
-    "text": "Neuroscientist Karen Konkoly wanted to determine whether individuals can understand and respond to questions during REM sleep. She first taught volunteers eye movements they would use to respond to basic math problems while asleep (a single left-right eye movement indicated the number one). ______ she attached electrodes to the volunteers' faces to record their eye movements during sleep.<br><br>Which choice completes the text with the most logical transition?",
+    "text": "The following text is from Annie Dillard's 1987 autobiographical novel An American Childhood. The narrator is a young girl living in Pittsburgh.<br>I walked. My mother had given me the freedom of the streets as soon as I could say our telephone number. I walked and memorized the neighborhood. I made a mental map and located myself upon it. At night in bed I rehearsed the small world's scheme and set challenges: <u>Find the store using backyards only. Imagine a route from the school to my friend's house.</u><br>©1987 by Annie Dillard<br><br>Which choice best describes the function of the underlined portion in the text as a whole?",
     "choices": [
-     "Specifically,",
-     "Next,",
-     "For instance,",
-     "In sum,"
+     "It describes the narrator trying to memorize her telephone number.",
+     "It provides examples of what the narrator thinks about at night.",
+     "It gives directions to the narrator's favorite local store.",
+     "It portrays the narrator's relationship with her mother."
     ],
     "correct": 1,
     "choiceNotes": [
-     "Incorrect. \"specifically\" illogically signals that this sentence specifies or elaborates on an aspect of the action described in the previous sentence. Instead, it describes the next step in Konkoly's experiment.",
-     "Correct. \"Next\" logically signals that the action described in this sentence—Konkoly recording participants' eye movements— is the next step in Konkoly's experiment.",
-     "Incorrect. \"for instance\" illogically signals that the action described in this sentence is an example of the action described in the previous sentence. Instead, it is the next step in Konkoly's experiment.",
-     "Incorrect. \"in sum\" illogically signals that this sentence summarizes or concludes the action described in the previous sentence. Instead, it describes the next step in Konkoly's experiment."
+     "Incorrect. The underlined portion makes no mention of memorizing a telephone number. Although the narrator mentions that she had to learn the home telephone number before her mother would give her permission to walk around the neighborhood, there is nothing in the underlined portion or the rest of the text about memorizing the telephone number.",
+     "Correct. It accurately describes how the underlined portion functions in the text as a whole. In the text, the narrator explains that she walks around her neighborhood, making a \"mental map\" of the area that she imagines herself navigating through. She then states that she rehearses \"the small world's scheme\"—that is, imagines moving through her mental map—and challenges herself to use the map in her mind while lying in bed at night. The underlined portion presents two such challenges (getting to the store through backyards and traveling from school to a friend's house) and thus provides examples of what the narrator thinks about at night.",
+     "Incorrect. Although the underlined portion refers to navigation tasks like finding a route to a store only through backyards, the text contains no specific directions to any store, nor is any store identified as the narrator's favorite.",
+     "Incorrect. The underlined portion makes no mention of the narrator's mother and doesn't address the narrator's relationship with her. Although the narrator mentions that her mother gave her permission as a child to walk around the neighborhood, there is nothing in the underlined portion or the rest of the text about the mother or her relationship to her child."
     ],
     "source": "Non-Bluebook"
    },
    {
-    "qid": "f735493e",
-    "domain": "Expression of Ideas",
-    "skill": "Transitions",
-    "difficulty": "easy",
+    "qid": "aa7fc89b",
+    "domain": "Craft and Structure",
+    "skill": "Text Structure and Purpose",
+    "difficulty": "medium",
     "type": "mc",
-    "text": "Celebrated Tewa potter Maria Martinez (1887-1980) made her signature all-black ceramic vessels using a heating technique called reduction firing. This technique involves smothering the flame surrounding the clay vessel. ______ the vessel takes on a shiny, black hue.<br><br>Which choice completes the text with the most logical transition?",
+    "text": "The following text is adapted from Susan Glaspell's 1912 short story \"'Out There.'\" An elderly shop owner is looking at a picture that he recently acquired and hopes to sell.<br>It did seem that the picture failed to fit in with the rest of the shop. A persuasive young fellow who claimed he was closing out his stock let the old man have it for what he called a song. It was only a little out-of-the-way store which subsisted chiefly on the framing of pictures. The old man looked around at his views of the city, his pictures of cats and dogs, his flaming bits of landscape. \"Don't belong in here,\" he fumed. And yet the old man was secretly proud of his acquisition. There was a hidden dignity in his scowling as he shuffled about pondering the least ridiculous place for the picture.<br><br>Which choice best states the main purpose of the text?",
     "choices": [
-     "On the contrary,",
-     "For example,",
-     "Previously,",
-     "As a result,"
+     "To reveal the shop owner's conflicted feelings about the new picture",
+     "To convey the shop owner's resentment of the person he got the new picture from",
+     "To describe the items that the shop owner most highly prizes",
+     "To explain differences between the new picture and other pictures in the shop"
     ],
-    "correct": 3,
+    "correct": 0,
     "choiceNotes": [
-     "Incorrect. \"on the contrary\" illogically signals that the information in this sentence directly opposes the heating technique in the previous sentence. Instead, the vessel turns black as a result of that technique.",
-     "Incorrect. \"for example\" illogically signals that the information in this sentence is an example of the heating technique in the previous sentence. Instead, the vessel turns black as a result of that technique.",
-     "Incorrect. \"previously\" illogically signals that the information in this sentence occurs earlier in a chronological series of events than does the heating technique discussed in the first two sentences. Instead, the vessel turns black as a result of that technique.",
-     "Correct. \"As a result\" logically signals that the information in this sentence—the vessel turning black—is a result of the heating technique discussed in the previous sentence."
+     "Correct. It most accurately describes the main purpose of the text. The text begins by stating that the new picture \"failed to fit in\" with the other items that the shop owner has. The text goes on to illustrate that point by describing the other pictures the shop owner has, indicating that the shop owner is fuming because he doesn't think the new picture belongs in the store. In the second paragraph, however, the text indicates that the shop owner is \"secretly proud of his acquisition.\" The main purpose of the text is thus to reveal the shop owner's conflicted feelings about the new picture.",
+     "Incorrect. The text doesn't suggest that the shop owner resents the young man who sold him the new picture; in fact, the text gives no indication of the owner's feelings about the young man at all.",
+     "Incorrect. Although the text indicates that the new picture is different from the other items in the shop, there's no suggestion that the shop owner prizes either the new picture or the pictures of the city, pets, and landscapes more than he prizes any other items.",
+     "Incorrect. The text doesn't describe what the new picture looks like; rather, the text identifies some of the other kinds of images that the shop owner has and states that they're different from the new picture without explaining how they're different."
+    ],
+    "source": "Non-Bluebook"
+   },
+   {
+    "qid": "cf9a00e0",
+    "domain": "Craft and Structure",
+    "skill": "Text Structure and Purpose",
+    "difficulty": "medium",
+    "type": "mc",
+    "text": "Chile's Atacama Desert is one of the driest places on Earth. <u>Mary Beth Wilhelm and other astrobiologists search for life, or its remains, in this harsh place because the desert closely mirrors the extreme environment on Mars.</u> The algae and bacteria found in Atacama's driest regions may offer clues about Martian life. By studying how these and other microorganisms survive such extreme conditions on Earth, Wilhelm's team hopes to determine whether similar life might have existed on Mars and to develop the best tools to look for evidence of it.<br><br>Which choice best describes the function of the underlined sentence in the text as a whole?",
+    "choices": [
+     "To contrast the conditions in the Atacama Desert with those on Mars",
+     "To explain why many life-forms cannot survive in the Atacama Desert",
+     "To indicate why astrobiologists choose to conduct research in the Atacama Desert",
+     "To describe certain limitations to conducting scientific study in the Atacama Desert"
+    ],
+    "correct": 2,
+    "choiceNotes": [
+     "Incorrect. To contrast two things means to show the differences between them, and the phrase \"closely mirrors\" in the underlined sentence indicates that the extreme environment in the Atacama Desert is similar to, not different from, that on Mars. This similarity is why, according to the underlined sentence, astrobiologists conduct research in Atacama.",
+     "Incorrect. The underlined sentence doesn't address forms of life that are unable to survive the harsh environment of the Atacama Desert. Instead, the underlined sentence explains why astrobiologists study life, or its remains, in this environment.",
+     "Correct. It most accurately describes how the underlined sentence functions in the text as a whole. The first sentence describes a unique location on Earth, the Atacama Desert. The next sentence, which is the underlined sentence, states that the reason why astrobiologists study life, or its remains, in this unique location is that Atacama is a harsh environment that closely resembles the extreme environment of Mars. The remainder of the text explains that the researchers hope their work in Atacama will support inquiry into life on Mars. Thus, the underlined portion functions mainly to indicate why astrobiologists choose to conduct research in the Atacama Desert.",
+     "Incorrect. The underlined sentence doesn't suggest that the scientific research in the Atacama Desert is limited in any way; instead, the sentence explains that the similarity between the environments of Atacama and Mars is the reason why astrobiologists search for life, or its remains, in Atacama."
+    ],
+    "source": "Non-Bluebook"
+   },
+   {
+    "qid": "e23f50b9",
+    "domain": "Craft and Structure",
+    "skill": "Text Structure and Purpose",
+    "difficulty": "medium",
+    "type": "mc",
+    "text": "The people of medieval Europe have traditionally been seen as uninterested in cleanliness and hygiene, but modern research has shown that this is largely a myth. According to historian Eleanor Janega, most medieval towns in Europe had at least one public bathhouse, which often offered both full-immersion baths and—more affordably—steam baths. <u>While such amenities were available mainly to town dwellers</u>, regular bathing in rivers and streams or daily sponge baths at home were common practices throughout medieval Europe.<br><br>Which choice best describes the function of the underlined portion?",
+    "choices": [
+     "It asserts that in medieval Europe steam baths were more popular in rural areas than in urban ones.",
+     "It describes a limitation of earlier historians' studies of medieval European bathing habits.",
+     "It concedes that not all people in medieval Europe had access to public bathhouses.",
+     "It explains why Janega decided to study the popularity of public bathhouses in medieval Europe."
+    ],
+    "correct": 2,
+    "choiceNotes": [
+     "Incorrect. The underlined portion establishes that amenities such as steam baths were mainly available to town dwellers, which suggests in turn that steam baths were largely unavailable to people in rural areas. Thus, the distinction made by the underlined portion is not between the popularity of steam baths in towns versus their lack of popularity in rural areas but instead between their presence in towns and absence in rural areas.",
+     "Incorrect. Although the text does explain that recent historians have disproved the idea that medieval Europeans rarely bathed, it doesn't attribute that misconception to earlier historians of medieval Europe or suggest that their research was subject to limitations. Moreover, the underlined portion addresses a limitation of life in medieval Europe, not of historical research.",
+     "Correct. It most effectively describes the function of the underlined portion. The text discusses the long-standing misconception that people in medieval Europe were uninterested in cleanliness and hygiene. As evidence that this idea is false, the text cites historian Eleanor Janega's assertion that in medieval Europe, towns usually had at least one bathhouse, where people could take immersion baths or steam baths for a fee. The underlined portion then notes that mainly town dwellers had access to these bathhouses. The remainder of the text explains that those who lacked such access were nonetheless able to bathe in outdoor waterways or take sponge baths at home. Therefore, the underlined portion concedes that some people in medieval Europe lacked access to public bathhouses.",
+     "Incorrect. The underlined portion doesn't address why historian Eleanor Janega decided to study the popularity of public bathhouses in medieval Europe—nor does any portion of the text. The text mentions Janega in passing, but it doesn't go into detail about why she decided to study the popularity of public bathhouses in medieval Europe."
     ],
     "source": "Non-Bluebook"
    },
@@ -223,6 +245,72 @@ window.SECTION_BANKS = {
     "source": "Non-Bluebook"
    },
    {
+    "qid": "787729be",
+    "domain": "Information and Ideas",
+    "skill": "Inferences",
+    "difficulty": "medium",
+    "type": "mc",
+    "text": "Martin Dančák, Wewin Tjiasmanto, and colleagues have identified a new carnivorous plant species (Nepenthes pudica) in Indonesia. Like other carnivorous plants, N. pudica has pitfall traps, or pitchers, that capture prey, but unlike others, the pitchers of N. pudica are located underground. The researchers unearthed the new species on fairly dry ridges with surfaces that host few other plants and animals. Therefore, the researchers hypothesize that the N. pudica species likely ______<br><br>Which choice most logically completes the text?",
+    "choices": [
+     "represents one of many undiscovered carnivorous plant species in the region.",
+     "formed pitchers early in development to absorb more moisture.",
+     "is buried by nearby animals as they forage along the ridges for food.",
+     "evolved to have underground traps to access more prey than would surface traps."
+    ],
+    "correct": 3,
+    "choiceNotes": [
+     "Incorrect. This inference isn't supported. The text never mentions the possibility of other undiscovered carnivorous plant species in Indonesia, so there's no basis to make this inference.",
+     "Incorrect. This inference isn't supported. The text does say that the ridges where N. pudica lives are dry, but it also says that the purpose of carnivorous plant pitchers is to capture prey. It never suggests that these pitchers also absorb moisture, so there's no basis to make this inference.",
+     "Incorrect. This inference isn't supported. The text never suggests that N. pudica's underground pitcher can catch animals on the surface, so there's no basis to make this inference.",
+     "Correct. The text says that N.pudica's prey-catching pitchers are underground. It also says that the ridges where N. pudica lives don't have many plants and animals on the surface. This suggests that N. pudica evolved underground pitchers in order to catch more prey."
+    ],
+    "source": "Non-Bluebook"
+   },
+   {
+    "qid": "ad680167",
+    "domain": "Information and Ideas",
+    "skill": "Central Ideas and Details",
+    "difficulty": "medium",
+    "type": "mc",
+    "text": "The recovery of a 1,000-year-old Chinese shipwreck in the Java Sea near present-day Indonesia has yielded a treasure trove of artifacts, including thousands of small ceramic bowls. Using a portable X-ray fluorescence analyzer tool, Lisa Niziolek and her team were able to detect the chemical composition of these bowls without damaging them. By comparing the chemical signatures of the bowls with those of the materials still at old Chinese kiln sites, Niziolek and her team can pinpoint which Chinese kilns likely produced the ceramic bowls.<br><br>Which choice best states the main idea of the text?",
+    "choices": [
+     "Because of a new technology, researchers can locate and recover more shipwrecks than they could in the past.",
+     "Researchers have been able to identify the location of a number of Chinese kilns in operation 1,000 years ago.",
+     "With the help of a special tool, researchers have determined the likely origin of bowls recovered from a shipwreck.",
+     "Before the invention of portable X-ray fluorescence, researchers needed to take a small piece out of an artifact to analyze its components."
+    ],
+    "correct": 2,
+    "choiceNotes": [
+     "Incorrect. Although the text indicates that the researchers used technology in the form of a portable X-ray fluorescence analyzer, it doesn't specifically state that this technology is new. In addition, the text says that Niziolek and her team used the tool to determine the chemical composition of bowls that were found in a Chinese shipwreck, not to locate and recover the shipwreck itself. There's no indication in the text that a new technology can help researchers locate and recover shipwrecks.",
+     "Incorrect. The text indicates that the researchers collected materials from old kiln sites for chemical comparison with the ceramic bowls, which means that the researchers must have already known the location of those kiln sites. Rather than identifying the location of the kilns, the researchers determined which kilns in operation 1,000 years ago had likely produced the bowls that were found in the shipwreck.",
+     "Correct. It most accurately states the main idea of the text. According to the text, thousands of ceramic bowls were found in a recovered Chinese shipwreck. The text goes on to say that Niziolek and her team used a special tool, a portable X-ray fluorescence analyzer, to determine the bowls' chemical signatures. Comparing these chemical signatures with the chemical signatures of materials they had collected from old Chinese kiln sites, the text says, allowed the researchers to identify which kilns had produced the bowls. In other words, the researchers determined the bowls' origin.",
+     "Incorrect. Although the text says that using a portable X-ray fluorescence analyzer tool enabled Niziolek and her team to analyze artifacts in the form of ceramic bowls without damaging them, the text doesn't discuss how researchers analyzed artifacts before this tool was invented. Moreover, the point that the bowls were left undamaged isn't the text's main idea. Rather, it's a detail that's provided to develop the main idea, which is that the researchers used a special tool to determine where the bowls had been produced."
+    ],
+    "source": "Non-Bluebook"
+   },
+   {
+    "qid": "659c6c1d",
+    "domain": "Information and Ideas",
+    "skill": "Central Ideas and Details",
+    "difficulty": "medium",
+    "type": "mc",
+    "text": "The following text is adapted from Robert Louis Stevenson's 1883 novel Treasure Island. Bill is a sailor staying at the Admiral Benbow, an inn run by the narrator's parents.<br>Every day when [Bill] came back from his stroll he would ask if any seafaring men had gone by along the road. At first we thought it was the want of company of his own kind that made him ask this question, but at last we began to see he was desirous to avoid them. When a seaman did [stay] at the Admiral Benbow (as now and then some did) he would look in at him through the curtained door before he entered the parlour; and he was always sure to be as silent as a mouse when any such was present.<br><br>According to the text, why does Bill regularly ask about \"seafaring men\"?",
+    "choices": [
+     "He's hoping to find an old friend and fellow sailor.",
+     "He's trying to secure a job as part of the crew on a new ship.",
+     "He isn't sure that other guests at the inn will be welcoming of sailors.",
+     "He doesn't want to encounter any other sailor unexpectedly."
+    ],
+    "correct": 3,
+    "choiceNotes": [
+     "Incorrect. This isn't the reason the text gives for why Bill regularly asks about \"seafaring men.\" The narrator says that, at first, they thought Bill asked regularly about other seafarers because he wanted their company, but eventually they realized that Bill wanted to avoid them.",
+     "Incorrect. This isn't the reason the text gives for why Bill regularly asks about \"seafaring men.\" The narrator says that, at first, they thought Bill asked regularly about other seafarers because he wanted their company, but eventually they realized that Bill wanted to avoid them.",
+     "Incorrect. This isn't the reason the text gives for why Bill regularly asks about \"seafaring men.\" The narrator says that, at first, they thought Bill asked regularly about other seafarers because he wanted their company, but eventually they realized that Bill wanted to avoid them.",
+     "Correct. The narrator says that, at first, they thought Bill asked regularly about other seafarers because he wanted their company, but eventually they realized that Bill actually wanted to avoid them."
+    ],
+    "source": "Non-Bluebook"
+   },
+   {
     "qid": "89fe7f93",
     "domain": "Standard English Conventions",
     "skill": "Boundaries",
@@ -311,138 +399,6 @@ window.SECTION_BANKS = {
     "source": "Moretti Test Prep & Tutoring"
    },
    {
-    "qid": "ddb77846",
-    "domain": "Expression of Ideas",
-    "skill": "Transitions",
-    "difficulty": "medium",
-    "type": "mc",
-    "text": "My interest in old public libraries has led me to seek them out whenever I visit a new part of the United States. ______ I could visit every state in the US and still not find the oldest public library in the Western Hemisphere. That library, the Biblioteca Palafoxiana, is located in Puebla, Mexico.<br><br>Which choice completes the text with the most logical transition?",
-    "choices": [
-     "As a result,",
-     "Nevertheless,",
-     "Earlier,",
-     "In other words,"
-    ],
-    "correct": 1,
-    "choiceNotes": [
-     "Incorrect. \"as a result\" illogically signals that the claim in the sentence is a consequence of the previous claim about the speaker seeking out old public libraries. Instead, the claim is true despite the previous claim.",
-     "Correct. \"Nevertheless\" logically signals that the claim in the sentence—that the speaker could visit every state in the US and not find the oldest public library in the Western Hemisphere—is true despite the previous claim about the speaker seeking out old public libraries.",
-     "Incorrect. \"earlier\" illogically signals that the claim in the sentence occurs earlier in a chronological sequence of events than the previous claim about the speaker seeking out old public libraries. Instead, the claim is true despite the previous claim.",
-     "Incorrect. \"in other words\" illogically signals that the claim in the sentence is merely a paraphrase or restatement of the previous claim about the speaker seeking out old public libraries. Instead, the claim is true despite the previous claim."
-    ],
-    "source": "Non-Bluebook"
-   },
-   {
-    "qid": "4703eafb",
-    "domain": "Expression of Ideas",
-    "skill": "Transitions",
-    "difficulty": "medium",
-    "type": "mc",
-    "text": "Following the American Revolutionary War, North American foodways underwent a radical transformation, fueled in large part by spiking consumer demand for certain grains. The cultivation, trade, and transportation of maize and wheat, ______ reconfigured the continent's existing regional foodways into a globally oriented food system.<br><br>Which choice completes the text with the most logical transition?",
-    "choices": [
-     "in particular,",
-     "alternatively,",
-     "by comparison,",
-     "second of all,"
-    ],
-    "correct": 0,
-    "choiceNotes": [
-     "Correct. \"In particular\" logically signals that the information in this sentence—that maize and wheat supply chains transformed North American foodways into a global food system—provides specific, precise details elaborating on the more general information in the previous sentence about the transformation of North American foodways (with maize and wheat the \"certain grains\" at the center of it).",
-     "Incorrect. \"alternatively\" illogically signals that the information in this sentence is an alternative option to the previous information about the transformation of North American foodways. Instead, the roles of maize and wheat in creating a global food system are specific, precise details elaborating on that information.",
-     "Incorrect. \"by comparison\" illogically signals that the information in this sentence is being compared to the previous information about the transformation of North American foodways. Instead, the roles of maize and wheat in creating a global food system are specific, precise details elaborating on that information.",
-     "Incorrect. \"second of all\" illogically signals that the information in this sentence is a second, separate claim from the previous claim that North American foodways were transformed. Instead, the roles of maize and wheat in creating a global food system are specific, precise details elaborating on that information, rather than a separate claim."
-    ],
-    "source": "Non-Bluebook"
-   },
-   {
-    "qid": "c39e4149",
-    "domain": "Expression of Ideas",
-    "skill": "Rhetorical Synthesis",
-    "difficulty": "medium",
-    "type": "mc",
-    "text": "While researching a topic, a student has taken the following notes:<ul><li>About 11,000 plant species have seeds that ants carry and plant.</li><li>Each such seed bears an elaiosome, a fleshy outgrowth rich in fat.</li><li>An ant carries the seed back to its nest for the elaiosome.</li><li>It feeds the elaiosome to the larvae and discards the seed itself.</li><li>Discarded seeds end up in the refuse chamber, where the soil is loose.</li><li>Seeds moved this way travel about two meters, far less than birds carry them.</li></ul><br><br>The student wants to explain how ants come to plant the seeds.<br>Which choice most effectively uses relevant information from the notes to accomplish this goal?",
-    "choices": [
-     "Each of these seeds bears an elaiosome, a fleshy outgrowth rich in fat, which an ant carries back to its nest, feeding the elaiosome to the larvae waiting there.",
-     "Seeds that an ant has carried back to its nest travel about two meters on average, far less than the seeds that birds carry.",
-     "An ant carries a seed home for the fatty elaiosome, feeds that to the larvae, and discards the seed in the refuse chamber, where the soil is loose.",
-     "About 11,000 plant species have seeds that ants carry and plant, and each such seed bears an elaiosome, a fleshy outgrowth rich in fat."
-    ],
-    "correct": 2,
-    "choiceNotes": [
-     "Incorrect. It draws on those same notes but stops once the larvae are fed, so what becomes of the seed is never said.",
-     "Incorrect. It measures the dispersal without accounting for it.",
-     "Correct. The goal is to explain how ants come to plant the seeds, so the choice must follow a seed all the way to ground it can grow in. This choice does, drawing on the notes that an ant carries the seed back to its nest, feeds the elaiosome to the larvae, and leaves it where \"the soil is loose\".",
-     "Incorrect. It counts the species involved and describes the elaiosome without saying what an ant does with a seed."
-    ],
-    "source": "Moretti Test Prep & Tutoring"
-   },
-   {
-    "qid": "787729be",
-    "domain": "Information and Ideas",
-    "skill": "Inferences",
-    "difficulty": "medium",
-    "type": "mc",
-    "text": "Martin Dančák, Wewin Tjiasmanto, and colleagues have identified a new carnivorous plant species (Nepenthes pudica) in Indonesia. Like other carnivorous plants, N. pudica has pitfall traps, or pitchers, that capture prey, but unlike others, the pitchers of N. pudica are located underground. The researchers unearthed the new species on fairly dry ridges with surfaces that host few other plants and animals. Therefore, the researchers hypothesize that the N. pudica species likely ______<br><br>Which choice most logically completes the text?",
-    "choices": [
-     "represents one of many undiscovered carnivorous plant species in the region.",
-     "formed pitchers early in development to absorb more moisture.",
-     "is buried by nearby animals as they forage along the ridges for food.",
-     "evolved to have underground traps to access more prey than would surface traps."
-    ],
-    "correct": 3,
-    "choiceNotes": [
-     "Incorrect. This inference isn't supported. The text never mentions the possibility of other undiscovered carnivorous plant species in Indonesia, so there's no basis to make this inference.",
-     "Incorrect. This inference isn't supported. The text does say that the ridges where N. pudica lives are dry, but it also says that the purpose of carnivorous plant pitchers is to capture prey. It never suggests that these pitchers also absorb moisture, so there's no basis to make this inference.",
-     "Incorrect. This inference isn't supported. The text never suggests that N. pudica's underground pitcher can catch animals on the surface, so there's no basis to make this inference.",
-     "Correct. The text says that N.pudica's prey-catching pitchers are underground. It also says that the ridges where N. pudica lives don't have many plants and animals on the surface. This suggests that N. pudica evolved underground pitchers in order to catch more prey."
-    ],
-    "source": "Non-Bluebook"
-   },
-   {
-    "qid": "ad680167",
-    "domain": "Information and Ideas",
-    "skill": "Central Ideas and Details",
-    "difficulty": "medium",
-    "type": "mc",
-    "text": "The recovery of a 1,000-year-old Chinese shipwreck in the Java Sea near present-day Indonesia has yielded a treasure trove of artifacts, including thousands of small ceramic bowls. Using a portable X-ray fluorescence analyzer tool, Lisa Niziolek and her team were able to detect the chemical composition of these bowls without damaging them. By comparing the chemical signatures of the bowls with those of the materials still at old Chinese kiln sites, Niziolek and her team can pinpoint which Chinese kilns likely produced the ceramic bowls.<br><br>Which choice best states the main idea of the text?",
-    "choices": [
-     "Because of a new technology, researchers can locate and recover more shipwrecks than they could in the past.",
-     "Researchers have been able to identify the location of a number of Chinese kilns in operation 1,000 years ago.",
-     "With the help of a special tool, researchers have determined the likely origin of bowls recovered from a shipwreck.",
-     "Before the invention of portable X-ray fluorescence, researchers needed to take a small piece out of an artifact to analyze its components."
-    ],
-    "correct": 2,
-    "choiceNotes": [
-     "Incorrect. Although the text indicates that the researchers used technology in the form of a portable X-ray fluorescence analyzer, it doesn't specifically state that this technology is new. In addition, the text says that Niziolek and her team used the tool to determine the chemical composition of bowls that were found in a Chinese shipwreck, not to locate and recover the shipwreck itself. There's no indication in the text that a new technology can help researchers locate and recover shipwrecks.",
-     "Incorrect. The text indicates that the researchers collected materials from old kiln sites for chemical comparison with the ceramic bowls, which means that the researchers must have already known the location of those kiln sites. Rather than identifying the location of the kilns, the researchers determined which kilns in operation 1,000 years ago had likely produced the bowls that were found in the shipwreck.",
-     "Correct. It most accurately states the main idea of the text. According to the text, thousands of ceramic bowls were found in a recovered Chinese shipwreck. The text goes on to say that Niziolek and her team used a special tool, a portable X-ray fluorescence analyzer, to determine the bowls' chemical signatures. Comparing these chemical signatures with the chemical signatures of materials they had collected from old Chinese kiln sites, the text says, allowed the researchers to identify which kilns had produced the bowls. In other words, the researchers determined the bowls' origin.",
-     "Incorrect. Although the text says that using a portable X-ray fluorescence analyzer tool enabled Niziolek and her team to analyze artifacts in the form of ceramic bowls without damaging them, the text doesn't discuss how researchers analyzed artifacts before this tool was invented. Moreover, the point that the bowls were left undamaged isn't the text's main idea. Rather, it's a detail that's provided to develop the main idea, which is that the researchers used a special tool to determine where the bowls had been produced."
-    ],
-    "source": "Non-Bluebook"
-   },
-   {
-    "qid": "659c6c1d",
-    "domain": "Information and Ideas",
-    "skill": "Central Ideas and Details",
-    "difficulty": "medium",
-    "type": "mc",
-    "text": "The following text is adapted from Robert Louis Stevenson's 1883 novel Treasure Island. Bill is a sailor staying at the Admiral Benbow, an inn run by the narrator's parents.<br>Every day when [Bill] came back from his stroll he would ask if any seafaring men had gone by along the road. At first we thought it was the want of company of his own kind that made him ask this question, but at last we began to see he was desirous to avoid them. When a seaman did [stay] at the Admiral Benbow (as now and then some did) he would look in at him through the curtained door before he entered the parlour; and he was always sure to be as silent as a mouse when any such was present.<br><br>According to the text, why does Bill regularly ask about \"seafaring men\"?",
-    "choices": [
-     "He's hoping to find an old friend and fellow sailor.",
-     "He's trying to secure a job as part of the crew on a new ship.",
-     "He isn't sure that other guests at the inn will be welcoming of sailors.",
-     "He doesn't want to encounter any other sailor unexpectedly."
-    ],
-    "correct": 3,
-    "choiceNotes": [
-     "Incorrect. This isn't the reason the text gives for why Bill regularly asks about \"seafaring men.\" The narrator says that, at first, they thought Bill asked regularly about other seafarers because he wanted their company, but eventually they realized that Bill wanted to avoid them.",
-     "Incorrect. This isn't the reason the text gives for why Bill regularly asks about \"seafaring men.\" The narrator says that, at first, they thought Bill asked regularly about other seafarers because he wanted their company, but eventually they realized that Bill wanted to avoid them.",
-     "Incorrect. This isn't the reason the text gives for why Bill regularly asks about \"seafaring men.\" The narrator says that, at first, they thought Bill asked regularly about other seafarers because he wanted their company, but eventually they realized that Bill wanted to avoid them.",
-     "Correct. The narrator says that, at first, they thought Bill asked regularly about other seafarers because he wanted their company, but eventually they realized that Bill actually wanted to avoid them."
-    ],
-    "source": "Non-Bluebook"
-   },
-   {
     "qid": "b2509b33",
     "domain": "Standard English Conventions",
     "skill": "Form, Structure, and Sense",
@@ -509,139 +465,139 @@ window.SECTION_BANKS = {
     "source": "Non-Bluebook"
    },
    {
-    "qid": "d168e7c5",
-    "domain": "Craft and Structure",
-    "skill": "Text Structure and Purpose",
-    "difficulty": "medium",
-    "type": "mc",
-    "text": "The following text is from Annie Dillard's 1987 autobiographical novel An American Childhood. The narrator is a young girl living in Pittsburgh.<br>I walked. My mother had given me the freedom of the streets as soon as I could say our telephone number. I walked and memorized the neighborhood. I made a mental map and located myself upon it. At night in bed I rehearsed the small world's scheme and set challenges: <u>Find the store using backyards only. Imagine a route from the school to my friend's house.</u><br>©1987 by Annie Dillard<br><br>Which choice best describes the function of the underlined portion in the text as a whole?",
-    "choices": [
-     "It describes the narrator trying to memorize her telephone number.",
-     "It provides examples of what the narrator thinks about at night.",
-     "It gives directions to the narrator's favorite local store.",
-     "It portrays the narrator's relationship with her mother."
-    ],
-    "correct": 1,
-    "choiceNotes": [
-     "Incorrect. The underlined portion makes no mention of memorizing a telephone number. Although the narrator mentions that she had to learn the home telephone number before her mother would give her permission to walk around the neighborhood, there is nothing in the underlined portion or the rest of the text about memorizing the telephone number.",
-     "Correct. It accurately describes how the underlined portion functions in the text as a whole. In the text, the narrator explains that she walks around her neighborhood, making a \"mental map\" of the area that she imagines herself navigating through. She then states that she rehearses \"the small world's scheme\"—that is, imagines moving through her mental map—and challenges herself to use the map in her mind while lying in bed at night. The underlined portion presents two such challenges (getting to the store through backyards and traveling from school to a friend's house) and thus provides examples of what the narrator thinks about at night.",
-     "Incorrect. Although the underlined portion refers to navigation tasks like finding a route to a store only through backyards, the text contains no specific directions to any store, nor is any store identified as the narrator's favorite.",
-     "Incorrect. The underlined portion makes no mention of the narrator's mother and doesn't address the narrator's relationship with her. Although the narrator mentions that her mother gave her permission as a child to walk around the neighborhood, there is nothing in the underlined portion or the rest of the text about the mother or her relationship to her child."
-    ],
-    "source": "Non-Bluebook"
-   },
-   {
-    "qid": "aa7fc89b",
-    "domain": "Craft and Structure",
-    "skill": "Text Structure and Purpose",
-    "difficulty": "medium",
-    "type": "mc",
-    "text": "The following text is adapted from Susan Glaspell's 1912 short story \"'Out There.'\" An elderly shop owner is looking at a picture that he recently acquired and hopes to sell.<br>It did seem that the picture failed to fit in with the rest of the shop. A persuasive young fellow who claimed he was closing out his stock let the old man have it for what he called a song. It was only a little out-of-the-way store which subsisted chiefly on the framing of pictures. The old man looked around at his views of the city, his pictures of cats and dogs, his flaming bits of landscape. \"Don't belong in here,\" he fumed. And yet the old man was secretly proud of his acquisition. There was a hidden dignity in his scowling as he shuffled about pondering the least ridiculous place for the picture.<br><br>Which choice best states the main purpose of the text?",
-    "choices": [
-     "To reveal the shop owner's conflicted feelings about the new picture",
-     "To convey the shop owner's resentment of the person he got the new picture from",
-     "To describe the items that the shop owner most highly prizes",
-     "To explain differences between the new picture and other pictures in the shop"
-    ],
-    "correct": 0,
-    "choiceNotes": [
-     "Correct. It most accurately describes the main purpose of the text. The text begins by stating that the new picture \"failed to fit in\" with the other items that the shop owner has. The text goes on to illustrate that point by describing the other pictures the shop owner has, indicating that the shop owner is fuming because he doesn't think the new picture belongs in the store. In the second paragraph, however, the text indicates that the shop owner is \"secretly proud of his acquisition.\" The main purpose of the text is thus to reveal the shop owner's conflicted feelings about the new picture.",
-     "Incorrect. The text doesn't suggest that the shop owner resents the young man who sold him the new picture; in fact, the text gives no indication of the owner's feelings about the young man at all.",
-     "Incorrect. Although the text indicates that the new picture is different from the other items in the shop, there's no suggestion that the shop owner prizes either the new picture or the pictures of the city, pets, and landscapes more than he prizes any other items.",
-     "Incorrect. The text doesn't describe what the new picture looks like; rather, the text identifies some of the other kinds of images that the shop owner has and states that they're different from the new picture without explaining how they're different."
-    ],
-    "source": "Non-Bluebook"
-   },
-   {
-    "qid": "cf9a00e0",
-    "domain": "Craft and Structure",
-    "skill": "Text Structure and Purpose",
-    "difficulty": "medium",
-    "type": "mc",
-    "text": "Chile's Atacama Desert is one of the driest places on Earth. <u>Mary Beth Wilhelm and other astrobiologists search for life, or its remains, in this harsh place because the desert closely mirrors the extreme environment on Mars.</u> The algae and bacteria found in Atacama's driest regions may offer clues about Martian life. By studying how these and other microorganisms survive such extreme conditions on Earth, Wilhelm's team hopes to determine whether similar life might have existed on Mars and to develop the best tools to look for evidence of it.<br><br>Which choice best describes the function of the underlined sentence in the text as a whole?",
-    "choices": [
-     "To contrast the conditions in the Atacama Desert with those on Mars",
-     "To explain why many life-forms cannot survive in the Atacama Desert",
-     "To indicate why astrobiologists choose to conduct research in the Atacama Desert",
-     "To describe certain limitations to conducting scientific study in the Atacama Desert"
-    ],
-    "correct": 2,
-    "choiceNotes": [
-     "Incorrect. To contrast two things means to show the differences between them, and the phrase \"closely mirrors\" in the underlined sentence indicates that the extreme environment in the Atacama Desert is similar to, not different from, that on Mars. This similarity is why, according to the underlined sentence, astrobiologists conduct research in Atacama.",
-     "Incorrect. The underlined sentence doesn't address forms of life that are unable to survive the harsh environment of the Atacama Desert. Instead, the underlined sentence explains why astrobiologists study life, or its remains, in this environment.",
-     "Correct. It most accurately describes how the underlined sentence functions in the text as a whole. The first sentence describes a unique location on Earth, the Atacama Desert. The next sentence, which is the underlined sentence, states that the reason why astrobiologists study life, or its remains, in this unique location is that Atacama is a harsh environment that closely resembles the extreme environment of Mars. The remainder of the text explains that the researchers hope their work in Atacama will support inquiry into life on Mars. Thus, the underlined portion functions mainly to indicate why astrobiologists choose to conduct research in the Atacama Desert.",
-     "Incorrect. The underlined sentence doesn't suggest that the scientific research in the Atacama Desert is limited in any way; instead, the sentence explains that the similarity between the environments of Atacama and Mars is the reason why astrobiologists search for life, or its remains, in Atacama."
-    ],
-    "source": "Non-Bluebook"
-   },
-   {
-    "qid": "e23f50b9",
-    "domain": "Craft and Structure",
-    "skill": "Text Structure and Purpose",
-    "difficulty": "medium",
-    "type": "mc",
-    "text": "The people of medieval Europe have traditionally been seen as uninterested in cleanliness and hygiene, but modern research has shown that this is largely a myth. According to historian Eleanor Janega, most medieval towns in Europe had at least one public bathhouse, which often offered both full-immersion baths and—more affordably—steam baths. <u>While such amenities were available mainly to town dwellers</u>, regular bathing in rivers and streams or daily sponge baths at home were common practices throughout medieval Europe.<br><br>Which choice best describes the function of the underlined portion?",
-    "choices": [
-     "It asserts that in medieval Europe steam baths were more popular in rural areas than in urban ones.",
-     "It describes a limitation of earlier historians' studies of medieval European bathing habits.",
-     "It concedes that not all people in medieval Europe had access to public bathhouses.",
-     "It explains why Janega decided to study the popularity of public bathhouses in medieval Europe."
-    ],
-    "correct": 2,
-    "choiceNotes": [
-     "Incorrect. The underlined portion establishes that amenities such as steam baths were mainly available to town dwellers, which suggests in turn that steam baths were largely unavailable to people in rural areas. Thus, the distinction made by the underlined portion is not between the popularity of steam baths in towns versus their lack of popularity in rural areas but instead between their presence in towns and absence in rural areas.",
-     "Incorrect. Although the text does explain that recent historians have disproved the idea that medieval Europeans rarely bathed, it doesn't attribute that misconception to earlier historians of medieval Europe or suggest that their research was subject to limitations. Moreover, the underlined portion addresses a limitation of life in medieval Europe, not of historical research.",
-     "Correct. It most effectively describes the function of the underlined portion. The text discusses the long-standing misconception that people in medieval Europe were uninterested in cleanliness and hygiene. As evidence that this idea is false, the text cites historian Eleanor Janega's assertion that in medieval Europe, towns usually had at least one bathhouse, where people could take immersion baths or steam baths for a fee. The underlined portion then notes that mainly town dwellers had access to these bathhouses. The remainder of the text explains that those who lacked such access were nonetheless able to bathe in outdoor waterways or take sponge baths at home. Therefore, the underlined portion concedes that some people in medieval Europe lacked access to public bathhouses.",
-     "Incorrect. The underlined portion doesn't address why historian Eleanor Janega decided to study the popularity of public bathhouses in medieval Europe—nor does any portion of the text. The text mentions Janega in passing, but it doesn't go into detail about why she decided to study the popularity of public bathhouses in medieval Europe."
-    ],
-    "source": "Non-Bluebook"
-   }
-  ],
-  "module2Easier": [
-   {
-    "qid": "f7bd14de",
-    "domain": "Information and Ideas",
-    "skill": "Central Ideas and Details",
+    "qid": "2c61e0b9",
+    "domain": "Expression of Ideas",
+    "skill": "Rhetorical Synthesis",
     "difficulty": "hard",
     "type": "mc",
-    "text": "Several scholars have argued that conditions in England in the late ninth through early eleventh centuries—namely, burgeoning literacy amid running conflicts between England's Anglo-Saxon kingdoms and Danish invaders—were especially conducive to the production of the Old English epic poem Beowulf, and they have dated the poem's composition accordingly. It is not inconceivable that Beowulf emerged from such a context, but privileging contextual fit over the linguistic evidence of an eighth- or even seventh-century composition requires a level of justification that thus far has not been presented.<br><br>Which choice best states the main idea of the text?",
+    "text": "While researching a topic, a student has taken the following notes:<ul><li>British musicians John Lennon and Paul McCartney shared writing credit for numerous Beatles songs.</li><li>Many Lennon-McCartney songs were actually written by either Lennon or McCartney, not by both.</li><li>The exact authorship of specific parts of many Beatles songs, such as the verse for \"In My Life,\" is disputed.</li><li>Mark Glickman, Jason Brown, and Ryan Song used statistical methods to analyze the musical content of Beatles songs.</li><li>They concluded that there is 18.9% probability that McCartney wrote the verse for \"In My Life,\" stating that the verse is \"consistent with Lennon's songwriting style.\"</li></ul><br><br>The student wants to make a generalization about the kind of study conducted by Glickman, Brown, and Song. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
     "choices": [
-     "Although there are some grounds for believing that Beowulf was composed between the late ninth and early eleventh centuries, advocates for that view tend to rely on evidence that has been called into question by advocates for an earlier date.",
-     "Although several scholars have dated Beowulf to the late ninth through early eleventh centuries, others have argued that doing so privileges a controversial interpretation of the social conditions of the period.",
-     "Although Beowulf fits well with the historical context of England in the late ninth through early eleventh centuries, it fits equally well with the historical context of England in the seventh and eighth centuries.",
-     "Although the claim of a late ninth- through early eleventh-century composition date for Beowulf has some plausibility, advocates for the claim have not compellingly addressed evidence suggesting an earlier date."
+     "Based on statistical analysis, Glickman, Brown, and Song claim that John Lennon wrote the verse of \"In My Life.\"",
+     "There is only an 18.9% probability that Paul McCartney wrote the verse for \"In My Life\"; John Lennon is the more likely author.",
+     "It is likely that John Lennon, not Paul McCartney, wrote the verse for \"In My Life.\"",
+     "Researchers have used statistical methods to address questions of authorship within the field of music."
     ],
     "correct": 3,
     "choiceNotes": [
-     "Incorrect. The text says that scholars who date the poem to the late ninth through early eleventh centuries have failed to account for the linguistic evidence that the poem may have been composed earlier, not that the evidence those scholars cite in favor of their view is unreliable or that anyone has cast doubt on that evidence. In other words, the text does not suggest that there are problems with the evidence cited by advocates of the later composition date, only that there is other evidence of an earlier composition date that those advocates need to consider.",
-     "Incorrect. Nothing in the text suggests that those scholars who date the poem to the late ninth through early eleventh centuries are giving priority to a controversial view of the social conditions at that time. The text makes no reference to any controversy about how scholars interpret that historical period. Instead, the text suggests that scholars who date the poem on the basis of its fit with the historical context of England in the late ninth through early eleventh centuries have failed to account for linguistic evidence that the poem may have been composed earlier.",
-     "Incorrect. The text says nothing about how well the poem fits the historical context of England in the seventh and eighth centuries, let alone that it fits that historical context as well as it fits the historical context of the late ninth through early eleventh centuries. Rather, the text says that there is linguistic evidence that the poem may have been composed in the seventh or eighth century.",
-     "Correct. It most accurately states the main idea of the text. The text states that some scholars have dated the composition of Beowulf to the late ninth through early eleventh centuries due to the poem's fit with that period's historical context. The text goes on to say that while it is \"not inconceivable that Beowulf emerged from such a context\"—that is, it is possible that Beowulf was composed during the late ninth through eleventh centuries—there is linguistic evidence that the poem was composed earlier, in the seventh or eighth century. According to the text, favoring the historical context over the linguistic evidence requires justification that scholars have not yet supplied. In other words, the text suggests that scholars who favor the later composition date need to explain why the poem's fit with historical context should take precedence over the linguistic evidence, but they have not yet done so. Thus, the main idea of the text is that while there is some plausibility to the later composition date, advocates for the later date have not compellingly addressed evidence suggestive of an earlier date."
+     "Incorrect. The sentence summarizes the methodology and findings of a particular analysis of a single song; it doesn't make a generalization about the kind of study conducted.",
+     "Incorrect. The sentence mentions the data and conclusion of a particular analysis of a single song; it doesn't make a generalization about the kind of study conducted.",
+     "Incorrect. The sentence focuses on a specific conclusion from a particular analysis of a single song; it doesn't make a generalization about the kind of study conducted.",
+     "Correct. The sentence uses information from the notes to make a generalization about the kind of study Glickman, Brown, and Song conducted. Specifically, the sentence indicates that the study was of a kind that used statistical methods to address questions of authorship within the field of music."
     ],
     "source": "Non-Bluebook"
    },
    {
-    "qid": "e46a3758",
-    "domain": "Standard English Conventions",
-    "skill": "Boundaries",
-    "difficulty": "hard",
+    "qid": "0d3ebdce",
+    "domain": "Expression of Ideas",
+    "skill": "Transitions",
+    "difficulty": "easy",
     "type": "mc",
-    "text": "The Japanese art of kintsugi repairs broken pottery with seams that are meant to be noticed rather than hidden. A typical repair layers materials chosen as much for visibility as for ______ lacquer, a tree sap that hardens as it cures; a filler made from clay or wheat flour; and powdered gold, which makes the mended seams impossible to miss.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+    "text": "Neuroscientist Karen Konkoly wanted to determine whether individuals can understand and respond to questions during REM sleep. She first taught volunteers eye movements they would use to respond to basic math problems while asleep (a single left-right eye movement indicated the number one). ______ she attached electrodes to the volunteers' faces to record their eye movements during sleep.<br><br>Which choice completes the text with the most logical transition?",
     "choices": [
-     "strength; urushi",
-     "strength, urushi",
-     "strength: urushi",
-     "strength urushi"
+     "Specifically,",
+     "Next,",
+     "For instance,",
+     "In sum,"
+    ],
+    "correct": 1,
+    "choiceNotes": [
+     "Incorrect. \"specifically\" illogically signals that this sentence specifies or elaborates on an aspect of the action described in the previous sentence. Instead, it describes the next step in Konkoly's experiment.",
+     "Correct. \"Next\" logically signals that the action described in this sentence—Konkoly recording participants' eye movements— is the next step in Konkoly's experiment.",
+     "Incorrect. \"for instance\" illogically signals that the action described in this sentence is an example of the action described in the previous sentence. Instead, it is the next step in Konkoly's experiment.",
+     "Incorrect. \"in sum\" illogically signals that this sentence summarizes or concludes the action described in the previous sentence. Instead, it describes the next step in Konkoly's experiment."
+    ],
+    "source": "Non-Bluebook"
+   },
+   {
+    "qid": "f735493e",
+    "domain": "Expression of Ideas",
+    "skill": "Transitions",
+    "difficulty": "easy",
+    "type": "mc",
+    "text": "Celebrated Tewa potter Maria Martinez (1887-1980) made her signature all-black ceramic vessels using a heating technique called reduction firing. This technique involves smothering the flame surrounding the clay vessel. ______ the vessel takes on a shiny, black hue.<br><br>Which choice completes the text with the most logical transition?",
+    "choices": [
+     "On the contrary,",
+     "For example,",
+     "Previously,",
+     "As a result,"
+    ],
+    "correct": 3,
+    "choiceNotes": [
+     "Incorrect. \"on the contrary\" illogically signals that the information in this sentence directly opposes the heating technique in the previous sentence. Instead, the vessel turns black as a result of that technique.",
+     "Incorrect. \"for example\" illogically signals that the information in this sentence is an example of the heating technique in the previous sentence. Instead, the vessel turns black as a result of that technique.",
+     "Incorrect. \"previously\" illogically signals that the information in this sentence occurs earlier in a chronological series of events than does the heating technique discussed in the first two sentences. Instead, the vessel turns black as a result of that technique.",
+     "Correct. \"As a result\" logically signals that the information in this sentence—the vessel turning black—is a result of the heating technique discussed in the previous sentence."
+    ],
+    "source": "Non-Bluebook"
+   },
+   {
+    "qid": "ddb77846",
+    "domain": "Expression of Ideas",
+    "skill": "Transitions",
+    "difficulty": "medium",
+    "type": "mc",
+    "text": "My interest in old public libraries has led me to seek them out whenever I visit a new part of the United States. ______ I could visit every state in the US and still not find the oldest public library in the Western Hemisphere. That library, the Biblioteca Palafoxiana, is located in Puebla, Mexico.<br><br>Which choice completes the text with the most logical transition?",
+    "choices": [
+     "As a result,",
+     "Nevertheless,",
+     "Earlier,",
+     "In other words,"
+    ],
+    "correct": 1,
+    "choiceNotes": [
+     "Incorrect. \"as a result\" illogically signals that the claim in the sentence is a consequence of the previous claim about the speaker seeking out old public libraries. Instead, the claim is true despite the previous claim.",
+     "Correct. \"Nevertheless\" logically signals that the claim in the sentence—that the speaker could visit every state in the US and not find the oldest public library in the Western Hemisphere—is true despite the previous claim about the speaker seeking out old public libraries.",
+     "Incorrect. \"earlier\" illogically signals that the claim in the sentence occurs earlier in a chronological sequence of events than the previous claim about the speaker seeking out old public libraries. Instead, the claim is true despite the previous claim.",
+     "Incorrect. \"in other words\" illogically signals that the claim in the sentence is merely a paraphrase or restatement of the previous claim about the speaker seeking out old public libraries. Instead, the claim is true despite the previous claim."
+    ],
+    "source": "Non-Bluebook"
+   },
+   {
+    "qid": "4703eafb",
+    "domain": "Expression of Ideas",
+    "skill": "Transitions",
+    "difficulty": "medium",
+    "type": "mc",
+    "text": "Following the American Revolutionary War, North American foodways underwent a radical transformation, fueled in large part by spiking consumer demand for certain grains. The cultivation, trade, and transportation of maize and wheat, ______ reconfigured the continent's existing regional foodways into a globally oriented food system.<br><br>Which choice completes the text with the most logical transition?",
+    "choices": [
+     "in particular,",
+     "alternatively,",
+     "by comparison,",
+     "second of all,"
+    ],
+    "correct": 0,
+    "choiceNotes": [
+     "Correct. \"In particular\" logically signals that the information in this sentence—that maize and wheat supply chains transformed North American foodways into a global food system—provides specific, precise details elaborating on the more general information in the previous sentence about the transformation of North American foodways (with maize and wheat the \"certain grains\" at the center of it).",
+     "Incorrect. \"alternatively\" illogically signals that the information in this sentence is an alternative option to the previous information about the transformation of North American foodways. Instead, the roles of maize and wheat in creating a global food system are specific, precise details elaborating on that information.",
+     "Incorrect. \"by comparison\" illogically signals that the information in this sentence is being compared to the previous information about the transformation of North American foodways. Instead, the roles of maize and wheat in creating a global food system are specific, precise details elaborating on that information.",
+     "Incorrect. \"second of all\" illogically signals that the information in this sentence is a second, separate claim from the previous claim that North American foodways were transformed. Instead, the roles of maize and wheat in creating a global food system are specific, precise details elaborating on that information, rather than a separate claim."
+    ],
+    "source": "Non-Bluebook"
+   },
+   {
+    "qid": "c39e4149",
+    "domain": "Expression of Ideas",
+    "skill": "Rhetorical Synthesis",
+    "difficulty": "medium",
+    "type": "mc",
+    "text": "While researching a topic, a student has taken the following notes:<ul><li>About 11,000 plant species have seeds that ants carry and plant.</li><li>Each such seed bears an elaiosome, a fleshy outgrowth rich in fat.</li><li>An ant carries the seed back to its nest for the elaiosome.</li><li>It feeds the elaiosome to the larvae and discards the seed itself.</li><li>Discarded seeds end up in the refuse chamber, where the soil is loose.</li><li>Seeds moved this way travel about two meters, far less than birds carry them.</li></ul><br><br>The student wants to explain how ants come to plant the seeds.<br>Which choice most effectively uses relevant information from the notes to accomplish this goal?",
+    "choices": [
+     "Each of these seeds bears an elaiosome, a fleshy outgrowth rich in fat, which an ant carries back to its nest, feeding the elaiosome to the larvae waiting there.",
+     "Seeds that an ant has carried back to its nest travel about two meters on average, far less than the seeds that birds carry.",
+     "An ant carries a seed home for the fatty elaiosome, feeds that to the larvae, and discards the seed in the refuse chamber, where the soil is loose.",
+     "About 11,000 plant species have seeds that ants carry and plant, and each such seed bears an elaiosome, a fleshy outgrowth rich in fat."
     ],
     "correct": 2,
     "choiceNotes": [
-     "Incorrect. A semicolon can't introduce the list; semicolons here separate the items of the list from one another.",
-     "Incorrect. A comma can't introduce a list whose items are themselves separated by semicolons.",
-     "Correct. The convention being tested is the use of a colon within a sentence. A colon is conventionally used after a main clause to introduce a list. Here the list itself contains commas, so its items are separated by semicolons, but the boundary between the main clause (\"A typical repair...strength\") and the list still requires a colon.",
-     "Incorrect. Punctuation is needed to mark the boundary between the main clause and the list that follows it."
+     "Incorrect. It draws on those same notes but stops once the larvae are fed, so what becomes of the seed is never said.",
+     "Incorrect. It measures the dispersal without accounting for it.",
+     "Correct. The goal is to explain how ants come to plant the seeds, so the choice must follow a seed all the way to ground it can grow in. This choice does, drawing on the notes that an ant carries the seed back to its nest, feeds the elaiosome to the larvae, and leaves it where \"the soil is loose\".",
+     "Incorrect. It counts the species involved and describes the elaiosome without saying what an ant does with a seed."
     ],
     "source": "Moretti Test Prep & Tutoring"
-   },
+   }
+  ],
+  "module2Easier": [
    {
     "qid": "631a1b64",
     "domain": "Craft and Structure",
@@ -731,138 +687,6 @@ window.SECTION_BANKS = {
     "source": "Non-Bluebook"
    },
    {
-    "qid": "20733eac",
-    "domain": "Expression of Ideas",
-    "skill": "Transitions",
-    "difficulty": "easy",
-    "type": "mc",
-    "text": "It has long been thought that humans first crossed a land bridge into the Americas approximately 13,000 years ago. ______ based on radiocarbon dating of samples uncovered in Mexico, a research team recently suggested that humans may have arrived more than 30,000 years ago—much earlier than previously thought.<br><br>Which choice completes the text with the most logical transition?",
-    "choices": [
-     "As a result,",
-     "Similarly,",
-     "However,",
-     "In conclusion,"
-    ],
-    "correct": 2,
-    "choiceNotes": [
-     "Incorrect. \"as a result\" illogically signals that the theory in this sentence is the result of the theory discussed in the previous sentence. Instead, this theory contrasts with the previous one.",
-     "Incorrect. \"similarly\" illogically signals that the theory in this sentence is similar to the theory discussed in the previous sentence. Instead, this theory contrasts with the previous one.",
-     "Correct. \"However\" logically signals that the theory discussed in this sentence—that humans may have arrived in the Americas over 30,000 years ago—contrasts with the previously discussed theory that humans arrived around 13,000 years ago.",
-     "Incorrect. \"in conclusion\" illogically signals that the theory in this sentence concludes or summarizes the discussion of the previous theory. Instead, this theory contrasts with the previous one."
-    ],
-    "source": "Non-Bluebook"
-   },
-   {
-    "qid": "87d8a2ff",
-    "domain": "Expression of Ideas",
-    "skill": "Transitions",
-    "difficulty": "easy",
-    "type": "mc",
-    "text": "During a 2021 launch, Rocket Labs' Electron rocket experienced an unexpected failure: its second-stage booster shut down suddenly after ignition. ______ instead of downplaying the incident, Rocket Labs' CEO publicly acknowledged what happened and apologized for the loss of the rocket's payload, which had consisted of two satellites.<br><br>Which choice completes the text with the most logical transition?",
-    "choices": [
-     "Afterward,",
-     "Additionally,",
-     "Indeed,",
-     "Similarly,"
-    ],
-    "correct": 0,
-    "choiceNotes": [
-     "Correct. \"Afterward\" logically signals that the events described in this sentence—the CEO's public acknowledgment and apology—occurred after the rocket booster's failure and are part of a chronological sequence of events.",
-     "Incorrect. \"additionally\" illogically signals that the events described in this sentence merely occurred in addition to the rocket booster's failure. Instead, they occurred after the rocket booster's failure and are part of a chronological sequence of events.",
-     "Incorrect. \"indeed\" illogically signals that the events described in this sentence emphasize or strengthen a statement made in the previous sentence. Instead, they occurred after the rocket booster's failure and are part of a chronological sequence of events.",
-     "Incorrect. \"similarly\" illogically signals that the events described in this sentence are similar to the rocket booster's failure. Instead, they occurred after the rocket booster's failure and are part of a chronological sequence of events."
-    ],
-    "source": "Non-Bluebook"
-   },
-   {
-    "qid": "f6d454c1",
-    "domain": "Expression of Ideas",
-    "skill": "Rhetorical Synthesis",
-    "difficulty": "medium",
-    "type": "mc",
-    "text": "While researching a topic, a student has taken the following notes:<ul><li>If a moon orbiting a planet comes close enough to that planet, tidal forces can cause the moon to break apart.</li><li>In a 2022 study, researchers proposed that Saturn was once orbited by a large moon they named Chrysalis.</li><li>Their simulations indicated that Chrysalis would likely have come very close to Saturn around 160 million years ago.</li><li>At that distance, Chrysalis would have been broken apart by tidal forces.</li><li>The researchers hypothesized that the resulting debris formed Saturn's rings.</li></ul><br><br>The student wants to recount the sequence of events proposed by the researchers. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
-    "choices": [
-     "According to researchers' simulations, two events likely occurred around 160 million years ago: first, Chrysalis came very close to Saturn, and second, debris from Saturn's rings caused the moon to break apart.",
-     "If a moon orbiting a planet (like Saturn) comes close enough to that planet, tidal forces can cause the moon to break apart.",
-     "Around 160 million years ago, a large moon (Chrysalis) came close enough to Saturn that tidal forces broke the moon apart; its debris then formed the planet's rings.",
-     "First, researchers proposed that Saturn was orbited by a large moon (Chrysalis); next, they conducted simulations; and, finally, they formed a hypothesis."
-    ],
-    "correct": 2,
-    "choiceNotes": [
-     "Incorrect. The sentence misrepresents information from the notes; according to the notes, tidal forces, not debris, caused the moon to break apart.",
-     "Incorrect. The sentence offers information relevant to the 2022 study but doesn't recount the sequence of events proposed by the researchers.",
-     "Correct. The sentence recounts the sequence of events proposed by the researchers: a large moon orbiting Saturn came close enough to the planet that it was broken apart by tidal forces, and the resulting debris formed Saturn's rings.",
-     "Incorrect. The sentence recounts a sequence, but it's a sequence of the researchers' activities, not the sequence of events proposed by the researchers."
-    ],
-    "source": "Non-Bluebook"
-   },
-   {
-    "qid": "4f9ee1dc",
-    "domain": "Expression of Ideas",
-    "skill": "Rhetorical Synthesis",
-    "difficulty": "medium",
-    "type": "mc",
-    "text": "While researching a topic, a student has taken the following notes:<ul><li>Seven species of sea turtle exist today.</li><li>Five sea turtle species can be found in the Atlantic Ocean.</li><li>One of those species is the Kemp's ridley sea turtle.</li><li>Its scientific name is Lepidochelys kempii.</li><li>Another of those species is the olive ridley sea turtle.</li><li>Its scientific name is Lepidochelys olivacea.</li></ul><br><br>The student wants to emphasize a similarity between the two sea turtle species. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
-    "choices": [
-     "Among the seven species of sea turtle is the olive ridley sea turtle, which can be found in the Atlantic Ocean.",
-     "The Kemp's ridley sea turtle is referred to as Lepidochelys kempii, while the olive ridley sea turtle is referred to as Lepidochelys olivacea.",
-     "Both the Kemp's ridley sea turtle and the olive ridley sea turtle can be found in the Atlantic Ocean.",
-     "The Kemp's ridley sea turtle (Lepidochelys kempii) and the olive ridley sea turtle (Lepidochelys olivacea) are different species."
-    ],
-    "correct": 2,
-    "choiceNotes": [
-     "Incorrect. The sentence indicates that the olive ridley sea turtle is one of seven species of sea turtle; it fails to mention the Kemp's ridley sea turtle.",
-     "Incorrect. The sentence emphasizes a difference between the two sea turtle species rather than a similarity.",
-     "Correct. The sentence emphasizes a similarity between the two sea turtle species: both can be found in the Atlantic Ocean.",
-     "Incorrect. The sentence emphasizes a difference between the two sea turtle species rather than a similarity."
-    ],
-    "source": "Non-Bluebook"
-   },
-   {
-    "qid": "5222ffab",
-    "domain": "Expression of Ideas",
-    "skill": "Rhetorical Synthesis",
-    "difficulty": "hard",
-    "type": "mc",
-    "text": "While researching a topic, a student has taken the following notes:<ul><li>Neuroscientists Krishnan Padmanabhan and Zhen Chen sought to better understand the workings of the brain's olfactory system.</li><li>They devised a study using mathematical models.</li><li>They found that certain fibers allow the brain to toggle from one method of processing smells to another.</li><li>In one method, cells in the piriform cortex (where the perception of odor forms) capture olfactory information at a given moment.</li><li>In the other, the cells track changes in olfactory information over time.</li></ul><br><br>The student wants to summarize the study's findings. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
-    "choices": [
-     "To arrive at these findings, which describe dual methods of processing smells in the piriform cortex, Padmanabhan and Chen devised a study using mathematical models.",
-     "Padmanabhan and Chen showed that olfactory information is captured by cells in the piriform cortex, where the perception of odor forms.",
-     "Using mathematical models, Padmanabhan and Chen devised a study to better understand the workings of the brain's olfactory system.",
-     "According to Padmanabhan and Chen, the brain can toggle between capturing olfactory information at a given moment and tracking changes in that information over time."
-    ],
-    "correct": 3,
-    "choiceNotes": [
-     "Incorrect. While the sentence mentions findings, it mainly focuses on Padmanabhan and Chen's methodology. It doesn't effectively summarize the study's findings.",
-     "Incorrect. The sentence notes a fact about the olfactory system—that the perception of odor forms in the piriform cortex—but doesn't summarize the findings of Padmanabhan and Chen's study.",
-     "Incorrect. The sentence presents the goal of Padmanabhan and Chen's study; it doesn't summarize the study's findings.",
-     "Correct. The sentence effectively summarizes the study's findings, explaining what Padmanabhan and Chen found: that the brain can toggle between one method of processing smells (capturing information at a given moment) and another (tracking changes in information over time)."
-    ],
-    "source": "Non-Bluebook"
-   },
-   {
-    "qid": "b3edbb96",
-    "domain": "Expression of Ideas",
-    "skill": "Transitions",
-    "difficulty": "hard",
-    "type": "mc",
-    "text": "The Akhal-Teke horse breed originated in Turkmenistan, a country in Central Asia. ______ an annual national celebration honors horses and longstanding equestrian traditions.<br><br>Which choice completes the text with the most logical transition?",
-    "choices": [
-     "Accordingly,",
-     "In particular,",
-     "There,",
-     "Ultimately,"
-    ],
-    "correct": 2,
-    "choiceNotes": [
-     "Incorrect. \"accordingly\" signals that what follows is a consequence of what came before. A breed originating in a country is not a reason that the country holds an annual celebration.",
-     "Incorrect. \"in particular\" signals that what follows is a specific case of a general statement just made. The celebration is not an instance of the breed's origin.",
-     "Correct. \"There\" points back to Turkmenistan, the place named in the previous sentence, and identifies it as where the annual celebration is held. The two sentences are linked by location, and \"there\" is what makes that link explicit.",
-     "Incorrect. \"ultimately\" signals a final outcome in a sequence of events. The text presents no sequence, only a place of origin and a celebration held in that place."
-    ],
-    "source": "Moretti Test Prep & Tutoring"
-   },
-   {
     "qid": "5ccbfe22",
     "domain": "Craft and Structure",
     "skill": "Words in Context",
@@ -925,6 +749,28 @@ window.SECTION_BANKS = {
      "Incorrect. The text actually explains that Black female farmworkers were trying to achieve traditional feminine ideals, not resist them.",
      "Incorrect. The text doesn't evaluate a scholarly work but rather simply describes it. Furthermore, the text is focused on \"agricultural and domestic\" fashion, not urban fashion as this choice suggests.",
      "Correct. The text provides an overview of a scholarly work discussing the fashion practices of Black female farmworkers in late 19th- and early 20th-century Texas, and how these practices were influenced by both the fashion ideals of the time and the demands of farmwork."
+    ],
+    "source": "Non-Bluebook"
+   },
+   {
+    "qid": "f7bd14de",
+    "domain": "Information and Ideas",
+    "skill": "Central Ideas and Details",
+    "difficulty": "hard",
+    "type": "mc",
+    "text": "Several scholars have argued that conditions in England in the late ninth through early eleventh centuries—namely, burgeoning literacy amid running conflicts between England's Anglo-Saxon kingdoms and Danish invaders—were especially conducive to the production of the Old English epic poem Beowulf, and they have dated the poem's composition accordingly. It is not inconceivable that Beowulf emerged from such a context, but privileging contextual fit over the linguistic evidence of an eighth- or even seventh-century composition requires a level of justification that thus far has not been presented.<br><br>Which choice best states the main idea of the text?",
+    "choices": [
+     "Although there are some grounds for believing that Beowulf was composed between the late ninth and early eleventh centuries, advocates for that view tend to rely on evidence that has been called into question by advocates for an earlier date.",
+     "Although several scholars have dated Beowulf to the late ninth through early eleventh centuries, others have argued that doing so privileges a controversial interpretation of the social conditions of the period.",
+     "Although Beowulf fits well with the historical context of England in the late ninth through early eleventh centuries, it fits equally well with the historical context of England in the seventh and eighth centuries.",
+     "Although the claim of a late ninth- through early eleventh-century composition date for Beowulf has some plausibility, advocates for the claim have not compellingly addressed evidence suggesting an earlier date."
+    ],
+    "correct": 3,
+    "choiceNotes": [
+     "Incorrect. The text says that scholars who date the poem to the late ninth through early eleventh centuries have failed to account for the linguistic evidence that the poem may have been composed earlier, not that the evidence those scholars cite in favor of their view is unreliable or that anyone has cast doubt on that evidence. In other words, the text does not suggest that there are problems with the evidence cited by advocates of the later composition date, only that there is other evidence of an earlier composition date that those advocates need to consider.",
+     "Incorrect. Nothing in the text suggests that those scholars who date the poem to the late ninth through early eleventh centuries are giving priority to a controversial view of the social conditions at that time. The text makes no reference to any controversy about how scholars interpret that historical period. Instead, the text suggests that scholars who date the poem on the basis of its fit with the historical context of England in the late ninth through early eleventh centuries have failed to account for linguistic evidence that the poem may have been composed earlier.",
+     "Incorrect. The text says nothing about how well the poem fits the historical context of England in the seventh and eighth centuries, let alone that it fits that historical context as well as it fits the historical context of the late ninth through early eleventh centuries. Rather, the text says that there is linguistic evidence that the poem may have been composed in the seventh or eighth century.",
+     "Correct. It most accurately states the main idea of the text. The text states that some scholars have dated the composition of Beowulf to the late ninth through early eleventh centuries due to the poem's fit with that period's historical context. The text goes on to say that while it is \"not inconceivable that Beowulf emerged from such a context\"—that is, it is possible that Beowulf was composed during the late ninth through eleventh centuries—there is linguistic evidence that the poem was composed earlier, in the seventh or eighth century. According to the text, favoring the historical context over the linguistic evidence requires justification that scholars have not yet supplied. In other words, the text suggests that scholars who favor the later composition date need to explain why the poem's fit with historical context should take precedence over the linguistic evidence, but they have not yet done so. Thus, the main idea of the text is that while there is some plausibility to the later composition date, advocates for the later date have not compellingly addressed evidence suggestive of an earlier date."
     ],
     "source": "Non-Bluebook"
    },
@@ -1061,6 +907,28 @@ window.SECTION_BANKS = {
     "source": "Non-Bluebook"
    },
    {
+    "qid": "e46a3758",
+    "domain": "Standard English Conventions",
+    "skill": "Boundaries",
+    "difficulty": "hard",
+    "type": "mc",
+    "text": "The Japanese art of kintsugi repairs broken pottery with seams that are meant to be noticed rather than hidden. A typical repair layers materials chosen as much for visibility as for ______ lacquer, a tree sap that hardens as it cures; a filler made from clay or wheat flour; and powdered gold, which makes the mended seams impossible to miss.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+    "choices": [
+     "strength; urushi",
+     "strength, urushi",
+     "strength: urushi",
+     "strength urushi"
+    ],
+    "correct": 2,
+    "choiceNotes": [
+     "Incorrect. A semicolon can't introduce the list; semicolons here separate the items of the list from one another.",
+     "Incorrect. A comma can't introduce a list whose items are themselves separated by semicolons.",
+     "Correct. The convention being tested is the use of a colon within a sentence. A colon is conventionally used after a main clause to introduce a list. Here the list itself contains commas, so its items are separated by semicolons, but the boundary between the main clause (\"A typical repair...strength\") and the list still requires a colon.",
+     "Incorrect. Punctuation is needed to mark the boundary between the main clause and the list that follows it."
+    ],
+    "source": "Moretti Test Prep & Tutoring"
+   },
+   {
     "qid": "c102f9b0",
     "domain": "Standard English Conventions",
     "skill": "Form, Structure, and Sense",
@@ -1191,75 +1059,141 @@ window.SECTION_BANKS = {
      "Incorrect. It results in a comma splice. Without a conjunction following it, a comma can't be used in this way to join the two main clauses of the sentence."
     ],
     "source": "Non-Bluebook"
-   }
-  ],
-  "module2Harder": [
+   },
    {
-    "qid": "7d56630a",
+    "qid": "20733eac",
     "domain": "Expression of Ideas",
     "skill": "Transitions",
     "difficulty": "easy",
     "type": "mc",
-    "text": "In studying whether jellyfish sleep, researchers Michael Abrams, Claire Bedbrook, and Ravi Nath attempted to answer three questions. ______ is there a period each day when the pulse rates of jellyfish decline? Second, do jellyfish respond more slowly to stimuli during that period? Finally, if prevented from sleeping, are jellyfish adversely affected?<br><br>Which choice completes the text with the most logical transition?",
+    "text": "It has long been thought that humans first crossed a land bridge into the Americas approximately 13,000 years ago. ______ based on radiocarbon dating of samples uncovered in Mexico, a research team recently suggested that humans may have arrived more than 30,000 years ago—much earlier than previously thought.<br><br>Which choice completes the text with the most logical transition?",
     "choices": [
      "As a result,",
-     "First,",
+     "Similarly,",
+     "However,",
+     "In conclusion,"
+    ],
+    "correct": 2,
+    "choiceNotes": [
+     "Incorrect. \"as a result\" illogically signals that the theory in this sentence is the result of the theory discussed in the previous sentence. Instead, this theory contrasts with the previous one.",
+     "Incorrect. \"similarly\" illogically signals that the theory in this sentence is similar to the theory discussed in the previous sentence. Instead, this theory contrasts with the previous one.",
+     "Correct. \"However\" logically signals that the theory discussed in this sentence—that humans may have arrived in the Americas over 30,000 years ago—contrasts with the previously discussed theory that humans arrived around 13,000 years ago.",
+     "Incorrect. \"in conclusion\" illogically signals that the theory in this sentence concludes or summarizes the discussion of the previous theory. Instead, this theory contrasts with the previous one."
+    ],
+    "source": "Non-Bluebook"
+   },
+   {
+    "qid": "87d8a2ff",
+    "domain": "Expression of Ideas",
+    "skill": "Transitions",
+    "difficulty": "easy",
+    "type": "mc",
+    "text": "During a 2021 launch, Rocket Labs' Electron rocket experienced an unexpected failure: its second-stage booster shut down suddenly after ignition. ______ instead of downplaying the incident, Rocket Labs' CEO publicly acknowledged what happened and apologized for the loss of the rocket's payload, which had consisted of two satellites.<br><br>Which choice completes the text with the most logical transition?",
+    "choices": [
+     "Afterward,",
      "Additionally,",
-     "However,"
+     "Indeed,",
+     "Similarly,"
     ],
-    "correct": 1,
+    "correct": 0,
     "choiceNotes": [
-     "Incorrect. \"as a result\" illogically signals that the question in this sentence is a result of the three questions the researchers attempted to answer. Instead, it is the first of those three questions.",
-     "Correct. \"First\" logically signals that the question in this sentence—whether there is a daily period during which jellyfish pulse rates decline—is the first in a sequence of three questions the researchers attempted to answer about jellyfish sleep behavior.",
-     "Incorrect. \"additionally\" illogically signals that the question in this sentence is an additional question related to the three questions the researchers attempted to answer. Instead, it is the first of those three questions.",
-     "Incorrect. \"however\" illogically signals that the question in this sentence contrasts with the three questions the researchers attempted to answer. Instead, it is the first of those three questions."
+     "Correct. \"Afterward\" logically signals that the events described in this sentence—the CEO's public acknowledgment and apology—occurred after the rocket booster's failure and are part of a chronological sequence of events.",
+     "Incorrect. \"additionally\" illogically signals that the events described in this sentence merely occurred in addition to the rocket booster's failure. Instead, they occurred after the rocket booster's failure and are part of a chronological sequence of events.",
+     "Incorrect. \"indeed\" illogically signals that the events described in this sentence emphasize or strengthen a statement made in the previous sentence. Instead, they occurred after the rocket booster's failure and are part of a chronological sequence of events.",
+     "Incorrect. \"similarly\" illogically signals that the events described in this sentence are similar to the rocket booster's failure. Instead, they occurred after the rocket booster's failure and are part of a chronological sequence of events."
     ],
     "source": "Non-Bluebook"
    },
    {
-    "qid": "72cbdbc6",
-    "domain": "Information and Ideas",
-    "skill": "Inferences",
-    "difficulty": "easy",
+    "qid": "f6d454c1",
+    "domain": "Expression of Ideas",
+    "skill": "Rhetorical Synthesis",
+    "difficulty": "medium",
     "type": "mc",
-    "text": "Researchers Eugeni Vidal-Tortosa and Robin Lovelace looked at the relationship between street lighting in a city and people's willingness to ride a bicycle. Their results suggest that poor street lighting can deter new or inexperienced cyclists from riding in a city but has little effect on experienced cyclists. Therefore, increasing the number of streetlights in a city could potentially ______<br><br>Which choice most logically completes the text?",
+    "text": "While researching a topic, a student has taken the following notes:<ul><li>If a moon orbiting a planet comes close enough to that planet, tidal forces can cause the moon to break apart.</li><li>In a 2022 study, researchers proposed that Saturn was once orbited by a large moon they named Chrysalis.</li><li>Their simulations indicated that Chrysalis would likely have come very close to Saturn around 160 million years ago.</li><li>At that distance, Chrysalis would have been broken apart by tidal forces.</li><li>The researchers hypothesized that the resulting debris formed Saturn's rings.</li></ul><br><br>The student wants to recount the sequence of events proposed by the researchers. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
     "choices": [
-     "decrease the number of new or inexperienced cyclists riding in the city.",
-     "increase the number of experienced cyclists riding in the city.",
-     "decrease the number of experienced cyclists riding in the city.",
-     "increase the number of new or inexperienced cyclists riding in the city."
+     "According to researchers' simulations, two events likely occurred around 160 million years ago: first, Chrysalis came very close to Saturn, and second, debris from Saturn's rings caused the moon to break apart.",
+     "If a moon orbiting a planet (like Saturn) comes close enough to that planet, tidal forces can cause the moon to break apart.",
+     "Around 160 million years ago, a large moon (Chrysalis) came close enough to Saturn that tidal forces broke the moon apart; its debris then formed the planet's rings.",
+     "First, researchers proposed that Saturn was orbited by a large moon (Chrysalis); next, they conducted simulations; and, finally, they formed a hypothesis."
     ],
-    "correct": 3,
+    "correct": 2,
     "choiceNotes": [
-     "Incorrect. It contradicts the logical relationship established in the text. If poor street lighting deters new or inexperienced cyclists from riding in the city, then increasing the number of streetlights (improving lighting conditions) would be expected to encourage more of these cyclists to ride, not decrease their numbers.",
-     "Incorrect. The text explicitly states that street lighting didn't have an effect on experienced cyclists. If lighting conditions don't significantly influence experienced cyclists' decisions to ride, then increasing the number of streetlights wouldn't necessarily increase the number of experienced cyclists riding in the city.",
-     "Incorrect. The text indicates that street lighting didn't affect experienced cyclists, so increasing the number of streetlights wouldn't decrease the participation of these cyclists. Instead, their numbers would be expected to remain about the same.",
-     "Correct. It most logically completes the text's discussion of the relationship between street lighting and people's cycling behavior. According to the text, Eugeni Vidal-Tortosa and Robin Lovelace found that poor street lighting deters new or inexperienced cyclists from riding their bikes in a city but has little effect on experienced cyclists. This finding establishes a causal relationship between street lighting and the willingness of new or inexperienced cyclists to ride a bicycle in the city: if poor lighting discourages new or inexperienced cyclists from riding, then improving lighting conditions by increasing the number of streetlights would logically remove this deterrent, potentially leading to an increase in the number of new or inexperienced cyclists willing to ride in the city."
+     "Incorrect. The sentence misrepresents information from the notes; according to the notes, tidal forces, not debris, caused the moon to break apart.",
+     "Incorrect. The sentence offers information relevant to the 2022 study but doesn't recount the sequence of events proposed by the researchers.",
+     "Correct. The sentence recounts the sequence of events proposed by the researchers: a large moon orbiting Saturn came close enough to the planet that it was broken apart by tidal forces, and the resulting debris formed Saturn's rings.",
+     "Incorrect. The sentence recounts a sequence, but it's a sequence of the researchers' activities, not the sequence of events proposed by the researchers."
     ],
     "source": "Non-Bluebook"
    },
    {
-    "qid": "06742c8e",
-    "domain": "Standard English Conventions",
-    "skill": "Boundaries",
-    "difficulty": "easy",
+    "qid": "4f9ee1dc",
+    "domain": "Expression of Ideas",
+    "skill": "Rhetorical Synthesis",
+    "difficulty": "medium",
     "type": "mc",
-    "text": "Japan's Hayabusa2 spacecraft spent more than a year studying the asteroid Ryugu. In 2019, it fired a copper projectile into the asteroid to create an artificial ______ spacecraft then collected material exposed by the impact.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+    "text": "While researching a topic, a student has taken the following notes:<ul><li>Seven species of sea turtle exist today.</li><li>Five sea turtle species can be found in the Atlantic Ocean.</li><li>One of those species is the Kemp's ridley sea turtle.</li><li>Its scientific name is Lepidochelys kempii.</li><li>Another of those species is the olive ridley sea turtle.</li><li>Its scientific name is Lepidochelys olivacea.</li></ul><br><br>The student wants to emphasize a similarity between the two sea turtle species. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
     "choices": [
-     "crater, the",
-     "crater the",
-     "crater and the",
-     "crater. The"
+     "Among the seven species of sea turtle is the olive ridley sea turtle, which can be found in the Atlantic Ocean.",
+     "The Kemp's ridley sea turtle is referred to as Lepidochelys kempii, while the olive ridley sea turtle is referred to as Lepidochelys olivacea.",
+     "Both the Kemp's ridley sea turtle and the olive ridley sea turtle can be found in the Atlantic Ocean.",
+     "The Kemp's ridley sea turtle (Lepidochelys kempii) and the olive ridley sea turtle (Lepidochelys olivacea) are different species."
+    ],
+    "correct": 2,
+    "choiceNotes": [
+     "Incorrect. The sentence indicates that the olive ridley sea turtle is one of seven species of sea turtle; it fails to mention the Kemp's ridley sea turtle.",
+     "Incorrect. The sentence emphasizes a difference between the two sea turtle species rather than a similarity.",
+     "Correct. The sentence emphasizes a similarity between the two sea turtle species: both can be found in the Atlantic Ocean.",
+     "Incorrect. The sentence emphasizes a difference between the two sea turtle species rather than a similarity."
+    ],
+    "source": "Non-Bluebook"
+   },
+   {
+    "qid": "5222ffab",
+    "domain": "Expression of Ideas",
+    "skill": "Rhetorical Synthesis",
+    "difficulty": "hard",
+    "type": "mc",
+    "text": "While researching a topic, a student has taken the following notes:<ul><li>Neuroscientists Krishnan Padmanabhan and Zhen Chen sought to better understand the workings of the brain's olfactory system.</li><li>They devised a study using mathematical models.</li><li>They found that certain fibers allow the brain to toggle from one method of processing smells to another.</li><li>In one method, cells in the piriform cortex (where the perception of odor forms) capture olfactory information at a given moment.</li><li>In the other, the cells track changes in olfactory information over time.</li></ul><br><br>The student wants to summarize the study's findings. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
+    "choices": [
+     "To arrive at these findings, which describe dual methods of processing smells in the piriform cortex, Padmanabhan and Chen devised a study using mathematical models.",
+     "Padmanabhan and Chen showed that olfactory information is captured by cells in the piriform cortex, where the perception of odor forms.",
+     "Using mathematical models, Padmanabhan and Chen devised a study to better understand the workings of the brain's olfactory system.",
+     "According to Padmanabhan and Chen, the brain can toggle between capturing olfactory information at a given moment and tracking changes in that information over time."
     ],
     "correct": 3,
     "choiceNotes": [
-     "Incorrect. It results in a comma splice. A comma alone can't join two main clauses.",
-     "Incorrect. It results in a run-on sentence. The two main clauses are fused without punctuation or a conjunction.",
-     "Incorrect. When a coordinating conjunction joins two main clauses, a comma is conventionally placed before it.",
-     "Correct. The convention being tested is punctuation use between sentences. This choice correctly uses a period to mark the boundary between one sentence (\"In 2019...crater\") and another (\"The spacecraft...impact\")."
+     "Incorrect. While the sentence mentions findings, it mainly focuses on Padmanabhan and Chen's methodology. It doesn't effectively summarize the study's findings.",
+     "Incorrect. The sentence notes a fact about the olfactory system—that the perception of odor forms in the piriform cortex—but doesn't summarize the findings of Padmanabhan and Chen's study.",
+     "Incorrect. The sentence presents the goal of Padmanabhan and Chen's study; it doesn't summarize the study's findings.",
+     "Correct. The sentence effectively summarizes the study's findings, explaining what Padmanabhan and Chen found: that the brain can toggle between one method of processing smells (capturing information at a given moment) and another (tracking changes in information over time)."
+    ],
+    "source": "Non-Bluebook"
+   },
+   {
+    "qid": "b3edbb96",
+    "domain": "Expression of Ideas",
+    "skill": "Transitions",
+    "difficulty": "hard",
+    "type": "mc",
+    "text": "The Akhal-Teke horse breed originated in Turkmenistan, a country in Central Asia. ______ an annual national celebration honors horses and longstanding equestrian traditions.<br><br>Which choice completes the text with the most logical transition?",
+    "choices": [
+     "Accordingly,",
+     "In particular,",
+     "There,",
+     "Ultimately,"
+    ],
+    "correct": 2,
+    "choiceNotes": [
+     "Incorrect. \"accordingly\" signals that what follows is a consequence of what came before. A breed originating in a country is not a reason that the country holds an annual celebration.",
+     "Incorrect. \"in particular\" signals that what follows is a specific case of a general statement just made. The celebration is not an instance of the breed's origin.",
+     "Correct. \"There\" points back to Turkmenistan, the place named in the previous sentence, and identifies it as where the annual celebration is held. The two sentences are linked by location, and \"there\" is what makes that link explicit.",
+     "Incorrect. \"ultimately\" signals a final outcome in a sequence of events. The text presents no sequence, only a place of origin and a celebration held in that place."
     ],
     "source": "Moretti Test Prep & Tutoring"
-   },
+   }
+  ],
+  "module2Harder": [
    {
     "qid": "4eee64fa",
     "domain": "Craft and Structure",
@@ -1305,114 +1239,136 @@ window.SECTION_BANKS = {
     "source": "Non-Bluebook"
    },
    {
-    "qid": "8345a5ad",
-    "domain": "Expression of Ideas",
-    "skill": "Rhetorical Synthesis",
-    "difficulty": "medium",
+    "qid": "c762ca58",
+    "domain": "Craft and Structure",
+    "skill": "Text Structure and Purpose",
+    "difficulty": "hard",
     "type": "mc",
-    "text": "While researching a topic, a student has taken the following notes:<ul><li>In some lakes sediment settles each year in two layers, light and dark.</li><li>Such a pair is called a varve.</li><li>Counting varves down a sediment core gives the years the core spans.</li><li>Varve counting has produced continuous records tens of thousands of years long.</li><li>Varves survive only where the lake bed holds too little oxygen for burrowing animals.</li><li>Where burrowing animals live they mix the sediment and destroy the annual layers.</li></ul><br><br>The student wants to explain a limitation of varve counting to an audience already familiar with the technique. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
+    "text": "Technological advances have prompted companies to increasingly rely on automation to streamline production. Armin Granulo and colleagues, however, found that for products with higher symbolic value (those viewed as contributing to individual self-expression), consumers prefer products made by humans rather than by robots, likely because human-made products are more strongly associated with uniqueness. <u>When considering automation, therefore, companies—especially those specializing in products of symbolic value—should weigh trade-offs between efficiency gains and consumer preferences.</u><br><br>Which choice best describes the function of the underlined sentence in the text as a whole?",
     "choices": [
-     "Varve counting establishes how many years a sediment core spans by counting the annual layers down the core, a method that has produced continuous records tens of thousands of years long.",
-     "In some lakes, sediment settles each year in a pair of layers, one light and one dark, called a varve.",
-     "Varve counting has produced continuous records that are tens of thousands of years long.",
-     "Because burrowing animals mix lake sediment, varve counting works only in lakes whose beds hold too little oxygen for those animals to live."
+     "It presents evidence supporting the text's argument that consumers prefer products with high symbolic value over products with low symbolic value.",
+     "It refers to a finding presented in the previous sentence to recommend that companies that value product quality reconsider automating their production processes.",
+     "It illustrates the need for additional research to evaluate the claim in the previous sentence that automation affects how consumers rate product uniqueness.",
+     "It emphasizes that a research finding discussed in the text has practical implications that are particularly relevant for businesses making a certain class of product."
     ],
     "correct": 3,
     "choiceNotes": [
-     "Incorrect. It explains how varve counting works and how long a record it produces, which the audience already knows, and names no limitation.",
-     "Incorrect. It defines a varve, background the audience is said to be familiar with.",
-     "Incorrect. The reach of the technique is a strength, not a limit on where it can be used.",
-     "Correct. The goal is to explain a limitation of varve counting to an audience already familiar with the technique, so the sentence has to say what the technique can't do. This choice uses the notes that varves \"survive only where the lake bed holds too little oxygen for burrowing animals\" and that where such animals live \"they mix the sediment and destroy the annual layers.\""
+     "Incorrect. Although the text indicates that among products with high symbolic value, people prefer those made by humans over those made by machines, it doesn't address whether products with high symbolic value are preferred over those with low symbolic value.",
+     "Incorrect. Rather than reiterate the finding in the previous sentence—that people tend to prefer \"products with higher symbolic value\" that are human made over those that are machine made—the underlined sentence instead makes a recommendation to companies that sell such products to carefully consider a potential drawback of making their products with machines.",
+     "Incorrect. Nothing in the underlined sentence or the text as a whole suggests that additional research is needed to evaluate Granulo and colleagues' claim. Moreover, the researchers' finding is that consumers prefer \"products with higher symbolic value\" to be human made, not that automation affects consumers' ratings of how unique products are.",
+     "Correct. It best describes the function of the underlined sentence in the text as a whole. The text begins by noting that companies increasingly depend on automation to improve production efficiency. The text then presents Granulo and colleagues' finding that consumers think it's preferable for one category of products (those \"with higher symbolic value\") to be human made rather than machine made. The underlined sentence highlights a practical consequence of that finding: companies, especially those specializing in such products, should balance the efficiency of automation against consumer preferences. Thus, the underlined sentence emphasizes that the research finding has practical implications that are especially relevant for businesses making a certain class of product."
     ],
-    "source": "Moretti Test Prep & Tutoring"
+    "source": "Non-Bluebook"
    },
    {
-    "qid": "54c1b2dd",
-    "domain": "Expression of Ideas",
-    "skill": "Rhetorical Synthesis",
-    "difficulty": "medium",
+    "qid": "8af926b1",
+    "domain": "Craft and Structure",
+    "skill": "Text Structure and Purpose",
+    "difficulty": "hard",
     "type": "mc",
-    "text": "While researching a topic, a student has taken the following notes:<ul><li>In 1851, German American artist Emanuel Leutze painted Washington Crossing the Delaware.</li><li>His huge painting (149 × 255 inches) depicts the first US president crossing a river with soldiers in the Revolutionary War.</li><li>In 2019, Cree artist Kent Monkman painted mistikôsiwak (Wooden Boat People): Resurgence of the People.</li><li>Monkman's huge painting (132 × 264 inches) was inspired by Leutze's.</li><li>It portrays Indigenous people in a boat rescuing refugees.</li></ul><br><br>The student wants to emphasize a similarity between the two paintings. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
+    "text": "Despite potential independent confirmation, the apparent detection in 2020 of phosphine (PH3)—a gas that on Earth almost exclusively derives from biological sources—in Venus's cloud deck remains controversial, in part because Venus is thought to be uninhabitable. To evaluate such a finding's plausibility, William Bains et al. modeled multiple abiotic PH3 pathways, including geochemical, atmospheric, and photochemical reactions, but none adequately explain the observed levels of PH3. If Venusian PH3 does exist, it would indicate insufficiencies in the current consensus on Venus's chemistry.<br><br>Which choice best describes the overall structure of the text?",
     "choices": [
-     "Monkman, a Cree artist, finished his painting in 2019; Leutze, a German American artist, completed his in 1851.",
-     "Although Monkman's painting was inspired by Leutze's, the people and actions the two paintings portray are very different.",
-     "Leutze's and Monkman's paintings are both huge, measuring 149 × 255 inches and 132 × 264 inches, respectively.",
-     "Leutze's painting depicts Revolutionary War soldiers, while Monkman's depicts Indigenous people and refugees."
+     "It outlines recent efforts to confirm the presence of a particular gas in Venus's atmosphere, summarizes a research team's evaluations of those efforts' methodological shortcomings, and then explains why that team remains skeptical of the gas's future detection.",
+     "It explains why the consensus view of a particular gas in Venus's atmosphere has recently become controversial, expands on a scientific team's reasons for questioning that consensus, and then suggests that future observations of Venus's atmosphere will likely be needed to settle the controversy.",
+     "It introduces an unexpected observation of a particular gas in Venus's atmosphere, presents an effort to investigate possible mechanisms that could explain that observation, and then notes an implication of that investigation's findings.",
+     "It compares the levels of a particular gas on Venus and Earth, sketches the chemical processes that account for differences in these levels, and then addresses some of the practical challenges of studying the presence of this gas on Venus more closely."
     ],
     "correct": 2,
     "choiceNotes": [
-     "Incorrect. The sentence mentions that Monkman's painting was completed in 2019 and Leutze's was completed in 1851; it doesn't emphasize a similarity between the two paintings.",
-     "Incorrect. While the sentence acknowledges that one painting was inspired by the other, it emphasizes differences between the two paintings; it doesn't emphasize a similarity between them.",
-     "Correct. The sentence emphasizes a similarity between the two paintings, noting that Leutze's painting (which measures 149 × 255 inches) and Monkman's painting (which measures 132 × 264 inches) are both very large.",
-     "Incorrect. The sentence mentions a difference between the two paintings; it doesn't emphasize a similarity between them."
+     "Incorrect. The text starts by mentioning that phosphine has been detected in Venus's atmosphere. Rather than discuss whether the presence of phosphine on Venus can be confirmed, the text focuses on the efforts of one team of researchers, Bains et al., who are trying to explain the observed amount of phosphine on Venus. Furthermore, the text doesn't suggest that the research team was skeptical about the presence of phosphine on Venus.",
+     "Incorrect. Rather than indicating a consensus view about the phosphine detected on Venus, the text focuses on the fact that the detection \"remains controversial,\" a framing that suggests the controversy is not a new phenomenon. The text also doesn't suggest that future atmospheric observations would be needed to settle the controversy. There is no consensus view about the presence of phosphine on Venus.",
+     "Correct. It most accurately describes the overall structure of the text. The text begins by discussing the detection of phosphine gas in Venus's atmosphere, indicating that it is unexpected because on Earth, phosphine derives from biological sources, and Venus is thought to be uninhabitable, thereby lacking in biological sources. The text then presents the effort by Bains et al. to determine whether one or more abiotic (nonbiological) pathways could explain the observed levels of phosphine on Venus, noting that none could. Finally, the text notes an implication: if phosphine exists on Venus, its presence would indicate that our current understanding of chemical processes on Venus that could produce it is inadequate. Thus, the text introduces an unexpected observation about Venus's atmosphere, presents an effort to investigate mechanisms related to that observation, and notes an implication of that effort's findings.",
+     "Incorrect. The text does not compare levels of phosphine on Venus with levels on Earth, nor does it address practical challenges of studying the gas on Venus."
     ],
     "source": "Non-Bluebook"
    },
    {
-    "qid": "fecb66f8",
-    "domain": "Expression of Ideas",
-    "skill": "Rhetorical Synthesis",
+    "qid": "9b01bcf4",
+    "domain": "Craft and Structure",
+    "skill": "Text Structure and Purpose",
     "difficulty": "hard",
     "type": "mc",
-    "text": "While researching a topic, a student has taken the following notes:<ul><li>Loess is a wind-laid silt, thickest downwind of glaciated or desert land.</li><li>Loess holds water well and is easy to work.</li><li>The world's loess belts carry a share of cropland out of proportion to their area.</li><li>A vertical face of loess stands on its own but collapses when saturated or shaken.</li><li>Loess regions have suffered some of the deadliest landslides on record.</li><li>One was set off by an earthquake in Gansu in 1920.</li></ul><br><br>The student wants to generalize about the consequences of loess's structure, both the useful and the dangerous, and support the generalization. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
+    "text": "The 1967 release of Harold Cruse's book The Crisis of the Negro Intellectual isolated him from almost all other scholars and activists of the American Civil Rights Movement—though many of those thinkers disagreed with each other, he nonetheless found ways to disagree with them all. He thought that activists who believed that Black people such as himself should culturally assimilate were naïve. <u>But he also sharply criticized Black nationalists such as Marcus Garvey who wanted to establish independent, self-contained Black economies and societies, even though Cruse himself identified as a Black nationalist.</u><br><br>Which choice best describes the function of the underlined sentence in the text as a whole?",
     "choices": [
-     "Loess holds water well and is easy to work, giving its belts an outsized share of cropland; the same silt stands in a vertical face only until saturated or shaken, and loess regions have seen some of the deadliest landslides.",
-     "Loess is a wind-laid silt, thickest downwind of glaciated or desert land, and loess regions have suffered some of the deadliest landslides on record, one of them set off by an earthquake in Gansu in 1920.",
-     "Loess is a wind-laid silt, thickest downwind of glaciated or desert land; it holds water well and is easy to work, and the world's loess belts carry a share of cropland out of proportion to their area.",
-     "Loess holds water well and is easy to work, and yet a vertical face of the same wind-laid silt, thickest downwind of glaciated or desert land, stands up on its own only until it is saturated or shaken by an earthquake."
-    ],
-    "correct": 0,
-    "choiceNotes": [
-     "Correct. The goal is to generalize about the consequences of loess's structure, both the useful and the dangerous, and to support that generalization, so the choice must cover the two sides and give evidence for each. This choice does, pairing the note that loess \"holds water well and is easy to work\" with its outsized share of cropland, and the note that a vertical face collapses when saturated or shaken with the landslides loess regions have seen.",
-     "Incorrect. It gives the silt's origin and the landslides, leaving the useful side out.",
-     "Incorrect. It supports the useful side alone.",
-     "Incorrect. It states both consequences from those same notes and supports neither, offering no cropland and no landslides."
-    ],
-    "source": "Moretti Test Prep & Tutoring"
-   },
-   {
-    "qid": "ecb31049",
-    "domain": "Expression of Ideas",
-    "skill": "Transitions",
-    "difficulty": "hard",
-    "type": "mc",
-    "text": "The Sun and other stars are powered by nuclear fusion reactions, in which two atoms collide to form a single heavier atom, releasing energy. Scientists have long believed that fusion has the potential to meet humanity's clean energy needs. ______ prior to December 2022, no fusion reaction in a laboratory setting had ever generated a net energy gain.<br><br>Which choice completes the text with the most logical transition?",
-    "choices": [
-     "For this reason,",
-     "Moreover,",
-     "Specifically,",
-     "That said,"
+     "It describes a direction that Cruse felt the Civil Rights Movement ought to take.",
+     "It indicates that Cruse's reputation as a persistent antagonist of other scholars is undeserved.",
+     "It describes a controversy that Cruse's work caused within the Black nationalist movement.",
+     "It helps explain Cruse's position with respect to the community of civil rights thinkers."
     ],
     "correct": 3,
     "choiceNotes": [
-     "Incorrect. This choice uses a cause-and-effect transition, which doesn't make sense here. Scientists not being able to generate extra energy from lab fusion reactions isn't an effect of them believing in fusion's potential.",
-     "Incorrect. This transition indicates the addition of another supporting point. But this sentence is not adding a supporting point to the previous sentence—scientists not being able to successfully generate energy from fusion isn't another point in favor of fusion meeting humanity's clean energy needs.",
-     "Incorrect. This choice uses a transition that introduces or elaborates on a particular example. But this sentence doesn't give an example of scientists' belief in fusion's potential to meet humanity's clean energy needs—in fact, it contrasts that optimistic belief with the reality of past failures to successfully employ fusion for energy production.",
-     "Correct. Scientists believe in fusion's potential as an energy source, but have struggled to actually make it work—in other words, there is a contradiction between scientists' beliefs and their reality. \"That said\" is a disagreement transition that works perfectly in this context."
+     "Incorrect. The underlined sentence doesn't do this. It describes Cruse's criticisms—it never mentions what Cruse did want the movement to do instead.",
+     "Incorrect. This conflicts with the text, which argues that Cruse did disagree with almost all other scholars of the Civil Rights Movement.",
+     "Incorrect. This is a step too far. The text never says that Cruse's work caused controversy within the Black nationalist movement.",
+     "Correct. The text as a whole claims that Cruse disagreed with virtually all other Civil Rights scholars and activists. The underlined sentence describes one way that Cruse both did and didn't fit in with those thinkers: he criticized Black nationalists, even though he identified as one."
     ],
     "source": "Non-Bluebook"
    },
    {
-    "qid": "b0f3f211",
-    "domain": "Expression of Ideas",
-    "skill": "Transitions",
+    "qid": "a1d2c4d0",
+    "domain": "Craft and Structure",
+    "skill": "Text Structure and Purpose",
     "difficulty": "hard",
     "type": "mc",
-    "text": "A damselfish clears and defends a patch of reef algae, and the patch is often called a farm. It is rarely the monoculture that word suggests. ______, such a patch carries a mix of species the fish has thinned rather than planted, and on a heavily grazed reef these patches hold much of what algal diversity is left.<br><br>Which choice completes the text with the most logical transition?",
+    "text": "Pteropods are small swimming snails with thin, delicate calcium carbonate shells. These animals are thought to be especially vulnerable to ocean acidification due to calcium carbonate's susceptibility to dissolution at lower pH values. Victoria L. Peck and colleagues recently found that the periostracum (a protective coating on pteropods' outer shells) prevents this dissolution when intact. Moreover, the team was surprised to discover that even when the periostracum is breached, pteropods can still mitigate damage by rebuilding the inner shell wall.<br><br>Which choice best describes the main purpose of the text?",
     "choices": [
-     "More often",
-     "By contrast",
-     "As a result",
-     "For example"
+     "To call for additional research on biological mechanisms that improve pteropod survival rates",
+     "To discuss a conclusion drawn in a study of calcium carbonate's role in protecting the periostracum of pteropods",
+     "To address some of the ways ocean acidification has altered pteropod behavior over time",
+     "To present findings that suggest that a concern about the effects of ocean acidification on pteropod shells may be unwarranted"
+    ],
+    "correct": 3,
+    "choiceNotes": [
+     "Incorrect. The text doesn't call for additional research or suggest that more research is needed on biological mechanisms that improve pteropod survival rates. Instead, the text discusses a recent study showing that pteropods may not be as vulnerable to ocean acidification as is feared.",
+     "Incorrect. The study discussed in the text doesn't address calcium carbonate's role in protecting the periostracum of pteropods. According to the text, the study addresses the periostracum's role in protecting pteropods' calcium carbonate shells from dissolution due to ocean acidification.",
+     "Incorrect. The text doesn't address how ocean acidification has altered pteropod behavior over time. Instead, the text focuses on the potential effects of ocean acidification on pteropods' shells and the mechanisms protecting against those effects.",
+     "Correct. It most accurately describes the main purpose of the text, which is to present findings that suggest a previously held concern about the effects of ocean acidification on pteropod shells may be unwarranted. The text introduces the concern that pteropods are thought to be particularly vulnerable to ocean acidification, or lower pH levels, due to the susceptibility of their calcium carbonate shells to dissolution at lower pH levels. However, the text then describes findings from a recent study that suggest this concern may be unjustified, insofar as the protective periostracum coating on a pteropod's shell prevents dissolution, and even when the coating is breached, a pteropod can rebuild the inner shell wall, reducing the damage."
+    ],
+    "source": "Non-Bluebook"
+   },
+   {
+    "qid": "ac9a3a26",
+    "domain": "Craft and Structure",
+    "skill": "Text Structure and Purpose",
+    "difficulty": "hard",
+    "type": "mc",
+    "text": "According to historian Vicki L. Ruiz, Mexican American women made crucial contributions to the labor movement during World War II. At the time, food processing companies entered into contracts to supply United States armed forces with canned goods. Increased production quotas conferred greater bargaining power on the companies' employees, many of whom were Mexican American women: <u>employees insisted on more favorable benefits, and employers, who were anxious to fulfill the contracts, complied</u>. Thus, labor activism became a platform for Mexican American women to assert their agency.<br><br>Which choice best describes the function of the underlined portion in the text as a whole?",
+    "choices": [
+     "It elaborates on a claim about labor relations in a particular industry made earlier in the text.",
+     "It offers an example of a trend in the World War II-era economy discussed earlier in the text.",
+     "It notes a possible exception to the historical narrative of labor activism sketched earlier in the text.",
+     "It provides further details about the identities of the workers discussed earlier in the text."
     ],
     "correct": 0,
     "choiceNotes": [
-     "Correct. \"More often\" logically signals that the information in this sentence states what is usually true of a damselfish's patch, against what the previous sentence says is rarely true of it. The text says the patch \"is rarely the monoculture that word suggests,\" and then gives the usual case: a mix of species \"the fish has thinned rather than planted,\" which on a heavily grazed reef holds much of the algal diversity that is left.",
-     "Incorrect. \"By contrast\" illogically signals that a second, different subject is being set against the first, when both sentences describe the same patch.",
-     "Incorrect. \"As a result\" illogically signals that the mix of species is caused by the patch's not being a monoculture, when that mix is what not being a monoculture consists of.",
-     "Incorrect. \"For example\" illogically signals that this sentence offers one instance, when it makes a general statement about such patches."
+     "Correct. It best describes how the underlined portion functions in the text as a whole. The text says that the increased production quotas of food processing companies during World War II enabled employees to make better bargains in exchange for their labor. The underlined portion presents an example of this increased bargaining power: employees requested more favorable benefits, and employers complied because they were under pressure to fulfill the demanding terms of their contracts. Thus, the underlined portion of the text elaborates on a claim about labor relations in a particular industry (food processing) made earlier in the text.",
+     "Incorrect. There is no indication in the text that the economic factors that influenced food processing also influenced other parts of the economy; thus, the bargaining described in the underlined portion of the text cannot be called an example of a trend.",
+     "Incorrect. The underlined portion supports the historical narrative of labor activism in food processing that is sketched in the text, instead of noting an exception to that narrative.",
+     "Incorrect. While the underlined portion does discuss the demands that workers made in exchange for their labor, it does not discuss the identities of the workers."
     ],
-    "source": "Moretti Test Prep & Tutoring"
+    "source": "Non-Bluebook"
+   },
+   {
+    "qid": "72cbdbc6",
+    "domain": "Information and Ideas",
+    "skill": "Inferences",
+    "difficulty": "easy",
+    "type": "mc",
+    "text": "Researchers Eugeni Vidal-Tortosa and Robin Lovelace looked at the relationship between street lighting in a city and people's willingness to ride a bicycle. Their results suggest that poor street lighting can deter new or inexperienced cyclists from riding in a city but has little effect on experienced cyclists. Therefore, increasing the number of streetlights in a city could potentially ______<br><br>Which choice most logically completes the text?",
+    "choices": [
+     "decrease the number of new or inexperienced cyclists riding in the city.",
+     "increase the number of experienced cyclists riding in the city.",
+     "decrease the number of experienced cyclists riding in the city.",
+     "increase the number of new or inexperienced cyclists riding in the city."
+    ],
+    "correct": 3,
+    "choiceNotes": [
+     "Incorrect. It contradicts the logical relationship established in the text. If poor street lighting deters new or inexperienced cyclists from riding in the city, then increasing the number of streetlights (improving lighting conditions) would be expected to encourage more of these cyclists to ride, not decrease their numbers.",
+     "Incorrect. The text explicitly states that street lighting didn't have an effect on experienced cyclists. If lighting conditions don't significantly influence experienced cyclists' decisions to ride, then increasing the number of streetlights wouldn't necessarily increase the number of experienced cyclists riding in the city.",
+     "Incorrect. The text indicates that street lighting didn't affect experienced cyclists, so increasing the number of streetlights wouldn't decrease the participation of these cyclists. Instead, their numbers would be expected to remain about the same.",
+     "Correct. It most logically completes the text's discussion of the relationship between street lighting and people's cycling behavior. According to the text, Eugeni Vidal-Tortosa and Robin Lovelace found that poor street lighting deters new or inexperienced cyclists from riding their bikes in a city but has little effect on experienced cyclists. This finding establishes a causal relationship between street lighting and the willingness of new or inexperienced cyclists to ride a bicycle in the city: if poor lighting discourages new or inexperienced cyclists from riding, then improving lighting conditions by increasing the number of streetlights would logically remove this deterrent, potentially leading to an increase in the number of new or inexperienced cyclists willing to ride in the city."
+    ],
+    "source": "Non-Bluebook"
    },
    {
     "qid": "73d457b6",
@@ -1547,6 +1503,28 @@ window.SECTION_BANKS = {
     "source": "Non-Bluebook"
    },
    {
+    "qid": "06742c8e",
+    "domain": "Standard English Conventions",
+    "skill": "Boundaries",
+    "difficulty": "easy",
+    "type": "mc",
+    "text": "Japan's Hayabusa2 spacecraft spent more than a year studying the asteroid Ryugu. In 2019, it fired a copper projectile into the asteroid to create an artificial ______ spacecraft then collected material exposed by the impact.<br><br>Which choice completes the text so that it conforms to the conventions of Standard English?",
+    "choices": [
+     "crater, the",
+     "crater the",
+     "crater and the",
+     "crater. The"
+    ],
+    "correct": 3,
+    "choiceNotes": [
+     "Incorrect. It results in a comma splice. A comma alone can't join two main clauses.",
+     "Incorrect. It results in a run-on sentence. The two main clauses are fused without punctuation or a conjunction.",
+     "Incorrect. When a coordinating conjunction joins two main clauses, a comma is conventionally placed before it.",
+     "Correct. The convention being tested is punctuation use between sentences. This choice correctly uses a period to mark the boundary between one sentence (\"In 2019...crater\") and another (\"The spacecraft...impact\")."
+    ],
+    "source": "Moretti Test Prep & Tutoring"
+   },
+   {
     "qid": "7c766ceb",
     "domain": "Standard English Conventions",
     "skill": "Form, Structure, and Sense",
@@ -1679,114 +1657,136 @@ window.SECTION_BANKS = {
     "source": "Non-Bluebook"
    },
    {
-    "qid": "c762ca58",
-    "domain": "Craft and Structure",
-    "skill": "Text Structure and Purpose",
-    "difficulty": "hard",
+    "qid": "7d56630a",
+    "domain": "Expression of Ideas",
+    "skill": "Transitions",
+    "difficulty": "easy",
     "type": "mc",
-    "text": "Technological advances have prompted companies to increasingly rely on automation to streamline production. Armin Granulo and colleagues, however, found that for products with higher symbolic value (those viewed as contributing to individual self-expression), consumers prefer products made by humans rather than by robots, likely because human-made products are more strongly associated with uniqueness. <u>When considering automation, therefore, companies—especially those specializing in products of symbolic value—should weigh trade-offs between efficiency gains and consumer preferences.</u><br><br>Which choice best describes the function of the underlined sentence in the text as a whole?",
+    "text": "In studying whether jellyfish sleep, researchers Michael Abrams, Claire Bedbrook, and Ravi Nath attempted to answer three questions. ______ is there a period each day when the pulse rates of jellyfish decline? Second, do jellyfish respond more slowly to stimuli during that period? Finally, if prevented from sleeping, are jellyfish adversely affected?<br><br>Which choice completes the text with the most logical transition?",
     "choices": [
-     "It presents evidence supporting the text's argument that consumers prefer products with high symbolic value over products with low symbolic value.",
-     "It refers to a finding presented in the previous sentence to recommend that companies that value product quality reconsider automating their production processes.",
-     "It illustrates the need for additional research to evaluate the claim in the previous sentence that automation affects how consumers rate product uniqueness.",
-     "It emphasizes that a research finding discussed in the text has practical implications that are particularly relevant for businesses making a certain class of product."
+     "As a result,",
+     "First,",
+     "Additionally,",
+     "However,"
     ],
-    "correct": 3,
+    "correct": 1,
     "choiceNotes": [
-     "Incorrect. Although the text indicates that among products with high symbolic value, people prefer those made by humans over those made by machines, it doesn't address whether products with high symbolic value are preferred over those with low symbolic value.",
-     "Incorrect. Rather than reiterate the finding in the previous sentence—that people tend to prefer \"products with higher symbolic value\" that are human made over those that are machine made—the underlined sentence instead makes a recommendation to companies that sell such products to carefully consider a potential drawback of making their products with machines.",
-     "Incorrect. Nothing in the underlined sentence or the text as a whole suggests that additional research is needed to evaluate Granulo and colleagues' claim. Moreover, the researchers' finding is that consumers prefer \"products with higher symbolic value\" to be human made, not that automation affects consumers' ratings of how unique products are.",
-     "Correct. It best describes the function of the underlined sentence in the text as a whole. The text begins by noting that companies increasingly depend on automation to improve production efficiency. The text then presents Granulo and colleagues' finding that consumers think it's preferable for one category of products (those \"with higher symbolic value\") to be human made rather than machine made. The underlined sentence highlights a practical consequence of that finding: companies, especially those specializing in such products, should balance the efficiency of automation against consumer preferences. Thus, the underlined sentence emphasizes that the research finding has practical implications that are especially relevant for businesses making a certain class of product."
+     "Incorrect. \"as a result\" illogically signals that the question in this sentence is a result of the three questions the researchers attempted to answer. Instead, it is the first of those three questions.",
+     "Correct. \"First\" logically signals that the question in this sentence—whether there is a daily period during which jellyfish pulse rates decline—is the first in a sequence of three questions the researchers attempted to answer about jellyfish sleep behavior.",
+     "Incorrect. \"additionally\" illogically signals that the question in this sentence is an additional question related to the three questions the researchers attempted to answer. Instead, it is the first of those three questions.",
+     "Incorrect. \"however\" illogically signals that the question in this sentence contrasts with the three questions the researchers attempted to answer. Instead, it is the first of those three questions."
     ],
     "source": "Non-Bluebook"
    },
    {
-    "qid": "8af926b1",
-    "domain": "Craft and Structure",
-    "skill": "Text Structure and Purpose",
-    "difficulty": "hard",
+    "qid": "8345a5ad",
+    "domain": "Expression of Ideas",
+    "skill": "Rhetorical Synthesis",
+    "difficulty": "medium",
     "type": "mc",
-    "text": "Despite potential independent confirmation, the apparent detection in 2020 of phosphine (PH3)—a gas that on Earth almost exclusively derives from biological sources—in Venus's cloud deck remains controversial, in part because Venus is thought to be uninhabitable. To evaluate such a finding's plausibility, William Bains et al. modeled multiple abiotic PH3 pathways, including geochemical, atmospheric, and photochemical reactions, but none adequately explain the observed levels of PH3. If Venusian PH3 does exist, it would indicate insufficiencies in the current consensus on Venus's chemistry.<br><br>Which choice best describes the overall structure of the text?",
+    "text": "While researching a topic, a student has taken the following notes:<ul><li>In some lakes sediment settles each year in two layers, light and dark.</li><li>Such a pair is called a varve.</li><li>Counting varves down a sediment core gives the years the core spans.</li><li>Varve counting has produced continuous records tens of thousands of years long.</li><li>Varves survive only where the lake bed holds too little oxygen for burrowing animals.</li><li>Where burrowing animals live they mix the sediment and destroy the annual layers.</li></ul><br><br>The student wants to explain a limitation of varve counting to an audience already familiar with the technique. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
     "choices": [
-     "It outlines recent efforts to confirm the presence of a particular gas in Venus's atmosphere, summarizes a research team's evaluations of those efforts' methodological shortcomings, and then explains why that team remains skeptical of the gas's future detection.",
-     "It explains why the consensus view of a particular gas in Venus's atmosphere has recently become controversial, expands on a scientific team's reasons for questioning that consensus, and then suggests that future observations of Venus's atmosphere will likely be needed to settle the controversy.",
-     "It introduces an unexpected observation of a particular gas in Venus's atmosphere, presents an effort to investigate possible mechanisms that could explain that observation, and then notes an implication of that investigation's findings.",
-     "It compares the levels of a particular gas on Venus and Earth, sketches the chemical processes that account for differences in these levels, and then addresses some of the practical challenges of studying the presence of this gas on Venus more closely."
+     "Varve counting establishes how many years a sediment core spans by counting the annual layers down the core, a method that has produced continuous records tens of thousands of years long.",
+     "In some lakes, sediment settles each year in a pair of layers, one light and one dark, called a varve.",
+     "Varve counting has produced continuous records that are tens of thousands of years long.",
+     "Because burrowing animals mix lake sediment, varve counting works only in lakes whose beds hold too little oxygen for those animals to live."
+    ],
+    "correct": 3,
+    "choiceNotes": [
+     "Incorrect. It explains how varve counting works and how long a record it produces, which the audience already knows, and names no limitation.",
+     "Incorrect. It defines a varve, background the audience is said to be familiar with.",
+     "Incorrect. The reach of the technique is a strength, not a limit on where it can be used.",
+     "Correct. The goal is to explain a limitation of varve counting to an audience already familiar with the technique, so the sentence has to say what the technique can't do. This choice uses the notes that varves \"survive only where the lake bed holds too little oxygen for burrowing animals\" and that where such animals live \"they mix the sediment and destroy the annual layers.\""
+    ],
+    "source": "Moretti Test Prep & Tutoring"
+   },
+   {
+    "qid": "54c1b2dd",
+    "domain": "Expression of Ideas",
+    "skill": "Rhetorical Synthesis",
+    "difficulty": "medium",
+    "type": "mc",
+    "text": "While researching a topic, a student has taken the following notes:<ul><li>In 1851, German American artist Emanuel Leutze painted Washington Crossing the Delaware.</li><li>His huge painting (149 × 255 inches) depicts the first US president crossing a river with soldiers in the Revolutionary War.</li><li>In 2019, Cree artist Kent Monkman painted mistikôsiwak (Wooden Boat People): Resurgence of the People.</li><li>Monkman's huge painting (132 × 264 inches) was inspired by Leutze's.</li><li>It portrays Indigenous people in a boat rescuing refugees.</li></ul><br><br>The student wants to emphasize a similarity between the two paintings. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
+    "choices": [
+     "Monkman, a Cree artist, finished his painting in 2019; Leutze, a German American artist, completed his in 1851.",
+     "Although Monkman's painting was inspired by Leutze's, the people and actions the two paintings portray are very different.",
+     "Leutze's and Monkman's paintings are both huge, measuring 149 × 255 inches and 132 × 264 inches, respectively.",
+     "Leutze's painting depicts Revolutionary War soldiers, while Monkman's depicts Indigenous people and refugees."
     ],
     "correct": 2,
     "choiceNotes": [
-     "Incorrect. The text starts by mentioning that phosphine has been detected in Venus's atmosphere. Rather than discuss whether the presence of phosphine on Venus can be confirmed, the text focuses on the efforts of one team of researchers, Bains et al., who are trying to explain the observed amount of phosphine on Venus. Furthermore, the text doesn't suggest that the research team was skeptical about the presence of phosphine on Venus.",
-     "Incorrect. Rather than indicating a consensus view about the phosphine detected on Venus, the text focuses on the fact that the detection \"remains controversial,\" a framing that suggests the controversy is not a new phenomenon. The text also doesn't suggest that future atmospheric observations would be needed to settle the controversy. There is no consensus view about the presence of phosphine on Venus.",
-     "Correct. It most accurately describes the overall structure of the text. The text begins by discussing the detection of phosphine gas in Venus's atmosphere, indicating that it is unexpected because on Earth, phosphine derives from biological sources, and Venus is thought to be uninhabitable, thereby lacking in biological sources. The text then presents the effort by Bains et al. to determine whether one or more abiotic (nonbiological) pathways could explain the observed levels of phosphine on Venus, noting that none could. Finally, the text notes an implication: if phosphine exists on Venus, its presence would indicate that our current understanding of chemical processes on Venus that could produce it is inadequate. Thus, the text introduces an unexpected observation about Venus's atmosphere, presents an effort to investigate mechanisms related to that observation, and notes an implication of that effort's findings.",
-     "Incorrect. The text does not compare levels of phosphine on Venus with levels on Earth, nor does it address practical challenges of studying the gas on Venus."
+     "Incorrect. The sentence mentions that Monkman's painting was completed in 2019 and Leutze's was completed in 1851; it doesn't emphasize a similarity between the two paintings.",
+     "Incorrect. While the sentence acknowledges that one painting was inspired by the other, it emphasizes differences between the two paintings; it doesn't emphasize a similarity between them.",
+     "Correct. The sentence emphasizes a similarity between the two paintings, noting that Leutze's painting (which measures 149 × 255 inches) and Monkman's painting (which measures 132 × 264 inches) are both very large.",
+     "Incorrect. The sentence mentions a difference between the two paintings; it doesn't emphasize a similarity between them."
     ],
     "source": "Non-Bluebook"
    },
    {
-    "qid": "9b01bcf4",
-    "domain": "Craft and Structure",
-    "skill": "Text Structure and Purpose",
+    "qid": "fecb66f8",
+    "domain": "Expression of Ideas",
+    "skill": "Rhetorical Synthesis",
     "difficulty": "hard",
     "type": "mc",
-    "text": "The 1967 release of Harold Cruse's book The Crisis of the Negro Intellectual isolated him from almost all other scholars and activists of the American Civil Rights Movement—though many of those thinkers disagreed with each other, he nonetheless found ways to disagree with them all. He thought that activists who believed that Black people such as himself should culturally assimilate were naïve. <u>But he also sharply criticized Black nationalists such as Marcus Garvey who wanted to establish independent, self-contained Black economies and societies, even though Cruse himself identified as a Black nationalist.</u><br><br>Which choice best describes the function of the underlined sentence in the text as a whole?",
+    "text": "While researching a topic, a student has taken the following notes:<ul><li>Loess is a wind-laid silt, thickest downwind of glaciated or desert land.</li><li>Loess holds water well and is easy to work.</li><li>The world's loess belts carry a share of cropland out of proportion to their area.</li><li>A vertical face of loess stands on its own but collapses when saturated or shaken.</li><li>Loess regions have suffered some of the deadliest landslides on record.</li><li>One was set off by an earthquake in Gansu in 1920.</li></ul><br><br>The student wants to generalize about the consequences of loess's structure, both the useful and the dangerous, and support the generalization. Which choice most effectively uses relevant information from the notes to accomplish this goal?",
     "choices": [
-     "It describes a direction that Cruse felt the Civil Rights Movement ought to take.",
-     "It indicates that Cruse's reputation as a persistent antagonist of other scholars is undeserved.",
-     "It describes a controversy that Cruse's work caused within the Black nationalist movement.",
-     "It helps explain Cruse's position with respect to the community of civil rights thinkers."
-    ],
-    "correct": 3,
-    "choiceNotes": [
-     "Incorrect. The underlined sentence doesn't do this. It describes Cruse's criticisms—it never mentions what Cruse did want the movement to do instead.",
-     "Incorrect. This conflicts with the text, which argues that Cruse did disagree with almost all other scholars of the Civil Rights Movement.",
-     "Incorrect. This is a step too far. The text never says that Cruse's work caused controversy within the Black nationalist movement.",
-     "Correct. The text as a whole claims that Cruse disagreed with virtually all other Civil Rights scholars and activists. The underlined sentence describes one way that Cruse both did and didn't fit in with those thinkers: he criticized Black nationalists, even though he identified as one."
-    ],
-    "source": "Non-Bluebook"
-   },
-   {
-    "qid": "a1d2c4d0",
-    "domain": "Craft and Structure",
-    "skill": "Text Structure and Purpose",
-    "difficulty": "hard",
-    "type": "mc",
-    "text": "Pteropods are small swimming snails with thin, delicate calcium carbonate shells. These animals are thought to be especially vulnerable to ocean acidification due to calcium carbonate's susceptibility to dissolution at lower pH values. Victoria L. Peck and colleagues recently found that the periostracum (a protective coating on pteropods' outer shells) prevents this dissolution when intact. Moreover, the team was surprised to discover that even when the periostracum is breached, pteropods can still mitigate damage by rebuilding the inner shell wall.<br><br>Which choice best describes the main purpose of the text?",
-    "choices": [
-     "To call for additional research on biological mechanisms that improve pteropod survival rates",
-     "To discuss a conclusion drawn in a study of calcium carbonate's role in protecting the periostracum of pteropods",
-     "To address some of the ways ocean acidification has altered pteropod behavior over time",
-     "To present findings that suggest that a concern about the effects of ocean acidification on pteropod shells may be unwarranted"
-    ],
-    "correct": 3,
-    "choiceNotes": [
-     "Incorrect. The text doesn't call for additional research or suggest that more research is needed on biological mechanisms that improve pteropod survival rates. Instead, the text discusses a recent study showing that pteropods may not be as vulnerable to ocean acidification as is feared.",
-     "Incorrect. The study discussed in the text doesn't address calcium carbonate's role in protecting the periostracum of pteropods. According to the text, the study addresses the periostracum's role in protecting pteropods' calcium carbonate shells from dissolution due to ocean acidification.",
-     "Incorrect. The text doesn't address how ocean acidification has altered pteropod behavior over time. Instead, the text focuses on the potential effects of ocean acidification on pteropods' shells and the mechanisms protecting against those effects.",
-     "Correct. It most accurately describes the main purpose of the text, which is to present findings that suggest a previously held concern about the effects of ocean acidification on pteropod shells may be unwarranted. The text introduces the concern that pteropods are thought to be particularly vulnerable to ocean acidification, or lower pH levels, due to the susceptibility of their calcium carbonate shells to dissolution at lower pH levels. However, the text then describes findings from a recent study that suggest this concern may be unjustified, insofar as the protective periostracum coating on a pteropod's shell prevents dissolution, and even when the coating is breached, a pteropod can rebuild the inner shell wall, reducing the damage."
-    ],
-    "source": "Non-Bluebook"
-   },
-   {
-    "qid": "ac9a3a26",
-    "domain": "Craft and Structure",
-    "skill": "Text Structure and Purpose",
-    "difficulty": "hard",
-    "type": "mc",
-    "text": "According to historian Vicki L. Ruiz, Mexican American women made crucial contributions to the labor movement during World War II. At the time, food processing companies entered into contracts to supply United States armed forces with canned goods. Increased production quotas conferred greater bargaining power on the companies' employees, many of whom were Mexican American women: <u>employees insisted on more favorable benefits, and employers, who were anxious to fulfill the contracts, complied</u>. Thus, labor activism became a platform for Mexican American women to assert their agency.<br><br>Which choice best describes the function of the underlined portion in the text as a whole?",
-    "choices": [
-     "It elaborates on a claim about labor relations in a particular industry made earlier in the text.",
-     "It offers an example of a trend in the World War II-era economy discussed earlier in the text.",
-     "It notes a possible exception to the historical narrative of labor activism sketched earlier in the text.",
-     "It provides further details about the identities of the workers discussed earlier in the text."
+     "Loess holds water well and is easy to work, giving its belts an outsized share of cropland; the same silt stands in a vertical face only until saturated or shaken, and loess regions have seen some of the deadliest landslides.",
+     "Loess is a wind-laid silt, thickest downwind of glaciated or desert land, and loess regions have suffered some of the deadliest landslides on record, one of them set off by an earthquake in Gansu in 1920.",
+     "Loess is a wind-laid silt, thickest downwind of glaciated or desert land; it holds water well and is easy to work, and the world's loess belts carry a share of cropland out of proportion to their area.",
+     "Loess holds water well and is easy to work, and yet a vertical face of the same wind-laid silt, thickest downwind of glaciated or desert land, stands up on its own only until it is saturated or shaken by an earthquake."
     ],
     "correct": 0,
     "choiceNotes": [
-     "Correct. It best describes how the underlined portion functions in the text as a whole. The text says that the increased production quotas of food processing companies during World War II enabled employees to make better bargains in exchange for their labor. The underlined portion presents an example of this increased bargaining power: employees requested more favorable benefits, and employers complied because they were under pressure to fulfill the demanding terms of their contracts. Thus, the underlined portion of the text elaborates on a claim about labor relations in a particular industry (food processing) made earlier in the text.",
-     "Incorrect. There is no indication in the text that the economic factors that influenced food processing also influenced other parts of the economy; thus, the bargaining described in the underlined portion of the text cannot be called an example of a trend.",
-     "Incorrect. The underlined portion supports the historical narrative of labor activism in food processing that is sketched in the text, instead of noting an exception to that narrative.",
-     "Incorrect. While the underlined portion does discuss the demands that workers made in exchange for their labor, it does not discuss the identities of the workers."
+     "Correct. The goal is to generalize about the consequences of loess's structure, both the useful and the dangerous, and to support that generalization, so the choice must cover the two sides and give evidence for each. This choice does, pairing the note that loess \"holds water well and is easy to work\" with its outsized share of cropland, and the note that a vertical face collapses when saturated or shaken with the landslides loess regions have seen.",
+     "Incorrect. It gives the silt's origin and the landslides, leaving the useful side out.",
+     "Incorrect. It supports the useful side alone.",
+     "Incorrect. It states both consequences from those same notes and supports neither, offering no cropland and no landslides."
+    ],
+    "source": "Moretti Test Prep & Tutoring"
+   },
+   {
+    "qid": "ecb31049",
+    "domain": "Expression of Ideas",
+    "skill": "Transitions",
+    "difficulty": "hard",
+    "type": "mc",
+    "text": "The Sun and other stars are powered by nuclear fusion reactions, in which two atoms collide to form a single heavier atom, releasing energy. Scientists have long believed that fusion has the potential to meet humanity's clean energy needs. ______ prior to December 2022, no fusion reaction in a laboratory setting had ever generated a net energy gain.<br><br>Which choice completes the text with the most logical transition?",
+    "choices": [
+     "For this reason,",
+     "Moreover,",
+     "Specifically,",
+     "That said,"
+    ],
+    "correct": 3,
+    "choiceNotes": [
+     "Incorrect. This choice uses a cause-and-effect transition, which doesn't make sense here. Scientists not being able to generate extra energy from lab fusion reactions isn't an effect of them believing in fusion's potential.",
+     "Incorrect. This transition indicates the addition of another supporting point. But this sentence is not adding a supporting point to the previous sentence—scientists not being able to successfully generate energy from fusion isn't another point in favor of fusion meeting humanity's clean energy needs.",
+     "Incorrect. This choice uses a transition that introduces or elaborates on a particular example. But this sentence doesn't give an example of scientists' belief in fusion's potential to meet humanity's clean energy needs—in fact, it contrasts that optimistic belief with the reality of past failures to successfully employ fusion for energy production.",
+     "Correct. Scientists believe in fusion's potential as an energy source, but have struggled to actually make it work—in other words, there is a contradiction between scientists' beliefs and their reality. \"That said\" is a disagreement transition that works perfectly in this context."
     ],
     "source": "Non-Bluebook"
+   },
+   {
+    "qid": "b0f3f211",
+    "domain": "Expression of Ideas",
+    "skill": "Transitions",
+    "difficulty": "hard",
+    "type": "mc",
+    "text": "A damselfish clears and defends a patch of reef algae, and the patch is often called a farm. It is rarely the monoculture that word suggests. ______, such a patch carries a mix of species the fish has thinned rather than planted, and on a heavily grazed reef these patches hold much of what algal diversity is left.<br><br>Which choice completes the text with the most logical transition?",
+    "choices": [
+     "More often",
+     "By contrast",
+     "As a result",
+     "For example"
+    ],
+    "correct": 0,
+    "choiceNotes": [
+     "Correct. \"More often\" logically signals that the information in this sentence states what is usually true of a damselfish's patch, against what the previous sentence says is rarely true of it. The text says the patch \"is rarely the monoculture that word suggests,\" and then gives the usual case: a mix of species \"the fish has thinned rather than planted,\" which on a heavily grazed reef holds much of the algal diversity that is left.",
+     "Incorrect. \"By contrast\" illogically signals that a second, different subject is being set against the first, when both sentences describe the same patch.",
+     "Incorrect. \"As a result\" illogically signals that the mix of species is caused by the patch's not being a monoculture, when that mix is what not being a monoculture consists of.",
+     "Incorrect. \"For example\" illogically signals that this sentence offers one instance, when it makes a general statement about such patches."
+    ],
+    "source": "Moretti Test Prep & Tutoring"
    }
   ]
  },
