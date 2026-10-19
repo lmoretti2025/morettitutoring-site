@@ -25152,6 +25152,21 @@ window.renderNativeReport = function (data) {
      missProfile, audit 7). Such an area is not ranked, not named as a place
      to start, and the page says so. John-Carlos 9/28: prep said Algebra
      can't be judged while the report named it the place to start. */
+  /* ═══ THE FOUNDATION (one rule, 2026-10-19) ═══ grammar and punctuation, and
+     Algebra, are what the rest of each section builds on. Shaky by the reach
+     model's own line (PREREQ_SHAKY_BELOW). The summary's "start with" and the
+     plan's Relearning row both read this, so they cannot disagree again
+     (Kamilah: the summary said Algebra and grammar, the plan said nonlinear). */
+  var FOUNDATION_AREAS = [
+    ['reading-writing', 'Standard English Conventions', ['Boundaries', 'Form, Structure, and Sense']],
+    ['math', 'Algebra', ['Linear Equations in One Variable', 'Linear Equations in Two Variables', 'Linear Functions',
+                         'Systems of Two Linear Equations in Two Variables', 'Linear Inequalities in One or Two Variables']]
+  ];
+  function foundationShaky(dom) {
+    var b = domainBucketsDx[dom];
+    if (!b || !b.total || unjudgedDomain(dom)) return false;
+    return (b.mastered + b.skimmed + b.inefficient) / b.total < PREREQ_SHAKY_BELOW;
+  }
   function unjudgedDomain(dom) {
     var b = domainBucketsDx[dom];
     return !!b && b.total >= 6 && (b.skimmed + b.rushed) * 3 >= b.total;
@@ -27913,7 +27928,12 @@ window.renderNativeReport = function (data) {
     planInputs.methodSkills = (function () {
       var n = {};
       buckets.method.forEach(function (e) { n[e.r.sk] = (n[e.r.sk] || 0) + 1; });
-      return Object.keys(n).sort(function (a, b) { return n[b] - n[a]; }).slice(0, 2);
+      /* "Skills you already get right" has to be true: 3+ questions and 75%+ right
+         on this test. A slow right answer in a skill missed half the time is not a
+         skill to speed up (Kamilah, 2026-10-19: told to drill Nonlinear Functions). */
+      var known = function (sk) { var k = skills[sk]; return !!k && k.t >= 3 && k.c / k.t >= 0.75; };
+      return Object.keys(n).filter(known).sort(function (a, b) { return n[b] - n[a]; }).slice(0, 2);
+
     })();
     // The rows themselves, for the walkthrough (report-tour.js): its clock chart and per-section counts.
     planInputs.buckets = buckets;
@@ -28555,6 +28575,20 @@ window.renderNativeReport = function (data) {
           ' <em>' + A.n + ' question' + (A.n === 1 ? '' : 's') + ' on this test ' + (A.n === 1 ? 'was a skill' : 'were skills') + ' to practice rather than material to relearn: ' + esc(A.why) + '.</em>'
       });
     }
+    /* The foundation start, when no single area stood out (the summary's rule). While
+       it applies, and whenever no skill is mostly right, the Speed hours go to
+       relearning: speed comes after the material holds. */
+    var preP = planInputs.prereq, secKeysP = (sections || []).map(function (x) { return x.key; });
+    var foundation = (!strong && !preP && !contentAreas.length && causes.content > 5 && causes.content >= causes.clock)
+      ? FOUNDATION_AREAS.filter(function (f) { return secKeysP.indexOf(f[0]) !== -1 && foundationShaky(f[1]); }) : [];
+    if (foundation.length > 1 && typeof bridgeItems !== 'undefined' && bridgeItems) {
+      var fPts = function (f) { return bridgeItems.reduce(function (t, b) { return t + (b && b.dom === f[1] ? (b.points || 0) : 0); }, 0); };
+      foundation.sort(function (a, b) { return fPts(b) - fPts(a); });
+    }
+    planInputs.foundation = foundation.map(function (f) { return f[1]; });
+    if (hours.method > 0 && !strong && (foundation.length || !(planInputs.methodSkills || []).length)) {
+      hours.content += hours.method; hours.method = 0;
+    }
     if (hours.content > 0) {
       var pre = planInputs.prereq;
       rows.push({
@@ -28573,6 +28607,11 @@ window.renderNativeReport = function (data) {
           ? areaTxt + ' first, then practice on ' + (contentAreas.length === 1 ? 'it' : 'them') + ', in that order: practicing before the method is solid just rehearses the wrong method. ' +
             '<em>' + (strategyH ? contentOnly : causes.content) + ' question' + ((strategyH ? contentOnly : causes.content) === 1 ? '' : 's') + ' on this test got real work and still came back wrong' +
             (areaMiss > 0 && areaMiss < (strategyH ? contentOnly : causes.content) ? ', ' + areaMiss + ' of them in ' + (contentAreas.length === 1 ? esc(contentAreas[0].name) : 'those areas') + '. Go through the rest one by one from the question grids.' : '.') + '</em>'
+          : foundation.length
+          ? 'Start with the foundation the rest builds on: ' + foundation.map(function (f) {
+              return '<b>' + esc(f[1]) + '</b>' + (f[0] === 'reading-writing' ? ' (grammar and punctuation)' : '');
+            }).join(' and ') + '. Relearn the rules, then work this test’s misses there, then the rest. ' +
+            '<em>No single area stood out, so the week starts where everything else is built. The next test shows what still needs work.</em>'
           : 'Work the questions this test got wrong. ' +
             '<em>' + (hedgedLead
               ? '<b>' + esc(hedgedLead) + '</b> came out weakest, but not clearly enough to build the week around yet, so spread the time across the misses and let the next test show whether it holds.'
@@ -29000,11 +29039,7 @@ window.renderNativeReport = function (data) {
         // aren't the area going well.
         var secKeys = (sections || []).map(function (s) { return s.key; });
         var starts = [];
-        var shaky = function (dom) {
-          var b = (domainBucketsDx || {})[dom];
-          if (!b || !b.total || (best && best.name === dom) || unjudgedDomain(dom)) return false;
-          return (b.mastered + b.skimmed + b.inefficient) / b.total < PREREQ_SHAKY_BELOW;
-        };
+        var shaky = function (dom) { return !(best && best.name === dom) && foundationShaky(dom); };
         if (secKeys.indexOf('reading-writing') !== -1 && shaky('Standard English Conventions')) starts.push('Standard English Conventions (grammar and punctuation) in Reading and Writing');
         if (secKeys.indexOf('math') !== -1 && shaky('Algebra')) starts.push('Algebra in Math');
         steps.push('Go through the questions you got wrong, easy and medium ones first: ' + TILES + '. ' +
