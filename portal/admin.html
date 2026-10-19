@@ -1539,7 +1539,7 @@
      so the signed admin session is in sessionStorage when the auto-continue
      boot code below reads it. -->
 <script src="time-budgets.js?v=20260912a"></script>
-<script src="signals.js?v=20261018a"></script>
+<script src="signals.js?v=20261019a"></script>
   <script src="backend-url.js?v=20260905"></script>
   <script>
     /* Browser errors on this page reach the ClientErrors tab too (prep.gs's
@@ -5255,6 +5255,7 @@
     var prev = ((currentDetail && currentDetail.attempts) || []).filter(function (a) {
       if (!a || a === attempt || !a.reportRow || String(a.at || '') >= String(attempt.at || '')) return false;
       if (a.module && /^(module1|Easier|Harder)$/.test(a.module)) return false;
+      if (a.mode === 'section') return false;
       if (attempt.testType && a.testType && a.testType !== attempt.testType) return false;
       if (a.testId === hardest) return false;
       if (a.qStats && MSq && (MSq.abandonedSitting(a.qStats) || MSq.spamSitting(a.qStats))) return false;

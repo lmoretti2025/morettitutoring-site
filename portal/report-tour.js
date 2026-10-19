@@ -201,7 +201,7 @@
     l = String(l || '');
     var n = /\((\d+) skills?\)\s*$/.exec(l);
     l = l.replace(/\s*\(\d+ skills?\)\s*$/, '');
-    var o = /^Other\s*[\u2014\u2013-]+\s*(.+)$/.exec(l);
+    var o = /^Other\s*(?:[\u2014\u2013-]+|:)\s*(.+)$/.exec(l);
     if (o) l = o[1] + (n ? ' (' + n[1] + ' skills together)' : '');
     return l;
   }
@@ -253,11 +253,17 @@
     /* On a rushed sitting the clock never ran short, so its fast misses are
        lost to speed, not to "the clock" (Sakeena, 15 to 29 minutes left). */
     var clk = rushedSitting ? 'speed' : 'the clock';
+    // A rushed Module 1 that ended in the easier Module 2 (report: "Where the rushed module led").
+    var rushRoute = ((R.planInputs || {}).routedRush || []).map(function (x) {
+      return { label: x.name + ': a rushed Module 1 led to the easier Module 2',
+               detail: x.name + ' Module 1 was rushed and ended at ' + (x.right != null ? x.right + ' of ' + x.n + ' right' : 'a lower score') +
+                 '. That score sent you to the easier Module 2, which caps how high the ' + x.name + ' score can go. Module 1 worked at a steady pace is the way to the harder one.' };
+    });
     if (cond && cond.level === 'poor') {
       M.screens.push({ name: 'conditions', html:
         '<p class="t-eye r">How this test was taken</p><h2 class="r">Read this score with some care.</h2>' +
         '<p class="t-say r">A few things about the sitting can pull a score away from your real level, in either direction.</p><div class="t-cond">' +
-        cond.signals.map(function (g, i) {
+        cond.signals.concat(rushRoute).map(function (g, i) {
           return '<div class="t-habit" style="--i:' + i + '"><div class="n">!</div><div><h3>' + esc(undash(g.label)) + '</h3><p>' + esc(cap(undash(g.detail))) + '</p></div></div>';
         }).join('') + '</div>' });
     }
@@ -306,7 +312,7 @@
           '<span style="left:' + Math.min(96, at2(band.hi)) + '%">' + band.hi + '</span>' + (at2(band.hi) < 91 ? '<span class="end" style="left:auto;right:0;transform:none">' + smax + '</span>' : '') + '</div></div>' +
           '<p class="t-say r" style="margin-top:10px">Your real level is most likely between <strong>' + band.lo + '</strong> and <strong>' + band.hi + '</strong> (about 4 chances in 5).</p>';
       }
-      if (cond && cond.level === 'fair') bandLine += '<p class="t-small r">About how this test was taken: ' + esc(cond.signals.map(function (g) { return undash(g.label); }).join('; ')) + '. The full report has the detail.</p>';
+      if (cond && cond.level === 'fair') bandLine += '<p class="t-small r">About how this test was taken: ' + esc(cond.signals.concat(rushRoute).map(function (g) { return undash(g.label); }).join('; ')) + '. The full report has the detail.</p>';
       /* The all-hard test (audit 6): the report says the same student scores
          about 87 points lower on it; the walkthrough says so too. */
       var hardestId = (window.MorettiSignals && window.MorettiSignals.HARDEST_TEST_ID) || 'sat-practice-11';
@@ -651,11 +657,11 @@
       M.screens.push({ name: 'since', html:
         '<p class="t-eye r">Since your last test</p><h2 class="r">' + esc(cap(cmpHead)) + '</h2><div class="t-habits">' +
         picks.map(function (p, i) { return cmpCard(p[0], p[1], i); }).join('') + '</div>' +
-        '<p class="t-small r" style="margin-top:22px;transition-delay:1.6s">How you worked, moved through the test and did by area. Not the score: one test to the next swings too much to read.</p>' +
+        '<p class="t-small r" style="margin-top:22px;transition-delay:1.6s">How you worked and moved through the test. Not the score or the areas: one test to the next swings too much to read them.</p>' +
         '<div class="r" style="transition-delay:1.8s"><button type="button" class="t-more" data-sheet="since">See the full comparison</button></div>',
         sheet: { eye: 'Since your last test', title: 'Against your last test', html:
           cmpList('Better', CMP.better) + cmpList('About the same', CMP.same) + cmpList('Worse', CMP.worse) +
-          '<p class="t-small">An area or skill is called better or worse only when the change is bigger than one test to the next can show by chance.</p>' } });
+          '<p class="t-small">A count is called better or worse only when the change is bigger than one test to the next shows by chance. Areas are read across several tests, not from one to the next.</p>' } });
     }
 
     // ---- the path: the score bridge's own bars
@@ -780,7 +786,7 @@
     score: ['The score', 'The same 400 to 1600 scale as the real SAT, split into Reading & Writing and Math, with the range one test can honestly claim. A single sitting can land a little high or low, and the range keeps anyone from overreacting to one test.'],
     misses: ['Where the points went', 'Every missed question is sorted by why it was missed: not knowing the material, running short on time, or a slip on something your student actually knows. Each needs a different fix, and most students miss points in more than one way.'],
     strengths: ['What is already working', 'The skills your student got right consistently. Knowing them matters as much as knowing the gaps: session time does not go to them, so the hours go where the points are.'],
-    since: ['Since your last test', 'What got better, stayed the same or got worse against the test before: habits, how the test was worked and areas with enough questions to tell. Never the score, which swings too much from one test to the next.'],
+    since: ['Since your last test', 'What got better, stayed the same or got worse against the test before: habits and how the test was worked. Never the score or the areas, which swing too much from one test to the next.'],
     gaps: ['What to relearn', 'The specific skills behind the content misses, named the way the College Board names what the SAT tests. They come up on every SAT, so each one fixed pays off on every test after it.'],
     clock: ['The clock', 'How the time went in each module, against a steady pace. It shows whether your student ran out of time, rushed, or left minutes unused, which is often worth as many points as content.'],
     route: ['The route', 'The order your student moved through each module: the first pass, the skips, and the returns. It shows habits no score can, like getting stuck early or never going back to check.'],

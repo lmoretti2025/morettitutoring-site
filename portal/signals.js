@@ -853,7 +853,7 @@ var MorettiSignals = (function () {
      review-pass is now { id, gain, tests, fixed, broke, of, filled,
        filledOf, pHelp }: gain = fixed - broke, answers the review changed;
        blanks filled in are filled (right) of filledOf, never in gain. */
-  /* ═══ THE CONFIDENCE QUADRANT ═══ correctness crossed with how sure they felt.
+  /* === THE CONFIDENCE QUADRANT === correctness crossed with how sure they felt.
    *
    * Diagnostic only, because only the diagnostic asks (index.html confidenceAsked; a
    * practice test must stay a rehearsal of an exam that never asks). `cq` arrives in the
@@ -2606,7 +2606,9 @@ var MorettiSignals = (function () {
       if (si === undefined) return;
       var i = count[si] || 0; count[si] = i + 1;
       var sk = splitKey(qs.k[r[1]]);
-      var fast = (r.length > 9 && typeof r[9] === 'number') ? (r[9] === 1 ? 1 : 0) : (r.length > 7 && (r[7] === 0 || r[7] === 1)) ? r[7] : null;
+      // [7] tooFast (pacing time under the reading floor, end-of-module rushes included), the same
+      // test the report applies to its own rows, so a sitting counts the same as current and as previous.
+      var fast = (r.length > 7 && (r[7] === 0 || r[7] === 1)) ? r[7] : (r.length > 9 && typeof r[9] === 'number') ? (r[9] === 1 || r[9] === 2 ? 1 : 0) : null;
       out.push({ si: si, i: i, dom: sk.dom, sk: sk.skill, res: r[3], secs: Number(r[4]) || 0, fast: fast });
     });
     return out;
@@ -2621,7 +2623,13 @@ var MorettiSignals = (function () {
     var out = { v: 1, at: d.ts || d.dt || null, tid: d.pt || (d.t ? d.t + '-diag' : null),
                 secs: d.s.map(function (S) { return S.k; }), mods: [], fast: 0, answered: 0,
                 left: c.leftWindow || null, late: c.signals.some(function (x) { return x.id === 'late'; }),
-                brk: c.longestBreakMin, flags: 0, back: 0, crossed: 0, changed: 0, changedRight: 0, dom: {}, sk: {} };
+                brk: c.longestBreakMin, flags: 0, back: 0, crossed: 0, changed: 0, changedRight: 0, dom: {}, sk: {},
+                // Per section (audit 2026-09-30): counts are compared only over the sections both sittings had.
+                by: {} };
+    var byOf = function (si) {
+      var k = d.s[si] && d.s[si].k;
+      return out.by[k] || (out.by[k] = { fast: 0, answered: 0, flags: 0, crossed: 0, back: 0 });
+    };
     // A section saved without its clock length (records before 2026-09-26) can't say how much time was
     // left: an accommodated student would be judged on the standard clock. Its modules are left out.
     var clockKnown = {}; d.s.forEach(function (S) { if (S && S.tl > 0) clockKnown[S.k] = true; });
@@ -2643,7 +2651,8 @@ var MorettiSignals = (function () {
           var b = typeof opts.budgetMs === 'function' ? opts.budgetMs(x.si, x.i) : 0;
           f = (b > 0 && x.secs > 0) ? (x.secs * 1000 < TOO_FAST_REL * b ? 1 : 0) : 0;
         }
-        if (f === 1) out.fast++;
+        var B = byOf(x.si); B.answered++;
+        if (f === 1) { out.fast++; B.fast++; }
       }
     });
     // Highlighting in Reading and Writing (recorded from 2026-09-30, hv): the
@@ -2667,8 +2676,9 @@ var MorettiSignals = (function () {
     if (!hasVl) { out.back = null; out.changed = null; out.changedRight = null; }
     if (!hasEl) out.crossed = null;
     d.s.forEach(function (S, si) {
-      (S.m || []).forEach(function (m) { if (m === 1 || m === true) out.flags++; });
-      if (typeof S.el === 'string' && out.crossed !== null) out.crossed += S.el.replace(/0/g, '').length;
+      var B = byOf(si);
+      (S.m || []).forEach(function (m) { if (m === 1 || m === true) { out.flags++; B.flags++; } });
+      if (typeof S.el === 'string' && out.crossed !== null) { var cx = S.el.replace(/0/g, '').length; out.crossed += cx; B.crossed += cx; }
       var seen = {}, back = {}, firstAns = {}, lastAns = {};
       (S.vl || []).forEach(function (v) {
         if (!v || v.length < 4) return;
@@ -2679,7 +2689,7 @@ var MorettiSignals = (function () {
         if (has) { if (firstAns[q] === undefined) firstAns[q] = JSON.stringify(ans); lastAns[q] = JSON.stringify(ans); }
       });
       if (!hasVl) return;
-      out.back += Object.keys(back).length;
+      out.back += Object.keys(back).length; B.back += Object.keys(back).length;
       Object.keys(firstAns).forEach(function (q) {
         if (lastAns[q] !== firstAns[q]) {
           out.changed++;
@@ -2692,46 +2702,70 @@ var MorettiSignals = (function () {
   }
   function compareSittings(prev, cur) {
     var R = { better: [], same: [], worse: [] };
-    if (!prev || !cur) return R;
+    if (!prev || !cur || !Array.isArray(prev.secs) || !Array.isArray(cur.secs)) return R;
     var put = function (col, k, text) { R[col].push({ k: k, text: text }); };
     var plural = function (n, one, many) { return n + ' ' + (n === 1 ? one : (many || one + 's')); };
     var secName = function (k) { return k === 'math' ? 'Math' : 'Reading and Writing'; };
-    // Only what both sittings share: the same sections.
+    /* Audit 2026-09-30. Simulated on the real practice tests, a student who
+       had not changed was told some area or skill got better or worse on
+       47 to 72% of pairs (about 50% even on the same test twice), and a real
+       one-area gain of about 20 points of accuracy was caught at best 1 in 4
+       times: about a dozen questions per area cannot show a change from one
+       test to the next. So areas and skills are not compared here; the
+       pooled, two-read trends (skillTrend) do that across tests. Counts are
+       compared only over the sections both sittings had, and called better
+       or worse only past what one test to the next shows by chance
+       (COMPARE_Z on a Poisson-like count). */
     var shared = cur.secs.filter(function (k) { return prev.secs.indexOf(k) >= 0; });
-    // Time: minutes left in each shared section, and rushed modules.
+    if (!shared.length) return R;
+    var sameSecs = shared.length === prev.secs.length && shared.length === cur.secs.length;
+    // A count over the shared sections; whole-sitting totals only where both had the same sections
+    // (summaries written before 2026-09-30 carry no per-section split).
+    var count = function (S, f) {
+      if (S.by) { var n = 0, ok = true; shared.forEach(function (k) { var b = S.by[k]; if (!b || b[f] === null || b[f] === undefined) ok = false; else n += b[f]; }); return ok ? n : null; }
+      return sameSecs && typeof S[f] === 'number' ? S[f] : null;
+    };
+    var beyond = function (a, b, min) { return Math.abs(b - a) >= min && Math.abs(b - a) >= COMPARE_Z * Math.sqrt(a + b + 1); };
+    // Time: minutes left and rushed modules, over the modules both sittings had.
     shared.forEach(function (k) {
-      var pm = prev.mods.filter(function (m) { return m.sec === k; }), cm = cur.mods.filter(function (m) { return m.sec === k; });
-      if (!pm.length || !cm.length) return;
+      var key = function (m) { return m.module; };
+      var pm = (prev.mods || []).filter(function (m) { return m.sec === k; }), cm = (cur.mods || []).filter(function (m) { return m.sec === k; });
+      var both = pm.map(key).filter(function (x) { return cm.map(key).indexOf(x) >= 0; });
+      pm = pm.filter(function (m) { return both.indexOf(key(m)) >= 0; }); cm = cm.filter(function (m) { return both.indexOf(key(m)) >= 0; });
+      if (!pm.length || pm.length !== cm.length) return;
       var pl = pm.reduce(function (a, m) { return a + m.left; }, 0), cl = cm.reduce(function (a, m) { return a + m.left; }, 0);
       var pr = pm.filter(function (m) { return m.rushed; }).length, cr = cm.filter(function (m) { return m.rushed; }).length;
       if (cl <= 1 && pl <= 1 && !cr && !pr) { put('same', 'time-' + k, secName(k) + ': used the whole clock both times.'); return; }
       var txt = secName(k) + ': handed in with ' + plural(cl, 'minute') + ' left in all, against ' + pl + ' last time';
-      if (cr < pr) put('better', 'time-' + k, txt + '. You used the clock.');
-      else if (cr > pr) put('worse', 'time-' + k, txt + '. That time could have gone to checking.');
-      else put('same', 'time-' + k, cr ? txt + ': still rushed.' : txt + '.');
+      if (pr && !cr) put('better', 'time-' + k, txt + '. You used the clock.');
+      else if (cr && !pr) put('worse', 'time-' + k, txt + '. That time could have gone to checking.');
+      else if (cr && pr) {
+        // Rushed both times: the minutes left say which way it moved.
+        if (cl <= pl - 5) put('better', 'time-' + k, txt + ': still rushed, but more of the clock was used.');
+        else if (cl >= pl + 5) put('worse', 'time-' + k, txt + ': rushed, and more time went unused.');
+        else put('same', 'time-' + k, txt + ': still rushed.');
+      } else put('same', 'time-' + k, txt + '.');
     });
     // Answers too fast to read.
-    if (prev.fast >= 3 || cur.fast >= 3) {
-      var ft = plural(cur.fast, 'answer') + ' came too fast to read, against ' + prev.fast + ' last time';
-      if (cur.fast <= prev.fast - 3) put('better', 'fast', ft + '.');
-      else if (cur.fast >= prev.fast + 3) put('worse', 'fast', ft + '.');
-      else put('same', 'fast', ft + '.');
+    var pf = count(prev, 'fast'), cf = count(cur, 'fast');
+    if (pf !== null && cf !== null && (pf >= 3 || cf >= 3)) {
+      var ft = plural(cf, 'answer') + ' came too fast to read, against ' + pf + ' last time';
+      put(beyond(pf, cf, 3) ? (cf < pf ? 'better' : 'worse') : 'same', 'fast', ft + '.');
     }
-    // Checking before handing in (only where both sittings logged it).
-    // Only modules measured on both sittings, so 2 of 2 is never set against 4 of 4.
+    // Checking before handing in (only modules measured on both sittings, and only where 5+ minutes were left).
     var both = {};
-    prev.mods.forEach(function (x) { if (x.checked !== null) both[x.sec + '|' + x.module] = 1; });
-    cur.mods.forEach(function (x) { if (x.checked !== null && both[x.sec + '|' + x.module]) both[x.sec + '|' + x.module] = 2; });
+    (prev.mods || []).forEach(function (x) { if (x.checked !== null) both[x.sec + '|' + x.module] = 1; });
+    (cur.mods || []).forEach(function (x) { if (x.checked !== null && both[x.sec + '|' + x.module]) both[x.sec + '|' + x.module] = 2; });
     var chk = function (s) { var m = s.mods.filter(function (x) { return both[x.sec + '|' + x.module] === 2; }); return m.length ? { n: m.filter(function (x) { return x.checked; }).length, of: m.length } : null; };
     var pc = chk(prev), cc = chk(cur);
     if (pc && cc) {
       var ct = 'Checked ' + cc.n + ' of ' + cc.of + ' modules before handing in, against ' + pc.n + ' of ' + pc.of + ' last time';
       put(cc.n > pc.n ? 'better' : cc.n < pc.n ? 'worse' : 'same', 'checked', ct + '.');
     }
-    // Leaving the test window (only where both sittings logged it).
-    if (prev.left && cur.left && (prev.left.times >= 5 || cur.left.times >= 5)) {
+    // Leaving the test window (only where both sittings logged it, and both were full tests).
+    if (sameSecs && prev.left && cur.left && (prev.left.times >= 5 || cur.left.times >= 5)) {
       var lt = 'Left the test window ' + plural(cur.left.times, 'time') + ', against ' + prev.left.times + ' last time';
-      put(cur.left.times <= prev.left.times - 5 ? 'better' : cur.left.times >= prev.left.times + 5 ? 'worse' : 'same', 'left', lt + '.');
+      put(beyond(prev.left.times, cur.left.times, 5) ? (cur.left.times < prev.left.times ? 'better' : 'worse') : 'same', 'left', lt + '.');
     }
     // When and how it was sat.
     if (prev.late !== cur.late) put(cur.late ? 'worse' : 'better', 'late', cur.late ? 'Taken late at night this time; last time was earlier in the day.' : 'Taken earlier in the day this time, not late at night.');
@@ -2739,43 +2773,22 @@ var MorettiSignals = (function () {
       put(cur.brk > 15 ? 'worse' : 'better', 'break', 'Longest break between modules: ' + plural(cur.brk, 'minute') + ', against ' + prev.brk + ' last time (the SAT allows 10).');
     }
     // Navigation: facts, better only where the habit was started.
-    if (cur.flags !== prev.flags) {
-      var fl = 'Flagged ' + plural(cur.flags, 'question') + ' for review, against ' + prev.flags + ' last time';
-      put(prev.flags === 0 && cur.flags >= 2 ? 'better' : 'same', 'flags', fl + '.');
+    var pfl = count(prev, 'flags'), cfl = count(cur, 'flags');
+    if (pfl !== null && cfl !== null && cfl !== pfl) {
+      var fl = 'Flagged ' + plural(cfl, 'question') + ' for review, against ' + pfl + ' last time';
+      put(pfl === 0 && cfl >= 2 ? 'better' : 'same', 'flags', fl + '.');
     }
-    if (prev.crossed !== null && cur.crossed !== null && (prev.crossed || cur.crossed)) {
-      var cx = 'Crossed out choices on ' + plural(cur.crossed, 'question') + ', against ' + prev.crossed + ' last time';
-      put(prev.crossed < 3 && cur.crossed >= 5 ? 'better' : 'same', 'crossed', cx + '.');
+    var pcx = prev.crossed === null ? null : count(prev, 'crossed'), ccx = cur.crossed === null ? null : count(cur, 'crossed');
+    if (pcx !== null && ccx !== null && (pcx || ccx)) {
+      var cxt = 'Crossed out choices on ' + plural(ccx, 'question') + ', against ' + pcx + ' last time';
+      put(pcx < 3 && ccx >= 5 ? 'better' : 'same', 'crossed', cxt + '.');
     }
-    if (prev.back !== null && cur.back !== null && (prev.back || cur.back)) put('same', 'back', 'Went back to ' + plural(cur.back, 'question') + ', against ' + prev.back + ' last time.');
+    var pb = prev.back === null ? null : count(prev, 'back'), cb = cur.back === null ? null : count(cur, 'back');
+    if (pb !== null && cb !== null && (pb || cb)) put('same', 'back', 'Went back to ' + plural(cb, 'question') + ', against ' + pb + ' last time.');
     if (cur.changed) put('same', 'changed', 'Changed ' + plural(cur.changed, 'answer') + ' after first choosing; ' + cur.changedRight + ' of those ended right.');
-    // Areas and skills, past chance only.
-    var z = function (a, b) {
-      var p1 = a[0] / a[1], p2 = b[0] / b[1], p = (a[0] + b[0]) / (a[1] + b[1]);
-      var se = Math.sqrt(p * (1 - p) * (1 / a[1] + 1 / b[1]));
-      return se > 0 ? (p2 - p1) / se : 0;
-    };
-    var sameAreas = [];
-    Object.keys(cur.dom).sort().forEach(function (dn) {
-      var a = prev.dom[dn], b = cur.dom[dn];
-      if (!a || !b || a[1] < 6 || b[1] < 6) return;
-      var zz = z(a, b), diff = b[0] / b[1] - a[0] / a[1];
-      var t = dn + ': ' + b[0] + ' of ' + b[1] + ' right, against ' + a[0] + ' of ' + a[1] + ' last time.';
-      if (zz >= 1.96 && diff >= 0.2) put('better', 'dom-' + dn, t);
-      else if (zz <= -1.96 && diff <= -0.2) put('worse', 'dom-' + dn, t);
-      else sameAreas.push(dn);
-    });
-    Object.keys(cur.sk).sort().forEach(function (sn) {
-      var a = prev.sk[sn], b = cur.sk[sn];
-      if (!a || !b || a[1] < 4 || b[1] < 4) return;
-      var zz = z(a, b), diff = b[0] / b[1] - a[0] / a[1];
-      var t = sn + ': ' + b[0] + ' of ' + b[1] + ' right, against ' + a[0] + ' of ' + a[1] + ' last time.';
-      if (zz >= 1.96 && diff >= 0.3) put('better', 'sk-' + sn, t);
-      else if (zz <= -1.96 && diff <= -0.3) put('worse', 'sk-' + sn, t);
-    });
-    if (sameAreas.length) put('same', 'areas', 'About the same in ' + (sameAreas.length < 2 ? sameAreas[0] : sameAreas.slice(0, -1).join(', ') + ' and ' + sameAreas[sameAreas.length - 1]) + ': any change there is within what one test to the next can show.');
     return R;
   }
+  var COMPARE_Z = 2.58;
 
   /* -- L. REAL SAT AGAINST PRACTICE: realVsPractice (2026-09-27) ----------
      Each official result set beside the level the practice tests BEFORE it
@@ -4353,7 +4366,7 @@ var MorettiSignals = (function () {
     rushedLevel: rushedLevel,
     approachEvidence: approachEvidence, approachCompetent: approachCompetent, APPROACH_RW_DOMAINS: APPROACH_RW_DOMAINS, APPROACH_MIN_SHOWN: APPROACH_MIN_SHOWN,
     APPROACH_LESSONS: APPROACH_LESSONS,
-    VERSION: 45,
+    VERSION: 46,
     attemptAbility: attemptAbility,
     FOCUS_GATES: { domainClear: FOCUS_DOMAIN_CLEAR, skillLead: FOCUS_SKILL_LEAD, noOffsetsPenalty: FOCUS_NO_OFFSETS_PENALTY },
     practiceEvidence: practiceEvidence,
